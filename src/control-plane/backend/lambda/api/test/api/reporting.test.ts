@@ -12,7 +12,22 @@
  */
 
 import { CloudFormationClient } from '@aws-sdk/client-cloudformation';
-import { CreateAnalysisCommand, CreateDashboardCommand, DescribeDashboardDefinitionCommand, GenerateEmbedUrlForRegisteredUserCommand, ListDashboardsCommand, QuickSightClient, UpdateAnalysisCommand, UpdateDashboardCommand, UpdateDashboardPublishedVersionCommand } from '@aws-sdk/client-quicksight';
+import {
+  CreateAnalysisCommand,
+  CreateDashboardCommand,
+  DeleteAnalysisCommand,
+  DeleteDashboardCommand,
+  DeleteDataSetCommand,
+  DescribeDashboardDefinitionCommand,
+  ListAnalysesCommand,
+  ListDashboardsCommand,
+  ListDataSetsCommand,
+  QuickSightClient,
+  UpdateAnalysisCommand,
+  UpdateDashboardCommand,
+  UpdateDashboardPublishedVersionCommand,
+  GenerateEmbedUrlForRegisteredUserCommand,
+} from '@aws-sdk/client-quicksight';
 import { BatchExecuteStatementCommand, DescribeStatementCommand, RedshiftDataClient, StatusString } from '@aws-sdk/client-redshift-data';
 import { AssumeRoleCommand, STSClient } from '@aws-sdk/client-sts';
 import { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb';
@@ -165,9 +180,9 @@ describe('reporting test', () => {
     expect(res.statusCode).toBe(201);
     expect(res.body.success).toEqual(true);
     expect(res.body.data.dashboardArn).toEqual('arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa');
-    expect(res.body.data.dashboardName).toEqual('dashboard-testview0002');
+    expect(res.body.data.dashboardName).toEqual('_tmp_testview0002');
     expect(res.body.data.analysisArn).toEqual('arn:aws:quicksight:us-east-1:11111111:analysis/analysisaaaaaaaa');
-    expect(res.body.data.analysisName).toEqual('analysis-testview0002');
+    expect(res.body.data.analysisName).toEqual('_tmp_testview0002');
     expect(res.body.data.analysisId).toBeDefined();
     expect(res.body.data.dashboardId).toBeDefined();
     expect(res.body.data.visualIds).toBeDefined();
@@ -345,9 +360,9 @@ describe('reporting test', () => {
     expect(res.statusCode).toBe(201);
     expect(res.body.success).toEqual(true);
     expect(res.body.data.dashboardArn).toEqual('arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa');
-    expect(res.body.data.dashboardName).toEqual('dashboard-testview0002');
+    expect(res.body.data.dashboardName).toEqual('_tmp_testview0002');
     expect(res.body.data.analysisArn).toEqual('arn:aws:quicksight:us-east-1:11111111:analysis/analysisaaaaaaaa');
-    expect(res.body.data.analysisName).toEqual('analysis-testview0002');
+    expect(res.body.data.analysisName).toEqual('_tmp_testview0002');
     expect(res.body.data.analysisId).toBeDefined();
     expect(res.body.data.dashboardId).toBeDefined();
     expect(res.body.data.visualIds).toBeDefined();
@@ -532,9 +547,9 @@ describe('reporting test', () => {
     expect(res.statusCode).toBe(201);
     expect(res.body.success).toEqual(true);
     expect(res.body.data.dashboardArn).toEqual('arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa');
-    expect(res.body.data.dashboardName).toEqual('dashboard-testview0002');
+    expect(res.body.data.dashboardName).toEqual('_tmp_testview0002');
     expect(res.body.data.analysisArn).toEqual('arn:aws:quicksight:us-east-1:11111111:analysis/analysisaaaaaaaa');
-    expect(res.body.data.analysisName).toEqual('analysis-testview0002');
+    expect(res.body.data.analysisName).toEqual('_tmp_testview0002');
     expect(res.body.data.analysisId).toBeDefined();
     expect(res.body.data.dashboardId).toBeDefined();
     expect(res.body.data.visualIds).toBeDefined();
@@ -623,9 +638,9 @@ describe('reporting test', () => {
     expect(res.statusCode).toBe(201);
     expect(res.body.success).toEqual(true);
     expect(res.body.data.dashboardArn).toEqual('arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa');
-    expect(res.body.data.dashboardName).toEqual('dashboard-testview0002');
+    expect(res.body.data.dashboardName).toEqual('testview0002');
     expect(res.body.data.analysisArn).toEqual('arn:aws:quicksight:us-east-1:11111111:analysis/analysisaaaaaaaa');
-    expect(res.body.data.analysisName).toEqual('analysis-testview0002');
+    expect(res.body.data.analysisName).toEqual('testview0002');
     expect(res.body.data.analysisId).toBeDefined();
     expect(res.body.data.dashboardId).toBeDefined();
     expect(res.body.data.visualIds).toBeDefined();
@@ -724,9 +739,9 @@ describe('reporting test', () => {
     expect(res.statusCode).toBe(201);
     expect(res.body.success).toEqual(true);
     expect(res.body.data.dashboardArn).toEqual('arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa');
-    expect(res.body.data.dashboardName).toEqual('dashboard-testview0002');
+    expect(res.body.data.dashboardName).toEqual('testview0002');
     expect(res.body.data.analysisArn).toEqual('arn:aws:quicksight:us-east-1:11111111:analysis/analysisaaaaaaaa');
-    expect(res.body.data.analysisName).toEqual('analysis-testview0002');
+    expect(res.body.data.analysisName).toEqual('testview0002');
     expect(res.body.data.analysisId).toBeDefined();
     expect(res.body.data.dashboardId).toBeDefined();
     expect(res.body.data.visualIds).toBeDefined();
@@ -777,6 +792,65 @@ describe('reporting test', () => {
     expect(res.body.success).toEqual(true);
     expect(res.body.data.length).toEqual(1);
     expect(res.body.data[0].Arn).toEqual('arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa');
+
+  });
+
+  it('clean', async () => {
+
+    quickSightMock.on(ListDashboardsCommand).resolves({
+      DashboardSummaryList: [{
+        Arn: 'arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa',
+        Name: '_tmp_aaaaaaa',
+        CreatedTime: new Date((new Date()).getTime() - 80*60*1000),
+        DashboardId: 'dashboard-aaaaaaaa',
+      }],
+    });
+
+    quickSightMock.on(DeleteDashboardCommand).resolves({
+      Status: 200,
+      DashboardId: 'dashboard-aaaaaaaa',
+    });
+
+    quickSightMock.on(ListAnalysesCommand).resolves({
+      AnalysisSummaryList: [{
+        Arn: 'arn:aws:quicksight:us-east-1:11111111:analysis/analysis-aaaaaaaa',
+        Name: '_tmp_aaaaaaa',
+        CreatedTime: new Date((new Date()).getTime() - 80*60*1000),
+        AnalysisId: 'analysis_aaaaaaa',
+      }],
+    });
+
+    quickSightMock.on(DeleteAnalysisCommand).resolves({
+      Status: 200,
+      AnalysisId: 'analysis-aaaaaaaa',
+    });
+
+    quickSightMock.on(ListDataSetsCommand).resolves({
+      DataSetSummaries: [{
+        Arn: 'arn:aws:quicksight:us-east-1:11111111:dataset/dataset-aaaaaaaa',
+        Name: '_tmp_aaaaaaa',
+        CreatedTime: new Date((new Date()).getTime() - 80*60*1000),
+        DataSetId: 'dataset_aaaaaaa',
+      }],
+    });
+
+    quickSightMock.on(DeleteDataSetCommand).resolves({
+      Status: 200,
+      DataSetId: 'dataset-aaaaaaaa',
+    });
+
+    const res = await request(app)
+      .post('/api/reporting/clean')
+      .send({
+        region: 'us-east-1',
+      });
+
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(201);
+    expect(res.body.success).toEqual(true);
+    expect(res.body.data.deletedDashBoards[0]).toEqual('dashboard-aaaaaaaa');
+    expect(res.body.data.deletedAnalyses[0]).toEqual('analysis-aaaaaaaa');
+    expect(res.body.data.deletedDatasets[0]).toEqual('dataset-aaaaaaaa');
 
   });
 

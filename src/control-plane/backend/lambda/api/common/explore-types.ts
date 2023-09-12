@@ -66,7 +66,7 @@ export enum ExploreGroupColumn {
   MONTH = 'MONTH',
 }
 
-export enum ExploreFunnelRequestAction {
+export enum ExploreRequestAction {
   PREVIEW = 'PREVIEW',
   PUBLISH = 'PUBLISH',
 }

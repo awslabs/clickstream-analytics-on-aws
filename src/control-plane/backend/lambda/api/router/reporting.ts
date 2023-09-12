@@ -56,6 +56,12 @@ reporting_project.post(
     return reportingServ.warmup(req, res, next);
   });
 
+reporting_project.post(
+  '/clean',
+  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    return reportingServ.cleanQuickSightResources(req, res, next);
+  });
+
 
 export {
   reporting_project,

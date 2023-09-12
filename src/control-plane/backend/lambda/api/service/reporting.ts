@@ -38,15 +38,16 @@ import {
   getRetentionPivotTableVisualDef,
   retentionAnalysisVisualColumns,
   VisualMapProps,
+  getTempResourceName,
+  TEMP_RESOURCE_NAME_PREFIX,
 } from './quicksight/reporting-utils';
 import { buildEventAnalysisView, buildEventPathAnalysisView, buildFunnelDataSql, buildFunnelView, buildNodePathAnalysisView, buildRetentionAnalysisView } from './quicksight/sql-builder';
 import { awsAccountId } from '../common/constants';
-import { ExploreFunnelRequestAction, ExplorePathNodeType, ExploreTimeScopeType, ExploreVisualName } from '../common/explore-types';
+import { ExploreRequestAction, ExplorePathNodeType, ExploreTimeScopeType, ExploreVisualName } from '../common/explore-types';
 import { logger } from '../common/powertools';
 import { SDKClient } from '../common/sdk-client';
 import { ApiFail, ApiSuccess } from '../common/types';
 import { generateEmbedUrlForRegisteredUser, getClickstreamUserArn } from '../store/aws/quicksight';
-
 
 const sdkClient: SDKClient = new SDKClient();
 
@@ -62,7 +63,7 @@ export class ReportingServ {
       const dashboardCreateParameters = query.dashboardCreateParameters as DashboardCreateParameters;
 
       //construct parameters to build sql
-      const viewName = query.viewName;
+      const viewName = getTempResourceName(query.viewName, query.action);
       const sql = buildFunnelView(query.appId, viewName, {
         schemaName: query.appId,
         computeMethod: query.computeMethod,
@@ -233,7 +234,8 @@ export class ReportingServ {
       const dashboardCreateParameters = query.dashboardCreateParameters as DashboardCreateParameters;;
 
       //construct parameters to build sql
-      const viewName = query.viewName;
+      const viewName = getTempResourceName(query.viewName, query.action);
+
       const sql = buildEventAnalysisView(query.appId, viewName, {
         schemaName: query.appId,
         computeMethod: query.computeMethod,
@@ -332,7 +334,7 @@ export class ReportingServ {
       const dashboardCreateParameters = query.dashboardCreateParameters as DashboardCreateParameters;
 
       //construct parameters to build sql
-      const viewName = query.viewName;
+      const viewName = getTempResourceName(query.viewName, query.action);
       let sql = '';
       if (query.pathAnalysis.nodeType === ExplorePathNodeType.EVENT) {
         sql = buildEventPathAnalysisView(query.appId, viewName, {
@@ -452,7 +454,7 @@ export class ReportingServ {
       const dashboardCreateParameters = query.dashboardCreateParameters as DashboardCreateParameters;
 
       //construct parameters to build sql
-      const viewName = query.viewName;
+      const viewName = getTempResourceName(query.viewName, query.action);
       const sql = buildRetentionAnalysisView(query.appId, viewName, {
         schemaName: query.appId,
         computeMethod: query.computeMethod,
@@ -641,7 +643,7 @@ export class ReportingServ {
       const newAnalysis = await quickSight.createAnalysis({
         AwsAccountId: awsAccountId,
         AnalysisId: analysisId,
-        Name: `analysis-${resourceName}`,
+        Name: `${resourceName}`,
         Permissions: [{
           Principal: principals.dashboardOwner,
           Actions: [
@@ -662,7 +664,7 @@ export class ReportingServ {
       const newDashboard = await quickSight.createDashboard({
         AwsAccountId: awsAccountId,
         DashboardId: dashboardId,
-        Name: `dashboard-${resourceName}`,
+        Name: `${resourceName}`,
         Permissions: [{
           Principal: principals.dashboardOwner,
           Actions: [
@@ -688,11 +690,11 @@ export class ReportingServ {
       result = {
         dashboardId,
         dashboardArn: newDashboard.Arn!,
-        dashboardName: `dashboard-${resourceName}`,
+        dashboardName: `${resourceName}`,
         dashboardVersion: Number.parseInt(newDashboard.VersionArn!.substring(newDashboard.VersionArn!.lastIndexOf('/') + 1)),
         analysisId,
         analysisArn: newAnalysis.Arn!,
-        analysisName: `analysis-${resourceName}`,
+        analysisName: `${resourceName}`,
         sheetId,
         visualIds: [],
       };
@@ -758,7 +760,7 @@ export class ReportingServ {
 
     for (let visualProps of visualPropsArray) {
       let embedUrl;
-      if (query.action === ExploreFunnelRequestAction.PREVIEW) {
+      if (query.action === ExploreRequestAction.PREVIEW) {
         const embed = await generateEmbedUrlForRegisteredUser(
           dashboardCreateParameters.region,
           dashboardCreateParameters.allowedDomain,
@@ -839,6 +841,83 @@ export class ReportingServ {
       return res.status(201).json(new ApiSuccess(dashBoards.DashboardSummaryList));
     } catch (error) {
       next(`Warmup redshift serverless with error: ${error}`);
+    }
+  };
+
+  async cleanQuickSightResources(req: any, res: any, next: any) {
+    try {
+      logger.info('start to clean QuickSight temp resources');
+      logger.info(`request: ${JSON.stringify(req.body)}`);
+
+
+      const deletedDashBoards: string[] = [];
+      const deletedAnalyses: string[] = [];
+      const deletedDatasets: string[] = [];
+
+      const region = req.body.region;
+      const quickSight = sdkClient.QuickSight({ region: region });
+
+      const dashBoards = await quickSight.listDashboards({
+        AwsAccountId: awsAccountId,
+      });
+
+      if (dashBoards.DashboardSummaryList) {
+        for (const [_index, dashboard] of dashBoards.DashboardSummaryList.entries()) {
+          if (dashboard.Name?.startsWith(TEMP_RESOURCE_NAME_PREFIX) && (new Date().getTime() - dashboard.CreatedTime!.getTime()) > 60*60*1000) {
+            const deletedRes = await quickSight.deleteDashboard({
+              AwsAccountId: awsAccountId,
+              DashboardId: dashboard.DashboardId,
+            });
+            deletedDashBoards.push(deletedRes.DashboardId!);
+            logger.info(`dashboard ${dashboard.Name} removed`);
+          }
+        }
+      }
+
+      const analyses = await quickSight.listAnalyses({
+        AwsAccountId: awsAccountId,
+      });
+
+      if (analyses.AnalysisSummaryList) {
+        for (const [_index, analysis] of analyses.AnalysisSummaryList.entries()) {
+          if (analysis.Name?.startsWith(TEMP_RESOURCE_NAME_PREFIX) && (new Date().getTime() - analysis.CreatedTime!.getTime()) > 60*60*1000) {
+            const deletedRes = await quickSight.deleteAnalysis({
+              AwsAccountId: awsAccountId,
+              AnalysisId: analysis.AnalysisId,
+            });
+            deletedAnalyses.push(deletedRes.AnalysisId!);
+            logger.info(`analysis ${analysis.Name} removed`);
+          }
+        }
+      }
+
+      const datasets = await quickSight.listDataSets({
+        AwsAccountId: awsAccountId,
+      });
+
+      if (datasets.DataSetSummaries) {
+        for (const [_index, dataset] of datasets.DataSetSummaries.entries()) {
+          if (dataset.Name?.startsWith(TEMP_RESOURCE_NAME_PREFIX) && (new Date().getTime() - dataset.CreatedTime!.getTime()) > 60*60*1000) {
+            const deletedRes = await quickSight.deleteDataSet({
+              AwsAccountId: awsAccountId,
+              DataSetId: dataset.DataSetId,
+            });
+            deletedDatasets.push(deletedRes.DataSetId!);
+            logger.info(`dataset ${dataset.Name} removed`);
+          }
+        }
+      }
+
+      const result = {
+        deletedDashBoards,
+        deletedAnalyses,
+        deletedDatasets,
+      };
+      logger.info('end of clean QuickSight temp resources');
+      return res.status(201).json(new ApiSuccess(result));
+    } catch (error) {
+      logger.warn(`Clean QuickSight temp resources with warning: ${error}`);
+      next(`Clean QuickSight temp resources with warning: ${error}`);
     }
   };
 

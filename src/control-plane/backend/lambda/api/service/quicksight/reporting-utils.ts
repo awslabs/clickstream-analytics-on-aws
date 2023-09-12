@@ -25,8 +25,10 @@ import { AssumeRoleCommand, STSClient } from '@aws-sdk/client-sts';
 import Mustache from 'mustache';
 import { v4 as uuidv4 } from 'uuid';
 import { DataSetProps, dataSetActions } from './dashboard-ln';
-import { ExploreRelativeTimeUnit, ExploreTimeScopeType, ExploreVisualName } from '../../common/explore-types';
+import { ExploreRelativeTimeUnit, ExploreRequestAction, ExploreTimeScopeType, ExploreVisualName } from '../../common/explore-types';
 import { logger } from '../../common/powertools';
+
+export const TEMP_RESOURCE_NAME_PREFIX = '_tmp_';
 
 export interface VisualProps {
   readonly sheetId: string;
@@ -805,4 +807,12 @@ export function getQuickSightUnitFromTimeUnit(timeUnit: string) : string {
     unit = 'MONTH';
   }
   return unit;
+}
+
+export function getTempResourceName(resourceName: string, action: ExploreRequestAction) : string {
+  if (action === ExploreRequestAction.PREVIEW) {
+    return TEMP_RESOURCE_NAME_PREFIX + resourceName;
+  }
+
+  return resourceName;
 }
