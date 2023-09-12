@@ -34,6 +34,7 @@ import { useParams } from 'react-router-dom';
 import MetadataPlatformFC from '../comps/MetadataPlatform';
 import MetadataSourceFC from '../comps/MetadataSource';
 import MetadataDetailsTable from '../table/MetadataDetailsTable';
+import MetadataDictionaryTable from '../table/MetadataDictionaryTable';
 
 interface MetadataParameterSplitPanelProps {
   parameter: IMetadataEventParameter;
@@ -356,6 +357,34 @@ const MetadataParameterSplitPanel: React.FC<
                       emptyText: t(
                         'analytics:metadata.eventParameter.split.tableEmpty'
                       ),
+                    }}
+                  />
+                ),
+              },
+              {
+                label: (
+                  <Box fontWeight="bold">
+                    {t('analytics:metadata.eventParameter.split.dictionary')}
+                  </Box>
+                ),
+                id: 'second',
+                content: (
+                  <MetadataDictionaryTable
+                    parameter={parameterDetails}
+                    tableI18nStrings={{
+                      loadingText: '',
+                      emptyText: '',
+                      headerTitle: '',
+                      headerRefreshButtonText: '',
+                      filteringAriaLabel: '',
+                      filteringPlaceholder: '',
+                      groupPropertiesText: '',
+                      operatorsText: '',
+                      clearFiltersText: '',
+                      applyActionText: '',
+                      useText: '',
+                      matchText: '',
+                      matchesText: '',
                     }}
                   />
                 ),

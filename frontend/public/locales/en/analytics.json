@@ -102,6 +102,7 @@
       "split": {
         "title": "Event parameter details",
         "associatedEvents": "Associated events",
+        "dictionary": "Dictionary",
         "tableLoading": "Loading",
         "tableEmpty": "No resources"
       }
@@ -126,6 +127,10 @@
         "tableLoading": "Loading",
         "tableEmpty": "No resources"
       }
+    },
+    "dictionary": {
+      "tableColumnValue": "Value",
+      "tableColumnDisplayValue": "Display value"
     }
   },
   "dateRange": {

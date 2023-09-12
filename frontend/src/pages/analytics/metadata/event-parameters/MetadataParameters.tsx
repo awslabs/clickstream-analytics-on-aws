@@ -24,7 +24,6 @@ import Navigation from 'components/layouts/Navigation';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { MetadataPlatform, MetadataSource } from 'ts/explore-types';
 import MetadataParameterSplitPanel from './MetadataParameterSplitPanel';
 import MetadataPlatformFC from '../comps/MetadataPlatform';
 import MetadataSourceFC from '../comps/MetadataSource';
@@ -38,30 +37,31 @@ const MetadataParameters: React.FC = () => {
   const [showSplit, setShowSplit] = useState(false);
   const [curEventParameter, setCurEventParameter] =
     useState<IMetadataEventParameter | null>();
+
   const COLUMN_DEFINITIONS = [
     {
       id: 'name',
       header: t('analytics:metadata.eventParameter.tableColumnName'),
       sortingField: 'name',
-      cell: (e: { name: any }) => {
+      cell: (e: IMetadataEventParameter) => {
         return e.name;
       },
     },
     {
       id: 'displayName',
       header: t('analytics:metadata.eventParameter.tableColumnDisplayName'),
-      cell: (e: { displayName: string }) => {
+      cell: (e: IMetadataEventParameter) => {
         return e.displayName;
       },
       minWidth: 180,
       editConfig: {
-        validation(item: any, value: any) {
+        validation(item: IMetadataEventParameter, value: string) {
           return !displayNameRegex.test(value)
             ? undefined
             : t('tag.invalidInput');
         },
         editingCell: (
-          item: { displayName: string },
+          item: IMetadataEventParameter,
           { setValue, currentValue }: any
         ) => {
           return (
@@ -110,28 +110,28 @@ const MetadataParameters: React.FC = () => {
     {
       id: 'metadataSource',
       header: t('analytics:metadata.eventParameter.tableColumnMetadataSource'),
-      cell: (e: { metadataSource: MetadataSource }) => {
+      cell: (e: IMetadataEventParameter) => {
         return <MetadataSourceFC source={e.metadataSource} />;
       },
     },
     {
       id: 'parameterType',
       header: t('analytics:metadata.eventParameter.tableColumnParameterType'),
-      cell: (e: { parameterType: string }) => {
+      cell: (e: IMetadataEventParameter) => {
         return e.parameterType;
       },
     },
     {
       id: 'valueType',
       header: t('analytics:metadata.eventParameter.tableColumnDataType'),
-      cell: (e: { valueType: string }) => {
+      cell: (e: IMetadataEventParameter) => {
         return e.valueType;
       },
     },
     {
       id: 'hasData',
       header: t('analytics:metadata.eventParameter.tableColumnHasData'),
-      cell: (e: { hasData: boolean }) => {
+      cell: (e: IMetadataEventParameter) => {
         return (
           <StatusIndicator type={e.hasData ? 'success' : 'stopped'}>
             {e.hasData ? 'Yes' : 'No'}
@@ -142,7 +142,7 @@ const MetadataParameters: React.FC = () => {
     {
       id: 'platform',
       header: t('analytics:metadata.eventParameter.tableColumnPlatform'),
-      cell: (e: { platform: MetadataPlatform[] }) => {
+      cell: (e: IMetadataEventParameter) => {
         return <MetadataPlatformFC platform={e.platform} />;
       },
     },
@@ -257,71 +257,74 @@ const MetadataParameters: React.FC = () => {
   };
 
   return (
-    <AppLayout
-      toolsHide
-      content={
-        <MetadataTable
-          resourceName="EventParameter"
-          tableColumnDefinitions={COLUMN_DEFINITIONS}
-          tableContentDisplay={CONTENT_DISPLAY}
-          tableFilteringProperties={FILTERING_PROPERTIES}
-          tableI18nStrings={{
-            loadingText:
-              t('analytics:metadata.eventParameter.tableLoading') || 'Loading',
-            emptyText: t('analytics:metadata.eventParameter.tableEmpty'),
-            headerTitle: t('analytics:metadata.eventParameter.title'),
-            headerRefreshButtonText: t('common:button.refreshMetadata'),
-            filteringAriaLabel: t(
-              'analytics:metadata.eventParameter.filteringAriaLabel'
-            ),
-            filteringPlaceholder: t(
-              'analytics:metadata.eventParameter.filteringPlaceholder'
-            ),
-            groupPropertiesText: t('button.groupPropertiesText'),
-            operatorsText: t('button.operatorsText'),
-            clearFiltersText: t('button.clearFiltersText'),
-            applyActionText: t('button.applyActionText'),
-            useText: t('common:table.useText'),
-            matchText: t('common:table.matchText'),
-            matchesText: t('common:table.matchesText'),
-          }}
-          loadHelpPanelContent={() => {
-            console.log(1);
-          }}
-          setShowDetails={(
-            show: boolean,
-            data?:
-              | IMetadataEvent
-              | IMetadataEventParameter
-              | IMetadataUserAttribute
-          ) => {
-            setShowSplit(show);
-            if (data) {
-              setCurEventParameter(data as IMetadataEventParameter);
-            }
-          }}
-          fetchDataFunc={listMetadataEventParameters}
-          fetchUpdateFunc={updateMetadataEventParameterInfo}
-        ></MetadataTable>
-      }
-      headerSelector="#header"
-      navigation={
-        <Navigation
-          activeHref={`/analytics/${projectId}/app/${appId}/metadata/event-parameters`}
-        />
-      }
-      splitPanelOpen={showSplit}
-      onSplitPanelToggle={(e) => {
-        setShowSplit(e.detail.open);
-      }}
-      splitPanel={
-        curEventParameter ? (
-          <MetadataParameterSplitPanel parameter={curEventParameter} />
-        ) : (
-          ''
-        )
-      }
-    />
+    <>
+      <AppLayout
+        toolsHide
+        content={
+          <MetadataTable
+            resourceName="EventParameter"
+            tableColumnDefinitions={COLUMN_DEFINITIONS}
+            tableContentDisplay={CONTENT_DISPLAY}
+            tableFilteringProperties={FILTERING_PROPERTIES}
+            tableI18nStrings={{
+              loadingText:
+                t('analytics:metadata.eventParameter.tableLoading') ||
+                'Loading',
+              emptyText: t('analytics:metadata.eventParameter.tableEmpty'),
+              headerTitle: t('analytics:metadata.eventParameter.title'),
+              headerRefreshButtonText: t('common:button.refreshMetadata'),
+              filteringAriaLabel: t(
+                'analytics:metadata.eventParameter.filteringAriaLabel'
+              ),
+              filteringPlaceholder: t(
+                'analytics:metadata.eventParameter.filteringPlaceholder'
+              ),
+              groupPropertiesText: t('button.groupPropertiesText'),
+              operatorsText: t('button.operatorsText'),
+              clearFiltersText: t('button.clearFiltersText'),
+              applyActionText: t('button.applyActionText'),
+              useText: t('common:table.useText'),
+              matchText: t('common:table.matchText'),
+              matchesText: t('common:table.matchesText'),
+            }}
+            loadHelpPanelContent={() => {
+              console.log(1);
+            }}
+            setShowDetails={(
+              show: boolean,
+              data?:
+                | IMetadataEvent
+                | IMetadataEventParameter
+                | IMetadataUserAttribute
+            ) => {
+              setShowSplit(show);
+              if (data) {
+                setCurEventParameter(data as IMetadataEventParameter);
+              }
+            }}
+            fetchDataFunc={listMetadataEventParameters}
+            fetchUpdateFunc={updateMetadataEventParameterInfo}
+          ></MetadataTable>
+        }
+        headerSelector="#header"
+        navigation={
+          <Navigation
+            activeHref={`/analytics/${projectId}/app/${appId}/metadata/event-parameters`}
+          />
+        }
+        splitPanelOpen={showSplit}
+        onSplitPanelToggle={(e) => {
+          setShowSplit(e.detail.open);
+        }}
+        splitPanel={
+          curEventParameter ? (
+            <MetadataParameterSplitPanel parameter={curEventParameter} />
+          ) : (
+            ''
+          )
+        }
+      />
+    </>
   );
 };
 

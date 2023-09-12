@@ -102,6 +102,7 @@
       "split": {
         "title": "事件参数详细信息",
         "associatedEvents": "关联的事件",
+        "dictionary": "字典",
         "tableLoading": "加载中",
         "tableEmpty": "没有资源"
       }
