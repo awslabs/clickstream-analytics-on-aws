@@ -32,6 +32,7 @@ import {
   getMetadataUserAttributesList,
   getPipelineDetailByProjectId,
   previewFunnel,
+  warmup,
 } from 'apis/analytics';
 import Loading from 'components/common/Loading';
 import {
@@ -68,6 +69,7 @@ import {
   getFirstEventAndConditions,
   getDashboardCreateParameters,
   getIntervalInSeconds,
+  getWarmUpParameters,
 } from '../analytics-utils';
 import ExploreDateRangePicker from '../comps/ExploreDateRangePicker';
 import ExploreEmbedFrame from '../comps/ExploreEmbedFrame';
@@ -208,6 +210,11 @@ const AnalyticsFunnel: React.FC = () => {
         await getPipelineDetailByProjectId(projectId);
       if (success) {
         setPipeline(data);
+        setLoadingData(false);
+        const params = getWarmUpParameters(projectId, appId, data);
+        if (params) {
+          await warmup(params);
+        }
       }
     } catch (error) {
       console.log(error);

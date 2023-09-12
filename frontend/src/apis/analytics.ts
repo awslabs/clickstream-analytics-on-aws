@@ -212,3 +212,20 @@ export const getPathNodes = async (projectId: string, appId: string) => {
   );
   return result;
 };
+
+export const warmup = async (data: {
+  projectId: string;
+  appId: string;
+  dashboardCreateParameters: {
+    region: string;
+    redshift: {
+      dataApiRole: string;
+      newServerless: {
+        workgroupName: string;
+      };
+    };
+  };
+}) => {
+  const result: any = await apiRequest('post', '/reporting/warmup', data);
+  return result;
+};
