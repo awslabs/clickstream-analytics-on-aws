@@ -10,7 +10,7 @@ Clickstream Swift SDK 可以帮助您轻松从 iOS 设备收集和报告应用�
 
 Clickstream Swift SDK 支持 iOS 13+。
 
-Clickstream 需要 Xcode 13.4 或更高版本才能构建。
+Clickstream Swift SDK 需要 Xcode 13.4 或更高版本才能构建。
 
 ## 集成 SDK
 
@@ -478,13 +478,13 @@ Clickstream Swift SDK 支持以下数据类型：
     },
     "attributes": {
         "event_category": "recommended",
-		    "currency": "CNY",
+        "currency": "CNY",
         "_session_duration": 15349,
         "_session_id": "0E6614B7-20230526-062238846",
         "_session_number": 3,
         "_session_start_timestamp": 1685082158847,
         "_screen_name": "ProductDetailViewController",
-		    "_screen_unique_id": "5260751568"
+        "_screen_unique_id": "5260751568"
     }
 }
 ```
