@@ -30,6 +30,7 @@ import {
   getMetadataUserAttributesList,
   getPipelineDetailByProjectId,
   previewEvent,
+  warmup,
 } from 'apis/analytics';
 import Loading from 'components/common/Loading';
 import {
@@ -62,6 +63,7 @@ import {
   getDateRange,
   getEventAndConditions,
   getFirstEventAndConditions,
+  getWarmUpParameters,
   metadataEventsConvertToCategoryItemType,
   parametersConvertToCategoryItemType,
   validEventAnalyticsItem,
@@ -194,6 +196,11 @@ const AnalyticsEvent: React.FC = () => {
         await getPipelineDetailByProjectId(projectId);
       if (success) {
         setPipeline(data);
+        setLoadingData(false);
+        const params = getWarmUpParameters(projectId, appId, data);
+        if (params) {
+          await warmup(params);
+        }
       }
     } catch (error) {
       console.log(error);

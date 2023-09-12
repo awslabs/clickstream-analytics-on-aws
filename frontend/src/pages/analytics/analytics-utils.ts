@@ -340,3 +340,48 @@ export const getDashboardCreateParameters = (
     },
   };
 };
+
+export const getWarmUpParameters = (
+  projectId: string | undefined,
+  appId: string | undefined,
+  pipeline: IPipeline
+) => {
+  const redshiftOutputs = getValueFromStackOutputs(
+    pipeline,
+    'DataModelingRedshift',
+    [
+      OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME,
+      OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX,
+    ]
+  );
+  if (
+    !projectId ||
+    !appId ||
+    !redshiftOutputs.get(
+      OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME
+    ) ||
+    !redshiftOutputs.get(OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX)
+  ) {
+    return undefined;
+  }
+  return {
+    projectId: projectId,
+    appId: appId,
+    dashboardCreateParameters: {
+      region: pipeline.region,
+      redshift: {
+        dataApiRole:
+          redshiftOutputs.get(
+            OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX
+          ) ?? '',
+        newServerless: {
+          workgroupName:
+            redshiftOutputs.get(
+              OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME
+            ) ?? '',
+        },
+      },
+    },
+  };
+};
+
