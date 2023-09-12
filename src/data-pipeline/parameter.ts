@@ -63,6 +63,7 @@ export function createStackParameters(scope: Construct) {
     description: 'Max of user data keep days',
     default: 180,
     type: 'Number',
+    minValue: 1,
   });
 
 
@@ -70,6 +71,7 @@ export function createStackParameters(scope: Construct) {
     description: 'Max of item data keep days',
     default: 360,
     type: 'Number',
+    minValue: 1,
   });
 
 
@@ -236,11 +238,11 @@ export function createStackParameters(scope: Construct) {
         },
 
         [userKeepDaysParam.logicalId]: {
-          default: 'Max days of user data',
+          default: 'Max days of users',
         },
 
         [itemKeepDaysParam.logicalId]: {
-          default: 'Max days of item days',
+          default: 'Max days of items',
         },
 
         [dataBufferedSecondsParam.logicalId]: {
