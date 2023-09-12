@@ -46,6 +46,7 @@ const RetentionItem: React.FC<RetentionItemProps> = (
         <div className="cs-para-name">{label}</div>
         <div className="flex-1">
           <EventItem
+            placeholder="Select Event"
             categoryOption={value}
             changeCurCategoryOption={(item) => {
               changeEventOption(item);
@@ -62,6 +63,7 @@ const RetentionItem: React.FC<RetentionItemProps> = (
             <div className="cs-para-name">关联属性</div>
             <div className="flex-1">
               <EventItem
+                placeholder="Select Attribute"
                 categoryOption={attributeValue}
                 changeCurCategoryOption={(item) => {
                   changeRelationAttributeOption(item);
