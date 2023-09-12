@@ -39,6 +39,7 @@ import {
   retentionAnalysisVisualColumns,
   VisualMapProps,
   getTempResourceName,
+  TEMP_RESOURCE_NAME_PREFIX,
 } from './quicksight/reporting-utils';
 import { buildEventAnalysisView, buildEventPathAnalysisView, buildFunnelDataSql, buildFunnelView, buildNodePathAnalysisView, buildRetentionAnalysisView } from './quicksight/sql-builder';
 import { awsAccountId } from '../common/constants';
@@ -862,7 +863,7 @@ export class ReportingServ {
 
       if (dashBoards.DashboardSummaryList) {
         for (const [_index, dashboard] of dashBoards.DashboardSummaryList.entries()) {
-          if (dashboard.Name?.startsWith('_tmp_') && (new Date().getTime() - dashboard.CreatedTime!.getTime()) > 60*60*1000) {
+          if (dashboard.Name?.startsWith(TEMP_RESOURCE_NAME_PREFIX) && (new Date().getTime() - dashboard.CreatedTime!.getTime()) > 60*60*1000) {
             const deletedRes = await quickSight.deleteDashboard({
               AwsAccountId: awsAccountId,
               DashboardId: dashboard.DashboardId,
@@ -879,7 +880,7 @@ export class ReportingServ {
 
       if (analyses.AnalysisSummaryList) {
         for (const [_index, analysis] of analyses.AnalysisSummaryList.entries()) {
-          if (analysis.Name?.startsWith('_tmp_') && (new Date().getTime() - analysis.CreatedTime!.getTime()) > 60*60*1000) {
+          if (analysis.Name?.startsWith(TEMP_RESOURCE_NAME_PREFIX) && (new Date().getTime() - analysis.CreatedTime!.getTime()) > 60*60*1000) {
             const deletedRes = await quickSight.deleteAnalysis({
               AwsAccountId: awsAccountId,
               AnalysisId: analysis.AnalysisId,
@@ -896,7 +897,7 @@ export class ReportingServ {
 
       if (datasets.DataSetSummaries) {
         for (const [_index, dataset] of datasets.DataSetSummaries.entries()) {
-          if (dataset.Name?.startsWith('_tmp_') && (new Date().getTime() - dataset.CreatedTime!.getTime()) > 60*60*1000) {
+          if (dataset.Name?.startsWith(TEMP_RESOURCE_NAME_PREFIX) && (new Date().getTime() - dataset.CreatedTime!.getTime()) > 60*60*1000) {
             const deletedRes = await quickSight.deleteDataSet({
               AwsAccountId: awsAccountId,
               DataSetId: dataset.DataSetId,

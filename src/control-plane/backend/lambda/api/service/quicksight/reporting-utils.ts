@@ -28,7 +28,7 @@ import { DataSetProps, dataSetActions } from './dashboard-ln';
 import { ExploreRelativeTimeUnit, ExploreRequestAction, ExploreTimeScopeType, ExploreVisualName } from '../../common/explore-types';
 import { logger } from '../../common/powertools';
 
-const TEMP_RESOURCE_NAME_PREFIX = '_tmp_';
+export const TEMP_RESOURCE_NAME_PREFIX = '_tmp_';
 
 export interface VisualProps {
   readonly sheetId: string;
