@@ -115,7 +115,7 @@ const MetadataParameterSplitPanel: React.FC<
 
     try {
       const { success }: ApiResponse<null> = await updateMetadataDisplay({
-        id: `${parameterDetails.prefix}#${parameterDetails.name}`,
+        id: `EVENT_PARAMETER#${parameterDetails.id}`,
         projectId: parameterDetails.projectId,
         appId: parameterDetails.appId,
         displayName: parameterDetails.displayName,

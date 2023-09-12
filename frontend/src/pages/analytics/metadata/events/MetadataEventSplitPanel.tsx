@@ -117,7 +117,7 @@ const MetadataEventSplitPanel: React.FC<MetadataEventSplitPanelProps> = (
 
     try {
       const { success }: ApiResponse<null> = await updateMetadataDisplay({
-        id: `${eventDetails.prefix}#${eventDetails.name}`,
+        id: `EVENT#${eventDetails.id}`,
         projectId: eventDetails.projectId,
         appId: eventDetails.appId,
         displayName: eventDetails.displayName,

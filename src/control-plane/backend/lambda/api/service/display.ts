@@ -52,7 +52,8 @@ export class CMetadataDisplay {
         return metadatas;
       }
       for (let metadata of metadatas) {
-        const metadataDisplay = displays.find((d: IMetadataDisplay) => d.id === `${metadata.prefix}#${metadata.name}`);
+        const prefix = metadata.prefix.split('#')[0];
+        const metadataDisplay = displays.find((d: IMetadataDisplay) => d.id === `${prefix}#${metadata.id}`);
         if (metadataDisplay) {
           metadata.displayName = metadataDisplay.displayName;
           metadata.description = metadataDisplay.description;
@@ -60,12 +61,16 @@ export class CMetadataDisplay {
         if (metadata.prefix.startsWith('EVENT#')) {
           const event = metadata as IMetadataEvent;
           event.associatedParameters = this.patchAssociatedWithData(event.associatedParameters) as IMetadataEventParameter[];
-          event.associatedParameters = this.patchValueEnumWithData(event.associatedParameters);
+          event.associatedParameters = this.patchValueEnumWithData(event.associatedParameters) as IMetadataEventParameter[];
         }
         if (metadata.prefix.startsWith('EVENT_PARAMETER#')) {
           let parameter = metadata as IMetadataEventParameter;
           parameter.associatedEvents = this.patchAssociatedWithData(parameter.associatedEvents) as IMetadataEvent[];
-          parameter = this.patchValueEnumWithData([parameter])[0];
+          parameter = (this.patchValueEnumWithData([parameter]) as IMetadataEventParameter[])[0];
+        }
+        if (metadata.prefix.startsWith('USER_ATTRIBUTE#')) {
+          let userAttribute = metadata as IMetadataUserAttribute;
+          userAttribute = (this.patchValueEnumWithData([userAttribute]) as IMetadataUserAttribute[])[0];
         }
       }
       return metadatas;
@@ -84,7 +89,8 @@ export class CMetadataDisplay {
       return associated;
     }
     for (let metadata of associated) {
-      const metadataDisplay = displays.find((d: IMetadataDisplay) => d.id === `${metadata.prefix}#${metadata.name}`);
+      const prefix = metadata.prefix.split('#')[0];
+      const metadataDisplay = displays.find((d: IMetadataDisplay) => d.id === `${prefix}#${metadata.id}`);
       if (metadataDisplay) {
         metadata.displayName = metadataDisplay.displayName;
         metadata.description = metadataDisplay.description;
@@ -93,7 +99,7 @@ export class CMetadataDisplay {
     return associated;
   }
 
-  private patchValueEnumWithData(parameters: IMetadataEventParameter[] | undefined) {
+  private patchValueEnumWithData(parameters: IMetadataEventParameter[] | IMetadataUserAttribute[] | undefined) {
     const displays = this.displays;
     if (!parameters || parameters.length === 0) {
       return [];
@@ -104,7 +110,7 @@ export class CMetadataDisplay {
     for (let parameter of parameters) {
       const valueEnum = parameter.valueEnum;
       for (let v of valueEnum) {
-        const display = displays.find((d: IMetadataDisplay) => d.id === `DICTIONARY#${parameter.prefix}#${parameter.name}#${v.value}`);
+        const display = displays.find((d: IMetadataDisplay) => d.id === `DICTIONARY#${parameter.id}#${v.value}`);
         if (display) {
           v.displayValue = display.displayName;
         }

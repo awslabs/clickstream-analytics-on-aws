@@ -518,6 +518,7 @@ function groupAssociatedEventsByName(parameters: IMetadataEventParameter[]): IMe
     const existedEvent = groupEvents.find((e: IMetadataEvent) => e.name === parameter.eventName);
     if (!existedEvent) {
       groupEvents.push({
+        id: `${parameter.projectId}#${parameter.appId}#${parameter.eventName}`,
         projectId: parameter.projectId,
         appId: parameter.appId,
         name: parameter.eventName,
@@ -573,7 +574,7 @@ function groupEventParameterByName(parameters: IMetadataEventParameter[]): IMeta
     } else {
       existedParameter.hasData = existedParameter.hasData || parameter.hasData;
       existedParameter.platform = [...new Set(existedParameter.platform.concat(parameter.platform))];
-      existedParameter.valueEnum = uniqueParameterValues(existedParameter.valueEnum.concat(parameter.valueEnum));
+      existedParameter.valueEnum = uniqueParameterValues(existedParameter.valueEnum, parameter.valueEnum);
     }
   }
   return groupEventParameters;
@@ -587,7 +588,7 @@ function groupUserAttributeByName(attributes: IMetadataUserAttribute[]): IMetada
       groupAttributes.push(attribute);
     } else {
       existedAttribute.hasData = existedAttribute.hasData || attribute.hasData;
-      existedAttribute.valueEnum = uniqueParameterValues(existedAttribute.valueEnum.concat(attribute.valueEnum));
+      existedAttribute.valueEnum = uniqueParameterValues(existedAttribute.valueEnum, attribute.valueEnum);
     }
   }
   return groupAttributes;
@@ -606,13 +607,16 @@ function concatEventParameter(
     } else {
       existedParameter.hasData = existedParameter.hasData || parameter.hasData;
       existedParameter.platform = [...new Set(existedParameter.platform.concat(parameter.platform))];
-      existedParameter.valueEnum = uniqueParameterValues(existedParameter.valueEnum.concat(parameter.valueEnum));
+      existedParameter.valueEnum = uniqueParameterValues(existedParameter.valueEnum, parameter.valueEnum);
     }
   }
   return concatEventParameters;
 };
 
-function uniqueParameterValues(values: IMetadataAttributeValue[]) {
+function uniqueParameterValues(e: IMetadataAttributeValue[] | undefined, n: IMetadataAttributeValue[] | undefined) {
+  const existedValues = e ?? [];
+  const newValues = n ?? [];
+  const values = existedValues.concat(newValues);
   const res = new Map();
   return values.filter((item) => !res.has(item.value) && res.set(item.value, 1));
 };

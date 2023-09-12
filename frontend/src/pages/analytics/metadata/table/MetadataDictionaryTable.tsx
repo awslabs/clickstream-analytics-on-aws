@@ -176,7 +176,7 @@ const MetadataDictionaryTable: React.FC<MetadataDictionaryTableProps> = (
       if (parameter) {
         const { success, message }: ApiResponse<null> =
           await updateMetadataDisplay({
-            id: `DICTIONARY#${parameter.prefix}#${parameter.name}#${attribute.value}`,
+            id: `DICTIONARY#${parameter.id}#${attribute.value}`,
             projectId: parameter.projectId,
             appId: parameter.appId,
             displayName: attribute.displayValue,

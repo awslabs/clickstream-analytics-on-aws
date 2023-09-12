@@ -204,7 +204,7 @@ const MetadataEvents: React.FC = () => {
     try {
       const { success, message }: ApiResponse<null> =
         await updateMetadataDisplay({
-          id: `${newItem.prefix}#${newItem.name}`,
+          id: `EVENT#${newItem.id}`,
           projectId: newItem.projectId,
           appId: newItem.appId,
           displayName: newItem.displayName,
