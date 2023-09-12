@@ -127,6 +127,10 @@
         "tableLoading": "加载中",
         "tableEmpty": "没有资源"
       }
+    },
+    "dictionary": {
+      "tableColumnValue": "值",
+      "tableColumnDisplayValue": "显示值"
     }
   },
   "dateRange": {
