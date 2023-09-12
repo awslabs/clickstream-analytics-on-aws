@@ -13,8 +13,11 @@
 
 package software.aws.solution.clickstream;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.Resources;
+import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -24,11 +27,13 @@ import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
+import java.util.Date;
+import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
 
 import static java.util.Objects.requireNonNull;
-import static software.aws.solution.clickstream.ContextUtil.JOB_NAME_PROP;
-import static software.aws.solution.clickstream.ContextUtil.WAREHOUSE_DIR_PROP;
+import static software.aws.solution.clickstream.ContextUtil.*;
 
 public class BaseSparkTest {
     protected SparkSession spark;
@@ -70,14 +75,22 @@ public class BaseSparkTest {
 
     @BeforeEach
     public void init() {
+        System.setProperty(JOB_NAME_PROP, "test-job");
+        System.setProperty(WAREHOUSE_DIR_PROP, "/tmp/warehouse");
+        String dbName = "test_db";
+        System.setProperty(DATABASE_PROP, dbName);
+        System.setProperty(USER_KEEP_DAYS_PROP, String.valueOf(180));
+        System.setProperty(ITEM_KEEP_DAYS_PROP, String.valueOf(180));
+
         spark = SparkSession.builder()
                 .appName("Test Spark App")
                 .master("local[*]")
                 .config("spark.driver.bindAddress", "127.0.0.1")
+                .config("spark.sql.warehouse.dir", ContextUtil.getWarehouseDir())
+                .enableHiveSupport()
                 .getOrCreate();
-
-        System.setProperty(JOB_NAME_PROP, "test-job");
-        System.setProperty(WAREHOUSE_DIR_PROP, "/tmp/warehouse");
+        spark.sql("DROP DATABASE IF EXISTS " + dbName + " CASCADE");
+        spark.sql("CREATE DATABASE IF NOT EXISTS " + dbName);
     }
 
     @AfterEach
@@ -97,5 +110,13 @@ public class BaseSparkTest {
         ObjectMapper om = new ObjectMapper();
         String jsonStr = Resources.toString(getClass().getResource(fileName), StandardCharsets.UTF_8).trim();
         return om.readTree(jsonStr).toPrettyString();
+    }
+
+    public String datasetToPrettyJson(Dataset<Row> dataset) throws JsonProcessingException {
+        String rowsJson = dataset.collectAsList().stream().map(Row::prettyJson).collect(Collectors.joining(",\n"));
+        rowsJson = "[" + rowsJson + "]";
+        ObjectMapper om = new ObjectMapper();
+        rowsJson = om.readTree(rowsJson).toPrettyString();
+        return rowsJson;
     }
 }

@@ -18,36 +18,29 @@ import {
 
 export function getEventParameterTableColumns(): Column[] {
   return [
-  {
-    name: 'event_id',
-    type: Schema.STRING,
-  },
-  {
-    name: 'event_params',
-    type: Schema.array(
-      Schema.struct([{
-        name: 'key',
-        type: Schema.STRING,
-      },
-      {
-        name: 'value',
-        type: Schema.struct([{
-          name: 'double_value',
-          type: Schema.DOUBLE,
-        },
-        {
-          name: 'float_value',
-          type: Schema.FLOAT,
-        },
-        {
-          name: 'int_value',
-          type: Schema.BIG_INT,
-        },
-        {
-          name: 'string_value',
-          type: Schema.STRING,
-        }]),
-      }]),
-    ),
-  }];
+    {
+      name: 'event_id',
+      type: Schema.STRING,
+    },
+    {
+      name: 'event_param_key',
+      type: Schema.STRING,
+    },
+    {
+      name: 'event_param_double_value',
+      type: Schema.DOUBLE,
+    },
+    {
+      name: 'event_param_float_value',
+      type: Schema.FLOAT,
+    },
+    {
+      name: 'event_param_int_value',
+      type: Schema.BIG_INT,
+    },
+    {
+      name: 'event_param_string_value',
+      type: Schema.STRING,
+    },
+  ];
 }

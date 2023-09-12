@@ -346,7 +346,7 @@ describe('DataPipelineStack parameter test', () => {
     expect(cfnInterface.ParameterGroups).toBeDefined();
 
     const paramCount = Object.keys(cfnInterface.ParameterLabels).length;
-    expect(paramCount).toEqual(19);
+    expect(paramCount).toEqual(21);
   });
 
 
@@ -367,6 +367,22 @@ describe('DataPipelineStack parameter test', () => {
   test('Should has parameter DataFreshnessInHour', () => {
     template.hasParameter('DataFreshnessInHour', {
       Default: 72,
+      Type: 'Number',
+    });
+  });
+
+
+  test('Should has parameter UserKeepMaxDays', () => {
+    template.hasParameter('UserKeepMaxDays', {
+      Default: 180,
+      Type: 'Number',
+    });
+  });
+
+
+  test('Should has parameter ItemKeepMaxDays', () => {
+    template.hasParameter('ItemKeepMaxDays', {
+      Default: 360,
       Type: 'Number',
     });
   });

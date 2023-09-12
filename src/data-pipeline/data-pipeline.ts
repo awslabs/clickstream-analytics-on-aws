@@ -63,12 +63,22 @@ export interface DataPipelineProps {
   readonly outputFormat: 'json' | 'parquet';
   readonly emrVersion: string;
   readonly emrApplicationIdleTimeoutMinutes: number;
+  readonly userKeepDays: number;
+  readonly itemKeepDays: number;
+}
+
+export interface ClickstreamSinkTables {
+  readonly eventTable: Table;
+  readonly eventParameterTable: Table;
+  readonly userTable: Table;
+  readonly itemTable: Table;
+  readonly odsEventsTable: Table;
 }
 
 export class DataPipelineConstruct extends Construct {
   public readonly glueDatabase: Database;
   public readonly glueIngestionTable: Table;
-  public readonly glueSinkTables: Table[];
+  public readonly glueSinkTables: ClickstreamSinkTables;
 
   private readonly props: DataPipelineProps;
   private readonly roleUtil: RoleUtil;
@@ -146,6 +156,8 @@ export class DataPipelineConstruct extends Construct {
         s3PathPluginJars: Fn.join(',', s3PathPluginJars),
         s3PathPluginFiles: Fn.join(',', s3PathPluginFiles),
         outputFormat: this.props.outputFormat,
+        userKeepDays: this.props.userKeepDays,
+        itemKeepDays: this.props.itemKeepDays,
       },
       this.roleUtil,
     );
@@ -194,7 +206,7 @@ export class DataPipelineConstruct extends Construct {
     const partitionSyncerLambda = this.lambdaUtil.createPartitionSyncerLambda(
       glueDatabase.databaseName,
       sourceTable.tableName,
-      sinkTables.map(t => t.tableName),
+      sinkTables,
     );
     this.scheduleLambda(
       'partitionSyncerScheduler',
@@ -233,7 +245,7 @@ export class DataPipelineConstruct extends Construct {
   private createSparkJobSubmitter(
     glueDatabase: Database,
     sourceTable: Table,
-    sinkTables: Table[],
+    sinkTables: ClickstreamSinkTables,
     emrApplicationId: string,
   ) {
     const jobSubmitterLambda = this.lambdaUtil.createEmrJobSubmitterLambda(

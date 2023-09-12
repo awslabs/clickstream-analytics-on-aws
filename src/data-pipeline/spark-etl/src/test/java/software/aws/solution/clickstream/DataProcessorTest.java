@@ -43,7 +43,8 @@ public class DataProcessorTest extends BaseSparkTest{
         String dataFreshnessInHour = "72";
         String outputPartitions = "-1";
         String rePartitions = "-1";
-
+        String nUserKeepDays = "10";
+        String nItemKeepDays = "20";
         DataProcessor.runWithSpark(
                 new String[] {
                         "false", // String debug = args[0];
@@ -60,7 +61,9 @@ public class DataProcessorTest extends BaseSparkTest{
                         dataFreshnessInHour, //String dataFreshnessInHour = args[11];
                         outPutFormat, //String outPutFormat = args[12];
                         outputPartitions, //String outputPartitions = args[13];
-                        rePartitions//String rePartitions = args[14];
+                        rePartitions,//String rePartitions = args[14];
+                        nUserKeepDays, //String nUserKeepDays = args[15];
+                        nItemKeepDays //String nItemKeepDays = args[16];
                 },
                 spark
         );

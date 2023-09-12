@@ -11,27 +11,12 @@
     "nullable" : true,
     "metadata" : { }
   }, {
+    "name" : "event_timestamp",
+    "type" : "long",
+    "nullable" : true,
+    "metadata" : { }
+  }, {
     "name" : "id",
-    "type" : "string",
-    "nullable" : true,
-    "metadata" : { }
-  }, {
-    "name" : "price",
-    "type" : "double",
-    "nullable" : true,
-    "metadata" : { }
-  }, {
-    "name" : "currency",
-    "type" : "string",
-    "nullable" : true,
-    "metadata" : { }
-  }, {
-    "name" : "creative_name",
-    "type" : "string",
-    "nullable" : true,
-    "metadata" : { }
-  }, {
-    "name" : "creative_slot",
     "type" : "string",
     "nullable" : true,
     "metadata" : { }

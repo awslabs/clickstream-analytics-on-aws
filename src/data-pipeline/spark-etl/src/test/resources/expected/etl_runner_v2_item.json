@@ -1,0 +1,75 @@
+{
+  "event_timestamp" : 1682319109447,
+  "id" : "item_id1",
+  "properties" : [ {
+    "key" : "name",
+    "value" : {
+      "double_value" : null,
+      "string_value" : "French Press1"
+    }
+  }, {
+    "key" : "category",
+    "value" : {
+      "double_value" : null,
+      "string_value" : "housewares"
+    }
+  }, {
+    "key" : "price",
+    "value" : {
+      "double_value" : 52.99,
+      "string_value" : null
+    }
+  }, {
+    "key" : "brand",
+    "value" : {
+      "double_value" : null,
+      "string_value" : "Brand1"
+    }
+  }, {
+    "key" : "category2",
+    "value" : {
+      "double_value" : null,
+      "string_value" : "Category-2"
+    }
+  }, {
+    "key" : "category3",
+    "value" : {
+      "double_value" : null,
+      "string_value" : "Category-3"
+    }
+  }, {
+    "key" : "category4",
+    "value" : {
+      "double_value" : null,
+      "string_value" : "Category-4"
+    }
+  }, {
+    "key" : "category5",
+    "value" : {
+      "double_value" : null,
+      "string_value" : "Category-5"
+    }
+  }, {
+    "key" : "creative_name",
+    "value" : {
+      "double_value" : null,
+      "string_value" : "Creative Name"
+    }
+  }, {
+    "key" : "creative_slot",
+    "value" : {
+      "double_value" : null,
+      "string_value" : "Creative Slot"
+    }
+  }, {
+    "key" : "location_id",
+    "value" : {
+      "double_value" : null,
+      "string_value" : "Location#001"
+    }
+  } ],
+  "partition_app" : "uba-app",
+  "partition_year" : 2023,
+  "partition_month" : 4,
+  "partition_day" : 24
+}

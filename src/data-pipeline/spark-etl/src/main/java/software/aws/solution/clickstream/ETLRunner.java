@@ -25,6 +25,7 @@ import org.apache.spark.sql.functions;
 import org.apache.spark.sql.types.DataTypes;
 import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
+import org.jetbrains.annotations.NotNull;
 import org.sparkproject.guava.annotations.VisibleForTesting;
 import software.aws.solution.clickstream.exception.ExecuteTransformerException;
 
@@ -63,7 +64,7 @@ public class ETLRunner {
     public static final String PARTITION_MONTH = "partition_month";
     public static final String PARTITION_DAY = "partition_day";
 
-    enum TableName {
+    public enum TableName {
         ODS_EVENTS("ods_events"),
         ITEM("item"),
         USER("user"),
@@ -93,27 +94,37 @@ public class ETLRunner {
         log.info(WAREHOUSE_DIR_PROP + ":"  + System.getProperty(WAREHOUSE_DIR_PROP));
 
         Dataset<Row> dataset = readInputDataset(true);
+        ContextUtil.cacheDataset(dataset);
+        log.info(new ETLMetric(dataset, "source").toString());
+
+        Dataset<Row> dataset2 = executeTransformers(dataset, config.getTransformerClassNames());
+
+        long resultCount = writeResultDataset(dataset2);
+        log.info(new ETLMetric(resultCount, "sink").toString());
+    }
+
+    @NotNull
+    private Dataset<Row> rePartitionInputDataset(final Dataset<Row> dataset) {
         int inputDataPartitions = dataset.rdd().getNumPartitions();
+        Dataset<Row> repDataset = dataset;
         if (config.getRePartitions() > 0
                 && (inputDataPartitions > 200 || config.getRePartitions() < inputDataPartitions)
         ) {
             log.info("inputDataPartitions:" + inputDataPartitions + ", repartition to: " + config.getRePartitions());
-            dataset = dataset.repartition(config.getRePartitions(),
+            repDataset = repDataset.repartition(config.getRePartitions(),
                     col("ingest_time"), col("rid"));
         }
-        log.info("NumPartitions: " + dataset.rdd().getNumPartitions());
-        ContextUtil.cacheDataset(dataset);
+        log.info("NumPartitions: " + repDataset.rdd().getNumPartitions());
+        return repDataset;
+    }
 
-        log.info(new ETLMetric(dataset, "source").toString());
-        Dataset<Row> dataset2 = executeTransformers(dataset, config.getTransformerClassNames());
+    public long writeResultDataset(final Dataset<Row> dataset2) {
         String outPath = config.getOutputPath();
         TableName tableName = TableName.ODS_EVENTS;
         if (this.multipleOutDataset) {
             tableName = TableName.EVENT;
         }
-        long resultCount = writeResult(outPath, dataset2, tableName);
-        log.info(new ETLMetric(resultCount, "sink").toString());
-
+        return writeResult(outPath, dataset2, tableName);
     }
 
     public Dataset<Row> readInputDataset(final boolean checkModifiedTime) {
@@ -213,7 +224,7 @@ public class ETLRunner {
         long fileNameCount = inputFiles.size();
         log.info(new ETLMetric(fileNameCount, "loaded input files").toString());
 
-        return dataset;
+        return rePartitionInputDataset(dataset);
     }
 
     @VisibleForTesting
@@ -326,20 +337,30 @@ public class ETLRunner {
         }
         log.info("saveOutputPath: " + saveOutputPath);
 
+        SaveMode saveMode = SaveMode.Append;
+        if (tbName == TableName.ITEM || tbName == TableName.USER) {
+            saveMode = SaveMode.Overwrite;
+        }
+        log.info("saveMode: " + saveMode);
+
         String[] partitionBy = new String[]{PARTITION_APP, PARTITION_YEAR, PARTITION_MONTH, PARTITION_DAY};
         if ("json".equalsIgnoreCase(config.getOutPutFormat())) {
-            partitionedDataset.write().partitionBy(partitionBy).mode(SaveMode.Append).json(saveOutputPath);
+            partitionedDataset.write().partitionBy(partitionBy).mode(saveMode).json(saveOutputPath);
         } else {
-            int outPartitions = Integer.parseInt(System.getProperty(OUTPUT_COALESCE_PARTITIONS_PROP, "-1"));
-            int numPartitions = partitionedDataset.rdd().getNumPartitions();
-            log.info("outPartitions:" + outPartitions);
-            log.info("partitionedDataset.NumPartitions: " + numPartitions);
-            if (outPartitions > 0 && numPartitions > outPartitions) {
-                partitionedDataset = partitionedDataset.coalesce(outPartitions);
+            if (saveMode == SaveMode.Overwrite) {
+                partitionedDataset = partitionedDataset.coalesce(1);
+            } else {
+                int outPartitions = Integer.parseInt(System.getProperty(OUTPUT_COALESCE_PARTITIONS_PROP, "-1"));
+                int numPartitions = partitionedDataset.rdd().getNumPartitions();
+                log.info("outPartitions:" + outPartitions);
+                log.info("partitionedDataset.NumPartitions: " + numPartitions);
+                if (outPartitions > 0 && numPartitions > outPartitions) {
+                    partitionedDataset = partitionedDataset.coalesce(outPartitions);
+                }
             }
             partitionedDataset.write()
                     .option("compression", "snappy")
-                    .partitionBy(partitionBy).mode(SaveMode.Append).parquet(saveOutputPath);
+                    .partitionBy(partitionBy).mode(saveMode).parquet(saveOutputPath);
         }
         return resultCount;
     }

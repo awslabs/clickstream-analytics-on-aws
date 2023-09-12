@@ -58,6 +58,21 @@ export function createStackParameters(scope: Construct) {
     type: 'Number',
   });
 
+
+  const userKeepDaysParam = new CfnParameter(scope, 'UserKeepMaxDays', {
+    description: 'Max of user data keep days',
+    default: 180,
+    type: 'Number',
+  });
+
+
+  const itemKeepDaysParam = new CfnParameter(scope, 'ItemKeepMaxDays', {
+    description: 'Max of item data keep days',
+    default: 360,
+    type: 'Number',
+  });
+
+
   const dataBufferedSecondsParam = new CfnParameter(scope, 'DataBufferedSeconds', {
     description: 'S3 object stable wait time',
     default: 30,
@@ -75,7 +90,7 @@ export function createStackParameters(scope: Construct) {
 
   const transformerAndEnrichClassNamesParam = new CfnParameter(scope, 'TransformerAndEnrichClassNames', {
     description: 'The class name list of custom plugins to transform or enrich data',
-    default: 'software.aws.solution.clickstream.TransformerV2,software.aws.solution.clickstream.UAEnrichment,software.aws.solution.clickstream.IPEnrichment',
+    default: 'software.aws.solution.clickstream.Transformer,software.aws.solution.clickstream.UAEnrichment,software.aws.solution.clickstream.IPEnrichment',
     type: 'String',
   });
 
@@ -156,6 +171,8 @@ export function createStackParameters(scope: Construct) {
           Label: { default: 'Job Schedule' },
           Parameters: [
             dataFreshnessInHourParam.logicalId,
+            userKeepDaysParam.logicalId,
+            itemKeepDaysParam.logicalId,
             scheduleExpressionParam.logicalId,
             dataBufferedSecondsParam.logicalId,
           ],
@@ -218,6 +235,14 @@ export function createStackParameters(scope: Construct) {
           default: 'Data freshness',
         },
 
+        [userKeepDaysParam.logicalId]: {
+          default: 'Max days of user data',
+        },
+
+        [itemKeepDaysParam.logicalId]: {
+          default: 'Max days of item days',
+        },
+
         [dataBufferedSecondsParam.logicalId]: {
           default: 'Max time for data in buffer',
         },
@@ -275,6 +300,8 @@ export function createStackParameters(scope: Construct) {
       outputFormatParam,
       emrVersionParam,
       emrApplicationIdleTimeoutMinutesParam,
+      userKeepDaysParam,
+      itemKeepDaysParam,
     },
   };
 }

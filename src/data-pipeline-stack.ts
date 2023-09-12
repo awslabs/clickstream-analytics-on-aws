@@ -24,7 +24,7 @@ import {
 import { OUTPUT_DATA_PROCESSING_EMR_SERVERLESS_APPLICATION_ID_SUFFIX, OUTPUT_DATA_PROCESSING_GLUE_DATABASE_SUFFIX, OUTPUT_DATA_PROCESSING_GLUE_EVENT_PARAMETER_TABLE_SUFFIX, OUTPUT_DATA_PROCESSING_GLUE_EVENT_TABLE_SUFFIX, OUTPUT_DATA_PROCESSING_GLUE_ITEM_TABLE_SUFFIX, OUTPUT_DATA_PROCESSING_GLUE_ODS_EVENT_TABLE_SUFFIX, OUTPUT_DATA_PROCESSING_GLUE_USER_TABLE_SUFFIX } from './common/constant';
 import { SolutionInfo } from './common/solution-info';
 import { getExistVpc } from './common/vpc-utils';
-import { DataPipelineConstruct, DataPipelineProps } from './data-pipeline/data-pipeline';
+import { ClickstreamSinkTables, DataPipelineConstruct, DataPipelineProps } from './data-pipeline/data-pipeline';
 import { createStackParameters } from './data-pipeline/parameter';
 
 export interface DataProcessingStackProps extends StackProps {
@@ -60,6 +60,8 @@ export class DataPipelineStack extends Stack {
         outputFormatParam,
         emrVersionParam,
         emrApplicationIdleTimeoutMinutesParam,
+        userKeepDaysParam,
+        itemKeepDaysParam,
       },
     } = createStackParameters(this);
 
@@ -138,6 +140,8 @@ export class DataPipelineStack extends Stack {
       outputFormat: outputFormatParam.valueAsString as 'json'|'parquet',
       emrApplicationIdleTimeoutMinutes: emrApplicationIdleTimeoutMinutesParam.valueAsNumber,
       emrVersion: emrVersionParam.valueAsString,
+      userKeepDays: userKeepDaysParam.valueAsNumber,
+      itemKeepDays: itemKeepDaysParam.valueAsNumber,
     });
 
     (dataPipelineStackWithCustomPlugins.nestedStackResource as CfnStack).cfnOptions.condition = withCustomPluginsCondition;
@@ -150,28 +154,28 @@ export class DataPipelineStack extends Stack {
 
     new CfnOutput(this, `WithPlugins-${OUTPUT_DATA_PROCESSING_GLUE_EVENT_TABLE_SUFFIX}`, {
       description: 'Glue Event Table',
-      value: dataPipelineStackWithCustomPlugins.glueSinkTables[0].tableName,
+      value: dataPipelineStackWithCustomPlugins.glueSinkTables.eventTable.tableName,
     }).condition = withCustomPluginsCondition;
 
     new CfnOutput(this, `WithPlugins-${OUTPUT_DATA_PROCESSING_GLUE_EVENT_PARAMETER_TABLE_SUFFIX}`, {
       description: 'Glue Event Parameter Table',
-      value: dataPipelineStackWithCustomPlugins.glueSinkTables[1].tableName,
+      value: dataPipelineStackWithCustomPlugins.glueSinkTables.eventParameterTable.tableName,
     }).condition = withCustomPluginsCondition;
 
     new CfnOutput(this, `WithPlugins-${OUTPUT_DATA_PROCESSING_GLUE_USER_TABLE_SUFFIX}`, {
       description: 'Glue User Table',
-      value: dataPipelineStackWithCustomPlugins.glueSinkTables[2].tableName,
+      value: dataPipelineStackWithCustomPlugins.glueSinkTables.userTable.tableName,
     }).condition = withCustomPluginsCondition;
 
 
     new CfnOutput(this, `WithPlugins-${OUTPUT_DATA_PROCESSING_GLUE_ITEM_TABLE_SUFFIX}`, {
       description: 'Glue Item Table',
-      value: dataPipelineStackWithCustomPlugins.glueSinkTables[3].tableName,
+      value: dataPipelineStackWithCustomPlugins.glueSinkTables.itemTable.tableName,
     }).condition = withCustomPluginsCondition;
 
     new CfnOutput(this, `WithPlugins-${OUTPUT_DATA_PROCESSING_GLUE_ODS_EVENT_TABLE_SUFFIX}`, {
       description: 'Glue ODS Events Table',
-      value: dataPipelineStackWithCustomPlugins.glueSinkTables[4].tableName,
+      value: dataPipelineStackWithCustomPlugins.glueSinkTables.odsEventsTable.tableName,
     }).condition = withCustomPluginsCondition;
 
     new CfnOutput(this, `WithPlugins-${OUTPUT_DATA_PROCESSING_EMR_SERVERLESS_APPLICATION_ID_SUFFIX}`, {
@@ -197,6 +201,8 @@ export class DataPipelineStack extends Stack {
       outputFormat: outputFormatParam.valueAsString as 'json'|'parquet',
       emrApplicationIdleTimeoutMinutes: emrApplicationIdleTimeoutMinutesParam.valueAsNumber,
       emrVersion: emrVersionParam.valueAsString,
+      userKeepDays: userKeepDaysParam.valueAsNumber,
+      itemKeepDays: itemKeepDaysParam.valueAsNumber,
     });
 
     (dataPipelineStackWithoutCustomPlugins.nestedStackResource as CfnStack).cfnOptions.condition = withoutCustomPluginsCondition;
@@ -209,27 +215,27 @@ export class DataPipelineStack extends Stack {
 
     new CfnOutput(this, `WithoutPlugins-${OUTPUT_DATA_PROCESSING_GLUE_EVENT_TABLE_SUFFIX}`, {
       description: 'Glue Event Table',
-      value: dataPipelineStackWithoutCustomPlugins.glueSinkTables[0].tableName,
+      value: dataPipelineStackWithoutCustomPlugins.glueSinkTables.eventTable.tableName,
     }).condition = withoutCustomPluginsCondition;
 
     new CfnOutput(this, `WithoutPlugins-${OUTPUT_DATA_PROCESSING_GLUE_EVENT_PARAMETER_TABLE_SUFFIX}`, {
       description: 'Glue Event Parameter Table',
-      value: dataPipelineStackWithoutCustomPlugins.glueSinkTables[1].tableName,
+      value: dataPipelineStackWithoutCustomPlugins.glueSinkTables.eventParameterTable.tableName,
     }).condition = withoutCustomPluginsCondition;
 
     new CfnOutput(this, `WithoutPlugins-${OUTPUT_DATA_PROCESSING_GLUE_USER_TABLE_SUFFIX}`, {
       description: 'Glue User Table',
-      value: dataPipelineStackWithoutCustomPlugins.glueSinkTables[2].tableName,
+      value: dataPipelineStackWithoutCustomPlugins.glueSinkTables.userTable.tableName,
     }).condition = withoutCustomPluginsCondition;
 
     new CfnOutput(this, `WithoutPlugins-${OUTPUT_DATA_PROCESSING_GLUE_ITEM_TABLE_SUFFIX}`, {
       description: 'Glue Item Table',
-      value: dataPipelineStackWithoutCustomPlugins.glueSinkTables[3].tableName,
+      value: dataPipelineStackWithoutCustomPlugins.glueSinkTables.itemTable.tableName,
     }).condition = withoutCustomPluginsCondition;
 
     new CfnOutput(this, `WithoutPlugins-${OUTPUT_DATA_PROCESSING_GLUE_ODS_EVENT_TABLE_SUFFIX}`, {
       description: 'Glue ODS Events Table',
-      value: dataPipelineStackWithoutCustomPlugins.glueSinkTables[4].tableName,
+      value: dataPipelineStackWithoutCustomPlugins.glueSinkTables.odsEventsTable.tableName,
     }).condition = withoutCustomPluginsCondition;
 
 
@@ -245,7 +251,7 @@ interface DataPipelineNestedStackProps extends NestedStackProps, DataPipelinePro
 
 class DataPipelineNestedStack extends NestedStack {
   public readonly glueDatabase: Database;
-  public readonly glueSinkTables: Table[];
+  public readonly glueSinkTables: ClickstreamSinkTables;
   public readonly glueIngestionTable: Table;
   public readonly emrServerlessApplicationId: string;
 

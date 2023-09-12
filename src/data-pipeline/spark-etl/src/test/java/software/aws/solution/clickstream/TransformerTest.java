@@ -165,8 +165,8 @@ class TransformerTest extends BaseSparkTest {
         assertEquals(item1Expected, item1);
 
         String item2Expected = "{\"brand\":null,\"category\":\"housewares\",\"category2\":null,\"category3\":null,\"category4\":null,\"category5\":null," +
-                "\"creative_name\":null,\"creative_slot\":null,\"id\":\"d3b237ae-6039-45f9-9692-495ad2141c54\",\"location_id\":null,\"name\":\"French Press\"," +
-                "\"price\":52.99,\"currency\":null,\"quantity\":null}";
+                "\"creative_name\":null,\"creative_slot\":null,\"id\":\"d3b237aekdme3l\",\"location_id\":null,\"name\":\"French Press\",\"price\":52.99," +
+                "\"currency\":null,\"quantity\":null}";
         String item2 = items.get(1).json();
         assertEquals(item2Expected, item2);
     }

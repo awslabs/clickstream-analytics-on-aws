@@ -78,6 +78,8 @@ process.env.OUTPUT_PARTITIONS = '128';
 process.env.RE_PARTITIONS = '96';
 process.env.JOB_NAME = 'test-job-name-123456';
 process.env.SAVE_INFO_TO_WAREHOUSE = '1';
+process.env.USER_KEEP_DAYS = '10';
+process.env.ITEM_KEEP_DAYS = '12';
 
 describe('Data Process -- EMR Serverless job submitter function', () => {
 
@@ -131,6 +133,8 @@ describe('Data Process -- EMR Serverless job submitter function', () => {
             'json',
             '128',
             '96',
+            '10',
+            '12',
           ],
           sparkSubmitParameters: '--class software.aws.solution.clickstream.DataProcessor \
 --jars s3://test/main.jar,s3://test/test1.jar,s3://test/test2.jar \
@@ -196,6 +200,8 @@ describe('Data Process -- EMR Serverless job submitter function', () => {
             'json',
             '120',
             '90',
+            '10',
+            '12',
           ],
           sparkSubmitParameters: '--class software.aws.solution.clickstream.DataProcessor \
 --jars s3://test/main.jar,s3://test/test1.jar,s3://test/test2.jar \

@@ -150,6 +150,9 @@ export class EMRServerlessUtil {
 
     const jobDataDir = `${config.projectId}/job-data/${jobName}`;
 
+    const userKeepDays = config.userKeepDays;
+    const itemKeepDays = config.itemKeepDays;
+
     const entryPointArguments = [
       config.saveInfoToWarehouse,
       config.databaseName, // [1] glue catalog database.
@@ -166,6 +169,8 @@ export class EMRServerlessUtil {
       config.outputFormat, // [12] outputFormat,
       outputPartitions, // [13] outputPartitions
       rePartitions, // [14] rePartitions.
+      userKeepDays, // [15] userKeepDays
+      itemKeepDays, // [16] itemKeepDays
     ];
 
     const jars = Array.from(
@@ -278,6 +283,8 @@ export class EMRServerlessUtil {
       outputFormat: process.env.OUTPUT_FORMAT!,
       outputPartitions: process.env.OUTPUT_PARTITIONS || '-1',
       rePartitions: process.env.RE_PARTITIONS || '200',
+      userKeepDays: process.env.USER_KEEP_DAYS || '180',
+      itemKeepDays: process.env.ITEM_KEEP_DAYS || '360',
     };
   }
 

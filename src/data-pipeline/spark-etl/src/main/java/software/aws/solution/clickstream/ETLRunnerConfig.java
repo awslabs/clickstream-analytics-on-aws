@@ -53,6 +53,13 @@ public class ETLRunnerConfig {
     private final int outPartitions;
     @NotNull
     private final int rePartitions;
+
+    @NotNull
+    private final int userKeepDays;
+
+    @NotNull
+    private final int itemKeepDays;
+
     public ETLRunnerConfig(
             @NotNull final TransformationConfig transformationConfig,
             @NotNull final InputOutputConfig inputOutputConfig,
@@ -74,6 +81,8 @@ public class ETLRunnerConfig {
         this.outPartitions = partitionConfig.getOutPartitions();
         this.rePartitions = partitionConfig.getRePartitions();
         this.sourcePath = inputOutputConfig.getSourcePath();
+        this.userKeepDays = transformationConfig.getUserKeepDays();
+        this.itemKeepDays = transformationConfig.getItemKeepDays();
     }
 
     public boolean isSaveInfoToWarehouse() {
@@ -136,6 +145,14 @@ public class ETLRunnerConfig {
         return rePartitions;
     }
 
+    public int getUserKeepDays() {
+        return userKeepDays;
+    }
+
+    public int getItemKeepDays() {
+        return itemKeepDays;
+    }
+
     @AllArgsConstructor
     @Getter
     static class PartitionConfig {
@@ -184,6 +201,10 @@ public class ETLRunnerConfig {
         final String validAppIds;
         @NotNull
         final Long dataFreshnessInHour;
+        @NotNull
+        final Integer userKeepDays;
+        @NotNull
+        final Integer itemKeepDays;
     }
 }
 

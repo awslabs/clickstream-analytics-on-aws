@@ -70,31 +70,17 @@ public class KvConverter {
             JsonNode attrValueNode = jsonNode.get(attrName);
             String attrValue = attrValueNode.asText();
 
-            Double doubleValue = null;
-            Long longValue = null;
-            String stringValue = null;
-
-            if (Objects.equals("price", attrName)) {
-                doubleValue = Double.parseDouble(attrValue);
-            } else if (attrName.endsWith("_id")) {
-                stringValue = attrValue;
-            } else if (attrValue.matches("^\\d+$")) {
-                longValue = Long.parseLong(attrValue);
-            } else if (attrValue.matches("^[\\d]+\\.([\\d]+)?$")) {
-                doubleValue = Double.parseDouble(attrValue);
-            } else {
-                stringValue = attrValue;
-            }
+            ValueTypeResult result = getValueTypeResult(attrName, attrValue);
 
             list.add(new GenericRow(
                     new Object[]{
                             attrName,
                             new GenericRow(
                                     new Object[]{
-                                            doubleValue,
+                                            result.doubleValue,
                                             null,
-                                            longValue,
-                                            stringValue,
+                                            result.longValue,
+                                            result.stringValue,
                                     })
                     }
             ));
@@ -104,6 +90,38 @@ public class KvConverter {
             return list.toArray(new GenericRow[]{});
         } else {
             return null;
+        }
+    }
+
+    @NotNull
+    public static ValueTypeResult getValueTypeResult(final String attrName, final String attrValue) {
+        Double doubleValue = null;
+        Long longValue = null;
+        String stringValue = null;
+
+        if (Objects.equals("price", attrName)) {
+            doubleValue = Double.parseDouble(attrValue);
+        } else if (attrName.endsWith("_id")) {
+            stringValue = attrValue;
+        } else if (attrValue.matches("^\\d+$")) {
+            longValue = Long.parseLong(attrValue);
+        } else if (attrValue.matches("^\\d+\\.(\\d+)?$")) {
+            doubleValue = Double.parseDouble(attrValue);
+        } else {
+            stringValue = attrValue;
+        }
+        return new ValueTypeResult(doubleValue, longValue, stringValue);
+    }
+
+    public static class ValueTypeResult {
+        public final Double doubleValue;
+        public final Long longValue;
+        public final String stringValue;
+
+        public ValueTypeResult(final Double doubleValue, final Long longValue, final String stringValue) {
+            this.doubleValue = doubleValue;
+            this.longValue = longValue;
+            this.stringValue = stringValue;
         }
     }
 

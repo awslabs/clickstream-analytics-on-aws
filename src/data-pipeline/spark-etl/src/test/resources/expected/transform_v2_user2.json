@@ -2,7 +2,7 @@
   "app_id" : "uba-app",
   "event_date" : "2023-04-24",
   "event_timestamp" : 1682319109447,
-  "user_id" : "312121-1",
+  "user_id" : "p3121211",
   "user_pseudo_id" : "83e45133-ddaf-4ac6-9844-fe457807715198",
   "user_first_touch_timestamp" : 1667877267895,
   "user_properties" : [ {
@@ -11,7 +11,7 @@
       "double_value" : null,
       "float_value" : null,
       "int_value" : null,
-      "string_value" : "312121-1",
+      "string_value" : "p3121211",
       "set_timestamp_micros" : 1667877566697000
     }
   }, {
@@ -20,7 +20,7 @@
       "double_value" : null,
       "float_value" : null,
       "int_value" : null,
-      "string_value" : "testName",
+      "string_value" : "testName-3",
       "set_timestamp_micros" : 1667877566697000
     }
   }, {
@@ -92,10 +92,10 @@
     "currency" : "USD"
   },
   "_first_visit_date" : "2022-11-08",
-  "_first_referer" : null,
+  "_first_referer" : "http://myhost.com/_page_referer_001",
   "_first_traffic_source_type" : "TSN",
   "_first_traffic_medium" : "TSM",
   "_first_traffic_source" : "TSS",
-  "device_id_list" : [ "deviceid-1682319109447" ],
+  "device_id_list" : [ "deviceid-1", "deviceid-3", "deviceid-4" ],
   "_channel" : "C001"
 }

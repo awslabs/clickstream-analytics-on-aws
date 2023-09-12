@@ -13,6 +13,7 @@
 
 package software.aws.solution.clickstream;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.junit.jupiter.api.Assertions;
@@ -23,10 +24,12 @@ import java.lang.reflect.Method;
 import java.util.List;
 
 import static java.util.Objects.requireNonNull;
-import static software.aws.solution.clickstream.ContextUtil.APP_IDS_PROP;
-import static software.aws.solution.clickstream.ContextUtil.PROJECT_ID_PROP;
+import static org.apache.spark.sql.functions.*;
+import static software.aws.solution.clickstream.ContextUtil.*;
 import static software.aws.solution.clickstream.ETLRunner.TRANSFORM_METHOD_NAME;
+import static software.aws.solution.clickstream.TransformerV2.FULL_SUFFIX;
 
+@Slf4j
 class TransformerV2Test extends BaseSparkTest {
 
     private final TransformerV2 transformer = new TransformerV2();
@@ -46,7 +49,6 @@ class TransformerV2Test extends BaseSparkTest {
         String eventSchema =  datasetEvent.schema().prettyJson();
         String expectedSchema = this.resourceFileAsString("/expected/schema-event.json");
         Assertions.assertEquals(expectedSchema, eventSchema);
-
 
         System.out.println(datasetEvent.first().prettyJson());
         String expectedJson = this.resourceFileAsString("/expected/transform_v2_event.json");
@@ -70,9 +72,11 @@ class TransformerV2Test extends BaseSparkTest {
         Assertions.assertEquals(expectedSchema, schema);
 
         String expectedJson = this.resourceFileAsString("/expected/transform_v2_event_params.json");
-        Assertions.assertEquals(expectedJson, eventParams.first().prettyJson());
-    }
+        Dataset<Row> eventParams1 = eventParams.where(col("event_id").equalTo(lit("1fcd7f5b-9529-4977-a303-e8c7e39db7b898")));
 
+        String rowsJson = datasetToPrettyJson(eventParams1);
+        Assertions.assertEquals(expectedJson, rowsJson);
+    }
 
     @Test
     public void should_transform_items() throws IOException {
@@ -83,15 +87,17 @@ class TransformerV2Test extends BaseSparkTest {
         Dataset<Row> dataset =
                 spark.read().json(requireNonNull(getClass().getResource("/original_data_with_items.json")).getPath());
         List<Dataset<Row>> transformedDatasets = transformer.transform(dataset);
-        Dataset<Row> datasetItems = transformedDatasets.get(2);
+        String itemId = "item_id034394ldmf3";
+        Dataset<Row> itemsDataset = transformedDatasets.get(2);
+        Dataset<Row> datasetItem3 = itemsDataset.filter(col("id").equalTo(itemId));
 
-        String schema =  datasetItems.schema().prettyJson();
+        String schema =  itemsDataset.schema().prettyJson();
         String expectedSchema = this.resourceFileAsString("/expected/schema-item.json");
         Assertions.assertEquals(expectedSchema, schema);
 
         String expectedJson = this.resourceFileAsString("/expected/transform_v2_item0.json");
-        Assertions.assertEquals(expectedJson, datasetItems.first().prettyJson());
-        Assertions.assertEquals(3, datasetItems.count());
+        Assertions.assertEquals(expectedJson, datasetItem3.first().prettyJson());
+        Assertions.assertEquals(5, itemsDataset.count());
     }
 
     @Test
@@ -110,12 +116,116 @@ class TransformerV2Test extends BaseSparkTest {
         Assertions.assertEquals(expectedSchema, schema);
 
         String expectedJson = this.resourceFileAsString("/expected/transform_v2_user.json");
+        datasetUser = datasetUser.filter(expr("user_id='312121-1'"));
         Assertions.assertEquals(expectedJson, datasetUser.first().prettyJson());
         Assertions.assertEquals(1, datasetUser.count());
     }
 
+    @Test
+    public void should_transform_user_with_page_referer() throws IOException {
+        // DOWNLOAD_FILE=0 ./gradlew clean test --info --tests software.aws.solution.clickstream.TransformerV2Test.should_transform_user_with_page_referer
+        System.setProperty(APP_IDS_PROP, "uba-app");
+        System.setProperty(PROJECT_ID_PROP, "test_project_id_01");
+
+        Dataset<Row> dataset =
+                spark.read().json(requireNonNull(getClass().getResource("/original_data_with_user_profile_set2.json")).getPath());
+        List<Dataset<Row>> transformedDatasets = transformer.transform(dataset);
+        Dataset<Row> datasetUser = transformedDatasets.get(3);
+
+        String schema =  datasetUser.schema().prettyJson();
+        String expectedSchema = this.resourceFileAsString("/expected/schema-user.json");
+        Assertions.assertEquals(expectedSchema, schema);
+
+        String expectedJson = this.resourceFileAsString("/expected/transform_v2_user2.json");
+
+        Dataset<Row> datasetUser1 = datasetUser.filter(expr("user_id='p3121211'"));
+        Assertions.assertEquals(expectedJson, datasetUser1.first().prettyJson());
+        Assertions.assertEquals(1, datasetUser1.count());
+    }
 
     @Test
+    public void should_transform_save_state_data_temp_table() throws IOException {
+        // DOWNLOAD_FILE=0 ./gradlew clean test --info --tests software.aws.solution.clickstream.TransformerV2Test.should_transform_save_state_data_temp_table
+        System.setProperty(APP_IDS_PROP, "uba-app");
+        System.setProperty(PROJECT_ID_PROP, "test_project_id_01");
+        System.setProperty("force.merge", "false");
+
+        Dataset<Row> dataset =
+                spark.read().json(requireNonNull(getClass().getResource("/original_data_with_user_profile_set2.json")).getPath());
+        List<Dataset<Row>> transformedDatasets = transformer.transform(dataset);
+        Dataset<Row> datasetUser = transformedDatasets.get(3);
+
+        String dataDir = ContextUtil.getWarehouseDir();
+
+        String tableName1 = dataDir + "/" + TransformerV2.TABLE_ETL_USER_TRAFFIC_SOURCE + FULL_SUFFIX ;
+        String tableName2 = dataDir + "/" + TransformerV2.TABLE_ETL_USER_DEVICE_ID + FULL_SUFFIX;
+        String tableName3 = dataDir + "/" + TransformerV2.TABLE_ETL_USER_PAGE_REFERER + FULL_SUFFIX;
+
+        transformer.postTransform(datasetUser);
+        Dataset<Row> d1 = spark.read().parquet(tableName1);
+        Dataset<Row> d2 = spark.read().parquet(tableName2);
+        Dataset<Row> d3 = spark.read().parquet(tableName3);
+
+        String appId1 = d1.select("app_id").first().getAs(0);
+        String appId2 = d2.select("app_id").first().getAs(0);
+        String appId3 = d3.select("app_id").first().getAs(0);
+        log.info(String.format("%s, %s, %s", appId1, appId2, appId3));
+
+        Assertions.assertEquals("uba-app", appId1);
+        Assertions.assertEquals("uba-app", appId2);
+        Assertions.assertEquals("uba-app", appId3);
+
+        Integer dateStr1 = d1.select("update_date").orderBy(col("update_date").desc()).first().getAs(0);
+        Integer dateStr2 = d2.select("update_date").orderBy(col("update_date").desc()).first().getAs(0);
+        Integer dateStr3 = d3.select("update_date").orderBy(col("update_date").desc()).first().getAs(0);
+
+        log.info(String.format("%s, %s, %s", dateStr1, dateStr2, dateStr3));
+
+        Assertions.assertTrue(dateStr1.toString().matches("\\d{8}"));
+        Assertions.assertTrue(dateStr1.toString().matches("\\d{8}"));
+        Assertions.assertTrue(dateStr1.toString().matches("\\d{8}"));
+    }
+
+    @Test
+    public void should_transform_save_state_data_incremental() throws IOException {
+        // DOWNLOAD_FILE=0 ./gradlew clean test --info --tests software.aws.solution.clickstream.TransformerV2Test.should_transform_save_state_data_incremental
+        System.setProperty(APP_IDS_PROP, "uba-app");
+        System.setProperty(PROJECT_ID_PROP, "test_project_id_01");
+        System.setProperty("force.merge", "true");
+
+        Dataset<Row> dataset =
+                spark.read().json(requireNonNull(getClass().getResource("/original_data_with_user_profile_set2.json")).getPath());
+        List<Dataset<Row>> transformedDatasets = transformer.transform(dataset);
+        Dataset<Row> datasetUser = transformedDatasets.get(3);
+        transformer.postTransform(datasetUser);
+
+        String dirPath = ContextUtil.getWarehouseDir();
+        String pathUser = dirPath + "/user_incremental";
+        String pathItem = dirPath + "/item_incremental";
+
+        Dataset<Row> userDataset = spark.read().parquet(pathUser);
+        Dataset<Row> itemDataset = spark.read().parquet(pathItem);
+
+        String appId1 = userDataset.select("app_id").first().getAs(0);
+        String appId2 = itemDataset.select("app_id").first().getAs(0);
+        log.info(String.format("%s, %s", appId1, appId2));
+
+        Assertions.assertEquals("uba-app", appId1);
+        Assertions.assertEquals("uba-app", appId2);
+
+        Integer dateStr1 = userDataset.select("update_date").first().getAs(0);
+        Integer dateStr2 = itemDataset.select("update_date").first().getAs(0);
+
+        log.info(String.format("dateStr1=%s, dateStr2=%s\n", dateStr1, dateStr2));
+
+        Assertions.assertTrue(dateStr1.toString().matches("\\d{8}"));
+        Assertions.assertTrue(dateStr1.toString().matches("\\d{8}"));
+
+        System.setProperty("force.merge", "false");
+        transformer.postTransform(datasetUser);
+    }
+
+        @Test
     public void check_return_type() throws ClassNotFoundException, NoSuchMethodException {
         // DOWNLOAD_FILE=0 ./gradlew clean test --info --tests software.aws.solution.clickstream.TransformerV2Test.check_return_type
         Class<?> aClass = Class.forName("software.aws.solution.clickstream.TransformerV2");

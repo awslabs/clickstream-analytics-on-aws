@@ -21,7 +21,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -30,96 +29,53 @@ import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Objects.requireNonNull;
+import static org.apache.spark.sql.functions.expr;
 import static org.junit.jupiter.api.Assertions.*;
 import static software.aws.solution.clickstream.ContextUtil.*;
+import static software.aws.solution.clickstream.TransformerV2.FULL_SUFFIX;
+import static software.aws.solution.clickstream.TransformerV2.INCREMENTAL_SUFFIX;
 
 class ETLRunnerTest extends BaseSparkTest {
 
     @Test
     public void should_read_dataset_cross_multi_days() {
-        String database = "default";
-        String sourceTable = "fakeSourceTable";
-        String sourcePath = Paths.get(getClass().getResource("/original_data.json").getPath()).getParent().toString() + "/partition_data/";
-        String jobDataDir = "/tmp/job-data";
-        String transformerClassNames = String.join(",");
-        String outputPath = "/tmp/test-output";
-        String projectId = "projectId1";
-        String validAppIds = "id1,id2,uba-app";
-        String outPutFormat = "json";
+        List<String> transformers = Lists.newArrayList();
+
+        transformers.add("software.aws.solution.clickstream.Transformer");
+        transformers.add("software.aws.solution.clickstream.UAEnrichment");
+        transformers.add("software.aws.solution.clickstream.IPEnrichment");
         String startTimestamp = "1667963966000"; // 2022-11-09T03:19:26.000Z
         String endTimestamp = "1668136766000"; // 2022-11-11T03:19:26.000Z
-        String dataFreshnessInHour = "72";
-        String outputPartitions = "-1";
 
-        ETLRunnerConfig runnerConfig = new ETLRunnerConfig(
-                new ETLRunnerConfig.TransformationConfig(
-                        newArrayList(transformerClassNames.split(",")),
-                        projectId, validAppIds,
-                        Long.valueOf(dataFreshnessInHour)
-                ),
-                new ETLRunnerConfig.InputOutputConfig(
-                        "true",
-                        database,
-                        sourceTable,
-                        sourcePath,
-                        jobDataDir,
-                        outputPath,
-                        outPutFormat
-                ),
-                new ETLRunnerConfig.TimestampConfig(
-                        Long.valueOf(startTimestamp),
-                        Long.valueOf(endTimestamp)
-                ),
-                new ETLRunnerConfig.PartitionConfig(
-                        Integer.valueOf(outputPartitions), -1
-                ));
+        ETLRunnerConfig config = getRunnerConfigForPartitionData(
+                transformers, "cross_multi_days",
+                startTimestamp, endTimestamp
+        );
+        ETLRunner runner = new ETLRunner(spark, config);
 
-        ETLRunner runner = new ETLRunner(spark, runnerConfig);
         Dataset<Row> dataset = runner.readInputDataset(false);
         assertEquals(9, dataset.count());
     }
 
     @Test
     public void should_readDataset() {
-        String database = "default";
-        String sourceTable = "fakeSourceTable";
-        String sourcePath = Paths.get(getClass().getResource("/original_data.json").getPath()).getParent().toString() + "/partition_data/";
-        String jobDataDir = "/tmp/job-data";
-        String transformerClassNames = String.join(",");
-        String outputPath = "/tmp/test-output";
-        String projectId = "projectId1";
-        String validAppIds = "id1,id2,uba-app";
-        String outPutFormat = "json";
+        // DOWNLOAD_FILE=0 ./gradlew clean test --info --tests software.aws.solution.clickstream.ETLRunnerTest.should_readDataset
+
+        List<String> transformers = Lists.newArrayList();
+
+        transformers.add("software.aws.solution.clickstream.Transformer");
+        transformers.add("software.aws.solution.clickstream.UAEnrichment");
+        transformers.add("software.aws.solution.clickstream.IPEnrichment");
+
         String startTimestamp = "1667963966000"; // 2022-11-09T03:19:26.000Z
         String endTimestamp = "1667969999000"; // 2022-11-09T07:46:39.000Z
-        String dataFreshnessInHour = "72";
-        String outputPartitions = "-1";
 
+        ETLRunnerConfig config = getRunnerConfigForPartitionData(
+                transformers, "readDataset",
+                startTimestamp, endTimestamp
+        );
+        ETLRunner runner = new ETLRunner(spark, config);
 
-        ETLRunnerConfig runnerConfig = new ETLRunnerConfig(
-                new ETLRunnerConfig.TransformationConfig(
-                        newArrayList(transformerClassNames.split(",")),
-                        projectId, validAppIds,
-                        Long.valueOf(dataFreshnessInHour)
-                ),
-                new ETLRunnerConfig.InputOutputConfig(
-                        "true",
-                        database,
-                        sourceTable,
-                        sourcePath,
-                        jobDataDir,
-                        outputPath,
-                        outPutFormat
-                ),
-                new ETLRunnerConfig.TimestampConfig(
-                        Long.valueOf(startTimestamp),
-                        Long.valueOf(endTimestamp)
-                ),
-                new ETLRunnerConfig.PartitionConfig(
-                        Integer.valueOf(outputPartitions), -1
-                ));
-
-        ETLRunner runner = new ETLRunner(spark, runnerConfig);
         Dataset<Row> dataset = runner.readInputDataset(true);
         assertEquals(0, dataset.count());
         dataset = runner.readInputDataset(false);
@@ -129,50 +85,23 @@ class ETLRunnerTest extends BaseSparkTest {
 
     @Test
     public void should_read_corrupt_dataset() {
+       // DOWNLOAD_FILE=0 ./gradlew clean test --info --tests software.aws.solution.clickstream.ETLRunnerTest.should_read_corrupt_dataset
+
         List<String> transformers = Lists.newArrayList();
 
         transformers.add("software.aws.solution.clickstream.Transformer");
         transformers.add("software.aws.solution.clickstream.UAEnrichment");
         transformers.add("software.aws.solution.clickstream.IPEnrichment");
 
-        String database = "default";
-        String sourceTable = "fakeSourceTable";
-        String sourcePath = Paths.get(getClass().getResource("/original_data.json").getPath()).getParent().toString() + "/partition_data/";
-        String jobDataDir = "/tmp/job-data";
-        String transformerClassNames = String.join(",", transformers);
-        String outputPath = "/tmp/test-output";
-        String projectId = "projectId1";
-        String validAppIds = "id1,id2,uba-app";
-        String outPutFormat = "json";
         String startTimestamp = "1668128460000"; // '2022-11-11T01:01:00Z'
         String endTimestamp = "1668153660000"; // '2022-11-11T08:01:00Z'
-        String dataFreshnessInHour = "72";
-        String outputPartitions = "-1";
 
-        ETLRunnerConfig runnerConfig = new ETLRunnerConfig(
-                new ETLRunnerConfig.TransformationConfig(
-                        newArrayList(transformerClassNames.split(",")),
-                        projectId, validAppIds,
-                        Long.valueOf(dataFreshnessInHour)
-                ),
-                new ETLRunnerConfig.InputOutputConfig(
-                        "true",
-                        database,
-                        sourceTable,
-                        sourcePath,
-                        jobDataDir,
-                        outputPath,
-                        outPutFormat
-                ),
-                new ETLRunnerConfig.TimestampConfig(
-                        Long.valueOf(startTimestamp),
-                        Long.valueOf(endTimestamp)
-                ),
-                new ETLRunnerConfig.PartitionConfig(
-                        Integer.valueOf(outputPartitions), -1
-                ));
+        ETLRunnerConfig config = getRunnerConfigForPartitionData(
+                transformers, "read_corrupt_dataset",
+                startTimestamp, endTimestamp
+        );
+        ETLRunner runner = new ETLRunner(spark, config);
 
-        ETLRunner runner = new ETLRunner(spark, runnerConfig);
         Dataset<Row> dataset = runner.readInputDataset(true);
         assertEquals(0, dataset.count());
         dataset = runner.readInputDataset(false);
@@ -195,44 +124,8 @@ class ETLRunnerTest extends BaseSparkTest {
         transformers.add("software.aws.solution.clickstream.UAEnrichment");
         transformers.add("software.aws.solution.clickstream.IPEnrichment");
 
-        String database = "default";
-        String sourceTable = "fakeSourceTable";
-        String sourcePath = getClass().getResource("/original_data.json").getPath();
-        String jobDataDir = "/tmp/job-data";
-        String transformerClassNames = String.join(",", transformers);
-        String outputPath = "/tmp/test-output";
-        String projectId = "projectId1";
-        String validAppIds = "id1,id2,uba-app";
-        String outPutFormat = "json";
-        String startTimestamp = "1667963966000"; // 2022-11-09T03:19:26.000Z
-        String endTimestamp = "1667969999000"; // 2022-11-09T07:46:39.000Z
-        String dataFreshnessInHour = "72";
-        String outputPartitions = "-1";
-
-        ETLRunnerConfig runnerConfig = new ETLRunnerConfig(
-                new ETLRunnerConfig.TransformationConfig(
-                        newArrayList(transformerClassNames.split(",")),
-                        projectId, validAppIds,
-                        Long.valueOf(dataFreshnessInHour)
-                ),
-                new ETLRunnerConfig.InputOutputConfig(
-                        "false",
-                        database,
-                        sourceTable,
-                        sourcePath,
-                        jobDataDir,
-                        outputPath,
-                        outPutFormat
-                ),
-                new ETLRunnerConfig.TimestampConfig(
-                        Long.valueOf(startTimestamp),
-                        Long.valueOf(endTimestamp)
-                ),
-                new ETLRunnerConfig.PartitionConfig(
-                        Integer.valueOf(outputPartitions), -1
-                ));
-
-        ETLRunner runner = new ETLRunner(spark, runnerConfig);
+        ETLRunnerConfig config = getRunnerConfig(transformers, "executeTransformers");
+        ETLRunner runner = new ETLRunner(spark, config);
 
         Dataset<Row> sourceDataset =
                 spark.read().json(requireNonNull(getClass().getResource("/original_data.json")).getPath());
@@ -313,95 +206,25 @@ class ETLRunnerTest extends BaseSparkTest {
         transformers.add("software.aws.solution.clickstream.UAEnrichment");
         transformers.add("software.aws.solution.clickstream.IPEnrichment");
 
-        String database = "default";
-        String sourceTable = "fakeSourceTable";
-        String sourcePath = getClass().getResource("/original_data.json").getPath();
+        ETLRunnerConfig config = getRunnerConfig(transformers, "with_error");
+        ETLRunner runner = new ETLRunner(spark, config);
 
-        String jobDataDir = "/tmp/etl-debug/";
-        String transformerClassNames = String.join(",", transformers);
-        String outputPath = "/tmp/test-output";
-        String projectId = "projectId1";
-        String validAppIds = "id1,id2,uba-app";
-        String outPutFormat = "json";
-        String startTimestamp = "1667963966000";
-        String endTimestamp = "1667969999000";
-        String dataFreshnessInHour = "72";
-
-        ETLRunnerConfig runnerConfig = new ETLRunnerConfig(
-                new ETLRunnerConfig.TransformationConfig(
-                        newArrayList(transformerClassNames.split(",")),
-                        projectId, validAppIds,
-                        Long.valueOf(dataFreshnessInHour)
-                ),
-                new ETLRunnerConfig.InputOutputConfig(
-                        "false",
-                        database,
-                        sourceTable,
-                        sourcePath,
-                        jobDataDir,
-                        outputPath,
-                        outPutFormat
-                ),
-                new ETLRunnerConfig.TimestampConfig(
-                        Long.valueOf(startTimestamp),
-                        Long.valueOf(endTimestamp)
-                ),
-                new ETLRunnerConfig.PartitionConfig(
-                        -1, -1
-                ));
-
-
-        ETLRunner runner = new ETLRunner(spark, runnerConfig);
         Dataset<Row> sourceDataset =
                 spark.read().json(requireNonNull(getClass().getResource("/original_data_with_error.json")).getPath());
         assertEquals(sourceDataset.count(), 1);
         Dataset<Row> dataset = runner.executeTransformers(sourceDataset, transformers);
         assertEquals(dataset.count(), 0);
     }
+
     @Test
     public void should_executeTransformers_with_postTransformer() {
         List<String> transformers = Lists.newArrayList();
         transformers.add("software.aws.solution.clickstream.SimpleTransformer");
         transformers.add("software.aws.solution.clickstream.SimpleEnrich");
 
-        String database = "default";
-        String sourceTable = "fakeSourceTable";
-        String sourcePath = getClass().getResource("/original_data.json").getPath();
+        ETLRunnerConfig config = getRunnerConfig(transformers, "postTransformer");
+        ETLRunner runner = new ETLRunner(spark, config);
 
-        String jobDataDir = "/tmp/etl-debug/";
-        String transformerClassNames = String.join(",", transformers);
-        String outputPath = "/tmp/test-output";
-        String projectId = "projectId1";
-        String validAppIds = "id1,id2,uba-app";
-        String outPutFormat = "json";
-        String startTimestamp = "1667963966000";
-        String endTimestamp = "1667969999000";
-        String dataFreshnessInHour = "72";
-
-        ETLRunnerConfig runnerConfig = new ETLRunnerConfig(
-                new ETLRunnerConfig.TransformationConfig(
-                        newArrayList(transformerClassNames.split(",")),
-                        projectId, validAppIds,
-                        Long.valueOf(dataFreshnessInHour)
-                ),
-                new ETLRunnerConfig.InputOutputConfig(
-                        "false",
-                        database,
-                        sourceTable,
-                        sourcePath,
-                        jobDataDir,
-                        outputPath,
-                        outPutFormat
-                ),
-                new ETLRunnerConfig.TimestampConfig(
-                        Long.valueOf(startTimestamp),
-                        Long.valueOf(endTimestamp)
-                ),
-                new ETLRunnerConfig.PartitionConfig(
-                        -1, -1
-                ));
-
-        ETLRunner runner = new ETLRunner(spark, runnerConfig);
         Dataset<Row> sourceDataset =
                 spark.read().json(requireNonNull(getClass().getResource("/original_data.json")).getPath());
         assertEquals(sourceDataset.count(), 2);
@@ -424,44 +247,10 @@ class ETLRunnerTest extends BaseSparkTest {
         transformers.add("software.aws.solution.clickstream.UAEnrichment");
         transformers.add("software.aws.solution.clickstream.IPEnrichment");
 
-        String database = "default";
-        String sourceTable = "fakeSourceTable";
-        String sourcePath = getClass().getResource("/original_data.json").getPath();
+        ETLRunnerConfig config = getRunnerConfig(transformers, "TransformerV2_1");
+        String outputPath = config.getOutputPath();
 
-        String jobDataDir = "/tmp/etl-debug/";
-        String transformerClassNames = String.join(",", transformers);
-        String outputPath = "/tmp/test-output/TransformerV2_with_user-" + new Date().getTime() + "/";
-        String projectId = "projectId1";
-        String validAppIds = "id1,id2,uba-app";
-        String outPutFormat = "json";
-        String startTimestamp = "1667963966000";
-        String endTimestamp = "1667969999000";
-        String dataFreshnessInHour = "72";
-
-        ETLRunnerConfig runnerConfig = new ETLRunnerConfig(
-                new ETLRunnerConfig.TransformationConfig(
-                        newArrayList(transformerClassNames.split(",")),
-                        projectId, validAppIds,
-                        Long.valueOf(dataFreshnessInHour)
-                ),
-                new ETLRunnerConfig.InputOutputConfig(
-                        "false",
-                        database,
-                        sourceTable,
-                        sourcePath,
-                        jobDataDir,
-                        outputPath,
-                        outPutFormat
-                ),
-                new ETLRunnerConfig.TimestampConfig(
-                        Long.valueOf(startTimestamp),
-                        Long.valueOf(endTimestamp)
-                ),
-                new ETLRunnerConfig.PartitionConfig(
-                        -1, -1
-                ));
-
-        ETLRunner runner = new ETLRunner(spark, runnerConfig);
+        ETLRunner runner = new ETLRunner(spark, config);
         Dataset<Row> sourceDataset =
                 spark.read().json(requireNonNull(getClass().getResource("/original_data_with_user_profile_set.json")).getPath());
         assertEquals(sourceDataset.count(), 2);
@@ -470,11 +259,11 @@ class ETLRunnerTest extends BaseSparkTest {
         System.out.println(dataset.first().prettyJson());
 
         String partitionPart = "partition_app=uba-app/partition_year=2023/partition_month=04/partition_day=24";
-        String expectedJson = this.resourceFileAsString("/expected/etl_runner_event1.json");
+        String expectedJson = this.resourceFileAsString("/expected/etl_runner_v2_event1.json");
         Assertions.assertEquals(expectedJson, dataset.first().prettyJson());
         Path p1 = Paths.get(outputPath, "user", partitionPart);
         Assertions.assertTrue(p1.toFile().isDirectory());
-        Path p2 = Paths.get(outputPath, "even_parameter", partitionPart);
+        Path p2 = Paths.get(outputPath, "event_parameter", partitionPart);
         Assertions.assertTrue(p2.toFile().isDirectory());
         Path p3 = Paths.get(outputPath, "item", partitionPart);
         Assertions.assertTrue(p3.toFile().isDirectory());
@@ -487,31 +276,150 @@ class ETLRunnerTest extends BaseSparkTest {
         System.setProperty(APP_IDS_PROP, "uba-app");
         System.setProperty(PROJECT_ID_PROP, "test_project_id_01");
         spark.sparkContext().addFile(requireNonNull(getClass().getResource("/GeoLite2-City.mmdb")).getPath());
-
         List<String> transformers = Lists.newArrayList();
         transformers.add("software.aws.solution.clickstream.TransformerV2");
         transformers.add("software.aws.solution.clickstream.UAEnrichment");
         transformers.add("software.aws.solution.clickstream.IPEnrichment");
 
+        ETLRunner runner = new ETLRunner(spark, getRunnerConfig(transformers, "TransformerV2_2"));
+
+        Dataset<Row> sourceDataset =
+                spark.read().json(requireNonNull(getClass().getResource("/original_data_with_items.json")).getPath());
+        assertEquals(sourceDataset.count(), 1);
+        Dataset<Row> dataset = runner.executeTransformers(sourceDataset, transformers);
+        dataset.printSchema();
+        System.out.println(dataset.first().prettyJson());
+        String expectedJson = this.resourceFileAsString("/expected/etl_runner_v2_event2.json");
+        Assertions.assertEquals(expectedJson, dataset.first().prettyJson());
+    }
+
+    @Test
+    public void should_executeTransformers_with_TransformerV2_3() throws IOException {
+        // DOWNLOAD_FILE=1 ./gradlew clean test --info --tests software.aws.solution.clickstream.ETLRunnerTest.should_executeTransformers_with_TransformerV2_3
+        System.setProperty(APP_IDS_PROP, "uba-app");
+        System.setProperty(PROJECT_ID_PROP, "test_project_id_01");
+        System.setProperty("force.merge", "true");
+        spark.sparkContext().addFile(requireNonNull(getClass().getResource("/GeoLite2-City.mmdb")).getPath());
+        List<String> transformers = Lists.newArrayList();
+        transformers.add("software.aws.solution.clickstream.TransformerV2");
+        transformers.add("software.aws.solution.clickstream.UAEnrichment");
+        transformers.add("software.aws.solution.clickstream.IPEnrichment");
+
+        ETLRunnerConfig config = getRunnerConfig(transformers, "TransformerV2_3");
+        ETLRunner runner = new ETLRunner(spark, config);
+
+        Dataset<Row> sourceDataset =
+                spark.read().json(requireNonNull(getClass().getResource("/original_data_with_user_profile_set2.json")).getPath());
+        assertEquals(sourceDataset.count(), 4);
+        Dataset<Row> dataset = runner.executeTransformers(sourceDataset, transformers);
+        dataset.printSchema();
+        System.out.println(dataset.first().prettyJson());
+        String expectedJson = this.resourceFileAsString("/expected/etl_runner_v2_event3.json");
+        Assertions.assertEquals(expectedJson, dataset.first().prettyJson());
+
+        String dataDir = ContextUtil.getWarehouseDir();
+
+        String tableName1 = dataDir + "/" + TransformerV2.TABLE_ETL_USER_TRAFFIC_SOURCE + INCREMENTAL_SUFFIX ;
+        String tableName2 = dataDir + "/" + TransformerV2.TABLE_ETL_USER_DEVICE_ID + INCREMENTAL_SUFFIX;
+        String tableName3 = dataDir + "/" + TransformerV2.TABLE_ETL_USER_PAGE_REFERER + INCREMENTAL_SUFFIX;
+        Dataset<Row> d1 = spark.read().parquet(tableName1);
+        Dataset<Row> d2 = spark.read().parquet(tableName2);
+        Dataset<Row> d3 = spark.read().parquet(tableName3);
+
+        long cc1 = d1.count();
+        long cc2 = d2.count();
+        long cc3 = d3.count();
+
+        System.out.printf("cc1=%s, cc2=%s, cc3=%s%n", cc1, cc2, cc3);
+        Assertions.assertTrue( cc1 >= 1);
+        Assertions.assertTrue(cc2 >= 1);
+        Assertions.assertTrue(cc3 >= 1);
+
+        System.setProperty("force.merge", "false");
+    }
+
+    @Test
+    public void should_executeTransformers_with_TransformerV2_user_item_params() throws IOException {
+        // DOWNLOAD_FILE=1 ./gradlew clean test --info --tests software.aws.solution.clickstream.ETLRunnerTest.should_executeTransformers_with_TransformerV2_user_item_params
+        System.setProperty(APP_IDS_PROP, "uba-app");
+        System.setProperty(PROJECT_ID_PROP, "test_project_id_01");
+        spark.sparkContext().addFile(requireNonNull(getClass().getResource("/GeoLite2-City.mmdb")).getPath());
+        List<String> transformers = Lists.newArrayList();
+        transformers.add("software.aws.solution.clickstream.TransformerV2");
+        transformers.add("software.aws.solution.clickstream.UAEnrichment");
+        transformers.add("software.aws.solution.clickstream.IPEnrichment");
+
+        ETLRunnerConfig config = getRunnerConfig(transformers, "TransformerV2_3");
+        ETLRunner runner = new ETLRunner(spark, config);
+        Dataset<Row> sourceDataset =
+                spark.read().json(requireNonNull(getClass().getResource("/original_data_with_user_profile_set2.json")).getPath());
+        assertEquals(sourceDataset.count(), 4);
+        runner.writeResultDataset(runner.executeTransformers(sourceDataset, transformers));
+        String outputPath = config.getOutputPath();
+
+        System.out.println("outputPath:" + outputPath);
+
+        Dataset<Row> eventParamDataset = spark.read().json(outputPath + ETLRunner.TableName.EVEN_PARAMETER.tableName);
+        String expectedJsonEventParam = this.resourceFileAsString("/expected/etl_runner_v2_event_parameter.json");
+        String rowJsonEventParam = datasetToPrettyJson(eventParamDataset
+                .where(expr("event_id='1fcd7f5b-9529-4977-a303-e8c7e39db7b898-1'")).distinct());
+        Assertions.assertEquals(expectedJsonEventParam, rowJsonEventParam);
+        Assertions.assertEquals(44, eventParamDataset.count());
+
+        Dataset<Row> userDataset = spark.read().json(outputPath + ETLRunner.TableName.USER.tableName);
+        Dataset<Row> userDataset1 = userDataset.filter(expr("user_id='p3121211'"));
+        String expectedJsonUser = this.resourceFileAsString("/expected/etl_runner_v2_user.json");
+        Assertions.assertEquals(expectedJsonUser, userDataset1.first().prettyJson());
+        Assertions.assertEquals(1, userDataset1.count());
+
+        Dataset<Row> itemDataset = spark.read().json(outputPath + ETLRunner.TableName.ITEM.tableName);
+        Dataset<Row> itemDataset1 = itemDataset.filter(expr("id='item_id1'"));
+        String expectedJsonItem = this.resourceFileAsString("/expected/etl_runner_v2_item.json");
+        Assertions.assertEquals(expectedJsonItem, itemDataset1.first().prettyJson());
+        Assertions.assertEquals(1, itemDataset1.count());
+
+        Dataset<Row> eventDataset = spark.read().json(outputPath + ETLRunner.TableName.EVENT.tableName);
+        Assertions.assertEquals(4, eventDataset.count());
+        String lastRowJson = eventDataset.takeAsList(4).get(3).prettyJson();
+        String expectedJsonEvent = this.resourceFileAsString("/expected/etl_runner_v2_event4.json");
+        Assertions.assertEquals(expectedJsonEvent, lastRowJson);
+    }
+
+
+    public ETLRunnerConfig getRunnerConfig(List<String> transformers, String name) {
+        String sourcePath = getClass().getResource("/original_data.json").getPath();
+        String startTimestamp = "1667963966000"; // 2022-11-09T03:19:26.000Z
+        String endTimestamp = "1668136766000"; // 2022-11-11T03:19:26.000Z
+        return getRunnerConfig(transformers, name, sourcePath, startTimestamp, endTimestamp);
+    }
+
+    public ETLRunnerConfig getRunnerConfigForPartitionData(List<String> transformers, String name,
+                                                           String startTimestamp, String endTimestamp) {
+        String sourcePath = Paths.get(getClass().getResource("/original_data.json").getPath())
+                .getParent().toString() + "/partition_data/";
+        return getRunnerConfig(transformers, name, sourcePath, startTimestamp, endTimestamp);
+    }
+
+    public ETLRunnerConfig getRunnerConfig(List<String> transformers, String name, String sourcePath,
+                                           String startTimestamp, String endTimestamp) {
         String database = "default";
         String sourceTable = "fakeSourceTable";
-        String sourcePath = getClass().getResource("/original_data.json").getPath();
-
         String jobDataDir = "/tmp/etl-debug/";
         String transformerClassNames = String.join(",", transformers);
-        String outputPath = "/tmp/test-output/TransformerV2_with_item-" + new Date().getTime() + "/";
+        String outputPath = "/tmp/test-output/" + name + new Date().getTime() + "/";
         String projectId = "projectId1";
         String validAppIds = "id1,id2,uba-app";
         String outPutFormat = "json";
-        String startTimestamp = "1667963966000";
-        String endTimestamp = "1667969999000";
         String dataFreshnessInHour = "72";
+        int nDaysUser = 360 * 30;
+        int nDaysItem = 360 * 30;
 
         ETLRunnerConfig runnerConfig = new ETLRunnerConfig(
                 new ETLRunnerConfig.TransformationConfig(
                         newArrayList(transformerClassNames.split(",")),
                         projectId, validAppIds,
-                        Long.valueOf(dataFreshnessInHour)
+                        Long.valueOf(dataFreshnessInHour),
+                        nDaysUser, nDaysItem
                 ),
                 new ETLRunnerConfig.InputOutputConfig(
                         "false",
@@ -527,18 +435,8 @@ class ETLRunnerTest extends BaseSparkTest {
                         Long.valueOf(endTimestamp)
                 ),
                 new ETLRunnerConfig.PartitionConfig(
-                        -1, -1
+                        1, 1
                 ));
-
-        ETLRunner runner = new ETLRunner(spark, runnerConfig);
-
-        Dataset<Row> sourceDataset =
-                spark.read().json(requireNonNull(getClass().getResource("/original_data_with_items.json")).getPath());
-        assertEquals(sourceDataset.count(), 1);
-        Dataset<Row> dataset = runner.executeTransformers(sourceDataset, transformers);
-        dataset.printSchema();
-        System.out.println(dataset.first().prettyJson());
-        String expectedJson = this.resourceFileAsString("/expected/etl_runner_event2.json");
-        Assertions.assertEquals(expectedJson, dataset.first().prettyJson());
+        return runnerConfig;
     }
 }

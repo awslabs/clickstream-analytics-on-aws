@@ -18,52 +18,41 @@ import {
 
 export function getItemTableColumns(): Column[] {
   return [
-  {
-    name: 'id',
-    type: Schema.STRING,
-  },
-  {
-    name: 'price',
-    type: Schema.DOUBLE,
-  },
-  {
-    name: 'currency',
-    type: Schema.STRING,
-  },
-  {
-    name: 'creative_name',
-    type: Schema.STRING,
-  },
-  {
-    name: 'creative_slot',
-    type: Schema.STRING,
-  },
-  {
-    name: 'properties',
-    type: Schema.array(
-      Schema.struct([{
-        name: 'key',
-        type: Schema.STRING,
-      },
-      {
-        name: 'value',
-        type: Schema.struct([{
-          name: 'double_value',
-          type: Schema.DOUBLE,
-        },
-        {
-          name: 'float_value',
-          type: Schema.FLOAT,
-        },
-        {
-          name: 'int_value',
-          type: Schema.BIG_INT,
-        },
-        {
-          name: 'string_value',
+    {
+      name: 'id',
+      type: Schema.STRING,
+    },
+    {
+      name: 'event_timestamp',
+      type: Schema.BIG_INT,
+    },
+    {
+      name: 'properties',
+      type: Schema.array(
+        Schema.struct([{
+          name: 'key',
           type: Schema.STRING,
+        },
+        {
+          name: 'value',
+          type: Schema.struct([{
+            name: 'double_value',
+            type: Schema.DOUBLE,
+          },
+          {
+            name: 'float_value',
+            type: Schema.FLOAT,
+          },
+          {
+            name: 'int_value',
+            type: Schema.BIG_INT,
+          },
+          {
+            name: 'string_value',
+            type: Schema.STRING,
+          }]),
         }]),
-      }]),
-    ),
-  }];
+      ),
+    },
+  ];
 }

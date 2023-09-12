@@ -18,6 +18,7 @@ import { CompositePrincipal, Effect, Policy, PolicyStatement, Role, ServicePrinc
 import { Construct } from 'constructs';
 import { createLambdaRole } from '../../common/lambda';
 import { MetricsNamespace } from '../../common/model';
+import { ClickstreamSinkTables } from '../data-pipeline';
 
 export class RoleUtil {
   public static newInstance(scope: Construct) {
@@ -34,8 +35,10 @@ export class RoleUtil {
     roleName: string,
     databaseName: string,
     sourceTableName: string,
-    sinkTableNames: string[],
+    sinkTables: ClickstreamSinkTables,
   ): Role {
+
+    const sinkTableNames = Object.values(sinkTables).map(t => (t as Table).tableName);
     return createLambdaRole(this.scope, roleName, true, [
       new PolicyStatement({
         effect: Effect.ALLOW,
@@ -65,11 +68,13 @@ export class RoleUtil {
     );
   }
 
-  public createJobSubmitterLambdaRole(glueDB: Database, sourceTable: Table, sinkTables: Table[], emrApplicationId: string): Role {
+  public createJobSubmitterLambdaRole(glueDB: Database, sourceTable: Table, sinkTables: ClickstreamSinkTables, emrApplicationId: string): Role {
     const assumedBy = new CompositePrincipal(
       new ServicePrincipal('lambda.amazonaws.com'),
       new ServicePrincipal('emr-serverless.amazonaws.com'),
     );
+
+    const sinkTablesArr = Object.values(sinkTables);
 
     const policyStatement: PolicyStatement[] = [
       new PolicyStatement({
@@ -100,7 +105,7 @@ export class RoleUtil {
           this.getGlueResourceArn(`database/${glueDB.databaseName}`),
           this.getGlueResourceArn(`table/${glueDB.databaseName}/etl*`),
           this.getGlueResourceArn(`table/${glueDB.databaseName}/${sourceTable.tableName}`),
-          ... sinkTables.map(sinkTable =>
+          ... sinkTablesArr.map(sinkTable =>
             this.getGlueResourceArn(`table/${glueDB.databaseName}/${sinkTable.tableName}`),
           ),
         ],

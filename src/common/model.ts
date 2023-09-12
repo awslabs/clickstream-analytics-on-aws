@@ -53,6 +53,7 @@ export enum DataPipelineCustomMetricsName {
   SINK='Data Processing sink count',
   CORRUPTED='Data Processing corrupted count',
   RUN_TIME='Data Processing job run time seconds',
+  INPUT_FILE_COUNT='Data Processing input file count',
 };
 
 export enum AnalyticsCustomMetricsName {

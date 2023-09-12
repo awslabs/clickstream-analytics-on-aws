@@ -23,6 +23,10 @@ export function getUserTableColumns(): Column[] {
       type: Schema.STRING,
     },
     {
+      name: 'event_timestamp',
+      type: Schema.BIG_INT,
+    },
+    {
       name: 'user_pseudo_id',
       type: Schema.STRING,
     },
@@ -108,5 +112,6 @@ export function getUserTableColumns(): Column[] {
     {
       name: '_channel',
       type: Schema.STRING,
-    }];
+    },
+  ];
 }

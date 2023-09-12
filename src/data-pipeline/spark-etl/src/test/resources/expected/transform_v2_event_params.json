@@ -1,94 +1,100 @@
-{
+[ {
   "app_id" : "uba-app",
   "event_date" : "2023-04-24",
   "event_id" : "1fcd7f5b-9529-4977-a303-e8c7e39db7b898",
-  "event_params" : [ {
-    "key" : "_device_vendor_id",
-    "value" : {
-      "double_value" : null,
-      "float_value" : null,
-      "int_value" : null,
-      "string_value" : "V001"
-    }
-  }, {
-    "key" : "_device_advertising_id",
-    "value" : {
-      "double_value" : null,
-      "float_value" : null,
-      "int_value" : null,
-      "string_value" : "DAID001"
-    }
-  }, {
-    "key" : "_error_name_invalid",
-    "value" : {
-      "double_value" : null,
-      "float_value" : null,
-      "int_value" : null,
-      "string_value" : ""
-    }
-  }, {
-    "key" : "_error_name_length_exceed",
-    "value" : {
-      "double_value" : null,
-      "float_value" : null,
-      "int_value" : null,
-      "string_value" : ""
-    }
-  }, {
-    "key" : "_error_value_length_exceed",
-    "value" : {
-      "double_value" : null,
-      "float_value" : null,
-      "int_value" : null,
-      "string_value" : ""
-    }
-  }, {
-    "key" : "_error_attribute_size_exceed",
-    "value" : {
-      "double_value" : null,
-      "float_value" : null,
-      "int_value" : null,
-      "string_value" : ""
-    }
-  }, {
-    "key" : "_is_first_time",
-    "value" : {
-      "double_value" : null,
-      "float_value" : null,
-      "int_value" : null,
-      "string_value" : "true"
-    }
-  }, {
-    "key" : "_is_first_day",
-    "value" : {
-      "double_value" : null,
-      "float_value" : null,
-      "int_value" : null,
-      "string_value" : "true"
-    }
-  }, {
-    "key" : "_session_id",
-    "value" : {
-      "double_value" : null,
-      "float_value" : null,
-      "int_value" : null,
-      "string_value" : "see000201912dk-23u92-1df0020"
-    }
-  }, {
-    "key" : "_session_start_timestamp",
-    "value" : {
-      "double_value" : null,
-      "float_value" : null,
-      "int_value" : 1667963966697,
-      "string_value" : null
-    }
-  }, {
-    "key" : "_session_duration",
-    "value" : {
-      "double_value" : null,
-      "float_value" : null,
-      "int_value" : 690000,
-      "string_value" : null
-    }
-  } ]
-}
+  "event_param_key" : "_device_vendor_id",
+  "event_param_double_value" : null,
+  "event_param_float_value" : null,
+  "event_param_int_value" : null,
+  "event_param_string_value" : "V001"
+}, {
+  "app_id" : "uba-app",
+  "event_date" : "2023-04-24",
+  "event_id" : "1fcd7f5b-9529-4977-a303-e8c7e39db7b898",
+  "event_param_key" : "_device_advertising_id",
+  "event_param_double_value" : null,
+  "event_param_float_value" : null,
+  "event_param_int_value" : null,
+  "event_param_string_value" : "DAID001"
+}, {
+  "app_id" : "uba-app",
+  "event_date" : "2023-04-24",
+  "event_id" : "1fcd7f5b-9529-4977-a303-e8c7e39db7b898",
+  "event_param_key" : "_error_name_invalid",
+  "event_param_double_value" : null,
+  "event_param_float_value" : null,
+  "event_param_int_value" : null,
+  "event_param_string_value" : ""
+}, {
+  "app_id" : "uba-app",
+  "event_date" : "2023-04-24",
+  "event_id" : "1fcd7f5b-9529-4977-a303-e8c7e39db7b898",
+  "event_param_key" : "_error_name_length_exceed",
+  "event_param_double_value" : null,
+  "event_param_float_value" : null,
+  "event_param_int_value" : null,
+  "event_param_string_value" : ""
+}, {
+  "app_id" : "uba-app",
+  "event_date" : "2023-04-24",
+  "event_id" : "1fcd7f5b-9529-4977-a303-e8c7e39db7b898",
+  "event_param_key" : "_error_value_length_exceed",
+  "event_param_double_value" : null,
+  "event_param_float_value" : null,
+  "event_param_int_value" : null,
+  "event_param_string_value" : ""
+}, {
+  "app_id" : "uba-app",
+  "event_date" : "2023-04-24",
+  "event_id" : "1fcd7f5b-9529-4977-a303-e8c7e39db7b898",
+  "event_param_key" : "_error_attribute_size_exceed",
+  "event_param_double_value" : null,
+  "event_param_float_value" : null,
+  "event_param_int_value" : null,
+  "event_param_string_value" : ""
+}, {
+  "app_id" : "uba-app",
+  "event_date" : "2023-04-24",
+  "event_id" : "1fcd7f5b-9529-4977-a303-e8c7e39db7b898",
+  "event_param_key" : "_is_first_time",
+  "event_param_double_value" : null,
+  "event_param_float_value" : null,
+  "event_param_int_value" : null,
+  "event_param_string_value" : "true"
+}, {
+  "app_id" : "uba-app",
+  "event_date" : "2023-04-24",
+  "event_id" : "1fcd7f5b-9529-4977-a303-e8c7e39db7b898",
+  "event_param_key" : "_is_first_day",
+  "event_param_double_value" : null,
+  "event_param_float_value" : null,
+  "event_param_int_value" : null,
+  "event_param_string_value" : "true"
+}, {
+  "app_id" : "uba-app",
+  "event_date" : "2023-04-24",
+  "event_id" : "1fcd7f5b-9529-4977-a303-e8c7e39db7b898",
+  "event_param_key" : "_session_id",
+  "event_param_double_value" : null,
+  "event_param_float_value" : null,
+  "event_param_int_value" : null,
+  "event_param_string_value" : "see000201912dk-23u92-1df0020"
+}, {
+  "app_id" : "uba-app",
+  "event_date" : "2023-04-24",
+  "event_id" : "1fcd7f5b-9529-4977-a303-e8c7e39db7b898",
+  "event_param_key" : "_session_start_timestamp",
+  "event_param_double_value" : null,
+  "event_param_float_value" : null,
+  "event_param_int_value" : 1667963966697,
+  "event_param_string_value" : null
+}, {
+  "app_id" : "uba-app",
+  "event_date" : "2023-04-24",
+  "event_id" : "1fcd7f5b-9529-4977-a303-e8c7e39db7b898",
+  "event_param_key" : "_session_duration",
+  "event_param_double_value" : null,
+  "event_param_float_value" : null,
+  "event_param_int_value" : 690000,
+  "event_param_string_value" : null
+} ]

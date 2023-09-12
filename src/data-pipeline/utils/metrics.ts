@@ -244,6 +244,22 @@ export function createMetricsWidget(scope: Construct, props: {
         ],
       },
     },
+
+    {
+      type: 'metric',
+      properties: {
+        stat: 'Sum',
+        title: 'Data Processing file count',
+        metrics: [
+          [
+            dataPipelineNamespace,
+            DataPipelineCustomMetricsName.INPUT_FILE_COUNT,
+            ...customDimension,
+          ],
+        ],
+      },
+    },
+
   ];
 
   return new MetricsWidgets(scope, 'dataProcessing', {

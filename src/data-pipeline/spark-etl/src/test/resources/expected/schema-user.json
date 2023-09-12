@@ -1,6 +1,6 @@
 {
   "type" : "struct",
-  "fields" : [{
+  "fields" : [ {
     "name" : "app_id",
     "type" : "string",
     "nullable" : true,
@@ -8,6 +8,11 @@
   }, {
     "name" : "event_date",
     "type" : "date",
+    "nullable" : true,
+    "metadata" : { }
+  }, {
+    "name" : "event_timestamp",
+    "type" : "long",
     "nullable" : true,
     "metadata" : { }
   }, {

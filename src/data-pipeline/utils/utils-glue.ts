@@ -17,7 +17,7 @@ import { IBucket, Bucket } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
 import { getSinkTableLocationPrefix } from './utils-common';
 import { PARTITION_APP } from '../../common/constant';
-import { SinkTableEnum } from '../data-pipeline';
+import { ClickstreamSinkTables, SinkTableEnum } from '../data-pipeline';
 import { getEventParameterTableColumns } from '../tables/event-parameter-table';
 import { getEventTableColumns } from '../tables/event-table';
 import { getIngestionEventsTableColumns } from '../tables/ingestion-events-tabe';
@@ -82,7 +82,7 @@ export class GlueUtil {
     });
   }
 
-  public createSinkTables(glueDatabase: Database, projectId: string) {
+  public createSinkTables(glueDatabase: Database, projectId: string): ClickstreamSinkTables {
     const colMap = {
       event: getEventTableColumns(),
       event_parameter: getEventParameterTableColumns(),
@@ -91,15 +91,23 @@ export class GlueUtil {
       ods_events: getODSEventsTableColumns(),
     };
 
-    return [SinkTableEnum.EVENT,
+    const glueTables = [SinkTableEnum.EVENT,
       SinkTableEnum.EVENT_PARAMETER,
       SinkTableEnum.USER,
       SinkTableEnum.ITEM,
       SinkTableEnum.ODS_EVENTS].map(t => {
       const glueTable = this.createSinkTable(glueDatabase, projectId, t, colMap[t]);
       return glueTable;
-
     });
+
+    return {
+      eventTable: glueTables[0],
+      eventParameterTable: glueTables[1],
+      userTable: glueTables[2],
+      itemTable: glueTables[3],
+      odsEventsTable: glueTables[4],
+    };
+
   }
 
 

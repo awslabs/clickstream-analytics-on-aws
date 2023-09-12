@@ -64,6 +64,7 @@ public final class Transformer {
     public static final String DATA = "data";
     public static final String KEY = "key";
     public static final String VALUE = "value";
+    public static final String DATA_SCHEMA_FILE_PATH = "/data_schema.json";
 
 
     private final Cleaner cleaner = new Cleaner();
@@ -72,7 +73,7 @@ public final class Transformer {
 
     public Dataset<Row> transform(final Dataset<Row> dataset) {
         log.info(new ETLMetric(dataset, "transform enter").toString());
-        Dataset<Row> cleanedDataset = cleaner.clean(dataset, "/data_schema.json");
+        Dataset<Row> cleanedDataset = cleaner.clean(dataset, DATA_SCHEMA_FILE_PATH);
         ContextUtil.cacheDataset(cleanedDataset);
         log.info(new ETLMetric(cleanedDataset, "after clean").toString());
 

@@ -16,48 +16,28 @@
     "nullable" : true,
     "metadata" : { }
   }, {
-    "name" : "event_params",
-    "type" : {
-      "type" : "array",
-      "elementType" : {
-        "type" : "struct",
-        "fields" : [ {
-          "name" : "key",
-          "type" : "string",
-          "nullable" : true,
-          "metadata" : { }
-        }, {
-          "name" : "value",
-          "type" : {
-            "type" : "struct",
-            "fields" : [ {
-              "name" : "double_value",
-              "type" : "double",
-              "nullable" : true,
-              "metadata" : { }
-            }, {
-              "name" : "float_value",
-              "type" : "float",
-              "nullable" : true,
-              "metadata" : { }
-            }, {
-              "name" : "int_value",
-              "type" : "long",
-              "nullable" : true,
-              "metadata" : { }
-            }, {
-              "name" : "string_value",
-              "type" : "string",
-              "nullable" : true,
-              "metadata" : { }
-            } ]
-          },
-          "nullable" : true,
-          "metadata" : { }
-        } ]
-      },
-      "containsNull" : true
-    },
+    "name" : "event_param_key",
+    "type" : "string",
+    "nullable" : true,
+    "metadata" : { }
+  }, {
+    "name" : "event_param_double_value",
+    "type" : "double",
+    "nullable" : true,
+    "metadata" : { }
+  }, {
+    "name" : "event_param_float_value",
+    "type" : "float",
+    "nullable" : true,
+    "metadata" : { }
+  }, {
+    "name" : "event_param_int_value",
+    "type" : "long",
+    "nullable" : true,
+    "metadata" : { }
+  }, {
+    "name" : "event_param_string_value",
+    "type" : "string",
     "nullable" : true,
     "metadata" : { }
   } ]
