@@ -22,6 +22,7 @@ import {
 import DropDownContainer from './DropDownContainer';
 
 interface EventItemProps {
+  placeholder?: string | null;
   isMultiSelect?: boolean;
   hasTab?: boolean;
   categoryOption: IAnalyticsItem | null;
@@ -33,6 +34,7 @@ interface EventItemProps {
 
 const EventItem: React.FC<EventItemProps> = (props: EventItemProps) => {
   const {
+    placeholder,
     hasTab,
     isMultiSelect,
     categoryOption,
@@ -86,18 +88,17 @@ const EventItem: React.FC<EventItemProps> = (props: EventItemProps) => {
                 setShowDropdown(false);
               }
             }}
-            placeholder="Select event"
+            placeholder={placeholder ?? ''}
             selectedOption={categoryOption}
           />
         </div>
         {isMultiSelect && (
           <div className="second-select-option">
             <Select
-              placeholder="Please select caculate method"
+              placeholder="Please select calculate method"
               selectedOption={calcMethodOption ?? null}
               onChange={(e) => {
-                changeCurCalcMethodOption &&
-                  changeCurCalcMethodOption(e.detail.selectedOption);
+                changeCurCalcMethodOption?.(e.detail.selectedOption);
               }}
               options={MOCK_CALCULATION_OPTION_LIST}
             />

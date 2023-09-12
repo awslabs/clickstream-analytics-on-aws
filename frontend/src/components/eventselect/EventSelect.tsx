@@ -12,6 +12,7 @@
  */
 
 import { Button, SelectProps } from '@cloudscape-design/components';
+import { identity } from 'lodash';
 import React from 'react';
 import { ALPHABETS } from 'ts/const';
 import {
@@ -83,10 +84,10 @@ const EventsSelect: React.FC<EventsSelectProps> = (
     <div className="cs-analytics-dropdown">
       {data.map((element, index) => {
         return (
-          <div key={index}>
+          <div key={identity(index)}>
             <div className="cs-analytics-parameter">
               <div className="cs-para-name">
-                {(element.customOrderName && element.customOrderName) ||
+                {element.customOrderName ??
                   (element?.listOrderType === 'alphabet'
                     ? ALPHABETS[index]
                     : index + 1)}
@@ -99,8 +100,7 @@ const EventsSelect: React.FC<EventsSelectProps> = (
                     changeCurCategoryOption(index, item);
                   }}
                   changeCurCalcMethodOption={(method) => {
-                    changeCurCalcMethodOption &&
-                      changeCurCalcMethodOption(index, method);
+                    changeCurCalcMethodOption?.(index, method);
                   }}
                   hasTab={element.hasTab}
                   isMultiSelect={element.isMultiSelect}
@@ -162,7 +162,7 @@ const EventsSelect: React.FC<EventsSelectProps> = (
                       <ConditionItem
                         item={cElement}
                         conditionOptions={element.conditionOptions}
-                        key={cIndex}
+                        key={identity(cIndex)}
                         removeConditionItem={() => {
                           removeEventCondition(index, cIndex);
                         }}
