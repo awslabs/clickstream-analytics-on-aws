@@ -72,6 +72,24 @@ export interface SQLParameters {
   readonly pairEventAndConditions?: PairEventAndCondition[];
 }
 
+export const buildInEvents = [
+  '_session_start',
+  '_session_stop',
+  '_screen_view',
+  '_app_exception',
+  '_app_update',
+  '_first_open',
+  '_os_update',
+  '_user_engagement',
+  '_profile_set',
+  '_page_view',
+  '_app_start',
+  '_scroll',
+  '_search',
+  '_click',
+  '_clickstream_error',
+];
+
 export enum ExploreAnalyticsOperators {
   NULL = 'is_null',
   NOT_NULL = 'is_not_null',
@@ -195,7 +213,7 @@ const columnTemplate = `
 ,items as items####
 `;
 
-function _buildBaseTableSql(eventNames: string[], sqlParameters: SQLParameters) : string {
+function _buildBaseTableSql(eventNames: string[], sqlParameters: SQLParameters, isEventPathSQL: boolean = false) : string {
 
   let eventDateSQL = '';
   if (sqlParameters.timeScopeType === ExploreTimeScopeType.FIXED) {
@@ -265,7 +283,7 @@ function _buildBaseTableSql(eventNames: string[], sqlParameters: SQLParameters) 
       event_params
       from ${sqlParameters.schemaName}.ods_events ods 
       where ${eventDateSQL}
-      and event_name in (${ '\'' + eventNames.join('\',\'') + '\''})
+      ${ isEventPathSQL ? 'and event_name not in (\'' + buildInEvents.join('\',\'') + '\')' : 'and event_name in (\'' + eventNames.join('\',\'') + '\')' }
       ${globalConditionSql}
     ),
     tmp_base_data as (
@@ -276,7 +294,12 @@ function _buildBaseTableSql(eventNames: string[], sqlParameters: SQLParameters) 
     ),
   `;
 
+  if (isEventPathSQL && conditionSql !== '' ) {
+    conditionSql = conditionSql + ` or (event_name not in ('${eventNames.join('\',\'')}'))`;
+  }
+
   conditionSql = conditionSql !== '' ? `and (${conditionSql})` : '';
+
   sql = sql.concat(`
     base_data as (
       select 
@@ -693,10 +716,8 @@ export function buildEventPathAnalysisView(sqlParameters: SQLParameters) : strin
 
   let midTableSql = '';
   let dataTableSql = '';
-  let partitionBy = '';
   let joinSql = '';
   if (sqlParameters.pathAnalysis?.sessionType === ExplorePathSessionDef.SESSION ) {
-    partitionBy = ', session_id';
     joinSql = `
     and a.session_id = b.session_id 
     `;
@@ -704,13 +725,16 @@ export function buildEventPathAnalysisView(sqlParameters: SQLParameters) : strin
       mid_table as (
         select 
         day::date as event_date,
-        event_name,
+        CASE
+          WHEN event_name in ('note_create', 'note_share', 'note_print')  THEN event_name 
+          ELSE 'other'
+        END as event_name,
         user_pseudo_id,
         event_id,
         event_timestamp,
         (
           select
-              ep.value.string_value
+              ep.value.string_value::varchar
             from
               base_data e,
               e.event_params ep
@@ -721,36 +745,65 @@ export function buildEventPathAnalysisView(sqlParameters: SQLParameters) : strin
               1
         ) as session_id
       from base_data base
-      ${eventConditionSqlOut !== '' ? 'where '+ eventConditionSqlOut : '' }
+      ${eventConditionSqlOut !== '' ? 'where '+ eventConditionSqlOut + ' or event_name not in (\'' + eventNames.join('\',\'') + '\')' : '' }
       ),
     `;
+
     dataTableSql = `data as (
       select 
         *,
-        ROW_NUMBER() OVER (PARTITION BY user_pseudo_id ${partitionBy} ORDER BY event_timestamp asc) as step_1,
-        ROW_NUMBER() OVER (PARTITION BY user_pseudo_id ${partitionBy} ORDER BY event_timestamp asc) + 1 as step_2
+        ROW_NUMBER() OVER (PARTITION BY session_id ORDER BY event_timestamp asc) as step_1,
+        ROW_NUMBER() OVER (PARTITION BY session_id ORDER BY event_timestamp asc) + 1 as step_2
       from mid_table 
+    ),
+    step_table_1 as (
+      select 
+      data.user_pseudo_id user_pseudo_id,
+      data.session_id session_id,
+      min(step_1) min_step
+      from data
+      where event_name in ('${eventNames.join('\',\'')}')
+      group by user_pseudo_id, session_id
+    ),
+    step_table_2 as (
+      select 
+      data.*
+      from data join step_table_1 on data.user_pseudo_id = step_table_1.user_pseudo_id and data.session_id = step_table_1.session_id and data.step_1 >= step_table_1.min_step
+    ),
+    data_final as (
+      select
+        event_date,
+        event_name,
+        user_pseudo_id,
+        event_id,
+        event_timestamp,
+        session_id,
+        ROW_NUMBER() OVER (
+          PARTITION BY
+            session_id
+          ORDER BY
+            step_1 asc, step_2
+        ) as step_1,
+        ROW_NUMBER() OVER (
+          PARTITION BY
+            session_id
+          ORDER BY
+            step_1 asc, step_2
+        ) + 1 as step_2
+      from
+        step_table_2
     )
     select 
-      a.event_date as event_date,
       a.event_name || '_' || a.step_1 as source,
-      CASE 
+      CASE
         WHEN b.event_name is not null THEN b.event_name || '_' || a.step_2
-        ELSE 'other_' || a.step_2
+        ELSE 'lost'
       END as target,
-      ${sqlParameters.computeMethod != ExploreComputeMethod.EVENT_CNT ? 'count(distinct a.user_pseudo_id)' : 'count(distinct a.event_id)' } as weight
-    from data a left join data b 
-      on a.user_pseudo_id = b.user_pseudo_id 
+      ${sqlParameters.computeMethod != ExploreComputeMethod.EVENT_CNT ? 'a.user_pseudo_id' : 'a.event_id' } as x_id
+    from data_final a left join data_final b 
+      on a.step_2 = b.step_1 
       ${joinSql}
-      and a.step_2 = b.step_1
     where a.step_2 <= ${sqlParameters.maxStep ?? 10}
-    group by 
-      a.event_date,
-      a.event_name || '_' || a.step_1,
-      CASE 
-        WHEN b.event_name is not null THEN b.event_name || '_' || a.step_2
-        ELSE 'other_' || a.step_2
-      END
     `;
 
   } else {
@@ -840,7 +893,7 @@ export function buildEventPathAnalysisView(sqlParameters: SQLParameters) : strin
   }
 
   const sql = `
-    ${_buildBaseTableSql(eventNames, sqlParameters)}
+    ${_buildBaseTableSql(eventNames, sqlParameters, true)}
     ${midTableSql}
     ${dataTableSql}
   `;
