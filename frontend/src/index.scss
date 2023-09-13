@@ -124,6 +124,10 @@ code {
   padding: 0 20px;
 }
 
+.pl-30 {
+  padding-left: 30px;
+}
+
 .mr-5 {
   margin-right: 5px;
 }
@@ -538,6 +542,29 @@ ul.menu-list li.checkbox-item {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  .cs-dropdown-retention-header {
+    display: flex;
+    justify-content: space-between;
+    padding: 0 0 6px 0;
+    .header-label {
+      background-color: rgba(148, 191, 255, 0.2);
+      width: 24px;
+      height: 24px;
+      line-height: 24px;
+      text-align: center;
+      border-radius: 4px;
+      color: #0972d3;
+    }
+    .header-option {
+      opacity: 0;
+      transition: opacity ease-in 0.2s;
+    }
+  }
+  .cs-retention-item:hover {
+    .header-option {
+      opacity: 1;
+    }
+  }
   .cs-analytics-parameter {
     display: flex;
     .event-delete {
@@ -834,7 +861,6 @@ ul.menu-list li.checkbox-item {
                 box-sizing: border-box;
                 height: 26px;
                 padding: 0 8px;
-                border: 1px solid transparent;
                 border-radius: 4px;
                 border: 1px solid #ccc;
                 font-weight: 500;

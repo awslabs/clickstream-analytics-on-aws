@@ -25,7 +25,14 @@ import {
   Toggle,
 } from '@cloudscape-design/components';
 import Loading from 'components/common/Loading';
+import {
+  DEFAULT_RETENTION_ITEM,
+  IRetentionAnalyticsItem,
+  MOCK_EVENT_OPTION_LIST,
+} from 'components/eventselect/AnalyticsType';
+import RetentionSelect from 'components/eventselect/RetentionSelect';
 import Navigation from 'components/layouts/Navigation';
+import { cloneDeep } from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
@@ -34,6 +41,14 @@ const AnalyticsRetention: React.FC = () => {
   const { t } = useTranslation();
   const { projectId, appId } = useParams();
   const [loadingData, setLoadingData] = useState(false);
+
+  const [eventOptionData, setEventOptionData] = useState<
+    IRetentionAnalyticsItem[]
+  >([
+    {
+      ...DEFAULT_RETENTION_ITEM,
+    },
+  ]);
 
   const metricOptions = [
     {
@@ -118,6 +133,85 @@ const AnalyticsRetention: React.FC = () => {
                       {associateParameterChecked ? 'On' : 'Off'}
                     </Toggle>
                   </div>
+                </SpaceBetween>
+              </ColumnLayout>
+
+              <br />
+              <ColumnLayout columns={2} variant="text-grid">
+                <SpaceBetween direction="vertical" size="xs">
+                  <Box variant="awsui-key-label">
+                    {t('analytics:labels.eventsSelect')}
+                  </Box>
+                  <div>
+                    <RetentionSelect
+                      data={eventOptionData}
+                      eventOptionList={MOCK_EVENT_OPTION_LIST}
+                      addEventButtonLabel="留存指标"
+                      addNewEventAnalyticsItem={() => {
+                        setEventOptionData((prev) => {
+                          const preEventList = cloneDeep(prev);
+                          return [
+                            ...preEventList,
+                            {
+                              ...DEFAULT_RETENTION_ITEM,
+                            },
+                          ];
+                        });
+                      }}
+                      removeRetentionEventItem={(index) => {
+                        setEventOptionData((prev) => {
+                          const dataObj = cloneDeep(prev);
+                          return dataObj.filter(
+                            (item, eIndex) => eIndex !== index
+                          );
+                        });
+                      }}
+                      changeShowRelation={(index, show) => {
+                        setEventOptionData((prev) => {
+                          const dataObj = cloneDeep(prev);
+                          dataObj[index].startEventRelationAttribute = null;
+                          dataObj[index].revisitEventRelationAttribute = null;
+                          dataObj[index].showRelation = show;
+                          return dataObj;
+                        });
+                      }}
+                      changeStartEvent={(index, item) => {
+                        setEventOptionData((prev) => {
+                          const dataObj = cloneDeep(prev);
+                          dataObj[index].startEventOption = item;
+                          return dataObj;
+                        });
+                      }}
+                      changeRevisitEvent={(index, item) => {
+                        setEventOptionData((prev) => {
+                          const dataObj = cloneDeep(prev);
+                          dataObj[index].revisitEventOption = item;
+                          return dataObj;
+                        });
+                      }}
+                      changeStartRelativeAttribute={(index, item) => {
+                        setEventOptionData((prev) => {
+                          const dataObj = cloneDeep(prev);
+                          dataObj[index].startEventRelationAttribute = item;
+                          return dataObj;
+                        });
+                      }}
+                      changeRevisitRelativeAttribute={(index, item) => {
+                        setEventOptionData((prev) => {
+                          const dataObj = cloneDeep(prev);
+                          dataObj[index].revisitEventRelationAttribute = item;
+                          return dataObj;
+                        });
+                      }}
+                    />
+                  </div>
+                  <pre>{JSON.stringify(eventOptionData, null, 2)}</pre>
+                </SpaceBetween>
+                <SpaceBetween direction="vertical" size="xs">
+                  <Box variant="awsui-key-label">
+                    {t('analytics:labels.filters')}
+                  </Box>
+                  <div></div>
                 </SpaceBetween>
               </ColumnLayout>
             </Container>

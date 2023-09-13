@@ -44,7 +44,6 @@ export enum ERelationShip {
   AND = 'and',
   OR = 'or',
 }
-
 export interface IEventAnalyticsItem {
   listOrderType?: 'number' | 'alphabet';
   customOrderName?: string;
@@ -59,6 +58,14 @@ export interface IEventAnalyticsItem {
   enableChangeRelation?: boolean;
 }
 
+export interface IRetentionAnalyticsItem {
+  startEventOption: IAnalyticsItem | null;
+  revisitEventOption: IAnalyticsItem | null;
+  startEventRelationAttribute: IAnalyticsItem | null;
+  revisitEventRelationAttribute: IAnalyticsItem | null;
+  showRelation: boolean;
+}
+
 export const DEFAULT_EVENT_ITEM = {
   selectedEventOption: null,
   calculateMethodOption: null,
@@ -69,6 +76,14 @@ export const DEFAULT_EVENT_ITEM = {
   hasTab: true,
   isMultiSelect: true,
   enableChangeRelation: false,
+};
+
+export const DEFAULT_RETENTION_ITEM = {
+  startEventOption: null,
+  revisitEventOption: null,
+  startEventRelationAttribute: null,
+  revisitEventRelationAttribute: null,
+  showRelation: false,
 };
 
 export const INIT_EVENT_LIST: IEventAnalyticsItem[] = [DEFAULT_EVENT_ITEM];
@@ -117,6 +132,33 @@ export const MOCK_EVENT_OPTION_LIST: CategoryItemType[] = [
         value: 'custom-event-1',
         description: 'custom event 1 description',
         modifyTime: '2023-11-11 11:11:11',
+      },
+    ],
+  },
+];
+
+export const MOCK_ATTRIBUTE_OPTION_LIST: CategoryItemType[] = [
+  {
+    categoryName: '事件属性',
+    categoryType: 'attribute',
+    itemList: [
+      {
+        label: '事件属性一',
+        value: 'predefine-attribute-1',
+        description: 'predefine attribute 1 description',
+        modifyTime: '2022-12-11 11:11:11',
+      },
+      {
+        label: '事件属性二',
+        value: 'predefine-attribute-2',
+        description: 'predefine attribute 2 description',
+        modifyTime: '2022-12-12 12:12:12',
+      },
+      {
+        label: '事件属性三',
+        value: 'predefine-attribute-3',
+        description: 'predefine attribute 3 description',
+        modifyTime: '2022-12-13 13:13:13',
       },
     ],
   },
