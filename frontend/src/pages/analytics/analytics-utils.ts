@@ -150,13 +150,8 @@ export const validEventAnalyticsItem = (item: IEventAnalyticsItem) => {
 };
 
 export const validConditionItemType = (condition: IConditionItemType) => {
-  if (
-    condition.conditionOption?.value === null ||
-    condition.conditionOption?.value?.length === 0
-  ) {
-    return false;
-  }
-  return true;
+  return condition.conditionOption?.value !== null &&
+  condition.conditionOption?.value?.length !== 0;
 };
 
 export const getEventAndConditions = (

@@ -51,11 +51,10 @@ const ConditionItem: React.FC<ConditionItemProps> = (
   } = props;
 
   const [valueOptions, setValueOptions] = useState<SelectProps.Options>([]);
-  const [labelValues, setLabelValues] = useState<string[]>([]);
   const [values, setValues] = useState<string[]>([]);
+  const [labelValues, setLabelValues] = useState<string[]>([]);
   const [inputValue, setInputValue] = useState<string>('');
 
-  console.log('conditionOptions', conditionOptions);
   const setConditionValues = (values: string[], labelValues: string[]) => {
     setLabelValues(labelValues);
     setValues(values);
@@ -74,6 +73,9 @@ const ConditionItem: React.FC<ConditionItemProps> = (
         };
       });
       setValueOptions(options);
+      setLabelValues([]);
+      setValues([]);
+      changeConditionValue([]);
     }
   };
 
