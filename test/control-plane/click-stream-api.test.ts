@@ -23,7 +23,6 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
         'testClickStreamALBApiClickstreamDictionary0A1156B6',
         'testClickStreamALBApiClickstreamMetadataA721B303',
         'testClickStreamALBApiClickstreamAnalyticsMetadataA20F6663',
-        'testClickStreamALBApiClickstreamAnalyticsDisplayF1065F20',
         'testClickStreamALBApiClickstreamUser54DFA2EE',
       ]);
 
