@@ -65,16 +65,16 @@ dependencies {
 ```java
 import software.aws.solution.clickstream.ClickstreamAnalytics;
 
-public void onCreate(){
-        super.onCreate();
+public void onCreate() {
+    super.onCreate();
 
-        try{
+    try{
         ClickstreamAnalytics.init(getApplicationContext());
-        Log.i("MyApp","Initialized ClickstreamAnalytics");
-        }catch(AmplifyException error){
-        Log.e("MyApp","Could not initialize ClickstreamAnalytics",error);
-        }
-        }
+        Log.i("MyApp", "Initialized ClickstreamAnalytics");
+    } catch (AmplifyException error){
+        Log.e("MyApp", "Could not initialize ClickstreamAnalytics", error);
+    } 
+}
 ```
 
 ### 4. 开始使用
@@ -88,16 +88,16 @@ import software.aws.solution.clickstream.ClickstreamAnalytics;
 import software.aws.solution.clickstream.ClickstreamEvent;
 
 // 记录带有自定义参数的事件
-ClickstreamEvent event=ClickstreamEvent.builder()
-        .name("button_click")
-        .add("category","shoes")
-        .add("currency","CNY")
-        .add("value",279.9)
-        .build();
-        ClickstreamAnalytics.recordEvent(event);
+ClickstreamEvent event = ClickstreamEvent.builder()
+    .name("button_click")
+    .add("category", "shoes")
+    .add("currency", "CNY")
+    .add("value", 279.9)
+    .build();
+ClickstreamAnalytics.recordEvent(event);
 
 // 直接记录事件名
-        ClickstreamAnalytics.recordEvent("button_click");
+ClickstreamAnalytics.recordEvent("button_click");
 ```
 
 #### 添加全局属性
@@ -106,16 +106,16 @@ ClickstreamEvent event=ClickstreamEvent.builder()
 import software.aws.solution.clickstream.ClickstreamAttribute;
 import software.aws.solution.clickstream.ClickstreamAnalytics;
 
-ClickstreamAttribute globalAttribute=ClickstreamAttribute.builder()
-        .add("channel","Play Store")
-        .add("level",5.1)
-        .add("class",6)
-        .add("isOpenNotification",true)
-        .build();
-        ClickstreamAnalytics.addGlobalAttributes(globalAttribute);
+ClickstreamAttribute globalAttribute = ClickstreamAttribute.builder()
+    .add("channel", "Play Store")
+    .add("level", 5.1)
+    .add("class", 6)
+    .add("isOpenNotification", true)
+    .build();
+ClickstreamAnalytics.addGlobalAttributes(globalAttribute);
 
 // 删除全局属性
-        ClickstreamAnalytics.deleteGlobalAttributes("level");
+ClickstreamAnalytics.deleteGlobalAttributes("level");
 ```
 
 请在SDK初始化完成后添加全局属性，全局属性将添加到所有事件的属性对象中。
@@ -129,7 +129,7 @@ import software.aws.solution.clickstream.ClickstreamAnalytics;
 ClickstreamAnalytics.setUserId("UserId");
 
 // 当用户退出登录时设置
-        ClickstreamAnalytics.setUserId(null);
+ClickstreamAnalytics.setUserId(null);
 ```
 
 #### 添加用户属性
@@ -138,11 +138,11 @@ ClickstreamAnalytics.setUserId("UserId");
 import software.aws.solution.clickstream.ClickstreamAnalytcs;
 import software.aws.solution.clickstream.ClickstreamUserAttribute;
 
-ClickstreamUserAttribute clickstreamUserAttribute=ClickstreamUserAttribute.builder()
-        .add("_user_age",21)
-        .add("_user_name","carl")
-        .build();
-        ClickstreamAnalytics.addUserAttributes(clickstreamUserAttribute);
+ClickstreamUserAttribute clickstreamUserAttribute = ClickstreamUserAttribute.builder()
+    .add("_user_age", 21)
+    .add("_user_name", "carl")
+    .build();
+ClickstreamAnalytics.addUserAttributes(clickstreamUserAttribute);
 ```
 
 当前登录用户的属性会进行缓存，因此在下次App打开时不需要再次设置所有的用户属性，当然您可以使用相同的
@@ -209,7 +209,7 @@ ClickstreamAnalytics.getClickStreamConfiguration()
    ```java
    import software.aws.solution.clickstream.ClickstreamAnalytics;
 
-// 在调试模式下打开事件json内容的打印
+   // 在调试模式下打开事件json内容的打印
    ClickstreamAnalytics.getClickStreamConfiguration()
            .withLogEvents(BuildConfig.DEBUG);
    ```
