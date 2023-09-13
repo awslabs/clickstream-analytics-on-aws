@@ -32,7 +32,7 @@ async function _handler(event: CdkCustomResourceEvent) {
     return {};
   }
 
-  const expression = event.ResourceProperties.expression!;
+  const expression = event.ResourceProperties.expression;
   const evaluationPeriods = parseInt(event.ResourceProperties.evaluationPeriods || '1');
 
   let intervalSeconds;

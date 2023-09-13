@@ -23,7 +23,7 @@ export interface ResourcePropertiesType {
   projectId: string;
   name: string;
   version: string;
-  secourityGroupId: string;
+  securityGroupId: string;
   subnetIds: string;
   idleTimeoutMinutes: string;
 }
@@ -61,7 +61,9 @@ async function _handler(event: CloudFormationCustomResourceEvent, context: Conte
   const props = event.ResourceProperties as ResourcePropertiesType;
   if (event.RequestType == 'Delete') {
     await deleteEMRServerlessApp();
-    return;
+    return {
+      Data: {},
+    };
   } else {
     const applicationId = await createEMRServerlessApp(props);
     return {
@@ -80,7 +82,7 @@ async function createEMRServerlessApp(props: ResourcePropertiesType): Promise<st
     architecture: Architecture.X86_64,
     networkConfiguration: {
       subnetIds: props.subnetIds.split(','),
-      securityGroupIds: [props.secourityGroupId],
+      securityGroupIds: [props.securityGroupId],
     },
     autoStartConfiguration: {
       enabled: true,
@@ -98,13 +100,13 @@ async function createEMRServerlessApp(props: ResourcePropertiesType): Promise<st
   logger.info('created emr application applicationId:' + applicationId);
 
   logger.info('s3Bucket:' + s3Bucket + ', appIdKey:' + appIdKey);
-  let appIdCofing = await readS3ObjectAsJson(s3Bucket, appIdKey);
+  let appIdConfig = await readS3ObjectAsJson(s3Bucket, appIdKey);
   const nowStr = process.env.TEST_TIME_NOW_STR || new Date().toISOString();
 
-  if (appIdCofing) {
-    logger.info('find appIdCofing', { appIdCofing });
+  if (appIdConfig) {
+    logger.info('find appIdConfig', { appIdConfig: appIdConfig });
     // only save previous 5 appIds
-    const applicationIds = appIdCofing.applicationIds.slice(-5);
+    const applicationIds = appIdConfig.applicationIds.slice(-5);
     // delete old one
     for (const appInfo of applicationIds) {
       await deleteEMRServerlessAppById(appInfo.applicationId);
@@ -113,10 +115,10 @@ async function createEMRServerlessApp(props: ResourcePropertiesType): Promise<st
       applicationId,
       createAt: nowStr,
     });
-    appIdCofing.applicationIds = applicationIds;
+    appIdConfig.applicationIds = applicationIds;
   } else {
-    logger.info('not find appIdCofing');
-    appIdCofing = {
+    logger.info('not find appIdConfig');
+    appIdConfig = {
       applicationIds: [
         {
           applicationId,
@@ -126,16 +128,16 @@ async function createEMRServerlessApp(props: ResourcePropertiesType): Promise<st
     };
   }
 
-  logger.info('save new appIdCofing', appIdCofing);
-  await putStringToS3(JSON.stringify(appIdCofing), s3Bucket, appIdKey);
+  logger.info('save new appIdConfig', appIdConfig);
+  await putStringToS3(JSON.stringify(appIdConfig), s3Bucket, appIdKey);
   return applicationId;
 }
 
 async function deleteEMRServerlessApp() {
-  const appIdCofing = await readS3ObjectAsJson(s3Bucket, appIdKey);
-  if (appIdCofing) {
-    logger.info('find appIdCofing', { appIdCofing });
-    const applicationIds = appIdCofing.applicationIds;
+  const appIdConfig = await readS3ObjectAsJson(s3Bucket, appIdKey);
+  if (appIdConfig) {
+    logger.info('find appIdConfig', { appIdConfig: appIdConfig });
+    const applicationIds = appIdConfig.applicationIds;
     for (const app of applicationIds) {
       await deleteEMRServerlessAppById(app.applicationId);
     }

@@ -112,15 +112,15 @@ export const handler = async (_event: any, context: Context) => {
   let allJobNewCount = newRecordResp.Count;
   logger.info('queryItems response count=' + newRecordResp.Count);
 
-  if (newRecordResp.Count! > 0) {
+  if (newRecordResp.Count > 0) {
     newMinFileTimestamp = newRecordResp.Items[0].timestamp;
   }
 
   logger.info(`checked JOB_NEW, oldestFileTimestamp: ${newMinFileTimestamp}`);
 
-  while (newRecordResp.Count! > 0) {
+  while (newRecordResp.Count > 0) {
     if (candidateItems.length < queryResultLimit) {
-      candidateItems = candidateItems.concat(newRecordResp.Items!);
+      candidateItems = candidateItems.concat(newRecordResp.Items);
     }
     if (newRecordResp.LastEvaluatedKey) {
       newRecordResp = await queryItems(tableName, indexName, odsEventBucketWithPrefix, JobStatus.JOB_NEW, newRecordResp.LastEvaluatedKey);
@@ -212,10 +212,10 @@ const doManifestFiles = async (candidateItems: Array<ODSEventItem>,
  * @returns The appId.
  */
 function getAppIdFromS3Object(s3Object: string) {
-  const dirArray = s3Object.split('/');
-  for (let i = 0; i < dirArray.length; i++) {
-    if (dirArray[i].indexOf(`${PARTITION_APP}=`) != -1) {
-      return dirArray[i].split('=')[1];
+  const pathArray = s3Object.split('/');
+  for (const path of pathArray) {
+    if (path.indexOf(`${PARTITION_APP}=`) != -1) {
+      return path.split('=')[1];
     }
   }
   return null;

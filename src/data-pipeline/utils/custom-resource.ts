@@ -170,22 +170,22 @@ export function createInitPartitionCustomResource(
 }
 
 //
-//  EMRServelsssApplication
+//  EMRServerlessApplication
 //
-export interface EMRServelsssApplicationProps {
+export interface EMRServerlessApplicationProps {
   projectId: string;
   name: string;
   version: string;
-  secourityGroupId: string;
+  securityGroupId: string;
   subnetIds: string;
   idleTimeoutMinutes: number;
   pipelineS3Bucket: IBucket;
   pipelineS3Prefix: string;
 }
 
-function createEMRServelsssApplicationLambda(
+function createEMRServerlessApplicationLambda(
   scope: Construct,
-  props: EMRServelsssApplicationProps,
+  props: EMRServerlessApplicationProps,
 ): SolutionNodejsFunction {
 
   const ermAppArn = Arn.format(
@@ -199,7 +199,7 @@ function createEMRServelsssApplicationLambda(
     Stack.of(scope),
   );
 
-  const role = createLambdaRole(scope, 'CreateEMRServelsssApplicationLambdaRole', true, [
+  const role = createLambdaRole(scope, 'CreateEMRServerlessApplicationLambdaRole', true, [
     new PolicyStatement({
       actions: [
         'emr-serverless:CreateApplication',
@@ -211,7 +211,7 @@ function createEMRServelsssApplicationLambda(
 
   props.pipelineS3Bucket.grantReadWrite(role);
 
-  const fn = new SolutionNodejsFunction(scope, 'CreateEMRServelsssApplicationLambda', {
+  const fn = new SolutionNodejsFunction(scope, 'CreateEMRServerlessApplicationLambda', {
     runtime: LAMBDA_NODEJS_RUNTIME,
     entry: join(
       __dirname,
@@ -230,7 +230,7 @@ function createEMRServelsssApplicationLambda(
       PROJECT_ID: props.projectId,
       NAME: props.name,
       VERSION: props.version,
-      SECOURITYGROUPID: props.secourityGroupId,
+      SECURITYGROUPID: props.securityGroupId,
       SUBNETIDS: props.subnetIds,
       PIPELINE_S3_BUCKET_NAME: props.pipelineS3Bucket.bucketName,
       PIPELINE_S3_PREFIX: props.pipelineS3Prefix,
@@ -244,12 +244,12 @@ function createEMRServelsssApplicationLambda(
 }
 
 
-export function createEMRServelsssApplicationCustomResource(
+export function createEMRServerlessApplicationCustomResource(
   scope: Construct,
-  props: EMRServelsssApplicationProps,
+  props: EMRServerlessApplicationProps,
 ): CustomResource {
 
-  const fn = createEMRServelsssApplicationLambda(scope, props);
+  const fn = createEMRServerlessApplicationLambda(scope, props);
 
   const provider = new Provider(
     scope,
@@ -265,7 +265,7 @@ export function createEMRServelsssApplicationCustomResource(
       projectId: props.projectId,
       name: props.name,
       version: props.version,
-      secourityGroupId: props.secourityGroupId,
+      secourityGroupId: props.securityGroupId,
       subnetIds: props.subnetIds,
       idleTimeoutMinutes: props.idleTimeoutMinutes,
       pipelineS3BucketName: props.pipelineS3Bucket.bucketName,

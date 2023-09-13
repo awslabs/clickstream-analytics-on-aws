@@ -81,10 +81,10 @@ export interface FrontendProps {
   readonly buildArgs?: {
     [key: string]: string;
   };
-  readonly plaform?: Platform;
+  readonly platform?: Platform;
 
   /**
-   * The maximum of concurrent executations you want to reserve for the Frontend function
+   * The maximum of concurrent executions you want to reserve for the Frontend function
    *
    * @default - 5
    */
@@ -134,98 +134,12 @@ export class ApplicationLoadBalancerLambdaPortal extends Construct {
   constructor(scope: Construct, id: string, props: ApplicationLoadBalancerLambdaPortalProps) {
     super(scope, id);
 
-    const selectedVPCs = props.networkProps.vpc.selectSubnets(props.networkProps.subnets);
-    if (props.applicationLoadBalancerProps.internetFacing != selectedVPCs.hasPublic) {
-      throw new Error(`Make sure the given ${props.applicationLoadBalancerProps.internetFacing ? 'public' : 'private'} subnets for your load balancer.`);
-    }
+    this.doValidation(props);
 
-    this.node.addValidation({
-      validate: () => {
-        const messages: string[] = [];
-        if (props.domainProps !== undefined && props.applicationLoadBalancerProps.protocol === ApplicationProtocol.HTTP) {
-          messages.push(Constant.ERROR_CUSTOM_DOMAIN_REQUIRE_HTTPS);
-        }
-        return messages;
-      },
-    });
-
-    const dockerFile = props.frontendProps.dockerfile ?? 'Dockerfile';
-    const fnRole = new Role(this, 'portal_fn_role', {
-      assumedBy: new ServicePrincipal('lambda.amazonaws.com'),
-    });
-
-    const frontendLambdaSG = new SecurityGroup(this, 'frontend_function_sg', {
-      vpc: props.networkProps.vpc,
-      allowAllOutbound: false,
-    });
-    addCfnNagSuppressRules(
-      frontendLambdaSG.node.defaultChild as CfnSecurityGroup,
-      [
-        {
-          id: 'W29',
-          reason:
-              'Disallow all egress traffic',
-        },
-      ],
-    );
-
-    const lambdaFn = new DockerImageFunction(this, 'portal_fn', {
-      description: 'Lambda function for console plane of solution Clickstream Analytics on AWS',
-      code: DockerImageCode.fromImageAsset(props.frontendProps.directory, {
-        file: dockerFile,
-        ignoreMode: IgnoreMode.DOCKER,
-        buildArgs: props.frontendProps.buildArgs,
-        platform: props.frontendProps.plaform,
-      }),
-      role: fnRole,
-      vpc: props.networkProps.vpc,
-      timeout: Duration.seconds(10),
-      allowPublicSubnet: props.applicationLoadBalancerProps.internetFacing,
-      vpcSubnets: props.networkProps.subnets,
-      securityGroups: [frontendLambdaSG],
-      architecture: Architecture.X86_64,
-      environment: {
-        ... POWERTOOLS_ENVS,
-      },
-    });
-
-    createENI('frontend-func-eni', cloudWatchSendLogs('frontend-func-logs', lambdaFn));
-
-    addCfnNagSuppressRules(lambdaFn.node.defaultChild as CfnResource, [
-      ...rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions('addSubscription-custom-resource'),
-    ]);
-
-    this.securityGroup = new SecurityGroup(this, 'portal_sg', {
-      vpc: props.networkProps.vpc,
-      allowAllOutbound: false,
-    });
-    addCfnNagSuppressRules(
-      this.securityGroup.node.defaultChild as CfnSecurityGroup,
-      [
-        {
-          id: 'W29',
-          reason:
-              'Disallow all egress traffic',
-        },
-        {
-          id: 'W9',
-          reason:
-              'The open world ingress rule is by design',
-        },
-        {
-          id: 'W2',
-          reason:
-              'The SG is used by ELB to receive internet traffic',
-        },
-        {
-          id: 'W40',
-          reason: 'Design intent: Security Groups egress with an IpProtocol of -1',
-        },
-      ],
-    );
+    const frontendFunc = this.createFrontendFunction(props);
 
     let port = props.networkProps.port;
-    if ( port === undefined) {
+    if (port === undefined) {
       if (props.domainProps?.certificate === undefined) {
         port = 80;
       } else {
@@ -234,26 +148,9 @@ export class ApplicationLoadBalancerLambdaPortal extends Construct {
     }
     this.port = port;
 
-    if (props.applicationLoadBalancerProps.internetFacing) {
-      this.securityGroup.addIngressRule(Peer.anyIpv4(), Port.tcp(port), 'rule of allow inbound traffic from servier port ');
-      if (props.applicationLoadBalancerProps.ipAddressType === IpAddressType.DUAL_STACK) {
-        this.securityGroup.addIngressRule(Peer.anyIpv6(), Port.tcp(port), 'rule of allow IPv6 inbound traffic from servier port ');
-      }
-    } else {
-      const sourceSg = new SecurityGroup(this, 'portal_source_sg', {
-        vpc: props.networkProps.vpc,
-        allowAllOutbound: false,
-      });
-      this.sourceSecurityGroupId = sourceSg.securityGroupId;
-
-      this.securityGroup.connections.allowFrom(
-        new Connections({
-          securityGroups: [sourceSg],
-        }),
-        Port.tcp(port),
-        'application load balancer allow traffic from this security group under internal deploy mode',
-      );
-    }
+    const sgs = this.createALBSecurityGroup(props, port);
+    this.securityGroup = sgs.albSG;
+    this.sourceSecurityGroupId = sgs.sourceSG?.securityGroupId;
 
     // Need to get immutable version because otherwise the ApplicationLoadBalance
     // would create 0.0.0.0/0 rule for inbound traffic
@@ -284,37 +181,10 @@ export class ApplicationLoadBalancerLambdaPortal extends Construct {
       this.controlPlaneUrl = 'http://' + this.applicationLoadBalancer.loadBalancerDnsName + ':' + this.port;
     }
 
-    if (props.applicationLoadBalancerProps.logProps.enableAccessLog) {
-      let albLogBucket: IBucket;
-      if (props.applicationLoadBalancerProps.logProps.bucket === undefined) {
-        albLogBucket = new Bucket(this, 'logbucket', {
-          encryption: BucketEncryption.S3_MANAGED,
-          enforceSSL: true,
-          blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
-          serverAccessLogsPrefix: props.applicationLoadBalancerProps.logProps.enableAccessLog ?
-            (props.applicationLoadBalancerProps.logProps.prefix ?? 'bucket-access-logs') : undefined,
-        });
-      } else {
-        albLogBucket = props.applicationLoadBalancerProps.logProps.bucket;
-      }
-      const albLogPrefix = props.applicationLoadBalancerProps.logProps?.prefix ?? 'console-alb-access-logs/';
-      setAccessLogForApplicationLoadBalancer(scope, {
-        alb: this.applicationLoadBalancer,
-        albLogBucket: albLogBucket,
-        albLogPrefix: albLogPrefix,
-      });
-    }
+    this.configureALBAccessLog(props, scope);
 
     if (props.domainProps !== undefined) {
-      let certificate: ICertificate;
-      if (props.domainProps?.certificate === undefined) {
-        certificate = new Certificate(this, 'Certificate', {
-          domainName: Fn.join('.', [props.domainProps.recordName, props.domainProps.hostedZoneName]),
-          validation: CertificateValidation.fromDns(props.domainProps?.hostedZone),
-        });
-      } else {
-        certificate = props.domainProps.certificate;
-      }
+      const certificate = this.certificate(props);
 
       this.listener = this.applicationLoadBalancer.addListener('Listener', {
         protocol: ApplicationProtocol.HTTPS,
@@ -346,38 +216,9 @@ export class ApplicationLoadBalancerLambdaPortal extends Construct {
     });
 
     //if the protocol is HTTPS, creating a default 80 listener to redirect to HTTPS port
-    if (props.applicationLoadBalancerProps.protocol === ApplicationProtocol.HTTPS) {
-      const httpListener = this.applicationLoadBalancer.addListener('HttpListener', {
-        protocol: ApplicationProtocol.HTTP,
-        port: 80,
-      });
+    this.createRedirectMethod(props);
 
-      httpListener.addAction('RedirectAction', {
-        action: ListenerAction.redirect({
-          protocol: ApplicationProtocol.HTTPS,
-          port: this.port.toString(),
-        }),
-      });
-
-      //add ingress rule to allow 80 port
-      this.securityGroup.addIngressRule(Peer.anyIpv4(), Port.tcp(80), 'rule of allow inbound traffic from 80 port ');
-      if (props.applicationLoadBalancerProps.ipAddressType === IpAddressType.DUAL_STACK) {
-        this.securityGroup.addIngressRule(Peer.anyIpv6(), Port.tcp(80), 'rule of allow IPv6 inbound traffic from 80 port ');
-      }
-
-      addCfnNagSuppressRules(
-        httpListener.node.defaultChild as CfnListener,
-        [
-          {
-            id: 'W56',
-            reason:
-              'Using HTTP listener is by design',
-          },
-        ],
-      );
-    }
-
-    const targets = [new LambdaTarget(lambdaFn)];
+    const targets = [new LambdaTarget(frontendFunc)];
     const interval = props.applicationLoadBalancerProps.healthCheckInterval ?? Duration.seconds(60);
     const healthCheck = {
       enabled: true,
@@ -402,6 +243,194 @@ export class ApplicationLoadBalancerLambdaPortal extends Construct {
 
   };
 
+  private certificate(props: ApplicationLoadBalancerLambdaPortalProps) {
+    if (props.domainProps?.certificate === undefined) {
+      return new Certificate(this, 'Certificate', {
+        domainName: Fn.join('.', [props.domainProps!.recordName, props.domainProps!.hostedZoneName]),
+        validation: CertificateValidation.fromDns(props.domainProps?.hostedZone),
+      });
+    }
+    return props.domainProps.certificate;
+  }
+
+  private createRedirectMethod(props: ApplicationLoadBalancerLambdaPortalProps) {
+    if (props.applicationLoadBalancerProps.protocol === ApplicationProtocol.HTTPS) {
+      const httpListener = this.applicationLoadBalancer.addListener('HttpListener', {
+        protocol: ApplicationProtocol.HTTP,
+        port: 80,
+      });
+
+      httpListener.addAction('RedirectAction', {
+        action: ListenerAction.redirect({
+          protocol: ApplicationProtocol.HTTPS,
+          port: this.port.toString(),
+        }),
+      });
+
+      //add ingress rule to allow 80 port
+      this.securityGroup.addIngressRule(Peer.anyIpv4(), Port.tcp(80), 'rule of allow inbound traffic from 80 port ');
+      if (props.applicationLoadBalancerProps.ipAddressType === IpAddressType.DUAL_STACK) {
+        this.securityGroup.addIngressRule(Peer.anyIpv6(), Port.tcp(80), 'rule of allow IPv6 inbound traffic from 80 port ');
+      }
+
+      addCfnNagSuppressRules(
+        httpListener.node.defaultChild as CfnListener,
+        [
+          {
+            id: 'W56',
+            reason: 'Using HTTP listener is by design',
+          },
+        ],
+      );
+    }
+  }
+
+  private configureALBAccessLog(props: ApplicationLoadBalancerLambdaPortalProps, scope: Construct) {
+    if (props.applicationLoadBalancerProps.logProps.enableAccessLog) {
+      let albLogBucket: IBucket;
+      if (props.applicationLoadBalancerProps.logProps.bucket === undefined) {
+        albLogBucket = new Bucket(this, 'logbucket', {
+          encryption: BucketEncryption.S3_MANAGED,
+          enforceSSL: true,
+          blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
+          serverAccessLogsPrefix: props.applicationLoadBalancerProps.logProps.enableAccessLog ?
+            (props.applicationLoadBalancerProps.logProps.prefix ?? 'bucket-access-logs') : undefined,
+        });
+      } else {
+        albLogBucket = props.applicationLoadBalancerProps.logProps.bucket;
+      }
+      const albLogPrefix = props.applicationLoadBalancerProps.logProps?.prefix ?? 'console-alb-access-logs/';
+      setAccessLogForApplicationLoadBalancer(scope, {
+        alb: this.applicationLoadBalancer,
+        albLogBucket: albLogBucket,
+        albLogPrefix: albLogPrefix,
+      });
+    }
+  }
+
+  private createALBSecurityGroup(props: ApplicationLoadBalancerLambdaPortalProps, port: number): {
+    albSG: SecurityGroup;
+    sourceSG?: SecurityGroup;
+  } {
+    const sg = new SecurityGroup(this, 'portal_sg', {
+      vpc: props.networkProps.vpc,
+      allowAllOutbound: false,
+    });
+    addCfnNagSuppressRules(
+      sg.node.defaultChild as CfnSecurityGroup,
+      [
+        {
+          id: 'W29',
+          reason: 'Disallow all egress traffic',
+        },
+        {
+          id: 'W9',
+          reason: 'The open world ingress rule is by design',
+        },
+        {
+          id: 'W2',
+          reason: 'The SG is used by ELB to receive internet traffic',
+        },
+        {
+          id: 'W40',
+          reason: 'Design intent: Security Groups egress with an IpProtocol of -1',
+        },
+      ],
+    );
+
+
+    let sourceSG: SecurityGroup | undefined;
+    if (props.applicationLoadBalancerProps.internetFacing) {
+      sg.addIngressRule(Peer.anyIpv4(), Port.tcp(port), 'rule of allow inbound traffic from servier port ');
+      if (props.applicationLoadBalancerProps.ipAddressType === IpAddressType.DUAL_STACK) {
+        sg.addIngressRule(Peer.anyIpv6(), Port.tcp(port), 'rule of allow IPv6 inbound traffic from servier port ');
+      }
+    } else {
+      sourceSG = new SecurityGroup(this, 'portal_source_sg', {
+        vpc: props.networkProps.vpc,
+        allowAllOutbound: false,
+      });
+      sg.connections.allowFrom(
+        new Connections({
+          securityGroups: [sourceSG],
+        }),
+        Port.tcp(port),
+        'application load balancer allow traffic from this security group under internal deploy mode',
+      );
+    }
+    return {
+      albSG: sg,
+      sourceSG,
+    };
+  }
+
+  private createFrontendFunction(props: ApplicationLoadBalancerLambdaPortalProps) {
+    const dockerFile = props.frontendProps.dockerfile ?? 'Dockerfile';
+    const fnRole = new Role(this, 'portal_fn_role', {
+      assumedBy: new ServicePrincipal('lambda.amazonaws.com'),
+    });
+
+    const frontendLambdaSG = new SecurityGroup(this, 'frontend_function_sg', {
+      vpc: props.networkProps.vpc,
+      allowAllOutbound: false,
+    });
+    addCfnNagSuppressRules(
+      frontendLambdaSG.node.defaultChild as CfnSecurityGroup,
+      [
+        {
+          id: 'W29',
+          reason: 'Disallow all egress traffic',
+        },
+      ],
+    );
+
+    const lambdaFn = new DockerImageFunction(this, 'portal_fn', {
+      description: 'Lambda function for console plane of solution Clickstream Analytics on AWS',
+      code: DockerImageCode.fromImageAsset(props.frontendProps.directory, {
+        file: dockerFile,
+        ignoreMode: IgnoreMode.DOCKER,
+        buildArgs: props.frontendProps.buildArgs,
+        platform: props.frontendProps.platform,
+      }),
+      role: fnRole,
+      vpc: props.networkProps.vpc,
+      timeout: Duration.seconds(10),
+      allowPublicSubnet: props.applicationLoadBalancerProps.internetFacing,
+      vpcSubnets: props.networkProps.subnets,
+      securityGroups: [frontendLambdaSG],
+      architecture: Architecture.X86_64,
+      environment: {
+        ...POWERTOOLS_ENVS,
+      },
+    });
+
+
+    createENI('frontend-func-eni', cloudWatchSendLogs('frontend-func-logs', lambdaFn));
+
+    addCfnNagSuppressRules(lambdaFn.node.defaultChild as CfnResource, [
+      ...rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions('addSubscription-custom-resource'),
+    ]);
+
+    return lambdaFn;
+  }
+
+  private doValidation(props: ApplicationLoadBalancerLambdaPortalProps) {
+    const selectedVPCs = props.networkProps.vpc.selectSubnets(props.networkProps.subnets);
+    if (props.applicationLoadBalancerProps.internetFacing != selectedVPCs.hasPublic) {
+      throw new Error(`Make sure the given ${props.applicationLoadBalancerProps.internetFacing ? 'public' : 'private'} subnets for your load balancer.`);
+    }
+
+    this.node.addValidation({
+      validate: () => {
+        const messages: string[] = [];
+        if (props.domainProps !== undefined && props.applicationLoadBalancerProps.protocol === ApplicationProtocol.HTTP) {
+          messages.push(Constant.ERROR_CUSTOM_DOMAIN_REQUIRE_HTTPS);
+        }
+        return messages;
+      },
+    });
+  }
+
   /**
    * Add a route matching and target group to the ALB
    * @param id id of this target
@@ -410,7 +439,7 @@ export class ApplicationLoadBalancerLambdaPortal extends Construct {
   public addRoute(id: string, props: RouteProps) {
     const listenerCondition = [ListenerCondition.pathPatterns([props.routePath])];
     if (props.methods !== undefined) {
-      listenerCondition.concat([ListenerCondition.httpRequestMethods(props.methods)]);
+      listenerCondition.push(ListenerCondition.httpRequestMethods(props.methods));
     }
 
     this.listener.addTargets(id, {

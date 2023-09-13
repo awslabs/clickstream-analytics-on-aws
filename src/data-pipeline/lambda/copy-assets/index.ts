@@ -114,5 +114,4 @@ async function onDelete() {
   for (const s3Prefix of s3Dirs) {
     await deleteObjectsByPrefix(pipelineS3BucketName, s3Prefix);
   }
-  return;
 }

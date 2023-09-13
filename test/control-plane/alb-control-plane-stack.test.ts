@@ -919,7 +919,7 @@ describe('ALBLambdaPotalStack DynamoDB Endpoint', () => {
                       ],
                     ],
                   },
-                  `:443/signin","solution_version":"${SolutionInfo.SOLUTION_VERSION}","cotrol_plane_mode":"ALB","solution_data_bucket":"`,
+                  `:443/signin","solution_version":"${SolutionInfo.SOLUTION_VERSION}","control_plane_mode":"ALB","solution_data_bucket":"`,
                   {
                     Ref: 'ClickstreamSolutionDataBucket200465FE',
                   },

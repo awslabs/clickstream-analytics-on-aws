@@ -20,10 +20,10 @@ import { CloudFrontControlPlaneStack } from '../../src/cloudfront-control-plane-
 import { OUTPUT_CONTROL_PLANE_URL, OUTPUT_CONTROL_PLANE_BUCKET } from '../../src/common/constant';
 import { CFN_FN } from '../constants';
 
-describe('CloudFrontS3PotalStack', () => {
+describe('CloudFrontS3PortalStack', () => {
 
   const commonApp = new App();
-  const commonPortalStack = new CloudFrontControlPlaneStack(commonApp, 'CloudFrontS3PotalStack');
+  const commonPortalStack = new CloudFrontControlPlaneStack(commonApp, 'CloudFrontS3PortalStack');
   const commonTemplate = Template.fromStack(commonPortalStack);
 
   test('Global region', () => {
@@ -249,9 +249,6 @@ describe('CloudFrontS3PotalStack', () => {
           'Arn',
         ],
       },
-      Architectures: [
-        'arm64',
-      ],
       Environment: {
         Variables: {
           ISSUER: {
@@ -420,7 +417,7 @@ describe('CloudFrontS3PotalStack', () => {
     const app = new App();
 
     //WHEN
-    const portalStack = new CloudFrontControlPlaneStack(app, 'CloudFrontS3PotalStack', {
+    const portalStack = new CloudFrontControlPlaneStack(app, 'CloudFrontS3PortalStack', {
       useCustomDomainName: true,
     });
 
@@ -492,7 +489,7 @@ describe('CloudFrontS3PotalStack', () => {
     const app = new App();
 
     //WHEN
-    const portalStack = new CloudFrontControlPlaneStack(app, 'CloudFrontS3PotalStack', {
+    const portalStack = new CloudFrontControlPlaneStack(app, 'CloudFrontS3PortalStack', {
       targetToCNRegions: true,
     });
 
@@ -558,9 +555,6 @@ describe('CloudFrontS3PotalStack', () => {
           'Arn',
         ],
       },
-      Architectures: [
-        'arm64',
-      ],
       Environment: {
         Variables: {
           ISSUER: {
@@ -620,7 +614,7 @@ describe('CloudFrontS3PotalStack', () => {
     const app = new App();
 
     //WHEN
-    const portalStack = new CloudFrontControlPlaneStack(app, 'CloudFrontS3PotalStack', {
+    const portalStack = new CloudFrontControlPlaneStack(app, 'CloudFrontS3PortalStack', {
       useExistingOIDCProvider: true,
     });
     const template = Template.fromStack(portalStack);
@@ -629,9 +623,6 @@ describe('CloudFrontS3PotalStack', () => {
     template.hasParameter('OIDCClientId', {});
 
     template.hasResourceProperties('AWS::Lambda::Function', {
-      Architectures: [
-        'arm64',
-      ],
       Environment: {
         Variables: {
           ISSUER: Match.anyValue(),
@@ -738,7 +729,7 @@ describe('CloudFrontS3PotalStack', () => {
     const app = new App();
 
     //WHEN
-    const portalStack = new CloudFrontControlPlaneStack(app, 'CloudFrontS3PotalStack', {
+    const portalStack = new CloudFrontControlPlaneStack(app, 'CloudFrontS3PortalStack', {
       targetToCNRegions: true,
     });
 
@@ -769,7 +760,7 @@ describe('CloudFrontS3PotalStack', () => {
     const app = new App();
 
     //WHEN
-    const portalStack = new CloudFrontControlPlaneStack(app, 'CloudFrontS3PotalStack', {
+    const portalStack = new CloudFrontControlPlaneStack(app, 'CloudFrontS3PortalStack', {
       targetToCNRegions: true,
     });
 
@@ -794,7 +785,7 @@ describe('CloudFrontS3PotalStack', () => {
     const app = new App();
 
     //WHEN
-    const portalStack = new CloudFrontControlPlaneStack(app, 'CloudFrontS3PotalStack', {
+    const portalStack = new CloudFrontControlPlaneStack(app, 'CloudFrontS3PortalStack', {
       targetToCNRegions: true,
     });
 
@@ -843,7 +834,7 @@ describe('CloudFrontS3PotalStack', () => {
                 'Authorization',
                 'Accept',
                 'Cache-Control',
-                'Access-Control-Request-Mehod',
+                'Access-Control-Request-Method',
                 'Access-Control-Request-Headers',
                 'Referer',
               ],
@@ -859,11 +850,11 @@ describe('CloudFrontS3PotalStack', () => {
 
   });
 
-  test('Test security responose headers ', () => {
+  test('Test security response headers ', () => {
     const app = new App();
 
     //WHEN
-    const portalStack = new CloudFrontControlPlaneStack(app, 'CloudFrontS3PotalStack', {
+    const portalStack = new CloudFrontControlPlaneStack(app, 'CloudFrontS3PortalStack', {
       targetToCNRegions: false,
     });
     const template = Template.fromStack(portalStack);
@@ -965,11 +956,11 @@ describe('CloudFrontS3PotalStack', () => {
     }, 1);
   });
 
-  test('Test CloudFront loging function ', () => {
+  test('Test CloudFront logging function ', () => {
     const app = new App();
 
     //WHEN
-    const portalStack = new CloudFrontControlPlaneStack(app, 'CloudFrontS3PotalStack', {
+    const portalStack = new CloudFrontControlPlaneStack(app, 'CloudFrontS3PortalStack', {
       targetToCNRegions: false,
     });
     const template = Template.fromStack(portalStack);
@@ -998,8 +989,8 @@ describe('CloudFrontS3PotalStack', () => {
     , 1);
   });
 
-  test('Should has Rules CognitoUnsupportRegionRule', () => {
-    const rule = commonTemplate.toJSON().Rules.CognitoUnsupportRegionRule;
+  test('Should has Rules CognitoUnsupportedRegionRule', () => {
+    const rule = commonTemplate.toJSON().Rules.CognitoUnsupportedRegionRule;
     expect(rule.Assertions[0].Assert['Fn::Or'].length).toEqual(2);
 
     const paramList = [

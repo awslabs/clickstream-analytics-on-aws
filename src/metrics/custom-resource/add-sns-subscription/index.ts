@@ -44,7 +44,7 @@ async function _handler(
   context: Context,
 ) {
 
-  let requestType = (event as CloudFormationCustomResourceEvent).RequestType;
+  let requestType = event.RequestType;
 
   logger.info('requestType: ' + requestType);
 

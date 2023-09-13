@@ -45,7 +45,7 @@ export function createMetricsWidget(scope: Construct, props: {
     'service', MetricsService.EMR_SERVERLESS,
   ];
 
-  // Alrams
+  // Alarms
 
   const failedJobAlarm = new Alarm(scope, 'failedJobAlarm', {
     comparisonOperator: ComparisonOperator.GREATER_THAN_THRESHOLD,

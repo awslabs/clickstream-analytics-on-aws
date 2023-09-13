@@ -15,7 +15,7 @@
 import { Stack } from 'aws-cdk-lib';
 import { addCfnNagForCertificateRequest, addCfnNagForS3AutoDelete, addCfnNagForBucketDeployment } from '../../common/cfn-nag';
 
-export function supressWarningsForCloudFrontS3Portal(stack: Stack) {
+export function suppressWarningsForCloudFrontS3Portal(stack: Stack) {
 
   addCfnNagForCertificateRequest(stack);
 

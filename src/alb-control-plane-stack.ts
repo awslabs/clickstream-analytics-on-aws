@@ -52,7 +52,7 @@ export interface ApplicationLoadBalancerControlPlaneStackProps extends StackProp
    */
   existingVpc?: boolean;
 
-  /**, OUTPUT_CONSOLE_BUCKET, OUTPUT_CONSOLE_BUCKE, OUTPUT_CONSOLE_BUCKET, OUTPUT_CONSOLE_BUCKET, OUTPUT_CONSOLE_BUCKETT
+  /**
    * whether the application load balancer is internet facing or intranet.
    *
    */
@@ -80,7 +80,6 @@ export class ApplicationLoadBalancerControlPlaneStack extends Stack {
     super(scope, id, props);
 
     this.templateOptions.description = SolutionInfo.DESCRIPTION + `- Control Plane within VPC (${props.internetFacing ? 'Public' : 'Private'})`;
-    // this.addTransform('AWS::LanguageExtensions');
 
     let vpc:IVpc|undefined = undefined;
 
@@ -154,7 +153,7 @@ export class ApplicationLoadBalancerControlPlaneStack extends Stack {
       frontendProps: {
         directory: path.join(__dirname, '../'),
         dockerfile: 'src/control-plane/frontend/Dockerfile',
-        plaform: Platform.LINUX_AMD64,
+        platform: Platform.LINUX_AMD64,
         buildArgs: {
           GENERATE_SOURCEMAP: process.env.GENERATE_SOURCEMAP ?? 'false',
           CHUNK_MIN_SIZE: process.env.CHUNK_MIN_SIZE ?? '102400',
@@ -166,23 +165,23 @@ export class ApplicationLoadBalancerControlPlaneStack extends Stack {
     let issuer: string;
     let clientId: string;
     let oidcLogoutUrl: string = '';
-    const emailParamerter = Parameters.createCognitoUserEmailParameter(this);
+    const emailParameter = Parameters.createCognitoUserEmailParameter(this);
     /**
      * Create Cognito user pool and client for backend api,
-     * The client of Congito requires the redirect url using HTTPS
+     * The client of Cognito requires the redirect url using HTTPS
      */
     if (!props.useExistingOIDCProvider && props.useCustomDomain) {
-      this.paramLabels[emailParamerter.logicalId] = {
+      this.paramLabels[emailParameter.logicalId] = {
         default: 'Admin User Email',
       };
 
       this.paramGroups.push({
         Label: { default: 'Authentication Information' },
-        Parameters: [emailParamerter.logicalId],
+        Parameters: [emailParameter.logicalId],
       });
 
       const cognito = new SolutionCognito(this, 'solution-cognito', {
-        email: emailParamerter.valueAsString,
+        email: emailParameter.valueAsString,
         callbackUrls: [`${controlPlane.controlPlaneUrl}/signin`],
         logoutUrls: [`${controlPlane.controlPlaneUrl}`],
       });
@@ -237,7 +236,7 @@ export class ApplicationLoadBalancerControlPlaneStack extends Stack {
       stackWorkflowS3Bucket: solutionBucket.bucket,
       pluginPrefix: pluginPrefix,
       healthCheckPath: healthCheckPath,
-      adminUserEmail: emailParamerter.valueAsString,
+      adminUserEmail: emailParameter.valueAsString,
     });
 
     controlPlane.addRoute('api-targets', {
@@ -257,7 +256,7 @@ export class ApplicationLoadBalancerControlPlaneStack extends Stack {
       clientId: clientId,
       redirectUrl: controlPlane.controlPlaneUrl,
       solutionVersion: SolutionInfo.SOLUTION_VERSION,
-      cotrolPlaneMode: 'ALB',
+      controlPlaneMode: 'ALB',
       solutionBucket: solutionBucket.bucket.bucketName,
       solutionPluginPrefix: pluginPrefix,
       solutionRegion: Aws.REGION,
@@ -327,7 +326,7 @@ function addCfnNag(stack: Stack) {
   ];
   addCfnNagToStack(stack, cfnNagList);
   addCfnNagForLogRetention(stack);
-  addCfnNagForCustomResourceProvider(stack, 'CDK built-in provider for DicInitCustomResourceProvider', 'DicInitCustomResourceProvider', undefined);
+  addCfnNagForCustomResourceProvider(stack, 'CDK built-in provider for DicInitCustomResourceProvider', 'DicInitCustomResourceProvider');
   NagSuppressions.addStackSuppressions(stack, [
     {
       id: 'AwsSolutions-IAM4',
