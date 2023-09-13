@@ -168,17 +168,17 @@ import software.aws.solution.clickstream.ClickstreamAnalytics;
 
 // config the SDK after initialize.
 ClickstreamAnalytics.getClickStreamConfiguration()
-            .withAppId("your appId")
-            .withEndpoint("https://example.com/collect")
-            .withAuthCookie("your authentication cookie")
-            .withSendEventsInterval(10000)
-            .withSessionTimeoutDuration(1800000)
-            .withTrackScreenViewEvents(false)
-            .withTrackUserEngagementEvents(false)
-            .withTrackAppExceptionEvents(false)
-            .withLogEvents(true)
-            .withCustomDns(CustomOkhttpDns.getInstance())
-            .withCompressEvents(true);
+        .withAppId("your appId")
+        .withEndpoint("https://example.com/collect")
+        .withAuthCookie("your authentication cookie")
+        .withSendEventsInterval(10000)
+        .withSessionTimeoutDuration(1800000)
+        .withTrackScreenViewEvents(false)
+        .withTrackUserEngagementEvents(false)
+        .withTrackAppExceptionEvents(false)
+        .withLogEvents(true)
+        .withCustomDns(CustomOkhttpDns.getInstance())
+        .withCompressEvents(true);
 ```
 
 Here is an explanation of each method.
@@ -219,7 +219,7 @@ import software.aws.solution.clickstream.ClickstreamAnalytics;
 
 // config custom DNS.
 ClickstreamAnalytics.getClickStreamConfiguration()
-            .withCustomDns(CustomOkhttpDns.getInstance());
+        .withCustomDns(CustomOkhttpDns.getInstance());
 ```
 
 If you want to use custom DNS for network request, you can create your `CustomOkhttpDns` which implementation `okhttp3.Dns`, then configure `.withCustomDns(CustomOkhttpDns.getInstance())` to make it works, you can refer to the [example code](https://github.com/awslabs/clickstream-android/blob/main/clickstream/src/test/java/software/aws/solution/clickstream/IntegrationTest.java#L503-L516) .
