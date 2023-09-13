@@ -121,6 +121,7 @@ export const parametersConvertToCategoryItemType = (
         description: item.description,
         metadataSource: item.metadataSource,
         valueType: item.valueType,
+        valueEnum: item.valueEnum,
         modifyTime: moment(item.updateAt).format(TIME_FORMAT) || '-',
       });
     });
@@ -132,6 +133,7 @@ export const parametersConvertToCategoryItemType = (
       description: item.description,
       metadataSource: item.metadataSource,
       valueType: item.valueType,
+      valueEnum: item.valueEnum,
       modifyTime: moment(item.updateAt).format(TIME_FORMAT) || '-',
     });
   });
@@ -149,21 +151,12 @@ export const validEventAnalyticsItem = (item: IEventAnalyticsItem) => {
 
 export const validConditionItemType = (condition: IConditionItemType) => {
   if (
-    condition.conditionOption !== null &&
-    condition.conditionOption.value?.trim() !== '' &&
-    condition.conditionOperator !== null &&
-    condition.conditionOperator.value?.trim() !== ''
+    condition.conditionOption?.value === null ||
+    condition.conditionOption?.value?.length === 0
   ) {
-    if (
-      condition.conditionOperator.value === ExploreAnalyticsOperators.NULL ||
-      condition.conditionOperator.value === ExploreAnalyticsOperators.NOT_NULL
-    ) {
-      return true;
-    } else {
-      return condition.conditionValue.trim() !== '';
-    }
+    return false;
   }
-  return false;
+  return true;
 };
 
 export const getEventAndConditions = (
@@ -384,4 +377,3 @@ export const getWarmUpParameters = (
     },
   };
 };
-

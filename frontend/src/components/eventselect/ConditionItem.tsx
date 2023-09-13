@@ -12,15 +12,20 @@
  */
 
 import {
+  Autosuggest,
   Button,
-  Input,
   Select,
   SelectProps,
+  TokenGroup,
 } from '@cloudscape-design/components';
-import React from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ExploreAnalyticsOperators, MetadataValueType } from 'ts/explore-types';
-import { CategoryItemType, IConditionItemType } from './AnalyticsType';
+import {
+  CategoryItemType,
+  IAnalyticsItem,
+  IConditionItemType,
+} from './AnalyticsType';
 import EventItem from './EventItem';
 
 interface ConditionItemProps {
@@ -44,6 +49,33 @@ const ConditionItem: React.FC<ConditionItemProps> = (
     changeConditionOperator,
     changeConditionValue,
   } = props;
+
+  const [valueOptions, setValueOptions] = useState<SelectProps.Options>([]);
+  const [labelValues, setLabelValues] = useState<string[]>([]);
+  const [values, setValues] = useState<string[]>([]);
+  const [inputValue, setInputValue] = useState<string>('');
+
+  console.log('conditionOptions', conditionOptions);
+  const setConditionValues = (values: string[], labelValues: string[]) => {
+    setLabelValues(labelValues);
+    setValues(values);
+    changeConditionValue(values);
+  };
+
+  const setCurOptions = (item: IAnalyticsItem | null) => {
+    if (!item) {
+      return;
+    }
+    if (item.valueEnum) {
+      const options = item.valueEnum.map((i) => {
+        return {
+          value: i.value,
+          label: i.displayValue,
+        };
+      });
+      setValueOptions(options);
+    }
+  };
 
   const ANALYTICS_OPERATORS = {
     is_null: {
@@ -116,6 +148,7 @@ const ConditionItem: React.FC<ConditionItemProps> = (
           categoryOption={item.conditionOption}
           changeCurCategoryOption={(item) => {
             changeCurCategoryOption(item);
+            setCurOptions(item);
           }}
           categories={conditionOptions}
         />
@@ -139,16 +172,52 @@ const ConditionItem: React.FC<ConditionItemProps> = (
         {item.conditionOperator?.value !== ANALYTICS_OPERATORS.is_null.value &&
           item.conditionOperator?.value !==
             ANALYTICS_OPERATORS.is_not_null.value && (
-            <Input
-              disabled={!item.conditionOperator}
-              placeholder={
-                t('analytics:labels.conditionValueInputPlaceholder') ?? ''
-              }
-              value={item.conditionValue}
-              onChange={(e) => {
-                changeConditionValue(e.detail.value);
-              }}
-            />
+            <div className="condition-value">
+              <Autosuggest
+                onChange={({ detail }) => {
+                  setInputValue(detail.value);
+                }}
+                onSelect={({ detail }) => {
+                  setConditionValues(
+                    [...values, detail.value],
+                    [
+                      ...labelValues,
+                      detail.selectedOption?.label ?? detail.value,
+                    ]
+                  );
+                  setInputValue('');
+                }}
+                onKeyDown={({ detail }) => {
+                  if (detail.key === 'Enter') {
+                    setConditionValues(
+                      [...values, inputValue],
+                      [...labelValues, inputValue]
+                    );
+                    setInputValue('');
+                  }
+                }}
+                value={inputValue}
+                options={valueOptions}
+                ariaLabel="Autosuggest example with suggestions"
+                placeholder="Enter value"
+                empty="No matches found"
+              />
+              <TokenGroup
+                onDismiss={({ detail: { itemIndex } }) => {
+                  setConditionValues(
+                    [
+                      ...values.slice(0, itemIndex),
+                      ...values.slice(itemIndex + 1),
+                    ],
+                    [
+                      ...labelValues.slice(0, itemIndex),
+                      ...labelValues.slice(itemIndex + 1),
+                    ]
+                  );
+                }}
+                items={labelValues.map((value) => ({ label: value }))}
+              />
+            </div>
           )}
       </div>
       <div className="remove-item">
