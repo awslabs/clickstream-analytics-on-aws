@@ -3675,8 +3675,8 @@ describe('SQL Builder test', () => {
       END as target,
       a.user_pseudo_id as x_id
     from
-      data a
-      left join data b on a.user_pseudo_id = b.user_pseudo_id
+      data_final a
+      left join data_final b on a.user_pseudo_id = b.user_pseudo_id
       and a.session_id = b.session_id
       and a.step_2 = b.step_1
     where

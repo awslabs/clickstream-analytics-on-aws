@@ -1029,7 +1029,7 @@ export function buildNodePathAnalysisView(sqlParameters: SQLParameters) : string
         ELSE 'lost'
       END as target,
       ${sqlParameters.computeMethod != ExploreComputeMethod.EVENT_CNT ? 'a.user_pseudo_id' : 'a.event_id' } as x_id
-    from data a left join data b 
+    from data_final a left join data_final b 
       on a.user_pseudo_id = b.user_pseudo_id 
       ${joinSql}
       and a.step_2 = b.step_1
