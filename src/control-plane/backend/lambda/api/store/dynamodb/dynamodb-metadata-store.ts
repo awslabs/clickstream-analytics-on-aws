@@ -17,10 +17,9 @@ import {
   PutCommand,
   UpdateCommand,
   QueryCommandInput,
-  ScanCommandInput,
 } from '@aws-sdk/lib-dynamodb';
-import { analyticsDisplayTable, analyticsMetadataTable, invertedGSIName, prefixTimeGSIName } from '../../common/constants';
-import { docClient, query, scan } from '../../common/dynamodb-client';
+import { analyticsMetadataTable, invertedGSIName, prefixTimeGSIName } from '../../common/constants';
+import { docClient, query } from '../../common/dynamodb-client';
 import { MetadataParameterType, MetadataSource, MetadataValueType } from '../../common/explore-types';
 import { KeyVal } from '../../common/types';
 import { IMetadataDisplay, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute } from '../../model/metadata';
@@ -386,26 +385,34 @@ export class DynamoDbMetadataStore implements MetadataStore {
   };
 
   public async getDisplay(projectId: string, appId: string): Promise<IMetadataDisplay[]> {
-    const input: ScanCommandInput = {
-      TableName: analyticsDisplayTable,
+    const input: QueryCommandInput = {
+      TableName: analyticsMetadataTable,
+      IndexName: prefixTimeGSIName,
+      KeyConditionExpression: '#prefix= :prefix',
       FilterExpression: 'projectId = :projectId AND appId = :appId',
+      ExpressionAttributeNames: {
+        '#prefix': 'prefix',
+      },
       ExpressionAttributeValues: {
         ':projectId': projectId,
         ':appId': appId,
+        ':prefix': 'DISPLAY',
       },
     };
-    const records = await scan(input);
+    const records = await query(input);
     return records as IMetadataDisplay[];
   };
 
   public async updateDisplay(id: string, projectId: string, appId: string, description: string, displayName: string): Promise<void> {
-    let updateExpression = 'SET #updateAt= :u, projectId= :projectId, appId= :appId';
+    let updateExpression = 'SET #updateAt= :u, projectId= :projectId, appId= :appId, #prefix= :prefix';
     let expressionAttributeValues = new Map();
     let expressionAttributeNames = {} as KeyVal<string>;
     expressionAttributeValues.set(':u', Date.now());
     expressionAttributeValues.set(':projectId', projectId);
     expressionAttributeValues.set(':appId', appId);
+    expressionAttributeValues.set(':prefix', 'DISPLAY');
     expressionAttributeNames['#updateAt'] = 'updateAt';
+    expressionAttributeNames['#prefix'] = 'prefix';
     if (displayName) {
       updateExpression = `${updateExpression}, #displayName= :n`;
       expressionAttributeValues.set(':n', displayName);
@@ -416,9 +423,10 @@ export class DynamoDbMetadataStore implements MetadataStore {
       expressionAttributeValues.set(':d', description);
     }
     const params: UpdateCommand = new UpdateCommand({
-      TableName: analyticsDisplayTable,
+      TableName: analyticsMetadataTable,
       Key: {
         id: id,
+        createAt: 0,
       },
       UpdateExpression: updateExpression,
       ExpressionAttributeNames: expressionAttributeNames,

@@ -173,17 +173,6 @@ export class ClickStreamApiConstruct extends Construct {
       },
     });
 
-    const analyticsDisplayTable = new Table(this, 'ClickstreamAnalyticsDisplay', {
-      partitionKey: {
-        name: 'id',
-        type: AttributeType.STRING,
-      },
-      billingMode: BillingMode.PAY_PER_REQUEST,
-      removalPolicy: RemovalPolicy.DESTROY,
-      pointInTimeRecovery: true,
-      encryption: TableEncryption.AWS_MANAGED,
-    });
-
     const userTable = new Table(this, 'ClickstreamUser', {
       partitionKey: {
         name: 'uid',
@@ -399,7 +388,6 @@ export class ClickStreamApiConstruct extends Construct {
         DICTIONARY_TABLE_NAME: dictionaryTable.tableName,
         USER_TABLE_NAME: userTable.tableName,
         ANALYTICS_METADATA_TABLE_NAME: analyticsMetadataTable.tableName,
-        ANALYTICS_DISPLAY_TABLE_NAME: analyticsDisplayTable.tableName,
         STACK_ACTION_SATE_MACHINE: stackActionStateMachine.stateMachine.stateMachineArn,
         STACK_WORKFLOW_SATE_MACHINE: stackWorkflowStateMachine.stackWorkflowMachine.stateMachineArn,
         STACK_WORKFLOW_S3_BUCKET: props.stackWorkflowS3Bucket.bucketName,
@@ -427,7 +415,6 @@ export class ClickStreamApiConstruct extends Construct {
     dictionaryTable.grantReadWriteData(this.clickStreamApiFunction);
     clickStreamTable.grantReadWriteData(this.clickStreamApiFunction);
     analyticsMetadataTable.grantReadWriteData(this.clickStreamApiFunction);
-    analyticsDisplayTable.grantReadWriteData(this.clickStreamApiFunction);
     userTable.grantReadWriteData(this.clickStreamApiFunction);
     if (props.authProps?.authorizerTable) {
       props.authProps?.authorizerTable.grantReadWriteData(this.clickStreamApiFunction);

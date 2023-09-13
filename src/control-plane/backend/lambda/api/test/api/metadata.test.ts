@@ -21,7 +21,7 @@ import {
 import { mockClient } from 'aws-sdk-client-mock';
 import request from 'supertest';
 import { metadataEventExistedMock, MOCK_APP_ID, MOCK_EVENT_PARAMETER_NAME, MOCK_EVENT_NAME, MOCK_PROJECT_ID, MOCK_TOKEN, MOCK_USER_ATTRIBUTE_NAME, tokenMock } from './ddb-mock';
-import { analyticsDisplayTable } from '../../common/constants';
+import { analyticsMetadataTable, invertedGSIName, prefixTimeGSIName } from '../../common/constants';
 import { MetadataPlatform } from '../../common/explore-types';
 import { app, server } from '../../index';
 import 'aws-sdk-client-mock-jest';
@@ -32,12 +32,18 @@ describe('Metadata Event test', () => {
   beforeEach(() => {
     ddbMock.reset();
     // display data
-    ddbMock.on(ScanCommand, {
-      TableName: analyticsDisplayTable,
+    ddbMock.on(QueryCommand, {
+      TableName: analyticsMetadataTable,
+      IndexName: prefixTimeGSIName,
+      KeyConditionExpression: '#prefix= :prefix',
       FilterExpression: 'projectId = :projectId AND appId = :appId',
+      ExpressionAttributeNames: {
+        '#prefix': 'prefix',
+      },
       ExpressionAttributeValues: {
         ':projectId': MOCK_PROJECT_ID,
         ':appId': MOCK_APP_ID,
+        ':prefix': 'DISPLAY',
       },
     }).resolves({
       Items: [
@@ -247,7 +253,21 @@ describe('Metadata Event test', () => {
     expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 0);
   });
   it('Get metadata event by name', async () => {
-    ddbMock.on(QueryCommand).resolvesOnce({
+    ddbMock.on(QueryCommand, {
+      TableName: analyticsMetadataTable,
+      IndexName: invertedGSIName,
+      KeyConditionExpression: '#type = :type AND begins_with(#id, :id_start)',
+      FilterExpression: 'deleted = :d',
+      ExpressionAttributeNames: {
+        '#id': 'id',
+        '#type': 'type',
+      },
+      ExpressionAttributeValues: {
+        ':d': false,
+        ':type': `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}`,
+        ':id_start': `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}`,
+      },
+    }).resolves({
       Items: [
         {
           id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}`,
@@ -319,7 +339,6 @@ describe('Metadata Event test', () => {
     });
     let res = await request(app)
       .get(`/api/metadata/event/${MOCK_EVENT_NAME}?projectId=${MOCK_PROJECT_ID}&appId=${MOCK_APP_ID}`);
-    expect(ddbMock).toHaveReceivedCommandTimes(QueryCommand, 1);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({
@@ -807,12 +826,18 @@ describe('Metadata Event Attribute test', () => {
   beforeEach(() => {
     ddbMock.reset();
     // display data
-    ddbMock.on(ScanCommand, {
-      TableName: analyticsDisplayTable,
+    ddbMock.on(QueryCommand, {
+      TableName: analyticsMetadataTable,
+      IndexName: prefixTimeGSIName,
+      KeyConditionExpression: '#prefix= :prefix',
       FilterExpression: 'projectId = :projectId AND appId = :appId',
+      ExpressionAttributeNames: {
+        '#prefix': 'prefix',
+      },
       ExpressionAttributeValues: {
         ':projectId': MOCK_PROJECT_ID,
         ':appId': MOCK_APP_ID,
+        ':prefix': 'DISPLAY',
       },
     }).resolves({
       Items: [
@@ -1274,12 +1299,18 @@ describe('Metadata User Attribute test', () => {
   beforeEach(() => {
     ddbMock.reset();
     // display data
-    ddbMock.on(ScanCommand, {
-      TableName: analyticsDisplayTable,
+    ddbMock.on(QueryCommand, {
+      TableName: analyticsMetadataTable,
+      IndexName: prefixTimeGSIName,
+      KeyConditionExpression: '#prefix= :prefix',
       FilterExpression: 'projectId = :projectId AND appId = :appId',
+      ExpressionAttributeNames: {
+        '#prefix': 'prefix',
+      },
       ExpressionAttributeValues: {
         ':projectId': MOCK_PROJECT_ID,
         ':appId': MOCK_APP_ID,
+        ':prefix': 'DISPLAY',
       },
     }).resolves({
       Items: [

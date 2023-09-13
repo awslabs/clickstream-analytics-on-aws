@@ -547,34 +547,6 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
             Resource: [
               {
                 'Fn::GetAtt': [
-                  'testClickStreamALBApiClickstreamAnalyticsDisplayF1065F20',
-                  'Arn',
-                ],
-              },
-              {
-                Ref: 'AWS::NoValue',
-              },
-            ],
-          },
-          {
-            Action: [
-              'dynamodb:BatchGetItem',
-              'dynamodb:GetRecords',
-              'dynamodb:GetShardIterator',
-              'dynamodb:Query',
-              'dynamodb:GetItem',
-              'dynamodb:Scan',
-              'dynamodb:ConditionCheckItem',
-              'dynamodb:BatchWriteItem',
-              'dynamodb:PutItem',
-              'dynamodb:UpdateItem',
-              'dynamodb:DeleteItem',
-              'dynamodb:DescribeTable',
-            ],
-            Effect: 'Allow',
-            Resource: [
-              {
-                'Fn::GetAtt': [
                   'testClickStreamALBApiClickstreamUser54DFA2EE',
                   'Arn',
                 ],
