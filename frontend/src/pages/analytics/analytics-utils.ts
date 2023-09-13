@@ -31,7 +31,6 @@ import {
   OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN,
 } from 'ts/constant-ln';
 import {
-  ExploreAnalyticsOperators,
   ExploreConversionIntervalType,
   ExplorePathSessionDef,
   ExploreRelativeTimeUnit,
@@ -150,8 +149,10 @@ export const validEventAnalyticsItem = (item: IEventAnalyticsItem) => {
 };
 
 export const validConditionItemType = (condition: IConditionItemType) => {
-  return condition.conditionOption?.value !== null &&
-  condition.conditionOption?.value?.length !== 0;
+  return (
+    condition.conditionOption?.value !== null &&
+    condition.conditionOption?.value?.length !== 0
+  );
 };
 
 export const getEventAndConditions = (
