@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import path from 'path';
 import { DATA_PROCESSING_APPLICATION_NAME_PREFIX, TABLE_NAME_INGESTION } from '@aws/clickstream-base-lib';
 import { Database, Table } from '@aws-cdk/aws-glue-alpha';
 import { Fn, Stack, Duration } from 'aws-cdk-lib';
@@ -28,10 +29,10 @@ import {
   createInitPartitionCustomResource,
 } from './utils/custom-resource';
 import { createMetricsWidget } from './utils/metrics';
-import { uploadBuiltInSparkJarsAndFiles } from './utils/s3-asset';
 import { GlueUtil } from './utils/utils-glue';
 import { LambdaUtil } from './utils/utils-lambda';
 import { RoleUtil } from './utils/utils-role';
+import { uploadBuiltInJarsAndRemoteFiles } from '../common/s3-asset';
 import { createSGForEgressToAwsService } from '../common/sg';
 import { createDLQueue } from '../common/sqs';
 import { getShortIdOfStack } from '../common/stack';
@@ -108,14 +109,16 @@ export class DataPipelineConstruct extends Construct {
       entryPointJar,
       jars: builtInJars,
       files: builtInFiles,
-    } = uploadBuiltInSparkJarsAndFiles(
+    } = uploadBuiltInJarsAndRemoteFiles(
       scope,
+      path.resolve(__dirname, 'spark-etl'),
+      'spark-etl',
       this.props.pipelineS3Bucket,
       pluginPrefix,
     );
 
     const s3PathPluginJars = [builtInJars];
-    const s3PathPluginFiles = [builtInFiles];
+    const s3PathPluginFiles = [...builtInFiles];
 
     if (props.s3PathPluginJars) {
       // Custom resource - copies Data Processing jars and files to pipelineS3Bucket

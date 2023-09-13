@@ -21,22 +21,21 @@ import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { StateMachine } from 'aws-cdk-lib/aws-stepfunctions';
 import { Provider } from 'aws-cdk-lib/custom-resources';
 import { Construct } from 'constructs';
-import { ExistingRedshiftServerlessProps, ProvisionedRedshiftProps, WorkflowBucketInfo } from './model';
+import { BasicRedshiftServerlessProps, ProvisionedRedshiftProps, WorkflowBucketInfo } from './model';
 import { reportingViewsDef, schemaDefs } from './sql-def';
-import { createSQLExecutionStepFunctions } from './sql-exectution-stepfuncs';
+import { createSQLExecutionStepFunctions } from './sql-execution-workflow';
 import { createLambdaRole } from '../../common/lambda';
 import { attachListTagsPolicyForFunction } from '../../common/lambda/tags';
 import { SolutionNodejsFunction } from '../../private/function';
 import { RedshiftOdsTables } from '../analytics-on-redshift';
 
 export interface RedshiftSQLExecutionProps {
-  readonly serverlessRedshift?: ExistingRedshiftServerlessProps;
+  readonly serverlessRedshift?: BasicRedshiftServerlessProps;
   readonly provisionedRedshift?: ProvisionedRedshiftProps;
   readonly dataAPIRole: IRole;
   readonly codePath: string;
   readonly functionEntry: string;
   readonly workflowBucketInfo: WorkflowBucketInfo;
-  readonly projectId: string;
 }
 
 export abstract class RedshiftSQLExecution extends Construct {
@@ -74,9 +73,8 @@ export abstract class RedshiftSQLExecution extends Construct {
     this.crFunction = resource.fn;
     this.crProvider = resource.provider;
 
-    this.sqlExecutionStepFunctions.grantStartExecution(this.crFunction);
+    this.sqlExecutionStepFunctions?.grantStartExecution(this.crFunction);
     resource.cr.node.addDependency(this.sqlExecutionStepFunctions);
-
   }
 
   protected abstract getCustomResourceProperties(props: RedshiftSQLExecutionProps): { [key: string]: any };
@@ -143,7 +141,6 @@ export abstract class RedshiftSQLExecution extends Construct {
         STATE_MACHINE_ARN: this.sqlExecutionStepFunctions.stateMachineArn,
         S3_BUCKET: props.workflowBucketInfo.s3Bucket.bucketName,
         S3_PREFIX: props.workflowBucketInfo.prefix,
-        PROJECT_ID: props.projectId,
       },
       role: createLambdaRole(this, 'RedshiftSQLExecutionRole', false,
         this.additionalPolicies()),
@@ -151,7 +148,7 @@ export abstract class RedshiftSQLExecution extends Construct {
     });
 
     attachListTagsPolicyForFunction(this, fnId, fn);
-    props.workflowBucketInfo.s3Bucket.grantWrite(fn, `${props.workflowBucketInfo.prefix}*`);
+    props.workflowBucketInfo?.s3Bucket.grantWrite(fn, `${props.workflowBucketInfo.prefix}*`);
 
     return fn;
   }
