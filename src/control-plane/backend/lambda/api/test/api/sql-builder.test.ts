@@ -3650,6 +3650,7 @@ describe('SQL Builder test', () => {
           node,
           ROW_NUMBER() OVER (
             PARTITION BY
+              user_pseudo_id,
               session_id
             ORDER BY
               step_1 asc,
@@ -3657,6 +3658,7 @@ describe('SQL Builder test', () => {
           ) as step_1,
           ROW_NUMBER() OVER (
             PARTITION BY
+              user_pseudo_id,
               session_id
             ORDER BY
               step_1 asc,
@@ -3669,7 +3671,7 @@ describe('SQL Builder test', () => {
       a.node || '_' || a.step_1 as source,
       CASE
         WHEN b.node is not null THEN b.node || '_' || a.step_2
-        ELSE 'lost' || a.step_2
+        ELSE 'lost'
       END as target,
       a.user_pseudo_id as x_id
     from

@@ -1005,6 +1005,7 @@ export function buildNodePathAnalysisView(sqlParameters: SQLParameters) : string
         node,
         ROW_NUMBER() OVER (
           PARTITION BY
+            user_pseudo_id,
             session_id
           ORDER BY
             step_1 asc,
@@ -1012,6 +1013,7 @@ export function buildNodePathAnalysisView(sqlParameters: SQLParameters) : string
         ) as step_1,
         ROW_NUMBER() OVER (
           PARTITION BY
+            user_pseudo_id,
             session_id
           ORDER BY
             step_1 asc,
@@ -1024,7 +1026,7 @@ export function buildNodePathAnalysisView(sqlParameters: SQLParameters) : string
       a.node || '_' || a.step_1 as source,
       CASE 
         WHEN b.node is not null THEN b.node || '_' || a.step_2
-        ELSE 'lost' || a.step_2
+        ELSE 'lost'
       END as target,
       ${sqlParameters.computeMethod != ExploreComputeMethod.EVENT_CNT ? 'a.user_pseudo_id' : 'a.event_id' } as x_id
     from data a left join data b 
