@@ -133,152 +133,162 @@
     },
     {
       "name": "@aws-sdk/client-acm",
-      "version": "^3.405.0",
+      "version": "^3.462.0",
       "type": "runtime"
     },
     {
       "name": "@aws-sdk/client-cloudformation",
-      "version": "^3.405.0",
+      "version": "^3.462.0",
       "type": "runtime"
     },
     {
       "name": "@aws-sdk/client-cloudwatch-events",
-      "version": "^3.405.0",
+      "version": "^3.462.0",
       "type": "runtime"
     },
     {
       "name": "@aws-sdk/client-cloudwatch",
-      "version": "^3.405.0",
+      "version": "^3.462.0",
       "type": "runtime"
     },
     {
       "name": "@aws-sdk/client-dynamodb",
-      "version": "^3.405.0",
+      "version": "^3.462.0",
       "type": "runtime"
     },
     {
       "name": "@aws-sdk/client-ec2",
-      "version": "^3.405.0",
+      "version": "^3.462.0",
       "type": "runtime"
     },
     {
       "name": "@aws-sdk/client-ecs",
-      "version": "^3.405.0",
+      "version": "^3.462.0",
       "type": "runtime"
     },
     {
       "name": "@aws-sdk/client-elastic-load-balancing-v2",
-      "version": "^3.405.0",
+      "version": "^3.462.0",
       "type": "runtime"
     },
     {
       "name": "@aws-sdk/client-emr-serverless",
-      "version": "^3.405.0",
+      "version": "^3.462.0",
       "type": "runtime"
     },
     {
       "name": "@aws-sdk/client-glue",
-      "version": "^3.405.0",
+      "version": "^3.462.0",
       "type": "runtime"
     },
     {
       "name": "@aws-sdk/client-iam",
-      "version": "^3.405.0",
+      "version": "^3.462.0",
       "type": "runtime"
     },
     {
       "name": "@aws-sdk/client-kafka",
-      "version": "^3.405.0",
+      "version": "^3.462.0",
       "type": "runtime"
     },
     {
       "name": "@aws-sdk/client-kafkaconnect",
-      "version": "^3.405.0",
+      "version": "^3.462.0",
+      "type": "runtime"
+    },
+    {
+      "name": "@aws-sdk/client-kinesis-analytics-v2",
+      "version": "^3.462.0",
+      "type": "runtime"
+    },
+    {
+      "name": "@aws-sdk/client-kinesis",
+      "version": "^3.462.0",
       "type": "runtime"
     },
     {
       "name": "@aws-sdk/client-lambda",
-      "version": "^3.405.0",
+      "version": "^3.462.0",
       "type": "runtime"
     },
     {
       "name": "@aws-sdk/client-quicksight",
-      "version": "^3.405.0",
+      "version": "^3.462.0",
       "type": "runtime"
     },
     {
       "name": "@aws-sdk/client-redshift-data",
-      "version": "^3.405.0",
+      "version": "^3.462.0",
       "type": "runtime"
     },
     {
       "name": "@aws-sdk/client-redshift-serverless",
-      "version": "^3.405.0",
+      "version": "^3.462.0",
       "type": "runtime"
     },
     {
       "name": "@aws-sdk/client-redshift",
-      "version": "^3.405.0",
+      "version": "^3.462.0",
       "type": "runtime"
     },
     {
       "name": "@aws-sdk/client-route-53",
-      "version": "^3.405.0",
+      "version": "^3.462.0",
       "type": "runtime"
     },
     {
       "name": "@aws-sdk/client-s3",
-      "version": "^3.405.0",
+      "version": "^3.462.0",
       "type": "runtime"
     },
     {
       "name": "@aws-sdk/client-secrets-manager",
-      "version": "^3.405.0",
+      "version": "^3.462.0",
       "type": "runtime"
     },
     {
       "name": "@aws-sdk/client-sfn",
-      "version": "^3.405.0",
+      "version": "^3.462.0",
       "type": "runtime"
     },
     {
       "name": "@aws-sdk/client-sns",
-      "version": "^3.405.0",
+      "version": "^3.462.0",
       "type": "runtime"
     },
     {
       "name": "@aws-sdk/client-sqs",
-      "version": "^3.405.0",
+      "version": "^3.462.0",
       "type": "runtime"
     },
     {
       "name": "@aws-sdk/client-ssm",
-      "version": "^3.405.0",
+      "version": "^3.462.0",
       "type": "runtime"
     },
     {
       "name": "@aws-sdk/client-sts",
-      "version": "^3.405.0",
+      "version": "^3.462.0",
       "type": "runtime"
     },
     {
       "name": "@aws-sdk/credential-providers",
-      "version": "^3.398.0",
+      "version": "^3.462.0",
       "type": "runtime"
     },
     {
       "name": "@aws-sdk/lib-dynamodb",
-      "version": "^3.405.0",
+      "version": "^3.462.0",
       "type": "runtime"
     },
     {
       "name": "@aws-sdk/types",
-      "version": "^3.398.0",
+      "version": "^3.462.0",
       "type": "runtime"
     },
     {
       "name": "@aws-sdk/util-dynamodb",
-      "version": "^3.398.0",
+      "version": "^3.462.0",
       "type": "runtime"
     },
     {

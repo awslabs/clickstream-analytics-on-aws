@@ -45,6 +45,7 @@ import {
   S3_PREFIX_PATTERN,
   SERVICE_CATALOG_APPREGISTRY_ARN_PATTERN,
 } from './constant';
+import { REDSHIFT_MODE } from './model';
 
 export enum SubnetParameterType {
   'List',
@@ -463,6 +464,16 @@ export class Parameters {
       default: '',
       allowedPattern: `^(|${SERVICE_CATALOG_APPREGISTRY_ARN_PATTERN})$`,
       constraintDescription: `Service Catalog AppRegistry application arn parameter can either match pattern ${SERVICE_CATALOG_APPREGISTRY_ARN_PATTERN} or be empty`,
+    });
+  }
+
+  public static createRedshiftModeParameter(scope: Construct, id?: string, props: ParameterProps ={}) : CfnParameter {
+    return new CfnParameter(scope, id ?? 'RedshiftMode', {
+      description: 'Select Redshift cluster mode',
+      type: 'String',
+      default: REDSHIFT_MODE.NEW_SERVERLESS,
+      allowedValues: [REDSHIFT_MODE.NEW_SERVERLESS, REDSHIFT_MODE.SERVERLESS, REDSHIFT_MODE.PROVISIONED],
+      ...props,
     });
   }
 }

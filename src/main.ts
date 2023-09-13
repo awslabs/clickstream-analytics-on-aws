@@ -30,6 +30,7 @@ import { KafkaS3SinkConnectorStack } from './kafka-s3-connector-stack';
 import { MetricsStack } from './metrics-stack';
 import { SolutionNodejsFunction } from './private/function';
 import { ServiceCatalogAppregistryStack } from './service-catalog-appregistry-stack';
+import { StreamingIngestionMainStack } from './streaming-ingestion-stack';
 
 const app = new App();
 
@@ -217,6 +218,16 @@ stackSuppressions([
 new DataModelingAthenaStack(app, app.node.tryGetContext('modelAthenaStackName') ?? 'data-modeling-athena-stack', {
   synthesizer: synthesizer(),
 });
+
+stackSuppressions([
+  new StreamingIngestionMainStack(app, app.node.tryGetContext('streamingIngestionStackName') ?? 'streaming-ingestion-stack', {
+    synthesizer: synthesizer(),
+  }),
+], [
+  { id: 'AwsSolutions-IAM4', reason: 'Caused by CDK built-in Lambda Redshift/StreamingIngestionAssociateRole used managed role AWSLambdaBasicExecutionRole to enable S3 bucket EventBridge notification' },
+  { id: 'AwsSolutions-IAM5', reason: 'Caused by CDK built-in Lambda Redshift/StreamingIngestionAssociateRole with wildcard policy' },
+  { id: 'AwsSolutions-L1', reason: 'Caused by CDK built-in custom resource provider not using latest Nodejs runtime' },
+]);
 
 stackSuppressions([
   new DataReportingQuickSightStack(app, app.node.tryGetContext('reportingStackName') ?? 'data-reporting-quicksight-stack', {

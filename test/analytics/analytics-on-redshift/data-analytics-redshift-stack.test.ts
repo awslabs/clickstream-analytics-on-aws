@@ -338,7 +338,7 @@ describe('DataAnalyticsRedshiftStack common parameter test', () => {
     expect(cfnInterface.ParameterGroups).toBeDefined();
 
     const paramCount = Object.keys(cfnInterface.ParameterLabels).length;
-    expect(paramCount).toEqual(33);
+    expect(paramCount).toEqual(34);
   });
 
   test('Conditions for nested redshift stacks are created as expected', () => {
@@ -467,6 +467,7 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
       'ClearExpiredEventsRetentionRangeDays',
       'EMRServerlessApplicationId',
       'DataProcessingCronOrRateExpression',
+      'AssociateRoleTimeout',
     ];
     const templateParams = Object.keys(nestStack.Properties.Parameters).map(
       (pk) => {
@@ -631,6 +632,7 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
       },
       emrServerlessApplicationId: 'emrServerlessApplicationId001',
       dataProcessingCronOrRateExpression: 'cron(0 1 * * ? *)',
+      associateRoleTimeout: 120,
     };
     let error = false;
     try {
@@ -684,6 +686,7 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
       },
       emrServerlessApplicationId: 'emrServerlessApplicationId001',
       dataProcessingCronOrRateExpression: 'cron(0 1 * * ? *)',
+      associateRoleTimeout: 120,
     };
     let error = false;
     try {
@@ -724,6 +727,7 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
       },
       emrServerlessApplicationId: 'emrServerlessApplicationId001',
       dataProcessingCronOrRateExpression: 'cron(0 1 * * ? *)',
+      associateRoleTimeout: 120,
     };
 
     const nestedStack = new RedshiftAnalyticsStack(stack, testId + 'redshiftAnalytics' + count++, nestStackProps);

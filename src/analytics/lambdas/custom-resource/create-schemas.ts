@@ -54,7 +54,6 @@ const sfnClient = new SFNClient({
 const STATE_MACHINE_ARN = process.env.STATE_MACHINE_ARN!;
 const S3_BUCKET = process.env.S3_BUCKET!;
 const S3_PREFIX = process.env.S3_PREFIX!;
-const PROJECT_ID = process.env.PROJECT_ID!;
 
 export const physicalIdPrefix = 'create-redshift-db-schemas-custom-resource-';
 export const handler: CdkCustomResourceHandler = async (event: CloudFormationCustomResourceEvent, context: Context) => {
@@ -129,14 +128,14 @@ async function onCreateOrUpdate(event: CdkCustomResourceEvent, biUsername: strin
   }
 
   // 2. create schemas in Redshift for applications
-  const schmeaSqlsByAppId: Map<string, string[]> = getCreateOrUpdateSchemasSQL(newAddedAppIdList, props, biUsername);
+  const schemaSqlsByAppId: Map<string, string[]> = getCreateOrUpdateSchemasSQL(newAddedAppIdList, props, biUsername);
 
   // 3. create views for reporting
   const viewSqlsByAppId: Map<string, string[]> = getCreateOrUpdateViewForReportingSQL(newAddedAppIdList, props, biUsername);
 
-  const allSqlsByAppId = mergeMap(schmeaSqlsByAppId, viewSqlsByAppId);
+  const allSqlsByAppId = mergeMap(schemaSqlsByAppId, viewSqlsByAppId);
 
-  await createSchemasInRedshiftAsync(allSqlsByAppId);
+  await createSchemasInRedshiftAsync(props.projectId, allSqlsByAppId);
 
 }
 
@@ -373,11 +372,11 @@ const createDatabaseBIUser = async (redshiftClient: RedshiftDataClient, credenti
   }
 };
 
-const createSchemasInRedshiftAsync = async (sqlStatementsByApp: Map<string, string[]>) => {
+const createSchemasInRedshiftAsync = async (projectId: string, sqlStatementsByApp: Map<string, string[]>) => {
 
   const createSchemasInRedshiftForApp = async (appId: string, sqlStatements: string[]) => {
     logger.info(`creating schema in serverless Redshift for ${appId}`);
-    await executeSqlsByStateMachine(sqlStatements, appId);
+    await executeSqlsByStateMachine(sqlStatements, projectId, appId);
   };
 
   for (const [appId, sqlStatements] of sqlStatementsByApp) {
@@ -387,7 +386,7 @@ const createSchemasInRedshiftAsync = async (sqlStatementsByApp: Map<string, stri
 
 };
 
-const executeSqlsByStateMachine = async (sqlStatements: string[], appId: string) => {
+const executeSqlsByStateMachine = async (sqlStatements: string[], projectId: string, appId: string) => {
 
   const s3Paths = [];
   let index = 0;
@@ -396,7 +395,7 @@ const executeSqlsByStateMachine = async (sqlStatements: string[], appId: string)
   for (const sqlStatement of sqlStatements) {
     const bucketName = S3_BUCKET;
     const fileName = `${appId}-${timestamp}/${index++}.sql`;
-    const key = `${S3_PREFIX}tmp/${PROJECT_ID}/sqls/${fileName}`;
+    const key = `${S3_PREFIX}tmp/${projectId}/sqls/${fileName}`;
 
     await putStringToS3(sqlStatement, bucketName, key);
 

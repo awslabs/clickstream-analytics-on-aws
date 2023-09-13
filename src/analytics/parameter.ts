@@ -214,12 +214,7 @@ export function createStackParameters(scope: Construct): {
   };
   params: RedshiftAnalyticsStackProps;
 } {
-  const redshiftModeParam = new CfnParameter(scope, 'RedshiftMode', {
-    description: 'Select Redshift cluster mode',
-    type: 'String',
-    default: REDSHIFT_MODE.NEW_SERVERLESS,
-    allowedValues: [REDSHIFT_MODE.NEW_SERVERLESS, REDSHIFT_MODE.SERVERLESS, REDSHIFT_MODE.PROVISIONED],
-  });
+  const redshiftModeParam = Parameters.createRedshiftModeParameter(scope, 'RedshiftMode');
 
   const networkProps = Parameters.createNetworkParameters(scope, false, SubnetParameterType.String);
 
