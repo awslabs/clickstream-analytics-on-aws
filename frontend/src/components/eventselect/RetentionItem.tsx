@@ -11,18 +11,44 @@
  *  and limitations under the License.
  */
 
-import { SelectProps } from '@cloudscape-design/components';
+import { Button, SelectProps } from '@cloudscape-design/components';
+import { identity } from 'lodash';
 import React from 'react';
-import { CategoryItemType } from './AnalyticsType';
+import {
+  CategoryItemType,
+  ERelationShip,
+  IAnalyticsItem,
+  IConditionItemType,
+} from './AnalyticsType';
+import ConditionItem from './ConditionItem';
 import EventItem from './EventItem';
+import RelationAnd from './comps/RelationAnd';
+import RelationOr from './comps/RelationOr';
 
 interface RetentionItemProps {
   label: string;
   value: SelectProps.Option | null;
+  conditionOptions: CategoryItemType[];
+  conditionList: IConditionItemType[];
+  conditionRelationShip: ERelationShip;
+  enableChangeRelation: boolean;
   attributeValue: SelectProps.Option | null;
   eventOptionList: CategoryItemType[];
   attributeOptionList: CategoryItemType[];
   showRelation: boolean;
+  disableAddCondition?: boolean;
+  addNewConditionItem: () => void;
+  removeEventCondition: (conditionIndex: number) => void;
+  changeCurRelationShip: (relationShip: ERelationShip) => void;
+  changeConditionOperator: (
+    conditionIndex: number,
+    operator: SelectProps.Option | null
+  ) => void;
+  changeConditionCategoryOption: (
+    conditionIndex: number,
+    category: IAnalyticsItem | null
+  ) => void;
+  changeConditionValue: (conditionIndex: number, value: any) => void;
   changeEventOption: (event: SelectProps.Option | null) => void;
   changeRelationAttributeOption: (attribute: SelectProps.Option | null) => void;
 }
@@ -33,10 +59,21 @@ const RetentionItem: React.FC<RetentionItemProps> = (
   const {
     label,
     value,
+    conditionOptions,
+    conditionList,
+    conditionRelationShip,
+    enableChangeRelation,
     attributeValue,
     eventOptionList,
     attributeOptionList,
     showRelation,
+    disableAddCondition,
+    addNewConditionItem,
+    changeCurRelationShip,
+    removeEventCondition,
+    changeConditionOperator,
+    changeConditionCategoryOption,
+    changeConditionValue,
     changeEventOption,
     changeRelationAttributeOption,
   } = props;
@@ -55,6 +92,65 @@ const RetentionItem: React.FC<RetentionItemProps> = (
             isMultiSelect={false}
             categories={eventOptionList}
           />
+        </div>
+        {!disableAddCondition && (
+          <div className="ml-5">
+            <Button
+              onClick={() => {
+                addNewConditionItem();
+              }}
+              variant="link"
+              iconName="add-plus"
+            />
+          </div>
+        )}
+      </div>
+      <div className="flex">
+        {conditionList.length > 1 &&
+          conditionRelationShip === ERelationShip.AND && (
+            <RelationAnd
+              enableChangeRelation={enableChangeRelation}
+              onClick={() => {
+                enableChangeRelation &&
+                  changeCurRelationShip &&
+                  changeCurRelationShip(ERelationShip.OR);
+              }}
+            />
+          )}
+        {conditionList.length > 1 &&
+          conditionRelationShip === ERelationShip.OR && (
+            <RelationOr
+              enableChangeRelation={enableChangeRelation}
+              onClick={() => {
+                enableChangeRelation &&
+                  changeCurRelationShip &&
+                  changeCurRelationShip(ERelationShip.AND);
+              }}
+            />
+          )}
+        <div className="cs-analytics-param-events">
+          {conditionList.length > 0 &&
+            conditionList.map((cElement, cIndex) => {
+              return (
+                <ConditionItem
+                  item={cElement}
+                  conditionOptions={conditionOptions}
+                  key={identity(cIndex)}
+                  removeConditionItem={() => {
+                    removeEventCondition(cIndex);
+                  }}
+                  changeCurCategoryOption={(category) => {
+                    changeConditionCategoryOption(cIndex, category);
+                  }}
+                  changeConditionOperator={(item) => {
+                    changeConditionOperator(cIndex, item);
+                  }}
+                  changeConditionValue={(value) => {
+                    changeConditionValue(cIndex, value);
+                  }}
+                />
+              );
+            })}
         </div>
       </div>
       <div>

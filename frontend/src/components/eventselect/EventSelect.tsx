@@ -29,6 +29,7 @@ import RelationOr from './comps/RelationOr';
 interface EventsSelectProps {
   data: IEventAnalyticsItem[];
   eventOptionList: CategoryItemType[];
+  maxSelectNum?: number;
   disableAddCondition?: boolean;
   addEventButtonLabel: string;
   addNewEventAnalyticsItem: () => void;
@@ -66,6 +67,7 @@ const EventsSelect: React.FC<EventsSelectProps> = (
   const {
     data,
     eventOptionList,
+    maxSelectNum,
     disableAddCondition,
     addEventButtonLabel,
     addNewEventAnalyticsItem,
@@ -188,7 +190,11 @@ const EventsSelect: React.FC<EventsSelectProps> = (
         );
       })}
       <div className="mt-10">
-        <Button iconName="add-plus" onClick={addNewEventAnalyticsItem}>
+        <Button
+          iconName="add-plus"
+          onClick={addNewEventAnalyticsItem}
+          disabled={data.length >= (maxSelectNum ?? 10)}
+        >
           {addEventButtonLabel}
         </Button>
       </div>

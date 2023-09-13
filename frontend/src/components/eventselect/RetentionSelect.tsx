@@ -17,8 +17,9 @@ import React from 'react';
 import { ALPHABETS } from 'ts/const';
 import {
   CategoryItemType,
+  ERelationShip,
+  IAnalyticsItem,
   IRetentionAnalyticsItem,
-  MOCK_ATTRIBUTE_OPTION_LIST,
 } from './AnalyticsType';
 import RetentionItem from './RetentionItem';
 
@@ -26,6 +27,46 @@ interface RetentionSelectProps {
   data: IRetentionAnalyticsItem[];
   eventOptionList: CategoryItemType[];
   addEventButtonLabel: string;
+  maxSelectNum?: number;
+  addStartNewConditionItem: (index: number) => void;
+  addRevisitNewConditionItem: (index: number) => void;
+  changeStartRelationShip: (index: number, relationShip: ERelationShip) => void;
+  changeRevisitRelationShip: (
+    index: number,
+    relationShip: ERelationShip
+  ) => void;
+  removeStartEventCondition: (index: number, conditionIndex: number) => void;
+  removeRevisitEventCondition: (index: number, conditionIndex: number) => void;
+  changeStartConditionCategoryOption: (
+    eventIndex: number,
+    conditionIndex: number,
+    category: IAnalyticsItem | null
+  ) => void;
+  changeRevisitConditionCategoryOption: (
+    eventIndex: number,
+    conditionIndex: number,
+    category: IAnalyticsItem | null
+  ) => void;
+  changeStartConditionOperator: (
+    index: number,
+    conditionIndex: number,
+    value: SelectProps.Option | null
+  ) => void;
+  changeRevisitConditionOperator: (
+    index: number,
+    conditionIndex: number,
+    value: SelectProps.Option | null
+  ) => void;
+  changeStartConditionValue: (
+    index: number,
+    conditionIndex: number,
+    value: any
+  ) => void;
+  changeRevisitConditionValue: (
+    index: number,
+    conditionIndex: number,
+    value: any
+  ) => void;
   addNewEventAnalyticsItem: () => void;
   removeRetentionEventItem: (index: number) => void;
   changeStartEvent: (index: number, event: SelectProps.Option | null) => void;
@@ -47,6 +88,19 @@ const RetentionSelect: React.FC<RetentionSelectProps> = (
     data,
     eventOptionList,
     addEventButtonLabel,
+    maxSelectNum,
+    addStartNewConditionItem,
+    addRevisitNewConditionItem,
+    changeStartRelationShip,
+    changeRevisitRelationShip,
+    removeStartEventCondition,
+    removeRevisitEventCondition,
+    changeStartConditionCategoryOption,
+    changeRevisitConditionCategoryOption,
+    changeStartConditionOperator,
+    changeRevisitConditionOperator,
+    changeStartConditionValue,
+    changeRevisitConditionValue,
     addNewEventAnalyticsItem,
     removeRetentionEventItem,
     changeStartEvent,
@@ -92,35 +146,95 @@ const RetentionSelect: React.FC<RetentionSelectProps> = (
               label="起始"
               showRelation={element.showRelation}
               eventOptionList={eventOptionList}
-              attributeOptionList={MOCK_ATTRIBUTE_OPTION_LIST}
+              attributeOptionList={
+                element.startEventRelationAttributeOptions ?? []
+              }
               value={element.startEventOption}
               attributeValue={element.startEventRelationAttribute}
+              addNewConditionItem={() => {
+                addStartNewConditionItem(index);
+              }}
+              changeCurRelationShip={(relationShip) => {
+                changeStartRelationShip(index, relationShip);
+              }}
               changeEventOption={(option) => {
                 changeStartEvent(index, option);
               }}
               changeRelationAttributeOption={(attribute) => {
                 changeStartRelativeAttribute(index, attribute);
               }}
+              conditionOptions={element.startConditionOptions}
+              conditionList={element.startConditionList}
+              conditionRelationShip={element.startConditionRelationShip}
+              enableChangeRelation={true}
+              removeEventCondition={(conditionIndex) => {
+                removeStartEventCondition(index, conditionIndex);
+              }}
+              changeConditionOperator={(conditionIndex, value) => {
+                changeStartConditionOperator(index, conditionIndex, value);
+              }}
+              changeConditionCategoryOption={(conditionIndex, value) => {
+                changeStartConditionCategoryOption(
+                  index,
+                  conditionIndex,
+                  value
+                );
+              }}
+              changeConditionValue={(conditionIndex, value) => {
+                changeStartConditionValue(index, conditionIndex, value);
+              }}
             />
             <RetentionItem
               label="回访"
               showRelation={element.showRelation}
               eventOptionList={eventOptionList}
-              attributeOptionList={MOCK_ATTRIBUTE_OPTION_LIST}
+              attributeOptionList={
+                element.revisitEventRelationAttributeOptions ?? []
+              }
               value={element.revisitEventOption}
               attributeValue={element.revisitEventRelationAttribute}
+              addNewConditionItem={() => {
+                addRevisitNewConditionItem(index);
+              }}
+              changeCurRelationShip={(relationShip) => {
+                changeRevisitRelationShip(index, relationShip);
+              }}
               changeEventOption={(option) => {
                 changeRevisitEvent(index, option);
               }}
               changeRelationAttributeOption={(attribute) => {
                 changeRevisitRelativeAttribute(index, attribute);
               }}
+              conditionOptions={element.revisitConditionOptions}
+              conditionList={element.revisitConditionList}
+              conditionRelationShip={element.revisitConditionRelationShip}
+              enableChangeRelation={true}
+              removeEventCondition={(conditionIndex) => {
+                removeRevisitEventCondition(index, conditionIndex);
+              }}
+              changeConditionOperator={(conditionIndex, value) => {
+                changeRevisitConditionOperator(index, conditionIndex, value);
+              }}
+              changeConditionCategoryOption={(conditionIndex, value) => {
+                changeRevisitConditionCategoryOption(
+                  index,
+                  conditionIndex,
+                  value
+                );
+              }}
+              changeConditionValue={(conditionIndex, value) => {
+                changeRevisitConditionValue(index, conditionIndex, value);
+              }}
             />
           </div>
         );
       })}
       <div className="mt-5">
-        <Button iconName="add-plus" onClick={addNewEventAnalyticsItem}>
+        <Button
+          iconName="add-plus"
+          onClick={addNewEventAnalyticsItem}
+          disabled={data.length >= (maxSelectNum ?? 5)}
+        >
           {addEventButtonLabel}
         </Button>
       </div>

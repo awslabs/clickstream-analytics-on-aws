@@ -62,6 +62,14 @@ export interface IEventAnalyticsItem {
 export interface IRetentionAnalyticsItem {
   startEventOption: IAnalyticsItem | null;
   revisitEventOption: IAnalyticsItem | null;
+  startConditionOptions: CategoryItemType[];
+  startConditionList: IConditionItemType[];
+  startConditionRelationShip: ERelationShip;
+  revisitConditionOptions: CategoryItemType[];
+  revisitConditionList: IConditionItemType[];
+  revisitConditionRelationShip: ERelationShip;
+  startEventRelationAttributeOptions: CategoryItemType[] | null;
+  revisitEventRelationAttributeOptions: CategoryItemType[] | null;
   startEventRelationAttribute: IAnalyticsItem | null;
   revisitEventRelationAttribute: IAnalyticsItem | null;
   showRelation: boolean;
@@ -82,6 +90,14 @@ export const DEFAULT_EVENT_ITEM = {
 export const DEFAULT_RETENTION_ITEM = {
   startEventOption: null,
   revisitEventOption: null,
+  startConditionOptions: [],
+  startConditionList: [],
+  startConditionRelationShip: ERelationShip.AND,
+  revisitConditionOptions: [],
+  revisitConditionList: [],
+  revisitConditionRelationShip: ERelationShip.AND,
+  startEventRelationAttributeOptions: null,
+  revisitEventRelationAttributeOptions: null,
   startEventRelationAttribute: null,
   revisitEventRelationAttribute: null,
   showRelation: false,

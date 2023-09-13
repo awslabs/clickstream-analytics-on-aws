@@ -19,6 +19,7 @@ import {
   CategoryItemType,
   IConditionItemType,
   IEventAnalyticsItem,
+  IRetentionAnalyticsItem,
   SegmentationFilterDataType,
 } from 'components/eventselect/AnalyticsType';
 import i18n from 'i18n';
@@ -145,6 +146,15 @@ export const validEventAnalyticsItem = (item: IEventAnalyticsItem) => {
   return (
     item.selectedEventOption !== null &&
     item.selectedEventOption.value?.trim() !== ''
+  );
+};
+
+export const validIRetentionAnalyticsItem = (item: IRetentionAnalyticsItem) => {
+  return (
+    item.startEventOption !== null &&
+    item.startEventOption.value?.trim() !== '' &&
+    item.revisitEventOption !== null &&
+    item.revisitEventOption.value?.trim() !== ''
   );
 };
 
