@@ -147,6 +147,7 @@ const ConditionItem: React.FC<ConditionItemProps> = (
     <div className="cs-analytics-condition-item">
       <div className="condition-event">
         <EventItem
+          placeholder={t('analytics:labels.attributeSelectPlaceholder') ?? ''}
           categoryOption={item.conditionOption}
           changeCurCategoryOption={(item) => {
             changeCurCategoryOption(item);
@@ -158,7 +159,7 @@ const ConditionItem: React.FC<ConditionItemProps> = (
       <div className="condition-select">
         <Select
           disabled={!item.conditionOption}
-          placeholder="Operator"
+          placeholder={t('analytics:labels.operatorSelectPlaceholder') ?? ''}
           selectedOption={item.conditionOperator}
           onChange={(e) => {
             changeConditionOperator(e.detail.selectedOption);

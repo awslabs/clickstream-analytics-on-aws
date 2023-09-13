@@ -14,6 +14,7 @@
 import { Button, SelectProps, Toggle } from '@cloudscape-design/components';
 import { identity } from 'lodash';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { ALPHABETS } from 'ts/const';
 import {
   CategoryItemType,
@@ -109,6 +110,7 @@ const RetentionSelect: React.FC<RetentionSelectProps> = (
     changeRevisitRelativeAttribute,
     changeShowRelation,
   } = props;
+  const { t } = useTranslation();
 
   return (
     <div className="cs-analytics-dropdown">
@@ -125,7 +127,7 @@ const RetentionSelect: React.FC<RetentionSelectProps> = (
                     }}
                     checked={element.showRelation}
                   >
-                    关联属性
+                    {t('analytics:labels.associatedProperties')}
                   </Toggle>
 
                   <div className="ml-10">
@@ -143,7 +145,7 @@ const RetentionSelect: React.FC<RetentionSelectProps> = (
               </div>
             </div>
             <RetentionItem
-              label="起始"
+              label={t('analytics:labels.retentionStart')}
               showRelation={element.showRelation}
               eventOptionList={eventOptionList}
               attributeOptionList={
@@ -185,7 +187,7 @@ const RetentionSelect: React.FC<RetentionSelectProps> = (
               }}
             />
             <RetentionItem
-              label="回访"
+              label={t('analytics:labels.retentionRevisit')}
               showRelation={element.showRelation}
               eventOptionList={eventOptionList}
               attributeOptionList={

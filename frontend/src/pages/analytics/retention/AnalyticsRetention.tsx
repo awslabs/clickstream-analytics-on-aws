@@ -29,14 +29,12 @@ import {
   getMetadataParametersList,
   getMetadataUserAttributesList,
   getPipelineDetailByProjectId,
-  previewEvent,
   warmup,
 } from 'apis/analytics';
 import Loading from 'components/common/Loading';
 import {
   CategoryItemType,
   DEFAULT_CONDITION_DATA,
-  DEFAULT_EVENT_ITEM,
   DEFAULT_RETENTION_ITEM,
   ERelationShip,
   INIT_SEGMENTATION_DATA,
@@ -50,23 +48,15 @@ import { cloneDeep } from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { COMMON_ALERT_TYPE } from 'ts/const';
 import {
-  ExploreComputeMethod,
   ExploreGroupColumn,
-  ExploreRequestAction,
   MetadataSource,
   MetadataValueType,
 } from 'ts/explore-types';
-import { alertMsg, generateStr } from 'ts/utils';
 import {
-  getDashboardCreateParameters,
-  getDateRange,
   getWarmUpParameters,
   metadataEventsConvertToCategoryItemType,
   parametersConvertToCategoryItemType,
-  validEventAnalyticsItem,
-  validIRetentionAnalyticsItem,
 } from '../analytics-utils';
 import ExploreDateRangePicker from '../comps/ExploreDateRangePicker';
 import SaveToDashboardModal from '../comps/SelectDashboardModal';
@@ -389,7 +379,7 @@ const AnalyticsRetention: React.FC = () => {
                 <SpaceBetween direction="vertical" size="l">
                   <div>
                     <Box variant="awsui-key-label">
-                      {t('analytics:funnel.labels.associateParameter')}
+                      {t('analytics:labels.associateParameter')}
                     </Box>
                     <Toggle
                       onChange={({ detail }) =>
@@ -424,7 +414,7 @@ const AnalyticsRetention: React.FC = () => {
                     <RetentionSelect
                       data={eventOptionData}
                       eventOptionList={metadataEvents}
-                      addEventButtonLabel="留存指标"
+                      addEventButtonLabel={t('analytics:labels.retentionMetrics')}
                       addStartNewConditionItem={(index) => {
                         setEventOptionData((prev) => {
                           const dataObj = cloneDeep(prev);

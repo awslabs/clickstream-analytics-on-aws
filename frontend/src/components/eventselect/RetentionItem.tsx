@@ -14,6 +14,7 @@
 import { Button, SelectProps } from '@cloudscape-design/components';
 import { identity } from 'lodash';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   CategoryItemType,
   ERelationShip,
@@ -77,13 +78,15 @@ const RetentionItem: React.FC<RetentionItemProps> = (
     changeEventOption,
     changeRelationAttributeOption,
   } = props;
+  const { t } = useTranslation();
+
   return (
     <div className="mb-5">
       <div className="cs-analytics-parameter">
         <div className="cs-para-name">{label}</div>
         <div className="flex-1">
           <EventItem
-            placeholder="Select Event"
+            placeholder={t('analytics:labels.eventSelectPlaceholder')}
             categoryOption={value}
             changeCurCategoryOption={(item) => {
               changeEventOption(item);
@@ -156,10 +159,12 @@ const RetentionItem: React.FC<RetentionItemProps> = (
       <div>
         {showRelation && (
           <div className="cs-analytics-parameter pl-30 mt-5">
-            <div className="cs-para-name">关联属性</div>
+            <div className="cs-para-name">
+              {t('analytics:labels.associatedProperties')}
+            </div>
             <div className="flex-1">
               <EventItem
-                placeholder="Select Attribute"
+                placeholder={t('analytics:labels.attributeSelectPlaceholder')}
                 categoryOption={attributeValue}
                 changeCurCategoryOption={(item) => {
                   changeRelationAttributeOption(item);

@@ -14,6 +14,7 @@
 import { Button, SelectProps } from '@cloudscape-design/components';
 import { identity } from 'lodash';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { ALPHABETS } from 'ts/const';
 import {
   CategoryItemType,
@@ -81,6 +82,7 @@ const EventsSelect: React.FC<EventsSelectProps> = (
     changeCurCalcMethodOption,
     changeCurRelationShip,
   } = props;
+  const { t } = useTranslation();
 
   return (
     <div className="cs-analytics-dropdown">
@@ -96,6 +98,7 @@ const EventsSelect: React.FC<EventsSelectProps> = (
               </div>
               <div className="flex-1">
                 <EventItem
+                  placeholder={t('analytics:labels.eventSelectPlaceholder')}
                   calcMethodOption={element.calculateMethodOption}
                   categoryOption={element.selectedEventOption}
                   changeCurCategoryOption={(item) => {
