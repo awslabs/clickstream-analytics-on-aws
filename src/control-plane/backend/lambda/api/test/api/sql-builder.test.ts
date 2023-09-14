@@ -3311,7 +3311,7 @@ describe('SQL Builder test', () => {
         select
           day::date as event_date,
           CASE
-            WHEN event_name in ('note_create', 'note_share', 'note_print') THEN event_name
+            WHEN event_name in ('add_button_click','note_share','note_export') THEN event_name
             ELSE 'other'
           END as event_name,
           user_pseudo_id,

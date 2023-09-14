@@ -724,7 +724,7 @@ export function buildEventPathAnalysisView(sqlParameters: SQLParameters) : strin
         select 
         day::date as event_date,
         CASE
-          WHEN event_name in ('note_create', 'note_share', 'note_print')  THEN event_name 
+          WHEN event_name in ('${eventNames.join('\',\'')}')  THEN event_name 
           ELSE 'other'
         END as event_name,
         user_pseudo_id,
