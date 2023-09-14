@@ -20,6 +20,7 @@ import {
 } from '@cloudscape-design/components';
 import { getAnalyticsDashboardList } from 'apis/analytics';
 import AnalyticsNavigation from 'components/layouts/AnalyticsNavigation';
+import CustomBreadCrumb from 'components/layouts/CustomBreadCrumb';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -42,31 +43,41 @@ const AnalyticsDashboardCard: React.FC<any> = () => {
   >([]);
   const CARD_DEFINITIONS = {
     header: (item: IAnalyticsDashboard) => (
-      <div>
-        <Link
-          fontSize="heading-m"
-          href={`/analytics/${projectId}/app/${appId}/dashboard/${item.id}`}
-        >
-          {item.name}
-        </Link>
-      </div>
+      <Link
+        variant="secondary"
+        fontSize="heading-m"
+        href={`/analytics/${projectId}/app/${appId}/dashboard/${item.id}`}
+      >
+        {item.name === 'User lifecycle' ? (
+          <>
+            User lifecycle -
+            {
+              <small>
+                <i> default</i>
+              </small>
+            }
+          </>
+        ) : (
+          item.name
+        )}
+      </Link>
     ),
     sections: [
       {
         id: 'description',
         header: '',
-        content: (item: IAnalyticsDashboard) => item.description,
-      },
-      {
-        id: 'id',
-        header: t('analytics:list.id'),
-        content: (item: IAnalyticsDashboard) => item.id,
+        content: (item: IAnalyticsDashboard) => item.description || '-',
       },
       {
         id: 'createAt',
         header: t('analytics:list.createAt'),
         content: (item: IAnalyticsDashboard) =>
           moment(item?.createAt).format(TIME_FORMAT) || '-',
+      },
+      {
+        id: 'operator',
+        header: t('analytics:list.createdBy'),
+        content: (item: IAnalyticsDashboard) => item.operator || '-',
       },
     ],
   };
@@ -162,7 +173,19 @@ const AnalyticsDashboardCard: React.FC<any> = () => {
 };
 
 const AnalyticsDashboard: React.FC = () => {
+  const { t } = useTranslation();
   const { projectId, appId } = useParams();
+
+  const breadcrumbItems = [
+    {
+      text: t('breadCrumb.analytics'),
+      href: '/analytics',
+    },
+    {
+      text: t('breadCrumb.dashboard'),
+      href: `/analytics/${projectId}/app/${appId}/dashboards`,
+    },
+  ];
 
   return (
     <div className="flex">
@@ -174,6 +197,7 @@ const AnalyticsDashboard: React.FC = () => {
           toolsHide
           navigationHide
           content={<AnalyticsDashboardCard />}
+          breadcrumbs={<CustomBreadCrumb breadcrumbItems={breadcrumbItems} />}
           headerSelector="#header"
         />
       </div>

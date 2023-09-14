@@ -11,7 +11,12 @@
  *  and limitations under the License.
  */
 
-import { Select, TopNavigation } from '@cloudscape-design/components';
+import {
+  Select,
+  SelectProps,
+  TopNavigation,
+} from '@cloudscape-design/components';
+import { getProjectList } from 'apis/project';
 import { useLocalStorage } from 'pages/common/use-local-storage';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -23,11 +28,16 @@ import {
   ZH_LANGUAGE_LIST,
   ZH_TEXT,
 } from 'ts/const';
-import HeaderSwitchSpaceModal from './SwitchSpaceModal';
 
 interface IHeaderProps {
   user: any;
   signOut: any;
+}
+interface IProjectSelectItem extends SelectProps.Option {
+  projectId?: string;
+  projectName?: string;
+  appId?: string;
+  appName?: string;
 }
 
 const AnalyticsHeader: React.FC<IHeaderProps> = (props: IHeaderProps) => {
@@ -35,11 +45,9 @@ const AnalyticsHeader: React.FC<IHeaderProps> = (props: IHeaderProps) => {
   const { user, signOut } = props;
   const [displayName, setDisplayName] = useState('');
   const [fullLogoutUrl, setFullLogoutUrl] = useState('');
-  const [switchProjectVisible, setSwitchProjectVisible] = useState(false);
-  const [selectedOption, setSelectedOption] = React.useState<any>({
-    label: 'Option 1',
-    value: '1',
-  });
+  const [allProjectOptions, setAllProjectOptions] =
+    useState<SelectProps.Options>([]);
+  const [selectedOption, setSelectedOption] = React.useState<any>(null);
   const [analyticsInfo, setAnalyticsInfo] = useLocalStorage(
     ANALYTICS_INFO_KEY,
     {
@@ -54,6 +62,53 @@ const AnalyticsHeader: React.FC<IHeaderProps> = (props: IHeaderProps) => {
     i18n.changeLanguage(lng);
   };
 
+  const listProjects = async () => {
+    try {
+      const { success, data }: ApiResponse<ResponseTableData<IProject>> =
+        await getProjectList({
+          pageNumber: 1,
+          pageSize: 9999,
+        });
+      if (success) {
+        const projectOptions: SelectProps.Options = data.items.map(
+          (element) => ({
+            label: element.name,
+            value: element.id,
+            description: element.status,
+            options: element.applications?.map(
+              (app) =>
+                ({
+                  label: app.name,
+                  value: app.appId,
+                  projectId: element.id,
+                  projectName: element.name,
+                  appId: app.appId,
+                  appName: app.name,
+                } as IProjectSelectItem)
+            ),
+          })
+        );
+        setAllProjectOptions(projectOptions);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const setCurOption = () => {
+    if (
+      analyticsInfo.projectId &&
+      analyticsInfo.appId &&
+      analyticsInfo.projectName &&
+      analyticsInfo.appName
+    ) {
+      setSelectedOption({
+        label: `${analyticsInfo.projectName} / ${analyticsInfo.appName}`,
+        value: analyticsInfo.appId,
+      });
+    }
+  };
+
   useEffect(() => {
     setDisplayName(
       user?.profile?.email ||
@@ -63,6 +118,8 @@ const AnalyticsHeader: React.FC<IHeaderProps> = (props: IHeaderProps) => {
         user?.profile?.sub ||
         ''
     );
+    setCurOption();
+    listProjects();
   }, [user]);
 
   useEffect(() => {
@@ -98,48 +155,26 @@ const AnalyticsHeader: React.FC<IHeaderProps> = (props: IHeaderProps) => {
           title: t('header.solution') ?? '',
         }}
         search={
-          <>
-            <Select
-              selectedOption={selectedOption}
-              onChange={({ detail }) =>
-                setSelectedOption(detail.selectedOption)
-              }
-              options={[
-                {
-                  label: 'Group 1',
-                  options: [
-                    { label: 'Option 1', value: '1' },
-                    { label: 'Option 2', value: '2' },
-                    { label: 'Option 3', value: '3' },
-                  ],
-                },
-                {
-                  label: 'Group 2 (disabled)',
-                  disabled: true,
-                  options: [
-                    { label: 'Option 4', value: '4' },
-                    { label: 'Option 5', value: '5' },
-                  ],
-                },
-              ]}
-            />
-          </>
+          <Select
+            selectedOption={selectedOption}
+            onChange={({ detail }) => {
+              const option = detail.selectedOption as IProjectSelectItem;
+              setSelectedOption({
+                label: `${option.projectName} / ${option.appName}`,
+                value: detail.selectedOption.value,
+              });
+              setAnalyticsInfo({
+                projectId: option.projectId ?? '',
+                projectName: option.projectName ?? '',
+                appId: option.appId ?? '',
+                appName: option.appName ?? '',
+              });
+              window.location.href = `/analytics/${option.projectId}/app/${option.appId}/dashboards`;
+            }}
+            options={allProjectOptions}
+          />
         }
         utilities={[
-          {
-            type: 'button',
-            variant: 'link',
-            text: `${analyticsInfo?.projectName} / ${analyticsInfo.appName}`,
-          },
-          {
-            type: 'button',
-            variant: 'primary-button',
-            text: t('header.switchSpace') ?? '',
-            onClick: () => {
-              setSwitchProjectVisible(true);
-            },
-          },
-
           {
             type: 'button',
             text: 'Analytics Documentation',
@@ -184,12 +219,6 @@ const AnalyticsHeader: React.FC<IHeaderProps> = (props: IHeaderProps) => {
           overflowMenuBackIconAriaLabel: t('header.back') || '',
           overflowMenuDismissIconAriaLabel: t('header.closeMenu') || '',
         }}
-      />
-      <HeaderSwitchSpaceModal
-        visible={switchProjectVisible}
-        disableClose={false}
-        setSwitchProjectVisible={setSwitchProjectVisible}
-        setAnalyticsInfo={setAnalyticsInfo}
       />
     </header>
   );

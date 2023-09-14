@@ -52,11 +52,12 @@ export const deleteAnalyticsDashboard = async (
 export const getAnalyticsDashboard = async (
   projectId: string,
   appId: string,
-  dashboardId: string
+  dashboardId: string,
+  allowedDomain: string
 ) => {
   const result: any = await apiRequest(
     'get',
-    `/project/${projectId}/${appId}/dashboard/${dashboardId}`
+    `/project/${projectId}/${appId}/dashboard/${dashboardId}?allowedDomain=${allowedDomain}`
   );
   return result;
 };

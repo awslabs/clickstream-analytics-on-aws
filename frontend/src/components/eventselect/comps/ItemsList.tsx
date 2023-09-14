@@ -12,7 +12,7 @@
  */
 
 import classNames from 'classnames';
-import { debounce } from 'lodash';
+import { debounce, identity } from 'lodash';
 import React, { useEffect, useRef, useState } from 'react';
 import { CategoryItemType, IAnalyticsItem } from '../AnalyticsType';
 
@@ -102,7 +102,7 @@ const ItemsList: React.FC<ItemsListProps> = (props: ItemsListProps) => {
       onScroll={handleScroll}
     >
       {categories.map((category: CategoryItemType, index: number) => (
-        <div key={index} className="item-group">
+        <div key={identity(index)} className="item-group">
           <div className="item-group-header">
             {category.categoryName}{' '}
             <span className="count">
@@ -118,7 +118,7 @@ const ItemsList: React.FC<ItemsListProps> = (props: ItemsListProps) => {
                     element.value === selectedItem?.value &&
                     element.label === selectedItem?.label,
                 })}
-                key={index}
+                key={identity(index)}
                 onMouseOver={() => {
                   showOptionDetails(element);
                 }}

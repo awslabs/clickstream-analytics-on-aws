@@ -22,6 +22,7 @@ import {
 import ConditionItem from './ConditionItem';
 import RelationAnd from './comps/RelationAnd';
 import RelationOr from './comps/RelationOr';
+import { identity } from 'lodash';
 
 interface SegmentationFilterProps {
   segmentationData: SegmentationFilterDataType;
@@ -87,7 +88,7 @@ const SegmentationFilter: React.FC<SegmentationFilterProps> = (
                   <ConditionItem
                     item={element}
                     conditionOptions={segmentationData.conditionOptions}
-                    key={index}
+                    key={identity(index)}
                     removeConditionItem={() => {
                       removeEventCondition(index);
                     }}

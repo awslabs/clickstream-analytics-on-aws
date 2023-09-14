@@ -2,13 +2,17 @@
   "analytics": "Analytics",
   "dashboard": {
     "title": "Dashboards",
-    "description": "This page lists all the dashboards.",
+    "description": "You can view the out-of-the-box user lifecycle dashboards here, and create a custom dashboard with exploration analysis. ",
     "createTitle": "Create Dashboard",
-    "createInputName": "Please input a name for your dashboard",
-    "createInputNamePlaceholder": "e.g. my-dashboard",
-    "createDesc": "Dashboard description - optional",
-    "createDescPlaceholder": "e.g. description of dashboard",
-    "createSheets": "Dashboard sheets - optional",
+    "createInputName": "Dashboard name",
+    "createInputNameDec": "Please input a name for the dashboard.",
+    "createInputNamePlaceholder": "E.g. user lifecycle dashboard",
+    "createDesc": "Description",
+    "createDescDec": "Please provide a useful description for the dashboard.",
+    "createDescPlaceholder": "E.g. dashboard for the e-commerce department",
+    "createSheets": "Sheet name",
+    "createSheetsDec": "One dashboard could have multiple sheets to group charts into different topics. By default, the solution create a sheet with “Sheet 1”  if you don’t specify sheet name.",
+    "createSheetsPlaceholder": "Input sheet name",
     "deleteTip1": "Are you sure you want to delete the dashboard ",
     "deleteTip2": " delete dashboard will delete all data in QuickSight."
   },
@@ -16,8 +20,9 @@
     "loading": "Loading dashboards.",
     "noDashboard": "You don’t have any clickstream analytics dashboard yet.",
     "id": "ID",
-    "description": "Description",
-    "createAt": "CreateAt"
+    "description": "Descriptions",
+    "createAt": "Creation time",
+    "createdBy": "Created by"
   },
   "header": {
     "modalTitle": "Switch Project Space",

@@ -14,14 +14,16 @@
     "createPlugin": "Create Plugin",
     "registerApp": "Register Application",
     "alarms": "Alarms",
-    "users": "Users"
+    "users": "Users",
+    "analytics": "Analytics",
+    "dashboard": "Dashboard"
   },
   "nav": {
     "home": "Home",
     "projects": "Projects",
     "pipelines": "Pipelines",
     "plugins": "Plugins",
-    "explore": "Explore",
+    "explore": "Analytics",
     "analytics": {
       "realtime": "Realtime",
       "dashboards": "Dashboards",

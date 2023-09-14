@@ -19,9 +19,10 @@ import { logger } from '../common/powertools';
 import { aws_sdk_client_common_config } from '../common/sdk-client-config-ln';
 import { ApiFail, ApiSuccess, PipelineStackType } from '../common/types';
 import { getReportingDashboardsUrl, isEmpty, paginateData } from '../common/utils';
-import { CPipeline } from '../model/pipeline';
+import { IApplication } from '../model/application';
+import { CPipeline, IPipeline } from '../model/pipeline';
 import { IDashboard, IProject } from '../model/project';
-import { createDashboard, getClickstreamUserArn } from '../store/aws/quicksight';
+import { createDashboard, generateEmbedUrlForRegisteredUser, getClickstreamUserArn } from '../store/aws/quicksight';
 import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
 
@@ -42,8 +43,8 @@ export class ProjectServ {
     if (appDashboard) {
       const presetDashboard: IDashboard = {
         id: appDashboard.dashboardId,
-        name: 'Preset Dashboard',
-        description: 'Preset Dashboard',
+        name: 'User lifecycle',
+        description: 'Out-of-the-box user lifecycle analysis dashboard created by solution.',
         region: pipeline.region,
         sheets: [],
         ownerPrincipal: '',
@@ -173,13 +174,22 @@ export class ProjectServ {
   public async getDashboard(req: any, res: any, next: any) {
     try {
       const { dashboardId, projectId, appId } = req.params;
-      const presetAppDashboard = await this.getPresetAppDashboard(projectId, appId);
-      if (presetAppDashboard?.dashboardId === dashboardId) {
-        return res.json(new ApiSuccess(presetAppDashboard));
+      const { allowedDomain } = req.query;
+      let dashboard = await this.getPresetAppDashboard(projectId, appId);
+      if (dashboard?.dashboardId !== dashboardId) {
+        dashboard = await store.getDashboard(dashboardId);
       }
-      const dashboard = await store.getDashboard(dashboardId);
       if (!dashboard) {
         return res.status(404).json(new ApiFail('Dashboard not found'));
+      }
+      const embed = await generateEmbedUrlForRegisteredUser(
+        dashboard.region,
+        allowedDomain,
+        false,
+        dashboardId,
+      );
+      if (embed && embed.EmbedUrl) {
+        dashboard.embedUrl = embed.EmbedUrl;
       }
       return res.json(new ApiSuccess(dashboard));
     } catch (error) {
@@ -217,21 +227,22 @@ export class ProjectServ {
   public async list(req: any, res: any, next: any) {
     try {
       const { order, pageNumber, pageSize } = req.query;
-      const result = await store.listProjects(order);
-      const items = paginateData(result, true, pageSize, pageNumber);
-      for (let project of items) {
-        if (isEmpty(project.pipelineId)) {
-          const latestPipelines = await store.listPipeline(project.id, 'latest', 'asc');
-          if (latestPipelines.length === 0) {
-            project.pipelineId = '';
-          } else {
-            project.pipelineId = latestPipelines[0].pipelineId;
-          }
-          await store.updateProject(project);
+      const projects = await store.listProjects(order);
+      const pipelines = await store.listPipeline('', 'latest', 'asc');
+      const apps = await store.listApplication('', 'asc');
+      for (let project of projects) {
+        const pipeline = pipelines.find((item: IPipeline) => item.projectId === project.id);
+        if (pipeline) {
+          project.pipelineId = pipeline.pipelineId;
+        } else {
+          project.pipelineId = '';
         }
+        const projectApps = apps.filter((item: IApplication) => item.projectId === project.id);
+        project.applications = projectApps;
       }
+      const items = paginateData(projects, true, pageSize, pageNumber);
       return res.json(new ApiSuccess({
-        totalCount: result.length,
+        totalCount: projects.length,
         items: items,
       }));
     } catch (error) {

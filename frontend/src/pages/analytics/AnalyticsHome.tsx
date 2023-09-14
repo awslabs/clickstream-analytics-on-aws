@@ -14,30 +14,23 @@
 import { AppLayout } from '@cloudscape-design/components';
 import Loading from 'components/common/Loading';
 import Navigation from 'components/layouts/Navigation';
-import HeaderSwitchSpaceModal from 'components/layouts/SwitchSpaceModal';
 import { useLocalStorage } from 'pages/common/use-local-storage';
 import React, { useEffect, useState } from 'react';
 import { ANALYTICS_INFO_KEY } from 'ts/const';
 
 const AnalyticsHome: React.FC = () => {
   const [loadingData, setLoadingData] = useState(true);
-  const [switchProjectVisible, setSwitchProjectVisible] = useState(false);
-  const [analyticsInfo, setAnalyticsInfo] = useLocalStorage(
-    ANALYTICS_INFO_KEY,
-    {
-      projectId: '',
-      projectName: '',
-      appId: '',
-      appName: '',
-    }
-  );
+  const [analyticsInfo] = useLocalStorage(ANALYTICS_INFO_KEY, {
+    projectId: '',
+    projectName: '',
+    appId: '',
+    appName: '',
+  });
 
   useEffect(() => {
     setLoadingData(true);
     if (analyticsInfo.projectId && analyticsInfo.appId) {
       window.location.href = `/analytics/${analyticsInfo.projectId}/app/${analyticsInfo.appId}/dashboards`;
-    } else {
-      setSwitchProjectVisible(true);
     }
     setLoadingData(false);
   }, []);
@@ -45,20 +38,7 @@ const AnalyticsHome: React.FC = () => {
   return (
     <AppLayout
       toolsHide
-      content={
-        <div>
-          {loadingData ? (
-            <Loading />
-          ) : (
-            <HeaderSwitchSpaceModal
-              visible={switchProjectVisible}
-              disableClose={true}
-              setSwitchProjectVisible={setSwitchProjectVisible}
-              setAnalyticsInfo={setAnalyticsInfo}
-            />
-          )}
-        </div>
-      }
+      content={<div>{loadingData ? <Loading /> : <></>}</div>}
       headerSelector="#header"
       navigation={<Navigation activeHref="/analytics" />}
     />

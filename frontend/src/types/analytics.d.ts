@@ -181,6 +181,7 @@ declare global {
     readonly sheets: IAnalyticsDashboardSheet[];
     readonly ownerPrincipal: string;
     readonly defaultDataSourceArn: string;
+    readonly embedUrl?: string;
 
     readonly createAt: number;
     readonly updateAt: number;

@@ -201,19 +201,15 @@ const ConditionItem: React.FC<ConditionItemProps> = (
                 }}
                 value={inputValue}
                 options={valueOptions}
-                placeholder={t('analytics:labels.conditionValuePlaceholder') ?? ''}
+                placeholder={
+                  t('analytics:labels.conditionValuePlaceholder') ?? ''
+                }
               />
               <TokenGroup
                 onDismiss={({ detail: { itemIndex } }) => {
                   setConditionValues(
-                    [
-                      ...values.slice(0, itemIndex),
-                      ...values.slice(itemIndex + 1),
-                    ],
-                    [
-                      ...labelValues.slice(0, itemIndex),
-                      ...labelValues.slice(itemIndex + 1),
-                    ]
+                    values.filter((item, eIndex) => eIndex !== itemIndex),
+                    labelValues.filter((item, eIndex) => eIndex !== itemIndex)
                   );
                 }}
                 items={labelValues.map((value) => ({ label: value }))}

@@ -11,42 +11,29 @@
  *  and limitations under the License.
  */
 
-import { AppLayout } from '@cloudscape-design/components';
-import { createEmbeddingContext } from 'amazon-quicksight-embedding-sdk';
-import { fetchEmbeddingUrl, getAnalyticsDashboard } from 'apis/analytics';
+import {
+  AppLayout,
+  Container,
+  ContentLayout,
+  Header,
+  SpaceBetween,
+} from '@cloudscape-design/components';
+import { getAnalyticsDashboard } from 'apis/analytics';
 import Loading from 'components/common/Loading';
-import Navigation from 'components/layouts/Navigation';
+import AnalyticsNavigation from 'components/layouts/AnalyticsNavigation';
+import CustomBreadCrumb from 'components/layouts/CustomBreadCrumb';
+import ExploreEmbedFrame from 'pages/analytics/comps/ExploreEmbedFrame';
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
+import { generateStr } from 'ts/utils';
 
 const AnalyticsDashboardDetail: React.FC = () => {
+  const { t } = useTranslation();
   const { dashboardId, projectId, appId } = useParams();
   const [loadingData, setLoadingData] = useState(false);
-
-  const getEmbeddingUrl = async (dashboard: IAnalyticsDashboard) => {
-    try {
-      const { success, data }: ApiResponse<any> = await fetchEmbeddingUrl({
-        permission: dashboard.operator === 'Clickstream',
-        region: dashboard.region,
-        allowedDomain: window.location.origin,
-        dashboardId: dashboard.id,
-        sheetId: undefined,
-        visualId: undefined,
-      });
-      if (success) {
-        const embedDashboard = async () => {
-          const embeddingContext = await createEmbeddingContext();
-          await embeddingContext.embedDashboard({
-            url: data.EmbedUrl,
-            container: '#qs-container',
-          });
-        };
-        embedDashboard();
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
+  const [dashboardEmbedUrl, setDashboardEmbedUrl] = useState('');
+  const [dashboard, setDashboard] = useState({} as IAnalyticsDashboard);
 
   const getAnalyticsDashboardDetails = async () => {
     setLoadingData(true);
@@ -55,10 +42,12 @@ const AnalyticsDashboardDetail: React.FC = () => {
         await getAnalyticsDashboard(
           projectId ?? '',
           appId ?? '',
-          dashboardId ?? ''
+          dashboardId ?? '',
+          window.location.origin
         );
-      if (success) {
-        getEmbeddingUrl(data);
+      if (success && data.embedUrl) {
+        setDashboard(data);
+        setDashboardEmbedUrl(data.embedUrl);
         setLoadingData(false);
       }
     } catch (error) {
@@ -72,19 +61,64 @@ const AnalyticsDashboardDetail: React.FC = () => {
     }
   }, [dashboardId]);
 
+  const getDashboardName = () => {
+    return dashboard.name === 'User lifecycle'
+      ? 'User lifecycle - default'
+      : dashboard.name;
+  };
+
+  const breadcrumbItems = [
+    {
+      text: t('breadCrumb.analytics'),
+      href: '/analytics',
+    },
+    {
+      text: t('breadCrumb.dashboard'),
+      href: `/analytics/${projectId}/app/${appId}/dashboards`,
+    },
+    {
+      text: getDashboardName(),
+      href: `/analytics/${projectId}/app/${appId}/dashboard/${dashboardId}`,
+    },
+  ];
+
   return (
-    <AppLayout
-      toolsHide
-      content={
-        loadingData ? (
-          <Loading />
-        ) : (
-          <div id={'qs-container'} className="iframe-dashboard"></div>
-        )
-      }
-      headerSelector="#header"
-      navigation={<Navigation activeHref="/analytics/dashboard/detail" />}
-    />
+    <div className="flex">
+      <AnalyticsNavigation
+        activeHref={`/analytics/${projectId}/app/${appId}/dashboards`}
+      />
+      <div className="flex-1">
+        <AppLayout
+          toolsHide
+          navigationHide
+          content={
+            <ContentLayout
+              header={
+                <SpaceBetween size="m">
+                  <Header variant="h1" description={dashboard.description}>
+                    {dashboard.name}
+                  </Header>
+                </SpaceBetween>
+              }
+            >
+              <Container>
+                {loadingData ? (
+                  <Loading />
+                ) : (
+                  <ExploreEmbedFrame
+                    embedType="dashboard"
+                    embedUrl={dashboardEmbedUrl}
+                    embedId={`dashboard_${generateStr(6)}`}
+                  />
+                )}
+              </Container>
+            </ContentLayout>
+          }
+          breadcrumbs={<CustomBreadCrumb breadcrumbItems={breadcrumbItems} />}
+          headerSelector="#header"
+        />
+      </div>
+    </div>
   );
 };
 

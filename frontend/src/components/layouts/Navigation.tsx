@@ -12,6 +12,8 @@
  */
 
 import {
+  Link,
+  Popover,
   SideNavigation,
   SideNavigationProps,
 } from '@cloudscape-design/components';
@@ -40,6 +42,29 @@ const Navigation: React.FC<INavigationProps> = (props: INavigationProps) => {
     { type: 'link', text: t('nav.home'), href: '/' },
     { type: 'link', text: t('nav.projects'), href: '/projects' },
     {
+      type: 'link',
+      text: t('nav.explore'),
+      href: '/analytics',
+      info: (
+        <Popover
+          header="Introducing analytics"
+          content={
+            <div>
+              Analytics allow you explore the clickstream data on an easy-to-use
+              UI, and provides access to all reports and dashboards.
+              <br />
+              <Link href="#" variant="primary">
+                {' '}
+                Learn more.
+              </Link>
+            </div>
+          }
+        >
+          New
+        </Popover>
+      ),
+    },
+    {
       text: t('nav.operation'),
       type: 'section',
       defaultExpanded: true,
@@ -58,15 +83,6 @@ const Navigation: React.FC<INavigationProps> = (props: INavigationProps) => {
       type: 'section',
       defaultExpanded: true,
       items: [{ type: 'link', text: t('nav.user'), href: '/user' }],
-    },
-  ];
-  const exploreNavItems: SideNavigationProps.Item[] = [
-    { type: 'divider' },
-    {
-      type: 'link',
-      text: t('nav.explore'),
-      href: '/analytics',
-      external: true,
     },
   ];
   const docNavItems: SideNavigationProps.Item[] = [
@@ -139,16 +155,15 @@ const Navigation: React.FC<INavigationProps> = (props: INavigationProps) => {
     if (activeHref.startsWith('/analytics')) {
       return analyticsNavItems;
     } else if (currentUser?.role === IUserRole.ADMIN) {
+      return [...pipelineNavItems, ...systemNavItems, ...docNavItems];
+    } else if (currentUser?.role === IUserRole.ANALYST) {
+      return [...pipelineNavItems, ...docNavItems];
+    } else {
       return [
-        ...pipelineNavItems,
-        ...systemNavItems,
-        ...exploreNavItems,
+        ...pipelineNavItems.slice(0, 2),
+        ...pipelineNavItems.slice(3),
         ...docNavItems,
       ];
-    } else if (currentUser?.role === IUserRole.ANALYST) {
-      return [...pipelineNavItems, ...exploreNavItems, ...docNavItems];
-    } else {
-      return [...pipelineNavItems, ...docNavItems];
     }
   };
 

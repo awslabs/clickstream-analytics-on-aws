@@ -1,5 +1,3 @@
-import { ProjectEnvironment } from '../common/types';
-
 /**
  *  Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
  *
@@ -12,6 +10,8 @@ import { ProjectEnvironment } from '../common/types';
  *  OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions
  *  and limitations under the License.
  */
+import { IApplication } from './application';
+import { ProjectEnvironment } from '../common/types';
 
 export interface IProject {
   readonly id: string;
@@ -25,6 +25,7 @@ export interface IProject {
   readonly region: string;
   readonly environment: ProjectEnvironment | string;
   pipelineId: string;
+  applications: IApplication[];
   readonly status: string;
   readonly createAt: number;
   readonly updateAt: number;
@@ -52,6 +53,7 @@ export interface IDashboard {
   readonly sheets: IDashboardSheet[];
   readonly ownerPrincipal: string;
   readonly defaultDataSourceArn: string;
+  embedUrl?: string;
 
   readonly createAt: number;
   readonly updateAt: number;

@@ -365,19 +365,23 @@ export class DynamoDbStore implements ClickStreamStore {
   };
 
   public async listApplication(projectId: string, order: string): Promise<IApplication[]> {
+    let filterExpression = 'deleted = :d';
+    let expressionAttributeValues = new Map();
+    expressionAttributeValues.set(':d', false);
+    expressionAttributeValues.set(':prefix', 'APP');
+    if (!isEmpty(projectId)) {
+      filterExpression = `${filterExpression} AND projectId = :p`;
+      expressionAttributeValues.set(':p', projectId);
+    }
     const input: QueryCommandInput = {
       TableName: clickStreamTableName,
       IndexName: prefixTimeGSIName,
       KeyConditionExpression: '#prefix= :prefix',
-      FilterExpression: 'projectId = :p AND deleted = :d',
+      FilterExpression: filterExpression,
       ExpressionAttributeNames: {
         '#prefix': 'prefix',
       },
-      ExpressionAttributeValues: {
-        ':p': projectId,
-        ':d': false,
-        ':prefix': 'APP',
-      },
+      ExpressionAttributeValues: expressionAttributeValues,
       ScanIndexForward: order === 'asc',
     };
     const records = await query(input);
