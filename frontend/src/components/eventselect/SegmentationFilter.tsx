@@ -12,6 +12,7 @@
  */
 
 import { Button, SelectProps } from '@cloudscape-design/components';
+import { identity } from 'lodash';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -22,7 +23,6 @@ import {
 import ConditionItem from './ConditionItem';
 import RelationAnd from './comps/RelationAnd';
 import RelationOr from './comps/RelationOr';
-import { identity } from 'lodash';
 
 interface SegmentationFilterProps {
   segmentationData: SegmentationFilterDataType;
