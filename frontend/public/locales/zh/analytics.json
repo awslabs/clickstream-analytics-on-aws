@@ -193,7 +193,8 @@
     "sessionDefinition": "会话定义",
     "nodeType": "节点类型",
     "nodesSelect": "选择节点",
-    "pathNode": "节点"
+    "pathNode": "节点",
+    "conditionValuePlaceholder": "输入值"
   },
   "emptyData": "无数据",
   "emptyDataMessage": "请先配置分析指标"

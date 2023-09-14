@@ -193,7 +193,8 @@
     "sessionDefinition": "Session definition",
     "nodeType": "Node type",
     "nodesSelect": "Select nodes",
-    "pathNode": "Node"
+    "pathNode": "Node",
+    "conditionValuePlaceholder": "Input value"
   },
   "emptyData": "No Data",
   "emptyDataMessage": "Please configure analysis indicators first"

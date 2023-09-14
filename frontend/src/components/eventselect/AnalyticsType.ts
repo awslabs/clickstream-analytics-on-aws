@@ -32,6 +32,7 @@ export interface IAnalyticsItem extends SelectProps.Option {
   modifyTime?: string;
   metadataSource?: MetadataSource;
   valueType?: MetadataValueType;
+  valueEnum?: IMetadataAttributeValue[];
 }
 
 export interface CategoryItemType {
