@@ -200,9 +200,7 @@ const ConditionItem: React.FC<ConditionItemProps> = (
                 }}
                 value={inputValue}
                 options={valueOptions}
-                ariaLabel="Autosuggest example with suggestions"
-                placeholder="Enter value"
-                empty="No matches found"
+                placeholder={t('analytics:labels.conditionValuePlaceholder') ?? ''}
               />
               <TokenGroup
                 onDismiss={({ detail: { itemIndex } }) => {
