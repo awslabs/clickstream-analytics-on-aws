@@ -66,7 +66,7 @@ import {
   getDashboardCreateParameters,
   getDateRange,
   getEventAndConditions,
-  getFirstEventAndConditions,
+  getGlobalEventCondition,
   getIntervalInSeconds,
   getWarmUpParameters,
   metadataEventsConvertToCategoryItemType,
@@ -85,7 +85,7 @@ const AnalyticsPath: React.FC = () => {
   const [loadingChart, setLoadingChart] = useState(false);
   const [selectDashboardModalVisible, setSelectDashboardModalVisible] =
     useState(false);
-  const [chartEmbedUrl, setChartEmbedUrl] = useState('');
+  const [exploreEmbedUrl, setExploreEmbedUrl] = useState('');
   const [disableAddCondition, setDisableAddCondition] = useState(false);
   const [pipeline, setPipeline] = useState({} as IPipeline);
   const [metadataEvents, setMetadataEvents] = useState(
@@ -393,7 +393,7 @@ const AnalyticsPath: React.FC = () => {
     });
     setSelectedWindowUnit(minuteWindowUnitOption);
     setWindowValue('5');
-    setChartEmbedUrl('');
+    setExploreEmbedUrl('');
     setSelectedPlatform(defaultPlatformOption);
 
     await listMetadataEvents();
@@ -501,10 +501,7 @@ const AnalyticsPath: React.FC = () => {
       specifyJoinColumn: false,
       computeMethod: selectedMetric?.value ?? ExploreComputeMethod.USER_CNT,
       eventAndConditions: getEventAndConditions(eventOptionData),
-      firstEventExtraCondition: getFirstEventAndConditions(
-        eventOptionData,
-        segmentationOptionData
-      ),
+      globalEventCondition: getGlobalEventCondition(segmentationOptionData),
       maxStep: 10,
       pathAnalysis: pathAnalysisParameter,
       timeScopeType: dateRangeParams?.timeScopeType,
@@ -536,12 +533,8 @@ const AnalyticsPath: React.FC = () => {
       const { success, data }: ApiResponse<any> = await previewPath(body);
       setLoadingData(false);
       setLoadingChart(false);
-      if (
-        success &&
-        data.visualIds.length === 1 &&
-        data.visualIds[0].embedUrl
-      ) {
-        setChartEmbedUrl(data.visualIds[0].embedUrl);
+      if (success && data.dashboardEmbedUrl) {
+        setExploreEmbedUrl(data.dashboardEmbedUrl);
       }
     } catch (error) {
       console.log(error);
@@ -949,9 +942,9 @@ const AnalyticsPath: React.FC = () => {
                   <Loading />
                 ) : (
                   <ExploreEmbedFrame
-                    embedType="visual"
-                    embedUrl={chartEmbedUrl}
-                    embedId={`chart_${generateStr(6)}`}
+                    embedType="dashboard"
+                    embedUrl={exploreEmbedUrl}
+                    embedId={`explore_${generateStr(6)}`}
                   />
                 )}
               </Container>

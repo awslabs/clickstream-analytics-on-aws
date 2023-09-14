@@ -43,7 +43,7 @@ import {
 } from './quicksight/reporting-utils';
 import { buildEventAnalysisView, buildEventPathAnalysisView, buildFunnelDataSql, buildFunnelView, buildNodePathAnalysisView, buildRetentionAnalysisView } from './quicksight/sql-builder';
 import { awsAccountId } from '../common/constants';
-import { ExploreRequestAction, ExplorePathNodeType, ExploreTimeScopeType, ExploreVisualName } from '../common/explore-types';
+import { ExplorePathNodeType, ExploreTimeScopeType, ExploreVisualName } from '../common/explore-types';
 import { logger } from '../common/powertools';
 import { SDKClient } from '../common/sdk-client';
 import { ApiFail, ApiSuccess } from '../common/types';
@@ -624,11 +624,18 @@ export class ReportingServ {
         Definition: dashboard,
       });
 
+      const embedUrl = await generateEmbedUrlForRegisteredUser(
+        dashboardCreateParameters.region,
+        dashboardCreateParameters.allowedDomain,
+        false,
+        dashboardId,
+      );
       result = {
         dashboardId,
         dashboardArn: newDashboard.Arn!,
         dashboardName: `${resourceName}`,
         dashboardVersion: Number.parseInt(newDashboard.VersionArn!.substring(newDashboard.VersionArn!.lastIndexOf('/') + 1)),
+        dashboardEmbedUrl: embedUrl.EmbedUrl!,
         analysisId,
         analysisArn: newAnalysis.Arn!,
         analysisName: `${resourceName}`,
@@ -682,11 +689,18 @@ export class ReportingServ {
       if (cnt >= 60) {
         throw new Error(`publish dashboard new version failed after try ${cnt} times`);
       }
+      const embedUrl = await generateEmbedUrlForRegisteredUser(
+        dashboardCreateParameters.region,
+        dashboardCreateParameters.allowedDomain,
+        false,
+        query.dashboardId,
+      );
       result = {
         dashboardId: query.dashboardId,
         dashboardArn: newDashboard.Arn!,
         dashboardName: query.dashboardName,
         dashboardVersion: Number.parseInt(versionNumber!),
+        dashboardEmbedUrl: embedUrl.EmbedUrl!,
         analysisId: query.analysisId,
         analysisArn: newAnalysis?.Arn!,
         analysisName: query.analysisName,
@@ -696,26 +710,10 @@ export class ReportingServ {
     }
 
     for (let visualProps of visualPropsArray) {
-      let embedUrl;
-      if (query.action === ExploreRequestAction.PREVIEW) {
-        const embed = await generateEmbedUrlForRegisteredUser(
-          dashboardCreateParameters.region,
-          dashboardCreateParameters.allowedDomain,
-          false,
-          result.dashboardId,
-          result.sheetId,
-          visualProps.visualId,
-        );
-        if (embed.EmbedUrl) {
-          embedUrl = embed.EmbedUrl;
-        }
-      }
       const visual: VisualMapProps = {
         name: visualProps.name,
         id: visualProps.visualId,
-        embedUrl,
       };
-
       result.visualIds.push(visual);
     }
 

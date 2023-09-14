@@ -29,6 +29,7 @@ import {
   getMetadataParametersList,
   getMetadataUserAttributesList,
   getPipelineDetailByProjectId,
+  previewRetention,
   warmup,
 } from 'apis/analytics';
 import Loading from 'components/common/Loading';
@@ -48,17 +49,27 @@ import { cloneDeep } from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
+import { COMMON_ALERT_TYPE } from 'ts/const';
 import {
+  ExploreComputeMethod,
   ExploreGroupColumn,
+  ExploreRequestAction,
   MetadataSource,
   MetadataValueType,
 } from 'ts/explore-types';
+import { generateStr, alertMsg } from 'ts/utils';
 import {
+  getDashboardCreateParameters,
+  getDateRange,
+  getGlobalEventCondition,
+  getPairEventAndConditions,
   getWarmUpParameters,
   metadataEventsConvertToCategoryItemType,
   parametersConvertToCategoryItemType,
+  validRetentionAnalyticsItem,
 } from '../analytics-utils';
 import ExploreDateRangePicker from '../comps/ExploreDateRangePicker';
+import ExploreEmbedFrame from '../comps/ExploreEmbedFrame';
 import SaveToDashboardModal from '../comps/SelectDashboardModal';
 
 const AnalyticsRetention: React.FC = () => {
@@ -244,93 +255,118 @@ const AnalyticsRetention: React.FC = () => {
     setLoadingData(false);
   };
 
-  // const getRetentionRequest = (
-  //   action: ExploreRequestAction,
-  //   dashboardId?: string,
-  //   dashboardName?: string,
-  //   sheetId?: string,
-  //   sheetName?: string
-  // ) => {
-  //   const eventId = generateStr(6);
-  //   const parameters = getDashboardCreateParameters(
-  //     pipeline,
-  //     window.location.origin
-  //   );
-  //   if (!parameters) {
-  //     return;
-  //   }
-  //   const dateRangeParams = getDateRange(dateRangeValue);
-  //   let saveParams = {};
-  //   if (action === ExploreRequestAction.PUBLISH) {
-  //     saveParams = {
-  //       dashboardId: dashboardId,
-  //       dashboardName: dashboardName,
-  //       sheetId: sheetId,
-  //       sheetName: sheetName,
-  //     };
-  //   }
-  //   const body: IExploreRequest = {
-  //     action: action,
-  //     projectId: pipeline.projectId,
-  //     pipelineId: pipeline.pipelineId,
-  //     appId: appId ?? '',
-  //     sheetName: `retention_sheet_${eventId}`,
-  //     viewName: `event_view_${eventId}`,
-  //     dashboardCreateParameters: parameters,
-  //     specifyJoinColumn: false,
-  //     conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
-  //     conversionIntervalInSeconds: 60 * 60 * 24,
-  //     computeMethod: selectedMetric?.value ?? ExploreComputeMethod.USER_CNT,
-  //     eventAndConditions: getEventAndConditions(eventOptionData),
-  //     firstEventExtraCondition: getFirstEventAndConditions(
-  //       eventOptionData,
-  //       segmentationOptionData
-  //     ),
-  //     timeScopeType: dateRangeParams?.timeScopeType,
-  //     groupColumn: timeGranularity.value,
-  //     ...dateRangeParams,
-  //     ...saveParams,
-  //   };
-  //   return body;
-  // };
+  const getRetentionRequest = (
+    action: ExploreRequestAction,
+    dashboardId?: string,
+    dashboardName?: string,
+    sheetId?: string,
+    sheetName?: string
+  ) => {
+    const eventId = generateStr(6);
+    const parameters = getDashboardCreateParameters(
+      pipeline,
+      window.location.origin
+    );
+    if (!parameters) {
+      return;
+    }
+    const dateRangeParams = getDateRange(dateRangeValue);
+    let saveParams = {};
+    if (action === ExploreRequestAction.PUBLISH) {
+      saveParams = {
+        dashboardId: dashboardId,
+        dashboardName: dashboardName,
+        sheetId: sheetId,
+        sheetName: sheetName,
+      };
+    }
+    const body: IExploreRequest = {
+      action: action,
+      projectId: pipeline.projectId,
+      pipelineId: pipeline.pipelineId,
+      appId: appId ?? '',
+      sheetName: `retention_sheet_${eventId}`,
+      viewName: `event_view_${eventId}`,
+      dashboardCreateParameters: parameters,
+      computeMethod: ExploreComputeMethod.USER_CNT,
+      specifyJoinColumn: false,
+      eventAndConditions: [],
+      pairEventAndConditions: getPairEventAndConditions(eventOptionData),
+      globalEventCondition: getGlobalEventCondition(segmentationOptionData),
+      timeScopeType: dateRangeParams?.timeScopeType,
+      groupColumn: timeGranularity.value,
+      ...dateRangeParams,
+      ...saveParams,
+    };
+    return body;
+  };
 
-  // const saveToDashboard = async (
-  //   dashboardId: string,
-  //   dashboardName: string,
-  //   sheetId: string,
-  //   sheetName: string
-  // ) => {
-  //   if (
-  //     eventOptionData.length === 0 ||
-  //     !validIRetentionAnalyticsItem(eventOptionData[0])
-  //   ) {
-  //     return;
-  //   }
-  //   try {
-  //     const body = getRetentionRequest(
-  //       ExploreRequestAction.PUBLISH,
-  //       dashboardId,
-  //       dashboardName,
-  //       sheetId,
-  //       sheetName
-  //     );
-  //     if (!body) {
-  //       alertMsg(
-  //         t('analytics:valid.funnelPipelineVersionError'),
-  //         COMMON_ALERT_TYPE.Error as AlertType
-  //       );
-  //       return;
-  //     }
-  //     setLoadingData(true);
-  //     const { success }: ApiResponse<any> = await previewEvent(body);
-  //     if (success) {
-  //       setSelectDashboardModalVisible(false);
-  //     }
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
-  //   setLoadingData(false);
-  // };
+  const saveToDashboard = async (
+    dashboardId: string,
+    dashboardName: string,
+    sheetId: string,
+    sheetName: string
+  ) => {
+    if (
+      eventOptionData.length === 0 ||
+      !validRetentionAnalyticsItem(eventOptionData[0])
+    ) {
+      return;
+    }
+    try {
+      const body = getRetentionRequest(
+        ExploreRequestAction.PUBLISH,
+        dashboardId,
+        dashboardName,
+        sheetId,
+        sheetName
+      );
+      if (!body) {
+        alertMsg(
+          t('analytics:valid.funnelPipelineVersionError'),
+          COMMON_ALERT_TYPE.Error as AlertType
+        );
+        return;
+      }
+      setLoadingData(true);
+      const { success }: ApiResponse<any> = await previewRetention(body);
+      if (success) {
+        setSelectDashboardModalVisible(false);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+    setLoadingData(false);
+  };
+
+  const clickPreview = async () => {
+    if (
+      eventOptionData.length === 0 ||
+      !validRetentionAnalyticsItem(eventOptionData[0])
+    ) {
+      return;
+    }
+    try {
+      const body = getRetentionRequest(ExploreRequestAction.PREVIEW);
+      if (!body) {
+        alertMsg(
+          t('analytics:valid.funnelPipelineVersionError'),
+          COMMON_ALERT_TYPE.Error as AlertType
+        );
+        return;
+      }
+      setLoadingData(true);
+      setLoadingChart(true);
+      const { success, data }: ApiResponse<any> = await previewRetention(body);
+      setLoadingData(false);
+      setLoadingChart(false);
+      if (success && data.dashboardEmbedUrl) {
+        setExploreEmbedUrl(data.dashboardEmbedUrl);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   return (
     <AppLayout
@@ -414,7 +450,9 @@ const AnalyticsRetention: React.FC = () => {
                     <RetentionSelect
                       data={eventOptionData}
                       eventOptionList={metadataEvents}
-                      addEventButtonLabel={t('analytics:labels.retentionMetrics')}
+                      addEventButtonLabel={t(
+                        'analytics:labels.retentionMetrics'
+                      )}
                       addStartNewConditionItem={(index) => {
                         setEventOptionData((prev) => {
                           const dataObj = cloneDeep(prev);
@@ -642,7 +680,6 @@ const AnalyticsRetention: React.FC = () => {
                       }}
                     />
                   </div>
-                  <pre>{JSON.stringify(eventOptionData, null, 2)}</pre>
                 </SpaceBetween>
                 <SpaceBetween direction="vertical" size="xs">
                   <Box variant="awsui-key-label">
@@ -707,15 +744,25 @@ const AnalyticsRetention: React.FC = () => {
                   </div>
                 </SpaceBetween>
               </ColumnLayout>
+              <br />
+              <Button
+                variant="primary"
+                iconName="search"
+                onClick={clickPreview}
+                loading={loadingData}
+              >
+                {t('button.preview')}
+              </Button>
             </Container>
             <Container>
-              {loadingData ? (
+              {loadingChart ? (
                 <Loading />
               ) : (
-                <div
-                  id={'qs-funnel-container'}
-                  className="iframe-explore"
-                ></div>
+                <ExploreEmbedFrame
+                  embedType="dashboard"
+                  embedUrl={exploreEmbedUrl}
+                  embedId={`explore_${generateStr(6)}`}
+                />
               )}
             </Container>
           </SpaceBetween>
@@ -724,9 +771,7 @@ const AnalyticsRetention: React.FC = () => {
             disableClose={false}
             loading={loadingData}
             setModalVisible={setSelectDashboardModalVisible}
-            save={() => {
-              return;
-            }}
+            save={saveToDashboard}
           />
         </ContentLayout>
       }

@@ -83,6 +83,7 @@ export interface CreateDashboardResult {
   readonly dashboardName: string;
   readonly dashboardArn: string;
   readonly dashboardVersion: number;
+  readonly dashboardEmbedUrl: string;
   readonly analysisId: string;
   readonly analysisName: string;
   readonly analysisArn: string;

@@ -62,7 +62,7 @@ import {
   getDashboardCreateParameters,
   getDateRange,
   getEventAndConditions,
-  getFirstEventAndConditions,
+  getGlobalEventCondition,
   getWarmUpParameters,
   metadataEventsConvertToCategoryItemType,
   parametersConvertToCategoryItemType,
@@ -79,8 +79,7 @@ const AnalyticsEvent: React.FC = () => {
   const [loadingChart, setLoadingChart] = useState(false);
   const [selectDashboardModalVisible, setSelectDashboardModalVisible] =
     useState(false);
-  const [chartEmbedUrl, setChartEmbedUrl] = useState('');
-  const [tableEmbedUrl, setTableEmbedUrl] = useState('');
+  const [exploreEmbedUrl, setExploreEmbedUrl] = useState('');
   const [pipeline, setPipeline] = useState({} as IPipeline);
   const [metadataEvents, setMetadataEvents] = useState(
     [] as CategoryItemType[]
@@ -268,8 +267,7 @@ const AnalyticsEvent: React.FC = () => {
       amount: 7,
       unit: 'day',
     });
-    setChartEmbedUrl('');
-    setTableEmbedUrl('');
+    setExploreEmbedUrl('');
     setTimeGranularity({
       value: ExploreGroupColumn.DAY,
       label: t('analytics:options.dayTimeGranularity') ?? '',
@@ -355,10 +353,7 @@ const AnalyticsEvent: React.FC = () => {
       conversionIntervalInSeconds: 60 * 60 * 24,
       computeMethod: selectedMetric?.value ?? ExploreComputeMethod.USER_CNT,
       eventAndConditions: getEventAndConditions(eventOptionData),
-      firstEventExtraCondition: getFirstEventAndConditions(
-        eventOptionData,
-        segmentationOptionData
-      ),
+      globalEventCondition: getGlobalEventCondition(segmentationOptionData),
       timeScopeType: dateRangeParams?.timeScopeType,
       groupColumn: timeGranularity.value,
       ...dateRangeParams,
@@ -388,15 +383,8 @@ const AnalyticsEvent: React.FC = () => {
       const { success, data }: ApiResponse<any> = await previewEvent(body);
       setLoadingData(false);
       setLoadingChart(false);
-      if (success) {
-        if (
-          data.visualIds.length === 2 &&
-          data.visualIds[0].embedUrl &&
-          data.visualIds[1].embedUrl
-        ) {
-          setChartEmbedUrl(data.visualIds[0].embedUrl);
-          setTableEmbedUrl(data.visualIds[1].embedUrl);
-        }
+      if (success && data.dashboardEmbedUrl) {
+        setExploreEmbedUrl(data.dashboardEmbedUrl);
       }
     } catch (error) {
       console.log(error);
@@ -690,20 +678,9 @@ const AnalyticsEvent: React.FC = () => {
                   <Loading />
                 ) : (
                   <ExploreEmbedFrame
-                    embedType="visual"
-                    embedUrl={chartEmbedUrl}
-                    embedId={`chart_${generateStr(6)}`}
-                  />
-                )}
-              </Container>
-              <Container>
-                {loadingChart ? (
-                  <Loading />
-                ) : (
-                  <ExploreEmbedFrame
-                    embedType="visual"
-                    embedUrl={tableEmbedUrl}
-                    embedId={`table_${generateStr(6)}`}
+                    embedType="dashboard"
+                    embedUrl={exploreEmbedUrl}
+                    embedId={`explore_${generateStr(6)}`}
                   />
                 )}
               </Container>
