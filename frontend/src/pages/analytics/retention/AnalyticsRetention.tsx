@@ -49,6 +49,7 @@ import { cloneDeep } from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
+import { COMMON_ALERT_TYPE } from 'ts/const';
 import {
   ExploreComputeMethod,
   ExploreGroupColumn,
@@ -70,7 +71,6 @@ import {
 import ExploreDateRangePicker from '../comps/ExploreDateRangePicker';
 import ExploreEmbedFrame from '../comps/ExploreEmbedFrame';
 import SaveToDashboardModal from '../comps/SelectDashboardModal';
-import { COMMON_ALERT_TYPE } from 'ts/const';
 
 const AnalyticsRetention: React.FC = () => {
   const { t } = useTranslation();
