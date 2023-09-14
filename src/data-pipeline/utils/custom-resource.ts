@@ -265,7 +265,7 @@ export function createEMRServerlessApplicationCustomResource(
       projectId: props.projectId,
       name: props.name,
       version: props.version,
-      secourityGroupId: props.securityGroupId,
+      securityGroupId: props.securityGroupId,
       subnetIds: props.subnetIds,
       idleTimeoutMinutes: props.idleTimeoutMinutes,
       pipelineS3BucketName: props.pipelineS3Bucket.bucketName,
