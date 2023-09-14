@@ -11,27 +11,44 @@
  *  and limitations under the License.
  */
 
-import { TopNavigation } from '@cloudscape-design/components';
+import { Select, TopNavigation } from '@cloudscape-design/components';
+import { useLocalStorage } from 'pages/common/use-local-storage';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
+  ANALYTICS_INFO_KEY,
   EN_TEXT,
   LANGUAGE_ITEMS,
   PROJECT_CONFIG_JSON,
   ZH_LANGUAGE_LIST,
   ZH_TEXT,
 } from 'ts/const';
+import HeaderSwitchSpaceModal from './SwitchSpaceModal';
 
 interface IHeaderProps {
   user: any;
   signOut: any;
 }
 
-const Header: React.FC<IHeaderProps> = (props: IHeaderProps) => {
+const AnalyticsHeader: React.FC<IHeaderProps> = (props: IHeaderProps) => {
   const { t, i18n } = useTranslation();
   const { user, signOut } = props;
   const [displayName, setDisplayName] = useState('');
   const [fullLogoutUrl, setFullLogoutUrl] = useState('');
+  const [switchProjectVisible, setSwitchProjectVisible] = useState(false);
+  const [selectedOption, setSelectedOption] = React.useState<any>({
+    label: 'Option 1',
+    value: '1',
+  });
+  const [analyticsInfo, setAnalyticsInfo] = useLocalStorage(
+    ANALYTICS_INFO_KEY,
+    {
+      projectId: '',
+      projectName: '',
+      appId: '',
+      appName: '',
+    }
+  );
 
   const changeLanguage = (lng: string) => {
     i18n.changeLanguage(lng);
@@ -77,13 +94,55 @@ const Header: React.FC<IHeaderProps> = (props: IHeaderProps) => {
     <header id="h">
       <TopNavigation
         identity={{
-          href: '/',
+          href: '/analytics',
           title: t('header.solution') ?? '',
         }}
+        search={
+          <>
+            <Select
+              selectedOption={selectedOption}
+              onChange={({ detail }) =>
+                setSelectedOption(detail.selectedOption)
+              }
+              options={[
+                {
+                  label: 'Group 1',
+                  options: [
+                    { label: 'Option 1', value: '1' },
+                    { label: 'Option 2', value: '2' },
+                    { label: 'Option 3', value: '3' },
+                  ],
+                },
+                {
+                  label: 'Group 2 (disabled)',
+                  disabled: true,
+                  options: [
+                    { label: 'Option 4', value: '4' },
+                    { label: 'Option 5', value: '5' },
+                  ],
+                },
+              ]}
+            />
+          </>
+        }
         utilities={[
           {
             type: 'button',
-            text: t('header.solutionLibrary') || '',
+            variant: 'link',
+            text: `${analyticsInfo?.projectName} / ${analyticsInfo.appName}`,
+          },
+          {
+            type: 'button',
+            variant: 'primary-button',
+            text: t('header.switchSpace') ?? '',
+            onClick: () => {
+              setSwitchProjectVisible(true);
+            },
+          },
+
+          {
+            type: 'button',
+            text: 'Analytics Documentation',
             href: 'https://aws.amazon.com/solutions/',
             external: true,
           },
@@ -126,8 +185,14 @@ const Header: React.FC<IHeaderProps> = (props: IHeaderProps) => {
           overflowMenuDismissIconAriaLabel: t('header.closeMenu') || '',
         }}
       />
+      <HeaderSwitchSpaceModal
+        visible={switchProjectVisible}
+        disableClose={false}
+        setSwitchProjectVisible={setSwitchProjectVisible}
+        setAnalyticsInfo={setAnalyticsInfo}
+      />
     </header>
   );
 };
 
-export default Header;
+export default AnalyticsHeader;

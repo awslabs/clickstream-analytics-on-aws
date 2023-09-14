@@ -19,7 +19,7 @@ import {
   Pagination,
 } from '@cloudscape-design/components';
 import { getAnalyticsDashboardList } from 'apis/analytics';
-import Navigation from 'components/layouts/Navigation';
+import AnalyticsNavigation from 'components/layouts/AnalyticsNavigation';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -165,16 +165,19 @@ const AnalyticsDashboard: React.FC = () => {
   const { projectId, appId } = useParams();
 
   return (
-    <AppLayout
-      toolsHide
-      content={<AnalyticsDashboardCard />}
-      headerSelector="#header"
-      navigation={
-        <Navigation
-          activeHref={`/analytics/${projectId}/app/${appId}/dashboards`}
+    <div className="flex">
+      <AnalyticsNavigation
+        activeHref={`/analytics/${projectId}/app/${appId}/dashboards`}
+      />
+      <div className="flex-1">
+        <AppLayout
+          toolsHide
+          navigationHide
+          content={<AnalyticsDashboardCard />}
+          headerSelector="#header"
         />
-      }
-    />
+      </div>
+    </div>
   );
 };
 
