@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { ApiFail, ApiSuccess } from '../common/types';
+import { ApiFail, ApiSuccess, IUserRole } from '../common/types';
 import { getRoleFromToken, getTokenFromRequest } from '../common/utils';
 import { IUser } from '../model/user';
 import { ClickStreamStore } from '../store/click-stream-store';
@@ -46,22 +46,32 @@ export class UserServ {
   public async details(req: any, res: any, next: any) {
     try {
       const { uid } = req.query;
-      let result = await store.getUser(uid);
-      if (!result) {
-        const decodedToken = getTokenFromRequest(req);
-        const role = getRoleFromToken(decodedToken);
+      const decodedToken = getTokenFromRequest(req);
+      const roleInToken = getRoleFromToken(decodedToken);
+      const ddbUser = await store.getUser(uid);
+      if (!ddbUser) {
         const user: IUser = {
           uid: uid,
-          role: role,
+          role: roleInToken,
           createAt: Date.now(),
           updateAt: Date.now(),
           operator: res.get('X-Click-Stream-Operator'),
           deleted: false,
         };
         await store.addUser(user);
-        result = user;
+        return res.json(new ApiSuccess(user));
       }
-      return res.json(new ApiSuccess(result));
+      if (roleInToken === IUserRole.NO_IDENTITY) {
+        return res.json(new ApiSuccess(ddbUser));
+      } else if (ddbUser.role !== roleInToken) {
+        const newUser = {
+          ...ddbUser,
+          role: roleInToken,
+        };
+        await store.updateUser(newUser);
+        return res.json(new ApiSuccess(newUser));
+      }
+      return res.json(new ApiSuccess(ddbUser));
     } catch (error) {
       next(error);
     }

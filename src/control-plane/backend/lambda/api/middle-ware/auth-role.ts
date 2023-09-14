@@ -39,7 +39,6 @@ routerRoles.set('ALL /api/reporting/*', [IUserRole.ADMIN, IUserRole.ANALYST]);
 routerRoles.set('ALL /api/user/*', [IUserRole.ADMIN]);
 
 
-const UNAUTHORIZED_MESSAGE = 'Unauthorized.';
 const FORBIDDEN_MESSAGE = 'Insufficient permissions to access the API.';
 const HTTP_METHODS_PATTERN = '(GET|POST|PUT|DELETE|PATCH|OPTIONS|HEAD)';
 const ROUTER_PARAMETER_PATTERN = '([A-Za-z0-9_]+)';
@@ -69,21 +68,25 @@ export async function authRole(req: express.Request, res: express.Response, next
   const WITH_VALIDATE_ROLE = process.env.WITH_VALIDATE_ROLE;
   if (WITH_VALIDATE_ROLE === 'true' && req.url !== process.env.HEALTH_CHECK_PATH) {
     const token = getTokenFromRequest(req);
+    if (!token) {
+      logger.warn('No token found.');
+      return res.status(401).json(new ApiFail('No token found.'));
+    }
     const uid = getUidFromTokenPayload(token?.payload as JwtPayload);
     if (!uid) {
       logger.warn('Error authentication token.');
-      return res.status(401).json(new ApiFail(UNAUTHORIZED_MESSAGE));
+      return res.status(401).json(new ApiFail('Error authentication token.'));
     }
 
     const user = await store.getUser(uid);
-    if (!user || !user.role) {
-      logger.warn('User not found or no role.');
-      return res.status(403).json(new ApiFail(FORBIDDEN_MESSAGE));
+    let userRole = IUserRole.NO_IDENTITY;
+    if (user && user.role) {
+      userRole = user.role;
     }
 
     const requestKey = `${req.method} ${req.path}`;
     const accessRoles = matchRouter(requestKey);
-    if (!accessRoles || !accessRoles.includes(user.role)) {
+    if (!accessRoles || !accessRoles.includes(userRole)) {
       logger.warn(FORBIDDEN_MESSAGE);
       return res.status(403).json(new ApiFail(FORBIDDEN_MESSAGE));
     }

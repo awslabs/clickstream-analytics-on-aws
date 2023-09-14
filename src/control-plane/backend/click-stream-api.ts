@@ -403,6 +403,7 @@ export class ClickStreamApiConstruct extends Construct {
         QUICKSIGHT_EMBED_ROLE_ARN: quickSightEmbedRole.roleArn,
         HEALTH_CHECK_PATH: props.healthCheckPath,
         QUICKSIGHT_CONTROL_PLANE_REGION: props.targetToCNRegions ? 'cn-north-1' : 'us-east-1',
+        WITH_VALIDATE_ROLE: 'true',
         ... POWERTOOLS_ENVS,
       },
       timeout: Duration.seconds(30),

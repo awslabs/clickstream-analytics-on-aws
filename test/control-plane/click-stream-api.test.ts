@@ -138,6 +138,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
           },
           LOG_LEVEL: 'WARN',
           QUICKSIGHT_CONTROL_PLANE_REGION: 'us-east-1',
+          WITH_VALIDATE_ROLE: 'true',
         },
       },
       MemorySize: 512,
