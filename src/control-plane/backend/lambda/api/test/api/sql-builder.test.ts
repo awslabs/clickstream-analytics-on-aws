@@ -3272,7 +3272,8 @@ describe('SQL Builder test', () => {
             '_click',
             '_clickstream_error',
             '_mp_share',
-            '_mp_favorite'
+            '_mp_favorite',
+            '_app_end'
           )
       ),
       tmp_base_data as (
@@ -3606,7 +3607,8 @@ describe('SQL Builder test', () => {
             '_click',
             '_clickstream_error',
             '_mp_share',
-            '_mp_favorite'
+            '_mp_favorite',
+            '_app_end'
           )
       ),
       tmp_base_data as (

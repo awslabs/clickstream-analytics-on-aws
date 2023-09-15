@@ -90,6 +90,7 @@ export const builtInEvents = [
   '_clickstream_error',
   '_mp_share',
   '_mp_favorite',
+  '_app_end',
 ];
 
 export enum ExploreAnalyticsOperators {
