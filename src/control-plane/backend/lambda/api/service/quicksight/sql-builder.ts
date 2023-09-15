@@ -128,6 +128,7 @@ const baseColumns = `
 ,device.manufacturer:: varchar as device_manufacturer
 ,device.screen_width:: bigint as device_screen_width
 ,device.screen_height:: bigint as device_screen_height
+,device.viewport_height:: bigint as device_viewport_height
 ,device.carrier:: varchar as device_carrier
 ,device.network_type:: varchar as device_network_type
 ,device.operating_system:: varchar as device_operating_system
@@ -182,6 +183,7 @@ const columnTemplate = `
 ,device_manufacturer as device_manufacturer####
 ,device_screen_width as device_screen_width####
 ,device_screen_height as device_screen_height####
+,device_viewport_height as device_viewport_height####
 ,device_carrier as device_carrier####
 ,device_network_type as device_network_type####
 ,device_operating_system as device_operating_system####
