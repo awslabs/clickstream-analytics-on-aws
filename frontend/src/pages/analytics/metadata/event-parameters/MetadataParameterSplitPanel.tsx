@@ -352,10 +352,10 @@ const MetadataParameterSplitPanel: React.FC<
                     tableColumnDefinitions={COLUMN_DEFINITIONS}
                     tableI18nStrings={{
                       loadingText: t(
-                        'analytics:metadata.eventParameter.split.tableLoading'
+                        'analytics:metadata.labels.tableLoading'
                       ),
                       emptyText: t(
-                        'analytics:metadata.eventParameter.split.tableEmpty'
+                        'analytics:metadata.labels.tableEmpty'
                       ),
                     }}
                   />

@@ -24,6 +24,7 @@ import Navigation from 'components/layouts/Navigation';
 import { t } from 'i18next';
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { USER_ATTRIBUTE_DISPLAY_PREFIX } from 'ts/const';
 import { MetadataSource } from 'ts/explore-types';
 import MetadataUserAttributeSplitPanel from './MetadataUserAttributeSplitPanel';
 import MetadataSourceFC from '../comps/MetadataSource';
@@ -229,7 +230,7 @@ const MetadataUserAttributes: React.FC = () => {
     try {
       const { success, message }: ApiResponse<null> =
         await updateMetadataDisplay({
-          id: `USER_ATTRIBUTE#${newItem.id}`,
+          id: `${USER_ATTRIBUTE_DISPLAY_PREFIX}${newItem.id}`,
           projectId: newItem.projectId,
           appId: newItem.appId,
           displayName: newItem.displayName,
@@ -254,8 +255,8 @@ const MetadataUserAttributes: React.FC = () => {
           tableFilteringProperties={FILTERING_PROPERTIES}
           tableI18nStrings={{
             loadingText:
-              t('analytics:metadata.userAttribute.tableLoading') || 'Loading',
-            emptyText: t('analytics:metadata.userAttribute.tableEmpty'),
+              t('analytics:metadata.labels.tableLoading') || 'Loading',
+            emptyText: t('analytics:metadata.labels.tableEmpty'),
             headerTitle: t('analytics:metadata.userAttribute.title'),
             headerRefreshButtonText: t('common:button.refreshMetadata'),
             filteringAriaLabel: t(

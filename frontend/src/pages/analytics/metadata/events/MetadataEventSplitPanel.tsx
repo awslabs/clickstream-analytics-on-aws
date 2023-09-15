@@ -28,6 +28,7 @@ import Loading from 'components/common/Loading';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
+import { EVENT_DISPLAY_PREFIX } from 'ts/const';
 import { MetadataSource } from 'ts/explore-types';
 import MetadataPlatformFC from '../comps/MetadataPlatform';
 import MetadataSourceFC from '../comps/MetadataSource';
@@ -117,7 +118,7 @@ const MetadataEventSplitPanel: React.FC<MetadataEventSplitPanelProps> = (
 
     try {
       const { success }: ApiResponse<null> = await updateMetadataDisplay({
-        id: `EVENT#${eventDetails.id}`,
+        id: `${EVENT_DISPLAY_PREFIX}${eventDetails.id}`,
         projectId: eventDetails.projectId,
         appId: eventDetails.appId,
         displayName: eventDetails.displayName,
@@ -356,10 +357,10 @@ const MetadataEventSplitPanel: React.FC<MetadataEventSplitPanelProps> = (
                     tableColumnDefinitions={COLUMN_DEFINITIONS}
                     tableI18nStrings={{
                       loadingText: t(
-                        'analytics:metadata.eventParameter.split.tableLoading'
+                        'analytics:metadata.labels.tableLoading'
                       ),
                       emptyText: t(
-                        'analytics:metadata.eventParameter.split.tableEmpty'
+                        'analytics:metadata.labels.tableEmpty'
                       ),
                     }}
                   />
@@ -386,9 +387,9 @@ const MetadataEventSplitPanel: React.FC<MetadataEventSplitPanelProps> = (
                     tableColumnDefinitions={COLUMN_DEFINITIONS}
                     tableI18nStrings={{
                       loadingText: t(
-                        'analytics:metadata.event.split.tableLoading'
+                        'analytics:metadata.labels.tableLoading'
                       ),
-                      emptyText: t('analytics:metadata.event.split.tableEmpty'),
+                      emptyText: t('analytics:metadata.labels.tableEmpty'),
                     }}
                   />
                 ),

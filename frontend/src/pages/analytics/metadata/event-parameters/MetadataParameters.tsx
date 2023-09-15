@@ -24,6 +24,7 @@ import Navigation from 'components/layouts/Navigation';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
+import { EVENT_PARAMETER_DISPLAY_PREFIX } from 'ts/const';
 import MetadataParameterSplitPanel from './MetadataParameterSplitPanel';
 import MetadataPlatformFC from '../comps/MetadataPlatform';
 import MetadataSourceFC from '../comps/MetadataSource';
@@ -242,7 +243,7 @@ const MetadataParameters: React.FC = () => {
     try {
       const { success, message }: ApiResponse<null> =
         await updateMetadataDisplay({
-          id: `EVENT_PARAMETER#${newItem.id}`,
+          id: `${EVENT_PARAMETER_DISPLAY_PREFIX}${newItem.id}`,
           projectId: newItem.projectId,
           appId: newItem.appId,
           displayName: newItem.displayName,
@@ -268,9 +269,9 @@ const MetadataParameters: React.FC = () => {
             tableFilteringProperties={FILTERING_PROPERTIES}
             tableI18nStrings={{
               loadingText:
-                t('analytics:metadata.eventParameter.tableLoading') ||
+                t('analytics:metadata.labels.tableLoading') ||
                 'Loading',
-              emptyText: t('analytics:metadata.eventParameter.tableEmpty'),
+              emptyText: t('analytics:metadata.labels.tableEmpty'),
               headerTitle: t('analytics:metadata.eventParameter.title'),
               headerRefreshButtonText: t('common:button.refreshMetadata'),
               filteringAriaLabel: t(

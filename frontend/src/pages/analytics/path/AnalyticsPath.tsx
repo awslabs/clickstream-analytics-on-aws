@@ -32,6 +32,7 @@ import {
   getPathNodes,
   getPipelineDetailByProjectId,
   previewPath,
+  warmup,
 } from 'apis/analytics';
 import Loading from 'components/common/Loading';
 import {
@@ -67,6 +68,7 @@ import {
   getEventAndConditions,
   getFirstEventAndConditions,
   getIntervalInSeconds,
+  getWarmUpParameters,
   metadataEventsConvertToCategoryItemType,
   parametersConvertToCategoryItemType,
   pathNodesConvertToCategoryItemType,
@@ -215,16 +217,38 @@ const AnalyticsPath: React.FC = () => {
   const [selectedPlatform, setSelectedPlatform] =
     useState<SelectProps.Option | null>(defaultPlatformOption);
 
+  const getEventParameters = (eventName: string | undefined) => {
+    const event = originEvents.find((item) => item.name === eventName);
+    if (event) {
+      return event.associatedParameters;
+    }
+    return [];
+  };
+
+  const getAllPathNodes = async () => {
+    try {
+      const { success, data }: ApiResponse<any> = await getPathNodes(
+        projectId ?? '',
+        appId ?? ''
+      );
+      if (success) {
+        setNodes(data);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   const getUserAttributes = async () => {
     try {
-      if (!projectId || !appId) {
-        return [];
-      }
       const {
         success,
         data,
       }: ApiResponse<ResponseTableData<IMetadataUserAttribute>> =
-        await getMetadataUserAttributesList({ projectId, appId });
+        await getMetadataUserAttributesList({
+          projectId: projectId ?? '',
+          appId: appId ?? '',
+        });
       if (success) {
         setUserAttributes(data.items);
         return data.items;
@@ -236,15 +260,15 @@ const AnalyticsPath: React.FC = () => {
   };
 
   const getAllParameters = async () => {
-    if (!projectId || !appId) {
-      return [];
-    }
     try {
       const {
         success,
         data,
       }: ApiResponse<ResponseTableData<IMetadataEventParameter>> =
-        await getMetadataParametersList({ projectId, appId });
+        await getMetadataParametersList({
+          projectId: projectId ?? '',
+          appId: appId ?? '',
+        });
       if (success) {
         return data.items;
       }
@@ -254,37 +278,14 @@ const AnalyticsPath: React.FC = () => {
     }
   };
 
-  const getAllPathNodes = async () => {
-    if (!projectId || !appId) {
-      return [];
-    }
-    try {
-      const { success, data }: ApiResponse<any> = await getPathNodes(
-        projectId,
-        appId
-      );
-      if (success) {
-        setNodes(data);
-      }
-    } catch (error) {
-      console.log(error);
-      return [];
-    }
-    return [];
-  };
-
-  const getEventParameters = (eventName: string | undefined) => {
-    const event = originEvents.find((item) => item.name === eventName);
-    if (event) {
-      return event.associatedParameters;
-    }
-    return [];
-  };
-
   const listMetadataEvents = async () => {
     try {
       const { success, data }: ApiResponse<ResponseTableData<IMetadataEvent>> =
-        await getMetadataEventsList({ projectId, appId, attribute: true });
+        await getMetadataEventsList({
+          projectId: projectId ?? '',
+          appId: appId ?? '',
+          attribute: true,
+        });
       if (success) {
         const events = metadataEventsConvertToCategoryItemType(data.items);
         setOriginEvents(data.items);
@@ -292,7 +293,6 @@ const AnalyticsPath: React.FC = () => {
       }
     } catch (error) {
       console.log(error);
-      return;
     }
   };
 
@@ -300,9 +300,14 @@ const AnalyticsPath: React.FC = () => {
     setLoadingData(true);
     try {
       const { success, data }: ApiResponse<IPipeline> =
-        await getPipelineDetailByProjectId(projectId);
+        await getPipelineDetailByProjectId(projectId ?? '');
       if (success) {
         setPipeline(data);
+        setLoadingData(false);
+        const params = getWarmUpParameters(projectId ?? '', appId ?? '', data);
+        if (params) {
+          await warmup(params);
+        }
       }
     } catch (error) {
       console.log(error);
@@ -335,13 +340,13 @@ const AnalyticsPath: React.FC = () => {
   };
 
   useEffect(() => {
-    if (projectId || appId) {
+    if (projectId && appId) {
       loadPipeline();
       listMetadataEvents();
       listAllAttributes();
       getAllPathNodes();
     }
-  }, [projectId]);
+  }, [projectId, appId]);
 
   const [dateRangeValue, setDateRangeValue] =
     React.useState<DateRangePickerProps.Value>({

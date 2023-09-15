@@ -26,6 +26,7 @@ import { updateMetadataDisplay } from 'apis/analytics';
 import Loading from 'components/common/Loading';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { USER_ATTRIBUTE_DISPLAY_PREFIX } from 'ts/const';
 import MetadataSourceFC from '../comps/MetadataSource';
 
 interface MetadataUserAttributeSplitPanelProps {
@@ -72,7 +73,7 @@ const MetadataUserAttributeSplitPanel: React.FC<
 
     try {
       const { success }: ApiResponse<null> = await updateMetadataDisplay({
-        id: `USER_ATTRIBUTE#${attributeDetails.id}`,
+        id: `${USER_ATTRIBUTE_DISPLAY_PREFIX}${attributeDetails.id}`,
         projectId: attributeDetails.projectId,
         appId: attributeDetails.appId,
         displayName: attributeDetails.displayName,

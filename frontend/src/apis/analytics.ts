@@ -62,8 +62,8 @@ export const getAnalyticsDashboard = async (
 };
 
 export const getMetadataEventsList = async (params: {
-  projectId: string | undefined;
-  appId: string | undefined;
+  projectId: string;
+  appId: string;
   attribute?: boolean;
 }) => {
   if (!params.projectId || !params.appId) {
@@ -180,7 +180,7 @@ export const previewPath = async (data: IExploreRequest) => {
 };
 
 export const getPipelineDetailByProjectId = async (
-  projectId: string | undefined
+  projectId: string
 ) => {
   const result: any = await apiRequest(
     'get',

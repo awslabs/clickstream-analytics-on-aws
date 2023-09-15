@@ -59,7 +59,6 @@
     "event": {
       "title": "Origin Events",
       "description": "Description of the Origin Events",
-      "tableLoading": "Loading",
       "tableColumnID": "ID",
       "tableColumnName": "Event name",
       "tableColumnDisplayName": "Display name",
@@ -68,7 +67,6 @@
       "tableColumnHasData": "Has data",
       "tableColumnPlatform": "Platform",
       "tableColumnDataVolumeLastDay": "Data volume last day",
-      "tableEmpty": "No events",
       "filteringAriaLabel": "Find events",
       "filteringPlaceholder": "Find events",
       "split": {
@@ -78,15 +76,12 @@
         "parameterName": "Parameter name",
         "displayName": "Display name",
         "description": "Description",
-        "dataType": "Data type",
-        "tableLoading": "Loading",
-        "tableEmpty": "No resources"
+        "dataType": "Data type"
       }
     },
     "eventParameter": {
       "title": "Event Parameters",
       "description": "Description of the Event Parameter",
-      "tableLoading": "Loading",
       "tableColumnID": "ID",
       "tableColumnName": "Parameter name",
       "tableColumnDisplayName": "Display name",
@@ -96,21 +91,17 @@
       "tableColumnHasData": "Has data",
       "tableColumnPlatform": "Platform",
       "tableColumnDataType": "Data type",
-      "tableEmpty": "No event parameters",
       "filteringAriaLabel": "Find parameters",
       "filteringPlaceholder": "Find parameters",
       "split": {
         "title": "Event parameter details",
         "associatedEvents": "Associated events",
-        "dictionary": "Dictionary",
-        "tableLoading": "Loading",
-        "tableEmpty": "No resources"
+        "dictionary": "Dictionary"
       }
     },
     "userAttribute": {
       "title": "User Attribute",
       "description": "Description of the User Attribute",
-      "tableLoading": "Loading",
       "tableColumnID": "ID",
       "tableColumnName": "Attribute name",
       "tableColumnDisplayName": "Display name",
@@ -119,13 +110,10 @@
       "tableColumnHasData": "Has data",
       "tableColumnPlatform": "Platform",
       "tableColumnDataType": "Data type",
-      "tableEmpty": "No user attributes",
       "filteringAriaLabel": "Find attributes",
       "filteringPlaceholder": "Find attributes",
       "split": {
-        "title": "User attribute details",
-        "tableLoading": "Loading",
-        "tableEmpty": "No resources"
+        "title": "User attribute details"
       }
     },
     "dictionary": {
@@ -199,7 +187,10 @@
     "nodeType": "Node type",
     "nodesSelect": "Select nodes",
     "pathNode": "Node",
-    "conditionValuePlaceholder": "Input value"
+    "conditionValuePlaceholder": "Input value",
+    "tableLoading": "Loading",
+    "tableEmpty": "No resources",
+    "editError": "Edit error"
   },
   "emptyData": "No Data",
   "emptyDataMessage": "Please configure analysis indicators first"

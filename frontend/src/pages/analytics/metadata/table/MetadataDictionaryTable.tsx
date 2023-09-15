@@ -27,6 +27,8 @@ import {
 import { useColumnWidths } from 'pages/common/use-column-widths';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { DICTIONARY_DISPLAY_PREFIX } from 'ts/const';
+import { alertMsg } from 'ts/utils';
 import { descriptionRegex, displayNameRegex } from './table-config';
 
 interface MetadataDictionaryTableProps {
@@ -176,7 +178,7 @@ const MetadataDictionaryTable: React.FC<MetadataDictionaryTableProps> = (
       if (parameter) {
         const { success, message }: ApiResponse<null> =
           await updateMetadataDisplay({
-            id: `DICTIONARY#${parameter.id}#${attribute.value}`,
+            id: `${DICTIONARY_DISPLAY_PREFIX}${parameter.id}#${attribute.value}`,
             projectId: parameter.projectId,
             appId: parameter.appId,
             displayName: attribute.displayValue,
@@ -187,7 +189,7 @@ const MetadataDictionaryTable: React.FC<MetadataDictionaryTableProps> = (
         }
       }
     } catch (error) {
-      throw new Error('Edit error');
+      alertMsg(t('analytics:labels.editError'), 'error');
     }
   };
 

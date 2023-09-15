@@ -59,7 +59,6 @@
     "event": {
       "title": "原始事件",
       "description": "原始事件的描述",
-      "tableLoading": "加载中",
       "tableColumnID": "ID",
       "tableColumnName": "事件名称",
       "tableColumnDisplayName": "显示名称",
@@ -68,7 +67,6 @@
       "tableColumnHasData": "有数据",
       "tableColumnPlatform": "平台",
       "tableColumnDataVolumeLastDay": "最近一天的数据量",
-      "tableEmpty": "没有事件",
       "filteringAriaLabel": "查找事件",
       "filteringPlaceholder": "查找事件",
       "split": {
@@ -78,15 +76,12 @@
         "parameterName": "参数名称",
         "displayName": "显示名称",
         "description": "描述",
-        "dataType": "数据类型",
-        "tableLoading": "加载中",
-        "tableEmpty": "没有资源"
+        "dataType": "数据类型"
       }
     },
     "eventParameter": {
       "title": "事件参数",
       "description": "事件参数的描述",
-      "tableLoading": "加载中",
       "tableColumnID": "ID",
       "tableColumnName": "参数名称",
       "tableColumnDisplayName": "显示名称",
@@ -96,21 +91,17 @@
       "tableColumnHasData": "有数据",
       "tableColumnPlatform": "平台",
       "tableColumnDataType": "数据类型",
-      "tableEmpty": "没有事件参数",
       "filteringAriaLabel": "查找参数",
       "filteringPlaceholder": "查找参数",
       "split": {
         "title": "事件参数详细信息",
         "associatedEvents": "关联的事件",
-        "dictionary": "字典",
-        "tableLoading": "加载中",
-        "tableEmpty": "没有资源"
+        "dictionary": "字典"
       }
     },
     "userAttribute": {
       "title": "用户属性",
       "description": "用户属性的描述",
-      "tableLoading": "加载中",
       "tableColumnID": "ID",
       "tableColumnName": "属性名称",
       "tableColumnDisplayName": "显示名称",
@@ -119,13 +110,10 @@
       "tableColumnHasData": "有数据",
       "tableColumnPlatform": "平台",
       "tableColumnDataType": "数据类型",
-      "tableEmpty": "没有用户属性",
       "filteringAriaLabel": "查找属性",
       "filteringPlaceholder": "查找属性",
       "split": {
-        "title": "用户属性详细信息",
-        "tableLoading": "加载中",
-        "tableEmpty": "没有资源"
+        "title": "用户属性详细信息"
       }
     },
     "dictionary": {
@@ -199,7 +187,10 @@
     "nodeType": "节点类型",
     "nodesSelect": "选择节点",
     "pathNode": "节点",
-    "conditionValuePlaceholder": "输入值"
+    "conditionValuePlaceholder": "输入值",
+    "tableLoading": "正在加载数据",
+    "tableEmpty": "没有资源",
+    "editError": "编辑错误"
   },
   "emptyData": "无数据",
   "emptyDataMessage": "请先配置分析指标"
