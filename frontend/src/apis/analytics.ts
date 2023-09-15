@@ -62,8 +62,8 @@ export const getAnalyticsDashboard = async (
 };
 
 export const getMetadataEventsList = async (params: {
-  projectId: string | undefined;
-  appId: string | undefined;
+  projectId: string;
+  appId: string;
   attribute?: boolean;
 }) => {
   if (!params.projectId || !params.appId) {
@@ -94,8 +94,14 @@ export const getMetadataEventDetails = async (params: {
   return result;
 };
 
-export const updateMetadataEvent = async (event: IMetadataEvent) => {
-  const result: any = await apiRequest('put', '/metadata/event', event);
+export const updateMetadataDisplay = async (data: {
+  id: string;
+  projectId: string;
+  appId: string;
+  description: string;
+  displayName: string;
+}) => {
+  const result: any = await apiRequest('put', '/metadata/display', data);
   return result;
 };
 
@@ -122,17 +128,6 @@ export const getMetadataParametersDetails = async (params: {
   return result;
 };
 
-export const updateMetadataParameter = async (
-  parameter: IMetadataEventParameter
-) => {
-  const result: any = await apiRequest(
-    'put',
-    '/metadata/event_parameter',
-    parameter
-  );
-  return result;
-};
-
 export const getMetadataUserAttributesList = async (params: {
   projectId: string;
   appId: string;
@@ -140,17 +135,6 @@ export const getMetadataUserAttributesList = async (params: {
   const result: any = await apiRequest(
     'get',
     `/metadata/user_attributes?projectId=${params.projectId}&appId=${params.appId}`
-  );
-  return result;
-};
-
-export const updateMetadataUserAttribute = async (
-  attribute: IMetadataUserAttribute
-) => {
-  const result: any = await apiRequest(
-    'put',
-    '/metadata/user_attribute',
-    attribute
   );
   return result;
 };
@@ -196,7 +180,7 @@ export const previewPath = async (data: IExploreRequest) => {
 };
 
 export const getPipelineDetailByProjectId = async (
-  projectId: string | undefined
+  projectId: string
 ) => {
   const result: any = await apiRequest(
     'get',

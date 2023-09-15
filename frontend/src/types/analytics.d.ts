@@ -43,8 +43,6 @@ declare global {
     readonly appId: string;
 
     readonly eventName: string;
-    readonly eventDisplayName: string;
-    readonly eventDescription: string;
 
     readonly parameterId: string;
     readonly name: string;
