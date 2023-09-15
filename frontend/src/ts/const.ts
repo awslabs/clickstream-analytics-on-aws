@@ -412,3 +412,8 @@ export enum IUserRole {
   ANALYST = 'Analyst',
   NO_IDENTITY = 'NoIdentity',
 }
+
+export const EVENT_DISPLAY_PREFIX = 'EVENT#';
+export const EVENT_PARAMETER_DISPLAY_PREFIX = 'EVENT_PARAMETER#';
+export const USER_ATTRIBUTE_DISPLAY_PREFIX = 'USER_ATTRIBUTE#';
+export const DICTIONARY_DISPLAY_PREFIX = 'DICTIONARY#';

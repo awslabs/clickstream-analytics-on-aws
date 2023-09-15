@@ -21,6 +21,19 @@ const metadataEventServ: MetadataEventServ = new MetadataEventServ();
 const metadataEventParameterServ: MetadataEventParameterServ = new MetadataEventParameterServ();
 const metadataUserAttributeServ: MetadataUserAttributeServ = new MetadataUserAttributeServ();
 
+router_metadata.put(
+  '/display',
+  validate([
+    body().custom(isValidEmpty).custom(isXSSRequest),
+    body('projectId').custom(isValidEmpty),
+    body('appId').custom(isValidEmpty),
+    body('id').custom(isValidEmpty),
+    header('X-Click-Stream-Request-Id').custom(isRequestIdExisted),
+  ]),
+  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    return metadataEventServ.updateDisplay(req, res, next);
+  });
+
 router_metadata.get(
   '/pathNodes',
   validate([
@@ -68,17 +81,6 @@ router_metadata.get('/event/:name',
     return metadataEventServ.details(req, res, next);
   });
 
-router_metadata.put(
-  '/event',
-  validate([
-    body().custom(isValidEmpty),
-    body('projectId').custom(isValidEmpty),
-    body('appId').custom(isValidEmpty),
-  ]),
-  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-    return metadataEventServ.update(req, res, next);
-  });
-
 router_metadata.get(
   '/event_parameters',
   validate([
@@ -108,17 +110,6 @@ router_metadata.post(
 router_metadata.get('/event_parameter/:parameterName', async (req: express.Request, res: express.Response, next: express.NextFunction) => {
   return metadataEventParameterServ.details(req, res, next);
 });
-
-router_metadata.put(
-  '/event_parameter',
-  validate([
-    body().custom(isValidEmpty),
-    body('projectId').custom(isValidEmpty),
-    body('appId').custom(isValidEmpty),
-  ]),
-  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-    return metadataEventParameterServ.update(req, res, next);
-  });
 
 router_metadata.get(
   '/user_attributes',
@@ -151,17 +142,6 @@ router_metadata.post(
 router_metadata.get('/user_attribute/:name', async (req: express.Request, res: express.Response, next: express.NextFunction) => {
   return metadataUserAttributeServ.details(req, res, next);
 });
-
-router_metadata.put(
-  '/user_attribute',
-  validate([
-    body().custom(isValidEmpty),
-    body('projectId').custom(isValidEmpty),
-    body('appId').custom(isValidEmpty),
-  ]),
-  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-    return metadataUserAttributeServ.update(req, res, next);
-  });
 
 export {
   router_metadata,

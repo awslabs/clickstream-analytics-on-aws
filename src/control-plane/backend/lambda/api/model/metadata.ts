@@ -22,12 +22,12 @@ export interface IMetadataEvent {
   readonly appId: string;
 
   readonly name: string;
-  readonly displayName: string;
-  readonly description: string;
+  displayName: string;
+  description: string;
   readonly metadataSource: MetadataSource;
-  readonly hasData: boolean;
-  readonly platform: MetadataPlatform[];
   readonly dataVolumeLastDay: number;
+  hasData: boolean;
+  platform: MetadataPlatform[];
   associatedParameters? : IMetadataEventParameter[];
 
   readonly createAt: number;
@@ -38,7 +38,7 @@ export interface IMetadataEvent {
 
 export interface IMetadataAttributeValue {
   readonly value: string;
-  readonly displayValue: string;
+  displayValue: string;
 }
 
 export interface IMetadataEventParameter {
@@ -50,19 +50,17 @@ export interface IMetadataEventParameter {
   readonly appId: string;
 
   readonly eventName: string;
-  readonly eventDisplayName: string;
-  readonly eventDescription: string;
 
   readonly parameterId: string;
   readonly name: string;
-  readonly displayName: string;
-  readonly description: string;
+  displayName: string;
+  description: string;
   readonly metadataSource: MetadataSource;
-  readonly hasData: boolean;
-  readonly platform: MetadataPlatform[];
+  hasData: boolean;
+  platform: MetadataPlatform[];
   readonly parameterType: MetadataParameterType;
   readonly valueType: MetadataValueType;
-  readonly valueEnum: IMetadataAttributeValue[];
+  valueEnum: IMetadataAttributeValue[];
   associatedEvents? : IMetadataEvent[];
 
   readonly createAt: number;
@@ -81,15 +79,25 @@ export interface IMetadataUserAttribute {
 
   readonly attributeId: string;
   readonly name: string;
-  readonly displayName: string;
-  readonly description: string;
+  displayName: string;
+  description: string;
   readonly metadataSource: MetadataSource;
-  readonly hasData: boolean;
+  hasData: boolean;
   readonly valueType: MetadataValueType;
-  readonly valueEnum: IMetadataAttributeValue[];
+  valueEnum: IMetadataAttributeValue[];
 
   readonly createAt: number;
   readonly updateAt: number;
   readonly operator: string;
   readonly deleted: boolean;
+}
+
+export interface IMetadataDisplay {
+  readonly id: string;
+  readonly projectId: string;
+  readonly appId: string;
+
+  readonly displayName: string;
+  readonly description: string;
+  readonly updateAt: number;
 }

@@ -25,7 +25,7 @@ import {
 } from '@cloudscape-design/components';
 import {
   getMetadataParametersDetails,
-  updateMetadataParameter,
+  updateMetadataDisplay,
 } from 'apis/analytics';
 import Loading from 'components/common/Loading';
 import React, { useEffect, useState } from 'react';
@@ -34,6 +34,7 @@ import { useParams } from 'react-router-dom';
 import MetadataPlatformFC from '../comps/MetadataPlatform';
 import MetadataSourceFC from '../comps/MetadataSource';
 import MetadataDetailsTable from '../table/MetadataDetailsTable';
+import MetadataDictionaryTable from '../table/MetadataDictionaryTable';
 
 interface MetadataParameterSplitPanelProps {
   parameter: IMetadataEventParameter;
@@ -113,9 +114,13 @@ const MetadataParameterSplitPanel: React.FC<
     }
 
     try {
-      const { success }: ApiResponse<null> = await updateMetadataParameter(
-        parameterDetails
-      );
+      const { success }: ApiResponse<null> = await updateMetadataDisplay({
+        id: `EVENT_PARAMETER#${parameterDetails.id}`,
+        projectId: parameterDetails.projectId,
+        appId: parameterDetails.appId,
+        displayName: parameterDetails.displayName,
+        description: parameterDetails.description,
+      });
       if (success) {
         if (type === 'displayName') {
           setPrevDisplayName(parameterDetails.displayName);
@@ -347,11 +352,39 @@ const MetadataParameterSplitPanel: React.FC<
                     tableColumnDefinitions={COLUMN_DEFINITIONS}
                     tableI18nStrings={{
                       loadingText: t(
-                        'analytics:metadata.eventParameter.split.tableLoading'
+                        'analytics:metadata.labels.tableLoading'
                       ),
                       emptyText: t(
-                        'analytics:metadata.eventParameter.split.tableEmpty'
+                        'analytics:metadata.labels.tableEmpty'
                       ),
+                    }}
+                  />
+                ),
+              },
+              {
+                label: (
+                  <Box fontWeight="bold">
+                    {t('analytics:metadata.eventParameter.split.dictionary')}
+                  </Box>
+                ),
+                id: 'second',
+                content: (
+                  <MetadataDictionaryTable
+                    parameter={parameterDetails}
+                    tableI18nStrings={{
+                      loadingText: '',
+                      emptyText: '',
+                      headerTitle: '',
+                      headerRefreshButtonText: '',
+                      filteringAriaLabel: '',
+                      filteringPlaceholder: '',
+                      groupPropertiesText: '',
+                      operatorsText: '',
+                      clearFiltersText: '',
+                      applyActionText: '',
+                      useText: '',
+                      matchText: '',
+                      matchesText: '',
                     }}
                   />
                 ),

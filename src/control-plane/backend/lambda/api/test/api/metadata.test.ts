@@ -13,14 +13,16 @@
 
 import {
   DynamoDBDocumentClient,
-  GetCommand,
   PutCommand,
   QueryCommand,
+  ScanCommand,
   UpdateCommand,
 } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
 import request from 'supertest';
-import { metadataEventAttributeExistedMock, metadataEventExistedMock, metadataUserAttributeExistedMock, MOCK_APP_ID, MOCK_EVENT_PARAMETER_NAME, MOCK_EVENT_NAME, MOCK_PROJECT_ID, MOCK_TOKEN, MOCK_USER_ATTRIBUTE_NAME, tokenMock } from './ddb-mock';
+import { metadataEventExistedMock, MOCK_APP_ID, MOCK_EVENT_PARAMETER_NAME, MOCK_EVENT_NAME, MOCK_PROJECT_ID, MOCK_TOKEN, MOCK_USER_ATTRIBUTE_NAME, tokenMock } from './ddb-mock';
+import { analyticsMetadataTable, invertedGSIName, prefixTimeGSIName } from '../../common/constants';
+import { MetadataPlatform } from '../../common/explore-types';
 import { app, server } from '../../index';
 import 'aws-sdk-client-mock-jest';
 
@@ -29,6 +31,97 @@ const ddbMock = mockClient(DynamoDBDocumentClient);
 describe('Metadata Event test', () => {
   beforeEach(() => {
     ddbMock.reset();
+    // display data
+    ddbMock.on(QueryCommand, {
+      TableName: analyticsMetadataTable,
+      IndexName: prefixTimeGSIName,
+      KeyConditionExpression: '#prefix= :prefix',
+      FilterExpression: 'projectId = :projectId AND appId = :appId',
+      ExpressionAttributeNames: {
+        '#prefix': 'prefix',
+      },
+      ExpressionAttributeValues: {
+        ':projectId': MOCK_PROJECT_ID,
+        ':appId': MOCK_APP_ID,
+        ':prefix': 'DISPLAY',
+      },
+    }).resolves({
+      Items: [
+        {
+          id: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}`,
+          projectId: MOCK_PROJECT_ID,
+          appId: MOCK_APP_ID,
+          displayName: `display name of event ${MOCK_EVENT_NAME}`,
+          description: `Description of event ${MOCK_EVENT_NAME}`,
+        },
+        {
+          id: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}1`,
+          projectId: MOCK_PROJECT_ID,
+          appId: MOCK_APP_ID,
+          displayName: `display name of event ${MOCK_EVENT_NAME}1`,
+          description: `Description of event ${MOCK_EVENT_NAME}1`,
+        },
+        {
+          id: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}2`,
+          projectId: MOCK_PROJECT_ID,
+          appId: MOCK_APP_ID,
+          displayName: `display name of event ${MOCK_EVENT_NAME}2`,
+          description: `Description of event ${MOCK_EVENT_NAME}2`,
+        },
+        {
+          id: `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}#${MOCK_EVENT_PARAMETER_NAME}`,
+          projectId: MOCK_PROJECT_ID,
+          appId: MOCK_APP_ID,
+          displayName: `display name of event parameter ${MOCK_EVENT_PARAMETER_NAME}`,
+          description: `Description of event parameter ${MOCK_EVENT_PARAMETER_NAME}`,
+        },
+        {
+          id: `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}1#${MOCK_EVENT_PARAMETER_NAME}11`,
+          projectId: MOCK_PROJECT_ID,
+          appId: MOCK_APP_ID,
+          displayName: `display name of event parameter ${MOCK_EVENT_PARAMETER_NAME}11`,
+          description: `Description of event parameter ${MOCK_EVENT_PARAMETER_NAME}11`,
+        },
+        {
+          id: `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}1#${MOCK_EVENT_PARAMETER_NAME}12`,
+          projectId: MOCK_PROJECT_ID,
+          appId: MOCK_APP_ID,
+          displayName: `display name of event parameter ${MOCK_EVENT_PARAMETER_NAME}12`,
+          description: `Description of event parameter ${MOCK_EVENT_PARAMETER_NAME}12`,
+        },
+        {
+          id: `DICTIONARY#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}#${MOCK_EVENT_PARAMETER_NAME}#value-02`,
+          projectId: MOCK_PROJECT_ID,
+          appId: MOCK_APP_ID,
+          displayName: `display name of dictionary ${MOCK_EVENT_PARAMETER_NAME} value-02`,
+        },
+        {
+          id: `DICTIONARY#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}1#${MOCK_EVENT_PARAMETER_NAME}11#value-02`,
+          projectId: MOCK_PROJECT_ID,
+          appId: MOCK_APP_ID,
+          displayName: `display name of dictionary ${MOCK_EVENT_PARAMETER_NAME}11 value-02`,
+        },
+        {
+          id: `DICTIONARY#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}1#${MOCK_EVENT_PARAMETER_NAME}12#value-012`,
+          projectId: MOCK_PROJECT_ID,
+          appId: MOCK_APP_ID,
+          displayName: `display name of dictionary ${MOCK_EVENT_PARAMETER_NAME}12 value-012`,
+        },
+        {
+          id: `USER_ATTRIBUTE#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_USER_ATTRIBUTE_NAME}`,
+          projectId: MOCK_PROJECT_ID,
+          appId: MOCK_APP_ID,
+          displayName: `display name of user parameter ${MOCK_USER_ATTRIBUTE_NAME}`,
+          description: `Description of user parameter ${MOCK_USER_ATTRIBUTE_NAME}`,
+        },
+        {
+          id: `DICTIONARY#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_USER_ATTRIBUTE_NAME}#value-02`,
+          projectId: MOCK_PROJECT_ID,
+          appId: MOCK_APP_ID,
+          displayName: `display name of dictionary ${MOCK_USER_ATTRIBUTE_NAME} value-02`,
+        },
+      ],
+    });
   });
   it('Create metadata event', async () => {
     tokenMock(ddbMock, false);
@@ -40,7 +133,6 @@ describe('Metadata Event test', () => {
         projectId: MOCK_PROJECT_ID,
         appId: MOCK_APP_ID,
         name: MOCK_EVENT_NAME,
-        description: 'Description of event',
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(201);
@@ -58,7 +150,6 @@ describe('Metadata Event test', () => {
         projectId: MOCK_PROJECT_ID,
         appId: MOCK_APP_ID,
         name: '<IMG SRC=javascript:alert(\'XSS\')><script>alert(234)</script>',
-        description: 'Description of event',
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
@@ -74,7 +165,6 @@ describe('Metadata Event test', () => {
             projectId: MOCK_PROJECT_ID,
             appId: MOCK_APP_ID,
             name: '<IMG SRC=javascript:alert(\'XSS\')><script>alert(234)</script>',
-            description: 'Description of event',
           },
         },
       ],
@@ -91,7 +181,6 @@ describe('Metadata Event test', () => {
         projectId: MOCK_PROJECT_ID,
         appId: MOCK_APP_ID,
         name: MOCK_EVENT_NAME,
-        description: 'Description of event',
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(500);
@@ -146,7 +235,6 @@ describe('Metadata Event test', () => {
         projectId: MOCK_PROJECT_ID,
         appId: MOCK_APP_ID,
         name: MOCK_EVENT_NAME,
-        description: 'Description of event',
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
@@ -165,42 +253,92 @@ describe('Metadata Event test', () => {
     expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 0);
   });
   it('Get metadata event by name', async () => {
-    ddbMock.on(QueryCommand).resolvesOnce({
+    ddbMock.on(QueryCommand, {
+      TableName: analyticsMetadataTable,
+      IndexName: invertedGSIName,
+      KeyConditionExpression: '#type = :type AND begins_with(#id, :id_start)',
+      FilterExpression: 'deleted = :d',
+      ExpressionAttributeNames: {
+        '#id': 'id',
+        '#type': 'type',
+      },
+      ExpressionAttributeValues: {
+        ':d': false,
+        ':type': `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}`,
+        ':id_start': `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}`,
+      },
+    }).resolves({
       Items: [
         {
           id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}`,
           type: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}`,
-          prefix: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}`,
+          prefix: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
           deleted: false,
           updateAt: 1690788840458,
           createAt: 1690788840458,
           operator: '',
-          description: 'description of event 1',
-          name: `${MOCK_EVENT_NAME}`,
+          name: MOCK_EVENT_NAME,
+          hasData: false,
+          platform: [MetadataPlatform.ANDROID],
+        },
+        {
+          id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}`,
+          type: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}`,
+          prefix: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
+          deleted: false,
+          updateAt: 1690788840451,
+          createAt: 1690788840451,
+          operator: '',
+          name: MOCK_EVENT_NAME,
+          hasData: true,
+          platform: [MetadataPlatform.WEB],
         },
         {
           id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}#${MOCK_EVENT_PARAMETER_NAME}`,
           type: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}`,
           prefix: `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
-          appId: `${MOCK_APP_ID}`,
+          appId: MOCK_APP_ID,
+          projectId: MOCK_PROJECT_ID,
           createAt: 1691415932588,
           deleted: false,
-          description: 'descriptionIII',
-          displayName: 'event parameter DVM',
           hasData: true,
           metadataSource: 'Preset',
-          name: 'eventAttriII',
+          name: MOCK_EVENT_PARAMETER_NAME,
+          eventName: MOCK_EVENT_NAME,
           operator: '',
           parameterId: '9e944f193e3d4521ae81427423d28daf',
           parameterType: 'Public',
-          platform: 'Web',
-          projectId: `${MOCK_PROJECT_ID}`,
+          platform: [MetadataPlatform.ANDROID, MetadataPlatform.IOS],
+          valueEnum: [
+            { value: 'value-01', displayValue: 'label-01' },
+            { value: 'value-02', displayValue: 'label-02' },
+          ],
+        },
+        {
+          id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}#${MOCK_EVENT_PARAMETER_NAME}`,
+          type: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}`,
+          prefix: `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
+          appId: MOCK_APP_ID,
+          projectId: MOCK_PROJECT_ID,
+          createAt: 1691415932581,
+          deleted: false,
+          hasData: false,
+          metadataSource: 'Preset',
+          name: MOCK_EVENT_PARAMETER_NAME,
+          eventName: MOCK_EVENT_NAME,
+          operator: '',
+          parameterId: '9e944f193e3d4521ae81427423d28daf',
+          parameterType: 'Public',
+          platform: [MetadataPlatform.WEB],
+          valueEnum: [
+            { value: 'value-02', displayValue: 'label-02' },
+            { value: 'value-03', displayValue: 'label-03' },
+          ],
         },
       ],
     });
     let res = await request(app)
       .get(`/api/metadata/event/${MOCK_EVENT_NAME}?projectId=${MOCK_PROJECT_ID}&appId=${MOCK_APP_ID}`);
-    expect(ddbMock).toHaveReceivedCommandTimes(QueryCommand, 1);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({
@@ -209,31 +347,40 @@ describe('Metadata Event test', () => {
       data: {
         id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}`,
         type: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}`,
-        prefix: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}`,
+        prefix: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
         associatedParameters: [
           {
             id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}#${MOCK_EVENT_PARAMETER_NAME}`,
             type: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}`,
             prefix: `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
-            appId: 'app_7777_7777',
+            appId: MOCK_APP_ID,
             createAt: 1691415932588,
             deleted: false,
-            description: 'descriptionIII',
-            displayName: 'event parameter DVM',
-            hasData: true,
             metadataSource: 'Preset',
-            name: 'eventAttriII',
+            name: MOCK_EVENT_PARAMETER_NAME,
+            eventName: MOCK_EVENT_NAME,
+            displayName: `display name of event parameter ${MOCK_EVENT_PARAMETER_NAME}`,
+            description: `Description of event parameter ${MOCK_EVENT_PARAMETER_NAME}`,
             operator: '',
             parameterId: '9e944f193e3d4521ae81427423d28daf',
             parameterType: 'Public',
-            platform: 'Web',
-            projectId: 'project_8888_8888',
+            projectId: MOCK_PROJECT_ID,
+            hasData: true,
+            platform: [MetadataPlatform.ANDROID, MetadataPlatform.IOS, MetadataPlatform.WEB],
+            valueEnum: [
+              { value: 'value-01', displayValue: 'label-01' },
+              { value: 'value-02', displayValue: `display name of dictionary ${MOCK_EVENT_PARAMETER_NAME} value-02` },
+              { value: 'value-03', displayValue: 'label-03' },
+            ],
           },
         ],
+        hasData: true,
+        platform: [MetadataPlatform.ANDROID, MetadataPlatform.WEB],
         createAt: 1690788840458,
         deleted: false,
-        description: 'description of event 1',
-        name: 'event-mock',
+        name: MOCK_EVENT_NAME,
+        displayName: `display name of event ${MOCK_EVENT_NAME}`,
+        description: `Description of event ${MOCK_EVENT_NAME}`,
         operator: '',
         updateAt: 1690788840458,
       },
@@ -253,11 +400,56 @@ describe('Metadata Event test', () => {
     });
   });
   it('Get metadata event list', async () => {
-    ddbMock.on(QueryCommand).resolves({
+    ddbMock.on(QueryCommand).resolvesOnce({
       Items: [
-        { name: 'event-01' },
-        { name: 'event-02' },
-        { name: 'event-03' },
+        {
+          id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}1`,
+          type: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}1`,
+          prefix: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
+          deleted: false,
+          updateAt: 1690788840458,
+          createAt: 1690788840458,
+          operator: '',
+          name: `${MOCK_EVENT_NAME}1`,
+          hasData: false,
+          platform: [MetadataPlatform.ANDROID],
+        },
+        {
+          id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}1`,
+          type: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}1`,
+          prefix: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
+          deleted: false,
+          updateAt: 1690788840451,
+          createAt: 1690788840451,
+          operator: '',
+          name: `${MOCK_EVENT_NAME}1`,
+          hasData: true,
+          platform: [MetadataPlatform.WEB],
+        },
+        {
+          id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}2`,
+          type: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}2`,
+          prefix: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
+          deleted: false,
+          updateAt: 1690788840458,
+          createAt: 1690788840458,
+          operator: '',
+          name: `${MOCK_EVENT_NAME}2`,
+          hasData: false,
+          platform: [MetadataPlatform.ANDROID],
+        },
+        {
+          id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}2`,
+          type: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}2`,
+          prefix: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
+          deleted: false,
+          updateAt: 1690788840451,
+          createAt: 1690788840451,
+          operator: '',
+          name: `${MOCK_EVENT_NAME}2`,
+          hasData: true,
+          platform: [MetadataPlatform.WEB, MetadataPlatform.IOS],
+        },
       ],
     });
     let res = await request(app)
@@ -269,11 +461,38 @@ describe('Metadata Event test', () => {
       message: '',
       data: {
         items: [
-          { name: 'event-01' },
-          { name: 'event-02' },
-          { name: 'event-03' },
+          {
+            id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}1`,
+            type: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}1`,
+            prefix: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
+            deleted: false,
+            updateAt: 1690788840458,
+            createAt: 1690788840458,
+            operator: '',
+            name: `${MOCK_EVENT_NAME}1`,
+            displayName: `display name of event ${MOCK_EVENT_NAME}1`,
+            description: `Description of event ${MOCK_EVENT_NAME}1`,
+            hasData: true,
+            associatedParameters: [],
+            platform: [MetadataPlatform.ANDROID, MetadataPlatform.WEB],
+          },
+          {
+            id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}2`,
+            type: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}2`,
+            prefix: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
+            deleted: false,
+            updateAt: 1690788840458,
+            createAt: 1690788840458,
+            operator: '',
+            name: `${MOCK_EVENT_NAME}2`,
+            displayName: `display name of event ${MOCK_EVENT_NAME}2`,
+            description: `Description of event ${MOCK_EVENT_NAME}2`,
+            hasData: true,
+            associatedParameters: [],
+            platform: [MetadataPlatform.ANDROID, MetadataPlatform.WEB, MetadataPlatform.IOS],
+          },
         ],
-        totalCount: 3,
+        totalCount: 2,
       },
     });
 
@@ -290,53 +509,288 @@ describe('Metadata Event test', () => {
       error: 'Error',
     });
   });
-  it('Update metadata event', async () => {
-    metadataEventExistedMock(ddbMock, MOCK_PROJECT_ID, MOCK_APP_ID, true);
-    ddbMock.on(QueryCommand).resolves({
-      Items: [{
-        id: 'EVENT',
-        type: 'EVENT',
-        prefix: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
-      }],
+  it('Get metadata event list with parameters', async () => {
+    ddbMock.on(QueryCommand).resolvesOnce({
+      Items: [
+        {
+          id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}1`,
+          type: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}1`,
+          prefix: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
+          deleted: false,
+          updateAt: 1690788840458,
+          createAt: 1690788840458,
+          operator: '',
+          name: `${MOCK_EVENT_NAME}1`,
+          hasData: false,
+          platform: [MetadataPlatform.ANDROID],
+        },
+        {
+          id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}1`,
+          type: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}1`,
+          prefix: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
+          deleted: false,
+          updateAt: 1690788840451,
+          createAt: 1690788840451,
+          operator: '',
+          name: `${MOCK_EVENT_NAME}1`,
+          hasData: true,
+          platform: [MetadataPlatform.WEB],
+        },
+        {
+          id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}2`,
+          type: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}2`,
+          prefix: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
+          deleted: false,
+          updateAt: 1690788840458,
+          createAt: 1690788840458,
+          operator: '',
+          name: `${MOCK_EVENT_NAME}2`,
+          hasData: false,
+          platform: [MetadataPlatform.ANDROID],
+        },
+        {
+          id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}2`,
+          type: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}2`,
+          prefix: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
+          deleted: false,
+          updateAt: 1690788840451,
+          createAt: 1690788840451,
+          operator: '',
+          name: `${MOCK_EVENT_NAME}2`,
+          hasData: true,
+          platform: [MetadataPlatform.WEB, MetadataPlatform.IOS],
+        },
+      ],
+    }).resolves({
+      Items: [
+        {
+          id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}1#${MOCK_EVENT_PARAMETER_NAME}11`,
+          type: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}1`,
+          prefix: `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
+          appId: MOCK_APP_ID,
+          projectId: MOCK_PROJECT_ID,
+          createAt: 1691415932588,
+          deleted: false,
+          hasData: true,
+          metadataSource: 'Preset',
+          name: `${MOCK_EVENT_PARAMETER_NAME}11`,
+          eventName: `${MOCK_EVENT_NAME}1`,
+          operator: '',
+          parameterId: '9e944f193e3d4521ae81427423d28daf',
+          parameterType: 'Public',
+          platform: [MetadataPlatform.ANDROID, MetadataPlatform.IOS],
+          valueEnum: [
+            { value: 'value-01', displayValue: 'label-01' },
+            { value: 'value-02', displayValue: 'label-02' },
+          ],
+        },
+        {
+          id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}1#${MOCK_EVENT_PARAMETER_NAME}11`,
+          type: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}1`,
+          prefix: `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
+          appId: MOCK_APP_ID,
+          projectId: MOCK_PROJECT_ID,
+          createAt: 1691415932581,
+          deleted: false,
+          hasData: false,
+          metadataSource: 'Preset',
+          name: `${MOCK_EVENT_PARAMETER_NAME}11`,
+          eventName: `${MOCK_EVENT_NAME}1`,
+          operator: '',
+          parameterId: '9e944f193e3d4521ae81427423d28daf',
+          parameterType: 'Public',
+          platform: [MetadataPlatform.WEB],
+          valueEnum: [
+            { value: 'value-02', displayValue: 'label-02' },
+            { value: 'value-03', displayValue: 'label-03' },
+          ],
+        },
+        {
+          id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}1#${MOCK_EVENT_PARAMETER_NAME}12`,
+          type: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}1`,
+          prefix: `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
+          appId: MOCK_APP_ID,
+          projectId: MOCK_PROJECT_ID,
+          createAt: 1691415932588,
+          deleted: false,
+          hasData: true,
+          metadataSource: 'Preset',
+          name: `${MOCK_EVENT_PARAMETER_NAME}12`,
+          eventName: `${MOCK_EVENT_NAME}1`,
+          operator: '',
+          parameterId: '9e944f193e3d4521ae81427423d28daf',
+          parameterType: 'Public',
+          platform: [MetadataPlatform.IOS],
+          valueEnum: [
+            { value: 'value-011', displayValue: 'label-011' },
+            { value: 'value-012', displayValue: 'label-012' },
+          ],
+        },
+        {
+          id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}1#${MOCK_EVENT_PARAMETER_NAME}12`,
+          type: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}1`,
+          prefix: `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
+          appId: MOCK_APP_ID,
+          projectId: MOCK_PROJECT_ID,
+          createAt: 1691415932581,
+          deleted: false,
+          hasData: false,
+          metadataSource: 'Preset',
+          name: `${MOCK_EVENT_PARAMETER_NAME}12`,
+          eventName: `${MOCK_EVENT_NAME}1`,
+          operator: '',
+          parameterId: '9e944f193e3d4521ae81427423d28daf',
+          parameterType: 'Public',
+          platform: [MetadataPlatform.WEB],
+          valueEnum: [
+            { value: 'value-012', displayValue: 'label-012' },
+            { value: 'value-013', displayValue: 'label-013' },
+          ],
+        },
+      ],
     });
-    ddbMock.on(UpdateCommand).resolves({});
     let res = await request(app)
-      .put('/api/metadata/event')
+      .get(`/api/metadata/events?projectId=${MOCK_PROJECT_ID}&appId=${MOCK_APP_ID}&attribute=true`);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({
+      success: true,
+      message: '',
+      data: {
+        items: [
+          {
+            id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}1`,
+            type: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}1`,
+            prefix: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
+            deleted: false,
+            updateAt: 1690788840458,
+            createAt: 1690788840458,
+            operator: '',
+            name: `${MOCK_EVENT_NAME}1`,
+            displayName: `display name of event ${MOCK_EVENT_NAME}1`,
+            description: `Description of event ${MOCK_EVENT_NAME}1`,
+            hasData: true,
+            associatedParameters: [
+              {
+                id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}1#${MOCK_EVENT_PARAMETER_NAME}11`,
+                type: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}1`,
+                prefix: `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
+                appId: MOCK_APP_ID,
+                projectId: MOCK_PROJECT_ID,
+                createAt: 1691415932588,
+                deleted: false,
+                hasData: true,
+                metadataSource: 'Preset',
+                name: `${MOCK_EVENT_PARAMETER_NAME}11`,
+                eventName: `${MOCK_EVENT_NAME}1`,
+                displayName: `display name of event parameter ${MOCK_EVENT_PARAMETER_NAME}11`,
+                description: `Description of event parameter ${MOCK_EVENT_PARAMETER_NAME}11`,
+                operator: '',
+                parameterId: '9e944f193e3d4521ae81427423d28daf',
+                parameterType: 'Public',
+                platform: [MetadataPlatform.ANDROID, MetadataPlatform.IOS, MetadataPlatform.WEB],
+                valueEnum: [
+                  { value: 'value-01', displayValue: 'label-01' },
+                  { value: 'value-02', displayValue: `display name of dictionary ${MOCK_EVENT_PARAMETER_NAME}11 value-02` },
+                  { value: 'value-03', displayValue: 'label-03' },
+                ],
+              },
+              {
+                id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}1#${MOCK_EVENT_PARAMETER_NAME}12`,
+                type: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}1`,
+                prefix: `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
+                appId: MOCK_APP_ID,
+                projectId: MOCK_PROJECT_ID,
+                createAt: 1691415932588,
+                deleted: false,
+                hasData: true,
+                metadataSource: 'Preset',
+                name: `${MOCK_EVENT_PARAMETER_NAME}12`,
+                eventName: `${MOCK_EVENT_NAME}1`,
+                displayName: `display name of event parameter ${MOCK_EVENT_PARAMETER_NAME}12`,
+                description: `Description of event parameter ${MOCK_EVENT_PARAMETER_NAME}12`,
+                operator: '',
+                parameterId: '9e944f193e3d4521ae81427423d28daf',
+                parameterType: 'Public',
+                platform: [MetadataPlatform.IOS, MetadataPlatform.WEB],
+                valueEnum: [
+                  { value: 'value-011', displayValue: 'label-011' },
+                  { value: 'value-012', displayValue: `display name of dictionary ${MOCK_EVENT_PARAMETER_NAME}12 value-012` },
+                  { value: 'value-013', displayValue: 'label-013' },
+                ],
+              },
+            ],
+            platform: [MetadataPlatform.ANDROID, MetadataPlatform.WEB],
+          },
+          {
+            id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}2`,
+            type: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}2`,
+            prefix: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
+            deleted: false,
+            updateAt: 1690788840458,
+            createAt: 1690788840458,
+            operator: '',
+            name: `${MOCK_EVENT_NAME}2`,
+            displayName: `display name of event ${MOCK_EVENT_NAME}2`,
+            description: `Description of event ${MOCK_EVENT_NAME}2`,
+            hasData: true,
+            associatedParameters: [],
+            platform: [MetadataPlatform.ANDROID, MetadataPlatform.WEB, MetadataPlatform.IOS],
+          },
+        ],
+        totalCount: 2,
+      },
+    });
+
+    // Mock DynamoDB error
+    ddbMock.on(QueryCommand).rejects(new Error('Mock DynamoDB error'));
+    res = await request(app)
+      .get(`/api/metadata/events?projectId=${MOCK_PROJECT_ID}&appId=${MOCK_APP_ID}`);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(500);
+
+    expect(res.body).toEqual({
+      success: false,
+      message: 'Unexpected error occurred at server.',
+      error: 'Error',
+    });
+  });
+  it('Update metadata display data', async () => {
+    tokenMock(ddbMock, false);
+    let res = await request(app)
+      .put('/api/metadata/display')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
+        id: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}`,
         projectId: MOCK_PROJECT_ID,
         appId: MOCK_APP_ID,
-        name: MOCK_EVENT_NAME,
         description: 'Description of event',
         displayName: 'display name of event 555',
       });
-    expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 1);
-    expect(ddbMock).toHaveReceivedCommandTimes(QueryCommand, 1);
-    expect(ddbMock).toHaveReceivedCommandTimes(UpdateCommand, 1);
+    ddbMock.on(UpdateCommand).resolves({});
+    ddbMock.on(ScanCommand).resolvesOnce({});
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
-    expect(res.statusCode).toBe(201);
+    expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({
       data: null,
       success: true,
-      message: 'Event updated.',
+      message: 'Updated success.',
     });
+    expect(ddbMock).toHaveReceivedCommandTimes(UpdateCommand, 1);
   });
-  it('Update metadata event with not body', async () => {
+  it('Update metadata display data with not body', async () => {
+    tokenMock(ddbMock, false);
     metadataEventExistedMock(ddbMock, MOCK_PROJECT_ID, MOCK_APP_ID, true);
     ddbMock.on(PutCommand).resolves({});
     const res = await request(app)
-      .put('/api/metadata/event');
+      .put('/api/metadata/display')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
     expect(res.body).toEqual({
       success: false,
       message: 'Parameter verification failed.',
       error: [
-        {
-          location: 'body',
-          msg: 'Value is empty.',
-          param: '',
-          value: {},
-        },
         {
           location: 'body',
           msg: 'Value is empty.',
@@ -347,25 +801,18 @@ describe('Metadata Event test', () => {
           msg: 'Value is empty.',
           param: 'appId',
         },
+        {
+          location: 'body',
+          msg: 'Value is empty.',
+          param: 'id',
+        },
+        {
+          location: 'body',
+          msg: 'Value is empty.',
+          param: '',
+          value: {},
+        },
       ],
-    });
-  });
-  it('Update metadata event with no existed', async () => {
-    metadataEventExistedMock(ddbMock, MOCK_PROJECT_ID, MOCK_APP_ID, false);
-    const res = await request(app)
-      .put('/api/metadata/event')
-      .send({
-        projectId: MOCK_PROJECT_ID,
-        appId: MOCK_APP_ID,
-        name: MOCK_EVENT_NAME,
-        description: 'Description of event',
-        displayName: 'display name of event 555',
-      });
-    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
-    expect(res.statusCode).toBe(404);
-    expect(res.body).toEqual({
-      success: false,
-      message: 'Event not found',
     });
   });
 
@@ -378,6 +825,97 @@ describe('Metadata Event test', () => {
 describe('Metadata Event Attribute test', () => {
   beforeEach(() => {
     ddbMock.reset();
+    // display data
+    ddbMock.on(QueryCommand, {
+      TableName: analyticsMetadataTable,
+      IndexName: prefixTimeGSIName,
+      KeyConditionExpression: '#prefix= :prefix',
+      FilterExpression: 'projectId = :projectId AND appId = :appId',
+      ExpressionAttributeNames: {
+        '#prefix': 'prefix',
+      },
+      ExpressionAttributeValues: {
+        ':projectId': MOCK_PROJECT_ID,
+        ':appId': MOCK_APP_ID,
+        ':prefix': 'DISPLAY',
+      },
+    }).resolves({
+      Items: [
+        {
+          id: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}`,
+          projectId: MOCK_PROJECT_ID,
+          appId: MOCK_APP_ID,
+          displayName: `display name of event ${MOCK_EVENT_NAME}`,
+          description: `Description of event ${MOCK_EVENT_NAME}`,
+        },
+        {
+          id: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}1`,
+          projectId: MOCK_PROJECT_ID,
+          appId: MOCK_APP_ID,
+          displayName: `display name of event ${MOCK_EVENT_NAME}1`,
+          description: `Description of event ${MOCK_EVENT_NAME}1`,
+        },
+        {
+          id: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}2`,
+          projectId: MOCK_PROJECT_ID,
+          appId: MOCK_APP_ID,
+          displayName: `display name of event ${MOCK_EVENT_NAME}2`,
+          description: `Description of event ${MOCK_EVENT_NAME}2`,
+        },
+        {
+          id: `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}#${MOCK_EVENT_PARAMETER_NAME}`,
+          projectId: MOCK_PROJECT_ID,
+          appId: MOCK_APP_ID,
+          displayName: `display name of event parameter ${MOCK_EVENT_PARAMETER_NAME}`,
+          description: `Description of event parameter ${MOCK_EVENT_PARAMETER_NAME}`,
+        },
+        {
+          id: `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}1#${MOCK_EVENT_PARAMETER_NAME}11`,
+          projectId: MOCK_PROJECT_ID,
+          appId: MOCK_APP_ID,
+          displayName: `display name of event parameter ${MOCK_EVENT_PARAMETER_NAME}11`,
+          description: `Description of event parameter ${MOCK_EVENT_PARAMETER_NAME}11`,
+        },
+        {
+          id: `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}1#${MOCK_EVENT_PARAMETER_NAME}12`,
+          projectId: MOCK_PROJECT_ID,
+          appId: MOCK_APP_ID,
+          displayName: `display name of event parameter ${MOCK_EVENT_PARAMETER_NAME}12`,
+          description: `Description of event parameter ${MOCK_EVENT_PARAMETER_NAME}12`,
+        },
+        {
+          id: `DICTIONARY#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}#${MOCK_EVENT_PARAMETER_NAME}#value-02`,
+          projectId: MOCK_PROJECT_ID,
+          appId: MOCK_APP_ID,
+          displayName: `display name of dictionary ${MOCK_EVENT_PARAMETER_NAME} value-02`,
+        },
+        {
+          id: `DICTIONARY#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}1#${MOCK_EVENT_PARAMETER_NAME}11#value-02`,
+          projectId: MOCK_PROJECT_ID,
+          appId: MOCK_APP_ID,
+          displayName: `display name of dictionary ${MOCK_EVENT_PARAMETER_NAME}11 value-02`,
+        },
+        {
+          id: `DICTIONARY#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}1#${MOCK_EVENT_PARAMETER_NAME}12#value-012`,
+          projectId: MOCK_PROJECT_ID,
+          appId: MOCK_APP_ID,
+          displayName: `display name of dictionary ${MOCK_EVENT_PARAMETER_NAME}12 value-012`,
+        },
+        {
+          id: `USER_ATTRIBUTE#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_USER_ATTRIBUTE_NAME}`,
+          projectId: MOCK_PROJECT_ID,
+          appId: MOCK_APP_ID,
+          displayName: `display name of user parameter ${MOCK_USER_ATTRIBUTE_NAME}`,
+          description: `Description of user parameter ${MOCK_USER_ATTRIBUTE_NAME}`,
+        },
+        {
+          id: `DICTIONARY#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_USER_ATTRIBUTE_NAME}#value-02`,
+          projectId: MOCK_PROJECT_ID,
+          appId: MOCK_APP_ID,
+          displayName: `display name of dictionary ${MOCK_USER_ATTRIBUTE_NAME} value-02`,
+        },
+      ],
+    });
   });
   it('Create metadata event attribute', async () => {
     tokenMock(ddbMock, false);
@@ -389,7 +927,6 @@ describe('Metadata Event Attribute test', () => {
         projectId: MOCK_PROJECT_ID,
         appId: MOCK_APP_ID,
         name: MOCK_EVENT_PARAMETER_NAME,
-        description: 'Description of event',
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(201);
@@ -407,7 +944,6 @@ describe('Metadata Event Attribute test', () => {
         projectId: MOCK_PROJECT_ID,
         appId: MOCK_APP_ID,
         name: '<IMG SRC=javascript:alert(\'XSS\')><script>alert(234)</script>',
-        description: 'Description of event',
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
@@ -423,7 +959,6 @@ describe('Metadata Event Attribute test', () => {
             projectId: MOCK_PROJECT_ID,
             appId: MOCK_APP_ID,
             name: '<IMG SRC=javascript:alert(\'XSS\')><script>alert(234)</script>',
-            description: 'Description of event',
           },
         },
       ],
@@ -440,7 +975,6 @@ describe('Metadata Event Attribute test', () => {
         projectId: MOCK_PROJECT_ID,
         appId: MOCK_APP_ID,
         name: MOCK_EVENT_PARAMETER_NAME,
-        description: 'Description of event',
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(500);
@@ -495,7 +1029,6 @@ describe('Metadata Event Attribute test', () => {
         projectId: MOCK_PROJECT_ID,
         appId: MOCK_APP_ID,
         name: MOCK_EVENT_PARAMETER_NAME,
-        description: 'Description of event',
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
@@ -517,16 +1050,39 @@ describe('Metadata Event Attribute test', () => {
     ddbMock.on(QueryCommand).resolves({
       Items: [
         {
-          id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}`,
+          id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}#${MOCK_EVENT_PARAMETER_NAME}`,
           type: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}`,
           prefix: `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
+          projectId: MOCK_PROJECT_ID,
+          appId: MOCK_APP_ID,
           deleted: false,
           updateAt: 1690788840458,
           createAt: 1690788840458,
           operator: '',
-          description: 'description of event 1',
           name: MOCK_EVENT_PARAMETER_NAME,
           eventName: MOCK_EVENT_NAME,
+          hasData: false,
+          platform: [MetadataPlatform.ANDROID],
+          valueEnum: [],
+        },
+        {
+          id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}#${MOCK_EVENT_PARAMETER_NAME}`,
+          type: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}`,
+          prefix: `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
+          projectId: MOCK_PROJECT_ID,
+          appId: MOCK_APP_ID,
+          deleted: false,
+          updateAt: 1690788840451,
+          createAt: 1690788840451,
+          operator: '',
+          name: MOCK_EVENT_PARAMETER_NAME,
+          eventName: MOCK_EVENT_NAME,
+          hasData: false,
+          platform: [MetadataPlatform.WEB],
+          valueEnum: [
+            { value: 'value-01', displayValue: 'label-01' },
+            { value: 'value-02', displayValue: 'label-02' },
+          ],
         },
       ],
     });
@@ -540,19 +1096,34 @@ describe('Metadata Event Attribute test', () => {
       data: {
         associatedEvents: [
           {
-            name: 'event-mock',
+            name: MOCK_EVENT_NAME,
+            prefix: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
+            id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}`,
+            projectId: MOCK_PROJECT_ID,
+            appId: MOCK_APP_ID,
+            displayName: `display name of event ${MOCK_EVENT_NAME}`,
+            description: `Description of event ${MOCK_EVENT_NAME}`,
           },
         ],
-        createAt: 1690788840458,
+        id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}#${MOCK_EVENT_PARAMETER_NAME}`,
+        type: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}`,
+        prefix: `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
+        projectId: MOCK_PROJECT_ID,
+        appId: MOCK_APP_ID,
         deleted: false,
-        description: 'description of event 1',
-        eventName: 'event-mock',
-        id: 'project_8888_8888#app_7777_7777#event-mock',
-        name: 'event-attribute-mock',
-        operator: '',
-        prefix: 'EVENT_PARAMETER#project_8888_8888#app_7777_7777',
-        type: 'EVENT#project_8888_8888#app_7777_7777#event-mock',
         updateAt: 1690788840458,
+        createAt: 1690788840458,
+        operator: '',
+        name: MOCK_EVENT_PARAMETER_NAME,
+        eventName: MOCK_EVENT_NAME,
+        displayName: `display name of event parameter ${MOCK_EVENT_PARAMETER_NAME}`,
+        description: `Description of event parameter ${MOCK_EVENT_PARAMETER_NAME}`,
+        hasData: false,
+        platform: [MetadataPlatform.ANDROID, MetadataPlatform.WEB],
+        valueEnum: [
+          { value: 'value-01', displayValue: 'label-01' },
+          { value: 'value-02', displayValue: `display name of dictionary ${MOCK_EVENT_PARAMETER_NAME} value-02` },
+        ],
       },
     });
   });
@@ -572,9 +1143,78 @@ describe('Metadata Event Attribute test', () => {
   it('Get metadata event attribute list', async () => {
     ddbMock.on(QueryCommand).resolves({
       Items: [
-        { name: 'event-01' },
-        { name: 'event-02' },
-        { name: 'event-03' },
+        {
+          id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}#${MOCK_EVENT_PARAMETER_NAME}`,
+          type: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}`,
+          prefix: `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
+          projectId: MOCK_PROJECT_ID,
+          appId: MOCK_APP_ID,
+          deleted: false,
+          updateAt: 1690788840458,
+          createAt: 1690788840458,
+          operator: '',
+          name: MOCK_EVENT_PARAMETER_NAME,
+          eventName: MOCK_EVENT_NAME,
+          hasData: false,
+          platform: [MetadataPlatform.ANDROID],
+          valueEnum: [],
+        },
+        {
+          id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}#${MOCK_EVENT_PARAMETER_NAME}`,
+          type: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}`,
+          prefix: `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
+          projectId: MOCK_PROJECT_ID,
+          appId: MOCK_APP_ID,
+          deleted: false,
+          updateAt: 1690788840451,
+          createAt: 1690788840451,
+          operator: '',
+          name: MOCK_EVENT_PARAMETER_NAME,
+          eventName: MOCK_EVENT_NAME,
+          hasData: false,
+          platform: [MetadataPlatform.WEB],
+          valueEnum: [
+            { value: 'value-01', displayValue: 'label-01' },
+            { value: 'value-02', displayValue: 'label-02' },
+          ],
+        },
+        {
+          id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}#${MOCK_EVENT_PARAMETER_NAME}1`,
+          type: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}`,
+          prefix: `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
+          projectId: MOCK_PROJECT_ID,
+          appId: MOCK_APP_ID,
+          deleted: false,
+          updateAt: 1690788840458,
+          createAt: 1690788840458,
+          operator: '',
+          name: `${MOCK_EVENT_PARAMETER_NAME}1`,
+          eventName: `${MOCK_EVENT_NAME}1`,
+          hasData: false,
+          platform: [MetadataPlatform.ANDROID],
+          valueEnum: [],
+        },
+        {
+          id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}1#${MOCK_EVENT_PARAMETER_NAME}1`,
+          type: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}1`,
+          prefix: `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
+          projectId: MOCK_PROJECT_ID,
+          appId: MOCK_APP_ID,
+          deleted: false,
+          updateAt: 1690788840451,
+          createAt: 1690788840451,
+          operator: '',
+          name: `${MOCK_EVENT_PARAMETER_NAME}1`,
+          eventName: `${MOCK_EVENT_NAME}1`,
+          hasData: false,
+          platform: [MetadataPlatform.WEB],
+          valueEnum: [
+            { value: 'value-01', displayValue: 'label-01' },
+            { value: 'value-02', displayValue: 'label-02' },
+            { value: 'value-03', displayValue: 'label-03' },
+            { value: 'value-04', displayValue: 'label-04' },
+          ],
+        },
       ],
     });
     let res = await request(app)
@@ -586,11 +1226,52 @@ describe('Metadata Event Attribute test', () => {
       message: '',
       data: {
         items: [
-          { name: 'event-01' },
-          { name: 'event-02' },
-          { name: 'event-03' },
+          {
+            associatedEvents: [],
+            id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}#${MOCK_EVENT_PARAMETER_NAME}`,
+            type: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}`,
+            prefix: `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
+            projectId: MOCK_PROJECT_ID,
+            appId: MOCK_APP_ID,
+            deleted: false,
+            updateAt: 1690788840458,
+            createAt: 1690788840458,
+            operator: '',
+            name: MOCK_EVENT_PARAMETER_NAME,
+            eventName: MOCK_EVENT_NAME,
+            displayName: `display name of event parameter ${MOCK_EVENT_PARAMETER_NAME}`,
+            description: `Description of event parameter ${MOCK_EVENT_PARAMETER_NAME}`,
+            hasData: false,
+            platform: [MetadataPlatform.ANDROID, MetadataPlatform.WEB],
+            valueEnum: [
+              { value: 'value-01', displayValue: 'label-01' },
+              { value: 'value-02', displayValue: `display name of dictionary ${MOCK_EVENT_PARAMETER_NAME} value-02` },
+            ],
+          },
+          {
+            associatedEvents: [],
+            id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}#${MOCK_EVENT_PARAMETER_NAME}1`,
+            type: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}`,
+            prefix: `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
+            projectId: MOCK_PROJECT_ID,
+            appId: MOCK_APP_ID,
+            deleted: false,
+            updateAt: 1690788840458,
+            createAt: 1690788840458,
+            operator: '',
+            name: `${MOCK_EVENT_PARAMETER_NAME}1`,
+            eventName: `${MOCK_EVENT_NAME}1`,
+            hasData: false,
+            platform: [MetadataPlatform.ANDROID, MetadataPlatform.WEB],
+            valueEnum: [
+              { value: 'value-01', displayValue: 'label-01' },
+              { value: 'value-02', displayValue: 'label-02' },
+              { value: 'value-03', displayValue: 'label-03' },
+              { value: 'value-04', displayValue: 'label-04' },
+            ],
+          },
         ],
-        totalCount: 3,
+        totalCount: 2,
       },
     });
 
@@ -607,91 +1288,6 @@ describe('Metadata Event Attribute test', () => {
       error: 'Error',
     });
   });
-  it('Update metadata event attribute', async () => {
-    metadataEventAttributeExistedMock(ddbMock, MOCK_PROJECT_ID, MOCK_APP_ID, true);
-    ddbMock.on(QueryCommand).resolves({
-      Items: [{
-        id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}`,
-        type: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}`,
-        prefix: `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
-        deleted: false,
-      }],
-    });
-    ddbMock.on(UpdateCommand).resolves({});
-    let res = await request(app)
-      .put('/api/metadata/event_parameter')
-      .send({
-        projectId: MOCK_PROJECT_ID,
-        appId: MOCK_APP_ID,
-        id: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_PARAMETER_NAME}`,
-        parameterId: MOCK_EVENT_PARAMETER_NAME,
-        name: MOCK_EVENT_PARAMETER_NAME,
-        description: 'Description of event',
-        displayName: 'display name of event 555',
-      });
-    expect(ddbMock).toHaveReceivedCommandTimes(QueryCommand, 2);
-    expect(ddbMock).toHaveReceivedCommandTimes(UpdateCommand, 1);
-    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
-    expect(res.statusCode).toBe(201);
-    expect(res.body).toEqual({
-      data: null,
-      success: true,
-      message: 'Event attribute updated.',
-    });
-  });
-  it('Update metadata event attribute with not body', async () => {
-    metadataEventAttributeExistedMock(ddbMock, MOCK_PROJECT_ID, MOCK_APP_ID, true);
-    ddbMock.on(PutCommand).resolves({});
-    const res = await request(app)
-      .put('/api/metadata/event_parameter');
-    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
-    expect(res.statusCode).toBe(400);
-    expect(res.body).toEqual({
-      success: false,
-      message: 'Parameter verification failed.',
-      error: [
-        {
-          location: 'body',
-          msg: 'Value is empty.',
-          param: '',
-          value: {},
-        },
-        {
-          location: 'body',
-          msg: 'Value is empty.',
-          param: 'projectId',
-        },
-        {
-          location: 'body',
-          msg: 'Value is empty.',
-          param: 'appId',
-        },
-      ],
-    });
-  });
-  it('Update metadata event attribute with no existed', async () => {
-    metadataEventAttributeExistedMock(ddbMock, MOCK_PROJECT_ID, MOCK_APP_ID, false);
-    const res = await request(app)
-      .put('/api/metadata/event_parameter')
-      .send({
-        id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}#${MOCK_EVENT_PARAMETER_NAME}`,
-        type: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}`,
-        prefix: `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
-        projectId: MOCK_PROJECT_ID,
-        appId: MOCK_APP_ID,
-        parameterId: MOCK_EVENT_PARAMETER_NAME,
-        name: MOCK_EVENT_PARAMETER_NAME,
-        description: 'Description of event',
-        displayName: 'display name of event 555',
-      });
-    expect(ddbMock).toHaveReceivedCommandTimes(QueryCommand, 1);
-    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
-    expect(res.statusCode).toBe(404);
-    expect(res.body).toEqual({
-      success: false,
-      message: 'Event attribute not found',
-    });
-  });
 
   afterAll((done) => {
     server.close();
@@ -702,6 +1298,97 @@ describe('Metadata Event Attribute test', () => {
 describe('Metadata User Attribute test', () => {
   beforeEach(() => {
     ddbMock.reset();
+    // display data
+    ddbMock.on(QueryCommand, {
+      TableName: analyticsMetadataTable,
+      IndexName: prefixTimeGSIName,
+      KeyConditionExpression: '#prefix= :prefix',
+      FilterExpression: 'projectId = :projectId AND appId = :appId',
+      ExpressionAttributeNames: {
+        '#prefix': 'prefix',
+      },
+      ExpressionAttributeValues: {
+        ':projectId': MOCK_PROJECT_ID,
+        ':appId': MOCK_APP_ID,
+        ':prefix': 'DISPLAY',
+      },
+    }).resolves({
+      Items: [
+        {
+          id: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}`,
+          projectId: MOCK_PROJECT_ID,
+          appId: MOCK_APP_ID,
+          displayName: `display name of event ${MOCK_EVENT_NAME}`,
+          description: `Description of event ${MOCK_EVENT_NAME}`,
+        },
+        {
+          id: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}1`,
+          projectId: MOCK_PROJECT_ID,
+          appId: MOCK_APP_ID,
+          displayName: `display name of event ${MOCK_EVENT_NAME}1`,
+          description: `Description of event ${MOCK_EVENT_NAME}1`,
+        },
+        {
+          id: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}2`,
+          projectId: MOCK_PROJECT_ID,
+          appId: MOCK_APP_ID,
+          displayName: `display name of event ${MOCK_EVENT_NAME}2`,
+          description: `Description of event ${MOCK_EVENT_NAME}2`,
+        },
+        {
+          id: `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}#${MOCK_EVENT_PARAMETER_NAME}`,
+          projectId: MOCK_PROJECT_ID,
+          appId: MOCK_APP_ID,
+          displayName: `display name of event parameter ${MOCK_EVENT_PARAMETER_NAME}`,
+          description: `Description of event parameter ${MOCK_EVENT_PARAMETER_NAME}`,
+        },
+        {
+          id: `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}1#${MOCK_EVENT_PARAMETER_NAME}11`,
+          projectId: MOCK_PROJECT_ID,
+          appId: MOCK_APP_ID,
+          displayName: `display name of event parameter ${MOCK_EVENT_PARAMETER_NAME}11`,
+          description: `Description of event parameter ${MOCK_EVENT_PARAMETER_NAME}11`,
+        },
+        {
+          id: `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}1#${MOCK_EVENT_PARAMETER_NAME}12`,
+          projectId: MOCK_PROJECT_ID,
+          appId: MOCK_APP_ID,
+          displayName: `display name of event parameter ${MOCK_EVENT_PARAMETER_NAME}12`,
+          description: `Description of event parameter ${MOCK_EVENT_PARAMETER_NAME}12`,
+        },
+        {
+          id: `DICTIONARY#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}#${MOCK_EVENT_PARAMETER_NAME}#value-02`,
+          projectId: MOCK_PROJECT_ID,
+          appId: MOCK_APP_ID,
+          displayName: `display name of dictionary ${MOCK_EVENT_PARAMETER_NAME} value-02`,
+        },
+        {
+          id: `DICTIONARY#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}1#${MOCK_EVENT_PARAMETER_NAME}11#value-02`,
+          projectId: MOCK_PROJECT_ID,
+          appId: MOCK_APP_ID,
+          displayName: `display name of dictionary ${MOCK_EVENT_PARAMETER_NAME}11 value-02`,
+        },
+        {
+          id: `DICTIONARY#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}1#${MOCK_EVENT_PARAMETER_NAME}12#value-012`,
+          projectId: MOCK_PROJECT_ID,
+          appId: MOCK_APP_ID,
+          displayName: `display name of dictionary ${MOCK_EVENT_PARAMETER_NAME}12 value-012`,
+        },
+        {
+          id: `USER_ATTRIBUTE#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_USER_ATTRIBUTE_NAME}`,
+          projectId: MOCK_PROJECT_ID,
+          appId: MOCK_APP_ID,
+          displayName: `display name of user parameter ${MOCK_USER_ATTRIBUTE_NAME}`,
+          description: `Description of user parameter ${MOCK_USER_ATTRIBUTE_NAME}`,
+        },
+        {
+          id: `DICTIONARY#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_USER_ATTRIBUTE_NAME}#value-02`,
+          projectId: MOCK_PROJECT_ID,
+          appId: MOCK_APP_ID,
+          displayName: `display name of dictionary ${MOCK_USER_ATTRIBUTE_NAME} value-02`,
+        },
+      ],
+    });
   });
   it('Create metadata user attribute', async () => {
     tokenMock(ddbMock, false);
@@ -713,7 +1400,6 @@ describe('Metadata User Attribute test', () => {
         projectId: MOCK_PROJECT_ID,
         appId: MOCK_APP_ID,
         name: MOCK_USER_ATTRIBUTE_NAME,
-        description: 'Description of event',
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(201);
@@ -731,7 +1417,6 @@ describe('Metadata User Attribute test', () => {
         projectId: MOCK_PROJECT_ID,
         appId: MOCK_APP_ID,
         name: '<IMG SRC=javascript:alert(\'XSS\')><script>alert(234)</script>',
-        description: 'Description of event',
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
@@ -747,7 +1432,6 @@ describe('Metadata User Attribute test', () => {
             projectId: MOCK_PROJECT_ID,
             appId: MOCK_APP_ID,
             name: '<IMG SRC=javascript:alert(\'XSS\')><script>alert(234)</script>',
-            description: 'Description of event',
           },
         },
       ],
@@ -764,7 +1448,6 @@ describe('Metadata User Attribute test', () => {
         projectId: MOCK_PROJECT_ID,
         appId: MOCK_APP_ID,
         name: MOCK_USER_ATTRIBUTE_NAME,
-        description: 'Description of event',
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(500);
@@ -819,7 +1502,6 @@ describe('Metadata User Attribute test', () => {
         projectId: MOCK_PROJECT_ID,
         appId: MOCK_APP_ID,
         name: MOCK_USER_ATTRIBUTE_NAME,
-        description: 'Description of event',
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
@@ -838,19 +1520,40 @@ describe('Metadata User Attribute test', () => {
     expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 0);
   });
   it('Get metadata user attribute by name', async () => {
-    ddbMock.on(GetCommand).resolves({
-      Item:
+    ddbMock.on(QueryCommand).resolves({
+      Items: [
         {
+          id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_USER_ATTRIBUTE_NAME}`,
+          type: `USER_ATTRIBUTE#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
+          prefix: `USER_ATTRIBUTE#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
+          projectId: MOCK_PROJECT_ID,
+          appId: MOCK_APP_ID,
           deleted: false,
           updateAt: 1690788840458,
           createAt: 1690788840458,
-          prefix: `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
           operator: '',
-          id: `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_USER_ATTRIBUTE_NAME}`,
-          description: 'description of event 1',
-          name: 'event1',
-          type: `#METADATA#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_USER_ATTRIBUTE_NAME}`,
+          name: MOCK_USER_ATTRIBUTE_NAME,
+          hasData: false,
+          valueEnum: [],
         },
+        {
+          id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_USER_ATTRIBUTE_NAME}`,
+          type: `USER_ATTRIBUTE#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
+          prefix: `USER_ATTRIBUTE#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
+          projectId: MOCK_PROJECT_ID,
+          appId: MOCK_APP_ID,
+          deleted: false,
+          updateAt: 1690788840451,
+          createAt: 1690788840451,
+          operator: '',
+          name: MOCK_USER_ATTRIBUTE_NAME,
+          hasData: true,
+          valueEnum: [
+            { value: 'value-01', displayValue: 'label-01' },
+            { value: 'value-02', displayValue: 'label-02' },
+          ],
+        },
+      ],
     });
     let res = await request(app)
       .get(`/api/metadata/user_attribute/${MOCK_USER_ATTRIBUTE_NAME}?projectId=${MOCK_PROJECT_ID}&appId=${MOCK_APP_ID}`);
@@ -860,20 +1563,30 @@ describe('Metadata User Attribute test', () => {
       success: true,
       message: '',
       data: {
-        createAt: 1690788840458,
+        id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_USER_ATTRIBUTE_NAME}`,
+        type: `USER_ATTRIBUTE#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
+        prefix: `USER_ATTRIBUTE#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
+        projectId: MOCK_PROJECT_ID,
+        appId: MOCK_APP_ID,
         deleted: false,
-        description: 'description of event 1',
-        id: `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_USER_ATTRIBUTE_NAME}`,
-        name: 'event1',
-        operator: '',
-        prefix: `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
-        type: `#METADATA#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_USER_ATTRIBUTE_NAME}`,
         updateAt: 1690788840458,
+        createAt: 1690788840458,
+        operator: '',
+        name: MOCK_USER_ATTRIBUTE_NAME,
+        displayName: `display name of user parameter ${MOCK_USER_ATTRIBUTE_NAME}`,
+        description: `Description of user parameter ${MOCK_USER_ATTRIBUTE_NAME}`,
+        hasData: true,
+        valueEnum: [
+          { value: 'value-01', displayValue: 'label-01' },
+          { value: 'value-02', displayValue: `display name of dictionary ${MOCK_USER_ATTRIBUTE_NAME} value-02` },
+        ],
       },
     });
   });
   it('Get non-existent metadata user attribute', async () => {
-    ddbMock.on(GetCommand).resolves({});
+    ddbMock.on(QueryCommand).resolves({
+      Items: [],
+    });
     const res = await request(app)
       .get(`/api/metadata/user_attribute/${MOCK_USER_ATTRIBUTE_NAME}?projectId=${MOCK_PROJECT_ID}&appId=${MOCK_APP_ID}`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
@@ -919,80 +1632,6 @@ describe('Metadata User Attribute test', () => {
       success: false,
       message: 'Unexpected error occurred at server.',
       error: 'Error',
-    });
-  });
-  it('Update metadata user attribute', async () => {
-    metadataUserAttributeExistedMock(ddbMock, MOCK_PROJECT_ID, MOCK_APP_ID, true);
-    ddbMock.on(UpdateCommand).resolves({});
-    let res = await request(app)
-      .put('/api/metadata/user_attribute')
-      .send({
-        projectId: MOCK_PROJECT_ID,
-        appId: MOCK_APP_ID,
-        id: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_USER_ATTRIBUTE_NAME}`,
-        attributeId: MOCK_USER_ATTRIBUTE_NAME,
-        name: MOCK_USER_ATTRIBUTE_NAME,
-        description: 'Description of event',
-        displayName: 'display name of event 555',
-      });
-    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
-    expect(res.statusCode).toBe(201);
-    expect(res.body).toEqual({
-      data: null,
-      success: true,
-      message: 'User attribute updated.',
-    });
-    expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 1);
-    expect(ddbMock).toHaveReceivedCommandTimes(UpdateCommand, 1);
-  });
-  it('Update metadata user attribute with not body', async () => {
-    metadataUserAttributeExistedMock(ddbMock, MOCK_PROJECT_ID, MOCK_APP_ID, true);
-    ddbMock.on(PutCommand).resolves({});
-    const res = await request(app)
-      .put('/api/metadata/user_attribute');
-    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
-    expect(res.statusCode).toBe(400);
-    expect(res.body).toEqual({
-      success: false,
-      message: 'Parameter verification failed.',
-      error: [
-        {
-          location: 'body',
-          msg: 'Value is empty.',
-          param: '',
-          value: {},
-        },
-        {
-          location: 'body',
-          msg: 'Value is empty.',
-          param: 'projectId',
-        },
-        {
-          location: 'body',
-          msg: 'Value is empty.',
-          param: 'appId',
-        },
-      ],
-    });
-  });
-  it('Update metadata user attribute with no existed', async () => {
-    metadataUserAttributeExistedMock(ddbMock, MOCK_PROJECT_ID, MOCK_APP_ID, false);
-    const res = await request(app)
-      .put('/api/metadata/user_attribute')
-      .send({
-        projectId: MOCK_PROJECT_ID,
-        appId: MOCK_APP_ID,
-        id: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_USER_ATTRIBUTE_NAME}`,
-        attributeId: MOCK_USER_ATTRIBUTE_NAME,
-        name: MOCK_USER_ATTRIBUTE_NAME,
-        description: 'Description of event',
-        displayName: 'display name of event 555',
-      });
-    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
-    expect(res.statusCode).toBe(404);
-    expect(res.body).toEqual({
-      success: false,
-      message: 'User attribute not found',
     });
   });
 

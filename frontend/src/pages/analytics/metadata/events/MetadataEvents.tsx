@@ -16,11 +16,12 @@ import {
   Input,
   StatusIndicator,
 } from '@cloudscape-design/components';
-import { getMetadataEventsList, updateMetadataEvent } from 'apis/analytics';
+import { getMetadataEventsList, updateMetadataDisplay } from 'apis/analytics';
 import Navigation from 'components/layouts/Navigation';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
+import { EVENT_DISPLAY_PREFIX } from 'ts/const';
 import { MetadataPlatform, MetadataSource } from 'ts/explore-types';
 import MetadataEventSplitPanel from './MetadataEventSplitPanel';
 import MetadataDataVolumeFC from '../comps/MetadataDataVolume';
@@ -202,9 +203,14 @@ const MetadataEvents: React.FC = () => {
     newItem: IMetadataEvent | IMetadataEventParameter | IMetadataUserAttribute
   ) => {
     try {
-      const { success, message }: ApiResponse<null> = await updateMetadataEvent(
-        newItem as IMetadataEvent
-      );
+      const { success, message }: ApiResponse<null> =
+        await updateMetadataDisplay({
+          id: `${EVENT_DISPLAY_PREFIX}${newItem.id}`,
+          projectId: newItem.projectId,
+          appId: newItem.appId,
+          displayName: newItem.displayName,
+          description: newItem.description,
+        });
       if (!success) {
         throw new Error(message);
       }
@@ -224,8 +230,8 @@ const MetadataEvents: React.FC = () => {
           tableFilteringProperties={FILTERING_PROPERTIES}
           tableI18nStrings={{
             loadingText:
-              t('analytics:metadata.event.tableLoading') || 'Loading',
-            emptyText: t('analytics:metadata.event.tableEmpty'),
+              t('analytics:labels.tableLoading') || 'Loading',
+            emptyText: t('analytics:labels.tableEmpty'),
             headerTitle: t('analytics:metadata.event.title'),
             headerRefreshButtonText: t('common:button.refreshMetadata'),
             filteringAriaLabel: t(

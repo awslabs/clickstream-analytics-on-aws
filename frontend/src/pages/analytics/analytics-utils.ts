@@ -331,8 +331,8 @@ export const getDashboardCreateParameters = (
 };
 
 export const getWarmUpParameters = (
-  projectId: string | undefined,
-  appId: string | undefined,
+  projectId: string,
+  appId: string,
   pipeline: IPipeline
 ) => {
   const redshiftOutputs = getValueFromStackOutputs(
