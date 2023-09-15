@@ -43,7 +43,7 @@ import {
 } from './quicksight/reporting-utils';
 import { buildEventAnalysisView, buildEventPathAnalysisView, buildFunnelDataSql, buildFunnelView, buildNodePathAnalysisView, buildRetentionAnalysisView } from './quicksight/sql-builder';
 import { awsAccountId } from '../common/constants';
-import { ExplorePathNodeType, ExploreTimeScopeType, ExploreVisualName } from '../common/explore-types';
+import { ExplorePathNodeType, ExploreRequestAction, ExploreTimeScopeType, ExploreVisualName } from '../common/explore-types';
 import { logger } from '../common/powertools';
 import { SDKClient } from '../common/sdk-client';
 import { ApiFail, ApiSuccess } from '../common/types';
@@ -624,18 +624,22 @@ export class ReportingServ {
         Definition: dashboard,
       });
 
-      const embedUrl = await generateEmbedUrlForRegisteredUser(
-        dashboardCreateParameters.region,
-        dashboardCreateParameters.allowedDomain,
-        false,
-        dashboardId,
-      );
+      let dashboardEmbedUrl = '';
+      if (query.action === ExploreRequestAction.PREVIEW) {
+        const embedUrl = await generateEmbedUrlForRegisteredUser(
+          dashboardCreateParameters.region,
+          dashboardCreateParameters.allowedDomain,
+          false,
+          query.dashboardId,
+        );
+        dashboardEmbedUrl = embedUrl.EmbedUrl!;
+      }
       result = {
         dashboardId,
         dashboardArn: newDashboard.Arn!,
         dashboardName: `${resourceName}`,
         dashboardVersion: Number.parseInt(newDashboard.VersionArn!.substring(newDashboard.VersionArn!.lastIndexOf('/') + 1)),
-        dashboardEmbedUrl: embedUrl.EmbedUrl!,
+        dashboardEmbedUrl: dashboardEmbedUrl,
         analysisId,
         analysisArn: newAnalysis.Arn!,
         analysisName: `${resourceName}`,
@@ -689,18 +693,22 @@ export class ReportingServ {
       if (cnt >= 60) {
         throw new Error(`publish dashboard new version failed after try ${cnt} times`);
       }
-      const embedUrl = await generateEmbedUrlForRegisteredUser(
-        dashboardCreateParameters.region,
-        dashboardCreateParameters.allowedDomain,
-        false,
-        query.dashboardId,
-      );
+      let dashboardEmbedUrl = '';
+      if (query.action === ExploreRequestAction.PREVIEW) {
+        const embedUrl = await generateEmbedUrlForRegisteredUser(
+          dashboardCreateParameters.region,
+          dashboardCreateParameters.allowedDomain,
+          false,
+          query.dashboardId,
+        );
+        dashboardEmbedUrl = embedUrl.EmbedUrl!;
+      }
       result = {
         dashboardId: query.dashboardId,
         dashboardArn: newDashboard.Arn!,
         dashboardName: query.dashboardName,
         dashboardVersion: Number.parseInt(versionNumber!),
-        dashboardEmbedUrl: embedUrl.EmbedUrl!,
+        dashboardEmbedUrl: dashboardEmbedUrl,
         analysisId: query.analysisId,
         analysisArn: newAnalysis?.Arn!,
         analysisName: query.analysisName,
