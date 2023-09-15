@@ -186,10 +186,6 @@ export const funnelVisualColumns: InputColumn[] = [
 
 export const pathAnalysisVisualColumns: InputColumn[] = [
   {
-    Name: 'event_date',
-    Type: 'DATETIME',
-  },
-  {
     Name: 'source',
     Type: 'STRING',
   },
@@ -198,8 +194,8 @@ export const pathAnalysisVisualColumns: InputColumn[] = [
     Type: 'STRING',
   },
   {
-    Name: 'weight',
-    Type: 'DECIMAL',
+    Name: 'x_id',
+    Type: 'STRING',
   },
 ];
 

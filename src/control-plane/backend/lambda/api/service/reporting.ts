@@ -377,10 +377,9 @@ export class ReportingServ {
         importMode: 'DIRECT_QUERY',
         customSql: sql,
         projectedColumns: [
-          'event_date',
           'source',
           'target',
-          'weight',
+          'x_id',
         ],
       });
 

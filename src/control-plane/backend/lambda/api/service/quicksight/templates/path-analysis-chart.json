@@ -38,10 +38,10 @@
                               "FieldId": "{{weightFieldId}}",
                               "Column": {
                                   "DataSetIdentifier": "{{dataSetIdentifier}}",
-                                  "ColumnName": "weight"
+                                  "ColumnName": "x_id"
                               },
                               "AggregationFunction": {
-                                  "SimpleNumericalAggregation": "SUM"
+                                  "SimpleNumericalAggregation": "DISTINCT_COUNT"
                               }
                           }
                       }
