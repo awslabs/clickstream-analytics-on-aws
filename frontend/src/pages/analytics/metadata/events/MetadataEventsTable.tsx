@@ -11,10 +11,7 @@
  *  and limitations under the License.
  */
 
-import {
-  Input,
-  StatusIndicator,
-} from '@cloudscape-design/components';
+import { Input, StatusIndicator } from '@cloudscape-design/components';
 import { getMetadataEventsList, updateMetadataDisplay } from 'apis/analytics';
 import React from 'react';
 import { useTranslation } from 'react-i18next';

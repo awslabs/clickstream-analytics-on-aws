@@ -72,12 +72,18 @@ const AnalyticsNavigation: React.FC<INavigationProps> = (
           <li
             key={item.href}
             className={item.href === activeHref ? 'active' : ''}
+            title={item.text ?? ''}
+            aria-labelledby={item.text ?? ''}
           >
-            <a href={item.href}>
-              <span className="icon">
+            <a href={item.href} aria-labelledby={item.text ?? ''}>
+              <span className="icon" aria-labelledby={item.text ?? ''}>
                 <Icon name="settings" variant="inverted" />
               </span>
-              {isExpanded && <span className="text">{item.text}</span>}
+              {isExpanded && (
+                <span className="text" aria-labelledby={item.text ?? ''}>
+                  {item.text}
+                </span>
+              )}
             </a>
           </li>
         ))}
