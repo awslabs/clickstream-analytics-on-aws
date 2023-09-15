@@ -48,16 +48,11 @@ export class CMetadataDisplay {
     metadatas: IMetadataEvent[] | IMetadataEventParameter[] | IMetadataUserAttribute[]) {
     try {
       const displays = await this.getDisplay(projectId, appId);
-      if (displays.length === 0 || metadatas.length === 0) {
-        return metadatas;
-      }
       for (let metadata of metadatas) {
         const prefix = metadata.prefix.split('#')[0];
         const metadataDisplay = displays.find((d: IMetadataDisplay) => d.id === `${prefix}#${metadata.id}`);
-        if (metadataDisplay) {
-          metadata.displayName = metadataDisplay.displayName;
-          metadata.description = metadataDisplay.description;
-        }
+        metadata.displayName = metadataDisplay?.displayName ?? metadata.name;
+        metadata.description = metadataDisplay?.description ?? '';
         if (metadata.prefix.startsWith('EVENT#')) {
           const event = metadata as IMetadataEvent;
           event.associatedParameters = this.patchAssociatedWithData(event.associatedParameters) as IMetadataEventParameter[];
@@ -85,16 +80,11 @@ export class CMetadataDisplay {
     if (!associated || associated.length === 0) {
       return [];
     }
-    if (displays.length === 0) {
-      return associated;
-    }
     for (let metadata of associated) {
       const prefix = metadata.prefix.split('#')[0];
       const metadataDisplay = displays.find((d: IMetadataDisplay) => d.id === `${prefix}#${metadata.id}`);
-      if (metadataDisplay) {
-        metadata.displayName = metadataDisplay.displayName;
-        metadata.description = metadataDisplay.description;
-      }
+      metadata.displayName = metadataDisplay?.displayName ?? metadata.name;
+      metadata.description = metadataDisplay?.description ?? '';
     }
     return associated;
   }
@@ -104,16 +94,11 @@ export class CMetadataDisplay {
     if (!parameters || parameters.length === 0) {
       return [];
     }
-    if (displays.length === 0) {
-      return parameters;
-    }
     for (let parameter of parameters) {
       const valueEnum = parameter.valueEnum;
       for (let v of valueEnum) {
         const display = displays.find((d: IMetadataDisplay) => d.id === `DICTIONARY#${parameter.id}#${v.value}`);
-        if (display) {
-          v.displayValue = display.displayName;
-        }
+        v.displayValue = display?.displayName ?? v.value;
       }
     }
     return parameters;

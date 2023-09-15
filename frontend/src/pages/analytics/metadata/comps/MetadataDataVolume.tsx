@@ -23,6 +23,7 @@ const MetadataDataVolumeFC: React.FC<MetadataDataVolumeFCProps> = (
   const { dataVolume } = props;
 
   const formatCount = (num: number, decimals = 2) => {
+    if (!num) return '0';
     if (num === 0) return '0';
     const k = 1000;
     const dm = decimals < 0 ? 0 : decimals;
