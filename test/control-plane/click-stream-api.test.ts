@@ -724,6 +724,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
               'iam:ListPolicies',
               'iam:ListRoles',
               'iam:UpdateRoleDescription',
+              'iam:CreateServiceLinkedRole',
             ],
             Effect: 'Allow',
             Resource: [
@@ -788,6 +789,22 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
                       Ref: 'AWS::AccountId',
                     },
                     ':role/aws-service-role/ecs.application-autoscaling.amazonaws.com/AWSServiceRoleForApplicationAutoScaling_ECSService',
+                  ],
+                ],
+              },
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    {
+                      Ref: 'AWS::Partition',
+                    },
+                    ':iam::',
+                    {
+                      Ref: 'AWS::AccountId',
+                    },
+                    ':role/aws-service-role/autoscaling.amazonaws.com/AWSServiceRoleForAutoScaling',
                   ],
                 ],
               },

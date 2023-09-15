@@ -1260,7 +1260,7 @@ test('Nested stack has CreateEMRServelsssApplicationCustomResource', () => {
       ],
     },
     version: RefAnyValue,
-    secourityGroupId: {
+    securityGroupId: {
       'Fn::GetAtt': [
         Match.anyValue(),
         'GroupId',

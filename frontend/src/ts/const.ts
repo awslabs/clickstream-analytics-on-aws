@@ -16,6 +16,7 @@ export const SUPPORT_USER_SELECT_REDSHIFT_SERVERLESS = false;
 export const SUPPORT_SELF_HOSTED_KAFKA = true;
 
 export const PROJECT_CONFIG_JSON = 'ClickStreamOnAWSConfigId';
+export const ANALYTICS_NAV_STATUS = 'ClickStreamAnalyticsNavigationStatus';
 export const CONFIG_URL = '/aws-exports.json';
 export const COMMON_ALERT_TYPE = {
   Success: 'success',
@@ -29,6 +30,13 @@ export const ALPHABETS = Array.from({ length: 26 }, (_, index) =>
 );
 export const MAX_USER_INPUT_LENGTH = 1024;
 export const ZH_LANGUAGE_LIST = ['zh', 'zh-cn', 'zh_CN', 'zh-CN'];
+
+export const ZH_TEXT = '简体中文';
+export const EN_TEXT = 'English(US)';
+export const LANGUAGE_ITEMS = [
+  { id: 'en', text: EN_TEXT },
+  { id: 'zh', text: ZH_TEXT },
+];
 
 export const XMIND_LINK = 'https://www.maxmind.com';
 

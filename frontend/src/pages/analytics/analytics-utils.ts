@@ -31,7 +31,6 @@ import {
   OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN,
 } from 'ts/constant-ln';
 import {
-  ExploreAnalyticsOperators,
   ExploreConversionIntervalType,
   ExplorePathSessionDef,
   ExploreRelativeTimeUnit,
@@ -121,6 +120,7 @@ export const parametersConvertToCategoryItemType = (
         description: item.description,
         metadataSource: item.metadataSource,
         valueType: item.valueType,
+        valueEnum: item.valueEnum,
         modifyTime: moment(item.updateAt).format(TIME_FORMAT) || '-',
       });
     });
@@ -132,6 +132,7 @@ export const parametersConvertToCategoryItemType = (
       description: item.description,
       metadataSource: item.metadataSource,
       valueType: item.valueType,
+      valueEnum: item.valueEnum,
       modifyTime: moment(item.updateAt).format(TIME_FORMAT) || '-',
     });
   });
@@ -148,22 +149,10 @@ export const validEventAnalyticsItem = (item: IEventAnalyticsItem) => {
 };
 
 export const validConditionItemType = (condition: IConditionItemType) => {
-  if (
-    condition.conditionOption !== null &&
-    condition.conditionOption.value?.trim() !== '' &&
-    condition.conditionOperator !== null &&
-    condition.conditionOperator.value?.trim() !== ''
-  ) {
-    if (
-      condition.conditionOperator.value === ExploreAnalyticsOperators.NULL ||
-      condition.conditionOperator.value === ExploreAnalyticsOperators.NOT_NULL
-    ) {
-      return true;
-    } else {
-      return condition.conditionValue.trim() !== '';
-    }
-  }
-  return false;
+  return (
+    condition.conditionOption?.value !== null &&
+    condition.conditionOption?.value?.length !== 0
+  );
 };
 
 export const getEventAndConditions = (
@@ -384,4 +373,3 @@ export const getWarmUpParameters = (
     },
   };
 };
-

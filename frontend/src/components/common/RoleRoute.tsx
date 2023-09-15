@@ -11,15 +11,22 @@
  *  and limitations under the License.
  */
 
+import AnalyticsLayout from 'components/layouts/AnalyticsLayout';
+import CommonLayout from 'components/layouts/CommonLayout';
 import { UserContext } from 'context/UserContext';
 import AccessDenied from 'pages/error-page/AccessDenied';
 import { ReactElement, useContext } from 'react';
+import { AuthContextProps } from 'react-oidc-context';
 import { IUserRole } from 'ts/const';
 
 const RoleRoute = ({
+  layout,
+  auth,
   children,
   roles,
 }: {
+  auth: AuthContextProps;
+  layout: 'common' | 'analytics';
   children: ReactElement;
   roles: Array<IUserRole>;
 }) => {
@@ -31,6 +38,14 @@ const RoleRoute = ({
 
   if (!userHasRequiredRole) {
     return <AccessDenied />;
+  }
+
+  if (layout === 'common') {
+    return <CommonLayout auth={auth}>{children}</CommonLayout>;
+  }
+
+  if (layout === 'analytics') {
+    return <AnalyticsLayout auth={auth}>{children}</AnalyticsLayout>;
   }
 
   return children;
