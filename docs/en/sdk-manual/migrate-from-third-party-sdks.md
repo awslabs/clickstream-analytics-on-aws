@@ -2,16 +2,16 @@
 
 ## Introduction
 
-This article provides a best practice for you to migrate from a third-party SDK to Clickstream SDK. If you already have an SDK in your app or website, and you want to replace it with Clickstream SDK, we recommended you adopt this practice which allow you to achieve a smooth migration with the following benefits:
+This article provides a best practice for you to migrate from a third-party SDK to Clickstream SDK. If you already have an SDK in your app or website, and you want to replace it with Clickstream SDK, we recommend you adopt this practice, which allow you to achieve a smooth migration with the following benefits:
 
 * Minimum code changes
 * Reuse existing data tracking codes
 * Quick implementation time
 * Dual measurement to ensure data completeness
 
-In summary, we recommend you create one overarching analytic logger function that encapsulates all the event logging methods from both legacy SDK and Clickstream SDK, so that you have one API to log event data to multiple destinations. Once you satisfy with the data, you can easily update the function to disable the legacy SDK data logging.
+In summary, we recommend you create one overarching analytic logger function that encapsulates all the event logging methods from both legacy SDK and Clickstream SDK, so that you have one API to log event data to multiple destinations. Once satisfied with the data, you can easily update the function to disable the legacy SDK data logging.
 
-To make it easier to understand, we will use Clickstream Web SDK to replace Firebase Web SDK (GA4 SDK) as an example to illustrate. Assuming that you have integrated Firebase Web SDK in your website, you can follow below steps.
+To make it easier to understand, we will use Clickstream Web SDK to replace Firebase Web SDK (GA4 SDK) as an example to illustrate. Assuming you have integrated Firebase Web SDK into your website, follow the steps below.
 
 ## Step 1: Integrate Clickstream Web SDK
 
@@ -23,7 +23,7 @@ npm install @aws/clickstream-web
 
 ### Initialize the SDK
 
-Copy your configuration code from your clickstream solution web console, we recommended you add the code to your app's root entry point, for example `index.js/app.tsx` in React or `main.ts` in Vue/Angular, the configuration code should look like as follows.
+Copy your configuration code from your clickstream solution web console. We recommend you add the code to your app's root entry point, for example `index.js/app.tsx` in React or `main.ts` in Vue/Angular. The configuration code should look as follows.
 
 ```typescript
 import { ClickstreamAnalytics } from '@aws/clickstream-web';
@@ -34,9 +34,9 @@ ClickstreamAnalytics.init({
 });
 ```
 
-## Step 2: Encapsulate commonly data logger methods
+## Step 2: Encapsulate common data logger methods
 
-When integrating multiple data analysis SDKs, it is strongly recommended that you encapsulate all event logging methods in one function. Processing data logging codes of different SDKs in the same place can not only make the code concise but also make it easy for you to maintain. Below is an example of our encapsulation that you can copy directly into your project.
+When integrating multiple data analysis SDKs, it is strongly recommended that you encapsulate all event-logging methods in one function.  Processing data logging codes of different SDKs in the same place can make the code concise and easy for you to maintain. Below is an example of our encapsulation that you can copy directly into your project.
 
 ```javascript
 import { ClickstreamAnalytics } from "@aws/clickstream-web";
@@ -80,7 +80,7 @@ export const AnalyticsLogger = {
 }
 ```
 
-We need to encapsulate three APIs `log()` 、`setUserAttributes()` and `setUserId()`, that's all. When we invoke the `AnalyticsLogger.log('testEvent')`  method, both Clickstream and Firebase SDK will log the event, so we only need to call the `AnalyticsLogger` api when you need to log event data.
+We need to encapsulate three APIs `log()` 、`setUserAttributes()` and `setUserId()`, that's all. When we invoke the `AnalyticsLogger.log('testEvent')`  method, both Clickstream and Firebase SDK will log the event, so we only need to call the `AnalyticsLogger` API when you need to log event data.
 
 ## Step 3: Migrate to common APIs in minutes
 
@@ -98,7 +98,7 @@ We need to encapsulate three APIs `log()` 、`setUserAttributes()` and `setUserI
   }
 ```
 
-For the events log api, we just need to get the event name, attributes and pass them into the new api. Of course, you can also use the "Replace in File" feature to make quick changes, as shown in the image below.
+For the events log API. We need to get the event name and attributes for the events log API and pass them into the new API. Of course, you can also use the "Replace in File" feature to make quick changes, as shown in the image below.
 
 ![replace_in_files](../images/sdk-manual/replace-in-file.png) 
 
@@ -124,4 +124,4 @@ For user attributes, replace `setUserProperties()` with `AnalyticsLogger.setUser
 
 ## Summary
 
-As we saw above, it is easy to get Clickstream SDK and Firebase SDK to work together, after these three steps, your data will both upload to Clickstream analytics and Firebase, these two SDKs will work well together, and has no influence with each other. After you satisfy with the data, you only need to modify the `AnalyticsLogger` file to smoothly remove or disable another SDK.
+As we saw above, it is easy to get Clickstream SDK and Firebase SDK to work together. After these three steps, your data will be uploaded to Clickstream Analytics and Firebase, these two SDKs will work well together and will not influence each other. After you are satisfied with the data, you only need to modify the `AnalyticsLogger` file to remove or disable another SDK smoothly.
