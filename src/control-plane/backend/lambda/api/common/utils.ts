@@ -135,19 +135,24 @@ function getUidFromTokenPayload(payload: JwtPayload | undefined) {
 }
 
 function getTokenFromRequest(req: any) {
-  let authorization;
-  const WITH_AUTH_MIDDLEWARE = process.env.WITH_AUTH_MIDDLEWARE;
-  if (WITH_AUTH_MIDDLEWARE === 'true') {
-    authorization = req.get('authorization');
-  } else {
-    authorization = getTokenFromRequestContext(req.get(amznRequestContextHeader));
+  try {
+    let authorization;
+    const WITH_AUTH_MIDDLEWARE = process.env.WITH_AUTH_MIDDLEWARE;
+    if (WITH_AUTH_MIDDLEWARE === 'true') {
+      authorization = req.get('authorization');
+    } else {
+      authorization = getTokenFromRequestContext(req.get(amznRequestContextHeader));
+    }
+    if (authorization) {
+      const token = authorization.split(' ')[1];
+      const decodedToken = jwt.decode(token, { complete: true });
+      return decodedToken;
+    }
+    return undefined;
+  } catch (err) {
+    logger.warn('Error when get token from request.', { error: err });
+    return undefined;
   }
-  if (authorization) {
-    const token = authorization.split(' ')[1];
-    const decodedToken = jwt.decode(token, { complete: true });
-    return decodedToken;
-  }
-  return undefined;
 }
 
 function getRoleFromToken(decodedToken: any) {
