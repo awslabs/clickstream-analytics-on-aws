@@ -102,16 +102,24 @@ const AnalyticsRetention: React.FC = () => {
   const [segmentationOptionData, setSegmentationOptionData] =
     useState<SegmentationFilterDataType>(INIT_SEGMENTATION_DATA);
 
+  const getEventParameters = (eventName: string | undefined) => {
+    const event = originEvents.find((item) => item.name === eventName);
+    if (event) {
+      return event.associatedParameters;
+    }
+    return [];
+  };
+
   const getUserAttributes = async () => {
     try {
-      if (!projectId || !appId) {
-        return [];
-      }
       const {
         success,
         data,
       }: ApiResponse<ResponseTableData<IMetadataUserAttribute>> =
-        await getMetadataUserAttributesList({ projectId, appId });
+        await getMetadataUserAttributesList({
+          projectId: projectId ?? '',
+          appId: appId ?? '',
+        });
       if (success) {
         setUserAttributes(data.items);
         return data.items;
@@ -123,15 +131,15 @@ const AnalyticsRetention: React.FC = () => {
   };
 
   const getAllParameters = async () => {
-    if (!projectId || !appId) {
-      return [];
-    }
     try {
       const {
         success,
         data,
       }: ApiResponse<ResponseTableData<IMetadataEventParameter>> =
-        await getMetadataParametersList({ projectId, appId });
+        await getMetadataParametersList({
+          projectId: projectId ?? '',
+          appId: appId ?? '',
+        });
       if (success) {
         return data.items;
       }
@@ -141,21 +149,14 @@ const AnalyticsRetention: React.FC = () => {
     }
   };
 
-  const getEventParameters = (eventName: string | undefined) => {
-    const event = originEvents.find((item) => item.name === eventName);
-    if (event) {
-      return event.associatedParameters;
-    }
-    return [];
-  };
-
   const listMetadataEvents = async () => {
-    if (!projectId || !appId) {
-      return;
-    }
     try {
       const { success, data }: ApiResponse<ResponseTableData<IMetadataEvent>> =
-        await getMetadataEventsList({ projectId, appId, attribute: true });
+        await getMetadataEventsList({
+          projectId: projectId ?? '',
+          appId: appId ?? '',
+          attribute: true,
+        });
       if (success) {
         const events = metadataEventsConvertToCategoryItemType(data.items);
         setOriginEvents(data.items);
@@ -163,22 +164,18 @@ const AnalyticsRetention: React.FC = () => {
       }
     } catch (error) {
       console.log(error);
-      return;
     }
   };
 
   const loadPipeline = async () => {
-    if (!projectId) {
-      return;
-    }
     setLoadingData(true);
     try {
       const { success, data }: ApiResponse<IPipeline> =
-        await getPipelineDetailByProjectId(projectId);
+        await getPipelineDetailByProjectId(projectId ?? '');
       if (success) {
         setPipeline(data);
         setLoadingData(false);
-        const params = getWarmUpParameters(projectId, appId, data);
+        const params = getWarmUpParameters(projectId ?? '', appId ?? '', data);
         if (params) {
           await warmup(params);
         }
@@ -214,10 +211,12 @@ const AnalyticsRetention: React.FC = () => {
   };
 
   useEffect(() => {
-    loadPipeline();
-    listMetadataEvents();
-    listAllAttributes();
-  }, [projectId]);
+    if (projectId && appId) {
+      loadPipeline();
+      listMetadataEvents();
+      listAllAttributes();
+    }
+  }, [projectId, appId]);
 
   const [dateRangeValue, setDateRangeValue] =
     React.useState<DateRangePickerProps.Value>({
