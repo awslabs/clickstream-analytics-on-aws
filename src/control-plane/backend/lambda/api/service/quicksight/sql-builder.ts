@@ -72,7 +72,7 @@ export interface SQLParameters {
   readonly pairEventAndConditions?: PairEventAndCondition[];
 }
 
-export const buildInEvents = [
+export const builtInEvents = [
   '_session_start',
   '_session_stop',
   '_screen_view',
@@ -88,6 +88,8 @@ export const buildInEvents = [
   '_search',
   '_click',
   '_clickstream_error',
+  '_mp_share',
+  '_mp_favorite'
 ];
 
 export enum ExploreAnalyticsOperators {
