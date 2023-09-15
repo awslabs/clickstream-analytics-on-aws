@@ -36,6 +36,7 @@ interface MetadataTableProps {
     loadingText: string;
     emptyText: string;
     headerTitle: string;
+    headerDescription: string;
     headerRefreshButtonText: string;
     filteringAriaLabel: string;
     filteringPlaceholder: string;
@@ -49,16 +50,9 @@ interface MetadataTableProps {
   };
   selectionType?: 'multi' | 'single';
   loadHelpPanelContent: () => void;
-  setShowDetails: (
-    show: boolean,
-    data?: IMetadataEvent | IMetadataEventParameter | IMetadataUserAttribute
-  ) => void;
-  fetchDataFunc: () => Promise<
-    IMetadataEvent[] | IMetadataEventParameter[] | IMetadataUserAttribute[]
-  >;
-  fetchUpdateFunc: (
-    item: IMetadataEvent | IMetadataEventParameter | IMetadataUserAttribute
-  ) => Promise<void>;
+  setShowDetails: (show: boolean, data?: IMetadataType) => void;
+  fetchDataFunc: () => Promise<IMetadataType[]>;
+  fetchUpdateFunc: (item: IMetadataType) => Promise<void>;
 }
 
 const MetadataTable: React.FC<MetadataTableProps> = (
@@ -207,8 +201,7 @@ const MetadataTable: React.FC<MetadataTableProps> = (
     <div>
       <Table
         {...tableCollectionProps}
-        variant="full-page"
-        stickyHeader={true}
+        variant="embedded"
         resizableColumns={true}
         loading={loadingData}
         items={itemsSnap.length > 0 ? itemsSnap : items}
@@ -228,7 +221,7 @@ const MetadataTable: React.FC<MetadataTableProps> = (
         header={
           <MetadataTableHeader
             title={tableI18nStrings.headerTitle}
-            refreshButtonText={tableI18nStrings.headerRefreshButtonText}
+            description={tableI18nStrings.headerDescription}
             selectedItemsCount={collectionProps.selectedItems?.length ?? 0}
             counter={
               !loadingData &&
@@ -238,9 +231,6 @@ const MetadataTable: React.FC<MetadataTableProps> = (
                 : `(${data.length})`
             }
             onInfoLinkClick={loadHelpPanelContent}
-            onRefreshButtonClick={() => {
-              console.log('refresh button clicked');
-            }}
           />
         }
         filter={

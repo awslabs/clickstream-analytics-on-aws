@@ -12,30 +12,32 @@
  */
 
 import {
-  AppLayout,
   Input,
   StatusIndicator,
 } from '@cloudscape-design/components';
 import { getMetadataEventsList, updateMetadataDisplay } from 'apis/analytics';
-import Navigation from 'components/layouts/Navigation';
-import React, { useState } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { EVENT_DISPLAY_PREFIX } from 'ts/const';
 import { MetadataPlatform, MetadataSource } from 'ts/explore-types';
-import MetadataEventSplitPanel from './MetadataEventSplitPanel';
 import MetadataDataVolumeFC from '../comps/MetadataDataVolume';
 import MetadataPlatformFC from '../comps/MetadataPlatform';
 import MetadataSourceFC from '../comps/MetadataSource';
 import MetadataTable from '../table/MetadataTable';
 import { descriptionRegex, displayNameRegex } from '../table/table-config';
 
-const MetadataEvents: React.FC = () => {
+interface MetadataEventsTableProps {
+  setShowDetails: (show: boolean, data?: IMetadataType) => void;
+}
+
+const MetadataEventsTable: React.FC<MetadataEventsTableProps> = (
+  props: MetadataEventsTableProps
+) => {
   const { projectId, appId } = useParams();
   const { t } = useTranslation();
+  const { setShowDetails } = props;
 
-  const [showSplit, setShowSplit] = useState(false);
-  const [curEvent, setCurEvent] = useState<IMetadataEvent | null>();
   const COLUMN_DEFINITIONS = [
     {
       id: 'name',
@@ -199,9 +201,7 @@ const MetadataEvents: React.FC = () => {
     }
   };
 
-  const updateMetadataEventInfo = async (
-    newItem: IMetadataEvent | IMetadataEventParameter | IMetadataUserAttribute
-  ) => {
+  const updateMetadataEventInfo = async (newItem: IMetadataType) => {
     try {
       const { success, message }: ApiResponse<null> =
         await updateMetadataDisplay({
@@ -220,66 +220,37 @@ const MetadataEvents: React.FC = () => {
   };
 
   return (
-    <AppLayout
-      toolsHide
-      content={
-        <MetadataTable
-          resourceName="Event"
-          tableColumnDefinitions={COLUMN_DEFINITIONS}
-          tableContentDisplay={CONTENT_DISPLAY}
-          tableFilteringProperties={FILTERING_PROPERTIES}
-          tableI18nStrings={{
-            loadingText:
-              t('analytics:labels.tableLoading') || 'Loading',
-            emptyText: t('analytics:labels.tableEmpty'),
-            headerTitle: t('analytics:metadata.event.title'),
-            headerRefreshButtonText: t('common:button.refreshMetadata'),
-            filteringAriaLabel: t(
-              'analytics:metadata.event.filteringAriaLabel'
-            ),
-            filteringPlaceholder: t(
-              'analytics:metadata.event.filteringPlaceholder'
-            ),
-            groupPropertiesText: t('button.groupPropertiesText'),
-            operatorsText: t('button.operatorsText'),
-            clearFiltersText: t('button.clearFiltersText'),
-            applyActionText: t('button.applyActionText'),
-            useText: t('common:table.useText'),
-            matchText: t('common:table.matchText'),
-            matchesText: t('common:table.matchesText'),
-          }}
-          loadHelpPanelContent={() => {
-            console.log(1);
-          }}
-          setShowDetails={(
-            show: boolean,
-            data?:
-              | IMetadataEvent
-              | IMetadataEventParameter
-              | IMetadataUserAttribute
-          ) => {
-            setShowSplit(show);
-            if (data) {
-              setCurEvent(data as IMetadataEvent);
-            }
-          }}
-          fetchDataFunc={listMetadataEvents}
-          fetchUpdateFunc={updateMetadataEventInfo}
-        ></MetadataTable>
-      }
-      headerSelector="#header"
-      navigation={
-        <Navigation
-          activeHref={`/analytics/${projectId}/app/${appId}/metadata/events`}
-        />
-      }
-      splitPanelOpen={showSplit}
-      onSplitPanelToggle={(e) => {
-        setShowSplit(e.detail.open);
+    <MetadataTable
+      resourceName="Event"
+      tableColumnDefinitions={COLUMN_DEFINITIONS}
+      tableContentDisplay={CONTENT_DISPLAY}
+      tableFilteringProperties={FILTERING_PROPERTIES}
+      tableI18nStrings={{
+        loadingText: t('analytics:metadata.event.tableLoading') || 'Loading',
+        emptyText: t('analytics:metadata.event.tableEmpty'),
+        headerTitle: t('analytics:metadata.event.title'),
+        headerDescription: t('analytics:metadata.event.description'),
+        headerRefreshButtonText: t('common:button.refreshMetadata'),
+        filteringAriaLabel: t('analytics:metadata.event.filteringAriaLabel'),
+        filteringPlaceholder: t(
+          'analytics:metadata.event.filteringPlaceholder'
+        ),
+        groupPropertiesText: t('button.groupPropertiesText'),
+        operatorsText: t('button.operatorsText'),
+        clearFiltersText: t('button.clearFiltersText'),
+        applyActionText: t('button.applyActionText'),
+        useText: t('common:table.useText'),
+        matchText: t('common:table.matchText'),
+        matchesText: t('common:table.matchesText'),
       }}
-      splitPanel={curEvent ? <MetadataEventSplitPanel event={curEvent} /> : ''}
-    />
+      loadHelpPanelContent={() => {
+        console.log(1);
+      }}
+      setShowDetails={setShowDetails}
+      fetchDataFunc={listMetadataEvents}
+      fetchUpdateFunc={updateMetadataEventInfo}
+    ></MetadataTable>
   );
 };
 
-export default MetadataEvents;
+export default MetadataEventsTable;

@@ -16,6 +16,29 @@
     "deleteTip1": "Are you sure you want to delete the dashboard ",
     "deleteTip2": " delete dashboard will delete all data in QuickSight."
   },
+  "realtime": {
+    "title": "Realtime",
+    "description": "You can view key metrics of your apps and website in realtime here. ",
+    "disableMessage": "This project has not enabled real-time dashboard, please contact your admin to turn on real-time dashboard.",
+    "configProject": "Configure project"
+  },
+  "analyzes": {
+    "title": "Analyzes",
+    "description": "You can customize the design and signage here.",
+    "comeSoon": "The feature is about to be launched."
+  },
+  "explore": {
+    "title": "Explore",
+    "description": "Explore allows you query and analyze the clickstream data with an easy-to-use UI in a dynamic manner. Select an analytics model to begin with.",
+    "analyticsModel": "Analytics model",
+    "exploitativeAnalytics": "Exploratory analytics",
+    "funnelAnalysis": "Funnel analysis",
+    "eventAnalysis": "Event analysis",
+    "pathAnalysis": "Path analysis",
+    "retentionAnalysis": "Retention analysis",
+    "userAnalytics": "User analytics",
+    "userSearch": "User search"
+  },
   "list": {
     "loading": "Loading dashboards.",
     "noDashboard": "You don’t have any clickstream analytics dashboard yet.",
@@ -61,9 +84,11 @@
     "platformWechatMinPro": "Wechat MiniProgram"
   },
   "metadata": {
+    "description": "You can view  the out-of-the-box user lifecycle dashboards here, and create a custom dashboard with exploration analysis. ",
     "event": {
-      "title": "Origin Events",
-      "description": "Description of the Origin Events",
+      "title": "Events",
+      "description": "This table lists out all the events in your clickstream analytics project.",
+      "tableLoading": "Loading",
       "tableColumnID": "ID",
       "tableColumnName": "Event name",
       "tableColumnDisplayName": "Display name",

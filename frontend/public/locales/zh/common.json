@@ -16,7 +16,11 @@
     "alarms": "告警",
     "users": "用户",
     "analytics": "数据分析",
-    "dashboard": "看板"
+    "dashboard": "看板",
+    "realtime": "实时",
+    "explore": "探索",
+    "analyzes": "分析",
+    "data-management": "数据管理"
   },
   "nav": {
     "home": "主页",
@@ -28,14 +32,9 @@
       "realtime": "实时",
       "dashboards": "看板",
       "explore": "探索",
+      "analyzes": "分析",
       "metadata": "元数据",
-      "exploreEvent": "事件分析",
-      "explorePath": "路径分析",
-      "exploreRetention": "留存分析",
-      "exploreFunnel": "转化分析",
-      "metadata-events": "原始事件",
-      "metadata-event-parameters": "事件属性",
-      "metadata-user-attributes": "用户属性"
+      "data-management": "数据管理"
     },
     "operation": "运维",
     "dashboard": "显示器仪表板",

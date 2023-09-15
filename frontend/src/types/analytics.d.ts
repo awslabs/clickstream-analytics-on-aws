@@ -13,6 +13,11 @@
 
 export {};
 declare global {
+  type IMetadataType =
+    | IMetadataEvent
+    | IMetadataEventParameter
+    | IMetadataUserAttribute;
+
   interface IMetadataEvent {
     readonly id: string;
     readonly type: string;

@@ -12,12 +12,10 @@
  */
 
 import {
-  AppLayout,
   Box,
   Button,
   ColumnLayout,
   Container,
-  ContentLayout,
   Header,
   Input,
   Select,
@@ -45,7 +43,6 @@ import {
 } from 'components/eventselect/AnalyticsType';
 import EventsSelect from 'components/eventselect/EventSelect';
 import SegmentationFilter from 'components/eventselect/SegmentationFilter';
-import Navigation from 'components/layouts/Navigation';
 import { cloneDeep } from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -444,372 +441,331 @@ const AnalyticsFunnel: React.FC = () => {
   };
 
   return (
-    <AppLayout
-      toolsHide
-      content={
-        <>
-          <ContentLayout
-            header={
-              <SpaceBetween size="m">
-                <Header variant="h1">{t('nav.analytics.exploreFunnel')}</Header>
-              </SpaceBetween>
-            }
-          >
-            <SpaceBetween direction="vertical" size="l">
-              <Container
-                header={
-                  <Header
-                    variant="h2"
-                    actions={
-                      <SpaceBetween direction="horizontal" size="xs">
-                        <Button
-                          iconName="refresh"
-                          onClick={resetConfig}
-                          loading={loadingData}
-                        >
-                          {t('button.reset')}
-                        </Button>
-                        <Button
-                          variant="primary"
-                          loading={loadingData}
-                          onClick={() => {
-                            setSelectDashboardModalVisible(true);
-                          }}
-                        >
-                          {t('button.saveToDashboard')}
-                        </Button>
-                      </SpaceBetween>
-                    }
+    <>
+      <SpaceBetween direction="vertical" size="l">
+        <Container
+          header={
+            <Header
+              variant="h2"
+              actions={
+                <SpaceBetween direction="horizontal" size="xs">
+                  <Button
+                    iconName="refresh"
+                    onClick={resetConfig}
+                    loading={loadingData}
                   >
-                    {t('analytics:header.configurations')}
-                  </Header>
-                }
-              >
-                <div className="cs-analytics-config">
-                  <SpaceBetween direction="vertical" size="xs">
-                    <Box variant="awsui-key-label">
-                      {t('analytics:labels.metrics')}
-                    </Box>
-                    <div className="cs-analytics-config">
-                      <Select
-                        selectedOption={selectedMetric}
-                        options={computeMethodOptions}
-                        onChange={(event) => {
-                          setSelectedMetric(event.detail.selectedOption);
-                        }}
-                      />
-                    </div>
-                  </SpaceBetween>
-                  <SpaceBetween direction="vertical" size="xs">
-                    <Box variant="awsui-key-label">
-                      {t('analytics:labels.window')}
-                    </Box>
-                    <div className="cs-analytics-window">
-                      <div className="cs-analytics-window-type">
-                        <Select
-                          selectedOption={selectedWindowType}
-                          options={windowTypeOptions}
-                          onChange={(event) => {
-                            setSelectedWindowType(event.detail.selectedOption);
-                          }}
-                        />
-                      </div>
-                      {selectedWindowType?.value === customWindowType?.value ? (
-                        <>
-                          <div className="cs-analytics-window-value">
-                            <Input
-                              type="number"
-                              placeholder="5"
-                              value={windowValue}
-                              onChange={(event) => {
-                                setWindowValue(event.detail.value);
-                              }}
-                            />
-                          </div>
-                          <div className="cs-analytics-window-unit">
-                            <Select
-                              selectedOption={selectedWindowUnit}
-                              options={windowUnitOptions}
-                              onChange={(event) => {
-                                setSelectedWindowUnit(
-                                  event.detail.selectedOption
-                                );
-                              }}
-                            />
-                          </div>
-                        </>
-                      ) : null}
-                    </div>
-                  </SpaceBetween>
-                  <SpaceBetween direction="vertical" size="xs">
-                    <Box variant="awsui-key-label">
-                      {t('analytics:labels.associateParameter')}
-                    </Box>
-                    <div className="cs-analytics-config">
-                      <Toggle
-                        onChange={({ detail }) =>
-                          setAssociateParameterChecked(detail.checked)
-                        }
-                        checked={associateParameterChecked}
-                      >
-                        {associateParameterChecked ? 'On' : 'Off'}
-                      </Toggle>
-                    </div>
-                  </SpaceBetween>
-                </div>
-                <br />
-                <SpaceBetween direction="vertical" size="xs">
-                  <Box variant="awsui-key-label">
-                    {t('analytics:labels.dateRange')}
-                  </Box>
-                  <ExploreDateRangePicker
-                    dateRangeValue={dateRangeValue}
-                    setDateRangeValue={setDateRangeValue}
-                    timeGranularity={timeGranularity}
-                    setTimeGranularity={setTimeGranularity}
-                  />
+                    {t('button.reset')}
+                  </Button>
+                  <Button
+                    variant="primary"
+                    loading={loadingData}
+                    onClick={() => {
+                      setSelectDashboardModalVisible(true);
+                    }}
+                  >
+                    {t('button.saveToDashboard')}
+                  </Button>
                 </SpaceBetween>
-                <br />
-                <ColumnLayout columns={2} variant="text-grid">
-                  <SpaceBetween direction="vertical" size="xs">
-                    <Box variant="awsui-key-label">
-                      {t('analytics:labels.funnelSteps')}
-                    </Box>
-                    <div>
-                      <EventsSelect
-                        data={eventOptionData}
-                        eventOptionList={metadataEvents}
-                        addEventButtonLabel={t('common:button.addFunnelStep')}
-                        addNewEventAnalyticsItem={() => {
-                          setEventOptionData((prev) => {
-                            const preEventList = cloneDeep(prev);
-                            return [
-                              ...preEventList,
-                              {
-                                ...DEFAULT_EVENT_ITEM,
-                                isMultiSelect: false,
-                              },
-                            ];
-                          });
-                        }}
-                        removeEventItem={(index) => {
-                          setEventOptionData((prev) => {
-                            const dataObj = cloneDeep(prev);
-                            return dataObj.filter(
-                              (item, eIndex) => eIndex !== index
-                            );
-                          });
-                        }}
-                        addNewConditionItem={(index: number) => {
-                          setEventOptionData((prev) => {
-                            const dataObj = cloneDeep(prev);
-                            dataObj[index].conditionList.push(
-                              DEFAULT_CONDITION_DATA
-                            );
-                            return dataObj;
-                          });
-                        }}
-                        removeEventCondition={(eventIndex, conditionIndex) => {
-                          setEventOptionData((prev) => {
-                            const dataObj = cloneDeep(prev);
-                            const newCondition = dataObj[
-                              eventIndex
-                            ].conditionList.filter(
-                              (item, i) => i !== conditionIndex
-                            );
-                            dataObj[eventIndex].conditionList = newCondition;
-                            return dataObj;
-                          });
-                        }}
-                        changeConditionCategoryOption={(
-                          eventIndex,
-                          conditionIndex,
-                          category
-                        ) => {
-                          setEventOptionData((prev) => {
-                            const dataObj = cloneDeep(prev);
-                            dataObj[eventIndex].conditionList[
-                              conditionIndex
-                            ].conditionOption = category;
-                            if (
-                              category?.valueType === MetadataValueType.STRING
-                            ) {
-                              dataObj[eventIndex].conditionList[
-                                conditionIndex
-                              ].conditionValue = [];
-                            } else {
-                              dataObj[eventIndex].conditionList[
-                                conditionIndex
-                              ].conditionValue = '';
-                            }
-                            return dataObj;
-                          });
-                        }}
-                        changeConditionOperator={(
-                          eventIndex,
-                          conditionIndex,
-                          operator
-                        ) => {
-                          setEventOptionData((prev) => {
-                            const dataObj = cloneDeep(prev);
-                            dataObj[eventIndex].conditionList[
-                              conditionIndex
-                            ].conditionOperator = operator;
-                            return dataObj;
-                          });
-                        }}
-                        changeConditionValue={(
-                          eventIndex,
-                          conditionIndex,
-                          value
-                        ) => {
-                          setEventOptionData((prev) => {
-                            const dataObj = cloneDeep(prev);
-                            dataObj[eventIndex].conditionList[
-                              conditionIndex
-                            ].conditionValue = value;
-                            return dataObj;
-                          });
-                        }}
-                        changeCurCalcMethodOption={(eventIndex, method) => {
-                          setEventOptionData((prev) => {
-                            const dataObj = cloneDeep(prev);
-                            dataObj[eventIndex].calculateMethodOption = method;
-                            return dataObj;
-                          });
-                        }}
-                        changeCurCategoryOption={async (
-                          eventIndex,
-                          category
-                        ) => {
-                          const eventName = category?.value;
-                          const eventParameters = getEventParameters(eventName);
-                          const parameterOption =
-                            parametersConvertToCategoryItemType(
-                              userAttributes,
-                              eventParameters
-                            );
-                          setEventOptionData((prev) => {
-                            const dataObj = cloneDeep(prev);
-                            dataObj[eventIndex].selectedEventOption = category;
-                            dataObj[eventIndex].conditionOptions =
-                              parameterOption;
-                            return dataObj;
-                          });
-                        }}
-                        changeCurRelationShip={(eventIndex, relation) => {
-                          setEventOptionData((prev) => {
-                            const dataObj = cloneDeep(prev);
-                            dataObj[eventIndex].conditionRelationShip =
-                              relation;
-                            return dataObj;
-                          });
-                        }}
-                      />
-                    </div>
-                  </SpaceBetween>
-                  <SpaceBetween direction="vertical" size="xs">
-                    <Box variant="awsui-key-label">
-                      {t('analytics:labels.filters')}
-                    </Box>
-                    <div>
-                      <SegmentationFilter
-                        segmentationData={segmentationOptionData}
-                        addNewConditionItem={() => {
-                          setSegmentationOptionData((prev) => {
-                            const dataObj = cloneDeep(prev);
-                            dataObj.data.push(DEFAULT_CONDITION_DATA);
-                            return dataObj;
-                          });
-                        }}
-                        removeEventCondition={(index) => {
-                          setSegmentationOptionData((prev) => {
-                            const dataObj = cloneDeep(prev);
-                            const newCondition = dataObj.data.filter(
-                              (item, i) => i !== index
-                            );
-                            dataObj.data = newCondition;
-                            return dataObj;
-                          });
-                        }}
-                        changeConditionCategoryOption={(index, category) => {
-                          setSegmentationOptionData((prev) => {
-                            const dataObj = cloneDeep(prev);
-                            dataObj.data[index].conditionOption = category;
-                            if (
-                              category?.valueType === MetadataValueType.STRING
-                            ) {
-                              dataObj.data[index].conditionValue = [];
-                            } else {
-                              dataObj.data[index].conditionValue = '';
-                            }
-                            return dataObj;
-                          });
-                        }}
-                        changeConditionOperator={(index, operator) => {
-                          setSegmentationOptionData((prev) => {
-                            const dataObj = cloneDeep(prev);
-                            dataObj.data[index].conditionOperator = operator;
-                            return dataObj;
-                          });
-                        }}
-                        changeConditionValue={(index, value) => {
-                          setSegmentationOptionData((prev) => {
-                            const dataObj = cloneDeep(prev);
-                            dataObj.data[index].conditionValue = value;
-                            return dataObj;
-                          });
-                        }}
-                        changeCurRelationShip={(relation) => {
-                          setSegmentationOptionData((prev) => {
-                            const dataObj = cloneDeep(prev);
-                            dataObj.conditionRelationShip = relation;
-                            return dataObj;
-                          });
-                        }}
-                      />
-                    </div>
-                  </SpaceBetween>
-                </ColumnLayout>
-                <br />
-                <Button
-                  variant="primary"
-                  iconName="search"
-                  onClick={clickPreview}
-                  loading={loadingData}
-                >
-                  {t('button.preview')}
-                </Button>
-              </Container>
-              <Container>
-                {loadingChart ? (
-                  <Loading />
-                ) : (
-                  <ExploreEmbedFrame
-                    embedType="dashboard"
-                    embedUrl={exploreEmbedUrl}
-                    embedId={`explore_${generateStr(6)}`}
-                  />
-                )}
-              </Container>
+              }
+            >
+              {t('analytics:header.configurations')}
+            </Header>
+          }
+        >
+          <div className="cs-analytics-config">
+            <SpaceBetween direction="vertical" size="xs">
+              <Box variant="awsui-key-label">
+                {t('analytics:labels.metrics')}
+              </Box>
+              <div className="cs-analytics-config">
+                <Select
+                  selectedOption={selectedMetric}
+                  options={computeMethodOptions}
+                  onChange={(event) => {
+                    setSelectedMetric(event.detail.selectedOption);
+                  }}
+                />
+              </div>
             </SpaceBetween>
-          </ContentLayout>
-          <SaveToDashboardModal
-            visible={selectDashboardModalVisible}
-            disableClose={false}
+            <SpaceBetween direction="vertical" size="xs">
+              <Box variant="awsui-key-label">
+                {t('analytics:labels.window')}
+              </Box>
+              <div className="cs-analytics-window">
+                <div className="cs-analytics-window-type">
+                  <Select
+                    selectedOption={selectedWindowType}
+                    options={windowTypeOptions}
+                    onChange={(event) => {
+                      setSelectedWindowType(event.detail.selectedOption);
+                    }}
+                  />
+                </div>
+                {selectedWindowType?.value === customWindowType?.value ? (
+                  <>
+                    <div className="cs-analytics-window-value">
+                      <Input
+                        type="number"
+                        placeholder="5"
+                        value={windowValue}
+                        onChange={(event) => {
+                          setWindowValue(event.detail.value);
+                        }}
+                      />
+                    </div>
+                    <div className="cs-analytics-window-unit">
+                      <Select
+                        selectedOption={selectedWindowUnit}
+                        options={windowUnitOptions}
+                        onChange={(event) => {
+                          setSelectedWindowUnit(event.detail.selectedOption);
+                        }}
+                      />
+                    </div>
+                  </>
+                ) : null}
+              </div>
+            </SpaceBetween>
+            <SpaceBetween direction="vertical" size="xs">
+              <Box variant="awsui-key-label">
+                {t('analytics:labels.associateParameter')}
+              </Box>
+              <div className="cs-analytics-config">
+                <Toggle
+                  onChange={({ detail }) =>
+                    setAssociateParameterChecked(detail.checked)
+                  }
+                  checked={associateParameterChecked}
+                >
+                  {associateParameterChecked ? 'On' : 'Off'}
+                </Toggle>
+              </div>
+            </SpaceBetween>
+          </div>
+          <br />
+          <SpaceBetween direction="vertical" size="xs">
+            <Box variant="awsui-key-label">
+              {t('analytics:labels.dateRange')}
+            </Box>
+            <ExploreDateRangePicker
+              dateRangeValue={dateRangeValue}
+              setDateRangeValue={setDateRangeValue}
+              timeGranularity={timeGranularity}
+              setTimeGranularity={setTimeGranularity}
+            />
+          </SpaceBetween>
+          <br />
+          <ColumnLayout columns={2} variant="text-grid">
+            <SpaceBetween direction="vertical" size="xs">
+              <Box variant="awsui-key-label">
+                {t('analytics:labels.funnelSteps')}
+              </Box>
+              <div>
+                <EventsSelect
+                  data={eventOptionData}
+                  eventOptionList={metadataEvents}
+                  addEventButtonLabel={t('common:button.addFunnelStep')}
+                  addNewEventAnalyticsItem={() => {
+                    setEventOptionData((prev) => {
+                      const preEventList = cloneDeep(prev);
+                      return [
+                        ...preEventList,
+                        {
+                          ...DEFAULT_EVENT_ITEM,
+                          isMultiSelect: false,
+                        },
+                      ];
+                    });
+                  }}
+                  removeEventItem={(index) => {
+                    setEventOptionData((prev) => {
+                      const dataObj = cloneDeep(prev);
+                      return dataObj.filter((item, eIndex) => eIndex !== index);
+                    });
+                  }}
+                  addNewConditionItem={(index: number) => {
+                    setEventOptionData((prev) => {
+                      const dataObj = cloneDeep(prev);
+                      dataObj[index].conditionList.push(DEFAULT_CONDITION_DATA);
+                      return dataObj;
+                    });
+                  }}
+                  removeEventCondition={(eventIndex, conditionIndex) => {
+                    setEventOptionData((prev) => {
+                      const dataObj = cloneDeep(prev);
+                      const newCondition = dataObj[
+                        eventIndex
+                      ].conditionList.filter((item, i) => i !== conditionIndex);
+                      dataObj[eventIndex].conditionList = newCondition;
+                      return dataObj;
+                    });
+                  }}
+                  changeConditionCategoryOption={(
+                    eventIndex,
+                    conditionIndex,
+                    category
+                  ) => {
+                    setEventOptionData((prev) => {
+                      const dataObj = cloneDeep(prev);
+                      dataObj[eventIndex].conditionList[
+                        conditionIndex
+                      ].conditionOption = category;
+                      if (category?.valueType === MetadataValueType.STRING) {
+                        dataObj[eventIndex].conditionList[
+                          conditionIndex
+                        ].conditionValue = [];
+                      } else {
+                        dataObj[eventIndex].conditionList[
+                          conditionIndex
+                        ].conditionValue = '';
+                      }
+                      return dataObj;
+                    });
+                  }}
+                  changeConditionOperator={(
+                    eventIndex,
+                    conditionIndex,
+                    operator
+                  ) => {
+                    setEventOptionData((prev) => {
+                      const dataObj = cloneDeep(prev);
+                      dataObj[eventIndex].conditionList[
+                        conditionIndex
+                      ].conditionOperator = operator;
+                      return dataObj;
+                    });
+                  }}
+                  changeConditionValue={(eventIndex, conditionIndex, value) => {
+                    setEventOptionData((prev) => {
+                      const dataObj = cloneDeep(prev);
+                      dataObj[eventIndex].conditionList[
+                        conditionIndex
+                      ].conditionValue = value;
+                      return dataObj;
+                    });
+                  }}
+                  changeCurCalcMethodOption={(eventIndex, method) => {
+                    setEventOptionData((prev) => {
+                      const dataObj = cloneDeep(prev);
+                      dataObj[eventIndex].calculateMethodOption = method;
+                      return dataObj;
+                    });
+                  }}
+                  changeCurCategoryOption={async (eventIndex, category) => {
+                    const eventName = category?.value;
+                    const eventParameters = getEventParameters(eventName);
+                    const parameterOption = parametersConvertToCategoryItemType(
+                      userAttributes,
+                      eventParameters
+                    );
+                    setEventOptionData((prev) => {
+                      const dataObj = cloneDeep(prev);
+                      dataObj[eventIndex].selectedEventOption = category;
+                      dataObj[eventIndex].conditionOptions = parameterOption;
+                      return dataObj;
+                    });
+                  }}
+                  changeCurRelationShip={(eventIndex, relation) => {
+                    setEventOptionData((prev) => {
+                      const dataObj = cloneDeep(prev);
+                      dataObj[eventIndex].conditionRelationShip = relation;
+                      return dataObj;
+                    });
+                  }}
+                />
+              </div>
+            </SpaceBetween>
+            <SpaceBetween direction="vertical" size="xs">
+              <Box variant="awsui-key-label">
+                {t('analytics:labels.filters')}
+              </Box>
+              <div>
+                <SegmentationFilter
+                  segmentationData={segmentationOptionData}
+                  addNewConditionItem={() => {
+                    setSegmentationOptionData((prev) => {
+                      const dataObj = cloneDeep(prev);
+                      dataObj.data.push(DEFAULT_CONDITION_DATA);
+                      return dataObj;
+                    });
+                  }}
+                  removeEventCondition={(index) => {
+                    setSegmentationOptionData((prev) => {
+                      const dataObj = cloneDeep(prev);
+                      const newCondition = dataObj.data.filter(
+                        (item, i) => i !== index
+                      );
+                      dataObj.data = newCondition;
+                      return dataObj;
+                    });
+                  }}
+                  changeConditionCategoryOption={(index, category) => {
+                    setSegmentationOptionData((prev) => {
+                      const dataObj = cloneDeep(prev);
+                      dataObj.data[index].conditionOption = category;
+                      if (category?.valueType === MetadataValueType.STRING) {
+                        dataObj.data[index].conditionValue = [];
+                      } else {
+                        dataObj.data[index].conditionValue = '';
+                      }
+                      return dataObj;
+                    });
+                  }}
+                  changeConditionOperator={(index, operator) => {
+                    setSegmentationOptionData((prev) => {
+                      const dataObj = cloneDeep(prev);
+                      dataObj.data[index].conditionOperator = operator;
+                      return dataObj;
+                    });
+                  }}
+                  changeConditionValue={(index, value) => {
+                    setSegmentationOptionData((prev) => {
+                      const dataObj = cloneDeep(prev);
+                      dataObj.data[index].conditionValue = value;
+                      return dataObj;
+                    });
+                  }}
+                  changeCurRelationShip={(relation) => {
+                    setSegmentationOptionData((prev) => {
+                      const dataObj = cloneDeep(prev);
+                      dataObj.conditionRelationShip = relation;
+                      return dataObj;
+                    });
+                  }}
+                />
+              </div>
+            </SpaceBetween>
+          </ColumnLayout>
+          <br />
+          <Button
+            variant="primary"
+            iconName="search"
+            onClick={clickPreview}
             loading={loadingData}
-            setModalVisible={setSelectDashboardModalVisible}
-            save={saveToDashboard}
-          />
-        </>
-      }
-      headerSelector="#header"
-      navigation={
-        <Navigation
-          activeHref={`/analytics/${projectId}/app/${appId}/funnel`}
-        />
-      }
-    />
+          >
+            {t('button.preview')}
+          </Button>
+        </Container>
+        <Container>
+          {loadingChart ? (
+            <Loading />
+          ) : (
+            <ExploreEmbedFrame
+              embedType="dashboard"
+              embedUrl={exploreEmbedUrl}
+              embedId={`explore_${generateStr(6)}`}
+            />
+          )}
+        </Container>
+      </SpaceBetween>
+      <SaveToDashboardModal
+        visible={selectDashboardModalVisible}
+        disableClose={false}
+        loading={loadingData}
+        setModalVisible={setSelectDashboardModalVisible}
+        save={saveToDashboard}
+      />
+    </>
   );
 };
 

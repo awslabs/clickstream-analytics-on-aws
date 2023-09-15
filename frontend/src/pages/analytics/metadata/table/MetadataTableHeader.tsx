@@ -10,19 +10,11 @@
  *  OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions
  *  and limitations under the License.
  */
-import {
-  Button,
-  Header,
-  HeaderProps,
-  Link,
-  SpaceBetween,
-} from '@cloudscape-design/components';
+import { Header, HeaderProps, Link } from '@cloudscape-design/components';
 import React from 'react';
 
 interface MetadataTableHeaderProps extends HeaderProps {
   title?: string;
-  refreshButtonText?: string;
-  extraActions?: React.ReactNode;
   selectedItemsCount: number;
   onRefreshButtonClick?: () => void;
   onInfoLinkClick?: () => void;
@@ -30,10 +22,7 @@ interface MetadataTableHeaderProps extends HeaderProps {
 
 export function MetadataTableHeader({
   title = '',
-  refreshButtonText = '',
-  extraActions = null,
   selectedItemsCount,
-  onRefreshButtonClick,
   onInfoLinkClick,
   ...props
 }: MetadataTableHeaderProps) {
@@ -46,18 +35,6 @@ export function MetadataTableHeader({
             Info
           </Link>
         )
-      }
-      actions={
-        <SpaceBetween size="xs" direction="horizontal">
-          {extraActions}
-          <Button
-            data-testid="header-btn-create"
-            variant="primary"
-            onClick={onRefreshButtonClick}
-          >
-            {refreshButtonText}
-          </Button>
-        </SpaceBetween>
       }
       {...props}
     >

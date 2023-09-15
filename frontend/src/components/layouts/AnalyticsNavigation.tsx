@@ -48,33 +48,20 @@ const AnalyticsNavigation: React.FC<INavigationProps> = (
       href: `/analytics/${projectId}/app/${appId}/dashboards`,
     },
     {
-      text: t('nav.analytics.exploreEvent'),
-      href: `/analytics/${projectId}/app/${appId}/event`,
+      text: t('nav.analytics.realtime'),
+      href: `/analytics/${projectId}/app/${appId}/realtime`,
     },
     {
-      text: t('nav.analytics.exploreRetention'),
-      href: `/analytics/${projectId}/app/${appId}/retention`,
+      text: t('nav.analytics.explore'),
+      href: `/analytics/${projectId}/app/${appId}/explore`,
     },
     {
-      text: t('nav.analytics.exploreFunnel'),
-      href: `/analytics/${projectId}/app/${appId}/funnel`,
+      text: t('nav.analytics.analyzes'),
+      href: `/analytics/${projectId}/app/${appId}/analyzes`,
     },
     {
-      text: t('nav.analytics.explorePath'),
-      href: `/analytics/${projectId}/app/${appId}/path`,
-    },
-
-    {
-      text: t('nav.analytics.metadata-events'),
-      href: `/analytics/${projectId}/app/${appId}/metadata/events`,
-    },
-    {
-      text: t('nav.analytics.metadata-event-parameters'),
-      href: `/analytics/${projectId}/app/${appId}/metadata/event-parameters`,
-    },
-    {
-      text: t('nav.analytics.metadata-user-attributes'),
-      href: `/analytics/${projectId}/app/${appId}/metadata/user-attributes`,
+      text: t('nav.analytics.data-management'),
+      href: `/analytics/${projectId}/app/${appId}/data-management`,
     },
   ];
 

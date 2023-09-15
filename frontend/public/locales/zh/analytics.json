@@ -16,6 +16,29 @@
     "deleteTip1": "您确定要删除该看板吗 ",
     "deleteTip2": " 删除看板将删除 QuickSight 中的所有数据。"
   },
+  "realtime": {
+    "title": "实时",
+    "description": "您可以在此处实时查看应用程序和网站的关键指标。 ",
+    "disableMessage": "此项目尚未启用实时面板，请与管理员联系以打开实时面板。",
+    "configProject": "配置项目"
+  },
+  "analyzes": {
+    "title": "分析",
+    "description": "您可以在此处自定义试图和看板。",
+    "comeSoon": "当前功能即将上线"
+  },
+  "explore": {
+    "title": "探索",
+    "description": "探索允许您使用UI以动态方式查询和分析点击流数据。选择一个分析模型开始。",
+    "analyticsModel": "分析模型",
+    "exploitativeAnalytics": "探索性分析",
+    "funnelAnalysis": "漏斗分析",
+    "eventAnalysis": "事件分析",
+    "pathAnalysis": "路径分析",
+    "retentionAnalysis": "留存分析",
+    "userAnalytics": "用户分析",
+    "userSearch": "用户搜索"
+  },
   "list": {
     "loading": "正在加载看板。",
     "noDashboard": "您还没有任何点击流分析看板。",

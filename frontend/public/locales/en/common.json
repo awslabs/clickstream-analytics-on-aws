@@ -16,7 +16,11 @@
     "alarms": "Alarms",
     "users": "Users",
     "analytics": "Analytics",
-    "dashboard": "Dashboard"
+    "dashboard": "Dashboard",
+    "realtime": "Realtime",
+    "explore": "Explore",
+    "analyzes": "Analyzes",
+    "data-management": "Data Management"
   },
   "nav": {
     "home": "Home",
@@ -28,14 +32,9 @@
       "realtime": "Realtime",
       "dashboards": "Dashboards",
       "explore": "Explore",
+      "analyzes": "Analyzes",
       "metadata": "Metadata",
-      "exploreEvent": "Event Analysis",
-      "explorePath": "Path Analysis",
-      "exploreRetention": "Retention Analysis",
-      "exploreFunnel": "Funnel Analysis",
-      "metadata-events": "Origin Events",
-      "metadata-event-parameters": "Event Parameters",
-      "metadata-user-attributes": "User Attributes"
+      "data-management": "Data Management"
     },
     "operation": "Operation",
     "dashboard": "Monitors Dashboard",

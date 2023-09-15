@@ -11,32 +11,29 @@
  *  and limitations under the License.
  */
 
-import {
-  AppLayout,
-  Input,
-  StatusIndicator,
-} from '@cloudscape-design/components';
+import { Input, StatusIndicator } from '@cloudscape-design/components';
 import {
   getMetadataUserAttributesList,
   updateMetadataDisplay,
 } from 'apis/analytics';
-import Navigation from 'components/layouts/Navigation';
 import { t } from 'i18next';
-import React, { useState } from 'react';
+import React from 'react';
 import { useParams } from 'react-router-dom';
 import { USER_ATTRIBUTE_DISPLAY_PREFIX } from 'ts/const';
 import { MetadataSource } from 'ts/explore-types';
-import MetadataUserAttributeSplitPanel from './MetadataUserAttributeSplitPanel';
 import MetadataSourceFC from '../comps/MetadataSource';
 import MetadataTable from '../table/MetadataTable';
 import { displayNameRegex, descriptionRegex } from '../table/table-config';
 
-const MetadataUserAttributes: React.FC = () => {
-  const { projectId, appId } = useParams();
+interface MetadataUserAttributesTableProps {
+  setShowDetails: (show: boolean, data?: IMetadataType) => void;
+}
 
-  const [showSplit, setShowSplit] = useState(false);
-  const [curUserAttribute, setCurUserAttribute] =
-    useState<IMetadataUserAttribute | null>();
+const MetadataUserAttributesTable: React.FC<
+  MetadataUserAttributesTableProps
+> = (props: MetadataUserAttributesTableProps) => {
+  const { projectId, appId } = useParams();
+  const { setShowDetails } = props;
 
   const COLUMN_DEFINITIONS = [
     {
@@ -245,72 +242,40 @@ const MetadataUserAttributes: React.FC = () => {
   };
 
   return (
-    <AppLayout
-      toolsHide
-      content={
-        <MetadataTable
-          resourceName="UserAttribute"
-          tableColumnDefinitions={COLUMN_DEFINITIONS}
-          tableContentDisplay={CONTENT_DISPLAY}
-          tableFilteringProperties={FILTERING_PROPERTIES}
-          tableI18nStrings={{
-            loadingText:
-              t('analytics:metadata.labels.tableLoading') || 'Loading',
-            emptyText: t('analytics:metadata.labels.tableEmpty'),
-            headerTitle: t('analytics:metadata.userAttribute.title'),
-            headerRefreshButtonText: t('common:button.refreshMetadata'),
-            filteringAriaLabel: t(
-              'analytics:metadata.userAttribute.filteringAriaLabel'
-            ),
-            filteringPlaceholder: t(
-              'analytics:metadata.userAttribute.filteringPlaceholder'
-            ),
-            groupPropertiesText: t('button.groupPropertiesText'),
-            operatorsText: t('button.operatorsText'),
-            clearFiltersText: t('button.clearFiltersText'),
-            applyActionText: t('button.applyActionText'),
-            useText: t('common:table.useText'),
-            matchText: t('common:table.matchText'),
-            matchesText: t('common:table.matchesText'),
-          }}
-          loadHelpPanelContent={() => {
-            console.log(1);
-          }}
-          setShowDetails={(
-            show: boolean,
-            data?:
-              | IMetadataEvent
-              | IMetadataEventParameter
-              | IMetadataUserAttribute
-          ) => {
-            setShowSplit(show);
-            if (data) {
-              setCurUserAttribute(data as IMetadataUserAttribute);
-            }
-          }}
-          fetchDataFunc={listMetadataUserAttributes}
-          fetchUpdateFunc={updateMetadataUserAttributeInfo}
-        ></MetadataTable>
-      }
-      headerSelector="#header"
-      navigation={
-        <Navigation
-          activeHref={`/analytics/${projectId}/app/${appId}/metadata/user-attributes`}
-        />
-      }
-      splitPanelOpen={showSplit}
-      onSplitPanelToggle={(e) => {
-        setShowSplit(e.detail.open);
+    <MetadataTable
+      resourceName="UserAttribute"
+      tableColumnDefinitions={COLUMN_DEFINITIONS}
+      tableContentDisplay={CONTENT_DISPLAY}
+      tableFilteringProperties={FILTERING_PROPERTIES}
+      tableI18nStrings={{
+        loadingText:
+          t('analytics:metadata.userAttribute.tableLoading') || 'Loading',
+        emptyText: t('analytics:metadata.userAttribute.tableEmpty'),
+        headerTitle: t('analytics:metadata.userAttribute.title'),
+        headerDescription: t('analytics:metadata.userAttribute.description'),
+        headerRefreshButtonText: t('common:button.refreshMetadata'),
+        filteringAriaLabel: t(
+          'analytics:metadata.userAttribute.filteringAriaLabel'
+        ),
+        filteringPlaceholder: t(
+          'analytics:metadata.userAttribute.filteringPlaceholder'
+        ),
+        groupPropertiesText: t('button.groupPropertiesText'),
+        operatorsText: t('button.operatorsText'),
+        clearFiltersText: t('button.clearFiltersText'),
+        applyActionText: t('button.applyActionText'),
+        useText: t('common:table.useText'),
+        matchText: t('common:table.matchText'),
+        matchesText: t('common:table.matchesText'),
       }}
-      splitPanel={
-        curUserAttribute ? (
-          <MetadataUserAttributeSplitPanel attribute={curUserAttribute} />
-        ) : (
-          ''
-        )
-      }
-    />
+      loadHelpPanelContent={() => {
+        console.log(1);
+      }}
+      setShowDetails={setShowDetails}
+      fetchDataFunc={listMetadataUserAttributes}
+      fetchUpdateFunc={updateMetadataUserAttributeInfo}
+    ></MetadataTable>
   );
 };
 
-export default MetadataUserAttributes;
+export default MetadataUserAttributesTable;

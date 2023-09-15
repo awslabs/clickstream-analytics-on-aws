@@ -21,16 +21,12 @@ import { UserContext } from 'context/UserContext';
 import { WebStorageStateStore } from 'oidc-client-ts';
 import AlarmsList from 'pages/alarms/AlarmList';
 import AnalyticsHome from 'pages/analytics/AnalyticsHome';
+import AnalyticsAnalyzes from 'pages/analytics/analyzes/AnalyticsAnalyzes';
 import AnalyticsDashboard from 'pages/analytics/dashboard/AnalyticsDashboard';
 import AnalyticsDashboardDetail from 'pages/analytics/dashboard/detail/AnalyticsDashboardDetail';
-import AnalyticsEvent from 'pages/analytics/event/AnalyticsEvent';
-import AnalyticsFunnel from 'pages/analytics/funnel/AnalyticsFunnel';
-import MetadataParameters from 'pages/analytics/metadata/event-parameters/MetadataParameters';
-import MetadataEvents from 'pages/analytics/metadata/events/MetadataEvents';
-import MetadataUserAttributes from 'pages/analytics/metadata/user-attributes/MetadataUserAttributes';
-import AnalyticsPath from 'pages/analytics/path/AnalyticsPath';
+import AnalyticsDataManagement from 'pages/analytics/data-management/AnalyticsDataManagement';
+import AnalyticsExplore from 'pages/analytics/explore/AnalyticsExplore';
 import AnalyticsRealtime from 'pages/analytics/realtime/AnalyticsRealtime';
-import AnalyticsRetention from 'pages/analytics/retention/AnalyticsRetention';
 import CreateApplication from 'pages/application/create/CreateApplication';
 import ApplicationDetail from 'pages/application/detail/ApplicationDetail';
 import CreatePipeline from 'pages/pipelines/create/CreatePipeline';
@@ -291,6 +287,18 @@ const SignedInPage: React.FC = () => {
                 }
               />
               <Route
+                path="/analytics/:projectId/app/:appId/data-management"
+                element={
+                  <RoleRoute
+                    layout="analytics"
+                    auth={auth}
+                    roles={[IUserRole.ADMIN, IUserRole.ANALYST]}
+                  >
+                    <AnalyticsDataManagement />
+                  </RoleRoute>
+                }
+              />
+              <Route
                 path="/analytics/:projectId/app/:appId/realtime"
                 element={
                   <RoleRoute
@@ -299,6 +307,30 @@ const SignedInPage: React.FC = () => {
                     roles={[IUserRole.ADMIN, IUserRole.ANALYST]}
                   >
                     <AnalyticsRealtime />
+                  </RoleRoute>
+                }
+              />
+              <Route
+                path="/analytics/:projectId/app/:appId/explore"
+                element={
+                  <RoleRoute
+                    layout="analytics"
+                    auth={auth}
+                    roles={[IUserRole.ADMIN, IUserRole.ANALYST]}
+                  >
+                    <AnalyticsExplore />
+                  </RoleRoute>
+                }
+              />
+              <Route
+                path="/analytics/:projectId/app/:appId/analyzes"
+                element={
+                  <RoleRoute
+                    layout="analytics"
+                    auth={auth}
+                    roles={[IUserRole.ADMIN, IUserRole.ANALYST]}
+                  >
+                    <AnalyticsAnalyzes />
                   </RoleRoute>
                 }
               />
@@ -323,90 +355,6 @@ const SignedInPage: React.FC = () => {
                     roles={[IUserRole.ADMIN, IUserRole.ANALYST]}
                   >
                     <AnalyticsDashboardDetail />
-                  </RoleRoute>
-                }
-              />
-              <Route
-                path="/analytics/:projectId/app/:appId/event"
-                element={
-                  <RoleRoute
-                    layout="analytics"
-                    auth={auth}
-                    roles={[IUserRole.ADMIN, IUserRole.ANALYST]}
-                  >
-                    <AnalyticsEvent />
-                  </RoleRoute>
-                }
-              />
-              <Route
-                path="/analytics/:projectId/app/:appId/path"
-                element={
-                  <RoleRoute
-                    layout="analytics"
-                    auth={auth}
-                    roles={[IUserRole.ADMIN, IUserRole.ANALYST]}
-                  >
-                    <AnalyticsPath />
-                  </RoleRoute>
-                }
-              />
-              <Route
-                path="/analytics/:projectId/app/:appId/retention"
-                element={
-                  <RoleRoute
-                    layout="analytics"
-                    auth={auth}
-                    roles={[IUserRole.ADMIN, IUserRole.ANALYST]}
-                  >
-                    <AnalyticsRetention />
-                  </RoleRoute>
-                }
-              />
-              <Route
-                path="/analytics/:projectId/app/:appId/funnel"
-                element={
-                  <RoleRoute
-                    layout="analytics"
-                    auth={auth}
-                    roles={[IUserRole.ADMIN, IUserRole.ANALYST]}
-                  >
-                    <AnalyticsFunnel />
-                  </RoleRoute>
-                }
-              />
-              <Route
-                path="/analytics/:projectId/app/:appId/metadata/events"
-                element={
-                  <RoleRoute
-                    layout="analytics"
-                    auth={auth}
-                    roles={[IUserRole.ADMIN, IUserRole.ANALYST]}
-                  >
-                    <MetadataEvents />
-                  </RoleRoute>
-                }
-              />
-              <Route
-                path="/analytics/:projectId/app/:appId/metadata/event-parameters"
-                element={
-                  <RoleRoute
-                    layout="analytics"
-                    auth={auth}
-                    roles={[IUserRole.ADMIN, IUserRole.ANALYST]}
-                  >
-                    <MetadataParameters />
-                  </RoleRoute>
-                }
-              />
-              <Route
-                path="/analytics/:projectId/app/:appId/metadata/user-attributes"
-                element={
-                  <RoleRoute
-                    layout="analytics"
-                    auth={auth}
-                    roles={[IUserRole.ADMIN, IUserRole.ANALYST]}
-                  >
-                    <MetadataUserAttributes />
                   </RoleRoute>
                 }
               />
