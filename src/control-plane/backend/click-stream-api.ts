@@ -140,10 +140,9 @@ export class ClickStreamApiConstruct extends Construct {
         type: AttributeType.STRING,
       },
       sortKey: {
-        name: 'type',
-        type: AttributeType.STRING,
+        name: 'createAt',
+        type: AttributeType.NUMBER,
       },
-
       billingMode: BillingMode.PAY_PER_REQUEST,
       removalPolicy: RemovalPolicy.DESTROY,
       pointInTimeRecovery: true,
