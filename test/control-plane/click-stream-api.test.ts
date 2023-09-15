@@ -106,6 +106,77 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
         Enabled: true,
       },
     });
+    newALBApiStackTemplate.hasResourceProperties('AWS::DynamoDB::Table', {
+      AttributeDefinitions: [
+        {
+          AttributeName: 'id',
+          AttributeType: 'S',
+        },
+        {
+          AttributeName: 'createAt',
+          AttributeType: 'N',
+        },
+        {
+          AttributeName: 'prefix',
+          AttributeType: 'S',
+        },
+        {
+          AttributeName: 'type',
+          AttributeType: 'S',
+        },
+      ],
+      BillingMode: 'PAY_PER_REQUEST',
+      GlobalSecondaryIndexes: [
+        {
+          IndexName: 'prefix-time-index',
+          KeySchema: [
+            {
+              AttributeName: 'prefix',
+              KeyType: 'HASH',
+            },
+            {
+              AttributeName: 'createAt',
+              KeyType: 'RANGE',
+            },
+          ],
+          Projection: {
+            ProjectionType: 'ALL',
+          },
+        },
+        {
+          IndexName: 'inverted-index',
+          KeySchema: [
+            {
+              AttributeName: 'type',
+              KeyType: 'HASH',
+            },
+            {
+              AttributeName: 'id',
+              KeyType: 'RANGE',
+            },
+          ],
+          Projection: {
+            ProjectionType: 'ALL',
+          },
+        },
+      ],
+      KeySchema: [
+        {
+          AttributeName: 'id',
+          KeyType: 'HASH',
+        },
+        {
+          AttributeName: 'createAt',
+          KeyType: 'RANGE',
+        },
+      ],
+      PointInTimeRecoverySpecification: {
+        PointInTimeRecoveryEnabled: true,
+      },
+      SSESpecification: {
+        SSEEnabled: true,
+      },
+    });
   });
 
   test('Api lambda Function', () => {
