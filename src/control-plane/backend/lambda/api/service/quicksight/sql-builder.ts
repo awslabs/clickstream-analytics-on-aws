@@ -89,7 +89,7 @@ export const builtInEvents = [
   '_click',
   '_clickstream_error',
   '_mp_share',
-  '_mp_favorite'
+  '_mp_favorite',
 ];
 
 export enum ExploreAnalyticsOperators {
@@ -285,7 +285,7 @@ function _buildBaseTableSql(eventNames: string[], sqlParameters: SQLParameters, 
       event_params
       from ${sqlParameters.schemaName}.ods_events ods 
       where ${eventDateSQL}
-      ${ isEventPathSQL ? 'and event_name not in (\'' + buildInEvents.join('\',\'') + '\')' : 'and event_name in (\'' + eventNames.join('\',\'') + '\')' }
+      ${ isEventPathSQL ? 'and event_name not in (\'' + builtInEvents.join('\',\'') + '\')' : 'and event_name in (\'' + eventNames.join('\',\'') + '\')' }
       ${globalConditionSql}
     ),
     tmp_base_data as (
