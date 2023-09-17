@@ -36,8 +36,12 @@ export class UserServ {
     try {
       req.body.operator = res.get('X-Click-Stream-Operator');
       const user: IUser = req.body;
-      const uid = await store.addUser(user);
-      return res.status(201).json(new ApiSuccess({ uid }, 'User created.'));
+      const ddbUser = await store.getUser(user.id);
+      if (ddbUser) {
+        return res.status(400).json(new ApiFail('User already existed.'));
+      }
+      const id = await store.addUser(user);
+      return res.status(201).json(new ApiSuccess({ id }, 'User created.'));
     } catch (error) {
       next(error);
     }
@@ -45,13 +49,15 @@ export class UserServ {
 
   public async details(req: any, res: any, next: any) {
     try {
-      const { uid } = req.query;
+      const { id } = req.query;
       const decodedToken = getTokenFromRequest(req);
       const roleInToken = getRoleFromToken(decodedToken);
-      const ddbUser = await store.getUser(uid);
+      const ddbUser = await store.getUser(id);
       if (!ddbUser) {
         const user: IUser = {
-          uid: uid,
+          id: id,
+          type: 'USER',
+          prefix: 'USER',
           role: roleInToken,
           createAt: Date.now(),
           updateAt: Date.now(),
@@ -93,9 +99,9 @@ export class UserServ {
 
   public async delete(req: any, res: any, next: any) {
     try {
-      const { uid } = req.params;
+      const { id } = req.params;
       const operator = res.get('X-Click-Stream-Operator');
-      await store.deleteUser(uid, operator);
+      await store.deleteUser(id, operator);
       return res.status(200).json(new ApiSuccess(null, 'User deleted.'));
     } catch (error) {
       next(error);

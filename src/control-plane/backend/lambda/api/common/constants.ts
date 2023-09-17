@@ -14,7 +14,6 @@
 // Get the DynamoDB table name from environment variables
 const clickStreamTableName = process.env.CLICK_STREAM_TABLE_NAME;
 const dictionaryTableName = process.env.DICTIONARY_TABLE_NAME;
-const userTableName = process.env.USER_TABLE_NAME;
 const analyticsMetadataTable = process.env.ANALYTICS_METADATA_TABLE_NAME;
 const stackActionStateMachineArn = process.env.STACK_ACTION_SATE_MACHINE;
 const stackWorkflowStateMachineArn = process.env.STACK_WORKFLOW_SATE_MACHINE;
@@ -68,7 +67,6 @@ const QUICKSIGHT_EMBED_NO_REPLY_EMAIL = 'quicksight-embedding-no-reply@amazon.co
 export {
   clickStreamTableName,
   dictionaryTableName,
-  userTableName,
   analyticsMetadataTable,
   stackActionStateMachineArn,
   stackWorkflowStateMachineArn,

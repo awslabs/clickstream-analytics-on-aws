@@ -17,7 +17,7 @@ import {
   DynamoDBDocumentClient,
   GetCommand,
   PutCommand,
-  ScanCommand,
+  QueryCommand,
   UpdateCommand,
 } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
@@ -84,7 +84,7 @@ describe('Validate role middleware test', () => {
 
   it('Validate right role with operator in request context.', async () => {
     userMock(ddbMock, 'fake@example.com', IUserRole.ADMIN, true);
-    ddbMock.on(ScanCommand).resolvesOnce({
+    ddbMock.on(QueryCommand).resolvesOnce({
       Items: [{
         uid: 'fake@example.com',
         role: IUserRole.ADMIN,
@@ -94,7 +94,7 @@ describe('Validate role middleware test', () => {
       .get('/api/user')
       .set(amznRequestContextHeader, context);
     expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 1);
-    expect(ddbMock).toHaveReceivedCommandTimes(ScanCommand, 1);
+    expect(ddbMock).toHaveReceivedCommandTimes(QueryCommand, 1);
     expect(res.statusCode).toBe(200);
     expect(res.body.success).toEqual(true);
     expect(res.body.message).toEqual('');
@@ -109,7 +109,7 @@ describe('Validate role middleware test', () => {
     expect(res.body.success).toEqual(false);
     expect(res.body.message).toEqual('Insufficient permissions to access the API.');
     expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 1);
-    expect(ddbMock).toHaveReceivedCommandTimes(ScanCommand, 0);
+    expect(ddbMock).toHaveReceivedCommandTimes(QueryCommand, 0);
   });
 
   it('User not in DDB and no group in token.', async () => {

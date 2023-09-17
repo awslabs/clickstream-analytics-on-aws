@@ -15,7 +15,7 @@ import {
   DynamoDBDocumentClient,
   GetCommand,
   PutCommand,
-  ScanCommand,
+  QueryCommand,
   UpdateCommand,
 } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
@@ -37,16 +37,16 @@ describe('User test', () => {
 
   it('List user', async () => {
     tokenMock(ddbMock, false);
-    ddbMock.on(ScanCommand).resolvesOnce({
+    ddbMock.on(QueryCommand).resolvesOnce({
       Items: [
         {
-          uid: 'uid-01',
+          id: 'uid-01',
           role: IUserRole.ADMIN,
           operator: 'operator-01',
           deleted: false,
         },
         {
-          uid: 'uid-02',
+          id: 'uid-02',
           role: IUserRole.OPERATOR,
           operator: 'operator-02',
           deleted: false,
@@ -57,8 +57,8 @@ describe('User test', () => {
       .get('/api/user');
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
-    expect(res.body).toEqual({ data: { items: [{ deleted: false, operator: 'operator-01', role: 'Admin', uid: 'uid-01' }, { deleted: false, operator: 'operator-02', role: 'Operator', uid: 'uid-02' }], totalCount: 2 }, message: '', success: true });
-    expect(ddbMock).toHaveReceivedCommandTimes(ScanCommand, 1);
+    expect(res.body).toEqual({ data: { items: [{ deleted: false, operator: 'operator-01', role: 'Admin', id: 'uid-01' }, { deleted: false, operator: 'operator-02', role: 'Operator', id: 'uid-02' }], totalCount: 2 }, message: '', success: true });
+    expect(ddbMock).toHaveReceivedCommandTimes(QueryCommand, 1);
   });
 
   it('Add user', async () => {

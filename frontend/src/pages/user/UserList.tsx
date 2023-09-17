@@ -11,7 +11,12 @@
  *  and limitations under the License.
  */
 
-import { AppLayout, Input, Select } from '@cloudscape-design/components';
+import {
+  AppLayout,
+  Input,
+  Select,
+  SelectProps,
+} from '@cloudscape-design/components';
 import { getAllUsers, updateUser } from 'apis/user';
 import Navigation from 'components/layouts/Navigation';
 import moment from 'moment';
@@ -24,11 +29,11 @@ import UserTable from './UserTable';
 const UserList: React.FC = () => {
   const { t } = useTranslation();
 
-  const roleOptions = [
-    { value: IUserRole.ADMIN, label: t('user:options.admin') },
-    { value: IUserRole.OPERATOR, label: t('user:options.operator') },
-    { value: IUserRole.ANALYST, label: t('user:options.analyst') },
-    { value: IUserRole.NO_IDENTITY, label: t('user:options.noIdentity') },
+  const roleOptions: SelectProps.Options = [
+    { value: IUserRole.ADMIN, label: t('user:options.admin') ?? '' },
+    { value: IUserRole.OPERATOR, label: t('user:options.operator') ?? '' },
+    { value: IUserRole.ANALYST, label: t('user:options.analyst') ?? '' },
+    { value: IUserRole.NO_IDENTITY, label: t('user:options.noIdentity') ?? '' },
   ];
 
   const getRoleName = (role: string) => {
@@ -46,10 +51,10 @@ const UserList: React.FC = () => {
 
   const COLUMN_DEFINITIONS = [
     {
-      id: 'uid',
+      id: 'id',
       header: t('user:labels.tableColumnUserId'),
-      cell: (e: { uid: string }) => {
-        return e.uid;
+      cell: (e: { id: string }) => {
+        return e.id;
       },
     },
     {
@@ -87,7 +92,10 @@ const UserList: React.FC = () => {
       header: t('user:labels.tableColumnRole'),
       minWidth: 200,
       editConfig: {
-        editingCell: (item: { role: any }, { setValue, currentValue }: any) => {
+        editingCell: (
+          item: { role: IUserRole },
+          { setValue, currentValue }: any
+        ) => {
           return (
             <Select
               autoFocus={true}
@@ -98,7 +106,8 @@ const UserList: React.FC = () => {
               }}
               selectedOption={
                 roleOptions.find(
-                  (option) => option.value === (currentValue ?? item.role)
+                  (option: SelectProps.Option) =>
+                    option.value === (currentValue ?? item.role)
                 ) ?? roleOptions[0]
               }
             />
@@ -119,7 +128,7 @@ const UserList: React.FC = () => {
   ];
 
   const CONTENT_DISPLAY = [
-    { id: 'uid', visible: true },
+    { id: 'id', visible: true },
     { id: 'name', visible: true },
     { id: 'role', visible: true },
     { id: 'createAt', visible: true },
@@ -128,7 +137,7 @@ const UserList: React.FC = () => {
   const FILTERING_PROPERTIES = [
     {
       propertyLabel: t('user:labels.tableColumnUserId'),
-      key: 'uid',
+      key: 'id',
       groupValuesLabel: t('user:labels.tableColumnUserId'),
       operators: [':', '!:', '=', '!='],
     },

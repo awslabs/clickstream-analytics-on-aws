@@ -43,18 +43,18 @@ router_user.get(
   });
 
 router_user.put(
-  '/:uid',
+  '/:id',
   validate([
-    body('uid').custom(isUserValid),
+    body('id').custom(isUserValid),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return userServ.update(req, res, next);
   });
 
 router_user.delete(
-  '/:uid',
+  '/:id',
   validate([
-    param('uid').custom(isUserValid),
+    param('id').custom(isUserValid),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return userServ.delete(req, res, next);

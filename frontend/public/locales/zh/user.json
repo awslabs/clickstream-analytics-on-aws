@@ -8,13 +8,25 @@
     "tableEmpty": "没有用户",
     "tableLoading": "加载中",
     "filteringAriaLabel": "查找用户",
-    "filteringPlaceholder": "查找用户"
+    "filteringPlaceholder": "查找用户",
+    "createTitle": "创建用户",
+    "createUserEmail": "Email",
+    "createUserEmailPlaceholder": "example@example.com",
+    "createUserName": "用户名",
+    "createUserNamePlaceholder": "请输入用户名",
+    "createUserRole": "角色",
+    "deleteTitle": "删除用户",
+    "deleteTip1": "是否确实要删除该用户 ",
+    "deleteTip2": " 删除用户可能导致用户无法登录。"
   },
   "options": {
     "admin": "管理员",
     "operator": "IT运维",
     "analyst": "分析师",
     "noIdentity": "无身份"
+  },
+  "valid": {
+    "userEmailEmptyError": "电子邮件不能为空"
   },
   "emptyData": "没有数据"
 }

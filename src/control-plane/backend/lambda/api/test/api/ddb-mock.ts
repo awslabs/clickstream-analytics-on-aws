@@ -28,7 +28,7 @@ import { GetBucketPolicyCommand } from '@aws-sdk/client-s3';
 import { GetSecretValueCommand } from '@aws-sdk/client-secrets-manager';
 import { StartExecutionCommand } from '@aws-sdk/client-sfn';
 import { GetCommand, GetCommandInput, QueryCommand, QueryCommandInput } from '@aws-sdk/lib-dynamodb';
-import { analyticsMetadataTable, clickStreamTableName, dictionaryTableName, prefixTimeGSIName, userTableName } from '../../common/constants';
+import { analyticsMetadataTable, clickStreamTableName, dictionaryTableName, prefixTimeGSIName } from '../../common/constants';
 import { IUserRole, ProjectEnvironment } from '../../common/types';
 import { IPipeline } from '../../model/pipeline';
 
@@ -63,21 +63,23 @@ export const AllowIAMUserPutObejectPolicyInApSouthEast1 = '{"Version":"2012-10-1
 function userMock(ddbMock: any, userId: string, role: IUserRole, existed?: boolean): any {
   if (!existed) {
     return ddbMock.on(GetCommand, {
-      TableName: userTableName,
+      TableName: clickStreamTableName,
       Key: {
-        uid: userId,
+        id: userId,
+        type: 'USER',
       },
     }, true).resolves({});
   }
 
   return ddbMock.on(GetCommand, {
-    TableName: userTableName,
+    TableName: clickStreamTableName,
     Key: {
-      uid: userId,
+      id: userId,
+      type: 'USER',
     },
   }, true).resolves({
     Item: {
-      uid: userId,
+      id: userId,
       role: role,
       deleted: false,
     },

@@ -16,7 +16,9 @@ import { IUserRole } from 'ts/const';
 export {};
 declare global {
   interface IUser {
-    readonly uid: string;
+    readonly id: string;
+    readonly type: string;
+    readonly prefix: string;
 
     readonly name?: string;
     readonly role: IUserRole;

@@ -127,6 +127,7 @@
   },
   "button": {
     "cancel": "取消",
+    "settings": "设置",
     "createProject": "创建项目",
     "createPipeline": "创建数据管道",
     "remove": "移除",

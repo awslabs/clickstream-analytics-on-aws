@@ -14,7 +14,9 @@
 import { IUserRole } from '../common/types';
 
 export interface IUser {
-  readonly uid: string;
+  readonly id: string;
+  readonly type: string;
+  readonly prefix: string;
 
   readonly name?: string;
   readonly role: IUserRole;
