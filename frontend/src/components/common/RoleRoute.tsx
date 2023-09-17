@@ -37,7 +37,11 @@ const RoleRoute = ({
   );
 
   if (!userHasRequiredRole) {
-    return <AccessDenied />;
+    return (
+      <CommonLayout auth={auth}>
+        <AccessDenied />
+      </CommonLayout>
+    );
   }
 
   if (layout === 'common') {
