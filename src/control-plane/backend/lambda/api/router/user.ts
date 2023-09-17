@@ -60,6 +60,18 @@ router_user.delete(
     return userServ.delete(req, res, next);
   });
 
+router_user.get(
+  '/settings',
+  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    return userServ.getSettings(req, res, next);
+  });
+
+router_user.post(
+  '/settings',
+  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    return userServ.updateSettings(req, res, next);
+  });
+
 export {
   router_user,
 };

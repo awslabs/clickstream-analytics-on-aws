@@ -64,6 +64,10 @@ const PIPELINE_SUPPORTED_REGIONS = [
 
 const QUICKSIGHT_EMBED_NO_REPLY_EMAIL = 'quicksight-embedding-no-reply@amazon.com';
 
+const DEFAULT_ROLE_JSON_PATH = '$.payload.cognito:groups';
+const DEFAULT_OPERATOR_ROLE_NAMES = 'ClickstreamOperator';
+const DEFAULT_ANALYST_ROLE_NAMES = 'ClickstreamAnalyst';
+
 export {
   clickStreamTableName,
   dictionaryTableName,
@@ -87,4 +91,7 @@ export {
   PIPELINE_SUPPORTED_REGIONS,
   ALLOW_UPLOADED_FILE_TYPES,
   QUICKSIGHT_EMBED_NO_REPLY_EMAIL,
+  DEFAULT_ROLE_JSON_PATH,
+  DEFAULT_OPERATOR_ROLE_NAMES,
+  DEFAULT_ANALYST_ROLE_NAMES,
 };

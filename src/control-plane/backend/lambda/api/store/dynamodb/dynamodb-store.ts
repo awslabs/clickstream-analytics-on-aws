@@ -766,6 +766,24 @@ export class DynamoDbStore implements ClickStreamStore {
     return result.Item as IDictionary;
   };
 
+  public async updateDictionary(dictionary: IDictionary): Promise<void> {
+    const params: UpdateCommand = new UpdateCommand({
+      TableName: dictionaryTableName,
+      Key: {
+        name: dictionary.name,
+      },
+      UpdateExpression: 'SET #data =:data',
+      ExpressionAttributeNames: {
+        '#data': 'data',
+      },
+      ExpressionAttributeValues: {
+        ':data': dictionary.data,
+      },
+      ReturnValues: 'ALL_NEW',
+    });
+    await docClient.send(params);
+  };
+
   public async listDictionary(): Promise<IDictionary[]> {
     const input: ScanCommandInput = {
       TableName: dictionaryTableName,

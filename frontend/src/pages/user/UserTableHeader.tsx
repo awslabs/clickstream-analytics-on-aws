@@ -22,6 +22,7 @@ import { deleteUser } from 'apis/user';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import CreateUser from './CreateUser';
+import SettingUser from './SettingUser';
 
 interface UserTableHeaderProps extends HeaderProps {
   selectedItemsCount: number;
@@ -39,6 +40,7 @@ export function UserTableHeader({
   const [loadingDelete, setLoadingDelete] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showSettingModal, setShowSettingModal] = useState(false);
 
   const confirmDeleteUser = async () => {
     setLoadingDelete(true);
@@ -62,6 +64,12 @@ export function UserTableHeader({
           setShowCreateModal(false);
         }}
         refreshPage={refreshPage}
+      />
+      <SettingUser
+        openModel={showSettingModal}
+        closeModel={() => {
+          setShowSettingModal(false);
+        }}
       />
       <Modal
         onDismiss={() => setShowDeleteModal(false)}
@@ -108,7 +116,7 @@ export function UserTableHeader({
             </Button>
             <Button
               onClick={() => {
-                console.log('setting');
+                setShowSettingModal(true);
               }}
               iconName="settings"
             >

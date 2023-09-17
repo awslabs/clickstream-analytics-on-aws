@@ -28,4 +28,9 @@ declare global {
     readonly operator: string;
     readonly deleted: boolean;
   }
+  interface IUserSettings {
+    readonly roleJsonPath: string;
+    readonly operatorRoleNames: string;
+    readonly analystRoleNames: string;
+  }
 }

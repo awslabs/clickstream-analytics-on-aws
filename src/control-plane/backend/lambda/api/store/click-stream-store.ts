@@ -61,6 +61,7 @@ export interface ClickStreamStore {
   deleteUser: (uid: string, operator: string) => Promise<void>;
 
   getDictionary: (name: string) => Promise<IDictionary | undefined>;
+  updateDictionary: (dictionary: IDictionary) => Promise<void>;
   listDictionary: () => Promise<IDictionary[]>;
 
   isRequestIdExisted: (id: string) => Promise<boolean>;

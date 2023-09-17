@@ -23,7 +23,7 @@ import {
 import { mockClient } from 'aws-sdk-client-mock';
 import request from 'supertest';
 import 'aws-sdk-client-mock-jest';
-import { MOCK_USER_ID, userMock } from './ddb-mock';
+import { MOCK_USER_ID, dictionaryMock, userMock } from './ddb-mock';
 import { amznRequestContextHeader } from '../../common/constants';
 import { IUserRole } from '../../common/types';
 import { app, server } from '../../index';
@@ -86,7 +86,7 @@ describe('Validate role middleware test', () => {
     userMock(ddbMock, 'fake@example.com', IUserRole.ADMIN, true);
     ddbMock.on(QueryCommand).resolvesOnce({
       Items: [{
-        uid: 'fake@example.com',
+        id: 'fake@example.com',
         role: IUserRole.ADMIN,
       }],
     });
@@ -113,45 +113,48 @@ describe('Validate role middleware test', () => {
   });
 
   it('User not in DDB and no group in token.', async () => {
+    dictionaryMock(ddbMock);
     userMock(ddbMock, 'fake@example.com', IUserRole.ADMIN, false);
     const res = await request(app)
-      .get('/api/user/details?uid=fake@example.com')
+      .get('/api/user/details?id=fake@example.com')
       .set(amznRequestContextHeader, context_no_group);
     expect(res.statusCode).toBe(200);
     expect(res.body.data.role).toEqual(IUserRole.NO_IDENTITY);
-    expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 2);
-    expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 1);
+    expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 3);
+    expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 0);
     expect(ddbMock).toHaveReceivedCommandTimes(UpdateCommand, 0);
   });
 
   it('User not in DDB but group in token.', async () => {
+    dictionaryMock(ddbMock);
     userMock(ddbMock, 'fake@example.com', IUserRole.ADMIN, false);
     const res = await request(app)
-      .get('/api/user/details?uid=fake@example.com')
+      .get('/api/user/details?id=fake@example.com')
       .set(amznRequestContextHeader, context);
     expect(res.statusCode).toBe(200);
     expect(res.body.data.role).toEqual(IUserRole.OPERATOR);
-    expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 2);
-    expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 1);
+    expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 3);
+    expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 0);
     expect(ddbMock).toHaveReceivedCommandTimes(UpdateCommand, 0);
   });
 
   it('User not in DDB and error group in token.', async () => {
+    dictionaryMock(ddbMock);
     userMock(ddbMock, 'fake@example.com', IUserRole.ADMIN, false);
     const res = await request(app)
-      .get('/api/user/details?uid=fake@example.com')
+      .get('/api/user/details?id=fake@example.com')
       .set(amznRequestContextHeader, context_error_group);
     expect(res.statusCode).toBe(200);
     expect(res.body.data.role).toEqual(IUserRole.NO_IDENTITY);
-    expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 2);
-    expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 1);
+    expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 3);
+    expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 0);
     expect(ddbMock).toHaveReceivedCommandTimes(UpdateCommand, 0);
   });
 
   it('User in DDB and no group in token.', async () => {
     userMock(ddbMock, 'fake@example.com', IUserRole.ADMIN, true);
     const res = await request(app)
-      .get('/api/user/details?uid=fake@example.com')
+      .get('/api/user/details?id=fake@example.com')
       .set(amznRequestContextHeader, context_no_group);
     expect(res.statusCode).toBe(200);
     expect(res.body.data.role).toEqual(IUserRole.ADMIN);
@@ -163,13 +166,13 @@ describe('Validate role middleware test', () => {
   it('User in DDB and group in token.', async () => {
     userMock(ddbMock, 'fake@example.com', IUserRole.ADMIN, true);
     const res = await request(app)
-      .get('/api/user/details?uid=fake@example.com')
+      .get('/api/user/details?id=fake@example.com')
       .set(amznRequestContextHeader, context);
     expect(res.statusCode).toBe(200);
-    expect(res.body.data.role).toEqual(IUserRole.OPERATOR);
+    expect(res.body.data.role).toEqual(IUserRole.ADMIN);
     expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 2);
     expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 0);
-    expect(ddbMock).toHaveReceivedCommandTimes(UpdateCommand, 1);
+    expect(ddbMock).toHaveReceivedCommandTimes(UpdateCommand, 0);
   });
 
   afterAll((done) => {

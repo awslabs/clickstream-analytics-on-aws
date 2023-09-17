@@ -21,7 +21,10 @@ import { logger } from './powertools';
 import { ALBRegionMappingObject, BucketPrefix, ClickStreamSubnet, IUserRole, PipelineStackType, PipelineStatus, RPURange, RPURegionMappingObject, ReportingDashboardOutput, SubnetType } from './types';
 import { IMetadataAttributeValue, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute } from '../model/metadata';
 import { CPipelineResources, IPipeline } from '../model/pipeline';
+import { IUserSettings } from '../model/user';
+import { UserServ } from '../service/user';
 
+const userServ: UserServ = new UserServ();
 
 function isEmpty(a: any): boolean {
   if (a === '') return true; //Verify empty string
@@ -156,7 +159,7 @@ function getTokenFromRequest(req: any) {
   }
 }
 
-function getRoleFromToken(decodedToken: any) {
+async function getRoleFromToken(decodedToken: any) {
   let role = IUserRole.NO_IDENTITY;
   if (!decodedToken) {
     return role;
@@ -164,26 +167,38 @@ function getRoleFromToken(decodedToken: any) {
 
   let oidcRoles: string[] = [];
 
-  const OIDC_ROLE_PATH = process.env.OIDC_ROLE_PATH ?? '$.payload.cognito:groups';
-  const OIDC_OPERATOR_ROLE_NAME = process.env.OIDC_OPERATOR_ROLE_NAME ?? `Clickstream${IUserRole.OPERATOR}`;
-  const OIDC_ANALYST_ROLE_NAME = process.env.OIDC_ANALYST_ROLE_NAME ?? `Clickstream${IUserRole.ANALYST}`;
+  const userSettings = await userServ.getUserSettingsFromDDB();
+  if (isEmpty(userSettings.roleJsonPath) || isEmpty(userSettings.operatorRoleNames) || isEmpty(userSettings.analystRoleNames)) {
+    return role;
+  }
 
-  const values = JSONPath({ path: OIDC_ROLE_PATH, json: decodedToken });
+  const values = JSONPath({ path: userSettings.roleJsonPath, json: decodedToken });
   if (Array.prototype.isPrototypeOf(values) && values.length > 0) {
     oidcRoles = values[0] as string[];
   } else {
     return role;
   }
-  if (oidcRoles &&
-          oidcRoles.includes(OIDC_OPERATOR_ROLE_NAME) &&
-          oidcRoles.includes(OIDC_ANALYST_ROLE_NAME)) {
-    role = IUserRole.ADMIN;
-  } else if (oidcRoles && oidcRoles.includes(OIDC_OPERATOR_ROLE_NAME)) {
-    role = IUserRole.OPERATOR;
-  } else if (oidcRoles && oidcRoles.includes(OIDC_ANALYST_ROLE_NAME)) {
-    role = IUserRole.ANALYST;
+
+  return mapToRole(userSettings, oidcRoles);
+}
+
+function mapToRole(userSettings: IUserSettings, oidcRoles: string[]) {
+  if (isEmpty(oidcRoles)) {
+    return IUserRole.NO_IDENTITY;
   }
-  return role;
+  const operatorRoleNames = userSettings.operatorRoleNames.split(',');
+  const analystRoleNames = userSettings.analystRoleNames.split(',');
+
+  if (oidcRoles.some(role => operatorRoleNames.includes(role)) && oidcRoles.some(role => analystRoleNames.includes(role))) {
+    return IUserRole.ADMIN;
+  }
+  if (oidcRoles.some(role => operatorRoleNames.includes(role))) {
+    return IUserRole.OPERATOR;
+  }
+  if (oidcRoles.some(role => analystRoleNames.includes(role))) {
+    return IUserRole.ANALYST;
+  }
+  return IUserRole.NO_IDENTITY;
 }
 
 function getBucketPrefix(projectId: string, key: BucketPrefix, value: string | undefined): string {

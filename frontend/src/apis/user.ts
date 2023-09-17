@@ -37,3 +37,13 @@ export const getUserDetails = async (uid: string) => {
   const result: any = await apiRequest('get', `/user/details?id=${uid}`);
   return result;
 };
+
+export const getUserSettings = async () => {
+  const result: any = await apiRequest('get', `/user/settings`);
+  return result;
+};
+
+export const updateUserSettings = async (userSettings: IUserSettings) => {
+  const result: any = await apiRequest('post', `/user/settings`, userSettings);
+  return result;
+};

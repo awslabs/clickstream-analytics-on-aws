@@ -26,3 +26,9 @@ export interface IUser {
   readonly operator: string;
   readonly deleted: boolean;
 }
+
+export interface IUserSettings {
+  readonly roleJsonPath: string;
+  readonly operatorRoleNames: string;
+  readonly analystRoleNames: string;
+}

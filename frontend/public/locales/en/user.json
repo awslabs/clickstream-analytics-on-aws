@@ -17,7 +17,14 @@
     "createUserRole": "Role",
     "deleteTitle": "Delete User",
     "deleteTip1": "Are you sure you want to delete the user ",
-    "deleteTip2": " delete the user may result in the user being unable to log in."
+    "deleteTip2": " delete the user may result in the user being unable to log in.",
+    "userSetting": "User Setting",
+    "settingUserRoleJsonPath": "User Role Json Path",
+    "settingUserRoleJsonPathDesc": "Obtain user role or group information from id_token, for example: $.realm_access.roles",
+    "settingUserOperatorRoleNames": "Operator Role Names",
+    "settingUserOperatorRoleNamesDesc": "The roles in OIDC are mapped to operators in Click stream, with multiple role names separated by commas, for example: operator,others",
+    "settingUserAnalystRoleNames": "Analyst Role Names",
+    "settingUserAnalystRoleNamesDesc": "The roles in OIDC are mapped to analyst in Click stream, with multiple role names separated by commas, for example: analyst,others"
   },
   "options": {
     "admin": "Administrator",
