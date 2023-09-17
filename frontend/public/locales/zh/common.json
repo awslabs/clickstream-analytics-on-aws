@@ -13,7 +13,8 @@
     "plugins": "插件",
     "createPlugin": "创建插件",
     "registerApp": "注册应用程序",
-    "alarms": "告警"
+    "alarms": "告警",
+    "users": "用户"
   },
   "nav": {
     "home": "主页",

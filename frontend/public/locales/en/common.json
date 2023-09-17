@@ -13,7 +13,8 @@
     "plugins": "Plugins",
     "createPlugin": "Create Plugin",
     "registerApp": "Register Application",
-    "alarms": "Alarms"
+    "alarms": "Alarms",
+    "users": "Users"
   },
   "nav": {
     "home": "Home",

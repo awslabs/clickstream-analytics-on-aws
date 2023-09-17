@@ -18,6 +18,7 @@ import {
   SelectProps,
 } from '@cloudscape-design/components';
 import { getAllUsers, updateUser } from 'apis/user';
+import CustomBreadCrumb from 'components/layouts/CustomBreadCrumb';
 import Navigation from 'components/layouts/Navigation';
 import moment from 'moment';
 import React from 'react';
@@ -179,6 +180,17 @@ const UserList: React.FC = () => {
     }
   };
 
+  const breadcrumbItems = [
+    {
+      text: t('breadCrumb.name'),
+      href: '/',
+    },
+    {
+      text: t('breadCrumb.users'),
+      href: '/user',
+    },
+  ];
+
   return (
     <AppLayout
       toolsHide
@@ -206,6 +218,7 @@ const UserList: React.FC = () => {
         ></UserTable>
       }
       headerSelector="#header"
+      breadcrumbs={<CustomBreadCrumb breadcrumbItems={breadcrumbItems} />}
       navigation={<Navigation activeHref={'/user'} />}
     />
   );
