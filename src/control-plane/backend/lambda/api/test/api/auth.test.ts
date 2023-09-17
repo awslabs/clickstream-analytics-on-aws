@@ -120,7 +120,7 @@ describe('Validate role middleware test', () => {
       .set(amznRequestContextHeader, context_no_group);
     expect(res.statusCode).toBe(200);
     expect(res.body.data.role).toEqual(IUserRole.NO_IDENTITY);
-    expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 3);
+    expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 4);
     expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 0);
     expect(ddbMock).toHaveReceivedCommandTimes(UpdateCommand, 0);
   });
@@ -133,7 +133,7 @@ describe('Validate role middleware test', () => {
       .set(amznRequestContextHeader, context);
     expect(res.statusCode).toBe(200);
     expect(res.body.data.role).toEqual(IUserRole.OPERATOR);
-    expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 3);
+    expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 4);
     expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 0);
     expect(ddbMock).toHaveReceivedCommandTimes(UpdateCommand, 0);
   });
@@ -146,7 +146,37 @@ describe('Validate role middleware test', () => {
       .set(amznRequestContextHeader, context_error_group);
     expect(res.statusCode).toBe(200);
     expect(res.body.data.role).toEqual(IUserRole.NO_IDENTITY);
-    expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 3);
+    expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 4);
+    expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 0);
+    expect(ddbMock).toHaveReceivedCommandTimes(UpdateCommand, 0);
+  });
+
+  it('Get User settings with current user not in DDB and error group in token.', async () => {
+    dictionaryMock(ddbMock);
+    userMock(ddbMock, 'fake@example.com', IUserRole.ADMIN, false);
+    const res = await request(app)
+      .get('/api/user/settings')
+      .set(amznRequestContextHeader, context_error_group);
+    expect(res.statusCode).toBe(403);
+    expect(res.body).toEqual({ message: 'Insufficient permissions to access the API.', success: false });
+    expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 2);
+    expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 0);
+    expect(ddbMock).toHaveReceivedCommandTimes(UpdateCommand, 0);
+  });
+
+  it('Get User settings with current user in DDB and error group in token.', async () => {
+    dictionaryMock(ddbMock);
+    userMock(ddbMock, 'fake@example.com', IUserRole.ADMIN, true);
+    const res = await request(app)
+      .get('/api/user/settings')
+      .set(amznRequestContextHeader, context_error_group);
+    expect(res.statusCode).toBe(200);
+    expect(res.body.data).toEqual({
+      analystRoleNames: 'ClickstreamAnalyst',
+      operatorRoleNames: 'ClickstreamOperator',
+      roleJsonPath: '$.payload.cognito:groups',
+    });
+    expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 2);
     expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 0);
     expect(ddbMock).toHaveReceivedCommandTimes(UpdateCommand, 0);
   });
