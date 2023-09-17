@@ -186,8 +186,8 @@ function mapToRole(userSettings: IUserSettings, oidcRoles: string[]) {
   if (isEmpty(oidcRoles)) {
     return IUserRole.NO_IDENTITY;
   }
-  const operatorRoleNames = userSettings.operatorRoleNames.split(',');
-  const analystRoleNames = userSettings.analystRoleNames.split(',');
+  const operatorRoleNames = userSettings.operatorRoleNames.split(',').map(role => role.trim());
+  const analystRoleNames = userSettings.analystRoleNames.split(',').map(role => role.trim());
 
   if (oidcRoles.some(role => operatorRoleNames.includes(role)) && oidcRoles.some(role => analystRoleNames.includes(role))) {
     return IUserRole.ADMIN;

@@ -316,8 +316,8 @@ describe('User test', () => {
         name: 'UserSettings',
         data: {
           roleJsonPath: '$.payload.any_keys.roles',
-          operatorRoleNames: `${DEFAULT_OPERATOR_ROLE_NAMES},Operator1,Operator2`,
-          analystRoleNames: `${DEFAULT_ANALYST_ROLE_NAMES},Analyst1,Analyst2`,
+          operatorRoleNames: `${DEFAULT_OPERATOR_ROLE_NAMES} , Operator1 , Operator2 `,
+          analystRoleNames: `${DEFAULT_ANALYST_ROLE_NAMES} , Analyst1 , Analyst2 `,
         },
       },
     });
