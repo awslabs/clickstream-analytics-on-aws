@@ -217,7 +217,7 @@ const AnalyticsPath: React.FC = () => {
   const [selectedPlatform, setSelectedPlatform] =
     useState<SelectProps.Option | null>(defaultPlatformOption);
 
-  const getEventParameters = (eventName: string | undefined) => {
+  const getEventParameters = (eventName?: string) => {
     const event = originEvents.find((item) => item.name === eventName);
     if (event) {
       return event.associatedParameters;

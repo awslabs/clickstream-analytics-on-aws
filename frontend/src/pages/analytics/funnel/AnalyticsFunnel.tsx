@@ -134,7 +134,7 @@ const AnalyticsFunnel: React.FC = () => {
     { value: 'day', label: t('analytics:options.dayWindowUnit') },
   ];
 
-  const getEventParameters = (eventName: string | undefined) => {
+  const getEventParameters = (eventName?: string) => {
     const event = originEvents.find((item) => item.name === eventName);
     if (event) {
       return event.associatedParameters;

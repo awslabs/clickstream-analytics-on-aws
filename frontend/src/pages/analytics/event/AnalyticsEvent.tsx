@@ -120,7 +120,7 @@ const AnalyticsEvent: React.FC = () => {
   const [segmentationOptionData, setSegmentationOptionData] =
     useState<SegmentationFilterDataType>(INIT_SEGMENTATION_DATA);
 
-  const getEventParameters = (eventName: string | undefined) => {
+  const getEventParameters = (eventName?: string) => {
     const event = originEvents.find((item) => item.name === eventName);
     if (event) {
       return event.associatedParameters;
