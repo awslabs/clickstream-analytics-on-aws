@@ -354,6 +354,7 @@ const AnalyticsRetention: React.FC = () => {
         );
         return;
       }
+      setExploreEmbedUrl('');
       setLoadingData(true);
       setLoadingChart(true);
       const { success, data }: ApiResponse<any> = await previewRetention(body);

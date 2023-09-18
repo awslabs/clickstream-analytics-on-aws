@@ -378,6 +378,7 @@ const AnalyticsEvent: React.FC = () => {
         );
         return;
       }
+      setExploreEmbedUrl('');
       setLoadingData(true);
       setLoadingChart(true);
       const { success, data }: ApiResponse<any> = await previewEvent(body);
