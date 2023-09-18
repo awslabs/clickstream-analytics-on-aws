@@ -19,6 +19,7 @@ import {
   CategoryItemType,
   IConditionItemType,
   IEventAnalyticsItem,
+  IRetentionAnalyticsItem,
   SegmentationFilterDataType,
 } from 'components/eventselect/AnalyticsType';
 import i18n from 'i18n';
@@ -148,6 +149,15 @@ export const validEventAnalyticsItem = (item: IEventAnalyticsItem) => {
   );
 };
 
+export const validRetentionAnalyticsItem = (item: IRetentionAnalyticsItem) => {
+  return (
+    item.startEventOption !== null &&
+    item.startEventOption.value?.trim() !== '' &&
+    item.revisitEventOption !== null &&
+    item.revisitEventOption.value?.trim() !== ''
+  );
+};
+
 export const validConditionItemType = (condition: IConditionItemType) => {
   return (
     condition.conditionOption?.value !== null &&
@@ -187,17 +197,62 @@ export const getEventAndConditions = (
   return eventAndConditions;
 };
 
-export const getFirstEventAndConditions = (
-  eventOptionData: IEventAnalyticsItem[],
+export const getPairEventAndConditions = (
+  retentionOptionData: IRetentionAnalyticsItem[]
+) => {
+  const pairEventAndConditions: IPairEventAndCondition[] = [];
+  retentionOptionData.forEach((item) => {
+    if (validRetentionAnalyticsItem(item)) {
+      const startConditions: ICondition[] = [];
+      const revisitConditions: ICondition[] = [];
+      item.startConditionList.forEach((condition) => {
+        if (validConditionItemType(condition)) {
+          const conditionObj: ICondition = {
+            category: 'other',
+            property: condition.conditionOption?.value ?? '',
+            operator: condition.conditionOperator?.value ?? '',
+            value: condition.conditionValue,
+            dataType:
+              condition.conditionOption?.valueType ?? MetadataValueType.STRING,
+          };
+          startConditions.push(conditionObj);
+        }
+      });
+      item.revisitConditionList.forEach((condition) => {
+        if (validConditionItemType(condition)) {
+          const conditionObj: ICondition = {
+            category: 'other',
+            property: condition.conditionOption?.value ?? '',
+            operator: condition.conditionOperator?.value ?? '',
+            value: condition.conditionValue,
+            dataType:
+              condition.conditionOption?.valueType ?? MetadataValueType.STRING,
+          };
+          revisitConditions.push(conditionObj);
+        }
+      });
+
+      const pairEventAndCondition: IPairEventAndCondition = {
+        startEvent: {
+          eventName: item.startEventOption?.value ?? '',
+          conditions: startConditions,
+          conditionOperator: item.startConditionRelationShip,
+        },
+        backEvent: {
+          eventName: item.revisitEventOption?.value ?? '',
+          conditions: revisitConditions,
+          conditionOperator: item.revisitConditionRelationShip,
+        },
+      };
+      pairEventAndConditions.push(pairEventAndCondition);
+    }
+  });
+  return pairEventAndConditions;
+};
+
+export const getGlobalEventCondition = (
   segmentationOptionData: SegmentationFilterDataType
 ) => {
-  if (
-    eventOptionData.length === 0 ||
-    !validEventAnalyticsItem(eventOptionData[0])
-  ) {
-    return;
-  }
-  const firstEventName = eventOptionData[0].selectedEventOption?.value ?? '';
   const conditions: ICondition[] = [];
   segmentationOptionData.data.forEach((condition) => {
     if (validConditionItemType(condition)) {
@@ -212,12 +267,11 @@ export const getFirstEventAndConditions = (
       conditions.push(conditionObj);
     }
   });
-  const firstEventAndCondition: IEventAndCondition = {
-    eventName: firstEventName,
+  const globalEventCondition: ISQLCondition = {
     conditions: conditions,
     conditionOperator: segmentationOptionData.conditionRelationShip,
   };
-  return firstEventAndCondition;
+  return globalEventCondition;
 };
 
 export const getIntervalInSeconds = (

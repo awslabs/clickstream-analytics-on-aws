@@ -25,6 +25,7 @@ import RelationOr from './comps/RelationOr';
 
 interface SegmentationFilterProps {
   segmentationData: SegmentationFilterDataType;
+  maxSelectNum?: number;
   addNewConditionItem: () => void;
   removeEventCondition: (index: number) => void;
   changeConditionOperator: (
@@ -44,6 +45,7 @@ const SegmentationFilter: React.FC<SegmentationFilterProps> = (
   const { t } = useTranslation();
   const {
     segmentationData,
+    maxSelectNum,
     addNewConditionItem,
     removeEventCondition,
     changeConditionOperator,
@@ -104,7 +106,11 @@ const SegmentationFilter: React.FC<SegmentationFilterProps> = (
           </div>
         </div>
         <div className="mt-10">
-          <Button iconName="add-plus" onClick={addNewConditionItem}>
+          <Button
+            iconName="add-plus"
+            onClick={addNewConditionItem}
+            disabled={segmentationData.data.length >= (maxSelectNum ?? 10)}
+          >
             {t('common:button.addFilter')}
           </Button>
         </div>

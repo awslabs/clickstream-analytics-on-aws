@@ -14,6 +14,7 @@
 import { Button, SelectProps } from '@cloudscape-design/components';
 import { identity } from 'lodash';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { ALPHABETS } from 'ts/const';
 import {
   CategoryItemType,
@@ -29,6 +30,7 @@ import RelationOr from './comps/RelationOr';
 interface EventsSelectProps {
   data: IEventAnalyticsItem[];
   eventOptionList: CategoryItemType[];
+  maxSelectNum?: number;
   disableAddCondition?: boolean;
   addEventButtonLabel: string;
   addNewEventAnalyticsItem: () => void;
@@ -66,6 +68,7 @@ const EventsSelect: React.FC<EventsSelectProps> = (
   const {
     data,
     eventOptionList,
+    maxSelectNum,
     disableAddCondition,
     addEventButtonLabel,
     addNewEventAnalyticsItem,
@@ -79,6 +82,7 @@ const EventsSelect: React.FC<EventsSelectProps> = (
     changeCurCalcMethodOption,
     changeCurRelationShip,
   } = props;
+  const { t } = useTranslation();
 
   return (
     <div className="cs-analytics-dropdown">
@@ -94,6 +98,7 @@ const EventsSelect: React.FC<EventsSelectProps> = (
               </div>
               <div className="flex-1">
                 <EventItem
+                  placeholder={t('analytics:labels.eventSelectPlaceholder')}
                   calcMethodOption={element.calculateMethodOption}
                   categoryOption={element.selectedEventOption}
                   changeCurCategoryOption={(item) => {
@@ -188,7 +193,11 @@ const EventsSelect: React.FC<EventsSelectProps> = (
         );
       })}
       <div className="mt-10">
-        <Button iconName="add-plus" onClick={addNewEventAnalyticsItem}>
+        <Button
+          iconName="add-plus"
+          onClick={addNewEventAnalyticsItem}
+          disabled={data.length >= (maxSelectNum ?? 10)}
+        >
           {addEventButtonLabel}
         </Button>
       </div>

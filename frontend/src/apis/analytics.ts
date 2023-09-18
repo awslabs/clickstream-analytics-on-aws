@@ -179,6 +179,11 @@ export const previewPath = async (data: IExploreRequest) => {
   return result;
 };
 
+export const previewRetention = async (data: IExploreRequest) => {
+  const result: any = await apiRequest('post', `/reporting/retention`, data);
+  return result;
+};
+
 export const getPipelineDetailByProjectId = async (
   projectId: string
 ) => {

@@ -107,7 +107,7 @@ declare global {
     readonly joinColumn?: string;
     readonly conversionIntervalType?: ExploreConversionIntervalType;
     readonly conversionIntervalInSeconds?: number;
-    readonly firstEventExtraCondition?: EventAndCondition;
+    readonly globalEventCondition?: ISQLCondition;
     readonly eventAndConditions: IEventAndCondition[];
     readonly timeScopeType: ExploreTimeScopeType;
     readonly timeStart?: string;
@@ -136,8 +136,13 @@ declare global {
 
   interface IEventAndCondition {
     readonly eventName: string;
-    readonly conditions?: Condition[];
-    readonly conditionOperator?: 'and' | 'or';
+    readonly conditions?: ICondition[];
+    readonly conditionOperator: 'and' | 'or';
+  }
+
+  interface ISQLCondition {
+    readonly conditions: ICondition[];
+    readonly conditionOperator: 'and' | 'or';
   }
 
   interface IDashboardCreateParameters {

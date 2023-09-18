@@ -187,10 +187,17 @@
     "nodeType": "Node type",
     "nodesSelect": "Select nodes",
     "pathNode": "Node",
-    "conditionValuePlaceholder": "Input value",
     "tableLoading": "Loading",
     "tableEmpty": "No resources",
-    "editError": "Edit error"
+    "editError": "Edit error",
+    "retentionStart": "Start",
+    "retentionRevisit": "Revisit",
+    "associatedProperties": "Associated properties",
+    "retentionMetrics": "Retention metric",
+    "eventSelectPlaceholder": "Select event",
+    "attributeSelectPlaceholder": "Select attribute",
+    "operatorSelectPlaceholder": "Select operator",
+    "conditionValuePlaceholder": "Input value"
   },
   "emptyData": "No Data",
   "emptyDataMessage": "Please configure analysis indicators first"

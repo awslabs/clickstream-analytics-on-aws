@@ -187,7 +187,7 @@ describe('reporting test', () => {
     expect(res.body.data.dashboardId).toBeDefined();
     expect(res.body.data.visualIds).toBeDefined();
     expect(res.body.data.visualIds.length).toEqual(2);
-    expect(res.body.data.visualIds[0].embedUrl).toEqual('https://quicksight.aws.amazon.com/embed/4ui7xyvq73/studies/4a05631e-cbe6-477c-915d-1704aec9f101?isauthcode=true&identityprovider=quicksight&code=4a05631e-cbe6-477c-915d-1704aec9f101');
+    expect(res.body.data.dashboardEmbedUrl).toEqual('https://quicksight.aws.amazon.com/embed/4ui7xyvq73/studies/4a05631e-cbe6-477c-915d-1704aec9f101?isauthcode=true&identityprovider=quicksight&code=4a05631e-cbe6-477c-915d-1704aec9f101');
 
   });
 
@@ -367,7 +367,7 @@ describe('reporting test', () => {
     expect(res.body.data.dashboardId).toBeDefined();
     expect(res.body.data.visualIds).toBeDefined();
     expect(res.body.data.visualIds.length).toEqual(2);
-    expect(res.body.data.visualIds[0].embedUrl).toEqual('https://quicksight.aws.amazon.com/embed/4ui7xyvq73/studies/4a05631e-cbe6-477c-915d-1704aec9f101?isauthcode=true&identityprovider=quicksight&code=4a05631e-cbe6-477c-915d-1704aec9f101');
+    expect(res.body.data.dashboardEmbedUrl).toEqual('https://quicksight.aws.amazon.com/embed/4ui7xyvq73/studies/4a05631e-cbe6-477c-915d-1704aec9f101?isauthcode=true&identityprovider=quicksight&code=4a05631e-cbe6-477c-915d-1704aec9f101');
 
 
   });
@@ -554,7 +554,7 @@ describe('reporting test', () => {
     expect(res.body.data.dashboardId).toBeDefined();
     expect(res.body.data.visualIds).toBeDefined();
     expect(res.body.data.visualIds.length).toEqual(1);
-    expect(res.body.data.visualIds[0].embedUrl).toEqual('https://quicksight.aws.amazon.com/embed/4ui7xyvq73/studies/4a05631e-cbe6-477c-915d-1704aec9f101?isauthcode=true&identityprovider=quicksight&code=4a05631e-cbe6-477c-915d-1704aec9f101');
+    expect(res.body.data.dashboardEmbedUrl).toEqual('https://quicksight.aws.amazon.com/embed/4ui7xyvq73/studies/4a05631e-cbe6-477c-915d-1704aec9f101?isauthcode=true&identityprovider=quicksight&code=4a05631e-cbe6-477c-915d-1704aec9f101');
 
   });
 

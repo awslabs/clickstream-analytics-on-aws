@@ -66,10 +66,10 @@ import {
   validEventAnalyticsItem,
   getDateRange,
   getEventAndConditions,
-  getFirstEventAndConditions,
   getDashboardCreateParameters,
   getIntervalInSeconds,
   getWarmUpParameters,
+  getGlobalEventCondition,
 } from '../analytics-utils';
 import ExploreDateRangePicker from '../comps/ExploreDateRangePicker';
 import ExploreEmbedFrame from '../comps/ExploreEmbedFrame';
@@ -82,8 +82,7 @@ const AnalyticsFunnel: React.FC = () => {
   const [loadingChart, setLoadingChart] = useState(false);
   const [selectDashboardModalVisible, setSelectDashboardModalVisible] =
     useState(false);
-  const [chartEmbedUrl, setChartEmbedUrl] = useState('');
-  const [tableEmbedUrl, setTableEmbedUrl] = useState('');
+  const [exploreEmbedUrl, setExploreEmbedUrl] = useState('');
   const [pipeline, setPipeline] = useState({} as IPipeline);
   const [metadataEvents, setMetadataEvents] = useState(
     [] as CategoryItemType[]
@@ -135,7 +134,7 @@ const AnalyticsFunnel: React.FC = () => {
     { value: 'day', label: t('analytics:options.dayWindowUnit') },
   ];
 
-  const getEventParameters = (eventName: string | undefined) => {
+  const getEventParameters = (eventName?: string) => {
     const event = originEvents.find((item) => item.name === eventName);
     if (event) {
       return event.associatedParameters;
@@ -333,10 +332,7 @@ const AnalyticsFunnel: React.FC = () => {
         windowValue
       ),
       eventAndConditions: getEventAndConditions(eventOptionData),
-      firstEventExtraCondition: getFirstEventAndConditions(
-        eventOptionData,
-        segmentationOptionData
-      ),
+      globalEventCondition: getGlobalEventCondition(segmentationOptionData),
       timeScopeType: dateRangeParams?.timeScopeType,
       groupColumn: timeGranularity.value,
       ...dateRangeParams,
@@ -361,20 +357,14 @@ const AnalyticsFunnel: React.FC = () => {
         );
         return;
       }
+      setExploreEmbedUrl('');
       setLoadingData(true);
       setLoadingChart(true);
       const { success, data }: ApiResponse<any> = await previewFunnel(body);
       setLoadingData(false);
       setLoadingChart(false);
-      if (success) {
-        if (
-          data.visualIds.length === 2 &&
-          data.visualIds[0].embedUrl &&
-          data.visualIds[1].embedUrl
-        ) {
-          setChartEmbedUrl(data.visualIds[0].embedUrl);
-          setTableEmbedUrl(data.visualIds[1].embedUrl);
-        }
+      if (success && data.dashboardEmbedUrl) {
+        setExploreEmbedUrl(data.dashboardEmbedUrl);
       }
     } catch (error) {
       console.log(error);
@@ -409,6 +399,7 @@ const AnalyticsFunnel: React.FC = () => {
       value: ExploreGroupColumn.DAY,
       label: t('analytics:options.dayTimeGranularity') ?? '',
     });
+    setExploreEmbedUrl('');
     await listMetadataEvents();
     await listAllAttributes();
     setLoadingData(false);
@@ -795,20 +786,9 @@ const AnalyticsFunnel: React.FC = () => {
                   <Loading />
                 ) : (
                   <ExploreEmbedFrame
-                    embedType="visual"
-                    embedUrl={chartEmbedUrl}
-                    embedId={`event_chart_${generateStr(6)}`}
-                  />
-                )}
-              </Container>
-              <Container>
-                {loadingChart ? (
-                  <Loading />
-                ) : (
-                  <ExploreEmbedFrame
-                    embedType="visual"
-                    embedUrl={tableEmbedUrl}
-                    embedId={`event_table_${generateStr(6)}`}
+                    embedType="dashboard"
+                    embedUrl={exploreEmbedUrl}
+                    embedId={`explore_${generateStr(6)}`}
                   />
                 )}
               </Container>
