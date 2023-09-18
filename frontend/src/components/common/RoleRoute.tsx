@@ -37,7 +37,18 @@ const RoleRoute = ({
   );
 
   if (!userHasRequiredRole) {
-    return <AccessDenied />;
+    if (layout === 'analytics') {
+      return (
+        <AnalyticsLayout auth={auth}>
+          <AccessDenied />
+        </AnalyticsLayout>
+      );
+    }
+    return (
+      <CommonLayout auth={auth}>
+        <AccessDenied />
+      </CommonLayout>
+    );
   }
 
   if (layout === 'common') {
