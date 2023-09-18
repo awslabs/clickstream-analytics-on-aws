@@ -139,12 +139,12 @@ declare global {
   interface IEventAndCondition {
     readonly eventName: string;
     readonly conditions?: ICondition[];
-    readonly conditionOperator?: 'and' | 'or';
+    readonly conditionOperator: 'and' | 'or';
   }
 
   interface ISQLCondition {
     readonly conditions: ICondition[];
-    readonly conditionOperator?: 'and' | 'or';
+    readonly conditionOperator: 'and' | 'or';
   }
 
   interface IDashboardCreateParameters {
