@@ -145,12 +145,12 @@ declare global {
     readonly eventName: string;
     readonly conditions?: ICondition[];
     readonly conditionOperator: 'and' | 'or';
+    readonly method: ExploreComputeMethod;
   }
 
   interface ISQLCondition {
     readonly conditions: ICondition[];
     readonly conditionOperator: 'and' | 'or';
-    readonly method: ExploreComputeMethod;
   }
 
   interface IDashboardCreateParameters {

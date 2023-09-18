@@ -240,11 +240,13 @@ export const getPairEventAndConditions = (
           eventName: item.startEventOption?.value ?? '',
           conditions: startConditions,
           conditionOperator: item.startConditionRelationShip,
+          method: ExploreComputeMethod.USER_CNT,
         },
         backEvent: {
           eventName: item.revisitEventOption?.value ?? '',
           conditions: revisitConditions,
           conditionOperator: item.revisitConditionRelationShip,
+          method: ExploreComputeMethod.USER_CNT,
         },
       };
       pairEventAndConditions.push(pairEventAndCondition);
@@ -273,7 +275,6 @@ export const getGlobalEventCondition = (
   const globalEventCondition: ISQLCondition = {
     conditions: conditions,
     conditionOperator: segmentationOptionData.conditionRelationShip,
-    method: ExploreComputeMethod.USER_CNT,
   };
   return globalEventCondition;
 };
