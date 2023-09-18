@@ -12,7 +12,7 @@
  */
 
 import { ExploreComputeMethod, ExploreConversionIntervalType, ExploreGroupColumn, ExplorePathNodeType, ExplorePathSessionDef, ExploreTimeScopeType, MetadataPlatform, MetadataValueType } from '../../common/explore-types';
-import { buildFunnelDataSql, buildFunnelView, buildEventPathAnalysisView, buildNodePathAnalysisView, buildEventAnalysisView, buildRetentionAnalysisView, ExploreAnalyticsOperators } from '../../service/quicksight/sql-builder';
+import { buildFunnelTableView, buildFunnelView, buildEventPathAnalysisView, buildNodePathAnalysisView, buildEventAnalysisView, buildRetentionAnalysisView, ExploreAnalyticsOperators } from '../../service/quicksight/sql-builder';
 
 describe('SQL Builder test', () => {
 
@@ -21,7 +21,7 @@ describe('SQL Builder test', () => {
 
   test('funnel sql - user_cnt', () => {
 
-    const sql = buildFunnelDataSql({
+    const sql = buildFunnelTableView({
       schemaName: 'app1',
       computeMethod: ExploreComputeMethod.USER_CNT,
       specifyJoinColumn: true,
@@ -385,7 +385,7 @@ describe('SQL Builder test', () => {
 
   test('funnel sql - event_cnt', () => {
 
-    const sql = buildFunnelDataSql({
+    const sql = buildFunnelTableView({
       schemaName: 'app1',
       computeMethod: ExploreComputeMethod.EVENT_CNT,
       specifyJoinColumn: true,
@@ -749,7 +749,7 @@ describe('SQL Builder test', () => {
 
   test('funnel sql - conversionIntervalType', () => {
 
-    const sql = buildFunnelDataSql({
+    const sql = buildFunnelTableView({
       schemaName: 'app1',
       computeMethod: ExploreComputeMethod.EVENT_CNT,
       specifyJoinColumn: true,
@@ -1123,7 +1123,7 @@ describe('SQL Builder test', () => {
 
   test('funnel sql - specifyJoinColumn', () => {
 
-    const sql = buildFunnelDataSql({
+    const sql = buildFunnelTableView({
       schemaName: 'app1',
       computeMethod: ExploreComputeMethod.EVENT_CNT,
       specifyJoinColumn: false,
@@ -1496,7 +1496,7 @@ describe('SQL Builder test', () => {
 
   test('funnel table visual sql - conditions', () => {
 
-    const sql = buildFunnelDataSql( {
+    const sql = buildFunnelTableView( {
       schemaName: 'app1',
       computeMethod: ExploreComputeMethod.USER_CNT,
       specifyJoinColumn: true,
@@ -1904,7 +1904,7 @@ describe('SQL Builder test', () => {
 
   test('funnel sql - first event extra conditions', () => {
 
-    const sql = buildFunnelDataSql({
+    const sql = buildFunnelTableView({
       schemaName: 'app1',
       computeMethod: ExploreComputeMethod.USER_CNT,
       specifyJoinColumn: true,
@@ -2782,38 +2782,9 @@ describe('SQL Builder test', () => {
     });
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
-  with
-    base_data as (
+    with
+    tmp_data as (
       select
-        TO_CHAR(
-          TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
-          'YYYY-MM'
-        ) as month,
-        TO_CHAR(
-          date_trunc(
-            'week',
-            TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-          ),
-          'YYYY-MM-DD'
-        ) || ' - ' || TO_CHAR(
-          date_trunc(
-            'week',
-            (
-              TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-            ) + INTERVAL '6 days'
-          ),
-          'YYYY-MM-DD'
-        ) as week,
-        TO_CHAR(
-          TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
-          'YYYY-MM-DD'
-        ) as day,
-        TO_CHAR(
-          TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
-          'YYYY-MM-DD HH24'
-        ) || '00:00' as hour,
-        event_params,
-        user_properties,
         event_date,
         event_name,
         event_id,
@@ -2865,7 +2836,36 @@ describe('SQL Builder test', () => {
         user_ltv,
         event_dimensions,
         ecommerce,
-        items
+        items,
+        TO_CHAR(
+          TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+          'YYYY-MM'
+        ) as month,
+        TO_CHAR(
+          date_trunc(
+            'week',
+            TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
+          ),
+          'YYYY-MM-DD'
+        ) || ' - ' || TO_CHAR(
+          date_trunc(
+            'week',
+            (
+              TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
+            ) + INTERVAL '6 days'
+          ),
+          'YYYY-MM-DD'
+        ) as week,
+        TO_CHAR(
+          TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+          'YYYY-MM-DD'
+        ) as day,
+        TO_CHAR(
+          TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+          'YYYY-MM-DD HH24'
+        ) || '00:00' as hour,
+        user_properties,
+        event_params
       from
         app1.ods_events ods
       where
@@ -2932,7 +2932,7 @@ describe('SQL Builder test', () => {
         ecommerce as ecommerce_0,
         items as items_0
       from
-        base_data base
+        tmp_data base
       where
         event_name = 'add_button_click'
     ),
@@ -2995,7 +2995,7 @@ describe('SQL Builder test', () => {
         ecommerce as ecommerce_1,
         items as items_1
       from
-        base_data base
+        tmp_data base
       where
         event_name = 'note_share'
     ),
@@ -3058,7 +3058,7 @@ describe('SQL Builder test', () => {
         ecommerce as ecommerce_2,
         items as items_2
       from
-        base_data base
+        tmp_data base
       where
         event_name = 'note_export'
     ),
@@ -4394,17 +4394,23 @@ describe('SQL Builder test', () => {
       joinColumn: 'user_pseudo_id',
       conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
       conversionIntervalInSeconds: 10*60,
-      eventAndConditions: [
-        {
-          eventName: 'add_button_click',
+      globalEventCondition: {
+        conditions: [{
+          category: 'other',
+          property: 'platform',
+          operator: '=',
+          value: ['Android'],
+          dataType: MetadataValueType.STRING,
         },
         {
-          eventName: 'note_share',
-        },
-        {
-          eventName: 'note_export',
-        },
-      ],
+          category: 'device',
+          property: 'screen_height',
+          operator: '<>',
+          value: [1400],
+          dataType: MetadataValueType.INTEGER,
+        }],
+        conditionOperator: 'and',
+      },
       timeScopeType: ExploreTimeScopeType.FIXED,
       groupColumn: ExploreGroupColumn.DAY,
       timeStart: new Date('2023-06-19'),
@@ -4413,9 +4419,33 @@ describe('SQL Builder test', () => {
         {
           startEvent: {
             eventName: 'add_button_click',
+            sqlCondition: {
+              conditions: [
+                {
+                  category: 'device',
+                  property: 'screen_height',
+                  operator: '>',
+                  value: [1400],
+                  dataType: MetadataValueType.INTEGER,
+                },
+              ],
+              conditionOperator: 'or',
+            },
           },
           backEvent: {
             eventName: 'note_share',
+            sqlCondition: {
+              conditions: [
+                {
+                  category: 'device',
+                  property: 'screen_height',
+                  operator: '>',
+                  value: [1400],
+                  dataType: MetadataValueType.INTEGER,
+                },
+              ],
+              conditionOperator: 'or',
+            },
           },
         },
         {
@@ -4424,6 +4454,18 @@ describe('SQL Builder test', () => {
           },
           backEvent: {
             eventName: 'note_export',
+            sqlCondition: {
+              conditions: [
+                {
+                  category: 'device',
+                  property: 'screen_height',
+                  operator: '>',
+                  value: [1400],
+                  dataType: MetadataValueType.INTEGER,
+                },
+              ],
+              conditionOperator: 'or',
+            },
           },
         },
       ],
@@ -4432,226 +4474,531 @@ describe('SQL Builder test', () => {
 
     const expectResult = `
     with
-    tmp_data as (
-      select
-        event_date,
-        event_name,
-        event_id,
-        event_bundle_sequence_id::bigint as event_bundle_sequence_id,
-        event_previous_timestamp::bigint as event_previous_timestamp,
-        event_server_timestamp_offset::bigint as event_server_timestamp_offset,
-        event_timestamp::bigint as event_timestamp,
-        ingest_timestamp,
-        event_value_in_usd,
-        app_info.app_id::varchar as app_info_app_id,
-        app_info.id::varchar as app_info_package_id,
-        app_info.install_source::varchar as app_info_install_source,
-        app_info.version::varchar as app_info_version,
-        device.vendor_id::varchar as device_id,
-        device.mobile_brand_name::varchar as device_mobile_brand_name,
-        device.mobile_model_name::varchar as device_mobile_model_name,
-        device.manufacturer::varchar as device_manufacturer,
-        device.screen_width::bigint as device_screen_width,
-        device.screen_height::bigint as device_screen_height,
-        device.viewport_height::bigint as device_viewport_height,
-        device.carrier::varchar as device_carrier,
-        device.network_type::varchar as device_network_type,
-        device.operating_system::varchar as device_operating_system,
-        device.operating_system_version::varchar as device_operating_system_version,
-        device.ua_browser::varchar as device_ua_browser,
-        device.ua_browser_version::varchar as device_ua_browser_version,
-        device.ua_os::varchar as device_ua_os,
-        device.ua_os_version::varchar as device_ua_os_version,
-        device.ua_device::varchar as device_ua_device,
-        device.ua_device_category::varchar as device_ua_device_category,
-        device.system_language::varchar as device_system_language,
-        device.time_zone_offset_seconds::bigint as device_time_zone_offset_seconds,
-        device.advertising_id::varchar as device_advertising_id,
-        geo.continent::varchar as geo_continent,
-        geo.country::varchar as geo_country,
-        geo.city::varchar as geo_city,
-        geo.metro::varchar as geo_metro,
-        geo.region::varchar as geo_region,
-        geo.sub_continent::varchar as geo_sub_continent,
-        geo.locale::varchar as geo_locale,
-        platform,
-        project_id,
-        traffic_source.name::varchar as traffic_source_name,
-        traffic_source.medium::varchar as traffic_source_medium,
-        traffic_source.source::varchar as traffic_source_source,
-        user_first_touch_timestamp,
-        user_id,
-        user_pseudo_id,
-        user_ltv,
-        event_dimensions,
-        ecommerce,
-        items,
-        TO_CHAR(
-          TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
-          'YYYY-MM'
-        ) as month,
-        TO_CHAR(
-          date_trunc(
-            'week',
-            TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-          ),
-          'YYYY-MM-DD'
-        ) || ' - ' || TO_CHAR(
-          date_trunc(
-            'week',
-            (
+      tmp_data as (
+        select
+          event_date,
+          event_name,
+          event_id,
+          event_bundle_sequence_id::bigint as event_bundle_sequence_id,
+          event_previous_timestamp::bigint as event_previous_timestamp,
+          event_server_timestamp_offset::bigint as event_server_timestamp_offset,
+          event_timestamp::bigint as event_timestamp,
+          ingest_timestamp,
+          event_value_in_usd,
+          app_info.app_id::varchar as app_info_app_id,
+          app_info.id::varchar as app_info_package_id,
+          app_info.install_source::varchar as app_info_install_source,
+          app_info.version::varchar as app_info_version,
+          device.vendor_id::varchar as device_id,
+          device.mobile_brand_name::varchar as device_mobile_brand_name,
+          device.mobile_model_name::varchar as device_mobile_model_name,
+          device.manufacturer::varchar as device_manufacturer,
+          device.screen_width::bigint as device_screen_width,
+          device.screen_height::bigint as device_screen_height,
+          device.viewport_height::bigint as device_viewport_height,
+          device.carrier::varchar as device_carrier,
+          device.network_type::varchar as device_network_type,
+          device.operating_system::varchar as device_operating_system,
+          device.operating_system_version::varchar as device_operating_system_version,
+          device.ua_browser::varchar as device_ua_browser,
+          device.ua_browser_version::varchar as device_ua_browser_version,
+          device.ua_os::varchar as device_ua_os,
+          device.ua_os_version::varchar as device_ua_os_version,
+          device.ua_device::varchar as device_ua_device,
+          device.ua_device_category::varchar as device_ua_device_category,
+          device.system_language::varchar as device_system_language,
+          device.time_zone_offset_seconds::bigint as device_time_zone_offset_seconds,
+          device.advertising_id::varchar as device_advertising_id,
+          geo.continent::varchar as geo_continent,
+          geo.country::varchar as geo_country,
+          geo.city::varchar as geo_city,
+          geo.metro::varchar as geo_metro,
+          geo.region::varchar as geo_region,
+          geo.sub_continent::varchar as geo_sub_continent,
+          geo.locale::varchar as geo_locale,
+          platform,
+          project_id,
+          traffic_source.name::varchar as traffic_source_name,
+          traffic_source.medium::varchar as traffic_source_medium,
+          traffic_source.source::varchar as traffic_source_source,
+          user_first_touch_timestamp,
+          user_id,
+          user_pseudo_id,
+          user_ltv,
+          event_dimensions,
+          ecommerce,
+          items,
+          TO_CHAR(
+            TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+              'week',
               TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-            ) + INTERVAL '6 days'
-          ),
-          'YYYY-MM-DD'
-        ) as week,
-        TO_CHAR(
-          TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
-          'YYYY-MM-DD'
-        ) as day,
-        TO_CHAR(
-          TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
-          'YYYY-MM-DD HH24'
-        ) || '00:00' as hour,
-        user_properties,
-        event_params
-      from
-        app1.ods_events ods
-      where
-        event_date >= 'MonJun19202300:00:00GMT+0000(CoordinatedUniversalTime)'
-        and event_date <= 'ThuJun22202300:00:00GMT+0000(CoordinatedUniversalTime)'
-        and event_name in ('add_button_click', 'note_share', 'note_export')
-    ),
-    tmp_base_data as (
-      select
-        *
-      from
-        tmp_data base
-    ),
-    base_data as (
-      select
-        *
-      from
-        tmp_base_data
-      where
-        1 = 1
-        and (
-          (event_name = 'add_button_click')
-          or (event_name = 'note_share')
-          or (event_name = 'note_export')
-        )
-    ),
-    data as (
-      select
-        event_date,
-        event_name,
-        user_pseudo_id
-      from
-        base_data
-    ),
-    first_date as (
-      select
-        min(event_date) as first_date
-      from
-        data
-    ),
-    date_list as (
-      select
-        '2023-06-20'::date as event_date
-      union all
-      select
-        '2023-06-21'::date as event_date
-      union all
-      select
-        '2023-06-22'::date as event_date
-    ),
-    first_table_0 as (
-      select
-        event_date,
-        event_name,
-        user_pseudo_id
-      from
-        data
-        join first_date on data.event_date = first_date.first_date
-      where
-        data.event_name = 'add_button_click'
-    ),
-    second_table_0 as (
-      select
-        event_date,
-        event_name,
-        user_pseudo_id
-      from
-        data
-        join first_date on data.event_date > first_date.first_date
-      where
-        data.event_name = 'note_share'
-    ),
-    first_table_1 as (
-      select
-        event_date,
-        event_name,
-        user_pseudo_id
-      from
-        data
-        join first_date on data.event_date = first_date.first_date
-      where
-        data.event_name = 'add_button_click'
-    ),
-    second_table_1 as (
-      select
-        event_date,
-        event_name,
-        user_pseudo_id
-      from
-        data
-        join first_date on data.event_date > first_date.first_date
-      where
-        data.event_name = 'note_export'
-    ),
-    result_table as (
-      select
-        first_table_0.event_name || '_' || 0 as grouping,
-        first_table_0.event_date as start_event_date,
-        first_table_0.user_pseudo_id as start_user_pseudo_id,
-        date_list.event_date as event_date,
-        second_table_0.user_pseudo_id as end_user_pseudo_id,
-        second_table_0.event_date as end_event_date
-      from
-        first_table_0
-        join date_list on 1 = 1
-        left join second_table_0 on date_list.event_date = second_table_0.event_date
-        and first_table_0.user_pseudo_id = second_table_0.user_pseudo_id
-      union all
-      select
-        first_table_1.event_name || '_' || 1 as grouping,
-        first_table_1.event_date as start_event_date,
-        first_table_1.user_pseudo_id as start_user_pseudo_id,
-        date_list.event_date as event_date,
-        second_table_1.user_pseudo_id as end_user_pseudo_id,
-        second_table_1.event_date as end_event_date
-      from
-        first_table_1
-        join date_list on 1 = 1
-        left join second_table_1 on date_list.event_date = second_table_1.event_date
-        and first_table_1.user_pseudo_id = second_table_1.user_pseudo_id
-    )
-  select
-    grouping,
-    start_event_date,
-    event_date,
-    (
-      count(distinct end_user_pseudo_id)::decimal / NULLIF(count(distinct start_user_pseudo_id), 0)
-    )::decimal(20, 4) as retention
-  from
-    result_table
-  group by
-    grouping,
-    start_event_date,
-    event_date
-  order by
-    grouping,
-    event_date`;
+            ),
+            'YYYY-MM-DD'
+          ) || ' - ' || TO_CHAR(
+            date_trunc(
+              'week',
+              (
+                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
+              ) + INTERVAL '6 days'
+            ),
+            'YYYY-MM-DD'
+          ) as week,
+          TO_CHAR(
+            TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR(
+            TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+            'YYYY-MM-DD HH24'
+          ) || '00:00' as hour,
+          user_properties,
+          event_params
+        from
+          app1.ods_events ods
+        where
+          event_date >= 'Mon Jun 19 2023 00:00:00 GMT+0000 (Coordinated Universal Time)'
+          and event_date <= 'Thu Jun 22 2023 00:00:00 GMT+0000 (Coordinated Universal Time)'
+          and (
+            platform = 'Android'
+            and device_screen_height <> 1400
+          )
+      ),
+      first_date as (
+        select
+          min(event_date) as first_date
+        from
+          tmp_data
+      ),
+      mid_table as (
+        select
+          *
+        from
+          tmp_data as base
+      ),
+      date_list as (
+        select
+          '2023-06-20'::date as event_date
+        union all
+        select
+          '2023-06-21'::date as event_date
+        union all
+        select
+          '2023-06-22'::date as event_date
+      ),
+      first_table_0 as (
+        select
+          event_date,
+          event_name,
+          user_pseudo_id
+        from
+          mid_table
+          join first_date on mid_table.event_date = first_date.first_date
+        where
+          (
+            event_name = 'add_button_click'
+            and (device_screen_height > 1400)
+          )
+      ),
+      second_table_0 as (
+        select
+          event_date,
+          event_name,
+          user_pseudo_id
+        from
+          mid_table
+          join first_date on mid_table.event_date > first_date.first_date
+        where
+          (
+            event_name = 'note_share'
+            and (device_screen_height > 1400)
+          )
+      ),
+      first_table_1 as (
+        select
+          event_date,
+          event_name,
+          user_pseudo_id
+        from
+          mid_table
+          join first_date on mid_table.event_date = first_date.first_date
+      ),
+      second_table_1 as (
+        select
+          event_date,
+          event_name,
+          user_pseudo_id
+        from
+          mid_table
+          join first_date on mid_table.event_date > first_date.first_date
+        where
+          (
+            event_name = 'note_export'
+            and (device_screen_height > 1400)
+          )
+      ),
+      result_table as (
+        select
+          first_table_0.event_name || '_' || 0 as grouping,
+          first_table_0.event_date as start_event_date,
+          first_table_0.user_pseudo_id as start_user_pseudo_id,
+          date_list.event_date as event_date,
+          second_table_0.user_pseudo_id as end_user_pseudo_id,
+          second_table_0.event_date as end_event_date
+        from
+          first_table_0
+          join date_list on 1 = 1
+          left join second_table_0 on date_list.event_date = second_table_0.event_date
+          and first_table_0.user_pseudo_id = second_table_0.user_pseudo_id
+        union all
+        select
+          first_table_1.event_name || '_' || 1 as grouping,
+          first_table_1.event_date as start_event_date,
+          first_table_1.user_pseudo_id as start_user_pseudo_id,
+          date_list.event_date as event_date,
+          second_table_1.user_pseudo_id as end_user_pseudo_id,
+          second_table_1.event_date as end_event_date
+        from
+          first_table_1
+          join date_list on 1 = 1
+          left join second_table_1 on date_list.event_date = second_table_1.event_date
+          and first_table_1.user_pseudo_id = second_table_1.user_pseudo_id
+      )
+    select
+      grouping,
+      start_event_date,
+      event_date,
+      (
+        count(distinct end_user_pseudo_id)::decimal / NULLIF(count(distinct start_user_pseudo_id), 0)
+      )::decimal(20, 4) as retention
+    from
+      result_table
+    group by
+      grouping,
+      start_event_date,
+      event_date
+    order by
+      grouping,
+      event_date
+    `;
+
+    expect(sql.trim().replace(/ /g, '')).toEqual(expectResult.trim().replace(/ /g, ''));
+
+  });
+
+  test('retention view - join column', () => {
+
+    const sql = buildRetentionAnalysisView({
+      schemaName: 'app1',
+      computeMethod: ExploreComputeMethod.USER_CNT,
+      specifyJoinColumn: true,
+      joinColumn: 'user_pseudo_id',
+      conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
+      conversionIntervalInSeconds: 10*60,
+      globalEventCondition: {
+        conditions: [{
+          category: 'other',
+          property: 'platform',
+          operator: '=',
+          value: ['Android'],
+          dataType: MetadataValueType.STRING,
+        },
+        {
+          category: 'device',
+          property: 'screen_height',
+          operator: '<>',
+          value: [1400],
+          dataType: MetadataValueType.INTEGER,
+        }],
+        conditionOperator: 'and',
+      },
+      timeScopeType: ExploreTimeScopeType.FIXED,
+      groupColumn: ExploreGroupColumn.DAY,
+      timeStart: new Date('2023-06-19'),
+      timeEnd: new Date('2023-06-22'),
+      pairEventAndConditions: [
+        {
+          startEvent: {
+            eventName: 'add_button_click',
+            sqlCondition: {
+              conditions: [
+                {
+                  category: 'device',
+                  property: 'screen_height',
+                  operator: '>',
+                  value: [1400],
+                  dataType: MetadataValueType.INTEGER,
+                },
+              ],
+              conditionOperator: 'or',
+            },
+            retentionJoinColumn: {
+              category: 'device',
+              property: 'screen_height',
+            },
+          },
+          backEvent: {
+            eventName: 'note_share',
+            sqlCondition: {
+              conditions: [
+                {
+                  category: 'device',
+                  property: 'screen_height',
+                  operator: '>',
+                  value: [1400],
+                  dataType: MetadataValueType.INTEGER,
+                },
+              ],
+              conditionOperator: 'or',
+            },
+            retentionJoinColumn: {
+              category: 'device',
+              property: 'screen_height',
+            },
+          },
+        },
+        {
+          startEvent: {
+            eventName: 'add_button_click',
+          },
+          backEvent: {
+            eventName: 'note_export',
+            sqlCondition: {
+              conditions: [
+                {
+                  category: 'device',
+                  property: 'screen_height',
+                  operator: '>',
+                  value: [1400],
+                  dataType: MetadataValueType.INTEGER,
+                },
+              ],
+              conditionOperator: 'or',
+            },
+          },
+        },
+      ],
+
+    });
+
+    const expectResult = `
+    with
+      tmp_data as (
+        select
+          event_date,
+          event_name,
+          event_id,
+          event_bundle_sequence_id::bigint as event_bundle_sequence_id,
+          event_previous_timestamp::bigint as event_previous_timestamp,
+          event_server_timestamp_offset::bigint as event_server_timestamp_offset,
+          event_timestamp::bigint as event_timestamp,
+          ingest_timestamp,
+          event_value_in_usd,
+          app_info.app_id::varchar as app_info_app_id,
+          app_info.id::varchar as app_info_package_id,
+          app_info.install_source::varchar as app_info_install_source,
+          app_info.version::varchar as app_info_version,
+          device.vendor_id::varchar as device_id,
+          device.mobile_brand_name::varchar as device_mobile_brand_name,
+          device.mobile_model_name::varchar as device_mobile_model_name,
+          device.manufacturer::varchar as device_manufacturer,
+          device.screen_width::bigint as device_screen_width,
+          device.screen_height::bigint as device_screen_height,
+          device.viewport_height::bigint as device_viewport_height,
+          device.carrier::varchar as device_carrier,
+          device.network_type::varchar as device_network_type,
+          device.operating_system::varchar as device_operating_system,
+          device.operating_system_version::varchar as device_operating_system_version,
+          device.ua_browser::varchar as device_ua_browser,
+          device.ua_browser_version::varchar as device_ua_browser_version,
+          device.ua_os::varchar as device_ua_os,
+          device.ua_os_version::varchar as device_ua_os_version,
+          device.ua_device::varchar as device_ua_device,
+          device.ua_device_category::varchar as device_ua_device_category,
+          device.system_language::varchar as device_system_language,
+          device.time_zone_offset_seconds::bigint as device_time_zone_offset_seconds,
+          device.advertising_id::varchar as device_advertising_id,
+          geo.continent::varchar as geo_continent,
+          geo.country::varchar as geo_country,
+          geo.city::varchar as geo_city,
+          geo.metro::varchar as geo_metro,
+          geo.region::varchar as geo_region,
+          geo.sub_continent::varchar as geo_sub_continent,
+          geo.locale::varchar as geo_locale,
+          platform,
+          project_id,
+          traffic_source.name::varchar as traffic_source_name,
+          traffic_source.medium::varchar as traffic_source_medium,
+          traffic_source.source::varchar as traffic_source_source,
+          user_first_touch_timestamp,
+          user_id,
+          user_pseudo_id,
+          user_ltv,
+          event_dimensions,
+          ecommerce,
+          items,
+          TO_CHAR(
+            TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+              'week',
+              TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
+            ),
+            'YYYY-MM-DD'
+          ) || ' - ' || TO_CHAR(
+            date_trunc(
+              'week',
+              (
+                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
+              ) + INTERVAL '6 days'
+            ),
+            'YYYY-MM-DD'
+          ) as week,
+          TO_CHAR(
+            TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR(
+            TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+            'YYYY-MM-DD HH24'
+          ) || '00:00' as hour,
+          user_properties,
+          event_params
+        from
+          app1.ods_events ods
+        where
+          event_date >= 'Mon Jun 19 2023 00:00:00 GMT+0000 (Coordinated Universal Time)'
+          and event_date <= 'Thu Jun 22 2023 00:00:00 GMT+0000 (Coordinated Universal Time)'
+          and (
+            platform = 'Android'
+            and device_screen_height <> 1400
+          )
+      ),
+      first_date as (
+        select
+          min(event_date) as first_date
+        from
+          tmp_data
+      ),
+      mid_table as (
+        select
+          *
+        from
+          tmp_data as base
+      ),
+      date_list as (
+        select
+          '2023-06-20'::date as event_date
+        union all
+        select
+          '2023-06-21'::date as event_date
+        union all
+        select
+          '2023-06-22'::date as event_date
+      ),
+      first_table_0 as (
+        select
+          event_date,
+          event_name,
+          device_screen_height,
+          user_pseudo_id
+        from
+          mid_table
+          join first_date on mid_table.event_date = first_date.first_date
+        where
+          (
+            event_name = 'add_button_click'
+            and (device_screen_height > 1400)
+          )
+      ),
+      second_table_0 as (
+        select
+          event_date,
+          event_name,
+          device_screen_height,
+          user_pseudo_id
+        from
+          mid_table
+          join first_date on mid_table.event_date > first_date.first_date
+        where
+          (
+            event_name = 'note_share'
+            and (device_screen_height > 1400)
+          )
+      ),
+      first_table_1 as (
+        select
+          event_date,
+          event_name,
+          user_pseudo_id
+        from
+          mid_table
+          join first_date on mid_table.event_date = first_date.first_date
+      ),
+      second_table_1 as (
+        select
+          event_date,
+          event_name,
+          user_pseudo_id
+        from
+          mid_table
+          join first_date on mid_table.event_date > first_date.first_date
+        where
+          (
+            event_name = 'note_export'
+            and (device_screen_height > 1400)
+          )
+      ),
+      result_table as (
+        select
+          first_table_0.event_name || '_' || 0 as grouping,
+          first_table_0.event_date as start_event_date,
+          first_table_0.user_pseudo_id as start_user_pseudo_id,
+          date_list.event_date as event_date,
+          second_table_0.user_pseudo_id as end_user_pseudo_id,
+          second_table_0.event_date as end_event_date
+        from
+          first_table_0
+          join date_list on 1 = 1
+          left join second_table_0 on date_list.event_date = second_table_0.event_date
+          and first_table_0.user_pseudo_id = second_table_0.user_pseudo_id
+          and first_table_0.device_screen_height = second_table_0.device_screen_height
+        union all
+        select
+          first_table_1.event_name || '_' || 1 as grouping,
+          first_table_1.event_date as start_event_date,
+          first_table_1.user_pseudo_id as start_user_pseudo_id,
+          date_list.event_date as event_date,
+          second_table_1.user_pseudo_id as end_user_pseudo_id,
+          second_table_1.event_date as end_event_date
+        from
+          first_table_1
+          join date_list on 1 = 1
+          left join second_table_1 on date_list.event_date = second_table_1.event_date
+          and first_table_1.user_pseudo_id = second_table_1.user_pseudo_id
+      )
+    select
+      grouping,
+      start_event_date,
+      event_date,
+      (
+        count(distinct end_user_pseudo_id)::decimal / NULLIF(count(distinct start_user_pseudo_id), 0)
+      )::decimal(20, 4) as retention
+    from
+      result_table
+    group by
+      grouping,
+      start_event_date,
+      event_date
+    order by
+      grouping,
+      event_date
+    `;
 
     expect(sql.trim().replace(/ /g, '')).toEqual(expectResult.trim().replace(/ /g, ''));
 
@@ -4659,7 +5006,7 @@ describe('SQL Builder test', () => {
 
   test('global condition and custom attribute', () => {
 
-    const sql = buildFunnelDataSql({
+    const sql = buildFunnelTableView({
       schemaName: 'app1',
       computeMethod: ExploreComputeMethod.USER_CNT,
       specifyJoinColumn: true,
@@ -5128,7 +5475,7 @@ describe('SQL Builder test', () => {
 
   test('compute method - real user id', () => {
 
-    const sql = buildFunnelDataSql( {
+    const sql = buildFunnelTableView( {
       schemaName: 'app1',
       computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
