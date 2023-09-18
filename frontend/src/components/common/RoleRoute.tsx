@@ -37,6 +37,13 @@ const RoleRoute = ({
   );
 
   if (!userHasRequiredRole) {
+    if (layout === 'analytics') {
+      return (
+        <AnalyticsLayout auth={auth}>
+          <AccessDenied />
+        </AnalyticsLayout>
+      );
+    }
     return (
       <CommonLayout auth={auth}>
         <AccessDenied />
