@@ -44,13 +44,13 @@
     "noDashboard": "您还没有任何点击流分析看板。",
     "id": "ID",
     "description": "描述",
-    "createAt": "创建时间"
+    "createAt": "创建时间",
+    "createdBy": "创建者"
   },
   "header": {
     "modalTitle": "切换项目空间",
     "selectProjectTitle": "请选择一个项目",
     "selectAppTitle": "请选择一个应用程序",
-    "configurations": "配置",
     "saveToDashboardModalTitle": "保存到看板",
     "selectDashboardTitle": "请选择一个看板",
     "selectSheetTitle": "请选择一个工作表"
@@ -58,7 +58,6 @@
   "options": {
     "eventNumber": "事件数",
     "userNumber": "用户数",
-    "userPseudoNumber": "伪用户数",
     "customWindow": "自定义",
     "theDayWindow": "当天",
     "noWindow": "无",
@@ -80,12 +79,15 @@
     "platformWeb": "Web",
     "platformAndroid": "Android",
     "platformIOS": "iOS",
-    "platformWechatMinPro": "微信小程序"
+    "platformWechatMinPro": "微信小程序",
+    "directlyFollowed": "直接跟随",
+    "indirectlyFollowed": "非直接跟随"
   },
   "metadata": {
+    "description": "您可以在此处查看开箱即用的用户生命周期面板，并创建带有探索分析的自定义面板。",
     "event": {
-      "title": "原始事件",
-      "description": "原始事件的描述",
+      "title": "事件",
+      "description": "此表列出了您的点击流分析项目中的所有事件。",
       "tableColumnID": "ID",
       "tableColumnName": "事件名称",
       "tableColumnDisplayName": "显示名称",
@@ -224,7 +226,10 @@
     "eventSelectPlaceholder": "选择事件",
     "attributeSelectPlaceholder": "选择属性",
     "operatorSelectPlaceholder": "选择操作符",
-    "conditionValuePlaceholder": "输入值"
+    "conditionValuePlaceholder": "输入值",
+    "funnelModel": "漏斗模式",
+    "attributeGrouping": "属性分组",
+    "defineMetrics": "定义指标"
   },
   "emptyData": "无数据",
   "emptyDataMessage": "请先配置分析指标"

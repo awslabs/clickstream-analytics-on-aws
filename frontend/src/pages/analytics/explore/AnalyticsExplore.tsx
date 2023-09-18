@@ -17,6 +17,7 @@ import {
   FormField,
   Header,
   Link,
+  Popover,
   Select,
   SelectProps,
 } from '@cloudscape-design/components';
@@ -36,8 +37,8 @@ const AnalyticsExplore: React.FC = () => {
 
   const [selectedOption, setSelectedOption] =
     useState<SelectProps.Option | null>({
-      label: t('analytics:explore.eventAnalysis') ?? '',
-      value: 'Event',
+      label: t('analytics:explore.funnelAnalysis') ?? '',
+      value: 'Funnel',
     });
 
   const analyticsModelOptions: SelectProps.Options = [
@@ -87,14 +88,26 @@ const AnalyticsExplore: React.FC = () => {
               header={
                 <Header
                   variant="h1"
-                  info={<Link variant="info">Info</Link>}
+                  info={
+                    <Popover
+                      triggerType="custom"
+                      content="This instance contains insufficient memory. Stop the instance, choose a different instance type with more memory, and restart it."
+                    >
+                      <Link variant="info">Info</Link>
+                    </Popover>
+                  }
                   description={t('analytics:explore.description')}
                   actions={
                     <FormField
                       label={
                         <>
                           {t('analytics:explore.analyticsModel')} &nbsp;
-                          <Link variant="info">Info</Link>
+                          <Popover
+                            triggerType="custom"
+                            content="This instance contains insufficient memory. Stop the instance, choose a different instance type with more memory, and restart it."
+                          >
+                            <Link variant="info">Info</Link>
+                          </Popover>
                         </>
                       }
                     >

@@ -51,7 +51,6 @@
     "modalTitle": "Switch Project Space",
     "selectProjectTitle": "Please select a project",
     "selectAppTitle": "Please select an application",
-    "configurations": "Configurations",
     "saveToDashboardModalTitle": "Save to Dashboard",
     "selectDashboardTitle": "Please select a dashboard",
     "selectSheetTitle": "Please select a sheet"
@@ -59,7 +58,6 @@
   "options": {
     "eventNumber": "Event number",
     "userNumber": "User number",
-    "userPseudoNumber": "Pseudo User number",
     "customWindow": "Custom",
     "theDayWindow": "The Day",
     "noWindow": "Off",
@@ -81,14 +79,15 @@
     "platformWeb": "Web",
     "platformAndroid": "Android",
     "platformIOS": "iOS",
-    "platformWechatMinPro": "Wechat MiniProgram"
+    "platformWechatMinPro": "Wechat MiniProgram",
+    "directlyFollowed": "Directly followed",
+    "indirectlyFollowed": "Indirectly followed"
   },
   "metadata": {
     "description": "You can view  the out-of-the-box user lifecycle dashboards here, and create a custom dashboard with exploration analysis. ",
     "event": {
       "title": "Events",
       "description": "This table lists out all the events in your clickstream analytics project.",
-      "tableLoading": "Loading",
       "tableColumnID": "ID",
       "tableColumnName": "Event name",
       "tableColumnDisplayName": "Display name",
@@ -227,7 +226,10 @@
     "eventSelectPlaceholder": "Select event",
     "attributeSelectPlaceholder": "Select attribute",
     "operatorSelectPlaceholder": "Select operator",
-    "conditionValuePlaceholder": "Input value"
+    "conditionValuePlaceholder": "Input value",
+    "funnelModel": "Funnel model",
+    "attributeGrouping": "Attribute grouping",
+    "defineMetrics": "Define metrics"
   },
   "emptyData": "No Data",
   "emptyDataMessage": "Please configure analysis indicators first"

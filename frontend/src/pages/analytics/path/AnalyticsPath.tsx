@@ -18,7 +18,11 @@ import {
   Container,
   DateRangePickerProps,
   Header,
+  Icon,
   Input,
+  Popover,
+  SegmentedControl,
+  SegmentedControlProps,
   Select,
   SelectProps,
   SpaceBetween,
@@ -92,6 +96,27 @@ const AnalyticsPath: React.FC = () => {
   const [userAttributes, setUserAttributes] = useState<
     IMetadataUserAttribute[]
   >([]);
+
+  const defaultChartTypeOption = 'line-chart';
+  const chartTypeOptions: SegmentedControlProps.Option[] = [
+    {
+      iconName: 'view-full',
+      iconAlt: 'line-chart',
+      id: 'line-chart',
+    },
+    {
+      iconName: 'view-horizontal',
+      iconAlt: 'bar-chart',
+      id: 'bar-chart',
+    },
+    {
+      iconName: 'view-vertical',
+      iconAlt: 'stack-chart',
+      id: 'stack-chart',
+    },
+  ];
+  const [chartType, setChartType] = useState(defaultChartTypeOption);
+
   const [nodes, setNodes] = useState<{
     pageTitles: IMetadataAttributeValue[];
     pageUrls: IMetadataAttributeValue[];
@@ -100,16 +125,12 @@ const AnalyticsPath: React.FC = () => {
   }>();
 
   const defaultComputeMethodOption: SelectProps.Option = {
-    value: ExploreComputeMethod.USER_CNT,
-    label: t('analytics:options.userPseudoNumber') ?? '',
+    value: ExploreComputeMethod.USER_ID_CNT,
+    label: t('analytics:options.userNumber') ?? '',
   };
 
   const computeMethodOptions: SelectProps.Options = [
     defaultComputeMethodOption,
-    {
-      value: ExploreComputeMethod.USER_ID_CNT,
-      label: t('analytics:options.userNumber') ?? '',
-    },
     {
       value: ExploreComputeMethod.EVENT_CNT,
       label: t('analytics:options.eventNumber') ?? '',
@@ -348,8 +369,8 @@ const AnalyticsPath: React.FC = () => {
   const [dateRangeValue, setDateRangeValue] =
     React.useState<DateRangePickerProps.Value>({
       type: 'relative',
-      amount: 7,
-      unit: 'day',
+      amount: 1,
+      unit: 'month',
     });
 
   const [timeGranularity, setTimeGranularity] =
@@ -361,8 +382,8 @@ const AnalyticsPath: React.FC = () => {
   const resetConfig = async () => {
     setLoadingData(true);
     setSelectedMetric({
-      value: ExploreComputeMethod.USER_CNT,
-      label: t('analytics:options.userPseudoNumber') ?? '',
+      value: ExploreComputeMethod.USER_ID_CNT,
+      label: t('analytics:options.userNumber') ?? '',
     });
     setEventOptionData([
       {
@@ -373,8 +394,8 @@ const AnalyticsPath: React.FC = () => {
     setSegmentationOptionData(INIT_SEGMENTATION_DATA);
     setDateRangeValue({
       type: 'relative',
-      amount: 7,
-      unit: 'day',
+      amount: 1,
+      unit: 'month',
     });
     setTimeGranularity({
       value: ExploreGroupColumn.DAY,
@@ -496,7 +517,7 @@ const AnalyticsPath: React.FC = () => {
       viewName: `path_view_${eventId}`,
       dashboardCreateParameters: parameters,
       specifyJoinColumn: false,
-      computeMethod: selectedMetric?.value ?? ExploreComputeMethod.USER_CNT,
+      computeMethod: selectedMetric?.value ?? ExploreComputeMethod.USER_ID_CNT,
       eventAndConditions: getEventAndConditions(eventOptionData),
       globalEventCondition: getGlobalEventCondition(segmentationOptionData),
       maxStep: 10,
@@ -610,14 +631,21 @@ const AnalyticsPath: React.FC = () => {
                 </SpaceBetween>
               }
             >
-              {t('analytics:header.configurations')}
+              {t('analytics:explore.pathAnalysis')}
             </Header>
           }
         >
           <div className="cs-analytics-config">
             <SpaceBetween direction="vertical" size="xs">
               <Box variant="awsui-key-label">
-                {t('analytics:labels.metrics')}
+                {t('analytics:labels.metrics')}{' '}
+                <Popover
+                  triggerType="custom"
+                  size="small"
+                  content="This instance contains insufficient memory. Stop the instance, choose a different instance type with more memory, and restart it."
+                >
+                  <Icon name="status-info" size="small" />
+                </Popover>
               </Box>
               <div className="cs-analytics-config">
                 <Select
@@ -631,10 +659,17 @@ const AnalyticsPath: React.FC = () => {
             </SpaceBetween>
             <SpaceBetween direction="vertical" size="xs">
               <Box variant="awsui-key-label">
-                {t('analytics:labels.sessionDefinition')}
+                {t('analytics:labels.sessionDefinition')}{' '}
+                <Popover
+                  triggerType="custom"
+                  size="small"
+                  content="This instance contains insufficient memory. Stop the instance, choose a different instance type with more memory, and restart it."
+                >
+                  <Icon name="status-info" size="small" />
+                </Popover>
               </Box>
-              <div className="cs-analytics-window">
-                <div className="cs-analytics-window-type">
+              <div className="cs-analytics-session-window">
+                <div className="cs-analytics-session-window-type">
                   <Select
                     selectedOption={selectedSessionDefinition}
                     options={sessionDefinitionOptions}
@@ -646,7 +681,7 @@ const AnalyticsPath: React.FC = () => {
                 {selectedSessionDefinition?.value ===
                 customSessionDefinitionOption?.value ? (
                   <>
-                    <div className="cs-analytics-window-value">
+                    <div className="cs-analytics-session-window-value">
                       <Input
                         type="number"
                         placeholder="5"
@@ -656,7 +691,7 @@ const AnalyticsPath: React.FC = () => {
                         }}
                       />
                     </div>
-                    <div className="cs-analytics-window-unit">
+                    <div className="cs-analytics-session-window-unit">
                       <Select
                         selectedOption={selectedWindowUnit}
                         options={windowUnitOptions}
@@ -671,10 +706,17 @@ const AnalyticsPath: React.FC = () => {
             </SpaceBetween>
             <SpaceBetween direction="vertical" size="xs">
               <Box variant="awsui-key-label">
-                {t('analytics:labels.nodeType')}
+                {t('analytics:labels.nodeType')}{' '}
+                <Popover
+                  triggerType="custom"
+                  size="small"
+                  content="This instance contains insufficient memory. Stop the instance, choose a different instance type with more memory, and restart it."
+                >
+                  <Icon name="status-info" size="small" />
+                </Popover>
               </Box>
-              <div className="cs-analytics-window">
-                <div className="cs-analytics-window-type">
+              <div className="cs-analytics-session-window">
+                <div className="cs-analytics-session-window-type">
                   <Select
                     selectedOption={selectedNodeType}
                     options={nodeTypeOptions}
@@ -682,7 +724,7 @@ const AnalyticsPath: React.FC = () => {
                   />
                 </div>
                 {selectedNodeType?.value !== defaultNodeTypeOption?.value ? (
-                  <div className="cs-analytics-window-unit">
+                  <div className="cs-analytics-session-window-unit">
                     <Select
                       selectedOption={selectedPlatform}
                       options={platformOptions}
@@ -696,198 +738,190 @@ const AnalyticsPath: React.FC = () => {
             </SpaceBetween>
           </div>
           <br />
-          <SpaceBetween direction="vertical" size="xs">
-            <Box variant="awsui-key-label">
-              {t('analytics:labels.dateRange')}
-            </Box>
-            <ExploreDateRangePicker
-              dateRangeValue={dateRangeValue}
-              setDateRangeValue={setDateRangeValue}
-              timeGranularity={timeGranularity}
-              setTimeGranularity={setTimeGranularity}
-            />
-          </SpaceBetween>
-          <br />
           <ColumnLayout columns={2} variant="text-grid">
             <SpaceBetween direction="vertical" size="xs">
-              <Box variant="awsui-key-label">
+              <Button
+                variant="link"
+                iconName="menu"
+                className="cs-analytics-select-event"
+              >
                 {t('analytics:labels.nodesSelect')}
-              </Box>
-              <div>
-                <EventsSelect
-                  data={eventOptionData}
-                  disableAddCondition={disableAddCondition}
-                  eventOptionList={metadataEvents}
-                  addEventButtonLabel={t('common:button.addEvent')}
-                  addNewEventAnalyticsItem={() => {
-                    setEventOptionData((prev) => {
-                      const preEventList = cloneDeep(prev);
-                      return [
-                        ...preEventList,
-                        {
-                          ...DEFAULT_EVENT_ITEM,
-                          isMultiSelect: false,
-                        },
-                      ];
-                    });
-                  }}
-                  removeEventItem={(index) => {
-                    setEventOptionData((prev) => {
-                      const dataObj = cloneDeep(prev);
-                      return dataObj.filter((item, eIndex) => eIndex !== index);
-                    });
-                  }}
-                  addNewConditionItem={(index: number) => {
-                    setEventOptionData((prev) => {
-                      const dataObj = cloneDeep(prev);
-                      dataObj[index].conditionList.push(DEFAULT_CONDITION_DATA);
-                      return dataObj;
-                    });
-                  }}
-                  removeEventCondition={(eventIndex, conditionIndex) => {
-                    setEventOptionData((prev) => {
-                      const dataObj = cloneDeep(prev);
-                      const newCondition = dataObj[
-                        eventIndex
-                      ].conditionList.filter((item, i) => i !== conditionIndex);
-                      dataObj[eventIndex].conditionList = newCondition;
-                      return dataObj;
-                    });
-                  }}
-                  changeConditionCategoryOption={(
-                    eventIndex,
-                    conditionIndex,
-                    category
-                  ) => {
-                    setEventOptionData((prev) => {
-                      const dataObj = cloneDeep(prev);
+              </Button>
+              <EventsSelect
+                data={eventOptionData}
+                disableAddCondition={disableAddCondition}
+                eventOptionList={metadataEvents}
+                addEventButtonLabel={t('common:button.addEvent')}
+                addNewEventAnalyticsItem={() => {
+                  setEventOptionData((prev) => {
+                    const preEventList = cloneDeep(prev);
+                    return [
+                      ...preEventList,
+                      {
+                        ...DEFAULT_EVENT_ITEM,
+                        isMultiSelect: false,
+                      },
+                    ];
+                  });
+                }}
+                removeEventItem={(index) => {
+                  setEventOptionData((prev) => {
+                    const dataObj = cloneDeep(prev);
+                    return dataObj.filter((item, eIndex) => eIndex !== index);
+                  });
+                }}
+                addNewConditionItem={(index: number) => {
+                  setEventOptionData((prev) => {
+                    const dataObj = cloneDeep(prev);
+                    dataObj[index].conditionList.push(DEFAULT_CONDITION_DATA);
+                    return dataObj;
+                  });
+                }}
+                removeEventCondition={(eventIndex, conditionIndex) => {
+                  setEventOptionData((prev) => {
+                    const dataObj = cloneDeep(prev);
+                    const newCondition = dataObj[
+                      eventIndex
+                    ].conditionList.filter((item, i) => i !== conditionIndex);
+                    dataObj[eventIndex].conditionList = newCondition;
+                    return dataObj;
+                  });
+                }}
+                changeConditionCategoryOption={(
+                  eventIndex,
+                  conditionIndex,
+                  category
+                ) => {
+                  setEventOptionData((prev) => {
+                    const dataObj = cloneDeep(prev);
+                    dataObj[eventIndex].conditionList[
+                      conditionIndex
+                    ].conditionOption = category;
+                    if (category?.valueType === MetadataValueType.STRING) {
                       dataObj[eventIndex].conditionList[
                         conditionIndex
-                      ].conditionOption = category;
-                      if (category?.valueType === MetadataValueType.STRING) {
-                        dataObj[eventIndex].conditionList[
-                          conditionIndex
-                        ].conditionValue = [];
-                      } else {
-                        dataObj[eventIndex].conditionList[
-                          conditionIndex
-                        ].conditionValue = '';
-                      }
-                      return dataObj;
-                    });
-                  }}
-                  changeConditionOperator={(
-                    eventIndex,
-                    conditionIndex,
-                    operator
-                  ) => {
-                    setEventOptionData((prev) => {
-                      const dataObj = cloneDeep(prev);
+                      ].conditionValue = [];
+                    } else {
                       dataObj[eventIndex].conditionList[
                         conditionIndex
-                      ].conditionOperator = operator;
-                      return dataObj;
-                    });
-                  }}
-                  changeConditionValue={(eventIndex, conditionIndex, value) => {
-                    setEventOptionData((prev) => {
-                      const dataObj = cloneDeep(prev);
-                      dataObj[eventIndex].conditionList[
-                        conditionIndex
-                      ].conditionValue = value;
-                      return dataObj;
-                    });
-                  }}
-                  changeCurCalcMethodOption={(eventIndex, method) => {
-                    setEventOptionData((prev) => {
-                      const dataObj = cloneDeep(prev);
-                      dataObj[eventIndex].calculateMethodOption = method;
-                      return dataObj;
-                    });
-                  }}
-                  changeCurCategoryOption={async (eventIndex, category) => {
-                    const eventName = category?.value;
-                    const eventParameters = getEventParameters(eventName);
-                    const parameterOption = parametersConvertToCategoryItemType(
-                      userAttributes,
-                      eventParameters
-                    );
-                    setEventOptionData((prev) => {
-                      const dataObj = cloneDeep(prev);
-                      dataObj[eventIndex].selectedEventOption = category;
-                      dataObj[eventIndex].conditionOptions = parameterOption;
-                      return dataObj;
-                    });
-                  }}
-                  changeCurRelationShip={(eventIndex, relation) => {
-                    setEventOptionData((prev) => {
-                      const dataObj = cloneDeep(prev);
-                      dataObj[eventIndex].conditionRelationShip = relation;
-                      return dataObj;
-                    });
-                  }}
-                />
-              </div>
+                      ].conditionValue = '';
+                    }
+                    return dataObj;
+                  });
+                }}
+                changeConditionOperator={(
+                  eventIndex,
+                  conditionIndex,
+                  operator
+                ) => {
+                  setEventOptionData((prev) => {
+                    const dataObj = cloneDeep(prev);
+                    dataObj[eventIndex].conditionList[
+                      conditionIndex
+                    ].conditionOperator = operator;
+                    return dataObj;
+                  });
+                }}
+                changeConditionValue={(eventIndex, conditionIndex, value) => {
+                  setEventOptionData((prev) => {
+                    const dataObj = cloneDeep(prev);
+                    dataObj[eventIndex].conditionList[
+                      conditionIndex
+                    ].conditionValue = value;
+                    return dataObj;
+                  });
+                }}
+                changeCurCalcMethodOption={(eventIndex, method) => {
+                  setEventOptionData((prev) => {
+                    const dataObj = cloneDeep(prev);
+                    dataObj[eventIndex].calculateMethodOption = method;
+                    return dataObj;
+                  });
+                }}
+                changeCurCategoryOption={async (eventIndex, category) => {
+                  const eventName = category?.value;
+                  const eventParameters = getEventParameters(eventName);
+                  const parameterOption = parametersConvertToCategoryItemType(
+                    userAttributes,
+                    eventParameters
+                  );
+                  setEventOptionData((prev) => {
+                    const dataObj = cloneDeep(prev);
+                    dataObj[eventIndex].selectedEventOption = category;
+                    dataObj[eventIndex].conditionOptions = parameterOption;
+                    return dataObj;
+                  });
+                }}
+                changeCurRelationShip={(eventIndex, relation) => {
+                  setEventOptionData((prev) => {
+                    const dataObj = cloneDeep(prev);
+                    dataObj[eventIndex].conditionRelationShip = relation;
+                    return dataObj;
+                  });
+                }}
+              />
             </SpaceBetween>
             <SpaceBetween direction="vertical" size="xs">
-              <Box variant="awsui-key-label">
+              <Button
+                variant="link"
+                iconName="filter"
+                className="cs-analytics-select-filter"
+              >
                 {t('analytics:labels.filters')}
-              </Box>
-              <div>
-                <SegmentationFilter
-                  segmentationData={segmentationOptionData}
-                  addNewConditionItem={() => {
-                    setSegmentationOptionData((prev) => {
-                      const dataObj = cloneDeep(prev);
-                      dataObj.data.push(DEFAULT_CONDITION_DATA);
-                      return dataObj;
-                    });
-                  }}
-                  removeEventCondition={(index) => {
-                    setSegmentationOptionData((prev) => {
-                      const dataObj = cloneDeep(prev);
-                      const newCondition = dataObj.data.filter(
-                        (item, i) => i !== index
-                      );
-                      dataObj.data = newCondition;
-                      return dataObj;
-                    });
-                  }}
-                  changeConditionCategoryOption={(index, category) => {
-                    setSegmentationOptionData((prev) => {
-                      const dataObj = cloneDeep(prev);
-                      dataObj.data[index].conditionOption = category;
-                      if (category?.valueType === MetadataValueType.STRING) {
-                        dataObj.data[index].conditionValue = [];
-                      } else {
-                        dataObj.data[index].conditionValue = '';
-                      }
-                      return dataObj;
-                    });
-                  }}
-                  changeConditionOperator={(index, operator) => {
-                    setSegmentationOptionData((prev) => {
-                      const dataObj = cloneDeep(prev);
-                      dataObj.data[index].conditionOperator = operator;
-                      return dataObj;
-                    });
-                  }}
-                  changeConditionValue={(index, value) => {
-                    setSegmentationOptionData((prev) => {
-                      const dataObj = cloneDeep(prev);
-                      dataObj.data[index].conditionValue = value;
-                      return dataObj;
-                    });
-                  }}
-                  changeCurRelationShip={(relation) => {
-                    setSegmentationOptionData((prev) => {
-                      const dataObj = cloneDeep(prev);
-                      dataObj.conditionRelationShip = relation;
-                      return dataObj;
-                    });
-                  }}
-                />
-              </div>
+              </Button>
+              <SegmentationFilter
+                segmentationData={segmentationOptionData}
+                addNewConditionItem={() => {
+                  setSegmentationOptionData((prev) => {
+                    const dataObj = cloneDeep(prev);
+                    dataObj.data.push(DEFAULT_CONDITION_DATA);
+                    return dataObj;
+                  });
+                }}
+                removeEventCondition={(index) => {
+                  setSegmentationOptionData((prev) => {
+                    const dataObj = cloneDeep(prev);
+                    const newCondition = dataObj.data.filter(
+                      (item, i) => i !== index
+                    );
+                    dataObj.data = newCondition;
+                    return dataObj;
+                  });
+                }}
+                changeConditionCategoryOption={(index, category) => {
+                  setSegmentationOptionData((prev) => {
+                    const dataObj = cloneDeep(prev);
+                    dataObj.data[index].conditionOption = category;
+                    if (category?.valueType === MetadataValueType.STRING) {
+                      dataObj.data[index].conditionValue = [];
+                    } else {
+                      dataObj.data[index].conditionValue = '';
+                    }
+                    return dataObj;
+                  });
+                }}
+                changeConditionOperator={(index, operator) => {
+                  setSegmentationOptionData((prev) => {
+                    const dataObj = cloneDeep(prev);
+                    dataObj.data[index].conditionOperator = operator;
+                    return dataObj;
+                  });
+                }}
+                changeConditionValue={(index, value) => {
+                  setSegmentationOptionData((prev) => {
+                    const dataObj = cloneDeep(prev);
+                    dataObj.data[index].conditionValue = value;
+                    return dataObj;
+                  });
+                }}
+                changeCurRelationShip={(relation) => {
+                  setSegmentationOptionData((prev) => {
+                    const dataObj = cloneDeep(prev);
+                    dataObj.conditionRelationShip = relation;
+                    return dataObj;
+                  });
+                }}
+              />
             </SpaceBetween>
           </ColumnLayout>
           <br />
@@ -901,6 +935,16 @@ const AnalyticsPath: React.FC = () => {
           </Button>
         </Container>
         <Container>
+          <div className="cs-analytics-data-range">
+            <ExploreDateRangePicker
+              dateRangeValue={dateRangeValue}
+              setDateRangeValue={setDateRangeValue}
+              timeGranularity={timeGranularity}
+              setTimeGranularity={setTimeGranularity}
+              onChange={clickPreview}
+            />
+          </div>
+          <br />
           {loadingChart ? (
             <Loading />
           ) : (

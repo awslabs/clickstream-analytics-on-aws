@@ -161,8 +161,8 @@ export const validRetentionAnalyticsItem = (item: IRetentionAnalyticsItem) => {
 
 export const validConditionItemType = (condition: IConditionItemType) => {
   return (
-    condition.conditionOption?.value !== null &&
-    condition.conditionOption?.value?.length !== 0
+    condition.conditionOption !== null &&
+    condition.conditionOption.value?.trim() !== ''
   );
 };
 
@@ -192,7 +192,7 @@ export const getEventAndConditions = (
         conditions: conditions,
         conditionOperator: item.conditionRelationShip,
         method:
-          item.calculateMethodOption?.value ?? ExploreComputeMethod.USER_CNT,
+          item.calculateMethodOption?.value ?? ExploreComputeMethod.USER_ID_CNT,
       };
       eventAndConditions.push(eventAndCondition);
     }
@@ -240,13 +240,13 @@ export const getPairEventAndConditions = (
           eventName: item.startEventOption?.value ?? '',
           conditions: startConditions,
           conditionOperator: item.startConditionRelationShip,
-          method: ExploreComputeMethod.USER_CNT,
+          method: ExploreComputeMethod.USER_ID_CNT,
         },
         backEvent: {
           eventName: item.revisitEventOption?.value ?? '',
           conditions: revisitConditions,
           conditionOperator: item.revisitConditionRelationShip,
-          method: ExploreComputeMethod.USER_CNT,
+          method: ExploreComputeMethod.USER_ID_CNT,
         },
       };
       pairEventAndConditions.push(pairEventAndCondition);

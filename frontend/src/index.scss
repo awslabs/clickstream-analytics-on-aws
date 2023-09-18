@@ -527,13 +527,29 @@ ul.menu-list li.checkbox-item {
 .cs-analytics-window {
   display: flex;
   gap: 5px;
+  width: 60%;
   .cs-analytics-window-type {
     flex: 1;
+    max-width: 120px;
   }
   .cs-analytics-window-value {
     flex: 1;
   }
   .cs-analytics-window-unit {
+    flex: 1;
+  }
+}
+
+.cs-analytics-session-window {
+  display: flex;
+  gap: 5px;
+  .cs-analytics-session-window-type {
+    flex: 1;
+  }
+  .cs-analytics-session-window-value {
+    flex: 1;
+  }
+  .cs-analytics-session-window-unit {
     flex: 1;
   }
 }
@@ -914,6 +930,22 @@ ul.menu-list li.checkbox-item {
   }
   [class^='awsui_breadcrumb'] {
     background-color: #014a87 !important;
+  }
+
+  .cs-analytics-select-event {
+    background-color: #d3e7f9 !important;
+  }
+
+  .cs-analytics-select-filter {
+    background-color: #67a353 !important;
+  }
+
+  .cs-analytics-select-group {
+    background-color: #b1b4b1 !important;
+  }
+
+  .cs-analytics-select-group-item {
+    width: 188px;
   }
 
   .sidebar {

@@ -20,6 +20,10 @@ import {
   ContentLayout,
   DateRangePickerProps,
   Header,
+  Icon,
+  Popover,
+  SegmentedControl,
+  SegmentedControlProps,
   SelectProps,
   SpaceBetween,
   Toggle,
@@ -42,6 +46,7 @@ import {
   IRetentionAnalyticsItem,
   SegmentationFilterDataType,
 } from 'components/eventselect/AnalyticsType';
+import EventItem from 'components/eventselect/EventItem';
 import RetentionSelect from 'components/eventselect/RetentionSelect';
 import SegmentationFilter from 'components/eventselect/SegmentationFilter';
 import Navigation from 'components/layouts/Navigation';
@@ -89,6 +94,26 @@ const AnalyticsRetention: React.FC = () => {
     IMetadataUserAttribute[]
   >([]);
 
+  const defaultChartTypeOption = 'line-chart';
+  const chartTypeOptions: SegmentedControlProps.Option[] = [
+    {
+      iconName: 'view-full',
+      iconAlt: 'line-chart',
+      id: 'line-chart',
+    },
+    {
+      iconName: 'view-horizontal',
+      iconAlt: 'bar-chart',
+      id: 'bar-chart',
+    },
+    {
+      iconName: 'view-vertical',
+      iconAlt: 'stack-chart',
+      id: 'stack-chart',
+    },
+  ];
+  const [chartType, setChartType] = useState(defaultChartTypeOption);
+
   const [eventOptionData, setEventOptionData] = useState<
     IRetentionAnalyticsItem[]
   >([
@@ -101,6 +126,12 @@ const AnalyticsRetention: React.FC = () => {
     useState<boolean>(true);
   const [segmentationOptionData, setSegmentationOptionData] =
     useState<SegmentationFilterDataType>(INIT_SEGMENTATION_DATA);
+
+  const [groupOption, setGroupOption] = useState<SelectProps.Option | null>(
+    null
+  );
+
+  const [groupOptions, setGroupOptions] = useState<CategoryItemType[]>([]);
 
   const getEventParameters = (eventName?: string) => {
     const event = originEvents.find((item) => item.name === eventName);
@@ -205,6 +236,7 @@ const AnalyticsRetention: React.FC = () => {
         dataObj.conditionOptions = conditionOptions;
         return dataObj;
       });
+      setGroupOptions(conditionOptions);
     } catch (error) {
       console.log(error);
     }
@@ -287,7 +319,7 @@ const AnalyticsRetention: React.FC = () => {
       sheetName: `retention_sheet_${eventId}`,
       viewName: `event_view_${eventId}`,
       dashboardCreateParameters: parameters,
-      computeMethod: ExploreComputeMethod.USER_CNT,
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: false,
       eventAndConditions: [],
       pairEventAndConditions: getPairEventAndConditions(eventOptionData),
@@ -369,419 +401,420 @@ const AnalyticsRetention: React.FC = () => {
   };
 
   return (
-    <AppLayout
-      toolsHide
-      content={
-        <ContentLayout
+    <>
+      <SpaceBetween direction="vertical" size="l">
+        <Container
           header={
-            <SpaceBetween size="m">
-              <Header variant="h1">
-                {t('nav.analytics.exploreRetention')}
-              </Header>
-            </SpaceBetween>
-          }
-        >
-          <SpaceBetween direction="vertical" size="l">
-            <Container
-              header={
-                <Header
-                  variant="h2"
-                  actions={
-                    <SpaceBetween direction="horizontal" size="xs">
-                      <Button
-                        iconName="refresh"
-                        onClick={resetConfig}
-                        loading={loadingData}
-                      >
-                        {t('button.reset')}
-                      </Button>
-                      <Button
-                        variant="primary"
-                        loading={loadingData}
-                        onClick={() => {
-                          setSelectDashboardModalVisible(true);
-                        }}
-                      >
-                        {t('button.saveToDashboard')}
-                      </Button>
-                    </SpaceBetween>
-                  }
-                >
-                  {t('analytics:header.configurations')}
-                </Header>
+            <Header
+              variant="h2"
+              actions={
+                <SpaceBetween direction="horizontal" size="xs">
+                  <Button
+                    iconName="refresh"
+                    onClick={resetConfig}
+                    loading={loadingData}
+                  >
+                    {t('button.reset')}
+                  </Button>
+                  <Button
+                    variant="primary"
+                    loading={loadingData}
+                    onClick={() => {
+                      setSelectDashboardModalVisible(true);
+                    }}
+                  >
+                    {t('button.saveToDashboard')}
+                  </Button>
+                </SpaceBetween>
               }
             >
-              <ColumnLayout columns={3} variant="text-grid">
-                <SpaceBetween direction="vertical" size="l">
-                  <div>
-                    <Box variant="awsui-key-label">
-                      {t('analytics:labels.associateParameter')}
-                    </Box>
-                    <Toggle
-                      onChange={({ detail }) =>
-                        setAssociateParameterChecked(detail.checked)
-                      }
-                      checked={associateParameterChecked}
-                    >
-                      {associateParameterChecked ? 'On' : 'Off'}
-                    </Toggle>
-                  </div>
-                </SpaceBetween>
-              </ColumnLayout>
-              <br />
-              <SpaceBetween direction="vertical" size="xs">
+              {t('analytics:explore.retentionAnalysis')}
+            </Header>
+          }
+        >
+          <ColumnLayout columns={3} variant="text-grid">
+            <SpaceBetween direction="vertical" size="l">
+              <div>
                 <Box variant="awsui-key-label">
-                  {t('analytics:labels.dateRange')}
+                  {t('analytics:labels.associateParameter')}{' '}
+                  <Popover
+                    triggerType="custom"
+                    size="small"
+                    content="This instance contains insufficient memory. Stop the instance, choose a different instance type with more memory, and restart it."
+                  >
+                    <Icon name="status-info" size="small" />
+                  </Popover>
                 </Box>
-                <ExploreDateRangePicker
-                  dateRangeValue={dateRangeValue}
-                  setDateRangeValue={setDateRangeValue}
-                  timeGranularity={timeGranularity}
-                  setTimeGranularity={setTimeGranularity}
-                />
-              </SpaceBetween>
-              <br />
-              <ColumnLayout columns={2} variant="text-grid">
-                <SpaceBetween direction="vertical" size="xs">
-                  <Box variant="awsui-key-label">
-                    {t('analytics:labels.eventsSelect')}
-                  </Box>
-                  <div>
-                    <RetentionSelect
-                      data={eventOptionData}
-                      eventOptionList={metadataEvents}
-                      addEventButtonLabel={t(
-                        'analytics:labels.retentionMetrics'
-                      )}
-                      addStartNewConditionItem={(index) => {
-                        setEventOptionData((prev) => {
-                          const dataObj = cloneDeep(prev);
-                          dataObj[index].startConditionList.push(
-                            DEFAULT_CONDITION_DATA
-                          );
-                          return dataObj;
-                        });
-                      }}
-                      addRevisitNewConditionItem={(index) => {
-                        setEventOptionData((prev) => {
-                          const dataObj = cloneDeep(prev);
-                          dataObj[index].revisitConditionList.push(
-                            DEFAULT_CONDITION_DATA
-                          );
-                          return dataObj;
-                        });
-                      }}
-                      changeStartRelationShip={(
-                        index: number,
-                        relation: ERelationShip
-                      ) => {
-                        setEventOptionData((prev) => {
-                          const dataObj = cloneDeep(prev);
-                          dataObj[index].startConditionRelationShip = relation;
-                          return dataObj;
-                        });
-                      }}
-                      changeRevisitRelationShip={(
-                        index: number,
-                        relation: ERelationShip
-                      ) => {
-                        setEventOptionData((prev) => {
-                          const dataObj = cloneDeep(prev);
-                          dataObj[index].revisitConditionRelationShip =
-                            relation;
-                          return dataObj;
-                        });
-                      }}
-                      removeStartEventCondition={(index, conditionIndex) => {
-                        setEventOptionData((prev) => {
-                          const dataObj = cloneDeep(prev);
-                          const newCondition = dataObj[
-                            index
-                          ].startConditionList.filter(
-                            (item, i) => i !== conditionIndex
-                          );
-                          dataObj[index].startConditionList = newCondition;
-                          return dataObj;
-                        });
-                      }}
-                      removeRevisitEventCondition={(index, conditionIndex) => {
-                        setEventOptionData((prev) => {
-                          const dataObj = cloneDeep(prev);
-                          const newCondition = dataObj[
-                            index
-                          ].revisitConditionList.filter(
-                            (item, i) => i !== conditionIndex
-                          );
-                          dataObj[index].revisitConditionList = newCondition;
-                          return dataObj;
-                        });
-                      }}
-                      changeStartConditionCategoryOption={(
-                        index,
-                        conditionIndex,
-                        category
-                      ) => {
-                        setEventOptionData((prev) => {
-                          const dataObj = cloneDeep(prev);
-                          dataObj[index].startConditionList[
-                            conditionIndex
-                          ].conditionOption = category;
-                          dataObj[index].startConditionList[
-                            conditionIndex
-                          ].conditionValue = [];
-                          return dataObj;
-                        });
-                      }}
-                      changeRevisitConditionCategoryOption={(
-                        index,
-                        conditionIndex,
-                        category
-                      ) => {
-                        setEventOptionData((prev) => {
-                          const dataObj = cloneDeep(prev);
-                          dataObj[index].revisitConditionList[
-                            conditionIndex
-                          ].conditionOption = category;
-                          dataObj[index].revisitConditionList[
-                            conditionIndex
-                          ].conditionValue = [];
-                          return dataObj;
-                        });
-                      }}
-                      changeStartConditionOperator={(
-                        eventIndex,
-                        conditionIndex,
-                        operator
-                      ) => {
-                        setEventOptionData((prev) => {
-                          const dataObj = cloneDeep(prev);
-                          dataObj[eventIndex].startConditionList[
-                            conditionIndex
-                          ].conditionOperator = operator;
-                          return dataObj;
-                        });
-                      }}
-                      changeRevisitConditionOperator={(
-                        eventIndex,
-                        conditionIndex,
-                        operator
-                      ) => {
-                        setEventOptionData((prev) => {
-                          const dataObj = cloneDeep(prev);
-                          dataObj[eventIndex].revisitConditionList[
-                            conditionIndex
-                          ].conditionOperator = operator;
-                          return dataObj;
-                        });
-                      }}
-                      changeStartConditionValue={(
-                        eventIndex,
-                        conditionIndex,
-                        value
-                      ) => {
-                        setEventOptionData((prev) => {
-                          const dataObj = cloneDeep(prev);
-                          dataObj[eventIndex].startConditionList[
-                            conditionIndex
-                          ].conditionValue = value;
-                          return dataObj;
-                        });
-                      }}
-                      changeRevisitConditionValue={(
-                        eventIndex,
-                        conditionIndex,
-                        value
-                      ) => {
-                        setEventOptionData((prev) => {
-                          const dataObj = cloneDeep(prev);
-                          dataObj[eventIndex].revisitConditionList[
-                            conditionIndex
-                          ].conditionValue = value;
-                          return dataObj;
-                        });
-                      }}
-                      addNewEventAnalyticsItem={() => {
-                        setEventOptionData((prev) => {
-                          const preEventList = cloneDeep(prev);
-                          return [
-                            ...preEventList,
-                            {
-                              ...DEFAULT_RETENTION_ITEM,
-                            },
-                          ];
-                        });
-                      }}
-                      removeRetentionEventItem={(index) => {
-                        setEventOptionData((prev) => {
-                          const dataObj = cloneDeep(prev);
-                          return dataObj.filter(
-                            (item, eIndex) => eIndex !== index
-                          );
-                        });
-                      }}
-                      changeShowRelation={(index, show) => {
-                        setEventOptionData((prev) => {
-                          const dataObj = cloneDeep(prev);
-                          dataObj[index].startEventRelationAttribute = null;
-                          dataObj[index].revisitEventRelationAttribute = null;
-                          dataObj[index].showRelation = show;
-                          return dataObj;
-                        });
-                      }}
-                      changeStartEvent={(index, item) => {
-                        const eventName = item?.value;
-                        const eventParameters = getEventParameters(eventName);
-                        const parameterOption =
-                          parametersConvertToCategoryItemType(
-                            userAttributes,
-                            eventParameters
-                          );
-                        setEventOptionData((prev) => {
-                          const dataObj = cloneDeep(prev);
-                          dataObj[index].startEventOption = item;
-                          dataObj[index].startEventRelationAttributeOptions =
-                            parameterOption;
-                          dataObj[index].startConditionOptions =
-                            parameterOption;
-                          return dataObj;
-                        });
-                      }}
-                      changeRevisitEvent={(index, item) => {
-                        const eventName = item?.value;
-                        const eventParameters = getEventParameters(eventName);
-                        const parameterOption =
-                          parametersConvertToCategoryItemType(
-                            userAttributes,
-                            eventParameters
-                          );
-                        setEventOptionData((prev) => {
-                          const dataObj = cloneDeep(prev);
-                          dataObj[index].revisitEventOption = item;
-                          dataObj[index].revisitEventRelationAttributeOptions =
-                            parameterOption;
-                          dataObj[index].revisitConditionOptions =
-                            parameterOption;
-                          return dataObj;
-                        });
-                      }}
-                      changeStartRelativeAttribute={(index, item) => {
-                        setEventOptionData((prev) => {
-                          const dataObj = cloneDeep(prev);
-                          dataObj[index].startEventRelationAttribute = item;
-                          return dataObj;
-                        });
-                      }}
-                      changeRevisitRelativeAttribute={(index, item) => {
-                        setEventOptionData((prev) => {
-                          const dataObj = cloneDeep(prev);
-                          dataObj[index].revisitEventRelationAttribute = item;
-                          return dataObj;
-                        });
-                      }}
-                    />
-                  </div>
-                </SpaceBetween>
-                <SpaceBetween direction="vertical" size="xs">
-                  <Box variant="awsui-key-label">
-                    {t('analytics:labels.filters')}
-                  </Box>
-                  <div>
-                    <SegmentationFilter
-                      segmentationData={segmentationOptionData}
-                      addNewConditionItem={() => {
-                        setSegmentationOptionData((prev) => {
-                          const dataObj = cloneDeep(prev);
-                          dataObj.data.push(DEFAULT_CONDITION_DATA);
-                          return dataObj;
-                        });
-                      }}
-                      removeEventCondition={(index) => {
-                        setSegmentationOptionData((prev) => {
-                          const dataObj = cloneDeep(prev);
-                          const newCondition = dataObj.data.filter(
-                            (item, i) => i !== index
-                          );
-                          dataObj.data = newCondition;
-                          return dataObj;
-                        });
-                      }}
-                      changeConditionCategoryOption={(index, category) => {
-                        setSegmentationOptionData((prev) => {
-                          const dataObj = cloneDeep(prev);
-                          dataObj.data[index].conditionOption = category;
-                          if (
-                            category?.valueType === MetadataValueType.STRING
-                          ) {
-                            dataObj.data[index].conditionValue = [];
-                          } else {
-                            dataObj.data[index].conditionValue = '';
-                          }
-                          return dataObj;
-                        });
-                      }}
-                      changeConditionOperator={(index, operator) => {
-                        setSegmentationOptionData((prev) => {
-                          const dataObj = cloneDeep(prev);
-                          dataObj.data[index].conditionOperator = operator;
-                          return dataObj;
-                        });
-                      }}
-                      changeConditionValue={(index, value) => {
-                        setSegmentationOptionData((prev) => {
-                          const dataObj = cloneDeep(prev);
-                          dataObj.data[index].conditionValue = value;
-                          return dataObj;
-                        });
-                      }}
-                      changeCurRelationShip={(relation) => {
-                        setSegmentationOptionData((prev) => {
-                          const dataObj = cloneDeep(prev);
-                          dataObj.conditionRelationShip = relation;
-                          return dataObj;
-                        });
-                      }}
-                    />
-                  </div>
-                </SpaceBetween>
-              </ColumnLayout>
-              <br />
+                <Toggle
+                  onChange={({ detail }) =>
+                    setAssociateParameterChecked(detail.checked)
+                  }
+                  checked={associateParameterChecked}
+                >
+                  {associateParameterChecked ? 'On' : 'Off'}
+                </Toggle>
+              </div>
+            </SpaceBetween>
+          </ColumnLayout>
+          <br />
+          <ColumnLayout columns={2} variant="text-grid">
+            <SpaceBetween direction="vertical" size="xs">
               <Button
-                variant="primary"
-                iconName="search"
-                onClick={clickPreview}
-                loading={loadingData}
+                variant="link"
+                iconName="menu"
+                className="cs-analytics-select-event"
               >
-                {t('button.preview')}
+                {t('analytics:labels.defineMetrics')}
               </Button>
-            </Container>
-            <Container>
-              {loadingChart ? (
-                <Loading />
-              ) : (
-                <ExploreEmbedFrame
-                  embedType="dashboard"
-                  embedUrl={exploreEmbedUrl}
-                  embedId={`explore_${generateStr(6)}`}
-                />
-              )}
-            </Container>
-          </SpaceBetween>
-          <SaveToDashboardModal
-            visible={selectDashboardModalVisible}
-            disableClose={false}
+              <RetentionSelect
+                data={eventOptionData}
+                eventOptionList={metadataEvents}
+                addEventButtonLabel={t('analytics:labels.retentionMetrics')}
+                addStartNewConditionItem={(index) => {
+                  setEventOptionData((prev) => {
+                    const dataObj = cloneDeep(prev);
+                    dataObj[index].startConditionList.push(
+                      DEFAULT_CONDITION_DATA
+                    );
+                    return dataObj;
+                  });
+                }}
+                addRevisitNewConditionItem={(index) => {
+                  setEventOptionData((prev) => {
+                    const dataObj = cloneDeep(prev);
+                    dataObj[index].revisitConditionList.push(
+                      DEFAULT_CONDITION_DATA
+                    );
+                    return dataObj;
+                  });
+                }}
+                changeStartRelationShip={(
+                  index: number,
+                  relation: ERelationShip
+                ) => {
+                  setEventOptionData((prev) => {
+                    const dataObj = cloneDeep(prev);
+                    dataObj[index].startConditionRelationShip = relation;
+                    return dataObj;
+                  });
+                }}
+                changeRevisitRelationShip={(
+                  index: number,
+                  relation: ERelationShip
+                ) => {
+                  setEventOptionData((prev) => {
+                    const dataObj = cloneDeep(prev);
+                    dataObj[index].revisitConditionRelationShip = relation;
+                    return dataObj;
+                  });
+                }}
+                removeStartEventCondition={(index, conditionIndex) => {
+                  setEventOptionData((prev) => {
+                    const dataObj = cloneDeep(prev);
+                    const newCondition = dataObj[
+                      index
+                    ].startConditionList.filter(
+                      (item, i) => i !== conditionIndex
+                    );
+                    dataObj[index].startConditionList = newCondition;
+                    return dataObj;
+                  });
+                }}
+                removeRevisitEventCondition={(index, conditionIndex) => {
+                  setEventOptionData((prev) => {
+                    const dataObj = cloneDeep(prev);
+                    const newCondition = dataObj[
+                      index
+                    ].revisitConditionList.filter(
+                      (item, i) => i !== conditionIndex
+                    );
+                    dataObj[index].revisitConditionList = newCondition;
+                    return dataObj;
+                  });
+                }}
+                changeStartConditionCategoryOption={(
+                  index,
+                  conditionIndex,
+                  category
+                ) => {
+                  setEventOptionData((prev) => {
+                    const dataObj = cloneDeep(prev);
+                    dataObj[index].startConditionList[
+                      conditionIndex
+                    ].conditionOption = category;
+                    dataObj[index].startConditionList[
+                      conditionIndex
+                    ].conditionValue = [];
+                    return dataObj;
+                  });
+                }}
+                changeRevisitConditionCategoryOption={(
+                  index,
+                  conditionIndex,
+                  category
+                ) => {
+                  setEventOptionData((prev) => {
+                    const dataObj = cloneDeep(prev);
+                    dataObj[index].revisitConditionList[
+                      conditionIndex
+                    ].conditionOption = category;
+                    dataObj[index].revisitConditionList[
+                      conditionIndex
+                    ].conditionValue = [];
+                    return dataObj;
+                  });
+                }}
+                changeStartConditionOperator={(
+                  eventIndex,
+                  conditionIndex,
+                  operator
+                ) => {
+                  setEventOptionData((prev) => {
+                    const dataObj = cloneDeep(prev);
+                    dataObj[eventIndex].startConditionList[
+                      conditionIndex
+                    ].conditionOperator = operator;
+                    return dataObj;
+                  });
+                }}
+                changeRevisitConditionOperator={(
+                  eventIndex,
+                  conditionIndex,
+                  operator
+                ) => {
+                  setEventOptionData((prev) => {
+                    const dataObj = cloneDeep(prev);
+                    dataObj[eventIndex].revisitConditionList[
+                      conditionIndex
+                    ].conditionOperator = operator;
+                    return dataObj;
+                  });
+                }}
+                changeStartConditionValue={(
+                  eventIndex,
+                  conditionIndex,
+                  value
+                ) => {
+                  setEventOptionData((prev) => {
+                    const dataObj = cloneDeep(prev);
+                    dataObj[eventIndex].startConditionList[
+                      conditionIndex
+                    ].conditionValue = value;
+                    return dataObj;
+                  });
+                }}
+                changeRevisitConditionValue={(
+                  eventIndex,
+                  conditionIndex,
+                  value
+                ) => {
+                  setEventOptionData((prev) => {
+                    const dataObj = cloneDeep(prev);
+                    dataObj[eventIndex].revisitConditionList[
+                      conditionIndex
+                    ].conditionValue = value;
+                    return dataObj;
+                  });
+                }}
+                addNewEventAnalyticsItem={() => {
+                  setEventOptionData((prev) => {
+                    const preEventList = cloneDeep(prev);
+                    return [
+                      ...preEventList,
+                      {
+                        ...DEFAULT_RETENTION_ITEM,
+                      },
+                    ];
+                  });
+                }}
+                removeRetentionEventItem={(index) => {
+                  setEventOptionData((prev) => {
+                    const dataObj = cloneDeep(prev);
+                    return dataObj.filter((item, eIndex) => eIndex !== index);
+                  });
+                }}
+                changeShowRelation={(index, show) => {
+                  setEventOptionData((prev) => {
+                    const dataObj = cloneDeep(prev);
+                    dataObj[index].startEventRelationAttribute = null;
+                    dataObj[index].revisitEventRelationAttribute = null;
+                    dataObj[index].showRelation = show;
+                    return dataObj;
+                  });
+                }}
+                changeStartEvent={(index, item) => {
+                  const eventName = item?.value;
+                  const eventParameters = getEventParameters(eventName);
+                  const parameterOption = parametersConvertToCategoryItemType(
+                    userAttributes,
+                    eventParameters
+                  );
+                  setEventOptionData((prev) => {
+                    const dataObj = cloneDeep(prev);
+                    dataObj[index].startEventOption = item;
+                    dataObj[index].startEventRelationAttributeOptions =
+                      parameterOption;
+                    dataObj[index].startConditionOptions = parameterOption;
+                    return dataObj;
+                  });
+                }}
+                changeRevisitEvent={(index, item) => {
+                  const eventName = item?.value;
+                  const eventParameters = getEventParameters(eventName);
+                  const parameterOption = parametersConvertToCategoryItemType(
+                    userAttributes,
+                    eventParameters
+                  );
+                  setEventOptionData((prev) => {
+                    const dataObj = cloneDeep(prev);
+                    dataObj[index].revisitEventOption = item;
+                    dataObj[index].revisitEventRelationAttributeOptions =
+                      parameterOption;
+                    dataObj[index].revisitConditionOptions = parameterOption;
+                    return dataObj;
+                  });
+                }}
+                changeStartRelativeAttribute={(index, item) => {
+                  setEventOptionData((prev) => {
+                    const dataObj = cloneDeep(prev);
+                    dataObj[index].startEventRelationAttribute = item;
+                    return dataObj;
+                  });
+                }}
+                changeRevisitRelativeAttribute={(index, item) => {
+                  setEventOptionData((prev) => {
+                    const dataObj = cloneDeep(prev);
+                    dataObj[index].revisitEventRelationAttribute = item;
+                    return dataObj;
+                  });
+                }}
+              />
+            </SpaceBetween>
+            <SpaceBetween direction="vertical" size="xs">
+              <Button
+                variant="link"
+                iconName="filter"
+                className="cs-analytics-select-filter"
+              >
+                {t('analytics:labels.filters')}
+              </Button>
+              <SegmentationFilter
+                segmentationData={segmentationOptionData}
+                addNewConditionItem={() => {
+                  setSegmentationOptionData((prev) => {
+                    const dataObj = cloneDeep(prev);
+                    dataObj.data.push(DEFAULT_CONDITION_DATA);
+                    return dataObj;
+                  });
+                }}
+                removeEventCondition={(index) => {
+                  setSegmentationOptionData((prev) => {
+                    const dataObj = cloneDeep(prev);
+                    const newCondition = dataObj.data.filter(
+                      (item, i) => i !== index
+                    );
+                    dataObj.data = newCondition;
+                    return dataObj;
+                  });
+                }}
+                changeConditionCategoryOption={(index, category) => {
+                  setSegmentationOptionData((prev) => {
+                    const dataObj = cloneDeep(prev);
+                    dataObj.data[index].conditionOption = category;
+                    if (category?.valueType === MetadataValueType.STRING) {
+                      dataObj.data[index].conditionValue = [];
+                    } else {
+                      dataObj.data[index].conditionValue = '';
+                    }
+                    return dataObj;
+                  });
+                }}
+                changeConditionOperator={(index, operator) => {
+                  setSegmentationOptionData((prev) => {
+                    const dataObj = cloneDeep(prev);
+                    dataObj.data[index].conditionOperator = operator;
+                    return dataObj;
+                  });
+                }}
+                changeConditionValue={(index, value) => {
+                  setSegmentationOptionData((prev) => {
+                    const dataObj = cloneDeep(prev);
+                    dataObj.data[index].conditionValue = value;
+                    return dataObj;
+                  });
+                }}
+                changeCurRelationShip={(relation) => {
+                  setSegmentationOptionData((prev) => {
+                    const dataObj = cloneDeep(prev);
+                    dataObj.conditionRelationShip = relation;
+                    return dataObj;
+                  });
+                }}
+              />
+              <br />
+              <Button variant="link" className="cs-analytics-select-group">
+                {t('analytics:labels.attributeGrouping')}
+              </Button>
+              <div className="cs-analytics-select-group-item">
+                <div className="cs-analytics-dropdown">
+                  <div className="cs-analytics-parameter">
+                    <div className="flex-1">
+                      <EventItem
+                        placeholder={
+                          t('analytics:labels.attributeSelectPlaceholder') ?? ''
+                        }
+                        categoryOption={groupOption}
+                        changeCurCategoryOption={(item) => {
+                          setGroupOption(item);
+                        }}
+                        categories={groupOptions}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </SpaceBetween>
+          </ColumnLayout>
+          <br />
+          <Button
+            variant="primary"
+            iconName="search"
+            onClick={clickPreview}
             loading={loadingData}
-            setModalVisible={setSelectDashboardModalVisible}
-            save={saveToDashboard}
-          />
-        </ContentLayout>
-      }
-      headerSelector="#header"
-      navigation={
-        <Navigation
-          activeHref={`/analytics/${projectId}/app/${appId}/retention`}
-        />
-      }
-    />
+          >
+            {t('button.preview')}
+          </Button>
+        </Container>
+        <Container>
+          <div className="cs-analytics-data-range">
+            <ExploreDateRangePicker
+              dateRangeValue={dateRangeValue}
+              setDateRangeValue={setDateRangeValue}
+              timeGranularity={timeGranularity}
+              setTimeGranularity={setTimeGranularity}
+              onChange={clickPreview}
+            />
+          </div>
+          <br />
+          {loadingChart ? (
+            <Loading />
+          ) : (
+            <ExploreEmbedFrame
+              embedType="dashboard"
+              embedUrl={exploreEmbedUrl}
+              embedId={`explore_${generateStr(6)}`}
+            />
+          )}
+        </Container>
+      </SpaceBetween>
+      <SaveToDashboardModal
+        visible={selectDashboardModalVisible}
+        disableClose={false}
+        loading={loadingData}
+        setModalVisible={setSelectDashboardModalVisible}
+        save={saveToDashboard}
+      />
+    </>
   );
 };
 

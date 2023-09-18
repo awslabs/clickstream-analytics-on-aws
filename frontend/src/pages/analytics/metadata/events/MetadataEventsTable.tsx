@@ -223,8 +223,8 @@ const MetadataEventsTable: React.FC<MetadataEventsTableProps> = (
       tableContentDisplay={CONTENT_DISPLAY}
       tableFilteringProperties={FILTERING_PROPERTIES}
       tableI18nStrings={{
-        loadingText: t('analytics:metadata.event.tableLoading') || 'Loading',
-        emptyText: t('analytics:metadata.event.tableEmpty'),
+        loadingText: t('analytics:labels.tableLoading') || 'Loading',
+        emptyText: t('analytics:labels.tableEmpty'),
         headerTitle: t('analytics:metadata.event.title'),
         headerDescription: t('analytics:metadata.event.description'),
         headerRefreshButtonText: t('common:button.refreshMetadata'),

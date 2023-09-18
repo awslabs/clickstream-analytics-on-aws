@@ -60,7 +60,7 @@ const Navigation: React.FC<INavigationProps> = (props: INavigationProps) => {
             </div>
           }
         >
-          New
+          <Link variant="info"> New</Link>
         </Popover>
       ),
     },

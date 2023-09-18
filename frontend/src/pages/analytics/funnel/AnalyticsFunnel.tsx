@@ -17,7 +17,11 @@ import {
   ColumnLayout,
   Container,
   Header,
+  Icon,
   Input,
+  Popover,
+  SegmentedControl,
+  SegmentedControlProps,
   Select,
   SelectProps,
   SpaceBetween,
@@ -37,10 +41,13 @@ import {
   CategoryItemType,
   DEFAULT_CONDITION_DATA,
   DEFAULT_EVENT_ITEM,
+  IAnalyticsItem,
   IEventAnalyticsItem,
   INIT_SEGMENTATION_DATA,
+  MOCK_ATTRIBUTE_OPTION_LIST,
   SegmentationFilterDataType,
 } from 'components/eventselect/AnalyticsType';
+import EventItem from 'components/eventselect/EventItem';
 import EventsSelect from 'components/eventselect/EventSelect';
 import SegmentationFilter from 'components/eventselect/SegmentationFilter';
 import { cloneDeep } from 'lodash';
@@ -89,9 +96,45 @@ const AnalyticsFunnel: React.FC = () => {
     IMetadataUserAttribute[]
   >([]);
 
+  const defaultChartTypeOption = 'line-chart';
+  const chartTypeOptions: SegmentedControlProps.Option[] = [
+    {
+      iconName: 'view-full',
+      iconAlt: 'line-chart',
+      id: 'line-chart',
+    },
+    {
+      iconName: 'view-horizontal',
+      iconAlt: 'bar-chart',
+      id: 'bar-chart',
+    },
+    {
+      iconName: 'view-vertical',
+      iconAlt: 'stack-chart',
+      id: 'stack-chart',
+    },
+  ];
+  const [chartType, setChartType] = useState(defaultChartTypeOption);
+
+  const defaultWindowOption: SelectProps.Option = {
+    value: 'indirectly',
+    label: t('analytics:options.indirectlyFollowed') ?? '',
+  };
+  const windowOptions: SelectProps.Options = [
+    defaultWindowOption,
+    {
+      value: 'directly',
+      label: t('analytics:options.directlyFollowed') ?? '',
+    },
+  ];
+
+  const [windowModule, setWindowModule] = useState<SelectProps.Option | null>(
+    defaultWindowOption
+  );
+
   const defaultComputeMethodOption: SelectProps.Option = {
-    value: ExploreComputeMethod.USER_CNT,
-    label: t('analytics:options.userPseudoNumber') ?? '',
+    value: ExploreComputeMethod.USER_ID_CNT,
+    label: t('analytics:options.userNumber') ?? '',
   };
 
   const computeMethodOptions: SelectProps.Options = [
@@ -234,6 +277,7 @@ const AnalyticsFunnel: React.FC = () => {
         dataObj.conditionOptions = conditionOptions;
         return dataObj;
       });
+      setGroupOptions(conditionOptions);
     } catch (error) {
       console.log(error);
     }
@@ -250,8 +294,8 @@ const AnalyticsFunnel: React.FC = () => {
   const [dateRangeValue, setDateRangeValue] =
     React.useState<DateRangePickerProps.Value>({
       type: 'relative',
-      amount: 7,
-      unit: 'day',
+      amount: 1,
+      unit: 'month',
     });
 
   const [timeGranularity, setTimeGranularity] =
@@ -278,12 +322,19 @@ const AnalyticsFunnel: React.FC = () => {
       {
         ...DEFAULT_EVENT_ITEM,
         isMultiSelect: false,
+        enableChangeRelation: true,
       },
     ]
   );
 
   const [segmentationOptionData, setSegmentationOptionData] =
     useState<SegmentationFilterDataType>(INIT_SEGMENTATION_DATA);
+
+  const [groupOption, setGroupOption] = useState<SelectProps.Option | null>(
+    null
+  );
+
+  const [groupOptions, setGroupOptions] = useState<CategoryItemType[]>([]);
 
   const getFunnelRequest = (
     action: ExploreRequestAction,
@@ -318,7 +369,7 @@ const AnalyticsFunnel: React.FC = () => {
       sheetName: `funnel_sheet_${funnelId}`,
       viewName: `funnel_view_${funnelId}`,
       dashboardCreateParameters: parameters,
-      computeMethod: selectedMetric?.value ?? ExploreComputeMethod.USER_CNT,
+      computeMethod: selectedMetric?.value ?? ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: associateParameterChecked,
       joinColumn: 'user_pseudo_id',
       conversionIntervalType:
@@ -371,8 +422,8 @@ const AnalyticsFunnel: React.FC = () => {
   const resetConfig = async () => {
     setLoadingData(true);
     setSelectedMetric({
-      value: ExploreComputeMethod.USER_CNT,
-      label: t('analytics:options.userPseudoNumber') ?? '',
+      value: ExploreComputeMethod.USER_ID_CNT,
+      label: t('analytics:options.userNumber') ?? '',
     });
     setSelectedWindowType(customWindowType);
     setSelectedWindowUnit({
@@ -384,13 +435,14 @@ const AnalyticsFunnel: React.FC = () => {
       {
         ...DEFAULT_EVENT_ITEM,
         isMultiSelect: false,
+        enableChangeRelation: true,
       },
     ]);
     setSegmentationOptionData(INIT_SEGMENTATION_DATA);
     setDateRangeValue({
       type: 'relative',
-      amount: 7,
-      unit: 'day',
+      amount: 1,
+      unit: 'month',
     });
     setTimeGranularity({
       value: ExploreGroupColumn.DAY,
@@ -468,67 +520,57 @@ const AnalyticsFunnel: React.FC = () => {
                 </SpaceBetween>
               }
             >
-              {t('analytics:header.configurations')}
+              {t('analytics:explore.funnelAnalysis')}
             </Header>
           }
         >
           <div className="cs-analytics-config">
             <SpaceBetween direction="vertical" size="xs">
               <Box variant="awsui-key-label">
-                {t('analytics:labels.metrics')}
+                {t('analytics:labels.metrics')}{' '}
+                <Popover
+                  triggerType="custom"
+                  size="small"
+                  content="This instance contains insufficient memory. Stop the instance, choose a different instance type with more memory, and restart it."
+                >
+                  <Icon name="status-info" size="small" />
+                </Popover>
               </Box>
-              <div className="cs-analytics-config">
-                <Select
-                  selectedOption={selectedMetric}
-                  options={computeMethodOptions}
-                  onChange={(event) => {
-                    setSelectedMetric(event.detail.selectedOption);
-                  }}
-                />
-              </div>
+              <Select
+                selectedOption={selectedMetric}
+                options={computeMethodOptions}
+                onChange={(event) => {
+                  setSelectedMetric(event.detail.selectedOption);
+                }}
+              />
             </SpaceBetween>
             <SpaceBetween direction="vertical" size="xs">
               <Box variant="awsui-key-label">
-                {t('analytics:labels.window')}
+                {t('analytics:labels.funnelModel')}{' '}
+                <Popover
+                  triggerType="custom"
+                  content="This instance contains insufficient memory. Stop the instance, choose a different instance type with more memory, and restart it."
+                >
+                  <Icon name="status-info" size="small" />
+                </Popover>
               </Box>
-              <div className="cs-analytics-window">
-                <div className="cs-analytics-window-type">
-                  <Select
-                    selectedOption={selectedWindowType}
-                    options={windowTypeOptions}
-                    onChange={(event) => {
-                      setSelectedWindowType(event.detail.selectedOption);
-                    }}
-                  />
-                </div>
-                {selectedWindowType?.value === customWindowType?.value ? (
-                  <>
-                    <div className="cs-analytics-window-value">
-                      <Input
-                        type="number"
-                        placeholder="5"
-                        value={windowValue}
-                        onChange={(event) => {
-                          setWindowValue(event.detail.value);
-                        }}
-                      />
-                    </div>
-                    <div className="cs-analytics-window-unit">
-                      <Select
-                        selectedOption={selectedWindowUnit}
-                        options={windowUnitOptions}
-                        onChange={(event) => {
-                          setSelectedWindowUnit(event.detail.selectedOption);
-                        }}
-                      />
-                    </div>
-                  </>
-                ) : null}
-              </div>
+              <Select
+                selectedOption={windowModule}
+                options={windowOptions}
+                onChange={(event) => {
+                  setWindowModule(event.detail.selectedOption);
+                }}
+              />
             </SpaceBetween>
             <SpaceBetween direction="vertical" size="xs">
               <Box variant="awsui-key-label">
-                {t('analytics:labels.associateParameter')}
+                {t('analytics:labels.associateParameter')}{' '}
+                <Popover
+                  triggerType="custom"
+                  content="This instance contains insufficient memory. Stop the instance, choose a different instance type with more memory, and restart it."
+                >
+                  <Icon name="status-info" size="small" />
+                </Popover>
               </Box>
               <div className="cs-analytics-config">
                 <Toggle
@@ -543,24 +585,64 @@ const AnalyticsFunnel: React.FC = () => {
             </SpaceBetween>
           </div>
           <br />
-          <SpaceBetween direction="vertical" size="xs">
-            <Box variant="awsui-key-label">
-              {t('analytics:labels.dateRange')}
-            </Box>
-            <ExploreDateRangePicker
-              dateRangeValue={dateRangeValue}
-              setDateRangeValue={setDateRangeValue}
-              timeGranularity={timeGranularity}
-              setTimeGranularity={setTimeGranularity}
-            />
-          </SpaceBetween>
-          <br />
           <ColumnLayout columns={2} variant="text-grid">
             <SpaceBetween direction="vertical" size="xs">
-              <Box variant="awsui-key-label">
+              <Button
+                variant="link"
+                iconName="menu"
+                className="cs-analytics-select-event"
+              >
                 {t('analytics:labels.funnelSteps')}
-              </Box>
+              </Button>
               <div>
+                <SpaceBetween direction="vertical" size="xs">
+                  <Box variant="awsui-key-label">
+                    {t('analytics:labels.window')}{' '}
+                    <Popover
+                      triggerType="custom"
+                      content="This instance contains insufficient memory. Stop the instance, choose a different instance type with more memory, and restart it."
+                    >
+                      <Icon name="status-info" size="small" />
+                    </Popover>
+                  </Box>
+                  <div className="cs-analytics-window">
+                    <div className="cs-analytics-window-type">
+                      <Select
+                        selectedOption={selectedWindowType}
+                        options={windowTypeOptions}
+                        onChange={(event) => {
+                          setSelectedWindowType(event.detail.selectedOption);
+                        }}
+                      />
+                    </div>
+                    {selectedWindowType?.value === customWindowType?.value ? (
+                      <>
+                        <div className="cs-analytics-window-value">
+                          <Input
+                            type="number"
+                            placeholder="5"
+                            value={windowValue}
+                            onChange={(event) => {
+                              setWindowValue(event.detail.value);
+                            }}
+                          />
+                        </div>
+                        <div className="cs-analytics-window-unit">
+                          <Select
+                            selectedOption={selectedWindowUnit}
+                            options={windowUnitOptions}
+                            onChange={(event) => {
+                              setSelectedWindowUnit(
+                                event.detail.selectedOption
+                              );
+                            }}
+                          />
+                        </div>
+                      </>
+                    ) : null}
+                  </div>
+                </SpaceBetween>
+                <br />
                 <EventsSelect
                   data={eventOptionData}
                   eventOptionList={metadataEvents}
@@ -573,6 +655,7 @@ const AnalyticsFunnel: React.FC = () => {
                         {
                           ...DEFAULT_EVENT_ITEM,
                           isMultiSelect: false,
+                          enableChangeRelation: true,
                         },
                       ];
                     });
@@ -676,63 +759,87 @@ const AnalyticsFunnel: React.FC = () => {
               </div>
             </SpaceBetween>
             <SpaceBetween direction="vertical" size="xs">
-              <Box variant="awsui-key-label">
+              <Button
+                variant="link"
+                iconName="filter"
+                className="cs-analytics-select-filter"
+              >
                 {t('analytics:labels.filters')}
-              </Box>
-              <div>
-                <SegmentationFilter
-                  segmentationData={segmentationOptionData}
-                  addNewConditionItem={() => {
-                    setSegmentationOptionData((prev) => {
-                      const dataObj = cloneDeep(prev);
-                      dataObj.data.push(DEFAULT_CONDITION_DATA);
-                      return dataObj;
-                    });
-                  }}
-                  removeEventCondition={(index) => {
-                    setSegmentationOptionData((prev) => {
-                      const dataObj = cloneDeep(prev);
-                      const newCondition = dataObj.data.filter(
-                        (item, i) => i !== index
-                      );
-                      dataObj.data = newCondition;
-                      return dataObj;
-                    });
-                  }}
-                  changeConditionCategoryOption={(index, category) => {
-                    setSegmentationOptionData((prev) => {
-                      const dataObj = cloneDeep(prev);
-                      dataObj.data[index].conditionOption = category;
-                      if (category?.valueType === MetadataValueType.STRING) {
-                        dataObj.data[index].conditionValue = [];
-                      } else {
-                        dataObj.data[index].conditionValue = '';
-                      }
-                      return dataObj;
-                    });
-                  }}
-                  changeConditionOperator={(index, operator) => {
-                    setSegmentationOptionData((prev) => {
-                      const dataObj = cloneDeep(prev);
-                      dataObj.data[index].conditionOperator = operator;
-                      return dataObj;
-                    });
-                  }}
-                  changeConditionValue={(index, value) => {
-                    setSegmentationOptionData((prev) => {
-                      const dataObj = cloneDeep(prev);
-                      dataObj.data[index].conditionValue = value;
-                      return dataObj;
-                    });
-                  }}
-                  changeCurRelationShip={(relation) => {
-                    setSegmentationOptionData((prev) => {
-                      const dataObj = cloneDeep(prev);
-                      dataObj.conditionRelationShip = relation;
-                      return dataObj;
-                    });
-                  }}
-                />
+              </Button>
+              <SegmentationFilter
+                segmentationData={segmentationOptionData}
+                addNewConditionItem={() => {
+                  setSegmentationOptionData((prev) => {
+                    const dataObj = cloneDeep(prev);
+                    dataObj.data.push(DEFAULT_CONDITION_DATA);
+                    return dataObj;
+                  });
+                }}
+                removeEventCondition={(index) => {
+                  setSegmentationOptionData((prev) => {
+                    const dataObj = cloneDeep(prev);
+                    const newCondition = dataObj.data.filter(
+                      (item, i) => i !== index
+                    );
+                    dataObj.data = newCondition;
+                    return dataObj;
+                  });
+                }}
+                changeConditionCategoryOption={(index, category) => {
+                  setSegmentationOptionData((prev) => {
+                    const dataObj = cloneDeep(prev);
+                    dataObj.data[index].conditionOption = category;
+                    if (category?.valueType === MetadataValueType.STRING) {
+                      dataObj.data[index].conditionValue = [];
+                    } else {
+                      dataObj.data[index].conditionValue = '';
+                    }
+                    return dataObj;
+                  });
+                }}
+                changeConditionOperator={(index, operator) => {
+                  setSegmentationOptionData((prev) => {
+                    const dataObj = cloneDeep(prev);
+                    dataObj.data[index].conditionOperator = operator;
+                    return dataObj;
+                  });
+                }}
+                changeConditionValue={(index, value) => {
+                  setSegmentationOptionData((prev) => {
+                    const dataObj = cloneDeep(prev);
+                    dataObj.data[index].conditionValue = value;
+                    return dataObj;
+                  });
+                }}
+                changeCurRelationShip={(relation) => {
+                  setSegmentationOptionData((prev) => {
+                    const dataObj = cloneDeep(prev);
+                    dataObj.conditionRelationShip = relation;
+                    return dataObj;
+                  });
+                }}
+              />
+              <br />
+              <Button variant="link" className="cs-analytics-select-group">
+                {t('analytics:labels.attributeGrouping')}
+              </Button>
+              <div className="cs-analytics-select-group-item">
+                <div className="cs-analytics-dropdown">
+                  <div className="cs-analytics-parameter">
+                    <div className="flex-1">
+                      <EventItem
+                        placeholder={
+                          t('analytics:labels.attributeSelectPlaceholder') ?? ''
+                        }
+                        categoryOption={groupOption}
+                        changeCurCategoryOption={(item) => {
+                          setGroupOption(item);
+                        }}
+                        categories={groupOptions}
+                      />
+                    </div>
+                  </div>
+                </div>
               </div>
             </SpaceBetween>
           </ColumnLayout>
@@ -747,6 +854,21 @@ const AnalyticsFunnel: React.FC = () => {
           </Button>
         </Container>
         <Container>
+          <div className="cs-analytics-data-range">
+            <ExploreDateRangePicker
+              dateRangeValue={dateRangeValue}
+              setDateRangeValue={setDateRangeValue}
+              timeGranularity={timeGranularity}
+              setTimeGranularity={setTimeGranularity}
+              onChange={clickPreview}
+            />
+            <SegmentedControl
+              selectedId={chartType}
+              onChange={({ detail }) => setChartType(detail.selectedId)}
+              options={chartTypeOptions}
+            />
+          </div>
+          <br />
           {loadingChart ? (
             <Loading />
           ) : (

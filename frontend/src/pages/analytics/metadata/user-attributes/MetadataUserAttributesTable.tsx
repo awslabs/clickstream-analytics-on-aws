@@ -249,8 +249,8 @@ const MetadataUserAttributesTable: React.FC<
       tableFilteringProperties={FILTERING_PROPERTIES}
       tableI18nStrings={{
         loadingText:
-          t('analytics:metadata.userAttribute.tableLoading') || 'Loading',
-        emptyText: t('analytics:metadata.userAttribute.tableEmpty'),
+          t('analytics:labels.tableLoading') || 'Loading',
+        emptyText: t('analytics:labels.tableEmpty'),
         headerTitle: t('analytics:metadata.userAttribute.title'),
         headerDescription: t('analytics:metadata.userAttribute.description'),
         headerRefreshButtonText: t('common:button.refreshMetadata'),
