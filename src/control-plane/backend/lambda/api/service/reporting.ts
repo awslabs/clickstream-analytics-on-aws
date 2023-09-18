@@ -41,7 +41,7 @@ import {
   getTempResourceName,
   TEMP_RESOURCE_NAME_PREFIX,
 } from './quicksight/reporting-utils';
-import { buildEventAnalysisView, buildEventPathAnalysisView, buildFunnelDataSql, buildFunnelView, buildNodePathAnalysisView, buildRetentionAnalysisView } from './quicksight/sql-builder';
+import { buildEventAnalysisView, buildEventPathAnalysisView, buildFunnelTableView, buildFunnelView, buildNodePathAnalysisView, buildRetentionAnalysisView } from './quicksight/sql-builder';
 import { awsAccountId } from '../common/constants';
 import { ExplorePathNodeType, ExploreRequestAction, ExploreTimeScopeType, ExploreVisualName } from '../common/explore-types';
 import { logger } from '../common/powertools';
@@ -82,7 +82,7 @@ export class ReportingServ {
       logger.debug(`funnel sql: ${sql}`);
 
       const tableVisualViewName = viewName + '_tab';
-      const sqlTable = buildFunnelDataSql({
+      const sqlTable = buildFunnelTableView({
         schemaName: query.appId,
         computeMethod: query.computeMethod,
         specifyJoinColumn: query.specifyJoinColumn,
