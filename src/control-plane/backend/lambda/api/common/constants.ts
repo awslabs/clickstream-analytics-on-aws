@@ -11,10 +11,9 @@
  *  and limitations under the License.
  */
 
-// Get the DynamoDB table name from environment variables
+const QUICKSIGHT_EMBED_NO_REPLY_EMAIL = 'quicksight-embedding-no-reply@amazon.com';
 const clickStreamTableName = process.env.CLICK_STREAM_TABLE_NAME;
 const dictionaryTableName = process.env.DICTIONARY_TABLE_NAME;
-const userTableName = process.env.USER_TABLE_NAME;
 const analyticsMetadataTable = process.env.ANALYTICS_METADATA_TABLE_NAME;
 const stackActionStateMachineArn = process.env.STACK_ACTION_SATE_MACHINE;
 const stackWorkflowStateMachineArn = process.env.STACK_WORKFLOW_SATE_MACHINE;
@@ -63,12 +62,13 @@ const PIPELINE_SUPPORTED_REGIONS = [
   'cn-northwest-1',
 ];
 
-const QUICKSIGHT_EMBED_NO_REPLY_EMAIL = 'quicksight-embedding-no-reply@amazon.com';
+const DEFAULT_ROLE_JSON_PATH = '$.payload.cognito:groups';
+const DEFAULT_OPERATOR_ROLE_NAMES = 'ClickstreamOperator';
+const DEFAULT_ANALYST_ROLE_NAMES = 'ClickstreamAnalyst';
 
 export {
   clickStreamTableName,
   dictionaryTableName,
-  userTableName,
   analyticsMetadataTable,
   stackActionStateMachineArn,
   stackWorkflowStateMachineArn,
@@ -89,4 +89,7 @@ export {
   PIPELINE_SUPPORTED_REGIONS,
   ALLOW_UPLOADED_FILE_TYPES,
   QUICKSIGHT_EMBED_NO_REPLY_EMAIL,
+  DEFAULT_ROLE_JSON_PATH,
+  DEFAULT_OPERATOR_ROLE_NAMES,
+  DEFAULT_ANALYST_ROLE_NAMES,
 };

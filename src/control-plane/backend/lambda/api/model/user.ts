@@ -14,7 +14,9 @@
 import { IUserRole } from '../common/types';
 
 export interface IUser {
-  readonly uid: string;
+  readonly id: string;
+  readonly type: string;
+  readonly prefix: string;
 
   readonly name?: string;
   readonly role: IUserRole;
@@ -23,4 +25,10 @@ export interface IUser {
   readonly updateAt: number;
   readonly operator: string;
   readonly deleted: boolean;
+}
+
+export interface IUserSettings {
+  readonly roleJsonPath: string;
+  readonly operatorRoleNames: string;
+  readonly analystRoleNames: string;
 }

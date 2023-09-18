@@ -37,7 +37,9 @@ export class AddAdminUser extends Construct {
       parameters: {
         TableName: props.userTable.tableName,
         Item: {
-          uid: { S: props.uid },
+          id: { S: props.uid },
+          type: { S: 'USER' },
+          prefix: { S: 'USER' },
           role: { S: 'Admin' },
           createAt: { N: Date.now().toString() },
           updateAt: { N: Date.now().toString() },
@@ -55,17 +57,20 @@ export class AddAdminUser extends Construct {
       parameters: {
         TableName: props.userTable.tableName,
         Key: {
-          uid: { S: props.uid },
+          id: { S: props.uid },
+          type: { S: 'USER' },
         },
-        UpdateExpression: 'SET #role = :role, #createAt = :createAt, #updateAt = :updateAt, #operator = :operator, #deleted = :deleted',
+        UpdateExpression: 'SET #role = :role, #prefix = :prefix, #createAt = :createAt, #updateAt = :updateAt, #operator = :operator, #deleted = :deleted',
         ExpressionAttributeNames: {
           '#role': 'role',
           '#createAt': 'createAt',
           '#updateAt': 'updateAt',
           '#operator': 'operator',
           '#deleted': 'deleted',
+          '#prefix': 'prefix',
         },
         ExpressionAttributeValues: {
+          ':prefix': { S: 'USER' },
           ':role': { S: 'Admin' },
           ':createAt': { N: Date.now().toString() },
           ':updateAt': { N: Date.now().toString() },
@@ -82,7 +87,8 @@ export class AddAdminUser extends Construct {
       parameters: {
         TableName: props.userTable.tableName,
         Key: {
-          uid: { S: props.uid },
+          id: { S: props.uid },
+          type: { S: 'USER' },
         },
         ConditionExpression: 'attribute_exists(uid)',
       },

@@ -21,9 +21,9 @@ import {
   QueryCommandInput,
 } from '@aws-sdk/lib-dynamodb';
 import { marshall } from '@aws-sdk/util-dynamodb';
-import { clickStreamTableName, dictionaryTableName, prefixTimeGSIName, userTableName } from '../../common/constants';
+import { clickStreamTableName, dictionaryTableName, prefixTimeGSIName } from '../../common/constants';
 import { docClient, marshallOptions, query, scan } from '../../common/dynamodb-client';
-import { IUserRole, KeyVal, PipelineStatusType } from '../../common/types';
+import { KeyVal, PipelineStatusType } from '../../common/types';
 import { isEmpty } from '../../common/utils';
 import { IApplication } from '../../model/application';
 import { IDictionary } from '../../model/dictionary';
@@ -766,6 +766,24 @@ export class DynamoDbStore implements ClickStreamStore {
     return result.Item as IDictionary;
   };
 
+  public async updateDictionary(dictionary: IDictionary): Promise<void> {
+    const params: UpdateCommand = new UpdateCommand({
+      TableName: dictionaryTableName,
+      Key: {
+        name: dictionary.name,
+      },
+      UpdateExpression: 'SET #data =:data',
+      ExpressionAttributeNames: {
+        '#data': 'data',
+      },
+      ExpressionAttributeValues: {
+        ':data': dictionary.data,
+      },
+      ReturnValues: 'ALL_NEW',
+    });
+    await docClient.send(params);
+  };
+
   public async listDictionary(): Promise<IDictionary[]> {
     const input: ScanCommandInput = {
       TableName: dictionaryTableName,
@@ -1006,11 +1024,13 @@ export class DynamoDbStore implements ClickStreamStore {
 
   public async addUser(user: IUser): Promise<string> {
     const params: PutCommand = new PutCommand({
-      TableName: userTableName,
+      TableName: clickStreamTableName,
       Item: {
-        uid: user.uid,
+        id: user.id,
+        type: 'USER',
+        prefix: 'USER',
         name: user.name ?? '',
-        role: user.role ?? IUserRole.OPERATOR,
+        role: user.role,
         createAt: Date.now(),
         updateAt: Date.now(),
         operator: user.operator?? '',
@@ -1018,14 +1038,15 @@ export class DynamoDbStore implements ClickStreamStore {
       },
     });
     await docClient.send(params);
-    return user.uid;
+    return user.id;
   };
 
-  public async getUser(uid: string): Promise<IUser | undefined> {
+  public async getUser(id: string): Promise<IUser | undefined> {
     const params: GetCommand = new GetCommand({
-      TableName: userTableName,
+      TableName: clickStreamTableName,
       Key: {
-        uid: uid,
+        id: id,
+        type: 'USER',
       },
     });
     const result: GetCommandOutput = await docClient.send(params);
@@ -1055,9 +1076,10 @@ export class DynamoDbStore implements ClickStreamStore {
       expressionAttributeNames['#role'] = 'role';
     }
     const params: UpdateCommand = new UpdateCommand({
-      TableName: userTableName,
+      TableName: clickStreamTableName,
       Key: {
-        uid: user.uid,
+        id: user.id,
+        type: 'USER',
       },
       // Define expressions for the new or updated attributes
       UpdateExpression: updateExpression,
@@ -1069,22 +1091,29 @@ export class DynamoDbStore implements ClickStreamStore {
   };
 
   public async listUser(): Promise<IUser[]> {
-    const input: ScanCommandInput = {
-      TableName: userTableName,
+    const input: QueryCommandInput = {
+      TableName: clickStreamTableName,
+      IndexName: prefixTimeGSIName,
+      KeyConditionExpression: '#prefix= :prefix',
       FilterExpression: 'deleted = :d',
+      ExpressionAttributeNames: {
+        '#prefix': 'prefix',
+      },
       ExpressionAttributeValues: {
         ':d': false,
+        ':prefix': 'USER',
       },
     };
-    const records = await scan(input);
+    const records = await query(input);
     return records as IUser[];
   };
 
-  public async deleteUser(uid: string, operator: string): Promise<void> {
+  public async deleteUser(id: string, operator: string): Promise<void> {
     const params: UpdateCommand = new UpdateCommand({
-      TableName: userTableName,
+      TableName: clickStreamTableName,
       Key: {
-        uid: uid,
+        id: id,
+        type: 'USER',
       },
       // Define expressions for the new or updated attributes
       UpdateExpression: 'SET deleted= :d, #operator= :operator',

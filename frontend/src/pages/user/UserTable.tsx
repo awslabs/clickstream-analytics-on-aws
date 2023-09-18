@@ -168,8 +168,8 @@ const UserTable: React.FC<UserTableProps> = (props: UserTableProps) => {
       <Table
         {...tableCollectionProps}
         variant="full-page"
-        stickyHeader={true}
         resizableColumns={true}
+        selectionType="single"
         loading={loadingData}
         items={itemsSnap.length > 0 ? itemsSnap : items}
         loadingText={tableI18nStrings.loadingText}
@@ -186,7 +186,6 @@ const UserTable: React.FC<UserTableProps> = (props: UserTableProps) => {
         }
         header={
           <UserTableHeader
-            title={tableI18nStrings.headerTitle}
             selectedItemsCount={collectionProps.selectedItems?.length ?? 0}
             counter={
               !loadingData &&
@@ -195,6 +194,14 @@ const UserTable: React.FC<UserTableProps> = (props: UserTableProps) => {
                 ? `(${collectionProps.selectedItems.length}/${data.length})`
                 : `(${data.length})`
             }
+            user={collectionProps.selectedItems?.[0]}
+            refreshPage={() => {
+              collectionProps.selectedItems = [];
+              fetchData();
+            }}
+            setSelectItemEmpty={() => {
+              collectionProps.selectedItems = [];
+            }}
           />
         }
         filter={

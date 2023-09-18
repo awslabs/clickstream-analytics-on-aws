@@ -8,13 +8,32 @@
     "tableEmpty": "No users",
     "tableLoading": "Loading",
     "filteringAriaLabel": "Find users",
-    "filteringPlaceholder": "Find users"
+    "filteringPlaceholder": "Find users",
+    "createTitle": "Create user",
+    "createUserEmail": "Email",
+    "createUserEmailPlaceholder": "example@example.com",
+    "createUserName": "User name",
+    "createUserNamePlaceholder": "Input user name",
+    "createUserRole": "Role",
+    "deleteTitle": "Delete User",
+    "deleteTip1": "Are you sure you want to delete the user ",
+    "deleteTip2": " delete the user may result in the user being unable to log in.",
+    "userSetting": "User Setting",
+    "settingUserRoleJsonPath": "User Role Json Path",
+    "settingUserRoleJsonPathDesc": "Obtain user role or group information from id_token, for example: $.realm_access.roles",
+    "settingUserOperatorRoleNames": "Operator Role Names",
+    "settingUserOperatorRoleNamesDesc": "The roles in OIDC are mapped to operators in Click stream, with multiple role names separated by commas, for example: operator,others",
+    "settingUserAnalystRoleNames": "Analyst Role Names",
+    "settingUserAnalystRoleNamesDesc": "The roles in OIDC are mapped to analyst in Click stream, with multiple role names separated by commas, for example: analyst,others"
   },
   "options": {
     "admin": "Administrator",
     "operator": "Operator",
     "analyst": "Analyst",
     "noIdentity": "NoIdentity"
+  },
+  "valid": {
+    "userEmailEmptyError": "Email can not be empty"
   },
   "emptyData": "No Data"
 }

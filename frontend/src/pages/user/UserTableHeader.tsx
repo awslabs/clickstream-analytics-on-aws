@@ -11,35 +11,132 @@
  *  and limitations under the License.
  */
 import {
+  Box,
+  Button,
   Header,
   HeaderProps,
+  Modal,
   SpaceBetween,
 } from '@cloudscape-design/components';
-import React from 'react';
+import { deleteUser } from 'apis/user';
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import CreateUser from './CreateUser';
+import SettingUser from './SettingUser';
 
 interface UserTableHeaderProps extends HeaderProps {
-  title?: string;
-  extraActions?: React.ReactNode;
   selectedItemsCount: number;
+  user?: IUser;
+  refreshPage: () => void;
+  setSelectItemEmpty: () => void;
 }
 
 export function UserTableHeader({
-  title = '',
-  extraActions = null,
   selectedItemsCount,
   ...props
 }: UserTableHeaderProps) {
-  return (
-    <Header
-      variant="awsui-h1-sticky"
-      actions={
-        <SpaceBetween size="xs" direction="horizontal">
-          {extraActions}
-        </SpaceBetween>
+  const { t } = useTranslation();
+  const { user, refreshPage, setSelectItemEmpty } = props;
+  const [loadingDelete, setLoadingDelete] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showSettingModal, setShowSettingModal] = useState(false);
+
+  const confirmDeleteUser = async () => {
+    setLoadingDelete(true);
+    try {
+      const resData: ApiResponse<null> = await deleteUser(user?.id ?? '');
+      if (resData.success) {
+        refreshPage();
+        setLoadingDelete(false);
+        setShowDeleteModal(false);
+        setSelectItemEmpty();
       }
-      {...props}
-    >
-      {title}
-    </Header>
+    } catch (error) {
+      setLoadingDelete(false);
+    }
+  };
+  return (
+    <div>
+      <CreateUser
+        openModel={showCreateModal}
+        closeModel={() => {
+          setShowCreateModal(false);
+        }}
+        refreshPage={refreshPage}
+      />
+      <SettingUser
+        openModel={showSettingModal}
+        closeModel={() => {
+          setShowSettingModal(false);
+        }}
+      />
+      <Modal
+        onDismiss={() => setShowDeleteModal(false)}
+        visible={showDeleteModal}
+        footer={
+          <Box float="right">
+            <SpaceBetween direction="horizontal" size="xs">
+              <Button
+                onClick={() => {
+                  setShowDeleteModal(false);
+                }}
+                variant="link"
+              >
+                {t('button.cancel')}
+              </Button>
+              <Button
+                variant="primary"
+                onClick={() => {
+                  confirmDeleteUser();
+                }}
+                loading={loadingDelete}
+              >
+                {t('button.confirm')}
+              </Button>
+            </SpaceBetween>
+          </Box>
+        }
+        header={t('user:labels.deleteTitle')}
+      >
+        {t('user:labels.deleteTip1')} <b>{user?.id}</b>,
+        {t('user:labels.deleteTip2')}
+      </Modal>
+      <Header
+        variant="awsui-h1-sticky"
+        actions={
+          <SpaceBetween size="xs" direction="horizontal">
+            <Button
+              disabled={!user?.id}
+              onClick={() => {
+                setShowDeleteModal(true);
+              }}
+            >
+              {t('button.delete')}
+            </Button>
+            <Button
+              onClick={() => {
+                setShowSettingModal(true);
+              }}
+              iconName="settings"
+            >
+              {t('button.settings')}
+            </Button>
+            <Button
+              variant="primary"
+              iconName="add-plus"
+              onClick={() => {
+                setShowCreateModal(true);
+              }}
+            >
+              {t('button.create')}
+            </Button>
+          </SpaceBetween>
+        }
+        {...props}
+      >
+        {t('user:labels.title')}
+      </Header>
+    </div>
   );
 }

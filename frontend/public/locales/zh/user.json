@@ -8,13 +8,32 @@
     "tableEmpty": "没有用户",
     "tableLoading": "加载中",
     "filteringAriaLabel": "查找用户",
-    "filteringPlaceholder": "查找用户"
+    "filteringPlaceholder": "查找用户",
+    "createTitle": "创建用户",
+    "createUserEmail": "Email",
+    "createUserEmailPlaceholder": "example@example.com",
+    "createUserName": "用户名",
+    "createUserNamePlaceholder": "请输入用户名",
+    "createUserRole": "角色",
+    "deleteTitle": "删除用户",
+    "deleteTip1": "是否确实要删除该用户 ",
+    "deleteTip2": " 删除用户可能导致用户无法登录。",
+    "userSetting": "用户设置",
+    "settingUserRoleJsonPath": "获取用户角色的JsonPath",
+    "settingUserRoleJsonPathDesc": "从id_token中获取用户角色或者组信息的JsonPath，例如：$.realm_access.roles",
+    "settingUserOperatorRoleNames": "操作员角色名称",
+    "settingUserOperatorRoleNamesDesc": "OIDC中的角色映射为Click stream中的操作员，多个角色名称用逗号分隔，例如：operator,operator2",
+    "settingUserAnalystRoleNames": "分析员角色名称",
+    "settingUserAnalystRoleNamesDesc": "OIDC中的角色映射为Click stream中的分析员，多个角色名称用逗号分隔，例如：analyst,analyst2"
   },
   "options": {
     "admin": "管理员",
     "operator": "IT运维",
     "analyst": "分析师",
     "noIdentity": "无身份"
+  },
+  "valid": {
+    "userEmailEmptyError": "电子邮件不能为空"
   },
   "emptyData": "没有数据"
 }

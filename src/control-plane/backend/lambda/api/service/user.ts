@@ -11,9 +11,11 @@
  *  and limitations under the License.
  */
 
-import { ApiFail, ApiSuccess, IUserRole } from '../common/types';
-import { getRoleFromToken, getTokenFromRequest } from '../common/utils';
-import { IUser } from '../model/user';
+import { DEFAULT_ANALYST_ROLE_NAMES, DEFAULT_OPERATOR_ROLE_NAMES, DEFAULT_ROLE_JSON_PATH } from '../common/constants';
+import { ApiFail, ApiSuccess } from '../common/types';
+import { getRoleFromToken, getTokenFromRequest, tryToJson } from '../common/utils';
+import { IDictionary } from '../model/dictionary';
+import { IUser, IUserSettings } from '../model/user';
 import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
 
@@ -36,8 +38,13 @@ export class UserServ {
     try {
       req.body.operator = res.get('X-Click-Stream-Operator');
       const user: IUser = req.body;
-      const uid = await store.addUser(user);
-      return res.status(201).json(new ApiSuccess({ uid }, 'User created.'));
+      const ddbUser = await store.getUser(user.id);
+      console.log('ddbUser', ddbUser);
+      if (ddbUser) {
+        return res.status(400).json(new ApiFail('User already existed.'));
+      }
+      const id = await store.addUser(user);
+      return res.status(201).json(new ApiSuccess({ id }, 'User created.'));
     } catch (error) {
       next(error);
     }
@@ -45,33 +52,26 @@ export class UserServ {
 
   public async details(req: any, res: any, next: any) {
     try {
-      const { uid } = req.query;
-      const decodedToken = getTokenFromRequest(req);
-      const roleInToken = getRoleFromToken(decodedToken);
-      const ddbUser = await store.getUser(uid);
-      if (!ddbUser) {
-        const user: IUser = {
-          uid: uid,
+      const { id } = req.query;
+      const ddbUser = await store.getUser(id);
+      if (ddbUser) {
+        return res.json(new ApiSuccess(ddbUser));
+      } else {
+        const decodedToken = getTokenFromRequest(req);
+        const roleInToken = await getRoleFromToken(decodedToken);
+        const tokenUser: IUser = {
+          id: id,
+          type: 'USER',
+          prefix: 'USER',
+          name: id,
           role: roleInToken,
           createAt: Date.now(),
           updateAt: Date.now(),
-          operator: res.get('X-Click-Stream-Operator'),
+          operator: 'FromToken',
           deleted: false,
         };
-        await store.addUser(user);
-        return res.json(new ApiSuccess(user));
+        return res.json(new ApiSuccess(tokenUser));
       }
-      if (roleInToken === IUserRole.NO_IDENTITY) {
-        return res.json(new ApiSuccess(ddbUser));
-      } else if (ddbUser.role !== roleInToken) {
-        const newUser = {
-          ...ddbUser,
-          role: roleInToken,
-        };
-        await store.updateUser(newUser);
-        return res.json(new ApiSuccess(newUser));
-      }
-      return res.json(new ApiSuccess(ddbUser));
     } catch (error) {
       next(error);
     }
@@ -93,12 +93,47 @@ export class UserServ {
 
   public async delete(req: any, res: any, next: any) {
     try {
-      const { uid } = req.params;
+      const { id } = req.params;
       const operator = res.get('X-Click-Stream-Operator');
-      await store.deleteUser(uid, operator);
+      await store.deleteUser(id, operator);
       return res.status(200).json(new ApiSuccess(null, 'User deleted.'));
     } catch (error) {
       next(error);
     }
   };
+
+  public async getUserSettingsFromDDB() {
+    const userSettingsDic = await store.getDictionary('UserSettings');
+    if (!userSettingsDic) {
+      const defaultSettings = {
+        roleJsonPath: DEFAULT_ROLE_JSON_PATH,
+        operatorRoleNames: DEFAULT_OPERATOR_ROLE_NAMES,
+        analystRoleNames: DEFAULT_ANALYST_ROLE_NAMES,
+      } as IUserSettings;
+      return defaultSettings;
+    }
+    return tryToJson(userSettingsDic?.data) as IUserSettings;
+  }
+
+  public async getSettings(_req: any, res: any, next: any) {
+    try {
+      const userSettings = await this.getUserSettingsFromDDB();
+      return res.status(200).json(new ApiSuccess(userSettings));
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public async updateSettings(req: any, res: any, next: any) {
+    try {
+      const userSettings: IUserSettings = req.body as IUserSettings;
+      await store.updateDictionary(
+        { name: 'UserSettings', data: userSettings } as IDictionary,
+      );
+      return res.status(200).json(new ApiSuccess(null, 'User settings updated.'));
+    } catch (error) {
+      next(error);
+    }
+  };
+
 }

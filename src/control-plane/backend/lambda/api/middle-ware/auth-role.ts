@@ -15,7 +15,7 @@ import express from 'express';
 import { JwtPayload } from 'jsonwebtoken';
 import { logger } from '../common/powertools';
 import { ApiFail, IUserRole } from '../common/types';
-import { getTokenFromRequest, getUidFromTokenPayload } from '../common/utils';
+import { getRoleFromToken, getTokenFromRequest, getUidFromTokenPayload } from '../common/utils';
 import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
 
@@ -82,6 +82,8 @@ export async function authRole(req: express.Request, res: express.Response, next
     let userRole = IUserRole.NO_IDENTITY;
     if (user && user.role) {
       userRole = user.role;
+    } else {
+      userRole = await getRoleFromToken(token);
     }
 
     const requestKey = `${req.method} ${req.path}`;
