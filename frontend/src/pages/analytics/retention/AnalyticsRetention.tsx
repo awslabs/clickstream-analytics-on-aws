@@ -12,18 +12,14 @@
  */
 
 import {
-  AppLayout,
   Box,
   Button,
   ColumnLayout,
   Container,
-  ContentLayout,
   DateRangePickerProps,
   Header,
   Icon,
   Popover,
-  SegmentedControl,
-  SegmentedControlProps,
   SelectProps,
   SpaceBetween,
   Toggle,
@@ -49,7 +45,6 @@ import {
 import EventItem from 'components/eventselect/EventItem';
 import RetentionSelect from 'components/eventselect/RetentionSelect';
 import SegmentationFilter from 'components/eventselect/SegmentationFilter';
-import Navigation from 'components/layouts/Navigation';
 import { cloneDeep } from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -93,26 +88,6 @@ const AnalyticsRetention: React.FC = () => {
   const [userAttributes, setUserAttributes] = useState<
     IMetadataUserAttribute[]
   >([]);
-
-  const defaultChartTypeOption = 'line-chart';
-  const chartTypeOptions: SegmentedControlProps.Option[] = [
-    {
-      iconName: 'view-full',
-      iconAlt: 'line-chart',
-      id: 'line-chart',
-    },
-    {
-      iconName: 'view-horizontal',
-      iconAlt: 'bar-chart',
-      id: 'bar-chart',
-    },
-    {
-      iconName: 'view-vertical',
-      iconAlt: 'stack-chart',
-      id: 'stack-chart',
-    },
-  ];
-  const [chartType, setChartType] = useState(defaultChartTypeOption);
 
   const [eventOptionData, setEventOptionData] = useState<
     IRetentionAnalyticsItem[]

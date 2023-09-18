@@ -41,10 +41,8 @@ import {
   CategoryItemType,
   DEFAULT_CONDITION_DATA,
   DEFAULT_EVENT_ITEM,
-  IAnalyticsItem,
   IEventAnalyticsItem,
   INIT_SEGMENTATION_DATA,
-  MOCK_ATTRIBUTE_OPTION_LIST,
   SegmentationFilterDataType,
 } from 'components/eventselect/AnalyticsType';
 import EventItem from 'components/eventselect/EventItem';

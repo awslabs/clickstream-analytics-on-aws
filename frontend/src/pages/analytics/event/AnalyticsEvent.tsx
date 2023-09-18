@@ -12,7 +12,6 @@
  */
 
 import {
-  Box,
   Button,
   ColumnLayout,
   Container,

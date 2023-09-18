@@ -21,8 +21,6 @@ import {
   Icon,
   Input,
   Popover,
-  SegmentedControl,
-  SegmentedControlProps,
   Select,
   SelectProps,
   SpaceBetween,
@@ -96,26 +94,6 @@ const AnalyticsPath: React.FC = () => {
   const [userAttributes, setUserAttributes] = useState<
     IMetadataUserAttribute[]
   >([]);
-
-  const defaultChartTypeOption = 'line-chart';
-  const chartTypeOptions: SegmentedControlProps.Option[] = [
-    {
-      iconName: 'view-full',
-      iconAlt: 'line-chart',
-      id: 'line-chart',
-    },
-    {
-      iconName: 'view-horizontal',
-      iconAlt: 'bar-chart',
-      id: 'bar-chart',
-    },
-    {
-      iconName: 'view-vertical',
-      iconAlt: 'stack-chart',
-      id: 'stack-chart',
-    },
-  ];
-  const [chartType, setChartType] = useState(defaultChartTypeOption);
 
   const [nodes, setNodes] = useState<{
     pageTitles: IMetadataAttributeValue[];
