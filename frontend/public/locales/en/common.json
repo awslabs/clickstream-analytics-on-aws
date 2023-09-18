@@ -172,7 +172,7 @@
     "viewAlarms": "View Alarms",
     "refreshMetadata": "Refresh Metadata",
     "clearFilters": "Clear filters",
-    "preview": "Preview",
+    "preview": "Query",
     "createDashboard": "Create Dashboard",
     "deleteDashboard": "Delete Dashboard",
     "addEvent": "Add Event",

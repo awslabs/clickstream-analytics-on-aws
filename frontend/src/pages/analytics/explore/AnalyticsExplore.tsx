@@ -25,7 +25,10 @@ import CustomBreadCrumb from 'components/layouts/CustomBreadCrumb';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
+import AnalyticsEvent from '../event/AnalyticsEvent';
 import AnalyticsFunnel from '../funnel/AnalyticsFunnel';
+import AnalyticsPath from '../path/AnalyticsPath';
+import AnalyticsRetention from '../retention/AnalyticsRetention';
 
 const AnalyticsExplore: React.FC = () => {
   const { t } = useTranslation();
@@ -33,8 +36,8 @@ const AnalyticsExplore: React.FC = () => {
 
   const [selectedOption, setSelectedOption] =
     useState<SelectProps.Option | null>({
-      label: t('analytics:explore.funnelAnalysis') ?? '',
-      value: 'Funnel',
+      label: t('analytics:explore.eventAnalysis') ?? '',
+      value: 'Event',
     });
 
   const analyticsModelOptions: SelectProps.Options = [
@@ -97,7 +100,6 @@ const AnalyticsExplore: React.FC = () => {
                     >
                       <Select
                         selectedOption={selectedOption}
-                        placeholder="Select an option"
                         onChange={({ detail }) =>
                           setSelectedOption(detail.selectedOption)
                         }
@@ -110,7 +112,10 @@ const AnalyticsExplore: React.FC = () => {
                 </Header>
               }
             >
-              <AnalyticsFunnel />
+              {selectedOption?.value === 'Funnel' && <AnalyticsFunnel />}
+              {selectedOption?.value === 'Event' && <AnalyticsEvent />}
+              {selectedOption?.value === 'Path' && <AnalyticsPath />}
+              {selectedOption?.value === 'Retention' && <AnalyticsRetention />}
             </ContentLayout>
           }
           breadcrumbs={<CustomBreadCrumb breadcrumbItems={breadcrumbItems} />}

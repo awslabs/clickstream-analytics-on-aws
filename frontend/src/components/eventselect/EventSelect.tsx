@@ -58,7 +58,7 @@ interface EventsSelectProps {
   ) => void;
   changeCurCalcMethodOption?: (
     eventIndex: number,
-    calcMethod: IAnalyticsItem | null
+    calcMethod: SelectProps.Option | null
   ) => void;
   changeCurRelationShip?: (eventIndex: number, relation: ERelationShip) => void;
 }

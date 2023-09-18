@@ -14,11 +14,9 @@
 import { Select, SelectProps } from '@cloudscape-design/components';
 import classNames from 'classnames';
 import React, { useEffect, useRef, useState } from 'react';
-import {
-  CategoryItemType,
-  IAnalyticsItem,
-  MOCK_CALCULATION_OPTION_LIST,
-} from './AnalyticsType';
+import { useTranslation } from 'react-i18next';
+import { ExploreComputeMethod } from 'ts/explore-types';
+import { CategoryItemType, IAnalyticsItem } from './AnalyticsType';
 import DropDownContainer from './DropDownContainer';
 
 interface EventItemProps {
@@ -43,8 +41,21 @@ const EventItem: React.FC<EventItemProps> = (props: EventItemProps) => {
     changeCurCalcMethodOption,
     categories,
   } = props;
+  const { t } = useTranslation();
   const [showDropdown, setShowDropdown] = useState(false);
   const [clickedOutside, setClickedOutside] = useState(false);
+  const defaultComputeMethodOption: SelectProps.Option = {
+    value: ExploreComputeMethod.USER_ID_CNT,
+    label: t('analytics:options.userNumber') ?? '',
+  };
+
+  const computeMethodOptions: SelectProps.Options = [
+    defaultComputeMethodOption,
+    {
+      value: ExploreComputeMethod.EVENT_CNT,
+      label: t('analytics:options.eventNumber') ?? '',
+    },
+  ];
 
   function useOutsideAlerter(ref: any) {
     useEffect(() => {
@@ -95,12 +106,11 @@ const EventItem: React.FC<EventItemProps> = (props: EventItemProps) => {
         {isMultiSelect && (
           <div className="second-select-option">
             <Select
-              placeholder="Please select calculate method"
               selectedOption={calcMethodOption ?? null}
               onChange={(e) => {
                 changeCurCalcMethodOption?.(e.detail.selectedOption);
               }}
-              options={MOCK_CALCULATION_OPTION_LIST}
+              options={computeMethodOptions}
             />
           </div>
         )}

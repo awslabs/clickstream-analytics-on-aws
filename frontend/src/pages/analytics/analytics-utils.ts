@@ -32,6 +32,7 @@ import {
   OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN,
 } from 'ts/constant-ln';
 import {
+  ExploreComputeMethod,
   ExploreConversionIntervalType,
   ExplorePathSessionDef,
   ExploreRelativeTimeUnit,
@@ -189,7 +190,9 @@ export const getEventAndConditions = (
       const eventAndCondition: IEventAndCondition = {
         eventName: item.selectedEventOption?.value ?? '',
         conditions: conditions,
-        conditionOperator: 'and',
+        conditionOperator: item.conditionRelationShip,
+        method:
+          item.calculateMethodOption?.value ?? ExploreComputeMethod.USER_CNT,
       };
       eventAndConditions.push(eventAndCondition);
     }
@@ -270,6 +273,7 @@ export const getGlobalEventCondition = (
   const globalEventCondition: ISQLCondition = {
     conditions: conditions,
     conditionOperator: segmentationOptionData.conditionRelationShip,
+    method: ExploreComputeMethod.USER_CNT,
   };
   return globalEventCondition;
 };

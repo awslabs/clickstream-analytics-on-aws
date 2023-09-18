@@ -150,6 +150,7 @@ declare global {
   interface ISQLCondition {
     readonly conditions: ICondition[];
     readonly conditionOperator: 'and' | 'or';
+    readonly method: ExploreComputeMethod;
   }
 
   interface IDashboardCreateParameters {

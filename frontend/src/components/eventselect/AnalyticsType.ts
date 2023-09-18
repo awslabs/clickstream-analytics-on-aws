@@ -180,8 +180,3 @@ export const MOCK_ATTRIBUTE_OPTION_LIST: CategoryItemType[] = [
     ],
   },
 ];
-
-export const MOCK_CALCULATION_OPTION_LIST = [
-  { label: '总次数', value: 'totalCount' },
-  { label: '总人数', value: 'totalUser' },
-];
