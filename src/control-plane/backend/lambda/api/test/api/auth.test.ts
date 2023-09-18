@@ -193,6 +193,18 @@ describe('Validate role middleware test', () => {
     expect(ddbMock).toHaveReceivedCommandTimes(UpdateCommand, 0);
   });
 
+  it('User role is analyst in DDB and operator role map from token.', async () => {
+    userMock(ddbMock, 'fake@example.com', IUserRole.ANALYST, true);
+    const res = await request(app)
+      .get('/api/user/details?id=fake@example.com')
+      .set(amznRequestContextHeader, context);
+    expect(res.statusCode).toBe(200);
+    expect(res.body.data.role).toEqual(IUserRole.ANALYST);
+    expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 2);
+    expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 0);
+    expect(ddbMock).toHaveReceivedCommandTimes(UpdateCommand, 0);
+  });
+
   it('User in DDB and group in token.', async () => {
     userMock(ddbMock, 'fake@example.com', IUserRole.ADMIN, true);
     const res = await request(app)

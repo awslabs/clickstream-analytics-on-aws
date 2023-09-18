@@ -37,11 +37,17 @@ const CreateUser: React.FC<CreateUserProps> = (props: CreateUserProps) => {
   const { openModel, closeModel, refreshPage } = props;
   const [loadingCreate, setLoadingCreate] = useState(false);
   const [visible, setVisible] = useState(openModel);
-  const defaultUser = {
+  const defaultUser: IUser = {
     id: '',
+    type: 'USER',
+    prefix: 'USER',
     name: '',
     role: IUserRole.NO_IDENTITY,
-  } as IUser;
+    createAt: 0,
+    updateAt: 0,
+    operator: '',
+    deleted: false,
+  };
   const [curUser, setCurUser] = useState<IUser>(defaultUser);
 
   const [userEmailRequiredError, setUserEmailRequiredError] = useState(false);

@@ -195,7 +195,7 @@ const UserTable: React.FC<UserTableProps> = (props: UserTableProps) => {
                 : `(${data.length})`
             }
             user={collectionProps.selectedItems?.[0]}
-            refreshPage={function (): void {
+            refreshPage={() => {
               collectionProps.selectedItems = [];
               fetchData();
             }}
