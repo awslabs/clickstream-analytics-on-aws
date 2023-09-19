@@ -24,7 +24,7 @@ dependencies {
 }
 ```
 
-您可以将SDK同步为最新版本：[![Maven Central](https://img.shields.io/maven-central/v/software.aws.solution/clickstream.svg)](https://central.sonatype.com/artifact/software.aws.solution/clickstream/versions)。
+您可以将SDK同步为最新版本：[![Maven Central](https://img.shields.io/maven-central/v/software.aws.solution/clickstream.svg)](https://central.sonatype.com/artifact/software.aws.solution/clickstream/versions)
 
 ### 2. 配置参数
 
