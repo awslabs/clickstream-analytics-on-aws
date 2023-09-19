@@ -239,13 +239,29 @@ describe('Project test', () => {
     });
   });
   it('Get project list', async () => {
-    ddbMock.on(QueryCommand).resolves({
+    ddbMock.on(QueryCommand).resolvesOnce({
       Items: [
-        { name: 'Project-01' },
-        { name: 'Project-02' },
-        { name: 'Project-03' },
-        { name: 'Project-04' },
-        { name: 'Project-05' },
+        { name: 'Project-01', id: '1' },
+        { name: 'Project-02', id: '2' },
+        { name: 'Project-03', id: '3' },
+        { name: 'Project-04', id: '4' },
+        { name: 'Project-05', id: '5' },
+      ],
+    }).resolvesOnce({
+      Items: [
+        { pipelineId: 'pipeline-01', projectId: '1' },
+        { pipelineId: 'pipeline-02', projectId: '2' },
+        { pipelineId: 'pipeline-03', projectId: '3' },
+        { pipelineId: 'pipeline-04', projectId: '4' },
+        { pipelineId: 'pipeline-05', projectId: '5' },
+      ],
+    }).resolvesOnce({
+      Items: [
+        { name: 'App-01', projectId: '1' },
+        { name: 'App-02', projectId: '2' },
+        { name: 'App-03', projectId: '3' },
+        { name: 'App-04', projectId: '4' },
+        { name: 'App-05', projectId: '5' },
       ],
     });
     let res = await request(app)
@@ -257,11 +273,11 @@ describe('Project test', () => {
       message: '',
       data: {
         items: [
-          { name: 'Project-01' },
-          { name: 'Project-02' },
-          { name: 'Project-03' },
-          { name: 'Project-04' },
-          { name: 'Project-05' },
+          { name: 'Project-01', pipelineId: 'pipeline-01', applications: [{ name: 'App-01', projectId: '1' }], id: '1' },
+          { name: 'Project-02', pipelineId: 'pipeline-02', applications: [{ name: 'App-02', projectId: '2' }], id: '2' },
+          { name: 'Project-03', pipelineId: 'pipeline-03', applications: [{ name: 'App-03', projectId: '3' }], id: '3' },
+          { name: 'Project-04', pipelineId: 'pipeline-04', applications: [{ name: 'App-04', projectId: '4' }], id: '4' },
+          { name: 'Project-05', pipelineId: 'pipeline-05', applications: [{ name: 'App-05', projectId: '5' }], id: '5' },
         ],
         totalCount: 5,
       },
@@ -281,13 +297,29 @@ describe('Project test', () => {
     });
   });
   it('Get project list with page', async () => {
-    ddbMock.on(QueryCommand).resolves({
+    ddbMock.on(QueryCommand).resolvesOnce({
       Items: [
-        { name: 'Project-01' },
-        { name: 'Project-02' },
-        { name: 'Project-03' },
-        { name: 'Project-04' },
-        { name: 'Project-05' },
+        { name: 'Project-01', id: '1' },
+        { name: 'Project-02', id: '2' },
+        { name: 'Project-03', id: '3' },
+        { name: 'Project-04', id: '4' },
+        { name: 'Project-05', id: '5' },
+      ],
+    }).resolvesOnce({
+      Items: [
+        { pipelineId: 'pipeline-01', projectId: '1' },
+        { pipelineId: 'pipeline-02', projectId: '2' },
+        { pipelineId: 'pipeline-03', projectId: '3' },
+        { pipelineId: 'pipeline-04', projectId: '4' },
+        { pipelineId: 'pipeline-05', projectId: '5' },
+      ],
+    }).resolvesOnce({
+      Items: [
+        { name: 'App-01', projectId: '1' },
+        { name: 'App-02', projectId: '2' },
+        { name: 'App-03', projectId: '3' },
+        { name: 'App-04', projectId: '4' },
+        { name: 'App-05', projectId: '5' },
       ],
     });
     const res = await request(app)
@@ -299,8 +331,8 @@ describe('Project test', () => {
       message: '',
       data: {
         items: [
-          { name: 'Project-03' },
-          { name: 'Project-04' },
+          { name: 'Project-03', pipelineId: 'pipeline-03', applications: [{ name: 'App-03', projectId: '3' }], id: '3' },
+          { name: 'Project-04', pipelineId: 'pipeline-04', applications: [{ name: 'App-04', projectId: '4' }], id: '4' },
         ],
         totalCount: 5,
       },

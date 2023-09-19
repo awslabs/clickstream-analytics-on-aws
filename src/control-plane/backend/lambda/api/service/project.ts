@@ -229,7 +229,7 @@ export class ProjectServ {
       const { order, pageNumber, pageSize } = req.query;
       const projects = await store.listProjects(order);
       const pipelines = await store.listPipeline('', 'latest', 'asc');
-      const apps = await store.listApplication('', 'asc');
+      const apps = await store.listAllApplication();
       for (let project of projects) {
         const pipeline = pipelines.find((item: IPipeline) => item.projectId === project.id);
         if (pipeline) {
