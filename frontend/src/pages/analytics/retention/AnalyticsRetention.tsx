@@ -124,8 +124,8 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
   const [dateRangeValue, setDateRangeValue] =
     React.useState<DateRangePickerProps.Value>({
       type: 'relative',
-      amount: 7,
-      unit: 'day',
+      amount: 1,
+      unit: 'month',
     });
 
   const [timeGranularity, setTimeGranularity] =
@@ -147,8 +147,8 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
     });
     setDateRangeValue({
       type: 'relative',
-      amount: 7,
-      unit: 'day',
+      amount: 1,
+      unit: 'month',
     });
     setExploreEmbedUrl('');
     setTimeGranularity({
@@ -189,7 +189,7 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
       pipelineId: pipeline.pipelineId,
       appId: appId ?? '',
       sheetName: `retention_sheet_${eventId}`,
-      viewName: `event_view_${eventId}`,
+      viewName: `retention_view_${eventId}`,
       dashboardCreateParameters: parameters,
       computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: false,

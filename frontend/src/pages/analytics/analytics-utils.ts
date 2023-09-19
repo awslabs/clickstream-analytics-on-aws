@@ -189,8 +189,10 @@ export const getEventAndConditions = (
 
       const eventAndCondition: IEventAndCondition = {
         eventName: item.selectedEventOption?.value ?? '',
-        conditions: conditions,
-        conditionOperator: item.conditionRelationShip,
+        sqlCondition: {
+          conditions: conditions,
+          conditionOperator: item.conditionRelationShip,
+        },
         method:
           item.calculateMethodOption?.value ?? ExploreComputeMethod.USER_ID_CNT,
       };
@@ -238,15 +240,17 @@ export const getPairEventAndConditions = (
       const pairEventAndCondition: IPairEventAndCondition = {
         startEvent: {
           eventName: item.startEventOption?.value ?? '',
-          conditions: startConditions,
-          conditionOperator: item.startConditionRelationShip,
-          method: ExploreComputeMethod.USER_ID_CNT,
+          sqlCondition: {
+            conditions: startConditions,
+            conditionOperator: item.startConditionRelationShip,
+          },
         },
         backEvent: {
           eventName: item.revisitEventOption?.value ?? '',
-          conditions: revisitConditions,
-          conditionOperator: item.revisitConditionRelationShip,
-          method: ExploreComputeMethod.USER_ID_CNT,
+          sqlCondition: {
+            conditions: revisitConditions,
+            conditionOperator: item.revisitConditionRelationShip,
+          },
         },
       };
       pairEventAndConditions.push(pairEventAndCondition);

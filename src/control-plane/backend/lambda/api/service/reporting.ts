@@ -457,6 +457,7 @@ export class ReportingService {
         groupColumn: query.groupColumn,
         pairEventAndConditions: query.pairEventAndConditions,
       });
+      console.log(`retention analysis sql: ${sql}`);
       logger.debug(`retention analysis sql: ${sql}`);
 
       const datasetPropsArray: DataSetProps[] = [];

@@ -141,11 +141,23 @@ declare global {
     readonly dataType: MetadataValueType;
   }
 
+  interface IRetentionJoinColumn {
+    readonly category:
+      | 'user'
+      | 'event'
+      | 'device'
+      | 'geo'
+      | 'app_info'
+      | 'traffic_source'
+      | 'other';
+    readonly property: string;
+  }
+
   interface IEventAndCondition {
     readonly eventName: string;
-    readonly conditions?: ICondition[];
-    readonly conditionOperator: 'and' | 'or';
-    readonly method: ExploreComputeMethod;
+    readonly sqlCondition?: ISQLCondition;
+    readonly retentionJoinColumn?: IRetentionJoinColumn;
+    readonly method?: ExploreComputeMethod;
   }
 
   interface ISQLCondition {
