@@ -14,7 +14,7 @@ Clickstream Android SDK supports Android 4.1 (API level 16) and later.
 
 ### 1. Include the SDK
 
-Add the following dependency to your `app` module's `build.gradle` file.
+Add the Clickstream SDK dependency to your `app` module's `build.gradle` file, for example:
 
 ```groovy
 dependencies {
@@ -22,7 +22,7 @@ dependencies {
 }
 ```
 
-Next, synchronize your project with the latest version: [![Maven Central](https://img.shields.io/maven-central/v/software.aws.solution/clickstream.svg)](https://search.maven.org/artifact/software.aws.solution/clickstream) 
+You can synchronize your project with the latest version: [![Maven Central](https://img.shields.io/maven-central/v/software.aws.solution/clickstream.svg)](https://central.sonatype.com/artifact/software.aws.solution/clickstream/versions) 
 
 ### 2. Configure parameters
 
