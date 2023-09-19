@@ -28,6 +28,7 @@ import {
   Alert,
   AppLayout,
   Button,
+  ColumnLayout,
   Container,
   ContentLayout,
   DateRangePicker,
@@ -36,6 +37,7 @@ import {
   Link,
   Popover,
   SpaceBetween,
+  Toggle,
 } from '@cloudscape-design/components';
 import AnalyticsNavigation from 'components/layouts/AnalyticsNavigation';
 import CustomBreadCrumb from 'components/layouts/CustomBreadCrumb';
@@ -48,54 +50,32 @@ const AnalyticsRealtime: React.FC = () => {
   const { t } = useTranslation();
   const { projectId, appId } = useParams();
 
+  const [checked, setChecked] = React.useState(false);
+
   const [dateRangeValue, setDateRangeValue] =
     React.useState<DateRangePickerProps.Value>({
       type: 'relative',
-      amount: 7,
-      unit: 'day',
+      amount: 30,
+      unit: 'minute',
     });
 
   const relativeOptions: ReadonlyArray<DateRangePickerProps.RelativeOption> = [
     {
-      key: 'previous-1-day',
+      key: 'previous-10-minute',
+      amount: 10,
+      unit: 'minute',
+      type: 'relative',
+    },
+    {
+      key: 'previous-30-minute',
+      amount: 30,
+      unit: 'minute',
+      type: 'relative',
+    },
+    {
+      key: 'previous-1-hour',
       amount: 1,
-      unit: 'day',
-      type: 'relative',
-    },
-    {
-      key: 'previous-1-week',
-      amount: 1,
-      unit: 'week',
-      type: 'relative',
-    },
-    {
-      key: 'previous-2-week',
-      amount: 2,
-      unit: 'week',
-      type: 'relative',
-    },
-    {
-      key: 'previous-1-month',
-      amount: 1,
-      unit: 'month',
-      type: 'relative',
-    },
-    {
-      key: 'previous-3-months',
-      amount: 3,
-      unit: 'month',
-      type: 'relative',
-    },
-    {
-      key: 'previous-6-months',
-      amount: 6,
-      unit: 'month',
-      type: 'relative',
-    },
-    {
-      key: 'previous-1-year',
-      amount: 1,
-      unit: 'year',
+      unit: 'hour',
       type: 'relative',
     },
   ];
@@ -168,44 +148,59 @@ const AnalyticsRealtime: React.FC = () => {
               }
             >
               <Container>
-                <DateRangePicker
-                  onChange={({ detail }) => {
-                    setDateRangeValue(
-                      detail.value as DateRangePickerProps.Value
-                    );
-                  }}
-                  value={dateRangeValue ?? null}
-                  dateOnly
-                  relativeOptions={relativeOptions}
-                  isValidRange={isValidRange}
-                  i18nStrings={{
-                    relativeModeTitle:
-                      t('analytics:dateRange.relativeModeTitle') ?? '',
-                    absoluteModeTitle:
-                      t('analytics:dateRange.absoluteModeTitle') ?? '',
-                    relativeRangeSelectionHeading:
-                      t('analytics:dateRange.relativeRangeSelectionHeading') ??
-                      '',
-                    cancelButtonLabel:
-                      t('analytics:dateRange.cancelButtonLabel') ?? '',
-                    applyButtonLabel:
-                      t('analytics:dateRange.applyButtonLabel') ?? '',
-                    clearButtonLabel:
-                      t('analytics:dateRange.clearButtonLabel') ?? '',
-                    customRelativeRangeOptionLabel:
-                      t('analytics:dateRange.customRelativeRangeOptionLabel') ??
-                      '',
-                    formatRelativeRange: (
-                      value: DateRangePickerProps.RelativeValue
-                    ) => {
-                      return `${t(
-                        'analytics:dateRange.formatRelativeRangeLabel'
-                      )} ${value.amount} ${i18n.t(
-                        `analytics:dateRange.${value.unit}`
-                      )}`;
-                    },
-                  }}
-                />
+                <ColumnLayout columns={2}>
+                  <div>
+                    <Toggle
+                      onChange={({ detail }) => setChecked(detail.checked)}
+                      checked={checked}
+                    >
+                      {checked
+                        ? t('analytics:labels.realtimeStarted')
+                        : t('analytics:labels.realtimeStopped')}
+                    </Toggle>
+                  </div>
+                  <div>
+                    <DateRangePicker
+                      onChange={({ detail }) => {
+                        setDateRangeValue(
+                          detail.value as DateRangePickerProps.Value
+                        );
+                      }}
+                      value={dateRangeValue ?? null}
+                      relativeOptions={relativeOptions}
+                      isValidRange={isValidRange}
+                      i18nStrings={{
+                        relativeModeTitle:
+                          t('analytics:dateRange.relativeModeTitle') ?? '',
+                        absoluteModeTitle:
+                          t('analytics:dateRange.absoluteModeTitle') ?? '',
+                        relativeRangeSelectionHeading:
+                          t(
+                            'analytics:dateRange.relativeRangeSelectionHeading'
+                          ) ?? '',
+                        cancelButtonLabel:
+                          t('analytics:dateRange.cancelButtonLabel') ?? '',
+                        applyButtonLabel:
+                          t('analytics:dateRange.applyButtonLabel') ?? '',
+                        clearButtonLabel:
+                          t('analytics:dateRange.clearButtonLabel') ?? '',
+                        customRelativeRangeOptionLabel:
+                          t(
+                            'analytics:dateRange.customRelativeRangeOptionLabel'
+                          ) ?? '',
+                        formatRelativeRange: (
+                          value: DateRangePickerProps.RelativeValue
+                        ) => {
+                          return `${t(
+                            'analytics:dateRange.formatRelativeRangeLabel'
+                          )} ${value.amount} ${i18n.t(
+                            `analytics:dateRange.${value.unit}`
+                          )}`;
+                        },
+                      }}
+                    />
+                  </div>
+                </ColumnLayout>
                 <br />
                 <Alert
                   statusIconAriaLabel="Info"

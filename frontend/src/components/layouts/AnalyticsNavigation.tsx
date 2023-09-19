@@ -12,6 +12,7 @@
  */
 
 import { Icon } from '@cloudscape-design/components';
+import ExtendIcon from 'components/common/ExtendIcon';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
@@ -45,22 +46,27 @@ const AnalyticsNavigation: React.FC<INavigationProps> = (
   const analyticsNavItems: IAnalyticsItemType[] = [
     {
       text: t('nav.analytics.dashboards'),
+      icon: <ExtendIcon icon="BsKanban" />,
       href: `/analytics/${projectId}/app/${appId}/dashboards`,
     },
     {
       text: t('nav.analytics.realtime'),
+      icon: <ExtendIcon icon="BsActivity" />,
       href: `/analytics/${projectId}/app/${appId}/realtime`,
     },
     {
       text: t('nav.analytics.explore'),
+      icon: <ExtendIcon icon="BsFunnel" />,
       href: `/analytics/${projectId}/app/${appId}/explore`,
     },
     {
       text: t('nav.analytics.analyzes'),
+      icon: <ExtendIcon icon="BsPencilSquare" />,
       href: `/analytics/${projectId}/app/${appId}/analyzes`,
     },
     {
       text: t('nav.analytics.data-management'),
+      icon: <ExtendIcon icon="settings" />,
       href: `/analytics/${projectId}/app/${appId}/data-management`,
     },
   ];
@@ -77,7 +83,7 @@ const AnalyticsNavigation: React.FC<INavigationProps> = (
           >
             <a href={item.href} aria-labelledby={item.text ?? ''}>
               <span className="icon" aria-labelledby={item.text ?? ''}>
-                <Icon name="settings" variant="inverted" />
+                {item.icon}
               </span>
               {isExpanded && (
                 <span className="text" aria-labelledby={item.text ?? ''}>

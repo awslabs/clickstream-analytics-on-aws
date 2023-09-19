@@ -25,6 +25,7 @@ import {
   SpaceBetween,
 } from '@cloudscape-design/components';
 import { previewEvent } from 'apis/analytics';
+import ExtendIcon from 'components/common/ExtendIcon';
 import Loading from 'components/common/Loading';
 import {
   CategoryItemType,
@@ -95,19 +96,16 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
   const defaultChartTypeOption = 'line-chart';
   const chartTypeOptions: SegmentedControlProps.Option[] = [
     {
-      iconName: 'view-full',
-      iconAlt: 'line-chart',
       id: 'line-chart',
+      iconSvg: <ExtendIcon icon="BsGraphUp" color="black" />,
     },
     {
-      iconName: 'view-horizontal',
-      iconAlt: 'bar-chart',
       id: 'bar-chart',
+      iconSvg: <ExtendIcon icon="BsBarChartFill" color="black" />,
     },
     {
-      iconName: 'view-vertical',
-      iconAlt: 'stack-chart',
-      id: 'stack-chart',
+      id: 'pie-chart',
+      iconSvg: <ExtendIcon icon="BsPieChart" color="black" />,
     },
   ];
   const [chartType, setChartType] = useState(defaultChartTypeOption);

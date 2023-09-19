@@ -229,10 +229,33 @@
     "conditionValuePlaceholder": "输入值",
     "funnelModel": "漏斗模式",
     "attributeGrouping": "属性分组",
-    "defineMetrics": "定义指标"
+    "defineMetrics": "定义指标",
+    "realtimeStopped": "实时流已停止",
+    "realtimeStarted": "实时流已启动"
   },
   "emptyData": "无数据",
-  "emptyDataMessage": "请先配置分析指标",
+  "emptyDataMessage": "请配置要查询的指标",
   "noDataAvailableTitle": "没有可用于分析的点击流数据",
-  "noDataAvailableMessage": "该解决方案尚未找到任何具有点击流数据的项目，请与您的系统管理员联系以开始收集数据。"
+  "noDataAvailableMessage": "该解决方案尚未找到任何具有点击流数据的项目，请与您的系统管理员联系以开始收集数据。",
+  "information": {
+    "dashboardsInfo": "dashboardsInfo",
+    "dashboardSheetInfo": "dashboardSheetInfo",
+    "userLifecycleInfo": "userLifecycleInfo",
+    "realtimeInfo": "realtimeInfo",
+    "dataManagementInfo": "dataManagementInfo",
+    "dataManagementEventInfo": "dataManagementEventInfo",
+    "metadataEventsInfo": "metadataEventsInfo",
+    "metadataEventParametersInfo": "metadataEventParametersInfo",
+    "metadataUserAttributesInfo": "metadataUserAttributesInfo",
+    "exploreInfo": "exploreInfo",
+    "analyticsModelInfo": "analyticsModelInfo",
+    "funnelInfo": "funnelInfo",
+    "funnelMetricsInfo": "funnelMetricsInfo",
+    "funnelModelInfo": "funnelModelInfo",
+    "funnelAssociateParameterInfo": "funnelAssociateParameterInfo",
+    "funnelWindowInfo": "funnelWindowInfo",
+    "eventInfo": "eventInfo",
+    "pathInfo": "pathInfo",
+    "retentionInfo": "retentionInfo"
+  }
 }

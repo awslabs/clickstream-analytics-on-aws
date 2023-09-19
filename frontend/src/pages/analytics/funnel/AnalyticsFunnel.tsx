@@ -30,6 +30,7 @@ import {
 } from '@cloudscape-design/components';
 import { DateRangePickerProps } from '@cloudscape-design/components/date-range-picker/interfaces';
 import { previewFunnel } from 'apis/analytics';
+import ExtendIcon from 'components/common/ExtendIcon';
 import Loading from 'components/common/Loading';
 import {
   CategoryItemType,
@@ -98,41 +99,18 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
     useState(false);
   const [exploreEmbedUrl, setExploreEmbedUrl] = useState('');
 
-  const defaultChartTypeOption = 'line-chart';
+  const defaultChartTypeOption = 'funnel-chart';
   const chartTypeOptions: SegmentedControlProps.Option[] = [
     {
-      iconName: 'view-full',
-      iconAlt: 'line-chart',
-      id: 'line-chart',
+      id: 'funnel-chart',
+      iconSvg: <ExtendIcon icon="BsFilter" color="black" />,
     },
     {
-      iconName: 'view-horizontal',
-      iconAlt: 'bar-chart',
       id: 'bar-chart',
-    },
-    {
-      iconName: 'view-vertical',
-      iconAlt: 'stack-chart',
-      id: 'stack-chart',
+      iconSvg: <ExtendIcon icon="BsBarChartFill" color="black" />,
     },
   ];
   const [chartType, setChartType] = useState(defaultChartTypeOption);
-
-  const defaultWindowOption: SelectProps.Option = {
-    value: 'indirectly',
-    label: t('analytics:options.indirectlyFollowed') ?? '',
-  };
-  const windowOptions: SelectProps.Options = [
-    defaultWindowOption,
-    {
-      value: 'directly',
-      label: t('analytics:options.directlyFollowed') ?? '',
-    },
-  ];
-
-  const [windowModule, setWindowModule] = useState<SelectProps.Option | null>(
-    defaultWindowOption
-  );
 
   const defaultComputeMethodOption: SelectProps.Option = {
     value: ExploreComputeMethod.USER_ID_CNT,
@@ -444,24 +422,6 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
                 options={computeMethodOptions}
                 onChange={(event) => {
                   setSelectedMetric(event.detail.selectedOption);
-                }}
-              />
-            </SpaceBetween>
-            <SpaceBetween direction="vertical" size="xs">
-              <Box variant="awsui-key-label">
-                {t('analytics:labels.funnelModel')}{' '}
-                <Popover
-                  triggerType="custom"
-                  content={t('analytics:information.funnelModelInfo')}
-                >
-                  <Icon name="status-info" size="small" />
-                </Popover>
-              </Box>
-              <Select
-                selectedOption={windowModule}
-                options={windowOptions}
-                onChange={(event) => {
-                  setWindowModule(event.detail.selectedOption);
                 }}
               />
             </SpaceBetween>
