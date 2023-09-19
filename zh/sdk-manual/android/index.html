@@ -2064,12 +2064,12 @@
 <p>Clickstream Android SDK 支持 Android 4.1（API 级别 16）及更高版本。</p>
 <h2 id="sdk">集成 SDK</h2>
 <h3 id="1-sdk">1. 添加 SDK</h3>
-<p>将以下依赖项添加到您的 <code>app</code> 模块的 <code>build.gradle</code> 文件中。</p>
+<p>在您 <code>app</code> 模块的 <code>build.gradle</code> 文件中添加 Clickstream SDK 依赖，例如：</p>
 <div class="language-groovy highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">dependencies</span><span class="w"> </span><span class="o">{</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">    </span><span class="n">implementation</span><span class="w"> </span><span class="s1">&#39;software.aws.solution:clickstream:0.7.1&#39;</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="o">}</span>
 </span></code></pre></div>
-<p>接下来，将您的项目与最新版本进行同步：<a href="https://search.maven.org/artifact/software.aws.solution/clickstream"><img alt="Maven Central" src="https://img.shields.io/maven-central/v/software.aws.solution/clickstream.svg" /></a></p>
+<p>您可以将SDK同步为最新版本：<a href="https://central.sonatype.com/artifact/software.aws.solution/clickstream/versions"><img alt="Maven Central" src="https://img.shields.io/maven-central/v/software.aws.solution/clickstream.svg" /></a></p>
 <h3 id="2">2. 配置参数</h3>
 <p>在 <code>project/app/src/main</code> 下找到 <code>res</code> 目录，并在 <code>res</code> 目录中手动创建一个 raw 文件夹。</p>
 <p><a class="glightbox" href="../../images/sdk-manual/android_raw_folder.png" data-type="image" data-width="100%" data-height="auto" data-desc-position="bottom"><img alt="android_raw_folder" src="../../images/sdk-manual/android_raw_folder.png" /></a></p>
