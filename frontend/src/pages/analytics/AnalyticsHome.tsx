@@ -11,43 +11,67 @@
  *  and limitations under the License.
  */
 
-import {
-  AppLayout,
-  ContentLayout,
-  Header,
-  Link,
-  Popover,
-} from '@cloudscape-design/components';
+import { Alert, AppLayout } from '@cloudscape-design/components';
+import { getProjectList } from 'apis/project';
+import Loading from 'components/common/Loading';
 import AnalyticsNavigation from 'components/layouts/AnalyticsNavigation';
-import CustomBreadCrumb from 'components/layouts/CustomBreadCrumb';
 import { t } from 'i18next';
 import { useLocalStorage } from 'pages/common/use-local-storage';
 import React, { useEffect, useState } from 'react';
 import { ANALYTICS_INFO_KEY } from 'ts/const';
 
 const AnalyticsHome: React.FC = () => {
-  const [loadingData, setLoadingData] = useState(true);
-  const [analyticsInfo] = useLocalStorage(ANALYTICS_INFO_KEY, {
-    projectId: '',
-    projectName: '',
-    appId: '',
-    appName: '',
-  });
+  const [loading, setLoading] = useState<boolean>(false);
+  const [analyticsInfo, setAnalyticsInfo] = useLocalStorage(
+    ANALYTICS_INFO_KEY,
+    {
+      projectId: '',
+      projectName: '',
+      appId: '',
+      appName: '',
+    }
+  );
+
+  const gotoFirstProjectApp = async () => {
+    try {
+      setLoading(true);
+      const apps = [];
+      const { success, data }: ApiResponse<ResponseTableData<IProject>> =
+        await getProjectList({
+          pageNumber: 1,
+          pageSize: 9999,
+        });
+      setLoading(false);
+      if (success) {
+        for (const project of data.items) {
+          if (project.applications) {
+            for (const app of project.applications) {
+              apps.push({
+                projectId: project.id,
+                projectName: project.name,
+                appId: app.appId,
+                appName: app.name,
+              });
+            }
+          }
+        }
+      }
+      if (apps.length > 0) {
+        setAnalyticsInfo(apps[0]);
+        window.location.href = `/analytics/${apps[0].projectId}/app/${apps[0].appId}/dashboards`;
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   useEffect(() => {
-    setLoadingData(true);
     if (analyticsInfo.projectId && analyticsInfo.appId) {
       window.location.href = `/analytics/${analyticsInfo.projectId}/app/${analyticsInfo.appId}/dashboards`;
+    } else {
+      gotoFirstProjectApp();
     }
-    setLoadingData(false);
   }, []);
-
-  const breadcrumbItems = [
-    {
-      text: t('breadCrumb.analytics'),
-      href: '/analytics',
-    },
-  ];
 
   return (
     <div className="flex">
@@ -57,26 +81,20 @@ const AnalyticsHome: React.FC = () => {
           toolsHide
           navigationHide
           content={
-            <ContentLayout
-              header={
-                <Header
-                  variant="h1"
-                  info={
-                    <Popover
-                      triggerType="custom"
-                      content="This instance contains insufficient memory. Stop the instance, choose a different instance type with more memory, and restart it."
-                    >
-                      <Link variant="info">Info</Link>
-                    </Popover>
-                  }
-                  description={t('analytics:explore.description')}
+            <>
+              {loading ? (
+                <Loading />
+              ) : (
+                <Alert
+                  statusIconAriaLabel="Error"
+                  type="error"
+                  header={t('analytics:noDataAvailableTitle')}
                 >
-                  {t('analytics:explore.title')}
-                </Header>
-              }
-            ></ContentLayout>
+                  {t('analytics:noDataAvailableMessage')}
+                </Alert>
+              )}
+            </>
           }
-          breadcrumbs={<CustomBreadCrumb breadcrumbItems={breadcrumbItems} />}
           headerSelector="#header"
         />
       </div>

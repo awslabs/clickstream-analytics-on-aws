@@ -232,5 +232,7 @@
     "defineMetrics": "定义指标"
   },
   "emptyData": "无数据",
-  "emptyDataMessage": "请先配置分析指标"
+  "emptyDataMessage": "请先配置分析指标",
+  "noDataAvailableTitle": "没有可用于分析的点击流数据",
+  "noDataAvailableMessage": "该解决方案尚未找到任何具有点击流数据的项目，请与您的系统管理员联系以开始收集数据。"
 }
