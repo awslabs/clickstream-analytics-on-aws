@@ -16,6 +16,8 @@ import {
   Container,
   ContentLayout,
   Header,
+  Link,
+  Popover,
   SpaceBetween,
 } from '@cloudscape-design/components';
 import { getAnalyticsDashboard } from 'apis/analytics';
@@ -26,6 +28,7 @@ import ExploreEmbedFrame from 'pages/analytics/comps/ExploreEmbedFrame';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
+import { DEFAULT_DASHBOARD_NAME } from 'ts/constant-ln';
 import { generateStr } from 'ts/utils';
 
 const AnalyticsDashboardDetail: React.FC = () => {
@@ -62,8 +65,8 @@ const AnalyticsDashboardDetail: React.FC = () => {
   }, [dashboardId]);
 
   const getDashboardName = () => {
-    return dashboard.name === 'User lifecycle'
-      ? 'User lifecycle - default'
+    return dashboard.name === DEFAULT_DASHBOARD_NAME
+      ? `${DEFAULT_DASHBOARD_NAME} - default`
       : dashboard.name;
   };
 
@@ -95,7 +98,24 @@ const AnalyticsDashboardDetail: React.FC = () => {
             <ContentLayout
               header={
                 <SpaceBetween size="m">
-                  <Header variant="h1" description={dashboard.description}>
+                  <Header
+                    variant="h1"
+                    description={dashboard.description}
+                    info={
+                      <>
+                        {dashboard.name === DEFAULT_DASHBOARD_NAME ? (
+                          <Popover
+                            triggerType="custom"
+                            content={t(
+                              'analytics:information.userLifecycleInfo'
+                            )}
+                          >
+                            <Link variant="info">Info</Link>
+                          </Popover>
+                        ) : null}
+                      </>
+                    }
+                  >
                     {dashboard.name}
                   </Header>
                 </SpaceBetween>

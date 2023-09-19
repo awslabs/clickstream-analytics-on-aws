@@ -248,8 +248,9 @@ const MetadataUserAttributesTable: React.FC<
       tableContentDisplay={CONTENT_DISPLAY}
       tableFilteringProperties={FILTERING_PROPERTIES}
       tableI18nStrings={{
-        loadingText:
-          t('analytics:labels.tableLoading') || 'Loading',
+        infoContent:
+          t('analytics:information.metadataUserAttributesInfo') ?? '',
+        loadingText: t('analytics:labels.tableLoading') || 'Loading',
         emptyText: t('analytics:labels.tableEmpty'),
         headerTitle: t('analytics:metadata.userAttribute.title'),
         headerDescription: t('analytics:metadata.userAttribute.description'),
@@ -267,9 +268,6 @@ const MetadataUserAttributesTable: React.FC<
         useText: t('common:table.useText'),
         matchText: t('common:table.matchText'),
         matchesText: t('common:table.matchesText'),
-      }}
-      loadHelpPanelContent={() => {
-        console.log(1);
       }}
       setShowDetails={setShowDetails}
       fetchDataFunc={listMetadataUserAttributes}

@@ -28,6 +28,7 @@ import { useParams } from 'react-router-dom';
 import { TIME_FORMAT } from 'ts/const';
 import CreateDashboard from './create/CreateDashboard';
 import DashboardHeader from '../comps/DashboardHeader';
+import { DEFAULT_DASHBOARD_NAME } from 'ts/constant-ln';
 
 const AnalyticsDashboardCard: React.FC<any> = () => {
   const { t } = useTranslation();
@@ -48,7 +49,7 @@ const AnalyticsDashboardCard: React.FC<any> = () => {
         fontSize="heading-m"
         href={`/analytics/${projectId}/app/${appId}/dashboard/${item.id}`}
       >
-        {item.name === 'User lifecycle' ? (
+        {item.name === DEFAULT_DASHBOARD_NAME ? (
           <>
             User lifecycle -
             {

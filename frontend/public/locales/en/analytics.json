@@ -234,5 +234,26 @@
   "emptyData": "No Data",
   "emptyDataMessage": "Please configure analysis indicators first",
   "noDataAvailableTitle": "No clickstream data available for analytics",
-  "noDataAvailableMessage": "The solution did not find any project has clickstream data yet, please contact your system admin to start collecting data."
+  "noDataAvailableMessage": "The solution did not find any project has clickstream data yet, please contact your system admin to start collecting data.",
+  "information": {
+    "dashboardsInfo": "dashboardsInfo",
+    "dashboardSheetInfo": "dashboardSheetInfo",
+    "userLifecycleInfo": "userLifecycleInfo",
+    "realtimeInfo": "realtimeInfo",
+    "dataManagementInfo": "dataManagementInfo",
+    "dataManagementEventInfo": "dataManagementEventInfo",
+    "metadataEventsInfo": "metadataEventsInfo",
+    "metadataEventParametersInfo": "metadataEventParametersInfo",
+    "metadataUserAttributesInfo": "metadataUserAttributesInfo",
+    "exploreInfo": "exploreInfo",
+    "analyticsModelInfo": "analyticsModelInfo",
+    "funnelInfo": "funnelInfo",
+    "funnelMetricsInfo": "funnelMetricsInfo",
+    "funnelModelInfo": "funnelModelInfo",
+    "funnelAssociateParameterInfo": "funnelAssociateParameterInfo",
+    "funnelWindowInfo": "funnelWindowInfo",
+    "eventInfo": "eventInfo",
+    "pathInfo": "pathInfo",
+    "retentionInfo": "retentionInfo"
+  }
 }

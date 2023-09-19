@@ -19,6 +19,7 @@ import {
   DateRangePickerProps,
   Header,
   Icon,
+  Link,
   Popover,
   SelectProps,
   SpaceBetween,
@@ -278,6 +279,14 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
           header={
             <Header
               variant="h2"
+              info={
+                <Popover
+                  triggerType="custom"
+                  content={t('analytics:information.retentionInfo')}
+                >
+                  <Link variant="info">Info</Link>
+                </Popover>
+              }
               actions={
                 <SpaceBetween direction="horizontal" size="xs">
                   <Button

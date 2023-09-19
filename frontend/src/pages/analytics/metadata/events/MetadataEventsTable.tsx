@@ -223,6 +223,7 @@ const MetadataEventsTable: React.FC<MetadataEventsTableProps> = (
       tableContentDisplay={CONTENT_DISPLAY}
       tableFilteringProperties={FILTERING_PROPERTIES}
       tableI18nStrings={{
+        infoContent: t('analytics:information.metadataEventsInfo') ?? '',
         loadingText: t('analytics:labels.tableLoading') || 'Loading',
         emptyText: t('analytics:labels.tableEmpty'),
         headerTitle: t('analytics:metadata.event.title'),
@@ -239,9 +240,6 @@ const MetadataEventsTable: React.FC<MetadataEventsTableProps> = (
         useText: t('common:table.useText'),
         matchText: t('common:table.matchText'),
         matchesText: t('common:table.matchesText'),
-      }}
-      loadHelpPanelContent={() => {
-        console.log(1);
       }}
       setShowDetails={setShowDetails}
       fetchDataFunc={listMetadataEvents}

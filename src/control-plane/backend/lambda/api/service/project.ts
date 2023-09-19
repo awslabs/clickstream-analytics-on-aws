@@ -14,7 +14,7 @@
 import { CreateDashboardCommandInput, DataSetImportMode, QuickSight, SheetDefinition } from '@aws-sdk/client-quicksight';
 import { v4 as uuidv4 } from 'uuid';
 import { createDataSet } from './quicksight/reporting-utils';
-import { DEFAULT_SOLUTION_OPERATOR, OUTPUT_REPORT_DASHBOARDS_SUFFIX } from '../common/constants-ln';
+import { DEFAULT_DASHBOARD_NAME, DEFAULT_SOLUTION_OPERATOR, OUTPUT_REPORT_DASHBOARDS_SUFFIX } from '../common/constants-ln';
 import { logger } from '../common/powertools';
 import { aws_sdk_client_common_config } from '../common/sdk-client-config-ln';
 import { ApiFail, ApiSuccess, PipelineStackType } from '../common/types';
@@ -43,7 +43,7 @@ export class ProjectServ {
     if (appDashboard) {
       const presetDashboard: IDashboard = {
         id: appDashboard.dashboardId,
-        name: 'User lifecycle',
+        name: DEFAULT_DASHBOARD_NAME,
         description: 'Out-of-the-box user lifecycle analysis dashboard created by solution.',
         region: pipeline.region,
         sheets: [],

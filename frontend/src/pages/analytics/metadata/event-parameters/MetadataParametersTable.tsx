@@ -262,6 +262,7 @@ const MetadataParametersTable: React.FC<MetadataParametersTableProps> = (
       tableContentDisplay={CONTENT_DISPLAY}
       tableFilteringProperties={FILTERING_PROPERTIES}
       tableI18nStrings={{
+        infoContent: t('analytics:information.metadataEventParametersInfo') ?? '',
         loadingText:
           t('analytics:labels.tableLoading') || 'Loading',
         emptyText: t('analytics:labels.tableEmpty'),
@@ -281,9 +282,6 @@ const MetadataParametersTable: React.FC<MetadataParametersTableProps> = (
         useText: t('common:table.useText'),
         matchText: t('common:table.matchText'),
         matchesText: t('common:table.matchesText'),
-      }}
-      loadHelpPanelContent={() => {
-        console.log(1);
       }}
       setShowDetails={setShowDetails}
       fetchDataFunc={listMetadataEventParameters}

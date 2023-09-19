@@ -10,31 +10,32 @@
  *  OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions
  *  and limitations under the License.
  */
-import { Header, HeaderProps, Link } from '@cloudscape-design/components';
-import React from 'react';
+import {
+  Header,
+  HeaderProps,
+  Link,
+  Popover,
+} from '@cloudscape-design/components';
 
 interface MetadataTableHeaderProps extends HeaderProps {
   title?: string;
   selectedItemsCount: number;
-  onRefreshButtonClick?: () => void;
-  onInfoLinkClick?: () => void;
+  infoContent?: string;
 }
 
 export function MetadataTableHeader({
   title = '',
   selectedItemsCount,
-  onInfoLinkClick,
+  infoContent,
   ...props
 }: MetadataTableHeaderProps) {
   return (
     <Header
       variant="awsui-h1-sticky"
       info={
-        onInfoLinkClick && (
-          <Link variant="info" onFollow={onInfoLinkClick}>
-            Info
-          </Link>
-        )
+        <Popover triggerType="custom" content={infoContent}>
+          <Link variant="info">Info</Link>
+        </Popover>
       }
       {...props}
     >

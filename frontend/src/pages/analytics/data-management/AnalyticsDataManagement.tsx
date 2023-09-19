@@ -18,6 +18,7 @@ import {
   ContentLayout,
   Header,
   Link,
+  Popover,
   SpaceBetween,
   Tabs,
 } from '@cloudscape-design/components';
@@ -70,7 +71,14 @@ const AnalyticsDataManagement: React.FC = () => {
               header={
                 <Header
                   variant="h1"
-                  info={<Link variant="info">Info</Link>}
+                  info={
+                    <Popover
+                      triggerType="custom"
+                      content={t('analytics:information.dataManagementInfo')}
+                    >
+                      <Link variant="info">Info</Link>
+                    </Popover>
+                  }
                   description={t('analytics:metadata.description')}
                   actions={
                     <SpaceBetween size="xs" direction="horizontal">

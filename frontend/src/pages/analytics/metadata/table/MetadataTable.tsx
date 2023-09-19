@@ -36,6 +36,7 @@ interface MetadataTableProps {
     loadingText: string;
     emptyText: string;
     headerTitle: string;
+    infoContent: string;
     headerDescription: string;
     headerRefreshButtonText: string;
     filteringAriaLabel: string;
@@ -49,7 +50,6 @@ interface MetadataTableProps {
     matchesText: string;
   };
   selectionType?: 'multi' | 'single';
-  loadHelpPanelContent: () => void;
   setShowDetails: (show: boolean, data?: IMetadataType) => void;
   fetchDataFunc: () => Promise<IMetadataType[]>;
   fetchUpdateFunc: (item: IMetadataType) => Promise<void>;
@@ -65,7 +65,6 @@ const MetadataTable: React.FC<MetadataTableProps> = (
     tableContentDisplay,
     tableFilteringProperties,
     tableI18nStrings,
-    loadHelpPanelContent,
     setShowDetails,
     fetchDataFunc,
     fetchUpdateFunc,
@@ -221,6 +220,7 @@ const MetadataTable: React.FC<MetadataTableProps> = (
         header={
           <MetadataTableHeader
             title={tableI18nStrings.headerTitle}
+            infoContent={tableI18nStrings.infoContent}
             description={tableI18nStrings.headerDescription}
             selectedItemsCount={collectionProps.selectedItems?.length ?? 0}
             counter={
@@ -230,7 +230,6 @@ const MetadataTable: React.FC<MetadataTableProps> = (
                 ? `(${collectionProps.selectedItems.length}/${data.length})`
                 : `(${data.length})`
             }
-            onInfoLinkClick={loadHelpPanelContent}
           />
         }
         filter={

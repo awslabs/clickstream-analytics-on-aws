@@ -261,7 +261,7 @@ const AnalyticsExplore: React.FC = () => {
                   info={
                     <Popover
                       triggerType="custom"
-                      content="This instance contains insufficient memory. Stop the instance, choose a different instance type with more memory, and restart it."
+                      content={t('analytics:information.exploreInfo')}
                     >
                       <Link variant="info">Info</Link>
                     </Popover>
@@ -274,7 +274,9 @@ const AnalyticsExplore: React.FC = () => {
                           {t('analytics:explore.analyticsModel')} &nbsp;
                           <Popover
                             triggerType="custom"
-                            content="This instance contains insufficient memory. Stop the instance, choose a different instance type with more memory, and restart it."
+                            content={t(
+                              'analytics:information.analyticsModelInfo'
+                            )}
                           >
                             <Link variant="info">Info</Link>
                           </Popover>

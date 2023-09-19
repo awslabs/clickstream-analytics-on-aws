@@ -17,6 +17,8 @@ import {
   Container,
   DateRangePickerProps,
   Header,
+  Link,
+  Popover,
   SegmentedControl,
   SegmentedControlProps,
   SelectProps,
@@ -304,6 +306,14 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
           header={
             <Header
               variant="h2"
+              info={
+                <Popover
+                  triggerType="custom"
+                  content={t('analytics:information.eventInfo')}
+                >
+                  <Link variant="info">Info</Link>
+                </Popover>
+              }
               actions={
                 <SpaceBetween direction="horizontal" size="xs">
                   <Button

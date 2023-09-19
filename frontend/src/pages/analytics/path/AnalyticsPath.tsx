@@ -20,6 +20,7 @@ import {
   Header,
   Icon,
   Input,
+  Link,
   Popover,
   Select,
   SelectProps,
@@ -476,6 +477,14 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
           header={
             <Header
               variant="h2"
+              info={
+                <Popover
+                  triggerType="custom"
+                  content={t('analytics:information.pathInfo')}
+                >
+                  <Link variant="info">Info</Link>
+                </Popover>
+              }
               actions={
                 <SpaceBetween direction="horizontal" size="xs">
                   <Button

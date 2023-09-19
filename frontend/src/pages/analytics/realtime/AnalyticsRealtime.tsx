@@ -33,6 +33,8 @@ import {
   DateRangePicker,
   DateRangePickerProps,
   Header,
+  Link,
+  Popover,
   SpaceBetween,
 } from '@cloudscape-design/components';
 import AnalyticsNavigation from 'components/layouts/AnalyticsNavigation';
@@ -151,6 +153,14 @@ const AnalyticsRealtime: React.FC = () => {
                   <Header
                     variant="h1"
                     description={t('analytics:realtime.description')}
+                    info={
+                      <Popover
+                        triggerType="custom"
+                        content={t('analytics:information.realtimeInfo')}
+                      >
+                        <Link variant="info">Info</Link>
+                      </Popover>
+                    }
                   >
                     {t('analytics:realtime.title')}
                   </Header>

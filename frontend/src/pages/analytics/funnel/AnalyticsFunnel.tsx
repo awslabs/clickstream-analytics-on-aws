@@ -19,6 +19,7 @@ import {
   Header,
   Icon,
   Input,
+  Link,
   Popover,
   SegmentedControl,
   SegmentedControlProps,
@@ -393,6 +394,14 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
           header={
             <Header
               variant="h2"
+              info={
+                <Popover
+                  triggerType="custom"
+                  content={t('analytics:information.funnelInfo')}
+                >
+                  <Link variant="info">Info</Link>
+                </Popover>
+              }
               actions={
                 <SpaceBetween direction="horizontal" size="xs">
                   <Button
@@ -425,7 +434,7 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
                 <Popover
                   triggerType="custom"
                   size="small"
-                  content="This instance contains insufficient memory. Stop the instance, choose a different instance type with more memory, and restart it."
+                  content={t('analytics:information.funnelMetricsInfo')}
                 >
                   <Icon name="status-info" size="small" />
                 </Popover>
@@ -443,7 +452,7 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
                 {t('analytics:labels.funnelModel')}{' '}
                 <Popover
                   triggerType="custom"
-                  content="This instance contains insufficient memory. Stop the instance, choose a different instance type with more memory, and restart it."
+                  content={t('analytics:information.funnelModelInfo')}
                 >
                   <Icon name="status-info" size="small" />
                 </Popover>
@@ -461,7 +470,9 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
                 {t('analytics:labels.associateParameter')}{' '}
                 <Popover
                   triggerType="custom"
-                  content="This instance contains insufficient memory. Stop the instance, choose a different instance type with more memory, and restart it."
+                  content={t(
+                    'analytics:information.funnelAssociateParameterInfo'
+                  )}
                 >
                   <Icon name="status-info" size="small" />
                 </Popover>
@@ -494,7 +505,7 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
                     {t('analytics:labels.window')}{' '}
                     <Popover
                       triggerType="custom"
-                      content="This instance contains insufficient memory. Stop the instance, choose a different instance type with more memory, and restart it."
+                      content={t('analytics:information.funnelWindowInfo')}
                     >
                       <Icon name="status-info" size="small" />
                     </Popover>
