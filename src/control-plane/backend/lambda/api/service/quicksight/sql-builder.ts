@@ -165,65 +165,57 @@ const baseColumns = `
 ,user_first_touch_timestamp
 ,user_id
 ,user_pseudo_id
-,user_ltv
-,event_dimensions
-,ecommerce
-,items
 `;
 
 const columnTemplate = `
- event_date as event_date####
-,event_name as event_name####
-,event_id as event_id####
-,event_bundle_sequence_id as event_bundle_sequence_id####
-,event_previous_timestamp as event_previous_timestamp####
-,event_server_timestamp_offset as event_server_timestamp_offset####
-,event_timestamp as event_timestamp####
-,ingest_timestamp as ingest_timestamp####
-,event_value_in_usd as event_value_in_usd####
-,app_info_app_id as app_info_app_id####
-,app_info_package_id as app_info_package_id####
-,app_info_install_source as app_info_install_source####
-,app_info_version as app_info_version####
-,device_id as device_id####
-,device_mobile_brand_name as device_mobile_brand_name####
-,device_mobile_model_name as device_mobile_model_name####
-,device_manufacturer as device_manufacturer####
-,device_screen_width as device_screen_width####
-,device_screen_height as device_screen_height####
-,device_viewport_height as device_viewport_height####
-,device_carrier as device_carrier####
-,device_network_type as device_network_type####
-,device_operating_system as device_operating_system####
-,device_operating_system_version as device_operating_system_version####
-,device_ua_browser as ua_browser####
-,device_ua_browser_version as ua_browser_version####
-,device_ua_os as ua_os####
-,device_ua_os_version as ua_os_version####
-,device_ua_device as ua_device####
-,device_ua_device_category as ua_device_category####
-,device_system_language as device_system_language####
-,device_time_zone_offset_seconds as device_time_zone_offset_seconds####
-,device_advertising_id as advertising_id####
-,geo_continent as geo_continent####
-,geo_country as geo_country####
-,geo_city as geo_city####
-,geo_metro as geo_metro####
-,geo_region as geo_region####
-,geo_sub_continent as geo_sub_continent####
-,geo_locale as geo_locale####
-,platform as platform####
-,project_id as project_id####
-,traffic_source_name as traffic_source_name####
-,traffic_source_medium as traffic_source_medium####
-,traffic_source_source as traffic_source_source####
-,user_first_touch_timestamp as user_first_touch_timestamp####
-,user_id as user_id####
-,user_pseudo_id as user_pseudo_id####
-,user_ltv as user_ltv####
-,event_dimensions as event_dimensions####
-,ecommerce as ecommerce####
-,items as items####
+ event.event_date as event_date####
+,event.event_name as event_name####
+,event.event_id as event_id####
+,event.event_bundle_sequence_id as event_bundle_sequence_id####
+,event.event_previous_timestamp as event_previous_timestamp####
+,event.event_server_timestamp_offset as event_server_timestamp_offset####
+,event.event_timestamp as event_timestamp####
+,event.ingest_timestamp as ingest_timestamp####
+,event.event_value_in_usd as event_value_in_usd####
+,event.app_info_app_id as app_info_app_id####
+,event.app_info_package_id as app_info_package_id####
+,event.app_info_install_source as app_info_install_source####
+,event.app_info_version as app_info_version####
+,event.device_id as device_id####
+,event.device_mobile_brand_name as device_mobile_brand_name####
+,event.device_mobile_model_name as device_mobile_model_name####
+,event.device_manufacturer as device_manufacturer####
+,event.device_screen_width as device_screen_width####
+,event.device_screen_height as device_screen_height####
+,event.device_viewport_height as device_viewport_height####
+,event.device_carrier as device_carrier####
+,event.device_network_type as device_network_type####
+,event.device_operating_system as device_operating_system####
+,event.device_operating_system_version as device_operating_system_version####
+,event.device_ua_browser as ua_browser####
+,event.device_ua_browser_version as ua_browser_version####
+,event.device_ua_os as ua_os####
+,event.device_ua_os_version as ua_os_version####
+,event.device_ua_device as ua_device####
+,event.device_ua_device_category as ua_device_category####
+,event.device_system_language as device_system_language####
+,event.device_time_zone_offset_seconds as device_time_zone_offset_seconds####
+,event.device_advertising_id as advertising_id####
+,event.geo_continent as geo_continent####
+,event.geo_country as geo_country####
+,event.geo_city as geo_city####
+,event.geo_metro as geo_metro####
+,event.geo_region as geo_region####
+,event.geo_sub_continent as geo_sub_continent####
+,event.geo_locale as geo_locale####
+,event.platform as platform####
+,event.project_id as project_id####
+,event.traffic_source_name as traffic_source_name####
+,event.traffic_source_medium as traffic_source_medium####
+,event.traffic_source_source as traffic_source_source####
+,event.user_first_touch_timestamp as user_first_touch_timestamp####
+,event.user_id as user_id####
+,event.user_pseudo_id as user_pseudo_id####
 `;
 
 function _buildCommonPartSql(eventNames: string[], sqlParameters: SQLParameters, isEventPathSQL: boolean = false) : string {
@@ -253,6 +245,71 @@ function _buildCommonPartSql(eventNames: string[], sqlParameters: SQLParameters,
     where ${eventDateSQL}
     ${ isEventPathSQL ? 'and event_name not in (\'' + builtInEvents.filter(event => !eventNames.includes(event)).join('\',\'') + '\')' : eventNameClause }
     ${globalConditionSql}
+  ),
+  `;
+}
+
+export function _buildCommonPartSqlDWD(eventNames: string[], sqlParameters: SQLParameters, isEventPathSQL: boolean = false) : string {
+  let eventDateSQL = '';
+  if (sqlParameters.timeScopeType === ExploreTimeScopeType.FIXED) {
+    eventDateSQL = eventDateSQL.concat(`event_date >= date '${sqlParameters.timeStart}'  and event_date <=  date '${sqlParameters.timeEnd}'`);
+  } else {
+    const nDayNumber = getLastNDayNumber(sqlParameters.lastN!, sqlParameters.timeUnit!);
+    eventDateSQL = eventDateSQL.concat(`event_date >= DATEADD(day, -${nDayNumber}, CURRENT_DATE) and event_date <= DATEADD(day, -1, CURRENT_DATE)`);
+  }
+
+  let globalConditionSql = getNormalConditionSql(sqlParameters.globalEventCondition);
+  globalConditionSql = globalConditionSql !== '' ? `and (${globalConditionSql}) ` : '';
+
+  const sqlParameterAnalyzeResult = _analyzeSQLParameter(sqlParameters);
+
+  let eventJoinSql = '';
+  let userJoinSql = '';
+  let eventColumn = '';
+  let userColumn = '';
+  if (sqlParameterAnalyzeResult.hasEventAttribute) {
+    eventJoinSql = `join ${sqlParameters.schemaName}.clickstream_ods_events_parameter_view as event_param
+    on event.event_date = event_param.event_date and event.event_id = event_param.event_id
+    `;
+
+    eventColumn = `
+    event_param.event_parameter_key,
+    event_param.event_parameter_value,
+    `;
+  }
+
+  if (sqlParameterAnalyzeResult.hasUserAttribute) {
+    userJoinSql = `join ${sqlParameters.schemaName}.clickstream_user_attr_view as user_param
+    on event.user_pseudo_id = user_param.user_pseudo_id
+    `;
+    userColumn = `
+    user_param.custom_attr_key,
+    user_param.custom_attr_value,
+    `;
+  }
+
+  const eventNameSql = eventNames.length > 0 ? `and event_name in ('${ eventNames.join('\',\'')}')` : '' ;
+
+  return `with tmp_data as (
+    select 
+    ${_renderUserPseudoIdColumn(baseColumns, sqlParameters.computeMethod, false)},
+    TO_CHAR(TIMESTAMP 'epoch' + cast(event_timestamp/1000 as bigint) * INTERVAL '1 second', 'YYYY-MM') as month,
+    TO_CHAR(date_trunc('week', TIMESTAMP 'epoch' + cast(event_timestamp/1000 as bigint) * INTERVAL '1 second'), 'YYYY-MM-DD') || ' - ' || TO_CHAR(date_trunc('week', (TIMESTAMP 'epoch' + cast(event_timestamp/1000 as bigint) * INTERVAL '1 second') + INTERVAL '6 days'), 'YYYY-MM-DD') as week,
+    TO_CHAR(TIMESTAMP 'epoch' + cast(event_timestamp/1000 as bigint) * INTERVAL '1 second', 'YYYY-MM-DD') as day,
+    TO_CHAR(TIMESTAMP 'epoch' + cast(event_timestamp/1000 as bigint) * INTERVAL '1 second', 'YYYY-MM-DD HH24') || '00:00' as hour
+    from ${sqlParameters.schemaName}.ods_events
+    where ${eventDateSQL}
+    ${ isEventPathSQL ? `and event_name not in ('${builtInEvents.join('\',\'')}')` : eventNameSql }
+    ${globalConditionSql}
+  ),
+  common_base_data as (
+    select 
+      ${eventColumn}
+      ${userColumn}
+      event.*,
+    from tmp_data as event
+    ${eventJoinSql}
+    ${userJoinSql}
   ),
   `;
 }
@@ -1543,13 +1600,13 @@ function _buildSqlFromNumberCondition(condition: Condition, prefix: string) : st
 
 function _renderUserPseudoIdColumn(columns: string, computeMethod: ExploreComputeMethod, addSuffix: boolean): string {
   if (computeMethod === ExploreComputeMethod.USER_ID_CNT) {
-    let pattern = /,user_pseudo_id/g;
+    let pattern = /,event.user_pseudo_id/g;
     let suffix = '';
     if (addSuffix) {
-      pattern = /,user_pseudo_id as user_pseudo_id####/g;
+      pattern = /,event.user_pseudo_id as user_pseudo_id####/g;
       suffix = '####';
     }
-    return columns.replace(pattern, `,COALESCE(user_id, user_pseudo_id) as user_pseudo_id${suffix}`);
+    return columns.replace(pattern, `,COALESCE(event.user_id, event.user_pseudo_id) as event.user_pseudo_id${suffix}`);
   }
 
   return columns;
@@ -1618,4 +1675,73 @@ function _getRetentionAnalysisViewEventNames(sqlParameters: SQLParameters) : str
   }
 
   return [...new Set(eventNames)];
+}
+export interface SQLParameterAnalyzeResult {
+  readonly hasUserAttribute: boolean;
+  readonly hasEventAttribute: boolean;
+}
+
+function hasNestAttribute(conditions: Condition[]): boolean[] {
+
+  let hasUserAttribute = false;
+  let hasEventAttribute = false;
+  for (const [_index, condition] of conditions.entries()) {
+    if (condition.category === 'user') {
+      hasUserAttribute = true;
+    } else if (condition.category === 'event') {
+      hasEventAttribute = true;
+    }
+  }
+
+  return [hasEventAttribute, hasUserAttribute];
+}
+
+function _analyzeSQLParameter(sqlParameters: SQLParameters): SQLParameterAnalyzeResult {
+
+  let hasUserAttribute = false;
+  let hasEventAttribute = false;
+  if (sqlParameters.eventAndConditions) {
+    for (const [_index, eventCondition] of sqlParameters.eventAndConditions.entries()) {
+      if (eventCondition.sqlCondition?.conditions !== undefined) {
+        const nestAttribute = hasNestAttribute(eventCondition.sqlCondition?.conditions);
+        hasUserAttribute = hasUserAttribute || nestAttribute[1];
+        hasEventAttribute = hasEventAttribute || nestAttribute[0];
+      }
+    }
+  }
+
+  if (sqlParameters.pairEventAndConditions) {
+    for (const [_index, pair] of sqlParameters.pairEventAndConditions.entries()) {
+
+      if (pair.startEvent.retentionJoinColumn?.category === 'user') {
+        hasUserAttribute = true;
+      } else if (pair.startEvent.retentionJoinColumn?.category === 'event') {
+        hasEventAttribute = true;
+      }
+
+      if (pair.backEvent.retentionJoinColumn?.category === 'user') {
+        hasUserAttribute = true;
+      } else if (pair.backEvent.retentionJoinColumn?.category === 'event') {
+        hasEventAttribute = true;
+      }
+
+      if (pair.startEvent.sqlCondition?.conditions) {
+        const nestAttribute = hasNestAttribute(pair.startEvent.sqlCondition?.conditions);
+        hasUserAttribute = hasUserAttribute || nestAttribute[1];
+        hasEventAttribute = hasEventAttribute || nestAttribute[0];
+      }
+
+      if (pair.backEvent.sqlCondition?.conditions) {
+        const nestAttribute = hasNestAttribute(pair.backEvent.sqlCondition?.conditions);
+        hasUserAttribute = hasUserAttribute || nestAttribute[1];
+        hasEventAttribute = hasEventAttribute || nestAttribute[0];
+      }
+    }
+  }
+
+  return {
+    hasEventAttribute,
+    hasUserAttribute,
+  };
+
 }
