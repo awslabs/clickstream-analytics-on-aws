@@ -24,14 +24,7 @@ import {
   SpaceBetween,
   Toggle,
 } from '@cloudscape-design/components';
-import {
-  getMetadataEventsList,
-  getMetadataParametersList,
-  getMetadataUserAttributesList,
-  getPipelineDetailByProjectId,
-  previewRetention,
-  warmup,
-} from 'apis/analytics';
+import { previewRetention } from 'apis/analytics';
 import Loading from 'components/common/Loading';
 import {
   CategoryItemType,
@@ -54,7 +47,6 @@ import {
   ExploreComputeMethod,
   ExploreGroupColumn,
   ExploreRequestAction,
-  MetadataSource,
   MetadataValueType,
 } from 'ts/explore-types';
 import { generateStr, alertMsg } from 'ts/utils';
@@ -63,8 +55,6 @@ import {
   getDateRange,
   getGlobalEventCondition,
   getPairEventAndConditions,
-  getWarmUpParameters,
-  metadataEventsConvertToCategoryItemType,
   parametersConvertToCategoryItemType,
   validRetentionAnalyticsItem,
 } from '../analytics-utils';
@@ -72,22 +62,35 @@ import ExploreDateRangePicker from '../comps/ExploreDateRangePicker';
 import ExploreEmbedFrame from '../comps/ExploreEmbedFrame';
 import SaveToDashboardModal from '../comps/SelectDashboardModal';
 
-const AnalyticsRetention: React.FC = () => {
+interface AnalyticsRetentionProps {
+  loading: boolean;
+  loadFunc: () => void;
+  pipeline: IPipeline;
+  metadataEvents: IMetadataEvent[];
+  metadataEventParameters: IMetadataEventParameter[];
+  metadataUserAttributes: IMetadataUserAttribute[];
+  categoryEvents: CategoryItemType[];
+  presetParameters: CategoryItemType[];
+}
+
+const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
+  props: AnalyticsRetentionProps
+) => {
   const { t } = useTranslation();
-  const { projectId, appId } = useParams();
-  const [loadingData, setLoadingData] = useState(false);
+  const {
+    loading,
+    pipeline,
+    metadataEvents,
+    metadataUserAttributes,
+    categoryEvents,
+    presetParameters,
+  } = props;
+  const { appId } = useParams();
+  const [loadingData, setLoadingData] = useState(loading);
   const [loadingChart, setLoadingChart] = useState(false);
   const [selectDashboardModalVisible, setSelectDashboardModalVisible] =
     useState(false);
-  const [pipeline, setPipeline] = useState({} as IPipeline);
   const [exploreEmbedUrl, setExploreEmbedUrl] = useState('');
-  const [metadataEvents, setMetadataEvents] = useState(
-    [] as CategoryItemType[]
-  );
-  const [originEvents, setOriginEvents] = useState([] as IMetadataEvent[]);
-  const [userAttributes, setUserAttributes] = useState<
-    IMetadataUserAttribute[]
-  >([]);
 
   const [eventOptionData, setEventOptionData] = useState<
     IRetentionAnalyticsItem[]
@@ -100,130 +103,22 @@ const AnalyticsRetention: React.FC = () => {
   const [associateParameterChecked, setAssociateParameterChecked] =
     useState<boolean>(true);
   const [segmentationOptionData, setSegmentationOptionData] =
-    useState<SegmentationFilterDataType>(INIT_SEGMENTATION_DATA);
+    useState<SegmentationFilterDataType>({
+      ...INIT_SEGMENTATION_DATA,
+      conditionOptions: presetParameters,
+    });
 
   const [groupOption, setGroupOption] = useState<SelectProps.Option | null>(
     null
   );
 
-  const [groupOptions, setGroupOptions] = useState<CategoryItemType[]>([]);
-
   const getEventParameters = (eventName?: string) => {
-    const event = originEvents.find((item) => item.name === eventName);
+    const event = metadataEvents.find((item) => item.name === eventName);
     if (event) {
       return event.associatedParameters;
     }
     return [];
   };
-
-  const getUserAttributes = async () => {
-    try {
-      const {
-        success,
-        data,
-      }: ApiResponse<ResponseTableData<IMetadataUserAttribute>> =
-        await getMetadataUserAttributesList({
-          projectId: projectId ?? '',
-          appId: appId ?? '',
-        });
-      if (success) {
-        setUserAttributes(data.items);
-        return data.items;
-      }
-      return [];
-    } catch (error) {
-      return [];
-    }
-  };
-
-  const getAllParameters = async () => {
-    try {
-      const {
-        success,
-        data,
-      }: ApiResponse<ResponseTableData<IMetadataEventParameter>> =
-        await getMetadataParametersList({
-          projectId: projectId ?? '',
-          appId: appId ?? '',
-        });
-      if (success) {
-        return data.items;
-      }
-    } catch (error) {
-      console.log(error);
-      return [];
-    }
-  };
-
-  const listMetadataEvents = async () => {
-    try {
-      const { success, data }: ApiResponse<ResponseTableData<IMetadataEvent>> =
-        await getMetadataEventsList({
-          projectId: projectId ?? '',
-          appId: appId ?? '',
-          attribute: true,
-        });
-      if (success) {
-        const events = metadataEventsConvertToCategoryItemType(data.items);
-        setOriginEvents(data.items);
-        setMetadataEvents(events);
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  const loadPipeline = async () => {
-    setLoadingData(true);
-    try {
-      const { success, data }: ApiResponse<IPipeline> =
-        await getPipelineDetailByProjectId(projectId ?? '');
-      if (success) {
-        setPipeline(data);
-        setLoadingData(false);
-        const params = getWarmUpParameters(projectId ?? '', appId ?? '', data);
-        if (params) {
-          await warmup(params);
-        }
-      }
-    } catch (error) {
-      console.log(error);
-    }
-    setLoadingData(false);
-  };
-
-  const listAllAttributes = async () => {
-    try {
-      const parameters = await getAllParameters();
-      const presetParameters = parameters?.filter(
-        (item) => item.metadataSource === MetadataSource.PRESET
-      );
-      const userAttributes = await getUserAttributes();
-      const presetUserAttributes = userAttributes.filter(
-        (item) => item.metadataSource === MetadataSource.PRESET
-      );
-      const conditionOptions = parametersConvertToCategoryItemType(
-        presetUserAttributes,
-        presetParameters
-      );
-      setSegmentationOptionData((prev) => {
-        const dataObj = cloneDeep(prev);
-        dataObj.conditionOptions = conditionOptions;
-        return dataObj;
-      });
-      setGroupOptions(conditionOptions);
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  useEffect(() => {
-    if (projectId && appId) {
-      loadPipeline();
-      listMetadataEvents();
-      listAllAttributes();
-    }
-  }, [projectId, appId]);
 
   const [dateRangeValue, setDateRangeValue] =
     React.useState<DateRangePickerProps.Value>({
@@ -245,7 +140,10 @@ const AnalyticsRetention: React.FC = () => {
         ...DEFAULT_RETENTION_ITEM,
       },
     ]);
-    setSegmentationOptionData(INIT_SEGMENTATION_DATA);
+    setSegmentationOptionData({
+      ...INIT_SEGMENTATION_DATA,
+      conditionOptions: presetParameters,
+    });
     setDateRangeValue({
       type: 'relative',
       amount: 7,
@@ -256,8 +154,6 @@ const AnalyticsRetention: React.FC = () => {
       value: ExploreGroupColumn.DAY,
       label: t('analytics:options.dayTimeGranularity') ?? '',
     });
-    await listMetadataEvents();
-    await listAllAttributes();
     setLoadingData(false);
   };
 
@@ -443,7 +339,7 @@ const AnalyticsRetention: React.FC = () => {
               </Button>
               <RetentionSelect
                 data={eventOptionData}
-                eventOptionList={metadataEvents}
+                eventOptionList={categoryEvents}
                 addEventButtonLabel={t('analytics:labels.retentionMetrics')}
                 addStartNewConditionItem={(index) => {
                   setEventOptionData((prev) => {
@@ -621,7 +517,7 @@ const AnalyticsRetention: React.FC = () => {
                   const eventName = item?.value;
                   const eventParameters = getEventParameters(eventName);
                   const parameterOption = parametersConvertToCategoryItemType(
-                    userAttributes,
+                    metadataUserAttributes,
                     eventParameters
                   );
                   setEventOptionData((prev) => {
@@ -637,7 +533,7 @@ const AnalyticsRetention: React.FC = () => {
                   const eventName = item?.value;
                   const eventParameters = getEventParameters(eventName);
                   const parameterOption = parametersConvertToCategoryItemType(
-                    userAttributes,
+                    metadataUserAttributes,
                     eventParameters
                   );
                   setEventOptionData((prev) => {
@@ -742,7 +638,7 @@ const AnalyticsRetention: React.FC = () => {
                         changeCurCategoryOption={(item) => {
                           setGroupOption(item);
                         }}
-                        categories={groupOptions}
+                        categories={presetParameters}
                       />
                     </div>
                   </div>

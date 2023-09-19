@@ -28,14 +28,7 @@ import {
   Toggle,
 } from '@cloudscape-design/components';
 import { DateRangePickerProps } from '@cloudscape-design/components/date-range-picker/interfaces';
-import {
-  getMetadataEventsList,
-  getMetadataParametersList,
-  getMetadataUserAttributesList,
-  getPipelineDetailByProjectId,
-  previewFunnel,
-  warmup,
-} from 'apis/analytics';
+import { previewFunnel } from 'apis/analytics';
 import Loading from 'components/common/Loading';
 import {
   CategoryItemType,
@@ -49,7 +42,7 @@ import EventItem from 'components/eventselect/EventItem';
 import EventsSelect from 'components/eventselect/EventSelect';
 import SegmentationFilter from 'components/eventselect/SegmentationFilter';
 import { cloneDeep } from 'lodash';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { COMMON_ALERT_TYPE } from 'ts/const';
@@ -58,41 +51,51 @@ import {
   ExploreConversionIntervalType,
   ExploreRequestAction,
   ExploreGroupColumn,
-  MetadataSource,
   MetadataValueType,
 } from 'ts/explore-types';
 import { alertMsg, generateStr } from 'ts/utils';
 import {
-  metadataEventsConvertToCategoryItemType,
   parametersConvertToCategoryItemType,
   validEventAnalyticsItem,
   getDateRange,
   getEventAndConditions,
   getDashboardCreateParameters,
   getIntervalInSeconds,
-  getWarmUpParameters,
   getGlobalEventCondition,
 } from '../analytics-utils';
 import ExploreDateRangePicker from '../comps/ExploreDateRangePicker';
 import ExploreEmbedFrame from '../comps/ExploreEmbedFrame';
 import SaveToDashboardModal from '../comps/SelectDashboardModal';
 
-const AnalyticsFunnel: React.FC = () => {
+interface AnalyticsFunnelProps {
+  loading: boolean;
+  loadFunc: () => void;
+  pipeline: IPipeline;
+  metadataEvents: IMetadataEvent[];
+  metadataEventParameters: IMetadataEventParameter[];
+  metadataUserAttributes: IMetadataUserAttribute[];
+  categoryEvents: CategoryItemType[];
+  presetParameters: CategoryItemType[];
+}
+
+const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
+  props: AnalyticsFunnelProps
+) => {
   const { t } = useTranslation();
-  const { projectId, appId } = useParams();
-  const [loadingData, setLoadingData] = useState(false);
+  const {
+    loading,
+    pipeline,
+    metadataEvents,
+    metadataUserAttributes,
+    categoryEvents,
+    presetParameters,
+  } = props;
+  const { appId } = useParams();
+  const [loadingData, setLoadingData] = useState(loading);
   const [loadingChart, setLoadingChart] = useState(false);
   const [selectDashboardModalVisible, setSelectDashboardModalVisible] =
     useState(false);
   const [exploreEmbedUrl, setExploreEmbedUrl] = useState('');
-  const [pipeline, setPipeline] = useState({} as IPipeline);
-  const [metadataEvents, setMetadataEvents] = useState(
-    [] as CategoryItemType[]
-  );
-  const [originEvents, setOriginEvents] = useState([] as IMetadataEvent[]);
-  const [userAttributes, setUserAttributes] = useState<
-    IMetadataUserAttribute[]
-  >([]);
 
   const defaultChartTypeOption = 'line-chart';
   const chartTypeOptions: SegmentedControlProps.Option[] = [
@@ -173,121 +176,12 @@ const AnalyticsFunnel: React.FC = () => {
   ];
 
   const getEventParameters = (eventName?: string) => {
-    const event = originEvents.find((item) => item.name === eventName);
+    const event = metadataEvents.find((item) => item.name === eventName);
     if (event) {
       return event.associatedParameters;
     }
     return [];
   };
-
-  const getUserAttributes = async () => {
-    try {
-      const {
-        success,
-        data,
-      }: ApiResponse<ResponseTableData<IMetadataUserAttribute>> =
-        await getMetadataUserAttributesList({
-          projectId: projectId ?? '',
-          appId: appId ?? '',
-        });
-      if (success) {
-        setUserAttributes(data.items);
-        return data.items;
-      }
-      return [];
-    } catch (error) {
-      return [];
-    }
-  };
-
-  const getAllParameters = async () => {
-    try {
-      const {
-        success,
-        data,
-      }: ApiResponse<ResponseTableData<IMetadataEventParameter>> =
-        await getMetadataParametersList({
-          projectId: projectId ?? '',
-          appId: appId ?? '',
-        });
-      if (success) {
-        return data.items;
-      }
-    } catch (error) {
-      console.log(error);
-      return [];
-    }
-  };
-
-  const listMetadataEvents = async () => {
-    try {
-      const { success, data }: ApiResponse<ResponseTableData<IMetadataEvent>> =
-        await getMetadataEventsList({
-          projectId: projectId ?? '',
-          appId: appId ?? '',
-          attribute: true,
-        });
-      if (success) {
-        const events = metadataEventsConvertToCategoryItemType(data.items);
-        setOriginEvents(data.items);
-        setMetadataEvents(events);
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  const loadPipeline = async () => {
-    setLoadingData(true);
-    try {
-      const { success, data }: ApiResponse<IPipeline> =
-        await getPipelineDetailByProjectId(projectId ?? '');
-      if (success) {
-        setPipeline(data);
-        setLoadingData(false);
-        const params = getWarmUpParameters(projectId ?? '', appId ?? '', data);
-        if (params) {
-          await warmup(params);
-        }
-      }
-    } catch (error) {
-      console.log(error);
-    }
-    setLoadingData(false);
-  };
-
-  const listAllAttributes = async () => {
-    try {
-      const parameters = await getAllParameters();
-      const presetParameters = parameters?.filter(
-        (item) => item.metadataSource === MetadataSource.PRESET
-      );
-      const userAttributes = await getUserAttributes();
-      const presetUserAttributes = userAttributes.filter(
-        (item) => item.metadataSource === MetadataSource.PRESET
-      );
-      const conditionOptions = parametersConvertToCategoryItemType(
-        presetUserAttributes,
-        presetParameters
-      );
-      setSegmentationOptionData((prev) => {
-        const dataObj = cloneDeep(prev);
-        dataObj.conditionOptions = conditionOptions;
-        return dataObj;
-      });
-      setGroupOptions(conditionOptions);
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  useEffect(() => {
-    if (projectId && appId) {
-      loadPipeline();
-      listMetadataEvents();
-      listAllAttributes();
-    }
-  }, [projectId, appId]);
 
   const [dateRangeValue, setDateRangeValue] =
     React.useState<DateRangePickerProps.Value>({
@@ -326,13 +220,14 @@ const AnalyticsFunnel: React.FC = () => {
   );
 
   const [segmentationOptionData, setSegmentationOptionData] =
-    useState<SegmentationFilterDataType>(INIT_SEGMENTATION_DATA);
+    useState<SegmentationFilterDataType>({
+      ...INIT_SEGMENTATION_DATA,
+      conditionOptions: presetParameters,
+    });
 
   const [groupOption, setGroupOption] = useState<SelectProps.Option | null>(
     null
   );
-
-  const [groupOptions, setGroupOptions] = useState<CategoryItemType[]>([]);
 
   const getFunnelRequest = (
     action: ExploreRequestAction,
@@ -436,7 +331,10 @@ const AnalyticsFunnel: React.FC = () => {
         enableChangeRelation: true,
       },
     ]);
-    setSegmentationOptionData(INIT_SEGMENTATION_DATA);
+    setSegmentationOptionData({
+      ...INIT_SEGMENTATION_DATA,
+      conditionOptions: presetParameters,
+    });
     setDateRangeValue({
       type: 'relative',
       amount: 1,
@@ -447,8 +345,6 @@ const AnalyticsFunnel: React.FC = () => {
       label: t('analytics:options.dayTimeGranularity') ?? '',
     });
     setExploreEmbedUrl('');
-    await listMetadataEvents();
-    await listAllAttributes();
     setLoadingData(false);
   };
 
@@ -643,7 +539,7 @@ const AnalyticsFunnel: React.FC = () => {
                 <br />
                 <EventsSelect
                   data={eventOptionData}
-                  eventOptionList={metadataEvents}
+                  eventOptionList={categoryEvents}
                   addEventButtonLabel={t('common:button.addFunnelStep')}
                   addNewEventAnalyticsItem={() => {
                     setEventOptionData((prev) => {
@@ -736,7 +632,7 @@ const AnalyticsFunnel: React.FC = () => {
                     const eventName = category?.value;
                     const eventParameters = getEventParameters(eventName);
                     const parameterOption = parametersConvertToCategoryItemType(
-                      userAttributes,
+                      metadataUserAttributes,
                       eventParameters
                     );
                     setEventOptionData((prev) => {
@@ -833,7 +729,7 @@ const AnalyticsFunnel: React.FC = () => {
                         changeCurCategoryOption={(item) => {
                           setGroupOption(item);
                         }}
-                        categories={groupOptions}
+                        categories={presetParameters}
                       />
                     </div>
                   </div>

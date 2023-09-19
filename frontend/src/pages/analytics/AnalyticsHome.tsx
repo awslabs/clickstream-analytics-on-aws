@@ -11,9 +11,16 @@
  *  and limitations under the License.
  */
 
-import { AppLayout } from '@cloudscape-design/components';
-import Loading from 'components/common/Loading';
-import Navigation from 'components/layouts/Navigation';
+import {
+  AppLayout,
+  ContentLayout,
+  Header,
+  Link,
+  Popover,
+} from '@cloudscape-design/components';
+import AnalyticsNavigation from 'components/layouts/AnalyticsNavigation';
+import CustomBreadCrumb from 'components/layouts/CustomBreadCrumb';
+import { t } from 'i18next';
 import { useLocalStorage } from 'pages/common/use-local-storage';
 import React, { useEffect, useState } from 'react';
 import { ANALYTICS_INFO_KEY } from 'ts/const';
@@ -35,13 +42,45 @@ const AnalyticsHome: React.FC = () => {
     setLoadingData(false);
   }, []);
 
+  const breadcrumbItems = [
+    {
+      text: t('breadCrumb.analytics'),
+      href: '/analytics',
+    },
+  ];
+
   return (
-    <AppLayout
-      toolsHide
-      content={<div>{loadingData ? <Loading /> : <></>}</div>}
-      headerSelector="#header"
-      navigation={<Navigation activeHref="/analytics" />}
-    />
+    <div className="flex">
+      <AnalyticsNavigation activeHref={`/analytics`} />
+      <div className="flex-1">
+        <AppLayout
+          toolsHide
+          navigationHide
+          content={
+            <ContentLayout
+              header={
+                <Header
+                  variant="h1"
+                  info={
+                    <Popover
+                      triggerType="custom"
+                      content="This instance contains insufficient memory. Stop the instance, choose a different instance type with more memory, and restart it."
+                    >
+                      <Link variant="info">Info</Link>
+                    </Popover>
+                  }
+                  description={t('analytics:explore.description')}
+                >
+                  {t('analytics:explore.title')}
+                </Header>
+              }
+            ></ContentLayout>
+          }
+          breadcrumbs={<CustomBreadCrumb breadcrumbItems={breadcrumbItems} />}
+          headerSelector="#header"
+        />
+      </div>
+    </div>
   );
 };
 

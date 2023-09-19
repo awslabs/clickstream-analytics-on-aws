@@ -21,11 +21,28 @@ import {
   Select,
   SelectProps,
 } from '@cloudscape-design/components';
+import {
+  getMetadataUserAttributesList,
+  getMetadataParametersList,
+  getMetadataEventsList,
+  getPipelineDetailByProjectId,
+  warmup,
+  clean,
+  getPathNodes,
+} from 'apis/analytics';
+import Loading from 'components/common/Loading';
+import { CategoryItemType } from 'components/eventselect/AnalyticsType';
 import AnalyticsNavigation from 'components/layouts/AnalyticsNavigation';
 import CustomBreadCrumb from 'components/layouts/CustomBreadCrumb';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
+import { MetadataSource } from 'ts/explore-types';
+import {
+  metadataEventsConvertToCategoryItemType,
+  getWarmUpParameters,
+  parametersConvertToCategoryItemType,
+} from '../analytics-utils';
 import AnalyticsEvent from '../event/AnalyticsEvent';
 import AnalyticsFunnel from '../funnel/AnalyticsFunnel';
 import AnalyticsPath from '../path/AnalyticsPath';
@@ -73,6 +90,159 @@ const AnalyticsExplore: React.FC = () => {
       href: `/analytics/${projectId}/app/${appId}/explore`,
     },
   ];
+
+  const [pipeline, setPipeline] = useState<IPipeline | null>(null);
+  const [metadataEvents, setMetadataEvents] = useState<IMetadataEvent[]>([]);
+  const [metadataEventParameters, setMetadataEventParameters] = useState<
+    IMetadataEventParameter[]
+  >([]);
+  const [metadataUserAttributes, setMetadataUserAttributes] = useState<
+    IMetadataUserAttribute[]
+  >([]);
+
+  const [categoryEvents, setCategoryEvents] = useState(
+    [] as CategoryItemType[]
+  );
+
+  const [presetParameters, setPresetParameters] = useState<CategoryItemType[]>(
+    []
+  );
+
+  const [pathNodes, setPathNodes] = useState<{
+    pageTitles: IMetadataAttributeValue[];
+    pageUrls: IMetadataAttributeValue[];
+    screenNames: IMetadataAttributeValue[];
+    screenIds: IMetadataAttributeValue[];
+  }>({
+    pageTitles: [],
+    pageUrls: [],
+    screenNames: [],
+    screenIds: [],
+  });
+
+  const getAllPathNodes = async () => {
+    try {
+      const { success, data }: ApiResponse<any> = await getPathNodes(
+        projectId ?? '',
+        appId ?? ''
+      );
+      if (success) {
+        setPathNodes(data);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const getUserAttributes = async () => {
+    try {
+      const {
+        success,
+        data,
+      }: ApiResponse<ResponseTableData<IMetadataUserAttribute>> =
+        await getMetadataUserAttributesList({
+          projectId: projectId ?? '',
+          appId: appId ?? '',
+        });
+      if (success) {
+        setMetadataUserAttributes(data.items);
+        return data.items;
+      }
+      return [];
+    } catch (error) {
+      return [];
+    }
+  };
+
+  const getAllParameters = async () => {
+    try {
+      const {
+        success,
+        data,
+      }: ApiResponse<ResponseTableData<IMetadataEventParameter>> =
+        await getMetadataParametersList({
+          projectId: projectId ?? '',
+          appId: appId ?? '',
+        });
+      if (success) {
+        setMetadataEventParameters(data.items);
+        return data.items;
+      }
+    } catch (error) {
+      console.log(error);
+      return [];
+    }
+  };
+
+  const listMetadataEvents = async () => {
+    try {
+      const { success, data }: ApiResponse<ResponseTableData<IMetadataEvent>> =
+        await getMetadataEventsList({
+          projectId: projectId ?? '',
+          appId: appId ?? '',
+          attribute: true,
+        });
+      if (success) {
+        setMetadataEvents(data.items);
+        const events = metadataEventsConvertToCategoryItemType(data.items);
+        setCategoryEvents(events);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const loadPipeline = async () => {
+    try {
+      const { success, data }: ApiResponse<IPipeline> =
+        await getPipelineDetailByProjectId(projectId ?? '');
+      if (success) {
+        setPipeline(data);
+        const params = getWarmUpParameters(projectId ?? '', appId ?? '', data);
+        if (params) {
+          await warmup(params);
+          await clean(params.dashboardCreateParameters.region);
+        }
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const listAllAttributes = async () => {
+    try {
+      const parameters = await getAllParameters();
+      const presetParameters = parameters?.filter(
+        (item) => item.metadataSource === MetadataSource.PRESET
+      );
+      const userAttributes = await getUserAttributes();
+      const presetUserAttributes = userAttributes.filter(
+        (item) => item.metadataSource === MetadataSource.PRESET
+      );
+      const conditionOptions = parametersConvertToCategoryItemType(
+        presetUserAttributes,
+        presetParameters
+      );
+      setPresetParameters(conditionOptions);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const loadData = () => {
+    loadPipeline();
+    listMetadataEvents();
+    listAllAttributes();
+    if (selectedOption?.value === 'Path') {
+      getAllPathNodes();
+    }
+  };
+
+  useEffect(() => {
+    if (projectId && appId) {
+      loadData();
+    }
+  }, [projectId, appId]);
 
   return (
     <div className="flex">
@@ -125,10 +295,56 @@ const AnalyticsExplore: React.FC = () => {
                 </Header>
               }
             >
-              {selectedOption?.value === 'Funnel' && <AnalyticsFunnel />}
-              {selectedOption?.value === 'Event' && <AnalyticsEvent />}
-              {selectedOption?.value === 'Path' && <AnalyticsPath />}
-              {selectedOption?.value === 'Retention' && <AnalyticsRetention />}
+              {!pipeline && <Loading />}
+              {pipeline && selectedOption?.value === 'Funnel' && (
+                <AnalyticsFunnel
+                  loading={false}
+                  loadFunc={loadData}
+                  pipeline={pipeline}
+                  metadataEvents={metadataEvents}
+                  metadataEventParameters={metadataEventParameters}
+                  metadataUserAttributes={metadataUserAttributes}
+                  categoryEvents={categoryEvents}
+                  presetParameters={presetParameters}
+                />
+              )}
+              {pipeline && selectedOption?.value === 'Event' && (
+                <AnalyticsEvent
+                  loading={false}
+                  loadFunc={loadData}
+                  pipeline={pipeline}
+                  metadataEvents={metadataEvents}
+                  metadataEventParameters={metadataEventParameters}
+                  metadataUserAttributes={metadataUserAttributes}
+                  categoryEvents={categoryEvents}
+                  presetParameters={presetParameters}
+                />
+              )}
+              {pipeline && selectedOption?.value === 'Path' && (
+                <AnalyticsPath
+                  loading={false}
+                  loadFunc={loadData}
+                  pipeline={pipeline}
+                  metadataEvents={metadataEvents}
+                  metadataEventParameters={metadataEventParameters}
+                  metadataUserAttributes={metadataUserAttributes}
+                  categoryEvents={categoryEvents}
+                  presetParameters={presetParameters}
+                  nodes={pathNodes}
+                />
+              )}
+              {pipeline && selectedOption?.value === 'Retention' && (
+                <AnalyticsRetention
+                  loading={false}
+                  loadFunc={loadData}
+                  pipeline={pipeline}
+                  metadataEvents={metadataEvents}
+                  metadataEventParameters={metadataEventParameters}
+                  metadataUserAttributes={metadataUserAttributes}
+                  categoryEvents={categoryEvents}
+                  presetParameters={presetParameters}
+                />
+              )}
             </ContentLayout>
           }
           breadcrumbs={<CustomBreadCrumb breadcrumbItems={breadcrumbItems} />}

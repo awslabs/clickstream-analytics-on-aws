@@ -219,3 +219,8 @@ export const warmup = async (data: {
   const result: any = await apiRequest('post', '/reporting/warmup', data);
   return result;
 };
+
+export const clean = async (region: string) => {
+  const result: any = await apiRequest('post', '/reporting/clean', {region: region});
+  return result;
+};
