@@ -20,6 +20,7 @@ import {
   REDSHIFT_CLUSTER_IDENTIFIER_PATTERN,
   REDSHIFT_DB_USER_NAME_PATTERN,
   S3_BUCKET_NAME_PATTERN, SCHEDULE_EXPRESSION_PATTERN, SUBNETS_THREE_AZ_PATTERN, VPC_ID_PATTERN,
+  DDB_TABLE_ARN_PATTERN,
 } from '../common/constant';
 import { REDSHIFT_MODE } from '../common/model';
 import { Parameters, SubnetParameterType } from '../common/parameters';
@@ -50,6 +51,11 @@ export interface RedshiftAnalyticsStackProps {
   };
   upsertUsersConfiguration: {
     scheduleExpression: string;
+  };
+  scanMetadataConfiguration: {
+    scheduleExpression: string;
+    clickstreamAnalyticsMetadataDdbArn: string;
+    topFrequentPropertiesLimit: string;
   };
   clearExpiredEventsConfiguration: {
     scheduleExpression: string;
@@ -522,6 +528,50 @@ export function createStackParameters(scope: Construct): {
     },
   };
 
+  // Set scan metadata job parameters
+  const scanMetadataWorkflowParamsGroup = [];
+
+  const scanMetadataWorkflowScheduleExpressionParam = new CfnParameter(scope, 'ScanMetadataScheduleExpression', {
+    description: 'The schedule expression at which the scan metadata job runs regularly. in days.',
+    type: 'String',
+    allowedPattern: SCHEDULE_EXPRESSION_PATTERN,
+    constraintDescription: 'Must be in the format cron(minutes,hours,day-of-month,month,day-of-week,year), when the task should run at any time on everyday.',
+    default: 'cron(0 1 * * ? *)',
+  });
+
+  const clickstreamAnalyticsMetadataDdbArnParam = new CfnParameter(scope, 'ClickstreamAnalyticsMetadataDdbArn', {
+    description: 'The arn of ClickstreamAnalyticsMetadata Dynamodb table.',
+    type: 'String',
+    allowedPattern: DDB_TABLE_ARN_PATTERN,
+  });
+
+  const topFrequentPropertiesLimitParam = new CfnParameter(scope, 'TopFrequentPropertiesLimit', {
+    description: 'The number of top property values that get from ods event table.',
+    type: 'Number',
+    default: 20,
+  });
+
+  scanMetadataWorkflowParamsGroup.push({
+    Label: { default: 'Scan metadata job' },
+    Parameters: [
+      scanMetadataWorkflowScheduleExpressionParam.logicalId,
+      clickstreamAnalyticsMetadataDdbArnParam.logicalId,
+      topFrequentPropertiesLimitParam.logicalId,
+    ],
+  });
+
+  const scanMetadataWorkflowParamsLabels = {
+    [scanMetadataWorkflowScheduleExpressionParam.logicalId]: {
+      default: 'Scan metadata schedule expression',
+    },
+    [clickstreamAnalyticsMetadataDdbArnParam.logicalId]: {
+      default: 'Scan metadata dynamodb table arn',
+    },
+    [topFrequentPropertiesLimitParam.logicalId]: {
+      default: 'The number of top property values',
+    },
+  };
+
   // Set clear expired events job parameters
   const clearExpiredEventsWorkflowParamsGroup = [];
 
@@ -609,6 +659,7 @@ export function createStackParameters(scope: Construct): {
         ...redshiftClusterParamsGroup,
         ...loadJobParamsGroup,
         ...upsertUsersWorkflowParamsGroup,
+        ...scanMetadataWorkflowParamsGroup,
         ...clearExpiredEventsWorkflowParamsGroup,
       ],
       ParameterLabels: {
@@ -650,6 +701,7 @@ export function createStackParameters(scope: Construct): {
         ...redshiftClusterParamsLabels,
         ...loadJobParamsLabels,
         ...upsertUsersWorkflowParamsLabels,
+        ...scanMetadataWorkflowParamsLabels,
         ...clearExpiredEventsWorkflowParamsLabels,
 
         [dataProcessingCronOrRateExpressionParam.logicalId]: {
@@ -700,6 +752,11 @@ export function createStackParameters(scope: Construct): {
       },
       upsertUsersConfiguration: {
         scheduleExpression: upsertUsersWorkflowScheduleExpressionParam.valueAsString,
+      },
+      scanMetadataConfiguration: {
+        scheduleExpression: scanMetadataWorkflowScheduleExpressionParam.valueAsString,
+        clickstreamAnalyticsMetadataDdbArn: clickstreamAnalyticsMetadataDdbArnParam.valueAsString,
+        topFrequentPropertiesLimit: topFrequentPropertiesLimitParam.valueAsString,
       },
       clearExpiredEventsConfiguration: {
         scheduleExpression: clearExpiredEventsWorkflowScheduleExpressionParam.valueAsString,

@@ -23,10 +23,12 @@ export const REDSHIFT_ODS_TABLE_NAME = 'ods_events';
 export const REDSHIFT_DUPLICATE_DATE_INTERVAL = 3; // Days
 
 export const SP_UPSERT_USERS = 'sp_upsert_users';
+export const SP_SCAN_METADATA = 'scan_metadata';
 export const SP_CLEAR_EXPIRED_EVENTS = 'sp_clear_expired_events';
 
 export const SQL_TEMPLATE_PARAMETER = {
   sp_upsert_users: 'sp_upsert_users',
+  sp_scan_metadata: 'sp_scan_metadata',
   table_ods_users: 'ods_users',
   table_dim_users: 'dim_users',
   sp_clickstream_log: 'sp_clickstream_log',

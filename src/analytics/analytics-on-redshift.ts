@@ -31,8 +31,9 @@ import {
 import { LoadODSEventToRedshiftWorkflow } from './private/load-ods-events-workflow';
 import { createMetricsWidgetForRedshiftCluster } from './private/metircs-redshift-cluster';
 import { createMetricsWidgetForRedshiftServerless } from './private/metircs-redshift-serverless';
-import { ODSSource, LoadDataProps, ExistingRedshiftServerlessProps, ProvisionedRedshiftProps, LoadWorkflowData, NewRedshiftServerlessProps, UpsertUsersWorkflowData, ClearExpiredEventsWorkflowData } from './private/model';
+import { ODSSource, LoadDataProps, ExistingRedshiftServerlessProps, ProvisionedRedshiftProps, LoadWorkflowData, NewRedshiftServerlessProps, UpsertUsersWorkflowData, ScanMetadataWorkflowData, ClearExpiredEventsWorkflowData } from './private/model';
 import { RedshiftServerless } from './private/redshift-serverless';
+import { ScanMetadataWorkflow } from './private/scan-metadata-workflow';
 import { UpsertUsersWorkflow } from './private/upsert-users-workflow';
 import { addCfnNagForCustomResourceProvider, addCfnNagForLogRetention, addCfnNagToStack, ruleRolePolicyWithWildcardResources, ruleForLambdaVPCAndReservedConcurrentExecutions } from '../common/cfn-nag';
 import { SolutionInfo } from '../common/solution-info';
@@ -50,6 +51,7 @@ export interface RedshiftAnalyticsStackProps extends NestedStackProps {
   readonly provisionedRedshiftProps?: ProvisionedRedshiftProps;
   readonly loadDataProps: LoadDataProps;
   readonly upsertUsersWorkflowData: UpsertUsersWorkflowData;
+  readonly scanMetadataWorkflowData: ScanMetadataWorkflowData;
   readonly clearExpiredEventsWorkflowData: ClearExpiredEventsWorkflowData;
   readonly emrServerlessApplicationId: string;
   readonly dataProcessingCronOrRateExpression: string;
@@ -234,6 +236,19 @@ export class RedshiftAnalyticsStack extends NestedStack {
       upsertUsersWorkflowData: props.upsertUsersWorkflowData,
     });
 
+    const scanMetadataWorkflow = new ScanMetadataWorkflow(this, 'ScanMetadataWorkflow', {
+      appIds: props.appIds,
+      networkConfig: {
+        vpc: props.vpc,
+        vpcSubnets: props.subnetSelection,
+      },
+      serverlessRedshift: existingRedshiftServerlessProps,
+      provisionedRedshift: props.provisionedRedshiftProps,
+      databaseName: projectDatabaseName,
+      dataAPIRole: this.redshiftDataAPIExecRole,
+      scanMetadataWorkflowData: props.scanMetadataWorkflowData,
+    });
+
     const clearExpiredEventsWorkflow = new ClearExpiredEventsWorkflow(this, 'ClearExpiredEventsWorkflow', {
       appId: props.appIds,
       networkConfig: {
@@ -252,10 +267,12 @@ export class RedshiftAnalyticsStack extends NestedStack {
         projectId: props.projectId,
         dataProcessingCronOrRateExpression: props.dataProcessingCronOrRateExpression,
         upsertUsersCronOrRateExpression: props.upsertUsersWorkflowData.scheduleExpression,
+        scanMetadataCronOrRateExpression: props.scanMetadataWorkflowData.scheduleExpression,
         redshiftServerlessNamespace: this.redshiftServerlessWorkgroup.workgroup.namespaceName,
         redshiftServerlessWorkgroupName: this.redshiftServerlessWorkgroup.workgroup.workgroupName,
         loadEventsWorkflow: loadEventsWorkflow.loadEventWorkflow,
         upsertUsersWorkflow: upsertUsersWorkflow.upsertUsersWorkflow,
+        scanMetadataWorkflow: scanMetadataWorkflow.scanMetadataWorkflow,
         clearExpiredEventsWorkflow: clearExpiredEventsWorkflow.clearExpiredEventsWorkflow,
 
       });
@@ -266,10 +283,12 @@ export class RedshiftAnalyticsStack extends NestedStack {
         projectId: props.projectId,
         dataProcessingCronOrRateExpression: props.dataProcessingCronOrRateExpression,
         upsertUsersCronOrRateExpression: props.upsertUsersWorkflowData.scheduleExpression,
+        scanMetadataCronOrRateExpression: props.scanMetadataWorkflowData.scheduleExpression,
         redshiftServerlessNamespace: props.existingRedshiftServerlessProps.namespaceId,
         redshiftServerlessWorkgroupName: props.existingRedshiftServerlessProps.workgroupName,
         loadEventsWorkflow: loadEventsWorkflow.loadEventWorkflow,
         upsertUsersWorkflow: upsertUsersWorkflow.upsertUsersWorkflow,
+        scanMetadataWorkflow: scanMetadataWorkflow.scanMetadataWorkflow,
         clearExpiredEventsWorkflow: clearExpiredEventsWorkflow.clearExpiredEventsWorkflow,
       });
     }
@@ -279,9 +298,11 @@ export class RedshiftAnalyticsStack extends NestedStack {
         projectId: props.projectId,
         dataProcessingCronOrRateExpression: props.dataProcessingCronOrRateExpression,
         upsertUsersCronOrRateExpression: props.upsertUsersWorkflowData.scheduleExpression,
+        scanMetadataCronOrRateExpression: props.scanMetadataWorkflowData.scheduleExpression,
         redshiftClusterIdentifier: props.provisionedRedshiftProps.clusterIdentifier,
         loadEventsWorkflow: loadEventsWorkflow.loadEventWorkflow,
         upsertUsersWorkflow: upsertUsersWorkflow.upsertUsersWorkflow,
+        scanMetadataWorkflow: scanMetadataWorkflow.scanMetadataWorkflow,
         clearExpiredEventsWorkflow: clearExpiredEventsWorkflow.clearExpiredEventsWorkflow,
 
       });
@@ -303,6 +324,9 @@ function addCfnNag(stack: Stack) {
     ruleRolePolicyWithWildcardResources(
       'UpsertUsersWorkflow/UpsertUsersStateMachine/Role/DefaultPolicy/Resource',
       'UpsertUsersWorkflow', 'logs/xray'),
+    ruleRolePolicyWithWildcardResources(
+      'ScanMetadataWorkflow/ScanMetadataStateMachine/Role/DefaultPolicy/Resource',
+      'ScanMetadataWorkflow', 'logs/xray'),
     ruleRolePolicyWithWildcardResources(
       'ClearExpiredEventsWorkflow/ClearExpiredEventsStateMachine/Role/DefaultPolicy/Resource',
       'ClearExpiredEventsWorkflow', 'logs/xray'),

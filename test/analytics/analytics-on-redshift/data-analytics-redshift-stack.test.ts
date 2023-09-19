@@ -324,7 +324,7 @@ describe('DataAnalyticsRedshiftStack common parameter test', () => {
     expect(cfnInterface.ParameterGroups).toBeDefined();
 
     const paramCount = Object.keys(cfnInterface.ParameterLabels).length;
-    expect(paramCount).toEqual(28);
+    expect(paramCount).toEqual(31);
   });
 
   test('Conditions for nested redshift stacks are created as expected', () => {
@@ -351,6 +351,31 @@ describe('DataAnalyticsRedshiftStack common parameter test', () => {
 
   test('Check UpsertUsersScheduleExpression pattern', () => {
     const param = getParameter(template, 'UpsertUsersScheduleExpression');
+    const pattern = param.AllowedPattern;
+    const regex = new RegExp(`${pattern}`);
+    const validValues = [
+      'cron(0 1 * * ? *)',
+      'cron(59 23 * * ? *)',
+      'cron(0 */4 * * ? *)',
+      'cron(0/30 * * * ? *)',
+      'cron(0/30 */20 * * ? *)',
+    ];
+
+    for (const v of validValues) {
+      expect(v).toMatch(regex);
+    }
+
+    const invalidValues = [
+      '(0 1 * * ? *)',
+      'cron(0 1 * * ? *',
+    ];
+    for (const v of invalidValues) {
+      expect(v).not.toMatch(regex);
+    }
+  });
+
+  test('Check ScanMetadataScheduleExpression pattern', () => {
+    const param = getParameter(template, 'ScanMetadataScheduleExpression');
     const pattern = param.AllowedPattern;
     const regex = new RegExp(`${pattern}`);
     const validValues = [
@@ -434,6 +459,9 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
       'MaxFilesLimit',
       'LoadJobScheduleInterval',
       'UpsertUsersScheduleExpression',
+      'ScanMetadataScheduleExpression',
+      'ClickstreamAnalyticsMetadataDdbArn',
+      'TopFrequentPropertiesLimit',
       'ClearExpiredEventsScheduleExpression',
       'ClearExpiredEventsRetentionRangeDays',
       'EMRServerlessApplicationId',
@@ -601,6 +629,11 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
       upsertUsersWorkflowData: {
         scheduleExpression: 'cron(0 1 * * ? *)',
       },
+      scanMetadataWorkflowData: {
+        scheduleExpression: 'cron(0 1 * * ? *)',
+        clickstreamAnalyticsMetadataDdbArn: 'arn:aws:dynamodb:us-east-1:111122223333:table/ClickstreamAnalyticsMetadata',
+        topFrequentPropertiesLimit: '20',
+      },
       clearExpiredEventsWorkflowData: {
         scheduleExpression: 'cron(0 17 * * ? *)',
         retentionRangeDays: 365,
@@ -662,6 +695,11 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
       upsertUsersWorkflowData: {
         scheduleExpression: 'cron(0 1 * * ? *)',
       },
+      scanMetadataWorkflowData: {
+        scheduleExpression: 'cron(0 1 * * ? *)',
+        clickstreamAnalyticsMetadataDdbArn: 'arn:aws:dynamodb:us-east-1:111122223333:table/ClickstreamAnalyticsMetadata',
+        topFrequentPropertiesLimit: '20',
+      },
       clearExpiredEventsWorkflowData: {
         scheduleExpression: 'cron(0 17 * * ? *)',
         retentionRangeDays: 365,
@@ -709,6 +747,11 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
       existingRedshiftServerlessProps: serverlessRedshiftProps,
       upsertUsersWorkflowData: {
         scheduleExpression: 'cron(0 1 * * ? *)',
+      },
+      scanMetadataWorkflowData: {
+        scheduleExpression: 'cron(0 1 * * ? *)',
+        clickstreamAnalyticsMetadataDdbArn: 'arn:aws:dynamodb:us-east-1:111122223333:table/ClickstreamAnalyticsMetadata',
+        topFrequentPropertiesLimit: '20',
       },
       clearExpiredEventsWorkflowData: {
         scheduleExpression: 'cron(0 17 * * ? *)',
@@ -2833,6 +2876,32 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
     }
   });
 
+  test('Check ScanMetadataWorkflowScanMetadataFnSG', ()=>{
+    if (stack.nestedStacks.redshiftServerlessStack) {
+      const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
+      const sg = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::EC2::SecurityGroup', 'ScanMetadataWorkflowScanMetadataFnSG');
+      expect(sg).toBeDefined();
+    }
+    if (stack.nestedStacks.redshiftProvisionedStack) {
+      const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftProvisionedStack);
+      const sg = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::EC2::SecurityGroup', 'ScanMetadataWorkflowScanMetadataFnSG');
+      expect(sg).toBeDefined();
+    }
+  });
+
+  test('Check ScanMetadataWorkflowScanMetadataRole', ()=>{
+    if (stack.nestedStacks.redshiftServerlessStack) {
+      const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
+      const role = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::IAM::Role', 'ScanMetadataWorkflowScanMetadataRole');
+      expect(role).toBeDefined();
+    }
+    if (stack.nestedStacks.redshiftProvisionedStack) {
+      const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftProvisionedStack);
+      const role = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::IAM::Role', 'ScanMetadataWorkflowScanMetadataRole');
+      expect(role).toBeDefined();
+    }
+  });
+
   test('Check RedshiftServerelssWorkgroupRedshiftServerlessDataAPIRoleDefaultPolicy', ()=>{
     if (stack.nestedStacks.newRedshiftServerlessStack) {
       const nestedTemplate = Template.fromStack(stack.nestedStacks.newRedshiftServerlessStack);
@@ -3141,6 +3210,58 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
     if (stack.nestedStacks.redshiftProvisionedStack) {
       const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftProvisionedStack);
       const role = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::IAM::Role', 'UpsertUsersWorkflowCheckUpsertJobStatusRole');
+      expect(role).toBeDefined();
+    }
+  });
+
+  test('Check ScanMetadataWorkflowCheckScanMetadataJobStatusFnSG', ()=>{
+    if (stack.nestedStacks.redshiftServerlessStack) {
+      const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
+      const sg = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::EC2::SecurityGroup', 'ScanMetadataWorkflowCheckScanMetadataJobStatusFnSG');
+      expect(sg).toBeDefined();
+    }
+    if (stack.nestedStacks.redshiftProvisionedStack) {
+      const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftProvisionedStack);
+      const sg = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::EC2::SecurityGroup', 'ScanMetadataWorkflowCheckScanMetadataJobStatusFnSG');
+      expect(sg).toBeDefined();
+    }
+  });
+
+  test('Check ScanMetadataWorkflowCheckScanMetadataJobStatusRole', ()=>{
+    if (stack.nestedStacks.redshiftServerlessStack) {
+      const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
+      const role = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::IAM::Role', 'ScanMetadataWorkflowCheckScanMetadataJobStatusRole');
+      expect(role).toBeDefined();
+    }
+    if (stack.nestedStacks.redshiftProvisionedStack) {
+      const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftProvisionedStack);
+      const role = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::IAM::Role', 'ScanMetadataWorkflowCheckScanMetadataJobStatusRole');
+      expect(role).toBeDefined();
+    }
+  });
+
+  test('Check ScanMetadataWorkflowStoreMetadataIntoDDBFnSG', ()=>{
+    if (stack.nestedStacks.redshiftServerlessStack) {
+      const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
+      const sg = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::EC2::SecurityGroup', 'ScanMetadataWorkflowStoreMetadataIntoDDBFnSG');
+      expect(sg).toBeDefined();
+    }
+    if (stack.nestedStacks.redshiftProvisionedStack) {
+      const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftProvisionedStack);
+      const sg = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::EC2::SecurityGroup', 'ScanMetadataWorkflowStoreMetadataIntoDDBFnSG');
+      expect(sg).toBeDefined();
+    }
+  });
+
+  test('Check ScanMetadataWorkflowStoreMetadataIntoDDBRole', ()=>{
+    if (stack.nestedStacks.redshiftServerlessStack) {
+      const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
+      const role = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::IAM::Role', 'ScanMetadataWorkflowStoreMetadataIntoDDBRole');
+      expect(role).toBeDefined();
+    }
+    if (stack.nestedStacks.redshiftProvisionedStack) {
+      const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftProvisionedStack);
+      const role = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::IAM::Role', 'ScanMetadataWorkflowStoreMetadataIntoDDBRole');
       expect(role).toBeDefined();
     }
   });

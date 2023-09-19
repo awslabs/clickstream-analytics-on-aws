@@ -23,9 +23,11 @@ export function createMetricsWidgetForRedshiftCluster(scope: Construct, props: {
   projectId: string;
   dataProcessingCronOrRateExpression: string;
   upsertUsersCronOrRateExpression: string;
+  scanMetadataCronOrRateExpression: string;
   redshiftClusterIdentifier: string;
   loadEventsWorkflow: IStateMachine;
   upsertUsersWorkflow: IStateMachine;
+  scanMetadataWorkflow: IStateMachine;
   clearExpiredEventsWorkflow: IStateMachine;
 }) {
 

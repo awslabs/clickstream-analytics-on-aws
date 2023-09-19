@@ -91,6 +91,10 @@ export const schemaDefs: SQLDef[] = [
   },
   {
     updatable: 'true',
+    sqlFile: 'sp-scan-metadata.sql',
+  },
+  {
+    updatable: 'true',
     sqlFile: 'sp-clear-expired-events.sql',
   },
 
