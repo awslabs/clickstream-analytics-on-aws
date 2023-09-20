@@ -1,0 +1,67 @@
+{
+    "Status": 200,
+    "DashboardId": "131716a593914c50b778f4ec5dee8239",
+    "Name": "dddd6",
+    "ResourceStatus": "CREATION_SUCCESSFUL",
+    "Definition": {
+        "DataSetIdentifierDeclarations": [
+            {
+                "Identifier": "default",
+                "DataSetArn": "arn:aws:quicksight:ap-northeast-1:615633583142:dataset/7f0e281f-9ffd-4331-b082-2b333c1dfc96"
+            }
+        ],
+        "Sheets": [
+            {
+                "SheetId": "e6c6359c67a44a99811b74f4068c2336",
+                "Name": "Sheet 1",
+                "Visuals": [],
+                "Layouts": [
+                    {
+                        "Configuration": {
+                            "GridLayout": {
+                                "Elements": []
+                            }
+                        }
+                    }
+                ],
+                "ContentType": "INTERACTIVE"
+            }
+        ],
+        "CalculatedFields": [],
+        "ParameterDeclarations": [],
+        "FilterGroups": []
+    },
+    "RequestId": "8e408b49-c572-45cb-8537-a4937e27e5df",
+    "DashboardPublishOptions": {
+        "AdHocFilteringOption": {
+            "AvailabilityStatus": "ENABLED"
+        },
+        "ExportToCSVOption": {
+            "AvailabilityStatus": "ENABLED"
+        },
+        "SheetControlsOption": {
+            "VisibilityState": "COLLAPSED"
+        },
+        "SheetLayoutElementMaximizationOption": {
+            "AvailabilityStatus": "ENABLED"
+        },
+        "VisualMenuOption": {
+            "AvailabilityStatus": "ENABLED"
+        },
+        "VisualAxisSortOption": {
+            "AvailabilityStatus": "ENABLED"
+        },
+        "ExportWithHiddenFieldsOption": {
+            "AvailabilityStatus": "DISABLED"
+        },
+        "DataPointDrillUpDownOption": {
+            "AvailabilityStatus": "ENABLED"
+        },
+        "DataPointMenuLabelOption": {
+            "AvailabilityStatus": "ENABLED"
+        },
+        "DataPointTooltipOption": {
+            "AvailabilityStatus": "ENABLED"
+        }
+    }
+}

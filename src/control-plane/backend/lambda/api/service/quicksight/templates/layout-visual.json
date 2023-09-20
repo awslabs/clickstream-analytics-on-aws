@@ -1,8 +1,8 @@
 {
   "ElementId": "",
   "ElementType": "VISUAL",
-  "ColumnIndex": 1,
-  "ColumnSpan": 20,
+  "ColumnIndex": 0,
+  "ColumnSpan": 36,
   "RowIndex": 2,
   "RowSpan": 20
 }

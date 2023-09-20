@@ -126,6 +126,7 @@ export class ProjectServ {
         const sheetDefinition: SheetDefinition = {
           SheetId: sheet.id,
           Name: sheet.name,
+          FilterControls: [],
         };
         sheets.push(sheetDefinition);
       }
@@ -142,6 +143,9 @@ export class ProjectServ {
             },
           ],
           Sheets: sheets,
+          FilterGroups: [],
+          CalculatedFields: [],
+          ParameterDeclarations: [],
         },
         Permissions: [{
           Principal: principals.dashboardOwner,

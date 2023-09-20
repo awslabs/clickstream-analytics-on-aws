@@ -360,7 +360,10 @@ function addVisuals(visuals: VisualProps[], dashboardDef: DashboardVersionDefini
       }
 
       //add filter
-      const controls = sheet.FilterControls!;
+      if (!sheet.FilterControls) {
+        sheet.FilterControls = [];
+      }
+      const controls = sheet.FilterControls;
       if (visual.filterControl && requestAction === ExploreRequestAction.PUBLISH) {
         controls.push(visual.filterControl);
       }
@@ -750,6 +753,37 @@ function findElementByPath(jsonData: any, path: string): any {
   }
 
   return jsonData;
+}
+
+function findKthElement(jsonData: any, path: string, index: number): any {
+  const pathKeys = path.split('.');
+
+  for (const key of pathKeys) {
+    if (jsonData && typeof jsonData === 'object' && key in jsonData) {
+      jsonData = jsonData[key];
+    } else {
+      return undefined;
+    }
+  }
+
+  if (Array.isArray(jsonData) && jsonData.length >= index) {
+    return jsonData[index-1];
+  } else {
+    return undefined;
+  }
+}
+
+function findFirstChild(jsonData: any): any {
+  if (Array.isArray(jsonData)) {
+    return undefined;
+  } else if (jsonData && typeof jsonData === 'object') {
+    for (const key in jsonData) {
+      if (jsonData.hasOwnProperty(key)) {
+        return jsonData[key];
+      }
+    }
+  }
+  return undefined;
 }
 
 function findElementWithPropertyValue(root: any, path: string, property: string, value: string): any {
