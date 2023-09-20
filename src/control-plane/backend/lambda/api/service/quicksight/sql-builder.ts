@@ -724,15 +724,13 @@ export function buildEventPathAnalysisView(sqlParameters: SQLParameters) : strin
         event_timestamp,
         (
           select
-              ep.value.string_value::varchar
+              max(ep.value.string_value)::varchar
             from
               base_data e,
               e.event_params ep
             where
               ep.key = '_session_id'
               and e.event_id = base.event_id
-            limit
-              1
         ) as session_id
       from base_data base
       ${eventConditionSqlOut !== '' ? 'where '+ eventConditionSqlOut + ` or event_name not in (${eventNameHasCondition})` : '' }
@@ -935,27 +933,23 @@ export function buildNodePathAnalysisView(sqlParameters: SQLParameters) : string
         event_timestamp,
         (
           select
-              ep.value.string_value::varchar
+              max(ep.value.string_value)::varchar
             from
               base_data e,
               e.event_params ep
             where
               ep.key = '_session_id'
               and e.event_id = base.event_id
-            limit
-              1
         ) as session_id,
         (
           select
-              ep.value.string_value::varchar
+              max(ep.value.string_value)::varchar
             from
               base_data e,
               e.event_params ep
             where
               ep.key = '${sqlParameters.pathAnalysis!.nodeType}'
               and e.event_id = base.event_id
-            limit
-              1
         ) as node
       from base_data base
       ),
@@ -1059,15 +1053,13 @@ export function buildNodePathAnalysisView(sqlParameters: SQLParameters) : string
         event_timestamp,
         (
           select
-              ep.value.string_value
+              max(ep.value.string_value)::varchar
             from
               base_data e,
               e.event_params ep
             where
               ep.key = '${sqlParameters.pathAnalysis!.nodeType}'
               and e.event_id = base.event_id
-            limit
-              1
         )::varchar as node
       from base_data base
       ),
@@ -1457,28 +1449,26 @@ function _buildColumnSQL(condition: Condition, propertyList: string[], prefix: s
     if (condition.category == 'user') {
       columnSql += `(
             select
-              up.value.${valueType}
+              max(up.value.${valueType})
             from
               tmp_data e,
               e.user_properties up
             where
               up.key = '${condition.property}'
               and e.event_id = base.event_id
-            limit 1
           ) as ${prefix}${condition.property},
           `;
 
     } else if (condition.category == 'event') {
       columnSql += `(
             select
-              ep.value.${valueType}
+              max(ep.value.${valueType})
             from
               tmp_data e,
               e.event_params ep
             where
               ep.key = '${condition.property}'
               and e.event_id = base.event_id
-            limit 1
           ) as ${prefix}${condition.property},
           `;
     }
