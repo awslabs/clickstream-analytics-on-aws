@@ -1251,10 +1251,10 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
           DICTIONARY_TABLE_NAME: {
             Ref: 'testClickStreamCloudfrontApiClickstreamDictionaryB094D60B',
           },
-          STACK_ACTION_SATE_MACHINE: {
+          STACK_ACTION_STATE_MACHINE: {
             Ref: 'testClickStreamCloudfrontApiStackActionStateMachineF9686748',
           },
-          STACK_WORKFLOW_SATE_MACHINE: {
+          STACK_WORKFLOW_STATE_MACHINE: {
             Ref: 'testClickStreamCloudfrontApiStackWorkflowStateMachine74FBB0F0',
           },
           STACK_WORKFLOW_S3_BUCKET: {
