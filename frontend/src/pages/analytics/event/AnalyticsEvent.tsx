@@ -97,15 +97,15 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
   const chartTypeOptions: SegmentedControlProps.Option[] = [
     {
       id: 'line-chart',
-      iconSvg: <ExtendIcon icon="BsGraphUp" color="black" />,
+      iconSvg: <ExtendIcon icon="BsGraphUp" />,
     },
     {
       id: 'bar-chart',
-      iconSvg: <ExtendIcon icon="BsBarChartFill" color="black" />,
+      iconSvg: <ExtendIcon icon="BsBarChartFill" />,
     },
     {
       id: 'pie-chart',
-      iconSvg: <ExtendIcon icon="BsPieChart" color="black" />,
+      iconSvg: <ExtendIcon icon="BsPieChart" />,
     },
   ];
   const [chartType, setChartType] = useState(defaultChartTypeOption);

@@ -43,7 +43,7 @@ const Navigation: React.FC<INavigationProps> = (props: INavigationProps) => {
     { type: 'link', text: t('nav.projects'), href: '/projects' },
     {
       type: 'link',
-      text: t('nav.explore'),
+      text: t('nav.analyticsStudio'),
       href: '/analytics',
       info: (
         <Popover

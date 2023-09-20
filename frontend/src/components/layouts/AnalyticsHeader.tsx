@@ -152,7 +152,7 @@ const AnalyticsHeader: React.FC<IHeaderProps> = (props: IHeaderProps) => {
       <TopNavigation
         identity={{
           href: '/analytics',
-          title: t('header.solution') ?? '',
+          title: t('header.analyticsStudio') ?? '',
         }}
         search={
           <Select

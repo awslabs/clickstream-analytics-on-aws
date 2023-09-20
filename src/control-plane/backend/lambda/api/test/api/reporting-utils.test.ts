@@ -367,24 +367,7 @@ describe('QuickSight visual management test', () => {
             {
               Configuration: {
                 GridLayout: {
-                  Elements: [
-                    {
-                      ElementId: 'ec48601c-4fa5-4219-a31b-ceaedfd9ad80',
-                      ElementType: 'FILTER_CONTROL',
-                      ColumnIndex: 1,
-                      ColumnSpan: 8,
-                      RowIndex: 0,
-                      RowSpan: 2,
-                    },
-                    {
-                      ElementId: 'e6105df1-3bd6-4d4d-9a44-f34d00fafea0',
-                      ElementType: 'VISUAL',
-                      ColumnIndex: 1,
-                      ColumnSpan: 20,
-                      RowIndex: 2,
-                      RowSpan: 15,
-                    },
-                  ],
+                  Elements: [],
                   CanvasSizeOptions: {
                     ScreenCanvasSizeOptions: {
                       ResizeOption: 'FIXED',

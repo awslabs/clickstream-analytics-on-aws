@@ -15,7 +15,7 @@
     "registerApp": "Register Application",
     "alarms": "Alarms",
     "users": "Users",
-    "analytics": "Analytics",
+    "analyticsStudio": "Analytics Studio",
     "dashboard": "Dashboard",
     "realtime": "Realtime",
     "explore": "Explore",
@@ -27,7 +27,7 @@
     "projects": "Projects",
     "pipelines": "Pipelines",
     "plugins": "Plugins",
-    "explore": "Analytics",
+    "analyticsStudio": "Analytics Studio",
     "analytics": {
       "realtime": "Realtime",
       "dashboards": "Dashboards",
@@ -49,7 +49,7 @@
   "header": {
     "solution": "AWS Solutions",
     "solutionLibrary": "Solution Library",
-    "analytics": "Clickstream Analytics",
+    "analyticsStudio": "Clickstream Analytics Studio",
     "notifications": "Notifications",
     "settings": "Settings",
     "projectSettings": "Project settings",

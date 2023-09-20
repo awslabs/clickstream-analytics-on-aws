@@ -26,9 +26,9 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { TIME_FORMAT } from 'ts/const';
+import { DEFAULT_DASHBOARD_NAME } from 'ts/constant-ln';
 import CreateDashboard from './create/CreateDashboard';
 import DashboardHeader from '../comps/DashboardHeader';
-import { DEFAULT_DASHBOARD_NAME } from 'ts/constant-ln';
 
 const AnalyticsDashboardCard: React.FC<any> = () => {
   const { t } = useTranslation();
@@ -179,7 +179,7 @@ const AnalyticsDashboard: React.FC = () => {
 
   const breadcrumbItems = [
     {
-      text: t('breadCrumb.analytics'),
+      text: t('breadCrumb.analyticsStudio'),
       href: '/analytics',
     },
     {

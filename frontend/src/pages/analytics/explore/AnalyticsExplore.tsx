@@ -82,7 +82,7 @@ const AnalyticsExplore: React.FC = () => {
 
   const breadcrumbItems = [
     {
-      text: t('breadCrumb.analytics'),
+      text: t('breadCrumb.analyticsStudio'),
       href: '/analytics',
     },
     {
