@@ -27,7 +27,7 @@ The solution creates a web service as an ingestion endpoint to collect data sent
 
         !!! warning "Warning"
 
-            CORS is a mandatory setting if you are collecting data from a website. If you do not set value for this parameter, the ingestion server to reject all the requests.
+            CORS is a mandatory setting if you are collecting data from a website. If you do not set value for this parameter, the ingestion server to reject all the requests from Web platform.
 
 * Additional Settings
     * Request path: User can input the path of ingestion endpoint to collect data, the default path is "/collect".
