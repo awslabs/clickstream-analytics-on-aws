@@ -662,7 +662,6 @@ const updateDataSet = async (quickSight: QuickSight, awsAccountId: string,
     }
 
     logger.info('start to update dataset');
-    logger.info(`DatasetParameters: ${JSON.stringify(props.datasetParameters)}`);
     let dataset: CreateDataSetCommandOutput | undefined = undefined;
     dataset = await quickSight.updateDataSet({
       AwsAccountId: awsAccountId,
@@ -682,7 +681,6 @@ const updateDataSet = async (quickSight: QuickSight, awsAccountId: string,
       },
       LogicalTableMap: needLogicalMap ? logicalMap : undefined,
       ColumnGroups: colGroups.length > 0 ? colGroups : undefined,
-      DatasetParameters: props.datasetParameters,
       DataSetUsageConfiguration: {
         DisableUseAsDirectQuerySource: false,
         DisableUseAsImportedSource: false,
