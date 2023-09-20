@@ -1630,13 +1630,14 @@ We also recommend that you refer <a href="https://docs.aws.amazon.com/vpc/latest
 <li>Private Subnets: Select two private subnets in the same AZs as public subnets</li>
 <li>Ingestion capacity: Keep the default values</li>
 <li>Enable HTTPS: Uncheck and then <strong>Acknowledge</strong> the security warning</li>
+<li>Cross-Origin Resource Sharing (CORS): leave it blank</li>
 <li>Additional settings: Keep the default values</li>
 </ul>
 </li>
 <li>Fill in the form of <strong>Data sink settings</strong>.<ul>
 <li>Sink type: <strong><code>Amazon Kinesis Data Stream(KDS)</code></strong></li>
 <li>Provision mode: <strong><code>On-demand</code></strong></li>
-<li>In <strong>Additional Settings</strong>, change <strong>Sink Maximum Interval</strong> to <code>60</code> and <strong>Batch Size</strong> to <code>1000</code></li>
+<li>In <strong>Additional Settings</strong>, change <strong>Sink Maximum Interval</strong> to <code>60</code> and <strong>Batch Size</strong> to <code>1000</code>  </li>
 </ul>
 </li>
 <li>Click <strong>Next</strong> to move to step 3.</li>

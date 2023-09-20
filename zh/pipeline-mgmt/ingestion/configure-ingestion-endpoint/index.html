@@ -1569,6 +1569,13 @@
 </ul>
 </li>
 <li>
+<p><strong>跨源资源共享 (CORS)</strong>: 您可以启用 CORS 来限制来自特定域的数据摄取 API 的请求。请注意，你需要输入一个完整的互联网地址，例如 https://www.example.com、http://localhost:8080。如果您有多个域用于此设置，请使用逗号分隔域。</p>
+<div class="language-text highlight"><pre><span></span><code>!!! warning &quot;Warning&quot;
+
+    如果您要从网站收集数据，则必须设置 CORS。如果您未为此参数设置值，则摄取服务器将拒绝所有从网页平台来的请求。
+</code></pre></div>
+</li>
+<li>
 <p>其他设置</p>
 <ul>
 <li>
