@@ -15,7 +15,7 @@
     "registerApp": "注册应用程序",
     "alarms": "告警",
     "users": "用户",
-    "analyticsStudio": "Analytics Studio",
+    "analyticsStudio": "点击流分析工作坊",
     "analytics": "数据分析",
     "dashboard": "看板",
     "realtime": "实时",
@@ -28,7 +28,7 @@
     "projects": "项目",
     "pipelines": "数据管道",
     "plugins": "插件",
-    "analyticsStudio": "Analytics Studio",
+    "analyticsStudio": "分析工作坊",
     "analytics": {
       "realtime": "实时",
       "dashboards": "看板",
@@ -50,7 +50,7 @@
   "header": {
     "solution": "亚马逊云科技解决方案",
     "solutionLibrary": "解决方案库",
-    "analyticsStudio": "点击流分析 Studio",
+    "analyticsStudio": "点击流分析工作坊",
     "notifications": "通知",
     "settings": "设置",
     "projectSettings": "项目设置",
