@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { DatasetParameter, InputColumn, QuickSight, ResourceNotFoundException } from '@aws-sdk/client-quicksight';
+import { InputColumn, QuickSight, ResourceNotFoundException } from '@aws-sdk/client-quicksight';
 import { logger } from '../../common/powertools';
 
 export interface RedShiftProps {
@@ -62,7 +62,6 @@ export interface DataSetProps {
   projectedColumns?: string[];
   tagColumnOperations?: TagColumnOperationProps[];
   customSql: string;
-  datasetParameters?: DatasetParameter[];
 };
 
 export interface QuickSightDashboardDefProps {

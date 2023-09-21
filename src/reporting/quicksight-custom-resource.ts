@@ -111,16 +111,6 @@ export function createQuicksightCustomResource(
             columnGeographicRoles: ['COUNTRY'],
           },
         ],
-        datasetParameters: [
-          {
-            DateTimeDatasetParameter: {
-              Id: 'a05a5ad5-c6b1-40de-9f96-f2bfcc5d2c21',
-              Name: 'EventStartDate',
-              ValueType: 'SINGLE_VALUED',
-              TimeGranularity: 'DAY',
-            },
-          },
-        ],
       },
       {
         name: '',
@@ -156,19 +146,6 @@ export function createQuicksightCustomResource(
           'session_date_hour',
           'entry_view',
           'exit_view',
-        ],
-        datasetParameters: [
-          {
-            DateTimeDatasetParameter: {
-              Id: '2a008707-fa82-44b8-ad3a-452fd9d3ca40',
-              Name: 'SessionDate',
-              ValueType: 'SINGLE_VALUED',
-              TimeGranularity: 'DAY',
-              DefaultValues: {
-                StaticValues: [getDate(-31)],
-              },
-            },
-          },
         ],
       },
       {
@@ -252,19 +229,6 @@ export function createQuicksightCustomResource(
           'user_id',
           'user_pseudo_id',
         ],
-        datasetParameters: [
-          {
-            DateTimeDatasetParameter: {
-              Id: 'b4738678-5d1a-4bfc-b297-152fac95bcd4',
-              Name: 'EventDate',
-              ValueType: 'SINGLE_VALUED',
-              TimeGranularity: 'DAY',
-              DefaultValues: {
-                StaticValues: [getDate(-31)],
-              },
-            },
-          },
-        ],
       },
       {
         name: '',
@@ -298,19 +262,6 @@ export function createQuicksightCustomResource(
           'user_id',
           'usage_num',
         ],
-        datasetParameters: [
-          {
-            DateTimeDatasetParameter: {
-              Id: 'f89d74cb-bff7-44d3-8e84-7332c1543d91',
-              Name: 'EventDate',
-              ValueType: 'SINGLE_VALUED',
-              TimeGranularity: 'DAY',
-              DefaultValues: {
-                StaticValues: [getDate(-31)],
-              },
-            },
-          },
-        ],
       },
       {
         name: '',
@@ -326,19 +277,6 @@ export function createQuicksightCustomResource(
           'event_parameter_key',
           'event_parameter_value',
         ],
-        datasetParameters: [
-          {
-            DateTimeDatasetParameter: {
-              Id: 'c5a69e41-ac17-40e1-b633-ff6927db97d2',
-              Name: 'EventDate',
-              ValueType: 'SINGLE_VALUED',
-              TimeGranularity: 'DAY',
-              DefaultValues: {
-                StaticValues: [getDate(-31)],
-              },
-            },
-          },
-        ],
       },
       {
         name: '',
@@ -351,19 +289,6 @@ export function createQuicksightCustomResource(
           'time_period',
           'this_day_value',
           'sum',
-        ],
-        datasetParameters: [
-          {
-            DateTimeDatasetParameter: {
-              Id: '6147bdf0-9c71-4adf-98ce-4c99245af724',
-              Name: 'EventDate',
-              ValueType: 'SINGLE_VALUED',
-              TimeGranularity: 'DAY',
-              DefaultValues: {
-                StaticValues: [getDate(-31)],
-              },
-            },
-          },
         ],
       },
       {
@@ -399,19 +324,6 @@ export function createQuicksightCustomResource(
           'next_event',
           'previous_screen',
           'next_screen',
-        ],
-        datasetParameters: [
-          {
-            DateTimeDatasetParameter: {
-              Id: '2ca7f3a1-f58d-4ee9-a6b0-6fdc63df6ee3',
-              Name: 'EventDate',
-              ValueType: 'SINGLE_VALUED',
-              TimeGranularity: 'DAY',
-              DefaultValues: {
-                StaticValues: [getDate(-31)],
-              },
-            },
-          },
         ],
       },
     ],
@@ -457,10 +369,4 @@ function createQuicksightLambda(
   });
 
   return fn;
-}
-
-function getDate(index: number) {
-  const newDate = new Date();
-  newDate.setDate(new Date().getDate() + index);
-  return newDate;
 }
