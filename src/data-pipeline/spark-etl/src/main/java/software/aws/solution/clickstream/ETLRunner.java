@@ -25,7 +25,6 @@ import org.apache.spark.sql.functions;
 import org.apache.spark.sql.types.DataTypes;
 import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
-import org.jetbrains.annotations.NotNull;
 import org.sparkproject.guava.annotations.VisibleForTesting;
 import software.aws.solution.clickstream.exception.ExecuteTransformerException;
 
@@ -103,7 +102,6 @@ public class ETLRunner {
         log.info(new ETLMetric(resultCount, "sink").toString());
     }
 
-    @NotNull
     private Dataset<Row> rePartitionInputDataset(final Dataset<Row> dataset) {
         int inputDataPartitions = dataset.rdd().getNumPartitions();
         Dataset<Row> repDataset = dataset;
@@ -315,13 +313,16 @@ public class ETLRunner {
         Dataset<Row> userDataset = transformedDatasets.get(3);
         String outPath = config.getOutputPath();
         long evenParamDatasetCount = writeResult(outPath, evenParamDataset, TableName.EVEN_PARAMETER);
-        long itemDatasetCount = writeResult(outPath , itemDataset, TableName.ITEM);
-        long userDatasetCount = writeResult(outPath, userDataset, TableName.USER);
-
         log.info(new ETLMetric(evenParamDatasetCount, "sink " + TableName.EVEN_PARAMETER.tableName).toString());
-        log.info(new ETLMetric(itemDatasetCount, "sink " + TableName.ITEM.tableName).toString());
-        log.info(new ETLMetric(userDatasetCount, "sink " + TableName.USER.tableName).toString());
 
+        if (itemDataset != null) {
+            long itemDatasetCount = writeResult(outPath, itemDataset, TableName.ITEM);
+            log.info(new ETLMetric(itemDatasetCount, "sink " + TableName.ITEM.tableName).toString());
+        }
+        if (userDataset != null) {
+            long userDatasetCount = writeResult(outPath, userDataset, TableName.USER);
+            log.info(new ETLMetric(userDatasetCount, "sink " + TableName.USER.tableName).toString());
+        }
     }
 
     protected long writeResult(final String outputPath, final Dataset<Row> dataset, final TableName tbName) {
@@ -329,6 +330,9 @@ public class ETLRunner {
         long resultCount = partitionedDataset.count();
         log.info(new ETLMetric(resultCount, "writeResult for table " + tbName).toString());
         log.info("outputPath: " + outputPath);
+        if (resultCount == 0) {
+            return 0L;
+        }
         String saveOutputPath = outputPath;
         if (!(saveOutputPath.endsWith(tbName.tableName + "/")
                 || saveOutputPath.endsWith(tbName.tableName))) {

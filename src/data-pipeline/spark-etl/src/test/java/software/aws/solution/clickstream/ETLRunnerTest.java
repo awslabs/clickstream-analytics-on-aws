@@ -386,6 +386,77 @@ class ETLRunnerTest extends BaseSparkTest {
     }
 
 
+
+    @Test
+    public void should_executeTransformers_with_TransformerV2_with_empty_user() throws IOException {
+        // DOWNLOAD_FILE=1 ./gradlew clean test --info --tests software.aws.solution.clickstream.ETLRunnerTest.should_executeTransformers_with_TransformerV2_with_empty_user
+        System.setProperty(APP_IDS_PROP, "uba-app");
+        System.setProperty(PROJECT_ID_PROP, "test_project_id_01");
+        System.setProperty("force.merge", "true");
+
+        spark.sparkContext().addFile(requireNonNull(getClass().getResource("/GeoLite2-City.mmdb")).getPath());
+        List<String> transformers = Lists.newArrayList();
+        transformers.add("software.aws.solution.clickstream.TransformerV2");
+        transformers.add("software.aws.solution.clickstream.UAEnrichment");
+        transformers.add("software.aws.solution.clickstream.IPEnrichment");
+
+        ETLRunnerConfig config = getRunnerConfig(transformers, "TransformerV2_4");
+        ETLRunner runner = new ETLRunner(spark, config);
+        Dataset<Row> sourceDataset =
+                spark.read().json(requireNonNull(getClass().getResource("/original_data_with_empty_user.json")).getPath());
+        assertEquals(sourceDataset.count(), 1);
+        runner.writeResultDataset(runner.executeTransformers(sourceDataset, transformers));
+        String outputPath = config.getOutputPath();
+
+        System.out.println("outputPath:" + outputPath);
+        Dataset<Row> eventDataset = spark.read().json(outputPath + ETLRunner.TableName.EVENT.tableName);
+        Dataset<Row> eventParamDataset = spark.read().json(outputPath + ETLRunner.TableName.EVEN_PARAMETER.tableName);
+        Dataset<Row> itemDataset = spark.read().json(outputPath + ETLRunner.TableName.ITEM.tableName);
+        try {
+           spark.read().json(outputPath + ETLRunner.TableName.USER.tableName);
+        } catch (Exception e) {
+            Assertions.assertTrue(e.getMessage().contains("Path does not exist"));
+        }
+        Assertions.assertEquals(1, eventDataset.count());
+        Assertions.assertEquals(11, eventParamDataset.count());
+        Assertions.assertTrue(itemDataset.count() > 0);
+    }
+
+    @Test
+    public void should_executeTransformers_with_TransformerV2_with_empty_user_and_item() throws IOException {
+        // DOWNLOAD_FILE=0 ./gradlew clean test --info --tests software.aws.solution.clickstream.ETLRunnerTest.should_executeTransformers_with_TransformerV2_with_empty_user_and_item
+        System.setProperty(APP_IDS_PROP, "uba-app");
+        System.setProperty(PROJECT_ID_PROP, "test_project_id_01");
+        System.setProperty("force.merge", "true");
+
+        List<String> transformers = Lists.newArrayList();
+        transformers.add("software.aws.solution.clickstream.TransformerV2");
+
+        ETLRunnerConfig config = getRunnerConfig(transformers, "TransformerV2_5");
+        ETLRunner runner = new ETLRunner(spark, config);
+        Dataset<Row> sourceDataset =
+                spark.read().json(requireNonNull(getClass().getResource("/original_data_with_empty_user.json")).getPath());
+        assertEquals(sourceDataset.count(), 1);
+        runner.writeResultDataset(runner.executeTransformers(sourceDataset, transformers));
+        String outputPath = config.getOutputPath();
+
+        System.out.println("outputPath:" + outputPath);
+        Dataset<Row> eventDataset = spark.read().json(outputPath + ETLRunner.TableName.EVENT.tableName);
+        Dataset<Row> eventParamDataset = spark.read().json(outputPath + ETLRunner.TableName.EVEN_PARAMETER.tableName);
+        try {
+            spark.read().json(outputPath + ETLRunner.TableName.USER.tableName);
+        } catch (Exception e) {
+            Assertions.assertTrue(e.getMessage().contains("Path does not exist"));
+        }
+        try {
+            spark.read().json(outputPath + ETLRunner.TableName.ITEM.tableName);
+        } catch (Exception e) {
+            Assertions.assertTrue(e.getMessage().contains("Path does not exist"));
+        }
+        Assertions.assertEquals(1, eventDataset.count());
+        Assertions.assertEquals(11, eventParamDataset.count());
+    }
+
     public ETLRunnerConfig getRunnerConfig(List<String> transformers, String name) {
         String sourcePath = getClass().getResource("/original_data.json").getPath();
         String startTimestamp = "1667963966000"; // 2022-11-09T03:19:26.000Z

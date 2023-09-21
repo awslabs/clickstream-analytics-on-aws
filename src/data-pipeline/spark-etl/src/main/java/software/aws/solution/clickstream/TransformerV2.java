@@ -39,6 +39,7 @@ import java.util.List;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Optional;
 
 import static org.apache.spark.sql.functions.col;
 import static org.apache.spark.sql.functions.coalesce;
@@ -89,7 +90,7 @@ public final class TransformerV2 {
     private static DateFormat dateFormatYMD = new SimpleDateFormat("yyyyMMdd");
     private static Map<String, StructType> scheamMap = new HashMap<>();
 
-    private static Dataset<Row> getUserTrafficSourceDataset(final Dataset<Row> userDataset) {
+    private static Dataset<Row> getUserTrafficSourceDataset(final Dataset<Row> userDataset, final long newUserCount) {
         Column dataCol = col("data");
         Column attributesCol = dataCol.getField(ATTRIBUTES);
         SparkSession spark = userDataset.sparkSession();
@@ -107,18 +108,27 @@ public final class TransformerV2 {
                         "_traffic_source_source",
                         "event_timestamp");
 
-        Dataset<Row> newAggUserTrafficSourceDataset = getAggTrafficSourceDataset(newUserTrafficSourceDataset);
-        log.info("newAggUserTrafficSourceDataset count:" + newAggUserTrafficSourceDataset.count());
-        String path = saveIncrementalDatasetWithTableName(tableName, newAggUserTrafficSourceDataset);
+        long newTrafficSourceCount = newUserTrafficSourceDataset.count();
+        log.info("newUserCount=" + newUserCount + ", newTrafficSourceCount=" + newTrafficSourceCount);
 
-        Dataset<Row> allTrafficSourceDataset = readDatasetFromPath(spark, path, ContextUtil.getUserKeepDays());
-        log.info("allTrafficSourceDataset count:" + allTrafficSourceDataset.count());
+        setSchemaMap(newUserTrafficSourceDataset, tableName);
 
-        Dataset<Row> aggTrafficSourceDataset = getAggTrafficSourceDataset(allTrafficSourceDataset);
-
-        log.info("aggTrafficSourceDataset count:" + aggTrafficSourceDataset.count());
-        saveFullDataset(tableName, aggTrafficSourceDataset);
-        return aggTrafficSourceDataset;
+        if (newTrafficSourceCount > 0) {
+            Dataset<Row> newAggUserTrafficSourceDataset = getAggTrafficSourceDataset(newUserTrafficSourceDataset);
+            log.info("newAggUserTrafficSourceDataset count:" + newAggUserTrafficSourceDataset.count());
+            String path = saveIncrementalDatasetWithTableName(tableName, newAggUserTrafficSourceDataset);
+            Dataset<Row> allTrafficSourceDataset = readDatasetFromPath(spark, path, ContextUtil.getUserKeepDays());
+            log.info("allTrafficSourceDataset count:" + allTrafficSourceDataset.count());
+            Dataset<Row> aggTrafficSourceDataset = getAggTrafficSourceDataset(allTrafficSourceDataset);
+            log.info("aggTrafficSourceDataset count:" + aggTrafficSourceDataset.count());
+            saveFullDataset(tableName, aggTrafficSourceDataset);
+            return aggTrafficSourceDataset;
+        } else if (newUserCount > 0 && newTrafficSourceCount == 0) {
+            String pathFull = getPathForTable(tableName + FULL_SUFFIX);
+            return readDatasetFromPath(spark, pathFull, ContextUtil.getUserKeepDays());
+        } else {
+            return null;
+        }
     }
 
     private static Dataset<Row> getAggTrafficSourceDataset(final Dataset<Row> allTrafficSourceDataset) {
@@ -131,7 +141,8 @@ public final class TransformerV2 {
                 .select(col("app_id"), col("user_id"), expr("traffic_source_source.*"));
     }
 
-    private static Dataset<Row> getPageRefererDataset(final Dataset<Row> userDataset) {
+    private static Dataset<Row> getPageRefererDataset(final Dataset<Row> userDataset,
+                                                      final long newUserCount) {
         Column dataCol = col("data");
         Column attributesCol = dataCol.getField(ATTRIBUTES);
         SparkSession spark = userDataset.sparkSession();
@@ -144,17 +155,27 @@ public final class TransformerV2 {
                 .filter(col("_page_referer").isNotNull())
                 .select("app_id", "user_id", "_page_referer", "event_timestamp");
 
-        Dataset<Row> newAggUserRefererDataset = getAggUserRefererDataset(newUserRefererDataset);
-        log.info("newAggUserRefererDataset count:" + newAggUserRefererDataset.count());
-        String path = saveIncrementalDatasetWithTableName(tableName, newAggUserRefererDataset);
-        Dataset<Row> allUserRefererDataset = readDatasetFromPath(spark, path, ContextUtil.getUserKeepDays());
-        log.info("allUserRefererDataset count:" + allUserRefererDataset.count());
+        long newRefererCount = newUserRefererDataset.count();
+        log.info("newUserCount=" + newUserCount + ", newRefererCount=" + newRefererCount);
 
-        Dataset<Row> aggUserRefererDataset = getAggUserRefererDataset(allUserRefererDataset);
+        setSchemaMap(newUserRefererDataset, tableName);
 
-        log.info("aggTrafficSourceDataset count:" + aggUserRefererDataset.count());
-        saveFullDataset(tableName, aggUserRefererDataset);
-        return aggUserRefererDataset;
+        if (newRefererCount > 0) {
+            Dataset<Row> newAggUserRefererDataset = getAggUserRefererDataset(newUserRefererDataset);
+            log.info("newAggUserRefererDataset count:" + newAggUserRefererDataset.count());
+            String path = saveIncrementalDatasetWithTableName(tableName, newAggUserRefererDataset);
+            Dataset<Row> allUserRefererDataset = readDatasetFromPath(spark, path, ContextUtil.getUserKeepDays());
+            log.info("allUserRefererDataset count:" + allUserRefererDataset.count());
+            Dataset<Row> aggUserRefererDataset = getAggUserRefererDataset(allUserRefererDataset);
+            log.info("aggTrafficSourceDataset count:" + aggUserRefererDataset.count());
+            saveFullDataset(tableName, aggUserRefererDataset);
+            return aggUserRefererDataset;
+        } else if (newUserCount > 0 && newRefererCount == 0) {
+            String pathFull = getPathForTable(tableName + FULL_SUFFIX);
+            return readDatasetFromPath(spark, pathFull, ContextUtil.getUserKeepDays());
+        } else {
+            return null;
+        }
     }
 
     private static Dataset<Row> getAggUserRefererDataset(final Dataset<Row> allUserRefererDataset) {
@@ -167,7 +188,7 @@ public final class TransformerV2 {
         return aggUserRefererDataset;
     }
 
-    private static Dataset<Row> getUserDeviceIdDataset(final Dataset<Row> userDataset) {
+    private static Dataset<Row> getUserDeviceIdDataset(final Dataset<Row> userDataset, final long newUserCount) {
         Column dataCol = col("data");
         SparkSession spark = userDataset.sparkSession();
         String tableName = TABLE_ETL_USER_DEVICE_ID;
@@ -178,20 +199,27 @@ public final class TransformerV2 {
                 .withColumn("device_id_list", array(col("device_id")))
                 .select("app_id", "user_id", "device_id_list", "event_timestamp");
 
-        Dataset<Row> newAggUserDeviceIdDataset = getAggUserDeviceIdDataset(newUserDeviceIdDataset);
-        log.info("newAggUserDeviceIdDataset count:" + newAggUserDeviceIdDataset.count());
-        String path = saveIncrementalDatasetWithTableName(tableName, newAggUserDeviceIdDataset);
+        long newDeviceIdCount = newUserDeviceIdDataset.count();
+        log.info("newUserCount=" + newUserCount + ", newDeviceIdCount=" + newDeviceIdCount);
+        setSchemaMap(newUserDeviceIdDataset, tableName);
 
-        Dataset<Row> allUserDeviceIdDataset = readDatasetFromPath(spark, path,
-                ContextUtil.getUserKeepDays());
-        log.info("allUserDeviceIdDataset count:" + allUserDeviceIdDataset.count());
-
-        Dataset<Row> aggUserDeviceIdDataset = getAggUserDeviceIdDataset(allUserDeviceIdDataset);
-
-        log.info("aggUserDeviceIdDataset count:" + allUserDeviceIdDataset.count());
-
-        saveFullDataset(tableName, aggUserDeviceIdDataset);
-        return aggUserDeviceIdDataset;
+        if (newDeviceIdCount > 0) {
+            Dataset<Row> newAggUserDeviceIdDataset = getAggUserDeviceIdDataset(newUserDeviceIdDataset);
+            log.info("newAggUserDeviceIdDataset count:" + newAggUserDeviceIdDataset.count());
+            String path = saveIncrementalDatasetWithTableName(tableName, newAggUserDeviceIdDataset);
+            Dataset<Row> allUserDeviceIdDataset = readDatasetFromPath(spark, path,
+                    ContextUtil.getUserKeepDays());
+            log.info("allUserDeviceIdDataset count:" + allUserDeviceIdDataset.count());
+            Dataset<Row> aggUserDeviceIdDataset = getAggUserDeviceIdDataset(allUserDeviceIdDataset);
+            log.info("aggUserDeviceIdDataset count:" + allUserDeviceIdDataset.count());
+            saveFullDataset(tableName, aggUserDeviceIdDataset);
+            return aggUserDeviceIdDataset;
+        } else if (newUserCount > 0 && newDeviceIdCount == 0) {
+            String pathFull = getPathForTable(tableName + FULL_SUFFIX);
+            return readDatasetFromPath(spark, pathFull, ContextUtil.getUserKeepDays());
+        } else {
+            return null;
+        }
     }
 
     private static Dataset<Row> getAggUserDeviceIdDataset(final Dataset<Row> allUserDeviceIdDataset) {
@@ -220,7 +248,6 @@ public final class TransformerV2 {
         Date now = new Date();
         String yyyyMMdd = dateFormatYMD.format(now);
         Dataset<Row> dataset1 = dataset.withColumn(UPDATE_DATE, lit(yyyyMMdd).cast(DataTypes.StringType));
-        scheamMap.put(path, dataset1.schema());
 
         dataset1.coalesce(1).write()
                 .partitionBy(UPDATE_DATE, "app_id")
@@ -323,13 +350,16 @@ public final class TransformerV2 {
         Dataset<Row> eventParameterDataset = extractEventParameter(dataset1);
         log.info(new ETLMetric(eventParameterDataset, "eventParameterDataset").toString());
 
-        Dataset<Row> itemDataset = extractItem(dataset1);
-        log.info(new ETLMetric(itemDataset, "itemDataset").toString());
+        Optional<Dataset<Row>> itemDataset = extractItem(dataset1);
+        itemDataset.ifPresent(rowDataset -> log.info(new ETLMetric(rowDataset, "itemDataset").toString()));
 
-        Dataset<Row> userDataset = extractUser(dataset1);
-        log.info(new ETLMetric(userDataset, "userDataset").toString());
+        Optional<Dataset<Row>> userDataset = extractUser(dataset1);
+        itemDataset.ifPresent(rowDataset -> log.info(new ETLMetric(rowDataset, "userDataset").toString()));
 
-        return Arrays.asList(eventDataset, eventParameterDataset, itemDataset, userDataset);
+        return Arrays.asList(eventDataset,
+                eventParameterDataset,
+                itemDataset.orElse(null),
+                userDataset.orElse(null));
     }
 
     private Dataset<Row> extractEvent(final Dataset<Row> dataset) {
@@ -381,11 +411,13 @@ public final class TransformerV2 {
 
     }
 
-    private Dataset<Row> extractItem(final Dataset<Row> dataset) {
+    private Optional<Dataset<Row>> extractItem(final Dataset<Row> dataset) {
         SparkSession spark = dataset.sparkSession();
         Column dataCol = col("data");
         ArrayType itemsType = DataTypes.createArrayType(DataTypes.StringType);
-        Dataset<Row> dataset0 = dataset.withColumn("item_json", explode(from_json(dataCol.getField("items"), itemsType)));
+        Dataset<Row> datasetItems = dataset
+                .withColumn("item_json", explode(from_json(dataCol.getField("items"), itemsType)))
+                .filter(col("item_json").isNotNull());
 
         List<String> topFields = Collections.singletonList("id");
         List<String> ignoreFields = Collections.singletonList("quantity");
@@ -394,8 +426,24 @@ public final class TransformerV2 {
         excludedAttributes.addAll(topFields);
         excludedAttributes.addAll(ignoreFields);
 
-        Dataset<Row> dataset1 = kvConverter.transform(dataset0, col("item_json"), "properties", excludedAttributes);
-        Dataset<Row> dataset2 = dataset1.withColumn("id", get_json_object(col("item_json"), "$.id").cast(DataTypes.StringType));
+        Dataset<Row> dataset1 = kvConverter.transform(datasetItems, col("item_json"), "properties", excludedAttributes);
+        Dataset<Row> dataset2 = dataset1
+                .withColumn("id", get_json_object(col("item_json"), "$.id").cast(DataTypes.StringType))
+                .filter(col("id").isNotNull())
+                .select(
+                        "app_id",
+                        "event_date",
+                        "event_timestamp",
+                        "id",
+                        "properties"
+                );
+
+        String tableName = ETLRunner.TableName.ITEM.tableName;
+        setSchemaMap(dataset2, tableName);
+
+        if (dataset2.count() == 0) {
+            return Optional.empty();
+        }
 
         List<String> selectedFields = new ArrayList<>();
         selectedFields.add("app_id");
@@ -407,7 +455,8 @@ public final class TransformerV2 {
         Column[] selectCols = selectedFields.stream().map(functions::col).toArray(Column[]::new);
         Dataset<Row> newItemsDataset = dataset2.select(selectCols);
         Dataset<Row> newAggItemsDataset = getAggItemDataset(newItemsDataset);
-        log.info("newAggItemsDataset count " + newAggItemsDataset.count());
+        long newCount = newAggItemsDataset.count();
+        log.info("newAggItemsDataset count  " + newCount);
 
         String path = saveIncrementalDataset(ETLRunner.TableName.ITEM, newAggItemsDataset);
         Dataset<Row> fullItemsDataset = readDatasetFromPath(spark, path,
@@ -424,28 +473,24 @@ public final class TransformerV2 {
                 "properties"
         );
         saveFullDataset(ETLRunner.TableName.ITEM.tableName, fullAggItemsDatasetRt);
-        return fullAggItemsDatasetRt;
+        return Optional.of(fullAggItemsDatasetRt);
     }
 
-    private Dataset<Row> extractUser(final Dataset<Row> dataset) {
-
+    private Optional<Dataset<Row>> extractUser(final Dataset<Row> dataset) {
         SparkSession spark = dataset.sparkSession();
-
         Column dataCol = col("data");
         Column attributesCol = dataCol.getField(ATTRIBUTES);
-
         Dataset<Row> userDataset = dataset.filter(col("user_id").isNotNull());
-        Dataset<Row> userReferrerDataset = getPageRefererDataset(userDataset);
-        Dataset<Row> userDeviceIdDataset = getUserDeviceIdDataset(userDataset);
-        Dataset<Row> userTrafficSourceDataset = getUserTrafficSourceDataset(userDataset);
-
-        Dataset<Row> profileSetDataset = dataset
+        Dataset<Row> profileSetDataset = userDataset
                 .filter(col("event_name")
                         .isin("user_profile_set", "_user_profile_set", "_profile_set"));
 
-        long setUserProfileEventCount = profileSetDataset.count();
+        long newUserCount = profileSetDataset.count();
+        log.info("newUserCount:" + newUserCount);
 
-        log.info("profileSetDataset:" + setUserProfileEventCount);
+        Dataset<Row> userReferrerDataset = getPageRefererDataset(userDataset, newUserCount);
+        Dataset<Row> userDeviceIdDataset = getUserDeviceIdDataset(userDataset, newUserCount);
+        Dataset<Row> userTrafficSourceDataset = getUserTrafficSourceDataset(userDataset, newUserCount);
 
         Dataset<Row> profileSetDataset1 = this.userPropertiesConverter.transform(profileSetDataset);
 
@@ -465,6 +510,11 @@ public final class TransformerV2 {
                         "_channel"
                 ).distinct();
 
+        String tableName = ETLRunner.TableName.USER.tableName;
+        setSchemaMap(newUserProfileMainDataset, tableName);
+        if (newUserCount == 0) {
+            return Optional.empty();
+        }
 
         log.info("newUserProfileMainDataset:" + newUserProfileMainDataset.count());
 
@@ -491,10 +541,7 @@ public final class TransformerV2 {
                 .join(userReferrerDataset, userIdJoinForPageReferrer, "left");
 
         log.info("joinedFullUserDataset:" + joinedFullUserDataset.count());
-
-
-
-        return joinedFullUserDataset.select(appIdCol,
+        Dataset<Row> joinedFullUserDatasetRt = joinedFullUserDataset.select(appIdCol,
                         col("event_date"),
                         eventTimestampCol,
                         userIdCol,
@@ -509,6 +556,16 @@ public final class TransformerV2 {
                         col("_traffic_source_source").alias("_first_traffic_source"),
                         col("device_id_list"),
                         col("_channel"));
+
+        return Optional.of(joinedFullUserDatasetRt);
+    }
+
+    private static void setSchemaMap(final Dataset<Row> newUserProfileMainDataset, final String tableName) {
+        StructType schema = newUserProfileMainDataset.schema().add(UPDATE_DATE, DataTypes.StringType, true);
+        String pathFull = getPathForTable(tableName + FULL_SUFFIX);
+        String pathIncremental = getPathForTable(tableName + INCREMENTAL_SUFFIX);
+        scheamMap.put(pathFull, schema);
+        scheamMap.put(pathIncremental, schema);
     }
 
     private Dataset<Row> getAggUserDataset(final Dataset<Row> newUserDataset) {
