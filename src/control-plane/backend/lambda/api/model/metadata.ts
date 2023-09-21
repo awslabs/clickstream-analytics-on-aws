@@ -60,8 +60,10 @@ export interface IMetadataEventParameter {
   platform: MetadataPlatform[];
   readonly parameterType: MetadataParameterType;
   readonly valueType: MetadataValueType;
-  valueEnum: IMetadataAttributeValue[];
+  valueEnum: string[];
+  values: IMetadataAttributeValue[];
   associatedEvents? : IMetadataEvent[];
+  readonly category: string;
 
   readonly createAt: number;
   readonly updateAt: number;
@@ -77,6 +79,8 @@ export interface IMetadataUserAttribute {
   readonly projectId: string;
   readonly appId: string;
 
+  readonly eventName: string;
+
   readonly attributeId: string;
   readonly name: string;
   displayName: string;
@@ -84,7 +88,9 @@ export interface IMetadataUserAttribute {
   readonly metadataSource: MetadataSource;
   hasData: boolean;
   readonly valueType: MetadataValueType;
-  valueEnum: IMetadataAttributeValue[];
+  valueEnum: string[];
+  values: IMetadataAttributeValue[];
+  readonly category: string;
 
   readonly createAt: number;
   readonly updateAt: number;

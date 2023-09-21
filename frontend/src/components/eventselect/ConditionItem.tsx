@@ -65,8 +65,8 @@ const ConditionItem: React.FC<ConditionItemProps> = (
     if (!item) {
       return;
     }
-    if (item.valueEnum) {
-      const options = item.valueEnum.map((i) => {
+    if (item.values) {
+      const options = item.values.map((i) => {
         return {
           value: i.value,
           label: i.displayValue,

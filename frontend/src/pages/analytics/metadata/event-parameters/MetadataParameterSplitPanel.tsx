@@ -35,6 +35,7 @@ import MetadataPlatformFC from '../comps/MetadataPlatform';
 import MetadataSourceFC from '../comps/MetadataSource';
 import MetadataDetailsTable from '../table/MetadataDetailsTable';
 import MetadataDictionaryTable from '../table/MetadataDictionaryTable';
+import { EVENT_PARAMETER_DISPLAY_PREFIX } from 'ts/const';
 
 interface MetadataParameterSplitPanelProps {
   parameter: IMetadataEventParameter;
@@ -115,7 +116,7 @@ const MetadataParameterSplitPanel: React.FC<
 
     try {
       const { success }: ApiResponse<null> = await updateMetadataDisplay({
-        id: `EVENT_PARAMETER#${parameterDetails.id}`,
+        id: `${EVENT_PARAMETER_DISPLAY_PREFIX}${parameterDetails.projectId}#${parameterDetails.appId}#${parameterDetails.name}`,
         projectId: parameterDetails.projectId,
         appId: parameterDetails.appId,
         displayName: parameterDetails.displayName,

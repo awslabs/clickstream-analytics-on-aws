@@ -53,7 +53,8 @@ declare global {
     readonly platform: MetadataPlatform[];
     readonly parameterType: MetadataParameterType;
     readonly valueType: MetadataValueType;
-    readonly valueEnum: IMetadataAttributeValue[];
+    readonly valueEnum: string[];
+    readonly values: IMetadataAttributeValue[];
     readonly associatedEvents?: IMetadataEvent[];
 
     readonly createAt: number;
@@ -75,7 +76,8 @@ declare global {
     readonly metadataSource: MetadataSource;
     readonly hasData: boolean;
     readonly valueType: MetadataValueType;
-    readonly valueEnum: IMetadataAttributeValue[];
+    readonly valueEnum: string[];
+    readonly values: IMetadataAttributeValue[];
 
     readonly createAt: number;
     readonly updateAt: number;

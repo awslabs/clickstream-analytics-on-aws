@@ -121,7 +121,7 @@ export const parametersConvertToCategoryItemType = (
         description: item.description,
         metadataSource: item.metadataSource,
         valueType: item.valueType,
-        valueEnum: item.valueEnum,
+        values: item.values,
         modifyTime: moment(item.updateAt).format(TIME_FORMAT) || '-',
       });
     });
@@ -133,7 +133,7 @@ export const parametersConvertToCategoryItemType = (
       description: item.description,
       metadataSource: item.metadataSource,
       valueType: item.valueType,
-      valueEnum: item.valueEnum,
+      values: item.values,
       modifyTime: moment(item.updateAt).format(TIME_FORMAT) || '-',
     });
   });

@@ -12,7 +12,7 @@
  */
 
 import { logger } from '../common/powertools';
-import { IMetadataDisplay, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute } from '../model/metadata';
+import { IMetadataAttributeValue, IMetadataDisplay, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute } from '../model/metadata';
 import { DynamoDbMetadataStore } from '../store/dynamodb/dynamodb-metadata-store';
 import { MetadataStore } from '../store/metadata-store';
 
@@ -50,7 +50,8 @@ export class CMetadataDisplay {
       const displays = await this.getDisplay(projectId, appId);
       for (let metadata of metadataArray) {
         const prefix = metadata.prefix.split('#')[0];
-        const metadataDisplay = displays.find((d: IMetadataDisplay) => d.id === `${prefix}#${metadata.id}`);
+        const key = `${prefix}#${metadata.projectId}#${metadata.appId}#${metadata.name}`;
+        const metadataDisplay = displays.find((d: IMetadataDisplay) => d.id === key);
         metadata.displayName = metadataDisplay?.displayName ?? metadata.name;
         metadata.description = metadataDisplay?.description ?? '';
         if (metadata.prefix.startsWith('EVENT#')) {
@@ -81,7 +82,8 @@ export class CMetadataDisplay {
     }
     for (let metadata of associated) {
       const prefix = metadata.prefix.split('#')[0];
-      const metadataDisplay = displays.find((d: IMetadataDisplay) => d.id === `${prefix}#${metadata.id}`);
+      const key = `${prefix}#${metadata.projectId}#${metadata.appId}#${metadata.name}`;
+      const metadataDisplay = displays.find((d: IMetadataDisplay) => d.id === key);
       metadata.displayName = metadataDisplay?.displayName ?? metadata.name;
       metadata.description = metadataDisplay?.description ?? '';
     }
@@ -95,10 +97,17 @@ export class CMetadataDisplay {
     }
     for (let parameter of parameters) {
       const valueEnum = parameter.valueEnum;
+      const values: IMetadataAttributeValue[] = [];
       for (let v of valueEnum) {
-        const display = displays.find((d: IMetadataDisplay) => d.id === `DICTIONARY#${parameter.id}#${v.value}`);
-        v.displayValue = display?.displayName ?? v.value;
+        const key = `DICTIONARY#${parameter.projectId}#${parameter.appId}#${parameter.name}#${v}`;
+        const display = displays.find((d: IMetadataDisplay) => d.id === key);
+        const value: IMetadataAttributeValue = {
+          value: v,
+          displayValue: display?.displayName ?? v,
+        };
+        values.push(value);
       }
+      parameter.values = values;
     }
     return parameters;
   }
