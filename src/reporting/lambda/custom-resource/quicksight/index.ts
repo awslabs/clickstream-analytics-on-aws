@@ -383,8 +383,7 @@ const createDataSet = async (quickSight: QuickSight, awsAccountId: string, princ
     }
 
     logger.info('start to create dataset');
-    logger.info(`DatasetParameters: ${JSON.stringify(props.datasetParameters)}`);
-    const dataset = await quickSight.createDataSet({
+    const datasetParams = {
       AwsAccountId: awsAccountId,
       DataSetId: datasetId,
       Name: `${props.name}${identifier.tableNameIdentifier}-${identifier.schemaIdentifier}-${identifier.databaseIdentifier}`,
@@ -406,12 +405,13 @@ const createDataSet = async (quickSight: QuickSight, awsAccountId: string, princ
       },
       LogicalTableMap: needLogicalMap ? logicalMap : undefined,
       ColumnGroups: colGroups.length > 0 ? colGroups : undefined,
-      DatasetParameters: props.datasetParameters,
       DataSetUsageConfiguration: {
         DisableUseAsDirectQuerySource: false,
         DisableUseAsImportedSource: false,
       },
-    });
+    };
+    logger.info(`dataset params: ${JSON.stringify(datasetParams)}`);
+    const dataset = await quickSight.createDataSet(datasetParams);
 
     await waitForDataSetCreateCompleted(quickSight, awsAccountId, datasetId);
     logger.info(`create dataset finished. Id: ${datasetId}`);
@@ -580,7 +580,7 @@ const deleteDataSet = async (quickSight: QuickSight, awsAccountId: string,
     if ((err as Error) instanceof ResourceNotFoundException) {
       logger.info('Dataset not exist. skip delete operation.');
     } else {
-      logger.error(`Create QuickSight dataset failed due to: ${(err as Error).message}`);
+      logger.error(`Delete QuickSight dataset failed due to: ${(err as Error).message}`);
       throw err;
     }
   }
@@ -662,7 +662,6 @@ const updateDataSet = async (quickSight: QuickSight, awsAccountId: string,
     }
 
     logger.info('start to update dataset');
-    logger.info(`DatasetParameters: ${JSON.stringify(props.datasetParameters)}`);
     let dataset: CreateDataSetCommandOutput | undefined = undefined;
     dataset = await quickSight.updateDataSet({
       AwsAccountId: awsAccountId,
@@ -682,7 +681,6 @@ const updateDataSet = async (quickSight: QuickSight, awsAccountId: string,
       },
       LogicalTableMap: needLogicalMap ? logicalMap : undefined,
       ColumnGroups: colGroups.length > 0 ? colGroups : undefined,
-      DatasetParameters: props.datasetParameters,
       DataSetUsageConfiguration: {
         DisableUseAsDirectQuerySource: false,
         DisableUseAsImportedSource: false,
