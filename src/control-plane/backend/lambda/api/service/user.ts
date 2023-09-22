@@ -13,8 +13,7 @@
 
 import { DEFAULT_ANALYST_ROLE_NAMES, DEFAULT_OPERATOR_ROLE_NAMES, DEFAULT_ROLE_JSON_PATH } from '../common/constants';
 import { ApiFail, ApiSuccess } from '../common/types';
-import { getRoleFromToken, getTokenFromRequest, tryToJson } from '../common/utils';
-import { IDictionary } from '../model/dictionary';
+import { getRoleFromToken, getTokenFromRequest } from '../common/utils';
 import { IUser, IUserSettings } from '../model/user';
 import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
@@ -103,8 +102,8 @@ export class UserServ {
   };
 
   public async getUserSettingsFromDDB() {
-    const userSettingsDic = await store.getDictionary('UserSettings');
-    if (!userSettingsDic) {
+    const userSettings = await store.getUserSettings();
+    if (!userSettings) {
       const defaultSettings = {
         roleJsonPath: DEFAULT_ROLE_JSON_PATH,
         operatorRoleNames: DEFAULT_OPERATOR_ROLE_NAMES,
@@ -112,7 +111,7 @@ export class UserServ {
       } as IUserSettings;
       return defaultSettings;
     }
-    return tryToJson(userSettingsDic?.data) as IUserSettings;
+    return userSettings;
   }
 
   public async getSettings(_req: any, res: any, next: any) {
@@ -127,9 +126,7 @@ export class UserServ {
   public async updateSettings(req: any, res: any, next: any) {
     try {
       const userSettings: IUserSettings = req.body as IUserSettings;
-      await store.updateDictionary(
-        { name: 'UserSettings', data: userSettings } as IDictionary,
-      );
+      await store.updateUserSettings(userSettings);
       return res.status(200).json(new ApiSuccess(null, 'User settings updated.'));
     } catch (error) {
       next(error);

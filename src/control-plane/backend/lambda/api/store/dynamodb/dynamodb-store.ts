@@ -30,7 +30,7 @@ import { IDictionary } from '../../model/dictionary';
 import { IPipeline } from '../../model/pipeline';
 import { IPlugin } from '../../model/plugin';
 import { IDashboard, IProject } from '../../model/project';
-import { IUser } from '../../model/user';
+import { IUser, IUserSettings } from '../../model/user';
 import { ClickStreamStore } from '../click-stream-store';
 
 export class DynamoDbStore implements ClickStreamStore {
@@ -1123,6 +1123,37 @@ export class DynamoDbStore implements ClickStreamStore {
       ExpressionAttributeValues: {
         ':d': true,
         ':operator': operator,
+      },
+      ReturnValues: 'ALL_NEW',
+    });
+    await docClient.send(params);
+  };
+
+  public async getUserSettings(): Promise<IUserSettings | undefined> {
+    const params: GetCommand = new GetCommand({
+      TableName: clickStreamTableName,
+      Key: {
+        id: 'USER_SETTINGS',
+        type: 'USER_SETTINGS',
+      },
+    });
+    const result: GetCommandOutput = await docClient.send(params);
+    return result.Item ? result.Item as IUserSettings : undefined;
+  };
+
+  public async updateUserSettings(userSettings: IUserSettings): Promise<void> {
+    const params: UpdateCommand = new UpdateCommand({
+      TableName: clickStreamTableName,
+      Key: {
+        id: 'USER_SETTINGS',
+        type: 'USER_SETTINGS',
+      },
+      // Define expressions for the new or updated attributes
+      UpdateExpression: 'SET roleJsonPath= :roleJsonPath, operatorRoleNames= :operatorRoleNames, analystRoleNames= :analystRoleNames',
+      ExpressionAttributeValues: {
+        ':roleJsonPath': userSettings.roleJsonPath,
+        ':operatorRoleNames': userSettings.operatorRoleNames,
+        ':analystRoleNames': userSettings.analystRoleNames,
       },
       ReturnValues: 'ALL_NEW',
     });

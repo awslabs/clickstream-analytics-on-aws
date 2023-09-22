@@ -23,7 +23,7 @@ import {
 import { mockClient } from 'aws-sdk-client-mock';
 import request from 'supertest';
 import 'aws-sdk-client-mock-jest';
-import { MOCK_USER_ID, dictionaryMock, userMock } from './ddb-mock';
+import { MOCK_USER_ID, userMock } from './ddb-mock';
 import { amznRequestContextHeader } from '../../common/constants';
 import { IUserRole } from '../../common/types';
 import { app, server } from '../../index';
@@ -113,7 +113,7 @@ describe('Validate role middleware test', () => {
   });
 
   it('User not in DDB and no group in token.', async () => {
-    dictionaryMock(ddbMock);
+    ddbMock.on(GetCommand).resolves({});
     userMock(ddbMock, 'fake@example.com', IUserRole.ADMIN, false);
     const res = await request(app)
       .get('/api/user/details?id=fake@example.com')
@@ -126,7 +126,7 @@ describe('Validate role middleware test', () => {
   });
 
   it('User not in DDB but group in token.', async () => {
-    dictionaryMock(ddbMock);
+    ddbMock.on(GetCommand).resolves({});
     userMock(ddbMock, 'fake@example.com', IUserRole.ADMIN, false);
     const res = await request(app)
       .get('/api/user/details?id=fake@example.com')
@@ -139,7 +139,7 @@ describe('Validate role middleware test', () => {
   });
 
   it('User not in DDB and error group in token.', async () => {
-    dictionaryMock(ddbMock);
+    ddbMock.on(GetCommand).resolves({});
     userMock(ddbMock, 'fake@example.com', IUserRole.ADMIN, false);
     const res = await request(app)
       .get('/api/user/details?id=fake@example.com')
@@ -152,7 +152,7 @@ describe('Validate role middleware test', () => {
   });
 
   it('Get User settings with current user not in DDB and error group in token.', async () => {
-    dictionaryMock(ddbMock);
+    ddbMock.on(GetCommand).resolves({});
     userMock(ddbMock, 'fake@example.com', IUserRole.ADMIN, false);
     const res = await request(app)
       .get('/api/user/settings')
@@ -165,7 +165,7 @@ describe('Validate role middleware test', () => {
   });
 
   it('Get User settings with current user in DDB and error group in token.', async () => {
-    dictionaryMock(ddbMock);
+    ddbMock.on(GetCommand).resolves({});
     userMock(ddbMock, 'fake@example.com', IUserRole.ADMIN, true);
     const res = await request(app)
       .get('/api/user/settings')
