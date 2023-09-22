@@ -17,7 +17,7 @@ import {
   QUICKSIGHT_USER_NAME_PATTERN,
   QUICKSIGHT_NAMESPACE_PATTERN,
   REDSHIFT_DB_NAME_PATTERN,
-  MUTIL_APP_ID_PATTERN,
+  MULTI_APP_ID_PATTERN,
   DOMAIN_NAME_PATTERN,
   SECURITY_GROUP_PATTERN,
   SUBNETS_PATTERN,
@@ -99,8 +99,8 @@ export function createStackParametersQuickSight(scope: Construct, paramGroups?: 
   const redShiftDBSchemaParam = new CfnParameter(scope, 'RedShiftDBSchemaParam', {
     description: 'Comma delimited Redshift database schema name list ',
     type: 'String',
-    allowedPattern: MUTIL_APP_ID_PATTERN,
-    constraintDescription: `Redshift database schema name must match ${MUTIL_APP_ID_PATTERN}`,
+    allowedPattern: MULTI_APP_ID_PATTERN,
+    constraintDescription: `Redshift database schema name must match ${MULTI_APP_ID_PATTERN}`,
   });
   labels[redShiftDBSchemaParam.logicalId] = {
     default: 'Redshift Database Schema Names',

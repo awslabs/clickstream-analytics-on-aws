@@ -14,7 +14,7 @@
 import { SecurityGroupRule } from '@aws-sdk/client-ec2';
 import { MOCK_APP_ID, MOCK_PROJECT_ID } from './ddb-mock';
 import {
-  MUTIL_APP_ID_PATTERN,
+  MULTI_APP_ID_PATTERN,
   DOMAIN_NAME_PATTERN,
   KAFKA_BROKERS_PATTERN,
   KAFKA_TOPIC_PATTERN,
@@ -22,7 +22,7 @@ import {
   SUBNETS_PATTERN,
   VPC_ID_PATTERN,
   POSITIVE_INTEGERS,
-  MUTIL_EMAIL_PATTERN,
+  MULTI_EMAIL_PATTERN,
   S3_PATH_PLUGIN_JARS_PATTERN,
   S3_PATH_PLUGIN_FILES_PATTERN,
   SECRETS_MANAGER_ARN_PATTERN,
@@ -81,7 +81,7 @@ describe('Utils test', () => {
       MOCK_APP_ID,
       `${MOCK_APP_ID}_1,${MOCK_APP_ID}_2`,
     ];
-    validValues.forEach(v => expect(validatePattern('AppId', MUTIL_APP_ID_PATTERN, v)).toEqual(true));
+    validValues.forEach(v => expect(validatePattern('AppId', MULTI_APP_ID_PATTERN, v)).toEqual(true));
     const invalidValues = [
       'toooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooloooooooooooooooooooooooooooooooooooooooooooooooog',
       'abc.test',
@@ -95,7 +95,7 @@ describe('Utils test', () => {
       'abc,',
       'ab$',
     ];
-    invalidValues.forEach(v => expect(() => validatePattern('AppId', MUTIL_APP_ID_PATTERN, v)).toThrow(ClickStreamBadRequestError));
+    invalidValues.forEach(v => expect(() => validatePattern('AppId', MULTI_APP_ID_PATTERN, v)).toThrow(ClickStreamBadRequestError));
   });
 
   it('VPC Params valid', async () => {
@@ -244,14 +244,14 @@ describe('Utils test', () => {
       'fake@example.com',
       'fake1@example.com,fake2@example.com',
     ];
-    validValues.forEach(v => expect(validatePattern('Emails', MUTIL_EMAIL_PATTERN, v)).toEqual(true));
+    validValues.forEach(v => expect(validatePattern('Emails', MULTI_EMAIL_PATTERN, v)).toEqual(true));
     const invalidValues = [
       'a.com',
       '@example.com',
       'fake@example.com,',
       '',
     ];
-    invalidValues.forEach(v => expect(() => validatePattern('Emails', MUTIL_EMAIL_PATTERN, v)).toThrow(ClickStreamBadRequestError));
+    invalidValues.forEach(v => expect(() => validatePattern('Emails', MULTI_EMAIL_PATTERN, v)).toThrow(ClickStreamBadRequestError));
   });
 
   it('Secret arn valid', async () => {

@@ -32,31 +32,38 @@ export const listRoles = async (type: AssumeRoleType, key?: string) => {
   }
   const roles: IamRole[] = [];
   for (let record of records) {
-    if (record.AssumeRolePolicyDocument && awsRegion) {
-      const assumeRolePolicyDocument = decodeURIComponent(record.AssumeRolePolicyDocument);
-      const partition = awsRegion.startsWith('cn') ? 'aws-cn' : 'aws';
-      if (
-        type === AssumeRoleType.ALL ||
-        (type === AssumeRoleType.ACCOUNT && assumeRolePolicyDocument.includes(`arn:${partition}:iam::${key}:root`)) ||
-        (type === AssumeRoleType.SERVICE && assumeRolePolicyDocument.includes(`${key}.amazonaws.com`))
-      ) {
-        roles.push({
-          name: record.RoleName ?? '',
-          id: record.RoleId ?? '',
-          arn: record.Arn ?? '',
-        });
-      }
+    if (_isEligibleRule(record, type, key)) {
+      roles.push({
+        name: record.RoleName ?? '',
+        id: record.RoleId ?? '',
+        arn: record.Arn ?? '',
+      });
     }
   }
   return roles;
 };
 
-export const simulateCustomPolicy = async (policys: string[], actionNames: string[], resourceArns: string[]) => {
+function _isEligibleRule(role: Role, type: AssumeRoleType, key?: string) {
+  if (role.AssumeRolePolicyDocument && awsRegion) {
+    const assumeRolePolicyDocument = decodeURIComponent(role.AssumeRolePolicyDocument);
+    const partition = awsRegion.startsWith('cn') ? 'aws-cn' : 'aws';
+    if (
+      type === AssumeRoleType.ALL ||
+      (type === AssumeRoleType.ACCOUNT && assumeRolePolicyDocument.includes(`arn:${partition}:iam::${key}:root`)) ||
+      (type === AssumeRoleType.SERVICE && assumeRolePolicyDocument.includes(`${key}.amazonaws.com`))
+    ) {
+      return true;
+    }
+  }
+  return false;
+}
+
+export const simulateCustomPolicy = async (polices: string[], actionNames: string[], resourceArns: string[]) => {
   const iamClient = new IAMClient({
     ...aws_sdk_client_common_config,
   });
   const command = new SimulateCustomPolicyCommand({
-    PolicyInputList: policys,
+    PolicyInputList: polices,
     ActionNames: actionNames,
     ResourceArns: resourceArns,
   });

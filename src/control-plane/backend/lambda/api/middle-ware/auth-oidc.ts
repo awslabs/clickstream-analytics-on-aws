@@ -13,14 +13,14 @@
 
 import express from 'express';
 import { JwtPayload } from 'jsonwebtoken';
-import { ERR_OPENID_CONFIGURATION, JWTAuthorizer } from './authorizer';
+import { ERR_OPENID_CONFIGURATION, JWTAuthorizer, JWTAuthorizerResponse } from './authorizer';
 import { amznRequestContextHeader } from '../common/constants';
 import { logger } from '../common/powertools';
 import { getEmailFromRequestContext, isEmpty } from '../common/utils';
 
 // Implement access log middleware function
 export async function authOIDC(req: express.Request, res: express.Response, next: express.NextFunction) {
-  let operator = '';
+  let operatorName = '';
   const WITH_AUTH_MIDDLEWARE = process.env.WITH_AUTH_MIDDLEWARE;
   if (WITH_AUTH_MIDDLEWARE === 'true' && req.url !== process.env.HEALTH_CHECK_PATH) {
     // ALB control plane get IdToken from header
@@ -32,49 +32,66 @@ export async function authOIDC(req: express.Request, res: express.Response, next
         message: 'No token provided.',
       });
     } else {
-      try {
-        const issuerInput = process.env.ISSUER ?? '';
-        const authorizerTable = process.env.AUTHORIZER_TABLE ?? '';
-        const authorizer = new JWTAuthorizer({
-          issuer: issuerInput,
-          dynamodbTableName: authorizerTable,
-        });
-
-        const authResult = await authorizer.auth(authorization);
-        if (!authResult.success) {
-          const requestId = req.get('X-Click-Stream-Request-Id');
-          logger.warn(`Authentication failed. Request ID: ${requestId}`);
-          return res.status(403).send({
-            auth: false,
-            message: 'Invalid token provided.',
-          });
-        }
-
-        if (!isEmpty((authResult.jwtPayload as JwtPayload).email)) {
-          operator = (authResult.jwtPayload as JwtPayload).email.toString();
-        } else if (!isEmpty((authResult.jwtPayload as JwtPayload).username)) {
-          operator = (authResult.jwtPayload as JwtPayload).username.toString();
-        } else {
-          operator = authResult.jwtPayload?.sub?.toString() ?? '';
-        }
-      } catch (err: any) {
-        if (err instanceof Error && err.message == ERR_OPENID_CONFIGURATION) {
-          return res.status(401).send({
-            auth: false,
-            message: 'Get openid configuration error.',
-          });
-        }
-        logger.error(err);
-        return res.status(500).send({
-          auth: false,
-          message: 'internal error.',
-        });
-      }
+      const { operator, status } = await _authToken(req, res, authorization);
+      if (status) {return status;}
+      if (operator) {operatorName = operator;}
     }
   } else {
     // Cloudfront control plane
-    operator = getEmailFromRequestContext(req.get(amznRequestContextHeader));
+    operatorName = getEmailFromRequestContext(req.get(amznRequestContextHeader));
   }
-  res.set('X-Click-Stream-Operator', operator);
+  res.set('X-Click-Stream-Operator', operatorName);
   return next();
+}
+
+function _fetchUsernameFromToken(authResult: JWTAuthorizerResponse) {
+  if (!isEmpty((authResult.jwtPayload as JwtPayload).email)) {
+    return (authResult.jwtPayload as JwtPayload).email.toString();
+  } else if (!isEmpty((authResult.jwtPayload as JwtPayload).username)) {
+    return (authResult.jwtPayload as JwtPayload).username.toString();
+  }
+  return authResult.jwtPayload?.sub?.toString() ?? '';
+}
+
+async function _authToken(req: express.Request, res: express.Response, authorization: string) {
+  try {
+    const issuerInput = process.env.ISSUER ?? '';
+    const authorizerTable = process.env.AUTHORIZER_TABLE ?? '';
+    const authorizer = new JWTAuthorizer({
+      issuer: issuerInput,
+      dynamodbTableName: authorizerTable,
+    });
+
+    const authResult = await authorizer.auth(authorization);
+    if (!authResult.success) {
+      const requestId = req.get('X-Click-Stream-Request-Id');
+      logger.warn(`Authentication failed. Request ID: ${requestId}`);
+      return {
+        status: res.status(403).send({
+          auth: false,
+          message: 'Invalid token provided.',
+        }),
+      };
+    }
+
+    return {
+      operator: _fetchUsernameFromToken(authResult),
+    };
+  } catch (err: any) {
+    if (err instanceof Error && err.message == ERR_OPENID_CONFIGURATION) {
+      return {
+        status: res.status(401).send({
+          auth: false,
+          message: 'Get openid configuration error.',
+        }),
+      };
+    }
+    logger.error(err);
+    return {
+      status: res.status(500).send({
+        auth: false,
+        message: 'internal error.',
+      }),
+    };
+  }
 }

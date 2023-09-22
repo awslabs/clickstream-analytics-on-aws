@@ -22,9 +22,9 @@ import { ALBRegionMappingObject, BucketPrefix, ClickStreamSubnet, IUserRole, Pip
 import { IMetadataAttributeValue, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute } from '../model/metadata';
 import { CPipelineResources, IPipeline } from '../model/pipeline';
 import { IUserSettings } from '../model/user';
-import { UserServ } from '../service/user';
+import { UserService } from '../service/user';
 
-const userServ: UserServ = new UserServ();
+const userService: UserService = new UserService();
 
 function isEmpty(a: any): boolean {
   if (a === '') return true; //Verify empty string
@@ -167,7 +167,7 @@ async function getRoleFromToken(decodedToken: any) {
 
   let oidcRoles: string[] = [];
 
-  const userSettings = await userServ.getUserSettingsFromDDB();
+  const userSettings = await userService.getUserSettingsFromDDB();
   if (isEmpty(userSettings.roleJsonPath) || isEmpty(userSettings.operatorRoleNames) || isEmpty(userSettings.analystRoleNames)) {
     return role;
   }
@@ -203,14 +203,14 @@ function mapToRole(userSettings: IUserSettings, oidcRoles: string[]) {
 
 function getBucketPrefix(projectId: string, key: BucketPrefix, value: string | undefined): string {
   if (isEmpty(value) || value === '/') {
-    const prefixs: Map<string, string> = new Map();
-    prefixs.set(BucketPrefix.LOGS_ALB, `clickstream/${projectId}/logs/alb/`);
-    prefixs.set(BucketPrefix.LOGS_KAFKA_CONNECTOR, `clickstream/${projectId}/logs/kafka-connector/`);
-    prefixs.set(BucketPrefix.DATA_BUFFER, `clickstream/${projectId}/data/buffer/`);
-    prefixs.set(BucketPrefix.DATA_ODS, `clickstream/${projectId}/data/ods/`);
-    prefixs.set(BucketPrefix.DATA_PIPELINE_TEMP, `clickstream/${projectId}/data/pipeline-temp/`);
-    prefixs.set(BucketPrefix.KAFKA_CONNECTOR_PLUGIN, `clickstream/${projectId}/runtime/ingestion/kafka-connector/plugins/`);
-    return prefixs.get(key) ?? '';
+    const prefixes: Map<string, string> = new Map();
+    prefixes.set(BucketPrefix.LOGS_ALB, `clickstream/${projectId}/logs/alb/`);
+    prefixes.set(BucketPrefix.LOGS_KAFKA_CONNECTOR, `clickstream/${projectId}/logs/kafka-connector/`);
+    prefixes.set(BucketPrefix.DATA_BUFFER, `clickstream/${projectId}/data/buffer/`);
+    prefixes.set(BucketPrefix.DATA_ODS, `clickstream/${projectId}/data/ods/`);
+    prefixes.set(BucketPrefix.DATA_PIPELINE_TEMP, `clickstream/${projectId}/data/pipeline-temp/`);
+    prefixes.set(BucketPrefix.KAFKA_CONNECTOR_PLUGIN, `clickstream/${projectId}/runtime/ingestion/kafka-connector/plugins/`);
+    return prefixes.get(key) ?? '';
   }
   return value!;
 }
@@ -229,9 +229,9 @@ function getStackName(pipelineId: string, key: PipelineStackType, sinkType: stri
 
 function replaceTemplateVersion(templateUrl: string, version: string): string {
   const templateUrlSubstrings = templateUrl.split('/');
-  const urlPreffix = templateUrlSubstrings.slice(0, 4);
+  const urlPrefix = templateUrlSubstrings.slice(0, 4);
   const urlSuffix = templateUrlSubstrings.slice(templateUrlSubstrings.length - 2, templateUrlSubstrings.length);
-  return `${urlPreffix.join('/')}/${version}/${urlSuffix.join('/')}`;
+  return `${urlPrefix.join('/')}/${version}/${urlSuffix.join('/')}`;
 };
 
 function getKafkaTopic(pipeline: IPipeline): string {
@@ -247,38 +247,17 @@ function getPluginInfo(pipeline: IPipeline, resources: CPipelineResources) {
   const s3PathPluginJars: string[] = [];
   let s3PathPluginFiles: string[] = [];
   // Transformer
-  if (!isEmpty(pipeline.dataProcessing?.transformPlugin) && !pipeline.dataProcessing?.transformPlugin?.startsWith('BUILT-IN')) {
-    const transformer = resources.plugins?.filter(p => p.id === pipeline.dataProcessing?.transformPlugin)[0];
-    if (transformer?.mainFunction) {
-      transformerAndEnrichClassNames.push(transformer?.mainFunction);
-    }
-    if (transformer?.jarFile) {
-      s3PathPluginJars.push(transformer?.jarFile);
-    }
-    if (transformer?.dependencyFiles) {
-      s3PathPluginFiles = s3PathPluginFiles.concat(transformer?.dependencyFiles);
-    }
-  } else {
-    let defaultTransformer = resources.plugins?.filter(p => p.id === 'BUILT-IN-1')[0];
-    if (defaultTransformer?.mainFunction) {
-      transformerAndEnrichClassNames.push(defaultTransformer?.mainFunction);
-    }
-  }
+  const { transformerClassNames, transformerPluginJars, transformerPluginFiles } = _getTransformerPluginInfo(pipeline, resources);
+  transformerAndEnrichClassNames.push(...transformerClassNames);
+  s3PathPluginJars.push(...transformerPluginJars);
+  s3PathPluginFiles.push(...transformerPluginFiles);
   // Enrich
   if (pipeline.dataProcessing?.enrichPlugin) {
     for (let enrichPluginId of pipeline.dataProcessing?.enrichPlugin) {
-      const enrich = resources.plugins?.filter(p => p.id === enrichPluginId)[0];
-      if (!enrich?.id.startsWith('BUILT-IN')) {
-        if (enrich?.jarFile) {
-          s3PathPluginJars.push(enrich?.jarFile);
-        }
-        if (enrich?.dependencyFiles) {
-          s3PathPluginFiles = s3PathPluginFiles.concat(enrich?.dependencyFiles);
-        }
-      }
-      if (enrich?.mainFunction) {
-        transformerAndEnrichClassNames.push(enrich?.mainFunction);
-      }
+      const { classNames, pluginJars, pluginFiles } = _getEnrichPluginInfo(resources, enrichPluginId);
+      transformerAndEnrichClassNames.push(...classNames);
+      s3PathPluginJars.push(...pluginJars);
+      s3PathPluginFiles.push(...pluginFiles);
     }
   }
 
@@ -287,6 +266,49 @@ function getPluginInfo(pipeline: IPipeline, resources: CPipelineResources) {
     s3PathPluginJars,
     s3PathPluginFiles,
   };
+}
+
+function _getEnrichPluginInfo(resources: CPipelineResources, enrichPluginId: string) {
+  const classNames: string[] = [];
+  const pluginJars: string[] = [];
+  const pluginFiles: string[] = [];
+  const enrich = resources.plugins?.filter(p => p.id === enrichPluginId)[0];
+  if (!enrich?.id.startsWith('BUILT-IN')) {
+    if (enrich?.jarFile) {
+      pluginJars.push(enrich?.jarFile);
+    }
+    if (enrich?.dependencyFiles) {
+      pluginFiles.push(...enrich?.dependencyFiles);
+    }
+  }
+  if (enrich?.mainFunction) {
+    classNames.push(enrich?.mainFunction);
+  }
+  return { classNames, pluginJars, pluginFiles };
+}
+
+function _getTransformerPluginInfo(pipeline: IPipeline, resources: CPipelineResources) {
+  const transformerClassNames: string[] = [];
+  const transformerPluginJars: string[] = [];
+  const transformerPluginFiles: string[] = [];
+  if (!isEmpty(pipeline.dataProcessing?.transformPlugin) && !pipeline.dataProcessing?.transformPlugin?.startsWith('BUILT-IN')) {
+    const transformer = resources.plugins?.filter(p => p.id === pipeline.dataProcessing?.transformPlugin)[0];
+    if (transformer?.mainFunction) {
+      transformerClassNames.push(transformer?.mainFunction);
+    }
+    if (transformer?.jarFile) {
+      transformerPluginJars.push(transformer?.jarFile);
+    }
+    if (transformer?.dependencyFiles) {
+      transformerPluginFiles.push(...transformer?.dependencyFiles);
+    }
+  } else {
+    let defaultTransformer = resources.plugins?.filter(p => p.id === 'BUILT-IN-1')[0];
+    if (defaultTransformer?.mainFunction) {
+      transformerClassNames.push(defaultTransformer?.mainFunction);
+    }
+  }
+  return { transformerClassNames, transformerPluginJars, transformerPluginFiles };
 }
 
 function getSubnetType(routeTable: RouteTable) {
@@ -347,29 +369,36 @@ function checkVpcEndpoint(
           });
         }
       } else if (vpcEndpoint?.VpcEndpointType === VpcEndpointType.Interface && vpcEndpoint.Groups) {
-        if (!checkInterfaceVPCEndpointSubnets(allSubnets, isolatedSubnetsAZ, vpcEndpoint)) {
-          invalidServices.push({
-            service: service,
-            reason: `The Availability Zones (AZ) of VPC Endpoint (${service}) subnets must contain Availability Zones (AZ) of isolated subnets.`,
-          });
-        }
-        const vpcEndpointSGIds = vpcEndpoint.Groups?.map(g => g.GroupId!);
-        const vpcEndpointSGRules = securityGroupsRules.filter(rule => vpcEndpointSGIds.includes(rule.GroupId!));
-        const vpcEndpointRule: SecurityGroupRule = {
-          IsEgress: false,
-          IpProtocol: 'tcp',
-          FromPort: 443,
-          ToPort: 443,
-          CidrIpv4: subnet.cidr,
-        };
-        if (!containRule(vpcEndpointSGIds, vpcEndpointSGRules, vpcEndpointRule)) {
-          invalidServices.push({
-            service: service,
-            reason: 'The traffic is not allowed by security group rules',
-          });
-        }
+        invalidServices.push(..._checkInterfaceEndpoint(allSubnets, isolatedSubnetsAZ, vpcEndpoint, service, securityGroupsRules, subnet));
       }
     }
+  }
+  return invalidServices;
+}
+
+function _checkInterfaceEndpoint(allSubnets: ClickStreamSubnet[], isolatedSubnetsAZ: string[], vpcEndpoint: VpcEndpoint,
+  service: string, securityGroupsRules: SecurityGroupRule[], subnet: ClickStreamSubnet) {
+  const invalidServices = [];
+  if (!checkInterfaceVPCEndpointSubnets(allSubnets, isolatedSubnetsAZ, vpcEndpoint)) {
+    invalidServices.push({
+      service: service,
+      reason: `The Availability Zones (AZ) of VPC Endpoint (${service}) subnets must contain Availability Zones (AZ) of isolated subnets.`,
+    });
+  }
+  const vpcEndpointSGIds = vpcEndpoint.Groups?.map(g => g.GroupId!);
+  const vpcEndpointSGRules = securityGroupsRules.filter(rule => vpcEndpointSGIds?.includes(rule.GroupId!));
+  const vpcEndpointRule: SecurityGroupRule = {
+    IsEgress: false,
+    IpProtocol: 'tcp',
+    FromPort: 443,
+    ToPort: 443,
+    CidrIpv4: subnet.cidr,
+  };
+  if (!containRule(vpcEndpointSGIds ?? [], vpcEndpointSGRules, vpcEndpointRule)) {
+    invalidServices.push({
+      service: service,
+      reason: 'The traffic is not allowed by security group rules',
+    });
   }
   return invalidServices;
 }
@@ -404,33 +433,45 @@ function containRule(securityGroups: string[], securityGroupsRules: SecurityGrou
       && securityGroupsRule.CidrIpv4 === '0.0.0.0/0') {
       return true;
     }
-    if (securityGroupsRule.IsEgress !== rule.IsEgress) {
-      continue;
-    }
-    if (securityGroupsRule.IpProtocol !== '-1' && securityGroupsRule.IpProtocol !== rule.IpProtocol) {
-      continue;
-    }
-    if (securityGroupsRule.FromPort! !== -1 && securityGroupsRule.ToPort! !== -1
-      && (securityGroupsRule.FromPort! > rule.FromPort! || securityGroupsRule.ToPort! < rule.ToPort!)) {
-      continue;
-    }
-    if (securityGroupsRule.CidrIpv4 === '0.0.0.0/0') {
-      return true;
-    } else if (securityGroupsRule.CidrIpv4 && rule.CidrIpv4) {
-      const securityGroupsRuleCidr = ip.cidr(securityGroupsRule.CidrIpv4);
-      const ruleCidr = ip.cidr(rule.CidrIpv4);
-      if (!securityGroupsRuleCidr.includes(ruleCidr.firstUsableIp) || !securityGroupsRuleCidr.includes(ruleCidr.lastUsableIp)) {
-        continue;
-      }
-    } else if (securityGroupsRule.ReferencedGroupInfo?.GroupId) {
-      if (!securityGroups.includes(securityGroupsRule.ReferencedGroupInfo.GroupId)) {
-        continue;
-      }
-    }
+    if (!_isRuleMatch(securityGroupsRule, rule, securityGroups)) {continue;}
 
     return true;
   }
   return false;
+}
+
+function _isRuleMatch(securityGroupsRule: SecurityGroupRule, rule: SecurityGroupRule, securityGroups?: string[]) {
+  if (!_isRulesMatch2(securityGroupsRule, rule)) {return false;}
+
+  if (securityGroupsRule.CidrIpv4 !== '0.0.0.0/0') {
+    if (securityGroupsRule.CidrIpv4 && rule.CidrIpv4) {
+      const securityGroupsRuleCidr = ip.cidr(securityGroupsRule.CidrIpv4);
+      const ruleCidr = ip.cidr(rule.CidrIpv4);
+      if (!securityGroupsRuleCidr.includes(ruleCidr.firstUsableIp) || !securityGroupsRuleCidr.includes(ruleCidr.lastUsableIp)) {
+        return false;
+      }
+    } else if (securityGroupsRule.ReferencedGroupInfo?.GroupId) {
+      if (!securityGroups?.includes(securityGroupsRule.ReferencedGroupInfo.GroupId)) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+function _isRulesMatch2(securityGroupsRule: SecurityGroupRule, rule: SecurityGroupRule) {
+  if (securityGroupsRule.IsEgress !== rule.IsEgress) {
+    return false;
+  }
+  if (securityGroupsRule.IpProtocol !== '-1' && securityGroupsRule.IpProtocol !== rule.IpProtocol) {
+    return false;
+  }
+  if (securityGroupsRule.FromPort! !== -1 && securityGroupsRule.ToPort! !== -1
+    && (securityGroupsRule.FromPort! > rule.FromPort! || securityGroupsRule.ToPort! < rule.ToPort!)) {
+    return false;
+  }
+
+  return true;
 }
 
 function getSubnetsAZ(subnets: ClickStreamSubnet[]) {

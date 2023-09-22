@@ -156,50 +156,7 @@ export class StackManager {
       });
     }
     if (!isEmpty(stackStatusDetails)) {
-      let action: string = 'CREATE';
-      if (executionDetail?.input) {
-        const executionInput = JSON.parse(executionDetail?.input);
-        action = this.getWorkflowCurrentAction(executionInput as WorkflowState) ?? 'CREATE';
-      }
-      let miss: boolean = false;
-      let status: string = PipelineStatusType.ACTIVE;
-      for (let s of stackStatusDetails) {
-        if (s.stackStatus === undefined) {
-          miss = true;
-        } else if (s.stackStatus.endsWith('_FAILED')) {
-          action = s.stackStatus.split('_')[0];
-          status = PipelineStatusType.FAILED;
-          break;
-        } else if (s.stackStatus.endsWith('_IN_PROGRESS')) {
-          action = s.stackStatus.split('_')[0];
-          if (action === 'CREATE') {
-            status = PipelineStatusType.CREATING;
-          } else if (action === 'DELETE') {
-            status = PipelineStatusType.DELETING;
-          } else {
-            status = PipelineStatusType.UPDATING;
-          }
-        }
-      }
-      if (miss) {
-        if (executionDetail?.status === ExecutionStatus.FAILED ||
-          executionDetail?.status === ExecutionStatus.TIMED_OUT ||
-          executionDetail?.status === ExecutionStatus.ABORTED) {
-          status = PipelineStatusType.FAILED;
-        } else {
-          status = PipelineStatusType.CREATING;
-        }
-      } else {
-        if (executionDetail?.status === ExecutionStatus.RUNNING) {
-          if (action === 'CREATE') {
-            status = PipelineStatusType.CREATING;
-          } else if (action === 'DELETE') {
-            status = PipelineStatusType.DELETING;
-          } else {
-            status = PipelineStatusType.UPDATING;
-          }
-        }
-      }
+      let status: string | undefined = this._getPipelineStatus(executionDetail, stackStatusDetails);
       return {
         status: status,
         stackDetails: stackStatusDetails,
@@ -215,6 +172,61 @@ export class StackManager {
       stackDetails: [],
       executionDetail: {},
     } as PipelineStatus;
+  }
+
+  private _getPipelineStatus(executionDetail: DescribeExecutionOutput | undefined, stackStatusDetails: PipelineStatusDetail[]) {
+    let action: string = 'CREATE';
+    if (executionDetail?.input) {
+      const executionInput = JSON.parse(executionDetail?.input);
+      action = this.getWorkflowCurrentAction(executionInput as WorkflowState) ?? 'CREATE';
+    }
+    let miss: boolean | undefined;
+    let status: string | undefined;
+    ({ miss, status, action } = this._getPipelineStatus2(stackStatusDetails, action));
+    if (miss) {
+      if (executionDetail?.status === ExecutionStatus.FAILED ||
+        executionDetail?.status === ExecutionStatus.TIMED_OUT ||
+        executionDetail?.status === ExecutionStatus.ABORTED) {
+        status = PipelineStatusType.FAILED;
+      } else {
+        status = PipelineStatusType.CREATING;
+      }
+    } else {
+      if (executionDetail?.status === ExecutionStatus.RUNNING) {
+        if (action === 'CREATE') {
+          status = PipelineStatusType.CREATING;
+        } else if (action === 'DELETE') {
+          status = PipelineStatusType.DELETING;
+        } else {
+          status = PipelineStatusType.UPDATING;
+        }
+      }
+    }
+    return status;
+  }
+
+  private _getPipelineStatus2(stackStatusDetails: PipelineStatusDetail[], action: string) {
+    let miss: boolean = false;
+    let status: string = PipelineStatusType.ACTIVE;
+    for (let s of stackStatusDetails) {
+      if (s.stackStatus === undefined) {
+        miss = true;
+      } else if (s.stackStatus.endsWith('_FAILED')) {
+        action = s.stackStatus.split('_')[0];
+        status = PipelineStatusType.FAILED;
+        break;
+      } else if (s.stackStatus.endsWith('_IN_PROGRESS')) {
+        action = s.stackStatus.split('_')[0];
+        if (action === 'CREATE') {
+          status = PipelineStatusType.CREATING;
+        } else if (action === 'DELETE') {
+          status = PipelineStatusType.DELETING;
+        } else {
+          status = PipelineStatusType.UPDATING;
+        }
+      }
+    }
+    return { miss, status, action };
   }
 
   private async getExecutionDetail(executionArn: string): Promise<DescribeExecutionOutput | undefined> {
@@ -240,27 +252,7 @@ export class StackManager {
 
   private getDeleteWorkflow(state: WorkflowState): WorkflowState {
     if (state.Type === WorkflowStateType.PARALLEL) {
-      for (let branch of state.Branches as WorkflowParallelBranch[]) {
-        const orderMap = new Map<string, string>();
-        for (let key of Object.keys(branch.States)) {
-          if (branch.States[key].End) {
-            orderMap.set(key, 'End');
-          } else if (branch.States[key].Next) {
-            orderMap.set(key, branch.States[key].Next!);
-          }
-          branch.States[key] = this.getDeleteWorkflow(branch.States[key]);
-        }
-        orderMap.forEach((value, key, _map) => {
-          if (value !== 'End') {
-            branch.States[value].Next = key;
-          } else if (branch.StartAt !== key) {
-            branch.States[branch.StartAt].End = true;
-            delete branch.States[branch.StartAt].Next;
-            delete branch.States[key].End;
-            branch.StartAt = key;
-          }
-        });
-      }
+      this._getParallelDeleteWorkflow(state);
     } else if (state.Type === WorkflowStateType.STACK) {
       state.Data!.Input.Action = 'Delete';
       state.Data!.Callback = {
@@ -269,6 +261,30 @@ export class StackManager {
       };
     }
     return state;
+  }
+
+  private _getParallelDeleteWorkflow(state: WorkflowState) {
+    for (let branch of state.Branches as WorkflowParallelBranch[]) {
+      const orderMap = new Map<string, string>();
+      for (let key of Object.keys(branch.States)) {
+        if (branch.States[key].End) {
+          orderMap.set(key, 'End');
+        } else if (branch.States[key].Next) {
+          orderMap.set(key, branch.States[key].Next!);
+        }
+        branch.States[key] = this.getDeleteWorkflow(branch.States[key]);
+      }
+      orderMap.forEach((value, key, _map) => {
+        if (value !== 'End') {
+          branch.States[value].Next = key;
+        } else if (branch.StartAt !== key) {
+          branch.States[branch.StartAt].End = true;
+          delete branch.States[branch.StartAt].Next;
+          delete branch.States[key].End;
+          branch.StartAt = key;
+        }
+      });
+    }
   }
 
   private getUpgradeWorkflow(state: WorkflowState, stackTemplateMap: Map<string, string>, stackTags: Tag[], origin: boolean): WorkflowState {
@@ -322,24 +338,28 @@ export class StackManager {
         }
       }
     } else if (state.Type === WorkflowStateType.STACK && state.Data?.Input.StackName) {
-      const status = this.getStackStatusByName(state.Data?.Input.StackName, statusDetail);
-      if (status?.endsWith('_FAILED')) {
-        state.Data.Input.Action = 'Update';
-      } else if (status?.endsWith('_IN_PROGRESS')) {
-        state.Type = WorkflowStateType.PASS;
-      } else if (status?.endsWith('_COMPLETE')) {
-        if (editStacks.includes(state.Data?.Input.StackName)) {
-          state.Data.Input.Action = 'Update';
-        } else {
-          state.Type = WorkflowStateType.PASS;
-        }
-      }
-      state.Data.Callback = {
-        BucketName: stackWorkflowS3Bucket ?? '',
-        BucketPrefix: `clickstream/workflow/${this.pipeline.executionName}`,
-      };
+      this._updateUpdateWorkflow(state, statusDetail, editStacks);
     }
     return state;
+  }
+
+  private _updateUpdateWorkflow(state: WorkflowState, statusDetail: PipelineStatusDetail[], editStacks: string[]) {
+    const status = this.getStackStatusByName(state.Data!.Input.StackName, statusDetail);
+    if (status?.endsWith('_FAILED')) {
+      state.Data!.Input.Action = 'Update';
+    } else if (status?.endsWith('_IN_PROGRESS')) {
+      state.Type = WorkflowStateType.PASS;
+    } else if (status?.endsWith('_COMPLETE')) {
+      if (editStacks.includes(state.Data!.Input.StackName)) {
+        state.Data!.Input.Action = 'Update';
+      } else {
+        state.Type = WorkflowStateType.PASS;
+      }
+    }
+    state.Data!.Callback = {
+      BucketName: stackWorkflowS3Bucket ?? '',
+      BucketPrefix: `clickstream/workflow/${this.pipeline.executionName}`,
+    };
   }
 
   private getStackStatusByName(stackName: string, statusDetail: PipelineStatusDetail[]) {

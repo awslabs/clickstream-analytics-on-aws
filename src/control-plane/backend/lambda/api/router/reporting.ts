@@ -13,10 +13,10 @@
 
 import express from 'express';
 import { logger } from '../common/powertools';
-import { ReportingServ } from '../service/reporting';
+import { ReportingService } from '../service/reporting';
 
 const reporting_project = express.Router();
-const reportingServ: ReportingServ = new ReportingServ();
+const reportingServ: ReportingService = new ReportingService();
 
 reporting_project.post(
   '/funnel',

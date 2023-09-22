@@ -372,58 +372,65 @@ function addVisuals(visuals: VisualProps[], dashboardDef: DashboardVersionDefini
       }
 
       //add dataset configuration
-      const filterGroups = dashboardDef.FilterGroups!;
-      if (visual.filterGroup && requestAction === ExploreRequestAction.PUBLISH) {
-        filterGroups.push(visual.filterGroup);
-      }
-
-      if (visual.columnConfigurations) {
-        if (dashboardDef.ColumnConfigurations) {
-          dashboardDef.ColumnConfigurations?.push(...visual.columnConfigurations);
-        } else {
-          dashboardDef.ColumnConfigurations = visual.columnConfigurations;
-        }
-      }
+      _addDatasetConfiguration(dashboardDef, visual, requestAction);
 
       // visual layout
-      const layout = findKthElement(sheet, 'Layouts', 1) as Array<any>;
-      const elements = findElementByPath(layout, 'Configuration.GridLayout.Elements') as Array<any>;
-
-      const layoutControl = JSON.parse(readFileSync(join(__dirname, './templates/layout-control.json'), 'utf8'));
-      const visualControl = JSON.parse(readFileSync(join(__dirname, './templates/layout-visual.json'), 'utf8'));
-
-      if (elements.length > 0) {
-        const lastElement = elements.at(elements.length - 1);
-        layoutControl.RowIndex = lastElement.RowIndex + lastElement.RowSpan;
-        visualControl.RowIndex = lastElement.RowIndex + lastElement.RowSpan + layoutControl.RowSpan;
-      }
-
-      if (visual.filterControl && requestAction === ExploreRequestAction.PUBLISH) {
-        const firstObj = findFirstChild(visual.filterControl);
-        layoutControl.ElementId = firstObj.FilterControlId;
-        elements.push(layoutControl);
-      }
-
-      if (visual.eventCount) {
-        visualControl.RowSpan = visual.rowSpan ?? visual.eventCount * 3;
-        visualControl.ColumnSpan = visual.colSpan ?? 20;
-      }
-
-      visualControl.RowSpan = visual.rowSpan ?? 12;
-      visualControl.ColumnSpan = visual.colSpan ?? 20;
-
-      if (visual.eventCount) {
-        visualControl.RowSpan = visual.eventCount * 3;
-      }
-
-      visualControl.ElementId = findFirstChild(visual.visual).VisualId;
-      elements.push(visualControl);
-
+      _addVisualLayout(sheet, visual, requestAction);
     }
   }
 
   return dashboardDef;
 };
+
+function _addDatasetConfiguration(dashboardDef: DashboardVersionDefinition, visual: VisualProps, requestAction: string) {
+  const filterGroups = dashboardDef.FilterGroups!;
+  if (visual.filterGroup && requestAction === ExploreRequestAction.PUBLISH) {
+    filterGroups.push(visual.filterGroup);
+  }
+
+  if (visual.columnConfigurations) {
+    if (dashboardDef.ColumnConfigurations) {
+      dashboardDef.ColumnConfigurations?.push(...visual.columnConfigurations);
+    } else {
+      dashboardDef.ColumnConfigurations = visual.columnConfigurations;
+    }
+  }
+}
+
+function _addVisualLayout(sheet: any, visual: VisualProps, requestAction: string) {
+  const layout = findKthElement(sheet, 'Layouts', 1) as Array<any>;
+  const elements = findElementByPath(layout, 'Configuration.GridLayout.Elements') as Array<any>;
+
+  const layoutControl = JSON.parse(readFileSync(join(__dirname, './templates/layout-control.json'), 'utf8'));
+  const visualControl = JSON.parse(readFileSync(join(__dirname, './templates/layout-visual.json'), 'utf8'));
+
+  if (elements.length > 0) {
+    const lastElement = elements.at(elements.length - 1);
+    layoutControl.RowIndex = lastElement.RowIndex + lastElement.RowSpan;
+    visualControl.RowIndex = lastElement.RowIndex + lastElement.RowSpan + layoutControl.RowSpan;
+  }
+
+  if (visual.filterControl && requestAction === ExploreRequestAction.PUBLISH) {
+    const firstObj = findFirstChild(visual.filterControl);
+    layoutControl.ElementId = firstObj.FilterControlId;
+    elements.push(layoutControl);
+  }
+
+  if (visual.eventCount) {
+    visualControl.RowSpan = visual.rowSpan ?? visual.eventCount * 3;
+    visualControl.ColumnSpan = visual.colSpan ?? 20;
+  }
+
+  visualControl.RowSpan = visual.rowSpan ?? 12;
+  visualControl.ColumnSpan = visual.colSpan ?? 20;
+
+  if (visual.eventCount) {
+    visualControl.RowSpan = visual.eventCount * 3;
+  }
+
+  visualControl.ElementId = findFirstChild(visual.visual).VisualId;
+  elements.push(visualControl);
+}
 
 export async function getCredentialsFromRole(stsClient: STSClient, roleArn: string) {
   try {

@@ -20,7 +20,7 @@ import { IProject } from './project';
 import { CAthenaStack, CDataModelingStack, CDataProcessingStack, CIngestionServerStack, CKafkaConnectorStack, CMetricsStack, CReportingStack, getStackParameters } from './stacks';
 import { awsUrlSuffix, stackWorkflowS3Bucket } from '../common/constants';
 import {
-  MUTIL_APP_ID_PATTERN,
+  MULTI_APP_ID_PATTERN,
   PROJECT_ID_PATTERN,
   SECRETS_MANAGER_ARN_PATTERN,
 } from '../common/constants-ln';
@@ -412,76 +412,17 @@ export class CPipeline {
   private async resourcesCheck(): Promise<void> {
     // Check project resources that in DDB
     validatePattern('ProjectId', PROJECT_ID_PATTERN, this.pipeline.projectId);
-    if (!this.resources || !this.resources.project) {
-      const project = await store.getProject(this.pipeline.projectId);
-      if (!project) {
-        throw new ClickStreamBadRequestError('Project no found. Please check and try again.');
-      }
-      this.resources = {
-        ...this.resources,
-        project,
-      };
-    }
 
-    if (!this.resources || !this.resources.appIds) {
-      const apps = await store.listApplication(this.pipeline.projectId, 'asc');
-      const appIds = apps.map(a => a.appId);
-      if (!isEmpty(appIds)) {
-        validatePattern('AppId', MUTIL_APP_ID_PATTERN, appIds.join(','));
-      }
-      this.resources = {
-        ...this.resources,
-        appIds,
-      };
-    }
+    await this._fillResources();
 
-    if (!this.resources || !this.resources.plugins) {
-      const plugins = await store.listPlugin('', 'asc');
-      this.resources = {
-        ...this.resources,
-        plugins: plugins,
-      };
-    }
-
-    if (!this.resources || !this.resources.solution || !this.resources.templates) {
-      const solution = await store.getDictionary('Solution');
-      const templates = await store.getDictionary('Templates');
-      this.resources = {
-        ...this.resources,
-        solution,
-        templates,
-      };
-    }
-
-    if (!this.resources || !this.stackTags || this.stackTags?.length === 0) {
+    if (!this.stackTags || this.stackTags?.length === 0) {
       this.setTags();
       this.stackTags = this.getStackTags();
     }
 
-    // Check AWS account resources
-    if (!this.resources || (!this.resources.mskBrokers && this.pipeline.ingestionServer.sinkKafka?.mskCluster?.arn)) {
-      const mskBrokers = await listMSKClusterBrokers(this.pipeline.region, this.pipeline.ingestionServer.sinkKafka?.mskCluster?.arn);
-      this.resources = {
-        ...this.resources,
-        mskBrokers,
-      };
-    }
-
-    const workgroupName = this.pipeline.dataModeling?.redshift?.existingServerless?.workgroupName;
-    const clusterIdentifier = this.pipeline.dataModeling?.redshift?.provisioned?.clusterIdentifier;
-    if (!this.resources || (!this.resources?.redshift && (workgroupName || clusterIdentifier))) {
-      const redshift = await getRedshiftInfo(this.pipeline.region, workgroupName, clusterIdentifier);
-      if (!redshift) {
-        throw new ClickStreamBadRequestError('Redshift info no found. Please check and try again.');
-      }
-      this.resources = {
-        ...this.resources,
-        redshift,
-      };
-    }
     if (!this.validateNetworkOnce) {
       this.validateNetworkOnce = true;
-      await validatePipelineNetwork(this.pipeline, this.resources);
+      await validatePipelineNetwork(this.pipeline, this.resources!);
     }
 
     if (this.pipeline.ingestionServer.loadBalancer.authenticationSecretArn) {
@@ -497,6 +438,77 @@ export class CPipeline {
     if (this.pipeline.reporting) {
       await registerClickstreamUser();
     }
+  }
+
+  private async _fillResources() {
+    if (!this.resources?.project) {
+      this.resources = {
+        ...this.resources,
+        project: await this._getProject(this.pipeline),
+      };
+    }
+
+    if (!this.resources.appIds) {
+      this.resources = {
+        ...this.resources,
+        appIds: await this._getAppIds(this.pipeline),
+      };
+    }
+
+    if (!this.resources.plugins) {
+      this.resources = {
+        ...this.resources,
+        plugins: await store.listPlugin('', 'asc'),
+      };
+    }
+
+    if (!this.resources.solution || !this.resources.templates) {
+      this.resources = {
+        ...this.resources,
+        solution: await store.getDictionary('Solution'),
+        templates: await store.getDictionary('Templates'),
+      };
+    }
+
+    // Check AWS account resources
+    if (!this.resources.mskBrokers && this.pipeline.ingestionServer.sinkKafka?.mskCluster?.arn) {
+      this.resources = {
+        ...this.resources,
+        mskBrokers: await listMSKClusterBrokers(this.pipeline.region,
+          this.pipeline.ingestionServer.sinkKafka?.mskCluster?.arn),
+      };
+    }
+
+    const workgroupName = this.pipeline.dataModeling?.redshift?.existingServerless?.workgroupName;
+    const clusterIdentifier = this.pipeline.dataModeling?.redshift?.provisioned?.clusterIdentifier;
+    if (!this.resources.redshift && (workgroupName || clusterIdentifier)) {
+      const redshift = await getRedshiftInfo(this.pipeline.region, workgroupName, clusterIdentifier);
+      if (!redshift) {
+        throw new ClickStreamBadRequestError('Redshift info no found. Please check and try again.');
+      }
+      this.resources = {
+        ...this.resources,
+        redshift,
+      };
+    }
+  }
+
+  private async _getProject(pipeline: IPipeline) {
+    const project = await store.getProject(pipeline.projectId);
+    if (!project) {
+      throw new ClickStreamBadRequestError('Project no found. Please check and try again.');
+    }
+    return project;
+  }
+
+  private async _getAppIds(pipeline: IPipeline) {
+    const apps = await store.listApplication(pipeline.projectId, 'asc');
+    const appIds = apps.map(a => a.appId);
+    if (!isEmpty(appIds)) {
+      validatePattern('AppId', MULTI_APP_ID_PATTERN, appIds.join(','));
+    }
+
+    return appIds;
   }
 
   public async getStackTemplateMap() {
@@ -615,178 +627,189 @@ export class CPipeline {
   }
 
   private async getWorkflowStack(type: PipelineStackType): Promise<WorkflowParallelBranch | undefined> {
-
     if (!stackWorkflowS3Bucket) {
       throw new ClickStreamBadRequestError('Stack Workflow S3Bucket can not empty.');
     }
-    if (type === PipelineStackType.INGESTION) {
-      const ingestionTemplateURL = await this.getTemplateUrl(`${PipelineStackType.INGESTION}_${this.pipeline.ingestionServer.sinkType}`);
-      if (!ingestionTemplateURL) {
-        throw new ClickStreamBadRequestError(`Template: ${PipelineStackType.INGESTION}_${this.pipeline.ingestionServer.sinkType} not found in dictionary.`);
+    switch (type) {
+      case PipelineStackType.INGESTION:
+        return this._getIngestionWorkflow(stackWorkflowS3Bucket);
+      case PipelineStackType.DATA_PROCESSING:
+        if (this.pipeline.ingestionServer.sinkType === PipelineSinkType.KAFKA && !this.pipeline.ingestionServer.sinkKafka?.kafkaConnector.enable) {
+          return undefined;
+        }
+        return this._getDataProcessingWorkflow(stackWorkflowS3Bucket);
+      case PipelineStackType.METRICS:
+        return this._getMetricsWorkflow(stackWorkflowS3Bucket);
+      default:
+        return undefined;
+    }
+  }
+
+  private async _getMetricsWorkflow(bucketName: string): Promise<WorkflowParallelBranch> {
+    const metricsTemplateURL = await this.getTemplateUrl(PipelineStackType.METRICS);
+    if (!metricsTemplateURL) {
+      throw new ClickStreamBadRequestError('Template: metrics not found in dictionary.');
+    }
+
+    const metricsStack = new CMetricsStack(this.pipeline, this.resources!);
+    const metricsStackParameters = getStackParameters(metricsStack);
+    const metricsStackStackName = getStackName(this.pipeline.pipelineId, PipelineStackType.METRICS, this.pipeline.ingestionServer.sinkType);
+    const metricsState: WorkflowState = {
+      Type: WorkflowStateType.STACK,
+      Data: {
+        Input: {
+          Action: 'Create',
+          Region: this.pipeline.region,
+          StackName: metricsStackStackName,
+          TemplateURL: metricsTemplateURL,
+          Parameters: metricsStackParameters,
+          Tags: this.stackTags,
+        },
+        Callback: {
+          BucketName: bucketName,
+          BucketPrefix: `clickstream/workflow/${this.pipeline.executionName}`,
+        },
+      },
+      End: true,
+    };
+    return {
+      StartAt: PipelineStackType.METRICS,
+      States: {
+        [PipelineStackType.METRICS]: metricsState,
+      },
+    };
+  }
+
+  private async _getDataProcessingWorkflow(bucketName: string): Promise<WorkflowParallelBranch> {
+    const dataPipelineTemplateURL = await this.getTemplateUrl(PipelineStackType.DATA_PROCESSING);
+    if (!dataPipelineTemplateURL) {
+      throw new ClickStreamBadRequestError('Template: data-pipeline not found in dictionary.');
+    }
+
+    const dataProcessingStack = new CDataProcessingStack(this.pipeline, this.resources!);
+    const dataProcessingStackParameters = getStackParameters(dataProcessingStack);
+    const dataProcessingStackName = getStackName(
+      this.pipeline.pipelineId, PipelineStackType.DATA_PROCESSING, this.pipeline.ingestionServer.sinkType);
+    const dataProcessingState: WorkflowState = {
+      Type: WorkflowStateType.STACK,
+      Data: {
+        Input: {
+          Action: 'Create',
+          Region: this.pipeline.region,
+          StackName: dataProcessingStackName,
+          TemplateURL: dataPipelineTemplateURL,
+          Parameters: dataProcessingStackParameters,
+          Tags: this.stackTags,
+        },
+        Callback: {
+          BucketName: bucketName,
+          BucketPrefix: `clickstream/workflow/${this.pipeline.executionName}`,
+        },
+      },
+      End: true,
+    };
+    const branch: WorkflowParallelBranch = {
+      StartAt: PipelineStackType.DATA_PROCESSING,
+      States: {
+        [PipelineStackType.DATA_PROCESSING]: dataProcessingState,
+      },
+    };
+    const athenaState = await this.getAthenaState();
+    if (athenaState) {
+      branch.States[PipelineStackType.ATHENA] = athenaState;
+      branch.States[PipelineStackType.DATA_PROCESSING].Next = PipelineStackType.ATHENA;
+      delete branch.States[PipelineStackType.DATA_PROCESSING].End;
+    }
+    const dataModelingState = await this.getDataModelingState();
+    if (dataModelingState) {
+      if (athenaState) {
+        branch.States[PipelineStackType.DATA_MODELING_REDSHIFT] = dataModelingState;
+        branch.States[PipelineStackType.ATHENA].Next = PipelineStackType.DATA_MODELING_REDSHIFT;
+        delete branch.States[PipelineStackType.ATHENA].End;
+      } else {
+        branch.States[PipelineStackType.DATA_MODELING_REDSHIFT] = dataModelingState;
+        branch.States[PipelineStackType.DATA_PROCESSING].Next = PipelineStackType.DATA_MODELING_REDSHIFT;
+        delete branch.States[PipelineStackType.DATA_PROCESSING].End;
       }
-      const ingestionStack = new CIngestionServerStack(this.pipeline, this.resources!);
-      const ingestionStackParameters = getStackParameters(ingestionStack);
-      const ingestionStackName = getStackName(this.pipeline.pipelineId, PipelineStackType.INGESTION, this.pipeline.ingestionServer.sinkType);
-      const ingestionState: WorkflowState = {
+    }
+    const reportingState = await this.getReportingState();
+    if (reportingState && dataModelingState) {
+      branch.States[PipelineStackType.REPORTING] = reportingState;
+      branch.States[PipelineStackType.DATA_MODELING_REDSHIFT].Next = PipelineStackType.REPORTING;
+      delete branch.States[PipelineStackType.DATA_MODELING_REDSHIFT].End;
+    }
+    return branch;
+  }
+
+  private async _getIngestionWorkflow(bucketName: string): Promise<WorkflowParallelBranch> {
+    const ingestionTemplateURL = await this.getTemplateUrl(`${PipelineStackType.INGESTION}_${this.pipeline.ingestionServer.sinkType}`);
+    if (!ingestionTemplateURL) {
+      throw new ClickStreamBadRequestError(`Template: ${PipelineStackType.INGESTION}_${this.pipeline.ingestionServer.sinkType} not found in dictionary.`);
+    }
+    const ingestionStack = new CIngestionServerStack(this.pipeline, this.resources!);
+    const ingestionStackParameters = getStackParameters(ingestionStack);
+    const ingestionStackName = getStackName(this.pipeline.pipelineId, PipelineStackType.INGESTION, this.pipeline.ingestionServer.sinkType);
+    const ingestionState: WorkflowState = {
+      Type: WorkflowStateType.STACK,
+      Data: {
+        Input: {
+          Action: 'Create',
+          Region: this.pipeline.region,
+          StackName: ingestionStackName,
+          TemplateURL: ingestionTemplateURL,
+          Parameters: ingestionStackParameters,
+          Tags: this.stackTags,
+        },
+        Callback: {
+          BucketName: bucketName,
+          BucketPrefix: `clickstream/workflow/${this.pipeline.executionName}`,
+        },
+      },
+    };
+
+    if (this.pipeline.ingestionServer.sinkType === PipelineSinkType.KAFKA && this.pipeline.ingestionServer.sinkKafka?.kafkaConnector.enable) {
+      const kafkaConnectorTemplateURL = await this.getTemplateUrl(PipelineStackType.KAFKA_CONNECTOR);
+      if (!kafkaConnectorTemplateURL) {
+        throw new ClickStreamBadRequestError('Template: kafka-s3-sink not found in dictionary.');
+      }
+      const kafkaConnectorStack = new CKafkaConnectorStack(this.pipeline, this.resources!);
+      const kafkaConnectorStackParameters = getStackParameters(kafkaConnectorStack);
+      const kafkaConnectorStackName = getStackName(
+        this.pipeline.pipelineId, PipelineStackType.KAFKA_CONNECTOR, this.pipeline.ingestionServer.sinkType);
+      const kafkaConnectorState: WorkflowState = {
         Type: WorkflowStateType.STACK,
         Data: {
           Input: {
             Action: 'Create',
             Region: this.pipeline.region,
-            StackName: ingestionStackName,
-            TemplateURL: ingestionTemplateURL,
-            Parameters: ingestionStackParameters,
+            StackName: kafkaConnectorStackName,
+            TemplateURL: kafkaConnectorTemplateURL,
+            Parameters: kafkaConnectorStackParameters,
             Tags: this.stackTags,
           },
           Callback: {
-            BucketName: stackWorkflowS3Bucket,
+            BucketName: bucketName,
             BucketPrefix: `clickstream/workflow/${this.pipeline.executionName}`,
           },
         },
+        End: true,
       };
-
-      if (this.pipeline.ingestionServer.sinkType === PipelineSinkType.KAFKA && this.pipeline.ingestionServer.sinkKafka?.kafkaConnector.enable) {
-        const kafkaConnectorTemplateURL = await this.getTemplateUrl(PipelineStackType.KAFKA_CONNECTOR);
-        if (!kafkaConnectorTemplateURL) {
-          throw new ClickStreamBadRequestError('Template: kafka-s3-sink not found in dictionary.');
-        }
-        const kafkaConnectorStack = new CKafkaConnectorStack(this.pipeline, this.resources!);
-        const kafkaConnectorStackParameters = getStackParameters(kafkaConnectorStack);
-        const kafkaConnectorStackName = getStackName(
-          this.pipeline.pipelineId, PipelineStackType.KAFKA_CONNECTOR, this.pipeline.ingestionServer.sinkType);
-        const kafkaConnectorState: WorkflowState = {
-          Type: WorkflowStateType.STACK,
-          Data: {
-            Input: {
-              Action: 'Create',
-              Region: this.pipeline.region,
-              StackName: kafkaConnectorStackName,
-              TemplateURL: kafkaConnectorTemplateURL,
-              Parameters: kafkaConnectorStackParameters,
-              Tags: this.stackTags,
-            },
-            Callback: {
-              BucketName: stackWorkflowS3Bucket,
-              BucketPrefix: `clickstream/workflow/${this.pipeline.executionName}`,
-            },
-          },
-          End: true,
-        };
-        ingestionState.Next = PipelineStackType.KAFKA_CONNECTOR;
-        return {
-          StartAt: PipelineStackType.INGESTION,
-          States: {
-            [PipelineStackType.INGESTION]: ingestionState,
-            [PipelineStackType.KAFKA_CONNECTOR]: kafkaConnectorState,
-          },
-        };
-      }
-      ingestionState.End = true;
+      ingestionState.Next = PipelineStackType.KAFKA_CONNECTOR;
       return {
         StartAt: PipelineStackType.INGESTION,
         States: {
           [PipelineStackType.INGESTION]: ingestionState,
+          [PipelineStackType.KAFKA_CONNECTOR]: kafkaConnectorState,
         },
       };
     }
-    if (type === PipelineStackType.DATA_PROCESSING) {
-      if (this.pipeline.ingestionServer.sinkType === PipelineSinkType.KAFKA && !this.pipeline.ingestionServer.sinkKafka?.kafkaConnector.enable) {
-        return undefined;
-      }
-      const dataPipelineTemplateURL = await this.getTemplateUrl(PipelineStackType.DATA_PROCESSING);
-      if (!dataPipelineTemplateURL) {
-        throw new ClickStreamBadRequestError('Template: data-pipeline not found in dictionary.');
-      }
-
-      const dataProcessingStack = new CDataProcessingStack(this.pipeline, this.resources!);
-      const dataProcessingStackParameters = getStackParameters(dataProcessingStack);
-      const dataProcessingStackName = getStackName(
-        this.pipeline.pipelineId, PipelineStackType.DATA_PROCESSING, this.pipeline.ingestionServer.sinkType);
-      const dataProcessingState: WorkflowState = {
-        Type: WorkflowStateType.STACK,
-        Data: {
-          Input: {
-            Action: 'Create',
-            Region: this.pipeline.region,
-            StackName: dataProcessingStackName,
-            TemplateURL: dataPipelineTemplateURL,
-            Parameters: dataProcessingStackParameters,
-            Tags: this.stackTags,
-          },
-          Callback: {
-            BucketName: stackWorkflowS3Bucket,
-            BucketPrefix: `clickstream/workflow/${this.pipeline.executionName}`,
-          },
-        },
-        End: true,
-      };
-      const branch: WorkflowParallelBranch = {
-        StartAt: PipelineStackType.DATA_PROCESSING,
-        States: {
-          [PipelineStackType.DATA_PROCESSING]: dataProcessingState,
-        },
-      };
-      const athenaState = await this.getAthenaState();
-      if (athenaState) {
-        branch.States[PipelineStackType.ATHENA] = athenaState;
-        branch.States[PipelineStackType.DATA_PROCESSING].Next = PipelineStackType.ATHENA;
-        delete branch.States[PipelineStackType.DATA_PROCESSING].End;
-      }
-      const dataModelingState = await this.getDataModelingState();
-      if (dataModelingState) {
-        if (athenaState) {
-          branch.States[PipelineStackType.DATA_MODELING_REDSHIFT] = dataModelingState;
-          branch.States[PipelineStackType.ATHENA].Next = PipelineStackType.DATA_MODELING_REDSHIFT;
-          delete branch.States[PipelineStackType.ATHENA].End;
-        } else {
-          branch.States[PipelineStackType.DATA_MODELING_REDSHIFT] = dataModelingState;
-          branch.States[PipelineStackType.DATA_PROCESSING].Next = PipelineStackType.DATA_MODELING_REDSHIFT;
-          delete branch.States[PipelineStackType.DATA_PROCESSING].End;
-        }
-      }
-      const reportingState = await this.getReportingState();
-      if (reportingState && dataModelingState) {
-        branch.States[PipelineStackType.REPORTING] = reportingState;
-        branch.States[PipelineStackType.DATA_MODELING_REDSHIFT].Next = PipelineStackType.REPORTING;
-        delete branch.States[PipelineStackType.DATA_MODELING_REDSHIFT].End;
-      }
-      return branch;
-    }
-    if (type === PipelineStackType.METRICS) {
-      const metricsTemplateURL = await this.getTemplateUrl(PipelineStackType.METRICS);
-      if (!metricsTemplateURL) {
-        throw new ClickStreamBadRequestError('Template: metrics not found in dictionary.');
-      }
-
-      const metricsStack = new CMetricsStack(this.pipeline, this.resources!);
-      const metricsStackParameters = getStackParameters(metricsStack);
-      const metricsStackStackName = getStackName(this.pipeline.pipelineId, PipelineStackType.METRICS, this.pipeline.ingestionServer.sinkType);
-      const metricsState: WorkflowState = {
-        Type: WorkflowStateType.STACK,
-        Data: {
-          Input: {
-            Action: 'Create',
-            Region: this.pipeline.region,
-            StackName: metricsStackStackName,
-            TemplateURL: metricsTemplateURL,
-            Parameters: metricsStackParameters,
-            Tags: this.stackTags,
-          },
-          Callback: {
-            BucketName: stackWorkflowS3Bucket,
-            BucketPrefix: `clickstream/workflow/${this.pipeline.executionName}`,
-          },
-        },
-        End: true,
-      };
-      return {
-        StartAt: PipelineStackType.METRICS,
-        States: {
-          [PipelineStackType.METRICS]: metricsState,
-        },
-      };
-    }
-    return undefined;
+    ingestionState.End = true;
+    return {
+      StartAt: PipelineStackType.INGESTION,
+      States: {
+        [PipelineStackType.INGESTION]: ingestionState,
+      },
+    };
   }
 
   private async getDataModelingState(): Promise<WorkflowState | undefined> {
@@ -948,4 +971,3 @@ export class CPipeline {
     };
   };
 }
-

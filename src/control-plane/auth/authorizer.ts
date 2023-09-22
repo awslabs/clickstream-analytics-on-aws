@@ -46,7 +46,7 @@ interface JWTAuthorizerProps {
   readonly dynamodbTableName: string;
 }
 
-interface JWTAuthorizerReponse {
+export interface JWTAuthorizerResponse {
   readonly success: boolean;
   readonly jwtPayload?: string | JwtPayload;
 }
@@ -70,7 +70,7 @@ export class JWTAuthorizer {
     this.issuer = props.issuer;
   }
 
-  public async auth(authorizationToken: string): Promise<JWTAuthorizerReponse> {
+  public async auth(authorizationToken: string): Promise<JWTAuthorizerResponse> {
     if (authorizationToken === undefined
       || authorizationToken.indexOf('Bearer ') != 0 ) {
 
