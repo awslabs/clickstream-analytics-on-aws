@@ -557,7 +557,7 @@ describe('Lambda - Create manifest for Redshift COPY', () => {
         '#s3_uri': 's3_uri',
       },
       ExpressionAttributeValues: {
-        ':job_status': 'NEW',
+        ':job_status': 'ods_external_events#NEW',
         ':s3_uri': 's3://EXAMPLE-BUCKET-2/project1/raw/',
       },
       FilterExpression: 'begins_with(#s3_uri, :s3_uri)',
@@ -575,7 +575,7 @@ describe('Lambda - Create manifest for Redshift COPY', () => {
         '#s3_uri': 's3_uri',
       },
       ExpressionAttributeValues: {
-        ':job_status': 'NEW',
+        ':job_status': 'ods_external_events#NEW',
         ':s3_uri': 's3://EXAMPLE-BUCKET-2/project1/raw/',
       },
       FilterExpression: 'begins_with(#s3_uri, :s3_uri)',
@@ -593,7 +593,7 @@ describe('Lambda - Create manifest for Redshift COPY', () => {
         '#s3_uri': 's3_uri',
       },
       ExpressionAttributeValues: {
-        ':job_status': 'NEW',
+        ':job_status': 'ods_external_events#NEW',
         ':s3_uri': 's3://EXAMPLE-BUCKET-2/project1/raw/',
       },
       FilterExpression: 'begins_with(#s3_uri, :s3_uri)',
@@ -611,7 +611,7 @@ describe('Lambda - Create manifest for Redshift COPY', () => {
         '#s3_uri': 's3_uri',
       },
       ExpressionAttributeValues: {
-        ':job_status': 'NEW',
+        ':job_status': 'ods_external_events#NEW',
         ':s3_uri': 's3://EXAMPLE-BUCKET-2/project1/raw/',
       },
       FilterExpression: 'begins_with(#s3_uri, :s3_uri)',
@@ -628,7 +628,7 @@ describe('Lambda - Create manifest for Redshift COPY', () => {
         '#job_status': 'job_status',
       },
       ExpressionAttributeValues: {
-        ':p1': 'ENQUEUE',
+        ':p1': 'ods_external_events#ENQUEUE',
         ':p2': 'request-id-1',
       },
       Key: {
@@ -645,7 +645,7 @@ describe('Lambda - Create manifest for Redshift COPY', () => {
         '#s3_uri': 's3_uri',
       },
       ExpressionAttributeValues: {
-        ':job_status': 'PROCESSING',
+        ':job_status': 'ods_external_events#PROCESSING',
         ':s3_uri': 's3://EXAMPLE-BUCKET-2/project1/raw/',
       },
       FilterExpression: 'begins_with(#s3_uri, :s3_uri)',
@@ -661,7 +661,7 @@ describe('Lambda - Create manifest for Redshift COPY', () => {
         '#s3_uri': 's3_uri',
       },
       ExpressionAttributeValues: {
-        ':job_status': 'ENQUEUE',
+        ':job_status': 'ods_external_events#ENQUEUE',
         ':s3_uri': 's3://EXAMPLE-BUCKET-2/project1/raw/',
       },
       FilterExpression: 'begins_with(#s3_uri, :s3_uri)',

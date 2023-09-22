@@ -289,7 +289,8 @@ async function updateSchemas(props: ResourcePropertiesType, biUsername: string, 
       table_event: odsTableNames.event,
       table_event_parameter: odsTableNames.event_parameter,
       table_user: odsTableNames.user,
-      table_item: odsTableNames.item,      user_bi: biUsername,
+      table_item: odsTableNames.item,
+      user_bi: biUsername,
       ...SQL_TEMPLATE_PARAMETER,
     };
     for (const schemaDef of props.schemaDefs) {
@@ -445,21 +446,31 @@ const createSchemasInRedshift = async (redshiftClient: RedshiftDataClient, sqlSt
 };
 
 const generateRandomStr = (length: number, charSet?: string): string => {
-  const charset = charSet ?? 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!#$%^&-_=+|';
+  const lowerCase = 'abcdefghijklmnopqrstuvwxyz';
+  const upperCase = lowerCase.toUpperCase();
+  const numStr = '0123456789';
+  const other = '!#$%^&-_=+|';
+
   let password = '';
-  for (let i = 0; i < length; i++) {
-    password += charset.charAt(Math.floor(Math.random() * charset.length));
+  let strCharset = charSet;
+  if (!strCharset) {
+    strCharset = charSet ?? lowerCase + upperCase + numStr + other;
+    // Fix ERROR: password must contain a number
+    password = lowerCase[Math.floor(Math.random() * lowerCase.length)]
+  + upperCase[Math.floor(Math.random() * upperCase.length)]
+  + numStr[Math.floor(Math.random() * numStr.length)]
+  + other[Math.floor(Math.random() * other.length)];
+  }
+
+  while (password.length < length) {
+    password += strCharset.charAt(Math.floor(Math.random() * strCharset.length));
   }
   return password;
 };
 
 function generateRedshiftUserPassword(length: number): string {
   const password = generateRandomStr(length);
-  const regex = new RegExp(`^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!#$%^&-_=+|]).{${length},64}$`);
-  if (regex.test(password)) {
-    return password;
-  }
-  return generateRedshiftUserPassword(length);
+  return password;
 }
 
 export type AppUpdateProps = {

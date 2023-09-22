@@ -12,8 +12,8 @@
  */
 
 import { join } from 'path';
-import { Duration, CfnCondition, CfnResource, RemovalPolicy, Fn } from 'aws-cdk-lib';
-import { ITable, Table, AttributeType, BillingMode, TableEncryption } from 'aws-cdk-lib/aws-dynamodb';
+import { Duration, CfnCondition, CfnResource, Fn } from 'aws-cdk-lib';
+import { ITable } from 'aws-cdk-lib/aws-dynamodb';
 import { IVpc, SubnetSelection } from 'aws-cdk-lib/aws-ec2';
 import { Rule, Match, Schedule } from 'aws-cdk-lib/aws-events';
 import { SfnStateMachine, LambdaFunction } from 'aws-cdk-lib/aws-events-targets';
@@ -49,6 +49,7 @@ export interface LoadOdsDataToRedshiftWorkflowProps {
   readonly dataAPIRole: IRole;
   readonly emrServerlessApplicationId: string;
   readonly redshiftRoleForCopyFromS3: IRole;
+  readonly ddbStatusTable: ITable;
 }
 
 export class LoadOdsDataToRedshiftWorkflow extends Construct {
@@ -59,7 +60,7 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
   constructor(scope: Construct, id: string, props: LoadOdsDataToRedshiftWorkflowProps) {
     super(scope, id);
 
-    const ddbStatusTable = this.createDDBStatusTable(props.odsTableName);
+    const ddbStatusTable = props.ddbStatusTable;
 
     const processorLambda = this.createODSEventProcessorLambda(ddbStatusTable, props);
 
@@ -85,7 +86,7 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
     props.odsSource.s3Bucket.grantRead(props.redshiftRoleForCopyFromS3, `${props.odsSource.prefix}*`);
     props.loadWorkflowData.s3Bucket.grantRead(props.redshiftRoleForCopyFromS3, `${props.loadWorkflowData.prefix}*`);
 
-  
+
     // create Step function workflow to orchestrate the workflow to load data from s3 to redshift
     this.loadDataWorkflow = this.createWorkflow(ddbStatusTable, props, props.redshiftRoleForCopyFromS3);
 
@@ -126,31 +127,6 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
 
   }
 
-  private createDDBStatusTable(tableId: string): ITable {
-    const itemsTable = new Table(this, tableId, {
-      partitionKey: {
-        name: 's3_uri', //s3://s3Bucket/s3Object
-        type: AttributeType.STRING,
-      },
-      billingMode: BillingMode.PAY_PER_REQUEST,
-      pointInTimeRecovery: true,
-      encryption: TableEncryption.AWS_MANAGED,
-      // The default removal policy is RETAIN, which means that cdk destroy will not attempt to delete
-      // the new table, and it will remain in your account until manually deleted. By setting the policy to
-      // DESTROY, cdk destroy will delete the table (even if it has data in it)
-      removalPolicy: RemovalPolicy.DESTROY,
-    });
-
-    // Add a global secondary index with a different partition key and sort key
-    //GSI_PK=status, GSI_SK=timestamp
-    itemsTable.addGlobalSecondaryIndex({
-      indexName: DYNAMODB_TABLE_INDEX_NAME,
-      partitionKey: { name: 'job_status', type: AttributeType.STRING },
-      sortKey: { name: 'timestamp', type: AttributeType.NUMBER },
-    });
-
-    return itemsTable;
-  };
 
   /**
    * Create a lambda function to put ODS event source to dynamodb.
@@ -179,6 +155,7 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
         PROJECT_ID: props.projectId,
         S3_FILE_SUFFIX: props.odsSource.fileSuffix,
         DYNAMODB_TABLE_NAME: taskTable.tableName,
+        REDSHIFT_ODS_TABLE_NAME: props.odsTableName,
         ...POWERTOOLS_ENVS,
       },
     });
@@ -186,158 +163,6 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
     return fn;
   }
 
-  // private createCustomResourceAssociateIAMRole(props: LoadOdsDataToRedshiftWorkflowProps, copyRole: IRole): CustomResource {
-  //   const fn = new SolutionNodejsFunction(this, 'AssociateIAMRoleToRedshiftFn', {
-  //     runtime: Runtime.NODEJS_18_X,
-  //     entry: join(
-  //       __dirname + '/../lambdas/custom-resource',
-  //       'redshift-associate-iam-role.ts',
-  //     ),
-  //     handler: 'handler',
-  //     memorySize: 256,
-  //     reservedConcurrentExecutions: 1,
-  //     timeout: Duration.minutes(5),
-  //     logRetention: RetentionDays.ONE_WEEK,
-  //     role: createLambdaRole(this, 'AssociateIAMRoleFnRole', false, [
-  //       new PolicyStatement({
-  //         actions: [
-  //           'iam:PassRole',
-  //         ],
-  //         resources: ['*'], // have to use wildcard for keeping existing associated roles
-  //       }),
-  //     ]),
-  //     environment: {
-  //       ...POWERTOOLS_ENVS,
-  //     },
-  //   });
-
-  //   const provider = new Provider(
-  //     this,
-  //     'RedshiftAssociateIAMRoleCustomResourceProvider',
-  //     {
-  //       onEventHandler: fn,
-  //       logRetention: RetentionDays.FIVE_DAYS,
-  //     },
-  //   );
-
-  //   const customProps: AssociateIAMRoleToRedshift = {
-  //     roleArn: copyRole.roleArn,
-  //     serverlessRedshiftProps: props.serverlessRedshift,
-  //     provisionedRedshiftProps: props.provisionedRedshift,
-  //   };
-
-  //   const cr = new CustomResource(this, 'RedshiftAssociateIAMRoleCustomResource', {
-  //     serviceToken: provider.serviceToken,
-  //     properties: customProps,
-  //   });
-
-  //   if (props.serverlessRedshift) {
-  //     if (props.serverlessRedshift.workgroupId && Token.isUnresolved(props.serverlessRedshift.workgroupId) &&
-  //       !props.serverlessRedshift.createdInStack) {
-  //       const noWorkgroupIdCondition = getOrCreateNoWorkgroupIdCondition(this, props.serverlessRedshift.workgroupId);
-  //       this.createRedshiftServerlessWorkgroupPolicy('RedshiftServerlessAllWorkgroupPolicy', '*',
-  //         fn.role!, noWorkgroupIdCondition);
-
-  //       const withWorkgroupIdCondition = getOrCreateWithWorkgroupIdCondition(this, props.serverlessRedshift.workgroupId);
-  //       this.createRedshiftServerlessWorkgroupPolicy('RedshiftServerlessSingleWorkgroupPolicy', props.serverlessRedshift.workgroupId,
-  //         fn.role!, withWorkgroupIdCondition);
-  //     } else {
-  //       cr.node.addDependency(this.createRedshiftServerlessWorkgroupPolicy('RedshiftServerlessWorkgroupPolicy',
-  //         props.serverlessRedshift.workgroupId ?? '*', fn.role!));
-  //     }
-  //     if (props.serverlessRedshift.namespaceId && Token.isUnresolved(props.serverlessRedshift.namespaceId) &&
-  //       !props.serverlessRedshift.createdInStack) {
-  //       const noNamespaceIdCondition = getOrCreateNoNamespaceIdCondition(this, props.serverlessRedshift.namespaceId);
-  //       this.createRedshiftServerlessNamespacePolicy('RedshiftServerlessAllNamespacePolicy', '*',
-  //         fn.role!, noNamespaceIdCondition);
-
-  //       const withNamespaceIdCondition = getOrCreateWithNamespaceIdCondition(this, props.serverlessRedshift.namespaceId);
-  //       this.createRedshiftServerlessNamespacePolicy('RedshiftServerlessSingleNamespacePolicy', props.serverlessRedshift.namespaceId,
-  //         fn.role!, withNamespaceIdCondition);
-  //     } else {
-  //       cr.node.addDependency(this.createRedshiftServerlessNamespacePolicy('RedshiftServerlessNamespacePolicy',
-  //         props.serverlessRedshift.namespaceId ?? '*', fn.role!));
-  //     }
-  //   } else {
-  //     cr.node.addDependency(new Policy(this, 'ProvisionedRedshiftIAMPolicy', {
-  //       roles: [fn.role!],
-  //       statements: [
-  //         new PolicyStatement({
-  //           actions: [
-  //             'redshift:DescribeClusters',
-  //           ],
-  //           resources: [
-  //             Arn.format({
-  //               service: 'redshift',
-  //               resource: '*',
-  //             }, Stack.of(this)),
-  //           ],
-  //         }),
-  //         new PolicyStatement({
-  //           actions: [
-  //             'redshift:ModifyClusterIamRoles',
-  //           ],
-  //           resources: [
-  //             Arn.format({
-  //               service: 'redshift',
-  //               resource: 'cluster',
-  //               resourceName: props.provisionedRedshift!.clusterIdentifier,
-  //               arnFormat: ArnFormat.COLON_RESOURCE_NAME,
-  //             }, Stack.of(this)),
-  //           ],
-  //         }),
-  //       ],
-  //     }));
-  //   }
-  //   return cr;
-  // }
-
-  // private createRedshiftServerlessWorkgroupPolicy(id: string, workgroupId: string, role: IRole, condition?: CfnCondition): Policy {
-  //   const policy = new Policy(this, id, {
-  //     roles: [role],
-  //     statements: [
-  //       new PolicyStatement({
-  //         actions: [
-  //           'redshift-serverless:GetWorkgroup',
-  //         ],
-  //         resources: [
-  //           Arn.format({
-  //             service: 'redshift-serverless',
-  //             resource: 'workgroup',
-  //             resourceName: workgroupId,
-  //             arnFormat: ArnFormat.SLASH_RESOURCE_NAME,
-  //           }, Stack.of(this)),
-  //         ],
-  //       }),
-  //     ],
-  //   });
-  //   if (condition) { (policy.node.findChild('Resource') as CfnResource).cfnOptions.condition = condition; }
-  //   return policy;
-  // }
-
-  // private createRedshiftServerlessNamespacePolicy(id: string, namespaceId: string, role: IRole, condition?: CfnCondition): Policy {
-  //   const policy = new Policy(this, id, {
-  //     roles: [role],
-  //     statements: [
-  //       new PolicyStatement({
-  //         actions: [
-  //           'redshift-serverless:GetNamespace',
-  //           'redshift-serverless:UpdateNamespace',
-  //         ],
-  //         resources: [
-  //           Arn.format({
-  //             service: 'redshift-serverless',
-  //             resource: 'namespace',
-  //             resourceName: namespaceId,
-  //             arnFormat: ArnFormat.SLASH_RESOURCE_NAME,
-  //           }, Stack.of(this)),
-  //         ],
-  //       }),
-  //     ],
-  //   });
-  //   if (condition) { (policy.node.findChild('Resource') as CfnResource).cfnOptions.condition = condition; }
-  //   return policy;
-  // }
 
   private createWorkflow(dataTable: ITable, props: LoadOdsDataToRedshiftWorkflowProps, copyRole: IRole): IStateMachine {
 
@@ -497,7 +322,7 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
       logs: {
         destination: createLogGroup(this,
           {
-            prefix: `/aws/vendedlogs/states/Clickstream/LoadData-${this.node.id}` ,
+            prefix: `/aws/vendedlogs/states/Clickstream/LoadData-${this.node.id}`,
           },
         ),
         level: LogLevel.ALL,
@@ -547,6 +372,7 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
         QUERY_RESULT_LIMIT: props.loadDataProps.maxFilesLimit.toString(),
         DYNAMODB_TABLE_NAME: dataTable.tableName,
         DYNAMODB_TABLE_INDEX_NAME: DYNAMODB_TABLE_INDEX_NAME,
+        REDSHIFT_ODS_TABLE_NAME: props.odsTableName,
         ...POWERTOOLS_ENVS,
       },
     });
@@ -661,6 +487,7 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
         ODS_EVENT_BUCKET_PREFIX: props.odsSource.prefix,
         DYNAMODB_TABLE_NAME: dataTable.tableName,
         DYNAMODB_TABLE_INDEX_NAME: DYNAMODB_TABLE_INDEX_NAME,
+        REDSHIFT_ODS_TABLE_NAME: props.odsTableName,
         ...POWERTOOLS_ENVS,
       },
 
@@ -693,6 +520,7 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
         ODS_EVENT_BUCKET_PREFIX: props.odsSource.prefix,
         DYNAMODB_TABLE_NAME: dataTable.tableName,
         DYNAMODB_TABLE_INDEX_NAME: DYNAMODB_TABLE_INDEX_NAME,
+        REDSHIFT_ODS_TABLE_NAME: props.odsTableName,
         ...POWERTOOLS_ENVS,
       },
 

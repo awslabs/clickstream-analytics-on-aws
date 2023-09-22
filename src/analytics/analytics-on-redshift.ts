@@ -15,8 +15,9 @@ import {
   Stack,
   NestedStack,
   NestedStackProps,
-  Arn, ArnFormat, Aws, Fn, CustomResource,
+  Arn, ArnFormat, Aws, Fn, CustomResource, RemovalPolicy,
 } from 'aws-cdk-lib';
+import { ITable, Table, AttributeType, BillingMode, TableEncryption } from 'aws-cdk-lib/aws-dynamodb';
 import {
   SubnetSelection,
   IVpc,
@@ -25,18 +26,18 @@ import { PolicyStatement, Role, AccountPrincipal, IRole } from 'aws-cdk-lib/aws-
 import { Construct } from 'constructs';
 import { ApplicationSchemas } from './private/app-schema';
 import { ClearExpiredEventsWorkflow } from './private/clear-expired-events-workflow';
-import { REDSHIFT_EVENT_PARAMETER_TABLE_NAME, REDSHIFT_EVENT_TABLE_NAME, REDSHIFT_ITEM_TABLE_NAME, REDSHIFT_ODS_EVENTS_TABLE_NAME, REDSHIFT_USER_TABLE_NAME } from './private/constant';
-import { createMetricsWidgetForRedshiftCluster } from './private/metircs-redshift-cluster';
-import { LoadDataWorkflows, createMetricsWidgetForRedshiftServerless } from './private/metircs-redshift-serverless';
-import { ExistingRedshiftServerlessProps, ProvisionedRedshiftProps, LoadWorkflowData, NewRedshiftServerlessProps, UpsertUsersWorkflowData, ScanMetadataWorkflowData, ClearExpiredEventsWorkflowData, TablesODSSource, TablesLoadWorkflowData, TablesLoadDataProps } from './private/model';
+import { DYNAMODB_TABLE_INDEX_NAME, REDSHIFT_EVENT_PARAMETER_TABLE_NAME, REDSHIFT_EVENT_TABLE_NAME, REDSHIFT_ITEM_TABLE_NAME, REDSHIFT_ODS_EVENTS_TABLE_NAME, REDSHIFT_USER_TABLE_NAME } from './private/constant';
+import { LoadOdsDataToRedshiftWorkflow } from './private/load-ods-data-workflow';
+import { createMetricsWidgetForRedshiftCluster } from './private/metrics-redshift-cluster';
+import { LoadDataWorkflows, createMetricsWidgetForRedshiftServerless } from './private/metrics-redshift-serverless';
+import { ExistingRedshiftServerlessProps, ProvisionedRedshiftProps, NewRedshiftServerlessProps, UpsertUsersWorkflowData, ScanMetadataWorkflowData, ClearExpiredEventsWorkflowData, TablesODSSource, TablesLoadWorkflowData, TablesLoadDataProps } from './private/model';
+import { createCustomResourceAssociateIAMRole } from './private/redshift-associate-iam-role';
 import { RedshiftServerless } from './private/redshift-serverless';
 import { ScanMetadataWorkflow } from './private/scan-metadata-workflow';
 import { UpsertUsersWorkflow } from './private/upsert-users-workflow';
 import { addCfnNagForCustomResourceProvider, addCfnNagForLogRetention, addCfnNagToStack, ruleRolePolicyWithWildcardResources, ruleForLambdaVPCAndReservedConcurrentExecutions } from '../common/cfn-nag';
 import { SolutionInfo } from '../common/solution-info';
 import { getExistVpc } from '../common/vpc-utils';
-import { LoadOdsDataToRedshiftWorkflow } from './private/load-ods-data-workflow';
-import { createCustomResourceAssociateIAMRole } from './private/redshift-associate-iam-role';
 
 export interface RedshiftOdsTables {
   readonly odsEvents: string;
@@ -122,8 +123,8 @@ export class RedshiftAnalyticsStack extends NestedStack {
     } else if (props.existingRedshiftServerlessProps) {
       this.redshiftDataAPIExecRole = Role.fromRoleArn(this, 'RedshiftDataExecRole',
         props.existingRedshiftServerlessProps.dataAPIRoleArn, {
-        mutable: true,
-      });
+          mutable: true,
+        });
 
     } else {
       this.redshiftDataAPIExecRole = new Role(this, 'RedshiftDataExecRole', {
@@ -202,7 +203,7 @@ export class RedshiftAnalyticsStack extends NestedStack {
       event_parameter: REDSHIFT_EVENT_PARAMETER_TABLE_NAME,
       user: REDSHIFT_USER_TABLE_NAME,
       item: REDSHIFT_ITEM_TABLE_NAME,
-    }
+    };
 
     this.applicationSchema = new ApplicationSchemas(this, 'CreateApplicationSchemas', {
       projectId: props.projectId,
@@ -218,14 +219,15 @@ export class RedshiftAnalyticsStack extends NestedStack {
     }
 
     // custom resource to associate the IAM role to redshift cluster
-    const {cr: crForModifyClusterIAMRoles, redshiftRoleForCopyFromS3 } = createCustomResourceAssociateIAMRole(this,
+    const { cr: crForModifyClusterIAMRoles, redshiftRoleForCopyFromS3 } = createCustomResourceAssociateIAMRole(this,
       {
         serverlessRedshift: existingRedshiftServerlessProps,
-        provisionedRedshift: props.provisionedRedshiftProps
+        provisionedRedshift: props.provisionedRedshiftProps,
       });
 
     crForModifyClusterIAMRoles.node.addDependency(this.applicationSchema.crForCreateSchemas);
 
+    const ddbStatusTable = createDDBStatusTable(this, 'FileStatus');
     const loadDataCommonProps = {
       projectId: props.projectId,
       networkConfig: {
@@ -238,6 +240,7 @@ export class RedshiftAnalyticsStack extends NestedStack {
       serverlessRedshift: existingRedshiftServerlessProps,
       provisionedRedshift: props.provisionedRedshiftProps,
       redshiftRoleForCopyFromS3,
+      ddbStatusTable,
     };
 
     const loadOdsEventsFlow = new LoadOdsDataToRedshiftWorkflow(this, 'odsEventsFlow', {
@@ -384,6 +387,33 @@ export class RedshiftAnalyticsStack extends NestedStack {
   }
 }
 
+function createDDBStatusTable(scope: Construct, tableId: string): ITable {
+  const itemsTable = new Table(scope, tableId, {
+    partitionKey: {
+      name: 's3_uri', //s3://s3Bucket/s3Object
+      type: AttributeType.STRING,
+    },
+    billingMode: BillingMode.PAY_PER_REQUEST,
+    pointInTimeRecovery: true,
+    encryption: TableEncryption.AWS_MANAGED,
+    // The default removal policy is RETAIN, which means that cdk destroy will not attempt to delete
+    // the new table, and it will remain in your account until manually deleted. By setting the policy to
+    // DESTROY, cdk destroy will delete the table (even if it has data in it)
+    removalPolicy: RemovalPolicy.DESTROY,
+  });
+
+  // Add a global secondary index with a different partition key and sort key
+  //GSI_PK=status, GSI_SK=timestamp
+  itemsTable.addGlobalSecondaryIndex({
+    indexName: DYNAMODB_TABLE_INDEX_NAME,
+    partitionKey: { name: 'job_status', type: AttributeType.STRING },
+    sortKey: { name: 'timestamp', type: AttributeType.NUMBER },
+  });
+
+  return itemsTable;
+};
+
+
 function addCfnNag(stack: Stack) {
   addCfnNagForLogRetention(stack);
   addCfnNagForCustomResourceProvider(stack, 'CDK built-in provider for RedshiftSchemasCustomResource', 'RedshiftDbSchemasCustomResourceProvider');
@@ -410,7 +440,7 @@ function addCfnNag(stack: Stack) {
     ruleForLambdaVPCAndReservedConcurrentExecutions(
       'AssociateIAMRoleToRedshiftFn/Resource', 'AssociateIAMRoleToRedshift'),
     {
-      paths_endswith: ['LoadODSEventToRedshiftWorkflow/AssociateIAMRoleFnRole/DefaultPolicy/Resource'],
+      paths_endswith: ['AssociateIAMRoleFnRole/DefaultPolicy/Resource'],
       rules_to_suppress: [
         {
           id: 'F39',
@@ -425,11 +455,20 @@ function addCfnNag(stack: Stack) {
     },
 
     {
-      paths_endswith: ['LoadODSEventToRedshiftWorkflow/LoadManifestStateMachine/Role/DefaultPolicy/Resource'],
+      paths_endswith: ['LoadDataStateMachine/Role/DefaultPolicy/Resource'],
       rules_to_suppress: [
         ...ruleRolePolicyWithWildcardResources(
-          'LoadODSEventToRedshiftWorkflow/LoadManifestStateMachine/Role/DefaultPolicy/Resource',
-          'LoadODSEventToRedshiftWorkflow', 'logs/xray').rules_to_suppress,
+          'LoadDataStateMachine/Role/DefaultPolicy/Resource',
+          'loadDataFlow', 'logs/xray').rules_to_suppress,
+        {
+          id: 'W76',
+          reason: 'ACK: SPCM for IAM policy document is higher than 25',
+        },
+      ],
+    },
+    {
+      paths_endswith: ['CopyDataFromS3Role/DefaultPolicy/Resource'],
+      rules_to_suppress: [
         {
           id: 'W76',
           reason: 'ACK: SPCM for IAM policy document is higher than 25',

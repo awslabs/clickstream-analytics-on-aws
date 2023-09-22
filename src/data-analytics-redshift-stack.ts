@@ -24,7 +24,8 @@ import { RedshiftAnalyticsStack } from './analytics/analytics-on-redshift';
 import {
   createStackParameters, RedshiftAnalyticsStackProps,
 } from './analytics/parameter';
-import { addCfnNagForCfnResource, addCfnNagForCustomResourceProvider, ruleRolePolicyWithWildcardResources } from './common/cfn-nag';
+import { TablesLoadDataProps, TablesLoadWorkflowData, TablesODSSource } from './analytics/private/model';
+import { addCfnNagForCfnResource, addCfnNagForCustomResourceProvider, addCfnNagForLogRetention, ruleRolePolicyWithWildcardResources } from './common/cfn-nag';
 import {
   OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_CREDENTIAL_PARAMETER_SUFFIX,
   OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_NAMESPACE_NAME,
@@ -36,7 +37,6 @@ import {
 } from './common/constant';
 import { SolutionInfo } from './common/solution-info';
 import { REDSHIFT_MODE } from '../src/common/model';
-import { TablesLoadDataProps, TablesLoadWorkflowData, TablesODSSource } from './analytics/private/model';
 
 export class DataAnalyticsRedshiftStack extends Stack {
   public readonly nestedStacks: {
@@ -69,6 +69,9 @@ export class DataAnalyticsRedshiftStack extends Stack {
     addCfnNagForCustomResourceProvider(this.nestedStacks.newRedshiftServerlessStack, 'upsertUsersGetInterval', 'upsertUsersGetIntervalCustomResourceProvider', '');
     addCfnNagForCustomResourceProvider(this.nestedStacks.redshiftProvisionedStack, 'upsertUsersGetInterval', 'upsertUsersGetIntervalCustomResourceProvider', '');
     addCfnNagForCustomResourceProvider(this.nestedStacks.redshiftServerlessStack, 'upsertUsersGetInterval', 'upsertUsersGetIntervalCustomResourceProvider', '');
+
+    addCfnNagForLogRetention(this);
+    addCfnNagForCustomResourceProvider(this, 'CDK built-in provider for GetSourcePrefixCustomerResource', 'GetSourcePrefixCustomerResourceProvider');
   }
 }
 
@@ -76,30 +79,32 @@ export function createRedshiftAnalyticsStack(
   scope: Construct,
   props: RedshiftAnalyticsStackProps,
 ) {
+
+
   const tablesOdsSource: TablesODSSource = {
     ods_events: {
       s3Bucket: props.dataSourceConfiguration.bucket,
-      prefix: props.dataSourceConfiguration.prefix + "ods_events/",
+      prefix: props.dataSourceConfiguration.prefix + 'ods_events/',
       fileSuffix: props.dataSourceConfiguration.fileSuffix,
     },
     event: {
       s3Bucket: props.dataSourceConfiguration.bucket,
-      prefix: props.dataSourceConfiguration.prefix + "event/",
+      prefix: props.dataSourceConfiguration.prefix + 'event/',
       fileSuffix: props.dataSourceConfiguration.fileSuffix,
     },
     event_parameter: {
       s3Bucket: props.dataSourceConfiguration.bucket,
-      prefix: props.dataSourceConfiguration.prefix + "event_parameter/",
+      prefix: props.dataSourceConfiguration.prefix + 'event_parameter/',
       fileSuffix: props.dataSourceConfiguration.fileSuffix,
     },
     user: {
       s3Bucket: props.dataSourceConfiguration.bucket,
-      prefix: props.dataSourceConfiguration.prefix + "user/",
+      prefix: props.dataSourceConfiguration.prefix + 'user/',
       fileSuffix: props.dataSourceConfiguration.fileSuffix,
     },
     item: {
       s3Bucket: props.dataSourceConfiguration.bucket,
-      prefix: props.dataSourceConfiguration.prefix + "item/",
+      prefix: props.dataSourceConfiguration.prefix + 'item/',
       fileSuffix: props.dataSourceConfiguration.fileSuffix,
     },
   };
@@ -107,24 +112,24 @@ export function createRedshiftAnalyticsStack(
   const tablesLoadWorkflowData: TablesLoadWorkflowData = {
     ods_events: {
       s3Bucket: props.loadConfiguration.workdir.bucket,
-      prefix: props.loadConfiguration.workdir.prefix + "ods_events/",
+      prefix: props.loadConfiguration.workdir.prefix + 'ods_events/',
     },
     event: {
       s3Bucket: props.loadConfiguration.workdir.bucket,
-      prefix: props.loadConfiguration.workdir.prefix + "event/",
+      prefix: props.loadConfiguration.workdir.prefix + 'event/',
     },
     event_parameter: {
       s3Bucket: props.loadConfiguration.workdir.bucket,
-      prefix: props.loadConfiguration.workdir.prefix + "event_parameter/",
+      prefix: props.loadConfiguration.workdir.prefix + 'event_parameter/',
     },
     user: {
       s3Bucket: props.loadConfiguration.workdir.bucket,
-      prefix: props.loadConfiguration.workdir.prefix + "user/",
+      prefix: props.loadConfiguration.workdir.prefix + 'user/',
     },
 
     item: {
       s3Bucket: props.loadConfiguration.workdir.bucket,
-      prefix: props.loadConfiguration.workdir.prefix + "item/",
+      prefix: props.loadConfiguration.workdir.prefix + 'item/',
     },
   };
 
@@ -148,7 +153,7 @@ export function createRedshiftAnalyticsStack(
     item: {
       scheduleInterval: props.loadConfiguration.loadJobScheduleIntervalInMinutes,
       maxFilesLimit: props.loadConfiguration.maxFilesLimit,
-    }
+    },
   };
 
   const nestStackProps = {

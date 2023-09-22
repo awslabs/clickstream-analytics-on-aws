@@ -20,11 +20,11 @@ import { WIDGETS_ORDER } from '../../metrics/settings';
 
 
 export interface LoadDataWorkflows {
-   readonly ods_events: IStateMachine;
-   readonly event: IStateMachine;
-   readonly event_parameter: IStateMachine;
-   readonly user: IStateMachine;
-   readonly item: IStateMachine;
+  readonly ods_events: IStateMachine;
+  readonly event: IStateMachine;
+  readonly event_parameter: IStateMachine;
+  readonly user: IStateMachine;
+  readonly item: IStateMachine;
 }
 export function createMetricsWidgetForRedshiftServerless(scope: Construct, id: string, props: {
   projectId: string;

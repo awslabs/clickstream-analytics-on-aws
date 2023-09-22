@@ -19,12 +19,12 @@ import {
 export function getUserTableColumns(): Column[] {
   return [
     {
-      name: 'user_id',
-      type: Schema.STRING,
-    },
-    {
       name: 'event_timestamp',
       type: Schema.BIG_INT,
+    },
+    {
+      name: 'user_id',
+      type: Schema.STRING,
     },
     {
       name: 'user_pseudo_id',

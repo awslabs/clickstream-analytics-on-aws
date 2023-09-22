@@ -11,10 +11,15 @@
  *  and limitations under the License.
  */
 
-import { CfnParameter, CfnRule, Fn } from 'aws-cdk-lib';
+import { join } from 'path';
+import { CfnParameter, CfnResource, CfnRule, CustomResource, Duration, Fn } from 'aws-cdk-lib';
 import { IVpc, SubnetSelection } from 'aws-cdk-lib/aws-ec2';
+import { Runtime } from 'aws-cdk-lib/aws-lambda';
+import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Bucket, IBucket } from 'aws-cdk-lib/aws-s3';
+import { Provider } from 'aws-cdk-lib/custom-resources';
 import { Construct } from 'constructs';
+import { GetResourcePrefixPropertiesType } from './lambdas/custom-resource/get-source-prefix';
 import {
   PARAMETER_GROUP_LABEL_VPC, PARAMETER_LABEL_PRIVATE_SUBNETS, PARAMETER_LABEL_VPCID,
   REDSHIFT_CLUSTER_IDENTIFIER_PATTERN,
@@ -24,7 +29,11 @@ import {
 } from '../common/constant';
 import { REDSHIFT_MODE } from '../common/model';
 import { Parameters, SubnetParameterType } from '../common/parameters';
+import { POWERTOOLS_ENVS } from '../common/powertools';
 import { getExistVpc } from '../common/vpc-utils';
+import { SolutionNodejsFunction } from '../private/function';
+import { addCfnNagSuppressRules, rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions } from '../common/cfn-nag';
+import { createLambdaRole } from '../common/lambda';
 
 export interface RedshiftAnalyticsStackProps {
   network: {
@@ -184,13 +193,13 @@ export function createStackParameters(scope: Construct): {
 
   const { projectIdParam, appIdsParam } = Parameters.createProjectAndAppsParameters(scope, 'ProjectId', 'AppIds');
 
-  const sourceBucketParam = Parameters.createS3BucketParameter(scope, 'SourceDataBucket', {
-    description: 'The S3 bucket name for source data.',
+  const odsEventBucketParam = Parameters.createS3BucketParameter(scope, 'ODSEventBucket', {
+    description: 'The S3 bucket name for ODS data files.',
     allowedPattern: `^${S3_BUCKET_NAME_PATTERN}$`,
   });
 
-  const sourceDataPrefixParam = Parameters.createS3PrefixParameter(scope, 'SourceDataPrefix', {
-    description: 'The S3 prefix for source data.',
+  const odsEventBucketPrefixParam = Parameters.createS3PrefixParameter(scope, 'ODSEventPrefix', {
+    description: 'The S3 prefix for ODS data files.',
     default: '',
   });
 
@@ -200,9 +209,8 @@ export function createStackParameters(scope: Construct): {
     default: '',
   });
 
-
-  const sourceFileSuffixParam = new CfnParameter(scope, 'SourceFileSuffix', {
-    description: 'The suffix of the ODS event files on S3 to be imported.',
+  const odsEventFileSuffixParam = new CfnParameter(scope, 'ODSEventFileSuffix', {
+    description: 'The suffix of the ODS data files on S3 to be imported.',
     type: 'String',
     default: '.snappy.parquet',
   });
@@ -223,10 +231,10 @@ export function createStackParameters(scope: Construct): {
         assert:
           Fn.conditionAnd(
             Fn.conditionNot(
-              Fn.conditionEquals(sourceBucketParam.valueAsString, ''),
+              Fn.conditionEquals(odsEventBucketParam.valueAsString, ''),
             ),
             Fn.conditionNot(
-              Fn.conditionEquals(sourceDataPrefixParam.valueAsString, ''),
+              Fn.conditionEquals(odsEventBucketPrefixParam.valueAsString, ''),
             ),
             Fn.conditionNot(
               Fn.conditionEquals(loadWorkflowBucketParam.valueAsString, ''),
@@ -236,7 +244,7 @@ export function createStackParameters(scope: Construct): {
             ),
           ),
         assertDescription:
-          'SourceDataBucket, SourceDataPrefix, LoadWorkflowBucket and LoadWorkflowBucketPrefix cannot be empty.',
+          'ODSEventBucket, ODSEventPrefix, LoadWorkflowBucket and LoadWorkflowBucketPrefix cannot be empty.',
       },
     ],
   }).overrideLogicalId('S3BucketReadinessRule');
@@ -646,9 +654,9 @@ export function createStackParameters(scope: Construct): {
         {
           Label: { default: 'S3 Information' },
           Parameters: [
-            sourceBucketParam.logicalId,
-            sourceDataPrefixParam.logicalId,
-            sourceFileSuffixParam.logicalId,
+            odsEventBucketParam.logicalId,
+            odsEventBucketPrefixParam.logicalId,
+            odsEventFileSuffixParam.logicalId,
             loadWorkflowBucketParam.logicalId,
             loadWorkflowBucketPrefixParam.logicalId,
           ],
@@ -681,13 +689,13 @@ export function createStackParameters(scope: Construct): {
           default: 'EMR Serverless Application Id',
         },
 
-        [sourceBucketParam.logicalId]: {
+        [odsEventBucketParam.logicalId]: {
           default: 'S3 bucket name for source data',
         },
-        [sourceDataPrefixParam.logicalId]: {
+        [odsEventBucketPrefixParam.logicalId]: {
           default: 'S3 prefix for source data',
         },
-        [sourceFileSuffixParam.logicalId]: {
+        [odsEventFileSuffixParam.logicalId]: {
           default: 'File suffix for source data',
         },
         [loadWorkflowBucketParam.logicalId]: {
@@ -715,6 +723,7 @@ export function createStackParameters(scope: Construct): {
     availabilityZones: Fn.getAzs(),
     privateSubnetIds: Fn.split(',', networkProps.privateSubnets.valueAsString),
   });
+
   return {
     metadata,
     params: {
@@ -731,10 +740,10 @@ export function createStackParameters(scope: Construct): {
         bucket: Bucket.fromBucketName(
           scope,
           'pipeline-ods-events-bucket',
-          sourceBucketParam.valueAsString,
+          odsEventBucketParam.valueAsString,
         ),
-        prefix: sourceDataPrefixParam.valueAsString,
-        fileSuffix: sourceFileSuffixParam.valueAsString,
+        prefix: getSourcePrefix(scope, odsEventBucketPrefixParam.valueAsString),
+        fileSuffix: odsEventFileSuffixParam.valueAsString,
         emrServerlessApplicationId: emrServerlessApplicationIdParam.valueAsString,
       },
       loadConfiguration: {
@@ -794,4 +803,48 @@ function createWorkgroupParameter(scope: Construct, id: string): CfnParameter {
     default: 'default',
     allowedPattern: '^([a-z0-9-]{3,64})?$',
   });
+}
+
+function getSourcePrefix(scope: Construct, odsEventPrefix: string): string {
+
+  const role = createLambdaRole(scope, "GetSourcePrefixCustomerResourceFnRole", false, []);
+
+  const lambdaRootPath = __dirname + '/lambdas/custom-resource';
+  const fn = new SolutionNodejsFunction(scope, 'GetSourcePrefixCustomerResourceFn', {
+    runtime: Runtime.NODEJS_18_X,
+    entry: join(
+      lambdaRootPath,
+      'get-source-prefix.ts',
+    ),
+    handler: 'handler',
+    memorySize: 128,
+    reservedConcurrentExecutions: 1,
+    timeout: Duration.minutes(1),
+    logRetention: RetentionDays.ONE_WEEK,
+    role,
+    environment: {
+      ... POWERTOOLS_ENVS,
+    },
+  });
+  const provider = new Provider(
+    scope,
+    'GetSourcePrefixCustomerResourceProvider',
+    {
+      onEventHandler: fn,
+      logRetention: RetentionDays.FIVE_DAYS,
+    },
+  );
+
+  addCfnNagSuppressRules(fn.node.defaultChild as CfnResource,
+    rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions('CDK'));
+
+  const customProps: GetResourcePrefixPropertiesType = {
+    odsEventPrefix,
+  };
+
+  const cr = new CustomResource(scope, 'GetSourcePrefixCustomerResource', {
+    serviceToken: provider.serviceToken,
+    properties: customProps,
+  });
+  return cr.getAttString('prefix');
 }

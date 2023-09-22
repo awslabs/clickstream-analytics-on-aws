@@ -15,11 +15,11 @@ import { CfnResource, Duration } from 'aws-cdk-lib';
 import { Alarm, ComparisonOperator, Metric, TreatMissingData } from 'aws-cdk-lib/aws-cloudwatch';
 import { IStateMachine } from 'aws-cdk-lib/aws-stepfunctions';
 import { Construct } from 'constructs';
+import { LoadDataWorkflows } from './metrics-redshift-serverless';
 import { AnalyticsCustomMetricsName, MetricsNamespace, MetricsService } from '../../common/model';
 import { GetInterval } from '../../metrics/get-interval-custom-resource';
 import { AlarmsWidgetElement, MetricWidgetElement } from '../../metrics/metrics-widgets-custom-resource';
 import { getAlarmName, setCfnNagForAlarms } from '../../metrics/util';
-import { LoadDataWorkflows } from './metircs-redshift-serverless';
 
 
 export function buildMetricsWidgetForWorkflows(scope: Construct, id: string, props: {
@@ -86,16 +86,16 @@ export function buildMetricsWidgetForWorkflows(scope: Construct, id: string, pro
 
   (loadEventsWorkflowAlarm.node.defaultChild as CfnResource).addPropertyOverride('Period', processingJobInterval.getIntervalSeconds());
 
- const upsertUsersWorkflowAlarm = new Alarm(scope, id + 'upsertUsersWorkflowAlarm', {
-   comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
-   threshold: 1,
-   evaluationPeriods: 1,
-   treatMissingData: TreatMissingData.NOT_BREACHING,
-   metric: props.upsertUsersWorkflow.metricFailed({ period: Duration.hours(24) }),
-   alarmDescription: `Upsert users workflow failed, projectId: ${props.projectId}`,
-   alarmName: getAlarmName(scope, props.projectId, 'Upsert users workflow'),
- });
- (upsertUsersWorkflowAlarm.node.defaultChild as CfnResource).addPropertyOverride('Period', upsertUsersInterval.getIntervalSeconds());
+  const upsertUsersWorkflowAlarm = new Alarm(scope, id + 'upsertUsersWorkflowAlarm', {
+    comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+    threshold: 1,
+    evaluationPeriods: 1,
+    treatMissingData: TreatMissingData.NOT_BREACHING,
+    metric: props.upsertUsersWorkflow.metricFailed({ period: Duration.hours(24) }),
+    alarmDescription: `Upsert users workflow failed, projectId: ${props.projectId}`,
+    alarmName: getAlarmName(scope, props.projectId, 'Upsert users workflow'),
+  });
+  (upsertUsersWorkflowAlarm.node.defaultChild as CfnResource).addPropertyOverride('Period', upsertUsersInterval.getIntervalSeconds());
 
 
   const newFilesCountAlarm = new Alarm(scope, id + 'maxFileAgeAlarm', {
@@ -137,20 +137,20 @@ export function buildMetricsWidgetForWorkflows(scope: Construct, id: string, pro
 
 
   const workflowExecMetrics: MetricWidgetElement[] = [
-    [loadEventWorkflowDimension, "event"],
-    [loadEventParameterWorkflowDimension, "event parameter"],
-    [loadUserWorkflowDimension, "user"],
-    [loadItemWorkflowDimension, "item"],
-    [clearExpiredEventsWorkflowDimension, "clear expired events"],
-    [upsertUsersWorkflowDimension, "upsert user"],
-    [loadOdsEventsWorkflowDimension, "ods_events"],
+    [loadEventWorkflowDimension, 'event'],
+    [loadEventParameterWorkflowDimension, 'event parameter'],
+    [loadUserWorkflowDimension, 'user'],
+    [loadItemWorkflowDimension, 'item'],
+    [clearExpiredEventsWorkflowDimension, 'clear expired events'],
+    [upsertUsersWorkflowDimension, 'upsert user'],
+    [loadOdsEventsWorkflowDimension, 'ods_events'],
   ].flatMap(dimName => {
     return [
       {
         type: 'metric',
         properties: {
           stat: 'Sum',
-          title: `Load ${dimName[1]} workflow`,
+          title: `Load '${dimName[1]}' workflow`,
           metrics: [
             [statesNamespace, 'ExecutionsSucceeded', ...dimName[0]],
             ['.', 'ExecutionsFailed', '.', '.'],
@@ -163,13 +163,13 @@ export function buildMetricsWidgetForWorkflows(scope: Construct, id: string, pro
         type: 'metric',
         properties: {
           stat: 'Average',
-          title: `Load ${dimName[1]}  workflow execution time`,
+          title: `Load '${dimName[1]}' workflow execution time`,
           metrics: [
             [statesNamespace, 'ExecutionTime', ...dimName[0]],
           ],
         },
       },
-    ]
+    ];
   });
 
   const workflowMetrics: (MetricWidgetElement | AlarmsWidgetElement)[] = [

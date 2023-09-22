@@ -15,9 +15,9 @@
 import { IStateMachine } from 'aws-cdk-lib/aws-stepfunctions';
 import { Construct } from 'constructs';
 import { buildMetricsWidgetForWorkflows } from './metrics-common-workflow';
+import { LoadDataWorkflows } from './metrics-redshift-serverless';
 import { AlarmsWidgetElement, MetricWidgetElement, MetricsWidgets } from '../../metrics/metrics-widgets-custom-resource';
 import { WIDGETS_ORDER } from '../../metrics/settings';
-import { LoadDataWorkflows } from './metircs-redshift-serverless';
 
 
 export function createMetricsWidgetForRedshiftCluster(scope: Construct, props: {

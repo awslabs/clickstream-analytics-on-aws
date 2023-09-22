@@ -62,6 +62,7 @@ public class ETLRunner {
     public static final String PARTITION_YEAR = "partition_year";
     public static final String PARTITION_MONTH = "partition_month";
     public static final String PARTITION_DAY = "partition_day";
+    public static final String SINK = "sink";
 
     public enum TableName {
         ODS_EVENTS("ods_events"),
@@ -99,7 +100,7 @@ public class ETLRunner {
         Dataset<Row> dataset2 = executeTransformers(dataset, config.getTransformerClassNames());
 
         long resultCount = writeResultDataset(dataset2);
-        log.info(new ETLMetric(resultCount, "sink").toString());
+        log.info(new ETLMetric(resultCount, SINK).toString());
     }
 
     private Dataset<Row> rePartitionInputDataset(final Dataset<Row> dataset) {
@@ -313,15 +314,15 @@ public class ETLRunner {
         Dataset<Row> userDataset = transformedDatasets.get(3);
         String outPath = config.getOutputPath();
         long evenParamDatasetCount = writeResult(outPath, evenParamDataset, TableName.EVEN_PARAMETER);
-        log.info(new ETLMetric(evenParamDatasetCount, "sink " + TableName.EVEN_PARAMETER.tableName).toString());
+        log.info(new ETLMetric(evenParamDatasetCount, SINK + " " + TableName.EVEN_PARAMETER.tableName).toString());
 
         if (itemDataset != null) {
             long itemDatasetCount = writeResult(outPath, itemDataset, TableName.ITEM);
-            log.info(new ETLMetric(itemDatasetCount, "sink " + TableName.ITEM.tableName).toString());
+            log.info(new ETLMetric(itemDatasetCount, SINK + " " + TableName.ITEM.tableName).toString());
         }
         if (userDataset != null) {
             long userDatasetCount = writeResult(outPath, userDataset, TableName.USER);
-            log.info(new ETLMetric(userDatasetCount, "sink " + TableName.USER.tableName).toString());
+            log.info(new ETLMetric(userDatasetCount, SINK + " " + TableName.USER.tableName).toString());
         }
     }
 

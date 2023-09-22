@@ -20,6 +20,7 @@ import {
 import { QueryCommand, UpdateCommand } from '@aws-sdk/lib-dynamodb';
 import { NativeAttributeValue } from '@aws-sdk/util-dynamodb';
 import { Context } from 'aws-lambda';
+import { composeJobStatus } from './put-ods-source-to-store';
 import { PARTITION_APP } from '../../../common/constant';
 import { AnalyticsCustomMetricsName, MetricsNamespace, MetricsService } from '../../../common/model';
 import { logger } from '../../../common/powertools';
@@ -235,6 +236,9 @@ export const queryItems = async (tableName: string, indexName: string, prefix: s
 }> => {
   const s3UriPrefix = 's3://' + prefix;
 
+  const REDSHIFT_ODS_TABLE_NAME = process.env.REDSHIFT_ODS_TABLE_NAME!;
+  const qJobStatus = composeJobStatus(jobStatus, REDSHIFT_ODS_TABLE_NAME);
+
   // Set the parameters.
   const params = {
     TableName: tableName,
@@ -247,7 +251,7 @@ export const queryItems = async (tableName: string, indexName: string, prefix: s
     },
     ExpressionAttributeValues: {
       ':s3_uri': s3UriPrefix,
-      ':job_status': jobStatus,
+      ':job_status': qJobStatus,
     },
     ScanIndexForward: true, // Set to false for descending order, true for ascending order
     ExclusiveStartKey: lastEvaluatedKey,
@@ -256,7 +260,7 @@ export const queryItems = async (tableName: string, indexName: string, prefix: s
   try {
     logger.debug('queryCommand: ', params);
     const data = await ddbClient.send(new QueryCommand(params));
-    logger.info(`Success - items with status ${jobStatus} query`);
+    logger.info(`Success - items with status ${qJobStatus} query,  count: ${data.Count ?? 0}`);
     return {
       Count: data.Count ?? 0,
       Items: data.Items?.map((item) => (
@@ -285,6 +289,9 @@ export const queryItems = async (tableName: string, indexName: string, prefix: s
  * @returns The response of update item.
  */
 const updateItem = async (tableName: string, s3Uri: string, requestId: string, jobStatus: string) => {
+  const REDSHIFT_ODS_TABLE_NAME = process.env.REDSHIFT_ODS_TABLE_NAME!;
+  const qJobStatus = composeJobStatus(jobStatus, REDSHIFT_ODS_TABLE_NAME);
+
   const params = {
     TableName: tableName,
     Key: {
@@ -297,7 +304,7 @@ const updateItem = async (tableName: string, s3Uri: string, requestId: string, j
       '#execution_id': 'execution_id',
     },
     ExpressionAttributeValues: {
-      ':p1': jobStatus,
+      ':p1': qJobStatus,
       ':p2': requestId,
     },
     ConditionExpression: 'attribute_exists(s3_uri)',

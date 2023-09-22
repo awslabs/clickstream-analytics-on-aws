@@ -20,7 +20,6 @@ import { TreatMissingData } from 'aws-cdk-lib/aws-cloudwatch';
 import { SubnetSelection } from 'aws-cdk-lib/aws-ec2';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { RedshiftAnalyticsStack, RedshiftAnalyticsStackProps } from '../../../src/analytics/analytics-on-redshift';
-import { REDSHIFT_ODS_TABLE_NAME } from '../../../src/analytics/private/constant';
 import { OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_CREDENTIAL_PARAMETER_SUFFIX, OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_NAMESPACE_NAME, OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME, OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_PORT, OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_ADDRESS, OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX, OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_NAME_SUFFIX } from '../../../src/common/constant';
 import { REDSHIFT_MODE, BuiltInTagKeys, MetricsNamespace } from '../../../src/common/model';
 import { SolutionInfo } from '../../../src/common/solution-info';
@@ -29,7 +28,7 @@ import { DataAnalyticsRedshiftStack } from '../../../src/data-analytics-redshift
 import { WIDGETS_ORDER } from '../../../src/metrics/settings';
 import { CFN_FN } from '../../constants';
 import { validateSubnetsRule } from '../../rules';
-import { getParameter, findFirstResourceByKeyPrefix, RefAnyValue, findResourceByCondition, findConditionByName } from '../../utils';
+import { getParameter, findFirstResourceByKeyPrefix, RefAnyValue, findResourceByCondition, findConditionByName, JoinAnyValue } from '../../utils';
 
 const logger = new Logger();
 
@@ -434,6 +433,81 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
   beforeEach(() => {
   });
 
+
+  const nestStackCommonTablesProps = {
+    tablesOdsSource: {
+      ods_events: {
+        s3Bucket: sinkS3Bucket,
+        prefix: 'project1/ods_events/',
+        fileSuffix: '.snappy',
+      },
+      event: {
+        s3Bucket: sinkS3Bucket,
+        prefix: 'project1/event/',
+        fileSuffix: '.snappy',
+      },
+      event_parameter: {
+        s3Bucket: sinkS3Bucket,
+        prefix: 'project1/event_parameter/',
+        fileSuffix: '.snappy',
+      },
+      user: {
+        s3Bucket: sinkS3Bucket,
+        prefix: 'project1/user/',
+        fileSuffix: '.snappy',
+      },
+      item: {
+        s3Bucket: sinkS3Bucket,
+        prefix: 'project1/item/',
+        fileSuffix: '.snappy',
+      },
+    },
+    tablesLoadWorkflowData: {
+      ods_events: {
+        s3Bucket: loadWorkflowS3Bucket,
+        prefix: 'project1/',
+      },
+      event: {
+        s3Bucket: loadWorkflowS3Bucket,
+        prefix: 'project1/',
+      },
+      event_parameter: {
+        s3Bucket: loadWorkflowS3Bucket,
+        prefix: 'project1/',
+      },
+      user: {
+        s3Bucket: loadWorkflowS3Bucket,
+        prefix: 'project1/',
+      },
+      item: {
+        s3Bucket: loadWorkflowS3Bucket,
+        prefix: 'project1/',
+      },
+    },
+    tablesLoadDataProps: {
+      ods_events: {
+        scheduleInterval: '5',
+        maxFilesLimit: 50,
+      },
+      event: {
+        scheduleInterval: '5',
+        maxFilesLimit: 50,
+      },
+      event_parameter: {
+        scheduleInterval: '5',
+        maxFilesLimit: 50,
+      },
+      user: {
+        scheduleInterval: '5',
+        maxFilesLimit: 50,
+      },
+      item: {
+        scheduleInterval: '5',
+        maxFilesLimit: 50,
+      },
+    },
+  };
+
   test('Check parameters for existing serverless nested stack - has all parameters', () => {
     const nestStack = findResourceByCondition(
       template,
@@ -452,7 +526,6 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
       'ODSEventFileSuffix',
       'PrivateSubnetIds',
       'ODSEventBucket',
-      'ODSEventPrefix',
       'LoadWorkflowBucket',
       'LoadWorkflowBucketPrefix',
       'RedshiftServerlessNamespaceId',
@@ -480,7 +553,7 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
       logger.info(`ep: ${ep}, ${templateParams.includes(ep)}`);
       expect(templateParams.includes(ep)).toBeTruthy();
     }
-    expect(templateParams.length).toEqual(exceptedParams.length);
+    expect(templateParams.length).toEqual(exceptedParams.length + 1);
   });
 
   test('Check parameters for new serverless nested stack - has expected parameters for new redshift serverless', () => {
@@ -610,19 +683,7 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
       subnetSelection: subnetSelection,
       projectId: 'project1',
       appIds: 'app1',
-      odsSource: {
-        s3Bucket: sinkS3Bucket,
-        prefix: 'project1/',
-        fileSuffix: '.snappy',
-      },
-      loadWorkflowData: {
-        s3Bucket: loadWorkflowS3Bucket,
-        prefix: 'project1/',
-      },
-      loadDataProps: {
-        scheduleInterval: '5',
-        maxFilesLimit: 50,
-      },
+      ... nestStackCommonTablesProps,
       newRedshiftServerlessProps: undefined,
       existingRedshiftServerlessProps: undefined,
       provisionedRedshiftProps: undefined,
@@ -669,19 +730,7 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
       subnetSelection: subnetSelection,
       projectId: 'project1',
       appIds: 'app1',
-      odsSource: {
-        s3Bucket: sinkS3Bucket,
-        prefix: 'project1/',
-        fileSuffix: '.snappy',
-      },
-      loadWorkflowData: {
-        s3Bucket: loadWorkflowS3Bucket,
-        prefix: 'project1/',
-      },
-      loadDataProps: {
-        scheduleInterval: '5',
-        maxFilesLimit: 50,
-      },
+      ... nestStackCommonTablesProps,
       newRedshiftServerlessProps: {
         vpcId: 'vpc-id',
         subnetIds: 'subnet-1,subnet-2',
@@ -731,19 +780,7 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
       subnetSelection: subnetSelection,
       projectId: 'project1',
       appIds: 'app1',
-      odsSource: {
-        s3Bucket: sinkS3Bucket,
-        prefix: 'project1/',
-        fileSuffix: '.snappy',
-      },
-      loadWorkflowData: {
-        s3Bucket: loadWorkflowS3Bucket,
-        prefix: 'project1/',
-      },
-      loadDataProps: {
-        scheduleInterval: '5',
-        maxFilesLimit: 50,
-      },
+      ... nestStackCommonTablesProps,
       existingRedshiftServerlessProps: serverlessRedshiftProps,
       upsertUsersWorkflowData: {
         scheduleExpression: 'cron(0 1 * * ? *)',
@@ -901,36 +938,36 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
   });
 
 
-  test('Should has LoadODSEventToRedshiftWorkflowODSEventProcessorLambdaSg', () => {
+  test('Should has eventFlowODSEventProcessorLambdaSg', () => {
     if (stack.nestedStacks.redshiftServerlessStack) {
       const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
-      const sg = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::EC2::SecurityGroup', 'LoadODSEventToRedshiftWorkflowODSEventProcessorLambdaSg');
+      const sg = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::EC2::SecurityGroup', 'eventFlowODSEventProcessorLambdaSg');
       expect(sg).toBeDefined();
     }
     if (stack.nestedStacks.redshiftProvisionedStack) {
       const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftProvisionedStack);
-      const sg = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::EC2::SecurityGroup', 'LoadODSEventToRedshiftWorkflowODSEventProcessorLambdaSg');
+      const sg = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::EC2::SecurityGroup', 'eventFlowODSEventProcessorLambdaSg');
       expect(sg).toBeDefined();
     }
   });
 
-  test('Should has LoadODSEventToRedshiftWorkflowODSEventProcessorRole', () => {
+  test('Should has eventFlowODSEventProcessorRole', () => {
     if (stack.nestedStacks.redshiftServerlessStack) {
       const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
-      const role = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::IAM::Role', 'LoadODSEventToRedshiftWorkflowODSEventProcessorRole');
+      const role = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::IAM::Role', 'eventFlowODSEventProcessorRole');
       expect(role).toBeDefined();
     }
     if (stack.nestedStacks.redshiftProvisionedStack) {
       const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftProvisionedStack);
-      const role = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::IAM::Role', 'LoadODSEventToRedshiftWorkflowODSEventProcessorRole');
+      const role = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::IAM::Role', 'eventFlowODSEventProcessorRole');
       expect(role).toBeDefined();
     }
   });
 
-  test('Should has LoadODSEventToRedshiftWorkflowODSEventProcessorRoleDefaultPolicy', () => {
+  test('Should has eventFlowODSEventProcessorRoleDefaultPolicy', () => {
     if (stack.nestedStacks.redshiftServerlessStack) {
       const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
-      const policy = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::IAM::Policy', 'LoadODSEventToRedshiftWorkflowODSEventProcessorRoleDefaultPolicy');
+      const policy = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::IAM::Policy', 'eventFlowODSEventProcessorRoleDefaultPolicy');
       const statement = policy.resource.Properties.PolicyDocument.Statement;
       var containDynamodbAction = false;
       for (const s of statement) {
@@ -945,7 +982,7 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
     }
     if (stack.nestedStacks.redshiftProvisionedStack) {
       const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftProvisionedStack);
-      const policy = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::IAM::Policy', 'LoadODSEventToRedshiftWorkflowODSEventProcessorRoleDefaultPolicy');
+      const policy = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::IAM::Policy', 'eventFlowODSEventProcessorRoleDefaultPolicy');
       const statement = policy.resource.Properties.PolicyDocument.Statement;
       var containDynamodbAction = false;
       for (const s of statement) {
@@ -1161,7 +1198,7 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
             object: {
               key: [
                 {
-                  prefix: RefAnyValue,
+                  prefix: JoinAnyValue,
                 },
               ],
             },
@@ -1203,7 +1240,7 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
             object: {
               key: [
                 {
-                  prefix: RefAnyValue,
+                  prefix: JoinAnyValue,
                 },
               ],
             },
@@ -1263,7 +1300,7 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
                       RefAnyValue,
                       '/',
                       RefAnyValue,
-                      '*',
+                      'ods_events/*',
                     ],
                   ],
                 },
@@ -1298,7 +1335,293 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
                       RefAnyValue,
                       '/',
                       RefAnyValue,
-                      '*',
+                      'ods_events/*',
+                    ],
+                  ],
+                },
+              ],
+            },
+
+            {
+              Action: [
+                's3:GetObject*',
+                's3:GetBucket*',
+                's3:List*',
+              ],
+              Effect: 'Allow',
+              Resource: [
+                {
+                  'Fn::Join': [
+                    '',
+                    [
+                      'arn:',
+                      RefAnyValue,
+                      ':s3:::',
+                      RefAnyValue,
+                    ],
+                  ],
+                },
+                {
+                  'Fn::Join': [
+                    '',
+                    [
+                      'arn:',
+                      RefAnyValue,
+                      ':s3:::',
+                      RefAnyValue,
+                      '/',
+                      RefAnyValue,
+                      'event/*',
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              Action: [
+                's3:GetObject*',
+                's3:GetBucket*',
+                's3:List*',
+              ],
+              Effect: 'Allow',
+              Resource: [
+                {
+                  'Fn::Join': [
+                    '',
+                    [
+                      'arn:',
+                      RefAnyValue,
+                      ':s3:::',
+                      RefAnyValue,
+                    ],
+                  ],
+                },
+                {
+                  'Fn::Join': [
+                    '',
+                    [
+                      'arn:',
+                      RefAnyValue,
+                      ':s3:::',
+                      RefAnyValue,
+                      '/',
+                      RefAnyValue,
+                      'event/*',
+                    ],
+                  ],
+                },
+              ],
+            },
+
+            {
+              Action: [
+                's3:GetObject*',
+                's3:GetBucket*',
+                's3:List*',
+              ],
+              Effect: 'Allow',
+              Resource: [
+                {
+                  'Fn::Join': [
+                    '',
+                    [
+                      'arn:',
+                      RefAnyValue,
+                      ':s3:::',
+                      RefAnyValue,
+                    ],
+                  ],
+                },
+                {
+                  'Fn::Join': [
+                    '',
+                    [
+                      'arn:',
+                      RefAnyValue,
+                      ':s3:::',
+                      RefAnyValue,
+                      '/',
+                      RefAnyValue,
+                      'event_parameter/*',
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              Action: [
+                's3:GetObject*',
+                's3:GetBucket*',
+                's3:List*',
+              ],
+              Effect: 'Allow',
+              Resource: [
+                {
+                  'Fn::Join': [
+                    '',
+                    [
+                      'arn:',
+                      RefAnyValue,
+                      ':s3:::',
+                      RefAnyValue,
+                    ],
+                  ],
+                },
+                {
+                  'Fn::Join': [
+                    '',
+                    [
+                      'arn:',
+                      RefAnyValue,
+                      ':s3:::',
+                      RefAnyValue,
+                      '/',
+                      RefAnyValue,
+                      'event_parameter/*',
+                    ],
+                  ],
+                },
+              ],
+            },
+
+
+            {
+              Action: [
+                's3:GetObject*',
+                's3:GetBucket*',
+                's3:List*',
+              ],
+              Effect: 'Allow',
+              Resource: [
+                {
+                  'Fn::Join': [
+                    '',
+                    [
+                      'arn:',
+                      RefAnyValue,
+                      ':s3:::',
+                      RefAnyValue,
+                    ],
+                  ],
+                },
+                {
+                  'Fn::Join': [
+                    '',
+                    [
+                      'arn:',
+                      RefAnyValue,
+                      ':s3:::',
+                      RefAnyValue,
+                      '/',
+                      RefAnyValue,
+                      'user/*',
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              Action: [
+                's3:GetObject*',
+                's3:GetBucket*',
+                's3:List*',
+              ],
+              Effect: 'Allow',
+              Resource: [
+                {
+                  'Fn::Join': [
+                    '',
+                    [
+                      'arn:',
+                      RefAnyValue,
+                      ':s3:::',
+                      RefAnyValue,
+                    ],
+                  ],
+                },
+                {
+                  'Fn::Join': [
+                    '',
+                    [
+                      'arn:',
+                      RefAnyValue,
+                      ':s3:::',
+                      RefAnyValue,
+                      '/',
+                      RefAnyValue,
+                      'user/*',
+                    ],
+                  ],
+                },
+              ],
+            },
+
+
+            {
+              Action: [
+                's3:GetObject*',
+                's3:GetBucket*',
+                's3:List*',
+              ],
+              Effect: 'Allow',
+              Resource: [
+                {
+                  'Fn::Join': [
+                    '',
+                    [
+                      'arn:',
+                      RefAnyValue,
+                      ':s3:::',
+                      RefAnyValue,
+                    ],
+                  ],
+                },
+                {
+                  'Fn::Join': [
+                    '',
+                    [
+                      'arn:',
+                      RefAnyValue,
+                      ':s3:::',
+                      RefAnyValue,
+                      '/',
+                      RefAnyValue,
+                      'item/*',
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              Action: [
+                's3:GetObject*',
+                's3:GetBucket*',
+                's3:List*',
+              ],
+              Effect: 'Allow',
+              Resource: [
+                {
+                  'Fn::Join': [
+                    '',
+                    [
+                      'arn:',
+                      RefAnyValue,
+                      ':s3:::',
+                      RefAnyValue,
+                    ],
+                  ],
+                },
+                {
+                  'Fn::Join': [
+                    '',
+                    [
+                      'arn:',
+                      RefAnyValue,
+                      ':s3:::',
+                      RefAnyValue,
+                      '/',
+                      RefAnyValue,
+                      'item/*',
                     ],
                   ],
                 },
@@ -1348,7 +1671,7 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
                       RefAnyValue,
                       '/',
                       RefAnyValue,
-                      '*',
+                      'ods_events/*',
                     ],
                   ],
                 },
@@ -1383,12 +1706,298 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
                       RefAnyValue,
                       '/',
                       RefAnyValue,
-                      '*',
+                      'ods_events/*',
                     ],
                   ],
                 },
               ],
             },
+
+            {
+              Action: [
+                's3:GetObject*',
+                's3:GetBucket*',
+                's3:List*',
+              ],
+              Effect: 'Allow',
+              Resource: [
+                {
+                  'Fn::Join': [
+                    '',
+                    [
+                      'arn:',
+                      RefAnyValue,
+                      ':s3:::',
+                      RefAnyValue,
+                    ],
+                  ],
+                },
+                {
+                  'Fn::Join': [
+                    '',
+                    [
+                      'arn:',
+                      RefAnyValue,
+                      ':s3:::',
+                      RefAnyValue,
+                      '/',
+                      RefAnyValue,
+                      'event/*',
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              Action: [
+                's3:GetObject*',
+                's3:GetBucket*',
+                's3:List*',
+              ],
+              Effect: 'Allow',
+              Resource: [
+                {
+                  'Fn::Join': [
+                    '',
+                    [
+                      'arn:',
+                      RefAnyValue,
+                      ':s3:::',
+                      RefAnyValue,
+                    ],
+                  ],
+                },
+                {
+                  'Fn::Join': [
+                    '',
+                    [
+                      'arn:',
+                      RefAnyValue,
+                      ':s3:::',
+                      RefAnyValue,
+                      '/',
+                      RefAnyValue,
+                      'event/*',
+                    ],
+                  ],
+                },
+              ],
+            },
+
+            {
+              Action: [
+                's3:GetObject*',
+                's3:GetBucket*',
+                's3:List*',
+              ],
+              Effect: 'Allow',
+              Resource: [
+                {
+                  'Fn::Join': [
+                    '',
+                    [
+                      'arn:',
+                      RefAnyValue,
+                      ':s3:::',
+                      RefAnyValue,
+                    ],
+                  ],
+                },
+                {
+                  'Fn::Join': [
+                    '',
+                    [
+                      'arn:',
+                      RefAnyValue,
+                      ':s3:::',
+                      RefAnyValue,
+                      '/',
+                      RefAnyValue,
+                      'event_parameter/*',
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              Action: [
+                's3:GetObject*',
+                's3:GetBucket*',
+                's3:List*',
+              ],
+              Effect: 'Allow',
+              Resource: [
+                {
+                  'Fn::Join': [
+                    '',
+                    [
+                      'arn:',
+                      RefAnyValue,
+                      ':s3:::',
+                      RefAnyValue,
+                    ],
+                  ],
+                },
+                {
+                  'Fn::Join': [
+                    '',
+                    [
+                      'arn:',
+                      RefAnyValue,
+                      ':s3:::',
+                      RefAnyValue,
+                      '/',
+                      RefAnyValue,
+                      'event_parameter/*',
+                    ],
+                  ],
+                },
+              ],
+            },
+
+            {
+              Action: [
+                's3:GetObject*',
+                's3:GetBucket*',
+                's3:List*',
+              ],
+              Effect: 'Allow',
+              Resource: [
+                {
+                  'Fn::Join': [
+                    '',
+                    [
+                      'arn:',
+                      RefAnyValue,
+                      ':s3:::',
+                      RefAnyValue,
+                    ],
+                  ],
+                },
+                {
+                  'Fn::Join': [
+                    '',
+                    [
+                      'arn:',
+                      RefAnyValue,
+                      ':s3:::',
+                      RefAnyValue,
+                      '/',
+                      RefAnyValue,
+                      'user/*',
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              Action: [
+                's3:GetObject*',
+                's3:GetBucket*',
+                's3:List*',
+              ],
+              Effect: 'Allow',
+              Resource: [
+                {
+                  'Fn::Join': [
+                    '',
+                    [
+                      'arn:',
+                      RefAnyValue,
+                      ':s3:::',
+                      RefAnyValue,
+                    ],
+                  ],
+                },
+                {
+                  'Fn::Join': [
+                    '',
+                    [
+                      'arn:',
+                      RefAnyValue,
+                      ':s3:::',
+                      RefAnyValue,
+                      '/',
+                      RefAnyValue,
+                      'user/*',
+                    ],
+                  ],
+                },
+              ],
+            },
+
+            {
+              Action: [
+                's3:GetObject*',
+                's3:GetBucket*',
+                's3:List*',
+              ],
+              Effect: 'Allow',
+              Resource: [
+                {
+                  'Fn::Join': [
+                    '',
+                    [
+                      'arn:',
+                      RefAnyValue,
+                      ':s3:::',
+                      RefAnyValue,
+                    ],
+                  ],
+                },
+                {
+                  'Fn::Join': [
+                    '',
+                    [
+                      'arn:',
+                      RefAnyValue,
+                      ':s3:::',
+                      RefAnyValue,
+                      '/',
+                      RefAnyValue,
+                      'item/*',
+                    ],
+                  ],
+                },
+              ],
+            },
+            {
+              Action: [
+                's3:GetObject*',
+                's3:GetBucket*',
+                's3:List*',
+              ],
+              Effect: 'Allow',
+              Resource: [
+                {
+                  'Fn::Join': [
+                    '',
+                    [
+                      'arn:',
+                      RefAnyValue,
+                      ':s3:::',
+                      RefAnyValue,
+                    ],
+                  ],
+                },
+                {
+                  'Fn::Join': [
+                    '',
+                    [
+                      'arn:',
+                      RefAnyValue,
+                      ':s3:::',
+                      RefAnyValue,
+                      '/',
+                      RefAnyValue,
+                      'item/*',
+                    ],
+                  ],
+                },
+              ],
+            },
+
+
           ],
           Version: '2012-10-17',
         },
@@ -1682,7 +2291,7 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
                       RefAnyValue,
                       '/',
                       RefAnyValue,
-                      '*',
+                      'event_parameter/*',
                     ],
                   ],
                 },
@@ -1805,7 +2414,7 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
                       RefAnyValue,
                       '/',
                       RefAnyValue,
-                      '*',
+                      'event_parameter/*',
                     ],
                   ],
                 },
@@ -1842,9 +2451,9 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
           Variables: {
             PROJECT_ID: RefAnyValue,
             MANIFEST_BUCKET: RefAnyValue,
-            MANIFEST_BUCKET_PREFIX: RefAnyValue,
+            MANIFEST_BUCKET_PREFIX: JoinAnyValue,
             ODS_EVENT_BUCKET: RefAnyValue,
-            ODS_EVENT_BUCKET_PREFIX: RefAnyValue,
+            ODS_EVENT_BUCKET_PREFIX: JoinAnyValue,
             QUERY_RESULT_LIMIT: RefAnyValue,
             DYNAMODB_TABLE_NAME: RefAnyValue,
             DYNAMODB_TABLE_INDEX_NAME: 'status_timestamp_index',
@@ -1898,9 +2507,9 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
           Variables: {
             PROJECT_ID: RefAnyValue,
             MANIFEST_BUCKET: RefAnyValue,
-            MANIFEST_BUCKET_PREFIX: RefAnyValue,
+            MANIFEST_BUCKET_PREFIX: JoinAnyValue,
             ODS_EVENT_BUCKET: RefAnyValue,
-            ODS_EVENT_BUCKET_PREFIX: RefAnyValue,
+            ODS_EVENT_BUCKET_PREFIX: JoinAnyValue,
             QUERY_RESULT_LIMIT: RefAnyValue,
             DYNAMODB_TABLE_NAME: RefAnyValue,
             DYNAMODB_TABLE_INDEX_NAME: 'status_timestamp_index',
@@ -2172,7 +2781,7 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
             REDSHIFT_SERVERLESS_WORKGROUP_NAME: RefAnyValue,
             REDSHIFT_CLUSTER_IDENTIFIER: '',
             REDSHIFT_DATABASE: RefAnyValue,
-            REDSHIFT_ODS_TABLE_NAME: REDSHIFT_ODS_TABLE_NAME,
+            REDSHIFT_ODS_TABLE_NAME: 'event_parameter',
             REDSHIFT_DB_USER: '',
             REDSHIFT_ROLE: {
               'Fn::GetAtt': [
@@ -2236,7 +2845,7 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
             REDSHIFT_SERVERLESS_WORKGROUP_NAME: Match.anyValue(),
             REDSHIFT_CLUSTER_IDENTIFIER: RefAnyValue,
             REDSHIFT_DATABASE: RefAnyValue,
-            REDSHIFT_ODS_TABLE_NAME: REDSHIFT_ODS_TABLE_NAME,
+            REDSHIFT_ODS_TABLE_NAME: 'event_parameter',
             REDSHIFT_DB_USER: RefAnyValue,
             REDSHIFT_ROLE: {
               'Fn::GetAtt': [
@@ -2384,7 +2993,7 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
                     RefAnyValue,
                     '/',
                     RefAnyValue,
-                    '*',
+                    'event_parameter/*',
                   ],
                 ],
               },
@@ -2479,7 +3088,7 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
                     RefAnyValue,
                     '/',
                     RefAnyValue,
-                    '*',
+                    'event_parameter/*',
                   ],
                 ],
               },
@@ -2519,7 +3128,7 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
             REDSHIFT_SERVERLESS_WORKGROUP_NAME: RefAnyValue,
             REDSHIFT_CLUSTER_IDENTIFIER: '',
             REDSHIFT_DATABASE: RefAnyValue,
-            REDSHIFT_ODS_TABLE_NAME: REDSHIFT_ODS_TABLE_NAME,
+            REDSHIFT_ODS_TABLE_NAME: 'event_parameter',
             REDSHIFT_DB_USER: '',
             REDSHIFT_DATA_API_ROLE: RefAnyValue,
             POWERTOOLS_SERVICE_NAME: 'ClickStreamAnalyticsOnAWS',
@@ -2576,7 +3185,7 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
             REDSHIFT_SERVERLESS_WORKGROUP_NAME: Match.anyValue(),
             REDSHIFT_CLUSTER_IDENTIFIER: RefAnyValue,
             REDSHIFT_DATABASE: RefAnyValue,
-            REDSHIFT_ODS_TABLE_NAME: REDSHIFT_ODS_TABLE_NAME,
+            REDSHIFT_ODS_TABLE_NAME: 'event_parameter',
             REDSHIFT_DB_USER: RefAnyValue,
             REDSHIFT_DATA_API_ROLE: {
               'Fn::GetAtt': [
@@ -4084,7 +4693,13 @@ describe('DataAnalyticsRedshiftStack serverless custom resource test', () => {
         },
         projectId: RefAnyValue,
         appIds: RefAnyValue,
-        odsTableName: REDSHIFT_ODS_TABLE_NAME,
+        odsTableNames: {
+          odsEvents: 'ods_events',
+          event: 'event',
+          event_parameter: 'event_parameter',
+          user: 'user',
+          item: 'item',
+        },
         databaseName: RefAnyValue,
         dataAPIRole: RefAnyValue,
         serverlessRedshiftProps: {
@@ -4430,7 +5045,7 @@ describe('Should set metrics widgets', () => {
         'Fn::Join': [
           '',
           [
-            'Load events workflow failed, projectId: ',
+            'Load event workflow failed, projectId: ',
             Match.anyValue(),
           ],
         ],
@@ -4514,7 +5129,7 @@ describe('Should set metrics widgets', () => {
         'Fn::Join': [
           '',
           [
-            'Load events workflow failed, projectId: ',
+            'Load event workflow failed, projectId: ',
             Match.anyValue(),
           ],
         ],
@@ -4596,7 +5211,7 @@ describe('Should set metrics widgets', () => {
         'Fn::Join': [
           '',
           [
-            'Load events workflow failed, projectId: ',
+            'Load event workflow failed, projectId: ',
             Match.anyValue(),
           ],
         ],

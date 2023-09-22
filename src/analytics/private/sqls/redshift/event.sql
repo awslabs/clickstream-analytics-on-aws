@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS {{schema}}.{{table_event}}(
-    event_id VARCHAR(255)  DEFAULT RANDOM(),
+    event_id VARCHAR(255),
     event_date DATE, 
     event_timestamp BIGINT,
     event_previous_timestamp BIGINT,
@@ -17,4 +17,4 @@ CREATE TABLE IF NOT EXISTS {{schema}}.{{table_event}}(
     user_pseudo_id VARCHAR(255),
     user_id VARCHAR(255)
 ) DISTSTYLE EVEN 
-SORTKEY (event_date,event_name)
+SORTKEY(event_timestamp, event_name)

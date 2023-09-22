@@ -25,6 +25,10 @@ export const RefAnyValue = {
   Ref: Match.anyValue(),
 };
 
+export const JoinAnyValue = {
+  'Fn::Join': Match.anyValue(),
+};
+
 export function findResourceByCondition(template: Template, condition: string) {
   const allResources = template.toJSON().Resources;
   for (const key of Object.keys(allResources)) {

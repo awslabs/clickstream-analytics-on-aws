@@ -63,6 +63,15 @@ export const reportingViewsDef: SQLDef[] = [
     sqlFile: 'clickstream-user-attr-view.sql',
   },
 
+  {
+    updatable: 'false',
+    sqlFile: 'item-m-view.sql',
+  },
+  {
+    updatable: 'false',
+    sqlFile: 'user-m-view.sql',
+  },
+
 ];
 
 
@@ -112,6 +121,10 @@ export const schemaDefs: SQLDef[] = [
   {
     updatable: 'true',
     sqlFile: 'sp-clear-expired-events.sql',
+  },
+  {
+    updatable: 'true',
+    sqlFile: 'sp-clear-item-and-user.sql',
   },
 
 ];
