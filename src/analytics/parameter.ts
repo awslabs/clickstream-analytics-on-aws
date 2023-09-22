@@ -34,7 +34,7 @@ export interface RedshiftAnalyticsStackProps {
   projectId: string;
   appIds: string;
   dataProcessingCronOrRateExpression: string;
-  odsEvents: {
+  dataSourceConfiguration: {
     bucket: IBucket;
     prefix: string;
     fileSuffix: string;
@@ -184,13 +184,13 @@ export function createStackParameters(scope: Construct): {
 
   const { projectIdParam, appIdsParam } = Parameters.createProjectAndAppsParameters(scope, 'ProjectId', 'AppIds');
 
-  const odsEventBucketParam = Parameters.createS3BucketParameter(scope, 'ODSEventBucket', {
-    description: 'The S3 bucket name for ODS events.',
+  const sourceBucketParam = Parameters.createS3BucketParameter(scope, 'SourceDataBucket', {
+    description: 'The S3 bucket name for source data.',
     allowedPattern: `^${S3_BUCKET_NAME_PATTERN}$`,
   });
 
-  const odsEventBucketPrefixParam = Parameters.createS3PrefixParameter(scope, 'ODSEventPrefix', {
-    description: 'The S3 prefix for ODS events.',
+  const sourceDataPrefixParam = Parameters.createS3PrefixParameter(scope, 'SourceDataPrefix', {
+    description: 'The S3 prefix for source data.',
     default: '',
   });
 
@@ -201,7 +201,7 @@ export function createStackParameters(scope: Construct): {
   });
 
 
-  const odsEventFileSuffixParam = new CfnParameter(scope, 'ODSEventFileSuffix', {
+  const sourceFileSuffixParam = new CfnParameter(scope, 'SourceFileSuffix', {
     description: 'The suffix of the ODS event files on S3 to be imported.',
     type: 'String',
     default: '.snappy.parquet',
@@ -223,10 +223,10 @@ export function createStackParameters(scope: Construct): {
         assert:
           Fn.conditionAnd(
             Fn.conditionNot(
-              Fn.conditionEquals(odsEventBucketParam.valueAsString, ''),
+              Fn.conditionEquals(sourceBucketParam.valueAsString, ''),
             ),
             Fn.conditionNot(
-              Fn.conditionEquals(odsEventBucketPrefixParam.valueAsString, ''),
+              Fn.conditionEquals(sourceDataPrefixParam.valueAsString, ''),
             ),
             Fn.conditionNot(
               Fn.conditionEquals(loadWorkflowBucketParam.valueAsString, ''),
@@ -236,7 +236,7 @@ export function createStackParameters(scope: Construct): {
             ),
           ),
         assertDescription:
-          'ODSEventBucket, ODSEventPrefix, LoadWorkflowBucket and LoadWorkflowBucketPrefix cannot be empty.',
+          'SourceDataBucket, SourceDataPrefix, LoadWorkflowBucket and LoadWorkflowBucketPrefix cannot be empty.',
       },
     ],
   }).overrideLogicalId('S3BucketReadinessRule');
@@ -646,9 +646,9 @@ export function createStackParameters(scope: Construct): {
         {
           Label: { default: 'S3 Information' },
           Parameters: [
-            odsEventBucketParam.logicalId,
-            odsEventBucketPrefixParam.logicalId,
-            odsEventFileSuffixParam.logicalId,
+            sourceBucketParam.logicalId,
+            sourceDataPrefixParam.logicalId,
+            sourceFileSuffixParam.logicalId,
             loadWorkflowBucketParam.logicalId,
             loadWorkflowBucketPrefixParam.logicalId,
           ],
@@ -681,14 +681,14 @@ export function createStackParameters(scope: Construct): {
           default: 'EMR Serverless Application Id',
         },
 
-        [odsEventBucketParam.logicalId]: {
-          default: 'S3 bucket name for ODS Event',
+        [sourceBucketParam.logicalId]: {
+          default: 'S3 bucket name for source data',
         },
-        [odsEventBucketPrefixParam.logicalId]: {
-          default: 'S3 prefix for ODS Event',
+        [sourceDataPrefixParam.logicalId]: {
+          default: 'S3 prefix for source data',
         },
-        [odsEventFileSuffixParam.logicalId]: {
-          default: 'File suffix for ODS Event',
+        [sourceFileSuffixParam.logicalId]: {
+          default: 'File suffix for source data',
         },
         [loadWorkflowBucketParam.logicalId]: {
           default: 'S3 bucket name for load workflow data',
@@ -727,14 +727,14 @@ export function createStackParameters(scope: Construct): {
       projectId: projectIdParam.valueAsString,
       appIds: appIdsParam.valueAsString,
       dataProcessingCronOrRateExpression: dataProcessingCronOrRateExpressionParam.valueAsString,
-      odsEvents: {
+      dataSourceConfiguration: {
         bucket: Bucket.fromBucketName(
           scope,
           'pipeline-ods-events-bucket',
-          odsEventBucketParam.valueAsString,
+          sourceBucketParam.valueAsString,
         ),
-        prefix: odsEventBucketPrefixParam.valueAsString,
-        fileSuffix: odsEventFileSuffixParam.valueAsString,
+        prefix: sourceDataPrefixParam.valueAsString,
+        fileSuffix: sourceFileSuffixParam.valueAsString,
         emrServerlessApplicationId: emrServerlessApplicationIdParam.valueAsString,
       },
       loadConfiguration: {

@@ -36,6 +36,7 @@ import {
 } from './common/constant';
 import { SolutionInfo } from './common/solution-info';
 import { REDSHIFT_MODE } from '../src/common/model';
+import { TablesLoadDataProps, TablesLoadWorkflowData, TablesODSSource } from './analytics/private/model';
 
 export class DataAnalyticsRedshiftStack extends Stack {
   public readonly nestedStacks: {
@@ -75,25 +76,91 @@ export function createRedshiftAnalyticsStack(
   scope: Construct,
   props: RedshiftAnalyticsStackProps,
 ) {
+  const tablesOdsSource: TablesODSSource = {
+    ods_events: {
+      s3Bucket: props.dataSourceConfiguration.bucket,
+      prefix: props.dataSourceConfiguration.prefix + "ods_events/",
+      fileSuffix: props.dataSourceConfiguration.fileSuffix,
+    },
+    event: {
+      s3Bucket: props.dataSourceConfiguration.bucket,
+      prefix: props.dataSourceConfiguration.prefix + "event/",
+      fileSuffix: props.dataSourceConfiguration.fileSuffix,
+    },
+    event_parameter: {
+      s3Bucket: props.dataSourceConfiguration.bucket,
+      prefix: props.dataSourceConfiguration.prefix + "event_parameter/",
+      fileSuffix: props.dataSourceConfiguration.fileSuffix,
+    },
+    user: {
+      s3Bucket: props.dataSourceConfiguration.bucket,
+      prefix: props.dataSourceConfiguration.prefix + "user/",
+      fileSuffix: props.dataSourceConfiguration.fileSuffix,
+    },
+    item: {
+      s3Bucket: props.dataSourceConfiguration.bucket,
+      prefix: props.dataSourceConfiguration.prefix + "item/",
+      fileSuffix: props.dataSourceConfiguration.fileSuffix,
+    },
+  };
+
+  const tablesLoadWorkflowData: TablesLoadWorkflowData = {
+    ods_events: {
+      s3Bucket: props.loadConfiguration.workdir.bucket,
+      prefix: props.loadConfiguration.workdir.prefix + "ods_events/",
+    },
+    event: {
+      s3Bucket: props.loadConfiguration.workdir.bucket,
+      prefix: props.loadConfiguration.workdir.prefix + "event/",
+    },
+    event_parameter: {
+      s3Bucket: props.loadConfiguration.workdir.bucket,
+      prefix: props.loadConfiguration.workdir.prefix + "event_parameter/",
+    },
+    user: {
+      s3Bucket: props.loadConfiguration.workdir.bucket,
+      prefix: props.loadConfiguration.workdir.prefix + "user/",
+    },
+
+    item: {
+      s3Bucket: props.loadConfiguration.workdir.bucket,
+      prefix: props.loadConfiguration.workdir.prefix + "item/",
+    },
+  };
+
+  const tablesLoadDataProps: TablesLoadDataProps = {
+    ods_events: {
+      scheduleInterval: props.loadConfiguration.loadJobScheduleIntervalInMinutes,
+      maxFilesLimit: props.loadConfiguration.maxFilesLimit,
+    },
+    event: {
+      scheduleInterval: props.loadConfiguration.loadJobScheduleIntervalInMinutes,
+      maxFilesLimit: props.loadConfiguration.maxFilesLimit,
+    },
+    event_parameter: {
+      scheduleInterval: props.loadConfiguration.loadJobScheduleIntervalInMinutes,
+      maxFilesLimit: props.loadConfiguration.maxFilesLimit,
+    },
+    user: {
+      scheduleInterval: props.loadConfiguration.loadJobScheduleIntervalInMinutes,
+      maxFilesLimit: props.loadConfiguration.maxFilesLimit,
+    },
+    item: {
+      scheduleInterval: props.loadConfiguration.loadJobScheduleIntervalInMinutes,
+      maxFilesLimit: props.loadConfiguration.maxFilesLimit,
+    }
+  };
+
   const nestStackProps = {
     vpc: props.network.vpc,
     subnetSelection: props.network.subnetSelection,
     projectId: props.projectId,
     appIds: props.appIds,
     dataProcessingCronOrRateExpression: props.dataProcessingCronOrRateExpression,
-    odsSource: {
-      s3Bucket: props.odsEvents.bucket,
-      prefix: props.odsEvents.prefix,
-      fileSuffix: props.odsEvents.fileSuffix,
-    },
-    loadWorkflowData: {
-      s3Bucket: props.loadConfiguration.workdir.bucket,
-      prefix: props.loadConfiguration.workdir.prefix,
-    },
-    loadDataProps: {
-      scheduleInterval: props.loadConfiguration.loadJobScheduleIntervalInMinutes,
-      maxFilesLimit: props.loadConfiguration.maxFilesLimit,
-    },
+    tablesOdsSource,
+    tablesLoadWorkflowData,
+    tablesLoadDataProps,
+
     upsertUsersWorkflowData: {
       scheduleExpression: props.upsertUsersConfiguration.scheduleExpression,
     },
@@ -108,7 +175,7 @@ export function createRedshiftAnalyticsStack(
     },
   };
 
-  props.odsEvents.bucket.enableEventBridgeNotification();
+  props.dataSourceConfiguration.bucket.enableEventBridgeNotification();
 
   const redshiftModeStr = props.redshift.mode;
 
@@ -146,7 +213,7 @@ export function createRedshiftAnalyticsStack(
         ...props.redshift.newServerless!,
         databaseName: props.redshift.defaultDatabaseName,
       },
-      emrServerlessApplicationId: props.odsEvents.emrServerlessApplicationId,
+      emrServerlessApplicationId: props.dataSourceConfiguration.emrServerlessApplicationId,
       dataProcessingCronOrRateExpression: props.dataProcessingCronOrRateExpression,
     },
   );
@@ -163,7 +230,7 @@ export function createRedshiftAnalyticsStack(
         ...props.redshift.existingServerless!,
         dataAPIRoleArn: props.redshift.existingServerless!.iamRole,
       },
-      emrServerlessApplicationId: props.odsEvents.emrServerlessApplicationId,
+      emrServerlessApplicationId: props.dataSourceConfiguration.emrServerlessApplicationId,
       dataProcessingCronOrRateExpression: props.dataProcessingCronOrRateExpression,
     },
   );
@@ -178,7 +245,7 @@ export function createRedshiftAnalyticsStack(
         databaseName: props.redshift.defaultDatabaseName,
         ...props.redshift.provisioned!,
       },
-      emrServerlessApplicationId: props.odsEvents.emrServerlessApplicationId,
+      emrServerlessApplicationId: props.dataSourceConfiguration.emrServerlessApplicationId,
       dataProcessingCronOrRateExpression: props.dataProcessingCronOrRateExpression,
     },
   );

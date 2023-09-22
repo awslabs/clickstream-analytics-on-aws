@@ -17,6 +17,7 @@ import { Construct } from 'constructs';
 import { buildMetricsWidgetForWorkflows } from './metrics-common-workflow';
 import { AlarmsWidgetElement, MetricWidgetElement, MetricsWidgets } from '../../metrics/metrics-widgets-custom-resource';
 import { WIDGETS_ORDER } from '../../metrics/settings';
+import { LoadDataWorkflows } from './metircs-redshift-serverless';
 
 
 export function createMetricsWidgetForRedshiftCluster(scope: Construct, props: {
@@ -25,7 +26,7 @@ export function createMetricsWidgetForRedshiftCluster(scope: Construct, props: {
   upsertUsersCronOrRateExpression: string;
   scanMetadataCronOrRateExpression: string;
   redshiftClusterIdentifier: string;
-  loadEventsWorkflow: IStateMachine;
+  loadDataWorkflows: LoadDataWorkflows;
   upsertUsersWorkflow: IStateMachine;
   scanMetadataWorkflow: IStateMachine;
   clearExpiredEventsWorkflow: IStateMachine;

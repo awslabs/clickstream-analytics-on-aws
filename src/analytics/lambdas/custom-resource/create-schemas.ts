@@ -220,14 +220,18 @@ function splitString(str: string): string[] {
 }
 
 async function createSchemas(props: ResourcePropertiesType, biUsername: string) {
-  const odsTableName = props.odsTableName;
+  const odsTableNames = props.odsTableNames;
 
   const appIds = splitString(props.appIds);
   const sqlStatements : string[] = [];
   for (const app of appIds) {
     const mustacheParam: MustacheParamType = {
       schema: app,
-      table_ods_events: odsTableName,
+      table_ods_events: odsTableNames.odsEvents,
+      table_event: odsTableNames.event,
+      table_event_parameter: odsTableNames.event_parameter,
+      table_user: odsTableNames.user,
+      table_item: odsTableNames.item,
       user_bi: biUsername,
       ...SQL_TEMPLATE_PARAMETER,
     };
@@ -252,14 +256,18 @@ async function createSchemas(props: ResourcePropertiesType, biUsername: string) 
 }
 
 async function updateSchemas(props: ResourcePropertiesType, biUsername: string, oldProps: ResourcePropertiesType) {
-  const odsTableName = props.odsTableName;
+  const odsTableNames = props.odsTableNames;
   const appUpdateProps = getAppUpdateProps(props, oldProps);
 
   const sqlStatements : string[] = [];
   for (const app of appUpdateProps.createAppIds) {
     const mustacheParam: MustacheParamType = {
       schema: app,
-      table_ods_events: odsTableName,
+      table_ods_events: odsTableNames.odsEvents,
+      table_event: odsTableNames.event,
+      table_event_parameter: odsTableNames.event_parameter,
+      table_user: odsTableNames.user,
+      table_item: odsTableNames.item,
       user_bi: biUsername,
       ...SQL_TEMPLATE_PARAMETER,
     };
@@ -277,8 +285,11 @@ async function updateSchemas(props: ResourcePropertiesType, biUsername: string, 
   for (const app of appUpdateProps.updateAppIds) {
     const mustacheParam: MustacheParamType = {
       schema: app,
-      table_ods_events: odsTableName,
-      user_bi: biUsername,
+      table_ods_events: odsTableNames.odsEvents,
+      table_event: odsTableNames.event,
+      table_event_parameter: odsTableNames.event_parameter,
+      table_user: odsTableNames.user,
+      table_item: odsTableNames.item,      user_bi: biUsername,
       ...SQL_TEMPLATE_PARAMETER,
     };
     for (const schemaDef of props.schemaDefs) {
@@ -309,13 +320,17 @@ async function doUpdate(sqlStatements: string[], props: ResourcePropertiesType) 
 }
 
 async function createViewForReporting(props: ResourcePropertiesType) {
-  const odsTableName = props.odsTableName;
+  const odsTableNames = props.odsTableNames;
   const appIds = splitString(props.appIds);
   const sqlStatements : string[] = [];
   for (const app of appIds) {
     const mustacheParam: MustacheParamType = {
       schema: app,
-      table_ods_events: odsTableName,
+      table_ods_events: odsTableNames.odsEvents,
+      table_event: odsTableNames.event,
+      table_event_parameter: odsTableNames.event_parameter,
+      table_user: odsTableNames.user,
+      table_item: odsTableNames.item,
       ...SQL_TEMPLATE_PARAMETER,
     };
 
@@ -333,7 +348,7 @@ async function createViewForReporting(props: ResourcePropertiesType) {
 }
 
 async function updateViewForReporting(props: ResourcePropertiesType, oldProps: ResourcePropertiesType) {
-  const odsTableName = props.odsTableName;
+  const odsTableNames = props.odsTableNames;
 
   const appUpdateProps = getAppUpdateProps(props, oldProps);
   const sqlStatements : string[] = [];
@@ -341,7 +356,11 @@ async function updateViewForReporting(props: ResourcePropertiesType, oldProps: R
   for (const app of appUpdateProps.createAppIds) {
     const mustacheParam: MustacheParamType = {
       schema: app,
-      table_ods_events: odsTableName,
+      table_ods_events: odsTableNames.odsEvents,
+      table_event: odsTableNames.event,
+      table_event_parameter: odsTableNames.event_parameter,
+      table_user: odsTableNames.user,
+      table_item: odsTableNames.item,
       ...SQL_TEMPLATE_PARAMETER,
     };
     for (const viewDef of props.reportingViewsDef) {
@@ -352,7 +371,11 @@ async function updateViewForReporting(props: ResourcePropertiesType, oldProps: R
   for (const app of appUpdateProps.updateAppIds) {
     const mustacheParam: MustacheParamType = {
       schema: app,
-      table_ods_events: odsTableName,
+      table_ods_events: odsTableNames.odsEvents,
+      table_event: odsTableNames.event,
+      table_event_parameter: odsTableNames.event_parameter,
+      table_user: odsTableNames.user,
+      table_item: odsTableNames.item,
       ...SQL_TEMPLATE_PARAMETER,
     };
     for (const viewDef of props.reportingViewsDef) {

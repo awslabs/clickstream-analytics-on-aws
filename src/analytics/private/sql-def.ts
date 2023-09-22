@@ -74,6 +74,22 @@ export const schemaDefs: SQLDef[] = [
   },
   {
     updatable: 'true',
+    sqlFile: 'event.sql',
+  },
+  {
+    updatable: 'true',
+    sqlFile: 'event-parameter.sql',
+  },
+  {
+    updatable: 'true',
+    sqlFile: 'user.sql',
+  },
+  {
+    updatable: 'true',
+    sqlFile: 'item.sql',
+  },
+  {
+    updatable: 'true',
     sqlFile: 'sp-clickstream-log.sql',
   },
   {
