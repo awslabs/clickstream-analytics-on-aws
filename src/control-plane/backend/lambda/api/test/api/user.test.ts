@@ -20,8 +20,8 @@ import {
 } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
 import request from 'supertest';
-import { MOCK_TOKEN, MOCK_USER_ID, dictionaryMock, tokenMock } from './ddb-mock';
-import { DEFAULT_ANALYST_ROLE_NAMES, DEFAULT_OPERATOR_ROLE_NAMES, amznRequestContextHeader, clickStreamTableName, dictionaryTableName } from '../../common/constants';
+import { MOCK_TOKEN, MOCK_USER_ID, tokenMock } from './ddb-mock';
+import { DEFAULT_ANALYST_ROLE_NAMES, DEFAULT_OPERATOR_ROLE_NAMES, DEFAULT_ROLE_JSON_PATH, amznRequestContextHeader, clickStreamTableName } from '../../common/constants';
 import { DEFAULT_SOLUTION_OPERATOR } from '../../common/constants-ln';
 import { IUserRole } from '../../common/types';
 import { getRoleFromToken } from '../../common/utils';
@@ -205,7 +205,21 @@ describe('User test', () => {
   });
 
   it('Get role from cognito decoded token', async () => {
-    dictionaryMock(ddbMock);
+    ddbMock.on(GetCommand, {
+      TableName: clickStreamTableName,
+      Key: {
+        id: 'USER_SETTINGS',
+        type: 'USER_SETTINGS',
+      },
+    }).resolves({
+      Item: {
+        id: 'USER_SETTINGS',
+        type: 'USER_SETTINGS',
+        roleJsonPath: DEFAULT_ROLE_JSON_PATH,
+        operatorRoleNames: DEFAULT_OPERATOR_ROLE_NAMES,
+        analystRoleNames: DEFAULT_ANALYST_ROLE_NAMES,
+      },
+    });
     const operator = ['ClickstreamOperator'];
     const analyst = ['ClickstreamAnalyst'];
     const admin = ['ClickstreamOperator', 'ClickstreamAnalyst'];
@@ -257,18 +271,18 @@ describe('User test', () => {
 
   it('Get role from others decoded token', async () => {
     ddbMock.on(GetCommand, {
-      TableName: dictionaryTableName,
+      TableName: clickStreamTableName,
       Key: {
-        name: 'UserSettings',
+        id: 'USER_SETTINGS',
+        type: 'USER_SETTINGS',
       },
     }).resolves({
       Item: {
-        name: 'UserSettings',
-        data: {
-          roleJsonPath: '$.payload.any_keys.roles',
-          operatorRoleNames: DEFAULT_OPERATOR_ROLE_NAMES,
-          analystRoleNames: DEFAULT_ANALYST_ROLE_NAMES,
-        },
+        id: 'USER_SETTINGS',
+        type: 'USER_SETTINGS',
+        roleJsonPath: '$.payload.any_keys.roles',
+        operatorRoleNames: DEFAULT_OPERATOR_ROLE_NAMES,
+        analystRoleNames: DEFAULT_ANALYST_ROLE_NAMES,
       },
     });
     const operator = ['ClickstreamOperator'];
@@ -306,19 +320,20 @@ describe('User test', () => {
   });
 
   it('Get role from others decoded token with map mutil role name', async () => {
+
     ddbMock.on(GetCommand, {
-      TableName: dictionaryTableName,
+      TableName: clickStreamTableName,
       Key: {
-        name: 'UserSettings',
+        id: 'USER_SETTINGS',
+        type: 'USER_SETTINGS',
       },
     }).resolves({
       Item: {
-        name: 'UserSettings',
-        data: {
-          roleJsonPath: '$.payload.any_keys.roles',
-          operatorRoleNames: `${DEFAULT_OPERATOR_ROLE_NAMES} , Operator1 , Operator2 `,
-          analystRoleNames: `${DEFAULT_ANALYST_ROLE_NAMES} , Analyst1 , Analyst2 `,
-        },
+        id: 'USER_SETTINGS',
+        type: 'USER_SETTINGS',
+        roleJsonPath: '$.payload.any_keys.roles',
+        operatorRoleNames: `${DEFAULT_OPERATOR_ROLE_NAMES} , Operator1 , Operator2 `,
+        analystRoleNames: `${DEFAULT_ANALYST_ROLE_NAMES} , Analyst1 , Analyst2 `,
       },
     });
     const decodedToken = {
@@ -386,6 +401,83 @@ describe('User test', () => {
       },
     };
     expect(await getRoleFromToken(decodedTokenAdmin)).toEqual(IUserRole.ADMIN);
+  });
+
+  it('Get user settings by default', async () => {
+    ddbMock.on(GetCommand).resolves({});
+    const res = await request(app)
+      .get('/api/user/settings');
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual(
+      {
+        data: {
+          analystRoleNames: DEFAULT_ANALYST_ROLE_NAMES,
+          operatorRoleNames: DEFAULT_OPERATOR_ROLE_NAMES,
+          roleJsonPath: '$.payload.cognito:groups',
+        },
+        message: '',
+        success: true,
+      },
+    );
+    expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 1);
+  });
+
+  it('Get user settings', async () => {
+    ddbMock.on(GetCommand, {
+      TableName: clickStreamTableName,
+      Key: {
+        id: 'USER_SETTINGS',
+        type: 'USER_SETTINGS',
+      },
+    }).resolves({
+      Item: {
+        id: 'USER_SETTINGS',
+        type: 'USER_SETTINGS',
+        roleJsonPath: '$.payload.any_keys.roles',
+        operatorRoleNames: `${DEFAULT_OPERATOR_ROLE_NAMES} , Operator1 , Operator2 `,
+        analystRoleNames: `${DEFAULT_ANALYST_ROLE_NAMES} , Analyst1 , Analyst2 `,
+      },
+    });
+    const res = await request(app)
+      .get('/api/user/settings');
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual(
+      {
+        data: {
+          id: 'USER_SETTINGS',
+          type: 'USER_SETTINGS',
+          roleJsonPath: '$.payload.any_keys.roles',
+          operatorRoleNames: `${DEFAULT_OPERATOR_ROLE_NAMES} , Operator1 , Operator2 `,
+          analystRoleNames: `${DEFAULT_ANALYST_ROLE_NAMES} , Analyst1 , Analyst2 `,
+        },
+        message: '',
+        success: true,
+      },
+    );
+    expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 1);
+  });
+
+  it('Update user settings', async () => {
+    tokenMock(ddbMock, false);
+    ddbMock.on(UpdateCommand).resolves({});
+    const res = await request(app)
+      .post('/api/user/settings')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
+      .send({
+        id: 'USER_SETTINGS',
+        type: 'USER_SETTINGS',
+        roleJsonPath: '$.payload.any_keys.roles',
+        operatorRoleNames: `${DEFAULT_OPERATOR_ROLE_NAMES} , Operator1 , Operator2 `,
+        analystRoleNames: `${DEFAULT_ANALYST_ROLE_NAMES} , Analyst1 , Analyst2 `,
+      });
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(200);
+    expect(res.body.message).toEqual('User settings updated.');
+    expect(res.body.success).toEqual(true);
+    expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 1);
+    expect(ddbMock).toHaveReceivedCommandTimes(UpdateCommand, 1);
   });
 
   afterAll((done) => {

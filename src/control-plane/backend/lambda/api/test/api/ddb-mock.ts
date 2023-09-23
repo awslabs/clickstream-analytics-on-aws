@@ -28,7 +28,7 @@ import { GetBucketPolicyCommand } from '@aws-sdk/client-s3';
 import { GetSecretValueCommand } from '@aws-sdk/client-secrets-manager';
 import { StartExecutionCommand } from '@aws-sdk/client-sfn';
 import { GetCommand, GetCommandInput, QueryCommand, QueryCommandInput } from '@aws-sdk/lib-dynamodb';
-import { DEFAULT_ANALYST_ROLE_NAMES, DEFAULT_OPERATOR_ROLE_NAMES, DEFAULT_ROLE_JSON_PATH, analyticsMetadataTable, clickStreamTableName, dictionaryTableName, prefixTimeGSIName } from '../../common/constants';
+import { analyticsMetadataTable, clickStreamTableName, dictionaryTableName, prefixTimeGSIName } from '../../common/constants';
 import { IUserRole, ProjectEnvironment } from '../../common/types';
 import { IPipeline } from '../../model/pipeline';
 
@@ -342,23 +342,6 @@ function dictionaryMock(ddbMock: any, name?: string): any {
           target: 'feature-rel/main',
           prefix: 'default/',
           version: MOCK_SOLUTION_VERSION,
-        },
-      },
-    });
-  }
-  if (!name || name === 'UserSettings') {
-    ddbMock.on(GetCommand, {
-      TableName: dictionaryTableName,
-      Key: {
-        name: 'UserSettings',
-      },
-    }).resolves({
-      Item: {
-        name: 'UserSettings',
-        data: {
-          roleJsonPath: DEFAULT_ROLE_JSON_PATH,
-          operatorRoleNames: DEFAULT_OPERATOR_ROLE_NAMES,
-          analystRoleNames: DEFAULT_ANALYST_ROLE_NAMES,
         },
       },
     });
