@@ -134,6 +134,7 @@ describe('reporting test', () => {
 
     const res = await request(app)
       .post('/api/reporting/funnel')
+      .set('Referer', 'https://example.com/xxx/yyy/zzz')
       .send({
         action: 'PREVIEW',
         viewName: 'testview0002',
@@ -161,7 +162,6 @@ describe('reporting test', () => {
         groupColumn: 'week',
         dashboardCreateParameters: {
           region: 'us-east-1',
-          allowDomain: 'https://example.com',
           quickSight: {
             principal: 'arn:aws:quicksight:us-east-1:11111:user/default/testuser',
             dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
@@ -227,6 +227,7 @@ describe('reporting test', () => {
 
     const res = await request(app)
       .post('/api/reporting/funnel')
+      .set('Referer', 'https://example.com/xxx/yyy/zzz')
       .send({
         action: 'PUBLISH',
         viewName: 'testview00022',
@@ -259,7 +260,6 @@ describe('reporting test', () => {
         groupColumn: 'week',
         dashboardCreateParameters: {
           region: 'us-east-1',
-          allowDomain: 'https://example.com',
           quickSight: {
             dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
           },
@@ -314,6 +314,7 @@ describe('reporting test', () => {
 
     const res = await request(app)
       .post('/api/reporting/event')
+      .set('Referer', 'https://example.com/xxx/yyy/zzz')
       .send({
         action: 'PREVIEW',
         viewName: 'testview0002',
@@ -341,7 +342,6 @@ describe('reporting test', () => {
         groupColumn: 'week',
         dashboardCreateParameters: {
           region: 'us-east-1',
-          allowDomain: 'https://example.com',
           quickSight: {
             principal: 'arn:aws:quicksight:us-east-1:11111:user/default/testuser',
             dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
@@ -408,6 +408,7 @@ describe('reporting test', () => {
 
     const res = await request(app)
       .post('/api/reporting/event')
+      .set('Referer', 'https://example.com/xxx/yyy/zzz')
       .send({
         action: 'PUBLISH',
         viewName: 'testview00022',
@@ -440,7 +441,6 @@ describe('reporting test', () => {
         groupColumn: 'week',
         dashboardCreateParameters: {
           region: 'us-east-1',
-          allowDomain: 'https://example.com',
           quickSight: {
             principal: 'arn:aws:quicksight:us-east-1:11111:user/default/testuser',
             dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
@@ -497,6 +497,7 @@ describe('reporting test', () => {
 
     const res = await request(app)
       .post('/api/reporting/path')
+      .set('Referer', 'https://example.com/xxx/yyy/zzz')
       .send({
         action: 'PREVIEW',
         viewName: 'testview0002',
@@ -524,7 +525,6 @@ describe('reporting test', () => {
         groupColumn: 'week',
         dashboardCreateParameters: {
           region: 'us-east-1',
-          allowDomain: 'https://example.com',
           quickSight: {
             principal: 'arn:aws:quicksight:us-east-1:11111:user/default/testuser',
             dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
@@ -585,6 +585,7 @@ describe('reporting test', () => {
 
     const res = await request(app)
       .post('/api/reporting/path')
+      .set('Referer', 'https://example.com/xxx/yyy/zzz')
       .send({
         action: 'PUBLISH',
         viewName: 'testview0002',
@@ -612,7 +613,6 @@ describe('reporting test', () => {
         groupColumn: 'week',
         dashboardCreateParameters: {
           region: 'us-east-1',
-          allowDomain: 'https://example.com',
           quickSight: {
             principal: 'arn:aws:quicksight:us-east-1:11111:user/default/testuser',
             dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
@@ -675,6 +675,7 @@ describe('reporting test', () => {
 
     const res = await request(app)
       .post('/api/reporting/retention')
+      .set('Referer', 'https://example.com/xxx/yyy/zzz')
       .send({
         action: 'PUBLISH',
         viewName: 'testview0002',
@@ -702,7 +703,6 @@ describe('reporting test', () => {
         groupColumn: 'week',
         dashboardCreateParameters: {
           region: 'us-east-1',
-          allowDomain: 'https://example.com',
           quickSight: {
             principal: 'arn:aws:quicksight:us-east-1:11111:user/default/testuser',
             dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',

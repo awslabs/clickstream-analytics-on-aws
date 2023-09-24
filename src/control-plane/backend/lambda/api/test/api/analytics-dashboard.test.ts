@@ -194,7 +194,8 @@ describe('Analytics dashboard test', () => {
       Items: [KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW],
     });
     const res = await request(app)
-      .get(`/api/project/${MOCK_PROJECT_ID}/${MOCK_APP_ID}/dashboard/${MOCK_DASHBOARD_ID}`);
+      .get(`/api/project/${MOCK_PROJECT_ID}/${MOCK_APP_ID}/dashboard/${MOCK_DASHBOARD_ID}`)
+      .set('Referer', 'https://example.com/xxx/yyy/zzz');
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual(
