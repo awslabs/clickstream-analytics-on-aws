@@ -167,6 +167,7 @@ declare global {
 
   interface IDashboardCreateParameters {
     readonly region: string;
+    readonly allowedDomain: string;
     readonly redshift: {
       readonly user: string;
       readonly dataApiRole: string;

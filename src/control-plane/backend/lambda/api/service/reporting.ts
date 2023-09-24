@@ -59,12 +59,6 @@ export class ReportingService {
       logger.info('start to create funnel analysis visuals');
       logger.info(`request: ${JSON.stringify(req.body)}`);
 
-      const referer = req.get('referer');
-      if (!referer) {
-        return res.status(400).json(new ApiFail('Referer is required.'));
-      }
-      const allowedDomain = referer.split('/').slice(0, 3).join('/');
-
       const query = req.body;
 
       //construct parameters to build sql
@@ -235,12 +229,6 @@ export class ReportingService {
       logger.info('start to create event analysis visuals');
       logger.info(`request: ${JSON.stringify(req.body)}`);
 
-      const referer = req.get('referer');
-      if (!referer) {
-        return res.status(400).json(new ApiFail('Referer is required.'));
-      }
-      const allowedDomain = referer.split('/').slice(0, 3).join('/');
-
       const query = req.body;
       //construct parameters to build sql
       const viewName = getTempResourceName(query.viewName, query.action);
@@ -324,7 +312,7 @@ export class ReportingService {
       };
 
       const result: CreateDashboardResult = await this.create(
-        sheetId, viewName, query, datasetPropsArray, [visualProps, tableVisualProps], allowedDomain);
+        sheetId, viewName, query, datasetPropsArray, [visualProps, tableVisualProps]);
 
       return res.status(201).json(new ApiSuccess(result));
     } catch (error) {
@@ -336,12 +324,6 @@ export class ReportingService {
     try {
       logger.info('start to create path analysis visuals');
       logger.info(`request: ${JSON.stringify(req.body)}`);
-
-      const referer = req.get('referer');
-      if (!referer) {
-        return res.status(400).json(new ApiFail('Referer is required.'));
-      }
-      const allowedDomain = referer.split('/').slice(0, 3).join('/');
 
       const query = req.body;
       //construct parameters to build sql
@@ -444,7 +426,7 @@ export class ReportingService {
       };
 
       const result: CreateDashboardResult = await this.create(
-        sheetId, viewName, query, datasetPropsArray, [visualProps], allowedDomain);
+        sheetId, viewName, query, datasetPropsArray, [visualProps]);
 
       return res.status(201).json(new ApiSuccess(result));
     } catch (error) {
@@ -456,12 +438,6 @@ export class ReportingService {
     try {
       logger.info('start to create retention analysis visuals');
       logger.info(`request: ${JSON.stringify(req.body)}`);
-
-      const referer = req.get('referer');
-      if (!referer) {
-        return res.status(400).json(new ApiFail('Referer is required.'));
-      }
-      const allowedDomain = referer.split('/').slice(0, 3).join('/');
 
       const query = req.body;
       //construct parameters to build sql
@@ -548,7 +524,7 @@ export class ReportingService {
       };
 
       const result: CreateDashboardResult = await this.create(
-        sheetId, viewName, query, datasetPropsArray, [visualProps, tableVisualProps], allowedDomain);
+        sheetId, viewName, query, datasetPropsArray, [visualProps, tableVisualProps]);
 
       return res.status(201).json(new ApiSuccess(result));
     } catch (error) {
@@ -557,7 +533,7 @@ export class ReportingService {
   };
 
   private async create(sheetId: string, resourceName: string, query: any,
-    datasetPropsArray: DataSetProps[], visualPropsArray: VisualProps[], allowedDomain: string) {
+    datasetPropsArray: DataSetProps[], visualPropsArray: VisualProps[]) {
 
     const dashboardCreateParameters = query.dashboardCreateParameters as DashboardCreateParameters;
     const quickSight = sdkClient.QuickSight({ region: dashboardCreateParameters.region });
@@ -654,7 +630,7 @@ export class ReportingService {
       if (query.action === ExploreRequestAction.PREVIEW) {
         const embedUrl = await generateEmbedUrlForRegisteredUser(
           dashboardCreateParameters.region,
-          allowedDomain,
+          dashboardCreateParameters.allowedDomain,
           false,
           query.dashboardId,
         );

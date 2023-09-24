@@ -54,6 +54,7 @@ export interface DashboardAction {
 
 export interface DashboardCreateParameters {
   readonly region: string;
+  readonly allowedDomain: string;
   readonly redshift: {
     readonly user: string;
     readonly dataApiRole: string;

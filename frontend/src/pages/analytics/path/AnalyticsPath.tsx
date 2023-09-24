@@ -328,7 +328,10 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
     sheetName?: string
   ) => {
     const eventId = generateStr(6);
-    const parameters = getDashboardCreateParameters(pipeline);
+    const parameters = getDashboardCreateParameters(
+      pipeline,
+      window.location.origin
+    );
     if (!parameters) {
       return;
     }
