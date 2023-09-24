@@ -138,7 +138,7 @@ const AnalyticsRealtime: React.FC = () => {
                         triggerType="custom"
                         content={t('analytics:information.realtimeInfo')}
                       >
-                        <Link variant="info">Info</Link>
+                        <Link variant="info">{t('info')}</Link>
                       </Popover>
                     }
                   >

@@ -81,7 +81,7 @@ const ItemsList: React.FC<ItemsListProps> = (props: ItemsListProps) => {
       return (
         item?.label
           ?.toLocaleLowerCase()
-          .includes(filterText.toLocaleLowerCase()) ||
+          .includes(filterText.toLocaleLowerCase()) ??
         item?.value
           ?.toLocaleLowerCase()
           .includes(filterText.toLocaleLowerCase())
@@ -104,7 +104,7 @@ const ItemsList: React.FC<ItemsListProps> = (props: ItemsListProps) => {
       {categories.map((category: CategoryItemType, index: number) => (
         <div key={identity(index)} className="item-group">
           <div className="item-group-header">
-            {category.categoryName}{' '}
+            {category.categoryName}
             <span className="count">
               {filteredItemList(category.itemList).length}
             </span>

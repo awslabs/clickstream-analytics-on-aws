@@ -263,7 +263,7 @@ const AnalyticsExplore: React.FC = () => {
                       triggerType="custom"
                       content={t('analytics:information.exploreInfo')}
                     >
-                      <Link variant="info">Info</Link>
+                      <Link variant="info">{t('info')}</Link>
                     </Popover>
                   }
                   description={t('analytics:explore.description')}
@@ -278,7 +278,7 @@ const AnalyticsExplore: React.FC = () => {
                               'analytics:information.analyticsModelInfo'
                             )}
                           >
-                            <Link variant="info">Info</Link>
+                            <Link variant="info">{t('info')}</Link>
                           </Popover>
                         </>
                       }

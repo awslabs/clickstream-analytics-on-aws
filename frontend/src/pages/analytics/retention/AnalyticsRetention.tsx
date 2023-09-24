@@ -48,7 +48,6 @@ import {
   ExploreComputeMethod,
   ExploreGroupColumn,
   ExploreRequestAction,
-  MetadataValueType,
 } from 'ts/explore-types';
 import { generateStr, alertMsg } from 'ts/utils';
 import {
@@ -284,7 +283,7 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
                   triggerType="custom"
                   content={t('analytics:information.retentionInfo')}
                 >
-                  <Link variant="info">Info</Link>
+                  <Link variant="info">{t('info')}</Link>
                 </Popover>
               }
               actions={
@@ -316,7 +315,7 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
             <SpaceBetween direction="vertical" size="l">
               <div>
                 <Box variant="awsui-key-label">
-                  {t('analytics:labels.associateParameter')}{' '}
+                  {t('analytics:labels.associateParameter')}
                   <Popover
                     triggerType="custom"
                     size="small"
@@ -601,11 +600,7 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
                   setSegmentationOptionData((prev) => {
                     const dataObj = cloneDeep(prev);
                     dataObj.data[index].conditionOption = category;
-                    if (category?.valueType === MetadataValueType.STRING) {
-                      dataObj.data[index].conditionValue = [];
-                    } else {
-                      dataObj.data[index].conditionValue = '';
-                    }
+                    dataObj.data[index].conditionValue = [];
                     return dataObj;
                   });
                 }}
@@ -662,7 +657,7 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
             onClick={clickPreview}
             loading={loadingData}
           >
-            {t('button.preview')}
+            {t('button.query')}
           </Button>
         </Container>
         <Container>

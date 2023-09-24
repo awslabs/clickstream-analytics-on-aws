@@ -16,6 +16,7 @@ import {
   Link,
   Popover,
 } from '@cloudscape-design/components';
+import { useTranslation } from 'react-i18next';
 
 interface MetadataTableHeaderProps extends HeaderProps {
   title?: string;
@@ -29,12 +30,13 @@ export function MetadataTableHeader({
   infoContent,
   ...props
 }: MetadataTableHeaderProps) {
+  const { t } = useTranslation();
   return (
     <Header
       variant="awsui-h1-sticky"
       info={
         <Popover triggerType="custom" content={infoContent}>
-          <Link variant="info">Info</Link>
+          <Link variant="info">{t('info')}</Link>
         </Popover>
       }
       {...props}

@@ -20,7 +20,6 @@ import {
 import { UserContext } from 'context/UserContext';
 import React, { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
 import { IUserRole } from 'ts/const';
 import { getDocumentList } from 'ts/url';
 
@@ -31,7 +30,6 @@ interface INavigationProps {
 const Navigation: React.FC<INavigationProps> = (props: INavigationProps) => {
   const { activeHref } = props;
   const { t, i18n } = useTranslation();
-  const { projectId, appId } = useParams();
   const currentUser = useContext(UserContext);
 
   const navHeader = {
@@ -54,7 +52,6 @@ const Navigation: React.FC<INavigationProps> = (props: INavigationProps) => {
               UI, and provides access to all reports and dashboards.
               <br />
               <Link href="#" variant="primary">
-                {' '}
                 Learn more.
               </Link>
             </div>
@@ -94,67 +91,9 @@ const Navigation: React.FC<INavigationProps> = (props: INavigationProps) => {
       external: true,
     },
   ];
-  const analyticsNavItems: SideNavigationProps.Item[] = [
-    {
-      type: 'link',
-      text: t('nav.analytics.dashboards'),
-      href: `/analytics/${projectId}/app/${appId}/dashboards`,
-    },
-    {
-      text: t('nav.analytics.explore'),
-      type: 'section',
-      defaultExpanded: true,
-      items: [
-        {
-          type: 'link',
-          text: t('nav.analytics.exploreEvent'),
-          href: `/analytics/${projectId}/app/${appId}/event`,
-        },
-        {
-          type: 'link',
-          text: t('nav.analytics.exploreRetention'),
-          href: `/analytics/${projectId}/app/${appId}/retention`,
-        },
-        {
-          type: 'link',
-          text: t('nav.analytics.exploreFunnel'),
-          href: `/analytics/${projectId}/app/${appId}/funnel`,
-        },
-        {
-          type: 'link',
-          text: t('nav.analytics.explorePath'),
-          href: `/analytics/${projectId}/app/${appId}/path`,
-        },
-      ],
-    },
-    {
-      text: t('nav.analytics.metadata'),
-      type: 'section',
-      defaultExpanded: true,
-      items: [
-        {
-          type: 'link',
-          text: t('nav.analytics.metadata-events'),
-          href: `/analytics/${projectId}/app/${appId}/metadata/events`,
-        },
-        {
-          type: 'link',
-          text: t('nav.analytics.metadata-event-parameters'),
-          href: `/analytics/${projectId}/app/${appId}/metadata/event-parameters`,
-        },
-        {
-          type: 'link',
-          text: t('nav.analytics.metadata-user-attributes'),
-          href: `/analytics/${projectId}/app/${appId}/metadata/user-attributes`,
-        },
-      ],
-    },
-  ];
 
   const getNavItems = () => {
-    if (activeHref.startsWith('/analytics')) {
-      return analyticsNavItems;
-    } else if (currentUser?.role === IUserRole.ADMIN) {
+    if (currentUser?.role === IUserRole.ADMIN) {
       return [...pipelineNavItems, ...systemNavItems, ...docNavItems];
     } else if (currentUser?.role === IUserRole.ANALYST) {
       return [...pipelineNavItems, ...docNavItems];

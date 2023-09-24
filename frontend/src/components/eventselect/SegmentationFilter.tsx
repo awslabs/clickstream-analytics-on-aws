@@ -37,7 +37,7 @@ interface SegmentationFilterProps {
     index: number,
     category: IAnalyticsItem | null
   ) => void;
-  changeConditionValue: (index: number, value: any) => void;
+  changeConditionValue: (index: number, value: string[]) => void;
   changeCurRelationShip?: (relation: ERelationShip) => void;
 }
 const SegmentationFilter: React.FC<SegmentationFilterProps> = (

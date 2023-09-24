@@ -137,7 +137,7 @@ declare global {
       | 'other';
     readonly property: string;
     readonly operator: string;
-    readonly value: string;
+    readonly value: string[];
     readonly dataType: MetadataValueType;
   }
 

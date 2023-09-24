@@ -110,7 +110,7 @@ const AnalyticsDashboardDetail: React.FC = () => {
                               'analytics:information.userLifecycleInfo'
                             )}
                           >
-                            <Link variant="info">Info</Link>
+                            <Link variant="info">{t('info')}</Link>
                           </Popover>
                         ) : null}
                       </>

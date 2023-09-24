@@ -144,25 +144,20 @@ export const parametersConvertToCategoryItemType = (
 };
 
 export const validEventAnalyticsItem = (item: IEventAnalyticsItem) => {
-  return (
-    item.selectedEventOption !== null &&
-    item.selectedEventOption.value?.trim() !== ''
-  );
+  return item.selectedEventOption?.value?.trim() !== '';
 };
 
 export const validRetentionAnalyticsItem = (item: IRetentionAnalyticsItem) => {
   return (
-    item.startEventOption !== null &&
-    item.startEventOption.value?.trim() !== '' &&
-    item.revisitEventOption !== null &&
-    item.revisitEventOption.value?.trim() !== ''
+    item.startEventOption?.value?.trim() !== '' &&
+    item.revisitEventOption?.value?.trim() !== ''
   );
 };
 
 export const validConditionItemType = (condition: IConditionItemType) => {
   return (
-    condition.conditionOption !== null &&
-    condition.conditionOption.value?.trim() !== ''
+    condition.conditionOption?.value?.trim() !== '' &&
+    condition.conditionValue.length > 0
   );
 };
 

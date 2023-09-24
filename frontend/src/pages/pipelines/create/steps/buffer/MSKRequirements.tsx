@@ -24,7 +24,7 @@ const MSKRequirements: React.FC = () => {
   const { t, i18n } = useTranslation();
   return (
     <Alert>
-      {t('pipeline:create.kafkaRequirements')}{' '}
+      {t('pipeline:create.kafkaRequirements')}
       <Link
         external
         href={buildDocumentLink(

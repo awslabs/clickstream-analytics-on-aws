@@ -76,7 +76,7 @@ const AnalyticsDataManagement: React.FC = () => {
                       triggerType="custom"
                       content={t('analytics:information.dataManagementInfo')}
                     >
-                      <Link variant="info">Info</Link>
+                      <Link variant="info">{t('info')}</Link>
                     </Popover>
                   }
                   description={t('analytics:metadata.description')}

@@ -46,14 +46,14 @@ const EventItem: React.FC<EventItemProps> = (props: EventItemProps) => {
   const [clickedOutside, setClickedOutside] = useState(false);
   const defaultComputeMethodOption: SelectProps.Option = {
     value: ExploreComputeMethod.USER_ID_CNT,
-    label: t('analytics:options.userNumber') ?? '',
+    label: t('analytics:options.userNumber') ?? 'User number',
   };
 
   const computeMethodOptions: SelectProps.Options = [
     defaultComputeMethodOption,
     {
       value: ExploreComputeMethod.EVENT_CNT,
-      label: t('analytics:options.eventNumber') ?? '',
+      label: t('analytics:options.eventNumber') ?? 'Event number',
     },
   ];
 

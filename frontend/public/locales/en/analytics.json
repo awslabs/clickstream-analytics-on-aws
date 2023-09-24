@@ -2,7 +2,7 @@
   "analytics": "Analytics",
   "dashboard": {
     "title": "Dashboards",
-    "description": "You can view the out-of-the-box user lifecycle dashboards here, and create a custom dashboard with exploration analysis. ",
+    "description": "You can view the out-of-the-box user lifecycle dashboards here, and create a custom dashboard with exploration analysis.",
     "createTitle": "Create Dashboard",
     "createInputName": "Dashboard name",
     "createInputNameDec": "Please input a name for the dashboard.",
@@ -18,7 +18,7 @@
   },
   "realtime": {
     "title": "Realtime",
-    "description": "You can view key metrics of your apps and website in realtime here. ",
+    "description": "You can view key metrics of your apps and website in realtime here.",
     "disableMessage": "This project has not enabled real-time dashboard, please contact your admin to turn on real-time dashboard.",
     "configProject": "Configure project"
   },
@@ -84,7 +84,7 @@
     "indirectlyFollowed": "Indirectly followed"
   },
   "metadata": {
-    "description": "You can view  the out-of-the-box user lifecycle dashboards here, and create a custom dashboard with exploration analysis. ",
+    "description": "You can view the out-of-the-box user lifecycle dashboards here, and create a custom dashboard with exploration analysis.",
     "event": {
       "title": "Events",
       "description": "This table lists out all the events in your clickstream analytics project.",
@@ -256,6 +256,9 @@
     "funnelWindowInfo": "funnelWindowInfo",
     "eventInfo": "eventInfo",
     "pathInfo": "pathInfo",
+    "pathMetricsInfo": "pathMetricsInfo",
+    "pathSessionDefInfo": "pathSessionDefInfo",
+    "pathNodeTypeInfo": "pathNodeTypeInfo",
     "retentionInfo": "retentionInfo"
   }
 }

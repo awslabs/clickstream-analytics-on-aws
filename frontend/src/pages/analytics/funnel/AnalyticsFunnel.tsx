@@ -53,7 +53,6 @@ import {
   ExploreConversionIntervalType,
   ExploreRequestAction,
   ExploreGroupColumn,
-  MetadataValueType,
 } from 'ts/explore-types';
 import { alertMsg, generateStr } from 'ts/utils';
 import {
@@ -114,18 +113,18 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
 
   const defaultComputeMethodOption: SelectProps.Option = {
     value: ExploreComputeMethod.USER_ID_CNT,
-    label: t('analytics:options.userNumber') ?? '',
+    label: t('analytics:options.userNumber') ?? 'User number',
   };
 
   const computeMethodOptions: SelectProps.Options = [
     defaultComputeMethodOption,
     {
       value: ExploreComputeMethod.USER_ID_CNT,
-      label: t('analytics:options.userNumber') ?? '',
+      label: t('analytics:options.userNumber') ?? 'User number',
     },
     {
       value: ExploreComputeMethod.EVENT_CNT,
-      label: t('analytics:options.eventNumber') ?? '',
+      label: t('analytics:options.eventNumber') ?? 'Event number',
     },
   ];
 
@@ -295,7 +294,7 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
     setLoadingData(true);
     setSelectedMetric({
       value: ExploreComputeMethod.USER_ID_CNT,
-      label: t('analytics:options.userNumber') ?? '',
+      label: t('analytics:options.userNumber') ?? 'User number',
     });
     setSelectedWindowType(customWindowType);
     setSelectedWindowUnit({
@@ -377,7 +376,7 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
                   triggerType="custom"
                   content={t('analytics:information.funnelInfo')}
                 >
-                  <Link variant="info">Info</Link>
+                  <Link variant="info">{t('info')}</Link>
                 </Popover>
               }
               actions={
@@ -408,7 +407,7 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
           <div className="cs-analytics-config">
             <SpaceBetween direction="vertical" size="xs">
               <Box variant="awsui-key-label">
-                {t('analytics:labels.metrics')}{' '}
+                {t('analytics:labels.metrics')}
                 <Popover
                   triggerType="custom"
                   size="small"
@@ -427,7 +426,7 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
             </SpaceBetween>
             <SpaceBetween direction="vertical" size="xs">
               <Box variant="awsui-key-label">
-                {t('analytics:labels.associateParameter')}{' '}
+                {t('analytics:labels.associateParameter')}
                 <Popover
                   triggerType="custom"
                   content={t(
@@ -462,7 +461,7 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
               <div>
                 <SpaceBetween direction="vertical" size="xs">
                   <Box variant="awsui-key-label">
-                    {t('analytics:labels.window')}{' '}
+                    {t('analytics:labels.window')}
                     <Popover
                       triggerType="custom"
                       content={t('analytics:information.funnelWindowInfo')}
@@ -558,15 +557,9 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
                       dataObj[eventIndex].conditionList[
                         conditionIndex
                       ].conditionOption = category;
-                      if (category?.valueType === MetadataValueType.STRING) {
-                        dataObj[eventIndex].conditionList[
-                          conditionIndex
-                        ].conditionValue = [];
-                      } else {
-                        dataObj[eventIndex].conditionList[
-                          conditionIndex
-                        ].conditionValue = '';
-                      }
+                      dataObj[eventIndex].conditionList[
+                        conditionIndex
+                      ].conditionValue = [];
                       return dataObj;
                     });
                   }}
@@ -654,11 +647,7 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
                   setSegmentationOptionData((prev) => {
                     const dataObj = cloneDeep(prev);
                     dataObj.data[index].conditionOption = category;
-                    if (category?.valueType === MetadataValueType.STRING) {
-                      dataObj.data[index].conditionValue = [];
-                    } else {
-                      dataObj.data[index].conditionValue = '';
-                    }
+                    dataObj.data[index].conditionValue = [];
                     return dataObj;
                   });
                 }}
@@ -715,7 +704,7 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
             onClick={clickPreview}
             loading={loadingData}
           >
-            {t('button.preview')}
+            {t('button.query')}
           </Button>
         </Container>
         <Container>

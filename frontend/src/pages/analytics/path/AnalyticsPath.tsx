@@ -49,7 +49,6 @@ import {
   ExploreGroupColumn,
   ExplorePathNodeType,
   ExplorePathSessionDef,
-  MetadataValueType,
   MetadataPlatform,
 } from 'ts/explore-types';
 import { alertMsg, generateStr } from 'ts/utils';
@@ -110,14 +109,14 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
 
   const defaultComputeMethodOption: SelectProps.Option = {
     value: ExploreComputeMethod.USER_ID_CNT,
-    label: t('analytics:options.userNumber') ?? '',
+    label: t('analytics:options.userNumber') ?? 'User number',
   };
 
   const computeMethodOptions: SelectProps.Options = [
     defaultComputeMethodOption,
     {
       value: ExploreComputeMethod.EVENT_CNT,
-      label: t('analytics:options.eventNumber') ?? '',
+      label: t('analytics:options.eventNumber') ?? 'Event number',
     },
   ];
   const [selectedMetric, setSelectedMetric] =
@@ -247,7 +246,7 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
     setLoadingData(true);
     setSelectedMetric({
       value: ExploreComputeMethod.USER_ID_CNT,
-      label: t('analytics:options.userNumber') ?? '',
+      label: t('analytics:options.userNumber') ?? 'User number',
     });
     setEventOptionData([
       {
@@ -361,9 +360,6 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
     const pathAnalysisNodes = eventOptionData.map((item) => {
       return item.selectedEventOption?.value ?? '';
     });
-    console.log(selectedNodeType);
-    console.log(defaultNodeTypeOption);
-    console.log(eventOptionData);
     const pathAnalysisParameter: IPathAnalysisParameter = {
       platform: pathAnalysisPlatform,
       sessionType: selectedSessionDefinition?.value,
@@ -482,7 +478,7 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
                   triggerType="custom"
                   content={t('analytics:information.pathInfo')}
                 >
-                  <Link variant="info">Info</Link>
+                  <Link variant="info">{t('info')}</Link>
                 </Popover>
               }
               actions={
@@ -513,11 +509,11 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
           <div className="cs-analytics-config">
             <SpaceBetween direction="vertical" size="xs">
               <Box variant="awsui-key-label">
-                {t('analytics:labels.metrics')}{' '}
+                {t('analytics:labels.metrics')}
                 <Popover
                   triggerType="custom"
                   size="small"
-                  content="This instance contains insufficient memory. Stop the instance, choose a different instance type with more memory, and restart it."
+                  content={t('analytics:information.pathMetricsInfo')}
                 >
                   <Icon name="status-info" size="small" />
                 </Popover>
@@ -534,11 +530,11 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
             </SpaceBetween>
             <SpaceBetween direction="vertical" size="xs">
               <Box variant="awsui-key-label">
-                {t('analytics:labels.sessionDefinition')}{' '}
+                {t('analytics:labels.sessionDefinition')}
                 <Popover
                   triggerType="custom"
                   size="small"
-                  content="This instance contains insufficient memory. Stop the instance, choose a different instance type with more memory, and restart it."
+                  content={t('analytics:information.pathSessionDefInfo')}
                 >
                   <Icon name="status-info" size="small" />
                 </Popover>
@@ -581,11 +577,11 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
             </SpaceBetween>
             <SpaceBetween direction="vertical" size="xs">
               <Box variant="awsui-key-label">
-                {t('analytics:labels.nodeType')}{' '}
+                {t('analytics:labels.nodeType')}
                 <Popover
                   triggerType="custom"
                   size="small"
-                  content="This instance contains insufficient memory. Stop the instance, choose a different instance type with more memory, and restart it."
+                  content={t('analytics:information.pathNodeTypeInfo')}
                 >
                   <Icon name="status-info" size="small" />
                 </Popover>
@@ -672,15 +668,9 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
                     dataObj[eventIndex].conditionList[
                       conditionIndex
                     ].conditionOption = category;
-                    if (category?.valueType === MetadataValueType.STRING) {
-                      dataObj[eventIndex].conditionList[
-                        conditionIndex
-                      ].conditionValue = [];
-                    } else {
-                      dataObj[eventIndex].conditionList[
-                        conditionIndex
-                      ].conditionValue = '';
-                    }
+                    dataObj[eventIndex].conditionList[
+                      conditionIndex
+                    ].conditionValue = [];
                     return dataObj;
                   });
                 }}
@@ -767,11 +757,7 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
                   setSegmentationOptionData((prev) => {
                     const dataObj = cloneDeep(prev);
                     dataObj.data[index].conditionOption = category;
-                    if (category?.valueType === MetadataValueType.STRING) {
-                      dataObj.data[index].conditionValue = [];
-                    } else {
-                      dataObj.data[index].conditionValue = '';
-                    }
+                    dataObj.data[index].conditionValue = [];
                     return dataObj;
                   });
                 }}
@@ -806,7 +792,7 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
             onClick={clickPreview}
             loading={loadingData}
           >
-            {t('button.preview')}
+            {t('button.query')}
           </Button>
         </Container>
         <Container>

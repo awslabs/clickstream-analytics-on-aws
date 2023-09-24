@@ -50,7 +50,7 @@ interface EventsSelectProps {
   changeConditionValue: (
     eventIndex: number,
     conditionIndex: number,
-    value: any
+    value: string[]
   ) => void;
   changeCurCategoryOption: (
     eventIndex: number,

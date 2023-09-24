@@ -105,7 +105,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = (
         description={t('analytics:dashboard.description')}
         info={
           <Popover triggerType="custom" content={t('analytics:information.dashboardsInfo')}>
-            <Link variant="info">Info</Link>
+            <Link variant="info">{t('info')}</Link>
           </Popover>
         }
         actions={

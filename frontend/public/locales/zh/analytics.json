@@ -18,13 +18,13 @@
   },
   "realtime": {
     "title": "实时",
-    "description": "您可以在此处实时查看应用程序和网站的关键指标。 ",
+    "description": "您可以在此处实时查看应用程序和网站的关键指标。",
     "disableMessage": "此项目尚未启用实时面板，请与管理员联系以打开实时面板。",
     "configProject": "配置项目"
   },
   "analyzes": {
     "title": "分析",
-    "description": "您可以在此处自定义试图和看板。",
+    "description": "您可以在此处自定义视图和看板。",
     "comeSoon": "当前功能即将上线"
   },
   "explore": {
@@ -256,6 +256,9 @@
     "funnelWindowInfo": "funnelWindowInfo",
     "eventInfo": "eventInfo",
     "pathInfo": "pathInfo",
+    "pathMetricsInfo": "pathMetricsInfo",
+    "pathSessionDefInfo": "pathSessionDefInfo",
+    "pathNodeTypeInfo": "pathNodeTypeInfo",
     "retentionInfo": "retentionInfo"
   }
 }

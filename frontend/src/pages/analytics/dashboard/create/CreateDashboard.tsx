@@ -228,7 +228,7 @@ const CreateDashboard: React.FC<CreateDashboardProps> = (
               label={t('analytics:dashboard.createSheets')}
               info={
                 <Popover triggerType="custom" content={t('analytics:information.dashboardSheetInfo')}>
-            <Link variant="info">Info</Link>
+            <Link variant="info">{t('info')}</Link>
           </Popover>
               }
               description={t('analytics:dashboard.createSheetsDec')}

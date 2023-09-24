@@ -34,7 +34,7 @@ interface ConditionItemProps {
   removeConditionItem: () => void;
   changeConditionOperator: (value: SelectProps.Option | null) => void;
   changeCurCategoryOption: (category: SelectProps.Option | null) => void;
-  changeConditionValue: (value: any) => void;
+  changeConditionValue: (value: string[]) => void;
 }
 
 const ConditionItem: React.FC<ConditionItemProps> = (

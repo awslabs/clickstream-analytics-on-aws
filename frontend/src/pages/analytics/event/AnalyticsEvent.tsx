@@ -48,7 +48,6 @@ import {
   ExploreConversionIntervalType,
   ExploreRequestAction,
   ExploreGroupColumn,
-  MetadataValueType,
 } from 'ts/explore-types';
 import { alertMsg, generateStr } from 'ts/utils';
 import {
@@ -112,7 +111,7 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
 
   const defaultComputeMethodOption: SelectProps.Option = {
     value: ExploreComputeMethod.USER_ID_CNT,
-    label: t('analytics:options.userNumber') ?? '',
+    label: t('analytics:options.userNumber') ?? 'User number',
   };
 
   const [eventOptionData, setEventOptionData] = useState<IEventAnalyticsItem[]>(
@@ -309,7 +308,7 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
                   triggerType="custom"
                   content={t('analytics:information.eventInfo')}
                 >
-                  <Link variant="info">Info</Link>
+                  <Link variant="info">{t('info')}</Link>
                 </Popover>
               }
               actions={
@@ -396,15 +395,9 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
                     dataObj[eventIndex].conditionList[
                       conditionIndex
                     ].conditionOption = category;
-                    if (category?.valueType === MetadataValueType.STRING) {
-                      dataObj[eventIndex].conditionList[
-                        conditionIndex
-                      ].conditionValue = [];
-                    } else {
-                      dataObj[eventIndex].conditionList[
-                        conditionIndex
-                      ].conditionValue = '';
-                    }
+                    dataObj[eventIndex].conditionList[
+                      conditionIndex
+                    ].conditionValue = [];
                     return dataObj;
                   });
                 }}
@@ -491,11 +484,7 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
                   setSegmentationOptionData((prev) => {
                     const dataObj = cloneDeep(prev);
                     dataObj.data[index].conditionOption = category;
-                    if (category?.valueType === MetadataValueType.STRING) {
-                      dataObj.data[index].conditionValue = [];
-                    } else {
-                      dataObj.data[index].conditionValue = '';
-                    }
+                    dataObj.data[index].conditionValue = [];
                     return dataObj;
                   });
                 }}
@@ -552,7 +541,7 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
             onClick={clickPreview}
             loading={loadingData}
           >
-            {t('button.preview')}
+            {t('button.query')}
           </Button>
         </Container>
         <Container>

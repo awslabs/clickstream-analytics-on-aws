@@ -146,7 +146,6 @@ const ExploreDateRangePicker: React.FC<IExploreDateRangePickerProps> = (
       />
       <DateRangePicker
         onChange={({ detail }) => {
-          console.log('date range picker changed', detail);
           setDateRangeValue(detail.value as DateRangePickerProps.Value);
           onChange();
         }}

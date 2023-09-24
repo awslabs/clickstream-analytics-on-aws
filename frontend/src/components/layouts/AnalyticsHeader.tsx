@@ -177,7 +177,7 @@ const AnalyticsHeader: React.FC<IHeaderProps> = (props: IHeaderProps) => {
         utilities={[
           {
             type: 'button',
-            text: 'Analytics Documentation',
+            text: t('header.analyticsDocumentation') ?? '',
             href: 'https://aws.amazon.com/solutions/',
             external: true,
           },
@@ -208,16 +208,16 @@ const AnalyticsHeader: React.FC<IHeaderProps> = (props: IHeaderProps) => {
                 signOut?.();
               }
             },
-            items: [{ id: 'signout', text: t('header.signOut') || '' }],
+            items: [{ id: 'signout', text: t('header.signOut') ?? '' }],
           },
         ]}
         i18nStrings={{
-          searchIconAriaLabel: t('header.search') || '',
-          searchDismissIconAriaLabel: t('header.closeSearch') || '',
-          overflowMenuTriggerText: t('header.more') || '',
-          overflowMenuTitleText: t('header.all') || '',
-          overflowMenuBackIconAriaLabel: t('header.back') || '',
-          overflowMenuDismissIconAriaLabel: t('header.closeMenu') || '',
+          searchIconAriaLabel: t('header.search') ?? '',
+          searchDismissIconAriaLabel: t('header.closeSearch') ?? '',
+          overflowMenuTriggerText: t('header.more') ?? '',
+          overflowMenuTitleText: t('header.all') ?? '',
+          overflowMenuBackIconAriaLabel: t('header.back') ?? '',
+          overflowMenuDismissIconAriaLabel: t('header.close??Menu') ?? '',
         }}
       />
     </header>
