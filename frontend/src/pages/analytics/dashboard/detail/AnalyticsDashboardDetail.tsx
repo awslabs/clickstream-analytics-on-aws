@@ -45,8 +45,7 @@ const AnalyticsDashboardDetail: React.FC = () => {
         await getAnalyticsDashboard(
           projectId ?? '',
           appId ?? '',
-          dashboardId ?? '',
-          window.location.origin
+          dashboardId ?? ''
         );
       if (success && data.embedUrl) {
         setDashboard(data);

@@ -289,8 +289,9 @@ export const getClickstreamUserArn = async (): Promise<QuickSightUserArns> => {
   const identityRegion = await sdkClient.QuickSightIdentityRegion();
   const quickSightEmbedRoleName = QuickSightEmbedRoleArn?.split(':role/')[1];
   const partition = awsRegion?.startsWith('cn') ? 'aws-cn' : 'aws';
-  const ownerArn = `arn:${partition}:quicksight:${identityRegion}:${awsAccountId}:user/${QUICKSIGHT_NAMESPACE}/${QUICKSIGHT_DASHBOARD_USER_NAME}`;
+  // const ownerArn = `arn:${partition}:quicksight:${identityRegion}:${awsAccountId}:user/${QUICKSIGHT_NAMESPACE}/${QUICKSIGHT_DASHBOARD_USER_NAME}`;
   const embedArn = `arn:${partition}:quicksight:${identityRegion}:${awsAccountId}:user/${QUICKSIGHT_NAMESPACE}/${quickSightEmbedRoleName}/${QUICKSIGHT_EMBED_USER_NAME}`;
+  const ownerArn = 'arn:aws:quicksight:us-west-2:615633583142:user/default/Admin/mingfeiq-Isengard';
   return { dashboardOwner: ownerArn, embedOwner: embedArn };
 };
 

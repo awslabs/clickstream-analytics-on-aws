@@ -178,7 +178,11 @@ export class ProjectServ {
   public async getDashboard(req: any, res: any, next: any) {
     try {
       const { dashboardId, projectId, appId } = req.params;
-      const { allowedDomain } = req.query;
+      const referer = req.get('referer');
+      if (!referer) {
+        return res.status(400).json(new ApiFail('Referer is required.'));
+      }
+      const allowedDomain = referer.split('/').slice(0, 3).join('/');
       let dashboard = await this.getPresetAppDashboard(projectId, appId);
       if (dashboard?.dashboardId !== dashboardId) {
         dashboard = await store.getDashboard(dashboardId);

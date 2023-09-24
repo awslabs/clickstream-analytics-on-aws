@@ -217,7 +217,6 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
     const funnelId = generateStr(6);
     const parameters = getDashboardCreateParameters(
       pipeline,
-      window.location.origin
     );
     if (!parameters) {
       return;

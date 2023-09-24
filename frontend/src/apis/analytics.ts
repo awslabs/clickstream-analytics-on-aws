@@ -52,12 +52,11 @@ export const deleteAnalyticsDashboard = async (
 export const getAnalyticsDashboard = async (
   projectId: string,
   appId: string,
-  dashboardId: string,
-  allowedDomain: string
+  dashboardId: string
 ) => {
   const result: any = await apiRequest(
     'get',
-    `/project/${projectId}/${appId}/dashboard/${dashboardId}?allowedDomain=${allowedDomain}`
+    `/project/${projectId}/${appId}/dashboard/${dashboardId}`
   );
   return result;
 };
@@ -140,31 +139,6 @@ export const getMetadataUserAttributesList = async (params: {
   return result;
 };
 
-export const fetchEmbeddingUrl = async (param: {
-  permission: boolean;
-  region: string;
-  allowedDomain: string;
-  dashboardId: string;
-  sheetId?: string;
-  visualId?: string;
-}) => {
-  let reqParams = `region=${param.region}&allowedDomain=${param.allowedDomain}&dashboardId=${param.dashboardId}`;
-  if (param.sheetId) {
-    reqParams = reqParams.concat(`&sheetId=${param.sheetId}`);
-  }
-  if (param.visualId) {
-    reqParams = reqParams.concat(`&visualId=${param.visualId}`);
-  }
-  if (param.permission) {
-    reqParams = reqParams.concat(`&permission=${param.permission}`);
-  }
-  const result: any = await apiRequest(
-    'get',
-    `/env/quicksight/embedUrl?${reqParams}`
-  );
-  return result;
-};
-
 export const previewFunnel = async (data: IExploreRequest) => {
   const result: any = await apiRequest('post', `/reporting/funnel`, data);
   return result;
@@ -185,9 +159,7 @@ export const previewRetention = async (data: IExploreRequest) => {
   return result;
 };
 
-export const getPipelineDetailByProjectId = async (
-  projectId: string
-) => {
+export const getPipelineDetailByProjectId = async (projectId: string) => {
   const result: any = await apiRequest(
     'get',
     `/pipeline/${projectId}?pid=${projectId}`
@@ -221,6 +193,8 @@ export const warmup = async (data: {
 };
 
 export const clean = async (region: string) => {
-  const result: any = await apiRequest('post', '/reporting/clean', {region: region});
+  const result: any = await apiRequest('post', '/reporting/clean', {
+    region: region,
+  });
   return result;
 };

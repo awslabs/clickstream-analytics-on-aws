@@ -165,10 +165,7 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
     sheetName?: string
   ) => {
     const eventId = generateStr(6);
-    const parameters = getDashboardCreateParameters(
-      pipeline,
-      window.location.origin
-    );
+    const parameters = getDashboardCreateParameters(pipeline);
     if (!parameters) {
       return;
     }
