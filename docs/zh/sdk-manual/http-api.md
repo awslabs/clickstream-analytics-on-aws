@@ -2,71 +2,74 @@
 
 ## 简介
 
-本文提供了通过 HTTP 请求将点击流数据发送到数据管道的指南。遵循如下规范，点击流数据将会被数据管道正确处理。
+本文将帮助您通过 HTTP 请求将点击流数据发送到 Clickstream 提取服务器。 Clickstream
+数据处理模块将按照以下准则正确处理您的数据。然后，您可以在后续的报告模块中直观地分析它们。
 
 ## 请求端点
 
-在Clickstream Web控制台创建完App后，在App详情页您获得请求端点和appId。请求端点示例：
+在Clickstream Web控制台创建完App后，在App详情页您获得 **服务器端点** 和 **App ID**。如下所示：
 
-> https://example.com/collect
+- **服务器端点**: `https://example.com/collect`
+- **App ID**: `my_app`
 
-## 请求规范
+## API规范
 
-1. 请求的端点及 query 参数中的 appId 必需是在 Clickstream Web 控制台中创建 app 时所生成的 appId 和对应的请求端点, 否则 server 会返回 HttpCode 403，错误内容：`DefaultAction: Invalid request`。
-2. 请求的 body 包含公共属性、`items`、`user` 和 `attributes` 四个部分，其中公共属性中的 `event_type`、`event_id`、`timestamp` 和 `app_id` 是必需的，其余均是可选参数。
-3. 事件中 `user`，`item`，`attributes` 中属性的 `key` 的长度建议不超过50个字符，且满足[命名规则](./web.md#_12)。
-4. 一个事件中建议最多不超过 50 个 item，50 个 user 属性和 50 个自定义属性。
-5. item 属性和用户属性的值建议不超过 256 个字符，attributes 里自定义属性值的长度建议不超过 1024 个字符。
-6. 单次上传 events 数建议控制在 100 条以内。
-7. 单次请求 body 总大小不能超过 1MB，超过则会返回 HttpCode 413, 错误内容：`Request Entity Too Large`。
+1. 请求的端点及 query 参数中的 appId 必需是在 Clickstream Web 控制台中创建 app 时所生成的 appId 和对应的请求端点, 否则
+   server 会返回 HttpCode 403，错误内容：`DefaultAction: Invalid request`。
+2. 请求的 body 包含公共属性、`items`、`user` 和 `attributes` 四个部分，其中公共属性中的 `event_type`、`event_id`、`timestamp`
+   和 `app_id` 是必需的，其余均是可选参数。
+3. 单次请求 body 总大小不能超过 1MB，超过则会返回 HttpCode 413, 错误内容：`Request Entity Too Large`。
 
 ### 请求方法
 
 **`POST`**
 
-### 请求header
+### 请求headers
 
-| 参数名             | 是否必需 | 示例                                                                                                                                  | 参数说明                      |
-|-----------------|------|-------------------------------------------------------------------------------------------------------------------------------------|---------------------------|
-| Content-Type    | 是    | application/json; charset=utf-8                                                                                                     | 请求类型                      |
-| X-Forwarded-For | 否    | [101.188.67.134](https://whatismyipaddress.com/page/36)                                                                             | 源IP地址                     |
-| User-Agent      | 否    | Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36 | 用户代理，浏览器中请求时会默认带上         |
-| cookie          | 否    | your auth cookie                                                                                                                    | 自定义OIDC生成的校验cookie，用于接口鉴权 |
+| 参数名             | 是否必需 | 示例                                                                                                                                  | 参数说明                                                                                 |
+|-----------------|------|-------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------|
+| Content-Type    | 是    | application/json; charset=utf-8                                                                                                     | 请求的 Content type                                                                     |
+| X-Forwarded-For | 否    | [101.188.67.134](https://whatismyipaddress.com/page/36)                                                                             | 源IP地址，如果您将客户端请求从您的服务器转发到点击流服务器，则这是必需的                                                |
+| User-Agent      | 否    | Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36 | 用户代理                                                                                 |
+| cookie          | 否    | your auth cookie                                                                                                                    | 您请求的认证token，请参考[服务端配置](./../pipeline-mgmt/ingestion/configure-ingestion-endpoint.md) |
 
 ### 请求query参数
 
-| 参数名                      | 是否必需 | 示例                  | 参数说明                                          |
-|--------------------------|------|---------------------|-----------------------------------------------|
-| appId                    | 是    | test_app            | 创建应用时对应的id, 可从Clickstream Web控制台获取            |
-| platform                 | 否    | Android/iOS/Web/... | 区分不同的平台                                       |
-| event_bundle_sequence_id | 否    | 1                   | 请求序列号，值从1开始的自增整数                              |
-| hashCode                 | 否    | 478acd09            | 请求body字符串进行sha256计算结果的前8位，server端用于验证请求体是否被篡改 |
-| compression              | 否    | gzip                | 请求body的压缩方式，目前仅支持gzip，不传该字段表示不压缩              |
+| 参数名                      | 是否必需 | 示例                  | 参数说明                             |
+|--------------------------|------|---------------------|----------------------------------|
+| appId                    | 是    | test_app            | 您应用的App ID, 在解决方案 Web 控制台创建应用时生成 |
+| platform                 | 否    | Android/iOS/Web/... | 区分不同的平台                          |
+| event_bundle_sequence_id | 否    | 1                   | 请求序列号，值从1开始的自增整数                 |
+| hashCode                 | 否    | 478acd09            | 请求body字符串进行sha256计算结果的前8位        |
+| compression              | 否    | gzip                | 请求body的压缩方式，目前仅支持gzip，不传该字段表示不压缩 |
 
 ### 请求body
 
 请求body为数组结构，其中包含一个或多个事件的JSON字符串，例如：
 
 ```json
-[{
+[
+  {
     "event_type": "button_click",
     "event_id": "460daa08-0717-4385-8f2e-acb5bd019ee7",
     "timestamp": 1667877566697,
     "app_id": "your appId",
     "attributes": {
-        "productName": "shoes",
-        "Price": 99.9
+      "productName": "shoes",
+      "Price": 99.9
     }
-}, {
+  },
+  {
     "event_type": "item_view",
     "event_id": "c6067c1c-fd8d-4fdb-bfaf-cc1212ca0195",
     "timestamp": 1667877565698,
     "app_id": "your appId",
     "attributes": {
-        "productName": "book",
-        "Price": 39.9
+      "productName": "book",
+      "Price": 39.9
     }
-}]
+  }
+]
 ```
 
 ### 事件参数
@@ -109,93 +112,92 @@
 
 #### HttpCode
 
-| Code   | Message                        | 说明                     |
-|--------|--------------------------------|------------------------|
-| 200    | OK                             | 请求成功                   |
-| 413    | Request Entity Too Large       | 请求失败，请求body超过1MB       |
-| 403    | DefaultAction: Invalid request | 请求失败，请检查appId和请求端点是否匹配 |
-| 403    | Forbidden                      | 请求失败，请检查域名解析是否正确       |
-| 其他Code | --                             | 请求失败                   |
+| Code   | 说明                                                |
+|--------|---------------------------------------------------|
+| 200    | 请求成功                                              |
+| 403    | 请求失败，请检查appId和请求端点是否匹配，如果接口配置认证，请检查认证 cookie 是否正确 |
+| 413    | 请求失败，请求body超过1MB                                  |
+| 其他Code | 请求失败                                              |
 
 ## 代码示例
 
-### cURL示例
+=== "cURL"
 
-```bash
-curl --location 'https://example.com/collect?appId=test_release&platform=Android&event_bundle_sequence_id=1' \
---header 'Content-Type: application/json; charset=utf-8' \
---header 'X-Forwarded-For: 101.188.67.134' \
---data '[{"event_type":"button_click","event_id":"460daa08-0717-4385-8f2e-acb5bd019ee7","timestamp":1667877566697,"app_id":"your appId","attributes":{"productName":"shoes","Price":99.9}},{"event_type":"item_view","event_id":"c6067c1c-fd8d-4fdb-bfaf-cc1212ca0195","timestamp":1667877565698,"app_id":"your appId","attributes":{"productName":"book","Price":39.9}}]'
-```
+    ```bash
+    curl --location 'https://example.com/collect?appId=test_release&platform=Android&event_bundle_sequence_id=1' \
+    --header 'Content-Type: application/json; charset=utf-8' \
+    --header 'X-Forwarded-For: 101.188.67.134' \
+    --data '[{"event_type":"button_click","event_id":"460daa08-0717-4385-8f2e-acb5bd019ee7","timestamp":1667877566697,"app_id":"your appId","attributes":{"productName":"shoes","Price":99.9}},{"event_type":"item_view","event_id":"c6067c1c-fd8d-4fdb-bfaf-cc1212ca0195","timestamp":1667877565698,"app_id":"your appId","attributes":{"productName":"book","Price":39.9}}]'
+    ```
 
-### C# HttpClient示例
+=== "C# HttpClient"
 
-```c#
-var client = new HttpClient();
-var request = new HttpRequestMessage(HttpMethod.Post, "https://example.com/collect?appId=test_release&platform=Android&event_bundle_sequence_id=1");
-request.Headers.Add("X-Forwarded-For", "101.188.67.134");
-var content = new StringContent("[{\"event_type\":\"button_click\",\"event_id\":\"460daa08-0717-4385-8f2e-acb5bd019ee7\",\"timestamp\":1667877566697,\"app_id\":\"your appId\",\"attributes\":{\"productName\":\"shoes\",\"Price\":99.9}},{\"event_type\":\"item_view\",\"event_id\":\"c6067c1c-fd8d-4fdb-bfaf-cc1212ca0195\",\"timestamp\":1667877565698,\"app_id\":\"your appId\",\"attributes\":{\"productName\":\"book\",\"Price\":39.9}}]", null, "application/json; charset=utf-8");
-request.Content = content;
-var response = await client.SendAsync(request);
-response.EnsureSuccessStatusCode();
-Console.WriteLine(await response.Content.ReadAsStringAsync());
-```
+    ```c#
+    var client = new HttpClient();
+    var request = new HttpRequestMessage(HttpMethod.Post, "https://example.com/collect?appId=test_release&platform=Android&event_bundle_sequence_id=1");
+    request.Headers.Add("X-Forwarded-For", "101.188.67.134");
+    var content = new StringContent("[{\"event_type\":\"button_click\",\"event_id\":\"460daa08-0717-4385-8f2e-acb5bd019ee7\",\"timestamp\":1667877566697,\"app_id\":\"your appId\",\"attributes\":{\"productName\":\"shoes\",\"Price\":99.9}},{\"event_type\":\"item_view\",\"event_id\":\"c6067c1c-fd8d-4fdb-bfaf-cc1212ca0195\",\"timestamp\":1667877565698,\"app_id\":\"your appId\",\"attributes\":{\"productName\":\"book\",\"Price\":39.9}}]", null, "application/json; charset=utf-8");
+    request.Content = content;
+    var response = await client.SendAsync(request);
+    response.EnsureSuccessStatusCode();
+    Console.WriteLine(await response.Content.ReadAsStringAsync());
+    ```
 
-### Java Okhttp 示例
+=== "Java Okhttp"
 
-```java
-OkHttpClient client = new OkHttpClient().newBuilder()
-  .build();
-MediaType mediaType = MediaType.parse("application/json; charset=utf-8");
-RequestBody body = RequestBody.create(mediaType, "[{\"event_type\":\"button_click\",\"event_id\":\"460daa08-0717-4385-8f2e-acb5bd019ee7\",\"timestamp\":1667877566697,\"app_id\":\"your appId\",\"attributes\":{\"productName\":\"shoes\",\"Price\":99.9}},{\"event_type\":\"item_view\",\"event_id\":\"c6067c1c-fd8d-4fdb-bfaf-cc1212ca0195\",\"timestamp\":1667877565698,\"app_id\":\"your appId\",\"attributes\":{\"productName\":\"book\",\"Price\":39.9}}]");
-Request request = new Request.Builder()
-  .url("https://example.com/collect?appId=test_release&platform=Android&event_bundle_sequence_id=1")
-  .method("POST", body)
-  .addHeader("Content-Type", "application/json; charset=utf-8")
-  .addHeader("X-Forwarded-For", "101.188.67.134")
-  .build();
-Response response = client.newCall(request).execute();
-```
+    ```java
+    OkHttpClient client=new OkHttpClient().newBuilder()
+            .build();
+            MediaType mediaType=MediaType.parse("application/json; charset=utf-8");
+            RequestBody body=RequestBody.create(mediaType,"[{\"event_type\":\"button_click\",\"event_id\":\"460daa08-0717-4385-8f2e-acb5bd019ee7\",\"timestamp\":1667877566697,\"app_id\":\"your appId\",\"attributes\":{\"productName\":\"shoes\",\"Price\":99.9}},{\"event_type\":\"item_view\",\"event_id\":\"c6067c1c-fd8d-4fdb-bfaf-cc1212ca0195\",\"timestamp\":1667877565698,\"app_id\":\"your appId\",\"attributes\":{\"productName\":\"book\",\"Price\":39.9}}]");
+            Request request=new Request.Builder()
+            .url("https://example.com/collect?appId=test_release&platform=Android&event_bundle_sequence_id=1")
+            .method("POST",body)
+            .addHeader("Content-Type","application/json; charset=utf-8")
+            .addHeader("X-Forwarded-For","101.188.67.134")
+            .build();
+            Response response=client.newCall(request).execute();
+    ```
 
-### JavaScript Fetch示例
+=== "JavaScript Fetch"
 
-```javascript
-var myHeaders = new Headers();
-myHeaders.append("Content-Type", "application/json; charset=utf-8");
-myHeaders.append("X-Forwarded-For", "101.188.67.134");
+    ```javascript
+    var myHeaders = new Headers();
+    myHeaders.append("Content-Type", "application/json; charset=utf-8");
+    myHeaders.append("X-Forwarded-For", "101.188.67.134");
+    
+    var raw = "[{\"event_type\":\"button_click\",\"event_id\":\"460daa08-0717-4385-8f2e-acb5bd019ee7\",\"timestamp\":1667877566697,\"app_id\":\"your appId\",\"attributes\":{\"productName\":\"shoes\",\"Price\":99.9}},{\"event_type\":\"item_view\",\"event_id\":\"c6067c1c-fd8d-4fdb-bfaf-cc1212ca0195\",\"timestamp\":1667877565698,\"app_id\":\"your appId\",\"attributes\":{\"productName\":\"book\",\"Price\":39.9}}]";
+    
+    var requestOptions = {
+        method: 'POST',
+        headers: myHeaders,
+        body: raw,
+        redirect: 'follow'
+    };
+    
+    fetch("https://example.com/collect?appId=test_release&platform=Android&event_bundle_sequence_id=1", requestOptions)
+        .then(response => response.text())
+        .then(result => console.log(result))
+        .catch(error => console.log('error', error));
+    ```
 
-var raw = "[{\"event_type\":\"button_click\",\"event_id\":\"460daa08-0717-4385-8f2e-acb5bd019ee7\",\"timestamp\":1667877566697,\"app_id\":\"your appId\",\"attributes\":{\"productName\":\"shoes\",\"Price\":99.9}},{\"event_type\":\"item_view\",\"event_id\":\"c6067c1c-fd8d-4fdb-bfaf-cc1212ca0195\",\"timestamp\":1667877565698,\"app_id\":\"your appId\",\"attributes\":{\"productName\":\"book\",\"Price\":39.9}}]";
+=== "Python Request"
 
-var requestOptions = {
-  method: 'POST',
-  headers: myHeaders,
-  body: raw,
-  redirect: 'follow'
-};
-
-fetch("https://example.com/collect?appId=test_release&platform=Android&event_bundle_sequence_id=1", requestOptions)
-  .then(response => response.text())
-  .then(result => console.log(result))
-  .catch(error => console.log('error', error));
-```
-
-### Python Request 示例
-
-```python
-import requests
-
-url = "https://example.com/collect?appId=test_release&platform=Android&event_bundle_sequence_id=1"
-
-payload = "[{\"event_type\":\"button_click\",\"event_id\":\"460daa08-0717-4385-8f2e-acb5bd019ee7\",\"timestamp\":1667877566697,\"app_id\":\"your appId\",\"attributes\":{\"productName\":\"shoes\",\"Price\":99.9}},{\"event_type\":\"item_view\",\"event_id\":\"c6067c1c-fd8d-4fdb-bfaf-cc1212ca0195\",\"timestamp\":1667877565698,\"app_id\":\"your appId\",\"attributes\":{\"productName\":\"book\",\"Price\":39.9}}]"
-headers = {
-  'Content-Type': 'application/json; charset=utf-8',
-  'X-Forwarded-For': '101.188.67.134'
-}
-
-response = requests.request("POST", url, headers=headers, data=payload)
-
-print(response.text)
-```
+    ```python
+    import requests
+    
+    url = "https://example.com/collect?appId=test_release&platform=Android&event_bundle_sequence_id=1"
+    
+    payload = "[{\"event_type\":\"button_click\",\"event_id\":\"460daa08-0717-4385-8f2e-acb5bd019ee7\",\"timestamp\":1667877566697,\"app_id\":\"your appId\",\"attributes\":{\"productName\":\"shoes\",\"Price\":99.9}},{\"event_type\":\"item_view\",\"event_id\":\"c6067c1c-fd8d-4fdb-bfaf-cc1212ca0195\",\"timestamp\":1667877565698,\"app_id\":\"your appId\",\"attributes\":{\"productName\":\"book\",\"Price\":39.9}}]"
+    headers = {
+        'Content-Type': 'application/json; charset=utf-8',
+        'X-Forwarded-For': '101.188.67.134'
+    }
+    
+    response = requests.request("POST", url, headers=headers, data=payload)
+    
+    print(response.text)
+    ```
 
 ## 验证数据上报成功
 
