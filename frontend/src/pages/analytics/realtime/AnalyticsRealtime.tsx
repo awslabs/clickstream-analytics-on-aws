@@ -205,7 +205,7 @@ const AnalyticsRealtime: React.FC = () => {
                 <Alert
                   statusIconAriaLabel="Info"
                   action={
-                    <Button iconAlign="right" iconName="external">
+                    <Button disabled iconAlign="right" iconName="external">
                       {t('analytics:realtime.configProject')}
                     </Button>
                   }

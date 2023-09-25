@@ -119,7 +119,7 @@ const EventsSelect: React.FC<EventsSelectProps> = (
                       addNewConditionItem(index);
                     }}
                     variant="link"
-                    iconName="add-plus"
+                    iconName="filter"
                   />
                 </div>
               )}

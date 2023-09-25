@@ -411,14 +411,16 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
           <div className="cs-analytics-config">
             <SpaceBetween direction="vertical" size="xs">
               <Box variant="awsui-key-label">
-                {t('analytics:labels.metrics')}
-                <Popover
-                  triggerType="custom"
-                  size="small"
-                  content={t('analytics:information.funnelMetricsInfo')}
-                >
-                  <Icon name="status-info" size="small" />
-                </Popover>
+                <SpaceBetween direction="horizontal" size="xxs">
+                  {t('analytics:labels.metrics')}
+                  <Popover
+                    triggerType="custom"
+                    size="small"
+                    content={t('analytics:information.funnelMetricsInfo')}
+                  >
+                    <Icon name="status-info" size="small" />
+                  </Popover>
+                </SpaceBetween>
               </Box>
               <Select
                 selectedOption={selectedMetric}
@@ -430,15 +432,17 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
             </SpaceBetween>
             <SpaceBetween direction="vertical" size="xs">
               <Box variant="awsui-key-label">
-                {t('analytics:labels.associateParameter')}
-                <Popover
-                  triggerType="custom"
-                  content={t(
-                    'analytics:information.funnelAssociateParameterInfo'
-                  )}
-                >
-                  <Icon name="status-info" size="small" />
-                </Popover>
+                <SpaceBetween direction="horizontal" size="xxs">
+                  {t('analytics:labels.associateParameter')}
+                  <Popover
+                    triggerType="custom"
+                    content={t(
+                      'analytics:information.funnelAssociateParameterInfo'
+                    )}
+                  >
+                    <Icon name="status-info" size="small" />
+                  </Popover>
+                </SpaceBetween>
               </Box>
               <div className="cs-analytics-config">
                 <Toggle
@@ -465,13 +469,15 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
               <div>
                 <SpaceBetween direction="vertical" size="xs">
                   <Box variant="awsui-key-label">
-                    {t('analytics:labels.window')}
-                    <Popover
-                      triggerType="custom"
-                      content={t('analytics:information.funnelWindowInfo')}
-                    >
-                      <Icon name="status-info" size="small" />
-                    </Popover>
+                    <SpaceBetween direction="horizontal" size="xxs">
+                      {t('analytics:labels.window')}
+                      <Popover
+                        triggerType="custom"
+                        content={t('analytics:information.funnelWindowInfo')}
+                      >
+                        <Icon name="status-info" size="small" />
+                      </Popover>
+                    </SpaceBetween>
                   </Box>
                   <div className="cs-analytics-window">
                     <div className="cs-analytics-window-type">

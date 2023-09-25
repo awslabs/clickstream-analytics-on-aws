@@ -513,14 +513,16 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
           <div className="cs-analytics-config">
             <SpaceBetween direction="vertical" size="xs">
               <Box variant="awsui-key-label">
-                {t('analytics:labels.metrics')}
-                <Popover
-                  triggerType="custom"
-                  size="small"
-                  content={t('analytics:information.pathMetricsInfo')}
-                >
-                  <Icon name="status-info" size="small" />
-                </Popover>
+                <SpaceBetween direction="horizontal" size="xxs">
+                  {t('analytics:labels.metrics')}
+                  <Popover
+                    triggerType="custom"
+                    size="small"
+                    content={t('analytics:information.pathMetricsInfo')}
+                  >
+                    <Icon name="status-info" size="small" />
+                  </Popover>
+                </SpaceBetween>
               </Box>
               <div className="cs-analytics-config">
                 <Select
@@ -534,14 +536,16 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
             </SpaceBetween>
             <SpaceBetween direction="vertical" size="xs">
               <Box variant="awsui-key-label">
-                {t('analytics:labels.sessionDefinition')}
-                <Popover
-                  triggerType="custom"
-                  size="small"
-                  content={t('analytics:information.pathSessionDefInfo')}
-                >
-                  <Icon name="status-info" size="small" />
-                </Popover>
+                <SpaceBetween direction="horizontal" size="xxs">
+                  {t('analytics:labels.sessionDefinition')}
+                  <Popover
+                    triggerType="custom"
+                    size="small"
+                    content={t('analytics:information.pathSessionDefInfo')}
+                  >
+                    <Icon name="status-info" size="small" />
+                  </Popover>
+                </SpaceBetween>
               </Box>
               <div className="cs-analytics-session-window">
                 <div className="cs-analytics-session-window-type">
@@ -581,14 +585,16 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
             </SpaceBetween>
             <SpaceBetween direction="vertical" size="xs">
               <Box variant="awsui-key-label">
-                {t('analytics:labels.nodeType')}
-                <Popover
-                  triggerType="custom"
-                  size="small"
-                  content={t('analytics:information.pathNodeTypeInfo')}
-                >
-                  <Icon name="status-info" size="small" />
-                </Popover>
+                <SpaceBetween direction="horizontal" size="xxs">
+                  {t('analytics:labels.nodeType')}
+                  <Popover
+                    triggerType="custom"
+                    size="small"
+                    content={t('analytics:information.pathNodeTypeInfo')}
+                  >
+                    <Icon name="status-info" size="small" />
+                  </Popover>
+                </SpaceBetween>
               </Box>
               <div className="cs-analytics-session-window">
                 <div className="cs-analytics-session-window-type">

@@ -21,11 +21,14 @@ import {
   Icon,
   Link,
   Popover,
+  SegmentedControl,
+  SegmentedControlProps,
   SelectProps,
   SpaceBetween,
   Toggle,
 } from '@cloudscape-design/components';
 import { previewRetention } from 'apis/analytics';
+import ExtendIcon from 'components/common/ExtendIcon';
 import Loading from 'components/common/Loading';
 import {
   CategoryItemType,
@@ -91,6 +94,19 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
   const [selectDashboardModalVisible, setSelectDashboardModalVisible] =
     useState(false);
   const [exploreEmbedUrl, setExploreEmbedUrl] = useState('');
+
+  const defaultChartTypeOption = 'line-chart';
+  const chartTypeOptions: SegmentedControlProps.Option[] = [
+    {
+      id: 'line-chart',
+      iconSvg: <ExtendIcon icon="BsGraphUp" />,
+    },
+    {
+      id: 'bar-chart',
+      iconSvg: <ExtendIcon icon="BsBarChartFill" />,
+    },
+  ];
+  const [chartType, setChartType] = useState(defaultChartTypeOption);
 
   const [eventOptionData, setEventOptionData] = useState<
     IRetentionAnalyticsItem[]
@@ -671,6 +687,11 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
               setDateRangeValue={setDateRangeValue}
               timeGranularity={timeGranularity}
               setTimeGranularity={setTimeGranularity}
+            />
+            <SegmentedControl
+              selectedId={chartType}
+              onChange={({ detail }) => setChartType(detail.selectedId)}
+              options={chartTypeOptions}
             />
           </div>
           <br />

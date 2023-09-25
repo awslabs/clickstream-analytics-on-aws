@@ -102,10 +102,6 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
       id: 'bar-chart',
       iconSvg: <ExtendIcon icon="BsBarChartFill" />,
     },
-    {
-      id: 'pie-chart',
-      iconSvg: <ExtendIcon icon="BsPieChart" />,
-    },
   ];
   const [chartType, setChartType] = useState(defaultChartTypeOption);
 

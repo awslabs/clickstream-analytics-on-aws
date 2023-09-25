@@ -20,6 +20,7 @@ import {
   Popover,
   Select,
   SelectProps,
+  SpaceBetween,
 } from '@cloudscape-design/components';
 import {
   getMetadataUserAttributesList,
@@ -270,7 +271,7 @@ const AnalyticsExplore: React.FC = () => {
                   actions={
                     <FormField
                       label={
-                        <>
+                        <SpaceBetween direction="horizontal" size="xxs">
                           {t('analytics:explore.analyticsModel')}
                           <Popover
                             triggerType="custom"
@@ -280,7 +281,7 @@ const AnalyticsExplore: React.FC = () => {
                           >
                             <Link variant="info">{t('info')}</Link>
                           </Popover>
-                        </>
+                        </SpaceBetween>
                       }
                     >
                       <Select
