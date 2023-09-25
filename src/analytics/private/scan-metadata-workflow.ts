@@ -161,6 +161,7 @@ export class ScanMetadataWorkflow extends Construct {
         level: LogLevel.ALL,
       },
       tracingEnabled: true,
+      comment: 'This state machine is responsible for periodically aggregating events and parameters data and store the aggregated data in DynamoDB',
     });
 
     return scanMetadataStateMachine;

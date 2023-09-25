@@ -52,7 +52,7 @@ export const handler = async (event: CheckScanMetadataStatusEvent) => {
       },
     };
   } else if (response.Status == StatusString.FAILED || response.Status == StatusString.ABORTED) {
-    logger.info(`Executing ${queryId} status of statement is ${response.Status}`);
+    logger.error(`Executing ${queryId} status of statement is ${response.Status}`);
     const queryResult = await queryScanMetadataLog(appId);
     return {
       detail: {

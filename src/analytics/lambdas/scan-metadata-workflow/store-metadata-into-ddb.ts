@@ -13,9 +13,8 @@
 
 import {
   DynamoDBClient,
-  BatchWriteItemCommand,
-  BatchWriteItemCommandInput,
 } from '@aws-sdk/client-dynamodb';
+import { DynamoDBDocumentClient, BatchWriteCommand, BatchWriteCommandInput } from '@aws-sdk/lib-dynamodb';
 import { logger } from '../../../common/powertools';
 import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
 import { StoreMetadataBody } from '../../private/model';
@@ -39,6 +38,8 @@ const ddbClient = new DynamoDBClient({
   region: ddb_region,
 });
 
+const ddbDocClient = DynamoDBDocumentClient.from(ddbClient);
+
 /**
  * The lambda function to get event metadata and properties metadata from redshift. And store them into DDB
  * @param event StoreMetadataEvent.
@@ -53,6 +54,8 @@ export const handler = async (event: StoreMetadataEvent) => {
     await handleEventMetadata(appId, metadataItems);
 
     await handlePropertiesMetadata(appId, metadataItems);
+
+    await handleUserAttributeMetadata(appId, metadataItems);
 
     await batchWriteIntoDDB(metadataItems);
 
@@ -83,35 +86,21 @@ async function handleEventMetadata(appId: string, metadataItems: any[]) {
 
   const response = await queryMetadata(inputSql);
 
-  // Transform data to DynamoDB format
-  const items = response.Records!.map(record => ({
-    PutRequest: {
-      Item: {
-        id: { S: record[0].stringValue },
-        type: { S: record[1].stringValue },
-        prefix: { S: record[2].stringValue },
-        projectId: { S: record[3].stringValue },
-        appId: { S: record[4].stringValue },
-        name: { S: record[5].stringValue },
-        displayName: { S: '' },
-        description: { S: '' },
-        hasData: { BOOL: true },
-        metadataSource: { S: record[6].stringValue },
-        dataVolumeLastDay: { N: record[7].stringValue },
-        platform: { L: convertToDDBList(record[8].stringValue) },
-        updateAt: { N: Date.now().toString() },
-        createAt: { N: Date.now().toString() },
-        operator: { S: '' },
-        deleted: { BOOL: false },
-        ttl: { N: (Math.floor(Date.now() / 1000) + 7 * 24 * 60 * 60).toString() },
-      },
-    },
-  }));
-
-  items.forEach(item => {
+  response.Records!.forEach(record => {
     metadataItems.push({
       PutRequest: {
-        Item: item.PutRequest.Item,
+        Item: {
+          id: record[0].stringValue,
+          type: record[1].stringValue,
+          prefix: record[2].stringValue,
+          projectId: record[3].stringValue,
+          appId: record[4].stringValue,
+          name: record[5].stringValue,
+          metadataSource: record[6].stringValue,
+          dataVolumeLastDay: record[7].longValue,
+          platform: convertToDDBList(record[8].stringValue),
+          ...getCommonData(),
+        },
       },
     });
   });
@@ -124,41 +113,58 @@ async function handlePropertiesMetadata(appId: string, metadataItems: any[]) {
   const response = await queryMetadata(inputSql);
 
   // Transform data to DynamoDB format
-  const items = response.Records!.map(record => ({
-    PutRequest: {
-      Item: {
-        id: { S: record[0].stringValue },
-        type: { S: record[1].stringValue },
-        prefix: { S: record[2].stringValue },
-        eventName: { S: record[3].stringValue },
-        projectId: { S: record[4].stringValue },
-        appId: { S: record[5].stringValue },
-        category: { S: record[6].stringValue },
-        metadataSource: { S: record[7].stringValue },
-        parameterType: { S: record[8].stringValue },
-        name: { S: record[9].stringValue },
-        parameterId: { S: record[10].stringValue },
-        valueType: { S: record[11].stringValue },
-        valueEnum: { L: convertToDDBList(record[12].stringValue) },
-        platform: { L: convertToDDBList(record[13].stringValue) },
-        eventDescription: { S: '' },
-        eventDisplayName: { S: '' },
-        displayName: { S: '' },
-        description: { S: '' },
-        hasData: { BOOL: true },
-        updateAt: { N: Date.now().toString() },
-        createAt: { N: Date.now().toString() },
-        operator: { S: '' },
-        deleted: { BOOL: false },
-        ttl: { N: (Math.floor(Date.now() / 1000) + 7 * 24 * 60 * 60).toString() },
-      },
-    },
-  }));
-
-  items.forEach(item => {
+  response.Records!.forEach(record => {
     metadataItems.push({
       PutRequest: {
-        Item: item.PutRequest.Item,
+        Item: {
+          id: record[0].stringValue,
+          type: record[1].stringValue,
+          prefix: record[2].stringValue,
+          eventName: record[3].stringValue,
+          projectId: record[4].stringValue,
+          appId: record[5].stringValue,
+          category: record[6].stringValue,
+          metadataSource: record[7].stringValue,
+          parameterType: record[8].stringValue,
+          name: record[9].stringValue,
+          parameterId: record[10].stringValue,
+          valueType: record[11].stringValue,
+          valueEnum: convertToDDBList(record[12].stringValue),
+          platform: convertToDDBList(record[13].stringValue),
+          eventDescription: '',
+          eventDisplayName: '',
+          ...getCommonData(),
+        },
+      },
+    });
+  });
+}
+
+async function handleUserAttributeMetadata(appId: string, metadataItems: any[]) {
+  const inputSql =
+    `SELECT id, type, prefix, project_id, app_id, category, metadata_source, property_type, property_name, value_type, value_enum, platform FROM ${appId}.user_attribute_metadata;`;
+
+  const response = await queryMetadata(inputSql);
+
+  // Transform data to DynamoDB format
+  response.Records!.forEach(record => {
+    metadataItems.push({
+      PutRequest: {
+        Item: {
+          id: record[0].stringValue,
+          type: record[1].stringValue,
+          prefix: record[2].stringValue,
+          projectId: record[3].stringValue,
+          appId: record[4].stringValue,
+          category: record[5].stringValue,
+          metadataSource: record[6].stringValue,
+          parameterType: record[7].stringValue,
+          name: record[8].stringValue,
+          valueType: record[9].stringValue,
+          valueEnum: convertToDDBList(record[10].stringValue),
+          platform: convertToDDBList(record[11].stringValue),
+          ...getCommonData(),
+        },
       },
     });
   });
@@ -168,12 +174,12 @@ async function batchWriteIntoDDB(metadataItems: any[]) {
   const chunkedMetadataItems = chunkArray(metadataItems, 20);
 
   for (const itemsChunk of chunkedMetadataItems) {
-    const inputPara: BatchWriteItemCommandInput = {
+    const inputPara: BatchWriteCommandInput = {
       RequestItems: {
         [ddb_table_name]: itemsChunk,
       },
     };
-    await ddbClient.send(new BatchWriteItemCommand(inputPara));
+    await ddbDocClient.send(new BatchWriteCommand(inputPara));
   }
 }
 
@@ -237,6 +243,18 @@ function convertToDDBList(inputString?: string) {
     const jsonArray = `[${formattedString}]`;
     listData = JSON.parse(jsonArray);
   }
+  return listData;
+}
 
-  return listData.map( (item: string) => ({ S: item }));
+function getCommonData() {
+  return {
+    displayName: '',
+    description: '',
+    hasData: true,
+    updateAt: Date.now(),
+    createAt: Date.now(),
+    operator: '',
+    deleted: false,
+    ttl: (Math.floor(Date.now() / 1000) + 7 * 24 * 60 * 60),
+  };
 }
