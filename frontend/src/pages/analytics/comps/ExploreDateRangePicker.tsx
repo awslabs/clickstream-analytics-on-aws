@@ -27,7 +27,6 @@ interface IExploreDateRangePickerProps {
   timeGranularity: SelectProps.Option;
   setDateRangeValue: (value: DateRangePickerProps.Value) => void;
   setTimeGranularity: (value: SelectProps.Option) => void;
-  onChange: () => void;
 }
 
 const ExploreDateRangePicker: React.FC<IExploreDateRangePickerProps> = (
@@ -38,7 +37,6 @@ const ExploreDateRangePicker: React.FC<IExploreDateRangePickerProps> = (
     timeGranularity,
     setDateRangeValue,
     setTimeGranularity,
-    onChange,
   } = props;
   const { t } = useTranslation();
 
@@ -141,13 +139,11 @@ const ExploreDateRangePicker: React.FC<IExploreDateRangePickerProps> = (
         options={timeGranularityOptions}
         onChange={(event) => {
           setTimeGranularity(event.detail.selectedOption);
-          onChange();
         }}
       />
       <DateRangePicker
         onChange={({ detail }) => {
           setDateRangeValue(detail.value as DateRangePickerProps.Value);
-          onChange();
         }}
         value={dateRangeValue ?? null}
         dateOnly

@@ -44,7 +44,7 @@ import EventItem from 'components/eventselect/EventItem';
 import EventsSelect from 'components/eventselect/EventSelect';
 import SegmentationFilter from 'components/eventselect/SegmentationFilter';
 import { cloneDeep } from 'lodash';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { COMMON_ALERT_TYPE } from 'ts/const';
@@ -363,6 +363,10 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
     }
     setLoadingData(false);
   };
+
+  useEffect(() => {
+    clickPreview();
+  }, [timeGranularity, dateRangeValue]);
 
   return (
     <>
@@ -714,7 +718,6 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
               setDateRangeValue={setDateRangeValue}
               timeGranularity={timeGranularity}
               setTimeGranularity={setTimeGranularity}
-              onChange={clickPreview}
             />
             <SegmentedControl
               selectedId={chartType}

@@ -40,7 +40,7 @@ import EventItem from 'components/eventselect/EventItem';
 import RetentionSelect from 'components/eventselect/RetentionSelect';
 import SegmentationFilter from 'components/eventselect/SegmentationFilter';
 import { cloneDeep } from 'lodash';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { COMMON_ALERT_TYPE } from 'ts/const';
@@ -270,6 +270,10 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
       console.log(error);
     }
   };
+
+  useEffect(() => {
+    clickPreview();
+  }, [timeGranularity, dateRangeValue]);
 
   return (
     <>
@@ -667,7 +671,6 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
               setDateRangeValue={setDateRangeValue}
               timeGranularity={timeGranularity}
               setTimeGranularity={setTimeGranularity}
-              onChange={clickPreview}
             />
           </div>
           <br />
