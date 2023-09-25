@@ -34,7 +34,6 @@ const AnalyticsHome: React.FC = () => {
 
   const gotoFirstProjectApp = async () => {
     try {
-      setLoading(true);
       const apps = [];
       const { success, data }: ApiResponse<ResponseTableData<IProject>> =
         await getProjectList({
@@ -58,8 +57,6 @@ const AnalyticsHome: React.FC = () => {
       if (apps.length > 0) {
         setAnalyticsInfo(apps[0]);
         window.location.href = `/analytics/${apps[0].projectId}/app/${apps[0].appId}/dashboards`;
-      } else {
-        setLoading(false);
       }
     } catch (error) {
       console.log(error);
@@ -67,10 +64,12 @@ const AnalyticsHome: React.FC = () => {
   };
 
   useEffect(() => {
+    setLoading(true);
     if (analyticsInfo.projectId && analyticsInfo.appId) {
       window.location.href = `/analytics/${analyticsInfo.projectId}/app/${analyticsInfo.appId}/dashboards`;
     } else {
       gotoFirstProjectApp();
+      setLoading(false);
     }
   }, []);
 
