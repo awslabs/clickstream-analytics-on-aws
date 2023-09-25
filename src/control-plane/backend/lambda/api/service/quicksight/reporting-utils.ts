@@ -522,7 +522,8 @@ export function getFunnelVisualDef(visualId: string, viewName: string, titleProp
 
 }
 
-export function getFunnelTableVisualDef(visualId: string, viewName: string, eventNames: string[], titleProps: DashboardTitleProps, groupColumn: string) : Visual {
+export function getFunnelTableVisualDef(visualId: string, viewName: string, eventNames: string[],
+  titleProps: DashboardTitleProps, groupColumn: string): Visual {
 
   const visualDef = JSON.parse(readFileSync(join(__dirname, './templates/funnel-table-chart.json'), 'utf8')) as Visual;
   visualDef.TableVisual!.VisualId = visualId;
