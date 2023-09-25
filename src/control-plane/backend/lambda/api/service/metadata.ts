@@ -161,7 +161,6 @@ export class MetadataUserAttributeServ {
     try {
       const { projectId, appId, order } = req.query;
       const results = await metadataStore.listUserAttributes(projectId, appId, order);
-      console.log(projectId, appId, results);
       let attributes = groupUserAttributeByName(results);
       attributes = await metadataDisplay.patch(projectId, appId, attributes) as IMetadataUserAttribute[];
       return res.json(new ApiSuccess({

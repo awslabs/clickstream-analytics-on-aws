@@ -31,11 +31,11 @@ import Loading from 'components/common/Loading';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
+import { EVENT_PARAMETER_DISPLAY_PREFIX } from 'ts/const';
 import MetadataPlatformFC from '../comps/MetadataPlatform';
 import MetadataSourceFC from '../comps/MetadataSource';
 import MetadataDetailsTable from '../table/MetadataDetailsTable';
 import MetadataDictionaryTable from '../table/MetadataDictionaryTable';
-import { EVENT_PARAMETER_DISPLAY_PREFIX } from 'ts/const';
 
 interface MetadataParameterSplitPanelProps {
   parameter: IMetadataEventParameter;
@@ -352,12 +352,8 @@ const MetadataParameterSplitPanel: React.FC<
                     data={parameterDetails.associatedEvents ?? []}
                     tableColumnDefinitions={COLUMN_DEFINITIONS}
                     tableI18nStrings={{
-                      loadingText: t(
-                        'analytics:metadata.labels.tableLoading'
-                      ),
-                      emptyText: t(
-                        'analytics:metadata.labels.tableEmpty'
-                      ),
+                      loadingText: t('analytics:metadata.labels.tableLoading'),
+                      emptyText: t('analytics:metadata.labels.tableEmpty'),
                     }}
                   />
                 ),
