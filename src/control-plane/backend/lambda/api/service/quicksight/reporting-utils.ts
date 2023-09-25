@@ -25,7 +25,7 @@ import { AssumeRoleCommand, STSClient } from '@aws-sdk/client-sts';
 import Mustache from 'mustache';
 import { v4 as uuidv4 } from 'uuid';
 import { DataSetProps, dataSetActions } from './dashboard-ln';
-import { ExploreRelativeTimeUnit, ExploreRequestAction, ExploreTimeScopeType, ExploreVisualName } from '../../common/explore-types';
+import { AnalysisType, ExploreLanguage, ExploreRelativeTimeUnit, ExploreRequestAction, ExploreTimeScopeType, ExploreVisualName } from '../../common/explore-types';
 import { logger } from '../../common/powertools';
 
 export const TEMP_RESOURCE_NAME_PREFIX = '_tmp_';
@@ -116,12 +116,20 @@ export interface VisualRelatedDefProps {
   readonly timeEnd?: Date;
 }
 
+export interface DashboardTitleProps {
+  readonly title: string;
+  readonly subTitle: string;
+  readonly tableTitle: string;
+}
+
 export type MustachePathAnalysisType = {
   visualId: string;
   dataSetIdentifier: string;
   sourceFieldId: string;
   targetFieldId: string;
   weightFieldId: string;
+  title: string;
+  subTitle?: string;
 }
 
 export type MustacheFunnelAnalysisType = {
@@ -129,6 +137,8 @@ export type MustacheFunnelAnalysisType = {
   dataSetIdentifier: string;
   dimFieldId: string;
   measureFieldId: string;
+  title: string;
+  subTitle?: string;
 }
 
 export type MustacheEventAnalysisType = {
@@ -139,8 +149,9 @@ export type MustacheEventAnalysisType = {
   catMeasureFieldId: string;
   dateGranularity?: string;
   hierarchyId?: string;
+  title: string;
+  subTitle?: string;
 }
-
 
 export type MustacheRetentionAnalysisType = {
   visualId: string;
@@ -150,6 +161,8 @@ export type MustacheRetentionAnalysisType = {
   numberMeasureFieldId: string;
   dateGranularity?: string;
   hierarchyId?: string;
+  title: string;
+  subTitle?: string;
 }
 
 export type MustacheFilterGroupType = {
@@ -447,7 +460,7 @@ export async function getCredentialsFromRole(stsClient: STSClient, roleArn: stri
   }
 }
 
-export function getFunnelVisualDef(visualId: string, viewName: string) : Visual {
+export function getFunnelVisualDef(visualId: string, viewName: string, titleProps: DashboardTitleProps) : Visual {
 
   const visualDef = readFileSync(join(__dirname, './templates/funnel-chart.json'), 'utf8');
   const mustacheFunnelAnalysisType: MustacheFunnelAnalysisType = {
@@ -455,16 +468,22 @@ export function getFunnelVisualDef(visualId: string, viewName: string) : Visual 
     dataSetIdentifier: viewName,
     dimFieldId: uuidv4(),
     measureFieldId: uuidv4(),
+    title: titleProps.title,
+    subTitle: titleProps.subTitle,
   };
 
   return JSON.parse(Mustache.render(visualDef, mustacheFunnelAnalysisType)) as Visual;
 
 }
 
-export function getFunnelTableVisualDef(visualId: string, viewName: string, eventNames: string[], dateField: string) : Visual {
+export function getFunnelTableVisualDef(visualId: string, viewName: string, eventNames: string[], titleProps: DashboardTitleProps, groupColumn: string) : Visual {
 
   const visualDef = JSON.parse(readFileSync(join(__dirname, './templates/funnel-table-chart.json'), 'utf8')) as Visual;
   visualDef.TableVisual!.VisualId = visualId;
+
+  visualDef.TableVisual!.Title!.FormatText = {
+    PlainText: titleProps.tableTitle
+  }
 
   const groupBy = visualDef.TableVisual!.ChartConfiguration!.FieldWells!.TableAggregatedFieldWells?.GroupBy!;
   const sortConfiguration = visualDef.TableVisual!.ChartConfiguration!.SortConfiguration!;
@@ -476,7 +495,7 @@ export function getFunnelTableVisualDef(visualId: string, viewName: string, even
       FieldId: sortFieldId,
       Column: {
         DataSetIdentifier: viewName,
-        ColumnName: dateField,
+        ColumnName: groupColumn,
       },
     },
   });
@@ -661,7 +680,7 @@ export function getFunnelTableVisualRelatedDefs(viewName: string, colNames: stri
   return columnConfigurations;
 }
 
-export function getEventLineChartVisualDef(visualId: string, viewName: string, groupColumn: string) : Visual {
+export function getEventLineChartVisualDef(visualId: string, viewName: string, titleProps: DashboardTitleProps, groupColumn: string) : Visual {
 
   const visualDef = readFileSync(join(__dirname, './templates/event-line-chart.json'), 'utf8');
   const mustacheEventAnalysisType: MustacheEventAnalysisType = {
@@ -672,12 +691,14 @@ export function getEventLineChartVisualDef(visualId: string, viewName: string, g
     catMeasureFieldId: uuidv4(),
     hierarchyId: uuidv4(),
     dateGranularity: groupColumn,
+    title: titleProps.title,
+    subTitle: titleProps.subTitle,
   };
 
   return JSON.parse(Mustache.render(visualDef, mustacheEventAnalysisType)) as Visual;
 }
 
-export function getEventPivotTableVisualDef(visualId: string, viewName: string, groupColumn: string) : Visual {
+export function getEventPivotTableVisualDef(visualId: string, viewName: string, titleProps: DashboardTitleProps, groupColumn: string) : Visual {
 
   const visualDef = readFileSync(join(__dirname, './templates/event-pivot-table-chart.json'), 'utf8');
   const mustacheEventAnalysisType: MustacheEventAnalysisType = {
@@ -687,13 +708,14 @@ export function getEventPivotTableVisualDef(visualId: string, viewName: string, 
     catDimFieldId: uuidv4(),
     catMeasureFieldId: uuidv4(),
     dateGranularity: groupColumn,
+    title: titleProps.tableTitle,
   };
 
   return JSON.parse(Mustache.render(visualDef, mustacheEventAnalysisType)) as Visual;
 
 }
 
-export function getPathAnalysisChartVisualDef(visualId: string, viewName: string) : Visual {
+export function getPathAnalysisChartVisualDef(visualId: string, viewName: string, titleProps: DashboardTitleProps) : Visual {
   const visualDef = readFileSync(join(__dirname, './templates/path-analysis-chart.json'), 'utf8');
   const mustachePathAnalysisType: MustachePathAnalysisType = {
     visualId,
@@ -701,12 +723,14 @@ export function getPathAnalysisChartVisualDef(visualId: string, viewName: string
     sourceFieldId: uuidv4(),
     targetFieldId: uuidv4(),
     weightFieldId: uuidv4(),
+    title: titleProps.title,
+    subTitle: titleProps.subTitle,
   };
 
   return JSON.parse(Mustache.render(visualDef, mustachePathAnalysisType)) as Visual;
 }
 
-export function getRetentionLineChartVisualDef(visualId: string, viewName: string) : Visual {
+export function getRetentionLineChartVisualDef(visualId: string, viewName: string, titleProps: DashboardTitleProps) : Visual {
 
   const visualDef = readFileSync(join(__dirname, './templates/retention-line-chart.json'), 'utf8');
   const mustacheRetentionAnalysisType: MustacheRetentionAnalysisType = {
@@ -716,12 +740,14 @@ export function getRetentionLineChartVisualDef(visualId: string, viewName: strin
     dateDimFieldId: uuidv4(),
     numberMeasureFieldId: uuidv4(),
     hierarchyId: uuidv4(),
+    title: titleProps.title,
+    subTitle: titleProps.subTitle,
   };
 
   return JSON.parse(Mustache.render(visualDef, mustacheRetentionAnalysisType)) as Visual;
 }
 
-export function getRetentionPivotTableVisualDef(visualId: string, viewName: string) : Visual {
+export function getRetentionPivotTableVisualDef(visualId: string, viewName: string, titleProps: DashboardTitleProps) : Visual {
 
   const visualDef = readFileSync(join(__dirname, './templates/retention-pivot-table-chart.json'), 'utf8');
   const mustacheRetentionAnalysisType: MustacheRetentionAnalysisType = {
@@ -730,6 +756,7 @@ export function getRetentionPivotTableVisualDef(visualId: string, viewName: stri
     catDimFieldId: uuidv4(),
     dateDimFieldId: uuidv4(),
     numberMeasureFieldId: uuidv4(),
+    title: titleProps.tableTitle
   };
 
   return JSON.parse(Mustache.render(visualDef, mustacheRetentionAnalysisType)) as Visual;
@@ -819,3 +846,61 @@ export function getTempResourceName(resourceName: string, action: ExploreRequest
 
   return resourceName;
 }
+
+export function getDashboardTitleProps(analysisType: AnalysisType, query: any) : DashboardTitleProps {
+  let title = '';
+  let subTitle = 'aa';
+  let tableTitle = '';
+
+  const language = query.language;
+  if(query.action === ExploreRequestAction.PUBLISH) {
+      title = query.chartTitle;
+      subTitle = query.subTitle;
+      if(language === ExploreLanguage.CHINESE) {
+        tableTitle = '详细信息';
+      } else {
+        tableTitle = 'Detail information';
+      }
+  } else {
+    if(language === ExploreLanguage.CHINESE) {
+      tableTitle = '详细信息';
+      switch (analysisType) {
+        case AnalysisType.FUNNEL:
+          title = '漏斗分析';
+          break;
+        case AnalysisType.EVENT:
+          title = '事件分析';
+          break;
+        case AnalysisType.PATH:
+          title = '路径分析';
+          break;
+        case AnalysisType.RETENTION:
+          title = '留存分析';
+          break;
+      }
+    } else {
+      tableTitle = 'Detail information';
+      switch (analysisType) {
+        case AnalysisType.FUNNEL:
+          title = 'Funnel analysis';
+          break;
+        case AnalysisType.EVENT:
+          title = 'Event analysis';
+          break;
+        case AnalysisType.PATH:
+          title = 'Path analysis';
+          break;
+        case AnalysisType.RETENTION:
+          title = 'Retention analysis';
+          break;
+      }
+    }
+  }
+
+  return {
+    title,
+    subTitle,
+    tableTitle
+  };
+}
+

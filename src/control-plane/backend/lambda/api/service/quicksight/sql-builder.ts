@@ -12,7 +12,7 @@
  */
 
 import { format } from 'sql-formatter';
-import { ConditionCategory, ExploreComputeMethod, ExploreConversionIntervalType, ExploreGroupColumn, ExplorePathNodeType, ExplorePathSessionDef, ExploreRelativeTimeUnit, ExploreTimeScopeType, MetadataPlatform, MetadataValueType } from '../../common/explore-types';
+import { ConditionCategory, ExploreComputeMethod, ExploreConversionIntervalType, ExploreGroupColumn, ExploreLanguage, ExplorePathNodeType, ExplorePathSessionDef, ExploreRelativeTimeUnit, ExploreTimeScopeType, MetadataPlatform, MetadataValueType} from '../../common/explore-types';
 import { logger } from '../../common/powertools';
 
 export interface Condition {
@@ -27,6 +27,7 @@ export interface EventAndCondition {
   readonly eventName: string;
   readonly sqlCondition?: SQLCondition;
   readonly retentionJoinColumn?: RetentionJoinColumn;
+  readonly computeMethod?: ExploreComputeMethod;
 }
 
 export interface SQLCondition {
@@ -76,6 +77,7 @@ export interface SQLParameters {
   readonly maxStep?: number;
   readonly pathAnalysis?: PathAnalysisParameter;
   readonly pairEventAndConditions?: PairEventAndCondition[];
+  readonly language?: ExploreLanguage;
 }
 
 export const builtInEvents = [
@@ -420,8 +422,8 @@ function _buildFunnelBaseSql(eventNames: string[], sqlParameters: SQLParameters)
 function _buildEventAnalysisBaseSql(eventNames: string[], sqlParameters: SQLParameters) : string {
 
   let sql = _buildCommonPartSql(eventNames, sqlParameters);
-
-  sql = _buildEventCondition(eventNames, sqlParameters, sql);
+  const buildResult = _buildEventCondition(eventNames, sqlParameters, sql);
+  sql = buildResult[0]
 
   let joinTableSQL = '';
 
@@ -431,6 +433,12 @@ function _buildEventAnalysisBaseSql(eventNames: string[], sqlParameters: SQLPara
     if (index > 0) {
       unionSql = 'union all';
     }
+    let idSql = '';
+    if (buildResult[1][index] === ExploreComputeMethod.EVENT_CNT) {
+      idSql = `, table_${index}.event_id_${index} as x_id`;
+    } else {
+      idSql = `, table_${index}.user_pseudo_id_${index} as x_id`;
+    }
     joinTableSQL = joinTableSQL.concat(`
     ${unionSql}
     select 
@@ -438,10 +446,9 @@ function _buildEventAnalysisBaseSql(eventNames: string[], sqlParameters: SQLPara
     , table_${index}.week
     , table_${index}.day
     , table_${index}.hour
-    , table_${index}.event_id_${index} as event_id
     , table_${index}.event_name_${index} as event_name
-    , table_${index}.user_pseudo_id_${index} as user_pseudo_id
     , table_${index}.event_timestamp_${index} as event_timestamp
+    ${idSql}
     from table_${index}
     `);
 
@@ -456,10 +463,11 @@ function _buildEventAnalysisBaseSql(eventNames: string[], sqlParameters: SQLPara
   return sql;
 };
 
-function _buildEventCondition(eventNames: string[], sqlParameters: SQLParameters, baseSQL: string) {
+function _buildEventCondition(eventNames: string[], sqlParameters: SQLParameters, baseSQL: string) : [string, ExploreComputeMethod[]] {
   let newSQL = baseSQL;
+  const computedMethodList: ExploreComputeMethod[] = [];
   for (const [index, event] of eventNames.entries()) {
-
+    computedMethodList.push(sqlParameters.eventAndConditions![index].computeMethod ?? ExploreComputeMethod.EVENT_CNT);
     const eventCondition = sqlParameters.eventAndConditions![index];
     let eventConditionSql = _buildEventConditionSQL(eventCondition);
 
@@ -481,7 +489,7 @@ function _buildEventCondition(eventNames: string[], sqlParameters: SQLParameters
     ),
     `);
   }
-  return newSQL;
+  return [newSQL, computedMethodList];
 }
 
 function _buildEventConditionSQL(eventCondition: EventAndCondition) {
@@ -652,46 +660,17 @@ export function buildEventAnalysisView(sqlParameters: SQLParameters) : string {
 
   let resultSql = '';
   const eventNames = _getEventsNameFromConditions(sqlParameters.eventAndConditions!);
-  let prefix = 'e';
-  if (sqlParameters.computeMethod === 'USER_CNT') {
-    prefix = 'u';
-  }
 
   let baseSQL = _buildEventAnalysisBaseSql(eventNames, sqlParameters);
-  let finalTableColumnsSQL = `
-     month
-    ,week
-    ,day
-    ,hour
-  `;
-
-  let finalTableGroupBySQL = `
-     month
-    ,week
-    ,day
-    ,hour
-  `;
-
-  finalTableColumnsSQL = finalTableColumnsSQL.concat(', event_id as e_id , event_name as e_name , user_pseudo_id as u_id ');
-
-  finalTableGroupBySQL = finalTableGroupBySQL.concat(', event_id , event_name , user_pseudo_id ');
-
-  baseSQL = baseSQL.concat(`,
-    final_table as (
-      select 
-      ${finalTableColumnsSQL}
-      from join_table 
-      group by
-      ${finalTableGroupBySQL}
-    )
-  `);
-
   resultSql = resultSql.concat(`
-  select 
-      day::date as event_date
-    ,e_name::varchar as event_name
-    ,${prefix}_id::varchar as x_id
-  from final_table where ${prefix}_id is not null
+      select 
+        day::date as event_date, 
+        event_name, 
+        x_id as count
+      from join_table 
+      where x_id is not null
+      group by
+      day, event_name, x_id
   `);
 
   let sql = `

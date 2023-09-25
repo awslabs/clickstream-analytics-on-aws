@@ -98,3 +98,15 @@ export enum ConditionCategory {
   TRAFFIC_SOURCE = 'traffic_source',
   OTHER = 'other',
 }
+
+export enum ExploreLanguage {
+  CHINESE = 'CN',
+  ENGLISH = 'EN'
+}
+
+export enum AnalysisType {
+  FUNNEL = 'FUNNEL',
+  EVENT = 'EVENT',
+  PATH = 'PATH',
+  RETENTION = 'RETENTION'
+}

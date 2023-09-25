@@ -2,9 +2,15 @@
   "LineChartVisual":{
       "VisualId":"{{visualId}}",
       "Title":{
+          "FormatText": {
+            "PlainText": "{{title}}"
+          },
           "Visibility":"VISIBLE"
       },
       "Subtitle":{
+          "FormatText": {
+            "PlainText": "{{subTitle}}"
+          },
           "Visibility":"VISIBLE"
       },
       "ChartConfiguration":{
@@ -29,7 +35,7 @@
                               "FieldId":"{{catMeasureFieldId}}",
                               "Column":{
                                   "DataSetIdentifier":"{{dataSetIdentifier}}",
-                                  "ColumnName":"x_id"
+                                  "ColumnName":"count"
                               },
                               "AggregationFunction":"DISTINCT_COUNT"
                           }

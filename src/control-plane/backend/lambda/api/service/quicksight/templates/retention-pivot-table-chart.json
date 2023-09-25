@@ -2,6 +2,9 @@
   "PivotTableVisual": {
       "VisualId": "{{visualId}}",
       "Title": {
+          "FormatText": {
+            "PlainText": "{{title}}"
+          },
           "Visibility": "VISIBLE"
       },
       "Subtitle": {
