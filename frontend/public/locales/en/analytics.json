@@ -233,7 +233,8 @@
     "attributeGrouping": "Attribute grouping",
     "defineMetrics": "Define metrics",
     "realtimeStopped": "Realtime streaming is stopped",
-    "realtimeStarted": "Realtime streaming is started"
+    "realtimeStarted": "Realtime streaming is started",
+    "reportingNotEnabled":"Reporting module is not enabled"
   },
   "emptyData": "No Data",
   "emptyDataMessage": "Please configure the metrics to query",

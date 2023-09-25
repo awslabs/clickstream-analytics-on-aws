@@ -233,7 +233,8 @@
     "attributeGrouping": "属性分组",
     "defineMetrics": "定义指标",
     "realtimeStopped": "实时流已停止",
-    "realtimeStarted": "实时流已启动"
+    "realtimeStarted": "实时流已启动",
+    "reportingNotEnabled":"Reporting模块未启用"
   },
   "emptyData": "无数据",
   "emptyDataMessage": "请配置要查询的指标",

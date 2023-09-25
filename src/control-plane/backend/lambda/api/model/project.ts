@@ -26,6 +26,7 @@ export interface IProject {
   readonly environment: ProjectEnvironment | string;
   pipelineId: string;
   applications: IApplication[];
+  reportingEnabled: boolean;
   readonly status: string;
   readonly createAt: number;
   readonly updateAt: number;

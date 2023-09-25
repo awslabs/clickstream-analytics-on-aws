@@ -237,8 +237,10 @@ export class ProjectServ {
         const pipeline = pipelines.find((item: IPipeline) => item.projectId === project.id);
         if (pipeline) {
           project.pipelineId = pipeline.pipelineId;
+          project.reportingEnabled = !isEmpty(pipeline.reporting?.quickSight?.accountName);
         } else {
           project.pipelineId = '';
+          project.reportingEnabled = false;
         }
         const projectApps = apps.filter((item: IApplication) => item.projectId === project.id);
         project.applications = projectApps;

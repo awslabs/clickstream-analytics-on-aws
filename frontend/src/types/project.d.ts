@@ -29,6 +29,7 @@ declare global {
     description: string;
     pipelineId?: string;
     applications?: IApplication[];
+    reportingEnabled?: boolean;
     updateAt?: number;
     operator?: string;
     deleted?: boolean;

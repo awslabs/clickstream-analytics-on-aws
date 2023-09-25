@@ -41,10 +41,9 @@ const AnalyticsHome: React.FC = () => {
           pageNumber: 1,
           pageSize: 9999,
         });
-      setLoading(false);
       if (success) {
         for (const project of data.items) {
-          if (project.applications) {
+          if (project.applications && project.reportingEnabled) {
             for (const app of project.applications) {
               apps.push({
                 projectId: project.id,
@@ -59,6 +58,8 @@ const AnalyticsHome: React.FC = () => {
       if (apps.length > 0) {
         setAnalyticsInfo(apps[0]);
         window.location.href = `/analytics/${apps[0].projectId}/app/${apps[0].appId}/dashboards`;
+      } else {
+        setLoading(false);
       }
     } catch (error) {
       console.log(error);

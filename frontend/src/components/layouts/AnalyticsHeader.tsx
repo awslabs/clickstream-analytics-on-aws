@@ -62,6 +62,12 @@ const AnalyticsHeader: React.FC<IHeaderProps> = (props: IHeaderProps) => {
     i18n.changeLanguage(lng);
   };
 
+  const getSelectLabelByReportingEnable = (label: string, enable: boolean) => {
+    return enable
+      ? label
+      : `${label} (${t('analytics:labels.reportingNotEnabled')})`;
+  };
+
   const listProjects = async () => {
     try {
       const { success, data }: ApiResponse<ResponseTableData<IProject>> =
@@ -72,14 +78,17 @@ const AnalyticsHeader: React.FC<IHeaderProps> = (props: IHeaderProps) => {
       if (success) {
         const projectOptions: SelectProps.Options = data.items.map(
           (element) => ({
-            label: element.name,
+            label: getSelectLabelByReportingEnable(
+              element.name,
+              element.reportingEnabled ?? false
+            ),
             value: element.id,
-            description: element.status,
+            disabled: !element.reportingEnabled,
             options: element.applications?.map(
               (app) =>
                 ({
                   label: app.name,
-                  value: app.appId,
+                  value: `${element.id}-${app.appId}`,
                   projectId: element.id,
                   projectName: element.name,
                   appId: app.appId,
@@ -104,7 +113,7 @@ const AnalyticsHeader: React.FC<IHeaderProps> = (props: IHeaderProps) => {
     ) {
       setSelectedOption({
         label: `${analyticsInfo.projectName} / ${analyticsInfo.appName}`,
-        value: analyticsInfo.appId,
+        value: `${analyticsInfo.projectId}-${analyticsInfo.appId}`,
       });
     }
   };
@@ -161,7 +170,7 @@ const AnalyticsHeader: React.FC<IHeaderProps> = (props: IHeaderProps) => {
               const option = detail.selectedOption as IProjectSelectItem;
               setSelectedOption({
                 label: `${option.projectName} / ${option.appName}`,
-                value: detail.selectedOption.value,
+                value: `${option.projectId}-${option.appId}`,
               });
               setAnalyticsInfo({
                 projectId: option.projectId ?? '',
