@@ -41,6 +41,8 @@ import {
   getTempResourceName,
   TEMP_RESOURCE_NAME_PREFIX,
   getDashboardTitleProps,
+  eventVisualColumns,
+  getAnalysisNameFromId,
 } from './quicksight/reporting-utils';
 import { buildEventAnalysisView, buildEventPathAnalysisView, buildFunnelTableView, buildFunnelView, buildNodePathAnalysisView, buildRetentionAnalysisView } from './quicksight/sql-builder';
 import { awsAccountId } from '../common/constants';
@@ -256,13 +258,13 @@ export class ReportingService {
       datasetPropsArray.push({
         name: '',
         tableName: viewName,
-        columns: funnelVisualColumns,
+        columns: eventVisualColumns,
         importMode: 'DIRECT_QUERY',
         customSql: sql,
         projectedColumns: [
           'event_date',
           'event_name',
-          'x_id',
+          'count',
         ],
       });
 
@@ -583,21 +585,24 @@ export class ReportingService {
     sheetId: string, resourceName: string, principals: QuickSightUserArns,
     dashboardCreateParameters: DashboardCreateParameters) {
     // generate dashboard definition
-    let dashboardDef;
+    let dashboardDef: DashboardVersionDefinition;
+    let dashboardName: string | undefined;
     if (!query.dashboardId) {
       dashboardDef = JSON.parse(readFileSync(join(__dirname, './quicksight/templates/dashboard.json')).toString()) as DashboardVersionDefinition;
       const sid = visualPropsArray[0].sheetId;
       dashboardDef.Sheets![0].SheetId = sid;
-      dashboardDef.Sheets![0].Name = query.sheetName;
+      dashboardDef.Sheets![0].Name = query.sheetName ?? 'sheet1';
     } else {
-      dashboardDef = await getDashboardDefinitionFromArn(quickSight, awsAccountId!, query.dashboardId);
+      const dashboardDefProps = await getDashboardDefinitionFromArn(quickSight, awsAccountId!, query.dashboardId);
+      dashboardDef = dashboardDefProps.def;
+      dashboardName = dashboardDefProps.name;
     }
 
     const dashboard = applyChangeToDashboard({
       action: 'ADD',
       requestAction: query.action,
       visuals: visualPropsArray,
-      dashboardDef: dashboardDef as DashboardVersionDefinition,
+      dashboardDef: dashboardDef,
     });
     logger.info(`final dashboard def: ${JSON.stringify(dashboard)}`);
 
@@ -610,10 +615,11 @@ export class ReportingService {
       //update QuickSight analysis
       let newAnalysis;
       if (query.analysisId) {
+        const analysisName = await getAnalysisNameFromId(quickSight, awsAccountId!, query.analysisId);
         newAnalysis = await quickSight.updateAnalysis({
           AwsAccountId: awsAccountId,
           AnalysisId: query.analysisId,
-          Name: query.analysisName,
+          Name: analysisName,
           Definition: dashboard as AnalysisDefinition,
         });
       }
@@ -622,7 +628,7 @@ export class ReportingService {
       const newDashboard = await quickSight.updateDashboard({
         AwsAccountId: awsAccountId,
         DashboardId: query.dashboardId,
-        Name: query.dashboardName,
+        Name: dashboardName,
         Definition: dashboard,
       });
       const versionNumber = newDashboard.VersionArn?.substring(newDashboard.VersionArn?.lastIndexOf('/') + 1);

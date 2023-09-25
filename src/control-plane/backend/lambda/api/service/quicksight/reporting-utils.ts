@@ -122,6 +122,11 @@ export interface DashboardTitleProps {
   readonly tableTitle: string;
 }
 
+export interface DashboardDefProps {
+  def: DashboardVersionDefinition;
+  name?: string;
+}
+
 export type MustachePathAnalysisType = {
   visualId: string;
   dataSetIdentifier: string;
@@ -194,6 +199,21 @@ export const funnelVisualColumns: InputColumn[] = [
   },
   {
     Name: 'x_id',
+    Type: 'STRING',
+  },
+];
+
+export const eventVisualColumns: InputColumn[] = [
+  {
+    Name: 'event_date',
+    Type: 'DATETIME',
+  },
+  {
+    Name: 'event_name',
+    Type: 'STRING',
+  },
+  {
+    Name: 'count',
     Type: 'STRING',
   },
 ];
@@ -333,13 +353,26 @@ export const createDataSet = async (quickSight: QuickSight, awsAccountId: string
 };
 
 export const getDashboardDefinitionFromArn = async (quickSight: QuickSight, awsAccountId: string, dashboardId: string)
-: Promise<DashboardVersionDefinition|undefined> => {
+: Promise<DashboardDefProps> => {
   const dashboard = await quickSight.describeDashboardDefinition({
     AwsAccountId: awsAccountId,
     DashboardId: dashboardId,
   });
 
-  return dashboard.Definition;
+  return {
+    name: dashboard.Name,
+    def: dashboard.Definition!
+  }
+};
+
+export const getAnalysisNameFromId = async (quickSight: QuickSight, awsAccountId: string, analysisId: string)
+: Promise<string | undefined> => {
+  const analysis = await quickSight.describeAnalysis({
+    AwsAccountId: awsAccountId,
+    AnalysisId: analysisId,
+  });
+
+  return analysis.Analysis?.Name;
 };
 
 export function applyChangeToDashboard(dashboardAction: DashboardAction) : DashboardVersionDefinition {
@@ -849,13 +882,13 @@ export function getTempResourceName(resourceName: string, action: ExploreRequest
 
 export function getDashboardTitleProps(analysisType: AnalysisType, query: any) : DashboardTitleProps {
   let title = '';
-  let subTitle = 'aa';
+  let subTitle = ' ';
   let tableTitle = '';
 
   const language = query.language;
   if(query.action === ExploreRequestAction.PUBLISH) {
       title = query.chartTitle;
-      subTitle = query.subTitle;
+      subTitle = query.chartSubTitle;
       if(language === ExploreLanguage.CHINESE) {
         tableTitle = '详细信息';
       } else {
