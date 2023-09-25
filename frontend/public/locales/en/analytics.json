@@ -14,7 +14,9 @@
     "createSheetsDec": "One dashboard could have multiple sheets to group charts into different topics. By default, the solution create a sheet with “Sheet 1”  if you don’t specify sheet name.",
     "createSheetsPlaceholder": "Input sheet name",
     "deleteTip1": "Are you sure you want to delete the dashboard ",
-    "deleteTip2": " delete dashboard will delete all data in QuickSight."
+    "deleteTip2": " delete dashboard will delete all data in QuickSight.",
+    "defaultUserLifecycle": "User lifecycle",
+    "defaultTag": "default"
   },
   "realtime": {
     "title": "Realtime",
@@ -259,6 +261,8 @@
     "pathMetricsInfo": "pathMetricsInfo",
     "pathSessionDefInfo": "pathSessionDefInfo",
     "pathNodeTypeInfo": "pathNodeTypeInfo",
-    "retentionInfo": "retentionInfo"
+    "retentionInfo": "retentionInfo",
+    "introducingAnalyticsHeader": "Introducing analytics",
+    "introducingAnalyticsContent": "Analytics allow you explore the clickstream data on an easy-to-use UI, and provides access to all reports and dashboards."
   }
 }

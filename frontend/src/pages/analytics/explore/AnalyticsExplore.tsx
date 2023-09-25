@@ -271,7 +271,7 @@ const AnalyticsExplore: React.FC = () => {
                     <FormField
                       label={
                         <>
-                          {t('analytics:explore.analyticsModel')} &nbsp;
+                          {t('analytics:explore.analyticsModel')}
                           <Popover
                             triggerType="custom"
                             content={t(

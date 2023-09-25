@@ -14,7 +14,9 @@
     "createSheetsDec": "一个仪表板可以有多个工作表，用于将图表分组为不同的主题。默认情况下，如果未指定工作表名称，则解决方案会创建一个具有“Sheet 1”的工作表。",
     "createSheetsPlaceholder": "工作表名称",
     "deleteTip1": "您确定要删除该看板吗 ",
-    "deleteTip2": " 删除看板将删除 QuickSight 中的所有数据。"
+    "deleteTip2": " 删除看板将删除 QuickSight 中的所有数据。",
+    "defaultUserLifecycle": "用户生命周期",
+    "defaultTag": "预置"
   },
   "realtime": {
     "title": "实时",
@@ -259,6 +261,8 @@
     "pathMetricsInfo": "pathMetricsInfo",
     "pathSessionDefInfo": "pathSessionDefInfo",
     "pathNodeTypeInfo": "pathNodeTypeInfo",
-    "retentionInfo": "retentionInfo"
+    "retentionInfo": "retentionInfo",
+    "introducingAnalyticsHeader": "介绍分析工作坊",
+    "introducingAnalyticsContent": "分析工作坊允许您在易于使用的UI上探索点击流数据，并提供对所有报告和看板的访问。"
   }
 }

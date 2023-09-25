@@ -45,11 +45,13 @@ const Navigation: React.FC<INavigationProps> = (props: INavigationProps) => {
       href: '/analytics',
       info: (
         <Popover
-          header="Introducing analytics"
+          header={
+            t('analytics:information.introducingAnalyticsHeader') ??
+            'Introducing analytics'
+          }
           content={
             <div>
-              Analytics allow you explore the clickstream data on an easy-to-use
-              UI, and provides access to all reports and dashboards.
+              {t('analytics:information.introducingAnalyticsContent')}
               <br />
               <Link href="#" variant="primary">
                 Learn more.

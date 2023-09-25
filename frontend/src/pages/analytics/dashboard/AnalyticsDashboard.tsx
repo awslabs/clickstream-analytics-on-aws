@@ -51,10 +51,10 @@ const AnalyticsDashboardCard: React.FC<any> = () => {
       >
         {item.name === DEFAULT_DASHBOARD_NAME ? (
           <>
-            User lifecycle -
+            {t('analytics:dashboard.defaultUserLifecycle')} -
             {
               <small>
-                <i> default</i>
+                <i> {t('analytics:dashboard.defaultTag')}</i>
               </small>
             }
           </>
@@ -73,7 +73,7 @@ const AnalyticsDashboardCard: React.FC<any> = () => {
         id: 'createAt',
         header: t('analytics:list.createAt'),
         content: (item: IAnalyticsDashboard) =>
-          moment(item?.createAt).format(TIME_FORMAT) || '-',
+          item?.createAt ? moment(item?.createAt).format(TIME_FORMAT) : '-',
       },
       {
         id: 'operator',
