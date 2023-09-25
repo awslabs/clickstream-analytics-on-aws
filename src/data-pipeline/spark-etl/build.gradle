@@ -39,6 +39,7 @@ dependencies {
 
     // For running spark basics
     implementation "org.apache.spark:spark-sql_2.13:$sparkVersion"
+    testImplementation "org.apache.spark:spark-hive_2.13:$sparkVersion"
 
     // For Ip to Geo.
     implementation "com.maxmind.db:maxmind-db:$maxmindDbVersion"

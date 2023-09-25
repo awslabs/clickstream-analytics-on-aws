@@ -85,8 +85,8 @@ public class UserPropertiesConverterTest extends BaseSparkTest {
         String firstKey = firstItem.getString(firstItem.fieldIndex("key"));
         Row valueItem = firstItem.getStruct(firstItem.fieldIndex("value"));
 
-        Long intValue = valueItem.getLong(valueItem.fieldIndex("int_value"));
-        assertEquals(312121L, intValue);
+        String stringValue = valueItem.getAs(valueItem.fieldIndex("string_value"));
+        assertEquals("312121", stringValue);
         assertEquals("_user_id", firstKey);
 
     }

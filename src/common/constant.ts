@@ -265,8 +265,12 @@ export const PARAMETER_LABEL_OIDC_JWKS_SUFFIX =
 
 // ods data partitions
 export const PARTITION_APP = 'partition_app';
-export const TABLE_NAME_ODS_EVENT = 'ods_events';
 export const TABLE_NAME_INGESTION = 'ingestion_events';
+export const TABLE_NAME_EVENT = 'event';
+export const TABLE_NAME_EVENT_PARAMETER = 'event_parameter';
+export const TABLE_NAME_USER = 'user';
+export const TABLE_NAME_ITEM= 'item';
+export const TABLE_NAME_ODS_EVENT = 'ods_events';
 
 // the outputs of stacks
 export const OUTPUT_CONTROL_PLANE_URL = 'ControlPlaneURL';
@@ -276,7 +280,12 @@ export const OUTPUT_INGESTION_SERVER_URL_SUFFIX = 'IngestionServerURL';
 export const OUTPUT_DATA_PROCESSING_EMR_SERVERLESS_APPLICATION_ID_SUFFIX =
   'EMRServerlessApplicationId';
 export const OUTPUT_DATA_PROCESSING_GLUE_DATABASE_SUFFIX = 'GlueDatabase';
+export const OUTPUT_DATA_PROCESSING_GLUE_ODS_EVENT_TABLE_SUFFIX = 'GlueODSEventTable';
 export const OUTPUT_DATA_PROCESSING_GLUE_EVENT_TABLE_SUFFIX = 'GlueEventTable';
+export const OUTPUT_DATA_PROCESSING_GLUE_EVENT_PARAMETER_TABLE_SUFFIX='GlueEventParameterTable';
+export const OUTPUT_DATA_PROCESSING_GLUE_USER_TABLE_SUFFIX = 'GlueUserTable';
+export const OUTPUT_DATA_PROCESSING_GLUE_ITEM_TABLE_SUFFIX = 'GlueItemTable';
+
 export const OUTPUT_REPORT_DASHBOARDS_SUFFIX = 'Dashboards';
 export const OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME =
   'StackCreatedRedshiftServerlessWorkgroupName';

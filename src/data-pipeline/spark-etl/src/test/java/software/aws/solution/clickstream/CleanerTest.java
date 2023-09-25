@@ -31,7 +31,7 @@ class CleanerTest extends BaseSparkTest {
         System.setProperty(SAVE_INFO_TO_WAREHOUSE_PROP, "false");
 
         Dataset<Row> dataset = spark.read().json(requireNonNull(getClass().getResource("/original_data.json")).getPath());
-        Dataset<Row> cleanedDataset = cleaner.clean(dataset);
+        Dataset<Row> cleanedDataset = cleaner.clean(dataset, "/data_schema.json");
 
         assertEquals(2, cleanedDataset.count());
 
@@ -66,7 +66,7 @@ class CleanerTest extends BaseSparkTest {
 
         Dataset<Row> dataset =
                 spark.read().json(requireNonNull(getClass().getResource("/original_data_with_error.json")).getPath());
-        Dataset<Row> cleanedDataset = cleaner.clean(dataset);
+        Dataset<Row> cleanedDataset = cleaner.clean(dataset, "/data_schema.json");
 
         assertEquals(0, cleanedDataset.count());
     }

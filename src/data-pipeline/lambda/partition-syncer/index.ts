@@ -15,6 +15,7 @@
 import { CloudFormationCustomResourceEvent, Context, EventBridgeEvent } from 'aws-lambda';
 import { GlueClientUtil } from './glue-client-util';
 import { logger } from '../../../common/powertools';
+import { SinkTableEnum } from '../../data-pipeline';
 import { InitPartitionCustomResourceProps } from '../../utils/custom-resource';
 
 interface PartitionDateEvent {
@@ -70,7 +71,6 @@ async function _handler(event: EventType, date: Date, context: Context) {
   let appIds = process.env.APP_IDS || '';
   let sinkS3Bucket = process.env.SINK_S3_BUCKET_NAME!;
   let sinkS3Prefix = process.env.SINK_S3_PREFIX!;
-  let sinkTableName = process.env.SINK_TABLE_NAME!;
 
   if ((event as any).RequestType) {
     // update/create by custom resource
@@ -90,7 +90,6 @@ async function _handler(event: EventType, date: Date, context: Context) {
     appIds = cfProps.appIds;
     sinkS3Bucket = cfProps.sinkS3BucketName;
     sinkS3Prefix = cfProps.sinkS3Prefix;
-    sinkTableName = cfProps.sinkTableName;
   }
 
 
@@ -98,9 +97,13 @@ async function _handler(event: EventType, date: Date, context: Context) {
   logger.info(`Added hourly partitions in table: ${sourceTableName} of date:${date.toISOString()}`);
 
   if (appIds.length > 0) {
-    await glueClientUtil.addDailyPartitionsForSinkTable(sinkS3Bucket, sinkS3Prefix, databaseName, sinkTableName, projectId, appIds, date);
-    logger.info(`Added daily partitions in table: ${sinkTableName} of date:${date.toISOString()}`);
+    for (let sinkTableName of [SinkTableEnum.EVENT,
+      SinkTableEnum.EVENT_PARAMETER, SinkTableEnum.USER,
+      SinkTableEnum.ITEM, SinkTableEnum.ODS_EVENTS]) {
+      await glueClientUtil.addDailyPartitionsForSinkTable(sinkS3Bucket, sinkS3Prefix, databaseName, sinkTableName, projectId, appIds, date);
+      logger.info(`Added daily partitions in table: ${sinkTableName} of date:${date.toISOString()}`);
+    }
   } else {
-    logger.info(`No new daily partitions in table: ${sinkTableName} of date:${date.toISOString()} as there is no existing app`);
+    logger.info('appId is empty, ignore addDailyPartitions for sink tables');
   }
 }

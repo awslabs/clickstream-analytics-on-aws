@@ -17,7 +17,7 @@ import util from 'util';
 import zlib from 'zlib';
 
 import { EMRServerlessClient, GetJobRunCommand } from '@aws-sdk/client-emr-serverless';
-import { CopyObjectCommand, GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { CopyObjectCommand, DeleteObjectsCommand, GetObjectCommand, ListObjectsV2Command, S3Client } from '@aws-sdk/client-s3';
 import { SQSClient, SendMessageCommand } from '@aws-sdk/client-sqs';
 
 import { EventBridgeEvent } from 'aws-lambda';
@@ -40,13 +40,13 @@ process.env.PIPELINE_S3_BUCKET_NAME = 'bucket1';
 process.env.PIPELINE_S3_PREFIX = 'prefix1/';
 process.env.DL_QUEUE_URL = 'dl_sqs_url';
 
-const addMetricMock = jest.fn(() => {});
-const publishStoredMetricsMock = jest.fn(() => {});
+const addMetricMock = jest.fn(() => { });
+const publishStoredMetricsMock = jest.fn(() => { });
 
 const MetricsMock = jest.fn(() => {
   return {
     addMetric: addMetricMock,
-    addDimensions: jest.fn(()=>{}),
+    addDimensions: jest.fn(() => { }),
     publishStoredMetrics: publishStoredMetricsMock,
   };
 });
@@ -121,6 +121,7 @@ test('lambda should record SUCCESS job state', async () => {
     'prefix1/job-info/project_id1/job-job_run_id1-SUCCESS.json',
   ];
   const logText = [
+    '23/09/15 06:34:30 INFO ETLRunner: [ETLMetric]loaded input files dataset count:41',
     '23/04/04 02:43:02 INFO ETLRunner: [ETLMetric]source dataset count:1',
     '23/04/04 02:43:07 INFO Transformer: [ETLMetric]transform enter dataset count:123',
     '23/04/04 02:43:11 INFO Cleaner: [ETLMetric]clean enter dataset count:123',
@@ -138,6 +139,13 @@ test('lambda should record SUCCESS job state', async () => {
     '23/04/04 02:44:05 INFO ETLRunner: [ETLMetric]after software.aws.solution.clickstream.Transformer dataset count:123',
     '23/04/04 02:44:20 INFO ETLRunner: [ETLMetric]writeResult dataset count:1000',
     '23/04/04 02:44:32 INFO ETLRunner: [ETLMetric]sink dataset count:3',
+    '23/09/15 06:37:01 INFO RepairTableCommand: Recovered all partitions: added (1), dropped (0).',
+    '23/09/15 06:37:01 INFO TransformerV2: DROP TABLE IF EXISTS test_project_007_13158910.etl_user_device_id_430162815_tmp_w_ PURGE',
+    '23/09/15 06:37:04 INFO TransformerV2: DROP TABLE IF EXISTS test_project_007_13158910.etl_user_device_id_430162815_tmp_ PURGE',
+    '23/09/15 06:36:17 INFO ETLRunner: [ETLMetric]sink event_parameter dataset count:55305',
+    '23/09/15 06:36:17 INFO ETLRunner: [ETLMetric]sink item dataset count:37119',
+    '23/09/15 06:36:17 INFO ETLRunner: [ETLMetric]sink user dataset count:7818',
+
   ].join('\n');
 
   const zipBuff = await gzip(logText);
@@ -151,6 +159,25 @@ test('lambda should record SUCCESS job state', async () => {
     expect(input.Bucket).toEqual('bucket1');
   });
 
+  s3ClientMock.on(ListObjectsV2Command).resolvesOnce({
+    IsTruncated: true,
+    NextContinuationToken: 'next',
+    Contents: [{
+      Key: 'test/key1-1',
+    },
+    {
+      Key: 'test/key1-2',
+    }],
+  } as any).resolves({
+    IsTruncated: false,
+    Contents: [{
+      Key: 'test/key2-1',
+    },
+    {
+      Key: 'test/key2-2',
+    }],
+  });
+
   emrClientMock.on(GetJobRunCommand).resolves({
     jobRun: {
       createdAt: new Date('2023-04-04T06:00:00.000Z'),
@@ -161,6 +188,27 @@ test('lambda should record SUCCESS job state', async () => {
   await handler(event);
 
   expect(s3ClientMock).toHaveReceivedCommandTimes(CopyObjectCommand, 1);
+  expect(s3ClientMock).toHaveReceivedCommandTimes(DeleteObjectsCommand, 3);
+  expect(s3ClientMock).toHaveReceivedNthCommandWith(3, ListObjectsV2Command,
+    {
+      Bucket: 'bucket1',
+      Prefix: 'prefix1/project_id1/job-data/etl_user_device_id_430162815_tmp_w_',
+    });
+
+  expect(s3ClientMock).toHaveReceivedNthCommandWith(5, ListObjectsV2Command,
+    {
+      Bucket: 'bucket1',
+      ContinuationToken: 'next',
+      Prefix: 'prefix1/project_id1/job-data/etl_user_device_id_430162815_tmp_w_',
+    },
+  );
+
+  expect(s3ClientMock).toHaveReceivedNthCommandWith(7, ListObjectsV2Command,
+    {
+      Bucket: 'bucket1',
+      Prefix: 'prefix1/project_id1/job-data/etl_user_device_id_430162815_tmp_',
+    },
+  );
 
   expect(addMetricMock.mock.calls).toEqual(
     [
@@ -169,6 +217,7 @@ test('lambda should record SUCCESS job state', async () => {
       [DataPipelineCustomMetricsName.SINK, 'Count', 3],
       [DataPipelineCustomMetricsName.CORRUPTED, 'Count', 4],
       [DataPipelineCustomMetricsName.RUN_TIME, 'Seconds', 3600],
+      [DataPipelineCustomMetricsName.INPUT_FILE_COUNT, 'Count', 41],
     ],
   );
   expect(publishStoredMetricsMock).toBeCalledTimes(1);

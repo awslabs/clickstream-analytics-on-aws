@@ -29,6 +29,7 @@ import { attachListTagsPolicyForFunction } from '../../common/lambda/tags';
 import { POWERTOOLS_ENVS } from '../../common/powertools';
 import { getShortIdOfStack } from '../../common/stack';
 import { SolutionNodejsFunction } from '../../private/function';
+import { ClickstreamSinkTables } from '../data-pipeline';
 
 interface Props {
   readonly vpc: IVpc;
@@ -49,6 +50,8 @@ interface Props {
   readonly entryPointJar: string;
   readonly scheduleExpression: string;
   readonly outputFormat: 'json'|'parquet';
+  readonly userKeepDays: number;
+  readonly itemKeepDays: number;
 }
 
 const functionSettings = {
@@ -81,13 +84,13 @@ export class LambdaUtil {
   public createPartitionSyncerLambda(
     databaseName: string,
     sourceTableName: string,
-    sinkTableName: string,
+    sinkTables: ClickstreamSinkTables,
   ): Function {
     const lambdaRole = this.roleUtil.createPartitionSyncerRole(
       'partitionSyncerLambdaRole',
       databaseName,
       sourceTableName,
-      sinkTableName,
+      sinkTables,
     );
     this.props.sinkS3Bucket.grantReadWrite(lambdaRole, `${this.props.sinkS3Prefix}*`);
     this.props.sourceS3Bucket.grantReadWrite(lambdaRole, `${this.props.sourceS3Prefix}*`);
@@ -118,7 +121,6 @@ export class LambdaUtil {
           PIPELINE_S3_PREFIX: this.props.pipelineS3Prefix,
           DATABASE_NAME: databaseName,
           SOURCE_TABLE_NAME: sourceTableName,
-          SINK_TABLE_NAME: sinkTableName,
           PROJECT_ID: this.props.projectId,
           APP_IDS: this.props.appIds,
           ...POWERTOOLS_ENVS,
@@ -145,8 +147,8 @@ export class LambdaUtil {
     return sg;
   }
 
-  public createEmrJobSubmitterLambda(glueDB: Database, sourceTable: Table, sinkTable: Table, emrApplicationId: string): Function {
-    const lambdaRole = this.roleUtil.createJobSubmitterLambdaRole(glueDB, sourceTable, sinkTable, emrApplicationId);
+  public createEmrJobSubmitterLambda(glueDB: Database, sourceTable: Table, sinkTables: ClickstreamSinkTables, emrApplicationId: string): Function {
+    const lambdaRole = this.roleUtil.createJobSubmitterLambdaRole(glueDB, sourceTable, sinkTables, emrApplicationId);
 
     this.props.sinkS3Bucket.grantReadWrite(lambdaRole, `${this.props.sinkS3Prefix}*`);
     this.props.sourceS3Bucket.grantRead(lambdaRole, `${this.props.sourceS3Prefix}*`);
@@ -176,7 +178,6 @@ export class LambdaUtil {
         GLUE_CATALOG_ID: glueDB.catalogId,
         GLUE_DB: glueDB.databaseName,
         SOURCE_TABLE_NAME: sourceTable.tableName,
-        SINK_TABLE_NAME: sinkTable.tableName,
         SOURCE_S3_BUCKET_NAME: this.props.sourceS3Bucket.bucketName,
         SOURCE_S3_PREFIX: this.props.sourceS3Prefix,
         SINK_S3_BUCKET_NAME: this.props.sinkS3Bucket.bucketName,
@@ -191,6 +192,8 @@ export class LambdaUtil {
         S3_PATH_PLUGIN_FILES: this.props.s3PathPluginFiles,
         S3_PATH_ENTRY_POINT_JAR: this.props.entryPointJar,
         OUTPUT_FORMAT: this.props.outputFormat,
+        USER_KEEP_DAYS: this.props.userKeepDays + '',
+        ITEM_KEEP_DAYS: this.props.itemKeepDays + '',
         ...POWERTOOLS_ENVS,
       },
       ...functionSettings,

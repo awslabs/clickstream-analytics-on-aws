@@ -141,7 +141,6 @@ export interface InitPartitionCustomResourceProps {
   appIds: string;
   databaseName: string;
   sourceTableName: string;
-  sinkTableName: string;
 }
 
 // Custom resource to create partitions during cloudformation deployment,

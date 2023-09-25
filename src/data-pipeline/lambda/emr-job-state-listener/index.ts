@@ -18,7 +18,7 @@ import { SQSClient, SendMessageCommand } from '@aws-sdk/client-sqs';
 import { EventBridgeEvent } from 'aws-lambda';
 import { DataPipelineCustomMetricsName, MetricsNamespace, MetricsService } from '../../../common/model';
 import { logger } from '../../../common/powertools';
-import { copyS3Object, processS3GzipObjectLineByLine, readS3ObjectAsJson } from '../../../common/s3';
+import { copyS3Object, deleteObjectsByPrefix, processS3GzipObjectLineByLine, readS3ObjectAsJson } from '../../../common/s3';
 import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
 import { getJobInfoKey } from '../../utils/utils-common';
 
@@ -63,12 +63,23 @@ export const handler = async (event: EventBridgeEvent<string, { jobRunId: string
   };
 
   // Only record SUCCESS/FAILED jobs
-  const recoredStates = [
+  const recordStates = [
     'SUCCESS',
     'FAILED',
   ];
-  if (recoredStates.includes(jobState)) {
-    await copyS3Object(buildS3Uri(jobStartStateFile), buildS3Uri(jobFinishStateFile));
+  if (recordStates.includes(jobState)) {
+    try {
+      await copyS3Object(buildS3Uri(jobStartStateFile), buildS3Uri(jobFinishStateFile));
+    } catch (e) {
+      logger.error('error', { error: e });
+      // ignore this error as for manually clone the job from EMR and re-run, the file does not exist.
+      if ((e as any).message.includes('key does not exist')) {
+        logger.warn('ignore copyS3Object error');
+      } else {
+        throw e;
+      }
+
+    }
   }
 
   if (jobState == 'SUCCESS') {
@@ -110,17 +121,32 @@ async function sendMetrics(event: any) {
     event.detail.jobRunId,
     'SPARK_DRIVER', 'stderr.gz');
 
-  let metrics: { source: number; flattedSource: number; sink: number; corrupted: number; jobTimeSeconds: number }
-    = { source: 0, flattedSource: 0, sink: 0, corrupted: 0, jobTimeSeconds };
+  let metrics: {
+    source: number;
+    flattedSource: number; sink: number;
+    corrupted: number; jobTimeSeconds: number;
+    inputFileCount: number;
+  } = { source: 0, flattedSource: 0, sink: 0, corrupted: 0, jobTimeSeconds: 0, inputFileCount: 0 };
 
+  const dropTableRegEx = new RegExp(/DROP TABLE IF EXISTS (.*) PURGE/);
   const metricRegEx = new RegExp(/\[ETLMetric\]/);
   const sourceRegEx = new RegExp(/\[ETLMetric\]source dataset count:\s*(\d+)/);
   const flattedSourceRegEx = new RegExp(/\[ETLMetric\]flatted source dataset count:\s*(\d+)/);
   const sinkRegEx = new RegExp(/\[ETLMetric\]sink dataset count:\s*(\d+)/);
   const corruptedRegEx = new RegExp(/\[ETLMetric\]corrupted dataset count:\s*(\d+)/);
+  const inputFileCountRegEx = new RegExp(/\[ETLMetric\]loaded input files dataset count:\s*(\d+)/);
+
+  const droppedTables: string[] = [];
   let n = 0;
   const lineProcess = (line: string) => {
     n++;
+
+    const dropTableMatch = line.match(dropTableRegEx);
+    if (dropTableMatch) {
+      droppedTables.push(dropTableMatch[1]);
+      return;
+    }
+
     if (!line.match(metricRegEx)) {
       return;
     }
@@ -129,6 +155,8 @@ async function sendMetrics(event: any) {
     const flattedSourceMatch = line.match(flattedSourceRegEx);
     const sinkMatch = line.match(sinkRegEx);
     const corruptedMatch = line.match(corruptedRegEx);
+    const inputFileCountMatch = line.match(inputFileCountRegEx);
+
     if (sourceMatch) {
       metrics = {
         ...metrics,
@@ -149,6 +177,11 @@ async function sendMetrics(event: any) {
         ...metrics,
         corrupted: parseInt(corruptedMatch[1]),
       };
+    } else if (inputFileCountMatch) {
+      metrics = {
+        ...metrics,
+        inputFileCount: parseInt(inputFileCountMatch[1]),
+      };
     }
   };
 
@@ -157,12 +190,25 @@ async function sendMetrics(event: any) {
   logger.info('log file length: ' + n);
   logger.info('metrics', { metrics });
 
-
   jobMetrics.addMetric(DataPipelineCustomMetricsName.SOURCE, MetricUnits.Count, metrics.source);
   jobMetrics.addMetric(DataPipelineCustomMetricsName.FLATTED_SOURCE, MetricUnits.Count, metrics.flattedSource);
   jobMetrics.addMetric(DataPipelineCustomMetricsName.SINK, MetricUnits.Count, metrics.sink);
   jobMetrics.addMetric(DataPipelineCustomMetricsName.CORRUPTED, MetricUnits.Count, metrics.corrupted);
   jobMetrics.addMetric(DataPipelineCustomMetricsName.RUN_TIME, MetricUnits.Seconds, jobTimeSeconds);
+  jobMetrics.addMetric(DataPipelineCustomMetricsName.INPUT_FILE_COUNT, MetricUnits.Count, metrics.inputFileCount);
+
   jobMetrics.publishStoredMetrics();
 
+  logger.info('droppedTables', { droppedTables });
+
+  for (const fullTableName of droppedTables) {
+    const tableName = fullTableName.split('.')[1];
+    const s3PathPrefix = path.join(
+      pipelineS3Prefix,
+      projectId,
+      'job-data',
+      tableName);
+    logger.info(`del s3://${pipelineS3BucketName}/${s3PathPrefix}`);
+    await deleteObjectsByPrefix(pipelineS3BucketName, s3PathPrefix);
+  };
 }

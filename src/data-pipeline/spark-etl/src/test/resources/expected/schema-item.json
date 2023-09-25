@@ -1,0 +1,69 @@
+{
+  "type" : "struct",
+  "fields" : [ {
+    "name" : "app_id",
+    "type" : "string",
+    "nullable" : true,
+    "metadata" : { }
+  }, {
+    "name" : "event_date",
+    "type" : "date",
+    "nullable" : true,
+    "metadata" : { }
+  }, {
+    "name" : "event_timestamp",
+    "type" : "long",
+    "nullable" : true,
+    "metadata" : { }
+  }, {
+    "name" : "id",
+    "type" : "string",
+    "nullable" : true,
+    "metadata" : { }
+  }, {
+    "name" : "properties",
+    "type" : {
+      "type" : "array",
+      "elementType" : {
+        "type" : "struct",
+        "fields" : [ {
+          "name" : "key",
+          "type" : "string",
+          "nullable" : true,
+          "metadata" : { }
+        }, {
+          "name" : "value",
+          "type" : {
+            "type" : "struct",
+            "fields" : [ {
+              "name" : "double_value",
+              "type" : "double",
+              "nullable" : true,
+              "metadata" : { }
+            }, {
+              "name" : "float_value",
+              "type" : "float",
+              "nullable" : true,
+              "metadata" : { }
+            }, {
+              "name" : "int_value",
+              "type" : "long",
+              "nullable" : true,
+              "metadata" : { }
+            }, {
+              "name" : "string_value",
+              "type" : "string",
+              "nullable" : true,
+              "metadata" : { }
+            } ]
+          },
+          "nullable" : true,
+          "metadata" : { }
+        } ]
+      },
+      "containsNull" : true
+    },
+    "nullable" : true,
+    "metadata" : { }
+  } ]
+}

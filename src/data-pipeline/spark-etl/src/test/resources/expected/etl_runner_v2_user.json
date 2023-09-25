@@ -1,0 +1,85 @@
+{
+  "_channel" : "C001",
+  "_first_referer" : "http://myhost.com/_page_referer_001",
+  "_first_traffic_medium" : "TSM",
+  "_first_traffic_source" : "TSS",
+  "_first_traffic_source_type" : "TSN",
+  "_first_visit_date" : "2022-11-08",
+  "device_id_list" : [ "deviceid-1", "deviceid-3", "deviceid-4" ],
+  "event_timestamp" : 1682319109447,
+  "user_first_touch_timestamp" : 1667877267895,
+  "user_id" : "p3121211",
+  "user_ltv" : {
+    "currency" : "USD",
+    "revenue" : 123.45
+  },
+  "user_properties" : [ {
+    "key" : "_user_id",
+    "value" : {
+      "int_value" : null,
+      "set_timestamp_micros" : 1667877566697000,
+      "string_value" : "p3121211"
+    }
+  }, {
+    "key" : "_user_name",
+    "value" : {
+      "int_value" : null,
+      "set_timestamp_micros" : 1667877566697000,
+      "string_value" : "testName-3"
+    }
+  }, {
+    "key" : "_user_age",
+    "value" : {
+      "int_value" : 20,
+      "set_timestamp_micros" : 1667877566697000,
+      "string_value" : null
+    }
+  }, {
+    "key" : "_user_first_touch_timestamp",
+    "value" : {
+      "int_value" : 1667877267895,
+      "set_timestamp_micros" : 1667877566697000,
+      "string_value" : null
+    }
+  }, {
+    "key" : "_first_referer",
+    "value" : {
+      "int_value" : null,
+      "set_timestamp_micros" : 1667877566697000,
+      "string_value" : "_first_referer 001"
+    }
+  }, {
+    "key" : "_first_traffic_source_type",
+    "value" : {
+      "int_value" : null,
+      "set_timestamp_micros" : 1667877566697000,
+      "string_value" : "_first_traffic_source_type 001"
+    }
+  }, {
+    "key" : "_first_traffic_medium",
+    "value" : {
+      "int_value" : null,
+      "set_timestamp_micros" : 1667877566697000,
+      "string_value" : "_first_traffic_medium 001"
+    }
+  }, {
+    "key" : "_first_traffic_source",
+    "value" : {
+      "int_value" : null,
+      "set_timestamp_micros" : 1667877566697000,
+      "string_value" : "_first_traffic_source 001"
+    }
+  }, {
+    "key" : "device_xx",
+    "value" : {
+      "int_value" : null,
+      "set_timestamp_micros" : 1667877566697000,
+      "string_value" : "device_xx_vv"
+    }
+  } ],
+  "user_pseudo_id" : "83e45133-ddaf-4ac6-9844-fe457807715198",
+  "partition_app" : "uba-app",
+  "partition_year" : 2023,
+  "partition_month" : 4,
+  "partition_day" : 24
+}

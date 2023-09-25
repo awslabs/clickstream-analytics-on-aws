@@ -15,7 +15,6 @@
 package software.aws.solution.clickstream;
 
 
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.spark.sql.Column;
 import org.apache.spark.sql.SaveMode;
@@ -32,6 +31,7 @@ import software.aws.solution.clickstream.exception.ExecuteTransformerException;
 import javax.validation.constraints.NotEmpty;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -46,8 +46,9 @@ import java.util.Comparator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.apache.spark.sql.functions.lit;
 import static org.apache.spark.sql.functions.col;
+import static org.apache.spark.sql.functions.input_file_name;
+import static org.apache.spark.sql.functions.lit;
 import static org.apache.spark.sql.functions.date_format;
 
 import static software.aws.solution.clickstream.ContextUtil.JOB_NAME_PROP;
@@ -56,15 +57,34 @@ import static software.aws.solution.clickstream.ContextUtil.OUTPUT_COALESCE_PART
 import static software.aws.solution.clickstream.Transformer.JOB_NAME_COL;
 
 @Slf4j
-@AllArgsConstructor
 public class ETLRunner {
+    public static final String PARTITION_APP = "partition_app";
+    public static final String PARTITION_YEAR = "partition_year";
+    public static final String PARTITION_MONTH = "partition_month";
+    public static final String PARTITION_DAY = "partition_day";
+
+    public enum TableName {
+        ODS_EVENTS("ods_events"),
+        ITEM("item"),
+        USER("user"),
+        EVENT("event"),
+        EVEN_PARAMETER("event_parameter");
+        final String tableName;
+        TableName(final String name) {
+            this.tableName = name;
+        }
+    }
     public static final String DEBUG_LOCAL_PATH = "/tmp/etl-debug";
-    private static final String TRANSFORM_METHOD_NAME = "transform";
+    public static final String TRANSFORM_METHOD_NAME = "transform";
     public static final String EVENT_DATE = "event_date";
     private final SparkSession spark;
     private final ETLRunnerConfig config;
 
-
+    private boolean multipleOutDataset = false;
+    public ETLRunner(final SparkSession spark, final ETLRunnerConfig config) {
+        this.spark = spark;
+        this.config = config;
+    }
 
     public void run() {
         ContextUtil.setContextProperties(this.config);
@@ -73,22 +93,36 @@ public class ETLRunner {
         log.info(WAREHOUSE_DIR_PROP + ":"  + System.getProperty(WAREHOUSE_DIR_PROP));
 
         Dataset<Row> dataset = readInputDataset(true);
+        ContextUtil.cacheDataset(dataset);
+        log.info(new ETLMetric(dataset, "source").toString());
+
+        Dataset<Row> dataset2 = executeTransformers(dataset, config.getTransformerClassNames());
+
+        long resultCount = writeResultDataset(dataset2);
+        log.info(new ETLMetric(resultCount, "sink").toString());
+    }
+
+    private Dataset<Row> rePartitionInputDataset(final Dataset<Row> dataset) {
         int inputDataPartitions = dataset.rdd().getNumPartitions();
+        Dataset<Row> repDataset = dataset;
         if (config.getRePartitions() > 0
                 && (inputDataPartitions > 200 || config.getRePartitions() < inputDataPartitions)
         ) {
             log.info("inputDataPartitions:" + inputDataPartitions + ", repartition to: " + config.getRePartitions());
-            dataset = dataset.repartition(config.getRePartitions(),
+            repDataset = repDataset.repartition(config.getRePartitions(),
                     col("ingest_time"), col("rid"));
         }
-        log.info("NumPartitions: " + dataset.rdd().getNumPartitions());
-        ContextUtil.cacheDataset(dataset);
+        log.info("NumPartitions: " + repDataset.rdd().getNumPartitions());
+        return repDataset;
+    }
 
-        log.info(new ETLMetric(dataset, "source").toString());
-        Dataset<Row> dataset2 = executeTransformers(dataset, config.getTransformerClassNames());
-        long resultCount = writeResult(config.getOutputPath(), dataset2);
-        log.info(new ETLMetric(resultCount, "sink").toString());
-
+    public long writeResultDataset(final Dataset<Row> dataset2) {
+        String outPath = config.getOutputPath();
+        TableName tableName = TableName.ODS_EVENTS;
+        if (this.multipleOutDataset) {
+            tableName = TableName.EVENT;
+        }
+        return writeResult(outPath, dataset2, tableName);
     }
 
     public Dataset<Row> readInputDataset(final boolean checkModifiedTime) {
@@ -170,7 +204,7 @@ public class ETLRunner {
 
             readFileDataset = readFileDataset.select(col("path"), col("modificationTime"), col("length"));
             log.info(new ETLMetric(readFileDataset, "loaded files").toString());
-            readFileDataset = readFileDataset.withColumn("jobName", lit(jobName));
+            readFileDataset = readFileDataset.withColumn(JOB_NAME_COL, lit(jobName));
             readFileDataset.cache();
             readFileDataset.takeAsList(Integer.MAX_VALUE).stream()
                     .sorted(Comparator.comparing(r -> r.getAs("modificationTime"))).forEach(r -> {
@@ -180,7 +214,15 @@ public class ETLRunner {
             readFileDataset.coalesce(1).write().mode(SaveMode.Append).partitionBy(JOB_NAME_COL)
                     .option("path", path).saveAsTable(config.getDatabase() + ".etl_load_files");
         }
-        return dataset;
+
+        List<Row> inputFiles = dataset.select(input_file_name().alias("fileName")).distinct().collectAsList();
+        inputFiles.forEach(row -> {
+            log.info(row.getAs("fileName"));
+        });
+        long fileNameCount = inputFiles.size();
+        log.info(new ETLMetric(fileNameCount, "loaded input files").toString());
+
+        return rePartitionInputDataset(dataset);
     }
 
     @VisibleForTesting
@@ -191,13 +233,14 @@ public class ETLRunner {
             log.info("executeTransformer: " + transformerClassName);
             result = executeTransformer(result, transformerClassName);
         }
-        return selectDistFields(result, transformerClassNames.get(0));
+        return execPostTransform(result, transformerClassNames.get(0));
     }
 
-    public static Dataset<Row> selectDistFields(final Dataset<Row> dataset, final String transformerClassName) {
+    public static Dataset<Row> execPostTransform(final Dataset<Row> dataset, final String transformerClassName) {
         List<String> colList = Arrays.asList(dataset.columns());
         log.info("Columns:" + String.join(",", dataset.columns()));
-        if (colList.contains("event_params") && colList.contains("event_bundle_sequence_id")) {
+        if (colList.contains("event_params") && colList.contains("event_bundle_sequence_id")
+                && colList.contains("items") && colList.contains("user_properties")) {
             return dataset.select(getDistFields());
         } else {
             return postTransform(dataset, transformerClassName);
@@ -207,21 +250,27 @@ public class ETLRunner {
     private static Dataset<Row> postTransform(final Dataset<Row> dataset, final String transformerClassName) {
         try {
             Class<?> transformClass = Class.forName(transformerClassName);
-            String mName = "postTransform";
-            try {
-                Method postTransform = transformClass.getDeclaredMethod(mName, Dataset.class);
-                log.info("find method: " + postTransform.getName());
-                Object instance = transformClass.getDeclaredConstructor().newInstance();
-                Dataset<Row> transformedDataset = (Dataset<Row>) postTransform.invoke(instance, dataset);
-                return transformedDataset;
-            } catch (NoSuchMethodException ignored) {
-                log.info("did not find method: " + mName);
-            }
-            return dataset;
+            return tryToExecPostTransform(dataset, transformClass);
         } catch (Exception e) {
             log.error(e.getMessage());
             throw new ExecuteTransformerException(e);
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Dataset<Row> tryToExecPostTransform(final Dataset<Row> dataset,
+                                                       final Class<?> transformClass) throws InstantiationException, IllegalAccessException, InvocationTargetException {
+        String mName = "postTransform";
+        Dataset<Row> resultDataset = dataset;
+        try {
+            Method postTransform = transformClass.getDeclaredMethod(mName, Dataset.class);
+            log.info("find method: " + postTransform.getName());
+            Object instance = transformClass.getDeclaredConstructor().newInstance();
+            resultDataset = (Dataset<Row>) postTransform.invoke(instance, dataset);
+        } catch (NoSuchMethodException ignored) {
+            log.info("did not find method: " + mName);
+        }
+        return resultDataset;
     }
 
     @SuppressWarnings("unchecked")
@@ -230,12 +279,22 @@ public class ETLRunner {
             Class<?> aClass = Class.forName(transformerClassName);
             Object instance = aClass.getDeclaredConstructor().newInstance();
             Method transform = aClass.getMethod(TRANSFORM_METHOD_NAME, Dataset.class);
-            Dataset<Row> transformedDataset = (Dataset<Row>) transform.invoke(instance, dataset);
-            if (ContextUtil.isDebugLocal()) {
-                transformedDataset.write().mode(SaveMode.Overwrite)
-                        .json(DEBUG_LOCAL_PATH + "/" + transformerClassName + "/");
+            Dataset<Row> eventDataset;
+
+            if (List.class.getCanonicalName().equals(transform.getReturnType().getCanonicalName())) {
+                // V2 transform
+                List<Dataset<Row>> transformedDatasets = (List<Dataset<Row>>) transform.invoke(instance, dataset);
+                eventDataset = transformedDatasets.get(0);
+                saveTransformedDatasets(transformedDatasets);
+            } else {
+                eventDataset = (Dataset<Row>) transform.invoke(instance, dataset);
             }
-            return transformedDataset;
+
+            if (ContextUtil.isDebugLocal()) {
+                eventDataset.write().mode(SaveMode.Overwrite)
+                        .json(DEBUG_LOCAL_PATH + "/" + transformerClassName + "-eventDataset/");
+            }
+            return eventDataset;
         } catch (ClassNotFoundException | InvocationTargetException | InstantiationException
                  | IllegalAccessException | NoSuchMethodException e) {
             log.error(e.getMessage());
@@ -243,34 +302,89 @@ public class ETLRunner {
         }
     }
 
-    protected long writeResult(final String outputPath, final Dataset<Row> dataset) {
-        Dataset<Row> partitionedDataset = prepareForPartition(dataset);
+    private void saveTransformedDatasets(final List<Dataset<Row>> transformedDatasets) {
+        if (transformedDatasets.size() != 4) {
+            return;
+        }
+
+        this.multipleOutDataset = true;
+        Dataset<Row> evenParamDataset = transformedDatasets.get(1);
+        Dataset<Row> itemDataset = transformedDatasets.get(2);
+        Dataset<Row> userDataset = transformedDatasets.get(3);
+        String outPath = config.getOutputPath();
+        long evenParamDatasetCount = writeResult(outPath, evenParamDataset, TableName.EVEN_PARAMETER);
+        log.info(new ETLMetric(evenParamDatasetCount, "sink " + TableName.EVEN_PARAMETER.tableName).toString());
+
+        if (itemDataset != null) {
+            long itemDatasetCount = writeResult(outPath, itemDataset, TableName.ITEM);
+            log.info(new ETLMetric(itemDatasetCount, "sink " + TableName.ITEM.tableName).toString());
+        }
+        if (userDataset != null) {
+            long userDatasetCount = writeResult(outPath, userDataset, TableName.USER);
+            log.info(new ETLMetric(userDatasetCount, "sink " + TableName.USER.tableName).toString());
+        }
+    }
+
+    protected long writeResult(final String outputPath, final Dataset<Row> dataset, final TableName tbName) {
+        Dataset<Row> partitionedDataset = prepareForPartition(dataset, tbName);
         long resultCount = partitionedDataset.count();
-        log.info(new ETLMetric(resultCount, "writeResult").toString());
+        log.info(new ETLMetric(resultCount, "writeResult for table " + tbName).toString());
         log.info("outputPath: " + outputPath);
-        String[] partitionBy = new String[]{"partition_app", "partition_year", "partition_month", "partition_day"};
+        if (resultCount == 0) {
+            return 0L;
+        }
+        String saveOutputPath = outputPath;
+        if (!(saveOutputPath.endsWith(tbName.tableName + "/")
+                || saveOutputPath.endsWith(tbName.tableName))) {
+            saveOutputPath = Paths.get(outputPath, tbName.tableName).toString()
+                    .replace("s3:/", "s3://");
+        }
+        log.info("saveOutputPath: " + saveOutputPath);
+
+        SaveMode saveMode = SaveMode.Append;
+        if (tbName == TableName.ITEM || tbName == TableName.USER) {
+            saveMode = SaveMode.Overwrite;
+        }
+        log.info("saveMode: " + saveMode);
+
+        String[] partitionBy = new String[]{PARTITION_APP, PARTITION_YEAR, PARTITION_MONTH, PARTITION_DAY};
         if ("json".equalsIgnoreCase(config.getOutPutFormat())) {
-            partitionedDataset.write().partitionBy(partitionBy).mode(SaveMode.Append).json(outputPath);
+            partitionedDataset.write().partitionBy(partitionBy).mode(saveMode).json(saveOutputPath);
         } else {
-            int outPartitions = Integer.parseInt(System.getProperty(OUTPUT_COALESCE_PARTITIONS_PROP, "-1"));
-            int numPartitions = partitionedDataset.rdd().getNumPartitions();
-            log.info("outPartitions:" + outPartitions);
-            log.info("partitionedDataset.NumPartitions: " + numPartitions);
-            if (outPartitions > 0 && numPartitions > outPartitions) {
-                partitionedDataset = partitionedDataset.coalesce(outPartitions);
+            if (saveMode == SaveMode.Overwrite) {
+                partitionedDataset = partitionedDataset.coalesce(1);
+            } else {
+                int outPartitions = Integer.parseInt(System.getProperty(OUTPUT_COALESCE_PARTITIONS_PROP, "-1"));
+                int numPartitions = partitionedDataset.rdd().getNumPartitions();
+                log.info("outPartitions:" + outPartitions);
+                log.info("partitionedDataset.NumPartitions: " + numPartitions);
+                if (outPartitions > 0 && numPartitions > outPartitions) {
+                    partitionedDataset = partitionedDataset.coalesce(outPartitions);
+                }
             }
             partitionedDataset.write()
                     .option("compression", "snappy")
-                    .partitionBy(partitionBy).mode(SaveMode.Append).parquet(outputPath);
+                    .partitionBy(partitionBy).mode(saveMode).parquet(saveOutputPath);
         }
         return resultCount;
     }
 
-    private Dataset<Row> prepareForPartition(final Dataset<Row> dataset) {
-        return dataset.withColumn("partition_app", col("app_info").getItem("app_id"))
-                .withColumn("partition_year", date_format(col(EVENT_DATE), "yyyy"))
-                .withColumn("partition_month", date_format(col(EVENT_DATE), "MM"))
-                .withColumn("partition_day", date_format(col(EVENT_DATE), "dd"));
+    private Dataset<Row> prepareForPartition(final Dataset<Row> dataset, final TableName tbName) {
+        List<String> colNames = Arrays.asList(dataset.columns());
+        String appId = "app_id";
+        Column appIdCol = col("app_info").getItem(appId);
+        if (colNames.contains(appId)) {
+            appIdCol = col(appId);
+        }
+        Dataset<Row> dataset1 = dataset.withColumn(PARTITION_APP, appIdCol)
+                .withColumn(PARTITION_YEAR, date_format(col(EVENT_DATE), "yyyy"))
+                .withColumn(PARTITION_MONTH, date_format(col(EVENT_DATE), "MM"))
+                .withColumn(PARTITION_DAY, date_format(col(EVENT_DATE), "dd"));
+        if (Arrays.asList(TableName.USER, TableName.EVEN_PARAMETER, TableName.ITEM).contains(tbName)) {
+            return dataset1.drop(EVENT_DATE, appId);
+        }
+        return dataset1;
+
     }
 
     private List<String[]> getSourcePartition(final long milliSecStart, final long milliSecEnd) {

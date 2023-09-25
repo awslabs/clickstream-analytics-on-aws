@@ -42,7 +42,8 @@ public class ContextUtilTest {
                 new ETLRunnerConfig.TransformationConfig(
                         newArrayList(transformerClassNames.split(",")),
                         projectId, validAppIds,
-                        Long.valueOf(dataFreshnessInHour)
+                        Long.valueOf(dataFreshnessInHour),
+                        360 * 30, 360 * 30
                 ),
                 new ETLRunnerConfig.InputOutputConfig(
                         "true",

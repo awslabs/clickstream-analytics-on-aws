@@ -61,7 +61,6 @@ process.env.ROLE_ARN = 'arn:aws::role:role1';
 process.env.GLUE_CATALOG_ID = 'cid_001';
 process.env.GLUE_DB = 'test_db';
 process.env.SOURCE_TABLE_NAME = 'source_table';
-process.env.SINK_TABLE_NAME = 'sink_table';
 process.env.SOURCE_S3_BUCKET_NAME = 'test-bucket-src';
 process.env.SOURCE_S3_PREFIX = 'src-prefix/';
 process.env.SINK_S3_BUCKET_NAME = 'test-bucket-sink';
@@ -79,6 +78,8 @@ process.env.OUTPUT_PARTITIONS = '128';
 process.env.RE_PARTITIONS = '96';
 process.env.JOB_NAME = 'test-job-name-123456';
 process.env.SAVE_INFO_TO_WAREHOUSE = '1';
+process.env.USER_KEEP_DAYS = '10';
+process.env.ITEM_KEEP_DAYS = '12';
 
 describe('Data Process -- EMR Serverless job submitter function', () => {
 
@@ -125,13 +126,15 @@ describe('Data Process -- EMR Serverless job submitter function', () => {
             's3://test-bucket-src/src-prefix/',
             's3://test-pipe-line-bucket/pipeline-prefix/test_proj_001/job-data/test-job-name-123456', // pipeline data path
             'com.test.ClassMain,com.test.ClassMainTest',
-            's3://test-bucket-sink/sink-prefix/test_proj_001/sink_table/', // output path
+            's3://test-bucket-sink/sink-prefix/test_proj_001/', // output path
             'test_proj_001',
             'app1,app2',
             '24',
             'json',
             '128',
             '96',
+            '10',
+            '12',
           ],
           sparkSubmitParameters: '--class software.aws.solution.clickstream.DataProcessor \
 --jars s3://test/main.jar,s3://test/test1.jar,s3://test/test2.jar \
@@ -190,13 +193,15 @@ describe('Data Process -- EMR Serverless job submitter function', () => {
             's3://test-bucket-src/src-prefix/',
             's3://test-pipe-line-bucket/pipeline-prefix/test_proj_001/job-data/test-sparkConfig-job', // pipeline data path
             'com.test.ClassMain,com.test.ClassMainTest',
-            's3://test-bucket-sink/sink-prefix/test_proj_001/sink_table/', // output path
+            's3://test-bucket-sink/sink-prefix/test_proj_001/', // output path
             'test_proj_001',
             'app1,app2',
             '24',
             'json',
             '120',
             '90',
+            '10',
+            '12',
           ],
           sparkSubmitParameters: '--class software.aws.solution.clickstream.DataProcessor \
 --jars s3://test/main.jar,s3://test/test1.jar,s3://test/test2.jar \

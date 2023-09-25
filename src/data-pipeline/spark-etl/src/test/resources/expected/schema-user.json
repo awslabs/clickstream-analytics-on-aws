@@ -1,0 +1,141 @@
+{
+  "type" : "struct",
+  "fields" : [ {
+    "name" : "app_id",
+    "type" : "string",
+    "nullable" : true,
+    "metadata" : { }
+  }, {
+    "name" : "event_date",
+    "type" : "date",
+    "nullable" : true,
+    "metadata" : { }
+  }, {
+    "name" : "event_timestamp",
+    "type" : "long",
+    "nullable" : true,
+    "metadata" : { }
+  }, {
+    "name" : "user_id",
+    "type" : "string",
+    "nullable" : true,
+    "metadata" : { }
+  }, {
+    "name" : "user_pseudo_id",
+    "type" : "string",
+    "nullable" : true,
+    "metadata" : { }
+  }, {
+    "name" : "user_first_touch_timestamp",
+    "type" : "long",
+    "nullable" : true,
+    "metadata" : { }
+  }, {
+    "name" : "user_properties",
+    "type" : {
+      "type" : "array",
+      "elementType" : {
+        "type" : "struct",
+        "fields" : [ {
+          "name" : "key",
+          "type" : "string",
+          "nullable" : true,
+          "metadata" : { }
+        }, {
+          "name" : "value",
+          "type" : {
+            "type" : "struct",
+            "fields" : [ {
+              "name" : "double_value",
+              "type" : "double",
+              "nullable" : true,
+              "metadata" : { }
+            }, {
+              "name" : "float_value",
+              "type" : "float",
+              "nullable" : true,
+              "metadata" : { }
+            }, {
+              "name" : "int_value",
+              "type" : "long",
+              "nullable" : true,
+              "metadata" : { }
+            }, {
+              "name" : "string_value",
+              "type" : "string",
+              "nullable" : true,
+              "metadata" : { }
+            }, {
+              "name" : "set_timestamp_micros",
+              "type" : "long",
+              "nullable" : true,
+              "metadata" : { }
+            } ]
+          },
+          "nullable" : true,
+          "metadata" : { }
+        } ]
+      },
+      "containsNull" : true
+    },
+    "nullable" : true,
+    "metadata" : { }
+  }, {
+    "name" : "user_ltv",
+    "type" : {
+      "type" : "struct",
+      "fields" : [ {
+        "name" : "revenue",
+        "type" : "double",
+        "nullable" : true,
+        "metadata" : { }
+      }, {
+        "name" : "currency",
+        "type" : "string",
+        "nullable" : true,
+        "metadata" : { }
+      } ]
+    },
+    "nullable" : true,
+    "metadata" : { }
+  }, {
+    "name" : "_first_visit_date",
+    "type" : "date",
+    "nullable" : true,
+    "metadata" : { }
+  }, {
+    "name" : "_first_referer",
+    "type" : "string",
+    "nullable" : true,
+    "metadata" : { }
+  }, {
+    "name" : "_first_traffic_source_type",
+    "type" : "string",
+    "nullable" : true,
+    "metadata" : { }
+  }, {
+    "name" : "_first_traffic_medium",
+    "type" : "string",
+    "nullable" : true,
+    "metadata" : { }
+  }, {
+    "name" : "_first_traffic_source",
+    "type" : "string",
+    "nullable" : true,
+    "metadata" : { }
+  }, {
+    "name" : "device_id_list",
+    "type" : {
+      "type" : "array",
+      "elementType" : "string",
+      "containsNull" : true
+    },
+    "nullable" : true,
+    "metadata" : { }
+  }, {
+    "name" : "_channel",
+    "type" : "string",
+    "nullable" : true,
+    "metadata" : { }
+  } ]
+}

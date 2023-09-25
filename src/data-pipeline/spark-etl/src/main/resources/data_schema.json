@@ -260,6 +260,18 @@
       "metadata": {}
     },
     {
+      "name": "viewport_width",
+      "type": "long",
+      "nullable": true,
+      "metadata": {}
+    },
+    {
+      "name": "viewport_height",
+      "type": "long",
+      "nullable": true,
+      "metadata": {}
+    },
+    {
       "name": "ecommerce",
       "type": {
         "type": "struct",
@@ -411,6 +423,12 @@
             {
               "name": "price",
               "type": "double",
+              "nullable": true,
+              "metadata": {}
+            },
+            {
+              "name": "currency",
+              "type": "string",
               "nullable": true,
               "metadata": {}
             },

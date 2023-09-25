@@ -58,6 +58,23 @@ export function createStackParameters(scope: Construct) {
     type: 'Number',
   });
 
+
+  const userKeepDaysParam = new CfnParameter(scope, 'UserKeepMaxDays', {
+    description: 'Max of user data keep days',
+    default: 180,
+    type: 'Number',
+    minValue: 1,
+  });
+
+
+  const itemKeepDaysParam = new CfnParameter(scope, 'ItemKeepMaxDays', {
+    description: 'Max of item data keep days',
+    default: 360,
+    type: 'Number',
+    minValue: 1,
+  });
+
+
   const dataBufferedSecondsParam = new CfnParameter(scope, 'DataBufferedSeconds', {
     description: 'S3 object stable wait time',
     default: 30,
@@ -156,6 +173,8 @@ export function createStackParameters(scope: Construct) {
           Label: { default: 'Job Schedule' },
           Parameters: [
             dataFreshnessInHourParam.logicalId,
+            userKeepDaysParam.logicalId,
+            itemKeepDaysParam.logicalId,
             scheduleExpressionParam.logicalId,
             dataBufferedSecondsParam.logicalId,
           ],
@@ -218,6 +237,14 @@ export function createStackParameters(scope: Construct) {
           default: 'Data freshness',
         },
 
+        [userKeepDaysParam.logicalId]: {
+          default: 'Max days of users',
+        },
+
+        [itemKeepDaysParam.logicalId]: {
+          default: 'Max days of items',
+        },
+
         [dataBufferedSecondsParam.logicalId]: {
           default: 'Max time for data in buffer',
         },
@@ -275,6 +302,8 @@ export function createStackParameters(scope: Construct) {
       outputFormatParam,
       emrVersionParam,
       emrApplicationIdleTimeoutMinutesParam,
+      userKeepDaysParam,
+      itemKeepDaysParam,
     },
   };
 }

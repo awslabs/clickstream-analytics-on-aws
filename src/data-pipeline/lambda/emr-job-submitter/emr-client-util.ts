@@ -22,7 +22,7 @@ import { getFunctionTags } from '../../../common/lambda/tags';
 import { logger } from '../../../common/powertools';
 import { putStringToS3, readS3ObjectAsJson } from '../../../common/s3';
 import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
-import { getJobInfoKey, getSinkTableLocationPrefix } from '../../utils/utils-common';
+import { getJobInfoKey, getSinkLocationPrefix } from '../../utils/utils-common';
 
 const emrClient = new EMRServerlessClient({
   ...aws_sdk_client_common_config,
@@ -146,9 +146,12 @@ export class EMRServerlessUtil {
 
     const jobName = event.jobName || process.env.JOB_NAME || `${startTimestamp}-${uuid()}`;
 
-    const sinkPrefix = getSinkTableLocationPrefix(config.sinkS3Prefix, config.projectId, config.sinkTableName);
+    const sinkPrefix = getSinkLocationPrefix(config.sinkS3Prefix, config.projectId);
 
     const jobDataDir = `${config.projectId}/job-data/${jobName}`;
+
+    const userKeepDays = config.userKeepDays;
+    const itemKeepDays = config.itemKeepDays;
 
     const entryPointArguments = [
       config.saveInfoToWarehouse,
@@ -166,6 +169,8 @@ export class EMRServerlessUtil {
       config.outputFormat, // [12] outputFormat,
       outputPartitions, // [13] outputPartitions
       rePartitions, // [14] rePartitions.
+      userKeepDays, // [15] userKeepDays
+      itemKeepDays, // [16] itemKeepDays
     ];
 
     const jars = Array.from(
@@ -276,9 +281,10 @@ export class EMRServerlessUtil {
       s3PathPluginFiles: process.env.S3_PATH_PLUGIN_FILES!,
       entryPointJar: process.env.S3_PATH_ENTRY_POINT_JAR!,
       outputFormat: process.env.OUTPUT_FORMAT!,
-      sinkTableName: process.env.SINK_TABLE_NAME!,
       outputPartitions: process.env.OUTPUT_PARTITIONS || '-1',
       rePartitions: process.env.RE_PARTITIONS || '200',
+      userKeepDays: process.env.USER_KEEP_DAYS || '180',
+      itemKeepDays: process.env.ITEM_KEEP_DAYS || '360',
     };
   }
 

@@ -37,6 +37,7 @@ import static org.apache.spark.sql.functions.udf;
 import static org.apache.spark.sql.functions.get_json_object;
 
 import static software.aws.solution.clickstream.ETLRunner.DEBUG_LOCAL_PATH;
+import static software.aws.solution.clickstream.KvConverter.getValueTypeResult;
 import static software.aws.solution.clickstream.Transformer.DOUBLE_VALUE;
 import static software.aws.solution.clickstream.Transformer.FLOAT_VALUE;
 import static software.aws.solution.clickstream.Transformer.INT_VALUE;
@@ -66,9 +67,43 @@ public class UserPropertiesConverter {
         };
     }
 
+    /**
+     *
+     * @param value is a json string as below:
+     *
+     *  {
+     *  "_user_id": {
+     *  "value": "312121",
+     *  "set_timestamp": 1667877566697
+     *  },
+     *  "_user_name": {
+     *  "value": "name1",
+     *  "set_timestamp": 1667877566697
+     *  },
+     *  "_user_age": {
+     *  "value": 20,
+     *  "set_timestamp": 1667877566697
+     *  },
+     *  "_user_first_touch_timestamp": {
+     *  "value": 1667877267895,
+     *  "set_timestamp": 1667877566697
+     *  },
+     *  "_user_ltv_currency": {
+     *  "value": "USD",
+     *  "set_timestamp": 1667877566697
+     *  },
+     *  "_user_ltv_revenue": {
+     *  "value": 123.45,
+     *  "set_timestamp": 1667877566697
+     *  }
+     *  }
+     * @return ArrayType for StructType
+     * @throws JsonProcessingException
+     */
     @NotNull
     private static GenericRow[] getUserPropertiesGenericRows(final String value) throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
+
         JsonNode jsonNode = objectMapper.readTree(value);
         List<GenericRow> list = new ArrayList<>();
         for (Iterator<String> it = jsonNode.fieldNames(); it.hasNext();) {
@@ -82,28 +117,19 @@ public class UserPropertiesConverter {
             String attrValue = attrValueNode.get(VALUE).asText();
             Long setTimestamp = attrValueNode.get("set_timestamp").asLong(0L);
 
-            Double doubleValue = null;
-            Long longValue = null;
-            String stringValue = null;
             Long setTimestampMicros = setTimestamp * 1000L;
 
-            if (attrValue.matches("^\\d+$")) {
-                longValue = Long.parseLong(attrValue);
-            } else if (attrValue.matches("^[\\d.]+$")) {
-                doubleValue = Double.parseDouble(attrValue);
-            } else {
-                stringValue = attrValue;
-            }
+            KvConverter.ValueTypeResult result = getValueTypeResult(attrName, attrValue);
 
             list.add(new GenericRow(
                     new Object[]{
                             attrName,
                             new GenericRow(
                                     new Object[]{
-                                            doubleValue,
+                                            result.doubleValue,
                                             null,
-                                            longValue,
-                                            stringValue,
+                                            result.longValue,
+                                            result.stringValue,
                                             setTimestampMicros,
                                     })
                     }

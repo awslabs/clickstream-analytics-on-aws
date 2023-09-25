@@ -17,6 +17,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.spark.sql.Column;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SaveMode;
@@ -28,9 +29,10 @@ import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
+import java.util.Objects;
 
 import static org.apache.spark.sql.functions.udf;
 import static software.aws.solution.clickstream.ContextUtil.DEBUG_LOCAL_PROP;
@@ -68,27 +70,17 @@ public class KvConverter {
             JsonNode attrValueNode = jsonNode.get(attrName);
             String attrValue = attrValueNode.asText();
 
-            Double doubleValue = null;
-            Long longValue = null;
-            String stringValue = null;
-
-            if (attrValue.matches("^\\d+$")) {
-                longValue = Long.parseLong(attrValue);
-            } else if (attrValue.matches("^[\\d.]+$")) {
-                doubleValue = Double.parseDouble(attrValue);
-            } else {
-                stringValue = attrValue;
-            }
+            ValueTypeResult result = getValueTypeResult(attrName, attrValue);
 
             list.add(new GenericRow(
                     new Object[]{
                             attrName,
                             new GenericRow(
                                     new Object[]{
-                                            doubleValue,
+                                            result.doubleValue,
                                             null,
-                                            longValue,
-                                            stringValue,
+                                            result.longValue,
+                                            result.stringValue,
                                     })
                     }
             ));
@@ -101,11 +93,48 @@ public class KvConverter {
         }
     }
 
-    public Dataset<Row> transform(final Dataset<Row> dataset, final String fromColName, final String toColName) {
-        return transform(dataset, fromColName, toColName, new ArrayList<>());
+    @NotNull
+    public static ValueTypeResult getValueTypeResult(final String attrName, final String attrValue) {
+        Double doubleValue = null;
+        Long longValue = null;
+        String stringValue = null;
+
+        if (Objects.equals("price", attrName)) {
+            doubleValue = Double.parseDouble(attrValue);
+        } else if (attrName.endsWith("_id")) {
+            stringValue = attrValue;
+        } else if (attrValue.matches("^\\d+$")) {
+            longValue = Long.parseLong(attrValue);
+        } else if (attrValue.matches("^\\d+\\.(\\d+)?$")) {
+            doubleValue = Double.parseDouble(attrValue);
+        } else {
+            stringValue = attrValue;
+        }
+        return new ValueTypeResult(doubleValue, longValue, stringValue);
     }
 
-    public Dataset<Row> transform(final Dataset<Row> dataset, final String fromColName, final String toColName, final List<String> excludeAttributes) {
+    public static class ValueTypeResult {
+        public final Double doubleValue;
+        public final Long longValue;
+        public final String stringValue;
+
+        public ValueTypeResult(final Double doubleValue, final Long longValue, final String stringValue) {
+            this.doubleValue = doubleValue;
+            this.longValue = longValue;
+            this.stringValue = stringValue;
+        }
+    }
+
+    public Dataset<Row> transform(final Dataset<Row> dataset, final String fromColNameInData, final String toColName) {
+        Column fromCol = dataset.col(DATA).getField(fromColNameInData);
+        return transform(dataset, fromCol, toColName, new ArrayList<>());
+    }
+
+    public Dataset<Row> transform(final Dataset<Row> dataset, final Column fromCol, final String toColName) {
+        return transform(dataset, fromCol, toColName, new ArrayList<>());
+    }
+
+    public Dataset<Row> transform(final Dataset<Row> dataset, final Column fromCol, final String toColName, final List<String> excludeAttributes) {
 
         StructType valueType = DataTypes.createStructType(new StructField[]{
                 DataTypes.createStructField(DOUBLE_VALUE, DataTypes.DoubleType, true),
@@ -122,7 +151,7 @@ public class KvConverter {
                         }
                 )));
         Dataset<Row> convertedKeyValueDataset = dataset.withColumn(toColName,
-                convertStringToKeyValueUdf.apply(dataset.col(DATA).getField(fromColName)));
+                convertStringToKeyValueUdf.apply(fromCol));
 
         boolean debugLocal = Boolean.valueOf(System.getProperty(DEBUG_LOCAL_PROP));
         if (debugLocal) {

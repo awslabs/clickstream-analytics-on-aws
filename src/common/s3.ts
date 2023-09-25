@@ -128,11 +128,12 @@ export async function deleteObjectsByPrefix(
   prefix: string,
 ) {
   let delCount = 0;
+  let listObjectsCommand = new ListObjectsV2Command({
+    Bucket: bucketName,
+    Prefix: prefix,
+  });
+
   while (true) {
-    let listObjectsCommand = new ListObjectsV2Command({
-      Bucket: bucketName,
-      Prefix: prefix,
-    });
     const output =
       await s3Client.send(listObjectsCommand);
     if (output.Contents) {
