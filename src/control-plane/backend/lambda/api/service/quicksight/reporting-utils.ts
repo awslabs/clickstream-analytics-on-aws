@@ -146,11 +146,15 @@ export type MustachePathAnalysisType = MustacheBaseType & {
   sourceFieldId: string;
   targetFieldId: string;
   weightFieldId: string;
+  title: string;
+  subTitle?: string;
 }
 
 export type MustacheFunnelAnalysisType = MustacheBaseType & {
   dimFieldId: string;
   measureFieldId: string;
+  title: string;
+  subTitle?: string;
 }
 
 export type MustacheEventAnalysisType = MustacheBaseType & {
@@ -159,6 +163,8 @@ export type MustacheEventAnalysisType = MustacheBaseType & {
   catMeasureFieldId: string;
   dateGranularity?: string;
   hierarchyId?: string;
+  title: string;
+  subTitle?: string;
 }
 
 export type MustacheRetentionAnalysisType = MustacheBaseType & {
@@ -167,6 +173,8 @@ export type MustacheRetentionAnalysisType = MustacheBaseType & {
   numberMeasureFieldId: string;
   dateGranularity?: string;
   hierarchyId?: string;
+  title: string;
+  subTitle?: string;
 }
 
 export type MustacheFilterGroupType = {
@@ -514,8 +522,7 @@ export function getFunnelVisualDef(visualId: string, viewName: string, titleProp
 
 }
 
-export function getFunnelTableVisualDef(visualId: string, viewName: string, eventNames: string[],
-  titleProps: DashboardTitleProps, groupColumn: string): Visual {
+export function getFunnelTableVisualDef(visualId: string, viewName: string, eventNames: string[], titleProps: DashboardTitleProps, groupColumn: string) : Visual {
 
   const visualDef = JSON.parse(readFileSync(join(__dirname, './templates/funnel-table-chart.json'), 'utf8')) as Visual;
   visualDef.TableVisual!.VisualId = visualId;
@@ -751,7 +758,6 @@ export function getEventPivotTableVisualDef(visualId: string, viewName: string, 
   };
 
   return JSON.parse(Mustache.render(visualDef, mustacheEventAnalysisType)) as Visual;
-
 }
 
 export function getPathAnalysisChartVisualDef(visualId: string, viewName: string, titleProps: DashboardTitleProps) : Visual {
@@ -799,7 +805,6 @@ export function getRetentionPivotTableVisualDef(visualId: string, viewName: stri
   };
 
   return JSON.parse(Mustache.render(visualDef, mustacheRetentionAnalysisType)) as Visual;
-
 }
 
 function findElementByPath(jsonData: any, path: string): any {
