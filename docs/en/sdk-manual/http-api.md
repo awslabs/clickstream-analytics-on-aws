@@ -2,9 +2,8 @@
 
 ## Introduction
 
-This documentation will help you send your data directly to the Clickstream ingestion server via HTTP requests, At the
-same time, following the below specifications, your data will be correctly processed by the Clickstream data processing
-module and can be visually analyzed in the subsequent report module.
+This article provides guidance for sending clickstream data to data pipeline through HTTP request. Following below
+specifications, the clickstream data will be processed properly by the data pipeline.
 
 ## Request endpoint
 
@@ -117,7 +116,8 @@ The request body is an array structure, which contains the JSON string of one or
 
 ### Request response
 
-If the HttpCode status code returned by the request is 200, the request is considered successful, other status codes are failures, and the request does not return any other content.
+If the HttpCode status code returned by the request is 200, the request is considered successful, other status codes are
+failures, and the request does not return any other content.
 
 #### HttpCode
 
@@ -211,5 +211,7 @@ print(response.text)
 
 ## Verification data reported successfully
 
-- Method 1: You can query the **ods_events table** in **Athena** directly through SQL. (Requires Athena to be enabled in data modeling)
-- Method 2: You can query the **ods_events table** in **Redshift** directly through SQL. (Requires Redshift to be enabled in data modeling)
+- Method 1: You can query the **ods_events table** in **Athena** directly through SQL. (Requires Athena to be enabled in
+  data modeling)
+- Method 2: You can query the **ods_events table** in **Redshift** directly through SQL. (Requires Redshift to be
+  enabled in data modeling)

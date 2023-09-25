@@ -5,7 +5,7 @@
 - [Swift](./swift.md)  
 - [Web](./web.md)
 
-In addition, we also provide [HTTP API](./http-api.md) for directly report click stream data to the data pipeline.
+In addition, we also provide [HTTP API](./http-api.md) to collect clickstream data from other platforms (e.g., server) through http request.
 
 ## Key features and benefits
 
