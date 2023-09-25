@@ -647,7 +647,6 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
               'redshift-serverless:ListWorkgroups',
               'redshift-serverless:GetWorkgroup',
               'redshift-serverless:GetNamespace',
-              'redshift-data:BatchExecuteStatement',
               's3:ListBucket',
               'quicksight:ListUsers',
               'quicksight:DescribeAccountSubscription',
