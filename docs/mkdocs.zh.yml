@@ -56,6 +56,7 @@ nav:
       - Android SDK: sdk-manual/android.md
       - Swift SDK: sdk-manual/swift.md
       - Web SDK: sdk-manual/web.md
+      - HTTP API: sdk-manual/http-api.md
     - 仪表板:
       - 概述: dashboard/index.md
       - 流量获取报表: dashboard/acquisition.md

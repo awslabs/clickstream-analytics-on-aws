@@ -5,6 +5,8 @@
 - [Swift](./swift.md)  
 - [Web](./web.md)
 
+In addition, we also provide [HTTP API](./http-api.md) for directly report click stream data to the data pipeline.
+
 ## Key features and benefits
 
 - **Automatic data collection**. Clickstream SDKs provide built-in capabilities to automatically collect common events, such as screen view or page view, session, and user engagement, so that you only need to focus on recording business-specific events.
