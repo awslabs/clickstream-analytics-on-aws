@@ -361,8 +361,8 @@ export const getDashboardDefinitionFromArn = async (quickSight: QuickSight, awsA
 
   return {
     name: dashboard.Name,
-    def: dashboard.Definition!
-  }
+    def: dashboard.Definition!,
+  };
 };
 
 export const getAnalysisNameFromId = async (quickSight: QuickSight, awsAccountId: string, analysisId: string)
@@ -488,7 +488,7 @@ export async function getCredentialsFromRole(stsClient: STSClient, roleArn: stri
 
     return credentials;
   } catch (error) {
-    console.error('Error occurred while assuming role:', error);
+    logger.error('Error occurred while assuming role:', error as Error);
     throw error;
   }
 }
@@ -509,14 +509,15 @@ export function getFunnelVisualDef(visualId: string, viewName: string, titleProp
 
 }
 
-export function getFunnelTableVisualDef(visualId: string, viewName: string, eventNames: string[], titleProps: DashboardTitleProps, groupColumn: string) : Visual {
+export function getFunnelTableVisualDef(visualId: string, viewName: string, eventNames: string[],
+  titleProps: DashboardTitleProps, groupColumn: string): Visual {
 
   const visualDef = JSON.parse(readFileSync(join(__dirname, './templates/funnel-table-chart.json'), 'utf8')) as Visual;
   visualDef.TableVisual!.VisualId = visualId;
 
   visualDef.TableVisual!.Title!.FormatText = {
-    PlainText: titleProps.tableTitle
-  }
+    PlainText: titleProps.tableTitle,
+  };
 
   const groupBy = visualDef.TableVisual!.ChartConfiguration!.FieldWells!.TableAggregatedFieldWells?.GroupBy!;
   const sortConfiguration = visualDef.TableVisual!.ChartConfiguration!.SortConfiguration!;
@@ -789,7 +790,7 @@ export function getRetentionPivotTableVisualDef(visualId: string, viewName: stri
     catDimFieldId: uuidv4(),
     dateDimFieldId: uuidv4(),
     numberMeasureFieldId: uuidv4(),
-    title: titleProps.tableTitle
+    title: titleProps.tableTitle,
   };
 
   return JSON.parse(Mustache.render(visualDef, mustacheRetentionAnalysisType)) as Visual;
@@ -886,16 +887,16 @@ export function getDashboardTitleProps(analysisType: AnalysisType, query: any) :
   let tableTitle = '';
 
   const language = query.language;
-  if(query.action === ExploreRequestAction.PUBLISH) {
-      title = query.chartTitle;
-      subTitle = query.chartSubTitle;
-      if(language === ExploreLanguage.CHINESE) {
-        tableTitle = '详细信息';
-      } else {
-        tableTitle = 'Detail information';
-      }
+  if (query.action === ExploreRequestAction.PUBLISH) {
+    title = query.chartTitle;
+    subTitle = query.chartSubTitle;
+    if (language === ExploreLanguage.CHINESE) {
+      tableTitle = '详细信息';
+    } else {
+      tableTitle = 'Detail information';
+    }
   } else {
-    if(language === ExploreLanguage.CHINESE) {
+    if (language === ExploreLanguage.CHINESE) {
       tableTitle = '详细信息';
       switch (analysisType) {
         case AnalysisType.FUNNEL:
@@ -933,7 +934,7 @@ export function getDashboardTitleProps(analysisType: AnalysisType, query: any) :
   return {
     title,
     subTitle,
-    tableTitle
+    tableTitle,
   };
 }
 

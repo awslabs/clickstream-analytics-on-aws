@@ -27,6 +27,7 @@ import {
   UpdateDashboardCommand,
   UpdateDashboardPublishedVersionCommand,
   GenerateEmbedUrlForRegisteredUserCommand,
+  DescribeAnalysisCommand,
 } from '@aws-sdk/client-quicksight';
 import { BatchExecuteStatementCommand, DescribeStatementCommand, RedshiftDataClient, StatusString } from '@aws-sdk/client-redshift-data';
 import { AssumeRoleCommand, STSClient } from '@aws-sdk/client-sts';
@@ -225,6 +226,12 @@ describe('reporting test', () => {
       DashboardId: 'dashboard-aaaaaaaa',
     });
 
+    quickSightMock.on(DescribeAnalysisCommand).resolves({
+      Analysis: {
+        Name: 'test-analysis',
+      },
+    });
+
     const res = await request(app)
       .post('/api/reporting/funnel')
       .send({
@@ -406,6 +413,12 @@ describe('reporting test', () => {
       DashboardId: 'dashboard-aaaaaaaa',
     });
 
+    quickSightMock.on(DescribeAnalysisCommand).resolves({
+      Analysis: {
+        Name: 'test-analysis',
+      },
+    });
+
     const res = await request(app)
       .post('/api/reporting/event')
       .send({
@@ -582,6 +595,11 @@ describe('reporting test', () => {
       Arn: 'arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa',
       VersionArn: 'arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa/1',
     });
+    quickSightMock.on(DescribeAnalysisCommand).resolves({
+      Analysis: {
+        Name: 'test-analysis',
+      },
+    });
 
     const res = await request(app)
       .post('/api/reporting/path')
@@ -671,6 +689,11 @@ describe('reporting test', () => {
     quickSightMock.on(CreateDashboardCommand).resolves({
       Arn: 'arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa',
       VersionArn: 'arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa/1',
+    });
+    quickSightMock.on(DescribeAnalysisCommand).resolves({
+      Analysis: {
+        Name: 'test-analysis',
+      },
     });
 
     const res = await request(app)
