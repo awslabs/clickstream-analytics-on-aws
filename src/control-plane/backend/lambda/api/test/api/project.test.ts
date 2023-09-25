@@ -273,11 +273,11 @@ describe('Project test', () => {
       message: '',
       data: {
         items: [
-          { name: 'Project-01', pipelineId: 'pipeline-01', applications: [{ name: 'App-01', projectId: '1' }], id: '1' },
-          { name: 'Project-02', pipelineId: 'pipeline-02', applications: [{ name: 'App-02', projectId: '2' }], id: '2' },
-          { name: 'Project-03', pipelineId: 'pipeline-03', applications: [{ name: 'App-03', projectId: '3' }], id: '3' },
-          { name: 'Project-04', pipelineId: 'pipeline-04', applications: [{ name: 'App-04', projectId: '4' }], id: '4' },
-          { name: 'Project-05', pipelineId: 'pipeline-05', applications: [{ name: 'App-05', projectId: '5' }], id: '5' },
+          { name: 'Project-01', pipelineId: 'pipeline-01', reportingEnabled: false, applications: [{ name: 'App-01', projectId: '1' }], id: '1' },
+          { name: 'Project-02', pipelineId: 'pipeline-02', reportingEnabled: false, applications: [{ name: 'App-02', projectId: '2' }], id: '2' },
+          { name: 'Project-03', pipelineId: 'pipeline-03', reportingEnabled: false, applications: [{ name: 'App-03', projectId: '3' }], id: '3' },
+          { name: 'Project-04', pipelineId: 'pipeline-04', reportingEnabled: false, applications: [{ name: 'App-04', projectId: '4' }], id: '4' },
+          { name: 'Project-05', pipelineId: 'pipeline-05', reportingEnabled: false, applications: [{ name: 'App-05', projectId: '5' }], id: '5' },
         ],
         totalCount: 5,
       },
@@ -310,7 +310,15 @@ describe('Project test', () => {
         { pipelineId: 'pipeline-01', projectId: '1' },
         { pipelineId: 'pipeline-02', projectId: '2' },
         { pipelineId: 'pipeline-03', projectId: '3' },
-        { pipelineId: 'pipeline-04', projectId: '4' },
+        {
+          pipelineId: 'pipeline-04',
+          projectId: '4',
+          reporting: {
+            quickSight: {
+              accountName: 'accountName',
+            },
+          },
+        },
         { pipelineId: 'pipeline-05', projectId: '5' },
       ],
     }).resolvesOnce({
@@ -331,8 +339,8 @@ describe('Project test', () => {
       message: '',
       data: {
         items: [
-          { name: 'Project-03', pipelineId: 'pipeline-03', applications: [{ name: 'App-03', projectId: '3' }], id: '3' },
-          { name: 'Project-04', pipelineId: 'pipeline-04', applications: [{ name: 'App-04', projectId: '4' }], id: '4' },
+          { name: 'Project-03', pipelineId: 'pipeline-03', reportingEnabled: false, applications: [{ name: 'App-03', projectId: '3' }], id: '3' },
+          { name: 'Project-04', pipelineId: 'pipeline-04', reportingEnabled: true, applications: [{ name: 'App-04', projectId: '4' }], id: '4' },
         ],
         totalCount: 5,
       },
