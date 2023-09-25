@@ -126,7 +126,6 @@ export class ProjectServ {
         const sheetDefinition: SheetDefinition = {
           SheetId: sheet.id,
           Name: sheet.name,
-          FilterControls: [],
         };
         sheets.push(sheetDefinition);
       }
@@ -189,7 +188,7 @@ export class ProjectServ {
       const embed = await generateEmbedUrlForRegisteredUser(
         dashboard.region,
         allowedDomain,
-        false,
+        true,
         dashboardId,
       );
       if (embed && embed.EmbedUrl) {

@@ -381,7 +381,7 @@ describe('QuickSight visual management test', () => {
                       ElementType: 'VISUAL',
                       ColumnIndex: 0,
                       ColumnSpan: 36,
-                      RowIndex: 2,
+                      RowIndex: 4,
                       RowSpan: 15,
                     },
                   ],
