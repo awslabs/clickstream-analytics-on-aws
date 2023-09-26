@@ -206,6 +206,15 @@ function createEMRServerlessApplicationLambda(
       ],
       resources: [`${ermAppArn}`],
     }),
+
+    new PolicyStatement({
+      actions: [
+        'iam:CreateServiceLinkedRole',
+      ],
+      resources: [
+        `arn:${Aws.PARTITION}:iam::${Aws.ACCOUNT_ID}:role/aws-service-role/ops.emr-serverless.amazonaws.com/AWSServiceRoleForAmazonEMRServerless`,
+      ],
+    }),
   ]);
 
   props.pipelineS3Bucket.grantReadWrite(role);
