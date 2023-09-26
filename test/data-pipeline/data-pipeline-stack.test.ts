@@ -1313,6 +1313,26 @@ test('CreateEMRServelsssApplicationLambdaRole policy is set correctly', () => {
           },
         },
         {
+          Action: 'iam:CreateServiceLinkedRole',
+          Effect: 'Allow',
+          Resource: {
+            'Fn::Join': [
+              '',
+              [
+                'arn:',
+                {
+                  Ref: 'AWS::Partition',
+                },
+                ':iam::',
+                {
+                  Ref: 'AWS::AccountId',
+                },
+                ':role/aws-service-role/ops.emr-serverless.amazonaws.com/AWSServiceRoleForAmazonEMRServerless',
+              ],
+            ],
+          },
+        },
+        {
           Action: [
             's3:GetObject*',
             's3:GetBucket*',

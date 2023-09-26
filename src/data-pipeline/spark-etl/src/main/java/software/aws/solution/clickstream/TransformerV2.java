@@ -40,6 +40,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Optional;
+import java.util.Objects;
 
 import static org.apache.spark.sql.functions.col;
 import static org.apache.spark.sql.functions.coalesce;
@@ -87,7 +88,6 @@ public final class TransformerV2 {
     private final EventParamsConverter eventParamsConverter = new EventParamsConverter();
     private final UserPropertiesConverter userPropertiesConverter = new UserPropertiesConverter();
     private final KvConverter kvConverter = new KvConverter();
-    private static DateFormat dateFormatYMD = new SimpleDateFormat("yyyyMMdd");
     private static Map<String, StructType> scheamMap = new HashMap<>();
 
     private static Dataset<Row> getUserTrafficSourceDataset(final Dataset<Row> userDataset, final long newUserCount) {
@@ -246,6 +246,7 @@ public final class TransformerV2 {
 
     private static void overWriteDataset(final String path, final Dataset<Row> dataset) {
         Date now = new Date();
+        DateFormat dateFormatYMD = new SimpleDateFormat("yyyyMMdd");
         String yyyyMMdd = dateFormatYMD.format(now);
         Dataset<Row> dataset1 = dataset.withColumn(UPDATE_DATE, lit(yyyyMMdd).cast(DataTypes.StringType));
 
@@ -286,6 +287,7 @@ public final class TransformerV2 {
     private static String saveIncrementalDataset(final String path, final Dataset<Row> newItemsDataset) {
         log.info("saveIncrementalDataset path=" + path);
         Date now = new Date();
+        DateFormat dateFormatYMD = new SimpleDateFormat("yyyyMMdd");
         String yyyyMMdd = dateFormatYMD.format(now);
         Dataset<Row> newItemsDatasetSave = newItemsDataset.withColumn(UPDATE_DATE, lit(yyyyMMdd).cast(DataTypes.StringType));
         scheamMap.put(path, newItemsDatasetSave.schema());
@@ -302,7 +304,7 @@ public final class TransformerV2 {
         log.info("readDatasetFromPath path=" + path);
         Date nDaysBeforeDate = Date.from(Instant.now().minusSeconds(fromNDays * 24 * 3600L));
         StructType schemaRead = scheamMap.get(path);
-
+        DateFormat dateFormatYMD = new SimpleDateFormat("yyyyMMdd");
         String nDaysBefore = dateFormatYMD.format(nDaysBeforeDate);
         Dataset<Row> fullItemsDataset;
         try {
@@ -516,6 +518,11 @@ public final class TransformerV2 {
             return Optional.empty();
         }
 
+        // newUserCount > 0, below dataset should not null
+        Objects.requireNonNull(userReferrerDataset);
+        Objects.requireNonNull(userDeviceIdDataset);
+        Objects.requireNonNull(userTrafficSourceDataset);
+
         log.info("newUserProfileMainDataset:" + newUserProfileMainDataset.count());
 
         Dataset<Row> newAggUserProfileMainDataset = getAggUserDataset(newUserProfileMainDataset);
@@ -709,6 +716,7 @@ public final class TransformerV2 {
     private static boolean isDatasetMergedToday(final SparkSession sparkSession) {
         boolean mergedToday = false;
         Date now = new Date();
+        DateFormat dateFormatYMD = new SimpleDateFormat("yyyyMMdd");
         String yyyyMMdd = dateFormatYMD.format(now);
 
         String statePath = getPathForTable("etl_merge_state");
