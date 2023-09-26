@@ -50,6 +50,7 @@ import {
   ProjectEnvironment,
 } from '../common/types';
 import { getBucketPrefix, getKafkaTopic, getPluginInfo, isEmpty, getValueFromStackOutputSuffix, isEmail, corsStackInput } from '../common/utils';
+import { analyticsMetadataTable, awsAccountId, awsRegion } from '../common/constants';
 
 export function getStackParameters(stack: JSONObject): Parameter[] {
   const parameters: Parameter[] = [];
@@ -953,6 +954,9 @@ export class CDataModelingStack extends JSONObject {
   @JSONObject.optional('')
     EMRServerlessApplicationId?: string;
 
+  @JSONObject.optional('')
+    ClickstreamAnalyticsMetadataDdbArn?: string;
+
   constructor(pipeline: IPipeline, resources: CPipelineResources) {
     if (pipeline.dataModeling?.redshift?.provisioned) {
       if (isEmpty(pipeline.dataModeling?.redshift?.provisioned.clusterIdentifier) ||
@@ -968,6 +972,8 @@ export class CDataModelingStack extends JSONObject {
         throw new ClickStreamBadRequestError('VpcId, SubnetIds, SecurityGroups required for provisioning new Redshift Serverless.');
       }
     }
+
+    const partition = awsRegion?.startsWith('cn') ? 'aws-cn' : 'aws';
 
     super({
       _pipeline: pipeline,
@@ -993,6 +999,7 @@ export class CDataModelingStack extends JSONObject {
         PipelineStackType.DATA_PROCESSING,
         OUTPUT_DATA_PROCESSING_EMR_SERVERLESS_APPLICATION_ID_SUFFIX,
       ),
+      ClickstreamAnalyticsMetadataDdbArn: `arn:${partition}:dynamodb:${awsRegion}:${awsAccountId}:table/${analyticsMetadataTable}`,
 
     });
   }
