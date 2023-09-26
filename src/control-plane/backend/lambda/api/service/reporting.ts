@@ -428,7 +428,6 @@ export class ReportingService {
         filterControl: visualRelatedParams.filterControl,
         parameterDeclarations: visualRelatedParams.parameterDeclarations,
         filterGroup: visualRelatedParams.filterGroup,
-        rowSpan: 12,
       };
 
       const result: CreateDashboardResult = await this.create(
@@ -514,7 +513,6 @@ export class ReportingService {
         filterControl: visualRelatedParams.filterControl,
         parameterDeclarations: visualRelatedParams.parameterDeclarations,
         filterGroup: visualRelatedParams.filterGroup,
-        eventCount: query.eventAndConditions.length,
       };
 
       const tableVisualId = uuidv4();

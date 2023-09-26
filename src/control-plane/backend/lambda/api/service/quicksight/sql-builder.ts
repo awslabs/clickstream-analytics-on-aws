@@ -423,7 +423,7 @@ function _buildEventAnalysisBaseSql(eventNames: string[], sqlParameters: SQLPara
 
   let sql = _buildCommonPartSql(eventNames, sqlParameters);
   const buildResult = _buildEventCondition(eventNames, sqlParameters, sql);
-  sql = buildResult[0]
+  sql = buildResult[0];
 
   let joinTableSQL = '';
 
