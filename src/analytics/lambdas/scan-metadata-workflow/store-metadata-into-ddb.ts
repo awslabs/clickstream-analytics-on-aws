@@ -237,11 +237,9 @@ function parseDynamoDBTableARN(ddbArn: string) {
 }
 
 function convertToDDBList(inputString?: string) {
-  let listData = [];
+  let listData: any[] = [];
   if (inputString) {
-    const formattedString = inputString.replace(/^\[|\]$/g, '').split(',').map(item => `"${item}"`).join(',');
-    const jsonArray = `[${formattedString}]`;
-    listData = JSON.parse(jsonArray);
+    listData = inputString.split('#');
   }
   return listData;
 }

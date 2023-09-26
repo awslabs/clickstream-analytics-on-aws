@@ -63,7 +63,7 @@ describe('Lambda - store the metadata into DDB from Redshift', () => {
             { stringValue: 'eventName' },
             { stringValue: 'custom' },
             { longValue: 2000 },
-            { stringValue: '[ANDROID,IOS]' },
+            { stringValue: 'ANDROID#IOS' },
           ],
         ],
       })
@@ -82,8 +82,8 @@ describe('Lambda - store the metadata into DDB from Redshift', () => {
             { stringValue: 'propertyName' },
             { stringValue: 'propertyId' },
             { stringValue: 'String' },
-            { stringValue: '[value1,value2,value3]' },
-            { stringValue: '[ANDROID,IOS]' },
+            { stringValue: 'value1#value2#value3' },
+            { stringValue: 'ANDROID#IOS' },
           ],
         ],
       })
@@ -100,8 +100,8 @@ describe('Lambda - store the metadata into DDB from Redshift', () => {
             { stringValue: 'Private' },
             { stringValue: 'userattributename' },
             { stringValue: 'String' },
-            { stringValue: '[value1,value2,value3]' },
-            { stringValue: '[ANDROID,IOS]' },
+            { stringValue: 'value1#value2#value3' },
+            { stringValue: 'ANDROID#IOS' },
           ],
         ],
       });

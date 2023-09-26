@@ -190,7 +190,7 @@ BEGIN
 			property_name, 
 			value_type, 
 			platform,
-			'[' || LISTAGG(property_value, ', ') WITHIN GROUP (ORDER BY property_value) || ']' AS property_values
+			LISTAGG(property_value, '#') WITHIN GROUP (ORDER BY property_value) AS property_values
 		FROM (
       SELECT 
         event_name, 
@@ -200,7 +200,7 @@ BEGIN
         property_name, 
         value_type,
         property_value,
-          '[' || LISTAGG(platform, ', ') WITHIN GROUP (ORDER BY platform) || ']' AS platform
+          LISTAGG(platform, '#') WITHIN GROUP (ORDER BY platform) AS platform
       FROM (
         SELECT 
           event_name, 
@@ -280,7 +280,7 @@ BEGIN
 			property_name, 
 			value_type, 
 			platform,
-			'[' || LISTAGG(property_value, ', ') WITHIN GROUP (ORDER BY property_value) || ']' AS property_values
+			LISTAGG(property_value, '#') WITHIN GROUP (ORDER BY property_value) AS property_values
 	  	FROM (
 	  		SELECT 
 	  			project_id, 
@@ -288,7 +288,7 @@ BEGIN
 	  			property_name, 
 	  			value_type,
 	  			property_value,
-	      		'[' || LISTAGG(platform, ', ') WITHIN GROUP (ORDER BY platform) || ']' AS platform
+	      	LISTAGG(platform, '#') WITHIN GROUP (ORDER BY platform) AS platform
 	  		FROM (
           SELECT 
             project_id, 
@@ -375,7 +375,7 @@ BEGIN
 		  project_id,
 		  app_info_app_id,
 			data_volumel_last_day,
-		  '[' || LISTAGG(platform, ', ') WITHIN GROUP (ORDER BY platform) || ']' AS platform
+		  LISTAGG(platform, '#') WITHIN GROUP (ORDER BY platform) AS platform
 		FROM (
 			SELECT
 				event_name,
