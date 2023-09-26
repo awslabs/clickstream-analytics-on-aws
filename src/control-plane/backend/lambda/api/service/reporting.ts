@@ -199,6 +199,7 @@ export class ReportingService {
       parameterDeclarations: visualRelatedParams.parameterDeclarations,
       filterGroup: visualRelatedParams.filterGroup,
       eventCount: query.eventAndConditions.length,
+      colSpan: 20,
     };
 
     const tableVisualId = uuidv4();

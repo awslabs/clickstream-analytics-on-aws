@@ -238,7 +238,7 @@ function _buildCommonPartSql(eventNames: string[], sqlParameters: SQLParameters,
   let globalConditionSql = getNormalConditionSql(sqlParameters.globalEventCondition);
   globalConditionSql = globalConditionSql !== '' ? `and (${globalConditionSql}) ` : '';
 
-  const eventNameInClause = `and event_name in (' ${eventNames.join('\',\'')} ')`;
+  const eventNameInClause = `and event_name in ('${eventNames.join('\',\'')}')`;
   const eventNameClause = eventNames.length > 0 ? eventNameInClause : '';
   return `with tmp_data as (
     select 
