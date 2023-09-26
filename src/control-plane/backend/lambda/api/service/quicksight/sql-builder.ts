@@ -548,6 +548,10 @@ function _buildRetentionConditionSql(eventName: string, sqlCondition: SQLConditi
     columnSql = `
     ${eventNameAndSQLCondition.nestSqlPair[1]}
     `;
+  } else {
+    conditionSql = `
+      ( event_name = '${eventName}' )
+    `;
   }
 
   return [conditionSql, columnSql];
@@ -1173,11 +1177,11 @@ export function buildNodePathAnalysisView(sqlParameters: SQLParameters) : string
 export function buildRetentionAnalysisView(sqlParameters: SQLParameters) : string {
 
   const dateListSql = _buildDateListSQL(sqlParameters);
-
   const { nestColumnSql, tableSql, resultSql } = _buildSQLs(sqlParameters);
 
+
   const sql = `
-    ${_buildCommonPartSql([], sqlParameters)}
+    ${_buildCommonPartSql(_getRetentionAnalysisViewEventNames(sqlParameters), sqlParameters)}
     first_date as (
       select min(event_date) as first_date from tmp_data
     ), 
@@ -1603,4 +1607,16 @@ function _buildEventCondition3(condition: Condition, eventConditionSql: string, 
           ${i === 0 ? '' : (eventCondition.sqlCondition!.conditionOperator ?? 'and')}  ${conditionSql}
         `);
   return eventConditionSql;
+}
+
+function _getRetentionAnalysisViewEventNames(sqlParameters: SQLParameters) : string[] {
+
+  const eventNames: string[] = [];
+
+  for (const pair of sqlParameters.pairEventAndConditions!) {
+    eventNames.push(pair.startEvent.eventName);
+    eventNames.push(pair.backEvent.eventName);
+  }
+
+  return [...new Set(eventNames)];
 }

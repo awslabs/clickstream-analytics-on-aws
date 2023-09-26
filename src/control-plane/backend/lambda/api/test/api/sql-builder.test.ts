@@ -4544,6 +4544,7 @@ describe('SQL Builder test', () => {
         where
           event_date >= 'Mon Jun 19 2023 00:00:00 GMT+0000 (Coordinated Universal Time)'
           and event_date <= 'Thu Jun 22 2023 00:00:00 GMT+0000 (Coordinated Universal Time)'
+          and event_name in ('add_button_click','note_share','note_export')
           and (
             platform = 'Android'
             and device_screen_height <> 1400
@@ -4610,6 +4611,8 @@ describe('SQL Builder test', () => {
         from
           mid_table
           join first_date on mid_table.event_date = first_date.first_date
+          where 
+          (event_name = 'add_button_click')
       ),
       second_table_1 as (
         select
@@ -4859,6 +4862,7 @@ describe('SQL Builder test', () => {
         where
           event_date >= 'Mon Jun 19 2023 00:00:00 GMT+0000 (Coordinated Universal Time)'
           and event_date <= 'Thu Jun 22 2023 00:00:00 GMT+0000 (Coordinated Universal Time)'
+          and event_name in ('add_button_click','note_share','note_export')
           and (
             platform = 'Android'
             and device_screen_height <> 1400
@@ -4924,6 +4928,8 @@ describe('SQL Builder test', () => {
         from
           mid_table
           join first_date on mid_table.event_date = first_date.first_date
+          where 
+          (event_name='add_button_click')
       ),
       second_table_1 as (
         select
