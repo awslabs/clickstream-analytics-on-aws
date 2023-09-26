@@ -19,7 +19,14 @@ import {
   TransformOperation,
   ColumnTag,
   InputColumn,
-  FilterControl, FilterGroup, ParameterDeclaration, Visual, DashboardVersionDefinition, DataSetIdentifierDeclaration, ColumnConfiguration,
+  FilterControl,
+  FilterGroup,
+  ParameterDeclaration,
+  Visual,
+  DashboardVersionDefinition,
+  DataSetIdentifierDeclaration,
+  ColumnConfiguration,
+  SheetDefinition,
 } from '@aws-sdk/client-quicksight';
 import { AssumeRoleCommand, STSClient } from '@aws-sdk/client-sts';
 import Mustache from 'mustache';
@@ -393,35 +400,16 @@ function addVisuals(visuals: VisualProps[], dashboardDef: DashboardVersionDefini
   for (const visual of visuals) {
     logger.info('start to add visual');
 
-    const sheet = findElementWithPropertyValue(dashboardDef, 'Sheets', 'SheetId', visual.sheetId);
+    const sheet = findElementWithPropertyValue(dashboardDef, 'Sheets', 'SheetId', visual.sheetId) as SheetDefinition;
     if ( sheet !== undefined) {
       //add visual to sheet
       const charts = sheet.Visuals!;
       charts.push(visual.visual);
 
-      //add dataset configuration
-      const configs = dashboardDef.DataSetIdentifierDeclarations!;
-      if (visual.dataSetIdentifierDeclaration) {
-        configs.push(...visual.dataSetIdentifierDeclaration);
-      }
+      _addDataSetAndFilterConfiguration(sheet, dashboardDef, visual, requestAction);
 
-      //add filter
-      if (!sheet.FilterControls) {
-        sheet.FilterControls = [];
-      }
-      const controls = sheet.FilterControls;
-      if (visual.filterControl && requestAction === ExploreRequestAction.PUBLISH) {
-        controls.push(visual.filterControl);
-      }
-
-      //add parameters
-      const parameters = dashboardDef.ParameterDeclarations!;
-      if (visual.parameterDeclarations) {
-        parameters.push(...visual.parameterDeclarations);
-      }
-
-      //add dataset configuration
-      _addDatasetConfiguration(dashboardDef, visual, requestAction);
+      //add filter group and column configuration
+      _addFilterGroupAndColumnConfiguration(dashboardDef, visual, requestAction);
 
       // visual layout
       _addVisualLayout(sheet, visual, requestAction);
@@ -431,7 +419,32 @@ function addVisuals(visuals: VisualProps[], dashboardDef: DashboardVersionDefini
   return dashboardDef;
 };
 
-function _addDatasetConfiguration(dashboardDef: DashboardVersionDefinition, visual: VisualProps, requestAction: string) {
+function _addDataSetAndFilterConfiguration(sheet: SheetDefinition, dashboardDef: DashboardVersionDefinition,
+  visual: VisualProps, requestAction: string) {
+  //add dataset configuration
+  const configs = dashboardDef.DataSetIdentifierDeclarations!;
+  if (visual.dataSetIdentifierDeclaration) {
+    configs.push(...visual.dataSetIdentifierDeclaration);
+  }
+
+  //add filter
+  if (!sheet.FilterControls) {
+    sheet.FilterControls = [];
+  }
+  const controls = sheet.FilterControls;
+  if (visual.filterControl && requestAction === ExploreRequestAction.PUBLISH) {
+    controls.push(visual.filterControl);
+  }
+
+  //add parameters
+  const parameters = dashboardDef.ParameterDeclarations!;
+  if (visual.parameterDeclarations) {
+    parameters.push(...visual.parameterDeclarations);
+  }
+
+}
+
+function _addFilterGroupAndColumnConfiguration(dashboardDef: DashboardVersionDefinition, visual: VisualProps, requestAction: string) {
   const filterGroups = dashboardDef.FilterGroups!;
   if (visual.filterGroup && requestAction === ExploreRequestAction.PUBLISH) {
     filterGroups.push(visual.filterGroup);
