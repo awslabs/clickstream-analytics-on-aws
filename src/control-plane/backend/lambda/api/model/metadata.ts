@@ -60,7 +60,7 @@ export interface IMetadataEventParameter {
   platform: MetadataPlatform[];
   readonly parameterType: MetadataParameterType;
   readonly valueType: MetadataValueType;
-  valueEnum: string[];
+  valueEnum?: string[];
   values: IMetadataAttributeValue[];
   associatedEvents? : IMetadataEvent[];
   readonly category: string;
@@ -88,7 +88,7 @@ export interface IMetadataUserAttribute {
   readonly metadataSource: MetadataSource;
   hasData: boolean;
   readonly valueType: MetadataValueType;
-  valueEnum: string[];
+  valueEnum?: string[];
   values: IMetadataAttributeValue[];
   readonly category: string;
 

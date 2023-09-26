@@ -98,7 +98,7 @@ export class CMetadataDisplay {
     for (let parameter of parameters) {
       const valueEnum = parameter.valueEnum;
       const values: IMetadataAttributeValue[] = [];
-      for (let v of valueEnum) {
+      for (let v of valueEnum!) {
         const key = `DICTIONARY#${parameter.projectId}#${parameter.appId}#${parameter.name}#${v}`;
         const display = displays.find((d: IMetadataDisplay) => d.id === key);
         const value: IMetadataAttributeValue = {
@@ -108,6 +108,7 @@ export class CMetadataDisplay {
         values.push(value);
       }
       parameter.values = values;
+      parameter.valueEnum = undefined;
     }
     return parameters;
   }

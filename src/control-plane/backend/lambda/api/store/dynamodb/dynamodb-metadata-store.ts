@@ -301,12 +301,12 @@ export class DynamoDbMetadataStore implements MetadataStore {
   };
 
   public async createUserAttribute(userAttribute: IMetadataUserAttribute): Promise<string> {
-    const userAttributeId =`${userAttribute.projectId}#${userAttribute.appId}#${userAttribute.eventName}#${userAttribute.name}`;
+    const userAttributeId =`${userAttribute.projectId}#${userAttribute.appId}#${userAttribute.name}`;
     const params: PutCommand = new PutCommand({
       TableName: analyticsMetadataTable,
       Item: {
         id: userAttributeId,
-        type: `EVENT#${userAttribute.projectId}#${userAttribute.appId}#${userAttribute.eventName}`,
+        type: `USER_ATTRIBUTE#${userAttributeId}`,
         prefix: `USER_ATTRIBUTE#${userAttribute.projectId}#${userAttribute.appId}`,
         projectId: userAttribute.projectId,
         appId: userAttribute.appId,
