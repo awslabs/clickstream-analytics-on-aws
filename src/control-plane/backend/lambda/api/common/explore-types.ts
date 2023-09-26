@@ -110,3 +110,10 @@ export enum AnalysisType {
   PATH = 'PATH',
   RETENTION = 'RETENTION'
 }
+
+export enum QuickSightChartType {
+  BAR = 'BAR',
+  LINE = 'LINE',
+  FUNNEL = 'FUNNEL',
+  SANKEY = 'SANKEY'
+}

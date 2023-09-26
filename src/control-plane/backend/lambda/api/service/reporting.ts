@@ -46,7 +46,7 @@ import {
 } from './quicksight/reporting-utils';
 import { buildEventAnalysisView, buildEventPathAnalysisView, buildFunnelTableView, buildFunnelView, buildNodePathAnalysisView, buildRetentionAnalysisView } from './quicksight/sql-builder';
 import { awsAccountId } from '../common/constants';
-import { AnalysisType, ExplorePathNodeType, ExploreRequestAction, ExploreTimeScopeType, ExploreVisualName } from '../common/explore-types';
+import { AnalysisType, ExplorePathNodeType, ExploreRequestAction, ExploreTimeScopeType, ExploreVisualName, QuickSightChartType } from '../common/explore-types';
 import { logger } from '../common/powertools';
 import { SDKClient } from '../common/sdk-client';
 import { ApiFail, ApiSuccess } from '../common/types';
@@ -177,7 +177,8 @@ export class ReportingService {
 
     const visualId = uuidv4();
     const titleProps = await getDashboardTitleProps(AnalysisType.FUNNEL, query);
-    const visualDef = getFunnelVisualDef(visualId, viewName, titleProps);
+    const quickSightChartType = query.chartType;
+    const visualDef = getFunnelVisualDef(visualId, viewName, titleProps, quickSightChartType, query.timeUnit);
     const visualRelatedParams = getVisualRelatedDefs({
       timeScopeType: query.timeScopeType,
       sheetId,
@@ -199,7 +200,7 @@ export class ReportingService {
       parameterDeclarations: visualRelatedParams.parameterDeclarations,
       filterGroup: visualRelatedParams.filterGroup,
       eventCount: query.eventAndConditions.length,
-      colSpan: 20,
+      colSpan: quickSightChartType === QuickSightChartType.FUNNEL ? 20: undefined,
     };
 
     const tableVisualId = uuidv4();

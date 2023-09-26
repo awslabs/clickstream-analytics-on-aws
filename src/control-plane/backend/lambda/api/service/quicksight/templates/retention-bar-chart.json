@@ -1,5 +1,5 @@
 {
-  "VisualId":"{{visualId}",
+  "VisualId":"{{visualId}}",
   "Title":{
       "FormatText": {
         "PlainText": "{{title}}"

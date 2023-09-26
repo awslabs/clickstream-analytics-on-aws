@@ -32,7 +32,7 @@ import { AssumeRoleCommand, STSClient } from '@aws-sdk/client-sts';
 import Mustache from 'mustache';
 import { v4 as uuidv4 } from 'uuid';
 import { DataSetProps, dataSetActions } from './dashboard-ln';
-import { AnalysisType, ExploreLocales, ExploreRelativeTimeUnit, ExploreRequestAction, ExploreTimeScopeType, ExploreVisualName } from '../../common/explore-types';
+import { AnalysisType, ExploreLocales, ExploreRelativeTimeUnit, ExploreRequestAction, ExploreTimeScopeType, ExploreVisualName, QuickSightChartType } from '../../common/explore-types';
 import { logger } from '../../common/powertools';
 import i18next from '../../i18n';
 
@@ -149,8 +149,11 @@ export type MustachePathAnalysisType = MustacheBaseType & {
 }
 
 export type MustacheFunnelAnalysisType = MustacheBaseType & {
+  dateDimFieldId?: string;
   dimFieldId: string;
   measureFieldId: string;
+  dateGranularity?: string;
+  hierarchyId?: string;
 }
 
 export type MustacheEventAnalysisType = MustacheBaseType & {
@@ -498,7 +501,20 @@ export async function getCredentialsFromRole(stsClient: STSClient, roleArn: stri
   }
 }
 
-export function getFunnelVisualDef(visualId: string, viewName: string, titleProps: DashboardTitleProps) : Visual {
+export function getFunnelVisualDef(visualId: string, viewName: string, titleProps: DashboardTitleProps, quickSightChartType: QuickSightChartType, timeUnit: string) : Visual {
+
+  if(quickSightChartType === QuickSightChartType.LINE) {
+    return _getFunnelLineVisualDef(visualId, viewName, titleProps);
+  } else if (quickSightChartType === QuickSightChartType.BAR) {
+    return _getFunnelBarVisualDef(visualId, viewName, titleProps, timeUnit);
+  } else {
+    const errorMessage = `unsupported quicksight char type ${quickSightChartType}`;
+    logger.debug(errorMessage);
+    throw new Error(errorMessage);
+  }
+}
+
+function _getFunnelLineVisualDef(visualId: string, viewName: string, titleProps: DashboardTitleProps) : Visual {
 
   const visualDef = readFileSync(join(__dirname, './templates/funnel-chart.json'), 'utf8');
   const mustacheFunnelAnalysisType: MustacheFunnelAnalysisType = {
@@ -509,6 +525,26 @@ export function getFunnelVisualDef(visualId: string, viewName: string, titleProp
     title: titleProps.title,
     subTitle: titleProps.subTitle,
   };
+
+  return JSON.parse(Mustache.render(visualDef, mustacheFunnelAnalysisType)) as Visual;
+}
+
+function _getFunnelBarVisualDef(visualId: string, viewName: string, titleProps: DashboardTitleProps, timeUnit: string) : Visual {
+
+  const visualDef = readFileSync(join(__dirname, './templates/funnel-bar-chart.json'), 'utf8');
+  const mustacheFunnelAnalysisType: MustacheFunnelAnalysisType = {
+    visualId,
+    dataSetIdentifier: viewName,
+    dateDimFieldId: uuidv4(),
+    dimFieldId: uuidv4(),
+    measureFieldId: uuidv4(),
+    dateGranularity: getQuickSightUnitFromTimeUnit(timeUnit),
+    hierarchyId: uuidv4(),
+    title: titleProps.title,
+    subTitle: titleProps.subTitle,
+  };
+
+  console.log(Mustache.render(visualDef, mustacheFunnelAnalysisType))
 
   return JSON.parse(Mustache.render(visualDef, mustacheFunnelAnalysisType)) as Visual;
 
