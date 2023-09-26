@@ -360,7 +360,10 @@ function addVisuals(visuals: VisualProps[], dashboardDef: DashboardVersionDefini
       }
 
       //add filter
-      const controls = sheet.FilterControls!;
+      if (!sheet.FilterControls) {
+        sheet.FilterControls = [];
+      }
+      const controls = sheet.FilterControls;
       if (visual.filterControl && requestAction === ExploreRequestAction.PUBLISH) {
         controls.push(visual.filterControl);
       }
@@ -416,16 +419,11 @@ function _addVisualLayout(sheet: any, visual: VisualProps, requestAction: string
     elements.push(layoutControl);
   }
 
+  visualControl.RowSpan = visual.rowSpan ?? 12;
+  visualControl.ColumnSpan = visual.colSpan ?? 36;
+
   if (visual.eventCount) {
     visualControl.RowSpan = visual.rowSpan ?? visual.eventCount * 3;
-    visualControl.ColumnSpan = visual.colSpan ?? 20;
-  }
-
-  visualControl.RowSpan = visual.rowSpan ?? 12;
-  visualControl.ColumnSpan = visual.colSpan ?? 20;
-
-  if (visual.eventCount) {
-    visualControl.RowSpan = visual.eventCount * 3;
   }
 
   visualControl.ElementId = findFirstChild(visual.visual).VisualId;

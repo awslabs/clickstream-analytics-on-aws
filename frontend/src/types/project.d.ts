@@ -27,6 +27,9 @@ declare global {
     emails: string;
     region: string;
     description: string;
+    pipelineId?: string;
+    applications?: IApplication[];
+    reportingEnabled?: boolean;
     updateAt?: number;
     operator?: string;
     deleted?: boolean;

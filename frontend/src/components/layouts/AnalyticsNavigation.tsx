@@ -12,6 +12,7 @@
  */
 
 import { Icon } from '@cloudscape-design/components';
+import ExtendIcon from 'components/common/ExtendIcon';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
@@ -45,36 +46,28 @@ const AnalyticsNavigation: React.FC<INavigationProps> = (
   const analyticsNavItems: IAnalyticsItemType[] = [
     {
       text: t('nav.analytics.dashboards'),
+      icon: <ExtendIcon icon="BsKanban" />,
       href: `/analytics/${projectId}/app/${appId}/dashboards`,
     },
     {
-      text: t('nav.analytics.exploreEvent'),
-      href: `/analytics/${projectId}/app/${appId}/event`,
+      text: t('nav.analytics.realtime'),
+      icon: <ExtendIcon icon="BsActivity" />,
+      href: `/analytics/${projectId}/app/${appId}/realtime`,
     },
     {
-      text: t('nav.analytics.exploreRetention'),
-      href: `/analytics/${projectId}/app/${appId}/retention`,
+      text: t('nav.analytics.explore'),
+      icon: <ExtendIcon icon="BsFunnel" />,
+      href: `/analytics/${projectId}/app/${appId}/explore`,
     },
     {
-      text: t('nav.analytics.exploreFunnel'),
-      href: `/analytics/${projectId}/app/${appId}/funnel`,
+      text: t('nav.analytics.analyzes'),
+      icon: <ExtendIcon icon="BsPencilSquare" />,
+      href: `/analytics/${projectId}/app/${appId}/analyzes`,
     },
     {
-      text: t('nav.analytics.explorePath'),
-      href: `/analytics/${projectId}/app/${appId}/path`,
-    },
-
-    {
-      text: t('nav.analytics.metadata-events'),
-      href: `/analytics/${projectId}/app/${appId}/metadata/events`,
-    },
-    {
-      text: t('nav.analytics.metadata-event-parameters'),
-      href: `/analytics/${projectId}/app/${appId}/metadata/event-parameters`,
-    },
-    {
-      text: t('nav.analytics.metadata-user-attributes'),
-      href: `/analytics/${projectId}/app/${appId}/metadata/user-attributes`,
+      text: t('nav.analytics.data-management'),
+      icon: <ExtendIcon icon="settings" />,
+      href: `/analytics/${projectId}/app/${appId}/data-management`,
     },
   ];
 
@@ -85,12 +78,18 @@ const AnalyticsNavigation: React.FC<INavigationProps> = (
           <li
             key={item.href}
             className={item.href === activeHref ? 'active' : ''}
+            title={item.text ?? ''}
+            aria-labelledby={item.text ?? ''}
           >
-            <a href={item.href}>
-              <span className="icon">
-                <Icon name="settings" variant="inverted" />
+            <a href={item.href} aria-labelledby={item.text ?? ''}>
+              <span className="icon" aria-labelledby={item.text ?? ''}>
+                {item.icon}
               </span>
-              {isExpanded && <span className="text">{item.text}</span>}
+              {isExpanded && (
+                <span className="text" aria-labelledby={item.text ?? ''}>
+                  {item.text}
+                </span>
+              )}
             </a>
           </li>
         ))}

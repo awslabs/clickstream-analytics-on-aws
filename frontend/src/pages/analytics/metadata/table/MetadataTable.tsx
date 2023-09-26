@@ -36,6 +36,8 @@ interface MetadataTableProps {
     loadingText: string;
     emptyText: string;
     headerTitle: string;
+    infoContent: string;
+    headerDescription: string;
     headerRefreshButtonText: string;
     filteringAriaLabel: string;
     filteringPlaceholder: string;
@@ -48,17 +50,9 @@ interface MetadataTableProps {
     matchesText: string;
   };
   selectionType?: 'multi' | 'single';
-  loadHelpPanelContent: () => void;
-  setShowDetails: (
-    show: boolean,
-    data?: IMetadataEvent | IMetadataEventParameter | IMetadataUserAttribute
-  ) => void;
-  fetchDataFunc: () => Promise<
-    IMetadataEvent[] | IMetadataEventParameter[] | IMetadataUserAttribute[]
-  >;
-  fetchUpdateFunc: (
-    item: IMetadataEvent | IMetadataEventParameter | IMetadataUserAttribute
-  ) => Promise<void>;
+  setShowDetails: (show: boolean, data?: IMetadataType) => void;
+  fetchDataFunc: () => Promise<IMetadataType[]>;
+  fetchUpdateFunc: (item: IMetadataType) => Promise<void>;
 }
 
 const MetadataTable: React.FC<MetadataTableProps> = (
@@ -71,7 +65,6 @@ const MetadataTable: React.FC<MetadataTableProps> = (
     tableContentDisplay,
     tableFilteringProperties,
     tableI18nStrings,
-    loadHelpPanelContent,
     setShowDetails,
     fetchDataFunc,
     fetchUpdateFunc,
@@ -207,8 +200,7 @@ const MetadataTable: React.FC<MetadataTableProps> = (
     <div>
       <Table
         {...tableCollectionProps}
-        variant="full-page"
-        stickyHeader={true}
+        variant="embedded"
         resizableColumns={true}
         loading={loadingData}
         items={itemsSnap.length > 0 ? itemsSnap : items}
@@ -228,7 +220,8 @@ const MetadataTable: React.FC<MetadataTableProps> = (
         header={
           <MetadataTableHeader
             title={tableI18nStrings.headerTitle}
-            refreshButtonText={tableI18nStrings.headerRefreshButtonText}
+            infoContent={tableI18nStrings.infoContent}
+            description={tableI18nStrings.headerDescription}
             selectedItemsCount={collectionProps.selectedItems?.length ?? 0}
             counter={
               !loadingData &&
@@ -237,10 +230,6 @@ const MetadataTable: React.FC<MetadataTableProps> = (
                 ? `(${collectionProps.selectedItems.length}/${data.length})`
                 : `(${data.length})`
             }
-            onInfoLinkClick={loadHelpPanelContent}
-            onRefreshButtonClick={() => {
-              console.log('refresh button clicked');
-            }}
           />
         }
         filter={

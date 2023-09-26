@@ -12,6 +12,7 @@
  */
 
 import { Button, SelectProps } from '@cloudscape-design/components';
+import { identity } from 'lodash';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -36,7 +37,7 @@ interface SegmentationFilterProps {
     index: number,
     category: IAnalyticsItem | null
   ) => void;
-  changeConditionValue: (index: number, value: any) => void;
+  changeConditionValue: (index: number, value: string[]) => void;
   changeCurRelationShip?: (relation: ERelationShip) => void;
 }
 const SegmentationFilter: React.FC<SegmentationFilterProps> = (
@@ -87,7 +88,7 @@ const SegmentationFilter: React.FC<SegmentationFilterProps> = (
                   <ConditionItem
                     item={element}
                     conditionOptions={segmentationData.conditionOptions}
-                    key={index}
+                    key={identity(index)}
                     removeConditionItem={() => {
                       removeEventCondition(index);
                     }}

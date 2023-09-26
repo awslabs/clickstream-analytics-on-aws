@@ -14,7 +14,9 @@ import {
   Box,
   Button,
   Header,
+  Link,
   Modal,
+  Popover,
   SpaceBetween,
 } from '@cloudscape-design/components';
 import { deleteAnalyticsDashboard } from 'apis/analytics';
@@ -101,6 +103,11 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = (
         variant="h1"
         counter={`(${totalNum})`}
         description={t('analytics:dashboard.description')}
+        info={
+          <Popover triggerType="custom" content={t('analytics:information.dashboardsInfo')}>
+            <Link variant="info">{t('info')}</Link>
+          </Popover>
+        }
         actions={
           <SpaceBetween size="xs" direction="horizontal">
             <Button

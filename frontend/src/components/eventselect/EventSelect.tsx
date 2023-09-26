@@ -50,7 +50,7 @@ interface EventsSelectProps {
   changeConditionValue: (
     eventIndex: number,
     conditionIndex: number,
-    value: any
+    value: string[]
   ) => void;
   changeCurCategoryOption: (
     eventIndex: number,
@@ -58,7 +58,7 @@ interface EventsSelectProps {
   ) => void;
   changeCurCalcMethodOption?: (
     eventIndex: number,
-    calcMethod: IAnalyticsItem | null
+    calcMethod: SelectProps.Option | null
   ) => void;
   changeCurRelationShip?: (eventIndex: number, relation: ERelationShip) => void;
 }
@@ -119,7 +119,7 @@ const EventsSelect: React.FC<EventsSelectProps> = (
                       addNewConditionItem(index);
                     }}
                     variant="link"
-                    iconName="add-plus"
+                    iconName="filter"
                   />
                 </div>
               )}

@@ -11,17 +11,17 @@
  *  and limitations under the License.
  */
 
-import { AppLayout } from '@cloudscape-design/components';
+import { Alert, AppLayout } from '@cloudscape-design/components';
+import { getProjectList } from 'apis/project';
 import Loading from 'components/common/Loading';
-import Navigation from 'components/layouts/Navigation';
-import HeaderSwitchSpaceModal from 'components/layouts/SwitchSpaceModal';
+import AnalyticsNavigation from 'components/layouts/AnalyticsNavigation';
+import { t } from 'i18next';
 import { useLocalStorage } from 'pages/common/use-local-storage';
 import React, { useEffect, useState } from 'react';
 import { ANALYTICS_INFO_KEY } from 'ts/const';
 
 const AnalyticsHome: React.FC = () => {
-  const [loadingData, setLoadingData] = useState(true);
-  const [switchProjectVisible, setSwitchProjectVisible] = useState(false);
+  const [loading, setLoading] = useState<boolean>(false);
   const [analyticsInfo, setAnalyticsInfo] = useLocalStorage(
     ANALYTICS_INFO_KEY,
     {
@@ -32,36 +32,73 @@ const AnalyticsHome: React.FC = () => {
     }
   );
 
+  const gotoFirstProjectApp = async () => {
+    try {
+      const apps = [];
+      const { success, data }: ApiResponse<ResponseTableData<IProject>> =
+        await getProjectList({
+          pageNumber: 1,
+          pageSize: 9999,
+        });
+      if (success) {
+        for (const project of data.items) {
+          if (project.applications && project.reportingEnabled) {
+            for (const app of project.applications) {
+              apps.push({
+                projectId: project.id,
+                projectName: project.name,
+                appId: app.appId,
+                appName: app.name,
+              });
+            }
+          }
+        }
+      }
+      if (apps.length > 0) {
+        setAnalyticsInfo(apps[0]);
+        window.location.href = `/analytics/${apps[0].projectId}/app/${apps[0].appId}/dashboards`;
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   useEffect(() => {
-    setLoadingData(true);
+    setLoading(true);
     if (analyticsInfo.projectId && analyticsInfo.appId) {
       window.location.href = `/analytics/${analyticsInfo.projectId}/app/${analyticsInfo.appId}/dashboards`;
     } else {
-      setSwitchProjectVisible(true);
+      gotoFirstProjectApp();
+      setLoading(false);
     }
-    setLoadingData(false);
   }, []);
 
   return (
-    <AppLayout
-      toolsHide
-      content={
-        <div>
-          {loadingData ? (
-            <Loading />
-          ) : (
-            <HeaderSwitchSpaceModal
-              visible={switchProjectVisible}
-              disableClose={true}
-              setSwitchProjectVisible={setSwitchProjectVisible}
-              setAnalyticsInfo={setAnalyticsInfo}
-            />
-          )}
-        </div>
-      }
-      headerSelector="#header"
-      navigation={<Navigation activeHref="/analytics" />}
-    />
+    <div className="flex">
+      <AnalyticsNavigation activeHref={`/analytics`} />
+      <div className="flex-1">
+        <AppLayout
+          toolsHide
+          navigationHide
+          content={
+            <>
+              {loading ? (
+                <Loading />
+              ) : (
+                <Alert
+                  statusIconAriaLabel="Error"
+                  type="error"
+                  header={t('analytics:noDataAvailableTitle')}
+                >
+                  {t('analytics:noDataAvailableMessage')}
+                </Alert>
+              )}
+            </>
+          }
+          headerSelector="#header"
+        />
+      </div>
+    </div>
   );
 };
 

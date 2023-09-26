@@ -61,12 +61,12 @@ interface RetentionSelectProps {
   changeStartConditionValue: (
     index: number,
     conditionIndex: number,
-    value: any
+    value: string[]
   ) => void;
   changeRevisitConditionValue: (
     index: number,
     conditionIndex: number,
-    value: any
+    value: string[]
   ) => void;
   addNewEventAnalyticsItem: () => void;
   removeRetentionEventItem: (index: number) => void;

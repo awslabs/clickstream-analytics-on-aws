@@ -2,28 +2,57 @@
   "analytics": "分析",
   "dashboard": {
     "title": "看板",
-    "description": "此页面列出所有看板。",
+    "description": "您可以在此处查看开箱即用的用户生命周期面板，并创建带有探索分析的自定义面板。",
     "createTitle": "创建看板",
-    "createInputName": "请输入看板名称",
-    "createInputNamePlaceholder": "例如，my-dashboard",
-    "createDesc": "看板描述-可选",
-    "createDescPlaceholder": "例如，description of dashboard",
-    "createSheets": "工作表-可选",
+    "createInputName": "看板名称",
+    "createInputNameDec": "请输入看板的名称。",
+    "createInputNamePlaceholder": "例如，用户生命周期看板",
+    "createDesc": "描述",
+    "createDescDec": "请输入看板的描述。",
+    "createDescPlaceholder": "例如，电子商务的看板",
+    "createSheets": "工作表名称",
+    "createSheetsDec": "一个仪表板可以有多个工作表，用于将图表分组为不同的主题。默认情况下，如果未指定工作表名称，则解决方案会创建一个具有“Sheet 1”的工作表。",
+    "createSheetsPlaceholder": "工作表名称",
     "deleteTip1": "您确定要删除该看板吗 ",
-    "deleteTip2": " 删除看板将删除 QuickSight 中的所有数据。"
+    "deleteTip2": " 删除看板将删除 QuickSight 中的所有数据。",
+    "defaultUserLifecycle": "用户生命周期",
+    "defaultTag": "预置"
+  },
+  "realtime": {
+    "title": "实时",
+    "description": "您可以在此处实时查看应用程序和网站的关键指标。",
+    "disableMessage": "此项目尚未启用实时面板，请与管理员联系以打开实时面板。",
+    "configProject": "配置项目"
+  },
+  "analyzes": {
+    "title": "分析",
+    "description": "您可以在此处自定义视图和看板。",
+    "comeSoon": "当前功能即将上线"
+  },
+  "explore": {
+    "title": "探索",
+    "description": "探索允许您使用UI以动态方式查询和分析点击流数据。选择一个分析模型开始。",
+    "analyticsModel": "分析模型",
+    "exploitativeAnalytics": "探索性分析",
+    "funnelAnalysis": "漏斗分析",
+    "eventAnalysis": "事件分析",
+    "pathAnalysis": "路径分析",
+    "retentionAnalysis": "留存分析",
+    "userAnalytics": "用户分析",
+    "userSearch": "用户搜索"
   },
   "list": {
     "loading": "正在加载看板。",
     "noDashboard": "您还没有任何点击流分析看板。",
     "id": "ID",
     "description": "描述",
-    "createAt": "创建时间"
+    "createAt": "创建时间",
+    "createdBy": "创建者"
   },
   "header": {
     "modalTitle": "切换项目空间",
     "selectProjectTitle": "请选择一个项目",
     "selectAppTitle": "请选择一个应用程序",
-    "configurations": "配置",
     "saveToDashboardModalTitle": "保存到看板",
     "selectDashboardTitle": "请选择一个看板",
     "selectSheetTitle": "请选择一个工作表"
@@ -31,7 +60,6 @@
   "options": {
     "eventNumber": "事件数",
     "userNumber": "用户数",
-    "userPseudoNumber": "伪用户数",
     "customWindow": "自定义",
     "theDayWindow": "当天",
     "noWindow": "无",
@@ -53,12 +81,15 @@
     "platformWeb": "Web",
     "platformAndroid": "Android",
     "platformIOS": "iOS",
-    "platformWechatMinPro": "微信小程序"
+    "platformWechatMinPro": "微信小程序",
+    "directlyFollowed": "直接跟随",
+    "indirectlyFollowed": "非直接跟随"
   },
   "metadata": {
+    "description": "您可以在此处查看开箱即用的用户生命周期面板，并创建带有探索分析的自定义面板。",
     "event": {
-      "title": "原始事件",
-      "description": "原始事件的描述",
+      "title": "事件",
+      "description": "此表列出了您的点击流分析项目中的所有事件。",
       "tableColumnID": "ID",
       "tableColumnName": "事件名称",
       "tableColumnDisplayName": "显示名称",
@@ -197,8 +228,42 @@
     "eventSelectPlaceholder": "选择事件",
     "attributeSelectPlaceholder": "选择属性",
     "operatorSelectPlaceholder": "选择操作符",
-    "conditionValuePlaceholder": "输入值"
+    "conditionValuePlaceholder": "输入值",
+    "funnelModel": "漏斗模式",
+    "attributeGrouping": "属性分组",
+    "defineMetrics": "定义指标",
+    "realtimeStopped": "实时流已停止",
+    "realtimeStarted": "实时流已启动",
+    "reportingNotEnabled":"Reporting模块未启用"
   },
   "emptyData": "无数据",
-  "emptyDataMessage": "请先配置分析指标"
+  "emptyDataMessage": "请配置要查询的指标",
+  "noDataAvailableTitle": "没有可用于分析的点击流数据",
+  "noDataAvailableMessage": "该解决方案尚未找到任何具有点击流数据的项目，请与您的系统管理员联系以开始收集数据。",
+  "information": {
+    "dashboardsInfo": "dashboardsInfo",
+    "dashboardSheetInfo": "dashboardSheetInfo",
+    "userLifecycleInfo": "userLifecycleInfo",
+    "realtimeInfo": "realtimeInfo",
+    "dataManagementInfo": "dataManagementInfo",
+    "dataManagementEventInfo": "dataManagementEventInfo",
+    "metadataEventsInfo": "metadataEventsInfo",
+    "metadataEventParametersInfo": "metadataEventParametersInfo",
+    "metadataUserAttributesInfo": "metadataUserAttributesInfo",
+    "exploreInfo": "exploreInfo",
+    "analyticsModelInfo": "analyticsModelInfo",
+    "funnelInfo": "funnelInfo",
+    "funnelMetricsInfo": "funnelMetricsInfo",
+    "funnelModelInfo": "funnelModelInfo",
+    "funnelAssociateParameterInfo": "funnelAssociateParameterInfo",
+    "funnelWindowInfo": "funnelWindowInfo",
+    "eventInfo": "eventInfo",
+    "pathInfo": "pathInfo",
+    "pathMetricsInfo": "pathMetricsInfo",
+    "pathSessionDefInfo": "pathSessionDefInfo",
+    "pathNodeTypeInfo": "pathNodeTypeInfo",
+    "retentionInfo": "retentionInfo",
+    "introducingAnalyticsHeader": "介绍分析工作坊",
+    "introducingAnalyticsContent": "分析工作坊允许您在易于使用的UI上探索点击流数据，并提供对所有报告和看板的访问。"
+  }
 }

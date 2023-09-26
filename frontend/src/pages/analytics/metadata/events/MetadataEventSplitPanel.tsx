@@ -356,8 +356,12 @@ const MetadataEventSplitPanel: React.FC<MetadataEventSplitPanelProps> = (
                     }
                     tableColumnDefinitions={COLUMN_DEFINITIONS}
                     tableI18nStrings={{
-                      loadingText: t('analytics:metadata.labels.tableLoading'),
-                      emptyText: t('analytics:metadata.labels.tableEmpty'),
+                      loadingText: t(
+                        'analytics:labels.tableLoading'
+                      ),
+                      emptyText: t(
+                        'analytics:labels.tableEmpty'
+                      ),
                     }}
                   />
                 ),
@@ -382,8 +386,10 @@ const MetadataEventSplitPanel: React.FC<MetadataEventSplitPanelProps> = (
                     }
                     tableColumnDefinitions={COLUMN_DEFINITIONS}
                     tableI18nStrings={{
-                      loadingText: t('analytics:metadata.labels.tableLoading'),
-                      emptyText: t('analytics:metadata.labels.tableEmpty'),
+                      loadingText: t(
+                        'analytics:labels.tableLoading'
+                      ),
+                      emptyText: t('analytics:labels.tableEmpty'),
                     }}
                   />
                 ),

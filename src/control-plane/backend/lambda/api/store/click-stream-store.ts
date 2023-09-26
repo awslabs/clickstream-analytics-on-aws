@@ -35,6 +35,7 @@ export interface ClickStreamStore {
   getApplication: (projectId: string, appId: string) => Promise<IApplication | undefined>;
   updateApplication: (app: IApplication) => Promise<void>;
   listApplication: (projectId: string, order: string) => Promise<IApplication[]>;
+  listAllApplication: () => Promise<IApplication[]>;
   deleteApplication: (projectId: string, appId: string, operator: string) => Promise<void>;
   isApplicationExisted: (projectId: string, appId: string) => Promise<boolean>;
 

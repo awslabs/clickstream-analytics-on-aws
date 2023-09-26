@@ -12,26 +12,20 @@
  */
 
 import {
-  AppLayout,
-  Box,
   Button,
   ColumnLayout,
   Container,
-  ContentLayout,
   DateRangePickerProps,
   Header,
-  Select,
+  Link,
+  Popover,
+  SegmentedControl,
+  SegmentedControlProps,
   SelectProps,
   SpaceBetween,
 } from '@cloudscape-design/components';
-import {
-  getMetadataEventsList,
-  getMetadataParametersList,
-  getMetadataUserAttributesList,
-  getPipelineDetailByProjectId,
-  previewEvent,
-  warmup,
-} from 'apis/analytics';
+import { previewEvent } from 'apis/analytics';
+import ExtendIcon from 'components/common/ExtendIcon';
 import Loading from 'components/common/Loading';
 import {
   CategoryItemType,
@@ -41,9 +35,9 @@ import {
   INIT_SEGMENTATION_DATA,
   SegmentationFilterDataType,
 } from 'components/eventselect/AnalyticsType';
+import EventItem from 'components/eventselect/EventItem';
 import EventsSelect from 'components/eventselect/EventSelect';
 import SegmentationFilter from 'components/eventselect/SegmentationFilter';
-import Navigation from 'components/layouts/Navigation';
 import { cloneDeep } from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -54,8 +48,6 @@ import {
   ExploreConversionIntervalType,
   ExploreRequestAction,
   ExploreGroupColumn,
-  MetadataSource,
-  MetadataValueType,
 } from 'ts/explore-types';
 import { alertMsg, generateStr } from 'ts/utils';
 import {
@@ -63,8 +55,6 @@ import {
   getDateRange,
   getEventAndConditions,
   getGlobalEventCondition,
-  getWarmUpParameters,
-  metadataEventsConvertToCategoryItemType,
   parametersConvertToCategoryItemType,
   validEventAnalyticsItem,
 } from '../analytics-utils';
@@ -72,175 +62,87 @@ import ExploreDateRangePicker from '../comps/ExploreDateRangePicker';
 import ExploreEmbedFrame from '../comps/ExploreEmbedFrame';
 import SaveToDashboardModal from '../comps/SelectDashboardModal';
 
-const AnalyticsEvent: React.FC = () => {
+interface AnalyticsEventProps {
+  loading: boolean;
+  loadFunc: () => void;
+  pipeline: IPipeline;
+  metadataEvents: IMetadataEvent[];
+  metadataEventParameters: IMetadataEventParameter[];
+  metadataUserAttributes: IMetadataUserAttribute[];
+  categoryEvents: CategoryItemType[];
+  presetParameters: CategoryItemType[];
+}
+
+const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
+  props: AnalyticsEventProps
+) => {
   const { t } = useTranslation();
-  const { projectId, appId } = useParams();
-  const [loadingData, setLoadingData] = useState(false);
+  const {
+    loading,
+    pipeline,
+    metadataEvents,
+    metadataUserAttributes,
+    categoryEvents,
+    presetParameters,
+  } = props;
+  const { appId } = useParams();
+  const [loadingData, setLoadingData] = useState(loading);
   const [loadingChart, setLoadingChart] = useState(false);
   const [selectDashboardModalVisible, setSelectDashboardModalVisible] =
     useState(false);
   const [exploreEmbedUrl, setExploreEmbedUrl] = useState('');
-  const [pipeline, setPipeline] = useState({} as IPipeline);
-  const [metadataEvents, setMetadataEvents] = useState(
-    [] as CategoryItemType[]
-  );
-  const [originEvents, setOriginEvents] = useState([] as IMetadataEvent[]);
-  const [userAttributes, setUserAttributes] = useState<
-    IMetadataUserAttribute[]
-  >([]);
 
-  const defaultComputeMethodOption: SelectProps.Option = {
-    value: ExploreComputeMethod.USER_CNT,
-    label: t('analytics:options.userPseudoNumber') ?? '',
-  };
-
-  const computeMethodOptions: SelectProps.Options = [
-    defaultComputeMethodOption,
+  const defaultChartTypeOption = 'line-chart';
+  const chartTypeOptions: SegmentedControlProps.Option[] = [
     {
-      value: ExploreComputeMethod.USER_ID_CNT,
-      label: t('analytics:options.userNumber') ?? '',
+      id: 'line-chart',
+      iconSvg: <ExtendIcon icon="BsGraphUp" />,
     },
     {
-      value: ExploreComputeMethod.EVENT_CNT,
-      label: t('analytics:options.eventNumber') ?? '',
+      id: 'bar-chart',
+      iconSvg: <ExtendIcon icon="BsBarChartFill" />,
     },
   ];
-  const [selectedMetric, setSelectedMetric] =
-    useState<SelectProps.Option | null>(defaultComputeMethodOption);
+  const [chartType, setChartType] = useState(defaultChartTypeOption);
+
+  const defaultComputeMethodOption: SelectProps.Option = {
+    value: ExploreComputeMethod.USER_ID_CNT,
+    label: t('analytics:options.userNumber') ?? 'User number',
+  };
 
   const [eventOptionData, setEventOptionData] = useState<IEventAnalyticsItem[]>(
     [
       {
         ...DEFAULT_EVENT_ITEM,
-        isMultiSelect: false,
+        calculateMethodOption: defaultComputeMethodOption,
+        enableChangeRelation: true,
       },
     ]
   );
 
   const [segmentationOptionData, setSegmentationOptionData] =
-    useState<SegmentationFilterDataType>(INIT_SEGMENTATION_DATA);
+    useState<SegmentationFilterDataType>({
+      ...INIT_SEGMENTATION_DATA,
+      conditionOptions: presetParameters,
+    });
+
+  const [groupOption, setGroupOption] = useState<SelectProps.Option | null>(
+    null
+  );
 
   const getEventParameters = (eventName?: string) => {
-    const event = originEvents.find((item) => item.name === eventName);
+    const event = metadataEvents.find((item) => item.name === eventName);
     if (event) {
       return event.associatedParameters;
     }
     return [];
   };
 
-  const getUserAttributes = async () => {
-    try {
-      const {
-        success,
-        data,
-      }: ApiResponse<ResponseTableData<IMetadataUserAttribute>> =
-        await getMetadataUserAttributesList({
-          projectId: projectId ?? '',
-          appId: appId ?? '',
-        });
-      if (success) {
-        setUserAttributes(data.items);
-        return data.items;
-      }
-      return [];
-    } catch (error) {
-      return [];
-    }
-  };
-
-  const getAllParameters = async () => {
-    try {
-      const {
-        success,
-        data,
-      }: ApiResponse<ResponseTableData<IMetadataEventParameter>> =
-        await getMetadataParametersList({
-          projectId: projectId ?? '',
-          appId: appId ?? '',
-        });
-      if (success) {
-        return data.items;
-      }
-    } catch (error) {
-      console.log(error);
-      return [];
-    }
-  };
-
-  const listMetadataEvents = async () => {
-    try {
-      const { success, data }: ApiResponse<ResponseTableData<IMetadataEvent>> =
-        await getMetadataEventsList({
-          projectId: projectId ?? '',
-          appId: appId ?? '',
-          attribute: true,
-        });
-      if (success) {
-        const events = metadataEventsConvertToCategoryItemType(data.items);
-        setOriginEvents(data.items);
-        setMetadataEvents(events);
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  const loadPipeline = async () => {
-    setLoadingData(true);
-    try {
-      const { success, data }: ApiResponse<IPipeline> =
-        await getPipelineDetailByProjectId(projectId ?? '');
-      if (success) {
-        setPipeline(data);
-        setLoadingData(false);
-        const params = getWarmUpParameters(projectId ?? '', appId ?? '', data);
-        if (params) {
-          await warmup(params);
-        }
-      }
-    } catch (error) {
-      console.log(error);
-    }
-    setLoadingData(false);
-  };
-
-  const listAllAttributes = async () => {
-    try {
-      const parameters = await getAllParameters();
-      const presetParameters = parameters?.filter(
-        (item) => item.metadataSource === MetadataSource.PRESET
-      );
-      const userAttributes = await getUserAttributes();
-      const presetUserAttributes = userAttributes.filter(
-        (item) => item.metadataSource === MetadataSource.PRESET
-      );
-      const conditionOptions = parametersConvertToCategoryItemType(
-        presetUserAttributes,
-        presetParameters
-      );
-      setSegmentationOptionData((prev) => {
-        const dataObj = cloneDeep(prev);
-        dataObj.conditionOptions = conditionOptions;
-        return dataObj;
-      });
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  useEffect(() => {
-    if (projectId && appId) {
-      loadPipeline();
-      listMetadataEvents();
-      listAllAttributes();
-    }
-  }, [projectId, appId]);
-
   const [dateRangeValue, setDateRangeValue] =
     React.useState<DateRangePickerProps.Value>({
       type: 'relative',
-      amount: 7,
-      unit: 'day',
+      amount: 1,
+      unit: 'month',
     });
 
   const [timeGranularity, setTimeGranularity] =
@@ -251,29 +153,27 @@ const AnalyticsEvent: React.FC = () => {
 
   const resetConfig = async () => {
     setLoadingData(true);
-    setSelectedMetric({
-      value: ExploreComputeMethod.USER_CNT,
-      label: t('analytics:options.userPseudoNumber') ?? '',
-    });
     setEventOptionData([
       {
         ...DEFAULT_EVENT_ITEM,
-        isMultiSelect: false,
+        calculateMethodOption: defaultComputeMethodOption,
+        enableChangeRelation: true,
       },
     ]);
-    setSegmentationOptionData(INIT_SEGMENTATION_DATA);
+    setSegmentationOptionData({
+      ...INIT_SEGMENTATION_DATA,
+      conditionOptions: presetParameters,
+    });
     setDateRangeValue({
       type: 'relative',
-      amount: 7,
-      unit: 'day',
+      amount: 1,
+      unit: 'month',
     });
     setExploreEmbedUrl('');
     setTimeGranularity({
       value: ExploreGroupColumn.DAY,
       label: t('analytics:options.dayTimeGranularity') ?? '',
     });
-    await listMetadataEvents();
-    await listAllAttributes();
     setLoadingData(false);
   };
 
@@ -351,7 +251,7 @@ const AnalyticsEvent: React.FC = () => {
       specifyJoinColumn: false,
       conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
       conversionIntervalInSeconds: 60 * 60 * 24,
-      computeMethod: selectedMetric?.value ?? ExploreComputeMethod.USER_CNT,
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
       eventAndConditions: getEventAndConditions(eventOptionData),
       globalEventCondition: getGlobalEventCondition(segmentationOptionData),
       timeScopeType: dateRangeParams?.timeScopeType,
@@ -392,315 +292,292 @@ const AnalyticsEvent: React.FC = () => {
     }
   };
 
+  useEffect(() => {
+    clickPreview();
+  }, [timeGranularity, dateRangeValue]);
+
   return (
-    <AppLayout
-      toolsHide
-      content={
-        <>
-          <ContentLayout
-            header={
-              <SpaceBetween size="m">
-                <Header variant="h1">{t('nav.analytics.exploreEvent')}</Header>
-              </SpaceBetween>
-            }
-          >
-            <SpaceBetween direction="vertical" size="l">
-              <Container
-                header={
-                  <Header
-                    variant="h2"
-                    actions={
-                      <SpaceBetween direction="horizontal" size="xs">
-                        <Button
-                          iconName="refresh"
-                          onClick={resetConfig}
-                          loading={loadingData}
-                        >
-                          {t('button.reset')}
-                        </Button>
-                        <Button
-                          variant="primary"
-                          loading={loadingData}
-                          onClick={() => {
-                            setSelectDashboardModalVisible(true);
-                          }}
-                        >
-                          {t('button.saveToDashboard')}
-                        </Button>
-                      </SpaceBetween>
-                    }
-                  >
-                    {t('analytics:header.configurations')}
-                  </Header>
-                }
-              >
-                <div className="cs-analytics-config">
-                  <SpaceBetween direction="vertical" size="xs">
-                    <Box variant="awsui-key-label">
-                      {t('analytics:labels.metrics')}
-                    </Box>
-                    <div className="cs-analytics-config">
-                      <Select
-                        selectedOption={selectedMetric}
-                        options={computeMethodOptions}
-                        onChange={(event) => {
-                          setSelectedMetric(event.detail.selectedOption);
-                        }}
-                      />
-                    </div>
-                  </SpaceBetween>
-                </div>
-                <br />
-                <SpaceBetween direction="vertical" size="xs">
-                  <Box variant="awsui-key-label">
-                    {t('analytics:labels.dateRange')}
-                  </Box>
-                  <ExploreDateRangePicker
-                    dateRangeValue={dateRangeValue}
-                    setDateRangeValue={setDateRangeValue}
-                    timeGranularity={timeGranularity}
-                    setTimeGranularity={setTimeGranularity}
-                  />
-                </SpaceBetween>
-                <br />
-                <ColumnLayout columns={2} variant="text-grid">
-                  <SpaceBetween direction="vertical" size="xs">
-                    <Box variant="awsui-key-label">
-                      {t('analytics:labels.eventsSelect')}
-                    </Box>
-                    <div>
-                      <EventsSelect
-                        data={eventOptionData}
-                        eventOptionList={metadataEvents}
-                        addEventButtonLabel={t('common:button.addEvent')}
-                        addNewEventAnalyticsItem={() => {
-                          setEventOptionData((prev) => {
-                            const preEventList = cloneDeep(prev);
-                            return [
-                              ...preEventList,
-                              {
-                                ...DEFAULT_EVENT_ITEM,
-                                isMultiSelect: false,
-                              },
-                            ];
-                          });
-                        }}
-                        removeEventItem={(index) => {
-                          setEventOptionData((prev) => {
-                            const dataObj = cloneDeep(prev);
-                            return dataObj.filter(
-                              (item, eIndex) => eIndex !== index
-                            );
-                          });
-                        }}
-                        addNewConditionItem={(index: number) => {
-                          setEventOptionData((prev) => {
-                            const dataObj = cloneDeep(prev);
-                            dataObj[index].conditionList.push(
-                              DEFAULT_CONDITION_DATA
-                            );
-                            return dataObj;
-                          });
-                        }}
-                        removeEventCondition={(eventIndex, conditionIndex) => {
-                          setEventOptionData((prev) => {
-                            const dataObj = cloneDeep(prev);
-                            const newCondition = dataObj[
-                              eventIndex
-                            ].conditionList.filter(
-                              (item, i) => i !== conditionIndex
-                            );
-                            dataObj[eventIndex].conditionList = newCondition;
-                            return dataObj;
-                          });
-                        }}
-                        changeConditionCategoryOption={(
-                          eventIndex,
-                          conditionIndex,
-                          category
-                        ) => {
-                          setEventOptionData((prev) => {
-                            const dataObj = cloneDeep(prev);
-                            dataObj[eventIndex].conditionList[
-                              conditionIndex
-                            ].conditionOption = category;
-                            if (
-                              category?.valueType === MetadataValueType.STRING
-                            ) {
-                              dataObj[eventIndex].conditionList[
-                                conditionIndex
-                              ].conditionValue = [];
-                            } else {
-                              dataObj[eventIndex].conditionList[
-                                conditionIndex
-                              ].conditionValue = '';
-                            }
-                            return dataObj;
-                          });
-                        }}
-                        changeConditionOperator={(
-                          eventIndex,
-                          conditionIndex,
-                          operator
-                        ) => {
-                          setEventOptionData((prev) => {
-                            const dataObj = cloneDeep(prev);
-                            dataObj[eventIndex].conditionList[
-                              conditionIndex
-                            ].conditionOperator = operator;
-                            return dataObj;
-                          });
-                        }}
-                        changeConditionValue={(
-                          eventIndex,
-                          conditionIndex,
-                          value
-                        ) => {
-                          setEventOptionData((prev) => {
-                            const dataObj = cloneDeep(prev);
-                            dataObj[eventIndex].conditionList[
-                              conditionIndex
-                            ].conditionValue = value;
-                            return dataObj;
-                          });
-                        }}
-                        changeCurCalcMethodOption={(eventIndex, method) => {
-                          setEventOptionData((prev) => {
-                            const dataObj = cloneDeep(prev);
-                            dataObj[eventIndex].calculateMethodOption = method;
-                            return dataObj;
-                          });
-                        }}
-                        changeCurCategoryOption={async (
-                          eventIndex,
-                          category
-                        ) => {
-                          const eventName = category?.value;
-                          const eventParameters = getEventParameters(eventName);
-                          const parameterOption =
-                            parametersConvertToCategoryItemType(
-                              userAttributes,
-                              eventParameters
-                            );
-                          setEventOptionData((prev) => {
-                            const dataObj = cloneDeep(prev);
-                            dataObj[eventIndex].selectedEventOption = category;
-                            dataObj[eventIndex].conditionOptions =
-                              parameterOption;
-                            return dataObj;
-                          });
-                        }}
-                        changeCurRelationShip={(eventIndex, relation) => {
-                          setEventOptionData((prev) => {
-                            const dataObj = cloneDeep(prev);
-                            dataObj[eventIndex].conditionRelationShip =
-                              relation;
-                            return dataObj;
-                          });
-                        }}
-                      />
-                    </div>
-                  </SpaceBetween>
-                  <SpaceBetween direction="vertical" size="xs">
-                    <Box variant="awsui-key-label">
-                      {t('analytics:labels.filters')}
-                    </Box>
-                    <div>
-                      <SegmentationFilter
-                        segmentationData={segmentationOptionData}
-                        addNewConditionItem={() => {
-                          setSegmentationOptionData((prev) => {
-                            const dataObj = cloneDeep(prev);
-                            dataObj.data.push(DEFAULT_CONDITION_DATA);
-                            return dataObj;
-                          });
-                        }}
-                        removeEventCondition={(index) => {
-                          setSegmentationOptionData((prev) => {
-                            const dataObj = cloneDeep(prev);
-                            const newCondition = dataObj.data.filter(
-                              (item, i) => i !== index
-                            );
-                            dataObj.data = newCondition;
-                            return dataObj;
-                          });
-                        }}
-                        changeConditionCategoryOption={(index, category) => {
-                          setSegmentationOptionData((prev) => {
-                            const dataObj = cloneDeep(prev);
-                            dataObj.data[index].conditionOption = category;
-                            if (
-                              category?.valueType === MetadataValueType.STRING
-                            ) {
-                              dataObj.data[index].conditionValue = [];
-                            } else {
-                              dataObj.data[index].conditionValue = '';
-                            }
-                            return dataObj;
-                          });
-                        }}
-                        changeConditionOperator={(index, operator) => {
-                          setSegmentationOptionData((prev) => {
-                            const dataObj = cloneDeep(prev);
-                            dataObj.data[index].conditionOperator = operator;
-                            return dataObj;
-                          });
-                        }}
-                        changeConditionValue={(index, value) => {
-                          setSegmentationOptionData((prev) => {
-                            const dataObj = cloneDeep(prev);
-                            dataObj.data[index].conditionValue = value;
-                            return dataObj;
-                          });
-                        }}
-                        changeCurRelationShip={(relation) => {
-                          setSegmentationOptionData((prev) => {
-                            const dataObj = cloneDeep(prev);
-                            dataObj.conditionRelationShip = relation;
-                            return dataObj;
-                          });
-                        }}
-                      />
-                    </div>
-                  </SpaceBetween>
-                </ColumnLayout>
-                <br />
-                <Button
-                  variant="primary"
-                  iconName="search"
-                  onClick={clickPreview}
-                  loading={loadingData}
+    <>
+      <SpaceBetween direction="vertical" size="l">
+        <Container
+          header={
+            <Header
+              variant="h2"
+              info={
+                <Popover
+                  triggerType="custom"
+                  content={t('analytics:information.eventInfo')}
                 >
-                  {t('button.preview')}
-                </Button>
-              </Container>
-              <Container>
-                {loadingChart ? (
-                  <Loading />
-                ) : (
-                  <ExploreEmbedFrame
-                    embedType="dashboard"
-                    embedUrl={exploreEmbedUrl}
-                    embedId={`explore_${generateStr(6)}`}
-                  />
-                )}
-              </Container>
+                  <Link variant="info">{t('info')}</Link>
+                </Popover>
+              }
+              actions={
+                <SpaceBetween direction="horizontal" size="xs">
+                  <Button
+                    iconName="refresh"
+                    onClick={resetConfig}
+                    loading={loadingData}
+                  >
+                    {t('button.reset')}
+                  </Button>
+                  <Button
+                    variant="primary"
+                    loading={loadingData}
+                    onClick={() => {
+                      setSelectDashboardModalVisible(true);
+                    }}
+                  >
+                    {t('button.saveToDashboard')}
+                  </Button>
+                </SpaceBetween>
+              }
+            >
+              {t('analytics:explore.eventAnalysis')}
+            </Header>
+          }
+        >
+          <ColumnLayout columns={2} variant="text-grid">
+            <SpaceBetween direction="vertical" size="xs">
+              <Button
+                variant="link"
+                iconName="menu"
+                className="cs-analytics-select-event"
+              >
+                {t('analytics:labels.defineMetrics')}
+              </Button>
+              <EventsSelect
+                data={eventOptionData}
+                eventOptionList={categoryEvents}
+                addEventButtonLabel={t('common:button.addEvent')}
+                addNewEventAnalyticsItem={() => {
+                  setEventOptionData((prev) => {
+                    const preEventList = cloneDeep(prev);
+                    return [
+                      ...preEventList,
+                      {
+                        ...DEFAULT_EVENT_ITEM,
+                        calculateMethodOption: defaultComputeMethodOption,
+                        enableChangeRelation: true,
+                      },
+                    ];
+                  });
+                }}
+                removeEventItem={(index) => {
+                  setEventOptionData((prev) => {
+                    const dataObj = cloneDeep(prev);
+                    return dataObj.filter((item, eIndex) => eIndex !== index);
+                  });
+                }}
+                addNewConditionItem={(index: number) => {
+                  setEventOptionData((prev) => {
+                    const dataObj = cloneDeep(prev);
+                    dataObj[index].conditionList.push(DEFAULT_CONDITION_DATA);
+                    return dataObj;
+                  });
+                }}
+                removeEventCondition={(eventIndex, conditionIndex) => {
+                  setEventOptionData((prev) => {
+                    const dataObj = cloneDeep(prev);
+                    const newCondition = dataObj[
+                      eventIndex
+                    ].conditionList.filter((item, i) => i !== conditionIndex);
+                    dataObj[eventIndex].conditionList = newCondition;
+                    return dataObj;
+                  });
+                }}
+                changeConditionCategoryOption={(
+                  eventIndex,
+                  conditionIndex,
+                  category
+                ) => {
+                  setEventOptionData((prev) => {
+                    const dataObj = cloneDeep(prev);
+                    dataObj[eventIndex].conditionList[
+                      conditionIndex
+                    ].conditionOption = category;
+                    dataObj[eventIndex].conditionList[
+                      conditionIndex
+                    ].conditionValue = [];
+                    return dataObj;
+                  });
+                }}
+                changeConditionOperator={(
+                  eventIndex,
+                  conditionIndex,
+                  operator
+                ) => {
+                  setEventOptionData((prev) => {
+                    const dataObj = cloneDeep(prev);
+                    dataObj[eventIndex].conditionList[
+                      conditionIndex
+                    ].conditionOperator = operator;
+                    return dataObj;
+                  });
+                }}
+                changeConditionValue={(eventIndex, conditionIndex, value) => {
+                  setEventOptionData((prev) => {
+                    const dataObj = cloneDeep(prev);
+                    dataObj[eventIndex].conditionList[
+                      conditionIndex
+                    ].conditionValue = value;
+                    return dataObj;
+                  });
+                }}
+                changeCurCalcMethodOption={(eventIndex, method) => {
+                  setEventOptionData((prev) => {
+                    const dataObj = cloneDeep(prev);
+                    dataObj[eventIndex].calculateMethodOption = method;
+                    return dataObj;
+                  });
+                }}
+                changeCurCategoryOption={async (eventIndex, category) => {
+                  const eventName = category?.value;
+                  const eventParameters = getEventParameters(eventName);
+                  const parameterOption = parametersConvertToCategoryItemType(
+                    metadataUserAttributes,
+                    eventParameters
+                  );
+                  setEventOptionData((prev) => {
+                    const dataObj = cloneDeep(prev);
+                    dataObj[eventIndex].selectedEventOption = category;
+                    dataObj[eventIndex].conditionOptions = parameterOption;
+                    return dataObj;
+                  });
+                }}
+                changeCurRelationShip={(eventIndex, relation) => {
+                  setEventOptionData((prev) => {
+                    const dataObj = cloneDeep(prev);
+                    dataObj[eventIndex].conditionRelationShip = relation;
+                    return dataObj;
+                  });
+                }}
+              />
             </SpaceBetween>
-          </ContentLayout>
-          <SaveToDashboardModal
-            visible={selectDashboardModalVisible}
-            disableClose={false}
+            <SpaceBetween direction="vertical" size="xs">
+              <Button
+                variant="link"
+                iconName="filter"
+                className="cs-analytics-select-filter"
+              >
+                {t('analytics:labels.filters')}
+              </Button>
+              <SegmentationFilter
+                segmentationData={segmentationOptionData}
+                addNewConditionItem={() => {
+                  setSegmentationOptionData((prev) => {
+                    const dataObj = cloneDeep(prev);
+                    dataObj.data.push(DEFAULT_CONDITION_DATA);
+                    return dataObj;
+                  });
+                }}
+                removeEventCondition={(index) => {
+                  setSegmentationOptionData((prev) => {
+                    const dataObj = cloneDeep(prev);
+                    const newCondition = dataObj.data.filter(
+                      (item, i) => i !== index
+                    );
+                    dataObj.data = newCondition;
+                    return dataObj;
+                  });
+                }}
+                changeConditionCategoryOption={(index, category) => {
+                  setSegmentationOptionData((prev) => {
+                    const dataObj = cloneDeep(prev);
+                    dataObj.data[index].conditionOption = category;
+                    dataObj.data[index].conditionValue = [];
+                    return dataObj;
+                  });
+                }}
+                changeConditionOperator={(index, operator) => {
+                  setSegmentationOptionData((prev) => {
+                    const dataObj = cloneDeep(prev);
+                    dataObj.data[index].conditionOperator = operator;
+                    return dataObj;
+                  });
+                }}
+                changeConditionValue={(index, value) => {
+                  setSegmentationOptionData((prev) => {
+                    const dataObj = cloneDeep(prev);
+                    dataObj.data[index].conditionValue = value;
+                    return dataObj;
+                  });
+                }}
+                changeCurRelationShip={(relation) => {
+                  setSegmentationOptionData((prev) => {
+                    const dataObj = cloneDeep(prev);
+                    dataObj.conditionRelationShip = relation;
+                    return dataObj;
+                  });
+                }}
+              />
+              <br />
+              <Button variant="link" className="cs-analytics-select-group">
+                {t('analytics:labels.attributeGrouping')}
+              </Button>
+              <div className="cs-analytics-select-group-item">
+                <div className="cs-analytics-dropdown">
+                  <div className="cs-analytics-parameter">
+                    <div className="flex-1">
+                      <EventItem
+                        placeholder={
+                          t('analytics:labels.attributeSelectPlaceholder') ?? ''
+                        }
+                        categoryOption={groupOption}
+                        changeCurCategoryOption={(item) => {
+                          setGroupOption(item);
+                        }}
+                        categories={presetParameters}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </SpaceBetween>
+          </ColumnLayout>
+          <br />
+          <Button
+            variant="primary"
+            iconName="search"
+            onClick={clickPreview}
             loading={loadingData}
-            setModalVisible={setSelectDashboardModalVisible}
-            save={saveToDashboard}
-          />
-        </>
-      }
-      headerSelector="#header"
-      navigation={
-        <Navigation activeHref={`/analytics/${projectId}/app/${appId}/event`} />
-      }
-    />
+          >
+            {t('button.query')}
+          </Button>
+        </Container>
+        <Container>
+          <div className="cs-analytics-data-range">
+            <ExploreDateRangePicker
+              dateRangeValue={dateRangeValue}
+              setDateRangeValue={setDateRangeValue}
+              timeGranularity={timeGranularity}
+              setTimeGranularity={setTimeGranularity}
+            />
+            <SegmentedControl
+              selectedId={chartType}
+              onChange={({ detail }) => setChartType(detail.selectedId)}
+              options={chartTypeOptions}
+            />
+          </div>
+          <br />
+          {loadingChart ? (
+            <Loading />
+          ) : (
+            <ExploreEmbedFrame
+              embedType="dashboard"
+              embedUrl={exploreEmbedUrl}
+              embedId={`explore_${generateStr(6)}`}
+            />
+          )}
+        </Container>
+      </SpaceBetween>
+      <SaveToDashboardModal
+        visible={selectDashboardModalVisible}
+        disableClose={false}
+        loading={loadingData}
+        setModalVisible={setSelectDashboardModalVisible}
+        save={saveToDashboard}
+      />
+    </>
   );
 };
 

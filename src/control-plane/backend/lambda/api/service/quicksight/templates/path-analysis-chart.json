@@ -34,17 +34,15 @@
                   ],
                   "Weight": [
                       {
-                          "NumericalMeasureField": {
-                              "FieldId": "{{weightFieldId}}",
-                              "Column": {
-                                  "DataSetIdentifier": "{{dataSetIdentifier}}",
-                                  "ColumnName": "x_id"
-                              },
-                              "AggregationFunction": {
-                                  "SimpleNumericalAggregation": "DISTINCT_COUNT"
-                              }
-                          }
-                      }
+                        "CategoricalMeasureField":{
+                            "FieldId":"{{weightFieldId}}",
+                            "Column":{
+                                "DataSetIdentifier":"{{dataSetIdentifier}}",
+                                "ColumnName":"x_id"
+                            },
+                            "AggregationFunction":"DISTINCT_COUNT"
+                        }
+                    }
                   ]
               }
           },

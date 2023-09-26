@@ -11,53 +11,33 @@
  *  and limitations under the License.
  */
 import {
-  Button,
   Header,
   HeaderProps,
   Link,
-  SpaceBetween,
+  Popover,
 } from '@cloudscape-design/components';
-import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface MetadataTableHeaderProps extends HeaderProps {
   title?: string;
-  refreshButtonText?: string;
-  extraActions?: React.ReactNode;
   selectedItemsCount: number;
-  onRefreshButtonClick?: () => void;
-  onInfoLinkClick?: () => void;
+  infoContent?: string;
 }
 
 export function MetadataTableHeader({
   title = '',
-  refreshButtonText = '',
-  extraActions = null,
   selectedItemsCount,
-  onRefreshButtonClick,
-  onInfoLinkClick,
+  infoContent,
   ...props
 }: MetadataTableHeaderProps) {
+  const { t } = useTranslation();
   return (
     <Header
       variant="awsui-h1-sticky"
       info={
-        onInfoLinkClick && (
-          <Link variant="info" onFollow={onInfoLinkClick}>
-            Info
-          </Link>
-        )
-      }
-      actions={
-        <SpaceBetween size="xs" direction="horizontal">
-          {extraActions}
-          <Button
-            data-testid="header-btn-create"
-            variant="primary"
-            onClick={onRefreshButtonClick}
-          >
-            {refreshButtonText}
-          </Button>
-        </SpaceBetween>
+        <Popover triggerType="custom" content={infoContent}>
+          <Link variant="info">{t('info')}</Link>
+        </Popover>
       }
       {...props}
     >

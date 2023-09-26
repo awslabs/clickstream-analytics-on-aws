@@ -13,6 +13,11 @@
 
 export {};
 declare global {
+  type IMetadataType =
+    | IMetadataEvent
+    | IMetadataEventParameter
+    | IMetadataUserAttribute;
+
   interface IMetadataEvent {
     readonly id: string;
     readonly type: string;
@@ -132,14 +137,27 @@ declare global {
       | 'other';
     readonly property: string;
     readonly operator: string;
-    readonly value: string;
+    readonly value: string[];
     readonly dataType: MetadataValueType;
+  }
+
+  interface IRetentionJoinColumn {
+    readonly category:
+      | 'user'
+      | 'event'
+      | 'device'
+      | 'geo'
+      | 'app_info'
+      | 'traffic_source'
+      | 'other';
+    readonly property: string;
   }
 
   interface IEventAndCondition {
     readonly eventName: string;
-    readonly conditions?: ICondition[];
-    readonly conditionOperator: 'and' | 'or';
+    readonly sqlCondition?: ISQLCondition;
+    readonly retentionJoinColumn?: IRetentionJoinColumn;
+    readonly method?: ExploreComputeMethod;
   }
 
   interface ISQLCondition {
@@ -181,6 +199,7 @@ declare global {
     readonly sheets: IAnalyticsDashboardSheet[];
     readonly ownerPrincipal: string;
     readonly defaultDataSourceArn: string;
+    readonly embedUrl?: string;
 
     readonly createAt: number;
     readonly updateAt: number;

@@ -1,8 +1,8 @@
 {
   "ElementId": "",
   "ElementType": "FILTER_CONTROL",
-  "ColumnIndex": 1,
+  "ColumnIndex": 0,
   "ColumnSpan": 8,
   "RowIndex": 0,
-  "RowSpan": 2
+  "RowSpan": 4
 }

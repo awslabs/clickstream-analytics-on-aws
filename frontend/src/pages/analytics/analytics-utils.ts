@@ -32,6 +32,7 @@ import {
   OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN,
 } from 'ts/constant-ln';
 import {
+  ExploreComputeMethod,
   ExploreConversionIntervalType,
   ExplorePathSessionDef,
   ExploreRelativeTimeUnit,
@@ -144,24 +145,24 @@ export const parametersConvertToCategoryItemType = (
 
 export const validEventAnalyticsItem = (item: IEventAnalyticsItem) => {
   return (
-    item.selectedEventOption !== null &&
-    item.selectedEventOption.value?.trim() !== ''
+    item.selectedEventOption && item.selectedEventOption.value?.trim() !== ''
   );
 };
 
 export const validRetentionAnalyticsItem = (item: IRetentionAnalyticsItem) => {
   return (
-    item.startEventOption !== null &&
-    item.startEventOption.value?.trim() !== '' &&
-    item.revisitEventOption !== null &&
-    item.revisitEventOption.value?.trim() !== ''
+    item.startEventOption &&
+    item.startEventOption?.value?.trim() !== '' &&
+    item.revisitEventOption &&
+    item.revisitEventOption?.value?.trim() !== ''
   );
 };
 
 export const validConditionItemType = (condition: IConditionItemType) => {
   return (
-    condition.conditionOption?.value !== null &&
-    condition.conditionOption?.value?.length !== 0
+    condition.conditionOption &&
+    condition.conditionOption?.value?.trim() !== '' &&
+    condition.conditionValue.length > 0
   );
 };
 
@@ -188,8 +189,12 @@ export const getEventAndConditions = (
 
       const eventAndCondition: IEventAndCondition = {
         eventName: item.selectedEventOption?.value ?? '',
-        conditions: conditions,
-        conditionOperator: 'and',
+        sqlCondition: {
+          conditions: conditions,
+          conditionOperator: item.conditionRelationShip,
+        },
+        method:
+          item.calculateMethodOption?.value ?? ExploreComputeMethod.USER_ID_CNT,
       };
       eventAndConditions.push(eventAndCondition);
     }
@@ -235,13 +240,17 @@ export const getPairEventAndConditions = (
       const pairEventAndCondition: IPairEventAndCondition = {
         startEvent: {
           eventName: item.startEventOption?.value ?? '',
-          conditions: startConditions,
-          conditionOperator: item.startConditionRelationShip,
+          sqlCondition: {
+            conditions: startConditions,
+            conditionOperator: item.startConditionRelationShip,
+          },
         },
         backEvent: {
           eventName: item.revisitEventOption?.value ?? '',
-          conditions: revisitConditions,
-          conditionOperator: item.revisitConditionRelationShip,
+          sqlCondition: {
+            conditions: revisitConditions,
+            conditionOperator: item.revisitConditionRelationShip,
+          },
         },
       };
       pairEventAndConditions.push(pairEventAndCondition);

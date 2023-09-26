@@ -20,11 +20,13 @@ import {
 } from '@cloudscape-design/components';
 import { getAnalyticsDashboardList } from 'apis/analytics';
 import AnalyticsNavigation from 'components/layouts/AnalyticsNavigation';
+import CustomBreadCrumb from 'components/layouts/CustomBreadCrumb';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { TIME_FORMAT } from 'ts/const';
+import { DEFAULT_DASHBOARD_NAME } from 'ts/constant-ln';
 import CreateDashboard from './create/CreateDashboard';
 import DashboardHeader from '../comps/DashboardHeader';
 
@@ -42,31 +44,41 @@ const AnalyticsDashboardCard: React.FC<any> = () => {
   >([]);
   const CARD_DEFINITIONS = {
     header: (item: IAnalyticsDashboard) => (
-      <div>
-        <Link
-          fontSize="heading-m"
-          href={`/analytics/${projectId}/app/${appId}/dashboard/${item.id}`}
-        >
-          {item.name}
-        </Link>
-      </div>
+      <Link
+        variant="secondary"
+        fontSize="heading-m"
+        href={`/analytics/${projectId}/app/${appId}/dashboard/${item.id}`}
+      >
+        {item.name === DEFAULT_DASHBOARD_NAME ? (
+          <>
+            {t('analytics:dashboard.defaultUserLifecycle')} -
+            {
+              <small>
+                <i> {t('analytics:dashboard.defaultTag')}</i>
+              </small>
+            }
+          </>
+        ) : (
+          item.name
+        )}
+      </Link>
     ),
     sections: [
       {
         id: 'description',
         header: '',
-        content: (item: IAnalyticsDashboard) => item.description,
-      },
-      {
-        id: 'id',
-        header: t('analytics:list.id'),
-        content: (item: IAnalyticsDashboard) => item.id,
+        content: (item: IAnalyticsDashboard) => item.description || '-',
       },
       {
         id: 'createAt',
         header: t('analytics:list.createAt'),
         content: (item: IAnalyticsDashboard) =>
-          moment(item?.createAt).format(TIME_FORMAT) || '-',
+          item?.createAt ? moment(item?.createAt).format(TIME_FORMAT) : '-',
+      },
+      {
+        id: 'operator',
+        header: t('analytics:list.createdBy'),
+        content: (item: IAnalyticsDashboard) => item.operator || '-',
       },
     ],
   };
@@ -162,7 +174,19 @@ const AnalyticsDashboardCard: React.FC<any> = () => {
 };
 
 const AnalyticsDashboard: React.FC = () => {
+  const { t } = useTranslation();
   const { projectId, appId } = useParams();
+
+  const breadcrumbItems = [
+    {
+      text: t('breadCrumb.analyticsStudio'),
+      href: '/analytics',
+    },
+    {
+      text: t('breadCrumb.dashboard'),
+      href: `/analytics/${projectId}/app/${appId}/dashboards`,
+    },
+  ];
 
   return (
     <div className="flex">
@@ -174,6 +198,7 @@ const AnalyticsDashboard: React.FC = () => {
           toolsHide
           navigationHide
           content={<AnalyticsDashboardCard />}
+          breadcrumbs={<CustomBreadCrumb breadcrumbItems={breadcrumbItems} />}
           headerSelector="#header"
         />
       </div>

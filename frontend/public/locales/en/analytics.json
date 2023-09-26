@@ -2,28 +2,57 @@
   "analytics": "Analytics",
   "dashboard": {
     "title": "Dashboards",
-    "description": "This page lists all the dashboards.",
+    "description": "You can view the out-of-the-box user lifecycle dashboards here, and create a custom dashboard with exploration analysis.",
     "createTitle": "Create Dashboard",
-    "createInputName": "Please input a name for your dashboard",
-    "createInputNamePlaceholder": "e.g. my-dashboard",
-    "createDesc": "Dashboard description - optional",
-    "createDescPlaceholder": "e.g. description of dashboard",
-    "createSheets": "Dashboard sheets - optional",
+    "createInputName": "Dashboard name",
+    "createInputNameDec": "Please input a name for the dashboard.",
+    "createInputNamePlaceholder": "E.g. user lifecycle dashboard",
+    "createDesc": "Description",
+    "createDescDec": "Please provide a useful description for the dashboard.",
+    "createDescPlaceholder": "E.g. dashboard for the e-commerce department",
+    "createSheets": "Sheet name",
+    "createSheetsDec": "One dashboard could have multiple sheets to group charts into different topics. By default, the solution create a sheet with “Sheet 1”  if you don’t specify sheet name.",
+    "createSheetsPlaceholder": "Input sheet name",
     "deleteTip1": "Are you sure you want to delete the dashboard ",
-    "deleteTip2": " delete dashboard will delete all data in QuickSight."
+    "deleteTip2": " delete dashboard will delete all data in QuickSight.",
+    "defaultUserLifecycle": "User lifecycle",
+    "defaultTag": "default"
+  },
+  "realtime": {
+    "title": "Realtime",
+    "description": "You can view key metrics of your apps and website in realtime here.",
+    "disableMessage": "This project has not enabled real-time dashboard, please contact your admin to turn on real-time dashboard.",
+    "configProject": "Configure project"
+  },
+  "analyzes": {
+    "title": "Analyzes",
+    "description": "You can customize the design and signage here.",
+    "comeSoon": "The feature is about to be launched."
+  },
+  "explore": {
+    "title": "Explore",
+    "description": "Explore allows you query and analyze the clickstream data with an easy-to-use UI in a dynamic manner. Select an analytics model to begin with.",
+    "analyticsModel": "Analytics model",
+    "exploitativeAnalytics": "Exploratory analytics",
+    "funnelAnalysis": "Funnel analysis",
+    "eventAnalysis": "Event analysis",
+    "pathAnalysis": "Path analysis",
+    "retentionAnalysis": "Retention analysis",
+    "userAnalytics": "User analytics",
+    "userSearch": "User search"
   },
   "list": {
     "loading": "Loading dashboards.",
     "noDashboard": "You don’t have any clickstream analytics dashboard yet.",
     "id": "ID",
-    "description": "Description",
-    "createAt": "CreateAt"
+    "description": "Descriptions",
+    "createAt": "Creation time",
+    "createdBy": "Created by"
   },
   "header": {
     "modalTitle": "Switch Project Space",
     "selectProjectTitle": "Please select a project",
     "selectAppTitle": "Please select an application",
-    "configurations": "Configurations",
     "saveToDashboardModalTitle": "Save to Dashboard",
     "selectDashboardTitle": "Please select a dashboard",
     "selectSheetTitle": "Please select a sheet"
@@ -31,7 +60,6 @@
   "options": {
     "eventNumber": "Event number",
     "userNumber": "User number",
-    "userPseudoNumber": "Pseudo User number",
     "customWindow": "Custom",
     "theDayWindow": "The Day",
     "noWindow": "Off",
@@ -53,12 +81,15 @@
     "platformWeb": "Web",
     "platformAndroid": "Android",
     "platformIOS": "iOS",
-    "platformWechatMinPro": "Wechat MiniProgram"
+    "platformWechatMinPro": "Wechat MiniProgram",
+    "directlyFollowed": "Directly followed",
+    "indirectlyFollowed": "Indirectly followed"
   },
   "metadata": {
+    "description": "You can view the out-of-the-box user lifecycle dashboards here, and create a custom dashboard with exploration analysis.",
     "event": {
-      "title": "Origin Events",
-      "description": "Description of the Origin Events",
+      "title": "Events",
+      "description": "This table lists out all the events in your clickstream analytics project.",
       "tableColumnID": "ID",
       "tableColumnName": "Event name",
       "tableColumnDisplayName": "Display name",
@@ -197,8 +228,42 @@
     "eventSelectPlaceholder": "Select event",
     "attributeSelectPlaceholder": "Select attribute",
     "operatorSelectPlaceholder": "Select operator",
-    "conditionValuePlaceholder": "Input value"
+    "conditionValuePlaceholder": "Input value",
+    "funnelModel": "Funnel model",
+    "attributeGrouping": "Attribute grouping",
+    "defineMetrics": "Define metrics",
+    "realtimeStopped": "Realtime streaming is stopped",
+    "realtimeStarted": "Realtime streaming is started",
+    "reportingNotEnabled":"Reporting module is not enabled"
   },
   "emptyData": "No Data",
-  "emptyDataMessage": "Please configure analysis indicators first"
+  "emptyDataMessage": "Please configure the metrics to query",
+  "noDataAvailableTitle": "No clickstream data available for analytics",
+  "noDataAvailableMessage": "The solution did not find any project has clickstream data yet, please contact your system admin to start collecting data.",
+  "information": {
+    "dashboardsInfo": "dashboardsInfo",
+    "dashboardSheetInfo": "dashboardSheetInfo",
+    "userLifecycleInfo": "userLifecycleInfo",
+    "realtimeInfo": "realtimeInfo",
+    "dataManagementInfo": "dataManagementInfo",
+    "dataManagementEventInfo": "dataManagementEventInfo",
+    "metadataEventsInfo": "metadataEventsInfo",
+    "metadataEventParametersInfo": "metadataEventParametersInfo",
+    "metadataUserAttributesInfo": "metadataUserAttributesInfo",
+    "exploreInfo": "exploreInfo",
+    "analyticsModelInfo": "analyticsModelInfo",
+    "funnelInfo": "funnelInfo",
+    "funnelMetricsInfo": "funnelMetricsInfo",
+    "funnelModelInfo": "funnelModelInfo",
+    "funnelAssociateParameterInfo": "funnelAssociateParameterInfo",
+    "funnelWindowInfo": "funnelWindowInfo",
+    "eventInfo": "eventInfo",
+    "pathInfo": "pathInfo",
+    "pathMetricsInfo": "pathMetricsInfo",
+    "pathSessionDefInfo": "pathSessionDefInfo",
+    "pathNodeTypeInfo": "pathNodeTypeInfo",
+    "retentionInfo": "retentionInfo",
+    "introducingAnalyticsHeader": "Introducing analytics",
+    "introducingAnalyticsContent": "Analytics allow you explore the clickstream data on an easy-to-use UI, and provides access to all reports and dashboards."
+  }
 }

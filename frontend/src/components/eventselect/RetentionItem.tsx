@@ -49,7 +49,7 @@ interface RetentionItemProps {
     conditionIndex: number,
     category: IAnalyticsItem | null
   ) => void;
-  changeConditionValue: (conditionIndex: number, value: any) => void;
+  changeConditionValue: (conditionIndex: number, value: string[]) => void;
   changeEventOption: (event: SelectProps.Option | null) => void;
   changeRelationAttributeOption: (attribute: SelectProps.Option | null) => void;
 }

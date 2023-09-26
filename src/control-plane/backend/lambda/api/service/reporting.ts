@@ -311,7 +311,8 @@ export class ReportingService {
         dataSetIdentifierDeclaration: [],
       };
 
-      const result: CreateDashboardResult = await this.create(sheetId, viewName, query, datasetPropsArray, [visualProps, tableVisualProps]);
+      const result: CreateDashboardResult = await this.create(
+        sheetId, viewName, query, datasetPropsArray, [visualProps, tableVisualProps]);
 
       return res.status(201).json(new ApiSuccess(result));
     } catch (error) {
@@ -421,11 +422,11 @@ export class ReportingService {
         filterControl: visualRelatedParams.filterControl,
         parameterDeclarations: visualRelatedParams.parameterDeclarations,
         filterGroup: visualRelatedParams.filterGroup,
-        colSpan: 32,
         rowSpan: 12,
       };
 
-      const result: CreateDashboardResult = await this.create(sheetId, viewName, query, datasetPropsArray, [visualProps]);
+      const result: CreateDashboardResult = await this.create(
+        sheetId, viewName, query, datasetPropsArray, [visualProps]);
 
       return res.status(201).json(new ApiSuccess(result));
     } catch (error) {
@@ -522,7 +523,8 @@ export class ReportingService {
         dataSetIdentifierDeclaration: [],
       };
 
-      const result: CreateDashboardResult = await this.create(sheetId, viewName, query, datasetPropsArray, [visualProps, tableVisualProps]);
+      const result: CreateDashboardResult = await this.create(
+        sheetId, viewName, query, datasetPropsArray, [visualProps, tableVisualProps]);
 
       return res.status(201).json(new ApiSuccess(result));
     } catch (error) {
@@ -596,7 +598,6 @@ export class ReportingService {
 
     let result: CreateDashboardResult;
     if (!query.dashboardId) {
-
       //create QuickSight analysis
       result = await this._createDashboard(quickSight, resourceName, principals, dashboard,
         query, dashboardCreateParameters, sheetId);
@@ -735,7 +736,7 @@ export class ReportingService {
         dashboardCreateParameters.region,
         dashboardCreateParameters.allowedDomain,
         false,
-        query.dashboardId,
+        dashboardId,
       );
       dashboardEmbedUrl = embedUrl.EmbedUrl!;
     }

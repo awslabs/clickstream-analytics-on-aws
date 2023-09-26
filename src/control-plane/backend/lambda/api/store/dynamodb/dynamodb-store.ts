@@ -384,6 +384,24 @@ export class DynamoDbStore implements ClickStreamStore {
     return records as IApplication[];
   };
 
+  public async listAllApplication(): Promise<IApplication[]> {
+    const input: QueryCommandInput = {
+      TableName: clickStreamTableName,
+      IndexName: prefixTimeGSIName,
+      KeyConditionExpression: '#prefix= :prefix',
+      FilterExpression: 'deleted = :d',
+      ExpressionAttributeNames: {
+        '#prefix': 'prefix',
+      },
+      ExpressionAttributeValues: {
+        ':d': false,
+        ':prefix': 'APP',
+      },
+    };
+    const records = await query(input);
+    return records as IApplication[];
+  };
+
   public async deleteApplication(projectId: string, appId: string, operator: string): Promise<void> {
     const params: UpdateCommand = new UpdateCommand({
       TableName: clickStreamTableName,

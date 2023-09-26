@@ -17,7 +17,9 @@ import {
   ColumnLayout,
   FormField,
   Input,
+  Link,
   Modal,
+  Popover,
   SpaceBetween,
   Textarea,
   TokenGroup,
@@ -84,7 +86,7 @@ const CreateDashboard: React.FC<CreateDashboardProps> = (
         region: pipeline.region,
         ownerPrincipal: pipeline.reporting?.quickSight?.arn,
         defaultDataSourceArn:
-          reportingOutputs.get(OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN) ||
+          reportingOutputs.get(OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN) ??
           '',
         sheets: sheetNames.map((item) => {
           return { id: uuidv4().replace(/-/g, ''), name: item.label };
@@ -171,6 +173,7 @@ const CreateDashboard: React.FC<CreateDashboardProps> = (
           <>
             <FormField
               label={t('analytics:dashboard.createInputName')}
+              description={t('analytics:dashboard.createInputNameDec')}
               errorText={
                 dashboardNameRequiredError
                   ? t('analytics:valid.dashboardNameEmptyError')
@@ -180,7 +183,7 @@ const CreateDashboard: React.FC<CreateDashboardProps> = (
               <SpaceBetween direction="vertical" size="s">
                 <Input
                   placeholder={
-                    t('analytics:dashboard.createInputNamePlaceholder') || ''
+                    t('analytics:dashboard.createInputNamePlaceholder') ?? ''
                   }
                   value={curDashboard.name ?? ''}
                   onChange={(e) => {
@@ -196,10 +199,13 @@ const CreateDashboard: React.FC<CreateDashboardProps> = (
               </SpaceBetween>
             </FormField>
             <div className="mt-10">
-              <FormField label={t('analytics:dashboard.createDesc')}>
+              <FormField
+                label={t('analytics:dashboard.createDesc')}
+                description={t('analytics:dashboard.createDescDec')}
+              >
                 <Textarea
                   placeholder={
-                    t('analytics:dashboard.createDescPlaceholder') || ''
+                    t('analytics:dashboard.createDescPlaceholder') ?? ''
                   }
                   rows={3}
                   value={curDashboard.description}
@@ -220,6 +226,12 @@ const CreateDashboard: React.FC<CreateDashboardProps> = (
 
             <FormField
               label={t('analytics:dashboard.createSheets')}
+              info={
+                <Popover triggerType="custom" content={t('analytics:information.dashboardSheetInfo')}>
+            <Link variant="info">{t('info')}</Link>
+          </Popover>
+              }
+              description={t('analytics:dashboard.createSheetsDec')}
               errorText={
                 dashboardSheetTooMuchError
                   ? t('analytics:valid.dashboardSheetTooMuchError')
@@ -230,6 +242,9 @@ const CreateDashboard: React.FC<CreateDashboardProps> = (
                 <Input
                   onChange={({ detail }) => setSheetName(detail.value)}
                   value={sheetName}
+                  placeholder={
+                    t('analytics:dashboard.createSheetsPlaceholder') ?? ''
+                  }
                 />
                 <Button
                   iconName="add-plus"
@@ -248,10 +263,9 @@ const CreateDashboard: React.FC<CreateDashboardProps> = (
             </FormField>
             <TokenGroup
               onDismiss={({ detail: { itemIndex } }) => {
-                setSheetNames([
-                  ...sheetNames.slice(0, 0),
-                  ...sheetNames.slice(0 + 1),
-                ]);
+                setSheetNames(
+                  sheetNames.filter((item, eIndex) => eIndex !== itemIndex)
+                );
               }}
               items={sheetNames}
             />

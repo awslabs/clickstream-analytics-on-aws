@@ -18,7 +18,7 @@ export interface IConditionItemType {
   eventType: string;
   conditionOption: IAnalyticsItem | null;
   conditionOperator: SelectProps.Option | null;
-  conditionValue: any;
+  conditionValue: string[];
 }
 
 export interface SegmentationFilterDataType {
@@ -109,14 +109,14 @@ export const DEFAULT_CONDITION_DATA: IConditionItemType = {
   eventType: 'attribute',
   conditionOption: null,
   conditionOperator: null,
-  conditionValue: '',
+  conditionValue: [],
 };
 
 export const DEFAULT_SEGMENTATION_DATA: IConditionItemType = {
   eventType: 'event',
   conditionOption: null,
   conditionOperator: null,
-  conditionValue: '',
+  conditionValue: [],
 };
 
 export const INIT_SEGMENTATION_DATA: SegmentationFilterDataType = {
@@ -179,9 +179,4 @@ export const MOCK_ATTRIBUTE_OPTION_LIST: CategoryItemType[] = [
       },
     ],
   },
-];
-
-export const MOCK_CALCULATION_OPTION_LIST = [
-  { label: '总次数', value: 'totalCount' },
-  { label: '总人数', value: 'totalUser' },
 ];
