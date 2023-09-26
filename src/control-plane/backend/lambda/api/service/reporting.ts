@@ -30,11 +30,11 @@ import {
   getFunnelTableVisualRelatedDefs,
   getFunnelTableVisualDef,
   VisualProps,
-  getEventLineChartVisualDef,
+  getEventChartVisualDef,
   getEventPivotTableVisualDef,
   pathAnalysisVisualColumns,
   getPathAnalysisChartVisualDef,
-  getRetentionLineChartVisualDef,
+  getRetentionChartVisualDef,
   getRetentionPivotTableVisualDef,
   retentionAnalysisVisualColumns,
   VisualMapProps,
@@ -178,7 +178,7 @@ export class ReportingService {
     const visualId = uuidv4();
     const titleProps = await getDashboardTitleProps(AnalysisType.FUNNEL, query);
     const quickSightChartType = query.chartType;
-    const visualDef = getFunnelVisualDef(visualId, viewName, titleProps, quickSightChartType, query.timeUnit);
+    const visualDef = getFunnelVisualDef(visualId, viewName, titleProps, quickSightChartType, query.groupColumn);
     const visualRelatedParams = getVisualRelatedDefs({
       timeScopeType: query.timeScopeType,
       sheetId,
@@ -282,7 +282,8 @@ export class ReportingService {
 
       const visualId = uuidv4();
       const titleProps = await getDashboardTitleProps(AnalysisType.EVENT, query);
-      const visualDef = getEventLineChartVisualDef(visualId, viewName, titleProps, query.groupColumn);
+      const quickSightChartType = query.chartType;
+      const visualDef = getEventChartVisualDef(visualId, viewName, titleProps, quickSightChartType, query.groupColumn);
       const visualRelatedParams = getVisualRelatedDefs({
         timeScopeType: query.timeScopeType,
         sheetId,
@@ -494,7 +495,8 @@ export class ReportingService {
 
       const titleProps = await getDashboardTitleProps(AnalysisType.RETENTION, query);
       const visualId = uuidv4();
-      const visualDef = getRetentionLineChartVisualDef(visualId, viewName, titleProps);
+      const quickSightChartType = query.chartType;
+      const visualDef = getRetentionChartVisualDef(visualId, viewName, titleProps, quickSightChartType);
       const visualRelatedParams = getVisualRelatedDefs({
         timeScopeType: query.timeScopeType,
         sheetId,

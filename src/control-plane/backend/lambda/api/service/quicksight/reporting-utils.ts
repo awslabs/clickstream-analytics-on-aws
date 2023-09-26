@@ -501,12 +501,12 @@ export async function getCredentialsFromRole(stsClient: STSClient, roleArn: stri
   }
 }
 
-export function getFunnelVisualDef(visualId: string, viewName: string, titleProps: DashboardTitleProps, quickSightChartType: QuickSightChartType, timeUnit: string) : Visual {
+export function getFunnelVisualDef(visualId: string, viewName: string, titleProps: DashboardTitleProps, quickSightChartType: QuickSightChartType, groupColumn: string) : Visual {
 
   if(quickSightChartType === QuickSightChartType.LINE) {
     return _getFunnelLineVisualDef(visualId, viewName, titleProps);
   } else if (quickSightChartType === QuickSightChartType.BAR) {
-    return _getFunnelBarVisualDef(visualId, viewName, titleProps, timeUnit);
+    return _getFunnelBarVisualDef(visualId, viewName, titleProps, groupColumn);
   } else {
     const errorMessage = `unsupported quicksight char type ${quickSightChartType}`;
     logger.debug(errorMessage);
@@ -529,7 +529,7 @@ function _getFunnelLineVisualDef(visualId: string, viewName: string, titleProps:
   return JSON.parse(Mustache.render(visualDef, mustacheFunnelAnalysisType)) as Visual;
 }
 
-function _getFunnelBarVisualDef(visualId: string, viewName: string, titleProps: DashboardTitleProps, timeUnit: string) : Visual {
+function _getFunnelBarVisualDef(visualId: string, viewName: string, titleProps: DashboardTitleProps, groupColumn: string) : Visual {
 
   const visualDef = readFileSync(join(__dirname, './templates/funnel-bar-chart.json'), 'utf8');
   const mustacheFunnelAnalysisType: MustacheFunnelAnalysisType = {
@@ -538,7 +538,7 @@ function _getFunnelBarVisualDef(visualId: string, viewName: string, titleProps: 
     dateDimFieldId: uuidv4(),
     dimFieldId: uuidv4(),
     measureFieldId: uuidv4(),
-    dateGranularity: getQuickSightUnitFromTimeUnit(timeUnit),
+    dateGranularity: groupColumn,
     hierarchyId: uuidv4(),
     title: titleProps.title,
     subTitle: titleProps.subTitle,
@@ -755,9 +755,20 @@ export function getFunnelTableVisualRelatedDefs(viewName: string, colNames: stri
   return columnConfigurations;
 }
 
-export function getEventLineChartVisualDef(visualId: string, viewName: string, titleProps: DashboardTitleProps, groupColumn: string) : Visual {
+export function getEventChartVisualDef(visualId: string, viewName: string, titleProps: DashboardTitleProps, quickSightChartType: QuickSightChartType, groupColumn: string) : Visual {
 
-  const visualDef = readFileSync(join(__dirname, './templates/event-line-chart.json'), 'utf8');
+  let templatePath = '';
+  if(quickSightChartType === QuickSightChartType.LINE) {
+    templatePath = './templates/event-line-chart.json'
+  } else if (quickSightChartType === QuickSightChartType.BAR) {
+    templatePath = './templates/event-bar-chart.json'
+  } else {
+    const errorMessage = `unsupported quicksight char type ${quickSightChartType}`;
+    logger.debug(errorMessage);
+    throw new Error(errorMessage);
+  }
+
+  const visualDef = readFileSync(join(__dirname, templatePath), 'utf8');
   const mustacheEventAnalysisType: MustacheEventAnalysisType = {
     visualId,
     dataSetIdentifier: viewName,
@@ -804,9 +815,20 @@ export function getPathAnalysisChartVisualDef(visualId: string, viewName: string
   return JSON.parse(Mustache.render(visualDef, mustachePathAnalysisType)) as Visual;
 }
 
-export function getRetentionLineChartVisualDef(visualId: string, viewName: string, titleProps: DashboardTitleProps) : Visual {
+export function getRetentionChartVisualDef(visualId: string, viewName: string, titleProps: DashboardTitleProps, quickSightChartType: QuickSightChartType) : Visual {
 
-  const visualDef = readFileSync(join(__dirname, './templates/retention-line-chart.json'), 'utf8');
+  let templatePath = '';
+  if(quickSightChartType === QuickSightChartType.LINE) {
+    templatePath = './templates/retention-line-chart.json'
+  } else if (quickSightChartType === QuickSightChartType.BAR) {
+    templatePath = './templates/retention-bar-chart.json'
+  } else {
+    const errorMessage = `unsupported quicksight char type ${quickSightChartType}`;
+    logger.debug(errorMessage);
+    throw new Error(errorMessage);
+  }
+  
+  const visualDef = readFileSync(join(__dirname, templatePath), 'utf8');
   const mustacheRetentionAnalysisType: MustacheRetentionAnalysisType = {
     visualId,
     dataSetIdentifier: viewName,
