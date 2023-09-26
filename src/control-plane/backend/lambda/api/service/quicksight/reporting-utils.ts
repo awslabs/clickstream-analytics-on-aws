@@ -501,9 +501,10 @@ export async function getCredentialsFromRole(stsClient: STSClient, roleArn: stri
   }
 }
 
-export function getFunnelVisualDef(visualId: string, viewName: string, titleProps: DashboardTitleProps, quickSightChartType: QuickSightChartType, groupColumn: string) : Visual {
+export function getFunnelVisualDef(visualId: string, viewName: string, titleProps: DashboardTitleProps,
+  quickSightChartType: QuickSightChartType, groupColumn: string) : Visual {
 
-  if(quickSightChartType === QuickSightChartType.LINE) {
+  if (quickSightChartType === QuickSightChartType.LINE) {
     return _getFunnelLineVisualDef(visualId, viewName, titleProps);
   } else if (quickSightChartType === QuickSightChartType.BAR) {
     return _getFunnelBarVisualDef(visualId, viewName, titleProps, groupColumn);
@@ -544,10 +545,7 @@ function _getFunnelBarVisualDef(visualId: string, viewName: string, titleProps: 
     subTitle: titleProps.subTitle,
   };
 
-  console.log(Mustache.render(visualDef, mustacheFunnelAnalysisType))
-
   return JSON.parse(Mustache.render(visualDef, mustacheFunnelAnalysisType)) as Visual;
-
 }
 
 export function getFunnelTableVisualDef(visualId: string, viewName: string, eventNames: string[],
@@ -755,13 +753,14 @@ export function getFunnelTableVisualRelatedDefs(viewName: string, colNames: stri
   return columnConfigurations;
 }
 
-export function getEventChartVisualDef(visualId: string, viewName: string, titleProps: DashboardTitleProps, quickSightChartType: QuickSightChartType, groupColumn: string) : Visual {
+export function getEventChartVisualDef(visualId: string, viewName: string, titleProps: DashboardTitleProps,
+  quickSightChartType: QuickSightChartType, groupColumn: string) : Visual {
 
   let templatePath = '';
-  if(quickSightChartType === QuickSightChartType.LINE) {
-    templatePath = './templates/event-line-chart.json'
+  if (quickSightChartType === QuickSightChartType.LINE) {
+    templatePath = './templates/event-line-chart.json';
   } else if (quickSightChartType === QuickSightChartType.BAR) {
-    templatePath = './templates/event-bar-chart.json'
+    templatePath = './templates/event-bar-chart.json';
   } else {
     const errorMessage = `unsupported quicksight char type ${quickSightChartType}`;
     logger.debug(errorMessage);
@@ -815,19 +814,20 @@ export function getPathAnalysisChartVisualDef(visualId: string, viewName: string
   return JSON.parse(Mustache.render(visualDef, mustachePathAnalysisType)) as Visual;
 }
 
-export function getRetentionChartVisualDef(visualId: string, viewName: string, titleProps: DashboardTitleProps, quickSightChartType: QuickSightChartType) : Visual {
+export function getRetentionChartVisualDef(visualId: string, viewName: string, titleProps: DashboardTitleProps,
+  quickSightChartType: QuickSightChartType) : Visual {
 
   let templatePath = '';
-  if(quickSightChartType === QuickSightChartType.LINE) {
-    templatePath = './templates/retention-line-chart.json'
+  if (quickSightChartType === QuickSightChartType.LINE) {
+    templatePath = './templates/retention-line-chart.json';
   } else if (quickSightChartType === QuickSightChartType.BAR) {
-    templatePath = './templates/retention-bar-chart.json'
+    templatePath = './templates/retention-bar-chart.json';
   } else {
     const errorMessage = `unsupported quicksight char type ${quickSightChartType}`;
     logger.debug(errorMessage);
     throw new Error(errorMessage);
   }
-  
+
   const visualDef = readFileSync(join(__dirname, templatePath), 'utf8');
   const mustacheRetentionAnalysisType: MustacheRetentionAnalysisType = {
     visualId,
