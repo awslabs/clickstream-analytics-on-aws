@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { OUTPUT_INGESTION_SERVER_DNS_SUFFIX, OUTPUT_INGESTION_SERVER_URL_SUFFIX, MUTIL_APP_ID_PATTERN } from '../common/constants-ln';
+import { OUTPUT_INGESTION_SERVER_DNS_SUFFIX, OUTPUT_INGESTION_SERVER_URL_SUFFIX, MULTI_APP_ID_PATTERN } from '../common/constants-ln';
 import { logger } from '../common/powertools';
 import { validatePattern } from '../common/stack-params-valid';
 import { ApiFail, ApiSuccess, PipelineStackType, PipelineStatusType } from '../common/types';
@@ -56,7 +56,7 @@ export class ApplicationServ {
       const apps = await store.listApplication(latestPipeline.projectId, 'asc');
       const appIds: string[] = apps.map(a => a.appId);
       appIds.push(appId);
-      validatePattern('AppId', MUTIL_APP_ID_PATTERN, appIds.join(','));
+      validatePattern('AppId', MULTI_APP_ID_PATTERN, appIds.join(','));
 
       const id = await store.addApplication(app);
 
@@ -133,7 +133,7 @@ export class ApplicationServ {
         return res.status(404).json(new ApiFail('The app not belonging to pipeline or it is deleted.'));
       }
       if (!isEmpty(appIds)) {
-        validatePattern('AppId', MUTIL_APP_ID_PATTERN, appIds.join(','));
+        validatePattern('AppId', MULTI_APP_ID_PATTERN, appIds.join(','));
       }
 
       const operator = res.get('X-Click-Stream-Operator');

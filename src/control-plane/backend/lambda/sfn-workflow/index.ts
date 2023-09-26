@@ -141,62 +141,75 @@ async function stackParametersResolve(stack: WorkFlowStack) {
     const bucket = stack.Data.Callback.BucketName;
     const prefix = stack.Data.Callback.BucketPrefix;
     for (let param of stack.Data.Input.Parameters) {
+      let key, value;
+      // Find the value in output accurately through JSONPath
       if (param.ParameterKey?.endsWith('.$') && param.ParameterValue?.startsWith('$.')) {
-        // Find the value in output accurately through JSONPath
-        // get stack name
-        const splitValues = param.ParameterValue.split('.');
-        const stackName = splitValues[1];
-        // get output from s3
-        let stackOutputs;
-        try {
-          const output = await getObject(bucket, `${prefix}/${stackName}/output.json`);
-          stackOutputs = JSON.parse(output as string);
-        } catch (err) {
-          logger.error('Stack workflow output error.', {
-            error: err,
-            output: `${prefix}/${stackName}/output.json`,
-          });
-        }
-        let value = '';
-        if (stackOutputs) {
-          const values = JSONPath({ path: param.ParameterValue, json: stackOutputs });
-          if (Array.prototype.isPrototypeOf(values) && values.length > 0) {
-            value = values[0] as string;
-          }
-        }
-        param.ParameterKey = param.ParameterKey.substring(0, param.ParameterKey.length - 2);
-        param.ParameterValue = value;
-      } else if (param.ParameterKey?.endsWith('.#') && param.ParameterValue?.startsWith('#.')) {
-        // Find the value in output by suffix
-        // get stack name
-        const splitValues = param.ParameterValue.split('.');
-        const stackName = splitValues[1];
-        // get output from s3
-        let stackOutputs;
-        try {
-          const output = await getObject(bucket, `${prefix}/${stackName}/output.json`);
-          stackOutputs = JSON.parse(output as string)[stackName].Outputs;
-        } catch (err) {
-          logger.error('Stack workflow output error.', {
-            error: err,
-            output: `${prefix}/${stackName}/output.json`,
-          });
-        }
-        let value = '';
-        if (stackOutputs) {
-          for (let out of stackOutputs as Output[]) {
-            if (out.OutputKey?.endsWith(splitValues[2])) {
-              value = out.OutputValue ?? '';
-              break;
-            }
-          }
-        }
-        param.ParameterKey = param.ParameterKey.substring(0, param.ParameterKey.length - 2);
-        param.ParameterValue = value ?? '';
+        ({ key, value } = await _getParameterKeyAndValueByJSONPath(param.ParameterKey, param.ParameterValue, bucket, prefix));
+      } else if (param.ParameterKey?.endsWith('.#') && param.ParameterValue?.startsWith('#.')) { // Find the value in output by suffix
+        ({ key, value } = await _getParameterKeyAndValueByStackOutput(param.ParameterKey, param.ParameterValue, bucket, prefix));
       }
+      param.ParameterKey = key;
+      param.ParameterValue = value;
     }
   }
   return stack;
+}
+
+async function _getParameterKeyAndValueByStackOutput(paramKey: string, paramValue: string, bucket: string, prefix: string) {
+  // get stack name
+  const splitValues = paramValue.split('.');
+  const stackName = splitValues[1];
+  // get output from s3
+  let stackOutputs;
+  try {
+    const output = await getObject(bucket, `${prefix}/${stackName}/output.json`);
+    stackOutputs = JSON.parse(output as string)[stackName].Outputs;
+  } catch (err) {
+    logger.error('Stack workflow output error.', {
+      error: err,
+      output: `${prefix}/${stackName}/output.json`,
+    });
+  }
+  let value = '';
+  if (stackOutputs) {
+    for (let out of stackOutputs as Output[]) {
+      if (out.OutputKey?.endsWith(splitValues[2])) {
+        value = out.OutputValue ?? '';
+        break;
+      }
+    }
+  }
+  return {
+    key: paramKey.substring(0, paramKey.length - 2),
+    value: value ?? '',
+  };
+}
+
+async function _getParameterKeyAndValueByJSONPath(paramKey: string, paramValue: string, bucket: string, prefix: string) {
+  const splitValues = paramValue.split('.');
+  const stackName = splitValues[1];
+  // get output from s3
+  let stackOutputs;
+  try {
+    const output = await getObject(bucket, `${prefix}/${stackName}/output.json`);
+    stackOutputs = JSON.parse(output as string);
+  } catch (err) {
+    logger.error('Stack workflow output error.', {
+      error: err,
+      output: `${prefix}/${stackName}/output.json`,
+    });
+  }
+  let value = '';
+  if (stackOutputs) {
+    const values = JSONPath({ path: paramValue, json: stackOutputs });
+    if (Array.prototype.isPrototypeOf(values) && values.length > 0) {
+      value = values[0] as string;
+    }
+  }
+  return {
+    key: paramKey.substring(0, paramKey.length - 2),
+    value,
+  };
 }
 
 async function getObject(bucket: string, key: string) {

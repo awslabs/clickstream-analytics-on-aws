@@ -45,10 +45,10 @@ export class CMetadataDisplay {
   }
 
   public async patch(projectId: string, appId: string,
-    metadatas: IMetadataEvent[] | IMetadataEventParameter[] | IMetadataUserAttribute[]) {
+    metadataArray: IMetadataEvent[] | IMetadataEventParameter[] | IMetadataUserAttribute[]) {
     try {
       const displays = await this.getDisplay(projectId, appId);
-      for (let metadata of metadatas) {
+      for (let metadata of metadataArray) {
         const prefix = metadata.prefix.split('#')[0];
         const metadataDisplay = displays.find((d: IMetadataDisplay) => d.id === `${prefix}#${metadata.id}`);
         metadata.displayName = metadataDisplay?.displayName ?? metadata.name;
@@ -68,11 +68,10 @@ export class CMetadataDisplay {
           userAttribute = (this.patchValueEnumWithData([userAttribute]) as IMetadataUserAttribute[])[0];
         }
       }
-      return metadatas;
     } catch (error) {
       logger.error('Patch display error', { error });
-      return metadatas;
     }
+    return metadataArray;
   }
 
   private patchAssociatedWithData(associated: IMetadataEvent[] | IMetadataEventParameter[] | undefined) {

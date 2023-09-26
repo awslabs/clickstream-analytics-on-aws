@@ -16,9 +16,9 @@ import { JSONObject } from 'ts-json-object';
 import { CPipelineResources, IPipeline } from './pipeline';
 import {
   CORS_PATTERN,
-  DOMAIN_NAME_PATTERN, MUTIL_EMAIL_PATTERN,
+  DOMAIN_NAME_PATTERN, MULTI_EMAIL_PATTERN,
   KAFKA_BROKERS_PATTERN,
-  KAFKA_TOPIC_PATTERN, MUTIL_SECURITY_GROUP_PATTERN,
+  KAFKA_TOPIC_PATTERN, MULTI_SECURITY_GROUP_PATTERN,
   OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_CREDENTIAL_PARAMETER_SUFFIX,
   OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_ADDRESS,
   OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_PORT,
@@ -273,7 +273,7 @@ export class CIngestionServerStack extends JSONObject {
   @JSONObject.optional
   @JSONObject.custom( (stack:CIngestionServerStack, key:string, value:string) => {
     if (stack._pipeline?.ingestionServer.sinkType == PipelineSinkType.KAFKA) {
-      validatePattern(key, MUTIL_SECURITY_GROUP_PATTERN, value);
+      validatePattern(key, MULTI_SECURITY_GROUP_PATTERN, value);
     }
     return stack._pipeline?.ingestionServer.sinkType == PipelineSinkType.KAFKA ? value : undefined;
   })
@@ -1164,7 +1164,7 @@ export class CMetricsStack extends JSONObject {
   @JSONObject.optional('')
   @JSONObject.custom( (_:any, key:string, value:any) => {
     if (value) {
-      validatePattern(key, MUTIL_EMAIL_PATTERN, value);
+      validatePattern(key, MULTI_EMAIL_PATTERN, value);
     }
     return value;
   })

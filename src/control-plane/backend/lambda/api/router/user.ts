@@ -14,10 +14,10 @@
 import express from 'express';
 import { body, header, param } from 'express-validator';
 import { isRequestIdExisted, isUserValid, isValidEmpty, isXSSRequest, validate } from '../common/request-valid';
-import { UserServ } from '../service/user';
+import { UserService } from '../service/user';
 
 const router_user = express.Router();
-const userServ: UserServ = new UserServ();
+const userServ: UserService = new UserService();
 
 router_user.get(
   '',

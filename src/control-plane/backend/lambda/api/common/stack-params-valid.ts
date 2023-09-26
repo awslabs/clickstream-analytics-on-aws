@@ -77,206 +77,13 @@ export const validateServerlessRedshiftRPU = (region: string, rpu: number) => {
 };
 
 export const validatePipelineNetwork = async (pipeline: IPipeline, resources: CPipelineResources) => {
+
   const network = pipeline.network;
-  if (isEmpty(network.privateSubnetIds)) {
-    // public subnets only
-    // pipeline.network.privateSubnetIds = pipeline.network.publicSubnetIds;
-    throw new ClickStreamBadRequestError(
-      'Validation error: you must select at least two private subnets for the ingestion endpoint.',
-    );
-  }
-  if (network.publicSubnetIds.length < 2 || network.privateSubnetIds.length < 2) {
-    throw new ClickStreamBadRequestError(
-      'Validate error: you must select at least two public subnets and at least two private subnets for the ingestion endpoint.',
-    );
-  }
+  const { allSubnets, privateSubnets } = await _checkSubnets(pipeline);
 
-  const allSubnets = await describeSubnetsWithType(pipeline.region, network.vpcId, SubnetType.ALL);
-  const privateSubnets = allSubnets.filter(subnet => network.privateSubnetIds.includes(subnet.id));
-  const publicSubnets = allSubnets.filter(subnet => network.publicSubnetIds.includes(subnet.id));
-  const privateSubnetsAZ = getSubnetsAZ(privateSubnets);
-  const publicSubnetsAZ = getSubnetsAZ(publicSubnets);
-  if (publicSubnetsAZ.length < 2 || privateSubnetsAZ.length < 2) {
-    throw new ClickStreamBadRequestError(
-      'Validate error: the public and private subnets for the ingestion endpoint must locate in at least two Availability Zones (AZ).',
-    );
-  }
-  const azInPublic = publicSubnetsAZ.filter(az => privateSubnetsAZ.includes(az));
-  if (azInPublic.length !== privateSubnetsAZ.length) {
-    throw new ClickStreamBadRequestError(
-      'Validate error: the public subnets and private subnets for ingestion endpoint must be in the same Availability Zones (AZ). '+
-      'For example, you can not select public subnets in AZ (a, b), while select private subnets in AZ (b, c).',
-    );
-  }
+  await _checkVpcEndpointsForIsolatedSubnets(pipeline, network.vpcId, privateSubnets, allSubnets);
 
-  const isolatedSubnets = privateSubnets.filter(subnet => subnet.type == SubnetType.ISOLATED);
-  if (isolatedSubnets.length > 0) {
-    const isolatedSubnetsAZ = getSubnetsAZ(isolatedSubnets);
-    const vpcEndpoints = await describeVpcEndpoints(pipeline.region, network.vpcId);
-    const vpcEndpointSecurityGroups: string[] = [];
-    for (let vpce of vpcEndpoints) {
-      for (let group of vpce.Groups!) {
-        vpcEndpointSecurityGroups.push(group.GroupId!);
-      }
-    }
-
-    const vpcEndpointSecurityGroupRules = await describeSecurityGroupsWithRules(pipeline.region, vpcEndpointSecurityGroups);
-
-    for (let privateSubnet of privateSubnets) {
-      if (privateSubnet.type === SubnetType.ISOLATED) {
-        validateVpcEndpoint(
-          pipeline.region,
-          allSubnets,
-          isolatedSubnetsAZ,
-          privateSubnet,
-          vpcEndpoints,
-          vpcEndpointSecurityGroupRules,
-          [
-            's3',
-            'logs',
-          ]);
-        if (pipeline.ingestionServer) {
-          const services = [
-            'ecr.dkr',
-            'ecr.api',
-            'ecs',
-            'ecs-agent',
-            'ecs-telemetry',
-          ];
-          if (pipeline.ingestionServer.sinkType === PipelineSinkType.KINESIS) {
-            services.push('kinesis-streams');
-          }
-          validateVpcEndpoint(
-            pipeline.region,
-            allSubnets,
-            isolatedSubnetsAZ,
-            privateSubnet,
-            vpcEndpoints,
-            vpcEndpointSecurityGroupRules,
-            services);
-        }
-        if (pipeline.dataProcessing) {
-          validateVpcEndpoint(
-            pipeline.region,
-            allSubnets,
-            isolatedSubnetsAZ,
-            privateSubnet,
-            vpcEndpoints,
-            vpcEndpointSecurityGroupRules,
-            [
-              'emr-serverless',
-              'glue',
-            ]);
-        }
-        if (pipeline.dataModeling) {
-          validateVpcEndpoint(pipeline.region,
-            allSubnets,
-            isolatedSubnetsAZ,
-            privateSubnet,
-            vpcEndpoints,
-            vpcEndpointSecurityGroupRules,
-            [
-              'redshift-data',
-              'states',
-              'sts',
-              'dynamodb',
-            ]);
-        }
-      }
-    }
-  }
-
-  if (pipeline.dataModeling?.redshift) {
-    let redshiftType = '';
-    let vpcSubnets = allSubnets;
-    let redshiftSubnets: ClickStreamSubnet[] = [];
-    let redshiftSecurityGroups: string[] = [];
-    let redshiftSecurityGroupsRules: SecurityGroupRule[] = [];
-    let portOfRedshift = 5439;
-
-    if (pipeline.dataModeling?.redshift?.newServerless) {
-      redshiftType = REDSHIFT_MODE.NEW_SERVERLESS;
-      if (pipeline.dataModeling?.redshift?.newServerless?.network.vpcId !== pipeline.network.vpcId) {
-        vpcSubnets = await describeSubnetsWithType(
-          pipeline.region, pipeline.dataModeling.redshift.newServerless.network.vpcId, SubnetType.ALL);
-      }
-      redshiftSubnets = vpcSubnets.filter(
-        subnet => pipeline.dataModeling?.redshift?.newServerless?.network.subnetIds.includes(subnet.id));
-      redshiftSecurityGroups = pipeline.dataModeling?.redshift?.newServerless?.network.securityGroups;
-      redshiftSecurityGroupsRules = await describeSecurityGroupsWithRules(pipeline.region, redshiftSecurityGroups);
-    } else if (pipeline.dataModeling?.redshift?.provisioned) {
-      redshiftType = REDSHIFT_MODE.PROVISIONED;
-      if (resources?.redshift?.network.vpcId !== pipeline.network.vpcId) {
-        vpcSubnets = await describeSubnetsWithType(
-          pipeline.region, resources?.redshift?.network.vpcId!, SubnetType.ALL);
-      }
-      redshiftSubnets = vpcSubnets.filter(
-        subnet => resources?.redshift?.network.subnetIds?.includes(subnet.id));
-      redshiftSecurityGroups = resources?.redshift?.network.securityGroups!;
-      redshiftSecurityGroupsRules = await describeSecurityGroupsWithRules(pipeline.region, redshiftSecurityGroups);
-      portOfRedshift = resources.redshift?.endpoint.port ?? 5439;
-    }
-
-    const azSet = new Set<string>();
-    const quickSightSubnets: ClickStreamSubnet[] = [];
-    for (let subnet of redshiftSubnets) {
-      if (!azSet.has(subnet.availabilityZone)) {
-        quickSightSubnets.push(subnet);
-      }
-      azSet.add(subnet.availabilityZone);
-    }
-    resources.quickSightSubnetIds = quickSightSubnets.map(subnet => subnet.id);
-
-    if (redshiftType === REDSHIFT_MODE.NEW_SERVERLESS) {
-      const azInRegion = await listAvailabilityZones(pipeline.region);
-      if (azInRegion.length < 2) {
-        throw new ClickStreamBadRequestError(
-          `Validation error: error in obtaining ${pipeline.region} availability zones information. ` +
-          'Please check and try again.',
-        );
-      } else if (azInRegion.length === 2) {
-        if (azSet.size < 2 || redshiftSubnets.length < 3) {
-          throw new ClickStreamBadRequestError(
-            `Validation error: the network for deploying ${redshiftType} Redshift at least three subnets that cross two AZs. ` +
-            'Please check and try again.',
-          );
-        }
-      } else if (azSet.size < 3) {
-        throw new ClickStreamBadRequestError(
-          `Validation error: the network for deploying ${redshiftType} Redshift at least three subnets that cross three AZs. ` +
-          'Please check and try again.',
-        );
-      }
-    }
-
-    if (pipeline.reporting) {
-      const accountInfo = await describeAccountSubscription();
-      if (!accountInfo.AccountInfo?.Edition?.includes('ENTERPRISE')) {
-        throw new ClickStreamBadRequestError(
-          'Validation error: QuickSight edition is not enterprise in your account.',
-        );
-      }
-      const validSubnets = [];
-      for (let quickSightSubnet of quickSightSubnets) {
-        const redshiftCidrRule: SecurityGroupRule = {
-          IsEgress: false,
-          IpProtocol: 'tcp',
-          FromPort: portOfRedshift,
-          ToPort: portOfRedshift,
-          CidrIpv4: quickSightSubnet.cidr,
-        };
-        if (containRule(redshiftSecurityGroups, redshiftSecurityGroupsRules, redshiftCidrRule)) {
-          validSubnets.push(quickSightSubnet.id);
-          break;
-        }
-      }
-      if (isEmpty(validSubnets)) {
-        throw new ClickStreamBadRequestError(
-          `Validation error: ${redshiftType} Redshift security groups missing rule for QuickSight access.`,
-        );
-      }
-    }
-  }
+  await _checkForDataModelingAndReporting(pipeline, allSubnets, resources);
 
   if (pipeline.ingestionServer.loadBalancer.enableApplicationLoadBalancerAccessLog) {
     const enableAccessLogs = await validateEnableAccessLogsForALB(pipeline.region, pipeline.bucket.name);
@@ -464,3 +271,248 @@ export const validateEnableAccessLogsForALB = async (region: string, bucket: str
   );
   return simulateResult;
 };
+
+async function _checkForDataModelingAndReporting(pipeline: IPipeline, allSubnets: ClickStreamSubnet[], resources: CPipelineResources) {
+  if (pipeline.dataModeling?.redshift) {
+    let redshiftType = '';
+    let vpcSubnets = allSubnets;
+    let redshiftSubnets: ClickStreamSubnet[] = [];
+    let redshiftSecurityGroups: string[] = [];
+    let redshiftSecurityGroupsRules: SecurityGroupRule[] = [];
+    let portOfRedshift = 5439;
+
+    if (pipeline.dataModeling?.redshift?.newServerless) {
+      redshiftType = REDSHIFT_MODE.NEW_SERVERLESS;
+      ({ redshiftSubnets, redshiftSecurityGroups, redshiftSecurityGroupsRules } =
+          await _getRedshiftServerlessConfiguration(pipeline, vpcSubnets));
+    } else if (pipeline.dataModeling?.redshift?.provisioned) {
+      redshiftType = REDSHIFT_MODE.PROVISIONED;
+      ({ redshiftSubnets, redshiftSecurityGroups, redshiftSecurityGroupsRules, portOfRedshift } =
+        await _getRedshiftConfiguration(resources, pipeline, vpcSubnets));
+    }
+
+    const azSet = new Set<string>();
+    const quickSightSubnets: ClickStreamSubnet[] = [];
+    for (let subnet of redshiftSubnets) {
+      if (!azSet.has(subnet.availabilityZone)) {
+        quickSightSubnets.push(subnet);
+      }
+      azSet.add(subnet.availabilityZone);
+    }
+    resources.quickSightSubnetIds = quickSightSubnets.map(subnet => subnet.id);
+
+    await _checkForRedshiftServerless(redshiftType, pipeline, azSet, redshiftSubnets);
+
+    await _checkForReporting(pipeline, quickSightSubnets, portOfRedshift, redshiftSecurityGroups, redshiftSecurityGroupsRules, redshiftType);
+  }
+}
+
+async function _getRedshiftConfiguration(resources: CPipelineResources, pipeline: IPipeline, vpcSubnets: ClickStreamSubnet[]) {
+  if (resources?.redshift?.network.vpcId !== pipeline.network.vpcId) {
+    vpcSubnets = await describeSubnetsWithType(
+      pipeline.region, resources?.redshift?.network.vpcId!, SubnetType.ALL);
+  }
+  const redshiftSubnets = vpcSubnets.filter(
+    subnet => resources?.redshift?.network.subnetIds?.includes(subnet.id));
+  const redshiftSecurityGroups = resources?.redshift?.network.securityGroups!;
+  const redshiftSecurityGroupsRules = await describeSecurityGroupsWithRules(pipeline.region, redshiftSecurityGroups);
+  const portOfRedshift = resources.redshift?.endpoint.port ?? 5439;
+  return { vpcSubnets, redshiftSubnets, redshiftSecurityGroups, redshiftSecurityGroupsRules, portOfRedshift };
+}
+
+async function _getRedshiftServerlessConfiguration(pipeline: IPipeline, vpcSubnets: ClickStreamSubnet[]) {
+  if (pipeline.dataModeling?.redshift?.newServerless?.network.vpcId !== pipeline.network.vpcId) {
+    vpcSubnets = await describeSubnetsWithType(
+      pipeline.region, pipeline.dataModeling!.redshift!.newServerless!.network.vpcId, SubnetType.ALL);
+  }
+  const redshiftSubnets = vpcSubnets.filter(
+    subnet => pipeline.dataModeling?.redshift?.newServerless?.network.subnetIds.includes(subnet.id));
+  const redshiftSecurityGroups = pipeline.dataModeling!.redshift!.newServerless!.network.securityGroups;
+  const redshiftSecurityGroupsRules = await describeSecurityGroupsWithRules(pipeline.region, redshiftSecurityGroups);
+  return { redshiftSubnets, redshiftSecurityGroups, redshiftSecurityGroupsRules };
+}
+
+async function _checkForReporting(pipeline: IPipeline, quickSightSubnets: ClickStreamSubnet[],
+  portOfRedshift: number, redshiftSecurityGroups: string[], redshiftSecurityGroupsRules: SecurityGroupRule[],
+  redshiftType: string) {
+  if (pipeline.reporting) {
+    const accountInfo = await describeAccountSubscription();
+    if (!accountInfo.AccountInfo?.Edition?.includes('ENTERPRISE')) {
+      throw new ClickStreamBadRequestError(
+        'Validation error: QuickSight edition is not enterprise in your account.',
+      );
+    }
+    const validSubnets = [];
+    for (let quickSightSubnet of quickSightSubnets) {
+      const redshiftCidrRule: SecurityGroupRule = {
+        IsEgress: false,
+        IpProtocol: 'tcp',
+        FromPort: portOfRedshift,
+        ToPort: portOfRedshift,
+        CidrIpv4: quickSightSubnet.cidr,
+      };
+      if (containRule(redshiftSecurityGroups, redshiftSecurityGroupsRules, redshiftCidrRule)) {
+        validSubnets.push(quickSightSubnet.id);
+        break;
+      }
+    }
+    if (isEmpty(validSubnets)) {
+      throw new ClickStreamBadRequestError(
+        `Validation error: ${redshiftType} Redshift security groups missing rule for QuickSight access.`,
+      );
+    }
+  }
+}
+
+async function _checkForRedshiftServerless(redshiftType: string, pipeline: IPipeline, azSet: Set<string>, redshiftSubnets: ClickStreamSubnet[]) {
+  if (redshiftType === REDSHIFT_MODE.NEW_SERVERLESS) {
+    const azInRegion = await listAvailabilityZones(pipeline.region);
+    if (azInRegion.length < 2) {
+      throw new ClickStreamBadRequestError(
+        `Validation error: error in obtaining ${pipeline.region} availability zones information. ` +
+        'Please check and try again.',
+      );
+    } else if (azInRegion.length === 2) {
+      if (azSet.size < 2 || redshiftSubnets.length < 3) {
+        throw new ClickStreamBadRequestError(
+          `Validation error: the network for deploying ${redshiftType} Redshift at least three subnets that cross two AZs. ` +
+          'Please check and try again.',
+        );
+      }
+    } else if (azSet.size < 3) {
+      throw new ClickStreamBadRequestError(
+        `Validation error: the network for deploying ${redshiftType} Redshift at least three subnets that cross three AZs. ` +
+        'Please check and try again.',
+      );
+    }
+  }
+}
+
+async function _checkVpcEndpointsForIsolatedSubnets(pipeline: IPipeline, vpcId: string,
+  privateSubnets: ClickStreamSubnet[], allSubnets: ClickStreamSubnet[]) {
+  const isolatedSubnets = privateSubnets.filter(subnet => subnet.type == SubnetType.ISOLATED);
+  if (isolatedSubnets.length > 0) {
+    const isolatedSubnetsAZ = getSubnetsAZ(isolatedSubnets);
+    const vpcEndpoints = await describeVpcEndpoints(pipeline.region, vpcId);
+    const vpcEndpointSecurityGroups: string[] = _getEndpointSecurityGroups(vpcEndpoints);
+
+    const vpcEndpointSecurityGroupRules = await describeSecurityGroupsWithRules(pipeline.region, vpcEndpointSecurityGroups);
+
+    for (let privateSubnet of privateSubnets) {
+      if (privateSubnet.type === SubnetType.ISOLATED) {
+        validateVpcEndpoint(
+          pipeline.region,
+          allSubnets,
+          isolatedSubnetsAZ,
+          privateSubnet,
+          vpcEndpoints,
+          vpcEndpointSecurityGroupRules,
+          [
+            's3',
+            'logs',
+          ]);
+        _validateEndpointsForModules(pipeline, allSubnets, isolatedSubnetsAZ, privateSubnet, vpcEndpoints, vpcEndpointSecurityGroupRules);
+      }
+    }
+  }
+}
+
+function _validateEndpointsForModules(pipeline: IPipeline, allSubnets: ClickStreamSubnet[], isolatedSubnetsAZ: string[],
+  privateSubnet: ClickStreamSubnet, vpcEndpoints: VpcEndpoint[], vpcEndpointSecurityGroupRules: SecurityGroupRule[]) {
+  if (pipeline.ingestionServer) {
+    const services = [
+      'ecr.dkr',
+      'ecr.api',
+      'ecs',
+      'ecs-agent',
+      'ecs-telemetry',
+    ];
+    if (pipeline.ingestionServer.sinkType === PipelineSinkType.KINESIS) {
+      services.push('kinesis-streams');
+    }
+    validateVpcEndpoint(
+      pipeline.region,
+      allSubnets,
+      isolatedSubnetsAZ,
+      privateSubnet,
+      vpcEndpoints,
+      vpcEndpointSecurityGroupRules,
+      services);
+  }
+  if (pipeline.dataProcessing) {
+    validateVpcEndpoint(
+      pipeline.region,
+      allSubnets,
+      isolatedSubnetsAZ,
+      privateSubnet,
+      vpcEndpoints,
+      vpcEndpointSecurityGroupRules,
+      [
+        'emr-serverless',
+        'glue',
+      ]);
+  }
+  if (pipeline.dataModeling) {
+    validateVpcEndpoint(pipeline.region,
+      allSubnets,
+      isolatedSubnetsAZ,
+      privateSubnet,
+      vpcEndpoints,
+      vpcEndpointSecurityGroupRules,
+      [
+        'redshift-data',
+        'states',
+        'sts',
+        'dynamodb',
+      ]);
+  }
+}
+
+function _getEndpointSecurityGroups(vpcEndpoints: VpcEndpoint[]) {
+  const vpcEndpointSecurityGroups: string[] = [];
+  for (let vpce of vpcEndpoints) {
+    for (let group of vpce.Groups!) {
+      vpcEndpointSecurityGroups.push(group.GroupId!);
+    }
+  }
+  return vpcEndpointSecurityGroups;
+}
+
+async function _checkSubnets(pipeline: IPipeline) {
+  const network = pipeline.network;
+  if (isEmpty(network.privateSubnetIds)) {
+    // public subnets only
+    // pipeline.network.privateSubnetIds = pipeline.network.publicSubnetIds;
+    throw new ClickStreamBadRequestError(
+      'Validation error: you must select at least two private subnets for the ingestion endpoint.',
+    );
+  }
+  if (network.publicSubnetIds.length < 2 || network.privateSubnetIds.length < 2) {
+    throw new ClickStreamBadRequestError(
+      'Validate error: you must select at least two public subnets and at least two private subnets for the ingestion endpoint.',
+    );
+  }
+
+  const allSubnets = await describeSubnetsWithType(pipeline.region, network.vpcId, SubnetType.ALL);
+  const privateSubnets = allSubnets.filter(subnet => network.privateSubnetIds.includes(subnet.id));
+  const publicSubnets = allSubnets.filter(subnet => network.publicSubnetIds.includes(subnet.id));
+  const privateSubnetsAZ = getSubnetsAZ(privateSubnets);
+  const publicSubnetsAZ = getSubnetsAZ(publicSubnets);
+  if (publicSubnetsAZ.length < 2 || privateSubnetsAZ.length < 2) {
+    throw new ClickStreamBadRequestError(
+      'Validate error: the public and private subnets for the ingestion endpoint must locate in at least two Availability Zones (AZ).',
+    );
+  }
+  const azInPublic = publicSubnetsAZ.filter(az => privateSubnetsAZ.includes(az));
+  if (azInPublic.length !== privateSubnetsAZ.length) {
+    throw new ClickStreamBadRequestError(
+      'Validate error: the public subnets and private subnets for ingestion endpoint must be in the same Availability Zones (AZ). '+
+      'For example, you can not select public subnets in AZ (a, b), while select private subnets in AZ (b, c).',
+    );
+  }
+
+  return {
+    allSubnets,
+    privateSubnets,
+  };
+}

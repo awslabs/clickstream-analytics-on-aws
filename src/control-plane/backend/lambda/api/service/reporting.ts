@@ -13,7 +13,7 @@
 
 import { readFileSync } from 'fs';
 import { join } from 'path';
-import { AnalysisDefinition, ConflictException, DashboardVersionDefinition, DataSetIdentifierDeclaration, InputColumn } from '@aws-sdk/client-quicksight';
+import { AnalysisDefinition, ConflictException, DashboardVersionDefinition, DataSetIdentifierDeclaration, InputColumn, QuickSight } from '@aws-sdk/client-quicksight';
 import { BatchExecuteStatementCommand, DescribeStatementCommand, StatusString } from '@aws-sdk/client-redshift-data';
 import { v4 as uuidv4 } from 'uuid';
 import { DataSetProps } from './quicksight/dashboard-ln';
@@ -47,11 +47,11 @@ import { ExplorePathNodeType, ExploreRequestAction, ExploreTimeScopeType, Explor
 import { logger } from '../common/powertools';
 import { SDKClient } from '../common/sdk-client';
 import { ApiFail, ApiSuccess } from '../common/types';
-import { generateEmbedUrlForRegisteredUser, getClickstreamUserArn } from '../store/aws/quicksight';
+import { QuickSightUserArns, generateEmbedUrlForRegisteredUser, getClickstreamUserArn } from '../store/aws/quicksight';
 
 const sdkClient: SDKClient = new SDKClient();
 
-export class ReportingServ {
+export class ReportingService {
 
   async createFunnelVisual(req: any, res: any, next: any) {
 
@@ -100,57 +100,6 @@ export class ReportingServ {
 
       logger.debug(`funnel table chart sql: ${sqlTable}`);
 
-      //create quicksight dataset
-      const datasetPropsArray: DataSetProps[] = [];
-      datasetPropsArray.push({
-        name: '',
-        tableName: viewName,
-        columns: funnelVisualColumns,
-        importMode: 'DIRECT_QUERY',
-        customSql: sql,
-        projectedColumns: [
-          'event_date',
-          'event_name',
-          'x_id',
-        ],
-      });
-
-      const projectedColumns: string[] = [query.groupColumn];
-      const tableViewCols: InputColumn[] = [{
-        Name: query.groupColumn,
-        Type: 'STRING',
-      }];
-
-      for (const [index, item] of query.eventAndConditions.entries()) {
-        projectedColumns.push(`${item.eventName}`);
-        tableViewCols.push({
-          Name: item.eventName,
-          Type: 'DECIMAL',
-        });
-
-        if (index === 0) {
-          projectedColumns.push('rate');
-          tableViewCols.push({
-            Name: 'rate',
-            Type: 'DECIMAL',
-          });
-        } else {
-          projectedColumns.push(`${item.eventName}_rate`);
-          tableViewCols.push({
-            Name: `${item.eventName}_rate`,
-            Type: 'DECIMAL',
-          });
-        }
-      }
-      datasetPropsArray.push({
-        name: '',
-        tableName: tableVisualViewName,
-        columns: tableViewCols,
-        importMode: 'DIRECT_QUERY',
-        customSql: sqlTable,
-        projectedColumns: ['event_date'].concat(projectedColumns),
-      });
-
       let sheetId;
       if (!query.dashboardId) {
         sheetId = uuidv4();
@@ -161,62 +110,119 @@ export class ReportingServ {
         sheetId = query.sheetId;
       }
 
-      const visualId = uuidv4();
-      const visualDef = getFunnelVisualDef(visualId, viewName);
-      const visualRelatedParams = getVisualRelatedDefs({
-        timeScopeType: query.timeScopeType,
-        sheetId,
-        visualId,
-        viewName,
-        lastN: query.lastN,
-        timeUnit: query.timeUnit,
-        timeStart: query.timeStart,
-        timeEnd: query.timeEnd,
-      });
-
-      const visualProps = {
-        sheetId: sheetId,
-        name: ExploreVisualName.CHART,
-        visualId: visualId,
-        visual: visualDef,
-        dataSetIdentifierDeclaration: [],
-        filterControl: visualRelatedParams.filterControl,
-        parameterDeclarations: visualRelatedParams.parameterDeclarations,
-        filterGroup: visualRelatedParams.filterGroup,
-        eventCount: query.eventAndConditions.length,
-      };
-
-      const tableVisualId = uuidv4();
-      const eventNames = [];
-      const percentageCols = ['rate'];
-      for (const [index, e] of query.eventAndConditions.entries()) {
-        eventNames.push(e.eventName);
-        if (index > 0) {
-          percentageCols.push(e.eventName + '_rate');
-        }
-      }
-      const tableVisualDef = getFunnelTableVisualDef(tableVisualId, tableVisualViewName, eventNames, query.groupColumn);
-      const columnConfigurations = getFunnelTableVisualRelatedDefs(tableVisualViewName, percentageCols);
-
-      visualRelatedParams.filterGroup!.ScopeConfiguration!.SelectedSheets!.SheetVisualScopingConfigurations![0].VisualIds?.push(tableVisualId);
-
-      const tableVisualProps = {
-        sheetId: sheetId,
-        name: ExploreVisualName.TABLE,
-        visualId: tableVisualId,
-        visual: tableVisualDef,
-        dataSetIdentifierDeclaration: [],
-        ColumnConfigurations: columnConfigurations,
-      };
-
-      const result: CreateDashboardResult = await this.create(sheetId, viewName, query, datasetPropsArray, [visualProps, tableVisualProps]);
-
+      const result = await this._buildQuickSightDashboard(viewName, sql, tableVisualViewName,
+        sqlTable, query, sheetId);
       return res.status(201).json(new ApiSuccess(result));
 
     } catch (error) {
       next(error);
     }
   };
+
+  private async _buildQuickSightDashboard(viewName: string, sql: string, tableVisualViewName: string,
+    sqlTable: string, query: any, sheetId: string) {
+    //create quicksight dataset
+    const datasetPropsArray: DataSetProps[] = [];
+    datasetPropsArray.push({
+      name: '',
+      tableName: viewName,
+      columns: funnelVisualColumns,
+      importMode: 'DIRECT_QUERY',
+      customSql: sql,
+      projectedColumns: [
+        'event_date',
+        'event_name',
+        'x_id',
+      ],
+    });
+
+    const projectedColumns: string[] = [query.groupColumn];
+    const tableViewCols: InputColumn[] = [{
+      Name: query.groupColumn,
+      Type: 'STRING',
+    }];
+
+    for (const [index, item] of query.eventAndConditions.entries()) {
+      projectedColumns.push(`${item.eventName}`);
+      tableViewCols.push({
+        Name: item.eventName,
+        Type: 'DECIMAL',
+      });
+
+      if (index === 0) {
+        projectedColumns.push('rate');
+        tableViewCols.push({
+          Name: 'rate',
+          Type: 'DECIMAL',
+        });
+      } else {
+        projectedColumns.push(`${item.eventName}_rate`);
+        tableViewCols.push({
+          Name: `${item.eventName}_rate`,
+          Type: 'DECIMAL',
+        });
+      }
+    }
+    datasetPropsArray.push({
+      name: '',
+      tableName: tableVisualViewName,
+      columns: tableViewCols,
+      importMode: 'DIRECT_QUERY',
+      customSql: sqlTable,
+      projectedColumns: ['event_date'].concat(projectedColumns),
+    });
+
+    const visualId = uuidv4();
+    const visualDef = getFunnelVisualDef(visualId, viewName);
+    const visualRelatedParams = getVisualRelatedDefs({
+      timeScopeType: query.timeScopeType,
+      sheetId,
+      visualId,
+      viewName,
+      lastN: query.lastN,
+      timeUnit: query.timeUnit,
+      timeStart: query.timeStart,
+      timeEnd: query.timeEnd,
+    });
+
+    const visualProps = {
+      sheetId: sheetId,
+      name: ExploreVisualName.CHART,
+      visualId: visualId,
+      visual: visualDef,
+      dataSetIdentifierDeclaration: [],
+      filterControl: visualRelatedParams.filterControl,
+      parameterDeclarations: visualRelatedParams.parameterDeclarations,
+      filterGroup: visualRelatedParams.filterGroup,
+      eventCount: query.eventAndConditions.length,
+    };
+
+    const tableVisualId = uuidv4();
+    const eventNames = [];
+    const percentageCols = ['rate'];
+    for (const [index, e] of query.eventAndConditions.entries()) {
+      eventNames.push(e.eventName);
+      if (index > 0) {
+        percentageCols.push(e.eventName + '_rate');
+      }
+    }
+    const tableVisualDef = getFunnelTableVisualDef(tableVisualId, tableVisualViewName, eventNames, query.groupColumn);
+    const columnConfigurations = getFunnelTableVisualRelatedDefs(tableVisualViewName, percentageCols);
+
+    visualRelatedParams.filterGroup!.ScopeConfiguration!.SelectedSheets!.SheetVisualScopingConfigurations![0].VisualIds?.push(tableVisualId);
+
+    const tableVisualProps = {
+      sheetId: sheetId,
+      name: ExploreVisualName.TABLE,
+      visualId: tableVisualId,
+      visual: tableVisualDef,
+      dataSetIdentifierDeclaration: [],
+      ColumnConfigurations: columnConfigurations,
+    };
+
+    const result: CreateDashboardResult = await this.create(sheetId, viewName, query, datasetPropsArray, [visualProps, tableVisualProps]);
+    return result;
+  }
 
   async createEventVisual(req: any, res: any, next: any) {
     try {
@@ -553,6 +559,22 @@ export class ReportingServ {
 
     logger.info(`visualPropsArray[0] ${JSON.stringify(visualPropsArray[0])}`);
 
+    const result = await this._buildDashboard(query, visualPropsArray, quickSight,
+      sheetId, resourceName, principals, dashboardCreateParameters);
+    for (let visualProps of visualPropsArray) {
+      const visual: VisualMapProps = {
+        name: visualProps.name,
+        id: visualProps.visualId,
+      };
+      result.visualIds.push(visual);
+    }
+
+    return result;
+  };
+
+  private async _buildDashboard(query: any, visualPropsArray: VisualProps[], quickSight: QuickSight,
+    sheetId: string, resourceName: string, principals: QuickSightUserArns,
+    dashboardCreateParameters: DashboardCreateParameters) {
     // generate dashboard definition
     let dashboardDef;
     if (!query.dashboardId) {
@@ -576,76 +598,8 @@ export class ReportingServ {
     if (!query.dashboardId) {
 
       //create QuickSight analysis
-      const analysisId = `clickstream-ext-${uuidv4()}`;
-      const newAnalysis = await quickSight.createAnalysis({
-        AwsAccountId: awsAccountId,
-        AnalysisId: analysisId,
-        Name: `${resourceName}`,
-        Permissions: [{
-          Principal: principals.dashboardOwner,
-          Actions: [
-            'quicksight:DescribeAnalysis',
-            'quicksight:QueryAnalysis',
-            'quicksight:UpdateAnalysis',
-            'quicksight:RestoreAnalysis',
-            'quicksight:DeleteAnalysis',
-            'quicksight:UpdateAnalysisPermissions',
-            'quicksight:DescribeAnalysisPermissions',
-          ],
-        }],
-        Definition: dashboard as AnalysisDefinition,
-      });
-
-      //create QuickSight dashboard
-      const dashboardId = `clickstream-ext-${uuidv4()}`;
-      const newDashboard = await quickSight.createDashboard({
-        AwsAccountId: awsAccountId,
-        DashboardId: dashboardId,
-        Name: `${resourceName}`,
-        Permissions: [{
-          Principal: principals.dashboardOwner,
-          Actions: [
-            'quicksight:DescribeDashboard',
-            'quicksight:ListDashboardVersions',
-            'quicksight:QueryDashboard',
-            'quicksight:UpdateDashboard',
-            'quicksight:DeleteDashboard',
-            'quicksight:UpdateDashboardPermissions',
-            'quicksight:DescribeDashboardPermissions',
-            'quicksight:UpdateDashboardPublishedVersion',
-          ],
-        },
-        {
-          Principal: principals.embedOwner,
-          Actions: [
-            'quicksight:DescribeDashboard', 'quicksight:QueryDashboard', 'quicksight:ListDashboardVersions',
-          ],
-        }],
-        Definition: dashboard,
-      });
-
-      let dashboardEmbedUrl = '';
-      if (query.action === ExploreRequestAction.PREVIEW) {
-        const embedUrl = await generateEmbedUrlForRegisteredUser(
-          dashboardCreateParameters.region,
-          dashboardCreateParameters.allowedDomain,
-          false,
-          query.dashboardId,
-        );
-        dashboardEmbedUrl = embedUrl.EmbedUrl!;
-      }
-      result = {
-        dashboardId,
-        dashboardArn: newDashboard.Arn!,
-        dashboardName: `${resourceName}`,
-        dashboardVersion: Number.parseInt(newDashboard.VersionArn!.substring(newDashboard.VersionArn!.lastIndexOf('/') + 1)),
-        dashboardEmbedUrl: dashboardEmbedUrl,
-        analysisId,
-        analysisArn: newAnalysis.Arn!,
-        analysisName: `${resourceName}`,
-        sheetId,
-        visualIds: [],
-      };
+      result = await this._createDashboard(quickSight, resourceName, principals, dashboard,
+        query, dashboardCreateParameters, sheetId);
     } else {
       //update QuickSight analysis
       let newAnalysis;
@@ -668,31 +622,8 @@ export class ReportingServ {
       const versionNumber = newDashboard.VersionArn?.substring(newDashboard.VersionArn?.lastIndexOf('/') + 1);
 
       // publish new version
-      let cnt = 0;
-      for (const _i of Array(60).keys()) {
-        cnt += 1;
-        try {
-          const response = await quickSight.updateDashboardPublishedVersion({
-            AwsAccountId: awsAccountId,
-            DashboardId: query.dashboardId,
-            VersionNumber: Number.parseInt(versionNumber!),
-          });
+      await this._publishNewVersionDashboard(quickSight, query, versionNumber!);
 
-          if (response.DashboardId) {
-            break;
-          }
-        } catch (err: any) {
-          if (err instanceof ConflictException ) {
-            logger.warn('sleep 100ms to wait updateDashboard finish');
-            await sleep(100);
-          } else {
-            throw err;
-          }
-        }
-      }
-      if (cnt >= 60) {
-        throw new Error(`publish dashboard new version failed after try ${cnt} times`);
-      }
       let dashboardEmbedUrl = '';
       if (query.action === ExploreRequestAction.PREVIEW) {
         const embedUrl = await generateEmbedUrlForRegisteredUser(
@@ -716,17 +647,112 @@ export class ReportingServ {
         visualIds: [],
       };
     }
-
-    for (let visualProps of visualPropsArray) {
-      const visual: VisualMapProps = {
-        name: visualProps.name,
-        id: visualProps.visualId,
-      };
-      result.visualIds.push(visual);
-    }
-
     return result;
-  };
+  }
+
+  private async _publishNewVersionDashboard(quickSight: QuickSight, query: any,
+    versionNumber: string) {
+    let cnt = 0;
+    for (const _i of Array(60).keys()) {
+      cnt += 1;
+      try {
+        const response = await quickSight.updateDashboardPublishedVersion({
+          AwsAccountId: awsAccountId,
+          DashboardId: query.dashboardId,
+          VersionNumber: Number.parseInt(versionNumber),
+        });
+
+        if (response.DashboardId) {
+          break;
+        }
+      } catch (err: any) {
+        if (err instanceof ConflictException ) {
+          logger.warn('sleep 100ms to wait updateDashboard finish');
+          await sleep(100);
+        } else {
+          throw err;
+        }
+      }
+    }
+    if (cnt >= 60) {
+      throw new Error(`publish dashboard new version failed after try ${cnt} times`);
+    }
+  }
+
+  private async _createDashboard(quickSight: QuickSight, resourceName: string, principals: QuickSightUserArns,
+    dashboard: DashboardVersionDefinition, query: any, dashboardCreateParameters: DashboardCreateParameters, sheetId: string) {
+    const analysisId = `clickstream-ext-${uuidv4()}`;
+    const newAnalysis = await quickSight.createAnalysis({
+      AwsAccountId: awsAccountId,
+      AnalysisId: analysisId,
+      Name: `${resourceName}`,
+      Permissions: [{
+        Principal: principals.dashboardOwner,
+        Actions: [
+          'quicksight:DescribeAnalysis',
+          'quicksight:QueryAnalysis',
+          'quicksight:UpdateAnalysis',
+          'quicksight:RestoreAnalysis',
+          'quicksight:DeleteAnalysis',
+          'quicksight:UpdateAnalysisPermissions',
+          'quicksight:DescribeAnalysisPermissions',
+        ],
+      }],
+      Definition: dashboard as AnalysisDefinition,
+    });
+
+    //create QuickSight dashboard
+    const dashboardId = `clickstream-ext-${uuidv4()}`;
+    const newDashboard = await quickSight.createDashboard({
+      AwsAccountId: awsAccountId,
+      DashboardId: dashboardId,
+      Name: `${resourceName}`,
+      Permissions: [{
+        Principal: principals.dashboardOwner,
+        Actions: [
+          'quicksight:DescribeDashboard',
+          'quicksight:ListDashboardVersions',
+          'quicksight:QueryDashboard',
+          'quicksight:UpdateDashboard',
+          'quicksight:DeleteDashboard',
+          'quicksight:UpdateDashboardPermissions',
+          'quicksight:DescribeDashboardPermissions',
+          'quicksight:UpdateDashboardPublishedVersion',
+        ],
+      },
+      {
+        Principal: principals.embedOwner,
+        Actions: [
+          'quicksight:DescribeDashboard', 'quicksight:QueryDashboard', 'quicksight:ListDashboardVersions',
+        ],
+      }],
+      Definition: dashboard,
+    });
+
+    let dashboardEmbedUrl = '';
+    if (query.action === ExploreRequestAction.PREVIEW) {
+      const embedUrl = await generateEmbedUrlForRegisteredUser(
+        dashboardCreateParameters.region,
+        dashboardCreateParameters.allowedDomain,
+        false,
+        query.dashboardId,
+      );
+      dashboardEmbedUrl = embedUrl.EmbedUrl!;
+    }
+    const result = {
+      dashboardId,
+      dashboardArn: newDashboard.Arn!,
+      dashboardName: `${resourceName}`,
+      dashboardVersion: Number.parseInt(newDashboard.VersionArn!.substring(newDashboard.VersionArn!.lastIndexOf('/') + 1)),
+      dashboardEmbedUrl: dashboardEmbedUrl,
+      analysisId,
+      analysisArn: newAnalysis.Arn!,
+      analysisName: `${resourceName}`,
+      sheetId,
+      visualIds: [],
+    };
+    return result;
+  }
 
   async warmup(req: any, res: any, next: any) {
     try {
@@ -795,63 +821,14 @@ export class ReportingServ {
       logger.info('start to clean QuickSight temp resources');
       logger.info(`request: ${JSON.stringify(req.body)}`);
 
-      const deletedDashBoards: string[] = [];
-      const deletedAnalyses: string[] = [];
-      const deletedDatasets: string[] = [];
-
       const region = req.body.region;
       const quickSight = sdkClient.QuickSight({ region: region });
 
-      const dashBoards = await quickSight.listDashboards({
-        AwsAccountId: awsAccountId,
-      });
+      const deletedDashBoards = await _cleanedDashboard(quickSight);
 
-      if (dashBoards.DashboardSummaryList) {
-        for (const [_index, dashboard] of dashBoards.DashboardSummaryList.entries()) {
-          if (dashboard.Name?.startsWith(TEMP_RESOURCE_NAME_PREFIX) && (new Date().getTime() - dashboard.CreatedTime!.getTime()) > 60*60*1000) {
-            const deletedRes = await quickSight.deleteDashboard({
-              AwsAccountId: awsAccountId,
-              DashboardId: dashboard.DashboardId,
-            });
-            deletedDashBoards.push(deletedRes.DashboardId!);
-            logger.info(`dashboard ${dashboard.Name} removed`);
-          }
-        }
-      }
+      const deletedAnalyses = await _deletedAnalyses(quickSight);
 
-      const analyses = await quickSight.listAnalyses({
-        AwsAccountId: awsAccountId,
-      });
-
-      if (analyses.AnalysisSummaryList) {
-        for (const [_index, analysis] of analyses.AnalysisSummaryList.entries()) {
-          if (analysis.Name?.startsWith(TEMP_RESOURCE_NAME_PREFIX) && (new Date().getTime() - analysis.CreatedTime!.getTime()) > 60*60*1000) {
-            const deletedRes = await quickSight.deleteAnalysis({
-              AwsAccountId: awsAccountId,
-              AnalysisId: analysis.AnalysisId,
-            });
-            deletedAnalyses.push(deletedRes.AnalysisId!);
-            logger.info(`analysis ${analysis.Name} removed`);
-          }
-        }
-      }
-
-      const datasets = await quickSight.listDataSets({
-        AwsAccountId: awsAccountId,
-      });
-
-      if (datasets.DataSetSummaries) {
-        for (const [_index, dataset] of datasets.DataSetSummaries.entries()) {
-          if (dataset.Name?.startsWith(TEMP_RESOURCE_NAME_PREFIX) && (new Date().getTime() - dataset.CreatedTime!.getTime()) > 60*60*1000) {
-            const deletedRes = await quickSight.deleteDataSet({
-              AwsAccountId: awsAccountId,
-              DataSetId: dataset.DataSetId,
-            });
-            deletedDatasets.push(deletedRes.DataSetId!);
-            logger.info(`dataset ${dataset.Name} removed`);
-          }
-        }
-      }
+      const deletedDatasets = await _deletedDatasets(quickSight);
 
       const result = {
         deletedDashBoards,
@@ -868,3 +845,65 @@ export class ReportingServ {
 
 }
 
+async function _deletedDatasets(quickSight: QuickSight) {
+  const deletedDatasets: string[] = [];
+  const datasets = await quickSight.listDataSets({
+    AwsAccountId: awsAccountId,
+  });
+
+  if (datasets.DataSetSummaries) {
+    for (const [_index, dataset] of datasets.DataSetSummaries.entries()) {
+      if (dataset.Name?.startsWith(TEMP_RESOURCE_NAME_PREFIX) && (new Date().getTime() - dataset.CreatedTime!.getTime()) > 60 * 60 * 1000) {
+        const deletedRes = await quickSight.deleteDataSet({
+          AwsAccountId: awsAccountId,
+          DataSetId: dataset.DataSetId,
+        });
+        deletedDatasets.push(deletedRes.DataSetId!);
+        logger.info(`dataset ${dataset.Name} removed`);
+      }
+    }
+  }
+  return deletedDatasets;
+}
+
+async function _deletedAnalyses(quickSight: QuickSight) {
+  const deletedAnalyses: string[] = [];
+  const analyses = await quickSight.listAnalyses({
+    AwsAccountId: awsAccountId,
+  });
+
+  if (analyses.AnalysisSummaryList) {
+    for (const [_index, analysis] of analyses.AnalysisSummaryList.entries()) {
+      if (analysis.Name?.startsWith(TEMP_RESOURCE_NAME_PREFIX) && (new Date().getTime() - analysis.CreatedTime!.getTime()) > 60 * 60 * 1000) {
+        const deletedRes = await quickSight.deleteAnalysis({
+          AwsAccountId: awsAccountId,
+          AnalysisId: analysis.AnalysisId,
+        });
+        deletedAnalyses.push(deletedRes.AnalysisId!);
+        logger.info(`analysis ${analysis.Name} removed`);
+      }
+    }
+  }
+  return deletedAnalyses;
+}
+
+async function _cleanedDashboard(quickSight: QuickSight) {
+  const deletedDashBoards: string[] = [];
+  const dashBoards = await quickSight.listDashboards({
+    AwsAccountId: awsAccountId,
+  });
+
+  if (dashBoards.DashboardSummaryList) {
+    for (const [_index, dashboard] of dashBoards.DashboardSummaryList.entries()) {
+      if (dashboard.Name?.startsWith(TEMP_RESOURCE_NAME_PREFIX) && (new Date().getTime() - dashboard.CreatedTime!.getTime()) > 60 * 60 * 1000) {
+        const deletedRes = await quickSight.deleteDashboard({
+          AwsAccountId: awsAccountId,
+          DashboardId: dashboard.DashboardId,
+        });
+        deletedDashBoards.push(deletedRes.DashboardId!);
+        logger.info(`dashboard ${dashboard.Name} removed`);
+      }
+    }
+  }
+  return deletedDashBoards;
+}
