@@ -4403,6 +4403,13 @@ describe('SQL Builder test', () => {
                   value: [1400],
                   dataType: MetadataValueType.INTEGER,
                 },
+                {
+                  category: 'device',
+                  property: 'screen_height',
+                  operator: '>',
+                  value: [1800],
+                  dataType: MetadataValueType.INTEGER,
+                },
               ],
               conditionOperator: 'or',
             },
@@ -4575,7 +4582,10 @@ describe('SQL Builder test', () => {
         where
           (
             event_name = 'add_button_click'
-            and (device_screen_height > 1400)
+            and (
+              device_screen_height > 1400
+              or device_screen_height > 1800
+            )
           )
       ),
       second_table_0 as (
