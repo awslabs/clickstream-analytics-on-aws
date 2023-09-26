@@ -419,16 +419,11 @@ function _addVisualLayout(sheet: any, visual: VisualProps, requestAction: string
     elements.push(layoutControl);
   }
 
+  visualControl.RowSpan = visual.rowSpan ?? 12;
+  visualControl.ColumnSpan = visual.colSpan ?? 36;
+
   if (visual.eventCount) {
     visualControl.RowSpan = visual.rowSpan ?? visual.eventCount * 3;
-    visualControl.ColumnSpan = visual.colSpan ?? 20;
-  }
-
-  visualControl.RowSpan = visual.rowSpan ?? 12;
-  visualControl.ColumnSpan = visual.colSpan ?? 20;
-
-  if (visual.eventCount) {
-    visualControl.RowSpan = visual.eventCount * 3;
   }
 
   visualControl.ElementId = findFirstChild(visual.visual).VisualId;

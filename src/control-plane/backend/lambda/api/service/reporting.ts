@@ -598,7 +598,6 @@ export class ReportingService {
 
     let result: CreateDashboardResult;
     if (!query.dashboardId) {
-
       //create QuickSight analysis
       result = await this._createDashboard(quickSight, resourceName, principals, dashboard,
         query, dashboardCreateParameters, sheetId);
@@ -737,7 +736,7 @@ export class ReportingService {
         dashboardCreateParameters.region,
         dashboardCreateParameters.allowedDomain,
         false,
-        query.dashboardId,
+        dashboardId,
       );
       dashboardEmbedUrl = embedUrl.EmbedUrl!;
     }

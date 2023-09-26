@@ -144,18 +144,23 @@ export const parametersConvertToCategoryItemType = (
 };
 
 export const validEventAnalyticsItem = (item: IEventAnalyticsItem) => {
-  return item.selectedEventOption?.value?.trim() !== '';
+  return (
+    item.selectedEventOption && item.selectedEventOption.value?.trim() !== ''
+  );
 };
 
 export const validRetentionAnalyticsItem = (item: IRetentionAnalyticsItem) => {
   return (
+    item.startEventOption &&
     item.startEventOption?.value?.trim() !== '' &&
+    item.revisitEventOption &&
     item.revisitEventOption?.value?.trim() !== ''
   );
 };
 
 export const validConditionItemType = (condition: IConditionItemType) => {
   return (
+    condition.conditionOption &&
     condition.conditionOption?.value?.trim() !== '' &&
     condition.conditionValue.length > 0
   );
