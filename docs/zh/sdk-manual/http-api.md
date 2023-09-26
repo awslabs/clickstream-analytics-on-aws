@@ -2,7 +2,7 @@
 
 ## 简介
 
-本文将帮助您通过 HTTP 请求将点击流数据发送到 Clickstream 提取服务器。 Clickstream
+本文将帮助您通过 HTTP 请求将点击流数据发送到 Clickstream 摄取服务器。 Clickstream
 数据处理模块将按照以下准则正确处理您的数据。然后，您可以在后续的报告模块中直观地分析它们。
 
 ## 请求端点
@@ -104,7 +104,7 @@
 | app_title        | 否    | String  | shopping                                                                                                                                                                                                                                                                                                                                         | 应用名称                                                                                                                                                   |
 | items            | 否    | Object  | [{<br/>	&nbsp;&nbsp;"id": "b011ddc3-632f-47cb-a68a-ad83678ecfed",<br/>	&nbsp;&nbsp;"name": "Classic coat-rack",<br/>	&nbsp;&nbsp;"category": "housewares",<br/>	&nbsp;&nbsp;"price": 167<br/>}]                                                                                                                                                  | 物品列表，支持一次上传多个item，一次最多上传100个item<br>关于item数量限制请参考[事件和属性限制](./web.md#_13) <br>关于item的支持的属性，请参考：[item 属性](./web.md#item_1)                               |
 | user             | 否    | Object  | {<br/>&nbsp;&nbsp;"_user_id": {<br/>&nbsp;&nbsp;&nbsp;&nbsp;"value": "0202d0e1",<br/>&nbsp;&nbsp;&nbsp;&nbsp;"set_timestamp": 1695006816345<br/>  &nbsp;&nbsp;},<br/> &nbsp;&nbsp; "username": {<br/>   &nbsp;&nbsp;&nbsp;&nbsp; "value": "carl",<br/>    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"set_timestamp": 1695006816345<br/>  &nbsp;&nbsp;}<br/>} | 用户属性，每个属性key是属性名，每个属性包含一个对象，对象中包含两个属性分别是：<br>`value`：属性的值。 <br>`set_timestamp`：改属性设置时的时间戳毫秒值。<br> 一个事件中用户属性最多可以添加100个, 具体限制请参考：[事件和属性限制](./web.md#_13) |
-| attributes       | 否    | Object  | {<br/>	&nbsp;&nbsp;"productName": "book",<br/>	&nbsp;&nbsp;"Price": 39.9,<br/>}                                                                                                                                                                                                                                                                  | 自定义属性，一个事件最多可以添加500个自定义属性，且满足属性名的[命名规则](./web.md#_12)                                                                                                  |
+| attributes       | 否    | Object  | {<br/>	&nbsp;&nbsp;"productName": "book",<br/>	&nbsp;&nbsp;"Price": 39.9<br/>}                                                                                                                                                                                                                                                                   | 自定义属性，一个事件最多可以添加500个自定义属性，且满足属性名的[命名规则](./web.md#_12)                                                                                                  |
 
 ### **请求返回值**
 
@@ -117,7 +117,6 @@
 | 200    | 请求成功                                              |
 | 403    | 请求失败，请检查appId和请求端点是否匹配，如果接口配置认证，请检查认证 cookie 是否正确 |
 | 413    | 请求失败，请求body超过1MB                                  |
-| 其他Code | 请求失败                                              |
 
 ## 代码示例
 

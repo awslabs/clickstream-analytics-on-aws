@@ -3,9 +3,8 @@
 ## Introduction
 
 This documentation will help you send your clickstream data directly to the Clickstream ingestion server via HTTP
-requests. The
-Clickstream data processing module will correctly process your data simultaneously by following the guidelines below.
-Then, you can visually analyze them in the subsequent report module.
+requests. The Clickstream data processing module will correctly process your data simultaneously by following the
+guidelines below. Then, you can visually analyze them in the subsequent report module.
 
 ## Request endpoint
 
@@ -21,7 +20,7 @@ details page. For example:
    console. Otherwise, the server will respond to HTTP status code 403.
 2. The request body contains four parts: common attributes, items, user, and attributes. The public attributes require
    the `event_type`, `event_id`, `timestamp`, and `app_id`; the rest are optional parameters.
-3. The total size of the body of a single request cannot exceed 1MB. The HTTP status code 403 will return if it exceeds.
+3. The total size of the body of a single request cannot exceed 1MB. The HTTP status code 413 will return if it exceeds.
 
 ### Reqeust method
 
@@ -107,7 +106,7 @@ The request body is an array structure that contains the JSON string of one or m
 | app_title        | NO       | String    | shopping                                                                                                                                                                                                                                                                                                                                         | Application name                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 | items            | NO       | Object    | [{<br/>	&nbsp;&nbsp;"id": "b011ddc3-632f-47cb-a68a-ad83678ecfed",<br/>	&nbsp;&nbsp;"name": "Classic coat-rack",<br/>	&nbsp;&nbsp;"category": "housewares",<br/>	&nbsp;&nbsp;"price": 167<br/>}]                                                                                                                                                  | Item list, Supports uploading multiple items at one time. A maximum of 100 items can be uploaded at one time<br>For the item quantity limit, please refer to [Event and Attribute Limitation](./web.md#event-and-attribute-limitation) <br>For the supported attributes of the item, please refer to [item attribute](./web.md#item-attributes)                                                                                                       |
 | user             | NO       | Object    | {<br/>&nbsp;&nbsp;"_user_id": {<br/>&nbsp;&nbsp;&nbsp;&nbsp;"value": "0202d0e1",<br/>&nbsp;&nbsp;&nbsp;&nbsp;"set_timestamp": 1695006816345<br/>  &nbsp;&nbsp;},<br/> &nbsp;&nbsp; "username": {<br/>   &nbsp;&nbsp;&nbsp;&nbsp; "value": "carl",<br/>    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"set_timestamp": 1695006816345<br/>  &nbsp;&nbsp;}<br/>} | User attributes. Each attribute key is the user attribute name. Each attribute contains an object. The object contains two attributes: <br>`value`: The value of the user attribute. <br>`set_timestamp`: The timestamp millisecond value when setting the attribute. <br> Up to 100 user attributes can be added to an event. For specific restrictions, please refer to: [Event and Attribute Limitations](./web.md#event-and-attribute-limitation) |
-| attributes       | NO       | Object    | {<br/>	&nbsp;&nbsp;"productName": "book",<br/>	&nbsp;&nbsp;"Price": 39.9,<br/>}                                                                                                                                                                                                                                                                  | Custom attributes. Up to 500 custom attributes can be added to an event, and the attribute name must meet the [naming rules](./web.md#naming-rules)                                                                                                                                                                                                                                                                                                   |
+| attributes       | NO       | Object    | {<br/>	&nbsp;&nbsp;"productName": "book",<br/>	&nbsp;&nbsp;"Price": 39.9<br/>}                                                                                                                                                                                                                                                                   | Custom attributes. Up to 500 custom attributes can be added to an event, and the attribute name must meet the [naming rules](./web.md#naming-rules)                                                                                                                                                                                                                                                                                                   |
 
 ### Request response
 
@@ -121,7 +120,6 @@ failures, and the request does not return any other content.
 | 200         | Request successful                                                                                                                                     |
 | 403         | Request failed. Please check if appId and endpoint match, if configured with authentication, please check whether the authentication cookie is correct |
 | 413         | Request failed. The request body exceeds 1MB                                                                                                           |
-| Other Code  | Request failed                                                                                                                                         |
 
 ## Request code example
 
