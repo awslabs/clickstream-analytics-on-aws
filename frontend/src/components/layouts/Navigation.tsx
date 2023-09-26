@@ -54,7 +54,7 @@ const Navigation: React.FC<INavigationProps> = (props: INavigationProps) => {
               {t('analytics:information.introducingAnalyticsContent')}
               <br />
               <Link href="#" variant="primary">
-                Learn more.
+                {t('learnMore')}
               </Link>
             </div>
           }
