@@ -38,7 +38,6 @@ export class UserService {
       req.body.operator = res.get('X-Click-Stream-Operator');
       const user: IUser = req.body;
       const ddbUser = await store.getUser(user.id);
-      console.log('ddbUser', ddbUser);
       if (ddbUser) {
         return res.status(400).json(new ApiFail('User already existed.'));
       }

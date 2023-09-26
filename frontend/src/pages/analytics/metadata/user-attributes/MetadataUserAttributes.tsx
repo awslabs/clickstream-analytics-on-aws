@@ -230,7 +230,7 @@ const MetadataUserAttributes: React.FC = () => {
     try {
       const { success, message }: ApiResponse<null> =
         await updateMetadataDisplay({
-          id: `${USER_ATTRIBUTE_DISPLAY_PREFIX}${newItem.id}`,
+          id: `${USER_ATTRIBUTE_DISPLAY_PREFIX}${newItem.projectId}#${newItem.appId}#${newItem.name}`,
           projectId: newItem.projectId,
           appId: newItem.appId,
           displayName: newItem.displayName,

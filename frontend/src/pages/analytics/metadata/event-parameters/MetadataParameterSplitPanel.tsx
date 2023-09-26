@@ -31,6 +31,7 @@ import Loading from 'components/common/Loading';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
+import { EVENT_PARAMETER_DISPLAY_PREFIX } from 'ts/const';
 import MetadataPlatformFC from '../comps/MetadataPlatform';
 import MetadataSourceFC from '../comps/MetadataSource';
 import MetadataDetailsTable from '../table/MetadataDetailsTable';
@@ -115,7 +116,7 @@ const MetadataParameterSplitPanel: React.FC<
 
     try {
       const { success }: ApiResponse<null> = await updateMetadataDisplay({
-        id: `EVENT_PARAMETER#${parameterDetails.id}`,
+        id: `${EVENT_PARAMETER_DISPLAY_PREFIX}${parameterDetails.projectId}#${parameterDetails.appId}#${parameterDetails.name}`,
         projectId: parameterDetails.projectId,
         appId: parameterDetails.appId,
         displayName: parameterDetails.displayName,
@@ -351,12 +352,8 @@ const MetadataParameterSplitPanel: React.FC<
                     data={parameterDetails.associatedEvents ?? []}
                     tableColumnDefinitions={COLUMN_DEFINITIONS}
                     tableI18nStrings={{
-                      loadingText: t(
-                        'analytics:metadata.labels.tableLoading'
-                      ),
-                      emptyText: t(
-                        'analytics:metadata.labels.tableEmpty'
-                      ),
+                      loadingText: t('analytics:metadata.labels.tableLoading'),
+                      emptyText: t('analytics:metadata.labels.tableEmpty'),
                     }}
                   />
                 ),

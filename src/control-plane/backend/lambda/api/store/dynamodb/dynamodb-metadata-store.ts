@@ -185,6 +185,7 @@ export class DynamoDbMetadataStore implements MetadataStore {
         parameterType: eventParameter.parameterType ?? MetadataParameterType.PUBLIC,
         valueType: eventParameter.valueType ?? MetadataValueType.STRING,
         valueEnum: eventParameter.valueEnum ?? [],
+        values: eventParameter.values ?? [],
         createAt: Date.now(),
         updateAt: Date.now(),
         operator: eventParameter.operator?? '',
@@ -280,19 +281,23 @@ export class DynamoDbMetadataStore implements MetadataStore {
   };
 
   public async isUserAttributeExisted(projectId: string, appId: string, userAttributeName: string): Promise<boolean> {
-    const params: GetCommand = new GetCommand({
+    const input: QueryCommandInput = {
       TableName: analyticsMetadataTable,
-      Key: {
-        id: `${projectId}#${appId}#${userAttributeName}`,
-        type: `USER_ATTRIBUTE#${projectId}#${appId}#${userAttributeName}`,
+      IndexName: prefixTimeGSIName,
+      KeyConditionExpression: '#prefix = :prefix',
+      FilterExpression: 'deleted = :d AND #name = :name',
+      ExpressionAttributeNames: {
+        '#prefix': 'prefix',
+        '#name': 'name',
       },
-    });
-    const result: GetCommandOutput = await docClient.send(params);
-    if (!result.Item) {
-      return false;
-    }
-    const userAttribute: IMetadataUserAttribute = result.Item as IMetadataUserAttribute;
-    return userAttribute && !userAttribute.deleted;
+      ExpressionAttributeValues: {
+        ':d': false,
+        ':prefix': `USER_ATTRIBUTE#${projectId}#${appId}`,
+        ':name': userAttributeName,
+      },
+    };
+    const records = await query(input);
+    return records && records.length > 0 && !records[0].deleted;
   };
 
   public async createUserAttribute(userAttribute: IMetadataUserAttribute): Promise<string> {
@@ -301,10 +306,11 @@ export class DynamoDbMetadataStore implements MetadataStore {
       TableName: analyticsMetadataTable,
       Item: {
         id: userAttributeId,
-        type: `USER_ATTRIBUTE#${userAttribute.projectId}#${userAttribute.appId}#${userAttribute.name}`,
+        type: `USER_ATTRIBUTE#${userAttributeId}`,
         prefix: `USER_ATTRIBUTE#${userAttribute.projectId}#${userAttribute.appId}`,
         projectId: userAttribute.projectId,
         appId: userAttribute.appId,
+        eventName: userAttribute.eventName,
         attributeId: userAttributeId,
         name: userAttribute.name,
         displayName: userAttribute.displayName?? '',
@@ -313,6 +319,7 @@ export class DynamoDbMetadataStore implements MetadataStore {
         hasData: userAttribute.hasData ?? false,
         valueType: userAttribute.valueType ?? MetadataValueType.STRING,
         valueEnum: userAttribute.valueEnum ?? [],
+        values: userAttribute.values ?? [],
         createAt: Date.now(),
         updateAt: Date.now(),
         operator: userAttribute.operator?? '',
@@ -324,45 +331,62 @@ export class DynamoDbMetadataStore implements MetadataStore {
   };
 
   public async getUserAttribute(projectId: string, appId: string, userAttributeName: string): Promise<IMetadataUserAttribute[]> {
-    let filterExpression = 'deleted = :d AND #name = :name';
-    let expressionAttributeValues = new Map();
-    let expressionAttributeNames = {} as KeyVal<string>;
-    expressionAttributeValues.set(':d', false);
-    expressionAttributeValues.set(':name', userAttributeName);
-    expressionAttributeValues.set(':prefix', `USER_ATTRIBUTE#${projectId}#${appId}`);
-    expressionAttributeNames['#prefix'] = 'prefix';
-    expressionAttributeNames['#name'] = 'name';
     const input: QueryCommandInput = {
       TableName: analyticsMetadataTable,
       IndexName: prefixTimeGSIName,
-      KeyConditionExpression: '#prefix= :prefix',
-      FilterExpression: filterExpression,
-      ExpressionAttributeNames: expressionAttributeNames,
-      ExpressionAttributeValues: expressionAttributeValues,
+      KeyConditionExpression: '#prefix = :prefix',
+      FilterExpression: 'deleted = :d AND #name = :name',
+      ExpressionAttributeNames: {
+        '#prefix': 'prefix',
+        '#name': 'name',
+      },
+      ExpressionAttributeValues: {
+        ':d': false,
+        ':prefix': `USER_ATTRIBUTE#${projectId}#${appId}`,
+        ':name': userAttributeName,
+      },
     };
     const records = await query(input);
     return records as IMetadataUserAttribute[];
   };
 
   public async deleteUserAttribute(projectId: string, appId: string, userAttributeName: string, operator: string): Promise<void> {
-    const params: UpdateCommand = new UpdateCommand({
+    const input: QueryCommandInput = {
       TableName: analyticsMetadataTable,
-      Key: {
-        id: `${projectId}#${appId}#${userAttributeName}`,
-        type: `USER_ATTRIBUTE#${projectId}#${appId}#${userAttributeName}`,
-      },
-      // Define expressions for the new or updated attributes
-      UpdateExpression: 'SET deleted= :d, #operator= :operator',
+      IndexName: prefixTimeGSIName,
+      KeyConditionExpression: '#prefix = :prefix',
+      FilterExpression: 'deleted = :d AND #name = :name',
       ExpressionAttributeNames: {
-        '#operator': 'operator',
+        '#prefix': 'prefix',
+        '#name': 'name',
       },
       ExpressionAttributeValues: {
-        ':d': true,
-        ':operator': operator,
+        ':d': false,
+        ':prefix': `USER_ATTRIBUTE#${projectId}#${appId}`,
+        ':name': userAttributeName,
       },
-      ReturnValues: 'ALL_NEW',
-    });
-    await docClient.send(params);
+    };
+    const records = await query(input);
+    for (let record of records) {
+      const params: UpdateCommand = new UpdateCommand({
+        TableName: analyticsMetadataTable,
+        Key: {
+          id: record.id,
+          type: record.type,
+        },
+        // Define expressions for the new or updated attributes
+        UpdateExpression: 'SET deleted= :d, #operator= :operator',
+        ExpressionAttributeNames: {
+          '#operator': 'operator',
+        },
+        ExpressionAttributeValues: {
+          ':d': true,
+          ':operator': operator,
+        },
+        ReturnValues: 'ALL_NEW',
+      });
+      await docClient.send(params);
+    }
   };
 
   public async listUserAttributes(projectId: string, appId: string, order: string): Promise<IMetadataUserAttribute[]> {

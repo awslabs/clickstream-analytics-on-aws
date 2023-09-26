@@ -243,7 +243,7 @@ const MetadataParameters: React.FC = () => {
     try {
       const { success, message }: ApiResponse<null> =
         await updateMetadataDisplay({
-          id: `${EVENT_PARAMETER_DISPLAY_PREFIX}${newItem.id}`,
+          id: `${EVENT_PARAMETER_DISPLAY_PREFIX}${newItem.projectId}#${newItem.appId}#${newItem.name}`,
           projectId: newItem.projectId,
           appId: newItem.appId,
           displayName: newItem.displayName,

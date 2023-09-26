@@ -118,7 +118,7 @@ const MetadataEventSplitPanel: React.FC<MetadataEventSplitPanelProps> = (
 
     try {
       const { success }: ApiResponse<null> = await updateMetadataDisplay({
-        id: `${EVENT_DISPLAY_PREFIX}${eventDetails.id}`,
+        id: `${EVENT_DISPLAY_PREFIX}${eventDetails.projectId}#${eventDetails.appId}#${eventDetails.name}`,
         projectId: eventDetails.projectId,
         appId: eventDetails.appId,
         displayName: eventDetails.displayName,
@@ -356,12 +356,8 @@ const MetadataEventSplitPanel: React.FC<MetadataEventSplitPanelProps> = (
                     }
                     tableColumnDefinitions={COLUMN_DEFINITIONS}
                     tableI18nStrings={{
-                      loadingText: t(
-                        'analytics:metadata.labels.tableLoading'
-                      ),
-                      emptyText: t(
-                        'analytics:metadata.labels.tableEmpty'
-                      ),
+                      loadingText: t('analytics:metadata.labels.tableLoading'),
+                      emptyText: t('analytics:metadata.labels.tableEmpty'),
                     }}
                   />
                 ),
@@ -386,9 +382,7 @@ const MetadataEventSplitPanel: React.FC<MetadataEventSplitPanelProps> = (
                     }
                     tableColumnDefinitions={COLUMN_DEFINITIONS}
                     tableI18nStrings={{
-                      loadingText: t(
-                        'analytics:metadata.labels.tableLoading'
-                      ),
+                      loadingText: t('analytics:metadata.labels.tableLoading'),
                       emptyText: t('analytics:metadata.labels.tableEmpty'),
                     }}
                   />

@@ -630,7 +630,8 @@ function groupEventParameterByName(parameters: IMetadataEventParameter[]): IMeta
     } else {
       existedParameter.hasData = existedParameter.hasData || parameter.hasData;
       existedParameter.platform = [...new Set(existedParameter.platform.concat(parameter.platform))];
-      existedParameter.valueEnum = uniqueParameterValues(existedParameter.valueEnum, parameter.valueEnum);
+      existedParameter.valueEnum = uniqueParameterValueEnum(existedParameter.valueEnum, parameter.valueEnum);
+      existedParameter.values = uniqueParameterValues(existedParameter.values, parameter.values);
     }
   }
   return groupEventParameters;
@@ -644,7 +645,8 @@ function groupUserAttributeByName(attributes: IMetadataUserAttribute[]): IMetada
       groupAttributes.push(attribute);
     } else {
       existedAttribute.hasData = existedAttribute.hasData || attribute.hasData;
-      existedAttribute.valueEnum = uniqueParameterValues(existedAttribute.valueEnum, attribute.valueEnum);
+      existedAttribute.valueEnum = uniqueParameterValueEnum(existedAttribute.valueEnum, attribute.valueEnum);
+      existedAttribute.values = uniqueParameterValues(existedAttribute.values, attribute.values);
     }
   }
   return groupAttributes;
@@ -663,7 +665,8 @@ function concatEventParameter(
     } else {
       existedParameter.hasData = existedParameter.hasData || parameter.hasData;
       existedParameter.platform = [...new Set(existedParameter.platform.concat(parameter.platform))];
-      existedParameter.valueEnum = uniqueParameterValues(existedParameter.valueEnum, parameter.valueEnum);
+      existedParameter.valueEnum = uniqueParameterValueEnum(existedParameter.valueEnum, parameter.valueEnum);
+      existedParameter.values = uniqueParameterValues(existedParameter.values, parameter.values);
     }
   }
   return concatEventParameters;
@@ -675,6 +678,14 @@ function uniqueParameterValues(e: IMetadataAttributeValue[] | undefined, n: IMet
   const values = existedValues.concat(newValues);
   const res = new Map();
   return values.filter((item) => !res.has(item.value) && res.set(item.value, 1));
+};
+
+function uniqueParameterValueEnum(e: string[] | undefined, n: string[] | undefined) {
+  const existedValues = e ?? [];
+  const newValues = n ?? [];
+  const values = existedValues.concat(newValues);
+  const res = new Map();
+  return values.filter((item) => !res.has(item) && res.set(item, 1));
 };
 
 export {
