@@ -34,6 +34,12 @@ export type UpsertUsersWorkflowData = {
   readonly scheduleExpression: string;
 }
 
+export type ScanMetadataWorkflowData = {
+  readonly scheduleExpression: string;
+  readonly clickstreamAnalyticsMetadataDdbArn: string;
+  readonly topFrequentPropertiesLimit: string;
+}
+
 export type ClearExpiredEventsWorkflowData = {
   readonly scheduleExpression: string;
   readonly retentionRangeDays: number;
@@ -137,7 +143,21 @@ export interface UpsertUsersBody {
   readonly appId: string;
 }
 
+export interface ScanMetadataBody {
+  readonly appId: string;
+}
+
+export interface StoreMetadataBody {
+  readonly appId: string;
+}
+
 export type CheckUpsertStatusEventDetail = {
+  id: string;
+  appId: string;
+  status: string;
+}
+
+export type CheckScanMetadataStatusEventDetail = {
   id: string;
   appId: string;
   status: string;
@@ -162,6 +182,7 @@ export type MustacheParamType = {
   schema: string;
   table_ods_events: string;
   sp_upsert_users: string;
+  sp_scan_metadata: string;
   table_ods_users: string;
   table_dim_users: string;
   sp_clickstream_log: string;

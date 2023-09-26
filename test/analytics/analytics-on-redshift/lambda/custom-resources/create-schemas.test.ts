@@ -181,6 +181,10 @@ describe('Custom resource - Create schemas for applications in Redshift database
     },
     {
       updatable: 'true',
+      sqlFile: 'sp-scan-metadata.sql',
+    },
+    {
+      updatable: 'true',
       sqlFile: 'sp-clear-expired-events.sql',
     },
 
@@ -255,6 +259,7 @@ describe('Custom resource - Create schemas for applications in Redshift database
       '/opt/sp-clear-expired-events.sql': testSqlContent(rootPath + 'sp-clear-expired-events.sql'),
       '/opt/sp-clickstream-log.sql': testSqlContent(rootPath + 'sp-clickstream-log.sql'),
       '/opt/sp-upsert-users.sql': testSqlContent(rootPath + 'sp-upsert-users.sql'),
+      '/opt/sp-scan-metadata.sql': testSqlContent(rootPath + 'sp-scan-metadata.sql'),
     });
   });
 
@@ -603,7 +608,7 @@ describe('Custom resource - Create schemas for applications in Redshift database
         if (input as BatchExecuteStatementCommandInput) {
           if (input.Sqls.length >= 9 && input.Sqls[0].includes('CREATE SCHEMA IF NOT EXISTS app2')
           && input.Sqls[1].includes(`CREATE TABLE IF NOT EXISTS app2.${TABLE_NAME_ODS_EVENT}(`)
-          && input.Sqls[9].includes(`CREATE TABLE IF NOT EXISTS app1.${TABLE_NAME_ODS_EVENT}`)) {
+          && input.Sqls[10].includes(`CREATE TABLE IF NOT EXISTS app1.${TABLE_NAME_ODS_EVENT}`)) {
             return { Id: 'Id-1' };
           }
         }
@@ -630,8 +635,8 @@ describe('Custom resource - Create schemas for applications in Redshift database
         if (input as BatchExecuteStatementCommandInput) {
           if (input.Sqls.length >= 10 && input.Sqls[0].includes('CREATE SCHEMA IF NOT EXISTS app2')
             && input.Sqls[1].includes(`CREATE TABLE IF NOT EXISTS app2.${TABLE_NAME_ODS_EVENT}(`)
-            && !input.Sqls[9].includes(`CREATE TABLE IF NOT EXISTS app1.${TABLE_NAME_ODS_EVENT}`)
-            && input.Sqls[9].includes('CREATE OR REPLACE PROCEDURE app1.sp_clickstream_log')
+            && !input.Sqls[10].includes(`CREATE TABLE IF NOT EXISTS app1.${TABLE_NAME_ODS_EVENT}`)
+            && input.Sqls[10].includes('CREATE OR REPLACE PROCEDURE app1.sp_clickstream_log')
           ) {
             return { Id: 'Id-1' };
           }

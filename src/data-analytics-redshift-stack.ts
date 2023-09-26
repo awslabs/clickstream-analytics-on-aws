@@ -97,6 +97,11 @@ export function createRedshiftAnalyticsStack(
     upsertUsersWorkflowData: {
       scheduleExpression: props.upsertUsersConfiguration.scheduleExpression,
     },
+    scanMetadataWorkflowData: {
+      scheduleExpression: props.scanMetadataConfiguration.scheduleExpression,
+      clickstreamAnalyticsMetadataDdbArn: props.scanMetadataConfiguration.clickstreamAnalyticsMetadataDdbArn,
+      topFrequentPropertiesLimit: props.scanMetadataConfiguration.topFrequentPropertiesLimit,
+    },
     clearExpiredEventsWorkflowData: {
       scheduleExpression: props.clearExpiredEventsConfiguration.scheduleExpression,
       retentionRangeDays: props.clearExpiredEventsConfiguration.retentionRangeDays,

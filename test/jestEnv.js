@@ -42,4 +42,5 @@ process.env.ODS_EVENT_BUCKET='EXAMPLE-BUCKET-2'
 process.env.ODS_EVENT_BUCKET_PREFIX='project1/raw/'
 process.env.REDSHIFT_ODS_TABLE_NAME='ods_external_events'
 process.env.REDSHIFT_ROLE = 'arn:aws:iam::xxxxxxxxxxxx:role/redshift-serverless-s3-copyrole'
+process.env.METADATA_DDB_TABLE_ARN = 'arn:aws:dynamodb:us-east-1:111122223333:table/ClickstreamAnalyticsMetadata';
 process.env.REDSHIFT_DATABASE = 'project1'

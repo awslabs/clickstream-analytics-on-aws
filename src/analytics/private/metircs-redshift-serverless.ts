@@ -23,10 +23,12 @@ export function createMetricsWidgetForRedshiftServerless(scope: Construct, id: s
   projectId: string;
   dataProcessingCronOrRateExpression: string;
   upsertUsersCronOrRateExpression: string;
+  scanMetadataCronOrRateExpression: string;
   redshiftServerlessNamespace?: string;
   redshiftServerlessWorkgroupName: string;
   loadEventsWorkflow: IStateMachine;
   upsertUsersWorkflow: IStateMachine;
+  scanMetadataWorkflow: IStateMachine;
   clearExpiredEventsWorkflow: IStateMachine;
 }) {
 
