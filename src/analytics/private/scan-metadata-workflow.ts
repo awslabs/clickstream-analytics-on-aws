@@ -255,7 +255,7 @@ export class ScanMetadataWorkflow extends Construct {
       ),
       handler: 'handler',
       memorySize: 1024,
-      timeout: Duration.minutes(13),
+      timeout: Duration.minutes(15),
       logRetention: RetentionDays.ONE_WEEK,
       reservedConcurrentExecutions: 1,
       role: createLambdaRole(this, 'StoreMetadataIntoDDBRole', true, policyStatements),

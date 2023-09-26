@@ -195,170 +195,6 @@ describe('Lambda - store the metadata into DDB from Redshift', () => {
         ],
       },
     });
-    //   RequestItems: {
-    //     ClickstreamAnalyticsMetadata: [
-    //       {
-    //         PutRequest: {
-    //           Item: {
-    //             appId: {
-    //               S: 'appId',
-    //             },
-    //             createAt: {
-    //               N: '1695120657125',
-    //             },
-    //             dataVolumeLastDay: {
-    //               N: '2000',
-    //             },
-    //             deleted: {
-    //               BOOL: false,
-    //             },
-    //             description: {
-    //               S: '',
-    //             },
-    //             displayName: {
-    //               S: '',
-    //             },
-    //             hasData: {
-    //               BOOL: true,
-    //             },
-    //             id: {
-    //               S: 'projectId#appId#eventName',
-    //             },
-    //             metadataSource: {
-    //               S: 'custom',
-    //             },
-    //             name: {
-    //               S: 'eventName',
-    //             },
-    //             operator: {
-    //               S: '',
-    //             },
-    //             platform: {
-    //               L: [
-    //                 {
-    //                   S: 'ANDROID',
-    //                 },
-    //                 {
-    //                   S: 'IOS',
-    //                 },
-    //               ],
-    //             },
-    //             prefix: {
-    //               S: 'EVENT#projectId#appId',
-    //             },
-    //             projectId: {
-    //               S: 'projectId',
-    //             },
-    //             ttl: {
-    //               N: '1695725457',
-    //             },
-    //             type: {
-    //               S: 'EVENT#sprojectId#appId#eventName',
-    //             },
-    //             updateAt: {
-    //               N: '1695120657125',
-    //             },
-    //           },
-    //         },
-    //       },
-    //       {
-    //         PutRequest: {
-    //           Item: {
-    //             appId: {
-    //               S: 'appId',
-    //             },
-    //             category: {
-    //               S: 'category',
-    //             },
-    //             createAt: {
-    //               N: '1695120657125',
-    //             },
-    //             deleted: {
-    //               BOOL: false,
-    //             },
-    //             description: {
-    //               S: '',
-    //             },
-    //             displayName: {
-    //               S: '',
-    //             },
-    //             eventDescription: {
-    //               S: '',
-    //             },
-    //             eventDisplayName: {
-    //               S: '',
-    //             },
-    //             eventName: {
-    //               S: 'eventName',
-    //             },
-    //             hasData: {
-    //               BOOL: true,
-    //             },
-    //             id: {
-    //               S: 'projectId#appId#eventName#propertyName',
-    //             },
-    //             metadataSource: {
-    //               S: 'custom',
-    //             },
-    //             name: {
-    //               S: 'propertyName',
-    //             },
-    //             operator: {
-    //               S: '',
-    //             },
-    //             parameterId: {
-    //               S: 'propertyId',
-    //             },
-    //             parameterType: {
-    //               S: 'Private',
-    //             },
-    //             platform: {
-    //               L: [
-    //                 {
-    //                   S: 'ANDROID',
-    //                 },
-    //                 {
-    //                   S: 'IOS',
-    //                 },
-    //               ],
-    //             },
-    //             prefix: {
-    //               S: 'EVENT_PARAMETER#projectId#appId',
-    //             },
-    //             projectId: {
-    //               S: 'projectId',
-    //             },
-    //             ttl: {
-    //               N: '1695725457',
-    //             },
-    //             type: {
-    //               S: 'EVENT#sprojectId#appId#eventName',
-    //             },
-    //             updateAt: {
-    //               N: '1695120657125',
-    //             },
-    //             valueEnum: {
-    //               L: [
-    //                 {
-    //                   S: 'value1',
-    //                 },
-    //                 {
-    //                   S: ' value2',
-    //                 },
-    //                 {
-    //                   S: ' value3',
-    //                 },
-    //               ],
-    //             },
-    //             valueType: {
-    //               S: 'String',
-    //             },
-    //           },
-    //         },
-    //       },
-    //     ],
-    //   },
-    // });
     expect(resp).toEqual({
       detail: {
         appId: 'app1',
@@ -396,45 +232,45 @@ describe('Lambda - store the metadata into DDB from Redshift', () => {
     });
   });
 
-  // test('Store metadata for query id is undefined', async () => {
-  //   redshiftDataMock.on(DescribeStatementCommand).resolvesOnce({
-  //     Status: StatusString.FAILED,
-  //   });
-  //   redshiftDataMock.on(ExecuteStatementCommand).resolves({ Id: undefined });
-  //   dynamoDBMock.on(BatchWriteCommand).resolves({});
-  //   redshiftDataMock.on(GetStatementResultCommand).resolves({
-  //     Records: [],
-  //   });
-  //   const resp = await handler(checkScanMetadataStatusEvent);
-  //   expect(resp).toEqual({
-  //     detail: {
-  //       appId: 'app1',
-  //       status: 'FAILED',
-  //       message: 'store metadata into ddb failed',
-  //     },
-  //   });
-  // });
+  test('Store metadata for query id is undefined', async () => {
+    redshiftDataMock.on(DescribeStatementCommand).resolvesOnce({
+      Status: StatusString.FAILED,
+    });
+    redshiftDataMock.on(ExecuteStatementCommand).resolves({ Id: undefined });
+    dynamoDBMock.on(BatchWriteCommand).resolves({});
+    redshiftDataMock.on(GetStatementResultCommand).resolves({
+      Records: [],
+    });
+    const resp = await handler(checkScanMetadataStatusEvent);
+    expect(resp).toEqual({
+      detail: {
+        appId: 'app1',
+        status: 'FAILED',
+        message: 'store metadata into ddb failed',
+      },
+    });
+  });
 
-  // test('Store metadata with redshift FAILED', async () => {
-  //   const exeuteId = 'Id-1';
-  //   redshiftDataMock.on(DescribeStatementCommand).resolvesOnce({
-  //     Status: StatusString.STARTED,
-  //   })
-  //     .resolvesOnce({
-  //       Status: StatusString.FAILED,
-  //     });
-  //   redshiftDataMock.on(ExecuteStatementCommand).resolves({ Id: exeuteId });
-  //   dynamoDBMock.on(BatchWriteCommand).resolves({});
-  //   redshiftDataMock.on(GetStatementResultCommand).resolves({
-  //     Records: [],
-  //   });
-  //   const resp = await handler(checkScanMetadataStatusEvent);
-  //   expect(resp).toEqual({
-  //     detail: {
-  //       appId: 'app1',
-  //       status: 'FAILED',
-  //       message: 'store metadata into ddb failed',
-  //     },
-  //   });
-  // });
+  test('Store metadata with redshift FAILED', async () => {
+    const exeuteId = 'Id-1';
+    redshiftDataMock.on(DescribeStatementCommand).resolvesOnce({
+      Status: StatusString.STARTED,
+    })
+      .resolvesOnce({
+        Status: StatusString.FAILED,
+      });
+    redshiftDataMock.on(ExecuteStatementCommand).resolves({ Id: exeuteId });
+    dynamoDBMock.on(BatchWriteCommand).resolves({});
+    redshiftDataMock.on(GetStatementResultCommand).resolves({
+      Records: [],
+    });
+    const resp = await handler(checkScanMetadataStatusEvent);
+    expect(resp).toEqual({
+      detail: {
+        appId: 'app1',
+        status: 'FAILED',
+        message: 'store metadata into ddb failed',
+      },
+    });
+  });
 });
