@@ -4404,7 +4404,7 @@ describe('SQL Builder test', () => {
                   dataType: MetadataValueType.INTEGER,
                 },
                 {
-                  category: 'device',
+                  category: ConditionCategory.DEVICE,
                   property: 'screen_height',
                   operator: '>',
                   value: [1800],

@@ -496,12 +496,12 @@ function _buildEventConditionSQL(eventCondition: EventAndCondition) {
   let eventConditionSql = '';
   if (eventCondition.sqlCondition !== undefined) {
     for (const condition of eventCondition.sqlCondition.conditions) {
-      if (condition.category === 'user' || condition.category === 'event') {
+      if (condition.category === ConditionCategory.USER || condition.category === ConditionCategory.EVENT) {
         continue;
       }
 
       let category: string = `${condition.category}_`;
-      if (condition.category === 'other') {
+      if (condition.category === ConditionCategory.OTHER) {
         category = '';
       }
       const conditionSql = buildSqlFromCondition(condition, category);
@@ -1274,8 +1274,8 @@ function _buildJoinSQL(pair: PairEventAndCondition, index: number) {
   let joinColLeft = '';
   let joinColRight = '';
   if (pair.startEvent.retentionJoinColumn && pair.backEvent.retentionJoinColumn) {
-    const prefix1 = pair.startEvent.retentionJoinColumn.category === 'other' ? '' : pair.startEvent.retentionJoinColumn.category;
-    const prefix2 = pair.backEvent.retentionJoinColumn.category === 'other' ? '' : pair.backEvent.retentionJoinColumn.category;
+    const prefix1 = pair.startEvent.retentionJoinColumn.category === ConditionCategory.OTHER ? '' : pair.startEvent.retentionJoinColumn.category;
+    const prefix2 = pair.backEvent.retentionJoinColumn.category === ConditionCategory.OTHER ? '' : pair.backEvent.retentionJoinColumn.category;
 
     joinColLeft = `${prefix1}_${pair.startEvent.retentionJoinColumn.property},`;
     joinColRight = `${prefix2}_${pair.backEvent.retentionJoinColumn.property},`;
@@ -1348,12 +1348,12 @@ function getNormalConditionSql(sqlCondition: SQLCondition | undefined) {
   let sql = '';
   if (sqlCondition) {
     for (const [_index, condition] of sqlCondition.conditions.entries()) {
-      if ((condition.category === 'user' || condition.category === 'event')) {
+      if (condition.category === ConditionCategory.USER || condition.category === ConditionCategory.EVENT) {
         continue;
       }
 
       let category: string = `${condition.category}_`;
-      if (condition.category === 'other') {
+      if (condition.category === ConditionCategory.OTHER) {
         category = '';
       }
 
@@ -1386,11 +1386,11 @@ function getNestPropertyConditionSql(sqlCondition: SQLCondition | undefined, pro
   let columnSql = '';
   if (sqlCondition) {
     for (const [_index, condition] of sqlCondition.conditions.entries()) {
-      if (condition.category !== 'user' && condition.category !== 'event' ) {
+      if (condition.category != ConditionCategory.USER && condition.category != ConditionCategory.EVENT) {
         continue;
       }
       let prefix = 'event_';
-      if (condition.category === 'user') {
+      if (condition.category === ConditionCategory.USER) {
         prefix= 'user_';
       }
 
@@ -1409,11 +1409,11 @@ function getNestPropertyList(sqlCondition: SQLCondition | undefined, propertyLis
   let columnSql = '';
   if (sqlCondition) {
     for (const [_index, condition] of sqlCondition.conditions.entries()) {
-      if (condition.category !== 'user' && condition.category !== 'event' ) {
+      if (condition.category != ConditionCategory.USER && condition.category != ConditionCategory.EVENT) {
         continue;
       }
       let prefix = 'event_';
-      if (condition.category === 'user') {
+      if (condition.category === ConditionCategory.USER) {
         prefix= 'user_';
       }
 
@@ -1429,7 +1429,7 @@ function _buildColumnSQL(condition: Condition, propertyList: string[], prefix: s
 
   if (!propertyList.includes(prefix + condition.property)) {
     propertyList.push(prefix + condition.property);
-    if (condition.category == 'user') {
+    if (condition.category == ConditionCategory.USER) {
       columnSql += `(
             select
               max(up.value.${valueType})
@@ -1442,7 +1442,7 @@ function _buildColumnSQL(condition: Condition, propertyList: string[], prefix: s
           ) as ${prefix}${condition.property},
           `;
 
-    } else if (condition.category == 'event') {
+    } else if (condition.category == ConditionCategory.EVENT) {
       columnSql += `(
             select
               max(ep.value.${valueType})
@@ -1581,7 +1581,7 @@ function _buildEventCondition2(eventCondition: EventAndCondition, eventCondition
   let eventConditionSql = '';
   if (eventCondition.sqlCondition?.conditions !== undefined) {
     for (const [i, condition] of eventCondition.sqlCondition.conditions.entries()) {
-      if (condition.category === 'user' || condition.category === 'event') {
+      if (condition.category === ConditionCategory.USER || condition.category === ConditionCategory.EVENT) {
         continue;
       }
 
@@ -1599,7 +1599,7 @@ function _buildEventCondition2(eventCondition: EventAndCondition, eventCondition
 
 function _buildEventCondition3(condition: Condition, eventConditionSql: string, i: number, eventCondition: EventAndCondition) {
   let category: string = `${condition.category}_`;
-  if (condition.category === 'other') {
+  if (condition.category === ConditionCategory.OTHER) {
     category = '';
   }
   const conditionSql = buildSqlFromCondition(condition, category);
