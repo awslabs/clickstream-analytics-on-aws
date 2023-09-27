@@ -14,6 +14,7 @@
 import { Parameter } from '@aws-sdk/client-cloudformation';
 import { JSONObject } from 'ts-json-object';
 import { CPipelineResources, IPipeline } from './pipeline';
+import { analyticsMetadataTable, awsAccountId, awsRegion } from '../common/constants';
 import {
   CORS_PATTERN,
   DOMAIN_NAME_PATTERN, MULTI_EMAIL_PATTERN,
@@ -953,6 +954,9 @@ export class CDataModelingStack extends JSONObject {
   @JSONObject.optional('')
     EMRServerlessApplicationId?: string;
 
+  @JSONObject.optional('')
+    ClickstreamAnalyticsMetadataDdbArn?: string;
+
   constructor(pipeline: IPipeline, resources: CPipelineResources) {
     if (pipeline.dataModeling?.redshift?.provisioned) {
       if (isEmpty(pipeline.dataModeling?.redshift?.provisioned.clusterIdentifier) ||
@@ -968,6 +972,8 @@ export class CDataModelingStack extends JSONObject {
         throw new ClickStreamBadRequestError('VpcId, SubnetIds, SecurityGroups required for provisioning new Redshift Serverless.');
       }
     }
+
+    const partition = awsRegion?.startsWith('cn') ? 'aws-cn' : 'aws';
 
     super({
       _pipeline: pipeline,
@@ -993,6 +999,7 @@ export class CDataModelingStack extends JSONObject {
         PipelineStackType.DATA_PROCESSING,
         OUTPUT_DATA_PROCESSING_EMR_SERVERLESS_APPLICATION_ID_SUFFIX,
       ),
+      ClickstreamAnalyticsMetadataDdbArn: `arn:${partition}:dynamodb:${awsRegion}:${awsAccountId}:table/${analyticsMetadataTable}`,
 
     });
   }

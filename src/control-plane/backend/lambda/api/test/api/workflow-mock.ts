@@ -687,6 +687,10 @@ const BASE_DATAANALYTICS_PARAMETERS = [
     ParameterKey: 'EMRServerlessApplicationId.#',
     ParameterValue: '#.Clickstream-DataProcessing-6666-6666.EMRServerlessApplicationId',
   },
+  {
+    ParameterKey: 'ClickstreamAnalyticsMetadataDdbArn',
+    ParameterValue: 'arn:aws:dynamodb:us-east-1:555555555555:table/analytics-metadata-table-name',
+  },
 ];
 
 export const MSK_DATA_PROCESSING_EXISTING_SERVERLESS_DATAANALYTICS_PARAMETERS = mergeParameters(
