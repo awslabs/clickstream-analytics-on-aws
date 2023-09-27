@@ -58,6 +58,7 @@ import {
   getEventAndConditions,
   getGlobalEventCondition,
   getIntervalInSeconds,
+  getLngFromLocalStorage,
   metadataEventsConvertToCategoryItemType,
   parametersConvertToCategoryItemType,
   pathNodesConvertToCategoryItemType,
@@ -286,7 +287,9 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
     dashboardId: string,
     dashboardName: string,
     sheetId: string,
-    sheetName: string
+    sheetName: string,
+    chartTitle: string,
+    chartSubTitle: string,
   ) => {
     if (
       eventOptionData.length === 0 ||
@@ -300,7 +303,9 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
         dashboardId,
         dashboardName,
         sheetId,
-        sheetName
+        sheetName,
+        chartTitle,
+        chartSubTitle,
       );
       if (!body) {
         alertMsg(
@@ -325,7 +330,9 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
     dashboardId?: string,
     dashboardName?: string,
     sheetId?: string,
-    sheetName?: string
+    sheetName?: string,
+    chartTitle?: string,
+    chartSubTitle?: string
   ) => {
     const eventId = generateStr(6);
     const parameters = getDashboardCreateParameters(
@@ -343,6 +350,8 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
         dashboardName: dashboardName,
         sheetId: sheetId,
         sheetName: sheetName,
+        chartTitle: chartTitle,
+        chartSubTitle: chartSubTitle,
       };
     }
     const pathAnalysisPlatform =
@@ -370,6 +379,7 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
 
     const body: IExploreRequest = {
       action: action,
+      locale: getLngFromLocalStorage(),
       projectId: pipeline.projectId,
       pipelineId: pipeline.pipelineId,
       appId: appId ?? '',

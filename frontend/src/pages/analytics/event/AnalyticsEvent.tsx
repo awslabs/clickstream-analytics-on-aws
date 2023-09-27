@@ -55,6 +55,7 @@ import {
   getDateRange,
   getEventAndConditions,
   getGlobalEventCondition,
+  getLngFromLocalStorage,
   parametersConvertToCategoryItemType,
   validEventAnalyticsItem,
 } from '../analytics-utils';
@@ -181,7 +182,9 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
     dashboardId: string,
     dashboardName: string,
     sheetId: string,
-    sheetName: string
+    sheetName: string,
+    chartTitle: string,
+    chartSubTitle: string,
   ) => {
     if (
       eventOptionData.length === 0 ||
@@ -195,7 +198,9 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
         dashboardId,
         dashboardName,
         sheetId,
-        sheetName
+        sheetName,
+        chartTitle,
+        chartSubTitle,
       );
       if (!body) {
         alertMsg(
@@ -220,7 +225,9 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
     dashboardId?: string,
     dashboardName?: string,
     sheetId?: string,
-    sheetName?: string
+    sheetName?: string,
+    chartTitle?: string,
+    chartSubTitle?: string
   ) => {
     const eventId = generateStr(6);
     const parameters = getDashboardCreateParameters(
@@ -238,10 +245,13 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
         dashboardName: dashboardName,
         sheetId: sheetId,
         sheetName: sheetName,
+        chartTitle: chartTitle,
+        chartSubTitle: chartSubTitle,
       };
     }
     const body: IExploreRequest = {
       action: action,
+      locale: getLngFromLocalStorage(),
       projectId: pipeline.projectId,
       pipelineId: pipeline.pipelineId,
       appId: appId ?? '',

@@ -97,6 +97,7 @@ declare global {
 
   interface IExploreRequest {
     readonly action: ExploreRequestAction;
+    readonly locale: ExploreLocales;
     readonly projectId: string;
     readonly appId: string;
     readonly pipelineId: string;

@@ -57,6 +57,7 @@ import {
   getDashboardCreateParameters,
   getDateRange,
   getGlobalEventCondition,
+  getLngFromLocalStorage,
   getPairEventAndConditions,
   parametersConvertToCategoryItemType,
   validRetentionAnalyticsItem,
@@ -178,7 +179,9 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
     dashboardId?: string,
     dashboardName?: string,
     sheetId?: string,
-    sheetName?: string
+    sheetName?: string,
+    chartTitle?: string,
+    chartSubTitle?: string
   ) => {
     const eventId = generateStr(6);
     const parameters = getDashboardCreateParameters(
@@ -196,10 +199,13 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
         dashboardName: dashboardName,
         sheetId: sheetId,
         sheetName: sheetName,
+        chartTitle: chartTitle,
+        chartSubTitle: chartSubTitle,
       };
     }
     const body: IExploreRequest = {
       action: action,
+      locale: getLngFromLocalStorage(),
       projectId: pipeline.projectId,
       pipelineId: pipeline.pipelineId,
       appId: appId ?? '',
@@ -223,7 +229,9 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
     dashboardId: string,
     dashboardName: string,
     sheetId: string,
-    sheetName: string
+    sheetName: string,
+    chartTitle: string,
+    chartSubTitle: string
   ) => {
     if (
       eventOptionData.length === 0 ||
@@ -237,7 +245,9 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
         dashboardId,
         dashboardName,
         sheetId,
-        sheetName
+        sheetName,
+        chartTitle,
+        chartSubTitle
       );
       if (!body) {
         alertMsg(

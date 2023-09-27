@@ -15,6 +15,7 @@ import {
   Box,
   Button,
   FormField,
+  Input,
   Modal,
   Select,
   SelectProps,
@@ -34,7 +35,9 @@ interface ISaveToDashboardModalProps {
     dashboardId: string,
     dashboardName: string,
     sheetId: string,
-    sheetName: string
+    sheetName: string,
+    chartTitle: string,
+    chartSubTitle: string,
   ) => void;
 }
 
@@ -49,6 +52,8 @@ const SaveToDashboardModal: React.FC<ISaveToDashboardModalProps> = (
   const { t } = useTranslation();
   const { projectId, appId } = useParams();
 
+  const [visualName, setVisualName] = useState<string>('');
+  const [visualDescription, setVisualDescription] = useState<string>('');
   const [dashboardOptions, setDashboardOptions] = useState<
     ISaveToDashboardOption[]
   >([]);
@@ -58,6 +63,8 @@ const SaveToDashboardModal: React.FC<ISaveToDashboardModalProps> = (
   const [selectedSheet, setSelectedSheet] = useState<SelectProps.Option | null>(
     null
   );
+  const [inputVisualNameRequiredError, setInputVisualNameRequiredError] =
+    useState(false);
   const [dashboardRequiredError, setDashboardRequiredError] = useState(false);
   const [sheetRequiredError, setSheetRequiredError] = useState(false);
 
@@ -121,6 +128,12 @@ const SaveToDashboardModal: React.FC<ISaveToDashboardModalProps> = (
                 variant="primary"
                 loading={loading}
                 onClick={() => {
+                  if (!visualName) {
+                    setInputVisualNameRequiredError(true);
+                    return;
+                  } else {
+                    setInputVisualNameRequiredError(false);
+                  }
                   if (!selectedDashboard?.value) {
                     setDashboardRequiredError(true);
                     return;
@@ -137,7 +150,9 @@ const SaveToDashboardModal: React.FC<ISaveToDashboardModalProps> = (
                     selectedDashboard.value,
                     selectedDashboard.label ?? '',
                     selectedSheet.value,
-                    selectedSheet.label ?? ''
+                    selectedSheet.label ?? '',
+                    visualName,
+                    visualDescription,
                   );
                 }}
               >
@@ -149,6 +164,40 @@ const SaveToDashboardModal: React.FC<ISaveToDashboardModalProps> = (
         header={t('analytics:header.saveToDashboardModalTitle')}
       >
         <FormField
+          label={t('analytics:header.inputVisualName')}
+          errorText={
+            inputVisualNameRequiredError
+              ? t('analytics:valid.inputVisualNameError')
+              : ''
+          }
+        >
+          <SpaceBetween direction="vertical" size="xs">
+            <Input
+              placeholder={
+                t('analytics:header.inputVisualNamePlaceholder') ?? ''
+              }
+              value={visualName ?? ''}
+              onChange={(e) => {
+                setInputVisualNameRequiredError(false);
+                setVisualName(e.detail.value);
+              }}
+            />
+          </SpaceBetween>
+        </FormField>
+        <FormField label={t('analytics:header.inputVisualDescription')}>
+          <SpaceBetween direction="vertical" size="xs">
+            <Input
+              placeholder={
+                t('analytics:header.inputVisualDescriptionPlaceholder') ?? ''
+              }
+              value={visualDescription ?? ''}
+              onChange={(e) => {
+                setVisualDescription(e.detail.value);
+              }}
+            />
+          </SpaceBetween>
+        </FormField>
+        <FormField
           label={t('analytics:header.selectDashboardTitle')}
           errorText={
             dashboardRequiredError
@@ -158,6 +207,9 @@ const SaveToDashboardModal: React.FC<ISaveToDashboardModalProps> = (
         >
           <SpaceBetween direction="vertical" size="xs">
             <Select
+              placeholder={
+                t('analytics:header.selectDashboardPlaceholder') ?? ''
+              }
               selectedOption={selectedDashboard}
               onChange={(e) => {
                 const selectedOption = e.detail
@@ -185,6 +237,7 @@ const SaveToDashboardModal: React.FC<ISaveToDashboardModalProps> = (
         >
           <SpaceBetween direction="vertical" size="xs">
             <Select
+              placeholder={t('analytics:header.selectSheetPlaceholder') ?? ''}
               selectedOption={selectedSheet}
               onChange={(e) => {
                 setSelectedSheet(e.detail.selectedOption);
