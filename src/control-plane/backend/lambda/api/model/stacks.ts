@@ -14,6 +14,7 @@
 import { Parameter } from '@aws-sdk/client-cloudformation';
 import { JSONObject } from 'ts-json-object';
 import { CPipelineResources, IPipeline } from './pipeline';
+import { analyticsMetadataTable, awsAccountId, awsRegion } from '../common/constants';
 import {
   CORS_PATTERN,
   DOMAIN_NAME_PATTERN, MULTI_EMAIL_PATTERN,
@@ -50,7 +51,6 @@ import {
   ProjectEnvironment,
 } from '../common/types';
 import { getBucketPrefix, getKafkaTopic, getPluginInfo, isEmpty, getValueFromStackOutputSuffix, isEmail, corsStackInput } from '../common/utils';
-import { analyticsMetadataTable, awsAccountId, awsRegion } from '../common/constants';
 
 export function getStackParameters(stack: JSONObject): Parameter[] {
   const parameters: Parameter[] = [];
