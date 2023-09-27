@@ -141,15 +141,13 @@ async function stackParametersResolve(stack: WorkFlowStack) {
     const bucket = stack.Data.Callback.BucketName;
     const prefix = stack.Data.Callback.BucketPrefix;
     for (let param of stack.Data.Input.Parameters) {
-      let key, value;
+      let key = param.ParameterKey;
+      let value = param.ParameterValue;
       // Find the value in output accurately through JSONPath
       if (param.ParameterKey?.endsWith('.$') && param.ParameterValue?.startsWith('$.')) {
         ({ key, value } = await _getParameterKeyAndValueByJSONPath(param.ParameterKey, param.ParameterValue, bucket, prefix));
       } else if (param.ParameterKey?.endsWith('.#') && param.ParameterValue?.startsWith('#.')) { // Find the value in output by suffix
         ({ key, value } = await _getParameterKeyAndValueByStackOutput(param.ParameterKey, param.ParameterValue, bucket, prefix));
-      } else {
-        key = param.ParameterKey;
-        value = param.ParameterValue;
       }
       param.ParameterKey = key;
       param.ParameterValue = value;
