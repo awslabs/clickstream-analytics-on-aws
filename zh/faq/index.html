@@ -46,6 +46,23 @@
     <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
+  
+
+
+  <script async src="https://github.com/awslabs/clickstream-web/releases/download/v0.5.1/clickstream-web.min.js"></script>
+<script>
+    window.onload = function() {
+        window.ClickstreamAnalytics.init({
+            appId: 'docs',
+            endpoint: 'https://pipeline.clickstream.solutions.gcr.aws.dev/collect',
+            pageType: window.PageType.multiPageApp,
+        });
+    };
+</script>
+  
+  
+    <script>"undefined"!=typeof __md_analytics&&__md_analytics()</script>
+  
 
     
     
@@ -1631,6 +1648,8 @@
 该解决方案可免费使用，您需要承担运行该解决方案时使用的 AWS 服务的费用。
 您只需为使用的内容付费，没有最低费用或设置费用。有关详细的成本估算，请参阅 <a href="../plan-deployment/cost/">Cost</a> 部分。</p>
 
+
+  
 
 
 

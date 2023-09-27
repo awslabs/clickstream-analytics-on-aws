@@ -44,6 +44,23 @@
     <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
+  
+
+
+  <script async src="https://github.com/awslabs/clickstream-web/releases/download/v0.5.1/clickstream-web.min.js"></script>
+<script>
+    window.onload = function() {
+        window.ClickstreamAnalytics.init({
+            appId: 'docs',
+            endpoint: 'https://pipeline.clickstream.solutions.gcr.aws.dev/collect',
+            pageType: window.PageType.multiPageApp,
+        });
+    };
+</script>
+  
+  
+    <script>"undefined"!=typeof __md_analytics&&__md_analytics()</script>
+  
 
     
     
@@ -1706,6 +1723,8 @@
 </ul>
 <p>You need to tune the EMR job default configuration, and please refer to the <a href="../pipeline-mgmt/data-processing/configure-execution-para/#config-spark-job-parameters">configure execution parameters</a>.</p>
 
+
+  
 
 
 

@@ -44,6 +44,23 @@
     <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
+  
+
+
+  <script async src="https://github.com/awslabs/clickstream-web/releases/download/v0.5.1/clickstream-web.min.js"></script>
+<script>
+    window.onload = function() {
+        window.ClickstreamAnalytics.init({
+            appId: 'docs',
+            endpoint: 'https://pipeline.clickstream.solutions.gcr.aws.dev/collect',
+            pageType: window.PageType.multiPageApp,
+        });
+    };
+</script>
+  
+  
+    <script>"undefined"!=typeof __md_analytics&&__md_analytics()</script>
+  
 
     
     
@@ -1685,6 +1702,8 @@
 <p>Please make sure your account has enough emr-serverless quotas, you can view the quotas via <a href="https://us-east-1.console.aws.amazon.com/servicequotas/home/services/emr-serverless/quotas/L-D05C8A75">emr-serverless-quotas</a> in region us-east-1.
 For more configurations, please refer to <a href="https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/jobs-spark.html#spark-defaults">Spark job properties</a> and application <a href="https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/application-capacity.html#worker-configs">worker config</a>.</p>
 
+
+  
 
 
 
