@@ -423,14 +423,9 @@ function _buildEventAnalysisBaseSql(eventNames: string[], sqlParameters: SQLPara
 
   let sql = _buildCommonPartSql(eventNames, sqlParameters);
   const buildResult = _buildEventCondition(eventNames, sqlParameters, sql);
-<<<<<<< HEAD
   sql = buildResult.sql;
-=======
-  sql = buildResult[0];
->>>>>>> cc19d5f0 (visual format update)
-
+  
   let joinTableSQL = '';
-
   for (const [index, _item] of eventNames.entries()) {
 
     let unionSql = '';

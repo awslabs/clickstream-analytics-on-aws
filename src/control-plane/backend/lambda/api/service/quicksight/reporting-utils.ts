@@ -146,15 +146,11 @@ export type MustachePathAnalysisType = MustacheBaseType & {
   sourceFieldId: string;
   targetFieldId: string;
   weightFieldId: string;
-  title: string;
-  subTitle?: string;
 }
 
 export type MustacheFunnelAnalysisType = MustacheBaseType & {
   dimFieldId: string;
   measureFieldId: string;
-  title: string;
-  subTitle?: string;
 }
 
 export type MustacheEventAnalysisType = MustacheBaseType & {
@@ -163,8 +159,6 @@ export type MustacheEventAnalysisType = MustacheBaseType & {
   catMeasureFieldId: string;
   dateGranularity?: string;
   hierarchyId?: string;
-  title: string;
-  subTitle?: string;
 }
 
 export type MustacheRetentionAnalysisType = MustacheBaseType & {
@@ -173,8 +167,6 @@ export type MustacheRetentionAnalysisType = MustacheBaseType & {
   numberMeasureFieldId: string;
   dateGranularity?: string;
   hierarchyId?: string;
-  title: string;
-  subTitle?: string;
 }
 
 export type MustacheFilterGroupType = {
