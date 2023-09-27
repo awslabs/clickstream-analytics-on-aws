@@ -17,13 +17,13 @@ import { JSONPath } from 'jsonpath-plus';
 import { logger } from '../../../../common/powertools';
 import { aws_sdk_client_common_config } from '../../../../common/sdk-client-config';
 
-interface WorkFlowStack {
+export interface WorkFlowStack {
   Name: string;
   Type: string;
   Data: SfnStackEvent;
 }
 
-interface SfnStackEvent {
+export interface SfnStackEvent {
   readonly Input: SfnStackInput;
   readonly Callback: SfnStackCallback;
 }
@@ -147,6 +147,9 @@ async function stackParametersResolve(stack: WorkFlowStack) {
         ({ key, value } = await _getParameterKeyAndValueByJSONPath(param.ParameterKey, param.ParameterValue, bucket, prefix));
       } else if (param.ParameterKey?.endsWith('.#') && param.ParameterValue?.startsWith('#.')) { // Find the value in output by suffix
         ({ key, value } = await _getParameterKeyAndValueByStackOutput(param.ParameterKey, param.ParameterValue, bucket, prefix));
+      } else {
+        key = param.ParameterKey;
+        value = param.ParameterValue;
       }
       param.ParameterKey = key;
       param.ParameterValue = value;
