@@ -35,6 +35,7 @@ import {
   ConditionCategory,
   ExploreComputeMethod,
   ExploreConversionIntervalType,
+  ExploreLocales,
   ExplorePathSessionDef,
   ExploreRelativeTimeUnit,
   ExploreTimeScopeType,

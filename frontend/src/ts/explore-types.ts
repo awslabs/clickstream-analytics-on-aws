@@ -108,3 +108,8 @@ export enum ConditionCategory {
   TRAFFIC_SOURCE = 'traffic_source',
   OTHER = 'other',
 }
+
+export enum ExploreLocales {
+  CHINESE = 'zh',
+  ENGLISH = 'en'
+}
