@@ -12,7 +12,7 @@
  */
 
 import { SelectProps } from '@cloudscape-design/components';
-import { MetadataSource, MetadataValueType } from 'ts/explore-types';
+import { ConditionCategory, MetadataSource, MetadataValueType } from 'ts/explore-types';
 
 export interface IConditionItemType {
   eventType: string;
@@ -31,6 +31,7 @@ export interface SegmentationFilterDataType {
 export interface IAnalyticsItem extends SelectProps.Option {
   modifyTime?: string;
   metadataSource?: MetadataSource;
+  category?: ConditionCategory;
   valueType?: MetadataValueType;
   values?: IMetadataAttributeValue[];
 }

@@ -32,6 +32,7 @@ import {
   OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN,
 } from 'ts/constant-ln';
 import {
+  ConditionCategory,
   ExploreComputeMethod,
   ExploreConversionIntervalType,
   ExplorePathSessionDef,
@@ -122,6 +123,7 @@ export const parametersConvertToCategoryItemType = (
         description: item.description,
         metadataSource: item.metadataSource,
         valueType: item.valueType,
+        category: item.category,
         values: item.values,
         modifyTime: moment(item.updateAt).format(TIME_FORMAT) || '-',
       });
@@ -134,6 +136,7 @@ export const parametersConvertToCategoryItemType = (
       description: item.description,
       metadataSource: item.metadataSource,
       valueType: item.valueType,
+      category: item.category,
       values: item.values,
       modifyTime: moment(item.updateAt).format(TIME_FORMAT) || '-',
     });
@@ -176,7 +179,8 @@ export const getEventAndConditions = (
       item.conditionList.forEach((condition) => {
         if (validConditionItemType(condition)) {
           const conditionObj: ICondition = {
-            category: 'other',
+            category:
+              condition.conditionOption?.category ?? ConditionCategory.OTHER,
             property: condition.conditionOption?.value ?? '',
             operator: condition.conditionOperator?.value ?? '',
             value: condition.conditionValue,
@@ -213,7 +217,8 @@ export const getPairEventAndConditions = (
       item.startConditionList.forEach((condition) => {
         if (validConditionItemType(condition)) {
           const conditionObj: ICondition = {
-            category: 'other',
+            category:
+              condition.conditionOption?.category ?? ConditionCategory.OTHER,
             property: condition.conditionOption?.value ?? '',
             operator: condition.conditionOperator?.value ?? '',
             value: condition.conditionValue,
@@ -226,7 +231,8 @@ export const getPairEventAndConditions = (
       item.revisitConditionList.forEach((condition) => {
         if (validConditionItemType(condition)) {
           const conditionObj: ICondition = {
-            category: 'other',
+            category:
+              condition.conditionOption?.category ?? ConditionCategory.OTHER,
             property: condition.conditionOption?.value ?? '',
             operator: condition.conditionOperator?.value ?? '',
             value: condition.conditionValue,
@@ -266,7 +272,8 @@ export const getGlobalEventCondition = (
   segmentationOptionData.data.forEach((condition) => {
     if (validConditionItemType(condition)) {
       const conditionObj: ICondition = {
-        category: 'other',
+        category:
+          condition.conditionOption?.category ?? ConditionCategory.OTHER,
         property: condition.conditionOption?.value ?? '',
         operator: condition.conditionOperator?.value ?? '',
         value: condition.conditionValue,

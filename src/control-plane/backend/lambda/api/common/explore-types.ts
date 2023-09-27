@@ -88,3 +88,13 @@ export enum ExploreVisualName {
   CHART = 'CHART',
   TABLE = 'TABLE',
 }
+
+export enum ConditionCategory {
+  USER = 'user',
+  EVENT = 'event',
+  DEVICE = 'device',
+  GEO = 'geo',
+  APP_INFO = 'app_info',
+  TRAFFIC_SOURCE = 'traffic_source',
+  OTHER = 'other',
+}
