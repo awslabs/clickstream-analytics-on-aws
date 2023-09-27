@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { ExploreComputeMethod, ExploreConversionIntervalType, ExploreGroupColumn, ExplorePathNodeType, ExplorePathSessionDef, ExploreTimeScopeType, MetadataPlatform, MetadataValueType } from '../../common/explore-types';
+import { ConditionCategory, ExploreComputeMethod, ExploreConversionIntervalType, ExploreGroupColumn, ExplorePathNodeType, ExplorePathSessionDef, ExploreTimeScopeType, MetadataPlatform, MetadataValueType } from '../../common/explore-types';
 import { buildFunnelTableView, buildFunnelView, buildEventPathAnalysisView, buildNodePathAnalysisView, buildEventAnalysisView, buildRetentionAnalysisView, ExploreAnalyticsOperators } from '../../service/quicksight/sql-builder';
 
 describe('SQL Builder test', () => {
@@ -1508,14 +1508,14 @@ describe('SQL Builder test', () => {
           eventName: 'add_button_click',
           sqlCondition: {
             conditions: [{
-              category: 'other',
+              category: ConditionCategory.OTHER,
               property: 'platform',
               operator: '=',
               value: ['Android'],
               dataType: MetadataValueType.STRING,
             },
             {
-              category: 'device',
+              category: ConditionCategory.DEVICE,
               property: 'screen_height',
               operator: '<>',
               value: [1400],
@@ -1528,14 +1528,14 @@ describe('SQL Builder test', () => {
           eventName: 'note_share',
           sqlCondition: {
             conditions: [{
-              category: 'other',
+              category: ConditionCategory.OTHER,
               property: 'platform',
               operator: '=',
               value: ['Android'],
               dataType: MetadataValueType.STRING,
             },
             {
-              category: 'device',
+              category: ConditionCategory.DEVICE,
               property: 'screen_height',
               operator: '<>',
               value: [1400],
@@ -1916,14 +1916,14 @@ describe('SQL Builder test', () => {
           eventName: 'add_button_click',
           sqlCondition: {
             conditions: [{
-              category: 'other',
+              category: ConditionCategory.OTHER,
               property: 'platform',
               operator: '=',
               value: ['Android'],
               dataType: MetadataValueType.STRING,
             },
             {
-              category: 'device',
+              category: ConditionCategory.DEVICE,
               property: 'screen_height',
               operator: '<>',
               value: [1400],
@@ -1936,14 +1936,14 @@ describe('SQL Builder test', () => {
           eventName: 'note_share',
           sqlCondition: {
             conditions: [{
-              category: 'other',
+              category: ConditionCategory.OTHER,
               property: 'platform',
               operator: '=',
               value: ['Android'],
               dataType: MetadataValueType.STRING,
             },
             {
-              category: 'device',
+              category: ConditionCategory.DEVICE,
               property: 'screen_height',
               operator: '<>',
               value: [1400],
@@ -2324,14 +2324,14 @@ describe('SQL Builder test', () => {
           eventName: 'add_button_click',
           sqlCondition: {
             conditions: [{
-              category: 'other',
+              category: ConditionCategory.OTHER,
               property: 'platform',
               operator: '=',
               value: ['Android'],
               dataType: MetadataValueType.STRING,
             },
             {
-              category: 'device',
+              category: ConditionCategory.DEVICE,
               property: 'screen_height',
               operator: '<>',
               value: [1400],
@@ -2344,14 +2344,14 @@ describe('SQL Builder test', () => {
           eventName: 'note_share',
           sqlCondition: {
             conditions: [{
-              category: 'other',
+              category: ConditionCategory.OTHER,
               property: 'platform',
               operator: '=',
               value: ['Android'],
               dataType: MetadataValueType.STRING,
             },
             {
-              category: 'device',
+              category: ConditionCategory.DEVICE,
               property: 'screen_height',
               operator: '<>',
               value: [1400],
@@ -3146,14 +3146,14 @@ describe('SQL Builder test', () => {
           eventName: 'add_button_click',
           sqlCondition: {
             conditions: [{
-              category: 'other',
+              category: ConditionCategory.OTHER,
               property: 'platform',
               operator: '=',
               value: ['Android'],
               dataType: MetadataValueType.STRING,
             },
             {
-              category: 'device',
+              category: ConditionCategory.DEVICE,
               property: 'screen_height',
               operator: '<>',
               value: [1400],
@@ -3166,14 +3166,14 @@ describe('SQL Builder test', () => {
           eventName: 'note_share',
           sqlCondition: {
             conditions: [{
-              category: 'other',
+              category: ConditionCategory.OTHER,
               property: 'platform',
               operator: '=',
               value: ['Android'],
               dataType: MetadataValueType.STRING,
             },
             {
-              category: 'device',
+              category: ConditionCategory.DEVICE,
               property: 'screen_height',
               operator: '<>',
               value: [1400],
@@ -3482,14 +3482,14 @@ describe('SQL Builder test', () => {
           eventName: 'add_button_click',
           sqlCondition: {
             conditions: [{
-              category: 'other',
+              category: ConditionCategory.OTHER,
               property: 'platform',
               operator: '=',
               value: ['Android'],
               dataType: MetadataValueType.STRING,
             },
             {
-              category: 'device',
+              category: ConditionCategory.DEVICE,
               property: 'screen_height',
               operator: '<>',
               value: [1400],
@@ -3502,14 +3502,14 @@ describe('SQL Builder test', () => {
           eventName: 'note_share',
           sqlCondition: {
             conditions: [{
-              category: 'other',
+              category: ConditionCategory.OTHER,
               property: 'platform',
               operator: '=',
               value: ['Android'],
               dataType: MetadataValueType.STRING,
             },
             {
-              category: 'device',
+              category: ConditionCategory.DEVICE,
               property: 'screen_height',
               operator: '<>',
               value: [1400],
@@ -4396,14 +4396,14 @@ describe('SQL Builder test', () => {
       conversionIntervalInSeconds: 10*60,
       globalEventCondition: {
         conditions: [{
-          category: 'other',
+          category: ConditionCategory.OTHER,
           property: 'platform',
           operator: '=',
           value: ['Android'],
           dataType: MetadataValueType.STRING,
         },
         {
-          category: 'device',
+          category: ConditionCategory.DEVICE,
           property: 'screen_height',
           operator: '<>',
           value: [1400],
@@ -4422,7 +4422,7 @@ describe('SQL Builder test', () => {
             sqlCondition: {
               conditions: [
                 {
-                  category: 'device',
+                  category: ConditionCategory.DEVICE,
                   property: 'screen_height',
                   operator: '>',
                   value: [1400],
@@ -4437,7 +4437,7 @@ describe('SQL Builder test', () => {
             sqlCondition: {
               conditions: [
                 {
-                  category: 'device',
+                  category: ConditionCategory.DEVICE,
                   property: 'screen_height',
                   operator: '>',
                   value: [1400],
@@ -4457,7 +4457,7 @@ describe('SQL Builder test', () => {
             sqlCondition: {
               conditions: [
                 {
-                  category: 'device',
+                  category: ConditionCategory.DEVICE,
                   property: 'screen_height',
                   operator: '>',
                   value: [1400],
@@ -4700,14 +4700,14 @@ describe('SQL Builder test', () => {
       conversionIntervalInSeconds: 10*60,
       globalEventCondition: {
         conditions: [{
-          category: 'other',
+          category: ConditionCategory.OTHER,
           property: 'platform',
           operator: '=',
           value: ['Android'],
           dataType: MetadataValueType.STRING,
         },
         {
-          category: 'device',
+          category: ConditionCategory.DEVICE,
           property: 'screen_height',
           operator: '<>',
           value: [1400],
@@ -4726,7 +4726,7 @@ describe('SQL Builder test', () => {
             sqlCondition: {
               conditions: [
                 {
-                  category: 'device',
+                  category: ConditionCategory.DEVICE,
                   property: 'screen_height',
                   operator: '>',
                   value: [1400],
@@ -4736,7 +4736,7 @@ describe('SQL Builder test', () => {
               conditionOperator: 'or',
             },
             retentionJoinColumn: {
-              category: 'device',
+              category: ConditionCategory.DEVICE,
               property: 'screen_height',
             },
           },
@@ -4745,7 +4745,7 @@ describe('SQL Builder test', () => {
             sqlCondition: {
               conditions: [
                 {
-                  category: 'device',
+                  category: ConditionCategory.DEVICE,
                   property: 'screen_height',
                   operator: '>',
                   value: [1400],
@@ -4755,7 +4755,7 @@ describe('SQL Builder test', () => {
               conditionOperator: 'or',
             },
             retentionJoinColumn: {
-              category: 'device',
+              category: ConditionCategory.DEVICE,
               property: 'screen_height',
             },
           },
@@ -4769,7 +4769,7 @@ describe('SQL Builder test', () => {
             sqlCondition: {
               conditions: [
                 {
-                  category: 'device',
+                  category: ConditionCategory.DEVICE,
                   property: 'screen_height',
                   operator: '>',
                   value: [1400],
@@ -5015,14 +5015,14 @@ describe('SQL Builder test', () => {
       conversionIntervalInSeconds: 10*60,
       globalEventCondition: {
         conditions: [{
-          category: 'other',
+          category: ConditionCategory.OTHER,
           property: 'platform',
           operator: '=',
           value: ['Android'],
           dataType: MetadataValueType.STRING,
         },
         {
-          category: 'device',
+          category: ConditionCategory.DEVICE,
           property: 'screen_height',
           operator: '<>',
           value: [1400],
@@ -5036,14 +5036,14 @@ describe('SQL Builder test', () => {
           sqlCondition: {
             conditions: [
               {
-                category: 'event',
+                category: ConditionCategory.EVENT,
                 property: '_session_duration',
                 operator: '>',
                 value: [200],
                 dataType: MetadataValueType.INTEGER,
               },
               {
-                category: 'user',
+                category: ConditionCategory.USER,
                 property: '_user_first_touch_timestamp',
                 operator: '>',
                 value: [1686532526770],
@@ -5058,14 +5058,14 @@ describe('SQL Builder test', () => {
           sqlCondition: {
             conditions: [
               {
-                category: 'event',
+                category: ConditionCategory.EVENT,
                 property: '_session_duration',
                 operator: '>',
                 value: [200],
                 dataType: MetadataValueType.INTEGER,
               },
               {
-                category: 'geo',
+                category: ConditionCategory.GEO,
                 property: 'city',
                 operator: '=',
                 value: ['Shanghai'],
@@ -5080,7 +5080,7 @@ describe('SQL Builder test', () => {
           sqlCondition: {
             conditions: [
               {
-                category: 'device',
+                category: ConditionCategory.DEVICE,
                 property: 'mobile_brand_name',
                 operator: '=',
                 value: ['Samsung'],
@@ -5484,35 +5484,35 @@ describe('SQL Builder test', () => {
       conversionIntervalInSeconds: 10*60,
       globalEventCondition: {
         conditions: [{
-          category: 'other',
+          category: ConditionCategory.OTHER,
           property: 'platform',
           operator: '=',
           value: ['Android'],
           dataType: MetadataValueType.STRING,
         },
         {
-          category: 'other',
+          category: ConditionCategory.OTHER,
           property: 'platform',
           operator: ExploreAnalyticsOperators.IN,
           value: ['Android', 'iOS'],
           dataType: MetadataValueType.STRING,
         },
         {
-          category: 'other',
+          category: ConditionCategory.OTHER,
           property: 'platform',
           operator: ExploreAnalyticsOperators.NOT_CONTAINS,
           value: ['Web', 'WebchatMP'],
           dataType: MetadataValueType.STRING,
         },
         {
-          category: 'other',
+          category: ConditionCategory.OTHER,
           property: 'platform',
           operator: ExploreAnalyticsOperators.NOT_IN,
           value: ['Web', 'WebchatMP'],
           dataType: MetadataValueType.STRING,
         },
         {
-          category: 'device',
+          category: ConditionCategory.DEVICE,
           property: 'screen_height',
           operator: '<>',
           value: [1400],
@@ -5526,28 +5526,28 @@ describe('SQL Builder test', () => {
           sqlCondition: {
             conditions: [
               {
-                category: 'event',
+                category: ConditionCategory.EVENT,
                 property: '_session_duration',
                 operator: '>',
                 value: [200],
                 dataType: MetadataValueType.INTEGER,
               },
               {
-                category: 'event',
+                category: ConditionCategory.EVENT,
                 property: '_session_duration',
                 operator: ExploreAnalyticsOperators.GREATER_THAN_OR_EQUAL,
                 value: [250],
                 dataType: MetadataValueType.INTEGER,
               },
               {
-                category: 'user',
+                category: ConditionCategory.USER,
                 property: '_user_first_touch_timestamp',
                 operator: '>',
                 value: [1686532526770],
                 dataType: MetadataValueType.INTEGER,
               },
               {
-                category: 'user',
+                category: ConditionCategory.USER,
                 property: '_user_first_touch_timestamp',
                 operator: ExploreAnalyticsOperators.NOT_NULL,
                 value: [],
@@ -5562,14 +5562,14 @@ describe('SQL Builder test', () => {
           sqlCondition: {
             conditions: [
               {
-                category: 'event',
+                category: ConditionCategory.EVENT,
                 property: '_session_duration',
                 operator: '>',
                 value: [200],
                 dataType: MetadataValueType.INTEGER,
               },
               {
-                category: 'geo',
+                category: ConditionCategory.GEO,
                 property: 'city',
                 operator: '=',
                 value: ['Shanghai'],
@@ -5584,7 +5584,7 @@ describe('SQL Builder test', () => {
           sqlCondition: {
             conditions: [
               {
-                category: 'device',
+                category: ConditionCategory.DEVICE,
                 property: 'mobile_brand_name',
                 operator: '=',
                 value: ['Samsung'],
