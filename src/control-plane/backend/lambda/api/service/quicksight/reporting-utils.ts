@@ -32,7 +32,7 @@ import { AssumeRoleCommand, STSClient } from '@aws-sdk/client-sts';
 import Mustache from 'mustache';
 import { v4 as uuidv4 } from 'uuid';
 import { DataSetProps, dataSetActions } from './dashboard-ln';
-import { AnalysisType, ExploreRelativeTimeUnit, ExploreRequestAction, ExploreTimeScopeType, ExploreVisualName } from '../../common/explore-types';
+import { AnalysisType, ExploreLocales, ExploreRelativeTimeUnit, ExploreRequestAction, ExploreTimeScopeType, ExploreVisualName } from '../../common/explore-types';
 import { logger } from '../../common/powertools';
 import i18next from '../../i18n';
 
@@ -888,7 +888,7 @@ export function getTempResourceName(resourceName: string, action: ExploreRequest
 
 export async function getDashboardTitleProps(analysisType: AnalysisType, query: any) {
 
-  const locale = query.locale;
+  const locale = query.locale ?? ExploreLocales.ENGLISH;
   const t = await i18next.changeLanguage(locale);
   let title = '';
   let subTitle = ' ';
