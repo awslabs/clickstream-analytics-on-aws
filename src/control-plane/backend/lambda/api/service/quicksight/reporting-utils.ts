@@ -892,7 +892,6 @@ export async function getDashboardTitleProps(analysisType: AnalysisType, query: 
   const t = await i18next.changeLanguage(locale);
   let title = '';
   let subTitle = ' ';
-  console.log(`locale: ${query.locale}`)
   const tableTitle = t('dashboard.title.tableChart');
 
   if (query.action === ExploreRequestAction.PUBLISH) {

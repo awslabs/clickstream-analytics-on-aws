@@ -281,7 +281,6 @@ export class ReportingService {
 
       const visualId = uuidv4();
       const titleProps = await getDashboardTitleProps(AnalysisType.EVENT, query);
-      console.log(titleProps)
       const visualDef = getEventLineChartVisualDef(visualId, viewName, titleProps, query.groupColumn);
       const visualRelatedParams = getVisualRelatedDefs({
         timeScopeType: query.timeScopeType,
