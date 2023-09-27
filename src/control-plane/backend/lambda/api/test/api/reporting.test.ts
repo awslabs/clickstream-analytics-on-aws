@@ -137,6 +137,7 @@ describe('reporting test', () => {
       .post('/api/reporting/funnel')
       .send({
         action: 'PREVIEW',
+        locale: 'zh',
         viewName: 'testview0002',
         projectId: 'project01_wvzh',
         pipelineId: 'pipeline-1111111',
@@ -236,7 +237,7 @@ describe('reporting test', () => {
       .post('/api/reporting/funnel')
       .send({
         action: 'PUBLISH',
-        language: 'EN',
+        locale: 'zh',
         chartTitle: 'test-title',
         chartSubTitle: 'test-subtitle',
         viewName: 'testview00022',
@@ -326,6 +327,7 @@ describe('reporting test', () => {
       .post('/api/reporting/event')
       .send({
         action: 'PREVIEW',
+        locale: 'zh',
         viewName: 'testview0002',
         projectId: 'project01_wvzh',
         pipelineId: 'pipeline-1111111',
@@ -426,7 +428,7 @@ describe('reporting test', () => {
       .post('/api/reporting/event')
       .send({
         action: 'PUBLISH',
-        language: 'EN',
+        locale: 'en',
         chartTitle: 'test-title',
         chartSubTitle: 'test-subtitle',
         viewName: 'testview00022',
@@ -611,7 +613,7 @@ describe('reporting test', () => {
       .post('/api/reporting/path')
       .send({
         action: 'PUBLISH',
-        language: 'EN',
+        locale: 'en',
         chartTitle: 'test-title',
         chartSubTitle: 'test-subtitle',
         viewName: 'testview0002',
@@ -709,7 +711,7 @@ describe('reporting test', () => {
       .post('/api/reporting/retention')
       .send({
         action: 'PUBLISH',
-        language: 'EN',
+        locale: 'en',
         chartTitle: 'test-title',
         chartSubTitle: 'test-subtitle',
         viewName: 'testview0002',
