@@ -35,13 +35,13 @@ class Device:
 
     @staticmethod
     def get_random_device():
-        brand = enums.brand.get_random_item()
-        screen = enums.screens.get_random_item()
+        brand = enums.android_brand.get_random_item()
+        screen = enums.android_screens.get_random_item()
         locale = enums.locale.get_random_item()
         split_local = locale[0].split('_')
         ip = util.generate_ip_by_country(split_local[1], locale[2])
         return Device(device_id=util.get_device_id(),
-                      os_version=enums.os_version.get_random_item(),
+                      os_version=enums.android_os_version.get_random_item(),
                       make=brand,
                       brand=brand,
                       model=enums.get_model_for_brand(brand),

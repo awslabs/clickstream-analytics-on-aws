@@ -10,14 +10,14 @@ or in the 'license' file accompanying this file. This file is distributed on an 
 OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions
 and limitations under the License.
 """
+import configure
 import enums as enums
 import util.util as utils
 from model.EventType import EventType
-from model.Screen import Screen
+from model.Screen import AppScreen
 import random
 
 sampleEvent = {
-    "hashCode": "",
     "unique_id": "",
     "event_type": "",
     "event_id": "",
@@ -67,11 +67,11 @@ global_engagement_start_time = 0
 def get_event_for_user(user):
     event = sampleEvent
     event["unique_id"] = user.user_unique_id
-    event["app_id"] = enums.APP_ID
+    event["app_id"] = configure.APP_ID
     event["device_id"] = user.device.device_id
-    event["os_version"] = user.device.os_version
+    event["os_version"] = user.device.android_os_version
     event["make"] = user.device.make
-    event["brand"] = user.device.brand
+    event["brand"] = user.device.android_brand
     event["model"] = user.device.model
     event["locale"] = user.device.locale
     event["carrier"] = user.device.carrier
@@ -132,7 +132,6 @@ def get_final_event(event_type, time_stamp, event, screen=None, entrances=0):
         event["attributes"]["_entrances"] = entrances
         global_previous_screen_name = screen.value[0]
         global_previous_screen_id = screen.value[1]
-    event["hashCode"] = uuid[:7]
     return event
 
 
@@ -171,9 +170,9 @@ def get_launch_events(user, event, current_timestamp):
     event["attributes"]["_session_id"] = new_session_id
     events.append(get_final_event(EventType.SESSION_START, current_timestamp, clean_event(event)))
     # add screen view event for first screen
-    events.append(get_final_event(EventType.SCREEN_VIEW, current_timestamp, clean_event(event), screen=Screen.NOTEPAD,
+    events.append(get_final_event(EventType.SCREEN_VIEW, current_timestamp, clean_event(event), screen=AppScreen.NOTEPAD,
                                   entrances=1))
-    current_timestamp += random.choices(enums.PER_ACTION_DURATION)[0] * 1000
+    current_timestamp += random.choices(configure.PER_ACTION_DURATION)[0] * 1000
     return events
 
 
@@ -229,7 +228,7 @@ def get_action_events(user, event, current_timestamp):
             user.login_timestamp = current_timestamp
         elif action_event_type.startswith("_screen_view"):
             screen_name = action_event_type.split(":")[1]
-            screen = Screen.get_screen(screen_name)
+            screen = AppScreen.get_screen(screen_name)
             events.append(get_final_event(EventType.SCREEN_VIEW, current_timestamp, action_event, screen))
             current_timestamp += random.randint(100, 2000)
             continue

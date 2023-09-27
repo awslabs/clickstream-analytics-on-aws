@@ -13,7 +13,7 @@ and limitations under the License.
 from enum import Enum
 
 
-class Screen(Enum):
+class AppScreen(Enum):
     NOTEPAD = ("NotepadActivity", "com.example.notepad.android.NotepadActivity")
     LOGIN = ('LoginActivity', "com.example.notepad.android.LoginActivity")
     NOTE_SHARE = ('NoteShareActivity', "com.example.notepad.android.NoteShareActivity")
@@ -23,12 +23,32 @@ class Screen(Enum):
     @staticmethod
     def get_screen(screen_name):
         if screen_name == "note_share":
-            return Screen.NOTE_SHARE
+            return AppScreen.NOTE_SHARE
         elif screen_name == "note_print":
-            return Screen.NOTE_PRINT
+            return AppScreen.NOTE_PRINT
         elif screen_name == "note_export":
-            return Screen.NOTE_EXPORT
+            return AppScreen.NOTE_EXPORT
         elif screen_name == "notepad":
-            return Screen.NOTEPAD
+            return AppScreen.NOTEPAD
         elif screen_name == "login":
-            return Screen.LOGIN
+            return AppScreen.LOGIN
+
+class WebScreen(Enum):
+    NOTEPAD = ("NotepadActivity", "com.example.notepad.android.NotepadActivity")
+    LOGIN = ('LoginActivity', "com.example.notepad.android.LoginActivity")
+    NOTE_SHARE = ('NoteShareActivity', "com.example.notepad.android.NoteShareActivity")
+    NOTE_PRINT = ('NotePrintActivity', "com.example.notepad.android.NotePrintActivity")
+    NOTE_EXPORT = ('NoteExportActivity', "com.example.notepad.android.NoteExportActivity")
+
+    @staticmethod
+    def get_screen(screen_name):
+        if screen_name == "note_share":
+            return WebScreen.NOTE_SHARE
+        elif screen_name == "note_print":
+            return WebScreen.NOTE_PRINT
+        elif screen_name == "note_export":
+            return WebScreen.NOTE_EXPORT
+        elif screen_name == "notepad":
+            return WebScreen.NOTEPAD
+        elif screen_name == "login":
+            return WebScreen.LOGIN
