@@ -360,7 +360,7 @@ const Processing: React.FC<TabContentProps> = (props: TabContentProps) => {
               <>
                 <div>
                   <Box variant="awsui-key-label">
-                    {t('pipeline:detail.anlyEngine')}
+                    {t('pipeline:detail.analyticEngine')}
                   </Box>
                   <div>{buildRedshiftDisplay(pipelineInfo)}</div>
                 </div>
