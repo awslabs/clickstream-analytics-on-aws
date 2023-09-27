@@ -64,20 +64,6 @@ describe('SFN workflow Lambda Function', () => {
     Name: 'DataProcessing',
   };
 
-  // const baseStackActionEvent: SfnStackEvent = {
-  //   Input: {
-  //     Region: 'ap-southeast-1',
-  //     Action: 'Create',
-  //     TemplateURL: 'https://aws-gcr-solutions.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-pipeline-stack.template.json',
-  //     Parameters: [],
-  //     StackName: 'Clickstream-ETL-6972c135cb864885b25c5b7ebe584fdf',
-  //   },
-  //   Callback: {
-  //     BucketPrefix: 'clickstream/workflow/main-6ba79aa7-b9ef-40dd-aed9-701bebb61eb4',
-  //     BucketName: 'cloudfront-s3-control-pl-solutionbucketlogbucket3-t64p6bbwz53m',
-  //   },
-  // };
-
   beforeEach(() => {
     s3Mock.reset();
     cloudFormationMock.reset();
