@@ -3,6 +3,7 @@ repo_url: !ENV [REPO_URL, 'https://github.com/awslabs/clickstream-analytics-on-a
 
 theme:
   name: material
+  custom_dir: overrides
   features:
     - navigation.tabs
     - search.suggest
@@ -35,6 +36,11 @@ extra:
   solution_name: Clickstream Analytics on AWS
   git_repo: https://github.com/awslabs/clickstream-analytics-on-aws.git
   source_repo: https://github.com/awslabs/clickstream-analytics-on-aws
+  analytics:
+    provider: custom
+    version: v0.5.1
+    endpoint: https://pipeline.clickstream.solutions.gcr.aws.dev/collect
+    appId: docs
 
 plugins:
   - search
