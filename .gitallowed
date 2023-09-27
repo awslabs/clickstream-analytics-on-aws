@@ -23,3 +23,4 @@ src/common/constant.ts:80
 src/common/constant.ts:83
 src/common/constant.ts:86
 src/common/constant.ts:89
+test/jestEnv.js:19
