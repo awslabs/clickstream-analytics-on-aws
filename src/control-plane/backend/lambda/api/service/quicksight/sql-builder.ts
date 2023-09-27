@@ -12,7 +12,7 @@
  */
 
 import { format } from 'sql-formatter';
-import { ConditionCategory, ExploreComputeMethod, ExploreConversionIntervalType, ExploreGroupColumn, ExploreLanguage, ExplorePathNodeType, ExplorePathSessionDef, ExploreRelativeTimeUnit, ExploreTimeScopeType, MetadataPlatform, MetadataValueType} from '../../common/explore-types';
+import { ConditionCategory, ExploreComputeMethod, ExploreConversionIntervalType, ExploreGroupColumn, ExploreLocales, ExplorePathNodeType, ExplorePathSessionDef, ExploreRelativeTimeUnit, ExploreTimeScopeType, MetadataPlatform, MetadataValueType } from '../../common/explore-types';
 import { logger } from '../../common/powertools';
 
 export interface Condition {
@@ -77,7 +77,7 @@ export interface SQLParameters {
   readonly maxStep?: number;
   readonly pathAnalysis?: PathAnalysisParameter;
   readonly pairEventAndConditions?: PairEventAndCondition[];
-  readonly language?: ExploreLanguage;
+  readonly locale?: ExploreLocales;
 }
 
 export const builtInEvents = [
@@ -423,7 +423,7 @@ function _buildEventAnalysisBaseSql(eventNames: string[], sqlParameters: SQLPara
 
   let sql = _buildCommonPartSql(eventNames, sqlParameters);
   const buildResult = _buildEventCondition(eventNames, sqlParameters, sql);
-  sql = buildResult[0];
+  sql = buildResult.sql;
 
   let joinTableSQL = '';
 
@@ -434,7 +434,7 @@ function _buildEventAnalysisBaseSql(eventNames: string[], sqlParameters: SQLPara
       unionSql = 'union all';
     }
     let idSql = '';
-    if (buildResult[1][index] === ExploreComputeMethod.EVENT_CNT) {
+    if (buildResult.computedMethodList[index] === ExploreComputeMethod.EVENT_CNT) {
       idSql = `, table_${index}.event_id_${index} as x_id`;
     } else {
       idSql = `, table_${index}.user_pseudo_id_${index} as x_id`;
@@ -463,8 +463,8 @@ function _buildEventAnalysisBaseSql(eventNames: string[], sqlParameters: SQLPara
   return sql;
 };
 
-function _buildEventCondition(eventNames: string[], sqlParameters: SQLParameters, baseSQL: string) : [string, ExploreComputeMethod[]] {
-  let newSQL = baseSQL;
+function _buildEventCondition(eventNames: string[], sqlParameters: SQLParameters, baseSQL: string) {
+  let sql = baseSQL;
   const computedMethodList: ExploreComputeMethod[] = [];
   for (const [index, event] of eventNames.entries()) {
     computedMethodList.push(sqlParameters.eventAndConditions![index].computeMethod ?? ExploreComputeMethod.EVENT_CNT);
@@ -479,7 +479,7 @@ function _buildEventCondition(eventNames: string[], sqlParameters: SQLParameters
       ,${_renderUserPseudoIdColumn(columnTemplate, sqlParameters.computeMethod, true).replace(/####/g, `_${index}`)}
     `;
 
-    newSQL = newSQL.concat(`
+    sql = sql.concat(`
     table_${index} as (
       select 
         ${tableColumns}
@@ -489,7 +489,7 @@ function _buildEventCondition(eventNames: string[], sqlParameters: SQLParameters
     ),
     `);
   }
-  return [newSQL, computedMethodList];
+  return { sql, computedMethodList };
 }
 
 function _buildEventConditionSQL(eventCondition: EventAndCondition) {

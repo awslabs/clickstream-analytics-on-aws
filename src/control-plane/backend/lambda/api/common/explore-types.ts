@@ -99,9 +99,9 @@ export enum ConditionCategory {
   OTHER = 'other',
 }
 
-export enum ExploreLanguage {
-  CHINESE = 'CN',
-  ENGLISH = 'EN'
+export enum ExploreLocales {
+  CHINESE = 'zh',
+  ENGLISH = 'en'
 }
 
 export enum AnalysisType {

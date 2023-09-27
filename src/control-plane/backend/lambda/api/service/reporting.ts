@@ -176,7 +176,7 @@ export class ReportingService {
     });
 
     const visualId = uuidv4();
-    const titleProps = getDashboardTitleProps(AnalysisType.FUNNEL, query);
+    const titleProps = await getDashboardTitleProps(AnalysisType.FUNNEL, query);
     const visualDef = getFunnelVisualDef(visualId, viewName, titleProps);
     const visualRelatedParams = getVisualRelatedDefs({
       timeScopeType: query.timeScopeType,
@@ -280,7 +280,8 @@ export class ReportingService {
       }
 
       const visualId = uuidv4();
-      const titleProps = getDashboardTitleProps(AnalysisType.EVENT, query);
+      const titleProps = await getDashboardTitleProps(AnalysisType.EVENT, query);
+      console.log(titleProps)
       const visualDef = getEventLineChartVisualDef(visualId, viewName, titleProps, query.groupColumn);
       const visualRelatedParams = getVisualRelatedDefs({
         timeScopeType: query.timeScopeType,
@@ -406,7 +407,7 @@ export class ReportingService {
         sheetId = query.sheetId;
       }
 
-      const titleProps = getDashboardTitleProps(AnalysisType.PATH, query);
+      const titleProps = await getDashboardTitleProps(AnalysisType.PATH, query);
       const visualId = uuidv4();
       const visualDef = getPathAnalysisChartVisualDef(visualId, viewName, titleProps);
       const visualRelatedParams = getVisualRelatedDefs({
@@ -491,7 +492,7 @@ export class ReportingService {
         sheetId = query.sheetId;
       }
 
-      const titleProps = getDashboardTitleProps(AnalysisType.RETENTION, query);
+      const titleProps = await getDashboardTitleProps(AnalysisType.RETENTION, query);
       const visualId = uuidv4();
       const visualDef = getRetentionLineChartVisualDef(visualId, viewName, titleProps);
       const visualRelatedParams = getVisualRelatedDefs({

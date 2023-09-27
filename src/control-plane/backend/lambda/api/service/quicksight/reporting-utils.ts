@@ -32,8 +32,9 @@ import { AssumeRoleCommand, STSClient } from '@aws-sdk/client-sts';
 import Mustache from 'mustache';
 import { v4 as uuidv4 } from 'uuid';
 import { DataSetProps, dataSetActions } from './dashboard-ln';
-import { AnalysisType, ExploreLanguage, ExploreRelativeTimeUnit, ExploreRequestAction, ExploreTimeScopeType, ExploreVisualName } from '../../common/explore-types';
+import { AnalysisType, ExploreRelativeTimeUnit, ExploreRequestAction, ExploreTimeScopeType, ExploreVisualName } from '../../common/explore-types';
 import { logger } from '../../common/powertools';
+import i18next from '../../i18n';
 
 export const TEMP_RESOURCE_NAME_PREFIX = '_tmp_';
 
@@ -134,61 +135,52 @@ export interface DashboardDefProps {
   name?: string;
 }
 
-export type MustachePathAnalysisType = {
+export type MustacheBaseType = {
   visualId: string;
   dataSetIdentifier: string;
+  title: string;
+  subTitle?: string;
+}
+
+export type MustachePathAnalysisType = MustacheBaseType & {
   sourceFieldId: string;
   targetFieldId: string;
   weightFieldId: string;
-  title: string;
-  subTitle?: string;
 }
 
-export type MustacheFunnelAnalysisType = {
-  visualId: string;
-  dataSetIdentifier: string;
+export type MustacheFunnelAnalysisType = MustacheBaseType & {
   dimFieldId: string;
   measureFieldId: string;
-  title: string;
-  subTitle?: string;
 }
 
-export type MustacheEventAnalysisType = {
-  visualId: string;
-  dataSetIdentifier: string;
+export type MustacheEventAnalysisType = MustacheBaseType & {
   dateDimFieldId: string;
   catDimFieldId: string;
   catMeasureFieldId: string;
   dateGranularity?: string;
   hierarchyId?: string;
-  title: string;
-  subTitle?: string;
 }
 
-export type MustacheRetentionAnalysisType = {
-  visualId: string;
-  dataSetIdentifier: string;
+export type MustacheRetentionAnalysisType = MustacheBaseType & {
   dateDimFieldId: string;
   catDimFieldId: string;
   numberMeasureFieldId: string;
   dateGranularity?: string;
   hierarchyId?: string;
-  title: string;
-  subTitle?: string;
 }
 
 export type MustacheFilterGroupType = {
   visualIds: string;
-  sheetId: string;
   dataSetIdentifier: string;
+  sheetId: string;
   filterGroupId: string;
   filterId: string;
 }
 
 export type MustacheRelativeDateFilterGroupType = {
   visualIds: string;
-  sheetId: string;
   dataSetIdentifier: string;
+  sheetId: string;
   filterGroupId: string;
   filterId: string;
   lastN: number;
@@ -894,53 +886,32 @@ export function getTempResourceName(resourceName: string, action: ExploreRequest
   return resourceName;
 }
 
-export function getDashboardTitleProps(analysisType: AnalysisType, query: any) : DashboardTitleProps {
+export async function getDashboardTitleProps(analysisType: AnalysisType, query: any) {
+
+  const locale = query.locale;
+  const t = await i18next.changeLanguage(locale);
   let title = '';
   let subTitle = ' ';
-  let tableTitle = '';
+  console.log(`locale: ${query.locale}`)
+  const tableTitle = t('dashboard.title.tableChart');
 
-  const language = query.language;
   if (query.action === ExploreRequestAction.PUBLISH) {
     title = query.chartTitle;
     subTitle = query.chartSubTitle;
-    if (language === ExploreLanguage.CHINESE) {
-      tableTitle = '详细信息';
-    } else {
-      tableTitle = 'Detail information';
-    }
   } else {
-    if (language === ExploreLanguage.CHINESE) {
-      tableTitle = '详细信息';
-      switch (analysisType) {
-        case AnalysisType.FUNNEL:
-          title = '漏斗分析';
-          break;
-        case AnalysisType.EVENT:
-          title = '事件分析';
-          break;
-        case AnalysisType.PATH:
-          title = '路径分析';
-          break;
-        case AnalysisType.RETENTION:
-          title = '留存分析';
-          break;
-      }
-    } else {
-      tableTitle = 'Detail information';
-      switch (analysisType) {
-        case AnalysisType.FUNNEL:
-          title = 'Funnel analysis';
-          break;
-        case AnalysisType.EVENT:
-          title = 'Event analysis';
-          break;
-        case AnalysisType.PATH:
-          title = 'Path analysis';
-          break;
-        case AnalysisType.RETENTION:
-          title = 'Retention analysis';
-          break;
-      }
+    switch (analysisType) {
+      case AnalysisType.FUNNEL:
+        title = t('dashboard.title.funnelAnalysis');
+        break;
+      case AnalysisType.EVENT:
+        title = t('dashboard.title.eventAnalysis');
+        break;
+      case AnalysisType.PATH:
+        title = t('dashboard.title.pathAnalysis');
+        break;
+      case AnalysisType.RETENTION:
+        title = t('dashboard.title.retentionAnalysis');
+        break;
     }
   }
 

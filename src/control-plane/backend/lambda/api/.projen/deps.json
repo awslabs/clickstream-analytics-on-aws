@@ -261,6 +261,16 @@
       "type": "runtime"
     },
     {
+      "name": "i18next-fs-backend",
+      "version": "^2.2.0",
+      "type": "runtime"
+    },
+    {
+      "name": "i18next",
+      "version": "^22.4.6",
+      "type": "runtime"
+    },
+    {
       "name": "json-difference",
       "version": "^1.9.1",
       "type": "runtime"
