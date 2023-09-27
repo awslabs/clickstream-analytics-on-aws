@@ -230,7 +230,7 @@ BEGIN
               project_id, 
               app_info_app_id, 
               property_category, 
-              property_name, 
+              property_name || '_' || value_type as property_name,
               property_value, 
               platform, 
               value_type, 
@@ -312,7 +312,7 @@ BEGIN
               SELECT 
                 project_id, 
                 app_info_app_id, 
-                property_name, 
+                property_name || '_' || value_type as property_name,
                 property_value, 
                 platform, 
                 value_type, 
