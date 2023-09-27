@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { MetadataParameterType, MetadataPlatform, MetadataSource, MetadataValueType } from '../common/explore-types';
+import { ConditionCategory, MetadataParameterType, MetadataPlatform, MetadataSource, MetadataValueType } from '../common/explore-types';
 
 export interface IMetadataEvent {
   readonly id: string;
@@ -63,7 +63,7 @@ export interface IMetadataEventParameter {
   valueEnum?: string[];
   values: IMetadataAttributeValue[];
   associatedEvents? : IMetadataEvent[];
-  readonly category: string;
+  readonly category: ConditionCategory;
 
   readonly createAt: number;
   readonly updateAt: number;
@@ -90,7 +90,7 @@ export interface IMetadataUserAttribute {
   readonly valueType: MetadataValueType;
   valueEnum?: string[];
   values: IMetadataAttributeValue[];
-  readonly category: string;
+  readonly category: ConditionCategory;
 
   readonly createAt: number;
   readonly updateAt: number;

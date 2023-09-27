@@ -61,6 +61,7 @@ declare global {
     readonly valueEnum: string[];
     readonly values: IMetadataAttributeValue[];
     readonly associatedEvents?: IMetadataEvent[];
+    readonly category: ConditionCategory;
 
     readonly createAt: number;
     readonly updateAt: number;
@@ -83,6 +84,7 @@ declare global {
     readonly valueType: MetadataValueType;
     readonly valueEnum: string[];
     readonly values: IMetadataAttributeValue[];
+    readonly category: ConditionCategory;
 
     readonly createAt: number;
     readonly updateAt: number;
@@ -127,14 +129,7 @@ declare global {
     readonly pairEventAndConditions?: IPairEventAndCondition[];
   }
   interface ICondition {
-    readonly category:
-      | 'user'
-      | 'event'
-      | 'device'
-      | 'geo'
-      | 'app_info'
-      | 'traffic_source'
-      | 'other';
+    readonly category: string;
     readonly property: string;
     readonly operator: string;
     readonly value: string[];
@@ -142,14 +137,7 @@ declare global {
   }
 
   interface IRetentionJoinColumn {
-    readonly category:
-      | 'user'
-      | 'event'
-      | 'device'
-      | 'geo'
-      | 'app_info'
-      | 'traffic_source'
-      | 'other';
+    readonly category: string;
     readonly property: string;
   }
 

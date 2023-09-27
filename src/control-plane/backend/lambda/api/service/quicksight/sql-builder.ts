@@ -12,11 +12,11 @@
  */
 
 import { format } from 'sql-formatter';
-import { ExploreComputeMethod, ExploreConversionIntervalType, ExploreGroupColumn, ExplorePathNodeType, ExplorePathSessionDef, ExploreRelativeTimeUnit, ExploreTimeScopeType, MetadataPlatform, MetadataValueType } from '../../common/explore-types';
+import { ConditionCategory, ExploreComputeMethod, ExploreConversionIntervalType, ExploreGroupColumn, ExplorePathNodeType, ExplorePathSessionDef, ExploreRelativeTimeUnit, ExploreTimeScopeType, MetadataPlatform, MetadataValueType } from '../../common/explore-types';
 import { logger } from '../../common/powertools';
 
 export interface Condition {
-  readonly category: 'user' | 'event' | 'device' | 'geo' | 'app_info' | 'traffic_source' | 'other';
+  readonly category: ConditionCategory;
   readonly property: string;
   readonly operator: string;
   readonly value: any[];
@@ -43,7 +43,7 @@ export interface PathAnalysisParameter {
 }
 
 export interface RetentionJoinColumn {
-  readonly category: 'user' | 'event' | 'device' | 'geo' | 'app_info' | 'traffic_source' | 'other';
+  readonly category: ConditionCategory;
   readonly property: string;
 }
 
