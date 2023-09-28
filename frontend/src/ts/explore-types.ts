@@ -110,8 +110,8 @@ export enum ConditionCategory {
 }
 
 export enum QuickSightChartType {
-  BAR = 'BAR',
-  LINE = 'LINE',
-  FUNNEL = 'FUNNEL',
-  SANKEY = 'SANKEY'
+  BAR = 'bar',
+  LINE = 'line',
+  FUNNEL = 'funnel',
+  SANKEY = 'sankey'
 }

@@ -505,19 +505,19 @@ export function getFunnelVisualDef(visualId: string, viewName: string, titleProp
   quickSightChartType: QuickSightChartType, groupColumn: string) : Visual {
 
   if (quickSightChartType === QuickSightChartType.LINE) {
-    return _getFunnelLineVisualDef(visualId, viewName, titleProps);
+    return _getFunnelChartVisualDef(visualId, viewName, titleProps);
   } else if (quickSightChartType === QuickSightChartType.BAR) {
-    return _getFunnelBarVisualDef(visualId, viewName, titleProps, groupColumn);
+    return _getFunnelBarChartVisualDef(visualId, viewName, titleProps, groupColumn);
   } else {
-    const errorMessage = `unsupported quicksight char type ${quickSightChartType}`;
-    logger.debug(errorMessage);
+    const errorMessage = `Funnel analysis: unsupported quicksight char type ${quickSightChartType}`;
+    logger.warn(errorMessage);
     throw new Error(errorMessage);
   }
 }
 
-function _getFunnelLineVisualDef(visualId: string, viewName: string, titleProps: DashboardTitleProps) : Visual {
+function _getFunnelChartVisualDef(visualId: string, viewName: string, titleProps: DashboardTitleProps) : Visual {
 
-  const visualDef = readFileSync(join(__dirname, './templates/funnel-chart.json'), 'utf8');
+  const visualDef = readFileSync(join(__dirname, './templates/funnel-funnel-chart.json'), 'utf8');
   const mustacheFunnelAnalysisType: MustacheFunnelAnalysisType = {
     visualId,
     dataSetIdentifier: viewName,
@@ -530,7 +530,7 @@ function _getFunnelLineVisualDef(visualId: string, viewName: string, titleProps:
   return JSON.parse(Mustache.render(visualDef, mustacheFunnelAnalysisType)) as Visual;
 }
 
-function _getFunnelBarVisualDef(visualId: string, viewName: string, titleProps: DashboardTitleProps, groupColumn: string) : Visual {
+function _getFunnelBarChartVisualDef(visualId: string, viewName: string, titleProps: DashboardTitleProps, groupColumn: string) : Visual {
 
   const visualDef = readFileSync(join(__dirname, './templates/funnel-bar-chart.json'), 'utf8');
   const mustacheFunnelAnalysisType: MustacheFunnelAnalysisType = {
@@ -756,17 +756,12 @@ export function getFunnelTableVisualRelatedDefs(viewName: string, colNames: stri
 export function getEventChartVisualDef(visualId: string, viewName: string, titleProps: DashboardTitleProps,
   quickSightChartType: QuickSightChartType, groupColumn: string) : Visual {
 
-  let templatePath = '';
-  if (quickSightChartType === QuickSightChartType.LINE) {
-    templatePath = './templates/event-line-chart.json';
-  } else if (quickSightChartType === QuickSightChartType.BAR) {
-    templatePath = './templates/event-bar-chart.json';
-  } else {
-    const errorMessage = `unsupported quicksight char type ${quickSightChartType}`;
-    logger.debug(errorMessage);
+  if (quickSightChartType != QuickSightChartType.LINE && quickSightChartType != QuickSightChartType.BAR) {
+    const errorMessage = `Event analysis: unsupported quicksight char type ${quickSightChartType}`;
+    logger.warn(errorMessage);
     throw new Error(errorMessage);
   }
-
+  const templatePath = `./templates/event-${quickSightChartType}-chart.json`;
   const visualDef = readFileSync(join(__dirname, templatePath), 'utf8');
   const mustacheEventAnalysisType: MustacheEventAnalysisType = {
     visualId,
@@ -800,7 +795,7 @@ export function getEventPivotTableVisualDef(visualId: string, viewName: string, 
 }
 
 export function getPathAnalysisChartVisualDef(visualId: string, viewName: string, titleProps: DashboardTitleProps) : Visual {
-  const visualDef = readFileSync(join(__dirname, './templates/path-analysis-chart.json'), 'utf8');
+  const visualDef = readFileSync(join(__dirname, './templates/path-sankey-chart.json'), 'utf8');
   const mustachePathAnalysisType: MustachePathAnalysisType = {
     visualId,
     dataSetIdentifier: viewName,
@@ -817,16 +812,12 @@ export function getPathAnalysisChartVisualDef(visualId: string, viewName: string
 export function getRetentionChartVisualDef(visualId: string, viewName: string, titleProps: DashboardTitleProps,
   quickSightChartType: QuickSightChartType) : Visual {
 
-  let templatePath = '';
-  if (quickSightChartType === QuickSightChartType.LINE) {
-    templatePath = './templates/retention-line-chart.json';
-  } else if (quickSightChartType === QuickSightChartType.BAR) {
-    templatePath = './templates/retention-bar-chart.json';
-  } else {
-    const errorMessage = `unsupported quicksight char type ${quickSightChartType}`;
-    logger.debug(errorMessage);
+  if (quickSightChartType != QuickSightChartType.LINE && quickSightChartType != QuickSightChartType.BAR) {
+    const errorMessage = `Retention analysis: unsupported quicksight char type ${quickSightChartType}`;
+    logger.warn(errorMessage);
     throw new Error(errorMessage);
   }
+  const templatePath = `./templates/retention-${quickSightChartType}-chart.json`;
 
   const visualDef = readFileSync(join(__dirname, templatePath), 'utf8');
   const mustacheRetentionAnalysisType: MustacheRetentionAnalysisType = {
