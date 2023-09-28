@@ -479,6 +479,13 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
   };
 
   useEffect(() => {
+    setSegmentationOptionData({
+      ...INIT_SEGMENTATION_DATA,
+      conditionOptions: presetParameters,
+    });
+  }, [presetParameters]);
+
+  useEffect(() => {
     clickPreview();
   }, [timeGranularity, dateRangeValue]);
 

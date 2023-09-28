@@ -377,6 +377,13 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
   };
 
   useEffect(() => {
+    setSegmentationOptionData({
+      ...INIT_SEGMENTATION_DATA,
+      conditionOptions: presetParameters,
+    });
+  }, [presetParameters]);
+
+  useEffect(() => {
     clickPreview();
   }, [timeGranularity, dateRangeValue, chartType]);
 

@@ -300,6 +300,13 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
   };
 
   useEffect(() => {
+    setSegmentationOptionData({
+      ...INIT_SEGMENTATION_DATA,
+      conditionOptions: presetParameters,
+    });
+  }, [presetParameters]);
+
+  useEffect(() => {
     clickPreview();
   }, [timeGranularity, dateRangeValue, chartType]);
 
