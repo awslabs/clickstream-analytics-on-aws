@@ -12,7 +12,7 @@
  */
 
 import { format } from 'sql-formatter';
-import { ConditionCategory, ExploreComputeMethod, ExploreConversionIntervalType, ExploreGroupColumn, ExploreLocales, ExplorePathNodeType, ExplorePathSessionDef, ExploreRelativeTimeUnit, ExploreTimeScopeType, MetadataPlatform, MetadataValueType} from '../../common/explore-types';
+import { ConditionCategory, ExploreComputeMethod, ExploreConversionIntervalType, ExploreGroupColumn, ExploreLocales, ExplorePathNodeType, ExplorePathSessionDef, ExploreRelativeTimeUnit, ExploreTimeScopeType, MetadataPlatform, MetadataValueType } from '../../common/explore-types';
 import { logger } from '../../common/powertools';
 
 export interface Condition {
@@ -424,7 +424,7 @@ function _buildEventAnalysisBaseSql(eventNames: string[], sqlParameters: SQLPara
   let sql = _buildCommonPartSql(eventNames, sqlParameters);
   const buildResult = _buildEventCondition(eventNames, sqlParameters, sql);
   sql = buildResult.sql;
-  
+
   let joinTableSQL = '';
   for (const [index, _item] of eventNames.entries()) {
 
