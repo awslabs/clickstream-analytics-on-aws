@@ -150,6 +150,7 @@ const MetadataParameterSplitPanel: React.FC<
           projectId: projectId ?? '',
           appId: appId ?? '',
           parameterName: parameter.name,
+          parameterValueType: parameter.valueType,
         });
       if (success) {
         setParameterDetails(data);
@@ -352,12 +353,8 @@ const MetadataParameterSplitPanel: React.FC<
                     data={parameterDetails.associatedEvents ?? []}
                     tableColumnDefinitions={COLUMN_DEFINITIONS}
                     tableI18nStrings={{
-                      loadingText: t(
-                        'analytics:labels.tableLoading'
-                      ),
-                      emptyText: t(
-                        'analytics:labels.tableEmpty'
-                      ),
+                      loadingText: t('analytics:labels.tableLoading'),
+                      emptyText: t('analytics:labels.tableEmpty'),
                     }}
                   />
                 ),

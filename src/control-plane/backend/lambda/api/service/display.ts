@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { MetadataValueType } from '../common/explore-types';
 import { logger } from '../common/powertools';
 import { IMetadataAttributeValue, IMetadataDisplay, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute } from '../model/metadata';
 import { DynamoDbMetadataStore } from '../store/dynamodb/dynamodb-metadata-store';
@@ -44,6 +45,14 @@ export class CMetadataDisplay {
     }
   }
 
+  private _getOriginalName(name: string, valueType: MetadataValueType) {
+    const typeSuffix = `_${valueType}`;
+    if (name.endsWith(typeSuffix)) {
+      return name.substring(0, name.length - typeSuffix.length);
+    }
+    return name;
+  }
+
   public async patch(projectId: string, appId: string,
     metadataArray: IMetadataEvent[] | IMetadataEventParameter[] | IMetadataUserAttribute[]) {
     try {
@@ -52,20 +61,24 @@ export class CMetadataDisplay {
         const prefix = metadata.prefix.split('#')[0];
         const key = `${prefix}#${metadata.projectId}#${metadata.appId}#${metadata.name}`;
         const metadataDisplay = displays.find((d: IMetadataDisplay) => d.id === key);
-        metadata.displayName = metadataDisplay?.displayName ?? metadata.name;
         metadata.description = metadataDisplay?.description ?? '';
         if (metadata.prefix.startsWith('EVENT#')) {
           const event = metadata as IMetadataEvent;
+          event.displayName = metadataDisplay?.displayName ?? event.name;
           event.associatedParameters = this.patchAssociatedWithData(event.associatedParameters) as IMetadataEventParameter[];
           event.associatedParameters = this.patchValueEnumWithData(event.associatedParameters) as IMetadataEventParameter[];
         }
         if (metadata.prefix.startsWith('EVENT_PARAMETER#')) {
           let parameter = metadata as IMetadataEventParameter;
+          parameter.name = this._getOriginalName(parameter.name, parameter.valueType);
+          parameter.displayName = metadataDisplay?.displayName ?? this._getOriginalName(parameter.name, parameter.valueType);
           parameter.associatedEvents = this.patchAssociatedWithData(parameter.associatedEvents) as IMetadataEvent[];
           parameter = (this.patchValueEnumWithData([parameter]) as IMetadataEventParameter[])[0];
         }
         if (metadata.prefix.startsWith('USER_ATTRIBUTE#')) {
           let userAttribute = metadata as IMetadataUserAttribute;
+          userAttribute.name = this._getOriginalName(userAttribute.name, userAttribute.valueType);
+          userAttribute.displayName = metadataDisplay?.displayName ?? this._getOriginalName(userAttribute.name, userAttribute.valueType);
           userAttribute = (this.patchValueEnumWithData([userAttribute]) as IMetadataUserAttribute[])[0];
         }
       }
@@ -84,8 +97,15 @@ export class CMetadataDisplay {
       const prefix = metadata.prefix.split('#')[0];
       const key = `${prefix}#${metadata.projectId}#${metadata.appId}#${metadata.name}`;
       const metadataDisplay = displays.find((d: IMetadataDisplay) => d.id === key);
-      metadata.displayName = metadataDisplay?.displayName ?? metadata.name;
-      metadata.description = metadataDisplay?.description ?? '';
+      if (metadata.prefix.startsWith('EVENT_PARAMETER#')) {
+        let parameter = metadata as IMetadataEventParameter;
+        parameter.name = this._getOriginalName(parameter.name, parameter.valueType);
+        parameter.displayName = metadataDisplay?.displayName ?? this._getOriginalName(parameter.name, parameter.valueType);
+        parameter.description = metadataDisplay?.description ?? '';
+      } else if (metadata.prefix.startsWith('EVENT#')) {
+        metadata.displayName = metadataDisplay?.displayName ?? metadata.name;
+        metadata.description = metadataDisplay?.description ?? '';
+      }
     }
     return associated;
   }
