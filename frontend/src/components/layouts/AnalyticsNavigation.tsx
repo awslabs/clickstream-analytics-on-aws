@@ -50,11 +50,6 @@ const AnalyticsNavigation: React.FC<INavigationProps> = (
       href: `/analytics/${projectId}/app/${appId}/dashboards`,
     },
     {
-      text: t('nav.analytics.realtime'),
-      icon: <ExtendIcon icon="BsActivity" />,
-      href: `/analytics/${projectId}/app/${appId}/realtime`,
-    },
-    {
       text: t('nav.analytics.explore'),
       icon: <ExtendIcon icon="BsFunnel" />,
       href: `/analytics/${projectId}/app/${appId}/explore`,
