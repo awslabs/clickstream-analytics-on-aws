@@ -224,7 +224,6 @@ const AnalyticsExplore: React.FC = () => {
         presetUserAttributes,
         presetParameters
       );
-      console.log(conditionOptions);
       setPresetParameters(conditionOptions);
     } catch (error) {
       console.log(error);
