@@ -27,6 +27,7 @@ import {
   UpdateDashboardCommand,
   UpdateDashboardPublishedVersionCommand,
   GenerateEmbedUrlForRegisteredUserCommand,
+  DescribeAnalysisCommand,
 } from '@aws-sdk/client-quicksight';
 import { BatchExecuteStatementCommand, DescribeStatementCommand, RedshiftDataClient, StatusString } from '@aws-sdk/client-redshift-data';
 import { AssumeRoleCommand, STSClient } from '@aws-sdk/client-sts';
@@ -136,6 +137,7 @@ describe('reporting test', () => {
       .post('/api/reporting/funnel')
       .send({
         action: 'PREVIEW',
+        locale: 'zh',
         viewName: 'testview0002',
         projectId: 'project01_wvzh',
         pipelineId: 'pipeline-1111111',
@@ -225,10 +227,19 @@ describe('reporting test', () => {
       DashboardId: 'dashboard-aaaaaaaa',
     });
 
+    quickSightMock.on(DescribeAnalysisCommand).resolves({
+      Analysis: {
+        Name: 'test-analysis',
+      },
+    });
+
     const res = await request(app)
       .post('/api/reporting/funnel')
       .send({
         action: 'PUBLISH',
+        locale: 'zh',
+        chartTitle: 'test-title',
+        chartSubTitle: 'test-subtitle',
         viewName: 'testview00022',
         projectId: 'project01_wvzh',
         pipelineId: '87ea3d080cc34bb398275a27f4e8b113',
@@ -316,6 +327,7 @@ describe('reporting test', () => {
       .post('/api/reporting/event')
       .send({
         action: 'PREVIEW',
+        locale: 'zh',
         viewName: 'testview0002',
         projectId: 'project01_wvzh',
         pipelineId: 'pipeline-1111111',
@@ -406,10 +418,19 @@ describe('reporting test', () => {
       DashboardId: 'dashboard-aaaaaaaa',
     });
 
+    quickSightMock.on(DescribeAnalysisCommand).resolves({
+      Analysis: {
+        Name: 'test-analysis',
+      },
+    });
+
     const res = await request(app)
       .post('/api/reporting/event')
       .send({
         action: 'PUBLISH',
+        locale: 'en',
+        chartTitle: 'test-title',
+        chartSubTitle: 'test-subtitle',
         viewName: 'testview00022',
         projectId: 'project01_wvzh',
         pipelineId: '87ea3d080cc34bb398275a27f4e8b113',
@@ -582,11 +603,19 @@ describe('reporting test', () => {
       Arn: 'arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa',
       VersionArn: 'arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa/1',
     });
+    quickSightMock.on(DescribeAnalysisCommand).resolves({
+      Analysis: {
+        Name: 'test-analysis',
+      },
+    });
 
     const res = await request(app)
       .post('/api/reporting/path')
       .send({
         action: 'PUBLISH',
+        locale: 'en',
+        chartTitle: 'test-title',
+        chartSubTitle: 'test-subtitle',
         viewName: 'testview0002',
         projectId: 'project01_wvzh',
         pipelineId: 'pipeline-1111111',
@@ -672,11 +701,19 @@ describe('reporting test', () => {
       Arn: 'arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa',
       VersionArn: 'arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa/1',
     });
+    quickSightMock.on(DescribeAnalysisCommand).resolves({
+      Analysis: {
+        Name: 'test-analysis',
+      },
+    });
 
     const res = await request(app)
       .post('/api/reporting/retention')
       .send({
         action: 'PUBLISH',
+        locale: 'en',
+        chartTitle: 'test-title',
+        chartSubTitle: 'test-subtitle',
         viewName: 'testview0002',
         projectId: 'project01_wvzh',
         pipelineId: 'pipeline-1111111',

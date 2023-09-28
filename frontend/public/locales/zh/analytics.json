@@ -55,7 +55,13 @@
     "selectAppTitle": "请选择一个应用程序",
     "saveToDashboardModalTitle": "保存到看板",
     "selectDashboardTitle": "请选择一个看板",
-    "selectSheetTitle": "请选择一个工作表"
+    "selectDashboardPlaceholder": "请选择一个看板",
+    "selectSheetTitle": "请选择一个工作表",
+    "selectSheetPlaceholder": "请选择一个工作表",
+    "inputVisualName": "图表名称",
+    "inputVisualNamePlaceholder": "请输入图表名称",
+    "inputVisualDescription": "图表描述",
+    "inputVisualDescriptionPlaceholder": "请输入图表描述"
   },
   "options": {
     "eventNumber": "事件数",
@@ -178,7 +184,8 @@
     "dashboardSelectError": "必须选择一个看板",
     "sheetSelectError": "必须选择一个工作表",
     "dateRangeIncomplete": "所选日期范围不完整。为日期范围选择开始和结束日期。",
-    "dateRangeInvalid": "所选日期范围无效。开始日期必须在结束日期之前。"
+    "dateRangeInvalid": "所选日期范围无效。开始日期必须在结束日期之前。",
+    "inputVisualNameError": "请输入图表名称"
   },
   "operators": {
     "null": "空",
@@ -234,7 +241,7 @@
     "defineMetrics": "定义指标",
     "realtimeStopped": "实时流已停止",
     "realtimeStarted": "实时流已启动",
-    "reportingNotEnabled":"Reporting模块未启用"
+    "reportingNotEnabled": "Reporting模块未启用"
   },
   "emptyData": "无数据",
   "emptyDataMessage": "请配置要查询的指标",

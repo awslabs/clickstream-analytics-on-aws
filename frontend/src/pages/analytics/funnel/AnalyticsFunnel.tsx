@@ -63,6 +63,7 @@ import {
   getDashboardCreateParameters,
   getIntervalInSeconds,
   getGlobalEventCondition,
+  getLngFromLocalStorage,
 } from '../analytics-utils';
 import ExploreDateRangePicker from '../comps/ExploreDateRangePicker';
 import ExploreEmbedFrame from '../comps/ExploreEmbedFrame';
@@ -212,7 +213,9 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
     dashboardId?: string,
     dashboardName?: string,
     sheetId?: string,
-    sheetName?: string
+    sheetName?: string,
+    chartTitle?: string,
+    chartSubTitle?: string
   ) => {
     const funnelId = generateStr(6);
     const parameters = getDashboardCreateParameters(
@@ -230,10 +233,13 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
         dashboardName: dashboardName,
         sheetId: sheetId,
         sheetName: sheetName,
+        chartTitle: chartTitle,
+        chartSubTitle: chartSubTitle,
       };
     }
     const body: IExploreRequest = {
       action: action,
+      locale: getLngFromLocalStorage(),
       projectId: pipeline.projectId,
       pipelineId: pipeline.pipelineId,
       appId: appId ?? '',
@@ -330,7 +336,9 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
     dashboardId: string,
     dashboardName: string,
     sheetId: string,
-    sheetName: string
+    sheetName: string,
+    chartTitle: string,
+    chartSubTitle: string,
   ) => {
     if (
       eventOptionData.length === 0 ||
@@ -344,7 +352,9 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
         dashboardId,
         dashboardName,
         sheetId,
-        sheetName
+        sheetName,
+        chartTitle,
+        chartSubTitle,
       );
       if (!body) {
         alertMsg(

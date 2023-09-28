@@ -40,10 +40,13 @@ import {
   VisualMapProps,
   getTempResourceName,
   TEMP_RESOURCE_NAME_PREFIX,
+  getDashboardTitleProps,
+  eventVisualColumns,
+  getAnalysisNameFromId,
 } from './quicksight/reporting-utils';
 import { buildEventAnalysisView, buildEventPathAnalysisView, buildFunnelTableView, buildFunnelView, buildNodePathAnalysisView, buildRetentionAnalysisView } from './quicksight/sql-builder';
 import { awsAccountId } from '../common/constants';
-import { ExplorePathNodeType, ExploreRequestAction, ExploreTimeScopeType, ExploreVisualName } from '../common/explore-types';
+import { AnalysisType, ExplorePathNodeType, ExploreRequestAction, ExploreTimeScopeType, ExploreVisualName } from '../common/explore-types';
 import { logger } from '../common/powertools';
 import { SDKClient } from '../common/sdk-client';
 import { ApiFail, ApiSuccess } from '../common/types';
@@ -110,7 +113,7 @@ export class ReportingService {
         sheetId = query.sheetId;
       }
 
-      const result = await this._buildQuickSightDashboard(viewName, sql, tableVisualViewName,
+      const result = await this._buildFunnelQuickSightDashboard(viewName, sql, tableVisualViewName,
         sqlTable, query, sheetId);
       return res.status(201).json(new ApiSuccess(result));
 
@@ -119,7 +122,7 @@ export class ReportingService {
     }
   };
 
-  private async _buildQuickSightDashboard(viewName: string, sql: string, tableVisualViewName: string,
+  private async _buildFunnelQuickSightDashboard(viewName: string, sql: string, tableVisualViewName: string,
     sqlTable: string, query: any, sheetId: string) {
     //create quicksight dataset
     const datasetPropsArray: DataSetProps[] = [];
@@ -173,7 +176,8 @@ export class ReportingService {
     });
 
     const visualId = uuidv4();
-    const visualDef = getFunnelVisualDef(visualId, viewName);
+    const titleProps = await getDashboardTitleProps(AnalysisType.FUNNEL, query);
+    const visualDef = getFunnelVisualDef(visualId, viewName, titleProps);
     const visualRelatedParams = getVisualRelatedDefs({
       timeScopeType: query.timeScopeType,
       sheetId,
@@ -195,6 +199,7 @@ export class ReportingService {
       parameterDeclarations: visualRelatedParams.parameterDeclarations,
       filterGroup: visualRelatedParams.filterGroup,
       eventCount: query.eventAndConditions.length,
+      colSpan: 20,
     };
 
     const tableVisualId = uuidv4();
@@ -206,7 +211,7 @@ export class ReportingService {
         percentageCols.push(e.eventName + '_rate');
       }
     }
-    const tableVisualDef = getFunnelTableVisualDef(tableVisualId, tableVisualViewName, eventNames, query.groupColumn);
+    const tableVisualDef = getFunnelTableVisualDef(tableVisualId, tableVisualViewName, eventNames, titleProps, query.groupColumn);
     const columnConfigurations = getFunnelTableVisualRelatedDefs(tableVisualViewName, percentageCols);
 
     visualRelatedParams.filterGroup!.ScopeConfiguration!.SelectedSheets!.SheetVisualScopingConfigurations![0].VisualIds?.push(tableVisualId);
@@ -254,13 +259,13 @@ export class ReportingService {
       datasetPropsArray.push({
         name: '',
         tableName: viewName,
-        columns: funnelVisualColumns,
+        columns: eventVisualColumns,
         importMode: 'DIRECT_QUERY',
         customSql: sql,
         projectedColumns: [
           'event_date',
           'event_name',
-          'x_id',
+          'count',
         ],
       });
 
@@ -275,7 +280,8 @@ export class ReportingService {
       }
 
       const visualId = uuidv4();
-      const visualDef = getEventLineChartVisualDef(visualId, viewName, query.groupColumn);
+      const titleProps = await getDashboardTitleProps(AnalysisType.EVENT, query);
+      const visualDef = getEventLineChartVisualDef(visualId, viewName, titleProps, query.groupColumn);
       const visualRelatedParams = getVisualRelatedDefs({
         timeScopeType: query.timeScopeType,
         sheetId,
@@ -299,7 +305,7 @@ export class ReportingService {
       };
 
       const tableVisualId = uuidv4();
-      const tableVisualDef = getEventPivotTableVisualDef(tableVisualId, viewName, query.groupColumn);
+      const tableVisualDef = getEventPivotTableVisualDef(tableVisualId, viewName, titleProps, query.groupColumn);
 
       visualRelatedParams.filterGroup!.ScopeConfiguration!.SelectedSheets!.SheetVisualScopingConfigurations![0].VisualIds!.push(tableVisualId);
 
@@ -400,8 +406,9 @@ export class ReportingService {
         sheetId = query.sheetId;
       }
 
+      const titleProps = await getDashboardTitleProps(AnalysisType.PATH, query);
       const visualId = uuidv4();
-      const visualDef = getPathAnalysisChartVisualDef(visualId, viewName);
+      const visualDef = getPathAnalysisChartVisualDef(visualId, viewName, titleProps);
       const visualRelatedParams = getVisualRelatedDefs({
         timeScopeType: query.timeScopeType,
         sheetId,
@@ -422,7 +429,6 @@ export class ReportingService {
         filterControl: visualRelatedParams.filterControl,
         parameterDeclarations: visualRelatedParams.parameterDeclarations,
         filterGroup: visualRelatedParams.filterGroup,
-        rowSpan: 12,
       };
 
       const result: CreateDashboardResult = await this.create(
@@ -485,8 +491,9 @@ export class ReportingService {
         sheetId = query.sheetId;
       }
 
+      const titleProps = await getDashboardTitleProps(AnalysisType.RETENTION, query);
       const visualId = uuidv4();
-      const visualDef = getRetentionLineChartVisualDef(visualId, viewName);
+      const visualDef = getRetentionLineChartVisualDef(visualId, viewName, titleProps);
       const visualRelatedParams = getVisualRelatedDefs({
         timeScopeType: query.timeScopeType,
         sheetId,
@@ -507,11 +514,10 @@ export class ReportingService {
         filterControl: visualRelatedParams.filterControl,
         parameterDeclarations: visualRelatedParams.parameterDeclarations,
         filterGroup: visualRelatedParams.filterGroup,
-        eventCount: query.eventAndConditions.length,
       };
 
       const tableVisualId = uuidv4();
-      const tableVisualDef = getRetentionPivotTableVisualDef(tableVisualId, viewName);
+      const tableVisualDef = getRetentionPivotTableVisualDef(tableVisualId, viewName, titleProps);
 
       visualRelatedParams.filterGroup!.ScopeConfiguration!.SelectedSheets!.SheetVisualScopingConfigurations![0].VisualIds!.push(tableVisualId);
 
@@ -578,21 +584,24 @@ export class ReportingService {
     sheetId: string, resourceName: string, principals: QuickSightUserArns,
     dashboardCreateParameters: DashboardCreateParameters) {
     // generate dashboard definition
-    let dashboardDef;
+    let dashboardDef: DashboardVersionDefinition;
+    let dashboardName: string | undefined;
     if (!query.dashboardId) {
       dashboardDef = JSON.parse(readFileSync(join(__dirname, './quicksight/templates/dashboard.json')).toString()) as DashboardVersionDefinition;
       const sid = visualPropsArray[0].sheetId;
       dashboardDef.Sheets![0].SheetId = sid;
-      dashboardDef.Sheets![0].Name = query.sheetName;
+      dashboardDef.Sheets![0].Name = query.sheetName ?? 'sheet1';
     } else {
-      dashboardDef = await getDashboardDefinitionFromArn(quickSight, awsAccountId!, query.dashboardId);
+      const dashboardDefProps = await getDashboardDefinitionFromArn(quickSight, awsAccountId!, query.dashboardId);
+      dashboardDef = dashboardDefProps.def;
+      dashboardName = dashboardDefProps.name;
     }
 
     const dashboard = applyChangeToDashboard({
       action: 'ADD',
       requestAction: query.action,
       visuals: visualPropsArray,
-      dashboardDef: dashboardDef as DashboardVersionDefinition,
+      dashboardDef: dashboardDef,
     });
     logger.info(`final dashboard def: ${JSON.stringify(dashboard)}`);
 
@@ -605,10 +614,11 @@ export class ReportingService {
       //update QuickSight analysis
       let newAnalysis;
       if (query.analysisId) {
+        const analysisName = await getAnalysisNameFromId(quickSight, awsAccountId!, query.analysisId);
         newAnalysis = await quickSight.updateAnalysis({
           AwsAccountId: awsAccountId,
           AnalysisId: query.analysisId,
-          Name: query.analysisName,
+          Name: analysisName,
           Definition: dashboard as AnalysisDefinition,
         });
       }
@@ -617,7 +627,7 @@ export class ReportingService {
       const newDashboard = await quickSight.updateDashboard({
         AwsAccountId: awsAccountId,
         DashboardId: query.dashboardId,
-        Name: query.dashboardName,
+        Name: dashboardName,
         Definition: dashboard,
       });
       const versionNumber = newDashboard.VersionArn?.substring(newDashboard.VersionArn?.lastIndexOf('/') + 1);

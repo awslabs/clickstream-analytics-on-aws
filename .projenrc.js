@@ -112,6 +112,8 @@ const depsForApiProject = [
   'cidr-block@^1.3.2',
   'json-difference@^1.9.1',
   'sql-formatter@^13.0.0',
+  'i18next@^22.4.6',
+  'i18next-fs-backend@^2.2.0',
   ...smithyPackagesDeps,
   ...awsSDKPackagesDeps,
   ...awsSDKPackagesDepsForApiProject,

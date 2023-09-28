@@ -55,7 +55,13 @@
     "selectAppTitle": "Please select an application",
     "saveToDashboardModalTitle": "Save to Dashboard",
     "selectDashboardTitle": "Please select a dashboard",
-    "selectSheetTitle": "Please select a sheet"
+    "selectDashboardPlaceholder": "Select a dashboard",
+    "selectSheetTitle": "Please select a sheet",
+    "selectSheetPlaceholder": "Select a sheet",
+    "inputVisualName": "Visualization name",
+    "inputVisualNamePlaceholder": "Input visualization name",
+    "inputVisualDescription": "Visualization description",
+    "inputVisualDescriptionPlaceholder": "Input visualization description"
   },
   "options": {
     "eventNumber": "Event number",
@@ -178,7 +184,8 @@
     "dashboardSelectError": "Must select a dashboard",
     "sheetSelectError": "Must select a sheet",
     "dateRangeIncomplete": "The selected date range is incomplete. Select a start and end date for the date range.",
-    "dateRangeInvalid": "The selected date range is invalid. The start date must be before the end date."
+    "dateRangeInvalid": "The selected date range is invalid. The start date must be before the end date.",
+    "inputVisualNameError": "Please input visualization name."
   },
   "operators": {
     "null": "is null",

@@ -1,0 +1,11 @@
+{
+  "dashboard": {
+    "title": {
+      "funnelAnalysis": "Funnel analysis",
+      "eventAnalysis": "Event analysis",
+      "pathAnalysis": "Path analysis",
+      "retentionAnalysis": "Retention analysis",
+      "tableChart": "Detail information"
+    }
+  }
+}

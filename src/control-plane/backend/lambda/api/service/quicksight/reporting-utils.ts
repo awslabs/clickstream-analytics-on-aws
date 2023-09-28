@@ -19,14 +19,22 @@ import {
   TransformOperation,
   ColumnTag,
   InputColumn,
-  FilterControl, FilterGroup, ParameterDeclaration, Visual, DashboardVersionDefinition, DataSetIdentifierDeclaration, ColumnConfiguration,
+  FilterControl,
+  FilterGroup,
+  ParameterDeclaration,
+  Visual,
+  DashboardVersionDefinition,
+  DataSetIdentifierDeclaration,
+  ColumnConfiguration,
+  SheetDefinition,
 } from '@aws-sdk/client-quicksight';
 import { AssumeRoleCommand, STSClient } from '@aws-sdk/client-sts';
 import Mustache from 'mustache';
 import { v4 as uuidv4 } from 'uuid';
 import { DataSetProps, dataSetActions } from './dashboard-ln';
-import { ExploreRelativeTimeUnit, ExploreRequestAction, ExploreTimeScopeType, ExploreVisualName } from '../../common/explore-types';
+import { AnalysisType, ExploreLocales, ExploreRelativeTimeUnit, ExploreRequestAction, ExploreTimeScopeType, ExploreVisualName } from '../../common/explore-types';
 import { logger } from '../../common/powertools';
+import i18next from '../../i18n';
 
 export const TEMP_RESOURCE_NAME_PREFIX = '_tmp_';
 
@@ -116,24 +124,36 @@ export interface VisualRelatedDefProps {
   readonly timeEnd?: Date;
 }
 
-export type MustachePathAnalysisType = {
+export interface DashboardTitleProps {
+  readonly title: string;
+  readonly subTitle: string;
+  readonly tableTitle: string;
+}
+
+export interface DashboardDefProps {
+  def: DashboardVersionDefinition;
+  name?: string;
+}
+
+export type MustacheBaseType = {
   visualId: string;
   dataSetIdentifier: string;
+  title: string;
+  subTitle?: string;
+}
+
+export type MustachePathAnalysisType = MustacheBaseType & {
   sourceFieldId: string;
   targetFieldId: string;
   weightFieldId: string;
 }
 
-export type MustacheFunnelAnalysisType = {
-  visualId: string;
-  dataSetIdentifier: string;
+export type MustacheFunnelAnalysisType = MustacheBaseType & {
   dimFieldId: string;
   measureFieldId: string;
 }
 
-export type MustacheEventAnalysisType = {
-  visualId: string;
-  dataSetIdentifier: string;
+export type MustacheEventAnalysisType = MustacheBaseType & {
   dateDimFieldId: string;
   catDimFieldId: string;
   catMeasureFieldId: string;
@@ -141,10 +161,7 @@ export type MustacheEventAnalysisType = {
   hierarchyId?: string;
 }
 
-
-export type MustacheRetentionAnalysisType = {
-  visualId: string;
-  dataSetIdentifier: string;
+export type MustacheRetentionAnalysisType = MustacheBaseType & {
   dateDimFieldId: string;
   catDimFieldId: string;
   numberMeasureFieldId: string;
@@ -154,16 +171,16 @@ export type MustacheRetentionAnalysisType = {
 
 export type MustacheFilterGroupType = {
   visualIds: string;
-  sheetId: string;
   dataSetIdentifier: string;
+  sheetId: string;
   filterGroupId: string;
   filterId: string;
 }
 
 export type MustacheRelativeDateFilterGroupType = {
   visualIds: string;
-  sheetId: string;
   dataSetIdentifier: string;
+  sheetId: string;
   filterGroupId: string;
   filterId: string;
   lastN: number;
@@ -181,6 +198,21 @@ export const funnelVisualColumns: InputColumn[] = [
   },
   {
     Name: 'x_id',
+    Type: 'STRING',
+  },
+];
+
+export const eventVisualColumns: InputColumn[] = [
+  {
+    Name: 'event_date',
+    Type: 'DATETIME',
+  },
+  {
+    Name: 'event_name',
+    Type: 'STRING',
+  },
+  {
+    Name: 'count',
     Type: 'STRING',
   },
 ];
@@ -320,13 +352,26 @@ export const createDataSet = async (quickSight: QuickSight, awsAccountId: string
 };
 
 export const getDashboardDefinitionFromArn = async (quickSight: QuickSight, awsAccountId: string, dashboardId: string)
-: Promise<DashboardVersionDefinition|undefined> => {
+: Promise<DashboardDefProps> => {
   const dashboard = await quickSight.describeDashboardDefinition({
     AwsAccountId: awsAccountId,
     DashboardId: dashboardId,
   });
 
-  return dashboard.Definition;
+  return {
+    name: dashboard.Name,
+    def: dashboard.Definition!,
+  };
+};
+
+export const getAnalysisNameFromId = async (quickSight: QuickSight, awsAccountId: string, analysisId: string)
+: Promise<string | undefined> => {
+  const analysis = await quickSight.describeAnalysis({
+    AwsAccountId: awsAccountId,
+    AnalysisId: analysisId,
+  });
+
+  return analysis.Analysis?.Name;
 };
 
 export function applyChangeToDashboard(dashboardAction: DashboardAction) : DashboardVersionDefinition {
@@ -347,35 +392,16 @@ function addVisuals(visuals: VisualProps[], dashboardDef: DashboardVersionDefini
   for (const visual of visuals) {
     logger.info('start to add visual');
 
-    const sheet = findElementWithPropertyValue(dashboardDef, 'Sheets', 'SheetId', visual.sheetId);
+    const sheet = findElementWithPropertyValue(dashboardDef, 'Sheets', 'SheetId', visual.sheetId) as SheetDefinition;
     if ( sheet !== undefined) {
       //add visual to sheet
       const charts = sheet.Visuals!;
       charts.push(visual.visual);
 
-      //add dataset configuration
-      const configs = dashboardDef.DataSetIdentifierDeclarations!;
-      if (visual.dataSetIdentifierDeclaration) {
-        configs.push(...visual.dataSetIdentifierDeclaration);
-      }
+      _addDataSetAndFilterConfiguration(sheet, dashboardDef, visual, requestAction);
 
-      //add filter
-      if (!sheet.FilterControls) {
-        sheet.FilterControls = [];
-      }
-      const controls = sheet.FilterControls;
-      if (visual.filterControl && requestAction === ExploreRequestAction.PUBLISH) {
-        controls.push(visual.filterControl);
-      }
-
-      //add parameters
-      const parameters = dashboardDef.ParameterDeclarations!;
-      if (visual.parameterDeclarations) {
-        parameters.push(...visual.parameterDeclarations);
-      }
-
-      //add dataset configuration
-      _addDatasetConfiguration(dashboardDef, visual, requestAction);
+      //add filter group and column configuration
+      _addFilterGroupAndColumnConfiguration(dashboardDef, visual, requestAction);
 
       // visual layout
       _addVisualLayout(sheet, visual, requestAction);
@@ -385,7 +411,32 @@ function addVisuals(visuals: VisualProps[], dashboardDef: DashboardVersionDefini
   return dashboardDef;
 };
 
-function _addDatasetConfiguration(dashboardDef: DashboardVersionDefinition, visual: VisualProps, requestAction: string) {
+function _addDataSetAndFilterConfiguration(sheet: SheetDefinition, dashboardDef: DashboardVersionDefinition,
+  visual: VisualProps, requestAction: string) {
+  //add dataset configuration
+  const configs = dashboardDef.DataSetIdentifierDeclarations!;
+  if (visual.dataSetIdentifierDeclaration) {
+    configs.push(...visual.dataSetIdentifierDeclaration);
+  }
+
+  //add filter
+  if (!sheet.FilterControls) {
+    sheet.FilterControls = [];
+  }
+  const controls = sheet.FilterControls;
+  if (visual.filterControl && requestAction === ExploreRequestAction.PUBLISH) {
+    controls.push(visual.filterControl);
+  }
+
+  //add parameters
+  const parameters = dashboardDef.ParameterDeclarations!;
+  if (visual.parameterDeclarations) {
+    parameters.push(...visual.parameterDeclarations);
+  }
+
+}
+
+function _addFilterGroupAndColumnConfiguration(dashboardDef: DashboardVersionDefinition, visual: VisualProps, requestAction: string) {
   const filterGroups = dashboardDef.FilterGroups!;
   if (visual.filterGroup && requestAction === ExploreRequestAction.PUBLISH) {
     filterGroups.push(visual.filterGroup);
@@ -442,12 +493,12 @@ export async function getCredentialsFromRole(stsClient: STSClient, roleArn: stri
 
     return credentials;
   } catch (error) {
-    console.error('Error occurred while assuming role:', error);
+    logger.error('Error occurred while assuming role:', error as Error);
     throw error;
   }
 }
 
-export function getFunnelVisualDef(visualId: string, viewName: string) : Visual {
+export function getFunnelVisualDef(visualId: string, viewName: string, titleProps: DashboardTitleProps) : Visual {
 
   const visualDef = readFileSync(join(__dirname, './templates/funnel-chart.json'), 'utf8');
   const mustacheFunnelAnalysisType: MustacheFunnelAnalysisType = {
@@ -455,16 +506,23 @@ export function getFunnelVisualDef(visualId: string, viewName: string) : Visual 
     dataSetIdentifier: viewName,
     dimFieldId: uuidv4(),
     measureFieldId: uuidv4(),
+    title: titleProps.title,
+    subTitle: titleProps.subTitle,
   };
 
   return JSON.parse(Mustache.render(visualDef, mustacheFunnelAnalysisType)) as Visual;
 
 }
 
-export function getFunnelTableVisualDef(visualId: string, viewName: string, eventNames: string[], dateField: string) : Visual {
+export function getFunnelTableVisualDef(visualId: string, viewName: string, eventNames: string[],
+  titleProps: DashboardTitleProps, groupColumn: string): Visual {
 
   const visualDef = JSON.parse(readFileSync(join(__dirname, './templates/funnel-table-chart.json'), 'utf8')) as Visual;
   visualDef.TableVisual!.VisualId = visualId;
+
+  visualDef.TableVisual!.Title!.FormatText = {
+    PlainText: titleProps.tableTitle,
+  };
 
   const groupBy = visualDef.TableVisual!.ChartConfiguration!.FieldWells!.TableAggregatedFieldWells?.GroupBy!;
   const sortConfiguration = visualDef.TableVisual!.ChartConfiguration!.SortConfiguration!;
@@ -476,7 +534,7 @@ export function getFunnelTableVisualDef(visualId: string, viewName: string, even
       FieldId: sortFieldId,
       Column: {
         DataSetIdentifier: viewName,
-        ColumnName: dateField,
+        ColumnName: groupColumn,
       },
     },
   });
@@ -661,7 +719,7 @@ export function getFunnelTableVisualRelatedDefs(viewName: string, colNames: stri
   return columnConfigurations;
 }
 
-export function getEventLineChartVisualDef(visualId: string, viewName: string, groupColumn: string) : Visual {
+export function getEventLineChartVisualDef(visualId: string, viewName: string, titleProps: DashboardTitleProps, groupColumn: string) : Visual {
 
   const visualDef = readFileSync(join(__dirname, './templates/event-line-chart.json'), 'utf8');
   const mustacheEventAnalysisType: MustacheEventAnalysisType = {
@@ -672,12 +730,14 @@ export function getEventLineChartVisualDef(visualId: string, viewName: string, g
     catMeasureFieldId: uuidv4(),
     hierarchyId: uuidv4(),
     dateGranularity: groupColumn,
+    title: titleProps.title,
+    subTitle: titleProps.subTitle,
   };
 
   return JSON.parse(Mustache.render(visualDef, mustacheEventAnalysisType)) as Visual;
 }
 
-export function getEventPivotTableVisualDef(visualId: string, viewName: string, groupColumn: string) : Visual {
+export function getEventPivotTableVisualDef(visualId: string, viewName: string, titleProps: DashboardTitleProps, groupColumn: string) : Visual {
 
   const visualDef = readFileSync(join(__dirname, './templates/event-pivot-table-chart.json'), 'utf8');
   const mustacheEventAnalysisType: MustacheEventAnalysisType = {
@@ -687,13 +747,14 @@ export function getEventPivotTableVisualDef(visualId: string, viewName: string, 
     catDimFieldId: uuidv4(),
     catMeasureFieldId: uuidv4(),
     dateGranularity: groupColumn,
+    title: titleProps.tableTitle,
   };
 
   return JSON.parse(Mustache.render(visualDef, mustacheEventAnalysisType)) as Visual;
 
 }
 
-export function getPathAnalysisChartVisualDef(visualId: string, viewName: string) : Visual {
+export function getPathAnalysisChartVisualDef(visualId: string, viewName: string, titleProps: DashboardTitleProps) : Visual {
   const visualDef = readFileSync(join(__dirname, './templates/path-analysis-chart.json'), 'utf8');
   const mustachePathAnalysisType: MustachePathAnalysisType = {
     visualId,
@@ -701,12 +762,14 @@ export function getPathAnalysisChartVisualDef(visualId: string, viewName: string
     sourceFieldId: uuidv4(),
     targetFieldId: uuidv4(),
     weightFieldId: uuidv4(),
+    title: titleProps.title,
+    subTitle: titleProps.subTitle,
   };
 
   return JSON.parse(Mustache.render(visualDef, mustachePathAnalysisType)) as Visual;
 }
 
-export function getRetentionLineChartVisualDef(visualId: string, viewName: string) : Visual {
+export function getRetentionLineChartVisualDef(visualId: string, viewName: string, titleProps: DashboardTitleProps) : Visual {
 
   const visualDef = readFileSync(join(__dirname, './templates/retention-line-chart.json'), 'utf8');
   const mustacheRetentionAnalysisType: MustacheRetentionAnalysisType = {
@@ -716,12 +779,14 @@ export function getRetentionLineChartVisualDef(visualId: string, viewName: strin
     dateDimFieldId: uuidv4(),
     numberMeasureFieldId: uuidv4(),
     hierarchyId: uuidv4(),
+    title: titleProps.title,
+    subTitle: titleProps.subTitle,
   };
 
   return JSON.parse(Mustache.render(visualDef, mustacheRetentionAnalysisType)) as Visual;
 }
 
-export function getRetentionPivotTableVisualDef(visualId: string, viewName: string) : Visual {
+export function getRetentionPivotTableVisualDef(visualId: string, viewName: string, titleProps: DashboardTitleProps) : Visual {
 
   const visualDef = readFileSync(join(__dirname, './templates/retention-pivot-table-chart.json'), 'utf8');
   const mustacheRetentionAnalysisType: MustacheRetentionAnalysisType = {
@@ -730,6 +795,7 @@ export function getRetentionPivotTableVisualDef(visualId: string, viewName: stri
     catDimFieldId: uuidv4(),
     dateDimFieldId: uuidv4(),
     numberMeasureFieldId: uuidv4(),
+    title: titleProps.tableTitle,
   };
 
   return JSON.parse(Mustache.render(visualDef, mustacheRetentionAnalysisType)) as Visual;
@@ -819,3 +885,39 @@ export function getTempResourceName(resourceName: string, action: ExploreRequest
 
   return resourceName;
 }
+
+export async function getDashboardTitleProps(analysisType: AnalysisType, query: any) {
+
+  const locale = query.locale ?? ExploreLocales.ENGLISH;
+  const t = await i18next.changeLanguage(locale);
+  let title = '';
+  let subTitle = ' ';
+  const tableTitle = t('dashboard.title.tableChart');
+
+  if (query.action === ExploreRequestAction.PUBLISH) {
+    title = query.chartTitle;
+    subTitle = query.chartSubTitle;
+  } else {
+    switch (analysisType) {
+      case AnalysisType.FUNNEL:
+        title = t('dashboard.title.funnelAnalysis');
+        break;
+      case AnalysisType.EVENT:
+        title = t('dashboard.title.eventAnalysis');
+        break;
+      case AnalysisType.PATH:
+        title = t('dashboard.title.pathAnalysis');
+        break;
+      case AnalysisType.RETENTION:
+        title = t('dashboard.title.retentionAnalysis');
+        break;
+    }
+  }
+
+  return {
+    title,
+    subTitle,
+    tableTitle,
+  };
+}
+

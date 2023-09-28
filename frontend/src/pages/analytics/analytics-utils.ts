@@ -443,3 +443,7 @@ export const getWarmUpParameters = (
     },
   };
 };
+
+export const getLngFromLocalStorage = () => {
+  return localStorage.getItem('i18nextLng') ?? 'en';
+};
