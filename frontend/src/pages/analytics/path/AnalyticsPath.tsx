@@ -50,6 +50,7 @@ import {
   ExplorePathNodeType,
   ExplorePathSessionDef,
   MetadataPlatform,
+  QuickSightChartType,
 } from 'ts/explore-types';
 import { alertMsg, generateStr } from 'ts/utils';
 import {
@@ -379,6 +380,7 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
 
     const body: IExploreRequest = {
       action: action,
+      chartType: QuickSightChartType.SANKEY,
       locale: getLngFromLocalStorage(),
       projectId: pipeline.projectId,
       pipelineId: pipeline.pipelineId,
