@@ -35,7 +35,6 @@ import {
   ConditionCategory,
   ExploreComputeMethod,
   ExploreConversionIntervalType,
-  ExploreLocales,
   ExplorePathSessionDef,
   ExploreRelativeTimeUnit,
   ExploreTimeScopeType,
@@ -446,6 +445,5 @@ export const getWarmUpParameters = (
 };
 
 export const getLngFromLocalStorage = () => {
-  const i18nextLng = localStorage.getItem('i18nextLng');
-  return i18nextLng === 'zh' ? ExploreLocales.CHINESE : ExploreLocales.ENGLISH;
+  return localStorage.getItem('i18nextLng') ?? 'en';
 };
