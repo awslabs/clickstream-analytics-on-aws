@@ -16,7 +16,7 @@ import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
 interface ExploreEmbedFrameProps {
-  embedType: 'dashboard' | 'visual';
+  embedType: 'dashboard' | 'visual' | 'console';
   embedUrl: string;
   embedId: string;
 }
@@ -33,16 +33,28 @@ const ExploreEmbedFrame: React.FC<ExploreEmbedFrameProps> = (
       case 'dashboard':
         await embeddingContext.embedDashboard({
           url: embedUrl,
-          container: `#${embedId}`,
+          container: `#embedId`,
           resizeHeightOnSizeChangedEvent: true,
         });
         break;
       case 'visual':
         await embeddingContext.embedVisual({
           url: embedUrl,
-          container: `#${embedId}`,
+          container: `#embedId`,
           resizeHeightOnSizeChangedEvent: true,
         });
+        break;
+      case 'console':
+        await embeddingContext.embedConsole(
+          {
+            url: embedUrl,
+            container: `#embedId`,
+            resizeHeightOnSizeChangedEvent: true,
+          },
+          {
+            locale: 'en-US',
+          }
+        );
         break;
       default:
         break;
@@ -55,22 +67,7 @@ const ExploreEmbedFrame: React.FC<ExploreEmbedFrameProps> = (
     }
   }, [embedUrl, embedId]);
 
-  return (
-    <>
-      {embedUrl ? (
-        <div id={embedId} className="iframe-explore"></div>
-      ) : (
-        <>
-          <Box textAlign="center" color="inherit">
-            <b>{t('analytics:emptyData')}</b>
-            <Box variant="p" color="inherit">
-              {t('analytics:emptyDataMessage')}
-            </Box>
-          </Box>
-        </>
-      )}
-    </>
-  );
+  return <div id={'embedId'} className="iframe-explore"></div>;
 };
 
 export default ExploreEmbedFrame;

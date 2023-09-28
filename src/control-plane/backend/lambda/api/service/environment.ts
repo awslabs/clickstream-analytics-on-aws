@@ -226,7 +226,7 @@ export class EnvironmentServ {
     try {
       const { region, allowedDomain, permission, dashboardId, sheetId, visualId } = req.query;
       const result = await generateEmbedUrlForRegisteredUser(
-        region, allowedDomain, permission, dashboardId, sheetId, visualId,
+        region, allowedDomain, permission === 'true', dashboardId, sheetId, visualId,
       );
       return res.json(new ApiSuccess(result));
     } catch (error) {

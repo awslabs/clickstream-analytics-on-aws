@@ -200,3 +200,26 @@ export const clean = async (region: string) => {
   });
   return result;
 };
+
+export const embedUrl = async (
+  region: string,
+  allowedDomain: string,
+  permission: boolean,
+  dashboardId?: string,
+  sheetId?: string,
+  visualId?: string
+) => {
+  const searchParams = new URLSearchParams({
+    region: region,
+    allowedDomain: allowedDomain,
+    permission: permission ? permission.toString() : 'false',
+    dashboardId: dashboardId ?? '',
+    sheetId: sheetId ?? '',
+    visualId: visualId ?? '',
+  });
+  const result: any = await apiRequest(
+    'get',
+    `env/quicksight/embedUrl?${searchParams.toString()}`
+  );
+  return result;
+};
