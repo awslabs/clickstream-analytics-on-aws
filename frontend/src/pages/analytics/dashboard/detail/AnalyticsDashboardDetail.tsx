@@ -29,7 +29,6 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { DEFAULT_DASHBOARD_NAME } from 'ts/constant-ln';
-import { generateStr } from 'ts/utils';
 
 const AnalyticsDashboardDetail: React.FC = () => {
   const { t } = useTranslation();
@@ -128,7 +127,6 @@ const AnalyticsDashboardDetail: React.FC = () => {
                   <ExploreEmbedFrame
                     embedType="dashboard"
                     embedUrl={dashboardEmbedUrl}
-                    embedId={`dashboard_${generateStr(6)}`}
                   />
                 )}
               </Container>

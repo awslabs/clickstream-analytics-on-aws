@@ -143,7 +143,7 @@ export const generateEmbedUrlForRegisteredUser = async (
   region: string,
   allowedDomain: string,
   permission: boolean,
-  dashboardId: string,
+  dashboardId?: string,
   sheetId?: string,
   visualId?: string,
 ): Promise<GenerateEmbedUrlForRegisteredUserCommandOutput> => {

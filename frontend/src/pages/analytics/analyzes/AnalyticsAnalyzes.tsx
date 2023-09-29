@@ -31,14 +31,13 @@ import {
   Header,
   SpaceBetween,
 } from '@cloudscape-design/components';
-import { embedUrl, getPipelineDetailByProjectId } from 'apis/analytics';
+import { embedAnalyzesUrl } from 'apis/analytics';
 import Loading from 'components/common/Loading';
 import AnalyticsNavigation from 'components/layouts/AnalyticsNavigation';
 import CustomBreadCrumb from 'components/layouts/CustomBreadCrumb';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { generateStr } from 'ts/utils';
 import ExploreEmbedFrame from '../comps/ExploreEmbedFrame';
 
 const AnalyticsAnalyzes: React.FC = () => {
@@ -47,31 +46,15 @@ const AnalyticsAnalyzes: React.FC = () => {
   const [loadingData, setLoadingData] = useState(false);
   const [dashboardEmbedUrl, setDashboardEmbedUrl] = useState('');
 
-  const loadPipeline = async () => {
-    try {
-      const { success, data }: ApiResponse<IPipeline> =
-        await getPipelineDetailByProjectId(projectId ?? '');
-      if (success) {
-        return data;
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
   const getAnalyzes = async () => {
     setLoadingData(true);
     try {
-      const pipeline = await loadPipeline();
-      if (pipeline) {
-        const { success, data }: ApiResponse<any> = await embedUrl(
-          pipeline.region,
-          window.location.origin,
-          false
-        );
-        if (success && data.EmbedUrl) {
-          setDashboardEmbedUrl(data.EmbedUrl);
-        }
+      const { success, data }: ApiResponse<any> = await embedAnalyzesUrl(
+        projectId ?? '',
+        window.location.origin
+      );
+      if (success && data.EmbedUrl) {
+        setDashboardEmbedUrl(data.EmbedUrl);
       }
     } catch (error) {
       setLoadingData(false);
@@ -81,7 +64,7 @@ const AnalyticsAnalyzes: React.FC = () => {
 
   useEffect(() => {
     getAnalyzes();
-  }, []);
+  }, [projectId]);
 
   const breadcrumbItems = [
     {
@@ -123,7 +106,6 @@ const AnalyticsAnalyzes: React.FC = () => {
                   <ExploreEmbedFrame
                     embedType="console"
                     embedUrl={dashboardEmbedUrl}
-                    embedId={`console_${generateStr(6)}`}
                   />
                 )}
               </Container>

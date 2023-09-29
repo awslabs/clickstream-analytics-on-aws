@@ -757,7 +757,6 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
             <ExploreEmbedFrame
               embedType="dashboard"
               embedUrl={exploreEmbedUrl}
-              embedId={`explore_${generateStr(6)}`}
             />
           )}
         </Container>

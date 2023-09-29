@@ -584,7 +584,6 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
             <ExploreEmbedFrame
               embedType="dashboard"
               embedUrl={exploreEmbedUrl}
-              embedId={`explore_${generateStr(6)}`}
             />
           )}
         </Container>
