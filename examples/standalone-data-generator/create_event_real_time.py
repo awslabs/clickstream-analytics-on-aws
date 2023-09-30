@@ -58,7 +58,7 @@ def send_user_event_of_day(users, start_time_stamp):
             action_times = random.choices(enums.ACTION_TIMES)[0]
             # different action in one session
             for j in range(action_times):
-                result = Event.get_action_events(user, event, current_timestamp)
+                result = Event.get_screen_events(user, event, current_timestamp)
                 events.extend(result[0])
                 current_timestamp = result[1]
             events.extend(Event.get_exit_events(event, current_timestamp))

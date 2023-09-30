@@ -10,97 +10,60 @@ or in the 'license' file accompanying this file. This file is distributed on an 
 OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions
 and limitations under the License.
 """
+import random
+
 import configure
 import enums as enums
 import util.util as utils
+from model import EventSample, ScreenEvent, Screen
 from model.EventType import EventType
-from model.Screen import AppScreen
-import random
-
-sampleEvent = {
-    "unique_id": "",
-    "event_type": "",
-    "event_id": "",
-    "app_id": "",
-    "timestamp": 0,
-    "device_id": "",
-    "platform": "Android",
-    "os_version": "",
-    "make": "",
-    "brand": "",
-    "model": "",
-    "locale": "",
-    "carrier": "",
-    "network_type": "",
-    "screen_height": 0,
-    "screen_width": 0,
-    "zone_offset": 0,
-    "system_language": "",
-    "country": "",
-    "country_code": "",
-    "sdk_version": "",
-    "sdk_name": "aws-solution-clickstream-sdk",
-    "app_version": "",
-    "app_package_name": "com.example.notepad",
-    "app_title": "Notepad",
-    "user": {
-        "_user_first_touch_timestamp": {
-            "value": 0,
-            "set_timestamp": 0
-        },
-    },
-    "attributes": {
-        "_session_id": "",
-        "_session_start_timestamp": 0,
-        "_session_duration": 0,
-        "_channel": "",
-        "_traffic_source_source": "",
-        "_traffic_source_medium": ""
-    }
-}
-
-global_previous_screen_name = ""
-global_previous_screen_id = ""
-global_engagement_start_time = 0
 
 
 def get_event_for_user(user):
-    event = sampleEvent
+    if user.platform == enums.Platform.Web:
+        event = EventSample.sampleWebEvent
+        event["device_id"] = user.device_web.device_id
+        event["make"] = user.device_web.make
+        event["locale"] = user.device_web.locale
+        event["screen_height"] = user.device_web.screen_height
+        event["screen_width"] = user.device_web.screen_width
+        event["viewport_height"] = user.device_web.viewport_height
+        event["viewport_width"] = user.device_web.viewport_width
+        event["zone_offset"] = user.device_web.zone_offset
+        event["system_language"] = user.device_web.system_language
+        event["country_code"] = user.device_web.country_code
+    else:
+        # todo add switch to web logic
+        event = EventSample.sampleAppEvent
+        event["device_id"] = user.mobile_device.device_id
+        event["platform"] = user.platform
+        event["os_version"] = user.mobile_device.os_version
+        event["make"] = user.mobile_device.make
+        event["brand"] = user.mobile_device.brand
+        event["model"] = user.mobile_device.model
+        event["locale"] = user.mobile_device.locale
+        event["carrier"] = user.mobile_device.carrier
+        event["network_type"] = user.mobile_device.network_type
+        event["screen_height"] = user.mobile_device.screen_height
+        event["screen_width"] = user.mobile_device.screen_width
+        event["zone_offset"] = user.mobile_device.zone_offset
+        event["system_language"] = user.mobile_device.system_language
+        event["country_code"] = user.mobile_device.country_code
+        event["attributes"]["_channel"] = user.channel
+        event["app_version"] = user.app.app_version
     event["unique_id"] = user.user_unique_id
     event["app_id"] = configure.APP_ID
-    event["device_id"] = user.device.device_id
-    event["os_version"] = user.device.android_os_version
-    event["make"] = user.device.make
-    event["brand"] = user.device.android_brand
-    event["model"] = user.device.model
-    event["locale"] = user.device.locale
-    event["carrier"] = user.device.carrier
-    event["network_type"] = user.device.network_type
-    event["screen_height"] = user.device.screen_height
-    event["screen_width"] = user.device.screen_width
-    event["zone_offset"] = user.device.zone_offset
-    event["system_language"] = user.device.system_language
-    event["country"] = user.device.country
-    event["country_code"] = user.device.country_code
     event["sdk_version"] = user.app.sdk_version
-    event["app_version"] = user.app.app_version
-    event["attributes"]["_channel"] = user.channel
+
     if user.is_login:
         user_id = {
             "value": user.user_id,
             "set_timestamp": user.login_timestamp
         }
-        user_name = {
-            "value": user.name,
-            "set_timestamp": user.login_timestamp
-        }
         event["user"]["_user_id"] = user_id
-        event["user"]["_user_name"] = user_name
     else:
         if "_user_id" in event["user"]:
             del event["user"]["_user_id"]
-        if "_user_name" in event["user"]:
-            del event["user"]["_user_name"]
     if user.first_touch_timestamp > 0:
         event["user"]["_user_first_touch_timestamp"]["value"] = user.first_touch_timestamp
         event["user"]["_user_first_touch_timestamp"]["set_timestamp"] = user.first_touch_timestamp
@@ -115,42 +78,48 @@ def get_new_session_id(unique_id, current_timestamp):
     return unique_id[-8:] + "-" + day
 
 
-def get_final_event(event_type, time_stamp, event, screen=None, entrances=0):
+def get_final_event(user, event_type, event):
     event["event_type"] = event_type
     uuid = utils.get_unique_id()
     event["event_id"] = uuid
-    event["timestamp"] = time_stamp
+    event["timestamp"] = user.current_timestamp
     start_timestamp = event["attributes"]["_session_start_timestamp"]
-    event["attributes"]["_session_duration"] = time_stamp - start_timestamp
-    if screen is not None:
-        global global_previous_screen_name, global_previous_screen_id, global_engagement_start_time
-        event["attributes"]["_screen_name"] = screen.value[0]
-        event["attributes"]["_screen_id"] = screen.value[1]
-        event["attributes"]["_previous_screen_name"] = global_previous_screen_name
-        event["attributes"]["_previous_screen_id"] = global_previous_screen_id
-        event["attributes"]["_engagement_time_msec"] = time_stamp - global_engagement_start_time
-        event["attributes"]["_entrances"] = entrances
-        global_previous_screen_name = screen.value[0]
-        global_previous_screen_id = screen.value[1]
+    event["attributes"]["_session_duration"] = user.current_timestamp - start_timestamp
+    platform = user.platform
+    if user.current_page_type != '':
+        if platform == enums.Platform.Web:
+            event["attributes"]["_page_title"] = user.current_page[0]
+            event["attributes"]["_page_url"] = user.current_page[1]
+        else:
+            event["attributes"]["_screen_name"] = user.current_page[0]
+            event["attributes"]["_screen_id"] = user.current_page[1]
+    user.current_timestamp += random.randint(1, 100)
     return event
 
 
-def get_launch_events(user, event, current_timestamp):
-    global global_engagement_start_time
-    global_engagement_start_time = current_timestamp
+def get_launch_events(user, event):
+    user.current_page_type = ''
+    user.current_page = ('', '')
+    user.current_page_start_time = 0
+    ScreenEvent.clear()
     events = []
     # handle traffic_source
     traffic_source = enums.traffic_source.get_random_item()
     event["attributes"]["_traffic_source_source"] = traffic_source[0]
     event["attributes"]["_traffic_source_medium"] = traffic_source[1]
+    # generate latest referrer for web
+    if user.platform == enums.Platform.Web:
+        referrer = enums.latest_referrer.get_random_item()
+        event["attributes"]["_latest_referrer"] = referrer[0]
+        event["attributes"]["_latest_referrer_host"] = referrer[1]
     # handle first open
     if user.is_first_open:
-        event["attributes"]["_session_start_timestamp"] = current_timestamp
-        event["user"]["_user_first_touch_timestamp"]["value"] = current_timestamp
-        event["user"]["_user_first_touch_timestamp"]["set_timestamp"] = current_timestamp
-        events.append(get_final_event(EventType.FIRST_OPEN, current_timestamp, clean_event(event)))
+        event["attributes"]["_session_start_timestamp"] = user.current_timestamp
+        event["user"]["_user_first_touch_timestamp"]["value"] = user.current_timestamp
+        event["user"]["_user_first_touch_timestamp"]["set_timestamp"] = user.current_timestamp
+        events.append(get_final_event(user, EventType.FIRST_OPEN, clean_event(event)))
         user.is_first_open = False
-        user.first_touch_timestamp = current_timestamp
+        user.first_touch_timestamp = user.current_timestamp
     # add user attribute if user is login
     if user.is_login:
         user_id = {
@@ -165,97 +134,58 @@ def get_launch_events(user, event, current_timestamp):
         event["user"]["_user_name"] = user_name
 
     # handle session
-    new_session_id = get_new_session_id(event["unique_id"], current_timestamp)
-    event["attributes"]["_session_start_timestamp"] = current_timestamp
+    user.session_number += 1
+    new_session_id = get_new_session_id(event["unique_id"], user.current_timestamp)
+    event["attributes"]["_session_start_timestamp"] = user.current_timestamp
     event["attributes"]["_session_id"] = new_session_id
-    events.append(get_final_event(EventType.SESSION_START, current_timestamp, clean_event(event)))
-    # add screen view event for first screen
-    events.append(get_final_event(EventType.SCREEN_VIEW, current_timestamp, clean_event(event), screen=AppScreen.NOTEPAD,
-                                  entrances=1))
-    current_timestamp += random.choices(configure.PER_ACTION_DURATION)[0] * 1000
+    event["attributes"]["_session_number"] = user.session_number
+    events.append(get_final_event(user, EventType.SESSION_START, clean_event(event)))
+
+    app_start_event = clean_event(event)
+    app_start_event["attributes"]["_is_first_time"] = True
+    events.append(get_final_event(user, EventType.APP_START, app_start_event))
+
+    # add splash screen view for app
+    if user.platform != enums.Platform.Web:
+        events.extend(ScreenEvent.get_enter_new_screen_events(user, event, Screen.Page.SPLASH))
+        user.current_timestamp += 1100
     return events
 
 
-def get_exit_events(event, current_timestamp):
+# get the user in current screen events
+def get_screen_events(user, event, page):
     events = []
-    global global_engagement_start_time
-    if current_timestamp - global_engagement_start_time > 1000:
-        user_engagement_event = clean_event(event)
-        user_engagement_event["attributes"]["_engagement_time_msec"] = current_timestamp - global_engagement_start_time
-        user_engagement_event = get_final_event(EventType.USER_ENGAGEMENT, current_timestamp, user_engagement_event)
-        user_engagement_event["attributes"]["_screen_name"] = global_previous_screen_name
-        user_engagement_event["attributes"]["_screen_id"] = global_previous_screen_id
-        events.append(user_engagement_event)
-    return events
-
-
-def get_action_events(user, event, current_timestamp):
-    events = []
-    global global_engagement_start_time
-    action_type = enums.action_type.get_random_item()
-    actions = enums.event_group[action_type]
-    for action_event_type in actions:
-        action_event = clean_event(event)
-        if action_event_type == EventType.NOTE_CREATE:
-            action_event["attributes"]["note_id"] = user.note_id
-            user.note_id += 1
-        elif action_event_type == EventType.NOTE_SHARE \
-                or action_event_type == EventType.NOTE_PRINT \
-                or action_event_type == EventType.NOTE_EXPORT:
-            action_event["attributes"]["note_id"] = random.randint(1, user.note_id)
-        elif action_event_type == EventType.USER_ENGAGEMENT:
-            if current_timestamp - global_engagement_start_time > 1000:
-                action_event["attributes"]["_engagement_time_msec"] = current_timestamp - global_engagement_start_time
-                action_event["attributes"]["_screen_name"] = global_previous_screen_name
-                action_event["attributes"]["_screen_id"] = global_previous_screen_id
-                global_engagement_start_time = current_timestamp
-            else:
-                continue
-        elif action_event_type == EventType.USER_LOGIN:
-            if not user.is_login_user:
-                continue
-            user_id = {
-                "value": user.user_id,
-                "set_timestamp": current_timestamp
-            }
-            user_name = {
-                "value": user.name,
-                "set_timestamp": current_timestamp
-            }
-            event["user"]["_user_id"] = user_id
-            event["user"]["_user_name"] = user_name
-            user.is_login = True
-            user.login_timestamp = current_timestamp
-        elif action_event_type.startswith("_screen_view"):
-            screen_name = action_event_type.split(":")[1]
-            screen = AppScreen.get_screen(screen_name)
-            events.append(get_final_event(EventType.SCREEN_VIEW, current_timestamp, action_event, screen))
-            current_timestamp += random.randint(100, 2000)
-            continue
-        events.append(get_final_event(action_event_type, current_timestamp, action_event))
-        current_timestamp += random.randint(100, 2000)
-    current_timestamp += random.choices(enums.PER_ACTION_DURATION)[0] * 1000
-    return (events, current_timestamp)
+    next_page = ''
+    if page != Screen.Page.EXIT:
+        events.extend(ScreenEvent.get_enter_new_screen_events(user, event, page))
+        result = ScreenEvent.get_page_events(user, event, page)
+        events.extend(result[0])
+        next_page = result[1]
+    else:
+        events.extend(ScreenEvent.get_exit_app_events(user, event))
+    return events, next_page
 
 
 def clean_event(event):
     new_event = event.copy()
     attributes = event["attributes"].copy()
     user = event["user"].copy()
-    if "_screen_name" in attributes:
-        del attributes["_screen_name"]
-    if "_screen_id" in attributes:
-        del attributes["_screen_id"]
     if "_previous_screen_name" in attributes:
         del attributes["_previous_screen_name"]
     if "_previous_screen_id" in attributes:
         del attributes["_previous_screen_id"]
-    if "note_id" in attributes:
-        del attributes["note_id"]
+    if "_page_referrer_title" in attributes:
+        del attributes["_page_referrer_title"]
+    if "_page_referrer" in attributes:
+        del attributes["_page_referrer"]
     if "_engagement_time_msec" in attributes:
         del attributes["_engagement_time_msec"]
     if "_entrances" in attributes:
         del attributes["_entrances"]
+    if "_is_first_time" in attributes:
+        del attributes["_is_first_time"]
+    if "items" in new_event:
+        del new_event["items"]
     new_event["attributes"] = attributes
     new_event["user"] = user
     return new_event

@@ -12,14 +12,13 @@ and limitations under the License.
 """
 import random
 
-from product import Products
 import configure
 import enums as enums
+import send_event
 import util.util as utils
 import model.Event as Event
+from model import Screen
 from model.User import User
-
-global_current_time = utils.current_timestamp()
 
 
 def init_all_user():
@@ -35,50 +34,58 @@ def get_user_event_of_day(user, day, events_of_day):
     event = Event.get_event_for_user(user)
     # different session for user in one day
     for i in range(session_times):
+        # init current timestamp
         hour = enums.visit_hour.get_random_item()
         minute = random.choices(enums.visit_minutes)[0]
         current_timestamp = day + (hour * 60 * 60 + minute * 60 + random.randint(0, 59)) * 1000 + random.randint(0, 999)
-        events.extend(Event.get_launch_events(user, event, current_timestamp))
-        current_timestamp += random.choices(configure.PER_ACTION_DURATION)[0] * 1000
-        action_times = random.choices(configure.ACTION_TIMES)[0]
+        user.current_timestamp = current_timestamp
+
+        # launch events
+        events.extend(Event.get_launch_events(user, event))
+        user.current_timestamp += random.choices(configure.PER_ACTION_DURATION)[0] * 1000
+
         # different action in one session
-        for j in range(action_times):
-            result = Event.get_action_events(user, event, current_timestamp)
+        screen_view_times = enums.screen_view_times.get_random_item() + random.randint(0, 9)
+        page = Screen.Page.LOGIN
+        for j in range(screen_view_times):
+            result = Event.get_screen_events(user, event, page)
             events.extend(result[0])
-            current_timestamp = result[1]
-        events.extend(Event.get_exit_events(event, current_timestamp))
+            if page == Screen.Page.EXIT:
+                break
+            page = result[1]
+        if page != Screen.Page.EXIT:
+            page = Screen.Page.EXIT
+            result = Event.get_screen_events(user, event, page)
+            events.extend(result)
     events_of_day.extend(events)
 
 
 if __name__ == '__main__':
-    products = Products.get_random_product(4)
-    print(products)
+    configure.init_config()
+    if configure.APP_ID == "" or configure.ENDPOINT == "":
+        print("Error: please config your appId and endpoint")
+    else:
+        start_time = utils.current_timestamp()
+        # init all user
+        users = init_all_user()
+        # get days arr
+        days = utils.get_days_arr()
+        total_event = 0
+        for day in days:
+            day_str = utils.get_day_of_timestamp(day)
+            print("start day: " + day_str)
+            events_of_day = []
+            users_count = random.choices(configure.RANDOM_DAU)[0]
+            day_users = random.sample(users, users_count)
+            print("total user: " + str(users_count))
+            start_gen_day_user_event_time = utils.current_timestamp()
+            for user in day_users:
+                get_user_event_of_day(user, day, events_of_day)
+            total_event = total_event + len(events_of_day)
+            print("gen " + str(len(events_of_day)) + " events for " + day_str + " cost:" + str(
+                utils.current_timestamp() - start_gen_day_user_event_time) + "\n")
+            # send event
+            send_event.send_events_of_day(events_of_day)
 
-    # configure.init_config()
-    # if configure.APP_ID == "" or configure.ENDPOINT == "":
-    #     print("Error: please config your appId and endpoint")
-    # else:
-    #     start_time = utils.current_timestamp()
-    #     # init all user
-    #     users = init_all_user()
-    #     # get days arr
-    #     days = utils.get_days_arr()
-    #     total_event = 0
-    #     for day in days:
-    #         day_str = utils.get_day_of_timestamp(day)
-    #         print("start day: " + day_str)
-    #         events_of_day = []
-    #         users_count = random.choices(configure.RANDOM_DAU)[0]
-    #         day_users = random.sample(users, users_count)
-    #         print("total user: " + str(users_count))
-    #         start_gen_day_user_event_time = utils.current_timestamp()
-    #         for user in day_users:
-    #             get_user_event_of_day(user, day, events_of_day)
-    #         total_event = total_event + len(events_of_day)
-    #         print("gen " + str(len(events_of_day)) + " events for " + day_str + " cost:" + str(
-    #             utils.current_timestamp() - start_gen_day_user_event_time) + "\n")
-    #         # send event
-    #         send_event.send_events_of_day(events_of_day)
-    #
-    #     print("job finished, upload " + str(total_event) + " events, cost: " +
-    #           str(utils.current_timestamp() - start_time) + "ms")
+        print("job finished, upload " + str(total_event) + " events, cost: " +
+              str(utils.current_timestamp() - start_time) + "ms")

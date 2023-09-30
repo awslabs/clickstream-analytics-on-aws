@@ -14,12 +14,12 @@ import json
 
 import enums
 
-PLATFORM = enums.Platform.Web
+PLATFORM = enums.Platform.All
 
 # for history event consts
-ALL_USER = 30000
+ALL_USER = 10000
 DURATION_OF_DAYS = 30
-RANDOM_DAU = range(3000, 6000)
+RANDOM_DAU = range(1000, 2000)
 PER_ACTION_DURATION = range(3, 60)
 events_per_request = 10000
 # gzip process number, for mac m1 is 8, for c5.metal is 50 to meet best performance
@@ -40,7 +40,6 @@ IS_GZIP = True
 # common settings
 # session and action duration
 SESSION_TIMES = range(1, 5)
-ACTION_TIMES = range(0, 30)
 
 # following value will be replaced by amplifyconfiguration.json file.
 APP_ID = ""

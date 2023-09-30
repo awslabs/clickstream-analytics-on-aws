@@ -11,24 +11,35 @@ OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific 
 and limitations under the License.
 """
 import random
+
 from weighted.weighted import WeightedArray
-from enum import Enum
 
 
-class Platform(Enum):
-    Android = 1
-    iOS = 2
-    Web = 3
-    All = 4
+class Platform:
+    Android = "Android"
+    iOS = "iOS"
+    Web = "Web"
+    All = "All"
+
+
+class Feature:
+    popular = "popular"
+    featured = "featured"
+    similar = "similar"
+    search = "search"
+    cart = "cart"
+    category = "category"
 
 
 random_platform = WeightedArray([(Platform.Android, 35), (Platform.iOS, 45), (Platform.Web, 20)])
+
+is_switch_to_web = WeightedArray([(True, 1), (False, 9)])
 
 # visit time weight
 visit_hour = WeightedArray([(0, 10), (1, 5), (2, 1), (3, 1), (4, 2), (5, 5),
                             (6, 8), (7, 10), (8, 15), (9, 20), (10, 25), (11, 20),
                             (12, 19), (13, 30), (14, 35), (15, 40), (16, 45), (17, 50),
-                            (18, 55), (19, 60), (20, 65), (21, 50), (22, 30), (23, 20)])
+                            (18, 55), (19, 60), (20, 105), (21, 50), (22, 30), (23, 20)])
 visit_minutes = range(0, 59)
 
 # Device enums
@@ -46,16 +57,17 @@ locale = WeightedArray(
      (('ko_KR', 'South Korea', ("1.208.0.0", "1.255.255.255")), 1.2),
      (('ru_RU', 'Russia', ("109.123.128.0", "109.123.191.255")), 0.8),
      (('ar_SA', 'Saudi Arabia', ("139.64.0.0", "139.64.127.255")), 0.6)])
+sdk_version = WeightedArray([('0.2.0', 15), ('0.2.1', 20), ('0.3.0', 3), ('0.3.1', 5), ('0.4.0', 7),
+                             ('0.5.0', 10), ('0.6.0', 12), ('0.6.1', 5), ('0.7.0', 20), ('0.7.1', 50)])
 
 # App enums
 carrier = WeightedArray(
     [('China Mobile', 26.7), ('Verizon', 22.3), ('China Unicom', 10.87), ('AT&T', 15.3), ('China Unicom', 14.8),
-     ('China Telecom', 4.0), ('T-Mobile', 2.2), ('US Cellular', 1.2), ('CBN', 0.8), ('Cricket Wireless', 0.6)])
+     ('China Telecom', 4.0), ('T-Mobile', 2.2), ('US Cellular', 1.2), ('CBN', 0.8), ('Cricket Wireless', 0.6),
+     ('UNKNOWN', 1)])
 network_type = WeightedArray([('Mobile', 46), ('WIFI', 53), ('UNKNOWN', 2)])
 app_version = WeightedArray([('2.2.0', 2), ('2.3.0', 1), ('2.4.0', 3), ('2.5.0', 5), ('2.5.1', 7),
                              ('2.6.0', 10), ('2.7.0', 12), ('2.8.1', 5), ('2.9.0', 20), ('3.0.0', 50)])
-sdk_version = WeightedArray([('0.2.0', 15), ('0.2.1', 20), ('0.3.0', 3), ('0.3.1', 5), ('0.4.0', 7),
-                             ('0.5.0', 10), ('0.6.0', 12), ('0.6.1', 5), ('0.7.0', 20), ('0.7.1', 50)])
 
 # Android device enums
 android_os_version = WeightedArray([('5', 1), ('6', 1), ('7', 2), ('8', 5), ('9', 7),
@@ -81,6 +93,7 @@ ios_model = WeightedArray(
      ('iPhone 15 Plus', 1.2), ('iPhone 15 Pro', 3.2), ('iPhone 15 Pro Max', 2.2)])
 
 # Web browser enums
+host_name = 'd3mpqdtjegq8im.cloudfront.net'
 browser_ua = WeightedArray([
     ('Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) '
      'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36', 30),
@@ -96,8 +109,15 @@ browser_ua = WeightedArray([
 
 browser_make = WeightedArray([('Chrome', 30), ('Safari', 20), ('Firefox', 10), ('Opera', 2), ('Edge', 8), ('IE', 5)])
 latest_referrer = WeightedArray(
-    [('https://www.google.com/search?q=shopping', 25), ('https://www.baidu.com/s?wd=shopping', 15),
-     ('https://www.amazon.com/?k=shopping', 10), ('', 50)])
+    [(('https://google.com/search?q=shopping', 'google.com'), 25),
+     (('https://www.baidu.com/s?wd=shopping', 'baidu.com'), 15),
+     (('https://www.amazon.com/?k=shopping', 'amazon.com'), 10), (('', ''), 80)])
+web_screens = WeightedArray(
+    [((1080, 1920), 26.7), ((1600, 2560), 20.3), ((1920, 3072), 12.3), ((1440, 2560), 8.3), ((2160, 3840), 3.87),
+     ((768, 1366), 1.3), ((900, 1600), 2.3)])
+web_viewport = WeightedArray(
+    [((980, 1920), 26.7), ((1500, 2560), 20.3), ((1820, 3072), 12.3), ((1340, 2560), 8.3), ((2060, 3840), 3.87),
+     ((668, 1366), 1.3), ((800, 1600), 2.3)])
 
 
 def get_model_for_brand(brand):
@@ -166,18 +186,29 @@ def get_model_for_brand(brand):
 
 
 # event enum
-action_type = WeightedArray(
-    [('click_add', 1), ('note_create', 5), ('note_share', 5), ('note_export', 2), ('login', 1), ('note_print', 1),
-     ('relaunch', 1)])
-event_group = {
-    'click_add': ['add_button_click'],
-    'note_create': ['add_button_click', 'note_create'],
-    'note_share': ['note_share', '_screen_view:note_share', '_screen_view:notepad'],
-    'note_export': ['note_export', '_screen_view:note_export', '_screen_view:notepad'],
-    'note_print': ['note_print', '_screen_view:note_print', '_screen_view:notepad'],
-    'login': ['_screen_view:login', 'user_login', '_screen_view:notepad'],
-    'relaunch': ['_user_engagement', '_screen_view:notepad'],
-}
+class Category:
+    BOOK = "books"
+    TOOLS = "tools"
+    FOOD_SERVICE = "food service"
+    CODE_DISPENSED = "cold dispensed"
+    BEAUTY = "beauty"
+    FOOTWEAR = "footwear"
+    OUTDOORS = "outdoors"
+    JEWELRY = "jewelry"
+
+
+product_category = WeightedArray(
+    [(Category.BOOK, 5), (Category.TOOLS, 3), (Category.FOOD_SERVICE, 2), (Category.CODE_DISPENSED, 1),
+     (Category.BEAUTY, 1), (Category.FOOTWEAR, 1), (Category.OUTDOORS, 2), (Category.JEWELRY, 1)])
+
+main_page_scroll_times = WeightedArray([(0, 50), (1, 15), (2, 35)])
+detail_page_scroll_times = WeightedArray([(0, 50), (1, 50)])
+category_page_scroll_times = WeightedArray([(0, 50), (1, 15), (2, 35)])
+search_times = WeightedArray([(1, 50), (2, 25), (3, 5)])
+add_to_cart_times = WeightedArray([(0, 60), (1, 30), (2, 10), (3, 1)])
+remove_from_cart_times = WeightedArray([(0, 60), (1, 30), (2, 10), (3, 1)])
+
+screen_view_times = WeightedArray([(0, 5), (10, 20), (20, 25), (30, 15), (40, 6), (40, 3)])
 
 
 # user enum
@@ -207,6 +238,8 @@ last_names = ['Smith', 'Johnson', 'Williams', 'Jones', 'Brown', 'Davis', 'Miller
               'Alexander', 'Russell', 'Griffin', 'Diaz', 'Hayes', 'Myers', 'Ford', 'Hamilton', 'Graham', 'Sullivan',
               'Wallace']
 is_login_user = WeightedArray([(True, 93), (False, 7)])
+user_gender = WeightedArray([('male', 45), ('female', 55)])
+age_range = WeightedArray([(10, 5), (20, 45), (30, 35), (40, 10), (50, 3)])
 
 # other enum
 channel = WeightedArray(

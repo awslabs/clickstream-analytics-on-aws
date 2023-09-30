@@ -12,28 +12,28 @@ and limitations under the License.
 """
 import time
 
+import configure
 import util.util as utils
 import requests
-import enums as enums
 from concurrent.futures import ThreadPoolExecutor
 
 global_sequence_id = 1
 
 
 def send_events_to_server(events):
-    time.sleep(enums.request_sleep_time)
+    time.sleep(configure.request_sleep_time)
     headers = {'Content-Type': 'application/json; charset=utf-8'}
     global global_sequence_id
     request_param = {
         "platform": "Android",
-        "appId": enums.APP_ID,
+        "appId": configure.APP_ID,
         "compression": "gzip",
         "fakeIp": utils.get_random_ip(),
         "event_bundle_sequence_id": global_sequence_id
     }
     global_sequence_id = global_sequence_id + 1
     try:
-        response = requests.post(url=enums.ENDPOINT, params=request_param, headers=headers, data=events)
+        response = requests.post(url=configure.ENDPOINT, params=request_param, headers=headers, data=events)
         if response.status_code == 200:
             print('send events success, data len(' + str(len(events) / 1024) + ")")
         else:
@@ -45,16 +45,16 @@ def send_events_to_server(events):
 def send_events_of_day(events_of_day):
     start_time = utils.current_timestamp()
     # gzip
-    if enums.IS_GZIP:
+    if configure.IS_GZIP:
         print("start gzip")
     else:
         print("start parse events")
-    n = int(len(events_of_day) / enums.gzip_times_per_day) + 1
+    n = int(len(events_of_day) / configure.gzip_times_per_day) + 1
     events_of_day_arr = [events_of_day[i:i + n] for i in range(0, len(events_of_day), n)]
     for event_arr in events_of_day_arr:
-        executor = ThreadPoolExecutor(enums.max_upload_thread_number)
+        executor = ThreadPoolExecutor(configure.max_upload_thread_number)
         day_event_lines = utils.convert_to_gzip_events_process_pool(event_arr)
-        if enums.IS_GZIP:
+        if configure.IS_GZIP:
             print("gzip events cost: " + str(utils.current_timestamp() - start_time) + "ms\n")
         else:
             print("parse events cost: " + str(utils.current_timestamp() - start_time) + "ms\n")

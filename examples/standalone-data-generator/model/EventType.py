@@ -19,13 +19,13 @@ class EventType:
     APP_START = '_app_start'
     APP_END = '_app_end'
     SCREEN_VIEW = '_screen_view'
-    PAGE_VIEW = '_page_view'
     USER_ENGAGEMENT = '_user_engagement'
     PROFILE_SET = '_profile_set'
 
     # web preset event
     CLICK = '_click'
     SCROLL = '_scroll'
+    PAGE_VIEW = '_page_view'
 
     # custom event
     LOGOUT = 'logout'

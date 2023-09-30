@@ -1,35 +1,155 @@
 import random
 
-from weighted.weighted import WeightedArray
+from model import Event
+from model.EventType import EventType
+import util.util as utils
+import enums
 
 
 def get_random_product(number):
     loop_times = int(number / 2)
     product_list = []
     for _ in range(loop_times):
-        category = product_category.get_random_item()
-        if category == 'books':
-            product_list.extend(random.sample(books, 2))
-        elif category == 'tools':
-            product_list.extend(random.sample(tools, 2))
-        elif category == 'food_service':
-            product_list.extend(random.sample(tools, 2))
-        elif category == 'code_dispensed':
-            product_list.extend(random.sample(tools, 2))
-        elif category == 'beauty':
-            product_list.extend(random.sample(tools, 2))
-        elif category == 'footwear':
-            product_list.extend(random.sample(tools, 2))
-        elif category == 'outdoors':
-            product_list.extend(random.sample(tools, 2))
-        elif category == 'jewelry':
-            product_list.extend(random.sample(tools, 2))
+        category = enums.product_category.get_random_item()
+        product_list.extend(get_random_category_product(category, 2))
     return product_list
 
 
-product_category = WeightedArray(
-    [('books', 5), ('tools', 3), ("food_service", 2), ('code_dispensed', 1), ('beauty', 1), ('footwear', 1),
-     ('outdoors', 2), ('jewelry', 1)])
+def get_random_category_product(category, number):
+    product_list = []
+    if category == enums.Category.BOOK:
+        product_list.extend(random.sample(books, number))
+    elif category == enums.Category.TOOLS:
+        product_list.extend(random.sample(tools, number))
+    elif category == enums.Category.FOOD_SERVICE:
+        product_list.extend(random.sample(food_service, number))
+    elif category == enums.Category.CODE_DISPENSED:
+        product_list.extend(random.sample(code_dispensed, number))
+    elif category == enums.Category.BEAUTY:
+        product_list.extend(random.sample(beauty, number))
+    elif category == enums.Category.FOOTWEAR:
+        product_list.extend(random.sample(footwear, number))
+    elif category == enums.Category.OUTDOORS:
+        product_list.extend(random.sample(outdoors, number))
+    elif category == enums.Category.JEWELRY:
+        product_list.extend(random.sample(jewelry, number))
+    return product_list
+
+
+def get_exposure_events(user, products, event, feature):
+    events = []
+    for product in products:
+        product_exposure = Event.clean_event(event)
+        product_exposure['attributes']['currency'] = 'USD'
+        product_exposure['attributes']['event_category'] = feature
+        product_exposure['attributes']['item_id'] = product['id']
+        product_exposure['items'] = [
+            {
+                "id": product['id'],
+                "name": product['name'],
+                "category": product['category'],
+                "style": product['style'],
+                "price": product['price'],
+                "quantity": product['current_stock']
+            }
+        ]
+        events.append(Event.get_final_event(user, EventType.PRODUCT_EXPOSURE, product_exposure))
+    return events
+
+
+def get_view_item_event(user, product, event, feature):
+    view_item_event = Event.clean_event(event)
+    view_item_event['attributes']['currency'] = 'USD'
+    view_item_event['attributes']['event_category'] = feature
+    view_item_event['attributes']['item_id'] = product['id']
+    view_item_event['items'] = [
+        {
+            "id": product['id'],
+            "name": product['name'],
+            "category": product['category'],
+            "style": product['style'],
+            "price": product['price'],
+            "quantity": product['current_stock']
+        }
+    ]
+    return Event.get_final_event(user, EventType.VIEW_ITEM, view_item_event)
+
+
+def get_add_to_cart_event(user, product, event, feature):
+    view_item_event = Event.clean_event(event)
+    view_item_event['attributes']['currency'] = 'USD'
+    view_item_event['attributes']['event_category'] = feature
+    view_item_event['attributes']['item_id'] = product['id']
+    view_item_event['items'] = [
+        {
+            "id": product['id'],
+            "name": product['name'],
+            "category": product['category'],
+            "style": product['style'],
+            "price": product['price'],
+            "quantity": product['current_stock']
+        }
+    ]
+    return Event.get_final_event(user, EventType.ADD_TO_CART, view_item_event)
+
+
+def get_remove_from_cart_event(user, product, event):
+    view_item_event = Event.clean_event(event)
+    view_item_event['attributes']['currency'] = 'USD'
+    view_item_event['attributes']['item_id'] = product['id']
+    view_item_event['items'] = [
+        {
+            "id": product['id'],
+            "name": product['name'],
+            "category": product['category'],
+            "style": product['style'],
+            "price": product['price'],
+            "quantity": product['current_stock']
+        }
+    ]
+    return Event.get_final_event(user, EventType.REMOVE_FROM_CART, view_item_event)
+
+
+def get_view_cart_event(user, products, event):
+    view_cart_event = Event.clean_event(event)
+    view_cart_event['attributes']['currency'] = 'USD'
+    total_price = 0
+    view_cart_event["items"] = []
+    for product in products:
+        item = {
+            "id": product['id'],
+            "name": product['name'],
+            "category": product['category'],
+            "style": product['style'],
+            "price": product['price'],
+            "quantity": product['current_stock']
+        }
+        total_price += product['price']
+        view_cart_event['items'].append(item)
+    view_cart_event['attributes']['value'] = total_price
+    return Event.get_final_event(user, EventType.VIEW_CART, view_cart_event)
+
+
+def get_purchase_event(user, products, event):
+    purchase_event = Event.clean_event(event)
+    purchase_event['attributes']['currency'] = 'USD'
+    purchase_event["items"] = []
+    total_price = 0
+    for product in products:
+        item = {
+            "id": product['id'],
+            "name": product['name'],
+            "category": product['category'],
+            "style": product['style'],
+            "price": product['price'],
+            "quantity": product['current_stock']
+        }
+        total_price += product['price']
+        purchase_event['items'].append(item)
+        purchase_event['attributes']['order_id'] = utils.get_unique_id()
+    purchase_event['attributes']['value'] = total_price
+    return Event.get_final_event(user, EventType.PURCHASE, purchase_event)
+
 
 books = [
     {
@@ -443,8 +563,16 @@ code_dispensed = [
         "name": "Herbal iced tea",
         "category": "cold dispensed",
         "style": "fountain-non-carbonated",
-        "price": 2.5,
+        "price": 2.2,
         "current_stock": 10
+    },
+    {
+        "id": "5afced85-ed2d-4525-a06e-dcfeab382e55",
+        "name": "iced milk tea",
+        "category": "cold dispensed",
+        "style": "fountain-non-carbonated",
+        "price": 3.5,
+        "current_stock": 22
     }
 ]
 beauty = [

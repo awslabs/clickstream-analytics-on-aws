@@ -15,6 +15,8 @@ import random
 import datetime
 import json
 import time
+
+import configure
 import enums as enums
 import gzip
 import base64
@@ -51,7 +53,7 @@ def current_timestamp():
 def get_days_arr():
     now = datetime.datetime.now() - datetime.timedelta(days=1)
     timestamps = []
-    for i in range(enums.DURATION_OF_DAYS):
+    for i in range(configure.DURATION_OF_DAYS):
         date = now - datetime.timedelta(days=i)
         date = date.replace(hour=0, minute=0, second=0, microsecond=0)
         timestamp = int(date.timestamp()) * 1000
@@ -117,12 +119,12 @@ def get_gzip(event_str):
 
 
 def convert_to_gzip_events_process_pool(events_of_day):
-    n = enums.events_per_request
+    n = configure.events_per_request
     small_arr = [events_of_day[i:i + n] for i in range(0, len(events_of_day), n)]
     manager = multiprocessing.Manager()
     day_event_lines = manager.list()
-    pool = multiprocessing.Pool(processes=enums.process_number)
-    day_event_lines = pool.starmap(get_gzipped_line, [(enums.IS_GZIP, small_arr[i]) for i in range(len(small_arr))])
+    pool = multiprocessing.Pool(processes=configure.process_number)
+    day_event_lines = pool.starmap(get_gzipped_line, [(configure.IS_GZIP, small_arr[i]) for i in range(len(small_arr))])
     pool.close()
     pool.join()
     return day_event_lines
