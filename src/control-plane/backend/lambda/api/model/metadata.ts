@@ -52,7 +52,7 @@ export interface IMetadataEventParameter {
   readonly eventName: string;
 
   readonly parameterId: string;
-  readonly name: string;
+  name: string;
   displayName: string;
   description: string;
   readonly metadataSource: MetadataSource;
@@ -82,7 +82,7 @@ export interface IMetadataUserAttribute {
   readonly eventName: string;
 
   readonly attributeId: string;
-  readonly name: string;
+  name: string;
   displayName: string;
   description: string;
   readonly metadataSource: MetadataSource;
