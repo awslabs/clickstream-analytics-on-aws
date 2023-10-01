@@ -53,6 +53,7 @@ import {
   ExploreConversionIntervalType,
   ExploreRequestAction,
   ExploreGroupColumn,
+  QuickSightChartType,
 } from 'ts/explore-types';
 import { alertMsg, generateStr } from 'ts/utils';
 import {
@@ -99,14 +100,14 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
     useState(false);
   const [exploreEmbedUrl, setExploreEmbedUrl] = useState('');
 
-  const defaultChartTypeOption = 'funnel-chart';
+  const defaultChartTypeOption = QuickSightChartType.FUNNEL;
   const chartTypeOptions: SegmentedControlProps.Option[] = [
     {
-      id: 'funnel-chart',
+      id: QuickSightChartType.FUNNEL,
       iconSvg: <ExtendIcon icon="BsFilter" color="black" />,
     },
     {
-      id: 'bar-chart',
+      id: QuickSightChartType.BAR,
       iconSvg: <ExtendIcon icon="BsBarChartFill" color="black" />,
     },
   ];
@@ -239,6 +240,7 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
     }
     const body: IExploreRequest = {
       action: action,
+      chartType: chartType,
       locale: getLngFromLocalStorage(),
       projectId: pipeline.projectId,
       pipelineId: pipeline.pipelineId,
@@ -338,7 +340,7 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
     sheetId: string,
     sheetName: string,
     chartTitle: string,
-    chartSubTitle: string,
+    chartSubTitle: string
   ) => {
     if (
       eventOptionData.length === 0 ||
@@ -354,7 +356,7 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
         sheetId,
         sheetName,
         chartTitle,
-        chartSubTitle,
+        chartSubTitle
       );
       if (!body) {
         alertMsg(
@@ -376,7 +378,7 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
 
   useEffect(() => {
     clickPreview();
-  }, [timeGranularity, dateRangeValue]);
+  }, [timeGranularity, dateRangeValue, chartType]);
 
   return (
     <>
@@ -737,7 +739,7 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
             />
             <SegmentedControl
               selectedId={chartType}
-              onChange={({ detail }) => setChartType(detail.selectedId)}
+              onChange={({ detail }) => setChartType(detail.selectedId as QuickSightChartType)}
               options={chartTypeOptions}
             />
           </div>

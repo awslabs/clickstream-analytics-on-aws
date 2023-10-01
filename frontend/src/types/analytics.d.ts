@@ -97,6 +97,7 @@ declare global {
 
   interface IExploreRequest {
     readonly action: ExploreRequestAction;
+    readonly chartType: QuickSightChartType;
     readonly locale: string;
     readonly projectId: string;
     readonly appId: string;

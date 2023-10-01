@@ -51,6 +51,7 @@ import {
   ExploreComputeMethod,
   ExploreGroupColumn,
   ExploreRequestAction,
+  QuickSightChartType,
 } from 'ts/explore-types';
 import { generateStr, alertMsg } from 'ts/utils';
 import {
@@ -96,14 +97,14 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
     useState(false);
   const [exploreEmbedUrl, setExploreEmbedUrl] = useState('');
 
-  const defaultChartTypeOption = 'line-chart';
+  const defaultChartTypeOption = QuickSightChartType.LINE;
   const chartTypeOptions: SegmentedControlProps.Option[] = [
     {
-      id: 'line-chart',
+      id: QuickSightChartType.LINE,
       iconSvg: <ExtendIcon icon="BsGraphUp" />,
     },
     {
-      id: 'bar-chart',
+      id: QuickSightChartType.BAR,
       iconSvg: <ExtendIcon icon="BsBarChartFill" />,
     },
   ];
@@ -205,6 +206,7 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
     }
     const body: IExploreRequest = {
       action: action,
+      chartType: chartType,
       locale: getLngFromLocalStorage(),
       projectId: pipeline.projectId,
       pipelineId: pipeline.pipelineId,
@@ -299,7 +301,7 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
 
   useEffect(() => {
     clickPreview();
-  }, [timeGranularity, dateRangeValue]);
+  }, [timeGranularity, dateRangeValue, chartType]);
 
   return (
     <>
@@ -700,7 +702,9 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
             />
             <SegmentedControl
               selectedId={chartType}
-              onChange={({ detail }) => setChartType(detail.selectedId)}
+              onChange={({ detail }) =>
+                setChartType(detail.selectedId as QuickSightChartType)
+              }
               options={chartTypeOptions}
             />
           </div>

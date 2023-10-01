@@ -32,7 +32,7 @@ import { AssumeRoleCommand, STSClient } from '@aws-sdk/client-sts';
 import Mustache from 'mustache';
 import { v4 as uuidv4 } from 'uuid';
 import { DataSetProps, dataSetActions } from './dashboard-ln';
-import { AnalysisType, ExploreLocales, ExploreRelativeTimeUnit, ExploreRequestAction, ExploreTimeScopeType, ExploreVisualName } from '../../common/explore-types';
+import { AnalysisType, ExploreLocales, ExploreRelativeTimeUnit, ExploreRequestAction, ExploreTimeScopeType, ExploreVisualName, QuickSightChartType } from '../../common/explore-types';
 import { logger } from '../../common/powertools';
 import i18next from '../../i18n';
 
@@ -149,8 +149,11 @@ export type MustachePathAnalysisType = MustacheBaseType & {
 }
 
 export type MustacheFunnelAnalysisType = MustacheBaseType & {
+  dateDimFieldId?: string;
   dimFieldId: string;
   measureFieldId: string;
+  dateGranularity?: string;
+  hierarchyId?: string;
 }
 
 export type MustacheEventAnalysisType = MustacheBaseType & {
@@ -498,9 +501,23 @@ export async function getCredentialsFromRole(stsClient: STSClient, roleArn: stri
   }
 }
 
-export function getFunnelVisualDef(visualId: string, viewName: string, titleProps: DashboardTitleProps) : Visual {
+export function getFunnelVisualDef(visualId: string, viewName: string, titleProps: DashboardTitleProps,
+  quickSightChartType: QuickSightChartType, groupColumn: string) : Visual {
 
-  const visualDef = readFileSync(join(__dirname, './templates/funnel-chart.json'), 'utf8');
+  if (quickSightChartType === QuickSightChartType.LINE) {
+    return _getFunnelChartVisualDef(visualId, viewName, titleProps);
+  } else if (quickSightChartType === QuickSightChartType.BAR) {
+    return _getFunnelBarChartVisualDef(visualId, viewName, titleProps, groupColumn);
+  } else {
+    const errorMessage = `Funnel analysis: unsupported quicksight char type ${quickSightChartType}`;
+    logger.warn(errorMessage);
+    throw new Error(errorMessage);
+  }
+}
+
+function _getFunnelChartVisualDef(visualId: string, viewName: string, titleProps: DashboardTitleProps) : Visual {
+
+  const visualDef = readFileSync(join(__dirname, './templates/funnel-funnel-chart.json'), 'utf8');
   const mustacheFunnelAnalysisType: MustacheFunnelAnalysisType = {
     visualId,
     dataSetIdentifier: viewName,
@@ -511,7 +528,24 @@ export function getFunnelVisualDef(visualId: string, viewName: string, titleProp
   };
 
   return JSON.parse(Mustache.render(visualDef, mustacheFunnelAnalysisType)) as Visual;
+}
 
+function _getFunnelBarChartVisualDef(visualId: string, viewName: string, titleProps: DashboardTitleProps, groupColumn: string) : Visual {
+
+  const visualDef = readFileSync(join(__dirname, './templates/funnel-bar-chart.json'), 'utf8');
+  const mustacheFunnelAnalysisType: MustacheFunnelAnalysisType = {
+    visualId,
+    dataSetIdentifier: viewName,
+    dateDimFieldId: uuidv4(),
+    dimFieldId: uuidv4(),
+    measureFieldId: uuidv4(),
+    dateGranularity: groupColumn,
+    hierarchyId: uuidv4(),
+    title: titleProps.title,
+    subTitle: titleProps.subTitle,
+  };
+
+  return JSON.parse(Mustache.render(visualDef, mustacheFunnelAnalysisType)) as Visual;
 }
 
 export function getFunnelTableVisualDef(visualId: string, viewName: string, eventNames: string[],
@@ -719,9 +753,16 @@ export function getFunnelTableVisualRelatedDefs(viewName: string, colNames: stri
   return columnConfigurations;
 }
 
-export function getEventLineChartVisualDef(visualId: string, viewName: string, titleProps: DashboardTitleProps, groupColumn: string) : Visual {
+export function getEventChartVisualDef(visualId: string, viewName: string, titleProps: DashboardTitleProps,
+  quickSightChartType: QuickSightChartType, groupColumn: string) : Visual {
 
-  const visualDef = readFileSync(join(__dirname, './templates/event-line-chart.json'), 'utf8');
+  if (quickSightChartType != QuickSightChartType.LINE && quickSightChartType != QuickSightChartType.BAR) {
+    const errorMessage = `Event analysis: unsupported quicksight char type ${quickSightChartType}`;
+    logger.warn(errorMessage);
+    throw new Error(errorMessage);
+  }
+  const templatePath = `./templates/event-${quickSightChartType}-chart.json`;
+  const visualDef = readFileSync(join(__dirname, templatePath), 'utf8');
   const mustacheEventAnalysisType: MustacheEventAnalysisType = {
     visualId,
     dataSetIdentifier: viewName,
@@ -751,11 +792,10 @@ export function getEventPivotTableVisualDef(visualId: string, viewName: string, 
   };
 
   return JSON.parse(Mustache.render(visualDef, mustacheEventAnalysisType)) as Visual;
-
 }
 
 export function getPathAnalysisChartVisualDef(visualId: string, viewName: string, titleProps: DashboardTitleProps) : Visual {
-  const visualDef = readFileSync(join(__dirname, './templates/path-analysis-chart.json'), 'utf8');
+  const visualDef = readFileSync(join(__dirname, './templates/path-sankey-chart.json'), 'utf8');
   const mustachePathAnalysisType: MustachePathAnalysisType = {
     visualId,
     dataSetIdentifier: viewName,
@@ -769,9 +809,17 @@ export function getPathAnalysisChartVisualDef(visualId: string, viewName: string
   return JSON.parse(Mustache.render(visualDef, mustachePathAnalysisType)) as Visual;
 }
 
-export function getRetentionLineChartVisualDef(visualId: string, viewName: string, titleProps: DashboardTitleProps) : Visual {
+export function getRetentionChartVisualDef(visualId: string, viewName: string, titleProps: DashboardTitleProps,
+  quickSightChartType: QuickSightChartType) : Visual {
 
-  const visualDef = readFileSync(join(__dirname, './templates/retention-line-chart.json'), 'utf8');
+  if (quickSightChartType != QuickSightChartType.LINE && quickSightChartType != QuickSightChartType.BAR) {
+    const errorMessage = `Retention analysis: unsupported quicksight char type ${quickSightChartType}`;
+    logger.warn(errorMessage);
+    throw new Error(errorMessage);
+  }
+  const templatePath = `./templates/retention-${quickSightChartType}-chart.json`;
+
+  const visualDef = readFileSync(join(__dirname, templatePath), 'utf8');
   const mustacheRetentionAnalysisType: MustacheRetentionAnalysisType = {
     visualId,
     dataSetIdentifier: viewName,
@@ -799,7 +847,6 @@ export function getRetentionPivotTableVisualDef(visualId: string, viewName: stri
   };
 
   return JSON.parse(Mustache.render(visualDef, mustacheRetentionAnalysisType)) as Visual;
-
 }
 
 function findElementByPath(jsonData: any, path: string): any {
