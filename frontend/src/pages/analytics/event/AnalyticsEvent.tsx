@@ -305,6 +305,13 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
   };
 
   useEffect(() => {
+    setSegmentationOptionData({
+      ...INIT_SEGMENTATION_DATA,
+      conditionOptions: presetParameters,
+    });
+  }, [presetParameters]);
+
+  useEffect(() => {
     clickPreview();
   }, [timeGranularity, dateRangeValue, chartType]);
 
