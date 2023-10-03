@@ -24,7 +24,7 @@ export interface IMetadataEvent {
   readonly name: string;
   displayName: string;
   description: string;
-  readonly metadataSource: MetadataSource;
+  metadataSource: MetadataSource;
   readonly dataVolumeLastDay: number;
   hasData: boolean;
   platform: MetadataPlatform[];
@@ -55,10 +55,10 @@ export interface IMetadataEventParameter {
   name: string;
   displayName: string;
   description: string;
-  readonly metadataSource: MetadataSource;
+  metadataSource: MetadataSource;
   hasData: boolean;
   platform: MetadataPlatform[];
-  readonly parameterType: MetadataParameterType;
+  parameterType: MetadataParameterType;
   readonly valueType: MetadataValueType;
   valueEnum?: string[];
   values: IMetadataAttributeValue[];
@@ -85,7 +85,7 @@ export interface IMetadataUserAttribute {
   name: string;
   displayName: string;
   description: string;
-  readonly metadataSource: MetadataSource;
+  metadataSource: MetadataSource;
   hasData: boolean;
   readonly valueType: MetadataValueType;
   valueEnum?: string[];
@@ -106,4 +106,26 @@ export interface IMetadataDisplay {
   readonly displayName: string;
   readonly description: string;
   readonly updateAt: number;
+}
+
+export interface IMetadataWhiteList {
+  readonly PresetEvents: Array<{
+    name: string;
+    description: string;
+  }>;
+  readonly PresetEventParameters: Array<{
+    name: string;
+    dataType: string;
+    description: string;
+  }>;
+  readonly PublicEventParameters: Array<{
+    name: string;
+    dataType: string;
+    description: string;
+  }>;
+  readonly PresetUserAttributes: Array<{
+    name: string;
+    dataType: string;
+    description: string;
+  }>;
 }

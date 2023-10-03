@@ -78,5 +78,237 @@
         "updateAt": 1667355960000
       }
     ]
+  },
+  {
+    "name": "MetadataWhiteList",
+    "data": {
+      "PresetEvents": [
+        {
+          "name": "_first_open",
+          "description": "The first time a user opens an app"
+        },
+        {
+          "name": "_session_start",
+          "description": "The start of a session"
+        },
+        {
+          "name": "_screen_view",
+          "description": "The user views a screen"
+        },
+        {
+          "name": "_user_engagement",
+          "description": "The user interacts with the app"
+        },
+        {
+          "name": "_app_start",
+          "description": "The app is launched"
+        },
+        {
+          "name": "_app_end",
+          "description": "The app is closed"
+        },
+        {
+          "name": "_profile_set",
+          "description": "The user profile is set"
+        },
+        {
+          "name": "_app_exception",
+          "description": "The app crashes"
+        },
+        {
+          "name": "_app_update",
+          "description": "The app is updated"
+        },
+        {
+          "name": "_os_update",
+          "description": "The OS is updated"
+        },
+        {
+          "name": "_clickstream_error",
+          "description": "The clickstream data is invalid"
+        }
+      ],
+      "PresetEventParameters": [
+        {
+          "name": "_session_id",
+          "dataType": "String",
+          "description": "The session ID"
+        },
+        {
+          "name": "_session_start_timestamp",
+          "dataType": "Integer",
+          "description": "The session start timestamp"
+        },
+        {
+          "name": "_session_duration",
+          "dataType": "Integer",
+          "description": "The session duration"
+        },
+        {
+          "name": "_session_number",
+          "dataType": "Integer",
+          "description": "The session number"
+        },
+        {
+          "name": "_screen_name",
+          "dataType": "String",
+          "description": "The session name"
+        },
+        {
+          "name": "_screen_unique_id",
+          "dataType": "String",
+          "description": "The session unique ID"
+        }
+      ],
+      "PublicEventParameters": [
+        {
+          "name": "hashCode",
+          "dataType": "String",
+          "description": "The hash code of the event"
+        },
+        {
+          "name": "app_id",
+          "dataType": "String",
+          "description": "The app ID"
+        },
+        {
+          "name": "unique_id",
+          "dataType": "String",
+          "description": "The unique ID of the user"
+        },
+        {
+          "name": "device_id",
+          "dataType": "String",
+          "description": "The device ID"
+        },
+        {
+          "name": "event_type",
+          "dataType": "String",
+          "description": "The event type"
+        },
+        {
+          "name": "event_id",
+          "dataType": "String",
+          "description": "The event ID"
+        },
+        {
+          "name": "timestamp",
+          "dataType": "Integer",
+          "description": "The event timestamp"
+        },
+        {
+          "name": "platform",
+          "dataType": "String",
+          "description": "The platform"
+        },
+        {
+          "name": "os_version",
+          "dataType": "String",
+          "description": "The OS version"
+        },
+        {
+          "name": "make",
+          "dataType": "String",
+          "description": "The device make"
+        },
+        {
+          "name": "brand",
+          "dataType": "String",
+          "description": "The device brand"
+        },
+        {
+          "name": "model",
+          "dataType": "String",
+          "description": "The device model"
+        },
+        {
+          "name": "carrier",
+          "dataType": "String",
+          "description": "The carrier"
+        },
+        {
+          "name": "network_type",
+          "dataType": "String",
+          "description": "The network type"
+        },
+        {
+          "name": "screen_height",
+          "dataType": "Integer",
+          "description": "The screen height"
+        },
+        {
+          "name": "screen_width",
+          "dataType": "Integer",
+          "description": "The screen width"
+        },
+        {
+          "name": "zone_offset",
+          "dataType": "Integer",
+          "description": "The time zone offset"
+        },
+        {
+          "name": "locale",
+          "dataType": "String",
+          "description": "The locale"
+        },
+        {
+          "name": "system_language",
+          "dataType": "String",
+          "description": "The system language"
+        },
+        {
+          "name": "country_code",
+          "dataType": "String",
+          "description": "The country code"
+        },
+        {
+          "name": "sdk_version",
+          "dataType": "String",
+          "description": "The SDK version"
+        },
+        {
+          "name": "sdk_name",
+          "dataType": "String",
+          "description": "The SDK name"
+        },
+        {
+          "name": "app_version",
+          "dataType": "String",
+          "description": "The app version"
+        },
+        {
+          "name": "app_package_name",
+          "dataType": "String",
+          "description": "The app package name"
+        },
+        {
+          "name": "app_title",
+          "dataType": "String",
+          "description": "The app title"
+        }
+      ],
+      "PresetUserAttributes": [
+        {
+          "name": "_user_id",
+          "dataType": "String",
+          "description": "The user ID"
+        },
+        {
+          "name": "_user_i_user_ltv_revenued",
+          "dataType": "String",
+          "description": "The user lifetime value"
+        },
+        {
+          "name": "_user_ltv_currency",
+          "dataType": "String",
+          "description": "The currency of the user lifetime value"
+        },
+        {
+          "name": "_user_first_touch_timestamp",
+          "dataType": "String",
+          "description": "The timestamp of the first touch"
+        }
+      ]
+    }
   }
 ]
