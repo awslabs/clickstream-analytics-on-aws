@@ -63,7 +63,9 @@ const AnalyticsAnalyzes: React.FC = () => {
   };
 
   useEffect(() => {
-    getAnalyzes();
+    if (projectId) {
+      getAnalyzes();
+    }
   }, [projectId]);
 
   const breadcrumbItems = [

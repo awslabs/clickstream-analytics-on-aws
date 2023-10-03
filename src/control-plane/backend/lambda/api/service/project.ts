@@ -237,7 +237,6 @@ export class ProjectServ {
         return res.status(404).json(new ApiFail('The latest pipeline not found.'));
       }
       const latestPipeline = latestPipelines[0];
-      console.log(latestPipeline);
       if (!latestPipeline.reporting?.quickSight?.accountName) {
         return res.status(400).json(new ApiFail('The latest pipeline not enable reporting.'));
       }
