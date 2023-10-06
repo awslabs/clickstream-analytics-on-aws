@@ -140,8 +140,8 @@ export class ClickStreamApiConstruct extends Construct {
         type: AttributeType.STRING,
       },
       sortKey: {
-        name: 'createAt',
-        type: AttributeType.NUMBER,
+        name: 'month',
+        type: AttributeType.STRING,
       },
       billingMode: BillingMode.PAY_PER_REQUEST,
       removalPolicy: RemovalPolicy.DESTROY,
@@ -155,19 +155,7 @@ export class ClickStreamApiConstruct extends Construct {
         type: AttributeType.STRING,
       },
       sortKey: {
-        name: 'createAt',
-        type: AttributeType.NUMBER,
-      },
-    });
-    const invertedGSIName = 'inverted-index';
-    analyticsMetadataTable.addGlobalSecondaryIndex({
-      indexName: invertedGSIName,
-      partitionKey: {
-        name: 'type',
-        type: AttributeType.STRING,
-      },
-      sortKey: {
-        name: 'id',
+        name: 'month',
         type: AttributeType.STRING,
       },
     });

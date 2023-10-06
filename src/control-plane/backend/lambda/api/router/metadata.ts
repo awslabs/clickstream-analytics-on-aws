@@ -60,18 +60,6 @@ router_metadata.get(
     return metadataEventServ.list(req, res, next);
   });
 
-router_metadata.post(
-  '/event',
-  validate([
-    body().custom(isValidEmpty).custom(isXSSRequest),
-    body('projectId').custom(isValidEmpty),
-    body('appId').custom(isValidEmpty),
-    header('X-Click-Stream-Request-Id').custom(isRequestIdExisted),
-  ]),
-  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-    return metadataEventServ.add(req, res, next);
-  });
-
 router_metadata.get('/event/:name',
   validate([
     query('projectId').custom(isValidEmpty),
@@ -84,30 +72,14 @@ router_metadata.get('/event/:name',
 router_metadata.get(
   '/event_parameters',
   validate([
-    query()
-      .custom((value: any, { req }: any) => defaultOrderValueValid(value, {
-        req,
-        location: 'body',
-        path: '',
-      })),
+    query('projectId').custom(isValidEmpty),
+    query('appId').custom(isValidEmpty),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return metadataEventParameterServ.list(req, res, next);
   });
 
-router_metadata.post(
-  '/event_parameter',
-  validate([
-    body().custom(isValidEmpty).custom(isXSSRequest),
-    body('projectId').custom(isValidEmpty),
-    body('appId').custom(isValidEmpty),
-    header('X-Click-Stream-Request-Id').custom(isRequestIdExisted),
-  ]),
-  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-    return metadataEventParameterServ.add(req, res, next);
-  });
-
-router_metadata.get('/event_parameter/:parameterName', async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+router_metadata.get('/event_parameter', async (req: express.Request, res: express.Response, next: express.NextFunction) => {
   return metadataEventParameterServ.details(req, res, next);
 });
 
@@ -116,30 +88,12 @@ router_metadata.get(
   validate([
     query('projectId').custom(isValidEmpty),
     query('appId').custom(isValidEmpty),
-    query()
-      .custom((value: any, { req }: any) => defaultOrderValueValid(value, {
-        req,
-        location: 'body',
-        path: '',
-      })),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return metadataUserAttributeServ.list(req, res, next);
   });
 
-router_metadata.post(
-  '/user_attribute',
-  validate([
-    body().custom(isValidEmpty).custom(isXSSRequest),
-    body('projectId').custom(isValidEmpty),
-    body('appId').custom(isValidEmpty),
-    header('X-Click-Stream-Request-Id').custom(isRequestIdExisted),
-  ]),
-  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-    return metadataUserAttributeServ.add(req, res, next);
-  });
-
-router_metadata.get('/user_attribute/:name', async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+router_metadata.get('/user_attribute', async (req: express.Request, res: express.Response, next: express.NextFunction) => {
   return metadataUserAttributeServ.details(req, res, next);
 });
 

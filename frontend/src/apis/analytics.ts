@@ -121,11 +121,11 @@ export const getMetadataParametersDetails = async (params: {
   projectId: string;
   appId: string;
   parameterName: string;
-  parameterValueType: string;
+  parameterType: string;
 }) => {
   const result: any = await apiRequest(
     'get',
-    `/metadata/event_parameter/${params.parameterName}_${params.parameterValueType}?projectId=${params.projectId}&appId=${params.appId}`
+    `/metadata/event_parameter?projectId=${params.projectId}&appId=${params.appId}&name=${params.parameterName}&type=${params.parameterType}`
   );
   return result;
 };

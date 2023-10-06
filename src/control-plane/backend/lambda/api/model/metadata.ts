@@ -13,27 +13,49 @@
 
 import { ConditionCategory, MetadataParameterType, MetadataPlatform, MetadataSource, MetadataValueType } from '../common/explore-types';
 
-export interface IMetadataEvent {
+export interface DDBMetadataValue {
+  readonly value: string;
+  readonly count: number;
+}
+
+export interface DDBMetadata {
   readonly id: string;
-  readonly type: string;
+  readonly month: string;
   readonly prefix: string;
 
   readonly projectId: string;
   readonly appId: string;
 
-  readonly name: string;
-  displayName: string;
-  description: string;
-  metadataSource: MetadataSource;
-  readonly dataVolumeLastDay: number;
-  hasData: boolean;
-  platform: MetadataPlatform[];
-  associatedParameters? : IMetadataEventParameter[];
+  readonly summary: {
+    readonly name: string;
+    readonly eventName?: string;
+    readonly dataVolumeLastDay?: number;
+    readonly hasData?: boolean;
+    readonly platform?: MetadataPlatform[];
+    readonly category?: ConditionCategory;
+    readonly valueType?: MetadataValueType;
+    readonly valueEnum?: DDBMetadataValue[];
+  };
+}
 
-  readonly createAt: number;
-  readonly updateAt: number;
-  readonly operator: string;
-  readonly deleted: boolean;
+export interface IMetadataEvent {
+  readonly id: string;
+  readonly month: string;
+  readonly prefix: string;
+
+  readonly projectId: string;
+  readonly appId: string;
+  readonly name: string;
+
+  readonly dataVolumeLastDay: number;
+  readonly hasData: boolean;
+  readonly platform: MetadataPlatform[];
+
+  displayName?: string;
+  description?: string;
+  metadataSource?: MetadataSource;
+
+  associatedParameters? : IMetadataEventParameter[];
 }
 
 export interface IMetadataAttributeValue {
@@ -43,59 +65,47 @@ export interface IMetadataAttributeValue {
 
 export interface IMetadataEventParameter {
   readonly id: string;
-  readonly type: string;
+  readonly month: string;
   readonly prefix: string;
 
   readonly projectId: string;
   readonly appId: string;
-
+  readonly name: string;
   readonly eventName: string;
 
-  readonly parameterId: string;
-  name: string;
-  displayName: string;
-  description: string;
-  metadataSource: MetadataSource;
-  hasData: boolean;
-  platform: MetadataPlatform[];
-  parameterType: MetadataParameterType;
   readonly valueType: MetadataValueType;
-  valueEnum?: string[];
-  values: IMetadataAttributeValue[];
-  associatedEvents? : IMetadataEvent[];
   readonly category: ConditionCategory;
+  readonly hasData: boolean;
+  readonly platform: MetadataPlatform[];
 
-  readonly createAt: number;
-  readonly updateAt: number;
-  readonly operator: string;
-  readonly deleted: boolean;
+  displayName?: string;
+  description?: string;
+  metadataSource?: MetadataSource;
+  parameterType?: MetadataParameterType;
+  valueEnum?: DDBMetadataValue[];
+  values?: IMetadataAttributeValue[];
+
+  associatedEvents? : IMetadataEvent[];
 }
 
 export interface IMetadataUserAttribute {
   readonly id: string;
-  readonly type: string;
+  readonly month: string;
   readonly prefix: string;
 
   readonly projectId: string;
   readonly appId: string;
+  readonly name: string;
 
-  readonly eventName: string;
-
-  readonly attributeId: string;
-  name: string;
-  displayName: string;
-  description: string;
-  metadataSource: MetadataSource;
-  hasData: boolean;
   readonly valueType: MetadataValueType;
-  valueEnum?: string[];
-  values: IMetadataAttributeValue[];
   readonly category: ConditionCategory;
+  readonly hasData: boolean;
 
-  readonly createAt: number;
-  readonly updateAt: number;
-  readonly operator: string;
-  readonly deleted: boolean;
+  displayName?: string;
+  description?: string;
+  metadataSource?: MetadataSource;
+  valueEnum?: DDBMetadataValue[];
+  values?: IMetadataAttributeValue[];
 }
 
 export interface IMetadataDisplay {

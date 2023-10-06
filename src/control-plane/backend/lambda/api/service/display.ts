@@ -13,7 +13,6 @@
 
 import { MetadataParameterType, MetadataSource } from '../common/explore-types';
 import { logger } from '../common/powertools';
-import { isEmpty } from '../common/utils';
 import { IMetadataAttributeValue, IMetadataDisplay, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute, IMetadataWhiteList } from '../model/metadata';
 import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbMetadataStore } from '../store/dynamodb/dynamodb-metadata-store';
@@ -61,49 +60,89 @@ export class CMetadataDisplay {
     }
   }
 
-  private pathEventInfoFromWhiteList(event: IMetadataEvent, whiteList: IMetadataWhiteList) {
-    const presetEvent = whiteList.PresetEvents.find((e: any) => e.name === event.name);
+  private pathEventInfo(event: IMetadataEvent) {
+    if (!this.displays) {
+      return;
+    }
+    const prefix = event.prefix.split('#')[0];
+    const key = `${prefix}#${event.projectId}#${event.appId}#${event.name}`;
+    const metadataDisplay = this.displays.find((d: IMetadataDisplay) => d.id === key);
+    event.displayName = metadataDisplay?.displayName ?? event.name;
+    event.description = metadataDisplay?.description ?? '';
+    if (!this.whiteList) {
+      return;
+    }
+    const presetEvent = this.whiteList.PresetEvents.find((e: any) => e.name === event.name);
     event.metadataSource = presetEvent ? MetadataSource.PRESET : MetadataSource.CUSTOM;
-    event.description = isEmpty(event.description) && presetEvent ? presetEvent.description : '';
+    event.description = presetEvent ? presetEvent.description : event.description;
   }
 
-  private pathEventParameterInfoFromWhiteList(parameter: IMetadataEventParameter, whiteList: IMetadataWhiteList) {
-    const presetEventParameter = whiteList.PresetEventParameters.find((e: any) => e.name === parameter.name);
-    const publicEventParameter = whiteList.PublicEventParameters.find((e: any) => e.name === parameter.name);
+  private pathEventParameterInfo(parameter: IMetadataEventParameter) {
+    if (!this.displays) {
+      return;
+    }
+    const prefix = parameter.prefix.split('#')[0];
+    const key = `${prefix}#${parameter.projectId}#${parameter.appId}#${parameter.name}#${parameter.valueType}`;
+    const metadataDisplay = this.displays.find((d: IMetadataDisplay) => d.id === key);
+    parameter.displayName = metadataDisplay?.displayName ?? parameter.name;
+    parameter.description = metadataDisplay?.description ?? '';
+    if (!this.whiteList) {
+      return;
+    }
+    const presetEventParameter = this.whiteList.PresetEventParameters.find(
+      (e: any) => e.name === parameter.name && e.dataType === parameter.valueType);
+    const publicEventParameter = this.whiteList.PublicEventParameters.find(
+      (e: any) => e.name === parameter.name && e.dataType === parameter.valueType);
     parameter.metadataSource = presetEventParameter ? MetadataSource.PRESET : MetadataSource.CUSTOM;
-    parameter.description = isEmpty(parameter.description) && presetEventParameter ? presetEventParameter.description : '';
+    parameter.description = presetEventParameter ? presetEventParameter.description : parameter.description;
     parameter.parameterType = publicEventParameter ? MetadataParameterType.PUBLIC : MetadataParameterType.PRIVATE;
   }
 
-  private pathUserAttributeInfoFromWhiteList(attribute: IMetadataUserAttribute, whiteList: IMetadataWhiteList) {
-    const presetUserAttribute = whiteList.PresetUserAttributes.find((e: any) => e.name === attribute.name);
+  private pathUserAttributeInfo(attribute: IMetadataUserAttribute) {
+    if (!this.displays) {
+      return;
+    }
+    const prefix = attribute.prefix.split('#')[0];
+    const key = `${prefix}#${attribute.projectId}#${attribute.appId}#${attribute.name}#${attribute.valueType}`;
+    const metadataDisplay = this.displays.find((d: IMetadataDisplay) => d.id === key);
+    attribute.displayName = metadataDisplay?.displayName ?? attribute.name;
+    attribute.description = metadataDisplay?.description ?? '';
+    if (!this.whiteList) {
+      return;
+    }
+    const presetUserAttribute = this.whiteList.PresetUserAttributes.find(
+      (e: any) => e.name === attribute.name && e.dataType === attribute.valueType);
     attribute.metadataSource = presetUserAttribute ? MetadataSource.PRESET : MetadataSource.CUSTOM;
-    attribute.description = isEmpty(attribute.description) && presetUserAttribute ? presetUserAttribute.description : '';
+    attribute.description = presetUserAttribute ? presetUserAttribute.description : attribute.description;
   }
 
   public async patch(projectId: string, appId: string,
     metadataArray: IMetadataEvent[] | IMetadataEventParameter[] | IMetadataUserAttribute[]) {
     try {
-      const displays = await this.getDisplay(projectId, appId);
-      const whiteList = await this.getWhiteList();
+      await this.getDisplay(projectId, appId);
+      await this.getWhiteList();
       for (let metadata of metadataArray) {
         const prefix = metadata.prefix.split('#')[0];
-        if (metadata.prefix.startsWith('EVENT#')) {
-          const event = metadata as IMetadataEvent;
-          this.pathEventInfoFromWhiteList(event, whiteList!);
-          event.associatedParameters = this.patchAssociatedWithData(event.associatedParameters) as IMetadataEventParameter[];
-          event.associatedParameters = this.patchValueEnumWithData(event.associatedParameters) as IMetadataEventParameter[];
-        }
-        if (metadata.prefix.startsWith('EVENT_PARAMETER#')) {
-          let parameter = metadata as IMetadataEventParameter;
-          this.pathEventParameterInfoFromWhiteList(parameter, whiteList!);
-          parameter.associatedEvents = this.patchAssociatedWithData(parameter.associatedEvents) as IMetadataEvent[];
-          parameter = (this.patchValueEnumWithData([parameter]) as IMetadataEventParameter[])[0];
-        }
-        if (metadata.prefix.startsWith('USER_ATTRIBUTE#')) {
-          let userAttribute = metadata as IMetadataUserAttribute;
-          this.pathUserAttributeInfoFromWhiteList(userAttribute, whiteList!);
-          userAttribute = (this.patchValueEnumWithData([userAttribute]) as IMetadataUserAttribute[])[0];
+        switch (prefix) {
+          case 'EVENT':
+            let event = metadata as IMetadataEvent;
+            this.pathEventInfo(event);
+            event.associatedParameters = this.patchAssociated(event.associatedParameters) as IMetadataEventParameter[];
+            event.associatedParameters = this.patchValues(event.associatedParameters) as IMetadataEventParameter[];
+            break;
+          case 'EVENT_PARAMETER':
+            let parameter = metadata as IMetadataEventParameter;
+            this.pathEventParameterInfo(parameter);
+            parameter.associatedEvents = this.patchAssociated(parameter.associatedEvents) as IMetadataEvent[];
+            parameter = this.patchValues([parameter])[0] as IMetadataEventParameter;
+            break;
+          case 'USER_ATTRIBUTE':
+            let userAttribute = metadata as IMetadataUserAttribute;
+            this.pathUserAttributeInfo(userAttribute);
+            userAttribute = this.patchValues([userAttribute])[0];
+            break;
+          default:
+            break;
         }
       }
     } catch (error) {
@@ -112,47 +151,46 @@ export class CMetadataDisplay {
     return metadataArray;
   }
 
-  private patchAssociatedWithData(associated: IMetadataEvent[] | IMetadataEventParameter[] | undefined) {
-    const displays = this.displays;
+  private patchAssociated(associated: IMetadataEvent[] | IMetadataEventParameter[] | undefined) {
     if (!associated || associated.length === 0) {
       return [];
     }
     for (let metadata of associated) {
       const prefix = metadata.prefix.split('#')[0];
-      const key = `${prefix}#${metadata.projectId}#${metadata.appId}#${metadata.name}`;
-      const metadataDisplay = displays.find((d: IMetadataDisplay) => d.id === key);
-      if (metadata.prefix.startsWith('EVENT_PARAMETER#')) {
-        let parameter = metadata as IMetadataEventParameter;
-        parameter.name = this._getOriginalName(parameter.name, parameter.valueType);
-        parameter.displayName = metadataDisplay?.displayName ?? this._getOriginalName(parameter.name, parameter.valueType);
-        parameter.description = metadataDisplay?.description ?? '';
-      } else if (metadata.prefix.startsWith('EVENT#')) {
-        metadata.displayName = metadataDisplay?.displayName ?? metadata.name;
-        metadata.description = metadataDisplay?.description ?? '';
+      switch (prefix) {
+        case 'EVENT':
+          const event = metadata as IMetadataEvent;
+          this.pathEventInfo(event);
+          break;
+        case 'EVENT_PARAMETER':
+          const parameter = metadata as IMetadataEventParameter;
+          this.pathEventParameterInfo(parameter);
+          break;
+        default:
+          break;
       }
     }
     return associated;
   }
 
-  private patchValueEnumWithData(parameters: IMetadataEventParameter[] | IMetadataUserAttribute[] | undefined) {
+  private patchValues(parameters: IMetadataEventParameter[] | IMetadataUserAttribute[] | undefined) {
     const displays = this.displays;
     if (!parameters || parameters.length === 0) {
       return [];
     }
     for (let parameter of parameters) {
-      const valueEnum = parameter.valueEnum;
+      const valueEnum = parameter.valueEnum ?? [];
       const values: IMetadataAttributeValue[] = [];
-      for (let v of valueEnum!) {
-        const key = `DICTIONARY#${parameter.projectId}#${parameter.appId}#${parameter.name}#${v}`;
+      for (let e of valueEnum) {
+        const key = `DICTIONARY#${parameter.projectId}#${parameter.appId}#${parameter.name}#${parameter.valueType}#${e.value}`;
         const display = displays.find((d: IMetadataDisplay) => d.id === key);
-        const value: IMetadataAttributeValue = {
-          value: v,
-          displayValue: display?.displayName ?? v,
-        };
-        values.push(value);
+        values.push({
+          value: e.value,
+          displayValue: display?.displayName ?? e.value,
+        });
       }
-      parameter.values = values;
       parameter.valueEnum = undefined;
+      parameter.values = values;
     }
     return parameters;
   }

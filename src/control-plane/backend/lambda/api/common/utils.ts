@@ -17,9 +17,10 @@ import { JSONPath } from 'jsonpath-plus';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import { amznRequestContextHeader } from './constants';
 import { ALBLogServiceAccountMapping, CORS_ORIGIN_DOMAIN_PATTERN, EMAIL_PATTERN, IP_PATTERN, ServerlessRedshiftRPUByRegionMapping } from './constants-ln';
+import { ConditionCategory, MetadataValueType } from './explore-types';
 import { logger } from './powertools';
 import { ALBRegionMappingObject, BucketPrefix, ClickStreamSubnet, IUserRole, PipelineStackType, PipelineStatus, RPURange, RPURegionMappingObject, ReportingDashboardOutput, SubnetType } from './types';
-import { IMetadataAttributeValue, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute } from '../model/metadata';
+import { DDBMetadata, DDBMetadataValue, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute } from '../model/metadata';
 import { CPipelineResources, IPipeline } from '../model/pipeline';
 import { IUserSettings } from '../model/user';
 import { UserService } from '../service/user';
@@ -593,7 +594,8 @@ function groupAssociatedEventParametersByName(events: IMetadataEvent[], paramete
         existedEvent.associatedParameters = [parameter];
         continue;
       }
-      let existedParameter = existedEvent.associatedParameters.find((p: IMetadataEventParameter) => p.name === parameter.name);
+      let existedParameter = existedEvent.associatedParameters.find(
+        (p: IMetadataEventParameter) => p.name === parameter.name && p.valueType === parameter.valueType);
       if (!existedParameter) {
         existedEvent.associatedParameters.push(parameter);
       } else {
@@ -604,52 +606,138 @@ function groupAssociatedEventParametersByName(events: IMetadataEvent[], paramete
   return events;
 };
 
-function groupEventByName(events: IMetadataEvent[]): IMetadataEvent[] {
+function getLatestEventByName(metadata: DDBMetadata[]): IMetadataEvent[] {
+  const latestEvents: IMetadataEvent[] = [];
+  for (let meta of metadata) {
+    const event: IMetadataEvent = {
+      id: meta.id,
+      month: meta.month,
+      prefix: meta.prefix,
+      projectId: meta.projectId,
+      appId: meta.appId,
+      name: meta.summary.name,
+      hasData: meta.summary.hasData ?? false,
+      platform: meta.summary.platform ?? [],
+      dataVolumeLastDay: meta.summary.dataVolumeLastDay ?? 0,
+    };
+    const index = latestEvents.findIndex((e: IMetadataEvent) => e.name === meta.summary.name);
+    if (index === -1) {
+      latestEvents.push(event);
+    } else if (meta.month > latestEvents[index].month) {
+      latestEvents[index] = event;
+    }
+  }
+  return latestEvents;
+};
+
+function getLatestParameterByName(metadata: DDBMetadata[]): IMetadataEventParameter[] {
+  const latestEventParameters: IMetadataEventParameter[] = [];
+  for (let meta of metadata) {
+    const parameter: IMetadataEventParameter = {
+      id: meta.id,
+      month: meta.month,
+      prefix: meta.prefix,
+      projectId: meta.projectId,
+      appId: meta.appId,
+      name: meta.summary.name,
+      eventName: meta.summary.eventName ?? '',
+      hasData: meta.summary.hasData ?? false,
+      platform: meta.summary.platform ?? [],
+      category: meta.summary.category ?? ConditionCategory.OTHER,
+      valueType: meta.summary.valueType ?? MetadataValueType.STRING,
+      valueEnum: meta.summary.valueEnum ?? [],
+    };
+    const index = latestEventParameters.findIndex(
+      (e: IMetadataEventParameter) => e.name === meta.summary.name && e.valueType === meta.summary.valueType);
+    if (index === -1) {
+      latestEventParameters.push(parameter);
+    } else if (meta.month > latestEventParameters[index].month) {
+      latestEventParameters[index] = parameter;
+    }
+  }
+  return latestEventParameters;
+};
+
+function getParameterByNameAndType(metadata: DDBMetadata[], parameterName: string, valueType: MetadataValueType):
+IMetadataEventParameter | undefined {
+  const filteredMetadata = metadata.filter((r: DDBMetadata) => r.summary.name === parameterName && r.summary.valueType === valueType);
+  if (filteredMetadata.length === 0) {
+    return;
+  }
   const groupEvents: IMetadataEvent[] = [];
-  for (let event of events) {
-    const existedEvent = groupEvents.find((e: IMetadataEvent) => e.name === event.name);
+  for (let meta of filteredMetadata) {
+    const existedEvent = groupEvents.find((e: IMetadataEvent) => e.name === meta.summary.eventName);
     if (!existedEvent) {
-      groupEvents.push(event);
-    } else {
-      existedEvent.hasData = existedEvent.hasData || event.hasData;
-      existedEvent.platform = [...new Set(existedEvent.platform.concat(event.platform))];
-      if (event.associatedParameters || existedEvent.associatedParameters) {
-        existedEvent.associatedParameters = concatEventParameter(existedEvent.associatedParameters, event.associatedParameters);
-      }
+      groupEvents.push({
+        id: `${meta.projectId}#${meta.appId}#${meta.summary.eventName}`,
+        projectId: meta.projectId,
+        appId: meta.appId,
+        name: meta.summary.eventName,
+        prefix: `EVENT#${meta.projectId}#${meta.appId}`,
+      } as IMetadataEvent);
     }
   }
-  return groupEvents;
+  return {
+    id: filteredMetadata[0].id,
+    month: filteredMetadata[0].month,
+    prefix: filteredMetadata[0].prefix,
+    projectId: filteredMetadata[0].projectId,
+    appId: filteredMetadata[0].appId,
+    name: filteredMetadata[0].summary.name,
+    eventName: '',
+    hasData: filteredMetadata[0].summary.hasData ?? false,
+    platform: filteredMetadata[0].summary.platform ?? [],
+    category: filteredMetadata[0].summary.category ?? ConditionCategory.OTHER,
+    valueType: filteredMetadata[0].summary.valueType ?? MetadataValueType.STRING,
+    valueEnum: filteredMetadata[0].summary.valueEnum ?? [],
+    associatedEvents: groupEvents,
+  } as IMetadataEventParameter;
 };
 
-function groupEventParameterByName(parameters: IMetadataEventParameter[]): IMetadataEventParameter[] {
-  const groupEventParameters: IMetadataEventParameter[] = [];
-  for (let parameter of parameters) {
-    const existedParameter = groupEventParameters.find((e: IMetadataEventParameter) => e.name === parameter.name);
-    if (!existedParameter) {
-      groupEventParameters.push(parameter);
-    } else {
-      existedParameter.hasData = existedParameter.hasData || parameter.hasData;
-      existedParameter.platform = [...new Set(existedParameter.platform.concat(parameter.platform))];
-      existedParameter.valueEnum = uniqueParameterValueEnum(existedParameter.valueEnum, parameter.valueEnum);
-      existedParameter.values = uniqueParameterValues(existedParameter.values, parameter.values);
+function getLatestAttributeByName(metadata: DDBMetadata[]): IMetadataUserAttribute[] {
+  const latestUserAttributes: IMetadataUserAttribute[] = [];
+  for (let meta of metadata) {
+    const attribute: IMetadataUserAttribute = {
+      id: meta.id,
+      month: meta.month,
+      prefix: meta.prefix,
+      projectId: meta.projectId,
+      appId: meta.appId,
+      name: meta.summary.name,
+      hasData: meta.summary.hasData ?? false,
+      category: meta.summary.category ?? ConditionCategory.OTHER,
+      valueType: meta.summary.valueType ?? MetadataValueType.STRING,
+      valueEnum: meta.summary.valueEnum ?? [],
+    };
+    const index = latestUserAttributes.findIndex(
+      (e: IMetadataUserAttribute) => e.name === meta.summary.name && e.valueType === meta.summary.valueType);
+    if (index === -1) {
+      latestUserAttributes.push(attribute);
+    } else if (meta.month > latestUserAttributes[index].month) {
+      latestUserAttributes[index] = attribute;
     }
   }
-  return groupEventParameters;
+  return latestUserAttributes;
 };
 
-function groupUserAttributeByName(attributes: IMetadataUserAttribute[]): IMetadataUserAttribute[] {
-  const groupAttributes: IMetadataUserAttribute[] = [];
-  for (let attribute of attributes) {
-    const existedAttribute = groupAttributes.find((e: IMetadataUserAttribute) => e.name === attribute.name);
-    if (!existedAttribute) {
-      groupAttributes.push(attribute);
-    } else {
-      existedAttribute.hasData = existedAttribute.hasData || attribute.hasData;
-      existedAttribute.valueEnum = uniqueParameterValueEnum(existedAttribute.valueEnum, attribute.valueEnum);
-      existedAttribute.values = uniqueParameterValues(existedAttribute.values, attribute.values);
-    }
+function getAttributeByNameAndType(metadata: DDBMetadata[], attributeName: string, valueType: MetadataValueType):
+IMetadataUserAttribute | undefined {
+  const filteredMetadata = metadata.filter((r: DDBMetadata) => r.summary.name === attributeName && r.summary.valueType === valueType);
+  if (filteredMetadata.length === 0) {
+    return;
   }
-  return groupAttributes;
+  return {
+    id: filteredMetadata[0].id,
+    month: filteredMetadata[0].month,
+    prefix: filteredMetadata[0].prefix,
+    projectId: filteredMetadata[0].projectId,
+    appId: filteredMetadata[0].appId,
+    name: filteredMetadata[0].summary.name,
+    hasData: filteredMetadata[0].summary.hasData ?? false,
+    category: filteredMetadata[0].summary.category ?? ConditionCategory.USER,
+    valueType: filteredMetadata[0].summary.valueType ?? MetadataValueType.STRING,
+    valueEnum: filteredMetadata[0].summary.valueEnum ?? [],
+  } as IMetadataUserAttribute;
 };
 
 function concatEventParameter(
@@ -659,33 +747,24 @@ function concatEventParameter(
     return concatEventParameters;
   }
   for (let parameter of parameters) {
-    const existedParameter = concatEventParameters.find((p: IMetadataEventParameter) => p.name === parameter.name);
+    const existedParameter = concatEventParameters.find(
+      (p: IMetadataEventParameter) => p.name === parameter.name && p.valueType === parameter.valueType);
     if (!existedParameter) {
       concatEventParameters.push(parameter);
     } else {
-      existedParameter.hasData = existedParameter.hasData || parameter.hasData;
-      existedParameter.platform = [...new Set(existedParameter.platform.concat(parameter.platform))];
-      existedParameter.valueEnum = uniqueParameterValueEnum(existedParameter.valueEnum, parameter.valueEnum);
-      existedParameter.values = uniqueParameterValues(existedParameter.values, parameter.values);
+      existedParameter.valueEnum = uniqueParameterValueEnum(existedParameter.valueEnum, parameter.valueEnum).sort(
+        (a, b) => a.count > b.count ? -1 : 1);
     }
   }
   return concatEventParameters;
 };
 
-function uniqueParameterValues(e: IMetadataAttributeValue[] | undefined, n: IMetadataAttributeValue[] | undefined) {
+function uniqueParameterValueEnum(e: DDBMetadataValue[] | undefined, n: DDBMetadataValue[] | undefined) {
   const existedValues = e ?? [];
   const newValues = n ?? [];
   const values = existedValues.concat(newValues);
   const res = new Map();
   return values.filter((item) => !res.has(item.value) && res.set(item.value, 1));
-};
-
-function uniqueParameterValueEnum(e: string[] | undefined, n: string[] | undefined) {
-  const existedValues = e ?? [];
-  const newValues = n ?? [];
-  const values = existedValues.concat(newValues);
-  const res = new Map();
-  return values.filter((item) => !res.has(item) && res.set(item, 1));
 };
 
 export {
@@ -716,10 +795,11 @@ export {
   getRoleFromToken,
   getUidFromTokenPayload,
   getTokenFromRequest,
-  uniqueParameterValues,
-  groupEventByName,
+  getLatestEventByName,
+  getLatestParameterByName,
   groupAssociatedEventsByName,
   groupAssociatedEventParametersByName,
-  groupEventParameterByName,
-  groupUserAttributeByName,
+  getLatestAttributeByName,
+  getParameterByNameAndType,
+  getAttributeByNameAndType,
 };

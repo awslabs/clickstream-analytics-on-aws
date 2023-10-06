@@ -116,7 +116,7 @@ const MetadataParameterSplitPanel: React.FC<
 
     try {
       const { success }: ApiResponse<null> = await updateMetadataDisplay({
-        id: `${EVENT_PARAMETER_DISPLAY_PREFIX}${parameterDetails.projectId}#${parameterDetails.appId}#${parameterDetails.name}`,
+        id: `${EVENT_PARAMETER_DISPLAY_PREFIX}${parameterDetails.projectId}#${parameterDetails.appId}#${parameterDetails.name}#${parameterDetails.valueType}`,
         projectId: parameterDetails.projectId,
         appId: parameterDetails.appId,
         displayName: parameterDetails.displayName,
@@ -150,7 +150,7 @@ const MetadataParameterSplitPanel: React.FC<
           projectId: projectId ?? '',
           appId: appId ?? '',
           parameterName: parameter.name,
-          parameterValueType: parameter.valueType,
+          parameterType: parameter.valueType,
         });
       if (success) {
         setParameterDetails(data);
