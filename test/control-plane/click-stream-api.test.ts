@@ -119,15 +119,11 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
           AttributeType: 'S',
         },
         {
-          AttributeName: 'createAt',
-          AttributeType: 'N',
-        },
-        {
-          AttributeName: 'prefix',
+          AttributeName: 'month',
           AttributeType: 'S',
         },
         {
-          AttributeName: 'type',
+          AttributeName: 'prefix',
           AttributeType: 'S',
         },
       ],
@@ -141,23 +137,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
               KeyType: 'HASH',
             },
             {
-              AttributeName: 'createAt',
-              KeyType: 'RANGE',
-            },
-          ],
-          Projection: {
-            ProjectionType: 'ALL',
-          },
-        },
-        {
-          IndexName: 'inverted-index',
-          KeySchema: [
-            {
-              AttributeName: 'type',
-              KeyType: 'HASH',
-            },
-            {
-              AttributeName: 'id',
+              AttributeName: 'month',
               KeyType: 'RANGE',
             },
           ],
@@ -172,7 +152,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
           KeyType: 'HASH',
         },
         {
-          AttributeName: 'createAt',
+          AttributeName: 'month',
           KeyType: 'RANGE',
         },
       ],
