@@ -11,15 +11,14 @@ OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific 
 and limitations under the License.
 """
 import json
-
 import enums
 
-PLATFORM = enums.Platform.All
+APP_TYPE = enums.Application.Shopping
 
 # for history event consts
-ALL_USER = 1000
+ALL_USER = 10000
 DURATION_OF_DAYS = 30
-RANDOM_DAU = range(100, 200)
+RANDOM_DAU = range(1000, 2000)
 PER_ACTION_DURATION = range(3, 60)
 events_per_request = 10000
 # gzip process number, for mac m1 is 8, for c5.metal is 50 to meet best performance
@@ -38,8 +37,13 @@ FLUSH_DURATION = 10
 IS_GZIP = True
 
 # common settings
-# session and action duration
 SESSION_TIMES = range(1, 5)
+
+# notepad configure
+ACTION_TIMES = range(0, 30)
+
+# shopping configure
+PLATFORM = enums.Platform.All
 
 # following value will be replaced by amplifyconfiguration.json file.
 APP_ID = ""

@@ -13,10 +13,9 @@ and limitations under the License.
 import random
 
 import enums
-from model import Event, Screen
-from model.EventType import EventType
-from model.Screen import Page
-from product import Products
+from shopping.ShoppingEventType import EventType
+from shopping.ShoppingScreen import Page
+from shopping import Products, ShoppingEvent, ShoppingScreen
 
 purchase_products = []
 cart_products = []
@@ -41,26 +40,26 @@ def get_enter_new_screen_events(user, event, page):
     if user.current_page_type != '':
         engagement_time = user.current_timestamp - user.current_page_start_time
         if engagement_time > 1000:
-            engagement_event = Event.clean_event(event)
+            engagement_event = ShoppingEvent.clean_event(event)
             engagement_event['_engagement_time_msec'] = engagement_time
-            events.append(Event.get_final_event(user, EventType.USER_ENGAGEMENT, engagement_event))
+            events.append(ShoppingEvent.get_final_event(user, EventType.USER_ENGAGEMENT, engagement_event))
     # screen view
-    screen_view_event = Event.clean_event(event)
-    page_info = Screen.get_page_by_platform(page, user.platform)
-    gen_screen_view_attribute(user, screen_view_event, page_info, engagement_time)
-    user.current_page = Screen.get_page_by_platform(page, user.platform)
+    screen_view_event = ShoppingEvent.clean_event(event)
+    # page_info = ShoppingScreen.get_page_by_platform(page, user.platform)
+    gen_screen_view_attribute(user, screen_view_event, engagement_time)
+    user.current_page = ShoppingScreen.get_page_by_platform(page, user.platform)
     user.current_page_type = page
     user.current_page_start_time = user.current_timestamp
     if user.platform == enums.Platform.Web:
         event_type = EventType.PAGE_VIEW
     else:
         event_type = EventType.SCREEN_VIEW
-    events.append(Event.get_final_event(user, event_type, screen_view_event))
+    events.append(ShoppingEvent.get_final_event(user, event_type, screen_view_event))
     return events
 
 
 # generate screen view attribute
-def gen_screen_view_attribute(user, event, page_info, engagement_time):
+def gen_screen_view_attribute(user, event, engagement_time):
     is_entrance = user.current_page_type == ''
     if is_entrance:
         event['attributes']['_entrances'] = 1
@@ -68,12 +67,13 @@ def gen_screen_view_attribute(user, event, page_info, engagement_time):
         event['attributes']['_entrances'] = 0
 
     if not is_entrance:
+        page_info = user.current_page
         if user.platform == enums.Platform.Web:
             event['attributes']['_page_referrer_title'] = page_info[0]
             event['attributes']['_page_referrer'] = page_info[1]
         else:
-            event['attributes']['_screen_name'] = page_info[0]
-            event['attributes']['_screen_id'] = page_info[1]
+            event['attributes']['_previous_screen_name'] = page_info[0]
+            event['attributes']['_previous_screen_id'] = page_info[1]
         event['attributes']['_engagement_time_msec'] = engagement_time
 
 
@@ -83,12 +83,12 @@ def get_exit_app_events(user, event):
     # user engagement
     engagement_time = user.current_timestamp - user.current_page_start_time
     if engagement_time > 1000:
-        event = Event.clean_event(event)
+        event = ShoppingEvent.clean_event(event)
         event['attributes']['_engagement_time_msec'] = engagement_time
-        events.append(Event.get_final_event(user, EventType.USER_ENGAGEMENT, event))
+        events.append(ShoppingEvent.get_final_event(user, EventType.USER_ENGAGEMENT, event))
     # app end
-    event = Event.clean_event(event)
-    events.append(Event.get_final_event(user, EventType.APP_END, event))
+    event = ShoppingEvent.clean_event(event)
+    events.append(ShoppingEvent.get_final_event(user, EventType.APP_END, event))
     return events
 
 
@@ -117,7 +117,7 @@ def get_page_events(user, event, page_name):
 
 def get_main_page_events(event, user):
     events = []
-    next_page = Screen.get_next_page(Page.MAIN)
+    next_page = ShoppingScreen.get_next_page(Page.MAIN)
     scroll_times = enums.main_page_scroll_times.get_random_item()
     # popular product exposure
     global clicked_product, current_feature
@@ -136,7 +136,7 @@ def get_main_page_events(event, user):
             featured_products = Products.get_random_category_product(user.prefer_category, 4)
         else:
             featured_products = Products.get_random_product(4)
-        events.append(Event.get_final_event(user, EventType.SCROLL, Event.clean_event(event)))
+        events.append(ShoppingEvent.get_final_event(user, EventType.SCROLL, ShoppingEvent.clean_event(event)))
         events.extend(Products.get_exposure_events(user, featured_products, event, enums.Feature.featured))
         user.current_timestamp += random.randint(3, 5) * 1000
     if next_page == Page.DETAIL:
@@ -151,7 +151,7 @@ def get_main_page_events(event, user):
 
 def get_category_page_events(event, user):
     events = []
-    next_page = Screen.get_next_page(Page.CATEGORY)
+    next_page = ShoppingScreen.get_next_page(Page.CATEGORY)
     global clicked_product, current_feature
     current_category = enums.product_category.get_random_item()
     if user.prefer_category == '':
@@ -161,7 +161,7 @@ def get_category_page_events(event, user):
     user.current_timestamp += random.randint(3, 60) * 1000
     scroll_times = enums.category_page_scroll_times.get_random_item()
     if scroll_times > 0:
-        events.append(Event.get_final_event(user, EventType.SCROLL, Event.clean_event(event)))
+        events.append(ShoppingEvent.get_final_event(user, EventType.SCROLL, ShoppingEvent.clean_event(event)))
         category_products = Products.get_random_category_product(user.prefer_category, 4)
         events.extend(Products.get_exposure_events(user, category_products, event, enums.Feature.category))
     user.current_timestamp += random.randint(3, 60) * 1000
@@ -173,16 +173,16 @@ def get_category_page_events(event, user):
 
 def get_search_page_events(event, user):
     events = []
-    next_page = Screen.get_next_page(Page.SEARCH)
+    next_page = ShoppingScreen.get_next_page(Page.SEARCH)
     global clicked_product, current_feature
     search_times = enums.search_times.get_random_item()
     search_products = []
     for i in range(search_times):
         search_category = enums.product_category.get_random_item()
-        search_event = Event.clean_event(event)
+        search_event = ShoppingEvent.clean_event(event)
         search_event['_search_key'] = 's'
         search_event['_search_term'] = search_category
-        events.append(Event.get_final_event(user, EventType.SEARCH, search_event))
+        events.append(ShoppingEvent.get_final_event(user, EventType.SEARCH, search_event))
         search_products = Products.get_random_category_product(search_category, 4)
         events.extend(Products.get_exposure_events(user, search_products, event, enums.Feature.search))
         user.current_timestamp += random.randint(15, 60) * 1000
@@ -211,18 +211,18 @@ def get_detail_page_events(event, user):
     scroll_times = enums.detail_page_scroll_times.get_random_item()
     similar_products = []
     if scroll_times > 0:
-        events.append(Event.get_final_event(user, EventType.SCROLL, Event.clean_event(event)))
+        events.append(ShoppingEvent.get_final_event(user, EventType.SCROLL, ShoppingEvent.clean_event(event)))
         similar_products = Products.get_random_category_product(clicked_product['category'], 4)
         events.extend(Products.get_exposure_events(user, similar_products, event, enums.Feature.similar))
-        next_page = Screen.get_next_page(Page.DETAIL)
+        next_page = ShoppingScreen.get_next_page(Page.DETAIL)
     else:
-        next_page = Screen.next_page_of_detail_without_scroll.get_random_item()
+        next_page = ShoppingScreen.next_page_of_detail_without_scroll.get_random_item()
     if next_page == Page.DETAIL:
         clicked_product = random.sample(similar_products, 1)[0]
         current_feature = enums.Feature.similar
     elif next_page == Page.CHECKOUT:
         purchase_products = [clicked_product]
-        events.append(Event.get_final_event(user, EventType.BEGIN_CHECKOUT, Event.clean_event(event)))
+        events.append(ShoppingEvent.get_final_event(user, EventType.BEGIN_CHECKOUT, ShoppingEvent.clean_event(event)))
     return events, next_page
 
 
@@ -240,22 +240,22 @@ def get_cart_page_events(event, user):
             user.current_timestamp += random.randint(3, 10) * 1000
             cart_products.remove(removed_product)
     if len(cart_products) > 0:
-        next_page = Screen.get_next_page(Page.CART)
+        next_page = ShoppingScreen.get_next_page(Page.CART)
     else:
-        next_page = Screen.next_page_of_empty_cart.get_random_item()
+        next_page = ShoppingScreen.next_page_of_empty_cart.get_random_item()
     if next_page == Page.DETAIL:
         clicked_product = random.sample(cart_products, 1)[0]
         current_feature = enums.Feature.cart
     elif next_page == Page.CHECKOUT:
         purchase_products = cart_products
-        events.append(Event.get_final_event(user, EventType.BEGIN_CHECKOUT, Event.clean_event(event)))
+        events.append(ShoppingEvent.get_final_event(user, EventType.BEGIN_CHECKOUT, ShoppingEvent.clean_event(event)))
     user.current_timestamp += random.randint(3, 10) * 1000
     return events, next_page
 
 
 def get_checkout_page_events(event, user):
     events = []
-    next_page = Screen.get_next_page(Page.CHECKOUT)
+    next_page = ShoppingScreen.get_next_page(Page.CHECKOUT)
     global cart_products
     if next_page == Page.RESULT:
         events.append(Products.get_purchase_event(user, cart_products, event))
@@ -265,20 +265,20 @@ def get_checkout_page_events(event, user):
 
 def get_result_page_events(event, user):
     events = []
-    next_page = Screen.get_next_page(Page.RESULT)
+    next_page = ShoppingScreen.get_next_page(Page.RESULT)
     user.current_timestamp = random.randint(3, 10) * 1000
     return events, next_page
 
 
 def get_profile_page_events(event, user):
     events = []
-    next_page = Screen.get_next_page(Page.PROFILE)
+    next_page = ShoppingScreen.get_next_page(Page.PROFILE)
     # logout event
     if next_page == Page.LOGIN:
         if user.is_login:
             user.is_login = False
             del event["user"]["_user_id"]
-            events.append(Event.get_final_event(user, EventType.LOGOUT, Event.clean_event(event)))
+            events.append(ShoppingEvent.get_final_event(user, EventType.LOGOUT, ShoppingEvent.clean_event(event)))
     user.current_timestamp += random.randint(3, 10) * 1000
     return events, next_page
 
@@ -286,11 +286,11 @@ def get_profile_page_events(event, user):
 def get_login_page_events(event, user):
     events = []
     if user.is_login:
-        next_page = Screen.Page.MAIN
+        next_page = ShoppingScreen.Page.MAIN
         return events, next_page
     user.current_timestamp += random.randint(10, 60) * 1000
-    next_page = Screen.get_next_page(Page.LOGIN)
-    if next_page == Screen.Page.MAIN:
+    next_page = ShoppingScreen.get_next_page(Page.LOGIN)
+    if next_page == ShoppingScreen.Page.MAIN:
         # login event
         if user.is_login_user:
             # profile set
@@ -299,7 +299,7 @@ def get_login_page_events(event, user):
                 "set_timestamp": user.current_timestamp
             }
             event["user"]["_user_id"] = user_id
-            profile_set_event = Event.clean_event(event)
+            profile_set_event = ShoppingEvent.clean_event(event)
             user_name = {
                 "value": user.name,
                 "set_timestamp": user.current_timestamp
@@ -315,9 +315,9 @@ def get_login_page_events(event, user):
                 "set_timestamp": user.current_timestamp
             }
             profile_set_event["user"]["age"] = user_age
-            events.append(Event.get_final_event(user, EventType.PROFILE_SET, profile_set_event))
+            events.append(ShoppingEvent.get_final_event(user, EventType.PROFILE_SET, profile_set_event))
 
-            events.append(Event.get_final_event(user, EventType.LOGIN, Event.clean_event(event)))
+            events.append(ShoppingEvent.get_final_event(user, EventType.LOGIN, ShoppingEvent.clean_event(event)))
             user.is_login = True
             user.login_timestamp = user.current_timestamp
     return events, next_page
@@ -326,8 +326,8 @@ def get_login_page_events(event, user):
 def get_sign_up_page_events(event, user):
     events = []
     user.current_timestamp += random.randint(5, 100) * 1000
-    next_page = Screen.get_next_page(Page.SIGN_UP)
-    if next_page == Screen.Page.MAIN:
+    next_page = ShoppingScreen.get_next_page(Page.SIGN_UP)
+    if next_page == ShoppingScreen.Page.MAIN:
         # sign up success
-        events.append(Event.get_final_event(user, EventType.SIGN_UP, Event.clean_event(event)))
+        events.append(ShoppingEvent.get_final_event(user, EventType.SIGN_UP, ShoppingEvent.clean_event(event)))
     return events, next_page

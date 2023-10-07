@@ -22,6 +22,11 @@ class Platform:
     All = "All"
 
 
+class Application:
+    NotePad = "NotePad"
+    Shopping = "Shopping"
+
+
 class Feature:
     popular = "popular"
     featured = "featured"

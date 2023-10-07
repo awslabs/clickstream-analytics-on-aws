@@ -16,9 +16,10 @@ import configure
 import enums as enums
 import send_event
 import util.util as utils
-import model.Event as Event
-from model import Screen
+import shopping.ShoppingEvent as Event
 from model.User import User
+from notepad import NotepadEvent
+from shopping import ShoppingScreen
 
 
 def get_users(count):
@@ -37,25 +38,37 @@ def get_user_event_of_day(user, day, events_of_day):
     for i in range(session_times):
         # init current timestamp
         user.current_timestamp = start_times[i]
-
-        # launch events
-        events.extend(Event.get_launch_events(user, event))
-        user.current_timestamp += random.choices(configure.PER_ACTION_DURATION)[0] * 1000
-
-        # different action in one session
-        screen_view_times = enums.screen_view_times.get_random_item() + random.randint(0, 9)
-        page = Screen.Page.LOGIN
-        for j in range(screen_view_times):
-            result = Event.get_screen_events(user, event, page)
-            events.extend(result[0])
-            if page == Screen.Page.EXIT:
-                break
-            page = result[1]
-        if page != Screen.Page.EXIT:
-            page = Screen.Page.EXIT
-            result = Event.get_screen_events(user, event, page)
-            events.extend(result[0])
+        if configure.APP_TYPE == enums.Application.NotePad:
+            get_events_for_notepad(user, events, event)
+        elif configure.APP_TYPE == enums.Application.Shopping:
+            get_events_for_shopping(user, events, event)
     events_of_day.extend(events)
+
+
+def get_events_for_shopping(user, events, event):
+    events.extend(Event.get_launch_events(user, event))
+    # different action in one session
+    screen_view_times = enums.screen_view_times.get_random_item() + random.randint(0, 9)
+    page = ShoppingScreen.Page.LOGIN
+    for j in range(screen_view_times):
+        result = Event.get_screen_events(user, event, page)
+        events.extend(result[0])
+        if page == ShoppingScreen.Page.EXIT:
+            break
+        page = result[1]
+    if page != ShoppingScreen.Page.EXIT:
+        page = ShoppingScreen.Page.EXIT
+        result = Event.get_screen_events(user, event, page)
+        events.extend(result[0])
+
+
+def get_events_for_notepad(user, events, event):
+    events.extend(NotepadEvent.get_launch_events(user, event))
+    user.current_timestamp += random.choices(configure.PER_ACTION_DURATION)[0] * 1000
+    action_times = random.choices(configure.ACTION_TIMES)[0]
+    for j in range(action_times):
+        events.extend(NotepadEvent.get_action_events(user, event))
+    events.extend(NotepadEvent.get_exit_events(user, event))
 
 
 if __name__ == '__main__':

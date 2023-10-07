@@ -46,23 +46,30 @@ class User:
         self.current_page_type = ''
         self.current_page = ('', '')
         self.current_page_start_time = 0
-        self.prefer_category = ''
         self.gender = gender
         self.age = age
+        # shopping attribute
+        self.prefer_category = ''
+        # notepad attribute
+        self.note_id = 1
 
     @staticmethod
     def get_random_user():
+        platform = enums.Platform.Android
         mobile_device = None
         device_web = None
         is_switch_to_web = False
-        if configure.PLATFORM == enums.Platform.All:
-            platform = enums.random_platform.get_random_item()
-            if platform != enums.Platform.Web:
-                is_switch_to_web = enums.is_switch_to_web.get_random_item()
-                if is_switch_to_web:
-                    device_web = WebDevice.get_random_device()
-        else:
-            platform = configure.PLATFORM
+        if configure.APP_TYPE == enums.Application.Shopping:
+            if configure.PLATFORM == enums.Platform.All:
+                platform = enums.random_platform.get_random_item()
+                if platform != enums.Platform.Web:
+                    is_switch_to_web = enums.is_switch_to_web.get_random_item()
+                    if is_switch_to_web:
+                        device_web = WebDevice.get_random_device()
+            else:
+                platform = configure.PLATFORM
+        elif configure.APP_TYPE == enums.Application.NotePad:
+            platform = enums.Platform.Android
 
         if platform == enums.Platform.Web:
             device_web = WebDevice.get_random_device()

@@ -14,7 +14,7 @@ import random
 import enums as enums
 import send_event_real_time
 import util.util as utils
-import model.Event as Event
+import shopping.ShoppingEvent as Event
 from model.User import User
 import time
 from concurrent.futures import ThreadPoolExecutor

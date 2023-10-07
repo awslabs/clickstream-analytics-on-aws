@@ -15,8 +15,8 @@ import random
 import configure
 import enums as enums
 import util.util as utils
-from model import EventSample, ScreenEvent, Screen
-from model.EventType import EventType
+from shopping import ScreenEvent, ShoppingScreen, EventSample
+from shopping.ShoppingEventType import EventType
 
 
 def get_event_for_user(user):
@@ -142,7 +142,7 @@ def get_launch_events(user, event):
 
     # add splash screen view for app
     if user.platform != enums.Platform.Web:
-        events.extend(ScreenEvent.get_enter_new_screen_events(user, event, Screen.Page.SPLASH))
+        events.extend(ScreenEvent.get_enter_new_screen_events(user, event, ShoppingScreen.Page.SPLASH))
         user.current_timestamp += 1100
     return events
 
@@ -151,7 +151,7 @@ def get_launch_events(user, event):
 def get_screen_events(user, event, page):
     events = []
     next_page = ''
-    if page != Screen.Page.EXIT:
+    if page != ShoppingScreen.Page.EXIT:
         events.extend(ScreenEvent.get_enter_new_screen_events(user, event, page))
         result = ScreenEvent.get_page_events(user, event, page)
         events.extend(result[0])
