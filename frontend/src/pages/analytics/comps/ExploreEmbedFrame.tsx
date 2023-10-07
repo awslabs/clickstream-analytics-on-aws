@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 import { createEmbeddingContext } from 'amazon-quicksight-embedding-sdk';
+import i18n from 'i18n';
 import React, { useEffect } from 'react';
 
 interface ExploreEmbedFrameProps {
@@ -49,7 +50,7 @@ const ExploreEmbedFrame: React.FC<ExploreEmbedFrameProps> = (
             height: '1000',
           },
           {
-            locale: 'en-US',
+            locale: i18n.language,
           }
         );
         break;

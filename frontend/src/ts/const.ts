@@ -29,13 +29,15 @@ export const ALPHABETS = Array.from({ length: 26 }, (_, index) =>
   String.fromCharCode(65 + index)
 );
 export const MAX_USER_INPUT_LENGTH = 1024;
-export const ZH_LANGUAGE_LIST = ['zh', 'zh-cn', 'zh_CN', 'zh-CN'];
+export const DEFAULT_ZH_LANG = 'zh-CN';
+export const DEFAULT_EN_LANG = 'en-US';
+export const ZH_LANGUAGE_LIST = ['zh', 'zh-cn', 'zh_CN'];
 
 export const ZH_TEXT = '简体中文';
 export const EN_TEXT = 'English(US)';
 export const LANGUAGE_ITEMS = [
-  { id: 'en', text: EN_TEXT },
-  { id: 'zh', text: ZH_TEXT },
+  { id: DEFAULT_EN_LANG, text: EN_TEXT },
+  { id: DEFAULT_ZH_LANG, text: ZH_TEXT },
 ];
 
 export const XMIND_LINK = 'https://www.maxmind.com';
