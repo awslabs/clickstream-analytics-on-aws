@@ -285,6 +285,9 @@ def get_profile_page_events(event, user):
 
 def get_login_page_events(event, user):
     events = []
+    if user.is_login:
+        next_page = Screen.Page.MAIN
+        return events, next_page
     user.current_timestamp += random.randint(10, 60) * 1000
     next_page = Screen.get_next_page(Page.LOGIN)
     if next_page == Screen.Page.MAIN:

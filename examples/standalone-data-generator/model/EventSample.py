@@ -40,7 +40,7 @@ sampleAppEvent = {
         "_traffic_source_source": "",
         "_traffic_source_medium": "",
         "_screen_name": "",
-        "_screen_unique_id": ""
+        "_screen_id": ""
     }
 }
 
