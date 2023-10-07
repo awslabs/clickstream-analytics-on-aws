@@ -13,7 +13,7 @@
 
 import { MetadataParameterType, MetadataSource } from '../common/explore-types';
 import { logger } from '../common/powertools';
-import { IMetadataAttributeValue, IMetadataDisplay, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute, IMetadataWhiteList } from '../model/metadata';
+import { IMetadataAttributeValue, IMetadataDisplay, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute, IMetadataBuiltInList } from '../model/metadata';
 import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbMetadataStore } from '../store/dynamodb/dynamodb-metadata-store';
 import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
@@ -25,11 +25,11 @@ const store: ClickStreamStore = new DynamoDbStore();
 export class CMetadataDisplay {
 
   private displays: IMetadataDisplay[];
-  private whiteList?: IMetadataWhiteList;
+  private builtList?: IMetadataBuiltInList;
 
   constructor() {
     this.displays = [];
-    this.whiteList = undefined;
+    this.builtList = undefined;
   }
 
   public async getDisplay(projectId: string, appId: string) {
@@ -39,14 +39,14 @@ export class CMetadataDisplay {
     return this.displays;
   }
 
-  public async getWhiteList() {
-    if (!this.whiteList) {
-      const dic = await store.getDictionary('MetadataWhiteList');
+  public async getBuiltList() {
+    if (!this.builtList) {
+      const dic = await store.getDictionary('MetadataBuiltInList');
       if (dic) {
-        this.whiteList = dic.data as IMetadataWhiteList;
+        this.builtList = dic.data as IMetadataBuiltInList;
       }
     }
-    return this.whiteList;
+    return this.builtList;
   }
 
   public async update(display: IMetadataDisplay) {
@@ -69,10 +69,10 @@ export class CMetadataDisplay {
     const metadataDisplay = this.displays.find((d: IMetadataDisplay) => d.id === key);
     event.displayName = metadataDisplay?.displayName ?? event.name;
     event.description = metadataDisplay?.description ?? '';
-    if (!this.whiteList) {
+    if (!this.builtList) {
       return;
     }
-    const presetEvent = this.whiteList.PresetEvents.find((e: any) => e.name === event.name);
+    const presetEvent = this.builtList.PresetEvents.find((e: any) => e.name === event.name);
     event.metadataSource = presetEvent ? MetadataSource.PRESET : MetadataSource.CUSTOM;
     event.description = presetEvent ? presetEvent.description : event.description;
   }
@@ -86,12 +86,12 @@ export class CMetadataDisplay {
     const metadataDisplay = this.displays.find((d: IMetadataDisplay) => d.id === key);
     parameter.displayName = metadataDisplay?.displayName ?? parameter.name;
     parameter.description = metadataDisplay?.description ?? '';
-    if (!this.whiteList) {
+    if (!this.builtList) {
       return;
     }
-    const presetEventParameter = this.whiteList.PresetEventParameters.find(
+    const presetEventParameter = this.builtList.PresetEventParameters.find(
       (e: any) => e.name === parameter.name && e.dataType === parameter.valueType);
-    const publicEventParameter = this.whiteList.PublicEventParameters.find(
+    const publicEventParameter = this.builtList.PublicEventParameters.find(
       (e: any) => e.name === parameter.name && e.dataType === parameter.valueType);
     parameter.metadataSource = presetEventParameter ? MetadataSource.PRESET : MetadataSource.CUSTOM;
     parameter.description = presetEventParameter ? presetEventParameter.description : parameter.description;
@@ -107,10 +107,10 @@ export class CMetadataDisplay {
     const metadataDisplay = this.displays.find((d: IMetadataDisplay) => d.id === key);
     attribute.displayName = metadataDisplay?.displayName ?? attribute.name;
     attribute.description = metadataDisplay?.description ?? '';
-    if (!this.whiteList) {
+    if (!this.builtList) {
       return;
     }
-    const presetUserAttribute = this.whiteList.PresetUserAttributes.find(
+    const presetUserAttribute = this.builtList.PresetUserAttributes.find(
       (e: any) => e.name === attribute.name && e.dataType === attribute.valueType);
     attribute.metadataSource = presetUserAttribute ? MetadataSource.PRESET : MetadataSource.CUSTOM;
     attribute.description = presetUserAttribute ? presetUserAttribute.description : attribute.description;
@@ -120,7 +120,7 @@ export class CMetadataDisplay {
     metadataArray: IMetadataEvent[] | IMetadataEventParameter[] | IMetadataUserAttribute[]) {
     try {
       await this.getDisplay(projectId, appId);
-      await this.getWhiteList();
+      await this.getBuiltList();
       for (let metadata of metadataArray) {
         const prefix = metadata.prefix.split('#')[0];
         switch (prefix) {

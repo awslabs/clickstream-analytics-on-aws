@@ -250,46 +250,46 @@ function displayDataMock(m: any) {
       },
     ],
   });
-  // WhiteList
+  // BuiltList
   m.on(GetCommand, {
     TableName: dictionaryTableName,
     Key: {
-      name: 'MetadataWhiteList',
+      name: 'MetadataBuiltInList',
     },
   }).resolves({
     Item: {
-      name: 'MetadataWhiteList',
+      name: 'MetadataBuiltInList',
       data: {
         PresetEvents: [
           {
             name: MOCK_EVENT_NAME,
-            description: 'mock event description in white list',
+            description: 'mock event description in built-in',
           },
         ],
         PresetEventParameters: [
           {
             name: MOCK_EVENT_PARAMETER_NAME,
             dataType: 'String',
-            description: 'mock preset event parameter description in white list',
+            description: 'mock preset event parameter description in built-in',
           },
         ],
         PublicEventParameters: [
           {
             name: MOCK_EVENT_PARAMETER_NAME,
             dataType: 'String',
-            description: 'mock public event parameter description in white list',
+            description: 'mock public event parameter description in built-in',
           },
           {
             name: `${MOCK_EVENT_PARAMETER_NAME}11`,
             dataType: 'Integer',
-            description: 'mock public event parameter description in white list',
+            description: 'mock public event parameter description in built-in',
           },
         ],
         PresetUserAttributes: [
           {
             name: MOCK_USER_ATTRIBUTE_NAME,
             dataType: 'String',
-            description: 'mock preset user attribute description in white list',
+            description: 'mock preset user attribute description in built-in',
           },
         ],
       },
@@ -375,7 +375,7 @@ describe('Metadata Event test', () => {
             name: MOCK_EVENT_PARAMETER_NAME,
             eventName: MOCK_EVENT_NAME,
             displayName: MOCK_EVENT_PARAMETER_NAME,
-            description: 'mock preset event parameter description in white list',
+            description: 'mock preset event parameter description in built-in',
             parameterType: 'Public',
             hasData: true,
             platform: [MetadataPlatform.ANDROID, MetadataPlatform.IOS],
@@ -395,7 +395,7 @@ describe('Metadata Event test', () => {
         metadataSource: MetadataSource.PRESET,
         dataVolumeLastDay: 2048,
         displayName: `display name of event ${MOCK_EVENT_NAME}`,
-        description: 'mock event description in white list',
+        description: 'mock event description in built-in',
       },
     });
   });
@@ -868,7 +868,7 @@ describe('Metadata Event Attribute test', () => {
             appId: MOCK_APP_ID,
             metadataSource: MetadataSource.PRESET,
             displayName: `display name of event ${MOCK_EVENT_NAME}`,
-            description: 'mock event description in white list',
+            description: 'mock event description in built-in',
           },
           {
             name: `${MOCK_EVENT_NAME}1`,
@@ -887,7 +887,7 @@ describe('Metadata Event Attribute test', () => {
         projectId: MOCK_PROJECT_ID,
         appId: MOCK_APP_ID,
         name: MOCK_EVENT_PARAMETER_NAME,
-        description: 'mock preset event parameter description in white list',
+        description: 'mock preset event parameter description in built-in',
         displayName: MOCK_EVENT_PARAMETER_NAME,
         eventName: '',
         category: 'event',
@@ -1016,7 +1016,7 @@ describe('Metadata Event Attribute test', () => {
             projectId: MOCK_PROJECT_ID,
             appId: MOCK_APP_ID,
             name: MOCK_EVENT_PARAMETER_NAME,
-            description: 'mock preset event parameter description in white list',
+            description: 'mock preset event parameter description in built-in',
             displayName: MOCK_EVENT_PARAMETER_NAME,
             eventName: MOCK_EVENT_NAME,
             category: 'event',
@@ -1179,7 +1179,7 @@ describe('Metadata User Attribute test', () => {
             projectId: MOCK_PROJECT_ID,
             appId: MOCK_APP_ID,
             name: MOCK_USER_ATTRIBUTE_NAME,
-            description: 'mock preset user attribute description in white list',
+            description: 'mock preset user attribute description in built-in',
             displayName: 'display name of user parameter user-attribute-mock',
             category: 'user',
             hasData: true,

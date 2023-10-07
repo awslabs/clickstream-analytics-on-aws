@@ -80,7 +80,7 @@
     ]
   },
   {
-    "name": "MetadataWhiteList",
+    "name": "MetadataBuiltInList",
     "data": {
       "PresetEvents": [
         {

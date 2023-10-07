@@ -118,7 +118,7 @@ export interface IMetadataDisplay {
   readonly updateAt: number;
 }
 
-export interface IMetadataWhiteList {
+export interface IMetadataBuiltInList {
   readonly PresetEvents: Array<{
     name: string;
     description: string;
