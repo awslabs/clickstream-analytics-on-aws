@@ -17,15 +17,15 @@ import enums
 PLATFORM = enums.Platform.All
 
 # for history event consts
-ALL_USER = 10000
+ALL_USER = 1000
 DURATION_OF_DAYS = 30
-RANDOM_DAU = range(1000, 2000)
+RANDOM_DAU = range(100, 200)
 PER_ACTION_DURATION = range(3, 60)
 events_per_request = 10000
 # gzip process number, for mac m1 is 8, for c5.metal is 50 to meet best performance
 process_number = 50
 # control the speed for event send.
-max_upload_thread_number = 1
+max_upload_thread_number = 2
 request_sleep_time = 0.2
 gzip_times_per_day = 1
 

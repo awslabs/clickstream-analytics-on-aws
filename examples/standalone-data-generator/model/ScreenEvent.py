@@ -277,8 +277,7 @@ def get_profile_page_events(event, user):
     if next_page == Page.LOGIN:
         if user.is_login:
             user.is_login = False
-            event["user"]["_user_id"]["value"] = ''
-            event["user"]["_user_id"]["set_timestamp"] = 0
+            del event["user"]["_user_id"]
             events.append(Event.get_final_event(user, EventType.LOGOUT, Event.clean_event(event)))
     user.current_timestamp += random.randint(3, 10) * 1000
     return events, next_page
