@@ -36,6 +36,17 @@ def get_session_id_of_timestamp(timestamp):
     return date_obj.strftime("%Y%m%d-%H%M%S%f")[:-3]
 
 
+def get_session_start_time_arr(session_times, day):
+    times = []
+    for i in range(session_times):
+        hour = enums.visit_hour.get_random_item()
+        minute = random.choices(enums.visit_minutes)[0]
+        start_timestamp = day + (hour * 60 * 60 + minute * 60 + random.randint(0, 59)) * 1000 + random.randint(0, 999)
+        times.append(start_timestamp)
+    times.sort()
+    return times
+
+
 def get_day_of_timestamp(timestamp):
     date_obj = datetime.datetime.fromtimestamp(timestamp / 1000)
     return date_obj.strftime("%Y%m%d")

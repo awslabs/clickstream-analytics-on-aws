@@ -147,7 +147,7 @@ def get_purchase_event(user, products, event):
         total_price += product['price']
         purchase_event['items'].append(item)
         purchase_event['attributes']['order_id'] = utils.get_unique_id()
-    purchase_event['attributes']['value'] = total_price
+    purchase_event['attributes']['value'] = round(total_price, 2)
     return Event.get_final_event(user, EventType.PURCHASE, purchase_event)
 
 

@@ -18,12 +18,6 @@ from model.EventType import EventType
 from model.Screen import Page
 from product import Products
 
-popular_products = []
-featured_products = []
-similar_products = []
-search_products = []
-category_products = []
-
 purchase_products = []
 cart_products = []
 
@@ -32,13 +26,7 @@ current_feature = ''
 
 
 def clear():
-    global popular_products, featured_products, similar_products, search_products, category_products, \
-        purchase_products, cart_products, clicked_product, current_feature
-    popular_products = []
-    featured_products = []
-    similar_products = []
-    search_products = []
-    category_products = []
+    global purchase_products, cart_products, clicked_product, current_feature
     purchase_products = []
     cart_products = []
     clicked_product = {}
@@ -93,7 +81,7 @@ def gen_screen_view_attribute(user, event, page_info, engagement_time):
 def get_exit_app_events(user, event):
     events = []
     # user engagement
-    engagement_time = user.current_page_start_time - user.current_timestamp
+    engagement_time = user.current_timestamp - user.current_page_start_time
     if engagement_time > 1000:
         event = Event.clean_event(event)
         event['attributes']['_engagement_time_msec'] = engagement_time
@@ -132,8 +120,9 @@ def get_main_page_events(event, user):
     next_page = Screen.get_next_page(Page.MAIN)
     scroll_times = enums.main_page_scroll_times.get_random_item()
     # popular product exposure
-    global popular_products, featured_products, clicked_product, current_feature
+    global clicked_product, current_feature
     popular_products = Products.get_random_product(8)
+    featured_products = []
     events.extend(Products.get_exposure_events(user, popular_products, event, enums.Feature.popular))
     user.current_timestamp += random.randint(3, 10) * 1000
     # scroll for more
@@ -163,7 +152,7 @@ def get_main_page_events(event, user):
 def get_category_page_events(event, user):
     events = []
     next_page = Screen.get_next_page(Page.CATEGORY)
-    global category_products, clicked_product, current_feature
+    global clicked_product, current_feature
     current_category = enums.product_category.get_random_item()
     if user.prefer_category == '':
         user.prefer_category = current_category
@@ -185,8 +174,9 @@ def get_category_page_events(event, user):
 def get_search_page_events(event, user):
     events = []
     next_page = Screen.get_next_page(Page.SEARCH)
-    global search_products, clicked_product, current_feature
+    global clicked_product, current_feature
     search_times = enums.search_times.get_random_item()
+    search_products = []
     for i in range(search_times):
         search_category = enums.product_category.get_random_item()
         search_event = Event.clean_event(event)
@@ -206,7 +196,7 @@ def get_search_page_events(event, user):
 def get_detail_page_events(event, user):
     events = []
 
-    global clicked_product, category_products, current_feature, purchase_products
+    global clicked_product, current_feature, purchase_products
     # view item
     if clicked_product != {}:
         events.append(Products.get_view_item_event(user, clicked_product, event, current_feature))
@@ -219,16 +209,16 @@ def get_detail_page_events(event, user):
         cart_products.append(clicked_product)
     # scroll event in 50% rate
     scroll_times = enums.detail_page_scroll_times.get_random_item()
-
+    similar_products = []
     if scroll_times > 0:
         events.append(Event.get_final_event(user, EventType.SCROLL, Event.clean_event(event)))
-        category_products = Products.get_random_category_product(clicked_product['category'], 4)
-        events.extend(Products.get_exposure_events(user, category_products, event, enums.Feature.similar))
+        similar_products = Products.get_random_category_product(clicked_product['category'], 4)
+        events.extend(Products.get_exposure_events(user, similar_products, event, enums.Feature.similar))
         next_page = Screen.get_next_page(Page.DETAIL)
     else:
         next_page = Screen.next_page_of_detail_without_scroll.get_random_item()
     if next_page == Page.DETAIL:
-        clicked_product = random.sample(category_products, 1)[0]
+        clicked_product = random.sample(similar_products, 1)[0]
         current_feature = enums.Feature.similar
     elif next_page == Page.CHECKOUT:
         purchase_products = [clicked_product]
@@ -299,34 +289,35 @@ def get_login_page_events(event, user):
     user.current_timestamp += random.randint(10, 60) * 1000
     next_page = Screen.get_next_page(Page.LOGIN)
     if next_page == Screen.Page.MAIN:
-        # profile set
-
-        user_id = {
-            "value": user.user_id,
-            "set_timestamp": user.current_timestamp
-        }
-        event["user"]["_user_id"] = user_id
-        profile_set_event = Event.clean_event(event)
-        user_name = {
-            "value": user.name,
-            "set_timestamp": user.current_timestamp
-        }
-        profile_set_event["user"]["username"] = user_name
-        user_gender = {
-            "value": user.gender,
-            "set_timestamp": user.current_timestamp
-        }
-        profile_set_event["user"]["gender"] = user_gender
-        user_age = {
-            "value": user.age,
-            "set_timestamp": user.current_timestamp
-        }
-        profile_set_event["user"]["age"] = user_age
-        events.append(Event.get_final_event(user, EventType.PROFILE_SET, profile_set_event))
         # login event
-        events.append(Event.get_final_event(user, EventType.LOGIN, Event.clean_event(event)))
-        user.is_login = True
-        user.login_timestamp = user.current_timestamp
+        if user.is_login_user:
+            # profile set
+            user_id = {
+                "value": user.user_id,
+                "set_timestamp": user.current_timestamp
+            }
+            event["user"]["_user_id"] = user_id
+            profile_set_event = Event.clean_event(event)
+            user_name = {
+                "value": user.name,
+                "set_timestamp": user.current_timestamp
+            }
+            profile_set_event["user"]["_user_name"] = user_name
+            user_gender = {
+                "value": user.gender,
+                "set_timestamp": user.current_timestamp
+            }
+            profile_set_event["user"]["gender"] = user_gender
+            user_age = {
+                "value": user.age,
+                "set_timestamp": user.current_timestamp
+            }
+            profile_set_event["user"]["age"] = user_age
+            events.append(Event.get_final_event(user, EventType.PROFILE_SET, profile_set_event))
+
+            events.append(Event.get_final_event(user, EventType.LOGIN, Event.clean_event(event)))
+            user.is_login = True
+            user.login_timestamp = user.current_timestamp
     return events, next_page
 
 

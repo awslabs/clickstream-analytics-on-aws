@@ -21,9 +21,9 @@ from model import Screen
 from model.User import User
 
 
-def init_all_user():
+def get_users(count):
     user_list = []
-    for i in range(configure.ALL_USER):
+    for i in range(count):
         user_list.append(User.get_random_user())
     return user_list
 
@@ -33,12 +33,10 @@ def get_user_event_of_day(user, day, events_of_day):
     session_times = random.choices(configure.SESSION_TIMES)[0]
     event = Event.get_event_for_user(user)
     # different session for user in one day
+    start_times = utils.get_session_start_time_arr(session_times, day)
     for i in range(session_times):
         # init current timestamp
-        hour = enums.visit_hour.get_random_item()
-        minute = random.choices(enums.visit_minutes)[0]
-        current_timestamp = day + (hour * 60 * 60 + minute * 60 + random.randint(0, 59)) * 1000 + random.randint(0, 999)
-        user.current_timestamp = current_timestamp
+        user.current_timestamp = start_times[i]
 
         # launch events
         events.extend(Event.get_launch_events(user, event))
@@ -56,7 +54,7 @@ def get_user_event_of_day(user, day, events_of_day):
         if page != Screen.Page.EXIT:
             page = Screen.Page.EXIT
             result = Event.get_screen_events(user, event, page)
-            events.extend(result)
+            events.extend(result[0])
     events_of_day.extend(events)
 
 
@@ -67,7 +65,8 @@ if __name__ == '__main__':
     else:
         start_time = utils.current_timestamp()
         # init all user
-        users = init_all_user()
+        users = get_users(int(configure.ALL_USER / 2))
+        new_users_of_day = int(configure.ALL_USER / 60)
         # get days arr
         days = utils.get_days_arr()
         total_event = 0
@@ -76,6 +75,7 @@ if __name__ == '__main__':
             print("start day: " + day_str)
             events_of_day = []
             users_count = random.choices(configure.RANDOM_DAU)[0]
+            users.extend(get_users(new_users_of_day))
             day_users = random.sample(users, users_count)
             print("total user: " + str(users_count))
             start_gen_day_user_event_time = utils.current_timestamp()

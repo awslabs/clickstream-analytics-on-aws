@@ -126,12 +126,7 @@ def get_launch_events(user, event):
             "value": user.user_id,
             "set_timestamp": user.login_timestamp
         }
-        user_name = {
-            "value": user.name,
-            "set_timestamp": user.login_timestamp
-        }
         event["user"]["_user_id"] = user_id
-        event["user"]["_user_name"] = user_name
 
     # handle session
     user.session_number += 1

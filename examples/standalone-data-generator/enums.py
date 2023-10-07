@@ -208,7 +208,7 @@ search_times = WeightedArray([(1, 50), (2, 25), (3, 5)])
 add_to_cart_times = WeightedArray([(0, 60), (1, 30), (2, 10), (3, 1)])
 remove_from_cart_times = WeightedArray([(0, 60), (1, 30), (2, 10), (3, 1)])
 
-screen_view_times = WeightedArray([(0, 5), (10, 20), (20, 25), (30, 15), (40, 6), (40, 3)])
+screen_view_times = WeightedArray([(0, 5), (10, 20), (20, 25), (30, 15), (40, 6), (50, 3)])
 
 
 # user enum
@@ -237,7 +237,7 @@ last_names = ['Smith', 'Johnson', 'Williams', 'Jones', 'Brown', 'Davis', 'Miller
               'Patterson', 'Hughes', 'Flores', 'Washington', 'Butler', 'Simmons', 'Foster', 'Gonzalez', 'Bryant',
               'Alexander', 'Russell', 'Griffin', 'Diaz', 'Hayes', 'Myers', 'Ford', 'Hamilton', 'Graham', 'Sullivan',
               'Wallace']
-is_login_user = WeightedArray([(True, 93), (False, 7)])
+is_login_user = WeightedArray([(True, 55), (False, 45)])
 user_gender = WeightedArray([('male', 45), ('female', 55)])
 age_range = WeightedArray([(10, 5), (20, 45), (30, 35), (40, 10), (50, 3)])
 
