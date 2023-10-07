@@ -53,7 +53,7 @@ Each column in the ods_event table represents an event-specific parameter. Note 
 | user_properties.value.set_timestamp_micros | BIGINT |         BIGINT          | The time (in microseconds) at which the user property was last set. |
 | user_ltv  | SUPER    | ARRAY| The Lifetime Value of the user. |
 | user_ltv.revenue  | DOUBLE PRECISION    | FLOAT| The Lifetime Value (revenue) of the user. |
-| user_ltv.revenue  | DOUBLE PRECISION    | FLOAT| The Lifetime Value (currency) of the user. |
+| user_ltv.currency  | DOUBLE PRECISION    | FLOAT| The Lifetime Value (currency) of the user. |
 
 ### Device fields
 | Field name                           | Data type | Data type - Athena | Description                                                                                              |
