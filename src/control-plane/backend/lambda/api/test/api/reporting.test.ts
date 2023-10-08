@@ -35,7 +35,7 @@ import { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
 import request from 'supertest';
 import { tokenMock } from './ddb-mock';
-import { ExplorePathNodeType, ExplorePathSessionDef, MetadataPlatform, QuickSightChartType } from '../../common/explore-types';
+import { ExploreLocales, ExplorePathNodeType, ExplorePathSessionDef, MetadataPlatform, QuickSightChartType } from '../../common/explore-types';
 import { app, server } from '../../index';
 import 'aws-sdk-client-mock-jest';
 
@@ -229,7 +229,7 @@ describe('reporting test', () => {
       .post('/api/reporting/funnel')
       .send({
         action: 'PREVIEW',
-        locale: 'zh',
+        locale: ExploreLocales.ZH_CN,
         chartType: QuickSightChartType.LINE,
         viewName: 'testview0002',
         projectId: 'project01_wvzh',
@@ -330,7 +330,7 @@ describe('reporting test', () => {
       .post('/api/reporting/funnel')
       .send({
         action: 'PUBLISH',
-        locale: 'zh',
+        locale: ExploreLocales.ZH_CN,
         chartTitle: 'test-title',
         chartSubTitle: 'test-subtitle',
         chartType: QuickSightChartType.LINE,
@@ -421,7 +421,7 @@ describe('reporting test', () => {
       .post('/api/reporting/event')
       .send({
         action: 'PREVIEW',
-        locale: 'zh',
+        locale: ExploreLocales.ZH_CN,
         chartType: QuickSightChartType.LINE,
         viewName: 'testview0002',
         projectId: 'project01_wvzh',
@@ -523,7 +523,7 @@ describe('reporting test', () => {
       .post('/api/reporting/event')
       .send({
         action: 'PUBLISH',
-        locale: 'en',
+        locale: ExploreLocales.EN_US,
         chartTitle: 'test-title',
         chartSubTitle: 'test-subtitle',
         chartType: QuickSightChartType.LINE,
@@ -709,7 +709,7 @@ describe('reporting test', () => {
       .post('/api/reporting/path')
       .send({
         action: 'PUBLISH',
-        locale: 'en',
+        locale: ExploreLocales.EN_US,
         chartTitle: 'test-title',
         chartSubTitle: 'test-subtitle',
         viewName: 'testview0002',
@@ -807,7 +807,7 @@ describe('reporting test', () => {
       .post('/api/reporting/retention')
       .send({
         action: 'PUBLISH',
-        locale: 'en',
+        locale: ExploreLocales.EN_US,
         chartTitle: 'test-title',
         chartSubTitle: 'test-subtitle',
         chartType: QuickSightChartType.LINE,

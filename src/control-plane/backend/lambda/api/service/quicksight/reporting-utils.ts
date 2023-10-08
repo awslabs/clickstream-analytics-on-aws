@@ -935,7 +935,7 @@ export function getTempResourceName(resourceName: string, action: ExploreRequest
 
 export async function getDashboardTitleProps(analysisType: AnalysisType, query: any) {
 
-  const locale = query.locale ?? ExploreLocales.ENGLISH;
+  const locale = query.locale ?? ExploreLocales.EN_US;
   const t = await i18next.changeLanguage(locale);
   let title = '';
   let subTitle = ' ';
