@@ -2488,6 +2488,93 @@ describe('Pipeline test', () => {
       },
     });
   });
+  it('Get pipeline list with stack rollback complete status', async () => {
+    projectExistedMock(ddbMock, true);
+    pipelineExistedMock(ddbMock, true);
+    ddbMock.on(QueryCommand).resolves({
+      Items: [KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW],
+    });
+    cloudFormationMock.on(DescribeStacksCommand)
+      .resolvesOnce({
+        Stacks: [{
+          StackName: 'test',
+          StackStatus: StackStatus.UPDATE_ROLLBACK_COMPLETE,
+          StackStatusReason: '',
+          CreationTime: undefined,
+        }],
+      })
+      .resolves({
+        Stacks: [{
+          StackName: 'test',
+          StackStatus: StackStatus.CREATE_COMPLETE,
+          StackStatusReason: '',
+          CreationTime: undefined,
+        }],
+      });
+    ddbMock.on(UpdateCommand).resolves({});
+    sfnMock.on(DescribeExecutionCommand).resolves({
+      executionArn: 'xx',
+      stateMachineArn: 'yy',
+      name: 'exec1',
+      status: ExecutionStatus.SUCCEEDED,
+      output: 'SUCCEEDED',
+    });
+    const res = await request(app)
+      .get(`/api/pipeline?pid=${MOCK_PROJECT_ID}`);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(200);
+    expect(res.body.data.items[0].status).toEqual({
+      status: 'Failed',
+      stackDetails: [
+        {
+          stackName: 'Clickstream-KafkaConnector-6666-6666',
+          stackType: 'KafkaConnector',
+          stackStatus: 'UPDATE_ROLLBACK_COMPLETE',
+          stackStatusReason: '',
+          outputs: [],
+        },
+        {
+          stackName: 'Clickstream-Ingestion-kafka-6666-6666',
+          stackType: 'Ingestion',
+          stackStatus: 'CREATE_COMPLETE',
+          stackStatusReason: '',
+          outputs: [],
+        },
+        {
+          stackName: 'Clickstream-DataProcessing-6666-6666',
+          stackType: 'DataProcessing',
+          stackStatus: 'CREATE_COMPLETE',
+          stackStatusReason: '',
+          outputs: [],
+        },
+        {
+          stackName: 'Clickstream-Reporting-6666-6666',
+          stackType: 'Reporting',
+          stackStatus: 'CREATE_COMPLETE',
+          stackStatusReason: '',
+          outputs: [],
+        },
+        {
+          stackName: 'Clickstream-DataModelingRedshift-6666-6666',
+          stackType: 'DataModelingRedshift',
+          stackStatus: 'CREATE_COMPLETE',
+          stackStatusReason: '',
+          outputs: [],
+        },
+        {
+          stackName: 'Clickstream-Metrics-6666-6666',
+          stackType: 'Metrics',
+          stackStatus: 'CREATE_COMPLETE',
+          stackStatusReason: '',
+          outputs: [],
+        },
+      ],
+      executionDetail: {
+        name: 'exec1',
+        status: 'SUCCEEDED',
+      },
+    });
+  });
   it('Update pipeline', async () => {
     tokenMock(ddbMock, false);
     projectExistedMock(ddbMock, true);
