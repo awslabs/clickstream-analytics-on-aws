@@ -17,8 +17,8 @@ import { Effect, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { AwsCustomResource, AwsCustomResourcePolicy, AwsSdkCall, PhysicalResourceId } from 'aws-cdk-lib/custom-resources';
 import { Construct } from 'constructs';
-import { DEFAULT_SOLUTION_OPERATOR } from '../../common/constant';
 import { generateRandomStr } from './lambda/api/common/utils';
+import { DEFAULT_SOLUTION_OPERATOR } from '../../common/constant';
 
 export interface AddAdminUserProps {
   readonly uid: string;
