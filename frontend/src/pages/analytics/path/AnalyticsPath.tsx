@@ -840,7 +840,6 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
             <ExploreEmbedFrame
               embedType="dashboard"
               embedUrl={exploreEmbedUrl}
-              embedId={`explore_${generateStr(6)}`}
             />
           )}
         </Container>

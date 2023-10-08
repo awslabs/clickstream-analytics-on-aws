@@ -200,3 +200,14 @@ export const clean = async (region: string) => {
   });
   return result;
 };
+
+export const embedAnalyzesUrl = async (
+  projectId: string,
+  allowedDomain: string
+) => {
+  const result: any = await apiRequest(
+    'get',
+    `project/${projectId}/analyzes?allowedDomain=${allowedDomain}`
+  );
+  return result;
+};

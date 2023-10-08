@@ -24,7 +24,7 @@ import {
 } from 'components/eventselect/AnalyticsType';
 import i18n from 'i18n';
 import moment from 'moment';
-import { TIME_FORMAT } from 'ts/const';
+import { DEFAULT_EN_LANG, TIME_FORMAT } from 'ts/const';
 import {
   OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME,
   OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX,
@@ -445,5 +445,5 @@ export const getWarmUpParameters = (
 };
 
 export const getLngFromLocalStorage = () => {
-  return localStorage.getItem('i18nextLng') ?? 'en';
+  return localStorage.getItem('i18nextLng') ?? DEFAULT_EN_LANG;
 };

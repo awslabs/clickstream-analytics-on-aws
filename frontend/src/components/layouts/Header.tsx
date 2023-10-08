@@ -15,6 +15,7 @@ import { TopNavigation } from '@cloudscape-design/components';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
+  DEFAULT_ZH_LANG,
   EN_TEXT,
   LANGUAGE_ITEMS,
   PROJECT_CONFIG_JSON,
@@ -50,7 +51,7 @@ const Header: React.FC<IHeaderProps> = (props: IHeaderProps) => {
 
   useEffect(() => {
     if (ZH_LANGUAGE_LIST.includes(i18n.language)) {
-      changeLanguage('zh');
+      changeLanguage(DEFAULT_ZH_LANG);
     }
     const configJSONObj: ConfigType = localStorage.getItem(PROJECT_CONFIG_JSON)
       ? JSON.parse(localStorage.getItem(PROJECT_CONFIG_JSON) || '')
@@ -96,7 +97,7 @@ const Header: React.FC<IHeaderProps> = (props: IHeaderProps) => {
               changeLanguage(item.detail.id);
             },
             items:
-              i18n.language === 'zh'
+              i18n.language === DEFAULT_ZH_LANG
                 ? [...LANGUAGE_ITEMS].reverse()
                 : LANGUAGE_ITEMS,
           },

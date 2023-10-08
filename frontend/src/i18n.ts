@@ -40,7 +40,7 @@ i18n
       'user',
     ],
     defaultNS: 'common',
-    fallbackLng: 'en',
+    fallbackLng: 'en-US',
     debug: true,
     saveMissing: true,
     interpolation: {

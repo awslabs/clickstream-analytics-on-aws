@@ -228,6 +228,29 @@ export class ProjectServ {
     }
   };
 
+  public async getAnalyzes(req: any, res: any, next: any) {
+    try {
+      const { projectId } = req.params;
+      const { allowedDomain } = req.query;
+      const latestPipelines = await store.listPipeline(projectId, 'latest', 'asc');
+      if (latestPipelines.length === 0) {
+        return res.status(404).json(new ApiFail('The latest pipeline not found.'));
+      }
+      const latestPipeline = latestPipelines[0];
+      if (!latestPipeline.reporting?.quickSight?.accountName) {
+        return res.status(400).json(new ApiFail('The latest pipeline not enable reporting.'));
+      }
+      const embed = await generateEmbedUrlForRegisteredUser(
+        latestPipeline.region,
+        allowedDomain,
+        false,
+      );
+      return res.json(new ApiSuccess(embed));
+    } catch (error) {
+      next(error);
+    }
+  };
+
   public async list(req: any, res: any, next: any) {
     try {
       const { order, pageNumber, pageSize } = req.query;

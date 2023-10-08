@@ -236,6 +236,7 @@ export class ClickStreamApiConstruct extends Construct {
               effect: iam.Effect.ALLOW,
               resources: [
                 `arn:${Aws.PARTITION}:quicksight:*:${Aws.ACCOUNT_ID}:dashboard/Clickstream*`,
+                `arn:${Aws.PARTITION}:quicksight:*:${Aws.ACCOUNT_ID}:user/*`,
               ],
               actions: [
                 'quicksight:GenerateEmbedUrlForRegisteredUser',

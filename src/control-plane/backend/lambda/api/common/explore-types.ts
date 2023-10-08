@@ -100,8 +100,8 @@ export enum ConditionCategory {
 }
 
 export enum ExploreLocales {
-  CHINESE = 'zh',
-  ENGLISH = 'en'
+  ZH_CN = 'zh-CN',
+  EN_US = 'en-US'
 }
 
 export enum AnalysisType {

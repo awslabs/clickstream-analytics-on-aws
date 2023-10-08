@@ -10,22 +10,19 @@
  *  OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions
  *  and limitations under the License.
  */
-import { Box } from '@cloudscape-design/components';
 import { createEmbeddingContext } from 'amazon-quicksight-embedding-sdk';
+import i18n from 'i18n';
 import React, { useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
 
 interface ExploreEmbedFrameProps {
-  embedType: 'dashboard' | 'visual';
+  embedType: 'dashboard' | 'visual' | 'console';
   embedUrl: string;
-  embedId: string;
 }
 
 const ExploreEmbedFrame: React.FC<ExploreEmbedFrameProps> = (
   props: ExploreEmbedFrameProps
 ) => {
-  const { t } = useTranslation();
-  const { embedType, embedUrl, embedId } = props;
+  const { embedType, embedUrl } = props;
 
   const embedContainer = async () => {
     const embeddingContext = await createEmbeddingContext();
@@ -33,16 +30,29 @@ const ExploreEmbedFrame: React.FC<ExploreEmbedFrameProps> = (
       case 'dashboard':
         await embeddingContext.embedDashboard({
           url: embedUrl,
-          container: `#${embedId}`,
+          container: `#EmbedId`,
           resizeHeightOnSizeChangedEvent: true,
         });
         break;
       case 'visual':
         await embeddingContext.embedVisual({
           url: embedUrl,
-          container: `#${embedId}`,
+          container: `#EmbedId`,
           resizeHeightOnSizeChangedEvent: true,
         });
+        break;
+      case 'console':
+        await embeddingContext.embedConsole(
+          {
+            url: embedUrl,
+            container: `#EmbedId`,
+            resizeHeightOnSizeChangedEvent: true,
+            height: '1000',
+          },
+          {
+            locale: i18n.language,
+          }
+        );
         break;
       default:
         break;
@@ -50,27 +60,12 @@ const ExploreEmbedFrame: React.FC<ExploreEmbedFrameProps> = (
   };
 
   useEffect(() => {
-    if (embedUrl && embedId) {
+    if (embedUrl) {
       embedContainer();
     }
-  }, [embedUrl, embedId]);
+  }, [embedUrl]);
 
-  return (
-    <>
-      {embedUrl ? (
-        <div id={embedId} className="iframe-explore"></div>
-      ) : (
-        <>
-          <Box textAlign="center" color="inherit">
-            <b>{t('analytics:emptyData')}</b>
-            <Box variant="p" color="inherit">
-              {t('analytics:emptyDataMessage')}
-            </Box>
-          </Box>
-        </>
-      )}
-    </>
-  );
+  return <div id={'EmbedId'} className="iframe-explore"></div>;
 };
 
 export default ExploreEmbedFrame;
