@@ -15,7 +15,7 @@ import {
   UpdateCommand,
   QueryCommandInput,
 } from '@aws-sdk/lib-dynamodb';
-import { analyticsMetadataTable, prefixTimeGSIName } from '../../common/constants';
+import { analyticsMetadataTable, prefixMonthGSIName } from '../../common/constants';
 import { docClient, query } from '../../common/dynamodb-client';
 import { MetadataValueType } from '../../common/explore-types';
 import { KeyVal } from '../../common/types';
@@ -60,7 +60,7 @@ export class DynamoDbMetadataStore implements MetadataStore {
   public async listEvents(projectId: string, appId: string): Promise<IMetadataEvent[]> {
     const input: QueryCommandInput = {
       TableName: analyticsMetadataTable,
-      IndexName: prefixTimeGSIName,
+      IndexName: prefixMonthGSIName,
       KeyConditionExpression: '#prefix= :prefix',
       ExpressionAttributeNames: {
         '#prefix': 'prefix',
@@ -79,7 +79,7 @@ export class DynamoDbMetadataStore implements MetadataStore {
   Promise<IMetadataEventParameter | undefined> {
     const input: QueryCommandInput = {
       TableName: analyticsMetadataTable,
-      IndexName: prefixTimeGSIName,
+      IndexName: prefixMonthGSIName,
       KeyConditionExpression: '#prefix= :prefix',
       ExpressionAttributeNames: {
         '#prefix': 'prefix',
@@ -96,7 +96,7 @@ export class DynamoDbMetadataStore implements MetadataStore {
   public async listEventParameters(projectId: string, appId: string): Promise<IMetadataEventParameter[]> {
     const input: QueryCommandInput = {
       TableName: analyticsMetadataTable,
-      IndexName: prefixTimeGSIName,
+      IndexName: prefixMonthGSIName,
       KeyConditionExpression: '#prefix= :prefix',
       ExpressionAttributeNames: {
         '#prefix': 'prefix',
@@ -115,7 +115,7 @@ export class DynamoDbMetadataStore implements MetadataStore {
   Promise<IMetadataUserAttribute | undefined> {
     const input: QueryCommandInput = {
       TableName: analyticsMetadataTable,
-      IndexName: prefixTimeGSIName,
+      IndexName: prefixMonthGSIName,
       KeyConditionExpression: '#prefix= :prefix',
       ExpressionAttributeNames: {
         '#prefix': 'prefix',
@@ -132,7 +132,7 @@ export class DynamoDbMetadataStore implements MetadataStore {
   public async listUserAttributes(projectId: string, appId: string): Promise<IMetadataUserAttribute[]> {
     const input: QueryCommandInput = {
       TableName: analyticsMetadataTable,
-      IndexName: prefixTimeGSIName,
+      IndexName: prefixMonthGSIName,
       KeyConditionExpression: '#prefix= :prefix',
       ExpressionAttributeNames: {
         '#prefix': 'prefix',
@@ -150,7 +150,7 @@ export class DynamoDbMetadataStore implements MetadataStore {
   public async getDisplay(projectId: string, appId: string): Promise<IMetadataDisplay[]> {
     const input: QueryCommandInput = {
       TableName: analyticsMetadataTable,
-      IndexName: prefixTimeGSIName,
+      IndexName: prefixMonthGSIName,
       KeyConditionExpression: '#prefix= :prefix',
       FilterExpression: 'projectId = :projectId AND appId = :appId',
       ExpressionAttributeNames: {

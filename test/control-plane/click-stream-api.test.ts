@@ -1315,6 +1315,7 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
             Ref: 'stackWorkflowS3BucketF67B9562',
           },
           PREFIX_TIME_GSI_NAME: 'prefix-time-index',
+          PREFIX_MONTH_GSI_NAME: 'prefix-month-index',
           AWS_ACCOUNT_ID: {
             Ref: 'AWS::AccountId',
           },

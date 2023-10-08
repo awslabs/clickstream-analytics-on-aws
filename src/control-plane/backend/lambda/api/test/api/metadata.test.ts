@@ -22,7 +22,7 @@ import {
 import { mockClient } from 'aws-sdk-client-mock';
 import request from 'supertest';
 import { metadataEventExistedMock, MOCK_APP_ID, MOCK_EVENT_PARAMETER_NAME, MOCK_EVENT_NAME, MOCK_PROJECT_ID, MOCK_TOKEN, MOCK_USER_ATTRIBUTE_NAME, tokenMock } from './ddb-mock';
-import { analyticsMetadataTable, dictionaryTableName, prefixTimeGSIName } from '../../common/constants';
+import { analyticsMetadataTable, dictionaryTableName, prefixMonthGSIName } from '../../common/constants';
 import { MetadataParameterType, MetadataPlatform, MetadataSource } from '../../common/explore-types';
 import { app, server } from '../../index';
 import 'aws-sdk-client-mock-jest';
@@ -183,7 +183,7 @@ function displayDataMock(m: any) {
   // display data
   m.on(QueryCommand, {
     TableName: analyticsMetadataTable,
-    IndexName: prefixTimeGSIName,
+    IndexName: prefixMonthGSIName,
     KeyConditionExpression: '#prefix= :prefix',
     FilterExpression: 'projectId = :projectId AND appId = :appId',
     ExpressionAttributeNames: {
@@ -330,7 +330,7 @@ describe('Metadata Event test', () => {
     });
     ddbMock.on(QueryCommand, {
       TableName: analyticsMetadataTable,
-      IndexName: prefixTimeGSIName,
+      IndexName: prefixMonthGSIName,
       KeyConditionExpression: '#prefix= :prefix',
       ExpressionAttributeNames: {
         '#prefix': 'prefix',
@@ -415,7 +415,7 @@ describe('Metadata Event test', () => {
   it('Get metadata event list', async () => {
     ddbMock.on(QueryCommand, {
       TableName: analyticsMetadataTable,
-      IndexName: prefixTimeGSIName,
+      IndexName: prefixMonthGSIName,
       KeyConditionExpression: '#prefix= :prefix',
       ExpressionAttributeNames: {
         '#prefix': 'prefix',
@@ -517,7 +517,7 @@ describe('Metadata Event test', () => {
   it('Get metadata event list with parameters', async () => {
     ddbMock.on(QueryCommand, {
       TableName: analyticsMetadataTable,
-      IndexName: prefixTimeGSIName,
+      IndexName: prefixMonthGSIName,
       KeyConditionExpression: '#prefix= :prefix',
       ExpressionAttributeNames: {
         '#prefix': 'prefix',
@@ -561,7 +561,7 @@ describe('Metadata Event test', () => {
     });
     ddbMock.on(QueryCommand, {
       TableName: analyticsMetadataTable,
-      IndexName: prefixTimeGSIName,
+      IndexName: prefixMonthGSIName,
       KeyConditionExpression: '#prefix= :prefix',
       ExpressionAttributeNames: {
         '#prefix': 'prefix',
@@ -794,7 +794,7 @@ describe('Metadata Event Attribute test', () => {
   it('Get metadata event attribute by name', async () => {
     ddbMock.on(QueryCommand, {
       TableName: analyticsMetadataTable,
-      IndexName: prefixTimeGSIName,
+      IndexName: prefixMonthGSIName,
       KeyConditionExpression: '#prefix= :prefix',
       ExpressionAttributeNames: {
         '#prefix': 'prefix',
@@ -920,7 +920,7 @@ describe('Metadata Event Attribute test', () => {
   it('Get metadata event attribute list', async () => {
     ddbMock.on(QueryCommand, {
       TableName: analyticsMetadataTable,
-      IndexName: prefixTimeGSIName,
+      IndexName: prefixMonthGSIName,
       KeyConditionExpression: '#prefix= :prefix',
       ExpressionAttributeNames: {
         '#prefix': 'prefix',
@@ -1098,7 +1098,7 @@ describe('Metadata User Attribute test', () => {
   it('Get metadata user attribute list', async () => {
     ddbMock.on(QueryCommand, {
       TableName: analyticsMetadataTable,
-      IndexName: prefixTimeGSIName,
+      IndexName: prefixMonthGSIName,
       KeyConditionExpression: '#prefix= :prefix',
       ExpressionAttributeNames: {
         '#prefix': 'prefix',

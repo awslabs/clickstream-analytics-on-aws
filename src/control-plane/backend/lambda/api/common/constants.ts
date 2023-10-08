@@ -19,6 +19,7 @@ const stackActionStateMachineArn = process.env.STACK_ACTION_STATE_MACHINE;
 const stackWorkflowStateMachineArn = process.env.STACK_WORKFLOW_STATE_MACHINE;
 const stackWorkflowS3Bucket = process.env.STACK_WORKFLOW_S3_BUCKET;
 const prefixTimeGSIName = process.env.PREFIX_TIME_GSI_NAME;
+const prefixMonthGSIName = process.env.PREFIX_MONTH_GSI_NAME;
 const serviceName = process.env.POWERTOOLS_SERVICE_NAME;
 const awsRegion = process.env.AWS_REGION;
 const awsPartition = process.env.AWS_PARTITION;
@@ -73,6 +74,7 @@ export {
   stackWorkflowStateMachineArn,
   stackWorkflowS3Bucket,
   prefixTimeGSIName,
+  prefixMonthGSIName,
   serviceName,
   awsRegion,
   awsPartition,

@@ -134,7 +134,7 @@ export class ClickStreamApiConstruct extends Construct {
       },
     });
 
-    const analyticsMetadataTable = new Table(this, 'ClickstreamAnalyticsMetadata', {
+    const analyticsMetadataTable = new Table(this, 'AnalyticsMetadata', {
       partitionKey: {
         name: 'id',
         type: AttributeType.STRING,
@@ -148,8 +148,9 @@ export class ClickStreamApiConstruct extends Construct {
       pointInTimeRecovery: true,
       encryption: TableEncryption.AWS_MANAGED,
     });
+    const prefixMonthGSIName = 'prefix-month-index';
     analyticsMetadataTable.addGlobalSecondaryIndex({
-      indexName: prefixTimeGSIName,
+      indexName: prefixMonthGSIName,
       partitionKey: {
         name: 'prefix',
         type: AttributeType.STRING,
@@ -374,6 +375,7 @@ export class ClickStreamApiConstruct extends Construct {
         STACK_WORKFLOW_STATE_MACHINE: stackWorkflowStateMachine.stackWorkflowMachine.stateMachineArn,
         STACK_WORKFLOW_S3_BUCKET: props.stackWorkflowS3Bucket.bucketName,
         PREFIX_TIME_GSI_NAME: prefixTimeGSIName,
+        PREFIX_MONTH_GSI_NAME: prefixMonthGSIName,
         AWS_ACCOUNT_ID: Stack.of(this).account,
         AWS_URL_SUFFIX: Aws.URL_SUFFIX,
         WITH_AUTH_MIDDLEWARE: props.fronting === 'alb' ? 'true' : 'false',
