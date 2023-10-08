@@ -253,7 +253,10 @@ public final class TransformerV2 {
         String yyyyMMdd = dateFormatYMD.format(now);
         Dataset<Row> dataset1 = dataset.withColumn(UPDATE_DATE, lit(yyyyMMdd).cast(DataTypes.StringType));
 
-        dataset1.coalesce(1).write()
+        int numPartitions = dataset1.rdd().getNumPartitions();
+        numPartitions = Math.max(Math.min(numPartitions, 10), 1);
+
+        dataset1.coalesce(numPartitions).write()
                 .partitionBy(UPDATE_DATE, "app_id")
                 .option("compression", "snappy")
                 .mode(SaveMode.Overwrite)

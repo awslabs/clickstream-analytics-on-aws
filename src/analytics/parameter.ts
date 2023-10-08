@@ -20,6 +20,7 @@ import { Bucket, IBucket } from 'aws-cdk-lib/aws-s3';
 import { Provider } from 'aws-cdk-lib/custom-resources';
 import { Construct } from 'constructs';
 import { GetResourcePrefixPropertiesType } from './lambdas/custom-resource/get-source-prefix';
+import { addCfnNagSuppressRules, rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions } from '../common/cfn-nag';
 import {
   PARAMETER_GROUP_LABEL_VPC, PARAMETER_LABEL_PRIVATE_SUBNETS, PARAMETER_LABEL_VPCID,
   REDSHIFT_CLUSTER_IDENTIFIER_PATTERN,
@@ -27,13 +28,12 @@ import {
   S3_BUCKET_NAME_PATTERN, SCHEDULE_EXPRESSION_PATTERN, SUBNETS_THREE_AZ_PATTERN, VPC_ID_PATTERN,
   DDB_TABLE_ARN_PATTERN,
 } from '../common/constant';
+import { createLambdaRole } from '../common/lambda';
 import { REDSHIFT_MODE } from '../common/model';
 import { Parameters, SubnetParameterType } from '../common/parameters';
 import { POWERTOOLS_ENVS } from '../common/powertools';
 import { getExistVpc } from '../common/vpc-utils';
 import { SolutionNodejsFunction } from '../private/function';
-import { addCfnNagSuppressRules, rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions } from '../common/cfn-nag';
-import { createLambdaRole } from '../common/lambda';
 
 export interface RedshiftAnalyticsStackProps {
   network: {
@@ -807,7 +807,7 @@ function createWorkgroupParameter(scope: Construct, id: string): CfnParameter {
 
 function getSourcePrefix(scope: Construct, odsEventPrefix: string): string {
 
-  const role = createLambdaRole(scope, "GetSourcePrefixCustomerResourceFnRole", false, []);
+  const role = createLambdaRole(scope, 'GetSourcePrefixCustomerResourceFnRole', false, []);
 
   const lambdaRootPath = __dirname + '/lambdas/custom-resource';
   const fn = new SolutionNodejsFunction(scope, 'GetSourcePrefixCustomerResourceFn', {
@@ -818,7 +818,6 @@ function getSourcePrefix(scope: Construct, odsEventPrefix: string): string {
     ),
     handler: 'handler',
     memorySize: 128,
-    reservedConcurrentExecutions: 1,
     timeout: Duration.minutes(1),
     logRetention: RetentionDays.ONE_WEEK,
     role,

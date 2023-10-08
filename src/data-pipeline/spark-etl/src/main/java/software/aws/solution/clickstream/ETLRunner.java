@@ -353,7 +353,9 @@ public class ETLRunner {
             partitionedDataset.write().partitionBy(partitionBy).mode(saveMode).json(saveOutputPath);
         } else {
             if (saveMode == SaveMode.Overwrite) {
-                partitionedDataset = partitionedDataset.coalesce(1);
+                int numPartitions = partitionedDataset.rdd().getNumPartitions();
+                numPartitions = Math.max(Math.min(numPartitions, 10), 1);
+                partitionedDataset = partitionedDataset.coalesce(numPartitions);
             } else {
                 int outPartitions = Integer.parseInt(System.getProperty(OUTPUT_COALESCE_PARTITIONS_PROP, "-1"));
                 int numPartitions = partitionedDataset.rdd().getNumPartitions();
