@@ -39,13 +39,13 @@ def get_user_event_of_day(user, day, events_of_day):
         # init current timestamp
         user.current_timestamp = start_times[i]
         if configure.APP_TYPE == enums.Application.NotePad:
-            get_events_for_notepad(user, events, event)
+            gen_events_for_notepad(user, events, event)
         elif configure.APP_TYPE == enums.Application.Shopping:
-            get_events_for_shopping(user, events, event)
+            gen_events_for_shopping(user, events, event)
     events_of_day.extend(events)
 
 
-def get_events_for_shopping(user, events, event):
+def gen_events_for_shopping(user, events, event):
     events.extend(Event.get_launch_events(user, event))
     # different action in one session
     screen_view_times = enums.screen_view_times.get_random_item() + random.randint(0, 9)
@@ -62,7 +62,7 @@ def get_events_for_shopping(user, events, event):
         events.extend(result[0])
 
 
-def get_events_for_notepad(user, events, event):
+def gen_events_for_notepad(user, events, event):
     events.extend(NotepadEvent.get_launch_events(user, event))
     user.current_timestamp += random.choices(configure.PER_ACTION_DURATION)[0] * 1000
     action_times = random.choices(configure.ACTION_TIMES)[0]
@@ -78,8 +78,9 @@ if __name__ == '__main__':
     else:
         start_time = utils.current_timestamp()
         # init all user
-        users = get_users(int(configure.ALL_USER / 2))
-        new_users_of_day = int(configure.ALL_USER / 60)
+        all_user_count = configure.get_all_user_count()
+        users = get_users(int(all_user_count / 2))
+        new_users_of_day = int(all_user_count / 60)
         # get days arr
         days = utils.get_days_arr()
         total_event = 0
@@ -87,7 +88,7 @@ if __name__ == '__main__':
             day_str = utils.get_day_of_timestamp(day)
             print("start day: " + day_str)
             events_of_day = []
-            users_count = random.choices(configure.RANDOM_DAU)[0]
+            users_count = random.choices(configure.get_dau_count())[0]
             users.extend(get_users(new_users_of_day))
             day_users = random.sample(users, users_count)
             print("total user: " + str(users_count))

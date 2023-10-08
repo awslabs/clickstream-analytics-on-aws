@@ -41,7 +41,7 @@ def get_enter_new_screen_events(user, event, page):
         engagement_time = user.current_timestamp - user.current_page_start_time
         if engagement_time > 1000:
             engagement_event = ShoppingEvent.clean_event(event)
-            engagement_event['_engagement_time_msec'] = engagement_time
+            engagement_event['attributes']['_engagement_time_msec'] = engagement_time
             events.append(ShoppingEvent.get_final_event(user, EventType.USER_ENGAGEMENT, engagement_event))
     # screen view
     screen_view_event = ShoppingEvent.clean_event(event)

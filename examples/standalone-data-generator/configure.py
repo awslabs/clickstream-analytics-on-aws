@@ -16,38 +16,55 @@ import enums
 APP_TYPE = enums.Application.Shopping
 
 # for history event consts
-ALL_USER = 10000
 DURATION_OF_DAYS = 30
-RANDOM_DAU = range(1000, 2000)
 PER_ACTION_DURATION = range(3, 60)
 events_per_request = 10000
 # gzip process number, for mac m1 is 8, for c5.metal is 50 to meet best performance
 process_number = 50
 # control the speed for event send.
-max_upload_thread_number = 2
+max_upload_thread_number = 1
 request_sleep_time = 0.2
 gzip_times_per_day = 1
 
 # for real-time event consts
 ALL_USER_REALTIME = 100000
 RANDOM_DAU_REALTIME = range(10000, 20000)
-THREAD_NUMBER_FOR_USER = 100
-PER_ACTION_DURATION_REALTIME = range(0, 5)
+THREAD_NUMBER_FOR_USER = 10
 FLUSH_DURATION = 10
-IS_GZIP = True
 
 # common settings
 SESSION_TIMES = range(1, 5)
+IS_GZIP = True
 
 # notepad configure
+ALL_USER = 10000
+RANDOM_DAU = range(1000, 2000)
 ACTION_TIMES = range(0, 30)
+# for real-time mode
+PER_ACTION_DURATION_REALTIME = range(0, 5)
 
 # shopping configure
+ALL_USER_SHOPPING = 30000
+RANDOM_DAU_SHOPPING = range(3000, 6000)
 PLATFORM = enums.Platform.All
 
 # following value will be replaced by amplifyconfiguration.json file.
 APP_ID = ""
 ENDPOINT = ""
+
+
+def get_all_user_count():
+    if APP_TYPE == enums.Application.Shopping:
+        return ALL_USER_SHOPPING
+    elif APP_TYPE == enums.Application.NotePad:
+        return ALL_USER
+
+
+def get_dau_count():
+    if APP_TYPE == enums.Application.Shopping:
+        return RANDOM_DAU_SHOPPING
+    elif APP_TYPE == enums.Application.NotePad:
+        return RANDOM_DAU
 
 
 def init_config():

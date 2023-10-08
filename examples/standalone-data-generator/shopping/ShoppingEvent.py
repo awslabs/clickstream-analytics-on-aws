@@ -33,7 +33,6 @@ def get_event_for_user(user):
         event["system_language"] = user.device_web.system_language
         event["country_code"] = user.device_web.country_code
     else:
-        # todo add switch to web logic
         event = EventSample.sampleAppEvent
         event["device_id"] = user.mobile_device.device_id
         event["platform"] = user.platform
@@ -84,6 +83,7 @@ def get_final_event(user, event_type, event):
     event["event_id"] = uuid
     event["timestamp"] = user.current_timestamp
     start_timestamp = event["attributes"]["_session_start_timestamp"]
+    session_duration = user.current_timestamp - start_timestamp
     event["attributes"]["_session_duration"] = user.current_timestamp - start_timestamp
     platform = user.platform
     if user.current_page_type != '':
@@ -100,7 +100,7 @@ def get_final_event(user, event_type, event):
 def get_launch_events(user, event):
     user.current_page_type = ''
     user.current_page = ('', '')
-    user.current_page_start_time = 0
+    user.current_page_start_time = user.current_timestamp
     ScreenEvent.clear()
     events = []
     # handle traffic_source

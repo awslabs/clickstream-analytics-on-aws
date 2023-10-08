@@ -100,7 +100,6 @@ def get_event_for_user(user):
             del event["user"]["_user_id"]
         if "_user_name" in event["user"]:
             del event["user"]["_user_name"]
-
     if user.first_touch_timestamp > 0:
         event["user"]["_user_first_touch_timestamp"]["value"] = user.first_touch_timestamp
         event["user"]["_user_first_touch_timestamp"]["set_timestamp"] = user.first_touch_timestamp
@@ -130,7 +129,7 @@ def get_final_event(user, event_type, event):
 
 def get_launch_events(user, event):
     user.current_page = ('', '')
-    user.current_page_start_time = 0
+    user.current_page_start_time = user.current_timestamp
     events = []
     # handle traffic_source
     traffic_source = enums.traffic_source.get_random_item()
