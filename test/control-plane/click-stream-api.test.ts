@@ -29,7 +29,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
       .toEqual([
         'testClickStreamALBApiClickstreamDictionary0A1156B6',
         'testClickStreamALBApiClickstreamMetadataA721B303',
-        'testClickStreamALBApiClickstreamAnalyticsMetadataA20F6663',
+        'testClickStreamALBApiAnalyticsMetadata4BCF420E',
       ]);
 
     newALBApiStackTemplate.hasResourceProperties('AWS::DynamoDB::Table', {
@@ -130,7 +130,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
       BillingMode: 'PAY_PER_REQUEST',
       GlobalSecondaryIndexes: [
         {
-          IndexName: 'prefix-time-index',
+          IndexName: 'prefix-month-index',
           KeySchema: [
             {
               AttributeName: 'prefix',
@@ -564,7 +564,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
             Resource: [
               {
                 'Fn::GetAtt': [
-                  'testClickStreamALBApiClickstreamAnalyticsMetadataA20F6663',
+                  'testClickStreamALBApiAnalyticsMetadata4BCF420E',
                   'Arn',
                 ],
               },
@@ -574,7 +574,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
                   [
                     {
                       'Fn::GetAtt': [
-                        'testClickStreamALBApiClickstreamAnalyticsMetadataA20F6663',
+                        'testClickStreamALBApiAnalyticsMetadata4BCF420E',
                         'Arn',
                       ],
                     },
