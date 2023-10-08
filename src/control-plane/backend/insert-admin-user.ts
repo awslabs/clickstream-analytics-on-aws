@@ -17,7 +17,6 @@ import { Effect, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { AwsCustomResource, AwsCustomResourcePolicy, AwsSdkCall, PhysicalResourceId } from 'aws-cdk-lib/custom-resources';
 import { Construct } from 'constructs';
-import { generateRandomStr } from './lambda/api/common/utils';
 import { DEFAULT_SOLUTION_OPERATOR } from '../../common/constant';
 
 export interface AddAdminUserProps {
@@ -34,7 +33,7 @@ export class AddAdminUser extends Construct {
     const putItemSdkCall: AwsSdkCall = {
       service: 'DynamoDB',
       action: 'putItem',
-      physicalResourceId: PhysicalResourceId.of(`AddAdminUserPut${generateRandomStr(8)}`),
+      physicalResourceId: PhysicalResourceId.of('AddAdminUserCustomResource'),
       parameters: {
         TableName: props.userTable.tableName,
         Item: {
@@ -54,7 +53,7 @@ export class AddAdminUser extends Construct {
     const updateItemSdkCall: AwsSdkCall = {
       service: 'DynamoDB',
       action: 'updateItem',
-      physicalResourceId: PhysicalResourceId.of(`AddAdminUserUpdate${generateRandomStr(8)}`),
+      physicalResourceId: PhysicalResourceId.of('AddAdminUserCustomResource'),
       parameters: {
         TableName: props.userTable.tableName,
         Key: {
@@ -84,7 +83,7 @@ export class AddAdminUser extends Construct {
     const deleteItemSdkCall: AwsSdkCall = {
       service: 'DynamoDB',
       action: 'deleteItem',
-      physicalResourceId: PhysicalResourceId.of(`AddAdminUserDelete${generateRandomStr(8)}`),
+      physicalResourceId: PhysicalResourceId.of('AddAdminUserCustomResource'),
       parameters: {
         TableName: props.userTable.tableName,
         Key: {
