@@ -132,9 +132,10 @@ export class StackActionStateMachine extends Construct {
             `arn:${Aws.PARTITION}:iam::${Aws.ACCOUNT_ID}:role/aws-service-role/autoscaling.amazonaws.com/AWSServiceRoleForAutoScaling`,
             `arn:${Aws.PARTITION}:iam::${Aws.ACCOUNT_ID}:role/aws-service-role/ecs.amazonaws.com/AWSServiceRoleForECS`,
             `arn:${Aws.PARTITION}:iam::${Aws.ACCOUNT_ID}:role/aws-service-role/elasticloadbalancing.amazonaws.com/AWSServiceRoleForElasticLoadBalancing`,
+            `arn:${Aws.PARTITION}:iam::${Aws.ACCOUNT_ID}:role/aws-service-role/globalaccelerator.amazonaws.com/AWSServiceRoleForGlobalAccelerator`,
           ],
         }),
-        // This list of actions is to ensure the call stack can be create/update/delete successfully.
+        // This list of actions is to ensure the call stack can be created/updated/deleted successfully.
         new iam.PolicyStatement({
           actions: [
             'sns:*',
