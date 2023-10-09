@@ -15,7 +15,6 @@ import random
 import datetime
 import json
 import time
-
 import configure
 import enums as enums
 import gzip

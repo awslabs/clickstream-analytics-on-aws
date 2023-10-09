@@ -10,8 +10,6 @@ or in the 'license' file accompanying this file. This file is distributed on an 
 OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions
 and limitations under the License.
 """
-from enum import Enum
-
 import enums
 from weighted.weighted import WeightedArray
 

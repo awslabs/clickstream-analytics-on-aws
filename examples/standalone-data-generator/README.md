@@ -44,11 +44,11 @@ to run the program.
 
 ### Other configuration
 
-Please modify the `configure.py` to define the data size and situation.
+Please modify the `configure.py` to define the data size and scenario.
 
 ```python
 
-# Application Type, NotePad and Shopping default is NotePad.
+# Application Type, default is NotePad, you can switch to `enums.Application.Shopping` to send shopping events.
 APP_TYPE = enums.Application.NotePad
 
 # For History Events consts

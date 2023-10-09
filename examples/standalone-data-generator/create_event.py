@@ -17,6 +17,7 @@ import util.util as utils
 from application.AppProvider import AppProvider
 
 app_provider = AppProvider()
+max_batch_event_number = configure.EVENTS_PER_REQUEST * (configure.MAX_BATCH_REQUEST_NUMBER - 1)
 
 
 def get_users(count):
@@ -50,23 +51,33 @@ if __name__ == '__main__':
         new_users_of_day = int(all_user_count / 60)
         # get days arr
         days = utils.get_days_arr()
-        total_event = 0
+        total_events_count = 0
         for day in days:
             day_str = utils.get_day_of_timestamp(day)
-            print("start day: " + day_str)
+            print("\nstart day: " + day_str)
             events_of_day = []
             users_count = random.choices(app_provider.get_dau_count())[0]
             users.extend(get_users(new_users_of_day))
             day_users = random.sample(users, users_count)
             print("total user: " + str(users_count))
             start_gen_day_user_event_time = utils.current_timestamp()
+            day_events_count = 0
+            handled_user_count = 0
             for user in day_users:
                 get_user_event_of_day(user, day, events_of_day)
-            total_event = total_event + len(events_of_day)
-            print("gen " + str(len(events_of_day)) + " events for " + day_str + " cost:" + str(
+                handled_user_count += 1
+                if len(events_of_day) > max_batch_event_number:
+                    day_events_count += len(events_of_day)
+                    print("processed user count: " + str(handled_user_count) + ", left: " +
+                          str(users_count - handled_user_count))
+                    send_event.send_events_of_batch(events_of_day)
+                    events_of_day = []
+            if len(events_of_day) > 0:
+                day_events_count += len(events_of_day)
+                send_event.send_events_of_batch(events_of_day)
+            total_events_count += day_events_count
+            print("send " + str(day_events_count) + " events for " + day_str + " cost:" + str(
                 utils.current_timestamp() - start_gen_day_user_event_time) + "\n")
-            # send event
-            send_event.send_events_of_day(events_of_day)
 
-        print("job finished, upload " + str(total_event) + " events, cost: " +
+        print("job finished, upload " + str(total_events_count) + " events, cost: " +
               str(utils.current_timestamp() - start_time) + "ms")

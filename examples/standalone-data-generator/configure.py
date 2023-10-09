@@ -13,12 +13,14 @@ and limitations under the License.
 import json
 import enums
 
+# application type, you can switch to `enums.Application.Shopping` to send shopping events.
 APP_TYPE = enums.Application.NotePad
 
 # for history event consts
 DURATION_OF_DAYS = 30
 PER_ACTION_DURATION = range(3, 60)
 EVENTS_PER_REQUEST = 10000
+MAX_BATCH_REQUEST_NUMBER = 20
 # gzip process number, for mac m1 is 8, for c5.metal is 50 to meet best performance
 PROCESS_NUMBER = 50
 # control the speed for event send.
