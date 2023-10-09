@@ -19,12 +19,12 @@ import {
 export function getItemTableColumns(): Column[] {
   return [
     {
-      name: 'id',
-      type: Schema.STRING,
-    },
-    {
       name: 'event_timestamp',
       type: Schema.BIG_INT,
+    },
+    {
+      name: 'id',
+      type: Schema.STRING,
     },
     {
       name: 'properties',

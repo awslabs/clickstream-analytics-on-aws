@@ -13,10 +13,20 @@
 
 import { IVpc, SubnetSelection } from 'aws-cdk-lib/aws-ec2';
 import { IBucket } from 'aws-cdk-lib/aws-s3';
+import { RedshiftOdsTables } from '../analytics-on-redshift';
 
 export interface LoadDataProps {
   readonly scheduleInterval: string;
   readonly maxFilesLimit: number;
+}
+
+
+export interface TablesLoadDataProps {
+  readonly ods_events: LoadDataProps;
+  readonly event: LoadDataProps;
+  readonly event_parameter: LoadDataProps;
+  readonly user: LoadDataProps;
+  readonly item: LoadDataProps;
 }
 
 interface BucketInfo {
@@ -28,7 +38,23 @@ export type ODSSource = BucketInfo & {
   readonly fileSuffix: string;
 }
 
+export interface TablesODSSource {
+  readonly ods_events: ODSSource;
+  readonly event: ODSSource;
+  readonly event_parameter: ODSSource;
+  readonly user: ODSSource;
+  readonly item: ODSSource;
+}
+
 export type LoadWorkflowData = BucketInfo;
+
+export interface TablesLoadWorkflowData {
+  readonly ods_events: LoadWorkflowData;
+  readonly event: LoadWorkflowData;
+  readonly event_parameter: LoadWorkflowData;
+  readonly user: LoadWorkflowData;
+  readonly item: LoadWorkflowData;
+}
 
 export type UpsertUsersWorkflowData = {
   readonly scheduleExpression: string;
@@ -86,7 +112,7 @@ export type SQLDef = {
 export type CreateDatabaseAndSchemas = CustomProperties & {
   readonly projectId: string;
   readonly appIds: string;
-  readonly odsTableName: string;
+  readonly odsTableNames: RedshiftOdsTables;
   readonly databaseName: string;
   readonly dataAPIRole: string;
   readonly redshiftBIUserParameter: string;
@@ -181,6 +207,10 @@ export type MustacheParamBaseType = {
 export type MustacheParamType = {
   schema: string;
   table_ods_events: string;
+  table_event: string;
+  table_event_parameter: string;
+  table_user: string;
+  table_item: string;
   sp_upsert_users: string;
   sp_scan_metadata: string;
   table_ods_users: string;

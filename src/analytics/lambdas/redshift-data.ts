@@ -45,6 +45,15 @@ export const executeStatements = async (client: RedshiftDataClient, sqlStatement
   } else if (provisionedRedshiftProps) {
     logger.info(`Execute SQL statement in ${provisionedRedshiftProps.clusterIdentifier}.${provisionedRedshiftProps.databaseName}`);
   }
+
+  const logSqlStatements = sqlStatements.map(s => {
+    if (s.toLocaleLowerCase().includes('password')) {
+      return s.replace(new RegExp(/password.*/i), 'password *****');
+    }
+    return s;
+  });
+  logger.info('executeStatements', { logSqlStatements });
+
   if (sqlStatements.length == 0) {
     logger.warn('No SQL statement to execute.');
     return;
@@ -97,6 +106,7 @@ export const executeStatementsWithWait = async (client: RedshiftDataClient, sqlS
   }
   if (response.Status == StatusString.FAILED) {
     logger.error('Error: '+ response.Status, JSON.stringify(response));
+    logger.info('executeStatementsWithWait: SQL:' + sqlStatements.join('\n'));
     throw new Error(JSON.stringify(response));
   }
   return queryId;

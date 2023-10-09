@@ -11,7 +11,17 @@
     "nullable" : true,
     "metadata" : { }
   }, {
+    "name" : "event_timestamp",
+    "type" : "long",
+    "nullable" : true,
+    "metadata" : { }
+  }, {
     "name" : "event_id",
+    "type" : "string",
+    "nullable" : true,
+    "metadata" : { }
+  }, {
+    "name" : "event_name",
     "type" : "string",
     "nullable" : true,
     "metadata" : { }

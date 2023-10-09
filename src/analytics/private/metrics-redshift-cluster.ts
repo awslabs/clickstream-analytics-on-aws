@@ -15,6 +15,7 @@
 import { IStateMachine } from 'aws-cdk-lib/aws-stepfunctions';
 import { Construct } from 'constructs';
 import { buildMetricsWidgetForWorkflows } from './metrics-common-workflow';
+import { LoadDataWorkflows } from './metrics-redshift-serverless';
 import { AlarmsWidgetElement, MetricWidgetElement, MetricsWidgets } from '../../metrics/metrics-widgets-custom-resource';
 import { WIDGETS_ORDER } from '../../metrics/settings';
 
@@ -25,7 +26,7 @@ export function createMetricsWidgetForRedshiftCluster(scope: Construct, props: {
   upsertUsersCronOrRateExpression: string;
   scanMetadataCronOrRateExpression: string;
   redshiftClusterIdentifier: string;
-  loadEventsWorkflow: IStateMachine;
+  loadDataWorkflows: LoadDataWorkflows;
   upsertUsersWorkflow: IStateMachine;
   scanMetadataWorkflow: IStateMachine;
   clearExpiredEventsWorkflow: IStateMachine;

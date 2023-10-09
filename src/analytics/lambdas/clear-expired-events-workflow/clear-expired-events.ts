@@ -39,6 +39,7 @@ export const handler = async (event: ClearExpiredEventsEvent) => {
   const retentionRangeDays = event.detail.retentionRangeDays;
   const sqlStatements : string[] = [];
   sqlStatements.push(`CALL ${schema}.sp_clear_expired_events(${retentionRangeDays})`);
+  sqlStatements.push(`CALL ${schema}.sp_clear_item_and_user()`);
 
   try {
     const queryId = await executeStatements(

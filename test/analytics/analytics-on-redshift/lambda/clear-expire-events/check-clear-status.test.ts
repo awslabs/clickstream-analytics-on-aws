@@ -43,11 +43,11 @@ describe('Lambda - check the clear status in Redshift Serverless', () => {
   });
 
   test('Check clear status with response FINISHED', async () => {
-    const exeuteId = 'Id-1';
+    const executeId = 'Id-1';
     redshiftDataMock.on(DescribeStatementCommand).resolves({
       Status: StatusString.FINISHED,
     });
-    redshiftDataMock.on(ExecuteStatementCommand).resolves({ Id: exeuteId });
+    redshiftDataMock.on(ExecuteStatementCommand).resolves({ Id: executeId });
     redshiftDataMock.on(GetStatementResultCommand).resolvesOnce({ Records: [] });
     const resp = await handler(clearExpiredEventsEvent);
     expect(resp).toEqual({
@@ -78,7 +78,7 @@ describe('Lambda - check the clear status in Redshift Serverless', () => {
   });
 
   test('Check clear status with response FAILED', async () => {
-    const exeuteId = 'Id-1';
+    const executeId = 'Id-1';
     redshiftDataMock.on(DescribeStatementCommand).resolvesOnce({
       Status: StatusString.FAILED,
     }).resolvesOnce({
@@ -86,7 +86,7 @@ describe('Lambda - check the clear status in Redshift Serverless', () => {
     }).resolvesOnce({
       Status: StatusString.FINISHED,
     });
-    redshiftDataMock.on(ExecuteStatementCommand).resolves({ Id: exeuteId });
+    redshiftDataMock.on(ExecuteStatementCommand).resolves({ Id: executeId });
     redshiftDataMock.on(GetStatementResultCommand).resolvesOnce({ Records: [] });
     const resp = await handler(clearExpiredEventsEvent);
     expect(resp).toEqual(expect.objectContaining({
@@ -100,7 +100,7 @@ describe('Lambda - check the clear status in Redshift Serverless', () => {
   });
 
   test('Check clear status with response ABORTED', async () => {
-    const exeuteId = 'Id-1';
+    const executeId = 'Id-1';
     redshiftDataMock.on(DescribeStatementCommand).resolvesOnce({
       Status: StatusString.ABORTED,
     }).resolvesOnce({
@@ -108,7 +108,7 @@ describe('Lambda - check the clear status in Redshift Serverless', () => {
     }).resolvesOnce({
       Status: StatusString.FINISHED,
     });
-    redshiftDataMock.on(ExecuteStatementCommand).resolves({ Id: exeuteId });
+    redshiftDataMock.on(ExecuteStatementCommand).resolves({ Id: executeId });
     redshiftDataMock.on(GetStatementResultCommand).resolvesOnce({ Records: [] });
     const resp = await handler(clearExpiredEventsEvent);
     expect(resp).toEqual(expect.objectContaining({
@@ -134,11 +134,11 @@ describe('Lambda - check the clear status in Redshift Serverless', () => {
   });
 
   test('Execute command error in Redshift when query clear log', async () => {
-    const exeuteId = 'Id-1';
+    const executeId = 'Id-1';
     redshiftDataMock.on(DescribeStatementCommand).resolves({
       Status: StatusString.FINISHED,
     });
-    redshiftDataMock.on(ExecuteStatementCommand).resolves({ Id: exeuteId });
+    redshiftDataMock.on(ExecuteStatementCommand).resolves({ Id: executeId });
     redshiftDataMock.on(GetStatementResultCommand).rejectsOnce();
     try {
       await handler(clearExpiredEventsEvent);
@@ -168,11 +168,11 @@ describe('Lambda - check the clear status in Redshift Provisioned', () => {
   });
 
   test('Check clear status with response FINISHED', async () => {
-    const exeuteId = 'Id-1';
+    const executeId = 'Id-1';
     redshiftDataMock.on(DescribeStatementCommand).resolves({
       Status: StatusString.FINISHED,
     });
-    redshiftDataMock.on(ExecuteStatementCommand).resolves({ Id: exeuteId });
+    redshiftDataMock.on(ExecuteStatementCommand).resolves({ Id: executeId });
     redshiftDataMock.on(GetStatementResultCommand).resolvesOnce({ Records: [] });
     const resp = await handler(clearExpiredEventsEvent);
     expect(resp).toEqual({
@@ -203,7 +203,7 @@ describe('Lambda - check the clear status in Redshift Provisioned', () => {
   });
 
   test('Check clear status with response FAILED', async () => {
-    const exeuteId = 'Id-1';
+    const executeId = 'Id-1';
     redshiftDataMock.on(DescribeStatementCommand).resolvesOnce({
       Status: StatusString.FAILED,
     }).resolvesOnce({
@@ -211,7 +211,7 @@ describe('Lambda - check the clear status in Redshift Provisioned', () => {
     }).resolvesOnce({
       Status: StatusString.FINISHED,
     });
-    redshiftDataMock.on(ExecuteStatementCommand).resolves({ Id: exeuteId });
+    redshiftDataMock.on(ExecuteStatementCommand).resolves({ Id: executeId });
     redshiftDataMock.on(GetStatementResultCommand).resolvesOnce({ Records: [] });
     const resp = await handler(clearExpiredEventsEvent);
     expect(resp).toEqual(expect.objectContaining({
@@ -225,7 +225,7 @@ describe('Lambda - check the clear status in Redshift Provisioned', () => {
   });
 
   test('Check clear status with response ABORTED', async () => {
-    const exeuteId = 'Id-1';
+    const executeId = 'Id-1';
     redshiftDataMock.on(DescribeStatementCommand).resolvesOnce({
       Status: StatusString.ABORTED,
     }).resolvesOnce({
@@ -233,7 +233,7 @@ describe('Lambda - check the clear status in Redshift Provisioned', () => {
     }).resolvesOnce({
       Status: StatusString.FINISHED,
     });
-    redshiftDataMock.on(ExecuteStatementCommand).resolves({ Id: exeuteId });
+    redshiftDataMock.on(ExecuteStatementCommand).resolves({ Id: executeId });
     redshiftDataMock.on(GetStatementResultCommand).resolvesOnce({ Records: [] });
     const resp = await handler(clearExpiredEventsEvent);
     expect(resp).toEqual(expect.objectContaining({

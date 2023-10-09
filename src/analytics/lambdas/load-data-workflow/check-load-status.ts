@@ -183,6 +183,8 @@ export const delFinishedJobInDynamodb = async (tableName: string, s3Uri: string)
       s3_uri: s3Uri,
     },
   };
+  logger.info(`delete ${s3Uri} from ${tableName}`);
+
   const response = await ddbClient.send(new DeleteCommand(params));
   return response;
 };

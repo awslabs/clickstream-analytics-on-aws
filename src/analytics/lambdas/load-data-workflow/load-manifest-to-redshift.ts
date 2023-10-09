@@ -16,6 +16,7 @@ import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { UpdateCommand } from '@aws-sdk/lib-dynamodb';
 
 import { Context } from 'aws-lambda';
+import { composeJobStatus } from './put-ods-source-to-store';
 import { AnalyticsCustomMetricsName, MetricsNamespace, MetricsService } from '../../../common/model';
 import { logger } from '../../../common/powertools';
 import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
@@ -35,7 +36,6 @@ const DYNAMODB_TABLE_NAME = process.env.DYNAMODB_TABLE_NAME!;
 const REDSHIFT_ROLE_ARN = process.env.REDSHIFT_ROLE!;
 const REDSHIFT_DATA_API_ROLE_ARN = process.env.REDSHIFT_DATA_API_ROLE!;
 const REDSHIFT_DATABASE = process.env.REDSHIFT_DATABASE!;
-const REDSHIFT_ODS_TABLE_NAME = process.env.REDSHIFT_ODS_TABLE_NAME!;
 const PROJECT_ID = process.env.PROJECT_ID!;
 
 const metrics = new Metrics({ namespace: MetricsNamespace.REDSHIFT_ANALYTICS, serviceName: MetricsService.WORKFLOW });
@@ -112,6 +112,7 @@ export const handler = async (event: LoadManifestEvent, context: Context) => {
    * WHERE c.relname='ods_events' and n.nspname NOT IN ('pg_catalog', 'information_schema') ORDER BY schema_name, table_name;
    */
   // Governs automatic computation and refresh of optimizer statistics at the end of a successful COPY command.
+  const REDSHIFT_ODS_TABLE_NAME = process.env.REDSHIFT_ODS_TABLE_NAME!;
   const sqlStatement = `COPY ${schema}.${REDSHIFT_ODS_TABLE_NAME} FROM '${manifestFileName}' `
     + `IAM_ROLE '${REDSHIFT_ROLE_ARN}' `
     + 'STATUPDATE ON '
@@ -155,7 +156,11 @@ export const handler = async (event: LoadManifestEvent, context: Context) => {
  */
 export const updateItem = async (
   tableName: string, s3Uri: string, jobStatus: string) => {
-  logger.info(`updateItem: s3Uri:${s3Uri},jobStatus:${jobStatus}`);
+
+  const REDSHIFT_ODS_TABLE_NAME = process.env.REDSHIFT_ODS_TABLE_NAME!;
+  const qJobStatus = composeJobStatus(jobStatus, REDSHIFT_ODS_TABLE_NAME);
+
+  logger.info(`updateItem: s3Uri:${s3Uri} set jobStatus=${qJobStatus}`);
 
   const params = {
     TableName: tableName,
@@ -168,7 +173,7 @@ export const updateItem = async (
       '#job_status': 'job_status',
     },
     ExpressionAttributeValues: {
-      ':p1': jobStatus,
+      ':p1': qJobStatus,
     },
   };
   try {

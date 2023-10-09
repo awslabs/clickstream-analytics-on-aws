@@ -1,7 +1,9 @@
 [ {
   "app_id" : "uba-app",
   "event_date" : "2023-04-24",
+  "event_timestamp" : 1682319109447,
   "event_id" : "1fcd7f5b-9529-4977-a303-e8c7e39db7b898",
+  "event_name" : "Click3",
   "event_param_key" : "_device_vendor_id",
   "event_param_double_value" : null,
   "event_param_float_value" : null,
@@ -10,7 +12,9 @@
 }, {
   "app_id" : "uba-app",
   "event_date" : "2023-04-24",
+  "event_timestamp" : 1682319109447,
   "event_id" : "1fcd7f5b-9529-4977-a303-e8c7e39db7b898",
+  "event_name" : "Click3",
   "event_param_key" : "_device_advertising_id",
   "event_param_double_value" : null,
   "event_param_float_value" : null,
@@ -19,7 +23,9 @@
 }, {
   "app_id" : "uba-app",
   "event_date" : "2023-04-24",
+  "event_timestamp" : 1682319109447,
   "event_id" : "1fcd7f5b-9529-4977-a303-e8c7e39db7b898",
+  "event_name" : "Click3",
   "event_param_key" : "_error_name_invalid",
   "event_param_double_value" : null,
   "event_param_float_value" : null,
@@ -28,7 +34,9 @@
 }, {
   "app_id" : "uba-app",
   "event_date" : "2023-04-24",
+  "event_timestamp" : 1682319109447,
   "event_id" : "1fcd7f5b-9529-4977-a303-e8c7e39db7b898",
+  "event_name" : "Click3",
   "event_param_key" : "_error_name_length_exceed",
   "event_param_double_value" : null,
   "event_param_float_value" : null,
@@ -37,7 +45,9 @@
 }, {
   "app_id" : "uba-app",
   "event_date" : "2023-04-24",
+  "event_timestamp" : 1682319109447,
   "event_id" : "1fcd7f5b-9529-4977-a303-e8c7e39db7b898",
+  "event_name" : "Click3",
   "event_param_key" : "_error_value_length_exceed",
   "event_param_double_value" : null,
   "event_param_float_value" : null,
@@ -46,7 +56,9 @@
 }, {
   "app_id" : "uba-app",
   "event_date" : "2023-04-24",
+  "event_timestamp" : 1682319109447,
   "event_id" : "1fcd7f5b-9529-4977-a303-e8c7e39db7b898",
+  "event_name" : "Click3",
   "event_param_key" : "_error_attribute_size_exceed",
   "event_param_double_value" : null,
   "event_param_float_value" : null,
@@ -55,7 +67,9 @@
 }, {
   "app_id" : "uba-app",
   "event_date" : "2023-04-24",
+  "event_timestamp" : 1682319109447,
   "event_id" : "1fcd7f5b-9529-4977-a303-e8c7e39db7b898",
+  "event_name" : "Click3",
   "event_param_key" : "_is_first_time",
   "event_param_double_value" : null,
   "event_param_float_value" : null,
@@ -64,7 +78,9 @@
 }, {
   "app_id" : "uba-app",
   "event_date" : "2023-04-24",
+  "event_timestamp" : 1682319109447,
   "event_id" : "1fcd7f5b-9529-4977-a303-e8c7e39db7b898",
+  "event_name" : "Click3",
   "event_param_key" : "_is_first_day",
   "event_param_double_value" : null,
   "event_param_float_value" : null,
@@ -73,7 +89,9 @@
 }, {
   "app_id" : "uba-app",
   "event_date" : "2023-04-24",
+  "event_timestamp" : 1682319109447,
   "event_id" : "1fcd7f5b-9529-4977-a303-e8c7e39db7b898",
+  "event_name" : "Click3",
   "event_param_key" : "_session_id",
   "event_param_double_value" : null,
   "event_param_float_value" : null,
@@ -82,7 +100,9 @@
 }, {
   "app_id" : "uba-app",
   "event_date" : "2023-04-24",
+  "event_timestamp" : 1682319109447,
   "event_id" : "1fcd7f5b-9529-4977-a303-e8c7e39db7b898",
+  "event_name" : "Click3",
   "event_param_key" : "_session_start_timestamp",
   "event_param_double_value" : null,
   "event_param_float_value" : null,
@@ -91,7 +111,9 @@
 }, {
   "app_id" : "uba-app",
   "event_date" : "2023-04-24",
+  "event_timestamp" : 1682319109447,
   "event_id" : "1fcd7f5b-9529-4977-a303-e8c7e39db7b898",
+  "event_name" : "Click3",
   "event_param_key" : "_session_duration",
   "event_param_double_value" : null,
   "event_param_float_value" : null,

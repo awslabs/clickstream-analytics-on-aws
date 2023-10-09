@@ -15,6 +15,7 @@ import { CfnResource, Duration } from 'aws-cdk-lib';
 import { Alarm, ComparisonOperator, Metric, TreatMissingData } from 'aws-cdk-lib/aws-cloudwatch';
 import { IStateMachine } from 'aws-cdk-lib/aws-stepfunctions';
 import { Construct } from 'constructs';
+import { LoadDataWorkflows } from './metrics-redshift-serverless';
 import { AnalyticsCustomMetricsName, MetricsNamespace, MetricsService } from '../../common/model';
 import { GetInterval } from '../../metrics/get-interval-custom-resource';
 import { AlarmsWidgetElement, MetricWidgetElement } from '../../metrics/metrics-widgets-custom-resource';
@@ -25,11 +26,10 @@ export function buildMetricsWidgetForWorkflows(scope: Construct, id: string, pro
   projectId: string;
   dataProcessingCronOrRateExpression: string;
   upsertUsersCronOrRateExpression: string;
-  loadEventsWorkflow: IStateMachine;
+  loadDataWorkflows: LoadDataWorkflows;
   upsertUsersWorkflow: IStateMachine;
   clearExpiredEventsWorkflow: IStateMachine;
 }) {
-
 
   const processingJobInterval = new GetInterval(scope, 'dataProcess', {
     expression: props.dataProcessingCronOrRateExpression,
@@ -40,8 +40,24 @@ export function buildMetricsWidgetForWorkflows(scope: Construct, id: string, pro
   });
 
   const statesNamespace = 'AWS/States';
-  const loadEventsWorkflowDimension = [
-    'StateMachineArn', props.loadEventsWorkflow.stateMachineArn,
+  const loadOdsEventsWorkflowDimension = [
+    'StateMachineArn', props.loadDataWorkflows.ods_events.stateMachineArn,
+  ];
+
+  const loadEventWorkflowDimension = [
+    'StateMachineArn', props.loadDataWorkflows.event.stateMachineArn,
+  ];
+
+  const loadEventParameterWorkflowDimension = [
+    'StateMachineArn', props.loadDataWorkflows.event_parameter.stateMachineArn,
+  ];
+
+  const loadUserWorkflowDimension = [
+    'StateMachineArn', props.loadDataWorkflows.user.stateMachineArn,
+  ];
+
+  const loadItemWorkflowDimension = [
+    'StateMachineArn', props.loadDataWorkflows.item.stateMachineArn,
   ];
 
   const upsertUsersWorkflowDimension = [
@@ -58,40 +74,38 @@ export function buildMetricsWidgetForWorkflows(scope: Construct, id: string, pro
     'service', MetricsService.WORKFLOW,
   ];
 
-  const loadEventsWorkflowAlarm = new Alarm(scope, id + 'loadEventsWorkflowAlarm', {
+  const loadEventsWorkflowAlarm = new Alarm(scope, id + 'LoadDataWorkflowAlarm', {
     comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
     threshold: 1,
     evaluationPeriods: 1,
     treatMissingData: TreatMissingData.NOT_BREACHING,
-    metric: props.loadEventsWorkflow.metricFailed({ period: Duration.hours(1) }),
-    alarmDescription: `Load events workflow failed, projectId: ${props.projectId}`,
-    alarmName: getAlarmName(scope, props.projectId, 'Load events workflow'),
+    metric: props.loadDataWorkflows.event.metricFailed({ period: Duration.hours(1) }), // place-holder value here, Override by addPropertyOverride below
+    alarmDescription: `Load event workflow failed, projectId: ${props.projectId}`,
+    alarmName: getAlarmName(scope, props.projectId, 'Load event workflow'),
   });
-
   (loadEventsWorkflowAlarm.node.defaultChild as CfnResource).addPropertyOverride('Period', processingJobInterval.getIntervalSeconds());
 
-
-  const upsertUsersWorkflowAlarm = new Alarm(scope, id + 'upsertUsersWorkflowAlarm', {
+  const upsertUsersWorkflowAlarm = new Alarm(scope, id + 'UpsertUsersWorkflowAlarm', {
     comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
     threshold: 1,
     evaluationPeriods: 1,
     treatMissingData: TreatMissingData.NOT_BREACHING,
-    metric: props.upsertUsersWorkflow.metricFailed({ period: Duration.hours(24) }),
+    metric: props.upsertUsersWorkflow.metricFailed({ period: Duration.hours(24) }), // place-holder value here, Override by addPropertyOverride below
     alarmDescription: `Upsert users workflow failed, projectId: ${props.projectId}`,
     alarmName: getAlarmName(scope, props.projectId, 'Upsert users workflow'),
   });
   (upsertUsersWorkflowAlarm.node.defaultChild as CfnResource).addPropertyOverride('Period', upsertUsersInterval.getIntervalSeconds());
 
 
-  const newFilesCountAlarm = new Alarm(scope, id + 'maxFileAgeAlarm', {
+  const newFilesCountAlarm = new Alarm(scope, id + 'MaxFileAgeAlarm', {
     comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
-    threshold: 1800, // half hour
+    threshold: 1800, // place-holder value here, Override by addPropertyOverride below
     evaluationPeriods: 1,
     treatMissingData: TreatMissingData.NOT_BREACHING,
     metric: new Metric({
       metricName: AnalyticsCustomMetricsName.FILE_MAX_AGE,
       namespace: MetricsNamespace.REDSHIFT_ANALYTICS,
-      period: Duration.minutes(10),
+      period: Duration.minutes(10), // place-holder value here, Override by addPropertyOverride below
       statistic: 'Average',
       dimensionsMap: {
         ProjectId: props.projectId,
@@ -105,96 +119,60 @@ export function buildMetricsWidgetForWorkflows(scope: Construct, id: string, pro
   (newFilesCountAlarm.node.defaultChild as CfnResource).addPropertyOverride('Threshold', processingJobInterval.getIntervalSeconds());
 
 
-  setCfnNagForAlarms([loadEventsWorkflowAlarm, upsertUsersWorkflowAlarm, newFilesCountAlarm]);
+  setCfnNagForAlarms([loadEventsWorkflowAlarm, newFilesCountAlarm, upsertUsersWorkflowAlarm]);
 
-  const workflowAlarms : (MetricWidgetElement | AlarmsWidgetElement)[]= [
+  const workflowAlarms: (MetricWidgetElement | AlarmsWidgetElement)[] = [
     {
       type: 'alarm',
       properties: {
         alarms: [
           loadEventsWorkflowAlarm.alarmArn,
-          upsertUsersWorkflowAlarm.alarmArn,
           newFilesCountAlarm.alarmArn,
         ],
         title: 'Data Modeling Alarms',
       },
     },
   ];
+
+
+  const workflowExecMetrics: MetricWidgetElement[] = [
+    [loadEventWorkflowDimension, 'event'],
+    [loadEventParameterWorkflowDimension, 'event parameter'],
+    [loadUserWorkflowDimension, 'user'],
+    [loadItemWorkflowDimension, 'item'],
+    [clearExpiredEventsWorkflowDimension, 'clear expired events'],
+    [upsertUsersWorkflowDimension, 'upsert user'],
+    [loadOdsEventsWorkflowDimension, 'ods_events'],
+  ].flatMap(dimName => {
+    return [
+      {
+        type: 'metric',
+        properties: {
+          stat: 'Sum',
+          title: `Load '${dimName[1]}' workflow`,
+          metrics: [
+            [statesNamespace, 'ExecutionsSucceeded', ...dimName[0]],
+            ['.', 'ExecutionsFailed', '.', '.'],
+            ['.', 'ExecutionsStarted', '.', '.'],
+          ],
+        },
+      },
+
+      {
+        type: 'metric',
+        properties: {
+          stat: 'Average',
+          title: `Load '${dimName[1]}' workflow execution time`,
+          metrics: [
+            [statesNamespace, 'ExecutionTime', ...dimName[0]],
+          ],
+        },
+      },
+    ];
+  });
+
   const workflowMetrics: (MetricWidgetElement | AlarmsWidgetElement)[] = [
-    {
-      type: 'metric',
-      properties: {
-        stat: 'Sum',
-        title: 'Load events workflow',
-        metrics: [
-          [statesNamespace, 'ExecutionsSucceeded', ...loadEventsWorkflowDimension],
-          ['.', 'ExecutionsFailed', '.', '.'],
-          ['.', 'ExecutionsStarted', '.', '.'],
-        ],
-      },
-    },
-
-    {
-      type: 'metric',
-      properties: {
-        stat: 'Average',
-        title: 'Load events workflow execution time',
-        metrics: [
-          [statesNamespace, 'ExecutionTime', ...loadEventsWorkflowDimension],
-        ],
-      },
-    },
-
-    {
-      type: 'metric',
-      properties: {
-        stat: 'Sum',
-        title: 'Upsert users workflow',
-        metrics: [
-          [statesNamespace, 'ExecutionsSucceeded', ...upsertUsersWorkflowDimension],
-          ['.', 'ExecutionsFailed', '.', '.'],
-          ['.', 'ExecutionsStarted', '.', '.'],
-        ],
-      },
-    },
-
-    {
-      type: 'metric',
-      properties: {
-        stat: 'Average',
-        title: 'Upsert users workflow execution time',
-        metrics: [
-          [statesNamespace, 'ExecutionTime', ...upsertUsersWorkflowDimension],
-        ],
-      },
-    },
-
-    {
-      type: 'metric',
-      properties: {
-        stat: 'Sum',
-        title: 'Clear expired events workflow',
-        view: 'timeSeries',
-        metrics: [
-          [statesNamespace, 'ExecutionsSucceeded', ...clearExpiredEventsWorkflowDimension],
-          ['.', 'ExecutionsStarted', '.', '.'],
-          ['.', 'ExecutionsFailed', '.', '.'],
-        ],
-      },
-    },
-
-    {
-      type: 'metric',
-      properties: {
-        stat: 'Average',
-        title: 'Clear expired events execution time',
-        view: 'timeSeries',
-        metrics: [
-          [statesNamespace, 'ExecutionTime', ...clearExpiredEventsWorkflowDimension],
-        ],
-      },
-    },
-
+    ...workflowExecMetrics,
     {
       type: 'metric',
       properties: {

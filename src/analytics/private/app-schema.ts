@@ -25,6 +25,7 @@ import { createLambdaRole } from '../../common/lambda';
 import { attachListTagsPolicyForFunction } from '../../common/lambda/tags';
 import { POWERTOOLS_ENVS } from '../../common/powertools';
 import { SolutionNodejsFunction } from '../../private/function';
+import { RedshiftOdsTables } from '../analytics-on-redshift';
 
 export interface ApplicationSchemasProps {
   readonly projectId: string;
@@ -32,7 +33,7 @@ export interface ApplicationSchemasProps {
   readonly serverlessRedshift?: ExistingRedshiftServerlessProps;
   readonly provisionedRedshift?: ProvisionedRedshiftProps;
   readonly databaseName: string;
-  readonly odsTableName: string;
+  readonly odsTableNames: RedshiftOdsTables;
   readonly dataAPIRole: IRole;
 }
 
@@ -70,7 +71,7 @@ export class ApplicationSchemas extends Construct {
     const customProps: CreateDatabaseAndSchemas = {
       projectId: props.projectId,
       appIds: props.appIds,
-      odsTableName: props.odsTableName,
+      odsTableNames: props.odsTableNames,
       databaseName: props.databaseName,
       dataAPIRole: props.dataAPIRole.roleArn,
       serverlessRedshiftProps: props.serverlessRedshift,

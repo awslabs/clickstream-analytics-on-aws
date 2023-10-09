@@ -18,11 +18,12 @@ import { CreateSecretCommand, DescribeSecretCommand, ResourceNotFoundException, 
 import { CdkCustomResourceEvent, CdkCustomResourceCallback, CdkCustomResourceResponse } from 'aws-lambda';
 import { mockClient } from 'aws-sdk-client-mock';
 import mockfs from 'mock-fs';
+import { RedshiftOdsTables } from '../../../../../src/analytics/analytics-on-redshift';
 import { ResourcePropertiesType, handler, physicalIdPrefix } from '../../../../../src/analytics/lambdas/custom-resource/create-schemas';
 import 'aws-sdk-client-mock-jest';
 import { ProvisionedRedshiftProps, SQLDef } from '../../../../../src/analytics/private/model';
 import { reportingViewsDef, schemaDefs } from '../../../../../src/analytics/private/sql-def';
-import { TABLE_NAME_ODS_EVENT } from '../../../../../src/common/constant';
+import { TABLE_NAME_EVENT_PARAMETER, TABLE_NAME_ODS_EVENT } from '../../../../../src/common/constant';
 import { getMockContext } from '../../../../common/lambda-context';
 import { basicCloudFormationEvent } from '../../../../common/lambda-events';
 
@@ -38,13 +39,20 @@ describe('Custom resource - Create schemas for applications in Redshift database
   const projectDBName = 'clickstream_project1';
   const roleName = 'MyRedshiftDBUserRole';
   const biUserNamePrefix = 'clickstream_report_user_';
+  const odsTableNames: RedshiftOdsTables = {
+    odsEvents: 'ods_events',
+    event: 'event',
+    event_parameter: 'event_parameter',
+    user: 'user',
+    item: 'item',
+  };
   const basicEvent = {
     ...basicCloudFormationEvent,
     ResourceProperties: {
       ...basicCloudFormationEvent.ResourceProperties,
       ServiceToken: 'token-1',
       projectId: 'project1',
-      odsTableName: 'ods_events',
+      odsTableNames,
       databaseName: projectDBName,
       dataAPIRole: `arn:aws:iam::1234567890:role/${roleName}`,
       redshiftBIUserParameter: '/clickstream/report/user/1111',
@@ -149,6 +157,14 @@ describe('Custom resource - Create schemas for applications in Redshift database
       sqlFile: 'clickstream-user-attr-view.sql',
     },
 
+    {
+      updatable: 'false',
+      sqlFile: 'user-m-view.sql',
+    },
+    {
+      updatable: 'false',
+      sqlFile: 'item-m-view.sql',
+    },
   ];
 
   const testReportingViewsDef2: SQLDef[] = testReportingViewsDef.slice();
@@ -162,6 +178,24 @@ describe('Custom resource - Create schemas for applications in Redshift database
       updatable: 'false',
       sqlFile: 'ods-events.sql',
     },
+    {
+      updatable: 'false',
+      sqlFile: 'event.sql',
+    },
+    {
+      updatable: 'false',
+      sqlFile: 'event-parameter.sql',
+    },
+    {
+      updatable: 'false',
+      sqlFile: 'item.sql',
+    },
+
+    {
+      updatable: 'false',
+      sqlFile: 'user.sql',
+    },
+
     {
       updatable: 'true',
       sqlFile: 'sp-clickstream-log.sql',
@@ -186,6 +220,11 @@ describe('Custom resource - Create schemas for applications in Redshift database
     {
       updatable: 'true',
       sqlFile: 'sp-clear-expired-events.sql',
+    },
+
+    {
+      updatable: 'true',
+      sqlFile: 'sp-clear-item-and-user.sql',
     },
 
   ];
@@ -257,9 +296,16 @@ describe('Custom resource - Create schemas for applications in Redshift database
       '/opt/grant-permissions-to-bi-user.sql': testSqlContent(rootPath + 'grant-permissions-to-bi-user.sql'),
       '/opt/ods-events.sql': testSqlContent(rootPath + 'ods-events.sql'),
       '/opt/sp-clear-expired-events.sql': testSqlContent(rootPath + 'sp-clear-expired-events.sql'),
-      '/opt/sp-clickstream-log.sql': testSqlContent(rootPath + 'sp-clickstream-log.sql'),
       '/opt/sp-upsert-users.sql': testSqlContent(rootPath + 'sp-upsert-users.sql'),
+      '/opt/sp-clickstream-log.sql': testSqlContent(rootPath + 'sp-clickstream-log.sql'),
       '/opt/sp-scan-metadata.sql': testSqlContent(rootPath + 'sp-scan-metadata.sql'),
+      '/opt/event.sql': testSqlContent(rootPath + 'event.sql'),
+      '/opt/event-parameter.sql': testSqlContent(rootPath + 'event-parameter.sql'),
+      '/opt/user.sql': testSqlContent(rootPath + 'user.sql'),
+      '/opt/item.sql': testSqlContent(rootPath + 'item.sql'),
+      '/opt/item-m-view.sql': testSqlContent(rootPath + 'item-m-view.sql'),
+      '/opt/user-m-view.sql': testSqlContent(rootPath + 'user-m-view.sql'),
+      '/opt/sp-clear-item-and-user.sql': testSqlContent(rootPath + 'sp-clear-item-and-user.sql'),
     });
   });
 
@@ -363,7 +409,7 @@ describe('Custom resource - Create schemas for applications in Redshift database
     lambdaMock.on(ListTagsCommand).resolves({
       Tags: { tag_key: 'tag_value' },
     });
-    const regex = new RegExp(`^CREATE USER ${biUserNamePrefix}[a-z0-9]{8} PASSWORD '[a-zA-Z0-9!#$%^&-_=+|]{32}'$`);
+    const regex = new RegExp(`^CREATE USER ${biUserNamePrefix}[a-z0-9A-Z$%]{8} PASSWORD '[a-zA-Z0-9!#$%^&-_=+|]{32}'$`);
     redshiftDataMock.on(ExecuteStatementCommand).resolvesOnce({ Id: 'Id-1' })
       .callsFakeOnce(input => {
         if (input as ExecuteStatementCommandInput && regex.test(input.Sql)) {
@@ -604,15 +650,15 @@ describe('Custom resource - Create schemas for applications in Redshift database
   test('Updated schemas and views in Redshift provisioned cluster', async () => {
     redshiftDataMock
       .callsFakeOnce(input => {
-        console.log(`Sql is ${JSON.stringify(input.Sqls)}`);
+        console.log(`3##Sql is## ${JSON.stringify(input.Sqls)}`);
         if (input as BatchExecuteStatementCommandInput) {
-          if (input.Sqls.length >= 9 && input.Sqls[0].includes('CREATE SCHEMA IF NOT EXISTS app2')
-          && input.Sqls[1].includes(`CREATE TABLE IF NOT EXISTS app2.${TABLE_NAME_ODS_EVENT}(`)
-          && input.Sqls[10].includes(`CREATE TABLE IF NOT EXISTS app1.${TABLE_NAME_ODS_EVENT}`)) {
+          if (input.Sqls.length >= 18 && input.Sqls[0].includes('CREATE SCHEMA IF NOT EXISTS app2')
+          && input.Sqls[3].includes(`CREATE TABLE IF NOT EXISTS app2.${TABLE_NAME_EVENT_PARAMETER}(`)
+          && input.Sqls[17].includes(`CREATE TABLE IF NOT EXISTS app1.${TABLE_NAME_EVENT_PARAMETER}`)) {
             return { Id: 'Id-1' };
           }
         }
-        throw new Error('Sqls are not expected');
+        throw new Error('3##Sqls are not expected');
       }).resolves({ Id: 'Id-2' });
     redshiftDataMock.on(DescribeStatementCommand).resolves({ Status: 'FINISHED' });
     const resp = await handler(updateAdditionalProvisionedEvent, context, callback) as CdkCustomResourceResponse;
@@ -634,9 +680,9 @@ describe('Custom resource - Create schemas for applications in Redshift database
         // console.log(`##1##Sql is ${JSON.stringify(input.Sqls)}`);
         if (input as BatchExecuteStatementCommandInput) {
           if (input.Sqls.length >= 10 && input.Sqls[0].includes('CREATE SCHEMA IF NOT EXISTS app2')
-            && input.Sqls[1].includes(`CREATE TABLE IF NOT EXISTS app2.${TABLE_NAME_ODS_EVENT}(`)
-            && !input.Sqls[10].includes(`CREATE TABLE IF NOT EXISTS app1.${TABLE_NAME_ODS_EVENT}`)
-            && input.Sqls[10].includes('CREATE OR REPLACE PROCEDURE app1.sp_clickstream_log')
+            && input.Sqls[3].includes(`CREATE TABLE IF NOT EXISTS app2.${TABLE_NAME_EVENT_PARAMETER}(`)
+            && !input.Sqls[16].includes(`CREATE TABLE IF NOT EXISTS app1.${TABLE_NAME_EVENT_PARAMETER}`)
+            && !input.Sqls[19].includes('CREATE OR REPLACE PROCEDURE app1.sp_clickstream_log')
           ) {
             return { Id: 'Id-1' };
           }
@@ -646,8 +692,9 @@ describe('Custom resource - Create schemas for applications in Redshift database
       .callsFake(input => {
         console.log(`##2##Sql is ${JSON.stringify(input.Sqls)}`);
         if (input as BatchExecuteStatementCommandInput) {
-          if (input.Sqls.length = 17 && input.Sqls[13].includes('CREATE MATERIALIZED VIEW app1.clickstream_ods_events_view')
-            && input.Sqls[14].includes('CREATE OR REPLACE VIEW app1.clickstream_ods_events_rt_view')
+          if (input.Sqls.length = 19
+            && input.Sqls[12].includes('CREATE MATERIALIZED VIEW app2.user_m_view')
+            && input.Sqls[13].includes('CREATE MATERIALIZED VIEW app2.item_m_view')
           ) {
             return { Id: 'Id-2' };
           }

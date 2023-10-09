@@ -239,6 +239,7 @@ class ETLRunnerTest extends BaseSparkTest {
         System.setProperty(APP_IDS_PROP, "uba-app");
         System.setProperty(PROJECT_ID_PROP, "test_project_id_01");
         System.setProperty(DEBUG_LOCAL_PROP, "true");
+        System.setProperty(WAREHOUSE_DIR_PROP, "/tmp/warehouse2_1");
 
         spark.sparkContext().addFile(requireNonNull(getClass().getResource("/GeoLite2-City.mmdb")).getPath());
 
@@ -275,6 +276,8 @@ class ETLRunnerTest extends BaseSparkTest {
         // DOWNLOAD_FILE=1 ./gradlew clean test --info --tests software.aws.solution.clickstream.ETLRunnerTest.should_executeTransformers_with_TransformerV2_2
         System.setProperty(APP_IDS_PROP, "uba-app");
         System.setProperty(PROJECT_ID_PROP, "test_project_id_01");
+        System.setProperty(WAREHOUSE_DIR_PROP, "/tmp/warehouse2_2");
+
         spark.sparkContext().addFile(requireNonNull(getClass().getResource("/GeoLite2-City.mmdb")).getPath());
         List<String> transformers = Lists.newArrayList();
         transformers.add("software.aws.solution.clickstream.TransformerV2");
@@ -299,6 +302,8 @@ class ETLRunnerTest extends BaseSparkTest {
         System.setProperty(APP_IDS_PROP, "uba-app");
         System.setProperty(PROJECT_ID_PROP, "test_project_id_01");
         System.setProperty("force.merge", "true");
+        System.setProperty(WAREHOUSE_DIR_PROP, "/tmp/warehouse2_3");
+
         spark.sparkContext().addFile(requireNonNull(getClass().getResource("/GeoLite2-City.mmdb")).getPath());
         List<String> transformers = Lists.newArrayList();
         transformers.add("software.aws.solution.clickstream.TransformerV2");
@@ -343,6 +348,8 @@ class ETLRunnerTest extends BaseSparkTest {
         // DOWNLOAD_FILE=1 ./gradlew clean test --info --tests software.aws.solution.clickstream.ETLRunnerTest.should_executeTransformers_with_TransformerV2_user_item_params
         System.setProperty(APP_IDS_PROP, "uba-app");
         System.setProperty(PROJECT_ID_PROP, "test_project_id_01");
+        System.setProperty(WAREHOUSE_DIR_PROP, "/tmp/warehouse_user_item_params");
+
         spark.sparkContext().addFile(requireNonNull(getClass().getResource("/GeoLite2-City.mmdb")).getPath());
         List<String> transformers = Lists.newArrayList();
         transformers.add("software.aws.solution.clickstream.TransformerV2");
@@ -393,6 +400,7 @@ class ETLRunnerTest extends BaseSparkTest {
         System.setProperty(APP_IDS_PROP, "uba-app");
         System.setProperty(PROJECT_ID_PROP, "test_project_id_01");
         System.setProperty("force.merge", "true");
+        System.setProperty(WAREHOUSE_DIR_PROP, "/tmp/warehouse_empty_user");
 
         spark.sparkContext().addFile(requireNonNull(getClass().getResource("/GeoLite2-City.mmdb")).getPath());
         List<String> transformers = Lists.newArrayList();
@@ -428,6 +436,7 @@ class ETLRunnerTest extends BaseSparkTest {
         System.setProperty(APP_IDS_PROP, "uba-app");
         System.setProperty(PROJECT_ID_PROP, "test_project_id_01");
         System.setProperty("force.merge", "true");
+        System.setProperty(WAREHOUSE_DIR_PROP, "/tmp/warehouse_empty_user_and_item");
 
         List<String> transformers = Lists.newArrayList();
         transformers.add("software.aws.solution.clickstream.TransformerV2");

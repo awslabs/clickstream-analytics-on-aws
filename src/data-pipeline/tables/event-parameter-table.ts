@@ -19,7 +19,15 @@ import {
 export function getEventParameterTableColumns(): Column[] {
   return [
     {
+      name: 'event_timestamp',
+      type: Schema.BIG_INT,
+    },
+    {
       name: 'event_id',
+      type: Schema.STRING,
+    },
+    {
+      name: 'event_name',
       type: Schema.STRING,
     },
     {

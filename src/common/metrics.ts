@@ -13,7 +13,7 @@
 
 import { Effect, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 
-export const getPutMericsPolicyStatements = (namespace: string) => {
+export const getPutMetricsPolicyStatements = (namespace: string) => {
   const cloudwatchPolicyStatements: PolicyStatement[] = [
     new PolicyStatement({
       effect: Effect.ALLOW,

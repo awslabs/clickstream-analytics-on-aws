@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { ExecuteStatementCommand, RedshiftDataClient } from '@aws-sdk/client-redshift-data';
+import { BatchExecuteStatementCommand, RedshiftDataClient } from '@aws-sdk/client-redshift-data';
 import { mockClient } from 'aws-sdk-client-mock';
 import { ClearExpiredEventsEvent, handler } from '../../../../../src/analytics/lambdas/clear-expired-events-workflow/clear-expired-events';
 import { ClearExpiredEventsBody } from '../../../../../src/analytics/private/model';
@@ -42,26 +42,26 @@ describe('Lambda - do clear expired events in Redshift Serverless', () => {
   });
 
   test('Executed Redshift clear expired events command', async () => {
-    const exeuteId = 'Id-1';
-    redshiftDataMock.on(ExecuteStatementCommand).resolvesOnce({ Id: exeuteId });
+    const executeId = 'Id-1';
+    redshiftDataMock.on(BatchExecuteStatementCommand).resolves({ Id: executeId });
     const resp = await handler(clearExpiredEventsEvent);
     expect(resp).toEqual({
       detail: expect.objectContaining({
-        id: exeuteId,
+        id: executeId,
       }),
     });
-    expect(redshiftDataMock).toHaveReceivedCommandWith(ExecuteStatementCommand, {
+    expect(redshiftDataMock).toHaveReceivedCommandWith(BatchExecuteStatementCommand, {
       WorkgroupName: workGroupName,
     });
   });
 
   test('Execute command error in Redshift when doing clear expired events', async () => {
-    redshiftDataMock.on(ExecuteStatementCommand).rejectsOnce();
+    redshiftDataMock.on(BatchExecuteStatementCommand).rejectsOnce();
     try {
       await handler(clearExpiredEventsEvent);
       fail('The error in executing statement of Redshift data was caught');
     } catch (error) {
-      expect(redshiftDataMock).toHaveReceivedCommandWith(ExecuteStatementCommand, {
+      expect(redshiftDataMock).toHaveReceivedCommandWith(BatchExecuteStatementCommand, {
         WorkgroupName: workGroupName,
       });
     }
@@ -86,14 +86,14 @@ describe('Lambda - do clear expire events in Redshift Provisioned', () => {
 
   test('Executed Redshift clear expired events command', async () => {
     const executeId = 'Id-1';
-    redshiftDataMock.on(ExecuteStatementCommand).resolvesOnce({ Id: executeId });
+    redshiftDataMock.on(BatchExecuteStatementCommand).resolves({ Id: executeId });
     const resp = await handler(clearExpiredEventsEvent);
     expect(resp).toEqual({
       detail: expect.objectContaining({
         id: executeId,
       }),
     });
-    expect(redshiftDataMock).toHaveReceivedCommandWith(ExecuteStatementCommand, {
+    expect(redshiftDataMock).toHaveReceivedCommandWith(BatchExecuteStatementCommand, {
       ClusterIdentifier: clusterIdentifier,
       DbUser: dbUser,
     });
