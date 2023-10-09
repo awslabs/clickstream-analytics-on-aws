@@ -182,7 +182,7 @@ const columnTemplate = `
 `;
 
 function _buildSessionIdSQL(eventNames: string[], sqlParameters: SQLParameters, isEventPathSQL: boolean = false) : string {
-  const eventDateSQL = _getEventDateSql(sqlParameters);
+  const eventDateSQL = _getEventDateSql(sqlParameters, 'event.');
   const eventNameInClause = `and event_name in ('${eventNames.join('\',\'')}')`;
   const eventNameClause = eventNames.length > 0 ? eventNameInClause : '';
 
@@ -204,7 +204,7 @@ function _buildSessionIdSQL(eventNames: string[], sqlParameters: SQLParameters, 
 
 
 function _buildNodePathSQL(eventNames: string[], sqlParameters: SQLParameters, nodeType: ExplorePathNodeType) : string {
-  const eventDateSQL = _getEventDateSql(sqlParameters);
+  const eventDateSQL = _getEventDateSql(sqlParameters, 'event.');
   return `
     select 
       event.event_date,
@@ -238,8 +238,7 @@ function _buildCommonColumnsSql(columns: string[], key: string, value: string) {
   };
 }
 
-function _buildUserJoinTable(eventNames: string[], schema: string, isEventPathSQL: boolean,
-  userJoinSql: string, userCommonColumnsSql: any, commonConditionSql: any, eventNameClause: string) {
+function _buildUserJoinTable(schema: string, userJoinSql: string, userCommonColumnsSql: any, commonConditionSql: any, eventNameClause: string) {
   return `
   join 
   (
@@ -250,14 +249,13 @@ function _buildUserJoinTable(eventNames: string[], schema: string, isEventPathSQ
     from ${schema}.ods_events as event
     ${userJoinSql}
     where ${commonConditionSql.eventDateSQL}
-    ${ isEventPathSQL ? 'and event.event_name not in (\'' + builtInEvents.filter(event => !eventNames.includes(event)).join('\',\'') + '\')' : eventNameClause }
+    ${eventNameClause}
     group by event.user_pseudo_id
   ) user_join_table on base_table.user_pseudo_id = user_join_table.user_pseudo_id
   `;
 }
 
-function _buildEventJoinTable(eventNames: string[], schema: string, isEventPathSQL: boolean,
-  eventJoinSql: string, eventCommonColumnsSql: any, commonConditionSql: any, eventNameClause: string) {
+function _buildEventJoinTable(schema: string, eventJoinSql: string, eventCommonColumnsSql: any, commonConditionSql: any, eventNameClause: string) {
   return `
   join
   (
@@ -267,30 +265,51 @@ function _buildEventJoinTable(eventNames: string[], schema: string, isEventPathS
     from ${schema}.ods_events as event
     ${eventJoinSql}
     where ${commonConditionSql.eventDateSQL}
-    ${ isEventPathSQL ? 'and event.event_name not in (\'' + builtInEvents.filter(event => !eventNames.includes(event)).join('\',\'') + '\')' : eventNameClause }
+    ${eventNameClause}
     group by event.event_id
   ) event_join_table on base_table.event_id =  event_join_table.event_id
   `;
 }
 
-export function _buildCommonPartSql(eventNames: string[], sqlParameters: SQLParameters, isEventPathSQL: boolean = false) : string {
+function _buildEventNameClause(eventNames: string[], sqlParameters: SQLParameters, isEventPathSQL: boolean, isNodePathSQL: boolean) {
+
+  const eventNameInClause = `and event.event_name in ('${eventNames.join('\',\'')}')`;
+  const eventNameClause = eventNames.length > 0 ? eventNameInClause : '';
+
+  if (isNodePathSQL) {
+    return `
+    and event.event_name = '${ (sqlParameters.pathAnalysis?.platform === MetadataPlatform.ANDROID || sqlParameters.pathAnalysis?.platform === MetadataPlatform.IOS) ? '_screen_view' : '_page_view' }'
+    ${sqlParameters.pathAnalysis!.platform ? 'and platform = \'' + sqlParameters.pathAnalysis!.platform + '\'' : '' }
+    `;
+  } else if (isEventPathSQL) {
+    return 'and event.event_name not in (\'' + builtInEvents.filter(event => !eventNames.includes(event)).join('\',\'') + '\')';
+  } else {
+    return eventNameClause;
+  }
+}
+
+export function _buildCommonPartSql(eventNames: string[], sqlParameters: SQLParameters,
+  isEventPathSQL: boolean = false, isNodePathAnalysis: boolean = false, isRetentionAnalysis: boolean = false) : string {
 
   //If the query condition is simple use a different way to improve performance when fetch data
   if (!_hasMoreThanOneNestConditionInEvent(sqlParameters)) {
-    return _buildCommonPartSqlSimple(eventNames, sqlParameters, isEventPathSQL);
+    return _buildCommonPartSqlSimple(eventNames, sqlParameters, isEventPathSQL, isNodePathAnalysis, isRetentionAnalysis);
   } else {
-    const commonConditionSql = _getCommonConditionSql(sqlParameters);
-    const allConditionSql = _getAllConditionSql(eventNames, sqlParameters, isEventPathSQL);
-
-    const eventNameInClause = `and event.event_name in ('${eventNames.join('\',\'')}')`;
-    const eventNameClause = eventNames.length > 0 ? eventNameInClause : '';
+    const commonConditionSql = _getCommonConditionSql(sqlParameters, false, 'event.');
+    let allConditionSql = '';
+    if(!isRetentionAnalysis) {
+      allConditionSql = _getAllConditionSql(eventNames, sqlParameters, isEventPathSQL);
+    }
+    const eventNameClause = _buildEventNameClause(eventNames, sqlParameters, isEventPathSQL, isNodePathAnalysis);
 
     let eventJoinSql = '';
     let userJoinSql = '';
     const eventCondition = _hasEventCondition(sqlParameters);
     let eventJoinTable = '';
     let eventColList: string[] = [];
-    if (eventCondition.hasEventAttribute) {
+    if (eventCondition.hasEventAttribute
+      || sqlParameters.pathAnalysis?.sessionType === ExplorePathSessionDef.SESSION
+    ) {
       eventJoinSql = `join ${sqlParameters.schemaName}.clickstream_ods_events_parameter_view as event_param
       on event.event_date = event_param.event_date and event.event_id = event_param.event_id
       `;
@@ -299,8 +318,7 @@ export function _buildCommonPartSql(eventNames: string[], sqlParameters: SQLPara
       eventAttributes.push(...eventCondition.eventAttributes);
       const eventCommonColumnsSql = _buildCommonColumnsSql([...new Set(eventAttributes)], 'event_parameter_key', 'event_parameter_value');
       eventColList = eventCommonColumnsSql.columns;
-      eventJoinTable = _buildEventJoinTable(eventNames, sqlParameters.schemaName, isEventPathSQL,
-        eventJoinSql, eventCommonColumnsSql, commonConditionSql, eventNameClause);
+      eventJoinTable = _buildEventJoinTable(sqlParameters.schemaName, eventJoinSql, eventCommonColumnsSql, commonConditionSql, eventNameClause);
     }
 
     const userCondition = _hasUserCondition(sqlParameters);
@@ -315,8 +333,7 @@ export function _buildCommonPartSql(eventNames: string[], sqlParameters: SQLPara
       userAttributes.push(...userCondition.userAttributes);
       const userCommonColumnsSql = _buildCommonColumnsSql([...new Set(userAttributes)], 'custom_attr_key', 'custom_attr_value');
       userColList = userCommonColumnsSql.columns;
-      userJoinTable = _buildUserJoinTable(eventNames, sqlParameters.schemaName, isEventPathSQL,
-        userJoinSql, userCommonColumnsSql, commonConditionSql, eventNameClause);
+      userJoinTable = _buildUserJoinTable(sqlParameters.schemaName, userJoinSql, userCommonColumnsSql, commonConditionSql, eventNameClause);
     }
 
     userColList.push(...eventColList);
@@ -339,7 +356,7 @@ export function _buildCommonPartSql(eventNames: string[], sqlParameters: SQLPara
       TO_CHAR(TIMESTAMP 'epoch' + cast(event_timestamp/1000 as bigint) * INTERVAL '1 second', 'YYYY-MM-DD HH24') || '00:00' as hour
       from ${sqlParameters.schemaName}.ods_events as event
       where ${commonConditionSql.eventDateSQL}
-      ${ isEventPathSQL ? 'and event.event_name not in (\'' + builtInEvents.filter(event => !eventNames.includes(event)).join('\',\'') + '\')' : eventNameClause }
+      ${eventNameClause}
       ) base_table
       ${eventJoinTable}
       ${userJoinTable}
@@ -351,14 +368,14 @@ export function _buildCommonPartSql(eventNames: string[], sqlParameters: SQLPara
   }
 }
 
-
-export function _buildCommonPartSqlSimple(eventNames: string[], sqlParameters: SQLParameters, isEventPathSQL: boolean = false) : string {
+export function _buildCommonPartSqlSimple(eventNames: string[], sqlParameters: SQLParameters,
+  isEventPathSQL: boolean = false, isNodePathAnalysis: boolean = false, isRetentionAnalysis: boolean = false) : string {
 
   const commonConditionSql = _getCommonConditionSql(sqlParameters, true);
-  const allConditionSql = _getAllConditionSql(eventNames, sqlParameters, isEventPathSQL, true);
-
-  const eventNameInClause = `and event.event_name in ('${eventNames.join('\',\'')}')`;
-  const eventNameClause = eventNames.length > 0 ? eventNameInClause : '';
+  let allConditionSql = '';
+  if(!isRetentionAnalysis) {
+    allConditionSql = _getAllConditionSql(eventNames, sqlParameters, isEventPathSQL, true);
+  }
 
   const eventCondition = _hasEventCondition(sqlParameters);
   let eventJoinSql = '';
@@ -404,13 +421,12 @@ export function _buildCommonPartSqlSimple(eventNames: string[], sqlParameters: S
     ${userJoinSql}
     ${eventJoinSql}
     where ${commonConditionSql.eventDateSQL}
-    ${ isEventPathSQL ? 'and event.event_name not in (\'' + builtInEvents.filter(event => !eventNames.includes(event)).join('\',\'') + '\')' : eventNameClause }
+    ${_buildEventNameClause(eventNames, sqlParameters, isEventPathSQL, isNodePathAnalysis)}
     ${commonConditionSql.globalConditionSql}
     ${allConditionSql}
   ),
   `;
 }
-
 
 function _getAllConditionSql(eventNames: string[], sqlParameters: SQLParameters,
   isEventPathSQL: boolean = false, simpleVersion: boolean = false) : string {
@@ -486,30 +502,30 @@ function _getEventDateSql(sqlParameters: SQLParameters, prefix: string = '') {
   return eventDateSQL;
 }
 
-function _buildNodePathAnalysisBaseSql(sqlParameters: SQLParameters) : string {
+// function _buildNodePathAnalysisBaseSql(sqlParameters: SQLParameters) : string {
 
-  const commonConditionSql = _getCommonConditionSql(sqlParameters);
+//   const commonConditionSql = _getCommonConditionSql(sqlParameters);
 
-  return `with base_data as (
-    select 
-    ${_renderUserPseudoIdColumn(baseColumns, sqlParameters.computeMethod, false)},
-    user_param.user_id,
-    user_param.user_pseudo_id,
-    user_param.custom_attr_key,
-    user_param.custom_attr_value,
-    TO_CHAR(TIMESTAMP 'epoch' + cast(event_timestamp/1000 as bigint) * INTERVAL '1 second', 'YYYY-MM') as month,
-    TO_CHAR(date_trunc('week', TIMESTAMP 'epoch' + cast(event_timestamp/1000 as bigint) * INTERVAL '1 second'), 'YYYY-MM-DD') || ' - ' || TO_CHAR(date_trunc('week', (TIMESTAMP 'epoch' + cast(event_timestamp/1000 as bigint) * INTERVAL '1 second') + INTERVAL '6 days'), 'YYYY-MM-DD') as week,
-    TO_CHAR(TIMESTAMP 'epoch' + cast(event_timestamp/1000 as bigint) * INTERVAL '1 second', 'YYYY-MM-DD') as day,
-    TO_CHAR(TIMESTAMP 'epoch' + cast(event_timestamp/1000 as bigint) * INTERVAL '1 second', 'YYYY-MM-DD HH24') || '00:00' as hour
-    from ${sqlParameters.schemaName}.ods_events as event
-    join ${sqlParameters.schemaName}.clickstream_user_attr_view as user_param on event.user_pseudo_id = user_param.user_pseudo_id
-    where ${commonConditionSql.eventDateSQL}
-    and event_name = '${ (sqlParameters.pathAnalysis?.platform === MetadataPlatform.ANDROID || sqlParameters.pathAnalysis?.platform === MetadataPlatform.IOS) ? '_screen_view' : '_page_view' }'
-    ${sqlParameters.pathAnalysis!.platform ? 'and platform = \'' + sqlParameters.pathAnalysis!.platform + '\'' : '' }
-    ${commonConditionSql.globalConditionSql}
-  ),
-  `;
-}
+//   return `with base_data as (
+//     select
+//     ${_renderUserPseudoIdColumn(baseColumns, sqlParameters.computeMethod, false)},
+//     user_param.user_id,
+//     user_param.user_pseudo_id,
+//     user_param.custom_attr_key,
+//     user_param.custom_attr_value,
+//     TO_CHAR(TIMESTAMP 'epoch' + cast(event_timestamp/1000 as bigint) * INTERVAL '1 second', 'YYYY-MM') as month,
+//     TO_CHAR(date_trunc('week', TIMESTAMP 'epoch' + cast(event_timestamp/1000 as bigint) * INTERVAL '1 second'), 'YYYY-MM-DD') || ' - ' || TO_CHAR(date_trunc('week', (TIMESTAMP 'epoch' + cast(event_timestamp/1000 as bigint) * INTERVAL '1 second') + INTERVAL '6 days'), 'YYYY-MM-DD') as week,
+//     TO_CHAR(TIMESTAMP 'epoch' + cast(event_timestamp/1000 as bigint) * INTERVAL '1 second', 'YYYY-MM-DD') as day,
+//     TO_CHAR(TIMESTAMP 'epoch' + cast(event_timestamp/1000 as bigint) * INTERVAL '1 second', 'YYYY-MM-DD HH24') || '00:00' as hour
+//     from ${sqlParameters.schemaName}.ods_events as event
+//     join ${sqlParameters.schemaName}.clickstream_user_attr_view as user_param on event.user_pseudo_id = user_param.user_pseudo_id
+//     where ${commonConditionSql.eventDateSQL}
+//     and event_name = '${ (sqlParameters.pathAnalysis?.platform === MetadataPlatform.ANDROID || sqlParameters.pathAnalysis?.platform === MetadataPlatform.IOS) ? '_screen_view' : '_page_view' }'
+//     ${sqlParameters.pathAnalysis!.platform ? 'and platform = \'' + sqlParameters.pathAnalysis!.platform + '\'' : '' }
+//     ${commonConditionSql.globalConditionSql}
+//   ),
+//   `;
+// }
 
 function _buildFunnelBaseSql(eventNames: string[], sqlParameters: SQLParameters) : string {
 
@@ -637,44 +653,44 @@ function _buildEventCondition(eventNames: string[], sqlParameters: SQLParameters
   return { sql, computedMethodList };
 }
 
-function _buildRetentionConditionSql(eventName: string, sqlCondition: SQLCondition | undefined): string[] {
+// function _buildRetentionConditionSql(eventName: string, sqlCondition: SQLCondition | undefined, simpleVersion: boolean): string[] {
 
-  let conditionSql = '';
-  let columnSql = '';
-  if (sqlCondition) {
-    const propertyList: string[] = [];
-    const eventNameAndSQLCondition: EventNameAndSQLConditions = {
-      eventName: eventName,
-      normalConditionSql: getNormalConditionSql(sqlCondition),
-      nestSqlPair: getNestPropertyConditionSql(sqlCondition, propertyList),
-    };
+//   let conditionSql = '';
+//   let columnSql = '';
+//   if (sqlCondition) {
+//     const propertyList: string[] = [];
+//     const eventNameAndSQLCondition: EventNameAndSQLConditions = {
+//       eventName: eventName,
+//       normalConditionSql: getNormalConditionSql(sqlCondition),
+//       nestSqlPair: getNestPropertyConditionSql(sqlCondition, propertyList),
+//     };
 
-    let normalConditionSql = eventNameAndSQLCondition.normalConditionSql;
-    if (normalConditionSql !== '') {
-      normalConditionSql = `and (${normalConditionSql}) `;
-    }
+//     let normalConditionSql = eventNameAndSQLCondition.normalConditionSql;
+//     if (normalConditionSql !== '') {
+//       normalConditionSql = `and (${normalConditionSql}) `;
+//     }
 
-    let nestSqlPair0 = eventNameAndSQLCondition.nestSqlPair[0];
+//     let nestSqlPair0 = eventNameAndSQLCondition.nestSqlPair[0];
 
-    if (nestSqlPair0 !== '') {
-      nestSqlPair0 = `and (${nestSqlPair0}) `;
-    }
+//     if (nestSqlPair0 !== '') {
+//       nestSqlPair0 = `and (${nestSqlPair0}) `;
+//     }
 
-    conditionSql = `
-      ( event_name = '${eventNameAndSQLCondition.eventName}' ${normalConditionSql} ${nestSqlPair0} )
-    `;
+//     conditionSql = `
+//       ( event_name = '${eventNameAndSQLCondition.eventName}' ${normalConditionSql} ${nestSqlPair0} )
+//     `;
 
-    columnSql = `
-    ${eventNameAndSQLCondition.nestSqlPair[1]}
-    `;
-  } else {
-    conditionSql = `
-      ( event_name = '${eventName}' )
-    `;
-  }
+//     columnSql = `
+//     ${eventNameAndSQLCondition.nestSqlPair[1]}
+//     `;
+//   } else {
+//     conditionSql = `
+//       ( event_name = '${eventName}' )
+//     `;
+//   }
 
-  return [conditionSql, columnSql];
-}
+//   return [conditionSql, columnSql];
+// }
 
 export function buildFunnelTableView(sqlParameters: SQLParameters) : string {
 
@@ -805,6 +821,51 @@ export function buildEventAnalysisView(sqlParameters: SQLParameters) : string {
   });
 }
 
+function _buildMidTableSQlForPathAnalysis(eventNames: string[], sqlParameters: SQLParameters) {
+
+  if (_hasMoreThanOneNestConditionInEvent(sqlParameters)) {
+    return `
+    mid_table as (
+      select 
+        day::date as event_date,
+        CASE
+          WHEN event_name in ('${eventNames.join('\',\'')}')  THEN event_name 
+          ELSE 'other'
+        END as event_name,
+        user_pseudo_id,
+        event_id,
+        event_timestamp,
+        _session_id as session_id
+      from base_data
+    ),
+    `;
+  } else {
+    return `
+    mid_table_1 as (
+      select 
+        day::date as event_date,
+        CASE
+          WHEN event_name in ('${eventNames.join('\',\'')}')  THEN event_name 
+          ELSE 'other'
+        END as event_name,
+        user_pseudo_id,
+        event_id,
+        event_timestamp
+      from base_data
+    ),
+      mid_table_2 as (
+      ${_buildSessionIdSQL(eventNames, sqlParameters, true)}
+    ),
+    mid_table as (
+      select 
+        mid_table_1.*,
+        mid_table_2.session_id
+      from 
+        mid_table_1 join mid_table_2 on mid_table_1.event_date = mid_table_2.event_date and mid_table_1.event_id = mid_table_2.event_id
+    ),
+  `;
+  }
+}
 export function buildEventPathAnalysisView(sqlParameters: SQLParameters) : string {
 
   const eventNames = _getEventsNameFromConditions(sqlParameters.eventAndConditions!);
@@ -812,30 +873,7 @@ export function buildEventPathAnalysisView(sqlParameters: SQLParameters) : strin
   let midTableSql = '';
   let dataTableSql = '';
   if (sqlParameters.pathAnalysis?.sessionType === ExplorePathSessionDef.SESSION ) {
-    midTableSql = `
-      mid_table_1 as (
-        select 
-          day::date as event_date,
-          CASE
-            WHEN event_name in ('${eventNames.join('\',\'')}')  THEN event_name 
-            ELSE 'other'
-          END as event_name,
-          user_pseudo_id,
-          event_id,
-          event_timestamp
-        from base_data
-      ),
-        mid_table_2 as (
-        ${_buildSessionIdSQL(eventNames, sqlParameters, true)}
-      ),
-      mid_table as (
-        select 
-          mid_table_1.*,
-          mid_table_2.session_id
-        from 
-          mid_table_1 join mid_table_2 on mid_table_1.event_date = mid_table_2.event_date and mid_table_1.event_id = mid_table_2.event_id
-      ),
-    `;
+    midTableSql = _buildMidTableSQlForPathAnalysis(eventNames, sqlParameters);
 
     dataTableSql = `data as (
       select 
@@ -1280,7 +1318,7 @@ export function buildNodePathAnalysisView(sqlParameters: SQLParameters) : string
   }
 
   const sql = `
-    ${_buildNodePathAnalysisBaseSql(sqlParameters)}
+    ${_buildCommonPartSql([], sqlParameters, false, true)}
     ${midTableSql}
     ${dataTableSql}
   `;
@@ -1293,18 +1331,14 @@ export function buildNodePathAnalysisView(sqlParameters: SQLParameters) : string
 export function buildRetentionAnalysisView(sqlParameters: SQLParameters) : string {
 
   const dateListSql = _buildDateListSQL(sqlParameters);
-  const { tableSql, resultSql } = _buildSQLs(sqlParameters);
+  const simpleVersion = !_hasMoreThanOneNestConditionInEvent(sqlParameters);
+  const { tableSql, resultSql } = _buildSQLs(sqlParameters, simpleVersion);
 
   const sql = `
-    ${_buildCommonPartSql(_getRetentionAnalysisViewEventNames(sqlParameters), sqlParameters)}
+    ${_buildCommonPartSql(_getRetentionAnalysisViewEventNames(sqlParameters), sqlParameters, false, false, true)}
     first_date as (
-      select min(event_date) as first_date from tmp_data
+      select min(event_date) as first_date from base_data
     ), 
-    mid_table as (
-      select 
-        * 
-      from tmp_data as base
-    ),
     ${dateListSql}
     ${tableSql}
     result_table as (${resultSql})
@@ -1323,14 +1357,33 @@ export function buildRetentionAnalysisView(sqlParameters: SQLParameters) : strin
   });
 }
 
-function _buildSQLs(sqlParameters: SQLParameters) {
+
+function _buildConditionSQLForRetention(eventName: string, sqlCondition: SQLCondition | undefined, simpleVersion: boolean) {
+
+  let sql = '';
+  if(!simpleVersion) {
+    sql = getConditionSql(sqlCondition)
+  } else {
+    sql = getConditionSqlSimple(sqlCondition)
+  }
+
+  if (sql !== '') {
+    sql = `and (${sql}) `;
+  }
+
+  return `
+    event_name = '${eventName}' ${sql}
+  `;
+}
+
+function _buildSQLs(sqlParameters: SQLParameters, simpleVersion: boolean) {
   let tableSql = '';
   let resultSql = '';
 
   for (const [index, pair] of sqlParameters.pairEventAndConditions!.entries()) {
 
-    const [startConditionSql, _startColumnSql] = _buildRetentionConditionSql(pair.startEvent.eventName, pair.startEvent.sqlCondition);
-    const [backConditionSql, _backColumnSql] = _buildRetentionConditionSql(pair.backEvent.eventName, pair.backEvent.sqlCondition);
+    const startConditionSql = _buildConditionSQLForRetention(pair.startEvent.eventName, pair.startEvent.sqlCondition, simpleVersion);
+    const backConditionSql = _buildConditionSQLForRetention(pair.backEvent.eventName, pair.backEvent.sqlCondition, simpleVersion);
 
     let { joinColLeft, joinColRight, joinSql } = _buildJoinSQL(pair, index);
 
@@ -1342,7 +1395,7 @@ function _buildSQLs(sqlParameters: SQLParameters) {
           event_name,
           ${joinColLeft}
           user_pseudo_id
-        from mid_table join first_date on mid_table.event_date = first_date.first_date
+        from base_data join first_date on base_data.event_date = first_date.first_date
         ${startConditionSql !== '' ? 'where ' + startConditionSql : ''}
       ),
       second_table_${index} as (
@@ -1351,7 +1404,7 @@ function _buildSQLs(sqlParameters: SQLParameters) {
           event_name,
           ${joinColRight}
           user_pseudo_id
-        from mid_table join first_date on mid_table.event_date > first_date.first_date
+        from base_data join first_date on base_data.event_date > first_date.first_date
         ${backConditionSql !== '' ? 'where ' + backConditionSql : ''}
       ),
       `,
@@ -1446,28 +1499,28 @@ function formatDateToYYYYMMDD(date: Date): string {
   return `'${year.toString().trim()}-${month.trim()}-${day.trim()}'`;
 }
 
-function getNormalConditionSql(sqlCondition: SQLCondition | undefined) {
-  let sql = '';
-  if (sqlCondition) {
-    for (const [_index, condition] of sqlCondition.conditions.entries()) {
-      if (condition.category === ConditionCategory.USER || condition.category === ConditionCategory.EVENT) {
-        continue;
-      }
+// function getNormalConditionSql(sqlCondition: SQLCondition | undefined) {
+//   let sql = '';
+//   if (sqlCondition) {
+//     for (const [_index, condition] of sqlCondition.conditions.entries()) {
+//       if (condition.category === ConditionCategory.USER || condition.category === ConditionCategory.EVENT) {
+//         continue;
+//       }
 
-      let category: string = `${condition.category}_`;
-      if (condition.category === ConditionCategory.OTHER) {
-        category = '';
-      }
+//       let category: string = `${condition.category}_`;
+//       if (condition.category === ConditionCategory.OTHER) {
+//         category = '';
+//       }
 
-      const conditionSql = buildSqlFromCondition(condition, category);
-      sql = sql.concat(`
-        ${sql === '' ? '' : sqlCondition.conditionOperator ?? 'and'} ${conditionSql}
-      `);
-    }
-  }
+//       const conditionSql = buildSqlFromCondition(condition, category);
+//       sql = sql.concat(`
+//         ${sql === '' ? '' : sqlCondition.conditionOperator ?? 'and'} ${conditionSql}
+//       `);
+//     }
+//   }
 
-  return sql;
-}
+//   return sql;
+// }
 
 function getConditionSql(sqlCondition: SQLCondition | undefined) {
   if (!sqlCondition) {
@@ -1591,78 +1644,78 @@ function getGlobalConditionSqlSimple(sqlCondition: SQLCondition | undefined) {
   return sql;
 }
 
-function getValueType(dataType: MetadataValueType) {
-  let valueType = '';
-  if (dataType === MetadataValueType.STRING) {
-    valueType = 'string_value';
-  } else if (dataType === MetadataValueType.INTEGER) {
-    valueType = 'int_value';
-  } else if (dataType === MetadataValueType.FLOAT) {
-    valueType = 'float_value';
-  } else if (dataType === MetadataValueType.DOUBLE) {
-    valueType = 'double_value';
-  }
-  return valueType;
-}
+// function getValueType(dataType: MetadataValueType) {
+//   let valueType = '';
+//   if (dataType === MetadataValueType.STRING) {
+//     valueType = 'string_value';
+//   } else if (dataType === MetadataValueType.INTEGER) {
+//     valueType = 'int_value';
+//   } else if (dataType === MetadataValueType.FLOAT) {
+//     valueType = 'float_value';
+//   } else if (dataType === MetadataValueType.DOUBLE) {
+//     valueType = 'double_value';
+//   }
+//   return valueType;
+// }
 
-function getNestPropertyConditionSql(sqlCondition: SQLCondition | undefined, propertyList: string[]): [string, string] {
-  let conditionSql = '';
-  let columnSql = '';
-  if (sqlCondition) {
-    for (const [_index, condition] of sqlCondition.conditions.entries()) {
-      if (condition.category != ConditionCategory.USER && condition.category != ConditionCategory.EVENT) {
-        continue;
-      }
-      let prefix = 'event_';
-      if (condition.category === ConditionCategory.USER) {
-        prefix= 'user_';
-      }
+// function getNestPropertyConditionSql(sqlCondition: SQLCondition | undefined, propertyList: string[]): [string, string] {
+//   let conditionSql = '';
+//   let columnSql = '';
+//   if (sqlCondition) {
+//     for (const [_index, condition] of sqlCondition.conditions.entries()) {
+//       if (condition.category != ConditionCategory.USER && condition.category != ConditionCategory.EVENT) {
+//         continue;
+//       }
+//       let prefix = 'event_';
+//       if (condition.category === ConditionCategory.USER) {
+//         prefix= 'user_';
+//       }
 
-      const singleConditionSql = buildSqlFromCondition(condition, prefix);
-      conditionSql = conditionSql.concat(`
-      ${ conditionSql !== '' ? (sqlCondition.conditionOperator ?? 'and') : '' } ${singleConditionSql}
-      `);
+//       const singleConditionSql = buildSqlFromCondition(condition, prefix);
+//       conditionSql = conditionSql.concat(`
+//       ${ conditionSql !== '' ? (sqlCondition.conditionOperator ?? 'and') : '' } ${singleConditionSql}
+//       `);
 
-      columnSql = _buildColumnSQL(condition, propertyList, prefix, columnSql);
-    }
-  }
-  return [conditionSql, columnSql];
-}
+//       columnSql = _buildColumnSQL(condition, propertyList, prefix, columnSql);
+//     }
+//   }
+//   return [conditionSql, columnSql];
+// }
 
-function _buildColumnSQL(condition: Condition, propertyList: string[], prefix: string, columnSql: string) {
-  const valueType = getValueType(condition.dataType);
+// function _buildColumnSQL(condition: Condition, propertyList: string[], prefix: string, columnSql: string) {
+//   const valueType = getValueType(condition.dataType);
 
-  if (!propertyList.includes(prefix + condition.property)) {
-    propertyList.push(prefix + condition.property);
-    if (condition.category == ConditionCategory.USER) {
-      columnSql += `(
-            select
-              max(up.value.${valueType})
-            from
-              tmp_data e,
-              e.user_properties up
-            where
-              up.key = '${condition.property}'
-              and e.event_id = base.event_id
-          ) as ${prefix}${condition.property},
-          `;
+//   if (!propertyList.includes(prefix + condition.property)) {
+//     propertyList.push(prefix + condition.property);
+//     if (condition.category == ConditionCategory.USER) {
+//       columnSql += `(
+//             select
+//               max(up.value.${valueType})
+//             from
+//               tmp_data e,
+//               e.user_properties up
+//             where
+//               up.key = '${condition.property}'
+//               and e.event_id = base.event_id
+//           ) as ${prefix}${condition.property},
+//           `;
 
-    } else if (condition.category == ConditionCategory.EVENT) {
-      columnSql += `(
-            select
-              max(ep.value.${valueType})
-            from
-              tmp_data e,
-              e.event_params ep
-            where
-              ep.key = '${condition.property}'
-              and e.event_id = base.event_id
-          ) as ${prefix}${condition.property},
-          `;
-    }
-  }
-  return columnSql;
-}
+//     } else if (condition.category == ConditionCategory.EVENT) {
+//       columnSql += `(
+//             select
+//               max(ep.value.${valueType})
+//             from
+//               tmp_data e,
+//               e.event_params ep
+//             where
+//               ep.key = '${condition.property}'
+//               and e.event_id = base.event_id
+//           ) as ${prefix}${condition.property},
+//           `;
+//     }
+//   }
+//   return columnSql;
+// }
 
 function getLastNDayNumber(lastN: number, timeUnit: ExploreRelativeTimeUnit) : number {
   let lastNDayNumber = lastN;
