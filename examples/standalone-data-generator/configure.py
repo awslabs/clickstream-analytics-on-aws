@@ -22,7 +22,7 @@ EVENTS_PER_REQUEST = 10000
 # gzip process number, for mac m1 is 8, for c5.metal is 50 to meet best performance
 PROCESS_NUMBER = 50
 # control the speed for event send.
-MAX_UPLOAD_THREAD_NUMBER = 2
+MAX_UPLOAD_THREAD_NUMBER = 1
 REQUEST_SLEEP_TIME = 0.2
 GZIP_TIMES_PER_DAY = 1
 
