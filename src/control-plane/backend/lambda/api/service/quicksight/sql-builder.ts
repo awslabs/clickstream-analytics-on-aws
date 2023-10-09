@@ -53,12 +53,6 @@ export interface PairEventAndCondition {
   readonly backEvent: EventAndCondition;
 }
 
-export interface EventNameAndSQLConditions {
-  readonly eventName: string;
-  readonly normalConditionSql: string;
-  readonly nestSqlPair: [string, string];
-}
-
 export interface EventNameAndConditionsSQL {
   readonly eventName: string;
   readonly conditionSql: string;
