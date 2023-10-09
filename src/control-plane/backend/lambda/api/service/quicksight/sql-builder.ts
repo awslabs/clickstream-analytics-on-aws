@@ -297,7 +297,7 @@ export function _buildCommonPartSql(eventNames: string[], sqlParameters: SQLPara
   } else {
     const commonConditionSql = _getCommonConditionSql(sqlParameters, false, 'event.');
     let allConditionSql = '';
-    if(!isRetentionAnalysis) {
+    if (!isRetentionAnalysis) {
       allConditionSql = _getAllConditionSql(eventNames, sqlParameters, isEventPathSQL);
     }
     const eventNameClause = _buildEventNameClause(eventNames, sqlParameters, isEventPathSQL, isNodePathAnalysis);
@@ -373,7 +373,7 @@ export function _buildCommonPartSqlSimple(eventNames: string[], sqlParameters: S
 
   const commonConditionSql = _getCommonConditionSql(sqlParameters, true);
   let allConditionSql = '';
-  if(!isRetentionAnalysis) {
+  if (!isRetentionAnalysis) {
     allConditionSql = _getAllConditionSql(eventNames, sqlParameters, isEventPathSQL, true);
   }
 
@@ -536,9 +536,11 @@ function _buildFunnelBaseSql(eventNames: string[], sqlParameters: SQLParameters)
     joinColumnsSQL = joinColumnsSQL.concat(`, table_${index}.user_pseudo_id_${index} \n`);
     joinColumnsSQL = joinColumnsSQL.concat(`, table_${index}.event_timestamp_${index} \n`);
 
-    let joinCondition = 'on 1 = 1';
+    let joinCondition = '';
     if ( sqlParameters.specifyJoinColumn) {
       joinCondition = `on table_${index-1}.${sqlParameters.joinColumn}_${index-1} = table_${index}.${sqlParameters.joinColumn}_${index}`;
+    } else {
+      joinCondition = `on table_${index-1}.user_pseudo_id_${index-1} = table_${index}.user_pseudo_id_${index}`;
     }
 
     if (sqlParameters.conversionIntervalType == 'CUSTOMIZE') {
@@ -1297,10 +1299,10 @@ export function buildRetentionAnalysisView(sqlParameters: SQLParameters) : strin
 function _buildConditionSQLForRetention(eventName: string, sqlCondition: SQLCondition | undefined, simpleVersion: boolean) {
 
   let sql = '';
-  if(!simpleVersion) {
-    sql = getConditionSql(sqlCondition)
+  if (!simpleVersion) {
+    sql = getConditionSql(sqlCondition);
   } else {
-    sql = getConditionSqlSimple(sqlCondition)
+    sql = getConditionSqlSimple(sqlCondition);
   }
 
   if (sql !== '') {
