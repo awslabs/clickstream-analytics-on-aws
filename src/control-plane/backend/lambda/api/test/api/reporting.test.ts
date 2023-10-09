@@ -230,7 +230,7 @@ describe('reporting test', () => {
       .send({
         action: 'PREVIEW',
         locale: ExploreLocales.ZH_CN,
-        chartType: QuickSightChartType.LINE,
+        chartType: QuickSightChartType.FUNNEL,
         viewName: 'testview0002',
         projectId: 'project01_wvzh',
         pipelineId: 'pipeline-1111111',
@@ -333,7 +333,7 @@ describe('reporting test', () => {
         locale: ExploreLocales.ZH_CN,
         chartTitle: 'test-title',
         chartSubTitle: 'test-subtitle',
-        chartType: QuickSightChartType.LINE,
+        chartType: QuickSightChartType.FUNNEL,
         viewName: 'testview00022',
         projectId: 'project01_wvzh',
         pipelineId: '87ea3d080cc34bb398275a27f4e8b113',
@@ -387,6 +387,101 @@ describe('reporting test', () => {
     expect(res.body.data.analysisId).toBeDefined();
     expect(res.body.data.visualIds).toBeDefined();
     expect(res.body.data.visualIds.length).toEqual(2);
+  });
+
+  it('funnel visual - unsupported chart type', async () => {
+    tokenMock(ddbMock, false);
+    stsClientMock.on(AssumeRoleCommand).resolves({
+      Credentials: {
+        AccessKeyId: '1111',
+        SecretAccessKey: '22222',
+        SessionToken: '33333',
+        Expiration: new Date(),
+      },
+    });
+
+    redshiftClientMock.on(BatchExecuteStatementCommand).resolves({
+    });
+    redshiftClientMock.on(DescribeStatementCommand).resolves({
+      Status: StatusString.FINISHED,
+    });
+
+    quickSightMock.on(DescribeDashboardDefinitionCommand).resolves({
+      Definition: dashboardDef,
+    });
+
+    quickSightMock.on(UpdateAnalysisCommand).resolves({
+      Arn: 'arn:aws:quicksight:us-east-1:11111111:analysis/analysis-aaaaaaaa',
+    });
+
+    quickSightMock.on(UpdateDashboardCommand).resolves({
+      Arn: 'arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa',
+      VersionArn: 'arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa/1',
+    });
+
+    quickSightMock.on(UpdateDashboardPublishedVersionCommand).resolves({
+      DashboardId: 'dashboard-aaaaaaaa',
+    });
+
+    quickSightMock.on(DescribeAnalysisCommand).resolves({
+      Analysis: {
+        Name: 'test-analysis',
+      },
+    });
+
+    const res = await request(app)
+      .post('/api/reporting/funnel')
+      .send({
+        action: 'PUBLISH',
+        locale: ExploreLocales.ZH_CN,
+        chartTitle: 'test-title',
+        chartSubTitle: 'test-subtitle',
+        chartType: QuickSightChartType.LINE,
+        viewName: 'testview00022',
+        projectId: 'project01_wvzh',
+        pipelineId: '87ea3d080cc34bb398275a27f4e8b113',
+        appId: 'app1',
+        sheetName: 'sheet99',
+        sheetId: 'a410f75d-48d7-4699-83b8-283fce0f8f31',
+        analysisId: 'analysis4e448d67-7c0d-4251-9f0f-45dc2c8dcb09',
+        analysisName: 'analysis-testview0004',
+        dashboardId: 'dashboard-37933899-0bb6-4e89-bced-cd8b17d3c160',
+        dashboardName: 'dashboard-testview0003',
+        computeMethod: 'USER_CNT',
+        specifyJoinColumn: true,
+        joinColumn: 'user_pseudo_id',
+        conversionIntervalType: 'CUSTOMIZE',
+        conversionIntervalInSeconds: 7200,
+        eventAndConditions: [{
+          eventName: 'add_button_click',
+        },
+        {
+          eventName: 'note_share',
+        },
+        {
+          eventName: 'note_export',
+        }],
+        timeScopeType: 'FIXED',
+        timeStart: new Date('2023-06-30'),
+        timeEnd: new Date('2023-08-30'),
+        groupColumn: 'week',
+        dashboardCreateParameters: {
+          region: 'us-east-1',
+          allowDomain: 'https://example.com',
+          quickSight: {
+            dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
+          },
+          redshift: {
+            dataApiRole: 'arn:aws:iam::11111111:role/test_api_role',
+            newServerless: {
+              workgroupName: 'clickstream-project01-wvzh',
+            },
+          },
+        },
+      });
+
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(500);
   });
 
   it('event visual - preview', async () => {

@@ -504,12 +504,12 @@ export async function getCredentialsFromRole(stsClient: STSClient, roleArn: stri
 export function getFunnelVisualDef(visualId: string, viewName: string, titleProps: DashboardTitleProps,
   quickSightChartType: QuickSightChartType, groupColumn: string) : Visual {
 
-  if (quickSightChartType === QuickSightChartType.LINE) {
+  if (quickSightChartType === QuickSightChartType.FUNNEL) {
     return _getFunnelChartVisualDef(visualId, viewName, titleProps);
   } else if (quickSightChartType === QuickSightChartType.BAR) {
     return _getFunnelBarChartVisualDef(visualId, viewName, titleProps, groupColumn);
   } else {
-    const errorMessage = `Funnel analysis: unsupported quicksight char type ${quickSightChartType}`;
+    const errorMessage = `Funnel analysis: unsupported quicksight chart type ${quickSightChartType}`;
     logger.warn(errorMessage);
     throw new Error(errorMessage);
   }
@@ -757,7 +757,7 @@ export function getEventChartVisualDef(visualId: string, viewName: string, title
   quickSightChartType: QuickSightChartType, groupColumn: string) : Visual {
 
   if (quickSightChartType != QuickSightChartType.LINE && quickSightChartType != QuickSightChartType.BAR) {
-    const errorMessage = `Event analysis: unsupported quicksight char type ${quickSightChartType}`;
+    const errorMessage = `Event analysis: unsupported quicksight chart type ${quickSightChartType}`;
     logger.warn(errorMessage);
     throw new Error(errorMessage);
   }
@@ -813,7 +813,7 @@ export function getRetentionChartVisualDef(visualId: string, viewName: string, t
   quickSightChartType: QuickSightChartType) : Visual {
 
   if (quickSightChartType != QuickSightChartType.LINE && quickSightChartType != QuickSightChartType.BAR) {
-    const errorMessage = `Retention analysis: unsupported quicksight char type ${quickSightChartType}`;
+    const errorMessage = `Retention analysis: unsupported quicksight chart type ${quickSightChartType}`;
     logger.warn(errorMessage);
     throw new Error(errorMessage);
   }
