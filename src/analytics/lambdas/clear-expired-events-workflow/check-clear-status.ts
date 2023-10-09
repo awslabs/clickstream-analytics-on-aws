@@ -53,13 +53,12 @@ export const handler = async (event: ClearExpiredEventsEvent) => {
     };
   } else if (response.Status == StatusString.FAILED || response.Status == StatusString.ABORTED) {
     logger.info(`Executing ${queryId} status of statement is ${response.Status}`);
-    const queryResult = await queryClearLog(appId);
     return {
       detail: {
         id: queryId,
         appId: appId,
         status: response.Status,
-        message: 'Error:' + response.Error + '\nLog:' + queryResult.detail.message,
+        message: 'Error:' + response.Error,
       },
     };
   } else {

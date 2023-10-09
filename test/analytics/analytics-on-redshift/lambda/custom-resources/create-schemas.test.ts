@@ -175,6 +175,10 @@ describe('Custom resource - Create schemas for applications in Redshift database
 
   const testSchemaDefs: SQLDef[] = [
     {
+      updatable: 'true',
+      sqlFile: 'clickstream-log.sql',
+    },
+    {
       updatable: 'false',
       sqlFile: 'ods-events.sql',
     },
@@ -306,6 +310,7 @@ describe('Custom resource - Create schemas for applications in Redshift database
       '/opt/item-m-view.sql': testSqlContent(rootPath + 'item-m-view.sql'),
       '/opt/user-m-view.sql': testSqlContent(rootPath + 'user-m-view.sql'),
       '/opt/sp-clear-item-and-user.sql': testSqlContent(rootPath + 'sp-clear-item-and-user.sql'),
+      '/opt/clickstream-log.sql': testSqlContent(rootPath + 'clickstream-log.sql'),
     });
   });
 
@@ -354,12 +359,13 @@ describe('Custom resource - Create schemas for applications in Redshift database
     };
     redshiftDataMock.on(ExecuteStatementCommand).resolvesOnce({ Id: 'id-1' })
       .callsFake(input => {
+        console.log(`Sql-1 is ${JSON.stringify(input.Sql)}`);
         if (input as ExecuteStatementCommandInput) {
           if (input.Sql.includes('CREATE USER')) {
             return { Id: 'id-2' };
           }
         }
-        throw new Error('Sqls are not expected');
+        throw new Error('Sql-1 are not expected');
       }).resolves({ Id: 'Id-1' });
     redshiftDataMock.on(BatchExecuteStatementCommand).resolves({ Id: 'Id-2' });
     redshiftDataMock.on(DescribeStatementCommand).resolves({ Status: 'FINISHED' });
@@ -386,12 +392,13 @@ describe('Custom resource - Create schemas for applications in Redshift database
     };
     redshiftDataMock.on(ExecuteStatementCommand).resolvesOnce({ Id: 'id-1' })
       .callsFake(input => {
+        console.log(`Sql-2 is ${JSON.stringify(input.Sql)}`);
         if (input as ExecuteStatementCommandInput) {
           if (input.Sql.includes('CREATE USER')) {
             return { Id: 'id-2' };
           }
         }
-        throw new Error('Sqls are not expected');
+        throw new Error('Sql-2 are not expected');
       }).resolves({ Id: 'Id-1' });
     redshiftDataMock.on(BatchExecuteStatementCommand).resolves({ Id: 'Id-2' });
     redshiftDataMock.on(DescribeStatementCommand).resolves({ Status: 'FINISHED' });
@@ -430,13 +437,15 @@ describe('Custom resource - Create schemas for applications in Redshift database
     });
     redshiftDataMock.on(ExecuteStatementCommand).resolves({ Id: 'Id-1' });
     redshiftDataMock.on(BatchExecuteStatementCommand).callsFakeOnce(input => {
+      console.log(`Sql-6 is ${JSON.stringify(input.Sqls)}`);
+      const sqlStr = input.Sqls.join(';\n');
       if (input as BatchExecuteStatementCommandInput) {
-        if (input.Sqls.length >= 2 && input.Sqls[0].includes('CREATE SCHEMA IF NOT EXISTS app1')
-        && input.Sqls[1].includes(`CREATE TABLE IF NOT EXISTS app1.${TABLE_NAME_ODS_EVENT}(`)) {
+        if (sqlStr.includes('CREATE SCHEMA IF NOT EXISTS app1')
+        && sqlStr.includes(`CREATE TABLE IF NOT EXISTS app1.${TABLE_NAME_ODS_EVENT}(`)) {
           return { Id: 'Id-1' };
         }
       }
-      throw new Error(`Sqls '${input.Sqls}' are not expected`);
+      throw new Error('Sql-6 are not expected');
     }).callsFakeOnce(input => {
       if (input as BatchExecuteStatementCommandInput) {
         for (const sql of input.Sqls) {
@@ -522,13 +531,15 @@ describe('Custom resource - Create schemas for applications in Redshift database
       Tags: { tag_key: 'tag_value' },
     });
     redshiftDataMock.on(BatchExecuteStatementCommand).callsFakeOnce(input => {
+      console.log(`Sql-3 is ${JSON.stringify(input.Sqls)}`);
+      const sqlStr = input.Sqls.join(';\n');
       if (input as BatchExecuteStatementCommandInput) {
-        if (input.Sqls.length >= 2 && input.Sqls[0].includes('CREATE SCHEMA IF NOT EXISTS app2')
-        && input.Sqls[1].includes(`CREATE TABLE IF NOT EXISTS app2.${TABLE_NAME_ODS_EVENT}(`)) {
+        if (sqlStr.includes('CREATE SCHEMA IF NOT EXISTS app2')
+        && sqlStr.includes(`CREATE TABLE IF NOT EXISTS app2.${TABLE_NAME_ODS_EVENT}(`)) {
           return { Id: 'Id-1' };
         }
       }
-      throw new Error('Sqls are not expected');
+      throw new Error('Sql-3 are not expected');
     }).resolves({ Id: 'Id-2' });
     redshiftDataMock.on(DescribeStatementCommand).resolves({ Status: 'FINISHED' });
     const resp = await handler(updateServerlessEvent2, context, callback) as CdkCustomResourceResponse;
@@ -557,13 +568,15 @@ describe('Custom resource - Create schemas for applications in Redshift database
       Tags: { tag_key: 'tag_value' },
     });
     redshiftDataMock.on(BatchExecuteStatementCommand).callsFakeOnce(input => {
+      console.log(`Sql-4 is ${JSON.stringify(input.Sqls)}`);
+      const sqlStr = input.Sqls.join(';\n');
       if (input as BatchExecuteStatementCommandInput) {
-        if (input.Sqls.length >= 2 && input.Sqls[0].includes('CREATE SCHEMA IF NOT EXISTS app2')
-        && input.Sqls[1].includes(`CREATE TABLE IF NOT EXISTS app2.${TABLE_NAME_ODS_EVENT}(`)) {
+        if (sqlStr.includes('CREATE SCHEMA IF NOT EXISTS app2')
+        && sqlStr.includes(`CREATE TABLE IF NOT EXISTS app2.${TABLE_NAME_ODS_EVENT}(`)) {
           return { Id: 'Id-1' };
         }
       }
-      throw new Error('Sqls are not expected');
+      throw new Error('Sql-4 are not expected');
     }).resolves({ Id: 'Id-2' });
     redshiftDataMock.on(DescribeStatementCommand).resolves({ Status: 'FINISHED' });
     const resp = await handler(updateServerlessEvent, context, callback) as CdkCustomResourceResponse;
@@ -650,15 +663,17 @@ describe('Custom resource - Create schemas for applications in Redshift database
   test('Updated schemas and views in Redshift provisioned cluster', async () => {
     redshiftDataMock
       .callsFakeOnce(input => {
-        console.log(`3##Sql is## ${JSON.stringify(input.Sqls)}`);
+        console.log(`Sql-5 is ${JSON.stringify(input.Sqls)}`);
+        const sqlStr = input.Sqls.join(';\n');
+
         if (input as BatchExecuteStatementCommandInput) {
-          if (input.Sqls.length >= 18 && input.Sqls[0].includes('CREATE SCHEMA IF NOT EXISTS app2')
-          && input.Sqls[3].includes(`CREATE TABLE IF NOT EXISTS app2.${TABLE_NAME_EVENT_PARAMETER}(`)
-          && input.Sqls[17].includes(`CREATE TABLE IF NOT EXISTS app1.${TABLE_NAME_EVENT_PARAMETER}`)) {
+          if (sqlStr.includes('CREATE SCHEMA IF NOT EXISTS app2')
+          && sqlStr.includes(`CREATE TABLE IF NOT EXISTS app2.${TABLE_NAME_EVENT_PARAMETER}(`)
+          && sqlStr.includes(`CREATE TABLE IF NOT EXISTS app1.${TABLE_NAME_EVENT_PARAMETER}`)) {
             return { Id: 'Id-1' };
           }
         }
-        throw new Error('3##Sqls are not expected');
+        throw new Error('Sql-5 are not expected');
       }).resolves({ Id: 'Id-2' });
     redshiftDataMock.on(DescribeStatementCommand).resolves({ Status: 'FINISHED' });
     const resp = await handler(updateAdditionalProvisionedEvent, context, callback) as CdkCustomResourceResponse;
@@ -677,29 +692,33 @@ describe('Custom resource - Create schemas for applications in Redshift database
   test('Updated schemas and views in Redshift provisioned cluster with updatable/new added view/schema table', async () => {
     redshiftDataMock
       .callsFakeOnce(input => {
-        // console.log(`##1##Sql is ${JSON.stringify(input.Sqls)}`);
         if (input as BatchExecuteStatementCommandInput) {
-          if (input.Sqls.length >= 10 && input.Sqls[0].includes('CREATE SCHEMA IF NOT EXISTS app2')
-            && input.Sqls[3].includes(`CREATE TABLE IF NOT EXISTS app2.${TABLE_NAME_EVENT_PARAMETER}(`)
-            && !input.Sqls[16].includes(`CREATE TABLE IF NOT EXISTS app1.${TABLE_NAME_EVENT_PARAMETER}`)
-            && !input.Sqls[19].includes('CREATE OR REPLACE PROCEDURE app1.sp_clickstream_log')
+          console.log(`Sql-7 is ${JSON.stringify(input.Sqls)}`);
+          const sqlStr = input.Sqls.join(';\n');
+          if (sqlStr.includes('CREATE SCHEMA IF NOT EXISTS app2')
+            && sqlStr.includes('CREATE TABLE IF NOT EXISTS app2.clickstream_log')
+            && sqlStr.includes(`CREATE TABLE IF NOT EXISTS app2.${TABLE_NAME_EVENT_PARAMETER}`)
+            && sqlStr.includes('CREATE OR REPLACE PROCEDURE app1.sp_clickstream_log')
+            && sqlStr.includes('CREATE TABLE IF NOT EXISTS app1.clickstream_log')
+            && !sqlStr.includes(`CREATE TABLE IF NOT EXISTS app1.${TABLE_NAME_EVENT_PARAMETER}`)
           ) {
             return { Id: 'Id-1' };
           }
         }
-        throw new Error('##1##Sql are not expected');
+        throw new Error('Sql-7 are not expected');
       })
       .callsFake(input => {
-        console.log(`##2##Sql is ${JSON.stringify(input.Sqls)}`);
+        console.log(`Sql-8 is ${JSON.stringify(input.Sqls)}`);
+        const sqlStr = input.Sqls.join(';\n');
+
         if (input as BatchExecuteStatementCommandInput) {
-          if (input.Sqls.length = 19
-            && input.Sqls[12].includes('CREATE MATERIALIZED VIEW app2.user_m_view')
-            && input.Sqls[13].includes('CREATE MATERIALIZED VIEW app2.item_m_view')
+          if ( sqlStr.includes('CREATE MATERIALIZED VIEW app2.user_m_view')
+            && sqlStr.includes('CREATE MATERIALIZED VIEW app2.item_m_view')
           ) {
             return { Id: 'Id-2' };
           }
         }
-        throw new Error('##2##Sql are not expected');
+        throw new Error('Sql-8 are not expected');
       });
     redshiftDataMock.on(DescribeStatementCommand).resolves({ Status: 'FINISHED' });
     const resp = await handler(updateAdditionalProvisionedEvent2, context, callback) as CdkCustomResourceResponse;

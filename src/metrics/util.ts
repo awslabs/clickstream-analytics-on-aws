@@ -82,5 +82,5 @@ export function setCfnNagForAlarms(alarms: Alarm[]) {
 
 export function getAlarmName(scope: Construct, projectId: string, alarm: string) {
   const stackId = getShortIdOfStack(Stack.of(scope));
-  return `${ALARM_NAME_PREFIX}|${projectId} ${alarm} ${stackId}`;
+  return `${ALARM_NAME_PREFIX}|${projectId} ${alarm}_${stackId}`;
 }

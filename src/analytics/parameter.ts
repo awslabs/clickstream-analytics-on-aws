@@ -742,7 +742,7 @@ export function createStackParameters(scope: Construct): {
           'pipeline-ods-events-bucket',
           odsEventBucketParam.valueAsString,
         ),
-        prefix: getSourcePrefix(scope, odsEventBucketPrefixParam.valueAsString),
+        prefix: getSourcePrefix(scope, odsEventBucketPrefixParam.valueAsString, projectIdParam.valueAsString),
         fileSuffix: odsEventFileSuffixParam.valueAsString,
         emrServerlessApplicationId: emrServerlessApplicationIdParam.valueAsString,
       },
@@ -805,7 +805,7 @@ function createWorkgroupParameter(scope: Construct, id: string): CfnParameter {
   });
 }
 
-function getSourcePrefix(scope: Construct, odsEventPrefix: string): string {
+function getSourcePrefix(scope: Construct, odsEventPrefix: string, projectId: string): string {
 
   const role = createLambdaRole(scope, 'GetSourcePrefixCustomerResourceFnRole', false, []);
 
@@ -839,6 +839,7 @@ function getSourcePrefix(scope: Construct, odsEventPrefix: string): string {
 
   const customProps: GetResourcePrefixPropertiesType = {
     odsEventPrefix,
+    projectId,
   };
 
   const cr = new CustomResource(scope, 'GetSourcePrefixCustomerResource', {

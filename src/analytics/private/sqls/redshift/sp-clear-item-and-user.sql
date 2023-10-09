@@ -1,9 +1,9 @@
 CREATE OR REPLACE PROCEDURE {{schema}}.sp_clear_item_and_user() 
-AS
+NONATOMIC AS
 $$
 DECLARE
     record_number INT; 
-    log_name varchar(50) := 'sp_clear_item_and_user';
+    log_name varchar(50) := 'sp_clear_expired_events';
 BEGIN
     -- clean table_item
     WITH item_id_rank AS(

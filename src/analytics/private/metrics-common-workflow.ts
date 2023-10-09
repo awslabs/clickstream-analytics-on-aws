@@ -81,7 +81,7 @@ export function buildMetricsWidgetForWorkflows(scope: Construct, id: string, pro
     treatMissingData: TreatMissingData.NOT_BREACHING,
     metric: props.loadDataWorkflows.event.metricFailed({ period: Duration.hours(1) }), // place-holder value here, Override by addPropertyOverride below
     alarmDescription: `Load event workflow failed, projectId: ${props.projectId}`,
-    alarmName: getAlarmName(scope, props.projectId, 'Load event workflow'),
+    alarmName: getAlarmName(scope, props.projectId, 'Load Event Workflow'),
   });
   (loadEventsWorkflowAlarm.node.defaultChild as CfnResource).addPropertyOverride('Period', processingJobInterval.getIntervalSeconds());
 
@@ -92,7 +92,7 @@ export function buildMetricsWidgetForWorkflows(scope: Construct, id: string, pro
     treatMissingData: TreatMissingData.NOT_BREACHING,
     metric: props.upsertUsersWorkflow.metricFailed({ period: Duration.hours(24) }), // place-holder value here, Override by addPropertyOverride below
     alarmDescription: `Upsert users workflow failed, projectId: ${props.projectId}`,
-    alarmName: getAlarmName(scope, props.projectId, 'Upsert users workflow'),
+    alarmName: getAlarmName(scope, props.projectId, 'Upsert User Workflow'),
   });
   (upsertUsersWorkflowAlarm.node.defaultChild as CfnResource).addPropertyOverride('Period', upsertUsersInterval.getIntervalSeconds());
 
