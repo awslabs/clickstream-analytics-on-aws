@@ -22,7 +22,7 @@ def send_events_to_server(user, events):
     headers = {'Content-Type': 'application/json; charset=utf-8'}
     global global_sequence_id
     if user.platform == enums.Platform.Web:
-        device = user.device_web
+        device = user.web_device
     else:
         device = user.mobile_device
     request_param = {

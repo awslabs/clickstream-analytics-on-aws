@@ -12,23 +12,20 @@ and limitations under the License.
 """
 import random
 
-import configure
-from model.device.MobileDevice import MobileDevice
-from model.device.WebDevice import WebDevice
-from model.App import App
+from model.AppInfo import AppInfo
 import util.util as util
 import enums as enums
 
 
 class User:
-    def __init__(self, user_id, user_unique_id, mobile_device, device_web, name, app, channel,
-                 is_login_user, platform, is_switch_to_web, gender, age):
+    def __init__(self, user_id, user_unique_id, mobile_device, web_device, name, app, channel,
+                 is_login_user, platform, gender, age):
         self.user_id = user_id
         self.user_unique_id = user_unique_id
         self.login_timestamp = 0
         self.name = name
         self.mobile_device = mobile_device
-        self.device_web = device_web
+        self.web_device = web_device
         self.app = app
         self.is_login = False
         self.is_first_open = True
@@ -38,7 +35,6 @@ class User:
         self.total_day_events = 0
         self.send_events = 0
         self.platform = platform
-        self.is_switch_to_web = is_switch_to_web
         self.session_number = 0
         self.latest_referrer = ''
         self.latest_referrer_host = ''
@@ -54,29 +50,9 @@ class User:
         self.note_id = 1
 
     @staticmethod
-    def get_random_user():
-        platform = enums.Platform.Android
-        mobile_device = None
-        device_web = None
-        is_switch_to_web = False
-        if configure.APP_TYPE == enums.Application.Shopping:
-            if configure.PLATFORM == enums.Platform.All:
-                platform = enums.random_platform.get_random_item()
-                if platform != enums.Platform.Web:
-                    is_switch_to_web = enums.is_switch_to_web.get_random_item()
-                    if is_switch_to_web:
-                        device_web = WebDevice.get_random_device()
-            else:
-                platform = configure.PLATFORM
-        elif configure.APP_TYPE == enums.Application.NotePad:
-            platform = enums.Platform.Android
-
-        if platform == enums.Platform.Web:
-            device_web = WebDevice.get_random_device()
-        else:
-            mobile_device = MobileDevice.get_random_device(platform)
+    def get_random_user(platform, mobile_device, web_device):
         age = enums.age_range.get_random_item() + random.randint(0, 10)
-        return User(util.get_unique_id(), util.get_unique_id(), mobile_device, device_web,
-                    enums.get_random_user_name(), App.get_random_app(), enums.channel.get_random_item(),
-                    enums.is_login_user.get_random_item(), platform, is_switch_to_web,
+        return User(util.get_unique_id(), util.get_unique_id(), mobile_device, web_device,
+                    enums.get_random_user_name(), AppInfo.get_random_app(), enums.channel.get_random_item(),
+                    enums.is_login_user.get_random_item(), platform,
                     enums.user_gender.get_random_item(), age)

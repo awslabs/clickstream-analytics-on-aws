@@ -21,7 +21,7 @@ global_sequence_id = 1
 
 
 def send_events_to_server(events):
-    time.sleep(configure.request_sleep_time)
+    time.sleep(configure.REQUEST_SLEEP_TIME)
     headers = {'Content-Type': 'application/json; charset=utf-8'}
     global global_sequence_id
     request_param = {
@@ -49,10 +49,10 @@ def send_events_of_day(events_of_day):
         print("start gzip")
     else:
         print("start parse events")
-    n = int(len(events_of_day) / configure.gzip_times_per_day) + 1
+    n = int(len(events_of_day) / configure.GZIP_TIMES_PER_DAY) + 1
     events_of_day_arr = [events_of_day[i:i + n] for i in range(0, len(events_of_day), n)]
     for event_arr in events_of_day_arr:
-        executor = ThreadPoolExecutor(configure.max_upload_thread_number)
+        executor = ThreadPoolExecutor(configure.MAX_UPLOAD_THREAD_NUMBER)
         day_event_lines = utils.convert_to_gzip_events_process_pool(event_arr)
         if configure.IS_GZIP:
             print("gzip events cost: " + str(utils.current_timestamp() - start_time) + "ms\n")

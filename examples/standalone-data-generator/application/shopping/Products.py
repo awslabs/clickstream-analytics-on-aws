@@ -1,7 +1,7 @@
 import random
 
-from shopping import ShoppingEvent
-from shopping.ShoppingEventType import EventType
+from application.shopping import ShoppingApp
+from application.shopping.ShoppingEventType import EventType
 import util.util as utils
 import enums
 
@@ -39,7 +39,7 @@ def get_random_category_product(category, number):
 def get_exposure_events(user, products, event, feature):
     events = []
     for product in products:
-        product_exposure = ShoppingEvent.clean_event(event)
+        product_exposure = ShoppingApp.clean_event(event)
         product_exposure['attributes']['currency'] = 'USD'
         product_exposure['attributes']['event_category'] = feature
         product_exposure['attributes']['item_id'] = product['id']
@@ -53,12 +53,12 @@ def get_exposure_events(user, products, event, feature):
                 "quantity": product['current_stock']
             }
         ]
-        events.append(ShoppingEvent.get_final_event(user, EventType.PRODUCT_EXPOSURE, product_exposure))
+        events.append(ShoppingApp.get_final_event(user, EventType.PRODUCT_EXPOSURE, product_exposure))
     return events
 
 
 def get_view_item_event(user, product, event, feature):
-    view_item_event = ShoppingEvent.clean_event(event)
+    view_item_event = ShoppingApp.clean_event(event)
     view_item_event['attributes']['currency'] = 'USD'
     view_item_event['attributes']['event_category'] = feature
     view_item_event['attributes']['item_id'] = product['id']
@@ -72,11 +72,11 @@ def get_view_item_event(user, product, event, feature):
             "quantity": product['current_stock']
         }
     ]
-    return ShoppingEvent.get_final_event(user, EventType.VIEW_ITEM, view_item_event)
+    return ShoppingApp.get_final_event(user, EventType.VIEW_ITEM, view_item_event)
 
 
 def get_add_to_cart_event(user, product, event, feature):
-    view_item_event = ShoppingEvent.clean_event(event)
+    view_item_event = ShoppingApp.clean_event(event)
     view_item_event['attributes']['currency'] = 'USD'
     view_item_event['attributes']['event_category'] = feature
     view_item_event['attributes']['item_id'] = product['id']
@@ -90,11 +90,11 @@ def get_add_to_cart_event(user, product, event, feature):
             "quantity": product['current_stock']
         }
     ]
-    return ShoppingEvent.get_final_event(user, EventType.ADD_TO_CART, view_item_event)
+    return ShoppingApp.get_final_event(user, EventType.ADD_TO_CART, view_item_event)
 
 
 def get_remove_from_cart_event(user, product, event):
-    view_item_event = ShoppingEvent.clean_event(event)
+    view_item_event = ShoppingApp.clean_event(event)
     view_item_event['attributes']['currency'] = 'USD'
     view_item_event['attributes']['item_id'] = product['id']
     view_item_event['items'] = [
@@ -107,11 +107,11 @@ def get_remove_from_cart_event(user, product, event):
             "quantity": product['current_stock']
         }
     ]
-    return ShoppingEvent.get_final_event(user, EventType.REMOVE_FROM_CART, view_item_event)
+    return ShoppingApp.get_final_event(user, EventType.REMOVE_FROM_CART, view_item_event)
 
 
 def get_view_cart_event(user, products, event):
-    view_cart_event = ShoppingEvent.clean_event(event)
+    view_cart_event = ShoppingApp.clean_event(event)
     view_cart_event['attributes']['currency'] = 'USD'
     total_price = 0
     view_cart_event["items"] = []
@@ -127,11 +127,11 @@ def get_view_cart_event(user, products, event):
         total_price += product['price']
         view_cart_event['items'].append(item)
     view_cart_event['attributes']['value'] = total_price
-    return ShoppingEvent.get_final_event(user, EventType.VIEW_CART, view_cart_event)
+    return ShoppingApp.get_final_event(user, EventType.VIEW_CART, view_cart_event)
 
 
 def get_purchase_event(user, products, event):
-    purchase_event = ShoppingEvent.clean_event(event)
+    purchase_event = ShoppingApp.clean_event(event)
     purchase_event['attributes']['currency'] = 'USD'
     purchase_event["items"] = []
     total_price = 0
@@ -148,7 +148,7 @@ def get_purchase_event(user, products, event):
         purchase_event['items'].append(item)
         purchase_event['attributes']['order_id'] = utils.get_unique_id()
     purchase_event['attributes']['value'] = round(total_price, 2)
-    return ShoppingEvent.get_final_event(user, EventType.PURCHASE, purchase_event)
+    return ShoppingApp.get_final_event(user, EventType.PURCHASE, purchase_event)
 
 
 books = [

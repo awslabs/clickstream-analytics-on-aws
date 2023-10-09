@@ -130,11 +130,11 @@ def get_gzip(event_str):
 
 
 def convert_to_gzip_events_process_pool(events_of_day):
-    n = configure.events_per_request
+    n = configure.EVENTS_PER_REQUEST
     small_arr = [events_of_day[i:i + n] for i in range(0, len(events_of_day), n)]
     manager = multiprocessing.Manager()
     day_event_lines = manager.list()
-    pool = multiprocessing.Pool(processes=configure.process_number)
+    pool = multiprocessing.Pool(processes=configure.PROCESS_NUMBER)
     day_event_lines = pool.starmap(get_gzipped_line, [(configure.IS_GZIP, small_arr[i]) for i in range(len(small_arr))])
     pool.close()
     pool.join()

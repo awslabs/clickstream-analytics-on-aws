@@ -98,7 +98,7 @@ ios_model = WeightedArray(
      ('iPhone 15 Plus', 1.2), ('iPhone 15 Pro', 3.2), ('iPhone 15 Pro Max', 2.2)])
 
 # Web browser enums
-host_name = 'd3mpqdtjegq8im.cloudfront.net'
+host_name = 'shopping.example.com'
 browser_ua = WeightedArray([
     ('Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) '
      'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36', 30),

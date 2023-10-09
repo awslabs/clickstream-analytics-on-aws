@@ -57,15 +57,15 @@ DURATION_OF_DAYS = 30
 # per action's duration time
 PER_ACTION_DURATION = range(3, 60)
 # event count for per request
-events_per_request = 10000
+EVENTS_PER_REQUEST = 10000
 # for mac m1 is 8, for c5.metal is 50 to meet the best performance
-process_number = 8
+PROCESS_NUMBER = 8
 # max thread for upload event
-max_upload_thread_number = 1
+MAX_UPLOAD_THREAD_NUMBER = 1
 # the sleep time for each request
-request_sleep_time = 0.2
+REQUEST_SLEEP_TIME = 0.2
 # the gzip times for per day, added for test huge events in one day and reduce memory usage
-gzip_times_per_day = 1
+GZIP_TIMES_PER_DAY = 1
 
 # For Real-Time Events Consts
 # all user for real-time

@@ -15,9 +15,12 @@ import random
 import configure
 import enums as enums
 import util.util as utils
-from notepad import NotepadEventType
-from notepad.NotepadEventType import EventType
-from notepad.NotepadScreen import Screen
+from model.App import App
+from application.notepad import NotepadEventType
+from application.notepad.NotepadEventType import EventType
+from application.notepad.NotepadScreen import Screen
+from model.User import User
+from model.device.MobileDevice import MobileDevice
 
 sampleEvent = {
     "event_type": "",
@@ -256,3 +259,26 @@ def clean_event(event):
     new_event["attributes"] = attributes
     new_event["user"] = user
     return new_event
+
+
+class NotePadApp(App):
+
+    def get_all_user_count(self):
+        return configure.ALL_USER
+
+    def get_dau_count(self):
+        return configure.RANDOM_DAU
+
+    def get_random_user(self):
+        platform = enums.Platform.Android
+        mobile_device = MobileDevice.get_random_device(platform)
+        return User.get_random_user(platform, mobile_device, None)
+
+    def gen_session_events(self, user, events):
+        event = get_event_for_user(user)
+        events.extend(get_launch_events(user, event))
+        user.current_timestamp += random.choices(configure.PER_ACTION_DURATION)[0] * 1000
+        action_times = random.choices(configure.ACTION_TIMES)[0]
+        for j in range(action_times):
+            events.extend(get_action_events(user, event))
+        events.extend(get_exit_events(user, event))

@@ -13,18 +13,18 @@ and limitations under the License.
 import json
 import enums
 
-APP_TYPE = enums.Application.NotePad
+APP_TYPE = enums.Application.Shopping
 
 # for history event consts
 DURATION_OF_DAYS = 30
 PER_ACTION_DURATION = range(3, 60)
-events_per_request = 10000
+EVENTS_PER_REQUEST = 10000
 # gzip process number, for mac m1 is 8, for c5.metal is 50 to meet best performance
-process_number = 50
+PROCESS_NUMBER = 50
 # control the speed for event send.
-max_upload_thread_number = 1
-request_sleep_time = 0.2
-gzip_times_per_day = 1
+MAX_UPLOAD_THREAD_NUMBER = 2
+REQUEST_SLEEP_TIME = 0.2
+GZIP_TIMES_PER_DAY = 1
 
 # for real-time event consts
 ALL_USER_REALTIME = 100000
@@ -53,22 +53,8 @@ APP_ID = ""
 ENDPOINT = ""
 
 
-def get_all_user_count():
-    if APP_TYPE == enums.Application.Shopping:
-        return ALL_USER_SHOPPING
-    elif APP_TYPE == enums.Application.NotePad:
-        return ALL_USER
-
-
-def get_dau_count():
-    if APP_TYPE == enums.Application.Shopping:
-        return RANDOM_DAU_SHOPPING
-    elif APP_TYPE == enums.Application.NotePad:
-        return RANDOM_DAU
-
-
 def init_config():
-    global APP_ID, ENDPOINT, IS_GZIP, request_sleep_time, max_upload_thread_number, events_per_request
+    global APP_ID, ENDPOINT, IS_GZIP, REQUEST_SLEEP_TIME, MAX_UPLOAD_THREAD_NUMBER, EVENTS_PER_REQUEST
     try:
         with open('amplifyconfiguration.json') as file:
             data = json.load(file)
@@ -76,9 +62,9 @@ def init_config():
             ENDPOINT = data['analytics']['plugins']['awsClickstreamPlugin']['endpoint']
             IS_GZIP = data['analytics']['plugins']['awsClickstreamPlugin']['isCompressEvents']
             if not IS_GZIP:
-                request_sleep_time = 0.1
-                max_upload_thread_number = 1
-                events_per_request = 500
+                REQUEST_SLEEP_TIME = 0.1
+                MAX_UPLOAD_THREAD_NUMBER = 1
+                EVENTS_PER_REQUEST = 500
     except FileNotFoundError:
         print("Error: amplifyconfiguration.json file not found.")
     except json.JSONDecodeError:

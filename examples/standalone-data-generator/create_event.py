@@ -11,64 +11,31 @@ OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific 
 and limitations under the License.
 """
 import random
-
 import configure
-import enums as enums
 import send_event
 import util.util as utils
-import shopping.ShoppingEvent as Event
-from model.User import User
-from notepad import NotepadEvent
-from shopping import ShoppingScreen
+from application.AppProvider import AppProvider
+
+app_provider = AppProvider()
 
 
 def get_users(count):
     user_list = []
     for i in range(count):
-        user_list.append(User.get_random_user())
+        user_list.append(app_provider.get_random_user())
     return user_list
 
 
 def get_user_event_of_day(user, day, events_of_day):
     events = []
     session_times = random.choices(configure.SESSION_TIMES)[0]
-    event = Event.get_event_for_user(user)
     # different session for user in one day
     start_times = utils.get_session_start_time_arr(session_times, day)
     for i in range(session_times):
         # init current timestamp
         user.current_timestamp = start_times[i]
-        if configure.APP_TYPE == enums.Application.NotePad:
-            gen_events_for_notepad(user, events, event)
-        elif configure.APP_TYPE == enums.Application.Shopping:
-            gen_events_for_shopping(user, events, event)
+        app_provider.generate_session_events(user, events)
     events_of_day.extend(events)
-
-
-def gen_events_for_shopping(user, events, event):
-    events.extend(Event.get_launch_events(user, event))
-    # different action in one session
-    screen_view_times = enums.screen_view_times.get_random_item() + random.randint(0, 9)
-    page = ShoppingScreen.Page.LOGIN
-    for j in range(screen_view_times):
-        result = Event.get_screen_events(user, event, page)
-        events.extend(result[0])
-        if page == ShoppingScreen.Page.EXIT:
-            break
-        page = result[1]
-    if page != ShoppingScreen.Page.EXIT:
-        page = ShoppingScreen.Page.EXIT
-        result = Event.get_screen_events(user, event, page)
-        events.extend(result[0])
-
-
-def gen_events_for_notepad(user, events, event):
-    events.extend(NotepadEvent.get_launch_events(user, event))
-    user.current_timestamp += random.choices(configure.PER_ACTION_DURATION)[0] * 1000
-    action_times = random.choices(configure.ACTION_TIMES)[0]
-    for j in range(action_times):
-        events.extend(NotepadEvent.get_action_events(user, event))
-    events.extend(NotepadEvent.get_exit_events(user, event))
 
 
 if __name__ == '__main__':
@@ -78,7 +45,7 @@ if __name__ == '__main__':
     else:
         start_time = utils.current_timestamp()
         # init all user
-        all_user_count = configure.get_all_user_count()
+        all_user_count = app_provider.get_all_user_count()
         users = get_users(int(all_user_count / 2))
         new_users_of_day = int(all_user_count / 60)
         # get days arr
@@ -88,7 +55,7 @@ if __name__ == '__main__':
             day_str = utils.get_day_of_timestamp(day)
             print("start day: " + day_str)
             events_of_day = []
-            users_count = random.choices(configure.get_dau_count())[0]
+            users_count = random.choices(app_provider.get_dau_count())[0]
             users.extend(get_users(new_users_of_day))
             day_users = random.sample(users, users_count)
             print("total user: " + str(users_count))

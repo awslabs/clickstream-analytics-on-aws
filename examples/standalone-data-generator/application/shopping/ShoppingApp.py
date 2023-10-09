@@ -15,23 +15,27 @@ import random
 import configure
 import enums as enums
 import util.util as utils
-from shopping import ScreenEvent, ShoppingScreen, EventSample
-from shopping.ShoppingEventType import EventType
+from model.App import App
+from application.shopping import EventSample, ScreenEvent, ShoppingScreen
+from application.shopping.ShoppingEventType import EventType
+from model.User import User
+from model.device.MobileDevice import MobileDevice
+from model.device.WebDevice import WebDevice
 
 
 def get_event_for_user(user):
     if user.platform == enums.Platform.Web:
         event = EventSample.sampleWebEvent
-        event["device_id"] = user.device_web.device_id
-        event["make"] = user.device_web.make
-        event["locale"] = user.device_web.locale
-        event["screen_height"] = user.device_web.screen_height
-        event["screen_width"] = user.device_web.screen_width
-        event["viewport_height"] = user.device_web.viewport_height
-        event["viewport_width"] = user.device_web.viewport_width
-        event["zone_offset"] = user.device_web.zone_offset
-        event["system_language"] = user.device_web.system_language
-        event["country_code"] = user.device_web.country_code
+        event["device_id"] = user.web_device.device_id
+        event["make"] = user.web_device.make
+        event["locale"] = user.web_device.locale
+        event["screen_height"] = user.web_device.screen_height
+        event["screen_width"] = user.web_device.screen_width
+        event["viewport_height"] = user.web_device.viewport_height
+        event["viewport_width"] = user.web_device.viewport_width
+        event["zone_offset"] = user.web_device.zone_offset
+        event["system_language"] = user.web_device.system_language
+        event["country_code"] = user.web_device.country_code
     else:
         event = EventSample.sampleAppEvent
         event["device_id"] = user.mobile_device.device_id
@@ -83,7 +87,6 @@ def get_final_event(user, event_type, event):
     event["event_id"] = uuid
     event["timestamp"] = user.current_timestamp
     start_timestamp = event["attributes"]["_session_start_timestamp"]
-    session_duration = user.current_timestamp - start_timestamp
     event["attributes"]["_session_duration"] = user.current_timestamp - start_timestamp
     platform = user.platform
     if user.current_page_type != '':
@@ -184,3 +187,42 @@ def clean_event(event):
     new_event["attributes"] = attributes
     new_event["user"] = user
     return new_event
+
+
+class ShoppingApp(App):
+
+    def get_all_user_count(self):
+        return configure.ALL_USER_SHOPPING
+
+    def get_dau_count(self):
+        return configure.RANDOM_DAU_SHOPPING
+
+    def get_random_user(self):
+        web_device = None
+        mobile_device = None
+        if configure.PLATFORM == enums.Platform.All:
+            platform = enums.random_platform.get_random_item()
+        else:
+            platform = configure.PLATFORM
+        if platform == enums.Platform.Web:
+            web_device = WebDevice.get_random_device()
+        else:
+            mobile_device = MobileDevice.get_random_device(platform)
+        return User.get_random_user(platform, mobile_device, web_device)
+
+    def gen_session_events(self, user, events):
+        event = get_event_for_user(user)
+        events.extend(get_launch_events(user, event))
+        # different action in one session
+        screen_view_times = enums.screen_view_times.get_random_item() + random.randint(0, 9)
+        page = ShoppingScreen.Page.LOGIN
+        for j in range(screen_view_times):
+            result = get_screen_events(user, event, page)
+            events.extend(result[0])
+            if page == ShoppingScreen.Page.EXIT:
+                break
+            page = result[1]
+        if page != ShoppingScreen.Page.EXIT:
+            page = ShoppingScreen.Page.EXIT
+            result = get_screen_events(user, event, page)
+            events.extend(result[0])

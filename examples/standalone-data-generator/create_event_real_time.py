@@ -11,33 +11,28 @@ OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific 
 and limitations under the License.
 """
 import random
-
 import configure
 import enums as enums
 import send_event_real_time
 import util.util as utils
-from model.User import User
+from application.AppProvider import AppProvider
 import time
 from concurrent.futures import ThreadPoolExecutor
 
-from notepad import NotepadEvent
-from shopping import ShoppingScreen
-import shopping.ShoppingEvent as Event
-
 global_current_time = utils.current_timestamp()
 global_total_events_for_day = 0
+app_provider = AppProvider()
 
 
 def init_all_user():
     user_list = []
     for i in range(configure.ALL_USER_REALTIME):
-        user_list.append(User.get_random_user())
+        user_list.append(app_provider.get_random_user())
     return user_list
 
 
 def get_user_event_of_day(users, start_time_stamp):
     all_events = []
-    end_timestamp = utils.get_tomorrow_timestamp()
     today = utils.get_today_timestamp()
     global global_total_events_for_day
     removed_users = []
@@ -45,12 +40,7 @@ def get_user_event_of_day(users, start_time_stamp):
     for user in users:
         user_count += 1
         events = []
-        event = {}
         session_times = random.choices(configure.SESSION_TIMES)[0]
-        if configure.APP_TYPE == enums.Application.NotePad:
-            event = NotepadEvent.get_event_for_user(user)
-        elif configure.APP_TYPE == enums.Application.Shopping:
-            event = Event.get_event_for_user(user)
         start_time_arr = []
         for i in range(session_times):
             hour = enums.visit_hour.get_random_item()
@@ -64,10 +54,7 @@ def get_user_event_of_day(users, start_time_stamp):
         for i in range(len(start_time_arr)):
             current_timestamp = start_time_arr[i]
             user.current_timestamp = current_timestamp
-            if configure.APP_TYPE == enums.Application.NotePad:
-                gen_events_for_notepad(user, events, event)
-            elif configure.APP_TYPE == enums.Application.Shopping:
-                gen_events_for_shopping(user, events, event)
+            app_provider.generate_session_events(user, events)
         if len(events) > 0:
             all_events.append(events)
             user.total_day_events = len(events)
@@ -92,37 +79,7 @@ def send_user_event_of_day(users, all_events):
         time.sleep(configure.FLUSH_DURATION)
 
 
-def gen_events_for_notepad(user, events, event):
-    events.extend(NotepadEvent.get_launch_events(user, event))
-    user.current_timestamp += random.choices(configure.PER_ACTION_DURATION_REALTIME)[0] * 1000
-    action_times = random.choices(configure.ACTION_TIMES)[0]
-    # different action in one session
-    for j in range(action_times):
-        events.extend(NotepadEvent.get_action_events(user, event))
-    events.extend(NotepadEvent.get_exit_events(user, event))
-
-
-def gen_events_for_shopping(user, events, event):
-    events.extend(Event.get_launch_events(user, event))
-    # different action in one session
-    screen_view_times = enums.screen_view_times.get_random_item() + random.randint(0, 9)
-    page = ShoppingScreen.Page.LOGIN
-    for j in range(screen_view_times):
-        result = Event.get_screen_events(user, event, page)
-        events.extend(result[0])
-        if page == ShoppingScreen.Page.EXIT:
-            break
-        page = result[1]
-    if page != ShoppingScreen.Page.EXIT:
-        page = ShoppingScreen.Page.EXIT
-        result = Event.get_screen_events(user, event, page)
-        events.extend(result[0])
-
-
 def create_day_event(day_users):
-    global global_total_events_for_day, global_total_add_count
-    global_total_events_for_day = 0
-    global_total_add_count = 0
     day = utils.get_current_day()
     print("start day: " + day + ", user number:" + str(len(day_users)))
     start_time_stamp = utils.current_timestamp()
@@ -134,7 +91,7 @@ def create_day_event(day_users):
     for users in user_arr:
         all_events = get_user_event_of_day(users, start_time_stamp)
         handled_thread_count += 1
-        print("finished thread count: " + str(handled_thread_count))
+        print("started thread count: " + str(handled_thread_count))
         if handled_thread_count == configure.THREAD_NUMBER_FOR_USER:
             print("all events count today: " + str(global_total_events_for_day))
         executor.submit(send_user_event_of_day, users, all_events)
