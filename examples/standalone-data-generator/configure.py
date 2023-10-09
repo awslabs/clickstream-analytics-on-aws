@@ -13,7 +13,7 @@ and limitations under the License.
 import json
 import enums
 
-APP_TYPE = enums.Application.Shopping
+APP_TYPE = enums.Application.NotePad
 
 # for history event consts
 DURATION_OF_DAYS = 30
