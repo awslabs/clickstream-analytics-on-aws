@@ -18,8 +18,8 @@ import { logger } from './common/powertools';
 i18next
   .use(fsBackend)
   .init({
-    lng: 'en',
-    fallbackLng: 'en',
+    lng: 'en-US',
+    fallbackLng: 'en-US',
     backend: {
       loadPath: './locales/{{lng}}.json',
     },

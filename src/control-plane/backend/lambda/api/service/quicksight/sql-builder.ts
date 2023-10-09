@@ -251,7 +251,7 @@ function _buildCommonPartSql(eventNames: string[], sqlParameters: SQLParameters,
     event_params
     from ${sqlParameters.schemaName}.ods_events ods 
     where ${eventDateSQL}
-    ${ isEventPathSQL ? 'and event_name not in (\'' + builtInEvents.join('\',\'') + '\')' : eventNameClause }
+    ${ isEventPathSQL ? 'and event_name not in (\'' + builtInEvents.filter(event => !eventNames.includes(event)).join('\',\'') + '\')' : eventNameClause }
     ${globalConditionSql}
   ),
   `;
@@ -426,7 +426,6 @@ function _buildEventAnalysisBaseSql(eventNames: string[], sqlParameters: SQLPara
   sql = buildResult.sql;
 
   let joinTableSQL = '';
-
   for (const [index, _item] of eventNames.entries()) {
 
     let unionSql = '';

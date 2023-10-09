@@ -25,22 +25,48 @@
  */
 
 import {
-  Alert,
   AppLayout,
   Container,
   ContentLayout,
   Header,
   SpaceBetween,
 } from '@cloudscape-design/components';
+import { embedAnalyzesUrl } from 'apis/analytics';
+import Loading from 'components/common/Loading';
 import AnalyticsNavigation from 'components/layouts/AnalyticsNavigation';
 import CustomBreadCrumb from 'components/layouts/CustomBreadCrumb';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
+import ExploreEmbedFrame from '../comps/ExploreEmbedFrame';
 
 const AnalyticsAnalyzes: React.FC = () => {
   const { t } = useTranslation();
   const { projectId, appId } = useParams();
+  const [loadingData, setLoadingData] = useState(false);
+  const [dashboardEmbedUrl, setDashboardEmbedUrl] = useState('');
+
+  const getAnalyzes = async () => {
+    setLoadingData(true);
+    try {
+      const { success, data }: ApiResponse<any> = await embedAnalyzesUrl(
+        projectId ?? '',
+        window.location.origin
+      );
+      if (success && data.EmbedUrl) {
+        setDashboardEmbedUrl(data.EmbedUrl);
+      }
+    } catch (error) {
+      setLoadingData(false);
+    }
+    setLoadingData(false);
+  };
+
+  useEffect(() => {
+    if (projectId) {
+      getAnalyzes();
+    }
+  }, [projectId]);
 
   const breadcrumbItems = [
     {
@@ -76,9 +102,14 @@ const AnalyticsAnalyzes: React.FC = () => {
               }
             >
               <Container>
-                <Alert statusIconAriaLabel="Info">
-                  {t('analytics:analyzes.comeSoon')}
-                </Alert>
+                {loadingData ? (
+                  <Loading />
+                ) : (
+                  <ExploreEmbedFrame
+                    embedType="console"
+                    embedUrl={dashboardEmbedUrl}
+                  />
+                )}
               </Container>
             </ContentLayout>
           }

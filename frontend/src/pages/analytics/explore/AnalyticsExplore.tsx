@@ -213,10 +213,10 @@ const AnalyticsExplore: React.FC = () => {
   const listAllAttributes = async () => {
     try {
       const parameters = await getAllParameters();
+      const userAttributes = await getUserAttributes();
       const presetParameters = parameters?.filter(
         (item) => item.metadataSource === MetadataSource.PRESET
       );
-      const userAttributes = await getUserAttributes();
       const presetUserAttributes = userAttributes.filter(
         (item) => item.metadataSource === MetadataSource.PRESET
       );

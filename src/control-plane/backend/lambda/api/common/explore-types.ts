@@ -100,8 +100,8 @@ export enum ConditionCategory {
 }
 
 export enum ExploreLocales {
-  CHINESE = 'zh',
-  ENGLISH = 'en'
+  ZH_CN = 'zh-CN',
+  EN_US = 'en-US'
 }
 
 export enum AnalysisType {
@@ -109,4 +109,11 @@ export enum AnalysisType {
   EVENT = 'EVENT',
   PATH = 'PATH',
   RETENTION = 'RETENTION'
+}
+
+export enum QuickSightChartType {
+  BAR = 'bar',
+  LINE = 'line',
+  FUNNEL = 'funnel',
+  SANKEY = 'sankey'
 }

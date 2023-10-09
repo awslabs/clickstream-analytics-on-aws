@@ -50,6 +50,7 @@ import {
   ExplorePathNodeType,
   ExplorePathSessionDef,
   MetadataPlatform,
+  QuickSightChartType,
 } from 'ts/explore-types';
 import { alertMsg, generateStr } from 'ts/utils';
 import {
@@ -379,6 +380,7 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
 
     const body: IExploreRequest = {
       action: action,
+      chartType: QuickSightChartType.SANKEY,
       locale: getLngFromLocalStorage(),
       projectId: pipeline.projectId,
       pipelineId: pipeline.pipelineId,
@@ -475,6 +477,13 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
         break;
     }
   };
+
+  useEffect(() => {
+    setSegmentationOptionData({
+      ...INIT_SEGMENTATION_DATA,
+      conditionOptions: presetParameters,
+    });
+  }, [presetParameters]);
 
   useEffect(() => {
     clickPreview();
@@ -831,7 +840,6 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
             <ExploreEmbedFrame
               embedType="dashboard"
               embedUrl={exploreEmbedUrl}
-              embedId={`explore_${generateStr(6)}`}
             />
           )}
         </Container>

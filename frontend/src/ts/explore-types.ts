@@ -108,3 +108,10 @@ export enum ConditionCategory {
   TRAFFIC_SOURCE = 'traffic_source',
   OTHER = 'other',
 }
+
+export enum QuickSightChartType {
+  BAR = 'bar',
+  LINE = 'line',
+  FUNNEL = 'funnel',
+  SANKEY = 'sankey'
+}

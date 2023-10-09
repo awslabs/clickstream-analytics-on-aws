@@ -35,7 +35,7 @@ import { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
 import request from 'supertest';
 import { tokenMock } from './ddb-mock';
-import { ExplorePathNodeType, ExplorePathSessionDef, MetadataPlatform } from '../../common/explore-types';
+import { ExploreLocales, ExplorePathNodeType, ExplorePathSessionDef, MetadataPlatform, QuickSightChartType } from '../../common/explore-types';
 import { app, server } from '../../index';
 import 'aws-sdk-client-mock-jest';
 
@@ -101,6 +101,98 @@ describe('reporting test', () => {
     stsClientMock.reset();
   });
 
+  it('funnel bar visual - preview', async () => {
+    tokenMock(ddbMock, false);
+    stsClientMock.on(AssumeRoleCommand).resolves({
+      Credentials: {
+        AccessKeyId: '1111',
+        SecretAccessKey: '22222',
+        SessionToken: '33333',
+        Expiration: new Date(),
+      },
+    });
+
+    redshiftClientMock.on(BatchExecuteStatementCommand).resolves({
+    });
+    redshiftClientMock.on(DescribeStatementCommand).resolves({
+      Status: StatusString.FINISHED,
+    });
+
+    redshiftClientMock.on(DescribeStatementCommand).resolves({
+      Status: StatusString.FINISHED,
+    });
+
+    quickSightMock.on(CreateAnalysisCommand).resolves({
+      Arn: 'arn:aws:quicksight:us-east-1:11111111:analysis/analysisaaaaaaaa',
+    });
+    quickSightMock.on(CreateDashboardCommand).resolves({
+      Arn: 'arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa',
+      VersionArn: 'arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa/1',
+    });
+    quickSightMock.on(GenerateEmbedUrlForRegisteredUserCommand).resolves({
+      EmbedUrl: 'https://quicksight.aws.amazon.com/embed/4ui7xyvq73/studies/4a05631e-cbe6-477c-915d-1704aec9f101?isauthcode=true&identityprovider=quicksight&code=4a05631e-cbe6-477c-915d-1704aec9f101',
+    });
+
+    const res = await request(app)
+      .post('/api/reporting/funnel')
+      .send({
+        action: 'PREVIEW',
+        chartType: QuickSightChartType.BAR,
+        viewName: 'testview0002',
+        projectId: 'project01_wvzh',
+        pipelineId: 'pipeline-1111111',
+        appId: 'app1',
+        sheetName: 'sheet99',
+        computeMethod: 'USER_CNT',
+        specifyJoinColumn: true,
+        joinColumn: 'user_pseudo_id',
+        conversionIntervalType: 'CUSTOMIZE',
+        conversionIntervalInSeconds: 7200,
+        eventAndConditions: [{
+          eventName: 'add_button_click',
+        },
+        {
+          eventName: 'note_share',
+        },
+        {
+          eventName: 'note_export',
+        }],
+        timeScopeType: 'RELATIVE',
+        lastN: 4,
+        timeUnit: 'WK',
+        groupColumn: 'week',
+        dashboardCreateParameters: {
+          region: 'us-east-1',
+          allowDomain: 'https://example.com',
+          quickSight: {
+            principal: 'arn:aws:quicksight:us-east-1:11111:user/default/testuser',
+            dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
+            redshiftUser: 'test_redshift_user',
+          },
+          redshift: {
+            dataApiRole: 'arn:aws:iam::11111111:role/test_api_role',
+            newServerless: {
+              workgroupName: 'clickstream-project01-wvzh',
+            },
+          },
+        },
+      });
+
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(201);
+    expect(res.body.success).toEqual(true);
+    expect(res.body.data.dashboardArn).toEqual('arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa');
+    expect(res.body.data.dashboardName).toEqual('_tmp_testview0002');
+    expect(res.body.data.analysisArn).toEqual('arn:aws:quicksight:us-east-1:11111111:analysis/analysisaaaaaaaa');
+    expect(res.body.data.analysisName).toEqual('_tmp_testview0002');
+    expect(res.body.data.analysisId).toBeDefined();
+    expect(res.body.data.dashboardId).toBeDefined();
+    expect(res.body.data.visualIds).toBeDefined();
+    expect(res.body.data.visualIds.length).toEqual(2);
+    expect(res.body.data.dashboardEmbedUrl).toEqual('https://quicksight.aws.amazon.com/embed/4ui7xyvq73/studies/4a05631e-cbe6-477c-915d-1704aec9f101?isauthcode=true&identityprovider=quicksight&code=4a05631e-cbe6-477c-915d-1704aec9f101');
+
+  });
+
   it('funnel visual - preview', async () => {
     tokenMock(ddbMock, false);
     stsClientMock.on(AssumeRoleCommand).resolves({
@@ -137,7 +229,8 @@ describe('reporting test', () => {
       .post('/api/reporting/funnel')
       .send({
         action: 'PREVIEW',
-        locale: 'zh',
+        locale: ExploreLocales.ZH_CN,
+        chartType: QuickSightChartType.LINE,
         viewName: 'testview0002',
         projectId: 'project01_wvzh',
         pipelineId: 'pipeline-1111111',
@@ -237,9 +330,10 @@ describe('reporting test', () => {
       .post('/api/reporting/funnel')
       .send({
         action: 'PUBLISH',
-        locale: 'zh',
+        locale: ExploreLocales.ZH_CN,
         chartTitle: 'test-title',
         chartSubTitle: 'test-subtitle',
+        chartType: QuickSightChartType.LINE,
         viewName: 'testview00022',
         projectId: 'project01_wvzh',
         pipelineId: '87ea3d080cc34bb398275a27f4e8b113',
@@ -327,7 +421,8 @@ describe('reporting test', () => {
       .post('/api/reporting/event')
       .send({
         action: 'PREVIEW',
-        locale: 'zh',
+        locale: ExploreLocales.ZH_CN,
+        chartType: QuickSightChartType.LINE,
         viewName: 'testview0002',
         projectId: 'project01_wvzh',
         pipelineId: 'pipeline-1111111',
@@ -428,9 +523,10 @@ describe('reporting test', () => {
       .post('/api/reporting/event')
       .send({
         action: 'PUBLISH',
-        locale: 'en',
+        locale: ExploreLocales.EN_US,
         chartTitle: 'test-title',
         chartSubTitle: 'test-subtitle',
+        chartType: QuickSightChartType.LINE,
         viewName: 'testview00022',
         projectId: 'project01_wvzh',
         pipelineId: '87ea3d080cc34bb398275a27f4e8b113',
@@ -613,7 +709,7 @@ describe('reporting test', () => {
       .post('/api/reporting/path')
       .send({
         action: 'PUBLISH',
-        locale: 'en',
+        locale: ExploreLocales.EN_US,
         chartTitle: 'test-title',
         chartSubTitle: 'test-subtitle',
         viewName: 'testview0002',
@@ -711,9 +807,10 @@ describe('reporting test', () => {
       .post('/api/reporting/retention')
       .send({
         action: 'PUBLISH',
-        locale: 'en',
+        locale: ExploreLocales.EN_US,
         chartTitle: 'test-title',
         chartSubTitle: 'test-subtitle',
+        chartType: QuickSightChartType.LINE,
         viewName: 'testview0002',
         projectId: 'project01_wvzh',
         pipelineId: 'pipeline-1111111',

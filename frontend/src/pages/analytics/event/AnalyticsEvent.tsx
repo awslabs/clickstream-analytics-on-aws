@@ -48,6 +48,7 @@ import {
   ExploreConversionIntervalType,
   ExploreRequestAction,
   ExploreGroupColumn,
+  QuickSightChartType,
 } from 'ts/explore-types';
 import { alertMsg, generateStr } from 'ts/utils';
 import {
@@ -93,14 +94,14 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
     useState(false);
   const [exploreEmbedUrl, setExploreEmbedUrl] = useState('');
 
-  const defaultChartTypeOption = 'line-chart';
+  const defaultChartTypeOption = QuickSightChartType.LINE;
   const chartTypeOptions: SegmentedControlProps.Option[] = [
     {
-      id: 'line-chart',
+      id: QuickSightChartType.LINE,
       iconSvg: <ExtendIcon icon="BsGraphUp" />,
     },
     {
-      id: 'bar-chart',
+      id: QuickSightChartType.BAR,
       iconSvg: <ExtendIcon icon="BsBarChartFill" />,
     },
   ];
@@ -184,7 +185,7 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
     sheetId: string,
     sheetName: string,
     chartTitle: string,
-    chartSubTitle: string,
+    chartSubTitle: string
   ) => {
     if (
       eventOptionData.length === 0 ||
@@ -200,7 +201,7 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
         sheetId,
         sheetName,
         chartTitle,
-        chartSubTitle,
+        chartSubTitle
       );
       if (!body) {
         alertMsg(
@@ -251,6 +252,7 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
     }
     const body: IExploreRequest = {
       action: action,
+      chartType: chartType,
       locale: getLngFromLocalStorage(),
       projectId: pipeline.projectId,
       pipelineId: pipeline.pipelineId,
@@ -303,8 +305,15 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
   };
 
   useEffect(() => {
+    setSegmentationOptionData({
+      ...INIT_SEGMENTATION_DATA,
+      conditionOptions: presetParameters,
+    });
+  }, [presetParameters]);
+
+  useEffect(() => {
     clickPreview();
-  }, [timeGranularity, dateRangeValue]);
+  }, [timeGranularity, dateRangeValue, chartType]);
 
   return (
     <>
@@ -564,7 +573,7 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
             />
             <SegmentedControl
               selectedId={chartType}
-              onChange={({ detail }) => setChartType(detail.selectedId)}
+              onChange={({ detail }) => setChartType(detail.selectedId as QuickSightChartType)}
               options={chartTypeOptions}
             />
           </div>
@@ -575,7 +584,6 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
             <ExploreEmbedFrame
               embedType="dashboard"
               embedUrl={exploreEmbedUrl}
-              embedId={`explore_${generateStr(6)}`}
             />
           )}
         </Container>

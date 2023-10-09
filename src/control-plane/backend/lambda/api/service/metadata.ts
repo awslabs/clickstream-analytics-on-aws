@@ -13,7 +13,7 @@
 
 import { CMetadataDisplay } from './display';
 import { ApiFail, ApiSuccess } from '../common/types';
-import { groupAssociatedEventParametersByName, groupAssociatedEventsByName, groupEventByName, groupEventParameterByName, isEmpty } from '../common/utils';
+import { groupAssociatedEventParametersByName, groupAssociatedEventsByName, groupEventByName, groupEventParameterByName, groupUserAttributeByName, isEmpty } from '../common/utils';
 import { IMetadataDisplay, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute } from '../model/metadata';
 import { DynamoDbMetadataStore } from '../store/dynamodb/dynamodb-metadata-store';
 import { MetadataStore } from '../store/metadata-store';
@@ -161,7 +161,8 @@ export class MetadataUserAttributeServ {
     try {
       const { projectId, appId, order } = req.query;
       const results = await metadataStore.listUserAttributes(projectId, appId, order);
-      const attributes = await metadataDisplay.patch(projectId, appId, results) as IMetadataUserAttribute[];
+      let attributes = groupUserAttributeByName(results);
+      attributes = await metadataDisplay.patch(projectId, appId, attributes) as IMetadataUserAttribute[];
       return res.json(new ApiSuccess({
         totalCount: attributes.length,
         items: attributes,
@@ -190,7 +191,8 @@ export class MetadataUserAttributeServ {
       if (isEmpty(results)) {
         return res.status(404).json(new ApiFail('User attribute not found'));
       }
-      const attribute = (await metadataDisplay.patch(projectId, appId, [results[0]]) as IMetadataUserAttribute[])[0];
+      let attribute = groupUserAttributeByName(results)[0];
+      attribute = (await metadataDisplay.patch(projectId, appId, [attribute]) as IMetadataUserAttribute[])[0];
       return res.json(new ApiSuccess(attribute));
     } catch (error) {
       next(error);

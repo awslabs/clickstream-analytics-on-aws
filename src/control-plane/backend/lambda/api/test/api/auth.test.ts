@@ -264,7 +264,7 @@ describe('Route role test', () => {
     expect((await request(app).put('/api/pipeline/1').set(amznRequestContextHeader, context)).statusCode).toBe(400);
     expect((await request(app).get('/api/pipeline/1').set(amznRequestContextHeader, context)).statusCode).toBe(400);
     expect((await request(app).delete('/api/pipeline/1').set(amznRequestContextHeader, context)).statusCode).toBe(400);
-    expect((await request(app).get('/api/env/quicksight/embedUrl').set(amznRequestContextHeader, context)).statusCode).toBe(200);
+    expect((await request(app).get('/api/project/1/analyzes').set(amznRequestContextHeader, context)).statusCode).toBe(400);
     expect((await request(app).get('/api/env/regions').set(amznRequestContextHeader, context)).statusCode).toBe(200);
     expect((await request(app).get('/api/metadata/events').set(amznRequestContextHeader, context)).statusCode).toBe(400);
     expect((await request(app).post('/api/metadata/event').set(amznRequestContextHeader, context)).statusCode).toBe(400);
@@ -310,7 +310,7 @@ describe('Route role test', () => {
     expect((await request(app).put('/api/pipeline/1').set(amznRequestContextHeader, context)).statusCode).toBe(400);
     expect((await request(app).get('/api/pipeline/1').set(amznRequestContextHeader, context)).statusCode).toBe(400);
     expect((await request(app).delete('/api/pipeline/1').set(amznRequestContextHeader, context)).statusCode).toBe(400);
-    expect((await request(app).get('/api/env/quicksight/embedUrl').set(amznRequestContextHeader, context)).statusCode).toBe(403);
+    expect((await request(app).get('/api/project/1/analyzes').set(amznRequestContextHeader, context)).statusCode).toBe(403);
     expect((await request(app).get('/api/env/regions').set(amznRequestContextHeader, context)).statusCode).toBe(200);
     expect((await request(app).get('/api/metadata/events').set(amznRequestContextHeader, context)).statusCode).toBe(403);
     expect((await request(app).post('/api/metadata/event').set(amznRequestContextHeader, context)).statusCode).toBe(403);
@@ -356,7 +356,7 @@ describe('Route role test', () => {
     expect((await request(app).put('/api/pipeline/1').set(amznRequestContextHeader, context)).statusCode).toBe(403);
     expect((await request(app).get('/api/pipeline/1').set(amznRequestContextHeader, context)).statusCode).toBe(400);
     expect((await request(app).delete('/api/pipeline/1').set(amznRequestContextHeader, context)).statusCode).toBe(403);
-    expect((await request(app).get('/api/env/quicksight/embedUrl').set(amznRequestContextHeader, context)).statusCode).toBe(200);
+    expect((await request(app).get('/api/project/1/analyzes').set(amznRequestContextHeader, context)).statusCode).toBe(400);
     expect((await request(app).get('/api/env/regions').set(amznRequestContextHeader, context)).statusCode).toBe(403);
     expect((await request(app).get('/api/metadata/events').set(amznRequestContextHeader, context)).statusCode).toBe(400);
     expect((await request(app).post('/api/metadata/event').set(amznRequestContextHeader, context)).statusCode).toBe(400);

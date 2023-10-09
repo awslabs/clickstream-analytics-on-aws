@@ -62,6 +62,13 @@ router_project.delete(
     return projectServ.deleteDashboard(req, res, next);
   });
 
+
+router_project.get(
+  '/:projectId/analyzes',
+  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    return projectServ.getAnalyzes(req, res, next);
+  });
+
 router_project.get(
   '',
   validate([

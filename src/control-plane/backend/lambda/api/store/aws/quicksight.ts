@@ -143,7 +143,7 @@ export const generateEmbedUrlForRegisteredUser = async (
   region: string,
   allowedDomain: string,
   permission: boolean,
-  dashboardId: string,
+  dashboardId?: string,
   sheetId?: string,
   visualId?: string,
 ): Promise<GenerateEmbedUrlForRegisteredUserCommandOutput> => {
@@ -151,7 +151,7 @@ export const generateEmbedUrlForRegisteredUser = async (
     region: region,
   });
   const arns = await getClickstreamUserArn();
-  if (permission) {
+  if (permission && dashboardId) {
     await updateDashboardPermissionsCommand(region, dashboardId, arns.embedOwner);
   }
   let commandInput: GenerateEmbedUrlForRegisteredUserCommandInput = {
@@ -173,12 +173,21 @@ export const generateEmbedUrlForRegisteredUser = async (
         },
       },
     };
-  } else {
+  } else if (dashboardId) {
     commandInput = {
       ...commandInput,
       ExperienceConfiguration: {
         Dashboard: {
           InitialDashboardId: dashboardId,
+        },
+      },
+    };
+  } else {
+    commandInput = {
+      ...commandInput,
+      ExperienceConfiguration: {
+        QuickSightConsole: {
+          InitialPath: '/start/analyses',
         },
       },
     };

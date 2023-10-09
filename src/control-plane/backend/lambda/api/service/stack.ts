@@ -211,7 +211,7 @@ export class StackManager {
     for (let s of stackStatusDetails) {
       if (s.stackStatus === undefined) {
         miss = true;
-      } else if (s.stackStatus.endsWith('_FAILED')) {
+      } else if (s.stackStatus.endsWith('_FAILED') || s.stackStatus.endsWith('_ROLLBACK_COMPLETE')) {
         action = s.stackStatus.split('_')[0];
         status = PipelineStatusType.FAILED;
         break;
