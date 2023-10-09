@@ -11,36 +11,36 @@ OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific 
 and limitations under the License.
 """
 import random
+import configure
 import enums as enums
 import send_event_real_time
 import util.util as utils
-import model.Event as Event
-from model.User import User
+from application.AppProvider import AppProvider
 import time
 from concurrent.futures import ThreadPoolExecutor
 
 global_current_time = utils.current_timestamp()
 global_total_events_for_day = 0
-global_total_add_count = 0
+app_provider = AppProvider()
 
 
 def init_all_user():
     user_list = []
-    for i in range(enums.ALL_USER_REALTIME):
-        user_list.append(User.get_random_user())
+    for i in range(configure.ALL_USER_REALTIME):
+        user_list.append(app_provider.get_random_user())
     return user_list
 
 
-def send_user_event_of_day(users, start_time_stamp):
+def get_user_event_of_day(users, start_time_stamp):
     all_events = []
-    end_timestamp = utils.get_tomorrow_timestamp()
     today = utils.get_today_timestamp()
-    global global_total_events_for_day, global_total_add_count
+    global global_total_events_for_day
     removed_users = []
+    user_count = 0
     for user in users:
+        user_count += 1
         events = []
-        session_times = random.choices(enums.SESSION_TIMES)[0]
-        event = Event.get_event_for_user(user)
+        session_times = random.choices(configure.SESSION_TIMES)[0]
         start_time_arr = []
         for i in range(session_times):
             hour = enums.visit_hour.get_random_item()
@@ -53,15 +53,8 @@ def send_user_event_of_day(users, start_time_stamp):
 
         for i in range(len(start_time_arr)):
             current_timestamp = start_time_arr[i]
-            events.extend(Event.get_launch_events(user, event, current_timestamp))
-            current_timestamp += random.choices(enums.PER_ACTION_DURATION_REALTIME)[0] * 1000
-            action_times = random.choices(enums.ACTION_TIMES)[0]
-            # different action in one session
-            for j in range(action_times):
-                result = Event.get_action_events(user, event, current_timestamp)
-                events.extend(result[0])
-                current_timestamp = result[1]
-            events.extend(Event.get_exit_events(event, current_timestamp))
+            user.current_timestamp = current_timestamp
+            app_provider.generate_session_events(user, events)
         if len(events) > 0:
             all_events.append(events)
             user.total_day_events = len(events)
@@ -71,11 +64,11 @@ def send_user_event_of_day(users, start_time_stamp):
             removed_users.append(user)
     for user in removed_users:
         users.remove(user)
-    global_total_add_count += 1
-    if global_total_add_count == 100:
-        print("today event count:" + str(global_total_events_for_day) + "\n\n")
-    # send events
-    while utils.current_timestamp() < end_timestamp:
+    return all_events
+
+
+def send_user_event_of_day(users, all_events):
+    while utils.current_timestamp() < utils.get_tomorrow_timestamp():
         now_time = utils.current_timestamp()
         for i in range(len(all_events)):
             for j in range(len(all_events[i])):
@@ -83,32 +76,36 @@ def send_user_event_of_day(users, start_time_stamp):
                     send_event_real_time.send_events_of_day(users[i], all_events[i][0:j])
                     all_events[i] = all_events[i][j:]
                     break
-        time.sleep(enums.FLUSH_DURATION)
+        time.sleep(configure.FLUSH_DURATION)
 
 
 def create_day_event(day_users):
-    global global_total_events_for_day, global_total_add_count
-    global_total_events_for_day = 0
-    global_total_add_count = 0
     day = utils.get_current_day()
     print("start day: " + day + ", user number:" + str(len(day_users)))
     start_time_stamp = utils.current_timestamp()
-    executor = ThreadPoolExecutor(enums.THREAD_NUMBER_FOR_USER)
-    n = int(len(day_users) / enums.THREAD_NUMBER_FOR_USER) + 1
+    executor = ThreadPoolExecutor(configure.THREAD_NUMBER_FOR_USER)
+    n = int(len(day_users) / configure.THREAD_NUMBER_FOR_USER) + 1
     user_arr = [day_users[i:i + n] for i in range(0, len(day_users), n)]
+
+    handled_thread_count = 0
     for users in user_arr:
-        executor.submit(send_user_event_of_day, users, start_time_stamp)
+        all_events = get_user_event_of_day(users, start_time_stamp)
+        handled_thread_count += 1
+        print("started thread count: " + str(handled_thread_count))
+        if handled_thread_count == configure.THREAD_NUMBER_FOR_USER:
+            print("all events count today: " + str(global_total_events_for_day))
+        executor.submit(send_user_event_of_day, users, all_events)
     executor.shutdown(wait=True)
     print("end day:" + day)
 
 
 if __name__ == '__main__':
-    enums.init_config()
-    if enums.APP_ID == "" or enums.ENDPOINT == "":
+    configure.init_config()
+    if configure.APP_ID == "" or configure.ENDPOINT == "":
         print("Error: please config your appId and endpoint")
     else:
         users = init_all_user()
         while True:
-            users_count = random.choices(enums.RANDOM_DAU_REALTIME)[0]
+            users_count = random.choices(configure.RANDOM_DAU_REALTIME)[0]
             day_users = random.sample(users, users_count)
             create_day_event(day_users)

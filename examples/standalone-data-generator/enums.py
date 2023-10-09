@@ -11,49 +11,46 @@ OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific 
 and limitations under the License.
 """
 import random
+
 from weighted.weighted import WeightedArray
-import json
 
-# for history event consts
-ALL_USER = 10000
-DURATION_OF_DAYS = 30
-RANDOM_DAU = range(1000, 2000)
-PER_ACTION_DURATION = range(3, 60)
-events_per_request = 10000
-# gzip process number, for mac m1 is 8, for c5.metal is 50 to meet best performance
-process_number = 50
-# control the speed for event send.
-max_upload_thread_number = 1
-request_sleep_time = 0.2
-gzip_times_per_day = 1
 
-# for real-time event consts
-ALL_USER_REALTIME = 100000
-RANDOM_DAU_REALTIME = range(10000, 20000)
-THREAD_NUMBER_FOR_USER = 100
-PER_ACTION_DURATION_REALTIME = range(0, 5)
-FLUSH_DURATION = 10
-IS_GZIP = True
+class Platform:
+    Android = "Android"
+    iOS = "iOS"
+    Web = "Web"
+    All = "All"
 
-# common settings
-# session and action duration
-SESSION_TIMES = range(1, 5)
-ACTION_TIMES = range(0, 30)
+
+class Application:
+    NotePad = "NotePad"
+    Shopping = "Shopping"
+
+
+class Feature:
+    popular = "popular"
+    featured = "featured"
+    similar = "similar"
+    search = "search"
+    cart = "cart"
+    category = "category"
+
+
+random_platform = WeightedArray([(Platform.Android, 35), (Platform.iOS, 45), (Platform.Web, 20)])
+
+is_switch_to_web = WeightedArray([(True, 1), (False, 9)])
 
 # visit time weight
 visit_hour = WeightedArray([(0, 10), (1, 5), (2, 1), (3, 1), (4, 2), (5, 5),
                             (6, 8), (7, 10), (8, 15), (9, 20), (10, 25), (11, 20),
                             (12, 19), (13, 30), (14, 35), (15, 40), (16, 45), (17, 50),
-                            (18, 55), (19, 60), (20, 65), (21, 50), (22, 30), (23, 20)])
+                            (18, 55), (19, 60), (20, 105), (21, 50), (22, 30), (23, 20)])
 visit_minutes = range(0, 59)
 
-# device enum
-os_version = WeightedArray([('5', 1), ('6', 1), ('7', 2), ('8', 5), ('9', 7),
-                            ('10', 14), ('11', 18), ('12', 32), ('13', 20)])
-brand = WeightedArray(
-    [('Samsung', 26.7), ('Xiaomi', 12.3), ('Oppo', 6.87), ('Vivo', 5.3), ('Huawei', 4.8), ('Realme', 4.0),
-     ('Motorola', 2.2), ('Oneplus', 1.2), ('Honor', 0.8), ('Meizu', 0.6)])
-
+# Device enums
+zone_offset = WeightedArray(
+    [(28800000, 26.7), (18000000, 16.7), (-14400000, 6.7), (-25200000, 2.7), (-21600000, 3.7), (-28800000, 7),
+     (3600000, 10.7), (7200000, 3.7)])
 locale = WeightedArray(
     [(('en_US', 'United States', ("100.0.0.0", "100.42.19.255")), 16.7),
      (('zh_CN', 'China', ("1.24.0.0", "1.31.255.255")), 22.3),
@@ -65,18 +62,67 @@ locale = WeightedArray(
      (('ko_KR', 'South Korea', ("1.208.0.0", "1.255.255.255")), 1.2),
      (('ru_RU', 'Russia', ("109.123.128.0", "109.123.191.255")), 0.8),
      (('ar_SA', 'Saudi Arabia', ("139.64.0.0", "139.64.127.255")), 0.6)])
+sdk_version = WeightedArray([('0.2.0', 15), ('0.2.1', 20), ('0.3.0', 3), ('0.3.1', 5), ('0.4.0', 7),
+                             ('0.5.0', 10), ('0.6.0', 12), ('0.6.1', 5), ('0.7.0', 20), ('0.7.1', 50)])
 
+# App enums
 carrier = WeightedArray(
     [('China Mobile', 26.7), ('Verizon', 22.3), ('China Unicom', 10.87), ('AT&T', 15.3), ('China Unicom', 14.8),
-     ('China Telecom', 4.0), ('T-Mobile', 2.2), ('US Cellular', 1.2), ('CBN', 0.8), ('Cricket Wireless', 0.6)])
-
+     ('China Telecom', 4.0), ('T-Mobile', 2.2), ('US Cellular', 1.2), ('CBN', 0.8), ('Cricket Wireless', 0.6),
+     ('UNKNOWN', 1)])
 network_type = WeightedArray([('Mobile', 46), ('WIFI', 53), ('UNKNOWN', 2)])
-screens = WeightedArray(
+app_version = WeightedArray([('2.2.0', 2), ('2.3.0', 1), ('2.4.0', 3), ('2.5.0', 5), ('2.5.1', 7),
+                             ('2.6.0', 10), ('2.7.0', 12), ('2.8.1', 5), ('2.9.0', 20), ('3.0.0', 50)])
+
+# Android device enums
+android_os_version = WeightedArray([('5', 1), ('6', 1), ('7', 2), ('8', 5), ('9', 7),
+                                    ('10', 14), ('11', 18), ('12', 32), ('13', 20)])
+android_brand = WeightedArray(
+    [('Samsung', 26.7), ('Xiaomi', 12.3), ('Oppo', 6.87), ('Vivo', 5.3), ('Huawei', 4.8), ('Realme', 4.0),
+     ('Motorola', 2.2), ('Oneplus', 1.2), ('Honor', 0.8), ('Meizu', 0.6)])
+android_screens = WeightedArray(
     [((1080, 2160), 26.7), ((1080, 1920), 22.3), ((1440, 2560), 10.87), ((2160, 3840), 1.3), ((1080, 2340), 14.8),
      ((1080, 2316), 14.0), ((1080, 2400), 12.2), ((1440, 2960), 2.2), ((2160, 3840), 0.8), ((720, 1280), 5.6)])
-zone_offset = WeightedArray(
-    [(28800000, 26.7), (18000000, 16.7), (-14400000, 6.7), (-25200000, 2.7), (-21600000, 3.7), (-28800000, 7),
-     (3600000, 10.7), (7200000, 3.7)])
+
+# iOS device enums
+ios_version = WeightedArray([('13', 1), ('14', 2), ('15', 10), ('16', 20), ('17', 5)])
+ios_brand = "apple"
+ios_screens = WeightedArray(
+    [((750, 1334), 2.7), ((1080, 2340), 6.7), ((1242, 2688), 9.3), ((1170, 2532), 22.3), ((1284, 2778), 15.87)])
+ios_model = WeightedArray(
+    [('iPhone XR', 1.0), ('iPhone 11', 1.5), ('iPhone 11 Pro', 1.87),
+     ('iPhone 11 Pro Max', 1.3), ('iPhone 12', 2.8), ('iPhone 12 mini', 2.0),
+     ('iPhone 12 Pro', 2.8), ('iPhone 12 Pro Max', 3.2), ('iPhone 13', 4.8),
+     ('iPhone 13 mini', 2.6), ('iPhone 13 Pro', 4.2), ('iPhone 13 Pro Max', 4.2), ('iPhone 14', 6.2),
+     ('iPhone 14 Plus', 6.2), ('iPhone 14 Pro', 7.2), ('iPhone 14 Pro Max', 8.2), ('iPhone 15', 2.2),
+     ('iPhone 15 Plus', 1.2), ('iPhone 15 Pro', 3.2), ('iPhone 15 Pro Max', 2.2)])
+
+# Web browser enums
+host_name = 'shopping.example.com'
+browser_ua = WeightedArray([
+    ('Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) '
+     'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36', 30),
+    ('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Firefox/97.0', 5),
+    ('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) '
+     'AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.0 Safari/605.1.15', 20),
+    ('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)'
+     ' Chrome/97.0.4692.71 Safari/537.36 OPR/97.0.4692.71', 2),
+    ('Mozilla/5.0 (Windows NT 10.0; Win64; x64; Trident/7.0; AS; rv:11.0) like Gecko', 10),
+    ('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)'
+     ' Chrome/97.0.4692.71 Safari/537.36 Edg/97.0.1072.76', 8),
+    ('Mozilla/5.0 (compatible; bingbot/2.0; +http://www.bing.com/bingbot.htm)', 5)])
+
+browser_make = WeightedArray([('Chrome', 30), ('Safari', 20), ('Firefox', 10), ('Opera', 2), ('Edge', 8), ('IE', 5)])
+latest_referrer = WeightedArray(
+    [(('https://google.com/search?q=shopping', 'google.com'), 25),
+     (('https://www.baidu.com/s?wd=shopping', 'baidu.com'), 15),
+     (('https://www.amazon.com/?k=shopping', 'amazon.com'), 10), (('', ''), 80)])
+web_screens = WeightedArray(
+    [((1080, 1920), 26.7), ((1600, 2560), 20.3), ((1920, 3072), 12.3), ((1440, 2560), 8.3), ((2160, 3840), 3.87),
+     ((768, 1366), 1.3), ((900, 1600), 2.3)])
+web_viewport = WeightedArray(
+    [((980, 1920), 26.7), ((1500, 2560), 20.3), ((1820, 3072), 12.3), ((1340, 2560), 8.3), ((2060, 3840), 3.87),
+     ((668, 1366), 1.3), ((800, 1600), 2.3)])
 
 
 def get_model_for_brand(brand):
@@ -144,27 +190,37 @@ def get_model_for_brand(brand):
     return model.get_random_item()
 
 
-# app enum
-app_version = WeightedArray([('2.2.0', 2), ('2.3.0', 1), ('2.4.0', 3), ('2.5.0', 5), ('2.5.1', 7),
-                             ('2.6.0', 10), ('2.7.0', 12), ('2.8.1', 5), ('2.9.0', 20), ('3.0.0', 50)])
-sdk_version = WeightedArray([('0.2.0', 15), ('0.2.1', 20), ('0.2.2', 3), ('0.2.3', 5), ('0.2.4', 7),
-                             ('0.2.5', 10), ('0.2.6', 12), ('0.2.7', 5), ('0.2.8', 20), ('0.3.0', 50)])
-
 # event enum
-action_type = WeightedArray(
-    [('click_add', 1), ('note_create', 5), ('note_share', 5), ('note_export', 2), ('login', 1), ('note_print', 1),
-     ('relaunch', 1)])
-event_group = {
-    'click_add': ['add_button_click'],
-    'note_create': ['add_button_click', 'note_create'],
-    'note_share': ['note_share', '_screen_view:note_share', '_screen_view:notepad'],
-    'note_export': ['note_export', '_screen_view:note_export', '_screen_view:notepad'],
-    'note_print': ['note_print', '_screen_view:note_print', '_screen_view:notepad'],
-    'login': ['_screen_view:login', 'user_login', '_screen_view:notepad'],
-    'relaunch': ['_user_engagement', '_screen_view:notepad'],
-}
+class Category:
+    BOOK = "books"
+    TOOLS = "tools"
+    FOOD_SERVICE = "food service"
+    CODE_DISPENSED = "cold dispensed"
+    BEAUTY = "beauty"
+    FOOTWEAR = "footwear"
+    OUTDOORS = "outdoors"
+    JEWELRY = "jewelry"
+
+
+product_category = WeightedArray(
+    [(Category.BOOK, 5), (Category.TOOLS, 3), (Category.FOOD_SERVICE, 2), (Category.CODE_DISPENSED, 1),
+     (Category.BEAUTY, 1), (Category.FOOTWEAR, 1), (Category.OUTDOORS, 2), (Category.JEWELRY, 1)])
+
+main_page_scroll_times = WeightedArray([(0, 50), (1, 15), (2, 35)])
+detail_page_scroll_times = WeightedArray([(0, 50), (1, 50)])
+category_page_scroll_times = WeightedArray([(0, 50), (1, 15), (2, 35)])
+search_times = WeightedArray([(1, 50), (2, 25), (3, 5)])
+add_to_cart_times = WeightedArray([(0, 60), (1, 30), (2, 10), (3, 1)])
+remove_from_cart_times = WeightedArray([(0, 60), (1, 30), (2, 10), (3, 1)])
+
+screen_view_times = WeightedArray([(0, 5), (10, 20), (20, 25), (30, 15), (40, 6), (50, 3)])
+
 
 # user enum
+def get_random_user_name():
+    return random.choices(first_names)[0] + " " + random.choices(last_names)[0]
+
+
 first_names = ['Emma', 'Olivia', 'Ava', 'Isabella', 'Sophia', 'Charlotte', 'Mia', 'Amelia', 'Harper', 'Evelyn',
                'Abigail', 'Emily', 'Ella', 'Elizabeth', 'Camila', 'Luna', 'Sofia', 'Avery', 'Mila', 'Aria', 'Scarlett',
                'Penelope', 'Layla', 'Chloe', 'Victoria', 'Madison', 'Eleanor', 'Grace', 'Nora', 'Riley', 'Zoey',
@@ -186,12 +242,11 @@ last_names = ['Smith', 'Johnson', 'Williams', 'Jones', 'Brown', 'Davis', 'Miller
               'Patterson', 'Hughes', 'Flores', 'Washington', 'Butler', 'Simmons', 'Foster', 'Gonzalez', 'Bryant',
               'Alexander', 'Russell', 'Griffin', 'Diaz', 'Hayes', 'Myers', 'Ford', 'Hamilton', 'Graham', 'Sullivan',
               'Wallace']
+is_login_user = WeightedArray([(True, 55), (False, 45)])
+user_gender = WeightedArray([('male', 45), ('female', 55)])
+age_range = WeightedArray([(10, 5), (20, 45), (30, 35), (40, 10), (50, 3)])
 
-
-def get_random_user_name():
-    return random.choices(first_names)[0] + " " + random.choices(last_names)[0]
-
-
+# other enum
 channel = WeightedArray(
     [('Google play', 50), ('Amazon Appstore', 5), ('F-Droid', 10), ('Galaxy Store', 15), ('QQ Store', 8),
      ('Huawei Store', 12), ('Xiaomi Store', 7), ('Oppo Store', 6), ('Vivo Store', 5), ('360 Store', 2)])
@@ -199,29 +254,3 @@ channel = WeightedArray(
 traffic_source = WeightedArray(
     [(('email', "Search"), 1), (('baidu', "Recommendations"), 2), (('google', "Paid search"), 3),
      (('douyin', "App Referral"), 5), (('bytedance', "Search"), 4), (('', ""), 90)])
-
-is_login_user = WeightedArray([(True, 93), (False, 7)])
-
-# following value will be replaced by amplifyconfiguration.json file.
-APP_ID = ""
-ENDPOINT = ""
-
-
-def init_config():
-    global APP_ID, ENDPOINT, IS_GZIP, request_sleep_time, max_upload_thread_number, events_per_request
-    try:
-        with open('amplifyconfiguration.json') as file:
-            data = json.load(file)
-            APP_ID = data['analytics']['plugins']['awsClickstreamPlugin']['appId']
-            ENDPOINT = data['analytics']['plugins']['awsClickstreamPlugin']['endpoint']
-            IS_GZIP = data['analytics']['plugins']['awsClickstreamPlugin']['isCompressEvents']
-            if not IS_GZIP:
-                request_sleep_time = 0.1
-                max_upload_thread_number = 1
-                events_per_request = 500
-    except FileNotFoundError:
-        print("Error: amplifyconfiguration.json file not found.")
-    except json.JSONDecodeError:
-        print("Error: when decoding the JSON file.")
-    except KeyError:
-        print("Error: error key in the JSON file.")

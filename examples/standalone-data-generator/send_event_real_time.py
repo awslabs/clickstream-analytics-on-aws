@@ -10,6 +10,7 @@ or in the 'license' file accompanying this file. This file is distributed on an 
 OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions
 and limitations under the License.
 """
+import configure
 import util.util as utils
 import requests
 import enums as enums
@@ -20,16 +21,20 @@ global_sequence_id = 1
 def send_events_to_server(user, events):
     headers = {'Content-Type': 'application/json; charset=utf-8'}
     global global_sequence_id
+    if user.platform == enums.Platform.Web:
+        device = user.web_device
+    else:
+        device = user.mobile_device
     request_param = {
         "platform": "Android",
-        "appId": enums.APP_ID,
+        "appId": configure.APP_ID,
         "compression": "gzip",
-        "fakeIp": user.device.ip_address,
+        "fakeIp": device.ip_address,
         "event_bundle_sequence_id": global_sequence_id
     }
     global_sequence_id = global_sequence_id + 1
     try:
-        response = requests.post(url=enums.ENDPOINT, params=request_param, headers=headers, data=events)
+        response = requests.post(url=configure.ENDPOINT, params=request_param, headers=headers, data=events)
         if response.status_code == 200:
             print("send " + user.user_id + "'s events success, data len(" + str(len(events) / 1024) + "k)")
         else:
@@ -39,7 +44,7 @@ def send_events_to_server(user, events):
 
 
 def send_events_of_day(user, events):
-    event_line = utils.get_gzipped_line(events)
+    event_line = utils.get_gzipped_line(configure.IS_GZIP, events)
     start_time = utils.current_timestamp()
     send_events_to_server(user, event_line)
     user.send_events += len(events)

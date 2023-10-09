@@ -10,14 +10,32 @@ or in the 'license' file accompanying this file. This file is distributed on an 
 OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions
 and limitations under the License.
 """
+
+
 class EventType:
-    SESSION_START = '_session_start'
+    # preset event
     FIRST_OPEN = '_first_open'
+    SESSION_START = '_session_start'
+    APP_START = '_app_start'
+    APP_END = '_app_end'
     SCREEN_VIEW = '_screen_view'
     USER_ENGAGEMENT = '_user_engagement'
-    ADD_BUTTON_CLICK = 'add_button_click'
-    NOTE_CREATE = 'note_create'
-    NOTE_SHARE = 'note_share'
-    NOTE_PRINT = 'note_print'
-    NOTE_EXPORT = 'note_export'
-    USER_LOGIN = 'user_login'
+    PROFILE_SET = '_profile_set'
+
+    # web preset event
+    CLICK = '_click'
+    SCROLL = '_scroll'
+    PAGE_VIEW = '_page_view'
+
+    # custom event
+    LOGOUT = 'logout'
+    SIGN_UP = 'sign_up'
+    LOGIN = 'login'
+    ADD_TO_CART = 'add_to_cart'
+    REMOVE_FROM_CART = 'remove_from_cart'
+    PRODUCT_EXPOSURE = 'product_exposure'
+    VIEW_ITEM = 'view_item'
+    VIEW_CART = 'view_cart'
+    BEGIN_CHECKOUT = 'begin_checkout'
+    PURCHASE = 'purchase'
+    SEARCH = 'search'

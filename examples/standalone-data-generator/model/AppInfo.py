@@ -10,23 +10,14 @@ or in the 'license' file accompanying this file. This file is distributed on an 
 OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions
 and limitations under the License.
 """
-from abc import abstractmethod, ABC
+import enums as enums
 
 
-class App(ABC):
+class AppInfo:
+    def __init__(self, app_version, sdk_version):
+        self.app_version = app_version
+        self.sdk_version = sdk_version
 
-    @abstractmethod
-    def get_all_user_count(self):
-        pass
-
-    @abstractmethod
-    def get_dau_count(self):
-        pass
-
-    @abstractmethod
-    def get_random_user(self):
-        pass
-
-    @abstractmethod
-    def gen_session_events(self, user, events):
-        pass
+    @staticmethod
+    def get_random_app():
+        return AppInfo(app_version=enums.app_version.get_random_item(), sdk_version=enums.sdk_version.get_random_item())

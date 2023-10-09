@@ -10,10 +10,9 @@ or in the 'license' file accompanying this file. This file is distributed on an 
 OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions
 and limitations under the License.
 """
-from enum import Enum
 
 
-class Screen(Enum):
+class Screen:
     NOTEPAD = ("NotepadActivity", "com.example.notepad.android.NotepadActivity")
     LOGIN = ('LoginActivity', "com.example.notepad.android.LoginActivity")
     NOTE_SHARE = ('NoteShareActivity', "com.example.notepad.android.NoteShareActivity")

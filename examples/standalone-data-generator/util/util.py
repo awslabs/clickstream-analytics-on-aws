@@ -15,6 +15,7 @@ import random
 import datetime
 import json
 import time
+import configure
 import enums as enums
 import gzip
 import base64
@@ -34,6 +35,17 @@ def get_session_id_of_timestamp(timestamp):
     return date_obj.strftime("%Y%m%d-%H%M%S%f")[:-3]
 
 
+def get_session_start_time_arr(session_times, day):
+    times = []
+    for i in range(session_times):
+        hour = enums.visit_hour.get_random_item()
+        minute = random.choices(enums.visit_minutes)[0]
+        start_timestamp = day + (hour * 60 * 60 + minute * 60 + random.randint(0, 59)) * 1000 + random.randint(0, 999)
+        times.append(start_timestamp)
+    times.sort()
+    return times
+
+
 def get_day_of_timestamp(timestamp):
     date_obj = datetime.datetime.fromtimestamp(timestamp / 1000)
     return date_obj.strftime("%Y%m%d")
@@ -51,7 +63,7 @@ def current_timestamp():
 def get_days_arr():
     now = datetime.datetime.now() - datetime.timedelta(days=1)
     timestamps = []
-    for i in range(enums.DURATION_OF_DAYS):
+    for i in range(configure.DURATION_OF_DAYS):
         date = now - datetime.timedelta(days=i)
         date = date.replace(hour=0, minute=0, second=0, microsecond=0)
         timestamp = int(date.timestamp()) * 1000
@@ -117,12 +129,12 @@ def get_gzip(event_str):
 
 
 def convert_to_gzip_events_process_pool(events_of_day):
-    n = enums.events_per_request
+    n = configure.EVENTS_PER_REQUEST
     small_arr = [events_of_day[i:i + n] for i in range(0, len(events_of_day), n)]
     manager = multiprocessing.Manager()
     day_event_lines = manager.list()
-    pool = multiprocessing.Pool(processes=enums.process_number)
-    day_event_lines = pool.starmap(get_gzipped_line, [(enums.IS_GZIP, small_arr[i]) for i in range(len(small_arr))])
+    pool = multiprocessing.Pool(processes=configure.PROCESS_NUMBER)
+    day_event_lines = pool.starmap(get_gzipped_line, [(configure.IS_GZIP, small_arr[i]) for i in range(len(small_arr))])
     pool.close()
     pool.join()
     return day_event_lines
