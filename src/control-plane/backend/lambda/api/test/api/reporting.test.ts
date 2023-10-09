@@ -389,7 +389,7 @@ describe('reporting test', () => {
     expect(res.body.data.visualIds.length).toEqual(2);
   });
 
-  it('funnel visual - error chart type', async () => {
+  it('funnel visual - unsupported chart type', async () => {
     tokenMock(ddbMock, false);
     stsClientMock.on(AssumeRoleCommand).resolves({
       Credentials: {
