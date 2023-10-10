@@ -192,7 +192,7 @@ describe('Dictionary Data', () => {
                 name: 'Transformer',
                 description: 'Description of Transformer',
                 builtIn: true,
-                mainFunction: 'software.aws.solution.clickstream.Transformer',
+                mainFunction: 'software.aws.solution.clickstream.TransformerV2',
                 jarFile: '',
                 bindCount: 0,
                 pluginType: 'Transform',
@@ -249,7 +249,7 @@ describe('Dictionary Data', () => {
                           S: '',
                         },
                         mainFunction: {
-                          S: 'software.aws.solution.clickstream.Transformer',
+                          S: 'software.aws.solution.clickstream.TransformerV2',
                         },
                         name: {
                           S: 'Transformer',
