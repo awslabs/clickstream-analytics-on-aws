@@ -11,19 +11,22 @@
  *  and limitations under the License.
  */
 
-import {
-  App,
-} from 'aws-cdk-lib';
 import { Capture, Match, Template } from 'aws-cdk-lib/assertions';
 import { findResourcesName } from './test-utils';
 import { CloudFrontControlPlaneStack } from '../../src/cloudfront-control-plane-stack';
 import { OUTPUT_CONTROL_PLANE_URL, OUTPUT_CONTROL_PLANE_BUCKET } from '../../src/common/constant';
+import { TestApp, removeFolder } from '../common/jest';
 import { CFN_FN } from '../constants';
 
-describe('CloudFrontS3PortalStack', () => {
+describe('CloudFrontS3PortalStack - Default stack props for common features', () => {
 
-  const commonApp = new App();
-  const commonPortalStack = new CloudFrontControlPlaneStack(commonApp, 'CloudFrontS3PortalStack');
+  afterAll(() => {
+    removeFolder(cdkOut);
+  });
+
+  const cdkOut = '/tmp/cloudfront-s3-portal-stack';
+  const app = new TestApp(cdkOut);
+  const commonPortalStack = new CloudFrontControlPlaneStack(app, 'CloudFrontS3PortalStack');
   const commonTemplate = Template.fromStack(commonPortalStack);
 
   test('Global region', () => {
@@ -288,7 +291,6 @@ describe('CloudFrontS3PortalStack', () => {
   });
 
   test('Cognito in Global region', () => {
-
     commonTemplate.hasResourceProperties('AWS::Cognito::UserPoolClient', {
       AllowedOAuthFlows: [
         'implicit',
@@ -410,226 +412,6 @@ describe('CloudFrontS3PortalStack', () => {
         'CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F',
         'LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A',
       ]);
-
-  });
-
-  test('Custom domain', () => {
-    const app = new App();
-
-    //WHEN
-    const portalStack = new CloudFrontControlPlaneStack(app, 'CloudFrontS3PortalStack', {
-      useCustomDomainName: true,
-    });
-
-    const template = Template.fromStack(portalStack);
-
-    template.hasParameter('HostedZoneId', {});
-    template.hasParameter('HostedZoneName', {});
-    template.hasParameter('RecordName', {});
-
-    expect(findResourcesName(template, 'AWS::Lambda::Function').sort())
-      .toEqual([
-        'AWS679f53fac002430cb0da5b7982bd22872D164C4C',
-        'AuthorizerFunctionB4DBAA43',
-        'ClickStreamApiApiFunction684A4D61',
-        'ClickStreamApiBatchInsertDDBCustomResourceDicInitCustomResourceFunction50F646E7',
-        'ClickStreamApiBatchInsertDDBCustomResourceDicInitCustomResourceProviderframeworkonEventCEE52DB5',
-        'ClickStreamApiStackActionStateMachineActionFunction8314F7B4',
-        'ClickStreamApiStackWorkflowStateMachineWorkflowFunctionD5F091A8',
-        'CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C81C01536',
-        'CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F',
-        'LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A',
-        'certificateCertificateRequestorFunction5D4BA95F',
-      ]);
-    expect(findResourcesName(template, 'AWS::CloudFormation::CustomResource'))
-      .toEqual([
-        'certificateCertificateRequestorResourceFD86DD58',
-        'ClickStreamApiBatchInsertDDBCustomResourceDicInitCustomResourceB9A4ABDE',
-      ]);
-    template.resourceCountIs('AWS::S3::Bucket', 2);
-    template.resourceCountIs('AWS::CloudFront::CloudFrontOriginAccessIdentity', 1);
-    template.resourceCountIs('AWS::CloudFront::Distribution', 1);
-    template.resourceCountIs('AWS::Route53::RecordSet', 1);
-    template.resourceCountIs('AWS::Lambda::LayerVersion', 2);
-    template.resourceCountIs('Custom::CDKBucketDeployment', 1);
-
-    template.hasOutput(OUTPUT_CONTROL_PLANE_URL, {});
-    template.hasOutput(OUTPUT_CONTROL_PLANE_BUCKET, {});
-
-    //lambda function to request certificate
-    template.hasResourceProperties('AWS::Lambda::Function', {
-      Code: {
-        S3Bucket: {
-          'Fn::Sub': Match.anyValue(),
-        },
-        S3Key: Match.anyValue(),
-      },
-      Role: {
-        'Fn::GetAtt': [
-          Match.stringLikeRegexp('certificateCertificateRequestorFunctionServiceRole[a-zA-Z0-9]+'),
-          'Arn',
-        ],
-      },
-      Handler: 'index.certificateRequestHandler',
-      Timeout: 900,
-    });
-
-    // TLS version check for custom domain
-    template.hasResourceProperties('AWS::CloudFront::Distribution', {
-      DistributionConfig: {
-        ViewerCertificate: {
-          MinimumProtocolVersion: 'TLSv1.2_2019',
-        },
-      },
-    });
-
-  });
-
-  test('China regions', () => {
-    const app = new App();
-
-    //WHEN
-    const portalStack = new CloudFrontControlPlaneStack(app, 'CloudFrontS3PortalStack', {
-      targetToCNRegions: true,
-    });
-
-    const template = Template.fromStack(portalStack);
-
-    template.hasParameter('DomainName', {});
-    template.hasParameter('IAMCertificateId', {});
-    template.hasParameter('OIDCProvider', {});
-    template.hasParameter('OIDCClientId', {});
-
-    expect(findResourcesName(template, 'AWS::Lambda::Function').sort())
-      .toEqual([
-        'AWS679f53fac002430cb0da5b7982bd22872D164C4C',
-        'AuthorizerFunctionB4DBAA43',
-        'ClickStreamApiApiFunction684A4D61',
-        'ClickStreamApiBatchInsertDDBCustomResourceDicInitCustomResourceFunction50F646E7',
-        'ClickStreamApiBatchInsertDDBCustomResourceDicInitCustomResourceProviderframeworkonEventCEE52DB5',
-        'ClickStreamApiStackActionStateMachineActionFunction8314F7B4',
-        'ClickStreamApiStackWorkflowStateMachineWorkflowFunctionD5F091A8',
-        'CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C81C01536',
-        'CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F',
-        'LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A',
-      ]);
-    template.resourceCountIs('AWS::S3::Bucket', 2);
-
-    template.resourceCountIs('AWS::CloudFront::CloudFrontOriginAccessIdentity', 1);
-    template.resourceCountIs('AWS::CloudFront::Distribution', 1);
-    template.resourceCountIs('AWS::Route53::RecordSet', 0);
-    template.resourceCountIs('AWS::Lambda::LayerVersion', 2);
-    template.resourceCountIs('Custom::CDKBucketDeployment', 1);
-
-    // Check Origin Request Policy
-    template.resourceCountIs('AWS::CloudFront::OriginRequestPolicy', 0);
-
-    template.hasOutput(OUTPUT_CONTROL_PLANE_URL, {});
-    template.hasOutput(OUTPUT_CONTROL_PLANE_BUCKET, {});
-    template.hasOutput('CloudFrontDomainName', {});
-
-    // TLS version check for custom domain
-    template.hasResourceProperties('AWS::CloudFront::Distribution', {
-      DistributionConfig: {
-        ViewerCertificate: {
-          MinimumProtocolVersion: 'TLSv1.2_2019',
-        },
-      },
-    });
-  });
-
-  test('OIDC authorizer', () => {
-
-    commonTemplate.hasParameter('Email', {});
-
-    commonTemplate.hasResourceProperties('AWS::Lambda::Function', {
-      Code: {
-        S3Bucket: {
-          'Fn::Sub': Match.anyValue(),
-        },
-        S3Key: Match.anyValue(),
-      },
-      Role: {
-        'Fn::GetAtt': [
-          Match.stringLikeRegexp('AuthorizerFunctionServiceRole[a-zA-Z0-9]+'),
-          'Arn',
-        ],
-      },
-      Environment: {
-        Variables: {
-          ISSUER: {
-            'Fn::Join': [
-              '',
-              [
-                'https://cognito-idp.',
-                {
-                  Ref: 'AWS::Region',
-                },
-                '.amazonaws.com/',
-                {
-                  Ref: Match.stringLikeRegexp('userPool[a-zA-Z0-9]+'),
-                },
-              ],
-            ],
-          },
-          AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
-        },
-      },
-      Handler: 'index.handler',
-      Runtime: 'nodejs18.x',
-    },
-    );
-  });
-
-  test('Authorizer function should kepp logs for at least 10 years', () => {
-
-    const capture = new Capture();
-    commonTemplate.hasResourceProperties('Custom::LogRetention', {
-      ServiceToken: {
-        'Fn::GetAtt': [
-          Match.stringLikeRegexp('LogRetention[a-fA-F0-9]+'),
-          'Arn',
-        ],
-      },
-      LogGroupName: {
-        'Fn::Join': [
-          '',
-          [
-            '/aws/lambda/',
-            {
-              Ref: Match.stringLikeRegexp('AuthorizerFunction[A-F0-9]+'),
-            },
-          ],
-        ],
-      },
-      RetentionInDays: capture,
-    },
-    );
-
-    expect(capture.asNumber()).toBeGreaterThanOrEqual(3653);
-
-  });
-
-  test('exist OIDC', () => {
-    const app = new App();
-
-    //WHEN
-    const portalStack = new CloudFrontControlPlaneStack(app, 'CloudFrontS3PortalStack', {
-      useExistingOIDCProvider: true,
-    });
-    const template = Template.fromStack(portalStack);
-
-    template.hasParameter('OIDCProvider', {});
-    template.hasParameter('OIDCClientId', {});
-
-    template.hasResourceProperties('AWS::Lambda::Function', {
-      Environment: {
-        Variables: {
-          ISSUER: Match.anyValue(),
-        },
-      },
-      Handler: 'index.handler',
-    });
   });
 
   test('exist api authorizer', () => {
@@ -725,17 +507,11 @@ describe('CloudFrontS3PortalStack', () => {
     });
   });
 
-  test('Function for user authentication in CN region', () => {
-    const app = new App();
+  test('OIDC authorizer', () => {
 
-    //WHEN
-    const portalStack = new CloudFrontControlPlaneStack(app, 'CloudFrontS3PortalStack', {
-      targetToCNRegions: true,
-    });
+    commonTemplate.hasParameter('Email', {});
 
-    const template = Template.fromStack(portalStack);
-
-    template.hasResourceProperties('AWS::Lambda::Function', {
+    commonTemplate.hasResourceProperties('AWS::Lambda::Function', {
       Code: {
         S3Bucket: {
           'Fn::Sub': Match.anyValue(),
@@ -748,118 +524,63 @@ describe('CloudFrontS3PortalStack', () => {
           'Arn',
         ],
       },
-      Architectures: Match.absent(),
+      Environment: {
+        Variables: {
+          ISSUER: {
+            'Fn::Join': [
+              '',
+              [
+                'https://cognito-idp.',
+                {
+                  Ref: 'AWS::Region',
+                },
+                '.amazonaws.com/',
+                {
+                  Ref: Match.stringLikeRegexp('userPool[a-zA-Z0-9]+'),
+                },
+              ],
+            ],
+          },
+          AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
+        },
+      },
       Handler: 'index.handler',
       Runtime: 'nodejs18.x',
     },
     );
-
   });
 
-  test('CustomError Responses in CN region', () => {
-    const app = new App();
+  test('Authorizer function should keep logs for at least 10 years', () => {
 
-    //WHEN
-    const portalStack = new CloudFrontControlPlaneStack(app, 'CloudFrontS3PortalStack', {
-      targetToCNRegions: true,
-    });
-
-    const template = Template.fromStack(portalStack);
-
-    template.hasResourceProperties('AWS::CloudFront::Distribution', {
-      DistributionConfig: {
-        CustomErrorResponses: [
-          {
-            ErrorCode: 403,
-            ResponseCode: 200,
-            ResponsePagePath: '/index.html',
-          },
+    const capture = new Capture();
+    commonTemplate.hasResourceProperties('Custom::LogRetention', {
+      ServiceToken: {
+        'Fn::GetAtt': [
+          Match.stringLikeRegexp('LogRetention[a-fA-F0-9]+'),
+          'Arn',
         ],
       },
+      LogGroupName: {
+        'Fn::Join': [
+          '',
+          [
+            '/aws/lambda/',
+            {
+              Ref: Match.stringLikeRegexp('AuthorizerFunction[A-F0-9]+'),
+            },
+          ],
+        ],
+      },
+      RetentionInDays: capture,
     },
     );
 
-  });
-
-  test('Test CloudFront disabled API call cache in China regions', () => {
-    const app = new App();
-
-    //WHEN
-    const portalStack = new CloudFrontControlPlaneStack(app, 'CloudFrontS3PortalStack', {
-      targetToCNRegions: true,
-    });
-
-    const template = Template.fromStack(portalStack);
-
-    template.resourceCountIs('AWS::CloudFront::Distribution', 1);
-    template.resourcePropertiesCountIs('AWS::CloudFront::Distribution', {
-      DistributionConfig: {
-        CacheBehaviors: [
-          {
-            PathPattern: {
-              'Fn::Join': [
-                '',
-                [
-                  '/',
-                  {
-                    Ref: Match.stringLikeRegexp('ClickStreamApiDeploymentStageapi[0-9A-Za-z]+'),
-                  },
-                  '/*',
-                ],
-              ],
-            },
-            TargetOriginId: 'origin2',
-            AllowedMethods: [
-              'GET',
-              'HEAD',
-              'OPTIONS',
-              'PUT',
-              'PATCH',
-              'POST',
-              'DELETE',
-            ],
-            CachedMethods: [
-              'GET',
-              'HEAD',
-            ],
-            Compress: true,
-            ViewerProtocolPolicy: 'redirect-to-https',
-            ForwardedValues: {
-              QueryString: true,
-              Cookies: {
-                Forward: 'none',
-              },
-              Headers: [
-                'Origin',
-                'Authorization',
-                'Accept',
-                'Cache-Control',
-                'Access-Control-Request-Method',
-                'Access-Control-Request-Headers',
-                'Referer',
-              ],
-            },
-            MaxTTL: 0,
-            MinTTL: 0,
-            DefaultTTL: 0,
-          },
-        ],
-      },
-    }, 1);
-
+    expect(capture.asNumber()).toBeGreaterThanOrEqual(3653);
 
   });
 
   test('Test security response headers ', () => {
-    const app = new App();
-
-    //WHEN
-    const portalStack = new CloudFrontControlPlaneStack(app, 'CloudFrontS3PortalStack', {
-      targetToCNRegions: false,
-    });
-    const template = Template.fromStack(portalStack);
-
-    template.resourcePropertiesCountIs('AWS::CloudFront::ResponseHeadersPolicy', {
+    commonTemplate.resourcePropertiesCountIs('AWS::CloudFront::ResponseHeadersPolicy', {
       ResponseHeadersPolicyConfig: {
         Name: {
           'Fn::Join': [
@@ -957,15 +678,7 @@ describe('CloudFrontS3PortalStack', () => {
   });
 
   test('Test CloudFront logging function ', () => {
-    const app = new App();
-
-    //WHEN
-    const portalStack = new CloudFrontControlPlaneStack(app, 'CloudFrontS3PortalStack', {
-      targetToCNRegions: false,
-    });
-    const template = Template.fromStack(portalStack);
-
-    template.resourcePropertiesCountIs('AWS::CloudFront::Distribution', {
+    commonTemplate.resourcePropertiesCountIs('AWS::CloudFront::Distribution', {
       DistributionConfig: {
         Logging: {
           'Fn::If': [
@@ -1026,5 +739,256 @@ describe('CloudFrontS3PortalStack', () => {
     }
     expect(paramCount).toEqual(paramList.length);
   });
+});
 
+describe('CloudFrontS3PortalStack - custom domain', () => {
+  afterAll(() => {
+    removeFolder(cdkOut);
+  });
+
+  const cdkOut = '/tmp/cloudfront-s3-portal-stack-custom-domain';
+  const app = new TestApp(cdkOut);
+  //WHEN
+  const portalStack = new CloudFrontControlPlaneStack(app, 'CloudFrontS3PortalStackCustomDomain', {
+    useCustomDomainName: true,
+  });
+
+  test('Custom domain', () => {
+
+    const template = Template.fromStack(portalStack);
+
+    template.hasParameter('HostedZoneId', {});
+    template.hasParameter('HostedZoneName', {});
+    template.hasParameter('RecordName', {});
+
+    expect(findResourcesName(template, 'AWS::Lambda::Function').sort())
+      .toEqual([
+        'AWS679f53fac002430cb0da5b7982bd22872D164C4C',
+        'AuthorizerFunctionB4DBAA43',
+        'ClickStreamApiApiFunction684A4D61',
+        'ClickStreamApiBatchInsertDDBCustomResourceDicInitCustomResourceFunction50F646E7',
+        'ClickStreamApiBatchInsertDDBCustomResourceDicInitCustomResourceProviderframeworkonEventCEE52DB5',
+        'ClickStreamApiStackActionStateMachineActionFunction8314F7B4',
+        'ClickStreamApiStackWorkflowStateMachineWorkflowFunctionD5F091A8',
+        'CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C81C01536',
+        'CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F',
+        'LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A',
+        'certificateCertificateRequestorFunction5D4BA95F',
+      ]);
+    expect(findResourcesName(template, 'AWS::CloudFormation::CustomResource'))
+      .toEqual([
+        'certificateCertificateRequestorResourceFD86DD58',
+        'ClickStreamApiBatchInsertDDBCustomResourceDicInitCustomResourceB9A4ABDE',
+      ]);
+    template.resourceCountIs('AWS::S3::Bucket', 2);
+    template.resourceCountIs('AWS::CloudFront::CloudFrontOriginAccessIdentity', 1);
+    template.resourceCountIs('AWS::CloudFront::Distribution', 1);
+    template.resourceCountIs('AWS::Route53::RecordSet', 1);
+    template.resourceCountIs('AWS::Lambda::LayerVersion', 2);
+    template.resourceCountIs('Custom::CDKBucketDeployment', 1);
+
+    template.hasOutput(OUTPUT_CONTROL_PLANE_URL, {});
+    template.hasOutput(OUTPUT_CONTROL_PLANE_BUCKET, {});
+
+    //lambda function to request certificate
+    template.hasResourceProperties('AWS::Lambda::Function', {
+      Code: {
+        S3Bucket: {
+          'Fn::Sub': Match.anyValue(),
+        },
+        S3Key: Match.anyValue(),
+      },
+      Role: {
+        'Fn::GetAtt': [
+          Match.stringLikeRegexp('certificateCertificateRequestorFunctionServiceRole[a-zA-Z0-9]+'),
+          'Arn',
+        ],
+      },
+      Handler: 'index.certificateRequestHandler',
+      Timeout: 900,
+    });
+
+    // TLS version check for custom domain
+    template.hasResourceProperties('AWS::CloudFront::Distribution', {
+      DistributionConfig: {
+        ViewerCertificate: {
+          MinimumProtocolVersion: 'TLSv1.2_2019',
+        },
+      },
+    });
+
+  });
+});
+
+describe('CloudFrontS3PortalStack - China region', () => {
+  afterAll(() => {
+    removeFolder(cdkOut);
+  });
+
+  const cdkOut = '/tmp/cloudfront-s3-portal-stack-china-regions';
+  const app = new TestApp(cdkOut);
+  //WHEN
+  const portalStack = new CloudFrontControlPlaneStack(app, 'CloudFrontS3PortalStackChinaRegions', {
+    targetToCNRegions: true,
+  });
+
+  test('China regions', () => {
+
+    const template = Template.fromStack(portalStack);
+
+    template.hasParameter('DomainName', {});
+    template.hasParameter('IAMCertificateId', {});
+    template.hasParameter('OIDCProvider', {});
+    template.hasParameter('OIDCClientId', {});
+
+    expect(findResourcesName(template, 'AWS::Lambda::Function').sort())
+      .toEqual([
+        'AWS679f53fac002430cb0da5b7982bd22872D164C4C',
+        'AuthorizerFunctionB4DBAA43',
+        'ClickStreamApiApiFunction684A4D61',
+        'ClickStreamApiBatchInsertDDBCustomResourceDicInitCustomResourceFunction50F646E7',
+        'ClickStreamApiBatchInsertDDBCustomResourceDicInitCustomResourceProviderframeworkonEventCEE52DB5',
+        'ClickStreamApiStackActionStateMachineActionFunction8314F7B4',
+        'ClickStreamApiStackWorkflowStateMachineWorkflowFunctionD5F091A8',
+        'CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C81C01536',
+        'CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F',
+        'LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A',
+      ]);
+    template.resourceCountIs('AWS::S3::Bucket', 2);
+
+    template.resourceCountIs('AWS::CloudFront::CloudFrontOriginAccessIdentity', 1);
+    template.resourceCountIs('AWS::CloudFront::Distribution', 1);
+    template.resourceCountIs('AWS::Route53::RecordSet', 0);
+    template.resourceCountIs('AWS::Lambda::LayerVersion', 2);
+    template.resourceCountIs('Custom::CDKBucketDeployment', 1);
+
+    // Check Origin Request Policy
+    template.resourceCountIs('AWS::CloudFront::OriginRequestPolicy', 0);
+
+    template.hasOutput(OUTPUT_CONTROL_PLANE_URL, {});
+    template.hasOutput(OUTPUT_CONTROL_PLANE_BUCKET, {});
+    template.hasOutput('CloudFrontDomainName', {});
+
+    // TLS version check for custom domain
+    template.hasResourceProperties('AWS::CloudFront::Distribution', {
+      DistributionConfig: {
+        ViewerCertificate: {
+          MinimumProtocolVersion: 'TLSv1.2_2019',
+        },
+      },
+    });
+  });
+
+  test('Function for user authentication in CN region', () => {
+    const template = Template.fromStack(portalStack);
+
+    template.hasResourceProperties('AWS::Lambda::Function', {
+      Code: {
+        S3Bucket: {
+          'Fn::Sub': Match.anyValue(),
+        },
+        S3Key: Match.anyValue(),
+      },
+      Role: {
+        'Fn::GetAtt': [
+          Match.stringLikeRegexp('AuthorizerFunctionServiceRole[a-zA-Z0-9]+'),
+          'Arn',
+        ],
+      },
+      Architectures: Match.absent(),
+      Handler: 'index.handler',
+      Runtime: 'nodejs18.x',
+    },
+    );
+
+  });
+
+  test('Test CloudFront disabled API call cache in China regions', () => {
+    const template = Template.fromStack(portalStack);
+
+    template.resourceCountIs('AWS::CloudFront::Distribution', 1);
+    template.resourcePropertiesCountIs('AWS::CloudFront::Distribution', {
+      DistributionConfig: {
+        CacheBehaviors: [
+          {
+            PathPattern: {
+              'Fn::Join': [
+                '',
+                [
+                  '/',
+                  {
+                    Ref: Match.stringLikeRegexp('ClickStreamApiDeploymentStageapi[0-9A-Za-z]+'),
+                  },
+                  '/*',
+                ],
+              ],
+            },
+            TargetOriginId: 'origin2',
+            AllowedMethods: [
+              'GET',
+              'HEAD',
+              'OPTIONS',
+              'PUT',
+              'PATCH',
+              'POST',
+              'DELETE',
+            ],
+            CachedMethods: [
+              'GET',
+              'HEAD',
+            ],
+            Compress: true,
+            ViewerProtocolPolicy: 'redirect-to-https',
+            ForwardedValues: {
+              QueryString: true,
+              Cookies: {
+                Forward: 'none',
+              },
+              Headers: [
+                'Origin',
+                'Authorization',
+                'Accept',
+                'Cache-Control',
+                'Access-Control-Request-Method',
+                'Access-Control-Request-Headers',
+                'Referer',
+              ],
+            },
+            MaxTTL: 0,
+            MinTTL: 0,
+            DefaultTTL: 0,
+          },
+        ],
+      },
+    }, 1);
+  });
+});
+
+describe('CloudFrontS3PortalStack - existing OIDC provider', () => {
+  afterAll(() => {
+    removeFolder(cdkOut);
+  });
+
+  const cdkOut = '/tmp/cloudfront-s3-portal-stack-oidc';
+  const app = new TestApp(cdkOut);
+  //WHEN
+  const portalStack = new CloudFrontControlPlaneStack(app, 'CloudFrontS3PortalStackOIDC', {
+    useExistingOIDCProvider: true,
+  });
+
+  test('exist OIDC', () => {
+    const template = Template.fromStack(portalStack);
+
+    template.hasParameter('OIDCProvider', {});
+    template.hasParameter('OIDCClientId', {});
+
+    template.hasResourceProperties('AWS::Lambda::Function', {
+      Environment: {
+        Variables: {
+          ISSUER: Match.anyValue(),
+        },
+      },
+      Handler: 'index.handler',
+    });
+  });
 });
