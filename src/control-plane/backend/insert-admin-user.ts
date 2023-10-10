@@ -30,10 +30,13 @@ export class AddAdminUser extends Construct {
 
   constructor(scope: Construct, id: string, props: AddAdminUserProps) {
     super(scope, id);
+
+    const physicalResourceId = PhysicalResourceId.of('AddAdminUserCustomResource');
+
     const putItemSdkCall: AwsSdkCall = {
       service: 'DynamoDB',
       action: 'putItem',
-      physicalResourceId: PhysicalResourceId.of('putItem-${props.userTable.tableName}'),
+      physicalResourceId: physicalResourceId,
       parameters: {
         TableName: props.userTable.tableName,
         Item: {
@@ -53,7 +56,7 @@ export class AddAdminUser extends Construct {
     const updateItemSdkCall: AwsSdkCall = {
       service: 'DynamoDB',
       action: 'updateItem',
-      physicalResourceId: PhysicalResourceId.of('updateItem-${props.userTable.tableName}'),
+      physicalResourceId: physicalResourceId,
       parameters: {
         TableName: props.userTable.tableName,
         Key: {
@@ -83,7 +86,7 @@ export class AddAdminUser extends Construct {
     const deleteItemSdkCall: AwsSdkCall = {
       service: 'DynamoDB',
       action: 'deleteItem',
-      physicalResourceId: PhysicalResourceId.of('deleteItem-${props.userTable.tableName}'),
+      physicalResourceId: physicalResourceId,
       parameters: {
         TableName: props.userTable.tableName,
         Key: {
