@@ -50,7 +50,7 @@ function _fetchUsernameFromToken(authResult: JWTAuthorizerResponse) {
   } else if (!isEmpty((authResult.jwtPayload as JwtPayload).username)) {
     return (authResult.jwtPayload as JwtPayload).username.toString();
   }
-  return authResult.jwtPayload?.sub?.toString() ?? '';
+  return authResult.jwtPayload?.sub?.toString() ?? ''; //NOSONAR
 }
 
 async function _authToken(req: express.Request, res: express.Response, authorization: string) {

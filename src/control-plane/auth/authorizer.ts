@@ -122,7 +122,7 @@ export class JWTAuthorizer {
       algorithms: ['RS256'],
       issuer: openidConfiguration.issuer,
     });
-    if (verifiedToken.sub === undefined) {
+    if (verifiedToken.sub === undefined) { //NOSONAR
       logger.info('VerifiedToken is invalid');
       return {
         success: false,

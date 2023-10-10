@@ -31,6 +31,7 @@ import { getFunctionTags } from '../../../common/lambda/tags';
 import { BIUserCredential } from '../../../common/model';
 import { logger } from '../../../common/powertools';
 import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
+import { generateRandomStr } from '../../../common/utils';
 import { SQL_TEMPLATE_PARAMETER } from '../../private/constant';
 import { CreateDatabaseAndSchemas, MustacheParamType } from '../../private/model';
 import { getSqlContent, getSqlContents } from '../../private/utils';
@@ -443,29 +444,6 @@ const createSchemasInRedshift = async (redshiftClient: RedshiftDataClient, sqlSt
     }
     throw err;
   }
-};
-
-const generateRandomStr = (length: number, charSet?: string): string => {
-  const lowerCase = 'abcdefghijklmnopqrstuvwxyz';
-  const upperCase = lowerCase.toUpperCase();
-  const numStr = '0123456789';
-  const other = '!#$%^&-_=+|';
-
-  let password = '';
-  let strCharset = charSet;
-  if (!strCharset) {
-    strCharset = charSet ?? lowerCase + upperCase + numStr + other;
-    // Fix ERROR: password must contain a number
-    password = lowerCase[Math.floor(Math.random() * lowerCase.length)]
-  + upperCase[Math.floor(Math.random() * upperCase.length)]
-  + numStr[Math.floor(Math.random() * numStr.length)]
-  + other[Math.floor(Math.random() * other.length)];
-  }
-
-  while (password.length < length) {
-    password += strCharset.charAt(Math.floor(Math.random() * strCharset.length));
-  }
-  return password;
 };
 
 function generateRedshiftUserPassword(length: number): string {

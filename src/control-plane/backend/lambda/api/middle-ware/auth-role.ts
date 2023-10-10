@@ -79,7 +79,7 @@ export async function authRole(req: express.Request, res: express.Response, next
     }
 
     const user = await store.getUser(uid);
-    let userRole = IUserRole.NO_IDENTITY;
+    let userRole;
     if (user && user.role) {
       userRole = user.role;
     } else {
