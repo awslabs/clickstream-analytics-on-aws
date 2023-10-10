@@ -253,7 +253,7 @@ export class ReportingService {
 
       //construct parameters to build sql
       const viewName = getTempResourceName(query.viewName, query.action);
-
+      
       const sql = buildEventAnalysisView({
         schemaName: query.appId,
         computeMethod: query.computeMethod,
@@ -268,8 +268,20 @@ export class ReportingService {
         lastN: query.lastN,
         timeUnit: query.timeUnit,
         groupColumn: query.groupColumn,
+        groupCondition: query.groupCondition,
       });
       logger.debug(`event analysis sql: ${sql}`);
+
+      const hasGrouping = query.groupCondition === undefined ? false: true;
+      const projectedColumns = ['event_date','event_name','count'];
+      if(hasGrouping) {
+        eventVisualColumns.push({
+          Name: "group_col",
+          Type: "STRING"
+        });
+
+        projectedColumns.push('group_col');
+      }
 
       const datasetPropsArray: DataSetProps[] = [];
       datasetPropsArray.push({
@@ -278,11 +290,7 @@ export class ReportingService {
         columns: eventVisualColumns,
         importMode: 'DIRECT_QUERY',
         customSql: sql,
-        projectedColumns: [
-          'event_date',
-          'event_name',
-          'count',
-        ],
+        projectedColumns,
       });
 
       let sheetId;
@@ -295,7 +303,7 @@ export class ReportingService {
         sheetId = query.sheetId;
       }
 
-      const hasGrouping = query.groupCondition === undefined ? false: true;
+      
       const visualId = uuidv4();
       const titleProps = await getDashboardTitleProps(AnalysisType.EVENT, query);
       const quickSightChartType = query.chartType;

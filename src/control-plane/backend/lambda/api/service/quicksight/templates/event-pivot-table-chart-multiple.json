@@ -16,7 +16,7 @@
                   "Rows": [
                       {
                           "CategoricalDimensionField": {
-                              "FieldId": "{{samlMultipleFieldId}}",
+                              "FieldId": "{{smalMultiplesFieldId}}",
                               "Column": {
                                   "DataSetIdentifier": "{{dataSetIdentifier}}",
                                   "ColumnName": "group_col"
@@ -85,7 +85,7 @@
           "FieldOptions": {
               "SelectedFieldOptions": [
                   {
-                    "FieldId": "{{samlMultipleFieldId}}",
+                    "FieldId": "{{smalMultiplesFieldId}}",
                     "Visibility": "VISIBLE"
                   },
                   {

@@ -770,6 +770,7 @@ export function buildEventAnalysisView(sqlParameters: SQLParameters) : string {
 
   let groupColSQL = '';
   let groupCol = '';
+
   if (sqlParameters.groupCondition !== undefined) {
     const colName = _getColNameWithPrefix(sqlParameters.groupCondition);
     groupColSQL = `${colName} as group_col,`;
