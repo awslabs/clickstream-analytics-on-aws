@@ -144,6 +144,7 @@ export type MustacheBaseType = {
   dataSetIdentifier: string;
   title: string;
   subTitle?: string;
+  smalMultiplesFieldId?: string;
 }
 
 export type MustachePathAnalysisType = MustacheBaseType & {
@@ -758,14 +759,22 @@ export function getFunnelTableVisualRelatedDefs(viewName: string, colNames: stri
 }
 
 export function getEventChartVisualDef(visualId: string, viewName: string, titleProps: DashboardTitleProps,
-  quickSightChartType: QuickSightChartType, groupColumn: string) : Visual {
+  quickSightChartType: QuickSightChartType, groupColumn: string, hasGrouping: boolean) : Visual {
 
   if (quickSightChartType != QuickSightChartType.LINE && quickSightChartType != QuickSightChartType.BAR) {
     const errorMessage = `Event analysis: unsupported quicksight chart type ${quickSightChartType}`;
     logger.warn(errorMessage);
     throw new Error(errorMessage);
   }
-  const templatePath = `./templates/event-${quickSightChartType}-chart.json`;
+
+  let suffix = '';
+  let smalMultiplesFieldId = undefined;
+  if(hasGrouping){
+    suffix = '-multiple';
+    smalMultiplesFieldId = uuidv4();
+  }
+
+  const templatePath = `./templates/event-${quickSightChartType}-chart${suffix}.json`;
   const visualDef = readFileSync(join(__dirname, templatePath), 'utf8');
   const mustacheEventAnalysisType: MustacheEventAnalysisType = {
     visualId,
@@ -777,14 +786,22 @@ export function getEventChartVisualDef(visualId: string, viewName: string, title
     dateGranularity: groupColumn,
     title: titleProps.title,
     subTitle: titleProps.subTitle,
+    smalMultiplesFieldId,
   };
 
   return JSON.parse(Mustache.render(visualDef, mustacheEventAnalysisType)) as Visual;
 }
 
-export function getEventPivotTableVisualDef(visualId: string, viewName: string, titleProps: DashboardTitleProps, groupColumn: string) : Visual {
+export function getEventPivotTableVisualDef(visualId: string, viewName: string, titleProps: DashboardTitleProps, groupColumn: string, hasGrouping: boolean) : Visual {
 
-  const visualDef = readFileSync(join(__dirname, './templates/event-pivot-table-chart.json'), 'utf8');
+  let suffix = '';
+  let smalMultiplesFieldId = undefined;
+  if(hasGrouping){
+    suffix = '-multiple';
+    smalMultiplesFieldId = uuidv4();
+  }
+
+  const visualDef = readFileSync(join(__dirname, `./templates/event-pivot-table-chart${suffix}.json`), 'utf8');
   const mustacheEventAnalysisType: MustacheEventAnalysisType = {
     visualId,
     dataSetIdentifier: viewName,
@@ -793,6 +810,7 @@ export function getEventPivotTableVisualDef(visualId: string, viewName: string, 
     catMeasureFieldId: uuidv4(),
     dateGranularity: groupColumn,
     title: titleProps.tableTitle,
+    smalMultiplesFieldId,
   };
 
   return JSON.parse(Mustache.render(visualDef, mustacheEventAnalysisType)) as Visual;

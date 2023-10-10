@@ -48,6 +48,12 @@ export interface RetentionJoinColumn {
   readonly property: string;
 }
 
+export interface GroupingCondition {
+  readonly category: ConditionCategory;
+  readonly property: string;
+  readonly dataType: MetadataValueType;
+}
+
 export interface PairEventAndCondition {
   readonly startEvent: EventAndCondition;
   readonly backEvent: EventAndCondition;
@@ -77,6 +83,7 @@ export interface SQLParameters {
   readonly pathAnalysis?: PathAnalysisParameter;
   readonly pairEventAndConditions?: PairEventAndCondition[];
   readonly locale?: ExploreLocales;
+  readonly groupCondition?: GroupingCondition;
 }
 
 export const builtInEvents = [
@@ -575,6 +582,13 @@ function _buildEventAnalysisBaseSql(eventNames: string[], sqlParameters: SQLPara
     } else {
       idSql = `, table_${index}.user_pseudo_id_${index} as x_id`;
     }
+    let groupColSql = '';
+    let groupCol = '';
+    if (sqlParameters.groupCondition !== undefined) {
+      groupCol = _getColNameWithPrefix(sqlParameters.groupCondition);
+      groupColSql = `, table_${index}.${groupCol}_${index} as ${groupCol}`;
+    }
+
     joinTableSQL = joinTableSQL.concat(`
     ${unionSql}
     select 
@@ -585,6 +599,7 @@ function _buildEventAnalysisBaseSql(eventNames: string[], sqlParameters: SQLPara
     , table_${index}.event_name_${index} as event_name
     , table_${index}.event_timestamp_${index} as event_timestamp
     ${idSql}
+    ${groupColSql}
     from table_${index}
     `);
 
@@ -599,8 +614,27 @@ function _buildEventAnalysisBaseSql(eventNames: string[], sqlParameters: SQLPara
   return sql;
 };
 
+function _getColNameWithPrefix(groupCondition: GroupingCondition) {
+
+  let prefix = '';
+  if (groupCondition.category !== ConditionCategory.EVENT
+     && groupCondition.category !== ConditionCategory.USER
+     && groupCondition.category !== ConditionCategory.OTHER
+  ) {
+    prefix = `${groupCondition.category}_`;
+  }
+
+  return `${prefix}${groupCondition.property}`;
+}
+
 function _buildEventCondition(eventNames: string[], sqlParameters: SQLParameters, baseSQL: string) {
   let sql = baseSQL;
+  let groupCol = '';
+  let newColumnTemplate = columnTemplate;
+  if (sqlParameters.groupCondition !== undefined) {
+    groupCol = `,${_getColNameWithPrefix(sqlParameters.groupCondition)}`;
+    newColumnTemplate += `${groupCol} as ${_getColNameWithPrefix(sqlParameters.groupCondition)}####`;
+  }
   const computedMethodList: ExploreComputeMethod[] = [];
   for (const [index, event] of eventNames.entries()) {
     computedMethodList.push(sqlParameters.eventAndConditions![index].computeMethod ?? ExploreComputeMethod.EVENT_CNT);
@@ -609,7 +643,7 @@ function _buildEventCondition(eventNames: string[], sqlParameters: SQLParameters
       ,week
       ,day
       ,hour
-      ,${_renderUserPseudoIdColumn(columnTemplate, sqlParameters.computeMethod, true).replace(/####/g, `_${index}`)}
+      ,${_renderUserPseudoIdColumn(newColumnTemplate, sqlParameters.computeMethod, true).replace(/####/g, `_${index}`)}
     `;
 
     sql = sql.concat(`
@@ -733,15 +767,25 @@ export function buildEventAnalysisView(sqlParameters: SQLParameters) : string {
   const eventNames = _getEventsNameFromConditions(sqlParameters.eventAndConditions!);
 
   let baseSQL = _buildEventAnalysisBaseSql(eventNames, sqlParameters);
+
+  let groupColSQL = '';
+  let groupCol = '';
+  if (sqlParameters.groupCondition !== undefined) {
+    const colName = _getColNameWithPrefix(sqlParameters.groupCondition);
+    groupColSQL = `${colName} as group_col,`;
+    groupCol = `${colName},`;
+  }
+
   resultSql = resultSql.concat(`
       select 
         day::date as event_date, 
         event_name, 
+        ${groupColSQL}
         x_id as count
       from join_table 
       where x_id is not null
       group by
-      day, event_name, x_id
+      day, event_name, ${groupCol} x_id
   `);
 
   let sql = `
@@ -1780,6 +1824,29 @@ function hasNestAttribute(conditions: Condition[]) {
   };
 }
 
+function hasNestAttributeInGroupingCondition(groupCondition: GroupingCondition) {
+
+  let hasUserAttribute = false;
+  let hasEventAttribute = false;
+  const userAttributes: string[] = [];
+  const eventAttributes: string[] = [];
+
+  if (groupCondition.category === ConditionCategory.USER) {
+    hasUserAttribute = true;
+    userAttributes.push(groupCondition.property);
+  } else if (groupCondition.category === ConditionCategory.EVENT) {
+    hasEventAttribute = true;
+    eventAttributes.push(groupCondition.property);
+  }
+
+  return {
+    hasEventAttribute,
+    hasUserAttribute,
+    userAttributes,
+    eventAttributes,
+  };
+}
+
 function _hasEventCondition(sqlParameters: SQLParameters) {
 
   let hasEventAttribute = false;
@@ -1798,6 +1865,12 @@ function _hasEventCondition(sqlParameters: SQLParameters) {
     const nestAttribute = hasNestAttribute(sqlParameters.globalEventCondition?.conditions);
     hasEventAttribute = hasEventAttribute || nestAttribute.hasEventAttribute;
     eventAttributes.push(...nestAttribute.eventAttributes);
+  }
+
+  if (sqlParameters.groupCondition) {
+    const groupingCondition = hasNestAttributeInGroupingCondition(sqlParameters.groupCondition);
+    hasEventAttribute = hasEventAttribute || groupingCondition.hasEventAttribute;
+    eventAttributes.push(...groupingCondition.eventAttributes);
   }
 
   const hasEventConditionRetentionAnalysis = _hasEventConditionRetentionAnalysis(sqlParameters);
@@ -1828,6 +1901,12 @@ function _hasUserCondition(sqlParameters: SQLParameters) {
     const nestAttribute = hasNestAttribute(sqlParameters.globalEventCondition?.conditions);
     hasUserAttribute = hasUserAttribute || nestAttribute.hasUserAttribute;
     userAttributes.push(...nestAttribute.userAttributes);
+  }
+
+  if (sqlParameters.groupCondition) {
+    const groupingCondition = hasNestAttributeInGroupingCondition(sqlParameters.groupCondition);
+    hasUserAttribute = hasUserAttribute || groupingCondition.hasUserAttribute;
+    userAttributes.push(...groupingCondition.userAttributes);
   }
 
   const hasUserConditionRetentionAnalysis = _hasUserConditionRetentionAnalysis(sqlParameters);
