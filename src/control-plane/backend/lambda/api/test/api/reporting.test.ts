@@ -28,6 +28,7 @@ import {
   UpdateDashboardPublishedVersionCommand,
   GenerateEmbedUrlForRegisteredUserCommand,
   DescribeAnalysisCommand,
+  ThrottlingException,
 } from '@aws-sdk/client-quicksight';
 import { BatchExecuteStatementCommand, DescribeStatementCommand, RedshiftDataClient, StatusString } from '@aws-sdk/client-redshift-data';
 import { AssumeRoleCommand, STSClient } from '@aws-sdk/client-sts';
@@ -1021,6 +1022,61 @@ describe('reporting test', () => {
     expect(res.body.success).toEqual(true);
     expect(res.body.data.length).toEqual(1);
     expect(res.body.data[0].Arn).toEqual('arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa');
+
+  });
+
+  it('clean - ThrottlingException', async () => {
+
+    quickSightMock.on(ListDashboardsCommand).resolves({
+      DashboardSummaryList: [{
+        Arn: 'arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa',
+        Name: '_tmp_aaaaaaa',
+        CreatedTime: new Date((new Date()).getTime() - 80*60*1000),
+        DashboardId: 'dashboard-aaaaaaaa',
+      }],
+    });
+
+    quickSightMock.on(DeleteDashboardCommand).resolves({
+      Status: 200,
+      DashboardId: 'dashboard-aaaaaaaa',
+    });
+
+    quickSightMock.on(ListAnalysesCommand).resolves({
+      AnalysisSummaryList: [{
+        Arn: 'arn:aws:quicksight:us-east-1:11111111:analysis/analysis-aaaaaaaa',
+        Name: '_tmp_aaaaaaa',
+        CreatedTime: new Date((new Date()).getTime() - 80*60*1000),
+        AnalysisId: 'analysis_aaaaaaa',
+      }],
+    });
+
+    quickSightMock.on(DeleteAnalysisCommand).resolves({
+      Status: 200,
+      AnalysisId: 'analysis-aaaaaaaa',
+    });
+
+    quickSightMock.on(ListDataSetsCommand).resolves({
+      DataSetSummaries: [{
+        Arn: 'arn:aws:quicksight:us-east-1:11111111:dataset/dataset-aaaaaaaa',
+        Name: '_tmp_aaaaaaa',
+        CreatedTime: new Date((new Date()).getTime() - 80*60*1000),
+        DataSetId: 'dataset_aaaaaaa',
+      }],
+    });
+
+    quickSightMock.on(DeleteDataSetCommand).rejectsOnce( new ThrottlingException({
+      message: 'Rate exceeded',
+      $metadata: {},
+    }));
+
+    const res = await request(app)
+      .post('/api/reporting/clean')
+      .send({
+        region: 'us-east-1',
+      });
+
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(201);
 
   });
 
