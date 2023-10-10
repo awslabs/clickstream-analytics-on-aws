@@ -43,6 +43,10 @@ import {
   getDashboardTitleProps,
   eventVisualColumns,
   getAnalysisNameFromId,
+  checkFunnelAnalysisParameter,
+  checkEventAnalysisParameter,
+  checkPathAnalysisParameter,
+  checkRetentionAnalysisParameter,
 } from './quicksight/reporting-utils';
 import { buildEventAnalysisView, buildEventPathAnalysisView, buildFunnelTableView, buildFunnelView, buildNodePathAnalysisView, buildRetentionAnalysisView } from './quicksight/sql-builder';
 import { awsAccountId } from '../common/constants';
@@ -63,6 +67,11 @@ export class ReportingService {
       logger.info(`request: ${JSON.stringify(req.body)}`);
 
       const query = req.body;
+      const checkResult = checkFunnelAnalysisParameter(query);
+      if (!checkResult.success) {
+        logger.debug(checkResult.message);
+        return res.status(400).json(new ApiFail(checkResult.message));
+      }
 
       //construct parameters to build sql
       const viewName = getTempResourceName(query.viewName, query.action);
@@ -236,6 +245,12 @@ export class ReportingService {
       logger.info(`request: ${JSON.stringify(req.body)}`);
 
       const query = req.body;
+      const checkResult = checkEventAnalysisParameter(query);
+      if (!checkResult.success) {
+        logger.debug(checkResult.message);
+        return res.status(400).json(new ApiFail(checkResult.message));
+      }
+
       //construct parameters to build sql
       const viewName = getTempResourceName(query.viewName, query.action);
 
@@ -328,60 +343,71 @@ export class ReportingService {
     }
   };
 
+  private _buildSqlForPathAnalysis(query: any) {
+    let sql= '';
+    if (query.pathAnalysis.nodeType === ExplorePathNodeType.EVENT) {
+      sql = buildEventPathAnalysisView({
+        schemaName: query.appId,
+        computeMethod: query.computeMethod,
+        specifyJoinColumn: query.specifyJoinColumn,
+        joinColumn: query.joinColumn,
+        conversionIntervalType: query.conversionIntervalType,
+        conversionIntervalInSeconds: query.conversionIntervalInSeconds,
+        eventAndConditions: query.eventAndConditions,
+        timeScopeType: query.timeScopeType,
+        timeStart: query.timeScopeType === ExploreTimeScopeType.FIXED ? query.timeStart : undefined,
+        timeEnd: query.timeScopeType === ExploreTimeScopeType.FIXED ? query.timeEnd : undefined,
+        lastN: query.lastN,
+        timeUnit: query.timeUnit,
+        groupColumn: query.groupColumn,
+        pathAnalysis: {
+          platform: query.pathAnalysis.platform,
+          sessionType: query.pathAnalysis.sessionType,
+          nodeType: query.pathAnalysis.nodeType,
+          lagSeconds: query.pathAnalysis.lagSeconds,
+        },
+      });
+    } else {
+      sql = buildNodePathAnalysisView({
+        schemaName: query.appId,
+        computeMethod: query.computeMethod,
+        specifyJoinColumn: query.specifyJoinColumn,
+        joinColumn: query.joinColumn,
+        conversionIntervalType: query.conversionIntervalType,
+        conversionIntervalInSeconds: query.conversionIntervalInSeconds,
+        timeScopeType: query.timeScopeType,
+        timeStart: query.timeScopeType === ExploreTimeScopeType.FIXED ? query.timeStart : undefined,
+        timeEnd: query.timeScopeType === ExploreTimeScopeType.FIXED ? query.timeEnd : undefined,
+        lastN: query.lastN,
+        timeUnit: query.timeUnit,
+        groupColumn: query.groupColumn,
+        pathAnalysis: {
+          platform: query.pathAnalysis.platform,
+          sessionType: query.pathAnalysis.sessionType,
+          nodeType: query.pathAnalysis.nodeType,
+          lagSeconds: query.pathAnalysis.lagSeconds,
+          nodes: query.pathAnalysis.nodes,
+        },
+      });
+    }
+
+    return sql;
+  }
+
   async createPathAnalysisVisual(req: any, res: any, next: any) {
     try {
       logger.info('start to create path analysis visuals');
       logger.info(`request: ${JSON.stringify(req.body)}`);
 
       const query = req.body;
+      const checkResult = checkPathAnalysisParameter(query);
+      if (!checkResult.success) {
+        logger.debug(checkResult.message);
+        return res.status(400).json(new ApiFail(checkResult.message));
+      }
       //construct parameters to build sql
       const viewName = getTempResourceName(query.viewName, query.action);
-      let sql = '';
-      if (query.pathAnalysis.nodeType === ExplorePathNodeType.EVENT) {
-        sql = buildEventPathAnalysisView({
-          schemaName: query.appId,
-          computeMethod: query.computeMethod,
-          specifyJoinColumn: query.specifyJoinColumn,
-          joinColumn: query.joinColumn,
-          conversionIntervalType: query.conversionIntervalType,
-          conversionIntervalInSeconds: query.conversionIntervalInSeconds,
-          eventAndConditions: query.eventAndConditions,
-          timeScopeType: query.timeScopeType,
-          timeStart: query.timeScopeType === ExploreTimeScopeType.FIXED ? query.timeStart : undefined,
-          timeEnd: query.timeScopeType === ExploreTimeScopeType.FIXED ? query.timeEnd : undefined,
-          lastN: query.lastN,
-          timeUnit: query.timeUnit,
-          groupColumn: query.groupColumn,
-          pathAnalysis: {
-            platform: query.pathAnalysis.platform,
-            sessionType: query.pathAnalysis.sessionType,
-            nodeType: query.pathAnalysis.nodeType,
-            lagSeconds: query.pathAnalysis.lagSeconds,
-          },
-        });
-      } else {
-        sql = buildNodePathAnalysisView({
-          schemaName: query.appId,
-          computeMethod: query.computeMethod,
-          specifyJoinColumn: query.specifyJoinColumn,
-          joinColumn: query.joinColumn,
-          conversionIntervalType: query.conversionIntervalType,
-          conversionIntervalInSeconds: query.conversionIntervalInSeconds,
-          timeScopeType: query.timeScopeType,
-          timeStart: query.timeScopeType === ExploreTimeScopeType.FIXED ? query.timeStart : undefined,
-          timeEnd: query.timeScopeType === ExploreTimeScopeType.FIXED ? query.timeEnd : undefined,
-          lastN: query.lastN,
-          timeUnit: query.timeUnit,
-          groupColumn: query.groupColumn,
-          pathAnalysis: {
-            platform: query.pathAnalysis.platform,
-            sessionType: query.pathAnalysis.sessionType,
-            nodeType: query.pathAnalysis.nodeType,
-            lagSeconds: query.pathAnalysis.lagSeconds,
-            nodes: query.pathAnalysis.nodes,
-          },
-        });
-      }
+      let sql = this._buildSqlForPathAnalysis(query);
       logger.debug(`path analysis sql: ${sql}`);
 
       const datasetPropsArray: DataSetProps[] = [];
@@ -448,6 +474,12 @@ export class ReportingService {
       logger.info(`request: ${JSON.stringify(req.body)}`);
 
       const query = req.body;
+      const checkResult = checkRetentionAnalysisParameter(query);
+      if (!checkResult.success) {
+        logger.debug(checkResult.message);
+        return res.status(400).json(new ApiFail(checkResult.message));
+      }
+
       //construct parameters to build sql
       const viewName = getTempResourceName(query.viewName, query.action);
       const sql = buildRetentionAnalysisView({
