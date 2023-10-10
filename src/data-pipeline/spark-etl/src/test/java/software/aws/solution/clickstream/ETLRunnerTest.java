@@ -32,7 +32,6 @@ import static java.util.Objects.requireNonNull;
 import static org.apache.spark.sql.functions.expr;
 import static org.junit.jupiter.api.Assertions.*;
 import static software.aws.solution.clickstream.ContextUtil.*;
-import static software.aws.solution.clickstream.TransformerV2.FULL_SUFFIX;
 import static software.aws.solution.clickstream.TransformerV2.INCREMENTAL_SUFFIX;
 
 class ETLRunnerTest extends BaseSparkTest {
@@ -366,26 +365,26 @@ class ETLRunnerTest extends BaseSparkTest {
 
         System.out.println("outputPath:" + outputPath);
 
-        Dataset<Row> eventParamDataset = spark.read().json(outputPath + ETLRunner.TableName.EVEN_PARAMETER.tableName);
+        Dataset<Row> eventParamDataset = spark.read().json(outputPath + ETLRunner.TableName.EVEN_PARAMETER.name);
         String expectedJsonEventParam = this.resourceFileAsString("/expected/etl_runner_v2_event_parameter.json");
         String rowJsonEventParam = datasetToPrettyJson(eventParamDataset
                 .where(expr("event_id='1fcd7f5b-9529-4977-a303-e8c7e39db7b898-1'")).distinct());
         Assertions.assertEquals(expectedJsonEventParam, rowJsonEventParam);
         Assertions.assertEquals(44, eventParamDataset.count());
 
-        Dataset<Row> userDataset = spark.read().json(outputPath + ETLRunner.TableName.USER.tableName);
+        Dataset<Row> userDataset = spark.read().json(outputPath + ETLRunner.TableName.USER.name);
         Dataset<Row> userDataset1 = userDataset.filter(expr("user_id='p3121211'"));
         String expectedJsonUser = this.resourceFileAsString("/expected/etl_runner_v2_user.json");
         Assertions.assertEquals(expectedJsonUser, userDataset1.first().prettyJson());
         Assertions.assertEquals(1, userDataset1.count());
 
-        Dataset<Row> itemDataset = spark.read().json(outputPath + ETLRunner.TableName.ITEM.tableName);
+        Dataset<Row> itemDataset = spark.read().json(outputPath + ETLRunner.TableName.ITEM.name);
         Dataset<Row> itemDataset1 = itemDataset.filter(expr("id='item_id1'"));
         String expectedJsonItem = this.resourceFileAsString("/expected/etl_runner_v2_item.json");
         Assertions.assertEquals(expectedJsonItem, itemDataset1.first().prettyJson());
         Assertions.assertEquals(1, itemDataset1.count());
 
-        Dataset<Row> eventDataset = spark.read().json(outputPath + ETLRunner.TableName.EVENT.tableName);
+        Dataset<Row> eventDataset = spark.read().json(outputPath + ETLRunner.TableName.EVENT.name);
         Assertions.assertEquals(4, eventDataset.count());
         String lastRowJson = eventDataset.takeAsList(4).get(3).prettyJson();
         String expectedJsonEvent = this.resourceFileAsString("/expected/etl_runner_v2_event4.json");
@@ -417,11 +416,11 @@ class ETLRunnerTest extends BaseSparkTest {
         String outputPath = config.getOutputPath();
 
         System.out.println("outputPath:" + outputPath);
-        Dataset<Row> eventDataset = spark.read().json(outputPath + ETLRunner.TableName.EVENT.tableName);
-        Dataset<Row> eventParamDataset = spark.read().json(outputPath + ETLRunner.TableName.EVEN_PARAMETER.tableName);
-        Dataset<Row> itemDataset = spark.read().json(outputPath + ETLRunner.TableName.ITEM.tableName);
+        Dataset<Row> eventDataset = spark.read().json(outputPath + ETLRunner.TableName.EVENT.name);
+        Dataset<Row> eventParamDataset = spark.read().json(outputPath + ETLRunner.TableName.EVEN_PARAMETER.name);
+        Dataset<Row> itemDataset = spark.read().json(outputPath + ETLRunner.TableName.ITEM.name);
         try {
-           spark.read().json(outputPath + ETLRunner.TableName.USER.tableName);
+           spark.read().json(outputPath + ETLRunner.TableName.USER.name);
         } catch (Exception e) {
             Assertions.assertTrue(e.getMessage().contains("Path does not exist"));
         }
@@ -450,15 +449,15 @@ class ETLRunnerTest extends BaseSparkTest {
         String outputPath = config.getOutputPath();
 
         System.out.println("outputPath:" + outputPath);
-        Dataset<Row> eventDataset = spark.read().json(outputPath + ETLRunner.TableName.EVENT.tableName);
-        Dataset<Row> eventParamDataset = spark.read().json(outputPath + ETLRunner.TableName.EVEN_PARAMETER.tableName);
+        Dataset<Row> eventDataset = spark.read().json(outputPath + ETLRunner.TableName.EVENT.name);
+        Dataset<Row> eventParamDataset = spark.read().json(outputPath + ETLRunner.TableName.EVEN_PARAMETER.name);
         try {
-            spark.read().json(outputPath + ETLRunner.TableName.USER.tableName);
+            spark.read().json(outputPath + ETLRunner.TableName.USER.name);
         } catch (Exception e) {
             Assertions.assertTrue(e.getMessage().contains("Path does not exist"));
         }
         try {
-            spark.read().json(outputPath + ETLRunner.TableName.ITEM.tableName);
+            spark.read().json(outputPath + ETLRunner.TableName.ITEM.name);
         } catch (Exception e) {
             Assertions.assertTrue(e.getMessage().contains("Path does not exist"));
         }

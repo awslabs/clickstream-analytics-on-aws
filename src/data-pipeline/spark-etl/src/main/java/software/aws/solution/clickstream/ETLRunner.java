@@ -70,9 +70,9 @@ public class ETLRunner {
         USER("user"),
         EVENT("event"),
         EVEN_PARAMETER("event_parameter");
-        final String tableName;
+        final String name;
         TableName(final String name) {
-            this.tableName = name;
+            this.name = name;
         }
     }
     public static final String DEBUG_LOCAL_PATH = "/tmp/etl-debug";
@@ -314,15 +314,15 @@ public class ETLRunner {
         Dataset<Row> userDataset = transformedDatasets.get(3);
         String outPath = config.getOutputPath();
         long evenParamDatasetCount = writeResult(outPath, evenParamDataset, TableName.EVEN_PARAMETER);
-        log.info(new ETLMetric(evenParamDatasetCount, SINK + " " + TableName.EVEN_PARAMETER.tableName).toString());
+        log.info(new ETLMetric(evenParamDatasetCount, SINK + " " + TableName.EVEN_PARAMETER.name).toString());
 
         if (itemDataset != null) {
             long itemDatasetCount = writeResult(outPath, itemDataset, TableName.ITEM);
-            log.info(new ETLMetric(itemDatasetCount, SINK + " " + TableName.ITEM.tableName).toString());
+            log.info(new ETLMetric(itemDatasetCount, SINK + " " + TableName.ITEM.name).toString());
         }
         if (userDataset != null) {
             long userDatasetCount = writeResult(outPath, userDataset, TableName.USER);
-            log.info(new ETLMetric(userDatasetCount, SINK + " " + TableName.USER.tableName).toString());
+            log.info(new ETLMetric(userDatasetCount, SINK + " " + TableName.USER.name).toString());
         }
     }
 
@@ -335,9 +335,9 @@ public class ETLRunner {
             return 0L;
         }
         String saveOutputPath = outputPath;
-        if (!(saveOutputPath.endsWith(tbName.tableName + "/")
-                || saveOutputPath.endsWith(tbName.tableName))) {
-            saveOutputPath = Paths.get(outputPath, tbName.tableName).toString()
+        if (!(saveOutputPath.endsWith(tbName.name + "/")
+                || saveOutputPath.endsWith(tbName.name))) {
+            saveOutputPath = Paths.get(outputPath, tbName.name).toString()
                     .replace("s3:/", "s3://");
         }
         log.info("saveOutputPath: " + saveOutputPath);
@@ -432,7 +432,8 @@ public class ETLRunner {
     }
 
     public static Column[] getDistFields() {
-       List<Column> cols = Stream.of(new String[]{
+       List<Column> cols = Stream.of(
+               new String[]{
                 "app_info", "device", "ecommerce", "event_bundle_sequence_id",
                 EVENT_DATE, "event_dimensions", "event_id", "event_name",
                 "event_params", "event_previous_timestamp", "event_server_timestamp_offset", "event_timestamp",
