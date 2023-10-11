@@ -218,7 +218,7 @@ function _buildNodePathSQL(eventNames: string[], sqlParameters: SQLParameters, n
 function _buildCommonColumnsSql(columns: string[], key: string, value: string) {
   let columnsSql = '';
   const columnList: string[] = [];
-  for ( const [_index, col] of columns.entries()) {
+  for ( const col of columns) {
     columnsSql += `max(case when ${key} = '${col}' then ${value} else null end) as ${col},`;
     columnList.push(col);
   }
@@ -277,9 +277,9 @@ function _buildEventNameClause(eventNames: string[], sqlParameters: SQLParameter
     `;
   } else if (isEventPathSQL) {
     return 'and event.event_name not in (\'' + builtInEvents.filter(event => !eventNames.includes(event)).join('\',\'') + '\')';
-  } else {
-    return eventNameClause;
   }
+
+  return eventNameClause;
 }
 
 export function _buildCommonPartSql(eventNames: string[], sqlParameters: SQLParameters,
@@ -1437,7 +1437,7 @@ function getConditionSql(sqlCondition: SQLCondition | undefined) {
   }
 
   let sql = '';
-  for (const [_index, condition] of sqlCondition.conditions.entries()) {
+  for (const condition of sqlCondition.conditions) {
 
     let conditionSql = '';
     if (condition.category === ConditionCategory.EVENT) {
@@ -1466,7 +1466,7 @@ function getConditionSqlSimple(sqlCondition: SQLCondition | undefined) {
   }
 
   let sql = '';
-  for (const [_index, condition] of sqlCondition.conditions.entries()) {
+  for (const condition of sqlCondition.conditions) {
 
     let conditionSql = '';
     if (condition.category === ConditionCategory.EVENT) {
@@ -1497,7 +1497,7 @@ function getGlobalConditionSql(sqlCondition: SQLCondition | undefined) {
   }
 
   let sql = '';
-  for (const [_index, condition] of sqlCondition.conditions.entries()) {
+  for (const condition of sqlCondition.conditions) {
 
     let conditionSql = '';
     //global condition were not supported on event attribute
@@ -1529,7 +1529,7 @@ function getGlobalConditionSqlSimple(sqlCondition: SQLCondition | undefined) {
   }
 
   let sql = '';
-  for (const [_index, condition] of sqlCondition.conditions.entries()) {
+  for (const condition of sqlCondition.conditions) {
 
     let conditionSql = '';
     //global condition were not supported on event attribute
@@ -1762,7 +1762,7 @@ function hasNestAttribute(conditions: Condition[]) {
   let hasEventAttribute = false;
   const userAttributes: string[] = [];
   const eventAttributes: string[] = [];
-  for (const [_index, condition] of conditions.entries()) {
+  for (const condition of conditions) {
     if (condition.category === ConditionCategory.USER) {
       hasUserAttribute = true;
       userAttributes.push(condition.property);
@@ -1785,7 +1785,7 @@ function _hasEventCondition(sqlParameters: SQLParameters) {
   let hasEventAttribute = false;
   const eventAttributes: string[] = [];
   if (sqlParameters.eventAndConditions) {
-    for (const [_index, eventCondition] of sqlParameters.eventAndConditions.entries()) {
+    for (const eventCondition of sqlParameters.eventAndConditions) {
       if (eventCondition.sqlCondition?.conditions !== undefined) {
         const nestAttribute = hasNestAttribute(eventCondition.sqlCondition?.conditions);
         hasEventAttribute = hasEventAttribute || nestAttribute.hasEventAttribute;
@@ -1815,7 +1815,7 @@ function _hasUserCondition(sqlParameters: SQLParameters) {
   let hasUserAttribute = false;
   const userAttributes: string[] = [];
   if (sqlParameters.eventAndConditions) {
-    for (const [_index, eventCondition] of sqlParameters.eventAndConditions.entries()) {
+    for (const eventCondition of sqlParameters.eventAndConditions) {
       if (eventCondition.sqlCondition?.conditions !== undefined) {
         const nestAttribute = hasNestAttribute(eventCondition.sqlCondition?.conditions);
         hasUserAttribute = hasUserAttribute || nestAttribute.hasUserAttribute;
@@ -1890,7 +1890,7 @@ function _hasUserConditionRetentionAnalysis(sqlParameters: SQLParameters) {
   let hasUserAttribute = false;
   const userAttributes: string[] = [];
   if (sqlParameters.pairEventAndConditions) {
-    for (const [_index, pair] of sqlParameters.pairEventAndConditions.entries()) {
+    for (const pair of sqlParameters.pairEventAndConditions) {
       const userNestConditionRetentionAnalysis = _hasNestConditionRetentionAnalysis(pair, ConditionCategory.USER);
       hasUserAttribute = hasUserAttribute || userNestConditionRetentionAnalysis.hasAttribute;
       userAttributes.push(...userNestConditionRetentionAnalysis.attributes);
@@ -1908,7 +1908,7 @@ function _hasEventConditionRetentionAnalysis(sqlParameters: SQLParameters) {
   let hasEventAttribute = false;
   const eventAttributes: string[] = [];
   if (sqlParameters.pairEventAndConditions) {
-    for (const [_index, pair] of sqlParameters.pairEventAndConditions.entries()) {
+    for (const pair of sqlParameters.pairEventAndConditions) {
       const eventNestConditionRetentionAnalysis = _hasNestConditionRetentionAnalysis(pair, ConditionCategory.EVENT);
       hasEventAttribute = hasEventAttribute || eventNestConditionRetentionAnalysis.hasAttribute;
       eventAttributes.push(...eventNestConditionRetentionAnalysis.attributes);
@@ -1945,7 +1945,7 @@ function _hasMoreThanOneNestConditionInEvent(sqlParameters: SQLParameters): bool
 function _hasMoreThanOneNestConditionInEvent1(sqlParameters: SQLParameters): boolean {
   let counter = 0;
   if (sqlParameters.globalEventCondition?.conditions !== undefined) {
-    for (const [_index, condition] of sqlParameters.globalEventCondition.conditions.entries()) {
+    for (const condition of sqlParameters.globalEventCondition.conditions) {
       if (condition.category === ConditionCategory.USER || condition.category === ConditionCategory.EVENT) {
         counter += 1;
       }
@@ -1960,7 +1960,7 @@ function _hasMoreThanOneNestConditionInEvent1(sqlParameters: SQLParameters): boo
 
 function _hasMoreThanOneNestConditionInEvent2(sqlParameters: SQLParameters): boolean {
   if (sqlParameters.eventAndConditions !== undefined) {
-    for (const [_index, eventAndCondition] of sqlParameters.eventAndConditions.entries()) {
+    for (const eventAndCondition of sqlParameters.eventAndConditions) {
       if (eventAndCondition.sqlCondition !== undefined) {
         const has = _hasMoreThanOneNestConditionInEventBase(eventAndCondition.sqlCondition);
         if (has) {
@@ -1993,7 +1993,7 @@ function _hasMoreThanOneNestConditionInEventBase(sqlCondition: SQLCondition): bo
 function _hasMoreThanOneNestConditionInEvent3(sqlParameters: SQLParameters): boolean {
 
   if (sqlParameters.pairEventAndConditions !== undefined) {
-    for (const [_index, pair] of sqlParameters.pairEventAndConditions.entries()) {
+    for (const pair of sqlParameters.pairEventAndConditions) {
       if (!pair.startEvent.sqlCondition) {
         const has = _hasMoreThanOneNestConditionInEventBase(pair.startEvent.sqlCondition!);
         if (has) {
@@ -2008,7 +2008,7 @@ function _hasMoreThanOneNestConditionInEvent3(sqlParameters: SQLParameters): boo
 
 function _hasMoreThanOneNestConditionInEvent4(sqlParameters: SQLParameters): boolean {
   if (sqlParameters.pairEventAndConditions !== undefined) {
-    for (const [_index, pair] of sqlParameters.pairEventAndConditions.entries()) {
+    for (const pair of sqlParameters.pairEventAndConditions) {
       if (!pair.backEvent.sqlCondition) {
         const has = _hasMoreThanOneNestConditionInEventBase(pair.backEvent.sqlCondition!);
         if (has) {
