@@ -12,6 +12,7 @@
  */
 
 import classNames from 'classnames';
+import { identity } from 'lodash';
 import React from 'react';
 import { CategoryItemType } from '../AnalyticsType';
 
@@ -29,7 +30,7 @@ const CategoryList: React.FC<CategoryListProps> = (
     <div>
       {categories.map((category: CategoryItemType, index: number) => (
         <div
-          key={index}
+          key={identity(index)}
           onClick={() => onCategoryClick(index)}
           className={classNames({
             'category-item': true,

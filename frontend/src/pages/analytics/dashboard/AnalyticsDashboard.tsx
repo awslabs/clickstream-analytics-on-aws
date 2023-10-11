@@ -42,8 +42,9 @@ const AnalyticsDashboardCard: React.FC<any> = () => {
   const [analyticsDashboardList, setAnalyticsDashboardList] = useState<
     IAnalyticsDashboard[]
   >([]);
-  const CARD_DEFINITIONS = {
-    header: (item: IAnalyticsDashboard) => (
+
+  const buildCardHeader = (item: IAnalyticsDashboard) => {
+    return (
       <Link
         variant="secondary"
         fontSize="heading-m"
@@ -62,7 +63,11 @@ const AnalyticsDashboardCard: React.FC<any> = () => {
           item.name
         )}
       </Link>
-    ),
+    );
+  };
+
+  const CARD_DEFINITIONS = {
+    header: (item: IAnalyticsDashboard) => buildCardHeader(item),
     sections: [
       {
         id: 'description',

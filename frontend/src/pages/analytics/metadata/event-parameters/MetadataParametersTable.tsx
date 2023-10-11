@@ -262,9 +262,9 @@ const MetadataParametersTable: React.FC<MetadataParametersTableProps> = (
       tableContentDisplay={CONTENT_DISPLAY}
       tableFilteringProperties={FILTERING_PROPERTIES}
       tableI18nStrings={{
-        infoContent: t('analytics:information.metadataEventParametersInfo') ?? '',
-        loadingText:
-          t('analytics:labels.tableLoading') || 'Loading',
+        infoContent:
+          t('analytics:information.metadataEventParametersInfo') ?? '',
+        loadingText: t('analytics:labels.tableLoading') || 'Loading',
         emptyText: t('analytics:labels.tableEmpty'),
         headerTitle: t('analytics:metadata.eventParameter.title'),
         headerDescription: t('analytics:metadata.eventParameter.description'),

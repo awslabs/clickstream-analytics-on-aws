@@ -160,9 +160,9 @@ const ExploreDateRangePicker: React.FC<IExploreDateRangePickerProps> = (
           customRelativeRangeOptionLabel:
             t('analytics:dateRange.customRelativeRangeOptionLabel') ?? '',
           formatRelativeRange: (value: DateRangePickerProps.RelativeValue) => {
-            return `${t('analytics:dateRange.formatRelativeRangeLabel')} ${
-              value.amount
-            } ${i18n.t(`analytics:dateRange.${value.unit}`)}`;
+            const label = t('analytics:dateRange.formatRelativeRangeLabel');
+            const unit = i18n.t(`analytics:dateRange.${value.unit}`);
+            return `${label} ${value.amount} ${unit}`;
           },
         }}
       />
