@@ -30,7 +30,7 @@ import { basicCloudFormationEvent } from '../../../../common/lambda-events';
 describe('Custom resource - Create schemas for applications in Redshift database', () => {
 
   const context = getMockContext();
-  const callback: CdkCustomResourceCallback = async (_response) => {};
+  const callback: CdkCustomResourceCallback = async (_response) => { /* test mock */ };
 
   const redshiftDataMock = mockClient(RedshiftDataClient);
   const smMock = mockClient(SecretsManagerClient);

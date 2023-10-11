@@ -120,14 +120,16 @@ export function createBucketPolicyForAlbAccessLog(
         ],
         principals: [new AnyPrincipal()],
       }),
-      new PolicyStatement({
-        actions: grant.resourceStatement!.actions,
-        principals: [
-          new ServicePrincipal(
-            'logdelivery.elasticloadbalancing.amazonaws.com',
-          ),
-        ],
-        resources: grant.resourceStatement!.resources,
+      ...grant.resourceStatements.map(statement => {
+        return new PolicyStatement({
+          actions: statement.actions,
+          principals: [
+            new ServicePrincipal(
+              'logdelivery.elasticloadbalancing.amazonaws.com',
+            ),
+          ],
+          resources: statement.resources,
+        });
       }),
     );
     (bucketPolicy.node.defaultChild as CfnResource).cfnOptions.condition = albAccountsNotInRegion;
