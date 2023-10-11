@@ -63,8 +63,8 @@ export const checkStringValidRegex = (str: string, regex: RegExp) => {
 export const validateEmails = (emails: string) => {
   const emailArray = emails.split(',');
   const regex = /\w[-\w.+]*@([A-Za-z0-9][-A-Za-z0-9]+\.)+[A-Za-z]{2,14}/;
-  for (let i = 0; i < emailArray.length; i++) {
-    const email = emailArray[i].trim();
+  for (const item of emailArray) {
+    const email = item.trim();
     if (!regex.test(email)) {
       return false;
     }
