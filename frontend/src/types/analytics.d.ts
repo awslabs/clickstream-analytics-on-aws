@@ -147,7 +147,7 @@ declare global {
     readonly eventName: string;
     readonly sqlCondition?: ISQLCondition;
     readonly retentionJoinColumn?: IRetentionJoinColumn;
-    readonly method?: ExploreComputeMethod;
+    readonly computeMethod?: ExploreComputeMethod;
   }
 
   interface ISQLCondition {
