@@ -75,7 +75,7 @@ public class ETLRunner {
             this.name = name;
         }
     }
-    public static final String DEBUG_LOCAL_PATH = "/tmp/etl-debug";
+    public static final String DEBUG_LOCAL_PATH = System.getProperty("debug.local.path", "/tmp/etl-debug");
     public static final String TRANSFORM_METHOD_NAME = "transform";
     public static final String EVENT_DATE = "event_date";
     private final SparkSession spark;
@@ -208,18 +208,14 @@ public class ETLRunner {
             readFileDataset = readFileDataset.withColumn(JOB_NAME_COL, lit(jobName));
             readFileDataset.cache();
             readFileDataset.takeAsList(Integer.MAX_VALUE).stream()
-                    .sorted(Comparator.comparing(r -> r.getAs("modificationTime"))).forEach(r -> {
-                        log.info("path: " + r.getAs("path"));
-                    });
+                    .sorted(Comparator.comparing(r -> r.getAs("modificationTime"))).forEach(r -> log.info("path: " + r.getAs("path")));
             String path = System.getProperty(WAREHOUSE_DIR_PROP) + "/etl_load_files";
             readFileDataset.coalesce(1).write().mode(SaveMode.Append).partitionBy(JOB_NAME_COL)
                     .option("path", path).saveAsTable(config.getDatabase() + ".etl_load_files");
         }
 
         List<Row> inputFiles = dataset.select(input_file_name().alias("fileName")).distinct().collectAsList();
-        inputFiles.forEach(row -> {
-            log.info(row.getAs("fileName"));
-        });
+        inputFiles.forEach(row -> log.info(row.getAs("fileName")));
         long fileNameCount = inputFiles.size();
         log.info(new ETLMetric(fileNameCount, "loaded input files").toString());
 
@@ -433,7 +429,6 @@ public class ETLRunner {
 
     public static Column[] getDistFields() {
        List<Column> cols = Stream.of(
-               new String[]{
                 "app_info", "device", "ecommerce", "event_bundle_sequence_id",
                 EVENT_DATE, "event_dimensions", "event_id", "event_name",
                 "event_params", "event_previous_timestamp", "event_server_timestamp_offset", "event_timestamp",
@@ -441,7 +436,7 @@ public class ETLRunner {
                 "platform", "privacy_info", "project_id", "traffic_source",
                 "user_first_touch_timestamp", "user_id", "user_ltv", "user_properties",
                 "user_pseudo_id"
-        }).map(functions::col).collect(Collectors.toList());
+        ).map(functions::col).collect(Collectors.toList());
        return cols.toArray(new Column[] {});
     }
 

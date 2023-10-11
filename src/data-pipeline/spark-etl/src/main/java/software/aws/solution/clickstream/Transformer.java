@@ -64,8 +64,7 @@ public final class Transformer {
     public static final String DATA = "data";
     public static final String KEY = "key";
     public static final String VALUE = "value";
-    public static final String DATA_SCHEMA_FILE_PATH = "/data_schema.json";
-
+    public static final String DATA_SCHEMA_FILE_PATH = System.getProperty("data.schema.file.path", "/data_schema.json");
 
     private final Cleaner cleaner = new Cleaner();
     private final UserPropertiesConverter userPropertiesConverter = new UserPropertiesConverter();
@@ -104,14 +103,13 @@ public final class Transformer {
     }
 
     private Dataset<Row> convertUri(final Dataset<Row> dataset) {
-        Dataset<Row> userDataset = dataset.withColumn("event_bundle_sequence_id_str",
+        return dataset.withColumn("event_bundle_sequence_id_str",
                         regexp_extract(col("uri"), "event_bundle_sequence_id=(\\d+)", 1)
                 )
                 .withColumn("event_bundle_sequence_id",
                         expr("if (event_bundle_sequence_id_str = '', 0, event_bundle_sequence_id_str)")
                                 .cast(DataTypes.LongType))
                 .drop("event_bundle_sequence_id_str");
-        return userDataset;
     }
 
     private Dataset<Row> convertUserProperties(final Dataset<Row> dataset) {

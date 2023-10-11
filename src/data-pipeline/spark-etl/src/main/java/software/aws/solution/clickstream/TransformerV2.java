@@ -83,7 +83,7 @@ public final class TransformerV2 {
     public static final String UPDATE_DATE = "update_date";
     public static final String INCREMENTAL_SUFFIX = "_incremental";
     public static final String FULL_SUFFIX = "_full";
-    public static final String DATA_SCHEMA_V2_FILE_PATH = "/data_schema_v2.json";
+    public static final String DATA_SCHEMA_V2_FILE_PATH = System.getProperty("data.schema.file.path.v2", "/data_schema_v2.json");
     public static final String PROPERTIES = "properties";
     public static final String YYYYMMDD = "yyyyMMdd";
     public static final String TRAFFIC_SOURCE_MEDIUM = "_traffic_source_medium";
@@ -204,14 +204,13 @@ public final class TransformerV2 {
     }
 
     private static Dataset<Row> getAggUserRefererDataset(final Dataset<Row> allUserRefererDataset) {
-        Dataset<Row> aggUserRefererDataset = allUserRefererDataset.groupBy(APP_ID, USER_ID)
+        return allUserRefererDataset.groupBy(APP_ID, USER_ID)
                 .agg(min_by(struct(
                                 col(PAGE_REFERER),
                                 col(EVENT_TIMESTAMP)),
                         col(EVENT_TIMESTAMP)).alias("page_referer"))
                 .select(col(APP_ID), col(USER_ID), expr("page_referer.*"))
                 .distinct();
-        return aggUserRefererDataset;
     }
 
     private static Dataset<Row> getUserDeviceIdDataset(final Dataset<Row> userDataset, final long newUserCount) {
@@ -253,7 +252,7 @@ public final class TransformerV2 {
         aggMap.put(DEVICE_ID_LIST, "collect_set");
         aggMap.put(EVENT_TIMESTAMP, "max");
 
-        Dataset<Row> aggUserDeviceIdDataset = allUserDeviceIdDataset
+        return allUserDeviceIdDataset
                 .groupBy(col(APP_ID), col(USER_ID))
                 .agg(aggMap)
                 .withColumnRenamed("max(event_timestamp)", EVENT_TIMESTAMP)
@@ -261,7 +260,6 @@ public final class TransformerV2 {
                 .withColumn(DEVICE_ID_LIST, array_sort(array_distinct(flatten(col("device_id_list_list")))))
                 .select(APP_ID, USER_ID, DEVICE_ID_LIST, EVENT_TIMESTAMP)
                 .distinct();
-        return aggUserDeviceIdDataset;
     }
 
 

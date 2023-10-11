@@ -26,7 +26,6 @@ import org.apache.spark.sql.expressions.UserDefinedFunction;
 import org.apache.spark.sql.types.DataTypes;
 import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -100,7 +99,7 @@ public class UserPropertiesConverter {
      * @return ArrayType for StructType
      * @throws JsonProcessingException
      */
-    @NotNull
+
     private static GenericRow[] getUserPropertiesGenericRows(final String value) throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
 
@@ -135,14 +134,9 @@ public class UserPropertiesConverter {
                     }
             ));
         }
-        if (list.size() > 0) {
-            return list.toArray(new GenericRow[]{});
-        } else {
-            return null;
-        }
+        return list.toArray(new GenericRow[]{});
     }
 
-    @NotNull
     private static GenericRow getUserLtvGenericRow(final String value) throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode jsonNode = objectMapper.readTree(value);
