@@ -312,3 +312,9 @@ export const getValueFromStackOutputs = (
   }
   return res;
 };
+
+/**
+ * The `ternary` function in TypeScript returns `caseOne` if `cond` is true, otherwise it returns
+ */
+export const ternary = <T>(cond: any, caseOne: T, caseTwo: T) =>
+  cond ? caseOne : caseTwo;
