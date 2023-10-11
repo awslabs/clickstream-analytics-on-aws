@@ -14,7 +14,6 @@
 
 package software.aws.solution.clickstream;
 
-import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.io.Resources;
@@ -30,7 +29,6 @@ import org.apache.spark.sql.api.java.UDF1;
 import org.apache.spark.sql.expressions.UserDefinedFunction;
 import org.apache.spark.sql.types.ArrayType;
 import org.apache.spark.sql.types.DataType;
-import org.jetbrains.annotations.NotNull;
 import software.aws.solution.clickstream.exception.ExtractDataException;
 
 import java.io.BufferedReader;
@@ -69,7 +67,6 @@ public class Cleaner {
         return dataset.withColumn("data", udfExtractData.apply(col("data")));
     }
 
-    @NotNull
     private static UDF1<String, String> extractData() {
         return data -> {
             // input data is not compress, is raw json array
@@ -149,7 +146,7 @@ public class Cleaner {
     private Dataset<Row> processDataColumnSchema(final Dataset<Row> dataset, final String schemaFile) {
         String schemaString;
         try {
-            schemaString = Resources.toString(requireNonNull(getClass().getResource(schemaFile)), Charsets.UTF_8);
+            schemaString = Resources.toString(requireNonNull(getClass().getResource(schemaFile)), StandardCharsets.UTF_8);
         } catch (IOException e) {
             throw new ExtractDataException(e);
         }
@@ -224,12 +221,11 @@ public class Cleaner {
     private Dataset<Row> filterByDataFreshness(final Dataset<Row> dataset) {
         long dataFreshnessInHour = Long.parseLong(System.getProperty(DATA_FRESHNESS_HOUR_PROP, "72"));
         log.info("dataFreshnessInHour:" + dataFreshnessInHour);
-        Dataset<Row> filteredDataset = dataset.filter((FilterFunction<Row>) row -> {
+        return dataset.filter((FilterFunction<Row>) row -> {
             long ingestTimestamp = row.getAs("ingest_time");
             long eventTimestamp = row.getStruct(row.fieldIndex("data")).getAs("timestamp");
             return ingestTimestamp - eventTimestamp <= dataFreshnessInHour * 60 * 60 * 1000L;
         });
-        return filteredDataset;
     }
 
     private Dataset<Row> filterByAppIds(final Dataset<Row> dataset) {
@@ -237,10 +233,9 @@ public class Cleaner {
         log.info("filterByAppIds[" + appIds + "]");
         Asserts.check(!Strings.isBlank(appIds), "valid appIds [app.ids] should not be blank");
         List<String> appIdList = Lists.newArrayList(appIds.split(","));
-        Dataset<Row> filteredDataset = dataset.filter((FilterFunction<Row>) row -> {
+        return dataset.filter((FilterFunction<Row>) row -> {
             String appId = row.getStruct(row.fieldIndex("data")).getAs("app_id");
             return Strings.isNotBlank(appId) && appIdList.contains(appId);
         });
-        return filteredDataset;
     }
 }

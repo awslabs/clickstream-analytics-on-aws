@@ -85,12 +85,8 @@ public class KvConverter {
                     }
             ));
         }
+        return list.toArray(new GenericRow[]{});
 
-        if (list.size() > 0) {
-            return list.toArray(new GenericRow[]{});
-        } else {
-            return null;
-        }
     }
 
     @NotNull
@@ -153,7 +149,7 @@ public class KvConverter {
         Dataset<Row> convertedKeyValueDataset = dataset.withColumn(toColName,
                 convertStringToKeyValueUdf.apply(fromCol));
 
-        boolean debugLocal = Boolean.valueOf(System.getProperty(DEBUG_LOCAL_PROP));
+        boolean debugLocal = Boolean.parseBoolean(System.getProperty(DEBUG_LOCAL_PROP));
         if (debugLocal) {
             convertedKeyValueDataset.write().mode(SaveMode.Overwrite).json(DEBUG_LOCAL_PATH + "/KvConverter-" + toColName + "/");
         }
