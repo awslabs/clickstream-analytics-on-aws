@@ -390,101 +390,6 @@ describe('reporting test', () => {
     expect(res.body.data.visualIds.length).toEqual(2);
   });
 
-  it('funnel visual - unsupported chart type', async () => {
-    tokenMock(ddbMock, false);
-    stsClientMock.on(AssumeRoleCommand).resolves({
-      Credentials: {
-        AccessKeyId: '1111',
-        SecretAccessKey: '22222',
-        SessionToken: '33333',
-        Expiration: new Date(),
-      },
-    });
-
-    redshiftClientMock.on(BatchExecuteStatementCommand).resolves({
-    });
-    redshiftClientMock.on(DescribeStatementCommand).resolves({
-      Status: StatusString.FINISHED,
-    });
-
-    quickSightMock.on(DescribeDashboardDefinitionCommand).resolves({
-      Definition: dashboardDef,
-    });
-
-    quickSightMock.on(UpdateAnalysisCommand).resolves({
-      Arn: 'arn:aws:quicksight:us-east-1:11111111:analysis/analysis-aaaaaaaa',
-    });
-
-    quickSightMock.on(UpdateDashboardCommand).resolves({
-      Arn: 'arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa',
-      VersionArn: 'arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa/1',
-    });
-
-    quickSightMock.on(UpdateDashboardPublishedVersionCommand).resolves({
-      DashboardId: 'dashboard-aaaaaaaa',
-    });
-
-    quickSightMock.on(DescribeAnalysisCommand).resolves({
-      Analysis: {
-        Name: 'test-analysis',
-      },
-    });
-
-    const res = await request(app)
-      .post('/api/reporting/funnel')
-      .send({
-        action: 'PUBLISH',
-        locale: ExploreLocales.ZH_CN,
-        chartTitle: 'test-title',
-        chartSubTitle: 'test-subtitle',
-        chartType: QuickSightChartType.LINE,
-        viewName: 'testview00022',
-        projectId: 'project01_wvzh',
-        pipelineId: '87ea3d080cc34bb398275a27f4e8b113',
-        appId: 'app1',
-        sheetName: 'sheet99',
-        sheetId: 'a410f75d-48d7-4699-83b8-283fce0f8f31',
-        analysisId: 'analysis4e448d67-7c0d-4251-9f0f-45dc2c8dcb09',
-        analysisName: 'analysis-testview0004',
-        dashboardId: 'dashboard-37933899-0bb6-4e89-bced-cd8b17d3c160',
-        dashboardName: 'dashboard-testview0003',
-        computeMethod: 'USER_CNT',
-        specifyJoinColumn: true,
-        joinColumn: 'user_pseudo_id',
-        conversionIntervalType: 'CUSTOMIZE',
-        conversionIntervalInSeconds: 7200,
-        eventAndConditions: [{
-          eventName: 'add_button_click',
-        },
-        {
-          eventName: 'note_share',
-        },
-        {
-          eventName: 'note_export',
-        }],
-        timeScopeType: 'FIXED',
-        timeStart: new Date('2023-06-30'),
-        timeEnd: new Date('2023-08-30'),
-        groupColumn: 'week',
-        dashboardCreateParameters: {
-          region: 'us-east-1',
-          allowDomain: 'https://example.com',
-          quickSight: {
-            dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
-          },
-          redshift: {
-            dataApiRole: 'arn:aws:iam::11111111:role/test_api_role',
-            newServerless: {
-              workgroupName: 'clickstream-project01-wvzh',
-            },
-          },
-        },
-      });
-
-    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
-    expect(res.statusCode).toBe(500);
-  });
-
   it('event visual - preview', async () => {
     tokenMock(ddbMock, false);
     stsClientMock.on(AssumeRoleCommand).resolves({
@@ -713,6 +618,7 @@ describe('reporting test', () => {
       .send({
         action: 'PREVIEW',
         viewName: 'testview0002',
+        chartType: QuickSightChartType.SANKEY,
         projectId: 'project01_wvzh',
         pipelineId: 'pipeline-1111111',
         appId: 'app1',
@@ -807,6 +713,7 @@ describe('reporting test', () => {
         action: 'PUBLISH',
         locale: ExploreLocales.EN_US,
         chartTitle: 'test-title',
+        chartType: QuickSightChartType.SANKEY,
         chartSubTitle: 'test-subtitle',
         viewName: 'testview0002',
         projectId: 'project01_wvzh',
@@ -850,7 +757,6 @@ describe('reporting test', () => {
           platform: MetadataPlatform.ANDROID,
           sessionType: ExplorePathSessionDef.SESSION,
           nodeType: ExplorePathNodeType.SCREEN_NAME,
-          lagSeconds: 3600,
           nodes: ['NotepadActivity', 'NotepadExportActivity', 'NotepadShareActivity', 'NotepadPrintActivity'],
         },
       });
@@ -1136,6 +1042,904 @@ describe('reporting test', () => {
     expect(res.body.data.deletedDashBoards[0]).toEqual('dashboard-aaaaaaaa');
     expect(res.body.data.deletedAnalyses[0]).toEqual('analysis-aaaaaaaa');
     expect(res.body.data.deletedDatasets[0]).toEqual('dataset-aaaaaaaa');
+
+  });
+
+  it('common parameter check - invalid parameter', async () => {
+    const res = await request(app)
+      .post('/api/reporting/funnel')
+      .send({
+        action: 'PREVIEW',
+        chartType: QuickSightChartType.BAR,
+        viewName: 'testview0002',
+        appId: 'app1',
+        sheetName: 'sheet99',
+        computeMethod: 'USER_CNT',
+        specifyJoinColumn: true,
+        joinColumn: 'user_pseudo_id',
+        conversionIntervalType: 'CUSTOMIZE',
+        conversionIntervalInSeconds: 7200,
+        eventAndConditions: [{
+          eventName: 'add_button_click',
+        },
+        {
+          eventName: 'note_share',
+        },
+        {
+          eventName: 'note_export',
+        }],
+        timeScopeType: 'RELATIVE',
+        lastN: 4,
+        timeUnit: 'WK',
+        groupColumn: 'week',
+        dashboardCreateParameters: {
+          region: 'us-east-1',
+          allowDomain: 'https://example.com',
+          quickSight: {
+            principal: 'arn:aws:quicksight:us-east-1:11111:user/default/testuser',
+            dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
+            redshiftUser: 'test_redshift_user',
+          },
+          redshift: {
+            dataApiRole: 'arn:aws:iam::11111111:role/test_api_role',
+            newServerless: {
+              workgroupName: 'clickstream-project01-wvzh',
+            },
+          },
+        },
+      });
+
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(400);
+
+  });
+
+  it('common parameter check - fixed timeScope', async () => {
+    const res = await request(app)
+      .post('/api/reporting/event')
+      .send({
+        action: 'PREVIEW',
+        chartType: QuickSightChartType.FUNNEL,
+        viewName: 'testview0002',
+        projectId: 'project01_wvzh',
+        pipelineId: 'pipeline-1111111',
+        appId: 'app1',
+        sheetName: 'sheet99',
+        computeMethod: 'USER_CNT',
+        specifyJoinColumn: true,
+        joinColumn: 'user_pseudo_id',
+        conversionIntervalType: 'CUSTOMIZE',
+        conversionIntervalInSeconds: 7200,
+        eventAndConditions: [{
+          eventName: 'add_button_click',
+        },
+        {
+          eventName: 'note_share',
+        },
+        {
+          eventName: 'note_export',
+        }],
+        timeScopeType: 'FIXED',
+        lastN: 4,
+        timeUnit: 'WK',
+        groupColumn: 'week',
+        dashboardCreateParameters: {
+          region: 'us-east-1',
+          allowDomain: 'https://example.com',
+          quickSight: {
+            principal: 'arn:aws:quicksight:us-east-1:11111:user/default/testuser',
+            dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
+            redshiftUser: 'test_redshift_user',
+          },
+          redshift: {
+            dataApiRole: 'arn:aws:iam::11111111:role/test_api_role',
+            newServerless: {
+              workgroupName: 'clickstream-project01-wvzh',
+            },
+          },
+        },
+      });
+
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(400);
+
+  });
+
+  it('common parameter check - relative timeScope', async () => {
+    const res = await request(app)
+      .post('/api/reporting/event')
+      .send({
+        action: 'PREVIEW',
+        chartType: QuickSightChartType.FUNNEL,
+        viewName: 'testview0002',
+        projectId: 'project01_wvzh',
+        pipelineId: 'pipeline-1111111',
+        appId: 'app1',
+        sheetName: 'sheet99',
+        computeMethod: 'USER_CNT',
+        specifyJoinColumn: true,
+        joinColumn: 'user_pseudo_id',
+        conversionIntervalType: 'CUSTOMIZE',
+        conversionIntervalInSeconds: 7200,
+        eventAndConditions: [{
+          eventName: 'add_button_click',
+        },
+        {
+          eventName: 'note_share',
+        },
+        {
+          eventName: 'note_export',
+        }],
+        timeScopeType: 'RELATIVE',
+        lastN: 4,
+        groupColumn: 'week',
+        dashboardCreateParameters: {
+          region: 'us-east-1',
+          allowDomain: 'https://example.com',
+          quickSight: {
+            principal: 'arn:aws:quicksight:us-east-1:11111:user/default/testuser',
+            dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
+            redshiftUser: 'test_redshift_user',
+          },
+          redshift: {
+            dataApiRole: 'arn:aws:iam::11111111:role/test_api_role',
+            newServerless: {
+              workgroupName: 'clickstream-project01-wvzh',
+            },
+          },
+        },
+      });
+
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(400);
+
+  });
+
+  it('funnel analysis - relative timeScope', async () => {
+    const res = await request(app)
+      .post('/api/reporting/event')
+      .send({
+        action: 'PREVIEW',
+        chartType: QuickSightChartType.FUNNEL,
+        viewName: 'testview0002',
+        projectId: 'project01_wvzh',
+        pipelineId: 'pipeline-1111111',
+        appId: 'app1',
+        sheetName: 'sheet99',
+        computeMethod: 'USER_CNT',
+        specifyJoinColumn: true,
+        joinColumn: 'user_pseudo_id',
+        conversionIntervalType: 'CUSTOMIZE',
+        conversionIntervalInSeconds: 7200,
+        eventAndConditions: [{
+          eventName: 'add_button_click',
+        },
+        {
+          eventName: 'note_share',
+        },
+        {
+          eventName: 'note_export',
+        }],
+        timeScopeType: 'RELATIVE',
+        lastN: 4,
+        groupColumn: 'week',
+        dashboardCreateParameters: {
+          region: 'us-east-1',
+          allowDomain: 'https://example.com',
+          quickSight: {
+            principal: 'arn:aws:quicksight:us-east-1:11111:user/default/testuser',
+            dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
+            redshiftUser: 'test_redshift_user',
+          },
+          redshift: {
+            dataApiRole: 'arn:aws:iam::11111111:role/test_api_role',
+            newServerless: {
+              workgroupName: 'clickstream-project01-wvzh',
+            },
+          },
+        },
+      });
+
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(400);
+
+  });
+
+  it('common parameter check - missing chart title', async () => {
+    const res = await request(app)
+      .post('/api/reporting/funnel')
+      .send({
+        action: 'PUBLISH',
+        chartType: QuickSightChartType.BAR,
+        sheetId: 'a410f75d-48d7-4699-83b8-283fce0f8f31',
+        dashboardId: 'analysis4e448d67-7c0d-4251-9f0f-45dc2c8dcb09',
+        viewName: 'testview0002',
+        projectId: 'project01_wvzh',
+        pipelineId: 'pipeline-1111111',
+        appId: 'app1',
+        sheetName: 'sheet99',
+        computeMethod: 'USER_CNT',
+        specifyJoinColumn: true,
+        joinColumn: 'user_pseudo_id',
+        conversionIntervalType: 'CUSTOMIZE',
+        conversionIntervalInSeconds: 7200,
+        eventAndConditions: [{
+          eventName: 'add_button_click',
+        },
+        {
+          eventName: 'note_share',
+        },
+        {
+          eventName: 'note_export',
+        }],
+        timeScopeType: 'RELATIVE',
+        lastN: 4,
+        timeUnit: 'WK',
+        groupColumn: 'week',
+        dashboardCreateParameters: {
+          region: 'us-east-1',
+          allowDomain: 'https://example.com',
+          quickSight: {
+            principal: 'arn:aws:quicksight:us-east-1:11111:user/default/testuser',
+            dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
+            redshiftUser: 'test_redshift_user',
+          },
+          redshift: {
+            dataApiRole: 'arn:aws:iam::11111111:role/test_api_role',
+            newServerless: {
+              workgroupName: 'clickstream-project01-wvzh',
+            },
+          },
+        },
+      });
+
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(400);
+
+  });
+
+  it('funnel analysis parameter check - unsupported chart type', async () => {
+    const res = await request(app)
+      .post('/api/reporting/funnel')
+      .send({
+        action: 'PREVIEW',
+        chartType: QuickSightChartType.LINE,
+        viewName: 'testview0002',
+        projectId: 'project01_wvzh',
+        pipelineId: 'pipeline-1111111',
+        appId: 'app1',
+        sheetName: 'sheet99',
+        computeMethod: 'USER_CNT',
+        specifyJoinColumn: true,
+        joinColumn: 'user_pseudo_id',
+        conversionIntervalType: 'CUSTOMIZE',
+        conversionIntervalInSeconds: 7200,
+        eventAndConditions: [{
+          eventName: 'add_button_click',
+        },
+        {
+          eventName: 'note_share',
+        },
+        {
+          eventName: 'note_export',
+        }],
+        timeScopeType: 'RELATIVE',
+        lastN: 4,
+        timeUnit: 'WK',
+        groupColumn: 'week',
+        dashboardCreateParameters: {
+          region: 'us-east-1',
+          allowDomain: 'https://example.com',
+          quickSight: {
+            principal: 'arn:aws:quicksight:us-east-1:11111:user/default/testuser',
+            dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
+            redshiftUser: 'test_redshift_user',
+          },
+          redshift: {
+            dataApiRole: 'arn:aws:iam::11111111:role/test_api_role',
+            newServerless: {
+              workgroupName: 'clickstream-project01-wvzh',
+            },
+          },
+        },
+      });
+
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(400);
+
+  });
+
+  it('funnel analysis parameter check - joinColumn', async () => {
+    const res = await request(app)
+      .post('/api/reporting/funnel')
+      .send({
+        action: 'PREVIEW',
+        chartType: QuickSightChartType.FUNNEL,
+        viewName: 'testview0002',
+        projectId: 'project01_wvzh',
+        pipelineId: 'pipeline-1111111',
+        appId: 'app1',
+        sheetName: 'sheet99',
+        computeMethod: 'USER_CNT',
+        specifyJoinColumn: true,
+        conversionIntervalType: 'CUSTOMIZE',
+        conversionIntervalInSeconds: 7200,
+        eventAndConditions: [{
+          eventName: 'add_button_click',
+        },
+        {
+          eventName: 'note_share',
+        },
+        {
+          eventName: 'note_export',
+        }],
+        timeScopeType: 'RELATIVE',
+        lastN: 4,
+        timeUnit: 'WK',
+        groupColumn: 'week',
+        dashboardCreateParameters: {
+          region: 'us-east-1',
+          allowDomain: 'https://example.com',
+          quickSight: {
+            principal: 'arn:aws:quicksight:us-east-1:11111:user/default/testuser',
+            dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
+            redshiftUser: 'test_redshift_user',
+          },
+          redshift: {
+            dataApiRole: 'arn:aws:iam::11111111:role/test_api_role',
+            newServerless: {
+              workgroupName: 'clickstream-project01-wvzh',
+            },
+          },
+        },
+      });
+
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(400);
+
+  });
+
+  it('funnel analysis parameter check - eventAndConditions', async () => {
+    const res = await request(app)
+      .post('/api/reporting/funnel')
+      .send({
+        action: 'PREVIEW',
+        chartType: QuickSightChartType.FUNNEL,
+        viewName: 'testview0002',
+        projectId: 'project01_wvzh',
+        pipelineId: 'pipeline-1111111',
+        appId: 'app1',
+        sheetName: 'sheet99',
+        computeMethod: 'USER_CNT',
+        specifyJoinColumn: true,
+        joinColumn: 'user_pseudo_id',
+        conversionIntervalType: 'CUSTOMIZE',
+        conversionIntervalInSeconds: 7200,
+        eventAndConditions: [],
+        timeScopeType: 'RELATIVE',
+        lastN: 4,
+        timeUnit: 'WK',
+        groupColumn: 'week',
+        dashboardCreateParameters: {
+          region: 'us-east-1',
+          allowDomain: 'https://example.com',
+          quickSight: {
+            principal: 'arn:aws:quicksight:us-east-1:11111:user/default/testuser',
+            dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
+            redshiftUser: 'test_redshift_user',
+          },
+          redshift: {
+            dataApiRole: 'arn:aws:iam::11111111:role/test_api_role',
+            newServerless: {
+              workgroupName: 'clickstream-project01-wvzh',
+            },
+          },
+        },
+      });
+
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(400);
+
+  });
+
+  it('event analysis parameter check -invalid request action', async () => {
+    const res = await request(app)
+      .post('/api/reporting/event')
+      .send({
+        action: 'SAVE',
+        locale: ExploreLocales.ZH_CN,
+        chartType: QuickSightChartType.BAR,
+        viewName: 'testview0002',
+        projectId: 'project01_wvzh',
+        pipelineId: 'pipeline-1111111',
+        appId: 'app1',
+        sheetName: 'sheet99',
+        computeMethod: 'USER_CNT',
+        specifyJoinColumn: true,
+        joinColumn: 'user_pseudo_id',
+        conversionIntervalType: 'CUSTOMIZE',
+        conversionIntervalInSeconds: 7200,
+        eventAndConditions: [{
+          eventName: 'add_button_click',
+        },
+        {
+          eventName: 'note_share',
+        },
+        {
+          eventName: 'note_export',
+        }],
+        timeScopeType: 'RELATIVE',
+        lastN: 4,
+        timeUnit: 'WK',
+        groupColumn: 'week',
+        dashboardCreateParameters: {
+          region: 'us-east-1',
+          allowDomain: 'https://example.com',
+          quickSight: {
+            principal: 'arn:aws:quicksight:us-east-1:11111:user/default/testuser',
+            dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
+            redshiftUser: 'test_redshift_user',
+          },
+          redshift: {
+            dataApiRole: 'arn:aws:iam::11111111:role/test_api_role',
+            newServerless: {
+              workgroupName: 'clickstream-project01-wvzh',
+            },
+          },
+        },
+      });
+
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(400);
+
+  });
+
+  it('event analysis parameter check - unsupported chart type', async () => {
+    const res = await request(app)
+      .post('/api/reporting/event')
+      .send({
+        action: 'PREVIEW',
+        locale: ExploreLocales.ZH_CN,
+        viewName: 'testview0002',
+        projectId: 'project01_wvzh',
+        pipelineId: 'pipeline-1111111',
+        appId: 'app1',
+        sheetName: 'sheet99',
+        computeMethod: 'USER_CNT',
+        specifyJoinColumn: true,
+        joinColumn: 'user_pseudo_id',
+        conversionIntervalType: 'CUSTOMIZE',
+        conversionIntervalInSeconds: 7200,
+        eventAndConditions: [{
+          eventName: 'add_button_click',
+        },
+        {
+          eventName: 'note_share',
+        },
+        {
+          eventName: 'note_export',
+        }],
+        timeScopeType: 'RELATIVE',
+        lastN: 4,
+        timeUnit: 'WK',
+        groupColumn: 'week',
+        dashboardCreateParameters: {
+          region: 'us-east-1',
+          allowDomain: 'https://example.com',
+          quickSight: {
+            principal: 'arn:aws:quicksight:us-east-1:11111:user/default/testuser',
+            dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
+            redshiftUser: 'test_redshift_user',
+          },
+          redshift: {
+            dataApiRole: 'arn:aws:iam::11111111:role/test_api_role',
+            newServerless: {
+              workgroupName: 'clickstream-project01-wvzh',
+            },
+          },
+        },
+      });
+
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(400);
+
+  });
+
+
+  it('path analysis parameter check - pathAnalysis', async () => {
+    const res = await request(app)
+      .post('/api/reporting/path')
+      .send({
+        action: 'PREVIEW',
+        viewName: 'testview0002',
+        chartType: QuickSightChartType.SANKEY,
+        projectId: 'project01_wvzh',
+        pipelineId: 'pipeline-1111111',
+        appId: 'app1',
+        sheetName: 'sheet99',
+        computeMethod: 'USER_CNT',
+        specifyJoinColumn: true,
+        joinColumn: 'user_pseudo_id',
+        conversionIntervalType: 'CUSTOMIZE',
+        conversionIntervalInSeconds: 7200,
+        eventAndConditions: [{
+          eventName: 'add_button_click',
+        },
+        {
+          eventName: 'note_share',
+        },
+        {
+          eventName: 'note_export',
+        }],
+        timeScopeType: 'RELATIVE',
+        lastN: 4,
+        timeUnit: 'WK',
+        groupColumn: 'week',
+        dashboardCreateParameters: {
+          region: 'us-east-1',
+          allowDomain: 'https://example.com',
+          quickSight: {
+            principal: 'arn:aws:quicksight:us-east-1:11111:user/default/testuser',
+            dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
+            redshiftUser: 'test_redshift_user',
+          },
+          redshift: {
+            dataApiRole: 'arn:aws:iam::11111111:role/test_api_role',
+            newServerless: {
+              workgroupName: 'clickstream-project01-wvzh',
+            },
+          },
+        },
+      });
+
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(400);
+  });
+
+  it('path analysis parameter check - lagSeconds', async () => {
+    const res = await request(app)
+      .post('/api/reporting/path')
+      .send({
+        action: 'PREVIEW',
+        viewName: 'testview0002',
+        chartType: QuickSightChartType.SANKEY,
+        projectId: 'project01_wvzh',
+        pipelineId: 'pipeline-1111111',
+        appId: 'app1',
+        sheetName: 'sheet99',
+        computeMethod: 'USER_CNT',
+        specifyJoinColumn: true,
+        joinColumn: 'user_pseudo_id',
+        conversionIntervalType: 'CUSTOMIZE',
+        conversionIntervalInSeconds: 7200,
+        eventAndConditions: [{
+          eventName: 'add_button_click',
+        },
+        {
+          eventName: 'note_share',
+        },
+        {
+          eventName: 'note_export',
+        }],
+        timeScopeType: 'RELATIVE',
+        lastN: 4,
+        timeUnit: 'WK',
+        groupColumn: 'week',
+        dashboardCreateParameters: {
+          region: 'us-east-1',
+          allowDomain: 'https://example.com',
+          quickSight: {
+            principal: 'arn:aws:quicksight:us-east-1:11111:user/default/testuser',
+            dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
+            redshiftUser: 'test_redshift_user',
+          },
+          redshift: {
+            dataApiRole: 'arn:aws:iam::11111111:role/test_api_role',
+            newServerless: {
+              workgroupName: 'clickstream-project01-wvzh',
+            },
+          },
+        },
+        pathAnalysis: {
+          sessionType: ExplorePathSessionDef.CUSTOMIZE,
+          nodeType: ExplorePathNodeType.EVENT,
+        },
+      });
+
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(400);
+  });
+
+  it('path analysis parameter check - nodes', async () => {
+    const res = await request(app)
+      .post('/api/reporting/path')
+      .send({
+        action: 'PREVIEW',
+        viewName: 'testview0002',
+        chartType: QuickSightChartType.SANKEY,
+        projectId: 'project01_wvzh',
+        pipelineId: 'pipeline-1111111',
+        appId: 'app1',
+        sheetName: 'sheet99',
+        computeMethod: 'USER_CNT',
+        specifyJoinColumn: true,
+        joinColumn: 'user_pseudo_id',
+        conversionIntervalType: 'CUSTOMIZE',
+        conversionIntervalInSeconds: 7200,
+        eventAndConditions: [{
+          eventName: 'add_button_click',
+        },
+        {
+          eventName: 'note_share',
+        },
+        {
+          eventName: 'note_export',
+        }],
+        timeScopeType: 'RELATIVE',
+        lastN: 4,
+        timeUnit: 'WK',
+        groupColumn: 'week',
+        dashboardCreateParameters: {
+          region: 'us-east-1',
+          allowDomain: 'https://example.com',
+          quickSight: {
+            principal: 'arn:aws:quicksight:us-east-1:11111:user/default/testuser',
+            dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
+            redshiftUser: 'test_redshift_user',
+          },
+          redshift: {
+            dataApiRole: 'arn:aws:iam::11111111:role/test_api_role',
+            newServerless: {
+              workgroupName: 'clickstream-project01-wvzh',
+            },
+          },
+        },
+        pathAnalysis: {
+          sessionType: ExplorePathSessionDef.SESSION,
+          nodeType: ExplorePathNodeType.PAGE_TITLE,
+          platform: 'Android',
+          nodes: [],
+        },
+      });
+
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(400);
+  });
+
+  it('path analysis parameter check - chart type', async () => {
+    const res = await request(app)
+      .post('/api/reporting/path')
+      .send({
+        action: 'PREVIEW',
+        viewName: 'testview0002',
+        chartType: QuickSightChartType.LINE,
+        projectId: 'project01_wvzh',
+        pipelineId: 'pipeline-1111111',
+        appId: 'app1',
+        sheetName: 'sheet99',
+        computeMethod: 'USER_CNT',
+        specifyJoinColumn: true,
+        joinColumn: 'user_pseudo_id',
+        conversionIntervalType: 'CUSTOMIZE',
+        conversionIntervalInSeconds: 7200,
+        eventAndConditions: [{
+          eventName: 'add_button_click',
+        },
+        {
+          eventName: 'note_share',
+        },
+        {
+          eventName: 'note_export',
+        }],
+        timeScopeType: 'RELATIVE',
+        lastN: 4,
+        timeUnit: 'WK',
+        groupColumn: 'week',
+        dashboardCreateParameters: {
+          region: 'us-east-1',
+          allowDomain: 'https://example.com',
+          quickSight: {
+            principal: 'arn:aws:quicksight:us-east-1:11111:user/default/testuser',
+            dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
+            redshiftUser: 'test_redshift_user',
+          },
+          redshift: {
+            dataApiRole: 'arn:aws:iam::11111111:role/test_api_role',
+            newServerless: {
+              workgroupName: 'clickstream-project01-wvzh',
+            },
+          },
+        },
+        pathAnalysis: {
+          sessionType: ExplorePathSessionDef.SESSION,
+          nodeType: ExplorePathNodeType.EVENT,
+        },
+      });
+
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(400);
+  });
+
+  it('path analysis parameter check - chart type', async () => {
+    const res = await request(app)
+      .post('/api/reporting/path')
+      .send({
+        action: 'PREVIEW',
+        viewName: 'testview0002',
+        chartType: QuickSightChartType.LINE,
+        projectId: 'project01_wvzh',
+        pipelineId: 'pipeline-1111111',
+        appId: 'app1',
+        sheetName: 'sheet99',
+        computeMethod: 'USER_CNT',
+        specifyJoinColumn: true,
+        joinColumn: 'user_pseudo_id',
+        conversionIntervalType: 'CUSTOMIZE',
+        conversionIntervalInSeconds: 7200,
+        eventAndConditions: [{
+          eventName: 'add_button_click',
+        },
+        {
+          eventName: 'note_share',
+        },
+        {
+          eventName: 'note_export',
+        }],
+        timeScopeType: 'RELATIVE',
+        lastN: 4,
+        timeUnit: 'WK',
+        groupColumn: 'week',
+        dashboardCreateParameters: {
+          region: 'us-east-1',
+          allowDomain: 'https://example.com',
+          quickSight: {
+            principal: 'arn:aws:quicksight:us-east-1:11111:user/default/testuser',
+            dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
+            redshiftUser: 'test_redshift_user',
+          },
+          redshift: {
+            dataApiRole: 'arn:aws:iam::11111111:role/test_api_role',
+            newServerless: {
+              workgroupName: 'clickstream-project01-wvzh',
+            },
+          },
+        },
+        pathAnalysis: {
+          sessionType: ExplorePathSessionDef.SESSION,
+          nodeType: ExplorePathNodeType.PAGE_TITLE,
+          nodes: ['NotepadActivity', 'NotepadExportActivity', 'NotepadShareActivity', 'NotepadPrintActivity'],
+        },
+      });
+
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(400);
+  });
+
+  it('retention analysis parameter check - pairEventAndConditions', async () => {
+    const res = await request(app)
+      .post('/api/reporting/retention')
+      .send({
+        action: 'PUBLISH',
+        locale: ExploreLocales.EN_US,
+        chartTitle: 'test-title',
+        chartSubTitle: 'test-subtitle',
+        chartType: QuickSightChartType.LINE,
+        viewName: 'testview0002',
+        projectId: 'project01_wvzh',
+        pipelineId: 'pipeline-1111111',
+        appId: 'app1',
+        sheetName: 'sheet99',
+        computeMethod: 'USER_CNT',
+        specifyJoinColumn: true,
+        joinColumn: 'user_pseudo_id',
+        conversionIntervalType: 'CUSTOMIZE',
+        conversionIntervalInSeconds: 7200,
+        eventAndConditions: [{
+          eventName: 'add_button_click',
+        },
+        {
+          eventName: 'note_share',
+        },
+        {
+          eventName: 'note_export',
+        }],
+        timeScopeType: 'RELATIVE',
+        lastN: 4,
+        timeUnit: 'WK',
+        groupColumn: 'week',
+        dashboardCreateParameters: {
+          region: 'us-east-1',
+          allowDomain: 'https://example.com',
+          quickSight: {
+            principal: 'arn:aws:quicksight:us-east-1:11111:user/default/testuser',
+            dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
+            redshiftUser: 'test_redshift_user',
+          },
+          redshift: {
+            dataApiRole: 'arn:aws:iam::11111111:role/test_api_role',
+            newServerless: {
+              workgroupName: 'clickstream-project01-wvzh',
+            },
+          },
+        },
+        pairEventAndConditions: [
+        ],
+      });
+
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(400);
+
+  });
+
+  it('retention analysis parameter check - unsupported chart type', async () => {
+    const res = await request(app)
+      .post('/api/reporting/retention')
+      .send({
+        action: 'PUBLISH',
+        locale: ExploreLocales.EN_US,
+        chartTitle: 'test-title',
+        chartSubTitle: 'test-subtitle',
+        chartType: QuickSightChartType.FUNNEL,
+        viewName: 'testview0002',
+        projectId: 'project01_wvzh',
+        pipelineId: 'pipeline-1111111',
+        appId: 'app1',
+        sheetName: 'sheet99',
+        computeMethod: 'USER_CNT',
+        specifyJoinColumn: true,
+        joinColumn: 'user_pseudo_id',
+        conversionIntervalType: 'CUSTOMIZE',
+        conversionIntervalInSeconds: 7200,
+        eventAndConditions: [{
+          eventName: 'add_button_click',
+        },
+        {
+          eventName: 'note_share',
+        },
+        {
+          eventName: 'note_export',
+        }],
+        timeScopeType: 'RELATIVE',
+        lastN: 4,
+        timeUnit: 'WK',
+        groupColumn: 'week',
+        dashboardCreateParameters: {
+          region: 'us-east-1',
+          allowDomain: 'https://example.com',
+          quickSight: {
+            principal: 'arn:aws:quicksight:us-east-1:11111:user/default/testuser',
+            dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
+            redshiftUser: 'test_redshift_user',
+          },
+          redshift: {
+            dataApiRole: 'arn:aws:iam::11111111:role/test_api_role',
+            newServerless: {
+              workgroupName: 'clickstream-project01-wvzh',
+            },
+          },
+        },
+        pairEventAndConditions: [
+          {
+            startEvent: {
+              eventName: 'add_button_click',
+            },
+            backEvent: {
+              eventName: 'note_share',
+            },
+          },
+          {
+            startEvent: {
+              eventName: 'add_button_click',
+            },
+            backEvent: {
+              eventName: 'note_export',
+            },
+          },
+        ],
+      });
+
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(400);
 
   });
 
