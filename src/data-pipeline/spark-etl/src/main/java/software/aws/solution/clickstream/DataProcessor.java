@@ -115,9 +115,7 @@ public final class DataProcessor {
                     .enableHiveSupport().appName(APP_NAME).getOrCreate();
         }
 
-        Arrays.stream(spark.sparkContext().getConf().getAll()).forEach(c -> {
-            log.info(c._1 + " -> " + c._2);
-        });
+        Arrays.stream(spark.sparkContext().getConf().getAll()).forEach(c -> log.info(c._1 + " -> " + c._2));
 
         ETLRunner etlRunner = new ETLRunner(spark, runnerConfig);
         etlRunner.run();
