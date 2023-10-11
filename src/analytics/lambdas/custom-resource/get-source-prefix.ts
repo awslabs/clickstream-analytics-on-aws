@@ -21,6 +21,7 @@ export interface ServiceTokenType {
 
 export interface GetResourcePrefixPropertiesType {
   readonly odsEventPrefix: string;
+  readonly projectId: string;
 }
 
 type PropertiesType = ServiceTokenType & GetResourcePrefixPropertiesType;
@@ -47,14 +48,18 @@ async function _handler(event: CdkCustomResourceEvent) {
   const odsEventPrefix = (event.ResourceProperties as PropertiesType).odsEventPrefix;
 
   let prefix = odsEventPrefix;
+  const projectId = (event.ResourceProperties as PropertiesType).projectId;
 
   if (odsEventPrefix.endsWith('/ods_events/') || odsEventPrefix.endsWith('/ods_events')) {
-    prefix = odsEventPrefix.replace(new RegExp('/ods_events[/]?'), '');
+    prefix = odsEventPrefix.replace(/ods_events\/?/, '');
+  } else if (odsEventPrefix.endsWith(`clickstream/${projectId}/data/ods/`)) {
+    // control plane set the prefix to clickstream/<projectId>/data/ods/
+    // the actual prefix should be clickstream/<projectId>/data/ods/<projectId>/
+    prefix = odsEventPrefix + projectId;
   }
-
   if (prefix.length > 0 && !prefix.endsWith('/')) {
     prefix += '/';
   }
-
+  logger.info(`prefix: '${prefix}'`);
   return prefix;
 }

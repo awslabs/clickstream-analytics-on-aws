@@ -79,6 +79,10 @@ export const reportingViewsDef: SQLDef[] = [
 export const schemaDefs: SQLDef[] = [
   {
     updatable: 'true',
+    sqlFile: 'clickstream-log.sql',
+  },
+  {
+    updatable: 'true',
     sqlFile: 'ods-events.sql',
   },
   {

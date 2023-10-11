@@ -1,5 +1,5 @@
 CREATE OR REPLACE PROCEDURE {{schema}}.sp_clear_expired_events(retention_range_days in int) 
-AS
+NONATOMIC AS
 $$
 DECLARE
     record_number INT; 
@@ -27,7 +27,7 @@ BEGIN
     IF latest_timestamp_record2.event_timestamp is null THEN
         CALL {{schema}}.{{sp_clickstream_log}}(log_name, 'info', 'no event_timestamp found in {{schema}}.{{table_event}}');
     ELSE
-        DELETE FROM {{schema}}.{{table_event}} WHERE event_date < DATEADD(day, -retention_range_days, CAST(TIMESTAMP 'epoch' + (latest_timestamp_record2.event_timestamp / 1000) * INTERVAL '1 second' as date));
+        DELETE FROM {{schema}}.{{table_event}} WHERE event_timestamp < (latest_timestamp_record2.event_timestamp - retention_range_days * 24 * 3600 * 1000);
         GET DIAGNOSTICS record_number := ROW_COUNT;
         CALL {{schema}}.{{sp_clickstream_log}}(log_name, 'info', 'delete '||record_number||' expired records from {{schema}}.{{table_event}} for retention_range_days='||retention_range_days);
         ANALYZE {{schema}}.{{table_event}};
@@ -39,6 +39,8 @@ BEGIN
         CALL {{schema}}.{{sp_clickstream_log}}(log_name, 'info', 'delete '||record_number||' expired records from {{schema}}.{{table_event_parameter}} for retention_range_days='||retention_range_days);
         ANALYZE {{schema}}.{{table_event_parameter}};
     END IF;
+
+    CALL {{schema}}.sp_clear_item_and_user();
 
 EXCEPTION WHEN OTHERS THEN
     CALL {{schema}}.{{sp_clickstream_log}}(log_name, 'error', 'error message:' || SQLERRM);    
