@@ -29,20 +29,23 @@ import { HostedZone } from 'aws-cdk-lib/aws-route53';
 import { getShortIdOfStack } from '../../src/common/stack';
 import { CloudFrontS3Portal } from '../../src/control-plane/cloudfront-s3-portal';
 import { Constant } from '../../src/control-plane/private/constant';
+import { TestApp, removeFolder } from '../common/jest';
 
-const commonApp = new App();
+const cdkOut = '/tmp/cloudfront-s3-portal-test';
+const commonApp = new TestApp(cdkOut);
+const frontendProps = {
+  assetPath: 'frontend',
+  dockerImage: DockerImage.fromRegistry(Constant.NODE_IMAGE_V18),
+  buildCommand: [
+    'bash', '-c',
+    'echo test > /asset-output/test',
+  ],
+  autoInvalidFilePaths: ['/index.html'],
+};
 
 const commonTestStack = new Stack(commonApp, 'comTestStack');
 new CloudFrontS3Portal(commonTestStack, 'common-test-portal', {
-  frontendProps: {
-    assetPath: 'frontend',
-    dockerImage: DockerImage.fromRegistry(Constant.NODE_IMAGE_V18),
-    buildCommand: [
-      'bash', '-c',
-      'echo test > /asset-output/test',
-    ],
-    autoInvalidFilePaths: ['/index.html'],
-  },
+  frontendProps,
   distributionProps: {
     functionAssociations: [{
       function: new Function(commonTestStack, 'FrontRewriteFunction', {
@@ -56,6 +59,10 @@ new CloudFrontS3Portal(commonTestStack, 'common-test-portal', {
 const commonTemplate = Template.fromStack(commonTestStack);
 
 describe('CloudFrontS3Portal', () => {
+
+  afterAll(() => {
+    removeFolder(cdkOut);
+  });
 
   test('default setting', () => {
     //portal bucket
@@ -174,13 +181,8 @@ describe('CloudFrontS3Portal', () => {
 
     new CloudFrontS3Portal(testStack, 'test-portal', {
       frontendProps: {
+        ...frontendProps,
         assetPath: join(__dirname, '../../frontend'),
-        dockerImage: DockerImage.fromRegistry(Constant.NODE_IMAGE_V18),
-        buildCommand: [
-          'bash', '-c',
-          'echo test > /asset-output/test',
-        ],
-        autoInvalidFilePaths: ['/index.html'],
       },
       domainProps: {
         hostZone: testHostedZone,
@@ -203,13 +205,8 @@ describe('CloudFrontS3Portal', () => {
 
     new CloudFrontS3Portal(testStack, 'test-portal', {
       frontendProps: {
+        ...frontendProps,
         assetPath: join(__dirname, '../../frontend'),
-        dockerImage: DockerImage.fromRegistry(Constant.NODE_IMAGE_V18),
-        buildCommand: [
-          'bash', '-c',
-          'echo test > /asset-output/test',
-        ],
-        autoInvalidFilePaths: ['/index.html'],
       },
       cnCloudFrontS3PortalProps: {
         domainName: 'test.example.com',
@@ -236,13 +233,8 @@ describe('CloudFrontS3Portal', () => {
 
     new CloudFrontS3Portal(testStack, 'test-portal', {
       frontendProps: {
+        ...frontendProps,
         assetPath: join(__dirname, '../../frontend'),
-        dockerImage: DockerImage.fromRegistry(Constant.NODE_IMAGE_V18),
-        buildCommand: [
-          'bash', '-c',
-          'echo test > /asset-output/test',
-        ],
-        autoInvalidFilePaths: ['/index.html'],
       },
       cnCloudFrontS3PortalProps: {
         domainName: 'test.example.com',
@@ -311,13 +303,8 @@ describe('CloudFrontS3Portal', () => {
     });
     const controlPlane = new CloudFrontS3Portal(testStack, 'test-portal', {
       frontendProps: {
+        ...frontendProps,
         assetPath: join(__dirname, '../../frontend'),
-        dockerImage: DockerImage.fromRegistry(Constant.NODE_IMAGE_V18),
-        buildCommand: [
-          'bash', '-c',
-          'echo test > /asset-output/test',
-        ],
-        autoInvalidFilePaths: ['/index.html'],
       },
     });
     controlPlane.addHttpOrigin(
@@ -425,13 +412,8 @@ describe('CloudFrontS3Portal', () => {
     const testStack = new Stack(new App(), 'testStack');
     const controlPlane = new CloudFrontS3Portal(testStack, 'test-portal', {
       frontendProps: {
+        ...frontendProps,
         assetPath: join(__dirname, '../../frontend'),
-        dockerImage: DockerImage.fromRegistry(Constant.NODE_IMAGE_V18),
-        buildCommand: [
-          'bash', '-c',
-          'echo test > /asset-output/test',
-        ],
-        autoInvalidFilePaths: ['/index.html'],
       },
       cnCloudFrontS3PortalProps: {
         domainName: 'test.example.com',
