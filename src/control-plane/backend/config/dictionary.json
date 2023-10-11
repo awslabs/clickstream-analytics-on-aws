@@ -33,7 +33,7 @@
         "name": "Transformer",
         "description": "Convert the data format reported by SDK into the data format in the data warehouse",
         "builtIn": true,
-        "mainFunction": "software.aws.solution.clickstream.Transformer",
+        "mainFunction": "software.aws.solution.clickstream.TransformerV2",
         "jarFile": "",
         "bindCount": 0,
         "pluginType": "Transform",
