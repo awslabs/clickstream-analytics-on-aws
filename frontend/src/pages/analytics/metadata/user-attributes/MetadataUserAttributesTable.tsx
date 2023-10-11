@@ -25,6 +25,15 @@ import MetadataSourceFC from '../comps/MetadataSource';
 import MetadataTable from '../table/MetadataTable';
 import { displayNameRegex, descriptionRegex } from '../table/table-config';
 
+interface IAttributeTableItem {
+  name: string;
+  displayName: string;
+  description: string;
+  metadataSource: MetadataSource;
+  valueType: string;
+  hasData: boolean;
+}
+
 interface MetadataUserAttributesTableProps {
   setShowDetails: (show: boolean, data?: IMetadataType) => void;
 }
@@ -35,99 +44,115 @@ const MetadataUserAttributesTable: React.FC<
   const { projectId, appId } = useParams();
   const { setShowDetails } = props;
 
+  const renderEditNameCell = (
+    item: IAttributeTableItem,
+    setValue: any,
+    currentValue: string
+  ) => {
+    return (
+      <Input
+        autoFocus={true}
+        value={currentValue ?? item.displayName}
+        onChange={(event) => {
+          setValue(event.detail.value);
+        }}
+        placeholder={t('tag.valuePlaceholder') ?? ''}
+      />
+    );
+  };
+
+  const renderEditDescCell = (
+    item: IAttributeTableItem,
+    setValue: any,
+    currentValue: string
+  ) => {
+    return (
+      <Input
+        autoFocus={true}
+        value={currentValue ?? item.description}
+        onChange={(event) => {
+          setValue(event.detail.value);
+        }}
+        placeholder={t('tag.valuePlaceholder') ?? ''}
+      />
+    );
+  };
+
+  const renderDataSource = (e: IAttributeTableItem) => {
+    return <MetadataSourceFC source={e.metadataSource} />;
+  };
+
+  const renderHasData = (e: IAttributeTableItem) => {
+    return (
+      <StatusIndicator type={e.hasData ? 'success' : 'stopped'}>
+        {e.hasData ? 'Yes' : 'No'}
+      </StatusIndicator>
+    );
+  };
+
   const COLUMN_DEFINITIONS = [
     {
       id: 'name',
       header: t('analytics:metadata.userAttribute.tableColumnName'),
       sortingField: 'name',
-      cell: (e: { name: any }) => {
+      cell: (e: IAttributeTableItem) => {
         return e.name;
       },
     },
     {
       id: 'displayName',
       header: t('analytics:metadata.userAttribute.tableColumnDisplayName'),
-      cell: (e: { displayName: string }) => {
+      cell: (e: IAttributeTableItem) => {
         return e.displayName;
       },
       minWidth: 180,
       editConfig: {
-        validation(item: any, value: any) {
+        validation(item: IAttributeTableItem, value: any) {
           return !displayNameRegex.test(value)
             ? undefined
             : t('tag.invalidInput');
         },
         editingCell: (
-          item: { displayName: string },
+          item: IAttributeTableItem,
           { setValue, currentValue }: any
-        ) => {
-          return (
-            <Input
-              autoFocus={true}
-              value={currentValue ?? item.displayName}
-              onChange={(event) => {
-                setValue(event.detail.value);
-              }}
-              placeholder={t('tag.valuePlaceholder') ?? ''}
-            />
-          );
-        },
+        ) => renderEditNameCell(item, setValue, currentValue),
       },
     },
     {
       id: 'description',
       header: t('analytics:metadata.userAttribute.tableColumnDescription'),
-      cell: (e: { description: string }) => {
+      cell: (e: IAttributeTableItem) => {
         return e.description;
       },
       minWidth: 180,
       editConfig: {
-        validation(item: any, value: any) {
+        validation(item: IAttributeTableItem, value: any) {
           return !descriptionRegex.test(value)
             ? undefined
             : t('tag.invalidInput');
         },
         editingCell: (
-          item: { description: string },
+          item: IAttributeTableItem,
           { setValue, currentValue }: any
-        ) => {
-          return (
-            <Input
-              autoFocus={true}
-              value={currentValue ?? item.description}
-              onChange={(event) => {
-                setValue(event.detail.value);
-              }}
-              placeholder={t('tag.valuePlaceholder') ?? ''}
-            />
-          );
-        },
+        ) => renderEditDescCell(item, setValue, currentValue),
       },
     },
     {
       id: 'metadataSource',
       header: t('analytics:metadata.userAttribute.tableColumnMetadataSource'),
-      cell: (e: { metadataSource: MetadataSource }) => {
-        return <MetadataSourceFC source={e.metadataSource} />;
-      },
+      cell: (e: IAttributeTableItem) => renderDataSource(e),
     },
     {
       id: 'valueType',
       header: t('analytics:metadata.userAttribute.tableColumnDataType'),
-      cell: (e: { valueType: string }) => {
+      cell: (e: IAttributeTableItem) => {
         return e.valueType;
       },
     },
     {
       id: 'hasData',
       header: t('analytics:metadata.userAttribute.tableColumnHasData'),
-      cell: (e: { hasData: boolean }) => {
-        return (
-          <StatusIndicator type={e.hasData ? 'success' : 'stopped'}>
-            {e.hasData ? 'Yes' : 'No'}
-          </StatusIndicator>
-        );
-      },
+      cell: (e: IAttributeTableItem) => renderHasData(e),
     },
   ];
   const CONTENT_DISPLAY = [

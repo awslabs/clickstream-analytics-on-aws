@@ -121,6 +121,16 @@ const ProjectPipeline: React.FC<ProjectPipelineProps> = (
     listApplicationByProject();
   }, [currentPage]);
 
+  const renderAppName = (e: IApplication) => {
+    return (
+      <Link
+        href={`/project/${pipelineInfo.projectId}/application/detail/${e.appId}`}
+      >
+        {e.name}
+      </Link>
+    );
+  };
+
   return (
     <SpaceBetween direction="vertical" size="l">
       <Container
@@ -216,13 +226,7 @@ const ProjectPipeline: React.FC<ProjectPipelineProps> = (
           {
             id: 'name',
             header: t('project:pipeline.appName'),
-            cell: (e) => (
-              <Link
-                href={`/project/${pipelineInfo.projectId}/application/detail/${e.appId}`}
-              >
-                {e.name}
-              </Link>
-            ),
+            cell: (e) => renderAppName(e),
           },
           {
             id: 'appId',
@@ -242,7 +246,7 @@ const ProjectPipeline: React.FC<ProjectPipelineProps> = (
         ]}
         loading={loadingApp}
         items={applicationList}
-        loadingText={t('project:pipeline.loading') || ''}
+        loadingText={t('project:pipeline.loading') ?? ''}
         selectionType="single"
         trackBy="appId"
         empty={
@@ -264,7 +268,7 @@ const ProjectPipeline: React.FC<ProjectPipelineProps> = (
         }
         filter={
           <TextFilter
-            filteringPlaceholder={t('project:pipeline.findApp') || ''}
+            filteringPlaceholder={t('project:pipeline.findApp') ?? ''}
             filteringText=""
           />
         }
@@ -328,8 +332,8 @@ const ProjectPipeline: React.FC<ProjectPipelineProps> = (
             }}
             pagesCount={Math.floor(totalCount / pageSize)}
             ariaLabels={{
-              nextPageLabel: t('nextPage') || '',
-              previousPageLabel: t('prePage') || '',
+              nextPageLabel: t('nextPage') ?? '',
+              previousPageLabel: t('prePage') ?? '',
               pageLabel: (pageNumber) =>
                 `${t('page')} ${pageNumber} ${t('allPages')}`,
             }}

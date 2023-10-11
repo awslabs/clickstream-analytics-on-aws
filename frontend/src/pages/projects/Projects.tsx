@@ -46,14 +46,23 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
   const [totalCount, setTotalCount] = useState(0);
   const [projectList, setProjectList] = useState<IProject[]>([]);
   const [openCreate, setOpenCreate] = useState(false);
-  const CARD_DEFINITIONS = {
-    header: (item: IProject) => (
+
+  const renderCardHeader = (item: IProject) => {
+    return (
       <div>
         <Link fontSize="heading-m" href={`/project/detail/${item.id}`}>
           {item.name}
         </Link>
       </div>
-    ),
+    );
+  };
+
+  const renderEnv = (item: IProject) => {
+    return <Environment env={item.environment} />;
+  };
+
+  const CARD_DEFINITIONS = {
+    header: (item: IProject) => renderCardHeader(item),
     sections: [
       {
         id: 'description',
@@ -74,7 +83,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
       {
         id: 'environment',
         header: '',
-        content: (item: IProject) => <Environment env={item.environment} />,
+        content: (item: IProject) => renderEnv(item),
       },
     ],
   };
@@ -133,7 +142,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
         loading={loadingData}
         stickyHeader={false}
         cardDefinition={CARD_DEFINITIONS}
-        loadingText={t('project:list.loading') || ''}
+        loadingText={t('project:list.loading') ?? ''}
         items={projectList}
         selectionType="single"
         variant="full-page"

@@ -25,6 +25,7 @@ import {
   Textarea,
 } from '@cloudscape-design/components';
 import { createProject, verificationProjectId } from 'apis/project';
+import { defaultTo } from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
@@ -34,6 +35,7 @@ import { INIT_PROJECT_DATA } from 'ts/init';
 import {
   alertMsg,
   generateStr,
+  ternary,
   validateEmails,
   validateProjectId,
 } from 'ts/utils';
@@ -82,7 +84,7 @@ const CreateProject: React.FC<CreateProjectProps> = (
   const confirmCreateProject = async () => {
     setLoadingCreate(true);
     try {
-      curProject.environment = selectedEnv?.value || '';
+      curProject.environment = selectedEnv?.value ?? '';
       const { success, data }: ApiResponse<ResponseCreate> =
         await createProject(curProject);
       if (success && data.id) {
@@ -198,7 +200,7 @@ const CreateProject: React.FC<CreateProjectProps> = (
             >
               <SpaceBetween direction="vertical" size="s">
                 <Input
-                  placeholder={t('project:create.inputNamePlaceholder') || ''}
+                  placeholder={t('project:create.inputNamePlaceholder') ?? ''}
                   value={curProject.name}
                   onChange={(e) => {
                     setProjectNameRequiredError(false);
@@ -277,7 +279,7 @@ const CreateProject: React.FC<CreateProjectProps> = (
             <div className="mt-10">
               <FormField>
                 <Textarea
-                  placeholder={t('project:create.projectDesc') || ''}
+                  placeholder={t('project:create.projectDesc') ?? ''}
                   rows={3}
                   value={curProject.description}
                   onChange={(e) => {
@@ -302,16 +304,21 @@ const CreateProject: React.FC<CreateProjectProps> = (
             <FormField
               label={t('project:create.inputEmail')}
               stretch
-              errorText={
-                emailsEmptyError
-                  ? t('project:valid.emailEmpty')
-                  : emailsInvalidError
-                  ? t('project:valid.emailInvalid')
-                  : ''
-              }
+              errorText={defaultTo(
+                ternary(
+                  emailsEmptyError,
+                  t('project:valid.emailEmpty'),
+                  undefined
+                ),
+                ternary(
+                  emailsInvalidError,
+                  t('project:valid.emailInvalid'),
+                  undefined
+                )
+              )}
             >
               <Input
-                placeholder={t('project:create.inputEmailPlaceholder') || ''}
+                placeholder={t('project:create.inputEmailPlaceholder') ?? ''}
                 value={curProject.emails}
                 onChange={(e) => {
                   setEmailsEmptyError(false);
@@ -339,7 +346,7 @@ const CreateProject: React.FC<CreateProjectProps> = (
                   setCurProject((prev) => {
                     return {
                       ...prev,
-                      environment: e.detail.selectedOption.value || '',
+                      environment: e.detail.selectedOption.value ?? '',
                     };
                   });
                 }}
