@@ -256,7 +256,7 @@ function dictionaryMock(ddbMock: any, name?: string): any {
             name: 'Transformer',
             description: 'Description of Transformer',
             builtIn: 'true',
-            mainFunction: 'software.aws.solution.clickstream.Transformer',
+            mainFunction: 'software.aws.solution.clickstream.TransformerV2',
             jarFile: '',
             bindCount: '0',
             pluginType: 'Transform',

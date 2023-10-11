@@ -146,7 +146,7 @@ test('processS3GzipObjectLineByLine()', async ()=> {
     '23/04/04 02:43:50 INFO Cleaner: [ETLMetric]after filter dataset count:123',
     '23/04/04 02:43:54 INFO Transformer: [ETLMetric]after clean dataset count:999',
     '23/04/04 02:43:59 INFO Transformer: [ETLMetric]transform return dataset count:123',
-    '23/04/04 02:44:05 INFO ETLRunner: [ETLMetric]after software.aws.solution.clickstream.Transformer dataset count:123',
+    '23/04/04 02:44:05 INFO ETLRunner: [ETLMetric]after software.aws.solution.clickstream.TransformerV2 dataset count:123',
     '23/04/04 02:44:20 INFO ETLRunner: [ETLMetric]writeResult dataset count:1000',
     '23/04/04 02:44:32 INFO ETLRunner: [ETLMetric]sink dataset count:3',
   ].join('\n');
