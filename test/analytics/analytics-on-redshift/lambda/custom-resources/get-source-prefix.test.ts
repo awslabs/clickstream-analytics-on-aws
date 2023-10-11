@@ -44,6 +44,7 @@ const event: CloudFormationCustomResourceEvent = {
   ResourceProperties: {
     ServiceToken: 'arn:aws:lambda:us-east-1:11111111111:function:testFn',
     odsEventPrefix: 'project0001/test/ods_events/',
+    projectId: 'test_project_id',
   },
 };
 
@@ -77,6 +78,14 @@ test('can get prefix from data prefix4', async () => {
 
   const res = await handler(event, c);
   expect(res).toEqual({ Data: { prefix: 'project0004/data/' }, Status: 'SUCCESS' });
+});
+
+
+test('can get prefix from data prefix endswith /data/ods/', async () => {
+  event.ResourceProperties.odsEventPrefix = 'clickstream/test_project_id/data/ods/';
+
+  const res = await handler(event, c);
+  expect(res).toEqual({ Data: { prefix: 'clickstream/test_project_id/data/ods/test_project_id/' }, Status: 'SUCCESS' });
 });
 
 

@@ -1,5 +1,6 @@
-CREATE OR REPLACE PROCEDURE {{schema}}.sp_scan_metadata(top_frequent_properties_limit NUMERIC, day_range NUMERIC)
-AS $$ 
+CREATE OR REPLACE PROCEDURE {{schema}}.sp_scan_metadata(top_frequent_properties_limit NUMERIC, day_range NUMERIC) 
+NONATOMIC AS 
+$$ 
 DECLARE
   rec RECORD;
   query text;

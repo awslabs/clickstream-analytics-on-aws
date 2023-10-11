@@ -12,6 +12,7 @@
  */
 
 import { logger } from '../../../common/powertools';
+import { SP_CLEAR_EXPIRED_EVENTS } from '../../private/constant';
 import { ClearExpiredEventsBody } from '../../private/model';
 import { getRedshiftClient, executeStatements, getRedshiftProps } from '../redshift-data';
 
@@ -38,14 +39,13 @@ export const handler = async (event: ClearExpiredEventsEvent) => {
   const schema = event.detail.appId;
   const retentionRangeDays = event.detail.retentionRangeDays;
   const sqlStatements : string[] = [];
-  sqlStatements.push(`CALL ${schema}.sp_clear_expired_events(${retentionRangeDays})`);
-  sqlStatements.push(`CALL ${schema}.sp_clear_item_and_user()`);
+  sqlStatements.push(`CALL ${schema}.${SP_CLEAR_EXPIRED_EVENTS}(${retentionRangeDays})`);
 
   try {
     const queryId = await executeStatements(
       redshiftDataApiClient, sqlStatements, redshiftProps.serverlessRedshiftProps, redshiftProps.provisionedRedshiftProps);
-
     logger.info('Clear expired events response:', { queryId });
+
     return {
       detail: {
         appId: schema,

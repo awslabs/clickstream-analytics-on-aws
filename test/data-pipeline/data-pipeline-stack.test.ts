@@ -434,6 +434,7 @@ describe('DataPipelineStack parameter test', () => {
 
   test('Should has parameter TransformerAndEnrichClassNames', () => {
     template.hasParameter('TransformerAndEnrichClassNames', {
+      Default: 'software.aws.solution.clickstream.TransformerV2,software.aws.solution.clickstream.UAEnrichment,software.aws.solution.clickstream.IPEnrichment',
       Type: 'String',
     });
   });

@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { App, Stack } from 'aws-cdk-lib';
+import { Stack } from 'aws-cdk-lib';
 import { Template } from 'aws-cdk-lib/assertions';
 import { TokenAuthorizer } from 'aws-cdk-lib/aws-apigateway';
 import { Certificate, CertificateValidation } from 'aws-cdk-lib/aws-certificatemanager';
@@ -31,6 +31,7 @@ import {
 } from '../../src/control-plane/alb-lambda-portal';
 import { ClickStreamApiConstruct, DicItem } from '../../src/control-plane/backend/click-stream-api';
 import { SolutionNodejsFunction } from '../../src/private/function';
+import { TestApp } from '../common/jest';
 
 export interface VPCAttributes {
   vpcId: string;
@@ -115,13 +116,13 @@ export interface ApiStackElements {
 
 export class TestEnv {
 
-  public static newStack() : TestStack {
-    return new TestStack(new App(), 'testStack');
+  public static newStack(outdir: string) : TestStack {
+    return new TestStack(new TestApp(outdir), 'testStack');
   }
 
-  public static newAlbStackWithDefaultPortal() : StackElements {
+  public static newAlbStackWithDefaultPortal(outdir: string) : StackElements {
 
-    const stack = new TestStack(new App(), 'testStack');
+    const stack = new TestStack(new TestApp(outdir), 'testStack');
 
     const portal = new ApplicationLoadBalancerLambdaPortal(stack, 'test-portal', {
       applicationLoadBalancerProps: {
@@ -145,9 +146,9 @@ export class TestEnv {
     return { stack, portal };
   }
 
-  public static newAlbStackWithPortalProps( props?: ApplicationLoadBalancerLambdaPortalTestProps) : TestStack {
+  public static newAlbStackWithPortalProps(outdir: string, props?: ApplicationLoadBalancerLambdaPortalTestProps) : TestStack {
 
-    const stack = props?.stack ?? new TestStack(new App(), 'testStack');
+    const stack = props?.stack ?? new TestStack(new TestApp(outdir), 'testStack');
 
     const bucket = props?.externalBucket ? new SolutionBucket(stack, 'SolutionBucket').bucket : undefined;
     const prefix = props?.prefix ?? undefined;
@@ -197,9 +198,9 @@ export class TestEnv {
     return stack;
   }
 
-  public static newAlbStackWithPortalPropsAndCusdomain( props?: ApplicationLoadBalancerLambdaPortalTestProps) : TestStack {
+  public static newAlbStackWithPortalPropsAndCustomDomain(outdir: string, props?: ApplicationLoadBalancerLambdaPortalTestProps) : TestStack {
 
-    const stack = new TestStack(new App(), 'testStack');
+    const stack = new TestStack(new TestApp(outdir), 'testStack');
 
     const applicationLoadBalancerProps = props?.applicationLoadBalancerProps ?? {
       internetFacing: true,
@@ -254,9 +255,9 @@ export class TestEnv {
     return stack;
   }
 
-  public static newALBApiStack(cn: boolean = false): ApiStackElements {
+  public static newALBApiStack(outdir: string, cn: boolean = false): ApiStackElements {
 
-    const stack = new TestStack(new App(), 'apiTestStack');
+    const stack = new TestStack(new TestApp(outdir), 'apiTestStack');
     const s3Bucket = new Bucket(stack, 'stackWorkflowS3Bucket');
 
     const pluginPrefix = 'plugins/';
@@ -278,9 +279,9 @@ export class TestEnv {
     return { stack, template };
   }
 
-  public static newCloudfrontApiStack(cn: boolean = false): ApiStackElements {
+  public static newCloudfrontApiStack(outdir: string, cn: boolean = false): ApiStackElements {
 
-    const stack = new TestStack(new App(), 'apiTestStack');
+    const stack = new TestStack(new TestApp(outdir), 'apiTestStack');
     const s3Bucket = new Bucket(stack, 'stackWorkflowS3Bucket');
 
     const authFunction = new SolutionNodejsFunction(stack, 'AuthorizerFunction', {

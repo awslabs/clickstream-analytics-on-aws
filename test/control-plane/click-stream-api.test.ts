@@ -12,10 +12,17 @@
  */
 
 import { findResourcesName, TestEnv } from './test-utils';
+import { removeFolder } from '../common/jest';
 
 describe('Click Stream Api ALB deploy Construct Test', () => {
-  const newALBApiStackTemplate = TestEnv.newALBApiStack().template;
-  const newALBApiStackCNTemplate = TestEnv.newALBApiStack(true).template;
+  afterAll(() => {
+    removeFolder(cdkOut);
+  });
+
+  const cdkOut = '/tmp/alb-portal-clickstream-api-test';
+
+  const newALBApiStackTemplate = TestEnv.newALBApiStack(cdkOut).template;
+  const newALBApiStackCNTemplate = TestEnv.newALBApiStack(cdkOut, true).template;
 
   test('DynamoDB table', () => {
     expect(findResourcesName(newALBApiStackTemplate, 'AWS::DynamoDB::Table'))
@@ -1201,9 +1208,14 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
 });
 
 describe('Click Stream Api Cloudfront deploy Construct Test', () => {
-  const newALBApiStackTemplate = TestEnv.newALBApiStack().template;
-  const newALBApiStackCNTemplate = TestEnv.newALBApiStack(true).template;
-  const newCloudfrontApiStackTemplate = TestEnv.newCloudfrontApiStack().template;
+  afterAll(() => {
+    removeFolder(cdkOut);
+  });
+
+  const cdkOut = '/tmp/cloudfront-portal-clickstream-api-test';
+  const newALBApiStackTemplate = TestEnv.newALBApiStack(cdkOut).template;
+  const newALBApiStackCNTemplate = TestEnv.newALBApiStack(cdkOut, true).template;
+  const newCloudfrontApiStackTemplate = TestEnv.newCloudfrontApiStack(cdkOut).template;
 
   test('DynamoDB table', () => {
     newCloudfrontApiStackTemplate.hasResourceProperties('AWS::DynamoDB::Table', {
