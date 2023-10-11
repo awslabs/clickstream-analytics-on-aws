@@ -197,7 +197,7 @@ export const getEventAndConditions = (
           conditions: conditions,
           conditionOperator: item.conditionRelationShip,
         },
-        method:
+        computeMethod:
           item.calculateMethodOption?.value ?? ExploreComputeMethod.USER_ID_CNT,
       };
       eventAndConditions.push(eventAndCondition);
