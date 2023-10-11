@@ -19,7 +19,7 @@ import { analyticsMetadataTable, prefixMonthGSIName } from '../../common/constan
 import { docClient, query } from '../../common/dynamodb-client';
 import { MetadataValueType } from '../../common/explore-types';
 import { KeyVal } from '../../common/types';
-import { getAttributeByNameAndType, getLatestAttributeByName, getLatestEventByName, getLatestParameterByName, getParameterByNameAndType } from '../../common/utils';
+import { getAttributeByNameAndType, getDataFromLastDay, getLatestAttributeByName, getLatestEventByName, getLatestParameterByName, getParameterByNameAndType } from '../../common/utils';
 import { DDBMetadata, IMetadataDisplay, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute } from '../../model/metadata';
 import { MetadataStore } from '../metadata-store';
 
@@ -43,6 +43,7 @@ export class DynamoDbMetadataStore implements MetadataStore {
     if (!records || records.length === 0) {
       return;
     }
+    const lastDayData = getDataFromLastDay(records[0]);
     const event: IMetadataEvent = {
       id: records[0].id,
       month: records[0].month,
@@ -50,8 +51,8 @@ export class DynamoDbMetadataStore implements MetadataStore {
       projectId: records[0].projectId,
       appId: records[0].appId,
       name: records[0].summary.name,
-      dataVolumeLastDay: records[0].summary.dataVolumeLastDay ?? 0,
-      hasData: records[0].summary.hasData ?? false,
+      dataVolumeLastDay: lastDayData.dataVolumeLastDay,
+      hasData: lastDayData.hasData,
       platform: records[0].summary.platform ?? [],
     };
     return event;

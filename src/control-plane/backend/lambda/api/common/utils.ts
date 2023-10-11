@@ -606,9 +606,25 @@ function groupAssociatedEventParametersByName(events: IMetadataEvent[], paramete
   return events;
 };
 
+function getDataFromLastDay(metadata: DDBMetadata) {
+  const year = new Date().getFullYear();
+  const month = new Date().getMonth() + 1;
+  const key = `#${year}${month < 10 ? '0' + month : month}`;
+  const lastDay = `day${new Date().getDate() - 1}`;
+  let hasData = false;
+  let dataVolumeLastDay = 0;
+  if (metadata.month === key) {
+    const lastDayData = (metadata as any)[lastDay];
+    dataVolumeLastDay = lastDayData.count ?? 0;
+    hasData = lastDayData.hasData ?? false;
+  }
+  return { hasData, dataVolumeLastDay };
+}
+
 function getLatestEventByName(metadata: DDBMetadata[]): IMetadataEvent[] {
   const latestEvents: IMetadataEvent[] = [];
   for (let meta of metadata) {
+    const lastDayData = getDataFromLastDay(meta);
     const event: IMetadataEvent = {
       id: meta.id,
       month: meta.month,
@@ -616,9 +632,9 @@ function getLatestEventByName(metadata: DDBMetadata[]): IMetadataEvent[] {
       projectId: meta.projectId,
       appId: meta.appId,
       name: meta.summary.name,
-      hasData: meta.summary.hasData ?? false,
+      hasData: lastDayData.hasData,
       platform: meta.summary.platform ?? [],
-      dataVolumeLastDay: meta.summary.dataVolumeLastDay ?? 0,
+      dataVolumeLastDay: lastDayData.dataVolumeLastDay,
     };
     const index = latestEvents.findIndex((e: IMetadataEvent) => e.name === meta.summary.name);
     if (index === -1) {
@@ -633,6 +649,7 @@ function getLatestEventByName(metadata: DDBMetadata[]): IMetadataEvent[] {
 function getLatestParameterByName(metadata: DDBMetadata[]): IMetadataEventParameter[] {
   const latestEventParameters: IMetadataEventParameter[] = [];
   for (let meta of metadata) {
+    const lastDayData = getDataFromLastDay(meta);
     const parameter: IMetadataEventParameter = {
       id: meta.id,
       month: meta.month,
@@ -641,7 +658,7 @@ function getLatestParameterByName(metadata: DDBMetadata[]): IMetadataEventParame
       appId: meta.appId,
       name: meta.summary.name,
       eventName: meta.summary.eventName ?? '',
-      hasData: meta.summary.hasData ?? false,
+      hasData: lastDayData.hasData,
       platform: meta.summary.platform ?? [],
       category: meta.summary.category ?? ConditionCategory.OTHER,
       valueType: meta.summary.valueType ?? MetadataValueType.STRING,
@@ -677,6 +694,7 @@ IMetadataEventParameter | undefined {
       } as IMetadataEvent);
     }
   }
+  const lastDayData = getDataFromLastDay(filteredMetadata[0]);
   return {
     id: filteredMetadata[0].id,
     month: filteredMetadata[0].month,
@@ -685,7 +703,7 @@ IMetadataEventParameter | undefined {
     appId: filteredMetadata[0].appId,
     name: filteredMetadata[0].summary.name,
     eventName: '',
-    hasData: filteredMetadata[0].summary.hasData ?? false,
+    hasData: lastDayData.hasData,
     platform: filteredMetadata[0].summary.platform ?? [],
     category: filteredMetadata[0].summary.category ?? ConditionCategory.OTHER,
     valueType: filteredMetadata[0].summary.valueType ?? MetadataValueType.STRING,
@@ -697,6 +715,7 @@ IMetadataEventParameter | undefined {
 function getLatestAttributeByName(metadata: DDBMetadata[]): IMetadataUserAttribute[] {
   const latestUserAttributes: IMetadataUserAttribute[] = [];
   for (let meta of metadata) {
+    const lastDayData = getDataFromLastDay(meta);
     const attribute: IMetadataUserAttribute = {
       id: meta.id,
       month: meta.month,
@@ -704,7 +723,7 @@ function getLatestAttributeByName(metadata: DDBMetadata[]): IMetadataUserAttribu
       projectId: meta.projectId,
       appId: meta.appId,
       name: meta.summary.name,
-      hasData: meta.summary.hasData ?? false,
+      hasData: lastDayData.hasData,
       category: meta.summary.category ?? ConditionCategory.OTHER,
       valueType: meta.summary.valueType ?? MetadataValueType.STRING,
       valueEnum: meta.summary.valueEnum ?? [],
@@ -726,6 +745,7 @@ IMetadataUserAttribute | undefined {
   if (filteredMetadata.length === 0) {
     return;
   }
+  const lastDayData = getDataFromLastDay(filteredMetadata[0]);
   return {
     id: filteredMetadata[0].id,
     month: filteredMetadata[0].month,
@@ -733,7 +753,7 @@ IMetadataUserAttribute | undefined {
     projectId: filteredMetadata[0].projectId,
     appId: filteredMetadata[0].appId,
     name: filteredMetadata[0].summary.name,
-    hasData: filteredMetadata[0].summary.hasData ?? false,
+    hasData: lastDayData.hasData,
     category: filteredMetadata[0].summary.category ?? ConditionCategory.USER,
     valueType: filteredMetadata[0].summary.valueType ?? MetadataValueType.STRING,
     valueEnum: filteredMetadata[0].summary.valueEnum ?? [],
@@ -802,4 +822,5 @@ export {
   getLatestAttributeByName,
   getParameterByNameAndType,
   getAttributeByNameAndType,
+  getDataFromLastDay,
 };

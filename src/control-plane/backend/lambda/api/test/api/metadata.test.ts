@@ -303,6 +303,9 @@ describe('Metadata Event test', () => {
     displayDataMock(ddbMock);
   });
   it('Get metadata event by name', async () => {
+    jest
+      .useFakeTimers()
+      .setSystemTime(new Date('2023-03-02'));
     ddbMock.on(QueryCommand, {
       TableName: analyticsMetadataTable,
       KeyConditionExpression: '#id= :id AND begins_with(#month, :month)',
@@ -393,7 +396,7 @@ describe('Metadata Event test', () => {
         appId: MOCK_APP_ID,
         name: MOCK_EVENT_NAME,
         metadataSource: MetadataSource.PRESET,
-        dataVolumeLastDay: 2048,
+        dataVolumeLastDay: 1,
         displayName: `display name of event ${MOCK_EVENT_NAME}`,
         description: 'mock event description in built-in',
       },
@@ -413,6 +416,9 @@ describe('Metadata Event test', () => {
     });
   });
   it('Get metadata event list', async () => {
+    jest
+      .useFakeTimers()
+      .setSystemTime(new Date('2023-02-02'));
     ddbMock.on(QueryCommand, {
       TableName: analyticsMetadataTable,
       IndexName: prefixMonthGSIName,
@@ -477,7 +483,7 @@ describe('Metadata Event test', () => {
             description: `Description of event ${MOCK_EVENT_NAME}1`,
             metadataSource: MetadataSource.CUSTOM,
             hasData: true,
-            dataVolumeLastDay: 2048,
+            dataVolumeLastDay: 1,
             associatedParameters: [],
             platform: [MetadataPlatform.ANDROID, MetadataPlatform.IOS],
           },
@@ -491,8 +497,8 @@ describe('Metadata Event test', () => {
             displayName: `${MOCK_EVENT_NAME}2`,
             description: '',
             metadataSource: MetadataSource.CUSTOM,
-            hasData: true,
-            dataVolumeLastDay: 1445,
+            hasData: false,
+            dataVolumeLastDay: 0,
             associatedParameters: [],
             platform: [MetadataPlatform.WEB],
           },
@@ -515,6 +521,9 @@ describe('Metadata Event test', () => {
     });
   });
   it('Get metadata event list with parameters', async () => {
+    jest
+      .useFakeTimers()
+      .setSystemTime(new Date('2023-02-02'));
     ddbMock.on(QueryCommand, {
       TableName: analyticsMetadataTable,
       IndexName: prefixMonthGSIName,
@@ -652,7 +661,7 @@ describe('Metadata Event test', () => {
             displayName: `display name of event ${MOCK_EVENT_NAME}1`,
             description: `Description of event ${MOCK_EVENT_NAME}1`,
             hasData: true,
-            dataVolumeLastDay: 2048,
+            dataVolumeLastDay: 1,
             metadataSource: MetadataSource.CUSTOM,
             month: '#202302',
             associatedParameters: [
@@ -682,7 +691,7 @@ describe('Metadata Event test', () => {
                 prefix: `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
                 appId: MOCK_APP_ID,
                 projectId: MOCK_PROJECT_ID,
-                hasData: true,
+                hasData: false,
                 metadataSource: MetadataSource.CUSTOM,
                 name: `${MOCK_EVENT_PARAMETER_NAME}12`,
                 eventName: `${MOCK_EVENT_NAME}1`,
@@ -707,8 +716,8 @@ describe('Metadata Event test', () => {
             name: `${MOCK_EVENT_NAME}2`,
             displayName: `${MOCK_EVENT_NAME}2`,
             description: '',
-            hasData: true,
-            dataVolumeLastDay: 1445,
+            hasData: false,
+            dataVolumeLastDay: 0,
             metadataSource: MetadataSource.CUSTOM,
             month: '#202301',
             associatedParameters: [],
@@ -918,6 +927,9 @@ describe('Metadata Event Attribute test', () => {
     });
   });
   it('Get metadata event attribute list', async () => {
+    jest
+      .useFakeTimers()
+      .setSystemTime(new Date('2023-02-02'));
     ddbMock.on(QueryCommand, {
       TableName: analyticsMetadataTable,
       IndexName: prefixMonthGSIName,
@@ -1045,7 +1057,7 @@ describe('Metadata Event Attribute test', () => {
             category: 'event',
             metadataSource: MetadataSource.CUSTOM,
             parameterType: MetadataParameterType.PRIVATE,
-            hasData: true,
+            hasData: false,
             platform: [MetadataPlatform.ANDROID, MetadataPlatform.WEB, MetadataPlatform.IOS],
             valueType: 'Float',
             values: [
@@ -1096,6 +1108,9 @@ describe('Metadata User Attribute test', () => {
     });
   });
   it('Get metadata user attribute list', async () => {
+    jest
+      .useFakeTimers()
+      .setSystemTime(new Date('2023-02-02'));
     ddbMock.on(QueryCommand, {
       TableName: analyticsMetadataTable,
       IndexName: prefixMonthGSIName,
@@ -1203,7 +1218,7 @@ describe('Metadata User Attribute test', () => {
             category: 'user',
             metadataSource: MetadataSource.CUSTOM,
             valueType: 'Float',
-            hasData: true,
+            hasData: false,
             values: [
               { value: 'value-02', displayValue: 'value-02' },
             ],

@@ -29,8 +29,6 @@ export interface DDBMetadata {
   readonly summary: {
     readonly name: string;
     readonly eventName?: string;
-    readonly dataVolumeLastDay?: number;
-    readonly hasData?: boolean;
     readonly platform?: MetadataPlatform[];
     readonly category?: ConditionCategory;
     readonly valueType?: MetadataValueType;
