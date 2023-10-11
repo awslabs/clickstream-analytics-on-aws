@@ -344,9 +344,8 @@ export class ReportingService {
   };
 
   private _buildSqlForPathAnalysis(query: any) {
-    let sql= '';
     if (query.pathAnalysis.nodeType === ExplorePathNodeType.EVENT) {
-      sql = buildEventPathAnalysisView({
+      return buildEventPathAnalysisView({
         schemaName: query.appId,
         computeMethod: query.computeMethod,
         specifyJoinColumn: query.specifyJoinColumn,
@@ -367,31 +366,29 @@ export class ReportingService {
           lagSeconds: query.pathAnalysis.lagSeconds,
         },
       });
-    } else {
-      sql = buildNodePathAnalysisView({
-        schemaName: query.appId,
-        computeMethod: query.computeMethod,
-        specifyJoinColumn: query.specifyJoinColumn,
-        joinColumn: query.joinColumn,
-        conversionIntervalType: query.conversionIntervalType,
-        conversionIntervalInSeconds: query.conversionIntervalInSeconds,
-        timeScopeType: query.timeScopeType,
-        timeStart: query.timeScopeType === ExploreTimeScopeType.FIXED ? query.timeStart : undefined,
-        timeEnd: query.timeScopeType === ExploreTimeScopeType.FIXED ? query.timeEnd : undefined,
-        lastN: query.lastN,
-        timeUnit: query.timeUnit,
-        groupColumn: query.groupColumn,
-        pathAnalysis: {
-          platform: query.pathAnalysis.platform,
-          sessionType: query.pathAnalysis.sessionType,
-          nodeType: query.pathAnalysis.nodeType,
-          lagSeconds: query.pathAnalysis.lagSeconds,
-          nodes: query.pathAnalysis.nodes,
-        },
-      });
     }
 
-    return sql;
+    return buildNodePathAnalysisView({
+      schemaName: query.appId,
+      computeMethod: query.computeMethod,
+      specifyJoinColumn: query.specifyJoinColumn,
+      joinColumn: query.joinColumn,
+      conversionIntervalType: query.conversionIntervalType,
+      conversionIntervalInSeconds: query.conversionIntervalInSeconds,
+      timeScopeType: query.timeScopeType,
+      timeStart: query.timeScopeType === ExploreTimeScopeType.FIXED ? query.timeStart : undefined,
+      timeEnd: query.timeScopeType === ExploreTimeScopeType.FIXED ? query.timeEnd : undefined,
+      lastN: query.lastN,
+      timeUnit: query.timeUnit,
+      groupColumn: query.groupColumn,
+      pathAnalysis: {
+        platform: query.pathAnalysis.platform,
+        sessionType: query.pathAnalysis.sessionType,
+        nodeType: query.pathAnalysis.nodeType,
+        lagSeconds: query.pathAnalysis.lagSeconds,
+        nodes: query.pathAnalysis.nodes,
+      },
+    });
   }
 
   async createPathAnalysisVisual(req: any, res: any, next: any) {
