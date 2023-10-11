@@ -21,7 +21,8 @@ export const generateStr = (length: number) => {
   let randomString = '';
   const letters = 'abcdefghijklmnopqrstuvwxyz';
   for (let i = 0; i < length; i++) {
-    const randomIndex = Math.floor(Math.random() * letters.length);
+    const date = new Date();
+    const randomIndex = date.getMilliseconds() % letters.length;
     randomString += letters[randomIndex];
   }
   return randomString;
