@@ -13,7 +13,7 @@
 
 import { readFileSync } from 'fs';
 import { join } from 'path';
-import { AnalysisDefinition, ConflictException, DashboardVersionDefinition, DataSetIdentifierDeclaration, InputColumn, QuickSight } from '@aws-sdk/client-quicksight';
+import { AnalysisDefinition, ConflictException, DashboardVersionDefinition, DataSetIdentifierDeclaration, InputColumn, QuickSight, ThrottlingException } from '@aws-sdk/client-quicksight';
 import { BatchExecuteStatementCommand, DescribeStatementCommand, StatusString } from '@aws-sdk/client-redshift-data';
 import { v4 as uuidv4 } from 'uuid';
 import { DataSetProps } from './quicksight/dashboard-ln';
@@ -853,7 +853,10 @@ export class ReportingService {
       return res.status(201).json(new ApiSuccess(result));
     } catch (error) {
       logger.warn(`Clean QuickSight temp resources with warning: ${error}`);
-      next(`Clean QuickSight temp resources with warning: ${error}`);
+      if ( error instanceof ThrottlingException) {
+        return res.status(201).json(new ApiSuccess(null, 'resource cleaning finished with error'));
+      }
+      next(error);
     }
   };
 
