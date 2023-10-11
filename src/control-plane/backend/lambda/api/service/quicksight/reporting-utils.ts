@@ -507,12 +507,12 @@ export async function getCredentialsFromRole(stsClient: STSClient, roleArn: stri
 }
 
 export function getFunnelVisualDef(visualId: string, viewName: string, titleProps: DashboardTitleProps,
-  quickSightChartType: QuickSightChartType, groupColumn: string) : Visual {
+  quickSightChartType: QuickSightChartType, groupColumn: string, hasGrouping: boolean) : Visual {
 
   if (quickSightChartType === QuickSightChartType.FUNNEL) {
     return _getFunnelChartVisualDef(visualId, viewName, titleProps);
   } else if (quickSightChartType === QuickSightChartType.BAR) {
-    return _getFunnelBarChartVisualDef(visualId, viewName, titleProps, groupColumn);
+    return _getFunnelBarChartVisualDef(visualId, viewName, titleProps, groupColumn, hasGrouping);
   } else {
     const errorMessage = `Funnel analysis: unsupported quicksight chart type ${quickSightChartType}`;
     logger.warn(errorMessage);
@@ -535,9 +535,17 @@ function _getFunnelChartVisualDef(visualId: string, viewName: string, titleProps
   return JSON.parse(Mustache.render(visualDef, mustacheFunnelAnalysisType)) as Visual;
 }
 
-function _getFunnelBarChartVisualDef(visualId: string, viewName: string, titleProps: DashboardTitleProps, groupColumn: string) : Visual {
+function _getFunnelBarChartVisualDef(visualId: string, viewName: string, titleProps: DashboardTitleProps, 
+  groupColumn: string, hasGrouping: boolean) : Visual {
 
-  const visualDef = readFileSync(join(__dirname, './templates/funnel-bar-chart.json'), 'utf8');
+  let suffix = '';
+  let smalMultiplesFieldId = undefined;
+  if (hasGrouping) {
+    suffix = '-multiple';
+    smalMultiplesFieldId = uuidv4();
+  }
+
+  const visualDef = readFileSync(join(__dirname, `./templates/funnel-bar-chart${suffix}.json`), 'utf8');
   const mustacheFunnelAnalysisType: MustacheFunnelAnalysisType = {
     visualId,
     dataSetIdentifier: viewName,
@@ -548,6 +556,7 @@ function _getFunnelBarChartVisualDef(visualId: string, viewName: string, titlePr
     hierarchyId: uuidv4(),
     title: titleProps.title,
     subTitle: titleProps.subTitle,
+    smalMultiplesFieldId,
   };
 
   return JSON.parse(Mustache.render(visualDef, mustacheFunnelAnalysisType)) as Visual;
@@ -769,7 +778,7 @@ export function getEventChartVisualDef(visualId: string, viewName: string, title
 
   let suffix = '';
   let smalMultiplesFieldId = undefined;
-  if(hasGrouping){
+  if (hasGrouping) {
     suffix = '-multiple';
     smalMultiplesFieldId = uuidv4();
   }
@@ -792,11 +801,12 @@ export function getEventChartVisualDef(visualId: string, viewName: string, title
   return JSON.parse(Mustache.render(visualDef, mustacheEventAnalysisType)) as Visual;
 }
 
-export function getEventPivotTableVisualDef(visualId: string, viewName: string, titleProps: DashboardTitleProps, groupColumn: string, hasGrouping: boolean) : Visual {
+export function getEventPivotTableVisualDef(visualId: string, viewName: string,
+  titleProps: DashboardTitleProps, groupColumn: string, hasGrouping: boolean) : Visual {
 
   let suffix = '';
   let smalMultiplesFieldId = undefined;
-  if(hasGrouping){
+  if (hasGrouping) {
     suffix = '-multiple';
     smalMultiplesFieldId = uuidv4();
   }

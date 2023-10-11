@@ -89,7 +89,8 @@ export class ReportingService {
         lastN: query.lastN,
         timeUnit: query.timeUnit,
         groupColumn: query.groupColumn,
-      });
+        groupCondition: query.groupCondition,
+      }, query.chartType === QuickSightChartType.BAR);
 
       logger.debug(`funnel sql: ${sql}`);
 
@@ -185,9 +186,10 @@ export class ReportingService {
     });
 
     const visualId = uuidv4();
+    const hasGrouping = query.chartType == QuickSightChartType.BAR && query.groupCondition !== undefined;
     const titleProps = await getDashboardTitleProps(AnalysisType.FUNNEL, query);
     const quickSightChartType = query.chartType;
-    const visualDef = getFunnelVisualDef(visualId, viewName, titleProps, quickSightChartType, query.groupColumn);
+    const visualDef = getFunnelVisualDef(visualId, viewName, titleProps, quickSightChartType, query.groupColumn, hasGrouping);
     const visualRelatedParams = getVisualRelatedDefs({
       timeScopeType: query.timeScopeType,
       sheetId,
@@ -253,7 +255,7 @@ export class ReportingService {
 
       //construct parameters to build sql
       const viewName = getTempResourceName(query.viewName, query.action);
-      
+
       const sql = buildEventAnalysisView({
         schemaName: query.appId,
         computeMethod: query.computeMethod,
@@ -273,11 +275,11 @@ export class ReportingService {
       logger.debug(`event analysis sql: ${sql}`);
 
       const hasGrouping = query.groupCondition === undefined ? false: true;
-      const projectedColumns = ['event_date','event_name','count'];
-      if(hasGrouping) {
+      const projectedColumns = ['event_date', 'event_name', 'count'];
+      if (hasGrouping) {
         eventVisualColumns.push({
-          Name: "group_col",
-          Type: "STRING"
+          Name: 'group_col',
+          Type: 'STRING',
         });
 
         projectedColumns.push('group_col');
@@ -303,7 +305,7 @@ export class ReportingService {
         sheetId = query.sheetId;
       }
 
-      
+
       const visualId = uuidv4();
       const titleProps = await getDashboardTitleProps(AnalysisType.EVENT, query);
       const quickSightChartType = query.chartType;

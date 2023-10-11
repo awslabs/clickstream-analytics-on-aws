@@ -182,24 +182,45 @@ const columnTemplate = `
 ,user_pseudo_id as user_pseudo_id####
 `;
 
-function _buildSessionIdSQL(eventNames: string[], sqlParameters: SQLParameters, isEventPathSQL: boolean = false) : string {
+function _buildSQLForEventNestParameter(parameterName: string, eventNames: string[],
+  sqlParameters: SQLParameters, isEventPathSQL: boolean = false) : string {
   const eventDateSQL = _getEventDateSql(sqlParameters, 'event.');
-  const eventNameInClause = `and event_name in ('${eventNames.join('\',\'')}')`;
+  const eventNameInClause = `and event.event_name in ('${eventNames.join('\',\'')}')`;
   const eventNameClause = eventNames.length > 0 ? eventNameInClause : '';
 
   return `
     select 
       event.event_date,
       event.event_id,
-      max(event_param.event_parameter_value) as session_id
+      max(event_param.event_parameter_value) as ${parameterName}
     from ${sqlParameters.schemaName}.ods_events as event
     join ${sqlParameters.schemaName}.clickstream_ods_events_parameter_view as event_param
     on event.event_date = event_param.event_date and event.event_id = event_param.event_id
     where 
     ${eventDateSQL}
     ${ isEventPathSQL ? 'and event.event_name not in (\'' + builtInEvents.filter(event => !eventNames.includes(event)).join('\',\'') + '\')' : eventNameClause }
-    and event_param.event_parameter_key = '_session_id'
+    and event_param.event_parameter_key = '${parameterName}'
     group by 1,2
+  `;
+}
+
+function _buildSQLForUserNestParameter(parameterName: string, eventNames: string[], sqlParameters: SQLParameters, isEventPathSQL: boolean = false) {
+
+  const eventDateSQL = _getEventDateSql(sqlParameters, 'event.');
+  const eventNameInClause = `and event_name in ('${eventNames.join('\',\'')}')`;
+  const eventNameClause = eventNames.length > 0 ? eventNameInClause : '';
+  return `
+    select 
+      event.user_pseudo_id,
+      max(user_param.custom_attr_value) as ${parameterName}
+    from ${sqlParameters.schemaName}.ods_events as event
+    join ${sqlParameters.schemaName}.clickstream_user_attr_view as user_param
+    on event.user_pseudo_id = user_param.user_pseudo_id
+    where 
+    ${eventDateSQL}
+    ${ isEventPathSQL ? 'and event.event_name not in (\'' + builtInEvents.filter(event => !eventNames.includes(event)).join('\',\'') + '\')' : eventNameClause }
+    and user_param.custom_attr_key = '${parameterName}'
+    group by 1
   `;
 }
 
@@ -369,6 +390,36 @@ export function _buildCommonPartSql(eventNames: string[], sqlParameters: SQLPara
   }
 }
 
+function _buildGroupConditionSQl(eventNames: string[], sqlParameters: SQLParameters, isEventPathSQL: boolean) {
+
+  let groupingSql = '';
+  let groupingCol = '';
+  if (sqlParameters.groupCondition !== undefined) {
+
+    if (sqlParameters.groupCondition.category === ConditionCategory.EVENT) {
+
+      groupingCol = `groupTable.${sqlParameters.groupCondition.property},`;
+      groupingSql = `
+      join (
+        ${_buildSQLForEventNestParameter(sqlParameters.groupCondition.property, eventNames, sqlParameters, isEventPathSQL)}
+      ) as groupTable on event.event_date = groupTable.event_date and event.event_id = groupTable.event_id
+    `;
+    } else if (sqlParameters.groupCondition.category === ConditionCategory.USER) {
+      groupingCol = `groupTable.${sqlParameters.groupCondition.property},`;
+      groupingSql = `
+      join (
+        ${_buildSQLForUserNestParameter(sqlParameters.groupCondition.property, eventNames, sqlParameters, isEventPathSQL)}
+      ) as groupTable on event.user_pseudo_id = groupTable.user_pseudo_id
+    `;
+    }
+
+  }
+  return {
+    groupingSql,
+    groupingCol,
+  };
+}
+
 export function _buildCommonPartSqlSimple(eventNames: string[], sqlParameters: SQLParameters,
   isEventPathSQL: boolean = false, isNodePathAnalysis: boolean = false, isRetentionAnalysis: boolean = false) : string {
 
@@ -395,6 +446,8 @@ export function _buildCommonPartSqlSimple(eventNames: string[], sqlParameters: S
 
   }
 
+  const groupingSql = _buildGroupConditionSQl(eventNames, sqlParameters, isEventPathSQL);
+
   const userCondition = _hasUserCondition(sqlParameters);
   let userColumns = '';
   let userJoinSql = '';
@@ -414,6 +467,7 @@ export function _buildCommonPartSqlSimple(eventNames: string[], sqlParameters: S
     ${_renderUserPseudoIdColumn(baseColumns, sqlParameters.computeMethod, false)},
     ${eventColumns}
     ${userColumns}
+    ${groupingSql.groupingCol}
     TO_CHAR(TIMESTAMP 'epoch' + cast(event_timestamp/1000 as bigint) * INTERVAL '1 second', 'YYYY-MM') as month,
     TO_CHAR(date_trunc('week', TIMESTAMP 'epoch' + cast(event_timestamp/1000 as bigint) * INTERVAL '1 second'), 'YYYY-MM-DD') || ' - ' || TO_CHAR(date_trunc('week', (TIMESTAMP 'epoch' + cast(event_timestamp/1000 as bigint) * INTERVAL '1 second') + INTERVAL '6 days'), 'YYYY-MM-DD') as week,
     TO_CHAR(TIMESTAMP 'epoch' + cast(event_timestamp/1000 as bigint) * INTERVAL '1 second', 'YYYY-MM-DD') as day,
@@ -421,6 +475,7 @@ export function _buildCommonPartSqlSimple(eventNames: string[], sqlParameters: S
     from ${sqlParameters.schemaName}.ods_events as event
     ${userJoinSql}
     ${eventJoinSql}
+    ${groupingSql.groupingSql}
     where ${commonConditionSql.eventDateSQL}
     ${_buildEventNameClause(eventNames, sqlParameters, isEventPathSQL, isNodePathAnalysis)}
     ${commonConditionSql.globalConditionSql}
@@ -503,22 +558,30 @@ function _getEventDateSql(sqlParameters: SQLParameters, prefix: string = '') {
   return eventDateSQL;
 }
 
-function _buildFunnelBaseSql(eventNames: string[], sqlParameters: SQLParameters) : string {
+function _buildFunnelBaseSql(eventNames: string[], sqlParameters: SQLParameters, groupCondition: GroupingCondition | undefined = undefined) : string {
 
   let sql = _buildCommonPartSql(eventNames, sqlParameters);
+
+  let groupCol = '';
+  let newColumnTemplate = columnTemplate;
+  if (groupCondition !== undefined) {
+    groupCol = `,${_getColNameWithPrefix(groupCondition)}`;
+    newColumnTemplate += `${groupCol} as ${_getColNameWithPrefix(groupCondition)}####`;
+  }
+
   for (const [index, event] of eventNames.entries()) {
     let firstTableColumns = `
        month
       ,week
       ,day
       ,hour
-      ,${_renderUserPseudoIdColumn(columnTemplate, sqlParameters.computeMethod, true).replace(/####/g, '_0')}
+      ,${_renderUserPseudoIdColumn(newColumnTemplate, sqlParameters.computeMethod, true).replace(/####/g, '_0')}
     `;
 
     sql = sql.concat(`
     table_${index} as (
       select 
-        ${ index === 0 ? firstTableColumns : _renderUserPseudoIdColumn(columnTemplate, sqlParameters.computeMethod, true).replace(/####/g, `_${index}`)}
+        ${ index === 0 ? firstTableColumns : _renderUserPseudoIdColumn(newColumnTemplate, sqlParameters.computeMethod, true).replace(/####/g, `_${index}`)}
       from base_data base
       where event_name = '${event}'
     ),
@@ -536,6 +599,9 @@ function _buildFunnelBaseSql(eventNames: string[], sqlParameters: SQLParameters)
     joinColumnsSQL = joinColumnsSQL.concat(`, table_${index}.event_name_${index} \n`);
     joinColumnsSQL = joinColumnsSQL.concat(`, table_${index}.user_pseudo_id_${index} \n`);
     joinColumnsSQL = joinColumnsSQL.concat(`, table_${index}.event_timestamp_${index} \n`);
+    if (groupCondition !== undefined) {
+      joinColumnsSQL = joinColumnsSQL.concat(`, table_${index}.${_getColNameWithPrefix(groupCondition)}_${index} \n`);
+    }
 
     let joinCondition = '';
     if ( sqlParameters.specifyJoinColumn) {
@@ -693,7 +759,7 @@ export function buildFunnelTableView(sqlParameters: SQLParameters) : string {
   });
 };
 
-export function buildFunnelView(sqlParameters: SQLParameters) : string {
+export function buildFunnelView(sqlParameters: SQLParameters, isMultipleChart: boolean = false) : string {
 
   let resultSql = '';
   const eventNames = _getEventsNameFromConditions(sqlParameters.eventAndConditions!);
@@ -704,7 +770,17 @@ export function buildFunnelView(sqlParameters: SQLParameters) : string {
     prefix = 'e';
   }
 
-  let baseSQL = _buildFunnelBaseSql(eventNames, sqlParameters);
+  let groupCondition: GroupingCondition | undefined = undefined;
+  let appendGroupingCol = false;
+  let colNameWithPrefix = '';
+
+  if (isMultipleChart && sqlParameters.groupCondition !== undefined) {
+    colNameWithPrefix = _getColNameWithPrefix(sqlParameters.groupCondition);
+    groupCondition = sqlParameters.groupCondition;
+    appendGroupingCol = true;
+  }
+
+  let baseSQL = _buildFunnelBaseSql(eventNames, sqlParameters, groupCondition);
   let finalTableColumnsSQL = `
      month
     ,week
@@ -727,6 +803,12 @@ export function buildFunnelView(sqlParameters: SQLParameters) : string {
     finalTableGroupBySQL = finalTableGroupBySQL.concat(`, event_id_${ind} \n`);
     finalTableGroupBySQL = finalTableGroupBySQL.concat(`, event_name_${ind} \n`);
     finalTableGroupBySQL = finalTableGroupBySQL.concat(`, user_pseudo_id_${ind} \n`);
+
+    if (appendGroupingCol) {
+      finalTableColumnsSQL = finalTableColumnsSQL.concat(`, ${colNameWithPrefix}_${ind} as group_col_${ind} \n`);
+      finalTableGroupBySQL = finalTableGroupBySQL.concat(`, ${colNameWithPrefix}_${ind} \n`);
+    }
+
   }
 
   baseSQL = baseSQL.concat(`,
@@ -747,6 +829,7 @@ export function buildFunnelView(sqlParameters: SQLParameters) : string {
        day::date as event_date
       ,e_name_${index}::varchar as event_name
       ,${prefix}_id_${index}::varchar as x_id
+      ${ appendGroupingCol ? `,group_col_${index}::varchar as group_col` : ''}
     from final_table where ${prefix}_id_${index} is not null
     `);
     index += 1;
@@ -812,7 +895,7 @@ function _buildMidTableSQlForPathAnalysis(eventNames: string[], sqlParameters: S
         user_pseudo_id,
         event_id,
         event_timestamp,
-        _session_id as session_id
+        _session_id
       from base_data
     ),
     `;
@@ -831,12 +914,12 @@ function _buildMidTableSQlForPathAnalysis(eventNames: string[], sqlParameters: S
       from base_data
     ),
       mid_table_2 as (
-      ${_buildSessionIdSQL(eventNames, sqlParameters, true)}
+      ${_buildSQLForEventNestParameter('_session_id', eventNames, sqlParameters, true)}
     ),
     mid_table as (
       select 
         mid_table_1.*,
-        mid_table_2.session_id
+        mid_table_2._session_id
       from 
         mid_table_1 join mid_table_2 on mid_table_1.event_date = mid_table_2.event_date and mid_table_1.event_id = mid_table_2.event_id
     ),
@@ -855,23 +938,23 @@ export function buildEventPathAnalysisView(sqlParameters: SQLParameters) : strin
     dataTableSql = `data as (
       select 
         *,
-        ROW_NUMBER() OVER (PARTITION BY session_id ORDER BY event_timestamp asc) as step_1,
-        ROW_NUMBER() OVER (PARTITION BY session_id ORDER BY event_timestamp asc) + 1 as step_2
+        ROW_NUMBER() OVER (PARTITION BY _session_id ORDER BY event_timestamp asc) as step_1,
+        ROW_NUMBER() OVER (PARTITION BY _session_id ORDER BY event_timestamp asc) + 1 as step_2
       from mid_table 
     ),
     step_table_1 as (
       select 
       data.user_pseudo_id user_pseudo_id,
-      data.session_id session_id,
+      data._session_id _session_id,
       min(step_1) min_step
       from data
       where event_name in ('${eventNames.join('\',\'')}')
-      group by user_pseudo_id, session_id
+      group by user_pseudo_id, _session_id
     ),
     step_table_2 as (
       select 
       data.*
-      from data join step_table_1 on data.user_pseudo_id = step_table_1.user_pseudo_id and data.session_id = step_table_1.session_id and data.step_1 >= step_table_1.min_step
+      from data join step_table_1 on data.user_pseudo_id = step_table_1.user_pseudo_id and data._session_id = step_table_1._session_id and data.step_1 >= step_table_1.min_step
     ),
     data_final as (
       select
@@ -880,16 +963,16 @@ export function buildEventPathAnalysisView(sqlParameters: SQLParameters) : strin
         user_pseudo_id,
         event_id,
         event_timestamp,
-        session_id,
+        _session_id,
         ROW_NUMBER() OVER (
           PARTITION BY
-            session_id
+            _session_id
           ORDER BY
             step_1 asc, step_2
         ) as step_1,
         ROW_NUMBER() OVER (
           PARTITION BY
-            session_id
+            _session_id
           ORDER BY
             step_1 asc, step_2
         ) + 1 as step_2
@@ -905,7 +988,7 @@ export function buildEventPathAnalysisView(sqlParameters: SQLParameters) : strin
       ${sqlParameters.computeMethod != ExploreComputeMethod.EVENT_CNT ? 'a.user_pseudo_id' : 'a.event_id' } as x_id
     from data_final a left join data_final b 
       on a.step_2 = b.step_1 
-      and a.session_id = b.session_id
+      and a._session_id = b._session_id
       and a.user_pseudo_id = b.user_pseudo_id
     where a.step_2 <= ${sqlParameters.maxStep ?? 10}
     `;
@@ -1049,7 +1132,7 @@ export function buildNodePathAnalysisView(sqlParameters: SQLParameters) : string
         from base_data
       ),
       mid_table_2 as (
-        ${_buildSessionIdSQL(['_screen_view', '_page_view'], sqlParameters, true)}
+        ${_buildSQLForEventNestParameter('_session_id', ['_screen_view', '_page_view'], sqlParameters, true)}
       ),
       mid_table_3 as (
         ${_buildNodePathSQL(['_screen_view', '_page_view'], sqlParameters, sqlParameters.pathAnalysis!.nodeType)}
@@ -1057,7 +1140,7 @@ export function buildNodePathAnalysisView(sqlParameters: SQLParameters) : string
       mid_table as (
         select 
           mid_table_1.*,
-          mid_table_2.session_id,
+          mid_table_2._session_id,
           mid_table_3.node
         from 
           mid_table_1 
@@ -1070,7 +1153,7 @@ export function buildNodePathAnalysisView(sqlParameters: SQLParameters) : string
         user_pseudo_id,
         event_id,
         event_timestamp,
-        session_id,
+        _session_id,
         case 
           when node in ('${sqlParameters.pathAnalysis?.nodes?.join('\',\'')}') then node 
           else 'other'
@@ -1078,14 +1161,14 @@ export function buildNodePathAnalysisView(sqlParameters: SQLParameters) : string
         ROW_NUMBER() OVER (
           PARTITION BY
             user_pseudo_id,
-            session_id
+            _session_id
           ORDER BY
             event_timestamp asc
         ) as step_1,
         ROW_NUMBER() OVER (
           PARTITION BY
             user_pseudo_id,
-            session_id
+            _session_id
           ORDER BY
             event_timestamp asc
         ) + 1 as step_2
@@ -1096,7 +1179,7 @@ export function buildNodePathAnalysisView(sqlParameters: SQLParameters) : string
     dataTableSql = `step_table_1 as (
       select
         user_pseudo_id,
-        session_id,
+        _session_id,
         min(step_1) min_step
       from
         data
@@ -1104,14 +1187,14 @@ export function buildNodePathAnalysisView(sqlParameters: SQLParameters) : string
         node in ('${sqlParameters.pathAnalysis?.nodes?.join('\',\'')}')
       group by
         user_pseudo_id,
-        session_id
+        _session_id
     ),
     step_table_2 as (
       select
         data.*
       from data
       join step_table_1 on data.user_pseudo_id = step_table_1.user_pseudo_id
-      and data.session_id = step_table_1.session_id
+      and data._session_id = step_table_1._session_id
       and data.step_1 >= step_table_1.min_step
     ),
     data_final as (
@@ -1120,12 +1203,12 @@ export function buildNodePathAnalysisView(sqlParameters: SQLParameters) : string
         user_pseudo_id,
         event_id,
         event_timestamp,
-        session_id,
+        _session_id,
         node,
         ROW_NUMBER() OVER (
           PARTITION BY
             user_pseudo_id,
-            session_id
+            _session_id
           ORDER BY
             step_1 asc,
             step_2
@@ -1133,7 +1216,7 @@ export function buildNodePathAnalysisView(sqlParameters: SQLParameters) : string
         ROW_NUMBER() OVER (
           PARTITION BY
             user_pseudo_id,
-            session_id
+            _session_id
           ORDER BY
             step_1 asc,
             step_2
@@ -1150,7 +1233,7 @@ export function buildNodePathAnalysisView(sqlParameters: SQLParameters) : string
       ${sqlParameters.computeMethod != ExploreComputeMethod.EVENT_CNT ? 'a.user_pseudo_id' : 'a.event_id' } as x_id
     from data_final a left join data_final b 
       on a.user_pseudo_id = b.user_pseudo_id 
-      and a.session_id = b.session_id
+      and a._session_id = b._session_id
       and a.step_2 = b.step_1
     where a.step_2 <= ${sqlParameters.maxStep ?? 10}
     `;
@@ -2074,8 +2157,8 @@ function _hasMoreThanOneNestConditionInEvent3(sqlParameters: SQLParameters): boo
 
   if (sqlParameters.pairEventAndConditions !== undefined) {
     for (const pair of sqlParameters.pairEventAndConditions) {
-      if (!pair.startEvent.sqlCondition) {
-        const has = _hasMoreThanOneNestConditionInEventBase(pair.startEvent.sqlCondition!);
+      if (pair.startEvent.sqlCondition !== undefined) {
+        const has = _hasMoreThanOneNestConditionInEventBase(pair.startEvent.sqlCondition);
         if (has) {
           return true;
         }
@@ -2089,8 +2172,8 @@ function _hasMoreThanOneNestConditionInEvent3(sqlParameters: SQLParameters): boo
 function _hasMoreThanOneNestConditionInEvent4(sqlParameters: SQLParameters): boolean {
   if (sqlParameters.pairEventAndConditions !== undefined) {
     for (const pair of sqlParameters.pairEventAndConditions) {
-      if (!pair.backEvent.sqlCondition) {
-        const has = _hasMoreThanOneNestConditionInEventBase(pair.backEvent.sqlCondition!);
+      if (pair.backEvent.sqlCondition !== undefined) {
+        const has = _hasMoreThanOneNestConditionInEventBase(pair.backEvent.sqlCondition);
         if (has) {
           return true;
         }
