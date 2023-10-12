@@ -195,7 +195,7 @@ describe('Lambda - store the metadata into DDB from Redshift', () => {
                 category: 'category',
                 valueEnum: [
                   {
-                    count: 30,
+                    count: 20,
                     value: 'value1',
                   },
                 ],
@@ -296,24 +296,11 @@ describe('Lambda - store the metadata into DDB from Redshift', () => {
             { stringValue: 'USER_ATTRIBUTE#projectId#appId' },
             { stringValue: 'projectId' },
             { stringValue: 'appId' },
-            { longValue: 9 },
+            { longValue: 20 },
             { stringValue: 'category' },
             { stringValue: 'userattributename' },
             { stringValue: 'String' },
             { stringValue: 'value1_10#value2_15#value3_25' },
-            { stringValue: 'ANDROID#IOS' },
-          ],
-          [
-            { stringValue: 'projectId#appId#userattributeName#valueType' },
-            { stringValue: '#202301' },
-            { stringValue: 'USER_ATTRIBUTE#projectId#appId' },
-            { stringValue: 'projectId' },
-            { stringValue: 'appId' },
-            { longValue: 11 },
-            { stringValue: 'category' },
-            { stringValue: 'userattributename' },
-            { stringValue: 'String' },
-            { stringValue: 'value1_15#value2_20#value4_20' },
             { stringValue: 'ANDROID#IOS' },
           ],
         ],
@@ -484,6 +471,15 @@ describe('Lambda - store the metadata into DDB from Redshift', () => {
                   ...userAttributeDayCommonData,
                   valueEnum: [
                     {
+                      count: 20,
+                      value: 'value1',
+                    },
+                  ],
+                },
+                day20: {
+                  ...userAttributeDayCommonData,
+                  valueEnum: [
+                    {
                       count: 10,
                       value: 'value1',
                     },
@@ -497,43 +493,22 @@ describe('Lambda - store the metadata into DDB from Redshift', () => {
                     },
                   ],
                 },
-                day11: {
-                  ...userAttributeDayCommonData,
-                  valueEnum: [
-                    {
-                      count: 15,
-                      value: 'value1',
-                    },
-                    {
-                      count: 20,
-                      value: 'value2',
-                    },
-                    {
-                      count: 20,
-                      value: 'value4',
-                    },
-                  ],
-                },
                 summary: {
                   name: 'userattributename',
                   valueType: 'String',
                   category: 'category',
                   valueEnum: [
                     {
-                      count: 35,
+                      count: 10,
                       value: 'value1',
                     },
                     {
-                      count: 35,
+                      count: 15,
                       value: 'value2',
                     },
                     {
                       count: 25,
                       value: 'value3',
-                    },
-                    {
-                      count: 20,
-                      value: 'value4',
                     },
                   ],
                 },

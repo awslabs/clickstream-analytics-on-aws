@@ -56,16 +56,24 @@ BEGIN
     event_name VARCHAR(255),
     project_id VARCHAR(255),
     app_info_app_id VARCHAR(255),
-		event_date VARCHAR(255),
+		event_timestamp BIGINT,
     property_category VARCHAR(20),
-		ingest_timestamp VARCHAR(15),
     property_name VARCHAR(255),
     property_value VARCHAR(255),
     value_type VARCHAR(255),
-    platform VARCHAR(255)
+    platform VARCHAR(255)	
   );
 
-	-- Table is for setting the the column of including into metadata
+  CREATE TEMP TABLE IF NOT EXISTS user_attribute_temp_table (
+		user_id VARCHAR(255),
+		event_timestamp BIGINT,
+    property_category VARCHAR(20),
+    property_name VARCHAR(255),
+    property_value VARCHAR(255),
+    value_type VARCHAR(255)
+  );	
+
+	-- Table is for setting the column name of including properties into metadata
 	CREATE TEMPORARY TABLE IF NOT EXISTS property_column_temp_table (column_name VARCHAR);
 
 	INSERT INTO 
@@ -74,7 +82,7 @@ BEGIN
 		('platform'), 
 		('project_id');
 
-	-- Table is for setting the the column and the properties that should be included into metadata
+	-- Table is for setting the column and the properties that should be included into metadata
 	CREATE TEMPORARY TABLE IF NOT EXISTS property_array_temp_table (column_name VARCHAR, property_name VARCHAR);
 
 	INSERT INTO 
@@ -117,45 +125,63 @@ BEGIN
 		('traffic_source', 'name'), 
 		('traffic_source', 'source');
 
-	CALL {{schema}}.{{sp_clickstream_log}}(log_name, 'info', 'create temp table successfully.');
+	-- Table is for setting the column of including user attributes into metadata
+	CREATE TEMPORARY TABLE IF NOT EXISTS user_column_temp_table (column_name VARCHAR);
+
+	INSERT INTO 
+		user_column_temp_table (column_name) 
+	VALUES 
+		('_first_visit_date'),
+		('_first_referer'),
+		('_first_traffic_source_type'),
+		('_first_traffic_medium'),
+		('_first_traffic_source'),
+		('_channel');			
+
+	CALL {{schema}}.{{sp_clickstream_log}}(log_name, 'info', 'create temp tables successfully.');
 
 	query := 'SELECT column_name FROM property_column_temp_table';
 	FOR rec IN EXECUTE query LOOP
-		EXECUTE 'INSERT INTO properties_temp_table (SELECT event_name, project_id, app_info.app_id::varchar AS app_info_app_id, event_date, ''other'' AS property_category, ingest_timestamp, ''' || quote_ident(rec.column_name) || ''' AS property_name, ' || quote_ident(rec.column_name) || '::varchar AS property_value, ''String'' AS value_type, platform FROM {{schema}}.ods_events WHERE ingest_timestamp >= EXTRACT(epoch FROM DATE_TRUNC(''day'', GETDATE() - INTERVAL ''' || quote_ident(day_range) || ' day'')::timestamp)*1000::bigint AND ingest_timestamp < EXTRACT(epoch FROM DATE_TRUNC(''day'', GETDATE())::timestamp)*1000::bigint)';
+		EXECUTE 'INSERT INTO properties_temp_table (SELECT event_name, project_id, app_info.app_id::varchar AS app_info_app_id, event_timestamp, ''other'' AS property_category, ''' || quote_ident(rec.column_name) || ''' AS property_name, ' || quote_ident(rec.column_name) || '::varchar AS property_value, ''string'' AS value_type, platform FROM {{schema}}.event WHERE event_timestamp >= EXTRACT(epoch FROM DATE_TRUNC(''day'', GETDATE() - INTERVAL ''' || quote_ident(day_range) || ' day'')::timestamp)*1000::bigint AND event_timestamp < EXTRACT(epoch FROM DATE_TRUNC(''day'', GETDATE())::timestamp)*1000::bigint)';
 	END LOOP;
 
 	query := 'SELECT column_name, property_name FROM property_array_temp_table';
 	FOR rec IN EXECUTE query LOOP
-		EXECUTE 'INSERT INTO properties_temp_table (SELECT event_name, project_id, app_info.app_id::varchar AS app_info_app_id, event_date, ''' || quote_ident(rec.column_name) || ''' AS property_category, ingest_timestamp, ' || quote_literal(rec.property_name) || ' AS property_name, ' || quote_ident(rec.column_name) || '.' || quote_ident(rec.property_name) || '::varchar AS property_value, CASE WHEN ''' || quote_ident(rec.property_name) || '''::varchar IN (''screen_height'', ''screen_width'', ''viewport_height'', ''viewport_width'', ''time_zone_offset_seconds'') THEN ''Integer'' ELSE ''String'' END AS value_type, platform FROM {{schema}}.ods_events WHERE ingest_timestamp >= EXTRACT(epoch FROM DATE_TRUNC(''day'', GETDATE() - INTERVAL ''' || quote_ident(day_range) || ' day'')::timestamp)*1000::bigint AND ingest_timestamp < EXTRACT(epoch FROM DATE_TRUNC(''day'', GETDATE())::timestamp)*1000::bigint)';
+		EXECUTE 'INSERT INTO properties_temp_table (SELECT event_name, project_id, app_info.app_id::varchar AS app_info_app_id, event_timestamp, ''' || quote_ident(rec.column_name) || ''' AS property_category, ' || quote_literal(rec.property_name) || ' AS property_name, ' || quote_ident(rec.column_name) || '.' || quote_ident(rec.property_name) || '::varchar AS property_value, CASE WHEN ''' || quote_ident(rec.property_name) || '''::varchar IN (''screen_height'', ''screen_width'', ''viewport_height'', ''viewport_width'', ''time_zone_offset_seconds'') THEN ''int'' ELSE ''string'' END AS value_type, platform FROM {{schema}}.event WHERE event_timestamp >= EXTRACT(epoch FROM DATE_TRUNC(''day'', GETDATE() - INTERVAL ''' || quote_ident(day_range) || ' day'')::timestamp)*1000::bigint AND event_timestamp < EXTRACT(epoch FROM DATE_TRUNC(''day'', GETDATE())::timestamp)*1000::bigint)';
 	END LOOP;
 
 	INSERT INTO properties_temp_table (
 		SELECT
-			event_name,
-			project_id,
-			app_info.app_id::varchar AS app_info_app_id,
-			event_date,
+			parameter.event_name,
+			'{{database_name}}' AS project_id,
+			'{{schema}}' AS app_info_app_id,
+			parameter.event_timestamp AS event_timestamp,
 			'event' AS property_category,
-			ingest_timestamp,
-			event_params.key::varchar AS property_name,
-			coalesce 
-				(nullif(event_params.value.string_value::varchar,'')
-			  	, nullif(event_params.value.int_value::varchar,'')
-			  	, nullif(event_params.value.float_value::varchar,'')
-			  	, nullif(event_params.value.double_value::varchar,'')) AS property_value,
-			CASE 
-				WHEN event_params.value.string_value::varchar IS NOT NULL THEN 'String'
-				WHEN event_params.value.int_value::varchar IS NOT NULL THEN 'Integer'
-				WHEN event_params.value.float_value::varchar IS NOT NULL THEN 'Float'
-				WHEN event_params.value.double_value::varchar IS NOT NULL THEN 'Double'
-			ELSE 'None'
+			parameter.event_param_key::varchar AS property_name,
+    CASE
+        WHEN event_param_double_value IS NOT NULL THEN CAST(event_param_double_value AS varchar)
+        WHEN event_param_float_value  IS NOT NULL THEN CAST(event_param_float_value AS varchar)
+        WHEN event_param_int_value    IS NOT NULL THEN CAST(event_param_int_value AS varchar)
+        WHEN event_param_string_value IS NOT NULL THEN event_param_string_value
+    END AS property_value,
+			CASE
+				WHEN event_param_double_value IS NOT NULL THEN 'double'
+				WHEN event_param_float_value  IS NOT NULL THEN 'float'
+				WHEN event_param_int_value    IS NOT NULL THEN 'int'
+				WHEN event_param_string_value IS NOT NULL THEN 'string'
 			END AS value_type,
-			platform
-		FROM {{schema}}.ods_events e, e.event_params AS event_params
+			event.platform AS platform
+		FROM 
+			{{schema}}.event_parameter parameter
+		JOIN 
+			{{schema}}.event event
+		ON 
+			parameter.event_timestamp = event.event_timestamp 
+			AND parameter.event_id = event.event_id 
 		WHERE 
 			property_name NOT LIKE '%timestamp%'
-			AND ingest_timestamp >= EXTRACT(epoch FROM DATE_TRUNC('day', GETDATE() - INTERVAL '1 day' * day_range)::timestamp)*1000::bigint
-			AND ingest_timestamp < EXTRACT(epoch FROM DATE_TRUNC('day', GETDATE())::timestamp)*1000::bigint
+			AND parameter.event_timestamp >= EXTRACT(epoch FROM DATE_TRUNC('day', GETDATE() - INTERVAL '1 day' * day_range)::timestamp)*1000::bigint
+			AND parameter.event_timestamp < EXTRACT(epoch FROM DATE_TRUNC('day', GETDATE())::timestamp)*1000::bigint
 	);
 
 	CALL {{schema}}.{{sp_clickstream_log}}(log_name, 'info', 'Insert data into properties_temp_table table successfully.');
@@ -219,8 +245,8 @@ BEGIN
 						project_id, 
 						app_info_app_id, 
 						property_category, 
-						'#' || TO_CHAR(TO_DATE(event_date, 'YYYY-MM-DD'), 'YYYYMM') AS month,
-						EXTRACT(DAY FROM TO_DATE(event_date, 'YYYY-MM-DD')) AS day_number,
+						'#' || TO_CHAR(TIMESTAMP 'epoch' + (event_timestamp / 1000.0) * INTERVAL '1 second', 'YYYYMM') AS month,
+						EXTRACT(DAY FROM TIMESTAMP 'epoch' + (event_timestamp / 1000.0) * INTERVAL '1 second') AS day_number,
 						property_name,
 						property_value, 
 						value_type, 
@@ -243,6 +269,36 @@ BEGIN
 
 	CALL {{schema}}.{{sp_clickstream_log}}(log_name, 'info', 'Insert all parameters data into event_properties_metadata table successfully.');	
 
+	query := 'SELECT column_name FROM user_column_temp_table';
+	FOR rec IN EXECUTE query LOOP
+		EXECUTE 'INSERT INTO user_attribute_temp_table (SELECT user_id, event_timestamp, ''user_outer'' AS property_category, ''' || quote_ident(rec.column_name) || ''' AS property_name, ' || quote_ident(rec.column_name) || '::varchar AS property_value, ''String'' AS value_type FROM {{schema}}.user)';
+	END LOOP;	
+
+	INSERT INTO user_attribute_temp_table (
+		SELECT
+			user_id,
+			event_timestamp,
+			'user' AS property_category,
+			user_properties.key::varchar AS property_name,
+			coalesce 
+			(
+			nullif
+				(user_properties.value.string_value::varchar,'')
+				, nullif(user_properties.value.int_value::varchar,'')
+				, nullif(user_properties.value.float_value::varchar,'')
+				, nullif(user_properties.value.double_value::varchar,'')
+			) AS property_value,
+			CASE 
+				WHEN user_properties.value.string_value::varchar IS NOT NULL THEN 'string'
+				WHEN user_properties.value.int_value::varchar IS NOT NULL THEN 'int'
+				WHEN user_properties.value.float_value::varchar IS NOT NULL THEN 'float'
+				WHEN user_properties.value.double_value::varchar IS NOT NULL THEN 'double'
+			ELSE 'None'
+			END AS value_type
+		FROM 
+			{{schema}}.user u, u.user_properties AS user_properties
+	);	
+
   -- user attribute
 	INSERT INTO {{schema}}.user_attribute_metadata (id, month, prefix, project_id, app_id, day_number, category, property_name, value_type, value_enum) 
 	SELECT
@@ -258,70 +314,37 @@ BEGIN
 		property_values AS value_enum
 	FROM (
 		SELECT 
-			project_id, 
-			app_info_app_id, 
-			month, 
-			day_number, 
+			'{{database_name}}' AS project_id,
+			'{{schema}}' AS app_info_app_id,
+			'#' || TO_CHAR(CURRENT_DATE, 'YYYYMM') AS month,
+			EXTRACT(DAY FROM CURRENT_DATE) AS day_number,
+			property_category,
 			property_name,
 			value_type, 
 			LISTAGG(property_value || '_' || parameter_count, '#') WITHIN GROUP (ORDER BY property_value) as property_values
 		FROM (
-			SELECT 
-				project_id, 
-				app_info_app_id, 
-				month, 
-				day_number, 
-				property_name, 
-				property_value, 
-				value_type, 
-				parameter_count
+			SELECT
+				property_category,
+				property_name,
+				property_value,
+				value_type,
+				count(*) AS parameter_count
 			FROM (
-				SELECT 
-					project_id, 
-					app_info_app_id, 
-					month, 
-					day_number, 
-					property_name, 
-					property_value, 
-					value_type, 
-					parameter_count,
-					ROW_NUMBER() OVER (PARTITION BY project_id, app_info_app_id, month, day_number, property_name, value_type ORDER BY parameter_count DESC) AS row_num
-				FROM (
-					SELECT
-						project_id,
-						app_info.app_id::varchar AS app_info_app_id,
-						'#' || TO_CHAR(TO_DATE(event_date, 'YYYY-MM-DD'), 'YYYYMM') AS month,
-						EXTRACT(DAY FROM TO_DATE(event_date, 'YYYY-MM-DD')) AS day_number,
-						user_properties.key::varchar AS property_name,
-						coalesce 
-						(
-						nullif
-							(user_properties.value.string_value::varchar,'')
-							, nullif(user_properties.value.int_value::varchar,'')
-							, nullif(user_properties.value.float_value::varchar,'')
-							, nullif(user_properties.value.double_value::varchar,'')
-						) AS property_value,
-						CASE 
-							WHEN user_properties.value.string_value::varchar IS NOT NULL THEN 'String'
-							WHEN user_properties.value.int_value::varchar IS NOT NULL THEN 'Integer'
-							WHEN user_properties.value.float_value::varchar IS NOT NULL THEN 'Float'
-							WHEN user_properties.value.double_value::varchar IS NOT NULL THEN 'Double'
-						ELSE 'None'
-						END AS value_type,
-						count(*) AS parameter_count
-					FROM {{schema}}.ods_events e, e.user_properties AS user_properties
-					WHERE 
-						property_name NOT LIKE '%timestamp%'
-						AND ingest_timestamp >= EXTRACT(epoch FROM DATE_TRUNC('day', GETDATE() - INTERVAL '1 day' * day_range)::timestamp)*1000::bigint
-						AND ingest_timestamp < EXTRACT(epoch FROM DATE_TRUNC('day', GETDATE())::timestamp)*1000::bigint
-						AND property_value IS NOT NULL
-					GROUP BY project_id, app_info_app_id, month, day_number, property_name, property_value, value_type
-				)
+				SELECT
+					*,
+					ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY event_timestamp DESC) AS rank
+				FROM
+					user_attribute_temp_table
 			)
-			WHERE row_num <= top_frequent_properties_limit
+			WHERE 
+				property_name NOT LIKE '%timestamp%'
+				AND rank = 1 
+				AND property_value IS NOT NULL
+			GROUP BY property_category, property_name, property_value, value_type
 		)
-		GROUP BY project_id, app_info_app_id, month, day_number, property_name, value_type
+		GROUP BY project_id, app_info_app_id, month, day_number, property_category, property_name, value_type
 	);
+
 	CALL {{schema}}.{{sp_clickstream_log}}(log_name, 'info', 'Insert all user attribute data into user_attribute_metadata table successfully.');
 
 	INSERT INTO {{schema}}.event_metadata (id, month, prefix, project_id, app_id, day_number, count, event_name, platform)
@@ -340,14 +363,14 @@ BEGIN
 					event_name,
 					project_id,
 					app_info.app_id::varchar AS app_info_app_id,
-					'#' || TO_CHAR(TO_DATE(event_date, 'YYYY-MM-DD'), 'YYYYMM') AS month,
-					EXTRACT(DAY FROM TO_DATE(event_date, 'YYYY-MM-DD')) AS day_number,
+					'#' || TO_CHAR(TIMESTAMP 'epoch' + (event_timestamp / 1000.0) * INTERVAL '1 second', 'YYYYMM') AS month,
+					EXTRACT(DAY FROM TIMESTAMP 'epoch' + (event_timestamp / 1000.0) * INTERVAL '1 second') AS day_number,
 					LISTAGG(DISTINCT platform, '#') WITHIN GROUP (ORDER BY platform) AS platform,
 					count(*) as count
-			FROM {{schema}}.ods_events
+			FROM {{schema}}.event
 			WHERE 
-					ingest_timestamp >= EXTRACT(epoch FROM DATE_TRUNC('day', GETDATE() - INTERVAL '1 day' * day_range)::timestamp)*1000::bigint
-					AND ingest_timestamp < EXTRACT(epoch FROM DATE_TRUNC('day', GETDATE())::timestamp)*1000::bigint
+					event_timestamp >= EXTRACT(epoch FROM DATE_TRUNC('day', GETDATE() - INTERVAL '1 day' * day_range)::timestamp)*1000::bigint
+					AND event_timestamp < EXTRACT(epoch FROM DATE_TRUNC('day', GETDATE())::timestamp)*1000::bigint
 					AND event_name != '_' 
 			GROUP BY event_name, project_id, app_info_app_id, month, day_number  
 	);

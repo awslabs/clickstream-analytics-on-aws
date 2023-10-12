@@ -229,6 +229,7 @@ async function createSchemas(props: ResourcePropertiesType, biUsername: string) 
   for (const app of appIds) {
     const sqlStatements: string[] = [];
     const mustacheParam: MustacheParamType = {
+      database_name: props.projectId,
       schema: app,
       table_ods_events: odsTableNames.odsEvents,
       table_event: odsTableNames.event,
@@ -267,6 +268,7 @@ async function updateSchemas(props: ResourcePropertiesType, biUsername: string, 
   for (const app of appUpdateProps.createAppIds) {
     const sqlStatements: string[] = [];
     const mustacheParam: MustacheParamType = {
+      database_name: props.projectId,
       schema: app,
       table_ods_events: odsTableNames.odsEvents,
       table_event: odsTableNames.event,
@@ -290,6 +292,7 @@ async function updateSchemas(props: ResourcePropertiesType, biUsername: string, 
 
   for (const app of appUpdateProps.updateAppIds) {
     const mustacheParam: MustacheParamType = {
+      database_name: props.projectId,
       schema: app,
       table_ods_events: odsTableNames.odsEvents,
       table_event: odsTableNames.event,
@@ -350,6 +353,7 @@ async function createViewForReporting(props: ResourcePropertiesType) {
   for (const app of appIds) {
     const sqlStatements: string[] = [];
     const mustacheParam: MustacheParamType = {
+      database_name: props.projectId,
       schema: app,
       table_ods_events: odsTableNames.odsEvents,
       table_event: odsTableNames.event,
@@ -382,6 +386,7 @@ async function updateViewForReporting(props: ResourcePropertiesType, oldProps: R
   for (const app of appUpdateProps.createAppIds) {
     const sqlStatements: string[] = [];
     const mustacheParam: MustacheParamType = {
+      database_name: props.projectId,
       schema: app,
       table_ods_events: odsTableNames.odsEvents,
       table_event: odsTableNames.event,
@@ -398,6 +403,7 @@ async function updateViewForReporting(props: ResourcePropertiesType, oldProps: R
 
   for (const app of appUpdateProps.updateAppIds) {
     const mustacheParam: MustacheParamType = {
+      database_name: props.projectId,
       schema: app,
       table_ods_events: odsTableNames.odsEvents,
       table_event: odsTableNames.event,

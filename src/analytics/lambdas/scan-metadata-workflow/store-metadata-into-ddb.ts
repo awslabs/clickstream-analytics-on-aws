@@ -233,6 +233,12 @@ async function handleUserAttributeMetadata(appId: string, metadataItems: any[]) 
         valueEnum: convertValueEnumToDDBList(record[9].stringValue),
         valueType: record[8].stringValue,
       };
+      item.summary = {
+        category: record[6].stringValue,
+        name: record[7].stringValue,
+        valueEnum: convertValueEnumToDDBList(record[9].stringValue),
+        valueType: record[8].stringValue,
+      };
     } else {
       const item = {
         id: record[0].stringValue,
@@ -250,36 +256,16 @@ async function handleUserAttributeMetadata(appId: string, metadataItems: any[]) 
           valueEnum: convertValueEnumToDDBList(record[9].stringValue),
           valueType: record[8].stringValue,
         },
+        summary: {
+          category: record[6].stringValue,
+          name: record[7].stringValue,
+          valueEnum: convertValueEnumToDDBList(record[9].stringValue),
+          valueType: record[8].stringValue,
+        },
       };
       itemsMap.set(key, item);
     }
   });
-
-  // aggregate summary info
-  for (const item of itemsMap.values()) {
-    const valueEnumAggregation: { [key: string]: number } = {};
-    for (const key in item) {
-      if (key.startsWith('day')) {
-        const dayData = item[key];
-        dayData.valueEnum.forEach((element: any) => {
-          if (valueEnumAggregation[element.value]) {
-            valueEnumAggregation[element.value] += element.count;
-          } else {
-            valueEnumAggregation[element.value] = element.count;
-          }
-        });
-      }
-    }
-    item.summary = {
-      name: item.name,
-      valueType: item.valueType,
-      category: item.category,
-      valueEnum: Object.keys(valueEnumAggregation).map(key => ({
-        count: valueEnumAggregation[key],
-        value: key,
-      })),
-    };
-  }
 
   putItemsMapIntoDDBItems(metadataItems, itemsMap);
 }
