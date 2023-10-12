@@ -65,7 +65,7 @@ export const EMAIL_PATTERN =
   '\\w+([-+.]\\w+)*@\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*';
 export const validateEmails = (emails: string) => {
   const emailArray = emails.split(',');
-  const regex = new RegExp(EMAIL_PATTERN);
+  const regex = new RegExp(`${EMAIL_PATTERN}`);
   for (const item of emailArray) {
     const email = item.trim();
     if (!regex.test(email)) {
