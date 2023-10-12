@@ -65,7 +65,6 @@ const ProjectWithAlarm: React.FC<ProjectWithAlarmProps> = (
         state: { activeTab: 'alarms' },
       }
     );
-    return;
   };
 
   useEffect(() => {

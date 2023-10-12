@@ -47,7 +47,7 @@ const PipelineStatus: React.FC<PipelineStatusProps> = (
     useState<StatusIndicatorProps.Type>('loading');
   useEffect(() => {
     let tmpDisplayStatus = '';
-    let tmpIndicatorType: StatusIndicatorProps.Type = 'loading';
+    let tmpIndicatorType: StatusIndicatorProps.Type;
     if (
       updatedStatus === EPipelineStatus.Creating ||
       updatedStatus === EPipelineStatus.Updating ||

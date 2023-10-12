@@ -20,6 +20,7 @@ import {
   Table,
 } from '@cloudscape-design/components';
 import { updateMetadataDisplay } from 'apis/analytics';
+import { cloneDeep } from 'lodash';
 import {
   TableEmptyState,
   TableNoMatchState,
@@ -56,6 +57,23 @@ const MetadataDictionaryTable: React.FC<MetadataDictionaryTableProps> = (
   const { t } = useTranslation();
   const { parameter, tableI18nStrings } = props;
 
+  const buildEditCell = (
+    currentValue: any,
+    setValue: any,
+    item: IMetadataAttributeValue
+  ) => {
+    return (
+      <Input
+        autoFocus={true}
+        value={currentValue ?? item.displayValue}
+        onChange={(event) => {
+          setValue(event.detail.value);
+        }}
+        placeholder={t('tag.valuePlaceholder') ?? ''}
+      />
+    );
+  };
+
   const COLUMN_DEFINITIONS = [
     {
       id: 'value',
@@ -81,18 +99,7 @@ const MetadataDictionaryTable: React.FC<MetadataDictionaryTableProps> = (
         editingCell: (
           item: IMetadataAttributeValue,
           { setValue, currentValue }: any
-        ) => {
-          return (
-            <Input
-              autoFocus={true}
-              value={currentValue ?? item.displayValue}
-              onChange={(event) => {
-                setValue(event.detail.value);
-              }}
-              placeholder={t('tag.valuePlaceholder') ?? ''}
-            />
-          );
-        },
+        ) => buildEditCell(currentValue, setValue, item),
       },
     },
   ];
@@ -128,7 +135,7 @@ const MetadataDictionaryTable: React.FC<MetadataDictionaryTableProps> = (
   );
 
   const persistChanges = () => {
-    setData(data);
+    setData(cloneDeep(data));
     setItemsSnap([]);
   };
 

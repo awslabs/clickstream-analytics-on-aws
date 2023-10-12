@@ -21,7 +21,8 @@ export const generateStr = (length: number) => {
   let randomString = '';
   const letters = 'abcdefghijklmnopqrstuvwxyz';
   for (let i = 0; i < length; i++) {
-    const randomIndex = Math.floor(Math.random() * letters.length);
+    const date = new Date();
+    const randomIndex = date.getMilliseconds() % letters.length;
     randomString += letters[randomIndex];
   }
   return randomString;
@@ -63,8 +64,8 @@ export const checkStringValidRegex = (str: string, regex: RegExp) => {
 export const validateEmails = (emails: string) => {
   const emailArray = emails.split(',');
   const regex = /\w[-\w.+]*@([A-Za-z0-9][-A-Za-z0-9]+\.)+[A-Za-z]{2,14}/;
-  for (let i = 0; i < emailArray.length; i++) {
-    const email = emailArray[i].trim();
+  for (const item of emailArray) {
+    const email = item.trim();
     if (!regex.test(email)) {
       return false;
     }
@@ -312,3 +313,9 @@ export const getValueFromStackOutputs = (
   }
   return res;
 };
+
+/**
+ * The `ternary` function in TypeScript returns `caseOne` if `cond` is true, otherwise it returns
+ */
+export const ternary = <T>(cond: any, caseOne: T, caseTwo: T) =>
+  cond ? caseOne : caseTwo;

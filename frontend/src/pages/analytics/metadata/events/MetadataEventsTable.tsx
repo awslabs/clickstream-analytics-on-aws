@@ -24,6 +24,16 @@ import MetadataSourceFC from '../comps/MetadataSource';
 import MetadataTable from '../table/MetadataTable';
 import { descriptionRegex, displayNameRegex } from '../table/table-config';
 
+interface IEventTableItem {
+  name: string;
+  displayName: string;
+  description: string;
+  metadataSource: MetadataSource;
+  hasData: boolean;
+  platform: MetadataPlatform[];
+  dataVolumeLastDay: number;
+}
+
 interface MetadataEventsTableProps {
   setShowDetails: (show: boolean, data?: IMetadataType) => void;
 }
@@ -35,109 +45,125 @@ const MetadataEventsTable: React.FC<MetadataEventsTableProps> = (
   const { t } = useTranslation();
   const { setShowDetails } = props;
 
+  const renderEditNameCell = (
+    item: IEventTableItem,
+    setValue: any,
+    currentValue: string
+  ) => {
+    return (
+      <Input
+        autoFocus={true}
+        value={currentValue ?? item.displayName}
+        onChange={(event) => {
+          setValue(event.detail.value);
+        }}
+        placeholder={t('tag.valuePlaceholder') ?? ''}
+      />
+    );
+  };
+
+  const renderEditDescCell = (
+    item: IEventTableItem,
+    setValue: any,
+    currentValue: string
+  ) => {
+    return (
+      <Input
+        autoFocus={true}
+        value={currentValue ?? item.description}
+        onChange={(event) => {
+          setValue(event.detail.value);
+        }}
+        placeholder={t('tag.valuePlaceholder') ?? ''}
+      />
+    );
+  };
+
+  const renderDataSource = (e: IEventTableItem) => {
+    return <MetadataSourceFC source={e.metadataSource} />;
+  };
+
+  const renderHasData = (e: IEventTableItem) => {
+    return (
+      <StatusIndicator type={e.hasData ? 'success' : 'stopped'}>
+        {e.hasData ? 'Yes' : 'No'}
+      </StatusIndicator>
+    );
+  };
+
+  const renderPlatform = (e: IEventTableItem) => {
+    return <MetadataPlatformFC platform={e.platform} />;
+  };
+
+  const renderLastDay = (e: IEventTableItem) => {
+    return <MetadataDataVolumeFC dataVolume={e.dataVolumeLastDay} />;
+  };
+
   const COLUMN_DEFINITIONS = [
     {
       id: 'name',
       header: t('analytics:metadata.event.tableColumnName'),
-      cell: (e: { name: string }) => {
+      cell: (e: IEventTableItem) => {
         return e.name;
       },
     },
     {
       id: 'displayName',
       header: t('analytics:metadata.event.tableColumnDisplayName'),
-      cell: (e: { displayName: string }) => {
+      cell: (e: IEventTableItem) => {
         return e.displayName;
       },
       minWidth: 180,
       editConfig: {
-        validation(item: any, value: any) {
+        validation(item: IEventTableItem, value: string) {
           return !displayNameRegex.test(value)
             ? undefined
             : t('tag.invalidInput');
         },
-        editingCell: (
-          item: { displayName: string },
-          { setValue, currentValue }: any
-        ) => {
-          return (
-            <Input
-              autoFocus={true}
-              value={currentValue ?? item.displayName}
-              onChange={(event) => {
-                setValue(event.detail.value);
-              }}
-              placeholder={t('tag.valuePlaceholder') ?? ''}
-            />
-          );
-        },
+        editingCell: (item: IEventTableItem, { setValue, currentValue }: any) =>
+          renderEditNameCell(item, setValue, currentValue),
       },
     },
     {
       id: 'description',
       header: t('analytics:metadata.event.tableColumnDescription'),
-      cell: (e: { description: string }) => {
+      cell: (e: IEventTableItem) => {
         return e.description;
       },
       minWidth: 180,
       editConfig: {
-        validation(item: any, value: any) {
+        validation(item: IEventTableItem, value: string) {
           return !descriptionRegex.test(value)
             ? undefined
             : t('tag.invalidInput');
         },
-        editingCell: (
-          item: { description: string },
-          { setValue, currentValue }: any
-        ) => {
-          return (
-            <Input
-              autoFocus={true}
-              value={currentValue ?? item.description}
-              onChange={(event) => {
-                setValue(event.detail.value);
-              }}
-              placeholder={t('tag.valuePlaceholder') ?? ''}
-            />
-          );
-        },
+        editingCell: (item: IEventTableItem, { setValue, currentValue }: any) =>
+          renderEditDescCell(item, setValue, currentValue),
       },
     },
     {
       id: 'metadataSource',
       header: t('analytics:metadata.event.tableColumnMetadataSource'),
       sortingField: 'metadataSource',
-      cell: (e: { metadataSource: MetadataSource }) => {
-        return <MetadataSourceFC source={e.metadataSource} />;
-      },
+      cell: (e: IEventTableItem) => renderDataSource(e),
     },
     {
       id: 'hasData',
       header: t('analytics:metadata.event.tableColumnHasData'),
       sortingField: 'hasData',
-      cell: (e: { hasData: boolean }) => {
-        return (
-          <StatusIndicator type={e.hasData ? 'success' : 'stopped'}>
-            {e.hasData ? 'Yes' : 'No'}
-          </StatusIndicator>
-        );
-      },
+      cell: (e: IEventTableItem) => renderHasData(e),
     },
     {
       id: 'platform',
       header: t('analytics:metadata.event.tableColumnPlatform'),
       sortingField: 'platform',
-      cell: (e: { platform: MetadataPlatform[] }) => {
-        return <MetadataPlatformFC platform={e.platform} />;
-      },
+      cell: (e: IEventTableItem) => renderPlatform(e),
     },
     {
       id: 'dataVolumeLastDay',
       header: t('analytics:metadata.event.tableColumnDataVolumeLastDay'),
       sortingField: 'dataVolumeLastDay',
-      cell: (e: { dataVolumeLastDay: number }) => {
-        return <MetadataDataVolumeFC dataVolume={e.dataVolumeLastDay} />;
-      },
+      cell: (e: IEventTableItem) => renderLastDay(e),
     },
   ];
   const CONTENT_DISPLAY = [

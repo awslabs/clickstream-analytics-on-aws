@@ -35,6 +35,7 @@ import { getSTSUploadRole } from 'apis/resource';
 import CustomBreadCrumb from 'components/layouts/CustomBreadCrumb';
 import Navigation from 'components/layouts/Navigation';
 import { AppContext } from 'context/AppContext';
+import { cloneDeep } from 'lodash';
 import moment from 'moment';
 import React, { useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -71,9 +72,9 @@ function Content() {
   const [uploadedDependencyFiles, setUploadedDependencyFiles] = useState<
     File[]
   >([]);
-  const [dependeciesS3FileKeys, setdependeciesS3FileKeys] = useState<string[]>(
-    []
-  );
+  const [dependenciesS3FileKeys, setDependenciesS3FileKeys] = useState<
+    string[]
+  >([]);
 
   const [s3Client, setS3Client] = useState<any>();
   const [curPlugin, setCurPlugin] = useState<IPlugin>({
@@ -144,7 +145,7 @@ function Content() {
       return;
     }
     setLoadingCreate(true);
-    curPlugin.dependencyFiles = dependeciesS3FileKeys;
+    curPlugin.dependencyFiles = dependenciesS3FileKeys;
     try {
       const { success, data }: ApiResponse<ResponseCreate> = await createPlugin(
         curPlugin
@@ -227,71 +228,64 @@ function Content() {
     }
   };
 
-  const uploadDependeciesFiles = async (readyToUploadFiles: File[]) => {
+  const uploadDependenciesFiles = async (readyToUploadFiles: File[]) => {
     setShowUploadDependenciesSuccess(false);
-    try {
-      (async () => {
-        const results = await Promise.all(
-          readyToUploadFiles.map(async (element) => {
-            dependenciesUploadingArr.push({
-              name: element.name,
-              loaded: 0,
-              total: 0,
-              isUploaded: false,
-            });
-            const Key = buildFileKey(element?.name);
-
-            const parallelUploads3 = new Upload({
-              client: s3Client,
-              params: {
-                Bucket: appConfig?.solution_data_bucket,
-                Key: Key,
-                Body: element,
-              },
-              queueSize: 4,
-              partSize: 1024 * 1024 * 5,
-              leavePartsOnError: false,
-            });
-
-            parallelUploads3.on('httpUploadProgress', (progress: any) => {
-              if (progress.loaded > 0 && progress.loaded === progress.total) {
-                setUploadedDependencyFiles((prev) => {
-                  return [...prev, element];
-                });
-              }
-              const tmpArr: any = JSON.parse(
-                JSON.stringify(dependenciesUploadingArr)
-              );
-              if (tmpArr) {
-                tmpArr.find((item: any) => item.name === element.name).loaded =
-                  progress.loaded;
-                tmpArr.find((item: any) => item.name === element.name).total =
-                  progress.total;
-                setDependenciesUploadingArr(tmpArr);
-              }
-            });
-            const result: any = await parallelUploads3.done();
-            if (result && result.Key) {
-              return result;
-            }
-          })
-        );
-        if (results && results.length > 0) {
-          setdependeciesS3FileKeys((prev) => {
-            return [
-              ...prev,
-              ...results.map((element) => buildS3Path(element.Key)),
-            ];
+    (async () => {
+      const results = await Promise.all(
+        readyToUploadFiles.map(async (element) => {
+          dependenciesUploadingArr.push({
+            name: element.name,
+            loaded: 0,
+            total: 0,
+            isUploaded: false,
           });
-        }
-        setUploadDependenciesProgress(0);
-        setShowUploadDependenciesSuccess(true);
-        setDependenciesUploadingArr([]);
-      })();
-    } catch (error) {
-      alertMsg(t('upload.uploadFailed'), 'error');
-      console.error(error);
-    }
+          const Key = buildFileKey(element?.name);
+
+          const parallelUploads3 = new Upload({
+            client: s3Client,
+            params: {
+              Bucket: appConfig?.solution_data_bucket,
+              Key: Key,
+              Body: element,
+            },
+            queueSize: 4,
+            partSize: 1024 * 1024 * 5,
+            leavePartsOnError: false,
+          });
+
+          parallelUploads3.on('httpUploadProgress', (progress: any) => {
+            if (progress.loaded > 0 && progress.loaded === progress.total) {
+              setUploadedDependencyFiles((prev) => {
+                return [...prev, element];
+              });
+            }
+            const tmpArr: any = cloneDeep(dependenciesUploadingArr);
+            if (tmpArr) {
+              tmpArr.find((item: any) => item.name === element.name).loaded =
+                progress.loaded;
+              tmpArr.find((item: any) => item.name === element.name).total =
+                progress.total;
+              setDependenciesUploadingArr(tmpArr);
+            }
+          });
+          const result: any = await parallelUploads3.done();
+          if (result.Key) {
+            return result;
+          }
+        })
+      );
+      if (results && results.length > 0) {
+        setDependenciesS3FileKeys((prev) => {
+          return [
+            ...prev,
+            ...results.map((element) => buildS3Path(element.Key)),
+          ];
+        });
+      }
+      setUploadDependenciesProgress(0);
+      setShowUploadDependenciesSuccess(true);
+      setDependenciesUploadingArr([]);
+    })();
   };
 
   useEffect(() => {
@@ -309,7 +303,7 @@ function Content() {
         dependenciesFiles,
         uploadedDependencyFiles
       );
-      uploadDependeciesFiles(missingFiles);
+      uploadDependenciesFiles(missingFiles);
     }
   }, [dependenciesFiles]);
 

@@ -75,6 +75,34 @@ const DomainNameWithStatus: React.FC<DomainNameWithStatusProps> = (
     }
   }, [pipelineId, dns, customDomain, endpoint, fetch]);
 
+  const renderStatus = () => {
+    if (domainResolved) {
+      return (
+        <span className="ml-5">
+          <StatusIndicator type="success" />
+        </span>
+      );
+    } else {
+      return (
+        <Popover
+          dismissButton={false}
+          position="top"
+          size="small"
+          triggerType="custom"
+          content={
+            <StatusIndicator type="error">
+              {t('common:status.dnsError')}
+            </StatusIndicator>
+          }
+        >
+          <span className="ml-5">
+            <StatusIndicator type="error" />
+          </span>
+        </Popover>
+      );
+    }
+  };
+
   return (
     <div>
       {showText ? (
@@ -88,28 +116,7 @@ const DomainNameWithStatus: React.FC<DomainNameWithStatusProps> = (
                   <Spinner />
                 </span>
               ) : (
-                pipelineId &&
-                (domainResolved ? (
-                  <span className="ml-5">
-                    <StatusIndicator type="success" />
-                  </span>
-                ) : (
-                  <Popover
-                    dismissButton={false}
-                    position="top"
-                    size="small"
-                    triggerType="custom"
-                    content={
-                      <StatusIndicator type="error">
-                        {t('common:status.dnsError')}
-                      </StatusIndicator>
-                    }
-                  >
-                    <span className="ml-5">
-                      <StatusIndicator type="error" />
-                    </span>
-                  </Popover>
-                ))
+                pipelineId && renderStatus()
               )}
             </>
           ) : null}

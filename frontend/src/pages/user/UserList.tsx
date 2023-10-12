@@ -27,6 +27,13 @@ import { IUserRole, TIME_FORMAT } from 'ts/const';
 import { XSS_PATTERN } from 'ts/constant-ln';
 import UserTable from './UserTable';
 
+interface IUserTableItem {
+  id: string;
+  name: string;
+  role: IUserRole;
+  createAt: string;
+}
+
 const UserList: React.FC = () => {
   const { t } = useTranslation();
 
@@ -50,42 +57,69 @@ const UserList: React.FC = () => {
     }
   };
 
+  const renderEditNameCell = (
+    item: IUserTableItem,
+    setValue: any,
+    currentValue: string
+  ) => {
+    return (
+      <Input
+        autoFocus={true}
+        value={currentValue ?? item.name}
+        onChange={(item) => {
+          setValue(item.detail.value);
+        }}
+        placeholder={t('tag.valuePlaceholder') ?? ''}
+      />
+    );
+  };
+
+  const renderEditRoleCell = (
+    item: IUserTableItem,
+    setValue: any,
+    currentValue: string
+  ) => {
+    return (
+      <Select
+        autoFocus={true}
+        expandToViewport={true}
+        options={roleOptions}
+        onChange={(event: any) => {
+          setValue(event.detail.selectedOption.value);
+        }}
+        selectedOption={
+          roleOptions.find(
+            (option: SelectProps.Option) =>
+              option.value === (currentValue ?? item.role)
+          ) ?? roleOptions[0]
+        }
+      />
+    );
+  };
+
   const COLUMN_DEFINITIONS = [
     {
       id: 'id',
       header: t('user:labels.tableColumnUserId'),
-      cell: (e: { id: string }) => {
+      cell: (e: IUserTableItem) => {
         return e.id;
       },
     },
     {
       id: 'name',
       header: t('user:labels.tableColumnName'),
-      cell: (e: { name: string }) => {
+      cell: (e: IUserTableItem) => {
         return e.name;
       },
       minWidth: 180,
       editConfig: {
-        validation(item: any, value: any) {
+        validation(item: IUserTableItem, value: any) {
           return !new RegExp(XSS_PATTERN).test(value)
             ? undefined
             : t('tag.invalidInput');
         },
-        editingCell: (
-          item: { name: string },
-          { setValue, currentValue }: any
-        ) => {
-          return (
-            <Input
-              autoFocus={true}
-              value={currentValue ?? item.name}
-              onChange={(item) => {
-                setValue(item.detail.value);
-              }}
-              placeholder={t('tag.valuePlaceholder') ?? ''}
-            />
-          );
-        },
+        editingCell: (item: IUserTableItem, { setValue, currentValue }: any) =>
+          renderEditNameCell(item, setValue, currentValue),
       },
     },
     {
@@ -93,27 +127,8 @@ const UserList: React.FC = () => {
       header: t('user:labels.tableColumnRole'),
       minWidth: 200,
       editConfig: {
-        editingCell: (
-          item: { role: IUserRole },
-          { setValue, currentValue }: any
-        ) => {
-          return (
-            <Select
-              autoFocus={true}
-              expandToViewport={true}
-              options={roleOptions}
-              onChange={(event: any) => {
-                setValue(event.detail.selectedOption.value);
-              }}
-              selectedOption={
-                roleOptions.find(
-                  (option: SelectProps.Option) =>
-                    option.value === (currentValue ?? item.role)
-                ) ?? roleOptions[0]
-              }
-            />
-          );
-        },
+        editingCell: (item: IUserTableItem, { setValue, currentValue }: any) =>
+          renderEditRoleCell(item, setValue, currentValue),
       },
       cell: (e: { role: string }) => {
         return getRoleName(e.role);
@@ -122,7 +137,7 @@ const UserList: React.FC = () => {
     {
       id: 'createAt',
       header: t('user:labels.tableColumnCreateAt'),
-      cell: (e: { createAt: string }) => {
+      cell: (e: IUserTableItem) => {
         return moment(e.createAt).format(TIME_FORMAT) || '-';
       },
     },

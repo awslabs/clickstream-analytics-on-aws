@@ -25,6 +25,7 @@ import {
   Textarea,
 } from '@cloudscape-design/components';
 import { updateProject } from 'apis/project';
+import { cloneDeep, defaultTo } from 'lodash';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -34,7 +35,7 @@ import {
   TIME_FORMAT,
 } from 'ts/const';
 import { XSS_PATTERN } from 'ts/constant-ln';
-import { validateEmails } from 'ts/utils';
+import { ternary, validateEmails } from 'ts/utils';
 
 interface SplitPanelContentProps {
   project: IProject;
@@ -84,6 +85,27 @@ const SplitPanelContent: React.FC<SplitPanelContentProps> = (
     ) || PROJECT_STAGE_LIST[0]
   );
 
+  const updateProjectData = (type: string) => {
+    if (type === 'email') {
+      setPrevEmail(newProject.emails);
+      setIsEditingEmail(false);
+    }
+    if (type === 'description') {
+      setPrevDesc(newProject.description);
+      setIsEditingDesc(false);
+    }
+    if (type === 'env') {
+      setPrevEnvOption(
+        PROJECT_STAGE_LIST.find(
+          (element) => element.value === newProject.environment
+        ) || PROJECT_STAGE_LIST[0]
+      );
+      setIsEditingEvn(false);
+      changeProjectEnv(newProject.environment);
+    }
+    refreshPage && refreshPage();
+  };
+
   const updateProjectInfo = async (type: 'email' | 'env' | 'description') => {
     if (type === 'email') {
       if (!newProject.emails) {
@@ -109,24 +131,7 @@ const SplitPanelContent: React.FC<SplitPanelContentProps> = (
     try {
       const { success }: ApiResponse<null> = await updateProject(newProject);
       if (success) {
-        if (type === 'email') {
-          setPrevEmail(newProject.emails);
-          setIsEditingEmail(false);
-        }
-        if (type === 'description') {
-          setPrevDesc(newProject.description);
-          setIsEditingDesc(false);
-        }
-        if (type === 'env') {
-          setPrevEnvOption(
-            PROJECT_STAGE_LIST.find(
-              (element) => element.value === newProject.environment
-            ) || PROJECT_STAGE_LIST[0]
-          );
-          setIsEditingEvn(false);
-          changeProjectEnv(newProject.environment);
-        }
-        refreshPage && refreshPage();
+        updateProjectData(type);
       }
       setLoadingUpdateEmail(false);
       setLoadingUpdateEnv(false);
@@ -233,13 +238,18 @@ const SplitPanelContent: React.FC<SplitPanelContentProps> = (
             {isEditingEmail && (
               <div>
                 <FormField
-                  errorText={
-                    emailsEmptyError
-                      ? t('project:valid.emailEmpty')
-                      : emailsInvalidError
-                      ? t('project:valid.emailInvalid')
-                      : ''
-                  }
+                  errorText={defaultTo(
+                    ternary(
+                      emailsEmptyError,
+                      t('project:valid.emailEmpty'),
+                      undefined
+                    ),
+                    ternary(
+                      emailsInvalidError,
+                      t('project:valid.emailInvalid'),
+                      undefined
+                    )
+                  )}
                 >
                   <Input
                     value={newProject.emails}
@@ -332,7 +342,7 @@ const SplitPanelContent: React.FC<SplitPanelContentProps> = (
                   <SpaceBetween direction="horizontal" size="xs">
                     <Button
                       onClick={() => {
-                        setPrevEnvOption(prevEnvOption);
+                        setPrevEnvOption(cloneDeep(prevEnvOption));
                         setIsEditingEvn(false);
                       }}
                     >
