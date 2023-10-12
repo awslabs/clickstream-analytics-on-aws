@@ -225,21 +225,21 @@ In Clickstream WeChat Miniprogram SDK, we define the `_user_engagement` as the m
 
 **Reserved attributes**
 
-| Attribute Name           | Required | Description                                                  |
-|--------------------------|:--------:| ------------------------------------------------------------ |
-| _error_code              |    no    | reserved for error                                           |
-| _error_message           |    no    | reserved for error                                           |
-| _session_id              |   yes    | reserved for session                                         |
-| _session_start_timestamp |   yes    | reserved for session                                         |
-| _session_duration        |   yes    | reserved for session                                         |
-| _session_number          |   yes    | reserved for session, calculated by device, starting from 1. |
-| _screen_name             |    no    | last viewed page title                                       |
-| _screen_id               |    no    | last viewed page id                                          |
-| _screen_route            |    no    | last viewed page route                                       |
-| _previous_screen_name    |    no    | current page title                                           |
-| _previous_screen_id      |    no    | current page path                                            |
-| _previous_screen_route   |    no    | current page route                                           |
-| _engagement_time_msec    |    no    | user engagement duration on the current page                 |
+| Attribute Name           | Required | Description                                                           |
+|--------------------------|:--------:|-----------------------------------------------------------------------|
+| _error_code              |    no    | error code, reserved for _clickstream_error event                     |
+| _error_message           |    no    | error reason, reserved for _clickstream_error event                   |
+| _session_id              |   yes    | session ID                                                            |
+| _session_start_timestamp |   yes    | session start time                                                    |
+| _session_duration        |   yes    | session duration                                                      |
+| _session_number          |   yes    | calculated by device, starting from 1.                                |
+| _screen_name             |    no    | current page title                                                    |
+| _screen_id               |    no    | current page id                                                       |
+| _screen_route            |    no    | current page route                                                    |
+| _previous_screen_name    |    no    | last viewed page title                                                |
+| _previous_screen_id      |    no    | last viewed page id                                                    |
+| _previous_screen_route   |    no    | last viewed page route                                                |
+| _engagement_time_msec    |    no    | user engagement duration on the current page                          |
 | _is_first_time           |    no    | `true` for the first `_app_start` event after the mini program starts |
 
 ### Item attributes
