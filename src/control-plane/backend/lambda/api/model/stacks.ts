@@ -37,6 +37,7 @@ import {
   S3_PREFIX_PATTERN,
   REDSHIFT_CLUSTER_IDENTIFIER_PATTERN,
   REDSHIFT_DB_USER_NAME_PATTERN,
+  TRANSFORMER_AND_ENRICH_CLASS_NAMES,
 } from '../common/constants-ln';
 import { REDSHIFT_MODE } from '../common/model-ln';
 import { validateDataProcessingInterval, validatePattern, validateServerlessRedshiftRPU, validateSinkBatch } from '../common/stack-params-valid';
@@ -670,7 +671,7 @@ export class CDataProcessingStack extends JSONObject {
   })
     ScheduleExpression?: string;
 
-  @JSONObject.optional('')
+  @JSONObject.optional(TRANSFORMER_AND_ENRICH_CLASS_NAMES)
     TransformerAndEnrichClassNames?: string;
 
   @JSONObject.optional('')
