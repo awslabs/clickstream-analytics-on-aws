@@ -338,19 +338,13 @@ public class ETLRunner {
         }
         log.info("saveOutputPath: " + saveOutputPath);
 
-        SaveMode saveMode = SaveMode.Append;
-        if (tbName == TableName.ITEM || tbName == TableName.USER) {
-            saveMode = SaveMode.Overwrite;
-        }
-        log.info("saveMode: " + saveMode);
-
         String[] partitionBy = new String[]{PARTITION_APP, PARTITION_YEAR, PARTITION_MONTH, PARTITION_DAY};
         if ("json".equalsIgnoreCase(config.getOutPutFormat())) {
-            partitionedDataset.write().partitionBy(partitionBy).mode(saveMode).json(saveOutputPath);
+            partitionedDataset.write().partitionBy(partitionBy).mode(SaveMode.Append).json(saveOutputPath);
         } else {
-            if (saveMode == SaveMode.Overwrite) {
+            if (tbName == TableName.ITEM || tbName == TableName.USER) {
                 int numPartitions = partitionedDataset.rdd().getNumPartitions();
-                numPartitions = Math.max(Math.min(numPartitions, 10), 1);
+                numPartitions = Math.max(Math.min(numPartitions, 5), 1);
                 partitionedDataset = partitionedDataset.coalesce(numPartitions);
             } else {
                 int outPartitions = Integer.parseInt(System.getProperty(OUTPUT_COALESCE_PARTITIONS_PROP, "-1"));
@@ -363,7 +357,7 @@ public class ETLRunner {
             }
             partitionedDataset.write()
                     .option("compression", "snappy")
-                    .partitionBy(partitionBy).mode(saveMode).parquet(saveOutputPath);
+                    .partitionBy(partitionBy).mode(SaveMode.Append).parquet(saveOutputPath);
         }
         return resultCount;
     }

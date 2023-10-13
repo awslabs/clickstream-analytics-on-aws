@@ -28,6 +28,7 @@ import static org.apache.spark.sql.functions.*;
 import static software.aws.solution.clickstream.ContextUtil.*;
 import static software.aws.solution.clickstream.ETLRunner.TRANSFORM_METHOD_NAME;
 import static software.aws.solution.clickstream.TransformerV2.FULL_SUFFIX;
+import static software.aws.solution.clickstream.TransformerV2.INCREMENTAL_SUFFIX;
 
 @Slf4j
 class TransformerV2Test extends BaseSparkTest {
@@ -97,7 +98,7 @@ class TransformerV2Test extends BaseSparkTest {
 
         String expectedJson = this.resourceFileAsString("/expected/transform_v2_item0.json");
         Assertions.assertEquals(expectedJson, datasetItem3.first().prettyJson());
-        Assertions.assertEquals(5, itemsDataset.count());
+        Assertions.assertEquals(3, itemsDataset.count());
     }
 
     @Test
@@ -116,7 +117,7 @@ class TransformerV2Test extends BaseSparkTest {
         Assertions.assertEquals(expectedSchema, schema);
 
         String expectedJson = this.resourceFileAsString("/expected/transform_v2_user.json");
-        datasetUser = datasetUser.filter(expr("user_id='312121-1'"));
+        datasetUser = datasetUser.filter(expr("user_pseudo_id='uuid1-231jdf'"));
         Assertions.assertEquals(expectedJson, datasetUser.first().prettyJson());
         Assertions.assertEquals(1, datasetUser.count());
     }
@@ -138,7 +139,7 @@ class TransformerV2Test extends BaseSparkTest {
 
         String expectedJson = this.resourceFileAsString("/expected/transform_v2_user2.json");
 
-        Dataset<Row> datasetUser1 = datasetUser.filter(expr("user_id='p3121211'"));
+        Dataset<Row> datasetUser1 = datasetUser.filter(expr("user_pseudo_id='uuid1-9844af32'"));
         Assertions.assertEquals(expectedJson, datasetUser1.first().prettyJson());
         Assertions.assertEquals(1, datasetUser1.count());
     }
@@ -200,8 +201,8 @@ class TransformerV2Test extends BaseSparkTest {
         transformer.postTransform(datasetUser);
 
         String dirPath = ContextUtil.getWarehouseDir();
-        String pathUser = dirPath + "/user_incremental";
-        String pathItem = dirPath + "/item_incremental";
+        String pathUser = dirPath + "/user" + INCREMENTAL_SUFFIX;
+        String pathItem = dirPath + "/item" + INCREMENTAL_SUFFIX;
 
         Dataset<Row> userDataset = spark.read().parquet(pathUser);
         Dataset<Row> itemDataset = spark.read().parquet(pathItem);
