@@ -56,6 +56,7 @@ nav:
       - Android SDK: sdk-manual/android.md
       - Swift SDK: sdk-manual/swift.md
       - Web SDK: sdk-manual/web.md
+      - 微信小程序 SDK: sdk-manual/wechat.md
       - HTTP API: sdk-manual/http-api.md
     - 仪表板:
       - 概述: dashboard/index.md
