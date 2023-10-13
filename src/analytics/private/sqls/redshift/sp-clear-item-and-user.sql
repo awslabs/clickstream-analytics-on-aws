@@ -14,7 +14,7 @@ BEGIN
     where {{schema}}.{{table_item}}.id = item_id_rank.id and item_id_rank.et_rank != 1;
 
     GET DIAGNOSTICS record_number := ROW_COUNT;
-    CALL {{schema}}.{{sp_clickstream_log}}(log_name, 'info', 'delete '||record_number||' from {{schema}}.{{table_item}}');
+    CALL {{schema}}.{{sp_clickstream_log_non_atomic}}(log_name, 'info', 'delete '||record_number||' from {{schema}}.{{table_item}}');
     ANALYZE {{schema}}.{{table_item}};
 
     
@@ -27,11 +27,11 @@ BEGIN
     where {{schema}}.{{table_user}}.user_id = user_id_rank.user_id and user_id_rank.et_rank != 1;
 
     GET DIAGNOSTICS record_number := ROW_COUNT;
-    CALL {{schema}}.{{sp_clickstream_log}}(log_name, 'info', 'delete '||record_number||' from {{schema}}.{{table_user}}');
+    CALL {{schema}}.{{sp_clickstream_log_non_atomic}}(log_name, 'info', 'delete '||record_number||' from {{schema}}.{{table_user}}');
     ANALYZE {{schema}}.{{table_user}};
 
 
 EXCEPTION WHEN OTHERS THEN
-    CALL {{schema}}.{{sp_clickstream_log}}(log_name, 'error', 'error message:' || SQLERRM);    
+    CALL {{schema}}.{{sp_clickstream_log_non_atomic}}(log_name, 'error', 'error message:' || SQLERRM);    
 END;
 $$ LANGUAGE plpgsql;

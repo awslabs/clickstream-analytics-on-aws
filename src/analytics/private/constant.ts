@@ -37,5 +37,6 @@ export const SQL_TEMPLATE_PARAMETER = {
   table_ods_users: 'ods_users',
   table_dim_users: 'dim_users',
   sp_clickstream_log: 'sp_clickstream_log',
+  sp_clickstream_log_non_atomic: 'sp_clickstream_log_non_atomic',
   table_clickstream_log: 'clickstream_log',
 };

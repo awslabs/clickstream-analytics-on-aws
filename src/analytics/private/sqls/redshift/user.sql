@@ -13,4 +13,4 @@ CREATE TABLE IF NOT EXISTS {{schema}}.{{table_user}}(
     device_id_list SUPER,
     _channel VARCHAR(255)
 ) DISTSTYLE EVEN 
-SORTKEY(user_id, event_timestamp)
+SORTKEY(user_pseudo_id, event_timestamp)

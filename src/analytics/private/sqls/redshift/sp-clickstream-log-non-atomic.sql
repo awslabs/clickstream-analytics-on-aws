@@ -1,5 +1,5 @@
-CREATE OR REPLACE PROCEDURE {{schema}}.{{sp_clickstream_log}}(name in varchar(50), level in varchar(10), msg in varchar(256))
-AS 
+CREATE OR REPLACE PROCEDURE {{schema}}.{{sp_clickstream_log_non_atomic}}(name in varchar(50), level in varchar(10), msg in varchar(256))
+NONATOMIC AS 
 $$ 
 DECLARE 
     log_id INT;
