@@ -1,5 +1,6 @@
 {
   "projects": "项目",
+  "noProject": "暂无项目",
   "description": "此页面列出了所有项目。",
   "valid": {
     "nameEmpty": "请输入项目名称。",

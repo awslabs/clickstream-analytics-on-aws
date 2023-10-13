@@ -17,6 +17,7 @@ import Pagination from '@cloudscape-design/components/pagination';
 import PropertyFilter from '@cloudscape-design/components/property-filter';
 import Table from '@cloudscape-design/components/table';
 
+import { cloneDeep } from 'lodash';
 import {
   TableEmptyState,
   TableNoMatchState,
@@ -80,7 +81,7 @@ const MetadataTable: React.FC<MetadataTableProps> = (
   );
 
   const persistChanges = () => {
-    setData(data);
+    setData(cloneDeep(data));
     setItemsSnap([]);
   };
 

@@ -23,6 +23,7 @@ import {
   Tabs,
 } from '@cloudscape-design/components';
 import { getMSKList, getSecurityGroups } from 'apis/resource';
+import { defaultTo } from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -31,7 +32,7 @@ import {
   SUPPORT_SELF_HOSTED_KAFKA,
 } from 'ts/const';
 import { XSS_PATTERN } from 'ts/constant-ln';
-import { isDisabled } from 'ts/utils';
+import { isDisabled, ternary } from 'ts/utils';
 import MSKRequirements from './MSKRequirements';
 
 interface BufferMSKProps {
@@ -153,9 +154,7 @@ const BufferMSK: React.FC<BufferMSKProps> = (props: BufferMSKProps) => {
         {SUPPORT_SELF_HOSTED_KAFKA ? (
           <Tabs
             onChange={(e) => {
-              changeSelfHosted(
-                e.detail.activeTabId === 'manual' ? true : false
-              );
+              changeSelfHosted(e.detail.activeTabId === 'manual');
             }}
             activeTabId={pipelineInfo.kafkaSelfHost ? 'manual' : 'select'}
             tabs={[
@@ -270,13 +269,18 @@ const BufferMSK: React.FC<BufferMSKProps> = (props: BufferMSKProps) => {
                         <FormField
                           label={t('pipeline:create.msk.brokerLink')}
                           description={t('pipeline:create.msk.brokerLinkDesc')}
-                          errorText={
-                            brokerLinkEmptyError
-                              ? t('pipeline:valid.kafkaBrokerEmptyError')
-                              : brokerLinkFormatError
-                              ? t('pipeline:valid.kafkaBrokerFormatError')
-                              : ''
-                          }
+                          errorText={defaultTo(
+                            ternary(
+                              brokerLinkEmptyError,
+                              t('pipeline:valid.kafkaBrokerEmptyError'),
+                              undefined
+                            ),
+                            ternary(
+                              brokerLinkFormatError,
+                              t('pipeline:valid.kafkaBrokerFormatError'),
+                              undefined
+                            )
+                          )}
                         >
                           <Input
                             disabled={isDisabled(update, pipelineInfo)}

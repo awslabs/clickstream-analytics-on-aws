@@ -33,6 +33,50 @@ const AlarmTableTable: React.FC = () => {
     IProjectWithAlarm[]
   >([]);
 
+  const buildProjectListByResult = (
+    results: IAlarmPromiseResult[],
+    promiseList: any
+  ) => {
+    const tmpProjectAlarmList: IProjectWithAlarm[] = [];
+    results.forEach((result, index) => {
+      const request = promiseList[index];
+      const param = request.params;
+      let tmpStatus = ALARM_DISPLAY_STATUS.NO_PIPELINE;
+      if (result.value) {
+        const alarmTotalCount = result.value?.data.totalCount;
+        if (alarmTotalCount >= 0) {
+          if (alarmTotalCount > 0) {
+            tmpStatus = ALARM_DISPLAY_STATUS.HAS_ALARM;
+          } else {
+            tmpStatus = ALARM_DISPLAY_STATUS.NO_ALARM;
+          }
+        } else {
+          tmpStatus = ALARM_DISPLAY_STATUS.NO_PIPELINE;
+        }
+      }
+      tmpProjectAlarmList.push({
+        project: param.project,
+        status: tmpStatus,
+        inAlarm:
+          result?.value?.data?.items?.filter(
+            (element) => element.StateValue === ALARM_STATUS.ALARM
+          ).length || 0,
+        alarms: result?.value?.data?.items || [],
+      });
+    });
+    return tmpProjectAlarmList;
+  };
+
+  const sortAlarmList = (list: IProjectWithAlarm[]) => {
+    return list.sort((a, b) => {
+      if (a.status === b.status) {
+        return b.inAlarm - a.inAlarm; // in alarm
+      } else {
+        return b.status - a.status; // has alarm
+      }
+    });
+  };
+
   const listProjects = async () => {
     setLoadingData(true);
     try {
@@ -55,42 +99,8 @@ const AlarmTableTable: React.FC = () => {
         const results: IAlarmPromiseResult[] = await Promise.allSettled(
           promiseList.map((request) => request.promise)
         );
-        const tmpProjectAlarmList: IProjectWithAlarm[] = [];
-        results.forEach((result, index) => {
-          const request = promiseList[index];
-          const param = request.params;
-          let tmpStatus = ALARM_DISPLAY_STATUS.NO_PIPELINE;
-          if (result.value) {
-            const alarmTotalCount = result.value?.data.totalCount;
-            if (alarmTotalCount >= 0) {
-              if (alarmTotalCount > 0) {
-                tmpStatus = ALARM_DISPLAY_STATUS.HAS_ALARM;
-              } else {
-                tmpStatus = ALARM_DISPLAY_STATUS.NO_ALARM;
-              }
-            } else {
-              tmpStatus = ALARM_DISPLAY_STATUS.NO_PIPELINE;
-            }
-          }
-          tmpProjectAlarmList.push({
-            project: param.project,
-            status: tmpStatus,
-            inAlarm:
-              result?.value?.data?.items?.filter(
-                (element) => element.StateValue === ALARM_STATUS.ALARM
-              ).length || 0,
-            alarms: result?.value?.data?.items || [],
-          });
-        });
-        setProjectWithAlarmList(
-          tmpProjectAlarmList.sort((a, b) => {
-            if (a.status === b.status) {
-              return b.inAlarm - a.inAlarm; // in alarm
-            } else {
-              return b.status - a.status; // has alarm
-            }
-          })
-        );
+        const projectAlarmList = buildProjectListByResult(results, promiseList);
+        setProjectWithAlarmList(sortAlarmList(projectAlarmList));
         setLoadingData(false);
       }
     } catch (error) {
@@ -101,6 +111,25 @@ const AlarmTableTable: React.FC = () => {
   useEffect(() => {
     listProjects();
   }, []);
+
+  const renderProjectWithAlarm = () => {
+    if (projectWithAlarmList.length > 0) {
+      return (
+        <SpaceBetween direction="vertical" size="l">
+          {projectWithAlarmList.map((element) => {
+            return (
+              <ProjectWithAlarm
+                key={element.project.id}
+                projectAlarmInfo={element}
+              />
+            );
+          })}
+        </SpaceBetween>
+      );
+    } else {
+      return <Box>{t('project:noProject')}</Box>;
+    }
+  };
 
   return (
     <div>
@@ -119,22 +148,7 @@ const AlarmTableTable: React.FC = () => {
         {t('alarm.alarmsList')}
       </Header>
       <div className="mt-20">
-        {loadingData ? (
-          <Spinner />
-        ) : projectWithAlarmList?.length > 0 ? (
-          <SpaceBetween direction="vertical" size="l">
-            {projectWithAlarmList.map((element) => {
-              return (
-                <ProjectWithAlarm
-                  key={element.project.id}
-                  projectAlarmInfo={element}
-                />
-              );
-            })}
-          </SpaceBetween>
-        ) : (
-          <Box>No Project</Box>
-        )}
+        {loadingData ? <Spinner /> : renderProjectWithAlarm()}
       </div>
     </div>
   );

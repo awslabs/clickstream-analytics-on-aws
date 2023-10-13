@@ -21,7 +21,8 @@ export const generateStr = (length: number) => {
   let randomString = '';
   const letters = 'abcdefghijklmnopqrstuvwxyz';
   for (let i = 0; i < length; i++) {
-    const randomIndex = Math.floor(Math.random() * letters.length);
+    const date = new Date();
+    const randomIndex = date.getMilliseconds() % letters.length;
     randomString += letters[randomIndex];
   }
   return randomString;
@@ -60,11 +61,13 @@ export const checkStringValidRegex = (str: string, regex: RegExp) => {
   return regex.test(str);
 };
 
+export const EMAIL_PATTERN =
+  '\\w+([-+.]\\w+)*@\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*';
 export const validateEmails = (emails: string) => {
   const emailArray = emails.split(',');
-  const regex = /\w[-\w.+]*@([A-Za-z0-9][-A-Za-z0-9]+\.)+[A-Za-z]{2,14}/;
-  for (let i = 0; i < emailArray.length; i++) {
-    const email = emailArray[i].trim();
+  const regex = new RegExp(`${EMAIL_PATTERN}`);
+  for (const item of emailArray) {
+    const email = item.trim();
     if (!regex.test(email)) {
       return false;
     }
@@ -81,7 +84,7 @@ export const validateProjectId = (projectId: string) => {
 };
 
 export const validateAppId = (appId: string) => {
-  const regex = /^[a-zA-Z][a-zA-Z0-9_]{0,126}$/;
+  const regex = /^[a-zA-Z]\w{0,126}$/;
   if (!regex.test(appId)) {
     return false;
   }
@@ -89,7 +92,7 @@ export const validateAppId = (appId: string) => {
 };
 
 export const validatePluginName = (name: string) => {
-  const re = /[^0-9a-zA-Z_\- |-]/g;
+  const re = /[^0-9a-zA-Z_\- |]/g;
   if (!re?.test(name)) {
     return true;
   }
@@ -97,7 +100,7 @@ export const validatePluginName = (name: string) => {
 };
 
 export const validatePluginMainFunction = (functionName: string) => {
-  const re = /[^0-9a-zA-Z._\- |-]/g;
+  const re = /[^0-9a-zA-Z._\- |]/g;
   if (!re?.test(functionName)) {
     return true;
   }
@@ -228,7 +231,7 @@ export const reverseFreshnessInHour = (value: number) => {
 };
 
 export const extractAccountIdFromArn = (arn: string) => {
-  const regex = /^arn:aws.*:redshift-serverless:[^:]+:([0-9]{12}):/;
+  const regex = /^arn:aws.*:redshift-serverless:[^:]+:(\d{12}):/;
   const matchResult = arn.match(regex);
   return matchResult ? matchResult[1] : '';
 };
@@ -247,7 +250,7 @@ export const isEmpty = (a: any) => {
 };
 
 export const extractRegionFromCloudWatchArn = (arn: string) => {
-  const regex = /^arn:aws.*:cloudwatch:(\w{2}-\w{1,10}-\d):[0-9]{12}:/;
+  const regex = /^arn:aws.*:cloudwatch:(\w{2}-\w{1,10}-\d):\d{12}:/;
   const matchResult = arn.match(regex);
   return matchResult ? matchResult[1] : '';
 };
@@ -312,3 +315,9 @@ export const getValueFromStackOutputs = (
   }
   return res;
 };
+
+/**
+ * The `ternary` function in TypeScript returns `caseOne` if `cond` is true, otherwise it returns
+ */
+export const ternary = <T>(cond: any, caseOne: T, caseTwo: T) =>
+  cond ? caseOne : caseTwo;

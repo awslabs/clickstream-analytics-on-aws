@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { randomInt } from 'crypto';
 import { Stack } from 'aws-cdk-lib';
 import { IConstruct } from 'constructs';
 
@@ -23,7 +24,6 @@ export function isEmpty(a: any): boolean {
   if (Object.prototype.isPrototypeOf(a) && Object.keys(a).length === 0) return true; //Verify empty objects
   return false;
 }
-
 
 /**
  * Given an object, converts all keys to PascalCase given they are currently in camel case.
@@ -55,3 +55,26 @@ export function capitalizePropertyNames(construct: IConstruct, obj: any): any {
 
   return newObj;
 }
+
+export function generateRandomStr(length: number, charSet?: string): string {
+  const lowerCase = 'abcdefghijklmnopqrstuvwxyz';
+  const upperCase = lowerCase.toUpperCase();
+  const numStr = '0123456789';
+  const other = '!#$%^&-_=+|';
+
+  let password = '';
+  let strCharset = charSet;
+  if (!strCharset) {
+    strCharset = charSet ?? lowerCase + upperCase + numStr + other;
+    // Fix ERROR: password must contain a number
+    password = lowerCase[Math.floor(randomInt(0, lowerCase.length))]
+  + upperCase[Math.floor(randomInt(0, upperCase.length))]
+  + numStr[Math.floor(randomInt(0, numStr.length))]
+  + other[Math.floor(randomInt(0, other.length))];
+  }
+
+  while (password.length < length) {
+    password += strCharset.charAt(Math.floor(randomInt(0, strCharset.length)));
+  }
+  return password;
+};

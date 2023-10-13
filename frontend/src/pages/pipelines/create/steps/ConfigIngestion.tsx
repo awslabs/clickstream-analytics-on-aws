@@ -31,6 +31,7 @@ import {
 } from '@cloudscape-design/components';
 import { OptionDefinition } from '@cloudscape-design/components/internal/components/option/interfaces';
 import { getCertificates, getSSMSecrets, getSubnetList } from 'apis/resource';
+import { defaultTo } from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import {
@@ -58,7 +59,7 @@ import {
   PIPELINE_SINK_CONNECTOR_LINK,
   buildDocumentLink,
 } from 'ts/url';
-import { isDisabled } from 'ts/utils';
+import { isDisabled, ternary } from 'ts/utils';
 import BufferKDS from './buffer/BufferKDS';
 import BufferMSK from './buffer/BufferMSK';
 import BufferS3 from './buffer/BufferS3';
@@ -244,7 +245,7 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
   };
 
   // get certificate list
-  const getCetificateListByRegion = async () => {
+  const getCertificateListByRegion = async () => {
     setLoadingCertificate(true);
     try {
       const { success, data }: ApiResponse<CetificateResponse[]> =
@@ -264,7 +265,7 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
   };
 
   // get ssm secret list
-  const getSSMSecretListByReion = async () => {
+  const getSSMSecretListByRegion = async () => {
     setLoadingSecret(true);
     try {
       const { success, data }: ApiResponse<SSMSecretRepoose[]> =
@@ -293,8 +294,8 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
 
   useEffect(() => {
     if (!update) {
-      getCetificateListByRegion();
-      getSSMSecretListByReion();
+      getCertificateListByRegion();
+      getSSMSecretListByRegion();
     }
   }, []);
 
@@ -339,13 +340,18 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
             label={t('pipeline:create.privateSubnet')}
             description={t('pipeline:create.privateSubnetDesc')}
             stretch
-            errorText={
-              privateSubnetError
-                ? t('pipeline:valid.privateSubnetEmpty')
-                : privateSubnetDiffWithPublicError
-                ? t('pipeline:valid.privateSubnetDiffWithPublicError')
-                : ''
-            }
+            errorText={defaultTo(
+              ternary(
+                privateSubnetError,
+                t('pipeline:valid.privateSubnetEmpty'),
+                undefined
+              ),
+              ternary(
+                privateSubnetDiffWithPublicError,
+                t('pipeline:valid.privateSubnetDiffWithPublicError'),
+                undefined
+              )
+            )}
           >
             <Multiselect
               filteringType="auto"
@@ -473,13 +479,18 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
               <div>
                 <FormField
                   label={t('pipeline:create.domainName')}
-                  errorText={
-                    domainNameEmptyError
-                      ? t('pipeline:valid.domainNameEmpty')
-                      : domainNameFormatError
-                      ? t('pipeline:valid.domainNameInvalid')
-                      : ''
-                  }
+                  errorText={defaultTo(
+                    ternary(
+                      domainNameEmptyError,
+                      t('pipeline:valid.domainNameEmpty'),
+                      undefined
+                    ),
+                    ternary(
+                      domainNameFormatError,
+                      t('pipeline:valid.domainNameInvalid'),
+                      undefined
+                    )
+                  )}
                 >
                   <Input
                     disabled={isDisabled(update, pipelineInfo)}
@@ -528,7 +539,7 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
                     iconName="refresh"
                     loading={loadingCertificate}
                     onClick={() => {
-                      getCetificateListByRegion();
+                      getCertificateListByRegion();
                     }}
                   />
                 ) : null}
@@ -648,7 +659,7 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
                             iconName="refresh"
                             loading={loadingSecret}
                             onClick={() => {
-                              getSSMSecretListByReion();
+                              getSSMSecretListByRegion();
                             }}
                           />
                         </div>

@@ -31,6 +31,7 @@ import { getFunctionTags } from '../../../common/lambda/tags';
 import { BIUserCredential } from '../../../common/model';
 import { logger } from '../../../common/powertools';
 import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
+import { generateRandomStr } from '../../../common/utils';
 import { SQL_TEMPLATE_PARAMETER } from '../../private/constant';
 import { CreateDatabaseAndSchemas, MustacheParamType } from '../../private/model';
 import { getSqlContent, getSqlContents } from '../../private/utils';
@@ -223,8 +224,10 @@ async function createSchemas(props: ResourcePropertiesType, biUsername: string) 
   const odsTableNames = props.odsTableNames;
 
   const appIds = splitString(props.appIds);
-  const sqlStatements : string[] = [];
+  const sqlStatementsByApp = new Map<string, string[]>();
+
   for (const app of appIds) {
+    const sqlStatements: string[] = [];
     const mustacheParam: MustacheParamType = {
       schema: app,
       table_ods_events: odsTableNames.odsEvents,
@@ -238,20 +241,21 @@ async function createSchemas(props: ResourcePropertiesType, biUsername: string) 
 
     sqlStatements.push(`CREATE SCHEMA IF NOT EXISTS ${app}`);
     for (const sqlDef of props.schemaDefs) {
-      if (sqlDef.multipleLine !== undefined && sqlDef.multipleLine === 'true' ) {
+      if (sqlDef.multipleLine !== undefined && sqlDef.multipleLine === 'true') {
         logger.info('multipleLine SQL: ', sqlDef.sqlFile);
         sqlStatements.push(...getSqlContents(sqlDef.sqlFile, mustacheParam));
       } else {
         sqlStatements.push(getSqlContent(sqlDef.sqlFile, mustacheParam));
       }
     }
+    sqlStatementsByApp.set(app, sqlStatements);
   };
 
-  if (sqlStatements.length == 0) {
+  if (sqlStatementsByApp.size == 0) {
     logger.info('Ignore creating schema in Redshift due to there is no application.');
   } else {
     const redShiftClient = getRedshiftClient(props.dataAPIRole);
-    await createSchemasInRedshift(redShiftClient, sqlStatements, props);
+    await createSchemasInRedshift(redShiftClient, sqlStatementsByApp, props);
   }
 }
 
@@ -259,8 +263,9 @@ async function updateSchemas(props: ResourcePropertiesType, biUsername: string, 
   const odsTableNames = props.odsTableNames;
   const appUpdateProps = getAppUpdateProps(props, oldProps);
 
-  const sqlStatements : string[] = [];
+  const sqlStatementsByApp = new Map<string, string[]>();
   for (const app of appUpdateProps.createAppIds) {
+    const sqlStatements: string[] = [];
     const mustacheParam: MustacheParamType = {
       schema: app,
       table_ods_events: odsTableNames.odsEvents,
@@ -273,16 +278,18 @@ async function updateSchemas(props: ResourcePropertiesType, biUsername: string, 
     };
     sqlStatements.push(`CREATE SCHEMA IF NOT EXISTS ${app}`);
     for (const sqlDef of props.schemaDefs) {
-      if (sqlDef.multipleLine !== undefined && sqlDef.multipleLine === 'true' ) {
+      if (sqlDef.multipleLine !== undefined && sqlDef.multipleLine === 'true') {
         logger.info('multipleLine SQL: ', sqlDef.sqlFile);
         sqlStatements.push(...getSqlContents(sqlDef.sqlFile, mustacheParam));
         continue;
       }
       sqlStatements.push(getSqlContent(sqlDef.sqlFile, mustacheParam));
     }
+    sqlStatementsByApp.set(app, sqlStatements);
   };
 
   for (const app of appUpdateProps.updateAppIds) {
+    const sqlStatements: string[] = [];
     const mustacheParam: MustacheParamType = {
       schema: app,
       table_ods_events: odsTableNames.odsEvents,
@@ -307,24 +314,33 @@ async function updateSchemas(props: ResourcePropertiesType, biUsername: string, 
         logger.info(`skip update ${schemaDef.sqlFile} due to it is not updatable.`);
       }
     }
+
+    if (sqlStatementsByApp.has(app)) {
+      sqlStatementsByApp.get(app)?.push(...sqlStatements);
+    } else {
+      sqlStatementsByApp.set(app, sqlStatements);
+    }
+
   };
-  await doUpdate(sqlStatements, props);
+  await doUpdate(sqlStatementsByApp, props);
 }
 
-async function doUpdate(sqlStatements: string[], props: ResourcePropertiesType) {
-  if (sqlStatements.length == 0) {
+async function doUpdate(sqlStatementsByApp: Map<string, string[]>, props: ResourcePropertiesType) {
+  if (sqlStatementsByApp.size == 0) {
     logger.info('Ignore creating schema in Redshift due to there is no application.');
   } else {
     const redShiftClient = getRedshiftClient(props.dataAPIRole);
-    await createSchemasInRedshift(redShiftClient, sqlStatements, props);
+    await createSchemasInRedshift(redShiftClient, sqlStatementsByApp, props);
   }
 }
 
 async function createViewForReporting(props: ResourcePropertiesType) {
   const odsTableNames = props.odsTableNames;
   const appIds = splitString(props.appIds);
-  const sqlStatements : string[] = [];
+
+  const sqlStatementsByApp = new Map<string, string[]>();
   for (const app of appIds) {
+    const sqlStatements: string[] = [];
     const mustacheParam: MustacheParamType = {
       schema: app,
       table_ods_events: odsTableNames.odsEvents,
@@ -338,13 +354,14 @@ async function createViewForReporting(props: ResourcePropertiesType) {
     for (const viewDef of props.reportingViewsDef) {
       sqlStatements.push(getSqlContent(viewDef.sqlFile, mustacheParam));
     }
+    sqlStatementsByApp.set(app, sqlStatements);
   };
 
-  if (sqlStatements.length == 0) {
+  if (sqlStatementsByApp.size == 0) {
     logger.info('Ignore creating reporting views in Redshift due to there is no application.');
   } else {
     const redShiftClient = getRedshiftClient(props.dataAPIRole);
-    await createSchemasInRedshift(redShiftClient, sqlStatements, props);
+    await createSchemasInRedshift(redShiftClient, sqlStatementsByApp, props);
   }
 }
 
@@ -352,9 +369,10 @@ async function updateViewForReporting(props: ResourcePropertiesType, oldProps: R
   const odsTableNames = props.odsTableNames;
 
   const appUpdateProps = getAppUpdateProps(props, oldProps);
-  const sqlStatements : string[] = [];
 
+  const sqlStatementsByApp = new Map<string, string[]>();
   for (const app of appUpdateProps.createAppIds) {
+    const sqlStatements: string[] = [];
     const mustacheParam: MustacheParamType = {
       schema: app,
       table_ods_events: odsTableNames.odsEvents,
@@ -367,9 +385,11 @@ async function updateViewForReporting(props: ResourcePropertiesType, oldProps: R
     for (const viewDef of props.reportingViewsDef) {
       sqlStatements.push(getSqlContent(viewDef.sqlFile, mustacheParam));
     }
+    sqlStatementsByApp.set(app, sqlStatements);
   };
 
   for (const app of appUpdateProps.updateAppIds) {
+    const sqlStatements: string[] = [];
     const mustacheParam: MustacheParamType = {
       schema: app,
       table_ods_events: odsTableNames.odsEvents,
@@ -393,13 +413,18 @@ async function updateViewForReporting(props: ResourcePropertiesType, oldProps: R
         logger.info(`skip update ${viewDef.sqlFile} due to it is not updatable.`);
       }
     }
+    if (sqlStatementsByApp.has(app)) {
+      sqlStatementsByApp.get(app)?.push(...sqlStatements);
+    } else {
+      sqlStatementsByApp.set(app, sqlStatements);
+    }
   };
 
-  if (sqlStatements.length == 0) {
+  if (sqlStatementsByApp.size == 0) {
     logger.info('Ignore creating reporting views in Redshift due to there is no application.');
   } else {
     const redShiftClient = getRedshiftClient(props.dataAPIRole);
-    await createSchemasInRedshift(redShiftClient, sqlStatements, props);
+    await createSchemasInRedshift(redShiftClient, sqlStatementsByApp, props);
   }
 
 }
@@ -433,39 +458,21 @@ const createDatabaseBIUser = async (redshiftClient: RedshiftDataClient, credenti
   }
 };
 
-const createSchemasInRedshift = async (redshiftClient: RedshiftDataClient, sqlStatements: string[], props: CreateDatabaseAndSchemas) => {
-  try {
-    await executeStatementsWithWait(redshiftClient, sqlStatements,
-      props.serverlessRedshiftProps, props.provisionedRedshiftProps, props.databaseName);
-  } catch (err) {
-    if (err instanceof Error) {
-      logger.error('Error when creating schema in serverless Redshift.', err);
+const createSchemasInRedshift = async (redshiftClient: RedshiftDataClient,
+  sqlStatementsByApp: Map<string, string[]>, props: CreateDatabaseAndSchemas) => {
+
+  for (const [appId, sqlStatements] of sqlStatementsByApp) {
+    logger.info(`creating schema in serverless Redshift for ${appId}`);
+    try {
+      await executeStatementsWithWait(redshiftClient, sqlStatements,
+        props.serverlessRedshiftProps, props.provisionedRedshiftProps, props.databaseName);
+    } catch (err) {
+      if (err instanceof Error) {
+        logger.error('Error when creating schema in serverless Redshift, appId=' + appId, err);
+      }
+      throw err;
     }
-    throw err;
   }
-};
-
-const generateRandomStr = (length: number, charSet?: string): string => {
-  const lowerCase = 'abcdefghijklmnopqrstuvwxyz';
-  const upperCase = lowerCase.toUpperCase();
-  const numStr = '0123456789';
-  const other = '!#$%^&-_=+|';
-
-  let password = '';
-  let strCharset = charSet;
-  if (!strCharset) {
-    strCharset = charSet ?? lowerCase + upperCase + numStr + other;
-    // Fix ERROR: password must contain a number
-    password = lowerCase[Math.floor(Math.random() * lowerCase.length)]
-  + upperCase[Math.floor(Math.random() * upperCase.length)]
-  + numStr[Math.floor(Math.random() * numStr.length)]
-  + other[Math.floor(Math.random() * other.length)];
-  }
-
-  while (password.length < length) {
-    password += strCharset.charAt(Math.floor(Math.random() * strCharset.length));
-  }
-  return password;
 };
 
 function generateRedshiftUserPassword(length: number): string {
@@ -485,7 +492,7 @@ function getAppUpdateProps(props: ResourcePropertiesType, oldProps: ResourceProp
   const oldAppIdArray: string[] = [];
   const oldViewSqlArray: string[] = [];
   const oldSchemaSqlArray: string[] = [];
-  if ( oldProps.appIds.trim().length > 0 ) {
+  if (oldProps.appIds.trim().length > 0) {
     oldAppIdArray.push(...oldProps.appIds.trim().split(','));
   };
   for (const view of oldProps.reportingViewsDef) {
@@ -499,7 +506,7 @@ function getAppUpdateProps(props: ResourcePropertiesType, oldProps: ResourceProp
   logger.info(`old schema sql array: ${oldSchemaSqlArray}`);
 
   const appIdArray: string[] = [];
-  if ( props.appIds.trim().length > 0 ) {
+  if (props.appIds.trim().length > 0) {
     appIdArray.push(...props.appIds.trim().split(','));
   };
 

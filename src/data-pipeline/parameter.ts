@@ -13,7 +13,7 @@
 
 import { CfnParameter } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
-import { EMR_VERSION_PATTERN, PARAMETER_GROUP_LABEL_VPC, PARAMETER_LABEL_PRIVATE_SUBNETS, PARAMETER_LABEL_VPCID, S3_BUCKET_NAME_PATTERN, S3_PATH_PLUGIN_FILES_PATTERN, S3_PATH_PLUGIN_JARS_PATTERN, SCHEDULE_EXPRESSION_PATTERN } from '../common/constant';
+import { EMR_VERSION_PATTERN, PARAMETER_GROUP_LABEL_VPC, PARAMETER_LABEL_PRIVATE_SUBNETS, PARAMETER_LABEL_VPCID, S3_BUCKET_NAME_PATTERN, S3_PATH_PLUGIN_FILES_PATTERN, S3_PATH_PLUGIN_JARS_PATTERN, SCHEDULE_EXPRESSION_PATTERN, TRANSFORMER_AND_ENRICH_CLASS_NAMES } from '../common/constant';
 import { Parameters, SubnetParameterType } from '../common/parameters';
 
 export function createStackParameters(scope: Construct) {
@@ -92,7 +92,7 @@ export function createStackParameters(scope: Construct) {
 
   const transformerAndEnrichClassNamesParam = new CfnParameter(scope, 'TransformerAndEnrichClassNames', {
     description: 'The class name list of custom plugins to transform or enrich data',
-    default: 'software.aws.solution.clickstream.TransformerV2,software.aws.solution.clickstream.UAEnrichment,software.aws.solution.clickstream.IPEnrichment',
+    default: TRANSFORMER_AND_ENRICH_CLASS_NAMES,
     type: 'String',
   });
 

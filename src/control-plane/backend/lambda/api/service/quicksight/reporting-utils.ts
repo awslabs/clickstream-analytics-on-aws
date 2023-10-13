@@ -32,7 +32,7 @@ import { AssumeRoleCommand, STSClient } from '@aws-sdk/client-sts';
 import Mustache from 'mustache';
 import { v4 as uuidv4 } from 'uuid';
 import { DataSetProps, dataSetActions } from './dashboard-ln';
-import { AnalysisType, ExploreLocales, ExploreRelativeTimeUnit, ExploreRequestAction, ExploreTimeScopeType, ExploreVisualName, QuickSightChartType } from '../../common/explore-types';
+import { AnalysisType, ExploreConversionIntervalType, ExploreLocales, ExplorePathNodeType, ExplorePathSessionDef, ExploreRelativeTimeUnit, ExploreRequestAction, ExploreTimeScopeType, ExploreVisualName, QuickSightChartType } from '../../common/explore-types';
 import { logger } from '../../common/powertools';
 import i18next from '../../i18n';
 
@@ -85,6 +85,10 @@ export interface VisualMapProps {
   readonly embedUrl?: string;
 }
 
+export interface CheckParamsStatus {
+  readonly success: boolean;
+  readonly message: string;
+}
 
 export interface CreateDashboardResult {
   readonly dashboardId: string;
@@ -968,3 +972,211 @@ export async function getDashboardTitleProps(analysisType: AnalysisType, query: 
   };
 }
 
+export function checkFunnelAnalysisParameter(params: any): CheckParamsStatus {
+
+  let success = true;
+  let message = 'OK';
+
+  _checkCommonPartParameter(params);
+
+  if (params.specifyJoinColumn === undefined
+    || params.eventAndConditions === undefined
+    || params.groupColumn === undefined
+    || (params.eventAndConditions !== undefined && params.eventAndConditions.length < 1)
+  ) {
+    return {
+      success: false,
+      message: 'Missing required parameter.',
+    };
+  }
+
+  if (
+    (params.specifyJoinColumn && params.joinColumn === undefined)
+    || (params.conversionIntervalType === ExploreConversionIntervalType.CUSTOMIZE && params.conversionIntervalInSeconds === undefined)
+  ) {
+    return {
+      success: false,
+      message: 'At least missing one of following parameters [joinColumn,conversionIntervalInSeconds].',
+    };
+  }
+
+  if (params.chartType !== QuickSightChartType.FUNNEL && params.chartType !== QuickSightChartType.BAR) {
+    return {
+      success: false,
+      message: 'unsupported chart type',
+    };
+  }
+
+  return {
+    success,
+    message,
+  };
+}
+
+export function checkEventAnalysisParameter(params: any): CheckParamsStatus {
+
+  let success = true;
+  let message = 'OK';
+
+  _checkCommonPartParameter(params);
+
+  if (params.eventAndConditions === undefined
+    || params.groupColumn === undefined
+    || (params.eventAndConditions !== undefined && params.eventAndConditions.length < 1)
+  ) {
+    return {
+      success: false,
+      message: 'Missing required parameter.',
+    };
+  }
+
+  if (params.chartType !== QuickSightChartType.LINE && params.chartType !== QuickSightChartType.BAR) {
+    return {
+      success: false,
+      message: 'unsupported chart type',
+    };
+  }
+
+  return {
+    success,
+    message,
+  };
+}
+
+export function checkPathAnalysisParameter(params: any): CheckParamsStatus {
+
+  let success = true;
+  let message = 'OK';
+  _checkCommonPartParameter(params);
+
+  if (params.eventAndConditions === undefined
+    || params.pathAnalysis === undefined
+  ) {
+    return {
+      success: false,
+      message: 'Missing required parameter.',
+    };
+  }
+
+  if (params.pathAnalysis.sessionType === ExplorePathSessionDef.CUSTOMIZE
+     && params.pathAnalysis.lagSeconds === undefined
+  ) {
+    return {
+      success: false,
+      message: 'Missing required parameter [lagSeconds].',
+    };
+  }
+
+  if (params.pathAnalysis.nodeType !== ExplorePathNodeType.EVENT
+    && (params.pathAnalysis.nodes === undefined
+        || params.pathAnalysis.platform === undefined
+        || params.pathAnalysis.nodes.length <1)
+  ) {
+    return {
+      success: false,
+      message: 'At least missing one required parameter [nodes,platform].',
+    };
+  }
+
+  if (params.chartType !== QuickSightChartType.SANKEY) {
+    return {
+      success: false,
+      message: 'unsupported chart type',
+    };
+  }
+
+  return {
+    success,
+    message,
+  };
+}
+
+export function checkRetentionAnalysisParameter(params: any): CheckParamsStatus {
+
+  let success = true;
+  let message = 'OK';
+
+  _checkCommonPartParameter(params);
+
+  if (params.pairEventAndConditions === undefined
+    || (params.pairEventAndConditions !== undefined && params.pairEventAndConditions.length < 1)
+    || params.groupColumn === undefined
+  ) {
+    return {
+      success: false,
+      message: 'Missing required parameter.',
+    };
+  }
+
+  if (params.chartType !== QuickSightChartType.LINE && params.chartType !== QuickSightChartType.BAR) {
+    return {
+      success: false,
+      message: 'unsupported chart type',
+    };
+  }
+
+  return {
+    success,
+    message,
+  };
+}
+
+function _checkCommonPartParameter(params: any): any | void {
+
+  if ( params.viewName === undefined
+    || params.projectId === undefined
+    || params.pipelineId === undefined
+    || params.appId === undefined
+    || params.computeMethod === undefined
+    || params.dashboardCreateParameters === undefined
+  ) {
+    return {
+      success: false,
+      message: 'Required parameter is not provided.',
+    };
+  }
+
+  if (params.action !== ExploreRequestAction.PREVIEW && params.action !== ExploreRequestAction.PUBLISH) {
+    return {
+      success: false,
+      message: 'Invalid request action.',
+    };
+  } else if (params.action === ExploreRequestAction.PUBLISH) {
+    if (params.chartTitle === undefined
+      || params.chartSubTitle === undefined
+      || params.dashboardId === undefined
+      || params.sheetId === undefined
+    ) {
+      return {
+        success: false,
+        message: 'At least missing one of following parameters [dashboardId,sheetId,chartTitle,chartSubTitle].',
+      };
+    }
+  }
+
+  _checkTimeParameters(params);
+
+}
+
+function _checkTimeParameters(params: any): any | void {
+  if (params.timeScopeType !== ExploreTimeScopeType.FIXED && params.timeScopeType !== ExploreTimeScopeType.RELATIVE) {
+    return {
+      success: false,
+      message: 'Invalid parameter [timeScopeType].',
+    };
+  } else if (params.timeScopeType === ExploreTimeScopeType.FIXED) {
+    if (params.timeStart === undefined || params.timeEnd === undefined ) {
+      return {
+        success: false,
+        message: 'At least missing one of following parameters [timeStart, timeEnd].',
+      };
+    }
+  } else if (params.timeScopeType === ExploreTimeScopeType.RELATIVE) {
+    if (params.lastN === undefined || params.timeUnit === undefined ) {
+      return {
+        success: false,
+        message: 'At least missing one of following parameters [lastN, timeUnit].',
+      };
+    }
+  }
+}

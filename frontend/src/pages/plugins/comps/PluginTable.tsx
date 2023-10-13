@@ -105,10 +105,9 @@ const PluginTable: React.FC<PluginTableProps> = (props: PluginTableProps) => {
                 setSelectedItems(
                   resultDataItem.filter((item) => item.builtIn === true)
                 );
-                changePluginSeletedItems &&
-                  changePluginSeletedItems(
-                    resultDataItem.filter((item) => item.builtIn === true)
-                  );
+                changePluginSeletedItems?.(
+                  resultDataItem.filter((item) => item.builtIn === true)
+                );
               }
             }
           }
@@ -120,10 +119,9 @@ const PluginTable: React.FC<PluginTableProps> = (props: PluginTableProps) => {
                 setSelectedItems(
                   resultDataItem.filter((item) => item.builtIn === true)
                 );
-                changePluginSeletedItems &&
-                  changePluginSeletedItems(
-                    resultDataItem.filter((item) => item.builtIn === true)
-                  );
+                changePluginSeletedItems?.(
+                  resultDataItem.filter((item) => item.builtIn === true)
+                );
               }
             }
           }
@@ -155,14 +153,21 @@ const PluginTable: React.FC<PluginTableProps> = (props: PluginTableProps) => {
     listPlugins();
   }, [currentPage]);
 
+  const renderDescription = (e: IPlugin) => {
+    return e.id?.startsWith('BUILT-IN') ? (
+      <Trans i18nKey={`plugin:${e.id}`}>{e.description}</Trans>
+    ) : (
+      e.description
+    );
+  };
+
   return (
     <div>
       <Table
         isItemDisabled={(item) => !hideAction && item.builtIn === true}
         onSelectionChange={({ detail }) => {
           setSelectedItems(detail.selectedItems);
-          changePluginSeletedItems &&
-            changePluginSeletedItems(detail.selectedItems);
+          changePluginSeletedItems?.(detail.selectedItems);
         }}
         selectedItems={selectedItems}
         ariaLabels={{
@@ -190,13 +195,7 @@ const PluginTable: React.FC<PluginTableProps> = (props: PluginTableProps) => {
           {
             id: 'description',
             header: t('plugin:list.desc'),
-            cell: (e) => {
-              return e.id?.startsWith('BUILT-IN') ? (
-                <Trans i18nKey={`plugin:${e.id}`}>{e.description}</Trans>
-              ) : (
-                e.description
-              );
-            },
+            cell: (e) => renderDescription(e),
             sortingField: 'desc',
           },
           {

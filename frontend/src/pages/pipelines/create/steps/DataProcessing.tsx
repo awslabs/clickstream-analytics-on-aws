@@ -39,6 +39,7 @@ import {
 } from 'apis/resource';
 
 import Divider from 'components/common/Divider';
+import { defaultTo } from 'lodash';
 import PluginTable from 'pages/plugins/comps/PluginTable';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -62,7 +63,11 @@ import {
   DATA_PROCESSING_LINK_EN,
   buildDocumentLink,
 } from 'ts/url';
-import { generateRedshiftRPUOptionListByRegion, isDisabled } from 'ts/utils';
+import {
+  generateRedshiftRPUOptionListByRegion,
+  isDisabled,
+  ternary,
+} from 'ts/utils';
 
 interface DataProcessingProps {
   update?: boolean;
@@ -838,17 +843,22 @@ const DataProcessing: React.FC<DataProcessingProps> = (
                             description={t(
                               'pipeline:create.redshiftSubnetDesc'
                             )}
-                            errorText={
-                              redshiftServerlessSubnetEmptyError
-                                ? t(
-                                    'pipeline:valid.redshiftServerlessSubnetEmptyError'
-                                  )
-                                : redshiftServerlessSubnetInvalidError
-                                ? t(
-                                    'pipeline:valid.redshiftServerlessSubnetInvalidError'
-                                  )
-                                : ''
-                            }
+                            errorText={defaultTo(
+                              ternary(
+                                redshiftServerlessSubnetEmptyError,
+                                t(
+                                  'pipeline:valid.redshiftServerlessSubnetEmptyError'
+                                ),
+                                undefined
+                              ),
+                              ternary(
+                                redshiftServerlessSubnetInvalidError,
+                                t(
+                                  'pipeline:valid.redshiftServerlessSubnetInvalidError'
+                                ),
+                                undefined
+                              )
+                            )}
                           >
                             <Multiselect
                               filteringType="auto"
@@ -932,17 +942,22 @@ const DataProcessing: React.FC<DataProcessingProps> = (
                         description={t(
                           'pipeline:create.redshiftDatabaseUserDesc'
                         )}
-                        errorText={
-                          redshiftProvisionedDBUserEmptyError
-                            ? t(
-                                'pipeline:valid.redshiftProvisionedDBUserEmptyError'
-                              )
-                            : redshiftProvisionedDBUserFormatError
-                            ? t(
-                                'pipeline:valid.redshiftProvisionedDBUserFormatError'
-                              )
-                            : ''
-                        }
+                        errorText={defaultTo(
+                          ternary(
+                            redshiftProvisionedDBUserEmptyError,
+                            t(
+                              'pipeline:valid.redshiftProvisionedDBUserEmptyError'
+                            ),
+                            undefined
+                          ),
+                          ternary(
+                            redshiftProvisionedDBUserFormatError,
+                            t(
+                              'pipeline:valid.redshiftProvisionedDBUserFormatError'
+                            ),
+                            undefined
+                          )
+                        )}
                       >
                         <Input
                           disabled={isDisabled(update, pipelineInfo)}

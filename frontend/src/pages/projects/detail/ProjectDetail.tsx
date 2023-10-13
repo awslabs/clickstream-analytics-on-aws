@@ -79,7 +79,7 @@ const ProjectDetail: React.FC = () => {
       href: '/projects',
     },
     {
-      text: projectInfo?.name || '',
+      text: projectInfo?.name ?? '',
       href: '/',
     },
   ];
@@ -89,6 +89,22 @@ const ProjectDetail: React.FC = () => {
       getProjectDetailById(id);
     }
   }, [id]);
+
+  const renderProjectDetail = () => {
+    if (!projectPipeline?.projectId) {
+      return <NonePipeline projectId={id?.toString()} />;
+    } else {
+      return (
+        <ProjectPipeline
+          loadingRefresh={loadingPipeline}
+          reloadPipeline={() => {
+            getPipelineByProjectId(id ?? '');
+          }}
+          pipelineInfo={projectPipeline}
+        />
+      );
+    }
+  };
 
   return (
     <AppLayout
@@ -101,19 +117,7 @@ const ProjectDetail: React.FC = () => {
             </SpaceBetween>
           }
         >
-          {loadingData ? (
-            <Loading />
-          ) : !projectPipeline?.projectId ? (
-            <NonePipeline projectId={id?.toString()} />
-          ) : (
-            <ProjectPipeline
-              loadingRefresh={loadingPipeline}
-              reloadPipeline={() => {
-                getPipelineByProjectId(id ?? '');
-              }}
-              pipelineInfo={projectPipeline}
-            />
-          )}
+          {loadingData ? <Loading /> : renderProjectDetail()}
         </ContentLayout>
       }
       headerSelector="#header"

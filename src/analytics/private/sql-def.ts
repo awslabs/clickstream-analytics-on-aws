@@ -107,6 +107,10 @@ export const schemaDefs: SQLDef[] = [
   },
   {
     updatable: 'true',
+    sqlFile: 'sp-clickstream-log-non-atomic.sql',
+  },
+  {
+    updatable: 'true',
     sqlFile: 'grant-permissions-to-bi-user.sql',
     multipleLine: 'true',
   },

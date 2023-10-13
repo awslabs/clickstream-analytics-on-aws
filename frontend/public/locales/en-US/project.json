@@ -1,5 +1,6 @@
 {
   "projects": "Projects",
+  "noProject": "No project",
   "description": "This page lists all the projects.",
   "valid": {
     "nameEmpty": "Please input project name.",

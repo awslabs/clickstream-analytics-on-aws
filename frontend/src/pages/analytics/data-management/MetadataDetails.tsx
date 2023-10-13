@@ -29,20 +29,20 @@ const MetadataDetails: React.FC<MetadataDetailsProps> = (
   props: MetadataDetailsProps
 ) => {
   const { type, metadata } = props;
+  if (type === 'event') {
+    return <MetadataEventSplitPanel event={metadata as IMetadataEvent} />;
+  }
+  if (type === 'eventParameter') {
+    return (
+      <MetadataParameterSplitPanel
+        parameter={metadata as IMetadataEventParameter}
+      />
+    );
+  }
   return (
-    <>
-      {type === 'event' ? (
-        <MetadataEventSplitPanel event={metadata as IMetadataEvent} />
-      ) : type === 'eventParameter' ? (
-        <MetadataParameterSplitPanel
-          parameter={metadata as IMetadataEventParameter}
-        />
-      ) : (
-        <MetadataUserAttributeSplitPanel
-          attribute={metadata as IMetadataUserAttribute}
-        />
-      )}
-    </>
+    <MetadataUserAttributeSplitPanel
+      attribute={metadata as IMetadataUserAttribute}
+    />
   );
 };
 

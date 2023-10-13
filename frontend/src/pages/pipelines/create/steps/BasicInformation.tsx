@@ -77,6 +77,10 @@ const BasicInformation: React.FC<BasicInformationProps> = (
   const [s3BucketOptionList, setS3BucketOptionList] =
     useState<AutosuggestProps.Options>([]);
 
+  const sortRegions = (data: RegionResponse[]) => {
+    return data.sort((a, b) => a.id.localeCompare(b.id));
+  };
+
   // get all region list
   const getAllRegionList = async () => {
     setLoadingRegion(true);
@@ -84,7 +88,7 @@ const BasicInformation: React.FC<BasicInformationProps> = (
       const { success, data }: ApiResponse<RegionResponse[]> =
         await getRegionList();
       if (success) {
-        const sortedRegions = data.sort((a, b) => a.id.localeCompare(b.id));
+        const sortedRegions = sortRegions(data);
         const regionOptions: SelectProps.Options = sortedRegions.map(
           (element) => ({
             label: AWS_REGION_MAP[element.id]?.RegionName
@@ -177,7 +181,7 @@ const BasicInformation: React.FC<BasicInformationProps> = (
               loadingServiceAvailable || isDisabled(update, pipelineInfo)
             }
             filteringType="auto"
-            placeholder={t('pipeline:create.awsRegionPlaceholder') || ''}
+            placeholder={t('pipeline:create.awsRegionPlaceholder') ?? ''}
             selectedOption={pipelineInfo.selectedRegion}
             options={regionOptionList}
             selectedAriaLabel="Selected"
@@ -223,7 +227,7 @@ const BasicInformation: React.FC<BasicInformationProps> = (
           <Select
             filteringType="auto"
             disabled={isDisabled(update, pipelineInfo)}
-            placeholder={t('pipeline:create.vpcPlaceholder') || ''}
+            placeholder={t('pipeline:create.vpcPlaceholder') ?? ''}
             selectedOption={pipelineInfo.selectedVPC}
             options={vpcOptionList}
             selectedAriaLabel="Selected"
@@ -241,7 +245,7 @@ const BasicInformation: React.FC<BasicInformationProps> = (
         >
           <Select
             disabled={isDisabled(update, pipelineInfo)}
-            placeholder={t('pipeline:create.dataSDKPlaceholder') || ''}
+            placeholder={t('pipeline:create.dataSDKPlaceholder') ?? ''}
             selectedOption={pipelineInfo.selectedSDK}
             options={SDK_LIST}
             selectedAriaLabel="Selected"
@@ -272,7 +276,7 @@ const BasicInformation: React.FC<BasicInformationProps> = (
         >
           <Autosuggest
             disabled={isDisabled(update, pipelineInfo)}
-            placeholder={t('pipeline:create.selectS3') || ''}
+            placeholder={t('pipeline:create.selectS3') ?? ''}
             statusType={loadingBucket ? 'loading' : 'finished'}
             onChange={({ detail }) => changeS3Bucket(detail.value)}
             value={pipelineInfo.ingestionServer.loadBalancer.logS3Bucket.name}

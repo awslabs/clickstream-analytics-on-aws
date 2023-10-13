@@ -662,7 +662,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
             const unSupportedServiceList = data.filter(
               (service) => !service.available
             );
-            if (unSupportedServiceList.length >= 0) {
+            if (unSupportedServiceList.length > 0) {
               setUnSupportedServices(
                 unSupportedServiceList
                   .map((service) => service.service)
@@ -696,7 +696,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
 
             // Set AGA disabled
             if (!agaAvailable) {
-              // Set AGA Disabled when AGA Not Avaiable
+              // Set AGA Disabled when AGA Not Available
               setPipelineInfo((prev) => {
                 return {
                   ...prev,

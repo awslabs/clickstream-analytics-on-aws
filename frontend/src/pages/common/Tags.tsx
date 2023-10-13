@@ -26,6 +26,19 @@ const Tags: React.FC<TagsProps> = (props: TagsProps) => {
   const { t } = useTranslation();
   const { tags, changeTags } = props;
   const prevItemsRef = useRef(tags.slice(0, 3));
+
+  const renderTagLimit = (availableTags: number, tagLimit: number) => {
+    if (availableTags === tagLimit) {
+      return t('tag.tagLimit.add') + tagLimit + t('tag.tagLimit.tags');
+    } else if (availableTags === 1) {
+      return t('tag.tagLimit.more1');
+    } else {
+      return (
+        t('tag.tagLimit.more2') + availableTags + t('tag.tagLimit.moreTags')
+      );
+    }
+  };
+
   return (
     <TagEditor
       i18nStrings={{
@@ -56,13 +69,7 @@ const Tags: React.FC<TagsProps> = (props: TagsProps) => {
         invalidValueError: t('tag.invalidValueError') ?? '',
         awsPrefixError: t('tag.awsPrefixError') ?? '',
         tagLimit: (availableTags, tagLimit) =>
-          availableTags === tagLimit
-            ? t('tag.tagLimit.add') + tagLimit + t('tag.tagLimit.tags')
-            : availableTags === 1
-            ? t('tag.tagLimit.more1')
-            : t('tag.tagLimit.more2') +
-              availableTags +
-              t('tag.tagLimit.moreTags'),
+          renderTagLimit(availableTags, tagLimit),
         tagLimitReached: (tagLimit) =>
           tagLimit === 1
             ? t('tag.tagLimit.reach1')

@@ -37,6 +37,56 @@ const MetadataParametersTable: React.FC<MetadataParametersTableProps> = (
 
   const { t } = useTranslation();
 
+  const renderEditNameCell = (
+    item: IMetadataEventParameter,
+    setValue: any,
+    currentValue: string
+  ) => {
+    return (
+      <Input
+        autoFocus={true}
+        value={currentValue ?? item.displayName}
+        onChange={(event) => {
+          setValue(event.detail.value);
+        }}
+        placeholder={t('tag.valuePlaceholder') ?? ''}
+      />
+    );
+  };
+
+  const renderEditDescCell = (
+    item: IMetadataEventParameter,
+    setValue: any,
+    currentValue: string
+  ) => {
+    return (
+      <Input
+        autoFocus={true}
+        value={currentValue ?? item.description}
+        onChange={(event) => {
+          setValue(event.detail.value);
+        }}
+        placeholder={t('tag.valuePlaceholder') ?? ''}
+      />
+    );
+  };
+
+  const renderDataSource = (e: IMetadataEventParameter) => {
+    return <MetadataSourceFC source={e.metadataSource} />;
+  };
+
+  const renderHasData = (e: IMetadataEventParameter) => {
+    return (
+      <StatusIndicator type={e.hasData ? 'success' : 'stopped'}>
+        {e.hasData ? 'Yes' : 'No'}
+      </StatusIndicator>
+    );
+  };
+
+  const renderPlatform = (e: IMetadataEventParameter) => {
+    return <MetadataPlatformFC platform={e.platform} />;
+  };
+
   const COLUMN_DEFINITIONS = [
     {
       id: 'name',
@@ -62,18 +112,7 @@ const MetadataParametersTable: React.FC<MetadataParametersTableProps> = (
         editingCell: (
           item: IMetadataEventParameter,
           { setValue, currentValue }: any
-        ) => {
-          return (
-            <Input
-              autoFocus={true}
-              value={currentValue ?? item.displayName}
-              onChange={(event) => {
-                setValue(event.detail.value);
-              }}
-              placeholder={t('tag.valuePlaceholder') ?? ''}
-            />
-          );
-        },
+        ) => renderEditNameCell(item, setValue, currentValue),
       },
     },
     {
@@ -90,28 +129,15 @@ const MetadataParametersTable: React.FC<MetadataParametersTableProps> = (
             : t('tag.invalidInput');
         },
         editingCell: (
-          item: { description: string },
+          item: IMetadataEventParameter,
           { setValue, currentValue }: any
-        ) => {
-          return (
-            <Input
-              autoFocus={true}
-              value={currentValue ?? item.description}
-              onChange={(event) => {
-                setValue(event.detail.value);
-              }}
-              placeholder={t('tag.valuePlaceholder') ?? ''}
-            />
-          );
-        },
+        ) => renderEditDescCell(item, setValue, currentValue),
       },
     },
     {
       id: 'metadataSource',
       header: t('analytics:metadata.eventParameter.tableColumnMetadataSource'),
-      cell: (e: IMetadataEventParameter) => {
-        return <MetadataSourceFC source={e.metadataSource} />;
-      },
+      cell: (e: IMetadataEventParameter) => renderDataSource(e),
     },
     {
       id: 'parameterType',
@@ -130,20 +156,12 @@ const MetadataParametersTable: React.FC<MetadataParametersTableProps> = (
     {
       id: 'hasData',
       header: t('analytics:metadata.eventParameter.tableColumnHasData'),
-      cell: (e: IMetadataEventParameter) => {
-        return (
-          <StatusIndicator type={e.hasData ? 'success' : 'stopped'}>
-            {e.hasData ? 'Yes' : 'No'}
-          </StatusIndicator>
-        );
-      },
+      cell: (e: IMetadataEventParameter) => renderHasData(e),
     },
     {
       id: 'platform',
       header: t('analytics:metadata.eventParameter.tableColumnPlatform'),
-      cell: (e: IMetadataEventParameter) => {
-        return <MetadataPlatformFC platform={e.platform} />;
-      },
+      cell: (e: IMetadataEventParameter) => renderPlatform(e),
     },
   ];
   const CONTENT_DISPLAY = [
@@ -262,9 +280,9 @@ const MetadataParametersTable: React.FC<MetadataParametersTableProps> = (
       tableContentDisplay={CONTENT_DISPLAY}
       tableFilteringProperties={FILTERING_PROPERTIES}
       tableI18nStrings={{
-        infoContent: t('analytics:information.metadataEventParametersInfo') ?? '',
-        loadingText:
-          t('analytics:labels.tableLoading') || 'Loading',
+        infoContent:
+          t('analytics:information.metadataEventParametersInfo') ?? '',
+        loadingText: t('analytics:labels.tableLoading') || 'Loading',
         emptyText: t('analytics:labels.tableEmpty'),
         headerTitle: t('analytics:metadata.eventParameter.title'),
         headerDescription: t('analytics:metadata.eventParameter.description'),

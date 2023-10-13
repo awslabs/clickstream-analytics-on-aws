@@ -41,7 +41,7 @@ const AlarmTable: React.FC<AlarmTableProps> = (props: AlarmTableProps) => {
     props;
   const { t } = useTranslation();
   const [selectedItems, setSelectedItems] = useState<IAlarm[]>(
-    alarmSelectedItems || []
+    alarmSelectedItems ?? []
   );
   const [loadingData, setLoadingData] = useState(false);
   const [pageSize] = useState(10);
@@ -114,6 +114,47 @@ const AlarmTable: React.FC<AlarmTableProps> = (props: AlarmTableProps) => {
     listAlarms();
   }, [currentPage]);
 
+  const renderState = (item: IAlarm) => {
+    let status = 'stopped' as StatusIndicatorProps.Type;
+    if (item.StateValue === 'OK') {
+      status = 'success' as StatusIndicatorProps.Type;
+    } else if (item.StateValue === 'ALARM') {
+      status = 'warning' as StatusIndicatorProps.Type;
+    }
+
+    return (
+      <SpaceBetween direction="horizontal" size="xs">
+        <Popover
+          dismissButton={false}
+          position="top"
+          size="small"
+          triggerType="custom"
+          content={
+            <StatusIndicator type={status}>{item.StateReason}</StatusIndicator>
+          }
+        >
+          <StatusIndicator type={status}>{item.StateValue}</StatusIndicator>
+        </Popover>
+      </SpaceBetween>
+    );
+  };
+
+  const renderAction = (item: IAlarm) => {
+    return (
+      <SpaceBetween direction="horizontal" size="xs">
+        {item.ActionsEnabled ? (
+          <StatusIndicator>
+            {t('pipeline:detail.alarmTableActionEnable')}
+          </StatusIndicator>
+        ) : (
+          <StatusIndicator type="stopped">
+            {t('pipeline:detail.alarmTableActionDisable')}
+          </StatusIndicator>
+        )}
+      </SpaceBetween>
+    );
+  };
+
   return (
     <div>
       <Table
@@ -148,34 +189,7 @@ const AlarmTable: React.FC<AlarmTableProps> = (props: AlarmTableProps) => {
           {
             id: 'state',
             header: t('pipeline:detail.alarmTableColumnState'),
-            cell: (item) => {
-              let status = 'stopped' as StatusIndicatorProps.Type;
-              if (item.StateValue === 'OK') {
-                status = 'success' as StatusIndicatorProps.Type;
-              } else if (item.StateValue === 'ALARM') {
-                status = 'warning' as StatusIndicatorProps.Type;
-              }
-
-              return (
-                <SpaceBetween direction="horizontal" size="xs">
-                  <Popover
-                    dismissButton={false}
-                    position="top"
-                    size="small"
-                    triggerType="custom"
-                    content={
-                      <StatusIndicator type={status}>
-                        {item.StateReason}
-                      </StatusIndicator>
-                    }
-                  >
-                    <StatusIndicator type={status}>
-                      {item.StateValue}
-                    </StatusIndicator>
-                  </Popover>
-                </SpaceBetween>
-              );
-            },
+            cell: (item) => renderState(item),
           },
           {
             id: 'description',
@@ -187,26 +201,12 @@ const AlarmTable: React.FC<AlarmTableProps> = (props: AlarmTableProps) => {
           {
             id: 'action',
             header: t('pipeline:detail.alarmTableColumnAction'),
-            cell: (item) => {
-              return (
-                <SpaceBetween direction="horizontal" size="xs">
-                  {item.ActionsEnabled ? (
-                    <StatusIndicator>
-                      {t('pipeline:detail.alarmTableActionEnable')}
-                    </StatusIndicator>
-                  ) : (
-                    <StatusIndicator type="stopped">
-                      {t('pipeline:detail.alarmTableActionDisable')}
-                    </StatusIndicator>
-                  )}
-                </SpaceBetween>
-              );
-            },
+            cell: (item) => renderAction(item),
           },
         ]}
         trackBy="AlarmName"
         items={alarmList}
-        loadingText={t('pipeline:detail.alarmTableLoading') || 'Loading'}
+        loadingText={t('pipeline:detail.alarmTableLoading') ?? 'Loading'}
         selectionType={selectionType}
         empty={
           <Box textAlign="center" color="inherit">
@@ -276,8 +276,8 @@ const AlarmTable: React.FC<AlarmTableProps> = (props: AlarmTableProps) => {
               setCurrentPage(e.detail.currentPageIndex);
             }}
             ariaLabels={{
-              nextPageLabel: t('nextPage') || '',
-              previousPageLabel: t('prePage') || '',
+              nextPageLabel: t('nextPage') ?? '',
+              previousPageLabel: t('prePage') ?? '',
               pageLabel: (pageNumber) =>
                 `${t('page')} ${pageNumber} ${t('allPages')}`,
             }}
