@@ -854,7 +854,7 @@ export function getRetentionChartVisualDef(visualId: string, viewName: string,
   let smalMultiplesFieldId: string | undefined = undefined;
   let suffix ='';
   if (hasGrouping) {
-    smalMultiplesFieldId == uuidv4();
+    smalMultiplesFieldId = uuidv4();
     suffix = '-multiple';
   }
 
@@ -882,7 +882,7 @@ export function getRetentionPivotTableVisualDef(visualId: string, viewName: stri
   let smalMultiplesFieldId: string | undefined = undefined;
   let suffix ='';
   if (hasGrouping) {
-    smalMultiplesFieldId == uuidv4();
+    smalMultiplesFieldId = uuidv4();
     suffix = '-multiple';
   }
 
@@ -962,7 +962,8 @@ function findElementWithPropertyValue(root: any, path: string, property: string,
   }
 }
 
-export function formatDateToYYYYMMDD(date: Date): string {
+export function formatDateToYYYYMMDD(date: any): string {
+  date = new Date(date);
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
   const day = String(date.getDate()).padStart(2, '0');

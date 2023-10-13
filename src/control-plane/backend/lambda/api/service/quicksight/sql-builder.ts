@@ -816,7 +816,9 @@ export function buildRetentionAnalysisView(sqlParameters: SQLParameters) : strin
 
   let groupingCol = '';
   let groupingColSql = '';
+  let groupByColSql = '';
   if (sqlParameters.groupCondition !== undefined) {
+    groupByColSql = `${_getColNameWithPrefix(sqlParameters.groupCondition)},`;
     groupingCol = _getColNameWithPrefix(sqlParameters.groupCondition);
     groupingColSql = `${groupingCol} as group_col,`;
   }
@@ -836,7 +838,7 @@ export function buildRetentionAnalysisView(sqlParameters: SQLParameters) : strin
       event_date, 
       (count(distinct end_user_pseudo_id)::decimal / NULLIF(count(distinct start_user_pseudo_id), 0)):: decimal(20, 4)  as retention 
     from result_table 
-    group by ${groupingCol}, grouping, start_event_date, event_date
+    group by ${groupByColSql} grouping, start_event_date, event_date
     order by grouping, event_date
   `;
 

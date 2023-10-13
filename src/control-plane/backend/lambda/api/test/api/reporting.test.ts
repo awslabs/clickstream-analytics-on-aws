@@ -36,7 +36,7 @@ import { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
 import request from 'supertest';
 import { tokenMock } from './ddb-mock';
-import { ExploreLocales, ExplorePathNodeType, ExplorePathSessionDef, MetadataPlatform, QuickSightChartType } from '../../common/explore-types';
+import { ExploreLocales, ExplorePathNodeType, ExplorePathSessionDef, QuickSightChartType } from '../../common/explore-types';
 import { app, server } from '../../index';
 import 'aws-sdk-client-mock-jest';
 

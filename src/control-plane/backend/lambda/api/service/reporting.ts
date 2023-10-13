@@ -134,19 +134,33 @@ export class ReportingService {
 
   private async _buildFunnelQuickSightDashboard(viewName: string, sql: string, tableVisualViewName: string,
     sqlTable: string, query: any, sheetId: string) {
+
+
+    const newFunnelVisualColumns = funnelVisualColumns;
+    const visualProjectedColumns = [
+      'event_name',
+      'event_date',
+      'x_id',
+    ];
+    const hasGrouping = query.chartType == QuickSightChartType.BAR && query.groupCondition !== undefined;
+    if (hasGrouping) {
+      newFunnelVisualColumns.push({
+        Name: 'group_col',
+        Type: 'STRING',
+      });
+
+      visualProjectedColumns.push('group_col');
+    }
+
     //create quicksight dataset
     const datasetPropsArray: DataSetProps[] = [];
     datasetPropsArray.push({
       name: '',
       tableName: viewName,
-      columns: funnelVisualColumns,
+      columns: newFunnelVisualColumns,
       importMode: 'DIRECT_QUERY',
       customSql: sql,
-      projectedColumns: [
-        'event_date',
-        'event_name',
-        'x_id',
-      ],
+      projectedColumns: visualProjectedColumns,
     });
 
     const projectedColumns: string[] = [query.groupColumn];
@@ -186,7 +200,6 @@ export class ReportingService {
     });
 
     const visualId = uuidv4();
-    const hasGrouping = query.chartType == QuickSightChartType.BAR && query.groupCondition !== undefined;
     const titleProps = await getDashboardTitleProps(AnalysisType.FUNNEL, query);
     const quickSightChartType = query.chartType;
     const visualDef = getFunnelVisualDef(visualId, viewName, titleProps, quickSightChartType, query.groupColumn, hasGrouping);
@@ -517,7 +530,7 @@ export class ReportingService {
         'retention',
       ];
       if (hasGrouping) {
-        eventVisualColumns.push({
+        retentionAnalysisVisualColumns.push({
           Name: 'group_col',
           Type: 'STRING',
         });

@@ -3172,7 +3172,6 @@ describe('SQL Builder test', () => {
     from
       result_table
     group by
-    ,
       grouping,
       start_event_date,
       event_date
@@ -3482,7 +3481,6 @@ describe('SQL Builder test', () => {
     from
       result_table
     group by
-    ,
       grouping,
       start_event_date,
       event_date
