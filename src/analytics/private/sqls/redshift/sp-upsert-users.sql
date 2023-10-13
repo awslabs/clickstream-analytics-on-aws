@@ -1,5 +1,5 @@
 CREATE OR REPLACE PROCEDURE {{schema}}.{{sp_upsert_users}}() 
-NONATOMIC AS 
+ AS 
 $$ 
 DECLARE 
   record_number INT; 

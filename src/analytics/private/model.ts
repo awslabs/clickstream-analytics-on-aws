@@ -216,6 +216,7 @@ export type MustacheParamType = {
   table_ods_users: string;
   table_dim_users: string;
   sp_clickstream_log: string;
+  sp_clickstream_log_non_atomic: string;
   table_clickstream_log: string;
   user_bi?: string;
 }
