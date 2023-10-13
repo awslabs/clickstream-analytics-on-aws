@@ -308,7 +308,14 @@ In Clickstream WeChat Miniprogram SDK, we define the `_user_engagement` as the m
     "_previous_screen_id": "pages/category/index",
     "_screen_id": "pages/items/11223/detail",
     "_engagement_time_msec": 30000
-  }
+  },
+  "items": [
+    {
+      "id": "p_123",
+      "name": "item_name",
+      "price": 168.99
+    }
+  ]
 }
 ```
 

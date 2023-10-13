@@ -77,7 +77,7 @@ ClickstreamAnalytics.setUserId(null);
 
 #### 记录事件
 
-您可以调用`ClickstreamAnalytics.record()`方法记录自定义事件。事件中的参数`name`是必需的，参数`attributes`和`items`不是必需的。参数`attributes`是一个对象，用来记录各种属性。参数`items`是一个保存`item`类型对象的数组，请参阅[item属性](#_17)查看item中的参数。
+您可以调用`ClickstreamAnalytics.record()`方法记录自定义事件。事件中的参数`name`是必需的，参数`attributes`和`items`不是必需的。参数`attributes`是一个对象，用来记录各种属性。参数`items`是一个保存`item`类型对象的数组，请参阅[item属性](#item)查看item中的参数。
 
 记录自定义事件示例：
 
@@ -302,7 +302,14 @@ ClickstreamAnalytics.record({
     "_previous_screen_id": "pages/category/index",
     "_screen_id": "pages/items/11223/detail",
     "_engagement_time_msec": 30000
-  }
+  },
+  "items": [
+    {
+      "id": "p_123",
+      "name": "item_name",
+      "price": 168.99
+    }
+  ]
 }
 ```
 
