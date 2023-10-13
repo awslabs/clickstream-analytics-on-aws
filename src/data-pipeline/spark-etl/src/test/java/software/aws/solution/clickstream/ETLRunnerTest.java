@@ -373,7 +373,7 @@ class ETLRunnerTest extends BaseSparkTest {
         Assertions.assertEquals(44, eventParamDataset.count());
 
         Dataset<Row> userDataset = spark.read().json(outputPath + ETLRunner.TableName.USER.name);
-        Dataset<Row> userDataset1 = userDataset.filter(expr("user_id='p3121211'"));
+        Dataset<Row> userDataset1 = userDataset.filter(expr("user_pseudo_id='uuid1-9844af32'"));
         String expectedJsonUser = this.resourceFileAsString("/expected/etl_runner_v2_user.json");
         Assertions.assertEquals(expectedJsonUser, userDataset1.first().prettyJson());
         Assertions.assertEquals(1, userDataset1.count());

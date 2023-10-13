@@ -81,8 +81,8 @@ public final class TransformerV2 {
     public static final String TABLE_ETL_USER_DEVICE_ID = "etl_user_device_id";
     public static final String TABLE_ETL_USER_PAGE_REFERER = "etl_user_page_referer";
     public static final String UPDATE_DATE = "update_date";
-    public static final String INCREMENTAL_SUFFIX = "_incremental";
-    public static final String FULL_SUFFIX = "_full";
+    public static final String INCREMENTAL_SUFFIX = "_incremental_v1";
+    public static final String FULL_SUFFIX = "_full_v1";
     public static final String DATA_SCHEMA_V2_FILE_PATH = System.getProperty("data.schema.file.path.v2", "/data_schema_v2.json");
     public static final String PROPERTIES = "properties";
     public static final String YYYYMMDD = "yyyyMMdd";
@@ -126,7 +126,7 @@ public final class TransformerV2 {
                 .withColumn(TRAFFIC_SOURCE_SOURCE, get_json_object(attributesCol, "$._traffic_source_source").cast(DataTypes.StringType))
                 .filter(col(TRAFFIC_SOURCE_SOURCE).isNotNull())
                 .select(APP_ID,
-                        USER_ID,
+                        USER_PSEUDO_ID,
                         TRAFFIC_SOURCE_MEDIUM,
                         TRAFFIC_SOURCE_NAME,
                         TRAFFIC_SOURCE_SOURCE,
@@ -156,13 +156,13 @@ public final class TransformerV2 {
     }
 
     private static Dataset<Row> getAggTrafficSourceDataset(final Dataset<Row> allTrafficSourceDataset) {
-        return allTrafficSourceDataset.groupBy(APP_ID, USER_ID)
+        return allTrafficSourceDataset.groupBy(APP_ID, USER_PSEUDO_ID)
                 .agg(min_by(struct(col(TRAFFIC_SOURCE_MEDIUM),
                                 col(TRAFFIC_SOURCE_NAME),
                                 col(TRAFFIC_SOURCE_SOURCE),
                                 col(EVENT_TIMESTAMP)),
                         col(EVENT_TIMESTAMP)).alias("traffic_source_source"))
-                .select(col(APP_ID), col(USER_ID), expr("traffic_source_source.*"))
+                .select(col(APP_ID), col(USER_PSEUDO_ID), expr("traffic_source_source.*"))
                 .distinct();
     }
 
@@ -178,7 +178,7 @@ public final class TransformerV2 {
                         coalesce(get_json_object(attributesCol, "$._page_referer").cast(DataTypes.StringType),
                                 get_json_object(attributesCol, "$._referer").cast(DataTypes.StringType)))
                 .filter(col(PAGE_REFERER).isNotNull())
-                .select(APP_ID, USER_ID, PAGE_REFERER, EVENT_TIMESTAMP);
+                .select(APP_ID, USER_PSEUDO_ID, PAGE_REFERER, EVENT_TIMESTAMP);
 
         long newRefererCount = newUserRefererDataset.count();
         log.info(NEW_USER_COUNT + "=" + newUserCount + ", newRefererCount=" + newRefererCount);
@@ -204,12 +204,12 @@ public final class TransformerV2 {
     }
 
     private static Dataset<Row> getAggUserRefererDataset(final Dataset<Row> allUserRefererDataset) {
-        return allUserRefererDataset.groupBy(APP_ID, USER_ID)
+        return allUserRefererDataset.groupBy(APP_ID, USER_PSEUDO_ID)
                 .agg(min_by(struct(
                                 col(PAGE_REFERER),
                                 col(EVENT_TIMESTAMP)),
                         col(EVENT_TIMESTAMP)).alias("page_referer"))
-                .select(col(APP_ID), col(USER_ID), expr("page_referer.*"))
+                .select(col(APP_ID), col(USER_PSEUDO_ID), expr("page_referer.*"))
                 .distinct();
     }
 
@@ -222,7 +222,7 @@ public final class TransformerV2 {
                 .withColumn(DEVICE_ID, dataCol.getItem(DEVICE_ID).cast(DataTypes.StringType))
                 .filter(col(DEVICE_ID).isNotNull())
                 .withColumn(DEVICE_ID_LIST, array(col(DEVICE_ID)))
-                .select(APP_ID, USER_ID, DEVICE_ID_LIST, EVENT_TIMESTAMP);
+                .select(APP_ID, USER_PSEUDO_ID, DEVICE_ID_LIST, EVENT_TIMESTAMP);
 
         long newDeviceIdCount = newUserDeviceIdDataset.count();
         log.info(NEW_USER_COUNT + "=" + newUserCount + ", newDeviceIdCount=" + newDeviceIdCount);
@@ -253,12 +253,12 @@ public final class TransformerV2 {
         aggMap.put(EVENT_TIMESTAMP, "max");
 
         return allUserDeviceIdDataset
-                .groupBy(col(APP_ID), col(USER_ID))
+                .groupBy(col(APP_ID), col(USER_PSEUDO_ID))
                 .agg(aggMap)
                 .withColumnRenamed("max(event_timestamp)", EVENT_TIMESTAMP)
                 .withColumnRenamed("collect_set(device_id_list)", "device_id_list_list")
                 .withColumn(DEVICE_ID_LIST, array_sort(array_distinct(flatten(col("device_id_list_list")))))
-                .select(APP_ID, USER_ID, DEVICE_ID_LIST, EVENT_TIMESTAMP)
+                .select(APP_ID, USER_PSEUDO_ID, DEVICE_ID_LIST, EVENT_TIMESTAMP)
                 .distinct();
     }
 
@@ -505,7 +505,7 @@ public final class TransformerV2 {
 
         Dataset<Row> fullAggItemsDataset = getAggItemDataset(fullItemsDataset);
         log.info("fullAggItemsDataset count " + fullAggItemsDataset.count());
-        Dataset<Row>  fullAggItemsDatasetRt = fullAggItemsDataset.select(
+        Dataset<Row> fullAggItemsDatasetRt = fullAggItemsDataset.select(
                 APP_ID,
                 EVENT_DATE,
                 EVENT_TIMESTAMP,
@@ -513,14 +513,18 @@ public final class TransformerV2 {
                 PROPERTIES
         );
         saveFullDataset(ETLRunner.TableName.ITEM.name, fullAggItemsDatasetRt);
-        return Optional.of(fullAggItemsDatasetRt);
+
+        return Optional.of(newAggItemsDataset);
     }
 
     private Optional<Dataset<Row>> extractUser(final Dataset<Row> dataset) {
         SparkSession spark = dataset.sparkSession();
         Column dataCol = col("data");
         Column attributesCol = dataCol.getField(ATTRIBUTES);
-        Dataset<Row> userDataset = dataset.filter(col(USER_ID).isNotNull());
+        Dataset<Row> userDataset = dataset.filter((col(USER_PSEUDO_ID).isNotNull()));
+
+        Dataset<Row> possibleUpdateUserIdDataset = dataset.select(col(APP_ID), col(USER_PSEUDO_ID)).distinct();
+
         Dataset<Row> profileSetDataset = userDataset
                 .filter(col(EVENT_NAME)
                         .isin("user_profile_set", "_user_profile_set", "_profile_set"));
@@ -572,25 +576,27 @@ public final class TransformerV2 {
         log.info("fullAggUserDataset count " + fullAggUserDataset.count());
         saveFullDataset(ETLRunner.TableName.USER.name, fullAggUserDataset);
 
-        Column userIdCol = fullAggUserDataset.col(USER_ID);
+        Column userPseudoIdCol = fullAggUserDataset.col(USER_PSEUDO_ID);
         Column appIdCol = fullAggUserDataset.col(APP_ID);
         Column eventTimestampCol =  fullAggUserDataset.col(EVENT_TIMESTAMP);
 
-        Column userIdJoinForDeviceId = userIdCol.equalTo(userDeviceIdDataset.col(USER_ID)).and(appIdCol.equalTo(userDeviceIdDataset.col(APP_ID)));
-        Column userIdJoinForTrafficSource = userIdCol.equalTo(userTrafficSourceDataset.col(USER_ID)).and(appIdCol.equalTo(userTrafficSourceDataset.col(APP_ID)));
-        Column userIdJoinForPageReferrer = userIdCol.equalTo(userReferrerDataset.col(USER_ID)).and(appIdCol.equalTo(userReferrerDataset.col(APP_ID)));
+        Column userIdJoinForPossibleUpdate = userPseudoIdCol.equalTo(possibleUpdateUserIdDataset.col(USER_PSEUDO_ID)).and(appIdCol.equalTo(possibleUpdateUserIdDataset.col(APP_ID)));
+        Column userIdJoinForDeviceId = userPseudoIdCol.equalTo(userDeviceIdDataset.col(USER_PSEUDO_ID)).and(appIdCol.equalTo(userDeviceIdDataset.col(APP_ID)));
+        Column userIdJoinForTrafficSource = userPseudoIdCol.equalTo(userTrafficSourceDataset.col(USER_PSEUDO_ID)).and(appIdCol.equalTo(userTrafficSourceDataset.col(APP_ID)));
+        Column userIdJoinForPageReferrer = userPseudoIdCol.equalTo(userReferrerDataset.col(USER_PSEUDO_ID)).and(appIdCol.equalTo(userReferrerDataset.col(APP_ID)));
 
-        Dataset<Row> joinedFullUserDataset = fullAggUserDataset
+        Dataset<Row> joinedPossibleUpdateUserDataset = fullAggUserDataset
+                .join(possibleUpdateUserIdDataset, userIdJoinForPossibleUpdate, "inner")
                 .join(userDeviceIdDataset, userIdJoinForDeviceId, "left")
                 .join(userTrafficSourceDataset, userIdJoinForTrafficSource, "left")
                 .join(userReferrerDataset, userIdJoinForPageReferrer, "left");
 
-        log.info("joinedFullUserDataset:" + joinedFullUserDataset.count());
-        Dataset<Row> joinedFullUserDatasetRt = joinedFullUserDataset.select(appIdCol,
+        log.info("joinedPossibleUpdateUserDataset:" + joinedPossibleUpdateUserDataset.count());
+        Dataset<Row> joinedPossibleUpdateUserDatasetRt = joinedPossibleUpdateUserDataset.select(appIdCol,
                 col(EVENT_DATE),
                 eventTimestampCol,
-                userIdCol,
-                col(USER_PSEUDO_ID),
+                col(USER_ID),
+                userPseudoIdCol,
                 col(USER_FIRST_TOUCH_TIMESTAMP),
                 col("user_properties"),
                 col("user_ltv"),
@@ -602,7 +608,7 @@ public final class TransformerV2 {
                 col(DEVICE_ID_LIST),
                 col(CHANNEL));
 
-        return Optional.of(joinedFullUserDatasetRt);
+        return Optional.of(joinedPossibleUpdateUserDatasetRt);
     }
 
     private static void setSchemaMap(final Dataset<Row> newUserProfileMainDataset, final String tableName) {
@@ -614,7 +620,7 @@ public final class TransformerV2 {
     }
 
     private Dataset<Row> getAggUserDataset(final Dataset<Row> newUserDataset) {
-        return newUserDataset.groupBy(APP_ID, USER_ID)
+        return newUserDataset.groupBy(APP_ID, USER_PSEUDO_ID)
                 .agg(max_by(struct(expr("*")), col(EVENT_TIMESTAMP)).alias("user"))
                 .select(expr("user.*"))
                 .distinct();
