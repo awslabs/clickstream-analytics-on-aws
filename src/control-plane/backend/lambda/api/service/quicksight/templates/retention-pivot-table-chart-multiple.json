@@ -1,0 +1,125 @@
+{
+  "PivotTableVisual": {
+      "VisualId": "{{visualId}}",
+      "Title": {
+          "FormatText": {
+            "PlainText": "{{title}}"
+          },
+          "Visibility": "VISIBLE"
+      },
+      "Subtitle": {
+          "Visibility": "VISIBLE"
+      },
+      "ChartConfiguration": {
+          "FieldWells": {
+              "PivotTableAggregatedFieldWells": {
+                  "Rows": [
+                      {
+                            "CategoricalDimensionField": {
+                                "FieldId": "{{smalMultiplesFieldId}}",
+                                "Column": {
+                                    "DataSetIdentifier": "{{dataSetIdentifier}}",
+                                    "ColumnName": "group_col"
+                                }
+                            }
+                      },
+                      {
+                          "CategoricalDimensionField": {
+                              "FieldId": "{{catDimFieldId}}",
+                              "Column": {
+                                  "DataSetIdentifier": "{{dataSetIdentifier}}",
+                                  "ColumnName": "grouping"
+                              }
+                          }
+                      }
+                  ],
+                  "Columns": [
+                      {
+                          "DateDimensionField": {
+                              "FieldId": "{{dateDimFieldId}}",
+                              "Column": {
+                                  "DataSetIdentifier": "{{dataSetIdentifier}}",
+                                  "ColumnName": "event_date"
+                              }
+                          }
+                      }
+                  ],
+                  "Values": [
+                      {
+                          "NumericalMeasureField": {
+                              "FieldId": "{{numberMeasureFieldId}}",
+                              "Column": {
+                                  "DataSetIdentifier": "{{dataSetIdentifier}}",
+                                  "ColumnName": "retention"
+                              },
+                              "AggregationFunction": {
+                                  "SimpleNumericalAggregation": "AVERAGE"
+                              },
+                              "FormatConfiguration": {
+                                  "FormatConfiguration": {
+                                      "PercentageDisplayFormatConfiguration": {
+                                          "Suffix": "%",
+                                          "SeparatorConfiguration": {
+                                              "DecimalSeparator": "DOT",
+                                              "ThousandsSeparator": {
+                                                  "Symbol": "COMMA",
+                                                  "Visibility": "VISIBLE"
+                                              }
+                                          },
+                                          "NegativeValueConfiguration": {
+                                              "DisplayMode": "NEGATIVE"
+                                          }
+                                      }
+                                  }
+                              }
+                          }
+                      }
+                  ]
+              }
+          },
+          "SortConfiguration": {
+              "FieldSortOptions": [
+                  {
+                      "FieldId": "{{dateDimFieldId}}",
+                      "SortBy": {
+                          "Field": {
+                              "FieldId": "{{dateDimFieldId}}",
+                              "Direction": "ASC"
+                          }
+                      }
+                  }
+              ]
+          },
+          "TableOptions": {
+              "ColumnHeaderStyle": {
+                  "TextWrap": "NONE"
+              },
+              "CellStyle": {
+                  "TextWrap": "NONE",
+                  "Height": 25
+              }
+          },
+          "FieldOptions": {
+              "SelectedFieldOptions": [
+                  {
+                    "FieldId": "{{smalMultiplesFieldId}}",
+                    "Visibility": "VISIBLE"
+                  },
+                  {
+                      "FieldId": "{{catDimFieldId}}",
+                      "Visibility": "VISIBLE"
+                  },
+                  {
+                      "FieldId": "{{dateDimFieldId}}",
+                      "Visibility": "VISIBLE"
+                  },
+                  {
+                      "FieldId": "{{numberMeasureFieldId}}",
+                      "Visibility": "VISIBLE"
+                  }
+              ]
+          }
+      },
+      "Actions": []
+  }
+}

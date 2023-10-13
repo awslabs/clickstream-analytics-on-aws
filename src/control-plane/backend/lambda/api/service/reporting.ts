@@ -505,8 +505,25 @@ export class ReportingService {
         timeUnit: query.timeUnit,
         groupColumn: query.groupColumn,
         pairEventAndConditions: query.pairEventAndConditions,
+        groupCondition: query.groupCondition,
       });
       logger.debug(`retention analysis sql: ${sql}`);
+
+      const hasGrouping = query.groupCondition === undefined ? false: true;
+      const projectedColumns = [
+        'grouping',
+        'start_event_date',
+        'event_date',
+        'retention',
+      ];
+      if (hasGrouping) {
+        eventVisualColumns.push({
+          Name: 'group_col',
+          Type: 'STRING',
+        });
+
+        projectedColumns.push('group_col');
+      }
 
       const datasetPropsArray: DataSetProps[] = [];
       datasetPropsArray.push({
@@ -515,12 +532,7 @@ export class ReportingService {
         columns: retentionAnalysisVisualColumns,
         importMode: 'DIRECT_QUERY',
         customSql: sql,
-        projectedColumns: [
-          'grouping',
-          'start_event_date',
-          'event_date',
-          'retention',
-        ],
+        projectedColumns,
       });
 
       let sheetId;
@@ -536,7 +548,7 @@ export class ReportingService {
       const titleProps = await getDashboardTitleProps(AnalysisType.RETENTION, query);
       const visualId = uuidv4();
       const quickSightChartType = query.chartType;
-      const visualDef = getRetentionChartVisualDef(visualId, viewName, titleProps, quickSightChartType);
+      const visualDef = getRetentionChartVisualDef(visualId, viewName, titleProps, quickSightChartType, hasGrouping);
       const visualRelatedParams = getVisualRelatedDefs({
         timeScopeType: query.timeScopeType,
         sheetId,
@@ -560,7 +572,7 @@ export class ReportingService {
       };
 
       const tableVisualId = uuidv4();
-      const tableVisualDef = getRetentionPivotTableVisualDef(tableVisualId, viewName, titleProps);
+      const tableVisualDef = getRetentionPivotTableVisualDef(tableVisualId, viewName, titleProps, hasGrouping);
 
       visualRelatedParams.filterGroup!.ScopeConfiguration!.SelectedSheets!.SheetVisualScopingConfigurations![0].VisualIds!.push(tableVisualId);
 

@@ -25,10 +25,10 @@ export enum MetadataPlatform {
 }
 
 export enum MetadataValueType {
-  STRING = 'String',
-  INTEGER = 'Integer',
-  DOUBLE = 'Double',
-  FLOAT = 'Float',
+  STRING = 'string',
+  INTEGER = 'int',
+  DOUBLE = 'double',
+  FLOAT = 'float',
 }
 
 export enum MetadataParameterType {

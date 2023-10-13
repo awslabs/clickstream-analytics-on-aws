@@ -25,10 +25,10 @@ export enum MetadataPlatform {
 }
 
 export enum MetadataValueType {
-  STRING = 'String',
-  INTEGER = 'Integer',
-  DOUBLE = 'Double',
-  FLOAT = 'Float',
+  STRING = 'string',
+  INTEGER = 'int',
+  DOUBLE = 'double',
+  FLOAT = 'float',
 }
 
 export enum MetadataParameterType {
@@ -91,6 +91,7 @@ export enum ExploreVisualName {
 
 export enum ConditionCategory {
   USER = 'user',
+  USER_OUTER = 'user_outer',
   EVENT = 'event',
   DEVICE = 'device',
   GEO = 'geo',
