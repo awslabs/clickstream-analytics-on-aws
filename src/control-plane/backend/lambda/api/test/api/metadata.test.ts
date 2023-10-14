@@ -68,9 +68,9 @@ const MOCK_EVENT_PARAMETER = {
   prefix: `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
   projectId: MOCK_PROJECT_ID,
   appId: MOCK_APP_ID,
+  eventName: MOCK_EVENT_NAME,
   day1: {
     category: 'event',
-    eventName: MOCK_EVENT_NAME,
     hasData: true,
     name: MOCK_EVENT_PARAMETER_NAME,
     platform: [
@@ -86,7 +86,6 @@ const MOCK_EVENT_PARAMETER = {
   },
   day31: {
     category: 'event',
-    eventName: MOCK_EVENT_NAME,
     hasData: true,
     name: MOCK_EVENT_PARAMETER_NAME,
     platform: [
@@ -106,7 +105,6 @@ const MOCK_EVENT_PARAMETER = {
   },
   summary: {
     category: 'event',
-    eventName: MOCK_EVENT_NAME,
     hasData: true,
     name: MOCK_EVENT_PARAMETER_NAME,
     platform: [
@@ -632,9 +630,9 @@ describe('Metadata Event test', () => {
           ...MOCK_EVENT_PARAMETER,
           id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}1#${MOCK_EVENT_PARAMETER_NAME}11#Integer`,
           month: '#202302',
+          eventName: `${MOCK_EVENT_NAME}1`,
           summary: {
             ...MOCK_EVENT_PARAMETER.summary,
-            eventName: `${MOCK_EVENT_NAME}1`,
             name: `${MOCK_EVENT_PARAMETER_NAME}11`,
             platform: [
               'Android',
@@ -652,9 +650,9 @@ describe('Metadata Event test', () => {
           ...MOCK_EVENT_PARAMETER,
           id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}1#${MOCK_EVENT_PARAMETER_NAME}11#Integer`,
           month: '#202301',
+          eventName: `${MOCK_EVENT_NAME}1`,
           summary: {
             ...MOCK_EVENT_PARAMETER.summary,
-            eventName: `${MOCK_EVENT_NAME}1`,
             name: `${MOCK_EVENT_PARAMETER_NAME}11`,
             platform: [
               'Android',
@@ -672,9 +670,9 @@ describe('Metadata Event test', () => {
           ...MOCK_EVENT_PARAMETER,
           id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}1#${MOCK_EVENT_PARAMETER_NAME}12#Double`,
           month: '#202301',
+          eventName: `${MOCK_EVENT_NAME}1`,
           summary: {
             ...MOCK_EVENT_PARAMETER.summary,
-            eventName: `${MOCK_EVENT_NAME}1`,
             name: `${MOCK_EVENT_PARAMETER_NAME}12`,
             platform: [
               'iOS',
@@ -884,9 +882,9 @@ describe('Metadata Event Attribute test', () => {
         {
           ...MOCK_EVENT_PARAMETER,
           month: '#202302',
+          eventName: `${MOCK_EVENT_NAME}1`,
           summary: {
             ...MOCK_EVENT_PARAMETER.summary,
-            eventName: `${MOCK_EVENT_NAME}1`,
             platform: [
               'Android',
             ],
@@ -902,9 +900,9 @@ describe('Metadata Event Attribute test', () => {
         {
           ...MOCK_EVENT_PARAMETER,
           month: '#202301',
+          eventName: `${MOCK_EVENT_NAME}1`,
           summary: {
             ...MOCK_EVENT_PARAMETER.summary,
-            eventName: `${MOCK_EVENT_NAME}1`,
             platform: [
               'Android',
             ],
@@ -1022,9 +1020,9 @@ describe('Metadata Event Attribute test', () => {
         {
           ...MOCK_EVENT_PARAMETER,
           month: '#202302',
+          eventName: `${MOCK_EVENT_NAME}1`,
           summary: {
             ...MOCK_EVENT_PARAMETER.summary,
-            eventName: `${MOCK_EVENT_NAME}1`,
             platform: [
               'Android',
             ],
@@ -1040,9 +1038,9 @@ describe('Metadata Event Attribute test', () => {
         {
           ...MOCK_EVENT_PARAMETER,
           month: '#202301',
+          eventName: `${MOCK_EVENT_NAME}1`,
           summary: {
             ...MOCK_EVENT_PARAMETER.summary,
-            eventName: `${MOCK_EVENT_NAME}1`,
             platform: [
               'Android',
             ],
@@ -1059,9 +1057,9 @@ describe('Metadata Event Attribute test', () => {
           ...MOCK_EVENT_PARAMETER,
           id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}1#${MOCK_EVENT_PARAMETER_NAME}1#Float`,
           month: '#202306',
+          eventName: `${MOCK_EVENT_NAME}1`,
           summary: {
             ...MOCK_EVENT_PARAMETER.summary,
-            eventName: `${MOCK_EVENT_NAME}1`,
             name: `${MOCK_EVENT_PARAMETER_NAME}1`,
             platform: [
               'Android',
