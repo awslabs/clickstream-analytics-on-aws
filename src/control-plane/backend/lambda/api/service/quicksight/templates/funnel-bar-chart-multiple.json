@@ -73,6 +73,12 @@
                         "FieldId":"{{dateDimFieldId}}",
                         "Direction":"ASC"
                     }
+                },
+                {
+                    "FieldSort":{
+                        "FieldId":"{{smalMultiplesFieldId}}",
+                        "Direction":"ASC"
+                    }
                 }
             ],
             "CategoryItemsLimit":{

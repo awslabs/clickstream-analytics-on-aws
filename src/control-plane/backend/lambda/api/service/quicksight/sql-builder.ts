@@ -257,11 +257,11 @@ export function buildFunnelView(sqlParameters: SQLParameters, isMultipleChart: b
 
   for (const [ind, _item] of eventNames.entries()) {
     finalTableColumnsSQL = finalTableColumnsSQL.concat(`, event_id_${ind} as e_id_${ind} \n`);
-    finalTableColumnsSQL = finalTableColumnsSQL.concat(`, event_name_${ind} as e_name_${ind} \n`);
+    finalTableColumnsSQL = finalTableColumnsSQL.concat(`, '${ind+1}_' || event_name_${ind} as e_name_${ind} \n`);
     finalTableColumnsSQL = finalTableColumnsSQL.concat(`, user_pseudo_id_${ind} as u_id_${ind} \n`);
 
     finalTableGroupBySQL = finalTableGroupBySQL.concat(`, event_id_${ind} \n`);
-    finalTableGroupBySQL = finalTableGroupBySQL.concat(`, event_name_${ind} \n`);
+    finalTableGroupBySQL = finalTableGroupBySQL.concat(`, '${ind+1}_' || event_name_${ind} \n`);
     finalTableGroupBySQL = finalTableGroupBySQL.concat(`, user_pseudo_id_${ind} \n`);
 
     if (appendGroupingCol) {

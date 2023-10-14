@@ -1376,13 +1376,13 @@ describe('SQL Builder test', () => {
           day,
           hour,
           event_id_0 as e_id_0,
-          event_name_0 as e_name_0,
+          '1_' || event_name_0 as e_name_0,
           user_pseudo_id_0 as u_id_0,
           event_id_1 as e_id_1,
-          event_name_1 as e_name_1,
+          '2_' || event_name_1 as e_name_1,
           user_pseudo_id_1 as u_id_1,
           event_id_2 as e_id_2,
-          event_name_2 as e_name_2,
+          '3_' || event_name_2 as e_name_2,
           user_pseudo_id_2 as u_id_2
         from
           join_table
@@ -1392,13 +1392,13 @@ describe('SQL Builder test', () => {
           day,
           hour,
           event_id_0,
-          event_name_0,
+          '1_' || event_name_0,
           user_pseudo_id_0,
           event_id_1,
-          event_name_1,
+          '2_' || event_name_1,
           user_pseudo_id_1,
           event_id_2,
-          event_name_2,
+          '3_' || event_name_2,
           user_pseudo_id_2
       )
     select
@@ -4730,6 +4730,8 @@ describe('SQL Builder test', () => {
       groupColumn: ExploreGroupColumn.DAY,
     });
 
+    console.log(sql);
+
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
       user_base as (
@@ -4972,13 +4974,13 @@ describe('SQL Builder test', () => {
           day,
           hour,
           event_id_0 as e_id_0,
-          event_name_0 as e_name_0,
+          '1_' || event_name_0 as e_name_0,
           user_pseudo_id_0 as u_id_0,
           event_id_1 as e_id_1,
-          event_name_1 as e_name_1,
+          '2_' || event_name_1 as e_name_1,
           user_pseudo_id_1 as u_id_1,
           event_id_2 as e_id_2,
-          event_name_2 as e_name_2,
+          '3_' || event_name_2 as e_name_2,
           user_pseudo_id_2 as u_id_2
         from
           join_table
@@ -4988,13 +4990,13 @@ describe('SQL Builder test', () => {
           day,
           hour,
           event_id_0,
-          event_name_0,
+          '1_' || event_name_0,
           user_pseudo_id_0,
           event_id_1,
-          event_name_1,
+          '2_' || event_name_1,
           user_pseudo_id_1,
           event_id_2,
-          event_name_2,
+          '3_' || event_name_2,
           user_pseudo_id_2
       )
     select
@@ -8090,15 +8092,15 @@ describe('SQL Builder test', () => {
           day,
           hour,
           event_id_0 as e_id_0,
-          event_name_0 as e_name_0,
+          '1_' || event_name_0 as e_name_0,
           user_pseudo_id_0 as u_id_0,
           _session_id_0 as group_col_0,
           event_id_1 as e_id_1,
-          event_name_1 as e_name_1,
+          '2_' || event_name_1 as e_name_1,
           user_pseudo_id_1 as u_id_1,
           _session_id_1 as group_col_1,
           event_id_2 as e_id_2,
-          event_name_2 as e_name_2,
+          '3_' || event_name_2 as e_name_2,
           user_pseudo_id_2 as u_id_2,
           _session_id_2 as group_col_2
         from
@@ -8109,15 +8111,15 @@ describe('SQL Builder test', () => {
           day,
           hour,
           event_id_0,
-          event_name_0,
+          '1_' || event_name_0,
           user_pseudo_id_0,
           _session_id_0,
           event_id_1,
-          event_name_1,
+          '2_' || event_name_1,
           user_pseudo_id_1,
           _session_id_1,
           event_id_2,
-          event_name_2,
+          '3_' || event_name_2,
           user_pseudo_id_2,
           _session_id_2
       )
@@ -8427,15 +8429,15 @@ describe('SQL Builder test', () => {
           day,
           hour,
           event_id_0 as e_id_0,
-          event_name_0 as e_name_0,
+          '1_' || event_name_0 as e_name_0,
           user_pseudo_id_0 as u_id_0,
           geo_country_0 as group_col_0,
           event_id_1 as e_id_1,
-          event_name_1 as e_name_1,
+          '2_' || event_name_1 as e_name_1,
           user_pseudo_id_1 as u_id_1,
           geo_country_1 as group_col_1,
           event_id_2 as e_id_2,
-          event_name_2 as e_name_2,
+          '3_' || event_name_2 as e_name_2,
           user_pseudo_id_2 as u_id_2,
           geo_country_2 as group_col_2
         from
@@ -8446,15 +8448,15 @@ describe('SQL Builder test', () => {
           day,
           hour,
           event_id_0,
-          event_name_0,
+          '1_' || event_name_0,
           user_pseudo_id_0,
           geo_country_0,
           event_id_1,
-          event_name_1,
+          '2_' || event_name_1,
           user_pseudo_id_1,
           geo_country_1,
           event_id_2,
-          event_name_2,
+          '3_' || event_name_2,
           user_pseudo_id_2,
           geo_country_2
       )
@@ -10961,15 +10963,15 @@ describe('SQL Builder test', () => {
           day,
           hour,
           event_id_0 as e_id_0,
-          event_name_0 as e_name_0,
+          '1_' || event_name_0 as e_name_0,
           user_pseudo_id_0 as u_id_0,
           geo_country_0 as group_col_0,
           event_id_1 as e_id_1,
-          event_name_1 as e_name_1,
+          '2_' || event_name_1 as e_name_1,
           user_pseudo_id_1 as u_id_1,
           geo_country_1 as group_col_1,
           event_id_2 as e_id_2,
-          event_name_2 as e_name_2,
+          '3_' || event_name_2 as e_name_2,
           user_pseudo_id_2 as u_id_2,
           geo_country_2 as group_col_2
         from
@@ -10980,15 +10982,15 @@ describe('SQL Builder test', () => {
           day,
           hour,
           event_id_0,
-          event_name_0,
+          '1_' || event_name_0,
           user_pseudo_id_0,
           geo_country_0,
           event_id_1,
-          event_name_1,
+          '2_' || event_name_1,
           user_pseudo_id_1,
           geo_country_1,
           event_id_2,
-          event_name_2,
+          '3_' || event_name_2,
           user_pseudo_id_2,
           geo_country_2
       )
