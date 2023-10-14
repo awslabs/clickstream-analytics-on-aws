@@ -25,13 +25,14 @@ export interface IMetadataRaw {
 
   readonly projectId: string;
   readonly appId: string;
+
+  readonly name: string;
   readonly eventName?: string;
+  readonly category?: ConditionCategory;
+  readonly valueType?: MetadataValueType;
 
   readonly summary: {
-    readonly name: string;
     readonly platform?: MetadataPlatform[];
-    readonly category?: ConditionCategory;
-    readonly valueType?: MetadataValueType;
     readonly valueEnum?: IMetadataRawValue[];
   };
 }

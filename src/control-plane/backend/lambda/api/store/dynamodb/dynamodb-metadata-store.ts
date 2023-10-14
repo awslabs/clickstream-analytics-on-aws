@@ -50,7 +50,7 @@ export class DynamoDbMetadataStore implements MetadataStore {
       prefix: records[0].prefix,
       projectId: records[0].projectId,
       appId: records[0].appId,
-      name: records[0].summary.name,
+      name: records[0].name,
       dataVolumeLastDay: lastDayData.dataVolumeLastDay,
       hasData: lastDayData.hasData,
       platform: records[0].summary.platform ?? [],

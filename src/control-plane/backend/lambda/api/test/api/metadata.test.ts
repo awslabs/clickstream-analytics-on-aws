@@ -35,10 +35,10 @@ const MOCK_EVENT = {
   prefix: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
   projectId: MOCK_PROJECT_ID,
   appId: MOCK_APP_ID,
+  name: MOCK_EVENT_NAME,
   day1: {
     count: 1,
     hasData: true,
-    name: MOCK_EVENT_NAME,
     platform: [
       'iOS',
     ],
@@ -46,7 +46,6 @@ const MOCK_EVENT = {
   day31: {
     count: 2,
     hasData: true,
-    name: MOCK_EVENT_NAME,
     platform: [
       'Android',
     ],
@@ -54,7 +53,6 @@ const MOCK_EVENT = {
   summary: {
     dataVolumeLastDay: 2048,
     hasData: true,
-    name: MOCK_EVENT_NAME,
     platform: [
       'Android',
       'iOS',
@@ -68,11 +66,12 @@ const MOCK_EVENT_PARAMETER = {
   prefix: `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
   projectId: MOCK_PROJECT_ID,
   appId: MOCK_APP_ID,
+  name: MOCK_EVENT_PARAMETER_NAME,
   eventName: MOCK_EVENT_NAME,
+  category: 'event',
+  valueType: 'String',
   day1: {
-    category: 'event',
     hasData: true,
-    name: MOCK_EVENT_PARAMETER_NAME,
     platform: [
       'Android',
     ],
@@ -82,12 +81,9 @@ const MOCK_EVENT_PARAMETER = {
         value: 'value-01',
       },
     ],
-    valueType: 'String',
   },
   day31: {
-    category: 'event',
     hasData: true,
-    name: MOCK_EVENT_PARAMETER_NAME,
     platform: [
       'iOS',
     ],
@@ -101,12 +97,9 @@ const MOCK_EVENT_PARAMETER = {
         value: 'value-03',
       },
     ],
-    valueType: 'String',
   },
   summary: {
-    category: 'event',
     hasData: true,
-    name: MOCK_EVENT_PARAMETER_NAME,
     platform: [
       'Android',
       'iOS',
@@ -125,7 +118,6 @@ const MOCK_EVENT_PARAMETER = {
         value: 'value-03',
       },
     ],
-    valueType: 'String',
   },
 };
 
@@ -135,22 +127,20 @@ const MOCK_USER_ATTRIBUTE = {
   prefix: `USER_ATTRIBUTE#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
   projectId: MOCK_PROJECT_ID,
   appId: MOCK_APP_ID,
+  name: MOCK_USER_ATTRIBUTE_NAME,
+  category: 'user',
+  valueType: 'String',
   day1: {
-    category: 'user',
     hasData: true,
-    name: MOCK_USER_ATTRIBUTE_NAME,
     valueEnum: [
       {
         count: 103,
         value: 'value-01',
       },
     ],
-    valueType: 'String',
   },
   day31: {
-    category: 'user',
     hasData: true,
-    name: MOCK_USER_ATTRIBUTE_NAME,
     valueEnum: [
       {
         count: 305,
@@ -161,12 +151,9 @@ const MOCK_USER_ATTRIBUTE = {
         value: 'value-03',
       },
     ],
-    valueType: 'String',
   },
   summary: {
-    category: 'user',
     hasData: true,
-    name: MOCK_USER_ATTRIBUTE_NAME,
     valueEnum: [
       {
         count: 103,
@@ -181,7 +168,6 @@ const MOCK_USER_ATTRIBUTE = {
         value: 'value-03',
       },
     ],
-    valueType: 'String',
   },
 };
 
@@ -475,27 +461,27 @@ describe('Metadata Event test', () => {
           ...MOCK_EVENT,
           id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}1`,
           month: '#202302',
+          name: `${MOCK_EVENT_NAME}1`,
           summary: {
             ...MOCK_EVENT.summary,
-            name: `${MOCK_EVENT_NAME}1`,
           },
         },
         {
           ...MOCK_EVENT,
           id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}1`,
           month: '#202301',
+          name: `${MOCK_EVENT_NAME}1`,
           summary: {
             ...MOCK_EVENT.summary,
-            name: `${MOCK_EVENT_NAME}1`,
           },
         },
         {
           ...MOCK_EVENT,
           id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}2`,
           month: '#202301',
+          name: `${MOCK_EVENT_NAME}2`,
           summary: {
             ...MOCK_EVENT.summary,
-            name: `${MOCK_EVENT_NAME}2`,
             platform: [MetadataPlatform.WEB],
             dataVolumeLastDay: 1445,
           },
@@ -586,27 +572,27 @@ describe('Metadata Event test', () => {
           ...MOCK_EVENT,
           id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}1`,
           month: '#202302',
+          name: `${MOCK_EVENT_NAME}1`,
           summary: {
             ...MOCK_EVENT.summary,
-            name: `${MOCK_EVENT_NAME}1`,
           },
         },
         {
           ...MOCK_EVENT,
           id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}1`,
           month: '#202301',
+          name: `${MOCK_EVENT_NAME}1`,
           summary: {
             ...MOCK_EVENT.summary,
-            name: `${MOCK_EVENT_NAME}1`,
           },
         },
         {
           ...MOCK_EVENT,
           id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}2`,
           month: '#202301',
+          name: `${MOCK_EVENT_NAME}2`,
           summary: {
             ...MOCK_EVENT.summary,
-            name: `${MOCK_EVENT_NAME}2`,
             platform: [MetadataPlatform.ANDROID, MetadataPlatform.WEB, MetadataPlatform.IOS],
             dataVolumeLastDay: 1445,
           },
@@ -630,10 +616,11 @@ describe('Metadata Event test', () => {
           ...MOCK_EVENT_PARAMETER,
           id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}1#${MOCK_EVENT_PARAMETER_NAME}11#Integer`,
           month: '#202302',
+          name: `${MOCK_EVENT_PARAMETER_NAME}11`,
           eventName: `${MOCK_EVENT_NAME}1`,
+          valueType: 'Integer',
           summary: {
             ...MOCK_EVENT_PARAMETER.summary,
-            name: `${MOCK_EVENT_PARAMETER_NAME}11`,
             platform: [
               'Android',
             ],
@@ -643,17 +630,17 @@ describe('Metadata Event test', () => {
                 value: 'value-01',
               },
             ],
-            valueType: 'Integer',
           },
         },
         {
           ...MOCK_EVENT_PARAMETER,
           id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}1#${MOCK_EVENT_PARAMETER_NAME}11#Integer`,
           month: '#202301',
+          name: `${MOCK_EVENT_PARAMETER_NAME}11`,
           eventName: `${MOCK_EVENT_NAME}1`,
+          valueType: 'Integer',
           summary: {
             ...MOCK_EVENT_PARAMETER.summary,
-            name: `${MOCK_EVENT_PARAMETER_NAME}11`,
             platform: [
               'Android',
             ],
@@ -663,17 +650,17 @@ describe('Metadata Event test', () => {
                 value: 'value-02',
               },
             ],
-            valueType: 'Integer',
           },
         },
         {
           ...MOCK_EVENT_PARAMETER,
           id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}1#${MOCK_EVENT_PARAMETER_NAME}12#Double`,
           month: '#202301',
+          name: `${MOCK_EVENT_PARAMETER_NAME}12`,
           eventName: `${MOCK_EVENT_NAME}1`,
+          valueType: 'Double',
           summary: {
             ...MOCK_EVENT_PARAMETER.summary,
-            name: `${MOCK_EVENT_PARAMETER_NAME}12`,
             platform: [
               'iOS',
             ],
@@ -683,7 +670,6 @@ describe('Metadata Event test', () => {
                 value: 'value-03',
               },
             ],
-            valueType: 'Double',
           },
         },
       ],
@@ -1021,6 +1007,7 @@ describe('Metadata Event Attribute test', () => {
           ...MOCK_EVENT_PARAMETER,
           month: '#202302',
           eventName: `${MOCK_EVENT_NAME}1`,
+          valueType: 'String',
           summary: {
             ...MOCK_EVENT_PARAMETER.summary,
             platform: [
@@ -1032,13 +1019,13 @@ describe('Metadata Event Attribute test', () => {
                 value: 'value-02',
               },
             ],
-            valueType: 'String',
           },
         },
         {
           ...MOCK_EVENT_PARAMETER,
           month: '#202301',
           eventName: `${MOCK_EVENT_NAME}1`,
+          valueType: 'String',
           summary: {
             ...MOCK_EVENT_PARAMETER.summary,
             platform: [
@@ -1050,17 +1037,17 @@ describe('Metadata Event Attribute test', () => {
                 value: 'value-02',
               },
             ],
-            valueType: 'String',
           },
         },
         {
           ...MOCK_EVENT_PARAMETER,
           id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}1#${MOCK_EVENT_PARAMETER_NAME}1#Float`,
           month: '#202306',
+          name: `${MOCK_EVENT_PARAMETER_NAME}1`,
           eventName: `${MOCK_EVENT_NAME}1`,
+          valueType: 'Float',
           summary: {
             ...MOCK_EVENT_PARAMETER.summary,
-            name: `${MOCK_EVENT_PARAMETER_NAME}1`,
             platform: [
               'Android',
               'Web',
@@ -1072,7 +1059,6 @@ describe('Metadata Event Attribute test', () => {
                 value: 'value-02',
               },
             ],
-            valueType: 'Float',
           },
         },
       ],
@@ -1207,6 +1193,7 @@ describe('Metadata User Attribute test', () => {
         {
           ...MOCK_USER_ATTRIBUTE,
           month: '#202302',
+          valueType: 'String',
           summary: {
             ...MOCK_USER_ATTRIBUTE.summary,
             valueEnum: [
@@ -1215,12 +1202,12 @@ describe('Metadata User Attribute test', () => {
                 value: 'value-02',
               },
             ],
-            valueType: 'String',
           },
         },
         {
           ...MOCK_USER_ATTRIBUTE,
           month: '#202301',
+          valueType: 'String',
           summary: {
             ...MOCK_USER_ATTRIBUTE.summary,
             valueEnum: [
@@ -1229,23 +1216,22 @@ describe('Metadata User Attribute test', () => {
                 value: 'value-02',
               },
             ],
-            valueType: 'String',
           },
         },
         {
           ...MOCK_USER_ATTRIBUTE,
           id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_USER_ATTRIBUTE_NAME}1#Float`,
           month: '#202312',
+          name: `${MOCK_USER_ATTRIBUTE_NAME}1`,
+          valueType: 'Float',
           summary: {
             ...MOCK_USER_ATTRIBUTE.summary,
-            name: `${MOCK_USER_ATTRIBUTE_NAME}1`,
             valueEnum: [
               {
                 count: 555,
                 value: 'value-02',
               },
             ],
-            valueType: 'Float',
           },
         },
       ],

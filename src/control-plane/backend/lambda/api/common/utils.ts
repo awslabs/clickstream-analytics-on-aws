@@ -631,12 +631,12 @@ function getLatestEventByName(metadata: IMetadataRaw[]): IMetadataEvent[] {
       prefix: meta.prefix,
       projectId: meta.projectId,
       appId: meta.appId,
-      name: meta.summary.name,
+      name: meta.name,
       hasData: lastDayData.hasData,
       platform: meta.summary.platform ?? [],
       dataVolumeLastDay: lastDayData.dataVolumeLastDay,
     };
-    const index = latestEvents.findIndex((e: IMetadataEvent) => e.name === meta.summary.name);
+    const index = latestEvents.findIndex((e: IMetadataEvent) => e.name === meta.name);
     if (index === -1) {
       latestEvents.push(event);
     } else if (meta.month > latestEvents[index].month) {
@@ -656,16 +656,16 @@ function getLatestParameterByName(metadata: IMetadataRaw[]): IMetadataEventParam
       prefix: meta.prefix,
       projectId: meta.projectId,
       appId: meta.appId,
-      name: meta.summary.name,
+      name: meta.name,
       eventName: meta.eventName ?? '',
       hasData: lastDayData.hasData,
       platform: meta.summary.platform ?? [],
-      category: meta.summary.category ?? ConditionCategory.OTHER,
-      valueType: meta.summary.valueType ?? MetadataValueType.STRING,
+      category: meta.category ?? ConditionCategory.OTHER,
+      valueType: meta.valueType ?? MetadataValueType.STRING,
       valueEnum: meta.summary.valueEnum ?? [],
     };
     const index = latestEventParameters.findIndex(
-      (e: IMetadataEventParameter) => e.name === meta.summary.name && e.valueType === meta.summary.valueType);
+      (e: IMetadataEventParameter) => e.name === meta.name && e.valueType === meta.valueType);
     if (index === -1) {
       latestEventParameters.push(parameter);
     } else if (meta.month > latestEventParameters[index].month) {
@@ -677,7 +677,7 @@ function getLatestParameterByName(metadata: IMetadataRaw[]): IMetadataEventParam
 
 function getParameterByNameAndType(metadata: IMetadataRaw[], parameterName: string, valueType: MetadataValueType):
 IMetadataEventParameter | undefined {
-  const filteredMetadata = metadata.filter((r: IMetadataRaw) => r.summary.name === parameterName && r.summary.valueType === valueType);
+  const filteredMetadata = metadata.filter((r: IMetadataRaw) => r.name === parameterName && r.valueType === valueType);
   if (filteredMetadata.length === 0) {
     return;
   }
@@ -701,12 +701,12 @@ IMetadataEventParameter | undefined {
     prefix: filteredMetadata[0].prefix,
     projectId: filteredMetadata[0].projectId,
     appId: filteredMetadata[0].appId,
-    name: filteredMetadata[0].summary.name,
+    name: filteredMetadata[0].name,
     eventName: '',
     hasData: lastDayData.hasData,
     platform: filteredMetadata[0].summary.platform ?? [],
-    category: filteredMetadata[0].summary.category ?? ConditionCategory.OTHER,
-    valueType: filteredMetadata[0].summary.valueType ?? MetadataValueType.STRING,
+    category: filteredMetadata[0].category ?? ConditionCategory.OTHER,
+    valueType: filteredMetadata[0].valueType ?? MetadataValueType.STRING,
     valueEnum: filteredMetadata[0].summary.valueEnum ?? [],
     associatedEvents: groupEvents,
   } as IMetadataEventParameter;
@@ -722,14 +722,14 @@ function getLatestAttributeByName(metadata: IMetadataRaw[]): IMetadataUserAttrib
       prefix: meta.prefix,
       projectId: meta.projectId,
       appId: meta.appId,
-      name: meta.summary.name,
+      name: meta.name,
       hasData: lastDayData.hasData,
-      category: meta.summary.category ?? ConditionCategory.OTHER,
-      valueType: meta.summary.valueType ?? MetadataValueType.STRING,
+      category: meta.category ?? ConditionCategory.OTHER,
+      valueType: meta.valueType ?? MetadataValueType.STRING,
       valueEnum: meta.summary.valueEnum ?? [],
     };
     const index = latestUserAttributes.findIndex(
-      (e: IMetadataUserAttribute) => e.name === meta.summary.name && e.valueType === meta.summary.valueType);
+      (e: IMetadataUserAttribute) => e.name === meta.name && e.valueType === meta.valueType);
     if (index === -1) {
       latestUserAttributes.push(attribute);
     } else if (meta.month > latestUserAttributes[index].month) {
@@ -741,7 +741,7 @@ function getLatestAttributeByName(metadata: IMetadataRaw[]): IMetadataUserAttrib
 
 function getAttributeByNameAndType(metadata: IMetadataRaw[], attributeName: string, valueType: MetadataValueType):
 IMetadataUserAttribute | undefined {
-  const filteredMetadata = metadata.filter((r: IMetadataRaw) => r.summary.name === attributeName && r.summary.valueType === valueType);
+  const filteredMetadata = metadata.filter((r: IMetadataRaw) => r.name === attributeName && r.valueType === valueType);
   if (filteredMetadata.length === 0) {
     return;
   }
@@ -752,10 +752,10 @@ IMetadataUserAttribute | undefined {
     prefix: filteredMetadata[0].prefix,
     projectId: filteredMetadata[0].projectId,
     appId: filteredMetadata[0].appId,
-    name: filteredMetadata[0].summary.name,
+    name: filteredMetadata[0].name,
     hasData: lastDayData.hasData,
-    category: filteredMetadata[0].summary.category ?? ConditionCategory.USER,
-    valueType: filteredMetadata[0].summary.valueType ?? MetadataValueType.STRING,
+    category: filteredMetadata[0].category ?? ConditionCategory.USER,
+    valueType: filteredMetadata[0].valueType ?? MetadataValueType.STRING,
     valueEnum: filteredMetadata[0].summary.valueEnum ?? [],
   } as IMetadataUserAttribute;
 };
