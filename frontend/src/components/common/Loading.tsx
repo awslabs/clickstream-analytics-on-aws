@@ -14,9 +14,14 @@
 import { Spinner } from '@cloudscape-design/components';
 import React from 'react';
 
-const Loading: React.FC = () => {
+interface LoadingProps {
+  isPage?: boolean;
+}
+
+const Loading: React.FC<LoadingProps> = (props: LoadingProps) => {
+  const { isPage } = props;
   return (
-    <div className="content-loading">
+    <div className={isPage ? 'page-loading' : 'content-loading'}>
       <Spinner />
     </div>
   );

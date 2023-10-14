@@ -956,7 +956,9 @@ ul.menu-list li.checkbox-item {
   .sidebar {
     box-shadow: 0px 1px 1px 1px #e9ebed;
     width: 88px;
-    position: relative;
+    height: calc(100vh - 56px);
+    position: sticky;
+    top: 56px;
     z-index: 99;
     display: flex;
     flex-direction: column;
