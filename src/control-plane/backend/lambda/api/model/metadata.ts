@@ -13,12 +13,12 @@
 
 import { ConditionCategory, MetadataParameterType, MetadataPlatform, MetadataSource, MetadataValueType } from '../common/explore-types';
 
-export interface DDBMetadataValue {
+export interface IMetadataRawValue {
   readonly value: string;
   readonly count: number;
 }
 
-export interface DDBMetadata {
+export interface IMetadataRaw {
   readonly id: string;
   readonly month: string;
   readonly prefix: string;
@@ -32,7 +32,7 @@ export interface DDBMetadata {
     readonly platform?: MetadataPlatform[];
     readonly category?: ConditionCategory;
     readonly valueType?: MetadataValueType;
-    readonly valueEnum?: DDBMetadataValue[];
+    readonly valueEnum?: IMetadataRawValue[];
   };
 }
 
@@ -80,7 +80,7 @@ export interface IMetadataEventParameter {
   description?: string;
   metadataSource?: MetadataSource;
   parameterType?: MetadataParameterType;
-  valueEnum?: DDBMetadataValue[];
+  valueEnum?: IMetadataRawValue[];
   values?: IMetadataAttributeValue[];
 
   associatedEvents? : IMetadataEvent[];
@@ -102,7 +102,7 @@ export interface IMetadataUserAttribute {
   displayName?: string;
   description?: string;
   metadataSource?: MetadataSource;
-  valueEnum?: DDBMetadataValue[];
+  valueEnum?: IMetadataRawValue[];
   values?: IMetadataAttributeValue[];
 }
 

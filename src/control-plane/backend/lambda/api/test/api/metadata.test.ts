@@ -79,7 +79,7 @@ const MOCK_EVENT_PARAMETER = {
     valueEnum: [
       {
         count: 103,
-        value: '0',
+        value: 'value-01',
       },
     ],
     valueType: 'String',
@@ -95,7 +95,11 @@ const MOCK_EVENT_PARAMETER = {
     valueEnum: [
       {
         count: 305,
-        value: '1',
+        value: 'value-02',
+      },
+      {
+        count: 505,
+        value: 'value-03',
       },
     ],
     valueType: 'String',
@@ -140,7 +144,7 @@ const MOCK_USER_ATTRIBUTE = {
     valueEnum: [
       {
         count: 103,
-        value: '0',
+        value: 'value-01',
       },
     ],
     valueType: 'String',
@@ -152,7 +156,11 @@ const MOCK_USER_ATTRIBUTE = {
     valueEnum: [
       {
         count: 305,
-        value: '1',
+        value: 'value-02',
+      },
+      {
+        count: 505,
+        value: 'value-03',
       },
     ],
     valueType: 'String',

@@ -20,7 +20,7 @@ import { docClient, query } from '../../common/dynamodb-client';
 import { MetadataValueType } from '../../common/explore-types';
 import { KeyVal } from '../../common/types';
 import { getAttributeByNameAndType, getDataFromLastDay, getLatestAttributeByName, getLatestEventByName, getLatestParameterByName, getParameterByNameAndType } from '../../common/utils';
-import { DDBMetadata, IMetadataDisplay, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute } from '../../model/metadata';
+import { IMetadataRaw, IMetadataDisplay, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute } from '../../model/metadata';
 import { MetadataStore } from '../metadata-store';
 
 export class DynamoDbMetadataStore implements MetadataStore {
@@ -39,7 +39,7 @@ export class DynamoDbMetadataStore implements MetadataStore {
       },
       ScanIndexForward: false,
     };
-    const records = await query(input) as DDBMetadata[];
+    const records = await query(input) as IMetadataRaw[];
     if (!records || records.length === 0) {
       return;
     }
@@ -71,7 +71,7 @@ export class DynamoDbMetadataStore implements MetadataStore {
       },
       ScanIndexForward: false,
     };
-    const records = await query(input) as DDBMetadata[];
+    const records = await query(input) as IMetadataRaw[];
     const events = getLatestEventByName(records);
     return events;
   };
@@ -90,7 +90,7 @@ export class DynamoDbMetadataStore implements MetadataStore {
       },
       ScanIndexForward: false,
     };
-    const records = await query(input) as DDBMetadata[];
+    const records = await query(input) as IMetadataRaw[];
     return getParameterByNameAndType(records, parameterName, valueType);
   };
 
@@ -107,7 +107,7 @@ export class DynamoDbMetadataStore implements MetadataStore {
       },
       ScanIndexForward: false,
     };
-    const records = await query(input) as DDBMetadata[];
+    const records = await query(input) as IMetadataRaw[];
     const parameters = getLatestParameterByName(records);
     return parameters;
   };
@@ -126,7 +126,7 @@ export class DynamoDbMetadataStore implements MetadataStore {
       },
       ScanIndexForward: false,
     };
-    const records = await query(input) as DDBMetadata[];
+    const records = await query(input) as IMetadataRaw[];
     return getAttributeByNameAndType(records, userAttributeName, valueType);
   };
 
@@ -143,7 +143,7 @@ export class DynamoDbMetadataStore implements MetadataStore {
       },
       ScanIndexForward: false,
     };
-    const records = await query(input) as DDBMetadata[];
+    const records = await query(input) as IMetadataRaw[];
     const attributes = getLatestAttributeByName(records);
     return attributes;
   };

@@ -20,7 +20,7 @@ import { ALBLogServiceAccountMapping, CORS_ORIGIN_DOMAIN_PATTERN, EMAIL_PATTERN,
 import { ConditionCategory, MetadataValueType } from './explore-types';
 import { logger } from './powertools';
 import { ALBRegionMappingObject, BucketPrefix, ClickStreamSubnet, IUserRole, PipelineStackType, PipelineStatus, RPURange, RPURegionMappingObject, ReportingDashboardOutput, SubnetType } from './types';
-import { DDBMetadata, DDBMetadataValue, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute } from '../model/metadata';
+import { IMetadataRaw, IMetadataRawValue, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute } from '../model/metadata';
 import { CPipelineResources, IPipeline } from '../model/pipeline';
 import { IUserSettings } from '../model/user';
 import { UserService } from '../service/user';
@@ -606,7 +606,7 @@ function groupAssociatedEventParametersByName(events: IMetadataEvent[], paramete
   return events;
 };
 
-function getDataFromLastDay(metadata: DDBMetadata) {
+function getDataFromLastDay(metadata: IMetadataRaw) {
   const year = new Date().getFullYear();
   const month = new Date().getMonth() + 1;
   const key = `#${year}${month < 10 ? '0' + month : month}`;
@@ -621,7 +621,7 @@ function getDataFromLastDay(metadata: DDBMetadata) {
   return { hasData, dataVolumeLastDay };
 }
 
-function getLatestEventByName(metadata: DDBMetadata[]): IMetadataEvent[] {
+function getLatestEventByName(metadata: IMetadataRaw[]): IMetadataEvent[] {
   const latestEvents: IMetadataEvent[] = [];
   for (let meta of metadata) {
     const lastDayData = getDataFromLastDay(meta);
@@ -646,7 +646,7 @@ function getLatestEventByName(metadata: DDBMetadata[]): IMetadataEvent[] {
   return latestEvents;
 };
 
-function getLatestParameterByName(metadata: DDBMetadata[]): IMetadataEventParameter[] {
+function getLatestParameterByName(metadata: IMetadataRaw[]): IMetadataEventParameter[] {
   const latestEventParameters: IMetadataEventParameter[] = [];
   for (let meta of metadata) {
     const lastDayData = getDataFromLastDay(meta);
@@ -675,9 +675,9 @@ function getLatestParameterByName(metadata: DDBMetadata[]): IMetadataEventParame
   return latestEventParameters;
 };
 
-function getParameterByNameAndType(metadata: DDBMetadata[], parameterName: string, valueType: MetadataValueType):
+function getParameterByNameAndType(metadata: IMetadataRaw[], parameterName: string, valueType: MetadataValueType):
 IMetadataEventParameter | undefined {
-  const filteredMetadata = metadata.filter((r: DDBMetadata) => r.summary.name === parameterName && r.summary.valueType === valueType);
+  const filteredMetadata = metadata.filter((r: IMetadataRaw) => r.summary.name === parameterName && r.summary.valueType === valueType);
   if (filteredMetadata.length === 0) {
     return;
   }
@@ -712,7 +712,7 @@ IMetadataEventParameter | undefined {
   } as IMetadataEventParameter;
 };
 
-function getLatestAttributeByName(metadata: DDBMetadata[]): IMetadataUserAttribute[] {
+function getLatestAttributeByName(metadata: IMetadataRaw[]): IMetadataUserAttribute[] {
   const latestUserAttributes: IMetadataUserAttribute[] = [];
   for (let meta of metadata) {
     const lastDayData = getDataFromLastDay(meta);
@@ -739,9 +739,9 @@ function getLatestAttributeByName(metadata: DDBMetadata[]): IMetadataUserAttribu
   return latestUserAttributes;
 };
 
-function getAttributeByNameAndType(metadata: DDBMetadata[], attributeName: string, valueType: MetadataValueType):
+function getAttributeByNameAndType(metadata: IMetadataRaw[], attributeName: string, valueType: MetadataValueType):
 IMetadataUserAttribute | undefined {
-  const filteredMetadata = metadata.filter((r: DDBMetadata) => r.summary.name === attributeName && r.summary.valueType === valueType);
+  const filteredMetadata = metadata.filter((r: IMetadataRaw) => r.summary.name === attributeName && r.summary.valueType === valueType);
   if (filteredMetadata.length === 0) {
     return;
   }
@@ -779,7 +779,7 @@ function concatEventParameter(
   return concatEventParameters;
 };
 
-function uniqueParameterValueEnum(e: DDBMetadataValue[] | undefined, n: DDBMetadataValue[] | undefined) {
+function uniqueParameterValueEnum(e: IMetadataRawValue[] | undefined, n: IMetadataRawValue[] | undefined) {
   const existedValues = e ?? [];
   const newValues = n ?? [];
   const values = existedValues.concat(newValues);
