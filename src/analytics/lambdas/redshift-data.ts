@@ -12,11 +12,11 @@
  */
 import { DescribeStatementCommand, BatchExecuteStatementCommand, RedshiftDataClient, ExecuteStatementCommand, GetStatementResultCommand, StatusString } from '@aws-sdk/client-redshift-data';
 import { fromTemporaryCredentials } from '@aws-sdk/credential-providers';
+import { NodeHttpHandler } from '@smithy/node-http-handler';
 import { REDSHIFT_MODE } from '../../common/model';
 import { logger } from '../../common/powertools';
 import { aws_sdk_client_common_config } from '../../common/sdk-client-config';
 import { ExistingRedshiftServerlessCustomProps, ProvisionedRedshiftProps } from '../private/model';
-import { NodeHttpHandler } from '@smithy/node-http-handler';
 
 export function getRedshiftClient(roleArn: string) {
   return new RedshiftDataClient({
@@ -138,8 +138,8 @@ export const getStatementResult = async (client: RedshiftDataClient, queryId: st
   } while (nextToken);
   const finalResponse: any = {
     Records: aggregatedRecords,
-    TotalNumRows: totalNumRows
-  }
+    TotalNumRows: totalNumRows,
+  };
   logger.info(`Get statement result: ${finalResponse.TotalNumRows}`, JSON.stringify(finalResponse));
   return finalResponse;
 };

@@ -89,14 +89,13 @@ async function handleEventMetadata(appId: string, metadataItems: any[]) {
 
   const response = await queryMetadata(inputSql);
 
-  response.Records!.forEach(record => {
+  response.Records!.forEach((record: any) => {
     const key = `${record[0].stringValue}${record[1].stringValue}`;
     if (itemsMap.has(key)) {
       const item = itemsMap.get(key);
       item[`day${record[5].longValue}`] = {
         count: record[6].longValue,
         hasData: true,
-        name: record[7].stringValue,
         platform: convertToDDBList(record[8].stringValue),
       };
     } else {
@@ -110,7 +109,6 @@ async function handleEventMetadata(appId: string, metadataItems: any[]) {
         [`day${record[5].longValue}`]: {
           count: record[6].longValue,
           hasData: true,
-          name: record[7].stringValue,
           platform: convertToDDBList(record[8].stringValue),
         },
       };
@@ -128,7 +126,6 @@ async function handleEventMetadata(appId: string, metadataItems: any[]) {
       }
     }
     item.summary = {
-      name: item.name,
       platform: Array.from(platformSet),
     };
   }
@@ -144,18 +141,14 @@ async function handlePropertiesMetadata(appId: string, metadataItems: any[]) {
 
   const response = await queryMetadata(inputSql);
 
-  response.Records!.forEach(record => {
+  response.Records!.forEach((record: any) => {
     const key = `${record[0].stringValue}${record[1].stringValue}`;
     if (itemsMap.has(key)) {
       const item = itemsMap.get(key);
       item[`day${record[5].longValue}`] = {
-        category: record[6].stringValue,
-        eventName: record[7].stringValue,
         hasData: true,
-        name: record[8].stringValue,
         platform: convertToDDBList(record[11].stringValue),
         valueEnum: convertValueEnumToDDBList(record[10].stringValue),
-        valueType: record[9].stringValue,
       };
     } else {
       const item = {
@@ -169,13 +162,9 @@ async function handlePropertiesMetadata(appId: string, metadataItems: any[]) {
         category: record[6].stringValue,
         valueType: record[9].stringValue,
         [`day${record[5].longValue}`]: {
-          category: record[6].stringValue,
-          eventName: record[7].stringValue,
           hasData: true,
-          name: record[8].stringValue,
           platform: convertToDDBList(record[11].stringValue),
           valueEnum: convertValueEnumToDDBList(record[10].stringValue),
-          valueType: record[9].stringValue,
         },
       };
       itemsMap.set(key, item);
@@ -200,10 +189,6 @@ async function handlePropertiesMetadata(appId: string, metadataItems: any[]) {
       }
     }
     item.summary = {
-      name: item.name,
-      eventName: item.eventName,
-      valueType: item.valueType,
-      category: item.category,
       platform: Array.from(platformSet),
       valueEnum: Object.keys(valueEnumAggregation).map(key => ({
         count: valueEnumAggregation[key],
@@ -222,22 +207,16 @@ async function handleUserAttributeMetadata(appId: string, metadataItems: any[]) 
 
   const response = await queryMetadata(inputSql);
 
-  response.Records!.forEach(record => {
+  response.Records!.forEach((record: any) => {
     const key = `${record[0].stringValue}${record[1].stringValue}`;
     if (itemsMap.has(key)) {
       const item = itemsMap.get(key);
       item[`day${record[5].longValue}`] = {
-        category: record[6].stringValue,
         hasData: true,
-        name: record[7].stringValue,
         valueEnum: convertValueEnumToDDBList(record[9].stringValue),
-        valueType: record[8].stringValue,
       };
       item.summary = {
-        category: record[6].stringValue,
-        name: record[7].stringValue,
         valueEnum: convertValueEnumToDDBList(record[9].stringValue),
-        valueType: record[8].stringValue,
       };
     } else {
       const item = {
@@ -250,17 +229,11 @@ async function handleUserAttributeMetadata(appId: string, metadataItems: any[]) 
         category: record[6].stringValue,
         valueType: record[8].stringValue,
         [`day${record[5].longValue}`]: {
-          category: record[6].stringValue,
           hasData: true,
-          name: record[7].stringValue,
           valueEnum: convertValueEnumToDDBList(record[9].stringValue),
-          valueType: record[8].stringValue,
         },
         summary: {
-          category: record[6].stringValue,
-          name: record[7].stringValue,
           valueEnum: convertValueEnumToDDBList(record[9].stringValue),
-          valueType: record[8].stringValue,
         },
       };
       itemsMap.set(key, item);
@@ -387,7 +360,7 @@ async function getExistingItemsFromDDB(appId: string, redshiftTableName: string)
 
   const keys:any[] = [];
 
-  idAndMonthResponse.Records!.forEach(record => {
+  idAndMonthResponse.Records!.forEach((record: any) => {
     keys.push(
       {
         id: record[0].stringValue,

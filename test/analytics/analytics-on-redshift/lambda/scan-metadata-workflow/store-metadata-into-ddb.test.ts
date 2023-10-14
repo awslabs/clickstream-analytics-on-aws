@@ -77,21 +77,6 @@ describe('Lambda - store the metadata into DDB from Redshift', () => {
       valueType: 'String',
     };
 
-    const eventParameterDayCommonData = {
-      category: 'category',
-      eventName: 'eventName',
-      hasData: true,
-      name: 'propertyName',
-      valueType: 'String',
-    };
-
-    const userAttributeDayCommonData = {
-      category: 'category',
-      hasData: true,
-      name: 'userattributename',
-      valueType: 'String',
-    };
-
     const exeuteId = 'Id-1';
     redshiftDataMock.on(DescribeStatementCommand).resolves({
       Status: StatusString.FINISHED,
@@ -107,17 +92,14 @@ describe('Lambda - store the metadata into DDB from Redshift', () => {
               day7: {
                 count: 40,
                 hasData: true,
-                name: 'eventName',
                 platform: ['APP'],
               },
               day9: {
                 count: 20,
                 hasData: true,
-                name: 'eventName',
                 platform: ['IOS'],
               },
               summary: {
-                name: 'eventName',
                 platform: ['APP', 'IOS'],
               },
             },
@@ -130,7 +112,7 @@ describe('Lambda - store the metadata into DDB from Redshift', () => {
             {
               ...eventParameterDDBCommonData,
               day7: {
-                ...eventParameterDayCommonData,
+                hasData: true,
                 platform: ['APP'],
                 valueEnum: [
                   {
@@ -140,7 +122,7 @@ describe('Lambda - store the metadata into DDB from Redshift', () => {
                 ],
               },
               day9: {
-                ...eventParameterDayCommonData,
+                hasData: true,
                 platform: ['APP'],
                 valueEnum: [
                   {
@@ -150,10 +132,6 @@ describe('Lambda - store the metadata into DDB from Redshift', () => {
                 ],
               },
               summary: {
-                name: 'propertyName',
-                eventName: 'eventName',
-                valueType: 'String',
-                category: 'category',
                 platform: ['APP'],
                 valueEnum: [
                   {
@@ -172,7 +150,7 @@ describe('Lambda - store the metadata into DDB from Redshift', () => {
             {
               ...userAttributeDDBCommonData,
               day7: {
-                ...userAttributeDayCommonData,
+                hasData: true,
                 valueEnum: [
                   {
                     count: 10,
@@ -181,7 +159,7 @@ describe('Lambda - store the metadata into DDB from Redshift', () => {
                 ],
               },
               day9: {
-                ...userAttributeDayCommonData,
+                hasData: true,
                 valueEnum: [
                   {
                     count: 20,
@@ -190,9 +168,6 @@ describe('Lambda - store the metadata into DDB from Redshift', () => {
                 ],
               },
               summary: {
-                name: 'userattributename',
-                valueType: 'String',
-                category: 'category',
                 valueEnum: [
                   {
                     count: 20,
@@ -354,23 +329,19 @@ describe('Lambda - store the metadata into DDB from Redshift', () => {
                 day7: {
                   count: 40,
                   hasData: true,
-                  name: 'eventName',
                   platform: ['APP'],
                 },
                 day9: {
                   count: 40,
                   hasData: true,
-                  name: 'eventName',
                   platform: ['ANDROID', 'IOS'],
                 },
                 day11: {
                   count: 30,
                   hasData: true,
-                  name: 'eventName',
                   platform: ['ANDROID', 'WEB'],
                 },
                 summary: {
-                  name: 'eventName',
                   platform: ['APP', 'ANDROID', 'IOS', 'WEB'],
                 },
               },
@@ -381,7 +352,7 @@ describe('Lambda - store the metadata into DDB from Redshift', () => {
               Item: {
                 ...eventParameterDDBCommonData,
                 day7: {
-                  ...eventParameterDayCommonData,
+                  hasData: true,
                   platform: ['APP'],
                   valueEnum: [
                     {
@@ -391,7 +362,7 @@ describe('Lambda - store the metadata into DDB from Redshift', () => {
                   ],
                 },
                 day9: {
-                  ...eventParameterDayCommonData,
+                  hasData: true,
                   platform: ['ANDROID', 'IOS'],
                   valueEnum: [
                     {
@@ -409,7 +380,7 @@ describe('Lambda - store the metadata into DDB from Redshift', () => {
                   ],
                 },
                 day11: {
-                  ...eventParameterDayCommonData,
+                  hasData: true,
                   platform: ['WEB', 'IOS'],
                   valueEnum: [
                     {
@@ -427,10 +398,6 @@ describe('Lambda - store the metadata into DDB from Redshift', () => {
                   ],
                 },
                 summary: {
-                  name: 'propertyName',
-                  eventName: 'eventName',
-                  valueType: 'String',
-                  category: 'category',
                   platform: ['APP', 'ANDROID', 'IOS', 'WEB'],
                   valueEnum: [
                     {
@@ -459,7 +426,7 @@ describe('Lambda - store the metadata into DDB from Redshift', () => {
               Item: {
                 ...userAttributeDDBCommonData,
                 day7: {
-                  ...userAttributeDayCommonData,
+                  hasData: true,
                   valueEnum: [
                     {
                       count: 10,
@@ -468,7 +435,7 @@ describe('Lambda - store the metadata into DDB from Redshift', () => {
                   ],
                 },
                 day9: {
-                  ...userAttributeDayCommonData,
+                  hasData: true,
                   valueEnum: [
                     {
                       count: 20,
@@ -477,7 +444,7 @@ describe('Lambda - store the metadata into DDB from Redshift', () => {
                   ],
                 },
                 day20: {
-                  ...userAttributeDayCommonData,
+                  hasData: true,
                   valueEnum: [
                     {
                       count: 10,
@@ -494,9 +461,6 @@ describe('Lambda - store the metadata into DDB from Redshift', () => {
                   ],
                 },
                 summary: {
-                  name: 'userattributename',
-                  valueType: 'String',
-                  category: 'category',
                   valueEnum: [
                     {
                       count: 10,
