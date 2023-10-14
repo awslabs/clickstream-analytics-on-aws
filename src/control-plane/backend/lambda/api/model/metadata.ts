@@ -50,7 +50,7 @@ export interface IMetadataEvent {
   readonly platform: MetadataPlatform[];
 
   displayName?: string;
-  description?: string;
+  description?: IMetadataDescription;
   metadataSource?: MetadataSource;
 
   associatedParameters? : IMetadataEventParameter[];
@@ -77,7 +77,7 @@ export interface IMetadataEventParameter {
   readonly platform: MetadataPlatform[];
 
   displayName?: string;
-  description?: string;
+  description?: IMetadataDescription;
   metadataSource?: MetadataSource;
   parameterType?: MetadataParameterType;
   valueEnum?: IMetadataRawValue[];
@@ -100,7 +100,7 @@ export interface IMetadataUserAttribute {
   readonly hasData: boolean;
 
   displayName?: string;
-  description?: string;
+  description?: IMetadataDescription;
   metadataSource?: MetadataSource;
   valueEnum?: IMetadataRawValue[];
   values?: IMetadataAttributeValue[];
@@ -112,28 +112,33 @@ export interface IMetadataDisplay {
   readonly appId: string;
 
   readonly displayName: string;
-  readonly description: string;
+  readonly description: IMetadataDescription;
   readonly updateAt: number;
 }
 
 export interface IMetadataBuiltInList {
   readonly PresetEvents: Array<{
     name: string;
-    description: string;
+    description: IMetadataDescription;
   }>;
   readonly PresetEventParameters: Array<{
     name: string;
     dataType: string;
-    description: string;
+    description: IMetadataDescription;
   }>;
   readonly PublicEventParameters: Array<{
     name: string;
     dataType: string;
-    description: string;
+    description: IMetadataDescription;
   }>;
   readonly PresetUserAttributes: Array<{
     name: string;
     dataType: string;
-    description: string;
+    description: IMetadataDescription;
   }>;
+}
+
+export interface IMetadataDescription {
+  'zh-CN': string;
+  'en-US': string;
 }

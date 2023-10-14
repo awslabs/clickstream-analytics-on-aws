@@ -68,7 +68,7 @@ export class CMetadataDisplay {
     const key = `${prefix}#${event.projectId}#${event.appId}#${event.name}`;
     const metadataDisplay = this.displays.find((d: IMetadataDisplay) => d.id === key);
     event.displayName = metadataDisplay?.displayName ?? event.name;
-    event.description = metadataDisplay?.description ?? '';
+    event.description = metadataDisplay?.description ?? { 'en-US': '', 'zh-CN': '' };
     if (!this.builtList) {
       return;
     }
@@ -85,7 +85,7 @@ export class CMetadataDisplay {
     const key = `${prefix}#${parameter.projectId}#${parameter.appId}#${parameter.name}#${parameter.valueType}`;
     const metadataDisplay = this.displays.find((d: IMetadataDisplay) => d.id === key);
     parameter.displayName = metadataDisplay?.displayName ?? parameter.name;
-    parameter.description = metadataDisplay?.description ?? '';
+    parameter.description = metadataDisplay?.description ?? { 'en-US': '', 'zh-CN': '' };
     if (!this.builtList) {
       return;
     }
@@ -106,7 +106,7 @@ export class CMetadataDisplay {
     const key = `${prefix}#${attribute.projectId}#${attribute.appId}#${attribute.name}#${attribute.valueType}`;
     const metadataDisplay = this.displays.find((d: IMetadataDisplay) => d.id === key);
     attribute.displayName = metadataDisplay?.displayName ?? attribute.name;
-    attribute.description = metadataDisplay?.description ?? '';
+    attribute.description = metadataDisplay?.description ?? { 'en-US': '', 'zh-CN': '' };
     if (!this.builtList) {
       return;
     }

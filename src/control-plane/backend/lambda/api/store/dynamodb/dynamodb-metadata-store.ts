@@ -20,7 +20,7 @@ import { docClient, query } from '../../common/dynamodb-client';
 import { MetadataValueType } from '../../common/explore-types';
 import { KeyVal } from '../../common/types';
 import { getAttributeByNameAndType, getDataFromLastDay, getLatestAttributeByName, getLatestEventByName, getLatestParameterByName, getParameterByNameAndType } from '../../common/utils';
-import { IMetadataRaw, IMetadataDisplay, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute } from '../../model/metadata';
+import { IMetadataRaw, IMetadataDisplay, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute, IMetadataDescription } from '../../model/metadata';
 import { MetadataStore } from '../metadata-store';
 
 export class DynamoDbMetadataStore implements MetadataStore {
@@ -167,7 +167,7 @@ export class DynamoDbMetadataStore implements MetadataStore {
     return records as IMetadataDisplay[];
   };
 
-  public async updateDisplay(id: string, projectId: string, appId: string, description: string, displayName: string): Promise<void> {
+  public async updateDisplay(id: string, projectId: string, appId: string, description: IMetadataDescription, displayName: string): Promise<void> {
     let updateExpression = 'SET #updateAt= :u, projectId= :projectId, appId= :appId, #prefix= :prefix';
     let expressionAttributeValues = new Map();
     let expressionAttributeNames = {} as KeyVal<string>;

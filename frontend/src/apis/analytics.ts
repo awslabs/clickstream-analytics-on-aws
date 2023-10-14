@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { getLngFromLocalStorage } from 'pages/analytics/analytics-utils';
 import { apiRequest } from 'ts/request';
 
 export const getAnalyticsDashboardList = async (params: {
@@ -80,6 +81,15 @@ export const getMetadataEventsList = async (params: {
     'get',
     `/metadata/events?${searchParams.toString()}`
   );
+  const localeLng = getLngFromLocalStorage();
+  for (const event of result.data.items) {
+    event.description = event.description[localeLng];
+    if (event.associatedParameters) {
+      for (const parameter of event.associatedParameters) {
+        parameter.description = parameter.description[localeLng];
+      }
+    }
+  }
   return result;
 };
 
@@ -92,6 +102,13 @@ export const getMetadataEventDetails = async (params: {
     'get',
     `/metadata/event/${params.eventName}?projectId=${params.projectId}&appId=${params.appId}`
   );
+  const localeLng = getLngFromLocalStorage();
+  result.data.description = result.data.description[localeLng];
+  if (result.data.associatedParameters) {
+    for (const parameter of result.data.associatedParameters) {
+      parameter.description = parameter.description[localeLng];
+    }
+  }
   return result;
 };
 
@@ -99,9 +116,13 @@ export const updateMetadataDisplay = async (data: {
   id: string;
   projectId: string;
   appId: string;
-  description: string;
+  description: any;
   displayName: string;
 }) => {
+  data.description = {
+    'en-US': data.description,
+    'zh-CN': data.description,
+  };
   const result: any = await apiRequest('put', '/metadata/display', data);
   return result;
 };
@@ -114,6 +135,15 @@ export const getMetadataParametersList = async (params: {
     'get',
     `/metadata/event_parameters?projectId=${params.projectId}&appId=${params.appId}`
   );
+  const localeLng = getLngFromLocalStorage();
+  for (const parameter of result.data.items) {
+    parameter.description = parameter.description[localeLng];
+    if (parameter.associatedEvents) {
+      for (const event of parameter.associatedEvents) {
+        event.description = event.description[localeLng];
+      }
+    }
+  }
   return result;
 };
 
@@ -127,6 +157,13 @@ export const getMetadataParametersDetails = async (params: {
     'get',
     `/metadata/event_parameter?projectId=${params.projectId}&appId=${params.appId}&name=${params.parameterName}&type=${params.parameterType}`
   );
+  const localeLng = getLngFromLocalStorage();
+  result.data.description = result.data.description[localeLng];
+  if (result.data.associatedEvents) {
+    for (const event of result.data.associatedEvents) {
+      event.description = event.description[localeLng];
+    }
+  }
   return result;
 };
 
@@ -138,6 +175,10 @@ export const getMetadataUserAttributesList = async (params: {
     'get',
     `/metadata/user_attributes?projectId=${params.projectId}&appId=${params.appId}`
   );
+  const localeLng = getLngFromLocalStorage();
+  for (const attribute of result.data.items) {
+    attribute.description = attribute.description[localeLng];
+  }
   return result;
 };
 

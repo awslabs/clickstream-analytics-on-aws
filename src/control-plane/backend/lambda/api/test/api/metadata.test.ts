@@ -209,21 +209,30 @@ function displayDataMock(m: any) {
         projectId: MOCK_PROJECT_ID,
         appId: MOCK_APP_ID,
         displayName: `display name of event ${MOCK_EVENT_NAME}`,
-        description: `Description of event ${MOCK_EVENT_NAME}`,
+        description: {
+          'en-US': `Description of event ${MOCK_EVENT_NAME}`,
+          'zh-CN': `${MOCK_EVENT_NAME}说明`,
+        },
       },
       {
         id: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}1`,
         projectId: MOCK_PROJECT_ID,
         appId: MOCK_APP_ID,
         displayName: `display name of event ${MOCK_EVENT_NAME}1`,
-        description: `Description of event ${MOCK_EVENT_NAME}1`,
+        description: {
+          'en-US': `Description of event ${MOCK_EVENT_NAME}1`,
+          'zh-CN': `${MOCK_EVENT_NAME}1说明`,
+        },
       },
       {
         id: `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}#${MOCK_EVENT_PARAMETER_NAME}#String`,
         projectId: MOCK_PROJECT_ID,
         appId: MOCK_APP_ID,
         displayName: `display name of event parameter ${MOCK_EVENT_PARAMETER_NAME}(String)`,
-        description: `Description of event parameter ${MOCK_EVENT_PARAMETER_NAME}(String)`,
+        description: {
+          'en-US': `Description of event parameter ${MOCK_EVENT_PARAMETER_NAME}(String)`,
+          'zh-CN': `${MOCK_EVENT_PARAMETER_NAME}参数说明`,
+        },
       },
       {
         id: `DICTIONARY#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_PARAMETER_NAME}#String#value-02`,
@@ -248,7 +257,10 @@ function displayDataMock(m: any) {
         projectId: MOCK_PROJECT_ID,
         appId: MOCK_APP_ID,
         displayName: `display name of user parameter ${MOCK_USER_ATTRIBUTE_NAME}`,
-        description: `Description of user parameter ${MOCK_USER_ATTRIBUTE_NAME}`,
+        description: {
+          'en-US': `Description of user parameter ${MOCK_USER_ATTRIBUTE_NAME}`,
+          'zh-CN': `${MOCK_USER_ATTRIBUTE_NAME}参数说明`,
+        },
       },
       {
         id: `DICTIONARY#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_USER_ATTRIBUTE_NAME}#String#value-02`,
@@ -271,33 +283,48 @@ function displayDataMock(m: any) {
         PresetEvents: [
           {
             name: MOCK_EVENT_NAME,
-            description: 'mock event description in built-in',
+            description: {
+              'en-US': 'mock event description in built-in',
+              'zh-CN': '内置事件的描述',
+            },
           },
         ],
         PresetEventParameters: [
           {
             name: MOCK_EVENT_PARAMETER_NAME,
             dataType: 'String',
-            description: 'mock preset event parameter description in built-in',
+            description: {
+              'en-US': 'mock preset event parameter description in built-in',
+              'zh-CN': '内置事件参数的描述',
+            },
           },
         ],
         PublicEventParameters: [
           {
             name: MOCK_EVENT_PARAMETER_NAME,
             dataType: 'String',
-            description: 'mock public event parameter description in built-in',
+            description: {
+              'en-US': 'mock public event parameter description in built-in',
+              'zh-CN': '内置事件参数的描述',
+            },
           },
           {
             name: `${MOCK_EVENT_PARAMETER_NAME}11`,
             dataType: 'Integer',
-            description: 'mock public event parameter description in built-in',
+            description: {
+              'en-US': 'mock public event parameter description in built-in',
+              'zh-CN': '内置事件参数的描述',
+            },
           },
         ],
         PresetUserAttributes: [
           {
             name: MOCK_USER_ATTRIBUTE_NAME,
             dataType: 'String',
-            description: 'mock preset user attribute description in built-in',
+            description: {
+              'en-US': 'mock preset user attribute description in built-in',
+              'zh-CN': '内置用户属性的描述',
+            },
           },
         ],
       },
@@ -386,7 +413,10 @@ describe('Metadata Event test', () => {
             name: MOCK_EVENT_PARAMETER_NAME,
             eventName: MOCK_EVENT_NAME,
             displayName: MOCK_EVENT_PARAMETER_NAME,
-            description: 'mock preset event parameter description in built-in',
+            description: {
+              'en-US': 'mock preset event parameter description in built-in',
+              'zh-CN': '内置事件参数的描述',
+            },
             parameterType: 'Public',
             hasData: true,
             platform: [MetadataPlatform.ANDROID, MetadataPlatform.IOS],
@@ -406,7 +436,10 @@ describe('Metadata Event test', () => {
         metadataSource: MetadataSource.PRESET,
         dataVolumeLastDay: 1,
         displayName: `display name of event ${MOCK_EVENT_NAME}`,
-        description: 'mock event description in built-in',
+        description: {
+          'en-US': 'mock event description in built-in',
+          'zh-CN': '内置事件的描述',
+        },
       },
     });
   });
@@ -488,7 +521,10 @@ describe('Metadata Event test', () => {
             appId: MOCK_APP_ID,
             name: `${MOCK_EVENT_NAME}1`,
             displayName: `display name of event ${MOCK_EVENT_NAME}1`,
-            description: `Description of event ${MOCK_EVENT_NAME}1`,
+            description: {
+              'en-US': `Description of event ${MOCK_EVENT_NAME}1`,
+              'zh-CN': `${MOCK_EVENT_NAME}1说明`,
+            },
             metadataSource: MetadataSource.CUSTOM,
             hasData: true,
             dataVolumeLastDay: 1,
@@ -503,7 +539,10 @@ describe('Metadata Event test', () => {
             appId: MOCK_APP_ID,
             name: `${MOCK_EVENT_NAME}2`,
             displayName: `${MOCK_EVENT_NAME}2`,
-            description: '',
+            description: {
+              'en-US': '',
+              'zh-CN': '',
+            },
             metadataSource: MetadataSource.CUSTOM,
             hasData: false,
             dataVolumeLastDay: 0,
@@ -667,7 +706,10 @@ describe('Metadata Event test', () => {
             appId: MOCK_APP_ID,
             name: `${MOCK_EVENT_NAME}1`,
             displayName: `display name of event ${MOCK_EVENT_NAME}1`,
-            description: `Description of event ${MOCK_EVENT_NAME}1`,
+            description: {
+              'en-US': `Description of event ${MOCK_EVENT_NAME}1`,
+              'zh-CN': `${MOCK_EVENT_NAME}1说明`,
+            },
             hasData: true,
             dataVolumeLastDay: 1,
             metadataSource: MetadataSource.CUSTOM,
@@ -684,7 +726,10 @@ describe('Metadata Event test', () => {
                 name: `${MOCK_EVENT_PARAMETER_NAME}11`,
                 eventName: `${MOCK_EVENT_NAME}1`,
                 displayName: `${MOCK_EVENT_PARAMETER_NAME}11`,
-                description: '',
+                description: {
+                  'en-US': '',
+                  'zh-CN': '',
+                },
                 parameterType: MetadataParameterType.PUBLIC,
                 platform: [MetadataPlatform.ANDROID],
                 valueType: 'Integer',
@@ -704,7 +749,10 @@ describe('Metadata Event test', () => {
                 name: `${MOCK_EVENT_PARAMETER_NAME}12`,
                 eventName: `${MOCK_EVENT_NAME}1`,
                 displayName: `${MOCK_EVENT_PARAMETER_NAME}12`,
-                description: '',
+                description: {
+                  'en-US': '',
+                  'zh-CN': '',
+                },
                 parameterType: MetadataParameterType.PRIVATE,
                 platform: [MetadataPlatform.IOS],
                 valueType: 'Double',
@@ -723,7 +771,10 @@ describe('Metadata Event test', () => {
             appId: MOCK_APP_ID,
             name: `${MOCK_EVENT_NAME}2`,
             displayName: `${MOCK_EVENT_NAME}2`,
-            description: '',
+            description: {
+              'en-US': '',
+              'zh-CN': '',
+            },
             hasData: false,
             dataVolumeLastDay: 0,
             metadataSource: MetadataSource.CUSTOM,
@@ -885,7 +936,10 @@ describe('Metadata Event Attribute test', () => {
             appId: MOCK_APP_ID,
             metadataSource: MetadataSource.PRESET,
             displayName: `display name of event ${MOCK_EVENT_NAME}`,
-            description: 'mock event description in built-in',
+            description: {
+              'en-US': 'mock event description in built-in',
+              'zh-CN': '内置事件的描述',
+            },
           },
           {
             name: `${MOCK_EVENT_NAME}1`,
@@ -895,7 +949,10 @@ describe('Metadata Event Attribute test', () => {
             appId: MOCK_APP_ID,
             metadataSource: MetadataSource.CUSTOM,
             displayName: `display name of event ${MOCK_EVENT_NAME}1`,
-            description: `Description of event ${MOCK_EVENT_NAME}1`,
+            description: {
+              'en-US': `Description of event ${MOCK_EVENT_NAME}1`,
+              'zh-CN': `${MOCK_EVENT_NAME}1说明`,
+            },
           },
         ],
         id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}#${MOCK_EVENT_PARAMETER_NAME}#String`,
@@ -904,7 +961,10 @@ describe('Metadata Event Attribute test', () => {
         projectId: MOCK_PROJECT_ID,
         appId: MOCK_APP_ID,
         name: MOCK_EVENT_PARAMETER_NAME,
-        description: 'mock preset event parameter description in built-in',
+        description: {
+          'en-US': 'mock preset event parameter description in built-in',
+          'zh-CN': '内置事件参数的描述',
+        },
         displayName: MOCK_EVENT_PARAMETER_NAME,
         eventName: '',
         category: 'event',
@@ -1036,7 +1096,10 @@ describe('Metadata Event Attribute test', () => {
             projectId: MOCK_PROJECT_ID,
             appId: MOCK_APP_ID,
             name: MOCK_EVENT_PARAMETER_NAME,
-            description: 'mock preset event parameter description in built-in',
+            description: {
+              'en-US': 'mock preset event parameter description in built-in',
+              'zh-CN': '内置事件参数的描述',
+            },
             displayName: MOCK_EVENT_PARAMETER_NAME,
             eventName: MOCK_EVENT_NAME,
             category: 'event',
@@ -1059,7 +1122,10 @@ describe('Metadata Event Attribute test', () => {
             projectId: MOCK_PROJECT_ID,
             appId: MOCK_APP_ID,
             name: `${MOCK_EVENT_PARAMETER_NAME}1`,
-            description: '',
+            description: {
+              'en-US': '',
+              'zh-CN': '',
+            },
             displayName: `${MOCK_EVENT_PARAMETER_NAME}1`,
             eventName: `${MOCK_EVENT_NAME}1`,
             category: 'event',
@@ -1202,7 +1268,10 @@ describe('Metadata User Attribute test', () => {
             projectId: MOCK_PROJECT_ID,
             appId: MOCK_APP_ID,
             name: MOCK_USER_ATTRIBUTE_NAME,
-            description: 'mock preset user attribute description in built-in',
+            description: {
+              'en-US': 'mock preset user attribute description in built-in',
+              'zh-CN': '内置用户属性的描述',
+            },
             displayName: 'display name of user parameter user-attribute-mock',
             category: 'user',
             hasData: true,
@@ -1221,7 +1290,10 @@ describe('Metadata User Attribute test', () => {
             projectId: MOCK_PROJECT_ID,
             appId: MOCK_APP_ID,
             name: `${MOCK_USER_ATTRIBUTE_NAME}1`,
-            description: '',
+            description: {
+              'en-US': '',
+              'zh-CN': '',
+            },
             displayName: `${MOCK_USER_ATTRIBUTE_NAME}1`,
             category: 'user',
             metadataSource: MetadataSource.CUSTOM,
