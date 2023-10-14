@@ -771,7 +771,7 @@ export function getEventChartVisualDef(visualId: string, viewName: string, title
     throw new Error(errorMessage);
   }
 
-  const props  = _getMultipleVisualProps(hasGrouping);
+  const props = _getMultipleVisualProps(hasGrouping);
 
   const templatePath = `./templates/event-${quickSightChartType}-chart${props.suffix}.json`;
   const visualDef = readFileSync(join(__dirname, templatePath), 'utf8');
@@ -794,7 +794,7 @@ export function getEventChartVisualDef(visualId: string, viewName: string, title
 export function getEventPivotTableVisualDef(visualId: string, viewName: string,
   titleProps: DashboardTitleProps, groupColumn: string, hasGrouping: boolean) : Visual {
 
-  const props  = _getMultipleVisualProps(hasGrouping);
+  const props = _getMultipleVisualProps(hasGrouping);
 
   const visualDef = readFileSync(join(__dirname, `./templates/event-pivot-table-chart${props.suffix}.json`), 'utf8');
   const mustacheEventAnalysisType: MustacheEventAnalysisType = {
@@ -836,7 +836,7 @@ export function getRetentionChartVisualDef(visualId: string, viewName: string,
     throw new Error(errorMessage);
   }
 
-  const props  = _getMultipleVisualProps(hasGrouping);
+  const props = _getMultipleVisualProps(hasGrouping);
 
   const templatePath = `./templates/retention-${quickSightChartType}-chart${props.suffix}.json`;
   const visualDef = readFileSync(join(__dirname, templatePath), 'utf8');
@@ -858,7 +858,7 @@ export function getRetentionChartVisualDef(visualId: string, viewName: string,
 export function getRetentionPivotTableVisualDef(visualId: string, viewName: string,
   titleProps: DashboardTitleProps, hasGrouping: boolean) : Visual {
 
-  const props  = _getMultipleVisualProps(hasGrouping);
+  const props = _getMultipleVisualProps(hasGrouping);
 
   const visualDef = readFileSync(join(__dirname, `./templates/retention-pivot-table-chart${props.suffix}.json`), 'utf8');
   const mustacheRetentionAnalysisType: MustacheRetentionAnalysisType = {
@@ -1260,6 +1260,6 @@ function _getMultipleVisualProps(hasGrouping: boolean) {
 
   return {
     suffix,
-    smalMultiplesFieldId
-  }
+    smalMultiplesFieldId,
+  };
 }
