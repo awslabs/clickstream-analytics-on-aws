@@ -657,7 +657,7 @@ function getLatestParameterByName(metadata: IMetadataRaw[]): IMetadataEventParam
       projectId: meta.projectId,
       appId: meta.appId,
       name: meta.summary.name,
-      eventName: meta.summary.eventName ?? '',
+      eventName: meta.eventName ?? '',
       hasData: lastDayData.hasData,
       platform: meta.summary.platform ?? [],
       category: meta.summary.category ?? ConditionCategory.OTHER,
@@ -683,13 +683,13 @@ IMetadataEventParameter | undefined {
   }
   const groupEvents: IMetadataEvent[] = [];
   for (let meta of filteredMetadata) {
-    const existedEvent = groupEvents.find((e: IMetadataEvent) => e.name === meta.summary.eventName);
+    const existedEvent = groupEvents.find((e: IMetadataEvent) => e.name === meta.eventName);
     if (!existedEvent) {
       groupEvents.push({
-        id: `${meta.projectId}#${meta.appId}#${meta.summary.eventName}`,
+        id: `${meta.projectId}#${meta.appId}#${meta.eventName}`,
         projectId: meta.projectId,
         appId: meta.appId,
-        name: meta.summary.eventName,
+        name: meta.eventName,
         prefix: `EVENT#${meta.projectId}#${meta.appId}`,
       } as IMetadataEvent);
     }

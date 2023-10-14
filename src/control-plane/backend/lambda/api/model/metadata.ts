@@ -25,10 +25,10 @@ export interface IMetadataRaw {
 
   readonly projectId: string;
   readonly appId: string;
+  readonly eventName?: string;
 
   readonly summary: {
     readonly name: string;
-    readonly eventName?: string;
     readonly platform?: MetadataPlatform[];
     readonly category?: ConditionCategory;
     readonly valueType?: MetadataValueType;
