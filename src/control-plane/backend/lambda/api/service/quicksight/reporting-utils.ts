@@ -538,14 +538,9 @@ function _getFunnelChartVisualDef(visualId: string, viewName: string, titleProps
 function _getFunnelBarChartVisualDef(visualId: string, viewName: string, titleProps: DashboardTitleProps,
   groupColumn: string, hasGrouping: boolean) : Visual {
 
-  let suffix = '';
-  let smalMultiplesFieldId = undefined;
-  if (hasGrouping) {
-    suffix = '-multiple';
-    smalMultiplesFieldId = uuidv4();
-  }
+  const props = _getMultipleVisualProps(hasGrouping);
 
-  const visualDef = readFileSync(join(__dirname, `./templates/funnel-bar-chart${suffix}.json`), 'utf8');
+  const visualDef = readFileSync(join(__dirname, `./templates/funnel-bar-chart${props.suffix}.json`), 'utf8');
   const mustacheFunnelAnalysisType: MustacheFunnelAnalysisType = {
     visualId,
     dataSetIdentifier: viewName,
@@ -556,7 +551,7 @@ function _getFunnelBarChartVisualDef(visualId: string, viewName: string, titlePr
     hierarchyId: uuidv4(),
     title: titleProps.title,
     subTitle: titleProps.subTitle,
-    smalMultiplesFieldId,
+    smalMultiplesFieldId: props.smalMultiplesFieldId,
   };
 
   return JSON.parse(Mustache.render(visualDef, mustacheFunnelAnalysisType)) as Visual;
@@ -776,14 +771,9 @@ export function getEventChartVisualDef(visualId: string, viewName: string, title
     throw new Error(errorMessage);
   }
 
-  let suffix = '';
-  let smalMultiplesFieldId = undefined;
-  if (hasGrouping) {
-    suffix = '-multiple';
-    smalMultiplesFieldId = uuidv4();
-  }
+  const props  = _getMultipleVisualProps(hasGrouping);
 
-  const templatePath = `./templates/event-${quickSightChartType}-chart${suffix}.json`;
+  const templatePath = `./templates/event-${quickSightChartType}-chart${props.suffix}.json`;
   const visualDef = readFileSync(join(__dirname, templatePath), 'utf8');
   const mustacheEventAnalysisType: MustacheEventAnalysisType = {
     visualId,
@@ -795,7 +785,7 @@ export function getEventChartVisualDef(visualId: string, viewName: string, title
     dateGranularity: groupColumn,
     title: titleProps.title,
     subTitle: titleProps.subTitle,
-    smalMultiplesFieldId,
+    smalMultiplesFieldId: props.smalMultiplesFieldId,
   };
 
   return JSON.parse(Mustache.render(visualDef, mustacheEventAnalysisType)) as Visual;
@@ -804,14 +794,9 @@ export function getEventChartVisualDef(visualId: string, viewName: string, title
 export function getEventPivotTableVisualDef(visualId: string, viewName: string,
   titleProps: DashboardTitleProps, groupColumn: string, hasGrouping: boolean) : Visual {
 
-  let suffix = '';
-  let smalMultiplesFieldId = undefined;
-  if (hasGrouping) {
-    suffix = '-multiple';
-    smalMultiplesFieldId = uuidv4();
-  }
+  const props  = _getMultipleVisualProps(hasGrouping);
 
-  const visualDef = readFileSync(join(__dirname, `./templates/event-pivot-table-chart${suffix}.json`), 'utf8');
+  const visualDef = readFileSync(join(__dirname, `./templates/event-pivot-table-chart${props.suffix}.json`), 'utf8');
   const mustacheEventAnalysisType: MustacheEventAnalysisType = {
     visualId,
     dataSetIdentifier: viewName,
@@ -820,7 +805,7 @@ export function getEventPivotTableVisualDef(visualId: string, viewName: string,
     catMeasureFieldId: uuidv4(),
     dateGranularity: groupColumn,
     title: titleProps.tableTitle,
-    smalMultiplesFieldId,
+    smalMultiplesFieldId: props.smalMultiplesFieldId,
   };
 
   return JSON.parse(Mustache.render(visualDef, mustacheEventAnalysisType)) as Visual;
@@ -851,15 +836,9 @@ export function getRetentionChartVisualDef(visualId: string, viewName: string,
     throw new Error(errorMessage);
   }
 
-  let smalMultiplesFieldId: string | undefined = undefined;
-  let suffix ='';
-  if (hasGrouping) {
-    smalMultiplesFieldId = uuidv4();
-    suffix = '-multiple';
-  }
+  const props  = _getMultipleVisualProps(hasGrouping);
 
-  const templatePath = `./templates/retention-${quickSightChartType}-chart${suffix}.json`;
-
+  const templatePath = `./templates/retention-${quickSightChartType}-chart${props.suffix}.json`;
   const visualDef = readFileSync(join(__dirname, templatePath), 'utf8');
   const mustacheRetentionAnalysisType: MustacheRetentionAnalysisType = {
     visualId,
@@ -870,7 +849,7 @@ export function getRetentionChartVisualDef(visualId: string, viewName: string,
     hierarchyId: uuidv4(),
     title: titleProps.title,
     subTitle: titleProps.subTitle,
-    smalMultiplesFieldId,
+    smalMultiplesFieldId: props.smalMultiplesFieldId,
   };
 
   return JSON.parse(Mustache.render(visualDef, mustacheRetentionAnalysisType)) as Visual;
@@ -879,14 +858,9 @@ export function getRetentionChartVisualDef(visualId: string, viewName: string,
 export function getRetentionPivotTableVisualDef(visualId: string, viewName: string,
   titleProps: DashboardTitleProps, hasGrouping: boolean) : Visual {
 
-  let smalMultiplesFieldId: string | undefined = undefined;
-  let suffix ='';
-  if (hasGrouping) {
-    smalMultiplesFieldId = uuidv4();
-    suffix = '-multiple';
-  }
+  const props  = _getMultipleVisualProps(hasGrouping);
 
-  const visualDef = readFileSync(join(__dirname, `./templates/retention-pivot-table-chart${suffix}.json`), 'utf8');
+  const visualDef = readFileSync(join(__dirname, `./templates/retention-pivot-table-chart${props.suffix}.json`), 'utf8');
   const mustacheRetentionAnalysisType: MustacheRetentionAnalysisType = {
     visualId,
     dataSetIdentifier: viewName,
@@ -894,7 +868,7 @@ export function getRetentionPivotTableVisualDef(visualId: string, viewName: stri
     dateDimFieldId: uuidv4(),
     numberMeasureFieldId: uuidv4(),
     title: titleProps.tableTitle,
-    smalMultiplesFieldId,
+    smalMultiplesFieldId: props.smalMultiplesFieldId,
   };
 
   return JSON.parse(Mustache.render(visualDef, mustacheRetentionAnalysisType)) as Visual;
@@ -1273,5 +1247,19 @@ function _checkTimeParameters(params: any): any | void {
         message: 'At least missing one of following parameters [lastN, timeUnit].',
       };
     }
+  }
+}
+
+function _getMultipleVisualProps(hasGrouping: boolean) {
+  let suffix = '';
+  let smalMultiplesFieldId = undefined;
+  if (hasGrouping) {
+    suffix = '-multiple';
+    smalMultiplesFieldId = uuidv4();
+  }
+
+  return {
+    suffix,
+    smalMultiplesFieldId
   }
 }
