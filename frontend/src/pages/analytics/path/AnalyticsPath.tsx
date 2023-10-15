@@ -28,6 +28,7 @@ import {
 } from '@cloudscape-design/components';
 import { previewPath } from 'apis/analytics';
 import Loading from 'components/common/Loading';
+import SectionTitle from 'components/common/titile/SectionTitle';
 import {
   CategoryItemType,
   DEFAULT_CONDITION_DATA,
@@ -290,7 +291,7 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
     sheetId: string,
     sheetName: string,
     chartTitle: string,
-    chartSubTitle: string,
+    chartSubTitle: string
   ) => {
     if (
       eventOptionData.length === 0 ||
@@ -306,7 +307,7 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
         sheetId,
         sheetName,
         chartTitle,
-        chartSubTitle,
+        chartSubTitle
       );
       if (!body) {
         alertMsg(
@@ -640,13 +641,10 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
           <br />
           <ColumnLayout columns={2} variant="text-grid">
             <SpaceBetween direction="vertical" size="xs">
-              <Button
-                variant="link"
-                iconName="menu"
-                className="cs-analytics-select-event"
-              >
-                {t('analytics:labels.nodesSelect')}
-              </Button>
+              <SectionTitle
+                type="event"
+                title={t('analytics:labels.nodesSelect')}
+              />
               <EventsSelect
                 data={eventOptionData}
                 disableAddCondition={disableAddCondition}
@@ -756,13 +754,7 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
               />
             </SpaceBetween>
             <SpaceBetween direction="vertical" size="xs">
-              <Button
-                variant="link"
-                iconName="filter"
-                className="cs-analytics-select-filter"
-              >
-                {t('analytics:labels.filters')}
-              </Button>
+              <SectionTitle type="filter" />
               <SegmentationFilter
                 segmentationData={segmentationOptionData}
                 addNewConditionItem={() => {

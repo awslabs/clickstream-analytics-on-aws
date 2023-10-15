@@ -31,6 +31,7 @@ import { DateRangePickerProps } from '@cloudscape-design/components/date-range-p
 import { previewFunnel } from 'apis/analytics';
 import ExtendIcon from 'components/common/ExtendIcon';
 import Loading from 'components/common/Loading';
+import SectionTitle from 'components/common/titile/SectionTitle';
 import {
   CategoryItemType,
   DEFAULT_CONDITION_DATA,
@@ -452,13 +453,10 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
           <br />
           <ColumnLayout columns={2} variant="text-grid">
             <SpaceBetween direction="vertical" size="xs">
-              <Button
-                variant="link"
-                iconName="menu"
-                className="cs-analytics-select-event"
-              >
-                {t('analytics:labels.funnelSteps')}
-              </Button>
+              <SectionTitle
+                type="event"
+                title={t('analytics:labels.funnelSteps')}
+              />
               <div>
                 <SpaceBetween direction="vertical" size="xs">
                   <Box variant="awsui-key-label">
@@ -620,13 +618,7 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
               </div>
             </SpaceBetween>
             <SpaceBetween direction="vertical" size="xs">
-              <Button
-                variant="link"
-                iconName="filter"
-                className="cs-analytics-select-filter"
-              >
-                {t('analytics:labels.filters')}
-              </Button>
+              <SectionTitle type="filter" />
               <SegmentationFilter
                 segmentationData={segmentationOptionData}
                 addNewConditionItem={() => {
@@ -677,9 +669,7 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
                 }}
               />
               <br />
-              <Button variant="link" className="cs-analytics-select-group">
-                {t('analytics:labels.attributeGrouping')}
-              </Button>
+              <SectionTitle type="group" />
               <div className="cs-analytics-select-group-item">
                 <div className="cs-analytics-dropdown">
                   <div className="cs-analytics-parameter">
