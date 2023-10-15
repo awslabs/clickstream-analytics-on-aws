@@ -18,6 +18,7 @@ import Loading from 'components/common/Loading';
 import RoleRoute from 'components/common/RoleRoute';
 import CommonAlert from 'components/common/alert';
 import { AppContext } from 'context/AppContext';
+import { GlobalProvider } from 'context/StateContext';
 import { UserContext } from 'context/UserContext';
 import { WebStorageStateStore } from 'oidc-client-ts';
 import AlarmsList from 'pages/alarms/AlarmList';
@@ -420,7 +421,7 @@ const App: React.FC = () => {
   const setLocalStorageAfterLoad = async () => {
     if (localStorage.getItem(PROJECT_CONFIG_JSON)) {
       const configData = JSON.parse(
-        localStorage.getItem(PROJECT_CONFIG_JSON) || ''
+        localStorage.getItem(PROJECT_CONFIG_JSON) ?? ''
       );
       setContextData(configData);
       initAuthentication(configData);
@@ -446,7 +447,9 @@ const App: React.FC = () => {
       ) : (
         <AuthProvider {...oidcConfig}>
           <AppContext.Provider value={contextData}>
-            <SignedInPage />
+            <GlobalProvider>
+              <SignedInPage />
+            </GlobalProvider>
           </AppContext.Provider>
         </AuthProvider>
       )}

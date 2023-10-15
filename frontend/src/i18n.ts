@@ -38,6 +38,7 @@ i18n
       'application',
       'analytics',
       'user',
+      'help',
     ],
     defaultNS: 'common',
     fallbackLng: 'en-US',

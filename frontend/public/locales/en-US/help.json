@@ -1,0 +1,9 @@
+{
+  "dashboard": {
+    "title": "Dashboard",
+    "description": "Dashboard description",
+    "links": {
+      "dashboardDocLinkName": "What is dashboard?"
+    }
+  }
+}

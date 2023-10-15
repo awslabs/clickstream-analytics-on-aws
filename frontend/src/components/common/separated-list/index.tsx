@@ -11,23 +11,21 @@
  *  and limitations under the License.
  */
 
-import { Link, LinkProps } from '@cloudscape-design/components';
+import { identity } from 'lodash';
 import React from 'react';
-import { useTranslation } from 'react-i18next';
+import styles from './styles.module.scss';
 
-interface InfoLinkProps {
-  id?: string;
+interface SeparatedListProps {
   ariaLabel?: string;
-  onFollow: LinkProps['onFollow'];
+  items: Array<React.ReactNode>;
 }
 
-const InfoLink: React.FC<InfoLinkProps> = (props: InfoLinkProps) => {
-  const { t } = useTranslation();
+export function SeparatedList({ ariaLabel, items }: SeparatedListProps) {
   return (
-    <Link variant="info" {...props}>
-      {t('info')}
-    </Link>
+    <ul aria-label={ariaLabel} className={styles.root}>
+      {items.map((item, index) => (
+        <li key={identity(index)}>{item}</li>
+      ))}
+    </ul>
   );
-};
-
-export default InfoLink;
+}

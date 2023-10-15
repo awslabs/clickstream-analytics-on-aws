@@ -21,8 +21,11 @@ import {
 import { getAnalyticsDashboardList } from 'apis/analytics';
 import AnalyticsNavigation from 'components/layouts/AnalyticsNavigation';
 import CustomBreadCrumb from 'components/layouts/CustomBreadCrumb';
+import HelpInfo from 'components/layouts/HelpInfo';
+import { DispatchContext, StateContext } from 'context/StateContext';
+import { HelpInfoActionType, HelpPanelType } from 'context/reducer';
 import moment from 'moment';
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { TIME_FORMAT } from 'ts/const';
@@ -181,6 +184,8 @@ const AnalyticsDashboardCard: React.FC<any> = () => {
 const AnalyticsDashboard: React.FC = () => {
   const { t } = useTranslation();
   const { projectId, appId } = useParams();
+  const state = useContext(StateContext);
+  const dispatch = useContext(DispatchContext);
 
   const breadcrumbItems = [
     {
@@ -200,7 +205,21 @@ const AnalyticsDashboard: React.FC = () => {
       />
       <div className="flex-1">
         <AppLayout
-          toolsHide
+          onToolsChange={(e) => {
+            if (state?.helpPanelType === HelpPanelType.NONE) {
+              return;
+            }
+            if (!e.detail.open) {
+              dispatch?.({ type: HelpInfoActionType.HIDE_HELP_PANEL });
+            } else {
+              dispatch?.({
+                type: HelpInfoActionType.SHOW_HELP_PANEL,
+                payload: state?.helpPanelType,
+              });
+            }
+          }}
+          toolsOpen={state?.showHelpPanel}
+          tools={<HelpInfo />}
           navigationHide
           content={<AnalyticsDashboardCard />}
           breadcrumbs={<CustomBreadCrumb breadcrumbItems={breadcrumbItems} />}

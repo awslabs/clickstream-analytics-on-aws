@@ -11,23 +11,25 @@
  *  and limitations under the License.
  */
 
-import { Link, LinkProps } from '@cloudscape-design/components';
-import React from 'react';
-import { useTranslation } from 'react-i18next';
+.root {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
 
-interface InfoLinkProps {
-  id?: string;
-  ariaLabel?: string;
-  onFollow: LinkProps['onFollow'];
+  li {
+    border-top: 1px solid #ccc;
+    padding: 0.8rem 0;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+
+    &:first-child {
+      padding-top: 0;
+      border-top: none;
+    }
+
+    &:last-child {
+      padding-bottom: 0;
+    }
+  }
 }
-
-const InfoLink: React.FC<InfoLinkProps> = (props: InfoLinkProps) => {
-  const { t } = useTranslation();
-  return (
-    <Link variant="info" {...props}>
-      {t('info')}
-    </Link>
-  );
-};
-
-export default InfoLink;

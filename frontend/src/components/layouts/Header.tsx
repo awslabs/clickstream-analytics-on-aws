@@ -54,7 +54,7 @@ const Header: React.FC<IHeaderProps> = (props: IHeaderProps) => {
       changeLanguage(DEFAULT_ZH_LANG);
     }
     const configJSONObj: ConfigType = localStorage.getItem(PROJECT_CONFIG_JSON)
-      ? JSON.parse(localStorage.getItem(PROJECT_CONFIG_JSON) || '')
+      ? JSON.parse(localStorage.getItem(PROJECT_CONFIG_JSON) ?? '')
       : {};
     if (configJSONObj.oidc_logout_url) {
       const redirectUrl = configJSONObj.oidc_redirect_url.replace(
@@ -84,7 +84,7 @@ const Header: React.FC<IHeaderProps> = (props: IHeaderProps) => {
         utilities={[
           {
             type: 'button',
-            text: t('header.solutionLibrary') || '',
+            text: t('header.solutionLibrary') ?? '',
             href: 'https://aws.amazon.com/solutions/',
             external: true,
           },
@@ -115,16 +115,16 @@ const Header: React.FC<IHeaderProps> = (props: IHeaderProps) => {
                 signOut?.();
               }
             },
-            items: [{ id: 'signout', text: t('header.signOut') || '' }],
+            items: [{ id: 'signout', text: t('header.signOut') ?? '' }],
           },
         ]}
         i18nStrings={{
-          searchIconAriaLabel: t('header.search') || '',
-          searchDismissIconAriaLabel: t('header.closeSearch') || '',
-          overflowMenuTriggerText: t('header.more') || '',
-          overflowMenuTitleText: t('header.all') || '',
-          overflowMenuBackIconAriaLabel: t('header.back') || '',
-          overflowMenuDismissIconAriaLabel: t('header.closeMenu') || '',
+          searchIconAriaLabel: t('header.search') ?? '',
+          searchDismissIconAriaLabel: t('header.closeSearch') ?? '',
+          overflowMenuTriggerText: t('header.more') ?? '',
+          overflowMenuTitleText: t('header.all') ?? '',
+          overflowMenuBackIconAriaLabel: t('header.back') ?? '',
+          overflowMenuDismissIconAriaLabel: t('header.closeMenu') ?? '',
         }}
       />
     </header>
