@@ -108,8 +108,8 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
   const [chartType, setChartType] = useState(defaultChartTypeOption);
 
   const defaultComputeMethodOption: SelectProps.Option = {
-    value: ExploreComputeMethod.USER_ID_CNT,
-    label: t('analytics:options.userNumber') ?? 'User number',
+    value: ExploreComputeMethod.EVENT_CNT,
+    label: t('analytics:options.eventNumber') ?? 'Event number',
   };
 
   const [eventOptionData, setEventOptionData] = useState<IEventAnalyticsItem[]>(
@@ -573,7 +573,9 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
             />
             <SegmentedControl
               selectedId={chartType}
-              onChange={({ detail }) => setChartType(detail.selectedId as QuickSightChartType)}
+              onChange={({ detail }) =>
+                setChartType(detail.selectedId as QuickSightChartType)
+              }
               options={chartTypeOptions}
             />
           </div>

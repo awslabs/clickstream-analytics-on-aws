@@ -177,7 +177,7 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
   const [selectedMetric, setSelectedMetric] =
     useState<SelectProps.Option | null>(defaultComputeMethodOption);
 
-  const [windowValue, setWindowValue] = useState<string>('5');
+  const [windowValue, setWindowValue] = useState<string>('10');
 
   const [selectedWindowType, setSelectedWindowType] =
     useState<SelectProps.Option | null>(customWindowType);
@@ -487,7 +487,7 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
                         <div className="cs-analytics-window-value">
                           <Input
                             type="number"
-                            placeholder="5"
+                            placeholder="10"
                             value={windowValue}
                             onChange={(event) => {
                               setWindowValue(event.detail.value);
