@@ -12,12 +12,10 @@
  */
 
 import {
-  Box,
   Button,
   ColumnLayout,
   Container,
   Header,
-  Icon,
   Input,
   Link,
   Popover,
@@ -31,7 +29,8 @@ import { DateRangePickerProps } from '@cloudscape-design/components/date-range-p
 import { previewFunnel } from 'apis/analytics';
 import ExtendIcon from 'components/common/ExtendIcon';
 import Loading from 'components/common/Loading';
-import SectionTitle from 'components/common/titile/SectionTitle';
+import InfoTitle from 'components/common/title/InfoTitle';
+import SectionTitle from 'components/common/title/SectionTitle';
 import {
   CategoryItemType,
   DEFAULT_CONDITION_DATA,
@@ -429,18 +428,12 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
         >
           <div className="cs-analytics-config">
             <SpaceBetween direction="vertical" size="xs">
-              <Box variant="awsui-key-label">
-                <SpaceBetween direction="horizontal" size="xxs">
-                  {t('analytics:labels.metrics')}
-                  <Popover
-                    triggerType="custom"
-                    size="small"
-                    content={t('analytics:information.funnelMetricsInfo')}
-                  >
-                    <Icon name="status-info" size="small" />
-                  </Popover>
-                </SpaceBetween>
-              </Box>
+              <InfoTitle
+                title={t('analytics:labels.metrics')}
+                popoverDescription={t(
+                  'analytics:information.funnelMetricsInfo'
+                )}
+              />
               <Select
                 selectedOption={selectedMetric}
                 options={computeMethodOptions}
@@ -457,19 +450,14 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
                 type="event"
                 title={t('analytics:labels.funnelSteps')}
               />
-              <div>
+              <div className="mt-10">
                 <SpaceBetween direction="vertical" size="xs">
-                  <Box variant="awsui-key-label">
-                    <SpaceBetween direction="horizontal" size="xxs">
-                      {t('analytics:labels.window')}
-                      <Popover
-                        triggerType="custom"
-                        content={t('analytics:information.funnelWindowInfo')}
-                      >
-                        <Icon name="status-info" size="small" />
-                      </Popover>
-                    </SpaceBetween>
-                  </Box>
+                  <InfoTitle
+                    title={t('analytics:labels.window')}
+                    popoverDescription={t(
+                      'analytics:information.funnelWindowInfo'
+                    )}
+                  />
                   <div className="cs-analytics-window">
                     <div className="cs-analytics-window-type">
                       <Select

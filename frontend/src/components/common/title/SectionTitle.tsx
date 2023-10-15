@@ -12,10 +12,13 @@
  */
 
 import { Icon, IconProps } from '@cloudscape-design/components';
+import { HelpPanelType } from 'context/reducer';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import InfoLink from '../InfoLink';
 
 interface SectionTitleProps {
+  helpInfoType?: HelpPanelType;
   type: 'event' | 'filter' | 'group';
   title?: string | null;
 }
@@ -38,10 +41,18 @@ const SectionTitle: React.FC<SectionTitleProps> = (
     iconName = 'keyboard';
     displayTitle = t('analytics:labels.attributeGrouping');
   }
+
   return (
-    <div className={`cs-analytics-header ${type}`}>
-      <Icon name={iconName} />
-      <span>{displayTitle}</span>
+    <div className="flex align-center gap-5">
+      <div className={`cs-analytics-header ${type}`}>
+        <Icon name={iconName} />
+        <span>{displayTitle}</span>
+      </div>
+      <InfoLink
+        onFollow={(e) => {
+          console.info(e);
+        }}
+      />
     </div>
   );
 };

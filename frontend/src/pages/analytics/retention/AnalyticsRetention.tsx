@@ -27,7 +27,7 @@ import {
 import { previewRetention } from 'apis/analytics';
 import ExtendIcon from 'components/common/ExtendIcon';
 import Loading from 'components/common/Loading';
-import SectionTitle from 'components/common/titile/SectionTitle';
+import SectionTitle from 'components/common/title/SectionTitle';
 import {
   CategoryItemType,
   DEFAULT_CONDITION_DATA,
