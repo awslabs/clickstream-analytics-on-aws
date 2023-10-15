@@ -122,7 +122,7 @@ const AnalyticsDashboardDetail: React.FC = () => {
             >
               <Container>
                 {loadingData ? (
-                  <Loading />
+                  <Loading isPage />
                 ) : (
                   <ExploreEmbedFrame
                     embedType="dashboard"

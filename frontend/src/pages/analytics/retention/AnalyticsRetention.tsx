@@ -12,20 +12,17 @@
  */
 
 import {
-  Box,
   Button,
   ColumnLayout,
   Container,
   DateRangePickerProps,
   Header,
-  Icon,
   Link,
   Popover,
   SegmentedControl,
   SegmentedControlProps,
   SelectProps,
   SpaceBetween,
-  Toggle,
 } from '@cloudscape-design/components';
 import { previewRetention } from 'apis/analytics';
 import ExtendIcon from 'components/common/ExtendIcon';
@@ -118,8 +115,6 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
     },
   ]);
 
-  const [associateParameterChecked, setAssociateParameterChecked] =
-    useState<boolean>(true);
   const [segmentationOptionData, setSegmentationOptionData] =
     useState<SegmentationFilterDataType>({
       ...INIT_SEGMENTATION_DATA,
@@ -350,30 +345,6 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
             </Header>
           }
         >
-          <ColumnLayout columns={3} variant="text-grid">
-            <SpaceBetween direction="vertical" size="l">
-              <div>
-                <Box variant="awsui-key-label">
-                  {t('analytics:labels.associateParameter')}
-                  <Popover
-                    triggerType="custom"
-                    size="small"
-                    content="This instance contains insufficient memory. Stop the instance, choose a different instance type with more memory, and restart it."
-                  >
-                    <Icon name="status-info" size="small" />
-                  </Popover>
-                </Box>
-                <Toggle
-                  onChange={({ detail }) =>
-                    setAssociateParameterChecked(detail.checked)
-                  }
-                  checked={associateParameterChecked}
-                >
-                  {associateParameterChecked ? 'On' : 'Off'}
-                </Toggle>
-              </div>
-            </SpaceBetween>
-          </ColumnLayout>
           <br />
           <ColumnLayout columns={2} variant="text-grid">
             <SpaceBetween direction="vertical" size="xs">

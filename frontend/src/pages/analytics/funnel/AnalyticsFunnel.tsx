@@ -26,7 +26,6 @@ import {
   Select,
   SelectProps,
   SpaceBetween,
-  Toggle,
 } from '@cloudscape-design/components';
 import { DateRangePickerProps } from '@cloudscape-design/components/date-range-picker/interfaces';
 import { previewFunnel } from 'apis/analytics';
@@ -449,31 +448,6 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
                 }}
               />
             </SpaceBetween>
-            <SpaceBetween direction="vertical" size="xs">
-              <Box variant="awsui-key-label">
-                <SpaceBetween direction="horizontal" size="xxs">
-                  {t('analytics:labels.associateParameter')}
-                  <Popover
-                    triggerType="custom"
-                    content={t(
-                      'analytics:information.funnelAssociateParameterInfo'
-                    )}
-                  >
-                    <Icon name="status-info" size="small" />
-                  </Popover>
-                </SpaceBetween>
-              </Box>
-              <div className="cs-analytics-config">
-                <Toggle
-                  onChange={({ detail }) =>
-                    setAssociateParameterChecked(detail.checked)
-                  }
-                  checked={associateParameterChecked}
-                >
-                  {associateParameterChecked ? 'On' : 'Off'}
-                </Toggle>
-              </div>
-            </SpaceBetween>
           </div>
           <br />
           <ColumnLayout columns={2} variant="text-grid">
@@ -746,7 +720,9 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
             />
             <SegmentedControl
               selectedId={chartType}
-              onChange={({ detail }) => setChartType(detail.selectedId as QuickSightChartType)}
+              onChange={({ detail }) =>
+                setChartType(detail.selectedId as QuickSightChartType)
+              }
               options={chartTypeOptions}
             />
           </div>

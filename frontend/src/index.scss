@@ -43,6 +43,10 @@ code {
   padding: 20px;
 }
 
+.transform-180 {
+  transform: rotate(180deg);
+}
+
 .oidc-login {
   min-height: 40vh;
   display: flex;
