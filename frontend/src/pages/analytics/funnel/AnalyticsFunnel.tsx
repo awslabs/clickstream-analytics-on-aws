@@ -39,7 +39,6 @@ import {
   INIT_SEGMENTATION_DATA,
   SegmentationFilterDataType,
 } from 'components/eventselect/AnalyticsType';
-import EventItem from 'components/eventselect/EventItem';
 import EventsSelect from 'components/eventselect/EventSelect';
 import SegmentationFilter from 'components/eventselect/SegmentationFilter';
 import { cloneDeep } from 'lodash';
@@ -65,6 +64,7 @@ import {
   getGlobalEventCondition,
   getLngFromLocalStorage,
 } from '../analytics-utils';
+import AttributeGroup from '../comps/AttributeGroup';
 import ExploreDateRangePicker from '../comps/ExploreDateRangePicker';
 import ExploreEmbedFrame from '../comps/ExploreEmbedFrame';
 import SaveToDashboardModal from '../comps/SelectDashboardModal';
@@ -658,24 +658,11 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
               />
               <br />
               <SectionTitle type="group" />
-              <div className="cs-analytics-select-group-item">
-                <div className="cs-analytics-dropdown">
-                  <div className="cs-analytics-parameter">
-                    <div className="flex-1">
-                      <EventItem
-                        placeholder={
-                          t('analytics:labels.attributeSelectPlaceholder') ?? ''
-                        }
-                        categoryOption={groupOption}
-                        changeCurCategoryOption={(item) => {
-                          setGroupOption(item);
-                        }}
-                        categories={presetParameters}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <AttributeGroup
+                presetParameters={presetParameters}
+                groupOption={groupOption}
+                setGroupOption={setGroupOption}
+              />
             </SpaceBetween>
           </ColumnLayout>
           <br />

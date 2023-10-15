@@ -186,7 +186,8 @@
     "groupPropertiesText": "属性",
     "operatorsText": "操作符",
     "clearFiltersText": "清除过滤器",
-    "applyActionText": "应用"
+    "applyActionText": "应用",
+    "clear": "清除"
   },
   "item": "项目",
   "items": "项目",

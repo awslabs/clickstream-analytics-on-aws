@@ -37,7 +37,7 @@ interface ISaveToDashboardModalProps {
     sheetId: string,
     sheetName: string,
     chartTitle: string,
-    chartSubTitle: string,
+    chartSubTitle: string
   ) => void;
 }
 
@@ -152,7 +152,7 @@ const SaveToDashboardModal: React.FC<ISaveToDashboardModalProps> = (
                     selectedSheet.value,
                     selectedSheet.label ?? '',
                     visualName,
-                    visualDescription,
+                    visualDescription
                   );
                 }}
               >
@@ -163,15 +163,15 @@ const SaveToDashboardModal: React.FC<ISaveToDashboardModalProps> = (
         }
         header={t('analytics:header.saveToDashboardModalTitle')}
       >
-        <FormField
-          label={t('analytics:header.inputVisualName')}
-          errorText={
-            inputVisualNameRequiredError
-              ? t('analytics:valid.inputVisualNameError')
-              : ''
-          }
-        >
-          <SpaceBetween direction="vertical" size="xs">
+        <SpaceBetween direction="vertical" size="xs">
+          <FormField
+            label={t('analytics:header.inputVisualName')}
+            errorText={
+              inputVisualNameRequiredError
+                ? t('analytics:valid.inputVisualNameError')
+                : ''
+            }
+          >
             <Input
               placeholder={
                 t('analytics:header.inputVisualNamePlaceholder') ?? ''
@@ -182,10 +182,8 @@ const SaveToDashboardModal: React.FC<ISaveToDashboardModalProps> = (
                 setVisualName(e.detail.value);
               }}
             />
-          </SpaceBetween>
-        </FormField>
-        <FormField label={t('analytics:header.inputVisualDescription')}>
-          <SpaceBetween direction="vertical" size="xs">
+          </FormField>
+          <FormField label={t('analytics:header.inputVisualDescription')}>
             <Input
               placeholder={
                 t('analytics:header.inputVisualDescriptionPlaceholder') ?? ''
@@ -195,17 +193,15 @@ const SaveToDashboardModal: React.FC<ISaveToDashboardModalProps> = (
                 setVisualDescription(e.detail.value);
               }}
             />
-          </SpaceBetween>
-        </FormField>
-        <FormField
-          label={t('analytics:header.selectDashboardTitle')}
-          errorText={
-            dashboardRequiredError
-              ? t('analytics:valid.dashboardSelectError')
-              : ''
-          }
-        >
-          <SpaceBetween direction="vertical" size="xs">
+          </FormField>
+          <FormField
+            label={t('analytics:header.selectDashboardTitle')}
+            errorText={
+              dashboardRequiredError
+                ? t('analytics:valid.dashboardSelectError')
+                : ''
+            }
+          >
             <Select
               placeholder={
                 t('analytics:header.selectDashboardPlaceholder') ?? ''
@@ -227,15 +223,13 @@ const SaveToDashboardModal: React.FC<ISaveToDashboardModalProps> = (
               }}
               options={dashboardOptions}
             />
-          </SpaceBetween>
-        </FormField>
-        <FormField
-          label={t('analytics:header.selectSheetTitle')}
-          errorText={
-            sheetRequiredError ? t('analytics:valid.sheetSelectError') : ''
-          }
-        >
-          <SpaceBetween direction="vertical" size="xs">
+          </FormField>
+          <FormField
+            label={t('analytics:header.selectSheetTitle')}
+            errorText={
+              sheetRequiredError ? t('analytics:valid.sheetSelectError') : ''
+            }
+          >
             <Select
               placeholder={t('analytics:header.selectSheetPlaceholder') ?? ''}
               selectedOption={selectedSheet}
@@ -244,8 +238,8 @@ const SaveToDashboardModal: React.FC<ISaveToDashboardModalProps> = (
               }}
               options={sheetOptions}
             />
-          </SpaceBetween>
-        </FormField>
+          </FormField>
+        </SpaceBetween>
       </Modal>
     </>
   );
