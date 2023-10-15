@@ -52,6 +52,17 @@
                             }
                         }
                     }
+                ],
+                "SmallMultiples": [
+                    {
+                        "CategoricalDimensionField": {
+                            "FieldId": "{{smalMultiplesFieldId}}",
+                            "Column": {
+                                "DataSetIdentifier": "{{dataSetIdentifier}}",
+                                "ColumnName": "group_col"
+                            }
+                        }
+                    }
                 ]
             }
         },
@@ -65,7 +76,7 @@
                 },
                 {
                     "FieldSort":{
-                        "FieldId":"{{dimFieldId}}",
+                        "FieldId":"{{smalMultiplesFieldId}}",
                         "Direction":"ASC"
                     }
                 }
@@ -108,6 +119,12 @@
                     {
                         "FieldTooltipItem":{
                             "FieldId":"{{dimFieldId}}",
+                            "Visibility":"VISIBLE"
+                        }
+                    },
+                    {
+                        "FieldTooltipItem":{
+                            "FieldId":"{{smalMultiplesFieldId}}",
                             "Visibility":"VISIBLE"
                         }
                     }

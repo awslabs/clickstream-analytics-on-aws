@@ -32,7 +32,7 @@ import { AssumeRoleCommand, STSClient } from '@aws-sdk/client-sts';
 import Mustache from 'mustache';
 import { v4 as uuidv4 } from 'uuid';
 import { DataSetProps, dataSetActions } from './dashboard-ln';
-import { AnalysisType, ExploreConversionIntervalType, ExploreLocales, ExplorePathNodeType, ExplorePathSessionDef, ExploreRelativeTimeUnit, ExploreRequestAction, ExploreTimeScopeType, ExploreVisualName, QuickSightChartType } from '../../common/explore-types';
+import { AnalysisType, ExploreConversionIntervalType, ExploreLocales, ExplorePathNodeType, ExplorePathSessionDef, ExploreRelativeTimeUnit, ExploreRequestAction, ExploreTimeScopeType, ExploreVisualName, MetadataValueType, QuickSightChartType } from '../../common/explore-types';
 import { logger } from '../../common/powertools';
 import i18next from '../../i18n';
 
@@ -144,6 +144,7 @@ export type MustacheBaseType = {
   dataSetIdentifier: string;
   title: string;
   subTitle?: string;
+  smalMultiplesFieldId?: string;
 }
 
 export type MustachePathAnalysisType = MustacheBaseType & {
@@ -506,12 +507,12 @@ export async function getCredentialsFromRole(stsClient: STSClient, roleArn: stri
 }
 
 export function getFunnelVisualDef(visualId: string, viewName: string, titleProps: DashboardTitleProps,
-  quickSightChartType: QuickSightChartType, groupColumn: string) : Visual {
+  quickSightChartType: QuickSightChartType, groupColumn: string, hasGrouping: boolean) : Visual {
 
   if (quickSightChartType === QuickSightChartType.FUNNEL) {
     return _getFunnelChartVisualDef(visualId, viewName, titleProps);
   } else if (quickSightChartType === QuickSightChartType.BAR) {
-    return _getFunnelBarChartVisualDef(visualId, viewName, titleProps, groupColumn);
+    return _getFunnelBarChartVisualDef(visualId, viewName, titleProps, groupColumn, hasGrouping);
   } else {
     const errorMessage = `Funnel analysis: unsupported quicksight chart type ${quickSightChartType}`;
     logger.warn(errorMessage);
@@ -534,9 +535,12 @@ function _getFunnelChartVisualDef(visualId: string, viewName: string, titleProps
   return JSON.parse(Mustache.render(visualDef, mustacheFunnelAnalysisType)) as Visual;
 }
 
-function _getFunnelBarChartVisualDef(visualId: string, viewName: string, titleProps: DashboardTitleProps, groupColumn: string) : Visual {
+function _getFunnelBarChartVisualDef(visualId: string, viewName: string, titleProps: DashboardTitleProps,
+  groupColumn: string, hasGrouping: boolean) : Visual {
 
-  const visualDef = readFileSync(join(__dirname, './templates/funnel-bar-chart.json'), 'utf8');
+  const props = _getMultipleVisualProps(hasGrouping);
+
+  const visualDef = readFileSync(join(__dirname, `./templates/funnel-bar-chart${props.suffix}.json`), 'utf8');
   const mustacheFunnelAnalysisType: MustacheFunnelAnalysisType = {
     visualId,
     dataSetIdentifier: viewName,
@@ -547,6 +551,7 @@ function _getFunnelBarChartVisualDef(visualId: string, viewName: string, titlePr
     hierarchyId: uuidv4(),
     title: titleProps.title,
     subTitle: titleProps.subTitle,
+    smalMultiplesFieldId: props.smalMultiplesFieldId,
   };
 
   return JSON.parse(Mustache.render(visualDef, mustacheFunnelAnalysisType)) as Visual;
@@ -758,14 +763,17 @@ export function getFunnelTableVisualRelatedDefs(viewName: string, colNames: stri
 }
 
 export function getEventChartVisualDef(visualId: string, viewName: string, titleProps: DashboardTitleProps,
-  quickSightChartType: QuickSightChartType, groupColumn: string) : Visual {
+  quickSightChartType: QuickSightChartType, groupColumn: string, hasGrouping: boolean) : Visual {
 
   if (quickSightChartType != QuickSightChartType.LINE && quickSightChartType != QuickSightChartType.BAR) {
     const errorMessage = `Event analysis: unsupported quicksight chart type ${quickSightChartType}`;
     logger.warn(errorMessage);
     throw new Error(errorMessage);
   }
-  const templatePath = `./templates/event-${quickSightChartType}-chart.json`;
+
+  const props = _getMultipleVisualProps(hasGrouping);
+
+  const templatePath = `./templates/event-${quickSightChartType}-chart${props.suffix}.json`;
   const visualDef = readFileSync(join(__dirname, templatePath), 'utf8');
   const mustacheEventAnalysisType: MustacheEventAnalysisType = {
     visualId,
@@ -777,14 +785,18 @@ export function getEventChartVisualDef(visualId: string, viewName: string, title
     dateGranularity: groupColumn,
     title: titleProps.title,
     subTitle: titleProps.subTitle,
+    smalMultiplesFieldId: props.smalMultiplesFieldId,
   };
 
   return JSON.parse(Mustache.render(visualDef, mustacheEventAnalysisType)) as Visual;
 }
 
-export function getEventPivotTableVisualDef(visualId: string, viewName: string, titleProps: DashboardTitleProps, groupColumn: string) : Visual {
+export function getEventPivotTableVisualDef(visualId: string, viewName: string,
+  titleProps: DashboardTitleProps, groupColumn: string, hasGrouping: boolean) : Visual {
 
-  const visualDef = readFileSync(join(__dirname, './templates/event-pivot-table-chart.json'), 'utf8');
+  const props = _getMultipleVisualProps(hasGrouping);
+
+  const visualDef = readFileSync(join(__dirname, `./templates/event-pivot-table-chart${props.suffix}.json`), 'utf8');
   const mustacheEventAnalysisType: MustacheEventAnalysisType = {
     visualId,
     dataSetIdentifier: viewName,
@@ -793,6 +805,7 @@ export function getEventPivotTableVisualDef(visualId: string, viewName: string, 
     catMeasureFieldId: uuidv4(),
     dateGranularity: groupColumn,
     title: titleProps.tableTitle,
+    smalMultiplesFieldId: props.smalMultiplesFieldId,
   };
 
   return JSON.parse(Mustache.render(visualDef, mustacheEventAnalysisType)) as Visual;
@@ -813,16 +826,19 @@ export function getPathAnalysisChartVisualDef(visualId: string, viewName: string
   return JSON.parse(Mustache.render(visualDef, mustachePathAnalysisType)) as Visual;
 }
 
-export function getRetentionChartVisualDef(visualId: string, viewName: string, titleProps: DashboardTitleProps,
-  quickSightChartType: QuickSightChartType) : Visual {
+export function getRetentionChartVisualDef(visualId: string, viewName: string,
+  titleProps: DashboardTitleProps,
+  quickSightChartType: QuickSightChartType, hasGrouping: boolean) : Visual {
 
   if (quickSightChartType != QuickSightChartType.LINE && quickSightChartType != QuickSightChartType.BAR) {
     const errorMessage = `Retention analysis: unsupported quicksight chart type ${quickSightChartType}`;
     logger.warn(errorMessage);
     throw new Error(errorMessage);
   }
-  const templatePath = `./templates/retention-${quickSightChartType}-chart.json`;
 
+  const props = _getMultipleVisualProps(hasGrouping);
+
+  const templatePath = `./templates/retention-${quickSightChartType}-chart${props.suffix}.json`;
   const visualDef = readFileSync(join(__dirname, templatePath), 'utf8');
   const mustacheRetentionAnalysisType: MustacheRetentionAnalysisType = {
     visualId,
@@ -833,14 +849,18 @@ export function getRetentionChartVisualDef(visualId: string, viewName: string, t
     hierarchyId: uuidv4(),
     title: titleProps.title,
     subTitle: titleProps.subTitle,
+    smalMultiplesFieldId: props.smalMultiplesFieldId,
   };
 
   return JSON.parse(Mustache.render(visualDef, mustacheRetentionAnalysisType)) as Visual;
 }
 
-export function getRetentionPivotTableVisualDef(visualId: string, viewName: string, titleProps: DashboardTitleProps) : Visual {
+export function getRetentionPivotTableVisualDef(visualId: string, viewName: string,
+  titleProps: DashboardTitleProps, hasGrouping: boolean) : Visual {
 
-  const visualDef = readFileSync(join(__dirname, './templates/retention-pivot-table-chart.json'), 'utf8');
+  const props = _getMultipleVisualProps(hasGrouping);
+
+  const visualDef = readFileSync(join(__dirname, `./templates/retention-pivot-table-chart${props.suffix}.json`), 'utf8');
   const mustacheRetentionAnalysisType: MustacheRetentionAnalysisType = {
     visualId,
     dataSetIdentifier: viewName,
@@ -848,6 +868,7 @@ export function getRetentionPivotTableVisualDef(visualId: string, viewName: stri
     dateDimFieldId: uuidv4(),
     numberMeasureFieldId: uuidv4(),
     title: titleProps.tableTitle,
+    smalMultiplesFieldId: props.smalMultiplesFieldId,
   };
 
   return JSON.parse(Mustache.render(visualDef, mustacheRetentionAnalysisType)) as Visual;
@@ -912,6 +933,33 @@ function findElementWithPropertyValue(root: any, path: string, property: string,
     return undefined;
   } else {
     return undefined;
+  }
+}
+
+export function formatDateToYYYYMMDD(date: any): string {
+  date = new Date(date);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+
+  return `'${year.toString().trim()}-${month.trim()}-${day.trim()}'`;
+}
+
+export function formatDatesInObject(inputObject: any): any {
+  if (typeof inputObject === 'object') {
+    if (inputObject instanceof Date) {
+      return formatDateToYYYYMMDD(inputObject);
+    } else if (Array.isArray(inputObject)) {
+      return inputObject.map(item => formatDatesInObject(item));
+    } else {
+      const formattedObject: any = {};
+      for (const key in inputObject) {
+        formattedObject[key] = formatDatesInObject(inputObject[key]);
+      }
+      return formattedObject;
+    }
+  } else {
+    return inputObject;
   }
 }
 
@@ -1007,6 +1055,13 @@ export function checkFunnelAnalysisParameter(params: any): CheckParamsStatus {
     };
   }
 
+  if (params.groupCondition !== undefined && params.chartType === QuickSightChartType.FUNNEL) {
+    return {
+      success: false,
+      message: 'Grouping function is not supported for funnel type chart.',
+    };
+  }
+
   return {
     success,
     message,
@@ -1085,6 +1140,13 @@ export function checkPathAnalysisParameter(params: any): CheckParamsStatus {
     };
   }
 
+  if (params.groupCondition !== undefined) {
+    return {
+      success: false,
+      message: 'Grouping function is not supported for path analysis.',
+    };
+  }
+
   return {
     success,
     message,
@@ -1111,7 +1173,7 @@ export function checkRetentionAnalysisParameter(params: any): CheckParamsStatus 
   if (params.chartType !== QuickSightChartType.LINE && params.chartType !== QuickSightChartType.BAR) {
     return {
       success: false,
-      message: 'unsupported chart type',
+      message: 'unsupported chart type.',
     };
   }
 
@@ -1154,6 +1216,13 @@ function _checkCommonPartParameter(params: any): any | void {
     }
   }
 
+  if (params.groupCondition !== undefined && params.groupCondition.dataType !== MetadataValueType.STRING) {
+    return {
+      success: false,
+      message: 'Grouping function is not supported on no-string attribute.',
+    };
+  }
+
   _checkTimeParameters(params);
 
 }
@@ -1179,4 +1248,18 @@ function _checkTimeParameters(params: any): any | void {
       };
     }
   }
+}
+
+function _getMultipleVisualProps(hasGrouping: boolean) {
+  let suffix = '';
+  let smalMultiplesFieldId = undefined;
+  if (hasGrouping) {
+    suffix = '-multiple';
+    smalMultiplesFieldId = uuidv4();
+  }
+
+  return {
+    suffix,
+    smalMultiplesFieldId,
+  };
 }

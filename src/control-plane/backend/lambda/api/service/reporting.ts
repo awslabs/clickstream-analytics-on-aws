@@ -89,7 +89,8 @@ export class ReportingService {
         lastN: query.lastN,
         timeUnit: query.timeUnit,
         groupColumn: query.groupColumn,
-      });
+        groupCondition: query.groupCondition,
+      }, query.chartType === QuickSightChartType.BAR);
 
       logger.debug(`funnel sql: ${sql}`);
 
@@ -133,19 +134,33 @@ export class ReportingService {
 
   private async _buildFunnelQuickSightDashboard(viewName: string, sql: string, tableVisualViewName: string,
     sqlTable: string, query: any, sheetId: string) {
+
+
+    const newFunnelVisualColumns = funnelVisualColumns;
+    const visualProjectedColumns = [
+      'event_name',
+      'event_date',
+      'x_id',
+    ];
+    const hasGrouping = query.chartType == QuickSightChartType.BAR && query.groupCondition !== undefined;
+    if (hasGrouping) {
+      newFunnelVisualColumns.push({
+        Name: 'group_col',
+        Type: 'STRING',
+      });
+
+      visualProjectedColumns.push('group_col');
+    }
+
     //create quicksight dataset
     const datasetPropsArray: DataSetProps[] = [];
     datasetPropsArray.push({
       name: '',
       tableName: viewName,
-      columns: funnelVisualColumns,
+      columns: newFunnelVisualColumns,
       importMode: 'DIRECT_QUERY',
       customSql: sql,
-      projectedColumns: [
-        'event_date',
-        'event_name',
-        'x_id',
-      ],
+      projectedColumns: visualProjectedColumns,
     });
 
     const projectedColumns: string[] = [query.groupColumn];
@@ -187,7 +202,7 @@ export class ReportingService {
     const visualId = uuidv4();
     const titleProps = await getDashboardTitleProps(AnalysisType.FUNNEL, query);
     const quickSightChartType = query.chartType;
-    const visualDef = getFunnelVisualDef(visualId, viewName, titleProps, quickSightChartType, query.groupColumn);
+    const visualDef = getFunnelVisualDef(visualId, viewName, titleProps, quickSightChartType, query.groupColumn, hasGrouping);
     const visualRelatedParams = getVisualRelatedDefs({
       timeScopeType: query.timeScopeType,
       sheetId,
@@ -268,8 +283,20 @@ export class ReportingService {
         lastN: query.lastN,
         timeUnit: query.timeUnit,
         groupColumn: query.groupColumn,
+        groupCondition: query.groupCondition,
       });
       logger.debug(`event analysis sql: ${sql}`);
+
+      const hasGrouping = query.groupCondition === undefined ? false: true;
+      const projectedColumns = ['event_date', 'event_name', 'count'];
+      if (hasGrouping) {
+        eventVisualColumns.push({
+          Name: 'group_col',
+          Type: 'STRING',
+        });
+
+        projectedColumns.push('group_col');
+      }
 
       const datasetPropsArray: DataSetProps[] = [];
       datasetPropsArray.push({
@@ -278,11 +305,7 @@ export class ReportingService {
         columns: eventVisualColumns,
         importMode: 'DIRECT_QUERY',
         customSql: sql,
-        projectedColumns: [
-          'event_date',
-          'event_name',
-          'count',
-        ],
+        projectedColumns,
       });
 
       let sheetId;
@@ -295,10 +318,11 @@ export class ReportingService {
         sheetId = query.sheetId;
       }
 
+
       const visualId = uuidv4();
       const titleProps = await getDashboardTitleProps(AnalysisType.EVENT, query);
       const quickSightChartType = query.chartType;
-      const visualDef = getEventChartVisualDef(visualId, viewName, titleProps, quickSightChartType, query.groupColumn);
+      const visualDef = getEventChartVisualDef(visualId, viewName, titleProps, quickSightChartType, query.groupColumn, hasGrouping);
       const visualRelatedParams = getVisualRelatedDefs({
         timeScopeType: query.timeScopeType,
         sheetId,
@@ -322,7 +346,7 @@ export class ReportingService {
       };
 
       const tableVisualId = uuidv4();
-      const tableVisualDef = getEventPivotTableVisualDef(tableVisualId, viewName, titleProps, query.groupColumn);
+      const tableVisualDef = getEventPivotTableVisualDef(tableVisualId, viewName, titleProps, query.groupColumn, hasGrouping);
 
       visualRelatedParams.filterGroup!.ScopeConfiguration!.SelectedSheets!.SheetVisualScopingConfigurations![0].VisualIds!.push(tableVisualId);
 
@@ -494,8 +518,25 @@ export class ReportingService {
         timeUnit: query.timeUnit,
         groupColumn: query.groupColumn,
         pairEventAndConditions: query.pairEventAndConditions,
+        groupCondition: query.groupCondition,
       });
       logger.debug(`retention analysis sql: ${sql}`);
+
+      const hasGrouping = query.groupCondition === undefined ? false: true;
+      const projectedColumns = [
+        'grouping',
+        'start_event_date',
+        'event_date',
+        'retention',
+      ];
+      if (hasGrouping) {
+        retentionAnalysisVisualColumns.push({
+          Name: 'group_col',
+          Type: 'STRING',
+        });
+
+        projectedColumns.push('group_col');
+      }
 
       const datasetPropsArray: DataSetProps[] = [];
       datasetPropsArray.push({
@@ -504,12 +545,7 @@ export class ReportingService {
         columns: retentionAnalysisVisualColumns,
         importMode: 'DIRECT_QUERY',
         customSql: sql,
-        projectedColumns: [
-          'grouping',
-          'start_event_date',
-          'event_date',
-          'retention',
-        ],
+        projectedColumns,
       });
 
       let sheetId;
@@ -525,7 +561,7 @@ export class ReportingService {
       const titleProps = await getDashboardTitleProps(AnalysisType.RETENTION, query);
       const visualId = uuidv4();
       const quickSightChartType = query.chartType;
-      const visualDef = getRetentionChartVisualDef(visualId, viewName, titleProps, quickSightChartType);
+      const visualDef = getRetentionChartVisualDef(visualId, viewName, titleProps, quickSightChartType, hasGrouping);
       const visualRelatedParams = getVisualRelatedDefs({
         timeScopeType: query.timeScopeType,
         sheetId,
@@ -549,7 +585,7 @@ export class ReportingService {
       };
 
       const tableVisualId = uuidv4();
-      const tableVisualDef = getRetentionPivotTableVisualDef(tableVisualId, viewName, titleProps);
+      const tableVisualDef = getRetentionPivotTableVisualDef(tableVisualId, viewName, titleProps, hasGrouping);
 
       visualRelatedParams.filterGroup!.ScopeConfiguration!.SelectedSheets!.SheetVisualScopingConfigurations![0].VisualIds!.push(tableVisualId);
 

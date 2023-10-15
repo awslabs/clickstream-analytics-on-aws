@@ -1,7 +1,7 @@
 {
     "BarChartVisual":
     {
-    "VisualId": "{{visualId}}",
+    "VisualId":"{{visualId}}",
     "Title":{
         "FormatText": {
             "PlainText": "{{title}}"
@@ -24,31 +24,42 @@
                             "Column":{
                                 "DataSetIdentifier":"{{dataSetIdentifier}}",
                                 "ColumnName":"event_date"
-                            },
-                            "HierarchyId":"{{hierarchyId}}",
-                            "DateGranularity": "{{dateGranularity}}"
+                            }
                         }
                     }
                 ],
                 "Values":[
                     {
-                        "CategoricalMeasureField":{
-                            "FieldId":"{{measureFieldId}}",
+                        "NumericalMeasureField":{
+                            "FieldId":"{{numberMeasureFieldId}}",
                             "Column":{
                                 "DataSetIdentifier":"{{dataSetIdentifier}}",
-                                "ColumnName":"x_id"
+                                "ColumnName":"retention"
                             },
-                            "AggregationFunction":"DISTINCT_COUNT"
+                            "AggregationFunction":{
+                                "SimpleNumericalAggregation":"SUM"
+                            }
                         }
                     }
                 ],
                 "Colors":[
                     {
                         "CategoricalDimensionField":{
-                            "FieldId":"{{dimFieldId}}",
+                            "FieldId":"{{catDimFieldId}}",
                             "Column":{
                                 "DataSetIdentifier":"{{dataSetIdentifier}}",
-                                "ColumnName":"event_name"
+                                "ColumnName":"grouping"
+                            }
+                        }
+                    }
+                ],
+                "SmallMultiples": [
+                    {
+                        "CategoricalDimensionField": {
+                            "FieldId": "{{smalMultiplesFieldId}}",
+                            "Column": {
+                                "DataSetIdentifier": "{{dataSetIdentifier}}",
+                                "ColumnName": "group_col"
                             }
                         }
                     }
@@ -60,12 +71,6 @@
                 {
                     "FieldSort":{
                         "FieldId":"{{dateDimFieldId}}",
-                        "Direction":"ASC"
-                    }
-                },
-                {
-                    "FieldSort":{
-                        "FieldId":"{{dimFieldId}}",
                         "Direction":"ASC"
                     }
                 }
@@ -101,13 +106,19 @@
                     },
                     {
                         "FieldTooltipItem":{
-                            "FieldId":"{{measureFieldId}}",
+                            "FieldId":"{{numberMeasureFieldId}}",
                             "Visibility":"VISIBLE"
                         }
                     },
                     {
                         "FieldTooltipItem":{
-                            "FieldId":"{{dimFieldId}}",
+                            "FieldId":"{{catDimFieldId}}",
+                            "Visibility":"VISIBLE"
+                        }
+                    },
+                    {
+                        "FieldTooltipItem":{
+                            "FieldId":"{{smalMultiplesFieldId}}",
                             "Visibility":"VISIBLE"
                         }
                     }
@@ -117,13 +128,6 @@
     },
     "Actions":[
 
-    ],
-    "ColumnHierarchies":[
-        {
-            "DateTimeHierarchy":{
-                "HierarchyId":"{{hierarchyId}}"
-            }
-        }
     ]
     }
 }

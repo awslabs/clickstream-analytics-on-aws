@@ -1,0 +1,108 @@
+{
+  "PivotTableVisual": {
+      "VisualId": "{{visualId}}",
+      "Title": {
+          "FormatText": {
+            "PlainText": "{{title}}"
+          },
+          "Visibility": "VISIBLE"
+      },
+      "Subtitle": {
+          "Visibility": "VISIBLE"
+      },
+      "ChartConfiguration": {
+          "FieldWells": {
+              "PivotTableAggregatedFieldWells": {
+                  "Rows": [
+                      {
+                          "CategoricalDimensionField": {
+                              "FieldId": "{{smalMultiplesFieldId}}",
+                              "Column": {
+                                  "DataSetIdentifier": "{{dataSetIdentifier}}",
+                                  "ColumnName": "group_col"
+                              }
+                          }
+                      },
+                      {
+                          "CategoricalDimensionField": {
+                              "FieldId": "{{catDimFieldId}}",
+                              "Column": {
+                                  "DataSetIdentifier": "{{dataSetIdentifier}}",
+                                  "ColumnName": "event_name"
+                              }
+                          }
+                      }
+                  ],
+                  "Columns": [
+                      {
+                          "DateDimensionField": {
+                              "FieldId": "{{dateDimFieldId}}",
+                              "Column": {
+                                  "DataSetIdentifier": "{{dataSetIdentifier}}",
+                                  "ColumnName": "event_date"
+                              },
+                              "DateGranularity": "{{dateGranularity}}"
+                          }
+                      }
+                  ],
+                  "Values": [
+                      {
+                          "CategoricalMeasureField": {
+                              "FieldId": "{{catMeasureFieldId}}",
+                              "Column": {
+                                  "DataSetIdentifier": "{{dataSetIdentifier}}",
+                                  "ColumnName": "count"
+                              },
+                              "AggregationFunction": "DISTINCT_COUNT"
+                          }
+                      }
+                  ]
+              }
+          },
+          "SortConfiguration": {
+              "FieldSortOptions": [
+                  {
+                      "FieldId": "{{dateDimFieldId}}",
+                      "SortBy": {
+                          "Field": {
+                              "FieldId": "{{dateDimFieldId}}",
+                              "Direction": "ASC"
+                          }
+                      }
+                  }
+              ]
+          },
+          "TableOptions": {
+              "MetricPlacement": "COLUMN",
+              "ColumnHeaderStyle": {
+                  "TextWrap": "NONE"
+              },
+              "CellStyle": {
+                  "TextWrap": "NONE"
+              },
+              "CollapsedRowDimensionsVisibility": "HIDDEN"
+          },
+          "FieldOptions": {
+              "SelectedFieldOptions": [
+                  {
+                    "FieldId": "{{smalMultiplesFieldId}}",
+                    "Visibility": "VISIBLE"
+                  },
+                  {
+                      "FieldId": "{{catDimFieldId}}",
+                      "Visibility": "VISIBLE"
+                  },
+                  {
+                      "FieldId": "{{dateDimFieldId}}",
+                      "Visibility": "VISIBLE"
+                  },
+                  {
+                      "FieldId": "{{catMeasureFieldId}}",
+                      "Visibility": "VISIBLE"
+                  }
+              ]
+          }
+      },
+      "Actions": []
+  }
+}
