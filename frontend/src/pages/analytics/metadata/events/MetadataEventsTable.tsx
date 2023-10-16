@@ -216,7 +216,6 @@ const MetadataEventsTable: React.FC<MetadataEventsTableProps> = (
       const { success, data }: ApiResponse<ResponseTableData<IMetadataEvent>> =
         await getMetadataEventsList({ projectId, appId });
       if (success) {
-        console.log(data);
         return data.items;
       }
       return [];
