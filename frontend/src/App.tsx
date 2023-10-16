@@ -11,12 +11,14 @@
  *  and limitations under the License.
  */
 
-import { Button, Spinner } from '@cloudscape-design/components';
+import { Button } from '@cloudscape-design/components';
 import { getUserDetails } from 'apis/user';
 import Axios from 'axios';
+import Loading from 'components/common/Loading';
 import RoleRoute from 'components/common/RoleRoute';
 import CommonAlert from 'components/common/alert';
 import { AppContext } from 'context/AppContext';
+import { GlobalProvider } from 'context/StateContext';
 import { UserContext } from 'context/UserContext';
 import { WebStorageStateStore } from 'oidc-client-ts';
 import AlarmsList from 'pages/alarms/AlarmList';
@@ -54,11 +56,7 @@ const LoginCallback: React.FC = () => {
       window.location.href = baseUrl;
     }
   }, []);
-  return (
-    <div className="page-loading">
-      <Spinner />
-    </div>
-  );
+  return <Loading isPage />;
 };
 
 const SignedInPage: React.FC = () => {
@@ -96,11 +94,7 @@ const SignedInPage: React.FC = () => {
   }, [auth]);
 
   if (auth.isLoading || (auth.isAuthenticated && !currentUser)) {
-    return (
-      <div className="page-loading">
-        <Spinner />
-      </div>
-    );
+    return <Loading isPage />;
   }
 
   if (auth.error) {
@@ -278,11 +272,11 @@ const SignedInPage: React.FC = () => {
                 path="/analytics"
                 element={
                   <RoleRoute
-                    layout="analytics"
+                    layout="none"
                     auth={auth}
                     roles={[IUserRole.ADMIN, IUserRole.ANALYST]}
                   >
-                    <AnalyticsHome />
+                    <AnalyticsHome auth={auth} />
                   </RoleRoute>
                 }
               />
@@ -427,7 +421,7 @@ const App: React.FC = () => {
   const setLocalStorageAfterLoad = async () => {
     if (localStorage.getItem(PROJECT_CONFIG_JSON)) {
       const configData = JSON.parse(
-        localStorage.getItem(PROJECT_CONFIG_JSON) || ''
+        localStorage.getItem(PROJECT_CONFIG_JSON) ?? ''
       );
       setContextData(configData);
       initAuthentication(configData);
@@ -449,13 +443,13 @@ const App: React.FC = () => {
   return (
     <div className="App">
       {loadingConfig ? (
-        <div className="page-loading">
-          <Spinner />
-        </div>
+        <Loading isPage />
       ) : (
         <AuthProvider {...oidcConfig}>
           <AppContext.Provider value={contextData}>
-            <SignedInPage />
+            <GlobalProvider>
+              <SignedInPage />
+            </GlobalProvider>
           </AppContext.Provider>
         </AuthProvider>
       )}

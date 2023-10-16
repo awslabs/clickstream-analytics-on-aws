@@ -14,14 +14,23 @@
 import { Alert, AppLayout } from '@cloudscape-design/components';
 import { getProjectList } from 'apis/project';
 import Loading from 'components/common/Loading';
+import AnalyticsLayout from 'components/layouts/AnalyticsLayout';
 import AnalyticsNavigation from 'components/layouts/AnalyticsNavigation';
 import { t } from 'i18next';
 import { useLocalStorage } from 'pages/common/use-local-storage';
 import React, { useEffect, useState } from 'react';
+import { AuthContextProps } from 'react-oidc-context';
 import { ANALYTICS_INFO_KEY } from 'ts/const';
 
-const AnalyticsHome: React.FC = () => {
-  const [loading, setLoading] = useState<boolean>(false);
+interface AnalyticsHomeProps {
+  auth: AuthContextProps;
+}
+
+const AnalyticsHome: React.FC<AnalyticsHomeProps> = (
+  props: AnalyticsHomeProps
+) => {
+  const [loading, setLoading] = useState<boolean>(true);
+  const { auth } = props;
   const [analyticsInfo, setAnalyticsInfo] = useLocalStorage(
     ANALYTICS_INFO_KEY,
     {
@@ -33,6 +42,7 @@ const AnalyticsHome: React.FC = () => {
   );
 
   const gotoFirstProjectApp = async () => {
+    setLoading(true);
     try {
       const apps = [];
       const { success, data }: ApiResponse<ResponseTableData<IProject>> =
@@ -57,34 +67,37 @@ const AnalyticsHome: React.FC = () => {
       if (apps.length > 0) {
         setAnalyticsInfo(apps[0]);
         window.location.href = `/analytics/${apps[0].projectId}/app/${apps[0].appId}/dashboards`;
+      } else {
+        setLoading(false);
       }
     } catch (error) {
       console.log(error);
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-    setLoading(true);
     if (analyticsInfo.projectId && analyticsInfo.appId) {
       window.location.href = `/analytics/${analyticsInfo.projectId}/app/${analyticsInfo.appId}/dashboards`;
     } else {
       gotoFirstProjectApp();
-      setLoading(false);
     }
   }, []);
 
+  if (loading) {
+    return <Loading isPage />;
+  }
+
   return (
-    <div className="flex">
-      <AnalyticsNavigation activeHref={`/analytics`} />
-      <div className="flex-1">
-        <AppLayout
-          toolsHide
-          navigationHide
-          content={
-            <>
-              {loading ? (
-                <Loading />
-              ) : (
+    <AnalyticsLayout auth={auth}>
+      <div className="flex">
+        <AnalyticsNavigation activeHref={`/analytics`} />
+        <div className="flex-1">
+          <AppLayout
+            toolsHide
+            navigationHide
+            content={
+              <>
                 <Alert
                   statusIconAriaLabel="Error"
                   type="error"
@@ -92,13 +105,13 @@ const AnalyticsHome: React.FC = () => {
                 >
                   {t('analytics:noDataAvailableMessage')}
                 </Alert>
-              )}
-            </>
-          }
-          headerSelector="#header"
-        />
+              </>
+            }
+            headerSelector="#header"
+          />
+        </div>
       </div>
-    </div>
+    </AnalyticsLayout>
   );
 };
 

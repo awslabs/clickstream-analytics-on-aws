@@ -185,7 +185,8 @@
     "groupPropertiesText": "Properties",
     "operatorsText": "Operators",
     "clearFiltersText": "Clear filters",
-    "applyActionText": "Apply"
+    "applyActionText": "Apply",
+    "clear": "Clear"
   },
   "item": "item",
   "items": "items",

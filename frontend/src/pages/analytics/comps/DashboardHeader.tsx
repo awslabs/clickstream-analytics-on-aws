@@ -14,13 +14,14 @@ import {
   Box,
   Button,
   Header,
-  Link,
   Modal,
-  Popover,
   SpaceBetween,
 } from '@cloudscape-design/components';
 import { deleteAnalyticsDashboard } from 'apis/analytics';
-import React, { useState } from 'react';
+import InfoLink from 'components/common/InfoLink';
+import { DispatchContext } from 'context/StateContext';
+import { HelpInfoActionType, HelpPanelType } from 'context/reducer';
+import React, { useContext, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 
@@ -46,6 +47,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = (
   const { projectId, appId } = useParams();
   const [loadingDelete, setLoadingDelete] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const dispatch = useContext(DispatchContext);
 
   const confirmDeleteDashboard = async () => {
     setLoadingDelete(true);
@@ -104,9 +106,14 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = (
         counter={`(${totalNum})`}
         description={t('analytics:dashboard.description')}
         info={
-          <Popover triggerType="custom" content={t('analytics:information.dashboardsInfo')}>
-            <Link variant="info">{t('info')}</Link>
-          </Popover>
+          <InfoLink
+            onFollow={() => {
+              dispatch?.({
+                type: HelpInfoActionType.SHOW_HELP_PANEL,
+                payload: HelpPanelType.ANALYTICS_DASHBOARD,
+              });
+            }}
+          />
         }
         actions={
           <SpaceBetween size="xs" direction="horizontal">

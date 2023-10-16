@@ -137,7 +137,7 @@ const AnalyticsHeader: React.FC<IHeaderProps> = (props: IHeaderProps) => {
       changeLanguage(DEFAULT_ZH_LANG);
     }
     const configJSONObj: ConfigType = localStorage.getItem(PROJECT_CONFIG_JSON)
-      ? JSON.parse(localStorage.getItem(PROJECT_CONFIG_JSON) || '')
+      ? JSON.parse(localStorage.getItem(PROJECT_CONFIG_JSON) ?? '')
       : {};
     if (configJSONObj.oidc_logout_url) {
       const redirectUrl = configJSONObj.oidc_redirect_url.replace(

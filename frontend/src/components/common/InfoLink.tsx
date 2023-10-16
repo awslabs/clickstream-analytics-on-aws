@@ -11,13 +11,23 @@
  *  and limitations under the License.
  */
 
-import { Link } from '@cloudscape-design/components';
+import { Link, LinkProps } from '@cloudscape-design/components';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
-const InfoLink: React.FC = () => {
+interface InfoLinkProps {
+  id?: string;
+  ariaLabel?: string;
+  onFollow: LinkProps['onFollow'];
+}
+
+const InfoLink: React.FC<InfoLinkProps> = (props: InfoLinkProps) => {
   const { t } = useTranslation();
-  return <Link variant="info">{t('info')}</Link>;
+  return (
+    <Link variant="info" {...props}>
+      {t('info')}
+    </Link>
+  );
 };
 
 export default InfoLink;

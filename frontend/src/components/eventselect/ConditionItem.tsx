@@ -147,6 +147,7 @@ const ConditionItem: React.FC<ConditionItemProps> = (
     <div className="cs-analytics-condition-item">
       <div className="condition-event">
         <EventItem
+          showMouseoverTitle
           placeholder={t('analytics:labels.attributeSelectPlaceholder') ?? ''}
           categoryOption={item.conditionOption}
           changeCurCategoryOption={(item) => {

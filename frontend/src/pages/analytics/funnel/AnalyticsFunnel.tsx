@@ -12,12 +12,10 @@
  */
 
 import {
-  Box,
   Button,
   ColumnLayout,
   Container,
   Header,
-  Icon,
   Input,
   Link,
   Popover,
@@ -26,12 +24,13 @@ import {
   Select,
   SelectProps,
   SpaceBetween,
-  Toggle,
 } from '@cloudscape-design/components';
 import { DateRangePickerProps } from '@cloudscape-design/components/date-range-picker/interfaces';
 import { previewFunnel } from 'apis/analytics';
 import ExtendIcon from 'components/common/ExtendIcon';
 import Loading from 'components/common/Loading';
+import InfoTitle from 'components/common/title/InfoTitle';
+import SectionTitle from 'components/common/title/SectionTitle';
 import {
   CategoryItemType,
   DEFAULT_CONDITION_DATA,
@@ -40,7 +39,6 @@ import {
   INIT_SEGMENTATION_DATA,
   SegmentationFilterDataType,
 } from 'components/eventselect/AnalyticsType';
-import EventItem from 'components/eventselect/EventItem';
 import EventsSelect from 'components/eventselect/EventSelect';
 import SegmentationFilter from 'components/eventselect/SegmentationFilter';
 import { cloneDeep } from 'lodash';
@@ -66,6 +64,7 @@ import {
   getGlobalEventCondition,
   getLngFromLocalStorage,
 } from '../analytics-utils';
+import AttributeGroup from '../comps/AttributeGroup';
 import ExploreDateRangePicker from '../comps/ExploreDateRangePicker';
 import ExploreEmbedFrame from '../comps/ExploreEmbedFrame';
 import SaveToDashboardModal from '../comps/SelectDashboardModal';
@@ -178,7 +177,7 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
   const [selectedMetric, setSelectedMetric] =
     useState<SelectProps.Option | null>(defaultComputeMethodOption);
 
-  const [windowValue, setWindowValue] = useState<string>('5');
+  const [windowValue, setWindowValue] = useState<string>('10');
 
   const [selectedWindowType, setSelectedWindowType] =
     useState<SelectProps.Option | null>(customWindowType);
@@ -429,18 +428,12 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
         >
           <div className="cs-analytics-config">
             <SpaceBetween direction="vertical" size="xs">
-              <Box variant="awsui-key-label">
-                <SpaceBetween direction="horizontal" size="xxs">
-                  {t('analytics:labels.metrics')}
-                  <Popover
-                    triggerType="custom"
-                    size="small"
-                    content={t('analytics:information.funnelMetricsInfo')}
-                  >
-                    <Icon name="status-info" size="small" />
-                  </Popover>
-                </SpaceBetween>
-              </Box>
+              <InfoTitle
+                title={t('analytics:labels.metrics')}
+                popoverDescription={t(
+                  'analytics:information.funnelMetricsInfo'
+                )}
+              />
               <Select
                 selectedOption={selectedMetric}
                 options={computeMethodOptions}
@@ -449,55 +442,22 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
                 }}
               />
             </SpaceBetween>
-            <SpaceBetween direction="vertical" size="xs">
-              <Box variant="awsui-key-label">
-                <SpaceBetween direction="horizontal" size="xxs">
-                  {t('analytics:labels.associateParameter')}
-                  <Popover
-                    triggerType="custom"
-                    content={t(
-                      'analytics:information.funnelAssociateParameterInfo'
-                    )}
-                  >
-                    <Icon name="status-info" size="small" />
-                  </Popover>
-                </SpaceBetween>
-              </Box>
-              <div className="cs-analytics-config">
-                <Toggle
-                  onChange={({ detail }) =>
-                    setAssociateParameterChecked(detail.checked)
-                  }
-                  checked={associateParameterChecked}
-                >
-                  {associateParameterChecked ? 'On' : 'Off'}
-                </Toggle>
-              </div>
-            </SpaceBetween>
           </div>
           <br />
           <ColumnLayout columns={2} variant="text-grid">
             <SpaceBetween direction="vertical" size="xs">
-              <Button
-                variant="link"
-                iconName="menu"
-                className="cs-analytics-select-event"
-              >
-                {t('analytics:labels.funnelSteps')}
-              </Button>
-              <div>
+              <SectionTitle
+                type="event"
+                title={t('analytics:labels.funnelSteps')}
+              />
+              <div className="mt-10">
                 <SpaceBetween direction="vertical" size="xs">
-                  <Box variant="awsui-key-label">
-                    <SpaceBetween direction="horizontal" size="xxs">
-                      {t('analytics:labels.window')}
-                      <Popover
-                        triggerType="custom"
-                        content={t('analytics:information.funnelWindowInfo')}
-                      >
-                        <Icon name="status-info" size="small" />
-                      </Popover>
-                    </SpaceBetween>
-                  </Box>
+                  <InfoTitle
+                    title={t('analytics:labels.window')}
+                    popoverDescription={t(
+                      'analytics:information.funnelWindowInfo'
+                    )}
+                  />
                   <div className="cs-analytics-window">
                     <div className="cs-analytics-window-type">
                       <Select
@@ -513,7 +473,7 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
                         <div className="cs-analytics-window-value">
                           <Input
                             type="number"
-                            placeholder="5"
+                            placeholder="10"
                             value={windowValue}
                             onChange={(event) => {
                               setWindowValue(event.detail.value);
@@ -646,13 +606,7 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
               </div>
             </SpaceBetween>
             <SpaceBetween direction="vertical" size="xs">
-              <Button
-                variant="link"
-                iconName="filter"
-                className="cs-analytics-select-filter"
-              >
-                {t('analytics:labels.filters')}
-              </Button>
+              <SectionTitle type="filter" />
               <SegmentationFilter
                 segmentationData={segmentationOptionData}
                 addNewConditionItem={() => {
@@ -703,27 +657,12 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
                 }}
               />
               <br />
-              <Button variant="link" className="cs-analytics-select-group">
-                {t('analytics:labels.attributeGrouping')}
-              </Button>
-              <div className="cs-analytics-select-group-item">
-                <div className="cs-analytics-dropdown">
-                  <div className="cs-analytics-parameter">
-                    <div className="flex-1">
-                      <EventItem
-                        placeholder={
-                          t('analytics:labels.attributeSelectPlaceholder') ?? ''
-                        }
-                        categoryOption={groupOption}
-                        changeCurCategoryOption={(item) => {
-                          setGroupOption(item);
-                        }}
-                        categories={presetParameters}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <SectionTitle type="group" />
+              <AttributeGroup
+                presetParameters={presetParameters}
+                groupOption={groupOption}
+                setGroupOption={setGroupOption}
+              />
             </SpaceBetween>
           </ColumnLayout>
           <br />
@@ -746,7 +685,9 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
             />
             <SegmentedControl
               selectedId={chartType}
-              onChange={({ detail }) => setChartType(detail.selectedId as QuickSightChartType)}
+              onChange={({ detail }) =>
+                setChartType(detail.selectedId as QuickSightChartType)
+              }
               options={chartTypeOptions}
             />
           </div>

@@ -267,31 +267,37 @@ const AnalyticsExplore: React.FC = () => {
                       <Link variant="info">{t('info')}</Link>
                     </Popover>
                   }
-                  description={t('analytics:explore.description')}
-                  actions={
-                    <FormField
-                      label={
-                        <SpaceBetween direction="horizontal" size="xxs">
-                          {t('analytics:explore.analyticsModel')}
-                          <Popover
-                            triggerType="custom"
-                            content={t(
-                              'analytics:information.analyticsModelInfo'
-                            )}
-                          >
-                            <Link variant="info">{t('info')}</Link>
-                          </Popover>
-                        </SpaceBetween>
-                      }
-                    >
-                      <Select
-                        selectedOption={selectedOption}
-                        onChange={({ detail }) =>
-                          setSelectedOption(detail.selectedOption)
-                        }
-                        options={analyticsModelOptions}
-                      />
-                    </FormField>
+                  description={
+                    <SpaceBetween direction="vertical" size="s">
+                      <div>{t('analytics:explore.description')}</div>
+                      <div className="flex align-center">
+                        <FormField
+                          label={
+                            <SpaceBetween direction="horizontal" size="xxs">
+                              {t('analytics:explore.analyticsModel')}
+                              <Popover
+                                triggerType="custom"
+                                content={t(
+                                  'analytics:information.analyticsModelInfo'
+                                )}
+                              >
+                                <Link variant="info">{t('info')}</Link>
+                              </Popover>
+                            </SpaceBetween>
+                          }
+                        ></FormField>
+                        <div className="flex-1 ml-10">
+                          <Select
+                            disabled={!pipeline}
+                            selectedOption={selectedOption}
+                            onChange={({ detail }) =>
+                              setSelectedOption(detail.selectedOption)
+                            }
+                            options={analyticsModelOptions}
+                          />
+                        </div>
+                      </div>
+                    </SpaceBetween>
                   }
                 >
                   {t('analytics:explore.title')}
