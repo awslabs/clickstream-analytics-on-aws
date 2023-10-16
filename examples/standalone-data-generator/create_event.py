@@ -54,12 +54,11 @@ if __name__ == '__main__':
         total_events_count = 0
         for day in days:
             day_str = utils.get_day_of_timestamp(day)
-            print("\nstart day: " + day_str)
+            print("\n----------- start day: " + day_str + " -----------")
             events_of_day = []
             users_count = random.choices(app_provider.get_dau_count())[0]
             users.extend(get_users(new_users_of_day))
             day_users = random.sample(users, users_count)
-            print("total user: " + str(users_count))
             start_gen_day_user_event_time = utils.current_timestamp()
             day_events_count = 0
             handled_user_count = 0
@@ -68,7 +67,7 @@ if __name__ == '__main__':
                 handled_user_count += 1
                 if len(events_of_day) > max_batch_event_number:
                     day_events_count += len(events_of_day)
-                    print("processed user count: " + str(handled_user_count) + ", left: " +
+                    print(day_str + " total user count: " + str(users_count) + ", left: " +
                           str(users_count - handled_user_count))
                     send_event.send_events_of_batch(events_of_day)
                     events_of_day = []

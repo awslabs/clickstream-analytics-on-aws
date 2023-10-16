@@ -78,6 +78,9 @@ RANDOM_DAU_REALTIME = range(10000, 20000)
 THREAD_NUMBER_FOR_USER = 10
 # flush events duration by second
 FLUSH_DURATION = 10
+# the duration(in minutes) of generation batch events for in one times, use this parameter to reduce memory usage
+# no less than 10 minutes
+BATCH_EVENT_DURATION_IN_MINUTES = 20
 
 # Common Settings
 # session times for one user in a day

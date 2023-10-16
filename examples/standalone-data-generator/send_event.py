@@ -35,9 +35,9 @@ def send_events_to_server(events):
     try:
         response = requests.post(url=configure.ENDPOINT, params=request_param, headers=headers, data=events)
         if response.status_code == 200:
-            print('send events success, data len(' + str(len(events) / 1024) + ")")
+            print('sent events success, data len(' + str(len(events) / 1024) + ")")
         else:
-            print('send events fail, status{}'.format(response.status_code))
+            print('sent events fail, status{}'.format(response.status_code))
     except Exception as e:
         print("endpoint error: " + str(e))
 
@@ -63,5 +63,5 @@ def send_events_of_batch(events_of_batch):
         for line in day_event_lines:
             executor.submit(send_events_to_server, line)
         executor.shutdown(wait=True)
-    print("send batch events cost: " + str(utils.current_timestamp() - start_time) + "ms")
+    print("sent batch events cost: " + str(utils.current_timestamp() - start_time) + "ms")
     print("total request number: " + str(global_sequence_id - 1) + "\n")
