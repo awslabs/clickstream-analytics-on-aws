@@ -820,7 +820,7 @@ test('Check EC2 IMDSv2 Enabled', () => {
     template,
     'AWS::AutoScaling::LaunchConfiguration',
   )?.resource;
-  
+
   const properties = launchConfiguration.Properties;
   expect(properties.MetadataOptions.HttpTokens == 'required').toBeTruthy();
 });
