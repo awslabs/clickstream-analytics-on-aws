@@ -93,7 +93,6 @@ def send_user_event_of_duration(users, all_events, end_timestamp):
         if len(all_events[i]) > 0:
             left_events.append(all_events[i])
             left_users.append(users[i])
-    print("\nthere are " + str(len(left_users)) + " users events left to send\n")
 
 
 def create_duration_event(day_users):
@@ -127,6 +126,8 @@ def create_duration_event(day_users):
         left_events = []
         left_users = []
     executor.shutdown(wait=True)
+
+    print("there are " + str(len(left_users)) + " users events left to send\n")
     print("end duration events sending\n\n")
 
 
