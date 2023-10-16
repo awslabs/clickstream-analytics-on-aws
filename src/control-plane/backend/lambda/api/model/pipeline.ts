@@ -248,6 +248,7 @@ export class CPipeline {
     this.pipeline = pipeline;
     this.stackManager = new StackManager(pipeline);
     this.validateNetworkOnce = false;
+    this.stackTags = this.getStackTags();
   }
 
   public async create(): Promise<void> {
@@ -321,8 +322,8 @@ export class CPipeline {
     this.pipeline.workflow = newWorkflow;
     this.pipeline.executionArn = await this.stackManager.execute(execWorkflow, this.pipeline.executionName);
 
-    const templateInfo = await this.getTemplateInfo();
-    this.pipeline.templateVersion = templateInfo.solutionVersion;
+    this.pipeline.templateVersion = oldPipeline.templateVersion;
+
     await store.updatePipeline(this.pipeline, oldPipeline);
   }
 
