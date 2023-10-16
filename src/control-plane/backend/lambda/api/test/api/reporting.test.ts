@@ -30,6 +30,8 @@ import {
   DescribeAnalysisCommand,
   ThrottlingException,
   CreateDataSetCommand,
+  ResizeOption,
+  SheetContentType,
 } from '@aws-sdk/client-quicksight';
 import { BatchExecuteStatementCommand, DescribeStatementCommand, RedshiftDataClient, StatusString } from '@aws-sdk/client-redshift-data';
 import { AssumeRoleCommand, STSClient } from '@aws-sdk/client-sts';
@@ -63,7 +65,7 @@ const dashboardDef =
                 Elements: [],
                 CanvasSizeOptions: {
                   ScreenCanvasSizeOptions: {
-                    ResizeOption: 'FIXED',
+                    ResizeOption: ResizeOption.FIXED,
                     OptimizedViewPortWidth: '1600px',
                   },
                 },
@@ -71,7 +73,7 @@ const dashboardDef =
             },
           },
         ],
-        ContentType: 'INTERACTIVE',
+        ContentType: SheetContentType.INTERACTIVE,
       },
     ],
     CalculatedFields: [],
@@ -83,13 +85,13 @@ const dashboardDef =
           Grid: {
             CanvasSizeOptions: {
               ScreenCanvasSizeOptions: {
-                ResizeOption: 'FIXED',
+                ResizeOption: ResizeOption.FIXED,
                 OptimizedViewPortWidth: '1600px',
               },
             },
           },
         },
-        SheetContentType: 'INTERACTIVE',
+        SheetContentType: SheetContentType.INTERACTIVE,
       },
     },
   };

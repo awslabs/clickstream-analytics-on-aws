@@ -12,10 +12,11 @@
  */
 
 import {
+  Capability,
   CloudFormationClient,
   CloudFormationServiceException,
   CreateStackCommand,
-  DescribeStacksCommand, StackStatus, UpdateStackCommand, UpdateTerminationProtectionCommand,
+  DescribeStacksCommand, StackDriftStatus, StackStatus, UpdateStackCommand, UpdateTerminationProtectionCommand,
 } from '@aws-sdk/client-cloudformation';
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { CdkCustomResourceResponse } from 'aws-lambda';
@@ -41,7 +42,7 @@ describe('SFN Action Lambda Function', () => {
     },
     Callback: {
       BucketPrefix: 'clickstream/workflow/main-6ba79aa7-b9ef-40dd-aed9-701bebb61eb4',
-      BucketName: 'cloudfront-s3-control-pl-solutionbucketlogbucket3-t64p6bbwz53m',
+      BucketName: 'cloudfront-s3-control-pl-solution-logbucket-123',
     },
   };
 
@@ -57,14 +58,14 @@ describe('SFN Action Lambda Function', () => {
     DisableRollback: true,
     NotificationARNs: [],
     Capabilities: [
-      'CAPABILITY_IAM',
-      'CAPABILITY_NAMED_IAM',
-      'CAPABILITY_AUTO_EXPAND',
+      Capability.CAPABILITY_IAM,
+      Capability.CAPABILITY_NAMED_IAM,
+      Capability.CAPABILITY_AUTO_EXPAND,
     ],
     Tags: [],
     EnableTerminationProtection: false,
     DriftInformation: {
-      StackDriftStatus: 'NOT_CHECKED',
+      StackDriftStatus: StackDriftStatus.NOT_CHECKED,
     },
   };
 
@@ -115,7 +116,7 @@ describe('SFN Action Lambda Function', () => {
     const mockValidationError = new CloudFormationServiceException({
       $metadata: {
         httpStatusCode: 200,
-        requestId: 'asdsad',
+        requestId: 'abcdefg',
       },
       $fault: 'client',
       name: 'ValidationError',

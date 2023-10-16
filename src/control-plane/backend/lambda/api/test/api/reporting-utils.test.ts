@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { CategoricalAggregationFunction, OtherCategories, ResizeOption, SelectedTooltipType, SheetContentType, SortDirection, TooltipTitleType, Visibility } from '@aws-sdk/client-quicksight';
 import { ExploreRequestAction, ExploreVisualName } from '../../common/explore-types';
 import { applyChangeToDashboard } from '../../service/quicksight/reporting-utils';
 
@@ -35,7 +36,7 @@ describe('QuickSight visual management test', () => {
                 Elements: [],
                 CanvasSizeOptions: {
                   ScreenCanvasSizeOptions: {
-                    ResizeOption: 'FIXED',
+                    ResizeOption: ResizeOption.FIXED,
                     OptimizedViewPortWidth: '1600px',
                   },
                 },
@@ -43,7 +44,7 @@ describe('QuickSight visual management test', () => {
             },
           },
         ],
-        ContentType: 'INTERACTIVE',
+        ContentType: SheetContentType.INTERACTIVE,
       },
     ],
     CalculatedFields: [],
@@ -55,13 +56,13 @@ describe('QuickSight visual management test', () => {
           Grid: {
             CanvasSizeOptions: {
               ScreenCanvasSizeOptions: {
-                ResizeOption: 'FIXED',
+                ResizeOption: ResizeOption.FIXED,
                 OptimizedViewPortWidth: '1600px',
               },
             },
           },
         },
-        SheetContentType: 'INTERACTIVE',
+        SheetContentType: SheetContentType.INTERACTIVE,
       },
     },
   };
@@ -71,10 +72,10 @@ describe('QuickSight visual management test', () => {
     FunnelChartVisual: {
       VisualId: 'e6105df1-3bd6-4d4d-9a44-f34d00fafea0',
       Title: {
-        Visibility: 'VISIBLE',
+        Visibility: Visibility.VISIBLE,
       },
       Subtitle: {
-        Visibility: 'VISIBLE',
+        Visibility: Visibility.VISIBLE,
       },
       ChartConfiguration: {
         FieldWells: {
@@ -98,7 +99,7 @@ describe('QuickSight visual management test', () => {
                     DataSetIdentifier: 'testview0001',
                     ColumnName: 'x_id',
                   },
-                  AggregationFunction: 'COUNT',
+                  AggregationFunction: CategoricalAggregationFunction.COUNT,
                 },
               },
             ],
@@ -109,46 +110,46 @@ describe('QuickSight visual management test', () => {
             {
               FieldSort: {
                 FieldId: 'e6105df1-3bd6-4d4d-9a44-f34d00fabbbb',
-                Direction: 'DESC',
+                Direction: SortDirection.DESC,
               },
             },
             {
               FieldSort: {
                 FieldId: 'e6105df1-3bd6-4d4d-9a44-f34d00faaaaa',
-                Direction: 'DESC',
+                Direction: SortDirection.DESC,
               },
             },
           ],
           CategoryItemsLimit: {
-            OtherCategories: 'INCLUDE',
+            OtherCategories: OtherCategories.INCLUDE,
           },
         },
         Tooltip: {
-          TooltipVisibility: 'VISIBLE',
-          SelectedTooltipType: 'DETAILED',
+          TooltipVisibility: Visibility.VISIBLE,
+          SelectedTooltipType: SelectedTooltipType.DETAILED,
           FieldBasedTooltip: {
-            AggregationVisibility: 'HIDDEN',
-            TooltipTitleType: 'PRIMARY_VALUE',
+            AggregationVisibility: Visibility.HIDDEN,
+            TooltipTitleType: TooltipTitleType.PRIMARY_VALUE,
             TooltipFields: [
               {
                 FieldTooltipItem: {
                   FieldId: 'e6105df1-3bd6-4d4d-9a44-f34d00fabbbb',
-                  Visibility: 'VISIBLE',
+                  Visibility: Visibility.VISIBLE,
                 },
               },
               {
                 FieldTooltipItem: {
                   FieldId: 'e6105df1-3bd6-4d4d-9a44-f34d00faaaaa',
-                  Visibility: 'VISIBLE',
+                  Visibility: Visibility.VISIBLE,
                 },
               },
             ],
           },
         },
         DataLabelOptions: {
-          Visibility: 'VISIBLE',
-          CategoryLabelVisibility: 'VISIBLE',
-          MeasureLabelVisibility: 'VISIBLE',
+          Visibility: Visibility.VISIBLE,
+          CategoryLabelVisibility: Visibility.VISIBLE,
+          MeasureLabelVisibility: Visibility.VISIBLE,
         },
       },
       Actions: [
