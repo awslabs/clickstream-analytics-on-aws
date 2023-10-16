@@ -18,12 +18,14 @@ import { EPipelineStatus, ExecutionType } from './const';
 import { ServerlessRedshiftRPUByRegionMapping } from './constant-ln';
 
 export const generateStr = (length: number) => {
+  const characters = 'abcdefghijklmnopqrstuvwxyz';
   let randomString = '';
-  const letters = 'abcdefghijklmnopqrstuvwxyz';
-  for (let i = 0; i < length; i++) {
-    const date = new Date();
-    const randomIndex = date.getMilliseconds() % letters.length;
-    randomString += letters[randomIndex];
+  let seed = new Date().getTime();
+
+  while (randomString.length < length) {
+    seed = (seed * 9301 + 49297) % 233280;
+    const randomIndex = Math.floor((seed / 233280) * characters.length);
+    randomString += characters.charAt(randomIndex);
   }
   return randomString;
 };
