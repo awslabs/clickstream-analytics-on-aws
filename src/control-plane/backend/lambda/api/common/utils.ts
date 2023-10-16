@@ -17,9 +17,10 @@ import { JSONPath } from 'jsonpath-plus';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import { amznRequestContextHeader } from './constants';
 import { ALBLogServiceAccountMapping, CORS_ORIGIN_DOMAIN_PATTERN, EMAIL_PATTERN, IP_PATTERN, ServerlessRedshiftRPUByRegionMapping } from './constants-ln';
+import { ConditionCategory, MetadataValueType } from './explore-types';
 import { logger } from './powertools';
 import { ALBRegionMappingObject, BucketPrefix, ClickStreamSubnet, IUserRole, PipelineStackType, PipelineStatus, RPURange, RPURegionMappingObject, ReportingDashboardOutput, SubnetType } from './types';
-import { IMetadataAttributeValue, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute } from '../model/metadata';
+import { IMetadataRaw, IMetadataRawValue, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute } from '../model/metadata';
 import { CPipelineResources, IPipeline } from '../model/pipeline';
 import { IUserSettings } from '../model/user';
 import { UserService } from '../service/user';
@@ -593,7 +594,8 @@ function groupAssociatedEventParametersByName(events: IMetadataEvent[], paramete
         existedEvent.associatedParameters = [parameter];
         continue;
       }
-      let existedParameter = existedEvent.associatedParameters.find((p: IMetadataEventParameter) => p.name === parameter.name);
+      let existedParameter = existedEvent.associatedParameters.find(
+        (p: IMetadataEventParameter) => p.name === parameter.name && p.valueType === parameter.valueType);
       if (!existedParameter) {
         existedEvent.associatedParameters.push(parameter);
       } else {
@@ -604,52 +606,158 @@ function groupAssociatedEventParametersByName(events: IMetadataEvent[], paramete
   return events;
 };
 
-function groupEventByName(events: IMetadataEvent[]): IMetadataEvent[] {
+function getDataFromLastDay(metadata: IMetadataRaw) {
+  const year = new Date().getFullYear();
+  const month = new Date().getMonth() + 1;
+  const key = `#${year}${month < 10 ? '0' + month : month}`;
+  const lastDay = `day${new Date().getDate() - 1}`;
+  let hasData = false;
+  let dataVolumeLastDay = 0;
+  if (metadata.month === key) {
+    const lastDayData = (metadata as any)[lastDay];
+    dataVolumeLastDay = lastDayData.count ?? 0;
+    hasData = lastDayData.hasData ?? false;
+  }
+  return { hasData, dataVolumeLastDay };
+}
+
+function getLatestEventByName(metadata: IMetadataRaw[]): IMetadataEvent[] {
+  const latestEvents: IMetadataEvent[] = [];
+  for (let meta of metadata) {
+    const lastDayData = getDataFromLastDay(meta);
+    const event: IMetadataEvent = {
+      id: meta.id,
+      month: meta.month,
+      prefix: meta.prefix,
+      projectId: meta.projectId,
+      appId: meta.appId,
+      name: meta.name,
+      hasData: lastDayData.hasData,
+      platform: meta.summary.platform ?? [],
+      dataVolumeLastDay: lastDayData.dataVolumeLastDay,
+    };
+    const index = latestEvents.findIndex((e: IMetadataEvent) => e.name === meta.name);
+    if (index === -1) {
+      latestEvents.push(event);
+    } else if (meta.month > latestEvents[index].month) {
+      latestEvents[index] = event;
+    }
+  }
+  return latestEvents;
+};
+
+function getLatestParameterByName(metadata: IMetadataRaw[]): IMetadataEventParameter[] {
+  const latestEventParameters: IMetadataEventParameter[] = [];
+  for (let meta of metadata) {
+    const lastDayData = getDataFromLastDay(meta);
+    const parameter: IMetadataEventParameter = {
+      id: meta.id,
+      month: meta.month,
+      prefix: meta.prefix,
+      projectId: meta.projectId,
+      appId: meta.appId,
+      name: meta.name,
+      eventName: meta.eventName ?? '',
+      hasData: lastDayData.hasData,
+      platform: meta.summary.platform ?? [],
+      category: meta.category ?? ConditionCategory.OTHER,
+      valueType: meta.valueType ?? MetadataValueType.STRING,
+      valueEnum: meta.summary.valueEnum ?? [],
+    };
+    const index = latestEventParameters.findIndex(
+      (e: IMetadataEventParameter) => e.name === meta.name && e.valueType === meta.valueType);
+    if (index === -1) {
+      latestEventParameters.push(parameter);
+    } else if (meta.month > latestEventParameters[index].month) {
+      latestEventParameters[index] = parameter;
+    }
+  }
+  return latestEventParameters;
+};
+
+function getParameterByNameAndType(metadata: IMetadataRaw[], parameterName: string, valueType: MetadataValueType):
+IMetadataEventParameter | undefined {
+  const filteredMetadata = metadata.filter((r: IMetadataRaw) => r.name === parameterName && r.valueType === valueType);
+  if (filteredMetadata.length === 0) {
+    return;
+  }
   const groupEvents: IMetadataEvent[] = [];
-  for (let event of events) {
-    const existedEvent = groupEvents.find((e: IMetadataEvent) => e.name === event.name);
+  for (let meta of filteredMetadata) {
+    const existedEvent = groupEvents.find((e: IMetadataEvent) => e.name === meta.eventName);
     if (!existedEvent) {
-      groupEvents.push(event);
-    } else {
-      existedEvent.hasData = existedEvent.hasData || event.hasData;
-      existedEvent.platform = [...new Set(existedEvent.platform.concat(event.platform))];
-      if (event.associatedParameters || existedEvent.associatedParameters) {
-        existedEvent.associatedParameters = concatEventParameter(existedEvent.associatedParameters, event.associatedParameters);
-      }
+      groupEvents.push({
+        id: `${meta.projectId}#${meta.appId}#${meta.eventName}`,
+        projectId: meta.projectId,
+        appId: meta.appId,
+        name: meta.eventName,
+        prefix: `EVENT#${meta.projectId}#${meta.appId}`,
+      } as IMetadataEvent);
     }
   }
-  return groupEvents;
+  const lastDayData = getDataFromLastDay(filteredMetadata[0]);
+  return {
+    id: filteredMetadata[0].id,
+    month: filteredMetadata[0].month,
+    prefix: filteredMetadata[0].prefix,
+    projectId: filteredMetadata[0].projectId,
+    appId: filteredMetadata[0].appId,
+    name: filteredMetadata[0].name,
+    eventName: '',
+    hasData: lastDayData.hasData,
+    platform: filteredMetadata[0].summary.platform ?? [],
+    category: filteredMetadata[0].category ?? ConditionCategory.OTHER,
+    valueType: filteredMetadata[0].valueType ?? MetadataValueType.STRING,
+    valueEnum: filteredMetadata[0].summary.valueEnum ?? [],
+    associatedEvents: groupEvents,
+  } as IMetadataEventParameter;
 };
 
-function groupEventParameterByName(parameters: IMetadataEventParameter[]): IMetadataEventParameter[] {
-  const groupEventParameters: IMetadataEventParameter[] = [];
-  for (let parameter of parameters) {
-    const existedParameter = groupEventParameters.find((e: IMetadataEventParameter) => e.name === parameter.name);
-    if (!existedParameter) {
-      groupEventParameters.push(parameter);
-    } else {
-      existedParameter.hasData = existedParameter.hasData || parameter.hasData;
-      existedParameter.platform = [...new Set(existedParameter.platform.concat(parameter.platform))];
-      existedParameter.valueEnum = uniqueParameterValueEnum(existedParameter.valueEnum, parameter.valueEnum);
-      existedParameter.values = uniqueParameterValues(existedParameter.values, parameter.values);
+function getLatestAttributeByName(metadata: IMetadataRaw[]): IMetadataUserAttribute[] {
+  const latestUserAttributes: IMetadataUserAttribute[] = [];
+  for (let meta of metadata) {
+    const lastDayData = getDataFromLastDay(meta);
+    const attribute: IMetadataUserAttribute = {
+      id: meta.id,
+      month: meta.month,
+      prefix: meta.prefix,
+      projectId: meta.projectId,
+      appId: meta.appId,
+      name: meta.name,
+      hasData: lastDayData.hasData,
+      category: meta.category ?? ConditionCategory.OTHER,
+      valueType: meta.valueType ?? MetadataValueType.STRING,
+      valueEnum: meta.summary.valueEnum ?? [],
+    };
+    const index = latestUserAttributes.findIndex(
+      (e: IMetadataUserAttribute) => e.name === meta.name && e.valueType === meta.valueType);
+    if (index === -1) {
+      latestUserAttributes.push(attribute);
+    } else if (meta.month > latestUserAttributes[index].month) {
+      latestUserAttributes[index] = attribute;
     }
   }
-  return groupEventParameters;
+  return latestUserAttributes;
 };
 
-function groupUserAttributeByName(attributes: IMetadataUserAttribute[]): IMetadataUserAttribute[] {
-  const groupAttributes: IMetadataUserAttribute[] = [];
-  for (let attribute of attributes) {
-    const existedAttribute = groupAttributes.find((e: IMetadataUserAttribute) => e.name === attribute.name);
-    if (!existedAttribute) {
-      groupAttributes.push(attribute);
-    } else {
-      existedAttribute.hasData = existedAttribute.hasData || attribute.hasData;
-      existedAttribute.valueEnum = uniqueParameterValueEnum(existedAttribute.valueEnum, attribute.valueEnum);
-      existedAttribute.values = uniqueParameterValues(existedAttribute.values, attribute.values);
-    }
+function getAttributeByNameAndType(metadata: IMetadataRaw[], attributeName: string, valueType: MetadataValueType):
+IMetadataUserAttribute | undefined {
+  const filteredMetadata = metadata.filter((r: IMetadataRaw) => r.name === attributeName && r.valueType === valueType);
+  if (filteredMetadata.length === 0) {
+    return;
   }
-  return groupAttributes;
+  const lastDayData = getDataFromLastDay(filteredMetadata[0]);
+  return {
+    id: filteredMetadata[0].id,
+    month: filteredMetadata[0].month,
+    prefix: filteredMetadata[0].prefix,
+    projectId: filteredMetadata[0].projectId,
+    appId: filteredMetadata[0].appId,
+    name: filteredMetadata[0].name,
+    hasData: lastDayData.hasData,
+    category: filteredMetadata[0].category ?? ConditionCategory.USER,
+    valueType: filteredMetadata[0].valueType ?? MetadataValueType.STRING,
+    valueEnum: filteredMetadata[0].summary.valueEnum ?? [],
+  } as IMetadataUserAttribute;
 };
 
 function concatEventParameter(
@@ -659,33 +767,24 @@ function concatEventParameter(
     return concatEventParameters;
   }
   for (let parameter of parameters) {
-    const existedParameter = concatEventParameters.find((p: IMetadataEventParameter) => p.name === parameter.name);
+    const existedParameter = concatEventParameters.find(
+      (p: IMetadataEventParameter) => p.name === parameter.name && p.valueType === parameter.valueType);
     if (!existedParameter) {
       concatEventParameters.push(parameter);
     } else {
-      existedParameter.hasData = existedParameter.hasData || parameter.hasData;
-      existedParameter.platform = [...new Set(existedParameter.platform.concat(parameter.platform))];
-      existedParameter.valueEnum = uniqueParameterValueEnum(existedParameter.valueEnum, parameter.valueEnum);
-      existedParameter.values = uniqueParameterValues(existedParameter.values, parameter.values);
+      existedParameter.valueEnum = uniqueParameterValueEnum(existedParameter.valueEnum, parameter.valueEnum).sort(
+        (a, b) => a.count > b.count ? -1 : 1);
     }
   }
   return concatEventParameters;
 };
 
-function uniqueParameterValues(e: IMetadataAttributeValue[] | undefined, n: IMetadataAttributeValue[] | undefined) {
+function uniqueParameterValueEnum(e: IMetadataRawValue[] | undefined, n: IMetadataRawValue[] | undefined) {
   const existedValues = e ?? [];
   const newValues = n ?? [];
   const values = existedValues.concat(newValues);
   const res = new Map();
   return values.filter((item) => !res.has(item.value) && res.set(item.value, 1));
-};
-
-function uniqueParameterValueEnum(e: string[] | undefined, n: string[] | undefined) {
-  const existedValues = e ?? [];
-  const newValues = n ?? [];
-  const values = existedValues.concat(newValues);
-  const res = new Map();
-  return values.filter((item) => !res.has(item) && res.set(item, 1));
 };
 
 export {
@@ -716,10 +815,12 @@ export {
   getRoleFromToken,
   getUidFromTokenPayload,
   getTokenFromRequest,
-  uniqueParameterValues,
-  groupEventByName,
+  getLatestEventByName,
+  getLatestParameterByName,
   groupAssociatedEventsByName,
   groupAssociatedEventParametersByName,
-  groupEventParameterByName,
-  groupUserAttributeByName,
+  getLatestAttributeByName,
+  getParameterByNameAndType,
+  getAttributeByNameAndType,
+  getDataFromLastDay,
 };

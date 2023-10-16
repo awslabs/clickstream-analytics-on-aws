@@ -242,6 +242,7 @@ export class ScanMetadataWorkflow extends Construct {
       new PolicyStatement({
         actions: [
           'dynamodb:BatchWriteItem',
+          'dynamodb:BatchGetItem',
         ],
         resources: [props.scanMetadataWorkflowData.clickstreamAnalyticsMetadataDdbArn],
       }),

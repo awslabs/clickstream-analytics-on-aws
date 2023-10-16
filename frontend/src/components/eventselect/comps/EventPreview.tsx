@@ -56,7 +56,7 @@ const EventPreview: React.FC<EventPreviewProps> = (
               <div className="info-key">
                 {t('analytics:labels.previewName')}
               </div>
-              <div className="info-value">{previewItem?.value}</div>
+              <div className="info-value">{previewItem?.name}</div>
             </div>
             <div className="info-tem">
               <div className="info-key">

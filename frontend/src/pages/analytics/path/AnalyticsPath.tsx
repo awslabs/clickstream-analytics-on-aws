@@ -707,8 +707,8 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
                     return dataObj;
                   });
                 }}
-                changeCurCategoryOption={async (eventIndex, category) => {
-                  const eventName = category?.value;
+                changeCurCategoryOption={(eventIndex, category) => {
+                  const eventName = category?.name;
                   const eventParameters = getEventParameters(eventName);
                   const parameterOption = parametersConvertToCategoryItemType(
                     metadataUserAttributes,

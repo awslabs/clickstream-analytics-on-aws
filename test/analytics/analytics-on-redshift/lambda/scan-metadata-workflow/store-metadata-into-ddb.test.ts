@@ -12,7 +12,7 @@
  */
 
 import { GetStatementResultCommand, DescribeStatementCommand, ExecuteStatementCommand, RedshiftDataClient, StatusString } from '@aws-sdk/client-redshift-data';
-import { BatchWriteCommand, DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb';
+import { BatchWriteCommand, DynamoDBDocumentClient, BatchGetCommand } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
 import { handler, StoreMetadataEvent } from '../../../../../src/analytics/lambdas/scan-metadata-workflow/store-metadata-into-ddb';
 import { StoreMetadataBody } from '../../../../../src/analytics/private/model';
@@ -44,151 +44,438 @@ describe('Lambda - store the metadata into DDB from Redshift', () => {
     process.env.REDSHIFT_SERVERLESS_WORKGROUP_NAME = workGroupName;
   });
 
-  test('Store metadata with response FINISHED', async () => {
+  test('Combine and Store metadata with response FINISHED', async () => {
+    const eventDDBCommonData = {
+      id: 'projectId#appId#eventName',
+      month: '#202301',
+      prefix: 'EVENT#projectId#appId',
+      projectId: 'projectId',
+      appId: 'appId',
+      name: 'eventName',
+    };
+
+    const eventParameterDDBCommonData = {
+      id: 'projectId#appId#eventName#propertyName#valueType',
+      month: '#202301',
+      prefix: 'EVENT_PARAMETER#projectId#appId',
+      projectId: 'projectId',
+      appId: 'appId',
+      name: 'propertyName',
+      eventName: 'eventName',
+      category: 'category',
+      valueType: 'String',
+    };
+
+    const userAttributeDDBCommonData = {
+      id: 'projectId#appId#userattributeName#valueType',
+      month: '#202301',
+      prefix: 'USER_ATTRIBUTE#projectId#appId',
+      projectId: 'projectId',
+      appId: 'appId',
+      name: 'userattributename',
+      category: 'category',
+      valueType: 'String',
+    };
+
     const exeuteId = 'Id-1';
     redshiftDataMock.on(DescribeStatementCommand).resolves({
       Status: StatusString.FINISHED,
     });
     redshiftDataMock.on(ExecuteStatementCommand).resolves({ Id: exeuteId });
     dynamoDBMock.on(BatchWriteCommand).resolves({});
+    dynamoDBMock.on(BatchGetCommand)
+      .resolvesOnce({
+        Responses: {
+          ClickstreamAnalyticsMetadata: [
+            {
+              ...eventDDBCommonData,
+              day7: {
+                count: 40,
+                hasData: true,
+                platform: ['APP'],
+              },
+              day9: {
+                count: 20,
+                hasData: true,
+                platform: ['IOS'],
+              },
+              summary: {
+                platform: ['APP', 'IOS'],
+              },
+            },
+          ],
+        },
+      })
+      .resolvesOnce({
+        Responses: {
+          ClickstreamAnalyticsMetadata: [
+            {
+              ...eventParameterDDBCommonData,
+              day7: {
+                hasData: true,
+                platform: ['APP'],
+                valueEnum: [
+                  {
+                    count: 20,
+                    value: 'value1',
+                  },
+                ],
+              },
+              day9: {
+                hasData: true,
+                platform: ['APP'],
+                valueEnum: [
+                  {
+                    count: 20,
+                    value: 'value1',
+                  },
+                ],
+              },
+              summary: {
+                platform: ['APP'],
+                valueEnum: [
+                  {
+                    count: 40,
+                    value: 'value1',
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      })
+      .resolvesOnce({
+        Responses: {
+          ClickstreamAnalyticsMetadata: [
+            {
+              ...userAttributeDDBCommonData,
+              day7: {
+                hasData: true,
+                valueEnum: [
+                  {
+                    count: 10,
+                    value: 'value1',
+                  },
+                ],
+              },
+              day9: {
+                hasData: true,
+                valueEnum: [
+                  {
+                    count: 20,
+                    value: 'value1',
+                  },
+                ],
+              },
+              summary: {
+                valueEnum: [
+                  {
+                    count: 20,
+                    value: 'value1',
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      });
+
     redshiftDataMock.on(GetStatementResultCommand)
       .resolvesOnce({
         Records: [
           [
             { stringValue: 'projectId#appId#eventName' },
-            { stringValue: 'EVENT#sprojectId#appId#eventName' },
+            { stringValue: '#202301' },
+          ],
+        ],
+      })
+      .resolvesOnce({
+        Records: [
+          [
+            { stringValue: 'projectId#appId#eventName' },
+            { stringValue: '#202301' },
             { stringValue: 'EVENT#projectId#appId' },
             { stringValue: 'projectId' },
             { stringValue: 'appId' },
+            { longValue: 9 },
+            { longValue: 40 },
             { stringValue: 'eventName' },
-            { stringValue: 'custom' },
-            { longValue: 2000 },
             { stringValue: 'ANDROID#IOS' },
           ],
-        ],
-      })
-      .resolvesOnce({
-        Records: [
           [
-            { stringValue: 'projectId#appId#eventName#propertyName' },
-            { stringValue: 'EVENT#sprojectId#appId#eventName' },
-            { stringValue: 'EVENT_PARAMETER#projectId#appId' },
-            { stringValue: 'eventName' },
+            { stringValue: 'projectId#appId#eventName' },
+            { stringValue: '#202301' },
+            { stringValue: 'EVENT#projectId#appId' },
             { stringValue: 'projectId' },
             { stringValue: 'appId' },
-            { stringValue: 'category' },
-            { stringValue: 'custom' },
-            { stringValue: 'Private' },
-            { stringValue: 'propertyName' },
-            { stringValue: 'propertyId' },
-            { stringValue: 'String' },
-            { stringValue: 'value1#value2#value3' },
-            { stringValue: 'ANDROID#IOS' },
+            { longValue: 11 },
+            { longValue: 30 },
+            { stringValue: 'eventName' },
+            { stringValue: 'ANDROID#WEB' },
           ],
         ],
       })
       .resolvesOnce({
         Records: [
           [
-            { stringValue: 'projectId#appId#eventName#userattributename' },
-            { stringValue: 'USER_ATTRIBUTE#sprojectId#appId#userattributename' },
+            { stringValue: 'projectId#appId#eventName#propertyName#valueType' },
+            { stringValue: '#202301' },
+          ],
+        ],
+      })
+      .resolvesOnce({
+        Records: [
+          [
+            { stringValue: 'projectId#appId#eventName#propertyName#valueType' },
+            { stringValue: '#202301' },
+            { stringValue: 'EVENT_PARAMETER#projectId#appId' },
+            { stringValue: 'projectId' },
+            { stringValue: 'appId' },
+            { longValue: 9 },
+            { stringValue: 'category' },
+            { stringValue: 'eventName' },
+            { stringValue: 'propertyName' },
+            { stringValue: 'String' },
+            { stringValue: 'value1_20#value2_40#value_30' },
+            { stringValue: 'ANDROID#IOS' },
+          ],
+          [
+            { stringValue: 'projectId#appId#eventName#propertyName#valueType' },
+            { stringValue: '#202301' },
+            { stringValue: 'EVENT_PARAMETER#projectId#appId' },
+            { stringValue: 'projectId' },
+            { stringValue: 'appId' },
+            { longValue: 11 },
+            { stringValue: 'category' },
+            { stringValue: 'eventName' },
+            { stringValue: 'propertyName' },
+            { stringValue: 'String' },
+            { stringValue: 'value3_20#value2_10#value_20' },
+            { stringValue: 'WEB#IOS' },
+          ],
+        ],
+      })
+      .resolvesOnce({
+        Records: [
+          [
+            { stringValue: 'projectId#appId#userattributeName#valueType' },
+            { stringValue: '#202301' },
+          ],
+        ],
+      })
+      .resolvesOnce({
+        Records: [
+          [
+            { stringValue: 'projectId#appId#userattributeName#valueType' },
+            { stringValue: '#202301' },
             { stringValue: 'USER_ATTRIBUTE#projectId#appId' },
             { stringValue: 'projectId' },
             { stringValue: 'appId' },
+            { longValue: 20 },
             { stringValue: 'category' },
-            { stringValue: 'custom' },
-            { stringValue: 'Private' },
             { stringValue: 'userattributename' },
             { stringValue: 'String' },
-            { stringValue: 'value1#value2#value3' },
+            { stringValue: 'value1_10#value2_15#value3_25' },
             { stringValue: 'ANDROID#IOS' },
           ],
         ],
       });
-    const dateNowSpy = jest.spyOn(Date, 'now');
-    const timestamp = 1695120657125;
-    dateNowSpy.mockReturnValue(timestamp);
     const resp = await handler(checkScanMetadataStatusEvent);
 
-    expect(dynamoDBMock).toHaveReceivedCommandWith(BatchWriteCommand, {
+
+    expect(dynamoDBMock).toHaveReceivedNthCommandWith(1, BatchGetCommand, {
+      RequestItems: {
+        ClickstreamAnalyticsMetadata: {
+          Keys: [
+            {
+              id: 'projectId#appId#eventName',
+              month: '#202301',
+            },
+          ],
+        },
+      },
+    });
+    expect(dynamoDBMock).toHaveReceivedNthCommandWith(2, BatchGetCommand, {
+      RequestItems: {
+        ClickstreamAnalyticsMetadata: {
+          Keys: [
+            {
+              id: 'projectId#appId#eventName#propertyName#valueType',
+              month: '#202301',
+            },
+          ],
+        },
+      },
+    });
+    expect(dynamoDBMock).toHaveReceivedNthCommandWith(3, BatchGetCommand, {
+      RequestItems: {
+        ClickstreamAnalyticsMetadata: {
+          Keys: [
+            {
+              id: 'projectId#appId#userattributeName#valueType',
+              month: '#202301',
+            },
+          ],
+        },
+      },
+    });
+    expect(dynamoDBMock).toHaveReceivedNthCommandWith(4, BatchWriteCommand, {
       RequestItems: {
         ClickstreamAnalyticsMetadata: [
           {
             PutRequest: {
               Item: {
-                appId: 'appId',
-                createAt: 1695120657125,
-                dataVolumeLastDay: 2000,
-                deleted: false,
-                description: '',
-                displayName: '',
-                hasData: true,
-                id: 'projectId#appId#eventName',
-                metadataSource: 'custom',
-                name: 'eventName',
-                operator: '',
-                platform: ['ANDROID', 'IOS'],
-                prefix: 'EVENT#projectId#appId',
-                projectId: 'projectId',
-                ttl: 1695725457,
-                type: 'EVENT#sprojectId#appId#eventName',
-                updateAt: 1695120657125,
+                ...eventDDBCommonData,
+                day7: {
+                  count: 40,
+                  hasData: true,
+                  platform: ['APP'],
+                },
+                day9: {
+                  count: 40,
+                  hasData: true,
+                  platform: ['ANDROID', 'IOS'],
+                },
+                day11: {
+                  count: 30,
+                  hasData: true,
+                  platform: ['ANDROID', 'WEB'],
+                },
+                summary: {
+                  platform: ['APP', 'ANDROID', 'IOS', 'WEB'],
+                },
               },
             },
           },
           {
             PutRequest: {
               Item: {
-                appId: 'appId',
-                category: 'category',
-                createAt: 1695120657125,
-                deleted: false,
-                description: '',
-                displayName: '',
-                eventDescription: '',
-                eventDisplayName: '',
-                eventName: 'eventName',
-                hasData: true,
-                id: 'projectId#appId#eventName#propertyName',
-                metadataSource: 'custom',
-                name: 'propertyName',
-                operator: '',
-                parameterId: 'propertyId',
-                parameterType: 'Private',
-                platform: ['ANDROID', 'IOS'],
-                prefix: 'EVENT_PARAMETER#projectId#appId',
-                projectId: 'projectId',
-                ttl: 1695725457,
-                type: 'EVENT#sprojectId#appId#eventName',
-                updateAt: 1695120657125,
-                valueEnum: ['value1', 'value2', 'value3'],
-                valueType: 'String',
+                ...eventParameterDDBCommonData,
+                day7: {
+                  hasData: true,
+                  platform: ['APP'],
+                  valueEnum: [
+                    {
+                      count: 20,
+                      value: 'value1',
+                    },
+                  ],
+                },
+                day9: {
+                  hasData: true,
+                  platform: ['ANDROID', 'IOS'],
+                  valueEnum: [
+                    {
+                      count: 20,
+                      value: 'value1',
+                    },
+                    {
+                      count: 40,
+                      value: 'value2',
+                    },
+                    {
+                      count: 30,
+                      value: 'value',
+                    },
+                  ],
+                },
+                day11: {
+                  hasData: true,
+                  platform: ['WEB', 'IOS'],
+                  valueEnum: [
+                    {
+                      count: 20,
+                      value: 'value3',
+                    },
+                    {
+                      count: 10,
+                      value: 'value2',
+                    },
+                    {
+                      count: 20,
+                      value: 'value',
+                    },
+                  ],
+                },
+                summary: {
+                  platform: ['APP', 'ANDROID', 'IOS', 'WEB'],
+                  valueEnum: [
+                    {
+                      count: 40,
+                      value: 'value1',
+                    },
+                    {
+                      count: 50,
+                      value: 'value2',
+                    },
+                    {
+                      count: 50,
+                      value: 'value',
+                    },
+                    {
+                      count: 20,
+                      value: 'value3',
+                    },
+                  ],
+                },
               },
             },
           },
           {
             PutRequest: {
               Item: {
-                appId: 'appId',
-                category: 'category',
-                createAt: 1695120657125,
-                deleted: false,
-                description: '',
-                displayName: '',
-                hasData: true,
-                id: 'projectId#appId#eventName#userattributename',
-                metadataSource: 'custom',
-                name: 'userattributename',
-                operator: '',
-                parameterType: 'Private',
-                platform: ['ANDROID', 'IOS'],
-                prefix: 'USER_ATTRIBUTE#projectId#appId',
-                projectId: 'projectId',
-                ttl: 1695725457,
-                type: 'USER_ATTRIBUTE#sprojectId#appId#userattributename',
-                updateAt: 1695120657125,
-                valueEnum: ['value1', 'value2', 'value3'],
-                valueType: 'String',
+                ...userAttributeDDBCommonData,
+                day7: {
+                  hasData: true,
+                  valueEnum: [
+                    {
+                      count: 10,
+                      value: 'value1',
+                    },
+                  ],
+                },
+                day9: {
+                  hasData: true,
+                  valueEnum: [
+                    {
+                      count: 20,
+                      value: 'value1',
+                    },
+                  ],
+                },
+                day20: {
+                  hasData: true,
+                  valueEnum: [
+                    {
+                      count: 10,
+                      value: 'value1',
+                    },
+                    {
+                      count: 15,
+                      value: 'value2',
+                    },
+                    {
+                      count: 25,
+                      value: 'value3',
+                    },
+                  ],
+                },
+                summary: {
+                  valueEnum: [
+                    {
+                      count: 10,
+                      value: 'value1',
+                    },
+                    {
+                      count: 15,
+                      value: 'value2',
+                    },
+                    {
+                      count: 25,
+                      value: 'value3',
+                    },
+                  ],
+                },
               },
             },
           },
@@ -206,29 +493,49 @@ describe('Lambda - store the metadata into DDB from Redshift', () => {
       ClusterIdentifier: undefined,
       Database: 'project1',
       DbUser: undefined,
-      Sql: 'SELECT id, type, prefix, project_id, app_id, event_name, metadata_source, data_volumel_last_day, platform FROM app1.event_metadata;',
+      Sql: 'SELECT distinct id, month FROM app1.event_metadata;',
       WithEvent: true,
       WorkgroupName: 'demo',
-    });
-    expect(redshiftDataMock).toHaveReceivedNthCommandWith(2, DescribeStatementCommand, {
-      Id: 'Id-1',
-    });
-    expect(redshiftDataMock).toHaveReceivedNthCommandWith(3, GetStatementResultCommand, {
-      Id: 'Id-1',
     });
     expect(redshiftDataMock).toHaveReceivedNthCommandWith(4, ExecuteStatementCommand, {
       ClusterIdentifier: undefined,
       Database: 'project1',
       DbUser: undefined,
-      Sql: 'SELECT id, type, prefix, event_name, project_id, app_id, category, metadata_source, property_type, property_name, property_id, value_type, value_enum, platform FROM app1.event_properties_metadata;',
+      Sql: 'SELECT id, month, prefix, project_id, app_id, day_number, count, event_name, platform FROM app1.event_metadata;',
       WithEvent: true,
       WorkgroupName: 'demo',
     });
-    expect(redshiftDataMock).toHaveReceivedNthCommandWith(5, DescribeStatementCommand, {
-      Id: 'Id-1',
+    expect(redshiftDataMock).toHaveReceivedNthCommandWith(7, ExecuteStatementCommand, {
+      ClusterIdentifier: undefined,
+      Database: 'project1',
+      DbUser: undefined,
+      Sql: 'SELECT distinct id, month FROM app1.event_properties_metadata;',
+      WithEvent: true,
+      WorkgroupName: 'demo',
     });
-    expect(redshiftDataMock).toHaveReceivedNthCommandWith(6, GetStatementResultCommand, {
-      Id: 'Id-1',
+    expect(redshiftDataMock).toHaveReceivedNthCommandWith(10, ExecuteStatementCommand, {
+      ClusterIdentifier: undefined,
+      Database: 'project1',
+      DbUser: undefined,
+      Sql: 'SELECT id, month, prefix, project_id, app_id, day_number, category, event_name, property_name, value_type, value_enum, platform FROM app1.event_properties_metadata;',
+      WithEvent: true,
+      WorkgroupName: 'demo',
+    });
+    expect(redshiftDataMock).toHaveReceivedNthCommandWith(13, ExecuteStatementCommand, {
+      ClusterIdentifier: undefined,
+      Database: 'project1',
+      DbUser: undefined,
+      Sql: 'SELECT distinct id, month FROM app1.user_attribute_metadata;',
+      WithEvent: true,
+      WorkgroupName: 'demo',
+    });
+    expect(redshiftDataMock).toHaveReceivedNthCommandWith(16, ExecuteStatementCommand, {
+      ClusterIdentifier: undefined,
+      Database: 'project1',
+      DbUser: undefined,
+      Sql: 'SELECT id, month, prefix, project_id, app_id, day_number, category, property_name, value_type, value_enum FROM app1.user_attribute_metadata;',
+      WithEvent: true,
+      WorkgroupName: 'demo',
     });
   });
 

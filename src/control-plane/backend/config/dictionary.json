@@ -78,5 +78,375 @@
         "updateAt": 1667355960000
       }
     ]
+  },
+  {
+    "name": "MetadataBuiltInList",
+    "data": {
+      "PresetEvents": [
+        {
+          "name": "_first_open",
+          "description": {
+            "en-US": "The first time a user opens an app",
+            "zh-CN": "用户首次打开应用"
+          }
+        },
+        {
+          "name": "_session_start",
+          "description": {
+            "en-US": "The start of a session",
+            "zh-CN": "会话开始"
+          }
+        },
+        {
+          "name": "_screen_view",
+          "description": {
+            "en-US": "The user views a screen",
+            "zh-CN": "用户浏览屏幕"
+          }
+        },
+        {
+          "name": "_user_engagement",
+          "description": {
+            "en-US": "The user interacts with the app",
+            "zh-CN": "用户与应用交互"
+          }
+        },
+        {
+          "name": "_app_start",
+          "description": {
+            "en-US": "The app is launched",
+            "zh-CN": "应用启动"
+          }
+        },
+        {
+          "name": "_app_end",
+          "description": {
+            "en-US": "The app is closed",
+            "zh-CN": "应用关闭"
+          }
+        },
+        {
+          "name": "_profile_set",
+          "description": {
+            "en-US": "The user profile is set",
+            "zh-CN": "用户配置文件设置"
+          }
+        },
+        {
+          "name": "_app_exception",
+          "description": {
+            "en-US": "The app exception",
+            "zh-CN": "应用异常"
+          }
+        },
+        {
+          "name": "_app_update",
+          "description": {
+            "en-US": "The app is updated",
+            "zh-CN": "应用更新"
+          }
+        },
+        {
+          "name": "_os_update",
+          "description": {
+            "en-US": "The OS is updated",
+            "zh-CN": "操作系统更新"
+          }
+        },
+        {
+          "name": "_clickstream_error",
+          "description": {
+            "en-US": "The clickstream data is invalid",
+            "zh-CN": "点击流数据无效"
+          }
+        }
+      ],
+      "PresetEventParameters": [
+        {
+          "name": "_session_id",
+          "dataType": "String",
+          "description": {
+            "en-US": "The session ID",
+            "zh-CN": "会话ID"
+          }
+        },
+        {
+          "name": "_session_start_timestamp",
+          "dataType": "Integer",
+          "description": {
+            "en-US": "The session start timestamp",
+            "zh-CN": "会话开始时间戳"
+          }
+        },
+        {
+          "name": "_session_duration",
+          "dataType": "Integer",
+          "description": {
+            "en-US": "The session duration",
+            "zh-CN": "会话持续时间"
+          }
+        },
+        {
+          "name": "_session_number",
+          "dataType": "Integer",
+          "description": {
+            "en-US": "The session number",
+            "zh-CN": "会话编号"
+          }
+        },
+        {
+          "name": "_screen_name",
+          "dataType": "String",
+          "description": {
+            "en-US": "The screen name",
+            "zh-CN": "屏幕名称"
+          }
+        },
+        {
+          "name": "_screen_unique_id",
+          "dataType": "String",
+          "description": {
+            "en-US": "The screen unique ID",
+            "zh-CN": "屏幕唯一ID"
+          }
+        }
+      ],
+      "PublicEventParameters": [
+        {
+          "name": "hashCode",
+          "dataType": "String",
+          "description": {
+            "en-US": "The hash code of the event",
+            "zh-CN": "事件哈希码"
+          }
+        },
+        {
+          "name": "app_id",
+          "dataType": "String",
+          "description": {
+            "en-US": "The app ID",
+            "zh-CN": "应用ID"
+          }
+        },
+        {
+          "name": "unique_id",
+          "dataType": "String",
+          "description": {
+            "en-US": "The unique ID of the user",
+            "zh-CN": "用户唯一ID"
+          }
+        },
+        {
+          "name": "device_id",
+          "dataType": "String",
+          "description": {
+            "en-US": "The device ID",
+            "zh-CN": "设备ID"
+          }
+        },
+        {
+          "name": "event_type",
+          "dataType": "String",
+          "description": {
+            "en-US": "The event type",
+            "zh-CN": "事件类型"
+          }
+        },
+        {
+          "name": "event_id",
+          "dataType": "String",
+          "description": {
+            "en-US": "The event ID",
+            "zh-CN": "事件ID"
+          }
+        },
+        {
+          "name": "timestamp",
+          "dataType": "Integer",
+          "description": {
+            "en-US": "The event timestamp",
+            "zh-CN": "事件时间戳"
+          }
+        },
+        {
+          "name": "platform",
+          "dataType": "String",
+          "description": {
+            "en-US": "The platform",
+            "zh-CN": "平台"
+          }
+        },
+        {
+          "name": "os_version",
+          "dataType": "String",
+          "description": {
+            "en-US": "The OS version",
+            "zh-CN": "操作系统版本"
+          }
+        },
+        {
+          "name": "make",
+          "dataType": "String",
+          "description": {
+            "en-US": "The device make",
+            "zh-CN": "设备制造商"
+          }
+        },
+        {
+          "name": "brand",
+          "dataType": "String",
+          "description": {
+            "en-US": "The device brand",
+            "zh-CN": "设备品牌"
+          }
+        },
+        {
+          "name": "model",
+          "dataType": "String",
+          "description": {
+            "en-US": "The device model",
+            "zh-CN": "设备型号"
+          }
+        },
+        {
+          "name": "carrier",
+          "dataType": "String",
+          "description": {
+            "en-US": "The carrier",
+            "zh-CN": "运营商"
+          }
+        },
+        {
+          "name": "network_type",
+          "dataType": "String",
+          "description": {
+            "en-US": "The network type",
+            "zh-CN": "网络类型"
+          }
+        },
+        {
+          "name": "screen_height",
+          "dataType": "Integer",
+          "description": {
+            "en-US": "The screen height",
+            "zh-CN": "屏幕高度"
+          }
+        },
+        {
+          "name": "screen_width",
+          "dataType": "Integer",
+          "description": {
+            "en-US": "The screen width",
+            "zh-CN": "屏幕宽度"
+          }
+        },
+        {
+          "name": "zone_offset",
+          "dataType": "Integer",
+          "description": {
+            "en-US": "The time zone offset",
+            "zh-CN": "时区偏移"
+          }
+        },
+        {
+          "name": "locale",
+          "dataType": "String",
+          "description": {
+            "en-US": "The locale",
+            "zh-CN": "区域设置"
+          }
+        },
+        {
+          "name": "system_language",
+          "dataType": "String",
+          "description": {
+            "en-US": "The system language",
+            "zh-CN": "系统语言"
+          }
+        },
+        {
+          "name": "country_code",
+          "dataType": "String",
+          "description": {
+            "en-US": "The country code",
+            "zh-CN": "国家代码"
+          }
+        },
+        {
+          "name": "sdk_version",
+          "dataType": "String",
+          "description": {
+            "en-US": "The SDK version",
+            "zh-CN": "SDK版本"
+          }
+        },
+        {
+          "name": "sdk_name",
+          "dataType": "String",
+          "description": {
+            "en-US": "The SDK name",
+            "zh-CN": "SDK名称"
+          }
+        },
+        {
+          "name": "app_version",
+          "dataType": "String",
+          "description": {
+            "en-US": "The app version",
+            "zh-CN": "应用版本"
+          }
+        },
+        {
+          "name": "app_package_name",
+          "dataType": "String",
+          "description": {
+            "en-US": "The app package name",
+            "zh-CN": "应用包名"
+          }
+        },
+        {
+          "name": "app_title",
+          "dataType": "String",
+          "description": {
+            "en-US": "The app title",
+            "zh-CN": "应用标题"
+          }
+        }
+      ],
+      "PresetUserAttributes": [
+        {
+          "name": "_user_id",
+          "dataType": "String",
+          "description": {
+            "en-US": "The user ID",
+            "zh-CN": "用户ID"
+          }
+        },
+        {
+          "name": "_user_i_user_ltv_revenued",
+          "dataType": "String",
+          "description": {
+            "en-US": "The user lifetime value",
+            "zh-CN": "用户生命周期价值"
+          }
+        },
+        {
+          "name": "_user_ltv_currency",
+          "dataType": "String",
+          "description": {
+            "en-US": "The currency of the user lifetime value",
+            "zh-CN": "当前用户生命周期价值"
+          }
+        },
+        {
+          "name": "_user_first_touch_timestamp",
+          "dataType": "String",
+          "description": {
+            "en-US": "The timestamp of the first touch",
+            "zh-CN": "首次触摸时间戳"
+          }
+        }
+      ]
+    }
   }
 ]

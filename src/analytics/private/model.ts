@@ -205,6 +205,7 @@ export type MustacheParamBaseType = {
 }
 
 export type MustacheParamType = {
+  database_name: string;
   schema: string;
   table_ods_events: string;
   table_event: string;
