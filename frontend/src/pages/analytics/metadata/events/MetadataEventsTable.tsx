@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { Input, StatusIndicator } from '@cloudscape-design/components';
+import { Input } from '@cloudscape-design/components';
 import { getMetadataEventsList, updateMetadataDisplay } from 'apis/analytics';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -83,14 +83,6 @@ const MetadataEventsTable: React.FC<MetadataEventsTableProps> = (
     return <MetadataSourceFC source={e.metadataSource} />;
   };
 
-  const renderHasData = (e: IEventTableItem) => {
-    return (
-      <StatusIndicator type={e.hasData ? 'success' : 'stopped'}>
-        {e.hasData ? 'Yes' : 'No'}
-      </StatusIndicator>
-    );
-  };
-
   const renderPlatform = (e: IEventTableItem) => {
     return <MetadataPlatformFC platform={e.platform} />;
   };
@@ -146,12 +138,6 @@ const MetadataEventsTable: React.FC<MetadataEventsTableProps> = (
       header: t('analytics:metadata.event.tableColumnMetadataSource'),
       sortingField: 'metadataSource',
       cell: (e: IEventTableItem) => renderDataSource(e),
-    },
-    {
-      id: 'hasData',
-      header: t('analytics:metadata.event.tableColumnHasData'),
-      sortingField: 'hasData',
-      cell: (e: IEventTableItem) => renderHasData(e),
     },
     {
       id: 'platform',

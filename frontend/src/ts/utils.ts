@@ -324,7 +324,7 @@ export const ternary = <T>(cond: any, caseOne: T, caseTwo: T) =>
 
 export const defaultStr = (
   i18nStr: string | null | undefined,
-  defaultStr?: string
+  defaultValue?: string
 ) => {
-  return i18nStr ?? defaultStr ?? '';
+  return i18nStr ?? defaultValue ?? '';
 };

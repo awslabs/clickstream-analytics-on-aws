@@ -13,13 +13,11 @@
 
 import {
   AppLayout,
-  Button,
   Container,
   ContentLayout,
   Header,
   Link,
   Popover,
-  SpaceBetween,
   Tabs,
 } from '@cloudscape-design/components';
 import AnalyticsNavigation from 'components/layouts/AnalyticsNavigation';
@@ -41,10 +39,6 @@ const AnalyticsDataManagement: React.FC = () => {
   const [curType, setCurType] = useState<
     'event' | 'eventParameter' | 'userAttribute'
   >('event');
-
-  const onRefreshButtonClick = () => {
-    console.log('onRefreshButtonClick');
-  };
 
   const breadcrumbItems = [
     {
@@ -80,17 +74,6 @@ const AnalyticsDataManagement: React.FC = () => {
                     </Popover>
                   }
                   description={t('analytics:metadata.description')}
-                  actions={
-                    <SpaceBetween size="xs" direction="horizontal">
-                      <Button
-                        data-testid="header-btn-create"
-                        variant="primary"
-                        onClick={onRefreshButtonClick}
-                      >
-                        {t('common:button.refreshMetadata')}
-                      </Button>
-                    </SpaceBetween>
-                  }
                 >
                   {t('nav.analytics.data-management')}
                 </Header>
