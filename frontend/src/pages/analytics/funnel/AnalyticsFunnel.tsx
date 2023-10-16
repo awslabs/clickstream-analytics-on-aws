@@ -53,7 +53,7 @@ import {
   ExploreGroupColumn,
   QuickSightChartType,
 } from 'ts/explore-types';
-import { alertMsg, generateStr } from 'ts/utils';
+import { alertMsg, defaultStr, generateStr } from 'ts/utils';
 import {
   parametersConvertToCategoryItemType,
   validEventAnalyticsItem,
@@ -114,18 +114,14 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
 
   const defaultComputeMethodOption: SelectProps.Option = {
     value: ExploreComputeMethod.USER_ID_CNT,
-    label: t('analytics:options.userNumber') ?? 'User number',
+    label: defaultStr(t('analytics:options.userNumber'), 'User number'),
   };
 
   const computeMethodOptions: SelectProps.Options = [
     defaultComputeMethodOption,
     {
-      value: ExploreComputeMethod.USER_ID_CNT,
-      label: t('analytics:options.userNumber') ?? 'User number',
-    },
-    {
       value: ExploreComputeMethod.EVENT_CNT,
-      label: t('analytics:options.eventNumber') ?? 'Event number',
+      label: defaultStr(t('analytics:options.eventNumber'), 'Event number'),
     },
   ];
 

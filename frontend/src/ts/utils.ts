@@ -321,3 +321,10 @@ export const getValueFromStackOutputs = (
  */
 export const ternary = <T>(cond: any, caseOne: T, caseTwo: T) =>
   cond ? caseOne : caseTwo;
+
+export const defaultStr = (
+  i18nStr: string | null | undefined,
+  defaultStr?: string
+) => {
+  return i18nStr ?? defaultStr ?? '';
+};
