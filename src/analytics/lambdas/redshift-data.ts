@@ -22,7 +22,7 @@ export function getRedshiftClient(roleArn: string) {
   return new RedshiftDataClient({
     ...aws_sdk_client_common_config,
     requestHandler: new NodeHttpHandler({
-      connectionTimeout: 50000,
+      connectionTimeout: 5000,
       requestTimeout: 50000,
     }),
     credentials: fromTemporaryCredentials({
