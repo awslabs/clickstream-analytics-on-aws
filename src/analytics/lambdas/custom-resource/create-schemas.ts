@@ -33,7 +33,7 @@ import { logger } from '../../../common/powertools';
 import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
 import { generateRandomStr } from '../../../common/utils';
 import { SQL_TEMPLATE_PARAMETER } from '../../private/constant';
-import { CreateDatabaseAndSchemas, MustacheParamType } from '../../private/model';
+import { CreateDatabaseAndSchemas, MustacheParamType, SQLDef } from '../../private/model';
 import { getSqlContent, getSqlContents } from '../../private/utils';
 import { getRedshiftClient, executeStatementsWithWait } from '../redshift-data';
 
@@ -289,7 +289,6 @@ async function updateSchemas(props: ResourcePropertiesType, biUsername: string, 
   };
 
   for (const app of appUpdateProps.updateAppIds) {
-    const sqlStatements: string[] = [];
     const mustacheParam: MustacheParamType = {
       schema: app,
       table_ods_events: odsTableNames.odsEvents,
@@ -300,29 +299,38 @@ async function updateSchemas(props: ResourcePropertiesType, biUsername: string, 
       user_bi: biUsername,
       ...SQL_TEMPLATE_PARAMETER,
     };
-    for (const schemaDef of props.schemaDefs) {
 
-      logger.info(`viewDef.updatable: ${schemaDef.updatable}`);
-
-      if (!appUpdateProps.oldSchemaSqlArray.includes(schemaDef.sqlFile)) {
-        logger.info(`new sql: ${schemaDef.sqlFile}`);
-        sqlStatements.push(getSqlContent(schemaDef.sqlFile, mustacheParam));
-      } else if (schemaDef.updatable === 'true') {
-        logger.info(`update sql: ${schemaDef.sqlFile}`);
-        sqlStatements.push(getSqlContent(schemaDef.sqlFile, mustacheParam));
-      } else {
-        logger.info(`skip update ${schemaDef.sqlFile} due to it is not updatable.`);
-      }
-    }
+    const sqlStatements2 = getUpdatableSql(props.schemaDefs, appUpdateProps.oldSchemaSqlArray, mustacheParam);
 
     if (sqlStatementsByApp.has(app)) {
-      sqlStatementsByApp.get(app)?.push(...sqlStatements);
+      sqlStatementsByApp.get(app)?.push(...sqlStatements2);
     } else {
-      sqlStatementsByApp.set(app, sqlStatements);
+      sqlStatementsByApp.set(app, sqlStatements2);
     }
 
   };
   await doUpdate(sqlStatementsByApp, props);
+}
+
+
+function getUpdatableSql(sqlOrViewDefs: SQLDef[], oldSqlArray: string[], mustacheParam: MustacheParamType) {
+
+  const sqlStatements: string[] = [];
+  for (const schemaOrViewDef of sqlOrViewDefs) {
+    logger.info(`schemaOrViewDef.updatable: ${schemaOrViewDef.updatable}`);
+
+    if (!oldSqlArray.includes(schemaOrViewDef.sqlFile)) {
+      logger.info(`new sql: ${schemaOrViewDef.sqlFile}`);
+      sqlStatements.push(getSqlContent(schemaOrViewDef.sqlFile, mustacheParam));
+    } else if (schemaOrViewDef.updatable === 'true') {
+      logger.info(`update sql: ${schemaOrViewDef.sqlFile}`);
+      sqlStatements.push(getSqlContent(schemaOrViewDef.sqlFile, mustacheParam));
+    } else {
+      logger.info(`skip update ${schemaOrViewDef.sqlFile} due to it is not updatable.`);
+    }
+  }
+
+  return sqlStatements;
 }
 
 async function doUpdate(sqlStatementsByApp: Map<string, string[]>, props: ResourcePropertiesType) {
@@ -389,7 +397,6 @@ async function updateViewForReporting(props: ResourcePropertiesType, oldProps: R
   };
 
   for (const app of appUpdateProps.updateAppIds) {
-    const sqlStatements: string[] = [];
     const mustacheParam: MustacheParamType = {
       schema: app,
       table_ods_events: odsTableNames.odsEvents,
@@ -399,24 +406,13 @@ async function updateViewForReporting(props: ResourcePropertiesType, oldProps: R
       table_item: odsTableNames.item,
       ...SQL_TEMPLATE_PARAMETER,
     };
-    for (const viewDef of props.reportingViewsDef) {
 
-      logger.info(`viewDef.updatable: ${viewDef.updatable}`);
+    const sqlStatements2 = getUpdatableSql(props.reportingViewsDef, appUpdateProps.oldViewSqls, mustacheParam);
 
-      if (!appUpdateProps.oldViewSqls.includes(viewDef.sqlFile)) {
-        logger.info(`new view: ${viewDef.sqlFile}`);
-        sqlStatements.push(getSqlContent(viewDef.sqlFile, mustacheParam));
-      } else if (viewDef.updatable === 'true') {
-        logger.info(`update view: ${viewDef.sqlFile}`);
-        sqlStatements.push(getSqlContent(viewDef.sqlFile, mustacheParam));
-      } else {
-        logger.info(`skip update ${viewDef.sqlFile} due to it is not updatable.`);
-      }
-    }
     if (sqlStatementsByApp.has(app)) {
-      sqlStatementsByApp.get(app)?.push(...sqlStatements);
+      sqlStatementsByApp.get(app)?.push(...sqlStatements2);
     } else {
-      sqlStatementsByApp.set(app, sqlStatements);
+      sqlStatementsByApp.set(app, sqlStatements2);
     }
   };
 
