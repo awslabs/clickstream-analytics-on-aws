@@ -14,7 +14,7 @@
 import {
   DynamoDBClient,
 } from '@aws-sdk/client-dynamodb';
-import { DynamoDBDocumentClient, BatchWriteCommand, BatchWriteCommandInput } from '@aws-sdk/lib-dynamodb';
+import { DynamoDBDocumentClient, BatchWriteCommand, BatchWriteCommandInput, BatchGetCommandInput, BatchGetCommand, BatchGetCommandOutput } from '@aws-sdk/lib-dynamodb';
 import { logger } from '../../../common/powertools';
 import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
 import { StoreMetadataBody } from '../../private/model';
@@ -48,9 +48,10 @@ const ddbDocClient = DynamoDBDocumentClient.from(ddbClient);
 export const handler = async (event: StoreMetadataEvent) => {
   logger.debug('request event:', JSON.stringify(event));
 
-  const metadataItems: any[] = [];
   const appId = event.detail.appId;
+  const metadataItems: any[] = [];
   try {
+
     await handleEventMetadata(appId, metadataItems);
 
     await handlePropertiesMetadata(appId, metadataItems);
@@ -82,92 +83,164 @@ export const handler = async (event: StoreMetadataEvent) => {
 
 async function handleEventMetadata(appId: string, metadataItems: any[]) {
 
-  const inputSql = `SELECT id, type, prefix, project_id, app_id, event_name, metadata_source, data_volumel_last_day, platform FROM ${appId}.event_metadata;`;
+  const itemsMap = await getExistingItemsFromDDB(appId, 'event_metadata');
+
+  const inputSql = `SELECT id, month, prefix, project_id, app_id, day_number, count, event_name, platform FROM ${appId}.event_metadata;`;
 
   const response = await queryMetadata(inputSql);
 
-  response.Records!.forEach(record => {
-    metadataItems.push({
-      PutRequest: {
-        Item: {
-          id: record[0].stringValue,
-          type: record[1].stringValue,
-          prefix: record[2].stringValue,
-          projectId: record[3].stringValue,
-          appId: record[4].stringValue,
-          name: record[5].stringValue,
-          metadataSource: record[6].stringValue,
-          dataVolumeLastDay: record[7].longValue,
+  response.Records!.forEach((record: any) => {
+    const key = `${record[0].stringValue}${record[1].stringValue}`;
+    if (itemsMap.has(key)) {
+      const item = itemsMap.get(key);
+      item[`day${record[5].longValue}`] = {
+        count: record[6].longValue,
+        hasData: true,
+        platform: convertToDDBList(record[8].stringValue),
+      };
+    } else {
+      const item = {
+        id: record[0].stringValue,
+        month: record[1].stringValue,
+        prefix: record[2].stringValue,
+        projectId: record[3].stringValue,
+        appId: record[4].stringValue,
+        name: record[7].stringValue,
+        [`day${record[5].longValue}`]: {
+          count: record[6].longValue,
+          hasData: true,
           platform: convertToDDBList(record[8].stringValue),
-          ...getCommonData(),
         },
-      },
-    });
+      };
+      itemsMap.set(key, item);
+    }
   });
+
+  // aggregate summary info
+  for (const item of itemsMap.values()) {
+    const platformSet: Set<string> = new Set();
+    for (const key in item) {
+      if (key.startsWith('day')) {
+        const dayData = item[key];
+        dayData.platform.forEach((element: string) => platformSet.add(element));
+      }
+    }
+    item.summary = {
+      platform: Array.from(platformSet),
+    };
+  }
+
+  putItemsMapIntoDDBItems(metadataItems, itemsMap);
 }
 
 async function handlePropertiesMetadata(appId: string, metadataItems: any[]) {
+  const itemsMap = await getExistingItemsFromDDB(appId, 'event_properties_metadata');
+
   const inputSql =
-    `SELECT id, type, prefix, event_name, project_id, app_id, category, metadata_source, property_type, property_name, property_id, value_type, value_enum, platform FROM ${appId}.event_properties_metadata;`;
+    `SELECT id, month, prefix, project_id, app_id, day_number, category, event_name, property_name, value_type, value_enum, platform FROM ${appId}.event_properties_metadata;`;
 
   const response = await queryMetadata(inputSql);
 
-  // Transform data to DynamoDB format
-  response.Records!.forEach(record => {
-    metadataItems.push({
-      PutRequest: {
-        Item: {
-          id: record[0].stringValue,
-          type: record[1].stringValue,
-          prefix: record[2].stringValue,
-          eventName: record[3].stringValue,
-          projectId: record[4].stringValue,
-          appId: record[5].stringValue,
-          category: record[6].stringValue,
-          metadataSource: record[7].stringValue,
-          parameterType: record[8].stringValue,
-          name: record[9].stringValue,
-          parameterId: record[10].stringValue,
-          valueType: record[11].stringValue,
-          valueEnum: convertToDDBList(record[12].stringValue),
-          platform: convertToDDBList(record[13].stringValue),
-          eventDescription: '',
-          eventDisplayName: '',
-          ...getCommonData(),
+  response.Records!.forEach((record: any) => {
+    const key = `${record[0].stringValue}${record[1].stringValue}`;
+    if (itemsMap.has(key)) {
+      const item = itemsMap.get(key);
+      item[`day${record[5].longValue}`] = {
+        hasData: true,
+        platform: convertToDDBList(record[11].stringValue),
+        valueEnum: convertValueEnumToDDBList(record[10].stringValue),
+      };
+    } else {
+      const item = {
+        id: record[0].stringValue,
+        month: record[1].stringValue,
+        prefix: record[2].stringValue,
+        projectId: record[3].stringValue,
+        appId: record[4].stringValue,
+        name: record[8].stringValue,
+        eventName: record[7].stringValue,
+        category: record[6].stringValue,
+        valueType: record[9].stringValue,
+        [`day${record[5].longValue}`]: {
+          hasData: true,
+          platform: convertToDDBList(record[11].stringValue),
+          valueEnum: convertValueEnumToDDBList(record[10].stringValue),
         },
-      },
-    });
+      };
+      itemsMap.set(key, item);
+    }
   });
+
+  // aggregate summary info
+  for (const item of itemsMap.values()) {
+    const platformSet: Set<string> = new Set();
+    const valueEnumAggregation: { [key: string]: number } = {};
+    for (const key in item) {
+      if (key.startsWith('day')) {
+        const dayData = item[key];
+        dayData.platform.forEach((element: string) => platformSet.add(element));
+        dayData.valueEnum.forEach((element: any) => {
+          if (valueEnumAggregation[element.value]) {
+            valueEnumAggregation[element.value] += element.count;
+          } else {
+            valueEnumAggregation[element.value] = element.count;
+          }
+        });
+      }
+    }
+    item.summary = {
+      platform: Array.from(platformSet),
+      valueEnum: Object.keys(valueEnumAggregation).map(key => ({
+        count: valueEnumAggregation[key],
+        value: key,
+      })),
+    };
+  }
+
+  putItemsMapIntoDDBItems(metadataItems, itemsMap);
 }
 
 async function handleUserAttributeMetadata(appId: string, metadataItems: any[]) {
+  const itemsMap = await getExistingItemsFromDDB(appId, 'user_attribute_metadata');
   const inputSql =
-    `SELECT id, type, prefix, project_id, app_id, category, metadata_source, property_type, property_name, value_type, value_enum, platform FROM ${appId}.user_attribute_metadata;`;
+    `SELECT id, month, prefix, project_id, app_id, day_number, category, property_name, value_type, value_enum FROM ${appId}.user_attribute_metadata;`;
 
   const response = await queryMetadata(inputSql);
 
-  // Transform data to DynamoDB format
-  response.Records!.forEach(record => {
-    metadataItems.push({
-      PutRequest: {
-        Item: {
-          id: record[0].stringValue,
-          type: record[1].stringValue,
-          prefix: record[2].stringValue,
-          projectId: record[3].stringValue,
-          appId: record[4].stringValue,
-          category: record[5].stringValue,
-          metadataSource: record[6].stringValue,
-          parameterType: record[7].stringValue,
-          name: record[8].stringValue,
-          valueType: record[9].stringValue,
-          valueEnum: convertToDDBList(record[10].stringValue),
-          platform: convertToDDBList(record[11].stringValue),
-          ...getCommonData(),
+  response.Records!.forEach((record: any) => {
+    const key = `${record[0].stringValue}${record[1].stringValue}`;
+    if (itemsMap.has(key)) {
+      const item = itemsMap.get(key);
+      item[`day${record[5].longValue}`] = {
+        hasData: true,
+        valueEnum: convertValueEnumToDDBList(record[9].stringValue),
+      };
+      item.summary = {
+        valueEnum: convertValueEnumToDDBList(record[9].stringValue),
+      };
+    } else {
+      const item = {
+        id: record[0].stringValue,
+        month: record[1].stringValue,
+        prefix: record[2].stringValue,
+        projectId: record[3].stringValue,
+        appId: record[4].stringValue,
+        name: record[7].stringValue,
+        category: record[6].stringValue,
+        valueType: record[8].stringValue,
+        [`day${record[5].longValue}`]: {
+          hasData: true,
+          valueEnum: convertValueEnumToDDBList(record[9].stringValue),
         },
-      },
-    });
+        summary: {
+          valueEnum: convertValueEnumToDDBList(record[9].stringValue),
+        },
+      };
+      itemsMap.set(key, item);
+    }
   });
+
+  putItemsMapIntoDDBItems(metadataItems, itemsMap);
 }
 
 async function batchWriteIntoDDB(metadataItems: any[]) {
@@ -244,15 +317,74 @@ function convertToDDBList(inputString?: string) {
   return listData;
 }
 
-function getCommonData() {
-  return {
-    displayName: '',
-    description: '',
-    hasData: true,
-    updateAt: Date.now(),
-    createAt: Date.now(),
-    operator: '',
-    deleted: false,
-    ttl: (Math.floor(Date.now() / 1000) + 7 * 24 * 60 * 60),
-  };
+function convertValueEnumToDDBList(inputString?: string) {
+  let listData: any[] = [];
+  if (inputString) {
+    listData = inputString.split('#').map(item => {
+      const lastUnderscoreIndex = item.lastIndexOf('_');
+      const value = item.substring(0, lastUnderscoreIndex);
+      const count = parseInt(item.substring(lastUnderscoreIndex + 1));
+      return { value, count };
+    });
+  }
+  return listData;
+}
+
+async function batchGetDDBItems(allKeys: any[]) {
+  const batchSize = 50;
+  const batchResults: any[] = [];
+  for (let i = 0; i < allKeys.length; i += batchSize) {
+    const currentBatchKeys = allKeys.slice(i, i + batchSize);
+    const request: BatchGetCommandInput = {
+      RequestItems: {
+        [ddb_table_name]: {
+          Keys: currentBatchKeys,
+        },
+      },
+    };
+    const command = new BatchGetCommand(request);
+    try {
+      const response: BatchGetCommandOutput = await ddbDocClient.send(command);
+      batchResults.push(...response.Responses![ddb_table_name]);
+    } catch (error) {
+      console.error(error);
+      return null;
+    }
+  }
+  return batchResults;
+}
+
+async function getExistingItemsFromDDB(appId: string, redshiftTableName: string) {
+  const distinctIdAndMonthSql = `SELECT distinct id, month FROM ${appId}.${redshiftTableName};`;
+  const idAndMonthResponse = await queryMetadata(distinctIdAndMonthSql);
+
+  const keys:any[] = [];
+
+  idAndMonthResponse.Records!.forEach((record: any) => {
+    keys.push(
+      {
+        id: record[0].stringValue,
+        month: record[1].stringValue,
+      },
+    );
+  });
+  // read all ddb item of keys
+  const ddbRecrods = await batchGetDDBItems(keys);
+
+  const itemsMap = new Map();
+  ddbRecrods?.forEach(item => {
+    const key = `${item.id}${item.month}`;
+    itemsMap.set(key, item);
+  });
+  return itemsMap;
+}
+
+function putItemsMapIntoDDBItems(metadataItems: any[], itemsMap: Map<string, any[]>) {
+  for (const item of itemsMap.values()) {
+    metadataItems.push({
+      PutRequest: {
+        Item: item,
+      },
+    });
+  }
 }

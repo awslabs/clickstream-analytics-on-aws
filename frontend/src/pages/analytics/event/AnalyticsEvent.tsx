@@ -447,9 +447,10 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
                     return dataObj;
                   });
                 }}
-                changeCurCategoryOption={async (eventIndex, category) => {
-                  const eventName = category?.value;
+                changeCurCategoryOption={(eventIndex, category) => {
+                  const eventName = category?.name;
                   const eventParameters = getEventParameters(eventName);
+                  console.log(eventParameters);
                   const parameterOption = parametersConvertToCategoryItemType(
                     metadataUserAttributes,
                     eventParameters

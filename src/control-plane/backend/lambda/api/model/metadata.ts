@@ -13,27 +13,48 @@
 
 import { ConditionCategory, MetadataParameterType, MetadataPlatform, MetadataSource, MetadataValueType } from '../common/explore-types';
 
-export interface IMetadataEvent {
+export interface IMetadataRawValue {
+  readonly value: string;
+  readonly count: number;
+}
+
+export interface IMetadataRaw {
   readonly id: string;
-  readonly type: string;
+  readonly month: string;
   readonly prefix: string;
 
   readonly projectId: string;
   readonly appId: string;
 
   readonly name: string;
-  displayName: string;
-  description: string;
-  readonly metadataSource: MetadataSource;
-  readonly dataVolumeLastDay: number;
-  hasData: boolean;
-  platform: MetadataPlatform[];
-  associatedParameters? : IMetadataEventParameter[];
+  readonly eventName?: string;
+  readonly category?: ConditionCategory;
+  readonly valueType?: MetadataValueType;
 
-  readonly createAt: number;
-  readonly updateAt: number;
-  readonly operator: string;
-  readonly deleted: boolean;
+  readonly summary: {
+    readonly platform?: MetadataPlatform[];
+    readonly valueEnum?: IMetadataRawValue[];
+  };
+}
+
+export interface IMetadataEvent {
+  readonly id: string;
+  readonly month: string;
+  readonly prefix: string;
+
+  readonly projectId: string;
+  readonly appId: string;
+  readonly name: string;
+
+  readonly dataVolumeLastDay: number;
+  readonly hasData: boolean;
+  readonly platform: MetadataPlatform[];
+
+  displayName?: string;
+  description?: IMetadataDescription;
+  metadataSource?: MetadataSource;
+
+  associatedParameters? : IMetadataEventParameter[];
 }
 
 export interface IMetadataAttributeValue {
@@ -43,59 +64,47 @@ export interface IMetadataAttributeValue {
 
 export interface IMetadataEventParameter {
   readonly id: string;
-  readonly type: string;
+  readonly month: string;
   readonly prefix: string;
 
   readonly projectId: string;
   readonly appId: string;
-
+  readonly name: string;
   readonly eventName: string;
 
-  readonly parameterId: string;
-  name: string;
-  displayName: string;
-  description: string;
-  readonly metadataSource: MetadataSource;
-  hasData: boolean;
-  platform: MetadataPlatform[];
-  readonly parameterType: MetadataParameterType;
   readonly valueType: MetadataValueType;
-  valueEnum?: string[];
-  values: IMetadataAttributeValue[];
-  associatedEvents? : IMetadataEvent[];
   readonly category: ConditionCategory;
+  readonly hasData: boolean;
+  readonly platform: MetadataPlatform[];
 
-  readonly createAt: number;
-  readonly updateAt: number;
-  readonly operator: string;
-  readonly deleted: boolean;
+  displayName?: string;
+  description?: IMetadataDescription;
+  metadataSource?: MetadataSource;
+  parameterType?: MetadataParameterType;
+  valueEnum?: IMetadataRawValue[];
+  values?: IMetadataAttributeValue[];
+
+  associatedEvents? : IMetadataEvent[];
 }
 
 export interface IMetadataUserAttribute {
   readonly id: string;
-  readonly type: string;
+  readonly month: string;
   readonly prefix: string;
 
   readonly projectId: string;
   readonly appId: string;
+  readonly name: string;
 
-  readonly eventName: string;
-
-  readonly attributeId: string;
-  name: string;
-  displayName: string;
-  description: string;
-  readonly metadataSource: MetadataSource;
-  hasData: boolean;
   readonly valueType: MetadataValueType;
-  valueEnum?: string[];
-  values: IMetadataAttributeValue[];
   readonly category: ConditionCategory;
+  readonly hasData: boolean;
 
-  readonly createAt: number;
-  readonly updateAt: number;
-  readonly operator: string;
-  readonly deleted: boolean;
+  displayName?: string;
+  description?: IMetadataDescription;
+  metadataSource?: MetadataSource;
+  valueEnum?: IMetadataRawValue[];
+  values?: IMetadataAttributeValue[];
 }
 
 export interface IMetadataDisplay {
@@ -104,6 +113,33 @@ export interface IMetadataDisplay {
   readonly appId: string;
 
   readonly displayName: string;
-  readonly description: string;
+  readonly description: IMetadataDescription;
   readonly updateAt: number;
+}
+
+export interface IMetadataBuiltInList {
+  readonly PresetEvents: Array<{
+    name: string;
+    description: IMetadataDescription;
+  }>;
+  readonly PresetEventParameters: Array<{
+    name: string;
+    dataType: string;
+    description: IMetadataDescription;
+  }>;
+  readonly PublicEventParameters: Array<{
+    name: string;
+    dataType: string;
+    description: IMetadataDescription;
+  }>;
+  readonly PresetUserAttributes: Array<{
+    name: string;
+    dataType: string;
+    description: IMetadataDescription;
+  }>;
+}
+
+export interface IMetadataDescription {
+  'zh-CN': string;
+  'en-US': string;
 }

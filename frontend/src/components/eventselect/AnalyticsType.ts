@@ -12,7 +12,11 @@
  */
 
 import { SelectProps } from '@cloudscape-design/components';
-import { ConditionCategory, MetadataSource, MetadataValueType } from 'ts/explore-types';
+import {
+  ConditionCategory,
+  MetadataSource,
+  MetadataValueType,
+} from 'ts/explore-types';
 
 export interface IConditionItemType {
   eventType: string;
@@ -29,6 +33,7 @@ export interface SegmentationFilterDataType {
 }
 
 export interface IAnalyticsItem extends SelectProps.Option {
+  name?: string;
   modifyTime?: string;
   metadataSource?: MetadataSource;
   category?: ConditionCategory;
@@ -126,58 +131,3 @@ export const INIT_SEGMENTATION_DATA: SegmentationFilterDataType = {
   conditionRelationShip: ERelationShip.AND,
   data: [DEFAULT_SEGMENTATION_DATA],
 };
-
-// MOCK DATA
-export const MOCK_EVENT_OPTION_LIST: CategoryItemType[] = [
-  {
-    categoryName: '预置事件',
-    categoryType: 'event',
-    itemList: [
-      {
-        label: '预置事件一',
-        value: 'predefine-event-1',
-        description: 'predefine event 1 description',
-        modifyTime: '2022-12-12 12:12:12',
-      },
-    ],
-  },
-  {
-    categoryName: '自定义事件',
-    categoryType: 'event',
-    itemList: [
-      {
-        label: '自定义事件一',
-        value: 'custom-event-1',
-        description: 'custom event 1 description',
-        modifyTime: '2023-11-11 11:11:11',
-      },
-    ],
-  },
-];
-
-export const MOCK_ATTRIBUTE_OPTION_LIST: CategoryItemType[] = [
-  {
-    categoryName: '事件属性',
-    categoryType: 'attribute',
-    itemList: [
-      {
-        label: '事件属性一',
-        value: 'predefine-attribute-1',
-        description: 'predefine attribute 1 description',
-        modifyTime: '2022-12-11 11:11:11',
-      },
-      {
-        label: '事件属性二',
-        value: 'predefine-attribute-2',
-        description: 'predefine attribute 2 description',
-        modifyTime: '2022-12-12 12:12:12',
-      },
-      {
-        label: '事件属性三',
-        value: 'predefine-attribute-3',
-        description: 'predefine attribute 3 description',
-        modifyTime: '2022-12-13 13:13:13',
-      },
-    ],
-  },
-];

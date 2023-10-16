@@ -11,27 +11,21 @@
  *  and limitations under the License.
  */
 
-import { IMetadataDisplay, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute } from '../model/metadata';
+import { MetadataValueType } from '../common/explore-types';
+import { IMetadataDescription, IMetadataDisplay, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute } from '../model/metadata';
 
 export interface MetadataStore {
-  createEvent: (event: IMetadataEvent) => Promise<string>;
-  getEvent: (projectId: string, appId: string, eventName: string) => Promise<any>;
-  listEvents: (projectId: string, appId: string, order: string) => Promise<IMetadataEvent[]>;
-  deleteEvent: (projectId: string, appId: string, eventName: string, operator: string) => Promise<void>;
-  isEventExisted: (projectId: string, appId: string, eventName: string) => Promise<boolean>;
+  getEvent: (projectId: string, appId: string, eventName: string) => Promise<IMetadataEvent | undefined>;
+  listEvents: (projectId: string, appId: string) => Promise<IMetadataEvent[]>;
 
-  createEventParameter: (eventParameter: IMetadataEventParameter) => Promise<string>;
-  getEventParameter: (projectId: string, appId: string, parameterName: string) => Promise<IMetadataEventParameter[]>;
-  listEventParameters: (projectId: string, appId: string, order: string, source?: string) => Promise<IMetadataEventParameter[]>;
-  deleteEventParameter: (projectId: string, appId: string, eventParameterName: string, operator: string) => Promise<void>;
-  isEventParameterExisted: (projectId: string, appId: string, eventParameterName: string) => Promise<boolean>;
+  getEventParameter: (projectId: string, appId: string, parameterName: string, valueType: MetadataValueType) =>
+  Promise<IMetadataEventParameter | undefined>;
+  listEventParameters: (projectId: string, appId: string) => Promise<IMetadataEventParameter[]>;
 
-  createUserAttribute: (userAttribute: IMetadataUserAttribute) => Promise<string>;
-  getUserAttribute: (projectId: string, appId: string, userAttributeName: string) => Promise<IMetadataUserAttribute[]>;
-  listUserAttributes: (projectId: string, appId: string, order: string) => Promise<IMetadataUserAttribute[]>;
-  deleteUserAttribute: (projectId: string, appId: string, userAttributeName: string, operator: string) => Promise<void>;
-  isUserAttributeExisted: (projectId: string, appId: string, userAttributeName: string) => Promise<boolean>;
+  getUserAttribute: (projectId: string, appId: string, userAttributeName: string, valueType: MetadataValueType) =>
+  Promise<IMetadataUserAttribute | undefined>;
+  listUserAttributes: (projectId: string, appId: string) => Promise<IMetadataUserAttribute[]>;
 
   getDisplay: (projectId: string, appId: string) => Promise<IMetadataDisplay[]>;
-  updateDisplay: (id: string, projectId: string, appId: string, description: string, displayName: string) => Promise<void>;
+  updateDisplay: (id: string, projectId: string, appId: string, description: IMetadataDescription, displayName: string) => Promise<void>;
 }

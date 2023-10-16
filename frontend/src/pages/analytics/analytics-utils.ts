@@ -61,7 +61,8 @@ export const metadataEventsConvertToCategoryItemType = (
     if (item.metadataSource === MetadataSource.PRESET) {
       categoryPresetItems.itemList.push({
         label: item.displayName,
-        value: item.name,
+        name: item.name,
+        value: item.id,
         description: item.description,
         metadataSource: item.metadataSource,
         modifyTime: moment(item.updateAt).format(TIME_FORMAT) || '-',
@@ -69,7 +70,8 @@ export const metadataEventsConvertToCategoryItemType = (
     } else if (item.metadataSource === MetadataSource.CUSTOM) {
       categoryCustomItems.itemList.push({
         label: item.displayName,
-        value: item.name,
+        name: item.name,
+        value: item.id,
         description: item.description,
         metadataSource: item.metadataSource,
         modifyTime: moment(item.updateAt).format(TIME_FORMAT) || '-',
@@ -93,6 +95,7 @@ export const pathNodesConvertToCategoryItemType = (
   pathNodes.forEach((item) => {
     categoryNodeItems.itemList.push({
       label: item.displayValue,
+      name: item.value,
       value: item.value,
     });
   });
@@ -119,7 +122,8 @@ export const parametersConvertToCategoryItemType = (
     parameterItems.forEach((item) => {
       categoryEventItems.itemList.push({
         label: item.displayName,
-        value: item.name,
+        name: item.name,
+        value: item.id,
         description: item.description,
         metadataSource: item.metadataSource,
         valueType: item.valueType,
@@ -132,7 +136,8 @@ export const parametersConvertToCategoryItemType = (
   userAttributeItems.forEach((item) => {
     categoryUserItems.itemList.push({
       label: item.displayName,
-      value: item.name,
+      name: item.name,
+      value: item.id,
       description: item.description,
       metadataSource: item.metadataSource,
       valueType: item.valueType,
@@ -164,7 +169,7 @@ export const validRetentionAnalyticsItem = (item: IRetentionAnalyticsItem) => {
 export const validConditionItemType = (condition: IConditionItemType) => {
   return (
     condition.conditionOption &&
-    condition.conditionOption?.value?.trim() !== '' &&
+    condition.conditionOption?.name?.trim() !== '' &&
     condition.conditionValue.length > 0
   );
 };
@@ -183,7 +188,7 @@ export const getEventAndConditions = (
               condition.conditionOption?.category,
               ConditionCategory.OTHER
             ),
-            property: defaultStr(condition.conditionOption?.value),
+            property: defaultStr(condition.conditionOption?.name),
             operator: defaultStr(condition.conditionOperator?.value),
             value: condition.conditionValue,
             dataType: defaultStr(
@@ -227,7 +232,7 @@ export const getPairEventAndConditions = (
               condition.conditionOption?.category,
               ConditionCategory.OTHER
             ),
-            property: defaultStr(condition.conditionOption?.value),
+            property: defaultStr(condition.conditionOption?.name),
             operator: defaultStr(condition.conditionOperator?.value),
             value: condition.conditionValue,
             dataType: defaultStr(
@@ -245,7 +250,7 @@ export const getPairEventAndConditions = (
               condition.conditionOption?.category,
               ConditionCategory.OTHER
             ),
-            property: defaultStr(condition.conditionOption?.value, ''),
+            property: defaultStr(condition.conditionOption?.name, ''),
             operator: defaultStr(condition.conditionOperator?.value, ''),
             value: condition.conditionValue,
             dataType: defaultStr(
@@ -290,7 +295,7 @@ export const getGlobalEventCondition = (
           condition.conditionOption?.category,
           ConditionCategory.OTHER
         ),
-        property: defaultStr(condition.conditionOption?.value, ''),
+        property: defaultStr(condition.conditionOption?.name, ''),
         operator: defaultStr(condition.conditionOperator?.value, ''),
         value: condition.conditionValue,
         dataType: defaultStr(

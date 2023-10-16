@@ -179,16 +179,6 @@ const MetadataUserAttributesTable: React.FC<
       operators: [':', '!:', '=', '!='],
     },
     {
-      propertyLabel: t(
-        'analytics:metadata.userAttribute.tableColumnParameterType'
-      ),
-      key: 'parameterType',
-      groupValuesLabel: t(
-        'analytics:metadata.userAttribute.tableColumnParameterType'
-      ),
-      operators: [':', '!:', '=', '!='],
-    },
-    {
       propertyLabel: t('analytics:metadata.userAttribute.tableColumnHasData'),
       key: 'hasData',
       groupValuesLabel: t(
@@ -237,13 +227,14 @@ const MetadataUserAttributesTable: React.FC<
     newItem: IMetadataEvent | IMetadataEventParameter | IMetadataUserAttribute
   ) => {
     try {
+      const attribute = newItem as IMetadataUserAttribute;
       const { success, message }: ApiResponse<null> =
         await updateMetadataDisplay({
-          id: `${USER_ATTRIBUTE_DISPLAY_PREFIX}${newItem.projectId}#${newItem.appId}#${newItem.name}`,
-          projectId: newItem.projectId,
-          appId: newItem.appId,
-          displayName: newItem.displayName,
-          description: newItem.description,
+          id: `${USER_ATTRIBUTE_DISPLAY_PREFIX}${attribute.projectId}#${attribute.appId}#${attribute.name}#${attribute.valueType}`,
+          projectId: attribute.projectId,
+          appId: attribute.appId,
+          displayName: attribute.displayName,
+          description: attribute.description,
         });
       if (!success) {
         throw new Error(message);

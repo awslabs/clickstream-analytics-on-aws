@@ -13,7 +13,7 @@
 
 import { CMetadataDisplay } from './display';
 import { ApiFail, ApiSuccess } from '../common/types';
-import { groupAssociatedEventParametersByName, groupAssociatedEventsByName, groupEventByName, groupEventParameterByName, groupUserAttributeByName, isEmpty } from '../common/utils';
+import { groupAssociatedEventParametersByName } from '../common/utils';
 import { IMetadataDisplay, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute } from '../model/metadata';
 import { DynamoDbMetadataStore } from '../store/dynamodb/dynamodb-metadata-store';
 import { MetadataStore } from '../store/metadata-store';
@@ -39,16 +39,15 @@ export class MetadataEventServ {
   public async listPathNodes(req: any, res: any, next: any) {
     try {
       const { projectId, appId } = req.query;
-      const pageView = await metadataStore.getEvent(projectId, appId, '_page_view');
-      const screenView = await metadataStore.getEvent(projectId, appId, '_screen_view');
+      const parameters = await metadataStore.listEventParameters(projectId, appId);
       const pageTitles: IMetadataEventParameter =
-      pageView.find((r: any) => r.prefix.startsWith('EVENT_PARAMETER#') && r.name === '_page_title') as IMetadataEventParameter;
+      parameters.find((p: IMetadataEventParameter) => p.eventName === '_page_view' && p.name === '_page_title') as IMetadataEventParameter;
       const pageUrls: IMetadataEventParameter =
-      pageView.find((r: any) => r.prefix.startsWith('EVENT_PARAMETER#') && r.name === '_page_url') as IMetadataEventParameter;
+      parameters.find((p: IMetadataEventParameter) => p.eventName === '_page_view' && p.name === '_page_url') as IMetadataEventParameter;
       const screenNames: IMetadataEventParameter =
-      screenView.find((r: any) => r.prefix.startsWith('EVENT_PARAMETER#') && r.name === '_screen_name') as IMetadataEventParameter;
+      parameters.find((p: IMetadataEventParameter) => p.eventName === '_screen_view' && p.name === '_screen_name') as IMetadataEventParameter;
       const screenIds: IMetadataEventParameter =
-      screenView.find((r: any) => r.prefix.startsWith('EVENT_PARAMETER#') && r.name === '_screen_id') as IMetadataEventParameter;
+      parameters.find((p: IMetadataEventParameter) => p.eventName === '_screen_view' && p.name === '_screen_id') as IMetadataEventParameter;
       return res.json(new ApiSuccess({
         pageTitles: pageTitles?.valueEnum ?? [],
         pageUrls: pageUrls?.valueEnum ?? [],
@@ -62,11 +61,10 @@ export class MetadataEventServ {
 
   public async list(req: any, res: any, next: any) {
     try {
-      const { projectId, appId, order, attribute } = req.query;
-      let events = await metadataStore.listEvents(projectId, appId, order);
-      events = groupEventByName(events);
+      const { projectId, appId, attribute } = req.query;
+      let events = await metadataStore.listEvents(projectId, appId);
       if (attribute && attribute === 'true') {
-        const eventParameters = await metadataStore.listEventParameters(projectId, appId, order);
+        const eventParameters = await metadataStore.listEventParameters(projectId, appId);
         events = groupAssociatedEventParametersByName(events, eventParameters);
       }
       events = await metadataDisplay.patch(projectId, appId, events) as IMetadataEvent[];
@@ -79,29 +77,16 @@ export class MetadataEventServ {
     }
   };
 
-  public async add(req: any, res: any, next: any) {
-    try {
-      req.body.operator = res.get('X-Click-Stream-Operator');
-      const event: IMetadataEvent = req.body;
-      const name = await metadataStore.createEvent(event);
-      return res.status(201).json(new ApiSuccess({ name }, 'Event created.'));
-    } catch (error) {
-      next(error);
-    }
-  };
-
   public async details(req: any, res: any, next: any) {
     try {
       const { name } = req.params;
       const { projectId, appId } = req.query;
-      const results = await metadataStore.getEvent(projectId, appId, name);
-      if (isEmpty(results)) {
+      let event = await metadataStore.getEvent(projectId, appId, name);
+      if (!event) {
         return res.status(404).json(new ApiFail('Event not found'));
       }
-      const events = results.filter((r: any) => r.prefix.startsWith('EVENT#')) as IMetadataEvent[];
-      const parameters = results.filter((r: any) => r.prefix.startsWith('EVENT_PARAMETER#')) as IMetadataEventParameter[];
-      let event = groupEventByName(events)[0];
-      event = groupAssociatedEventParametersByName([event], parameters)[0];
+      const eventParameters = await metadataStore.listEventParameters(projectId, appId);
+      event.associatedParameters = eventParameters.filter((r: IMetadataEventParameter) => r.eventName === name);
       event = (await metadataDisplay.patch(projectId, appId, [event]) as IMetadataEvent[])[0];
       return res.json(new ApiSuccess(event));
     } catch (error) {
@@ -114,9 +99,8 @@ export class MetadataEventParameterServ {
 
   public async list(req: any, res: any, next: any) {
     try {
-      const { projectId, appId, order } = req.query;
-      let results = await metadataStore.listEventParameters(projectId, appId, order);
-      results = groupEventParameterByName(results);
+      const { projectId, appId } = req.query;
+      let results = await metadataStore.listEventParameters(projectId, appId);
       results = await metadataDisplay.patch(projectId, appId, results) as IMetadataEventParameter[];
       return res.json(new ApiSuccess({
         totalCount: results.length,
@@ -127,27 +111,13 @@ export class MetadataEventParameterServ {
     }
   };
 
-  public async add(req: any, res: any, next: any) {
-    try {
-      req.body.operator = res.get('X-Click-Stream-Operator');
-      const eventParameter: IMetadataEventParameter = req.body;
-      const id = await metadataStore.createEventParameter(eventParameter);
-      return res.status(201).json(new ApiSuccess({ id }, 'Event attribute created.'));
-    } catch (error) {
-      next(error);
-    }
-  };
-
   public async details(req: any, res: any, next: any) {
     try {
-      const { parameterName } = req.params;
-      const { projectId, appId } = req.query;
-      const results = await metadataStore.getEventParameter(projectId, appId, parameterName);
-      if (isEmpty(results)) {
+      const { projectId, appId, name, type } = req.query;
+      let parameter = await metadataStore.getEventParameter(projectId, appId, name, type);
+      if (!parameter) {
         return res.status(404).json(new ApiFail('Event attribute not found'));
       }
-      let parameter = groupEventParameterByName(results)[0];
-      parameter.associatedEvents = groupAssociatedEventsByName(results);
       parameter = (await metadataDisplay.patch(projectId, appId, [parameter]) as IMetadataEventParameter[])[0];
       return res.json(new ApiSuccess(parameter));
     } catch (error) {
@@ -159,10 +129,9 @@ export class MetadataEventParameterServ {
 export class MetadataUserAttributeServ {
   public async list(req: any, res: any, next: any) {
     try {
-      const { projectId, appId, order } = req.query;
-      const results = await metadataStore.listUserAttributes(projectId, appId, order);
-      let attributes = groupUserAttributeByName(results);
-      attributes = await metadataDisplay.patch(projectId, appId, attributes) as IMetadataUserAttribute[];
+      const { projectId, appId } = req.query;
+      const results = await metadataStore.listUserAttributes(projectId, appId);
+      const attributes = await metadataDisplay.patch(projectId, appId, results) as IMetadataUserAttribute[];
       return res.json(new ApiSuccess({
         totalCount: attributes.length,
         items: attributes,
@@ -172,26 +141,13 @@ export class MetadataUserAttributeServ {
     }
   };
 
-  public async add(req: any, res: any, next: any) {
-    try {
-      req.body.operator = res.get('X-Click-Stream-Operator');
-      const userAttribute: IMetadataUserAttribute = req.body;
-      const id = await metadataStore.createUserAttribute(userAttribute);
-      return res.status(201).json(new ApiSuccess({ id }, 'User attribute created.'));
-    } catch (error) {
-      next(error);
-    }
-  };
-
   public async details(req: any, res: any, next: any) {
     try {
-      const { name } = req.params;
-      const { projectId, appId } = req.query;
-      const results = await metadataStore.getUserAttribute(projectId, appId, name);
-      if (isEmpty(results)) {
+      const { projectId, appId, name, type } = req.query;
+      let attribute = await metadataStore.getUserAttribute(projectId, appId, name, type);
+      if (!attribute) {
         return res.status(404).json(new ApiFail('User attribute not found'));
       }
-      let attribute = groupUserAttributeByName(results)[0];
       attribute = (await metadataDisplay.patch(projectId, appId, [attribute]) as IMetadataUserAttribute[])[0];
       return res.json(new ApiSuccess(attribute));
     } catch (error) {
