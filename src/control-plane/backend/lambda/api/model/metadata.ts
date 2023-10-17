@@ -34,6 +34,7 @@ export interface IMetadataRaw {
   readonly summary: {
     readonly platform?: MetadataPlatform[];
     readonly valueEnum?: IMetadataRawValue[];
+    readonly hasData?: boolean;
   };
 }
 
