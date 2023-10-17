@@ -2,16 +2,16 @@ import enums
 from application.shopping.ShoppingScreen import Page
 from weighted.weighted import WeightedArray
 
-main_exception_rate = WeightedArray([(True, 8), (False, 1000)])
-category_exception_rate = WeightedArray([(True, 2), (False, 1000)])
-search_exception_rate = WeightedArray([(True, 5), (False, 1000)])
-detail_exception_rate = WeightedArray([(True, 10), (False, 1000)])
-cart_exception_rate = WeightedArray([(True, 7), (False, 1000)])
-checkout_exception_rate = WeightedArray([(True, 4), (False, 1000)])
-result_exception_rate = WeightedArray([(True, 3), (False, 1000)])
-profile_exception_rate = WeightedArray([(True, 6), (False, 1000)])
-login_exception_rate = WeightedArray([(True, 2), (False, 1000)])
-signup_exception_rate = WeightedArray([(True, 1), (False, 1000)])
+main_exception_rate = WeightedArray([(True, 6), (False, 10000)])
+category_exception_rate = WeightedArray([(True, 1), (False, 10000)])
+search_exception_rate = WeightedArray([(True, 1), (False, 10000)])
+detail_exception_rate = WeightedArray([(True, 8), (False, 10000)])
+cart_exception_rate = WeightedArray([(True, 4), (False, 10000)])
+checkout_exception_rate = WeightedArray([(True, 1), (False, 10000)])
+result_exception_rate = WeightedArray([(True, 1), (False, 10000)])
+profile_exception_rate = WeightedArray([(True, 1), (False, 10000)])
+login_exception_rate = WeightedArray([(True, 2), (False, 10000)])
+signup_exception_rate = WeightedArray([(True, 1), (False, 10000)])
 
 
 def get_whether_have_exception(page):

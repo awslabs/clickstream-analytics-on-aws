@@ -60,14 +60,14 @@ next_page_of_login = WeightedArray(
 next_page_of_signup = WeightedArray(
     [(Page.MAIN, 70), (Page.LOGIN, 20), (Page.EXIT, 10)])
 next_page_of_main = WeightedArray(
-    [(Page.SEARCH, 18), (Page.CATEGORY, 21), (Page.DETAIL, 43), (Page.CART, 12), (Page.PROFILE, 6), (Page.EXIT, 2)])
+    [(Page.SEARCH, 18), (Page.CATEGORY, 21), (Page.DETAIL, 43), (Page.CART, 12), (Page.PROFILE, 6), (Page.EXIT, 1)])
 next_page_of_category = WeightedArray(
     [(Page.SEARCH, 12), (Page.DETAIL, 45), (Page.MAIN, 20), (Page.PROFILE, 5), (Page.CART, 16), (Page.EXIT, 1)])
 next_page_of_search = WeightedArray(
     [(Page.CATEGORY, 12), (Page.MAIN, 15), (Page.DETAIL, 30), (Page.EXIT, 1)])
 next_page_of_detail = WeightedArray(
     [(Page.SEARCH, 5), (Page.DETAIL, 15), (Page.CATEGORY, 17), (Page.MAIN, 20), (Page.CART, 10), (Page.CHECKOUT, 3),
-     (Page.EXIT, 2)])
+     (Page.EXIT, 1)])
 next_page_of_detail_without_scroll = WeightedArray(
     [(Page.SEARCH, 5), (Page.CATEGORY, 17), (Page.MAIN, 20), (Page.CART, 10), (Page.CHECKOUT, 3),
      (Page.EXIT, 1)])
