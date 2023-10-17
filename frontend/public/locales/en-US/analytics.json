@@ -197,7 +197,9 @@
     "lessThan": "<",
     "lessThanOrEqual": "<=",
     "in": "in",
-    "notIn": "not in"
+    "notIn": "not in",
+    "contains": "contains",
+    "notContains": "not contains"
   },
   "labels": {
     "eventTitle": "Event",

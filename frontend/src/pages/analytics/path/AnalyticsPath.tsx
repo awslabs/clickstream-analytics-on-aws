@@ -184,17 +184,18 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
   const [selectedNodeType, setSelectedNodeType] =
     useState<SelectProps.Option | null>(defaultNodeTypeOption);
 
-  const defaultPlatformOption: SelectProps.Option = {
+  const webPlatformOption: SelectProps.Option = {
     value: MetadataPlatform.WEB,
     label: defaultStr(t('analytics:options.platformWeb')),
   };
 
-  const platformOptions: SelectProps.Options = [
-    defaultPlatformOption,
-    {
-      value: MetadataPlatform.ANDROID,
-      label: defaultStr(t('analytics:options.platformAndroid')),
-    },
+  const defaultMobilePlatformOption: SelectProps.Option = {
+    value: MetadataPlatform.ANDROID,
+    label: defaultStr(t('analytics:options.platformAndroid')),
+  };
+
+  const mobilePlatformOption: SelectProps.Options = [
+    defaultMobilePlatformOption,
     {
       value: MetadataPlatform.IOS,
       label: defaultStr(t('analytics:options.platformIOS')),
@@ -220,8 +221,13 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
       conditionOptions: presetParameters,
     });
 
+  const [platformOptions, setPlatformOptions] = useState<SelectProps.Options>([
+    webPlatformOption,
+    ...mobilePlatformOption,
+  ]);
+
   const [selectedPlatform, setSelectedPlatform] =
-    useState<SelectProps.Option | null>(defaultPlatformOption);
+    useState<SelectProps.Option | null>(webPlatformOption);
 
   const getEventParameters = (eventName?: string) => {
     const event = metadataEvents.find((item) => item.name === eventName);
@@ -280,7 +286,7 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
     setSelectedWindowUnit(minuteWindowUnitOption);
     setWindowValue('5');
     setExploreEmbedUrl('');
-    setSelectedPlatform(defaultPlatformOption);
+    setSelectedPlatform(webPlatformOption);
     setLoadingData(false);
   };
 
@@ -480,6 +486,26 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
         break;
     }
   };
+
+  useEffect(() => {
+    // Update platform Options by node type
+    if (selectedNodeType?.value) {
+      if (
+        selectedNodeType.value === ExplorePathNodeType.SCREEN_NAME ||
+        selectedNodeType.value === ExplorePathNodeType.SCREEN_ID
+      ) {
+        setPlatformOptions(mobilePlatformOption);
+        setSelectedPlatform(defaultMobilePlatformOption);
+      }
+      if (
+        selectedNodeType?.value === ExplorePathNodeType.PAGE_TITLE ||
+        selectedNodeType?.value === ExplorePathNodeType.PAGE_URL
+      ) {
+        setPlatformOptions([webPlatformOption]);
+        setSelectedPlatform(webPlatformOption);
+      }
+    }
+  }, [selectedNodeType]);
 
   useEffect(() => {
     setSegmentationOptionData({

@@ -197,7 +197,9 @@
     "lessThan": "<",
     "lessThanOrEqual": "<=",
     "in": "在其中",
-    "notIn": "不在其中"
+    "notIn": "不在其中",
+    "contains": "包含",
+    "notContains": "不包含"
   },
   "labels": {
     "eventTitle": "事件",
