@@ -103,6 +103,20 @@ export const pathNodesConvertToCategoryItemType = (
   return categoryItems;
 };
 
+const buildEventItem = (item: IMetadataEventParameter) => {
+  return {
+    label: item.displayName,
+    name: item.name,
+    value: item.id,
+    description: item.description,
+    metadataSource: item.metadataSource,
+    valueType: item.valueType,
+    category: item.category,
+    values: item.values,
+    modifyTime: item.updateAt ? moment(item.updateAt).format(TIME_FORMAT) : '-',
+  };
+};
+
 export const parametersConvertToCategoryItemType = (
   userAttributeItems: IMetadataUserAttribute[],
   parameterItems?: IMetadataEventParameter[]
@@ -126,29 +140,9 @@ export const parametersConvertToCategoryItemType = (
   if (parameterItems) {
     parameterItems.forEach((item) => {
       if (item.name.startsWith('_')) {
-        categoryPrivateEventItems.itemList.push({
-          label: item.displayName,
-          name: item.name,
-          value: item.id,
-          description: item.description,
-          metadataSource: item.metadataSource,
-          valueType: item.valueType,
-          category: item.category,
-          values: item.values,
-          modifyTime: moment(item.updateAt).format(TIME_FORMAT) || '-',
-        });
+        categoryPrivateEventItems.itemList.push(buildEventItem(item));
       } else {
-        categoryPublicEventItems.itemList.push({
-          label: item.displayName,
-          name: item.name,
-          value: item.id,
-          description: item.description,
-          metadataSource: item.metadataSource,
-          valueType: item.valueType,
-          category: item.category,
-          values: item.values,
-          modifyTime: moment(item.updateAt).format(TIME_FORMAT) || '-',
-        });
+        categoryPublicEventItems.itemList.push(buildEventItem(item));
       }
     });
   }
