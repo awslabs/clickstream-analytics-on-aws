@@ -65,7 +65,9 @@ import {
   pathNodesConvertToCategoryItemType,
   validEventAnalyticsItem,
 } from '../analytics-utils';
-import ExploreDateRangePicker from '../comps/ExploreDateRangePicker';
+import ExploreDateRangePicker, {
+  DEFAULT_WEEK_RANGE,
+} from '../comps/ExploreDateRangePicker';
 import ExploreEmbedFrame from '../comps/ExploreEmbedFrame';
 import SaveToDashboardModal from '../comps/SelectDashboardModal';
 
@@ -84,6 +86,7 @@ interface AnalyticsPathProps {
     screenNames: IMetadataAttributeValue[];
     screenIds: IMetadataAttributeValue[];
   };
+  loadingEvents: boolean;
 }
 
 const AnalyticsPath: React.FC<AnalyticsPathProps> = (
@@ -98,6 +101,7 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
     categoryEvents,
     presetParameters,
     nodes,
+    loadingEvents,
   } = props;
   const { appId } = useParams();
   const [loadingData, setLoadingData] = useState(loading);
@@ -184,17 +188,18 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
   const [selectedNodeType, setSelectedNodeType] =
     useState<SelectProps.Option | null>(defaultNodeTypeOption);
 
-  const defaultPlatformOption: SelectProps.Option = {
+  const webPlatformOption: SelectProps.Option = {
     value: MetadataPlatform.WEB,
     label: defaultStr(t('analytics:options.platformWeb')),
   };
 
-  const platformOptions: SelectProps.Options = [
-    defaultPlatformOption,
-    {
-      value: MetadataPlatform.ANDROID,
-      label: defaultStr(t('analytics:options.platformAndroid')),
-    },
+  const defaultMobilePlatformOption: SelectProps.Option = {
+    value: MetadataPlatform.ANDROID,
+    label: defaultStr(t('analytics:options.platformAndroid')),
+  };
+
+  const mobilePlatformOption: SelectProps.Options = [
+    defaultMobilePlatformOption,
     {
       value: MetadataPlatform.IOS,
       label: defaultStr(t('analytics:options.platformIOS')),
@@ -220,8 +225,13 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
       conditionOptions: presetParameters,
     });
 
+  const [platformOptions, setPlatformOptions] = useState<SelectProps.Options>([
+    webPlatformOption,
+    ...mobilePlatformOption,
+  ]);
+
   const [selectedPlatform, setSelectedPlatform] =
-    useState<SelectProps.Option | null>(defaultPlatformOption);
+    useState<SelectProps.Option | null>(webPlatformOption);
 
   const getEventParameters = (eventName?: string) => {
     const event = metadataEvents.find((item) => item.name === eventName);
@@ -232,17 +242,12 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
   };
 
   const [dateRangeValue, setDateRangeValue] =
-    React.useState<DateRangePickerProps.Value>({
-      type: 'relative',
-      amount: 1,
-      unit: 'month',
-    });
+    React.useState<DateRangePickerProps.Value>(DEFAULT_WEEK_RANGE);
 
-  const [timeGranularity, setTimeGranularity] =
-    React.useState<SelectProps.Option>({
-      value: ExploreGroupColumn.DAY,
-      label: defaultStr(t('analytics:options.dayTimeGranularity')),
-    });
+  const [timeGranularity, setTimeGranularity] = useState<SelectProps.Option>({
+    value: ExploreGroupColumn.WEEK,
+    label: t('analytics:options.weekTimeGranularity') ?? '',
+  });
 
   const resetConfig = async () => {
     setLoadingData(true);
@@ -260,11 +265,7 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
       ...INIT_SEGMENTATION_DATA,
       conditionOptions: presetParameters,
     });
-    setDateRangeValue({
-      type: 'relative',
-      amount: 1,
-      unit: 'month',
-    });
+    setDateRangeValue(DEFAULT_WEEK_RANGE);
     setTimeGranularity({
       value: ExploreGroupColumn.DAY,
       label: defaultStr(t('analytics:options.dayTimeGranularity')),
@@ -280,7 +281,7 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
     setSelectedWindowUnit(minuteWindowUnitOption);
     setWindowValue('5');
     setExploreEmbedUrl('');
-    setSelectedPlatform(defaultPlatformOption);
+    setSelectedPlatform(webPlatformOption);
     setLoadingData(false);
   };
 
@@ -482,6 +483,26 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
   };
 
   useEffect(() => {
+    // Update platform Options by node type
+    if (selectedNodeType?.value) {
+      if (
+        selectedNodeType.value === ExplorePathNodeType.SCREEN_NAME ||
+        selectedNodeType.value === ExplorePathNodeType.SCREEN_ID
+      ) {
+        setPlatformOptions(mobilePlatformOption);
+        setSelectedPlatform(defaultMobilePlatformOption);
+      }
+      if (
+        selectedNodeType?.value === ExplorePathNodeType.PAGE_TITLE ||
+        selectedNodeType?.value === ExplorePathNodeType.PAGE_URL
+      ) {
+        setPlatformOptions([webPlatformOption]);
+        setSelectedPlatform(webPlatformOption);
+      }
+    }
+  }, [selectedNodeType]);
+
+  useEffect(() => {
     setSegmentationOptionData({
       ...INIT_SEGMENTATION_DATA,
       conditionOptions: presetParameters,
@@ -490,7 +511,7 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
 
   useEffect(() => {
     clickPreview();
-  }, [timeGranularity, dateRangeValue]);
+  }, [dateRangeValue]);
 
   return (
     <>
@@ -626,6 +647,7 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
                 title={t('analytics:labels.nodesSelect')}
               />
               <EventsSelect
+                loading={loadingEvents}
                 data={eventOptionData}
                 disableAddCondition={disableAddCondition}
                 eventOptionList={categoryEventsData}
@@ -807,7 +829,7 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
           </div>
           <br />
           {loadingChart ? (
-            <Loading />
+            <Loading isPage />
           ) : (
             <ExploreEmbedFrame
               embedType="dashboard"

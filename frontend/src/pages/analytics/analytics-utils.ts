@@ -103,13 +103,32 @@ export const pathNodesConvertToCategoryItemType = (
   return categoryItems;
 };
 
+const buildEventItem = (item: IMetadataEventParameter) => {
+  return {
+    label: item.displayName,
+    name: item.name,
+    value: item.id,
+    description: item.description,
+    metadataSource: item.metadataSource,
+    valueType: item.valueType,
+    category: item.category,
+    values: item.values,
+    modifyTime: item.updateAt ? moment(item.updateAt).format(TIME_FORMAT) : '-',
+  };
+};
+
 export const parametersConvertToCategoryItemType = (
   userAttributeItems: IMetadataUserAttribute[],
   parameterItems?: IMetadataEventParameter[]
 ) => {
   const categoryItems: CategoryItemType[] = [];
-  const categoryEventItems: CategoryItemType = {
-    categoryName: i18n.t('analytics:labels.eventAttribute'),
+  const categoryPublicEventItems: CategoryItemType = {
+    categoryName: i18n.t('analytics:labels.publicEventAttribute'),
+    categoryType: 'attribute',
+    itemList: [],
+  };
+  const categoryPrivateEventItems: CategoryItemType = {
+    categoryName: i18n.t('analytics:labels.privateEventAttribute'),
     categoryType: 'attribute',
     itemList: [],
   };
@@ -120,17 +139,11 @@ export const parametersConvertToCategoryItemType = (
   };
   if (parameterItems) {
     parameterItems.forEach((item) => {
-      categoryEventItems.itemList.push({
-        label: item.displayName,
-        name: item.name,
-        value: item.id,
-        description: item.description,
-        metadataSource: item.metadataSource,
-        valueType: item.valueType,
-        category: item.category,
-        values: item.values,
-        modifyTime: moment(item.updateAt).format(TIME_FORMAT) || '-',
-      });
+      if (item.name.startsWith('_')) {
+        categoryPrivateEventItems.itemList.push(buildEventItem(item));
+      } else {
+        categoryPublicEventItems.itemList.push(buildEventItem(item));
+      }
     });
   }
   userAttributeItems.forEach((item) => {
@@ -146,7 +159,8 @@ export const parametersConvertToCategoryItemType = (
       modifyTime: moment(item.updateAt).format(TIME_FORMAT) || '-',
     });
   });
-  categoryItems.push(categoryEventItems);
+  categoryItems.push(categoryPublicEventItems);
+  categoryItems.push(categoryPrivateEventItems);
   categoryItems.push(categoryUserItems);
   return categoryItems;
 };

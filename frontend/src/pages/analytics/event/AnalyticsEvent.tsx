@@ -61,7 +61,9 @@ import {
   validEventAnalyticsItem,
 } from '../analytics-utils';
 import AttributeGroup from '../comps/AttributeGroup';
-import ExploreDateRangePicker from '../comps/ExploreDateRangePicker';
+import ExploreDateRangePicker, {
+  DEFAULT_WEEK_RANGE,
+} from '../comps/ExploreDateRangePicker';
 import ExploreEmbedFrame from '../comps/ExploreEmbedFrame';
 import SaveToDashboardModal from '../comps/SelectDashboardModal';
 
@@ -74,6 +76,7 @@ interface AnalyticsEventProps {
   metadataUserAttributes: IMetadataUserAttribute[];
   categoryEvents: CategoryItemType[];
   presetParameters: CategoryItemType[];
+  loadingEvents: boolean;
 }
 
 const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
@@ -87,6 +90,7 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
     metadataUserAttributes,
     categoryEvents,
     presetParameters,
+    loadingEvents,
   } = props;
   const { appId } = useParams();
   const [loadingData, setLoadingData] = useState(loading);
@@ -142,17 +146,12 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
   };
 
   const [dateRangeValue, setDateRangeValue] =
-    React.useState<DateRangePickerProps.Value>({
-      type: 'relative',
-      amount: 1,
-      unit: 'month',
-    });
+    useState<DateRangePickerProps.Value>(DEFAULT_WEEK_RANGE);
 
-  const [timeGranularity, setTimeGranularity] =
-    React.useState<SelectProps.Option>({
-      value: ExploreGroupColumn.DAY,
-      label: t('analytics:options.dayTimeGranularity') ?? '',
-    });
+  const [timeGranularity, setTimeGranularity] = useState<SelectProps.Option>({
+    value: ExploreGroupColumn.WEEK,
+    label: t('analytics:options.weekTimeGranularity') ?? '',
+  });
 
   const resetConfig = async () => {
     setLoadingData(true);
@@ -167,11 +166,7 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
       ...INIT_SEGMENTATION_DATA,
       conditionOptions: presetParameters,
     });
-    setDateRangeValue({
-      type: 'relative',
-      amount: 1,
-      unit: 'month',
-    });
+    setDateRangeValue(DEFAULT_WEEK_RANGE);
     setExploreEmbedUrl('');
     setTimeGranularity({
       value: ExploreGroupColumn.DAY,
@@ -314,7 +309,7 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
 
   useEffect(() => {
     clickPreview();
-  }, [timeGranularity, dateRangeValue, chartType]);
+  }, [dateRangeValue, chartType]);
 
   return (
     <>
@@ -363,6 +358,7 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
                 title={t('analytics:labels.defineMetrics')}
               />
               <EventsSelect
+                loading={loadingEvents}
                 data={eventOptionData}
                 eventOptionList={categoryEvents}
                 addEventButtonLabel={t('common:button.addEvent')}
@@ -559,7 +555,7 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
           </div>
           <br />
           {loadingChart ? (
-            <Loading />
+            <Loading isPage />
           ) : (
             <ExploreEmbedFrame
               embedType="dashboard"

@@ -61,7 +61,7 @@ const ItemsList: React.FC<ItemsListProps> = (props: ItemsListProps) => {
     let closestCategory = 0;
     let closestDistance = Infinity;
 
-    for (let i = 0; i < itemContainer.children.length; i++) {
+    for (let i = 0; i < itemContainer?.children?.length; i++) {
       const itemGroup = itemContainer.children[i];
       const distance = Math.abs(itemGroup.offsetTop - itemContainer.scrollTop);
       if (distance < closestDistance) {

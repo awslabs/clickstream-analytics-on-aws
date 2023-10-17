@@ -18,9 +18,29 @@ import {
   SelectProps,
 } from '@cloudscape-design/components';
 import i18n from 'i18n';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ExploreGroupColumn } from 'ts/explore-types';
+
+export const DEFAULT_DAY_RANGE: DateRangePickerProps.RelativeOption = {
+  key: 'previous-1-day',
+  amount: 1,
+  unit: 'day',
+  type: 'relative',
+};
+export const DEFAULT_WEEK_RANGE: DateRangePickerProps.RelativeOption = {
+  key: 'previous-1-week',
+  amount: 1,
+  unit: 'week',
+  type: 'relative',
+};
+
+export const DEFAULT_MONTH_RANGE: DateRangePickerProps.RelativeOption = {
+  key: 'previous-1-month',
+  amount: 1,
+  unit: 'month',
+  type: 'relative',
+};
 
 interface IExploreDateRangePickerProps {
   dateRangeValue: DateRangePickerProps.Value | null;
@@ -41,30 +61,15 @@ const ExploreDateRangePicker: React.FC<IExploreDateRangePickerProps> = (
   const { t } = useTranslation();
 
   const relativeOptions: ReadonlyArray<DateRangePickerProps.RelativeOption> = [
-    {
-      key: 'previous-1-day',
-      amount: 1,
-      unit: 'day',
-      type: 'relative',
-    },
-    {
-      key: 'previous-1-week',
-      amount: 1,
-      unit: 'week',
-      type: 'relative',
-    },
+    DEFAULT_DAY_RANGE,
+    DEFAULT_WEEK_RANGE,
     {
       key: 'previous-2-week',
       amount: 2,
       unit: 'week',
       type: 'relative',
     },
-    {
-      key: 'previous-1-month',
-      amount: 1,
-      unit: 'month',
-      type: 'relative',
-    },
+    DEFAULT_MONTH_RANGE,
     {
       key: 'previous-3-months',
       amount: 3,
@@ -85,13 +90,11 @@ const ExploreDateRangePicker: React.FC<IExploreDateRangePickerProps> = (
     },
   ];
 
-  const defaultTimeGranularityOption: SelectProps.Option = {
-    value: ExploreGroupColumn.DAY,
-    label: t('analytics:options.dayTimeGranularity') ?? '',
-  };
-
   const timeGranularityOptions: SelectProps.Options = [
-    defaultTimeGranularityOption,
+    {
+      value: ExploreGroupColumn.DAY,
+      label: t('analytics:options.dayTimeGranularity') ?? '',
+    },
     {
       value: ExploreGroupColumn.WEEK,
       label: t('analytics:options.weekTimeGranularity') ?? '',
@@ -127,6 +130,18 @@ const ExploreDateRangePicker: React.FC<IExploreDateRangePickerProps> = (
     }
     return { valid: true };
   };
+
+  useEffect(() => {
+    if (timeGranularity.value === ExploreGroupColumn.DAY) {
+      setDateRangeValue(DEFAULT_DAY_RANGE);
+    }
+    if (timeGranularity.value === ExploreGroupColumn.WEEK) {
+      setDateRangeValue(DEFAULT_WEEK_RANGE);
+    }
+    if (timeGranularity.value === ExploreGroupColumn.MONTH) {
+      setDateRangeValue(DEFAULT_MONTH_RANGE);
+    }
+  }, [timeGranularity]);
 
   return (
     <div className="cs-analytics-data-range">

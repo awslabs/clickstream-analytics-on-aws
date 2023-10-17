@@ -67,6 +67,17 @@ code {
   transform: rotate(180deg);
 }
 
+.custom-description {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  color: #8d99a8;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 400;
+}
+
 .oidc-login {
   min-height: 40vh;
   display: flex;
@@ -536,6 +547,7 @@ ul.menu-list li.checkbox-item {
   width: 100%;
   border: 0px;
   overflow: 'hidden';
+  min-height: 150px;
 }
 
 .cs-analytics-config {
@@ -826,7 +838,7 @@ ul.menu-list li.checkbox-item {
             display: flex;
             flex: 1 1;
             .csdc-container-event-category {
-              max-width: 129px;
+              min-width: 129px;
               overflow-x: hidden;
               box-shadow: inset -1px 0 0 #e1e4f0;
               padding: 5px 0;
@@ -1014,6 +1026,7 @@ ul.menu-list li.checkbox-item {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    overflow-y: auto;
     &.expanded {
       width: 280px;
     }

@@ -61,6 +61,7 @@ interface EventsSelectProps {
     calcMethod: SelectProps.Option | null
   ) => void;
   changeCurRelationShip?: (eventIndex: number, relation: ERelationShip) => void;
+  loading?: boolean;
 }
 const EventsSelect: React.FC<EventsSelectProps> = (
   props: EventsSelectProps
@@ -81,6 +82,7 @@ const EventsSelect: React.FC<EventsSelectProps> = (
     changeConditionCategoryOption,
     changeCurCalcMethodOption,
     changeCurRelationShip,
+    loading,
   } = props;
   const { t } = useTranslation();
 
@@ -110,6 +112,7 @@ const EventsSelect: React.FC<EventsSelectProps> = (
                   hasTab={element.hasTab}
                   isMultiSelect={element.isMultiSelect}
                   categories={eventOptionList}
+                  loading={loading}
                 />
               </div>
               {!disableAddCondition && (

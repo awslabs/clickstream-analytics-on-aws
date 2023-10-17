@@ -35,6 +35,7 @@ interface ConditionItemProps {
   changeConditionOperator: (value: SelectProps.Option | null) => void;
   changeCurCategoryOption: (category: SelectProps.Option | null) => void;
   changeConditionValue: (value: string[]) => void;
+  loading?: boolean;
 }
 
 const ConditionItem: React.FC<ConditionItemProps> = (
@@ -48,6 +49,7 @@ const ConditionItem: React.FC<ConditionItemProps> = (
     changeCurCategoryOption,
     changeConditionOperator,
     changeConditionValue,
+    loading,
   } = props;
 
   const [valueOptions, setValueOptions] = useState<SelectProps.Options>([]);
@@ -120,6 +122,14 @@ const ConditionItem: React.FC<ConditionItemProps> = (
       value: ExploreAnalyticsOperators.NOT_IN,
       label: t('analytics:operators.notIn'),
     },
+    contains: {
+      value: ExploreAnalyticsOperators.CONTAINS,
+      label: t('analytics:operators.contains'),
+    },
+    not_contains: {
+      value: ExploreAnalyticsOperators.NOT_CONTAINS,
+      label: t('analytics:operators.notContains'),
+    },
   };
 
   const CONDITION_STRING_OPERATORS: SelectProps.Options = [
@@ -129,6 +139,8 @@ const ConditionItem: React.FC<ConditionItemProps> = (
     ANALYTICS_OPERATORS.not_equal,
     ANALYTICS_OPERATORS.in,
     ANALYTICS_OPERATORS.not_in,
+    ANALYTICS_OPERATORS.contains,
+    ANALYTICS_OPERATORS.not_contains,
   ];
   const CONDITION_NUMBER_OPERATORS: SelectProps.Options = [
     ANALYTICS_OPERATORS.is_null,
@@ -155,6 +167,7 @@ const ConditionItem: React.FC<ConditionItemProps> = (
             setCurOptions(item);
           }}
           categories={conditionOptions}
+          loading={loading}
         />
       </div>
       <div className="condition-select">

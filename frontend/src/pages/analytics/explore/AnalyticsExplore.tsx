@@ -38,7 +38,6 @@ import CustomBreadCrumb from 'components/layouts/CustomBreadCrumb';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { MetadataParameterType, MetadataSource } from 'ts/explore-types';
 import {
   metadataEventsConvertToCategoryItemType,
   getWarmUpParameters,
@@ -93,6 +92,7 @@ const AnalyticsExplore: React.FC = () => {
   ];
 
   const [pipeline, setPipeline] = useState<IPipeline | null>(null);
+  const [loadingMetadataEvent, setLoadingMetadataEvent] = useState(false);
   const [metadataEvents, setMetadataEvents] = useState<IMetadataEvent[]>([]);
   const [metadataEventParameters, setMetadataEventParameters] = useState<
     IMetadataEventParameter[]
@@ -176,6 +176,7 @@ const AnalyticsExplore: React.FC = () => {
   };
 
   const listMetadataEvents = async () => {
+    setLoadingMetadataEvent(true);
     try {
       const { success, data }: ApiResponse<ResponseTableData<IMetadataEvent>> =
         await getMetadataEventsList({
@@ -188,7 +189,9 @@ const AnalyticsExplore: React.FC = () => {
         const events = metadataEventsConvertToCategoryItemType(data.items);
         setCategoryEvents(events);
       }
+      setLoadingMetadataEvent(false);
     } catch (error) {
+      setLoadingMetadataEvent(false);
       console.log(error);
     }
   };
@@ -213,16 +216,10 @@ const AnalyticsExplore: React.FC = () => {
   const listAllAttributes = async () => {
     try {
       const parameters = await getAllParameters();
-      const publicParameters = parameters?.filter(
-        (item) => item.parameterType === MetadataParameterType.PUBLIC
-      );
       const userAttributes = await getUserAttributes();
-      const presetUserAttributes = userAttributes.filter(
-        (item) => item.metadataSource === MetadataSource.PRESET
-      );
       const conditionOptions = parametersConvertToCategoryItemType(
-        presetUserAttributes,
-        publicParameters
+        userAttributes,
+        parameters
       );
       setPresetParameters(conditionOptions);
     } catch (error) {
@@ -260,56 +257,57 @@ const AnalyticsExplore: React.FC = () => {
           content={
             <ContentLayout
               header={
-                <Header
-                  variant="h1"
-                  info={
-                    <Popover
-                      triggerType="custom"
-                      content={t('analytics:information.exploreInfo')}
-                    >
-                      <Link variant="info">{t('info')}</Link>
-                    </Popover>
-                  }
-                  description={
-                    <SpaceBetween direction="vertical" size="s">
-                      <div>{t('analytics:explore.description')}</div>
-                      <div className="flex align-center">
-                        <FormField
-                          label={
-                            <SpaceBetween direction="horizontal" size="xxs">
-                              {t('analytics:explore.analyticsModel')}
-                              <Popover
-                                triggerType="custom"
-                                content={t(
-                                  'analytics:information.analyticsModelInfo'
-                                )}
-                              >
-                                <Link variant="info">{t('info')}</Link>
-                              </Popover>
-                            </SpaceBetween>
-                          }
-                        ></FormField>
-                        <div className="m-w-320 ml-10">
-                          <Select
-                            disabled={!pipeline}
-                            selectedOption={selectedOption}
-                            onChange={({ detail }) =>
-                              setSelectedOption(detail.selectedOption)
-                            }
-                            options={analyticsModelOptions}
-                          />
-                        </div>
-                      </div>
-                    </SpaceBetween>
-                  }
-                >
-                  {t('analytics:explore.title')}
-                </Header>
+                <SpaceBetween direction="vertical" size="xs">
+                  <Header
+                    variant="h1"
+                    info={
+                      <Popover
+                        triggerType="custom"
+                        content={t('analytics:information.exploreInfo')}
+                      >
+                        <Link variant="info">{t('info')}</Link>
+                      </Popover>
+                    }
+                  >
+                    {t('analytics:explore.title')}
+                  </Header>
+                  <div className="custom-description">
+                    {t('analytics:explore.description')}
+                  </div>
+                  <div className="mt-10 flex align-center">
+                    <FormField
+                      label={
+                        <SpaceBetween direction="horizontal" size="xxs">
+                          <div>{t('analytics:explore.analyticsModel')}</div>
+                          <Popover
+                            triggerType="custom"
+                            content={t(
+                              'analytics:information.analyticsModelInfo'
+                            )}
+                          >
+                            <Link variant="info">{t('info')}</Link>
+                          </Popover>
+                        </SpaceBetween>
+                      }
+                    ></FormField>
+                    <div className="m-w-320 ml-10">
+                      <Select
+                        disabled={!pipeline}
+                        selectedOption={selectedOption}
+                        onChange={({ detail }) =>
+                          setSelectedOption(detail.selectedOption)
+                        }
+                        options={analyticsModelOptions}
+                      />
+                    </div>
+                  </div>
+                </SpaceBetween>
               }
             >
               {!pipeline && <Loading />}
               {pipeline && selectedOption?.value === 'Funnel' && (
                 <AnalyticsFunnel
+                  loadingEvents={loadingMetadataEvent}
                   loading={false}
                   loadFunc={loadData}
                   pipeline={pipeline}
@@ -322,6 +320,7 @@ const AnalyticsExplore: React.FC = () => {
               )}
               {pipeline && selectedOption?.value === 'Event' && (
                 <AnalyticsEvent
+                  loadingEvents={loadingMetadataEvent}
                   loading={false}
                   loadFunc={loadData}
                   pipeline={pipeline}
@@ -334,6 +333,7 @@ const AnalyticsExplore: React.FC = () => {
               )}
               {pipeline && selectedOption?.value === 'Path' && (
                 <AnalyticsPath
+                  loadingEvents={loadingMetadataEvent}
                   loading={false}
                   loadFunc={loadData}
                   pipeline={pipeline}
