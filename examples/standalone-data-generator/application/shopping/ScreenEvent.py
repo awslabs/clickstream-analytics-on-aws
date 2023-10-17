@@ -15,7 +15,7 @@ import random
 import enums
 from application.shopping.ShoppingEventType import EventType
 from application.shopping.ShoppingScreen import Page
-from application.shopping import Products, ShoppingApp, ShoppingScreen
+from application.shopping import Products, ShoppingApp, ShoppingScreen, ExceptionEvent
 
 purchase_products = []
 cart_products = []
@@ -80,6 +80,14 @@ def gen_screen_view_attribute(user, event, engagement_time):
 # generate user engagement and app end event when app exit
 def get_exit_app_events(user, event):
     events = []
+    # exception event
+    if user.platform != enums.Platform.Web:
+        exception = ExceptionEvent.get_exception_by_page(user.current_page_type, user.platform)
+        if exception is not None:
+            exception_event = ShoppingApp.clean_event(event)
+            exception_event["attributes"]["_exception_message"] = exception[0]
+            exception_event["attributes"]["_exception_stack"] = exception[1]
+            events.append(ShoppingApp.get_final_event(user, EventType.APP_EXCEPTION, exception_event))
     # user engagement
     engagement_time = user.current_timestamp - user.current_page_start_time
     if engagement_time > 1000:
