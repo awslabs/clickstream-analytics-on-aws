@@ -61,7 +61,9 @@ const ProjectPipeline: React.FC<ProjectPipelineProps> = (
   };
 
   const goToApplicationDetail = () => {
-    navigate(`/application/detail/${selectedItems[0]?.appId}`);
+    navigate(
+      `/project/${pipelineInfo.projectId}/application/detail/${selectedItems[0]?.appId}`
+    );
   };
 
   const listApplicationByProject = async () => {
