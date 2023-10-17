@@ -325,10 +325,10 @@ export const ternary = <T>(cond: any, caseOne: T, caseTwo: T) =>
   cond ? caseOne : caseTwo;
 
 export const defaultStr = (
-  i18nStr: string | null | undefined,
+  expectStr: string | null | undefined,
   defaultValue?: string
 ) => {
-  return i18nStr ?? defaultValue ?? '';
+  return expectStr ?? defaultValue ?? '';
 };
 
 export const defaultSelectOptions = (
@@ -350,4 +350,12 @@ export const checkDisable = (condOne?: boolean, condTwo?: boolean) => {
     return true;
   }
   return false;
+};
+
+export const defaultGenericsValue = <T>(expectValue: T, defaultValue: T) => {
+  if (expectValue) {
+    return expectValue;
+  } else {
+    return defaultValue;
+  }
 };
