@@ -65,7 +65,9 @@ import {
   getLngFromLocalStorage,
 } from '../analytics-utils';
 import AttributeGroup from '../comps/AttributeGroup';
-import ExploreDateRangePicker from '../comps/ExploreDateRangePicker';
+import ExploreDateRangePicker, {
+  DEFAULT_WEEK_RANGE,
+} from '../comps/ExploreDateRangePicker';
 import ExploreEmbedFrame from '../comps/ExploreEmbedFrame';
 import SaveToDashboardModal from '../comps/SelectDashboardModal';
 
@@ -161,18 +163,12 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
   };
 
   const [dateRangeValue, setDateRangeValue] =
-    React.useState<DateRangePickerProps.Value>({
-      key: 'previous-1-week',
-      type: 'relative',
-      amount: 1,
-      unit: 'week',
-    });
+    useState<DateRangePickerProps.Value>(DEFAULT_WEEK_RANGE);
 
-  const [timeGranularity, setTimeGranularity] =
-    React.useState<SelectProps.Option>({
-      value: ExploreGroupColumn.DAY,
-      label: t('analytics:options.dayTimeGranularity') ?? '',
-    });
+  const [timeGranularity, setTimeGranularity] = useState<SelectProps.Option>({
+    value: ExploreGroupColumn.WEEK,
+    label: t('analytics:options.weekTimeGranularity') ?? '',
+  });
   const [selectedMetric, setSelectedMetric] =
     useState<SelectProps.Option | null>(defaultComputeMethodOption);
 
@@ -319,12 +315,7 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
       ...INIT_SEGMENTATION_DATA,
       conditionOptions: presetParameters,
     });
-    setDateRangeValue({
-      key: 'previous-1-week',
-      type: 'relative',
-      amount: 1,
-      unit: 'week',
-    });
+    setDateRangeValue(DEFAULT_WEEK_RANGE);
     setTimeGranularity({
       value: ExploreGroupColumn.DAY,
       label: t('analytics:options.dayTimeGranularity') ?? '',
@@ -384,7 +375,7 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
 
   useEffect(() => {
     clickPreview();
-  }, [timeGranularity, dateRangeValue, chartType]);
+  }, [dateRangeValue, chartType]);
 
   return (
     <>

@@ -61,7 +61,9 @@ import {
   validRetentionAnalyticsItem,
 } from '../analytics-utils';
 import AttributeGroup from '../comps/AttributeGroup';
-import ExploreDateRangePicker from '../comps/ExploreDateRangePicker';
+import ExploreDateRangePicker, {
+  DEFAULT_WEEK_RANGE,
+} from '../comps/ExploreDateRangePicker';
 import ExploreEmbedFrame from '../comps/ExploreEmbedFrame';
 import SaveToDashboardModal from '../comps/SelectDashboardModal';
 
@@ -135,17 +137,12 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
   };
 
   const [dateRangeValue, setDateRangeValue] =
-    React.useState<DateRangePickerProps.Value>({
-      type: 'relative',
-      amount: 1,
-      unit: 'week',
-    });
+    useState<DateRangePickerProps.Value>(DEFAULT_WEEK_RANGE);
 
-  const [timeGranularity, setTimeGranularity] =
-    React.useState<SelectProps.Option>({
-      value: ExploreGroupColumn.DAY,
-      label: t('analytics:options.dayTimeGranularity') ?? '',
-    });
+  const [timeGranularity, setTimeGranularity] = useState<SelectProps.Option>({
+    value: ExploreGroupColumn.WEEK,
+    label: t('analytics:options.weekTimeGranularity') ?? '',
+  });
 
   const resetConfig = async () => {
     setLoadingData(true);
@@ -158,11 +155,7 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
       ...INIT_SEGMENTATION_DATA,
       conditionOptions: presetParameters,
     });
-    setDateRangeValue({
-      type: 'relative',
-      amount: 1,
-      unit: 'week',
-    });
+    setDateRangeValue(DEFAULT_WEEK_RANGE);
     setExploreEmbedUrl('');
     setTimeGranularity({
       value: ExploreGroupColumn.DAY,
@@ -304,7 +297,7 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
 
   useEffect(() => {
     clickPreview();
-  }, [timeGranularity, dateRangeValue, chartType]);
+  }, [dateRangeValue, chartType]);
 
   return (
     <>

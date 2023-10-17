@@ -65,7 +65,9 @@ import {
   pathNodesConvertToCategoryItemType,
   validEventAnalyticsItem,
 } from '../analytics-utils';
-import ExploreDateRangePicker from '../comps/ExploreDateRangePicker';
+import ExploreDateRangePicker, {
+  DEFAULT_WEEK_RANGE,
+} from '../comps/ExploreDateRangePicker';
 import ExploreEmbedFrame from '../comps/ExploreEmbedFrame';
 import SaveToDashboardModal from '../comps/SelectDashboardModal';
 
@@ -240,18 +242,12 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
   };
 
   const [dateRangeValue, setDateRangeValue] =
-    React.useState<DateRangePickerProps.Value>({
-      key: 'previous-1-week',
-      type: 'relative',
-      amount: 1,
-      unit: 'week',
-    });
+    React.useState<DateRangePickerProps.Value>(DEFAULT_WEEK_RANGE);
 
-  const [timeGranularity, setTimeGranularity] =
-    React.useState<SelectProps.Option>({
-      value: ExploreGroupColumn.DAY,
-      label: defaultStr(t('analytics:options.dayTimeGranularity')),
-    });
+  const [timeGranularity, setTimeGranularity] = useState<SelectProps.Option>({
+    value: ExploreGroupColumn.WEEK,
+    label: t('analytics:options.weekTimeGranularity') ?? '',
+  });
 
   const resetConfig = async () => {
     setLoadingData(true);
@@ -269,12 +265,7 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
       ...INIT_SEGMENTATION_DATA,
       conditionOptions: presetParameters,
     });
-    setDateRangeValue({
-      key: 'previous-1-week',
-      type: 'relative',
-      amount: 1,
-      unit: 'week',
-    });
+    setDateRangeValue(DEFAULT_WEEK_RANGE);
     setTimeGranularity({
       value: ExploreGroupColumn.DAY,
       label: defaultStr(t('analytics:options.dayTimeGranularity')),
@@ -520,7 +511,7 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
 
   useEffect(() => {
     clickPreview();
-  }, [timeGranularity, dateRangeValue]);
+  }, [dateRangeValue]);
 
   return (
     <>
