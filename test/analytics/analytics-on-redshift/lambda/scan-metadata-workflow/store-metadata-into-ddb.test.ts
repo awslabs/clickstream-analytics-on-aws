@@ -461,6 +461,7 @@ describe('Lambda - store the metadata into DDB from Redshift', () => {
                   ],
                 },
                 summary: {
+                  hasData: true,
                   valueEnum: [
                     {
                       count: 10,

@@ -715,7 +715,6 @@ IMetadataEventParameter | undefined {
 function getLatestAttributeByName(metadata: IMetadataRaw[]): IMetadataUserAttribute[] {
   const latestUserAttributes: IMetadataUserAttribute[] = [];
   for (let meta of metadata) {
-    const lastDayData = getDataFromLastDay(meta);
     const attribute: IMetadataUserAttribute = {
       id: meta.id,
       month: meta.month,
@@ -723,7 +722,7 @@ function getLatestAttributeByName(metadata: IMetadataRaw[]): IMetadataUserAttrib
       projectId: meta.projectId,
       appId: meta.appId,
       name: meta.name,
-      hasData: lastDayData.hasData,
+      hasData: meta.summary.hasData ?? false,
       category: meta.category ?? ConditionCategory.OTHER,
       valueType: meta.valueType ?? MetadataValueType.STRING,
       valueEnum: meta.summary.valueEnum ?? [],

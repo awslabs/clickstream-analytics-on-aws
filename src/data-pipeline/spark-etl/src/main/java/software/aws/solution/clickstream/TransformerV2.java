@@ -527,7 +527,7 @@ public final class TransformerV2 {
 
         Dataset<Row> profileSetDataset = userDataset
                 .filter(col(EVENT_NAME)
-                        .isin("user_profile_set", "_user_profile_set", "_profile_set"));
+                        .isin("user_profile_set", "_user_profile_set", "_profile_set", "_first_open"));
 
         long newUserCount = profileSetDataset.count();
         log.info(NEW_USER_COUNT + ":" + newUserCount);

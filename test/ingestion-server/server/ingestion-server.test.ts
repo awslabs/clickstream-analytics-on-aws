@@ -809,3 +809,19 @@ test('Ingestion server with MskConfig should set metrics widgets for kafkaCluste
   });
 });
 
+test('Check EC2 IMDSv2 Enabled', () => {
+  const app = new App();
+  const stack = new TestStack(app, 'test', {
+    withS3SinkConfig: true,
+  });
+
+  const template = Template.fromStack(stack);
+  const launchConfiguration = findFirstResource(
+    template,
+    'AWS::AutoScaling::LaunchConfiguration',
+  )?.resource;
+
+  const properties = launchConfiguration.Properties;
+  expect(properties.MetadataOptions.HttpTokens == 'required').toBeTruthy();
+});
+

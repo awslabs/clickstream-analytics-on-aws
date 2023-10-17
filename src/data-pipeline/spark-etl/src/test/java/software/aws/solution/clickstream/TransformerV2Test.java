@@ -143,7 +143,6 @@ class TransformerV2Test extends BaseSparkTest {
         Assertions.assertEquals(expectedJson, datasetUser1.first().prettyJson());
         Assertions.assertEquals(1, datasetUser1.count());
     }
-
     @Test
     public void should_transform_save_state_data_temp_table() throws IOException {
         // DOWNLOAD_FILE=0 ./gradlew clean test --info --tests software.aws.solution.clickstream.TransformerV2Test.should_transform_save_state_data_temp_table
@@ -237,4 +236,23 @@ class TransformerV2Test extends BaseSparkTest {
         Method transform1 = aClass1.getMethod(TRANSFORM_METHOD_NAME, Dataset.class);
         Assertions.assertEquals("org.apache.spark.sql.Dataset", transform1.getReturnType().getCanonicalName());
     }
+
+    @Test
+    public void should_transform_user_with_first_open() throws IOException {
+        // DOWNLOAD_FILE=0 ./gradlew clean test --info --tests software.aws.solution.clickstream.TransformerV2Test.should_transform_user_with_first_open
+        System.setProperty(APP_IDS_PROP, "uba-app");
+        System.setProperty(PROJECT_ID_PROP, "test_project_id_01");
+
+        Dataset<Row> dataset =
+                spark.read().json(requireNonNull(getClass().getResource("/original_data_with_first_open.json")).getPath());
+        List<Dataset<Row>> transformedDatasets = transformer.transform(dataset);
+        Dataset<Row> datasetUser = transformedDatasets.get(3);
+
+
+        String expectedJson = this.resourceFileAsString("/expected/transform_v2_user_first_open.json");
+        datasetUser = datasetUser.filter(expr("user_pseudo_id='uuid1_first_open1'"));
+        Assertions.assertEquals(expectedJson, datasetUser.first().prettyJson());
+        Assertions.assertEquals(1, datasetUser.count());
+    }
+
 }
