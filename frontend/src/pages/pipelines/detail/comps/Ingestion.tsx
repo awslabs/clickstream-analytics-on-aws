@@ -22,6 +22,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { ProtocalType, SinkType } from 'ts/const';
 import { buildMSKLink, buildS3Link, buildSubnetLink } from 'ts/url';
+import { defaultStr, ternary } from 'ts/utils';
 
 interface TabContentProps {
   pipelineInfo?: IExtPipeline;
@@ -31,18 +32,29 @@ const Ingestion: React.FC<TabContentProps> = (props: TabContentProps) => {
   const { t } = useTranslation();
 
   const buildBufferDisplay = (pipelineInfo?: IExtPipeline) => {
-    if (pipelineInfo?.ingestionServer.sinkType === SinkType.S3) {
+    if (!pipelineInfo) return '-';
+
+    const linkProps = {
+      S3: (info: IExtPipeline) =>
+        buildS3Link(
+          info.region,
+          info.ingestionServer.sinkS3.sinkBucket.name,
+          info.ingestionServer.sinkS3.sinkBucket.prefix
+        ),
+      MSK: (info: IExtPipeline) =>
+        buildMSKLink(
+          info.region,
+          encodeURIComponent(info.ingestionServer.sinkKafka.mskCluster.arn)
+        ),
+    };
+
+    const sinkType = pipelineInfo.ingestionServer.sinkType;
+
+    if (sinkType === SinkType.S3) {
       return (
         <div>
           S3 (
-          <Link
-            href={buildS3Link(
-              pipelineInfo.region,
-              pipelineInfo.ingestionServer.sinkS3.sinkBucket.name,
-              pipelineInfo.ingestionServer.sinkS3.sinkBucket.prefix
-            )}
-            external
-          >
+          <Link href={linkProps['S3'](pipelineInfo)} external>
             S3://{pipelineInfo.ingestionServer.sinkS3.sinkBucket.name}/
             {pipelineInfo.ingestionServer.sinkS3.sinkBucket.prefix}
           </Link>
@@ -50,65 +62,30 @@ const Ingestion: React.FC<TabContentProps> = (props: TabContentProps) => {
         </div>
       );
     }
-    if (pipelineInfo?.ingestionServer.sinkType === SinkType.KDS) {
+
+    if (sinkType === SinkType.KDS) {
       return `KDS (${pipelineInfo.ingestionServer.sinkKinesis.kinesisStreamMode})`;
     }
-    // review and launch page
-    if (!pipelineInfo?.pipelineId) {
-      // self hosted kafka
-      if (pipelineInfo?.ingestionServer.sinkType === SinkType.MSK) {
-        if (pipelineInfo?.kafkaSelfHost) {
-          return `Kafka (${pipelineInfo.ingestionServer.sinkKafka.brokers.join(
-            ','
-          )})`;
-        } else {
-          return (
-            <div>
-              MSK (
-              <Link
-                href={buildMSKLink(
-                  pipelineInfo.region,
-                  encodeURIComponent(
-                    pipelineInfo.ingestionServer.sinkKafka.mskCluster.arn
-                  )
-                )}
-                external
-              >
-                {pipelineInfo?.ingestionServer.sinkKafka.mskCluster.name}
-              </Link>
-              )
-            </div>
-          );
-        }
-      }
-    } else {
-      // pipeline detail page
-      if (pipelineInfo?.ingestionServer.sinkType === SinkType.MSK) {
-        if (pipelineInfo?.ingestionServer.sinkKafka.mskCluster) {
-          return (
-            <div>
-              MSK (
-              <Link
-                href={buildMSKLink(
-                  pipelineInfo.region,
-                  encodeURIComponent(
-                    pipelineInfo.ingestionServer.sinkKafka.mskCluster.arn
-                  )
-                )}
-                external
-              >
-                {pipelineInfo?.ingestionServer.sinkKafka.mskCluster.name}
-              </Link>
-              )
-            </div>
-          );
-        } else {
-          return `Kafka (${pipelineInfo.ingestionServer.sinkKafka.brokers.join(
-            ','
-          )})`;
-        }
+
+    if (sinkType === SinkType.MSK) {
+      const hasMskCluster = pipelineInfo.ingestionServer.sinkKafka.mskCluster;
+      if (hasMskCluster) {
+        return (
+          <div>
+            MSK (
+            <Link href={linkProps['MSK'](pipelineInfo)} external>
+              {pipelineInfo.ingestionServer.sinkKafka.mskCluster.name}
+            </Link>
+            )
+          </div>
+        );
+      } else {
+        return `Kafka (${pipelineInfo.ingestionServer.sinkKafka.brokers.join(
+          ','
+        )})`;
       }
     }
+
     return '-';
   };
 
@@ -120,18 +97,24 @@ const Ingestion: React.FC<TabContentProps> = (props: TabContentProps) => {
             {t('pipeline:detail.publicSubnet')}
           </Box>
           <div>
-            {pipelineInfo?.network?.publicSubnetIds?.map((element) => {
-              return (
-                <div key={element}>
-                  <Link
-                    external
-                    href={buildSubnetLink(pipelineInfo.region || '', element)}
-                  >
-                    {element}
-                  </Link>
-                </div>
-              );
-            }) || '-'}
+            {pipelineInfo?.network?.publicSubnetIds &&
+            pipelineInfo?.network?.publicSubnetIds?.length > 0
+              ? pipelineInfo.network.publicSubnetIds.map((element) => {
+                  return (
+                    <div key={element}>
+                      <Link
+                        external
+                        href={buildSubnetLink(
+                          pipelineInfo.region || '',
+                          element
+                        )}
+                      >
+                        {element}
+                      </Link>
+                    </div>
+                  );
+                })
+              : '-'}
           </div>
         </div>
 
@@ -140,18 +123,24 @@ const Ingestion: React.FC<TabContentProps> = (props: TabContentProps) => {
             {t('pipeline:detail.privateSubnet')}
           </Box>
           <div>
-            {pipelineInfo?.network?.privateSubnetIds?.map((element) => {
-              return (
-                <div key={element}>
-                  <Link
-                    external
-                    href={buildSubnetLink(pipelineInfo.region || '', element)}
-                  >
-                    {element}
-                  </Link>
-                </div>
-              );
-            }) || '-'}
+            {pipelineInfo?.network?.privateSubnetIds &&
+            pipelineInfo?.network?.privateSubnetIds.length > 0
+              ? pipelineInfo?.network?.privateSubnetIds?.map((element) => {
+                  return (
+                    <div key={element}>
+                      <Link
+                        external
+                        href={buildSubnetLink(
+                          pipelineInfo.region || '',
+                          element
+                        )}
+                      >
+                        {element}
+                      </Link>
+                    </div>
+                  );
+                })
+              : '-'}
           </div>
         </div>
 
@@ -187,7 +176,10 @@ const Ingestion: React.FC<TabContentProps> = (props: TabContentProps) => {
         <div>
           <Box variant="awsui-key-label">{t('pipeline:detail.acm')}</Box>
           <div>
-            {pipelineInfo?.ingestionServer.domain.certificateArn || '-'}
+            {defaultStr(
+              pipelineInfo?.ingestionServer.domain.certificateArn,
+              '-'
+            )}
           </div>
         </div>
       </SpaceBetween>
@@ -200,7 +192,7 @@ const Ingestion: React.FC<TabContentProps> = (props: TabContentProps) => {
             projectId={pipelineInfo?.projectId}
             pipelineId={pipelineInfo?.pipelineId}
             customDomain={pipelineInfo?.ingestionServer.domain.domainName}
-            fetch={pipelineInfo?.pipelineId ? true : false}
+            fetch={ternary(pipelineInfo?.pipelineId, true, false)}
           />
         </div>
 
@@ -226,7 +218,7 @@ const Ingestion: React.FC<TabContentProps> = (props: TabContentProps) => {
                 projectId={pipelineInfo?.projectId}
                 pipelineId={pipelineInfo?.pipelineId}
                 endpoint={pipelineInfo?.endpoint}
-                fetch={pipelineInfo?.pipelineId ? true : false}
+                fetch={ternary(pipelineInfo?.pipelineId, true, false)}
               />
             </div>
           </>
