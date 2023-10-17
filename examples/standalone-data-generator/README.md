@@ -81,6 +81,8 @@ FLUSH_DURATION = 10
 # the duration(in minutes) of generation batch events for in one times, use this parameter to reduce memory usage
 # no less than 10 minutes
 BATCH_EVENT_DURATION_IN_MINUTES = 20
+# whether print each request log in terminal, when switched to false, print every 100 requests.
+IS_LOG_FULL_REQUEST_MESSAGE = True
 
 # Common Settings
 # session times for one user in a day
