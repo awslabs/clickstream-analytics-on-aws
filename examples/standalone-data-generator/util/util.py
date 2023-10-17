@@ -60,6 +60,11 @@ def current_timestamp():
     return round(time.time() * 1000)
 
 
+def get_end_timestamp_minute(end_timestamp):
+    date_obj = datetime.datetime.fromtimestamp(end_timestamp / 1000)
+    return date_obj.strftime("%Y-%m-%d %H:%M")
+
+
 def get_days_arr():
     now = datetime.datetime.now() - datetime.timedelta(days=1)
     timestamps = []

@@ -21,6 +21,7 @@ class EventType:
     SCREEN_VIEW = '_screen_view'
     USER_ENGAGEMENT = '_user_engagement'
     PROFILE_SET = '_profile_set'
+    APP_EXCEPTION = '_app_exception'
 
     # web preset event
     CLICK = '_click'

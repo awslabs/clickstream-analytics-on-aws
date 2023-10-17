@@ -58,8 +58,10 @@ DURATION_OF_DAYS = 30
 PER_ACTION_DURATION = range(3, 60)
 # event count for per request
 EVENTS_PER_REQUEST = 10000
+# max request number in one batch events. Reduce this value to reduce memory usage. 
+MAX_BATCH_REQUEST_NUMBER = 20
 # for mac m1 is 8, for c5.metal is 50 to meet the best performance
-PROCESS_NUMBER = 8
+PROCESS_NUMBER = 50
 # max thread for upload event
 MAX_UPLOAD_THREAD_NUMBER = 1
 # the sleep time for each request
@@ -76,6 +78,11 @@ RANDOM_DAU_REALTIME = range(10000, 20000)
 THREAD_NUMBER_FOR_USER = 10
 # flush events duration by second
 FLUSH_DURATION = 10
+# the duration(in minutes) of generation batch events for in one times, use this parameter to reduce memory usage
+# no less than 10 minutes
+BATCH_EVENT_DURATION_IN_MINUTES = 20
+# whether print each request log in terminal, when switched to false, print every 100 requests.
+IS_LOG_FULL_REQUEST_MESSAGE = True
 
 # Common Settings
 # session times for one user in a day
