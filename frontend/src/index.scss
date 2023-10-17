@@ -67,6 +67,17 @@ code {
   transform: rotate(180deg);
 }
 
+.custom-description {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  color: #8d99a8;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 400;
+}
+
 .oidc-login {
   min-height: 40vh;
   display: flex;

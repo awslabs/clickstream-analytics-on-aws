@@ -264,51 +264,51 @@ const AnalyticsExplore: React.FC = () => {
           content={
             <ContentLayout
               header={
-                <Header
-                  variant="h1"
-                  info={
-                    <Popover
-                      triggerType="custom"
-                      content={t('analytics:information.exploreInfo')}
-                    >
-                      <Link variant="info">{t('info')}</Link>
-                    </Popover>
-                  }
-                  description={
-                    <SpaceBetween direction="vertical" size="s">
-                      <div>{t('analytics:explore.description')}</div>
-                      <div className="flex align-center">
-                        <FormField
-                          label={
-                            <SpaceBetween direction="horizontal" size="xxs">
-                              {t('analytics:explore.analyticsModel')}
-                              <Popover
-                                triggerType="custom"
-                                content={t(
-                                  'analytics:information.analyticsModelInfo'
-                                )}
-                              >
-                                <Link variant="info">{t('info')}</Link>
-                              </Popover>
-                            </SpaceBetween>
-                          }
-                        ></FormField>
-                        <div className="m-w-320 ml-10">
-                          <Select
-                            disabled={!pipeline}
-                            selectedOption={selectedOption}
-                            onChange={({ detail }) =>
-                              setSelectedOption(detail.selectedOption)
-                            }
-                            options={analyticsModelOptions}
-                          />
-                        </div>
-                      </div>
-                    </SpaceBetween>
-                  }
-                >
-                  {t('analytics:explore.title')}
-                </Header>
+                <SpaceBetween direction="vertical" size="xs">
+                  <Header
+                    variant="h1"
+                    info={
+                      <Popover
+                        triggerType="custom"
+                        content={t('analytics:information.exploreInfo')}
+                      >
+                        <Link variant="info">{t('info')}</Link>
+                      </Popover>
+                    }
+                  >
+                    {t('analytics:explore.title')}
+                  </Header>
+                  <div className="custom-description">
+                    {t('analytics:explore.description')}
+                  </div>
+                  <div className="mt-10 flex align-center">
+                    <FormField
+                      label={
+                        <SpaceBetween direction="horizontal" size="xxs">
+                          <div>{t('analytics:explore.analyticsModel')}</div>
+                          <Popover
+                            triggerType="custom"
+                            content={t(
+                              'analytics:information.analyticsModelInfo'
+                            )}
+                          >
+                            <Link variant="info">{t('info')}</Link>
+                          </Popover>
+                        </SpaceBetween>
+                      }
+                    ></FormField>
+                    <div className="m-w-320 ml-10">
+                      <Select
+                        disabled={!pipeline}
+                        selectedOption={selectedOption}
+                        onChange={({ detail }) =>
+                          setSelectedOption(detail.selectedOption)
+                        }
+                        options={analyticsModelOptions}
+                      />
+                    </div>
+                  </div>
+                </SpaceBetween>
               }
             >
               {!pipeline && <Loading />}
