@@ -331,6 +331,17 @@ export const defaultStr = (
   return i18nStr ?? defaultValue ?? '';
 };
 
+export const defaultSelectOptions = (
+  optionDefault: SelectProps.Option,
+  optionNotSure?: SelectProps.Option | null
+) => {
+  if (optionNotSure) {
+    return optionNotSure;
+  } else {
+    return optionDefault;
+  }
+};
+
 export const checkDisable = (condOne?: boolean, condTwo?: boolean) => {
   if (condOne) {
     return true;
