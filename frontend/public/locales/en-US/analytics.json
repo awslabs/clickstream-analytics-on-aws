@@ -205,6 +205,8 @@
     "eventTitle": "Event",
     "attributeTitle": "Attribute",
     "eventAttribute": "Event attribute",
+    "publicEventAttribute": "Public event attribute",
+    "privateEventAttribute": "Private event attribute",
     "userAttribute": "User attribute",
     "customAttribute": "Custom attribute",
     "presetAttribute": "Preset attribute",

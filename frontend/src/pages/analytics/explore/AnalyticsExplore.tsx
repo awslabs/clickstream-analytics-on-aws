@@ -217,16 +217,10 @@ const AnalyticsExplore: React.FC = () => {
   const listAllAttributes = async () => {
     try {
       const parameters = await getAllParameters();
-      const publicParameters = parameters?.filter(
-        (item) => item.parameterType === MetadataParameterType.PUBLIC
-      );
       const userAttributes = await getUserAttributes();
-      const presetUserAttributes = userAttributes.filter(
-        (item) => item.metadataSource === MetadataSource.PRESET
-      );
       const conditionOptions = parametersConvertToCategoryItemType(
-        presetUserAttributes,
-        publicParameters
+        userAttributes,
+        parameters
       );
       setPresetParameters(conditionOptions);
     } catch (error) {

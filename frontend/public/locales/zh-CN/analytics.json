@@ -205,6 +205,8 @@
     "eventTitle": "事件",
     "attributeTitle": "属性",
     "eventAttribute": "事件属性",
+    "publicEventAttribute": "公共事件属性",
+    "privateEventAttribute": "私有事件属性",
     "userAttribute": "用户属性",
     "customAttribute": "自定义属性",
     "presetAttribute": "预置属性",
