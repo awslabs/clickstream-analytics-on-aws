@@ -20,6 +20,7 @@ import { CategoryItemType, IAnalyticsItem } from './AnalyticsType';
 import DropDownContainer from './DropDownContainer';
 
 interface EventItemProps {
+  showMouseoverTitle?: boolean;
   placeholder?: string | null;
   isMultiSelect?: boolean;
   hasTab?: boolean;
@@ -32,6 +33,7 @@ interface EventItemProps {
 
 const EventItem: React.FC<EventItemProps> = (props: EventItemProps) => {
   const {
+    showMouseoverTitle,
     placeholder,
     hasTab,
     isMultiSelect,
@@ -102,9 +104,12 @@ const EventItem: React.FC<EventItemProps> = (props: EventItemProps) => {
             placeholder={placeholder ?? ''}
             selectedOption={categoryOption}
           />
+          {categoryOption?.label && showMouseoverTitle && (
+            <div className="custom-popover">{categoryOption?.label}</div>
+          )}
         </div>
         {isMultiSelect && (
-          <div className="second-select-option">
+          <div className="second-select-option" title={calcMethodOption?.label}>
             <Select
               selectedOption={calcMethodOption ?? null}
               onChange={(e) => {

@@ -26,7 +26,7 @@ const RoleRoute = ({
   roles,
 }: {
   auth: AuthContextProps;
-  layout: 'common' | 'analytics';
+  layout: 'common' | 'analytics' | 'none';
   children: ReactElement;
   roles: Array<IUserRole>;
 }) => {
@@ -49,6 +49,10 @@ const RoleRoute = ({
         <AccessDenied />
       </CommonLayout>
     );
+  }
+
+  if (layout === 'none') {
+    return children;
   }
 
   if (layout === 'common') {

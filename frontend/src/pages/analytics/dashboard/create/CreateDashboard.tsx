@@ -168,9 +168,9 @@ const CreateDashboard: React.FC<CreateDashboardProps> = (
         header={t('analytics:dashboard.createTitle')}
       >
         {loadingData ? (
-          <Loading />
+          <Loading isPage />
         ) : (
-          <>
+          <SpaceBetween direction="vertical" size="xs">
             <FormField
               label={t('analytics:dashboard.createInputName')}
               description={t('analytics:dashboard.createInputNameDec')}
@@ -198,38 +198,40 @@ const CreateDashboard: React.FC<CreateDashboardProps> = (
                 />
               </SpaceBetween>
             </FormField>
-            <div className="mt-10">
-              <FormField
-                label={t('analytics:dashboard.createDesc')}
-                description={t('analytics:dashboard.createDescDec')}
-              >
-                <Textarea
-                  placeholder={
-                    t('analytics:dashboard.createDescPlaceholder') ?? ''
+
+            <FormField
+              label={t('analytics:dashboard.createDesc')}
+              description={t('analytics:dashboard.createDescDec')}
+            >
+              <Textarea
+                placeholder={
+                  t('analytics:dashboard.createDescPlaceholder') ?? ''
+                }
+                rows={3}
+                value={curDashboard.description}
+                onChange={(e) => {
+                  if (
+                    new RegExp(XSS_PATTERN).test(e.detail.value) ||
+                    e.detail.value.length > MAX_USER_INPUT_LENGTH
+                  ) {
+                    return false;
                   }
-                  rows={3}
-                  value={curDashboard.description}
-                  onChange={(e) => {
-                    if (
-                      new RegExp(XSS_PATTERN).test(e.detail.value) ||
-                      e.detail.value.length > MAX_USER_INPUT_LENGTH
-                    ) {
-                      return false;
-                    }
-                    setCurDashboard((prev) => {
-                      return { ...prev, description: e.detail.value };
-                    });
-                  }}
-                />
-              </FormField>
-            </div>
+                  setCurDashboard((prev) => {
+                    return { ...prev, description: e.detail.value };
+                  });
+                }}
+              />
+            </FormField>
 
             <FormField
               label={t('analytics:dashboard.createSheets')}
               info={
-                <Popover triggerType="custom" content={t('analytics:information.dashboardSheetInfo')}>
-            <Link variant="info">{t('info')}</Link>
-          </Popover>
+                <Popover
+                  triggerType="custom"
+                  content={t('analytics:information.dashboardSheetInfo')}
+                >
+                  <Link variant="info">{t('info')}</Link>
+                </Popover>
               }
               description={t('analytics:dashboard.createSheetsDec')}
               errorText={
@@ -260,16 +262,16 @@ const CreateDashboard: React.FC<CreateDashboardProps> = (
                   }}
                 />
               </ColumnLayout>
+              <TokenGroup
+                onDismiss={({ detail: { itemIndex } }) => {
+                  setSheetNames(
+                    sheetNames.filter((item, eIndex) => eIndex !== itemIndex)
+                  );
+                }}
+                items={sheetNames}
+              />
             </FormField>
-            <TokenGroup
-              onDismiss={({ detail: { itemIndex } }) => {
-                setSheetNames(
-                  sheetNames.filter((item, eIndex) => eIndex !== itemIndex)
-                );
-              }}
-              items={sheetNames}
-            />
-          </>
+          </SpaceBetween>
         )}
       </Modal>
     </div>

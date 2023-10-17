@@ -124,7 +124,7 @@ const EventsSelect: React.FC<EventsSelectProps> = (
                 </div>
               )}
               <div className="event-delete">
-                {index > 0 && (
+                {data.length > 1 && (
                   <span className="remove-icon">
                     <Button
                       onClick={() => {

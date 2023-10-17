@@ -32,6 +32,14 @@ describe('generateStr', () => {
     const result = generateStr(12);
     expect(result.length).toBe(12);
   });
+
+  it('should generate a string with different characters', () => {
+    const randomString = generateStr(10);
+    const isNotAllSame = randomString
+      .split('')
+      .some((char, index, array) => char !== array[0]);
+    expect(isNotAllSame).toBe(true);
+  });
 });
 
 describe('validateEmails', () => {

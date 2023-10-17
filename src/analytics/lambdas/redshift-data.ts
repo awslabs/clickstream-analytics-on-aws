@@ -12,6 +12,7 @@
  */
 import { DescribeStatementCommand, BatchExecuteStatementCommand, RedshiftDataClient, ExecuteStatementCommand, GetStatementResultCommand, StatusString } from '@aws-sdk/client-redshift-data';
 import { fromTemporaryCredentials } from '@aws-sdk/credential-providers';
+import { NodeHttpHandler } from '@smithy/node-http-handler';
 import { REDSHIFT_MODE } from '../../common/model';
 import { logger } from '../../common/powertools';
 import { aws_sdk_client_common_config } from '../../common/sdk-client-config';
@@ -20,6 +21,10 @@ import { ExistingRedshiftServerlessCustomProps, ProvisionedRedshiftProps } from 
 export function getRedshiftClient(roleArn: string) {
   return new RedshiftDataClient({
     ...aws_sdk_client_common_config,
+    requestHandler: new NodeHttpHandler({
+      connectionTimeout: 5000,
+      requestTimeout: 50000,
+    }),
     credentials: fromTemporaryCredentials({
       // Required. Options passed to STS AssumeRole operation.
       params: {
@@ -113,12 +118,30 @@ export const executeStatementsWithWait = async (client: RedshiftDataClient, sqlS
 };
 
 export const getStatementResult = async (client: RedshiftDataClient, queryId: string) => {
-  const checkParams = new GetStatementResultCommand({
-    Id: queryId,
-  });
-  const response = await client.send(checkParams);
-  logger.info(`Get statement result: ${response.TotalNumRows}`, JSON.stringify(response));
-  return response;
+  let nextToken;
+  let aggregatedRecords:any[] = [];
+  let totalNumRows = 0;
+  do {
+    const checkParams = new GetStatementResultCommand({
+      Id: queryId,
+      NextToken: nextToken,
+    });
+    const response: any = await client.send(checkParams);
+
+    if (response.Records) {
+      aggregatedRecords = aggregatedRecords.concat(response.Records);
+    }
+    if (response.TotalNumRows && totalNumRows === 0) {
+      totalNumRows = response.TotalNumRows;
+    }
+    nextToken = response.NextToken;
+  } while (nextToken);
+  const finalResponse: any = {
+    Records: aggregatedRecords,
+    TotalNumRows: totalNumRows,
+  };
+  logger.info(`Get statement result: ${finalResponse.TotalNumRows}`, JSON.stringify(finalResponse));
+  return finalResponse;
 };
 
 export const describeStatement = async (client: RedshiftDataClient, queryId: string) => {

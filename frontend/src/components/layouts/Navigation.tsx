@@ -43,6 +43,7 @@ const Navigation: React.FC<INavigationProps> = (props: INavigationProps) => {
       type: 'link',
       text: t('nav.analyticsStudio'),
       href: '/analytics',
+      external: true,
       info: (
         <Popover
           header={

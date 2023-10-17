@@ -41,7 +41,7 @@ import {
   MetadataSource,
   MetadataValueType,
 } from 'ts/explore-types';
-import { getValueFromStackOutputs } from 'ts/utils';
+import { defaultStr, getValueFromStackOutputs } from 'ts/utils';
 
 export const metadataEventsConvertToCategoryItemType = (
   apiDataItems: IMetadataEvent[]
@@ -61,7 +61,8 @@ export const metadataEventsConvertToCategoryItemType = (
     if (item.metadataSource === MetadataSource.PRESET) {
       categoryPresetItems.itemList.push({
         label: item.displayName,
-        value: item.name,
+        name: item.name,
+        value: item.id,
         description: item.description,
         metadataSource: item.metadataSource,
         modifyTime: moment(item.updateAt).format(TIME_FORMAT) || '-',
@@ -69,7 +70,8 @@ export const metadataEventsConvertToCategoryItemType = (
     } else if (item.metadataSource === MetadataSource.CUSTOM) {
       categoryCustomItems.itemList.push({
         label: item.displayName,
-        value: item.name,
+        name: item.name,
+        value: item.id,
         description: item.description,
         metadataSource: item.metadataSource,
         modifyTime: moment(item.updateAt).format(TIME_FORMAT) || '-',
@@ -93,6 +95,7 @@ export const pathNodesConvertToCategoryItemType = (
   pathNodes.forEach((item) => {
     categoryNodeItems.itemList.push({
       label: item.displayValue,
+      name: item.value,
       value: item.value,
     });
   });
@@ -119,7 +122,8 @@ export const parametersConvertToCategoryItemType = (
     parameterItems.forEach((item) => {
       categoryEventItems.itemList.push({
         label: item.displayName,
-        value: item.name,
+        name: item.name,
+        value: item.id,
         description: item.description,
         metadataSource: item.metadataSource,
         valueType: item.valueType,
@@ -132,7 +136,8 @@ export const parametersConvertToCategoryItemType = (
   userAttributeItems.forEach((item) => {
     categoryUserItems.itemList.push({
       label: item.displayName,
-      value: item.name,
+      name: item.name,
+      value: item.id,
       description: item.description,
       metadataSource: item.metadataSource,
       valueType: item.valueType,
@@ -164,7 +169,7 @@ export const validRetentionAnalyticsItem = (item: IRetentionAnalyticsItem) => {
 export const validConditionItemType = (condition: IConditionItemType) => {
   return (
     condition.conditionOption &&
-    condition.conditionOption?.value?.trim() !== '' &&
+    condition.conditionOption?.name?.trim() !== '' &&
     condition.conditionValue.length > 0
   );
 };
@@ -179,26 +184,32 @@ export const getEventAndConditions = (
       item.conditionList.forEach((condition) => {
         if (validConditionItemType(condition)) {
           const conditionObj: ICondition = {
-            category:
-              condition.conditionOption?.category ?? ConditionCategory.OTHER,
-            property: condition.conditionOption?.value ?? '',
-            operator: condition.conditionOperator?.value ?? '',
+            category: defaultStr(
+              condition.conditionOption?.category,
+              ConditionCategory.OTHER
+            ),
+            property: defaultStr(condition.conditionOption?.name),
+            operator: defaultStr(condition.conditionOperator?.value),
             value: condition.conditionValue,
-            dataType:
-              condition.conditionOption?.valueType ?? MetadataValueType.STRING,
+            dataType: defaultStr(
+              condition.conditionOption?.valueType,
+              MetadataValueType.STRING
+            ),
           };
           conditions.push(conditionObj);
         }
       });
 
       const eventAndCondition: IEventAndCondition = {
-        eventName: item.selectedEventOption?.value ?? '',
+        eventName: defaultStr(item.selectedEventOption?.value),
         sqlCondition: {
           conditions: conditions,
           conditionOperator: item.conditionRelationShip,
         },
-        computeMethod:
-          item.calculateMethodOption?.value ?? ExploreComputeMethod.USER_ID_CNT,
+        computeMethod: defaultStr(
+          item.calculateMethodOption?.value,
+          ExploreComputeMethod.USER_ID_CNT
+        ),
       };
       eventAndConditions.push(eventAndCondition);
     }
@@ -217,13 +228,17 @@ export const getPairEventAndConditions = (
       item.startConditionList.forEach((condition) => {
         if (validConditionItemType(condition)) {
           const conditionObj: ICondition = {
-            category:
-              condition.conditionOption?.category ?? ConditionCategory.OTHER,
-            property: condition.conditionOption?.value ?? '',
-            operator: condition.conditionOperator?.value ?? '',
+            category: defaultStr(
+              condition.conditionOption?.category,
+              ConditionCategory.OTHER
+            ),
+            property: defaultStr(condition.conditionOption?.name),
+            operator: defaultStr(condition.conditionOperator?.value),
             value: condition.conditionValue,
-            dataType:
-              condition.conditionOption?.valueType ?? MetadataValueType.STRING,
+            dataType: defaultStr(
+              condition.conditionOption?.valueType,
+              MetadataValueType.STRING
+            ),
           };
           startConditions.push(conditionObj);
         }
@@ -231,13 +246,17 @@ export const getPairEventAndConditions = (
       item.revisitConditionList.forEach((condition) => {
         if (validConditionItemType(condition)) {
           const conditionObj: ICondition = {
-            category:
-              condition.conditionOption?.category ?? ConditionCategory.OTHER,
-            property: condition.conditionOption?.value ?? '',
-            operator: condition.conditionOperator?.value ?? '',
+            category: defaultStr(
+              condition.conditionOption?.category,
+              ConditionCategory.OTHER
+            ),
+            property: defaultStr(condition.conditionOption?.name, ''),
+            operator: defaultStr(condition.conditionOperator?.value, ''),
             value: condition.conditionValue,
-            dataType:
-              condition.conditionOption?.valueType ?? MetadataValueType.STRING,
+            dataType: defaultStr(
+              condition.conditionOption?.valueType,
+              MetadataValueType.STRING
+            ),
           };
           revisitConditions.push(conditionObj);
         }
@@ -245,14 +264,14 @@ export const getPairEventAndConditions = (
 
       const pairEventAndCondition: IPairEventAndCondition = {
         startEvent: {
-          eventName: item.startEventOption?.value ?? '',
+          eventName: defaultStr(item.startEventOption?.value, ''),
           sqlCondition: {
             conditions: startConditions,
             conditionOperator: item.startConditionRelationShip,
           },
         },
         backEvent: {
-          eventName: item.revisitEventOption?.value ?? '',
+          eventName: defaultStr(item.revisitEventOption?.value, ''),
           sqlCondition: {
             conditions: revisitConditions,
             conditionOperator: item.revisitConditionRelationShip,
@@ -272,13 +291,17 @@ export const getGlobalEventCondition = (
   segmentationOptionData.data.forEach((condition) => {
     if (validConditionItemType(condition)) {
       const conditionObj: ICondition = {
-        category:
-          condition.conditionOption?.category ?? ConditionCategory.OTHER,
-        property: condition.conditionOption?.value ?? '',
-        operator: condition.conditionOperator?.value ?? '',
+        category: defaultStr(
+          condition.conditionOption?.category,
+          ConditionCategory.OTHER
+        ),
+        property: defaultStr(condition.conditionOption?.name, ''),
+        operator: defaultStr(condition.conditionOperator?.value, ''),
         value: condition.conditionValue,
-        dataType:
-          condition.conditionOption?.valueType ?? MetadataValueType.STRING,
+        dataType: defaultStr(
+          condition.conditionOption?.valueType,
+          MetadataValueType.STRING
+        ),
       };
       conditions.push(conditionObj);
     }

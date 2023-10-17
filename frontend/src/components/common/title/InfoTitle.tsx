@@ -11,20 +11,27 @@
  *  and limitations under the License.
  */
 
-import { Spinner } from '@cloudscape-design/components';
+import { Box, Popover } from '@cloudscape-design/components';
 import React from 'react';
+import ExtendIcon from '../ExtendIcon';
 
-interface LoadingProps {
-  isPage?: boolean;
+interface InfoTitleProps {
+  title: string | null;
+  popoverDescription?: string | null;
 }
 
-const Loading: React.FC<LoadingProps> = (props: LoadingProps) => {
-  const { isPage } = props;
+const InfoTitle: React.FC<InfoTitleProps> = (props: InfoTitleProps) => {
+  const { title, popoverDescription } = props;
   return (
-    <div className={isPage ? 'page-loading' : 'content-loading'}>
-      <Spinner />
+    <div className="flex align-center gap-3">
+      <Box variant="awsui-key-label">{title}</Box>
+      <Popover triggerType="custom" size="small" content={popoverDescription}>
+        <div>
+          <ExtendIcon icon="Info" color="#666" />
+        </div>
+      </Popover>
     </div>
   );
 };
 
-export default Loading;
+export default InfoTitle;

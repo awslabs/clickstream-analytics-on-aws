@@ -97,6 +97,7 @@ export function createECSClusterAndService(
         volume: BlockDeviceVolume.ebs(30),
       },
     ],
+    requireImdsv2: true,
   });
 
   if (Token.isUnresolved(ecsAsgSetting.warmPoolSize)) {

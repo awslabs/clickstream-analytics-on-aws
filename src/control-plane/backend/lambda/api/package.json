@@ -87,6 +87,9 @@
     "ts-json-object": "^0.4.0",
     "uuid": "^9.0.0"
   },
+  "resolutions": {
+    "@babel/traverse": "^7.23.2"
+  },
   "engines": {
     "node": ">= 18.17.0"
   },

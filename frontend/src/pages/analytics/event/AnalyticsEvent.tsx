@@ -27,6 +27,7 @@ import {
 import { previewEvent } from 'apis/analytics';
 import ExtendIcon from 'components/common/ExtendIcon';
 import Loading from 'components/common/Loading';
+import SectionTitle from 'components/common/title/SectionTitle';
 import {
   CategoryItemType,
   DEFAULT_CONDITION_DATA,
@@ -35,7 +36,6 @@ import {
   INIT_SEGMENTATION_DATA,
   SegmentationFilterDataType,
 } from 'components/eventselect/AnalyticsType';
-import EventItem from 'components/eventselect/EventItem';
 import EventsSelect from 'components/eventselect/EventSelect';
 import SegmentationFilter from 'components/eventselect/SegmentationFilter';
 import { cloneDeep } from 'lodash';
@@ -60,6 +60,7 @@ import {
   parametersConvertToCategoryItemType,
   validEventAnalyticsItem,
 } from '../analytics-utils';
+import AttributeGroup from '../comps/AttributeGroup';
 import ExploreDateRangePicker from '../comps/ExploreDateRangePicker';
 import ExploreEmbedFrame from '../comps/ExploreEmbedFrame';
 import SaveToDashboardModal from '../comps/SelectDashboardModal';
@@ -108,8 +109,8 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
   const [chartType, setChartType] = useState(defaultChartTypeOption);
 
   const defaultComputeMethodOption: SelectProps.Option = {
-    value: ExploreComputeMethod.USER_ID_CNT,
-    label: t('analytics:options.userNumber') ?? 'User number',
+    value: ExploreComputeMethod.EVENT_CNT,
+    label: t('analytics:options.eventNumber') ?? 'Event number',
   };
 
   const [eventOptionData, setEventOptionData] = useState<IEventAnalyticsItem[]>(
@@ -357,13 +358,10 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
         >
           <ColumnLayout columns={2} variant="text-grid">
             <SpaceBetween direction="vertical" size="xs">
-              <Button
-                variant="link"
-                iconName="menu"
-                className="cs-analytics-select-event"
-              >
-                {t('analytics:labels.defineMetrics')}
-              </Button>
+              <SectionTitle
+                type="event"
+                title={t('analytics:labels.defineMetrics')}
+              />
               <EventsSelect
                 data={eventOptionData}
                 eventOptionList={categoryEvents}
@@ -449,9 +447,10 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
                     return dataObj;
                   });
                 }}
-                changeCurCategoryOption={async (eventIndex, category) => {
-                  const eventName = category?.value;
+                changeCurCategoryOption={(eventIndex, category) => {
+                  const eventName = category?.name;
                   const eventParameters = getEventParameters(eventName);
+                  console.log(eventParameters);
                   const parameterOption = parametersConvertToCategoryItemType(
                     metadataUserAttributes,
                     eventParameters
@@ -473,13 +472,7 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
               />
             </SpaceBetween>
             <SpaceBetween direction="vertical" size="xs">
-              <Button
-                variant="link"
-                iconName="filter"
-                className="cs-analytics-select-filter"
-              >
-                {t('analytics:labels.filters')}
-              </Button>
+              <SectionTitle type="filter" />
               <SegmentationFilter
                 segmentationData={segmentationOptionData}
                 addNewConditionItem={() => {
@@ -530,27 +523,12 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
                 }}
               />
               <br />
-              <Button variant="link" className="cs-analytics-select-group">
-                {t('analytics:labels.attributeGrouping')}
-              </Button>
-              <div className="cs-analytics-select-group-item">
-                <div className="cs-analytics-dropdown">
-                  <div className="cs-analytics-parameter">
-                    <div className="flex-1">
-                      <EventItem
-                        placeholder={
-                          t('analytics:labels.attributeSelectPlaceholder') ?? ''
-                        }
-                        categoryOption={groupOption}
-                        changeCurCategoryOption={(item) => {
-                          setGroupOption(item);
-                        }}
-                        categories={presetParameters}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <SectionTitle type="group" />
+              <AttributeGroup
+                presetParameters={presetParameters}
+                groupOption={groupOption}
+                setGroupOption={setGroupOption}
+              />
             </SpaceBetween>
           </ColumnLayout>
           <br />
@@ -573,7 +551,9 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
             />
             <SegmentedControl
               selectedId={chartType}
-              onChange={({ detail }) => setChartType(detail.selectedId as QuickSightChartType)}
+              onChange={({ detail }) =>
+                setChartType(detail.selectedId as QuickSightChartType)
+              }
               options={chartTypeOptions}
             />
           </div>

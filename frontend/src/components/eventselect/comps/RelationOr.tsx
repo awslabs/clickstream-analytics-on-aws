@@ -42,7 +42,7 @@ const RelationOr: React.FC<RelationOrProps> = (props: RelationOrProps) => {
           xmlns="http://www.w3.org/2000/svg"
         >
           <path
-            fill-rule="evenodd"
+            fillRule="evenodd"
             clip-rule="evenodd"
             d="M1 0C1.55228 0 2 0.447715 2 1V3.342C2 5.42622 3.29286 7.29182 5.24438 8.02364L5.35112 8.06367C5.86824 8.25759 6.13025 8.834 5.93633 9.35112C5.74241 9.86824 5.166 10.1302 4.64888 9.93633L4.54214 9.8963C1.81001 8.87175 0 6.25991 0 3.342V1C0 0.447715 0.447715 0 1 0Z"
           ></path>

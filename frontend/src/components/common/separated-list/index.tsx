@@ -11,20 +11,21 @@
  *  and limitations under the License.
  */
 
-import { Spinner } from '@cloudscape-design/components';
+import { identity } from 'lodash';
 import React from 'react';
+import styles from './styles.module.scss';
 
-interface LoadingProps {
-  isPage?: boolean;
+interface SeparatedListProps {
+  ariaLabel?: string;
+  items: Array<React.ReactNode>;
 }
 
-const Loading: React.FC<LoadingProps> = (props: LoadingProps) => {
-  const { isPage } = props;
+export function SeparatedList({ ariaLabel, items }: SeparatedListProps) {
   return (
-    <div className={isPage ? 'page-loading' : 'content-loading'}>
-      <Spinner />
-    </div>
+    <ul aria-label={ariaLabel} className={styles.root}>
+      {items.map((item, index) => (
+        <li key={identity(index)}>{item}</li>
+      ))}
+    </ul>
   );
-};
-
-export default Loading;
+}

@@ -103,7 +103,7 @@ const AnalyticsAnalyzes: React.FC = () => {
             >
               <Container>
                 {loadingData ? (
-                  <Loading />
+                  <Loading isPage />
                 ) : (
                   <ExploreEmbedFrame
                     embedType="console"

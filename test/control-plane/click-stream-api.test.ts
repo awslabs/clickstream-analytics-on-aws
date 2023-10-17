@@ -29,7 +29,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
       .toEqual([
         'testClickStreamALBApiClickstreamDictionary0A1156B6',
         'testClickStreamALBApiClickstreamMetadataA721B303',
-        'testClickStreamALBApiClickstreamAnalyticsMetadataA20F6663',
+        'testClickStreamALBApiAnalyticsMetadata4BCF420E',
       ]);
 
     newALBApiStackTemplate.hasResourceProperties('AWS::DynamoDB::Table', {
@@ -119,45 +119,25 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
           AttributeType: 'S',
         },
         {
-          AttributeName: 'createAt',
-          AttributeType: 'N',
-        },
-        {
-          AttributeName: 'prefix',
+          AttributeName: 'month',
           AttributeType: 'S',
         },
         {
-          AttributeName: 'type',
+          AttributeName: 'prefix',
           AttributeType: 'S',
         },
       ],
       BillingMode: 'PAY_PER_REQUEST',
       GlobalSecondaryIndexes: [
         {
-          IndexName: 'prefix-time-index',
+          IndexName: 'prefix-month-index',
           KeySchema: [
             {
               AttributeName: 'prefix',
               KeyType: 'HASH',
             },
             {
-              AttributeName: 'createAt',
-              KeyType: 'RANGE',
-            },
-          ],
-          Projection: {
-            ProjectionType: 'ALL',
-          },
-        },
-        {
-          IndexName: 'inverted-index',
-          KeySchema: [
-            {
-              AttributeName: 'type',
-              KeyType: 'HASH',
-            },
-            {
-              AttributeName: 'id',
+              AttributeName: 'month',
               KeyType: 'RANGE',
             },
           ],
@@ -172,7 +152,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
           KeyType: 'HASH',
         },
         {
-          AttributeName: 'createAt',
+          AttributeName: 'month',
           KeyType: 'RANGE',
         },
       ],
@@ -584,7 +564,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
             Resource: [
               {
                 'Fn::GetAtt': [
-                  'testClickStreamALBApiClickstreamAnalyticsMetadataA20F6663',
+                  'testClickStreamALBApiAnalyticsMetadata4BCF420E',
                   'Arn',
                 ],
               },
@@ -594,7 +574,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
                   [
                     {
                       'Fn::GetAtt': [
-                        'testClickStreamALBApiClickstreamAnalyticsMetadataA20F6663',
+                        'testClickStreamALBApiAnalyticsMetadata4BCF420E',
                         'Arn',
                       ],
                     },
@@ -1335,6 +1315,7 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
             Ref: 'stackWorkflowS3BucketF67B9562',
           },
           PREFIX_TIME_GSI_NAME: 'prefix-time-index',
+          PREFIX_MONTH_GSI_NAME: 'prefix-month-index',
           AWS_ACCOUNT_ID: {
             Ref: 'AWS::AccountId',
           },

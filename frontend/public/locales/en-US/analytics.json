@@ -205,9 +205,9 @@
     "eventAttribute": "Event attribute",
     "userAttribute": "User attribute",
     "customAttribute": "Custom attribute",
-    "presetAttribute": "Prest attribute",
+    "presetAttribute": "Preset attribute",
     "customEvent": "Custom event",
-    "presetEvent": "Prest event",
+    "presetEvent": "Preset event",
     "previewName": "Name",
     "previewDescription": "Description",
     "previewDataType": "Data type",
@@ -241,7 +241,7 @@
     "defineMetrics": "Define metrics",
     "realtimeStopped": "Realtime streaming is stopped",
     "realtimeStarted": "Realtime streaming is started",
-    "reportingNotEnabled":"Reporting module is not enabled"
+    "reportingNotEnabled": "Reporting module is not enabled"
   },
   "emptyData": "No Data",
   "emptyDataMessage": "Please configure the metrics to query",

@@ -1,0 +1,9 @@
+{
+  "dashboard": {
+    "title": "仪表盘",
+    "description": "仪表盘描述",
+    "links": {
+      "dashboardDocLinkName": "什么是仪表盘"
+    }
+  }
+}

@@ -15,7 +15,7 @@ import { TagEditor, TagEditorProps } from '@cloudscape-design/components';
 import { isEqual } from 'lodash';
 import React, { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { alertMsg } from 'ts/utils';
+import { alertMsg, defaultStr } from 'ts/utils';
 
 interface TagsProps {
   tags: TagEditorProps.Tag[];
@@ -42,32 +42,41 @@ const Tags: React.FC<TagsProps> = (props: TagsProps) => {
   return (
     <TagEditor
       i18nStrings={{
-        keyPlaceholder: t('tag.keyPlaceholder') ?? '',
-        valuePlaceholder: t('tag.valuePlaceholder') ?? '',
-        addButton: t('tag.addButton') ?? '',
-        removeButton: t('tag.removeButton') ?? '',
-        undoButton: t('tag.undoButton') ?? '',
-        undoPrompt: t('tag.undoPrompt') ?? '',
-        loading: t('tag.loading') ?? '',
-        keyHeader: t('tag.keyHeader') ?? '',
-        valueHeader: t('tag.valueHeader') ?? '',
-        optional: t('tag.optional') ?? '',
-        keySuggestion: t('tag.keySuggestion') ?? '',
-        valueSuggestion: t('tag.valueSuggestion') ?? '',
-        emptyTags: t('tag.emptyTags') ?? '',
-        tooManyKeysSuggestion: t('tag.tooManyKeysSuggestion') ?? '',
-        tooManyValuesSuggestion: t('tag.tooManyValuesSuggestion') ?? '',
-        keysSuggestionLoading: t('tag.keysSuggestionLoading') ?? '',
-        keysSuggestionError: t('tag.keysSuggestionError') ?? '',
-        valuesSuggestionLoading: t('tag.valuesSuggestionLoading') ?? '',
-        valuesSuggestionError: t('tag.valuesSuggestionError') ?? '',
-        emptyKeyError: t('tag.emptyKeyError') ?? '',
-        maxKeyCharLengthError: t('tag.maxKeyCharLengthError') ?? '',
-        maxValueCharLengthError: t('tag.maxValueCharLengthError') ?? '',
-        duplicateKeyError: t('tag.duplicateKeyError') ?? '',
-        invalidKeyError: t('tag.invalidKeyError') ?? '',
-        invalidValueError: t('tag.invalidValueError') ?? '',
-        awsPrefixError: t('tag.awsPrefixError') ?? '',
+        keyPlaceholder: defaultStr(t('tag.keyPlaceholder')),
+        valuePlaceholder: defaultStr(t('tag.valuePlaceholder')),
+        addButton: defaultStr(t('tag.addButton')),
+        removeButton: defaultStr(t('tag.removeButton')),
+        undoButton: defaultStr(t('tag.undoButton')),
+        undoPrompt: defaultStr(t('tag.undoPrompt')),
+        loading: defaultStr(t('tag.loading')),
+        keyHeader: defaultStr(t('tag.keyHeader')),
+        valueHeader: defaultStr(t('tag.valueHeader')),
+        optional: defaultStr(t('tag.optional')),
+        keySuggestion: defaultStr(t('tag.keySuggestion')),
+        valueSuggestion: defaultStr(t('tag.valueSuggestion')),
+        emptyTags: defaultStr(t('tag.emptyTags')),
+        tooManyKeysSuggestion: defaultStr(t('tag.tooManyKeysSuggestion'), ''),
+        tooManyValuesSuggestion: defaultStr(
+          t('tag.tooManyValuesSuggestion'),
+          ''
+        ),
+        keysSuggestionLoading: defaultStr(t('tag.keysSuggestionLoading'), ''),
+        keysSuggestionError: defaultStr(t('tag.keysSuggestionError')),
+        valuesSuggestionLoading: defaultStr(
+          t('tag.valuesSuggestionLoading'),
+          ''
+        ),
+        valuesSuggestionError: defaultStr(t('tag.valuesSuggestionError'), ''),
+        emptyKeyError: defaultStr(t('tag.emptyKeyError')),
+        maxKeyCharLengthError: defaultStr(t('tag.maxKeyCharLengthError'), ''),
+        maxValueCharLengthError: defaultStr(
+          t('tag.maxValueCharLengthError'),
+          ''
+        ),
+        duplicateKeyError: defaultStr(t('tag.duplicateKeyError')),
+        invalidKeyError: defaultStr(t('tag.invalidKeyError')),
+        invalidValueError: defaultStr(t('tag.invalidValueError')),
+        awsPrefixError: defaultStr(t('tag.awsPrefixError')),
         tagLimit: (availableTags, tagLimit) =>
           renderTagLimit(availableTags, tagLimit),
         tagLimitReached: (tagLimit) =>

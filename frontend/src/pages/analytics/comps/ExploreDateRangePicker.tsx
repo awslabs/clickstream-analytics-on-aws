@@ -91,10 +91,6 @@ const ExploreDateRangePicker: React.FC<IExploreDateRangePickerProps> = (
   };
 
   const timeGranularityOptions: SelectProps.Options = [
-    {
-      value: ExploreGroupColumn.HOUR,
-      label: t('analytics:options.hourTimeGranularity') ?? '',
-    },
     defaultTimeGranularityOption,
     {
       value: ExploreGroupColumn.WEEK,

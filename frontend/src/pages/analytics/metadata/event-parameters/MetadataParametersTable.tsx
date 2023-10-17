@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { Input, StatusIndicator } from '@cloudscape-design/components';
+import { Input } from '@cloudscape-design/components';
 import {
   getMetadataParametersList,
   updateMetadataDisplay,
@@ -73,14 +73,6 @@ const MetadataParametersTable: React.FC<MetadataParametersTableProps> = (
 
   const renderDataSource = (e: IMetadataEventParameter) => {
     return <MetadataSourceFC source={e.metadataSource} />;
-  };
-
-  const renderHasData = (e: IMetadataEventParameter) => {
-    return (
-      <StatusIndicator type={e.hasData ? 'success' : 'stopped'}>
-        {e.hasData ? 'Yes' : 'No'}
-      </StatusIndicator>
-    );
   };
 
   const renderPlatform = (e: IMetadataEventParameter) => {
@@ -152,11 +144,6 @@ const MetadataParametersTable: React.FC<MetadataParametersTableProps> = (
       cell: (e: IMetadataEventParameter) => {
         return e.valueType;
       },
-    },
-    {
-      id: 'hasData',
-      header: t('analytics:metadata.eventParameter.tableColumnHasData'),
-      cell: (e: IMetadataEventParameter) => renderHasData(e),
     },
     {
       id: 'platform',
@@ -257,13 +244,14 @@ const MetadataParametersTable: React.FC<MetadataParametersTableProps> = (
     newItem: IMetadataEvent | IMetadataEventParameter | IMetadataUserAttribute
   ) => {
     try {
+      const parameter = newItem as IMetadataEventParameter;
       const { success, message }: ApiResponse<null> =
         await updateMetadataDisplay({
-          id: `${EVENT_PARAMETER_DISPLAY_PREFIX}${newItem.projectId}#${newItem.appId}#${newItem.name}`,
-          projectId: newItem.projectId,
-          appId: newItem.appId,
-          displayName: newItem.displayName,
-          description: newItem.description,
+          id: `${EVENT_PARAMETER_DISPLAY_PREFIX}${parameter.projectId}#${parameter.appId}#${parameter.name}#${parameter.valueType}`,
+          projectId: parameter.projectId,
+          appId: parameter.appId,
+          displayName: parameter.displayName,
+          description: parameter.description,
         });
       if (!success) {
         throw new Error(message);

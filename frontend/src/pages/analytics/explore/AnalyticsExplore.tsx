@@ -38,7 +38,7 @@ import CustomBreadCrumb from 'components/layouts/CustomBreadCrumb';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { MetadataSource } from 'ts/explore-types';
+import { MetadataParameterType, MetadataSource } from 'ts/explore-types';
 import {
   metadataEventsConvertToCategoryItemType,
   getWarmUpParameters,
@@ -213,16 +213,16 @@ const AnalyticsExplore: React.FC = () => {
   const listAllAttributes = async () => {
     try {
       const parameters = await getAllParameters();
-      const userAttributes = await getUserAttributes();
-      const presetParameters = parameters?.filter(
-        (item) => item.metadataSource === MetadataSource.PRESET
+      const publicParameters = parameters?.filter(
+        (item) => item.parameterType === MetadataParameterType.PUBLIC
       );
+      const userAttributes = await getUserAttributes();
       const presetUserAttributes = userAttributes.filter(
         (item) => item.metadataSource === MetadataSource.PRESET
       );
       const conditionOptions = parametersConvertToCategoryItemType(
         presetUserAttributes,
-        presetParameters
+        publicParameters
       );
       setPresetParameters(conditionOptions);
     } catch (error) {
@@ -234,9 +234,6 @@ const AnalyticsExplore: React.FC = () => {
     loadPipeline();
     listMetadataEvents();
     listAllAttributes();
-    if (selectedOption?.value === 'Path') {
-      getAllPathNodes();
-    }
   };
 
   useEffect(() => {
@@ -244,6 +241,12 @@ const AnalyticsExplore: React.FC = () => {
       loadData();
     }
   }, [projectId, appId]);
+
+  useEffect(() => {
+    if (projectId && appId && selectedOption?.value === 'Path') {
+      getAllPathNodes();
+    }
+  }, [selectedOption]);
 
   return (
     <div className="flex">
@@ -267,31 +270,37 @@ const AnalyticsExplore: React.FC = () => {
                       <Link variant="info">{t('info')}</Link>
                     </Popover>
                   }
-                  description={t('analytics:explore.description')}
-                  actions={
-                    <FormField
-                      label={
-                        <SpaceBetween direction="horizontal" size="xxs">
-                          {t('analytics:explore.analyticsModel')}
-                          <Popover
-                            triggerType="custom"
-                            content={t(
-                              'analytics:information.analyticsModelInfo'
-                            )}
-                          >
-                            <Link variant="info">{t('info')}</Link>
-                          </Popover>
-                        </SpaceBetween>
-                      }
-                    >
-                      <Select
-                        selectedOption={selectedOption}
-                        onChange={({ detail }) =>
-                          setSelectedOption(detail.selectedOption)
-                        }
-                        options={analyticsModelOptions}
-                      />
-                    </FormField>
+                  description={
+                    <SpaceBetween direction="vertical" size="s">
+                      <div>{t('analytics:explore.description')}</div>
+                      <div className="flex align-center">
+                        <FormField
+                          label={
+                            <SpaceBetween direction="horizontal" size="xxs">
+                              {t('analytics:explore.analyticsModel')}
+                              <Popover
+                                triggerType="custom"
+                                content={t(
+                                  'analytics:information.analyticsModelInfo'
+                                )}
+                              >
+                                <Link variant="info">{t('info')}</Link>
+                              </Popover>
+                            </SpaceBetween>
+                          }
+                        ></FormField>
+                        <div className="m-w-320 ml-10">
+                          <Select
+                            disabled={!pipeline}
+                            selectedOption={selectedOption}
+                            onChange={({ detail }) =>
+                              setSelectedOption(detail.selectedOption)
+                            }
+                            options={analyticsModelOptions}
+                          />
+                        </div>
+                      </div>
+                    </SpaceBetween>
                   }
                 >
                   {t('analytics:explore.title')}

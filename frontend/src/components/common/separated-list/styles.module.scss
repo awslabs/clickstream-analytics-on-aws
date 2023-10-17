@@ -11,20 +11,25 @@
  *  and limitations under the License.
  */
 
-import { Spinner } from '@cloudscape-design/components';
-import React from 'react';
+.root {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
 
-interface LoadingProps {
-  isPage?: boolean;
+  li {
+    border-top: 1px solid #ccc;
+    padding: 0.8rem 0;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+
+    &:first-child {
+      padding-top: 0;
+      border-top: none;
+    }
+
+    &:last-child {
+      padding-bottom: 0;
+    }
+  }
 }
-
-const Loading: React.FC<LoadingProps> = (props: LoadingProps) => {
-  const { isPage } = props;
-  return (
-    <div className={isPage ? 'page-loading' : 'content-loading'}>
-      <Spinner />
-    </div>
-  );
-};
-
-export default Loading;

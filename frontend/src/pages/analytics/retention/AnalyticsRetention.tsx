@@ -12,24 +12,22 @@
  */
 
 import {
-  Box,
   Button,
   ColumnLayout,
   Container,
   DateRangePickerProps,
   Header,
-  Icon,
   Link,
   Popover,
   SegmentedControl,
   SegmentedControlProps,
   SelectProps,
   SpaceBetween,
-  Toggle,
 } from '@cloudscape-design/components';
 import { previewRetention } from 'apis/analytics';
 import ExtendIcon from 'components/common/ExtendIcon';
 import Loading from 'components/common/Loading';
+import SectionTitle from 'components/common/title/SectionTitle';
 import {
   CategoryItemType,
   DEFAULT_CONDITION_DATA,
@@ -39,7 +37,6 @@ import {
   IRetentionAnalyticsItem,
   SegmentationFilterDataType,
 } from 'components/eventselect/AnalyticsType';
-import EventItem from 'components/eventselect/EventItem';
 import RetentionSelect from 'components/eventselect/RetentionSelect';
 import SegmentationFilter from 'components/eventselect/SegmentationFilter';
 import { cloneDeep } from 'lodash';
@@ -63,6 +60,7 @@ import {
   parametersConvertToCategoryItemType,
   validRetentionAnalyticsItem,
 } from '../analytics-utils';
+import AttributeGroup from '../comps/AttributeGroup';
 import ExploreDateRangePicker from '../comps/ExploreDateRangePicker';
 import ExploreEmbedFrame from '../comps/ExploreEmbedFrame';
 import SaveToDashboardModal from '../comps/SelectDashboardModal';
@@ -118,8 +116,6 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
     },
   ]);
 
-  const [associateParameterChecked, setAssociateParameterChecked] =
-    useState<boolean>(true);
   const [segmentationOptionData, setSegmentationOptionData] =
     useState<SegmentationFilterDataType>({
       ...INIT_SEGMENTATION_DATA,
@@ -350,40 +346,13 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
             </Header>
           }
         >
-          <ColumnLayout columns={3} variant="text-grid">
-            <SpaceBetween direction="vertical" size="l">
-              <div>
-                <Box variant="awsui-key-label">
-                  {t('analytics:labels.associateParameter')}
-                  <Popover
-                    triggerType="custom"
-                    size="small"
-                    content="This instance contains insufficient memory. Stop the instance, choose a different instance type with more memory, and restart it."
-                  >
-                    <Icon name="status-info" size="small" />
-                  </Popover>
-                </Box>
-                <Toggle
-                  onChange={({ detail }) =>
-                    setAssociateParameterChecked(detail.checked)
-                  }
-                  checked={associateParameterChecked}
-                >
-                  {associateParameterChecked ? 'On' : 'Off'}
-                </Toggle>
-              </div>
-            </SpaceBetween>
-          </ColumnLayout>
           <br />
           <ColumnLayout columns={2} variant="text-grid">
             <SpaceBetween direction="vertical" size="xs">
-              <Button
-                variant="link"
-                iconName="menu"
-                className="cs-analytics-select-event"
-              >
-                {t('analytics:labels.defineMetrics')}
-              </Button>
+              <SectionTitle
+                type="event"
+                title={t('analytics:labels.defineMetrics')}
+              />
               <RetentionSelect
                 data={eventOptionData}
                 eventOptionList={categoryEvents}
@@ -609,13 +578,7 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
               />
             </SpaceBetween>
             <SpaceBetween direction="vertical" size="xs">
-              <Button
-                variant="link"
-                iconName="filter"
-                className="cs-analytics-select-filter"
-              >
-                {t('analytics:labels.filters')}
-              </Button>
+              <SectionTitle type="filter" />
               <SegmentationFilter
                 segmentationData={segmentationOptionData}
                 addNewConditionItem={() => {
@@ -666,27 +629,12 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
                 }}
               />
               <br />
-              <Button variant="link" className="cs-analytics-select-group">
-                {t('analytics:labels.attributeGrouping')}
-              </Button>
-              <div className="cs-analytics-select-group-item">
-                <div className="cs-analytics-dropdown">
-                  <div className="cs-analytics-parameter">
-                    <div className="flex-1">
-                      <EventItem
-                        placeholder={
-                          t('analytics:labels.attributeSelectPlaceholder') ?? ''
-                        }
-                        categoryOption={groupOption}
-                        changeCurCategoryOption={(item) => {
-                          setGroupOption(item);
-                        }}
-                        categories={presetParameters}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <SectionTitle type="group" />
+              <AttributeGroup
+                presetParameters={presetParameters}
+                groupOption={groupOption}
+                setGroupOption={setGroupOption}
+              />
             </SpaceBetween>
           </ColumnLayout>
           <br />

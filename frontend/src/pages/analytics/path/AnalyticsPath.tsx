@@ -12,13 +12,11 @@
  */
 
 import {
-  Box,
   Button,
   ColumnLayout,
   Container,
   DateRangePickerProps,
   Header,
-  Icon,
   Input,
   Link,
   Popover,
@@ -28,6 +26,8 @@ import {
 } from '@cloudscape-design/components';
 import { previewPath } from 'apis/analytics';
 import Loading from 'components/common/Loading';
+import InfoTitle from 'components/common/title/InfoTitle';
+import SectionTitle from 'components/common/title/SectionTitle';
 import {
   CategoryItemType,
   DEFAULT_CONDITION_DATA,
@@ -52,7 +52,7 @@ import {
   MetadataPlatform,
   QuickSightChartType,
 } from 'ts/explore-types';
-import { alertMsg, generateStr } from 'ts/utils';
+import { alertMsg, defaultStr, generateStr } from 'ts/utils';
 import {
   getDashboardCreateParameters,
   getDateRange,
@@ -111,14 +111,14 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
 
   const defaultComputeMethodOption: SelectProps.Option = {
     value: ExploreComputeMethod.USER_ID_CNT,
-    label: t('analytics:options.userNumber') ?? 'User number',
+    label: defaultStr(t('analytics:options.userNumber'), 'User number'),
   };
 
   const computeMethodOptions: SelectProps.Options = [
     defaultComputeMethodOption,
     {
       value: ExploreComputeMethod.EVENT_CNT,
-      label: t('analytics:options.eventNumber') ?? 'Event number',
+      label: defaultStr(t('analytics:options.eventNumber'), 'Event number'),
     },
   ];
   const [selectedMetric, setSelectedMetric] =
@@ -126,11 +126,11 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
 
   const defaultSessionDefinitionOption: SelectProps.Option = {
     value: ExplorePathSessionDef.SESSION,
-    label: t('analytics:options.sessionId') ?? '',
+    label: defaultStr(t('analytics:options.sessionId')),
   };
   const customSessionDefinitionOption: SelectProps.Option = {
     value: ExplorePathSessionDef.CUSTOMIZE,
-    label: t('analytics:options.sessionCustom') ?? '',
+    label: defaultStr(t('analytics:options.sessionCustom')),
   };
 
   const sessionDefinitionOptions: SelectProps.Options = [
@@ -159,26 +159,26 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
 
   const defaultNodeTypeOption: SelectProps.Option = {
     value: ExplorePathNodeType.EVENT,
-    label: t('analytics:options.pathNodeEventName') ?? '',
+    label: defaultStr(t('analytics:options.pathNodeEventName')),
   };
 
   const nodeTypeOptions: SelectProps.Options = [
     defaultNodeTypeOption,
     {
       value: ExplorePathNodeType.SCREEN_NAME,
-      label: t('analytics:options.pathNodeScreenName') ?? '',
+      label: defaultStr(t('analytics:options.pathNodeScreenName')),
     },
     {
       value: ExplorePathNodeType.SCREEN_ID,
-      label: t('analytics:options.pathNodeScreenID') ?? '',
+      label: defaultStr(t('analytics:options.pathNodeScreenID')),
     },
     {
       value: ExplorePathNodeType.PAGE_TITLE,
-      label: t('analytics:options.pathNodePageTitle') ?? '',
+      label: defaultStr(t('analytics:options.pathNodePageTitle')),
     },
     {
       value: ExplorePathNodeType.PAGE_URL,
-      label: t('analytics:options.pathNodePageUrl') ?? '',
+      label: defaultStr(t('analytics:options.pathNodePageUrl')),
     },
   ];
   const [selectedNodeType, setSelectedNodeType] =
@@ -186,22 +186,22 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
 
   const defaultPlatformOption: SelectProps.Option = {
     value: MetadataPlatform.WEB,
-    label: t('analytics:options.platformWeb') ?? '',
+    label: defaultStr(t('analytics:options.platformWeb')),
   };
 
   const platformOptions: SelectProps.Options = [
     defaultPlatformOption,
     {
       value: MetadataPlatform.ANDROID,
-      label: t('analytics:options.platformAndroid') ?? '',
+      label: defaultStr(t('analytics:options.platformAndroid')),
     },
     {
       value: MetadataPlatform.IOS,
-      label: t('analytics:options.platformIOS') ?? '',
+      label: defaultStr(t('analytics:options.platformIOS')),
     },
     {
       value: MetadataPlatform.WECHAT_MINIPROGRAM,
-      label: t('analytics:options.platformWechatMinPro') ?? '',
+      label: defaultStr(t('analytics:options.platformWechatMinPro')),
     },
   ];
 
@@ -241,14 +241,14 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
   const [timeGranularity, setTimeGranularity] =
     React.useState<SelectProps.Option>({
       value: ExploreGroupColumn.DAY,
-      label: t('analytics:options.dayTimeGranularity') ?? '',
+      label: defaultStr(t('analytics:options.dayTimeGranularity')),
     });
 
   const resetConfig = async () => {
     setLoadingData(true);
     setSelectedMetric({
       value: ExploreComputeMethod.USER_ID_CNT,
-      label: t('analytics:options.userNumber') ?? 'User number',
+      label: defaultStr(t('analytics:options.userNumber'), 'User number'),
     });
     setEventOptionData([
       {
@@ -267,15 +267,15 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
     });
     setTimeGranularity({
       value: ExploreGroupColumn.DAY,
-      label: t('analytics:options.dayTimeGranularity') ?? '',
+      label: defaultStr(t('analytics:options.dayTimeGranularity')),
     });
     setSelectedNodeType({
       value: ExplorePathNodeType.EVENT,
-      label: t('analytics:options.pathNodeEventName') ?? '',
+      label: defaultStr(t('analytics:options.pathNodeEventName')),
     });
     setSelectedSessionDefinition({
       value: ExplorePathSessionDef.SESSION,
-      label: t('analytics:options.sessionId') ?? '',
+      label: defaultStr(t('analytics:options.sessionId')),
     });
     setSelectedWindowUnit(minuteWindowUnitOption);
     setWindowValue('5');
@@ -290,7 +290,7 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
     sheetId: string,
     sheetName: string,
     chartTitle: string,
-    chartSubTitle: string,
+    chartSubTitle: string
   ) => {
     if (
       eventOptionData.length === 0 ||
@@ -306,7 +306,7 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
         sheetId,
         sheetName,
         chartTitle,
-        chartSubTitle,
+        chartSubTitle
       );
       if (!body) {
         alertMsg(
@@ -368,12 +368,12 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
           )
         : undefined;
     const pathAnalysisNodes = eventOptionData.map((item) => {
-      return item.selectedEventOption?.value ?? '';
+      return defaultStr(item.selectedEventOption?.value);
     });
     const pathAnalysisParameter: IPathAnalysisParameter = {
       platform: pathAnalysisPlatform,
       sessionType: selectedSessionDefinition?.value,
-      nodeType: selectedNodeType?.value ?? ExplorePathNodeType.EVENT,
+      nodeType: defaultStr(selectedNodeType?.value, ExplorePathNodeType.EVENT),
       lagSeconds: pathAnalysisLagSeconds,
       nodes: pathAnalysisNodes,
     };
@@ -384,12 +384,15 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
       locale: getLngFromLocalStorage(),
       projectId: pipeline.projectId,
       pipelineId: pipeline.pipelineId,
-      appId: appId ?? '',
+      appId: defaultStr(appId),
       sheetName: `path_sheet_${eventId}`,
       viewName: `path_view_${eventId}`,
       dashboardCreateParameters: parameters,
       specifyJoinColumn: false,
-      computeMethod: selectedMetric?.value ?? ExploreComputeMethod.USER_ID_CNT,
+      computeMethod: defaultStr(
+        selectedMetric?.value,
+        ExploreComputeMethod.USER_ID_CNT
+      ),
       eventAndConditions: getEventAndConditions(eventOptionData),
       globalEventCondition: getGlobalEventCondition(segmentationOptionData),
       maxStep: 10,
@@ -531,18 +534,10 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
         >
           <div className="cs-analytics-config">
             <SpaceBetween direction="vertical" size="xs">
-              <Box variant="awsui-key-label">
-                <SpaceBetween direction="horizontal" size="xxs">
-                  {t('analytics:labels.metrics')}
-                  <Popover
-                    triggerType="custom"
-                    size="small"
-                    content={t('analytics:information.pathMetricsInfo')}
-                  >
-                    <Icon name="status-info" size="small" />
-                  </Popover>
-                </SpaceBetween>
-              </Box>
+              <InfoTitle
+                title={t('analytics:labels.metrics')}
+                popoverDescription={t('analytics:information.pathMetricsInfo')}
+              />
               <div className="cs-analytics-config">
                 <Select
                   selectedOption={selectedMetric}
@@ -554,18 +549,12 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
               </div>
             </SpaceBetween>
             <SpaceBetween direction="vertical" size="xs">
-              <Box variant="awsui-key-label">
-                <SpaceBetween direction="horizontal" size="xxs">
-                  {t('analytics:labels.sessionDefinition')}
-                  <Popover
-                    triggerType="custom"
-                    size="small"
-                    content={t('analytics:information.pathSessionDefInfo')}
-                  >
-                    <Icon name="status-info" size="small" />
-                  </Popover>
-                </SpaceBetween>
-              </Box>
+              <InfoTitle
+                title={t('analytics:labels.sessionDefinition')}
+                popoverDescription={t(
+                  'analytics:information.pathSessionDefInfo'
+                )}
+              />
               <div className="cs-analytics-session-window">
                 <div className="cs-analytics-session-window-type">
                   <Select
@@ -603,18 +592,10 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
               </div>
             </SpaceBetween>
             <SpaceBetween direction="vertical" size="xs">
-              <Box variant="awsui-key-label">
-                <SpaceBetween direction="horizontal" size="xxs">
-                  {t('analytics:labels.nodeType')}
-                  <Popover
-                    triggerType="custom"
-                    size="small"
-                    content={t('analytics:information.pathNodeTypeInfo')}
-                  >
-                    <Icon name="status-info" size="small" />
-                  </Popover>
-                </SpaceBetween>
-              </Box>
+              <InfoTitle
+                title={t('analytics:labels.nodeType')}
+                popoverDescription={t('analytics:information.pathNodeTypeInfo')}
+              />
               <div className="cs-analytics-session-window">
                 <div className="cs-analytics-session-window-type">
                   <Select
@@ -640,13 +621,10 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
           <br />
           <ColumnLayout columns={2} variant="text-grid">
             <SpaceBetween direction="vertical" size="xs">
-              <Button
-                variant="link"
-                iconName="menu"
-                className="cs-analytics-select-event"
-              >
-                {t('analytics:labels.nodesSelect')}
-              </Button>
+              <SectionTitle
+                type="event"
+                title={t('analytics:labels.nodesSelect')}
+              />
               <EventsSelect
                 data={eventOptionData}
                 disableAddCondition={disableAddCondition}
@@ -732,8 +710,8 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
                     return dataObj;
                   });
                 }}
-                changeCurCategoryOption={async (eventIndex, category) => {
-                  const eventName = category?.value;
+                changeCurCategoryOption={(eventIndex, category) => {
+                  const eventName = category?.name;
                   const eventParameters = getEventParameters(eventName);
                   const parameterOption = parametersConvertToCategoryItemType(
                     metadataUserAttributes,
@@ -756,13 +734,7 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
               />
             </SpaceBetween>
             <SpaceBetween direction="vertical" size="xs">
-              <Button
-                variant="link"
-                iconName="filter"
-                className="cs-analytics-select-filter"
-              >
-                {t('analytics:labels.filters')}
-              </Button>
+              <SectionTitle type="filter" />
               <SegmentationFilter
                 segmentationData={segmentationOptionData}
                 addNewConditionItem={() => {

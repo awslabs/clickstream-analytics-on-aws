@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { Input, StatusIndicator } from '@cloudscape-design/components';
+import { Input } from '@cloudscape-design/components';
 import {
   getMetadataUserAttributesList,
   updateMetadataDisplay,
@@ -82,14 +82,6 @@ const MetadataUserAttributesTable: React.FC<
     return <MetadataSourceFC source={e.metadataSource} />;
   };
 
-  const renderHasData = (e: IAttributeTableItem) => {
-    return (
-      <StatusIndicator type={e.hasData ? 'success' : 'stopped'}>
-        {e.hasData ? 'Yes' : 'No'}
-      </StatusIndicator>
-    );
-  };
-
   const COLUMN_DEFINITIONS = [
     {
       id: 'name',
@@ -149,11 +141,6 @@ const MetadataUserAttributesTable: React.FC<
         return e.valueType;
       },
     },
-    {
-      id: 'hasData',
-      header: t('analytics:metadata.userAttribute.tableColumnHasData'),
-      cell: (e: IAttributeTableItem) => renderHasData(e),
-    },
   ];
   const CONTENT_DISPLAY = [
     { id: 'name', visible: true },
@@ -188,16 +175,6 @@ const MetadataUserAttributesTable: React.FC<
       key: 'metadataSource',
       groupValuesLabel: t(
         'analytics:metadata.userAttribute.tableColumnMetadataSource'
-      ),
-      operators: [':', '!:', '=', '!='],
-    },
-    {
-      propertyLabel: t(
-        'analytics:metadata.userAttribute.tableColumnParameterType'
-      ),
-      key: 'parameterType',
-      groupValuesLabel: t(
-        'analytics:metadata.userAttribute.tableColumnParameterType'
       ),
       operators: [':', '!:', '=', '!='],
     },
@@ -250,13 +227,14 @@ const MetadataUserAttributesTable: React.FC<
     newItem: IMetadataEvent | IMetadataEventParameter | IMetadataUserAttribute
   ) => {
     try {
+      const attribute = newItem as IMetadataUserAttribute;
       const { success, message }: ApiResponse<null> =
         await updateMetadataDisplay({
-          id: `${USER_ATTRIBUTE_DISPLAY_PREFIX}${newItem.projectId}#${newItem.appId}#${newItem.name}`,
-          projectId: newItem.projectId,
-          appId: newItem.appId,
-          displayName: newItem.displayName,
-          description: newItem.description,
+          id: `${USER_ATTRIBUTE_DISPLAY_PREFIX}${attribute.projectId}#${attribute.appId}#${attribute.name}#${attribute.valueType}`,
+          projectId: attribute.projectId,
+          appId: attribute.appId,
+          displayName: attribute.displayName,
+          description: attribute.description,
         });
       if (!success) {
         throw new Error(message);
