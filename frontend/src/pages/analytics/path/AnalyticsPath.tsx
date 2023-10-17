@@ -241,9 +241,10 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
 
   const [dateRangeValue, setDateRangeValue] =
     React.useState<DateRangePickerProps.Value>({
+      key: 'previous-1-week',
       type: 'relative',
       amount: 1,
-      unit: 'month',
+      unit: 'week',
     });
 
   const [timeGranularity, setTimeGranularity] =
@@ -269,9 +270,10 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
       conditionOptions: presetParameters,
     });
     setDateRangeValue({
+      key: 'previous-1-week',
       type: 'relative',
       amount: 1,
-      unit: 'month',
+      unit: 'week',
     });
     setTimeGranularity({
       value: ExploreGroupColumn.DAY,
@@ -836,7 +838,7 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
           </div>
           <br />
           {loadingChart ? (
-            <Loading />
+            <Loading isPage />
           ) : (
             <ExploreEmbedFrame
               embedType="dashboard"

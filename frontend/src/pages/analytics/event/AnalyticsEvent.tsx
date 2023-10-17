@@ -144,17 +144,17 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
   };
 
   const [dateRangeValue, setDateRangeValue] =
-    React.useState<DateRangePickerProps.Value>({
+    useState<DateRangePickerProps.Value>({
+      key: 'previous-1-week',
       type: 'relative',
       amount: 1,
-      unit: 'month',
+      unit: 'week',
     });
 
-  const [timeGranularity, setTimeGranularity] =
-    React.useState<SelectProps.Option>({
-      value: ExploreGroupColumn.DAY,
-      label: t('analytics:options.dayTimeGranularity') ?? '',
-    });
+  const [timeGranularity, setTimeGranularity] = useState<SelectProps.Option>({
+    value: ExploreGroupColumn.DAY,
+    label: t('analytics:options.dayTimeGranularity') ?? '',
+  });
 
   const resetConfig = async () => {
     setLoadingData(true);
@@ -170,9 +170,10 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
       conditionOptions: presetParameters,
     });
     setDateRangeValue({
+      key: 'previous-1-week',
       type: 'relative',
       amount: 1,
-      unit: 'month',
+      unit: 'week',
     });
     setExploreEmbedUrl('');
     setTimeGranularity({
@@ -562,7 +563,7 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
           </div>
           <br />
           {loadingChart ? (
-            <Loading />
+            <Loading isPage />
           ) : (
             <ExploreEmbedFrame
               embedType="dashboard"

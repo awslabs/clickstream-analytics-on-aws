@@ -162,9 +162,10 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
 
   const [dateRangeValue, setDateRangeValue] =
     React.useState<DateRangePickerProps.Value>({
+      key: 'previous-1-week',
       type: 'relative',
       amount: 1,
-      unit: 'month',
+      unit: 'week',
     });
 
   const [timeGranularity, setTimeGranularity] =
@@ -319,9 +320,10 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
       conditionOptions: presetParameters,
     });
     setDateRangeValue({
+      key: 'previous-1-week',
       type: 'relative',
       amount: 1,
-      unit: 'month',
+      unit: 'week',
     });
     setTimeGranularity({
       value: ExploreGroupColumn.DAY,
@@ -692,7 +694,7 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
           </div>
           <br />
           {loadingChart ? (
-            <Loading />
+            <Loading isPage />
           ) : (
             <ExploreEmbedFrame
               embedType="dashboard"

@@ -138,7 +138,7 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
     React.useState<DateRangePickerProps.Value>({
       type: 'relative',
       amount: 1,
-      unit: 'month',
+      unit: 'week',
     });
 
   const [timeGranularity, setTimeGranularity] =
@@ -161,7 +161,7 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
     setDateRangeValue({
       type: 'relative',
       amount: 1,
-      unit: 'month',
+      unit: 'week',
     });
     setExploreEmbedUrl('');
     setTimeGranularity({
@@ -665,7 +665,7 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
           </div>
           <br />
           {loadingChart ? (
-            <Loading />
+            <Loading isPage />
           ) : (
             <ExploreEmbedFrame
               embedType="dashboard"
