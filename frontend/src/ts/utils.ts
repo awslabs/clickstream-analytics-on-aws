@@ -330,3 +330,13 @@ export const defaultStr = (
 ) => {
   return i18nStr ?? defaultValue ?? '';
 };
+
+export const checkDisable = (condOne?: boolean, condTwo?: boolean) => {
+  if (condOne) {
+    return true;
+  }
+  if (condTwo) {
+    return true;
+  }
+  return false;
+};

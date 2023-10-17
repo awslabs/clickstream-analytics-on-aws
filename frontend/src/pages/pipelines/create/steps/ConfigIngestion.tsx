@@ -59,7 +59,7 @@ import {
   PIPELINE_SINK_CONNECTOR_LINK,
   buildDocumentLink,
 } from 'ts/url';
-import { isDisabled, ternary } from 'ts/utils';
+import { checkDisable, defaultStr, isDisabled, ternary } from 'ts/utils';
 import BufferKDS from './buffer/BufferKDS';
 import BufferMSK from './buffer/BufferMSK';
 import BufferS3 from './buffer/BufferS3';
@@ -286,8 +286,8 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
   useEffect(() => {
     if (!update && pipelineInfo.selectedRegion && pipelineInfo.selectedVPC) {
       getSubnetListByRegionAndVPC(
-        pipelineInfo.selectedRegion.value || '',
-        pipelineInfo.selectedVPC.value || ''
+        pipelineInfo.selectedRegion.value ?? '',
+        pipelineInfo.selectedVPC.value ?? ''
       );
     }
   }, [pipelineInfo.selectedRegion, pipelineInfo.selectedVPC]);
@@ -316,9 +316,11 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
             label={t('pipeline:create.publicSubnet')}
             description={t('pipeline:create.publicSubnetDesc')}
             stretch
-            errorText={
-              publicSubnetError ? t('pipeline:valid.publicSubnetEmpty') : ''
-            }
+            errorText={ternary(
+              publicSubnetError,
+              t('pipeline:valid.publicSubnetEmpty'),
+              undefined
+            )}
           >
             <Multiselect
               filteringType="auto"
@@ -327,9 +329,9 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
               tokenLimit={3}
               deselectAriaLabel={(e) => `${t('remove')} ${e.label}`}
               options={publicSubnetOptionList}
-              placeholder={t('pipeline:create.subnetPlaceholder') || ''}
+              placeholder={defaultStr(t('pipeline:create.subnetPlaceholder'))}
               selectedAriaLabel="Selected"
-              statusType={loadingSubnet ? 'loading' : 'finished'}
+              statusType={ternary(loadingSubnet, 'loading', 'finished')}
               onChange={(e) => {
                 changePublicSubnets(e.detail.selectedOptions as any);
               }}
@@ -360,9 +362,9 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
               tokenLimit={3}
               deselectAriaLabel={(e) => `${t('remove')} ${e.label}`}
               options={privateSubnetOptionList}
-              placeholder={t('pipeline:create.subnetPlaceholder') || ''}
+              placeholder={defaultStr(t('pipeline:create.subnetPlaceholder'))}
               selectedAriaLabel="Selected"
-              statusType={loadingSubnet ? 'loading' : 'finished'}
+              statusType={ternary(loadingSubnet, 'loading', 'finished')}
               onChange={(e) => {
                 changePrivateSubnets(e.detail.selectedOptions as any);
               }}
@@ -377,9 +379,11 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
             <ColumnLayout columns={3}>
               <FormField
                 stretch
-                errorText={
-                  minCapacityError ? t('pipeline:valid.minCapacityError') : ''
-                }
+                errorText={ternary(
+                  minCapacityError,
+                  t('pipeline:valid.minCapacityError'),
+                  undefined
+                )}
               >
                 <div>{t('pipeline:create.minSize')}</div>
                 <Input
@@ -392,9 +396,11 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
               </FormField>
               <FormField
                 stretch
-                errorText={
-                  maxCapacityError ? t('pipeline:valid.maxCapacityError') : ''
-                }
+                errorText={ternary(
+                  maxCapacityError,
+                  t('pipeline:valid.maxCapacityError'),
+                  undefined
+                )}
               >
                 <div>{t('pipeline:create.maxSize')}</div>
                 <Input
@@ -407,9 +413,11 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
               </FormField>
               <FormField
                 stretch
-                errorText={
-                  warmPoolError ? t('pipeline:valid.warmPoolError') : ''
-                }
+                errorText={ternary(
+                  warmPoolError,
+                  t('pipeline:valid.warmPoolError'),
+                  undefined
+                )}
               >
                 <div>{t('pipeline:create.warmPool')}</div>
                 <Input
@@ -444,10 +452,11 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
             ProtocalType.HTTP && (
             <FormField
               stretch
-              errorText={
-                !acknowledgedHTTPSecurity &&
-                t('pipeline:valid.acknowledgeHTTPSecurity')
-              }
+              errorText={ternary(
+                !acknowledgedHTTPSecurity,
+                t('pipeline:valid.acknowledgeHTTPSecurity'),
+                undefined
+              )}
             >
               <div className="mb-5">
                 <Alert
@@ -511,16 +520,22 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
               <div>
                 <FormField
                   label={t('pipeline:create.certificate')}
-                  errorText={
-                    certificateEmptyError
-                      ? t('pipeline:valid.certificateEmpty')
-                      : ''
-                  }
+                  errorText={ternary(
+                    certificateEmptyError,
+                    t('pipeline:valid.certificateEmpty'),
+                    undefined
+                  )}
                 >
                   <Select
                     disabled={isDisabled(update, pipelineInfo)}
-                    statusType={loadingCertificate ? 'loading' : 'finished'}
-                    placeholder={t('pipeline:create.selectCertificate') || ''}
+                    statusType={ternary(
+                      loadingCertificate,
+                      'loading',
+                      'finished'
+                    )}
+                    placeholder={defaultStr(
+                      t('pipeline:create.selectCertificate')
+                    )}
                     selectedOption={pipelineInfo.selectedCertificate}
                     options={certificateOptionList}
                     onChange={(e) => {
@@ -557,12 +572,14 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
           <FormField
             label={t('pipeline:create.cors')}
             description={t('pipeline:create.corsDesc')}
-            errorText={
-              corsFormatError ? t('pipeline:valid.corsFormatError') : ''
-            }
+            errorText={ternary(
+              corsFormatError,
+              t('pipeline:valid.corsFormatError'),
+              undefined
+            )}
           >
             <Input
-              placeholder={t('pipeline:create.corsPlaceholder') || ''}
+              placeholder={defaultStr(t('pipeline:create.corsPlaceholder'))}
               value={pipelineInfo.ingestionServer.loadBalancer.serverCorsOrigin}
               onChange={(e) => {
                 if (
@@ -583,7 +600,9 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
                 description={t('pipeline:create.requestPathDesc')}
               >
                 <Input
-                  placeholder={t('pipeline:create.requestPlaceholder') || ''}
+                  placeholder={defaultStr(
+                    t('pipeline:create.requestPlaceholder')
+                  )}
                   value={
                     pipelineInfo.ingestionServer.loadBalancer.serverEndpointPath
                   }
@@ -601,10 +620,10 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
 
               <Checkbox
                 controlId="test-aga-id"
-                disabled={
-                  isDisabled(update, pipelineInfo) ||
+                disabled={checkDisable(
+                  isDisabled(update, pipelineInfo),
                   !pipelineInfo.serviceStatus.AGA
-                }
+                )}
                 onChange={({ detail }) => {
                   changeEnableAGA(detail.checked);
                 }}
@@ -632,21 +651,25 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
                   {pipelineInfo.enableAuthentication && (
                     <FormField
                       label={t('pipeline:create.secret')}
-                      errorText={
-                        secretEmptyError
-                          ? t('pipeline:valid.secretEmptyError')
-                          : ''
-                      }
+                      errorText={ternary(
+                        secretEmptyError,
+                        t('pipeline:valid.secretEmptyError'),
+                        undefined
+                      )}
                     >
                       <div className="flex">
                         <div className="flex-1">
                           <Select
                             filteringType="auto"
                             disabled={isDisabled(update, pipelineInfo)}
-                            statusType={loadingSecret ? 'loading' : 'finished'}
-                            placeholder={
-                              t('pipeline:create.selectSecret') || ''
-                            }
+                            statusType={ternary(
+                              loadingSecret,
+                              'loading',
+                              'finished'
+                            )}
+                            placeholder={defaultStr(
+                              t('pipeline:create.selectSecret')
+                            )}
                             selectedOption={pipelineInfo.selectedSecret}
                             options={ssmSecretOptionList}
                             onChange={(e) => {
@@ -729,9 +752,10 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
                   label: t('pipeline:create.bufferMSK'),
                   description: t('pipeline:create.bufferMSKDesc'),
                   value: SinkType.MSK,
-                  disabled:
-                    isDisabled(update, pipelineInfo) ||
-                    !pipelineInfo.serviceStatus.MSK,
+                  disabled: checkDisable(
+                    isDisabled(update, pipelineInfo),
+                    !pipelineInfo.serviceStatus.MSK
+                  ),
                 },
                 {
                   label: t('pipeline:create.bufferS3'),
@@ -825,10 +849,10 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
             >
               <FormField>
                 <Checkbox
-                  disabled={
-                    isDisabled(update, pipelineInfo) ||
+                  disabled={checkDisable(
+                    isDisabled(update, pipelineInfo),
                     !pipelineInfo.serviceStatus.MSK
-                  }
+                  )}
                   onChange={({ detail }) =>
                     changeEnableKafkaConnector(detail.checked)
                   }
@@ -870,30 +894,30 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
                 <FormField
                   label={t('pipeline:create.sinkMaxInterval')}
                   description={t('pipeline:create.sinkMaxIntervalDesc')}
-                  errorText={
-                    sinkIntervalError
-                      ? t('pipeline:valid.sinkIntervalError', {
-                          min:
-                            pipelineInfo.ingestionServer.sinkType ===
-                            SinkType.KDS
-                              ? MIN_KDS_SINK_INTERVAL
-                              : MIN_MSK_SINK_INTERVAL,
-                          max:
-                            pipelineInfo.ingestionServer.sinkType ===
-                            SinkType.KDS
-                              ? MAX_KDS_SINK_INTERVAL
-                              : MAX_MSK_SINK_INTERVAL,
-                        })
-                      : ''
-                  }
+                  errorText={ternary(
+                    sinkIntervalError,
+                    t('pipeline:valid.sinkIntervalError', {
+                      min: ternary(
+                        pipelineInfo.ingestionServer.sinkType === SinkType.KDS,
+                        MIN_KDS_SINK_INTERVAL,
+                        MIN_MSK_SINK_INTERVAL
+                      ),
+                      max: ternary(
+                        pipelineInfo.ingestionServer.sinkType === SinkType.KDS,
+                        MAX_KDS_SINK_INTERVAL,
+                        MAX_MSK_SINK_INTERVAL
+                      ),
+                    }),
+                    undefined
+                  )}
                 >
                   <Input
                     type="number"
-                    placeholder={
-                      pipelineInfo.ingestionServer.sinkType === SinkType.KDS
-                        ? DEFAULT_KDS_SINK_INTERVAL
-                        : DEFAULT_MSK_SINK_INTERVAL
-                    }
+                    placeholder={ternary(
+                      pipelineInfo.ingestionServer.sinkType === SinkType.KDS,
+                      DEFAULT_KDS_SINK_INTERVAL,
+                      DEFAULT_MSK_SINK_INTERVAL
+                    )}
                     value={pipelineInfo.ingestionServer.sinkBatch?.intervalSeconds.toString()}
                     onChange={(e) => {
                       changeSinkMaxInterval(e.detail.value);
@@ -903,30 +927,30 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
                 <FormField
                   label={t('pipeline:create.sinkBatchSize')}
                   description={t('pipeline:create.sinkBatchSizeDesc')}
-                  errorText={
-                    sinkBatchSizeError
-                      ? t('pipeline:valid.sinkSizeError', {
-                          min:
-                            pipelineInfo.ingestionServer.sinkType ===
-                            SinkType.KDS
-                              ? MIN_KDS_BATCH_SIZE
-                              : MIN_MSK_BATCH_SIZE,
-                          max:
-                            pipelineInfo.ingestionServer.sinkType ===
-                            SinkType.KDS
-                              ? MAX_KDS_BATCH_SIZE
-                              : MAX_MSK_BATCH_SIZE,
-                        })
-                      : ''
-                  }
+                  errorText={ternary(
+                    sinkBatchSizeError,
+                    t('pipeline:valid.sinkSizeError', {
+                      min: ternary(
+                        pipelineInfo.ingestionServer.sinkType === SinkType.KDS,
+                        MIN_KDS_BATCH_SIZE,
+                        MIN_MSK_BATCH_SIZE
+                      ),
+                      max: ternary(
+                        pipelineInfo.ingestionServer.sinkType === SinkType.KDS,
+                        MAX_KDS_BATCH_SIZE,
+                        MAX_MSK_BATCH_SIZE
+                      ),
+                    }),
+                    undefined
+                  )}
                 >
                   <Input
                     type="number"
-                    placeholder={
-                      pipelineInfo.ingestionServer.sinkType === SinkType.KDS
-                        ? DEFAULT_KDS_BATCH_SIZE
-                        : DEFAULT_MSK_BATCH_SIZE
-                    }
+                    placeholder={ternary(
+                      pipelineInfo.ingestionServer.sinkType === SinkType.KDS,
+                      DEFAULT_KDS_BATCH_SIZE,
+                      DEFAULT_MSK_BATCH_SIZE
+                    )}
                     value={pipelineInfo.ingestionServer.sinkBatch.size.toString()}
                     onChange={(e) => {
                       changeSinkBatchSize(e.detail.value);
