@@ -93,17 +93,17 @@ def get_page_by_platform(page, platform):
 
 
 class AndroidScreen:
-    SPLASH = ('SplashActivity', "com.shopping.app.SplashActivity")
-    LOGIN = ('LoginActivity', "com.shopping.app.LoginActivity")
-    SIGN_UP = ('SignupActivity', "com.shopping.app.SignupActivity")
-    MAIN = ("MainActivity", "com.shopping.app.MainActivity")
-    CATEGORY = ("CategoryActivity", "com.shopping.app.CategoryActivity")
-    SEARCH = ("SearchActivity", "com.shopping.app.SearchActivity")
-    PRODUCT_DETAIL = ("ProductDetailActivity", "com.shopping.app.ProductDetailActivity")
-    SHOPPING_CART = ("ShoppingCartActivity", "com.shopping.app.ShoppingCartActivity")
-    CHECKOUT = ("CheckoutActivity", "com.shopping.app.CheckoutActivity")
-    BUY_RESULT = ("BuyResultActivity", "com.shopping.app.BuyResultActivity")
-    PROFILE = ("ProfileActivity", "com.shopping.app.ProfileActivity")
+    SPLASH = ('SplashActivity', "com.example.shopping.SplashActivity")
+    LOGIN = ('LoginActivity', "com.example.shopping.LoginActivity")
+    SIGN_UP = ('SignupActivity', "com.example.shopping.SignupActivity")
+    MAIN = ("MainActivity", "com.example.shopping.MainActivity")
+    CATEGORY = ("CategoryActivity", "com.example.shopping.CategoryActivity")
+    SEARCH = ("SearchActivity", "com.example.shopping.SearchActivity")
+    PRODUCT_DETAIL = ("ProductDetailActivity", "com.example.shopping.ProductDetailActivity")
+    SHOPPING_CART = ("ShoppingCartActivity", "com.example.shopping.ShoppingCartActivity")
+    CHECKOUT = ("CheckoutActivity", "com.example.shopping.CheckoutActivity")
+    BUY_RESULT = ("BuyResultActivity", "com.example.shopping.BuyResultActivity")
+    PROFILE = ("ProfileActivity", "com.example.shopping.ProfileActivity")
     EXIT = ("", "")
 
     @staticmethod
@@ -135,17 +135,17 @@ class AndroidScreen:
 
 
 class iOSScreen:
-    SPLASH = ('SplashVC', "com.shopping.app.SplashVC")
-    LOGIN = ('LoginVC', "com.shopping.app.LoginVC")
-    SIGN_UP = ('SignupVC', "com.shopping.app.SignupVC")
-    MAIN = ("MainVC", "com.shopping.app.MainVC")
-    CATEGORY = ("CategoryVC", "com.shopping.app.CategoryVC")
-    SEARCH = ("SearchVC", "com.shopping.app.SearchVC")
-    PRODUCT_DETAIL = ("ProductDetailVC", "com.shopping.app.ProductDetailVC")
-    SHOPPING_CART = ("ShoppingCartVC", "com.shopping.app.ShoppingCartVC")
-    CHECKOUT = ("CheckoutVC", "com.shopping.app.CheckoutVC")
-    BUY_RESULT = ("BuyResultVC", "com.shopping.app.BuyResultVC")
-    PROFILE = ("ProfileVC", "com.shopping.app.ProfileVC")
+    SPLASH = ('SplashVC', "com.example.shopping.SplashVC")
+    LOGIN = ('LoginVC', "com.example.shopping.LoginVC")
+    SIGN_UP = ('SignupVC', "com.example.shopping.SignupVC")
+    MAIN = ("MainVC", "com.example.shopping.MainVC")
+    CATEGORY = ("CategoryVC", "com.example.shopping.CategoryVC")
+    SEARCH = ("SearchVC", "com.example.shopping.SearchVC")
+    PRODUCT_DETAIL = ("ProductDetailVC", "com.example.shopping.ProductDetailVC")
+    SHOPPING_CART = ("ShoppingCartVC", "com.example.shopping.ShoppingCartVC")
+    CHECKOUT = ("CheckoutVC", "com.example.shopping.CheckoutVC")
+    BUY_RESULT = ("BuyResultVC", "com.example.shopping.BuyResultVC")
+    PROFILE = ("ProfileVC", "com.example.shopping.ProfileVC")
     EXIT = ("", "")
 
     @staticmethod

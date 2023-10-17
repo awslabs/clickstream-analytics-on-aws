@@ -35,7 +35,7 @@ sampleAppEvent = {
     "sdk_version": "",
     "sdk_name": "aws-solution-clickstream-sdk",
     "app_version": "",
-    "app_package_name": "com.shopping.app",
+    "app_package_name": "com.example.shopping",
     "app_title": "shopping",
     "user": {
         "_user_first_touch_timestamp": {
