@@ -1202,6 +1202,7 @@ describe('Metadata User Attribute test', () => {
                 value: 'value-02',
               },
             ],
+            hasData: true,
           },
         },
         {
@@ -1216,6 +1217,7 @@ describe('Metadata User Attribute test', () => {
                 value: 'value-02',
               },
             ],
+            hasData: true,
           },
         },
         {
@@ -1232,6 +1234,7 @@ describe('Metadata User Attribute test', () => {
                 value: 'value-02',
               },
             ],
+            hasData: false,
           },
         },
       ],
