@@ -340,6 +340,7 @@ BEGIN
 				property_name NOT LIKE '%timestamp%'
 				AND rank = 1 
 				AND property_value IS NOT NULL
+				AND property_value != ''
 			GROUP BY property_category, property_name, property_value, value_type
 		)
 		GROUP BY project_id, app_info_app_id, month, day_number, property_category, property_name, value_type
