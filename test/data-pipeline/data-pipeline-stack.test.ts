@@ -17,7 +17,7 @@ import { EMR_VERSION_PATTERN, OUTPUT_DATA_PROCESSING_EMR_SERVERLESS_APPLICATION_
 import { DataPipelineStack } from '../../src/data-pipeline-stack';
 import { WIDGETS_ORDER } from '../../src/metrics/settings';
 import { validateSubnetsRule } from '../rules';
-import { genString } from '../utils';
+import { genString, getResourceById } from '../utils';
 
 const c63Str = genString(63);
 const c64Str = genString(64);
@@ -501,6 +501,42 @@ describe('DataPipelineStack parameter test', () => {
     }
   });
 
+});
+
+
+describe('Glue tables have fixed logic id', () => {
+
+  for (const template of nestedTemplates) {
+    test('Glue table `ods_events` logic id is SinkTable20F355C6', ()=> {
+      const tableResource = getResourceById(template, 'SinkTable20F355C6');
+      expect( tableResource.Properties.TableInput.Name).toEqual('ods_events');
+    });
+
+    test('Glue table `ingestion_events` logic id is SourceTable617AB4E1', ()=> {
+      const tableResource = getResourceById(template, 'SourceTable617AB4E1');
+      expect( tableResource.Properties.TableInput.Name).toEqual('ingestion_events');
+    });
+
+    test('Glue table `event` logic id is eventSinkTableA33E3CC9', ()=> {
+      const tableResource = getResourceById(template, 'eventSinkTableA33E3CC9');
+      expect( tableResource.Properties.TableInput.Name).toEqual('event');
+    });
+
+    test('Glue table `event_parameter` logic id is eventparameterSinkTable03A457D7', ()=> {
+      const tableResource = getResourceById(template, 'eventparameterSinkTable03A457D7');
+      expect( tableResource.Properties.TableInput.Name).toEqual('event_parameter');
+    });
+
+    test('Glue table `item` logic id is itemSinkTable7F9A1F7C', ()=> {
+      const tableResource = getResourceById(template, 'itemSinkTable7F9A1F7C');
+      expect( tableResource.Properties.TableInput.Name).toEqual('item');
+    });
+
+    test('Glue table `user` logic id is userSinkTable993D48C3', ()=> {
+      const tableResource = getResourceById(template, 'userSinkTable993D48C3');
+      expect( tableResource.Properties.TableInput.Name).toEqual('user');
+    });
+  }
 });
 
 describe('DataPipelineStack Glue catalog resources test', () => {
@@ -1447,7 +1483,7 @@ test('Should set metrics widgets', () => {
   });
 });
 
-test ('Should has alaram: data Processing Job Failed', ()=> {
+test ('Should has alarm: data Processing Job Failed', ()=> {
   const template = nestedTemplates[0];
   template.hasResourceProperties('AWS::CloudWatch::Alarm', {
     ComparisonOperator: 'GreaterThanThreshold',
@@ -1483,7 +1519,7 @@ test ('Should has alaram: data Processing Job Failed', ()=> {
 });
 
 
-test ('Should has alaram: No data loaded in past 24 hours', ()=> {
+test ('Should has alarm: No data loaded in past 24 hours', ()=> {
   const template = nestedTemplates[0];
   template.hasResourceProperties('AWS::CloudWatch::Alarm', {
     ComparisonOperator: 'LessThanOrEqualToThreshold',

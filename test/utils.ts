@@ -100,3 +100,8 @@ export function findConditionByName(template: Template, conditionName: string) {
   const allConditions = template.toJSON().Conditions;
   return allConditions[conditionName];
 }
+
+
+export function getResourceById(template: Template, logicId: string) {
+  return template.toJSON().Resources[logicId];
+}

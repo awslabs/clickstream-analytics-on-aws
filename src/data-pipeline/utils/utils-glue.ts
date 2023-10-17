@@ -13,6 +13,7 @@
 
 import { Database, DataFormat, Table } from '@aws-cdk/aws-glue-alpha';
 import { Column, Schema } from '@aws-cdk/aws-glue-alpha/lib/schema';
+import { CfnResource } from 'aws-cdk-lib';
 import { IBucket, Bucket } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
 import { getSinkTableLocationPrefix } from './utils-common';
@@ -20,7 +21,7 @@ import { PARTITION_APP } from '../../common/constant';
 import { ClickstreamSinkTables, SinkTableEnum } from '../data-pipeline';
 import { getEventParameterTableColumns } from '../tables/event-parameter-table';
 import { getEventTableColumns } from '../tables/event-table';
-import { getIngestionEventsTableColumns } from '../tables/ingestion-events-tabe';
+import { getIngestionEventsTableColumns } from '../tables/ingestion-events-table';
 import { getItemTableColumns } from '../tables/item-table';
 import { getODSEventsTableColumns } from '../tables/ods-events-table';
 import { getUserTableColumns } from '../tables/user-table';
@@ -31,6 +32,15 @@ interface Props {
   readonly sinkS3Bucket: IBucket;
   readonly sinkS3Prefix: string;
 }
+
+const glueTablesLogicId = {
+  ingestion_events: 'SourceTable617AB4E1',
+  ods_events: 'SinkTable20F355C6',
+  event: 'eventSinkTableA33E3CC9',
+  event_parameter: 'eventparameterSinkTable03A457D7',
+  user: 'userSinkTable993D48C3',
+  item: 'itemSinkTable7F9A1F7C',
+};
 
 export class GlueUtil {
 
@@ -112,7 +122,7 @@ export class GlueUtil {
 
 
   public createSinkTable(glueDatabase: Database, projectId: string, tableName: SinkTableEnum, columns: Column[]) {
-    return new Table(this.scope, `${tableName}-SinkTable`, {
+    const table = new Table(this.scope, `${tableName}-SinkTable`, {
       database: glueDatabase,
       description: `ClickStream data pipeline ${tableName} table`,
       tableName,
@@ -140,5 +150,9 @@ export class GlueUtil {
       bucket: Bucket.fromBucketName(this.scope, `SinkBucketFor${tableName}`, this.props.sinkS3Bucket.bucketName),
       s3Prefix: getSinkTableLocationPrefix(this.props.sinkS3Prefix, projectId, tableName),
     });
+    const tableLogicId = glueTablesLogicId[`${tableName}`];
+    (table.node.defaultChild as CfnResource).overrideLogicalId(tableLogicId);
+
+    return table;
   }
 }
