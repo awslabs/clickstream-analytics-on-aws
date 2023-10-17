@@ -70,9 +70,9 @@ const DropDownContainer: React.FC<DropDownContainerProps> = (
             ) : (
               <>
                 <div>
-                  <div className="csdc-header">
+                  <div className="click-stream-header">
                     {hasTab && (
-                      <div className="csdc-header-tab flex">
+                      <div className="click-stream-header-tab flex">
                         {curPreviewOption && categoryType === 'event' && (
                           <div className="tab-item active">
                             {t('analytics:labels.eventTitle')}
@@ -85,7 +85,7 @@ const DropDownContainer: React.FC<DropDownContainerProps> = (
                         )}
                       </div>
                     )}
-                    <div className="csdc-header-search">
+                    <div className="click-stream-header-search">
                       <Input
                         placeholder="Search"
                         type="search"
@@ -96,9 +96,9 @@ const DropDownContainer: React.FC<DropDownContainerProps> = (
                       />
                     </div>
                   </div>
-                  <div className="csdc-container">
-                    <div className="csdc-container-event-category">
-                      <div className="csdc-container-event-category-content">
+                  <div className="click-stream-container">
+                    <div className="click-stream-container-event-category">
+                      <div className="click-stream-container-event-category-content">
                         <CategoryList
                           categories={categories}
                           selectedCategory={selectedCategory}
@@ -106,7 +106,7 @@ const DropDownContainer: React.FC<DropDownContainerProps> = (
                         />
                       </div>
                     </div>
-                    <div className="csdc-container-event-option-list">
+                    <div className="click-stream-container-event-option-list">
                       <ItemsList
                         selectedItem={selectedItem}
                         filterText={filterText}

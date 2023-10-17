@@ -26,9 +26,9 @@ const EventPreview: React.FC<EventPreviewProps> = (
   const { t } = useTranslation();
   const { previewItem } = props;
   return (
-    <div className="csdc-event-preview">
-      <div className="csdc-event-preview-container">
-        <div className="csdc-event-preview-container-content">
+    <div className="click-stream-event-preview">
+      <div className="click-stream-event-preview-container">
+        <div className="click-stream-event-preview-container-content">
           <div>
             {previewItem.metadataSource === MetadataSource.PRESET ? (
               <>
