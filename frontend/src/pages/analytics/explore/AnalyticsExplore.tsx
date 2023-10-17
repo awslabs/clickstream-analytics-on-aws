@@ -289,7 +289,7 @@ const AnalyticsExplore: React.FC = () => {
                             </SpaceBetween>
                           }
                         ></FormField>
-                        <div className="flex-1 ml-10">
+                        <div className="m-w-320 ml-10">
                           <Select
                             disabled={!pipeline}
                             selectedOption={selectedOption}

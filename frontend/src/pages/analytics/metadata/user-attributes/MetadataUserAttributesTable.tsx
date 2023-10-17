@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { Input, StatusIndicator } from '@cloudscape-design/components';
+import { Input } from '@cloudscape-design/components';
 import {
   getMetadataUserAttributesList,
   updateMetadataDisplay,
@@ -82,14 +82,6 @@ const MetadataUserAttributesTable: React.FC<
     return <MetadataSourceFC source={e.metadataSource} />;
   };
 
-  const renderHasData = (e: IAttributeTableItem) => {
-    return (
-      <StatusIndicator type={e.hasData ? 'success' : 'stopped'}>
-        {e.hasData ? 'Yes' : 'No'}
-      </StatusIndicator>
-    );
-  };
-
   const COLUMN_DEFINITIONS = [
     {
       id: 'name',
@@ -148,11 +140,6 @@ const MetadataUserAttributesTable: React.FC<
       cell: (e: IAttributeTableItem) => {
         return e.valueType;
       },
-    },
-    {
-      id: 'hasData',
-      header: t('analytics:metadata.userAttribute.tableColumnHasData'),
-      cell: (e: IAttributeTableItem) => renderHasData(e),
     },
   ];
   const CONTENT_DISPLAY = [
