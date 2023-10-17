@@ -31,7 +31,7 @@ export const ALPHABETS = Array.from({ length: 26 }, (_, index) =>
 export const MAX_USER_INPUT_LENGTH = 1024;
 export const DEFAULT_ZH_LANG = 'zh-CN';
 export const DEFAULT_EN_LANG = 'en-US';
-export const ZH_LANGUAGE_LIST = ['zh', 'zh-cn', 'zh_CN'];
+export const ZH_LANGUAGE_LIST = [DEFAULT_ZH_LANG, 'zh', 'zh-cn', 'zh_CN'];
 
 export const ZH_TEXT = '简体中文';
 export const EN_TEXT = 'English(US)';
