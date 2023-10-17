@@ -52,6 +52,7 @@ interface RetentionItemProps {
   changeConditionValue: (conditionIndex: number, value: string[]) => void;
   changeEventOption: (event: SelectProps.Option | null) => void;
   changeRelationAttributeOption: (attribute: SelectProps.Option | null) => void;
+  loading?: boolean;
 }
 
 const RetentionItem: React.FC<RetentionItemProps> = (
@@ -77,6 +78,7 @@ const RetentionItem: React.FC<RetentionItemProps> = (
     changeConditionValue,
     changeEventOption,
     changeRelationAttributeOption,
+    loading,
   } = props;
   const { t } = useTranslation();
 
@@ -94,6 +96,7 @@ const RetentionItem: React.FC<RetentionItemProps> = (
             hasTab={true}
             isMultiSelect={false}
             categories={eventOptionList}
+            loading={loading}
           />
         </div>
         {!disableAddCondition && (
@@ -172,6 +175,7 @@ const RetentionItem: React.FC<RetentionItemProps> = (
                 hasTab={false}
                 isMultiSelect={false}
                 categories={attributeOptionList}
+                loading={loading}
               />
             </div>
           </div>

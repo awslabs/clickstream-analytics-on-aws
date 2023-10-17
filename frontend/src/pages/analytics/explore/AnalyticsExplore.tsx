@@ -93,6 +93,7 @@ const AnalyticsExplore: React.FC = () => {
   ];
 
   const [pipeline, setPipeline] = useState<IPipeline | null>(null);
+  const [loadingMetadataEvent, setLoadingMetadataEvent] = useState(false);
   const [metadataEvents, setMetadataEvents] = useState<IMetadataEvent[]>([]);
   const [metadataEventParameters, setMetadataEventParameters] = useState<
     IMetadataEventParameter[]
@@ -176,6 +177,7 @@ const AnalyticsExplore: React.FC = () => {
   };
 
   const listMetadataEvents = async () => {
+    setLoadingMetadataEvent(true);
     try {
       const { success, data }: ApiResponse<ResponseTableData<IMetadataEvent>> =
         await getMetadataEventsList({
@@ -188,7 +190,9 @@ const AnalyticsExplore: React.FC = () => {
         const events = metadataEventsConvertToCategoryItemType(data.items);
         setCategoryEvents(events);
       }
+      setLoadingMetadataEvent(false);
     } catch (error) {
+      setLoadingMetadataEvent(false);
       console.log(error);
     }
   };
@@ -310,6 +314,7 @@ const AnalyticsExplore: React.FC = () => {
               {!pipeline && <Loading />}
               {pipeline && selectedOption?.value === 'Funnel' && (
                 <AnalyticsFunnel
+                  loadingEvents={loadingMetadataEvent}
                   loading={false}
                   loadFunc={loadData}
                   pipeline={pipeline}
@@ -322,6 +327,7 @@ const AnalyticsExplore: React.FC = () => {
               )}
               {pipeline && selectedOption?.value === 'Event' && (
                 <AnalyticsEvent
+                  loadingEvents={loadingMetadataEvent}
                   loading={false}
                   loadFunc={loadData}
                   pipeline={pipeline}
@@ -334,6 +340,7 @@ const AnalyticsExplore: React.FC = () => {
               )}
               {pipeline && selectedOption?.value === 'Path' && (
                 <AnalyticsPath
+                  loadingEvents={loadingMetadataEvent}
                   loading={false}
                   loadFunc={loadData}
                   pipeline={pipeline}

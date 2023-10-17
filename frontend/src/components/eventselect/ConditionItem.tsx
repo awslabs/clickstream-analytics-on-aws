@@ -35,6 +35,7 @@ interface ConditionItemProps {
   changeConditionOperator: (value: SelectProps.Option | null) => void;
   changeCurCategoryOption: (category: SelectProps.Option | null) => void;
   changeConditionValue: (value: string[]) => void;
+  loading?: boolean;
 }
 
 const ConditionItem: React.FC<ConditionItemProps> = (
@@ -48,6 +49,7 @@ const ConditionItem: React.FC<ConditionItemProps> = (
     changeCurCategoryOption,
     changeConditionOperator,
     changeConditionValue,
+    loading,
   } = props;
 
   const [valueOptions, setValueOptions] = useState<SelectProps.Options>([]);
@@ -165,6 +167,7 @@ const ConditionItem: React.FC<ConditionItemProps> = (
             setCurOptions(item);
           }}
           categories={conditionOptions}
+          loading={loading}
         />
       </div>
       <div className="condition-select">

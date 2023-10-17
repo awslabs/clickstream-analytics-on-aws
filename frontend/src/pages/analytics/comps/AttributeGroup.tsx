@@ -25,13 +25,14 @@ interface AttributeGroupProps {
   presetParameters: CategoryItemType[];
   groupOption: IAnalyticsItem | null;
   setGroupOption: (option: OptionDefinition | null) => void;
+  loading?: boolean;
 }
 
 const AttributeGroup: React.FC<AttributeGroupProps> = (
   props: AttributeGroupProps
 ) => {
   const { t } = useTranslation();
-  const { groupOption, setGroupOption, presetParameters } = props;
+  const { groupOption, setGroupOption, presetParameters, loading } = props;
   return (
     <div className="cs-analytics-dropdown">
       <div className="cs-analytics-parameter">
@@ -46,6 +47,7 @@ const AttributeGroup: React.FC<AttributeGroupProps> = (
                 setGroupOption(item);
               }}
               categories={presetParameters}
+              loading={loading}
             />
           </div>
           {groupOption?.value && (

@@ -78,6 +78,7 @@ interface AnalyticsFunnelProps {
   metadataUserAttributes: IMetadataUserAttribute[];
   categoryEvents: CategoryItemType[];
   presetParameters: CategoryItemType[];
+  loadingEvents: boolean;
 }
 
 const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
@@ -91,6 +92,7 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
     metadataUserAttributes,
     categoryEvents,
     presetParameters,
+    loadingEvents,
   } = props;
   const { appId } = useParams();
   const [loadingData, setLoadingData] = useState(loading);
@@ -493,6 +495,7 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
                 </SpaceBetween>
                 <br />
                 <EventsSelect
+                  loading={loadingEvents}
                   data={eventOptionData}
                   eventOptionList={categoryEvents}
                   addEventButtonLabel={t('common:button.addFunnelStep')}

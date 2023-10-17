@@ -74,6 +74,7 @@ interface AnalyticsEventProps {
   metadataUserAttributes: IMetadataUserAttribute[];
   categoryEvents: CategoryItemType[];
   presetParameters: CategoryItemType[];
+  loadingEvents: boolean;
 }
 
 const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
@@ -87,6 +88,7 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
     metadataUserAttributes,
     categoryEvents,
     presetParameters,
+    loadingEvents,
   } = props;
   const { appId } = useParams();
   const [loadingData, setLoadingData] = useState(loading);
@@ -363,6 +365,7 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
                 title={t('analytics:labels.defineMetrics')}
               />
               <EventsSelect
+                loading={loadingEvents}
                 data={eventOptionData}
                 eventOptionList={categoryEvents}
                 addEventButtonLabel={t('common:button.addEvent')}

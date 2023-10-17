@@ -84,6 +84,7 @@ interface AnalyticsPathProps {
     screenNames: IMetadataAttributeValue[];
     screenIds: IMetadataAttributeValue[];
   };
+  loadingEvents: boolean;
 }
 
 const AnalyticsPath: React.FC<AnalyticsPathProps> = (
@@ -98,6 +99,7 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
     categoryEvents,
     presetParameters,
     nodes,
+    loadingEvents,
   } = props;
   const { appId } = useParams();
   const [loadingData, setLoadingData] = useState(loading);
@@ -652,6 +654,7 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
                 title={t('analytics:labels.nodesSelect')}
               />
               <EventsSelect
+                loading={loadingEvents}
                 data={eventOptionData}
                 disableAddCondition={disableAddCondition}
                 eventOptionList={categoryEventsData}

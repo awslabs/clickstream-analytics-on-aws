@@ -29,6 +29,7 @@ interface EventItemProps {
   changeCurCategoryOption: (category: SelectProps.Option | null) => void;
   changeCurCalcMethodOption?: (method: SelectProps.Option | null) => void;
   categories: CategoryItemType[];
+  loading?: boolean;
 }
 
 const EventItem: React.FC<EventItemProps> = (props: EventItemProps) => {
@@ -42,6 +43,7 @@ const EventItem: React.FC<EventItemProps> = (props: EventItemProps) => {
     changeCurCategoryOption,
     changeCurCalcMethodOption,
     categories,
+    loading,
   } = props;
   const { t } = useTranslation();
   const [showDropdown, setShowDropdown] = useState(false);
@@ -122,6 +124,7 @@ const EventItem: React.FC<EventItemProps> = (props: EventItemProps) => {
       </div>
       {showDropdown && (
         <DropDownContainer
+          loading={loading}
           selectedItem={categoryOption}
           changeSelectItem={(item) => {
             changeCurCategoryOption(item);

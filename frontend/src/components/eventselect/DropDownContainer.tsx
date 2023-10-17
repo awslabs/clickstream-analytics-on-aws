@@ -12,6 +12,7 @@
  */
 
 import { Input } from '@cloudscape-design/components';
+import Loading from 'components/common/Loading';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { CategoryItemType, IAnalyticsItem } from './AnalyticsType';
@@ -25,13 +26,14 @@ interface DropDownContainerProps {
   categories: CategoryItemType[];
   selectedItem: IAnalyticsItem | null;
   changeSelectItem: (item: IAnalyticsItem) => void;
+  loading?: boolean;
 }
 
 const DropDownContainer: React.FC<DropDownContainerProps> = (
   props: DropDownContainerProps
 ) => {
   const { t } = useTranslation();
-  const { hasTab, categories, selectedItem, changeSelectItem } = props;
+  const { hasTab, categories, selectedItem, changeSelectItem, loading } = props;
   const [categoryType, setCategoryType] = useState<string>('event');
   const [selectedCategory, setSelectedCategory] = useState<number>(0);
   const [curPreviewOption, setCurPreviewOption] = useState<IAnalyticsItem>();
@@ -63,62 +65,68 @@ const DropDownContainer: React.FC<DropDownContainerProps> = (
       <div className="cs-dropdown-pop-wrapper">
         <div className="cs-dropdown-pop-container">
           <div className="cs-dropdown-container">
-            <div>
-              <div className="csdc-header">
-                {hasTab && (
-                  <div className="csdc-header-tab flex">
-                    {curPreviewOption && categoryType === 'event' && (
-                      <div className="tab-item active">
-                        {t('analytics:labels.eventTitle')}
+            {loading ? (
+              <Loading isPage />
+            ) : (
+              <>
+                <div>
+                  <div className="csdc-header">
+                    {hasTab && (
+                      <div className="csdc-header-tab flex">
+                        {curPreviewOption && categoryType === 'event' && (
+                          <div className="tab-item active">
+                            {t('analytics:labels.eventTitle')}
+                          </div>
+                        )}
+                        {curPreviewOption && categoryType === 'attribute' && (
+                          <div className="tab-item active">
+                            {t('analytics:labels.attributeTitle')}
+                          </div>
+                        )}
                       </div>
                     )}
-                    {curPreviewOption && categoryType === 'attribute' && (
-                      <div className="tab-item active">
-                        {t('analytics:labels.attributeTitle')}
-                      </div>
-                    )}
+                    <div className="csdc-header-search">
+                      <Input
+                        placeholder="Search"
+                        type="search"
+                        value={filterText}
+                        onChange={(e) => {
+                          setFilterText(e.detail.value);
+                        }}
+                      />
+                    </div>
                   </div>
+                  <div className="csdc-container">
+                    <div className="csdc-container-event-category">
+                      <div className="csdc-container-event-category-content">
+                        <CategoryList
+                          categories={categories}
+                          selectedCategory={selectedCategory}
+                          onCategoryClick={handleCategoryClick}
+                        />
+                      </div>
+                    </div>
+                    <div className="csdc-container-event-option-list">
+                      <ItemsList
+                        selectedItem={selectedItem}
+                        filterText={filterText}
+                        isScroll={isScroll}
+                        categories={categories}
+                        selectedCategory={selectedCategory}
+                        onGroupScroll={handleGroupScroll}
+                        showOptionDetails={showOptionDetails}
+                        changeSelectItem={changeSelectItem}
+                      />
+                    </div>
+                  </div>
+                </div>
+                {curPreviewOption && categoryType === 'event' && (
+                  <EventPreview previewItem={curPreviewOption} />
                 )}
-                <div className="csdc-header-search">
-                  <Input
-                    placeholder="Search"
-                    type="search"
-                    value={filterText}
-                    onChange={(e) => {
-                      setFilterText(e.detail.value);
-                    }}
-                  />
-                </div>
-              </div>
-              <div className="csdc-container">
-                <div className="csdc-container-event-category">
-                  <div className="csdc-container-event-category-content">
-                    <CategoryList
-                      categories={categories}
-                      selectedCategory={selectedCategory}
-                      onCategoryClick={handleCategoryClick}
-                    />
-                  </div>
-                </div>
-                <div className="csdc-container-event-option-list">
-                  <ItemsList
-                    selectedItem={selectedItem}
-                    filterText={filterText}
-                    isScroll={isScroll}
-                    categories={categories}
-                    selectedCategory={selectedCategory}
-                    onGroupScroll={handleGroupScroll}
-                    showOptionDetails={showOptionDetails}
-                    changeSelectItem={changeSelectItem}
-                  />
-                </div>
-              </div>
-            </div>
-            {curPreviewOption && categoryType === 'event' && (
-              <EventPreview previewItem={curPreviewOption} />
-            )}
-            {curPreviewOption && categoryType === 'attribute' && (
-              <AttributePreview previewItem={curPreviewOption} />
+                {curPreviewOption && categoryType === 'attribute' && (
+                  <AttributePreview previewItem={curPreviewOption} />
+                )}
+              </>
             )}
           </div>
         </div>
