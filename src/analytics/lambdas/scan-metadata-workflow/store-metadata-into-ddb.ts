@@ -216,6 +216,7 @@ async function handleUserAttributeMetadata(appId: string, metadataItems: any[]) 
         valueEnum: convertValueEnumToDDBList(record[9].stringValue),
       };
       item.summary = {
+        hasData: true,
         valueEnum: convertValueEnumToDDBList(record[9].stringValue),
       };
     } else {
@@ -233,6 +234,7 @@ async function handleUserAttributeMetadata(appId: string, metadataItems: any[]) 
           valueEnum: convertValueEnumToDDBList(record[9].stringValue),
         },
         summary: {
+          hasData: true,
           valueEnum: convertValueEnumToDDBList(record[9].stringValue),
         },
       };
