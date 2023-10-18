@@ -16,62 +16,56 @@ import { SQLDef } from './model';
 export const reportingViewsDef: SQLDef[] = [
   {
     updatable: 'false',
-    sqlFile: 'clickstream-ods-events-view.sql',
+    sqlFile: 'clickstream_event_view.sql',
   },
   {
     updatable: 'false',
-    sqlFile: 'clickstream-ods-events-parameter-view.sql',
+    sqlFile: 'clickstream_event_parameter_view.sql',
+  },
+  {
+    updatable: 'false',
+    sqlFile: 'clickstream_lifecycle_daily_view.sql',
+  },
+  {
+    updatable: 'false',
+    sqlFile: 'clickstream_lifecycle_weekly_view.sql',
+  },
+  {
+    updatable: 'false',
+    sqlFile: 'clickstream_user_dim_mv_1.sql',
+  },
+  {
+    updatable: 'false',
+    sqlFile: 'clickstream_user_dim_mv_2.sql',
   },
   {
     updatable: 'true',
-    sqlFile: 'clickstream-ods-events-rt-view.sql',
+    sqlFile: 'clickstream_user_dim_view.sql',
+  },
+  {
+    updatable: 'false',
+    sqlFile: 'clickstream_session_mv_1.sql',
+  },
+  {
+    updatable: 'false',
+    sqlFile: 'clickstream_session_mv_2.sql',
   },
   {
     updatable: 'true',
-    sqlFile: 'clickstream-ods-events-parameter-rt-view.sql',
+    sqlFile: 'clickstream_session_view.sql',
   },
   {
     updatable: 'false',
-    sqlFile: 'clickstream-lifecycle-daily-view.sql',
+    sqlFile: 'clickstream_device_view.sql',
   },
   {
     updatable: 'false',
-    sqlFile: 'clickstream-lifecycle-weekly-view.sql',
+    sqlFile: 'clickstream_retention_view.sql',
   },
   {
     updatable: 'false',
-    sqlFile: 'clickstream-user-dim-view.sql',
+    sqlFile: 'clickstream_user_attr_view.sql',
   },
-  {
-    updatable: 'false',
-    sqlFile: 'clickstream-session-view.sql',
-  },
-  {
-    updatable: 'false',
-    sqlFile: 'clickstream-path-view.sql',
-  },
-  {
-    updatable: 'false',
-    sqlFile: 'clickstream-device-view.sql',
-  },
-  {
-    updatable: 'false',
-    sqlFile: 'clickstream-retention-view.sql',
-  },
-  {
-    updatable: 'false',
-    sqlFile: 'clickstream-user-attr-view.sql',
-  },
-
-  {
-    updatable: 'false',
-    sqlFile: 'item-m-view.sql',
-  },
-  {
-    updatable: 'false',
-    sqlFile: 'user-m-view.sql',
-  },
-
 ];
 
 
@@ -102,6 +96,14 @@ export const schemaDefs: SQLDef[] = [
     sqlFile: 'item.sql',
   },
   {
+    updatable: 'false',
+    sqlFile: 'item-m-view.sql',
+  },
+  {
+    updatable: 'false',
+    sqlFile: 'user-m-view.sql',
+  },
+  {
     updatable: 'true',
     sqlFile: 'sp-clickstream-log.sql',
   },
@@ -113,10 +115,6 @@ export const schemaDefs: SQLDef[] = [
     updatable: 'true',
     sqlFile: 'grant-permissions-to-bi-user.sql',
     multipleLine: 'true',
-  },
-  {
-    updatable: 'true',
-    sqlFile: 'dim-users.sql',
   },
   {
     updatable: 'true',

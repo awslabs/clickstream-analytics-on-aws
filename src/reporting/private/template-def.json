@@ -141,11 +141,11 @@
             "ColumnGroupSchemaList": []
         },
         {
-            "Placeholder": "clickstream_ods_events_parameter_view",
+            "Placeholder": "clickstream_event_parameter_view",
             "DataSetSchema": {
                 "ColumnSchemaList": [
                     {
-                        "Name": "event_parameter_value",
+                        "Name": "event_param_key",
                         "DataType": "STRING"
                     },
                     {
@@ -161,7 +161,31 @@
                         "DataType": "STRING"
                     },
                     {
-                        "Name": "event_parameter_key",
+                        "Name": "event_param_string_value",
+                        "DataType": "STRING"
+                    },
+                    {
+                        "Name": "event_param_double_value",
+                        "DataType": "NUMBER"
+                    },
+                    {
+                        "Name": "event_param_float_value",
+                        "DataType": "NUMBER"
+                    },
+                    {
+                        "Name": "event_param_int_value",
+                        "DataType": "INTEGER"
+                    },
+                    {
+                        "Name": "platform",
+                        "DataType": "STRING"
+                    },
+                    {
+                        "Name": "user_id",
+                        "DataType": "STRING"
+                    },
+                    {
+                        "Name": "user_pseudo_id",
                         "DataType": "STRING"
                     }
                 ]
@@ -169,7 +193,7 @@
             "ColumnGroupSchemaList": []
         },
         {
-            "Placeholder": "clickstream_ods_events_view",
+            "Placeholder": "clickstream_event_view",
             "DataSetSchema": {
                 "ColumnSchemaList": [
                     {
@@ -229,6 +253,10 @@
                         "DataType": "STRING"
                     },
                     {
+                        "Name": "user_id",
+                        "DataType": "STRING"
+                    },
+                    {
                         "Name": "ua_os",
                         "DataType": "STRING"
                     },
@@ -242,50 +270,6 @@
                     },
                     {
                         "Name": "app_info_package_id",
-                        "DataType": "STRING"
-                    }
-                ]
-            },
-            "ColumnGroupSchemaList": []
-        },
-        {
-            "Placeholder": "clickstream_path_view",
-            "DataSetSchema": {
-                "ColumnSchemaList": [
-                    {
-                        "Name": "event_name",
-                        "DataType": "STRING"
-                    },
-                    {
-                        "Name": "platform",
-                        "DataType": "STRING"
-                    },
-                    {
-                        "Name": "event_date",
-                        "DataType": "DATETIME"
-                    },
-                    {
-                        "Name": "event_id",
-                        "DataType": "STRING"
-                    },
-                    {
-                        "Name": "user_pseudo_id",
-                        "DataType": "STRING"
-                    },
-                    {
-                        "Name": "event_rank",
-                        "DataType": "INTEGER"
-                    },
-                    {
-                        "Name": "event_timestamp",
-                        "DataType": "INTEGER"
-                    },
-                    {
-                        "Name": "current_screen",
-                        "DataType": "STRING"
-                    },
-                    {
-                        "Name": "next_screen",
                         "DataType": "STRING"
                     }
                 ]
@@ -382,6 +366,34 @@
                     },
                     {
                         "Name": "custom_attr_key",
+                        "DataType": "STRING"
+                    },
+                    {
+                        "Name": "user_first_touch_timestamp",
+                        "DataType": "INTEGER"
+                    },
+                    {
+                        "Name": "_first_visit_date",
+                        "DataType": "DATETIME"
+                    },
+                    {
+                        "Name": "_first_referer",
+                        "DataType": "STRING"
+                    },
+                    {
+                        "Name": "_first_traffic_source_type",
+                        "DataType": "STRING"
+                    },
+                    {
+                        "Name": "_first_traffic_medium",
+                        "DataType": "STRING"
+                    },
+                    {
+                        "Name": "_first_traffic_source",
+                        "DataType": "STRING"
+                    },
+                    {
+                        "Name": "_channel",
                         "DataType": "STRING"
                     }
                 ]
@@ -4176,7 +4188,7 @@
                                         "NumericalMeasureField": {
                                             "FieldId": "11b94932-9ee9-4dc8-8903-494895fd51e2.1.1684995862494",
                                             "Column": {
-                                                "DataSetIdentifier": "clickstream_ods_events_view",
+                                                "DataSetIdentifier": "clickstream_event_view",
                                                 "ColumnName": "Views"
                                             }
                                         }
@@ -4188,7 +4200,7 @@
                                         "DateDimensionField": {
                                             "FieldId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.event_date.1.1684995667101",
                                             "Column": {
-                                                "DataSetIdentifier": "clickstream_ods_events_view",
+                                                "DataSetIdentifier": "clickstream_event_view",
                                                 "ColumnName": "event_date"
                                             },
                                             "HierarchyId": "eeb04f54-a270-4cc7-94ac-e370c5a041b7",
@@ -4272,7 +4284,7 @@
                                             "DateDimensionField": {
                                                 "FieldId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.event_date.0.1684995486248",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_ods_events_view",
+                                                    "DataSetIdentifier": "clickstream_event_view",
                                                     "ColumnName": "event_date"
                                                 },
                                                 "HierarchyId": "2473ad50-c27f-4a10-9662-78fa336addc1",
@@ -4287,7 +4299,7 @@
                                             "CategoricalMeasureField": {
                                                 "FieldId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.event_id.1.1684995502599",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_ods_events_view",
+                                                    "DataSetIdentifier": "clickstream_event_view",
                                                     "ColumnName": "event_id"
                                                 },
                                                 "AggregationFunction": "DISTINCT_COUNT"
@@ -4297,7 +4309,7 @@
                                             "NumericalMeasureField": {
                                                 "FieldId": "11b94932-9ee9-4dc8-8903-494895fd51e2.2.1684995600989",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_ods_events_view",
+                                                    "DataSetIdentifier": "clickstream_event_view",
                                                     "ColumnName": "Views"
                                                 }
                                             }
@@ -4392,7 +4404,7 @@
                                         "CategoricalMeasureField": {
                                             "FieldId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.event_id.0.1684995665285",
                                             "Column": {
-                                                "DataSetIdentifier": "clickstream_ods_events_view",
+                                                "DataSetIdentifier": "clickstream_event_view",
                                                 "ColumnName": "event_id"
                                             },
                                             "AggregationFunction": "DISTINCT_COUNT"
@@ -4405,7 +4417,7 @@
                                         "DateDimensionField": {
                                             "FieldId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.event_date.1.1684995667101",
                                             "Column": {
-                                                "DataSetIdentifier": "clickstream_ods_events_view",
+                                                "DataSetIdentifier": "clickstream_event_view",
                                                 "ColumnName": "event_date"
                                             },
                                             "HierarchyId": "f5513097-3d26-4536-a092-baa348f52183",
@@ -4489,7 +4501,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.event_name.0.1684995936012",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_ods_events_view",
+                                                    "DataSetIdentifier": "clickstream_event_view",
                                                     "ColumnName": "event_name"
                                                 }
                                             }
@@ -4500,7 +4512,7 @@
                                             "CategoricalMeasureField": {
                                                 "FieldId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.event_id.1.1684995937897",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_ods_events_view",
+                                                    "DataSetIdentifier": "clickstream_event_view",
                                                     "ColumnName": "event_id"
                                                 },
                                                 "AggregationFunction": "DISTINCT_COUNT"
@@ -4548,7 +4560,7 @@
                                         "ApplyTo": {
                                             "FieldId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.event_name.0.1684995936012",
                                             "Column": {
-                                                "DataSetIdentifier": "clickstream_ods_events_view",
+                                                "DataSetIdentifier": "clickstream_event_view",
                                                 "ColumnName": "event_name"
                                             }
                                         }
@@ -4609,7 +4621,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "6cd8af54-c0b2-4afd-a83f-519acf8483c0.event_parameter_value.0.1684996254887",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_ods_events_parameter_view",
+                                                    "DataSetIdentifier": "clickstream_event_parameter_view",
                                                     "ColumnName": "event_parameter_value"
                                                 }
                                             }
@@ -4620,7 +4632,7 @@
                                             "CategoricalMeasureField": {
                                                 "FieldId": "6cd8af54-c0b2-4afd-a83f-519acf8483c0.event_id.1.1684996256882",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_ods_events_parameter_view",
+                                                    "DataSetIdentifier": "clickstream_event_parameter_view",
                                                     "ColumnName": "event_id"
                                                 },
                                                 "AggregationFunction": "DISTINCT_COUNT"
@@ -4658,7 +4670,7 @@
                                         "ApplyTo": {
                                             "FieldId": "6cd8af54-c0b2-4afd-a83f-519acf8483c0.event_parameter_value.0.1684996254887",
                                             "Column": {
-                                                "DataSetIdentifier": "clickstream_ods_events_parameter_view",
+                                                "DataSetIdentifier": "clickstream_event_parameter_view",
                                                 "ColumnName": "event_parameter_value"
                                             }
                                         }
@@ -4719,7 +4731,7 @@
                                             "DateDimensionField": {
                                                 "FieldId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.event_date.0.1684996894651",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_ods_events_view",
+                                                    "DataSetIdentifier": "clickstream_event_view",
                                                     "ColumnName": "event_date"
                                                 },
                                                 "HierarchyId": "4e6d8d69-a23b-4b04-8bf1-25329e468932",
@@ -4734,7 +4746,7 @@
                                             "CategoricalMeasureField": {
                                                 "FieldId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.event_id.1.1684996902114",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_ods_events_view",
+                                                    "DataSetIdentifier": "clickstream_event_view",
                                                     "ColumnName": "event_id"
                                                 },
                                                 "AggregationFunction": "COUNT"
@@ -4746,7 +4758,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "7aef6e50-2cb2-4aed-bc46-694ed6202d8e.2.1684996910517",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_ods_events_view",
+                                                    "DataSetIdentifier": "clickstream_event_view",
                                                     "ColumnName": "User Type"
                                                 }
                                             }
@@ -4785,7 +4797,7 @@
                                         "ApplyTo": {
                                             "FieldId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.event_id.1.1684996902114",
                                             "Column": {
-                                                "DataSetIdentifier": "clickstream_ods_events_view",
+                                                "DataSetIdentifier": "clickstream_event_view",
                                                 "ColumnName": "event_id"
                                             }
                                         }
@@ -4859,7 +4871,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.app_info_version.1.1684997009521",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_ods_events_view",
+                                                    "DataSetIdentifier": "clickstream_event_view",
                                                     "ColumnName": "app_info_version"
                                                 }
                                             }
@@ -4870,7 +4882,7 @@
                                             "CategoricalMeasureField": {
                                                 "FieldId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.event_id.1.1684997013722",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_ods_events_view",
+                                                    "DataSetIdentifier": "clickstream_event_view",
                                                     "ColumnName": "event_id"
                                                 },
                                                 "AggregationFunction": "COUNT"
@@ -4907,7 +4919,7 @@
                                         "ApplyTo": {
                                             "FieldId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.event_id.1.1684997013722",
                                             "Column": {
-                                                "DataSetIdentifier": "clickstream_ods_events_view",
+                                                "DataSetIdentifier": "clickstream_event_view",
                                                 "ColumnName": "event_id"
                                             }
                                         }
@@ -4966,7 +4978,7 @@
                                             "DateDimensionField": {
                                                 "FieldId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.event_date.0.1684997093562",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_ods_events_view",
+                                                    "DataSetIdentifier": "clickstream_event_view",
                                                     "ColumnName": "event_date"
                                                 },
                                                 "HierarchyId": "24c431b9-3888-4aac-90ab-6967d04bc755",
@@ -4981,7 +4993,7 @@
                                             "CategoricalMeasureField": {
                                                 "FieldId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.event_id.1.1684997098319",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_ods_events_view",
+                                                    "DataSetIdentifier": "clickstream_event_view",
                                                     "ColumnName": "event_id"
                                                 },
                                                 "AggregationFunction": "COUNT"
@@ -4991,7 +5003,7 @@
                                             "NumericalMeasureField": {
                                                 "FieldId": "fc639eb4-07ac-43ff-b62e-cb36d7fd79f2.2.1684997100466",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_ods_events_view",
+                                                    "DataSetIdentifier": "clickstream_event_view",
                                                     "ColumnName": "Activity in Last 7 Days"
                                                 }
                                             }
@@ -5000,7 +5012,7 @@
                                             "NumericalMeasureField": {
                                                 "FieldId": "05706569-487d-4572-b2fa-9fd33966e08a.3.1684997101260",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_ods_events_view",
+                                                    "DataSetIdentifier": "clickstream_event_view",
                                                     "ColumnName": "Activity in Last 30 Days"
                                                 }
                                             }
@@ -5105,7 +5117,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.event_id.0.1684997325042",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_ods_events_view",
+                                                    "DataSetIdentifier": "clickstream_event_view",
                                                     "ColumnName": "event_id"
                                                 }
                                             }
@@ -5114,7 +5126,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.event_name.1.1684997332636",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_ods_events_view",
+                                                    "DataSetIdentifier": "clickstream_event_view",
                                                     "ColumnName": "event_name"
                                                 }
                                             }
@@ -5123,7 +5135,7 @@
                                             "NumericalDimensionField": {
                                                 "FieldId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.event_value_in_usd.2.1684997339714",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_ods_events_view",
+                                                    "DataSetIdentifier": "clickstream_event_view",
                                                     "ColumnName": "event_value_in_usd"
                                                 }
                                             }
@@ -5132,7 +5144,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.user_pseudo_id.3.1684997400572",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_ods_events_view",
+                                                    "DataSetIdentifier": "clickstream_event_view",
                                                     "ColumnName": "user_pseudo_id"
                                                 }
                                             }
@@ -5141,7 +5153,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.user_id.4.1684997402726",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_ods_events_view",
+                                                    "DataSetIdentifier": "clickstream_event_view",
                                                     "ColumnName": "user_id"
                                                 }
                                             }
@@ -5150,7 +5162,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.app_info_version.5.1684997423561",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_ods_events_view",
+                                                    "DataSetIdentifier": "clickstream_event_view",
                                                     "ColumnName": "app_info_version"
                                                 }
                                             }
@@ -5159,7 +5171,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.geo_locale.6.1684997430694",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_ods_events_view",
+                                                    "DataSetIdentifier": "clickstream_event_view",
                                                     "ColumnName": "geo_locale"
                                                 }
                                             }
@@ -5223,7 +5235,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "6cd8af54-c0b2-4afd-a83f-519acf8483c0.event_parameter_key.0.1684997464507",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_ods_events_parameter_view",
+                                                    "DataSetIdentifier": "clickstream_event_parameter_view",
                                                     "ColumnName": "event_parameter_key"
                                                 }
                                             }
@@ -5232,7 +5244,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "6cd8af54-c0b2-4afd-a83f-519acf8483c0.event_parameter_value.1.1684997465290",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_ods_events_parameter_view",
+                                                    "DataSetIdentifier": "clickstream_event_parameter_view",
                                                     "ColumnName": "event_parameter_value"
                                                 }
                                             }
@@ -5250,7 +5262,7 @@
             "TextBoxes": [
                 {
                     "SheetTextBoxId": "e1af47c7-b7ce-464e-a359-790b10fc094e",
-                    "Content": "<text-box>\n  <inline font-size=\"20px\">Activity report</inline>\n  <br/>\n  Y\n  <inline font-size=\"16px\">ou can use the Activity report to get insights into the activities the users performed when using your websites and apps. This report measures user activity by the events that users triggered, and let you view the detail attributes of the events. This report mainly bases on data in clickstream_ods_events_view and clickstream_ods_events_parameters_view.</inline>\n</text-box>"
+                    "Content": "<text-box>\n  <inline font-size=\"20px\">Activity report</inline>\n  <br/>\n  Y\n  <inline font-size=\"16px\">ou can use the Activity report to get insights into the activities the users performed when using your websites and apps. This report measures user activity by the events that users triggered, and let you view the detail attributes of the events. This report mainly bases on data in clickstream_event_view and clickstream_event_parameters_view.</inline>\n</text-box>"
                 }
             ],
             "Layouts": [
@@ -5523,7 +5535,7 @@
                                         "CategoricalMeasureField": {
                                             "FieldId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.user_pseudo_id.0.1685001681727",
                                             "Column": {
-                                                "DataSetIdentifier": "clickstream_ods_events_view",
+                                                "DataSetIdentifier": "clickstream_event_view",
                                                 "ColumnName": "user_pseudo_id"
                                             },
                                             "AggregationFunction": "DISTINCT_COUNT"
@@ -5536,7 +5548,7 @@
                                         "DateDimensionField": {
                                             "FieldId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.event_date.1.1685001692998",
                                             "Column": {
-                                                "DataSetIdentifier": "clickstream_ods_events_view",
+                                                "DataSetIdentifier": "clickstream_event_view",
                                                 "ColumnName": "event_date"
                                             },
                                             "DateGranularity": "MONTH",
@@ -5613,7 +5625,7 @@
                                         "CategoricalMeasureField": {
                                             "FieldId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.user_pseudo_id.0.1685001681727",
                                             "Column": {
-                                                "DataSetIdentifier": "clickstream_ods_events_view",
+                                                "DataSetIdentifier": "clickstream_event_view",
                                                 "ColumnName": "user_pseudo_id"
                                             },
                                             "AggregationFunction": "DISTINCT_COUNT"
@@ -5626,7 +5638,7 @@
                                         "DateDimensionField": {
                                             "FieldId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.event_date.1.1685001692998",
                                             "Column": {
-                                                "DataSetIdentifier": "clickstream_ods_events_view",
+                                                "DataSetIdentifier": "clickstream_event_view",
                                                 "ColumnName": "event_date"
                                             },
                                             "DateGranularity": "WEEK",
@@ -5703,7 +5715,7 @@
                                         "CategoricalMeasureField": {
                                             "FieldId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.user_pseudo_id.0.1685001681727",
                                             "Column": {
-                                                "DataSetIdentifier": "clickstream_ods_events_view",
+                                                "DataSetIdentifier": "clickstream_event_view",
                                                 "ColumnName": "user_pseudo_id"
                                             },
                                             "AggregationFunction": "DISTINCT_COUNT"
@@ -5716,7 +5728,7 @@
                                         "DateDimensionField": {
                                             "FieldId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.event_date.1.1685001692998",
                                             "Column": {
-                                                "DataSetIdentifier": "clickstream_ods_events_view",
+                                                "DataSetIdentifier": "clickstream_event_view",
                                                 "ColumnName": "event_date"
                                             },
                                             "HierarchyId": "3f3e86b9-dd03-4480-a147-3b5d272bc6ff",
@@ -5793,7 +5805,7 @@
                                             "DateDimensionField": {
                                                 "FieldId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.event_date.0.1685001800930",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_ods_events_view",
+                                                    "DataSetIdentifier": "clickstream_event_view",
                                                     "ColumnName": "event_date"
                                                 },
                                                 "HierarchyId": "b5be5e55-2258-4d83-a9cc-4a7933c7a662",
@@ -5808,7 +5820,7 @@
                                             "CategoricalMeasureField": {
                                                 "FieldId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.user_pseudo_id.1.1685001812350",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_ods_events_view",
+                                                    "DataSetIdentifier": "clickstream_event_view",
                                                     "ColumnName": "user_pseudo_id"
                                                 },
                                                 "AggregationFunction": "COUNT"
@@ -5818,7 +5830,7 @@
                                             "CategoricalMeasureField": {
                                                 "FieldId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.user_id.2.1685001815523",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_ods_events_view",
+                                                    "DataSetIdentifier": "clickstream_event_view",
                                                     "ColumnName": "user_id"
                                                 },
                                                 "AggregationFunction": "COUNT"
@@ -5913,7 +5925,7 @@
                                             "DateDimensionField": {
                                                 "FieldId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.event_date.0.1685002366843",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_ods_events_view",
+                                                    "DataSetIdentifier": "clickstream_event_view",
                                                     "ColumnName": "event_date"
                                                 },
                                                 "HierarchyId": "397d716a-1f3a-444f-8201-a319c57023d7",
@@ -5928,7 +5940,7 @@
                                             "NumericalMeasureField": {
                                                 "FieldId": "025ce9da-a5bf-49c6-b02e-b708b1497651.1.1685002371923",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_ods_events_view",
+                                                    "DataSetIdentifier": "clickstream_event_view",
                                                     "ColumnName": "DAU/WAU"
                                                 },
                                                 "FormatConfiguration": {
@@ -5954,7 +5966,7 @@
                                             "NumericalMeasureField": {
                                                 "FieldId": "8e593e76-2317-4dcb-9f2b-c2c30a10812e.2.1685002376189",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_ods_events_view",
+                                                    "DataSetIdentifier": "clickstream_event_view",
                                                     "ColumnName": "DAU/MAU"
                                                 },
                                                 "FormatConfiguration": {
@@ -5980,7 +5992,7 @@
                                             "NumericalMeasureField": {
                                                 "FieldId": "1d4680d0-8264-4073-ac1d-ee42d6188212.3.1685002378575",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_ods_events_view",
+                                                    "DataSetIdentifier": "clickstream_event_view",
                                                     "ColumnName": "WAU/MAU"
                                                 },
                                                 "FormatConfiguration": {
@@ -6099,7 +6111,7 @@
                                             "DateDimensionField": {
                                                 "FieldId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.event_date.1.1685002465496",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_ods_events_view",
+                                                    "DataSetIdentifier": "clickstream_event_view",
                                                     "ColumnName": "event_date"
                                                 },
                                                 "HierarchyId": "3e0f7274-8182-4597-b718-c0b47ad37cb3",
@@ -6114,7 +6126,7 @@
                                             "CategoricalMeasureField": {
                                                 "FieldId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.user_pseudo_id.0.1685002455581",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_ods_events_view",
+                                                    "DataSetIdentifier": "clickstream_event_view",
                                                     "ColumnName": "user_pseudo_id"
                                                 },
                                                 "AggregationFunction": "DISTINCT_COUNT"
@@ -6126,7 +6138,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "7aef6e50-2cb2-4aed-bc46-694ed6202d8e.2.1685002471392",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_ods_events_view",
+                                                    "DataSetIdentifier": "clickstream_event_view",
                                                     "ColumnName": "User Type"
                                                 }
                                             }
@@ -6164,7 +6176,7 @@
                                         "ApplyTo": {
                                             "FieldId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.user_pseudo_id.0.1685002455581",
                                             "Column": {
-                                                "DataSetIdentifier": "clickstream_ods_events_view",
+                                                "DataSetIdentifier": "clickstream_event_view",
                                                 "ColumnName": "user_pseudo_id"
                                             }
                                         }
@@ -6238,7 +6250,7 @@
                                             "DateDimensionField": {
                                                 "FieldId": "c7f17272-e5c8-47f6-9735-65726c4053d3.0.1685003101640",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_ods_events_view",
+                                                    "DataSetIdentifier": "clickstream_event_view",
                                                     "ColumnName": "User First Touch Date"
                                                 }
                                             }
@@ -6249,7 +6261,7 @@
                                             "DateDimensionField": {
                                                 "FieldId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.event_date.1.1685003112530",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_ods_events_view",
+                                                    "DataSetIdentifier": "clickstream_event_view",
                                                     "ColumnName": "event_date"
                                                 },
                                                 "FormatConfiguration": {
@@ -6263,7 +6275,7 @@
                                             "NumericalMeasureField": {
                                                 "FieldId": "30028261-e7a8-4f70-8bd1-15aa49582189.2.1685003122261",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_ods_events_view",
+                                                    "DataSetIdentifier": "clickstream_event_view",
                                                     "ColumnName": "Retention Rate"
                                                 },
                                                 "FormatConfiguration": {
@@ -8759,322 +8771,6 @@
                 }
             ],
             "ContentType": "INTERACTIVE"
-        },
-        {
-            "SheetId": "a9c6b8ef-a967-4c9d-89c5-fbb2ce817b35",
-            "Name": "Path explorer",
-            "ParameterControls": [
-                {
-                    "DateTimePicker": {
-                        "ParameterControlId": "8ef9a288-596c-4843-a8ef-e067c3538376",
-                        "Title": "Start date",
-                        "SourceParameterName": "EventStartDate",
-                        "DisplayOptions": {
-                            "TitleOptions": {
-                                "Visibility": "VISIBLE",
-                                "FontConfiguration": {
-                                    "FontSize": {
-                                        "Relative": "MEDIUM"
-                                    }
-                                }
-                            },
-                            "DateTimeFormat": "YYYY/MM/DD"
-                        }
-                    }
-                },
-                {
-                    "DateTimePicker": {
-                        "ParameterControlId": "2cb7b2be-81d6-41b9-8516-2c035a5fb65b",
-                        "Title": "End date",
-                        "SourceParameterName": "EventEndDate",
-                        "DisplayOptions": {
-                            "TitleOptions": {
-                                "Visibility": "VISIBLE",
-                                "FontConfiguration": {
-                                    "FontSize": {
-                                        "Relative": "MEDIUM"
-                                    }
-                                }
-                            },
-                            "DateTimeFormat": "YYYY/MM/DD"
-                        }
-                    }
-                }
-            ],
-            "FilterControls": [
-                {
-                    "Dropdown": {
-                        "FilterControlId": "81281af9-1cb9-4ee0-9d1c-0a94485fa637",
-                        "Title": "platform equals",
-                        "SourceFilterId": "e391292f-a1f1-42bf-b10c-d2647c77fc7c",
-                        "DisplayOptions": {
-                            "SelectAllOptions": {
-                                "Visibility": "VISIBLE"
-                            },
-                            "TitleOptions": {
-                                "Visibility": "VISIBLE",
-                                "FontConfiguration": {
-                                    "FontSize": {
-                                        "Relative": "MEDIUM"
-                                    }
-                                }
-                            }
-                        },
-                        "Type": "MULTI_SELECT"
-                    }
-                }
-            ],
-            "Visuals": [
-                {
-                    "SankeyDiagramVisual": {
-                        "VisualId": "a80584bd-80fd-4645-afbc-4b29ca1f42b5",
-                        "Title": {
-                            "Visibility": "VISIBLE",
-                            "FormatText": {
-                                "RichText": "<visual-title>\n  <inline font-size=\"16px\">User journey</inline>\n</visual-title>"
-                            }
-                        },
-                        "Subtitle": {
-                            "Visibility": "VISIBLE"
-                        },
-                        "ChartConfiguration": {
-                            "FieldWells": {
-                                "SankeyDiagramAggregatedFieldWells": {
-                                    "Source": [
-                                        {
-                                            "CategoricalDimensionField": {
-                                                "FieldId": "148ba063-6fa8-471e-a6e6-02ff619838fa.current_screen.0.1685008241796",
-                                                "Column": {
-                                                    "DataSetIdentifier": "clickstream_path_view",
-                                                    "ColumnName": "current_screen"
-                                                }
-                                            }
-                                        }
-                                    ],
-                                    "Destination": [
-                                        {
-                                            "CategoricalDimensionField": {
-                                                "FieldId": "148ba063-6fa8-471e-a6e6-02ff619838fa.next_screen.1.1685008268135",
-                                                "Column": {
-                                                    "DataSetIdentifier": "clickstream_path_view",
-                                                    "ColumnName": "next_screen"
-                                                }
-                                            }
-                                        }
-                                    ],
-                                    "Weight": [
-                                        {
-                                            "CategoricalMeasureField": {
-                                                "FieldId": "148ba063-6fa8-471e-a6e6-02ff619838fa.event_id.2.1685008270261",
-                                                "Column": {
-                                                    "DataSetIdentifier": "clickstream_path_view",
-                                                    "ColumnName": "event_id"
-                                                },
-                                                "AggregationFunction": "COUNT"
-                                            }
-                                        }
-                                    ]
-                                }
-                            },
-                            "SortConfiguration": {
-                                "WeightSort": [
-                                    {
-                                        "FieldSort": {
-                                            "FieldId": "148ba063-6fa8-471e-a6e6-02ff619838fa.event_id.2.1685008270261",
-                                            "Direction": "DESC"
-                                        }
-                                    }
-                                ]
-                            },
-                            "DataLabels": {
-                                "Visibility": "VISIBLE",
-                                "Overlap": "DISABLE_OVERLAP"
-                            }
-                        },
-                        "Actions": []
-                    }
-                },
-                {
-                    "BarChartVisual": {
-                        "VisualId": "a5c48130-6ee3-4e2e-9ce5-e70f4abb32ce",
-                        "Title": {
-                            "Visibility": "VISIBLE",
-                            "FormatText": {
-                                "RichText": "<visual-title>\n  <inline font-size=\"16px\">User action sequence</inline>\n</visual-title>"
-                            }
-                        },
-                        "Subtitle": {
-                            "Visibility": "VISIBLE"
-                        },
-                        "ChartConfiguration": {
-                            "FieldWells": {
-                                "BarChartAggregatedFieldWells": {
-                                    "Category": [
-                                        {
-                                            "NumericalDimensionField": {
-                                                "FieldId": "148ba063-6fa8-471e-a6e6-02ff619838fa.event_rank.0.1685008821729",
-                                                "Column": {
-                                                    "DataSetIdentifier": "clickstream_path_view",
-                                                    "ColumnName": "event_rank"
-                                                }
-                                            }
-                                        }
-                                    ],
-                                    "Values": [
-                                        {
-                                            "CategoricalMeasureField": {
-                                                "FieldId": "148ba063-6fa8-471e-a6e6-02ff619838fa.event_id.2.1685008851149",
-                                                "Column": {
-                                                    "DataSetIdentifier": "clickstream_path_view",
-                                                    "ColumnName": "event_id"
-                                                },
-                                                "AggregationFunction": "COUNT"
-                                            }
-                                        }
-                                    ],
-                                    "Colors": [
-                                        {
-                                            "CategoricalDimensionField": {
-                                                "FieldId": "148ba063-6fa8-471e-a6e6-02ff619838fa.event_name.1.1685008823628",
-                                                "Column": {
-                                                    "DataSetIdentifier": "clickstream_path_view",
-                                                    "ColumnName": "event_name"
-                                                }
-                                            }
-                                        }
-                                    ]
-                                }
-                            },
-                            "SortConfiguration": {
-                                "CategorySort": [
-                                    {
-                                        "FieldSort": {
-                                            "FieldId": "148ba063-6fa8-471e-a6e6-02ff619838fa.event_rank.0.1685008821729",
-                                            "Direction": "ASC"
-                                        }
-                                    }
-                                ],
-                                "CategoryItemsLimit": {
-                                    "OtherCategories": "INCLUDE"
-                                },
-                                "ColorItemsLimit": {
-                                    "OtherCategories": "INCLUDE"
-                                },
-                                "SmallMultiplesLimitConfiguration": {
-                                    "OtherCategories": "INCLUDE"
-                                }
-                            },
-                            "Orientation": "VERTICAL",
-                            "BarsArrangement": "STACKED_PERCENT",
-                            "CategoryAxis": {
-                                "ScrollbarOptions": {
-                                    "VisibleRange": {
-                                        "PercentRange": {
-                                            "From": 0.0,
-                                            "To": 100.0
-                                        }
-                                    }
-                                }
-                            },
-                            "DataLabels": {
-                                "Visibility": "HIDDEN",
-                                "Overlap": "DISABLE_OVERLAP"
-                            },
-                            "Tooltip": {
-                                "TooltipVisibility": "VISIBLE",
-                                "SelectedTooltipType": "BASIC",
-                                "FieldBasedTooltip": {
-                                    "AggregationVisibility": "HIDDEN",
-                                    "TooltipTitleType": "PRIMARY_VALUE",
-                                    "TooltipFields": [
-                                        {
-                                            "FieldTooltipItem": {
-                                                "FieldId": "148ba063-6fa8-471e-a6e6-02ff619838fa.event_rank.0.1685008821729",
-                                                "Visibility": "VISIBLE"
-                                            }
-                                        },
-                                        {
-                                            "FieldTooltipItem": {
-                                                "FieldId": "148ba063-6fa8-471e-a6e6-02ff619838fa.event_name.1.1685008823628",
-                                                "Visibility": "VISIBLE"
-                                            }
-                                        },
-                                        {
-                                            "FieldTooltipItem": {
-                                                "FieldId": "148ba063-6fa8-471e-a6e6-02ff619838fa.event_id.2.1685008851149",
-                                                "Visibility": "VISIBLE"
-                                            }
-                                        }
-                                    ]
-                                }
-                            }
-                        },
-                        "Actions": [],
-                        "ColumnHierarchies": []
-                    }
-                }
-            ],
-            "Layouts": [
-                {
-                    "Configuration": {
-                        "GridLayout": {
-                            "Elements": [
-                                {
-                                    "ElementId": "a80584bd-80fd-4645-afbc-4b29ca1f42b5",
-                                    "ElementType": "VISUAL",
-                                    "ColumnIndex": 0,
-                                    "ColumnSpan": 36,
-                                    "RowIndex": 0,
-                                    "RowSpan": 12
-                                },
-                                {
-                                    "ElementId": "a5c48130-6ee3-4e2e-9ce5-e70f4abb32ce",
-                                    "ElementType": "VISUAL",
-                                    "ColumnIndex": 0,
-                                    "ColumnSpan": 36,
-                                    "RowIndex": 12,
-                                    "RowSpan": 15
-                                }
-                            ],
-                            "CanvasSizeOptions": {
-                                "ScreenCanvasSizeOptions": {
-                                    "ResizeOption": "FIXED",
-                                    "OptimizedViewPortWidth": "1600px"
-                                }
-                            }
-                        }
-                    }
-                }
-            ],
-            "SheetControlLayouts": [
-                {
-                    "Configuration": {
-                        "GridLayout": {
-                            "Elements": [
-                                {
-                                    "ElementId": "8ef9a288-596c-4843-a8ef-e067c3538376",
-                                    "ElementType": "PARAMETER_CONTROL",
-                                    "ColumnSpan": 2,
-                                    "RowSpan": 1
-                                },
-                                {
-                                    "ElementId": "2cb7b2be-81d6-41b9-8516-2c035a5fb65b",
-                                    "ElementType": "PARAMETER_CONTROL",
-                                    "ColumnSpan": 2,
-                                    "RowSpan": 1
-                                },
-                                {
-                                    "ElementId": "81281af9-1cb9-4ee0-9d1c-0a94485fa637",
-                                    "ElementType": "FILTER_CONTROL",
-                                    "ColumnSpan": 2,
-                                    "RowSpan": 1
-                                }
-                            ]
-                        }
-                    }
-                }
-            ],
-            "ContentType": "INTERACTIVE"
         }
     ],
     "CalculatedFields": [
@@ -9084,54 +8780,49 @@
             "Expression": "concat(toString({screen_height}),'x',toString({screen_width}))"
         },
         {
-            "DataSetIdentifier": "clickstream_ods_events_view",
+            "DataSetIdentifier": "clickstream_event_view",
             "Name": "Activity in Last 30 Days",
             "Expression": "windowSum(count({event_id}),[{event_date} ASC],29,0)"
         },
         {
-            "DataSetIdentifier": "clickstream_ods_events_view",
+            "DataSetIdentifier": "clickstream_event_view",
             "Name": "Activity in Last 7 Days",
             "Expression": "windowSum(count({event_id}),[{event_date} ASC],6,0)"
         },
         {
-            "DataSetIdentifier": "clickstream_ods_events_view",
+            "DataSetIdentifier": "clickstream_event_view",
             "Name": "DAU/MAU",
             "Expression": "distinct_count({user_pseudo_id})/windowSum(distinct_count({user_pseudo_id}),[{event_date} ASC],29,0)"
         },
         {
-            "DataSetIdentifier": "clickstream_ods_events_view",
+            "DataSetIdentifier": "clickstream_event_view",
             "Name": "DAU/WAU",
             "Expression": "distinct_count({user_pseudo_id})/windowSum(distinct_count({user_pseudo_id}),[{event_date} ASC],6,0)"
         },
         {
-            "DataSetIdentifier": "clickstream_ods_events_view",
+            "DataSetIdentifier": "clickstream_event_view",
             "Name": "Retention Rate",
             "Expression": "distinct_count({user_pseudo_id})/sum(distinct_count({user_pseudo_id},[{User First Touch Date}]))"
         },
         {
-            "DataSetIdentifier": "clickstream_ods_events_view",
+            "DataSetIdentifier": "clickstream_event_view",
             "Name": "User First Touch Date",
             "Expression": "minOver({event_date},[{user_pseudo_id}], PRE_AGG)"
         },
         {
-            "DataSetIdentifier": "clickstream_ods_events_view",
+            "DataSetIdentifier": "clickstream_event_view",
             "Name": "User Type",
             "Expression": "ifelse(\n    dateDiff({event_date}, epochDate({user_first_touch_timestamp}),'DD')=0,'New',\n    'Returning'\n)"
         },
         {
-            "DataSetIdentifier": "clickstream_ods_events_view",
+            "DataSetIdentifier": "clickstream_event_view",
             "Name": "Views",
             "Expression": "distinct_countIf({event_id}, {event_name} = '_screen_view' or {event_name} = '_page_view')"
         },
         {
-            "DataSetIdentifier": "clickstream_ods_events_view",
+            "DataSetIdentifier": "clickstream_event_view",
             "Name": "WAU/MAU",
             "Expression": "windowSum(distinct_count({user_pseudo_id}),[{event_date} ASC],6,0)/windowSum(distinct_count({user_pseudo_id}),[{event_date} ASC],29,0)"
-        },
-        {
-            "DataSetIdentifier": "clickstream_path_view",
-            "Name": "Event Time",
-            "Expression": "epochDate({event_timestamp})"
         },
         {
             "DataSetIdentifier": "clickstream_retention_view",
@@ -9682,7 +9373,7 @@
                     "TimeRangeFilter": {
                         "FilterId": "b36ced47-8eab-4c5e-94e1-f7ad28dee50e",
                         "Column": {
-                            "DataSetIdentifier": "clickstream_ods_events_view",
+                            "DataSetIdentifier": "clickstream_event_view",
                             "ColumnName": "event_date"
                         },
                         "IncludeMinimum": true,
@@ -9718,7 +9409,7 @@
                     "CategoryFilter": {
                         "FilterId": "18d4cd1d-e664-416b-b16a-368d410c29b1",
                         "Column": {
-                            "DataSetIdentifier": "clickstream_ods_events_view",
+                            "DataSetIdentifier": "clickstream_event_view",
                             "ColumnName": "platform"
                         },
                         "Configuration": {
@@ -9750,7 +9441,7 @@
                     "CategoryFilter": {
                         "FilterId": "9ff3e561-27bb-4c98-803e-f6c00eb7c642",
                         "Column": {
-                            "DataSetIdentifier": "clickstream_ods_events_parameter_view",
+                            "DataSetIdentifier": "clickstream_event_parameter_view",
                             "ColumnName": "event_name"
                         },
                         "Configuration": {
@@ -9787,7 +9478,7 @@
                     "CategoryFilter": {
                         "FilterId": "9cb2cf33-6df5-4099-9f61-f747681e1b66",
                         "Column": {
-                            "DataSetIdentifier": "clickstream_ods_events_parameter_view",
+                            "DataSetIdentifier": "clickstream_event_parameter_view",
                             "ColumnName": "event_parameter_key"
                         },
                         "Configuration": {
@@ -9824,7 +9515,7 @@
                     "CategoryFilter": {
                         "FilterId": "1e6cd184-8f59-49fe-baa7-432f2c184ff3",
                         "Column": {
-                            "DataSetIdentifier": "clickstream_ods_events_view",
+                            "DataSetIdentifier": "clickstream_event_view",
                             "ColumnName": "event_id"
                         },
                         "Configuration": {
@@ -9859,7 +9550,7 @@
                     "CategoryFilter": {
                         "FilterId": "233cb283-5410-4602-b5d4-e7b77bab02c9",
                         "Column": {
-                            "DataSetIdentifier": "clickstream_ods_events_view",
+                            "DataSetIdentifier": "clickstream_event_view",
                             "ColumnName": "user_pseudo_id"
                         },
                         "Configuration": {
@@ -9894,7 +9585,7 @@
                     "CategoryFilter": {
                         "FilterId": "1b1f3308-8942-443e-a5b7-4419c1c2c791",
                         "Column": {
-                            "DataSetIdentifier": "clickstream_ods_events_view",
+                            "DataSetIdentifier": "clickstream_event_view",
                             "ColumnName": "user_id"
                         },
                         "Configuration": {
@@ -9929,7 +9620,7 @@
                     "CategoryFilter": {
                         "FilterId": "b5b1940e-2c65-4215-b0f6-73fca321b497",
                         "Column": {
-                            "DataSetIdentifier": "clickstream_ods_events_view",
+                            "DataSetIdentifier": "clickstream_event_view",
                             "ColumnName": "app_info_install_source"
                         },
                         "Configuration": {
@@ -9964,7 +9655,7 @@
                     "CategoryFilter": {
                         "FilterId": "8575e9e8-19c5-40fc-94e9-2a79dccf869d",
                         "Column": {
-                            "DataSetIdentifier": "clickstream_ods_events_view",
+                            "DataSetIdentifier": "clickstream_event_view",
                             "ColumnName": "app_info_package_id"
                         },
                         "Configuration": {
@@ -9999,7 +9690,7 @@
                     "CategoryFilter": {
                         "FilterId": "60b7c4ce-48a5-494d-986d-258bbaaf244a",
                         "Column": {
-                            "DataSetIdentifier": "clickstream_ods_events_view",
+                            "DataSetIdentifier": "clickstream_event_view",
                             "ColumnName": "app_info_version"
                         },
                         "Configuration": {
@@ -10034,7 +9725,7 @@
                     "CategoryFilter": {
                         "FilterId": "3803cd75-d0e0-481e-9f65-483feacb7ca9",
                         "Column": {
-                            "DataSetIdentifier": "clickstream_ods_events_view",
+                            "DataSetIdentifier": "clickstream_event_view",
                             "ColumnName": "event_name"
                         },
                         "Configuration": {
@@ -10069,7 +9760,7 @@
                     "CategoryFilter": {
                         "FilterId": "9aa46e60-6a9e-4bec-a251-37e9004ff0c4",
                         "Column": {
-                            "DataSetIdentifier": "clickstream_ods_events_view",
+                            "DataSetIdentifier": "clickstream_event_view",
                             "ColumnName": "User Type"
                         },
                         "Configuration": {
@@ -10104,7 +9795,7 @@
                     "TimeRangeFilter": {
                         "FilterId": "254a27fc-5f9c-442c-b872-e31d700cfb8b",
                         "Column": {
-                            "DataSetIdentifier": "clickstream_ods_events_view",
+                            "DataSetIdentifier": "clickstream_event_view",
                             "ColumnName": "User First Touch Date"
                         },
                         "NullOption": "NON_NULLS_ONLY",
@@ -10135,7 +9826,7 @@
                     "CategoryFilter": {
                         "FilterId": "3bacb119-f23b-4ce0-b5d6-e7db6d1d974e",
                         "Column": {
-                            "DataSetIdentifier": "clickstream_ods_events_parameter_view",
+                            "DataSetIdentifier": "clickstream_event_parameter_view",
                             "ColumnName": "event_parameter_key"
                         },
                         "Configuration": {
@@ -10170,7 +9861,7 @@
                     "CategoryFilter": {
                         "FilterId": "00a42e44-b792-4b0e-9517-2a597bf64be8",
                         "Column": {
-                            "DataSetIdentifier": "clickstream_ods_events_parameter_view",
+                            "DataSetIdentifier": "clickstream_event_parameter_view",
                             "ColumnName": "event_parameter_value"
                         },
                         "Configuration": {
@@ -10296,7 +9987,7 @@
                     "TimeRangeFilter": {
                         "FilterId": "39fc3bd0-6353-407e-bdf8-800f5fd0e073",
                         "Column": {
-                            "DataSetIdentifier": "clickstream_ods_events_view",
+                            "DataSetIdentifier": "clickstream_event_view",
                             "ColumnName": "event_date"
                         },
                         "IncludeMinimum": true,
@@ -10332,7 +10023,7 @@
                     "CategoryFilter": {
                         "FilterId": "2e7848de-5fb5-411d-8cdd-167f299ad707",
                         "Column": {
-                            "DataSetIdentifier": "clickstream_ods_events_view",
+                            "DataSetIdentifier": "clickstream_event_view",
                             "ColumnName": "platform"
                         },
                         "Configuration": {
@@ -10681,194 +10372,6 @@
             },
             "Status": "ENABLED",
             "CrossDataset": "ALL_DATASETS"
-        },
-        {
-            "FilterGroupId": "c579aa2c-87fa-46d4-8184-6a0cb36cce43",
-            "Filters": [
-                {
-                    "CategoryFilter": {
-                        "FilterId": "ba715aa9-3fa5-4052-9213-63275f58a47d",
-                        "Column": {
-                            "DataSetIdentifier": "clickstream_path_view",
-                            "ColumnName": "event_name"
-                        },
-                        "Configuration": {
-                            "FilterListConfiguration": {
-                                "MatchOperator": "CONTAINS",
-                                "CategoryValues": [
-                                    "_screen_view"
-                                ]
-                            }
-                        }
-                    }
-                }
-            ],
-            "ScopeConfiguration": {
-                "SelectedSheets": {
-                    "SheetVisualScopingConfigurations": [
-                        {
-                            "SheetId": "a9c6b8ef-a967-4c9d-89c5-fbb2ce817b35",
-                            "Scope": "SELECTED_VISUALS",
-                            "VisualIds": [
-                                "a80584bd-80fd-4645-afbc-4b29ca1f42b5"
-                            ]
-                        }
-                    ]
-                }
-            },
-            "Status": "ENABLED",
-            "CrossDataset": "SINGLE_DATASET"
-        },
-        {
-            "FilterGroupId": "b0039645-e5fd-4fd0-aaee-3f4cead80082",
-            "Filters": [
-                {
-                    "CategoryFilter": {
-                        "FilterId": "149ce9b4-c8d9-457a-9d2c-381e35264e5d",
-                        "Column": {
-                            "DataSetIdentifier": "clickstream_path_view",
-                            "ColumnName": "event_name"
-                        },
-                        "Configuration": {
-                            "FilterListConfiguration": {
-                                "MatchOperator": "DOES_NOT_CONTAIN",
-                                "CategoryValues": [
-                                    "_profile_set",
-                                    "_screen_view",
-                                    "_session_start",
-                                    "_first_open",
-                                    "_user_engagement"
-                                ]
-                            }
-                        }
-                    }
-                }
-            ],
-            "ScopeConfiguration": {
-                "SelectedSheets": {
-                    "SheetVisualScopingConfigurations": [
-                        {
-                            "SheetId": "a9c6b8ef-a967-4c9d-89c5-fbb2ce817b35",
-                            "Scope": "SELECTED_VISUALS",
-                            "VisualIds": [
-                                "a5c48130-6ee3-4e2e-9ce5-e70f4abb32ce"
-                            ]
-                        }
-                    ]
-                }
-            },
-            "Status": "ENABLED",
-            "CrossDataset": "SINGLE_DATASET"
-        },
-        {
-            "FilterGroupId": "1f90e816-8d08-42a1-bc83-cf68bec40500",
-            "Filters": [
-                {
-                    "CategoryFilter": {
-                        "FilterId": "e391292f-a1f1-42bf-b10c-d2647c77fc7c",
-                        "Column": {
-                            "DataSetIdentifier": "clickstream_path_view",
-                            "ColumnName": "platform"
-                        },
-                        "Configuration": {
-                            "FilterListConfiguration": {
-                                "MatchOperator": "CONTAINS",
-                                "SelectAllOptions": "FILTER_ALL_VALUES"
-                            }
-                        }
-                    }
-                }
-            ],
-            "ScopeConfiguration": {
-                "SelectedSheets": {
-                    "SheetVisualScopingConfigurations": [
-                        {
-                            "SheetId": "a9c6b8ef-a967-4c9d-89c5-fbb2ce817b35",
-                            "Scope": "ALL_VISUALS"
-                        }
-                    ]
-                }
-            },
-            "Status": "ENABLED",
-            "CrossDataset": "SINGLE_DATASET"
-        },
-        {
-            "FilterGroupId": "3672bd89-e8dd-4b2b-9ba9-1c349088b4e6",
-            "Filters": [
-                {
-                    "TimeRangeFilter": {
-                        "FilterId": "31e8149a-781d-45b6-8502-8c82fa14e3eb",
-                        "Column": {
-                            "DataSetIdentifier": "clickstream_path_view",
-                            "ColumnName": "event_date"
-                        },
-                        "IncludeMinimum": true,
-                        "IncludeMaximum": false,
-                        "RangeMinimumValue": {
-                            "Parameter": "EventStartDate"
-                        },
-                        "RangeMaximumValue": {
-                            "Parameter": "EventEndDate"
-                        },
-                        "NullOption": "NON_NULLS_ONLY",
-                        "TimeGranularity": "DAY"
-                    }
-                }
-            ],
-            "ScopeConfiguration": {
-                "SelectedSheets": {
-                    "SheetVisualScopingConfigurations": [
-                        {
-                            "SheetId": "a9c6b8ef-a967-4c9d-89c5-fbb2ce817b35",
-                            "Scope": "SELECTED_VISUALS",
-                            "VisualIds": [
-                                "a80584bd-80fd-4645-afbc-4b29ca1f42b5"
-                            ]
-                        }
-                    ]
-                }
-            },
-            "Status": "ENABLED",
-            "CrossDataset": "SINGLE_DATASET"
-        },
-        {
-            "FilterGroupId": "eeaf9be7-ac98-4c71-ae27-289fa9e97931",
-            "Filters": [
-                {
-                    "TimeRangeFilter": {
-                        "FilterId": "4ddce2aa-157b-45e6-89bd-4fb8567101ee",
-                        "Column": {
-                            "DataSetIdentifier": "clickstream_path_view",
-                            "ColumnName": "event_date"
-                        },
-                        "IncludeMinimum": true,
-                        "IncludeMaximum": false,
-                        "RangeMinimumValue": {
-                            "Parameter": "EventStartDate"
-                        },
-                        "RangeMaximumValue": {
-                            "Parameter": "EventEndDate"
-                        },
-                        "NullOption": "NON_NULLS_ONLY",
-                        "TimeGranularity": "DAY"
-                    }
-                }
-            ],
-            "ScopeConfiguration": {
-                "SelectedSheets": {
-                    "SheetVisualScopingConfigurations": [
-                        {
-                            "SheetId": "a9c6b8ef-a967-4c9d-89c5-fbb2ce817b35",
-                            "Scope": "SELECTED_VISUALS",
-                            "VisualIds": [
-                                "a5c48130-6ee3-4e2e-9ce5-e70f4abb32ce"
-                            ]
-                        }
-                    ]
-                }
-            },
-            "Status": "ENABLED",
-            "CrossDataset": "SINGLE_DATASET"
         }
     ],
     "ColumnConfigurations": [

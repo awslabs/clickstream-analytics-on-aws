@@ -119,7 +119,7 @@ async function onCreate(event: CdkCustomResourceEvent, biUsername: string, tags:
   await createSchemas(props, biUsername);
 
   // 3. create views for reporting
-  await createViewForReporting(props);
+  await createViewForReporting(props, biUsername);
 }
 
 async function createBIUserCredentialSecret(secretName: string, biUsername: string, projectId: string, tags: Tag[]): Promise<BIUserCredential> {
@@ -195,7 +195,7 @@ async function onUpdate(event: CloudFormationCustomResourceUpdateEvent, biUserna
 
   await updateSchemas(props, biUsername, oldProps);
 
-  await updateViewForReporting(props, oldProps);
+  await updateViewForReporting(props, oldProps, biUsername);
 
 }
 
@@ -304,6 +304,7 @@ async function updateSchemas(props: ResourcePropertiesType, biUsername: string, 
     };
 
     const sqlStatements2 = getUpdatableSql(props.schemaDefs, appUpdateProps.oldSchemaSqlArray, mustacheParam);
+    _buildSqlStatements(sqlStatements2, props.schemaDefs, mustacheParam, appUpdateProps);
 
     if (sqlStatementsByApp.has(app)) {
       sqlStatementsByApp.get(app)?.push(...sqlStatements2);
@@ -345,13 +346,24 @@ async function doUpdate(sqlStatementsByApp: Map<string, string[]>, props: Resour
   }
 }
 
-async function createViewForReporting(props: ResourcePropertiesType) {
+function _buildGrantSqlStatements(views: string[], biUser: string): string[] {
+
+  const statements: string[] = [];
+  for (const view of views){
+    statements.push(`GRANT SELECT ON {{schema}}.${view} TO ${biUser};`)
+  }
+
+  return statements;
+}
+
+async function createViewForReporting(props: ResourcePropertiesType, biUser: string) {
   const odsTableNames = props.odsTableNames;
   const appIds = splitString(props.appIds);
 
   const sqlStatementsByApp = new Map<string, string[]>();
   for (const app of appIds) {
     const sqlStatements: string[] = [];
+    const views: string[] = [];
     const mustacheParam: MustacheParamType = {
       database_name: props.projectId,
       schema: app,
@@ -364,8 +376,10 @@ async function createViewForReporting(props: ResourcePropertiesType) {
     };
 
     for (const viewDef of props.reportingViewsDef) {
-      sqlStatements.push(getSqlContent(viewDef.sqlFile, mustacheParam));
+      views.push(viewDef.sqlFile.replace('/\.sql/g', ''));
+      sqlStatements.push(getSqlContent(viewDef.sqlFile, mustacheParam, '/opt/dashboard'));
     }
+    sqlStatements.push(..._buildGrantSqlStatements(views, biUser));
     sqlStatementsByApp.set(app, sqlStatements);
   };
 
@@ -377,7 +391,26 @@ async function createViewForReporting(props: ResourcePropertiesType) {
   }
 }
 
-async function updateViewForReporting(props: ResourcePropertiesType, oldProps: ResourcePropertiesType) {
+function _buildSqlStatements(sqlStatements: string[], sqlDef: SQLDef[], mustacheParam: MustacheParamType, appUpdateProps: AppUpdateProps) {
+
+  for (const viewDef of sqlDef) {
+
+    logger.info(`viewDef.updatable: ${viewDef.updatable}`);
+
+    if (!appUpdateProps.oldViewSqls.includes(viewDef.sqlFile)) {
+      logger.info(`new view: ${viewDef.sqlFile}`);
+      sqlStatements.push(getSqlContent(viewDef.sqlFile, mustacheParam));
+    } else if (viewDef.updatable === 'true') {
+      logger.info(`update view: ${viewDef.sqlFile}`);
+      sqlStatements.push(getSqlContent(viewDef.sqlFile, mustacheParam));
+    } else {
+      logger.info(`skip update ${viewDef.sqlFile} due to it is not updatable.`);
+    }
+  }
+  return sqlStatements;
+}
+
+async function updateViewForReporting(props: ResourcePropertiesType, oldProps: ResourcePropertiesType, biUser: string) {
   const odsTableNames = props.odsTableNames;
 
   const appUpdateProps = getAppUpdateProps(props, oldProps);
@@ -396,7 +429,7 @@ async function updateViewForReporting(props: ResourcePropertiesType, oldProps: R
       ...SQL_TEMPLATE_PARAMETER,
     };
     for (const viewDef of props.reportingViewsDef) {
-      sqlStatements.push(getSqlContent(viewDef.sqlFile, mustacheParam));
+      sqlStatements.push(getSqlContent(viewDef.sqlFile, mustacheParam, '/opt/dashboard'));
     }
     sqlStatementsByApp.set(app, sqlStatements);
   };
@@ -414,6 +447,15 @@ async function updateViewForReporting(props: ResourcePropertiesType, oldProps: R
     };
 
     const sqlStatements2 = getUpdatableSql(props.reportingViewsDef, appUpdateProps.oldViewSqls, mustacheParam);
+    
+    _buildSqlStatements(sqlStatements2, props.reportingViewsDef, mustacheParam, appUpdateProps);
+
+    //grant select on views to bi user.
+    const views: string[] = [];
+    for(const sqlDef of props.reportingViewsDef) {
+      views.push(sqlDef.sqlFile.replace('/\.sql/g', ''));
+    }
+    sqlStatements2.push(..._buildGrantSqlStatements(views, biUser));
 
     if (sqlStatementsByApp.has(app)) {
       sqlStatementsByApp.get(app)?.push(...sqlStatements2);
