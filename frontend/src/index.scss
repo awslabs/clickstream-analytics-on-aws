@@ -813,12 +813,12 @@ ul.menu-list li.checkbox-item {
           box-sizing: border-box;
           box-shadow: 0 4px 12px rgba(27, 31, 35, 0.15);
           border-radius: 6px;
-          .csdc-header {
+          .click-stream-header {
             display: flex;
             padding: 6px 12px;
             align-items: center;
             justify-content: space-between;
-            .csdc-header-tab {
+            .click-stream-header-tab {
               margin-right: 15px;
               .tab-item {
                 padding: 5px;
@@ -828,16 +828,16 @@ ul.menu-list li.checkbox-item {
                 }
               }
             }
-            .csdc-header-search {
+            .click-stream-header-search {
               flex: 1;
             }
           }
-          .csdc-container {
+          .click-stream-container {
             overflow: hidden;
             border-top: 1px solid #e1e4f0;
             display: flex;
             flex: 1 1;
-            .csdc-container-event-category {
+            .click-stream-container-event-category {
               min-width: 129px;
               overflow-x: hidden;
               box-shadow: inset -1px 0 0 #e1e4f0;
@@ -855,7 +855,7 @@ ul.menu-list li.checkbox-item {
                 }
               }
             }
-            .csdc-container-event-option-list {
+            .click-stream-container-event-option-list {
               position: relative;
               direction: ltr;
               .item-container {
@@ -900,7 +900,7 @@ ul.menu-list li.checkbox-item {
             }
           }
         }
-        .csdc-event-preview {
+        .click-stream-event-preview {
           left: 100%;
           width: 340px;
           height: 100%;
