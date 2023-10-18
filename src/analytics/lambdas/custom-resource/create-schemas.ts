@@ -32,7 +32,7 @@ import { BIUserCredential } from '../../../common/model';
 import { logger } from '../../../common/powertools';
 import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
 import { generateRandomStr } from '../../../common/utils';
-import { SQL_TEMPLATE_PARAMETER } from '../../private/constant';
+import { LEGACY_REDSHIFT_ODS_EVENTS_TABLE_NAME, SQL_TEMPLATE_PARAMETER } from '../../private/constant';
 import { CreateDatabaseAndSchemas, MustacheParamType, SQLDef } from '../../private/model';
 import { getSqlContent, getSqlContents } from '../../private/utils';
 import { getRedshiftClient, executeStatementsWithWait } from '../redshift-data';
@@ -231,7 +231,7 @@ async function createSchemas(props: ResourcePropertiesType, biUsername: string) 
     const mustacheParam: MustacheParamType = {
       database_name: props.projectId,
       schema: app,
-      table_ods_events: odsTableNames.odsEvents,
+      table_ods_events: LEGACY_REDSHIFT_ODS_EVENTS_TABLE_NAME,
       table_event: odsTableNames.event,
       table_event_parameter: odsTableNames.event_parameter,
       table_user: odsTableNames.user,
@@ -270,7 +270,7 @@ async function updateSchemas(props: ResourcePropertiesType, biUsername: string, 
     const mustacheParam: MustacheParamType = {
       database_name: props.projectId,
       schema: app,
-      table_ods_events: odsTableNames.odsEvents,
+      table_ods_events: LEGACY_REDSHIFT_ODS_EVENTS_TABLE_NAME,
       table_event: odsTableNames.event,
       table_event_parameter: odsTableNames.event_parameter,
       table_user: odsTableNames.user,
@@ -294,7 +294,7 @@ async function updateSchemas(props: ResourcePropertiesType, biUsername: string, 
     const mustacheParam: MustacheParamType = {
       database_name: props.projectId,
       schema: app,
-      table_ods_events: odsTableNames.odsEvents,
+      table_ods_events: LEGACY_REDSHIFT_ODS_EVENTS_TABLE_NAME,
       table_event: odsTableNames.event,
       table_event_parameter: odsTableNames.event_parameter,
       table_user: odsTableNames.user,
@@ -355,7 +355,7 @@ async function createViewForReporting(props: ResourcePropertiesType) {
     const mustacheParam: MustacheParamType = {
       database_name: props.projectId,
       schema: app,
-      table_ods_events: odsTableNames.odsEvents,
+      table_ods_events: LEGACY_REDSHIFT_ODS_EVENTS_TABLE_NAME,
       table_event: odsTableNames.event,
       table_event_parameter: odsTableNames.event_parameter,
       table_user: odsTableNames.user,
@@ -388,7 +388,7 @@ async function updateViewForReporting(props: ResourcePropertiesType, oldProps: R
     const mustacheParam: MustacheParamType = {
       database_name: props.projectId,
       schema: app,
-      table_ods_events: odsTableNames.odsEvents,
+      table_ods_events: LEGACY_REDSHIFT_ODS_EVENTS_TABLE_NAME,
       table_event: odsTableNames.event,
       table_event_parameter: odsTableNames.event_parameter,
       table_user: odsTableNames.user,
@@ -405,7 +405,7 @@ async function updateViewForReporting(props: ResourcePropertiesType, oldProps: R
     const mustacheParam: MustacheParamType = {
       database_name: props.projectId,
       schema: app,
-      table_ods_events: odsTableNames.odsEvents,
+      table_ods_events: LEGACY_REDSHIFT_ODS_EVENTS_TABLE_NAME,
       table_event: odsTableNames.event,
       table_event_parameter: odsTableNames.event_parameter,
       table_user: odsTableNames.user,

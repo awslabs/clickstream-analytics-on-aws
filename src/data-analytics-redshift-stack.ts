@@ -34,6 +34,10 @@ import {
   OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME,
   OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX,
   OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_NAME_SUFFIX,
+  TABLE_NAME_EVENT,
+  TABLE_NAME_EVENT_PARAMETER,
+  TABLE_NAME_USER,
+  TABLE_NAME_ITEM,
 } from './common/constant';
 import { SolutionInfo } from './common/solution-info';
 import { REDSHIFT_MODE } from '../src/common/model';
@@ -82,62 +86,49 @@ export function createRedshiftAnalyticsStack(
 
 
   const tablesOdsSource: TablesODSSource = {
-    ods_events: {
-      s3Bucket: props.dataSourceConfiguration.bucket,
-      prefix: props.dataSourceConfiguration.prefix + 'ods_events/',
-      fileSuffix: props.dataSourceConfiguration.fileSuffix,
-    },
     event: {
       s3Bucket: props.dataSourceConfiguration.bucket,
-      prefix: props.dataSourceConfiguration.prefix + 'event/',
+      prefix: props.dataSourceConfiguration.prefix + TABLE_NAME_EVENT + '/',
       fileSuffix: props.dataSourceConfiguration.fileSuffix,
     },
     event_parameter: {
       s3Bucket: props.dataSourceConfiguration.bucket,
-      prefix: props.dataSourceConfiguration.prefix + 'event_parameter/',
+      prefix: props.dataSourceConfiguration.prefix + TABLE_NAME_EVENT_PARAMETER + '/',
       fileSuffix: props.dataSourceConfiguration.fileSuffix,
     },
     user: {
       s3Bucket: props.dataSourceConfiguration.bucket,
-      prefix: props.dataSourceConfiguration.prefix + 'user/',
+      prefix: props.dataSourceConfiguration.prefix + TABLE_NAME_USER + '/',
       fileSuffix: props.dataSourceConfiguration.fileSuffix,
     },
     item: {
       s3Bucket: props.dataSourceConfiguration.bucket,
-      prefix: props.dataSourceConfiguration.prefix + 'item/',
+      prefix: props.dataSourceConfiguration.prefix + TABLE_NAME_ITEM + '/',
       fileSuffix: props.dataSourceConfiguration.fileSuffix,
     },
   };
 
   const tablesLoadWorkflowData: TablesLoadWorkflowData = {
-    ods_events: {
-      s3Bucket: props.loadConfiguration.workdir.bucket,
-      prefix: props.loadConfiguration.workdir.prefix + 'ods_events/',
-    },
     event: {
       s3Bucket: props.loadConfiguration.workdir.bucket,
-      prefix: props.loadConfiguration.workdir.prefix + 'event/',
+      prefix: props.loadConfiguration.workdir.prefix + TABLE_NAME_EVENT + '/',
     },
     event_parameter: {
       s3Bucket: props.loadConfiguration.workdir.bucket,
-      prefix: props.loadConfiguration.workdir.prefix + 'event_parameter/',
+      prefix: props.loadConfiguration.workdir.prefix + TABLE_NAME_EVENT_PARAMETER + '/',
     },
     user: {
       s3Bucket: props.loadConfiguration.workdir.bucket,
-      prefix: props.loadConfiguration.workdir.prefix + 'user/',
+      prefix: props.loadConfiguration.workdir.prefix + TABLE_NAME_USER + '/',
     },
 
     item: {
       s3Bucket: props.loadConfiguration.workdir.bucket,
-      prefix: props.loadConfiguration.workdir.prefix + 'item/',
+      prefix: props.loadConfiguration.workdir.prefix + TABLE_NAME_ITEM + '/',
     },
   };
 
   const tablesLoadDataProps: TablesLoadDataProps = {
-    ods_events: {
-      scheduleInterval: props.loadConfiguration.loadJobScheduleIntervalInMinutes,
-      maxFilesLimit: props.loadConfiguration.maxFilesLimit,
-    },
     event: {
       scheduleInterval: props.loadConfiguration.loadJobScheduleIntervalInMinutes,
       maxFilesLimit: props.loadConfiguration.maxFilesLimit,
@@ -166,9 +157,6 @@ export function createRedshiftAnalyticsStack(
     tablesLoadWorkflowData,
     tablesLoadDataProps,
 
-    upsertUsersWorkflowData: {
-      scheduleExpression: props.upsertUsersConfiguration.scheduleExpression,
-    },
     scanMetadataWorkflowData: {
       scheduleExpression: props.scanMetadataConfiguration.scheduleExpression,
       clickstreamAnalyticsMetadataDdbArn: props.scanMetadataConfiguration.clickstreamAnalyticsMetadataDdbArn,

@@ -21,9 +21,10 @@ import mockfs from 'mock-fs';
 import { RedshiftOdsTables } from '../../../../../src/analytics/analytics-on-redshift';
 import { ResourcePropertiesType, handler, physicalIdPrefix } from '../../../../../src/analytics/lambdas/custom-resource/create-schemas';
 import 'aws-sdk-client-mock-jest';
+import { LEGACY_REDSHIFT_ODS_EVENTS_TABLE_NAME } from '../../../../../src/analytics/private/constant';
 import { ProvisionedRedshiftProps, SQLDef } from '../../../../../src/analytics/private/model';
 import { reportingViewsDef, schemaDefs } from '../../../../../src/analytics/private/sql-def';
-import { TABLE_NAME_EVENT_PARAMETER, TABLE_NAME_ODS_EVENT } from '../../../../../src/common/constant';
+import { TABLE_NAME_EVENT_PARAMETER } from '../../../../../src/common/constant';
 import { getMockContext } from '../../../../common/lambda-context';
 import { basicCloudFormationEvent } from '../../../../common/lambda-events';
 
@@ -40,7 +41,6 @@ describe('Custom resource - Create schemas for applications in Redshift database
   const roleName = 'MyRedshiftDBUserRole';
   const biUserNamePrefix = 'clickstream_report_user_';
   const odsTableNames: RedshiftOdsTables = {
-    odsEvents: 'ods_events',
     event: 'event',
     event_parameter: 'event_parameter',
     user: 'user',
@@ -446,7 +446,7 @@ describe('Custom resource - Create schemas for applications in Redshift database
       const sqlStr = input.Sqls.join(';\n');
       if (input as BatchExecuteStatementCommandInput) {
         if (sqlStr.includes('CREATE SCHEMA IF NOT EXISTS app1')
-          && sqlStr.includes(`CREATE TABLE IF NOT EXISTS app1.${TABLE_NAME_ODS_EVENT}(`)) {
+          && sqlStr.includes(`CREATE TABLE IF NOT EXISTS app1.${LEGACY_REDSHIFT_ODS_EVENTS_TABLE_NAME}(`)) {
           return { Id: 'Id-1' };
         }
       }
@@ -540,7 +540,7 @@ describe('Custom resource - Create schemas for applications in Redshift database
       const sqlStr = input.Sqls.join(';\n');
       if (input as BatchExecuteStatementCommandInput) {
         if (sqlStr.includes('CREATE SCHEMA IF NOT EXISTS app2')
-          && sqlStr.includes(`CREATE TABLE IF NOT EXISTS app2.${TABLE_NAME_ODS_EVENT}(`)) {
+          && sqlStr.includes(`CREATE TABLE IF NOT EXISTS app2.${LEGACY_REDSHIFT_ODS_EVENTS_TABLE_NAME}(`)) {
           return { Id: 'Id-1' };
         }
       }
@@ -577,7 +577,7 @@ describe('Custom resource - Create schemas for applications in Redshift database
       const sqlStr = input.Sqls.join(';\n');
       if (input as BatchExecuteStatementCommandInput) {
         if (sqlStr.includes('CREATE SCHEMA IF NOT EXISTS app2')
-          && sqlStr.includes(`CREATE TABLE IF NOT EXISTS app2.${TABLE_NAME_ODS_EVENT}(`)) {
+          && sqlStr.includes(`CREATE TABLE IF NOT EXISTS app2.${LEGACY_REDSHIFT_ODS_EVENTS_TABLE_NAME}(`)) {
           return { Id: 'Id-1' };
         }
       }

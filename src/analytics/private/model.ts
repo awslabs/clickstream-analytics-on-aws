@@ -22,7 +22,6 @@ export interface LoadDataProps {
 
 
 export interface TablesLoadDataProps {
-  readonly ods_events: LoadDataProps;
   readonly event: LoadDataProps;
   readonly event_parameter: LoadDataProps;
   readonly user: LoadDataProps;
@@ -39,7 +38,6 @@ export type ODSSource = BucketInfo & {
 }
 
 export interface TablesODSSource {
-  readonly ods_events: ODSSource;
   readonly event: ODSSource;
   readonly event_parameter: ODSSource;
   readonly user: ODSSource;
@@ -49,7 +47,6 @@ export interface TablesODSSource {
 export type LoadWorkflowData = BucketInfo;
 
 export interface TablesLoadWorkflowData {
-  readonly ods_events: LoadWorkflowData;
   readonly event: LoadWorkflowData;
   readonly event_parameter: LoadWorkflowData;
   readonly user: LoadWorkflowData;

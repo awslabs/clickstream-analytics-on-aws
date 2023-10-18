@@ -26,21 +26,20 @@ import { PolicyStatement, Role, AccountPrincipal, IRole } from 'aws-cdk-lib/aws-
 import { Construct } from 'constructs';
 import { ApplicationSchemas } from './private/app-schema';
 import { ClearExpiredEventsWorkflow } from './private/clear-expired-events-workflow';
-import { DYNAMODB_TABLE_INDEX_NAME, REDSHIFT_EVENT_PARAMETER_TABLE_NAME, REDSHIFT_EVENT_TABLE_NAME, REDSHIFT_ITEM_TABLE_NAME, REDSHIFT_ODS_EVENTS_TABLE_NAME, REDSHIFT_USER_TABLE_NAME } from './private/constant';
+import { DYNAMODB_TABLE_INDEX_NAME } from './private/constant';
 import { LoadOdsDataToRedshiftWorkflow } from './private/load-ods-data-workflow';
 import { createMetricsWidgetForRedshiftCluster } from './private/metrics-redshift-cluster';
 import { LoadDataWorkflows, createMetricsWidgetForRedshiftServerless } from './private/metrics-redshift-serverless';
-import { ExistingRedshiftServerlessProps, ProvisionedRedshiftProps, NewRedshiftServerlessProps, UpsertUsersWorkflowData, ScanMetadataWorkflowData, ClearExpiredEventsWorkflowData, TablesODSSource, TablesLoadWorkflowData, TablesLoadDataProps } from './private/model';
+import { ExistingRedshiftServerlessProps, ProvisionedRedshiftProps, NewRedshiftServerlessProps, ScanMetadataWorkflowData, ClearExpiredEventsWorkflowData, TablesODSSource, TablesLoadWorkflowData, TablesLoadDataProps } from './private/model';
 import { createCustomResourceAssociateIAMRole } from './private/redshift-associate-iam-role';
 import { RedshiftServerless } from './private/redshift-serverless';
 import { ScanMetadataWorkflow } from './private/scan-metadata-workflow';
-import { UpsertUsersWorkflow } from './private/upsert-users-workflow';
 import { addCfnNagForCustomResourceProvider, addCfnNagForLogRetention, addCfnNagToStack, ruleRolePolicyWithWildcardResources, ruleForLambdaVPCAndReservedConcurrentExecutions } from '../common/cfn-nag';
+import { TABLE_NAME_EVENT, TABLE_NAME_EVENT_PARAMETER, TABLE_NAME_ITEM, TABLE_NAME_USER } from '../common/constant';
 import { SolutionInfo } from '../common/solution-info';
 import { getExistVpc } from '../common/vpc-utils';
 
 export interface RedshiftOdsTables {
-  readonly odsEvents: string;
   readonly event: string;
   readonly event_parameter: string;
   readonly user: string;
@@ -57,7 +56,6 @@ export interface RedshiftAnalyticsStackProps extends NestedStackProps {
   readonly existingRedshiftServerlessProps?: ExistingRedshiftServerlessProps;
   readonly provisionedRedshiftProps?: ProvisionedRedshiftProps;
   readonly tablesLoadDataProps: TablesLoadDataProps;
-  readonly upsertUsersWorkflowData: UpsertUsersWorkflowData;
   readonly scanMetadataWorkflowData: ScanMetadataWorkflowData;
   readonly clearExpiredEventsWorkflowData: ClearExpiredEventsWorkflowData;
   readonly emrServerlessApplicationId: string;
@@ -198,11 +196,10 @@ export class RedshiftAnalyticsStack extends NestedStack {
     }
 
     const redshiftTables: RedshiftOdsTables = {
-      odsEvents: REDSHIFT_ODS_EVENTS_TABLE_NAME,
-      event: REDSHIFT_EVENT_TABLE_NAME,
-      event_parameter: REDSHIFT_EVENT_PARAMETER_TABLE_NAME,
-      user: REDSHIFT_USER_TABLE_NAME,
-      item: REDSHIFT_ITEM_TABLE_NAME,
+      event: TABLE_NAME_EVENT,
+      event_parameter: TABLE_NAME_EVENT_PARAMETER,
+      user: TABLE_NAME_USER,
+      item: TABLE_NAME_ITEM,
     };
 
     this.applicationSchema = new ApplicationSchemas(this, 'CreateApplicationSchemas', {
@@ -243,15 +240,6 @@ export class RedshiftAnalyticsStack extends NestedStack {
       ddbStatusTable,
     };
 
-    const loadOdsEventsFlow = new LoadOdsDataToRedshiftWorkflow(this, 'odsEventsFlow', {
-      ...loadDataCommonProps,
-
-      odsSource: props.tablesOdsSource.ods_events,
-      loadDataProps: props.tablesLoadDataProps.ods_events,
-      loadWorkflowData: props.tablesLoadWorkflowData.ods_events,
-      odsTableName: redshiftTables.odsEvents,
-    });
-
     const loadEventFlow = new LoadOdsDataToRedshiftWorkflow(this, 'eventFlow', {
       ...loadDataCommonProps,
 
@@ -290,19 +278,6 @@ export class RedshiftAnalyticsStack extends NestedStack {
     });
 
 
-    const upsertUsersWorkflow = new UpsertUsersWorkflow(this, 'UpsertUsersWorkflow', {
-      appId: props.appIds,
-      networkConfig: {
-        vpc: props.vpc,
-        vpcSubnets: props.subnetSelection,
-      },
-      serverlessRedshift: existingRedshiftServerlessProps,
-      provisionedRedshift: props.provisionedRedshiftProps,
-      databaseName: projectDatabaseName,
-      dataAPIRole: this.redshiftDataAPIExecRole,
-      upsertUsersWorkflowData: props.upsertUsersWorkflowData,
-    });
-
     const scanMetadataWorkflow = new ScanMetadataWorkflow(this, 'ScanMetadataWorkflow', {
       appIds: props.appIds,
       networkConfig: {
@@ -330,7 +305,6 @@ export class RedshiftAnalyticsStack extends NestedStack {
     });
 
     const loadDataWorkflows: LoadDataWorkflows = {
-      ods_events: loadOdsEventsFlow.loadDataWorkflow,
       event: loadEventFlow.loadDataWorkflow,
       event_parameter: loadEventParameterFlow.loadDataWorkflow,
       user: loadUserFlow.loadDataWorkflow,
@@ -341,12 +315,10 @@ export class RedshiftAnalyticsStack extends NestedStack {
       createMetricsWidgetForRedshiftServerless(this, 'newServerless', {
         projectId: props.projectId,
         dataProcessingCronOrRateExpression: props.dataProcessingCronOrRateExpression,
-        upsertUsersCronOrRateExpression: props.upsertUsersWorkflowData.scheduleExpression,
         scanMetadataCronOrRateExpression: props.scanMetadataWorkflowData.scheduleExpression,
         redshiftServerlessNamespace: this.redshiftServerlessWorkgroup.workgroup.namespaceName,
         redshiftServerlessWorkgroupName: this.redshiftServerlessWorkgroup.workgroup.workgroupName,
         loadDataWorkflows,
-        upsertUsersWorkflow: upsertUsersWorkflow.upsertUsersWorkflow,
         scanMetadataWorkflow: scanMetadataWorkflow.scanMetadataWorkflow,
         clearExpiredEventsWorkflow: clearExpiredEventsWorkflow.clearExpiredEventsWorkflow,
 
@@ -357,12 +329,10 @@ export class RedshiftAnalyticsStack extends NestedStack {
       createMetricsWidgetForRedshiftServerless(this, 'existingServerless', {
         projectId: props.projectId,
         dataProcessingCronOrRateExpression: props.dataProcessingCronOrRateExpression,
-        upsertUsersCronOrRateExpression: props.upsertUsersWorkflowData.scheduleExpression,
         scanMetadataCronOrRateExpression: props.scanMetadataWorkflowData.scheduleExpression,
         redshiftServerlessNamespace: props.existingRedshiftServerlessProps.namespaceId,
         redshiftServerlessWorkgroupName: props.existingRedshiftServerlessProps.workgroupName,
         loadDataWorkflows,
-        upsertUsersWorkflow: upsertUsersWorkflow.upsertUsersWorkflow,
         scanMetadataWorkflow: scanMetadataWorkflow.scanMetadataWorkflow,
         clearExpiredEventsWorkflow: clearExpiredEventsWorkflow.clearExpiredEventsWorkflow,
       });
@@ -372,11 +342,9 @@ export class RedshiftAnalyticsStack extends NestedStack {
       createMetricsWidgetForRedshiftCluster(this, {
         projectId: props.projectId,
         dataProcessingCronOrRateExpression: props.dataProcessingCronOrRateExpression,
-        upsertUsersCronOrRateExpression: props.upsertUsersWorkflowData.scheduleExpression,
         scanMetadataCronOrRateExpression: props.scanMetadataWorkflowData.scheduleExpression,
         redshiftClusterIdentifier: props.provisionedRedshiftProps.clusterIdentifier,
         loadDataWorkflows,
-        upsertUsersWorkflow: upsertUsersWorkflow.upsertUsersWorkflow,
         scanMetadataWorkflow: scanMetadataWorkflow.scanMetadataWorkflow,
         clearExpiredEventsWorkflow: clearExpiredEventsWorkflow.clearExpiredEventsWorkflow,
 
@@ -423,9 +391,6 @@ function addCfnNag(stack: Stack) {
 
   addCfnNagToStack(stack, [
 
-    ruleRolePolicyWithWildcardResources(
-      'UpsertUsersWorkflow/UpsertUsersStateMachine/Role/DefaultPolicy/Resource',
-      'UpsertUsersWorkflow', 'logs/xray'),
     ruleRolePolicyWithWildcardResources(
       'ScanMetadataWorkflow/ScanMetadataStateMachine/Role/DefaultPolicy/Resource',
       'ScanMetadataWorkflow', 'logs/xray'),

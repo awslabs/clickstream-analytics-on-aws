@@ -39,8 +39,7 @@ export enum SinkTableEnum {
   EVENT='event',
   EVENT_PARAMETER='event_parameter',
   USER='user',
-  ITEM='item',
-  ODS_EVENTS='ods_events'
+  ITEM='item'
 }
 
 export interface DataPipelineProps {
@@ -72,7 +71,6 @@ export interface ClickstreamSinkTables {
   readonly eventParameterTable: Table;
   readonly userTable: Table;
   readonly itemTable: Table;
-  readonly odsEventsTable: Table;
 }
 
 export class DataPipelineConstruct extends Construct {

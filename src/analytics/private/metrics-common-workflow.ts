@@ -25,9 +25,7 @@ import { getAlarmName, setCfnNagForAlarms } from '../../metrics/util';
 export function buildMetricsWidgetForWorkflows(scope: Construct, id: string, props: {
   projectId: string;
   dataProcessingCronOrRateExpression: string;
-  upsertUsersCronOrRateExpression: string;
   loadDataWorkflows: LoadDataWorkflows;
-  upsertUsersWorkflow: IStateMachine;
   clearExpiredEventsWorkflow: IStateMachine;
 }) {
 
@@ -35,14 +33,7 @@ export function buildMetricsWidgetForWorkflows(scope: Construct, id: string, pro
     expression: props.dataProcessingCronOrRateExpression,
   });
 
-  const upsertUsersInterval = new GetInterval(scope, 'upsertUsers', {
-    expression: props.upsertUsersCronOrRateExpression,
-  });
-
   const statesNamespace = 'AWS/States';
-  const loadOdsEventsWorkflowDimension = [
-    'StateMachineArn', props.loadDataWorkflows.ods_events.stateMachineArn,
-  ];
 
   const loadEventWorkflowDimension = [
     'StateMachineArn', props.loadDataWorkflows.event.stateMachineArn,
@@ -60,9 +51,6 @@ export function buildMetricsWidgetForWorkflows(scope: Construct, id: string, pro
     'StateMachineArn', props.loadDataWorkflows.item.stateMachineArn,
   ];
 
-  const upsertUsersWorkflowDimension = [
-    'StateMachineArn', props.upsertUsersWorkflow.stateMachineArn,
-  ];
 
   const clearExpiredEventsWorkflowDimension = [
     'StateMachineArn', props.clearExpiredEventsWorkflow.stateMachineArn,
@@ -84,17 +72,6 @@ export function buildMetricsWidgetForWorkflows(scope: Construct, id: string, pro
     alarmName: getAlarmName(scope, props.projectId, 'Load Event Workflow'),
   });
   (loadEventsWorkflowAlarm.node.defaultChild as CfnResource).addPropertyOverride('Period', processingJobInterval.getIntervalSeconds());
-
-  const upsertUsersWorkflowAlarm = new Alarm(scope, id + 'UpsertUsersWorkflowAlarm', {
-    comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
-    threshold: 1,
-    evaluationPeriods: 1,
-    treatMissingData: TreatMissingData.NOT_BREACHING,
-    metric: props.upsertUsersWorkflow.metricFailed({ period: Duration.hours(24) }), // place-holder value here, Override by addPropertyOverride below
-    alarmDescription: `Upsert users workflow failed, projectId: ${props.projectId}`,
-    alarmName: getAlarmName(scope, props.projectId, 'Upsert User Workflow'),
-  });
-  (upsertUsersWorkflowAlarm.node.defaultChild as CfnResource).addPropertyOverride('Period', upsertUsersInterval.getIntervalSeconds());
 
 
   const newFilesCountAlarm = new Alarm(scope, id + 'MaxFileAgeAlarm', {
@@ -119,7 +96,7 @@ export function buildMetricsWidgetForWorkflows(scope: Construct, id: string, pro
   (newFilesCountAlarm.node.defaultChild as CfnResource).addPropertyOverride('Threshold', processingJobInterval.getIntervalSeconds());
 
 
-  setCfnNagForAlarms([loadEventsWorkflowAlarm, newFilesCountAlarm, upsertUsersWorkflowAlarm]);
+  setCfnNagForAlarms([loadEventsWorkflowAlarm, newFilesCountAlarm]);
 
   const workflowAlarms: (MetricWidgetElement | AlarmsWidgetElement)[] = [
     {
@@ -141,8 +118,6 @@ export function buildMetricsWidgetForWorkflows(scope: Construct, id: string, pro
     [loadUserWorkflowDimension, 'user'],
     [loadItemWorkflowDimension, 'item'],
     [clearExpiredEventsWorkflowDimension, 'clear expired events'],
-    [upsertUsersWorkflowDimension, 'upsert user'],
-    [loadOdsEventsWorkflowDimension, 'ods_events'],
   ].flatMap(dimName => {
     return [
       {

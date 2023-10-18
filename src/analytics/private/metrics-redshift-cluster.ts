@@ -23,11 +23,9 @@ import { WIDGETS_ORDER } from '../../metrics/settings';
 export function createMetricsWidgetForRedshiftCluster(scope: Construct, props: {
   projectId: string;
   dataProcessingCronOrRateExpression: string;
-  upsertUsersCronOrRateExpression: string;
   scanMetadataCronOrRateExpression: string;
   redshiftClusterIdentifier: string;
   loadDataWorkflows: LoadDataWorkflows;
-  upsertUsersWorkflow: IStateMachine;
   scanMetadataWorkflow: IStateMachine;
   clearExpiredEventsWorkflow: IStateMachine;
 }) {
