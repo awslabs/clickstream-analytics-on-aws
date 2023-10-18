@@ -30,8 +30,10 @@ jobs:
         with:
           name: templates-${{ github.event.pull_request.number }}
           path: templates
-      - name: Setup Cloud Formation Linter with Latest Version
+      - name: Setup Cloud Formation Linter with 0.81.0
         uses: scottbrenner/cfn-lint-action@v2
+        with: 
+          version: 0.81.0
       - name: Print the Cloud Formation Linter Version & run Linter.
         id: cfn-lint
         run: |
