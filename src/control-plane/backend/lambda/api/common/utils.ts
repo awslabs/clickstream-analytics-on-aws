@@ -615,8 +615,10 @@ function getDataFromLastDay(metadata: IMetadataRaw) {
   let dataVolumeLastDay = 0;
   if (metadata.month === key) {
     const lastDayData = (metadata as any)[lastDay];
-    dataVolumeLastDay = lastDayData.count ?? 0;
-    hasData = lastDayData.hasData ?? false;
+    if (lastDayData) {
+      dataVolumeLastDay = lastDayData.count ?? 0;
+      hasData = lastDayData.hasData ?? false;
+    }
   }
   return { hasData, dataVolumeLastDay };
 }
