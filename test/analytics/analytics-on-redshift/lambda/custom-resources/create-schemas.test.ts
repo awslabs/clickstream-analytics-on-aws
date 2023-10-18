@@ -106,71 +106,49 @@ describe('Custom resource - Create schemas for applications in Redshift database
     RequestType: 'Update',
   };
 
-
   const testReportingViewsDef: SQLDef[] = [
     {
       updatable: 'true',
-      sqlFile: 'clickstream-ods-events-view.sql',
+      sqlFile: 'clickstream_event_view.sql',
     },
     {
       updatable: 'false',
-      sqlFile: 'clickstream-ods-events-parameter-view.sql',
-    },
-    {
-      updatable: 'true',
-      sqlFile: 'clickstream-ods-events-rt-view.sql',
-    },
-    {
-      updatable: 'true',
-      sqlFile: 'clickstream-ods-events-parameter-rt-view.sql',
+      sqlFile: 'clickstream_event_parameter_view.sql',
     },
     {
       updatable: 'false',
-      sqlFile: 'clickstream-lifecycle-daily-view.sql',
+      sqlFile: 'clickstream_lifecycle_daily_view.sql',
     },
     {
       updatable: 'false',
-      sqlFile: 'clickstream-lifecycle-weekly-view.sql',
+      sqlFile: 'clickstream_lifecycle_weekly_view.sql',
     },
     {
       updatable: 'false',
-      sqlFile: 'clickstream-user-dim-view.sql',
+      sqlFile: 'clickstream_user_dim_view.sql',
     },
     {
       updatable: 'false',
-      sqlFile: 'clickstream-session-view.sql',
+      sqlFile: 'clickstream_session_view.sql',
     },
     {
       updatable: 'false',
-      sqlFile: 'clickstream-path-view.sql',
+      sqlFile: 'clickstream_device_view.sql',
     },
     {
       updatable: 'false',
-      sqlFile: 'clickstream-device-view.sql',
+      sqlFile: 'clickstream_retention_view.sql',
     },
     {
       updatable: 'false',
-      sqlFile: 'clickstream-retention-view.sql',
-    },
-    {
-      updatable: 'false',
-      sqlFile: 'clickstream-user-attr-view.sql',
-    },
-
-    {
-      updatable: 'false',
-      sqlFile: 'user-m-view.sql',
-    },
-    {
-      updatable: 'false',
-      sqlFile: 'item-m-view.sql',
+      sqlFile: 'clickstream_user_attr_view.sql',
     },
   ];
 
   const testReportingViewsDef2: SQLDef[] = testReportingViewsDef.slice();
   testReportingViewsDef2.push({
     updatable: 'false',
-    sqlFile: 'clickstream-ods-events-parameter-test-view.sql',
+    sqlFile: 'clickstream_event_parameter_test_view.sql',
   });
 
   const testSchemaDefs: SQLDef[] = [
@@ -201,6 +179,14 @@ describe('Custom resource - Create schemas for applications in Redshift database
     },
 
     {
+      updatable: 'false',
+      sqlFile: 'user-m-view.sql',
+    },
+    {
+      updatable: 'false',
+      sqlFile: 'item-m-view.sql',
+    },
+    {
       updatable: 'true',
       sqlFile: 'sp-clickstream-log.sql',
     },
@@ -212,10 +198,6 @@ describe('Custom resource - Create schemas for applications in Redshift database
       updatable: 'true',
       sqlFile: 'grant-permissions-to-bi-user.sql',
       multipleLine: 'true',
-    },
-    {
-      updatable: 'true',
-      sqlFile: 'dim-users.sql',
     },
     {
       updatable: 'true',
@@ -287,20 +269,24 @@ describe('Custom resource - Create schemas for applications in Redshift database
     smMock.reset();
     const rootPath = __dirname + '/../../../../../src/analytics/private/sqls/redshift/';
     mockfs({
-      '/opt/clickstream-device-view.sql': testSqlContent(rootPath + 'clickstream-device-view.sql'),
-      '/opt/clickstream-path-view.sql': testSqlContent(rootPath + 'clickstream-path-view.sql'),
-      '/opt/clickstream-lifecycle-daily-view.sql': testSqlContent(rootPath + 'clickstream-lifecycle-daily-view.sql'),
-      '/opt/clickstream-lifecycle-weekly-view.sql': testSqlContent(rootPath + 'clickstream-lifecycle-weekly-view.sql'),
-      '/opt/clickstream-ods-events-parameter-view.sql': testSqlContent(rootPath + 'clickstream-ods-events-parameter-view.sql'),
-      '/opt/clickstream-ods-events-view.sql': testSqlContent(rootPath + 'clickstream-ods-events-view.sql'),
-      '/opt/clickstream-ods-events-parameter-rt-view.sql': testSqlContent(rootPath + 'clickstream-ods-events-parameter-rt-view.sql'),
-      '/opt/clickstream-ods-events-rt-view.sql': testSqlContent(rootPath + 'clickstream-ods-events-rt-view.sql'),
-      '/opt/clickstream-retention-view.sql': testSqlContent(rootPath + 'clickstream-retention-view.sql'),
-      '/opt/clickstream-session-view.sql': testSqlContent(rootPath + 'clickstream-session-view.sql'),
-      '/opt/clickstream-user-dim-view.sql': testSqlContent(rootPath + 'clickstream-user-dim-view.sql'),
-      '/opt/clickstream-user-attr-view.sql': testSqlContent(rootPath + 'clickstream-user-attr-view.sql'),
-      '/opt/clickstream-ods-events-parameter-test-view.sql': testSqlContent(rootPath + 'clickstream-ods-events-parameter-view.sql'),
-      '/opt/dim-users.sql': testSqlContent(rootPath + 'dim-users.sql'),
+      '/opt/dashboard/clickstream_device_view.sql': testSqlContent(rootPath + 'dashboard/clickstream_device_view.sql'),
+      '/opt/dashboard/clickstream_lifecycle_daily_view.sql': testSqlContent(rootPath + 'dashboard/clickstream_lifecycle_daily_view.sql'),
+      '/opt/dashboard/clickstream_lifecycle_weekly_view.sql': testSqlContent(rootPath + 'dashboard/clickstream_lifecycle_weekly_view.sql'),
+      '/opt/dashboard/clickstream_event_parameter_view.sql': testSqlContent(rootPath + 'dashboard/clickstream_event_parameter_view.sql'),
+      '/opt/dashboard/clickstream_event_view.sql': testSqlContent(rootPath + 'dashboard/clickstream_event_view.sql'),
+      '/opt/dashboard/clickstream_retention_view.sql': testSqlContent(rootPath + 'dashboard/clickstream_retention_view.sql'),
+      '/opt/dashboard/clickstream_session_view.sql': testSqlContent(rootPath + 'dashboard/clickstream_session_view.sql'),
+      '/opt/dashboard/clickstream_user_dim_view.sql': testSqlContent(rootPath + 'dashboard/clickstream_user_dim_view.sql'),
+      '/opt/dashboard/clickstream_user_attr_view.sql': testSqlContent(rootPath + 'dashboard/clickstream_user_attr_view.sql'),
+      '/opt/dashboard/clickstream_user_dim_mv_1.sql': testSqlContent(rootPath + 'dashboard/clickstream_user_dim_mv_1.sql'),
+      '/opt/dashboard/clickstream_user_dim_mv_2.sql': testSqlContent(rootPath + 'dashboard/clickstream_user_dim_mv_2.sql'),
+      '/opt/dashboard/clickstream_session_mv_1.sql': testSqlContent(rootPath + 'dashboard/clickstream_session_mv_1.sql'),
+      '/opt/dashboard/clickstream_session_mv_2.sql': testSqlContent(rootPath + 'dashboard/clickstream_session_mv_2.sql'),
+      '/opt/clickstream_user_dim_view.sql': testSqlContent(rootPath + 'dashboard/clickstream_user_dim_view.sql'),
+      '/opt/clickstream_session_view.sql': testSqlContent(rootPath + 'dashboard/clickstream_session_view.sql'),
+      '/opt/clickstream_event_view.sql': testSqlContent(rootPath + 'dashboard/clickstream_event_view.sql'),
+      '/opt/clickstream_event_parameter_test_view.sql': testSqlContent(rootPath + 'dashboard/clickstream_event_parameter_view.sql'),
+      '/opt/dashboard/clickstream_event_parameter_test_view.sql': testSqlContent(rootPath + 'dashboard/clickstream_event_parameter_view.sql'),
       '/opt/grant-permissions-to-bi-user.sql': testSqlContent(rootPath + 'grant-permissions-to-bi-user.sql'),
       '/opt/ods-events.sql': testSqlContent(rootPath + 'ods-events.sql'),
       '/opt/sp-clear-expired-events.sql': testSqlContent(rootPath + 'sp-clear-expired-events.sql'),
@@ -555,7 +541,7 @@ describe('Custom resource - Create schemas for applications in Redshift database
     expect(redshiftDataMock).toHaveReceivedNthSpecificCommandWith(1, BatchExecuteStatementCommand, {
       Sqls: expect.arrayContaining([
         `GRANT USAGE ON SCHEMA app2 TO ${biUserNamePrefix}abcde`,
-        `GRANT SELECT ON ALL TABLES IN SCHEMA app2 TO ${biUserNamePrefix}abcde`,
+        `ALTER DEFAULT PRIVILEGES IN SCHEMA app2 GRANT SELECT ON TABLES TO ${biUserNamePrefix}abcde`,
       ]),
     });
     expect(redshiftDataMock).toHaveReceivedNthSpecificCommandWith(1, BatchExecuteStatementCommand, {
@@ -592,7 +578,7 @@ describe('Custom resource - Create schemas for applications in Redshift database
     expect(redshiftDataMock).toHaveReceivedNthSpecificCommandWith(1, BatchExecuteStatementCommand, {
       Sqls: expect.arrayContaining([
         `GRANT USAGE ON SCHEMA app2 TO ${biUserNamePrefix}abcde`,
-        `GRANT SELECT ON ALL TABLES IN SCHEMA app2 TO ${biUserNamePrefix}abcde`,
+        `ALTER DEFAULT PRIVILEGES IN SCHEMA app2 GRANT SELECT ON TABLES TO ${biUserNamePrefix}abcde`,
       ]),
     });
     expect(redshiftDataMock).toHaveReceivedNthSpecificCommandWith(1, BatchExecuteStatementCommand, {

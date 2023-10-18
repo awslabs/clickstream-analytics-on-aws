@@ -6,19 +6,17 @@ AS
 WITH user_first_date AS (
   SELECT
     user_pseudo_id,
-    -- to_date(dateadd(ms, event_timestamp, '1970-01-01')) AS first_date
     min(event_date) as first_date
-  FROM {{schema}}.ods_events
+  FROM {{schema}}.event
   GROUP BY user_pseudo_id
 ),
 
 retention_data AS (
 SELECT
     user_pseudo_id,
-    -- event_date,
     first_date,
     DATE_DIFF('day', first_date, event_date) AS day_diff
-  FROM {{schema}}.ods_events
+  FROM {{schema}}.event
   JOIN user_first_date USING (user_pseudo_id)
 ),
 

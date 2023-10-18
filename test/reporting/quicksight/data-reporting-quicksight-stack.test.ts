@@ -1061,19 +1061,54 @@ describe('DataReportingQuickSightStack resource test', () => {
                 Name: 'custom_attr_value',
                 Type: 'STRING',
               },
+              {
+                Name: 'user_first_touch_timestamp',
+                Type: 'INTEGER',
+              },
+              {
+                Name: '_first_visit_date',
+                Type: 'DATETIME',
+              },
+              {
+                Name: '_first_referer',
+                Type: 'STRING',
+              },
+              {
+                Name: '_first_traffic_source_type',
+                Type: 'STRING',
+              },
+              {
+                Name: '_first_traffic_medium',
+                Type: 'STRING',
+              },
+              {
+                Name: '_first_traffic_source',
+                Type: 'STRING',
+              },
+              {
+                Name: '_channel',
+                Type: 'STRING',
+              },
             ],
             projectedColumns: [
               'user_pseudo_id',
               'user_id',
+              'user_first_touch_timestamp',
+              '_first_visit_date',
+              '_first_referer',
+              '_first_traffic_source_type',
+              '_first_traffic_medium',
+              '_first_traffic_source',
+              '_channel',
               'custom_attr_key',
               'custom_attr_value',
             ],
           },
           {
             name: '',
-            tableName: 'clickstream_ods_events_view',
+            tableName: 'clickstream_event_view',
             importMode: 'DIRECT_QUERY',
-            customSql: 'SELECT * FROM {{schema}}.clickstream_ods_events_rt_view',
+            customSql: 'SELECT * FROM {{schema}}.clickstream_event_view',
             columns: [
               {
                 Name: 'event_date',
@@ -1096,15 +1131,7 @@ describe('DataReportingQuickSightStack resource test', () => {
                 Type: 'INTEGER',
               },
               {
-                Name: 'event_server_timestamp_offset',
-                Type: 'INTEGER',
-              },
-              {
                 Name: 'event_timestamp',
-                Type: 'INTEGER',
-              },
-              {
-                Name: 'ingest_timestamp',
                 Type: 'INTEGER',
               },
               {
@@ -1282,9 +1309,7 @@ describe('DataReportingQuickSightStack resource test', () => {
               'event_id',
               'event_bundle_sequence_id',
               'event_previous_timestamp',
-              'event_server_timestamp_offset',
               'event_timestamp',
-              'ingest_timestamp',
               'event_value_in_usd',
               'app_info_app_id',
               'app_info_package_id',
@@ -1451,9 +1476,9 @@ describe('DataReportingQuickSightStack resource test', () => {
           },
           {
             name: '',
-            tableName: 'clickstream_ods_events_parameter_view',
+            tableName: 'clickstream_event_parameter_view',
             importMode: 'DIRECT_QUERY',
-            customSql: 'SELECT * FROM {{schema}}.clickstream_ods_events_parameter_rt_view ',
+            customSql: 'SELECT * FROM {{schema}}.clickstream_event_parameter_view ',
             columns: [
               {
                 Name: 'event_id',
@@ -1468,20 +1493,55 @@ describe('DataReportingQuickSightStack resource test', () => {
                 Type: 'DATETIME',
               },
               {
-                Name: 'event_parameter_key',
+                Name: 'event_param_key',
                 Type: 'STRING',
               },
               {
-                Name: 'event_parameter_value',
+                Name: 'event_param_double_value',
+                Type: 'DECIMAL',
+              },
+              {
+                Name: 'event_param_float_value',
+                Type: 'DECIMAL',
+              },
+              {
+                Name: 'event_param_int_value',
+                Type: 'INTEGER',
+              },
+              {
+                Name: 'event_param_string_value',
                 Type: 'STRING',
+              },
+              {
+                Name: 'platform',
+                Type: 'STRING',
+              },
+              {
+                Name: 'user_id',
+                Type: 'STRING',
+              },
+              {
+                Name: 'user_pseudo_id',
+                Type: 'STRING',
+              },
+              {
+                Name: 'event_timestamp',
+                Type: 'INTEGER',
               },
             ],
             projectedColumns: [
               'event_id',
               'event_name',
               'event_date',
-              'event_parameter_key',
-              'event_parameter_value',
+              'platform',
+              'user_id',
+              'user_pseudo_id',
+              'event_timestamp',
+              'event_param_key',
+              'event_param_string_value',
+              'event_param_double_value',
+              'event_param_float_value',
+              'event_param_int_value',
             ],
           },
           {
@@ -1534,83 +1594,7 @@ describe('DataReportingQuickSightStack resource test', () => {
               'sum',
             ],
           },
-          {
-            name: '',
-            tableName: 'clickstream_path_view',
-            importMode: 'DIRECT_QUERY',
-            customSql: 'SELECT * FROM {{schema}}.clickstream_path_view',
-            columns: [
-              {
-                Name: 'user_pseudo_id',
-                Type: 'STRING',
-              },
-              {
-                Name: 'event_date',
-                Type: 'DATETIME',
-              },
-              {
-                Name: 'event_id',
-                Type: 'STRING',
-              },
-              {
-                Name: 'event_name',
-                Type: 'STRING',
-              },
-              {
-                Name: 'event_timestamp',
-                Type: 'INTEGER',
-              },
-              {
-                Name: 'platform',
-                Type: 'STRING',
-              },
-              {
-                Name: 'session_id',
-                Type: 'STRING',
-              },
-              {
-                Name: 'current_screen',
-                Type: 'STRING',
-              },
-              {
-                Name: 'event_rank',
-                Type: 'INTEGER',
-              },
-              {
-                Name: 'previous_event',
-                Type: 'STRING',
-              },
-              {
-                Name: 'next_event',
-                Type: 'STRING',
-              },
-              {
-                Name: 'previous_screen',
-                Type: 'STRING',
-              },
-              {
-                Name: 'next_screen',
-                Type: 'STRING',
-              },
-            ],
-            projectedColumns: [
-              'user_pseudo_id',
-              'event_date',
-              'event_id',
-              'event_name',
-              'event_timestamp',
-              'platform',
-              'session_id',
-              'current_screen',
-              'event_rank',
-              'previous_event',
-              'next_event',
-              'previous_screen',
-              'next_screen',
-            ],
-          },
         ],
-
       },
     }, 1);
 

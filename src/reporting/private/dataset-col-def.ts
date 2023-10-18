@@ -32,7 +32,7 @@ export const clickstream_retention_view_columns: InputColumn[] = [
   },
 ];
 
-export const clickstream_ods_events_view_columns: InputColumn[] = [
+export const clickstream_event_view_columns: InputColumn[] = [
   {
     Name: 'event_date',
     Type: 'DATETIME',
@@ -54,15 +54,7 @@ export const clickstream_ods_events_view_columns: InputColumn[] = [
     Type: 'INTEGER',
   },
   {
-    Name: 'event_server_timestamp_offset',
-    Type: 'INTEGER',
-  },
-  {
     Name: 'event_timestamp',
-    Type: 'INTEGER',
-  },
-  {
-    Name: 'ingest_timestamp',
     Type: 'INTEGER',
   },
   {
@@ -229,12 +221,40 @@ export const clickstream_event_parameter_view_columns: InputColumn[] = [
     Type: 'DATETIME',
   },
   {
-    Name: 'event_parameter_key',
+    Name: 'event_param_key',
     Type: 'STRING',
   },
   {
-    Name: 'event_parameter_value',
+    Name: 'event_param_double_value',
+    Type: 'DECIMAL',
+  },
+  {
+    Name: 'event_param_float_value',
+    Type: 'DECIMAL',
+  },
+  {
+    Name: 'event_param_int_value',
+    Type: 'INTEGER',
+  },
+  {
+    Name: 'event_param_string_value',
     Type: 'STRING',
+  },
+  {
+    Name: 'platform',
+    Type: 'STRING',
+  },
+  {
+    Name: 'user_id',
+    Type: 'STRING',
+  },
+  {
+    Name: 'user_pseudo_id',
+    Type: 'STRING',
+  },
+  {
+    Name: 'event_timestamp',
+    Type: 'INTEGER',
   },
 ];
 
@@ -250,61 +270,6 @@ export const clickstream_lifecycle_daily_view_columns: InputColumn[] = [
   {
     Name: 'sum',
     Type: 'INTEGER',
-  },
-];
-
-export const clickstream_path_view_columns: InputColumn[] = [
-  {
-    Name: 'user_pseudo_id',
-    Type: 'STRING',
-  },
-  {
-    Name: 'event_date',
-    Type: 'DATETIME',
-  },
-  {
-    Name: 'event_id',
-    Type: 'STRING',
-  },
-  {
-    Name: 'event_name',
-    Type: 'STRING',
-  },
-  {
-    Name: 'event_timestamp',
-    Type: 'INTEGER',
-  },
-  {
-    Name: 'platform',
-    Type: 'STRING',
-  },
-  {
-    Name: 'session_id',
-    Type: 'STRING',
-  },
-  {
-    Name: 'current_screen',
-    Type: 'STRING',
-  },
-  {
-    Name: 'event_rank',
-    Type: 'INTEGER',
-  },
-  {
-    Name: 'previous_event',
-    Type: 'STRING',
-  },
-  {
-    Name: 'next_event',
-    Type: 'STRING',
-  },
-  {
-    Name: 'previous_screen',
-    Type: 'STRING',
-  },
-  {
-    Name: 'next_screen',
-    Type: 'STRING',
   },
 ];
 
@@ -488,6 +453,34 @@ export const clickstream_user_attr_view_columns: InputColumn[] = [
   },
   {
     Name: 'custom_attr_value',
+    Type: 'STRING',
+  },
+  {
+    Name: 'user_first_touch_timestamp',
+    Type: 'INTEGER',
+  },
+  {
+    Name: '_first_visit_date',
+    Type: 'DATETIME',
+  },
+  {
+    Name: '_first_referer',
+    Type: 'STRING',
+  },
+  {
+    Name: '_first_traffic_source_type',
+    Type: 'STRING',
+  },
+  {
+    Name: '_first_traffic_medium',
+    Type: 'STRING',
+  },
+  {
+    Name: '_first_traffic_source',
+    Type: 'STRING',
+  },
+  {
+    Name: '_channel',
     Type: 'STRING',
   },
 ];
