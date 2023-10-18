@@ -64,6 +64,9 @@ import {
   buildDocumentLink,
 } from 'ts/url';
 import {
+  checkDisable,
+  defaultSelectOptions,
+  defaultStr,
   generateRedshiftRPUOptionListByRegion,
   isDisabled,
   ternary,
@@ -153,20 +156,35 @@ const DataProcessing: React.FC<DataProcessingProps> = (
   } = props;
 
   const [selectedExecution, setSelectedExecution] = useState(
-    pipelineInfo.selectedExcutionType || EXECUTION_TYPE_LIST[0]
+    defaultSelectOptions(
+      EXECUTION_TYPE_LIST[0],
+      pipelineInfo.selectedExcutionType
+    )
   );
   const [selectedExecutionUnit, setSelectedExecutionUnit] = useState(
-    pipelineInfo.selectedExcutionUnit || EXCUTION_UNIT_LIST[0]
+    defaultSelectOptions(
+      EXCUTION_UNIT_LIST[0],
+      pipelineInfo.selectedExcutionUnit
+    )
   );
   const [selectedEventFreshUnit, setSelectedEventFreshUnit] = useState(
-    pipelineInfo.selectedEventFreshUnit || EVENT_REFRESH_UNIT_LIST[1]
+    defaultSelectOptions(
+      EVENT_REFRESH_UNIT_LIST[1],
+      pipelineInfo.selectedEventFreshUnit
+    )
   );
   const [selectedRedshiftExeUnit, setSelectedRedshiftExeUnit] = useState(
-    pipelineInfo.selectedRedshiftExecutionUnit || REDSHIFT_UNIT_LIST[0]
+    defaultSelectOptions(
+      REDSHIFT_UNIT_LIST[0],
+      pipelineInfo.selectedRedshiftExecutionUnit
+    )
   );
 
   const [selectedUpsertType, setSelectedUpsertType] = useState(
-    pipelineInfo.selectedUpsertType || EXECUTION_TYPE_LIST[0]
+    defaultSelectOptions(
+      EXECUTION_TYPE_LIST[0],
+      pipelineInfo.selectedUpsertType
+    )
   );
 
   const [loadingRedshift, setLoadingRedshift] = useState(false);
@@ -188,8 +206,10 @@ const DataProcessing: React.FC<DataProcessingProps> = (
   const [loadingRoles, setLoadingRoles] = useState(false);
 
   const [redshiftCapacity, setRedshiftCapacity] = useState(
-    pipelineInfo.redshiftBaseCapacity ||
-      generateRedshiftRPUOptionListByRegion(pipelineInfo.region)[0]
+    defaultSelectOptions(
+      generateRedshiftRPUOptionListByRegion(pipelineInfo.region)[0],
+      pipelineInfo.redshiftBaseCapacity
+    )
   );
   const [threeAZVPCOptionList, setThreeAZVPCOptionList] =
     useState<SelectProps.Options>([]);
@@ -200,7 +220,10 @@ const DataProcessing: React.FC<DataProcessingProps> = (
     useState<SelectProps.Options>([]);
 
   const [upsertUserUnit, setUpsertUserUnit] = useState(
-    pipelineInfo.redshiftUpsertFreqUnit || REDSHIFT_FREQUENCY_UNIT[2]
+    defaultSelectOptions(
+      REDSHIFT_FREQUENCY_UNIT[2],
+      pipelineInfo.redshiftUpsertFreqUnit
+    )
   );
 
   // get redshift clusters by region
@@ -466,11 +489,11 @@ const DataProcessing: React.FC<DataProcessingProps> = (
               <FormField
                 label={t('pipeline:create.processInterval')}
                 description={t('pipeline:create.processIntervalDesc')}
-                errorText={
-                  dataProcessorIntervalInvalidError
-                    ? t('pipeline:valid.dataProcessorIntervalError')
-                    : ''
-                }
+                errorText={ternary(
+                  dataProcessorIntervalInvalidError,
+                  t('pipeline:valid.dataProcessorIntervalError'),
+                  undefined
+                )}
               >
                 <div className="flex">
                   <div style={{ width: 200 }}>
@@ -648,9 +671,10 @@ const DataProcessing: React.FC<DataProcessingProps> = (
                           'pipeline:create.redshiftServerlessDesc'
                         ),
                         value: 'serverless',
-                        disabled:
-                          isDisabled(update, pipelineInfo) ||
-                          !pipelineInfo.serviceStatus.REDSHIFT_SERVERLESS,
+                        disabled: checkDisable(
+                          isDisabled(update, pipelineInfo),
+                          !pipelineInfo.serviceStatus.REDSHIFT_SERVERLESS
+                        ),
                       },
                       {
                         controlId: 'test-redshift-provisioned-id',
@@ -684,14 +708,16 @@ const DataProcessing: React.FC<DataProcessingProps> = (
                             }
                           >
                             <Select
-                              statusType={
-                                loadingRedshift ? 'loading' : 'finished'
-                              }
-                              placeholder={
+                              statusType={ternary(
+                                loadingRedshift,
+                                'loading',
+                                'finished'
+                              )}
+                              placeholder={defaultStr(
                                 t(
                                   'pipeline:create.engineRedshiftClusterPlaceholder'
-                                ) || ''
-                              }
+                                )
+                              )}
                               selectedOption={
                                 pipelineInfo.selectedRedshiftCluster
                               }
@@ -723,10 +749,14 @@ const DataProcessing: React.FC<DataProcessingProps> = (
                             }
                           >
                             <Select
-                              statusType={loadingRoles ? 'loading' : 'finished'}
-                              placeholder={
-                                t('pipeline:create.findIAMRole') || ''
-                              }
+                              statusType={ternary(
+                                loadingRoles,
+                                'loading',
+                                'finished'
+                              )}
+                              placeholder={defaultStr(
+                                t('pipeline:create.findIAMRole')
+                              )}
                               selectedOption={pipelineInfo.selectedRedshiftRole}
                               onChange={({ detail }) =>
                                 changeSelectedRedshiftRole(
@@ -765,31 +795,33 @@ const DataProcessing: React.FC<DataProcessingProps> = (
                           <FormField
                             label={t('pipeline:create.redshiftVpc')}
                             description={t('pipeline:create.redshiftVpcDesc')}
-                            errorText={
-                              redshiftServerlessVpcEmptyError
-                                ? t(
-                                    'pipeline:valid.redshiftServerlessVpcEmptyError'
-                                  )
-                                : ''
-                            }
+                            errorText={ternary(
+                              redshiftServerlessVpcEmptyError,
+                              t(
+                                'pipeline:valid.redshiftServerlessVpcEmptyError'
+                              ),
+                              undefined
+                            )}
                           >
                             <Select
                               filteringType="auto"
-                              disabled={
-                                isDisabled(update, pipelineInfo) ||
+                              disabled={checkDisable(
+                                isDisabled(update, pipelineInfo),
                                 !pipelineInfo.serviceStatus.REDSHIFT_SERVERLESS
-                              }
-                              placeholder={
-                                t('pipeline:create.vpcPlaceholder') || ''
-                              }
+                              )}
+                              placeholder={defaultStr(
+                                t('pipeline:create.vpcPlaceholder')
+                              )}
                               selectedOption={
                                 pipelineInfo.redshiftServerlessVPC
                               }
                               options={threeAZVPCOptionList}
                               selectedAriaLabel="Selected"
-                              statusType={
-                                loading3AZVpc ? 'loading' : 'finished'
-                              }
+                              statusType={ternary(
+                                loading3AZVpc,
+                                'loading',
+                                'finished'
+                              )}
                               onChange={(e) => {
                                 changeServerlessRedshiftVPC(
                                   e.detail.selectedOption
@@ -803,20 +835,20 @@ const DataProcessing: React.FC<DataProcessingProps> = (
                             description={t(
                               'pipeline:create.redshiftSecurityGroupDesc'
                             )}
-                            errorText={
-                              redshiftServerlessSGEmptyError
-                                ? t(
-                                    'pipeline:valid.redshiftServerlessSGEmptyError'
-                                  )
-                                : ''
-                            }
+                            errorText={ternary(
+                              redshiftServerlessSGEmptyError,
+                              t(
+                                'pipeline:valid.redshiftServerlessSGEmptyError'
+                              ),
+                              undefined
+                            )}
                           >
                             <Multiselect
                               filteringType="auto"
-                              disabled={
-                                isDisabled(update, pipelineInfo) ||
+                              disabled={checkDisable(
+                                isDisabled(update, pipelineInfo),
                                 !pipelineInfo.serviceStatus.REDSHIFT_SERVERLESS
-                              }
+                              )}
                               selectedOptions={
                                 pipelineInfo.redshiftServerlessSG
                               }
@@ -825,11 +857,14 @@ const DataProcessing: React.FC<DataProcessingProps> = (
                                 `${t('remove')} ${e.label}`
                               }
                               options={vpcSGOptionList}
-                              placeholder={
-                                t('pipeline:create.securityGroupPlaceholder') ||
-                                ''
-                              }
-                              statusType={loadingSG ? 'loading' : 'finished'}
+                              placeholder={defaultStr(
+                                t('pipeline:create.securityGroupPlaceholder')
+                              )}
+                              statusType={ternary(
+                                loadingSG,
+                                'loading',
+                                'finished'
+                              )}
                               onChange={(e) => {
                                 changeSecurityGroup(
                                   e.detail.selectedOptions as any
@@ -862,10 +897,10 @@ const DataProcessing: React.FC<DataProcessingProps> = (
                           >
                             <Multiselect
                               filteringType="auto"
-                              disabled={
-                                isDisabled(update, pipelineInfo) ||
+                              disabled={checkDisable(
+                                isDisabled(update, pipelineInfo),
                                 !pipelineInfo.serviceStatus.REDSHIFT_SERVERLESS
-                              }
+                              )}
                               selectedOptions={
                                 pipelineInfo.redshiftServerlessSubnets
                               }
@@ -874,12 +909,14 @@ const DataProcessing: React.FC<DataProcessingProps> = (
                                 `${t('remove')} ${e.label}`
                               }
                               options={vpcThreeAZSubnetsOptionList}
-                              placeholder={
-                                t('pipeline:create.subnetPlaceholder') || ''
-                              }
-                              statusType={
-                                loadingSubnets ? 'loading' : 'finished'
-                              }
+                              placeholder={defaultStr(
+                                t('pipeline:create.subnetPlaceholder')
+                              )}
+                              statusType={ternary(
+                                loadingSubnets,
+                                'loading',
+                                'finished'
+                              )}
                               onChange={(e) => {
                                 changeReshiftSubnets(
                                   e.detail.selectedOptions as any
@@ -897,13 +934,13 @@ const DataProcessing: React.FC<DataProcessingProps> = (
                       <FormField
                         label={t('pipeline:create.redshiftCluster')}
                         description={t('pipeline:create.redshiftClusterDesc')}
-                        errorText={
-                          redshiftProvisionedClusterEmptyError
-                            ? t(
-                                'pipeline:valid.redshiftProvisionedClusterEmptyError'
-                              )
-                            : ''
-                        }
+                        errorText={ternary(
+                          redshiftProvisionedClusterEmptyError,
+                          t(
+                            'pipeline:valid.redshiftProvisionedClusterEmptyError'
+                          ),
+                          undefined
+                        )}
                         secondaryControl={
                           <Button
                             loading={loadingRedshift}
@@ -916,12 +953,16 @@ const DataProcessing: React.FC<DataProcessingProps> = (
                       >
                         <Select
                           disabled={isDisabled(update, pipelineInfo)}
-                          statusType={loadingRedshift ? 'loading' : 'finished'}
-                          placeholder={
+                          statusType={ternary(
+                            loadingRedshift,
+                            'loading',
+                            'finished'
+                          )}
+                          placeholder={defaultStr(
                             t(
                               'pipeline:create.engineRedshiftClusterPlaceholder'
-                            ) || ''
-                          }
+                            )
+                          )}
                           selectedOption={pipelineInfo.selectedRedshiftCluster}
                           onChange={({ detail }) => {
                             changeSelectedRedshift(detail.selectedOption);
@@ -961,11 +1002,9 @@ const DataProcessing: React.FC<DataProcessingProps> = (
                       >
                         <Input
                           disabled={isDisabled(update, pipelineInfo)}
-                          placeholder={
-                            t(
-                              'pipeline:create.redshiftDatabaseUserPlaceholder'
-                            ) || ''
-                          }
+                          placeholder={defaultStr(
+                            t('pipeline:create.redshiftDatabaseUserPlaceholder')
+                          )}
                           value={
                             pipelineInfo.dataModeling?.redshift?.provisioned
                               ?.dbUser

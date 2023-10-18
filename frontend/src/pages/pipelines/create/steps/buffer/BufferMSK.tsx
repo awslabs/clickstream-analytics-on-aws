@@ -32,7 +32,7 @@ import {
   SUPPORT_SELF_HOSTED_KAFKA,
 } from 'ts/const';
 import { XSS_PATTERN } from 'ts/constant-ln';
-import { isDisabled, ternary } from 'ts/utils';
+import { checkDisable, defaultStr, isDisabled, ternary } from 'ts/utils';
 import MSKRequirements from './MSKRequirements';
 
 interface BufferMSKProps {
@@ -117,7 +117,7 @@ const BufferMSK: React.FC<BufferMSKProps> = (props: BufferMSKProps) => {
       const { success, data }: ApiResponse<SecurityGroupResponse[]> =
         await getSecurityGroups({
           region: pipelineInfo.region,
-          vpcId: pipelineInfo.selectedVPC?.value || '',
+          vpcId: defaultStr(pipelineInfo.selectedVPC?.value, ''),
         });
       if (success) {
         const sgOptions: SelectProps.Options = data.map((element) => ({
@@ -174,23 +174,27 @@ const BufferMSK: React.FC<BufferMSKProps> = (props: BufferMSKProps) => {
                         <FormField
                           label={t('pipeline:create.msk.existingMSK')}
                           description={t('pipeline:create.msk.existingMSKDesc')}
-                          errorText={
-                            mskEmptyError
-                              ? t('pipeline:valid.mskEmptyError')
-                              : ''
-                          }
+                          errorText={ternary(
+                            mskEmptyError,
+                            t('pipeline:valid.mskEmptyError'),
+                            undefined
+                          )}
                         >
                           <div className="flex">
                             <div className="flex-1">
                               <Select
-                                disabled={
-                                  isDisabled(update, pipelineInfo) ||
+                                disabled={checkDisable(
+                                  isDisabled(update, pipelineInfo),
                                   !pipelineInfo.serviceStatus.MSK
-                                }
-                                placeholder={
-                                  t('pipeline:create.msk.selectMSK') || ''
-                                }
-                                statusType={loadingMSK ? 'loading' : 'finished'}
+                                )}
+                                placeholder={defaultStr(
+                                  t('pipeline:create.msk.selectMSK')
+                                )}
+                                statusType={ternary(
+                                  loadingMSK,
+                                  'loading',
+                                  'finished'
+                                )}
                                 selectedOption={pipelineInfo.selectedMSK}
                                 onChange={({ detail }) => {
                                   const clusters: MSKResponse[] =
@@ -225,20 +229,20 @@ const BufferMSK: React.FC<BufferMSKProps> = (props: BufferMSKProps) => {
                       <FormField
                         label={t('pipeline:create.msk.topic')}
                         description={t('pipeline:create.msk.topicDesc')}
-                        errorText={
-                          topicFormatError
-                            ? t('pipeline:valid.topicFormatError')
-                            : ''
-                        }
+                        errorText={ternary(
+                          topicFormatError,
+                          t('pipeline:valid.topicFormatError'),
+                          undefined
+                        )}
                       >
                         <Input
-                          disabled={
-                            isDisabled(update, pipelineInfo) ||
+                          disabled={checkDisable(
+                            isDisabled(update, pipelineInfo),
                             !pipelineInfo.serviceStatus.MSK
-                          }
-                          placeholder={
-                            t('pipeline:create.msk.enterTopicName') || ''
-                          }
+                          )}
+                          placeholder={defaultStr(
+                            t('pipeline:create.msk.enterTopicName')
+                          )}
                           value={pipelineInfo.ingestionServer.sinkKafka.topic}
                           onChange={(e) => {
                             if (
@@ -284,10 +288,9 @@ const BufferMSK: React.FC<BufferMSKProps> = (props: BufferMSKProps) => {
                         >
                           <Input
                             disabled={isDisabled(update, pipelineInfo)}
-                            placeholder={
-                              t('pipeline:create.msk.brokerLindPlaceHolder') ||
-                              ''
-                            }
+                            placeholder={defaultStr(
+                              t('pipeline:create.msk.brokerLindPlaceHolder')
+                            )}
                             value={pipelineInfo.kafkaBrokers}
                             onChange={(e) => {
                               if (
@@ -303,17 +306,17 @@ const BufferMSK: React.FC<BufferMSKProps> = (props: BufferMSKProps) => {
                         <FormField
                           label={t('pipeline:create.msk.topic')}
                           description={t('pipeline:create.msk.manualTopicDesc')}
-                          errorText={
-                            topicFormatError
-                              ? t('pipeline:valid.topicFormatError')
-                              : ''
-                          }
+                          errorText={ternary(
+                            topicFormatError,
+                            t('pipeline:valid.topicFormatError'),
+                            undefined
+                          )}
                         >
                           <Input
                             disabled={isDisabled(update, pipelineInfo)}
-                            placeholder={
-                              t('pipeline:create.msk.enterTopicName') || ''
-                            }
+                            placeholder={defaultStr(
+                              t('pipeline:create.msk.enterTopicName')
+                            )}
                             value={pipelineInfo.ingestionServer.sinkKafka.topic}
                             onChange={(e) => {
                               if (
@@ -331,11 +334,11 @@ const BufferMSK: React.FC<BufferMSKProps> = (props: BufferMSKProps) => {
                           description={t(
                             'pipeline:create.mskSecurityGroupDesc'
                           )}
-                          errorText={
-                            kafkaSGEmptyError
-                              ? t('pipeline:valid.kafkaSGEmptyError')
-                              : ''
-                          }
+                          errorText={ternary(
+                            kafkaSGEmptyError,
+                            t('pipeline:valid.kafkaSGEmptyError'),
+                            undefined
+                          )}
                         >
                           <Select
                             filteringType="auto"
@@ -343,12 +346,15 @@ const BufferMSK: React.FC<BufferMSKProps> = (props: BufferMSKProps) => {
                               pipelineInfo.selectedSelfHostedMSKSG
                             }
                             options={vpcSGOptionList}
-                            placeholder={
-                              t('pipeline:create.securityGroupPlaceholder') ||
-                              ''
-                            }
+                            placeholder={defaultStr(
+                              t('pipeline:create.securityGroupPlaceholder')
+                            )}
                             selectedAriaLabel="Selected"
-                            statusType={loadingSG ? 'loading' : 'finished'}
+                            statusType={ternary(
+                              loadingSG,
+                              'loading',
+                              'finished'
+                            )}
                             onChange={(e) => {
                               changeSecurityGroup(e.detail.selectedOption);
                             }}
@@ -371,19 +377,23 @@ const BufferMSK: React.FC<BufferMSKProps> = (props: BufferMSKProps) => {
                   controlId="test-select-msk-id"
                   label={t('pipeline:create.msk.existingMSK')}
                   description={t('pipeline:create.msk.existingMSKDesc')}
-                  errorText={
-                    mskEmptyError ? t('pipeline:valid.mskEmptyError') : ''
-                  }
+                  errorText={ternary(
+                    mskEmptyError,
+                    t('pipeline:valid.mskEmptyError'),
+                    undefined
+                  )}
                 >
                   <div className="flex">
                     <div className="flex-1">
                       <Select
-                        disabled={
-                          isDisabled(update, pipelineInfo) ||
+                        disabled={checkDisable(
+                          isDisabled(update, pipelineInfo),
                           !pipelineInfo.serviceStatus.MSK
-                        }
-                        placeholder={t('pipeline:create.msk.selectMSK') || ''}
-                        statusType={loadingMSK ? 'loading' : 'finished'}
+                        )}
+                        placeholder={defaultStr(
+                          t('pipeline:create.msk.selectMSK')
+                        )}
+                        statusType={ternary(loadingMSK, 'loading', 'finished')}
                         selectedOption={pipelineInfo.selectedMSK}
                         onChange={({ detail }) => {
                           const clusters: MSKResponse[] = mskClusterList.filter(
@@ -413,16 +423,20 @@ const BufferMSK: React.FC<BufferMSKProps> = (props: BufferMSKProps) => {
               <FormField
                 label={t('pipeline:create.msk.topic')}
                 description={t('pipeline:create.msk.topicDesc')}
-                errorText={
-                  topicFormatError ? t('pipeline:valid.topicFormatError') : ''
-                }
+                errorText={ternary(
+                  topicFormatError,
+                  t('pipeline:valid.topicFormatError'),
+                  undefined
+                )}
               >
                 <Input
-                  disabled={
-                    isDisabled(update, pipelineInfo) ||
+                  disabled={checkDisable(
+                    isDisabled(update, pipelineInfo),
                     !pipelineInfo.serviceStatus.MSK
-                  }
-                  placeholder={t('pipeline:create.msk.enterTopicName') || ''}
+                  )}
+                  placeholder={defaultStr(
+                    t('pipeline:create.msk.enterTopicName')
+                  )}
                   value={pipelineInfo.ingestionServer.sinkKafka.topic}
                   onChange={(e) => {
                     if (

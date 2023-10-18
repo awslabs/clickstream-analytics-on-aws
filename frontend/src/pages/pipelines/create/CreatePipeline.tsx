@@ -72,6 +72,8 @@ import {
 import { INIT_EXT_PIPELINE_DATA } from 'ts/init';
 import {
   checkStringValidRegex,
+  defaultGenericsValue,
+  defaultStr,
   extractAccountIdFromArn,
   generateCronDateRange,
   generateRedshiftInterval,
@@ -2558,57 +2560,88 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
   const getDefaultExtPipeline = (data: IExtPipeline): IExtPipeline => {
     const res: IExtPipeline = {
       ...INIT_EXT_PIPELINE_DATA,
-      id: data.id ?? '',
-      type: data.type ?? '',
-      prefix: data.prefix ?? '',
-      projectId: data.projectId ?? '',
-      pipelineId: data.pipelineId ?? '',
-      region: data.region ?? '',
-      dataCollectionSDK: data.dataCollectionSDK ?? '',
-      tags: data.tags ?? [],
+      id: defaultStr(data.id),
+      type: defaultStr(data.type),
+      prefix: defaultStr(data.prefix),
+      projectId: defaultStr(data.projectId),
+      pipelineId: defaultStr(data.pipelineId),
+      region: defaultStr(data.region),
+      dataCollectionSDK: defaultStr(data.dataCollectionSDK),
+      tags: defaultGenericsValue(data.tags, []),
       network: {
-        vpcId: data.network.vpcId ?? '',
-        publicSubnetIds: data.network.publicSubnetIds ?? [],
-        privateSubnetIds: data.network.privateSubnetIds ?? [],
+        vpcId: defaultStr(data.network.vpcId),
+        publicSubnetIds: defaultGenericsValue(data.network.publicSubnetIds, []),
+        privateSubnetIds: defaultGenericsValue(
+          data.network.privateSubnetIds,
+          []
+        ),
       },
       bucket: {
-        name: data.bucket?.name ?? '',
-        prefix: data.bucket?.prefix ?? '',
+        name: defaultStr(data.bucket?.name),
+        prefix: defaultStr(data.bucket?.prefix),
       },
       ingestionServer: {
         size: {
-          serverMin: data.ingestionServer.size.serverMin ?? 2,
-          serverMax: data.ingestionServer.size.serverMax ?? 4,
-          warmPoolSize: data.ingestionServer.size.warmPoolSize ?? 1,
-          scaleOnCpuUtilizationPercent:
-            data.ingestionServer.size.scaleOnCpuUtilizationPercent ?? 50,
+          serverMin: defaultGenericsValue(
+            data.ingestionServer.size.serverMin,
+            2
+          ),
+          serverMax: defaultGenericsValue(
+            data.ingestionServer.size.serverMax,
+            4
+          ),
+          warmPoolSize: defaultGenericsValue(
+            data.ingestionServer.size.warmPoolSize,
+            1
+          ),
+          scaleOnCpuUtilizationPercent: defaultGenericsValue(
+            data.ingestionServer.size.scaleOnCpuUtilizationPercent,
+            50
+          ),
         },
         domain: {
-          domainName: data.ingestionServer.domain.domainName ?? '',
-          certificateArn: data.ingestionServer.domain.certificateArn ?? '',
+          domainName: defaultStr(data.ingestionServer.domain.domainName),
+          certificateArn: defaultStr(
+            data.ingestionServer.domain.certificateArn
+          ),
         },
         loadBalancer: {
-          serverEndpointPath:
-            data.ingestionServer.loadBalancer.serverEndpointPath ?? '/collect',
-          serverCorsOrigin:
-            data.ingestionServer.loadBalancer.serverCorsOrigin ?? '',
-          protocol:
-            data.ingestionServer.loadBalancer.protocol ?? ProtocalType.HTTPS,
-          enableGlobalAccelerator:
-            data.ingestionServer.loadBalancer.enableGlobalAccelerator ?? false,
-          enableApplicationLoadBalancerAccessLog:
+          serverEndpointPath: defaultStr(
+            data.ingestionServer.loadBalancer.serverEndpointPath,
+            '/collect'
+          ),
+          serverCorsOrigin: defaultStr(
+            data.ingestionServer.loadBalancer.serverCorsOrigin
+          ),
+          protocol: defaultStr(
+            data.ingestionServer.loadBalancer.protocol,
+            ProtocalType.HTTPS
+          ),
+          enableGlobalAccelerator: defaultGenericsValue(
+            data.ingestionServer.loadBalancer.enableGlobalAccelerator,
+            false
+          ),
+          enableApplicationLoadBalancerAccessLog: defaultGenericsValue(
             data.ingestionServer.loadBalancer
-              .enableApplicationLoadBalancerAccessLog ?? false,
-          authenticationSecretArn:
-            data.ingestionServer.loadBalancer.authenticationSecretArn ?? '',
+              .enableApplicationLoadBalancerAccessLog,
+            false
+          ),
+          authenticationSecretArn: defaultStr(
+            data.ingestionServer.loadBalancer.authenticationSecretArn
+          ),
           logS3Bucket: {
-            name: data.ingestionServer.loadBalancer.logS3Bucket.name ?? '',
-            prefix: data.ingestionServer.loadBalancer.logS3Bucket.prefix ?? '',
+            name: defaultStr(
+              data.ingestionServer.loadBalancer.logS3Bucket.name
+            ),
+            prefix: defaultStr(
+              data.ingestionServer.loadBalancer.logS3Bucket.prefix
+            ),
           },
-          notificationsTopicArn:
-            data.ingestionServer.loadBalancer.notificationsTopicArn ?? '',
+          notificationsTopicArn: defaultStr(
+            data.ingestionServer.loadBalancer.notificationsTopicArn
+          ),
         },
-        sinkType: data.ingestionServer.sinkType ?? SinkType.MSK,
+        sinkType: defaultStr(data.ingestionServer.sinkType, SinkType.MSK),
         sinkBatch: {
           size: data.ingestionServer.sinkBatch?.size ?? 50000,
           intervalSeconds:
@@ -2616,8 +2649,8 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
         },
         sinkS3: {
           sinkBucket: {
-            name: data.ingestionServer.sinkS3?.sinkBucket?.name ?? '',
-            prefix: data.ingestionServer.sinkS3?.sinkBucket?.prefix ?? '',
+            name: defaultStr(data.ingestionServer.sinkS3?.sinkBucket?.name),
+            prefix: defaultStr(data.ingestionServer.sinkS3?.sinkBucket?.prefix),
           },
           s3BufferSize: data.ingestionServer.sinkS3?.s3BufferSize ?? 10,
           s3BufferInterval:
@@ -2625,12 +2658,13 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
         },
         sinkKafka: {
           brokers: data.ingestionServer.sinkKafka?.brokers ?? [],
-          topic: data.ingestionServer.sinkKafka?.topic ?? '',
-          securityGroupId:
-            data.ingestionServer.sinkKafka?.securityGroupId ?? '',
+          topic: defaultStr(data.ingestionServer.sinkKafka?.topic),
+          securityGroupId: defaultStr(
+            data.ingestionServer.sinkKafka?.securityGroupId
+          ),
           mskCluster: {
-            name: data.ingestionServer.sinkKafka?.mskCluster?.name ?? '',
-            arn: data.ingestionServer.sinkKafka?.mskCluster?.arn ?? '',
+            name: defaultStr(data.ingestionServer.sinkKafka?.mskCluster?.name),
+            arn: defaultStr(data.ingestionServer.sinkKafka?.mskCluster?.arn),
           },
           kafkaConnector: {
             enable:
@@ -2638,32 +2672,35 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
           },
         },
         sinkKinesis: {
-          kinesisStreamMode:
-            data.ingestionServer.sinkKinesis?.kinesisStreamMode ?? '',
+          kinesisStreamMode: defaultStr(
+            data.ingestionServer.sinkKinesis?.kinesisStreamMode
+          ),
           kinesisShardCount:
             data.ingestionServer.sinkKinesis?.kinesisShardCount ?? 2,
           sinkBucket: {
-            name: data.ingestionServer.sinkKinesis?.sinkBucket.name ?? '',
-            prefix: data.ingestionServer.sinkKinesis?.sinkBucket.prefix ?? '',
+            name: defaultStr(data.ingestionServer.sinkKinesis?.sinkBucket.name),
+            prefix: defaultStr(
+              data.ingestionServer.sinkKinesis?.sinkBucket.prefix
+            ),
           },
         },
       },
       dataProcessing: {
         dataFreshnessInHour: data.dataProcessing?.dataFreshnessInHour ?? 72,
-        scheduleExpression: data.dataProcessing?.scheduleExpression ?? '',
+        scheduleExpression: defaultStr(data.dataProcessing?.scheduleExpression),
         sourceS3Bucket: {
-          name: data.dataProcessing?.sourceS3Bucket?.name ?? '',
-          prefix: data.dataProcessing?.sourceS3Bucket?.prefix ?? '',
+          name: defaultStr(data.dataProcessing?.sourceS3Bucket?.name),
+          prefix: defaultStr(data.dataProcessing?.sourceS3Bucket?.prefix),
         },
         sinkS3Bucket: {
-          name: data.dataProcessing?.sinkS3Bucket?.name ?? '',
-          prefix: data.dataProcessing?.sinkS3Bucket?.prefix ?? '',
+          name: defaultStr(data.dataProcessing?.sinkS3Bucket?.name),
+          prefix: defaultStr(data.dataProcessing?.sinkS3Bucket?.prefix),
         },
         pipelineBucket: {
-          name: data.dataProcessing?.pipelineBucket?.name ?? '',
-          prefix: data.dataProcessing?.pipelineBucket?.prefix ?? '',
+          name: defaultStr(data.dataProcessing?.pipelineBucket?.name),
+          prefix: defaultStr(data.dataProcessing?.pipelineBucket?.prefix),
         },
-        transformPlugin: data.dataProcessing?.transformPlugin ?? '',
+        transformPlugin: defaultStr(data.dataProcessing?.transformPlugin),
         enrichPlugin: data.dataProcessing?.enrichPlugin ?? [],
       },
       dataModeling: {
@@ -2674,23 +2711,24 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
           newServerless: data.dataModeling?.redshift?.newServerless ?? null,
         },
         upsertUsers: {
-          scheduleExpression:
-            data.dataModeling?.upsertUsers?.scheduleExpression ?? '',
+          scheduleExpression: defaultStr(
+            data.dataModeling?.upsertUsers?.scheduleExpression
+          ),
         },
       },
       status: {
-        status: data.status?.status ?? '',
+        status: defaultStr(data.status?.status),
         stackDetails: data.status?.stackDetails ?? [],
       },
       workflow: data.workflow,
       executionName: data.executionName,
       executionArn: data.executionArn,
-      version: data.version ?? '',
-      versionTag: data.versionTag ?? '',
-      createAt: data.createAt ?? 0,
-      updateAt: data.updateAt ?? 0,
-      operator: data.operator ?? '',
-      deleted: data.deleted ?? false,
+      version: defaultStr(data.version),
+      versionTag: defaultStr(data.versionTag),
+      createAt: defaultGenericsValue(data.createAt, 0),
+      updateAt: defaultGenericsValue(data.updateAt, 0),
+      operator: defaultStr(data.operator),
+      deleted: defaultGenericsValue(data.deleted, false),
     };
     res.enableDataProcessing = !isEmpty(data.dataProcessing);
     res.enableReporting = !isEmpty(data.reporting);

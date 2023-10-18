@@ -26,6 +26,7 @@ import React, { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { TIME_FORMAT, XMIND_LINK } from 'ts/const';
+import { defaultStr } from 'ts/utils';
 
 interface PluginTableProps {
   pipelineInfo?: IExtPipeline;
@@ -75,6 +76,36 @@ const PluginTable: React.FC<PluginTableProps> = (props: PluginTableProps) => {
     navigate(`/plugins/create`);
   };
 
+  const handleTransformPlugin = (resultDataItem: IPlugin[]) => {
+    if (pipelineInfo?.transformPluginChanged) {
+      setSelectedItems(pipelineInfo.selectedTransformPlugins);
+    } else {
+      if (selectBuitInPlugins) {
+        setSelectedItems(
+          resultDataItem.filter((item) => item.builtIn === true)
+        );
+        changePluginSeletedItems?.(
+          resultDataItem.filter((item) => item.builtIn === true)
+        );
+      }
+    }
+  };
+
+  const handelEnrichPlugin = (resultDataItem: IPlugin[]) => {
+    if (pipelineInfo?.enrichPluginChanged) {
+      setSelectedItems(pipelineInfo.selectedEnrichPlugins);
+    } else {
+      if (selectBuitInPlugins) {
+        setSelectedItems(
+          resultDataItem.filter((item) => item.builtIn === true)
+        );
+        changePluginSeletedItems?.(
+          resultDataItem.filter((item) => item.builtIn === true)
+        );
+      }
+    }
+  };
+
   const listPlugins = async () => {
     setLoadingData(true);
     try {
@@ -98,32 +129,10 @@ const PluginTable: React.FC<PluginTableProps> = (props: PluginTableProps) => {
         // In Pipeline Page
         if (pipelineInfo) {
           if (pluginType === 'Transform') {
-            if (pipelineInfo.transformPluginChanged) {
-              setSelectedItems(pipelineInfo.selectedTransformPlugins);
-            } else {
-              if (selectBuitInPlugins) {
-                setSelectedItems(
-                  resultDataItem.filter((item) => item.builtIn === true)
-                );
-                changePluginSeletedItems?.(
-                  resultDataItem.filter((item) => item.builtIn === true)
-                );
-              }
-            }
+            handleTransformPlugin(resultDataItem);
           }
           if (pluginType === 'Enrich') {
-            if (pipelineInfo.enrichPluginChanged) {
-              setSelectedItems(pipelineInfo.selectedEnrichPlugins);
-            } else {
-              if (selectBuitInPlugins) {
-                setSelectedItems(
-                  resultDataItem.filter((item) => item.builtIn === true)
-                );
-                changePluginSeletedItems?.(
-                  resultDataItem.filter((item) => item.builtIn === true)
-                );
-              }
-            }
+            handelEnrichPlugin(resultDataItem);
           }
         }
         setLoadingData(false);
@@ -137,7 +146,7 @@ const PluginTable: React.FC<PluginTableProps> = (props: PluginTableProps) => {
     setLoadingDelete(true);
     try {
       const resData: ApiResponse<null> = await deletePlugin({
-        id: selectedItems[0]?.id || '',
+        id: defaultStr(selectedItems[0]?.id),
       });
       if (resData.success) {
         setSelectedItems([]);
@@ -213,7 +222,7 @@ const PluginTable: React.FC<PluginTableProps> = (props: PluginTableProps) => {
           },
         ]}
         items={pluginList}
-        loadingText={t('plugin:list.loading') || 'Loading'}
+        loadingText={defaultStr(t('plugin:list.loading'), 'Loading')}
         selectionType={selectionType}
         trackBy="id"
         empty={
@@ -301,8 +310,8 @@ const PluginTable: React.FC<PluginTableProps> = (props: PluginTableProps) => {
               setCurrentPage(e.detail.currentPageIndex);
             }}
             ariaLabels={{
-              nextPageLabel: t('nextPage') || '',
-              previousPageLabel: t('prePage') || '',
+              nextPageLabel: defaultStr(t('nextPage')),
+              previousPageLabel: defaultStr(t('prePage')),
               pageLabel: (pageNumber) =>
                 `${t('page')} ${pageNumber} ${t('allPages')}`,
             }}
