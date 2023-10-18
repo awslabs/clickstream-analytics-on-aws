@@ -226,11 +226,11 @@ export const clickstream_event_parameter_view_columns: InputColumn[] = [
   },
   {
     Name: 'event_param_double_value',
-    Type: 'NUMBER',
+    Type: 'DECIMAL',
   },
   {
     Name: 'event_param_float_value',
-    Type: 'NUMBER',
+    Type: 'DECIMAL',
   },
   {
     Name: 'event_param_int_value',
@@ -469,10 +469,6 @@ export const clickstream_user_attr_view_columns: InputColumn[] = [
   },
   {
     Name: '_first_traffic_source_type',
-    Type: 'STRING',
-  },
-  {
-    Name: '_first_traffic_medium',
     Type: 'STRING',
   },
   {

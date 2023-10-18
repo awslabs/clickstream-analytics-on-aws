@@ -166,11 +166,11 @@
                     },
                     {
                         "Name": "event_param_double_value",
-                        "DataType": "NUMBER"
+                        "DataType": "DECIMAL"
                     },
                     {
                         "Name": "event_param_float_value",
-                        "DataType": "NUMBER"
+                        "DataType": "DECIMAL"
                     },
                     {
                         "Name": "event_param_int_value",
@@ -4128,7 +4128,7 @@
                 {
                     "Dropdown": {
                         "FilterControlId": "1a44943a-8ea8-476d-9005-f2b1cfa184f0",
-                        "Title": "event_parameter_key equals",
+                        "Title": "event_param_key equals",
                         "SourceFilterId": "3bacb119-f23b-4ce0-b5d6-e7db6d1d974e",
                         "DisplayOptions": {
                             "SelectAllOptions": {
@@ -4149,7 +4149,7 @@
                 {
                     "Dropdown": {
                         "FilterControlId": "56d5efbb-19da-494f-98ad-41d7209093a8",
-                        "Title": "event_parameter_value equals",
+                        "Title": "event_param_value equals",
                         "SourceFilterId": "00a42e44-b792-4b0e-9517-2a597bf64be8",
                         "DisplayOptions": {
                             "SelectAllOptions": {
@@ -4619,10 +4619,10 @@
                                     "Category": [
                                         {
                                             "CategoricalDimensionField": {
-                                                "FieldId": "6cd8af54-c0b2-4afd-a83f-519acf8483c0.event_parameter_value.0.1684996254887",
+                                                "FieldId": "6cd8af54-c0b2-4afd-a83f-519acf8483c0.event_param_string_value.0.1684996254887",
                                                 "Column": {
                                                     "DataSetIdentifier": "clickstream_event_parameter_view",
-                                                    "ColumnName": "event_parameter_value"
+                                                    "ColumnName": "event_param_string_value"
                                                 }
                                             }
                                         }
@@ -4668,10 +4668,10 @@
                                     {
                                         "CustomLabel": "Screen name",
                                         "ApplyTo": {
-                                            "FieldId": "6cd8af54-c0b2-4afd-a83f-519acf8483c0.event_parameter_value.0.1684996254887",
+                                            "FieldId": "6cd8af54-c0b2-4afd-a83f-519acf8483c0.event_param_string_value.0.1684996254887",
                                             "Column": {
                                                 "DataSetIdentifier": "clickstream_event_parameter_view",
-                                                "ColumnName": "event_parameter_value"
+                                                "ColumnName": "event_param_string_value"
                                             }
                                         }
                                     }
@@ -4693,7 +4693,7 @@
                                     "TooltipFields": [
                                         {
                                             "FieldTooltipItem": {
-                                                "FieldId": "6cd8af54-c0b2-4afd-a83f-519acf8483c0.event_parameter_value.0.1684996254887",
+                                                "FieldId": "6cd8af54-c0b2-4afd-a83f-519acf8483c0.event_param_string_value.0.1684996254887",
                                                 "Visibility": "VISIBLE"
                                             }
                                         },
@@ -5233,19 +5233,19 @@
                                     "GroupBy": [
                                         {
                                             "CategoricalDimensionField": {
-                                                "FieldId": "6cd8af54-c0b2-4afd-a83f-519acf8483c0.event_parameter_key.0.1684997464507",
+                                                "FieldId": "6cd8af54-c0b2-4afd-a83f-519acf8483c0.event_param_key.0.1684997464507",
                                                 "Column": {
                                                     "DataSetIdentifier": "clickstream_event_parameter_view",
-                                                    "ColumnName": "event_parameter_key"
+                                                    "ColumnName": "event_param_key"
                                                 }
                                             }
                                         },
                                         {
                                             "CategoricalDimensionField": {
-                                                "FieldId": "6cd8af54-c0b2-4afd-a83f-519acf8483c0.event_parameter_value.1.1684997465290",
+                                                "FieldId": "6cd8af54-c0b2-4afd-a83f-519acf8483c0.event_param_string_value.1.1684997465290",
                                                 "Column": {
                                                     "DataSetIdentifier": "clickstream_event_parameter_view",
-                                                    "ColumnName": "event_parameter_value"
+                                                    "ColumnName": "event_param_string_value"
                                                 }
                                             }
                                         }
@@ -9479,7 +9479,7 @@
                         "FilterId": "9cb2cf33-6df5-4099-9f61-f747681e1b66",
                         "Column": {
                             "DataSetIdentifier": "clickstream_event_parameter_view",
-                            "ColumnName": "event_parameter_key"
+                            "ColumnName": "event_param_key"
                         },
                         "Configuration": {
                             "FilterListConfiguration": {
@@ -9827,7 +9827,7 @@
                         "FilterId": "3bacb119-f23b-4ce0-b5d6-e7db6d1d974e",
                         "Column": {
                             "DataSetIdentifier": "clickstream_event_parameter_view",
-                            "ColumnName": "event_parameter_key"
+                            "ColumnName": "event_param_key"
                         },
                         "Configuration": {
                             "FilterListConfiguration": {
@@ -9862,7 +9862,7 @@
                         "FilterId": "00a42e44-b792-4b0e-9517-2a597bf64be8",
                         "Column": {
                             "DataSetIdentifier": "clickstream_event_parameter_view",
-                            "ColumnName": "event_parameter_value"
+                            "ColumnName": "event_param_string_value"
                         },
                         "Configuration": {
                             "FilterListConfiguration": {

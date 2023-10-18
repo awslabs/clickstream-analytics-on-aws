@@ -1,8 +1,5 @@
 -- recompute refresh
-CREATE MATERIALIZED VIEW {{schema}}.clickstream_session_mv_2 
-BACKUP NO
-SORTKEY(session_id, first_sv_event_id, last_sv_event_id)
-AUTO REFRESH YES
+CREATE OR REPLACE VIEW {{schema}}.clickstream_session_mv_2
 AS
 select session_id, first_sv_event_id, last_sv_event_id, count(event_id) from (
     select 

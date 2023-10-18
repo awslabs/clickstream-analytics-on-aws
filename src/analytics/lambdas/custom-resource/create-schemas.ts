@@ -346,11 +346,11 @@ async function doUpdate(sqlStatementsByApp: Map<string, string[]>, props: Resour
   }
 }
 
-function _buildGrantSqlStatements(views: string[], biUser: string): string[] {
+function _buildGrantSqlStatements(views: string[], schema: string, biUser: string): string[] {
 
   const statements: string[] = [];
-  for (const view of views){
-    statements.push(`GRANT SELECT ON {{schema}}.${view} TO ${biUser};`)
+  for (const view of views) {
+    statements.push(`GRANT SELECT ON ${schema}.${view} TO ${biUser};`);
   }
 
   return statements;
@@ -376,10 +376,10 @@ async function createViewForReporting(props: ResourcePropertiesType, biUser: str
     };
 
     for (const viewDef of props.reportingViewsDef) {
-      views.push(viewDef.sqlFile.replace('/\.sql/g', ''));
+      views.push(viewDef.sqlFile.replace('.sql', ''));
       sqlStatements.push(getSqlContent(viewDef.sqlFile, mustacheParam, '/opt/dashboard'));
     }
-    sqlStatements.push(..._buildGrantSqlStatements(views, biUser));
+    sqlStatements.push(..._buildGrantSqlStatements(views, app, biUser));
     sqlStatementsByApp.set(app, sqlStatements);
   };
 
@@ -428,9 +428,13 @@ async function updateViewForReporting(props: ResourcePropertiesType, oldProps: R
       table_item: odsTableNames.item,
       ...SQL_TEMPLATE_PARAMETER,
     };
+    const views: string[] = [];
     for (const viewDef of props.reportingViewsDef) {
+      views.push(viewDef.sqlFile.replace('.sql', ''));
       sqlStatements.push(getSqlContent(viewDef.sqlFile, mustacheParam, '/opt/dashboard'));
     }
+    sqlStatements.push(..._buildGrantSqlStatements(views, app, biUser));
+
     sqlStatementsByApp.set(app, sqlStatements);
   };
 
@@ -452,10 +456,10 @@ async function updateViewForReporting(props: ResourcePropertiesType, oldProps: R
 
     //grant select on views to bi user.
     const views: string[] = [];
-    for(const sqlDef of props.reportingViewsDef) {
-      views.push(sqlDef.sqlFile.replace('/\.sql/g', ''));
+    for (const sqlDef of props.reportingViewsDef) {
+      views.push(sqlDef.sqlFile.replace('.sql', ''));
     }
-    sqlStatements2.push(..._buildGrantSqlStatements(views, biUser));
+    sqlStatements2.push(..._buildGrantSqlStatements(views, app, biUser));
 
     if (sqlStatementsByApp.has(app)) {
       sqlStatementsByApp.get(app)?.push(...sqlStatements2);
