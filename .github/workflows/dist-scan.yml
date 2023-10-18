@@ -4,7 +4,7 @@ on:
   workflow_dispatch: {}
 jobs:
   build-dist:
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.LARGE_RUNNER_S || 'ubuntu-latest' }}
     permissions:
       id-token: write
       contents: read

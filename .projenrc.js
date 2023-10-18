@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-const { awscdk, gitlab, javascript, typescript } = require('projen');
+const { awscdk, gitlab, javascript, typescript, JsonPatch } = require('projen');
 const version = '1.0.0';
 const cdkVersion = '2.81.0';
 const minNodeVersion = '18.17.0';
@@ -290,6 +290,7 @@ apiProject.addFields({ version });
 project.buildWorkflow.buildTask._env = {
   NODE_OPTIONS: '--max_old_space_size=6144',
 };
+
 project.buildWorkflow.workflow.file?.addOverride(
   'jobs.build.permissions.checks',
   'write',
@@ -361,6 +362,11 @@ project.buildWorkflow.addPostBuildSteps({
     path: 'code-coverage-results.md',
   },
 });
+const runner = 'LARGE_RUNNER_L';
+project.buildWorkflow.workflow.file?.patch(
+  JsonPatch.replace('/jobs/build/runs-on', `$\{\{ vars.${runner} || 'ubuntu-latest' }}`),
+);
+
 project.upgradeWorkflow.workflows[0].jobs.upgrade.steps.splice(4, 0, {
   name: 'Upgrade frontend dependencies',
   run: 'yarn upgrade --cwd frontend',
