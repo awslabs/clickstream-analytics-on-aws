@@ -551,6 +551,79 @@ describe('Metadata Event test', () => {
       error: 'Error',
     });
   });
+  it('Get metadata event list without last day data', async () => {
+    jest
+      .useFakeTimers()
+      .setSystemTime(new Date('2023-02-03'));
+    ddbMock.on(QueryCommand, {
+      TableName: analyticsMetadataTable,
+      IndexName: prefixMonthGSIName,
+      KeyConditionExpression: '#prefix= :prefix',
+      ExpressionAttributeNames: {
+        '#prefix': 'prefix',
+      },
+      ExpressionAttributeValues: {
+        ':prefix': `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
+      },
+      ScanIndexForward: false,
+    }).resolves({
+      Items: [
+        {
+          ...MOCK_EVENT,
+          id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}1`,
+          month: '#202302',
+          name: `${MOCK_EVENT_NAME}1`,
+          summary: {
+            ...MOCK_EVENT.summary,
+          },
+        },
+      ],
+    });
+    let res = await request(app)
+      .get(`/api/metadata/events?projectId=${MOCK_PROJECT_ID}&appId=${MOCK_APP_ID}`);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({
+      success: true,
+      message: '',
+      data: {
+        items: [
+          {
+            id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}1`,
+            month: '#202302',
+            prefix: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
+            projectId: MOCK_PROJECT_ID,
+            appId: MOCK_APP_ID,
+            name: `${MOCK_EVENT_NAME}1`,
+            displayName: `display name of event ${MOCK_EVENT_NAME}1`,
+            description: {
+              'en-US': `Description of event ${MOCK_EVENT_NAME}1`,
+              'zh-CN': `${MOCK_EVENT_NAME}1说明`,
+            },
+            metadataSource: MetadataSource.CUSTOM,
+            hasData: false,
+            dataVolumeLastDay: 0,
+            associatedParameters: [],
+            platform: [MetadataPlatform.ANDROID, MetadataPlatform.IOS],
+          },
+        ],
+        totalCount: 1,
+      },
+    });
+
+    // Mock DynamoDB error
+    ddbMock.on(QueryCommand).rejects(new Error('Mock DynamoDB error'));
+    res = await request(app)
+      .get(`/api/metadata/events?projectId=${MOCK_PROJECT_ID}&appId=${MOCK_APP_ID}`);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(500);
+
+    expect(res.body).toEqual({
+      success: false,
+      message: 'Unexpected error occurred at server.',
+      error: 'Error',
+    });
+  });
   it('Get metadata event list with parameters', async () => {
     jest
       .useFakeTimers()
