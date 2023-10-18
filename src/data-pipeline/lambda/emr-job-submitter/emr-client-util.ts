@@ -132,7 +132,7 @@ export class EMRServerlessUtil {
       `${config.pipelineS3Prefix}${config.projectId}/config/spark-config.json`,
     );
 
-    if (sparkConfigS3Obj && sparkConfigS3Obj.sparkConfig) {
+    if (sparkConfigS3Obj?.sparkConfig) {
       sparkConfigS3 = sparkConfigS3Obj.sparkConfig;
     }
 
@@ -204,7 +204,7 @@ export class EMRServerlessUtil {
 
     const configMap = new Map<string, string>();
     for (let it of [...defaultConfig, ...sparkConfigS3, ...sparkConfigEvent]) {
-      const m = it.match(/(.*)=(.*)/);
+      const m = new RegExp(/(.*)=(.*)/).exec(it);
       if (m) {
         const key = m[1];
         const value = m[2];
@@ -281,10 +281,10 @@ export class EMRServerlessUtil {
       s3PathPluginFiles: process.env.S3_PATH_PLUGIN_FILES!,
       entryPointJar: process.env.S3_PATH_ENTRY_POINT_JAR!,
       outputFormat: process.env.OUTPUT_FORMAT!,
-      outputPartitions: process.env.OUTPUT_PARTITIONS || '-1',
-      rePartitions: process.env.RE_PARTITIONS || '200',
-      userKeepDays: process.env.USER_KEEP_DAYS || '180',
-      itemKeepDays: process.env.ITEM_KEEP_DAYS || '360',
+      outputPartitions: process.env.OUTPUT_PARTITIONS ?? '-1',
+      rePartitions: process.env.RE_PARTITIONS ?? '200',
+      userKeepDays: process.env.USER_KEEP_DAYS ?? '180',
+      itemKeepDays: process.env.ITEM_KEEP_DAYS ?? '360',
     };
   }
 
@@ -344,11 +344,11 @@ function getTimestampFromEvent(inputTimestamp: string | number): number {
     return inputTimestamp;
   }
 
-  if (inputTimestamp.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d+Z$/)) {
+  if (new RegExp(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d+Z$/).exec(inputTimestamp)) {
     return new Date(inputTimestamp).getTime();
   }
 
-  if (inputTimestamp.match(/^\d+$/)) {
+  if (new RegExp(/^\d+$/).exec(inputTimestamp)) {
     return parseInt(inputTimestamp);
   }
 

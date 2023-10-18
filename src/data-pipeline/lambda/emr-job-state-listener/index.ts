@@ -141,21 +141,22 @@ async function sendMetrics(event: any) {
   const lineProcess = (line: string) => {
     n++;
 
-    const dropTableMatch = line.match(dropTableRegEx);
+
+    const dropTableMatch = dropTableRegEx.exec(line);;
     if (dropTableMatch) {
       droppedTables.push(dropTableMatch[1]);
       return;
     }
 
-    if (!line.match(metricRegEx)) {
+    if (!metricRegEx.exec(line)) {
       return;
     }
 
-    const sourceMatch = line.match(sourceRegEx);
-    const flattedSourceMatch = line.match(flattedSourceRegEx);
-    const sinkMatch = line.match(sinkRegEx);
-    const corruptedMatch = line.match(corruptedRegEx);
-    const inputFileCountMatch = line.match(inputFileCountRegEx);
+    const sourceMatch = sourceRegEx.exec(line);
+    const flattedSourceMatch = flattedSourceRegEx.exec(line);
+    const sinkMatch = sinkRegEx.exec(line);
+    const corruptedMatch = corruptedRegEx.exec(line);
+    const inputFileCountMatch = inputFileCountRegEx.exec(line);
 
     if (sourceMatch) {
       metrics = {
