@@ -4730,8 +4730,6 @@ describe('SQL Builder test', () => {
       groupColumn: ExploreGroupColumn.DAY,
     });
 
-    console.log(sql);
-
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
       user_base as (
@@ -13930,6 +13928,324 @@ describe('SQL Builder test', () => {
     event_date
     `;
     expect(sql.trim().replace(/ /g, '')).toEqual(expectResult.trim().replace(/ /g, ''));
+
+  });
+
+  test('schema name hard code', () => {
+
+    const sql = buildFunnelView({
+      schemaName: 'shopping',
+      computeMethod: ExploreComputeMethod.USER_CNT,
+      specifyJoinColumn: true,
+      joinColumn: 'user_pseudo_id',
+      conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
+      conversionIntervalInSeconds: 10*60,
+      eventAndConditions: [
+        {
+          eventName: 'add_button_click',
+          sqlCondition: {
+            conditions: [{
+              category: ConditionCategory.OTHER,
+              property: 'platform',
+              operator: '=',
+              value: ['Android'],
+              dataType: MetadataValueType.STRING,
+            },
+            {
+              category: ConditionCategory.EVENT,
+              property: '_session_duration',
+              operator: '>',
+              value: [200],
+              dataType: MetadataValueType.INTEGER,
+            }],
+            conditionOperator: 'and',
+          },
+        },
+        {
+          eventName: 'note_share',
+          sqlCondition: {
+            conditions: [{
+              category: ConditionCategory.OTHER,
+              property: 'platform',
+              operator: '=',
+              value: ['Android'],
+              dataType: MetadataValueType.STRING,
+            },
+            {
+              category: ConditionCategory.DEVICE,
+              property: 'screen_height',
+              operator: '<>',
+              value: [1400],
+              dataType: MetadataValueType.INTEGER,
+            }],
+            conditionOperator: 'and',
+          },
+
+        },
+        {
+          eventName: 'note_export',
+        },
+      ],
+      timeScopeType: ExploreTimeScopeType.FIXED,
+      timeStart: new Date('2023-10-01'),
+      timeEnd: new Date('22023-10-10'),
+      groupColumn: ExploreGroupColumn.DAY,
+    });
+
+    expect(sql.includes('shopping.event_parameter')).toEqual(true);
+    expect(sql.includes('shopping.event')).toEqual(true);
+    expect(sql.includes('app1.')).toEqual(false);
+
+    console.log(sql);
+    expect(sql.trim().replace(/ /g, '')).toEqual(`
+    with
+      event_base as (
+        select
+          event.event_date,
+          event.event_name,
+          event.event_id,
+          event_bundle_sequence_id::bigint as event_bundle_sequence_id,
+          event_previous_timestamp::bigint as event_previous_timestamp,
+          event_timestamp::bigint as event_timestamp,
+          ingest_timestamp,
+          event_value_in_usd,
+          app_info.app_id::varchar as app_info_app_id,
+          app_info.id::varchar as app_info_package_id,
+          app_info.install_source::varchar as app_info_install_source,
+          app_info.version::varchar as app_info_version,
+          device.vendor_id::varchar as device_id,
+          device.mobile_brand_name::varchar as device_mobile_brand_name,
+          device.mobile_model_name::varchar as device_mobile_model_name,
+          device.manufacturer::varchar as device_manufacturer,
+          device.screen_width::bigint as device_screen_width,
+          device.screen_height::bigint as device_screen_height,
+          device.viewport_height::bigint as device_viewport_height,
+          device.carrier::varchar as device_carrier,
+          device.network_type::varchar as device_network_type,
+          device.operating_system::varchar as device_operating_system,
+          device.operating_system_version::varchar as device_operating_system_version,
+          device.ua_browser::varchar as device_ua_browser,
+          device.ua_browser_version::varchar as device_ua_browser_version,
+          device.ua_os::varchar as device_ua_os,
+          device.ua_os_version::varchar as device_ua_os_version,
+          device.ua_device::varchar as device_ua_device,
+          device.ua_device_category::varchar as device_ua_device_category,
+          device.system_language::varchar as device_system_language,
+          device.time_zone_offset_seconds::bigint as device_time_zone_offset_seconds,
+          device.advertising_id::varchar as device_advertising_id,
+          geo.continent::varchar as geo_continent,
+          geo.country::varchar as geo_country,
+          geo.city::varchar as geo_city,
+          geo.metro::varchar as geo_metro,
+          geo.region::varchar as geo_region,
+          geo.sub_continent::varchar as geo_sub_continent,
+          geo.locale::varchar as geo_locale,
+          platform,
+          project_id,
+          traffic_source.name::varchar as traffic_source_name,
+          traffic_source.medium::varchar as traffic_source_medium,
+          traffic_source.source::varchar as traffic_source_source,
+          COALESCE(event.user_id, event.user_pseudo_id) as user_pseudo_id,
+          event.user_id,
+          TO_CHAR(
+            TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+              'week',
+              TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
+            ),
+            'YYYY-MM-DD'
+          ) || ' - ' || TO_CHAR(
+            date_trunc(
+              'week',
+              (
+                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
+              ) + INTERVAL '6 days'
+            ),
+            'YYYY-MM-DD'
+          ) as week,
+          TO_CHAR(
+            TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR(
+            TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+            'YYYY-MM-DD HH24'
+          ) || '00:00' as hour
+        from
+          shopping.event as event
+        where
+          event.event_date >= date '2023-10-01'
+          and event.event_date <= date '22023-10-10'
+          and event.event_name in ('add_button_click', 'note_share', 'note_export')
+      ),
+      base_data as (
+        select
+          _session_duration,
+          event_base.*
+        from
+          event_base
+          join (
+            select
+              event_base.event_id,
+              max(
+                case
+                  when event_param_key = '_session_duration' then event_param_int_value
+                  else null
+                end
+              ) as _session_duration
+            from
+              event_base
+              join shopping.event_parameter as event_param on event_base.event_timestamp = event_param.event_timestamp
+              and event_base.event_id = event_param.event_id
+            group by
+              event_base.event_id
+          ) as event_join_table on event_base.event_id = event_join_table.event_id
+        where
+          1 = 1
+          and (
+            (
+              event_name = 'add_button_click'
+              and (
+                platform = 'Android'
+                and _session_duration > 200
+              )
+            )
+            or (
+              event_name = 'note_share'
+              and (
+                platform = 'Android'
+                and device_screen_height <> 1400
+              )
+            )
+            or (event_name = 'note_export')
+          )
+      ),
+      table_0 as (
+        select
+          month,
+          week,
+          day,
+          hour,
+          event_date as event_date_0,
+          event_name as event_name_0,
+          event_timestamp as event_timestamp_0,
+          event_id as event_id_0,
+          user_id as user_id_0,
+          user_pseudo_id as user_pseudo_id_0
+        from
+          base_data base
+        where
+          event_name = 'add_button_click'
+      ),
+      table_1 as (
+        select
+          event_date as event_date_1,
+          event_name as event_name_1,
+          event_timestamp as event_timestamp_1,
+          event_id as event_id_1,
+          user_id as user_id_1,
+          user_pseudo_id as user_pseudo_id_1
+        from
+          base_data base
+        where
+          event_name = 'note_share'
+      ),
+      table_2 as (
+        select
+          event_date as event_date_2,
+          event_name as event_name_2,
+          event_timestamp as event_timestamp_2,
+          event_id as event_id_2,
+          user_id as user_id_2,
+          user_pseudo_id as user_pseudo_id_2
+        from
+          base_data base
+        where
+          event_name = 'note_export'
+      ),
+      join_table as (
+        select
+          table_0.*,
+          table_1.event_id_1,
+          table_1.event_name_1,
+          table_1.user_pseudo_id_1,
+          table_1.event_timestamp_1,
+          table_2.event_id_2,
+          table_2.event_name_2,
+          table_2.user_pseudo_id_2,
+          table_2.event_timestamp_2
+        from
+          table_0
+          left outer join table_1 on table_0.user_pseudo_id_0 = table_1.user_pseudo_id_1
+          and table_1.event_timestamp_1 - table_0.event_timestamp_0 > 0
+          and table_1.event_timestamp_1 - table_0.event_timestamp_0 < 600 * 1000
+          left outer join table_2 on table_1.user_pseudo_id_1 = table_2.user_pseudo_id_2
+          and table_2.event_timestamp_2 - table_1.event_timestamp_1 > 0
+          and table_2.event_timestamp_2 - table_1.event_timestamp_1 < 600 * 1000
+      ),
+      final_table as (
+        select
+          month,
+          week,
+          day,
+          hour,
+          event_id_0 as e_id_0,
+          '1_' || event_name_0 as e_name_0,
+          user_pseudo_id_0 as u_id_0,
+          event_id_1 as e_id_1,
+          '2_' || event_name_1 as e_name_1,
+          user_pseudo_id_1 as u_id_1,
+          event_id_2 as e_id_2,
+          '3_' || event_name_2 as e_name_2,
+          user_pseudo_id_2 as u_id_2
+        from
+          join_table
+        group by
+          month,
+          week,
+          day,
+          hour,
+          event_id_0,
+          '1_' || event_name_0,
+          user_pseudo_id_0,
+          event_id_1,
+          '2_' || event_name_1,
+          user_pseudo_id_1,
+          event_id_2,
+          '3_' || event_name_2,
+          user_pseudo_id_2
+      )
+    select
+      day::date as event_date,
+      e_name_0::varchar as event_name,
+      u_id_0::varchar as x_id
+    from
+      final_table
+    where
+      u_id_0 is not null
+    union all
+    select
+      day::date as event_date,
+      e_name_1::varchar as event_name,
+      u_id_1::varchar as x_id
+    from
+      final_table
+    where
+      u_id_1 is not null
+    union all
+    select
+      day::date as event_date,
+      e_name_2::varchar as event_name,
+      u_id_2::varchar as x_id
+    from
+      final_table
+    where
+      u_id_2 is not null
+  `.trim().replace(/ /g, ''),
+    );
 
   });
 
