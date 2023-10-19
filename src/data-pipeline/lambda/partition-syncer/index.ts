@@ -68,7 +68,7 @@ async function _handler(event: EventType, date: Date, context: Context) {
   let databaseName = process.env.DATABASE_NAME!;
   let sourceTableName = process.env.SOURCE_TABLE_NAME!;
   let projectId = process.env.PROJECT_ID!;
-  let appIds = process.env.APP_IDS || '';
+  let appIds = process.env.APP_IDS ?? '';
   let sinkS3Bucket = process.env.SINK_S3_BUCKET_NAME!;
   let sinkS3Prefix = process.env.SINK_S3_PREFIX!;
 
