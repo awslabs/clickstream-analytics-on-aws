@@ -28,17 +28,17 @@ We identify user devices by Device ID.
 
 The following table will introduce how the SDK on each end generates the Device ID.
 
-| SDK Types    | Generate Rules                                                                                                                                                            | Storage Location                                | Is Unique                                                                                                                                                    |
-|--------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Android SDK  | By default, AndroidId is used as the Device ID. If the AndroidId cannot be obtained, a random UUID is used instead                                                        | Stored in SharedPreference key-value pair file  | Usually the AndroidId will not change when the app is uninstalled. <br>If the UUID is obtained, the Device ID will change after the user uninstalls the app  |
-| Swift SDK    | If the user has been authorized to obtain IDFA, use IDFA as the Device ID. Otherwise, use IDFV as the Device ID by default. If IDFV cannot be obtained, use a random UUID | UserDefault key-value pair file                 | Usually the IDFA does not change when the app is uninstalled. <br>When using IDFV or UUID, the Device ID will change after the user uninstalls the app       |
-| Web SDK      | By default, a random UUID is used as the device ID                                                                                                                        | In the browser's localStorage                   | Device ID will be regenerated after user clears browser cache                                                                                                |
+| SDK Types   | Generate Rules                                                                                                                                                 | Storage Location                               | Is Unique                                                                                                                                                                                 |
+|-------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Android SDK | By default, AndroidId is used as the Device ID. If the AndroidId cannot be obtained, a random UUID is used instead                                             | Stored in SharedPreference key-value pair file | Usually, the AndroidId will not change even if the app is uninstalled and reinstalled. <br>If using the UUID as Device ID, it will change after the user uninstalls and reinstall the app |
+| Swift SDK   | If your app has been authorized to obtain IDFA, use IDFA as the Device ID. Otherwise, use IDFV as the Device ID. If IDFV cannot be obtained, use a random UUID | UserDefault key-value pair file                | Usually, the IDFA does not change even if the app is uninstalled and reinstalled.<br>When using IDFV or UUID, the Device ID will change after the user uninstalls and reinstalls the app  |
+| Web SDK     | By default, a random UUID is used as the device ID                                                                                                             | In the browser's localStorage                  | Device ID will be regenerated after user clears browser cache                                                                                                                             |
 
 ## User Pseudo ID
 
-{{ solution_name }} solution use User Pseudo ID to correlate logged-in and non-logged-in behavior on the same device.
+{{ solution_name }} solution uses User Pseudo ID to correlate logged-in and non-logged-in behavior on the same device.
 
-* User Pseudo ID are generated from random UUIDs in all SDKs.
+* User Pseudo IDs are generated from random UUIDs in all SDKs.
 * User Pseudo ID will only be reassigned when a new user logs in on the current device. When switching to a user who has already logged in on the current device, it will revert to the User Pseudo ID of the previous user.
 * The User Pseudo ID is stored in the `user_pseudo_id` field of the user table.
 
