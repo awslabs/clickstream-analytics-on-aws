@@ -12,7 +12,7 @@ select
   event_parameter.event_param_int_value,
   event_parameter.event_param_string_value
 from {{database}}.{{eventTable}} as event
-join {{database}}.{{eventParameterTable}} as event_parameter 
+join {{database}}.{{eventParamTable}} as event_parameter 
 on event.event_timestamp = event_parameter.event_timestamp and event.event_id = event_parameter.event_id
 where event.partition_app = ? 
   and event.partition_year >= ?

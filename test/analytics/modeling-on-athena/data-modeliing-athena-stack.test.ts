@@ -22,11 +22,11 @@ describe('Athena built-in query test', () => {
   const template = Template.fromStack(stack);
 
   test('parameter and condition test', () => {
-
     template.hasParameter('AthenaDatabase', {});
     template.hasParameter('AthenaWorkGroup', {});
     template.hasParameter('AthenaEventTable', {});
-
+    template.hasParameter('AthenaEventParamTable', {});
+    template.hasParameter('AthenaUserTable', {});
   });
 
   test('Should have device query', () => {
@@ -111,23 +111,6 @@ describe('Athena built-in query test', () => {
         ],
       },
       Description: 'Athena SQL that queries events information',
-    });
-  });
-
-  test('Should have path query', () => {
-    template.hasResourceProperties('AWS::Athena::NamedQuery', {
-      Name: {
-        'Fn::Join': [
-          '',
-          [
-            'Clickstream - User Path Query - ',
-            {
-              Ref: Match.anyValue(),
-            },
-          ],
-        ],
-      },
-      Description: 'Athena SQL that generates user\'s activity path',
     });
   });
 

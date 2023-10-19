@@ -149,7 +149,7 @@ export function createAthenaStackParameters(scope: Construct): {
       athenaDatabaseParam.logicalId,
       athenaEventTableParam.logicalId,
       athenaEventParamTableParam.logicalId,
-      athenaUserTableParam.logicalId
+      athenaUserTableParam.logicalId,
     ],
   });
 

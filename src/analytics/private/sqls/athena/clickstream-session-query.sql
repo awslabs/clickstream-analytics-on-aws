@@ -13,7 +13,7 @@ with temp_1 as (
     event_parameter.event_param_int_value,
     event_parameter.event_param_string_value
   from {{database}}.{{eventTable}} as event
-  join {{database}}.{{eventParameterTable}} as event_parameter 
+  join {{database}}.{{eventParamTable}} as event_parameter 
   on event.event_timestamp = event_parameter.event_timestamp and event.event_id = event_parameter.event_id
   where event.partition_app = ? 
   and event.partition_year >= ?
@@ -27,9 +27,9 @@ temp_2 as
     ,event_id
     ,platform
     ,max(case when event_param_key = '_session_id' then event_param_string_value else null end) as session_id
-    ,max(case when event_param_key = '_session_duration' then event_param_string_value else null end) as session_duration
-    ,max(case when event_param_key = '_session_start_timestamp' then event_param_string_value else null end) as session_st
-    ,max(case when event_param_key = '_engagement_time_msec' then event_param_string_value else null end) as engagement_time
+    ,max(case when event_param_key = '_session_duration' then event_param_int_value else null end) as session_duration
+    ,max(case when event_param_key = '_session_start_timestamp' then event_param_int_value else null end) as session_st
+    ,max(case when event_param_key = '_engagement_time_msec' then event_param_int_value else null end) as engagement_time
     ,(case when max(event_name) in ('_screen_view', '_page_view') then 1 else 0 end) as view
   FROM temp_1
   group by 1,2,3
@@ -40,6 +40,7 @@ temp_3 as (
     ,event_id
     ,event_timestamp
     ,max(case when event_param_key = '_session_id' then event_param_string_value else null end) as session_id
+    ,(case when max(event_name) in ('_screen_view', '_page_view') then 1 else 0 end) as view
     from temp_1 where event_name in ('_screen_view','_page_view')
     group by 1,2,3
 ),
@@ -60,19 +61,25 @@ clickstream_session_mv_1 as (
 clickstream_session_mv_2 as (
   select session_id, first_sv_event_id, last_sv_event_id, count(event_id) from (
     select 
-    session_id
-    , event_id
-    ,first_value(event_id) over(partition by session_id order by event_timestamp asc rows between unbounded preceding and unbounded following) as first_sv_event_id,
-    last_value(event_id) over(partition by session_id order by event_timestamp asc rows between unbounded preceding and unbounded following) as last_sv_event_id
-        from temp_3 
+      session_id
+      ,event_id
+      ,first_value(event_id) over(partition by session_id order by event_timestamp asc rows between unbounded preceding and unbounded following) as first_sv_event_id,
+      last_value(event_id) over(partition by session_id order by event_timestamp asc rows between unbounded preceding and unbounded following) as last_sv_event_id
+    from temp_3 
   ) group by 1,2,3
   ),
   session_f_sv_view as (
-    select * from clickstream_session_mv_2 as session_f_l_sv left outer join
+    select 
+      session_f_l_sv.*,
+      t.view as first_sv_view
+    from clickstream_session_mv_2 as session_f_l_sv left outer join
     temp_3 as t on session_f_l_sv.first_sv_event_id=t.event_id
 ), 
 session_f_l_sv_view as (
-    select * from session_f_sv_view left outer join
+    select 
+      session_f_sv_view.*,
+      t.view as last_sv_view
+    from session_f_sv_view left outer join
     temp_3 as t on session_f_sv_view.last_sv_event_id=t.event_id
 )
 select 
