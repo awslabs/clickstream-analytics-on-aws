@@ -366,8 +366,8 @@ export function buildEventPathAnalysisView(sqlParameters: SQLParameters) : strin
     dataTableSql = `data as (
       select 
         *,
-        ROW_NUMBER() OVER (PARTITION BY _session_id ORDER BY event_timestamp asc) as step_1,
-        ROW_NUMBER() OVER (PARTITION BY _session_id ORDER BY event_timestamp asc) + 1 as step_2
+        ROW_NUMBER() OVER (PARTITION BY user_pseudo_id, _session_id ORDER BY event_timestamp asc) as step_1,
+        ROW_NUMBER() OVER (PARTITION BY user_pseudo_id, _session_id ORDER BY event_timestamp asc) + 1 as step_2
       from mid_table 
     ),
     step_table_1 as (
@@ -393,12 +393,14 @@ export function buildEventPathAnalysisView(sqlParameters: SQLParameters) : strin
         _session_id,
         ROW_NUMBER() OVER (
           PARTITION BY
+            user_pseudo_id,
             _session_id
           ORDER BY
             step_1 asc, step_2
         ) as step_1,
         ROW_NUMBER() OVER (
           PARTITION BY
+            user_pseudo_id,
             _session_id
           ORDER BY
             step_1 asc, step_2
