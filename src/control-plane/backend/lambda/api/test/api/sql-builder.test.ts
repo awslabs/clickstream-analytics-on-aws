@@ -13996,7 +13996,6 @@ describe('SQL Builder test', () => {
     expect(sql.includes('shopping.event')).toEqual(true);
     expect(sql.includes('app1.')).toEqual(false);
 
-    console.log(sql);
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
       event_base as (
