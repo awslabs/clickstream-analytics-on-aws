@@ -13931,7 +13931,7 @@ describe('SQL Builder test', () => {
 
   });
 
-  test('schema name hard code', () => {
+  test('use specified schema name in generated SQL', () => {
 
     const sql = buildFunnelView({
       schemaName: 'shopping',
