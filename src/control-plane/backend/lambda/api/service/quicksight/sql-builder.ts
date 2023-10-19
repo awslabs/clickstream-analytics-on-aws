@@ -366,8 +366,8 @@ export function buildEventPathAnalysisView(sqlParameters: SQLParameters) : strin
     dataTableSql = `data as (
       select 
         *,
-        ROW_NUMBER() OVER (PARTITION BY _session_id ORDER BY event_timestamp asc) as step_1,
-        ROW_NUMBER() OVER (PARTITION BY _session_id ORDER BY event_timestamp asc) + 1 as step_2
+        ROW_NUMBER() OVER (PARTITION BY user_pseudo_id, _session_id ORDER BY event_timestamp asc) as step_1,
+        ROW_NUMBER() OVER (PARTITION BY user_pseudo_id, _session_id ORDER BY event_timestamp asc) + 1 as step_2
       from mid_table 
     ),
     step_table_1 as (
@@ -376,7 +376,7 @@ export function buildEventPathAnalysisView(sqlParameters: SQLParameters) : strin
       data._session_id _session_id,
       min(step_1) min_step
       from data
-      where event_name in ('${eventNames.join('\',\'')}')
+      where event_name = '${eventNames[0]}'
       group by user_pseudo_id, _session_id
     ),
     step_table_2 as (
@@ -393,12 +393,14 @@ export function buildEventPathAnalysisView(sqlParameters: SQLParameters) : strin
         _session_id,
         ROW_NUMBER() OVER (
           PARTITION BY
+            user_pseudo_id,
             _session_id
           ORDER BY
             step_1 asc, step_2
         ) as step_1,
         ROW_NUMBER() OVER (
           PARTITION BY
+            user_pseudo_id,
             _session_id
           ORDER BY
             step_1 asc, step_2
@@ -479,7 +481,7 @@ export function buildEventPathAnalysisView(sqlParameters: SQLParameters) : strin
       from
         data
       where
-        event_name in ('${eventNames.join('\',\'')}')
+        event_name = '${eventNames[0]}'
       group by
         user_pseudo_id,
         group_id
@@ -606,7 +608,7 @@ export function buildNodePathAnalysisView(sqlParameters: SQLParameters) : string
       from
         data
       where
-        node in ('${sqlParameters.pathAnalysis?.nodes?.join('\',\'')}')
+        node = '${sqlParameters.pathAnalysis!.nodes![0]}'
       group by
         user_pseudo_id,
         _session_id
@@ -744,7 +746,7 @@ export function buildNodePathAnalysisView(sqlParameters: SQLParameters) : string
       from
         data
       where
-        node in ('${sqlParameters.pathAnalysis?.nodes?.join('\',\'')}')
+        node = '${sqlParameters.pathAnalysis!.nodes![0]}'
       group by
         user_pseudo_id,
         group_id
