@@ -1908,7 +1908,7 @@ describe('SQL Builder test', () => {
         from
           data
         where
-          event_name in ('add_button_click', 'note_share', 'note_export')
+          event_name = 'add_button_click'
         group by
           user_pseudo_id,
           _session_id
@@ -2253,7 +2253,7 @@ describe('SQL Builder test', () => {
         from
           data
         where
-          event_name in ('add_button_click', 'note_share', 'note_export')
+          event_name = 'add_button_click'
         group by
           user_pseudo_id,
           group_id
@@ -2517,12 +2517,7 @@ describe('SQL Builder test', () => {
         from
           data
         where
-          node in (
-            'NotepadActivity',
-            'NotepadExportActivity',
-            'NotepadShareActivity',
-            'NotepadPrintActivity'
-          )
+          node = 'NotepadActivity'
         group by
           user_pseudo_id,
           _session_id
@@ -2815,12 +2810,7 @@ describe('SQL Builder test', () => {
         from
           data
         where
-          node in (
-            'NotepadActivity',
-            'NotepadExportActivity',
-            'NotepadShareActivity',
-            'NotepadPrintActivity'
-          )
+          node = 'NotepadActivity'
         group by
           user_pseudo_id,
           group_id
@@ -6185,7 +6175,7 @@ describe('SQL Builder test', () => {
         from
           data
         where
-          event_name in ('add_button_click', 'note_share', 'note_export')
+          event_name = 'add_button_click'
         group by
           user_pseudo_id,
           _session_id
@@ -6660,7 +6650,7 @@ describe('SQL Builder test', () => {
         from
           data
         where
-          event_name in ('add_button_click', 'note_share', 'note_export')
+          event_name = 'add_button_click'
         group by
           user_pseudo_id,
           group_id
@@ -7127,12 +7117,7 @@ describe('SQL Builder test', () => {
         from
           data
         where
-          node in (
-            'NotepadActivity',
-            'NotepadExportActivity',
-            'NotepadShareActivity',
-            'NotepadPrintActivity'
-          )
+          node = 'NotepadActivity'
         group by
           user_pseudo_id,
           group_id
@@ -12188,7 +12173,7 @@ describe('SQL Builder test', () => {
         from
           data
         where
-          event_name in ('add_button_click', 'note_share', 'note_export')
+          event_name = 'add_button_click'
         group by
           user_pseudo_id,
           _session_id
@@ -12453,7 +12438,7 @@ describe('SQL Builder test', () => {
         from
           data
         where
-          event_name in ('add_button_click', 'note_share', 'note_export')
+          event_name = 'add_button_click'
         group by
           user_pseudo_id,
           _session_id
@@ -12876,12 +12861,7 @@ describe('SQL Builder test', () => {
         from
           data
         where
-          node in (
-            'NotepadActivity',
-            'NotepadExportActivity',
-            'NotepadShareActivity',
-            'NotepadPrintActivity'
-          )
+        node = 'NotepadActivity'
         group by
           user_pseudo_id,
           _session_id
@@ -13350,12 +13330,7 @@ describe('SQL Builder test', () => {
         from
           data
         where
-          node in (
-            'NotepadActivity',
-            'NotepadExportActivity',
-            'NotepadShareActivity',
-            'NotepadPrintActivity'
-          )
+        node = 'NotepadActivity'
         group by
           user_pseudo_id,
           group_id

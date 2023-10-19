@@ -376,7 +376,7 @@ export function buildEventPathAnalysisView(sqlParameters: SQLParameters) : strin
       data._session_id _session_id,
       min(step_1) min_step
       from data
-      where event_name in ('${eventNames.join('\',\'')}')
+      where event_name = '${eventNames[0]}'
       group by user_pseudo_id, _session_id
     ),
     step_table_2 as (
@@ -479,7 +479,7 @@ export function buildEventPathAnalysisView(sqlParameters: SQLParameters) : strin
       from
         data
       where
-        event_name in ('${eventNames.join('\',\'')}')
+        event_name = '${eventNames[0]}'
       group by
         user_pseudo_id,
         group_id
@@ -606,7 +606,7 @@ export function buildNodePathAnalysisView(sqlParameters: SQLParameters) : string
       from
         data
       where
-        node in ('${sqlParameters.pathAnalysis?.nodes?.join('\',\'')}')
+        node = '${sqlParameters.pathAnalysis!.nodes![0]}'
       group by
         user_pseudo_id,
         _session_id
@@ -744,7 +744,7 @@ export function buildNodePathAnalysisView(sqlParameters: SQLParameters) : string
       from
         data
       where
-        node in ('${sqlParameters.pathAnalysis?.nodes?.join('\',\'')}')
+        node = '${sqlParameters.pathAnalysis!.nodes![0]}'
       group by
         user_pseudo_id,
         group_id
