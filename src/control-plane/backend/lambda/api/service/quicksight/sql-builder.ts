@@ -991,7 +991,7 @@ export function _buildCommonPartSql(eventNames: string[], sqlParameters: SQLPara
     eventAttributes.push(...eventConditionProps.eventAttributes);
     const eventCommonColumnsSql = _buildCommonColumnsSql(eventAttributes, 'event_param_key', 'event_param_{{}}_value');
     eventColList = eventCommonColumnsSql.columns;
-    eventJoinTable = _buildEventJoinTable(eventCommonColumnsSql.columnsSql);
+    eventJoinTable = _buildEventJoinTable(sqlParameters.schemaName, eventCommonColumnsSql.columnsSql);
   }
 
   const userConditionProps = _getUserConditionProps(sqlParameters);
@@ -1129,7 +1129,7 @@ function _buildUserJoinTable(columnsSql: any) {
   `;
 }
 
-function _buildEventJoinTable(columnsSql: string) {
+function _buildEventJoinTable(schema: string, columnsSql: string) {
   return `
   join
   (
@@ -1137,7 +1137,7 @@ function _buildEventJoinTable(columnsSql: string) {
     event_base.event_id,
     ${columnsSql}
     from event_base
-    join app1.event_parameter as event_param on event_base.event_timestamp = event_param.event_timestamp 
+    join ${schema}.event_parameter as event_param on event_base.event_timestamp = event_param.event_timestamp 
       and event_base.event_id = event_param.event_id
     group by
       event_base.event_id
