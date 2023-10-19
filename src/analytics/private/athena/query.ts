@@ -34,19 +34,13 @@ export const AthenaBuiltInQueries = [
     id: 'EventsParameterQuery',
     name: 'Clickstream - Events Parameter Query',
     description: 'Athena SQL that queries event parameters',
-    sqlFile: 'clickstream-ods-events-parameter-query.sql',
+    sqlFile: 'clickstream-event-parameter-query.sql',
   },
   {
     id: 'EventsQuery',
     name: 'Clickstream - Event Query',
     description: 'Athena SQL that queries events information',
-    sqlFile: 'clickstream-ods-events-query.sql',
-  },
-  {
-    id: 'PathQuery',
-    name: 'Clickstream - User Path Query',
-    description: 'Athena SQL that generates user\'s activity path',
-    sqlFile: 'clickstream-path-query.sql',
+    sqlFile: 'clickstream-event-query.sql',
   },
   {
     id: 'RetentionQuery',

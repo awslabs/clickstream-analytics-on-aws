@@ -27,6 +27,9 @@ import {
   REDSHIFT_DB_USER_NAME_PATTERN,
   S3_BUCKET_NAME_PATTERN, SCHEDULE_EXPRESSION_PATTERN, SUBNETS_THREE_AZ_PATTERN, VPC_ID_PATTERN,
   DDB_TABLE_ARN_PATTERN,
+  TABLE_NAME_EVENT,
+  TABLE_NAME_EVENT_PARAMETER,
+  TABLE_NAME_USER,
 } from '../common/constant';
 import { createLambdaRole } from '../common/lambda';
 import { REDSHIFT_MODE } from '../common/model';
@@ -94,9 +97,11 @@ export interface RedshiftAnalyticsStackProps {
 }
 
 export interface AthenaAnalyticsStackProps {
-  database: string;
-  workGroup: string;
-  eventTable: string;
+  readonly database: string;
+  readonly workGroup: string;
+  readonly eventTable: string;
+  readonly eventParamTable: string;
+  readonly userTable: string;
 }
 
 export function createAthenaStackParameters(scope: Construct): {
@@ -122,7 +127,19 @@ export function createAthenaStackParameters(scope: Construct): {
   const athenaEventTableParam = new CfnParameter(scope, 'AthenaEventTable', {
     description: 'The Athena event table name.',
     type: 'String',
-    default: 'ods_events',
+    default: TABLE_NAME_EVENT,
+  });
+
+  const athenaEventParamTableParam = new CfnParameter(scope, 'AthenaEventParamTable', {
+    description: 'The Athena event table name.',
+    type: 'String',
+    default: TABLE_NAME_EVENT_PARAMETER,
+  });
+
+  const athenaUserTableParam = new CfnParameter(scope, 'AthenaUserTable', {
+    description: 'The Athena event table name.',
+    type: 'String',
+    default: TABLE_NAME_USER,
   });
 
   athenaParamsGroup.push({
@@ -131,6 +148,8 @@ export function createAthenaStackParameters(scope: Construct): {
       athenaWorkGroupParam.logicalId,
       athenaDatabaseParam.logicalId,
       athenaEventTableParam.logicalId,
+      athenaEventParamTableParam.logicalId,
+      athenaUserTableParam.logicalId
     ],
   });
 
@@ -152,6 +171,18 @@ export function createAthenaStackParameters(scope: Construct): {
     },
   };
 
+  const athenaEventParamTableParamsLabels = {
+    [athenaEventParamTableParam.logicalId]: {
+      default: 'Athena Event Parameter Table Name',
+    },
+  };
+
+  const athenaUserTableParamsLabels = {
+    [athenaUserTableParam.logicalId]: {
+      default: 'Athena User Table Name',
+    },
+  };
+
   const metadata = {
     'AWS::CloudFormation::Interface': {
       ParameterGroups: [
@@ -161,6 +192,8 @@ export function createAthenaStackParameters(scope: Construct): {
         ...athenaDatabaseParamsLabels,
         ...athenaWorkGroupParamsLabels,
         ...athenaEventTableParamsLabels,
+        ...athenaEventParamTableParamsLabels,
+        ...athenaUserTableParamsLabels,
       },
     },
   };
@@ -171,6 +204,8 @@ export function createAthenaStackParameters(scope: Construct): {
       database: athenaDatabaseParam.valueAsString,
       workGroup: athenaWorkGroupParam.valueAsString,
       eventTable: athenaEventTableParam.valueAsString,
+      eventParamTable: athenaEventParamTableParam.valueAsString,
+      userTable: athenaUserTableParam.valueAsString,
     },
   };
 

@@ -9,7 +9,7 @@ with base as (
 ),
 clickstream_user_dim_mv_1 as (
   SELECT
-    user_pseudo_id
+      user_pseudo_id
     , event_date as first_visit_date
     , app_info.install_source as first_visit_install_source
     , device.system_language as first_visit_device_language

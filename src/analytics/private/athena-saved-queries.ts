@@ -16,16 +16,15 @@ import { CfnNamedQuery } from 'aws-cdk-lib/aws-athena';
 import { Construct } from 'constructs';
 import { AthenaBuiltInQueries } from './athena/query';
 import { getSqlContent } from './utils';
+import { AthenaAnalyticsStackProps } from '../parameter';
 
-export interface AthenaSavedQueryProps {
-  readonly databaseName: string;
-  readonly workGroup: string;
-  readonly eventTable: string;
-}
+export type AthenaSavedQueryProps = AthenaAnalyticsStackProps;
 
 export type MustacheParamType = {
   database: string;
   eventTable: string;
+  eventParamTable: string;
+  userTable: string;
 }
 
 export class AthenaSavedQuery extends Construct {
@@ -34,17 +33,19 @@ export class AthenaSavedQuery extends Construct {
     super(scope, id);
 
     const mustacheParam: MustacheParamType = {
-      database: props.databaseName,
+      database: props.database,
       eventTable: props.eventTable,
+      eventParamTable: props.eventParamTable,
+      userTable: props.userTable,
     };
 
     for (const query of AthenaBuiltInQueries) {
       new CfnNamedQuery(scope, `Query_${query.id}`, {
-        name: `${query.name} - ${props.databaseName}`,
+        name: `${query.name} - ${props.database}`,
         description: query.description,
         queryString: getSqlContent(query.sqlFile, mustacheParam, join(__dirname, 'sqls/athena')),
         workGroup: props.workGroup,
-        database: props.databaseName,
+        database: props.database,
       });
     }
   }
