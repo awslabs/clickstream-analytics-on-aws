@@ -17,9 +17,9 @@ FROM
         ,event_id
         ,platform
         ,max(case when event_param_key = '_session_id' then event_param_string_value else null end) as session_id
-        ,max(case when event_param_key = '_session_duration' then event_param_string_value else null end) as session_duration
-        ,max(case when event_param_key = '_session_start_timestamp' then event_param_string_value else null end) as session_st
-        ,max(case when event_param_key = '_engagement_time_msec' then event_param_string_value else null end) as engagement_time
+        ,max(case when event_param_key = '_session_duration' then event_param_int_value else null end) as session_duration
+        ,max(case when event_param_key = '_session_start_timestamp' then event_param_int_value else null end) as session_st
+        ,max(case when event_param_key = '_engagement_time_msec' then event_param_int_value else null end) as engagement_time
         ,(case when max(event_name) in ('_screen_view', '_page_view') then 1 else 0 end) as view
     FROM {{schema}}.clickstream_event_parameter_view
     group by 1,2,3
