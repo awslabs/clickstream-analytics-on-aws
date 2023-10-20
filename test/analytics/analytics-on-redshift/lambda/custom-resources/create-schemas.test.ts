@@ -217,6 +217,11 @@ describe('Custom resource - Create schemas for applications in Redshift database
       sqlFile: 'sp-clear-item-and-user.sql',
     },
 
+    {
+      updatable: 'true',
+      sqlFile: 'sp-migrate-ods-events-1.0-to-1.1.sql',
+    },
+
   ];
 
   const clusterId = 'redshift-cluster-1';
@@ -302,6 +307,7 @@ describe('Custom resource - Create schemas for applications in Redshift database
       '/opt/user-m-view.sql': testSqlContent(rootPath + 'user-m-view.sql'),
       '/opt/sp-clear-item-and-user.sql': testSqlContent(rootPath + 'sp-clear-item-and-user.sql'),
       '/opt/clickstream-log.sql': testSqlContent(rootPath + 'clickstream-log.sql'),
+      '/opt/sp-migrate-ods-events-1.0-to-1.1.sql': testSqlContent(rootPath + 'sp-migrate-ods-events-1.0-to-1.1.sql'),
     });
   });
 
@@ -662,7 +668,6 @@ describe('Custom resource - Create schemas for applications in Redshift database
             && sqlStr.includes('CREATE SCHEMA IF NOT EXISTS app2')
             && sqlStr.includes(`CREATE TABLE IF NOT EXISTS app2.${TABLE_NAME_EVENT_PARAMETER}(`)
             && sqlStr.includes('CREATE OR REPLACE PROCEDURE app2.sp_clickstream_log_non_atomic')
-
           ) {
             return { Id: 'Id-1-1' };
           }

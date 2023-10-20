@@ -132,5 +132,8 @@ export const schemaDefs: SQLDef[] = [
     updatable: 'true',
     sqlFile: 'sp-clear-item-and-user.sql',
   },
-
+  {
+    updatable: 'true',
+    sqlFile: 'sp-migrate-ods-events-1.0-to-1.1.sql',
+  },
 ];
