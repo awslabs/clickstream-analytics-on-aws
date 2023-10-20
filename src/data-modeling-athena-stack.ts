@@ -40,9 +40,11 @@ export class DataModelingAthenaStack extends Stack {
     const athenaParameters = parameters.params;
 
     new AthenaSavedQuery(this, 'AthenaSavedQuery', {
-      databaseName: athenaParameters.database,
+      database: athenaParameters.database,
       workGroup: athenaParameters.workGroup,
       eventTable: athenaParameters.eventTable,
+      eventParamTable: athenaParameters.eventParamTable,
+      userTable: athenaParameters.userTable,
     });
   }
 }
