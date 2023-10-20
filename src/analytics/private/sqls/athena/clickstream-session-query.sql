@@ -45,8 +45,8 @@ temp_3 as (
     group by 1,2,3
 ),
 session_part_1 as (
-SELECT
-    es.session_id 
+  SELECT
+     session_id 
     ,user_pseudo_id
     ,platform
     ,max(session_duration) as session_duration
@@ -69,10 +69,11 @@ session_part_2 as (
   ) group by 1,2,3
   ),
   session_f_sv_view as (
-    select * from session_part_2 as session_f_l_sv left outer join
-    (select e.event_id as event_id, ep.value.string_value as first_sv_view
-    from base e cross join unnest(event_params) as t(ep) 
-    where ep.key in ('_screen_name','_page_title')) t on session_f_l_sv.first_sv_event_id=t.event_id
+    select 
+      session_f_l_sv.*,
+      t.view as first_sv_view
+    from session_part_2 as session_f_l_sv left outer join
+    temp_3 as t on session_f_l_sv.first_sv_event_id=t.event_id
 ), 
 session_f_l_sv_view as (
     select 
