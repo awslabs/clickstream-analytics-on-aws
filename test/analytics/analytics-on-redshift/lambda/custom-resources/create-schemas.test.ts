@@ -285,8 +285,6 @@ describe('Custom resource - Create schemas for applications in Redshift database
       '/opt/dashboard/clickstream_user_attr_view.sql': testSqlContent(rootPath + 'dashboard/clickstream_user_attr_view.sql'),
       '/opt/dashboard/clickstream_user_dim_mv_1.sql': testSqlContent(rootPath + 'dashboard/clickstream_user_dim_mv_1.sql'),
       '/opt/dashboard/clickstream_user_dim_mv_2.sql': testSqlContent(rootPath + 'dashboard/clickstream_user_dim_mv_2.sql'),
-      '/opt/dashboard/clickstream_session_mv_1.sql': testSqlContent(rootPath + 'dashboard/clickstream_session_mv_1.sql'),
-      '/opt/dashboard/clickstream_session_mv_2.sql': testSqlContent(rootPath + 'dashboard/clickstream_session_mv_2.sql'),
       '/opt/clickstream_user_dim_view.sql': testSqlContent(rootPath + 'dashboard/clickstream_user_dim_view.sql'),
       '/opt/clickstream_session_view.sql': testSqlContent(rootPath + 'dashboard/clickstream_session_view.sql'),
       '/opt/clickstream_event_view.sql': testSqlContent(rootPath + 'dashboard/clickstream_event_view.sql'),
