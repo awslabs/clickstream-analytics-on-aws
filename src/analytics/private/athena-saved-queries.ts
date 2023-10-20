@@ -20,24 +20,14 @@ import { AthenaAnalyticsStackProps } from '../parameter';
 
 export type AthenaSavedQueryProps = AthenaAnalyticsStackProps;
 
-export type MustacheParamType = {
-  database: string;
-  eventTable: string;
-  eventParamTable: string;
-  userTable: string;
-}
+export type MustacheParamType = Omit<AthenaSavedQueryProps, 'workGroup'>;
 
 export class AthenaSavedQuery extends Construct {
 
   constructor(scope: Construct, id: string, props: AthenaSavedQueryProps) {
     super(scope, id);
 
-    const mustacheParam: MustacheParamType = {
-      database: props.database,
-      eventTable: props.eventTable,
-      eventParamTable: props.eventParamTable,
-      userTable: props.userTable,
-    };
+    const mustacheParam = props as MustacheParamType;
 
     for (const query of AthenaBuiltInQueries) {
       new CfnNamedQuery(scope, `Query_${query.id}`, {
