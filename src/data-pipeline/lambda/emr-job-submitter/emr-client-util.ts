@@ -204,11 +204,13 @@ export class EMRServerlessUtil {
 
     const configMap = new Map<string, string>();
     for (let it of [...defaultConfig, ...sparkConfigS3, ...sparkConfigEvent]) {
-      const m = new RegExp(/(.*)=(.*)/).exec(it);
-      if (m) {
-        const key = m[1];
-        const value = m[2];
+      const configs = it.split('=', 2);
+      if (configs.length == 2) {
+        const key = configs[0];
+        const value = configs[1];
         configMap.set(key, value);
+      } else {
+        logger.warn(`Unrecognized spark config '${it}'!`);
       }
     }
 

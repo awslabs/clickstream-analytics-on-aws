@@ -27,6 +27,7 @@ import { reporting_project } from './router/reporting';
 import { router_user } from './router/user';
 
 const app = express();
+app.disable('x-powered-by');
 const port = process.env.PORT || 8080;
 
 app.use(express.json({ limit: '384kb' }));
@@ -39,7 +40,7 @@ app.use(authOIDC);
 
 app.use(responseTime);
 
-// healthcheck
+// health check
 app.get(process.env.HEALTH_CHECK_PATH ?? '/', async (_req: express.Request, res: express.Response) => {
   res.send('OK!');
 });

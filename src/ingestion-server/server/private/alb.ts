@@ -140,7 +140,7 @@ export function createApplicationLoadBalancer(
     );
 
     const HttpRedirectListener = alb.addListener('HttpRedirectListener', {
-      protocol: ApplicationProtocol.HTTP,
+      protocol: ApplicationProtocol.HTTP, //NOSONAR it's intended
       port: httpPort,
     });
 
@@ -163,7 +163,7 @@ export function createApplicationLoadBalancer(
     );
   } else {
     listener = alb.addListener('Listener', {
-      protocol: ApplicationProtocol.HTTP,
+      protocol: ApplicationProtocol.HTTP, //NOSONAR it's intended
       port: httpPort,
     });
     targetGroup = addECSTargetsToListener(

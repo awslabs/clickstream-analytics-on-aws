@@ -11,6 +11,7 @@ cp src/common/constant.ts src/control-plane/backend/lambda/api/common/constants-
 cp src/common/model.ts src/control-plane/backend/lambda/api/common/model-ln.ts
 cp src/common/sdk-client-config.ts src/control-plane/backend/lambda/api/common/sdk-client-config-ln.ts
 cp src/common/solution-info.ts src/control-plane/backend/lambda/api/common/solution-info-ln.ts
+cp src/common/utils.ts src/control-plane/backend/lambda/api/common/utils-ln.ts
 rm src/control-plane/backend/lambda/api/middle-ware/authorizer.ts
 cp src/control-plane/auth/authorizer.ts src/control-plane/backend/lambda/api/middle-ware/authorizer.ts
 rm src/control-plane/backend/lambda/api/service/quicksight/dashboard-ln.ts

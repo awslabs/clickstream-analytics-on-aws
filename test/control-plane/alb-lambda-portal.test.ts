@@ -250,7 +250,7 @@ describe('ApplicationLoadBalancerLambdaPortal', () => {
         'x86_64',
       ],
     });
-    template.hasResource('AWS::Lambda::Function', { // create dependencies on executation role with sufficient policy to create ENI
+    template.hasResource('AWS::Lambda::Function', { // create dependencies on execution role with sufficient policy to create ENI
       DependsOn: [
         'frontendfunceni3AD2BF09',
         'testportalportalfnrole5B2099BA',
@@ -514,14 +514,12 @@ describe('ApplicationLoadBalancerLambdaPortal', () => {
       SecurityGroupIngress: [
         {
           CidrIp: '0.0.0.0/0',
-          Description: 'rule of allow inbound traffic from servier port ',
           FromPort: 443,
           IpProtocol: 'tcp',
           ToPort: 443,
         },
         {
           CidrIp: '0.0.0.0/0',
-          Description: 'rule of allow inbound traffic from 80 port ',
           FromPort: 80,
           IpProtocol: 'tcp',
           ToPort: 80,
