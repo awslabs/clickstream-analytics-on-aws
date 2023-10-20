@@ -44,7 +44,7 @@ temp_3 as (
     from temp_1 where event_name in ('_screen_view','_page_view')
     group by 1,2,3
 ),
-clickstream_session_mv_1 as (
+session_part_1 as (
   SELECT
      session_id 
     ,user_pseudo_id
@@ -58,7 +58,7 @@ clickstream_session_mv_1 as (
   FROM temp_2
   GROUP BY 1,2,3
 ),
-clickstream_session_mv_2 as (
+session_part_2 as (
   select session_id, first_sv_event_id, last_sv_event_id, count(event_id) from (
     select 
       session_id
@@ -72,7 +72,7 @@ clickstream_session_mv_2 as (
     select 
       session_f_l_sv.*,
       t.view as first_sv_view
-    from clickstream_session_mv_2 as session_f_l_sv left outer join
+    from session_part_2 as session_f_l_sv left outer join
     temp_3 as t on session_f_l_sv.first_sv_event_id=t.event_id
 ), 
 session_f_l_sv_view as (
@@ -104,5 +104,5 @@ select
     ,DATE_TRUNC('hour', from_unixtime(session_start_timestamp/1000)) as session_date_hour
     ,first_sv_view as entry_view
     ,last_sv_view as exit_view
-from clickstream_session_mv_1 as session left outer join 
+from session_part_1 as session left outer join 
 session_f_l_sv_view on session.session_id = session_f_l_sv_view.session_id
