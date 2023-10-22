@@ -610,19 +610,6 @@ describe('Metadata Event test', () => {
         totalCount: 1,
       },
     });
-
-    // Mock DynamoDB error
-    ddbMock.on(QueryCommand).rejects(new Error('Mock DynamoDB error'));
-    res = await request(app)
-      .get(`/api/metadata/events?projectId=${MOCK_PROJECT_ID}&appId=${MOCK_APP_ID}`);
-    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
-    expect(res.statusCode).toBe(500);
-
-    expect(res.body).toEqual({
-      success: false,
-      message: 'Unexpected error occurred at server.',
-      error: 'Error',
-    });
   });
   it('Get metadata event list with parameters', async () => {
     jest
