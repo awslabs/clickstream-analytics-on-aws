@@ -79,8 +79,8 @@ public class BaseSparkTest {
         System.setProperty(WAREHOUSE_DIR_PROP, "/tmp/warehouse");
         String dbName = "test_db";
         System.setProperty(DATABASE_PROP, dbName);
-        System.setProperty(USER_KEEP_DAYS_PROP, String.valueOf(180));
-        System.setProperty(ITEM_KEEP_DAYS_PROP, String.valueOf(180));
+        System.setProperty(USER_KEEP_DAYS_PROP, String.valueOf(365 * 100));
+        System.setProperty(ITEM_KEEP_DAYS_PROP, String.valueOf(365 * 100));
 
         spark = SparkSession.builder()
                 .appName("Test Spark App")
