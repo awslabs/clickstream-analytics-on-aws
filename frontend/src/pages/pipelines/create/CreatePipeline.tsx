@@ -83,6 +83,7 @@ import {
   reverseCronDateRange,
   reverseFreshnessInHour,
   reverseRedshiftInterval,
+  ternary,
   validatePublicSubnetInSameAZWithPrivateSubnets,
   validateSubnetCrossInAZs,
 } from 'ts/utils';
@@ -486,72 +487,80 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
     return true;
   };
 
+  const checkDataProcessingInterval = (info: IExtPipeline) => {
+    if (
+      info.selectedExcutionType?.value === ExecutionType.FIXED_RATE &&
+      parseInt(info.excutionFixedValue) < 3 &&
+      info.selectedExcutionUnit?.value === 'minute'
+    ) {
+      setDataProcessorIntervalInvalidError(true);
+      return false;
+    }
+    return true;
+  };
+
+  const checkRedshiftServerlessConfig = (info: IExtPipeline) => {
+    if (!info.redshiftServerlessVPC?.value) {
+      setRedshiftServerlessVpcEmptyError(true);
+      return false;
+    }
+    if (info.redshiftServerlessSG.length <= 0) {
+      setRedshiftServerlessSGEmptyError(true);
+      return false;
+    }
+    if (
+      info.redshiftServerlessSubnets.length <= 0 ||
+      !validateSubnetCrossInAZs(info.redshiftServerlessSubnets, 2) ||
+      info.redshiftServerlessSubnets.length < 3
+    ) {
+      setRedshiftServerlessSubnetInvalidError(true);
+      return false;
+    }
+    return true;
+  };
+
+  const checkRedshiftProvisionedConfig = (info: IExtPipeline) => {
+    if (!info.selectedRedshiftCluster?.value) {
+      setRedshiftProvisionedClusterEmptyError(true);
+      return false;
+    }
+    const dbUser = info.dataModeling?.redshift?.provisioned?.dbUser.trim();
+    if (!dbUser) {
+      setRedshiftProvisionedDBUserEmptyError(true);
+      return false;
+    }
+    if (
+      !checkStringValidRegex(dbUser, new RegExp(REDSHIFT_DB_USER_NAME_PATTERN))
+    ) {
+      setRedshiftProvisionedDBUserFormatError(true);
+      return false;
+    }
+    return true;
+  };
+
+  // 主验证函数现在更加简洁，它调用了新的独立函数来进行详细检查。
   const validateDataProcessing = () => {
-    if (pipelineInfo.enableDataProcessing) {
-      // check data processing interval
+    if (!pipelineInfo.enableDataProcessing) {
+      return true;
+    }
+
+    if (!checkDataProcessingInterval(pipelineInfo)) {
+      return false;
+    }
+
+    if (pipelineInfo.enableRedshift) {
       if (
-        pipelineInfo.selectedExcutionType?.value === ExecutionType.FIXED_RATE &&
-        parseInt(pipelineInfo.excutionFixedValue) < 3 &&
-        pipelineInfo.selectedExcutionUnit?.value === 'minute'
+        pipelineInfo.redshiftType === 'serverless' &&
+        !checkRedshiftServerlessConfig(pipelineInfo)
       ) {
-        setDataProcessorIntervalInvalidError(true);
         return false;
       }
 
-      // if redshift enabled
-      if (pipelineInfo.enableRedshift) {
-        // if redshift serverless
-        if (pipelineInfo.redshiftType === 'serverless') {
-          // Check VPC
-          if (!pipelineInfo.redshiftServerlessVPC?.value) {
-            setRedshiftServerlessVpcEmptyError(true);
-            return false;
-          }
-          // Check Security group
-          if (pipelineInfo.redshiftServerlessSG.length <= 0) {
-            setRedshiftServerlessSGEmptyError(true);
-            return false;
-          }
-          // Check subnets
-          if (pipelineInfo.redshiftServerlessSubnets.length <= 0) {
-            setRedshiftServerlessSubnetEmptyError(true);
-            return false;
-          }
-          // Check subnets valid 3 subnets locates in at least 2 different AZ
-          if (
-            !validateSubnetCrossInAZs(
-              pipelineInfo.redshiftServerlessSubnets,
-              2
-            ) ||
-            pipelineInfo.redshiftServerlessSubnets.length < 3
-          ) {
-            setRedshiftServerlessSubnetInvalidError(true);
-            return false;
-          }
-        }
-        if (pipelineInfo.redshiftType === 'provisioned') {
-          // Check redshift cluster
-          if (!pipelineInfo.selectedRedshiftCluster?.value) {
-            setRedshiftProvisionedClusterEmptyError(true);
-            return false;
-          }
-          // Check DB user
-          if (
-            !pipelineInfo.dataModeling?.redshift?.provisioned?.dbUser.trim()
-          ) {
-            setRedshiftProvisionedDBUserEmptyError(true);
-            return false;
-          }
-          if (
-            !checkStringValidRegex(
-              pipelineInfo.dataModeling?.redshift?.provisioned?.dbUser,
-              new RegExp(REDSHIFT_DB_USER_NAME_PATTERN)
-            )
-          ) {
-            setRedshiftProvisionedDBUserFormatError(true);
-            return false;
-          }
-        }
+      if (
+        pipelineInfo.redshiftType === 'provisioned' &&
+        !checkRedshiftProvisionedConfig(pipelineInfo)
+      ) {
+        return false;
       }
     }
 
@@ -736,10 +745,11 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                 return {
                   ...prev,
                   kafkaSelfHost: true, // Change to self hosted as default
-                  enableDataProcessing:
-                    pipelineInfo.ingestionServer.sinkType === SinkType.MSK
-                      ? false
-                      : true, // disabled all data processing when sink type is MSK and MSK not available
+                  enableDataProcessing: ternary(
+                    pipelineInfo.ingestionServer.sinkType === SinkType.MSK,
+                    false,
+                    true
+                  ), // disabled all data processing when sink type is MSK and MSK not available
                   ingestionServer: {
                     ...prev.ingestionServer,
                     sinkKafka: {
@@ -795,60 +805,74 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
     }
   };
 
-  const confirmCreatePipeline = async () => {
-    const createPipelineObj: any = cloneDeep(pipelineInfo);
-    if (createPipelineObj.enableDataProcessing) {
-      createPipelineObj.dataProcessing.dataFreshnessInHour =
-        pipelineInfo.selectedEventFreshUnit?.value === 'day'
-          ? parseInt(pipelineInfo.eventFreshValue) * 24
-          : parseInt(pipelineInfo.eventFreshValue) || 72;
+  const processDataProcessing = (createPipelineObj: any) => {
+    createPipelineObj.dataProcessing.dataFreshnessInHour =
+      pipelineInfo.selectedEventFreshUnit?.value === 'day'
+        ? parseInt(pipelineInfo.eventFreshValue) * 24
+        : parseInt(pipelineInfo.eventFreshValue) || 72;
 
-      createPipelineObj.dataProcessing.scheduleExpression =
-        generateCronDateRange(
-          pipelineInfo.selectedExcutionType?.value,
-          parseInt(pipelineInfo.excutionFixedValue),
-          pipelineInfo.exeCronExp,
-          pipelineInfo.selectedExcutionUnit,
-          'processing'
-        );
+    createPipelineObj.dataProcessing.scheduleExpression = generateCronDateRange(
+      pipelineInfo.selectedExcutionType?.value,
+      parseInt(pipelineInfo.excutionFixedValue),
+      pipelineInfo.exeCronExp,
+      pipelineInfo.selectedExcutionUnit,
+      'processing'
+    );
 
-      // set plugin value
-      createPipelineObj.dataProcessing.transformPlugin =
-        pipelineInfo.selectedTransformPlugins?.[0]?.id || '';
-      createPipelineObj.dataProcessing.enrichPlugin =
-        pipelineInfo.selectedEnrichPlugins.map((element) => element.id);
+    // set plugin value
+    createPipelineObj.dataProcessing.transformPlugin = defaultStr(
+      pipelineInfo.selectedTransformPlugins?.[0]?.id
+    );
+    createPipelineObj.dataProcessing.enrichPlugin =
+      pipelineInfo.selectedEnrichPlugins.map((element) => element.id);
 
-      // set redshift schedule
-      createPipelineObj.dataModeling.redshift.dataRange =
-        generateRedshiftInterval(
-          parseInt(pipelineInfo.redshiftExecutionValue),
-          pipelineInfo.selectedRedshiftExecutionUnit?.value
-        );
+    // set redshift schedule
+    createPipelineObj.dataModeling.redshift.dataRange =
+      generateRedshiftInterval(
+        parseInt(pipelineInfo.redshiftExecutionValue),
+        pipelineInfo.selectedRedshiftExecutionUnit?.value
+      );
 
-      // set redshift upsert frequency express
-      createPipelineObj.dataModeling.upsertUsers.scheduleExpression =
-        generateCronDateRange(
-          pipelineInfo.selectedUpsertType?.value,
-          parseInt(pipelineInfo.redshiftUpsertFreqValue),
-          pipelineInfo.upsertCronExp,
-          pipelineInfo.redshiftUpsertFreqUnit,
-          'upsert'
-        );
+    // set redshift upsert frequency express
+    createPipelineObj.dataModeling.upsertUsers.scheduleExpression =
+      generateCronDateRange(
+        pipelineInfo.selectedUpsertType?.value,
+        parseInt(pipelineInfo.redshiftUpsertFreqValue),
+        pipelineInfo.upsertCronExp,
+        pipelineInfo.redshiftUpsertFreqUnit,
+        'upsert'
+      );
 
-      // set dataModeling to null when not enable Redshift
-      if (!pipelineInfo.enableRedshift) {
-        createPipelineObj.dataModeling.redshift = null;
-      } else {
-        // set serverless to null when user select provisioned
-        if (pipelineInfo.redshiftType === 'provisioned') {
-          createPipelineObj.dataModeling.redshift.newServerless = null;
-        }
-
-        // set provisioned to null when user select serverless
-        if (pipelineInfo.redshiftType === 'serverless') {
-          createPipelineObj.dataModeling.redshift.provisioned = null;
-        }
+    // set dataModeling to null when not enable Redshift
+    if (!pipelineInfo.enableRedshift) {
+      createPipelineObj.dataModeling.redshift = null;
+    } else {
+      // set serverless to null when user select provisioned
+      if (pipelineInfo.redshiftType === 'provisioned') {
+        createPipelineObj.dataModeling.redshift.newServerless = null;
       }
+
+      // set provisioned to null when user select serverless
+      if (pipelineInfo.redshiftType === 'serverless') {
+        createPipelineObj.dataModeling.redshift.provisioned = null;
+      }
+    }
+    return createPipelineObj;
+  };
+
+  const removeTemporaryProperties = (
+    obj: any,
+    propertiesToRemove: string[]
+  ) => {
+    propertiesToRemove.forEach((prop) => {
+      delete obj[prop];
+    });
+  };
+
+  const confirmCreatePipeline = async () => {
+    let createPipelineObj: any = cloneDeep(pipelineInfo);
+    if (createPipelineObj.enableDataProcessing) {
+      createPipelineObj = processDataProcessing(createPipelineObj);
     } else {
       createPipelineObj.dataProcessing = null;
       // set dataModeling to null when disable data processing
@@ -876,69 +900,62 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
       createPipelineObj.reporting = null;
     }
 
+    const propertiesToRemove = [
+      'selectedRegion',
+      'selectedVPC',
+      'selectedSDK',
+      'selectedPublicSubnet',
+      'selectedPrivateSubnet',
+      'enableEdp',
+      'selectedCertificate',
+      'mskCreateMethod',
+      'selectedMSK',
+      'seledtedKDKProvisionType',
+      'enableDataProcessing',
+      'scheduleExpression',
+      'exeCronExp',
+      'excutionFixedValue',
+      'enableRedshift',
+      'eventFreshValue',
+      'redshiftExecutionValue',
+      'selectedExcutionType',
+      'selectedExcutionUnit',
+      'selectedEventFreshUnit',
+      'selectedRedshiftCluster',
+      'selectedRedshiftRole',
+      'selectedRedshiftExecutionUnit',
+      'selectedTransformPlugins',
+      'selectedEnrichPlugins',
+      'selectedSecret',
+      'kafkaSelfHost',
+      'kafkaBrokers',
+      'arnAccountId',
+      'enableReporting',
+      'selectedQuickSightUser',
+      'dataConnectionType',
+      'quickSightVpcConnection',
+      'enableAuthentication',
+      'redshiftType',
+      'redshiftServerlessVPC',
+      'redshiftBaseCapacity',
+      'redshiftServerlessSG',
+      'redshiftServerlessSubnets',
+      'redshiftDataLoadValue',
+      'redshiftDataLoadUnit',
+      'redshiftUpsertFreqValue',
+      'redshiftUpsertFreqUnit',
+      'selectedSelfHostedMSKSG',
+      'selectedUpsertType',
+      'upsertCronExp',
+      'selectedDataLoadType',
+      'dataLoadCronExp',
+      'serviceStatus',
+      'showServiceStatus',
+      'enrichPluginChanged',
+      'transformPluginChanged',
+    ];
     // remove temporary properties
-    delete createPipelineObj.selectedRegion;
-    delete createPipelineObj.selectedVPC;
-    delete createPipelineObj.selectedSDK;
-    delete createPipelineObj.selectedPublicSubnet;
-    delete createPipelineObj.selectedPrivateSubnet;
-    delete createPipelineObj.enableEdp;
-    delete createPipelineObj.selectedCertificate;
-
-    delete createPipelineObj.mskCreateMethod;
-    delete createPipelineObj.selectedMSK;
-    delete createPipelineObj.seledtedKDKProvisionType;
-
-    delete createPipelineObj.enableDataProcessing;
-    delete createPipelineObj.scheduleExpression;
-
-    delete createPipelineObj.exeCronExp;
-    delete createPipelineObj.excutionFixedValue;
-    delete createPipelineObj.enableRedshift;
-
-    delete createPipelineObj.eventFreshValue;
-
-    delete createPipelineObj.redshiftExecutionValue;
-    delete createPipelineObj.selectedExcutionType;
-    delete createPipelineObj.selectedExcutionUnit;
-    delete createPipelineObj.selectedEventFreshUnit;
-    delete createPipelineObj.selectedRedshiftCluster;
-    delete createPipelineObj.selectedRedshiftRole;
-    delete createPipelineObj.selectedRedshiftExecutionUnit;
-    delete createPipelineObj.selectedTransformPlugins;
-    delete createPipelineObj.selectedEnrichPlugins;
-    delete createPipelineObj.selectedSecret;
-
-    delete createPipelineObj.kafkaSelfHost;
-    delete createPipelineObj.kafkaBrokers;
-
-    delete createPipelineObj.arnAccountId;
-    delete createPipelineObj.enableReporting;
-    delete createPipelineObj.selectedQuickSightUser;
-    delete createPipelineObj.dataConnectionType;
-    delete createPipelineObj.quickSightVpcConnection;
-    delete createPipelineObj.enableAuthentication;
-
-    delete createPipelineObj.redshiftType;
-    delete createPipelineObj.redshiftServerlessVPC;
-    delete createPipelineObj.redshiftBaseCapacity;
-    delete createPipelineObj.redshiftServerlessSG;
-    delete createPipelineObj.redshiftServerlessSubnets;
-    delete createPipelineObj.redshiftDataLoadValue;
-    delete createPipelineObj.redshiftDataLoadUnit;
-    delete createPipelineObj.redshiftUpsertFreqValue;
-    delete createPipelineObj.redshiftUpsertFreqUnit;
-
-    delete createPipelineObj.selectedSelfHostedMSKSG;
-    delete createPipelineObj.selectedUpsertType;
-    delete createPipelineObj.upsertCronExp;
-
-    delete createPipelineObj.selectedDataLoadType;
-    delete createPipelineObj.dataLoadCronExp;
-    delete createPipelineObj.serviceStatus;
-    delete createPipelineObj.showServiceStatus;
-    delete createPipelineObj.enrichPluginChanged;
-    delete createPipelineObj.transformPluginChanged;
+    removeTemporaryProperties(createPipelineObj, propertiesToRemove);
 
     setLoadingCreate(true);
     try {
@@ -976,14 +993,14 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
         stepNumberLabel: (stepNumber) => `${t('step')} ${stepNumber}`,
         collapsedStepsLabel: (stepNumber, stepsCount) =>
           `${t('step')} ${stepNumber} ${t('of')} ${stepsCount}`,
-        navigationAriaLabel: t('steps') || 'Steps',
-        cancelButton: t('button.cancel') || '',
-        previousButton: t('button.previous') || '',
-        nextButton: t('button.next') || '',
+        navigationAriaLabel: defaultStr(t('steps'), 'Steps'),
+        cancelButton: defaultStr(t('button.cancel')),
+        previousButton: defaultStr(t('button.previous')),
+        nextButton: defaultStr(t('button.next')),
         submitButton: update
           ? t('button.save') ?? ''
           : t('button.create') ?? '',
-        optional: t('optional') || 'optional',
+        optional: defaultStr(t('optional'), 'optional'),
       }}
       onNavigate={({ detail }) => {
         if (detail.requestedStepIndex === 1 && !validateBasicInfo()) {
@@ -1037,7 +1054,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                   return {
                     ...prev,
                     selectedRegion: region,
-                    region: region.value || '',
+                    region: defaultStr(region.value),
                   };
                 });
               }}
@@ -1063,7 +1080,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                     selectedPrivateSubnet: [], // set private subnets to empty
                     network: {
                       ...prev.network,
-                      vpcId: vpc.value || '',
+                      vpcId: defaultStr(vpc.value),
                       publicSubnetIds: [], // clear public subnets value
                       privateSubnetIds: [], // clear private subnets value
                     },
@@ -1076,7 +1093,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                   return {
                     ...prev,
                     selectedSDK: sdk,
-                    dataCollectionSDK: sdk.value || '',
+                    dataCollectionSDK: defaultStr(sdk.value),
                   };
                 });
               }}
@@ -1176,8 +1193,8 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                     selectedPublicSubnet: subnets,
                     network: {
                       ...prev.network,
-                      publicSubnetIds: subnets.map(
-                        (element) => element.value || ''
+                      publicSubnetIds: subnets.map((element) =>
+                        defaultStr(element.value)
                       ),
                     },
                   };
@@ -1192,8 +1209,8 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                     selectedPrivateSubnet: subnets,
                     network: {
                       ...prev.network,
-                      privateSubnetIds: subnets.map(
-                        (element) => element.value || ''
+                      privateSubnetIds: subnets.map((element) =>
+                        defaultStr(element.value)
                       ),
                     },
                   };
@@ -1359,7 +1376,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                       ...prev.ingestionServer,
                       domain: {
                         ...prev.ingestionServer.domain,
-                        certificateArn: cert.value || '',
+                        certificateArn: defaultStr(cert.value),
                       },
                     },
                   };
@@ -1375,7 +1392,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                       ...prev.ingestionServer,
                       loadBalancer: {
                         ...prev.ingestionServer.loadBalancer,
-                        authenticationSecretArn: secret?.value || '',
+                        authenticationSecretArn: defaultStr(secret?.value),
                       },
                     },
                   };
@@ -1392,13 +1409,16 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                   sinkInterval = DEFAULT_MSK_SINK_INTERVAL;
                   sinkBatchSize = DEFAULT_MSK_BATCH_SIZE;
                 }
-                let tmpEnableProcessing = pipelineInfo.serviceStatus
-                  .EMR_SERVERLESS
-                  ? true
-                  : false;
-                let tmpEnableQuickSight = pipelineInfo.serviceStatus.QUICK_SIGHT
-                  ? true
-                  : false;
+                let tmpEnableProcessing = ternary(
+                  pipelineInfo.serviceStatus.EMR_SERVERLESS,
+                  true,
+                  false
+                );
+                let tmpEnableQuickSight = ternary(
+                  pipelineInfo.serviceStatus.QUICK_SIGHT,
+                  true,
+                  false
+                );
                 setSinkIntervalError(false);
                 setSinkBatchSizeError(false);
 
@@ -1562,7 +1582,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                       ...prev.ingestionServer,
                       sinkKafka: {
                         ...prev.ingestionServer.sinkKafka,
-                        securityGroupId: sg.value || '',
+                        securityGroupId: defaultStr(sg.value),
                       },
                     },
                   };
@@ -1589,12 +1609,16 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                   setPipelineInfo((prev) => {
                     return {
                       ...prev,
-                      enableDataProcessing: prev.serviceStatus.EMR_SERVERLESS
-                        ? true
-                        : false,
-                      enableReporting: prev.serviceStatus.QUICK_SIGHT
-                        ? true
-                        : false,
+                      enableDataProcessing: ternary(
+                        prev.serviceStatus.EMR_SERVERLESS,
+                        true,
+                        false
+                      ),
+                      enableReporting: ternary(
+                        prev.serviceStatus.QUICK_SIGHT,
+                        true,
+                        false
+                      ),
                       ingestionServer: {
                         ...prev.ingestionServer,
                         sinkKafka: {
@@ -1675,7 +1699,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                       ...prev.ingestionServer,
                       sinkKinesis: {
                         ...prev.ingestionServer.sinkKinesis,
-                        kinesisStreamMode: type.value || '',
+                        kinesisStreamMode: defaultStr(type.value),
                       },
                     },
                   };
@@ -1734,9 +1758,11 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                       ...prev,
                       enableDataProcessing: true,
                       // Enable QuickSight When QuickSight Available
-                      enableReporting: prev.serviceStatus.QUICK_SIGHT
-                        ? true
-                        : false,
+                      enableReporting: ternary(
+                        prev.serviceStatus.QUICK_SIGHT,
+                        true,
+                        false
+                      ),
                     };
                   });
                 } else {
@@ -1827,9 +1853,11 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                       ...prev,
                       enableRedshift: true,
                       // Enable QuickSight When QuickSight Available
-                      enableReporting: prev.serviceStatus.QUICK_SIGHT
-                        ? true
-                        : false,
+                      enableReporting: ternary(
+                        prev.serviceStatus.QUICK_SIGHT,
+                        true,
+                        false
+                      ),
                     };
                   });
                 } else {
@@ -1850,7 +1878,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                     ...prev,
                     selectedRedshiftCluster: cluster,
                     arnAccountId: extractAccountIdFromArn(
-                      cluster.description || ''
+                      defaultStr(cluster.description)
                     ),
                     dataModeling: {
                       ...prev.dataModeling,
@@ -1858,7 +1886,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                         ...prev.dataModeling.redshift,
                         provisioned: {
                           ...prev.dataModeling.redshift.provisioned,
-                          clusterIdentifier: cluster.value || '',
+                          clusterIdentifier: defaultStr(cluster.value),
                         },
                       },
                     },
@@ -1937,7 +1965,9 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                         ...prev.dataModeling.redshift,
                         newServerless: {
                           ...prev.dataModeling.redshift.newServerless,
-                          baseCapacity: parseInt(capacity?.value || '0'),
+                          baseCapacity: parseInt(
+                            defaultStr(capacity?.value, '0')
+                          ),
                         },
                       },
                     },
@@ -1960,7 +1990,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                           ...prev.dataModeling.redshift.newServerless,
                           network: {
                             ...prev.dataModeling.redshift.newServerless.network,
-                            vpcId: vpc.value || '',
+                            vpcId: defaultStr(vpc.value),
                             securityGroups: [], // set security group value to empty
                             subnetIds: [], // set subnets value to empty
                           },
@@ -1984,8 +2014,8 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                           ...prev.dataModeling.redshift.newServerless,
                           network: {
                             ...prev.dataModeling.redshift.newServerless.network,
-                            securityGroups: sg.map(
-                              (element) => element.value || ''
+                            securityGroups: sg.map((element) =>
+                              defaultStr(element.value)
                             ),
                           },
                         },
@@ -2009,8 +2039,8 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                           ...prev.dataModeling.redshift.newServerless,
                           network: {
                             ...prev.dataModeling.redshift.newServerless.network,
-                            subnetIds: subnets.map(
-                              (element) => element.value || ''
+                            subnetIds: subnets.map((element) =>
+                              defaultStr(element.value)
                             ),
                           },
                         },
@@ -2154,7 +2184,7 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
   const setUpdateRegion = async (pipelineInfo: IExtPipeline) => {
     pipelineInfo.selectedRegion = {
       label: AWS_REGION_MAP[pipelineInfo.region]?.RegionName
-        ? t(AWS_REGION_MAP[pipelineInfo.region].RegionName) || ''
+        ? defaultStr(t(AWS_REGION_MAP[pipelineInfo.region].RegionName))
         : '-',
       labelTag: pipelineInfo.region,
       value: pipelineInfo.region,
@@ -2340,7 +2370,7 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
           (item) => item.id === pipelineInfo.dataProcessing.transformPlugin
         );
         pipelineInfo.selectedEnrichPlugins = data.items.filter((item) =>
-          pipelineInfo.dataProcessing.enrichPlugin.includes(item.id || '')
+          pipelineInfo.dataProcessing.enrichPlugin.includes(defaultStr(item.id))
         );
       }
     } catch (error) {
