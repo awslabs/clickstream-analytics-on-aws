@@ -596,14 +596,18 @@ function groupAssociatedEventParametersByName(events: IMetadataEvent[], paramete
   return events;
 };
 
-function getDataFromLastDay(metadata: IMetadataRaw) {
+function getCurMonthStr() {
   const year = new Date().getFullYear();
   const month = new Date().getMonth() + 1;
-  const key = `#${year}${month < 10 ? '0' + month : month}`;
+  return `#${year}${month < 10 ? '0' + month : month}`;
+}
+
+function getDataFromLastDay(metadata: IMetadataRaw) {
+  const curMonth = getCurMonthStr();
   const lastDay = `day${new Date().getDate() - 1}`;
   let hasData = false;
   let dataVolumeLastDay = 0;
-  if (metadata.month === key) {
+  if (metadata.month === curMonth) {
     const lastDayData = (metadata as any)[lastDay];
     if (lastDayData) {
       dataVolumeLastDay = lastDayData.count ?? 0;
@@ -687,6 +691,7 @@ function getParameterByNameAndType(metadata: IMetadataRaw[], parameterName: stri
 IMetadataEventParameter | undefined {
   const filteredMetadata = metadata.filter((r: IMetadataRaw) => r.name === parameterName && r.valueType === valueType);
   if (filteredMetadata.length === 0) {
+    // Add built-in metadata
     return;
   }
   const groupEvents: IMetadataEvent[] = [];
@@ -845,4 +850,5 @@ export {
   getAttributeByNameAndType,
   getDataFromLastDay,
   pathNodesToAttribute,
+  getCurMonthStr,
 };

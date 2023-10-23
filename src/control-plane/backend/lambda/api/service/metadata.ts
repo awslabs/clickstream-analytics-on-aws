@@ -64,11 +64,13 @@ export class MetadataEventServ {
     try {
       const { projectId, appId, attribute } = req.query;
       let events = await metadataStore.listEvents(projectId, appId);
-      if (attribute && attribute === 'true') {
-        let eventParameters = await metadataStore.listEventParameters(projectId, appId);
+      const associated = attribute && attribute === 'true';
+      if (associated) {
+        const eventParameters = await metadataStore.listEventParameters(projectId, appId);
         events = groupAssociatedEventParametersByName(events, eventParameters);
       }
       events = await metadataDisplay.patch(projectId, appId, events) as IMetadataEvent[];
+      events = await metadataDisplay.patchPresetEvents(projectId, appId, events, associated);
       return res.json(new ApiSuccess({
         totalCount: events.length,
         items: events,
