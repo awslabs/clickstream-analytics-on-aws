@@ -12,8 +12,6 @@
  */
 
 import { randomInt } from 'crypto';
-import { Stack } from 'aws-cdk-lib';
-import { IConstruct } from 'constructs';
 
 export function isEmpty(a: any): boolean {
   if (a === '') return true; //Verify empty string
@@ -23,37 +21,6 @@ export function isEmpty(a: any): boolean {
   if (Array.prototype.isPrototypeOf(a) && a.length === 0) return true; //Verify empty array
   if (Object.prototype.isPrototypeOf(a) && Object.keys(a).length === 0) return true; //Verify empty objects
   return false;
-}
-
-/**
- * Given an object, converts all keys to PascalCase given they are currently in camel case.
- * @param obj The object.
- */
-export function capitalizePropertyNames(construct: IConstruct, obj: any): any {
-  const stack = Stack.of(construct);
-  obj = stack.resolve(obj);
-
-  if (typeof(obj) !== 'object') {
-    return obj;
-  }
-
-  if (Array.isArray(obj)) {
-    return obj.map(x => capitalizePropertyNames(construct, x));
-  }
-
-  const newObj: any = { };
-  for (const key of Object.keys(obj)) {
-    const value = obj[key];
-
-    const first = key.charAt(0).toUpperCase();
-    let newKey = first + key.slice(1);
-    newKey = newKey.replace('Https', 'HTTPS')
-      .replace('Http', 'HTTP')
-      .replace('Ssl', 'SSL');
-    newObj[newKey] = capitalizePropertyNames(construct, value);
-  }
-
-  return newObj;
 }
 
 export function generateRandomStr(length: number, charSet?: string): string {

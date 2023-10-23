@@ -25,7 +25,7 @@ export interface BucketProps {
 }
 
 /**
- * Create S3 buckt for solution data and service log
+ * Create S3 bucket for solution data and service log
  */
 export class SolutionBucket extends Construct {
 
@@ -34,7 +34,7 @@ export class SolutionBucket extends Construct {
   constructor(scope: Construct, id: string, props?: BucketProps) {
     super(scope, id);
 
-    this.bucket = new Bucket(this, 'DataBucket', {
+    this.bucket = new Bucket(this, 'DataBucket', { //NOSONAR it's unnecessary to enable version
       encryption: props?.encryption ?? BucketEncryption.S3_MANAGED,
       enforceSSL: props?.enforceSSL ?? true,
       autoDeleteObjects: props?.autoDeleteObjects ?? false,
