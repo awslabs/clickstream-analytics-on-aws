@@ -121,7 +121,7 @@
         {
           "name": "_app_end",
           "description": {
-            "en-US": "The app is closed",
+            "en-US": "Every time the app goes to invisible",
             "zh-CN": "每次App变为不可见时"
           }
         },
