@@ -17,6 +17,7 @@ import {
 } from '@cloudscape-design/components';
 import {
   CategoryItemType,
+  IAnalyticsItem,
   IConditionItemType,
   IEventAnalyticsItem,
   IRetentionAnalyticsItem,
@@ -296,6 +297,15 @@ export const getPairEventAndConditions = (
     }
   });
   return pairEventAndConditions;
+};
+
+export const getGroupCondition = (option: IAnalyticsItem | null) => {
+  const groupingCondition: GroupingCondition = {
+    category: defaultStr(option?.category, ConditionCategory.OTHER),
+    property: defaultStr(option?.name, ''),
+    dataType: defaultStr(option?.valueType, MetadataValueType.STRING),
+  };
+  return groupingCondition;
 };
 
 export const getGlobalEventCondition = (

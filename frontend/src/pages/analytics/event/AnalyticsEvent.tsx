@@ -56,6 +56,7 @@ import {
   getDateRange,
   getEventAndConditions,
   getGlobalEventCondition,
+  getGroupCondition,
   getLngFromLocalStorage,
   parametersConvertToCategoryItemType,
   validEventAnalyticsItem,
@@ -265,6 +266,7 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
       globalEventCondition: getGlobalEventCondition(segmentationOptionData),
       timeScopeType: dateRangeParams?.timeScopeType,
       groupColumn: timeGranularity.value,
+      groupCondition: getGroupCondition(groupOption),
       ...dateRangeParams,
       ...saveParams,
     };
@@ -447,7 +449,6 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
                 changeCurCategoryOption={(eventIndex, category) => {
                   const eventName = category?.name;
                   const eventParameters = getEventParameters(eventName);
-                  console.log(eventParameters);
                   const parameterOption = parametersConvertToCategoryItemType(
                     metadataUserAttributes,
                     eventParameters
