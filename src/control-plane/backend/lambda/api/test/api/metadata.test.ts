@@ -779,6 +779,7 @@ describe('Metadata Event test', () => {
                 valueType: MetadataValueType.INTEGER,
                 category: 'event',
                 values: [
+                  { value: 'value-02', displayValue: 'value-02' },
                   { value: 'value-01', displayValue: `display name of dictionary ${MOCK_EVENT_PARAMETER_NAME}11(Integer) value-01` },
                 ],
               },

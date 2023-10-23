@@ -13,7 +13,7 @@
 
 import { CMetadataDisplay } from './display';
 import { ApiFail, ApiSuccess } from '../common/types';
-import { groupAssociatedEventParametersByName, groupByLatestParameterByName } from '../common/utils';
+import { groupAssociatedEventParametersByName, groupByParameterByName, pathNodesToAttribute } from '../common/utils';
 import { IMetadataDisplay, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute } from '../model/metadata';
 import { DynamoDbMetadataStore } from '../store/dynamodb/dynamodb-metadata-store';
 import { MetadataStore } from '../store/metadata-store';
@@ -48,11 +48,12 @@ export class MetadataEventServ {
       parameters.find((p: IMetadataEventParameter) => p.eventName === '_screen_view' && p.name === '_screen_name') as IMetadataEventParameter;
       const screenIds: IMetadataEventParameter =
       parameters.find((p: IMetadataEventParameter) => p.eventName === '_screen_view' && p.name === '_screen_id') as IMetadataEventParameter;
+
       return res.json(new ApiSuccess({
-        pageTitles: pageTitles?.valueEnum ?? [],
-        pageUrls: pageUrls?.valueEnum ?? [],
-        screenNames: screenNames?.valueEnum ?? [],
-        screenIds: screenIds?.valueEnum ?? [],
+        pageTitles: pathNodesToAttribute(pageTitles?.valueEnum),
+        pageUrls: pathNodesToAttribute(pageUrls?.valueEnum),
+        screenNames: pathNodesToAttribute(screenNames?.valueEnum),
+        screenIds: pathNodesToAttribute(screenIds?.valueEnum),
       }));
     } catch (error) {
       next(error);
@@ -65,7 +66,6 @@ export class MetadataEventServ {
       let events = await metadataStore.listEvents(projectId, appId);
       if (attribute && attribute === 'true') {
         let eventParameters = await metadataStore.listEventParameters(projectId, appId);
-        eventParameters = groupByLatestParameterByName(eventParameters);
         events = groupAssociatedEventParametersByName(events, eventParameters);
       }
       events = await metadataDisplay.patch(projectId, appId, events) as IMetadataEvent[];
@@ -87,7 +87,7 @@ export class MetadataEventServ {
         return res.status(404).json(new ApiFail('Event not found'));
       }
       let eventParameters = await metadataStore.listEventParameters(projectId, appId);
-      eventParameters = groupByLatestParameterByName(eventParameters);
+      eventParameters = groupByParameterByName(eventParameters, name);
       event.associatedParameters = eventParameters.filter((r: IMetadataEventParameter) => r.eventName === name);
       event = (await metadataDisplay.patch(projectId, appId, [event]) as IMetadataEvent[])[0];
       return res.json(new ApiSuccess(event));
@@ -103,7 +103,7 @@ export class MetadataEventParameterServ {
     try {
       const { projectId, appId } = req.query;
       let results = await metadataStore.listEventParameters(projectId, appId);
-      results = groupByLatestParameterByName(results);
+      results = groupByParameterByName(results);
       results = await metadataDisplay.patch(projectId, appId, results) as IMetadataEventParameter[];
       return res.json(new ApiSuccess({
         totalCount: results.length,

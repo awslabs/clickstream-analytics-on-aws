@@ -20,7 +20,7 @@ import { ALBLogServiceAccountMapping, CORS_ORIGIN_DOMAIN_PATTERN, EMAIL_PATTERN,
 import { ConditionCategory, MetadataValueType } from './explore-types';
 import { logger } from './powertools';
 import { ALBRegionMappingObject, BucketPrefix, ClickStreamSubnet, IUserRole, PipelineStackType, PipelineStatus, RPURange, RPURegionMappingObject, ReportingDashboardOutput, SubnetType } from './types';
-import { IMetadataRaw, IMetadataRawValue, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute } from '../model/metadata';
+import { IMetadataRaw, IMetadataRawValue, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute, IMetadataAttributeValue } from '../model/metadata';
 import { CPipelineResources, IPipeline } from '../model/pipeline';
 import { IUserSettings } from '../model/user';
 import { UserService } from '../service/user';
@@ -638,7 +638,7 @@ function getLatestEventByName(metadata: IMetadataRaw[]): IMetadataEvent[] {
   return latestEvents;
 };
 
-function getParameterById(metadata: IMetadataRaw[]): IMetadataEventParameter[] {
+function getLatestParameterById(metadata: IMetadataRaw[]): IMetadataEventParameter[] {
   const latestEventParameters: IMetadataEventParameter[] = [];
   for (let meta of metadata) {
     const lastDayData = getDataFromLastDay(meta);
@@ -656,20 +656,28 @@ function getParameterById(metadata: IMetadataRaw[]): IMetadataEventParameter[] {
       valueType: meta.valueType ?? MetadataValueType.STRING,
       valueEnum: meta.summary.valueEnum ?? [],
     };
+    const index = latestEventParameters.findIndex(
+      (e: IMetadataEventParameter) => e.name === parameter.name && e.valueType === parameter.valueType);
+    if (index === -1) {
+      latestEventParameters.push(parameter);
+    } else if (parameter.month > latestEventParameters[index].month) {
+      latestEventParameters[index] = parameter;
+    }
     latestEventParameters.push(parameter);
   }
   return latestEventParameters;
 };
 
-function groupByLatestParameterByName(parameters: IMetadataEventParameter[]): IMetadataEventParameter[] {
+function groupByParameterByName(parameters: IMetadataEventParameter[], eventName?: string): IMetadataEventParameter[] {
   const groupParameters: IMetadataEventParameter[] = [];
   for (let parameter of parameters) {
+    if (eventName && parameter.eventName !== eventName) {
+      continue;
+    }
     const index = groupParameters.findIndex(
       (e: IMetadataEventParameter) => e.name === parameter.name && e.valueType === parameter.valueType);
     if (index === -1) {
       groupParameters.push(parameter);
-    } else if (parameter.month > groupParameters[index].month) {
-      groupParameters[index] = parameter;
     }
   }
   return groupParameters;
@@ -786,6 +794,20 @@ function uniqueParameterValueEnum(e: IMetadataRawValue[] | undefined, n: IMetada
   return values.filter((item) => !res.has(item.value) && res.set(item.value, 1));
 };
 
+function pathNodesToAttribute(nodes: IMetadataRawValue[] | undefined) {
+  if (!nodes) {
+    return [];
+  }
+  const pathNodes: IMetadataAttributeValue[] = [];
+  for (let n of nodes) {
+    pathNodes.push({
+      value: n.value,
+      displayValue: n.value,
+    });
+  }
+  return pathNodes;
+}
+
 export {
   isEmpty,
   isEmail,
@@ -814,12 +836,13 @@ export {
   getUidFromTokenPayload,
   getTokenFromRequest,
   getLatestEventByName,
-  getParameterById,
-  groupByLatestParameterByName,
+  getLatestParameterById,
+  groupByParameterByName,
   groupAssociatedEventsByName,
   groupAssociatedEventParametersByName,
   getLatestAttributeByName,
   getParameterByNameAndType,
   getAttributeByNameAndType,
   getDataFromLastDay,
+  pathNodesToAttribute,
 };

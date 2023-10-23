@@ -102,7 +102,7 @@ const commonSuppresionRulesForCloudFrontS3PatternInGloabl = [
 ];
 
 stackSuppressions([
-  new CloudFrontControlPlaneStack(app, 'cloudfront-s3-control-plane-stack-global', {
+  new CloudFrontControlPlaneStack(app, 'clickstream-demo', {
     synthesizer: synthesizer(),
   }),
   new CloudFrontControlPlaneStack(app, 'cloudfront-s3-control-plane-stack-global-oidc', {

@@ -19,7 +19,7 @@ import { analyticsMetadataTable, prefixMonthGSIName } from '../../common/constan
 import { docClient, query } from '../../common/dynamodb-client';
 import { MetadataValueType } from '../../common/explore-types';
 import { KeyVal } from '../../common/types';
-import { getAttributeByNameAndType, getDataFromLastDay, getLatestAttributeByName, getLatestEventByName, getParameterById, getParameterByNameAndType } from '../../common/utils';
+import { getAttributeByNameAndType, getDataFromLastDay, getLatestAttributeByName, getLatestEventByName, getLatestParameterById, getParameterByNameAndType } from '../../common/utils';
 import { IMetadataRaw, IMetadataDisplay, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute, IMetadataDescription } from '../../model/metadata';
 import { MetadataStore } from '../metadata-store';
 
@@ -108,7 +108,7 @@ export class DynamoDbMetadataStore implements MetadataStore {
       ScanIndexForward: false,
     };
     const records = await query(input) as IMetadataRaw[];
-    const parameters = getParameterById(records);
+    const parameters = getLatestParameterById(records);
     return parameters;
   };
 
