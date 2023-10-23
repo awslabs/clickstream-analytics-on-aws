@@ -712,7 +712,6 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
                       {
                         ...DEFAULT_EVENT_ITEM,
                         isMultiSelect: false,
-                        disabled: true,
                       },
                     ];
                   });

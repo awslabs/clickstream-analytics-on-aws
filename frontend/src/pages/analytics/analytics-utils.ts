@@ -39,6 +39,7 @@ import {
   ExplorePathSessionDef,
   ExploreRelativeTimeUnit,
   ExploreTimeScopeType,
+  MetadataParameterType,
   MetadataSource,
   MetadataValueType,
 } from 'ts/explore-types';
@@ -95,7 +96,7 @@ export const pathNodesConvertToCategoryItemType = (
   };
   pathNodes.forEach((item) => {
     categoryNodeItems.itemList.push({
-      label: item.displayValue,
+      label: item.value,
       name: item.value,
       value: item.value,
     });
@@ -128,11 +129,6 @@ export const parametersConvertToCategoryItemType = (
     categoryType: 'attribute',
     itemList: [],
   };
-  const categoryPrivateEventItems: CategoryItemType = {
-    categoryName: i18n.t('analytics:labels.privateEventAttribute'),
-    categoryType: 'attribute',
-    itemList: [],
-  };
   const categoryUserItems: CategoryItemType = {
     categoryName: i18n.t('analytics:labels.userAttribute'),
     categoryType: 'attribute',
@@ -140,9 +136,7 @@ export const parametersConvertToCategoryItemType = (
   };
   if (parameterItems) {
     parameterItems.forEach((item) => {
-      if (item.name.startsWith('_')) {
-        categoryPrivateEventItems.itemList.push(buildEventItem(item));
-      } else {
+      if (item.parameterType === MetadataParameterType.PUBLIC) {
         categoryPublicEventItems.itemList.push(buildEventItem(item));
       }
     });
@@ -161,7 +155,6 @@ export const parametersConvertToCategoryItemType = (
     });
   });
   categoryItems.push(categoryPublicEventItems);
-  categoryItems.push(categoryPrivateEventItems);
   categoryItems.push(categoryUserItems);
   return categoryItems;
 };
