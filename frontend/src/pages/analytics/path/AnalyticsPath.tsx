@@ -67,6 +67,7 @@ import {
   validEventAnalyticsItem,
 } from '../analytics-utils';
 import ExploreDateRangePicker, {
+  DEFAULT_DAY_RANGE,
   DEFAULT_WEEK_RANGE,
 } from '../comps/ExploreDateRangePicker';
 import ExploreEmbedFrame from '../comps/ExploreEmbedFrame';
@@ -249,11 +250,11 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
   };
 
   const [dateRangeValue, setDateRangeValue] =
-    React.useState<DateRangePickerProps.Value>(DEFAULT_WEEK_RANGE);
+    React.useState<DateRangePickerProps.Value>(DEFAULT_DAY_RANGE);
 
   const [timeGranularity, setTimeGranularity] = useState<SelectProps.Option>({
-    value: ExploreGroupColumn.WEEK,
-    label: t('analytics:options.weekTimeGranularity') ?? '',
+    value: ExploreGroupColumn.DAY,
+    label: t('analytics:options.dayTimeGranularity') ?? '',
   });
 
   const resetConfig = async () => {
