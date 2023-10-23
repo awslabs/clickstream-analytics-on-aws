@@ -245,7 +245,7 @@
           }
         },
         {
-          "name": "",
+          "name": "_page_url",
           "dataType": "String",
           "description": {
             "en-US": "The page url",
@@ -297,7 +297,7 @@
           "dataType": "String",
           "description": {
             "en-US": "The previous screen name",
-            "zh-CN": ""
+            "zh-CN": "上一个屏幕名称"
           }
         },
         {
@@ -305,7 +305,7 @@
           "dataType": "String",
           "description": {
             "en-US": "The previous screen ID",
-            "zh-CN": ""
+            "zh-CN": "上一个屏幕ID"
           }
         },
         {
@@ -313,7 +313,7 @@
           "dataType": "String",
           "description": {
             "en-US": "The previous screen unique ID",
-            "zh-CN": ""
+            "zh-CN": "上一个屏幕唯一ID"
           }
         },
         {
