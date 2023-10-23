@@ -60,6 +60,7 @@ export interface IEventAnalyticsItem {
   conditionOptions: CategoryItemType[];
   conditionList: IConditionItemType[];
   conditionRelationShip: ERelationShip;
+  disabled?: boolean;
   hasTab?: boolean;
   isMultiSelect?: boolean;
   enableChangeRelation?: boolean;

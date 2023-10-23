@@ -245,7 +245,9 @@
     "defineMetrics": "Define metrics",
     "realtimeStopped": "Realtime streaming is stopped",
     "realtimeStarted": "Realtime streaming is started",
-    "reportingNotEnabled": "Reporting module is not enabled"
+    "reportingNotEnabled": "Reporting module is not enabled",
+    "setStartNode": "Set start node",
+    "participateNodes": "Select nodes to participate in the analysis"
   },
   "emptyData": "No Data",
   "emptyDataMessage": "Please configure the metrics to query",
@@ -273,6 +275,8 @@
     "pathMetricsInfo": "pathMetricsInfo",
     "pathSessionDefInfo": "pathSessionDefInfo",
     "pathNodeTypeInfo": "pathNodeTypeInfo",
+    "pathSetStartNodeInfo": "pathSetStartNodeInfo",
+    "pathParticipateNodesInfo": "pathParticipateNodesInfo",
     "retentionInfo": "retentionInfo",
     "introducingAnalyticsHeader": "Introducing analytics",
     "introducingAnalyticsContent": "Analytics allow you explore the clickstream data on an easy-to-use UI, and provides access to all reports and dashboards."

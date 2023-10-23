@@ -215,9 +215,7 @@ export const getEventAndConditions = (
       });
 
       const eventAndCondition: IEventAndCondition = {
-        eventName: defaultStr(
-          item.selectedEventOption?.value?.split('#').pop()
-        ),
+        eventName: defaultStr(item.selectedEventOption?.name),
         sqlCondition: {
           conditions: conditions,
           conditionOperator: item.conditionRelationShip,
