@@ -63,12 +63,12 @@ import {
   BucketDeployment,
 } from 'aws-cdk-lib/aws-s3-deployment';
 
-import { Construct } from 'constructs';
+import { Construct, IConstruct } from 'constructs';
 import { Constant } from './private/constant';
 import { LogProps } from '../common/alb';
 import { addCfnNagSuppressRules } from '../common/cfn-nag';
 import { getShortIdOfStack } from '../common/stack';
-import { capitalizePropertyNames, isEmpty } from '../common/utils';
+import { isEmpty } from '../common/utils';
 
 export interface DistributionProps {
   readonly enableIpv6?: boolean;
@@ -423,7 +423,7 @@ export class CloudFrontS3Portal extends Construct {
     logBucket: IBucket;
     portalBucket: IBucket;
   } {
-    const newLogBucket = logBucket ?? new Bucket(this, 'portal_log_bucket', {
+    const newLogBucket = logBucket ?? new Bucket(this, 'portal_log_bucket', { //NOSONAR it's unnecessary to enable version
       encryption: BucketEncryption.S3_MANAGED,
       accessControl: BucketAccessControl.LOG_DELIVERY_WRITE,
       enforceSSL: true,
@@ -435,7 +435,7 @@ export class CloudFrontS3Portal extends Construct {
     });
 
     const portalBucket = new Bucket(this, 'portal_bucket', {
-      versioned: false,
+      versioned: false, //NOSONAR it's unnecessary to enable version for frontend code that can be built from source
       encryption: BucketEncryption.S3_MANAGED,
       accessControl: BucketAccessControl.LOG_DELIVERY_WRITE,
       enforceSSL: true,
@@ -528,4 +528,35 @@ export class CloudFrontS3Portal extends Construct {
       originPath: props.originPath,
     };
   }
+}
+
+/**
+ * Given an object, converts all keys to PascalCase given they are currently in camel case.
+ * @param obj The object.
+ */
+export function capitalizePropertyNames(construct: IConstruct, obj: any): any {
+  const stack = Stack.of(construct);
+  obj = stack.resolve(obj);
+
+  if (typeof(obj) !== 'object') {
+    return obj;
+  }
+
+  if (Array.isArray(obj)) {
+    return obj.map(x => capitalizePropertyNames(construct, x));
+  }
+
+  const newObj: any = { };
+  for (const key of Object.keys(obj)) {
+    const value = obj[key];
+
+    const first = key.charAt(0).toUpperCase();
+    let newKey = first + key.slice(1);
+    newKey = newKey.replace('Https', 'HTTPS')
+      .replace('Http', 'HTTP')
+      .replace('Ssl', 'SSL');
+    newObj[newKey] = capitalizePropertyNames(construct, value);
+  }
+
+  return newObj;
 }

@@ -88,16 +88,6 @@ function getServerlessRedshiftRPU(region: string): RPURange {
   return { min: 0, max: 0 } as RPURange;
 }
 
-function generateRandomStr(length: number) {
-  let randomString = '';
-  const letters = 'abcdefghijklmnopqrstuvwxyz';
-  for (let i = 0; i < length; i++) {
-    const randomIndex = Math.floor(Math.random() * letters.length);
-    randomString += letters[randomIndex];
-  }
-  return randomString;
-}
-
 function getEmailFromRequestContext(requestContext: string | undefined) {
   let email = '';
   try {
@@ -795,7 +785,6 @@ export {
   getValueFromTags,
   getALBLogServiceAccount,
   getServerlessRedshiftRPU,
-  generateRandomStr,
   getEmailFromRequestContext,
   getTokenFromRequestContext,
   getBucketPrefix,

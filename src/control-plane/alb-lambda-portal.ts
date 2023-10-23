@@ -178,7 +178,7 @@ export class ApplicationLoadBalancerLambdaPortal extends Construct {
       const customDomainName = Fn.join('.', [props.domainProps.recordName, props.domainProps.hostedZoneName]);
       this.controlPlaneUrl = 'https://' + customDomainName + ':' + this.port;
     } else {
-      this.controlPlaneUrl = 'http://' + this.applicationLoadBalancer.loadBalancerDnsName + ':' + this.port;
+      this.controlPlaneUrl = 'http://' + this.applicationLoadBalancer.loadBalancerDnsName + ':' + this.port; //NOSONAR it's intended
     }
 
     this.configureALBAccessLog(props, scope);
@@ -289,7 +289,7 @@ export class ApplicationLoadBalancerLambdaPortal extends Construct {
     if (props.applicationLoadBalancerProps.logProps.enableAccessLog) {
       let albLogBucket: IBucket;
       if (props.applicationLoadBalancerProps.logProps.bucket === undefined) {
-        albLogBucket = new Bucket(this, 'logbucket', {
+        albLogBucket = new Bucket(this, 'logbucket', { //NOSONAR it's not required version for log bucket
           encryption: BucketEncryption.S3_MANAGED,
           enforceSSL: true,
           blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
@@ -341,9 +341,9 @@ export class ApplicationLoadBalancerLambdaPortal extends Construct {
 
     let sourceSG: SecurityGroup | undefined;
     if (props.applicationLoadBalancerProps.internetFacing) {
-      sg.addIngressRule(Peer.anyIpv4(), Port.tcp(port), 'rule of allow inbound traffic from servier port ');
+      sg.addIngressRule(Peer.anyIpv4(), Port.tcp(port), 'rule of allow inbound traffic from server port ');
       if (props.applicationLoadBalancerProps.ipAddressType === IpAddressType.DUAL_STACK) {
-        sg.addIngressRule(Peer.anyIpv6(), Port.tcp(port), 'rule of allow IPv6 inbound traffic from servier port ');
+        sg.addIngressRule(Peer.anyIpv6(), Port.tcp(port), 'rule of allow IPv6 inbound traffic from server port ');
       }
     } else {
       sourceSG = new SecurityGroup(this, 'portal_source_sg', {

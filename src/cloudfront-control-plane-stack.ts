@@ -23,7 +23,7 @@ import {
   OriginRequestCookieBehavior,
   OriginRequestPolicy,
   OriginRequestQueryStringBehavior,
-  Function,
+  Function as CloudFrontFunction,
   ResponseHeadersPolicy,
   HeadersFrameOption,
   HeadersReferrerPolicy,
@@ -139,7 +139,7 @@ export class CloudFrontControlPlaneStack extends Stack {
     const functionAssociations: FunctionAssociation[] = [];
     if (!props?.targetToCNRegions) {
       functionAssociations.push({
-        function: new Function(this, 'FrontRewriteFunction', {
+        function: new CloudFrontFunction(this, 'FrontRewriteFunction', {
           functionName: `FrontRewriteFunction-${Aws.REGION}-${getShortIdOfStack(this)}`,
           code: FunctionCode.fromInline(`function handler(event) {
   var request = event.request;
@@ -199,8 +199,8 @@ export class CloudFrontControlPlaneStack extends Stack {
         dockerImage: DockerImage.fromRegistry(Constant.NODE_IMAGE_V18),
         buildCommand: [
           'bash', '-c',
-          'export APP_PATH=/tmp/app && mkdir $APP_PATH && cd ./frontend/ && find -L . -type f -not -path "./build/*" -not -path "./node_modules/*" \
-          -exec cp --parents {} $APP_PATH \\; && cd $APP_PATH && yarn install --loglevel error && yarn run build --loglevel error && cp -r ./build/* /asset-output/',
+          'export APP_PATH=/tmp/app && mkdir $APP_PATH && cd ./frontend/ && find -L . -type f -not -path "./build/*" -not -path "./node_modules/*" ' +
+          '-exec cp --parents {} $APP_PATH \\; && cd $APP_PATH && yarn install --loglevel error && yarn run build --loglevel error && cp -r ./build/* /asset-output/',
         ],
         environment: {
           GENERATE_SOURCEMAP: process.env.GENERATE_SOURCEMAP ?? 'false',
