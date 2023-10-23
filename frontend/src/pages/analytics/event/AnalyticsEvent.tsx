@@ -309,7 +309,7 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
 
   useEffect(() => {
     clickPreview();
-  }, [dateRangeValue, chartType]);
+  }, [timeGranularity, dateRangeValue, chartType]);
 
   return (
     <>
@@ -543,6 +543,7 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
               dateRangeValue={dateRangeValue}
               setDateRangeValue={setDateRangeValue}
               timeGranularity={timeGranularity}
+              timeGranularityVisible={true}
               setTimeGranularity={setTimeGranularity}
             />
             <SegmentedControl

@@ -824,6 +824,7 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
               dateRangeValue={dateRangeValue}
               setDateRangeValue={setDateRangeValue}
               timeGranularity={timeGranularity}
+              timeGranularityVisible={false}
               setTimeGranularity={setTimeGranularity}
             />
           </div>

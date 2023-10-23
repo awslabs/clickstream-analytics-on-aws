@@ -375,7 +375,7 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
 
   useEffect(() => {
     clickPreview();
-  }, [dateRangeValue, chartType]);
+  }, [timeGranularity, dateRangeValue, chartType]);
 
   return (
     <>
@@ -673,6 +673,7 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
               dateRangeValue={dateRangeValue}
               setDateRangeValue={setDateRangeValue}
               timeGranularity={timeGranularity}
+              timeGranularityVisible={true}
               setTimeGranularity={setTimeGranularity}
             />
             <SegmentedControl

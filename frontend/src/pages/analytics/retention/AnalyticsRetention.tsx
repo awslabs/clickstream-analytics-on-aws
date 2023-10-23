@@ -297,7 +297,7 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
 
   useEffect(() => {
     clickPreview();
-  }, [dateRangeValue, chartType]);
+  }, [timeGranularity, dateRangeValue, chartType]);
 
   return (
     <>
@@ -646,6 +646,7 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
               dateRangeValue={dateRangeValue}
               setDateRangeValue={setDateRangeValue}
               timeGranularity={timeGranularity}
+              timeGranularityVisible={true}
               setTimeGranularity={setTimeGranularity}
             />
             <SegmentedControl
