@@ -313,7 +313,7 @@ public final class TransformerV2 {
     }
 
     private static String saveIncrementalDataset(final String path, final Dataset<Row> newItemsDataset) {
-        log.info("saveIncrementalDataset path=" + path);
+        log.info("saveIncrementalDataset path=" + path + ", count:" + newItemsDataset.count());
         Date now = new Date();
         DateFormat dateFormatYMD = new SimpleDateFormat(YYYYMMDD);
         String yyyyMMdd = dateFormatYMD.format(now);
@@ -324,23 +324,28 @@ public final class TransformerV2 {
                 .partitionBy(UPDATE_DATE, APP_ID)
                 .option(COMPRESSION, SNAPPY)
                 .mode(SaveMode.Append).parquet(path);
+
         return path;
     }
 
     private static Dataset<Row> readDatasetFromPath(final SparkSession spark, final String path,
                                                     final int fromNDays) {
-        log.info("readDatasetFromPath path=" + path);
         Date nDaysBeforeDate = Date.from(Instant.now().minusSeconds(fromNDays * 24 * 3600L));
         StructType schemaRead = schemaMap.get(path);
         DateFormat dateFormatYMD = new SimpleDateFormat(YYYYMMDD);
         String nDaysBefore = dateFormatYMD.format(nDaysBeforeDate);
+        String pathInfo = "readDatasetFromPath path=" + path;
+        log.info(pathInfo + ", nDaysBefore=" + nDaysBefore + ", fromNDays=" + fromNDays);
         Dataset<Row> fullItemsDataset;
         try {
-            fullItemsDataset = spark.read().schema(schemaRead).parquet(path)
-                    .filter(
+            Dataset<Row>  fullItemsDatasetRead = spark.read().schema(schemaRead).parquet(path);
+            log.info(pathInfo + ", read count:" + fullItemsDatasetRead.count());
+
+            fullItemsDataset = fullItemsDatasetRead.filter(
                             expr(String.format("%s >= '%s'", UPDATE_DATE, nDaysBefore)).and(
                                     expr(String.format("%s >= %s", EVENT_TIMESTAMP, nDaysBeforeDate.getTime()))
                             ));
+
         } catch (Exception e) {
             log.error(e.getMessage());
             if (e.getMessage().toLowerCase().contains("path does not exist")) {
@@ -349,6 +354,7 @@ public final class TransformerV2 {
             }
             throw e;
         }
+        log.info(pathInfo + ", return count:" + fullItemsDataset.count());
         return fullItemsDataset;
     }
 
@@ -502,7 +508,6 @@ public final class TransformerV2 {
         Dataset<Row> fullItemsDataset = readDatasetFromPath(spark, path,
                 ContextUtil.getItemKeepDays()
         );
-
         Dataset<Row> fullAggItemsDataset = getAggItemDataset(fullItemsDataset);
         log.info("fullAggItemsDataset count " + fullAggItemsDataset.count());
         Dataset<Row> fullAggItemsDatasetRt = fullAggItemsDataset.select(
