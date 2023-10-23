@@ -206,7 +206,7 @@
       "PresetEventParameters": [
         {
           "name": "_session_id",
-          "dataType": "String",
+          "dataType": "string",
           "description": {
             "en-US": "The session ID",
             "zh-CN": "会话ID"
@@ -214,7 +214,7 @@
         },
         {
           "name": "_session_start_timestamp",
-          "dataType": "Integer",
+          "dataType": "int",
           "description": {
             "en-US": "The session start timestamp",
             "zh-CN": "会话开始时间戳"
@@ -222,7 +222,7 @@
         },
         {
           "name": "_session_duration",
-          "dataType": "Integer",
+          "dataType": "int",
           "description": {
             "en-US": "The session duration",
             "zh-CN": "会话持续时间"
@@ -230,7 +230,7 @@
         },
         {
           "name": "_session_number",
-          "dataType": "Integer",
+          "dataType": "int",
           "description": {
             "en-US": "The session number",
             "zh-CN": "会话编号"
@@ -238,7 +238,7 @@
         },
         {
           "name": "_page_title",
-          "dataType": "String",
+          "dataType": "string",
           "description": {
             "en-US": "The page title",
             "zh-CN": "页面标题"
@@ -246,7 +246,7 @@
         },
         {
           "name": "_page_url",
-          "dataType": "String",
+          "dataType": "string",
           "description": {
             "en-US": "The page url",
             "zh-CN": "页面URL"
@@ -254,7 +254,7 @@
         },
         {
           "name": "_latest_referrer",
-          "dataType": "String",
+          "dataType": "string",
           "description": {
             "en-US": "Last off-site link",
             "zh-CN": "最近一次站外链接"
@@ -262,7 +262,7 @@
         },
         {
           "name": "_latest_referrer_host",
-          "dataType": "String",
+          "dataType": "string",
           "description": {
             "en-US": "Last off-site domain name",
             "zh-CN": "最近一次站外域名"
@@ -270,7 +270,7 @@
         },
         {
           "name": "_screen_name",
-          "dataType": "String",
+          "dataType": "string",
           "description": {
             "en-US": "The screen name",
             "zh-CN": "屏幕名称"
@@ -278,7 +278,7 @@
         },
         {
           "name": "_screen_id",
-          "dataType": "String",
+          "dataType": "string",
           "description": {
             "en-US": "The screen ID",
             "zh-CN": "屏幕ID"
@@ -286,7 +286,7 @@
         },
         {
           "name": "_screen_unique_id",
-          "dataType": "String",
+          "dataType": "string",
           "description": {
             "en-US": "The screen unique ID",
             "zh-CN": "屏幕唯一ID"
@@ -294,7 +294,7 @@
         },
         {
           "name": "_previous_screen_name",
-          "dataType": "String",
+          "dataType": "string",
           "description": {
             "en-US": "The previous screen name",
             "zh-CN": "上一个屏幕名称"
@@ -302,7 +302,7 @@
         },
         {
           "name": "_previous_screen_id",
-          "dataType": "String",
+          "dataType": "string",
           "description": {
             "en-US": "The previous screen ID",
             "zh-CN": "上一个屏幕ID"
@@ -310,7 +310,7 @@
         },
         {
           "name": "_previous_screen_unique_id",
-          "dataType": "String",
+          "dataType": "string",
           "description": {
             "en-US": "The previous screen unique ID",
             "zh-CN": "上一个屏幕唯一ID"
@@ -318,7 +318,7 @@
         },
         {
           "name": "_entrances",
-          "dataType": "String",
+          "dataType": "string",
           "description": {
             "en-US": "The first screen view event in a session is 1, others is 0",
             "zh-CN": "会话中的第一个屏幕浏览事件该值为 1，其他则为 0"
@@ -326,7 +326,7 @@
         },
         {
           "name": "_previous_timestamp",
-          "dataType": "Integer",
+          "dataType": "int",
           "description": {
             "en-US": "The timestamp of the previous _screen_view event",
             "zh-CN": "上一个 screen_view 事件的时间戳"
@@ -334,7 +334,7 @@
         },
         {
           "name": "_engagement_time_msec",
-          "dataType": "String",
+          "dataType": "string",
           "description": {
             "en-US": "The previous page last engagement milliseconds",
             "zh-CN": "上个屏幕最后一次用户参与事件时长的毫秒数"
@@ -342,7 +342,7 @@
         },
         {
           "name": "_is_first_time",
-          "dataType": "String",
+          "dataType": "string",
           "description": {
             "en-US": "When it is the first _app_start event after the application starts, the value is true",
             "zh-CN": "当应用程序启动后第一个 _app_start 事件时，值为 true"
@@ -350,7 +350,7 @@
         },
         {
           "name": "_exception_message",
-          "dataType": "String",
+          "dataType": "string",
           "description": {
             "en-US": "The message of exception",
             "zh-CN": "异常信息"
@@ -358,7 +358,7 @@
         },
         {
           "name": "_exception_stack",
-          "dataType": "String",
+          "dataType": "string",
           "description": {
             "en-US": "The stack details of exception",
             "zh-CN": "异常堆栈信息"
@@ -366,7 +366,7 @@
         },
         {
           "name": "_previous_app_version",
-          "dataType": "String",
+          "dataType": "string",
           "description": {
             "en-US": "The version of previous app",
             "zh-CN": "上一个应用版本"
@@ -374,7 +374,7 @@
         },
         {
           "name": "_previous_os_version",
-          "dataType": "String",
+          "dataType": "string",
           "description": {
             "en-US": "The version of previous operating system",
             "zh-CN": "上一个操作系统版本"
@@ -382,7 +382,7 @@
         },
         {
           "name": "_error_code",
-          "dataType": "String",
+          "dataType": "string",
           "description": {
             "en-US": "Error code",
             "zh-CN": "错误代码"
@@ -390,7 +390,7 @@
         },
         {
           "name": "_error_message",
-          "dataType": "String",
+          "dataType": "string",
           "description": {
             "en-US": "Error message",
             "zh-CN": "错误信息"
@@ -398,7 +398,7 @@
         },
         {
           "name": "_page_referrer",
-          "dataType": "String",
+          "dataType": "string",
           "description": {
             "en-US": "Last page url",
             "zh-CN": "前一个页面URL"
@@ -406,7 +406,7 @@
         },
         {
           "name": "_page_referrer_title",
-          "dataType": "String",
+          "dataType": "string",
           "description": {
             "en-US": "Last page title",
             "zh-CN": "前一个页面标题"
@@ -414,7 +414,7 @@
         },
         {
           "name": "_search_key",
-          "dataType": "String",
+          "dataType": "string",
           "description": {
             "en-US": "The keyword name",
             "zh-CN": "搜索参数名称"
@@ -422,7 +422,7 @@
         },
         {
           "name": "_search_term",
-          "dataType": "String",
+          "dataType": "string",
           "description": {
             "en-US": "The search content",
             "zh-CN": "搜索内容"
@@ -430,7 +430,7 @@
         },
         {
           "name": "_link_classes",
-          "dataType": "String",
+          "dataType": "string",
           "description": {
             "en-US": "The content of class in tag <a>",
             "zh-CN": "标签 <a>中class里的内容"
@@ -438,7 +438,7 @@
         },
         {
           "name": "_link_domain",
-          "dataType": "String",
+          "dataType": "string",
           "description": {
             "en-US": "The domain of href in tag <a>",
             "zh-CN": "标签 <a>中href里的域名"
@@ -446,7 +446,7 @@
         },
         {
           "name": "_link_id",
-          "dataType": "String",
+          "dataType": "string",
           "description": {
             "en-US": "The content of id in tag <a>",
             "zh-CN": "标签 <a>中id里的内容"
@@ -454,7 +454,7 @@
         },
         {
           "name": "_link_url",
-          "dataType": "String",
+          "dataType": "string",
           "description": {
             "en-US": "The content of href in tag <a>",
             "zh-CN": "标签 <a>中href里的内容"
@@ -462,7 +462,7 @@
         },
         {
           "name": "_outbound",
-          "dataType": "String",
+          "dataType": "string",
           "description": {
             "en-US": "If the domain is not in configured domain list, the attribute value is true",
             "zh-CN": "如果该域不在配置的域名列表中，则属性值为true"
@@ -472,7 +472,7 @@
       "PublicEventParameters": [
         {
           "name": "hashCode",
-          "dataType": "String",
+          "dataType": "string",
           "description": {
             "en-US": "The hash code of the event",
             "zh-CN": "事件哈希码"
@@ -480,7 +480,7 @@
         },
         {
           "name": "app_id",
-          "dataType": "String",
+          "dataType": "string",
           "description": {
             "en-US": "The app ID",
             "zh-CN": "应用ID"
@@ -488,7 +488,7 @@
         },
         {
           "name": "unique_id",
-          "dataType": "String",
+          "dataType": "string",
           "description": {
             "en-US": "The unique ID of the user",
             "zh-CN": "用户唯一ID"
@@ -496,7 +496,7 @@
         },
         {
           "name": "device_id",
-          "dataType": "String",
+          "dataType": "string",
           "description": {
             "en-US": "The device ID",
             "zh-CN": "设备ID"
@@ -504,7 +504,7 @@
         },
         {
           "name": "event_type",
-          "dataType": "String",
+          "dataType": "string",
           "description": {
             "en-US": "The event type",
             "zh-CN": "事件类型"
@@ -512,7 +512,7 @@
         },
         {
           "name": "event_id",
-          "dataType": "String",
+          "dataType": "string",
           "description": {
             "en-US": "The event ID",
             "zh-CN": "事件ID"
@@ -520,7 +520,7 @@
         },
         {
           "name": "timestamp",
-          "dataType": "Integer",
+          "dataType": "int",
           "description": {
             "en-US": "The event timestamp",
             "zh-CN": "事件时间戳"
@@ -528,7 +528,7 @@
         },
         {
           "name": "platform",
-          "dataType": "String",
+          "dataType": "string",
           "description": {
             "en-US": "The platform",
             "zh-CN": "平台"
@@ -536,7 +536,7 @@
         },
         {
           "name": "os_version",
-          "dataType": "String",
+          "dataType": "string",
           "description": {
             "en-US": "The OS version",
             "zh-CN": "操作系统版本"
@@ -544,7 +544,7 @@
         },
         {
           "name": "make",
-          "dataType": "String",
+          "dataType": "string",
           "description": {
             "en-US": "The device make",
             "zh-CN": "设备制造商"
@@ -552,7 +552,7 @@
         },
         {
           "name": "brand",
-          "dataType": "String",
+          "dataType": "string",
           "description": {
             "en-US": "The device brand",
             "zh-CN": "设备品牌"
@@ -560,7 +560,7 @@
         },
         {
           "name": "model",
-          "dataType": "String",
+          "dataType": "string",
           "description": {
             "en-US": "The device model",
             "zh-CN": "设备型号"
@@ -568,7 +568,7 @@
         },
         {
           "name": "carrier",
-          "dataType": "String",
+          "dataType": "string",
           "description": {
             "en-US": "The carrier",
             "zh-CN": "运营商"
@@ -576,7 +576,7 @@
         },
         {
           "name": "network_type",
-          "dataType": "String",
+          "dataType": "string",
           "description": {
             "en-US": "The network type",
             "zh-CN": "网络类型"
@@ -584,7 +584,7 @@
         },
         {
           "name": "screen_height",
-          "dataType": "Integer",
+          "dataType": "int",
           "description": {
             "en-US": "The screen height",
             "zh-CN": "屏幕高度"
@@ -592,7 +592,7 @@
         },
         {
           "name": "screen_width",
-          "dataType": "Integer",
+          "dataType": "int",
           "description": {
             "en-US": "The screen width",
             "zh-CN": "屏幕宽度"
@@ -600,7 +600,7 @@
         },
         {
           "name": "viewport_height",
-          "dataType": "Integer",
+          "dataType": "int",
           "description": {
             "en-US": "The website viewport height pixel",
             "zh-CN": "视区高度"
@@ -608,7 +608,7 @@
         },
         {
           "name": "viewport_width",
-          "dataType": "Integer",
+          "dataType": "int",
           "description": {
             "en-US": "The website viewport width pixel",
             "zh-CN": "视区宽度"
@@ -616,7 +616,7 @@
         },
         {
           "name": "zone_offset",
-          "dataType": "Integer",
+          "dataType": "int",
           "description": {
             "en-US": "The time zone offset",
             "zh-CN": "时区偏移"
@@ -624,7 +624,7 @@
         },
         {
           "name": "locale",
-          "dataType": "String",
+          "dataType": "string",
           "description": {
             "en-US": "The locale",
             "zh-CN": "区域设置"
@@ -632,7 +632,7 @@
         },
         {
           "name": "system_language",
-          "dataType": "String",
+          "dataType": "string",
           "description": {
             "en-US": "The system language",
             "zh-CN": "系统语言"
@@ -640,7 +640,7 @@
         },
         {
           "name": "country_code",
-          "dataType": "String",
+          "dataType": "string",
           "description": {
             "en-US": "The country code",
             "zh-CN": "国家代码"
@@ -648,7 +648,7 @@
         },
         {
           "name": "sdk_version",
-          "dataType": "String",
+          "dataType": "string",
           "description": {
             "en-US": "The SDK version",
             "zh-CN": "SDK版本"
@@ -656,7 +656,7 @@
         },
         {
           "name": "sdk_name",
-          "dataType": "String",
+          "dataType": "string",
           "description": {
             "en-US": "The SDK name",
             "zh-CN": "SDK名称"
@@ -664,7 +664,7 @@
         },
         {
           "name": "app_version",
-          "dataType": "String",
+          "dataType": "string",
           "description": {
             "en-US": "The app version",
             "zh-CN": "应用版本"
@@ -672,7 +672,7 @@
         },
         {
           "name": "app_package_name",
-          "dataType": "String",
+          "dataType": "string",
           "description": {
             "en-US": "The app package name",
             "zh-CN": "应用包名"
@@ -680,7 +680,7 @@
         },
         {
           "name": "app_title",
-          "dataType": "String",
+          "dataType": "string",
           "description": {
             "en-US": "The app title",
             "zh-CN": "应用标题"
@@ -688,7 +688,7 @@
         },
         {
           "name": "host_name",
-          "dataType": "String",
+          "dataType": "string",
           "description": {
             "en-US": "The website hostname",
             "zh-CN": "网站主机名"
@@ -698,7 +698,7 @@
       "PresetUserAttributes": [
         {
           "name": "_user_id",
-          "dataType": "String",
+          "dataType": "string",
           "description": {
             "en-US": "The user ID",
             "zh-CN": "用户ID"
@@ -706,7 +706,7 @@
         },
         {
           "name": "_user_i_user_ltv_revenued",
-          "dataType": "String",
+          "dataType": "string",
           "description": {
             "en-US": "The user lifetime value",
             "zh-CN": "用户生命周期价值"
@@ -714,7 +714,7 @@
         },
         {
           "name": "_user_ltv_currency",
-          "dataType": "String",
+          "dataType": "string",
           "description": {
             "en-US": "The currency of the user lifetime value",
             "zh-CN": "当前用户生命周期价值"
@@ -722,7 +722,7 @@
         },
         {
           "name": "_user_first_touch_timestamp",
-          "dataType": "String",
+          "dataType": "string",
           "description": {
             "en-US": "The timestamp of the first touch",
             "zh-CN": "首次触摸时间戳"
