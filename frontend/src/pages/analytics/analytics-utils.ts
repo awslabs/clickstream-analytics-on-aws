@@ -96,7 +96,7 @@ export const pathNodesConvertToCategoryItemType = (
   };
   pathNodes.forEach((item) => {
     categoryNodeItems.itemList.push({
-      label: item.value,
+      label: item.displayValue,
       name: item.value,
       value: item.value,
     });
@@ -129,6 +129,11 @@ export const parametersConvertToCategoryItemType = (
     categoryType: 'attribute',
     itemList: [],
   };
+  const categoryPrivateEventItems: CategoryItemType = {
+    categoryName: i18n.t('analytics:labels.privateEventAttribute'),
+    categoryType: 'attribute',
+    itemList: [],
+  };
   const categoryUserItems: CategoryItemType = {
     categoryName: i18n.t('analytics:labels.userAttribute'),
     categoryType: 'attribute',
@@ -136,7 +141,9 @@ export const parametersConvertToCategoryItemType = (
   };
   if (parameterItems) {
     parameterItems.forEach((item) => {
-      if (item.parameterType === MetadataParameterType.PUBLIC) {
+      if (item.parameterType === MetadataParameterType.PRIVATE) {
+        categoryPrivateEventItems.itemList.push(buildEventItem(item));
+      } else {
         categoryPublicEventItems.itemList.push(buildEventItem(item));
       }
     });
@@ -155,6 +162,7 @@ export const parametersConvertToCategoryItemType = (
     });
   });
   categoryItems.push(categoryPublicEventItems);
+  categoryItems.push(categoryPrivateEventItems);
   categoryItems.push(categoryUserItems);
   return categoryItems;
 };
@@ -209,7 +217,9 @@ export const getEventAndConditions = (
       });
 
       const eventAndCondition: IEventAndCondition = {
-        eventName: defaultStr(item.selectedEventOption?.name),
+        eventName: defaultStr(
+          item.selectedEventOption?.value?.split('#').pop()
+        ),
         sqlCondition: {
           conditions: conditions,
           conditionOperator: item.conditionRelationShip,
