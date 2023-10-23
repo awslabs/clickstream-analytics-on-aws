@@ -13,7 +13,7 @@
 
 import { CMetadataDisplay } from './display';
 import { ApiFail, ApiSuccess } from '../common/types';
-import { groupAssociatedEventParametersByName } from '../common/utils';
+import { groupAssociatedEventParametersByName, groupByLatestParameterByName } from '../common/utils';
 import { IMetadataDisplay, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute } from '../model/metadata';
 import { DynamoDbMetadataStore } from '../store/dynamodb/dynamodb-metadata-store';
 import { MetadataStore } from '../store/metadata-store';
@@ -64,7 +64,8 @@ export class MetadataEventServ {
       const { projectId, appId, attribute } = req.query;
       let events = await metadataStore.listEvents(projectId, appId);
       if (attribute && attribute === 'true') {
-        const eventParameters = await metadataStore.listEventParameters(projectId, appId);
+        let eventParameters = await metadataStore.listEventParameters(projectId, appId);
+        eventParameters = groupByLatestParameterByName(eventParameters);
         events = groupAssociatedEventParametersByName(events, eventParameters);
       }
       events = await metadataDisplay.patch(projectId, appId, events) as IMetadataEvent[];
@@ -85,7 +86,8 @@ export class MetadataEventServ {
       if (!event) {
         return res.status(404).json(new ApiFail('Event not found'));
       }
-      const eventParameters = await metadataStore.listEventParameters(projectId, appId);
+      let eventParameters = await metadataStore.listEventParameters(projectId, appId);
+      eventParameters = groupByLatestParameterByName(eventParameters);
       event.associatedParameters = eventParameters.filter((r: IMetadataEventParameter) => r.eventName === name);
       event = (await metadataDisplay.patch(projectId, appId, [event]) as IMetadataEvent[])[0];
       return res.json(new ApiSuccess(event));
@@ -101,6 +103,7 @@ export class MetadataEventParameterServ {
     try {
       const { projectId, appId } = req.query;
       let results = await metadataStore.listEventParameters(projectId, appId);
+      results = groupByLatestParameterByName(results);
       results = await metadataDisplay.patch(projectId, appId, results) as IMetadataEventParameter[];
       return res.json(new ApiSuccess({
         totalCount: results.length,

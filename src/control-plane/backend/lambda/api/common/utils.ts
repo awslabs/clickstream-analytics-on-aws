@@ -638,7 +638,7 @@ function getLatestEventByName(metadata: IMetadataRaw[]): IMetadataEvent[] {
   return latestEvents;
 };
 
-function getLatestParameterByName(metadata: IMetadataRaw[]): IMetadataEventParameter[] {
+function getParameterById(metadata: IMetadataRaw[]): IMetadataEventParameter[] {
   const latestEventParameters: IMetadataEventParameter[] = [];
   for (let meta of metadata) {
     const lastDayData = getDataFromLastDay(meta);
@@ -656,15 +656,23 @@ function getLatestParameterByName(metadata: IMetadataRaw[]): IMetadataEventParam
       valueType: meta.valueType ?? MetadataValueType.STRING,
       valueEnum: meta.summary.valueEnum ?? [],
     };
-    const index = latestEventParameters.findIndex(
-      (e: IMetadataEventParameter) => e.name === meta.name && e.valueType === meta.valueType);
-    if (index === -1) {
-      latestEventParameters.push(parameter);
-    } else if (meta.month > latestEventParameters[index].month) {
-      latestEventParameters[index] = parameter;
-    }
+    latestEventParameters.push(parameter);
   }
   return latestEventParameters;
+};
+
+function groupByLatestParameterByName(parameters: IMetadataEventParameter[]): IMetadataEventParameter[] {
+  const groupParameters: IMetadataEventParameter[] = [];
+  for (let parameter of parameters) {
+    const index = groupParameters.findIndex(
+      (e: IMetadataEventParameter) => e.name === parameter.name && e.valueType === parameter.valueType);
+    if (index === -1) {
+      groupParameters.push(parameter);
+    } else if (parameter.month > groupParameters[index].month) {
+      groupParameters[index] = parameter;
+    }
+  }
+  return groupParameters;
 };
 
 function getParameterByNameAndType(metadata: IMetadataRaw[], parameterName: string, valueType: MetadataValueType):
@@ -806,7 +814,8 @@ export {
   getUidFromTokenPayload,
   getTokenFromRequest,
   getLatestEventByName,
-  getLatestParameterByName,
+  getParameterById,
+  groupByLatestParameterByName,
   groupAssociatedEventsByName,
   groupAssociatedEventParametersByName,
   getLatestAttributeByName,
