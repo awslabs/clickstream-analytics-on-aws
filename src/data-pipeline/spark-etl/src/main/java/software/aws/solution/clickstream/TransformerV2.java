@@ -90,7 +90,6 @@ public final class TransformerV2 {
     public static final String TRAFFIC_SOURCE_NAME = "_traffic_source_name";
     public static final String TRAFFIC_SOURCE_SOURCE = "_traffic_source_source";
     public static final String EVENT_TIMESTAMP = "event_timestamp";
-    public static final String PAGE_REFERER = "_page_referer";
     public static final String NEW_USER_COUNT = "newUserCount";
     public static final String EVENT_NAME = "event_name";
     public static final String EVENT_DATE = "event_date";
@@ -108,6 +107,11 @@ public final class TransformerV2 {
     public static final String EVENT_VALUE_IN_USD = "event_value_in_usd";
     public static final String DEVICE_ID_LIST = "device_id_list";
     public static final String APP_ID = "app_id";
+    public static final String REFERRER = "_referrer";
+    public static final String PROP_PAGE_REFERRER = "_page" + REFERRER;
+    public static final String REFERER = "_referer";
+    public static final String COL_PAGE_REFERER = "_page" + REFERER;
+    public static final String PAGE_VIEW = "_page_view";
     private final Cleaner cleaner = new Cleaner();
     private final EventParamsConverter eventParamsConverter = new EventParamsConverter();
     private final UserPropertiesConverter userPropertiesConverter = new UserPropertiesConverter();
@@ -173,12 +177,16 @@ public final class TransformerV2 {
         SparkSession spark = userDataset.sparkSession();
         String tableName = TABLE_ETL_USER_PAGE_REFERER;
 
-        Dataset<Row> newUserRefererDataset = userDataset.filter(col(EVENT_NAME).isin("_page_view", "page_view", "pageView", "PageView"))
-                .withColumn(PAGE_REFERER,
-                        coalesce(get_json_object(attributesCol, "$._page_referer").cast(DataTypes.StringType),
-                                get_json_object(attributesCol, "$._referer").cast(DataTypes.StringType)))
-                .filter(col(PAGE_REFERER).isNotNull())
-                .select(APP_ID, USER_PSEUDO_ID, PAGE_REFERER, EVENT_TIMESTAMP);
+        Dataset<Row> newUserRefererDataset = userDataset.filter(col(EVENT_NAME).equalTo(PAGE_VIEW))
+                .withColumn(COL_PAGE_REFERER,
+                        coalesce(
+                                get_json_object(attributesCol, "$." + PROP_PAGE_REFERRER).cast(DataTypes.StringType),
+                                get_json_object(attributesCol, "$." + COL_PAGE_REFERER).cast(DataTypes.StringType),
+                                get_json_object(attributesCol, "$." + REFERER).cast(DataTypes.StringType),
+                                get_json_object(attributesCol, "$." + REFERRER).cast(DataTypes.StringType)
+                        ))
+                .filter(col(COL_PAGE_REFERER).isNotNull())
+                .select(APP_ID, USER_PSEUDO_ID, COL_PAGE_REFERER, EVENT_TIMESTAMP);
 
         long newRefererCount = newUserRefererDataset.count();
         log.info(NEW_USER_COUNT + "=" + newUserCount + ", newRefererCount=" + newRefererCount);
@@ -206,7 +214,7 @@ public final class TransformerV2 {
     private static Dataset<Row> getAggUserRefererDataset(final Dataset<Row> allUserRefererDataset) {
         return allUserRefererDataset.groupBy(APP_ID, USER_PSEUDO_ID)
                 .agg(min_by(struct(
-                                col(PAGE_REFERER),
+                                col(COL_PAGE_REFERER),
                                 col(EVENT_TIMESTAMP)),
                         col(EVENT_TIMESTAMP)).alias("page_referer"))
                 .select(col(APP_ID), col(USER_PSEUDO_ID), expr("page_referer.*"))
@@ -606,7 +614,7 @@ public final class TransformerV2 {
                 col("user_properties"),
                 col("user_ltv"),
                 col(FIRST_VISIT_DATE),
-                col(PAGE_REFERER).alias("_first_referer"),
+                col(COL_PAGE_REFERER).alias("_first_referer"),
                 col(TRAFFIC_SOURCE_NAME).alias("_first_traffic_source_type"),
                 col(TRAFFIC_SOURCE_MEDIUM).alias("_first_traffic_medium"),
                 col(TRAFFIC_SOURCE_SOURCE).alias("_first_traffic_source"),
