@@ -1718,6 +1718,7 @@ describe('SQL Builder test', () => {
         sessionType: ExplorePathSessionDef.SESSION,
         nodeType: ExplorePathNodeType.EVENT,
         lagSeconds: 3600,
+        includingOtherEvents: true,
       },
     });
 
@@ -2121,26 +2122,7 @@ describe('SQL Builder test', () => {
             where
               event.event_date >= date '2023-10-01'
               and event.event_date <= date '22023-10-10'
-              and event.event_name not in (
-                '_session_start',
-                '_session_stop',
-                '_screen_view',
-                '_app_exception',
-                '_app_update',
-                '_first_open',
-                '_os_update',
-                '_user_engagement',
-                '_profile_set',
-                '_page_view',
-                '_app_start',
-                '_scroll',
-                '_search',
-                '_click',
-                '_clickstream_error',
-                '_mp_share',
-                '_mp_favorite',
-                '_app_end'
-              )
+              and event.event_name in ('add_button_click', 'note_share', 'note_export')
           ) as event_base
         where
           1 = 1
@@ -2160,9 +2142,6 @@ describe('SQL Builder test', () => {
               )
             )
             or (event_name = 'note_export')
-            or (
-              event_name not in ('add_button_click', 'note_share', 'note_export')
-            )
           )
       ),
       mid_table as (
@@ -2334,6 +2313,7 @@ describe('SQL Builder test', () => {
         nodeType: ExplorePathNodeType.SCREEN_NAME,
         lagSeconds: 3600,
         nodes: ['NotepadActivity', 'NotepadExportActivity', 'NotepadShareActivity', 'NotepadPrintActivity'],
+        includingOtherEvents: true,
       },
     });
 
@@ -2580,6 +2560,567 @@ describe('SQL Builder test', () => {
     );
   });
 
+  test('node path analysis view - merge consecutive nodes', () => {
+
+    const sql = buildNodePathAnalysisView({
+      schemaName: 'app1',
+      computeMethod: ExploreComputeMethod.USER_CNT,
+      specifyJoinColumn: true,
+      joinColumn: 'user_pseudo_id',
+      conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
+      conversionIntervalInSeconds: 10*60,
+      timeScopeType: ExploreTimeScopeType.FIXED,
+      groupColumn: ExploreGroupColumn.DAY,
+      timeStart: new Date('2023-10-01'),
+      timeEnd: new Date('22023-10-10'),
+      pathAnalysis: {
+        platform: MetadataPlatform.ANDROID,
+        sessionType: ExplorePathSessionDef.SESSION,
+        nodeType: ExplorePathNodeType.SCREEN_NAME,
+        lagSeconds: 3600,
+        nodes: ['NotepadActivity', 'NotepadExportActivity', 'NotepadShareActivity', 'NotepadPrintActivity'],
+        mergeConsecutiveEvents: true,
+        includingOtherEvents: true,
+      },
+    });
+
+    expect(sql.trim().replace(/ /g, '')).toEqual(`
+    with
+      event_base as (
+        select
+          event.event_date,
+          event.event_name,
+          event.event_id,
+          event_bundle_sequence_id::bigint as event_bundle_sequence_id,
+          event_previous_timestamp::bigint as event_previous_timestamp,
+          event_timestamp::bigint as event_timestamp,
+          ingest_timestamp,
+          event_value_in_usd,
+          app_info.app_id::varchar as app_info_app_id,
+          app_info.id::varchar as app_info_package_id,
+          app_info.install_source::varchar as app_info_install_source,
+          app_info.version::varchar as app_info_version,
+          device.vendor_id::varchar as device_id,
+          device.mobile_brand_name::varchar as device_mobile_brand_name,
+          device.mobile_model_name::varchar as device_mobile_model_name,
+          device.manufacturer::varchar as device_manufacturer,
+          device.screen_width::bigint as device_screen_width,
+          device.screen_height::bigint as device_screen_height,
+          device.viewport_height::bigint as device_viewport_height,
+          device.carrier::varchar as device_carrier,
+          device.network_type::varchar as device_network_type,
+          device.operating_system::varchar as device_operating_system,
+          device.operating_system_version::varchar as device_operating_system_version,
+          device.ua_browser::varchar as device_ua_browser,
+          device.ua_browser_version::varchar as device_ua_browser_version,
+          device.ua_os::varchar as device_ua_os,
+          device.ua_os_version::varchar as device_ua_os_version,
+          device.ua_device::varchar as device_ua_device,
+          device.ua_device_category::varchar as device_ua_device_category,
+          device.system_language::varchar as device_system_language,
+          device.time_zone_offset_seconds::bigint as device_time_zone_offset_seconds,
+          device.advertising_id::varchar as device_advertising_id,
+          geo.continent::varchar as geo_continent,
+          geo.country::varchar as geo_country,
+          geo.city::varchar as geo_city,
+          geo.metro::varchar as geo_metro,
+          geo.region::varchar as geo_region,
+          geo.sub_continent::varchar as geo_sub_continent,
+          geo.locale::varchar as geo_locale,
+          platform,
+          project_id,
+          traffic_source.name::varchar as traffic_source_name,
+          traffic_source.medium::varchar as traffic_source_medium,
+          traffic_source.source::varchar as traffic_source_source,
+          COALESCE(event.user_id, event.user_pseudo_id) as user_pseudo_id,
+          event.user_id,
+          TO_CHAR(
+            TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+              'week',
+              TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
+            ),
+            'YYYY-MM-DD'
+          ) || ' - ' || TO_CHAR(
+            date_trunc(
+              'week',
+              (
+                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
+              ) + INTERVAL '6 days'
+            ),
+            'YYYY-MM-DD'
+          ) as week,
+          TO_CHAR(
+            TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR(
+            TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+            'YYYY-MM-DD HH24'
+          ) || '00:00' as hour
+        from
+          app1.event as event
+        where
+          event.event_date >= date '2023-10-01'
+          and event.event_date <= date '22023-10-10'
+          and event.event_name = '_screen_view'
+          and platform = 'Android'
+      ),
+      base_data as (
+        select
+          _session_id,
+          event_base.*
+        from
+          event_base
+          join (
+            select
+              event_base.event_id,
+              max(
+                case
+                  when event_param_key = '_session_id' then event_param_string_value
+                  else null
+                end
+              ) as _session_id
+            from
+              event_base
+              join app1.event_parameter as event_param on event_base.event_timestamp = event_param.event_timestamp
+              and event_base.event_id = event_param.event_id
+            group by
+              event_base.event_id
+          ) as event_join_table on event_base.event_id = event_join_table.event_id
+        where
+          1 = 1
+      ),
+      mid_table_1 as (
+        select
+          event_name,
+          user_pseudo_id,
+          event_id,
+          event_timestamp,
+          _session_id
+        from
+          base_data
+      ),
+      mid_table_2 as (
+        select
+          base_data.event_timestamp,
+          base_data.event_id,
+          max(event_param.event_param_string_value) as node
+        from
+          base_data
+          join app1.event_parameter as event_param on base_data.event_timestamp = event_param.event_timestamp
+          and base_data.event_id = event_param.event_id
+        where
+          event_param.event_param_key = '_screen_name'
+        group by
+          1,
+          2
+      ),
+      mid_table as (
+        select
+          event_name,
+          user_pseudo_id,
+          event_id,
+          event_timestamp,
+          _session_id,
+          node
+        from
+          (
+            select
+              mid_table_1.*,
+              mid_table_2.node,
+              ROW_NUMBER() over (
+                partition by
+                  event_name,
+                  user_pseudo_id,
+                  _session_id,
+                  node
+                order by
+                  mid_table_1.event_timestamp desc
+              ) as rk
+            from
+              mid_table_1
+              join mid_table_2 on mid_table_1.event_id = mid_table_2.event_id
+          )
+        where
+          rk = 1
+      ),
+      data as (
+        select
+          event_name,
+          user_pseudo_id,
+          event_id,
+          event_timestamp,
+          _session_id,
+          case
+            when node in (
+              'NotepadActivity',
+              'NotepadExportActivity',
+              'NotepadShareActivity',
+              'NotepadPrintActivity'
+            ) then node
+            else 'other'
+          end as node,
+          ROW_NUMBER() OVER (
+            PARTITION BY
+              user_pseudo_id,
+              _session_id
+            ORDER BY
+              event_timestamp asc
+          ) as step_1,
+          ROW_NUMBER() OVER (
+            PARTITION BY
+              user_pseudo_id,
+              _session_id
+            ORDER BY
+              event_timestamp asc
+          ) + 1 as step_2
+        from
+          mid_table
+      ),
+      step_table_1 as (
+        select
+          user_pseudo_id,
+          _session_id,
+          min(step_1) min_step
+        from
+          data
+        where
+          node = 'NotepadActivity'
+        group by
+          user_pseudo_id,
+          _session_id
+      ),
+      step_table_2 as (
+        select
+          data.*
+        from
+          data
+          join step_table_1 on data.user_pseudo_id = step_table_1.user_pseudo_id
+          and data._session_id = step_table_1._session_id
+          and data.step_1 >= step_table_1.min_step
+      ),
+      data_final as (
+        select
+          event_name,
+          user_pseudo_id,
+          event_id,
+          event_timestamp,
+          _session_id,
+          node,
+          ROW_NUMBER() OVER (
+            PARTITION BY
+              user_pseudo_id,
+              _session_id
+            ORDER BY
+              step_1 asc,
+              step_2
+          ) as step_1,
+          ROW_NUMBER() OVER (
+            PARTITION BY
+              user_pseudo_id,
+              _session_id
+            ORDER BY
+              step_1 asc,
+              step_2
+          ) + 1 as step_2
+        from
+          step_table_2
+      )
+    select
+      a.node || '_' || a.step_1 as source,
+      CASE
+        WHEN b.node is not null THEN b.node || '_' || a.step_2
+        ELSE 'lost'
+      END as target,
+      a.user_pseudo_id as x_id
+    from
+      data_final a
+      left join data_final b on a.user_pseudo_id = b.user_pseudo_id
+      and a._session_id = b._session_id
+      and a.step_2 = b.step_1
+    where
+      a.step_2 <= 10
+  `.trim().replace(/ /g, ''),
+    );
+  });
+
+  test('node path analysis view - exclude other Events', () => {
+
+    const sql = buildNodePathAnalysisView({
+      schemaName: 'app1',
+      computeMethod: ExploreComputeMethod.USER_CNT,
+      specifyJoinColumn: true,
+      joinColumn: 'user_pseudo_id',
+      conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
+      conversionIntervalInSeconds: 10*60,
+      timeScopeType: ExploreTimeScopeType.FIXED,
+      groupColumn: ExploreGroupColumn.DAY,
+      timeStart: new Date('2023-10-01'),
+      timeEnd: new Date('22023-10-10'),
+      pathAnalysis: {
+        platform: MetadataPlatform.ANDROID,
+        sessionType: ExplorePathSessionDef.SESSION,
+        nodeType: ExplorePathNodeType.SCREEN_NAME,
+        lagSeconds: 3600,
+        nodes: ['NotepadActivity', 'NotepadExportActivity', 'NotepadShareActivity', 'NotepadPrintActivity'],
+        includingOtherEvents: false,
+      },
+    });
+
+    expect(sql.trim().replace(/ /g, '')).toEqual(`
+    with
+      event_base as (
+        select
+          event.event_date,
+          event.event_name,
+          event.event_id,
+          event_bundle_sequence_id::bigint as event_bundle_sequence_id,
+          event_previous_timestamp::bigint as event_previous_timestamp,
+          event_timestamp::bigint as event_timestamp,
+          ingest_timestamp,
+          event_value_in_usd,
+          app_info.app_id::varchar as app_info_app_id,
+          app_info.id::varchar as app_info_package_id,
+          app_info.install_source::varchar as app_info_install_source,
+          app_info.version::varchar as app_info_version,
+          device.vendor_id::varchar as device_id,
+          device.mobile_brand_name::varchar as device_mobile_brand_name,
+          device.mobile_model_name::varchar as device_mobile_model_name,
+          device.manufacturer::varchar as device_manufacturer,
+          device.screen_width::bigint as device_screen_width,
+          device.screen_height::bigint as device_screen_height,
+          device.viewport_height::bigint as device_viewport_height,
+          device.carrier::varchar as device_carrier,
+          device.network_type::varchar as device_network_type,
+          device.operating_system::varchar as device_operating_system,
+          device.operating_system_version::varchar as device_operating_system_version,
+          device.ua_browser::varchar as device_ua_browser,
+          device.ua_browser_version::varchar as device_ua_browser_version,
+          device.ua_os::varchar as device_ua_os,
+          device.ua_os_version::varchar as device_ua_os_version,
+          device.ua_device::varchar as device_ua_device,
+          device.ua_device_category::varchar as device_ua_device_category,
+          device.system_language::varchar as device_system_language,
+          device.time_zone_offset_seconds::bigint as device_time_zone_offset_seconds,
+          device.advertising_id::varchar as device_advertising_id,
+          geo.continent::varchar as geo_continent,
+          geo.country::varchar as geo_country,
+          geo.city::varchar as geo_city,
+          geo.metro::varchar as geo_metro,
+          geo.region::varchar as geo_region,
+          geo.sub_continent::varchar as geo_sub_continent,
+          geo.locale::varchar as geo_locale,
+          platform,
+          project_id,
+          traffic_source.name::varchar as traffic_source_name,
+          traffic_source.medium::varchar as traffic_source_medium,
+          traffic_source.source::varchar as traffic_source_source,
+          COALESCE(event.user_id, event.user_pseudo_id) as user_pseudo_id,
+          event.user_id,
+          TO_CHAR(
+            TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+              'week',
+              TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
+            ),
+            'YYYY-MM-DD'
+          ) || ' - ' || TO_CHAR(
+            date_trunc(
+              'week',
+              (
+                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
+              ) + INTERVAL '6 days'
+            ),
+            'YYYY-MM-DD'
+          ) as week,
+          TO_CHAR(
+            TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR(
+            TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+            'YYYY-MM-DD HH24'
+          ) || '00:00' as hour
+        from
+          app1.event as event
+        where
+          event.event_date >= date '2023-10-01'
+          and event.event_date <= date '22023-10-10'
+          and event.event_name = '_screen_view'
+          and platform = 'Android'
+      ),
+      base_data as (
+        select
+          _session_id,
+          event_base.*
+        from
+          event_base
+          join (
+            select
+              event_base.event_id,
+              max(
+                case
+                  when event_param_key = '_session_id' then event_param_string_value
+                  else null
+                end
+              ) as _session_id
+            from
+              event_base
+              join app1.event_parameter as event_param on event_base.event_timestamp = event_param.event_timestamp
+              and event_base.event_id = event_param.event_id
+            group by
+              event_base.event_id
+          ) as event_join_table on event_base.event_id = event_join_table.event_id
+        where
+          1 = 1
+      ),
+      mid_table_1 as (
+        select
+          event_name,
+          user_pseudo_id,
+          event_id,
+          event_timestamp,
+          _session_id
+        from
+          base_data
+      ),
+      mid_table_2 as (
+        select
+          base_data.event_timestamp,
+          base_data.event_id,
+          max(event_param.event_param_string_value) as node
+        from
+          base_data
+          join app1.event_parameter as event_param on base_data.event_timestamp = event_param.event_timestamp
+          and base_data.event_id = event_param.event_id
+        where
+          event_param.event_param_key = '_screen_name'
+        group by
+          1,
+          2
+      ),
+      mid_table as (
+        select
+          mid_table_1.*,
+          mid_table_2.node
+        from
+          mid_table_1
+          join mid_table_2 on mid_table_1.event_id = mid_table_2.event_id
+      ),
+      data as (
+        select
+          event_name,
+          user_pseudo_id,
+          event_id,
+          event_timestamp,
+          _session_id,
+          case
+            when node in (
+              'NotepadActivity',
+              'NotepadExportActivity',
+              'NotepadShareActivity',
+              'NotepadPrintActivity'
+            ) then node
+            else 'other'
+          end as node,
+          ROW_NUMBER() OVER (
+            PARTITION BY
+              user_pseudo_id,
+              _session_id
+            ORDER BY
+              event_timestamp asc
+          ) as step_1,
+          ROW_NUMBER() OVER (
+            PARTITION BY
+              user_pseudo_id,
+              _session_id
+            ORDER BY
+              event_timestamp asc
+          ) + 1 as step_2
+        from
+          mid_table
+        where
+          node in (
+            'NotepadActivity',
+            'NotepadExportActivity',
+            'NotepadShareActivity',
+            'NotepadPrintActivity'
+          )
+      ),
+      step_table_1 as (
+        select
+          user_pseudo_id,
+          _session_id,
+          min(step_1) min_step
+        from
+          data
+        where
+          node = 'NotepadActivity'
+        group by
+          user_pseudo_id,
+          _session_id
+      ),
+      step_table_2 as (
+        select
+          data.*
+        from
+          data
+          join step_table_1 on data.user_pseudo_id = step_table_1.user_pseudo_id
+          and data._session_id = step_table_1._session_id
+          and data.step_1 >= step_table_1.min_step
+      ),
+      data_final as (
+        select
+          event_name,
+          user_pseudo_id,
+          event_id,
+          event_timestamp,
+          _session_id,
+          node,
+          ROW_NUMBER() OVER (
+            PARTITION BY
+              user_pseudo_id,
+              _session_id
+            ORDER BY
+              step_1 asc,
+              step_2
+          ) as step_1,
+          ROW_NUMBER() OVER (
+            PARTITION BY
+              user_pseudo_id,
+              _session_id
+            ORDER BY
+              step_1 asc,
+              step_2
+          ) + 1 as step_2
+        from
+          step_table_2
+      )
+    select
+      a.node || '_' || a.step_1 as source,
+      CASE
+        WHEN b.node is not null THEN b.node || '_' || a.step_2
+        ELSE 'lost'
+      END as target,
+      a.user_pseudo_id as x_id
+    from
+      data_final a
+      left join data_final b on a.user_pseudo_id = b.user_pseudo_id
+      and a._session_id = b._session_id
+      and a.step_2 = b.step_1
+    where
+      a.step_2 <= 10
+  `.trim().replace(/ /g, ''),
+    );
+  });
+
   test('node path analysis view - sessionType=customize ', () => {
 
     const sql = buildNodePathAnalysisView({
@@ -2596,6 +3137,7 @@ describe('SQL Builder test', () => {
         nodeType: ExplorePathNodeType.SCREEN_NAME,
         lagSeconds: 3600,
         nodes: ['NotepadActivity', 'NotepadExportActivity', 'NotepadShareActivity', 'NotepadPrintActivity'],
+        includingOtherEvents: true,
       },
     });
 
@@ -2751,6 +3293,617 @@ describe('SQL Builder test', () => {
           ) + 1 as step_2
         from
           mid_table
+      ),
+      data_2 as (
+        select
+          a.node,
+          a.user_pseudo_id,
+          a.event_id,
+          a.event_timestamp,
+          case
+            when (
+              b.event_timestamp - a.event_timestamp < 3600000
+              and b.event_timestamp - a.event_timestamp >= 0
+            ) then 0
+            else 1
+          end as group_start
+        from
+          data_1 a
+          left join data_1 b on a.user_pseudo_id = b.user_pseudo_id
+          and a.step_2 = b.step_1
+      ),
+      data_3 AS (
+        select
+          *,
+          SUM(group_start) over (
+            order by
+              user_pseudo_id,
+              event_timestamp ROWS BETWEEN UNBOUNDED PRECEDING
+              AND CURRENT ROW
+          ) AS group_id
+        from
+          data_2
+      ),
+      data as (
+        select
+          node,
+          user_pseudo_id,
+          event_id,
+          event_timestamp,
+          group_id,
+          ROW_NUMBER() OVER (
+            PARTITION BY
+              user_pseudo_id,
+              group_id
+            ORDER BY
+              event_timestamp asc
+          ) as step_1,
+          ROW_NUMBER() OVER (
+            PARTITION BY
+              user_pseudo_id,
+              group_id
+            ORDER BY
+              event_timestamp asc
+          ) + 1 as step_2
+        from
+          data_3
+      ),
+      step_table_1 as (
+        select
+          data.user_pseudo_id user_pseudo_id,
+          group_id,
+          min(step_1) min_step
+        from
+          data
+        where
+          node = 'NotepadActivity'
+        group by
+          user_pseudo_id,
+          group_id
+      ),
+      step_table_2 as (
+        select
+          data.*
+        from
+          data
+          join step_table_1 on data.user_pseudo_id = step_table_1.user_pseudo_id
+          and data.group_id = step_table_1.group_id
+          and data.step_1 >= step_table_1.min_step
+      ),
+      data_final as (
+        select
+          node,
+          user_pseudo_id,
+          event_id,
+          group_id,
+          ROW_NUMBER() OVER (
+            PARTITION BY
+              user_pseudo_id,
+              group_id
+            ORDER BY
+              step_1 asc,
+              step_2
+          ) as step_1,
+          ROW_NUMBER() OVER (
+            PARTITION BY
+              user_pseudo_id,
+              group_id
+            ORDER BY
+              step_1 asc,
+              step_2
+          ) + 1 as step_2
+        from
+          step_table_2
+      )
+    select
+      a.node || '_' || a.step_1 as source,
+      CASE
+        WHEN b.node is not null THEN b.node || '_' || a.step_2
+        ELSE 'lost'
+      END as target,
+      a.user_pseudo_id as x_id
+    from
+      data_final a
+      left join data_final b on a.user_pseudo_id = b.user_pseudo_id
+      and a.group_id = b.group_id
+      and a.step_2 = b.step_1
+    where
+      a.step_2 <= 10
+  `.trim().replace(/ /g, ''),
+    );
+  });
+
+  test('node path analysis view - sessionType=customize - merge consecutive nodes ', () => {
+
+    const sql = buildNodePathAnalysisView({
+      schemaName: 'app1',
+      computeMethod: ExploreComputeMethod.USER_CNT,
+      specifyJoinColumn: false,
+      timeScopeType: ExploreTimeScopeType.FIXED,
+      groupColumn: ExploreGroupColumn.DAY,
+      timeStart: new Date('2023-10-01'),
+      timeEnd: new Date('22023-10-10'),
+      pathAnalysis: {
+        platform: MetadataPlatform.ANDROID,
+        sessionType: ExplorePathSessionDef.CUSTOMIZE,
+        nodeType: ExplorePathNodeType.SCREEN_NAME,
+        lagSeconds: 3600,
+        nodes: ['NotepadActivity', 'NotepadExportActivity', 'NotepadShareActivity', 'NotepadPrintActivity'],
+        mergeConsecutiveEvents: true,
+        includingOtherEvents: true,
+      },
+    });
+
+    expect(sql.trim().replace(/ /g, '')).toEqual(`
+    with
+      base_data as (
+        select
+          event_base.*
+        from
+          (
+            select
+              event.event_date,
+              event.event_name,
+              event.event_id,
+              event_bundle_sequence_id::bigint as event_bundle_sequence_id,
+              event_previous_timestamp::bigint as event_previous_timestamp,
+              event_timestamp::bigint as event_timestamp,
+              ingest_timestamp,
+              event_value_in_usd,
+              app_info.app_id::varchar as app_info_app_id,
+              app_info.id::varchar as app_info_package_id,
+              app_info.install_source::varchar as app_info_install_source,
+              app_info.version::varchar as app_info_version,
+              device.vendor_id::varchar as device_id,
+              device.mobile_brand_name::varchar as device_mobile_brand_name,
+              device.mobile_model_name::varchar as device_mobile_model_name,
+              device.manufacturer::varchar as device_manufacturer,
+              device.screen_width::bigint as device_screen_width,
+              device.screen_height::bigint as device_screen_height,
+              device.viewport_height::bigint as device_viewport_height,
+              device.carrier::varchar as device_carrier,
+              device.network_type::varchar as device_network_type,
+              device.operating_system::varchar as device_operating_system,
+              device.operating_system_version::varchar as device_operating_system_version,
+              device.ua_browser::varchar as device_ua_browser,
+              device.ua_browser_version::varchar as device_ua_browser_version,
+              device.ua_os::varchar as device_ua_os,
+              device.ua_os_version::varchar as device_ua_os_version,
+              device.ua_device::varchar as device_ua_device,
+              device.ua_device_category::varchar as device_ua_device_category,
+              device.system_language::varchar as device_system_language,
+              device.time_zone_offset_seconds::bigint as device_time_zone_offset_seconds,
+              device.advertising_id::varchar as device_advertising_id,
+              geo.continent::varchar as geo_continent,
+              geo.country::varchar as geo_country,
+              geo.city::varchar as geo_city,
+              geo.metro::varchar as geo_metro,
+              geo.region::varchar as geo_region,
+              geo.sub_continent::varchar as geo_sub_continent,
+              geo.locale::varchar as geo_locale,
+              platform,
+              project_id,
+              traffic_source.name::varchar as traffic_source_name,
+              traffic_source.medium::varchar as traffic_source_medium,
+              traffic_source.source::varchar as traffic_source_source,
+              COALESCE(event.user_id, event.user_pseudo_id) as user_pseudo_id,
+              event.user_id,
+              TO_CHAR(
+                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+                'YYYY-MM'
+              ) as month,
+              TO_CHAR(
+                date_trunc(
+                  'week',
+                  TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
+                ),
+                'YYYY-MM-DD'
+              ) || ' - ' || TO_CHAR(
+                date_trunc(
+                  'week',
+                  (
+                    TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
+                  ) + INTERVAL '6 days'
+                ),
+                'YYYY-MM-DD'
+              ) as week,
+              TO_CHAR(
+                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+                'YYYY-MM-DD'
+              ) as day,
+              TO_CHAR(
+                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+                'YYYY-MM-DD HH24'
+              ) || '00:00' as hour
+            from
+              app1.event as event
+            where
+              event.event_date >= date '2023-10-01'
+              and event.event_date <= date '22023-10-10'
+              and event.event_name = '_screen_view'
+              and platform = 'Android'
+          ) as event_base
+        where
+          1 = 1
+      ),
+      mid_table_1 as (
+        select
+          event_name,
+          user_pseudo_id,
+          event_id,
+          event_timestamp
+        from
+          base_data
+      ),
+      mid_table_2 as (
+        select
+          base_data.event_timestamp,
+          base_data.event_id,
+          max(event_param.event_param_string_value) as node
+        from
+          base_data
+          join app1.event_parameter as event_param on base_data.event_timestamp = event_param.event_timestamp
+          and base_data.event_id = event_param.event_id
+        where
+          event_param.event_param_key = '_screen_name'
+        group by
+          1,
+          2
+      ),
+      mid_table as (
+        select
+          event_name,
+          user_pseudo_id,
+          event_id,
+          event_timestamp,
+          node
+        from
+          (
+            select
+              mid_table_1.*,
+              mid_table_2.node,
+              ROW_NUMBER() over (
+                partition by
+                  event_name,
+                  user_pseudo_id,
+                  node
+                order by
+                  mid_table_1.event_timestamp desc
+              ) as rk
+            from
+              mid_table_1
+              join mid_table_2 on mid_table_1.event_id = mid_table_2.event_id
+          )
+        where
+          rk = 1
+      ),
+      data_1 as (
+        select
+          user_pseudo_id,
+          event_id,
+          event_timestamp,
+          case
+            when node in (
+              'NotepadActivity',
+              'NotepadExportActivity',
+              'NotepadShareActivity',
+              'NotepadPrintActivity'
+            ) then node
+            else 'other'
+          end as node,
+          ROW_NUMBER() OVER (
+            PARTITION BY
+              user_pseudo_id
+            ORDER BY
+              event_timestamp asc
+          ) as step_1,
+          ROW_NUMBER() OVER (
+            PARTITION BY
+              user_pseudo_id
+            ORDER BY
+              event_timestamp asc
+          ) + 1 as step_2
+        from
+          mid_table
+      ),
+      data_2 as (
+        select
+          a.node,
+          a.user_pseudo_id,
+          a.event_id,
+          a.event_timestamp,
+          case
+            when (
+              b.event_timestamp - a.event_timestamp < 3600000
+              and b.event_timestamp - a.event_timestamp >= 0
+            ) then 0
+            else 1
+          end as group_start
+        from
+          data_1 a
+          left join data_1 b on a.user_pseudo_id = b.user_pseudo_id
+          and a.step_2 = b.step_1
+      ),
+      data_3 AS (
+        select
+          *,
+          SUM(group_start) over (
+            order by
+              user_pseudo_id,
+              event_timestamp ROWS BETWEEN UNBOUNDED PRECEDING
+              AND CURRENT ROW
+          ) AS group_id
+        from
+          data_2
+      ),
+      data as (
+        select
+          node,
+          user_pseudo_id,
+          event_id,
+          event_timestamp,
+          group_id,
+          ROW_NUMBER() OVER (
+            PARTITION BY
+              user_pseudo_id,
+              group_id
+            ORDER BY
+              event_timestamp asc
+          ) as step_1,
+          ROW_NUMBER() OVER (
+            PARTITION BY
+              user_pseudo_id,
+              group_id
+            ORDER BY
+              event_timestamp asc
+          ) + 1 as step_2
+        from
+          data_3
+      ),
+      step_table_1 as (
+        select
+          data.user_pseudo_id user_pseudo_id,
+          group_id,
+          min(step_1) min_step
+        from
+          data
+        where
+          node = 'NotepadActivity'
+        group by
+          user_pseudo_id,
+          group_id
+      ),
+      step_table_2 as (
+        select
+          data.*
+        from
+          data
+          join step_table_1 on data.user_pseudo_id = step_table_1.user_pseudo_id
+          and data.group_id = step_table_1.group_id
+          and data.step_1 >= step_table_1.min_step
+      ),
+      data_final as (
+        select
+          node,
+          user_pseudo_id,
+          event_id,
+          group_id,
+          ROW_NUMBER() OVER (
+            PARTITION BY
+              user_pseudo_id,
+              group_id
+            ORDER BY
+              step_1 asc,
+              step_2
+          ) as step_1,
+          ROW_NUMBER() OVER (
+            PARTITION BY
+              user_pseudo_id,
+              group_id
+            ORDER BY
+              step_1 asc,
+              step_2
+          ) + 1 as step_2
+        from
+          step_table_2
+      )
+    select
+      a.node || '_' || a.step_1 as source,
+      CASE
+        WHEN b.node is not null THEN b.node || '_' || a.step_2
+        ELSE 'lost'
+      END as target,
+      a.user_pseudo_id as x_id
+    from
+      data_final a
+      left join data_final b on a.user_pseudo_id = b.user_pseudo_id
+      and a.group_id = b.group_id
+      and a.step_2 = b.step_1
+    where
+      a.step_2 <= 10
+  `.trim().replace(/ /g, ''),
+    );
+  });
+
+  test('node path analysis view - sessionType=customize - exclude other events ', () => {
+
+    const sql = buildNodePathAnalysisView({
+      schemaName: 'app1',
+      computeMethod: ExploreComputeMethod.USER_CNT,
+      specifyJoinColumn: false,
+      timeScopeType: ExploreTimeScopeType.FIXED,
+      groupColumn: ExploreGroupColumn.DAY,
+      timeStart: new Date('2023-10-01'),
+      timeEnd: new Date('22023-10-10'),
+      pathAnalysis: {
+        platform: MetadataPlatform.ANDROID,
+        sessionType: ExplorePathSessionDef.CUSTOMIZE,
+        nodeType: ExplorePathNodeType.SCREEN_NAME,
+        lagSeconds: 3600,
+        nodes: ['NotepadActivity', 'NotepadExportActivity', 'NotepadShareActivity', 'NotepadPrintActivity'],
+        includingOtherEvents: false,
+      },
+    });
+
+    expect(sql.trim().replace(/ /g, '')).toEqual(`
+    with
+      base_data as (
+        select
+          event_base.*
+        from
+          (
+            select
+              event.event_date,
+              event.event_name,
+              event.event_id,
+              event_bundle_sequence_id::bigint as event_bundle_sequence_id,
+              event_previous_timestamp::bigint as event_previous_timestamp,
+              event_timestamp::bigint as event_timestamp,
+              ingest_timestamp,
+              event_value_in_usd,
+              app_info.app_id::varchar as app_info_app_id,
+              app_info.id::varchar as app_info_package_id,
+              app_info.install_source::varchar as app_info_install_source,
+              app_info.version::varchar as app_info_version,
+              device.vendor_id::varchar as device_id,
+              device.mobile_brand_name::varchar as device_mobile_brand_name,
+              device.mobile_model_name::varchar as device_mobile_model_name,
+              device.manufacturer::varchar as device_manufacturer,
+              device.screen_width::bigint as device_screen_width,
+              device.screen_height::bigint as device_screen_height,
+              device.viewport_height::bigint as device_viewport_height,
+              device.carrier::varchar as device_carrier,
+              device.network_type::varchar as device_network_type,
+              device.operating_system::varchar as device_operating_system,
+              device.operating_system_version::varchar as device_operating_system_version,
+              device.ua_browser::varchar as device_ua_browser,
+              device.ua_browser_version::varchar as device_ua_browser_version,
+              device.ua_os::varchar as device_ua_os,
+              device.ua_os_version::varchar as device_ua_os_version,
+              device.ua_device::varchar as device_ua_device,
+              device.ua_device_category::varchar as device_ua_device_category,
+              device.system_language::varchar as device_system_language,
+              device.time_zone_offset_seconds::bigint as device_time_zone_offset_seconds,
+              device.advertising_id::varchar as device_advertising_id,
+              geo.continent::varchar as geo_continent,
+              geo.country::varchar as geo_country,
+              geo.city::varchar as geo_city,
+              geo.metro::varchar as geo_metro,
+              geo.region::varchar as geo_region,
+              geo.sub_continent::varchar as geo_sub_continent,
+              geo.locale::varchar as geo_locale,
+              platform,
+              project_id,
+              traffic_source.name::varchar as traffic_source_name,
+              traffic_source.medium::varchar as traffic_source_medium,
+              traffic_source.source::varchar as traffic_source_source,
+              COALESCE(event.user_id, event.user_pseudo_id) as user_pseudo_id,
+              event.user_id,
+              TO_CHAR(
+                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+                'YYYY-MM'
+              ) as month,
+              TO_CHAR(
+                date_trunc(
+                  'week',
+                  TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
+                ),
+                'YYYY-MM-DD'
+              ) || ' - ' || TO_CHAR(
+                date_trunc(
+                  'week',
+                  (
+                    TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
+                  ) + INTERVAL '6 days'
+                ),
+                'YYYY-MM-DD'
+              ) as week,
+              TO_CHAR(
+                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+                'YYYY-MM-DD'
+              ) as day,
+              TO_CHAR(
+                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+                'YYYY-MM-DD HH24'
+              ) || '00:00' as hour
+            from
+              app1.event as event
+            where
+              event.event_date >= date '2023-10-01'
+              and event.event_date <= date '22023-10-10'
+              and event.event_name = '_screen_view'
+              and platform = 'Android'
+          ) as event_base
+        where
+          1 = 1
+      ),
+      mid_table_1 as (
+        select
+          event_name,
+          user_pseudo_id,
+          event_id,
+          event_timestamp
+        from
+          base_data
+      ),
+      mid_table_2 as (
+        select
+          base_data.event_timestamp,
+          base_data.event_id,
+          max(event_param.event_param_string_value) as node
+        from
+          base_data
+          join app1.event_parameter as event_param on base_data.event_timestamp = event_param.event_timestamp
+          and base_data.event_id = event_param.event_id
+        where
+          event_param.event_param_key = '_screen_name'
+        group by
+          1,
+          2
+      ),
+      mid_table as (
+        select
+          mid_table_1.*,
+          mid_table_2.node
+        from
+          mid_table_1
+          join mid_table_2 on mid_table_1.event_id = mid_table_2.event_id
+      ),
+      data_1 as (
+        select
+          user_pseudo_id,
+          event_id,
+          event_timestamp,
+          case
+            when node in (
+              'NotepadActivity',
+              'NotepadExportActivity',
+              'NotepadShareActivity',
+              'NotepadPrintActivity'
+            ) then node
+            else 'other'
+          end as node,
+          ROW_NUMBER() OVER (
+            PARTITION BY
+              user_pseudo_id
+            ORDER BY
+              event_timestamp asc
+          ) as step_1,
+          ROW_NUMBER() OVER (
+            PARTITION BY
+              user_pseudo_id
+            ORDER BY
+              event_timestamp asc
+          ) + 1 as step_2
+        from
+          mid_table
+        where
+          node in (
+            'NotepadActivity',
+            'NotepadExportActivity',
+            'NotepadShareActivity',
+            'NotepadPrintActivity'
+          )
       ),
       data_2 as (
         select
@@ -5932,6 +7085,7 @@ describe('SQL Builder test', () => {
       pathAnalysis: {
         sessionType: ExplorePathSessionDef.SESSION,
         nodeType: ExplorePathNodeType.EVENT,
+        includingOtherEvents: true,
       },
       timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: new Date('2023-10-01'),
@@ -6365,6 +7519,7 @@ describe('SQL Builder test', () => {
         sessionType: ExplorePathSessionDef.CUSTOMIZE,
         nodeType: ExplorePathNodeType.EVENT,
         lagSeconds: 3600,
+        includingOtherEvents: true,
       },
       timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: new Date('2023-10-01'),
@@ -6843,6 +7998,7 @@ describe('SQL Builder test', () => {
         lagSeconds: 3600,
         nodeType: ExplorePathNodeType.SCREEN_NAME,
         nodes: ['NotepadActivity', 'NotepadExportActivity', 'NotepadShareActivity', 'NotepadPrintActivity'],
+        includingOtherEvents: true,
       },
       timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: new Date('2023-10-01'),
@@ -12043,26 +13199,7 @@ describe('SQL Builder test', () => {
         where
           event.event_date >= date '2023-10-01'
           and event.event_date <= date '2023-10-10'
-          and event.event_name not in (
-            '_session_start',
-            '_session_stop',
-            '_screen_view',
-            '_app_exception',
-            '_app_update',
-            '_first_open',
-            '_os_update',
-            '_user_engagement',
-            '_profile_set',
-            '_page_view',
-            '_app_start',
-            '_scroll',
-            '_search',
-            '_click',
-            '_clickstream_error',
-            '_mp_share',
-            '_mp_favorite',
-            '_app_end'
-          )
+          and event.event_name in ('add_button_click','note_share','note_export')
       ),
       base_data as (
         select
@@ -12136,9 +13273,6 @@ describe('SQL Builder test', () => {
                 and _user_first_touch_timestamp > 1686532526770
                 and _session_duration > 200
               )
-            )
-            or (
-              event_name not in ('add_button_click', 'note_share', 'note_export')
             )
           )
       ),
@@ -12357,26 +13491,7 @@ describe('SQL Builder test', () => {
         where
           event.event_date >= date '2023-10-01'
           and event.event_date <= date '2023-10-10'
-          and event.event_name not in (
-            '_session_start',
-            '_session_stop',
-            '_screen_view',
-            '_app_exception',
-            '_app_update',
-            '_first_open',
-            '_os_update',
-            '_user_engagement',
-            '_profile_set',
-            '_page_view',
-            '_app_start',
-            '_scroll',
-            '_search',
-            '_click',
-            '_clickstream_error',
-            '_mp_share',
-            '_mp_favorite',
-            '_app_end'
-          )
+          and event.event_name in ('add_button_click','note_share','note_export')
       ),
       base_data as (
         select
@@ -12406,9 +13521,6 @@ describe('SQL Builder test', () => {
             (event_name = 'add_button_click')
             or (event_name = 'note_share')
             or (event_name = 'note_export')
-            or (
-              event_name not in ('add_button_click', 'note_share', 'note_export')
-            )
           )
       ),
       mid_table as (
@@ -12637,6 +13749,7 @@ describe('SQL Builder test', () => {
         sessionType: ExplorePathSessionDef.SESSION,
         nodeType: ExplorePathNodeType.SCREEN_NAME,
         nodes: ['NotepadActivity', 'NotepadExportActivity', 'NotepadShareActivity', 'NotepadPrintActivity'],
+        includingOtherEvents: true,
       },
       timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: new Date('2023-10-01'),
@@ -13767,6 +14880,459 @@ describe('SQL Builder test', () => {
       final_table
     where
       u_id_2 is not null
+  `.trim().replace(/ /g, ''),
+    );
+
+  });
+
+  test('buildEventPathAnalysisView - includingOtherEvents and merge consecutive events', () => {
+
+    const sql = buildEventPathAnalysisView({
+      schemaName: 'app1',
+      computeMethod: ExploreComputeMethod.EVENT_CNT,
+      specifyJoinColumn: true,
+      joinColumn: 'user_pseudo_id',
+      conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
+      conversionIntervalInSeconds: 10*60,
+      globalEventCondition: {
+        conditions: [
+          {
+            category: ConditionCategory.OTHER,
+            property: 'platform',
+            operator: '=',
+            value: ['Android'],
+            dataType: MetadataValueType.STRING,
+          },
+          {
+            category: ConditionCategory.GEO,
+            property: 'country',
+            operator: '=',
+            value: ['China'],
+            dataType: MetadataValueType.STRING,
+          },
+          {
+            category: ConditionCategory.USER,
+            property: '_user_first_touch_timestamp',
+            operator: '>',
+            value: [1686532526770],
+            dataType: MetadataValueType.INTEGER,
+          },
+          {
+            category: ConditionCategory.USER,
+            property: '_user_first_touch_timestamp',
+            operator: '>',
+            value: [1686532526780],
+            dataType: MetadataValueType.INTEGER,
+          },
+        ],
+      },
+      eventAndConditions: [
+        {
+          eventName: 'add_button_click',
+          computeMethod: ExploreComputeMethod.EVENT_CNT,
+          sqlCondition: {
+            conditionOperator: 'and',
+            conditions: [
+              {
+                category: ConditionCategory.OTHER,
+                property: 'platform',
+                operator: '=',
+                value: ['Android'],
+                dataType: MetadataValueType.STRING,
+              },
+              {
+                category: ConditionCategory.GEO,
+                property: 'country',
+                operator: '=',
+                value: ['China'],
+                dataType: MetadataValueType.STRING,
+              },
+              {
+                category: ConditionCategory.USER,
+                property: '_user_first_touch_timestamp',
+                operator: '>',
+                value: [1686532526770],
+                dataType: MetadataValueType.INTEGER,
+              },
+              {
+                category: ConditionCategory.USER,
+                property: '_user_first_touch_timestamp',
+                operator: '>',
+                value: [1686532526780],
+                dataType: MetadataValueType.INTEGER,
+              },
+            ],
+          },
+        },
+        {
+          eventName: 'note_share',
+          computeMethod: ExploreComputeMethod.EVENT_CNT,
+        },
+        {
+          eventName: 'note_export',
+          computeMethod: ExploreComputeMethod.USER_CNT,
+          sqlCondition: {
+            conditionOperator: 'and',
+            conditions: [
+              {
+                category: ConditionCategory.OTHER,
+                property: 'platform',
+                operator: '=',
+                value: ['Android'],
+                dataType: MetadataValueType.STRING,
+              },
+              {
+                category: ConditionCategory.GEO,
+                property: 'country',
+                operator: '=',
+                value: ['China'],
+                dataType: MetadataValueType.STRING,
+              },
+              {
+                category: ConditionCategory.USER,
+                property: '_user_first_touch_timestamp',
+                operator: '>',
+                value: [1686532526770],
+                dataType: MetadataValueType.INTEGER,
+              },
+              {
+                category: ConditionCategory.EVENT,
+                property: '_session_duration',
+                operator: '>',
+                value: [200],
+                dataType: MetadataValueType.INTEGER,
+              },
+            ],
+          },
+        },
+      ],
+      pathAnalysis: {
+        sessionType: ExplorePathSessionDef.SESSION,
+        nodeType: ExplorePathNodeType.EVENT,
+        includingOtherEvents: true,
+        mergeConsecutiveEvents: true,
+      },
+      timeScopeType: ExploreTimeScopeType.FIXED,
+      timeStart: new Date('2023-10-01'),
+      timeEnd: new Date('2023-10-10'),
+      groupColumn: ExploreGroupColumn.DAY,
+    });
+
+    expect(sql.trim().replace(/ /g, '')).toEqual(`
+    with
+      user_base as (
+        select
+          COALESCE(user_id, user_pseudo_id) as user_pseudo_id,
+          user_id,
+          user_first_touch_timestamp,
+          _first_visit_date,
+          _first_referer,
+          _first_traffic_source_type,
+          _first_traffic_medium,
+          _first_traffic_source,
+          _channel,
+          user_properties.key::varchar as user_param_key,
+          user_properties.value.string_value::varchar as user_param_string_value,
+          user_properties.value.int_value::bigint as user_param_int_value,
+          user_properties.value.float_value::double precision as user_param_float_value,
+          user_properties.value.double_value::double precision as user_param_double_value
+        from
+          app1.user_m_view u,
+          u.user_properties as user_properties
+      ),
+      event_base as (
+        select
+          event.event_date,
+          event.event_name,
+          event.event_id,
+          event_bundle_sequence_id::bigint as event_bundle_sequence_id,
+          event_previous_timestamp::bigint as event_previous_timestamp,
+          event_timestamp::bigint as event_timestamp,
+          ingest_timestamp,
+          event_value_in_usd,
+          app_info.app_id::varchar as app_info_app_id,
+          app_info.id::varchar as app_info_package_id,
+          app_info.install_source::varchar as app_info_install_source,
+          app_info.version::varchar as app_info_version,
+          device.vendor_id::varchar as device_id,
+          device.mobile_brand_name::varchar as device_mobile_brand_name,
+          device.mobile_model_name::varchar as device_mobile_model_name,
+          device.manufacturer::varchar as device_manufacturer,
+          device.screen_width::bigint as device_screen_width,
+          device.screen_height::bigint as device_screen_height,
+          device.viewport_height::bigint as device_viewport_height,
+          device.carrier::varchar as device_carrier,
+          device.network_type::varchar as device_network_type,
+          device.operating_system::varchar as device_operating_system,
+          device.operating_system_version::varchar as device_operating_system_version,
+          device.ua_browser::varchar as device_ua_browser,
+          device.ua_browser_version::varchar as device_ua_browser_version,
+          device.ua_os::varchar as device_ua_os,
+          device.ua_os_version::varchar as device_ua_os_version,
+          device.ua_device::varchar as device_ua_device,
+          device.ua_device_category::varchar as device_ua_device_category,
+          device.system_language::varchar as device_system_language,
+          device.time_zone_offset_seconds::bigint as device_time_zone_offset_seconds,
+          device.advertising_id::varchar as device_advertising_id,
+          geo.continent::varchar as geo_continent,
+          geo.country::varchar as geo_country,
+          geo.city::varchar as geo_city,
+          geo.metro::varchar as geo_metro,
+          geo.region::varchar as geo_region,
+          geo.sub_continent::varchar as geo_sub_continent,
+          geo.locale::varchar as geo_locale,
+          platform,
+          project_id,
+          traffic_source.name::varchar as traffic_source_name,
+          traffic_source.medium::varchar as traffic_source_medium,
+          traffic_source.source::varchar as traffic_source_source,
+          COALESCE(event.user_id, event.user_pseudo_id) as user_pseudo_id,
+          event.user_id,
+          TO_CHAR(
+            TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+              'week',
+              TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
+            ),
+            'YYYY-MM-DD'
+          ) || ' - ' || TO_CHAR(
+            date_trunc(
+              'week',
+              (
+                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
+              ) + INTERVAL '6 days'
+            ),
+            'YYYY-MM-DD'
+          ) as week,
+          TO_CHAR(
+            TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR(
+            TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+            'YYYY-MM-DD HH24'
+          ) || '00:00' as hour
+        from
+          app1.event as event
+        where
+          event.event_date >= date '2023-10-01'
+          and event.event_date <= date '2023-10-10'
+          and event.event_name not in (
+            '_session_start',
+            '_session_stop',
+            '_screen_view',
+            '_app_exception',
+            '_app_update',
+            '_first_open',
+            '_os_update',
+            '_user_engagement',
+            '_profile_set',
+            '_page_view',
+            '_app_start',
+            '_scroll',
+            '_search',
+            '_click',
+            '_clickstream_error',
+            '_mp_share',
+            '_mp_favorite',
+            '_app_end'
+          )
+      ),
+      base_data as (
+        select
+          _user_first_touch_timestamp,
+          _session_duration,
+          _session_id,
+          event_base.*
+        from
+          event_base
+          join (
+            select
+              event_base.event_id,
+              max(
+                case
+                  when event_param_key = '_session_duration' then event_param_int_value
+                  else null
+                end
+              ) as _session_duration,
+              max(
+                case
+                  when event_param_key = '_session_id' then event_param_int_value
+                  else null
+                end
+              ) as _session_id
+            from
+              event_base
+              join app1.event_parameter as event_param on event_base.event_timestamp = event_param.event_timestamp
+              and event_base.event_id = event_param.event_id
+            group by
+              event_base.event_id
+          ) as event_join_table on event_base.event_id = event_join_table.event_id
+          join (
+            select
+              event_base.user_pseudo_id,
+              max(
+                case
+                  when user_param_key = '_user_first_touch_timestamp' then user_param_int_value
+                  else null
+                end
+              ) as _user_first_touch_timestamp
+            from
+              event_base
+              join user_base on event_base.user_pseudo_id = user_base.user_pseudo_id
+            group by
+              event_base.user_pseudo_id
+          ) user_join_table on event_base.user_pseudo_id = user_join_table.user_pseudo_id
+        where
+          1 = 1
+          and (
+            platform = 'Android'
+            and geo_country = 'China'
+            and _user_first_touch_timestamp > 1686532526770
+            and _user_first_touch_timestamp > 1686532526780
+          )
+          and (
+            (
+              event_name = 'add_button_click'
+              and (
+                platform = 'Android'
+                and geo_country = 'China'
+                and _user_first_touch_timestamp > 1686532526770
+                and _user_first_touch_timestamp > 1686532526780
+              )
+            )
+            or (event_name = 'note_share')
+            or (
+              event_name = 'note_export'
+              and (
+                platform = 'Android'
+                and geo_country = 'China'
+                and _user_first_touch_timestamp > 1686532526770
+                and _session_duration > 200
+              )
+            )
+            or (
+              event_name not in ('add_button_click', 'note_share', 'note_export')
+            )
+          )
+      ),
+      mid_table as (
+        select
+          CASE
+            WHEN event_name in ('add_button_click', 'note_share', 'note_export') THEN event_name
+            ELSE 'other'
+          END as event_name,
+          user_pseudo_id,
+          event_id,
+          event_timestamp,
+          _session_id
+        from
+          (
+            select
+              event_name,
+              user_pseudo_id,
+              event_id,
+              event_timestamp,
+              _session_id,
+              ROW_NUMBER() over (
+                partition by
+                  event_name,
+                  user_pseudo_id,
+                  _session_id
+                order by
+                  event_timestamp desc
+              ) as rk
+            from
+              base_data
+          )
+        where
+          rk = 1
+      ),
+      data as (
+        select
+          *,
+          ROW_NUMBER() OVER (
+            PARTITION BY
+              user_pseudo_id,
+              _session_id
+            ORDER BY
+              event_timestamp asc
+          ) as step_1,
+          ROW_NUMBER() OVER (
+            PARTITION BY
+              user_pseudo_id,
+              _session_id
+            ORDER BY
+              event_timestamp asc
+          ) + 1 as step_2
+        from
+          mid_table
+      ),
+      step_table_1 as (
+        select
+          data.user_pseudo_id user_pseudo_id,
+          data._session_id _session_id,
+          min(step_1) min_step
+        from
+          data
+        where
+          event_name = 'add_button_click'
+        group by
+          user_pseudo_id,
+          _session_id
+      ),
+      step_table_2 as (
+        select
+          data.*
+        from
+          data
+          join step_table_1 on data.user_pseudo_id = step_table_1.user_pseudo_id
+          and data._session_id = step_table_1._session_id
+          and data.step_1 >= step_table_1.min_step
+      ),
+      data_final as (
+        select
+          event_name,
+          user_pseudo_id,
+          event_id,
+          event_timestamp,
+          _session_id,
+          ROW_NUMBER() OVER (
+            PARTITION BY
+              user_pseudo_id,
+              _session_id
+            ORDER BY
+              step_1 asc,
+              step_2
+          ) as step_1,
+          ROW_NUMBER() OVER (
+            PARTITION BY
+              user_pseudo_id,
+              _session_id
+            ORDER BY
+              step_1 asc,
+              step_2
+          ) + 1 as step_2
+        from
+          step_table_2
+      )
+    select
+      a.event_name || '_' || a.step_1 as source,
+      CASE
+        WHEN b.event_name is not null THEN b.event_name || '_' || a.step_2
+        ELSE 'lost'
+      END as target,
+      a.event_id as x_id
+    from
+      data_final a
+      left join data_final b on a.step_2 = b.step_1
+      and a._session_id = b._session_id
+      and a.user_pseudo_id = b.user_pseudo_id
+    where
+      a.step_2 <= 10
   `.trim().replace(/ /g, ''),
     );
 
