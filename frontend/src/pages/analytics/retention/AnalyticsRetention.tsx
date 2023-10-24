@@ -62,6 +62,7 @@ import {
 } from '../analytics-utils';
 import AttributeGroup from '../comps/AttributeGroup';
 import ExploreDateRangePicker, {
+  DEFAULT_DAY_RANGE,
   DEFAULT_WEEK_RANGE,
 } from '../comps/ExploreDateRangePicker';
 import ExploreEmbedFrame from '../comps/ExploreEmbedFrame';
@@ -137,11 +138,11 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
   };
 
   const [dateRangeValue, setDateRangeValue] =
-    useState<DateRangePickerProps.Value>(DEFAULT_WEEK_RANGE);
+    useState<DateRangePickerProps.Value>(DEFAULT_DAY_RANGE);
 
   const [timeGranularity, setTimeGranularity] = useState<SelectProps.Option>({
-    value: ExploreGroupColumn.WEEK,
-    label: t('analytics:options.weekTimeGranularity') ?? '',
+    value: ExploreGroupColumn.DAY,
+    label: t('analytics:options.dayTimeGranularity') ?? '',
   });
 
   const resetConfig = async () => {
@@ -297,7 +298,7 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
 
   useEffect(() => {
     clickPreview();
-  }, [dateRangeValue, chartType]);
+  }, [timeGranularity, dateRangeValue, chartType]);
 
   return (
     <>
@@ -646,6 +647,7 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
               dateRangeValue={dateRangeValue}
               setDateRangeValue={setDateRangeValue}
               timeGranularity={timeGranularity}
+              timeGranularityVisible={true}
               setTimeGranularity={setTimeGranularity}
             />
             <SegmentedControl

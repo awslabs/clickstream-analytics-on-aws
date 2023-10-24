@@ -38,6 +38,7 @@ import CustomBreadCrumb from 'components/layouts/CustomBreadCrumb';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
+import { MetadataParameterType, MetadataSource } from 'ts/explore-types';
 import {
   metadataEventsConvertToCategoryItemType,
   getWarmUpParameters,
@@ -216,10 +217,16 @@ const AnalyticsExplore: React.FC = () => {
   const listAllAttributes = async () => {
     try {
       const parameters = await getAllParameters();
+      const publicParameters = parameters?.filter(
+        (item) => item.parameterType === MetadataParameterType.PUBLIC
+      );
       const userAttributes = await getUserAttributes();
+      const presetUserAttributes = userAttributes.filter((item) => {
+        return item.metadataSource === MetadataSource.PRESET;
+      });
       const conditionOptions = parametersConvertToCategoryItemType(
-        userAttributes,
-        parameters
+        presetUserAttributes,
+        publicParameters
       );
       setPresetParameters(conditionOptions);
     } catch (error) {

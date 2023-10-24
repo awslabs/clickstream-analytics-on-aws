@@ -17,6 +17,7 @@ import {
 } from '@cloudscape-design/components';
 import {
   CategoryItemType,
+  IAnalyticsItem,
   IConditionItemType,
   IEventAnalyticsItem,
   IRetentionAnalyticsItem,
@@ -38,6 +39,7 @@ import {
   ExplorePathSessionDef,
   ExploreRelativeTimeUnit,
   ExploreTimeScopeType,
+  MetadataParameterType,
   MetadataSource,
   MetadataValueType,
 } from 'ts/explore-types';
@@ -139,7 +141,7 @@ export const parametersConvertToCategoryItemType = (
   };
   if (parameterItems) {
     parameterItems.forEach((item) => {
-      if (item.name.startsWith('_')) {
+      if (item.parameterType === MetadataParameterType.PRIVATE) {
         categoryPrivateEventItems.itemList.push(buildEventItem(item));
       } else {
         categoryPublicEventItems.itemList.push(buildEventItem(item));
@@ -280,14 +282,14 @@ export const getPairEventAndConditions = (
 
       const pairEventAndCondition: IPairEventAndCondition = {
         startEvent: {
-          eventName: defaultStr(item.startEventOption?.value, ''),
+          eventName: defaultStr(item.startEventOption?.name, ''),
           sqlCondition: {
             conditions: startConditions,
             conditionOperator: item.startConditionRelationShip,
           },
         },
         backEvent: {
-          eventName: defaultStr(item.revisitEventOption?.value, ''),
+          eventName: defaultStr(item.revisitEventOption?.name, ''),
           sqlCondition: {
             conditions: revisitConditions,
             conditionOperator: item.revisitConditionRelationShip,
@@ -298,6 +300,15 @@ export const getPairEventAndConditions = (
     }
   });
   return pairEventAndConditions;
+};
+
+export const getGroupCondition = (option: IAnalyticsItem | null) => {
+  const groupingCondition: GroupingCondition = {
+    category: defaultStr(option?.category, ConditionCategory.OTHER),
+    property: defaultStr(option?.name, ''),
+    dataType: defaultStr(option?.valueType, MetadataValueType.STRING),
+  };
+  return groupingCondition;
 };
 
 export const getGlobalEventCondition = (

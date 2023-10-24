@@ -32,6 +32,7 @@ import {
   CategoryItemType,
   DEFAULT_CONDITION_DATA,
   DEFAULT_EVENT_ITEM,
+  IAnalyticsItem,
   IEventAnalyticsItem,
   INIT_SEGMENTATION_DATA,
   SegmentationFilterDataType,
@@ -66,10 +67,12 @@ import {
   validEventAnalyticsItem,
 } from '../analytics-utils';
 import ExploreDateRangePicker, {
+  DEFAULT_DAY_RANGE,
   DEFAULT_WEEK_RANGE,
 } from '../comps/ExploreDateRangePicker';
 import ExploreEmbedFrame from '../comps/ExploreEmbedFrame';
 import SaveToDashboardModal from '../comps/SelectDashboardModal';
+import StartNodeSelect from '../comps/StartNodeSelect';
 
 interface AnalyticsPathProps {
   loading: boolean;
@@ -210,11 +213,16 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
     },
   ];
 
+  const [startNodeOption, setStartNodeOption] = useState<IAnalyticsItem | null>(
+    null
+  );
+
   const [eventOptionData, setEventOptionData] = useState<IEventAnalyticsItem[]>(
     [
       {
         ...DEFAULT_EVENT_ITEM,
         isMultiSelect: false,
+        disabled: true,
       },
     ]
   );
@@ -242,11 +250,11 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
   };
 
   const [dateRangeValue, setDateRangeValue] =
-    React.useState<DateRangePickerProps.Value>(DEFAULT_WEEK_RANGE);
+    React.useState<DateRangePickerProps.Value>(DEFAULT_DAY_RANGE);
 
   const [timeGranularity, setTimeGranularity] = useState<SelectProps.Option>({
-    value: ExploreGroupColumn.WEEK,
-    label: t('analytics:options.weekTimeGranularity') ?? '',
+    value: ExploreGroupColumn.DAY,
+    label: t('analytics:options.dayTimeGranularity') ?? '',
   });
 
   const resetConfig = async () => {
@@ -259,6 +267,7 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
       {
         ...DEFAULT_EVENT_ITEM,
         isMultiSelect: false,
+        disabled: true,
       },
     ]);
     setSegmentationOptionData({
@@ -445,6 +454,7 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
       {
         ...DEFAULT_EVENT_ITEM,
         isMultiSelect: false,
+        disabled: true,
       },
     ]);
     setSegmentationOptionData({
@@ -646,6 +656,48 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
                 type="event"
                 title={t('analytics:labels.nodesSelect')}
               />
+              <InfoTitle
+                title={t('analytics:labels.setStartNode')}
+                popoverDescription={t(
+                  'analytics:information.pathSetStartNodeInfo'
+                )}
+              />
+              <StartNodeSelect
+                nodes={categoryEventsData}
+                nodeOption={startNodeOption}
+                setNodeOption={(option) => {
+                  setStartNodeOption(option);
+                  setEventOptionData((prev) => {
+                    const preEventList = cloneDeep(prev);
+                    const filterEventList = preEventList.filter(
+                      (item, eIndex) => eIndex !== 0
+                    );
+                    const eventName = option?.name;
+                    const eventParameters = getEventParameters(eventName);
+                    const parameterOption = parametersConvertToCategoryItemType(
+                      metadataUserAttributes,
+                      eventParameters
+                    );
+                    return [
+                      {
+                        ...DEFAULT_EVENT_ITEM,
+                        selectedEventOption: option,
+                        conditionOptions: parameterOption,
+                        enableChangeRelation: false,
+                        isMultiSelect: false,
+                        disabled: true,
+                      },
+                      ...filterEventList,
+                    ];
+                  });
+                }}
+              />
+              <InfoTitle
+                title={t('analytics:labels.participateNodes')}
+                popoverDescription={t(
+                  'analytics:information.pathParticipateNodesInfo'
+                )}
+              />
               <EventsSelect
                 loading={loadingEvents}
                 data={eventOptionData}
@@ -824,6 +876,7 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
               dateRangeValue={dateRangeValue}
               setDateRangeValue={setDateRangeValue}
               timeGranularity={timeGranularity}
+              timeGranularityVisible={false}
               setTimeGranularity={setTimeGranularity}
             />
           </div>
