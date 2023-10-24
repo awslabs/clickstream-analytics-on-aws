@@ -135,8 +135,7 @@ export class ReportingService {
   private async _buildFunnelQuickSightDashboard(viewName: string, sql: string, tableVisualViewName: string,
     sqlTable: string, query: any, sheetId: string) {
 
-
-    const newFunnelVisualColumns = funnelVisualColumns;
+    const datasetColumns = JSON.parse(JSON.stringify(funnelVisualColumns));
     const visualProjectedColumns = [
       'event_name',
       'event_date',
@@ -144,7 +143,7 @@ export class ReportingService {
     ];
     const hasGrouping = query.chartType == QuickSightChartType.BAR && query.groupCondition !== undefined;
     if (hasGrouping) {
-      newFunnelVisualColumns.push({
+      datasetColumns.push({
         Name: 'group_col',
         Type: 'STRING',
       });
@@ -157,7 +156,7 @@ export class ReportingService {
     datasetPropsArray.push({
       name: '',
       tableName: viewName,
-      columns: newFunnelVisualColumns,
+      columns: datasetColumns,
       importMode: 'DIRECT_QUERY',
       customSql: sql,
       projectedColumns: visualProjectedColumns,
@@ -289,8 +288,9 @@ export class ReportingService {
 
       const hasGrouping = query.groupCondition === undefined ? false: true;
       const projectedColumns = ['event_date', 'event_name', 'count'];
+      const datasetColumns = JSON.parse(JSON.stringify(eventVisualColumns));
       if (hasGrouping) {
-        eventVisualColumns.push({
+        datasetColumns.push({
           Name: 'group_col',
           Type: 'STRING',
         });
@@ -302,7 +302,7 @@ export class ReportingService {
       datasetPropsArray.push({
         name: '',
         tableName: viewName,
-        columns: eventVisualColumns,
+        columns: datasetColumns,
         importMode: 'DIRECT_QUERY',
         customSql: sql,
         projectedColumns,
@@ -529,8 +529,9 @@ export class ReportingService {
         'event_date',
         'retention',
       ];
+      const datasetColumns = JSON.parse(JSON.stringify(retentionAnalysisVisualColumns));
       if (hasGrouping) {
-        retentionAnalysisVisualColumns.push({
+        datasetColumns.push({
           Name: 'group_col',
           Type: 'STRING',
         });

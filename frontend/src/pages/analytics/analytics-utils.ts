@@ -308,6 +308,9 @@ export const getGroupCondition = (option: IAnalyticsItem | null) => {
     property: defaultStr(option?.name, ''),
     dataType: defaultStr(option?.valueType, MetadataValueType.STRING),
   };
+  if (groupingCondition.property === '') {
+    return undefined;
+  }
   return groupingCondition;
 };
 
