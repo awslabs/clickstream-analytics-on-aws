@@ -80,7 +80,6 @@ export class DynamoDbMetadataStore implements MetadataStore {
       records = await this.queryMetadataRawFromBuiltInList(projectId, appId, 'EVENT');
     }
     const events = getLatestEventByName(records);
-
     return events;
   };
 
@@ -115,7 +114,10 @@ export class DynamoDbMetadataStore implements MetadataStore {
       },
       ScanIndexForward: false,
     };
-    const records = await query(input) as IMetadataRaw[];
+    let records = await query(input) as IMetadataRaw[];
+    if (records.length === 0) {
+      records = await this.queryMetadataRawFromBuiltInList(projectId, appId, 'EVENT_PARAMETER');
+    }
     const parameters = getLatestParameterById(records);
     return parameters;
   };
@@ -151,7 +153,10 @@ export class DynamoDbMetadataStore implements MetadataStore {
       },
       ScanIndexForward: false,
     };
-    const records = await query(input) as IMetadataRaw[];
+    let records = await query(input) as IMetadataRaw[];
+    if (records.length === 0) {
+      records = await this.queryMetadataRawFromBuiltInList(projectId, appId, 'USER_ATTRIBUTE');
+    }
     const attributes = getLatestAttributeByName(records);
     return attributes;
   };
@@ -219,6 +224,8 @@ export class DynamoDbMetadataStore implements MetadataStore {
         return this.buildMetadataEventRaws(builtInList, projectId, appId);
       case 'EVENT_PARAMETER':
         return this.buildMetadataEventParameterRaws(builtInList, projectId, appId);
+      case 'USER_ATTRIBUTE':
+        return this.buildMetadataUserAttributeRaws(builtInList, projectId, appId);
       default:
         break;
     }
@@ -248,17 +255,78 @@ export class DynamoDbMetadataStore implements MetadataStore {
 
   private buildMetadataEventParameterRaws(builtInList: IMetadataBuiltInList, projectId: string, appId: string): IMetadataRaw[] {
     const metadataRaws: IMetadataRaw[] = [];
-    const builtInParameters = builtInList.PresetEventParameters.concat(builtInList.PublicEventParameters);
-    for (let e of builtInParameters) {
+    for (let preset of builtInList.PresetEventParameters) {
+      if (!preset.eventName) {
+        for (let e of builtInList.PresetEvents) {
+          const raw: IMetadataRaw = {
+            id: `${projectId}#${appId}#${e.name}#${preset.name}#${preset.dataType}`,
+            month: getCurMonthStr(),
+            prefix: `EVENT_PARAMETER#${projectId}#${appId}`,
+            projectId: projectId,
+            appId: appId,
+            name: preset.name,
+            eventName: e.name,
+            valueType: preset.dataType,
+            summary: {
+              platform: [],
+              hasData: false,
+            },
+          };
+          metadataRaws.push(raw);
+        }
+      } else {
+        const raw: IMetadataRaw = {
+          id: `${projectId}#${appId}#${preset.eventName}#${preset.name}#${preset.dataType}`,
+          month: getCurMonthStr(),
+          prefix: `EVENT_PARAMETER#${projectId}#${appId}`,
+          projectId: projectId,
+          appId: appId,
+          name: preset.name,
+          eventName: preset.eventName,
+          valueType: preset.dataType,
+          summary: {
+            platform: [],
+            hasData: false,
+          },
+        };
+        metadataRaws.push(raw);
+      }
+    }
+
+    for (let pub of builtInList.PublicEventParameters) {
+      for (let e of builtInList.PresetEvents) {
+        const raw: IMetadataRaw = {
+          id: `${projectId}#${appId}#${e.name}#${pub.name}#${pub.dataType}`,
+          month: getCurMonthStr(),
+          prefix: `EVENT_PARAMETER#${projectId}#${appId}`,
+          projectId: projectId,
+          appId: appId,
+          name: pub.name,
+          eventName: e.name,
+          valueType: pub.dataType,
+          summary: {
+            platform: [],
+            hasData: false,
+          },
+        };
+        metadataRaws.push(raw);
+      }
+    }
+    return metadataRaws;
+  }
+
+  private buildMetadataUserAttributeRaws(builtInList: IMetadataBuiltInList, projectId: string, appId: string): IMetadataRaw[] {
+    const metadataRaws: IMetadataRaw[] = [];
+    for (let attr of builtInList.PresetUserAttributes) {
       const raw: IMetadataRaw = {
-        id: `${projectId}#${appId}#${e.name}#`,
+        id: `${projectId}#${appId}##${attr.name}#${attr.dataType}`,
         month: getCurMonthStr(),
-        prefix: `EVENT_PARAMETER#${projectId}#${appId}`,
+        prefix: `USER_ATTRIBUTE#${projectId}#${appId}`,
         projectId: projectId,
         appId: appId,
-        name: e.name,
+        name: attr.name,
+        valueType: attr.dataType,
         summary: {
-          platform: [],
           hasData: false,
         },
       };
