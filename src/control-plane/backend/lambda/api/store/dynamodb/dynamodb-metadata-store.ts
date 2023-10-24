@@ -44,10 +44,10 @@ export class DynamoDbMetadataStore implements MetadataStore {
       ScanIndexForward: false,
     };
     let records = await query(input) as IMetadataRaw[];
-    if (!records || records.length === 0) {
+    if (records.length === 0) {
       records = await this.queryEventFromBuiltInList(projectId, appId, eventName);
     }
-    if (!records || records.length === 0) {
+    if (records.length === 0) {
       return;
     }
     const lastDayData = getDataFromLastDay(records[0]);
@@ -101,7 +101,7 @@ export class DynamoDbMetadataStore implements MetadataStore {
       ScanIndexForward: false,
     };
     let records = await query(input) as IMetadataRaw[];
-    if (!records || records.length === 0) {
+    if (records.length === 0) {
       records = await this.queryEventParameterFromBuiltInList(projectId, appId, parameterName, valueType);
     }
     return getParameterByNameAndType(records, parameterName, valueType);
