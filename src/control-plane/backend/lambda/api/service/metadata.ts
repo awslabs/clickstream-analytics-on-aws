@@ -70,7 +70,6 @@ export class MetadataEventServ {
         events = groupAssociatedEventParametersByName(events, eventParameters);
       }
       events = await metadataDisplay.patch(projectId, appId, events) as IMetadataEvent[];
-      events = await metadataDisplay.patchPresetEvents(projectId, appId, events, associated);
       return res.json(new ApiSuccess({
         totalCount: events.length,
         items: events,

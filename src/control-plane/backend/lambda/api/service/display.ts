@@ -11,9 +11,8 @@
  *  and limitations under the License.
  */
 
-import { ConditionCategory, MetadataParameterType, MetadataSource, MetadataValueType } from '../common/explore-types';
+import { MetadataParameterType, MetadataSource } from '../common/explore-types';
 import { logger } from '../common/powertools';
-import { getCurMonthStr } from '../common/utils';
 import { IMetadataAttributeValue, IMetadataDisplay, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute, IMetadataBuiltInList } from '../model/metadata';
 import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbMetadataStore } from '../store/dynamodb/dynamodb-metadata-store';
@@ -150,110 +149,6 @@ export class CMetadataDisplay {
       logger.error('Patch display error', { error });
     }
     return metadataArray;
-  }
-
-  public async patchPresetEvents(projectId: string, appId: string, eventArray: IMetadataEvent[], associated?: boolean) {
-    try {
-      if (eventArray.length === 0) {
-        return this.getPresetEvents(projectId, appId, associated);
-      }
-    } catch (error) {
-      logger.error('Patch Preset Events error', { error });
-    }
-    return eventArray;
-  }
-
-  private getPresetEvents(projectId: string, appId: string, associated?: boolean) {
-    const presetEvents: IMetadataEvent[] = [];
-    if (this.builtList) {
-      for (let e of this.builtList.PresetEvents) {
-        const presetEvent: IMetadataEvent = {
-          id: `${projectId}#${appId}#${e.name}`,
-          month: getCurMonthStr(),
-          prefix: `EVENT#${projectId}#${appId}`,
-          projectId: projectId,
-          appId: appId,
-          name: e.name,
-          dataVolumeLastDay: 0,
-          hasData: true,
-          platform: [],
-          displayName: e.name,
-          description: e.description,
-          metadataSource: MetadataSource.PRESET,
-          associatedParameters: [],
-        };
-        if (associated) {
-          const associatedParameters = this.getPresetEventParameters(projectId, appId, e.name).concat(
-            this.getPublicEventParameters(projectId, appId, e.name),
-          );
-          presetEvent.associatedParameters = associatedParameters;
-        }
-        presetEvents.push(presetEvent);
-      }
-    }
-    return presetEvents;
-  }
-
-  private getPresetEventParameters(projectId: string, appId: string, eventName: string, associated?: boolean) {
-    const presetEventParameters: IMetadataEventParameter[] = [];
-    if (this.builtList) {
-      for (let p of this.builtList.PresetEventParameters) {
-        const parameter: IMetadataEventParameter = {
-          id: `${projectId}#${appId}#${eventName}#${p.dataType}`,
-          month: getCurMonthStr(),
-          prefix: `EVENT_PARAMETER#${projectId}#${appId}`,
-          projectId: projectId,
-          appId: appId,
-          name: p.name,
-          eventName: eventName,
-          valueType: p.dataType as MetadataValueType,
-          category: ConditionCategory.EVENT,
-          hasData: true,
-          platform: [],
-          displayName: p.name,
-          description: p.description,
-          metadataSource: MetadataSource.PRESET,
-          parameterType: MetadataParameterType.PRIVATE,
-          values: [],
-        };
-        if (associated) {
-          parameter.associatedEvents = this.getPresetEvents(projectId, appId);
-        }
-        presetEventParameters.push(parameter);
-      }
-    }
-    return presetEventParameters;
-  }
-
-  private getPublicEventParameters(projectId: string, appId: string, eventName: string, associated?: boolean) {
-    const publicEventParameters: IMetadataEventParameter[] = [];
-    if (this.builtList) {
-      for (let p of this.builtList.PublicEventParameters) {
-        const parameter: IMetadataEventParameter = {
-          id: `${projectId}#${appId}#${eventName}#${p.dataType}`,
-          month: getCurMonthStr(),
-          prefix: `EVENT_PARAMETER#${projectId}#${appId}`,
-          projectId: projectId,
-          appId: appId,
-          name: p.name,
-          eventName: eventName,
-          valueType: p.dataType as MetadataValueType,
-          category: ConditionCategory.EVENT,
-          hasData: true,
-          platform: [],
-          displayName: p.name,
-          description: p.description,
-          metadataSource: MetadataSource.PRESET,
-          parameterType: MetadataParameterType.PUBLIC,
-          values: [],
-        };
-        if (associated) {
-          parameter.associatedEvents = this.getPresetEvents(projectId, appId);
-        }
-        publicEventParameters.push(parameter);
-      }
-    }
-    return publicEventParameters;
   }
 
   private patchAssociated(associated: IMetadataEvent[] | IMetadataEventParameter[] | undefined) {
