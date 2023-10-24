@@ -18,7 +18,7 @@ import {
 import { DynamoDbStore } from './dynamodb-store';
 import { analyticsMetadataTable, prefixMonthGSIName } from '../../common/constants';
 import { docClient, query } from '../../common/dynamodb-client';
-import { MetadataValueType } from '../../common/explore-types';
+import { ConditionCategory, MetadataValueType } from '../../common/explore-types';
 import { KeyVal } from '../../common/types';
 import { getAttributeByNameAndType, getCurMonthStr, getDataFromLastDay, getLatestAttributeByName, getLatestEventByName, getLatestParameterById, getParameterByNameAndType } from '../../common/utils';
 import { IMetadataRaw, IMetadataDisplay, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute, IMetadataDescription, IMetadataBuiltInList } from '../../model/metadata';
@@ -44,7 +44,9 @@ export class DynamoDbMetadataStore implements MetadataStore {
       ScanIndexForward: false,
     };
     let records = await query(input) as IMetadataRaw[];
-    records = await this.queryEventFromBuiltInList(projectId, appId, eventName);
+    if (!records || records.length === 0) {
+      records = await this.queryEventFromBuiltInList(projectId, appId, eventName);
+    }
     if (!records || records.length === 0) {
       return;
     }
@@ -99,7 +101,9 @@ export class DynamoDbMetadataStore implements MetadataStore {
       ScanIndexForward: false,
     };
     let records = await query(input) as IMetadataRaw[];
-    records = await this.queryEventParameterFromBuiltInList(projectId, appId, parameterName, valueType);
+    if (!records || records.length === 0) {
+      records = await this.queryEventParameterFromBuiltInList(projectId, appId, parameterName, valueType);
+    }
     return getParameterByNameAndType(records, parameterName, valueType);
   };
 
@@ -281,6 +285,7 @@ export class DynamoDbMetadataStore implements MetadataStore {
             appId: appId,
             name: preset.name,
             eventName: e.name,
+            category: ConditionCategory.EVENT,
             valueType: preset.dataType,
             summary: {
               platform: [],
@@ -298,6 +303,7 @@ export class DynamoDbMetadataStore implements MetadataStore {
           appId: appId,
           name: preset.name,
           eventName: preset.eventName,
+          category: ConditionCategory.EVENT,
           valueType: preset.dataType,
           summary: {
             platform: [],
@@ -318,6 +324,7 @@ export class DynamoDbMetadataStore implements MetadataStore {
           appId: appId,
           name: pub.name,
           eventName: e.name,
+          category: ConditionCategory.EVENT,
           valueType: pub.dataType,
           summary: {
             platform: [],
@@ -363,6 +370,7 @@ export class DynamoDbMetadataStore implements MetadataStore {
             appId: appId,
             name: preset.name,
             eventName: e.name,
+            category: ConditionCategory.EVENT,
             valueType: preset.dataType,
             summary: {
               platform: [],
@@ -380,6 +388,7 @@ export class DynamoDbMetadataStore implements MetadataStore {
           appId: appId,
           name: preset.name,
           eventName: preset.eventName,
+          category: ConditionCategory.EVENT,
           valueType: preset.dataType,
           summary: {
             platform: [],
@@ -400,6 +409,7 @@ export class DynamoDbMetadataStore implements MetadataStore {
           appId: appId,
           name: pub.name,
           eventName: e.name,
+          category: ConditionCategory.EVENT,
           valueType: pub.dataType,
           summary: {
             platform: [],
@@ -416,12 +426,13 @@ export class DynamoDbMetadataStore implements MetadataStore {
     const metadataRaws: IMetadataRaw[] = [];
     for (let attr of builtInList.PresetUserAttributes) {
       const raw: IMetadataRaw = {
-        id: `${projectId}#${appId}##${attr.name}#${attr.dataType}`,
+        id: `${projectId}#${appId}#${attr.name}#${attr.dataType}`,
         month: getCurMonthStr(),
         prefix: `USER_ATTRIBUTE#${projectId}#${appId}`,
         projectId: projectId,
         appId: appId,
         name: attr.name,
+        category: ConditionCategory.USER,
         valueType: attr.dataType,
         summary: {
           hasData: false,
