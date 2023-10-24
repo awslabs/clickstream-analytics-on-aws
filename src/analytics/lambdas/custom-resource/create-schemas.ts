@@ -304,7 +304,6 @@ async function updateSchemas(props: ResourcePropertiesType, biUsername: string, 
     };
 
     const sqlStatements2 = getUpdatableSql(props.schemaDefs, appUpdateProps.oldSchemaSqlArray, mustacheParam);
-    _buildSqlStatements(sqlStatements2, props.schemaDefs, mustacheParam, appUpdateProps);
 
     if (sqlStatementsByApp.has(app)) {
       sqlStatementsByApp.get(app)?.push(...sqlStatements2);
@@ -391,25 +390,6 @@ async function createViewForReporting(props: ResourcePropertiesType, biUser: str
   }
 }
 
-function _buildSqlStatements(sqlStatements: string[], sqlDef: SQLDef[], mustacheParam: MustacheParamType, appUpdateProps: AppUpdateProps) {
-
-  for (const viewDef of sqlDef) {
-
-    logger.info(`viewDef.updatable: ${viewDef.updatable}`);
-
-    if (!appUpdateProps.oldViewSqls.includes(viewDef.sqlFile)) {
-      logger.info(`new view: ${viewDef.sqlFile}`);
-      sqlStatements.push(getSqlContent(viewDef.sqlFile, mustacheParam));
-    } else if (viewDef.updatable === 'true') {
-      logger.info(`update view: ${viewDef.sqlFile}`);
-      sqlStatements.push(getSqlContent(viewDef.sqlFile, mustacheParam));
-    } else {
-      logger.info(`skip update ${viewDef.sqlFile} due to it is not updatable.`);
-    }
-  }
-  return sqlStatements;
-}
-
 async function updateViewForReporting(props: ResourcePropertiesType, oldProps: ResourcePropertiesType, biUser: string) {
   const odsTableNames = props.odsTableNames;
 
@@ -451,8 +431,6 @@ async function updateViewForReporting(props: ResourcePropertiesType, oldProps: R
     };
 
     const sqlStatements2 = getUpdatableSql(props.reportingViewsDef, appUpdateProps.oldViewSqls, mustacheParam);
-
-    _buildSqlStatements(sqlStatements2, props.reportingViewsDef, mustacheParam, appUpdateProps);
 
     //grant select on views to bi user.
     const views: string[] = [];
