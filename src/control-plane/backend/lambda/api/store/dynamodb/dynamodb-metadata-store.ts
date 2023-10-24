@@ -43,7 +43,8 @@ export class DynamoDbMetadataStore implements MetadataStore {
       },
       ScanIndexForward: false,
     };
-    const records = await query(input) as IMetadataRaw[];
+    let records = await query(input) as IMetadataRaw[];
+    records = await this.queryEventFromBuiltInList(projectId, appId, eventName);
     if (!records || records.length === 0) {
       return;
     }
@@ -77,7 +78,7 @@ export class DynamoDbMetadataStore implements MetadataStore {
     };
     let records = await query(input) as IMetadataRaw[];
     if (records.length === 0) {
-      records = await this.queryMetadataRawFromBuiltInList(projectId, appId, 'EVENT');
+      records = await this.queryMetadataRawsFromBuiltInList(projectId, appId, 'EVENT');
     }
     const events = getLatestEventByName(records);
     return events;
@@ -97,7 +98,8 @@ export class DynamoDbMetadataStore implements MetadataStore {
       },
       ScanIndexForward: false,
     };
-    const records = await query(input) as IMetadataRaw[];
+    let records = await query(input) as IMetadataRaw[];
+    records = await this.queryEventParameterFromBuiltInList(projectId, appId, parameterName, valueType);
     return getParameterByNameAndType(records, parameterName, valueType);
   };
 
@@ -116,7 +118,7 @@ export class DynamoDbMetadataStore implements MetadataStore {
     };
     let records = await query(input) as IMetadataRaw[];
     if (records.length === 0) {
-      records = await this.queryMetadataRawFromBuiltInList(projectId, appId, 'EVENT_PARAMETER');
+      records = await this.queryMetadataRawsFromBuiltInList(projectId, appId, 'EVENT_PARAMETER');
     }
     const parameters = getLatestParameterById(records);
     return parameters;
@@ -155,7 +157,7 @@ export class DynamoDbMetadataStore implements MetadataStore {
     };
     let records = await query(input) as IMetadataRaw[];
     if (records.length === 0) {
-      records = await this.queryMetadataRawFromBuiltInList(projectId, appId, 'USER_ATTRIBUTE');
+      records = await this.queryMetadataRawsFromBuiltInList(projectId, appId, 'USER_ATTRIBUTE');
     }
     const attributes = getLatestAttributeByName(records);
     return attributes;
@@ -213,7 +215,7 @@ export class DynamoDbMetadataStore implements MetadataStore {
     await docClient.send(params);
   };
 
-  private async queryMetadataRawFromBuiltInList(projectId: string, appId: string, type: string): Promise<IMetadataRaw[]> {
+  private async queryMetadataRawsFromBuiltInList(projectId: string, appId: string, type: string): Promise<IMetadataRaw[]> {
     const dic = await store.getDictionary('MetadataBuiltInList');
     if (!dic) {
       return [];
@@ -231,6 +233,101 @@ export class DynamoDbMetadataStore implements MetadataStore {
     }
 
     return [];
+  };
+
+  private async queryEventFromBuiltInList(projectId: string, appId: string, eventName: string): Promise<IMetadataRaw[]> {
+    const metadataRaws: IMetadataRaw[] = [];
+    const dic = await store.getDictionary('MetadataBuiltInList');
+    if (!dic) {
+      return metadataRaws;
+    }
+    const builtInList = dic.data as IMetadataBuiltInList;
+    const presetEvents = builtInList.PresetEvents.filter(p => p.name === eventName);
+    if (presetEvents.length > 0) {
+      const raw: IMetadataRaw = {
+        id: `${projectId}#${appId}#${eventName}`,
+        month: getCurMonthStr(),
+        prefix: `EVENT#${projectId}#${appId}`,
+        projectId: projectId,
+        appId: appId,
+        name: eventName,
+        summary: {
+          platform: [],
+          hasData: false,
+        },
+      };
+      metadataRaws.push(raw);
+    }
+    return metadataRaws;
+  };
+
+  private async queryEventParameterFromBuiltInList(
+    projectId: string, appId: string, parameterName: string, valueType: MetadataValueType): Promise<IMetadataRaw[]> {
+    const metadataRaws: IMetadataRaw[] = [];
+    const dic = await store.getDictionary('MetadataBuiltInList');
+    if (!dic) {
+      return metadataRaws;
+    }
+    const builtInList = dic.data as IMetadataBuiltInList;
+    const presetEventParameters = builtInList.PresetEventParameters.filter(p => p.name === parameterName && p.dataType === valueType);
+    for (let preset of presetEventParameters) {
+      if (!preset.eventName) {
+        for (let e of builtInList.PresetEvents) {
+          const raw: IMetadataRaw = {
+            id: `${projectId}#${appId}#${e.name}#${preset.name}#${preset.dataType}`,
+            month: getCurMonthStr(),
+            prefix: `EVENT_PARAMETER#${projectId}#${appId}`,
+            projectId: projectId,
+            appId: appId,
+            name: preset.name,
+            eventName: e.name,
+            valueType: preset.dataType,
+            summary: {
+              platform: [],
+              hasData: false,
+            },
+          };
+          metadataRaws.push(raw);
+        }
+      } else {
+        const raw: IMetadataRaw = {
+          id: `${projectId}#${appId}#${preset.eventName}#${preset.name}#${preset.dataType}`,
+          month: getCurMonthStr(),
+          prefix: `EVENT_PARAMETER#${projectId}#${appId}`,
+          projectId: projectId,
+          appId: appId,
+          name: preset.name,
+          eventName: preset.eventName,
+          valueType: preset.dataType,
+          summary: {
+            platform: [],
+            hasData: false,
+          },
+        };
+        metadataRaws.push(raw);
+      }
+    }
+    const publicEventParameters = builtInList.PublicEventParameters.filter(p => p.name === parameterName && p.dataType === valueType);
+    for (let pub of publicEventParameters) {
+      for (let e of builtInList.PresetEvents) {
+        const raw: IMetadataRaw = {
+          id: `${projectId}#${appId}#${e.name}#${pub.name}#${pub.dataType}`,
+          month: getCurMonthStr(),
+          prefix: `EVENT_PARAMETER#${projectId}#${appId}`,
+          projectId: projectId,
+          appId: appId,
+          name: pub.name,
+          eventName: e.name,
+          valueType: pub.dataType,
+          summary: {
+            platform: [],
+            hasData: false,
+          },
+        };
+        metadataRaws.push(raw);
+      }
+    }
+    return metadataRaws;
   };
 
   private buildMetadataEventRaws(builtInList: IMetadataBuiltInList, projectId: string, appId: string): IMetadataRaw[] {
