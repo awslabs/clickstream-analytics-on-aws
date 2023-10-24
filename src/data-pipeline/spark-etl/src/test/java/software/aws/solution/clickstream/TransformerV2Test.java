@@ -123,8 +123,8 @@ class TransformerV2Test extends BaseSparkTest {
     }
 
     @Test
-    public void should_transform_user_with_page_referer() throws IOException {
-        // DOWNLOAD_FILE=0 ./gradlew clean test --info --tests software.aws.solution.clickstream.TransformerV2Test.should_transform_user_with_page_referer
+    public void should_transform_user_with_page_referer1() throws IOException {
+        // DOWNLOAD_FILE=0 ./gradlew clean test --info --tests software.aws.solution.clickstream.TransformerV2Test.should_transform_user_with_page_referer1
         System.setProperty(APP_IDS_PROP, "uba-app");
         System.setProperty(PROJECT_ID_PROP, "test_project_id_01");
 
@@ -140,6 +140,28 @@ class TransformerV2Test extends BaseSparkTest {
         String expectedJson = this.resourceFileAsString("/expected/transform_v2_user2.json");
 
         Dataset<Row> datasetUser1 = datasetUser.filter(expr("user_pseudo_id='uuid1-9844af32'"));
+        Assertions.assertEquals(expectedJson, datasetUser1.first().prettyJson());
+        Assertions.assertEquals(1, datasetUser1.count());
+    }
+
+    @Test
+    public void should_transform_user_with_page_referrer2() throws IOException {
+        // DOWNLOAD_FILE=0 ./gradlew clean test --info --tests software.aws.solution.clickstream.TransformerV2Test.should_transform_user_with_page_referrer2
+        System.setProperty(APP_IDS_PROP, "uba-app");
+        System.setProperty(PROJECT_ID_PROP, "test_project_id_01");
+
+        Dataset<Row> dataset =
+                spark.read().json(requireNonNull(getClass().getResource("/original_data_with_user_referrer.json")).getPath());
+        List<Dataset<Row>> transformedDatasets = transformer.transform(dataset);
+        Dataset<Row> datasetUser = transformedDatasets.get(3);
+
+        String schema =  datasetUser.schema().prettyJson();
+        String expectedSchema = this.resourceFileAsString("/expected/schema-user.json");
+        Assertions.assertEquals(expectedSchema, schema);
+
+        String expectedJson = this.resourceFileAsString("/expected/transform_v2_user_referrer.json");
+
+        Dataset<Row> datasetUser1 = datasetUser.filter(expr("user_pseudo_id='uu_referrer1'"));
         Assertions.assertEquals(expectedJson, datasetUser1.first().prettyJson());
         Assertions.assertEquals(1, datasetUser1.count());
     }

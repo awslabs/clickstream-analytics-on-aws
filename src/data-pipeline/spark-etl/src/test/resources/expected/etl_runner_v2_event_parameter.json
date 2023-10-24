@@ -12,6 +12,17 @@
 }, {
   "event_id" : "1fcd7f5b-9529-4977-a303-e8c7e39db7b898-1",
   "event_name" : "_page_view",
+  "event_param_int_value" : null,
+  "event_param_key" : "_page_referrer",
+  "event_param_string_value" : "http://myhost.com/_page_referer_003",
+  "event_timestamp" : 1682319109447,
+  "partition_app" : "uba-app",
+  "partition_year" : 2023,
+  "partition_month" : 4,
+  "partition_day" : 24
+}, {
+  "event_id" : "1fcd7f5b-9529-4977-a303-e8c7e39db7b898-1",
+  "event_name" : "_page_view",
   "event_param_int_value" : 690000,
   "event_param_key" : "_session_duration",
   "event_param_string_value" : null,
@@ -92,17 +103,6 @@
   "event_param_int_value" : null,
   "event_param_key" : "_error_value_length_exceed",
   "event_param_string_value" : "",
-  "event_timestamp" : 1682319109447,
-  "partition_app" : "uba-app",
-  "partition_year" : 2023,
-  "partition_month" : 4,
-  "partition_day" : 24
-}, {
-  "event_id" : "1fcd7f5b-9529-4977-a303-e8c7e39db7b898-1",
-  "event_name" : "_page_view",
-  "event_param_int_value" : null,
-  "event_param_key" : "_page_referer",
-  "event_param_string_value" : "http://myhost.com/_page_referer_003",
   "event_timestamp" : 1682319109447,
   "partition_app" : "uba-app",
   "partition_year" : 2023,
