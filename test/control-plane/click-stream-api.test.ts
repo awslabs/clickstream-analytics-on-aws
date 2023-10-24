@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { Match } from 'aws-cdk-lib/assertions';
 import { findResourcesName, TestEnv } from './test-utils';
 import { removeFolder } from '../common/jest';
 
@@ -984,6 +985,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
                 },
               ],
             },
+            Match.anyValue(),
           ],
         ],
       },
@@ -1604,6 +1606,7 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
                 },
               ],
             },
+            Match.anyValue(),
           ],
         ],
       },

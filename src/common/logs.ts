@@ -16,6 +16,7 @@ import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Construct } from 'constructs';
 import { addCfnNagSuppressRules } from './cfn-nag';
 import { getShortIdOfStack } from './stack';
+import { generateRandomStr } from './utils';
 
 export function createLogGroup(
   scope: Construct,
@@ -25,7 +26,8 @@ export function createLogGroup(
   },
 ) {
   const shortId = getShortIdOfStack(Stack.of(scope));
-  const logGroupName = `${props.prefix ?? 'clickstream-loggroup'}-${shortId}`;
+  const randStr = generateRandomStr(5, 'abcdefghijklmnopqrstuvwxyz0123456789');
+  const logGroupName = `${props.prefix ?? 'clickstream-loggroup'}-${shortId}${randStr}`;
 
   const logGroup = new LogGroup(scope, 'LogGroup', {
     logGroupName,
