@@ -282,14 +282,14 @@ export const getPairEventAndConditions = (
 
       const pairEventAndCondition: IPairEventAndCondition = {
         startEvent: {
-          eventName: defaultStr(item.startEventOption?.value, ''),
+          eventName: defaultStr(item.startEventOption?.name, ''),
           sqlCondition: {
             conditions: startConditions,
             conditionOperator: item.startConditionRelationShip,
           },
         },
         backEvent: {
-          eventName: defaultStr(item.revisitEventOption?.value, ''),
+          eventName: defaultStr(item.revisitEventOption?.name, ''),
           sqlCondition: {
             conditions: revisitConditions,
             conditionOperator: item.revisitConditionRelationShip,
