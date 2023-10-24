@@ -47,7 +47,7 @@ const secretManagerClient = new SecretsManagerClient({
 
 export const physicalIdPrefix = 'create-redshift-db-schemas-custom-resource-';
 export const handler: CdkCustomResourceHandler = async (event: CloudFormationCustomResourceEvent, context: Context) => {
-  logger.info(JSON.stringify(event));
+  logger.info('event', { event });
   const physicalId = ('PhysicalResourceId' in event) ? event.PhysicalResourceId :
     `${physicalIdPrefix}${generateRandomStr(8, 'abcdefghijklmnopqrstuvwxyz0123456789')}`;
   const biUsername = `${(event.ResourceProperties as ResourcePropertiesType).redshiftBIUsernamePrefix}${physicalId.substring(physicalIdPrefix.length)}`;
@@ -264,6 +264,10 @@ async function updateSchemas(props: ResourcePropertiesType, biUsername: string, 
   const odsTableNames = props.odsTableNames;
   const appUpdateProps = getAppUpdateProps(props, oldProps);
 
+  logger.info('updateSchemas- props', { props });
+  logger.info('updateSchemas- oldProps', { oldProps });
+  logger.info('updateSchemas- appUpdateProps', { appUpdateProps });
+
   const sqlStatementsByApp = new Map<string, string[]>();
   for (const app of appUpdateProps.createAppIds) {
     const sqlStatements: string[] = [];
@@ -304,7 +308,8 @@ async function updateSchemas(props: ResourcePropertiesType, biUsername: string, 
     };
 
     const sqlStatements2 = getUpdatableSql(props.schemaDefs, appUpdateProps.oldSchemaSqlArray, mustacheParam);
-    _buildSqlStatements(sqlStatements2, props.schemaDefs, mustacheParam, appUpdateProps);
+
+    logger.info('updateSchemas- sqlStatements2', { app, sqlStatements2 });
 
     if (sqlStatementsByApp.has(app)) {
       sqlStatementsByApp.get(app)?.push(...sqlStatements2);
@@ -318,7 +323,9 @@ async function updateSchemas(props: ResourcePropertiesType, biUsername: string, 
 
 
 function getUpdatableSql(sqlOrViewDefs: SQLDef[], oldSqlArray: string[], mustacheParam: MustacheParamType) {
+  logger.info('getUpdatableSql', { sqlOrViewDefs, oldSqlArray });
 
+  const updateFilesInfo = [];
   const sqlStatements: string[] = [];
   for (const schemaOrViewDef of sqlOrViewDefs) {
     logger.info(`schemaOrViewDef.updatable: ${schemaOrViewDef.updatable}`);
@@ -326,12 +333,16 @@ function getUpdatableSql(sqlOrViewDefs: SQLDef[], oldSqlArray: string[], mustach
     if (!oldSqlArray.includes(schemaOrViewDef.sqlFile)) {
       logger.info(`new sql: ${schemaOrViewDef.sqlFile}`);
       sqlStatements.push(getSqlContent(schemaOrViewDef.sqlFile, mustacheParam));
+      updateFilesInfo.push('new: ' + schemaOrViewDef.sqlFile);
     } else if (schemaOrViewDef.updatable === 'true') {
       logger.info(`update sql: ${schemaOrViewDef.sqlFile}`);
       sqlStatements.push(getSqlContent(schemaOrViewDef.sqlFile, mustacheParam));
+      updateFilesInfo.push('update: ' + schemaOrViewDef.sqlFile);
     } else {
       logger.info(`skip update ${schemaOrViewDef.sqlFile} due to it is not updatable.`);
     }
+
+    logger.info('getUpdatableSql', { updateFilesInfo });
   }
 
   return sqlStatements;
@@ -391,25 +402,6 @@ async function createViewForReporting(props: ResourcePropertiesType, biUser: str
   }
 }
 
-function _buildSqlStatements(sqlStatements: string[], sqlDef: SQLDef[], mustacheParam: MustacheParamType, appUpdateProps: AppUpdateProps) {
-
-  for (const viewDef of sqlDef) {
-
-    logger.info(`viewDef.updatable: ${viewDef.updatable}`);
-
-    if (!appUpdateProps.oldViewSqls.includes(viewDef.sqlFile)) {
-      logger.info(`new view: ${viewDef.sqlFile}`);
-      sqlStatements.push(getSqlContent(viewDef.sqlFile, mustacheParam));
-    } else if (viewDef.updatable === 'true') {
-      logger.info(`update view: ${viewDef.sqlFile}`);
-      sqlStatements.push(getSqlContent(viewDef.sqlFile, mustacheParam));
-    } else {
-      logger.info(`skip update ${viewDef.sqlFile} due to it is not updatable.`);
-    }
-  }
-  return sqlStatements;
-}
-
 async function updateViewForReporting(props: ResourcePropertiesType, oldProps: ResourcePropertiesType, biUser: string) {
   const odsTableNames = props.odsTableNames;
 
@@ -451,8 +443,6 @@ async function updateViewForReporting(props: ResourcePropertiesType, oldProps: R
     };
 
     const sqlStatements2 = getUpdatableSql(props.reportingViewsDef, appUpdateProps.oldViewSqls, mustacheParam);
-
-    _buildSqlStatements(sqlStatements2, props.reportingViewsDef, mustacheParam, appUpdateProps);
 
     //grant select on views to bi user.
     const views: string[] = [];

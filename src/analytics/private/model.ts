@@ -15,19 +15,10 @@ import { IVpc, SubnetSelection } from 'aws-cdk-lib/aws-ec2';
 import { IBucket } from 'aws-cdk-lib/aws-s3';
 import { RedshiftOdsTables } from '../analytics-on-redshift';
 
-export interface LoadDataProps {
-  readonly scheduleInterval: string;
+export interface LoadDataConfig {
   readonly maxFilesLimit: number;
 }
 
-
-export interface TablesLoadDataProps {
-  readonly ods_events: LoadDataProps;
-  readonly event: LoadDataProps;
-  readonly event_parameter: LoadDataProps;
-  readonly user: LoadDataProps;
-  readonly item: LoadDataProps;
-}
 
 interface BucketInfo {
   readonly s3Bucket: IBucket;
@@ -46,15 +37,8 @@ export interface TablesODSSource {
   readonly item: ODSSource;
 }
 
-export type LoadWorkflowData = BucketInfo;
+export type WorkflowBucketInfo = BucketInfo;
 
-export interface TablesLoadWorkflowData {
-  readonly ods_events: LoadWorkflowData;
-  readonly event: LoadWorkflowData;
-  readonly event_parameter: LoadWorkflowData;
-  readonly user: LoadWorkflowData;
-  readonly item: LoadWorkflowData;
-}
 
 export type UpsertUsersWorkflowData = {
   readonly scheduleExpression: string;

@@ -236,8 +236,14 @@ export const queryItems = async (tableName: string, indexName: string, prefix: s
 }> => {
   const s3UriPrefix = 's3://' + prefix;
 
-  const REDSHIFT_ODS_TABLE_NAME = process.env.REDSHIFT_ODS_TABLE_NAME!;
+  const REDSHIFT_ODS_TABLE_NAME = process.env.REDSHIFT_ODS_TABLE_NAME;
   const qJobStatus = composeJobStatus(jobStatus, REDSHIFT_ODS_TABLE_NAME);
+
+  logger.info('queryItems() ', {
+    tableName,
+    qJobStatus,
+    s3UriPrefix,
+  });
 
   // Set the parameters.
   const params = {

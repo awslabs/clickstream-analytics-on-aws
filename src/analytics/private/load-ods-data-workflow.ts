@@ -12,19 +12,22 @@
  */
 
 import { join } from 'path';
-import { Duration, CfnCondition, CfnResource, Fn } from 'aws-cdk-lib';
+import { Duration } from 'aws-cdk-lib';
 import { ITable } from 'aws-cdk-lib/aws-dynamodb';
 import { IVpc, SubnetSelection } from 'aws-cdk-lib/aws-ec2';
-import { Rule, Match, Schedule } from 'aws-cdk-lib/aws-events';
+import { Rule, Match } from 'aws-cdk-lib/aws-events';
 import { SfnStateMachine, LambdaFunction } from 'aws-cdk-lib/aws-events-targets';
 import { IRole, Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { IFunction, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
-import { StateMachine, LogLevel, IStateMachine, TaskInput, Wait, WaitTime, Succeed, Choice, Map, Condition, Pass, Fail, DefinitionBody } from 'aws-cdk-lib/aws-stepfunctions';
+import {
+  StateMachine, LogLevel, IStateMachine, TaskInput, Wait, WaitTime, Succeed, Choice, Map,
+  Condition, Pass, Fail, DefinitionBody, Parallel,
+} from 'aws-cdk-lib/aws-stepfunctions';
 import { LambdaInvoke } from 'aws-cdk-lib/aws-stepfunctions-tasks';
 import { Construct } from 'constructs';
 import { DYNAMODB_TABLE_INDEX_NAME } from './constant';
-import { ODSSource, ExistingRedshiftServerlessProps, ProvisionedRedshiftProps, LoadDataProps, LoadWorkflowData } from './model';
+import { ODSSource, ExistingRedshiftServerlessProps, ProvisionedRedshiftProps, TablesODSSource, LoadDataConfig, WorkflowBucketInfo } from './model';
 import { createLambdaRole } from '../../common/lambda';
 import { createLogGroup } from '../../common/logs';
 import { getPutMetricsPolicyStatements } from '../../common/metrics';
@@ -39,17 +42,18 @@ export interface LoadOdsDataToRedshiftWorkflowProps {
     readonly vpc: IVpc;
     readonly vpcSubnets: SubnetSelection;
   };
-  readonly odsSource: ODSSource;
-  readonly loadWorkflowData: LoadWorkflowData;
-  readonly loadDataProps: LoadDataProps;
+
   readonly serverlessRedshift?: ExistingRedshiftServerlessProps;
   readonly provisionedRedshift?: ProvisionedRedshiftProps;
-  readonly odsTableName: string;
   readonly databaseName: string;
   readonly dataAPIRole: IRole;
   readonly emrServerlessApplicationId: string;
   readonly redshiftRoleForCopyFromS3: IRole;
   readonly ddbStatusTable: ITable;
+
+  readonly tablesOdsSource: TablesODSSource; // data S3 bucket
+  readonly loadDataConfig: LoadDataConfig; // workflow config info, e.g. maxFilesLimit, etc..
+  readonly workflowBucketInfo: WorkflowBucketInfo; // bucket to store workflow logs, temp files
 }
 
 export class LoadOdsDataToRedshiftWorkflow extends Construct {
@@ -62,47 +66,40 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
 
     const ddbStatusTable = props.ddbStatusTable;
 
-    const processorLambda = this.createODSEventProcessorLambda(ddbStatusTable, props);
+    for (const tableName of Object.keys(props.tablesOdsSource)) {
 
-    ddbStatusTable.grantWriteData(processorLambda);
-    // create a rule to store the ods source files
-    const sourceTriggerRule = new Rule(this, 'odsS3DataHandler', {
-      eventPattern: {
-        detailType: Match.equalsIgnoreCase('object created'),
-        detail: {
-          bucket: {
-            name: Match.exactString(props.odsSource.s3Bucket.bucketName),
+      const odsSource: ODSSource = (props.tablesOdsSource as any)[`${tableName}`];
+
+      const processorLambda = this.createS3EventProcessorLambda(ddbStatusTable, tableName, odsSource, props);
+
+      ddbStatusTable.grantWriteData(processorLambda);
+      // create a rule to store the ods source files
+      const sourceTriggerRule = new Rule(this, `S3Event-${tableName}`, {
+        eventPattern: {
+          detailType: Match.equalsIgnoreCase('object created'),
+          detail: {
+            bucket: {
+              name: Match.exactString(odsSource.s3Bucket.bucketName),
+            },
+            object: {
+              key: Match.prefix(odsSource.prefix),
+            },
           },
-          object: {
-            key: Match.prefix(props.odsSource.prefix),
-          },
+          source: ['aws.s3'],
         },
-        source: ['aws.s3'],
-      },
-    });
-    sourceTriggerRule.addTarget(new LambdaFunction(processorLambda));
+      });
+      sourceTriggerRule.addTarget(new LambdaFunction(processorLambda));
 
-
-    props.odsSource.s3Bucket.grantRead(props.redshiftRoleForCopyFromS3, `${props.odsSource.prefix}*`);
-    props.loadWorkflowData.s3Bucket.grantRead(props.redshiftRoleForCopyFromS3, `${props.loadWorkflowData.prefix}*`);
-
+      odsSource.s3Bucket.grantRead(props.redshiftRoleForCopyFromS3, `${odsSource.prefix}*`);
+      props.workflowBucketInfo.s3Bucket.grantRead(props.redshiftRoleForCopyFromS3, `${props.workflowBucketInfo.prefix}*`);
+    }
 
     // create Step function workflow to orchestrate the workflow to load data from s3 to redshift
     this.loadDataWorkflow = this.createWorkflow(ddbStatusTable, props, props.redshiftRoleForCopyFromS3);
 
-
     const emrApplicationId = props.emrServerlessApplicationId;
 
-
-    const noEmrApplicationIdCondition = new CfnCondition(this, 'NoEmrApplicationIdCondition', {
-      expression: Fn.conditionEquals(emrApplicationId, ''),
-    });
-
-    const hasEmrApplicationIdCondition = new CfnCondition(this, 'HasEmrApplicationIdCondition', {
-      expression: Fn.conditionNot(noEmrApplicationIdCondition),
-    });
-
-    const emrServerlessJobSuccessRule = new Rule(this, 'EmrServerlessJobSuccessRule', {
+    new Rule(this, 'EmrServerlessJobSuccessRule', { //NOSONAR
       eventPattern: {
         source: ['aws.emr-serverless'],
         detailType: ['EMR Serverless Job Run State Change'],
@@ -115,15 +112,6 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
         new SfnStateMachine(this.loadDataWorkflow),
       ],
     });
-    (emrServerlessJobSuccessRule.node.defaultChild as CfnResource).cfnOptions.condition = hasEmrApplicationIdCondition;
-
-    const timeBasedScheduleRule = new Rule(this, 'LoadScheduleRule', {
-      schedule: Schedule.expression(props.loadDataProps.scheduleInterval),
-      targets: [
-        new SfnStateMachine(this.loadDataWorkflow),
-      ],
-    });
-    (timeBasedScheduleRule.node.defaultChild as CfnResource).cfnOptions.condition = noEmrApplicationIdCondition;
 
   }
 
@@ -134,10 +122,11 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
    * @param props The property for input parameters.
    * @returns A lambda function.
    */
-  private createODSEventProcessorLambda(taskTable: ITable, props: LoadOdsDataToRedshiftWorkflowProps): IFunction {
-    const fnSG = createSGForEgressToAwsService(this, 'ODSEventProcessorLambdaSg', props.networkConfig.vpc);
+  private createS3EventProcessorLambda(taskTable: ITable, redshiftTable: string,
+    odsSource: ODSSource, props: LoadOdsDataToRedshiftWorkflowProps): IFunction {
+    const fnSG = createSGForEgressToAwsService(this, `s3EventFnSG-${redshiftTable}`, props.networkConfig.vpc);
 
-    const fn = new SolutionNodejsFunction(this, 'ODSEventProcessorFn', {
+    const fn = new SolutionNodejsFunction(this, `s3EventFn-${redshiftTable}`, {
       runtime: Runtime.NODEJS_18_X,
       entry: join(
         this.lambdaRootPath,
@@ -148,14 +137,14 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
       timeout: Duration.minutes(1),
       logRetention: RetentionDays.ONE_WEEK,
       reservedConcurrentExecutions: 2,
-      role: createLambdaRole(this, 'ODSEventProcessorRole', true, []),
+      role: createLambdaRole(this, `s3EventFnRole-${redshiftTable}`, true, []),
       ...props.networkConfig,
       securityGroups: [fnSG],
       environment: {
         PROJECT_ID: props.projectId,
-        S3_FILE_SUFFIX: props.odsSource.fileSuffix,
+        S3_FILE_SUFFIX: odsSource.fileSuffix,
         DYNAMODB_TABLE_NAME: taskTable.tableName,
-        REDSHIFT_ODS_TABLE_NAME: props.odsTableName,
+        REDSHIFT_ODS_TABLE_NAME: redshiftTable,
         ...POWERTOOLS_ENVS,
       },
     });
@@ -164,13 +153,15 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
   }
 
 
-  private createWorkflow(dataTable: ITable, props: LoadOdsDataToRedshiftWorkflowProps, copyRole: IRole): IStateMachine {
+  private createWorkflow(ddbTable: ITable, props: LoadOdsDataToRedshiftWorkflowProps, copyRole: IRole): IStateMachine {
 
-    const hasRunningWorkflowFn = this.createCheckHasRunningWorkflowFn(dataTable, props);
+    const hasRunningWorkflowFn = this.createCheckHasRunningWorkflowFn(ddbTable, props);
     const checkHasRunningWorkflow = new LambdaInvoke(this, `${this.node.id} - Check Other Running Workflow`, {
       lambdaFunction: hasRunningWorkflowFn,
       payload: TaskInput.fromObject({
         'execution_id.$': '$$.Execution.Id',
+        'eventBucketName': props.tablesOdsSource.event.s3Bucket.bucketName,
+        'eventPrefix': props.tablesOdsSource.event.prefix,
       }),
       outputPath: '$.Payload',
     });
@@ -182,137 +173,159 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
       maxAttempts: 6,
     });
 
+    //
+    // function:  createLoadRedshiftTableWorkflow
+    //
+    const createLoadRedshiftTableWorkflow = (odsTableName: string) => {
 
-    const createLoadManifestFn = this.createLoadManifestFn(dataTable, props);
-    const getJobList = new LambdaInvoke(this, `${this.node.id} - Create job manifest`, {
-      lambdaFunction: createLoadManifestFn,
-      payload: TaskInput.fromObject({
-        'execution_id.$': '$$.Execution.Id',
-      }),
-      outputPath: '$.Payload',
-    });
-
-    getJobList.addRetry({
-      errors: ['Lambda.TooManyRequestsException'],
-      interval: Duration.seconds(3),
-      backoffRate: 2,
-      maxAttempts: 6,
-    });
-
-
-    const loadManifestToRedshiftFn = this.loadManifestToRedshiftFn(dataTable, props, copyRole);
-    const submitJob = new LambdaInvoke(this, `${this.node.id} - Submit job`, {
-      lambdaFunction: loadManifestToRedshiftFn,
-      payload: TaskInput.fromObject({
-        detail: {
+      const createLoadManifestFn = this.createLoadManifestFn(ddbTable, odsTableName, props);
+      const getJobList = new LambdaInvoke(this, `${odsTableName} - Create job manifest`, {
+        lambdaFunction: createLoadManifestFn,
+        payload: TaskInput.fromObject({
           'execution_id.$': '$$.Execution.Id',
-          'appId.$': '$.appId',
-          'manifestFileName.$': '$.manifestFileName',
-          'jobList.$': '$.jobList',
+        }),
+        outputPath: '$.Payload',
+      });
+
+      getJobList.addRetry({
+        errors: ['Lambda.TooManyRequestsException'],
+        interval: Duration.seconds(3),
+        backoffRate: 2,
+        maxAttempts: 6,
+      });
+
+
+      const loadManifestToRedshiftFn = this.loadManifestToRedshiftFn(ddbTable, odsTableName, props, copyRole);
+      const submitJob = new LambdaInvoke(this, `${odsTableName} - Submit job`, {
+        lambdaFunction: loadManifestToRedshiftFn,
+        payload: TaskInput.fromObject({
+          detail: {
+            'execution_id.$': '$$.Execution.Id',
+            'appId.$': '$.appId',
+            'manifestFileName.$': '$.manifestFileName',
+            'jobList.$': '$.jobList',
+          },
+        }),
+        outputPath: '$.Payload',
+      });
+
+      submitJob.addRetry({
+        errors: ['Lambda.TooManyRequestsException'],
+        interval: Duration.seconds(3),
+        backoffRate: 2,
+        maxAttempts: 6,
+      });
+
+      const createCheckLoadJobStatusFn = this.createCheckLoadJobStatusFn(ddbTable, odsTableName, props);
+
+      const checkJobStatus = new LambdaInvoke(this, `${odsTableName} - Check job status`, {
+        lambdaFunction: createCheckLoadJobStatusFn,
+        payload: TaskInput.fromObject({
+          'detail.$': '$.detail',
+        }),
+        outputPath: '$.Payload',
+      });
+
+      checkJobStatus.addRetry({
+        errors: ['Lambda.TooManyRequestsException'],
+        interval: Duration.seconds(3),
+        backoffRate: 2,
+        maxAttempts: 6,
+      });
+
+      const waitX = new Wait(this, `${odsTableName} - Wait seconds`, {
+        /**
+           *  You can also implement with the path stored in the state like:
+           *  sfn.WaitTime.secondsPath('$.waitSeconds')
+           */
+        time: WaitTime.duration(Duration.seconds(30)),
+      });
+
+      const jobFailed = new Fail(this, `${odsTableName} - Job fails`, {
+        cause: 'LoadManifest Job Failed',
+        error: 'DescribeJob returned FAILED',
+      });
+
+      const finalStatus = new Pass(this, `${odsTableName} - Job completes`);
+
+      // Create sub chain
+      const subDefinition = submitJob
+        .next(waitX)
+        .next(checkJobStatus)
+        .next(new Choice(this, `${odsTableName} - Check if job completes`)
+          // Look at the "status" field
+          .when(Condition.stringEquals('$.detail.status', 'FAILED'), jobFailed)
+          .when(Condition.stringEquals('$.detail.status', 'ABORTED'), jobFailed)
+          .when(Condition.stringEquals('$.detail.status', 'FINISHED'), finalStatus)
+          .when(Condition.stringEquals('$.detail.status', 'NO_JOBS'), finalStatus)
+          .otherwise(waitX));
+
+      const doLoadJob = new Map(
+        this,
+        `${odsTableName} - Do load job`,
+        {
+          maxConcurrency: 2,
+          itemsPath: '$.manifestList',
         },
-      }),
-      outputPath: '$.Payload',
-    });
-
-    submitJob.addRetry({
-      errors: ['Lambda.TooManyRequestsException'],
-      interval: Duration.seconds(3),
-      backoffRate: 2,
-      maxAttempts: 6,
-    });
-
-    const createCheckLoadJobStatusFn = this.createCheckLoadJobStatusFn(dataTable, props);
-
-    const checkJobStatus = new LambdaInvoke(this, `${this.node.id} - Check job status`, {
-      lambdaFunction: createCheckLoadJobStatusFn,
-      payload: TaskInput.fromObject({
-        'detail.$': '$.detail',
-      }),
-      outputPath: '$.Payload',
-    });
-
-    checkJobStatus.addRetry({
-      errors: ['Lambda.TooManyRequestsException'],
-      interval: Duration.seconds(3),
-      backoffRate: 2,
-      maxAttempts: 6,
-    });
-
-    const waitX = new Wait(this, `${this.node.id} - Wait seconds`, {
-      /**
-         *  You can also implement with the path stored in the state like:
-         *  sfn.WaitTime.secondsPath('$.waitSeconds')
-         */
-      time: WaitTime.duration(Duration.seconds(30)),
-    });
-
-    const jobFailed = new Fail(this, `${this.node.id} - Job fails`, {
-      cause: 'LoadManifest Job Failed',
-      error: 'DescribeJob returned FAILED',
-    });
-
-    const finalStatus = new Pass(this, `${this.node.id} - Job completes`);
-
-    // Create sub chain
-    const subDefinition = submitJob
-      .next(waitX)
-      .next(checkJobStatus)
-      .next(new Choice(this, `${this.node.id} - Check if job completes`)
-        // Look at the "status" field
-        .when(Condition.stringEquals('$.detail.status', 'FAILED'), jobFailed)
-        .when(Condition.stringEquals('$.detail.status', 'ABORTED'), jobFailed)
-        .when(Condition.stringEquals('$.detail.status', 'FINISHED'), finalStatus)
-        .when(Condition.stringEquals('$.detail.status', 'NO_JOBS'), finalStatus)
-        .otherwise(waitX));
-
-    const doLoadJob = new Map(
-      this,
-      `${this.node.id} - Do load job`,
-      {
-        maxConcurrency: 2,
-        itemsPath: '$.manifestList',
-      },
-    );
-    doLoadJob.iterator(subDefinition);
+      );
+      doLoadJob.iterator(subDefinition);
 
 
-    const hasMoreWorkFn = this.createHasMoreWorkFn(dataTable, props);
-    const checkMoreWork = new LambdaInvoke(this, `${this.node.id} - Check more work`, {
-      lambdaFunction: hasMoreWorkFn,
-      outputPath: '$.Payload',
-    });
+      const hasMoreWorkFn = this.createHasMoreWorkFn(ddbTable, odsTableName, props);
+      const checkMoreWork = new LambdaInvoke(this, `${odsTableName} - Check more work`, {
+        lambdaFunction: hasMoreWorkFn,
+        outputPath: '$.Payload',
+      });
 
-    checkMoreWork.addRetry({
-      errors: ['Lambda.TooManyRequestsException'],
-      interval: Duration.seconds(3),
-      backoffRate: 2,
-      maxAttempts: 6,
-    });
+      checkMoreWork.addRetry({
+        errors: ['Lambda.TooManyRequestsException'],
+        interval: Duration.seconds(3),
+        backoffRate: 2,
+        maxAttempts: 6,
+      });
 
-    const allCompleted = new Succeed(this, `${this.node.id} - Completed`);
+      const jobCompleted = new Succeed(this, `${odsTableName} - Job Completed`);
 
-    const hasMoreChoice = new Choice(this, `${this.node.id} - Has more work`)
-      .when(Condition.numberGreaterThan('$.jobNewCount', 0), getJobList)
-      .otherwise(allCompleted);
+      const hasMoreChoice = new Choice(this, `${odsTableName} - Has more work`)
+        .when(Condition.numberGreaterThan('$.jobNewCount', 0), getJobList)
+        .otherwise(jobCompleted);
 
-    const checkMoreWorkTodo = checkMoreWork.next(hasMoreChoice);
+      const checkMoreWorkTodo = checkMoreWork.next(hasMoreChoice);
 
-    const waitX2 = new Wait(this, `${this.node.id} - Wait and check again`, {
-      time: WaitTime.duration(Duration.seconds(30)),
-    });
+      const waitX2 = new Wait(this, `${odsTableName} - Wait and check again`, {
+        time: WaitTime.duration(Duration.seconds(30)),
+      });
 
-    const waitAndCheckMoreWork = waitX2.next(checkMoreWorkTodo);
-    const checkJobExist = new Choice(this, `${this.node.id} - Check if job exists`)
-      .when(Condition.isNotPresent('$.manifestList'), waitAndCheckMoreWork)
-      .when(Condition.numberGreaterThan('$.count', 0), doLoadJob.next(checkMoreWorkTodo))
-      .otherwise(waitAndCheckMoreWork);
+      const waitAndCheckMoreWork = waitX2.next(checkMoreWorkTodo);
+      const checkJobExist = new Choice(this, `${odsTableName} - Check if job exists`)
+        .when(Condition.isNotPresent('$.manifestList'), waitAndCheckMoreWork)
+        .when(Condition.numberGreaterThan('$.count', 0), doLoadJob.next(checkMoreWorkTodo))
+        .otherwise(waitAndCheckMoreWork);
 
-    const doWorkflow = getJobList.next(checkJobExist);
-    const ignoreRunflow = new Pass(this, `${this.node.id} - Ignore Running`).next(allCompleted);
+      const doWorkflow = getJobList.next(checkJobExist);
+      return doWorkflow;
+    };
+
+
+    //
+    // Main workflow
+    //
+
+    let parallelLoadDataToTables = new Parallel(this, `${this.node.id} - Load data to tables`);
+    for (const odsTable of Object.keys(props.tablesOdsSource)) {
+      const loadOneTableWorkflow = createLoadRedshiftTableWorkflow(odsTable);
+      parallelLoadDataToTables = parallelLoadDataToTables.branch(loadOneTableWorkflow);
+    }
+
+    const allCompleted = new Succeed(this, `${this.node.id} - All Completed`);
+
+    const parallelLoadBranch = parallelLoadDataToTables.next(allCompleted);
+
+    const ignoreRunFlow = new Pass(this, `${this.node.id} - Ignore Running`).next(allCompleted);
 
     const hasRunningWorkflowChoice = new Choice(this, `${this.node.id} - Has Other Running Workflow`)
-      .when(Condition.booleanEquals('$.HasRunningWorkflow', false), doWorkflow)
-      .otherwise(ignoreRunflow);
+      .when(Condition.booleanEquals('$.HasRunningWorkflow', false), parallelLoadBranch)
+      .otherwise(ignoreRunFlow);
 
     const definition = checkHasRunningWorkflow.next(hasRunningWorkflowChoice);
 
@@ -346,10 +359,14 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
     return loadDataStateMachine;
   }
 
-  private createLoadManifestFn(dataTable: ITable, props: LoadOdsDataToRedshiftWorkflowProps): IFunction {
-    const fnSG = createSGForEgressToAwsService(this, 'CreateLoadManifestFnSG', props.networkConfig.vpc);
+  private createLoadManifestFn(ddbTable: ITable, odsTableName: string, props: LoadOdsDataToRedshiftWorkflowProps): IFunction {
+    const odsSource = (props.tablesOdsSource as any)[odsTableName];
+    const loadDataConfig = props.loadDataConfig;
+    const resourceId = `CreateLoadManifest-${odsTableName}`;
+
+    const fnSG = createSGForEgressToAwsService(this, `${resourceId}SG`, props.networkConfig.vpc);
     const cloudwatchPolicyStatements = getPutMetricsPolicyStatements(MetricsNamespace.REDSHIFT_ANALYTICS);
-    const fn = new SolutionNodejsFunction(this, 'CreateLoadManifestFn', {
+    const fn = new SolutionNodejsFunction(this, `${resourceId}Fn`, {
       runtime: Runtime.NODEJS_18_X,
       entry: join(
         this.lambdaRootPath,
@@ -360,34 +377,38 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
       timeout: Duration.minutes(5),
       logRetention: RetentionDays.ONE_WEEK,
       reservedConcurrentExecutions: 1,
-      role: createLambdaRole(this, 'CreateLoadManifestFnRole', true, [...cloudwatchPolicyStatements]),
+      role: createLambdaRole(this, `${resourceId}Role`, true, [...cloudwatchPolicyStatements]),
       ...props.networkConfig,
       securityGroups: [fnSG],
       environment: {
         PROJECT_ID: props.projectId,
-        MANIFEST_BUCKET: props.loadWorkflowData.s3Bucket.bucketName,
-        MANIFEST_BUCKET_PREFIX: props.loadWorkflowData.prefix,
-        ODS_EVENT_BUCKET: props.odsSource.s3Bucket.bucketName,
-        ODS_EVENT_BUCKET_PREFIX: props.odsSource.prefix,
-        QUERY_RESULT_LIMIT: props.loadDataProps.maxFilesLimit.toString(),
-        DYNAMODB_TABLE_NAME: dataTable.tableName,
+        MANIFEST_BUCKET: props.workflowBucketInfo.s3Bucket.bucketName,
+        MANIFEST_BUCKET_PREFIX: props.workflowBucketInfo.prefix + odsTableName + '/',
+        ODS_EVENT_BUCKET: odsSource.s3Bucket.bucketName,
+        ODS_EVENT_BUCKET_PREFIX: odsSource.prefix,
+        QUERY_RESULT_LIMIT: loadDataConfig.maxFilesLimit.toString(),
+        DYNAMODB_TABLE_NAME: ddbTable.tableName,
         DYNAMODB_TABLE_INDEX_NAME: DYNAMODB_TABLE_INDEX_NAME,
-        REDSHIFT_ODS_TABLE_NAME: props.odsTableName,
+        REDSHIFT_ODS_TABLE_NAME: odsTableName,
         ...POWERTOOLS_ENVS,
       },
     });
 
     // Update the job_status from NEW to ENQUEUE.
-    dataTable.grantReadWriteData(fn);
-    props.loadWorkflowData.s3Bucket.grantWrite(fn, `${props.loadWorkflowData.prefix}*`);
+    ddbTable.grantReadWriteData(fn);
+    props.workflowBucketInfo.s3Bucket.grantWrite(fn, `${props.workflowBucketInfo.prefix}*`);
 
     return fn;
   }
 
-  private loadManifestToRedshiftFn(dataTable: ITable, props: LoadOdsDataToRedshiftWorkflowProps, copyRole: IRole): IFunction {
-    const fnSG = createSGForEgressToAwsService(this, 'LoadManifestToRedshiftFnSG', props.networkConfig.vpc);
+  private loadManifestToRedshiftFn(ddbTable: ITable, odsTableName: string, props: LoadOdsDataToRedshiftWorkflowProps, copyRole: IRole): IFunction {
+
+    const loadDataConfig = props.loadDataConfig;
+    const resourceId = `LoadManifest-${odsTableName}`;
+
+    const fnSG = createSGForEgressToAwsService(this, `${resourceId}SG}`, props.networkConfig.vpc);
     const cloudwatchPolicyStatements = getPutMetricsPolicyStatements(MetricsNamespace.REDSHIFT_ANALYTICS);
-    const fn = new SolutionNodejsFunction(this, 'LoadManifestToRedshiftFn', {
+    const fn = new SolutionNodejsFunction(this, `${resourceId}Fn`, {
       runtime: Runtime.NODEJS_18_X,
       entry: join(
         this.lambdaRootPath,
@@ -398,26 +419,26 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
       timeout: Duration.minutes(3),
       logRetention: RetentionDays.ONE_WEEK,
       reservedConcurrentExecutions: 1,
-      role: createLambdaRole(this, 'LoadManifestToRedshiftRole', true, [...cloudwatchPolicyStatements]),
+      role: createLambdaRole(this, `${resourceId}Role`, true, [...cloudwatchPolicyStatements]),
       ...props.networkConfig,
       securityGroups: [fnSG],
       environment: {
         PROJECT_ID: props.projectId,
-        QUERY_RESULT_LIMIT: props.loadDataProps.maxFilesLimit.toString(),
-        DYNAMODB_TABLE_NAME: dataTable.tableName,
-        ... this.toRedshiftEnvVariables(props),
+        QUERY_RESULT_LIMIT: loadDataConfig.maxFilesLimit.toString(),
+        DYNAMODB_TABLE_NAME: ddbTable.tableName,
+        ... this.toRedshiftEnvVariables(odsTableName, props),
         REDSHIFT_ROLE: copyRole.roleArn,
         REDSHIFT_DATA_API_ROLE: props.dataAPIRole.roleArn,
         ...POWERTOOLS_ENVS,
       },
     });
     // Update the job_status from ENQUEUE to PROCESSING.
-    dataTable.grantReadWriteData(fn);
+    ddbTable.grantReadWriteData(fn);
     props.dataAPIRole.grantAssumeRole(fn.grantPrincipal);
     return fn;
   }
 
-  private toRedshiftEnvVariables(props: LoadOdsDataToRedshiftWorkflowProps): {
+  private toRedshiftEnvVariables(odsTableName: string, props: LoadOdsDataToRedshiftWorkflowProps): {
     [key: string]: string;
   } {
     return {
@@ -425,15 +446,18 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
       REDSHIFT_SERVERLESS_WORKGROUP_NAME: props.serverlessRedshift?.workgroupName ?? '',
       REDSHIFT_CLUSTER_IDENTIFIER: props.provisionedRedshift?.clusterIdentifier ?? '',
       REDSHIFT_DATABASE: props.databaseName,
-      REDSHIFT_ODS_TABLE_NAME: props.odsTableName,
+      REDSHIFT_ODS_TABLE_NAME: odsTableName,
       REDSHIFT_DB_USER: props.provisionedRedshift?.dbUser ?? '',
     };
   }
 
-  private createCheckLoadJobStatusFn(dataTable: ITable, props: LoadOdsDataToRedshiftWorkflowProps): IFunction {
-    const fnSG = createSGForEgressToAwsService(this, 'CheckLoadJobStatusFnSG', props.networkConfig.vpc);
+  private createCheckLoadJobStatusFn(ddbTable: ITable, odsTableName: string, props: LoadOdsDataToRedshiftWorkflowProps): IFunction {
 
-    const fn = new SolutionNodejsFunction(this, 'CheckLoadJobStatusFn', {
+    const resourceId = `CheckLoadJobStatus-${odsTableName}`;
+
+    const fnSG = createSGForEgressToAwsService(this, `${resourceId}SG`, props.networkConfig.vpc);
+
+    const fn = new SolutionNodejsFunction(this, `${resourceId}Fn`, {
       runtime: Runtime.NODEJS_18_X,
       entry: join(
         this.lambdaRootPath,
@@ -444,30 +468,34 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
       timeout: Duration.minutes(2),
       logRetention: RetentionDays.ONE_WEEK,
       reservedConcurrentExecutions: 1,
-      role: createLambdaRole(this, 'CheckLoadJobStatusRole', true, []),
+      role: createLambdaRole(this, `${resourceId}Role`, true, []),
       ...props.networkConfig,
       securityGroups: [fnSG],
       environment: {
         PROJECT_ID: props.projectId,
-        DYNAMODB_TABLE_NAME: dataTable.tableName,
-        ... this.toRedshiftEnvVariables(props),
+        DYNAMODB_TABLE_NAME: ddbTable.tableName,
+        ... this.toRedshiftEnvVariables(odsTableName, props),
         REDSHIFT_DATA_API_ROLE: props.dataAPIRole.roleArn,
         ...POWERTOOLS_ENVS,
       },
     });
 
-    dataTable.grantWriteData(fn);
+    ddbTable.grantWriteData(fn);
     props.dataAPIRole.grantAssumeRole(fn.grantPrincipal);
-    props.loadWorkflowData.s3Bucket.grantDelete(fn, `${props.loadWorkflowData.prefix}*`);
+    props.workflowBucketInfo.s3Bucket.grantDelete(fn, `${props.workflowBucketInfo.prefix}*`);
 
     return fn;
   }
 
 
-  private createHasMoreWorkFn(dataTable: ITable, props: LoadOdsDataToRedshiftWorkflowProps): IFunction {
-    const fnSG = createSGForEgressToAwsService(this, 'HasMoreWorkFnSG', props.networkConfig.vpc);
+  private createHasMoreWorkFn(ddbTable: ITable, odsTableName: string, props: LoadOdsDataToRedshiftWorkflowProps): IFunction {
 
-    const fn = new SolutionNodejsFunction(this, 'HasMoreWorkFn', {
+    const odsSource = (props.tablesOdsSource as any)[odsTableName];
+    const resourceId = `HasMoreWork-${odsTableName}`;
+
+    const fnSG = createSGForEgressToAwsService(this, `${resourceId}SG`, props.networkConfig.vpc);
+
+    const fn = new SolutionNodejsFunction(this, `${resourceId}Fn`, {
       runtime: Runtime.NODEJS_18_X,
       entry: join(
         this.lambdaRootPath,
@@ -478,26 +506,27 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
       timeout: Duration.minutes(2),
       logRetention: RetentionDays.ONE_WEEK,
       reservedConcurrentExecutions: 1,
-      role: createLambdaRole(this, 'HasMoreWorkFnRole', true, []),
+      role: createLambdaRole(this, `${resourceId}Role`, true, []),
       ...props.networkConfig,
       securityGroups: [fnSG],
       environment: {
         PROJECT_ID: props.projectId,
-        ODS_EVENT_BUCKET: props.odsSource.s3Bucket.bucketName,
-        ODS_EVENT_BUCKET_PREFIX: props.odsSource.prefix,
-        DYNAMODB_TABLE_NAME: dataTable.tableName,
+        ODS_EVENT_BUCKET: odsSource.s3Bucket.bucketName,
+        ODS_EVENT_BUCKET_PREFIX: odsSource.prefix,
+        DYNAMODB_TABLE_NAME: ddbTable.tableName,
         DYNAMODB_TABLE_INDEX_NAME: DYNAMODB_TABLE_INDEX_NAME,
-        REDSHIFT_ODS_TABLE_NAME: props.odsTableName,
+        REDSHIFT_ODS_TABLE_NAME: odsTableName,
         ...POWERTOOLS_ENVS,
       },
 
     });
-    dataTable.grantReadData(fn);
+    ddbTable.grantReadData(fn);
     return fn;
   }
 
 
-  private createCheckHasRunningWorkflowFn(dataTable: ITable, props: LoadOdsDataToRedshiftWorkflowProps): IFunction {
+  private createCheckHasRunningWorkflowFn(ddbTable: ITable, props: LoadOdsDataToRedshiftWorkflowProps): IFunction {
+
     const fnSG = createSGForEgressToAwsService(this, 'HasRunningWorkflowFnSG', props.networkConfig.vpc);
 
     const fn = new SolutionNodejsFunction(this, 'HasRunningWorkflowFn', {
@@ -516,16 +545,13 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
       securityGroups: [fnSG],
       environment: {
         PROJECT_ID: props.projectId,
-        ODS_EVENT_BUCKET: props.odsSource.s3Bucket.bucketName,
-        ODS_EVENT_BUCKET_PREFIX: props.odsSource.prefix,
-        DYNAMODB_TABLE_NAME: dataTable.tableName,
+        DYNAMODB_TABLE_NAME: ddbTable.tableName,
         DYNAMODB_TABLE_INDEX_NAME: DYNAMODB_TABLE_INDEX_NAME,
-        REDSHIFT_ODS_TABLE_NAME: props.odsTableName,
         ...POWERTOOLS_ENVS,
       },
 
     });
-    dataTable.grantReadData(fn);
+    ddbTable.grantReadData(fn);
     return fn;
   }
 }
