@@ -106,6 +106,20 @@ describe('Custom resource - Create schemas for applications in Redshift database
     RequestType: 'Update',
   };
 
+  const updateServerlessEvent3: CdkCustomResourceEvent = {
+    ...createServerlessEvent,
+    OldResourceProperties: {
+      ...createServerlessEvent.ResourceProperties,
+      appIds: 'app1',
+    },
+    ResourceProperties: {
+      ...createServerlessEvent.ResourceProperties,
+      appIds: 'app1,app2',
+    },
+    PhysicalResourceId: `${physicalIdPrefix}abcde`,
+    RequestType: 'Update',
+  };
+
   const testReportingViewsDef: SQLDef[] = [
     {
       updatable: 'true',
@@ -549,6 +563,56 @@ describe('Custom resource - Create schemas for applications in Redshift database
       DbUser: undefined,
     });
     expect(redshiftDataMock).toHaveReceivedCommandTimes(DescribeStatementCommand, 2);
+  });
+
+
+  test('Validate sqls when update schema', async () => {
+    smMock.onAnyCommand().resolves({});
+    lambdaMock.on(ListTagsCommand).resolves({
+      Tags: { tag_key: 'tag_value' },
+    });
+    redshiftDataMock.on(BatchExecuteStatementCommand).callsFakeOnce(input => {
+      const expectedSql = 'CREATE SCHEMA IF NOT EXISTS app2';
+      console.log(input.Sqls.length);
+      if (input.Sqls.length !== 17 || input.Sqls[0] !== expectedSql) {
+        throw new Error('create schema sqls are not expected');
+      }
+      return { Id: 'Id-1' };
+    }).callsFakeOnce(input => {
+      const expectedSql = 'CREATE TABLE IF NOT EXISTS app1.clickstream_log';
+      console.log(input.Sqls.length);
+      if (input.Sqls.length !== 13 || !(input.Sqls[0] as string).startsWith(expectedSql)) {
+        throw new Error('update schema sqls are not expected');
+      }
+      return { Id: 'Id-1' };
+
+    }).callsFakeOnce(input => {
+      const expectedSql = 'CREATE MATERIALIZED VIEW app2.clickstream_event_view';
+      const expectedSql2 = 'GRANT SELECT ON app2.clickstream_user_attr_view TO clickstream_report_user_abcde;';
+      if (input.Sqls.length !== 22
+        || !(input.Sqls[0] as string).startsWith(expectedSql)
+        || !(input.Sqls[21] as string).startsWith(expectedSql2)
+      ) {
+        throw new Error('create report view sqls are not expected');
+      }
+      return { Id: 'Id-1' };
+    }).callsFakeOnce(input => {
+      const expectedSql = 'CREATE OR REPLACE VIEW app1.clickstream_user_dim_view';
+      const expectedSql2 = 'GRANT SELECT ON app1.clickstream_user_attr_view TO clickstream_report_user_abcde;';
+      if (input.Sqls.length !== 13
+        || !(input.Sqls[0] as string).startsWith(expectedSql)
+        || !(input.Sqls[12] as string).startsWith(expectedSql2)
+      ) {
+        throw new Error('update report view sqls are not expected');
+      }
+      return { Id: 'Id-1' };
+    })
+      .resolves({ Id: 'Id-2' });
+    redshiftDataMock.on(DescribeStatementCommand).resolves({ Status: 'FINISHED' });
+    const resp = await handler(updateServerlessEvent3, context, callback) as CdkCustomResourceResponse;
+    expect(resp.Status).toEqual('SUCCESS');
+    expect(redshiftDataMock).toHaveReceivedCommandTimes(BatchExecuteStatementCommand, 4);
+
   });
 
   test('Updated schemas and views only in Redshift serverless in update stack from empty appIds', async () => {

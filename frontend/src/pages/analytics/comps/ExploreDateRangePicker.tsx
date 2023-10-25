@@ -18,13 +18,13 @@ import {
   SelectProps,
 } from '@cloudscape-design/components';
 import i18n from 'i18n';
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { ExploreGroupColumn } from 'ts/explore-types';
 
 export const DEFAULT_DAY_RANGE: DateRangePickerProps.RelativeOption = {
-  key: 'previous-1-day',
-  amount: 1,
+  key: 'previous-7-day',
+  amount: 7,
   unit: 'day',
   type: 'relative',
 };
@@ -45,6 +45,7 @@ export const DEFAULT_MONTH_RANGE: DateRangePickerProps.RelativeOption = {
 interface IExploreDateRangePickerProps {
   dateRangeValue: DateRangePickerProps.Value | null;
   timeGranularity: SelectProps.Option;
+  timeGranularityVisible: boolean;
   setDateRangeValue: (value: DateRangePickerProps.Value) => void;
   setTimeGranularity: (value: SelectProps.Option) => void;
 }
@@ -55,12 +56,19 @@ const ExploreDateRangePicker: React.FC<IExploreDateRangePickerProps> = (
   const {
     dateRangeValue,
     timeGranularity,
+    timeGranularityVisible,
     setDateRangeValue,
     setTimeGranularity,
   } = props;
   const { t } = useTranslation();
 
   const relativeOptions: ReadonlyArray<DateRangePickerProps.RelativeOption> = [
+    {
+      key: 'previous-1-day',
+      amount: 1,
+      unit: 'day',
+      type: 'relative',
+    },
     DEFAULT_DAY_RANGE,
     DEFAULT_WEEK_RANGE,
     {
@@ -131,27 +139,17 @@ const ExploreDateRangePicker: React.FC<IExploreDateRangePickerProps> = (
     return { valid: true };
   };
 
-  useEffect(() => {
-    if (timeGranularity.value === ExploreGroupColumn.DAY) {
-      setDateRangeValue(DEFAULT_DAY_RANGE);
-    }
-    if (timeGranularity.value === ExploreGroupColumn.WEEK) {
-      setDateRangeValue(DEFAULT_WEEK_RANGE);
-    }
-    if (timeGranularity.value === ExploreGroupColumn.MONTH) {
-      setDateRangeValue(DEFAULT_MONTH_RANGE);
-    }
-  }, [timeGranularity]);
-
   return (
     <div className="cs-analytics-data-range">
-      <Select
-        selectedOption={timeGranularity}
-        options={timeGranularityOptions}
-        onChange={(event) => {
-          setTimeGranularity(event.detail.selectedOption);
-        }}
-      />
+      {timeGranularityVisible && (
+        <Select
+          selectedOption={timeGranularity}
+          options={timeGranularityOptions}
+          onChange={(event) => {
+            setTimeGranularity(event.detail.selectedOption);
+          }}
+        />
+      )}
       <DateRangePicker
         onChange={({ detail }) => {
           setDateRangeValue(detail.value as DateRangePickerProps.Value);

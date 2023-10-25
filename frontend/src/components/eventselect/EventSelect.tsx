@@ -113,6 +113,7 @@ const EventsSelect: React.FC<EventsSelectProps> = (
                   isMultiSelect={element.isMultiSelect}
                   categories={eventOptionList}
                   loading={loading}
+                  disabled={element.disabled}
                 />
               </div>
               {!disableAddCondition && (

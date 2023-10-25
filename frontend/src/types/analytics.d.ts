@@ -95,6 +95,14 @@ declare global {
     readonly displayValue: string;
   }
 
+  interface IColumnAttribute {
+    readonly category: ConditionCategory;
+    readonly property: string;
+    readonly dataType: MetadataValueType;
+  }
+
+  type GroupingCondition = IColumnAttribute;
+
   interface IExploreRequest {
     readonly action: ExploreRequestAction;
     readonly chartType: QuickSightChartType;
@@ -129,7 +137,9 @@ declare global {
     readonly maxStep?: number;
     readonly pathAnalysis?: IPathAnalysisParameter;
     readonly pairEventAndConditions?: IPairEventAndCondition[];
+    readonly groupCondition?: GroupingCondition;
   }
+
   interface ICondition {
     readonly category: string;
     readonly property: string;

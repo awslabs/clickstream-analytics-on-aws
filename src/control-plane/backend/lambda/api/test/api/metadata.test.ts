@@ -23,7 +23,7 @@ import { mockClient } from 'aws-sdk-client-mock';
 import request from 'supertest';
 import { metadataEventExistedMock, MOCK_APP_ID, MOCK_EVENT_PARAMETER_NAME, MOCK_EVENT_NAME, MOCK_PROJECT_ID, MOCK_TOKEN, MOCK_USER_ATTRIBUTE_NAME, tokenMock } from './ddb-mock';
 import { analyticsMetadataTable, dictionaryTableName, prefixMonthGSIName } from '../../common/constants';
-import { MetadataParameterType, MetadataPlatform, MetadataSource, MetadataValueType } from '../../common/explore-types';
+import { ConditionCategory, MetadataParameterType, MetadataPlatform, MetadataSource, MetadataValueType } from '../../common/explore-types';
 import { app, server } from '../../index';
 import 'aws-sdk-client-mock-jest';
 
@@ -276,6 +276,7 @@ function displayDataMock(m: any) {
         PresetEventParameters: [
           {
             name: MOCK_EVENT_PARAMETER_NAME,
+            eventName: MOCK_EVENT_NAME,
             dataType: MetadataValueType.STRING,
             description: {
               'en-US': 'mock preset event parameter description in built-in',
@@ -432,12 +433,86 @@ describe('Metadata Event test', () => {
       Items: [],
     });
     const res = await request(app)
-      .get(`/api/metadata/event/${MOCK_EVENT_NAME}?projectId=${MOCK_PROJECT_ID}&appId=${MOCK_APP_ID}`);
+      .get(`/api/metadata/event/${MOCK_EVENT_NAME}NoExist?projectId=${MOCK_PROJECT_ID}&appId=${MOCK_APP_ID}`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(404);
     expect(res.body).toEqual({
       success: false,
       message: 'Event not found',
+    });
+  });
+  it('Get preset event when no data in DDB', async () => {
+    ddbMock.on(QueryCommand).resolves({
+      Items: [],
+    });
+    const res = await request(app)
+      .get(`/api/metadata/event/${MOCK_EVENT_NAME}?projectId=${MOCK_PROJECT_ID}&appId=${MOCK_APP_ID}`);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({
+      success: true,
+      message: '',
+      data: {
+        id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}`,
+        prefix: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
+        month: '#202303',
+        associatedParameters: [
+          {
+            id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}#${MOCK_EVENT_PARAMETER_NAME}#${MetadataValueType.STRING}`,
+            month: '#202303',
+            prefix: `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
+            projectId: MOCK_PROJECT_ID,
+            appId: MOCK_APP_ID,
+            category: ConditionCategory.EVENT,
+            metadataSource: MetadataSource.PRESET,
+            name: MOCK_EVENT_PARAMETER_NAME,
+            eventName: MOCK_EVENT_NAME,
+            displayName: MOCK_EVENT_PARAMETER_NAME,
+            description: {
+              'en-US': 'mock preset event parameter description in built-in',
+              'zh-CN': '内置事件参数的描述',
+            },
+            parameterType: 'Public',
+            hasData: false,
+            platform: [],
+            valueType: MetadataValueType.STRING,
+            values: [],
+          },
+          {
+            id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}#${MOCK_EVENT_PARAMETER_NAME}11#${MetadataValueType.INTEGER}`,
+            month: '#202303',
+            prefix: `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
+            projectId: MOCK_PROJECT_ID,
+            appId: MOCK_APP_ID,
+            category: ConditionCategory.EVENT,
+            metadataSource: MetadataSource.CUSTOM,
+            name: `${MOCK_EVENT_PARAMETER_NAME}11`,
+            eventName: MOCK_EVENT_NAME,
+            displayName: `${MOCK_EVENT_PARAMETER_NAME}11`,
+            description: {
+              'en-US': '',
+              'zh-CN': '',
+            },
+            parameterType: 'Public',
+            hasData: false,
+            platform: [],
+            valueType: MetadataValueType.INTEGER,
+            values: [],
+          },
+        ],
+        hasData: false,
+        platform: [],
+        projectId: MOCK_PROJECT_ID,
+        appId: MOCK_APP_ID,
+        name: MOCK_EVENT_NAME,
+        metadataSource: MetadataSource.PRESET,
+        dataVolumeLastDay: 0,
+        displayName: `display name of event ${MOCK_EVENT_NAME}`,
+        description: {
+          'en-US': 'mock event description in built-in',
+          'zh-CN': '内置事件的描述',
+        },
+      },
     });
   });
   it('Get metadata event list', async () => {
@@ -779,6 +854,7 @@ describe('Metadata Event test', () => {
                 valueType: MetadataValueType.INTEGER,
                 category: 'event',
                 values: [
+                  { value: 'value-02', displayValue: 'value-02' },
                   { value: 'value-01', displayValue: `display name of dictionary ${MOCK_EVENT_PARAMETER_NAME}11(Integer) value-01` },
                 ],
               },
@@ -828,6 +904,56 @@ describe('Metadata Event test', () => {
           },
         ],
         totalCount: 2,
+      },
+    });
+  });
+  it('Get metadata event list when no data in DDB', async () => {
+    jest
+      .useFakeTimers()
+      .setSystemTime(new Date('2023-02-02'));
+    ddbMock.on(QueryCommand, {
+      TableName: analyticsMetadataTable,
+      IndexName: prefixMonthGSIName,
+      KeyConditionExpression: '#prefix= :prefix',
+      ExpressionAttributeNames: {
+        '#prefix': 'prefix',
+      },
+      ExpressionAttributeValues: {
+        ':prefix': `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
+      },
+      ScanIndexForward: false,
+    }).resolves({
+      Items: [],
+    });
+    const res = await request(app)
+      .get(`/api/metadata/events?projectId=${MOCK_PROJECT_ID}&appId=${MOCK_APP_ID}`);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({
+      success: true,
+      message: '',
+      data: {
+        items: [
+          {
+            id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}`,
+            month: '#202302',
+            prefix: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
+            projectId: MOCK_PROJECT_ID,
+            appId: MOCK_APP_ID,
+            name: `${MOCK_EVENT_NAME}`,
+            displayName: `display name of event ${MOCK_EVENT_NAME}`,
+            description: {
+              'en-US': 'mock event description in built-in',
+              'zh-CN': '内置事件的描述',
+            },
+            metadataSource: MetadataSource.PRESET,
+            hasData: false,
+            dataVolumeLastDay: 0,
+            associatedParameters: [],
+            platform: [],
+          },
+        ],
+        totalCount: 1,
       },
     });
   });
@@ -1030,12 +1156,75 @@ describe('Metadata Event Attribute test', () => {
       Items: [],
     });
     const res = await request(app)
-      .get(`/api/metadata/event_parameter?projectId=${MOCK_PROJECT_ID}&appId=${MOCK_APP_ID}&name=${MOCK_EVENT_PARAMETER_NAME}&type=String`);
+      .get(`/api/metadata/event_parameter?projectId=${MOCK_PROJECT_ID}&appId=${MOCK_APP_ID}&name=${MOCK_EVENT_PARAMETER_NAME}NoExist&type=String`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(404);
     expect(res.body).toEqual({
       success: false,
       message: 'Event attribute not found',
+    });
+  });
+  it('Get metadata event attribute by name when no data in DDB', async () => {
+    jest
+      .useFakeTimers()
+      .setSystemTime(new Date('2023-03-02'));
+    ddbMock.on(QueryCommand, {
+      TableName: analyticsMetadataTable,
+      IndexName: prefixMonthGSIName,
+      KeyConditionExpression: '#prefix= :prefix',
+      ExpressionAttributeNames: {
+        '#prefix': 'prefix',
+      },
+      ExpressionAttributeValues: {
+        ':prefix': `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
+      },
+      ScanIndexForward: false,
+    }).resolves({
+      Items: [],
+    });
+    const res = await request(app)
+      .get(`/api/metadata/event_parameter?projectId=${MOCK_PROJECT_ID}&appId=${MOCK_APP_ID}&name=${MOCK_EVENT_PARAMETER_NAME}&type=${MetadataValueType.STRING}`);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({
+      success: true,
+      message: '',
+      data: {
+        associatedEvents: [
+          {
+            name: MOCK_EVENT_NAME,
+            prefix: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
+            id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}`,
+            projectId: MOCK_PROJECT_ID,
+            appId: MOCK_APP_ID,
+            metadataSource: MetadataSource.PRESET,
+            displayName: `display name of event ${MOCK_EVENT_NAME}`,
+            description: {
+              'en-US': 'mock event description in built-in',
+              'zh-CN': '内置事件的描述',
+            },
+          },
+        ],
+        id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}#${MOCK_EVENT_PARAMETER_NAME}#${MetadataValueType.STRING}`,
+        month: '#202303',
+        prefix: `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
+        projectId: MOCK_PROJECT_ID,
+        appId: MOCK_APP_ID,
+        name: MOCK_EVENT_PARAMETER_NAME,
+        description: {
+          'en-US': 'mock preset event parameter description in built-in',
+          'zh-CN': '内置事件参数的描述',
+        },
+        displayName: MOCK_EVENT_PARAMETER_NAME,
+        eventName: '',
+        category: ConditionCategory.EVENT,
+        metadataSource: MetadataSource.PRESET,
+        parameterType: MetadataParameterType.PUBLIC,
+        hasData: false,
+        platform: [],
+        valueType: MetadataValueType.STRING,
+        values: [],
+      },
     });
   });
   it('Get metadata event attribute list', async () => {
@@ -1200,6 +1389,82 @@ describe('Metadata Event Attribute test', () => {
       error: 'Error',
     });
   });
+  it('Get metadata event attribute list when no data in DDB', async () => {
+    jest
+      .useFakeTimers()
+      .setSystemTime(new Date('2023-02-02'));
+    ddbMock.on(QueryCommand, {
+      TableName: analyticsMetadataTable,
+      IndexName: prefixMonthGSIName,
+      KeyConditionExpression: '#prefix= :prefix',
+      ExpressionAttributeNames: {
+        '#prefix': 'prefix',
+      },
+      ExpressionAttributeValues: {
+        ':prefix': `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
+      },
+      ScanIndexForward: false,
+    }).resolves({
+      Items: [],
+    });
+    const res = await request(app)
+      .get(`/api/metadata/event_parameters?projectId=${MOCK_PROJECT_ID}&appId=${MOCK_APP_ID}`);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({
+      success: true,
+      message: '',
+      data: {
+        items: [
+          {
+            associatedEvents: [],
+            id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}#${MOCK_EVENT_PARAMETER_NAME}#${MetadataValueType.STRING}`,
+            month: '#202302',
+            prefix: `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
+            projectId: MOCK_PROJECT_ID,
+            appId: MOCK_APP_ID,
+            name: MOCK_EVENT_PARAMETER_NAME,
+            description: {
+              'en-US': 'mock preset event parameter description in built-in',
+              'zh-CN': '内置事件参数的描述',
+            },
+            displayName: MOCK_EVENT_PARAMETER_NAME,
+            eventName: MOCK_EVENT_NAME,
+            category: ConditionCategory.EVENT,
+            metadataSource: MetadataSource.PRESET,
+            parameterType: MetadataParameterType.PUBLIC,
+            hasData: false,
+            platform: [],
+            valueType: MetadataValueType.STRING,
+            values: [],
+          },
+          {
+            associatedEvents: [],
+            id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}#${MOCK_EVENT_PARAMETER_NAME}11#${MetadataValueType.INTEGER}`,
+            month: '#202302',
+            prefix: `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
+            projectId: MOCK_PROJECT_ID,
+            appId: MOCK_APP_ID,
+            name: `${MOCK_EVENT_PARAMETER_NAME}11`,
+            description: {
+              'en-US': '',
+              'zh-CN': '',
+            },
+            displayName: `${MOCK_EVENT_PARAMETER_NAME}11`,
+            eventName: `${MOCK_EVENT_NAME}`,
+            category: ConditionCategory.EVENT,
+            metadataSource: MetadataSource.CUSTOM,
+            parameterType: MetadataParameterType.PUBLIC,
+            hasData: false,
+            platform: [],
+            valueType: MetadataValueType.INTEGER,
+            values: [],
+          },
+        ],
+        totalCount: 2,
+      },
+    });
+  });
 
   afterAll((done) => {
     server.close();
@@ -1320,7 +1585,7 @@ describe('Metadata User Attribute test', () => {
               'zh-CN': '内置用户属性的描述',
             },
             displayName: 'display name of user parameter user-attribute-mock',
-            category: 'user',
+            category: ConditionCategory.USER,
             hasData: true,
             metadataSource: MetadataSource.PRESET,
             valueType: MetadataValueType.STRING,
@@ -1342,7 +1607,7 @@ describe('Metadata User Attribute test', () => {
               'zh-CN': '',
             },
             displayName: `${MOCK_USER_ATTRIBUTE_NAME}1`,
-            category: 'user',
+            category: ConditionCategory.USER,
             metadataSource: MetadataSource.CUSTOM,
             valueType: MetadataValueType.FLOAT,
             hasData: false,
@@ -1366,6 +1631,56 @@ describe('Metadata User Attribute test', () => {
       success: false,
       message: 'Unexpected error occurred at server.',
       error: 'Error',
+    });
+  });
+  it('Get metadata user attribute list when no data in DDB', async () => {
+    jest
+      .useFakeTimers()
+      .setSystemTime(new Date('2023-02-02'));
+    ddbMock.on(QueryCommand, {
+      TableName: analyticsMetadataTable,
+      IndexName: prefixMonthGSIName,
+      KeyConditionExpression: '#prefix= :prefix',
+      ExpressionAttributeNames: {
+        '#prefix': 'prefix',
+      },
+      ExpressionAttributeValues: {
+        ':prefix': `USER_ATTRIBUTE#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
+      },
+      ScanIndexForward: false,
+    }).resolves({
+      Items: [],
+    });
+    const res = await request(app)
+      .get(`/api/metadata/user_attributes?projectId=${MOCK_PROJECT_ID}&appId=${MOCK_APP_ID}`);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({
+      success: true,
+      message: '',
+      data: {
+        items: [
+          {
+            id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_USER_ATTRIBUTE_NAME}#${MetadataValueType.STRING}`,
+            month: '#202302',
+            prefix: `USER_ATTRIBUTE#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
+            projectId: MOCK_PROJECT_ID,
+            appId: MOCK_APP_ID,
+            name: MOCK_USER_ATTRIBUTE_NAME,
+            description: {
+              'en-US': 'mock preset user attribute description in built-in',
+              'zh-CN': '内置用户属性的描述',
+            },
+            displayName: 'display name of user parameter user-attribute-mock',
+            category: ConditionCategory.USER,
+            hasData: false,
+            metadataSource: MetadataSource.PRESET,
+            valueType: MetadataValueType.STRING,
+            values: [],
+          },
+        ],
+        totalCount: 1,
+      },
     });
   });
 
