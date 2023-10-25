@@ -135,7 +135,7 @@ export class ReportingService {
   private async _buildFunnelQuickSightDashboard(viewName: string, sql: string, tableVisualViewName: string,
     sqlTable: string, query: any, sheetId: string) {
 
-    const datasetColumns = JSON.parse(JSON.stringify(funnelVisualColumns));
+    const datasetColumns = [...funnelVisualColumns];
     const visualProjectedColumns = [
       'event_name',
       'event_date',
@@ -288,7 +288,7 @@ export class ReportingService {
 
       const hasGrouping = query.groupCondition === undefined ? false: true;
       const projectedColumns = ['event_date', 'event_name', 'count'];
-      const datasetColumns = JSON.parse(JSON.stringify(eventVisualColumns));
+      const datasetColumns = [...eventVisualColumns];
       if (hasGrouping) {
         datasetColumns.push({
           Name: 'group_col',
@@ -529,7 +529,7 @@ export class ReportingService {
         'event_date',
         'retention',
       ];
-      const datasetColumns = JSON.parse(JSON.stringify(retentionAnalysisVisualColumns));
+      const datasetColumns = [...retentionAnalysisVisualColumns];
       if (hasGrouping) {
         datasetColumns.push({
           Name: 'group_col',
