@@ -316,7 +316,7 @@ async function updateSchemas(props: ResourcePropertiesType, biUsername: string, 
 }
 
 
-function getUpdatableSql(sqlOrViewDefs: SQLDef[], oldSqlArray: string[], mustacheParam: MustacheParamType) {
+function getUpdatableSql(sqlOrViewDefs: SQLDef[], oldSqlArray: string[], mustacheParam: MustacheParamType, path: string = '/opt') {
 
   const sqlStatements: string[] = [];
   for (const schemaOrViewDef of sqlOrViewDefs) {
@@ -324,10 +324,10 @@ function getUpdatableSql(sqlOrViewDefs: SQLDef[], oldSqlArray: string[], mustach
 
     if (!oldSqlArray.includes(schemaOrViewDef.sqlFile)) {
       logger.info(`new sql: ${schemaOrViewDef.sqlFile}`);
-      sqlStatements.push(getSqlContent(schemaOrViewDef.sqlFile, mustacheParam));
+      sqlStatements.push(getSqlContent(schemaOrViewDef.sqlFile, mustacheParam, path));
     } else if (schemaOrViewDef.updatable === 'true') {
       logger.info(`update sql: ${schemaOrViewDef.sqlFile}`);
-      sqlStatements.push(getSqlContent(schemaOrViewDef.sqlFile, mustacheParam));
+      sqlStatements.push(getSqlContent(schemaOrViewDef.sqlFile, mustacheParam, path));
     } else {
       logger.info(`skip update ${schemaOrViewDef.sqlFile} due to it is not updatable.`);
     }
@@ -430,7 +430,7 @@ async function updateViewForReporting(props: ResourcePropertiesType, oldProps: R
       ...SQL_TEMPLATE_PARAMETER,
     };
 
-    const sqlStatements2 = getUpdatableSql(props.reportingViewsDef, appUpdateProps.oldViewSqls, mustacheParam);
+    const sqlStatements2 = getUpdatableSql(props.reportingViewsDef, appUpdateProps.oldViewSqls, mustacheParam, '/opt/dashboard');
 
     //grant select on views to bi user.
     const views: string[] = [];
