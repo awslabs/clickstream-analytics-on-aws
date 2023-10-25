@@ -599,7 +599,7 @@ function groupAssociatedEventParametersByName(events: IMetadataEvent[], paramete
 function getCurMonthStr() {
   const year = new Date().getFullYear();
   const month = new Date().getMonth() + 1;
-  return `#${year}${month < 10 ? '0' + month : month}`;
+  return `#${year}${month.toString().padStart(2, '0')}`;
 }
 
 function getDataFromLastDay(metadata: IMetadataRaw) {
