@@ -1900,7 +1900,7 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
               Action: 'cloudwatch:PutMetricData',
               Condition: {
                 StringEquals: {
-                  'cloudwatch:namespace': 'Clickstream/DataModeling/Redshift',
+                  'cloudwatch:namespace': MetricsNamespace.REDSHIFT_ANALYTICS,
                 },
               },
               Effect: 'Allow',
@@ -2024,7 +2024,7 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
               Action: 'cloudwatch:PutMetricData',
               Condition: {
                 StringEquals: {
-                  'cloudwatch:namespace': 'Clickstream/DataModeling/Redshift',
+                  'cloudwatch:namespace': MetricsNamespace.REDSHIFT_ANALYTICS,
                 },
               },
               Effect: 'Allow',
