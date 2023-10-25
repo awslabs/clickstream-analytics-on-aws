@@ -451,7 +451,7 @@
           "name": "_traffic_source_medium",
           "dataType": "string",
           "description": {
-            "en-US": "",
+            "en-US": "Traffic medium. Use this attribute to store the medium that acquired user when events were logged. Example: Email, Paid search, Search engine",
             "zh-CN": "流量媒介，存储事件记录时获取用户的媒介，例如：电子邮件、付费搜索、搜索引擎"
           }
         },
@@ -459,7 +459,7 @@
           "name": "_traffic_source_name",
           "dataType": "string",
           "description": {
-            "en-US": "",
+            "en-US": "Traffic name. Use this attribute to store the marketing campaign that acquired user when events were logged. Example: Summer promotion",
             "zh-CN": "流量名称，存储事件记录时获取用户的营销活动，例如：夏季促销"
           }
         },
@@ -467,7 +467,7 @@
           "name": "_traffic_source_source",
           "dataType": "string",
           "description": {
-            "en-US": "",
+            "en-US": "Traffic source. Name of the network source that acquired the user when the event were reported. Example: Google, Facebook, Bing, Baidu",
             "zh-CN": "流量来源，事件报告时获取的网络来源的名称，例如：Google, Facebook, Bing, Baidu"
           }
         },
@@ -475,7 +475,7 @@
           "name": "_channel",
           "dataType": "string",
           "description": {
-            "en-US": "",
+            "en-US": "Install source, it is the channel for app was downloaded",
             "zh-CN": "安装源，app下载的渠道"
           }
         },
