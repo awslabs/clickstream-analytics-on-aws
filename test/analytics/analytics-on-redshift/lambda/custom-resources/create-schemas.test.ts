@@ -294,9 +294,6 @@ describe('Custom resource - Create schemas for applications in Redshift database
       '/opt/dashboard/clickstream_user_attr_view.sql': testSqlContent(rootPath + 'dashboard/clickstream_user_attr_view.sql'),
       '/opt/dashboard/clickstream_user_dim_mv_1.sql': testSqlContent(rootPath + 'dashboard/clickstream_user_dim_mv_1.sql'),
       '/opt/dashboard/clickstream_user_dim_mv_2.sql': testSqlContent(rootPath + 'dashboard/clickstream_user_dim_mv_2.sql'),
-      '/opt/clickstream_user_dim_view.sql': testSqlContent(rootPath + 'dashboard/clickstream_user_dim_view.sql'),
-      '/opt/clickstream_session_view.sql': testSqlContent(rootPath + 'dashboard/clickstream_session_view.sql'),
-      '/opt/clickstream_event_view.sql': testSqlContent(rootPath + 'dashboard/clickstream_event_view.sql'),
       '/opt/clickstream_event_parameter_test_view.sql': testSqlContent(rootPath + 'dashboard/clickstream_event_parameter_view.sql'),
       '/opt/dashboard/clickstream_event_parameter_test_view.sql': testSqlContent(rootPath + 'dashboard/clickstream_event_parameter_view.sql'),
       '/opt/grant-permissions-to-bi-user.sql': testSqlContent(rootPath + 'grant-permissions-to-bi-user.sql'),
@@ -573,14 +570,12 @@ describe('Custom resource - Create schemas for applications in Redshift database
     });
     redshiftDataMock.on(BatchExecuteStatementCommand).callsFakeOnce(input => {
       const expectedSql = 'CREATE SCHEMA IF NOT EXISTS app2';
-      console.log(input.Sqls.length);
       if (input.Sqls.length !== 17 || input.Sqls[0] !== expectedSql) {
         throw new Error('create schema sqls are not expected');
       }
       return { Id: 'Id-1' };
     }).callsFakeOnce(input => {
       const expectedSql = 'CREATE TABLE IF NOT EXISTS app1.clickstream_log';
-      console.log(input.Sqls.length);
       if (input.Sqls.length !== 13 || !(input.Sqls[0] as string).startsWith(expectedSql)) {
         throw new Error('update schema sqls are not expected');
       }
@@ -599,15 +594,14 @@ describe('Custom resource - Create schemas for applications in Redshift database
     }).callsFakeOnce(input => {
       const expectedSql = 'CREATE OR REPLACE VIEW app1.clickstream_user_dim_view';
       const expectedSql2 = 'GRANT SELECT ON app1.clickstream_user_attr_view TO clickstream_report_user_abcde;';
-      if (input.Sqls.length !== 13
+      if (input.Sqls.length !== 12
         || !(input.Sqls[0] as string).startsWith(expectedSql)
-        || !(input.Sqls[12] as string).startsWith(expectedSql2)
+        || !(input.Sqls[11] as string).startsWith(expectedSql2)
       ) {
         throw new Error('update report view sqls are not expected');
       }
       return { Id: 'Id-1' };
-    })
-      .resolves({ Id: 'Id-2' });
+    }).resolves({ Id: 'Id-2' });
     redshiftDataMock.on(DescribeStatementCommand).resolves({ Status: 'FINISHED' });
     const resp = await handler(updateServerlessEvent3, context, callback) as CdkCustomResourceResponse;
     expect(resp.Status).toEqual('SUCCESS');
