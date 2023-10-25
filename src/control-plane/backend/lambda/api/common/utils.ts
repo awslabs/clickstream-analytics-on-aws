@@ -691,7 +691,6 @@ function getParameterByNameAndType(metadata: IMetadataRaw[], parameterName: stri
 IMetadataEventParameter | undefined {
   const filteredMetadata = metadata.filter((r: IMetadataRaw) => r.name === parameterName && r.valueType === valueType);
   if (filteredMetadata.length === 0) {
-    // Add built-in metadata
     return;
   }
   const groupEvents: IMetadataEvent[] = [];
