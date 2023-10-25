@@ -142,13 +142,9 @@ describe('Test update pipeline when not eanble data processing or data modeling'
         changeEnableReporting={() => {
           return;
         }}
-        changeQuickSightSelectedUser={() => {
-          return;
-        }}
         changeQuickSightAccountName={() => {
           return;
         }}
-        quickSightUserEmptyError={false}
       />
     );
 
@@ -279,13 +275,9 @@ describe('Test update pipeline when not eanble data processing or data modeling'
         changeEnableReporting={() => {
           return;
         }}
-        changeQuickSightSelectedUser={() => {
-          return;
-        }}
         changeQuickSightAccountName={() => {
           return;
         }}
-        quickSightUserEmptyError={false}
       />
     );
 

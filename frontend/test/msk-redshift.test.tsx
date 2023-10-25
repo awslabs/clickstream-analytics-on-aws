@@ -137,13 +137,9 @@ describe('Test data processing settings', () => {
         changeEnableReporting={() => {
           return;
         }}
-        changeQuickSightSelectedUser={() => {
-          return;
-        }}
         changeQuickSightAccountName={() => {
           return;
         }}
-        quickSightUserEmptyError={false}
       />
     );
 
@@ -265,13 +261,9 @@ describe('Test redsfhit settings', () => {
         changeEnableReporting={() => {
           return;
         }}
-        changeQuickSightSelectedUser={() => {
-          return;
-        }}
         changeQuickSightAccountName={() => {
           return;
         }}
-        quickSightUserEmptyError={false}
       />
     );
 
@@ -395,13 +387,9 @@ describe('Test redsfhit settings', () => {
         changeEnableReporting={() => {
           return;
         }}
-        changeQuickSightSelectedUser={() => {
-          return;
-        }}
         changeQuickSightAccountName={() => {
           return;
         }}
-        quickSightUserEmptyError={false}
       />
     );
 
@@ -527,13 +515,9 @@ describe('Test MSK kafkaConnector settings', () => {
         changeEnableReporting={() => {
           return;
         }}
-        changeQuickSightSelectedUser={() => {
-          return;
-        }}
         changeQuickSightAccountName={() => {
           return;
         }}
-        quickSightUserEmptyError={false}
       />
     );
 
@@ -668,13 +652,9 @@ describe('Test MSK kafkaConnector settings', () => {
         changeEnableReporting={() => {
           return;
         }}
-        changeQuickSightSelectedUser={() => {
-          return;
-        }}
         changeQuickSightAccountName={() => {
           return;
         }}
-        quickSightUserEmptyError={false}
       />
     );
 

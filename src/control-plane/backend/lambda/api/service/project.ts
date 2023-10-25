@@ -11,9 +11,8 @@
  *  and limitations under the License.
  */
 
-import { CreateDashboardCommandInput, DataSetImportMode, QuickSight, SheetDefinition } from '@aws-sdk/client-quicksight';
+import { QuickSight } from '@aws-sdk/client-quicksight';
 import { v4 as uuidv4 } from 'uuid';
-import { createDataSet } from './quicksight/reporting-utils';
 import { DEFAULT_DASHBOARD_NAME, DEFAULT_SOLUTION_OPERATOR, OUTPUT_REPORT_DASHBOARDS_SUFFIX } from '../common/constants-ln';
 import { logger } from '../common/powertools';
 import { aws_sdk_client_common_config } from '../common/sdk-client-config-ln';
@@ -22,7 +21,7 @@ import { getReportingDashboardsUrl, isEmpty, paginateData } from '../common/util
 import { IApplication } from '../model/application';
 import { CPipeline, IPipeline } from '../model/pipeline';
 import { IDashboard, IProject } from '../model/project';
-import { createDashboard, generateEmbedUrlForRegisteredUser, getClickstreamUserArn } from '../store/aws/quicksight';
+import { createPublishDashboard, generateEmbedUrlForRegisteredUser } from '../store/aws/quicksight';
 import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
 
@@ -89,79 +88,10 @@ export class ProjectServ {
       req.body.id = dashboardId;
       req.body.operator = res.get('X-Click-Stream-Operator');
       const dashboard: IDashboard = req.body;
-      if (isEmpty(dashboard.defaultDataSourceArn) || isEmpty(dashboard.ownerPrincipal)) {
+      if (isEmpty(dashboard.defaultDataSourceArn)) {
         return res.status(400).json(new ApiFail('Default data source ARN and owner principal is required.'));
       }
-      // Create dataset in QuickSight
-      const quickSightClient = new QuickSight({
-        region: dashboard.region,
-        ...aws_sdk_client_common_config,
-      });
-      const dataset = await createDataSet(
-        quickSightClient,
-        process.env.AWS_ACCOUNT_ID!,
-        dashboard.ownerPrincipal,
-        dashboard.defaultDataSourceArn, {
-          name: `${dashboard.name}-default-dataset`,
-          tableName: 'ods_events',
-          columns: [
-            {
-              Name: 'event_date',
-              Type: 'DATETIME',
-            },
-            {
-              Name: 'event_name',
-              Type: 'STRING',
-            },
-            {
-              Name: 'x_id',
-              Type: 'STRING',
-            },
-          ],
-          importMode: DataSetImportMode.DIRECT_QUERY,
-          customSql: `select * from ${dashboard.appId}.ods_events`,
-        });
-      // Create dashboard in QuickSight
-      const sheets: SheetDefinition[] = [];
-      for (let sheet of dashboard.sheets) {
-        const sheetDefinition: SheetDefinition = {
-          SheetId: sheet.id,
-          Name: sheet.name,
-        };
-        sheets.push(sheetDefinition);
-      }
-      const principals = await getClickstreamUserArn();
-      const dashboardInput: CreateDashboardCommandInput = {
-        AwsAccountId: process.env.AWS_ACCOUNT_ID,
-        DashboardId: dashboardId,
-        Name: dashboard.name,
-        Definition: {
-          DataSetIdentifierDeclarations: [
-            {
-              Identifier: 'default',
-              DataSetArn: dataset?.Arn,
-            },
-          ],
-          Sheets: sheets,
-          FilterGroups: [],
-          CalculatedFields: [],
-          ParameterDeclarations: [],
-        },
-        Permissions: [{
-          Principal: principals.publishUserArn,
-          Actions: [
-            'quicksight:DescribeDashboard',
-            'quicksight:ListDashboardVersions',
-            'quicksight:QueryDashboard',
-            'quicksight:UpdateDashboard',
-            'quicksight:DeleteDashboard',
-            'quicksight:UpdateDashboardPermissions',
-            'quicksight:DescribeDashboardPermissions',
-            'quicksight:UpdateDashboardPublishedVersion',
-          ],
-        }],
-      };
-      await createDashboard(dashboard.region, dashboardInput);
+      await createPublishDashboard(dashboard);
       const id = await store.createDashboard(dashboard);
       return res.status(201).json(new ApiSuccess({ id }, 'Dashboard created.'));
     } catch (error) {

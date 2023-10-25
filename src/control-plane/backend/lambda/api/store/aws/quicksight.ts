@@ -37,6 +37,15 @@ import {
   SearchFoldersCommand,
   FilterOperator,
   FolderFilterAttribute,
+  CreateAnalysisCommand,
+  CreateAnalysisCommandInput,
+  CreateAnalysisCommandOutput,
+  CreateDataSetCommand,
+  CreateDataSetCommandOutput,
+  CreateDataSetCommandInput,
+  DataSetImportMode,
+  SheetDefinition,
+  ResourcePermission,
 } from '@aws-sdk/client-quicksight';
 import { APIRoleName, awsAccountId, awsRegion, QUICKSIGHT_CONTROL_PLANE_REGION, QUICKSIGHT_EMBED_NO_REPLY_EMAIL, QuickSightEmbedRoleArn } from '../../common/constants';
 import { getPaginatedResults } from '../../common/paginator';
@@ -44,6 +53,8 @@ import { logger } from '../../common/powertools';
 import { SDKClient } from '../../common/sdk-client';
 import { QuickSightAccountInfo, QuickSightUser } from '../../common/types';
 import { generateRandomStr } from '../../common/utils-ln';
+import { IDashboard } from '../../model/project';
+import { dataSetActions } from '../../service/quicksight/dashboard-ln';
 
 const QUICKSIGHT_NAMESPACE = 'default';
 const QUICKSIGHT_PREFIX = 'Clickstream';
@@ -326,6 +337,22 @@ export const getClickstreamUserArn = async (): Promise<QuickSightUserArns> => {
   return { exploreUserArn, publishUserArn, exploreUserName, publishUserName };
 };
 
+export const createDataSet = async (
+  region: string,
+  input: CreateDataSetCommandInput,
+): Promise<CreateDataSetCommandOutput> => {
+  try {
+    const quickSightClient = sdkClient.QuickSightClient({
+      region: region,
+    });
+    const command: CreateDataSetCommand = new CreateDataSetCommand(input);
+    return await quickSightClient.send(command);
+  } catch (err) {
+    logger.error('Create DataSet Error.', { err });
+    throw err;
+  }
+};
+
 export const createDashboard = async (
   region: string,
   input: CreateDashboardCommandInput,
@@ -338,6 +365,22 @@ export const createDashboard = async (
     return await quickSightClient.send(command);
   } catch (err) {
     logger.error('Create Dashboard Error.', { err });
+    throw err;
+  }
+};
+
+export const createAnalysis = async (
+  region: string,
+  input: CreateAnalysisCommandInput,
+): Promise<CreateAnalysisCommandOutput> => {
+  try {
+    const quickSightClient = sdkClient.QuickSightClient({
+      region: region,
+    });
+    const command: CreateAnalysisCommand = new CreateAnalysisCommand(input);
+    return await quickSightClient.send(command);
+  } catch (err) {
+    logger.error('Create Analysis Error.', { err });
     throw err;
   }
 };
@@ -428,6 +471,107 @@ export const moveToFolder = async (
     );
   } catch (err) {
     logger.error('Move to folder Error.', { err });
+    throw err;
+  }
+};
+
+export const createPublishDashboard = async (
+  dashboard: IDashboard,
+): Promise<any> => {
+  try {
+    const principals = await getClickstreamUserArn();
+    // Create dataset in QuickSight
+    const datasetId = randomUUID();
+    const datasetInput: CreateDataSetCommandInput = {
+      AwsAccountId: awsAccountId,
+      DataSetId: datasetId,
+      Name: `dataset-${dashboard.name}-default`,
+      Permissions: [{
+        Principal: principals.publishUserArn,
+        Actions: dataSetActions,
+      }],
+      ImportMode: DataSetImportMode.DIRECT_QUERY,
+      PhysicalTableMap: {
+        PhyTable0: {
+          CustomSql: {
+            DataSourceArn: dashboard.defaultDataSourceArn,
+            Name: 'event',
+            SqlQuery: `select * from ${dashboard.appId}.event`,
+            Columns: [
+              {
+                Name: 'event_date',
+                Type: 'DATETIME',
+              },
+              {
+                Name: 'event_name',
+                Type: 'STRING',
+              },
+            ],
+          },
+        },
+      },
+      DataSetUsageConfiguration: {
+        DisableUseAsDirectQuerySource: false,
+        DisableUseAsImportedSource: false,
+      },
+    };
+    const dataset = await createDataSet(dashboard.region, datasetInput);
+    // Create dashboard in QuickSight
+    const sheets: SheetDefinition[] = [];
+    for (let sheet of dashboard.sheets) {
+      const sheetDefinition: SheetDefinition = {
+        SheetId: sheet.id,
+        Name: sheet.name,
+      };
+      sheets.push(sheetDefinition);
+    }
+    const dashboardPermission: ResourcePermission = {
+      Principal: principals.publishUserArn,
+      Actions: [
+        'quicksight:DescribeDashboard',
+        'quicksight:ListDashboardVersions',
+        'quicksight:QueryDashboard',
+        'quicksight:UpdateDashboard',
+        'quicksight:DeleteDashboard',
+        'quicksight:UpdateDashboardPermissions',
+        'quicksight:DescribeDashboardPermissions',
+        'quicksight:UpdateDashboardPublishedVersion',
+      ],
+    };
+    const dashboardDefinition = {
+      DataSetIdentifierDeclarations: [
+        {
+          Identifier: 'default',
+          DataSetArn: dataset.Arn,
+        },
+      ],
+      Sheets: sheets,
+      FilterGroups: [],
+      CalculatedFields: [],
+      ParameterDeclarations: [],
+    };
+    const dashboardInput: CreateDashboardCommandInput = {
+      AwsAccountId: process.env.AWS_ACCOUNT_ID,
+      DashboardId: dashboard.id,
+      Name: dashboard.name,
+      Definition: dashboardDefinition,
+      Permissions: [dashboardPermission],
+    };
+    await createDashboard(dashboard.region, dashboardInput);
+    const analysisId = randomUUID();
+    const analysisInput: CreateAnalysisCommandInput = {
+      AwsAccountId: process.env.AWS_ACCOUNT_ID,
+      AnalysisId: analysisId,
+      Name: dashboard.name,
+      Definition: dashboardDefinition,
+      Permissions: [dashboardPermission],
+    };
+    await createAnalysis(dashboard.region, analysisInput);
+    await moveToFolder(dashboard.region, dashboard.projectId, datasetId, MemberType.DATASET);
+    await moveToFolder(dashboard.region, dashboard.projectId, dashboard.id, MemberType.DASHBOARD);
+    await moveToFolder(dashboard.region, dashboard.projectId, analysisId, MemberType.ANALYSIS);
+  } catch (err) {
+    logger.error('Create Publish Dashboard Error.', { err });
     throw err;
   }
 };

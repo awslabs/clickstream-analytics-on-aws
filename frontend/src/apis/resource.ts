@@ -98,11 +98,6 @@ const getQuickSightStatus = async () => {
   return result;
 };
 
-const getQuickSightUsers = async () => {
-  const result: any = await apiRequest('get', `/env/quicksight/users`);
-  return result;
-};
-
 const unsubscribQuickSight = async () => {
   const result: any = await apiRequest(
     'post',
@@ -120,14 +115,6 @@ const subscribQuickSight = async (params: {
     `/env/quicksight/subscription`,
     params
   );
-  return result;
-};
-
-const createQuickSightUser = async (params: {
-  email: string;
-  accountName: string;
-}) => {
-  const result: any = await apiRequest('post', `/env/quicksight/user`, params);
   return result;
 };
 
@@ -191,14 +178,12 @@ const checkServicesAvailable = async (params: { region: string }) => {
 
 export {
   fetchStatusWithType,
-  createQuickSightUser,
   get3AZVPCList,
   getCertificates,
   getHostedZoneList,
   getMSKList,
   getQuickSightDetail,
   getQuickSightStatus,
-  getQuickSightUsers,
   getRedshiftCluster,
   getRedshiftServerlessWorkgroup,
   getRegionList,

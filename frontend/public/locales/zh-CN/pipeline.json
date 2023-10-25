@@ -46,7 +46,6 @@
     "redshiftProvisionedClusterEmptyError": "请选择群集",
     "redshiftProvisionedDBUserEmptyError": "请输入数据库用户。",
     "redshiftProvisionedDBUserFormatError": "数据库用户格式错误",
-    "quickSightUserEmptyError": "请选择 QuickSight 用户。",
     "emailInvalid": "电子邮件无效。"
   },
   "create": {
@@ -221,8 +220,6 @@
     "quickSightNotEnterprise": "您的账户中的 QuickSight 版本不是企业版",
     "quickSightNotEnterpriseDesc": "解决方案控制面板需要 QuickSight Enterprise，你可以在 QuickSight 管理控制台中升级版本。",
     "quickSightSubscription": "订阅",
-    "quickSightUser": "QuickSight 用户",
-    "quickSightUserDesc": "为解决方案选择 QuickSight 用户以创建数据集和分析。单击 “新建” 按钮创建新用户。",
     "quickSIghtPlaceholder": "选择 quicksight 用户",
     "ingestSettings": "摄取设置",
     "clusterSize": "集群大小",

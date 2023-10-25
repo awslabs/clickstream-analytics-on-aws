@@ -97,12 +97,6 @@ const Reporting: React.FC<TabContentProps> = (props: TabContentProps) => {
                 {pipelineInfo?.reporting?.quickSight?.accountName || '-'}
               </div>
             </div>
-            <div>
-              <Box variant="awsui-key-label">
-                {t('pipeline:create.quickSightUser')}
-              </Box>
-              <div>{pipelineInfo?.reporting?.quickSight?.user || '-'}</div>
-            </div>
           </SpaceBetween>
         </>
       )}
