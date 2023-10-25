@@ -46,6 +46,7 @@ import {
   DataSetImportMode,
   SheetDefinition,
   ResourcePermission,
+  CreateFolderCommandOutput,
 } from '@aws-sdk/client-quicksight';
 import { APIRoleName, awsAccountId, awsRegion, QUICKSIGHT_CONTROL_PLANE_REGION, QUICKSIGHT_EMBED_NO_REPLY_EMAIL, QuickSightEmbedRoleArn } from '../../common/constants';
 import { getPaginatedResults } from '../../common/paginator';
@@ -407,7 +408,7 @@ export const searchFolder = async (
     }
     return;
   } catch (err) {
-    logger.error('Create Folder Error.', { err });
+    logger.error('Search Folder Error.', { err });
     throw err;
   }
 };
@@ -415,7 +416,7 @@ export const searchFolder = async (
 export const createFolder = async (
   region: string,
   name: string,
-): Promise<string | undefined> => {
+): Promise<CreateFolderCommandOutput> => {
   try {
     const quickSightClient = sdkClient.QuickSightClient({
       region: region,
@@ -425,8 +426,7 @@ export const createFolder = async (
       FolderId: randomUUID(),
       Name: name,
     });
-    const res = await quickSightClient.send(command);
-    return res.FolderId;
+    return await quickSightClient.send(command);
   } catch (err) {
     logger.error('Create Folder Error.', { err });
     throw err;
@@ -458,7 +458,8 @@ export const moveToFolder = async (
   try {
     let folderId = await searchFolder(region, folderName);
     if (!folderId) {
-      folderId = await createFolder(region, folderName);
+      const folderRes = await createFolder(region, folderName);
+      folderId = folderRes.FolderId;
     }
     await createFolderMembership(
       region,

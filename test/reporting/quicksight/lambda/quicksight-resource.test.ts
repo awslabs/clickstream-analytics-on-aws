@@ -15,15 +15,21 @@ import {
   CreateAnalysisCommand,
   CreateDashboardCommand,
   CreateDataSetCommand,
+  CreateFolderCommand,
+  CreateFolderMembershipCommand,
   DeleteAnalysisCommand,
   DeleteDashboardCommand,
   DeleteDataSetCommand,
+  DeleteFolderCommand,
+  DeleteFolderMembershipCommand,
   DescribeAnalysisCommand,
   DescribeDashboardCommand,
   DescribeDataSetCommand,
+  ListFolderMembersCommand,
   QuickSightClient,
   ResourceExistsException,
   ResourceNotFoundException,
+  SearchFoldersCommand,
   UpdateAnalysisCommand,
   UpdateDashboardCommand,
   UpdateDataSetCommand,
@@ -241,7 +247,15 @@ describe('QuickSight Lambda function', () => {
   });
 
   test('Create QuickSight dashboard - Empty app ids', async () => {
+    quickSightClientMock.on(SearchFoldersCommand).resolves({
+      FolderSummaryList: [],
+    });
+    quickSightClientMock.on(CreateFolderCommand).resolves({});
+    quickSightClientMock.on(CreateFolderMembershipCommand).resolves({});
     const resp = await handler(emptyAppIdEvent, context) as CdkCustomResourceResponse;
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(SearchFoldersCommand, 1);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateFolderCommand, 1);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateFolderMembershipCommand, 0);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateDataSetCommand, 0);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateAnalysisCommand, 0);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateDashboardCommand, 0);
@@ -288,8 +302,16 @@ describe('QuickSight Lambda function', () => {
       DashboardId: 'dashboard_0',
       Status: 200,
     });
+    quickSightClientMock.on(SearchFoldersCommand).resolves({
+      FolderSummaryList: [],
+    });
+    quickSightClientMock.on(CreateFolderCommand).resolves({});
+    quickSightClientMock.on(CreateFolderMembershipCommand).resolves({});
 
     const resp = await handler(basicEvent, context) as CdkCustomResourceResponse;
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(SearchFoldersCommand, 1);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateFolderCommand, 1);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateFolderMembershipCommand, 4);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeAnalysisCommand, 1);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDashboardCommand, 1);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDataSetCommand, 2);
@@ -377,8 +399,20 @@ describe('QuickSight Lambda function', () => {
       DashboardId: 'dashboard_1',
       Status: 200,
     });
+    quickSightClientMock.on(SearchFoldersCommand).resolvesOnce({
+      FolderSummaryList: [],
+    }).resolves({
+      FolderSummaryList: [{
+        FolderId: 'clickstream_folder_xxx',
+      }],
+    });
+    quickSightClientMock.on(CreateFolderCommand).resolves({});
+    quickSightClientMock.on(CreateFolderMembershipCommand).resolves({});
 
     const resp = await handler(multiAppIdEvent, context) as CdkCustomResourceResponse;
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(SearchFoldersCommand, 1);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateFolderCommand, 1);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateFolderMembershipCommand, 8);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeAnalysisCommand, 2);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDashboardCommand, 2);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDataSetCommand, 4);
@@ -401,10 +435,20 @@ describe('QuickSight Lambda function', () => {
 
   test('Create QuickSight dashboard - dataset already exist', async () => {
 
+    quickSightClientMock.on(SearchFoldersCommand).resolvesOnce({
+      FolderSummaryList: [{
+        FolderId: 'clickstream_folder_xxx',
+      }],
+    });
+    quickSightClientMock.on(CreateFolderCommand).resolves({});
+    quickSightClientMock.on(CreateFolderMembershipCommand).resolves({});
     quickSightClientMock.on(CreateDataSetCommand).rejectsOnce(existError);
     try {
       await handler(basicEvent, context);
     } catch (e) {
+      expect(quickSightClientMock).toHaveReceivedCommandTimes(SearchFoldersCommand, 1);
+      expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateFolderCommand, 0);
+      expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateFolderMembershipCommand, 0);
       expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateDataSetCommand, 1);
       expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateAnalysisCommand, 0);
       expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateDashboardCommand, 0);
@@ -416,6 +460,13 @@ describe('QuickSight Lambda function', () => {
 
   test('Create QuickSight dashboard - analysis already exist', async () => {
 
+    quickSightClientMock.on(SearchFoldersCommand).resolvesOnce({
+      FolderSummaryList: [{
+        FolderId: 'clickstream_folder_xxx',
+      }],
+    });
+    quickSightClientMock.on(CreateFolderCommand).resolves({});
+    quickSightClientMock.on(CreateFolderMembershipCommand).resolves({});
     quickSightClientMock.on(DescribeDataSetCommand).resolvesOnce({
       DataSet: {
         DataSetId: 'dataset_0',
@@ -439,6 +490,9 @@ describe('QuickSight Lambda function', () => {
     try {
       await handler(basicEvent, context);
     } catch (e) {
+      expect(quickSightClientMock).toHaveReceivedCommandTimes(SearchFoldersCommand, 1);
+      expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateFolderCommand, 0);
+      expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateFolderMembershipCommand, 0);
       expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateDataSetCommand, 2);
       expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateAnalysisCommand, 1);
       expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateDashboardCommand, 0);
@@ -451,6 +505,13 @@ describe('QuickSight Lambda function', () => {
 
   test('Create QuickSight dashboard - dashboard already exist', async () => {
 
+    quickSightClientMock.on(SearchFoldersCommand).resolvesOnce({
+      FolderSummaryList: [{
+        FolderId: 'clickstream_folder_xxx',
+      }],
+    });
+    quickSightClientMock.on(CreateFolderCommand).resolves({});
+    quickSightClientMock.on(CreateFolderMembershipCommand).resolves({});
     quickSightClientMock.on(DescribeDataSetCommand).resolvesOnce({
       DataSet: {
         DataSetId: 'dataset_0',
@@ -484,6 +545,9 @@ describe('QuickSight Lambda function', () => {
     try {
       await handler(basicEvent, context);
     } catch (e) {
+      expect(quickSightClientMock).toHaveReceivedCommandTimes(SearchFoldersCommand, 1);
+      expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateFolderCommand, 0);
+      expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateFolderMembershipCommand, 0);
       expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateDataSetCommand, 2);
       expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateAnalysisCommand, 1);
       expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateDashboardCommand, 1);
@@ -507,7 +571,26 @@ describe('QuickSight Lambda function', () => {
     quickSightClientMock.on(DescribeDashboardCommand).rejects(notExistError);
     quickSightClientMock.on(DeleteDashboardCommand).resolves({});
 
+    quickSightClientMock.on(ListFolderMembersCommand).resolves({
+      FolderMemberList: [
+        {
+          MemberId: 'clickstream_dataset_a',
+        },
+        {
+          MemberId: 'clickstream_analysis_',
+        },
+        {
+          MemberId: 'clickstream_dashboard_',
+        },
+      ],
+    });
+    quickSightClientMock.on(DeleteFolderCommand).resolves({});
+    quickSightClientMock.on(DeleteFolderMembershipCommand).resolves({});
+
     const resp = await handler(deleteEvent, context) as CdkCustomResourceResponse;
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(ListFolderMembersCommand, 5);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteFolderCommand, 1);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteFolderMembershipCommand, 3);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDataSetCommand, 2);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteDataSetCommand, 2);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateDataSetCommand, 0);
@@ -713,8 +796,16 @@ describe('QuickSight Lambda function', () => {
       },
     });
 
+    quickSightClientMock.on(SearchFoldersCommand).resolves({
+      FolderSummaryList: [],
+    });
+    quickSightClientMock.on(CreateFolderCommand).resolves({});
+    quickSightClientMock.on(CreateFolderMembershipCommand).resolves({});
 
     const resp = await handler(updateFromEmptyEvent, context) as CdkCustomResourceResponse;
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(SearchFoldersCommand, 0);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateFolderCommand, 0);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateFolderMembershipCommand, 4);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeAnalysisCommand, 1);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDashboardCommand, 1);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDataSetCommand, 2);
@@ -830,7 +921,38 @@ describe('QuickSight Lambda function', () => {
     quickSightClientMock.on(DeleteDashboardCommand).resolvesOnce({});
     quickSightClientMock.on(DescribeDashboardCommand).rejectsOnce(notExistError);
 
+    quickSightClientMock.on(SearchFoldersCommand).resolvesOnce({
+      FolderSummaryList: [{
+        FolderId: 'clickstream_folder_xxx',
+      }],
+    });
+    quickSightClientMock.on(CreateFolderCommand).resolves({});
+    quickSightClientMock.on(CreateFolderMembershipCommand).resolves({});
+
+    quickSightClientMock.on(ListFolderMembersCommand).resolves({
+      FolderMemberList: [
+        {
+          MemberId: 'clickstream_dataset_a',
+        },
+        {
+          MemberId: 'clickstream_analysis_',
+        },
+        {
+          MemberId: 'clickstream_dashboard_',
+        },
+      ],
+    });
+    quickSightClientMock.on(DeleteFolderCommand).resolves({});
+    quickSightClientMock.on(DeleteFolderMembershipCommand).resolves({});
+
     const resp = await handler(multiSchemaUpdateWithDeleteEvent, context) as CdkCustomResourceResponse;
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(SearchFoldersCommand, 0);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateFolderCommand, 0);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateFolderMembershipCommand, 0);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(ListFolderMembersCommand, 4);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteFolderCommand, 0);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteFolderMembershipCommand, 0);
+
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeAnalysisCommand, 1);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDashboardCommand, 1);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDataSetCommand, 2);
@@ -913,7 +1035,38 @@ describe('QuickSight Lambda function', () => {
       })
       .rejectsOnce(notExistError);
 
+    quickSightClientMock.on(SearchFoldersCommand).resolvesOnce({
+      FolderSummaryList: [{
+        FolderId: 'clickstream_folder_xxx',
+      }],
+    });
+    quickSightClientMock.on(CreateFolderCommand).resolves({});
+    quickSightClientMock.on(CreateFolderMembershipCommand).resolves({});
+
+    quickSightClientMock.on(ListFolderMembersCommand).resolves({
+      FolderMemberList: [
+        {
+          MemberId: 'clickstream_dataset_a',
+        },
+        {
+          MemberId: 'clickstream_analysis_',
+        },
+        {
+          MemberId: 'clickstream_dashboard_',
+        },
+      ],
+    });
+    quickSightClientMock.on(DeleteFolderCommand).resolves({});
+    quickSightClientMock.on(DeleteFolderMembershipCommand).resolves({});
+
     const resp = await handler(multiSchemaUpdateWithDeleteAndCreateEvent, context) as CdkCustomResourceResponse;
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(SearchFoldersCommand, 0);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateFolderCommand, 0);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateFolderMembershipCommand, 4);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(ListFolderMembersCommand, 4);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteFolderCommand, 0);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteFolderMembershipCommand, 0);
+
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeAnalysisCommand, 2);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDashboardCommand, 2);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDataSetCommand, 4);
