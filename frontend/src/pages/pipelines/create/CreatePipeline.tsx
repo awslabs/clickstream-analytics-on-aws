@@ -538,7 +538,6 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
     return true;
   };
 
-  // 主验证函数现在更加简洁，它调用了新的独立函数来进行详细检查。
   const validateDataProcessing = () => {
     if (!pipelineInfo.enableDataProcessing) {
       return true;
