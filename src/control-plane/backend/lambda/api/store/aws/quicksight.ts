@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { randomUUID } from 'crypto';
 import {
   ListUsersCommand,
   User,
@@ -27,6 +28,15 @@ import {
   CreateDashboardCommand,
   CreateDashboardCommandOutput,
   CreateDashboardCommandInput,
+  RegisterUserCommandInput,
+  CreateFolderCommand,
+  CreateFolderMembershipCommand,
+  CreateFolderMembershipCommandOutput,
+  CreateFolderMembershipCommandInput,
+  MemberType,
+  SearchFoldersCommand,
+  FilterOperator,
+  FolderFilterAttribute,
 } from '@aws-sdk/client-quicksight';
 import { APIRoleName, awsAccountId, awsRegion, QUICKSIGHT_CONTROL_PLANE_REGION, QUICKSIGHT_EMBED_NO_REPLY_EMAIL, QuickSightEmbedRoleArn } from '../../common/constants';
 import { getPaginatedResults } from '../../common/paginator';
@@ -38,8 +48,8 @@ import { generateRandomStr } from '../../common/utils-ln';
 const QUICKSIGHT_NAMESPACE = 'default';
 const QUICKSIGHT_PREFIX = 'Clickstream';
 const QUICKSIGHT_DEFAULT_USER = `${QUICKSIGHT_PREFIX}-User-${generateRandomStr(8, 'abcdefghijklmnopqrstuvwxyz')}`;
-const QUICKSIGHT_DASHBOARD_USER_NAME = 'ClickstreamDashboardUser';
-const QUICKSIGHT_EMBED_USER_NAME = 'ClickstreamEmbedUser';
+const QUICKSIGHT_EXPLORE_USER_NAME = 'ClickstreamExploreUser';
+const QUICKSIGHT_PUBLISH_USER_NAME = 'ClickstreamPublishUser';
 
 const sdkClient: SDKClient = new SDKClient();
 
@@ -87,8 +97,25 @@ export const registerQuickSightUser = async (email: string, username?: string) =
 
 export const registerClickstreamUser = async () => {
   const identityRegion = await sdkClient.QuickSightIdentityRegion();
-  await registerEmbeddingUserByRegion(identityRegion);
-  await registerQuickSightUserByRegion(identityRegion, QUICKSIGHT_EMBED_NO_REPLY_EMAIL, QUICKSIGHT_DASHBOARD_USER_NAME);
+  await registerUserByRegion(identityRegion, {
+    IdentityType: IdentityType.IAM,
+    AwsAccountId: awsAccountId,
+    Email: QUICKSIGHT_EMBED_NO_REPLY_EMAIL,
+    IamArn: QuickSightEmbedRoleArn,
+    Namespace: QUICKSIGHT_NAMESPACE,
+    UserRole: UserRole.ADMIN,
+    SessionName: QUICKSIGHT_PUBLISH_USER_NAME,
+  });
+  await registerUserByRegion(identityRegion, {
+    IdentityType: IdentityType.IAM,
+    AwsAccountId: awsAccountId,
+    Email: QUICKSIGHT_EMBED_NO_REPLY_EMAIL,
+    IamArn: QuickSightEmbedRoleArn,
+    Namespace: QUICKSIGHT_NAMESPACE,
+    UserRole: UserRole.ADMIN,
+    SessionName: QUICKSIGHT_EXPLORE_USER_NAME,
+  });
+  return getClickstreamUserArn();
 };
 
 export const registerQuickSightUserByRegion = async (region: string, email: string, username?: string) => {
@@ -114,27 +141,22 @@ export const registerQuickSightUserByRegion = async (region: string, email: stri
   }
 };
 
-export const registerEmbeddingUserByRegion = async (region: string) => {
+export const registerUserByRegion = async (
+  region: string,
+  user: RegisterUserCommandInput,
+) => {
   try {
     const quickSightClient = sdkClient.QuickSightClient({
       region: region,
     });
-    const command: RegisterUserCommand = new RegisterUserCommand({
-      IdentityType: IdentityType.IAM,
-      AwsAccountId: awsAccountId,
-      Email: QUICKSIGHT_EMBED_NO_REPLY_EMAIL,
-      IamArn: QuickSightEmbedRoleArn,
-      Namespace: QUICKSIGHT_NAMESPACE,
-      UserRole: UserRole.READER,
-      SessionName: QUICKSIGHT_EMBED_USER_NAME,
-    });
+    const command: RegisterUserCommand = new RegisterUserCommand(user);
     await quickSightClient.send(command);
     return true;
   } catch (err) {
     if (err instanceof ResourceExistsException) {
       return true;
     }
-    logger.error('Register Embedding User Error.', { err });
+    logger.error('Register User Error.', { err });
     return false;
   }
 };
@@ -142,7 +164,7 @@ export const registerEmbeddingUserByRegion = async (region: string) => {
 export const generateEmbedUrlForRegisteredUser = async (
   region: string,
   allowedDomain: string,
-  permission: boolean,
+  publish: boolean,
   dashboardId?: string,
   sheetId?: string,
   visualId?: string,
@@ -151,12 +173,9 @@ export const generateEmbedUrlForRegisteredUser = async (
     region: region,
   });
   const arns = await getClickstreamUserArn();
-  if (permission && dashboardId) {
-    await updateDashboardPermissionsCommand(region, dashboardId, arns.embedOwner);
-  }
   let commandInput: GenerateEmbedUrlForRegisteredUserCommandInput = {
     AwsAccountId: awsAccountId,
-    UserArn: arns.embedOwner,
+    UserArn: publish ? arns.publishUserArn : arns.exploreUserArn,
     AllowedDomains: [allowedDomain],
     ExperienceConfiguration: {},
   };
@@ -290,17 +309,21 @@ export const describeClickstreamAccountSubscription = async (): Promise<QuickSig
 };
 
 export interface QuickSightUserArns {
-  dashboardOwner: string;
-  embedOwner: string;
+  exploreUserArn: string;
+  publishUserArn: string;
+  exploreUserName: string;
+  publishUserName: string;
 }
 
 export const getClickstreamUserArn = async (): Promise<QuickSightUserArns> => {
   const identityRegion = await sdkClient.QuickSightIdentityRegion();
   const quickSightEmbedRoleName = QuickSightEmbedRoleArn?.split(':role/')[1];
   const partition = awsRegion?.startsWith('cn') ? 'aws-cn' : 'aws';
-  const ownerArn = `arn:${partition}:quicksight:${identityRegion}:${awsAccountId}:user/${QUICKSIGHT_NAMESPACE}/${QUICKSIGHT_DASHBOARD_USER_NAME}`;
-  const embedArn = `arn:${partition}:quicksight:${identityRegion}:${awsAccountId}:user/${QUICKSIGHT_NAMESPACE}/${quickSightEmbedRoleName}/${QUICKSIGHT_EMBED_USER_NAME}`;
-  return { dashboardOwner: ownerArn, embedOwner: embedArn };
+  const exploreUserName = `${quickSightEmbedRoleName}/${QUICKSIGHT_EXPLORE_USER_NAME}`;
+  const publishUserName = `${quickSightEmbedRoleName}/${QUICKSIGHT_PUBLISH_USER_NAME}`;
+  const exploreUserArn = `arn:${partition}:quicksight:${identityRegion}:${awsAccountId}:user/${QUICKSIGHT_NAMESPACE}/${exploreUserName}`;
+  const publishUserArn = `arn:${partition}:quicksight:${identityRegion}:${awsAccountId}:user/${QUICKSIGHT_NAMESPACE}/${publishUserName}`;
+  return { exploreUserArn, publishUserArn, exploreUserName, publishUserName };
 };
 
 export const createDashboard = async (
@@ -319,6 +342,92 @@ export const createDashboard = async (
   }
 };
 
-export const Sleep = (ms: number) => {
-  return new Promise(resolve=>setTimeout(resolve, ms));
+export const searchFolder = async (
+  region: string,
+  folderName: string,
+): Promise<string | undefined> => {
+  try {
+    const quickSightClient = sdkClient.QuickSightClient({
+      region: region,
+    });
+    const command: SearchFoldersCommand = new SearchFoldersCommand({
+      AwsAccountId: awsAccountId,
+      Filters: [{
+        Operator: FilterOperator.StringEquals,
+        Name: FolderFilterAttribute.FOLDER_NAME,
+        Value: folderName,
+      }],
+    });
+    const res = await quickSightClient.send(command);
+    if (res.FolderSummaryList && res.FolderSummaryList?.length > 0) {
+      return res.FolderSummaryList[0].FolderId;
+    }
+    return;
+  } catch (err) {
+    logger.error('Create Folder Error.', { err });
+    throw err;
+  }
+};
+
+export const createFolder = async (
+  region: string,
+  name: string,
+): Promise<string | undefined> => {
+  try {
+    const quickSightClient = sdkClient.QuickSightClient({
+      region: region,
+    });
+    const command: CreateFolderCommand = new CreateFolderCommand({
+      AwsAccountId: awsAccountId,
+      FolderId: randomUUID(),
+      Name: name,
+    });
+    const res = await quickSightClient.send(command);
+    return res.FolderId;
+  } catch (err) {
+    logger.error('Create Folder Error.', { err });
+    throw err;
+  }
+};
+
+export const createFolderMembership = async (
+  region: string,
+  input: CreateFolderMembershipCommandInput,
+): Promise<CreateFolderMembershipCommandOutput> => {
+  try {
+    const quickSightClient = sdkClient.QuickSightClient({
+      region: region,
+    });
+    const command: CreateFolderMembershipCommand = new CreateFolderMembershipCommand(input);
+    return await quickSightClient.send(command);
+  } catch (err) {
+    logger.error('Create Folder Membership Error.', { err });
+    throw err;
+  }
+};
+
+export const moveToFolder = async (
+  region: string,
+  folderName: string,
+  resourceId: string,
+  resourceType: MemberType,
+): Promise<any> => {
+  try {
+    let folderId = await searchFolder(region, folderName);
+    if (!folderId) {
+      folderId = await createFolder(region, folderName);
+    }
+    await createFolderMembership(
+      region,
+      {
+        AwsAccountId: awsAccountId,
+        FolderId: folderId,
+        MemberId: resourceId,
+        MemberType: resourceType,
+      },
+    );
+  } catch (err) {
+    logger.error('Move to folder Error.', { err });
+    throw err;
+  }
 };

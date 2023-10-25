@@ -148,7 +148,7 @@ export class ProjectServ {
           ParameterDeclarations: [],
         },
         Permissions: [{
-          Principal: principals.dashboardOwner,
+          Principal: principals.publishUserArn,
           Actions: [
             'quicksight:DescribeDashboard',
             'quicksight:ListDashboardVersions',
@@ -158,12 +158,6 @@ export class ProjectServ {
             'quicksight:UpdateDashboardPermissions',
             'quicksight:DescribeDashboardPermissions',
             'quicksight:UpdateDashboardPublishedVersion',
-          ],
-        },
-        {
-          Principal: principals.embedOwner,
-          Actions: [
-            'quicksight:DescribeDashboard', 'quicksight:QueryDashboard', 'quicksight:ListDashboardVersions',
           ],
         }],
       };
@@ -243,7 +237,7 @@ export class ProjectServ {
       const embed = await generateEmbedUrlForRegisteredUser(
         latestPipeline.region,
         allowedDomain,
-        false,
+        true,
       );
       return res.json(new ApiSuccess(embed));
     } catch (error) {
