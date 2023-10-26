@@ -592,20 +592,29 @@ describe('Custom resource - Create schemas for applications in Redshift database
       console.log('input.Sqls.length-3:' + input.Sqls.length);
       const expectedSql = 'CREATE MATERIALIZED VIEW app2.clickstream_event_view';
       const expectedSql2 = 'GRANT SELECT ON app2.clickstream_user_attr_view TO clickstream_report_user_abcde;';
-      if (input.Sqls.length !== 22
+      const expectedSql3 = 'GRANT SELECT ON app2.event TO clickstream_report_user_abcde;';
+      const expectedSql4 = 'GRANT SELECT ON app2.item_m_view TO clickstream_report_user_abcde;';
+      if (input.Sqls.length !== 28
         || !(input.Sqls[0] as string).startsWith(expectedSql)
         || !(input.Sqls[21] as string).startsWith(expectedSql2)
+        || !(input.Sqls[22] as string).startsWith(expectedSql3)
+        || !(input.Sqls[27] as string).startsWith(expectedSql4)
       ) {
         throw new Error('create report view sqls are not expected');
       }
       return { Id: 'Id-1' };
     }).callsFakeOnce(input => {
+      console.log('input.Sqls.length-4:' + input.Sqls.length);
+
       const expectedSql = 'CREATE OR REPLACE VIEW app1.clickstream_user_dim_view';
       const expectedSql2 = 'GRANT SELECT ON app1.clickstream_user_attr_view TO clickstream_report_user_abcde;';
-      console.log('input.Sqls.length-4:' + input.Sqls.length);
-      if (input.Sqls.length !== 12
+      const expectedSql3 = 'GRANT SELECT ON app1.event TO clickstream_report_user_abcde;';
+      const expectedSql4 = 'GRANT SELECT ON app1.item_m_view TO clickstream_report_user_abcde;';
+      if (input.Sqls.length !== 18
         || !(input.Sqls[0] as string).startsWith(expectedSql)
         || !(input.Sqls[11] as string).startsWith(expectedSql2)
+        || !(input.Sqls[12] as string).startsWith(expectedSql3)
+        || !(input.Sqls[17] as string).startsWith(expectedSql4)
       ) {
         throw new Error('update report view sqls are not expected');
       }
