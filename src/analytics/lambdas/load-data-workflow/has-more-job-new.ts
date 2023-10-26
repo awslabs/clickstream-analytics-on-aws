@@ -39,7 +39,7 @@ export const handler = async (_: any, context: Context) => {
 
     let lastEvaluatedKey = undefined;
     const jobStatusQuery = composeJobStatus(JobStatus.JOB_NEW, redshiftTableName);
-    const prefixQuery = odsEventBucketWithPrefix.replace(new RegExp(`\/${REDSHIFT_ODS_TABLE_NAME}\/$`), `/${redshiftTableName}/`);
+    const prefixQuery = odsEventBucketWithPrefix.replace(new RegExp(`\/${REDSHIFT_ODS_TABLE_NAME}\/?$`), `/${redshiftTableName}/`);
 
     logger.info('queryItems by', {
       redshiftTableName,

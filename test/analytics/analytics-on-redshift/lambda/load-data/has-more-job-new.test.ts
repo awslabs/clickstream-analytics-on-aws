@@ -12,6 +12,9 @@
  */
 
 
+process.env.REDSHIFT_ODS_TABLE_NAME = 'test_me_table';
+process.env.ODS_EVENT_BUCKET_PREFIX = 'project1/test/test_me_table/';
+
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { QueryCommand } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
@@ -24,9 +27,6 @@ import { getMockContext } from '../../../../common/lambda-context';
 const ddbClientMock = mockClient(DynamoDBClient);
 
 const context = getMockContext();
-
-process.env.REDSHIFT_ODS_TABLE_NAME = 'test_me_table';
-process.env.ODS_EVENT_BUCKET_PREFIX = 'project1/test/test_me_table/';
 
 beforeEach(() => {
   ddbClientMock.reset();
@@ -99,7 +99,19 @@ test('Should get all JOB_NEW files', async () => {
     ExclusiveStartKey: 'next1',
     ExpressionAttributeNames:
      { '#job_status': 'job_status', '#s3_uri': 's3_uri' },
-    ExpressionAttributeValues: { ':job_status': 'event#NEW', ':s3_uri': 's3://EXAMPLE-BUCKET-2/project1/raw/' },
+    ExpressionAttributeValues: { ':job_status': 'event#NEW', ':s3_uri': 's3://EXAMPLE-BUCKET-2/project1/test/event/' },
+    FilterExpression: 'begins_with(#s3_uri, :s3_uri)',
+    IndexName: 'by_status',
+    KeyConditionExpression: '#job_status = :job_status',
+    ScanIndexForward: true,
+    TableName: 'project1_ods_events_trigger',
+  } as any);
+
+  expect(ddbClientMock).toHaveReceivedNthCommandWith(5, QueryCommand, {
+    ExclusiveStartKey: undefined,
+    ExpressionAttributeNames:
+     { '#job_status': 'job_status', '#s3_uri': 's3_uri' },
+    ExpressionAttributeValues: { ':job_status': 'user#NEW', ':s3_uri': 's3://EXAMPLE-BUCKET-2/project1/test/user/' },
     FilterExpression: 'begins_with(#s3_uri, :s3_uri)',
     IndexName: 'by_status',
     KeyConditionExpression: '#job_status = :job_status',
