@@ -28,8 +28,8 @@ export class ServiceCatalogAppregistryStack extends Stack {
     const featureName = 'AppRegistry';
     this.templateOptions.description = `(${SolutionInfo.SOLUTION_ID}-appreg ${SolutionInfo.SOLUTION_NAME} - ${featureName} ${SolutionInfo.SOLUTION_VERSION_DETAIL}`;
 
-    const pipelineIdParam = new CfnParameter(this, 'PipelineId', {
-      description: 'Pipeline Id',
+    const projectIdParam = new CfnParameter(this, 'ProjectId', {
+      description: 'Project Id',
       type: 'String',
       default: '',
     });
@@ -59,11 +59,11 @@ export class ServiceCatalogAppregistryStack extends Stack {
     const application = new Application(this, 'ServiceCatalogApplication', {
       applicationName: Fn.join('-', [
         'clickstream-analytics',
-        pipelineIdParam.valueAsString,
+        projectIdParam.valueAsString,
         Aws.REGION,
         Aws.ACCOUNT_ID,
       ]),
-      description: `Catalog Service AppRegistry application for Clickstream Analytics pipeline: ${pipelineIdParam.valueAsString}`,
+      description: `Catalog Service AppRegistry application for Clickstream Analytics project: ${projectIdParam.valueAsString}`,
     });
     // Add condition for region validation
     (application.node.defaultChild as CfnResource).cfnOptions.condition = serviceAvailableRegion;

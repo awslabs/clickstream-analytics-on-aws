@@ -19,8 +19,8 @@ const app = new App();
 const stack = new ServiceCatalogAppregistryStack(app, 'test-service-catalog-appregistry-stack');
 const template = Template.fromStack(stack);
 
-test('Should has parameter PipelineId', () => {
-  template.hasParameter('PipelineId', {
+test('Should has parameter projectId', () => {
+  template.hasParameter('ProjectId', {
     Type: 'String',
   });
 });
@@ -37,7 +37,7 @@ test('Should has Service Catalog AppRegistry application', () => {
         [
           'clickstream-analytics',
           {
-            Ref: 'PipelineId',
+            Ref: 'ProjectId',
           },
           {
             Ref: 'AWS::Region',
