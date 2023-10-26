@@ -156,6 +156,7 @@ const baseColumns = `
 ,device.system_language:: varchar as device_system_language
 ,device.time_zone_offset_seconds:: bigint as device_time_zone_offset_seconds
 ,device.advertising_id:: varchar as device_advertising_id
+,device.host_name:: varchar as device_host_name
 ,geo.continent:: varchar as geo_continent
 ,geo.country:: varchar as geo_country
 ,geo.city:: varchar as geo_city
