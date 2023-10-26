@@ -13,6 +13,7 @@
 
 import { findResourcesName, TestEnv } from './test-utils';
 import { removeFolder } from '../common/jest';
+import { writeFile } from 'fs';
 
 describe('Click Stream Api ALB deploy Construct Test', () => {
   afterAll(() => {
@@ -1027,7 +1028,67 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
       Runtime: 'nodejs18.x',
       Timeout: 30,
     });
+    writeFile('test.template.json', JSON.stringify(newALBApiStackTemplate.toJSON(), null, 2), function(err) {
+      if (err) {
+        console.log(err);
+      }
+    });
+    expect(findResourcesName(newALBApiStackTemplate, 'Custom::AWS'))
+      .toEqual([
+        'ClickStreamApiAddAdminUserCustomResourceAddAdminUserAwsCustomResourceBD22F9F9',
+      ]);
 
+    newALBApiStackTemplate.hasResourceProperties('Custom::AWS', {
+      Create: {
+        'Fn::Join': [
+          '',
+          [
+            '{"service":"DynamoDB","action":"putItem","physicalResourceId":{"id":"AddAdminUserCustomResource"},"parameters":{"TableName":"',
+            {
+              Ref: 'ClickStreamApiClickstreamMetadataEC136DD8',
+            },
+            '","Item":{"id":{"S":"',
+            {
+              Ref: 'Email',
+            },
+            '"},"type":{"S":"USER"},"prefix":{"S":"USER"},"role":{"S":"Admin"},"createAt":{"N":"1698140593938"},"updateAt":{"N":"1698140593938"},"operator":{"S":"Clickstream"},"deleted":{"BOOL":false}},"ConditionExpression":"attribute_not_exists(uid)"}}',
+          ],
+        ],
+      },
+      Update: {
+        'Fn::Join': [
+          '',
+          [
+            '{"service":"DynamoDB","action":"updateItem","physicalResourceId":{"id":"AddAdminUserCustomResource"},"parameters":{"TableName":"',
+            {
+              Ref: 'ClickStreamApiClickstreamMetadataEC136DD8',
+            },
+            '","Key":{"id":{"S":"',
+            {
+              Ref: 'Email',
+            },
+            '"},"type":{"S":"USER"}},"UpdateExpression":"SET #role = :role, #prefix = :prefix, #createAt = :createAt, #updateAt = :updateAt, #operator = :operator, #deleted = :deleted","ExpressionAttributeNames":{"#role":"role","#createAt":"createAt","#updateAt":"updateAt","#operator":"operator","#deleted":"deleted","#prefix":"prefix"},"ExpressionAttributeValues":{":prefix":{"S":"USER"},":role":{"S":"Admin"},":createAt":{"N":"1698140593938"},":updateAt":{"N":"1698140593938"},":operator":{"S":"Clickstream"},":deleted":{"BOOL":false}}}}',
+          ],
+        ],
+      },
+      Delete: {
+        'Fn::Join': [
+          '',
+          [
+            '{"service":"DynamoDB","action":"deleteItem","physicalResourceId":{"id":"AddAdminUserCustomResource"},"parameters":{"TableName":"',
+            {
+              Ref: 'ClickStreamApiClickstreamMetadataEC136DD8',
+            },
+            '","Key":{"id":{"S":"',
+            {
+              Ref: 'Email',
+            },
+            '"},"type":{"S":"USER"}},"ConditionExpression":"attribute_exists(uid)"}}',
+          ],
+        ],
+      },
+      InstallLatestAwsSdk: false,
+    });
   });
 
   test('State Machine', () => {

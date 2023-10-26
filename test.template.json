@@ -1,0 +1,3894 @@
+{
+  "Resources": {
+    "testsg872EB48A": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "apiTestStack/test-sg",
+        "VpcId": "vpc-11111111111111111"
+      }
+    },
+    "testsgtoapiTestStacktestClickStreamALBApiClickStreamApiFunctionSG1F3A34C3ALLPORTS13101667": {
+      "Type": "AWS::EC2::SecurityGroupEgress",
+      "Properties": {
+        "Description": "allow all traffic from application load balancer",
+        "DestinationSecurityGroupId": {
+          "Fn::GetAtt": [
+            "testClickStreamALBApiClickStreamApiFunctionSGC830FA60",
+            "GroupId"
+          ]
+        },
+        "FromPort": 0,
+        "GroupId": {
+          "Fn::GetAtt": [
+            "testsg872EB48A",
+            "GroupId"
+          ]
+        },
+        "IpProtocol": "tcp",
+        "ToPort": 65535
+      }
+    },
+    "stackWorkflowS3BucketF67B9562": {
+      "Type": "AWS::S3::Bucket",
+      "UpdateReplacePolicy": "Retain",
+      "DeletionPolicy": "Retain"
+    },
+    "testClickStreamALBApiClickstreamDictionary0A1156B6": {
+      "Type": "AWS::DynamoDB::Table",
+      "Properties": {
+        "AttributeDefinitions": [
+          {
+            "AttributeName": "name",
+            "AttributeType": "S"
+          }
+        ],
+        "BillingMode": "PAY_PER_REQUEST",
+        "KeySchema": [
+          {
+            "AttributeName": "name",
+            "KeyType": "HASH"
+          }
+        ],
+        "PointInTimeRecoverySpecification": {
+          "PointInTimeRecoveryEnabled": true
+        },
+        "SSESpecification": {
+          "SSEEnabled": true
+        }
+      },
+      "UpdateReplacePolicy": "Delete",
+      "DeletionPolicy": "Delete"
+    },
+    "testClickStreamALBApiClickstreamMetadataA721B303": {
+      "Type": "AWS::DynamoDB::Table",
+      "Properties": {
+        "AttributeDefinitions": [
+          {
+            "AttributeName": "id",
+            "AttributeType": "S"
+          },
+          {
+            "AttributeName": "type",
+            "AttributeType": "S"
+          },
+          {
+            "AttributeName": "prefix",
+            "AttributeType": "S"
+          },
+          {
+            "AttributeName": "createAt",
+            "AttributeType": "N"
+          }
+        ],
+        "BillingMode": "PAY_PER_REQUEST",
+        "GlobalSecondaryIndexes": [
+          {
+            "IndexName": "prefix-time-index",
+            "KeySchema": [
+              {
+                "AttributeName": "prefix",
+                "KeyType": "HASH"
+              },
+              {
+                "AttributeName": "createAt",
+                "KeyType": "RANGE"
+              }
+            ],
+            "Projection": {
+              "ProjectionType": "ALL"
+            }
+          }
+        ],
+        "KeySchema": [
+          {
+            "AttributeName": "id",
+            "KeyType": "HASH"
+          },
+          {
+            "AttributeName": "type",
+            "KeyType": "RANGE"
+          }
+        ],
+        "PointInTimeRecoverySpecification": {
+          "PointInTimeRecoveryEnabled": true
+        },
+        "SSESpecification": {
+          "SSEEnabled": true
+        },
+        "TimeToLiveSpecification": {
+          "AttributeName": "ttl",
+          "Enabled": true
+        }
+      },
+      "UpdateReplacePolicy": "Delete",
+      "DeletionPolicy": "Delete"
+    },
+    "testClickStreamALBApiAnalyticsMetadata4BCF420E": {
+      "Type": "AWS::DynamoDB::Table",
+      "Properties": {
+        "AttributeDefinitions": [
+          {
+            "AttributeName": "id",
+            "AttributeType": "S"
+          },
+          {
+            "AttributeName": "month",
+            "AttributeType": "S"
+          },
+          {
+            "AttributeName": "prefix",
+            "AttributeType": "S"
+          }
+        ],
+        "BillingMode": "PAY_PER_REQUEST",
+        "GlobalSecondaryIndexes": [
+          {
+            "IndexName": "prefix-month-index",
+            "KeySchema": [
+              {
+                "AttributeName": "prefix",
+                "KeyType": "HASH"
+              },
+              {
+                "AttributeName": "month",
+                "KeyType": "RANGE"
+              }
+            ],
+            "Projection": {
+              "ProjectionType": "ALL"
+            }
+          }
+        ],
+        "KeySchema": [
+          {
+            "AttributeName": "id",
+            "KeyType": "HASH"
+          },
+          {
+            "AttributeName": "month",
+            "KeyType": "RANGE"
+          }
+        ],
+        "PointInTimeRecoverySpecification": {
+          "PointInTimeRecoveryEnabled": true
+        },
+        "SSESpecification": {
+          "SSEEnabled": true
+        }
+      },
+      "UpdateReplacePolicy": "Delete",
+      "DeletionPolicy": "Delete"
+    },
+    "testClickStreamALBApiBatchInsertDDBCustomResourceDicInitCustomResourceRoleD2CDF2CF": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        }
+      }
+    },
+    "testClickStreamALBApiBatchInsertDDBCustomResourceDicInitCustomResourceRoleDefaultPolicy2DB98D9D": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "logs:CreateLogStream",
+                "logs:PutLogEvents",
+                "logs:CreateLogGroup"
+              ],
+              "Effect": "Allow",
+              "Resource": "*"
+            },
+            {
+              "Action": [
+                "dynamodb:BatchGetItem",
+                "dynamodb:GetRecords",
+                "dynamodb:GetShardIterator",
+                "dynamodb:Query",
+                "dynamodb:GetItem",
+                "dynamodb:Scan",
+                "dynamodb:ConditionCheckItem",
+                "dynamodb:BatchWriteItem",
+                "dynamodb:PutItem",
+                "dynamodb:UpdateItem",
+                "dynamodb:DeleteItem",
+                "dynamodb:DescribeTable"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "testClickStreamALBApiClickstreamDictionary0A1156B6",
+                    "Arn"
+                  ]
+                },
+                {
+                  "Ref": "AWS::NoValue"
+                }
+              ]
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": "testClickStreamALBApiBatchInsertDDBCustomResourceDicInitCustomResourceRoleDefaultPolicy2DB98D9D",
+        "Roles": [
+          {
+            "Ref": "testClickStreamALBApiBatchInsertDDBCustomResourceDicInitCustomResourceRoleD2CDF2CF"
+          }
+        ]
+      },
+      "Metadata": {
+        "cfn_nag": {
+          "rules_to_suppress": [
+            {
+              "id": "W12",
+              "reason": "The lambda service writes to undetermined logs stream by design"
+            }
+          ]
+        }
+      }
+    },
+    "testClickStreamALBApiBatchInsertDDBCustomResourceDicInitCustomResourceFunction504311BF": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Architectures": [
+          "x86_64"
+        ],
+        "Code": {
+          "S3Bucket": {
+            "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
+          },
+          "S3Key": "2afff38553bf482d7947ea389eb1e39c1feb125db374c0e527812bf5b5e2cc0f.zip"
+        },
+        "Description": "Lambda function for dictionary init of solution Click Stream Analytics on AWS",
+        "Environment": {
+          "Variables": {
+            "POWERTOOLS_SERVICE_NAME": "ClickStreamAnalyticsOnAWS",
+            "POWERTOOLS_LOGGER_SAMPLE_RATE": "1",
+            "POWERTOOLS_LOGGER_LOG_EVENT": "true",
+            "LOG_LEVEL": "WARN",
+            "AWS_NODEJS_CONNECTION_REUSE_ENABLED": "1"
+          }
+        },
+        "Handler": "index.handler",
+        "MemorySize": 256,
+        "ReservedConcurrentExecutions": 1,
+        "Role": {
+          "Fn::GetAtt": [
+            "testClickStreamALBApiBatchInsertDDBCustomResourceDicInitCustomResourceRoleD2CDF2CF",
+            "Arn"
+          ]
+        },
+        "Runtime": "nodejs18.x",
+        "Timeout": 30
+      },
+      "DependsOn": [
+        "testClickStreamALBApiBatchInsertDDBCustomResourceDicInitCustomResourceRoleDefaultPolicy2DB98D9D",
+        "testClickStreamALBApiBatchInsertDDBCustomResourceDicInitCustomResourceRoleD2CDF2CF"
+      ],
+      "Metadata": {
+        "cfn_nag": {
+          "rules_to_suppress": [
+            {
+              "id": "W89",
+              "reason": "Lambda function is only used by DicInitCustomResourceFunction for deployment as cloudformation custom resources or per product design, no need to be deployed in VPC"
+            },
+            {
+              "id": "W92",
+              "reason": "Lambda function is only used by DicInitCustomResourceFunction for deployment as cloudformation custom resources or per product design, no need to set ReservedConcurrentExecutions"
+            }
+          ]
+        }
+      }
+    },
+    "testClickStreamALBApiBatchInsertDDBCustomResourceDicInitCustomResourceProviderframeworkonEventServiceRole256DF90A": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+              ]
+            ]
+          }
+        ]
+      }
+    },
+    "testClickStreamALBApiBatchInsertDDBCustomResourceDicInitCustomResourceProviderframeworkonEventServiceRoleDefaultPolicy7EB8455A": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "lambda:InvokeFunction",
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "testClickStreamALBApiBatchInsertDDBCustomResourceDicInitCustomResourceFunction504311BF",
+                    "Arn"
+                  ]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "testClickStreamALBApiBatchInsertDDBCustomResourceDicInitCustomResourceFunction504311BF",
+                          "Arn"
+                        ]
+                      },
+                      ":*"
+                    ]
+                  ]
+                }
+              ]
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": "testClickStreamALBApiBatchInsertDDBCustomResourceDicInitCustomResourceProviderframeworkonEventServiceRoleDefaultPolicy7EB8455A",
+        "Roles": [
+          {
+            "Ref": "testClickStreamALBApiBatchInsertDDBCustomResourceDicInitCustomResourceProviderframeworkonEventServiceRole256DF90A"
+          }
+        ]
+      }
+    },
+    "testClickStreamALBApiBatchInsertDDBCustomResourceDicInitCustomResourceProviderframeworkonEventFB731F8E": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
+          },
+          "S3Key": "7382a0addb9f34974a1ea6c6c9b063882af874828f366f5c93b2b7b64db15c94.zip"
+        },
+        "Description": "AWS CDK resource provider framework - onEvent (apiTestStack/testClickStreamALBApi/BatchInsertDDBCustomResource/DicInitCustomResourceProvider)",
+        "Environment": {
+          "Variables": {
+            "USER_ON_EVENT_FUNCTION_ARN": {
+              "Fn::GetAtt": [
+                "testClickStreamALBApiBatchInsertDDBCustomResourceDicInitCustomResourceFunction504311BF",
+                "Arn"
+              ]
+            }
+          }
+        },
+        "Handler": "framework.onEvent",
+        "Role": {
+          "Fn::GetAtt": [
+            "testClickStreamALBApiBatchInsertDDBCustomResourceDicInitCustomResourceProviderframeworkonEventServiceRole256DF90A",
+            "Arn"
+          ]
+        },
+        "Runtime": "nodejs18.x",
+        "Timeout": 900
+      },
+      "DependsOn": [
+        "testClickStreamALBApiBatchInsertDDBCustomResourceDicInitCustomResourceProviderframeworkonEventServiceRoleDefaultPolicy7EB8455A",
+        "testClickStreamALBApiBatchInsertDDBCustomResourceDicInitCustomResourceProviderframeworkonEventServiceRole256DF90A"
+      ]
+    },
+    "testClickStreamALBApiBatchInsertDDBCustomResourceDicInitCustomResourceProviderframeworkonEventLogRetention9547C1FD": {
+      "Type": "Custom::LogRetention",
+      "Properties": {
+        "ServiceToken": {
+          "Fn::GetAtt": [
+            "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A",
+            "Arn"
+          ]
+        },
+        "LogGroupName": {
+          "Fn::Join": [
+            "",
+            [
+              "/aws/lambda/",
+              {
+                "Ref": "testClickStreamALBApiBatchInsertDDBCustomResourceDicInitCustomResourceProviderframeworkonEventFB731F8E"
+              }
+            ]
+          ]
+        },
+        "RetentionInDays": 5
+      }
+    },
+    "testClickStreamALBApiBatchInsertDDBCustomResourceDicInitCustomResource5AE5EDD9": {
+      "Type": "AWS::CloudFormation::CustomResource",
+      "Properties": {
+        "ServiceToken": {
+          "Fn::GetAtt": [
+            "testClickStreamALBApiBatchInsertDDBCustomResourceDicInitCustomResourceProviderframeworkonEventFB731F8E",
+            "Arn"
+          ]
+        },
+        "tableName": {
+          "Ref": "testClickStreamALBApiClickstreamDictionary0A1156B6"
+        },
+        "items": [
+          {
+            "name": "Solution",
+            "data": {
+              "name": "__SOLUTION_NAME__",
+              "dist_output_bucket": "__DIST_OUTPUT_BUCKET__",
+              "target": "__TARGET__",
+              "prefix": "__PREFIX__",
+              "version": "__SOLUTION_VERSION__"
+            }
+          },
+          {
+            "name": "Templates",
+            "data": {
+              "Ingestion_s3": "ingestion-server-s3-stack.template.json",
+              "Ingestion_kafka": "ingestion-server-kafka-stack.template.json",
+              "Ingestion_kinesis": "ingestion-server-kinesis-stack.template.json",
+              "KafkaConnector": "kafka-s3-sink-stack.template.json",
+              "DataProcessing": "data-pipeline-stack.template.json",
+              "DataModelingRedshift": "data-analytics-redshift-stack.template.json",
+              "Reporting": "data-reporting-quicksight-stack.template.json",
+              "Metrics": "metrics-stack.template.json",
+              "DataModelingAthena": "data-modeling-athena-stack.template.json"
+            }
+          },
+          {
+            "name": "BuiltInPlugins",
+            "data": [
+              {
+                "id": "BUILT-IN-1",
+                "type": "PLUGIN#BUILT-IN-1",
+                "prefix": "PLUGIN",
+                "name": "Transformer",
+                "description": "Convert the data format reported by SDK into the data format in the data warehouse",
+                "builtIn": true,
+                "mainFunction": "software.aws.solution.clickstream.TransformerV2",
+                "jarFile": "",
+                "bindCount": 0,
+                "pluginType": "Transform",
+                "dependencyFiles": [],
+                "operator": "",
+                "deleted": false,
+                "createAt": 1667355960000,
+                "updateAt": 1667355960000
+              },
+              {
+                "id": "BUILT-IN-2",
+                "type": "PLUGIN#BUILT-IN-2",
+                "prefix": "PLUGIN",
+                "name": "UAEnrichment",
+                "description": "Derive OS, device, browser information from User Agent string from the HTTP request header",
+                "builtIn": true,
+                "mainFunction": "software.aws.solution.clickstream.UAEnrichment",
+                "jarFile": "",
+                "bindCount": 0,
+                "pluginType": "Enrich",
+                "dependencyFiles": [],
+                "operator": "",
+                "deleted": false,
+                "createAt": 1667355960000,
+                "updateAt": 1667355960000
+              },
+              {
+                "id": "BUILT-IN-3",
+                "type": "PLUGIN#BUILT-IN-3",
+                "prefix": "PLUGIN",
+                "name": "IPEnrichment",
+                "description": "Derive location information (e.g., city, country, region) based on the request source IP",
+                "builtIn": true,
+                "mainFunction": "software.aws.solution.clickstream.IPEnrichment",
+                "jarFile": "",
+                "bindCount": 0,
+                "pluginType": "Enrich",
+                "dependencyFiles": [],
+                "operator": "",
+                "deleted": false,
+                "createAt": 1667355960000,
+                "updateAt": 1667355960000
+              }
+            ]
+          },
+          {
+            "name": "MetadataBuiltInList",
+            "data": {
+              "PresetEvents": [
+                {
+                  "name": "_first_open",
+                  "description": {
+                    "en-US": "When the user launches an app the first time after installation",
+                    "zh-CN": "当用户安装后第一次启动应用程序时"
+                  }
+                },
+                {
+                  "name": "_session_start",
+                  "description": {
+                    "en-US": "When a user first open the app or a user returns to the app after 30 minutes of inactivity period",
+                    "zh-CN": "当用户首次打开App或用户在 30 分钟不活动后返回App时"
+                  }
+                },
+                {
+                  "name": "_screen_view",
+                  "description": {
+                    "en-US": "When new screen is opens",
+                    "zh-CN": "当新的屏幕打开时"
+                  }
+                },
+                {
+                  "name": "_user_engagement",
+                  "description": {
+                    "en-US": "When user navigates away from current screen and the screen is in focus for at least one second",
+                    "zh-CN": "当用户离开当前屏幕并且屏幕处于焦点状态至少一秒钟时"
+                  }
+                },
+                {
+                  "name": "_app_start",
+                  "description": {
+                    "en-US": "Every time the app goes to visible",
+                    "zh-CN": "每次App变为可见时"
+                  }
+                },
+                {
+                  "name": "_app_end",
+                  "description": {
+                    "en-US": "Every time the app goes to invisible",
+                    "zh-CN": "每次App变为不可见时"
+                  }
+                },
+                {
+                  "name": "_profile_set",
+                  "description": {
+                    "en-US": "When the addUserAttributes() or setUserId() API is called",
+                    "zh-CN": "当调用 addUserAttributes() 或 setUserId() API 时"
+                  }
+                },
+                {
+                  "name": "_app_exception",
+                  "description": {
+                    "en-US": "When the app crashes",
+                    "zh-CN": "当应用程序崩溃时"
+                  }
+                },
+                {
+                  "name": "_app_update",
+                  "description": {
+                    "en-US": "When the app is updated to a new version and launched again",
+                    "zh-CN": "当App更新到新版本并再次启动时"
+                  }
+                },
+                {
+                  "name": "_os_update",
+                  "description": {
+                    "en-US": "When device operating system is updated to a new version",
+                    "zh-CN": "当操作系统更新到新版本时"
+                  }
+                },
+                {
+                  "name": "_clickstream_error",
+                  "description": {
+                    "en-US": "Event name is invalid or user attribute is invalid",
+                    "zh-CN": "事件名称无效或用户属性无效时"
+                  }
+                },
+                {
+                  "name": "_page_view",
+                  "description": {
+                    "en-US": "When new page is opens",
+                    "zh-CN": "当新的页面打开时"
+                  }
+                },
+                {
+                  "name": "_scroll",
+                  "description": {
+                    "en-US": "The first time a user reaches the bottom of each page",
+                    "zh-CN": "用户第一次到达每个页面的底部时"
+                  }
+                },
+                {
+                  "name": "_search",
+                  "description": {
+                    "en-US": "Each time a user performs a site search",
+                    "zh-CN": "每次用户执行站点搜索时，根据 URL 查询参数的存在来判断"
+                  }
+                },
+                {
+                  "name": "_click",
+                  "description": {
+                    "en-US": "Each time a user clicks a link that leads away from the current domain",
+                    "zh-CN": "每次用户单击将其带离当前域名（或配置的域名列表）的链接时"
+                  }
+                },
+                {
+                  "name": "_mp_share",
+                  "description": {
+                    "en-US": "When user shares the mini program to others",
+                    "zh-CN": "当用户分享微信小程序时"
+                  }
+                },
+                {
+                  "name": "_mp_favorite",
+                  "description": {
+                    "en-US": "When user adds the mini program to favorites",
+                    "zh-CN": "当用户收藏微信小程序时"
+                  }
+                }
+              ],
+              "PresetEventParameters": [
+                {
+                  "name": "_screen_id",
+                  "dataType": "string",
+                  "description": {
+                    "en-US": "The screen ID",
+                    "zh-CN": "屏幕ID"
+                  },
+                  "eventName": "_screen_view"
+                },
+                {
+                  "name": "_previous_screen_name",
+                  "dataType": "string",
+                  "description": {
+                    "en-US": "The previous screen name",
+                    "zh-CN": "上一个屏幕名称"
+                  },
+                  "eventName": "_screen_view"
+                },
+                {
+                  "name": "_previous_screen_id",
+                  "dataType": "string",
+                  "description": {
+                    "en-US": "The previous screen ID",
+                    "zh-CN": "上一个屏幕ID"
+                  },
+                  "eventName": "_screen_view"
+                },
+                {
+                  "name": "_previous_screen_unique_id",
+                  "dataType": "string",
+                  "description": {
+                    "en-US": "The previous screen unique ID",
+                    "zh-CN": "上一个屏幕唯一ID"
+                  },
+                  "eventName": "_screen_view"
+                },
+                {
+                  "name": "_page_referrer",
+                  "dataType": "string",
+                  "description": {
+                    "en-US": "Last page url",
+                    "zh-CN": "前一个页面URL"
+                  },
+                  "eventName": "_page_view"
+                },
+                {
+                  "name": "_page_referrer_title",
+                  "dataType": "string",
+                  "description": {
+                    "en-US": "Last page title",
+                    "zh-CN": "前一个页面标题"
+                  },
+                  "eventName": "_page_view"
+                },
+                {
+                  "name": "_entrances",
+                  "dataType": "string",
+                  "description": {
+                    "en-US": "The first screen view event in a session is 1, others is 0",
+                    "zh-CN": "会话中的第一个屏幕浏览事件该值为 1，其他则为 0"
+                  },
+                  "eventName": "_page_view"
+                },
+                {
+                  "name": "_entrances",
+                  "dataType": "string",
+                  "description": {
+                    "en-US": "The first screen view event in a session is 1, others is 0",
+                    "zh-CN": "会话中的第一个屏幕浏览事件该值为 1，其他则为 0"
+                  },
+                  "eventName": "_screen_view"
+                },
+                {
+                  "name": "_previous_timestamp",
+                  "dataType": "int",
+                  "description": {
+                    "en-US": "The timestamp of the previous _screen_view event",
+                    "zh-CN": "上一个 screen_view 事件的时间戳"
+                  },
+                  "eventName": "_screen_view"
+                },
+                {
+                  "name": "_previous_timestamp",
+                  "dataType": "int",
+                  "description": {
+                    "en-US": "The timestamp of the previous _screen_view event",
+                    "zh-CN": "上一个 screen_view 事件的时间戳"
+                  },
+                  "eventName": "_page_view"
+                },
+                {
+                  "name": "_engagement_time_msec",
+                  "dataType": "int",
+                  "description": {
+                    "en-US": "The previous page last engagement milliseconds",
+                    "zh-CN": "上个屏幕最后一次用户参与事件时长的毫秒数"
+                  },
+                  "eventName": "_screen_view"
+                },
+                {
+                  "name": "_engagement_time_msec",
+                  "dataType": "int",
+                  "description": {
+                    "en-US": "The previous page last engagement milliseconds",
+                    "zh-CN": "上个屏幕最后一次用户参与事件时长的毫秒数"
+                  },
+                  "eventName": "_page_view"
+                },
+                {
+                  "name": "_engagement_time_msec",
+                  "dataType": "int",
+                  "description": {
+                    "en-US": "The previous page last engagement milliseconds",
+                    "zh-CN": "上个屏幕最后一次用户参与事件时长的毫秒数"
+                  },
+                  "eventName": "_user_engagement"
+                },
+                {
+                  "name": "_is_first_time",
+                  "dataType": "string",
+                  "description": {
+                    "en-US": "When it is the first _app_start event after the application starts, the value is true",
+                    "zh-CN": "当应用程序启动后第一个 _app_start 事件时，值为 true"
+                  },
+                  "eventName": "_app_start"
+                },
+                {
+                  "name": "_exception_message",
+                  "dataType": "string",
+                  "description": {
+                    "en-US": "The message of exception",
+                    "zh-CN": "异常信息"
+                  },
+                  "eventName": "_app_exception"
+                },
+                {
+                  "name": "_exception_stack",
+                  "dataType": "string",
+                  "description": {
+                    "en-US": "The stack details of exception",
+                    "zh-CN": "异常堆栈信息"
+                  },
+                  "eventName": "_app_exception"
+                },
+                {
+                  "name": "_previous_app_version",
+                  "dataType": "string",
+                  "description": {
+                    "en-US": "The version of previous app",
+                    "zh-CN": "上一个应用版本"
+                  },
+                  "eventName": "_app_update"
+                },
+                {
+                  "name": "_previous_os_version",
+                  "dataType": "string",
+                  "description": {
+                    "en-US": "The version of previous operating system",
+                    "zh-CN": "上一个操作系统版本"
+                  },
+                  "eventName": "_os_update"
+                },
+                {
+                  "name": "_error_code",
+                  "dataType": "string",
+                  "description": {
+                    "en-US": "Error code",
+                    "zh-CN": "错误代码"
+                  },
+                  "eventName": "_clickstream_error"
+                },
+                {
+                  "name": "_error_message",
+                  "dataType": "string",
+                  "description": {
+                    "en-US": "Error message",
+                    "zh-CN": "错误信息"
+                  },
+                  "eventName": "_clickstream_error"
+                },
+                {
+                  "name": "_search_key",
+                  "dataType": "string",
+                  "description": {
+                    "en-US": "The keyword name",
+                    "zh-CN": "搜索参数名称"
+                  },
+                  "eventName": "_search"
+                },
+                {
+                  "name": "_search_term",
+                  "dataType": "string",
+                  "description": {
+                    "en-US": "The search content",
+                    "zh-CN": "搜索内容"
+                  },
+                  "eventName": "_search"
+                },
+                {
+                  "name": "_link_classes",
+                  "dataType": "string",
+                  "description": {
+                    "en-US": "The content of class in tag <a>",
+                    "zh-CN": "标签 <a>中class里的内容"
+                  },
+                  "eventName": "_click"
+                },
+                {
+                  "name": "_link_domain",
+                  "dataType": "string",
+                  "description": {
+                    "en-US": "The domain of href in tag <a>",
+                    "zh-CN": "标签 <a>中href里的域名"
+                  },
+                  "eventName": "_click"
+                },
+                {
+                  "name": "_link_id",
+                  "dataType": "string",
+                  "description": {
+                    "en-US": "The content of id in tag <a>",
+                    "zh-CN": "标签 <a>中id里的内容"
+                  },
+                  "eventName": "_click"
+                },
+                {
+                  "name": "_link_url",
+                  "dataType": "string",
+                  "description": {
+                    "en-US": "The content of href in tag <a>",
+                    "zh-CN": "标签 <a>中href里的内容"
+                  },
+                  "eventName": "_click"
+                },
+                {
+                  "name": "_outbound",
+                  "dataType": "string",
+                  "description": {
+                    "en-US": "If the domain is not in configured domain list, the attribute value is true",
+                    "zh-CN": "如果该域不在配置的域名列表中，则属性值为true"
+                  },
+                  "eventName": "_click"
+                },
+                {
+                  "name": "_traffic_source_medium",
+                  "dataType": "string",
+                  "description": {
+                    "en-US": "Traffic medium. Use this attribute to store the medium that acquired user when events were logged. Example: Email, Paid search, Search engine",
+                    "zh-CN": "流量媒介，存储事件记录时获取用户的媒介，例如：电子邮件、付费搜索、搜索引擎"
+                  }
+                },
+                {
+                  "name": "_traffic_source_name",
+                  "dataType": "string",
+                  "description": {
+                    "en-US": "Traffic name. Use this attribute to store the marketing campaign that acquired user when events were logged. Example: Summer promotion",
+                    "zh-CN": "流量名称，存储事件记录时获取用户的营销活动，例如：夏季促销"
+                  }
+                },
+                {
+                  "name": "_traffic_source_source",
+                  "dataType": "string",
+                  "description": {
+                    "en-US": "Traffic source. Name of the network source that acquired the user when the event were reported. Example: Google, Facebook, Bing, Baidu",
+                    "zh-CN": "流量来源，事件报告时获取的网络来源的名称，例如：Google, Facebook, Bing, Baidu"
+                  }
+                },
+                {
+                  "name": "_channel",
+                  "dataType": "string",
+                  "description": {
+                    "en-US": "Install source, it is the channel for app was downloaded",
+                    "zh-CN": "安装源，app下载的渠道"
+                  }
+                },
+                {
+                  "name": "_session_id",
+                  "dataType": "string",
+                  "description": {
+                    "en-US": "The session ID",
+                    "zh-CN": "会话ID"
+                  }
+                },
+                {
+                  "name": "_session_start_timestamp",
+                  "dataType": "int",
+                  "description": {
+                    "en-US": "The session start timestamp",
+                    "zh-CN": "会话开始时间戳"
+                  }
+                },
+                {
+                  "name": "_session_duration",
+                  "dataType": "int",
+                  "description": {
+                    "en-US": "The session duration",
+                    "zh-CN": "会话持续时间"
+                  }
+                },
+                {
+                  "name": "_session_number",
+                  "dataType": "int",
+                  "description": {
+                    "en-US": "The session number",
+                    "zh-CN": "会话编号"
+                  }
+                },
+                {
+                  "name": "_latest_referrer",
+                  "dataType": "string",
+                  "description": {
+                    "en-US": "Last off-site link",
+                    "zh-CN": "最近一次站外链接"
+                  }
+                },
+                {
+                  "name": "_latest_referrer_host",
+                  "dataType": "string",
+                  "description": {
+                    "en-US": "Last off-site domain name",
+                    "zh-CN": "最近一次站外域名"
+                  }
+                },
+                {
+                  "name": "_screen_name",
+                  "dataType": "string",
+                  "description": {
+                    "en-US": "The screen name",
+                    "zh-CN": "屏幕名称"
+                  }
+                },
+                {
+                  "name": "_screen_unique_id",
+                  "dataType": "string",
+                  "description": {
+                    "en-US": "The screen unique ID",
+                    "zh-CN": "屏幕唯一ID"
+                  }
+                },
+                {
+                  "name": "_page_title",
+                  "dataType": "string",
+                  "description": {
+                    "en-US": "The page title",
+                    "zh-CN": "页面标题"
+                  }
+                },
+                {
+                  "name": "_page_url",
+                  "dataType": "string",
+                  "description": {
+                    "en-US": "The page url",
+                    "zh-CN": "页面URL"
+                  }
+                }
+              ],
+              "PublicEventParameters": [
+                {
+                  "name": "app_id",
+                  "dataType": "string",
+                  "description": {
+                    "en-US": "The app ID",
+                    "zh-CN": "应用ID"
+                  }
+                },
+                {
+                  "name": "unique_id",
+                  "dataType": "string",
+                  "description": {
+                    "en-US": "The unique ID of the user",
+                    "zh-CN": "用户唯一ID"
+                  }
+                },
+                {
+                  "name": "device_id",
+                  "dataType": "string",
+                  "description": {
+                    "en-US": "The device ID",
+                    "zh-CN": "设备ID"
+                  }
+                },
+                {
+                  "name": "event_type",
+                  "dataType": "string",
+                  "description": {
+                    "en-US": "The event type",
+                    "zh-CN": "事件类型"
+                  }
+                },
+                {
+                  "name": "event_id",
+                  "dataType": "string",
+                  "description": {
+                    "en-US": "The event ID",
+                    "zh-CN": "事件ID"
+                  }
+                },
+                {
+                  "name": "timestamp",
+                  "dataType": "int",
+                  "description": {
+                    "en-US": "The event timestamp",
+                    "zh-CN": "事件时间戳"
+                  }
+                },
+                {
+                  "name": "platform",
+                  "dataType": "string",
+                  "description": {
+                    "en-US": "The platform",
+                    "zh-CN": "平台"
+                  }
+                },
+                {
+                  "name": "os_version",
+                  "dataType": "string",
+                  "description": {
+                    "en-US": "The OS version",
+                    "zh-CN": "操作系统版本"
+                  }
+                },
+                {
+                  "name": "make",
+                  "dataType": "string",
+                  "description": {
+                    "en-US": "The device make",
+                    "zh-CN": "设备制造商"
+                  }
+                },
+                {
+                  "name": "brand",
+                  "dataType": "string",
+                  "description": {
+                    "en-US": "The device brand",
+                    "zh-CN": "设备品牌"
+                  }
+                },
+                {
+                  "name": "model",
+                  "dataType": "string",
+                  "description": {
+                    "en-US": "The device model",
+                    "zh-CN": "设备型号"
+                  }
+                },
+                {
+                  "name": "carrier",
+                  "dataType": "string",
+                  "description": {
+                    "en-US": "The carrier",
+                    "zh-CN": "运营商"
+                  }
+                },
+                {
+                  "name": "network_type",
+                  "dataType": "string",
+                  "description": {
+                    "en-US": "The network type",
+                    "zh-CN": "网络类型"
+                  }
+                },
+                {
+                  "name": "screen_height",
+                  "dataType": "int",
+                  "description": {
+                    "en-US": "The screen height",
+                    "zh-CN": "屏幕高度"
+                  }
+                },
+                {
+                  "name": "screen_width",
+                  "dataType": "int",
+                  "description": {
+                    "en-US": "The screen width",
+                    "zh-CN": "屏幕宽度"
+                  }
+                },
+                {
+                  "name": "viewport_height",
+                  "dataType": "int",
+                  "description": {
+                    "en-US": "The website viewport height pixel",
+                    "zh-CN": "视区高度"
+                  }
+                },
+                {
+                  "name": "viewport_width",
+                  "dataType": "int",
+                  "description": {
+                    "en-US": "The website viewport width pixel",
+                    "zh-CN": "视区宽度"
+                  }
+                },
+                {
+                  "name": "zone_offset",
+                  "dataType": "int",
+                  "description": {
+                    "en-US": "The time zone offset",
+                    "zh-CN": "时区偏移"
+                  }
+                },
+                {
+                  "name": "locale",
+                  "dataType": "string",
+                  "description": {
+                    "en-US": "The locale",
+                    "zh-CN": "区域设置"
+                  }
+                },
+                {
+                  "name": "system_language",
+                  "dataType": "string",
+                  "description": {
+                    "en-US": "The system language",
+                    "zh-CN": "系统语言"
+                  }
+                },
+                {
+                  "name": "country_code",
+                  "dataType": "string",
+                  "description": {
+                    "en-US": "The country code",
+                    "zh-CN": "国家代码"
+                  }
+                },
+                {
+                  "name": "sdk_version",
+                  "dataType": "string",
+                  "description": {
+                    "en-US": "The SDK version",
+                    "zh-CN": "SDK版本"
+                  }
+                },
+                {
+                  "name": "sdk_name",
+                  "dataType": "string",
+                  "description": {
+                    "en-US": "The SDK name",
+                    "zh-CN": "SDK名称"
+                  }
+                },
+                {
+                  "name": "app_version",
+                  "dataType": "string",
+                  "description": {
+                    "en-US": "The app version",
+                    "zh-CN": "应用版本"
+                  }
+                },
+                {
+                  "name": "app_package_name",
+                  "dataType": "string",
+                  "description": {
+                    "en-US": "The app package name",
+                    "zh-CN": "应用包名"
+                  }
+                },
+                {
+                  "name": "app_title",
+                  "dataType": "string",
+                  "description": {
+                    "en-US": "The app title",
+                    "zh-CN": "应用标题"
+                  }
+                },
+                {
+                  "name": "host_name",
+                  "dataType": "string",
+                  "description": {
+                    "en-US": "The website hostname",
+                    "zh-CN": "网站主机名"
+                  }
+                }
+              ],
+              "PresetUserAttributes": [
+                {
+                  "name": "_user_id",
+                  "dataType": "string",
+                  "description": {
+                    "en-US": "Reserved for user id that is assigned by app",
+                    "zh-CN": "用户ID"
+                  }
+                },
+                {
+                  "name": "_user_name",
+                  "dataType": "string",
+                  "description": {
+                    "en-US": "User name",
+                    "zh-CN": "用户名"
+                  }
+                },
+                {
+                  "name": "_user_ltv_revenue",
+                  "dataType": "string",
+                  "description": {
+                    "en-US": "Reserved for user lifetime value",
+                    "zh-CN": "用户终身价值"
+                  }
+                },
+                {
+                  "name": "_user_ltv_currency",
+                  "dataType": "string",
+                  "description": {
+                    "en-US": "Reserved for user lifetime value currency",
+                    "zh-CN": "用户终身价值货币"
+                  }
+                },
+                {
+                  "name": "_user_first_touch_timestamp",
+                  "dataType": "int",
+                  "description": {
+                    "en-US": "Added to the user object for all events. The time (in milliseconds) when the user first opened the app",
+                    "zh-CN": "用户首次打开应用程序或访问站点的时间（以毫秒为单位），在 user 对象的每个事件中都包含此属性"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "UpdateReplacePolicy": "Delete",
+      "DeletionPolicy": "Delete"
+    },
+    "testClickStreamALBApiAddAdminUserCustomResourceAddAdminUserAwsCustomResourceD9F42A0D": {
+      "Type": "Custom::AWS",
+      "Properties": {
+        "ServiceToken": {
+          "Fn::GetAtt": [
+            "AWS679f53fac002430cb0da5b7982bd22872D164C4C",
+            "Arn"
+          ]
+        },
+        "Create": {
+          "Fn::Join": [
+            "",
+            [
+              "{\"service\":\"DynamoDB\",\"action\":\"putItem\",\"physicalResourceId\":{\"id\":\"AddAdminUserCustomResource\"},\"parameters\":{\"TableName\":\"",
+              {
+                "Ref": "testClickStreamALBApiClickstreamMetadataA721B303"
+              },
+              "\",\"Item\":{\"id\":{\"S\":\"fake@example.com\"},\"type\":{\"S\":\"USER\"},\"prefix\":{\"S\":\"USER\"},\"role\":{\"S\":\"Admin\"},\"createAt\":{\"N\":\"1698299985259\"},\"updateAt\":{\"N\":\"1698299985259\"},\"operator\":{\"S\":\"Clickstream\"},\"deleted\":{\"BOOL\":false}},\"ConditionExpression\":\"attribute_not_exists(id)\"}}"
+            ]
+          ]
+        },
+        "Update": {
+          "Fn::Join": [
+            "",
+            [
+              "{\"service\":\"DynamoDB\",\"action\":\"updateItem\",\"physicalResourceId\":{\"id\":\"AddAdminUserCustomResource\"},\"parameters\":{\"TableName\":\"",
+              {
+                "Ref": "testClickStreamALBApiClickstreamMetadataA721B303"
+              },
+              "\",\"Key\":{\"id\":{\"S\":\"fake@example.com\"},\"type\":{\"S\":\"USER\"}},\"UpdateExpression\":\"SET #role = :role, #prefix = :prefix, #createAt = :createAt, #updateAt = :updateAt, #operator = :operator, #deleted = :deleted\",\"ExpressionAttributeNames\":{\"#role\":\"role\",\"#createAt\":\"createAt\",\"#updateAt\":\"updateAt\",\"#operator\":\"operator\",\"#deleted\":\"deleted\",\"#prefix\":\"prefix\"},\"ExpressionAttributeValues\":{\":prefix\":{\"S\":\"USER\"},\":role\":{\"S\":\"Admin\"},\":createAt\":{\"N\":\"1698299985259\"},\":updateAt\":{\"N\":\"1698299985259\"},\":operator\":{\"S\":\"Clickstream\"},\":deleted\":{\"BOOL\":false}}}}"
+            ]
+          ]
+        },
+        "Delete": {
+          "Fn::Join": [
+            "",
+            [
+              "{\"service\":\"DynamoDB\",\"action\":\"deleteItem\",\"physicalResourceId\":{\"id\":\"AddAdminUserCustomResource\"},\"parameters\":{\"TableName\":\"",
+              {
+                "Ref": "testClickStreamALBApiClickstreamMetadataA721B303"
+              },
+              "\",\"Key\":{\"id\":{\"S\":\"fake@example.com\"},\"type\":{\"S\":\"USER\"}},\"ConditionExpression\":\"attribute_exists(id)\"}}"
+            ]
+          ]
+        },
+        "InstallLatestAwsSdk": false
+      },
+      "DependsOn": [
+        "testClickStreamALBApiAddAdminUserCustomResourceAddAdminUserAwsCustomResourceCustomResourcePolicy58851F61"
+      ],
+      "UpdateReplacePolicy": "Delete",
+      "DeletionPolicy": "Delete"
+    },
+    "testClickStreamALBApiAddAdminUserCustomResourceAddAdminUserAwsCustomResourceCustomResourcePolicy58851F61": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "dynamodb:PutItem",
+                "dynamodb:UpdateItem",
+                "dynamodb:DeleteItem"
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "testClickStreamALBApiClickstreamMetadataA721B303",
+                  "Arn"
+                ]
+              },
+              "Sid": "DynamoWriteAccess"
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": "testClickStreamALBApiAddAdminUserCustomResourceAddAdminUserAwsCustomResourceCustomResourcePolicy58851F61",
+        "Roles": [
+          {
+            "Ref": "AWS679f53fac002430cb0da5b7982bd2287ServiceRoleC1EA0FF2"
+          }
+        ]
+      }
+    },
+    "testClickStreamALBApiClickStreamApiFunctionSGC830FA60": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "apiTestStack/testClickStreamALBApi/ClickStreamApiFunctionSG",
+        "SecurityGroupEgress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "Allow all outbound traffic by default",
+            "IpProtocol": "-1"
+          }
+        ],
+        "VpcId": "vpc-11111111111111111"
+      },
+      "Metadata": {
+        "cfn_nag": {
+          "rules_to_suppress": [
+            {
+              "id": "W29",
+              "reason": "Disallow all egress traffic"
+            },
+            {
+              "id": "W27",
+              "reason": "Allow all traffic from application load balancer"
+            },
+            {
+              "id": "W40",
+              "reason": "Design intent: Security Groups egress with an IpProtocol of -1"
+            },
+            {
+              "id": "W5",
+              "reason": "Design intent: Security Groups found with cidr open to world on egress"
+            }
+          ]
+        }
+      }
+    },
+    "testClickStreamALBApiClickStreamApiFunctionSGfromapiTestStacktestsg4FAC454FALLPORTSFCC6B698": {
+      "Type": "AWS::EC2::SecurityGroupIngress",
+      "Properties": {
+        "Description": "allow all traffic from application load balancer",
+        "FromPort": 0,
+        "GroupId": {
+          "Fn::GetAtt": [
+            "testClickStreamALBApiClickStreamApiFunctionSGC830FA60",
+            "GroupId"
+          ]
+        },
+        "IpProtocol": "tcp",
+        "SourceSecurityGroupId": {
+          "Fn::GetAtt": [
+            "testsg872EB48A",
+            "GroupId"
+          ]
+        },
+        "ToPort": 65535
+      }
+    },
+    "testClickStreamALBApiStackActionStateMachineActionFunctionRoleB3901335": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        }
+      }
+    },
+    "testClickStreamALBApiStackActionStateMachineActionFunctionRoleDefaultPolicy22F19739": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "xray:PutTraceSegments",
+                "xray:PutTelemetryRecords"
+              ],
+              "Effect": "Allow",
+              "Resource": "*"
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": "testClickStreamALBApiStackActionStateMachineActionFunctionRoleDefaultPolicy22F19739",
+        "Roles": [
+          {
+            "Ref": "testClickStreamALBApiStackActionStateMachineActionFunctionRoleB3901335"
+          }
+        ]
+      }
+    },
+    "testClickStreamALBApiStackActionStateMachineActionFunction9CC75763": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Architectures": [
+          "x86_64"
+        ],
+        "Code": {
+          "S3Bucket": {
+            "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
+          },
+          "S3Key": "e65027329c85e3ba56b113814d7a21839f9435d34e1cc201b61bfafa44c6fc4c.zip"
+        },
+        "Description": "Lambda function for state machine action of solution Clickstream Analytics on AWS",
+        "Environment": {
+          "Variables": {
+            "POWERTOOLS_SERVICE_NAME": "ClickStreamAnalyticsOnAWS",
+            "POWERTOOLS_LOGGER_SAMPLE_RATE": "1",
+            "POWERTOOLS_LOGGER_LOG_EVENT": "true",
+            "LOG_LEVEL": "WARN",
+            "AWS_NODEJS_CONNECTION_REUSE_ENABLED": "1"
+          }
+        },
+        "Handler": "index.handler",
+        "Role": {
+          "Fn::GetAtt": [
+            "testClickStreamALBApiStackActionStateMachineActionFunctionRoleB3901335",
+            "Arn"
+          ]
+        },
+        "Runtime": "nodejs18.x",
+        "Timeout": 15,
+        "TracingConfig": {
+          "Mode": "Active"
+        },
+        "VpcConfig": {
+          "SecurityGroupIds": [
+            {
+              "Fn::GetAtt": [
+                "testClickStreamALBApiClickStreamApiFunctionSGC830FA60",
+                "GroupId"
+              ]
+            }
+          ],
+          "SubnetIds": [
+            "subnet-33333333333333333",
+            "subnet-44444444444444444"
+          ]
+        }
+      },
+      "DependsOn": [
+        "actionfunceniA16F9174",
+        "testClickStreamALBApiStackActionStateMachineActionFunctionRoleDefaultPolicy22F19739",
+        "testClickStreamALBApiStackActionStateMachineActionFunctionRoleB3901335"
+      ],
+      "Metadata": {
+        "cfn_nag": {
+          "rules_to_suppress": [
+            {
+              "id": "W89",
+              "reason": "Lambda function is only used by ActionFunction for deployment as cloudformation custom resources or per product design, no need to be deployed in VPC"
+            },
+            {
+              "id": "W92",
+              "reason": "Lambda function is only used by ActionFunction for deployment as cloudformation custom resources or per product design, no need to set ReservedConcurrentExecutions"
+            }
+          ]
+        }
+      }
+    },
+    "testClickStreamALBApiStackActionStateMachineActionFunctionRolePolicyEC43145C": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "cloudformation:CreateStack",
+                "cloudformation:UpdateStack",
+                "cloudformation:DeleteStack",
+                "cloudformation:DescribeStacks",
+                "cloudformation:UpdateTerminationProtection"
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":cloudformation:*:",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":stack/Clickstream-*"
+                  ]
+                ]
+              }
+            },
+            {
+              "Action": [
+                "iam:GetRole",
+                "iam:PassRole",
+                "iam:DetachRolePolicy",
+                "iam:GetPolicy",
+                "iam:DeleteRolePolicy",
+                "iam:CreateRole",
+                "iam:DeleteRole",
+                "iam:AttachRolePolicy",
+                "iam:PutRolePolicy",
+                "iam:ListRolePolicies",
+                "iam:GetRolePolicy",
+                "iam:CreateInstanceProfile",
+                "iam:DeleteInstanceProfile",
+                "iam:RemoveRoleFromInstanceProfile",
+                "iam:AddRoleToInstanceProfile",
+                "iam:ListPolicies",
+                "iam:ListRoles",
+                "iam:UpdateRoleDescription"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":iam::",
+                      {
+                        "Ref": "AWS::AccountId"
+                      },
+                      ":role/Clickstream*"
+                    ]
+                  ]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":iam::",
+                      {
+                        "Ref": "AWS::AccountId"
+                      },
+                      ":policy/Clickstream*"
+                    ]
+                  ]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":iam::",
+                      {
+                        "Ref": "AWS::AccountId"
+                      },
+                      ":instance-profile/Clickstream*"
+                    ]
+                  ]
+                }
+              ]
+            },
+            {
+              "Action": [
+                "iam:PassRole",
+                "iam:CreateServiceLinkedRole"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":iam::",
+                      {
+                        "Ref": "AWS::AccountId"
+                      },
+                      ":role/aws-service-role/ecs.application-autoscaling.amazonaws.com/AWSServiceRoleForApplicationAutoScaling_ECSService"
+                    ]
+                  ]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":iam::",
+                      {
+                        "Ref": "AWS::AccountId"
+                      },
+                      ":role/aws-service-role/autoscaling.amazonaws.com/AWSServiceRoleForAutoScaling"
+                    ]
+                  ]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":iam::",
+                      {
+                        "Ref": "AWS::AccountId"
+                      },
+                      ":role/aws-service-role/ecs.amazonaws.com/AWSServiceRoleForECS"
+                    ]
+                  ]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":iam::",
+                      {
+                        "Ref": "AWS::AccountId"
+                      },
+                      ":role/aws-service-role/elasticloadbalancing.amazonaws.com/AWSServiceRoleForElasticLoadBalancing"
+                    ]
+                  ]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":iam::",
+                      {
+                        "Ref": "AWS::AccountId"
+                      },
+                      ":role/aws-service-role/globalaccelerator.amazonaws.com/AWSServiceRoleForGlobalAccelerator"
+                    ]
+                  ]
+                }
+              ]
+            },
+            {
+              "Action": [
+                "sns:*",
+                "sqs:*",
+                "redshift-serverless:*",
+                "s3:*",
+                "apigateway:*",
+                "logs:*",
+                "redshift:*",
+                "dynamodb:*",
+                "autoscaling:*",
+                "application-autoscaling:*",
+                "glue:*",
+                "cloudwatch:*",
+                "emr-serverless:*",
+                "ssm:*",
+                "ecs:*",
+                "lambda:*",
+                "quicksight:*",
+                "ec2:*",
+                "events:*",
+                "elasticloadbalancing:*",
+                "kinesis:*",
+                "kafka:*",
+                "states:*",
+                "secretsmanager:*",
+                "globalaccelerator:*",
+                "kms:*",
+                "athena:*"
+              ],
+              "Effect": "Allow",
+              "Resource": "*"
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": "testClickStreamALBApiStackActionStateMachineActionFunctionRolePolicyEC43145C",
+        "Roles": [
+          {
+            "Ref": "testClickStreamALBApiStackActionStateMachineActionFunctionRoleB3901335"
+          }
+        ]
+      },
+      "Metadata": {
+        "cfn_nag": {
+          "rules_to_suppress": [
+            {
+              "id": "F4",
+              "reason": "This policy requires releted actions in order to start/delete/update cloudformation stacks with many other services"
+            },
+            {
+              "id": "F39",
+              "reason": "When start/delete/update cloudformation stacks, we have to PassRole to existing undeterministical roles."
+            },
+            {
+              "id": "W76",
+              "reason": "This policy needs to be able to execute stacks, and call other AWS service"
+            },
+            {
+              "id": "W12",
+              "reason": "This policy needs to be able to start/delete other cloudformation stacks of the plugin with unknown resources names"
+            }
+          ]
+        }
+      }
+    },
+    "testClickStreamALBApiStackActionStateMachineLogGroupDE72356F": {
+      "Type": "AWS::Logs::LogGroup",
+      "Properties": {
+        "LogGroupName": {
+          "Fn::Join": [
+            "",
+            [
+              "/aws/vendedlogs/states/Clickstream/StackActionLogGroup-",
+              {
+                "Fn::Select": [
+                  0,
+                  {
+                    "Fn::Split": [
+                      "-",
+                      {
+                        "Fn::Select": [
+                          2,
+                          {
+                            "Fn::Split": [
+                              "/",
+                              {
+                                "Ref": "AWS::StackId"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          ]
+        },
+        "RetentionInDays": 180
+      },
+      "UpdateReplacePolicy": "Retain",
+      "DeletionPolicy": "Retain",
+      "Metadata": {
+        "cfn_nag": {
+          "rules_to_suppress": [
+            {
+              "id": "W84",
+              "reason": "Log group data is always encrypted in CloudWatch Logs. By default, CloudWatch Logs uses server-side encryption for the log data at rest."
+            }
+          ]
+        }
+      }
+    },
+    "testClickStreamALBApiStackActionStateMachineRoleE114EFCD": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": {
+                  "Fn::FindInMap": [
+                    "ServiceprincipalMap",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    "states"
+                  ]
+                }
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        }
+      }
+    },
+    "testClickStreamALBApiStackActionStateMachineRoleDefaultPolicy2F163742": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "logs:CreateLogDelivery",
+                "logs:GetLogDelivery",
+                "logs:UpdateLogDelivery",
+                "logs:DeleteLogDelivery",
+                "logs:ListLogDeliveries",
+                "logs:PutResourcePolicy",
+                "logs:DescribeResourcePolicies",
+                "logs:DescribeLogGroups"
+              ],
+              "Effect": "Allow",
+              "Resource": "*"
+            },
+            {
+              "Action": [
+                "xray:PutTraceSegments",
+                "xray:PutTelemetryRecords",
+                "xray:GetSamplingRules",
+                "xray:GetSamplingTargets"
+              ],
+              "Effect": "Allow",
+              "Resource": "*"
+            },
+            {
+              "Action": "lambda:InvokeFunction",
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "testClickStreamALBApiStackActionStateMachineActionFunction9CC75763",
+                    "Arn"
+                  ]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "testClickStreamALBApiStackActionStateMachineActionFunction9CC75763",
+                          "Arn"
+                        ]
+                      },
+                      ":*"
+                    ]
+                  ]
+                }
+              ]
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": "testClickStreamALBApiStackActionStateMachineRoleDefaultPolicy2F163742",
+        "Roles": [
+          {
+            "Ref": "testClickStreamALBApiStackActionStateMachineRoleE114EFCD"
+          }
+        ]
+      }
+    },
+    "testClickStreamALBApiStackActionStateMachineD1557E17": {
+      "Type": "AWS::StepFunctions::StateMachine",
+      "Properties": {
+        "DefinitionString": {
+          "Fn::Join": [
+            "",
+            [
+              "{\"StartAt\":\"Execute Task\",\"States\":{\"Execute Task\":{\"Next\":\"End?\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Type\":\"Task\",\"OutputPath\":\"$.Payload\",\"Resource\":\"arn:",
+              {
+                "Ref": "AWS::Partition"
+              },
+              ":states:::lambda:invoke\",\"Parameters\":{\"FunctionName\":\"",
+              {
+                "Fn::GetAtt": [
+                  "testClickStreamALBApiStackActionStateMachineActionFunction9CC75763",
+                  "Arn"
+                ]
+              },
+              "\",\"Payload.$\":\"$\"}},\"End?\":{\"Type\":\"Choice\",\"Choices\":[{\"Variable\":\"$.Action\",\"StringEquals\":\"End\",\"Next\":\"EndState\"}],\"Default\":\"Wait 15 Seconds\"},\"Wait 15 Seconds\":{\"Type\":\"Wait\",\"Seconds\":15,\"Next\":\"Describe Stack\"},\"Stack in progress?\":{\"Type\":\"Choice\",\"Choices\":[{\"Variable\":\"$.Result.StackStatus\",\"StringMatches\":\"*_IN_PROGRESS\",\"Next\":\"Wait 15 Seconds\"}],\"Default\":\"Callback Task\"},\"Describe Stack\":{\"Next\":\"Stack in progress?\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Type\":\"Task\",\"OutputPath\":\"$.Payload\",\"Resource\":\"arn:",
+              {
+                "Ref": "AWS::Partition"
+              },
+              ":states:::lambda:invoke\",\"Parameters\":{\"FunctionName\":\"",
+              {
+                "Fn::GetAtt": [
+                  "testClickStreamALBApiStackActionStateMachineActionFunction9CC75763",
+                  "Arn"
+                ]
+              },
+              "\",\"Payload.$\":\"$\"}},\"Callback Task\":{\"Next\":\"EndState\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Type\":\"Task\",\"OutputPath\":\"$.Payload\",\"Resource\":\"arn:",
+              {
+                "Ref": "AWS::Partition"
+              },
+              ":states:::lambda:invoke\",\"Parameters\":{\"FunctionName\":\"",
+              {
+                "Fn::GetAtt": [
+                  "testClickStreamALBApiStackActionStateMachineActionFunction9CC75763",
+                  "Arn"
+                ]
+              },
+              "\",\"Payload.$\":\"$\"}},\"EndState\":{\"Type\":\"Pass\",\"End\":true}},\"TimeoutSeconds\":7200}"
+            ]
+          ]
+        },
+        "LoggingConfiguration": {
+          "Destinations": [
+            {
+              "CloudWatchLogsLogGroup": {
+                "LogGroupArn": {
+                  "Fn::GetAtt": [
+                    "testClickStreamALBApiStackActionStateMachineLogGroupDE72356F",
+                    "Arn"
+                  ]
+                }
+              }
+            }
+          ],
+          "Level": "ALL"
+        },
+        "RoleArn": {
+          "Fn::GetAtt": [
+            "testClickStreamALBApiStackActionStateMachineRoleE114EFCD",
+            "Arn"
+          ]
+        },
+        "TracingConfiguration": {
+          "Enabled": true
+        }
+      },
+      "DependsOn": [
+        "testClickStreamALBApiStackActionStateMachineRoleDefaultPolicy2F163742",
+        "testClickStreamALBApiStackActionStateMachineRoleE114EFCD"
+      ],
+      "UpdateReplacePolicy": "Delete",
+      "DeletionPolicy": "Delete"
+    },
+    "testClickStreamALBApiStackWorkflowStateMachineWorkflowFunctionRole15F382D1": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        }
+      }
+    },
+    "testClickStreamALBApiStackWorkflowStateMachineWorkflowFunctionRoleDefaultPolicy8BFD716F": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "xray:PutTraceSegments",
+                "xray:PutTelemetryRecords"
+              ],
+              "Effect": "Allow",
+              "Resource": "*"
+            },
+            {
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+                "s3:DeleteObject*",
+                "s3:PutObject",
+                "s3:PutObjectLegalHold",
+                "s3:PutObjectRetention",
+                "s3:PutObjectTagging",
+                "s3:PutObjectVersionTagging",
+                "s3:Abort*"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "stackWorkflowS3BucketF67B9562",
+                    "Arn"
+                  ]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "stackWorkflowS3BucketF67B9562",
+                          "Arn"
+                        ]
+                      },
+                      "/clickstream/*"
+                    ]
+                  ]
+                }
+              ]
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": "testClickStreamALBApiStackWorkflowStateMachineWorkflowFunctionRoleDefaultPolicy8BFD716F",
+        "Roles": [
+          {
+            "Ref": "testClickStreamALBApiStackWorkflowStateMachineWorkflowFunctionRole15F382D1"
+          }
+        ]
+      },
+      "Metadata": {
+        "cfn_nag": {
+          "rules_to_suppress": [
+            {
+              "id": "W12",
+              "reason": "Policy is generated by WorkflowFunInStateAction, * xray resources for read only access or IAM limitation."
+            }
+          ]
+        }
+      }
+    },
+    "testClickStreamALBApiStackWorkflowStateMachineWorkflowCFNPolicy917DC336": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "cloudformation:DescribeStacks",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":cloudformation:*:",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":stack/Clickstream-*"
+                  ]
+                ]
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": "testClickStreamALBApiStackWorkflowStateMachineWorkflowCFNPolicy917DC336",
+        "Roles": [
+          {
+            "Ref": "testClickStreamALBApiStackWorkflowStateMachineWorkflowFunctionRole15F382D1"
+          }
+        ]
+      }
+    },
+    "testClickStreamALBApiStackWorkflowStateMachineWorkflowFunctionE7DBCFDE": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Architectures": [
+          "x86_64"
+        ],
+        "Code": {
+          "S3Bucket": {
+            "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
+          },
+          "S3Key": "032b4ac54a11967add69b9080bc897fa301dd4acbe4fda3fea3b103bd2941a04.zip"
+        },
+        "Description": "Lambda function for state machine workflow of solution Clickstream Analytics on AWS",
+        "Environment": {
+          "Variables": {
+            "POWERTOOLS_SERVICE_NAME": "ClickStreamAnalyticsOnAWS",
+            "POWERTOOLS_LOGGER_SAMPLE_RATE": "1",
+            "POWERTOOLS_LOGGER_LOG_EVENT": "true",
+            "LOG_LEVEL": "WARN",
+            "AWS_NODEJS_CONNECTION_REUSE_ENABLED": "1"
+          }
+        },
+        "Handler": "index.handler",
+        "Role": {
+          "Fn::GetAtt": [
+            "testClickStreamALBApiStackWorkflowStateMachineWorkflowFunctionRole15F382D1",
+            "Arn"
+          ]
+        },
+        "Runtime": "nodejs18.x",
+        "Timeout": 15,
+        "TracingConfig": {
+          "Mode": "Active"
+        },
+        "VpcConfig": {
+          "SecurityGroupIds": [
+            {
+              "Fn::GetAtt": [
+                "testClickStreamALBApiClickStreamApiFunctionSGC830FA60",
+                "GroupId"
+              ]
+            }
+          ],
+          "SubnetIds": [
+            "subnet-33333333333333333",
+            "subnet-44444444444444444"
+          ]
+        }
+      },
+      "DependsOn": [
+        "testClickStreamALBApiStackWorkflowStateMachineWorkflowFunctionRoleDefaultPolicy8BFD716F",
+        "testClickStreamALBApiStackWorkflowStateMachineWorkflowFunctionRole15F382D1",
+        "workflowfunceniF26BB9B3"
+      ],
+      "Metadata": {
+        "cfn_nag": {
+          "rules_to_suppress": [
+            {
+              "id": "W89",
+              "reason": "Lambda function is only used by WorkflowFunction for deployment as cloudformation custom resources or per product design, no need to be deployed in VPC"
+            },
+            {
+              "id": "W92",
+              "reason": "Lambda function is only used by WorkflowFunction for deployment as cloudformation custom resources or per product design, no need to set ReservedConcurrentExecutions"
+            }
+          ]
+        }
+      }
+    },
+    "testClickStreamALBApiStackWorkflowStateMachineLogGroupD7FD1922": {
+      "Type": "AWS::Logs::LogGroup",
+      "Properties": {
+        "LogGroupName": {
+          "Fn::Join": [
+            "",
+            [
+              "/aws/vendedlogs/states/Clickstream/StackWorkflowLogGroup-",
+              {
+                "Fn::Select": [
+                  0,
+                  {
+                    "Fn::Split": [
+                      "-",
+                      {
+                        "Fn::Select": [
+                          2,
+                          {
+                            "Fn::Split": [
+                              "/",
+                              {
+                                "Ref": "AWS::StackId"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          ]
+        },
+        "RetentionInDays": 180
+      },
+      "UpdateReplacePolicy": "Retain",
+      "DeletionPolicy": "Retain",
+      "Metadata": {
+        "cfn_nag": {
+          "rules_to_suppress": [
+            {
+              "id": "W84",
+              "reason": "Log group data is always encrypted in CloudWatch Logs. By default, CloudWatch Logs uses server-side encryption for the log data at rest."
+            }
+          ]
+        }
+      }
+    },
+    "testClickStreamALBApiStackWorkflowStateMachineRole7E1D20E5": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": {
+                  "Fn::FindInMap": [
+                    "ServiceprincipalMap",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    "states"
+                  ]
+                }
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        }
+      }
+    },
+    "testClickStreamALBApiStackWorkflowStateMachineRoleDefaultPolicyDFDB6DE4": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "logs:CreateLogDelivery",
+                "logs:GetLogDelivery",
+                "logs:UpdateLogDelivery",
+                "logs:DeleteLogDelivery",
+                "logs:ListLogDeliveries",
+                "logs:PutResourcePolicy",
+                "logs:DescribeResourcePolicies",
+                "logs:DescribeLogGroups"
+              ],
+              "Effect": "Allow",
+              "Resource": "*"
+            },
+            {
+              "Action": [
+                "xray:PutTraceSegments",
+                "xray:PutTelemetryRecords",
+                "xray:GetSamplingRules",
+                "xray:GetSamplingTargets"
+              ],
+              "Effect": "Allow",
+              "Resource": "*"
+            },
+            {
+              "Action": "lambda:InvokeFunction",
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "testClickStreamALBApiStackWorkflowStateMachineWorkflowFunctionE7DBCFDE",
+                    "Arn"
+                  ]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "testClickStreamALBApiStackWorkflowStateMachineWorkflowFunctionE7DBCFDE",
+                          "Arn"
+                        ]
+                      },
+                      ":*"
+                    ]
+                  ]
+                }
+              ]
+            },
+            {
+              "Action": "states:StartExecution",
+              "Effect": "Allow",
+              "Resource": {
+                "Ref": "testClickStreamALBApiStackActionStateMachineD1557E17"
+              }
+            },
+            {
+              "Action": [
+                "states:DescribeExecution",
+                "states:StopExecution"
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":states:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":execution:",
+                    {
+                      "Fn::Select": [
+                        6,
+                        {
+                          "Fn::Split": [
+                            ":",
+                            {
+                              "Ref": "testClickStreamALBApiStackActionStateMachineD1557E17"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    "*"
+                  ]
+                ]
+              }
+            },
+            {
+              "Action": [
+                "events:PutTargets",
+                "events:PutRule",
+                "events:DescribeRule"
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":events:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":rule/StepFunctionsGetEventsForStepFunctionsExecutionRule"
+                  ]
+                ]
+              }
+            },
+            {
+              "Action": "states:StartExecution",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":states:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":stateMachine:clickstream-stack-workflow-",
+                    {
+                      "Fn::Select": [
+                        0,
+                        {
+                          "Fn::Split": [
+                            "-",
+                            {
+                              "Fn::Select": [
+                                2,
+                                {
+                                  "Fn::Split": [
+                                    "/",
+                                    {
+                                      "Ref": "AWS::StackId"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                ]
+              }
+            },
+            {
+              "Action": [
+                "states:DescribeExecution",
+                "states:StopExecution"
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":states:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":execution:clickstream-stack-workflow-",
+                    {
+                      "Fn::Select": [
+                        0,
+                        {
+                          "Fn::Split": [
+                            "-",
+                            {
+                              "Fn::Select": [
+                                2,
+                                {
+                                  "Fn::Split": [
+                                    "/",
+                                    {
+                                      "Ref": "AWS::StackId"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    "*"
+                  ]
+                ]
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": "testClickStreamALBApiStackWorkflowStateMachineRoleDefaultPolicyDFDB6DE4",
+        "Roles": [
+          {
+            "Ref": "testClickStreamALBApiStackWorkflowStateMachineRole7E1D20E5"
+          }
+        ]
+      },
+      "Metadata": {
+        "cfn_nag": {
+          "rules_to_suppress": [
+            {
+              "id": "W12",
+              "reason": "Policy is generated by StackWorkflowStateMachine, * xray/logs resources for read only access or IAM limitation."
+            },
+            {
+              "id": "W76",
+              "reason": "The state machine default policy document create by many CallAwsService."
+            }
+          ]
+        }
+      }
+    },
+    "testClickStreamALBApiStackWorkflowStateMachineAE34E0DF": {
+      "Type": "AWS::StepFunctions::StateMachine",
+      "Properties": {
+        "DefinitionString": {
+          "Fn::Join": [
+            "",
+            [
+              "{\"StartAt\":\"InputTask\",\"States\":{\"InputTask\":{\"Next\":\"TypeChoice\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Type\":\"Task\",\"OutputPath\":\"$.Payload\",\"Resource\":\"arn:",
+              {
+                "Ref": "AWS::Partition"
+              },
+              ":states:::lambda:invoke\",\"Parameters\":{\"FunctionName\":\"",
+              {
+                "Fn::GetAtt": [
+                  "testClickStreamALBApiStackWorkflowStateMachineWorkflowFunctionE7DBCFDE",
+                  "Arn"
+                ]
+              },
+              "\",\"Payload.$\":\"$\"}},\"TypeChoice\":{\"Type\":\"Choice\",\"OutputPath\":\"$.Data\",\"Choices\":[{\"Variable\":\"$.Type\",\"StringEquals\":\"Stack\",\"Next\":\"StackExecution\"},{\"Variable\":\"$.Type\",\"StringEquals\":\"Serial\",\"Next\":\"SerialMap\"},{\"Variable\":\"$.Type\",\"StringEquals\":\"Parallel\",\"Next\":\"ParallelMap\"}],\"Default\":\"Pass\"},\"Pass\":{\"Type\":\"Pass\",\"End\":true},\"StackExecution\":{\"End\":true,\"Type\":\"Task\",\"Resource\":\"arn:",
+              {
+                "Ref": "AWS::Partition"
+              },
+              ":states:::states:startExecution.sync:2\",\"Parameters\":{\"Input\":{\"Action.$\":\"$.Input.Action\",\"Token.$\":\"$$.Task.Token\",\"Input.$\":\"$.Input\",\"Callback.$\":\"$.Callback\"},\"StateMachineArn\":\"",
+              {
+                "Ref": "testClickStreamALBApiStackActionStateMachineD1557E17"
+              },
+              "\"}},\"SerialMap\":{\"Type\":\"Map\",\"End\":true,\"Iterator\":{\"StartAt\":\"SerialCallSelf\",\"States\":{\"SerialCallSelf\":{\"End\":true,\"Type\":\"Task\",\"Resource\":\"arn:",
+              {
+                "Ref": "AWS::Partition"
+              },
+              ":states:::states:startExecution.sync:2\",\"Parameters\":{\"Input\":{\"Token.$\":\"$$.Task.Token\",\"MapRun\":true,\"Data.$\":\"$\"},\"StateMachineArn\":\"arn:",
+              {
+                "Ref": "AWS::Partition"
+              },
+              ":states:",
+              {
+                "Ref": "AWS::Region"
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId"
+              },
+              ":stateMachine:clickstream-stack-workflow-",
+              {
+                "Fn::Select": [
+                  0,
+                  {
+                    "Fn::Split": [
+                      "-",
+                      {
+                        "Fn::Select": [
+                          2,
+                          {
+                            "Fn::Split": [
+                              "/",
+                              {
+                                "Ref": "AWS::StackId"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              "\"}}}},\"ItemsPath\":\"$\",\"MaxConcurrency\":1},\"ParallelMap\":{\"Type\":\"Map\",\"End\":true,\"Iterator\":{\"StartAt\":\"ParallelCallSelf\",\"States\":{\"ParallelCallSelf\":{\"End\":true,\"Type\":\"Task\",\"Resource\":\"arn:",
+              {
+                "Ref": "AWS::Partition"
+              },
+              ":states:::states:startExecution.sync:2\",\"Parameters\":{\"Input\":{\"Token.$\":\"$$.Task.Token\",\"MapRun\":true,\"Data.$\":\"$\"},\"StateMachineArn\":\"arn:",
+              {
+                "Ref": "AWS::Partition"
+              },
+              ":states:",
+              {
+                "Ref": "AWS::Region"
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId"
+              },
+              ":stateMachine:clickstream-stack-workflow-",
+              {
+                "Fn::Select": [
+                  0,
+                  {
+                    "Fn::Split": [
+                      "-",
+                      {
+                        "Fn::Select": [
+                          2,
+                          {
+                            "Fn::Split": [
+                              "/",
+                              {
+                                "Ref": "AWS::StackId"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              "\"}}}},\"ItemsPath\":\"$\",\"MaxConcurrency\":40}},\"TimeoutSeconds\":259200}"
+            ]
+          ]
+        },
+        "LoggingConfiguration": {
+          "Destinations": [
+            {
+              "CloudWatchLogsLogGroup": {
+                "LogGroupArn": {
+                  "Fn::GetAtt": [
+                    "testClickStreamALBApiStackWorkflowStateMachineLogGroupD7FD1922",
+                    "Arn"
+                  ]
+                }
+              }
+            }
+          ],
+          "Level": "ALL"
+        },
+        "RoleArn": {
+          "Fn::GetAtt": [
+            "testClickStreamALBApiStackWorkflowStateMachineRole7E1D20E5",
+            "Arn"
+          ]
+        },
+        "StateMachineName": {
+          "Fn::Join": [
+            "",
+            [
+              "clickstream-stack-workflow-",
+              {
+                "Fn::Select": [
+                  0,
+                  {
+                    "Fn::Split": [
+                      "-",
+                      {
+                        "Fn::Select": [
+                          2,
+                          {
+                            "Fn::Split": [
+                              "/",
+                              {
+                                "Ref": "AWS::StackId"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          ]
+        },
+        "TracingConfiguration": {
+          "Enabled": true
+        }
+      },
+      "DependsOn": [
+        "testClickStreamALBApiStackWorkflowStateMachineRoleDefaultPolicyDFDB6DE4",
+        "testClickStreamALBApiStackWorkflowStateMachineRole7E1D20E5"
+      ],
+      "UpdateReplacePolicy": "Delete",
+      "DeletionPolicy": "Delete"
+    },
+    "testClickStreamALBApiQuickSightEmbedRole6CE59BC9": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "Policies": [
+          {
+            "PolicyDocument": {
+              "Statement": [
+                {
+                  "Action": "quicksight:GenerateEmbedUrlForRegisteredUser",
+                  "Effect": "Allow",
+                  "Resource": [
+                    {
+                      "Fn::Join": [
+                        "",
+                        [
+                          "arn:",
+                          {
+                            "Ref": "AWS::Partition"
+                          },
+                          ":quicksight:*:",
+                          {
+                            "Ref": "AWS::AccountId"
+                          },
+                          ":dashboard/Clickstream*"
+                        ]
+                      ]
+                    },
+                    {
+                      "Fn::Join": [
+                        "",
+                        [
+                          "arn:",
+                          {
+                            "Ref": "AWS::Partition"
+                          },
+                          ":quicksight:*:",
+                          {
+                            "Ref": "AWS::AccountId"
+                          },
+                          ":user/*"
+                        ]
+                      ]
+                    }
+                  ]
+                }
+              ],
+              "Version": "2012-10-17"
+            },
+            "PolicyName": "quickSightEmbedPolicy"
+          }
+        ]
+      }
+    },
+    "testClickStreamALBApiClickStreamApiFunctionRoleAE8AB92D": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        }
+      }
+    },
+    "testClickStreamALBApiClickStreamApiFunctionRoleDefaultPolicyD977CF6D": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "dynamodb:BatchGetItem",
+                "dynamodb:GetRecords",
+                "dynamodb:GetShardIterator",
+                "dynamodb:Query",
+                "dynamodb:GetItem",
+                "dynamodb:Scan",
+                "dynamodb:ConditionCheckItem",
+                "dynamodb:BatchWriteItem",
+                "dynamodb:PutItem",
+                "dynamodb:UpdateItem",
+                "dynamodb:DeleteItem",
+                "dynamodb:DescribeTable"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "testClickStreamALBApiClickstreamDictionary0A1156B6",
+                    "Arn"
+                  ]
+                },
+                {
+                  "Ref": "AWS::NoValue"
+                }
+              ]
+            },
+            {
+              "Action": [
+                "dynamodb:BatchGetItem",
+                "dynamodb:GetRecords",
+                "dynamodb:GetShardIterator",
+                "dynamodb:Query",
+                "dynamodb:GetItem",
+                "dynamodb:Scan",
+                "dynamodb:ConditionCheckItem",
+                "dynamodb:BatchWriteItem",
+                "dynamodb:PutItem",
+                "dynamodb:UpdateItem",
+                "dynamodb:DeleteItem",
+                "dynamodb:DescribeTable"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "testClickStreamALBApiClickstreamMetadataA721B303",
+                    "Arn"
+                  ]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "testClickStreamALBApiClickstreamMetadataA721B303",
+                          "Arn"
+                        ]
+                      },
+                      "/index/*"
+                    ]
+                  ]
+                }
+              ]
+            },
+            {
+              "Action": [
+                "dynamodb:BatchGetItem",
+                "dynamodb:GetRecords",
+                "dynamodb:GetShardIterator",
+                "dynamodb:Query",
+                "dynamodb:GetItem",
+                "dynamodb:Scan",
+                "dynamodb:ConditionCheckItem",
+                "dynamodb:BatchWriteItem",
+                "dynamodb:PutItem",
+                "dynamodb:UpdateItem",
+                "dynamodb:DeleteItem",
+                "dynamodb:DescribeTable"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "testClickStreamALBApiAnalyticsMetadata4BCF420E",
+                    "Arn"
+                  ]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "testClickStreamALBApiAnalyticsMetadata4BCF420E",
+                          "Arn"
+                        ]
+                      },
+                      "/index/*"
+                    ]
+                  ]
+                }
+              ]
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": "testClickStreamALBApiClickStreamApiFunctionRoleDefaultPolicyD977CF6D",
+        "Roles": [
+          {
+            "Ref": "testClickStreamALBApiClickStreamApiFunctionRoleAE8AB92D"
+          }
+        ]
+      }
+    },
+    "testClickStreamALBApiClickStreamApiStepFunctionPolicy71DA1626": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "states:StartExecution",
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Ref": "testClickStreamALBApiStackActionStateMachineD1557E17"
+                },
+                {
+                  "Ref": "testClickStreamALBApiStackWorkflowStateMachineAE34E0DF"
+                }
+              ]
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": "testClickStreamALBApiClickStreamApiStepFunctionPolicy71DA1626",
+        "Roles": [
+          {
+            "Ref": "testClickStreamALBApiClickStreamApiFunctionRoleAE8AB92D"
+          }
+        ]
+      }
+    },
+    "testClickStreamALBApiClickStreamApiAWSSdkPolicy48F56187": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "ec2:DescribeRegions",
+                "ec2:DescribeVpcs",
+                "ec2:DescribeSecurityGroups",
+                "ec2:DescribeSubnets",
+                "ec2:DescribeRouteTables",
+                "ec2:DescribeVpcEndpoints",
+                "ec2:DescribeSecurityGroupRules",
+                "ec2:DescribeAvailabilityZones",
+                "kafka:ListClustersV2",
+                "kafka:ListClusters",
+                "kafka:ListNodes",
+                "s3:ListAllMyBuckets",
+                "redshift:DescribeClusters",
+                "redshift:DescribeClusterSubnetGroups",
+                "redshift-serverless:ListWorkgroups",
+                "redshift-serverless:GetWorkgroup",
+                "redshift-serverless:GetNamespace",
+                "redshift-data:BatchExecuteStatement",
+                "s3:ListBucket",
+                "quicksight:ListUsers",
+                "quicksight:DescribeAccountSubscription",
+                "quicksight:RegisterUser",
+                "quicksight:GenerateEmbedUrlForRegisteredUser",
+                "quicksight:UpdateDashboardPermissions",
+                "quicksight:CreateDataSet",
+                "quicksight:ListDataSets",
+                "quicksight:DeleteDataSet",
+                "quicksight:PassDataSet",
+                "quicksight:PassDataSource",
+                "quicksight:CreateDashboard",
+                "quicksight:ListDashboards",
+                "quicksight:DeleteDashboard",
+                "quicksight:UpdateDashboard",
+                "quicksight:DescribeDashboard",
+                "quicksight:UpdateDashboardPublishedVersion",
+                "quicksight:CreateAnalysis",
+                "quicksight:ListAnalyses",
+                "quicksight:DeleteAnalysis",
+                "ds:AuthorizeApplication",
+                "ds:UnauthorizeApplication",
+                "ds:CheckAlias",
+                "ds:CreateAlias",
+                "ds:DescribeDirectories",
+                "ds:DescribeTrusts",
+                "ds:DeleteDirectory",
+                "ds:CreateIdentityPoolDirectory",
+                "s3:GetBucketLocation",
+                "s3:GetBucketPolicy",
+                "route53:ListHostedZones",
+                "athena:ListWorkGroups",
+                "iam:ListRoles",
+                "iam:ListServerCertificates",
+                "iam:GetContextKeysForCustomPolicy",
+                "iam:SimulateCustomPolicy",
+                "states:DescribeExecution",
+                "acm:ListCertificates",
+                "cloudformation:DescribeStacks",
+                "secretsmanager:ListSecrets",
+                "secretsmanager:GetSecretValue",
+                "cloudwatch:DescribeAlarms",
+                "cloudwatch:EnableAlarmActions",
+                "cloudwatch:DisableAlarmActions",
+                "emr-serverless:ListApplications"
+              ],
+              "Effect": "Allow",
+              "Resource": "*"
+            },
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":iam::",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":role/Clickstream-DataModeling*"
+                  ]
+                ]
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": "testClickStreamALBApiClickStreamApiAWSSdkPolicy48F56187",
+        "Roles": [
+          {
+            "Ref": "testClickStreamALBApiClickStreamApiFunctionRoleAE8AB92D"
+          }
+        ]
+      },
+      "Metadata": {
+        "cfn_nag": {
+          "rules_to_suppress": [
+            {
+              "id": "W12",
+              "reason": "The lambda need to be queried all resources under the current account by design"
+            },
+            {
+              "id": "W76",
+              "reason": "This policy needs to be able to call other AWS service by design"
+            }
+          ]
+        }
+      }
+    },
+    "testClickStreamALBApiUploadRoleD732B7C0": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": {
+                  "Fn::GetAtt": [
+                    "testClickStreamALBApiClickStreamApiFunctionRoleAE8AB92D",
+                    "Arn"
+                  ]
+                }
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        }
+      }
+    },
+    "testClickStreamALBApiUploadRoleDefaultPolicyEBF1E156": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "s3:PutObject",
+                "s3:PutObjectLegalHold",
+                "s3:PutObjectRetention",
+                "s3:PutObjectTagging",
+                "s3:PutObjectVersionTagging",
+                "s3:Abort*"
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    {
+                      "Fn::GetAtt": [
+                        "stackWorkflowS3BucketF67B9562",
+                        "Arn"
+                      ]
+                    },
+                    "/plugins/*"
+                  ]
+                ]
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": "testClickStreamALBApiUploadRoleDefaultPolicyEBF1E156",
+        "Roles": [
+          {
+            "Ref": "testClickStreamALBApiUploadRoleD732B7C0"
+          }
+        ]
+      }
+    },
+    "testClickStreamALBApiLambdaAdapterLayerX86A6711566": {
+      "Type": "AWS::Lambda::LayerVersion",
+      "Properties": {
+        "CompatibleRuntimes": [
+          "nodejs16.x",
+          "nodejs18.x"
+        ],
+        "Content": {
+          "S3Bucket": {
+            "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
+          },
+          "S3Key": "63c2a18a3a9bf5ec8fcbe24e88f42413fcf25fa2b45056a427444d902ce9975a.zip"
+        }
+      }
+    },
+    "testClickStreamALBApiApiFunction9890103B": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Architectures": [
+          "x86_64"
+        ],
+        "Code": {
+          "S3Bucket": {
+            "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
+          },
+          "S3Key": "b78b143cc91f050d271c1b607b4ae422c1e870321050a5b3755ccae7bc2c2b9d.zip"
+        },
+        "Description": "Lambda function for api of solution Clickstream Analytics on AWS",
+        "Environment": {
+          "Variables": {
+            "AWS_LAMBDA_EXEC_WRAPPER": "/opt/bootstrap",
+            "CLICK_STREAM_TABLE_NAME": {
+              "Ref": "testClickStreamALBApiClickstreamMetadataA721B303"
+            },
+            "DICTIONARY_TABLE_NAME": {
+              "Ref": "testClickStreamALBApiClickstreamDictionary0A1156B6"
+            },
+            "ANALYTICS_METADATA_TABLE_NAME": {
+              "Ref": "testClickStreamALBApiAnalyticsMetadata4BCF420E"
+            },
+            "STACK_ACTION_STATE_MACHINE": {
+              "Ref": "testClickStreamALBApiStackActionStateMachineD1557E17"
+            },
+            "STACK_WORKFLOW_STATE_MACHINE": {
+              "Ref": "testClickStreamALBApiStackWorkflowStateMachineAE34E0DF"
+            },
+            "STACK_WORKFLOW_S3_BUCKET": {
+              "Ref": "stackWorkflowS3BucketF67B9562"
+            },
+            "PREFIX_TIME_GSI_NAME": "prefix-time-index",
+            "PREFIX_MONTH_GSI_NAME": "prefix-month-index",
+            "AWS_ACCOUNT_ID": {
+              "Ref": "AWS::AccountId"
+            },
+            "AWS_URL_SUFFIX": {
+              "Ref": "AWS::URLSuffix"
+            },
+            "WITH_AUTH_MIDDLEWARE": "true",
+            "ISSUER": "",
+            "AUTHORIZER_TABLE_NAME": "",
+            "STS_UPLOAD_ROLE_ARN": {
+              "Fn::GetAtt": [
+                "testClickStreamALBApiUploadRoleD732B7C0",
+                "Arn"
+              ]
+            },
+            "API_ROLE_NAME": {
+              "Ref": "testClickStreamALBApiClickStreamApiFunctionRoleAE8AB92D"
+            },
+            "QUICKSIGHT_EMBED_ROLE_ARN": {
+              "Fn::GetAtt": [
+                "testClickStreamALBApiQuickSightEmbedRole6CE59BC9",
+                "Arn"
+              ]
+            },
+            "HEALTH_CHECK_PATH": "/",
+            "QUICKSIGHT_CONTROL_PLANE_REGION": "us-east-1",
+            "WITH_VALIDATE_ROLE": "true",
+            "POWERTOOLS_SERVICE_NAME": "ClickStreamAnalyticsOnAWS",
+            "POWERTOOLS_LOGGER_SAMPLE_RATE": "1",
+            "POWERTOOLS_LOGGER_LOG_EVENT": "true",
+            "LOG_LEVEL": "WARN"
+          }
+        },
+        "Handler": "run.sh",
+        "Layers": [
+          {
+            "Ref": "testClickStreamALBApiLambdaAdapterLayerX86A6711566"
+          }
+        ],
+        "MemorySize": 512,
+        "Role": {
+          "Fn::GetAtt": [
+            "testClickStreamALBApiClickStreamApiFunctionRoleAE8AB92D",
+            "Arn"
+          ]
+        },
+        "Runtime": "nodejs18.x",
+        "Timeout": 30,
+        "VpcConfig": {
+          "SecurityGroupIds": [
+            {
+              "Fn::GetAtt": [
+                "testClickStreamALBApiClickStreamApiFunctionSGC830FA60",
+                "GroupId"
+              ]
+            }
+          ],
+          "SubnetIds": [
+            "subnet-33333333333333333",
+            "subnet-44444444444444444"
+          ]
+        }
+      },
+      "DependsOn": [
+        "apifunceni59253B5A",
+        "testClickStreamALBApiClickStreamApiFunctionRoleDefaultPolicyD977CF6D",
+        "testClickStreamALBApiClickStreamApiFunctionRoleAE8AB92D"
+      ],
+      "Metadata": {
+        "cfn_nag": {
+          "rules_to_suppress": [
+            {
+              "id": "W92",
+              "reason": "Lambda function is only used by ClickStreamApiFunction for deployment as cloudformation custom resources or per product design, no need to set ReservedConcurrentExecutions"
+            }
+          ]
+        }
+      }
+    },
+    "customresourcefunclogs9B71FED3": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "logs:CreateLogStream",
+                "logs:PutLogEvents",
+                "logs:CreateLogGroup"
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":logs:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":log-group:/aws/lambda/",
+                    {
+                      "Ref": "testClickStreamALBApiBatchInsertDDBCustomResourceDicInitCustomResourceFunction504311BF"
+                    },
+                    ":*"
+                  ]
+                ]
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": "customresourcefunclogs9B71FED3",
+        "Roles": [
+          {
+            "Ref": "testClickStreamALBApiBatchInsertDDBCustomResourceDicInitCustomResourceRoleD2CDF2CF"
+          }
+        ]
+      },
+      "Metadata": {
+        "cfn_nag": {
+          "rules_to_suppress": [
+            {
+              "id": "W12",
+              "reason": "The lambda service writes to undetermined logs stream by design"
+            }
+          ]
+        }
+      }
+    },
+    "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRole9741ECFB": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+              ]
+            ]
+          }
+        ]
+      }
+    },
+    "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRoleDefaultPolicyADDA7DEB": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "logs:PutRetentionPolicy",
+                "logs:DeleteRetentionPolicy"
+              ],
+              "Effect": "Allow",
+              "Resource": "*"
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRoleDefaultPolicyADDA7DEB",
+        "Roles": [
+          {
+            "Ref": "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRole9741ECFB"
+          }
+        ]
+      }
+    },
+    "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Handler": "index.handler",
+        "Runtime": "nodejs18.x",
+        "Timeout": 900,
+        "Code": {
+          "S3Bucket": {
+            "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
+          },
+          "S3Key": "5bc602ecde93c947efe5899ae355f999986a1acbe610b1c0b9c468d738857555.zip"
+        },
+        "Role": {
+          "Fn::GetAtt": [
+            "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRole9741ECFB",
+            "Arn"
+          ]
+        }
+      },
+      "DependsOn": [
+        "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRoleDefaultPolicyADDA7DEB",
+        "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRole9741ECFB"
+      ]
+    },
+    "AWS679f53fac002430cb0da5b7982bd2287ServiceRoleC1EA0FF2": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+              ]
+            ]
+          }
+        ]
+      }
+    },
+    "AWS679f53fac002430cb0da5b7982bd22872D164C4C": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
+          },
+          "S3Key": "17c16a3854838fd3ff4bda08146122a6701f33b9c86ae17f415ad0dc47a97544.zip"
+        },
+        "Handler": "index.handler",
+        "Role": {
+          "Fn::GetAtt": [
+            "AWS679f53fac002430cb0da5b7982bd2287ServiceRoleC1EA0FF2",
+            "Arn"
+          ]
+        },
+        "Runtime": "nodejs18.x",
+        "Timeout": 60
+      },
+      "DependsOn": [
+        "AWS679f53fac002430cb0da5b7982bd2287ServiceRoleC1EA0FF2"
+      ]
+    },
+    "AWS679f53fac002430cb0da5b7982bd2287LogRetentionCE72797A": {
+      "Type": "Custom::LogRetention",
+      "Properties": {
+        "ServiceToken": {
+          "Fn::GetAtt": [
+            "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A",
+            "Arn"
+          ]
+        },
+        "LogGroupName": {
+          "Fn::Join": [
+            "",
+            [
+              "/aws/lambda/",
+              {
+                "Ref": "AWS679f53fac002430cb0da5b7982bd22872D164C4C"
+              }
+            ]
+          ]
+        },
+        "RetentionInDays": 7
+      }
+    },
+    "actionfunclogs394D90DA": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "logs:CreateLogStream",
+                "logs:PutLogEvents",
+                "logs:CreateLogGroup"
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":logs:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":log-group:/aws/lambda/",
+                    {
+                      "Ref": "testClickStreamALBApiStackActionStateMachineActionFunction9CC75763"
+                    },
+                    ":*"
+                  ]
+                ]
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": "actionfunclogs394D90DA",
+        "Roles": [
+          {
+            "Ref": "testClickStreamALBApiStackActionStateMachineActionFunctionRoleB3901335"
+          }
+        ]
+      },
+      "Metadata": {
+        "cfn_nag": {
+          "rules_to_suppress": [
+            {
+              "id": "W12",
+              "reason": "The lambda service writes to undetermined logs stream by design"
+            }
+          ]
+        }
+      }
+    },
+    "actionfunceniA16F9174": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "ec2:CreateNetworkInterface",
+                "ec2:DescribeNetworkInterfaces",
+                "ec2:DeleteNetworkInterface",
+                "ec2:AssignPrivateIpAddresses",
+                "ec2:UnassignPrivateIpAddresses"
+              ],
+              "Effect": "Allow",
+              "Resource": "*"
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": "actionfunceniA16F9174",
+        "Roles": [
+          {
+            "Ref": "testClickStreamALBApiStackActionStateMachineActionFunctionRoleB3901335"
+          }
+        ]
+      },
+      "Metadata": {
+        "cfn_nag": {
+          "rules_to_suppress": [
+            {
+              "id": "W12",
+              "reason": "The lambda service creates undetermined eni by design"
+            }
+          ]
+        }
+      }
+    },
+    "workflowfunclogs7A318BBF": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "logs:CreateLogStream",
+                "logs:PutLogEvents",
+                "logs:CreateLogGroup"
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":logs:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":log-group:/aws/lambda/",
+                    {
+                      "Ref": "testClickStreamALBApiStackWorkflowStateMachineWorkflowFunctionE7DBCFDE"
+                    },
+                    ":*"
+                  ]
+                ]
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": "workflowfunclogs7A318BBF",
+        "Roles": [
+          {
+            "Ref": "testClickStreamALBApiStackWorkflowStateMachineWorkflowFunctionRole15F382D1"
+          }
+        ]
+      },
+      "Metadata": {
+        "cfn_nag": {
+          "rules_to_suppress": [
+            {
+              "id": "W12",
+              "reason": "The lambda service writes to undetermined logs stream by design"
+            }
+          ]
+        }
+      }
+    },
+    "workflowfunceniF26BB9B3": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "ec2:CreateNetworkInterface",
+                "ec2:DescribeNetworkInterfaces",
+                "ec2:DeleteNetworkInterface",
+                "ec2:AssignPrivateIpAddresses",
+                "ec2:UnassignPrivateIpAddresses"
+              ],
+              "Effect": "Allow",
+              "Resource": "*"
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": "workflowfunceniF26BB9B3",
+        "Roles": [
+          {
+            "Ref": "testClickStreamALBApiStackWorkflowStateMachineWorkflowFunctionRole15F382D1"
+          }
+        ]
+      },
+      "Metadata": {
+        "cfn_nag": {
+          "rules_to_suppress": [
+            {
+              "id": "W12",
+              "reason": "The lambda service creates undetermined eni by design"
+            }
+          ]
+        }
+      }
+    },
+    "apifunclogs9F7B9244": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "logs:CreateLogStream",
+                "logs:PutLogEvents",
+                "logs:CreateLogGroup"
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":logs:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":log-group:/aws/lambda/",
+                    {
+                      "Ref": "testClickStreamALBApiApiFunction9890103B"
+                    },
+                    ":*"
+                  ]
+                ]
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": "apifunclogs9F7B9244",
+        "Roles": [
+          {
+            "Ref": "testClickStreamALBApiClickStreamApiFunctionRoleAE8AB92D"
+          }
+        ]
+      },
+      "Metadata": {
+        "cfn_nag": {
+          "rules_to_suppress": [
+            {
+              "id": "W12",
+              "reason": "The lambda service writes to undetermined logs stream by design"
+            }
+          ]
+        }
+      }
+    },
+    "apifunceni59253B5A": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "ec2:CreateNetworkInterface",
+                "ec2:DescribeNetworkInterfaces",
+                "ec2:DeleteNetworkInterface",
+                "ec2:AssignPrivateIpAddresses",
+                "ec2:UnassignPrivateIpAddresses"
+              ],
+              "Effect": "Allow",
+              "Resource": "*"
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": "apifunceni59253B5A",
+        "Roles": [
+          {
+            "Ref": "testClickStreamALBApiClickStreamApiFunctionRoleAE8AB92D"
+          }
+        ]
+      },
+      "Metadata": {
+        "cfn_nag": {
+          "rules_to_suppress": [
+            {
+              "id": "W12",
+              "reason": "The lambda service creates undetermined eni by design"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "Mappings": {
+    "ServiceprincipalMap": {
+      "af-south-1": {
+        "states": "states.af-south-1.amazonaws.com"
+      },
+      "ap-east-1": {
+        "states": "states.ap-east-1.amazonaws.com"
+      },
+      "ap-northeast-1": {
+        "states": "states.ap-northeast-1.amazonaws.com"
+      },
+      "ap-northeast-2": {
+        "states": "states.ap-northeast-2.amazonaws.com"
+      },
+      "ap-northeast-3": {
+        "states": "states.ap-northeast-3.amazonaws.com"
+      },
+      "ap-south-1": {
+        "states": "states.ap-south-1.amazonaws.com"
+      },
+      "ap-south-2": {
+        "states": "states.ap-south-2.amazonaws.com"
+      },
+      "ap-southeast-1": {
+        "states": "states.ap-southeast-1.amazonaws.com"
+      },
+      "ap-southeast-2": {
+        "states": "states.ap-southeast-2.amazonaws.com"
+      },
+      "ap-southeast-3": {
+        "states": "states.ap-southeast-3.amazonaws.com"
+      },
+      "ap-southeast-4": {
+        "states": "states.ap-southeast-4.amazonaws.com"
+      },
+      "ca-central-1": {
+        "states": "states.ca-central-1.amazonaws.com"
+      },
+      "cn-north-1": {
+        "states": "states.cn-north-1.amazonaws.com"
+      },
+      "cn-northwest-1": {
+        "states": "states.cn-northwest-1.amazonaws.com"
+      },
+      "eu-central-1": {
+        "states": "states.eu-central-1.amazonaws.com"
+      },
+      "eu-central-2": {
+        "states": "states.eu-central-2.amazonaws.com"
+      },
+      "eu-north-1": {
+        "states": "states.eu-north-1.amazonaws.com"
+      },
+      "eu-south-1": {
+        "states": "states.eu-south-1.amazonaws.com"
+      },
+      "eu-south-2": {
+        "states": "states.eu-south-2.amazonaws.com"
+      },
+      "eu-west-1": {
+        "states": "states.eu-west-1.amazonaws.com"
+      },
+      "eu-west-2": {
+        "states": "states.eu-west-2.amazonaws.com"
+      },
+      "eu-west-3": {
+        "states": "states.eu-west-3.amazonaws.com"
+      },
+      "il-central-1": {
+        "states": "states.il-central-1.amazonaws.com"
+      },
+      "me-central-1": {
+        "states": "states.me-central-1.amazonaws.com"
+      },
+      "me-south-1": {
+        "states": "states.me-south-1.amazonaws.com"
+      },
+      "sa-east-1": {
+        "states": "states.sa-east-1.amazonaws.com"
+      },
+      "us-east-1": {
+        "states": "states.us-east-1.amazonaws.com"
+      },
+      "us-east-2": {
+        "states": "states.us-east-2.amazonaws.com"
+      },
+      "us-gov-east-1": {
+        "states": "states.us-gov-east-1.amazonaws.com"
+      },
+      "us-gov-west-1": {
+        "states": "states.us-gov-west-1.amazonaws.com"
+      },
+      "us-iso-east-1": {
+        "states": "states.amazonaws.com"
+      },
+      "us-iso-west-1": {
+        "states": "states.amazonaws.com"
+      },
+      "us-isob-east-1": {
+        "states": "states.amazonaws.com"
+      },
+      "us-west-1": {
+        "states": "states.us-west-1.amazonaws.com"
+      },
+      "us-west-2": {
+        "states": "states.us-west-2.amazonaws.com"
+      }
+    }
+  },
+  "Parameters": {
+    "BootstrapVersion": {
+      "Type": "AWS::SSM::Parameter::Value<String>",
+      "Default": "/cdk-bootstrap/hnb659fds/version",
+      "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]"
+    }
+  },
+  "Rules": {
+    "CheckBootstrapVersion": {
+      "Assertions": [
+        {
+          "Assert": {
+            "Fn::Not": [
+              {
+                "Fn::Contains": [
+                  [
+                    "1",
+                    "2",
+                    "3",
+                    "4",
+                    "5"
+                  ],
+                  {
+                    "Ref": "BootstrapVersion"
+                  }
+                ]
+              }
+            ]
+          },
+          "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI."
+        }
+      ]
+    }
+  }
+}
