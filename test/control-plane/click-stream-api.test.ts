@@ -13,7 +13,6 @@
 
 import { findResourcesName, TestEnv } from './test-utils';
 import { removeFolder } from '../common/jest';
-import { writeFile } from 'fs';
 
 describe('Click Stream Api ALB deploy Construct Test', () => {
   afterAll(() => {
@@ -1028,14 +1027,9 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
       Runtime: 'nodejs18.x',
       Timeout: 30,
     });
-    writeFile('test.template.json', JSON.stringify(newALBApiStackTemplate.toJSON(), null, 2), function(err) {
-      if (err) {
-        console.log(err);
-      }
-    });
     expect(findResourcesName(newALBApiStackTemplate, 'Custom::AWS'))
       .toEqual([
-        'ClickStreamApiAddAdminUserCustomResourceAddAdminUserAwsCustomResourceBD22F9F9',
+        'testClickStreamALBApiAddAdminUserCustomResourceAddAdminUserAwsCustomResourceD9F42A0D',
       ]);
 
     newALBApiStackTemplate.hasResourceProperties('Custom::AWS', {
@@ -1045,13 +1039,9 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
           [
             '{"service":"DynamoDB","action":"putItem","physicalResourceId":{"id":"AddAdminUserCustomResource"},"parameters":{"TableName":"',
             {
-              Ref: 'ClickStreamApiClickstreamMetadataEC136DD8',
+              Ref: 'testClickStreamALBApiClickstreamMetadataA721B303',
             },
-            '","Item":{"id":{"S":"',
-            {
-              Ref: 'Email',
-            },
-            '"},"type":{"S":"USER"},"prefix":{"S":"USER"},"role":{"S":"Admin"},"createAt":{"N":"1698140593938"},"updateAt":{"N":"1698140593938"},"operator":{"S":"Clickstream"},"deleted":{"BOOL":false}},"ConditionExpression":"attribute_not_exists(uid)"}}',
+            '","Item":{"id":{"S":"fake@example.com"},"type":{"S":"USER"},"prefix":{"S":"USER"},"role":{"S":"Admin"},"createAt":{"N":"1698299985259"},"updateAt":{"N":"1698299985259"},"operator":{"S":"Clickstream"},"deleted":{"BOOL":false}},"ConditionExpression":"attribute_not_exists(id)"}}',
           ],
         ],
       },
@@ -1061,13 +1051,9 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
           [
             '{"service":"DynamoDB","action":"updateItem","physicalResourceId":{"id":"AddAdminUserCustomResource"},"parameters":{"TableName":"',
             {
-              Ref: 'ClickStreamApiClickstreamMetadataEC136DD8',
+              Ref: 'testClickStreamALBApiClickstreamMetadataA721B303',
             },
-            '","Key":{"id":{"S":"',
-            {
-              Ref: 'Email',
-            },
-            '"},"type":{"S":"USER"}},"UpdateExpression":"SET #role = :role, #prefix = :prefix, #createAt = :createAt, #updateAt = :updateAt, #operator = :operator, #deleted = :deleted","ExpressionAttributeNames":{"#role":"role","#createAt":"createAt","#updateAt":"updateAt","#operator":"operator","#deleted":"deleted","#prefix":"prefix"},"ExpressionAttributeValues":{":prefix":{"S":"USER"},":role":{"S":"Admin"},":createAt":{"N":"1698140593938"},":updateAt":{"N":"1698140593938"},":operator":{"S":"Clickstream"},":deleted":{"BOOL":false}}}}',
+            '","Key":{"id":{"S":"fake@example.com"},"type":{"S":"USER"}},"UpdateExpression":"SET #role = :role, #prefix = :prefix, #createAt = :createAt, #updateAt = :updateAt, #operator = :operator, #deleted = :deleted","ExpressionAttributeNames":{"#role":"role","#createAt":"createAt","#updateAt":"updateAt","#operator":"operator","#deleted":"deleted","#prefix":"prefix"},"ExpressionAttributeValues":{":prefix":{"S":"USER"},":role":{"S":"Admin"},":createAt":{"N":"1698299985259"},":updateAt":{"N":"1698299985259"},":operator":{"S":"Clickstream"},":deleted":{"BOOL":false}}}}',
           ],
         ],
       },
@@ -1077,13 +1063,9 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
           [
             '{"service":"DynamoDB","action":"deleteItem","physicalResourceId":{"id":"AddAdminUserCustomResource"},"parameters":{"TableName":"',
             {
-              Ref: 'ClickStreamApiClickstreamMetadataEC136DD8',
+              Ref: 'testClickStreamALBApiClickstreamMetadataA721B303',
             },
-            '","Key":{"id":{"S":"',
-            {
-              Ref: 'Email',
-            },
-            '"},"type":{"S":"USER"}},"ConditionExpression":"attribute_exists(uid)"}}',
+            '","Key":{"id":{"S":"fake@example.com"},"type":{"S":"USER"}},"ConditionExpression":"attribute_exists(id)"}}',
           ],
         ],
       },
