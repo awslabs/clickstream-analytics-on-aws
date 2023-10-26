@@ -345,13 +345,13 @@ async function doUpdate(sqlStatementsByApp: Map<string, string[]>, props: Resour
   }
 }
 
+export const TABLES_VIEWS_FOR_REPORTING = ['event', 'event_parameter', 'user', 'item', 'user_m_view', 'item_m_view'];
 function _buildGrantSqlStatements(views: string[], schema: string, biUser: string): string[] {
 
   const statements: string[] = [];
 
   //grant select permission on base base tables to BI user for explore analysis
-  const tables = ['event', 'event_parameter', 'user', 'item', 'user_m_view', 'item_m_view'];
-  views.push(...tables);
+  views.push(...TABLES_VIEWS_FOR_REPORTING);
 
   for (const view of views) {
     statements.push(`GRANT SELECT ON ${schema}.${view} TO ${biUser};`);
