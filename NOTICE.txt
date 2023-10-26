@@ -13,6 +13,7 @@ THIRD PARTY COMPONENTS
 This software includes third party software subject to the following copyrights:
 
 @aws-cdk/aws-glue-alpha under the Apache-2.0
+@aws-cdk/aws-servicecatalogappregistry-alpha under the Apache-2.0
 @aws-lambda-powertools/logger under the MIT
 @aws-lambda-powertools/metrics under the MIT-0
 @aws-sdk/client-acm under the Apache-2.0
