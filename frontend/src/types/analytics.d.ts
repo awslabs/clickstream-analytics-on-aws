@@ -217,6 +217,8 @@ declare global {
     readonly nodeType: ExplorePathNodeType;
     readonly lagSeconds?: number;
     readonly nodes?: string[];
+    readonly includingOtherEvents?: boolean;
+    readonly mergeConsecutiveEvents?: boolean;
   }
   interface IPairEventAndCondition {
     readonly startEvent: IEventAndCondition;

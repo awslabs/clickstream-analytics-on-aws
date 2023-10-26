@@ -42,6 +42,8 @@ export interface PathAnalysisParameter {
   readonly nodeType: ExplorePathNodeType;
   readonly lagSeconds?: number;
   readonly nodes?: string[];
+  readonly includingOtherEvents?: boolean;
+  readonly mergeConsecutiveEvents?: boolean;
 }
 
 export interface ColumnAttribute {
@@ -341,14 +343,36 @@ export function buildEventAnalysisView(sqlParameters: SQLParameters) : string {
   });
 }
 
-export function buildEventPathAnalysisView(sqlParameters: SQLParameters) : string {
+function _getMidTableForEventPathAnalysis(eventNames: string[], sqlParameters: SQLParameters, isSessionJoin: boolean) : string {
 
-  const eventNames = _getEventsNameFromConditions(sqlParameters.eventAndConditions!);
+  if (isSessionJoin) {
+    if (sqlParameters.pathAnalysis?.mergeConsecutiveEvents) {
+      return `
+        mid_table as (
+          select
+            CASE
+            WHEN event_name in ('${eventNames.join('\',\'')}')  THEN event_name 
+            ELSE 'other'
+            END as event_name,
+            user_pseudo_id,
+            event_id,
+            event_timestamp,
+            _session_id
+          from (
+            select 
+              event_name,
+              user_pseudo_id,
+              event_id,
+              event_timestamp,
+              _session_id,
+              ROW_NUMBER() over(partition by event_name, user_pseudo_id, _session_id order by event_timestamp desc) as rk
+            from base_data
+          ) where rk = 1
+        ),
+      `;
+    }
 
-  let midTableSql = '';
-  let dataTableSql = '';
-  if (sqlParameters.pathAnalysis?.sessionType === ExplorePathSessionDef.SESSION ) {
-    midTableSql = `
+    return `
       mid_table as (
         select 
           CASE
@@ -362,6 +386,129 @@ export function buildEventPathAnalysisView(sqlParameters: SQLParameters) : strin
         from base_data
       ),
     `;
+  } else {
+    if (sqlParameters.pathAnalysis?.mergeConsecutiveEvents) {
+      return `
+        mid_table as (
+          select
+            CASE
+            WHEN event_name in ('${eventNames.join('\',\'')}')  THEN event_name 
+            ELSE 'other'
+            END as event_name,
+            user_pseudo_id,
+            event_id,
+            event_timestamp
+          from (
+            select 
+              event_name,
+              user_pseudo_id,
+              event_id,
+              event_timestamp,
+              ROW_NUMBER() over(partition by event_name, user_pseudo_id order by event_timestamp desc) as rk
+            from base_data
+          ) where rk = 1
+        ),
+      `;
+    }
+
+    return `
+      mid_table as (
+        select 
+        CASE
+          WHEN event_name in ('${eventNames.join('\',\'')}')  THEN event_name 
+          ELSE 'other'
+        END as event_name,
+        user_pseudo_id,
+        event_id,
+        event_timestamp
+      from base_data base
+      ),
+    `;
+
+  }
+}
+
+function _getMidTableForNodePathAnalysis(sqlParameters: SQLParameters, isSessionJoin: boolean) : string {
+
+  if (isSessionJoin) {
+    if (sqlParameters.pathAnalysis?.mergeConsecutiveEvents) {
+      return `
+        mid_table as (
+          select 
+            event_name,
+            user_pseudo_id,
+            event_id,
+            event_timestamp,
+            _session_id,
+            node
+          from (
+            select 
+              mid_table_1.*,
+              mid_table_2.node,
+              ROW_NUMBER() over(partition by event_name, user_pseudo_id, _session_id, node order by mid_table_1.event_timestamp desc) as rk
+            from 
+              mid_table_1 
+              join mid_table_2 on mid_table_1.event_id = mid_table_2.event_id
+          ) where rk = 1
+        ),
+      `;
+    }
+
+    return `
+      mid_table as (
+        select 
+          mid_table_1.*,
+          mid_table_2.node
+        from 
+          mid_table_1 
+          join mid_table_2 on mid_table_1.event_id = mid_table_2.event_id
+      ),
+    `;
+  } else {
+    if (sqlParameters.pathAnalysis?.mergeConsecutiveEvents) {
+      return `
+      mid_table as (
+        select 
+          event_name,
+          user_pseudo_id,
+          event_id,
+          event_timestamp,
+          node
+        from (
+          select 
+            mid_table_1.*,
+            mid_table_2.node,
+            ROW_NUMBER() over(partition by event_name, user_pseudo_id, node order by mid_table_1.event_timestamp desc) as rk
+          from 
+            mid_table_1 
+            join mid_table_2 on mid_table_1.event_id = mid_table_2.event_id
+        ) where rk = 1
+      ),
+      `;
+    }
+
+    return `
+      mid_table as (
+        select 
+          mid_table_1.*,
+          mid_table_2.node
+        from 
+          mid_table_1 
+          join mid_table_2 on mid_table_1.event_id = mid_table_2.event_id
+      ),
+    `;
+
+  }
+}
+
+export function buildEventPathAnalysisView(sqlParameters: SQLParameters) : string {
+
+  const eventNames = _getEventsNameFromConditions(sqlParameters.eventAndConditions!);
+
+  let midTableSql = '';
+  let dataTableSql = '';
+  if (sqlParameters.pathAnalysis?.sessionType === ExplorePathSessionDef.SESSION ) {
+    midTableSql = _getMidTableForEventPathAnalysis(eventNames, sqlParameters, true);
 
     dataTableSql = `data as (
       select 
@@ -423,19 +570,7 @@ export function buildEventPathAnalysisView(sqlParameters: SQLParameters) : strin
     `;
 
   } else {
-    midTableSql = `
-      mid_table as (
-        select 
-        CASE
-          WHEN event_name in ('${eventNames.join('\',\'')}')  THEN event_name 
-          ELSE 'other'
-        END as event_name,
-        user_pseudo_id,
-        event_id,
-        event_timestamp
-      from base_data base
-      ),
-    `;
+    midTableSql = _getMidTableForEventPathAnalysis(eventNames, sqlParameters, false);
 
     dataTableSql = `data_1 as (
       select 
@@ -549,6 +684,8 @@ export function buildNodePathAnalysisView(sqlParameters: SQLParameters) : string
   let midTableSql = '';
   let dataTableSql = '';
 
+  const includingOtherEvents = sqlParameters.pathAnalysis?.includingOtherEvents ? true: false;
+
   if (sqlParameters.pathAnalysis!.sessionType === ExplorePathSessionDef.SESSION ) {
     midTableSql = `
       mid_table_1 as (
@@ -563,14 +700,7 @@ export function buildNodePathAnalysisView(sqlParameters: SQLParameters) : string
       mid_table_2 as (
         ${_buildNodePathSQL(sqlParameters, sqlParameters.pathAnalysis!.nodeType)}
       ),
-      mid_table as (
-        select 
-          mid_table_1.*,
-          mid_table_2.node
-        from 
-          mid_table_1 
-          join mid_table_2 on mid_table_1.event_id = mid_table_2.event_id
-      ),
+      ${_getMidTableForNodePathAnalysis(sqlParameters, true)}
       data as (
         select
         event_name,
@@ -598,6 +728,7 @@ export function buildNodePathAnalysisView(sqlParameters: SQLParameters) : string
         ) + 1 as step_2
         from
           mid_table
+        ${!includingOtherEvents ? `where node in ('${sqlParameters.pathAnalysis?.nodes?.join('\',\'')}')` : ''}
       ),
     `;
     dataTableSql = `step_table_1 as (
@@ -675,14 +806,7 @@ export function buildNodePathAnalysisView(sqlParameters: SQLParameters) : string
     mid_table_2 as (
       ${_buildNodePathSQL(sqlParameters, sqlParameters.pathAnalysis!.nodeType)}
     ),
-    mid_table as (
-      select 
-        mid_table_1.*,
-        mid_table_2.node
-      from 
-        mid_table_1 
-        join mid_table_2 on mid_table_1.event_id = mid_table_2.event_id
-    ),
+    ${_getMidTableForNodePathAnalysis(sqlParameters, false)}
     `;
 
     dataTableSql = `data_1 as (
@@ -697,6 +821,7 @@ export function buildNodePathAnalysisView(sqlParameters: SQLParameters) : string
         ROW_NUMBER() OVER (PARTITION BY user_pseudo_id ORDER BY event_timestamp asc) as step_1,
         ROW_NUMBER() OVER (PARTITION BY user_pseudo_id ORDER BY event_timestamp asc) + 1 as step_2
       from mid_table
+      ${!includingOtherEvents ? `where node in ('${sqlParameters.pathAnalysis?.nodes?.join('\',\'')}')` : ''}
     ),
     data_2 as (
       select 
@@ -1149,6 +1274,7 @@ function _buildEventJoinTable(schema: string, columnsSql: string) {
 
 function _buildEventNameClause(eventNames: string[], sqlParameters: SQLParameters, isEventPathSQL: boolean, isNodePathSQL: boolean, prefix: string = 'event.') {
 
+  const includingOtherEvents: boolean = sqlParameters.pathAnalysis?.includingOtherEvents ? true : false;
   const eventNameInClause = `and ${prefix}event_name in ('${eventNames.join('\',\'')}')`;
   const eventNameClause = eventNames.length > 0 ? eventNameInClause : '';
 
@@ -1157,7 +1283,7 @@ function _buildEventNameClause(eventNames: string[], sqlParameters: SQLParameter
     and ${prefix}event_name = '${ (sqlParameters.pathAnalysis?.platform === MetadataPlatform.ANDROID || sqlParameters.pathAnalysis?.platform === MetadataPlatform.IOS) ? '_screen_view' : '_page_view' }'
     ${sqlParameters.pathAnalysis!.platform ? 'and platform = \'' + sqlParameters.pathAnalysis!.platform + '\'' : '' }
     `;
-  } else if (isEventPathSQL) {
+  } else if (isEventPathSQL && includingOtherEvents) {
     return `and ${prefix}event_name not in ('${builtInEvents.filter(event => !eventNames.includes(event)).join('\',\'')}')`;
   }
 
@@ -1166,7 +1292,6 @@ function _buildEventNameClause(eventNames: string[], sqlParameters: SQLParameter
 
 function _buildBaseEventDataTableSQL(eventNames: string[], sqlParameters: SQLParameters,
   isEventPathSQL: boolean = false, isNodePathAnalysis: boolean = false) {
-
   const eventDateSQL = _getEventDateSql(sqlParameters, 'event.');
   const eventNameClause = _buildEventNameClause(eventNames, sqlParameters, isEventPathSQL, isNodePathAnalysis);
 
@@ -1292,7 +1417,8 @@ function _getAllConditionSql(eventNames: string[], sqlParameters: SQLParameters,
     `);
   }
 
-  if (isEventPathSQL && allConditionSql !== '' ) {
+  const includingOtherEvents: boolean = sqlParameters.pathAnalysis?.includingOtherEvents ? true : false;
+  if (isEventPathSQL && includingOtherEvents && allConditionSql !== '' ) {
     allConditionSql = allConditionSql + ` or (${prefix}event_name not in ('${eventNames.join('\',\'')}'))`;
   }
 

@@ -247,7 +247,9 @@
     "realtimeStarted": "实时流已启动",
     "reportingNotEnabled": "Reporting模块未启用",
     "setStartNode": "设置起始节点",
-    "participateNodes": "选择参与分析的节点"
+    "participateNodes": "选择参与分析的节点",
+    "includingOtherEvents": "包括其他事件",
+    "mergeConsecutiveEvents": "合并连续事件"
   },
   "emptyData": "无数据",
   "emptyDataMessage": "请配置要查询的指标",
@@ -277,6 +279,8 @@
     "pathNodeTypeInfo": "pathNodeTypeInfo",
     "pathSetStartNodeInfo": "pathSetStartNodeInfo",
     "pathParticipateNodesInfo": "pathParticipateNodesInfo",
+    "pathIncludingOtherEventsInfo": "pathIncludingOtherEventsInfo",
+    "pathMergeConsecutiveEventsInfo": "pathMergeConsecutiveEventsInfo",
     "retentionInfo": "retentionInfo",
     "introducingAnalyticsHeader": "介绍分析工作坊",
     "introducingAnalyticsContent": "分析工作坊允许您在易于使用的UI上探索点击流数据，并提供对所有报告和看板的访问。"

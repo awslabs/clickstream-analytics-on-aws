@@ -388,6 +388,8 @@ export class ReportingService {
           sessionType: query.pathAnalysis.sessionType,
           nodeType: query.pathAnalysis.nodeType,
           lagSeconds: query.pathAnalysis.lagSeconds,
+          includingOtherEvents: query.pathAnalysis.includingOtherEvents,
+          mergeConsecutiveEvents: query.pathAnalysis.mergeConsecutiveEvents,
         },
       });
     }
@@ -411,6 +413,8 @@ export class ReportingService {
         nodeType: query.pathAnalysis.nodeType,
         lagSeconds: query.pathAnalysis.lagSeconds,
         nodes: query.pathAnalysis.nodes,
+        includingOtherEvents: query.pathAnalysis.includingOtherEvents,
+        mergeConsecutiveEvents: query.pathAnalysis.mergeConsecutiveEvents,
       },
     });
   }
@@ -543,7 +547,7 @@ export class ReportingService {
       datasetPropsArray.push({
         name: '',
         tableName: viewName,
-        columns: retentionAnalysisVisualColumns,
+        columns: datasetColumns,
         importMode: 'DIRECT_QUERY',
         customSql: sql,
         projectedColumns,
