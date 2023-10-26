@@ -383,7 +383,7 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
           )
         : undefined;
     const pathAnalysisNodes = eventOptionData.map((item) => {
-      return defaultStr(item.selectedEventOption?.value);
+      return defaultStr(item.selectedEventOption?.name);
     });
     const pathAnalysisParameter: IPathAnalysisParameter = {
       platform: pathAnalysisPlatform,
