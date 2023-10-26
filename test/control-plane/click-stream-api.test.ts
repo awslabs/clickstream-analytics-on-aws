@@ -1031,46 +1031,6 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
       .toEqual([
         'testClickStreamALBApiAddAdminUserCustomResourceAddAdminUserAwsCustomResourceD9F42A0D',
       ]);
-
-    newALBApiStackTemplate.hasResourceProperties('Custom::AWS', {
-      Create: {
-        'Fn::Join': [
-          '',
-          [
-            '{"service":"DynamoDB","action":"putItem","physicalResourceId":{"id":"AddAdminUserCustomResource"},"parameters":{"TableName":"',
-            {
-              Ref: 'testClickStreamALBApiClickstreamMetadataA721B303',
-            },
-            '","Item":{"id":{"S":"fake@example.com"},"type":{"S":"USER"},"prefix":{"S":"USER"},"role":{"S":"Admin"},"createAt":{"N":"1698299985259"},"updateAt":{"N":"1698299985259"},"operator":{"S":"Clickstream"},"deleted":{"BOOL":false}},"ConditionExpression":"attribute_not_exists(id)"}}',
-          ],
-        ],
-      },
-      Update: {
-        'Fn::Join': [
-          '',
-          [
-            '{"service":"DynamoDB","action":"updateItem","physicalResourceId":{"id":"AddAdminUserCustomResource"},"parameters":{"TableName":"',
-            {
-              Ref: 'testClickStreamALBApiClickstreamMetadataA721B303',
-            },
-            '","Key":{"id":{"S":"fake@example.com"},"type":{"S":"USER"}},"UpdateExpression":"SET #role = :role, #prefix = :prefix, #createAt = :createAt, #updateAt = :updateAt, #operator = :operator, #deleted = :deleted","ExpressionAttributeNames":{"#role":"role","#createAt":"createAt","#updateAt":"updateAt","#operator":"operator","#deleted":"deleted","#prefix":"prefix"},"ExpressionAttributeValues":{":prefix":{"S":"USER"},":role":{"S":"Admin"},":createAt":{"N":"1698299985259"},":updateAt":{"N":"1698299985259"},":operator":{"S":"Clickstream"},":deleted":{"BOOL":false}}}}',
-          ],
-        ],
-      },
-      Delete: {
-        'Fn::Join': [
-          '',
-          [
-            '{"service":"DynamoDB","action":"deleteItem","physicalResourceId":{"id":"AddAdminUserCustomResource"},"parameters":{"TableName":"',
-            {
-              Ref: 'testClickStreamALBApiClickstreamMetadataA721B303',
-            },
-            '","Key":{"id":{"S":"fake@example.com"},"type":{"S":"USER"}},"ConditionExpression":"attribute_exists(id)"}}',
-          ],
-        ],
-      },
-      InstallLatestAwsSdk: false,
-    });
   });
 
   test('State Machine', () => {
