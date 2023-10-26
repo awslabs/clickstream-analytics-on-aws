@@ -88,7 +88,7 @@ const _onCreate = async (quickSight: QuickSight, awsAccountId: string, principal
   logger.info('receive event', JSON.stringify(event));
 
   const props = event.ResourceProperties as QuicksightCustomResourceLambdaPropsType;
-  await createFolder(quickSight, awsAccountId, props.dashboardDefProps.databaseName);
+  await createFolder(quickSight, awsAccountId, principalArn, props.dashboardDefProps.databaseName);
   let dashboards = [];
   const databaseSchemaNames = props.schemas;
   if ( databaseSchemaNames.trim().length > 0 ) {
@@ -818,14 +818,8 @@ const buildDataSetId = function (databaseName: string, schema: string, tableName
 
 };
 
-const buildFolderId = function (databaseName: string): Identifier {
-  const databaseIdentifier = truncateString(databaseName, 15);
-  const suffix = crypto.createHash('sha256').update(databaseName).digest('hex').substring(0, 8);
-  return {
-    id: `clickstream_folder_${databaseName}`,
-    idSuffix: suffix,
-    databaseIdentifier,
-  };
+const getFolderIdFromProjectId = function (databaseName: string): string {
+  return `clickstream_folder_${databaseName}`.replace(/_/g, '-');
 };
 
 const getMemberTypeFromId = (id: string) => {
@@ -838,22 +832,33 @@ const getMemberTypeFromId = (id: string) => {
   return memberType;
 };
 
-const createFolder = async (quickSight: QuickSight, awsAccountId: string, databaseName: string) => {
+const createFolder = async (quickSight: QuickSight, awsAccountId: string, principalArn: string, databaseName: string) => {
   try {
-    const folderId: string = buildFolderId(databaseName).id;
-    const search = await quickSight.searchFolders({
+    const folderId: string = getFolderIdFromProjectId(databaseName);
+    const folder = await quickSight.describeFolder({
       AwsAccountId: awsAccountId,
-      Filters: [{
-        Operator: FilterOperator.StringEquals,
-        Name: FolderFilterAttribute.FOLDER_NAME,
-        Value: databaseName,
-      }],
+      FolderId: folderId,
     });
-    if (!search.FolderSummaryList || search.FolderSummaryList?.length === 0) {
+    if (!folder || !folder.Folder) {
       await quickSight.createFolder({
         AwsAccountId: awsAccountId,
         FolderId: folderId,
         Name: databaseName,
+        Permissions: [
+          {
+            Principal: principalArn,
+            Actions: [
+              'quicksight:CreateFolder',
+              'quicksight:DescribeFolder',
+              'quicksight:UpdateFolder',
+              'quicksight:DeleteFolder',
+              'quicksight:CreateFolderMembership',
+              'quicksight:DeleteFolderMembership',
+              'quicksight:DescribeFolderPermissions',
+              'quicksight:UpdateFolderPermissions',
+            ],
+          }
+        ],
       });
     }
   } catch (err: any) {
@@ -864,7 +869,7 @@ const createFolder = async (quickSight: QuickSight, awsAccountId: string, databa
 
 const moveToFolder = async (quickSight: QuickSight, awsAccountId: string, databaseName: string, resources: FolderMember[]) => {
   try {
-    const folderId: string = buildFolderId(databaseName).id;
+    const folderId: string = getFolderIdFromProjectId(databaseName);
     for (let r of resources) {
       await quickSight.createFolderMembership({
         AwsAccountId: awsAccountId,
@@ -881,10 +886,10 @@ const moveToFolder = async (quickSight: QuickSight, awsAccountId: string, databa
 
 const deleteFolder = async (quickSight: QuickSight, awsAccountId: string, databaseName: string) => {
   try {
-    const folderId: string = buildFolderId(databaseName).id;
+    const folderId: string = getFolderIdFromProjectId(databaseName);
     const folderMembers = await quickSight.listFolderMembers({
       AwsAccountId: awsAccountId,
-      FolderId: databaseName,
+      FolderId: folderId,
     });
     if (folderMembers.FolderMemberList) {
       for (let member of folderMembers.FolderMemberList) {
@@ -908,10 +913,10 @@ const deleteFolder = async (quickSight: QuickSight, awsAccountId: string, databa
 
 const deleteMembers = async (quickSight: QuickSight, awsAccountId: string, databaseName: string, memberIds: string[]) => {
   try {
-    const folderId: string = buildFolderId(databaseName).id;
+    const folderId: string = getFolderIdFromProjectId(databaseName);
     const folderMembers = await quickSight.listFolderMembers({
       AwsAccountId: awsAccountId,
-      FolderId: databaseName,
+      FolderId: folderId,
     });
     if (folderMembers.FolderMemberList) {
       for (let member of folderMembers.FolderMemberList) {
