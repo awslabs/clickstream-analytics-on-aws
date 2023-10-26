@@ -18,10 +18,7 @@ import { queryItems } from './create-load-manifest';
 import { composeJobStatus } from './put-ods-source-to-store';
 import { logger } from '../../../common/powertools';
 import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
-import {
-  JobStatus, REDSHIFT_EVENT_PARAMETER_TABLE_NAME, REDSHIFT_EVENT_TABLE_NAME,
-  REDSHIFT_ITEM_TABLE_NAME, REDSHIFT_ODS_EVENTS_TABLE_NAME, REDSHIFT_USER_TABLE_NAME,
-} from '../../private/constant';
+import { JobStatus, REDSHIFT_TABLE_NAMES } from '../../private/constant';
 
 const DYNAMODB_TABLE_NAME = process.env.DYNAMODB_TABLE_NAME!;
 const DYNAMODB_TABLE_INDEX_NAME = process.env.DYNAMODB_TABLE_INDEX_NAME!;
@@ -52,11 +49,7 @@ export const handler = async (event: {
   logger.debug(`context.awsRequestId: ${requestId}`);
 
   const eventBucketWithPrefix = `${event.eventBucketName}/${event.eventPrefix}`;
-  const odsTableNames = [
-    REDSHIFT_EVENT_TABLE_NAME, REDSHIFT_EVENT_PARAMETER_TABLE_NAME,
-    REDSHIFT_ITEM_TABLE_NAME, REDSHIFT_USER_TABLE_NAME,
-    REDSHIFT_ODS_EVENTS_TABLE_NAME,
-  ];
+  const odsTableNames = REDSHIFT_TABLE_NAMES;
 
   const filesCountInfo = [];
   for (const odsTableName of odsTableNames) {
@@ -102,14 +95,19 @@ async function getCountForOdsTable(odsTableName: string, eventBucketWithPrefix: 
     tableBucketWithPrefix,
   });
 
+
   const countEnQ = await queryAllCount(ddbTableName, ddbIndexName, tableBucketWithPrefix,
     composeJobStatus(JobStatus.JOB_ENQUEUE, odsTableName));
 
   const countProcessing = await queryAllCount(ddbTableName, ddbIndexName, tableBucketWithPrefix,
     composeJobStatus(JobStatus.JOB_PROCESSING, odsTableName));
 
+  const countNew = await queryAllCount(ddbTableName, ddbIndexName, tableBucketWithPrefix,
+    composeJobStatus(JobStatus.JOB_NEW, odsTableName));
+
   return {
     tableName: odsTableName,
+    countNew,
     countEnQ,
     countProcessing,
   };

@@ -23,6 +23,7 @@ import {
   IVpc,
 } from 'aws-cdk-lib/aws-ec2';
 import { PolicyStatement, Role, AccountPrincipal, IRole } from 'aws-cdk-lib/aws-iam';
+import { TaskInput } from 'aws-cdk-lib/aws-stepfunctions';
 import { Construct } from 'constructs';
 import { ApplicationSchemas } from './private/app-schema';
 import { ClearExpiredEventsWorkflow } from './private/clear-expired-events-workflow';
@@ -36,6 +37,7 @@ import { RedshiftServerless } from './private/redshift-serverless';
 import { ScanMetadataWorkflow } from './private/scan-metadata-workflow';
 import { UpsertUsersWorkflow } from './private/upsert-users-workflow';
 import { addCfnNagForCustomResourceProvider, addCfnNagForLogRetention, addCfnNagToStack, ruleRolePolicyWithWildcardResources, ruleForLambdaVPCAndReservedConcurrentExecutions } from '../common/cfn-nag';
+import { EVENT_SOURCE_LOAD_DATA_FLOW } from '../common/constant';
 import { SolutionInfo } from '../common/solution-info';
 import { getExistVpc } from '../common/vpc-utils';
 
@@ -229,28 +231,6 @@ export class RedshiftAnalyticsStack extends NestedStack {
 
     const ddbStatusTable = createDDBStatusTable(this, 'FileStatus');
 
-    const loadDataProps = {
-      projectId: props.projectId,
-      networkConfig: {
-        vpc: props.vpc,
-        vpcSubnets: props.subnetSelection,
-      },
-      databaseName: projectDatabaseName,
-      dataAPIRole: this.redshiftDataAPIExecRole,
-      emrServerlessApplicationId: props.emrServerlessApplicationId,
-      serverlessRedshift: existingRedshiftServerlessProps,
-      provisionedRedshift: props.provisionedRedshiftProps,
-      redshiftRoleForCopyFromS3,
-      ddbStatusTable,
-      tablesOdsSource: props.tablesOdsSource,
-      workflowBucketInfo: props.workflowBucketInfo,
-      loadDataConfig: props.loadDataConfig,
-    };
-
-    const loadRedshiftTablesWorkflow = new LoadOdsDataToRedshiftWorkflow(this, 'LoadData', loadDataProps);
-
-
-    (loadRedshiftTablesWorkflow.loadDataWorkflow.node.defaultChild as CfnResource).overrideLogicalId('ClickstreamLoadDataWorkflow');
 
     const upsertUsersWorkflow = new UpsertUsersWorkflow(this, 'UpsertUsersWorkflow', {
       appId: props.appIds,
@@ -290,6 +270,35 @@ export class RedshiftAnalyticsStack extends NestedStack {
       dataAPIRole: this.redshiftDataAPIExecRole,
       clearExpiredEventsWorkflowData: props.clearExpiredEventsWorkflowData,
     });
+
+
+    const loadDataProps = {
+      projectId: props.projectId,
+      networkConfig: {
+        vpc: props.vpc,
+        vpcSubnets: props.subnetSelection,
+      },
+      databaseName: projectDatabaseName,
+      dataAPIRole: this.redshiftDataAPIExecRole,
+      emrServerlessApplicationId: props.emrServerlessApplicationId,
+      serverlessRedshift: existingRedshiftServerlessProps,
+      provisionedRedshift: props.provisionedRedshiftProps,
+      redshiftRoleForCopyFromS3,
+      ddbStatusTable,
+      tablesOdsSource: props.tablesOdsSource,
+      workflowBucketInfo: props.workflowBucketInfo,
+      loadDataConfig: props.loadDataConfig,
+      nextStateStateMachines: [
+        {
+          name: 'Scan Metadata Async',
+          stateMachine: scanMetadataWorkflow.scanMetadataWorkflow,
+          input: TaskInput.fromObject({ eventSource: EVENT_SOURCE_LOAD_DATA_FLOW }),
+        },
+      ],
+    };
+
+    const loadRedshiftTablesWorkflow = new LoadOdsDataToRedshiftWorkflow(this, 'LoadData', loadDataProps);
+    (loadRedshiftTablesWorkflow.loadDataWorkflow.node.defaultChild as CfnResource).overrideLogicalId('ClickstreamLoadDataWorkflow');
 
 
     if (this.redshiftServerlessWorkgroup) {

@@ -22,9 +22,9 @@ import { IFunction, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import {
   StateMachine, LogLevel, IStateMachine, TaskInput, Wait, WaitTime, Succeed, Choice, Map,
-  Condition, Pass, Fail, DefinitionBody, Parallel,
+  Condition, Pass, Fail, DefinitionBody, Parallel, IntegrationPattern,
 } from 'aws-cdk-lib/aws-stepfunctions';
-import { LambdaInvoke } from 'aws-cdk-lib/aws-stepfunctions-tasks';
+import { LambdaInvoke, StepFunctionsStartExecution } from 'aws-cdk-lib/aws-stepfunctions-tasks';
 import { Construct } from 'constructs';
 import { DYNAMODB_TABLE_INDEX_NAME } from './constant';
 import { ODSSource, ExistingRedshiftServerlessProps, ProvisionedRedshiftProps, TablesODSSource, LoadDataConfig, WorkflowBucketInfo } from './model';
@@ -54,6 +54,9 @@ export interface LoadOdsDataToRedshiftWorkflowProps {
   readonly tablesOdsSource: TablesODSSource; // data S3 bucket
   readonly loadDataConfig: LoadDataConfig; // workflow config info, e.g. maxFilesLimit, etc..
   readonly workflowBucketInfo: WorkflowBucketInfo; // bucket to store workflow logs, temp files
+
+  readonly nextStateStateMachines: { name: string; stateMachine: IStateMachine;
+    input?: TaskInput; integrationPattern?: IntegrationPattern; resultPath?: string; }[];
 }
 
 export class LoadOdsDataToRedshiftWorkflow extends Construct {
@@ -306,6 +309,39 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
       return doWorkflow;
     };
 
+    //
+    // Next state machines
+    //
+
+    let nexTaskExecChain;
+    for (const nexTask of props.nextStateStateMachines) {
+      const taskName = nexTask.name;
+      const stateMachine = nexTask.stateMachine;
+      const input = nexTask.input;
+      const integrationPattern = nexTask.integrationPattern?? IntegrationPattern.REQUEST_RESPONSE;
+      const resultPath = `$.${nexTask.resultPath ?? taskName.replace(/ /g, '')}`;
+      const nexTaskExec = new StepFunctionsStartExecution(this, `${this.node.id} - ${taskName}`, {
+        stateMachine,
+        integrationPattern,
+        input,
+        resultSelector: {
+          'ExecutionArn.$': '$.ExecutionArn',
+        },
+        resultPath,
+      });
+      if (!nexTaskExecChain) {
+        nexTaskExecChain = nexTaskExec;
+      } else {
+        nexTaskExecChain = nexTaskExecChain.next(nexTaskExec);
+      }
+    }
+
+    const allCompleted = new Succeed(this, `${this.node.id} - All Completed`);
+    if (nexTaskExecChain) {
+      nexTaskExecChain.next(allCompleted);
+    } else {
+      nexTaskExecChain = allCompleted;
+    }
 
     //
     // Main workflow
@@ -317,14 +353,17 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
       parallelLoadDataToTables = parallelLoadDataToTables.branch(loadOneTableWorkflow);
     }
 
-    const allCompleted = new Succeed(this, `${this.node.id} - All Completed`);
+    const loadCompleted = new Pass(this, `${this.node.id} - Load Data To Redshift Completed`, {
+      // change the input from array to object
+      parameters: { 'parallelLoadData.$': '$$' },
+    });
 
-    const parallelLoadBranch = parallelLoadDataToTables.next(allCompleted);
+    const parallelLoadBranch = parallelLoadDataToTables.next(loadCompleted);
 
     const ignoreRunFlow = new Pass(this, `${this.node.id} - Ignore Running`).next(allCompleted);
 
     const hasRunningWorkflowChoice = new Choice(this, `${this.node.id} - Has Other Running Workflow`)
-      .when(Condition.booleanEquals('$.HasRunningWorkflow', false), parallelLoadBranch)
+      .when(Condition.booleanEquals('$.HasRunningWorkflow', false), parallelLoadBranch.next(nexTaskExecChain))
       .otherwise(ignoreRunFlow);
 
     const definition = checkHasRunningWorkflow.next(hasRunningWorkflowChoice);

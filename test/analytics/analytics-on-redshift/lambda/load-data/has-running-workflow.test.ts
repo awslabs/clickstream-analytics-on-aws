@@ -17,7 +17,7 @@ import { QueryCommand } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
 import 'aws-sdk-client-mock-jest';
 import { handler } from '../../../../../src/analytics/lambdas/load-data-workflow/has-running-workflow';
-import { JobStatus, REDSHIFT_EVENT_PARAMETER_TABLE_NAME, REDSHIFT_EVENT_TABLE_NAME, REDSHIFT_ITEM_TABLE_NAME, REDSHIFT_ODS_EVENTS_TABLE_NAME, REDSHIFT_USER_TABLE_NAME } from '../../../../../src/analytics/private/constant';
+import { JobStatus, REDSHIFT_TABLE_NAMES } from '../../../../../src/analytics/private/constant';
 import { PARTITION_APP } from '../../../../../src/common/constant';
 import { getMockContext } from '../../../../common/lambda-context';
 
@@ -122,18 +122,14 @@ test('Should have other running workflow', async () => {
   };
 
   const response = await handler(event, context);
-  const tableNames = [
-    REDSHIFT_EVENT_TABLE_NAME, REDSHIFT_EVENT_PARAMETER_TABLE_NAME,
-    REDSHIFT_ITEM_TABLE_NAME, REDSHIFT_USER_TABLE_NAME,
-    REDSHIFT_ODS_EVENTS_TABLE_NAME,
-  ];
+  const tableNames = REDSHIFT_TABLE_NAMES;
 
   expect(response.FilesCountInfo).toEqual([
-    { countEnQ: 4, countProcessing: 3, tableName: tableNames[0] },
-    { countEnQ: 1, countProcessing: 1, tableName: tableNames[1] },
-    { countEnQ: 1, countProcessing: 1, tableName: tableNames[2] },
-    { countEnQ: 1, countProcessing: 1, tableName: tableNames[3] },
-    { countEnQ: 1, countProcessing: 1, tableName: tableNames[4] },
+    { countEnQ: 4, countNew: 1, countProcessing: 3, tableName: tableNames[0] },
+    { countEnQ: 1, countNew: 1, countProcessing: 1, tableName: tableNames[1] },
+    { countEnQ: 1, countNew: 1, countProcessing: 1, tableName: tableNames[2] },
+    { countEnQ: 1, countNew: 1, countProcessing: 1, tableName: tableNames[3] },
+    { countEnQ: 1, countNew: 1, countProcessing: 1, tableName: tableNames[4] },
   ]);
   expect(response.HasRunningWorkflow).toBeTruthy();
   expect(snfClientMock).toReceiveNthCommandWith(1, ListExecutionsCommand, {
@@ -197,5 +193,15 @@ test('Should get no other running workflow', async () => {
   const response = await handler(event, context);
   expect(response.FilesCountInfo.length).toEqual(5);
   expect(response.HasRunningWorkflow).toBeFalsy();
+
+  expect(ddbClientMock).toHaveReceivedNthCommandWith(1, QueryCommand, {
+    ExpressionAttributeValues: { ':job_status': 'event#ENQUEUE', ':s3_uri': 's3://bucket_test/test/prefix1/event/' },
+  });
+  expect(ddbClientMock).toHaveReceivedNthCommandWith(2, QueryCommand, {
+    ExpressionAttributeValues: { ':job_status': 'event#PROCESSING', ':s3_uri': 's3://bucket_test/test/prefix1/event/' },
+  });
+  expect(ddbClientMock).toHaveReceivedNthCommandWith(3, QueryCommand, {
+    ExpressionAttributeValues: { ':job_status': 'event#NEW', ':s3_uri': 's3://bucket_test/test/prefix1/event/' },
+  });
 
 });

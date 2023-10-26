@@ -25,8 +25,12 @@ const ddbClientMock = mockClient(DynamoDBClient);
 
 const context = getMockContext();
 
+process.env.REDSHIFT_ODS_TABLE_NAME = 'test_me_table';
+process.env.ODS_EVENT_BUCKET_PREFIX = 'project1/test/test_me_table/';
+
 beforeEach(() => {
   ddbClientMock.reset();
+
 });
 
 test('Should get all JOB_NEW files', async () => {
@@ -55,6 +59,17 @@ test('Should get all JOB_NEW files', async () => {
       },
     ],
   }).resolvesOnce({
+    Count: 2,
+    Items: [
+      {
+        s3_uri: `s3://${process.env.ODS_EVENT_BUCKET}/project1/ods_external_events/${PARTITION_APP}=app1/partition_year=2023/partition_month=01/partition_day=15/clickstream-1-job_part00004.parquet.snappy`,
+        s3_object_size: 1823224,
+        job_status: JobStatus.JOB_NEW,
+        timestamp: new Date().getTime(),
+      },
+
+    ],
+  }).resolves({
     Count: 1,
     Items: [
       {
@@ -68,5 +83,27 @@ test('Should get all JOB_NEW files', async () => {
   });
 
   const response = await handler({}, context);
-  expect(response.jobNewCount).toEqual(4);
+  expect(response).toEqual({
+    tableNewCountInfo: {
+      event: 5,
+      event_parameter: 1,
+      item: 1,
+      ods_events: 1,
+      user: 1,
+    },
+    jobNewCount: 9,
+  });
+  expect(response.jobNewCount).toEqual(9);
+
+  expect(ddbClientMock).toHaveReceivedNthCommandWith(2, QueryCommand, {
+    ExclusiveStartKey: 'next1',
+    ExpressionAttributeNames:
+     { '#job_status': 'job_status', '#s3_uri': 's3_uri' },
+    ExpressionAttributeValues: { ':job_status': 'event#NEW', ':s3_uri': 's3://EXAMPLE-BUCKET-2/project1/raw/' },
+    FilterExpression: 'begins_with(#s3_uri, :s3_uri)',
+    IndexName: 'by_status',
+    KeyConditionExpression: '#job_status = :job_status',
+    ScanIndexForward: true,
+    TableName: 'project1_ods_events_trigger',
+  } as any);
 });
