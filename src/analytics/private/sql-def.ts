@@ -43,7 +43,7 @@ export const reportingViewsDef: SQLDef[] = [
     sqlFile: 'clickstream_user_dim_view.sql',
   },
   {
-    updatable: 'true',
+    updatable: 'false',
     sqlFile: 'clickstream_session_view.sql',
   },
   {
