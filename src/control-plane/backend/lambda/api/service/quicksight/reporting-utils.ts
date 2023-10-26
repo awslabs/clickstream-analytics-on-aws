@@ -27,6 +27,7 @@ import {
   DataSetIdentifierDeclaration,
   ColumnConfiguration,
   SheetDefinition,
+  GeoSpatialDataRole,
 } from '@aws-sdk/client-quicksight';
 import { AssumeRoleCommand, STSClient } from '@aws-sdk/client-sts';
 import Mustache from 'mustache';
@@ -286,7 +287,7 @@ export const createDataSet = async (quickSight: QuickSight, awsAccountId: string
         const tags: ColumnTag[] = [];
         for (const role of tagColOperation.columnGeographicRoles) {
           tags.push({
-            ColumnGeographicRole: role,
+            ColumnGeographicRole: role as GeoSpatialDataRole,
           });
         }
         dataTransforms.push({
