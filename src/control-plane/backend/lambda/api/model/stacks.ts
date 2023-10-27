@@ -1011,6 +1011,7 @@ export class CReportingStack extends JSONObject {
   public static editAllowedList(): string[] {
     const allowedList:string[] = [
       'QuickSightUserParam',
+      'QuickSightPrincipalParam',
       'RedshiftDBParam',
       'RedShiftDBSchemaParam',
       'QuickSightVpcConnectionSubnetParam',
