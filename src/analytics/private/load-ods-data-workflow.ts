@@ -69,9 +69,7 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
 
     const ddbStatusTable = props.ddbStatusTable;
 
-    for (const tableName of Object.keys(props.tablesOdsSource)) {
-
-      const odsSource: ODSSource = (props.tablesOdsSource as any)[`${tableName}`];
+    for (const [tableName, odsSource] of Object.entries(props.tablesOdsSource)) {
 
       const processorLambda = this.createS3EventProcessorLambda(ddbStatusTable, tableName, odsSource, props);
 
