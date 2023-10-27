@@ -68,8 +68,10 @@ import {
   S3_DATA_PROCESSING_WITH_ERROR_PREFIX_PIPELINE,
   KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW_AND_EXPRESSION_UPDATE,
   KINESIS_DATA_PROCESSING_PROVISIONED_REDSHIFT_ERROR_DBUSER_QUICKSIGHT_PIPELINE,
+  BASE_STATUS,
 } from './pipeline-mock';
 import { clickStreamTableName, dictionaryTableName, prefixTimeGSIName } from '../../common/constants';
+import { PipelineStatusType } from '../../common/types';
 import { app, server } from '../../index';
 import 'aws-sdk-client-mock-jest';
 
@@ -2903,19 +2905,46 @@ describe('Pipeline test', () => {
     tokenMock(ddbMock, false);
     projectExistedMock(ddbMock, true);
     dictionaryMock(ddbMock);
-    ddbMock.on(GetCommand, { Key: { id: MOCK_PROJECT_ID, type: `PIPELINE#${MOCK_PIPELINE_ID}#latest` }, TableName: clickStreamTableName }).resolves({
-      Item: KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW_FOR_UPGRADE,
-    });
+    createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock,
+      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, iamMock, {
+        publicAZContainPrivateAZ: true,
+        subnetsCross3AZ: true,
+        subnetsIsolated: true,
+        update: true,
+        updatePipeline: {
+          ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
+          status: {
+            ...BASE_STATUS,
+          },
+        },
+      });
     cloudFormationMock.on(DescribeStacksCommand).resolves({
       Stacks: [
         {
           StackName: 'xxx',
+          Outputs: [
+            {
+              OutputKey: 'IngestionServerC000IngestionServerURL',
+              OutputValue: 'http://xxx/xxx',
+            },
+            {
+              OutputKey: 'IngestionServerC000IngestionServerDNS',
+              OutputValue: 'http://yyy/yyy',
+            },
+            {
+              OutputKey: 'Dashboards',
+              OutputValue: '[{"appId":"app1","dashboardId":"clickstream_dashboard_v1_notepad_mtzfsocy_app1"},{"appId":"app2","dashboardId":"clickstream_dashboard_v1_notepad_mtzfsocy_app2"}]',
+            },
+            {
+              OutputKey: 'ObservabilityDashboardName',
+              OutputValue: 'clickstream_dashboard_notepad_mtzfsocy',
+            },
+          ],
           StackStatus: StackStatus.CREATE_COMPLETE,
           CreationTime: new Date(),
         },
       ],
     });
-    sfnMock.on(StartExecutionCommand).resolves({ executionArn: 'xxx' });
     ddbMock.on(TransactWriteItemsCommand).resolves({});
     let res = await request(app)
       .post(`/api/pipeline/${MOCK_PIPELINE_ID}/upgrade?pid=${MOCK_PROJECT_ID}`)
@@ -2933,20 +2962,25 @@ describe('Pipeline test', () => {
     tokenMock(ddbMock, false);
     projectExistedMock(ddbMock, true);
     dictionaryMock(ddbMock);
-    ddbMock.on(GetCommand, { Key: { id: MOCK_PROJECT_ID, type: `PIPELINE#${MOCK_PIPELINE_ID}#latest` }, TableName: clickStreamTableName }).resolves({
-      Item: {
-        ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW_FOR_UPGRADE,
-        ingestionServer: {
-          ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW_FOR_UPGRADE.ingestionServer,
-          size: {
-            serverMax: 1,
-            warmPoolSize: 1,
-            serverMin: 1,
-            scaleOnCpuUtilizationPercent: 50,
+    createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock,
+      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, iamMock, {
+        publicAZContainPrivateAZ: true,
+        subnetsCross3AZ: true,
+        subnetsIsolated: true,
+        update: true,
+        updatePipeline: {
+          ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW_FOR_UPGRADE,
+          ingestionServer: {
+            ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW_FOR_UPGRADE.ingestionServer,
+            size: {
+              serverMax: 1,
+              warmPoolSize: 1,
+              serverMin: 1,
+              scaleOnCpuUtilizationPercent: 50,
+            },
           },
         },
-      },
-    });
+      });
     cloudFormationMock.on(DescribeStacksCommand).resolves({
       Stacks: [
         {
@@ -2971,9 +3005,20 @@ describe('Pipeline test', () => {
     tokenMock(ddbMock, false);
     projectExistedMock(ddbMock, true);
     dictionaryMock(ddbMock);
-    ddbMock.on(GetCommand, { Key: { id: MOCK_PROJECT_ID, type: `PIPELINE#${MOCK_PIPELINE_ID}#latest` }, TableName: clickStreamTableName }).resolves({
-      Item: KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
-    });
+    createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock,
+      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, iamMock, {
+        publicAZContainPrivateAZ: true,
+        subnetsCross3AZ: true,
+        subnetsIsolated: true,
+        update: true,
+        updatePipeline: {
+          ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
+          status: {
+            ...BASE_STATUS,
+            status: PipelineStatusType.FAILED,
+          },
+        },
+      });
     ddbMock.on(TransactWriteItemsCommand).resolves({});
     let res = await request(app)
       .post(`/api/pipeline/${MOCK_PIPELINE_ID}/upgrade?pid=${MOCK_PROJECT_ID}`)

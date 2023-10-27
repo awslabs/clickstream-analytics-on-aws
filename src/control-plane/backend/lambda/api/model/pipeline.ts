@@ -330,21 +330,15 @@ export class CPipeline {
 
   public async upgrade(oldPipeline: IPipeline): Promise<void> {
     this.pipeline.lastAction = 'Upgrade';
+    validateIngestionServerNum(this.pipeline.ingestionServer.size);
     const executionName = `main-${uuidv4()}`;
     this.pipeline.executionName = executionName;
-    validateIngestionServerNum(this.pipeline.ingestionServer.size);
-    // check quicksight user
-    if (this.pipeline.reporting) {
-      await registerClickstreamUser();
-    }
-    // update pipeline tags
-    if (!this.resources || !this.stackTags || this.stackTags?.length === 0) {
-      this.setTags();
-      this.stackTags = this.getStackTags();
-    }
-    const stackTemplateMap = await this.getStackTemplateMap();
+    this.pipeline.workflow = await this.generateWorkflow();
+    this.pipeline.templateVersion = this.resources?.solution?.data.version ?? '';
+
+    const oldStackNames = this.stackManager.getWorkflowStacks(oldPipeline.workflow?.Workflow!);
     // update workflow
-    this.stackManager.upgradeWorkflow(stackTemplateMap, this.stackTags);
+    this.stackManager.upgradeWorkflow(oldStackNames);
     // create new execution
     const execWorkflow = this.stackManager.getExecWorkflow();
     this.pipeline.executionArn = await this.stackManager.execute(execWorkflow, executionName);
@@ -526,8 +520,8 @@ export class CPipeline {
     return appIds;
   }
 
-  public async getStackTemplateMap() {
-    const stackNames = this.stackManager.getWorkflowStacks(this.pipeline.workflow?.Workflow!);
+  public async getStackTemplateMap(workflow: WorkflowTemplate) {
+    const stackNames = this.stackManager.getWorkflowStacks(workflow.Workflow);
     const stackTemplateMap = new Map();
     for (let stackName of stackNames) {
       const stackType = stackName.split('-')[1] as PipelineStackType;
@@ -562,6 +556,7 @@ export class CPipeline {
       const s3Region = process.env.AWS_REGION?.startsWith('cn') ? 'cn-north-1' : 'us-east-1';
       const s3Host = `https://${this.resources?.solution.data.dist_output_bucket}.s3.${s3Region}.${awsUrlSuffix}`;
 
+      console.log(this.resources);
       let version = this.resources?.solution.data.version === 'latest' ?
         this.resources?.solution.data.target : this.resources?.solution.data.version;
       return `${s3Host}/${solutionName}/${version}/${prefix}${templateName}`;

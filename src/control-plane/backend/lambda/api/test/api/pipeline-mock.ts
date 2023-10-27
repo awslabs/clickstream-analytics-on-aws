@@ -673,7 +673,7 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_QUICKSIGHT_PIPELINE: IPipeline
   },
 };
 
-const BASE_STATUS = {
+export const BASE_STATUS = {
   status: PipelineStatusType.ACTIVE,
   stackDetails: [
     {

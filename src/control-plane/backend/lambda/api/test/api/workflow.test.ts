@@ -11,7 +11,6 @@
  *  and limitations under the License.
  */
 
-import { Tag } from '@aws-sdk/client-cloudformation';
 import { EC2Client } from '@aws-sdk/client-ec2';
 import {
   IAMClient,
@@ -2099,11 +2098,16 @@ describe('Workflow test', () => {
   it('Generate Upgrade Workflow', async () => {
     dictionaryMock(ddbMock);
     sfnMock.on(StartExecutionCommand).resolves({ executionArn: MOCK_EXECUTION_ID });
-    const pipeline: CPipeline = new CPipeline(KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW_FOR_UPGRADE);
-    const stackTemplateMap = await pipeline.getStackTemplateMap();
+    const oldStackNames: string[] = [
+      'Clickstream-Ingestion-kafka-6666-6666',
+      'Clickstream-KafkaConnector-6666-6666',
+      'Clickstream-DataProcessing-6666-6666',
+      'Clickstream-Reporting-6666-6666',
+      'Clickstream-DataModelingRedshift-6666-6666',
+      'Clickstream-Metrics-6666-6666',
+    ];
     const stackManager: StackManager = new StackManager(KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW_FOR_UPGRADE);
-    const tags: Tag[] = [{ Key: 'version', Value: 'v2' }];
-    stackManager.upgradeWorkflow(stackTemplateMap, tags);
+    stackManager.upgradeWorkflow(oldStackNames);
     const expected = {
       Version: '2022-03-15',
       Workflow: {
@@ -2122,7 +2126,7 @@ describe('Workflow test', () => {
                     Region: 'ap-southeast-1',
                     Parameters: [],
                     StackName: 'Clickstream-Ingestion-kafka-6666-6666',
-                    Tags: [{ Key: 'version', Value: 'v2' }],
+                    Tags: [],
                     TemplateURL: `https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/${MOCK_SOLUTION_VERSION}/default/ingestion-server-kinesis-stack.template.json`,
                   },
                 },
@@ -2263,11 +2267,16 @@ describe('Workflow test', () => {
       },
     });
     sfnMock.on(StartExecutionCommand).resolves({ executionArn: MOCK_EXECUTION_ID });
-    const pipeline: CPipeline = new CPipeline(KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW_FOR_UPGRADE);
-    const stackTemplateMap = await pipeline.getStackTemplateMap();
+    const oldStackNames: string[] = [
+      'Clickstream-Ingestion-kafka-6666-6666',
+      'Clickstream-KafkaConnector-6666-6666',
+      'Clickstream-DataProcessing-6666-6666',
+      'Clickstream-Reporting-6666-6666',
+      'Clickstream-DataModelingRedshift-6666-6666',
+      'Clickstream-Metrics-6666-6666',
+    ];
     const stackManager: StackManager = new StackManager(KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW_FOR_UPGRADE);
-    const tags: Tag[] = [{ Key: 'version', Value: 'v2' }];
-    stackManager.upgradeWorkflow(stackTemplateMap, tags);
+    stackManager.upgradeWorkflow(oldStackNames);
     const expected = {
       Version: '2022-03-15',
       Workflow: {
@@ -3237,7 +3246,7 @@ describe('Workflow test', () => {
         ],
       },
     };
-    res = await stackManager.setWorkflowType(workflowTemplate.Workflow, WorkflowStateType.PASS);
+    res = stackManager.setWorkflowType(workflowTemplate.Workflow, WorkflowStateType.PASS);
     expect(res).toEqual({
       Branches: [
         {

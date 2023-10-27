@@ -146,7 +146,7 @@ export class PipelineServ {
       if (curPipeline.status?.status !== PipelineStatusType.ACTIVE) {
         return res.status(400).json(new ApiFail('The pipeline current status does not allow upgrade.'));
       }
-      const newPipeline = JSON.parse(JSON.stringify(curPipeline));
+      const newPipeline = { ...curPipeline };
       const pipeline = new CPipeline(newPipeline);
       const templateInfo = await pipeline.getTemplateInfo();
       if (templateInfo.isLatest) {

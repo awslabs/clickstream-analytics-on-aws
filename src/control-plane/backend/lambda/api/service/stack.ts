@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { StackStatus, Tag } from '@aws-sdk/client-cloudformation';
+import { StackStatus } from '@aws-sdk/client-cloudformation';
 import {
   DescribeExecutionCommand,
   DescribeExecutionCommandOutput,
@@ -96,12 +96,12 @@ export class StackManager {
     this.execWorkflow.Workflow = this.getDeleteWorkflow(this.execWorkflow.Workflow);
   }
 
-  public upgradeWorkflow(stackTemplateMap: Map<string, string>, stackTags: Tag[]): void {
+  public upgradeWorkflow(oldStackNames: string[]): void {
     if (!this.execWorkflow || !this.workflow) {
       throw new Error('Pipeline workflow is empty.');
     }
-    this.execWorkflow.Workflow = this.getUpgradeWorkflow(this.execWorkflow.Workflow, stackTemplateMap, stackTags, false);
-    this.workflow.Workflow = this.getUpgradeWorkflow(this.workflow.Workflow, stackTemplateMap, stackTags, true);
+    this.execWorkflow.Workflow = this.getUpgradeWorkflow(this.execWorkflow.Workflow, oldStackNames, false);
+    this.workflow.Workflow = this.getUpgradeWorkflow(this.workflow.Workflow, oldStackNames, true);
   }
 
   public retryWorkflow(stackTemplateMap: Map<string, string>, stackTags: Tag[]): void {
@@ -337,19 +337,17 @@ export class StackManager {
     }
   }
 
-  private getUpgradeWorkflow(state: WorkflowState, stackTemplateMap: Map<string, string>, stackTags: Tag[], origin: boolean): WorkflowState {
+  private getUpgradeWorkflow(state: WorkflowState, oldStackNames: string[], origin: boolean): WorkflowState {
     if (state.Type === WorkflowStateType.PARALLEL) {
       for (let branch of state.Branches as WorkflowParallelBranch[]) {
         for (let key of Object.keys(branch.States)) {
-          branch.States[key] = this.getUpgradeWorkflow(branch.States[key], stackTemplateMap, stackTags, origin);
+          branch.States[key] = this.getUpgradeWorkflow(branch.States[key], oldStackNames, origin);
         }
       }
     } else if (state.Type === WorkflowStateType.STACK && state.Data?.Input) {
-      state.Data.Input.TemplateURL = stackTemplateMap.get(state.Data?.Input.StackName) ?? '';
-      if (!origin) {
+      if (!origin && oldStackNames.includes(state.Data.Input.StackName)) {
         state.Data.Input.Action = 'Upgrade';
       }
-      state.Data.Input.Tags = stackTags;
       state.Data.Callback = {
         BucketName: stackWorkflowS3Bucket ?? '',
         BucketPrefix: `clickstream/workflow/${this.pipeline.executionName}`,
