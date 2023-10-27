@@ -536,7 +536,7 @@ export class CPipeline {
   };
 
   public async getTemplateUrl(name: string) {
-    if (!this.resources?.solution || !this.resources.templates) {
+    if (!this.resources?.solution || !this.resources?.templates) {
       const solution = await store.getDictionary('Solution');
       const templates = await store.getDictionary('Templates');
       this.resources = {
