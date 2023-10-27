@@ -167,11 +167,266 @@ describe('App test', () => {
   });
 
   it('DDB marshall', async () => {
-    const marshallPipeline = marshall(S3_INGESTION_PIPELINE, {
+    const marshallPipelineDefault = marshall(S3_INGESTION_PIPELINE, {
+      ...marshallOptions,
+    });
+    expect(marshallPipelineDefault).toEqual({
+      bucket: {
+        M: {
+          name: {
+            S: 'EXAMPLE_BUCKET',
+          },
+          prefix: {
+            S: 'example/',
+          },
+        },
+      },
+      createAt: {
+        N: '1681353806173',
+      },
+      dataCollectionSDK: {
+        S: 'clickstream',
+      },
+      deleted: {
+        BOOL: false,
+      },
+      executionArn: {
+        S: 'arn:aws:states:us-east-1:111122223333:execution:MyPipelineStateMachine:main-5ab07c6e-b6ac-47ea-bf3a-02ede7391807',
+      },
+      executionName: {
+        S: 'main-3333-3333',
+      },
+      id: {
+        S: 'project_8888_8888',
+      },
+      ingestionServer: {
+        M: {
+          domain: {
+            M: {
+              certificateArn: {
+                S: 'arn:aws:acm:ap-southeast-1:111122223333:certificate/398ce638-e522-40e8-b344-fad5a616e11b',
+              },
+              domainName: {
+                S: 'fake.example.com',
+              },
+            },
+          },
+          loadBalancer: {
+            M: {
+              authenticationSecretArn: {
+                S: 'arn:aws:secretsmanager:ap-southeast-1:111122223333:secret:test-bxjEaf',
+              },
+              enableApplicationLoadBalancerAccessLog: {
+                BOOL: true,
+              },
+              enableGlobalAccelerator: {
+                BOOL: true,
+              },
+              logS3Bucket: {
+                M: {
+                  name: {
+                    S: 'EXAMPLE_BUCKET',
+                  },
+                  prefix: {
+                    S: 'logs/',
+                  },
+                },
+              },
+              notificationsTopicArn: {
+                S: 'arn:aws:sns:us-east-1:111122223333:test',
+              },
+              protocol: {
+                S: 'HTTPS',
+              },
+              serverCorsOrigin: {
+                S: '',
+              },
+              serverEndpointPath: {
+                S: '/collect',
+              },
+            },
+          },
+          sinkS3: {
+            M: {
+              s3BatchMaxBytes: {
+                N: '1000000',
+              },
+              s3BatchTimeout: {
+                N: '60',
+              },
+              sinkBucket: {
+                M: {
+                  name: {
+                    S: 'EXAMPLE_BUCKET',
+                  },
+                  prefix: {
+                    S: '',
+                  },
+                },
+              },
+            },
+          },
+          sinkType: {
+            S: 's3',
+          },
+          size: {
+            M: {
+              scaleOnCpuUtilizationPercent: {
+                N: '50',
+              },
+              serverMax: {
+                N: '1',
+              },
+              serverMin: {
+                N: '1',
+              },
+              warmPoolSize: {
+                N: '0',
+              },
+            },
+          },
+        },
+      },
+      network: {
+        M: {
+          privateSubnetIds: {
+            L: [
+              {
+                S: 'subnet-00000000000000011',
+              },
+              {
+                S: 'subnet-00000000000000012',
+              },
+              {
+                S: 'subnet-00000000000000013',
+              },
+            ],
+          },
+          publicSubnetIds: {
+            L: [
+              {
+                S: 'subnet-00000000000000021',
+              },
+              {
+                S: 'subnet-00000000000000022',
+              },
+              {
+                S: 'subnet-00000000000000023',
+              },
+            ],
+          },
+          vpcId: {
+            S: 'vpc-00000000000000001',
+          },
+        },
+      },
+      operator: {
+        S: 'u3@example.com',
+      },
+      pipelineId: {
+        S: '6666-6666',
+      },
+      prefix: {
+        S: 'PIPELINE',
+      },
+      projectId: {
+        S: 'project_8888_8888',
+      },
+      region: {
+        S: 'ap-southeast-1',
+      },
+      status: {
+        M: {
+          executionDetail: {
+            M: {
+              name: {
+                S: 'main-3333-3333',
+              },
+              status: {
+                S: 'SUCCEEDED',
+              },
+            },
+          },
+          stackDetails: {
+            L: [],
+          },
+          status: {
+            S: 'Active',
+          },
+        },
+      },
+      tags: {
+        L: [
+          {
+            M: {
+              key: {
+                S: 'customerKey1',
+              },
+              value: {
+                S: 'tagValue1',
+              },
+            },
+          },
+          {
+            M: {
+              key: {
+                S: 'customerKey2',
+              },
+              value: {
+                S: 'tagValue2',
+              },
+            },
+          },
+          {
+            M: {
+              key: {
+                S: 'aws-solution/version',
+              },
+              value: {
+                S: 'tagValue3',
+              },
+            },
+          },
+        ],
+      },
+      type: {
+        S: 'PIPELINE#6666-6666#latest',
+      },
+      updateAt: {
+        N: '1681353806173',
+      },
+      version: {
+        S: '1681353806172',
+      },
+      versionTag: {
+        S: 'latest',
+      },
+      workflow: {
+        M: {
+          Version: {
+            S: '2022-03-15',
+          },
+          Workflow: {
+            M: {
+              Branches: {
+                L: [],
+              },
+              End: {
+                BOOL: true,
+              },
+              Type: {
+                S: 'Parallel',
+              },
+            },
+          },
+        },
+      },
+    });
+    const marshallPipelineConvertTopLevel = marshall(S3_INGESTION_PIPELINE, {
       ...marshallOptions,
       convertTopLevelContainer: false,
     });
-    expect(marshallPipeline).toEqual({
+    expect(marshallPipelineConvertTopLevel).toEqual({
       bucket: {
         M: {
           name: {
