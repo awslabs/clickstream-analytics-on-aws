@@ -855,7 +855,7 @@ const createFolder = async (quickSight: QuickSight, awsAccountId: string, princi
               'quicksight:DescribeFolderPermissions',
               'quicksight:UpdateFolderPermissions',
             ],
-          }
+          },
         ],
       });
     }
