@@ -2126,8 +2126,7 @@ describe('Workflow test', () => {
                     Region: 'ap-southeast-1',
                     Parameters: [],
                     StackName: 'Clickstream-Ingestion-kafka-6666-6666',
-                    Tags: [],
-                    TemplateURL: `https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/${MOCK_SOLUTION_VERSION}/default/ingestion-server-kinesis-stack.template.json`,
+                    TemplateURL: `https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/${MOCK_SOLUTION_VERSION}/default/ingestion-server-kafka-stack.template.json`,
                   },
                 },
                 Next: 'KafkaConnector',
@@ -2144,7 +2143,6 @@ describe('Workflow test', () => {
                     Region: 'ap-southeast-1',
                     Parameters: [],
                     StackName: 'Clickstream-KafkaConnector-6666-6666',
-                    Tags: [{ Key: 'version', Value: 'v2' }],
                     TemplateURL: `https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/${MOCK_SOLUTION_VERSION}/default/kafka-s3-sink-stack.template.json`,
                   },
                 },
@@ -2167,7 +2165,6 @@ describe('Workflow test', () => {
                     Region: 'ap-southeast-1',
                     Parameters: [],
                     StackName: 'Clickstream-DataProcessing-6666-6666',
-                    Tags: [{ Key: 'version', Value: 'v2' }],
                     TemplateURL: `https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/${MOCK_SOLUTION_VERSION}/default/data-pipeline-stack.template.json`,
                   },
                 },
@@ -2188,7 +2185,6 @@ describe('Workflow test', () => {
                     Action: 'Upgrade',
                     Parameters: [],
                     StackName: 'Clickstream-Reporting-6666-6666',
-                    Tags: [{ Key: 'version', Value: 'v2' }],
                   },
                   Callback: {
                     BucketPrefix: 'clickstream/workflow/main-3333-3333',
@@ -2208,7 +2204,6 @@ describe('Workflow test', () => {
                     Region: 'ap-southeast-1',
                     Parameters: [],
                     StackName: 'Clickstream-DataModelingRedshift-6666-6666',
-                    Tags: [{ Key: 'version', Value: 'v2' }],
                     TemplateURL: `https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/${MOCK_SOLUTION_VERSION}/default/data-analytics-redshift-stack.template.json`,
                   },
                 },
@@ -2231,7 +2226,6 @@ describe('Workflow test', () => {
                     Region: 'ap-southeast-1',
                     Parameters: BASE_METRICS_PARAMETERS,
                     StackName: 'Clickstream-Metrics-6666-6666',
-                    Tags: [{ Key: 'version', Value: 'v2' }],
                     TemplateURL: `https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/${MOCK_SOLUTION_VERSION}/default/metrics-stack.template.json`,
                   },
                 },
@@ -2247,25 +2241,8 @@ describe('Workflow test', () => {
     };
     expect(stackManager.getExecWorkflow()).toEqual(expected);
   });
-  it('Generate Upgrade Workflow with dictionary change', async () => {
+  it('Generate Upgrade Workflow with stack change', async () => {
     dictionaryMock(ddbMock);
-    ddbMock.on(GetCommand, {
-      TableName: dictionaryTableName,
-      Key: {
-        name: 'Solution',
-      },
-    }).resolves({
-      Item: {
-        name: 'Solution',
-        data: {
-          name: 'clickstream',
-          dist_output_bucket: 'EXAMPLE-BUCKET2',
-          target: 'clickstream/main',
-          prefix: '',
-          version: 'v2.0.0',
-        },
-      },
-    });
     sfnMock.on(StartExecutionCommand).resolves({ executionArn: MOCK_EXECUTION_ID });
     const oldStackNames: string[] = [
       'Clickstream-Ingestion-kafka-6666-6666',
@@ -2273,7 +2250,6 @@ describe('Workflow test', () => {
       'Clickstream-DataProcessing-6666-6666',
       'Clickstream-Reporting-6666-6666',
       'Clickstream-DataModelingRedshift-6666-6666',
-      'Clickstream-Metrics-6666-6666',
     ];
     const stackManager: StackManager = new StackManager(KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW_FOR_UPGRADE);
     stackManager.upgradeWorkflow(oldStackNames);
@@ -2295,8 +2271,7 @@ describe('Workflow test', () => {
                     Region: 'ap-southeast-1',
                     Parameters: [],
                     StackName: 'Clickstream-Ingestion-kafka-6666-6666',
-                    Tags: [{ Key: 'version', Value: 'v2' }],
-                    TemplateURL: 'https://EXAMPLE-BUCKET2.s3.us-east-1.amazonaws.com/clickstream/v2.0.0/ingestion-server-kinesis-stack.template.json',
+                    TemplateURL: `https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/${MOCK_SOLUTION_VERSION}/default/ingestion-server-kafka-stack.template.json`,
                   },
                 },
                 Next: 'KafkaConnector',
@@ -2313,8 +2288,7 @@ describe('Workflow test', () => {
                     Region: 'ap-southeast-1',
                     Parameters: [],
                     StackName: 'Clickstream-KafkaConnector-6666-6666',
-                    Tags: [{ Key: 'version', Value: 'v2' }],
-                    TemplateURL: 'https://EXAMPLE-BUCKET2.s3.us-east-1.amazonaws.com/clickstream/v2.0.0/kafka-s3-sink-stack.template.json',
+                    TemplateURL: `https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/${MOCK_SOLUTION_VERSION}/default/kafka-s3-sink-stack.template.json`,
                   },
                 },
                 End: true,
@@ -2336,8 +2310,7 @@ describe('Workflow test', () => {
                     Region: 'ap-southeast-1',
                     Parameters: [],
                     StackName: 'Clickstream-DataProcessing-6666-6666',
-                    Tags: [{ Key: 'version', Value: 'v2' }],
-                    TemplateURL: 'https://EXAMPLE-BUCKET2.s3.us-east-1.amazonaws.com/clickstream/v2.0.0/data-pipeline-stack.template.json',
+                    TemplateURL: `https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/${MOCK_SOLUTION_VERSION}/default/data-pipeline-stack.template.json`,
                   },
                 },
                 End: true,
@@ -2353,11 +2326,10 @@ describe('Workflow test', () => {
                 Data: {
                   Input: {
                     Region: 'ap-southeast-1',
-                    TemplateURL: 'https://EXAMPLE-BUCKET2.s3.us-east-1.amazonaws.com/clickstream/v2.0.0/data-reporting-quicksight-stack.template.json',
+                    TemplateURL: `https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/${MOCK_SOLUTION_VERSION}/default/data-reporting-quicksight-stack.template.json`,
                     Action: 'Upgrade',
                     Parameters: [],
                     StackName: 'Clickstream-Reporting-6666-6666',
-                    Tags: [{ Key: 'version', Value: 'v2' }],
                   },
                   Callback: {
                     BucketPrefix: 'clickstream/workflow/main-3333-3333',
@@ -2377,8 +2349,7 @@ describe('Workflow test', () => {
                     Region: 'ap-southeast-1',
                     Parameters: [],
                     StackName: 'Clickstream-DataModelingRedshift-6666-6666',
-                    Tags: [{ Key: 'version', Value: 'v2' }],
-                    TemplateURL: 'https://EXAMPLE-BUCKET2.s3.us-east-1.amazonaws.com/clickstream/v2.0.0/data-analytics-redshift-stack.template.json',
+                    TemplateURL: `https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/${MOCK_SOLUTION_VERSION}/default/data-analytics-redshift-stack.template.json`,
                   },
                 },
                 Next: 'Reporting',
@@ -2396,12 +2367,11 @@ describe('Workflow test', () => {
                     BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
-                    Action: 'Upgrade',
+                    Action: 'Create',
                     Region: 'ap-southeast-1',
                     Parameters: BASE_METRICS_PARAMETERS,
                     StackName: 'Clickstream-Metrics-6666-6666',
-                    Tags: [{ Key: 'version', Value: 'v2' }],
-                    TemplateURL: 'https://EXAMPLE-BUCKET2.s3.us-east-1.amazonaws.com/clickstream/v2.0.0/metrics-stack.template.json',
+                    TemplateURL: `https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/${MOCK_SOLUTION_VERSION}/default/metrics-stack.template.json`,
                   },
                 },
                 End: true,
@@ -2656,7 +2626,7 @@ describe('Workflow test', () => {
       Key: {
         name: 'Solution',
       },
-    }).resolves({
+    }).resolvesOnce({
       Item: {
         name: 'Solution',
         data: {

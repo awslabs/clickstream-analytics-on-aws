@@ -556,7 +556,6 @@ export class CPipeline {
       const s3Region = process.env.AWS_REGION?.startsWith('cn') ? 'cn-north-1' : 'us-east-1';
       const s3Host = `https://${this.resources?.solution.data.dist_output_bucket}.s3.${s3Region}.${awsUrlSuffix}`;
 
-      console.log(this.resources);
       let version = this.resources?.solution.data.version === 'latest' ?
         this.resources?.solution.data.target : this.resources?.solution.data.version;
       return `${s3Host}/${solutionName}/${version}/${prefix}${templateName}`;
