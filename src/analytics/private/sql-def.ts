@@ -105,8 +105,11 @@ export const schemaDefs: SQLDef[] = [
   },
   {
     updatable: 'true',
-    sqlFile: 'grant-permissions-to-bi-user.sql',
-    multipleLine: 'true',
+    sqlFile: 'grant-permissions-to-bi-user-1.sql',
+  },
+  {
+    updatable: 'true',
+    sqlFile: 'grant-permissions-to-bi-user-2.sql',
   },
   {
     updatable: 'true',

@@ -1,2 +1,1 @@
-GRANT USAGE ON SCHEMA {{schema}} TO {{user_bi}};
 ALTER DEFAULT PRIVILEGES IN SCHEMA {{schema}} GRANT SELECT ON TABLES TO {{user_bi}};
