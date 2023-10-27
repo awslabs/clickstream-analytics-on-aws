@@ -84,22 +84,22 @@ test('Should get all JOB_NEW files', async () => {
 
   const response = await handler({}, context);
   expect(response).toEqual({
-    tableNewCountInfo: {
-      event: 5,
+    processingFilesCount: {
+      event: 1,
       event_parameter: 1,
       item: 1,
       ods_events: 1,
       user: 1,
     },
-    jobNewCount: 9,
+    jobNewCount: 5,
+    hasMoreWork: true,
   });
-  expect(response.jobNewCount).toEqual(9);
 
   expect(ddbClientMock).toHaveReceivedNthCommandWith(2, QueryCommand, {
     ExclusiveStartKey: 'next1',
     ExpressionAttributeNames:
      { '#job_status': 'job_status', '#s3_uri': 's3_uri' },
-    ExpressionAttributeValues: { ':job_status': 'event#NEW', ':s3_uri': 's3://EXAMPLE-BUCKET-2/project1/test/event/' },
+    ExpressionAttributeValues: { ':job_status': 'test_me_table#NEW', ':s3_uri': 's3://EXAMPLE-BUCKET-2/project1/test/test_me_table/' },
     FilterExpression: 'begins_with(#s3_uri, :s3_uri)',
     IndexName: 'by_status',
     KeyConditionExpression: '#job_status = :job_status',
@@ -107,11 +107,11 @@ test('Should get all JOB_NEW files', async () => {
     TableName: 'project1_ods_events_trigger',
   } as any);
 
-  expect(ddbClientMock).toHaveReceivedNthCommandWith(5, QueryCommand, {
+  expect(ddbClientMock).toHaveReceivedNthCommandWith(6, QueryCommand, {
     ExclusiveStartKey: undefined,
     ExpressionAttributeNames:
      { '#job_status': 'job_status', '#s3_uri': 's3_uri' },
-    ExpressionAttributeValues: { ':job_status': 'user#NEW', ':s3_uri': 's3://EXAMPLE-BUCKET-2/project1/test/user/' },
+    ExpressionAttributeValues: { ':job_status': 'user#PROCESSING', ':s3_uri': 's3://EXAMPLE-BUCKET-2/project1/test/user/' },
     FilterExpression: 'begins_with(#s3_uri, :s3_uri)',
     IndexName: 'by_status',
     KeyConditionExpression: '#job_status = :job_status',

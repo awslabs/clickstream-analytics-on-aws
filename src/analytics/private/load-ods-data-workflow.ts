@@ -290,7 +290,7 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
       const jobCompleted = new Succeed(this, `${odsTableName} - Job Completed`);
 
       const hasMoreChoice = new Choice(this, `${odsTableName} - Has more work`)
-        .when(Condition.numberGreaterThan('$.jobNewCount', 0), getJobList)
+        .when(Condition.booleanEquals('$.hasMoreWork', true), getJobList)
         .otherwise(jobCompleted);
 
       const checkMoreWorkTodo = checkMoreWork.next(hasMoreChoice);

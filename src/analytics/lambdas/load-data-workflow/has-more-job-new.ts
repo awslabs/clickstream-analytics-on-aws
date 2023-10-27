@@ -35,10 +35,10 @@ export const handler = async (_: any, context: Context) => {
 
   let newRecordResp;
 
-  const getNewFilesCount = async (redshiftTableName: string) => {
+  const getStatusFilesCount = async (redshiftTableName: string, jobStatus: string) => {
 
     let lastEvaluatedKey = undefined;
-    const jobStatusQuery = composeJobStatus(JobStatus.JOB_NEW, redshiftTableName);
+    const jobStatusQuery = composeJobStatus(jobStatus, redshiftTableName);
     const prefixQuery = odsEventBucketWithPrefix.replace(new RegExp(`\/${REDSHIFT_ODS_TABLE_NAME}\/?$`), `/${redshiftTableName}/`);
 
     logger.info('queryItems by', {
@@ -62,23 +62,25 @@ export const handler = async (_: any, context: Context) => {
     logger.info('jobNewCountForTable=' + jobNewCountForTable + ', redshiftTableName=' + redshiftTableName);
     return jobNewCountForTable;
   };
+
+  const currentJobNewCount = await getStatusFilesCount(REDSHIFT_ODS_TABLE_NAME, JobStatus.JOB_NEW);
+
   const odsTableNames = REDSHIFT_TABLE_NAMES;
-
-  let totalNewCount = 0;
-  let tableNewCountInfo: { [key: string]: any } = {};
-
+  let tableProcessingCountInfo: { [key: string]: any } = {};
+  let totalProcessCount = 0;
   for (const odsTable of odsTableNames) {
-    const newCount = await getNewFilesCount(odsTable);
-    tableNewCountInfo = {
-      ...tableNewCountInfo,
-      [odsTable]: newCount,
+    const processingCount = await getStatusFilesCount(odsTable, JobStatus.JOB_PROCESSING);
+    tableProcessingCountInfo = {
+      ...tableProcessingCountInfo,
+      [odsTable]: processingCount,
     };
-    totalNewCount += newCount;
+    totalProcessCount += processingCount;
   }
 
   return {
-    tableNewCountInfo,
-    jobNewCount: totalNewCount,
+    processingFilesCount: tableProcessingCountInfo,
+    jobNewCount: currentJobNewCount,
+    hasMoreWork: (currentJobNewCount + totalProcessCount) > 0,
   };
 };
 

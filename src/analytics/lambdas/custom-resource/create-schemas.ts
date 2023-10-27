@@ -264,9 +264,7 @@ async function updateSchemas(props: ResourcePropertiesType, biUsername: string, 
   const odsTableNames = props.odsTableNames;
   const appUpdateProps = getAppUpdateProps(props, oldProps);
 
-  logger.info('updateSchemas- props', { props });
-  logger.info('updateSchemas- oldProps', { oldProps });
-  logger.info('updateSchemas- appUpdateProps', { appUpdateProps });
+  logger.info('updateSchemas', { props, oldProps, appUpdateProps });
 
   const sqlStatementsByApp = new Map<string, string[]>();
   for (const app of appUpdateProps.createAppIds) {
@@ -309,7 +307,7 @@ async function updateSchemas(props: ResourcePropertiesType, biUsername: string, 
 
     const sqlStatements2 = getUpdatableSql(props.schemaDefs, appUpdateProps.oldSchemaSqlArray, mustacheParam);
 
-    logger.info('updateSchemas- sqlStatements2', { app, sqlStatements2 });
+    logger.info('updateSchemas- sqlStatements2, app=' + app, { app, sqlStatements2 });
 
     if (sqlStatementsByApp.has(app)) {
       sqlStatementsByApp.get(app)?.push(...sqlStatements2);
@@ -332,11 +330,11 @@ function getUpdatableSql(sqlOrViewDefs: SQLDef[], oldSqlArray: string[], mustach
 
     if (!oldSqlArray.includes(schemaOrViewDef.sqlFile)) {
       logger.info(`new sql: ${schemaOrViewDef.sqlFile}`);
-      sqlStatements.push(getSqlContent(schemaOrViewDef.sqlFile, mustacheParam));
+      sqlStatements.push(getSqlContent(schemaOrViewDef.sqlFile, mustacheParam, path));
       updateFilesInfo.push('new: ' + schemaOrViewDef.sqlFile);
     } else if (schemaOrViewDef.updatable === 'true') {
       logger.info(`update sql: ${schemaOrViewDef.sqlFile}`);
-      sqlStatements.push(getSqlContent(schemaOrViewDef.sqlFile, mustacheParam));
+      sqlStatements.push(getSqlContent(schemaOrViewDef.sqlFile, mustacheParam, path));
       updateFilesInfo.push('update: ' + schemaOrViewDef.sqlFile);
     } else {
       logger.info(`skip update ${schemaOrViewDef.sqlFile} due to it is not updatable.`);
