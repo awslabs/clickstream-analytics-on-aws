@@ -35,10 +35,13 @@ const unmarshallOptions = {
   wrapNumbers: false, // false, by default.
 };
 
-const translateConfig = { marshallOptions, unmarshallOptions };
+const translateConfig = {
+  marshallOptions: { ...marshallOptions },
+  unmarshallOptions: { ...unmarshallOptions },
+};
 
 // Create the DynamoDB Document client.
-const docClient = DynamoDBDocumentClient.from(ddbClient, translateConfig);
+const docClient = DynamoDBDocumentClient.from(ddbClient, { ...translateConfig });
 
 async function query(input: QueryCommandInput) {
   const records: Record<string, NativeAttributeValue>[] = [];
