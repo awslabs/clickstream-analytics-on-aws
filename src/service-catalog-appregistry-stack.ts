@@ -15,7 +15,7 @@ import { Application } from '@aws-cdk/aws-servicecatalogappregistry-alpha';
 import { Aws, CfnCondition, CfnOutput, CfnParameter, CfnResource, Fn, Stack, Tags } from 'aws-cdk-lib';
 import { StackProps } from 'aws-cdk-lib/core/lib/stack';
 import { Construct } from 'constructs';
-import { OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_ARN } from './common/constant';
+import { OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_ARN, PROJECT_ID_PATTERN } from './common/constant';
 import { SolutionInfo } from './common/solution-info';
 
 export interface ServiceCatalogAppRegistryProps extends StackProps {
@@ -26,12 +26,12 @@ export class ServiceCatalogAppregistryStack extends Stack {
     super(scope, id, props);
 
     const featureName = 'AppRegistry';
-    this.templateOptions.description = `(${SolutionInfo.SOLUTION_ID}-appreg ${SolutionInfo.SOLUTION_NAME} - ${featureName} ${SolutionInfo.SOLUTION_VERSION_DETAIL}`;
+    this.templateOptions.description = `(${SolutionInfo.SOLUTION_ID}-reg ${SolutionInfo.SOLUTION_NAME} - ${featureName} ${SolutionInfo.SOLUTION_VERSION_DETAIL}`;
 
     const projectIdParam = new CfnParameter(this, 'ProjectId', {
       description: 'Project Id',
+      allowedPattern: `^${PROJECT_ID_PATTERN}$`,
       type: 'String',
-      default: '',
     });
 
     const serviceAvailableRegion = new CfnCondition(this, 'ServiceCatalogAvailableRegion', {
@@ -76,7 +76,7 @@ export class ServiceCatalogAppregistryStack extends Stack {
 
     new CfnOutput(this, OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_ARN, {
       description: 'Service Catalog AppRegistry Application Arn',
-      value: application ? application.applicationArn : '',
+      value: application.applicationArn,
       condition: serviceAvailableRegion,
     });
   }

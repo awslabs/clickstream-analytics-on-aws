@@ -22,6 +22,7 @@ const template = Template.fromStack(stack);
 test('Should has parameter projectId', () => {
   template.hasParameter('ProjectId', {
     Type: 'String',
+    AllowedPattern: '^[a-z][a-z0-9_]{0,126}$',
   });
 });
 
