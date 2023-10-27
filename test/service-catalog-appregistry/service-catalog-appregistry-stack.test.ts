@@ -13,6 +13,7 @@
 
 import { App } from 'aws-cdk-lib';
 import { Match, Template } from 'aws-cdk-lib/assertions';
+import { SolutionInfo } from '../../src/common/solution-info';
 import { ServiceCatalogAppregistryStack } from '../../src/service-catalog-appregistry-stack';
 
 const app = new App();
@@ -40,19 +41,13 @@ test('Should has Service Catalog AppRegistry application', () => {
           {
             Ref: 'ProjectId',
           },
-          {
-            Ref: 'AWS::Region',
-          },
-          {
-            Ref: 'AWS::AccountId',
-          },
         ],
       ],
     },
     Tags: {
-      'Solutions:ApplicationType': 'AWS-Solutions',
-      'Solutions:SolutionID': Match.anyValue(),
-      'Solutions:SolutionName': 'Clickstream Analytics on AWS',
+      'Solutions:ApplicationType': SolutionInfo.SOLUTION_TYPE,
+      'Solutions:SolutionID': SolutionInfo.SOLUTION_ID,
+      'Solutions:SolutionName': SolutionInfo.SOLUTION_NAME,
       'Solutions:SolutionVersion': Match.anyValue(),
     },
   });

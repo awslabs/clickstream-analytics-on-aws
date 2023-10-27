@@ -57,8 +57,6 @@ export class ServiceCatalogAppregistryStack extends Stack {
       applicationName: Fn.join('-', [
         'clickstream-analytics',
         projectIdParam.valueAsString,
-        Aws.REGION,
-        Aws.ACCOUNT_ID,
       ]),
       description: `Catalog Service AppRegistry application for Clickstream Analytics project: ${projectIdParam.valueAsString}`,
     });
@@ -69,7 +67,7 @@ export class ServiceCatalogAppregistryStack extends Stack {
     Tags.of(application).add('Solutions:SolutionID', SolutionInfo.SOLUTION_ID);
     Tags.of(application).add('Solutions:SolutionName', SolutionInfo.SOLUTION_NAME);
     Tags.of(application).add('Solutions:SolutionVersion', SolutionInfo.SOLUTION_VERSION);
-    Tags.of(application).add('Solutions:ApplicationType', 'AWS-Solutions');
+    Tags.of(application).add('Solutions:ApplicationType', SolutionInfo.SOLUTION_TYPE);
 
     new CfnOutput(this, OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_ARN, {
       description: 'Service Catalog AppRegistry Application Arn',

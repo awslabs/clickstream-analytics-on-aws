@@ -20,6 +20,7 @@ export class SolutionInfo {
   static SOLUTION_VERSION = process.env.SOLUTION_VERSION || 'v1.0.0';
   static SOLUTION_VERSION_DETAIL = versionDetail(SolutionInfo.SOLUTION_VERSION);
   static DESCRIPTION = `(${SolutionInfo.SOLUTION_ID}) ${SolutionInfo.SOLUTION_NAME} ${SolutionInfo.SOLUTION_VERSION_DETAIL}`;
+  static SOLUTION_TYPE = 'AWS-Solutions';
 }
 
 function versionDetail(version: string): string {
