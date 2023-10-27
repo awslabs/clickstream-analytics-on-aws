@@ -213,7 +213,7 @@ export class DynamoDbMetadataStore implements MetadataStore {
       },
       UpdateExpression: updateExpression,
       ExpressionAttributeNames: expressionAttributeNames,
-      ExpressionAttributeValues: expressionAttributeValues,
+      ExpressionAttributeValues: Object.fromEntries(expressionAttributeValues),
       ReturnValues: 'ALL_NEW',
     });
     await docClient.send(params);
