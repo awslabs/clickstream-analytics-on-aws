@@ -441,6 +441,13 @@ export const createProjectFolder = async (
     });
     return await quickSightClient.send(command);
   } catch (err) {
+    if (err instanceof ResourceExistsException) {
+      const res: CreateFolderCommandOutput = {
+        $metadata: {},
+        FolderId: getFolderIdFromProjectId(projectId),
+      };
+      return res;
+    }
     logger.error('Create Folder Error.', { err });
     throw err;
   }
@@ -469,12 +476,8 @@ export const moveToProjectFolder = async (
   resourceType: MemberType,
 ): Promise<any> => {
   try {
-    const folderId = getFolderIdFromProjectId(projectId);
-    const folder = await describeFolder(region, folderId);
-    if (!folder || !folder.Folder) {
-      console.log(region, projectId);
-      await createProjectFolder(region, projectId);
-    }
+    const folder = await createProjectFolder(region, projectId);
+    const folderId = folder.FolderId;
     await createFolderMembership(
       region,
       {
