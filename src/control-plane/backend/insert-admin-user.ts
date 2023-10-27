@@ -49,7 +49,7 @@ export class AddAdminUser extends Construct {
           operator: { S: DEFAULT_SOLUTION_OPERATOR },
           deleted: { BOOL: false },
         },
-        ConditionExpression: 'attribute_not_exists(uid)',
+        ConditionExpression: 'attribute_not_exists(id)',
       },
     };
 
@@ -93,7 +93,7 @@ export class AddAdminUser extends Construct {
           id: { S: props.uid },
           type: { S: 'USER' },
         },
-        ConditionExpression: 'attribute_exists(uid)',
+        ConditionExpression: 'attribute_exists(id)',
       },
     };
 

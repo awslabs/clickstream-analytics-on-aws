@@ -231,6 +231,10 @@ describe('Custom resource - Create schemas for applications in Redshift database
       sqlFile: 'sp-clear-item-and-user.sql',
     },
 
+    {
+      updatable: 'true',
+      sqlFile: 'sp-migrate-ods-events-1.0-to-1.1.sql',
+    },
   ];
 
   const clusterId = 'redshift-cluster-1';
@@ -311,6 +315,7 @@ describe('Custom resource - Create schemas for applications in Redshift database
       '/opt/user-m-view.sql': testSqlContent(rootPath + 'user-m-view.sql'),
       '/opt/sp-clear-item-and-user.sql': testSqlContent(rootPath + 'sp-clear-item-and-user.sql'),
       '/opt/clickstream-log.sql': testSqlContent(rootPath + 'clickstream-log.sql'),
+      '/opt/sp-migrate-ods-events-1.0-to-1.1.sql': testSqlContent(rootPath + 'sp-migrate-ods-events-1.0-to-1.1.sql'),
     });
   });
 
@@ -569,19 +574,22 @@ describe('Custom resource - Create schemas for applications in Redshift database
       Tags: { tag_key: 'tag_value' },
     });
     redshiftDataMock.on(BatchExecuteStatementCommand).callsFakeOnce(input => {
+      console.log('input.Sqls.length-1:' + input.Sqls.length);
       const expectedSql = 'CREATE SCHEMA IF NOT EXISTS app2';
-      if (input.Sqls.length !== 17 || input.Sqls[0] !== expectedSql) {
+      if (input.Sqls.length !== 18 || input.Sqls[0] !== expectedSql) {
         throw new Error('create schema sqls are not expected');
       }
       return { Id: 'Id-1' };
     }).callsFakeOnce(input => {
+      console.log('input.Sqls.length-2:' + input.Sqls.length);
       const expectedSql = 'CREATE TABLE IF NOT EXISTS app1.clickstream_log';
-      if (input.Sqls.length !== 13 || !(input.Sqls[0] as string).startsWith(expectedSql)) {
+      if (input.Sqls.length !== 14 || !(input.Sqls[0] as string).startsWith(expectedSql)) {
         throw new Error('update schema sqls are not expected');
       }
       return { Id: 'Id-1' };
 
     }).callsFakeOnce(input => {
+      console.log('input.Sqls.length-3:' + input.Sqls.length);
       const expectedSql = 'CREATE MATERIALIZED VIEW app2.clickstream_event_view';
       const expectedSql2 = 'GRANT SELECT ON app2.clickstream_user_attr_view TO clickstream_report_user_abcde;';
       const expectedSql3 = 'GRANT SELECT ON app2.event TO clickstream_report_user_abcde;';
@@ -596,6 +604,8 @@ describe('Custom resource - Create schemas for applications in Redshift database
       }
       return { Id: 'Id-1' };
     }).callsFakeOnce(input => {
+      console.log('input.Sqls.length-4:' + input.Sqls.length);
+
       const expectedSql = 'CREATE OR REPLACE VIEW app1.clickstream_user_dim_view';
       const expectedSql2 = 'GRANT SELECT ON app1.clickstream_user_attr_view TO clickstream_report_user_abcde;';
       const expectedSql3 = 'GRANT SELECT ON app1.event TO clickstream_report_user_abcde;';

@@ -1027,7 +1027,10 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
       Runtime: 'nodejs18.x',
       Timeout: 30,
     });
-
+    expect(findResourcesName(newALBApiStackTemplate, 'Custom::AWS'))
+      .toEqual([
+        'testClickStreamALBApiAddAdminUserCustomResourceAddAdminUserAwsCustomResourceD9F42A0D',
+      ]);
   });
 
   test('State Machine', () => {

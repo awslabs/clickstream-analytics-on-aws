@@ -10,7 +10,7 @@
  *  OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions
  *  and limitations under the License.
  */
-import { ElasticLoadBalancingV2Client, DescribeRulesCommand, CreateRuleCommand, DeleteRuleCommand, ModifyListenerCommand, ModifyRuleCommand, Rule, RuleCondition } from '@aws-sdk/client-elastic-load-balancing-v2';
+import { ElasticLoadBalancingV2Client, DescribeRulesCommand, CreateRuleCommand, DeleteRuleCommand, ModifyListenerCommand, ModifyRuleCommand, Rule, RuleCondition, ActionTypeEnum, AuthenticateCognitoActionConditionalBehaviorEnum } from '@aws-sdk/client-elastic-load-balancing-v2';
 import { SecretsManagerClient, GetSecretValueCommand } from '@aws-sdk/client-secrets-manager';
 import { CloudFormationCustomResourceEvent, Context } from 'aws-lambda';
 import { logger } from '../../../common/powertools';
@@ -216,7 +216,7 @@ async function deleteRules(rules: Rule[]) {
 async function createFixedResponseRule(listenerArn: string) {
   const fixedResponseActions = [
     {
-      Type: 'fixed-response',
+      Type: ActionTypeEnum.FIXED_RESPONSE,
       FixedResponseConfig: {
         MessageBody: 'Configuration invalid!',
         StatusCode: '400',
@@ -372,7 +372,7 @@ async function generateForwardActions(
     // create auth forward rule
     defaultForwardActions.push(
       {
-        Type: 'authenticate-oidc',
+        Type: ActionTypeEnum.AUTHENTICATE_OIDC,
         Order: 1,
         AuthenticateOidcConfig: {
           Issuer: issuer,
@@ -381,13 +381,13 @@ async function generateForwardActions(
           TokenEndpoint: tokenEndpoint,
           UserInfoEndpoint: userEndpoint,
           AuthorizationEndpoint: authorizationEndpoint,
-          OnUnauthenticatedRequest: 'deny',
+          OnUnauthenticatedRequest: AuthenticateCognitoActionConditionalBehaviorEnum.DENY,
         },
       },
     );
   }
   defaultForwardActions.push({
-    Type: 'forward',
+    Type: ActionTypeEnum.FORWARD,
     Order: 2,
     TargetGroupArn: targetGroupArn,
   });
@@ -398,7 +398,7 @@ async function createAuthLogindRule(authenticationSecretArn: string, listenerArn
   const { issuer, userEndpoint, authorizationEndpoint, tokenEndpoint, appClientId, appClientSecret } = await getOidcInfo(authenticationSecretArn);
   const authLoginActions = [
     {
-      Type: 'authenticate-oidc',
+      Type: ActionTypeEnum.AUTHENTICATE_OIDC,
       Order: 1,
       AuthenticateOidcConfig: {
         Issuer: issuer,
@@ -407,11 +407,11 @@ async function createAuthLogindRule(authenticationSecretArn: string, listenerArn
         TokenEndpoint: tokenEndpoint,
         UserInfoEndpoint: userEndpoint,
         AuthorizationEndpoint: authorizationEndpoint,
-        OnUnauthenticatedRequest: 'authenticate',
+        OnUnauthenticatedRequest: AuthenticateCognitoActionConditionalBehaviorEnum.AUTHENTICATE,
       },
     },
     {
-      Type: 'fixed-response',
+      Type: ActionTypeEnum.FIXED_RESPONSE,
       Order: 2,
       FixedResponseConfig: {
         MessageBody: 'Authenticated',
@@ -465,7 +465,7 @@ async function modifyFallbackRule(listenerArn: string) {
   // modify default action to return 403,
   const defaultActions = [
     {
-      Type: 'fixed-response',
+      Type: ActionTypeEnum.FIXED_RESPONSE,
       FixedResponseConfig: {
         MessageBody: 'DefaultAction: Invalid request',
         StatusCode: '403',

@@ -23,6 +23,7 @@ import {
   Select,
   SelectProps,
   SpaceBetween,
+  Toggle,
 } from '@cloudscape-design/components';
 import { previewPath } from 'apis/analytics';
 import Loading from 'components/common/Loading';
@@ -257,6 +258,10 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
     label: t('analytics:options.dayTimeGranularity') ?? '',
   });
 
+  const [includingOtherEvents, setIncludingOtherEvents] = React.useState(false);
+  const [mergeConsecutiveEvents, setMergeConsecutiveEvents] =
+    React.useState(false);
+
   const resetConfig = async () => {
     setLoadingData(true);
     setSelectedMetric({
@@ -378,7 +383,7 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
           )
         : undefined;
     const pathAnalysisNodes = eventOptionData.map((item) => {
-      return defaultStr(item.selectedEventOption?.value);
+      return defaultStr(item.selectedEventOption?.name);
     });
     const pathAnalysisParameter: IPathAnalysisParameter = {
       platform: pathAnalysisPlatform,
@@ -386,6 +391,8 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
       nodeType: defaultStr(selectedNodeType?.value, ExplorePathNodeType.EVENT),
       lagSeconds: pathAnalysisLagSeconds,
       nodes: pathAnalysisNodes,
+      includingOtherEvents,
+      mergeConsecutiveEvents,
     };
 
     const body: IExploreRequest = {
@@ -646,6 +653,42 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
                     />
                   </div>
                 ) : null}
+              </div>
+            </SpaceBetween>
+            <SpaceBetween direction="vertical" size="xs">
+              <InfoTitle
+                title={t('analytics:labels.includingOtherEvents')}
+                popoverDescription={t(
+                  'analytics:information.pathIncludingOtherEventsInfo'
+                )}
+              />
+              <div className="cs-analytics-config">
+                <Toggle
+                  onChange={({ detail }) =>
+                    setIncludingOtherEvents(detail.checked)
+                  }
+                  checked={includingOtherEvents}
+                >
+                  {includingOtherEvents ? t('yes') : t('no')}
+                </Toggle>
+              </div>
+            </SpaceBetween>
+            <SpaceBetween direction="vertical" size="xs">
+              <InfoTitle
+                title={t('analytics:labels.mergeConsecutiveEvents')}
+                popoverDescription={t(
+                  'analytics:information.pathMergeConsecutiveEventsInfo'
+                )}
+              />
+              <div className="cs-analytics-config">
+                <Toggle
+                  onChange={({ detail }) =>
+                    setMergeConsecutiveEvents(detail.checked)
+                  }
+                  checked={mergeConsecutiveEvents}
+                >
+                  {mergeConsecutiveEvents ? t('yes') : t('no')}
+                </Toggle>
               </div>
             </SpaceBetween>
           </div>
