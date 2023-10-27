@@ -18,6 +18,7 @@ const minNodeVersion = '18.17.0';
 
 const cdkAlphaModules = [
   '@aws-cdk/aws-glue-alpha',
+  '@aws-cdk/aws-servicecatalogappregistry-alpha',
 ].map(m => `${m}@^${cdkVersion}-alpha.0`);
 
 const commonDeps = [
