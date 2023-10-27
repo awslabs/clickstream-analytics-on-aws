@@ -27,8 +27,6 @@ import {
   DeleteDashboardCommandOutput,
   GeoSpatialDataRole,
   DataSetImportMode,
-  FilterOperator,
-  FolderFilterAttribute,
   MemberType,
 } from '@aws-sdk/client-quicksight';
 import { Context, CloudFormationCustomResourceEvent, CloudFormationCustomResourceUpdateEvent, CloudFormationCustomResourceCreateEvent, CloudFormationCustomResourceDeleteEvent, CdkCustomResourceResponse } from 'aws-lambda';
