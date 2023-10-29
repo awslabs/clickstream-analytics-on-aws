@@ -11,7 +11,6 @@
  *  and limitations under the License.
  */
 
-import { randomUUID } from 'crypto';
 import {
   ListUsersCommand,
   User,
@@ -29,11 +28,6 @@ import {
   CreateDashboardCommandOutput,
   CreateDashboardCommandInput,
   RegisterUserCommandInput,
-  CreateFolderCommand,
-  CreateFolderMembershipCommand,
-  CreateFolderMembershipCommandOutput,
-  CreateFolderMembershipCommandInput,
-  MemberType,
   CreateAnalysisCommand,
   CreateAnalysisCommandInput,
   CreateAnalysisCommandOutput,
@@ -43,11 +37,9 @@ import {
   DataSetImportMode,
   SheetDefinition,
   ResourcePermission,
-  CreateFolderCommandOutput,
-  DescribeFolderCommand,
-  DescribeFolderCommandOutput,
-  ResourceNotFoundException,
+  AnalysisDefinition,
 } from '@aws-sdk/client-quicksight';
+import { v4 as uuidv4 } from 'uuid';
 import { APIRoleName, awsAccountId, awsRegion, QUICKSIGHT_CONTROL_PLANE_REGION, QUICKSIGHT_EMBED_NO_REPLY_EMAIL, QuickSightEmbedRoleArn } from '../../common/constants';
 import { getPaginatedResults } from '../../common/paginator';
 import { logger } from '../../common/powertools';
@@ -386,120 +378,13 @@ export const createAnalysis = async (
   }
 };
 
-export const describeFolder = async (
-  region: string,
-  folderId: string,
-): Promise<DescribeFolderCommandOutput | undefined> => {
-  try {
-    const quickSightClient = sdkClient.QuickSightClient({
-      region: region,
-    });
-    const command: DescribeFolderCommand = new DescribeFolderCommand({
-      AwsAccountId: awsAccountId,
-      FolderId: folderId,
-    });
-    console.log(command);
-    const res = await quickSightClient.send(command);
-    console.log(res);
-    return res;
-  } catch (err) {
-    if (err instanceof ResourceNotFoundException) {
-      return;
-    }
-    logger.error('Search Folder Error.', { err });
-    throw err;
-  }
-};
-
-export const createProjectFolder = async (
-  region: string,
-  projectId: string,
-): Promise<CreateFolderCommandOutput> => {
-  try {
-    const folderId = getFolderIdFromProjectId(projectId);
-    const quickSightClient = sdkClient.QuickSightClient({
-      region: region,
-    });
-    const arns = await getClickstreamUserArn();
-    const command: CreateFolderCommand = new CreateFolderCommand({
-      AwsAccountId: awsAccountId,
-      FolderId: folderId,
-      Name: projectId,
-      Permissions: [{
-        Principal: arns.publishUserArn,
-        Actions: [
-          'quicksight:CreateFolder',
-          'quicksight:DescribeFolder',
-          'quicksight:UpdateFolder',
-          'quicksight:DeleteFolder',
-          'quicksight:CreateFolderMembership',
-          'quicksight:DeleteFolderMembership',
-          'quicksight:DescribeFolderPermissions',
-          'quicksight:UpdateFolderPermissions',
-        ],
-      }],
-    });
-    return await quickSightClient.send(command);
-  } catch (err) {
-    if (err instanceof ResourceExistsException) {
-      const res: CreateFolderCommandOutput = {
-        $metadata: {},
-        FolderId: getFolderIdFromProjectId(projectId),
-      };
-      return res;
-    }
-    logger.error('Create Folder Error.', { err });
-    throw err;
-  }
-};
-
-export const createFolderMembership = async (
-  region: string,
-  input: CreateFolderMembershipCommandInput,
-): Promise<CreateFolderMembershipCommandOutput> => {
-  try {
-    const quickSightClient = sdkClient.QuickSightClient({
-      region: region,
-    });
-    const command: CreateFolderMembershipCommand = new CreateFolderMembershipCommand(input);
-    return await quickSightClient.send(command);
-  } catch (err) {
-    logger.error('Create Folder Membership Error.', { err });
-    throw err;
-  }
-};
-
-export const moveToProjectFolder = async (
-  region: string,
-  projectId: string,
-  resourceId: string,
-  resourceType: MemberType,
-): Promise<any> => {
-  try {
-    const folder = await createProjectFolder(region, projectId);
-    const folderId = folder.FolderId;
-    await createFolderMembership(
-      region,
-      {
-        AwsAccountId: awsAccountId,
-        FolderId: folderId,
-        MemberId: resourceId,
-        MemberType: resourceType,
-      },
-    );
-  } catch (err) {
-    logger.error('Move to folder Error.', { err });
-    throw err;
-  }
-};
-
 export const createPublishDashboard = async (
   dashboard: IDashboard,
 ): Promise<any> => {
   try {
     const principals = await getClickstreamUserArn();
     // Create dataset in QuickSight
-    const datasetId = randomUUID();
+    const datasetId = `clickstream-dataset-${uuidv4().replace(/-/g, '')}`;
     const datasetInput: CreateDataSetCommandInput = {
       AwsAccountId: awsAccountId,
       DataSetId: datasetId,
@@ -576,24 +461,30 @@ export const createPublishDashboard = async (
       Permissions: [dashboardPermission],
     };
     await createDashboard(dashboard.region, dashboardInput);
-    const analysisId = randomUUID();
+    const analysisId = `clickstream-analysis-${uuidv4().replace(/-/g, '')}`;
+
+    const analysisPermission: ResourcePermission = {
+      Principal: principals.publishUserArn,
+      Actions: [
+        'quicksight:DescribeAnalysis',
+        'quicksight:UpdateAnalysisPermissions',
+        'quicksight:QueryAnalysis',
+        'quicksight:UpdateAnalysis',
+        'quicksight:RestoreAnalysis',
+        'quicksight:DeleteAnalysis',
+        'quicksight:DescribeAnalysisPermissions',
+      ],
+    };
     const analysisInput: CreateAnalysisCommandInput = {
       AwsAccountId: awsAccountId,
       AnalysisId: analysisId,
       Name: dashboard.name,
-      Definition: dashboardDefinition,
-      Permissions: [dashboardPermission],
+      Definition: dashboardDefinition as AnalysisDefinition,
+      Permissions: [analysisPermission],
     };
     await createAnalysis(dashboard.region, analysisInput);
-    await moveToProjectFolder(dashboard.region, dashboard.projectId, datasetId, MemberType.DATASET);
-    await moveToProjectFolder(dashboard.region, dashboard.projectId, dashboard.id, MemberType.DASHBOARD);
-    await moveToProjectFolder(dashboard.region, dashboard.projectId, analysisId, MemberType.ANALYSIS);
   } catch (err) {
     logger.error('Create Publish Dashboard Error.', { err });
     throw err;
   }
-};
-
-const getFolderIdFromProjectId = (projectId: string) => {
-  return `clickstream_folder_${projectId}`.replace(/_/g, '-');
 };

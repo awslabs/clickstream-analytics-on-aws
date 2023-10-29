@@ -93,11 +93,6 @@ describe('Analytics dashboard test', () => {
         {
           location: 'body',
           msg: 'Value is empty.',
-          param: 'ownerPrincipal',
-        },
-        {
-          location: 'body',
-          msg: 'Value is empty.',
           param: 'defaultDataSourceArn',
         },
       ],

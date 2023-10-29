@@ -84,7 +84,7 @@ export class ProjectServ {
 
   public async createDashboard(req: any, res: any, next: any) {
     try {
-      const dashboardId = uuidv4().replace(/-/g, '');
+      const dashboardId = `clickstream-analysis-${uuidv4().replace(/-/g, '')}`;
       req.body.id = dashboardId;
       req.body.operator = res.get('X-Click-Stream-Operator');
       const dashboard: IDashboard = req.body;
