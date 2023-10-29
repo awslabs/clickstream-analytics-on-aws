@@ -27,7 +27,6 @@ import {
   DeleteDashboardCommandOutput,
   GeoSpatialDataRole,
   DataSetImportMode,
-  MemberType,
 } from '@aws-sdk/client-quicksight';
 import { Context, CloudFormationCustomResourceEvent, CloudFormationCustomResourceUpdateEvent, CloudFormationCustomResourceCreateEvent, CloudFormationCustomResourceDeleteEvent, CdkCustomResourceResponse } from 'aws-lambda';
 import Mustache from 'mustache';
@@ -86,7 +85,6 @@ const _onCreate = async (quickSight: QuickSight, awsAccountId: string, principal
   logger.info('receive event', JSON.stringify(event));
 
   const props = event.ResourceProperties as QuicksightCustomResourceLambdaPropsType;
-  await createFolder(quickSight, awsAccountId, principalArn, props.dashboardDefProps.databaseName);
   let dashboards = [];
   const databaseSchemaNames = props.schemas;
   if ( databaseSchemaNames.trim().length > 0 ) {
@@ -127,7 +125,7 @@ const _onDelete = async (quickSight: QuickSight, awsAccountId: string, event: Cl
       const dashboardDefProps: QuickSightDashboardDefProps = props.dashboardDefProps;
       logger.info('dashboardDefProps', JSON.stringify(dashboardDefProps));
 
-      const dashboard = await deleteQuickSightDashboard(quickSight, awsAccountId, schemaName, dashboardDefProps, true);
+      const dashboard = await deleteQuickSightDashboard(quickSight, awsAccountId, schemaName, dashboardDefProps);
       logger.info(`delete dashboard: ${dashboard?.DashboardId}`);
     };
   } else {
@@ -206,8 +204,7 @@ const _onUpdate = async (quickSight: QuickSight, awsAccountId: string, principal
 
     const dashboard = await deleteQuickSightDashboard(quickSight, awsAccountId,
       schemaName,
-      dashboardDefProps,
-      false);
+      dashboardDefProps);
     logger.info(`deleted dashboard: ${dashboard?.DashboardId}`);
   };
 
@@ -253,24 +250,6 @@ const createQuickSightDashboard = async (quickSight: QuickSight,
 
   const dashboard = await createDashboard(quickSight, accountId, principalArn, databaseName, schema, sourceEntity, dashboardDef);
   logger.info(`Dashboard ${dashboard?.DashboardId} creation completed.`);
-
-  const resources: FolderMember[] = [
-    {
-      id: dashboard?.DashboardId ?? '',
-      type: MemberType.DASHBOARD,
-    },
-    {
-      id: analysis?.AnalysisId ?? '',
-      type: MemberType.ANALYSIS,
-    },
-  ];
-  datasetIds.forEach(ds => {
-    resources.push({
-      id: ds,
-      type: MemberType.DATASET,
-    });
-  });
-  await moveToFolder(quickSight, accountId, databaseName, resources);
   return dashboard;
 
 };
@@ -278,8 +257,7 @@ const createQuickSightDashboard = async (quickSight: QuickSight,
 const deleteQuickSightDashboard = async (quickSight: QuickSight,
   accountId: string,
   schema: string,
-  dashboardDef: QuickSightDashboardDefProps,
-  folderDelete: boolean)
+  dashboardDef: QuickSightDashboardDefProps)
 : Promise<CreateDashboardCommandOutput|undefined> => {
 
   // Delete Dashboard
@@ -293,11 +271,6 @@ const deleteQuickSightDashboard = async (quickSight: QuickSight,
   const databaseName = dashboardDef.databaseName;
   for ( const dataSet of dataSets) {
     await deleteDataSet(quickSight, accountId, schema, databaseName, dataSet);
-  }
-
-  //delete Folder
-  if (folderDelete) {
-    await deleteFolder(quickSight, accountId, databaseName);
   }
 
   return result;
@@ -545,7 +518,6 @@ const deleteDashboard = async (quickSight: QuickSight, awsAccountId: string, dat
     });
 
     await waitForDashboardDeleteCompleted(quickSight, awsAccountId, dashboardId);
-    await deleteMembers(quickSight, awsAccountId, databaseName, [dashboardId]);
   } catch (err: any) {
     if ((err as Error) instanceof ResourceNotFoundException) {
       logger.info('Dashboard not exist. skip delete operation.');
@@ -574,7 +546,6 @@ const deleteAnalysis = async (quickSight: QuickSight, awsAccountId: string, data
       ForceDeleteWithoutRecovery: true,
     });
     await waitForAnalysisDeleteCompleted(quickSight, awsAccountId, analysisId);
-    await deleteMembers(quickSight, awsAccountId, databaseName, [analysisId]);
   } catch (err: any) {
     if ((err as Error) instanceof ResourceNotFoundException) {
       logger.info('Analysis not exist. skip delete operation.');
@@ -605,7 +576,6 @@ const deleteDataSet = async (quickSight: QuickSight, awsAccountId: string,
       DataSetId: datasetId,
     });
     await waitForDataSetDeleteCompleted(quickSight, awsAccountId, datasetId);
-    await deleteMembers(quickSight, awsAccountId, databaseName, [datasetId]);
   } catch (err: any) {
     if ((err as Error) instanceof ResourceNotFoundException) {
       logger.info('Dataset not exist. skip delete operation.');
@@ -815,129 +785,6 @@ const buildDataSetId = function (databaseName: string, schema: string, tableName
   };
 
 };
-
-const getFolderIdFromProjectId = function (databaseName: string): string {
-  return `clickstream_folder_${databaseName}`.replace(/_/g, '-');
-};
-
-const getMemberTypeFromId = (id: string) => {
-  let memberType: MemberType = MemberType.DASHBOARD;
-  if (id.startsWith('clickstream_dataset_')) {
-    memberType = MemberType.DATASET;
-  } else if (id.startsWith('clickstream_analysis_')) {
-    memberType = MemberType.ANALYSIS;
-  }
-  return memberType;
-};
-
-const createFolder = async (quickSight: QuickSight, awsAccountId: string, principalArn: string, databaseName: string) => {
-  try {
-    const folderId: string = getFolderIdFromProjectId(databaseName);
-    const folder = await quickSight.describeFolder({
-      AwsAccountId: awsAccountId,
-      FolderId: folderId,
-    });
-    if (!folder || !folder.Folder) {
-      await quickSight.createFolder({
-        AwsAccountId: awsAccountId,
-        FolderId: folderId,
-        Name: databaseName,
-        Permissions: [
-          {
-            Principal: principalArn,
-            Actions: [
-              'quicksight:CreateFolder',
-              'quicksight:DescribeFolder',
-              'quicksight:UpdateFolder',
-              'quicksight:DeleteFolder',
-              'quicksight:CreateFolderMembership',
-              'quicksight:DeleteFolderMembership',
-              'quicksight:DescribeFolderPermissions',
-              'quicksight:UpdateFolderPermissions',
-            ],
-          },
-        ],
-      });
-    }
-  } catch (err: any) {
-    logger.error(`Create folder failed due to: ${(err as Error).message}`);
-    throw err;
-  }
-};
-
-const moveToFolder = async (quickSight: QuickSight, awsAccountId: string, databaseName: string, resources: FolderMember[]) => {
-  try {
-    const folderId: string = getFolderIdFromProjectId(databaseName);
-    for (let r of resources) {
-      await quickSight.createFolderMembership({
-        AwsAccountId: awsAccountId,
-        FolderId: folderId,
-        MemberId: r.id,
-        MemberType: r.type,
-      });
-    }
-  } catch (err: any) {
-    logger.error(`Move to folder failed due to: ${(err as Error).message}`);
-    throw err;
-  }
-};
-
-const deleteFolder = async (quickSight: QuickSight, awsAccountId: string, databaseName: string) => {
-  try {
-    const folderId: string = getFolderIdFromProjectId(databaseName);
-    const folderMembers = await quickSight.listFolderMembers({
-      AwsAccountId: awsAccountId,
-      FolderId: folderId,
-    });
-    if (folderMembers.FolderMemberList) {
-      for (let member of folderMembers.FolderMemberList) {
-        await quickSight.deleteFolderMembership({
-          AwsAccountId: awsAccountId,
-          FolderId: folderId,
-          MemberId: member.MemberId,
-          MemberType: getMemberTypeFromId(member.MemberId!),
-        });
-      }
-    }
-    await quickSight.deleteFolder({
-      AwsAccountId: awsAccountId,
-      FolderId: folderId,
-    });
-  } catch (err: any) {
-    logger.error(`Delete folder failed due to: ${(err as Error).message}`);
-    throw err;
-  }
-};
-
-const deleteMembers = async (quickSight: QuickSight, awsAccountId: string, databaseName: string, memberIds: string[]) => {
-  try {
-    const folderId: string = getFolderIdFromProjectId(databaseName);
-    const folderMembers = await quickSight.listFolderMembers({
-      AwsAccountId: awsAccountId,
-      FolderId: folderId,
-    });
-    if (folderMembers.FolderMemberList) {
-      for (let member of folderMembers.FolderMemberList) {
-        if (memberIds.includes(member.MemberId!)) {
-          await quickSight.deleteFolderMembership({
-            AwsAccountId: awsAccountId,
-            FolderId: folderId,
-            MemberId: member.MemberId,
-            MemberType: getMemberTypeFromId(member.MemberId!),
-          });
-        }
-      }
-    }
-  } catch (err: any) {
-    logger.error(`Delete folder members failed due to: ${(err as Error).message}`);
-    throw err;
-  }
-};
-
-interface FolderMember {
-  id: string;
-  type: MemberType;
-}
 
 interface Identifier {
   id: string;
