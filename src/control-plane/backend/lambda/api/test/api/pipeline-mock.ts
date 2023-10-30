@@ -60,6 +60,7 @@ const BASE_PIPELINE_ATTRIBUTES = {
     { key: 'customerKey2', value: 'tagValue2' },
     { key: 'aws-solution/version', value: 'tagValue3' },
   ],
+  templateVersion: MOCK_SOLUTION_VERSION,
   bucket: {
     name: 'EXAMPLE_BUCKET',
     prefix: 'example/',
@@ -681,6 +682,7 @@ export const BASE_STATUS = {
       stackType: PipelineStackType.KAFKA_CONNECTOR,
       stackStatus: StackStatus.CREATE_COMPLETE,
       stackStatusReason: '',
+      stackTemplateVersion: MOCK_SOLUTION_VERSION,
       outputs: [],
     },
     {
@@ -688,6 +690,7 @@ export const BASE_STATUS = {
       stackType: PipelineStackType.INGESTION,
       stackStatus: StackStatus.CREATE_COMPLETE,
       stackStatusReason: '',
+      stackTemplateVersion: MOCK_SOLUTION_VERSION,
       outputs: [],
     },
     {
@@ -695,6 +698,7 @@ export const BASE_STATUS = {
       stackType: PipelineStackType.DATA_PROCESSING,
       stackStatus: StackStatus.CREATE_COMPLETE,
       stackStatusReason: '',
+      stackTemplateVersion: MOCK_SOLUTION_VERSION,
       outputs: [],
     },
     {
@@ -702,6 +706,7 @@ export const BASE_STATUS = {
       stackType: PipelineStackType.DATA_MODELING_REDSHIFT,
       stackStatus: StackStatus.CREATE_COMPLETE,
       stackStatusReason: '',
+      stackTemplateVersion: MOCK_SOLUTION_VERSION,
       outputs: [],
     },
     {
@@ -709,6 +714,7 @@ export const BASE_STATUS = {
       stackType: PipelineStackType.REPORTING,
       stackStatus: StackStatus.CREATE_COMPLETE,
       stackStatusReason: '',
+      stackTemplateVersion: MOCK_SOLUTION_VERSION,
       outputs: [],
     },
     {
@@ -716,6 +722,7 @@ export const BASE_STATUS = {
       stackType: PipelineStackType.METRICS,
       stackStatus: StackStatus.CREATE_COMPLETE,
       stackStatusReason: '',
+      stackTemplateVersion: MOCK_SOLUTION_VERSION,
       outputs: [],
     },
   ],

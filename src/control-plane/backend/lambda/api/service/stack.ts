@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { StackStatus } from '@aws-sdk/client-cloudformation';
+import { StackStatus, Tag } from '@aws-sdk/client-cloudformation';
 import {
   DescribeExecutionCommand,
   DescribeExecutionCommandOutput,
@@ -204,6 +204,7 @@ export class StackManager {
         stackType: stackName.split('-')[1] as PipelineStackType,
         stackStatus: stack?.StackStatus as StackStatus,
         stackStatusReason: stack?.StackStatusReason ?? '',
+        stackTemplateVersion: this._getVersionFromTags(stack?.Tags),
         outputs: stack?.Outputs ?? [],
       });
     }
@@ -224,6 +225,18 @@ export class StackManager {
       stackDetails: [],
       executionDetail: {},
     } as PipelineStatus;
+  }
+
+  private _getVersionFromTags(tags: Tag[] | undefined) {
+    let version = '';
+    if (!tags) {
+      return version;
+    }
+    const versionTag = tags.filter(t => t.Key === 'aws-solution/version');
+    if (versionTag.length === 1) {
+      version = versionTag[0].Value ?? '';
+    }
+    return version;
   }
 
   private _getPipelineStatus(executionDetail: DescribeExecutionOutput | undefined, stackStatusDetails: PipelineStatusDetail[]) {

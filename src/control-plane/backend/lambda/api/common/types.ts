@@ -270,6 +270,7 @@ export interface PipelineStatusDetail {
   readonly stackType: PipelineStackType;
   readonly stackStatus: StackStatus | undefined;
   readonly stackStatusReason: string;
+  readonly stackTemplateVersion: string;
   readonly outputs: Output[];
 }
 

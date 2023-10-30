@@ -1116,7 +1116,8 @@ describe('Pipeline test', () => {
           },
         ],
         templateInfo: {
-          isLatest: false,
+          isLatest: true,
+          pipelineVersion: 'v1.0.0',
           solutionVersion: 'v1.0.0',
         },
         metricsDashboardName: 'clickstream_dashboard_notepad_mtzfsocy',
@@ -1253,7 +1254,8 @@ describe('Pipeline test', () => {
         dashboards: [],
         metricsDashboardName: '',
         templateInfo: {
-          isLatest: false,
+          isLatest: true,
+          pipelineVersion: 'v1.0.0',
           solutionVersion: 'v1.0.0',
         },
       },
@@ -1336,7 +1338,8 @@ describe('Pipeline test', () => {
         dashboards: [],
         metricsDashboardName: '',
         templateInfo: {
-          isLatest: false,
+          isLatest: true,
+          pipelineVersion: 'v1.0.0',
           solutionVersion: 'v1.0.0',
         },
       },
@@ -1690,6 +1693,7 @@ describe('Pipeline test', () => {
           stackType: 'KafkaConnector',
           stackStatus: 'UPDATE_FAILED',
           stackStatusReason: '',
+          stackTemplateVersion: '',
           outputs: [],
         },
         {
@@ -1697,6 +1701,7 @@ describe('Pipeline test', () => {
           stackType: 'Ingestion',
           stackStatus: 'UPDATE_IN_PROGRESS',
           stackStatusReason: '',
+          stackTemplateVersion: '',
           outputs: [],
         },
         {
@@ -1704,6 +1709,7 @@ describe('Pipeline test', () => {
           stackType: 'DataProcessing',
           stackStatus: 'UPDATE_IN_PROGRESS',
           stackStatusReason: '',
+          stackTemplateVersion: '',
           outputs: [],
         },
         {
@@ -1711,6 +1717,7 @@ describe('Pipeline test', () => {
           stackType: 'Reporting',
           stackStatus: 'UPDATE_IN_PROGRESS',
           stackStatusReason: '',
+          stackTemplateVersion: '',
           outputs: [],
         },
         {
@@ -1718,6 +1725,7 @@ describe('Pipeline test', () => {
           stackType: 'DataModelingRedshift',
           stackStatus: 'UPDATE_IN_PROGRESS',
           stackStatusReason: '',
+          stackTemplateVersion: '',
           outputs: [],
         },
         {
@@ -1725,6 +1733,7 @@ describe('Pipeline test', () => {
           stackType: 'Metrics',
           stackStatus: 'UPDATE_IN_PROGRESS',
           stackStatusReason: '',
+          stackTemplateVersion: '',
           outputs: [],
         },
       ],
@@ -1777,6 +1786,7 @@ describe('Pipeline test', () => {
           stackType: 'KafkaConnector',
           stackStatus: 'CREATE_IN_PROGRESS',
           stackStatusReason: '',
+          stackTemplateVersion: '',
           outputs: [],
         },
         {
@@ -1784,6 +1794,7 @@ describe('Pipeline test', () => {
           stackType: 'Ingestion',
           stackStatus: 'CREATE_COMPLETE',
           stackStatusReason: '',
+          stackTemplateVersion: '',
           outputs: [],
         },
         {
@@ -1791,6 +1802,7 @@ describe('Pipeline test', () => {
           stackType: 'DataProcessing',
           stackStatus: 'CREATE_COMPLETE',
           stackStatusReason: '',
+          stackTemplateVersion: '',
           outputs: [],
         },
         {
@@ -1798,6 +1810,7 @@ describe('Pipeline test', () => {
           stackType: 'Reporting',
           stackStatus: 'CREATE_COMPLETE',
           stackStatusReason: '',
+          stackTemplateVersion: '',
           outputs: [],
         },
         {
@@ -1805,6 +1818,7 @@ describe('Pipeline test', () => {
           stackType: 'DataModelingRedshift',
           stackStatus: 'CREATE_COMPLETE',
           stackStatusReason: '',
+          stackTemplateVersion: '',
           outputs: [],
         },
         {
@@ -1812,6 +1826,7 @@ describe('Pipeline test', () => {
           stackType: 'Metrics',
           stackStatus: 'CREATE_COMPLETE',
           stackStatusReason: '',
+          stackTemplateVersion: '',
           outputs: [],
         },
       ],
@@ -1864,6 +1879,7 @@ describe('Pipeline test', () => {
           stackType: 'KafkaConnector',
           stackStatus: 'UPDATE_IN_PROGRESS',
           stackStatusReason: '',
+          stackTemplateVersion: '',
           outputs: [],
         },
         {
@@ -1871,6 +1887,7 @@ describe('Pipeline test', () => {
           stackType: 'Ingestion',
           stackStatus: 'UPDATE_COMPLETE',
           stackStatusReason: '',
+          stackTemplateVersion: '',
           outputs: [],
         },
         {
@@ -1878,6 +1895,7 @@ describe('Pipeline test', () => {
           stackType: 'DataProcessing',
           stackStatus: 'UPDATE_COMPLETE',
           stackStatusReason: '',
+          stackTemplateVersion: '',
           outputs: [],
         },
         {
@@ -1885,6 +1903,7 @@ describe('Pipeline test', () => {
           stackType: 'Reporting',
           stackStatus: 'UPDATE_COMPLETE',
           stackStatusReason: '',
+          stackTemplateVersion: '',
           outputs: [],
         },
         {
@@ -1892,6 +1911,7 @@ describe('Pipeline test', () => {
           stackType: 'DataModelingRedshift',
           stackStatus: 'UPDATE_COMPLETE',
           stackStatusReason: '',
+          stackTemplateVersion: '',
           outputs: [],
         },
         {
@@ -1899,6 +1919,7 @@ describe('Pipeline test', () => {
           stackType: 'Metrics',
           stackStatus: 'UPDATE_COMPLETE',
           stackStatusReason: '',
+          stackTemplateVersion: '',
           outputs: [],
         },
       ],
@@ -1957,6 +1978,7 @@ describe('Pipeline test', () => {
           stackType: 'KafkaConnector',
           stackStatus: 'UPDATE_COMPLETE',
           stackStatusReason: '',
+          stackTemplateVersion: '',
           outputs: [],
         },
         {
@@ -1964,6 +1986,7 @@ describe('Pipeline test', () => {
           stackType: 'Ingestion',
           stackStatus: 'UPDATE_COMPLETE',
           stackStatusReason: '',
+          stackTemplateVersion: '',
           outputs: [],
         },
         {
@@ -1971,6 +1994,7 @@ describe('Pipeline test', () => {
           stackType: 'DataProcessing',
           stackStatus: 'UPDATE_COMPLETE',
           stackStatusReason: '',
+          stackTemplateVersion: '',
           outputs: [],
         },
         {
@@ -1978,6 +2002,7 @@ describe('Pipeline test', () => {
           stackType: 'Reporting',
           stackStatus: 'UPDATE_IN_PROGRESS',
           stackStatusReason: '',
+          stackTemplateVersion: '',
           outputs: [],
         },
         {
@@ -1985,12 +2010,14 @@ describe('Pipeline test', () => {
           stackType: 'DataModelingRedshift',
           stackStatus: 'UPDATE_COMPLETE',
           stackStatusReason: '',
+          stackTemplateVersion: '',
           outputs: [],
         },
         {
           stackName: 'Clickstream-Metrics-6666-6666',
           stackStatus: 'UPDATE_COMPLETE',
           stackStatusReason: '',
+          stackTemplateVersion: '',
           stackType: 'Metrics',
           outputs: [],
         },
@@ -2039,6 +2066,7 @@ describe('Pipeline test', () => {
           stackType: 'KafkaConnector',
           stackStatus: 'UPDATE_COMPLETE',
           stackStatusReason: '',
+          stackTemplateVersion: '',
           outputs: [],
         },
         {
@@ -2046,6 +2074,7 @@ describe('Pipeline test', () => {
           stackType: 'Ingestion',
           stackStatus: 'UPDATE_COMPLETE',
           stackStatusReason: '',
+          stackTemplateVersion: '',
           outputs: [],
         },
         {
@@ -2053,6 +2082,7 @@ describe('Pipeline test', () => {
           stackType: 'DataProcessing',
           stackStatus: 'UPDATE_COMPLETE',
           stackStatusReason: '',
+          stackTemplateVersion: '',
           outputs: [],
         },
         {
@@ -2060,6 +2090,7 @@ describe('Pipeline test', () => {
           stackType: 'Reporting',
           stackStatus: 'UPDATE_COMPLETE',
           stackStatusReason: '',
+          stackTemplateVersion: '',
           outputs: [],
         },
         {
@@ -2067,11 +2098,13 @@ describe('Pipeline test', () => {
           stackType: 'DataModelingRedshift',
           stackStatus: 'UPDATE_COMPLETE',
           stackStatusReason: '',
+          stackTemplateVersion: '',
           outputs: [],
         }, {
           stackName: 'Clickstream-Metrics-6666-6666',
           stackStatus: 'UPDATE_COMPLETE',
           stackStatusReason: '',
+          stackTemplateVersion: '',
           stackType: 'Metrics',
           outputs: [],
         },
@@ -2125,6 +2158,7 @@ describe('Pipeline test', () => {
           stackType: 'KafkaConnector',
           stackStatus: 'DELETE_IN_PROGRESS',
           stackStatusReason: '',
+          stackTemplateVersion: '',
           outputs: [],
         },
         {
@@ -2132,6 +2166,7 @@ describe('Pipeline test', () => {
           stackType: 'Ingestion',
           stackStatus: 'DELETE_COMPLETE',
           stackStatusReason: '',
+          stackTemplateVersion: '',
           outputs: [],
         },
         {
@@ -2139,6 +2174,7 @@ describe('Pipeline test', () => {
           stackType: 'DataProcessing',
           stackStatus: 'DELETE_COMPLETE',
           stackStatusReason: '',
+          stackTemplateVersion: '',
           outputs: [],
         },
         {
@@ -2146,6 +2182,7 @@ describe('Pipeline test', () => {
           stackType: 'Reporting',
           stackStatus: 'DELETE_COMPLETE',
           stackStatusReason: '',
+          stackTemplateVersion: '',
           outputs: [],
         },
         {
@@ -2153,6 +2190,7 @@ describe('Pipeline test', () => {
           stackType: 'DataModelingRedshift',
           stackStatus: 'DELETE_COMPLETE',
           stackStatusReason: '',
+          stackTemplateVersion: '',
           outputs: [],
         },
         {
@@ -2160,6 +2198,7 @@ describe('Pipeline test', () => {
           stackType: 'Metrics',
           stackStatus: 'DELETE_COMPLETE',
           stackStatusReason: '',
+          stackTemplateVersion: '',
           outputs: [],
         },
       ],
@@ -2204,6 +2243,7 @@ describe('Pipeline test', () => {
           stackType: 'KafkaConnector',
           stackStatus: 'UPDATE_COMPLETE',
           stackStatusReason: '',
+          stackTemplateVersion: '',
           outputs: [],
         },
         {
@@ -2211,6 +2251,7 @@ describe('Pipeline test', () => {
           stackType: 'Ingestion',
           stackStatus: 'UPDATE_COMPLETE',
           stackStatusReason: '',
+          stackTemplateVersion: '',
           outputs: [],
         },
         {
@@ -2218,6 +2259,7 @@ describe('Pipeline test', () => {
           stackType: 'DataProcessing',
           stackStatus: 'UPDATE_COMPLETE',
           stackStatusReason: '',
+          stackTemplateVersion: '',
           outputs: [],
         },
         {
@@ -2225,6 +2267,7 @@ describe('Pipeline test', () => {
           stackType: 'Reporting',
           stackStatus: 'UPDATE_COMPLETE',
           stackStatusReason: '',
+          stackTemplateVersion: '',
           outputs: [],
         },
         {
@@ -2232,6 +2275,7 @@ describe('Pipeline test', () => {
           stackType: 'DataModelingRedshift',
           stackStatus: 'UPDATE_COMPLETE',
           stackStatusReason: '',
+          stackTemplateVersion: '',
           outputs: [],
         },
         {
@@ -2239,6 +2283,7 @@ describe('Pipeline test', () => {
           stackType: 'Metrics',
           stackStatus: 'UPDATE_COMPLETE',
           stackStatusReason: '',
+          stackTemplateVersion: '',
           outputs: [],
         },
       ],
@@ -2283,6 +2328,7 @@ describe('Pipeline test', () => {
           stackType: 'KafkaConnector',
           stackStatus: 'CREATE_COMPLETE',
           stackStatusReason: '',
+          stackTemplateVersion: '',
           outputs: [],
         },
         {
@@ -2290,6 +2336,7 @@ describe('Pipeline test', () => {
           stackType: 'Ingestion',
           stackStatus: 'CREATE_COMPLETE',
           stackStatusReason: '',
+          stackTemplateVersion: '',
           outputs: [],
         },
         {
@@ -2297,6 +2344,7 @@ describe('Pipeline test', () => {
           stackType: 'DataProcessing',
           stackStatus: 'CREATE_COMPLETE',
           stackStatusReason: '',
+          stackTemplateVersion: '',
           outputs: [],
         },
         {
@@ -2304,6 +2352,7 @@ describe('Pipeline test', () => {
           stackType: 'Reporting',
           stackStatus: 'CREATE_COMPLETE',
           stackStatusReason: '',
+          stackTemplateVersion: '',
           outputs: [],
         },
         {
@@ -2311,6 +2360,7 @@ describe('Pipeline test', () => {
           stackType: 'DataModelingRedshift',
           stackStatus: 'CREATE_COMPLETE',
           stackStatusReason: '',
+          stackTemplateVersion: '',
           outputs: [],
         },
         {
@@ -2318,6 +2368,7 @@ describe('Pipeline test', () => {
           stackType: 'Metrics',
           stackStatus: 'CREATE_COMPLETE',
           stackStatusReason: '',
+          stackTemplateVersion: '',
           outputs: [],
         },
       ],
@@ -2362,6 +2413,7 @@ describe('Pipeline test', () => {
           stackName: 'Clickstream-KafkaConnector-6666-6666',
           stackType: 'KafkaConnector',
           stackStatusReason: '',
+          stackTemplateVersion: '',
           outputs: [],
         },
         {
@@ -2369,6 +2421,7 @@ describe('Pipeline test', () => {
           stackType: 'Ingestion',
           stackStatus: 'CREATE_COMPLETE',
           stackStatusReason: '',
+          stackTemplateVersion: '',
           outputs: [],
         },
         {
@@ -2376,6 +2429,7 @@ describe('Pipeline test', () => {
           stackType: 'DataProcessing',
           stackStatus: 'CREATE_COMPLETE',
           stackStatusReason: '',
+          stackTemplateVersion: '',
           outputs: [],
         },
         {
@@ -2383,6 +2437,7 @@ describe('Pipeline test', () => {
           stackType: 'Reporting',
           stackStatus: 'CREATE_COMPLETE',
           stackStatusReason: '',
+          stackTemplateVersion: '',
           outputs: [],
         },
         {
@@ -2390,6 +2445,7 @@ describe('Pipeline test', () => {
           stackType: 'DataModelingRedshift',
           stackStatus: 'CREATE_COMPLETE',
           stackStatusReason: '',
+          stackTemplateVersion: '',
           outputs: [],
         },
         {
@@ -2397,6 +2453,7 @@ describe('Pipeline test', () => {
           stackType: 'Metrics',
           stackStatus: 'CREATE_COMPLETE',
           stackStatusReason: '',
+          stackTemplateVersion: '',
           outputs: [],
         },
       ],
@@ -2446,6 +2503,7 @@ describe('Pipeline test', () => {
           stackType: 'KafkaConnector',
           stackStatus: 'CREATE_COMPLETE',
           stackStatusReason: '',
+          stackTemplateVersion: '',
           outputs: [],
         },
         {
@@ -2453,6 +2511,7 @@ describe('Pipeline test', () => {
           stackType: 'Ingestion',
           stackStatus: 'UPDATE_FAILED',
           stackStatusReason: '',
+          stackTemplateVersion: '',
           outputs: [],
         },
         {
@@ -2460,6 +2519,7 @@ describe('Pipeline test', () => {
           stackType: 'DataProcessing',
           stackStatus: 'UPDATE_FAILED',
           stackStatusReason: '',
+          stackTemplateVersion: '',
           outputs: [],
         },
         {
@@ -2467,6 +2527,7 @@ describe('Pipeline test', () => {
           stackType: 'Reporting',
           stackStatus: 'UPDATE_FAILED',
           stackStatusReason: '',
+          stackTemplateVersion: '',
           outputs: [],
         },
         {
@@ -2474,6 +2535,7 @@ describe('Pipeline test', () => {
           stackType: 'DataModelingRedshift',
           stackStatus: 'UPDATE_FAILED',
           stackStatusReason: '',
+          stackTemplateVersion: '',
           outputs: [],
         },
         {
@@ -2481,6 +2543,7 @@ describe('Pipeline test', () => {
           stackType: 'Metrics',
           stackStatus: 'UPDATE_FAILED',
           stackStatusReason: '',
+          stackTemplateVersion: '',
           outputs: [],
         },
       ],
@@ -2533,6 +2596,7 @@ describe('Pipeline test', () => {
           stackType: 'KafkaConnector',
           stackStatus: 'UPDATE_ROLLBACK_COMPLETE',
           stackStatusReason: '',
+          stackTemplateVersion: '',
           outputs: [],
         },
         {
@@ -2540,6 +2604,7 @@ describe('Pipeline test', () => {
           stackType: 'Ingestion',
           stackStatus: 'CREATE_COMPLETE',
           stackStatusReason: '',
+          stackTemplateVersion: '',
           outputs: [],
         },
         {
@@ -2547,6 +2612,7 @@ describe('Pipeline test', () => {
           stackType: 'DataProcessing',
           stackStatus: 'CREATE_COMPLETE',
           stackStatusReason: '',
+          stackTemplateVersion: '',
           outputs: [],
         },
         {
@@ -2554,6 +2620,7 @@ describe('Pipeline test', () => {
           stackType: 'Reporting',
           stackStatus: 'CREATE_COMPLETE',
           stackStatusReason: '',
+          stackTemplateVersion: '',
           outputs: [],
         },
         {
@@ -2561,6 +2628,7 @@ describe('Pipeline test', () => {
           stackType: 'DataModelingRedshift',
           stackStatus: 'CREATE_COMPLETE',
           stackStatusReason: '',
+          stackTemplateVersion: '',
           outputs: [],
         },
         {
@@ -2568,6 +2636,7 @@ describe('Pipeline test', () => {
           stackType: 'Metrics',
           stackStatus: 'CREATE_COMPLETE',
           stackStatusReason: '',
+          stackTemplateVersion: '',
           outputs: [],
         },
       ],
@@ -2622,6 +2691,7 @@ describe('Pipeline test', () => {
       .put(`/api/pipeline/${MOCK_PIPELINE_ID}`)
       .send(KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW);
     expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 6);
+    expect(ddbMock).toHaveReceivedCommandTimes(TransactWriteItemsCommand, 1);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(201);
     expect(res.body).toEqual({
@@ -2916,6 +2986,7 @@ describe('Pipeline test', () => {
           status: {
             ...BASE_STATUS,
           },
+          templateVersion: 'v2.0.0',
         },
       });
     cloudFormationMock.on(DescribeStacksCommand).resolves({
@@ -2979,6 +3050,7 @@ describe('Pipeline test', () => {
               scaleOnCpuUtilizationPercent: 50,
             },
           },
+          templateVersion: 'v2.0.0',
         },
       });
     cloudFormationMock.on(DescribeStacksCommand).resolves({

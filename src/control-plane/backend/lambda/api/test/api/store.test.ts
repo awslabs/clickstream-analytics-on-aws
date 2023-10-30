@@ -26,6 +26,7 @@ import { describeSecurityGroupsWithRules, listAvailabilityZones } from '../../st
 import { ClickStreamStore } from '../../store/click-stream-store';
 import { DynamoDbStore } from '../../store/dynamodb/dynamodb-store';
 import 'aws-sdk-client-mock-jest';
+import { MOCK_SOLUTION_VERSION } from './ddb-mock';
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 const ec2Mock = mockClient(EC2Client);
@@ -198,6 +199,9 @@ describe('App test', () => {
       },
       id: {
         S: 'project_8888_8888',
+      },
+      templateVersion: {
+        S: MOCK_SOLUTION_VERSION,
       },
       ingestionServer: {
         M: {
@@ -454,6 +458,9 @@ describe('App test', () => {
       },
       id: {
         S: 'project_8888_8888',
+      },
+      templateVersion: {
+        S: MOCK_SOLUTION_VERSION,
       },
       ingestionServer: {
         M: {
