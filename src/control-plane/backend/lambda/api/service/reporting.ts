@@ -89,6 +89,7 @@ export class ReportingService {
         timeUnit: query.timeUnit,
         groupColumn: query.groupColumn,
         groupCondition: query.groupCondition,
+        globalEventCondition: query.globalEventCondition,
       }, query.chartType === QuickSightChartType.BAR);
 
       logger.debug(`funnel sql: ${sql}`);
@@ -108,6 +109,8 @@ export class ReportingService {
         lastN: query.lastN,
         timeUnit: query.timeUnit,
         groupColumn: query.groupColumn,
+        groupCondition: query.groupCondition,
+        globalEventCondition: query.globalEventCondition,
       });
 
       logger.debug(`funnel table chart sql: ${sqlTable}`);
@@ -282,6 +285,7 @@ export class ReportingService {
         timeUnit: query.timeUnit,
         groupColumn: query.groupColumn,
         groupCondition: query.groupCondition,
+        globalEventCondition: query.globalEventCondition,
       });
       logger.debug(`event analysis sql: ${sql}`);
 
@@ -390,6 +394,8 @@ export class ReportingService {
           includingOtherEvents: query.pathAnalysis.includingOtherEvents,
           mergeConsecutiveEvents: query.pathAnalysis.mergeConsecutiveEvents,
         },
+        groupCondition: query.groupCondition,
+        globalEventCondition: query.globalEventCondition,
       });
     }
 
@@ -415,6 +421,8 @@ export class ReportingService {
         includingOtherEvents: query.pathAnalysis.includingOtherEvents,
         mergeConsecutiveEvents: query.pathAnalysis.mergeConsecutiveEvents,
       },
+      groupCondition: query.groupCondition,
+      globalEventCondition: query.globalEventCondition,
     });
   }
 
@@ -522,6 +530,7 @@ export class ReportingService {
         groupColumn: query.groupColumn,
         pairEventAndConditions: query.pairEventAndConditions,
         groupCondition: query.groupCondition,
+        globalEventCondition: query.globalEventCondition,
       });
       logger.debug(`retention analysis sql: ${sql}`);
 

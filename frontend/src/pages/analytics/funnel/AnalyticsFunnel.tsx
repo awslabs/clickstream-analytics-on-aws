@@ -64,6 +64,7 @@ import {
   getIntervalInSeconds,
   getGlobalEventCondition,
   getLngFromLocalStorage,
+  getGroupCondition,
 } from '../analytics-utils';
 import AttributeGroup from '../comps/AttributeGroup';
 import ExploreDateRangePicker, {
@@ -236,6 +237,7 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
         chartSubTitle: chartSubTitle,
       };
     }
+
     const body: IExploreRequest = {
       action: action,
       chartType: chartType,
@@ -260,6 +262,7 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
       globalEventCondition: getGlobalEventCondition(segmentationOptionData),
       timeScopeType: dateRangeParams?.timeScopeType,
       groupColumn: timeGranularity.value,
+      groupCondition: chartType === QuickSightChartType.BAR ? getGroupCondition(groupOption) : undefined,
       ...dateRangeParams,
       ...saveParams,
     };
@@ -658,6 +661,7 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
                 presetParameters={presetParameters}
                 groupOption={groupOption}
                 setGroupOption={setGroupOption}
+                disabled={chartType === QuickSightChartType.FUNNEL}
               />
             </SpaceBetween>
           </ColumnLayout>
