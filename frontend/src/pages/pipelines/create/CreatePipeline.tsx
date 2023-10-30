@@ -22,7 +22,6 @@ import {
   checkServicesAvailable,
   getCertificates,
   getMSKList,
-  getQuickSightUsers,
   getRedshiftCluster,
   getSSMSecrets,
   getSecurityGroups,
@@ -180,9 +179,6 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
     redshiftProvisionedDBUserFormatError,
     setRedshiftProvisionedDBUserFormatError,
   ] = useState(false);
-
-  const [quickSightUserEmptyError, setQuickSightUserEmptyError] =
-    useState(false);
 
   const [
     dataProcessorIntervalInvalidError,
@@ -563,17 +559,6 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
       }
     }
 
-    return true;
-  };
-
-  const validateReporting = () => {
-    if (pipelineInfo.enableReporting) {
-      // check quick sight user
-      if (!pipelineInfo.selectedQuickSightUser?.value) {
-        setQuickSightUserEmptyError(true);
-        return false;
-      }
-    }
     return true;
   };
 
@@ -1009,9 +994,6 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
           return;
         }
         if (detail.requestedStepIndex === 3 && !validateDataProcessing()) {
-          return;
-        }
-        if (detail.requestedStepIndex === 4 && !validateReporting()) {
           return;
         }
         setActiveStepIndex(detail.requestedStepIndex);
@@ -2098,7 +2080,6 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
             <Reporting
               update={update}
               pipelineInfo={pipelineInfo}
-              quickSightUserEmptyError={quickSightUserEmptyError}
               changeLoadingQuickSight={(loading) => {
                 setloadingQuickSight(loading);
               }}
@@ -2107,24 +2088,6 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                   return {
                     ...prev,
                     enableReporting: enable,
-                  };
-                });
-              }}
-              changeQuickSightSelectedUser={(user) => {
-                setQuickSightUserEmptyError(false);
-                setPipelineInfo((prev) => {
-                  const userObj = JSON.parse(user.value ?? '{}');
-                  return {
-                    ...prev,
-                    selectedQuickSightUser: user,
-                    reporting: {
-                      ...prev.reporting,
-                      quickSight: {
-                        ...prev.reporting.quickSight,
-                        user: userObj.userName,
-                        arn: userObj.arn,
-                      },
-                    },
                   };
                 });
               }}
@@ -2557,33 +2520,9 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
       pipelineInfo.upsertCronExp = reverseUpsertUsersScheduleExpression.value;
     }
   };
-
-  const setUpdateQuickSightUserList = async (pipelineInfo: IExtPipeline) => {
-    try {
-      const { success, data }: ApiResponse<QuickSightUserResponse[]> =
-        await getQuickSightUsers();
-      if (success) {
-        const selectUser = data.filter(
-          (element) =>
-            element.userName === pipelineInfo.reporting.quickSight.user
-        )[0];
-        pipelineInfo.selectedQuickSightUser = {
-          label: selectUser.userName,
-          value: JSON.stringify(selectUser),
-          description: selectUser.email,
-          labelTag: selectUser.role,
-        };
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  };
   const setUpdateReport = async (pipelineInfo: IExtPipeline) => {
     if (!pipelineInfo.enableReporting) {
       return;
-    }
-    if (pipelineInfo.reporting.quickSight.user) {
-      await setUpdateQuickSightUserList(pipelineInfo);
     }
   };
   const getDefaultExtPipeline = (data: IExtPipeline): IExtPipeline => {

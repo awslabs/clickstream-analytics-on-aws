@@ -623,7 +623,7 @@ export class ReportingService {
     for (const datasetProps of datasetPropsArray) {
       const datasetOutput = await createDataSet(
         quickSight, awsAccountId!,
-        principals.dashboardOwner,
+        principals.exploreUserArn,
         dashboardCreateParameters.quickSight.dataSourceArn,
         datasetProps,
       );
@@ -771,7 +771,7 @@ export class ReportingService {
       AnalysisId: analysisId,
       Name: `${resourceName}`,
       Permissions: [{
-        Principal: principals.dashboardOwner,
+        Principal: principals.exploreUserArn,
         Actions: [
           'quicksight:DescribeAnalysis',
           'quicksight:QueryAnalysis',
@@ -792,7 +792,7 @@ export class ReportingService {
       DashboardId: dashboardId,
       Name: `${resourceName}`,
       Permissions: [{
-        Principal: principals.dashboardOwner,
+        Principal: principals.exploreUserArn,
         Actions: [
           'quicksight:DescribeDashboard',
           'quicksight:ListDashboardVersions',
@@ -802,12 +802,6 @@ export class ReportingService {
           'quicksight:UpdateDashboardPermissions',
           'quicksight:DescribeDashboardPermissions',
           'quicksight:UpdateDashboardPublishedVersion',
-        ],
-      },
-      {
-        Principal: principals.embedOwner,
-        Actions: [
-          'quicksight:DescribeDashboard', 'quicksight:QueryDashboard', 'quicksight:ListDashboardVersions',
         ],
       }],
       Definition: dashboard,

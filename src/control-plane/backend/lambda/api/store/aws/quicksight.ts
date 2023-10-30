@@ -27,19 +27,33 @@ import {
   CreateDashboardCommand,
   CreateDashboardCommandOutput,
   CreateDashboardCommandInput,
+  RegisterUserCommandInput,
+  CreateAnalysisCommand,
+  CreateAnalysisCommandInput,
+  CreateAnalysisCommandOutput,
+  CreateDataSetCommand,
+  CreateDataSetCommandOutput,
+  CreateDataSetCommandInput,
+  DataSetImportMode,
+  SheetDefinition,
+  ResourcePermission,
+  AnalysisDefinition,
 } from '@aws-sdk/client-quicksight';
+import { v4 as uuidv4 } from 'uuid';
 import { APIRoleName, awsAccountId, awsRegion, QUICKSIGHT_CONTROL_PLANE_REGION, QUICKSIGHT_EMBED_NO_REPLY_EMAIL, QuickSightEmbedRoleArn } from '../../common/constants';
 import { getPaginatedResults } from '../../common/paginator';
 import { logger } from '../../common/powertools';
 import { SDKClient } from '../../common/sdk-client';
 import { QuickSightAccountInfo, QuickSightUser } from '../../common/types';
 import { generateRandomStr } from '../../common/utils-ln';
+import { IDashboard } from '../../model/project';
+import { dataSetActions } from '../../service/quicksight/dashboard-ln';
 
 const QUICKSIGHT_NAMESPACE = 'default';
 const QUICKSIGHT_PREFIX = 'Clickstream';
 const QUICKSIGHT_DEFAULT_USER = `${QUICKSIGHT_PREFIX}-User-${generateRandomStr(8, 'abcdefghijklmnopqrstuvwxyz')}`;
-const QUICKSIGHT_DASHBOARD_USER_NAME = 'ClickstreamDashboardUser';
-const QUICKSIGHT_EMBED_USER_NAME = 'ClickstreamEmbedUser';
+const QUICKSIGHT_EXPLORE_USER_NAME = 'ClickstreamExploreUser';
+const QUICKSIGHT_PUBLISH_USER_NAME = 'ClickstreamPublishUser';
 
 const sdkClient: SDKClient = new SDKClient();
 
@@ -87,8 +101,25 @@ export const registerQuickSightUser = async (email: string, username?: string) =
 
 export const registerClickstreamUser = async () => {
   const identityRegion = await sdkClient.QuickSightIdentityRegion();
-  await registerEmbeddingUserByRegion(identityRegion);
-  await registerQuickSightUserByRegion(identityRegion, QUICKSIGHT_EMBED_NO_REPLY_EMAIL, QUICKSIGHT_DASHBOARD_USER_NAME);
+  await registerUserByRegion(identityRegion, {
+    IdentityType: IdentityType.IAM,
+    AwsAccountId: awsAccountId,
+    Email: QUICKSIGHT_EMBED_NO_REPLY_EMAIL,
+    IamArn: QuickSightEmbedRoleArn,
+    Namespace: QUICKSIGHT_NAMESPACE,
+    UserRole: UserRole.ADMIN,
+    SessionName: QUICKSIGHT_PUBLISH_USER_NAME,
+  });
+  await registerUserByRegion(identityRegion, {
+    IdentityType: IdentityType.IAM,
+    AwsAccountId: awsAccountId,
+    Email: QUICKSIGHT_EMBED_NO_REPLY_EMAIL,
+    IamArn: QuickSightEmbedRoleArn,
+    Namespace: QUICKSIGHT_NAMESPACE,
+    UserRole: UserRole.ADMIN,
+    SessionName: QUICKSIGHT_EXPLORE_USER_NAME,
+  });
+  return getClickstreamUserArn();
 };
 
 export const registerQuickSightUserByRegion = async (region: string, email: string, username?: string) => {
@@ -114,27 +145,22 @@ export const registerQuickSightUserByRegion = async (region: string, email: stri
   }
 };
 
-export const registerEmbeddingUserByRegion = async (region: string) => {
+export const registerUserByRegion = async (
+  region: string,
+  user: RegisterUserCommandInput,
+) => {
   try {
     const quickSightClient = sdkClient.QuickSightClient({
       region: region,
     });
-    const command: RegisterUserCommand = new RegisterUserCommand({
-      IdentityType: IdentityType.IAM,
-      AwsAccountId: awsAccountId,
-      Email: QUICKSIGHT_EMBED_NO_REPLY_EMAIL,
-      IamArn: QuickSightEmbedRoleArn,
-      Namespace: QUICKSIGHT_NAMESPACE,
-      UserRole: UserRole.READER,
-      SessionName: QUICKSIGHT_EMBED_USER_NAME,
-    });
+    const command: RegisterUserCommand = new RegisterUserCommand(user);
     await quickSightClient.send(command);
     return true;
   } catch (err) {
     if (err instanceof ResourceExistsException) {
       return true;
     }
-    logger.error('Register Embedding User Error.', { err });
+    logger.error('Register User Error.', { err });
     return false;
   }
 };
@@ -142,7 +168,7 @@ export const registerEmbeddingUserByRegion = async (region: string) => {
 export const generateEmbedUrlForRegisteredUser = async (
   region: string,
   allowedDomain: string,
-  permission: boolean,
+  publish: boolean,
   dashboardId?: string,
   sheetId?: string,
   visualId?: string,
@@ -151,12 +177,9 @@ export const generateEmbedUrlForRegisteredUser = async (
     region: region,
   });
   const arns = await getClickstreamUserArn();
-  if (permission && dashboardId) {
-    await updateDashboardPermissionsCommand(region, dashboardId, arns.embedOwner);
-  }
   let commandInput: GenerateEmbedUrlForRegisteredUserCommandInput = {
     AwsAccountId: awsAccountId,
-    UserArn: arns.embedOwner,
+    UserArn: publish ? arns.publishUserArn : arns.exploreUserArn,
     AllowedDomains: [allowedDomain],
     ExperienceConfiguration: {},
   };
@@ -290,17 +313,37 @@ export const describeClickstreamAccountSubscription = async (): Promise<QuickSig
 };
 
 export interface QuickSightUserArns {
-  dashboardOwner: string;
-  embedOwner: string;
+  exploreUserArn: string;
+  publishUserArn: string;
+  exploreUserName: string;
+  publishUserName: string;
 }
 
 export const getClickstreamUserArn = async (): Promise<QuickSightUserArns> => {
   const identityRegion = await sdkClient.QuickSightIdentityRegion();
   const quickSightEmbedRoleName = QuickSightEmbedRoleArn?.split(':role/')[1];
   const partition = awsRegion?.startsWith('cn') ? 'aws-cn' : 'aws';
-  const ownerArn = `arn:${partition}:quicksight:${identityRegion}:${awsAccountId}:user/${QUICKSIGHT_NAMESPACE}/${QUICKSIGHT_DASHBOARD_USER_NAME}`;
-  const embedArn = `arn:${partition}:quicksight:${identityRegion}:${awsAccountId}:user/${QUICKSIGHT_NAMESPACE}/${quickSightEmbedRoleName}/${QUICKSIGHT_EMBED_USER_NAME}`;
-  return { dashboardOwner: ownerArn, embedOwner: embedArn };
+  const exploreUserName = `${quickSightEmbedRoleName}/${QUICKSIGHT_EXPLORE_USER_NAME}`;
+  const publishUserName = `${quickSightEmbedRoleName}/${QUICKSIGHT_PUBLISH_USER_NAME}`;
+  const exploreUserArn = `arn:${partition}:quicksight:${identityRegion}:${awsAccountId}:user/${QUICKSIGHT_NAMESPACE}/${exploreUserName}`;
+  const publishUserArn = `arn:${partition}:quicksight:${identityRegion}:${awsAccountId}:user/${QUICKSIGHT_NAMESPACE}/${publishUserName}`;
+  return { exploreUserArn, publishUserArn, exploreUserName, publishUserName };
+};
+
+export const createDataSet = async (
+  region: string,
+  input: CreateDataSetCommandInput,
+): Promise<CreateDataSetCommandOutput> => {
+  try {
+    const quickSightClient = sdkClient.QuickSightClient({
+      region: region,
+    });
+    const command: CreateDataSetCommand = new CreateDataSetCommand(input);
+    return await quickSightClient.send(command);
+  } catch (err) {
+    logger.error('Create DataSet Error.', { err });
+    throw err;
+  }
 };
 
 export const createDashboard = async (
@@ -319,6 +362,129 @@ export const createDashboard = async (
   }
 };
 
-export const Sleep = (ms: number) => {
-  return new Promise(resolve=>setTimeout(resolve, ms));
+export const createAnalysis = async (
+  region: string,
+  input: CreateAnalysisCommandInput,
+): Promise<CreateAnalysisCommandOutput> => {
+  try {
+    const quickSightClient = sdkClient.QuickSightClient({
+      region: region,
+    });
+    const command: CreateAnalysisCommand = new CreateAnalysisCommand(input);
+    return await quickSightClient.send(command);
+  } catch (err) {
+    logger.error('Create Analysis Error.', { err });
+    throw err;
+  }
+};
+
+export const createPublishDashboard = async (
+  dashboard: IDashboard,
+): Promise<any> => {
+  try {
+    const principals = await getClickstreamUserArn();
+    // Create dataset in QuickSight
+    const datasetId = `clickstream-dataset-${uuidv4().replace(/-/g, '')}`;
+    const datasetInput: CreateDataSetCommandInput = {
+      AwsAccountId: awsAccountId,
+      DataSetId: datasetId,
+      Name: `dataset-${dashboard.name}-default`,
+      Permissions: [{
+        Principal: principals.publishUserArn,
+        Actions: dataSetActions,
+      }],
+      ImportMode: DataSetImportMode.DIRECT_QUERY,
+      PhysicalTableMap: {
+        PhyTable0: {
+          CustomSql: {
+            DataSourceArn: dashboard.defaultDataSourceArn,
+            Name: 'event',
+            SqlQuery: `select * from ${dashboard.appId}.event`,
+            Columns: [
+              {
+                Name: 'event_date',
+                Type: 'DATETIME',
+              },
+              {
+                Name: 'event_name',
+                Type: 'STRING',
+              },
+            ],
+          },
+        },
+      },
+      DataSetUsageConfiguration: {
+        DisableUseAsDirectQuerySource: false,
+        DisableUseAsImportedSource: false,
+      },
+    };
+    const dataset = await createDataSet(dashboard.region, datasetInput);
+    // Create dashboard in QuickSight
+    const sheets: SheetDefinition[] = [];
+    for (let sheet of dashboard.sheets) {
+      const sheetDefinition: SheetDefinition = {
+        SheetId: sheet.id,
+        Name: sheet.name,
+      };
+      sheets.push(sheetDefinition);
+    }
+    const dashboardPermission: ResourcePermission = {
+      Principal: principals.publishUserArn,
+      Actions: [
+        'quicksight:DescribeDashboard',
+        'quicksight:ListDashboardVersions',
+        'quicksight:QueryDashboard',
+        'quicksight:UpdateDashboard',
+        'quicksight:DeleteDashboard',
+        'quicksight:UpdateDashboardPermissions',
+        'quicksight:DescribeDashboardPermissions',
+        'quicksight:UpdateDashboardPublishedVersion',
+      ],
+    };
+    const dashboardDefinition = {
+      DataSetIdentifierDeclarations: [
+        {
+          Identifier: 'default',
+          DataSetArn: dataset.Arn,
+        },
+      ],
+      Sheets: sheets,
+      FilterGroups: [],
+      CalculatedFields: [],
+      ParameterDeclarations: [],
+    };
+    const dashboardInput: CreateDashboardCommandInput = {
+      AwsAccountId: awsAccountId,
+      DashboardId: dashboard.id,
+      Name: dashboard.name,
+      Definition: dashboardDefinition,
+      Permissions: [dashboardPermission],
+    };
+    await createDashboard(dashboard.region, dashboardInput);
+    const analysisId = `clickstream-analysis-${uuidv4().replace(/-/g, '')}`;
+
+    const analysisPermission: ResourcePermission = {
+      Principal: principals.publishUserArn,
+      Actions: [
+        'quicksight:DescribeAnalysis',
+        'quicksight:UpdateAnalysisPermissions',
+        'quicksight:QueryAnalysis',
+        'quicksight:UpdateAnalysis',
+        'quicksight:RestoreAnalysis',
+        'quicksight:DeleteAnalysis',
+        'quicksight:DescribeAnalysisPermissions',
+      ],
+    };
+    const analysisInput: CreateAnalysisCommandInput = {
+      AwsAccountId: awsAccountId,
+      AnalysisId: analysisId,
+      Name: dashboard.name,
+      Definition: dashboardDefinition as AnalysisDefinition,
+      Permissions: [analysisPermission],
+    };
+    await createAnalysis(dashboard.region, analysisInput);
+  } catch (err) {
+    logger.error('Create Publish Dashboard Error.', { err });
+    throw err;
+  }
 };

@@ -32,6 +32,8 @@ const ExploreEmbedFrame: React.FC<ExploreEmbedFrameProps> = (
           url: embedUrl,
           container: `#EmbedId`,
           resizeHeightOnSizeChangedEvent: true,
+          height: '100%',
+          width: '100%',
         });
         break;
       case 'visual':
@@ -39,6 +41,8 @@ const ExploreEmbedFrame: React.FC<ExploreEmbedFrameProps> = (
           url: embedUrl,
           container: `#EmbedId`,
           resizeHeightOnSizeChangedEvent: true,
+          height: '100%',
+          width: '100%',
         });
         break;
       case 'console':
@@ -48,6 +52,7 @@ const ExploreEmbedFrame: React.FC<ExploreEmbedFrameProps> = (
             container: `#EmbedId`,
             resizeHeightOnSizeChangedEvent: true,
             height: '1000',
+            width: '100%',
           },
           {
             locale: i18n.language,

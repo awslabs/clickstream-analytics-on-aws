@@ -223,6 +223,7 @@ const createQuickSightDashboard = async (quickSight: QuickSight,
 : Promise<CreateDashboardCommandOutput|undefined> => {
 
   const datasetRefs: DataSetReference[] = [];
+  const datasetIds: string[] = [];
   const dataSets = dashboardDef.dataSets;
   const databaseName = dashboardDef.databaseName;
   for ( const dataSet of dataSets) {
@@ -234,6 +235,7 @@ const createQuickSightDashboard = async (quickSight: QuickSight,
       DataSetPlaceholder: dataSet.tableName,
       DataSetArn: createdDataset?.Arn!,
     });
+    datasetIds.push(createdDataset?.DataSetId!);
   }
 
   const sourceEntity = {
@@ -248,7 +250,6 @@ const createQuickSightDashboard = async (quickSight: QuickSight,
 
   const dashboard = await createDashboard(quickSight, accountId, principalArn, databaseName, schema, sourceEntity, dashboardDef);
   logger.info(`Dashboard ${dashboard?.DashboardId} creation completed.`);
-
   return dashboard;
 
 };
@@ -311,7 +312,6 @@ const updateQuickSightDashboard = async (quickSight: QuickSight,
   return dashboard;
 
 };
-
 
 const createDataSet = async (quickSight: QuickSight, awsAccountId: string, principalArn: string,
   dataSourceArn: string,
@@ -546,7 +546,6 @@ const deleteAnalysis = async (quickSight: QuickSight, awsAccountId: string, data
       ForceDeleteWithoutRecovery: true,
     });
     await waitForAnalysisDeleteCompleted(quickSight, awsAccountId, analysisId);
-
   } catch (err: any) {
     if ((err as Error) instanceof ResourceNotFoundException) {
       logger.info('Analysis not exist. skip delete operation.');
@@ -577,7 +576,6 @@ const deleteDataSet = async (quickSight: QuickSight, awsAccountId: string,
       DataSetId: datasetId,
     });
     await waitForDataSetDeleteCompleted(quickSight, awsAccountId, datasetId);
-
   } catch (err: any) {
     if ((err as Error) instanceof ResourceNotFoundException) {
       logger.info('Dataset not exist. skip delete operation.');
@@ -792,6 +790,6 @@ interface Identifier {
   id: string;
   idSuffix: string;
   databaseIdentifier: string;
-  schemaIdentifier: string;
+  schemaIdentifier?: string;
   tableNameIdentifier?: string;
 }

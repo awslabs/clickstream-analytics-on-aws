@@ -25,7 +25,7 @@
     "@types/node": "^16.18.36",
     "@types/react": "^18.0.25",
     "@types/react-dom": "^18.0.8",
-    "amazon-quicksight-embedding-sdk": "2.3.1",
+    "amazon-quicksight-embedding-sdk": "^2.4.0",
     "axios": "^1.4.0",
     "babel-jest": "^27.4.2",
     "babel-loader": "^8.2.3",

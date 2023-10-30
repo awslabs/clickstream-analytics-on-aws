@@ -142,8 +142,6 @@ export const INIT_EXT_PIPELINE_DATA: IExtPipeline = {
   reporting: {
     quickSight: {
       accountName: '',
-      user: '',
-      arn: '',
     },
   },
 
@@ -180,7 +178,6 @@ export const INIT_EXT_PIPELINE_DATA: IExtPipeline = {
   selectedTransformPlugins: [],
   selectedEnrichPlugins: [],
   enableReporting: true,
-  selectedQuickSightUser: null,
   arnAccountId: '',
   enableAuthentication: false,
   redshiftType: 'serverless',

@@ -3953,11 +3953,12 @@ ajv@^8.0.0, ajv@^8.6.0, ajv@^8.9.0:
     require-from-string "^2.0.2"
     uri-js "^4.2.2"
 
-amazon-quicksight-embedding-sdk@2.3.1:
-  version "2.3.1"
-  resolved "https://registry.yarnpkg.com/amazon-quicksight-embedding-sdk/-/amazon-quicksight-embedding-sdk-2.3.1.tgz#88dde4a999307b844c5361f56455a49401e1af16"
-  integrity sha512-J0vgNuwx1F6CUDIsWvUfmvWgz47i+AwRV7wZLToBJ71DQc1gXn165SLwxHN221jVcGpBOPI1Ef8LVHdhMDk93g==
+amazon-quicksight-embedding-sdk@^2.4.0:
+  version "2.4.0"
+  resolved "https://registry.yarnpkg.com/amazon-quicksight-embedding-sdk/-/amazon-quicksight-embedding-sdk-2.4.0.tgz#9d620a039ba61eff2e753a0f2b57f9be31772125"
+  integrity sha512-z4WIyl3INY/YfKN3omBlVzFQQ0fb390S4x/95z1QGrINwaIcbvZ1sdjhpNTXqRmv3dYtiS82ofVZ0HI/UilYsQ==
   dependencies:
+    "@babel/runtime" "^7.20.6"
     punycode "^2.1.1"
     uuid "^9.0.0"
 

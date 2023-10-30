@@ -105,6 +105,18 @@ describe('SFN Action Lambda Function', () => {
     expect(resp.Result.StackName).toEqual('Clickstream-ETL-6972c135cb864885b25c5b7ebe584fdf');
     expect(resp.Result.StackStatus).toEqual(StackStatus.UPDATE_IN_PROGRESS);
     expect(cloudFormationMock).toHaveReceivedCommandTimes(UpdateStackCommand, 1);
+    expect(cloudFormationMock).toHaveReceivedNthSpecificCommandWith(1, UpdateStackCommand, {
+      StackName: event.Input.StackName,
+      Parameters: event.Input.Parameters,
+      DisableRollback: false,
+      UsePreviousTemplate: true,
+      Capabilities: [
+        Capability.CAPABILITY_IAM,
+        Capability.CAPABILITY_NAMED_IAM,
+        Capability.CAPABILITY_AUTO_EXPAND,
+      ],
+      Tags: event.Input.Tags,
+    });
     expect(s3Mock).toHaveReceivedCommandTimes(PutObjectCommand, 0);
   });
 
@@ -134,6 +146,31 @@ describe('SFN Action Lambda Function', () => {
     expect(resp.Result.StackName).toEqual('Clickstream-ETL-6972c135cb864885b25c5b7ebe584fdf');
     expect(resp.Result.StackStatus).toEqual(StackStatus.UPDATE_IN_PROGRESS);
     expect(cloudFormationMock).toHaveReceivedCommandTimes(UpdateStackCommand, 2);
+    expect(cloudFormationMock).toHaveReceivedNthSpecificCommandWith(1, UpdateStackCommand, {
+      StackName: event.Input.StackName,
+      Parameters: event.Input.Parameters,
+      DisableRollback: false,
+      UsePreviousTemplate: true,
+      Capabilities: [
+        Capability.CAPABILITY_IAM,
+        Capability.CAPABILITY_NAMED_IAM,
+        Capability.CAPABILITY_AUTO_EXPAND,
+      ],
+      Tags: event.Input.Tags,
+    });
+    expect(cloudFormationMock).toHaveReceivedNthSpecificCommandWith(2, UpdateStackCommand, {
+      StackName: event.Input.StackName,
+      Parameters: event.Input.Parameters,
+      DisableRollback: true,
+      RetainExceptOnCreate: true,
+      UsePreviousTemplate: true,
+      Capabilities: [
+        Capability.CAPABILITY_IAM,
+        Capability.CAPABILITY_NAMED_IAM,
+        Capability.CAPABILITY_AUTO_EXPAND,
+      ],
+      Tags: event.Input.Tags,
+    });
     expect(s3Mock).toHaveReceivedCommandTimes(PutObjectCommand, 0);
   });
 

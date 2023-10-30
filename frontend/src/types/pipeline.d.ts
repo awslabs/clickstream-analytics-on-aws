@@ -155,8 +155,6 @@ declare global {
     reporting: {
       quickSight: {
         accountName: string;
-        user: string;
-        arn: string;
       };
     };
     status?: {
@@ -218,7 +216,6 @@ declare global {
     selectedEnrichPlugins: IPlugin[];
 
     enableReporting: boolean;
-    selectedQuickSightUser: SelectProps.Option | null;
     arnAccountId: string;
     enableAuthentication: boolean;
 
