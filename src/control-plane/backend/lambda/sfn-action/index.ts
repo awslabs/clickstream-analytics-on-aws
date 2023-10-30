@@ -306,8 +306,12 @@ export const doUpdate = async (region: string, input: UpdateStackCommandInput): 
     if (err instanceof CloudFormationServiceException &&
       err.name === 'ValidationError' &&
       err.message.includes('please use the disable-rollback parameter with update-stack API')) {
-      input.DisableRollback = true;
-      return doUpdate(region, input);
+      const rollbackInput = {
+        ...input,
+        DisableRollback: true,
+        RetainExceptOnCreate: true,
+      };
+      return doUpdate(region, rollbackInput);
     }
     throw Error((err as Error).message);
   }
