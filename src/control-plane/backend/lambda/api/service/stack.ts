@@ -32,7 +32,7 @@ import {
   WorkflowStateType,
   WorkflowTemplate,
 } from '../common/types';
-import { isEmpty } from '../common/utils';
+import { getStackName, isEmpty } from '../common/utils';
 import { IPipeline } from '../model/pipeline';
 import { describeStack } from '../store/aws/cloudformation';
 
@@ -104,12 +104,64 @@ export class StackManager {
     this.workflow.Workflow = this.getUpgradeWorkflow(this.workflow.Workflow, stackTemplateMap, stackTags, true);
   }
 
-  public retryWorkflow(): void {
-    if (!this.execWorkflow || !this.pipeline.status?.stackDetails) {
+  public retryWorkflow(stackTemplateMap: Map<string, string>, stackTags: Tag[]): void {
+    if (!this.execWorkflow || !this.workflow || !this.pipeline.status?.stackDetails) {
       throw new Error('Pipeline workflow or stack information is empty.');
     }
+    const retryStackNames = this._getRetryStackNames();
+    this.execWorkflow.Workflow = this.getRetryWorkflow(
+      this.execWorkflow.Workflow,
+      this.pipeline.status?.stackDetails,
+      retryStackNames,
+      stackTemplateMap,
+      stackTags,
+      false);
+    this.workflow.Workflow = this.getRetryWorkflow(
+      this.workflow.Workflow,
+      this.pipeline.status?.stackDetails,
+      retryStackNames,
+      stackTemplateMap,
+      stackTags,
+      true);
+  }
+
+  private _getRetryStackNames(): string[] {
+    const editedStackNames: string[] = [];
+    const editedStackTypes: PipelineStackType[] = [];
     const stackDetails = this.pipeline.status?.stackDetails;
-    this.execWorkflow.Workflow = this.getRetryWorkflow(this.execWorkflow.Workflow, stackDetails);
+    if (!stackDetails) {
+      return editedStackNames;
+    }
+    for (let stackDetail of stackDetails) {
+      if (!stackDetail.stackStatus ||
+        stackDetail.stackStatus?.endsWith('_FAILED') ||
+        stackDetail.stackStatus?.endsWith('_ROLLBACK_COMPLETE') ) {
+        editedStackNames.push(stackDetail.stackName);
+        editedStackTypes.push(stackDetail.stackType);
+      }
+    }
+    if (editedStackTypes.includes(PipelineStackType.INGESTION)) {
+      editedStackNames.push(
+        getStackName(this.pipeline.pipelineId, PipelineStackType.KAFKA_CONNECTOR, this.pipeline.ingestionServer.sinkType),
+      );
+    }
+    if (editedStackTypes.includes(PipelineStackType.DATA_PROCESSING)) {
+      editedStackNames.push(
+        getStackName(this.pipeline.pipelineId, PipelineStackType.ATHENA, this.pipeline.ingestionServer.sinkType),
+      );
+      editedStackNames.push(
+        getStackName(this.pipeline.pipelineId, PipelineStackType.DATA_MODELING_REDSHIFT, this.pipeline.ingestionServer.sinkType),
+      );
+      editedStackNames.push(
+        getStackName(this.pipeline.pipelineId, PipelineStackType.REPORTING, this.pipeline.ingestionServer.sinkType),
+      );
+    }
+    if (editedStackTypes.includes(PipelineStackType.ATHENA) || editedStackTypes.includes(PipelineStackType.DATA_MODELING_REDSHIFT)) {
+      editedStackNames.push(
+        getStackName(this.pipeline.pipelineId, PipelineStackType.REPORTING, this.pipeline.ingestionServer.sinkType),
+      );
+    }
+    return Array.from(new Set(editedStackNames));
   }
 
   public updateWorkflow(editStacks: string[]): void {
@@ -191,15 +243,13 @@ export class StackManager {
       } else {
         status = PipelineStatusType.CREATING;
       }
-    } else {
-      if (executionDetail?.status === ExecutionStatus.RUNNING) {
-        if (action === 'CREATE') {
-          status = PipelineStatusType.CREATING;
-        } else if (action === 'DELETE') {
-          status = PipelineStatusType.DELETING;
-        } else {
-          status = PipelineStatusType.UPDATING;
-        }
+    } else if (executionDetail?.status === ExecutionStatus.RUNNING) {
+      if (action === 'CREATE') {
+        status = PipelineStatusType.CREATING;
+      } else if (action === 'DELETE') {
+        status = PipelineStatusType.DELETING;
+      } else {
+        status = PipelineStatusType.UPDATING;
       }
     }
     return status;
@@ -308,25 +358,53 @@ export class StackManager {
     return state;
   }
 
-  private getRetryWorkflow(state: WorkflowState, statusDetail: PipelineStatusDetail[]): WorkflowState {
+  private getRetryWorkflow(
+    state: WorkflowState, stackDetails: PipelineStatusDetail[], retryStackNames: string[],
+    stackTemplateMap: Map<string, string>, stackTags: Tag[], origin: boolean): WorkflowState {
     if (state.Type === WorkflowStateType.PARALLEL) {
       for (let branch of state.Branches as WorkflowParallelBranch[]) {
         for (let key of Object.keys(branch.States)) {
-          branch.States[key] = this.getRetryWorkflow(branch.States[key], statusDetail);
+          branch.States[key] = this.getRetryWorkflow(
+            branch.States[key], stackDetails, retryStackNames, stackTemplateMap, stackTags, origin);
         }
       }
-    } else if (state.Type === WorkflowStateType.STACK && state.Data?.Input.StackName) {
-      const status = this.getStackStatusByName(state.Data?.Input.StackName, statusDetail);
-      if (status?.endsWith('_FAILED')) {
-        state.Data.Input.Action = 'Update';
-      } else if (status?.endsWith('_IN_PROGRESS') || status?.endsWith('_COMPLETE')) {
+    } else if (state.Type === WorkflowStateType.STACK) {
+      state = this._getRetryState(state, stackDetails, retryStackNames, stackTemplateMap, stackTags, origin);
+    }
+    return state;
+  }
+
+  private _getRetryAction(lastAction: string, status: StackStatus | undefined) {
+    let action = 'Create';
+    if (status?.endsWith('_FAILED') || status?.endsWith('_ROLLBACK_COMPLETE')) {
+      action = lastAction;
+    }
+    return action;
+  }
+
+  private _getRetryState(
+    state: WorkflowState, stackDetails: PipelineStatusDetail[], retryStackNames: string[],
+    stackTemplateMap: Map<string, string>, stackTags: Tag[], origin: boolean): WorkflowState {
+    if (state.Data?.Input.StackName) {
+      const status = this.getStackStatusByName(state.Data?.Input.StackName, stackDetails);
+      const lastAction = this.pipeline.lastAction ?? 'Create';
+      if (retryStackNames.includes(state.Data.Input.StackName)) {
+        state.Data.Input.Action = this._getRetryAction(lastAction, status);
+        if (lastAction === 'Upgrade') {
+          state.Data.Input.TemplateURL = stackTemplateMap.get(state.Data?.Input.StackName) ?? '';
+          if (!origin) {
+            state.Data.Input.Action = 'Upgrade';
+          }
+          state.Data.Input.Tags = stackTags;
+        }
+      } else {
         state.Type = WorkflowStateType.PASS;
       }
-      state.Data.Callback = {
-        BucketName: stackWorkflowS3Bucket ?? '',
-        BucketPrefix: `clickstream/workflow/${this.pipeline.executionName}`,
-      };
     }
+    state.Data!.Callback = {
+      BucketName: stackWorkflowS3Bucket ?? '',
+      BucketPrefix: `clickstream/workflow/${this.pipeline.executionName}`,
+    };
     return state;
   }
 
@@ -430,7 +508,7 @@ export class StackManager {
     } else if (state.Data?.Input.StackName === stackName) {
       state.Type = WorkflowStateType.STACK;
       state.Data.Input.Action = action;
-      for (let p of state.Data?.Input.Parameters) {
+      for (let p of state.Data.Input.Parameters) {
         if (p.ParameterKey === parameterKey) {
           p.ParameterValue = parameterValue;
           break;

@@ -260,7 +260,7 @@ export const describe = async (region: string, stackName: string) => {
 };
 
 export const callback = async (event: SfnStackEvent) => {
-  if (!event.Callback || !event.Callback.BucketName || !event.Callback.BucketPrefix || !event.Result) {
+  if (!event.Callback?.BucketName || !event.Callback?.BucketPrefix || !event.Result) {
     logger.error('Save runtime to S3 failed, Parameter error.', {
       event: event,
     });

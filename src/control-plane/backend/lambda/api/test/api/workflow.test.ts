@@ -60,6 +60,7 @@ import {
   KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW_FOR_UPGRADE,
   S3_DATA_PROCESSING_WITH_SPECIFY_PREFIX_PIPELINE,
   MSK_DATA_PROCESSING_ATHENA_PIPELINE,
+  RETRY_PIPELINE_WITH_WORKFLOW_AND_ROLLBACK_COMPLETE,
 } from './pipeline-mock';
 import {
   BASE_ATHENA_PARAMETERS,
@@ -1668,8 +1669,11 @@ describe('Workflow test', () => {
   it('Generate Retry Workflow', async () => {
     dictionaryMock(ddbMock);
     sfnMock.on(StartExecutionCommand).resolves({ executionArn: MOCK_EXECUTION_ID });
-    const stackManager: StackManager = new StackManager(RETRY_PIPELINE_WITH_WORKFLOW);
-    stackManager.retryWorkflow();
+    const pipeline: CPipeline = new CPipeline({ ...RETRY_PIPELINE_WITH_WORKFLOW });
+    const stackTemplateMap = await pipeline.getStackTemplateMap();
+    const stackManager: StackManager = new StackManager({ ...RETRY_PIPELINE_WITH_WORKFLOW });
+    const tags: Tag[] = [{ Key: 'version', Value: 'v2' }];
+    stackManager.retryWorkflow(stackTemplateMap, tags);
     const expected = {
       Version: '2022-03-15',
       Workflow: {
@@ -1692,7 +1696,7 @@ describe('Workflow test', () => {
                   },
                 },
                 Next: 'KafkaConnector',
-                Type: 'Pass',
+                Type: 'Stack',
               },
               KafkaConnector: {
                 Data: {
@@ -1701,7 +1705,7 @@ describe('Workflow test', () => {
                     BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
-                    Action: 'Update',
+                    Action: 'Create',
                     Region: 'ap-southeast-1',
                     Parameters: [],
                     StackName: 'Clickstream-KafkaConnector-6666-6666',
@@ -1739,7 +1743,7 @@ describe('Workflow test', () => {
             StartAt: 'DataModeling',
             States: {
               Reporting: {
-                Type: 'Pass',
+                Type: 'Stack',
                 Data: {
                   Input: {
                     Region: 'ap-southeast-1',
@@ -1775,7 +1779,7 @@ describe('Workflow test', () => {
                   },
                 },
                 Next: 'Reporting',
-                Type: 'Pass',
+                Type: 'Stack',
               },
             },
           },
@@ -1797,7 +1801,7 @@ describe('Workflow test', () => {
                   },
                 },
                 End: true,
-                Type: 'Stack',
+                Type: 'Pass',
               },
             },
           },
@@ -1811,8 +1815,11 @@ describe('Workflow test', () => {
   it('Generate Retry Workflow with undefined stack status', async () => {
     dictionaryMock(ddbMock);
     sfnMock.on(StartExecutionCommand).resolves({ executionArn: MOCK_EXECUTION_ID });
-    const stackManager: StackManager = new StackManager(RETRY_PIPELINE_WITH_WORKFLOW_AND_UNDEFINED_STATUS);
-    stackManager.retryWorkflow();
+    const pipeline: CPipeline = new CPipeline({ ...RETRY_PIPELINE_WITH_WORKFLOW_AND_UNDEFINED_STATUS });
+    const stackTemplateMap = await pipeline.getStackTemplateMap();
+    const stackManager: StackManager = new StackManager({ ...RETRY_PIPELINE_WITH_WORKFLOW_AND_UNDEFINED_STATUS });
+    const tags: Tag[] = [{ Key: 'version', Value: 'v2' }];
+    stackManager.retryWorkflow(stackTemplateMap, tags);
     const expected = {
       Version: '2022-03-15',
       Workflow: {
@@ -1844,7 +1851,7 @@ describe('Workflow test', () => {
                     BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
-                    Action: 'Update',
+                    Action: 'Create',
                     Parameters: [],
                     Region: 'ap-southeast-1',
                     StackName: 'Clickstream-KafkaConnector-6666-6666',
@@ -1852,7 +1859,7 @@ describe('Workflow test', () => {
                   },
                 },
                 End: true,
-                Type: 'Stack',
+                Type: 'Pass',
               },
             },
           },
@@ -1908,7 +1915,7 @@ describe('Workflow test', () => {
                     Action: 'Create',
                     Parameters: [],
                     Region: 'ap-southeast-1',
-                    StackName: 'Clickstream-Reporting-e9a8f34fbf734ca4950787f1ad818989',
+                    StackName: 'Clickstream-Reporting-6666-6666',
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-reporting-quicksight-stack.template.json',
                   },
                 },
@@ -1935,7 +1942,150 @@ describe('Workflow test', () => {
                   },
                 },
                 End: true,
+                Type: 'Pass',
+              },
+            },
+          },
+        ],
+        End: true,
+        Type: 'Parallel',
+      },
+    };
+    expect(stackManager.getExecWorkflow()).toEqual(expected);
+  });
+  it('Generate Retry Workflow with rollback complete', async () => {
+    dictionaryMock(ddbMock);
+    sfnMock.on(StartExecutionCommand).resolves({ executionArn: MOCK_EXECUTION_ID });
+    const pipeline: CPipeline = new CPipeline({ ...RETRY_PIPELINE_WITH_WORKFLOW_AND_ROLLBACK_COMPLETE });
+    const stackTemplateMap = await pipeline.getStackTemplateMap();
+    const stackManager: StackManager = new StackManager({ ...RETRY_PIPELINE_WITH_WORKFLOW_AND_ROLLBACK_COMPLETE });
+    const tags: Tag[] = [{ Key: 'version', Value: 'v2' }];
+    stackManager.retryWorkflow(stackTemplateMap, tags);
+    const expected = {
+      Version: '2022-03-15',
+      Workflow: {
+        Branches: [
+          {
+            StartAt: 'Ingestion',
+            States: {
+              Ingestion: {
+                Data: {
+                  Callback: {
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                  },
+                  Input: {
+                    Action: 'Create',
+                    Parameters: [],
+                    Region: 'ap-southeast-1',
+                    StackName: 'Clickstream-Ingestion-kafka-6666-6666',
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/ingestion-server-kafka-stack.template.json',
+                  },
+                },
+                Next: 'KafkaConnector',
+                Type: 'Pass',
+              },
+              KafkaConnector: {
+                Data: {
+                  Callback: {
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                  },
+                  Input: {
+                    Action: 'Create',
+                    Parameters: [],
+                    Region: 'ap-southeast-1',
+                    StackName: 'Clickstream-KafkaConnector-6666-6666',
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/kafka-s3-sink-stack.template.json',
+                  },
+                },
+                End: true,
+                Type: 'Pass',
+              },
+            },
+          },
+          {
+            StartAt: 'DataProcessing',
+            States: {
+              DataProcessing: {
+                Data: {
+                  Callback: {
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                  },
+                  Input: {
+                    Action: 'Create',
+                    Parameters: [],
+                    Region: 'ap-southeast-1',
+                    StackName: 'Clickstream-DataProcessing-6666-6666',
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-pipeline-stack.template.json',
+                  },
+                },
+                End: true,
+                Type: 'Pass',
+              },
+            },
+          },
+          {
+            StartAt: 'DataModeling',
+            States: {
+              DataModeling: {
+                Data: {
+                  Callback: {
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                  },
+                  Input: {
+                    Action: 'Upgrade',
+                    Parameters: [],
+                    Region: 'ap-southeast-1',
+                    StackName: 'Clickstream-DataModelingRedshift-6666-6666',
+                    Tags: [{ Key: 'version', Value: 'v2' }],
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-analytics-redshift-stack.template.json',
+                  },
+                },
+                Next: 'Reporting',
                 Type: 'Stack',
+              },
+              Reporting: {
+                Data: {
+                  Callback: {
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                  },
+                  Input: {
+                    Action: 'Upgrade',
+                    Parameters: [],
+                    Region: 'ap-southeast-1',
+                    StackName: 'Clickstream-Reporting-6666-6666',
+                    Tags: [{ Key: 'version', Value: 'v2' }],
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-reporting-quicksight-stack.template.json',
+                  },
+                },
+                End: true,
+                Type: 'Stack',
+              },
+            },
+          },
+          {
+            StartAt: 'Metrics',
+            States: {
+              Metrics: {
+                Data: {
+                  Callback: {
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                  },
+                  Input: {
+                    Action: 'Create',
+                    Region: 'ap-southeast-1',
+                    Parameters: BASE_METRICS_PARAMETERS,
+                    StackName: 'Clickstream-Metrics-6666-6666',
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/metrics-stack.template.json',
+                  },
+                },
+                End: true,
+                Type: 'Pass',
               },
             },
           },
@@ -2260,7 +2410,7 @@ describe('Workflow test', () => {
   it('Generate Delete Workflow', async () => {
     dictionaryMock(ddbMock);
     sfnMock.on(StartExecutionCommand).resolves({ executionArn: MOCK_EXECUTION_ID });
-    const stackManager: StackManager = new StackManager(RETRY_PIPELINE_WITH_WORKFLOW);
+    const stackManager: StackManager = new StackManager({ ...RETRY_PIPELINE_WITH_WORKFLOW });
     stackManager.deleteWorkflow();
     const expected = {
       Version: '2022-03-15',

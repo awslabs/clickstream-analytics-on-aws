@@ -205,6 +205,7 @@ export interface IPipeline {
   readonly dataModeling?: DataModeling;
   readonly reporting?: Reporting;
 
+  lastAction?: string;
   status?: PipelineStatus;
   workflow?: WorkflowTemplate;
   executionName?: string;
@@ -251,6 +252,7 @@ export class CPipeline {
 
   public async create(): Promise<void> {
     // state machine
+    this.pipeline.lastAction = 'Create';
     this.pipeline.executionName = `main-${uuidv4()}`;
     this.pipeline.workflow = await this.generateWorkflow();
 
@@ -273,6 +275,7 @@ export class CPipeline {
     if (isEmpty(oldPipeline.workflow) || isEmpty(oldPipeline.workflow?.Workflow)) {
       throw new ClickStreamBadRequestError('Pipeline Workflow can not empty.');
     }
+    this.pipeline.lastAction = 'Update';
     const executionName = `main-${uuidv4()}`;
     this.pipeline.executionName = executionName;
 
@@ -326,6 +329,7 @@ export class CPipeline {
   }
 
   public async upgrade(oldPipeline: IPipeline): Promise<void> {
+    this.pipeline.lastAction = 'Upgrade';
     const executionName = `main-${uuidv4()}`;
     this.pipeline.executionName = executionName;
     validateIngestionServerNum(this.pipeline.ingestionServer.size);
@@ -354,6 +358,7 @@ export class CPipeline {
   }
 
   public async updateApp(appIds: string[]): Promise<void> {
+    this.pipeline.lastAction = 'Update';
     const executionName = `main-${uuidv4()}`;
     this.pipeline.executionName = executionName;
     const ingestionStackName = getStackName(
@@ -374,6 +379,7 @@ export class CPipeline {
   }
 
   public async delete(): Promise<void> {
+    this.pipeline.lastAction = 'Delete';
     const executionName = `main-${uuidv4()}`;
     this.pipeline.executionName = executionName;
     // update workflow
@@ -400,7 +406,13 @@ export class CPipeline {
     const executionName = `main-${uuidv4()}`;
     this.pipeline.executionName = executionName;
     // update workflow
-    this.stackManager.retryWorkflow();
+    // update pipeline tags
+    if (!this.resources || !this.stackTags || this.stackTags?.length === 0) {
+      this.setTags();
+      this.stackTags = this.getStackTags();
+    }
+    const stackTemplateMap = await this.getStackTemplateMap();
+    this.stackManager.retryWorkflow(stackTemplateMap, this.stackTags);
     // create new execution
     const execWorkflow = this.stackManager.getExecWorkflow();
     this.pipeline.executionArn = await this.stackManager.execute(execWorkflow, executionName);
@@ -530,7 +542,7 @@ export class CPipeline {
   };
 
   public async getTemplateUrl(name: string) {
-    if (!this.resources || !this.resources.solution || !this.resources.templates) {
+    if (!this.resources?.solution || !this.resources.templates) {
       const solution = await store.getDictionary('Solution');
       const templates = await store.getDictionary('Templates');
       this.resources = {
@@ -941,7 +953,7 @@ export class CPipeline {
   }
 
   public async getPluginsInfo() {
-    if (!this.resources || !this.resources.plugins) {
+    if (!this.resources?.plugins) {
       const plugins = await store.listPlugin('', 'asc');
       this.resources = {
         ...this.resources,
@@ -957,7 +969,7 @@ export class CPipeline {
   };
 
   public async getTemplateInfo() {
-    if (!this.resources || !this.resources.solution) {
+    if (!this.resources?.solution) {
       const solution = await store.getDictionary('Solution');
       this.resources = {
         ...this.resources,

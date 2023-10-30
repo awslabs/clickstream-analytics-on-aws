@@ -1291,14 +1291,19 @@ export const RETRY_PIPELINE_WITH_WORKFLOW: IPipeline = {
     ...BASE_STATUS,
     status: PipelineStatusType.FAILED,
     stackDetails: [
+      BASE_STATUS.stackDetails[0],
       {
-        ...BASE_STATUS.stackDetails[0],
+        ...BASE_STATUS.stackDetails[1],
         stackStatus: StackStatus.CREATE_FAILED,
       },
-      BASE_STATUS.stackDetails[1],
       BASE_STATUS.stackDetails[2],
+      {
+        ...BASE_STATUS.stackDetails[3],
+        stackStatus: StackStatus.CREATE_FAILED,
+      },
       BASE_STATUS.stackDetails[3],
       BASE_STATUS.stackDetails[4],
+      BASE_STATUS.stackDetails[5],
     ],
     executionDetail: {
       name: MOCK_EXECUTION_ID,
@@ -1389,7 +1394,7 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_QUICKSIGHT_PIPELINE_WITH_WORKF
                   TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-reporting-quicksight-stack.template.json',
                   Action: 'Create',
                   Parameters: [],
-                  StackName: 'Clickstream-Reporting-e9a8f34fbf734ca4950787f1ad818989',
+                  StackName: `Clickstream-Reporting-${MOCK_PIPELINE_ID}`,
                 },
                 Callback: {
                   BucketPrefix: 'clickstream/workflow/main-d6e73fc2-6211-4013-8c4d-a539c407f834',
@@ -1431,7 +1436,7 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_QUICKSIGHT_PIPELINE_WITH_WORKF
                   Action: 'Create',
                   Region: 'ap-southeast-1',
                   Parameters: BASE_METRICS_PARAMETERS,
-                  StackName: 'Clickstream-Metrics-6666-6666',
+                  StackName: `Clickstream-Metrics-${MOCK_PIPELINE_ID}`,
                   TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/metrics-stack.template.json',
                 },
               },
@@ -1447,24 +1452,44 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_QUICKSIGHT_PIPELINE_WITH_WORKF
 
 export const RETRY_PIPELINE_WITH_WORKFLOW_AND_UNDEFINED_STATUS: IPipeline = {
   ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_QUICKSIGHT_PIPELINE_WITH_WORKFLOW,
+  lastAction: 'Update',
   status: {
     ...BASE_STATUS,
     status: PipelineStatusType.FAILED,
     stackDetails: [
-      {
-        ...BASE_STATUS.stackDetails[0],
-        stackStatus: StackStatus.CREATE_FAILED,
-      },
-      {
-        ...BASE_STATUS.stackDetails[1],
-        stackStatus: StackStatus.CREATE_IN_PROGRESS,
-      },
+      BASE_STATUS.stackDetails[0],
+      BASE_STATUS.stackDetails[1],
       BASE_STATUS.stackDetails[2],
       BASE_STATUS.stackDetails[3],
       {
         ...BASE_STATUS.stackDetails[4],
         stackStatus: undefined,
       },
+      BASE_STATUS.stackDetails[5],
+    ],
+    executionDetail: {
+      name: MOCK_EXECUTION_ID,
+      status: ExecutionStatus.FAILED,
+    },
+  },
+};
+
+export const RETRY_PIPELINE_WITH_WORKFLOW_AND_ROLLBACK_COMPLETE: IPipeline = {
+  ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_QUICKSIGHT_PIPELINE_WITH_WORKFLOW,
+  lastAction: 'Upgrade',
+  status: {
+    ...BASE_STATUS,
+    status: PipelineStatusType.FAILED,
+    stackDetails: [
+      BASE_STATUS.stackDetails[0],
+      BASE_STATUS.stackDetails[1],
+      BASE_STATUS.stackDetails[2],
+      {
+        ...BASE_STATUS.stackDetails[3],
+        stackStatus: StackStatus.UPDATE_ROLLBACK_COMPLETE,
+      },
+      BASE_STATUS.stackDetails[4],
+      BASE_STATUS.stackDetails[5],
     ],
     executionDetail: {
       name: MOCK_EXECUTION_ID,
