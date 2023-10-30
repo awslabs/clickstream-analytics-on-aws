@@ -131,7 +131,17 @@ export const handler = async (_event: any, context: Context) => {
     }
   }
 
-  logger.info(`allJobNewCount: ${allJobNewCount}`);
+  logger.info(`allJobNewCount: ${allJobNewCount}, candidateItems.length: ${candidateItems.length}`);
+
+  // reprocess files in JOB_PROCESSING
+  let processingRecordResp = await queryItems(tableName, indexName, odsEventBucketWithPrefix, JobStatus.JOB_PROCESSING, undefined);
+  if (processingRecordResp.Count > 0) {
+    const processingAsCandidateItems = processingRecordResp.Items.slice(0, queryResultLimit);
+    logger.info(`add ${processingAsCandidateItems.length} JOB_PROCESSING files to candidateItems`);
+    candidateItems = candidateItems.concat(processingAsCandidateItems);
+  }
+
+  logger.info('candidateItems.length: ' + candidateItems.length);
 
   const response = await doManifestFiles(candidateItems, queryResultLimit, tableName, requestId);
 
@@ -236,8 +246,14 @@ export const queryItems = async (tableName: string, indexName: string, prefix: s
 }> => {
   const s3UriPrefix = 's3://' + prefix;
 
-  const REDSHIFT_ODS_TABLE_NAME = process.env.REDSHIFT_ODS_TABLE_NAME!;
+  const REDSHIFT_ODS_TABLE_NAME = process.env.REDSHIFT_ODS_TABLE_NAME;
   const qJobStatus = composeJobStatus(jobStatus, REDSHIFT_ODS_TABLE_NAME);
+
+  logger.info('queryItems() ', {
+    tableName,
+    qJobStatus,
+    s3UriPrefix,
+  });
 
   // Set the parameters.
   const params = {

@@ -28,7 +28,7 @@ const ddbClient = new DynamoDBClient({
 
 const DYNAMODB_TABLE_NAME = process.env.DYNAMODB_TABLE_NAME;
 const S3_FILE_SUFFIX = process.env.S3_FILE_SUFFIX;
-const REDSHIFT_ODS_TABLE_NAME = process.env.REDSHIFT_ODS_TABLE_NAME!;
+const REDSHIFT_ODS_TABLE_NAME = process.env.REDSHIFT_ODS_TABLE_NAME;
 
 /**
  * The lambda function try to put a item to Dynamodb table,
@@ -121,6 +121,12 @@ export const putItem = async (tableName: string, s3Bucket: string, s3Object: str
   }
 };
 
-export function composeJobStatus(status: string, odsTableName: string) {
+export function composeJobStatus(status: string, odsTableName?: string) {
+  if (! odsTableName) {
+    return status;
+  }
+  if (status.includes('#')) {
+    return status;
+  }
   return `${odsTableName}#${status}`;
 }

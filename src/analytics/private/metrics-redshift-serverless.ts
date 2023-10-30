@@ -19,13 +19,6 @@ import { AlarmsWidgetElement, MetricWidgetElement, MetricsWidgets } from '../../
 import { WIDGETS_ORDER } from '../../metrics/settings';
 
 
-export interface LoadDataWorkflows {
-  readonly ods_events: IStateMachine;
-  readonly event: IStateMachine;
-  readonly event_parameter: IStateMachine;
-  readonly user: IStateMachine;
-  readonly item: IStateMachine;
-}
 export function createMetricsWidgetForRedshiftServerless(scope: Construct, id: string, props: {
   projectId: string;
   dataProcessingCronOrRateExpression: string;
@@ -33,7 +26,7 @@ export function createMetricsWidgetForRedshiftServerless(scope: Construct, id: s
   scanMetadataCronOrRateExpression: string;
   redshiftServerlessNamespace?: string;
   redshiftServerlessWorkgroupName: string;
-  loadDataWorkflows: LoadDataWorkflows;
+  loadDataWorkflow: IStateMachine;
   upsertUsersWorkflow: IStateMachine;
   scanMetadataWorkflow: IStateMachine;
   clearExpiredEventsWorkflow: IStateMachine;

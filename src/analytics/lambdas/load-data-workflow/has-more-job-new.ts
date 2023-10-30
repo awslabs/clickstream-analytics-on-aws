@@ -14,13 +14,15 @@
 
 import { Context } from 'aws-lambda';
 import { queryItems } from './create-load-manifest';
+import { composeJobStatus } from './put-ods-source-to-store';
 import { logger } from '../../../common/powertools';
-import { JobStatus } from '../../private/constant';
+import { JobStatus, REDSHIFT_TABLE_NAMES } from '../../private/constant';
 
 const ODS_EVENT_BUCKET = process.env.ODS_EVENT_BUCKET!;
 const ODS_EVENT_BUCKET_PREFIX = process.env.ODS_EVENT_BUCKET_PREFIX!;
 const DYNAMODB_TABLE_NAME = process.env.DYNAMODB_TABLE_NAME!;
 const DYNAMODB_TABLE_INDEX_NAME = process.env.DYNAMODB_TABLE_INDEX_NAME!;
+const REDSHIFT_ODS_TABLE_NAME = process.env.REDSHIFT_ODS_TABLE_NAME!;
 
 export const handler = async (_: any, context: Context) => {
   const requestId = context.awsRequestId;
@@ -30,28 +32,55 @@ export const handler = async (_: any, context: Context) => {
   const indexName = DYNAMODB_TABLE_INDEX_NAME;
 
   const odsEventBucketWithPrefix = `${ODS_EVENT_BUCKET}/${ODS_EVENT_BUCKET_PREFIX}`;
-  let jobNewCount = 0;
+
   let newRecordResp;
 
-  logger.info('queryItems by', {
-    tableName,
-    indexName,
-    odsEventBucketWithPrefix,
-    JobStatus: JobStatus.JOB_NEW,
-  });
-  let lastEvaluatedKey = undefined;
+  const getStatusFilesCount = async (redshiftTableName: string, jobStatus: string) => {
 
-  while (true) {
-    newRecordResp = await queryItems(tableName, indexName, odsEventBucketWithPrefix, JobStatus.JOB_NEW, lastEvaluatedKey);
-    jobNewCount += newRecordResp.Count;
-    if (newRecordResp.LastEvaluatedKey) {
-      lastEvaluatedKey = newRecordResp.LastEvaluatedKey;
-    } else {
-      break;
+    let lastEvaluatedKey = undefined;
+    const jobStatusQuery = composeJobStatus(jobStatus, redshiftTableName);
+    const prefixQuery = odsEventBucketWithPrefix.replace(new RegExp(`/${REDSHIFT_ODS_TABLE_NAME}/?$`), `/${redshiftTableName}/`);
+
+    logger.info('queryItems by', {
+      redshiftTableName,
+      tableName,
+      indexName,
+      prefixQuery,
+      jobStatusQuery,
+    });
+
+    let jobNewCountForTable = 0;
+    while (true) {
+      newRecordResp = await queryItems(tableName, indexName, prefixQuery, jobStatusQuery, lastEvaluatedKey);
+      jobNewCountForTable += newRecordResp.Count;
+      if (newRecordResp.LastEvaluatedKey) {
+        lastEvaluatedKey = newRecordResp.LastEvaluatedKey;
+      } else {
+        break;
+      }
     }
+    logger.info('jobNewCountForTable=' + jobNewCountForTable + ', redshiftTableName=' + redshiftTableName);
+    return jobNewCountForTable;
+  };
+
+  const currentJobNewCount = await getStatusFilesCount(REDSHIFT_ODS_TABLE_NAME, JobStatus.JOB_NEW);
+
+  const odsTableNames = REDSHIFT_TABLE_NAMES;
+  let tableProcessingCountInfo: { [key: string]: any } = {};
+  let totalProcessCount = 0;
+  for (const odsTable of odsTableNames) {
+    const processingCount = await getStatusFilesCount(odsTable, JobStatus.JOB_PROCESSING);
+    tableProcessingCountInfo = {
+      ...tableProcessingCountInfo,
+      [odsTable]: processingCount,
+    };
+    totalProcessCount += processingCount;
   }
-  logger.info('jobNewCount=' + jobNewCount);
+
   return {
-    jobNewCount: jobNewCount,
+    processingFilesCount: tableProcessingCountInfo,
+    jobNewCount: currentJobNewCount,
+    hasMoreWork: (currentJobNewCount + totalProcessCount) > 0,
   };
 };
+

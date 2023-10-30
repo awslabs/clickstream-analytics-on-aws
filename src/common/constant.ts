@@ -327,3 +327,5 @@ export const DEFAULT_SOLUTION_OPERATOR = 'Clickstream';
 export const DEFAULT_DASHBOARD_NAME = 'User lifecycle';
 
 export const TRANSFORMER_AND_ENRICH_CLASS_NAMES = 'software.aws.solution.clickstream.TransformerV2,software.aws.solution.clickstream.UAEnrichment,software.aws.solution.clickstream.IPEnrichment';
+
+export const EVENT_SOURCE_LOAD_DATA_FLOW = 'LoadDataFlow';
