@@ -985,7 +985,7 @@ describe('Pipeline test', () => {
   it('Get pipeline by ID', async () => {
     projectExistedMock(ddbMock, true);
     ddbMock.on(QueryCommand).resolves({
-      Items: [KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW],
+      Items: [{ ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW }],
     });
     cloudFormationMock.on(DescribeStacksCommand).resolves({
       Stacks: [
@@ -1127,7 +1127,7 @@ describe('Pipeline test', () => {
   it('Get pipeline with cache status in ddb', async () => {
     projectExistedMock(ddbMock, true);
     ddbMock.on(QueryCommand).resolves({
-      Items: [KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW],
+      Items: [{ ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW }],
     });
     let res = await request(app)
       .get(`/api/pipeline/${MOCK_PIPELINE_ID}?pid=${MOCK_PROJECT_ID}&cache=true`);
@@ -1149,7 +1149,7 @@ describe('Pipeline test', () => {
   it('Get pipeline by ID with stack no outputs', async () => {
     projectExistedMock(ddbMock, true);
     ddbMock.on(QueryCommand).resolves({
-      Items: [KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW],
+      Items: [{ ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW }],
     });
     cloudFormationMock.on(DescribeStacksCommand).resolves({
       Stacks: [
@@ -1651,7 +1651,7 @@ describe('Pipeline test', () => {
     projectExistedMock(ddbMock, true);
     pipelineExistedMock(ddbMock, true);
     ddbMock.on(QueryCommand).resolves({
-      Items: [KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW],
+      Items: [{ ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW }],
     });
     cloudFormationMock.on(DescribeStacksCommand)
       .resolvesOnce({
@@ -1744,7 +1744,7 @@ describe('Pipeline test', () => {
     projectExistedMock(ddbMock, true);
     pipelineExistedMock(ddbMock, true);
     ddbMock.on(QueryCommand).resolves({
-      Items: [KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW],
+      Items: [{ ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW }],
     });
     cloudFormationMock.on(DescribeStacksCommand)
       .resolvesOnce({
@@ -1837,7 +1837,7 @@ describe('Pipeline test', () => {
     projectExistedMock(ddbMock, true);
     pipelineExistedMock(ddbMock, true);
     ddbMock.on(QueryCommand).resolves({
-      Items: [KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW],
+      Items: [{ ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW }],
     });
     cloudFormationMock.on(DescribeStacksCommand)
       .resolvesOnce({
@@ -1930,7 +1930,7 @@ describe('Pipeline test', () => {
     projectExistedMock(ddbMock, true);
     pipelineExistedMock(ddbMock, true);
     ddbMock.on(QueryCommand).resolves({
-      Items: [KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW],
+      Items: [{ ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW }],
     });
     cloudFormationMock
       .on(DescribeStacksCommand)
@@ -2029,7 +2029,7 @@ describe('Pipeline test', () => {
     projectExistedMock(ddbMock, true);
     pipelineExistedMock(ddbMock, true);
     ddbMock.on(QueryCommand).resolves({
-      Items: [KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW],
+      Items: [{ ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW }],
     });
     cloudFormationMock
       .on(DescribeStacksCommand)
@@ -2116,7 +2116,7 @@ describe('Pipeline test', () => {
     projectExistedMock(ddbMock, true);
     pipelineExistedMock(ddbMock, true);
     ddbMock.on(QueryCommand).resolves({
-      Items: [KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW],
+      Items: [{ ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW }],
     });
     cloudFormationMock.on(DescribeStacksCommand)
       .resolvesOnce({
@@ -2209,7 +2209,7 @@ describe('Pipeline test', () => {
     projectExistedMock(ddbMock, true);
     pipelineExistedMock(ddbMock, true);
     ddbMock.on(QueryCommand).resolves({
-      Items: [KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW],
+      Items: [{ ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW }],
     });
     cloudFormationMock.on(DescribeStacksCommand)
       .resolves({
@@ -2294,7 +2294,7 @@ describe('Pipeline test', () => {
     projectExistedMock(ddbMock, true);
     pipelineExistedMock(ddbMock, true);
     ddbMock.on(QueryCommand).resolves({
-      Items: [KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW],
+      Items: [{ ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW }],
     });
     cloudFormationMock.on(DescribeStacksCommand)
       .resolves({
@@ -2379,7 +2379,7 @@ describe('Pipeline test', () => {
     projectExistedMock(ddbMock, true);
     pipelineExistedMock(ddbMock, true);
     ddbMock.on(QueryCommand).resolves({
-      Items: [KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW],
+      Items: [{ ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW }],
     });
     cloudFormationMock.on(DescribeStacksCommand)
       .resolvesOnce({})
@@ -2464,7 +2464,7 @@ describe('Pipeline test', () => {
     projectExistedMock(ddbMock, true);
     pipelineExistedMock(ddbMock, true);
     ddbMock.on(QueryCommand).resolves({
-      Items: [KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW],
+      Items: [{ ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW }],
     });
     cloudFormationMock.on(DescribeStacksCommand)
       .resolvesOnce({
@@ -2557,7 +2557,7 @@ describe('Pipeline test', () => {
     projectExistedMock(ddbMock, true);
     pipelineExistedMock(ddbMock, true);
     ddbMock.on(QueryCommand).resolves({
-      Items: [KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW],
+      Items: [{ ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW }],
     });
     cloudFormationMock.on(DescribeStacksCommand)
       .resolvesOnce({
@@ -2589,7 +2589,7 @@ describe('Pipeline test', () => {
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body.data.items[0].status).toEqual({
-      status: 'Failed',
+      status: 'Warning',
       stackDetails: [
         {
           stackName: 'Clickstream-KafkaConnector-6666-6666',
@@ -2656,7 +2656,7 @@ describe('Pipeline test', () => {
         subnetsCross3AZ: true,
         subnetsIsolated: true,
         update: true,
-        updatePipeline: KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
+        updatePipeline: { ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW },
       });
     cloudFormationMock.on(DescribeStacksCommand).resolves({
       Stacks: [
@@ -2689,7 +2689,7 @@ describe('Pipeline test', () => {
     ddbMock.on(TransactWriteItemsCommand).resolves({});
     let res = await request(app)
       .put(`/api/pipeline/${MOCK_PIPELINE_ID}`)
-      .send(KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW);
+      .send({ ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW });
     expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 6);
     expect(ddbMock).toHaveReceivedCommandTimes(TransactWriteItemsCommand, 1);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
@@ -2706,7 +2706,7 @@ describe('Pipeline test', () => {
     ddbMock.on(TransactWriteItemsCommand).rejects(new Error('Mock DynamoDB error'));
     res = await request(app)
       .put(`/api/pipeline/${MOCK_PIPELINE_ID}`)
-      .send(KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW);
+      .send({ ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(500);
     expect(res.body).toEqual({
@@ -2830,7 +2830,7 @@ describe('Pipeline test', () => {
     pipelineExistedMock(ddbMock, true);
     const res = await request(app)
       .put(`/api/pipeline/${MOCK_PIPELINE_ID}1`)
-      .send(KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW);
+      .send({ ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
     expect(res.body).toEqual({
@@ -2886,7 +2886,7 @@ describe('Pipeline test', () => {
     pipelineExistedMock(ddbMock, true);
     const res = await request(app)
       .put(`/api/pipeline/${MOCK_PIPELINE_ID}`)
-      .send(KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW);
+      .send({ ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
     expect(res.body).toEqual({
@@ -2907,7 +2907,7 @@ describe('Pipeline test', () => {
     pipelineExistedMock(ddbMock, false);
     const res = await request(app)
       .put(`/api/pipeline/${MOCK_PIPELINE_ID}`)
-      .send(KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW);
+      .send({ ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(404);
     expect(res.body).toEqual({
@@ -2926,7 +2926,7 @@ describe('Pipeline test', () => {
         subnetsCross3AZ: true,
         subnetsIsolated: true,
         update: true,
-        updatePipeline: KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
+        updatePipeline: { ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW },
       });
     cloudFormationMock.on(DescribeStacksCommand).resolves({
       Stacks: [
@@ -3105,7 +3105,7 @@ describe('Pipeline test', () => {
     projectExistedMock(ddbMock, true);
     pipelineExistedMock(ddbMock, true);
     ddbMock.on(GetCommand).resolves({
-      Item: KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
+      Item: { ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW },
     });
     sfnMock.on(StartExecutionCommand).resolves({ executionArn: 'xxx' });
     ddbMock.on(ScanCommand).resolves({

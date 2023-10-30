@@ -90,6 +90,7 @@ import { server } from '../../index';
 import { CPipeline } from '../../model/pipeline';
 import { StackManager } from '../../service/stack';
 import 'aws-sdk-client-mock-jest';
+import { Tag } from '@aws-sdk/client-cloudformation';
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 const kafkaMock = mockClient(KafkaClient);
@@ -1669,7 +1670,7 @@ describe('Workflow test', () => {
     dictionaryMock(ddbMock);
     sfnMock.on(StartExecutionCommand).resolves({ executionArn: MOCK_EXECUTION_ID });
     const pipeline: CPipeline = new CPipeline({ ...RETRY_PIPELINE_WITH_WORKFLOW });
-    const stackTemplateMap = await pipeline.getStackTemplateMap();
+    const stackTemplateMap = await pipeline.getStackTemplateNameUrlMap();
     const stackManager: StackManager = new StackManager({ ...RETRY_PIPELINE_WITH_WORKFLOW });
     const tags: Tag[] = [{ Key: 'version', Value: 'v2' }];
     stackManager.retryWorkflow(stackTemplateMap, tags);
@@ -1815,7 +1816,7 @@ describe('Workflow test', () => {
     dictionaryMock(ddbMock);
     sfnMock.on(StartExecutionCommand).resolves({ executionArn: MOCK_EXECUTION_ID });
     const pipeline: CPipeline = new CPipeline({ ...RETRY_PIPELINE_WITH_WORKFLOW_AND_UNDEFINED_STATUS });
-    const stackTemplateMap = await pipeline.getStackTemplateMap();
+    const stackTemplateMap = await pipeline.getStackTemplateNameUrlMap();
     const stackManager: StackManager = new StackManager({ ...RETRY_PIPELINE_WITH_WORKFLOW_AND_UNDEFINED_STATUS });
     const tags: Tag[] = [{ Key: 'version', Value: 'v2' }];
     stackManager.retryWorkflow(stackTemplateMap, tags);
@@ -1956,7 +1957,7 @@ describe('Workflow test', () => {
     dictionaryMock(ddbMock);
     sfnMock.on(StartExecutionCommand).resolves({ executionArn: MOCK_EXECUTION_ID });
     const pipeline: CPipeline = new CPipeline({ ...RETRY_PIPELINE_WITH_WORKFLOW_AND_ROLLBACK_COMPLETE });
-    const stackTemplateMap = await pipeline.getStackTemplateMap();
+    const stackTemplateMap = await pipeline.getStackTemplateNameUrlMap();
     const stackManager: StackManager = new StackManager({ ...RETRY_PIPELINE_WITH_WORKFLOW_AND_ROLLBACK_COMPLETE });
     const tags: Tag[] = [{ Key: 'version', Value: 'v2' }];
     stackManager.retryWorkflow(stackTemplateMap, tags);

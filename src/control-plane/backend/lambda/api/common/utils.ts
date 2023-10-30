@@ -514,6 +514,18 @@ function getStackOutputFromPipelineStatus(status: PipelineStatus, stackType: Pip
   return '';
 }
 
+function getVersionFromTags(tags: Tag[] | undefined) {
+  let version = '';
+  if (!tags) {
+    return version;
+  }
+  const versionTag = tags.filter(t => t.Key === 'aws-solution/version');
+  if (versionTag.length > 0) {
+    version = versionTag[0].Value ?? '';
+  }
+  return version;
+}
+
 function getReportingDashboardsUrl(status: PipelineStatus, stackType: PipelineStackType, key: string): ReportingDashboardOutput[] {
   let dashboards: ReportingDashboardOutput[] = [];
   const dashboardsOutputs = getStackOutputFromPipelineStatus(
@@ -850,4 +862,5 @@ export {
   getDataFromLastDay,
   pathNodesToAttribute,
   getCurMonthStr,
+  getVersionFromTags,
 };
