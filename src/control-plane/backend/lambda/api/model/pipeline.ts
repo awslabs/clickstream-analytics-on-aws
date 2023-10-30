@@ -46,7 +46,7 @@ import { StackManager } from '../service/stack';
 import { describeStack } from '../store/aws/cloudformation';
 import { listMSKClusterBrokers } from '../store/aws/kafka';
 
-import { registerClickstreamUser } from '../store/aws/quicksight';
+import { QuickSightUserArns, registerClickstreamUser } from '../store/aws/quicksight';
 import { getRedshiftInfo } from '../store/aws/redshift';
 import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
@@ -167,8 +167,6 @@ export interface DataModeling {
 export interface Reporting {
   readonly quickSight?: {
     readonly accountName: string;
-    readonly user: string;
-    readonly arn: string;
     readonly namespace?: string;
     readonly vpcConnection?: string;
   };
@@ -235,6 +233,7 @@ export interface CPipelineResources {
   solution?: IDictionary;
   templates?: IDictionary;
   quickSightSubnetIds?: string[];
+  quickSightUser?: QuickSightUserArns;
 }
 
 export class CPipeline {
@@ -436,7 +435,11 @@ export class CPipeline {
     }
 
     if (this.pipeline.reporting) {
-      await registerClickstreamUser();
+      const quickSightUser = await registerClickstreamUser();
+      this.resources = {
+        ...this.resources,
+        quickSightUser: quickSightUser,
+      };
     }
   }
 

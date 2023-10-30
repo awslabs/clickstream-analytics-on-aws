@@ -46,7 +46,6 @@
     "redshiftProvisionedClusterEmptyError": "Please select a cluster",
     "redshiftProvisionedDBUserEmptyError": "Please input the database user.",
     "redshiftProvisionedDBUserFormatError": "Database user format error",
-    "quickSightUserEmptyError": "Please select a QuickSight user.",
     "emailInvalid": "Email invalid."
   },
   "create": {
@@ -221,8 +220,6 @@
     "quickSightNotEnterprise": "QuickSight edition is not enterprise in your account",
     "quickSightNotEnterpriseDesc": "The solution dashboard need the QuickSight Enterprise, you can upgrade edition in QuickSight Management Console.",
     "quickSightSubscription": "Subscription",
-    "quickSightUser": "QuickSight user",
-    "quickSightUserDesc": "Select a QuickSight user for the solution to create datasets and analyses. Click “Create new” button to create a new user.",
     "quickSIghtPlaceholder": "Select a quicksight user",
     "ingestSettings": "Ingestion setting",
     "clusterSize": "Cluster Size",

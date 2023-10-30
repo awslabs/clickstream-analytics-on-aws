@@ -110,14 +110,6 @@ declare global {
       | 'VALIDATION_TIMED_OUT';
   }
 
-  interface QuickSightUserResponse {
-    active: boolean;
-    arn: string;
-    email: string;
-    role: string;
-    userName: string;
-  }
-
   interface SubscribeQuickSightResponse {
     IAMUser: boolean;
     accountName: string;

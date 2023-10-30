@@ -407,13 +407,9 @@ describe('Test QuickSight service available', () => {
         changeEnableReporting={() => {
           return;
         }}
-        changeQuickSightSelectedUser={() => {
-          return;
-        }}
         changeQuickSightAccountName={() => {
           return;
         }}
-        quickSightUserEmptyError={false}
       />
     );
 
@@ -455,13 +451,9 @@ describe('Test QuickSight service available', () => {
         changeEnableReporting={() => {
           return;
         }}
-        changeQuickSightSelectedUser={() => {
-          return;
-        }}
         changeQuickSightAccountName={() => {
           return;
         }}
-        quickSightUserEmptyError={false}
       />
     );
 

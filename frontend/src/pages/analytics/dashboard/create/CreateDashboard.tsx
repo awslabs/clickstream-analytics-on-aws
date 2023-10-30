@@ -84,7 +84,6 @@ const CreateDashboard: React.FC<CreateDashboardProps> = (
         projectId: projectId,
         appId: appId,
         region: pipeline.region,
-        ownerPrincipal: pipeline.reporting?.quickSight?.arn,
         defaultDataSourceArn:
           reportingOutputs.get(OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN) ??
           '',

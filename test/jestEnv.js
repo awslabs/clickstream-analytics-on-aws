@@ -27,6 +27,7 @@ process.env.PREFIX_TIME_GSI_NAME = 'prefix-time-gsi-name'
 process.env.CLICK_STREAM_TABLE_NAME = 'click-stream-table-name'
 process.env.ANALYTICS_METADATA_TABLE_NAME = 'analytics-metadata-table-name'
 process.env.DICTIONARY_TABLE_NAME = 'dictionary-table-name'
+process.env.QUICKSIGHT_EMBED_ROLE_ARN = 'arn:aws:iam::555555555555:role/QuickSightEmbeddingRole'
 
 // controlplane bundling
 process.env.IS_SKIP_ASSET_BUNDLE = 'true'

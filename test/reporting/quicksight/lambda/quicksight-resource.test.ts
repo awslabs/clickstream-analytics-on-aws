@@ -400,7 +400,6 @@ describe('QuickSight Lambda function', () => {
   });
 
   test('Create QuickSight dashboard - dataset already exist', async () => {
-
     quickSightClientMock.on(CreateDataSetCommand).rejectsOnce(existError);
     try {
       await handler(basicEvent, context);
@@ -415,7 +414,6 @@ describe('QuickSight Lambda function', () => {
   });
 
   test('Create QuickSight dashboard - analysis already exist', async () => {
-
     quickSightClientMock.on(DescribeDataSetCommand).resolvesOnce({
       DataSet: {
         DataSetId: 'dataset_0',
@@ -450,7 +448,6 @@ describe('QuickSight Lambda function', () => {
   });
 
   test('Create QuickSight dashboard - dashboard already exist', async () => {
-
     quickSightClientMock.on(DescribeDataSetCommand).resolvesOnce({
       DataSet: {
         DataSetId: 'dataset_0',
@@ -712,8 +709,6 @@ describe('QuickSight Lambda function', () => {
         DashboardId: 'dashboard_0',
       },
     });
-
-
     const resp = await handler(updateFromEmptyEvent, context) as CdkCustomResourceResponse;
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeAnalysisCommand, 1);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDashboardCommand, 1);
@@ -831,6 +826,7 @@ describe('QuickSight Lambda function', () => {
     quickSightClientMock.on(DescribeDashboardCommand).rejectsOnce(notExistError);
 
     const resp = await handler(multiSchemaUpdateWithDeleteEvent, context) as CdkCustomResourceResponse;
+
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeAnalysisCommand, 1);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDashboardCommand, 1);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDataSetCommand, 2);
@@ -914,6 +910,7 @@ describe('QuickSight Lambda function', () => {
       .rejectsOnce(notExistError);
 
     const resp = await handler(multiSchemaUpdateWithDeleteAndCreateEvent, context) as CdkCustomResourceResponse;
+
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeAnalysisCommand, 2);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDashboardCommand, 2);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDataSetCommand, 4);

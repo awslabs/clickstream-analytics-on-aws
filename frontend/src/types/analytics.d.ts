@@ -197,7 +197,6 @@ declare global {
     readonly description: string;
     readonly region: string;
     readonly sheets: IAnalyticsDashboardSheet[];
-    readonly ownerPrincipal: string;
     readonly defaultDataSourceArn: string;
     readonly embedUrl?: string;
 
