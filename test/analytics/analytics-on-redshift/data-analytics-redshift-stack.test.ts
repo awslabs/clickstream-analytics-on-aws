@@ -183,7 +183,7 @@ describe('DataAnalyticsRedshiftStack common parameter test', () => {
 
   test('Should check S3 bucket pattern', () => {
     [getParameter(template, 'ODSEventBucket'),
-    getParameter(template, 'LoadWorkflowBucket')].forEach(param => {
+      getParameter(template, 'LoadWorkflowBucket')].forEach(param => {
       const pattern = param.AllowedPattern;
       const regex = new RegExp(`${pattern}`);
       const validValues = [
@@ -211,7 +211,7 @@ describe('DataAnalyticsRedshiftStack common parameter test', () => {
 
   test('Check S3Prefix pattern', () => {
     [getParameter(template, 'ODSEventPrefix'),
-    getParameter(template, 'LoadWorkflowBucketPrefix')].forEach(param => {
+      getParameter(template, 'LoadWorkflowBucketPrefix')].forEach(param => {
       const pattern = param.AllowedPattern;
       const regex = new RegExp(`${pattern}`);
       const validValues = [
