@@ -14,7 +14,7 @@
 import { join } from 'path';
 import { Duration } from 'aws-cdk-lib';
 import { ITable } from 'aws-cdk-lib/aws-dynamodb';
-import { IVpc, SubnetSelection } from 'aws-cdk-lib/aws-ec2';
+import { ISecurityGroup, IVpc, SubnetSelection } from 'aws-cdk-lib/aws-ec2';
 import { Rule, Match } from 'aws-cdk-lib/aws-events';
 import { SfnStateMachine, LambdaFunction } from 'aws-cdk-lib/aws-events-targets';
 import { IRole, Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
@@ -33,7 +33,6 @@ import { createLogGroup } from '../../common/logs';
 import { getPutMetricsPolicyStatements } from '../../common/metrics';
 import { MetricsNamespace, REDSHIFT_MODE } from '../../common/model';
 import { POWERTOOLS_ENVS } from '../../common/powertools';
-import { createSGForEgressToAwsService } from '../../common/sg';
 import { SolutionNodejsFunction } from '../../private/function';
 
 export interface LoadOdsDataToRedshiftWorkflowProps {
@@ -43,6 +42,7 @@ export interface LoadOdsDataToRedshiftWorkflowProps {
     readonly vpcSubnets: SubnetSelection;
   };
 
+  readonly securityGroupForLambda: ISecurityGroup;
   readonly serverlessRedshift?: ExistingRedshiftServerlessProps;
   readonly provisionedRedshift?: ProvisionedRedshiftProps;
   readonly databaseName: string;
@@ -125,7 +125,7 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
    */
   private createS3EventProcessorLambda(taskTable: ITable, redshiftTable: string,
     odsSource: ODSSource, props: LoadOdsDataToRedshiftWorkflowProps): IFunction {
-    const fnSG = createSGForEgressToAwsService(this, `s3EventFnSG-${redshiftTable}`, props.networkConfig.vpc);
+    const fnSG = props.securityGroupForLambda;
 
     const fn = new SolutionNodejsFunction(this, `s3EventFn-${redshiftTable}`, {
       runtime: Runtime.NODEJS_18_X,
@@ -401,7 +401,7 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
     const loadDataConfig = props.loadDataConfig;
     const resourceId = `CreateLoadManifest-${odsTableName}`;
 
-    const fnSG = createSGForEgressToAwsService(this, `${resourceId}SG`, props.networkConfig.vpc);
+    const fnSG = props.securityGroupForLambda;
     const cloudwatchPolicyStatements = getPutMetricsPolicyStatements(MetricsNamespace.REDSHIFT_ANALYTICS);
     const fn = new SolutionNodejsFunction(this, `${resourceId}Fn`, {
       runtime: Runtime.NODEJS_18_X,
@@ -443,7 +443,7 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
     const loadDataConfig = props.loadDataConfig;
     const resourceId = `LoadManifest-${odsTableName}`;
 
-    const fnSG = createSGForEgressToAwsService(this, `${resourceId}SG}`, props.networkConfig.vpc);
+    const fnSG = props.securityGroupForLambda;
     const cloudwatchPolicyStatements = getPutMetricsPolicyStatements(MetricsNamespace.REDSHIFT_ANALYTICS);
     const fn = new SolutionNodejsFunction(this, `${resourceId}Fn`, {
       runtime: Runtime.NODEJS_18_X,
@@ -492,7 +492,7 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
 
     const resourceId = `CheckLoadJobStatus-${odsTableName}`;
 
-    const fnSG = createSGForEgressToAwsService(this, `${resourceId}SG`, props.networkConfig.vpc);
+    const fnSG = props.securityGroupForLambda;
 
     const fn = new SolutionNodejsFunction(this, `${resourceId}Fn`, {
       runtime: Runtime.NODEJS_18_X,
@@ -530,7 +530,7 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
     const odsSource = (props.tablesOdsSource as any)[odsTableName];
     const resourceId = `HasMoreWork-${odsTableName}`;
 
-    const fnSG = createSGForEgressToAwsService(this, `${resourceId}SG`, props.networkConfig.vpc);
+    const fnSG = props.securityGroupForLambda;
 
     const fn = new SolutionNodejsFunction(this, `${resourceId}Fn`, {
       runtime: Runtime.NODEJS_18_X,
@@ -564,7 +564,7 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
 
   private createCheckHasRunningWorkflowFn(ddbTable: ITable, props: LoadOdsDataToRedshiftWorkflowProps): IFunction {
 
-    const fnSG = createSGForEgressToAwsService(this, 'HasRunningWorkflowFnSG', props.networkConfig.vpc);
+    const fnSG = props.securityGroupForLambda;
 
     const fn = new SolutionNodejsFunction(this, 'HasRunningWorkflowFn', {
       runtime: Runtime.NODEJS_18_X,

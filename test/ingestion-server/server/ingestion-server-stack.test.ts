@@ -1243,3 +1243,4 @@ test('Check there is no Kinesis outputs in S3 tempalte', () => {
   expect(kinesisArnOutput).toBeUndefined();
 });
 
+

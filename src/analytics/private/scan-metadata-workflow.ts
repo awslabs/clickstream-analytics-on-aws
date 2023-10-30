@@ -13,7 +13,7 @@
 
 import { join } from 'path';
 import { Duration } from 'aws-cdk-lib';
-import { IVpc, SubnetSelection } from 'aws-cdk-lib/aws-ec2';
+import { ISecurityGroup, IVpc, SubnetSelection } from 'aws-cdk-lib/aws-ec2';
 import { Rule, Schedule } from 'aws-cdk-lib/aws-events';
 import { SfnStateMachine } from 'aws-cdk-lib/aws-events-targets';
 import { IRole, PolicyStatement } from 'aws-cdk-lib/aws-iam';
@@ -27,7 +27,6 @@ import { createLambdaRole } from '../../common/lambda';
 import { createLogGroup } from '../../common/logs';
 import { REDSHIFT_MODE } from '../../common/model';
 import { POWERTOOLS_ENVS } from '../../common/powertools';
-import { createSGForEgressToAwsService } from '../../common/sg';
 import { SolutionNodejsFunction } from '../../private/function';
 
 export interface ScanMetadataWorkflowProps {
@@ -36,6 +35,7 @@ export interface ScanMetadataWorkflowProps {
     readonly vpc: IVpc;
     readonly vpcSubnets: SubnetSelection;
   };
+  readonly securityGroupForLambda: ISecurityGroup;
   readonly serverlessRedshift?: ExistingRedshiftServerlessCustomProps;
   readonly provisionedRedshift?: ProvisionedRedshiftProps;
   readonly databaseName: string;
@@ -168,7 +168,7 @@ export class ScanMetadataWorkflow extends Construct {
   }
 
   private scanMetadataFn(props: ScanMetadataWorkflowProps): IFunction {
-    const fnSG = createSGForEgressToAwsService(this, 'ScanMetadataFnSG', props.networkConfig.vpc);
+    const fnSG = props.securityGroupForLambda;
 
     const fn = new SolutionNodejsFunction(this, 'ScanMetadataFn', {
       runtime: Runtime.NODEJS_18_X,
@@ -209,7 +209,7 @@ export class ScanMetadataWorkflow extends Construct {
   }
 
   private checkScanMetadataStatusFn(props: ScanMetadataWorkflowProps): IFunction {
-    const fnSG = createSGForEgressToAwsService(this, 'CheckScanMetadataStatusFnSG', props.networkConfig.vpc);
+    const fnSG = props.securityGroupForLambda;
 
     const fn = new SolutionNodejsFunction(this, 'CheckScanMetadataStatusFn', {
       runtime: Runtime.NODEJS_18_X,
@@ -236,7 +236,7 @@ export class ScanMetadataWorkflow extends Construct {
   }
 
   private storeMetadataIntoDDBFn(props: ScanMetadataWorkflowProps): IFunction {
-    const fnSG = createSGForEgressToAwsService(this, 'StoreMetadataIntoDDBFnSG', props.networkConfig.vpc);
+    const fnSG = props.securityGroupForLambda;
 
     const policyStatements = [
       new PolicyStatement({

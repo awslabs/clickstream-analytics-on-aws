@@ -11,19 +11,13 @@
  *  and limitations under the License.
  */
 
-import { IVpc, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
+import { IVpc, ISecurityGroup } from 'aws-cdk-lib/aws-ec2';
 import { Construct } from 'constructs';
-import { addCfnNagToSecurityGroup } from '../../../common/cfn-nag';
+import { createSGForEgressToAwsService } from '../../../common/sg';
 
 export function createKinesisToS3LambdaSecurityGroup(
   scope: Construct,
   vpc: IVpc,
-): SecurityGroup {
-  const sg = new SecurityGroup(scope, 'lambdaKinesisToS3Sg', {
-    description: 'Security group for kinesis to s3 lambda',
-    vpc,
-    allowAllOutbound: true,
-  });
-  addCfnNagToSecurityGroup(sg, ['W40', 'W5']);
-  return sg;
+): ISecurityGroup {
+  return createSGForEgressToAwsService(scope, 'FnSg', vpc);
 }

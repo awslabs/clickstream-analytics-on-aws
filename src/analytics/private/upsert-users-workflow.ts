@@ -13,7 +13,7 @@
 
 import { join } from 'path';
 import { Duration } from 'aws-cdk-lib';
-import { IVpc, SubnetSelection } from 'aws-cdk-lib/aws-ec2';
+import { ISecurityGroup, IVpc, SubnetSelection } from 'aws-cdk-lib/aws-ec2';
 import { Rule, Schedule } from 'aws-cdk-lib/aws-events';
 import { SfnStateMachine } from 'aws-cdk-lib/aws-events-targets';
 import { IRole } from 'aws-cdk-lib/aws-iam';
@@ -27,7 +27,6 @@ import { createLambdaRole } from '../../common/lambda';
 import { createLogGroup } from '../../common/logs';
 import { REDSHIFT_MODE } from '../../common/model';
 import { POWERTOOLS_ENVS } from '../../common/powertools';
-import { createSGForEgressToAwsService } from '../../common/sg';
 import { SolutionNodejsFunction } from '../../private/function';
 
 export interface UpsertUsersWorkflowProps {
@@ -36,6 +35,7 @@ export interface UpsertUsersWorkflowProps {
     readonly vpc: IVpc;
     readonly vpcSubnets: SubnetSelection;
   };
+  readonly securityGroupForLambda: ISecurityGroup;
   readonly serverlessRedshift?: ExistingRedshiftServerlessCustomProps;
   readonly provisionedRedshift?: ProvisionedRedshiftProps;
   readonly databaseName: string;
@@ -155,7 +155,7 @@ export class UpsertUsersWorkflow extends Construct {
   }
 
   private upsertUsersFn(props: UpsertUsersWorkflowProps): IFunction {
-    const fnSG = createSGForEgressToAwsService(this, 'UpsertUsersFnSG', props.networkConfig.vpc);
+    const fnSG = props.securityGroupForLambda;
 
     const fn = new SolutionNodejsFunction(this, 'UpsertUsersFn', {
       runtime: Runtime.NODEJS_18_X,
@@ -194,7 +194,7 @@ export class UpsertUsersWorkflow extends Construct {
   }
 
   private createCheckUpsertJobStatusFn(props: UpsertUsersWorkflowProps): IFunction {
-    const fnSG = createSGForEgressToAwsService(this, 'CheckUpsertJobStatusFnSG', props.networkConfig.vpc);
+    const fnSG = props.securityGroupForLambda;
 
     const fn = new SolutionNodejsFunction(this, 'CheckUpsertJobStatusFn', {
       runtime: Runtime.NODEJS_18_X,

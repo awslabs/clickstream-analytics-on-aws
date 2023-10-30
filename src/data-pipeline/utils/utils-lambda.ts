@@ -15,7 +15,7 @@ import { join } from 'path';
 import { Database, Table } from '@aws-cdk/aws-glue-alpha';
 import { Duration, Stack } from 'aws-cdk-lib';
 
-import { IVpc, SecurityGroup, SubnetSelection } from 'aws-cdk-lib/aws-ec2';
+import { ISecurityGroup, IVpc, SubnetSelection } from 'aws-cdk-lib/aws-ec2';
 import { Runtime, Tracing, Function } from 'aws-cdk-lib/aws-lambda';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { IBucket } from 'aws-cdk-lib/aws-s3';
@@ -24,7 +24,6 @@ import { Construct } from 'constructs';
 
 import { RoleUtil } from './utils-role';
 
-import { addCfnNagToSecurityGroup } from '../../common/cfn-nag';
 import { attachListTagsPolicyForFunction } from '../../common/lambda/tags';
 import { POWERTOOLS_ENVS } from '../../common/powertools';
 import { getShortIdOfStack } from '../../common/stack';
@@ -49,7 +48,7 @@ interface Props {
   readonly s3PathPluginFiles: string;
   readonly entryPointJar: string;
   readonly scheduleExpression: string;
-  readonly outputFormat: 'json'|'parquet';
+  readonly outputFormat: 'json' | 'parquet';
   readonly userKeepDays: number;
   readonly itemKeepDays: number;
 }
@@ -80,11 +79,11 @@ export class LambdaUtil {
     this.scope = scope;
     this.roleUtil = roleUtil;
   }
-
   public createPartitionSyncerLambda(
     databaseName: string,
     sourceTableName: string,
     sinkTables: ClickstreamSinkTables,
+    securityGroupForLambda: ISecurityGroup,
   ): Function {
     const lambdaRole = this.roleUtil.createPartitionSyncerRole(
       'partitionSyncerLambdaRole',
@@ -95,20 +94,13 @@ export class LambdaUtil {
     this.props.sinkS3Bucket.grantReadWrite(lambdaRole, `${this.props.sinkS3Prefix}*`);
     this.props.sourceS3Bucket.grantReadWrite(lambdaRole, `${this.props.sourceS3Prefix}*`);
 
-    const lambdaSecurityGroup = this.createSecurityGroup(
-      this.scope,
-      this.props.vpc,
-      'lambdaPartitionSyncerSecurityGroup',
-      'Security group for Glue partition syncer lambda',
-    );
-
     const fn = new SolutionNodejsFunction(
       this.scope,
       'GlueTablePartitionSyncerFunction',
       {
         vpc: this.props.vpc,
         vpcSubnets: this.props.vpcSubnets,
-        securityGroups: [lambdaSecurityGroup],
+        securityGroups: [securityGroupForLambda],
         role: lambdaRole,
         entry: join(__dirname, '..', 'lambda', 'partition-syncer', 'index.ts'),
         reservedConcurrentExecutions: 1,
@@ -132,38 +124,22 @@ export class LambdaUtil {
     return fn;
   }
 
-  private createSecurityGroup(
-    scope: Construct,
-    vpc: IVpc,
-    id: string,
-    description: string,
-  ): SecurityGroup {
-    const sg = new SecurityGroup(scope, id, {
-      description,
-      vpc,
-      allowAllOutbound: true,
-    });
-    addCfnNagToSecurityGroup(sg, ['W40', 'W5']);
-    return sg;
-  }
 
-  public createEmrJobSubmitterLambda(glueDB: Database, sourceTable: Table, sinkTables: ClickstreamSinkTables, emrApplicationId: string): Function {
+  public createEmrJobSubmitterLambda(
+    glueDB: Database,
+    sourceTable: Table,
+    sinkTables: ClickstreamSinkTables,
+    emrApplicationId: string,
+    securityGroupForLambda: ISecurityGroup): Function {
     const lambdaRole = this.roleUtil.createJobSubmitterLambdaRole(glueDB, sourceTable, sinkTables, emrApplicationId);
 
     this.props.sinkS3Bucket.grantReadWrite(lambdaRole, `${this.props.sinkS3Prefix}*`);
     this.props.sourceS3Bucket.grantRead(lambdaRole, `${this.props.sourceS3Prefix}*`);
     this.props.pipelineS3Bucket.grantReadWrite(lambdaRole, `${this.props.pipelineS3Prefix}*`);
 
-    const lambdaSecurityGroup = this.createSecurityGroup(
-      this.scope,
-      this.props.vpc,
-      'emrSparkJobSubmitterFunctionSecurityGroup',
-      'Security Group for EMR Spark Job Submitter Function',
-    );
-
     const fn = new SolutionNodejsFunction(this.scope, 'EmrSparkJobSubmitterFunction', {
       role: lambdaRole,
-      securityGroups: [lambdaSecurityGroup],
+      securityGroups: [securityGroupForLambda],
       vpc: this.props.vpc,
       vpcSubnets: this.props.vpcSubnets,
       awsSdkConnectionReuse: true,
@@ -203,20 +179,14 @@ export class LambdaUtil {
     return fn;
   }
 
-  public createEmrJobStateListenerLambda(emrApplicationId: string, dlSqs: Queue) {
+  public createEmrJobStateListenerLambda(emrApplicationId: string, securityGroupForLambda: ISecurityGroup, dlSqs: Queue) {
     const lambdaRole = this.roleUtil.createEmrJobStateListenerLambdaRole(emrApplicationId);
     dlSqs.grantSendMessages(lambdaRole);
     this.props.pipelineS3Bucket.grantReadWrite(lambdaRole, `${this.props.pipelineS3Prefix}*`);
 
-    const lambdaSecurityGroup = this.createSecurityGroup(
-      this.scope,
-      this.props.vpc,
-      'EmrJobStateListenerFunctionSecurityGroup',
-      'Security Group for EMR Job State Listener',
-    );
     const fn = new SolutionNodejsFunction(this.scope, 'EmrJobStateListenerFunction', {
       role: lambdaRole,
-      securityGroups: [lambdaSecurityGroup],
+      securityGroups: [securityGroupForLambda],
       vpc: this.props.vpc,
       vpcSubnets: this.props.vpcSubnets,
       awsSdkConnectionReuse: true,

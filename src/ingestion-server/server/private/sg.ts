@@ -13,6 +13,7 @@
 
 import { CfnResource } from 'aws-cdk-lib';
 import {
+  ISecurityGroup,
   IVpc,
   Peer,
   Port,
@@ -20,6 +21,7 @@ import {
 } from 'aws-cdk-lib/aws-ec2';
 import { Construct } from 'constructs';
 import { addCfnNagSuppressRules } from '../../../common/cfn-nag';
+import { createSGForEgressToAwsService } from '../../../common/sg';
 import { RESOURCE_ID_PREFIX } from '../ingestion-server';
 
 export function createALBSecurityGroup(
@@ -69,24 +71,8 @@ export function createALBSecurityGroup(
 export function createECSSecurityGroup(
   scope: Construct,
   vpc: IVpc,
-): SecurityGroup {
-  const ec2Sg = new SecurityGroup(scope, `${RESOURCE_ID_PREFIX}ecs-sg`, {
-    description: 'ECS security group',
-    vpc,
-    allowAllOutbound: true,
-  });
+): ISecurityGroup {
 
-  addCfnNagSuppressRules(ec2Sg.node.defaultChild as CfnResource, [
-    {
-      id: 'W40',
-      reason: 'Design intent: Security Groups egress with an IpProtocol of -1',
-    },
-    {
-      id: 'W5',
-      reason: 'Design intent: Security Groups found with cidr open to world on egress',
-    },
-  ]);
-
-  return ec2Sg;
+  return createSGForEgressToAwsService(scope, `${RESOURCE_ID_PREFIX}ecs-sg`, vpc);
 }
 

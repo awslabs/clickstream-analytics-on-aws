@@ -38,6 +38,7 @@ import { ScanMetadataWorkflow } from './private/scan-metadata-workflow';
 import { UpsertUsersWorkflow } from './private/upsert-users-workflow';
 import { addCfnNagForCustomResourceProvider, addCfnNagForLogRetention, addCfnNagToStack, ruleRolePolicyWithWildcardResources, ruleForLambdaVPCAndReservedConcurrentExecutions } from '../common/cfn-nag';
 import { EVENT_SOURCE_LOAD_DATA_FLOW } from '../common/constant';
+import { createSGForEgressToAwsService } from '../common/sg';
 import { SolutionInfo } from '../common/solution-info';
 import { getExistVpc } from '../common/vpc-utils';
 
@@ -89,6 +90,8 @@ export class RedshiftAnalyticsStack extends NestedStack {
     const featureName = `Analytics-${id}`;
 
     this.templateOptions.description = `(${SolutionInfo.SOLUTION_ID}-dmr) ${SolutionInfo.SOLUTION_NAME} - ${featureName} ${SolutionInfo.SOLUTION_VERSION_DETAIL}`;
+
+    const securityGroupForLambda = createSGForEgressToAwsService(this, 'FnSg', props.vpc);
 
     let existingRedshiftServerlessProps: ExistingRedshiftServerlessProps | undefined = props.existingRedshiftServerlessProps;
 
@@ -238,6 +241,7 @@ export class RedshiftAnalyticsStack extends NestedStack {
         vpc: props.vpc,
         vpcSubnets: props.subnetSelection,
       },
+      securityGroupForLambda,
       serverlessRedshift: existingRedshiftServerlessProps,
       provisionedRedshift: props.provisionedRedshiftProps,
       databaseName: projectDatabaseName,
@@ -251,6 +255,7 @@ export class RedshiftAnalyticsStack extends NestedStack {
         vpc: props.vpc,
         vpcSubnets: props.subnetSelection,
       },
+      securityGroupForLambda,
       serverlessRedshift: existingRedshiftServerlessProps,
       provisionedRedshift: props.provisionedRedshiftProps,
       databaseName: projectDatabaseName,
@@ -264,6 +269,7 @@ export class RedshiftAnalyticsStack extends NestedStack {
         vpc: props.vpc,
         vpcSubnets: props.subnetSelection,
       },
+      securityGroupForLambda,
       serverlessRedshift: existingRedshiftServerlessProps,
       provisionedRedshift: props.provisionedRedshiftProps,
       databaseName: projectDatabaseName,
@@ -278,6 +284,7 @@ export class RedshiftAnalyticsStack extends NestedStack {
         vpc: props.vpc,
         vpcSubnets: props.subnetSelection,
       },
+      securityGroupForLambda,
       databaseName: projectDatabaseName,
       dataAPIRole: this.redshiftDataAPIExecRole,
       emrServerlessApplicationId: props.emrServerlessApplicationId,
