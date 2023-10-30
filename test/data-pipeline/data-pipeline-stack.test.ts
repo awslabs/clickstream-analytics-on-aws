@@ -601,7 +601,7 @@ describe('DataPipelineStack Glue catalog resources test', () => {
   });
 
 
-  test('Should create partition syncer lambda role', () => {
+  test('Should create partition sync lambda role', () => {
     const roleKey = findFirstResourceByKeyPrefix(
       template,
       'AWS::IAM::Role',
@@ -809,7 +809,7 @@ describe('DataPipelineStack Glue catalog resources test', () => {
 
   });
 
-  test('Should create partition syncer lambda', () => {
+  test('Should create partition sync lambda', () => {
     const lambdaRoleKey = findFirstResourceByKeyPrefix(
       template,
       'AWS::IAM::Role',
@@ -853,7 +853,7 @@ describe('DataPipelineStack Glue catalog resources test', () => {
   });
 
 
-  test('Should create partition syncer scheduler', () => {
+  test('Should create partition sync scheduler', () => {
     template.hasResourceProperties('AWS::Events::Rule', {
       ScheduleExpression: 'cron(0 0 * * ? *)',
       State: 'ENABLED',
@@ -1247,7 +1247,7 @@ test('Plugins nested stack has CopyAssetsCustomResource', () => {
   });
 });
 
-test('Nested stack has CreateEMRServelsssApplicationCustomResource', () => {
+test('Nested stack has CreateEMRServerlessApplicationCustomResource', () => {
   const template = nestedTemplates[0];
   template.hasResourceProperties('AWS::CloudFormation::CustomResource', {
     projectId: RefAnyValue,
@@ -1284,7 +1284,7 @@ test('Nested stack has CreateEMRServelsssApplicationCustomResource', () => {
   });
 });
 
-test('CreateEMRServelsssApplicationLambdaRole policy is set correctly', () => {
+test('CreateEMRServerlessApplicationLambdaRole policy is set correctly', () => {
   const template = nestedTemplates[0];
   template.hasResourceProperties('AWS::IAM::Policy', {
     PolicyDocument: {

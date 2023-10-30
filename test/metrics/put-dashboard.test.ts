@@ -19,7 +19,7 @@ process.env.COLUMN_NUMBER = '4';
 process.env.LEGEND_POSITION = 'bottom';
 process.env.SNS_TOPIC_ARN = 'arn:aws:sns:us-east-1:1111111111:metrics-alarmNotificationSnsTopic123456';
 
-import { CloudWatchClient, DescribeAlarmsCommand, PutDashboardCommand, PutMetricAlarmCommand } from '@aws-sdk/client-cloudwatch';
+import { CloudWatchClient, ComparisonOperator, DescribeAlarmsCommand, PutDashboardCommand, PutMetricAlarmCommand, StateValue, Statistic } from '@aws-sdk/client-cloudwatch';
 import { SSMClient, GetParametersByPathCommand } from '@aws-sdk/client-ssm';
 
 import { CloudFormationCustomResourceEvent } from 'aws-lambda';
@@ -510,7 +510,7 @@ const dashboardBody =
   ],
 };
 
-const allAlarams1 = {
+const allAlarms1 = {
   NextToken: 'next',
   $metadata: {
     httpStatusCode: 200,
@@ -576,7 +576,7 @@ const allAlarams1 = {
   ],
 };
 
-const allAlarams2 = {
+const allAlarms2 = {
   $metadata: {
     httpStatusCode: 200,
     requestId: '5146250d-5cc3-45d3-87e2-c5a376b5e839',
@@ -597,11 +597,11 @@ const allAlarams2 = {
 
       ],
       InsufficientDataActions: [],
-      StateValue: 'OK',
+      StateValue: StateValue.OK,
       StateReason: 'Threshold Crossed: 1 datapoint [0.0 (23/05/23 01:02:00)] was not greater than or equal to the threshold (1.0).',
       MetricName: 'ExecutionsFailed',
       Namespace: 'AWS/States',
-      Statistic: 'Sum',
+      Statistic: Statistic.Sum,
       Dimensions: [
         {
           Name: 'StateMachineArn',
@@ -611,7 +611,7 @@ const allAlarams2 = {
       Period: 86400,
       EvaluationPeriods: 1,
       Threshold: 1,
-      ComparisonOperator: 'GreaterThanOrEqualToThreshold',
+      ComparisonOperator: ComparisonOperator.GreaterThanOrEqualToThreshold,
     },
   ],
 };
@@ -659,7 +659,7 @@ test('Can put dashboard with alarms - Create', async () => {
     ],
   });
 
-  cwClientMock.on(DescribeAlarmsCommand).resolvesOnce(allAlarams1 as any).resolvesOnce(allAlarams2);
+  cwClientMock.on(DescribeAlarmsCommand).resolvesOnce(allAlarms1 as any).resolvesOnce(allAlarms2);
 
   await handler(event, c);
   expect(cwClientMock).toHaveReceivedCommandTimes(PutDashboardCommand, 1);
@@ -668,7 +668,7 @@ test('Can put dashboard with alarms - Create', async () => {
     DashboardBody: JSON.stringify(dashboardBody),
   });
 
-  expect(cwClientMock).toHaveReceivedCommandTimes(PutMetricAlarmCommand, allAlarams1.MetricAlarms.length - 1 + allAlarams2.MetricAlarms.length);
+  expect(cwClientMock).toHaveReceivedCommandTimes(PutMetricAlarmCommand, allAlarms1.MetricAlarms.length - 1 + allAlarms2.MetricAlarms.length);
   expect(cwClientMock).toHaveReceivedNthCommandWith(3, PutMetricAlarmCommand,
     {
       ActionsEnabled: true,
@@ -796,7 +796,7 @@ test('Put dashboard can be triggered by cloudwatch ssm update(Parameter Store Ch
       },
     ],
   });
-  cwClientMock.on(DescribeAlarmsCommand).resolves(allAlarams2 as any);
+  cwClientMock.on(DescribeAlarmsCommand).resolves(allAlarms2 as any);
 
   await handler(event, c);
   expect(cwClientMock).toHaveReceivedCommandTimes(PutDashboardCommand, 1);

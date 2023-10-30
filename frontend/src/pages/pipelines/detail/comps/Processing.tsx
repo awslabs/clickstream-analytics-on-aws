@@ -89,36 +89,41 @@ const Processing: React.FC<TabContentProps> = (props: TabContentProps) => {
     }
   };
 
+  const buildProcessingIntevalFixedRateDisplay = () => {
+    if (
+      pipelineInfo?.selectedExcutionType?.value === ExecutionType.FIXED_RATE
+    ) {
+      return `${pipelineInfo.excutionFixedValue} ${pipelineInfo.selectedExcutionUnit?.label} `;
+    } else {
+      return `${pipelineInfo?.exeCronExp}`;
+    }
+  };
+
+  const buildProcessingIntevalCronDisplay = () => {
+    if (pipelineInfo?.dataProcessing.scheduleExpression.startsWith('cron')) {
+      return pipelineInfo?.dataProcessing.scheduleExpression;
+    } else {
+      const pattern = /rate\((\d+\s\w+)\)/;
+      const match =
+        pipelineInfo?.dataProcessing.scheduleExpression.match(pattern);
+
+      if (match) {
+        const rateValue = match[1];
+        const formattedRateValue = rateValue.replace(/\b\s+(\w)/, (match) =>
+          match.toUpperCase()
+        );
+        return formattedRateValue;
+      }
+    }
+  };
+
   const getDataProcessingIntervalDisplay = () => {
     if (pipelineInfo) {
       if (pipelineInfo.selectedExcutionType) {
-        if (
-          pipelineInfo.selectedExcutionType.value === ExecutionType.FIXED_RATE
-        ) {
-          return `${pipelineInfo.excutionFixedValue} ${pipelineInfo.selectedExcutionUnit?.label} `;
-        } else {
-          return `${pipelineInfo.exeCronExp}`;
-        }
+        return buildProcessingIntevalFixedRateDisplay();
       } else if (pipelineInfo?.dataProcessing?.scheduleExpression) {
         if (pipelineInfo.dataProcessing.scheduleExpression) {
-          if (
-            pipelineInfo.dataProcessing.scheduleExpression.startsWith('cron')
-          ) {
-            return pipelineInfo.dataProcessing.scheduleExpression;
-          } else {
-            const pattern = /rate\((\d+\s\w+)\)/;
-            const match =
-              pipelineInfo.dataProcessing.scheduleExpression.match(pattern);
-
-            if (match) {
-              const rateValue = match[1];
-              const formattedRateValue = rateValue.replace(
-                /\b\s+(\w)/,
-                (match) => match.toUpperCase()
-              );
-              return formattedRateValue;
-            }
-          }
+          return buildProcessingIntevalCronDisplay();
         } else {
           return '-';
         }
@@ -167,40 +172,45 @@ const Processing: React.FC<TabContentProps> = (props: TabContentProps) => {
     }
   };
 
+  const buildRedshiftUpsertFreqFixedRate = () => {
+    if (pipelineInfo?.selectedUpsertType?.value === ExecutionType.FIXED_RATE) {
+      return `${pipelineInfo?.redshiftUpsertFreqValue} ${pipelineInfo.redshiftUpsertFreqUnit?.label} `;
+    } else {
+      return `${pipelineInfo?.upsertCronExp}`;
+    }
+  };
+
+  const buildRedshiftUpsertFreqCron = () => {
+    if (
+      pipelineInfo?.dataModeling?.upsertUsers?.scheduleExpression?.startsWith(
+        'cron'
+      )
+    ) {
+      return pipelineInfo?.dataModeling.upsertUsers?.scheduleExpression;
+    } else {
+      const pattern = /rate\((\d+\s\w+)\)/;
+      const match =
+        pipelineInfo?.dataModeling?.upsertUsers?.scheduleExpression?.match(
+          pattern
+        );
+
+      if (match) {
+        const rateValue = match[1];
+        const formattedRateValue = rateValue.replace(/\b\s+(\w)/, (match) =>
+          match.toUpperCase()
+        );
+        return formattedRateValue;
+      }
+    }
+  };
+
   const getRedshiftUpsertFrequncyDisplay = () => {
     if (pipelineInfo) {
       if (pipelineInfo.selectedUpsertType) {
-        if (
-          pipelineInfo.selectedUpsertType.value === ExecutionType.FIXED_RATE
-        ) {
-          return `${pipelineInfo.redshiftUpsertFreqValue} ${pipelineInfo.redshiftUpsertFreqUnit?.label} `;
-        } else {
-          return `${pipelineInfo.upsertCronExp}`;
-        }
+        return buildRedshiftUpsertFreqFixedRate();
       } else if (pipelineInfo?.dataModeling?.upsertUsers?.scheduleExpression) {
         if (pipelineInfo.dataModeling.upsertUsers.scheduleExpression) {
-          if (
-            pipelineInfo.dataModeling.upsertUsers.scheduleExpression.startsWith(
-              'cron'
-            )
-          ) {
-            return pipelineInfo.dataModeling.upsertUsers.scheduleExpression;
-          } else {
-            const pattern = /rate\((\d+\s\w+)\)/;
-            const match =
-              pipelineInfo.dataModeling.upsertUsers.scheduleExpression.match(
-                pattern
-              );
-
-            if (match) {
-              const rateValue = match[1];
-              const formattedRateValue = rateValue.replace(
-                /\b\s+(\w)/,
-                (match) => match.toUpperCase()
-              );
-              return formattedRateValue;
-            }
-          }
+          return buildRedshiftUpsertFreqCron();
         } else {
           return '-';
         }
@@ -277,7 +287,7 @@ const Processing: React.FC<TabContentProps> = (props: TabContentProps) => {
   const isRedshiftEnable = () => {
     // Pipeline Detail
     if (pipelineInfo?.pipelineId) {
-      if (pipelineInfo.dataModeling && pipelineInfo.dataModeling.redshift) {
+      if (pipelineInfo.dataModeling?.redshift) {
         return true;
       }
     } else {

@@ -47,7 +47,7 @@ const secretManagerClient = new SecretsManagerClient({
 
 export const physicalIdPrefix = 'create-redshift-db-schemas-custom-resource-';
 export const handler: CdkCustomResourceHandler = async (event: CloudFormationCustomResourceEvent, context: Context) => {
-  logger.info(JSON.stringify(event));
+  logger.info('event', { event });
   const physicalId = ('PhysicalResourceId' in event) ? event.PhysicalResourceId :
     `${physicalIdPrefix}${generateRandomStr(8, 'abcdefghijklmnopqrstuvwxyz0123456789')}`;
   const biUsername = `${(event.ResourceProperties as ResourcePropertiesType).redshiftBIUsernamePrefix}${physicalId.substring(physicalIdPrefix.length)}`;
@@ -119,7 +119,7 @@ async function onCreate(event: CdkCustomResourceEvent, biUsername: string, tags:
   await createSchemas(props, biUsername);
 
   // 3. create views for reporting
-  await createViewForReporting(props);
+  await createViewForReporting(props, biUsername);
 }
 
 async function createBIUserCredentialSecret(secretName: string, biUsername: string, projectId: string, tags: Tag[]): Promise<BIUserCredential> {
@@ -195,7 +195,7 @@ async function onUpdate(event: CloudFormationCustomResourceUpdateEvent, biUserna
 
   await updateSchemas(props, biUsername, oldProps);
 
-  await updateViewForReporting(props, oldProps);
+  await updateViewForReporting(props, oldProps, biUsername);
 
 }
 
@@ -264,6 +264,8 @@ async function updateSchemas(props: ResourcePropertiesType, biUsername: string, 
   const odsTableNames = props.odsTableNames;
   const appUpdateProps = getAppUpdateProps(props, oldProps);
 
+  logger.info('updateSchemas', { props, oldProps, appUpdateProps });
+
   const sqlStatementsByApp = new Map<string, string[]>();
   for (const app of appUpdateProps.createAppIds) {
     const sqlStatements: string[] = [];
@@ -305,6 +307,8 @@ async function updateSchemas(props: ResourcePropertiesType, biUsername: string, 
 
     const sqlStatements2 = getUpdatableSql(props.schemaDefs, appUpdateProps.oldSchemaSqlArray, mustacheParam);
 
+    logger.info('updateSchemas- sqlStatements2, app=' + app, { app, sqlStatements2 });
+
     if (sqlStatementsByApp.has(app)) {
       sqlStatementsByApp.get(app)?.push(...sqlStatements2);
     } else {
@@ -316,21 +320,27 @@ async function updateSchemas(props: ResourcePropertiesType, biUsername: string, 
 }
 
 
-function getUpdatableSql(sqlOrViewDefs: SQLDef[], oldSqlArray: string[], mustacheParam: MustacheParamType) {
+function getUpdatableSql(sqlOrViewDefs: SQLDef[], oldSqlArray: string[], mustacheParam: MustacheParamType, path: string = '/opt') {
+  logger.info('getUpdatableSql', { sqlOrViewDefs, oldSqlArray });
 
+  const updateFilesInfo = [];
   const sqlStatements: string[] = [];
   for (const schemaOrViewDef of sqlOrViewDefs) {
     logger.info(`schemaOrViewDef.updatable: ${schemaOrViewDef.updatable}`);
 
     if (!oldSqlArray.includes(schemaOrViewDef.sqlFile)) {
       logger.info(`new sql: ${schemaOrViewDef.sqlFile}`);
-      sqlStatements.push(getSqlContent(schemaOrViewDef.sqlFile, mustacheParam));
+      sqlStatements.push(getSqlContent(schemaOrViewDef.sqlFile, mustacheParam, path));
+      updateFilesInfo.push('new: ' + schemaOrViewDef.sqlFile);
     } else if (schemaOrViewDef.updatable === 'true') {
       logger.info(`update sql: ${schemaOrViewDef.sqlFile}`);
-      sqlStatements.push(getSqlContent(schemaOrViewDef.sqlFile, mustacheParam));
+      sqlStatements.push(getSqlContent(schemaOrViewDef.sqlFile, mustacheParam, path));
+      updateFilesInfo.push('update: ' + schemaOrViewDef.sqlFile);
     } else {
       logger.info(`skip update ${schemaOrViewDef.sqlFile} due to it is not updatable.`);
     }
+
+    logger.info('getUpdatableSql', { updateFilesInfo });
   }
 
   return sqlStatements;
@@ -345,13 +355,29 @@ async function doUpdate(sqlStatementsByApp: Map<string, string[]>, props: Resour
   }
 }
 
-async function createViewForReporting(props: ResourcePropertiesType) {
+export const TABLES_VIEWS_FOR_REPORTING = ['event', 'event_parameter', 'user', 'item', 'user_m_view', 'item_m_view'];
+function _buildGrantSqlStatements(views: string[], schema: string, biUser: string): string[] {
+
+  const statements: string[] = [];
+
+  //grant select permission on base base tables to BI user for explore analysis
+  views.push(...TABLES_VIEWS_FOR_REPORTING);
+
+  for (const view of views) {
+    statements.push(`GRANT SELECT ON ${schema}.${view} TO ${biUser};`);
+  }
+
+  return statements;
+}
+
+async function createViewForReporting(props: ResourcePropertiesType, biUser: string) {
   const odsTableNames = props.odsTableNames;
   const appIds = splitString(props.appIds);
 
   const sqlStatementsByApp = new Map<string, string[]>();
   for (const app of appIds) {
     const sqlStatements: string[] = [];
+    const views: string[] = [];
     const mustacheParam: MustacheParamType = {
       database_name: props.projectId,
       schema: app,
@@ -364,8 +390,10 @@ async function createViewForReporting(props: ResourcePropertiesType) {
     };
 
     for (const viewDef of props.reportingViewsDef) {
-      sqlStatements.push(getSqlContent(viewDef.sqlFile, mustacheParam));
+      views.push(viewDef.sqlFile.replace('.sql', ''));
+      sqlStatements.push(getSqlContent(viewDef.sqlFile, mustacheParam, '/opt/dashboard'));
     }
+    sqlStatements.push(..._buildGrantSqlStatements(views, app, biUser));
     sqlStatementsByApp.set(app, sqlStatements);
   };
 
@@ -377,7 +405,7 @@ async function createViewForReporting(props: ResourcePropertiesType) {
   }
 }
 
-async function updateViewForReporting(props: ResourcePropertiesType, oldProps: ResourcePropertiesType) {
+async function updateViewForReporting(props: ResourcePropertiesType, oldProps: ResourcePropertiesType, biUser: string) {
   const odsTableNames = props.odsTableNames;
 
   const appUpdateProps = getAppUpdateProps(props, oldProps);
@@ -395,9 +423,13 @@ async function updateViewForReporting(props: ResourcePropertiesType, oldProps: R
       table_item: odsTableNames.item,
       ...SQL_TEMPLATE_PARAMETER,
     };
+    const views: string[] = [];
     for (const viewDef of props.reportingViewsDef) {
-      sqlStatements.push(getSqlContent(viewDef.sqlFile, mustacheParam));
+      views.push(viewDef.sqlFile.replace('.sql', ''));
+      sqlStatements.push(getSqlContent(viewDef.sqlFile, mustacheParam, '/opt/dashboard'));
     }
+    sqlStatements.push(..._buildGrantSqlStatements(views, app, biUser));
+
     sqlStatementsByApp.set(app, sqlStatements);
   };
 
@@ -413,7 +445,14 @@ async function updateViewForReporting(props: ResourcePropertiesType, oldProps: R
       ...SQL_TEMPLATE_PARAMETER,
     };
 
-    const sqlStatements2 = getUpdatableSql(props.reportingViewsDef, appUpdateProps.oldViewSqls, mustacheParam);
+    const sqlStatements2 = getUpdatableSql(props.reportingViewsDef, appUpdateProps.oldViewSqls, mustacheParam, '/opt/dashboard');
+
+    //grant select on views to bi user.
+    const views: string[] = [];
+    for (const sqlDef of props.reportingViewsDef) {
+      views.push(sqlDef.sqlFile.replace('.sql', ''));
+    }
+    sqlStatements2.push(..._buildGrantSqlStatements(views, app, biUser));
 
     if (sqlStatementsByApp.has(app)) {
       sqlStatementsByApp.get(app)?.push(...sqlStatements2);

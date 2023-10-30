@@ -17,6 +17,19 @@ import { isEqual } from 'lodash';
 import { EPipelineStatus, ExecutionType } from './const';
 import { ServerlessRedshiftRPUByRegionMapping } from './constant-ln';
 
+/**
+ * The `ternary` function in TypeScript returns `caseOne` if `cond` is true, otherwise it returns
+ */
+export const ternary = <T>(cond: any, caseOne: T, caseTwo: T) =>
+  cond ? caseOne : caseTwo;
+
+export const defaultStr = (
+  expectStr: string | null | undefined,
+  defaultValue?: string
+) => {
+  return expectStr ?? defaultValue ?? '';
+};
+
 export const generateStr = (length: number) => {
   const characters = 'abcdefghijklmnopqrstuvwxyz';
   let randomString = '';
@@ -117,6 +130,30 @@ export const generateFileDownloadLink = (fileContent: string): string => {
   return url;
 };
 
+const buildCronFixedRate = (
+  fixedValue: number,
+  unit: SelectProps.Option | null,
+  defaultValue: string
+) => {
+  if (fixedValue && fixedValue > 0) {
+    if (unit?.value === 'hour') {
+      return `rate(${fixedValue} ${ternary(fixedValue > 1, 'hours', 'hour')})`;
+    } else if (unit?.value === 'minute') {
+      return `rate(${fixedValue} ${ternary(
+        fixedValue > 1,
+        'minutes',
+        'minute'
+      )})`;
+    } else if (unit?.value === 'day') {
+      return `rate(${fixedValue} ${ternary(fixedValue > 1, 'days', 'day')})`;
+    } else {
+      return defaultValue;
+    }
+  } else {
+    return defaultValue;
+  }
+};
+
 export const generateCronDateRange = (
   type: string | undefined,
   fixedValue: number,
@@ -132,19 +169,7 @@ export const generateCronDateRange = (
     DEFAULT_VALUE = `rate(5 minutes)`;
   }
   if (type === ExecutionType.FIXED_RATE) {
-    if (fixedValue && fixedValue > 0) {
-      if (unit?.value === 'hour') {
-        return `rate(${fixedValue} ${fixedValue > 1 ? 'hours' : 'hour'})`;
-      } else if (unit?.value === 'minute') {
-        return `rate(${fixedValue} ${fixedValue > 1 ? 'minutes' : 'minute'})`;
-      } else if (unit?.value === 'day') {
-        return `rate(${fixedValue} ${fixedValue > 1 ? 'days' : 'day'})`;
-      } else {
-        return DEFAULT_VALUE;
-      }
-    } else {
-      return DEFAULT_VALUE;
-    }
+    return buildCronFixedRate(fixedValue, unit, DEFAULT_VALUE);
   } else if (type === ExecutionType.CRON_EXPRESS) {
     if (cronExp) {
       return `cron(${cronExp})`;
@@ -316,19 +341,6 @@ export const getValueFromStackOutputs = (
     }
   }
   return res;
-};
-
-/**
- * The `ternary` function in TypeScript returns `caseOne` if `cond` is true, otherwise it returns
- */
-export const ternary = <T>(cond: any, caseOne: T, caseTwo: T) =>
-  cond ? caseOne : caseTwo;
-
-export const defaultStr = (
-  expectStr: string | null | undefined,
-  defaultValue?: string
-) => {
-  return expectStr ?? defaultValue ?? '';
 };
 
 export const defaultSelectOptions = (

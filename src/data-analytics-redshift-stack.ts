@@ -24,7 +24,7 @@ import { RedshiftAnalyticsStack } from './analytics/analytics-on-redshift';
 import {
   createStackParameters, RedshiftAnalyticsStackProps,
 } from './analytics/parameter';
-import { TablesLoadDataProps, TablesLoadWorkflowData, TablesODSSource } from './analytics/private/model';
+import { LoadDataConfig, TablesODSSource, WorkflowBucketInfo } from './analytics/private/model';
 import { addCfnNagForCfnResource, addCfnNagForCustomResourceProvider, addCfnNagForLogRetention, ruleRolePolicyWithWildcardResources } from './common/cfn-nag';
 import {
   OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_CREDENTIAL_PARAMETER_SUFFIX,
@@ -84,7 +84,6 @@ export function createRedshiftAnalyticsStack(
   props: RedshiftAnalyticsStackProps,
 ) {
 
-
   const tablesOdsSource: TablesODSSource = {
     event: {
       s3Bucket: props.dataSourceConfiguration.bucket,
@@ -108,43 +107,13 @@ export function createRedshiftAnalyticsStack(
     },
   };
 
-  const tablesLoadWorkflowData: TablesLoadWorkflowData = {
-    event: {
-      s3Bucket: props.loadConfiguration.workdir.bucket,
-      prefix: props.loadConfiguration.workdir.prefix + TABLE_NAME_EVENT + '/',
-    },
-    event_parameter: {
-      s3Bucket: props.loadConfiguration.workdir.bucket,
-      prefix: props.loadConfiguration.workdir.prefix + TABLE_NAME_EVENT_PARAMETER + '/',
-    },
-    user: {
-      s3Bucket: props.loadConfiguration.workdir.bucket,
-      prefix: props.loadConfiguration.workdir.prefix + TABLE_NAME_USER + '/',
-    },
-
-    item: {
-      s3Bucket: props.loadConfiguration.workdir.bucket,
-      prefix: props.loadConfiguration.workdir.prefix + TABLE_NAME_ITEM + '/',
-    },
+  const workflowBucketInfo: WorkflowBucketInfo = {
+    s3Bucket: props.loadConfiguration.workdir.bucket,
+    prefix: props.loadConfiguration.workdir.prefix,
   };
 
-  const tablesLoadDataProps: TablesLoadDataProps = {
-    event: {
-      scheduleInterval: props.loadConfiguration.loadJobScheduleIntervalInMinutes,
-      maxFilesLimit: props.loadConfiguration.maxFilesLimit,
-    },
-    event_parameter: {
-      scheduleInterval: props.loadConfiguration.loadJobScheduleIntervalInMinutes,
-      maxFilesLimit: props.loadConfiguration.maxFilesLimit,
-    },
-    user: {
-      scheduleInterval: props.loadConfiguration.loadJobScheduleIntervalInMinutes,
-      maxFilesLimit: props.loadConfiguration.maxFilesLimit,
-    },
-    item: {
-      scheduleInterval: props.loadConfiguration.loadJobScheduleIntervalInMinutes,
-      maxFilesLimit: props.loadConfiguration.maxFilesLimit,
-    },
+  const loadDataConfig: LoadDataConfig = {
+    maxFilesLimit: props.loadConfiguration.maxFilesLimit,
   };
 
   const nestStackProps = {
@@ -154,8 +123,8 @@ export function createRedshiftAnalyticsStack(
     appIds: props.appIds,
     dataProcessingCronOrRateExpression: props.dataProcessingCronOrRateExpression,
     tablesOdsSource,
-    tablesLoadWorkflowData,
-    tablesLoadDataProps,
+    loadDataConfig,
+    workflowBucketInfo,
 
     scanMetadataWorkflowData: {
       scheduleExpression: props.scanMetadataConfiguration.scheduleExpression,

@@ -30,6 +30,7 @@ interface EventItemProps {
   changeCurCalcMethodOption?: (method: SelectProps.Option | null) => void;
   categories: CategoryItemType[];
   loading?: boolean;
+  disabled?: boolean;
 }
 
 const EventItem: React.FC<EventItemProps> = (props: EventItemProps) => {
@@ -44,6 +45,7 @@ const EventItem: React.FC<EventItemProps> = (props: EventItemProps) => {
     changeCurCalcMethodOption,
     categories,
     loading,
+    disabled,
   } = props;
   const { t } = useTranslation();
   const [showDropdown, setShowDropdown] = useState(false);
@@ -105,6 +107,7 @@ const EventItem: React.FC<EventItemProps> = (props: EventItemProps) => {
             }}
             placeholder={placeholder ?? ''}
             selectedOption={categoryOption}
+            disabled={disabled}
           />
           {categoryOption?.label && showMouseoverTitle && (
             <div className="custom-popover">{categoryOption?.label}</div>

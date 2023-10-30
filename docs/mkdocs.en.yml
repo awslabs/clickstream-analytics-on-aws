@@ -54,6 +54,7 @@ nav:
       - Web SDK: sdk-manual/web.md
       - WeChat Miniprogram SDK: sdk-manual/wechat.md
       - HTTP API: sdk-manual/http-api.md
+      - User identifier: sdk-manual/user-identifier.md
       - Migrate from third-party SDKs: sdk-manual/migrate-from-third-party-sdks.md
     - Dashboards:
       - Overview: dashboard/index.md

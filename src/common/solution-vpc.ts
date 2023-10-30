@@ -70,7 +70,7 @@ export class SolutionVpc extends Construct {
 
       // Create a new VPC
       this.vpc = new Vpc(this, 'DefaultVPC', {
-        ipAddresses: IpAddresses.cidr('10.255.0.0/16'),
+        ipAddresses: IpAddresses.cidr('10.255.0.0/16'), //NOSONAR it's intended
         enableDnsHostnames: true,
         enableDnsSupport: true,
         subnetConfiguration: [

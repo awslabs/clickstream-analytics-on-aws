@@ -89,6 +89,7 @@ async function batchInsert(event: CdkCustomResourceEvent): Promise<any> {
       convertEmptyValues: false,
       removeUndefinedValues: true,
       convertClassInstanceToMap: true,
+      convertTopLevelContainer: false,
     });
     itemsAsDynamoPutRequest.push({
       PutRequest: {

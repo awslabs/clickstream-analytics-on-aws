@@ -33,11 +33,11 @@ import { getPaginatedResults } from '../../common/paginator';
 import { logger } from '../../common/powertools';
 import { SDKClient } from '../../common/sdk-client';
 import { QuickSightAccountInfo, QuickSightUser } from '../../common/types';
-import { generateRandomStr } from '../../common/utils';
+import { generateRandomStr } from '../../common/utils-ln';
 
 const QUICKSIGHT_NAMESPACE = 'default';
 const QUICKSIGHT_PREFIX = 'Clickstream';
-const QUICKSIGHT_DEFAULT_USER = `${QUICKSIGHT_PREFIX}-User-${generateRandomStr(8)}`;
+const QUICKSIGHT_DEFAULT_USER = `${QUICKSIGHT_PREFIX}-User-${generateRandomStr(8, 'abcdefghijklmnopqrstuvwxyz')}`;
 const QUICKSIGHT_DASHBOARD_USER_NAME = 'ClickstreamDashboardUser';
 const QUICKSIGHT_EMBED_USER_NAME = 'ClickstreamEmbedUser';
 

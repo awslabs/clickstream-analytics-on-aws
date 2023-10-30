@@ -7,6 +7,8 @@ RUN cd src/control-plane/backend/lambda/api && rm -rf node_modules && yarn insta
 
 RUN mkdir -p /home/node/app/src/control-plane/backend/lambda/api/dist/service/quicksight/
 RUN cp -r /home/node/app/src/control-plane/backend/lambda/api/service/quicksight/templates /home/node/app/src/control-plane/backend/lambda/api/dist/service/quicksight/
+RUN cp -r /home/node/app/src/control-plane/backend/lambda/api/locales /home/node/app/src/control-plane/backend/lambda/api/dist/locales/
+
 
 RUN mkdir -p /asset
 RUN cp -r /home/node/app/src/control-plane/backend/lambda/api/node_modules /asset/

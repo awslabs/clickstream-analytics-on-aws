@@ -18,6 +18,7 @@ const minNodeVersion = '18.17.0';
 
 const cdkAlphaModules = [
   '@aws-cdk/aws-glue-alpha',
+  '@aws-cdk/aws-servicecatalogappregistry-alpha',
 ].map(m => `${m}@^${cdkVersion}-alpha.0`);
 
 const commonDeps = [
@@ -234,10 +235,6 @@ project.eslint?.addRules({
     },
   ],
 });
-project.package.addField('resolutions',
-  Object.assign({}, project.package.resolutions ? project.package.resolutions : {}, {
-    '@babel/traverse': '^7.23.2',
-  }));
 project.addFields({ version });
 
 const apiProject = new typescript.TypeScriptProject({
@@ -281,10 +278,6 @@ const apiProject = new typescript.TypeScriptProject({
 });
 apiProject.setScript('dev', 'nodemon --watch \'src\' -e ts --exec \'ts-node\' ./index.ts');
 apiProject.setScript('start', 'node dist/index.js');
-apiProject.package.addField('resolutions',
-  Object.assign({}, project.package.resolutions ? project.package.resolutions : {}, {
-    '@babel/traverse': '^7.23.2',
-  }));
 apiProject.addFields({ version });
 
 project.buildWorkflow.buildTask._env = {

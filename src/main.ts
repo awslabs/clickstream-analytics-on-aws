@@ -28,6 +28,7 @@ import { IngestionServerStack } from './ingestion-server-stack';
 import { KafkaS3SinkConnectorStack } from './kafka-s3-connector-stack';
 import { MetricsStack } from './metrics-stack';
 import { SolutionNodejsFunction } from './private/function';
+import { ServiceCatalogAppregistryStack } from './service-catalog-appregistry-stack';
 
 const app = new App();
 
@@ -39,7 +40,7 @@ function stackSuppressions(stacks: Stack[], suppressions: NagPackSuppression[]) 
 
 const commonSuppresionRulesForALBLambdaPattern = [
   { id: 'AwsSolutions-IAM5', reason: 'allow the logs of Lambda publishing to CloudWatch Logs with ambiguous logstream name' },
-  { id: 'AwsSolutions-EC23', reason: 'It is a public facing service so it works as desgin' },
+  { id: 'AwsSolutions-EC23', reason: 'It is a public facing service so it works as design' },
 ];
 
 stackSuppressions([
@@ -77,7 +78,7 @@ stackSuppressions([
   }),
 ], commonSuppresionRulesForALBLambdaPattern);
 
-const commonSuppresionRulesForCloudFrontS3Pattern = [
+const commonSuppressionRulesForCloudFrontS3Pattern = [
   { id: 'AwsSolutions-IAM4', reason: 'Cause by CDK BucketDeployment construct (aws-cdk-lib/aws-s3-deployment)' },
   { id: 'AwsSolutions-IAM5', reason: 'Cause by CDK BucketDeployment construct (aws-cdk-lib/aws-s3-deployment)' },
   { id: 'AwsSolutions-APIG2', reason: 'The REST API input validation in Lambda(Express) code, the front ApiGateway does not need repeated validation.' },
@@ -91,12 +92,12 @@ stackSuppressions([
     synthesizer: synthesizer(),
   }),
 ], [
-  ...commonSuppresionRulesForCloudFrontS3Pattern,
+  ...commonSuppressionRulesForCloudFrontS3Pattern,
   { id: 'AwsSolutions-CFR4', reason: 'TLSv1 is required in China regions' },
 ]);
 
-const commonSuppresionRulesForCloudFrontS3PatternInGloabl = [
-  ...commonSuppresionRulesForCloudFrontS3Pattern,
+const commonSuppressionRulesForCloudFrontS3PatternInGlobal = [
+  ...commonSuppressionRulesForCloudFrontS3Pattern,
   { id: 'AwsSolutions-CFR4', reason: 'Cause by using default default CloudFront viewer certificate' },
   { id: 'AwsSolutions-L1', reason: 'Managed by CDK Cognito module for get service token' },
 ];
@@ -109,7 +110,7 @@ stackSuppressions([
     useExistingOIDCProvider: true,
     synthesizer: synthesizer(),
   }),
-], commonSuppresionRulesForCloudFrontS3PatternInGloabl);
+], commonSuppressionRulesForCloudFrontS3PatternInGlobal);
 
 stackSuppressions([
   new CloudFrontControlPlaneStack(app, 'cloudfront-s3-control-plane-stack-global-customdomain', {
@@ -122,7 +123,7 @@ stackSuppressions([
     synthesizer: synthesizer(),
   }),
 ], [
-  ...commonSuppresionRulesForCloudFrontS3PatternInGloabl,
+  ...commonSuppressionRulesForCloudFrontS3PatternInGlobal,
   { id: 'AwsSolutions-L1', reason: 'Caused by CDK DnsValidatedCertificate resource when request ACM certificate' },
 ]);
 
@@ -236,7 +237,6 @@ stackSuppressions([
   },
 ]);
 
-
 stackSuppressions([
   new MetricsStack(app, 'metrics-stack', {
     synthesizer: synthesizer(),
@@ -246,6 +246,10 @@ stackSuppressions([
   { id: 'AwsSolutions-IAM5', reason: 'Caused by CDK built-in Lambda LogRetention lambda handler with wildcard policy' },
   { id: 'AwsSolutions-L1', reason: 'Caused by CDK built-in custom resource provider not using latest Nodejs runtime' },
 ]);
+
+new ServiceCatalogAppregistryStack(app, 'service-catalog-appregistry-stack', {
+  synthesizer: synthesizer(),
+});
 
 Aspects.of(app).add(new AwsSolutionsChecks({ verbose: true }));
 if (process.env.USE_BSS) {

@@ -101,7 +101,7 @@ async function createEMRServerlessApp(props: ResourcePropertiesType): Promise<st
 
   logger.info('s3Bucket:' + s3Bucket + ', appIdKey:' + appIdKey);
   let appIdConfig = await readS3ObjectAsJson(s3Bucket, appIdKey);
-  const nowStr = process.env.TEST_TIME_NOW_STR || new Date().toISOString();
+  const nowStr = process.env.TEST_TIME_NOW_STR ?? new Date().toISOString();
 
   if (appIdConfig) {
     logger.info('find appIdConfig', { appIdConfig: appIdConfig });

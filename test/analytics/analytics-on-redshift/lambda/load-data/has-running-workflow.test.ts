@@ -17,7 +17,7 @@ import { QueryCommand } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
 import 'aws-sdk-client-mock-jest';
 import { handler } from '../../../../../src/analytics/lambdas/load-data-workflow/has-running-workflow';
-import { JobStatus } from '../../../../../src/analytics/private/constant';
+import { JobStatus, REDSHIFT_TABLE_NAMES } from '../../../../../src/analytics/private/constant';
 import { PARTITION_APP } from '../../../../../src/common/constant';
 import { getMockContext } from '../../../../common/lambda-context';
 
@@ -90,6 +90,16 @@ test('Should have other running workflow', async () => {
         timestamp: new Date().getTime(),
       },
     ],
+  }).resolves({
+    Count: 1,
+    Items: [
+      {
+        s3_uri: `s3://${process.env.ODS_EVENT_BUCKET}/project1/ods_external_events/${PARTITION_APP}=app1/partition_year=2023/partition_month=01/partition_day=15/clickstream-1-job_part00000.parquet.snappy`,
+        s3_object_size: 1823224,
+        job_status: JobStatus.JOB_PROCESSING,
+        timestamp: new Date().getTime(),
+      },
+    ],
   });
 
   snfClientMock.on(ListExecutionsCommand).resolves({
@@ -107,18 +117,24 @@ test('Should have other running workflow', async () => {
 
   const event = {
     execution_id: 'arn:aws:states:us-east-1:xxxxxxxxx:execution:stateMachineNameTest:exec_id_1',
+    eventBucketName: 'bucket_test',
+    eventPrefix: 'test/prefix1/event',
   };
 
   const response = await handler(event, context);
+  const tableNames = REDSHIFT_TABLE_NAMES;
 
-  expect(response.EnQueueCount).toEqual(4);
-  expect(response.ProcessingCount).toEqual(3);
+  expect(response.FilesCountInfo).toEqual([
+    { countEnQ: 4, countNew: 1, countProcessing: 3, tableName: tableNames[0] },
+    { countEnQ: 1, countNew: 1, countProcessing: 1, tableName: tableNames[1] },
+    { countEnQ: 1, countNew: 1, countProcessing: 1, tableName: tableNames[2] },
+    { countEnQ: 1, countNew: 1, countProcessing: 1, tableName: tableNames[3] },
+  ]);
   expect(response.HasRunningWorkflow).toBeTruthy();
   expect(snfClientMock).toReceiveNthCommandWith(1, ListExecutionsCommand, {
     stateMachineArn: 'arn:aws:states:us-east-1:xxxxxxxxx:stateMachine:stateMachineNameTest',
     statusFilter: ExecutionStatus.RUNNING,
   });
-
 });
 
 
@@ -146,6 +162,16 @@ test('Should get no other running workflow', async () => {
       },
 
     ],
+  }).resolves({
+    Count: 1,
+    Items: [
+      {
+        s3_uri: `s3://${process.env.ODS_EVENT_BUCKET}/project1/ods_external_events/${PARTITION_APP}=app1/partition_year=2023/partition_month=01/partition_day=15/clickstream-1-job_part00000.parquet.snappy`,
+        s3_object_size: 1823224,
+        job_status: JobStatus.JOB_PROCESSING,
+        timestamp: new Date().getTime(),
+      },
+    ],
   });
 
   snfClientMock.on(ListExecutionsCommand).resolves({
@@ -159,11 +185,22 @@ test('Should get no other running workflow', async () => {
 
   const event = {
     execution_id: 'arn:aws:states:us-east-1:xxxxxxxxx:execution:stateMachineNameTest:exec_id_1',
+    eventBucketName: 'bucket_test',
+    eventPrefix: 'test/prefix1/event',
   };
 
   const response = await handler(event, context);
-  expect(response.EnQueueCount).toEqual(1);
-  expect(response.ProcessingCount).toEqual(1);
+  expect(response.FilesCountInfo.length).toEqual(4);
   expect(response.HasRunningWorkflow).toBeFalsy();
+
+  expect(ddbClientMock).toHaveReceivedNthCommandWith(1, QueryCommand, {
+    ExpressionAttributeValues: { ':job_status': 'event#ENQUEUE', ':s3_uri': 's3://bucket_test/test/prefix1/event/' },
+  });
+  expect(ddbClientMock).toHaveReceivedNthCommandWith(2, QueryCommand, {
+    ExpressionAttributeValues: { ':job_status': 'event#PROCESSING', ':s3_uri': 's3://bucket_test/test/prefix1/event/' },
+  });
+  expect(ddbClientMock).toHaveReceivedNthCommandWith(3, QueryCommand, {
+    ExpressionAttributeValues: { ':job_status': 'event#NEW', ':s3_uri': 's3://bucket_test/test/prefix1/event/' },
+  });
 
 });

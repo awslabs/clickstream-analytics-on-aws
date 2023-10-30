@@ -56,12 +56,14 @@ import {
   getDateRange,
   getEventAndConditions,
   getGlobalEventCondition,
+  getGroupCondition,
   getLngFromLocalStorage,
   parametersConvertToCategoryItemType,
   validEventAnalyticsItem,
 } from '../analytics-utils';
 import AttributeGroup from '../comps/AttributeGroup';
 import ExploreDateRangePicker, {
+  DEFAULT_DAY_RANGE,
   DEFAULT_WEEK_RANGE,
 } from '../comps/ExploreDateRangePicker';
 import ExploreEmbedFrame from '../comps/ExploreEmbedFrame';
@@ -146,11 +148,11 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
   };
 
   const [dateRangeValue, setDateRangeValue] =
-    useState<DateRangePickerProps.Value>(DEFAULT_WEEK_RANGE);
+    useState<DateRangePickerProps.Value>(DEFAULT_DAY_RANGE);
 
   const [timeGranularity, setTimeGranularity] = useState<SelectProps.Option>({
-    value: ExploreGroupColumn.WEEK,
-    label: t('analytics:options.weekTimeGranularity') ?? '',
+    value: ExploreGroupColumn.DAY,
+    label: t('analytics:options.dayTimeGranularity') ?? '',
   });
 
   const resetConfig = async () => {
@@ -264,6 +266,7 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
       globalEventCondition: getGlobalEventCondition(segmentationOptionData),
       timeScopeType: dateRangeParams?.timeScopeType,
       groupColumn: timeGranularity.value,
+      groupCondition: getGroupCondition(groupOption),
       ...dateRangeParams,
       ...saveParams,
     };
@@ -309,7 +312,7 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
 
   useEffect(() => {
     clickPreview();
-  }, [dateRangeValue, chartType]);
+  }, [timeGranularity, dateRangeValue, chartType]);
 
   return (
     <>
@@ -446,7 +449,6 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
                 changeCurCategoryOption={(eventIndex, category) => {
                   const eventName = category?.name;
                   const eventParameters = getEventParameters(eventName);
-                  console.log(eventParameters);
                   const parameterOption = parametersConvertToCategoryItemType(
                     metadataUserAttributes,
                     eventParameters
@@ -543,6 +545,7 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
               dateRangeValue={dateRangeValue}
               setDateRangeValue={setDateRangeValue}
               timeGranularity={timeGranularity}
+              timeGranularityVisible={true}
               setTimeGranularity={setTimeGranularity}
             />
             <SegmentedControl

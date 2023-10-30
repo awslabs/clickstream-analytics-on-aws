@@ -25,6 +25,8 @@ import {
   TransformOperation,
   ColumnTag,
   DeleteDashboardCommandOutput,
+  GeoSpatialDataRole,
+  DataSetImportMode,
 } from '@aws-sdk/client-quicksight';
 import { Context, CloudFormationCustomResourceEvent, CloudFormationCustomResourceUpdateEvent, CloudFormationCustomResourceCreateEvent, CloudFormationCustomResourceDeleteEvent, CdkCustomResourceResponse } from 'aws-lambda';
 import Mustache from 'mustache';
@@ -348,7 +350,7 @@ const createDataSet = async (quickSight: QuickSight, awsAccountId: string, princ
         const tags: ColumnTag[] = [];
         for (const role of tagColOperation.columnGeographicRoles) {
           tags.push({
-            ColumnGeographicRole: role,
+            ColumnGeographicRole: role as GeoSpatialDataRole,
           });
         }
         dataTransforms.push({
@@ -392,7 +394,7 @@ const createDataSet = async (quickSight: QuickSight, awsAccountId: string, princ
         Actions: dataSetActions,
       }],
 
-      ImportMode: props.importMode,
+      ImportMode: props.importMode as DataSetImportMode,
       PhysicalTableMap: {
         PhyTable1: {
           CustomSql: {
@@ -627,7 +629,7 @@ const updateDataSet = async (quickSight: QuickSight, awsAccountId: string,
         const tags: ColumnTag[] = [];
         for (const role of tagColOperation.columnGeographicRoles) {
           tags.push({
-            ColumnGeographicRole: role,
+            ColumnGeographicRole: role as GeoSpatialDataRole,
           });
         }
         dataTransforms.push({
@@ -668,7 +670,7 @@ const updateDataSet = async (quickSight: QuickSight, awsAccountId: string,
       DataSetId: datasetId,
       Name: `${identifier.tableNameIdentifier}-${identifier.schemaIdentifier}-${identifier.databaseIdentifier}`,
 
-      ImportMode: props.importMode,
+      ImportMode: props.importMode as DataSetImportMode,
       PhysicalTableMap: {
         PhyTable1: {
           CustomSql: {

@@ -19,6 +19,7 @@ select
   ,device.system_language
   ,device.time_zone_offset_seconds
   ,device.advertising_id
+  ,device.host_name
   ,user_pseudo_id
   ,user_id
   ,count(event_id) as usage_num
@@ -48,5 +49,6 @@ group by
   ,device.system_language
   ,device.time_zone_offset_seconds
   ,device.advertising_id
+  ,device.host_name
   ,user_pseudo_id
   ,user_id

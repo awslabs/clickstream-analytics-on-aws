@@ -39,7 +39,7 @@ import {
   IVpc, SubnetType,
 } from 'aws-cdk-lib/aws-ec2';
 import { ArnPrincipal } from 'aws-cdk-lib/aws-iam';
-import { Architecture, Code, Function, Runtime } from 'aws-cdk-lib/aws-lambda';
+import { Architecture, Code, Function as LambdaFunction, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { IBucket } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
 import { BatchInsertDDBCustomResource } from './batch-insert-ddb-custom-resource-construct';
@@ -87,7 +87,7 @@ export interface ClickStreamApiProps {
 }
 
 export class ClickStreamApiConstruct extends Construct {
-  public readonly clickStreamApiFunction: Function;
+  public readonly clickStreamApiFunction: LambdaFunction;
   public readonly lambdaRestApi?: RestApi;
   public readonly batchInsertDDBCustomResource: BatchInsertDDBCustomResource;
   public readonly addAdminUserCustomResource: AddAdminUser;
@@ -357,7 +357,7 @@ export class ClickStreamApiConstruct extends Construct {
     });
     props.stackWorkflowS3Bucket.grantPut(uploadRole, `${props.pluginPrefix}*`);
 
-    this.clickStreamApiFunction = new Function(this, 'ApiFunction', {
+    this.clickStreamApiFunction = new LambdaFunction(this, 'ApiFunction', {
       description: 'Lambda function for api of solution Clickstream Analytics on AWS',
       code: Code.fromDockerBuild(path.join(__dirname, '../../../'), {
         file: './src/control-plane/backend/Dockerfile',

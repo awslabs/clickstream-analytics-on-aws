@@ -58,6 +58,7 @@ nav:
       - Web SDK: sdk-manual/web.md
       - 微信小程序 SDK: sdk-manual/wechat.md
       - HTTP API: sdk-manual/http-api.md
+      - 用户标识: sdk-manual/user-identifier.md
     - 仪表板:
       - 概述: dashboard/index.md
       - 流量获取报表: dashboard/acquisition.md

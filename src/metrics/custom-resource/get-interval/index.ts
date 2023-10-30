@@ -60,7 +60,7 @@ async function _handler(event: CdkCustomResourceEvent) {
 }
 
 function parseRate(expression: string) {
-  const m = expression.match(/rate\s*\(\s*(\d+)\s*(\w+)\s*\)/i);
+  const m = expression.match(/^rate\s*\(\s*(\d{1,5})\s*(\w+)\s*\)$/i);
   let intervalSeconds = 300;
   if (m) {
     const intervalValue = parseFloat(m[1]);

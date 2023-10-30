@@ -24,11 +24,12 @@ device.vendor_id::varchar as device_id
 , device.system_language::varchar
 , device.time_zone_offset_seconds::int
 , device.advertising_id::varchar
+, device.host_name::varchar
 , user_pseudo_id
 , user_id
 , count(event_id) as usage_num
 --pleaes update the following schema name with your schema name
-from {{schema}}.ods_events 
+from {{schema}}.event 
 group by
 device_id
 , event_date
@@ -50,5 +51,6 @@ device_id
 , device.system_language
 , device.time_zone_offset_seconds
 , device.advertising_id
+, device.host_name
 , user_pseudo_id
 , user_id;

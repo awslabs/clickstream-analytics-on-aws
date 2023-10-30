@@ -310,6 +310,8 @@ export const OUTPUT_METRICS_OBSERVABILITY_DASHBOARD_NAME =
   'ObservabilityDashboardName';
 export const OUTPUT_METRICS_SNS_TOPIC_ARN_NAME = 'ObservabilityTopicArn';
 
+export const OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_ARN = 'ServiceCatalogAppRegistryApplicationArn';
+
 export const DATA_PROCESSING_APPLICATION_NAME_PREFIX = 'Clickstream';
 
 export const CUSTOM_RESOURCE_RESPONSE_REDSHIFT_BI_USER_NAME =
@@ -323,3 +325,5 @@ export const DEFAULT_SOLUTION_OPERATOR = 'Clickstream';
 export const DEFAULT_DASHBOARD_NAME = 'User lifecycle';
 
 export const TRANSFORMER_AND_ENRICH_CLASS_NAMES = 'software.aws.solution.clickstream.TransformerV2,software.aws.solution.clickstream.UAEnrichment,software.aws.solution.clickstream.IPEnrichment';
+
+export const EVENT_SOURCE_LOAD_DATA_FLOW = 'LoadDataFlow';

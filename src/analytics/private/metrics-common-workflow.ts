@@ -15,7 +15,6 @@ import { CfnResource, Duration } from 'aws-cdk-lib';
 import { Alarm, ComparisonOperator, Metric, TreatMissingData } from 'aws-cdk-lib/aws-cloudwatch';
 import { IStateMachine } from 'aws-cdk-lib/aws-stepfunctions';
 import { Construct } from 'constructs';
-import { LoadDataWorkflows } from './metrics-redshift-serverless';
 import { AnalyticsCustomMetricsName, MetricsNamespace, MetricsService } from '../../common/model';
 import { GetInterval } from '../../metrics/get-interval-custom-resource';
 import { AlarmsWidgetElement, MetricWidgetElement } from '../../metrics/metrics-widgets-custom-resource';
@@ -25,7 +24,7 @@ import { getAlarmName, setCfnNagForAlarms } from '../../metrics/util';
 export function buildMetricsWidgetForWorkflows(scope: Construct, id: string, props: {
   projectId: string;
   dataProcessingCronOrRateExpression: string;
-  loadDataWorkflows: LoadDataWorkflows;
+  loadDataWorkflow: IStateMachine;
   clearExpiredEventsWorkflow: IStateMachine;
 }) {
 
@@ -34,21 +33,8 @@ export function buildMetricsWidgetForWorkflows(scope: Construct, id: string, pro
   });
 
   const statesNamespace = 'AWS/States';
-
-  const loadEventWorkflowDimension = [
-    'StateMachineArn', props.loadDataWorkflows.event.stateMachineArn,
-  ];
-
-  const loadEventParameterWorkflowDimension = [
-    'StateMachineArn', props.loadDataWorkflows.event_parameter.stateMachineArn,
-  ];
-
-  const loadUserWorkflowDimension = [
-    'StateMachineArn', props.loadDataWorkflows.user.stateMachineArn,
-  ];
-
-  const loadItemWorkflowDimension = [
-    'StateMachineArn', props.loadDataWorkflows.item.stateMachineArn,
+  const loadDataWorkflowDimension = [
+    'StateMachineArn', props.loadDataWorkflow.stateMachineArn,
   ];
 
 
@@ -62,16 +48,16 @@ export function buildMetricsWidgetForWorkflows(scope: Construct, id: string, pro
     'service', MetricsService.WORKFLOW,
   ];
 
-  const loadEventsWorkflowAlarm = new Alarm(scope, id + 'LoadDataWorkflowAlarm', {
+  const loadDataWorkflowAlarm = new Alarm(scope, id + 'LoadDataWorkflowAlarm', {
     comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
     threshold: 1,
     evaluationPeriods: 1,
     treatMissingData: TreatMissingData.NOT_BREACHING,
-    metric: props.loadDataWorkflows.event.metricFailed({ period: Duration.hours(1) }), // place-holder value here, Override by addPropertyOverride below
+    metric: props.loadDataWorkflow.metricFailed({ period: Duration.hours(1) }), // place-holder value here, Override by addPropertyOverride below
     alarmDescription: `Load event workflow failed, projectId: ${props.projectId}`,
-    alarmName: getAlarmName(scope, props.projectId, 'Load Event Workflow'),
+    alarmName: getAlarmName(scope, props.projectId, 'Load Data Workflow'),
   });
-  (loadEventsWorkflowAlarm.node.defaultChild as CfnResource).addPropertyOverride('Period', processingJobInterval.getIntervalSeconds());
+  (loadDataWorkflowAlarm.node.defaultChild as CfnResource).addPropertyOverride('Period', processingJobInterval.getIntervalSeconds());
 
 
   const newFilesCountAlarm = new Alarm(scope, id + 'MaxFileAgeAlarm', {
@@ -96,14 +82,14 @@ export function buildMetricsWidgetForWorkflows(scope: Construct, id: string, pro
   (newFilesCountAlarm.node.defaultChild as CfnResource).addPropertyOverride('Threshold', processingJobInterval.getIntervalSeconds());
 
 
-  setCfnNagForAlarms([loadEventsWorkflowAlarm, newFilesCountAlarm]);
+  setCfnNagForAlarms([loadDataWorkflowAlarm, newFilesCountAlarm]);
 
   const workflowAlarms: (MetricWidgetElement | AlarmsWidgetElement)[] = [
     {
       type: 'alarm',
       properties: {
         alarms: [
-          loadEventsWorkflowAlarm.alarmArn,
+          loadDataWorkflowAlarm.alarmArn,
           newFilesCountAlarm.alarmArn,
         ],
         title: 'Data Modeling Alarms',
@@ -113,18 +99,15 @@ export function buildMetricsWidgetForWorkflows(scope: Construct, id: string, pro
 
 
   const workflowExecMetrics: MetricWidgetElement[] = [
-    [loadEventWorkflowDimension, 'event'],
-    [loadEventParameterWorkflowDimension, 'event parameter'],
-    [loadUserWorkflowDimension, 'user'],
-    [loadItemWorkflowDimension, 'item'],
-    [clearExpiredEventsWorkflowDimension, 'clear expired events'],
+    [loadDataWorkflowDimension, 'Load data to redshift tables'],
+    [clearExpiredEventsWorkflowDimension, 'Clear expired events'],
   ].flatMap(dimName => {
     return [
       {
         type: 'metric',
         properties: {
           stat: 'Sum',
-          title: `Load '${dimName[1]}' workflow`,
+          title: `'${dimName[1]}' workflow`,
           metrics: [
             [statesNamespace, 'ExecutionsSucceeded', ...dimName[0]],
             ['.', 'ExecutionsFailed', '.', '.'],
@@ -137,7 +120,7 @@ export function buildMetricsWidgetForWorkflows(scope: Construct, id: string, pro
         type: 'metric',
         properties: {
           stat: 'Average',
-          title: `Load '${dimName[1]}' workflow execution time`,
+          title: `'${dimName[1]}' workflow execution time`,
           metrics: [
             [statesNamespace, 'ExecutionTime', ...dimName[0]],
           ],

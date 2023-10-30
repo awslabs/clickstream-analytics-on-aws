@@ -226,7 +226,7 @@ export class DynamoDbStore implements ClickStreamStore {
       // Define expressions for the new or updated attributes
       UpdateExpression: updateExpression,
       ExpressionAttributeNames: expressionAttributeNames,
-      ExpressionAttributeValues: expressionAttributeValues,
+      ExpressionAttributeValues: Object.fromEntries(expressionAttributeValues),
       ReturnValues: 'ALL_NEW',
     });
     await docClient.send(params);
@@ -358,7 +358,7 @@ export class DynamoDbStore implements ClickStreamStore {
       // Define expressions for the new or updated attributes
       UpdateExpression: updateExpression,
       ExpressionAttributeNames: expressionAttributeNames,
-      ExpressionAttributeValues: expressionAttributeValues,
+      ExpressionAttributeValues: Object.fromEntries(expressionAttributeValues),
       ReturnValues: 'ALL_NEW',
     });
     await docClient.send(params);
@@ -440,8 +440,11 @@ export class DynamoDbStore implements ClickStreamStore {
   };
 
   public async addPipeline(pipeline: IPipeline): Promise<string> {
-    const marshallPipeline = marshall(pipeline, marshallOptions);
-    const params: TransactWriteItemsCommand = new TransactWriteItemsCommand({
+    const marshallPipeline = marshall(pipeline, {
+      ...marshallOptions,
+      convertTopLevelContainer: false,
+    });
+    const input = {
       TransactItems: [
         {
           Update: {
@@ -476,7 +479,7 @@ export class DynamoDbStore implements ClickStreamStore {
               tags: marshallPipeline.tags,
               network: marshallPipeline.network,
               bucket: marshallPipeline.bucket,
-              ingestionServer: marshallPipeline.ingestionServer,
+              ingestionServer: marshallPipeline.ingestionServer ?? { M: {} },
               dataProcessing: marshallPipeline.dataProcessing ?? { M: {} },
               dataModeling: marshallPipeline.dataModeling ?? { M: {} },
               reporting: marshallPipeline.reporting ?? { M: {} },
@@ -494,7 +497,8 @@ export class DynamoDbStore implements ClickStreamStore {
           },
         },
       ],
-    });
+    };
+    const params: TransactWriteItemsCommand = new TransactWriteItemsCommand(input);
     await docClient.send(params);
     return pipeline.pipelineId;
   };
@@ -518,8 +522,14 @@ export class DynamoDbStore implements ClickStreamStore {
 
   public async updatePipeline(pipeline: IPipeline, curPipeline: IPipeline): Promise<void> {
     // Update new pipeline && Backup the current pipeline
-    const marshallCurPipeline = marshall(curPipeline, marshallOptions);
-    const marshallPipeline = marshall(pipeline, marshallOptions);
+    const marshallCurPipeline = marshall(curPipeline, {
+      ...marshallOptions,
+      convertTopLevelContainer: false,
+    });
+    const marshallPipeline = marshall(pipeline, {
+      ...marshallOptions,
+      convertTopLevelContainer: false,
+    });
     const params: TransactWriteItemsCommand = new TransactWriteItemsCommand({
       TransactItems: [
         {
@@ -747,7 +757,7 @@ export class DynamoDbStore implements ClickStreamStore {
       ExpressionAttributeNames: {
         '#prefix': 'prefix',
       },
-      ExpressionAttributeValues: expressionAttributeValues,
+      ExpressionAttributeValues: Object.fromEntries(expressionAttributeValues),
       ScanIndexForward: order === 'asc',
     };
     const records = await query(input);
@@ -929,7 +939,7 @@ export class DynamoDbStore implements ClickStreamStore {
       // Define expressions for the new or updated attributes
       UpdateExpression: updateExpression,
       ExpressionAttributeNames: expressionAttributeNames,
-      ExpressionAttributeValues: expressionAttributeValues,
+      ExpressionAttributeValues: Object.fromEntries(expressionAttributeValues),
       ReturnValues: 'ALL_NEW',
     });
     await docClient.send(params);
@@ -994,7 +1004,7 @@ export class DynamoDbStore implements ClickStreamStore {
       ExpressionAttributeNames: {
         '#prefix': 'prefix',
       },
-      ExpressionAttributeValues: expressionAttributeValues,
+      ExpressionAttributeValues: Object.fromEntries(expressionAttributeValues),
       ScanIndexForward: order === 'asc',
     };
     const records = await query(input);
@@ -1102,7 +1112,7 @@ export class DynamoDbStore implements ClickStreamStore {
       // Define expressions for the new or updated attributes
       UpdateExpression: updateExpression,
       ExpressionAttributeNames: expressionAttributeNames,
-      ExpressionAttributeValues: expressionAttributeValues,
+      ExpressionAttributeValues: Object.fromEntries(expressionAttributeValues),
       ReturnValues: 'ALL_NEW',
     });
     await docClient.send(params);

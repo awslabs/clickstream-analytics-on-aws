@@ -721,7 +721,7 @@ describe('Account Env test', () => {
     });
     s3Client.on(GetBucketLocationCommand)
       .resolvesOnce({
-        LocationConstraint: 'us-east-1',
+        LocationConstraint: undefined,
       })
       .resolves({
         LocationConstraint: 'us-east-2',
@@ -757,7 +757,7 @@ describe('Account Env test', () => {
     });
     s3Client.on(GetBucketLocationCommand)
       .resolvesOnce({
-        LocationConstraint: 'us-east-1',
+        LocationConstraint: undefined,
       })
       .resolves({
         LocationConstraint: 'us-east-2',
@@ -1542,7 +1542,7 @@ describe('Account Env test', () => {
           ],
           HasAdditionalSubjectAlternativeNames: false,
           InUse: true,
-          KeyAlgorithm: 'RSA-2048',
+          KeyAlgorithm: KeyAlgorithm.RSA_2048,
           KeyUsages: [
             'DIGITAL_SIGNATURE',
             'KEY_ENCIPHERMENT',
@@ -1563,7 +1563,7 @@ describe('Account Env test', () => {
           ],
           HasAdditionalSubjectAlternativeNames: false,
           InUse: false,
-          KeyAlgorithm: 'EC-prime256v1',
+          KeyAlgorithm: KeyAlgorithm.EC_prime256v1,
           KeyUsages: [
             'DIGITAL_SIGNATURE',
           ],

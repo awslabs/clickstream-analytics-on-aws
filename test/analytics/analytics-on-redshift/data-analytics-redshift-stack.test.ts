@@ -20,7 +20,12 @@ import { TreatMissingData } from 'aws-cdk-lib/aws-cloudwatch';
 import { SubnetSelection } from 'aws-cdk-lib/aws-ec2';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { RedshiftAnalyticsStack, RedshiftAnalyticsStackProps } from '../../../src/analytics/analytics-on-redshift';
-import { OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_CREDENTIAL_PARAMETER_SUFFIX, OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_NAMESPACE_NAME, OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME, OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_PORT, OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_ADDRESS, OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX, OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_NAME_SUFFIX } from '../../../src/common/constant';
+import {
+  OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_CREDENTIAL_PARAMETER_SUFFIX, OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_NAMESPACE_NAME,
+  OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME, OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_PORT,
+  OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_ADDRESS,
+  OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX, OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_NAME_SUFFIX,
+} from '../../../src/common/constant';
 import { REDSHIFT_MODE, BuiltInTagKeys, MetricsNamespace } from '../../../src/common/model';
 import { SolutionInfo } from '../../../src/common/solution-info';
 import { getExistVpc } from '../../../src/common/vpc-utils';
@@ -35,7 +40,7 @@ const logger = new Logger();
 describe('DataAnalyticsRedshiftStack common parameter test', () => {
   const app = new App();
   const testId = 'test-1';
-  const stack = new DataAnalyticsRedshiftStack(app, testId+'-data-analytics-redshift-stack-serverless', {});
+  const stack = new DataAnalyticsRedshiftStack(app, testId + '-data-analytics-redshift-stack-serverless', {});
   const template = Template.fromStack(stack);
 
   beforeEach(() => {
@@ -178,7 +183,7 @@ describe('DataAnalyticsRedshiftStack common parameter test', () => {
 
   test('Should check S3 bucket pattern', () => {
     [getParameter(template, 'ODSEventBucket'),
-      getParameter(template, 'LoadWorkflowBucket')].forEach(param => {
+    getParameter(template, 'LoadWorkflowBucket')].forEach(param => {
       const pattern = param.AllowedPattern;
       const regex = new RegExp(`${pattern}`);
       const validValues = [
@@ -206,7 +211,7 @@ describe('DataAnalyticsRedshiftStack common parameter test', () => {
 
   test('Check S3Prefix pattern', () => {
     [getParameter(template, 'ODSEventPrefix'),
-      getParameter(template, 'LoadWorkflowBucketPrefix')].forEach(param => {
+    getParameter(template, 'LoadWorkflowBucketPrefix')].forEach(param => {
       const pattern = param.AllowedPattern;
       const regex = new RegExp(`${pattern}`);
       const validValues = [
@@ -379,12 +384,12 @@ describe('DataAnalyticsRedshiftStack common parameter test', () => {
 describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
   const app = new App();
   const testId = 'test-2';
-  const stack = new DataAnalyticsRedshiftStack(app, testId+'-data-analytics-redshift-stack-serverless', {});
+  const stack = new DataAnalyticsRedshiftStack(app, testId + '-data-analytics-redshift-stack-serverless', {});
   const template = Template.fromStack(stack);
   var count = 1;
 
   // Vpc
-  const vpc = getExistVpc(stack, testId+'-from-vpc-for-redshift', {
+  const vpc = getExistVpc(stack, testId + '-from-vpc-for-redshift', {
     vpcId: 'vpc-1',
     availabilityZones: Fn.getAzs(),
     privateSubnetIds: Fn.split(',', 'subnet-1,subnet-2,subnet-3'),
@@ -396,13 +401,13 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
 
   const sinkS3Bucket = Bucket.fromBucketName(
     stack,
-    testId+'redshift-from-pipeline-sinkS3Bucket',
+    testId + 'redshift-from-pipeline-sinkS3Bucket',
     'doc-example-bucket',
   );
 
   const loadWorkflowS3Bucket = Bucket.fromBucketName(
     stack,
-    testId+'redshift-from-pipeline-loadWorkflowBucket',
+    testId + 'redshift-from-pipeline-loadWorkflowBucket',
     'doc-example-bucket',
   );
 
@@ -433,41 +438,12 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
         fileSuffix: '.snappy',
       },
     },
-    tablesLoadWorkflowData: {
-      event: {
-        s3Bucket: loadWorkflowS3Bucket,
-        prefix: 'project1/',
-      },
-      event_parameter: {
-        s3Bucket: loadWorkflowS3Bucket,
-        prefix: 'project1/',
-      },
-      user: {
-        s3Bucket: loadWorkflowS3Bucket,
-        prefix: 'project1/',
-      },
-      item: {
-        s3Bucket: loadWorkflowS3Bucket,
-        prefix: 'project1/',
-      },
+    workflowBucketInfo: {
+      s3Bucket: loadWorkflowS3Bucket,
+      prefix: 'project1/',
     },
-    tablesLoadDataProps: {
-      event: {
-        scheduleInterval: '5',
-        maxFilesLimit: 50,
-      },
-      event_parameter: {
-        scheduleInterval: '5',
-        maxFilesLimit: 50,
-      },
-      user: {
-        scheduleInterval: '5',
-        maxFilesLimit: 50,
-      },
-      item: {
-        scheduleInterval: '5',
-        maxFilesLimit: 50,
-      },
+    loadDataConfig: {
+      maxFilesLimit: 50,
     },
   };
 
@@ -493,7 +469,6 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
       'LoadWorkflowBucketPrefix',
       'RedshiftServerlessNamespaceId',
       'MaxFilesLimit',
-      'LoadJobScheduleInterval',
       'ScanMetadataScheduleExpression',
       'ClickstreamAnalyticsMetadataDdbArn',
       'TopFrequentPropertiesLimit',
@@ -645,7 +620,7 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
       subnetSelection: subnetSelection,
       projectId: 'project1',
       appIds: 'app1',
-      ... nestStackCommonTablesProps,
+      ...nestStackCommonTablesProps,
       newRedshiftServerlessProps: undefined,
       existingRedshiftServerlessProps: undefined,
       provisionedRedshiftProps: undefined,
@@ -663,9 +638,9 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
     };
     var error = false;
     try {
-      new RedshiftAnalyticsStack(stack, testId+'redshiftAnalytics'+count++, nestStackProps);
+      new RedshiftAnalyticsStack(stack, testId + 'redshiftAnalytics' + count++, nestStackProps);
     } catch (e) {
-      logger.error('ERROR:'+e);
+      logger.error('ERROR:' + e);
       error = true;
     }
     expect(error).toBeTruthy();
@@ -689,7 +664,7 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
       subnetSelection: subnetSelection,
       projectId: 'project1',
       appIds: 'app1',
-      ... nestStackCommonTablesProps,
+      ...nestStackCommonTablesProps,
       newRedshiftServerlessProps: {
         vpcId: 'vpc-id',
         subnetIds: 'subnet-1,subnet-2',
@@ -714,9 +689,9 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
     };
     var error = false;
     try {
-      new RedshiftAnalyticsStack(stack, testId+'redshiftAnalytics'+count++, nestStackProps);
+      new RedshiftAnalyticsStack(stack, testId + 'redshiftAnalytics' + count++, nestStackProps);
     } catch (e) {
-      logger.error('ERROR:'+e);
+      logger.error('ERROR:' + e);
       error = true;
     }
     expect(error).toBeTruthy();
@@ -736,7 +711,7 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
       subnetSelection: subnetSelection,
       projectId: 'project1',
       appIds: 'app1',
-      ... nestStackCommonTablesProps,
+      ...nestStackCommonTablesProps,
       existingRedshiftServerlessProps: serverlessRedshiftProps,
       scanMetadataWorkflowData: {
         scheduleExpression: 'cron(0 1 * * ? *)',
@@ -751,8 +726,20 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
       dataProcessingCronOrRateExpression: 'cron(0 1 * * ? *)',
     };
 
-    const nestedStack = new RedshiftAnalyticsStack(stack, testId+'redshiftAnalytics'+count++, nestStackProps);
+    const nestedStack = new RedshiftAnalyticsStack(stack, testId + 'redshiftAnalytics' + count++, nestStackProps);
     expect(nestedStack).toBeInstanceOf(RedshiftAnalyticsStack);
+  });
+
+  test('Should has 4 StateMachines', () => {
+    if (stack.nestedStacks.redshiftServerlessStack) {
+      const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
+      nestedTemplate.resourceCountIs('AWS::StepFunctions::StateMachine', 3);
+    }
+
+    if (stack.nestedStacks.redshiftProvisionedStack) {
+      const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftProvisionedStack);
+      nestedTemplate.resourceCountIs('AWS::StepFunctions::StateMachine', 3);
+    }
   });
 
   test('Should has Resource RedshiftServerlessAllWorkgroupPolicy', () => {
@@ -831,7 +818,7 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
 describe('DataAnalyticsRedshiftStack lambda function test', () => {
   const app = new App();
   const testId = 'test-3';
-  const stack = new DataAnalyticsRedshiftStack(app, testId+'-data-analytics-redshift-stack-serverless', {});
+  const stack = new DataAnalyticsRedshiftStack(app, testId + '-data-analytics-redshift-stack-serverless', {});
 
   beforeEach(() => {
   });
@@ -917,10 +904,10 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
     }
   });
 
-  test('Should has eventFlowODSEventProcessorRoleDefaultPolicy', () => {
+  test('Should has LoadDataCreateLoadManifesteventRoleDefaultPolicy', () => {
     if (stack.nestedStacks.redshiftServerlessStack) {
       const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
-      const policy = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::IAM::Policy', 'eventFlowODSEventProcessorRoleDefaultPolicy');
+      const policy = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::IAM::Policy', 'LoadDataCreateLoadManifesteventRoleDefaultPolicy');
       const statement = policy.resource.Properties.PolicyDocument.Statement;
       var containDynamodbAction = false;
       for (const s of statement) {
@@ -935,7 +922,7 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
     }
     if (stack.nestedStacks.redshiftProvisionedStack) {
       const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftProvisionedStack);
-      const policy = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::IAM::Policy', 'eventFlowODSEventProcessorRoleDefaultPolicy');
+      const policy = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::IAM::Policy', 'LoadDataCreateLoadManifesteventRoleDefaultPolicy');
       const statement = policy.resource.Properties.PolicyDocument.Statement;
       var containDynamodbAction = false;
       for (const s of statement) {
@@ -1288,43 +1275,7 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
                       RefAnyValue,
                       '/',
                       RefAnyValue,
-                      'event/*',
-                    ],
-                  ],
-                },
-              ],
-            },
-
-            {
-              Action: [
-                's3:GetObject*',
-                's3:GetBucket*',
-                's3:List*',
-              ],
-              Effect: 'Allow',
-              Resource: [
-                {
-                  'Fn::Join': [
-                    '',
-                    [
-                      'arn:',
-                      RefAnyValue,
-                      ':s3:::',
-                      RefAnyValue,
-                    ],
-                  ],
-                },
-                {
-                  'Fn::Join': [
-                    '',
-                    [
-                      'arn:',
-                      RefAnyValue,
-                      ':s3:::',
-                      RefAnyValue,
-                      '/',
-                      RefAnyValue,
-                      'event_parameter/*',
+                      '*',
                     ],
                   ],
                 },
@@ -1365,7 +1316,6 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
                 },
               ],
             },
-
             {
               Action: [
                 's3:GetObject*',
@@ -1396,78 +1346,6 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
                       '/',
                       RefAnyValue,
                       'user/*',
-                    ],
-                  ],
-                },
-              ],
-            },
-            {
-              Action: [
-                's3:GetObject*',
-                's3:GetBucket*',
-                's3:List*',
-              ],
-              Effect: 'Allow',
-              Resource: [
-                {
-                  'Fn::Join': [
-                    '',
-                    [
-                      'arn:',
-                      RefAnyValue,
-                      ':s3:::',
-                      RefAnyValue,
-                    ],
-                  ],
-                },
-                {
-                  'Fn::Join': [
-                    '',
-                    [
-                      'arn:',
-                      RefAnyValue,
-                      ':s3:::',
-                      RefAnyValue,
-                      '/',
-                      RefAnyValue,
-                      'user/*',
-                    ],
-                  ],
-                },
-              ],
-            },
-
-
-            {
-              Action: [
-                's3:GetObject*',
-                's3:GetBucket*',
-                's3:List*',
-              ],
-              Effect: 'Allow',
-              Resource: [
-                {
-                  'Fn::Join': [
-                    '',
-                    [
-                      'arn:',
-                      RefAnyValue,
-                      ':s3:::',
-                      RefAnyValue,
-                    ],
-                  ],
-                },
-                {
-                  'Fn::Join': [
-                    '',
-                    [
-                      'arn:',
-                      RefAnyValue,
-                      ':s3:::',
-                      RefAnyValue,
-                      '/',
-                      RefAnyValue,
-                      'item/*',
                     ],
                   ],
                 },
@@ -1558,6 +1436,7 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
                 },
               ],
             },
+
             {
               Action: [
                 's3:GetObject*',
@@ -1587,13 +1466,12 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
                       RefAnyValue,
                       '/',
                       RefAnyValue,
-                      'event/*',
+                      '*',
                     ],
                   ],
                 },
               ],
             },
-
             {
               Action: [
                 's3:GetObject*',
@@ -1658,114 +1536,7 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
                       RefAnyValue,
                       '/',
                       RefAnyValue,
-                      'event_parameter/*',
-                    ],
-                  ],
-                },
-              ],
-            },
-
-            {
-              Action: [
-                's3:GetObject*',
-                's3:GetBucket*',
-                's3:List*',
-              ],
-              Effect: 'Allow',
-              Resource: [
-                {
-                  'Fn::Join': [
-                    '',
-                    [
-                      'arn:',
-                      RefAnyValue,
-                      ':s3:::',
-                      RefAnyValue,
-                    ],
-                  ],
-                },
-                {
-                  'Fn::Join': [
-                    '',
-                    [
-                      'arn:',
-                      RefAnyValue,
-                      ':s3:::',
-                      RefAnyValue,
-                      '/',
-                      RefAnyValue,
                       'user/*',
-                    ],
-                  ],
-                },
-              ],
-            },
-            {
-              Action: [
-                's3:GetObject*',
-                's3:GetBucket*',
-                's3:List*',
-              ],
-              Effect: 'Allow',
-              Resource: [
-                {
-                  'Fn::Join': [
-                    '',
-                    [
-                      'arn:',
-                      RefAnyValue,
-                      ':s3:::',
-                      RefAnyValue,
-                    ],
-                  ],
-                },
-                {
-                  'Fn::Join': [
-                    '',
-                    [
-                      'arn:',
-                      RefAnyValue,
-                      ':s3:::',
-                      RefAnyValue,
-                      '/',
-                      RefAnyValue,
-                      'user/*',
-                    ],
-                  ],
-                },
-              ],
-            },
-
-            {
-              Action: [
-                's3:GetObject*',
-                's3:GetBucket*',
-                's3:List*',
-              ],
-              Effect: 'Allow',
-              Resource: [
-                {
-                  'Fn::Join': [
-                    '',
-                    [
-                      'arn:',
-                      RefAnyValue,
-                      ':s3:::',
-                      RefAnyValue,
-                    ],
-                  ],
-                },
-                {
-                  'Fn::Join': [
-                    '',
-                    [
-                      'arn:',
-                      RefAnyValue,
-                      ':s3:::',
-                      RefAnyValue,
-                      '/',
-                      RefAnyValue,
-                      'item/*',
                     ],
                   ],
                 },
@@ -1806,8 +1577,6 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
                 },
               ],
             },
-
-
           ],
           Version: '2012-10-17',
         },
@@ -1819,7 +1588,7 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
     }
   });
 
-  test('Check LoadODSEventToRedshiftWorkflowRedshiftServerlessAllWorkgroupPolicy', ()=>{
+  test('Check LoadODSEventToRedshiftWorkflowRedshiftServerlessAllWorkgroupPolicy', () => {
     if (stack.nestedStacks.redshiftServerlessStack) {
       const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
       nestedTemplate.hasResourceProperties('AWS::IAM::Policy', {
@@ -1854,7 +1623,7 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
     }
   });
 
-  test('Check LoadODSEventToRedshiftWorkflowRedshiftServerlessSingleWorkgroupPolicy', ()=>{
+  test('Check LoadODSEventToRedshiftWorkflowRedshiftServerlessSingleWorkgroupPolicy', () => {
     if (stack.nestedStacks.redshiftServerlessStack) {
       const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
       nestedTemplate.hasResourceProperties('AWS::IAM::Policy', {
@@ -1890,7 +1659,7 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
     }
   });
 
-  test('Check LoadODSEventToRedshiftWorkflowRedshiftServerlessAllNamespacePolicy', ()=>{
+  test('Check LoadODSEventToRedshiftWorkflowRedshiftServerlessAllNamespacePolicy', () => {
     if (stack.nestedStacks.redshiftServerlessStack) {
       const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
       nestedTemplate.hasResourceProperties('AWS::IAM::Policy', {
@@ -1928,7 +1697,7 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
     }
   });
 
-  test('Check LoadODSEventToRedshiftWorkflowRedshiftServerlessSingleNamespacePolicy', ()=>{
+  test('Check LoadODSEventToRedshiftWorkflowRedshiftServerlessSingleNamespacePolicy', () => {
     if (stack.nestedStacks.redshiftServerlessStack) {
       const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
       nestedTemplate.hasResourceProperties('AWS::IAM::Policy', {
@@ -1967,7 +1736,7 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
     }
   });
 
-  test('Check LoadODSEventToRedshiftWorkflowCreateLoadManifestFnSg', ()=>{
+  test('Check LoadODSEventToRedshiftWorkflowCreateLoadManifestFnSg', () => {
     if (stack.nestedStacks.redshiftServerlessStack) {
       const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
       const sg = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::EC2::SecurityGroup', 'LoadODSEventToRedshiftWorkflowCreateLoadManifestFnSG');
@@ -1980,7 +1749,7 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
     }
   });
 
-  test('Check LoadODSEventToRedshiftWorkflowCreateLoadManifestFnRole', ()=>{
+  test('Check LoadODSEventToRedshiftWorkflowCreateLoadManifestFnRole', () => {
     if (stack.nestedStacks.redshiftServerlessStack) {
       const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
       const role = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::IAM::Role', 'LoadODSEventToRedshiftWorkflowCreateLoadManifestFnRole');
@@ -1993,7 +1762,7 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
     }
   });
 
-  test('Check LoadODSEventToRedshiftWorkflowCreateLoadManifestFnRoleDefaultPolicy', ()=>{
+  test('Check LoadDataCreateLoadManifesteventRoleDefaultPolicy', () => {
     if (stack.nestedStacks.redshiftServerlessStack) {
       const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
       nestedTemplate.hasResourceProperties('AWS::IAM::Policy', {
@@ -2062,6 +1831,7 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
                           'Arn',
                         ],
                       },
+
                       '/index/*',
                     ],
                   ],
@@ -2101,7 +1871,7 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
                       RefAnyValue,
                       '/',
                       RefAnyValue,
-                      'event_parameter/*',
+                      '*',
                     ],
                   ],
                 },
@@ -2185,6 +1955,7 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
                           'Arn',
                         ],
                       },
+
                       '/index/*',
                     ],
                   ],
@@ -2224,7 +1995,7 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
                       RefAnyValue,
                       '/',
                       RefAnyValue,
-                      'event_parameter/*',
+                      '*',
                     ],
                   ],
                 },
@@ -2241,7 +2012,7 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
     }
   });
 
-  test('Check lambda LoadODSEventToRedshiftWorkflowCreateLoadManifestFn', ()=>{
+  test('Check lambda LoadODSEventToRedshiftWorkflowCreateLoadManifestFn', () => {
     if (stack.nestedStacks.redshiftServerlessStack) {
       const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
       nestedTemplate.hasResourceProperties('AWS::Lambda::Function', {
@@ -2355,7 +2126,7 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
     }
   });
 
-  test('Check LoadODSEventToRedshiftWorkflowLoadManifestToRedshiftFnSG', ()=>{
+  test('Check LoadODSEventToRedshiftWorkflowLoadManifestToRedshiftFnSG', () => {
     if (stack.nestedStacks.redshiftServerlessStack) {
       const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
       const sg = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::EC2::SecurityGroup', 'LoadODSEventToRedshiftWorkflowLoadManifestToRedshiftFnSG');
@@ -2368,7 +2139,7 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
     }
   });
 
-  test('Check LoadODSEventToRedshiftWorkflowLoadManifestToRedshiftRole', ()=>{
+  test('Check LoadODSEventToRedshiftWorkflowLoadManifestToRedshiftRole', () => {
     if (stack.nestedStacks.redshiftServerlessStack) {
       const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
       const role = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::IAM::Role', 'LoadODSEventToRedshiftWorkflowLoadManifestToRedshiftRole');
@@ -2381,7 +2152,7 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
     }
   });
 
-  test('Check LoadODSEventToRedshiftWorkflowLoadManifestToRedshiftRoleDefaultPolicy', ()=>{
+  test('Check LoadODSEventToRedshiftWorkflowLoadManifestToRedshiftRoleDefaultPolicy', () => {
     if (stack.nestedStacks.redshiftServerlessStack) {
       const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
       nestedTemplate.hasResourceProperties('AWS::IAM::Policy', {
@@ -2566,7 +2337,7 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
     }
   });
 
-  test('Check LoadODSEventToRedshiftWorkflowLoadManifestToRedshiftFn', ()=>{
+  test('Check LoadODSEventToRedshiftWorkflowLoadManifestToRedshiftFn', () => {
     if (stack.nestedStacks.redshiftServerlessStack) {
       const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
       nestedTemplate.hasResourceProperties('AWS::Lambda::Function', {
@@ -2701,33 +2472,33 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
     }
   });
 
-  test('Check LoadODSEventToRedshiftWorkflowCheckLoadJobStatusFnSG', ()=>{
+  test('Check LoadDatas3EventFnSGevent', () => {
     if (stack.nestedStacks.redshiftServerlessStack) {
       const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
-      const sg = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::EC2::SecurityGroup', 'LoadODSEventToRedshiftWorkflowCheckLoadJobStatusFnSG');
+      const sg = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::EC2::SecurityGroup', 'LoadDatas3EventFnSGevent');
       expect(sg).toBeDefined();
     }
     if (stack.nestedStacks.redshiftProvisionedStack) {
       const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftProvisionedStack);
-      const sg = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::EC2::SecurityGroup', 'LoadODSEventToRedshiftWorkflowCheckLoadJobStatusFnSG');
+      const sg = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::EC2::SecurityGroup', 'LoadDatas3EventFnSGevent');
       expect(sg).toBeDefined();
     }
   });
 
-  test('Check LoadODSEventToRedshiftWorkflowCheckLoadJobStatusRole', ()=>{
+  test('Check LoadDataCheckLoadJobStatuseventRole', () => {
     if (stack.nestedStacks.redshiftServerlessStack) {
       const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
-      const role = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::IAM::Role', 'LoadODSEventToRedshiftWorkflowCheckLoadJobStatusRole');
+      const role = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::IAM::Role', 'LoadDataCheckLoadJobStatuseventRole');
       expect(role).toBeDefined();
     }
     if (stack.nestedStacks.redshiftProvisionedStack) {
       const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftProvisionedStack);
-      const role = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::IAM::Role', 'LoadODSEventToRedshiftWorkflowCheckLoadJobStatusRole');
+      const role = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::IAM::Role', 'LoadDataCheckLoadJobStatuseventRole');
       expect(role).toBeDefined();
     }
   });
 
-  test('Check LoadODSEventToRedshiftWorkflowCheckLoadJobStatusRoleDefaultPolicy', ()=>{
+  test('Check LoadDataCheckLoadJobStatuseventRoleDefaultPolicy', () => {
     if (stack.nestedStacks.redshiftServerlessStack) {
       const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
       nestedTemplate.hasResourceProperties('AWS::IAM::Policy', {
@@ -2788,7 +2559,7 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
             {
               Action: 'sts:AssumeRole',
               Effect: 'Allow',
-              Resource: RefAnyValue,
+              Resource: Match.anyValue(),
             },
             {
               Action: 's3:DeleteObject*',
@@ -2803,7 +2574,7 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
                     RefAnyValue,
                     '/',
                     RefAnyValue,
-                    'event_parameter/*',
+                    '*',
                   ],
                 ],
               },
@@ -2878,12 +2649,7 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
             {
               Action: 'sts:AssumeRole',
               Effect: 'Allow',
-              Resource: {
-                'Fn::GetAtt': [
-                  Match.anyValue(),
-                  'Arn',
-                ],
-              },
+              Resource: Match.anyValue(),
             },
             {
               Action: 's3:DeleteObject*',
@@ -2898,7 +2664,7 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
                     RefAnyValue,
                     '/',
                     RefAnyValue,
-                    'event_parameter/*',
+                    '*',
                   ],
                 ],
               },
@@ -2914,7 +2680,7 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
     }
   });
 
-  test('Check LoadODSEventToRedshiftWorkflowCheckLoadJobStatusFn', ()=>{
+  test('Check LoadODSEventToRedshiftWorkflowCheckLoadJobStatusFn', () => {
     if (stack.nestedStacks.redshiftServerlessStack) {
       const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
       nestedTemplate.hasResourceProperties('AWS::Lambda::Function', {
@@ -3035,7 +2801,7 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
     }
   });
 
-  test('Check LoadODSEventToRedshiftWorkflowLoadManifestStateMachineEventsRole', ()=>{
+  test('Check LoadODSEventToRedshiftWorkflowLoadManifestStateMachineEventsRole', () => {
     if (stack.nestedStacks.redshiftServerlessStack) {
       const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
       const role = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::IAM::Role', 'LoadODSEventToRedshiftWorkflowLoadManifestStateMachineEventsRole');
@@ -3048,7 +2814,7 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
     }
   });
 
-  test('Check LoadODSEventToRedshiftWorkflowLoadManifestStateMachineRoleDefaultPolicy', ()=>{
+  test('Check LoadODSEventToRedshiftWorkflowLoadManifestStateMachineRoleDefaultPolicy', () => {
     if (stack.nestedStacks.redshiftServerlessStack) {
       const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
       const policy = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::IAM::Policy', 'LoadODSEventToRedshiftWorkflowLoadManifestStateMachineRoleDefaultPolicy');
@@ -3061,7 +2827,7 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
     }
   });
 
-  test('Check LoadScheduleRule', ()=>{
+  test('Check LoadScheduleRule', () => {
     if (stack.nestedStacks.redshiftServerlessStack) {
       const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
       nestedTemplate.hasResourceProperties('AWS::Events::Rule', {
@@ -3103,7 +2869,7 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
   });
 
 
-  test('Check EMR Serverless Job Run State Change Rule', ()=>{
+  test('Check EMR Serverless Job Run State Change Rule', () => {
     if (stack.nestedStacks.redshiftServerlessStack) {
       const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
       nestedTemplate.hasResourceProperties('AWS::Events::Rule', {
@@ -3182,7 +2948,7 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
     }
   });
 
-  test('Check ScanMetadataWorkflowScanMetadataFnSG', ()=>{
+  test('Check ScanMetadataWorkflowScanMetadataFnSG', () => {
     if (stack.nestedStacks.redshiftServerlessStack) {
       const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
       const sg = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::EC2::SecurityGroup', 'ScanMetadataWorkflowScanMetadataFnSG');
@@ -3195,7 +2961,7 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
     }
   });
 
-  test('Check ScanMetadataWorkflowScanMetadataRole', ()=>{
+  test('Check ScanMetadataWorkflowScanMetadataRole', () => {
     if (stack.nestedStacks.redshiftServerlessStack) {
       const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
       const role = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::IAM::Role', 'ScanMetadataWorkflowScanMetadataRole');
@@ -3208,7 +2974,7 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
     }
   });
 
-  test('Check RedshiftServerelssWorkgroupRedshiftServerlessDataAPIRoleDefaultPolicy', ()=>{
+  test('Check RedshiftServerelssWorkgroupRedshiftServerlessDataAPIRoleDefaultPolicy', () => {
     if (stack.nestedStacks.newRedshiftServerlessStack) {
       const nestedTemplate = Template.fromStack(stack.nestedStacks.newRedshiftServerlessStack);
       nestedTemplate.hasResourceProperties('AWS::IAM::Policy', {
@@ -3379,8 +3145,7 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
     }
   });
 
-
-  test('Check ScanMetadataWorkflowCheckScanMetadataJobStatusFnSG', ()=>{
+  test('Check ScanMetadataWorkflowCheckScanMetadataJobStatusFnSG', () => {
     if (stack.nestedStacks.redshiftServerlessStack) {
       const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
       const sg = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::EC2::SecurityGroup', 'ScanMetadataWorkflowCheckScanMetadataJobStatusFnSG');
@@ -3393,7 +3158,7 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
     }
   });
 
-  test('Check ScanMetadataWorkflowCheckScanMetadataJobStatusRole', ()=>{
+  test('Check ScanMetadataWorkflowCheckScanMetadataJobStatusRole', () => {
     if (stack.nestedStacks.redshiftServerlessStack) {
       const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
       const role = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::IAM::Role', 'ScanMetadataWorkflowCheckScanMetadataJobStatusRole');
@@ -3406,7 +3171,7 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
     }
   });
 
-  test('Check ScanMetadataWorkflowStoreMetadataIntoDDBFnSG', ()=>{
+  test('Check ScanMetadataWorkflowStoreMetadataIntoDDBFnSG', () => {
     if (stack.nestedStacks.redshiftServerlessStack) {
       const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
       const sg = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::EC2::SecurityGroup', 'ScanMetadataWorkflowStoreMetadataIntoDDBFnSG');
@@ -3419,7 +3184,7 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
     }
   });
 
-  test('Check ScanMetadataWorkflowStoreMetadataIntoDDBRole', ()=>{
+  test('Check ScanMetadataWorkflowStoreMetadataIntoDDBRole', () => {
     if (stack.nestedStacks.redshiftServerlessStack) {
       const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
       const role = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::IAM::Role', 'ScanMetadataWorkflowStoreMetadataIntoDDBRole');
@@ -3434,7 +3199,7 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
 
 
   // Check clear expired events lambda
-  test('Check ClearExpiredEventsWorkflowClearExpiredEventsFnSG', ()=>{
+  test('Check ClearExpiredEventsWorkflowClearExpiredEventsFnSG', () => {
     if (stack.nestedStacks.redshiftServerlessStack) {
       const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
       const sg = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::EC2::SecurityGroup', 'ClearExpiredEventsWorkflowClearExpiredEventsFnSG');
@@ -3447,7 +3212,7 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
     }
   });
 
-  test('Check ClearExpiredEventsWorkflowClearExpiredEventsRole', ()=>{
+  test('Check ClearExpiredEventsWorkflowClearExpiredEventsRole', () => {
     if (stack.nestedStacks.redshiftServerlessStack) {
       const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
       const role = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::IAM::Role', 'ClearExpiredEventsWorkflowClearExpiredEventsRole');
@@ -3460,7 +3225,7 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
     }
   });
 
-  test('Check ClearExpiredEventsWorkflowClearExpiredEventsRoleDefaultPolicy', ()=>{
+  test('Check ClearExpiredEventsWorkflowClearExpiredEventsRoleDefaultPolicy', () => {
     if (stack.nestedStacks.redshiftServerlessStack) {
       const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
       nestedTemplate.hasResourceProperties('AWS::IAM::Policy', {
@@ -3547,7 +3312,7 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
     }
   });
 
-  test('Check ClearExpiredEventsWorkflowClearExpiredEventsFn', ()=>{
+  test('Check ClearExpiredEventsWorkflowClearExpiredEventsFn', () => {
     if (stack.nestedStacks.redshiftServerlessStack) {
       const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
       nestedTemplate.hasResourceProperties('AWS::Lambda::Function', {
@@ -3662,7 +3427,7 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
     }
   });
 
-  test('Check ClearExpiredEventsWorkflowCheckClearJobStatusFnSG', ()=>{
+  test('Check ClearExpiredEventsWorkflowCheckClearJobStatusFnSG', () => {
     if (stack.nestedStacks.redshiftServerlessStack) {
       const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
       const sg = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::EC2::SecurityGroup', 'ClearExpiredEventsWorkflowCheckClearJobStatusFnSG');
@@ -3675,7 +3440,7 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
     }
   });
 
-  test('Check ClearExpiredEventsWorkflowCheckClearJobStatusRole', ()=>{
+  test('Check ClearExpiredEventsWorkflowCheckClearJobStatusRole', () => {
     if (stack.nestedStacks.redshiftServerlessStack) {
       const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
       const role = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::IAM::Role', 'ClearExpiredEventsWorkflowCheckClearJobStatusRole');
@@ -3688,7 +3453,7 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
     }
   });
 
-  test('Check ClearExpiredEventsWorkflowCheckClearJobStatusRoleDefaultPolicy', ()=>{
+  test('Check ClearExpiredEventsWorkflowCheckClearJobStatusRoleDefaultPolicy', () => {
     if (stack.nestedStacks.redshiftServerlessStack) {
       const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
       nestedTemplate.hasResourceProperties('AWS::IAM::Policy', {
@@ -3775,7 +3540,7 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
     }
   });
 
-  test('Check ClearExpiredEventsWorkflowCheckClearJobStatusFn', ()=>{
+  test('Check ClearExpiredEventsWorkflowCheckClearJobStatusFn', () => {
     if (stack.nestedStacks.redshiftServerlessStack) {
       const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
       nestedTemplate.hasResourceProperties('AWS::Lambda::Function', {
@@ -3890,7 +3655,7 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
     }
   });
 
-  test('Check ClearExpiredEventsWorkflowClearExpiredEventsStateMachineRole', ()=>{
+  test('Check ClearExpiredEventsWorkflowClearExpiredEventsStateMachineRole', () => {
     if (stack.nestedStacks.redshiftServerlessStack) {
       const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
       const role = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::IAM::Role', 'ClearExpiredEventsWorkflowClearExpiredEventsStateMachineRole');
@@ -3903,7 +3668,7 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
     }
   });
 
-  test('Check ClearExpiredEventsWorkflowClearExpiredEventsStateMachineRoleDefaultPolicy', ()=>{
+  test('Check ClearExpiredEventsWorkflowClearExpiredEventsStateMachineRoleDefaultPolicy', () => {
     if (stack.nestedStacks.redshiftServerlessStack) {
       const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
       const policy = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::IAM::Policy', 'ClearExpiredEventsWorkflowClearExpiredEventsStateMachineRoleDefaultPolicy');
@@ -3916,7 +3681,7 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
     }
   });
 
-  test('Check ClearExpiredEventsScheduleRule', ()=>{
+  test('Check ClearExpiredEventsScheduleRule', () => {
     if (stack.nestedStacks.redshiftServerlessStack) {
       const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
       nestedTemplate.hasResourceProperties('AWS::Events::Rule', {
@@ -3962,15 +3727,15 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
 describe('DataAnalyticsRedshiftStack serverless custom resource test', () => {
   const app = new App();
   const testId = 'test-4';
-  const stack = new DataAnalyticsRedshiftStack(app, testId+'-data-analytics-redshift-stack-serverless', {});
+  const stack = new DataAnalyticsRedshiftStack(app, testId + '-data-analytics-redshift-stack-serverless', {});
 
-  test('redshiftServerlessStack has 4 CustomResource', ()=>{
+  test('redshiftServerlessStack has 4 CustomResource', () => {
     if (stack.nestedStacks.redshiftServerlessStack) {
       Template.fromStack(stack.nestedStacks.redshiftServerlessStack).resourceCountIs('AWS::CloudFormation::CustomResource', 4);
     }
   });
 
-  test('redshiftServerlessStack has CreateApplicationSchemasRedshiftSchemasCustomResource', ()=>{
+  test('redshiftServerlessStack has CreateApplicationSchemasRedshiftSchemasCustomResource', () => {
     if (stack.nestedStacks.redshiftServerlessStack) {
       const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
       nestedTemplate.hasResourceProperties('AWS::CloudFormation::CustomResource', {
@@ -4035,7 +3800,7 @@ describe('DataAnalyticsRedshiftStack serverless custom resource test', () => {
     }
   });
 
-  test('redshiftServerlessStack has LoadODSEventToRedshiftWorkflowRedshiftAssociateIAMRoleCustomResource', ()=>{
+  test('redshiftServerlessStack has LoadODSEventToRedshiftWorkflowRedshiftAssociateIAMRoleCustomResource', () => {
     if (stack.nestedStacks.redshiftServerlessStack) {
       const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
       nestedTemplate.hasResourceProperties('AWS::CloudFormation::CustomResource', {
@@ -4379,6 +4144,7 @@ describe('Should set metrics widgets', () => {
 
   });
 
+
   test('Should set metrics widgets for existing redshiftServerless', () => {
     existingServerlessTemplate.hasResourceProperties('AWS::CloudFormation::CustomResource', {
       metricsWidgetsProps: {
@@ -4507,3 +4273,5 @@ describe('Should set metrics widgets', () => {
 
   });
 });
+
+

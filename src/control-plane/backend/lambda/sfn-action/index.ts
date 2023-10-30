@@ -25,6 +25,7 @@ import {
   CloudFormationServiceException,
   UpdateStackCommandInput,
   UpdateStackCommandOutput,
+  Capability,
 } from '@aws-sdk/client-cloudformation';
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { logger } from '../../../../common/powertools';
@@ -90,7 +91,11 @@ export const createStack = async (event: SfnStackEvent) => {
       Parameters: event.Input.Parameters,
       DisableRollback: true,
       EnableTerminationProtection: true,
-      Capabilities: ['CAPABILITY_IAM', 'CAPABILITY_NAMED_IAM', 'CAPABILITY_AUTO_EXPAND'],
+      Capabilities: [
+        Capability.CAPABILITY_IAM,
+        Capability.CAPABILITY_NAMED_IAM,
+        Capability.CAPABILITY_AUTO_EXPAND,
+      ],
       Tags: event.Input.Tags,
     });
     const result = await cloudFormationClient.send(params);
@@ -118,7 +123,11 @@ export const updateStack = async (event: SfnStackEvent) => {
       Parameters: event.Input.Parameters,
       DisableRollback: false,
       UsePreviousTemplate: true,
-      Capabilities: ['CAPABILITY_IAM', 'CAPABILITY_NAMED_IAM', 'CAPABILITY_AUTO_EXPAND'],
+      Capabilities: [
+        Capability.CAPABILITY_IAM,
+        Capability.CAPABILITY_NAMED_IAM,
+        Capability.CAPABILITY_AUTO_EXPAND,
+      ],
       Tags: event.Input.Tags,
     });
     return {

@@ -15,13 +15,11 @@
 import { SFNClient, ListExecutionsCommand, ListExecutionsCommandOutput } from '@aws-sdk/client-sfn';
 import { Context } from 'aws-lambda';
 import { queryItems } from './create-load-manifest';
+import { composeJobStatus } from './put-ods-source-to-store';
 import { logger } from '../../../common/powertools';
 import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
-import { JobStatus } from '../../private/constant';
+import { JobStatus, REDSHIFT_TABLE_NAMES } from '../../private/constant';
 
-
-const ODS_EVENT_BUCKET = process.env.ODS_EVENT_BUCKET!;
-const ODS_EVENT_BUCKET_PREFIX = process.env.ODS_EVENT_BUCKET_PREFIX!;
 const DYNAMODB_TABLE_NAME = process.env.DYNAMODB_TABLE_NAME!;
 const DYNAMODB_TABLE_INDEX_NAME = process.env.DYNAMODB_TABLE_INDEX_NAME!;
 
@@ -32,9 +30,10 @@ const sfnClient = new SFNClient({
   ...aws_sdk_client_common_config,
 });
 
-
 export const handler = async (event: {
   execution_id: string;
+  eventBucketName: string;
+  eventPrefix: string;
 }, context: Context) => {
   logger.info('event', { event });
   // arn:aws:states:us-east-1:xxxxxxxxx:execution:name1:a2k3jkj0-1112
@@ -49,13 +48,13 @@ export const handler = async (event: {
   const requestId = context.awsRequestId;
   logger.debug(`context.awsRequestId: ${requestId}`);
 
-  const tableName = DYNAMODB_TABLE_NAME;
-  const indexName = DYNAMODB_TABLE_INDEX_NAME;
+  const eventBucketWithPrefix = `${event.eventBucketName}/${event.eventPrefix}`;
+  const odsTableNames = REDSHIFT_TABLE_NAMES;
 
-  const odsEventBucketWithPrefix = `${ODS_EVENT_BUCKET}/${ODS_EVENT_BUCKET_PREFIX}`;
-
-  const countEnQ = await queryAllCount(tableName, indexName, odsEventBucketWithPrefix, JobStatus.JOB_ENQUEUE);
-  const countProcessing = await queryAllCount(tableName, indexName, odsEventBucketWithPrefix, JobStatus.JOB_PROCESSING);
+  const filesCountInfo = [];
+  for (const odsTableName of odsTableNames) {
+    filesCountInfo.push(await getCountForOdsTable(odsTableName, eventBucketWithPrefix));
+  }
 
   let hasRunningWorkflow = false;
   logger.info('ListExecutionsCommand, stateMachineArn=' + stateMachineArn);
@@ -79,15 +78,44 @@ export const handler = async (event: {
 
   const data = {
     HasRunningWorkflow: hasRunningWorkflow,
-    EnQueueCount: countEnQ,
-    ProcessingCount: countProcessing,
+    FilesCountInfo: filesCountInfo,
   };
   logger.info('return data', { data });
   return data;
 };
 
+async function getCountForOdsTable(odsTableName: string, eventBucketWithPrefix: string) {
+  const ddbTableName = DYNAMODB_TABLE_NAME;
+  const ddbIndexName = DYNAMODB_TABLE_INDEX_NAME;
+
+  const tableBucketWithPrefix = eventBucketWithPrefix.replace(/\/event\/?$/, `/${odsTableName}/`);
+  logger.info('getCountForOdsTable()', {
+    odsTableName,
+    eventBucketWithPrefix,
+    tableBucketWithPrefix,
+  });
+
+
+  const countEnQ = await queryAllCount(ddbTableName, ddbIndexName, tableBucketWithPrefix,
+    composeJobStatus(JobStatus.JOB_ENQUEUE, odsTableName));
+
+  const countProcessing = await queryAllCount(ddbTableName, ddbIndexName, tableBucketWithPrefix,
+    composeJobStatus(JobStatus.JOB_PROCESSING, odsTableName));
+
+  const countNew = await queryAllCount(ddbTableName, ddbIndexName, tableBucketWithPrefix,
+    composeJobStatus(JobStatus.JOB_NEW, odsTableName));
+
+  return {
+    tableName: odsTableName,
+    countNew,
+    countEnQ,
+    countProcessing,
+  };
+
+}
+
 async function queryAllCount(tableName: string, indexName: string, odsEventBucketWithPrefix: string, jobStatus: string) {
-  logger.info('queryAllCount() queryItems by', {
+  logger.info('queryAllCount() input', {
     tableName,
     indexName,
     odsEventBucketWithPrefix,
@@ -105,6 +133,6 @@ async function queryAllCount(tableName: string, indexName: string, odsEventBucke
       break;
     }
   }
-  logger.info('return count=' + count);
+  logger.info('queryAllCount() return count=' + count + ', jobStatus=' + jobStatus);
   return count;
 }

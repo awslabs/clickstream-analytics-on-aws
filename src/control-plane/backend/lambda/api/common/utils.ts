@@ -20,7 +20,7 @@ import { ALBLogServiceAccountMapping, CORS_ORIGIN_DOMAIN_PATTERN, EMAIL_PATTERN,
 import { ConditionCategory, MetadataValueType } from './explore-types';
 import { logger } from './powertools';
 import { ALBRegionMappingObject, BucketPrefix, ClickStreamSubnet, IUserRole, PipelineStackType, PipelineStatus, RPURange, RPURegionMappingObject, ReportingDashboardOutput, SubnetType } from './types';
-import { IMetadataRaw, IMetadataRawValue, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute } from '../model/metadata';
+import { IMetadataRaw, IMetadataRawValue, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute, IMetadataAttributeValue } from '../model/metadata';
 import { CPipelineResources, IPipeline } from '../model/pipeline';
 import { IUserSettings } from '../model/user';
 import { UserService } from '../service/user';
@@ -86,16 +86,6 @@ function getServerlessRedshiftRPU(region: string): RPURange {
     }
   }
   return { min: 0, max: 0 } as RPURange;
-}
-
-function generateRandomStr(length: number) {
-  let randomString = '';
-  const letters = 'abcdefghijklmnopqrstuvwxyz';
-  for (let i = 0; i < length; i++) {
-    const randomIndex = Math.floor(Math.random() * letters.length);
-    randomString += letters[randomIndex];
-  }
-  return randomString;
 }
 
 function getEmailFromRequestContext(requestContext: string | undefined) {
@@ -606,17 +596,23 @@ function groupAssociatedEventParametersByName(events: IMetadataEvent[], paramete
   return events;
 };
 
-function getDataFromLastDay(metadata: IMetadataRaw) {
+function getCurMonthStr() {
   const year = new Date().getFullYear();
   const month = new Date().getMonth() + 1;
-  const key = `#${year}${month < 10 ? '0' + month : month}`;
+  return `#${year}${month.toString().padStart(2, '0')}`;
+}
+
+function getDataFromLastDay(metadata: IMetadataRaw) {
+  const curMonth = getCurMonthStr();
   const lastDay = `day${new Date().getDate() - 1}`;
   let hasData = false;
   let dataVolumeLastDay = 0;
-  if (metadata.month === key) {
+  if (metadata.month === curMonth) {
     const lastDayData = (metadata as any)[lastDay];
-    dataVolumeLastDay = lastDayData.count ?? 0;
-    hasData = lastDayData.hasData ?? false;
+    if (lastDayData) {
+      dataVolumeLastDay = lastDayData.count ?? 0;
+      hasData = lastDayData.hasData ?? false;
+    }
   }
   return { hasData, dataVolumeLastDay };
 }
@@ -646,7 +642,7 @@ function getLatestEventByName(metadata: IMetadataRaw[]): IMetadataEvent[] {
   return latestEvents;
 };
 
-function getLatestParameterByName(metadata: IMetadataRaw[]): IMetadataEventParameter[] {
+function getLatestParameterById(metadata: IMetadataRaw[]): IMetadataEventParameter[] {
   const latestEventParameters: IMetadataEventParameter[] = [];
   for (let meta of metadata) {
     const lastDayData = getDataFromLastDay(meta);
@@ -665,14 +661,30 @@ function getLatestParameterByName(metadata: IMetadataRaw[]): IMetadataEventParam
       valueEnum: meta.summary.valueEnum ?? [],
     };
     const index = latestEventParameters.findIndex(
-      (e: IMetadataEventParameter) => e.name === meta.name && e.valueType === meta.valueType);
+      (e: IMetadataEventParameter) => e.name === parameter.name && e.valueType === parameter.valueType);
     if (index === -1) {
       latestEventParameters.push(parameter);
-    } else if (meta.month > latestEventParameters[index].month) {
+    } else if (parameter.month > latestEventParameters[index].month) {
       latestEventParameters[index] = parameter;
     }
+    latestEventParameters.push(parameter);
   }
   return latestEventParameters;
+};
+
+function groupByParameterByName(parameters: IMetadataEventParameter[], eventName?: string): IMetadataEventParameter[] {
+  const groupParameters: IMetadataEventParameter[] = [];
+  for (let parameter of parameters) {
+    if (eventName && parameter.eventName !== eventName) {
+      continue;
+    }
+    const index = groupParameters.findIndex(
+      (e: IMetadataEventParameter) => e.name === parameter.name && e.valueType === parameter.valueType);
+    if (index === -1) {
+      groupParameters.push(parameter);
+    }
+  }
+  return groupParameters;
 };
 
 function getParameterByNameAndType(metadata: IMetadataRaw[], parameterName: string, valueType: MetadataValueType):
@@ -786,6 +798,20 @@ function uniqueParameterValueEnum(e: IMetadataRawValue[] | undefined, n: IMetada
   return values.filter((item) => !res.has(item.value) && res.set(item.value, 1));
 };
 
+function pathNodesToAttribute(nodes: IMetadataRawValue[] | undefined) {
+  if (!nodes) {
+    return [];
+  }
+  const pathNodes: IMetadataAttributeValue[] = [];
+  for (let n of nodes) {
+    pathNodes.push({
+      value: n.value,
+      displayValue: n.value,
+    });
+  }
+  return pathNodes;
+}
+
 export {
   isEmpty,
   isEmail,
@@ -793,7 +819,6 @@ export {
   getValueFromTags,
   getALBLogServiceAccount,
   getServerlessRedshiftRPU,
-  generateRandomStr,
   getEmailFromRequestContext,
   getTokenFromRequestContext,
   getBucketPrefix,
@@ -815,11 +840,14 @@ export {
   getUidFromTokenPayload,
   getTokenFromRequest,
   getLatestEventByName,
-  getLatestParameterByName,
+  getLatestParameterById,
+  groupByParameterByName,
   groupAssociatedEventsByName,
   groupAssociatedEventParametersByName,
   getLatestAttributeByName,
   getParameterByNameAndType,
   getAttributeByNameAndType,
   getDataFromLastDay,
+  pathNodesToAttribute,
+  getCurMonthStr,
 };

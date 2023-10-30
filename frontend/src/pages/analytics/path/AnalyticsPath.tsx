@@ -23,6 +23,7 @@ import {
   Select,
   SelectProps,
   SpaceBetween,
+  Toggle,
 } from '@cloudscape-design/components';
 import { previewPath } from 'apis/analytics';
 import Loading from 'components/common/Loading';
@@ -32,6 +33,7 @@ import {
   CategoryItemType,
   DEFAULT_CONDITION_DATA,
   DEFAULT_EVENT_ITEM,
+  IAnalyticsItem,
   IEventAnalyticsItem,
   INIT_SEGMENTATION_DATA,
   SegmentationFilterDataType,
@@ -66,10 +68,12 @@ import {
   validEventAnalyticsItem,
 } from '../analytics-utils';
 import ExploreDateRangePicker, {
+  DEFAULT_DAY_RANGE,
   DEFAULT_WEEK_RANGE,
 } from '../comps/ExploreDateRangePicker';
 import ExploreEmbedFrame from '../comps/ExploreEmbedFrame';
 import SaveToDashboardModal from '../comps/SelectDashboardModal';
+import StartNodeSelect from '../comps/StartNodeSelect';
 
 interface AnalyticsPathProps {
   loading: boolean;
@@ -210,11 +214,16 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
     },
   ];
 
+  const [startNodeOption, setStartNodeOption] = useState<IAnalyticsItem | null>(
+    null
+  );
+
   const [eventOptionData, setEventOptionData] = useState<IEventAnalyticsItem[]>(
     [
       {
         ...DEFAULT_EVENT_ITEM,
         isMultiSelect: false,
+        disabled: true,
       },
     ]
   );
@@ -242,12 +251,16 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
   };
 
   const [dateRangeValue, setDateRangeValue] =
-    React.useState<DateRangePickerProps.Value>(DEFAULT_WEEK_RANGE);
+    React.useState<DateRangePickerProps.Value>(DEFAULT_DAY_RANGE);
 
   const [timeGranularity, setTimeGranularity] = useState<SelectProps.Option>({
-    value: ExploreGroupColumn.WEEK,
-    label: t('analytics:options.weekTimeGranularity') ?? '',
+    value: ExploreGroupColumn.DAY,
+    label: t('analytics:options.dayTimeGranularity') ?? '',
   });
+
+  const [includingOtherEvents, setIncludingOtherEvents] = React.useState(false);
+  const [mergeConsecutiveEvents, setMergeConsecutiveEvents] =
+    React.useState(false);
 
   const resetConfig = async () => {
     setLoadingData(true);
@@ -259,6 +272,7 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
       {
         ...DEFAULT_EVENT_ITEM,
         isMultiSelect: false,
+        disabled: true,
       },
     ]);
     setSegmentationOptionData({
@@ -369,7 +383,7 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
           )
         : undefined;
     const pathAnalysisNodes = eventOptionData.map((item) => {
-      return defaultStr(item.selectedEventOption?.value);
+      return defaultStr(item.selectedEventOption?.name);
     });
     const pathAnalysisParameter: IPathAnalysisParameter = {
       platform: pathAnalysisPlatform,
@@ -377,6 +391,8 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
       nodeType: defaultStr(selectedNodeType?.value, ExplorePathNodeType.EVENT),
       lagSeconds: pathAnalysisLagSeconds,
       nodes: pathAnalysisNodes,
+      includingOtherEvents,
+      mergeConsecutiveEvents,
     };
 
     const body: IExploreRequest = {
@@ -445,6 +461,7 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
       {
         ...DEFAULT_EVENT_ITEM,
         isMultiSelect: false,
+        disabled: true,
       },
     ]);
     setSegmentationOptionData({
@@ -638,6 +655,42 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
                 ) : null}
               </div>
             </SpaceBetween>
+            <SpaceBetween direction="vertical" size="xs">
+              <InfoTitle
+                title={t('analytics:labels.includingOtherEvents')}
+                popoverDescription={t(
+                  'analytics:information.pathIncludingOtherEventsInfo'
+                )}
+              />
+              <div className="cs-analytics-config">
+                <Toggle
+                  onChange={({ detail }) =>
+                    setIncludingOtherEvents(detail.checked)
+                  }
+                  checked={includingOtherEvents}
+                >
+                  {includingOtherEvents ? t('yes') : t('no')}
+                </Toggle>
+              </div>
+            </SpaceBetween>
+            <SpaceBetween direction="vertical" size="xs">
+              <InfoTitle
+                title={t('analytics:labels.mergeConsecutiveEvents')}
+                popoverDescription={t(
+                  'analytics:information.pathMergeConsecutiveEventsInfo'
+                )}
+              />
+              <div className="cs-analytics-config">
+                <Toggle
+                  onChange={({ detail }) =>
+                    setMergeConsecutiveEvents(detail.checked)
+                  }
+                  checked={mergeConsecutiveEvents}
+                >
+                  {mergeConsecutiveEvents ? t('yes') : t('no')}
+                </Toggle>
+              </div>
+            </SpaceBetween>
           </div>
           <br />
           <ColumnLayout columns={2} variant="text-grid">
@@ -645,6 +698,48 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
               <SectionTitle
                 type="event"
                 title={t('analytics:labels.nodesSelect')}
+              />
+              <InfoTitle
+                title={t('analytics:labels.setStartNode')}
+                popoverDescription={t(
+                  'analytics:information.pathSetStartNodeInfo'
+                )}
+              />
+              <StartNodeSelect
+                nodes={categoryEventsData}
+                nodeOption={startNodeOption}
+                setNodeOption={(option) => {
+                  setStartNodeOption(option);
+                  setEventOptionData((prev) => {
+                    const preEventList = cloneDeep(prev);
+                    const filterEventList = preEventList.filter(
+                      (item, eIndex) => eIndex !== 0
+                    );
+                    const eventName = option?.name;
+                    const eventParameters = getEventParameters(eventName);
+                    const parameterOption = parametersConvertToCategoryItemType(
+                      metadataUserAttributes,
+                      eventParameters
+                    );
+                    return [
+                      {
+                        ...DEFAULT_EVENT_ITEM,
+                        selectedEventOption: option,
+                        conditionOptions: parameterOption,
+                        enableChangeRelation: false,
+                        isMultiSelect: false,
+                        disabled: true,
+                      },
+                      ...filterEventList,
+                    ];
+                  });
+                }}
+              />
+              <InfoTitle
+                title={t('analytics:labels.participateNodes')}
+                popoverDescription={t(
+                  'analytics:information.pathParticipateNodesInfo'
+                )}
               />
               <EventsSelect
                 loading={loadingEvents}
@@ -824,6 +919,7 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
               dateRangeValue={dateRangeValue}
               setDateRangeValue={setDateRangeValue}
               timeGranularity={timeGranularity}
+              timeGranularityVisible={false}
               setTimeGranularity={setTimeGranularity}
             />
           </div>

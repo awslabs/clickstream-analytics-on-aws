@@ -121,6 +121,11 @@
       "type": "runtime"
     },
     {
+      "name": "@aws-cdk/aws-servicecatalogappregistry-alpha",
+      "version": "^2.81.0-alpha.0",
+      "type": "runtime"
+    },
+    {
       "name": "@aws-lambda-powertools/logger",
       "version": "^1.8.0",
       "type": "runtime"
