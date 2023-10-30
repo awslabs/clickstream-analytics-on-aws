@@ -312,6 +312,8 @@ export const OUTPUT_METRICS_OBSERVABILITY_DASHBOARD_NAME =
   'ObservabilityDashboardName';
 export const OUTPUT_METRICS_SNS_TOPIC_ARN_NAME = 'ObservabilityTopicArn';
 
+export const OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_ARN = 'ServiceCatalogAppRegistryApplicationArn';
+
 export const DATA_PROCESSING_APPLICATION_NAME_PREFIX = 'Clickstream';
 
 export const CUSTOM_RESOURCE_RESPONSE_REDSHIFT_BI_USER_NAME =

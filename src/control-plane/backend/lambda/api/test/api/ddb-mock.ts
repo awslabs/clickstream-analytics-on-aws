@@ -403,12 +403,12 @@ function createPipelineMock(
   ddbMock.on(QueryCommand, {
     ExclusiveStartKey: undefined,
     ExpressionAttributeNames: { '#prefix': 'prefix' },
-    ExpressionAttributeValues: new Map<string, any>([
-      [':d', false],
-      [':prefix', 'PIPELINE'],
-      [':vt', 'latest'],
-      [':p', MOCK_PROJECT_ID],
-    ]),
+    ExpressionAttributeValues: {
+      ':d': false,
+      ':prefix': 'PIPELINE',
+      ':vt': 'latest',
+      ':p': MOCK_PROJECT_ID,
+    },
     FilterExpression: 'deleted = :d AND versionTag=:vt AND id = :p',
     IndexName: prefixTimeGSIName,
     KeyConditionExpression: '#prefix= :prefix',
@@ -458,10 +458,10 @@ function createPipelineMock(
   ddbMock.on(QueryCommand, {
     ExclusiveStartKey: undefined,
     ExpressionAttributeNames: { '#prefix': 'prefix' },
-    ExpressionAttributeValues: new Map<string, any>([
-      [':d', false],
-      [':prefix', 'PLUGIN'],
-    ]),
+    ExpressionAttributeValues: {
+      ':d': false,
+      ':prefix': 'PLUGIN',
+    },
     FilterExpression: 'deleted = :d',
     IndexName: prefixTimeGSIName,
     KeyConditionExpression: '#prefix= :prefix',

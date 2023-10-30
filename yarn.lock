@@ -40,6 +40,11 @@
   resolved "https://registry.yarnpkg.com/@aws-cdk/aws-glue-alpha/-/aws-glue-alpha-2.81.0-alpha.0.tgz#66e828ef1ddaa16cdf55c06ffe335439a8387e80"
   integrity sha512-unzXzzkojF08YrA0Hhrlxl2XQYzyy3Vx/GgwmGsJ0MZ6MrT/Gnvz9iUNwE1DQoIKKJfOq/auFnVRcdJjrJVBjw==
 
+"@aws-cdk/aws-servicecatalogappregistry-alpha@^2.81.0-alpha.0":
+  version "2.81.0-alpha.0"
+  resolved "https://registry.yarnpkg.com/@aws-cdk/aws-servicecatalogappregistry-alpha/-/aws-servicecatalogappregistry-alpha-2.81.0-alpha.0.tgz#9bc8ca449456f8853ac2090d1315244b2dd3bc38"
+  integrity sha512-UIIHkvYa84P3ZLCeX6DZPnOOXMPZ14lwQvYvgVQ/+TTwLn6BCqEt9dNzsvuarjzQXfWyXOQK7X1Z7cJxQXjwVw==
+
 "@aws-crypto/crc32@3.0.0":
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/@aws-crypto/crc32/-/crc32-3.0.0.tgz#07300eca214409c33e3ff769cd5697b57fdd38fa"
