@@ -81,6 +81,7 @@ export enum ALARM_DISPLAY_STATUS {
 export enum EPipelineStatus {
   Active = 'Active',
   Failed = 'Failed',
+  Warning = 'Warning',
   Creating = 'Creating',
   Updating = 'Updating',
   Deleting = 'Deleting',

@@ -298,6 +298,7 @@ export enum PipelineStackType {
 export enum PipelineStatusType {
   ACTIVE = 'Active',
   FAILED = 'Failed',
+  WARNING = 'Warning',
   CREATING = 'Creating',
   UPDATING = 'Updating',
   DELETING = 'Deleting',
