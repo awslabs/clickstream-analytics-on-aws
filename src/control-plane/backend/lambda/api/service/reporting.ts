@@ -170,6 +170,7 @@ export class ReportingService {
       Type: 'STRING',
     }];
 
+    const maxIndex = query.eventAndConditions.length - 1;
     for (const [index, item] of query.eventAndConditions.entries()) {
       projectedColumns.push(`${item.eventName}`);
       tableViewCols.push({
@@ -177,19 +178,22 @@ export class ReportingService {
         Type: 'DECIMAL',
       });
 
-      if (index === 0) {
-        projectedColumns.push('rate');
+      if(index === 0){
+        continue;
+      }
+      if (index === maxIndex) {
+        projectedColumns.push('total_conversion_rate');
         tableViewCols.push({
-          Name: 'rate',
-          Type: 'DECIMAL',
-        });
-      } else {
-        projectedColumns.push(`${item.eventName}_rate`);
-        tableViewCols.push({
-          Name: `${item.eventName}_rate`,
+          Name: 'total_conversion_rate',
           Type: 'DECIMAL',
         });
       }
+      projectedColumns.push(`${item.eventName}_rate`);
+      tableViewCols.push({
+        Name: `${item.eventName}_rate`,
+        Type: 'DECIMAL',
+      });
+      
     }
     datasetPropsArray.push({
       name: '',
@@ -747,7 +751,7 @@ export class ReportingService {
   private async _publishNewVersionDashboard(quickSight: QuickSight, query: any,
     versionNumber: string) {
     let cnt = 0;
-    for (const _i of Array(60).keys()) {
+    for (const _i of Array(100).keys()) {
       cnt += 1;
       try {
         const response = await quickSight.updateDashboardPublishedVersion({
@@ -768,7 +772,7 @@ export class ReportingService {
         }
       }
     }
-    if (cnt >= 60) {
+    if (cnt >= 100) {
       throw new Error(`publish dashboard new version failed after try ${cnt} times`);
     }
   }

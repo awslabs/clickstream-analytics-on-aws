@@ -36,6 +36,7 @@ import { DataSetProps, dataSetActions } from './dashboard-ln';
 import { AnalysisType, ExploreConversionIntervalType, ExploreLocales, ExplorePathNodeType, ExplorePathSessionDef, ExploreRelativeTimeUnit, ExploreRequestAction, ExploreTimeScopeType, ExploreVisualName, MetadataValueType, QuickSightChartType } from '../../common/explore-types';
 import { logger } from '../../common/powertools';
 import i18next from '../../i18n';
+import { EventAndCondition } from './sql-builder';
 
 export const TEMP_RESOURCE_NAME_PREFIX = '_tmp_';
 
@@ -587,8 +588,8 @@ export function getFunnelTableVisualDef(visualId: string, viewName: string, even
     Width: '120px',
   });
 
+  const maxIndex = eventNames.length - 1;
   for (const [index, eventName] of eventNames.entries()) {
-
     const fieldId = uuidv4();
     groupBy.push({
       NumericalDimensionField: {
@@ -605,67 +606,77 @@ export function getFunnelTableVisualDef(visualId: string, viewName: string, even
       Width: '120px',
     });
 
-    const fieldIdRate = uuidv4();
-    if (index === 0) {
-      groupBy.push({
-        NumericalDimensionField: {
-          FieldId: fieldIdRate,
-          Column: {
-            DataSetIdentifier: viewName,
-            ColumnName: 'rate',
-          },
-          FormatConfiguration: {
-            FormatConfiguration: {
-              PercentageDisplayFormatConfiguration: {
-                Suffix: '%',
-                SeparatorConfiguration: {
-                  DecimalSeparator: 'DOT',
-                  ThousandsSeparator: {
-                    Symbol: 'COMMA',
-                    Visibility: 'VISIBLE',
-                  },
-                },
-                NegativeValueConfiguration: {
-                  DisplayMode: 'NEGATIVE',
-                },
-              },
-            },
-          },
-        },
-      });
-    } else {
-      groupBy.push({
-        NumericalDimensionField: {
-          FieldId: fieldIdRate,
-          Column: {
-            DataSetIdentifier: viewName,
-            ColumnName: `${eventName}_rate`,
-          },
-          FormatConfiguration: {
-            FormatConfiguration: {
-              PercentageDisplayFormatConfiguration: {
-                Suffix: '%',
-                SeparatorConfiguration: {
-                  DecimalSeparator: 'DOT',
-                  ThousandsSeparator: {
-                    Symbol: 'COMMA',
-                    Visibility: 'VISIBLE',
-                  },
-                },
-                NegativeValueConfiguration: {
-                  DisplayMode: 'NEGATIVE',
-                },
-              },
-            },
-          },
-        },
-      });
+    if(index === 0){
+      continue;
     }
+
+    const fieldIdRate = uuidv4();
+    groupBy.push({
+      NumericalDimensionField: {
+        FieldId: fieldIdRate,
+        Column: {
+          DataSetIdentifier: viewName,
+          ColumnName: `${eventName}_rate`,
+        },
+        FormatConfiguration: {
+          FormatConfiguration: {
+            PercentageDisplayFormatConfiguration: {
+              Suffix: '%',
+              SeparatorConfiguration: {
+                DecimalSeparator: 'DOT',
+                ThousandsSeparator: {
+                  Symbol: 'COMMA',
+                  Visibility: 'VISIBLE',
+                },
+              },
+              NegativeValueConfiguration: {
+                DisplayMode: 'NEGATIVE',
+              },
+            },
+          },
+        },
+      },
+    });
 
     fieldOptions.push({
       FieldId: fieldIdRate,
       Width: '120px',
     });
+
+    if (index === maxIndex) {
+      const totalRateId = uuidv4();
+      groupBy.push({
+        NumericalDimensionField: {
+          FieldId: totalRateId,
+          Column: {
+            DataSetIdentifier: viewName,
+            ColumnName: 'total_conversion_rate',
+          },
+          FormatConfiguration: {
+            FormatConfiguration: {
+              PercentageDisplayFormatConfiguration: {
+                Suffix: '%',
+                SeparatorConfiguration: {
+                  DecimalSeparator: 'DOT',
+                  ThousandsSeparator: {
+                    Symbol: 'COMMA',
+                    Visibility: 'VISIBLE',
+                  },
+                },
+                NegativeValueConfiguration: {
+                  DisplayMode: 'NEGATIVE',
+                },
+              },
+            },
+          },
+        },
+      });
+
+      fieldOptions.push({
+        FieldId: totalRateId,
+        Width: '120px',
+      });
+    }
   }
 
   sortConfiguration.RowSort = [
@@ -996,7 +1007,7 @@ export async function getDashboardTitleProps(analysisType: AnalysisType, query: 
 
   if (query.action === ExploreRequestAction.PUBLISH) {
     title = query.chartTitle;
-    subTitle = query.chartSubTitle;
+    subTitle = (query.chartSubTitle === undefined || query.chartSubTitle === '') ? ' ' : query.chartSubTitle;
   } else {
     switch (analysisType) {
       case AnalysisType.FUNNEL:
@@ -1026,7 +1037,10 @@ export function checkFunnelAnalysisParameter(params: any): CheckParamsStatus {
   let success = true;
   let message = 'OK';
 
-  _checkCommonPartParameter(params);
+  const commonCheckResult = _checkCommonPartParameter(params);
+  if(commonCheckResult !== undefined ){
+    return commonCheckResult;
+  }
 
   if (params.specifyJoinColumn === undefined
     || params.eventAndConditions === undefined
@@ -1063,6 +1077,18 @@ export function checkFunnelAnalysisParameter(params: any): CheckParamsStatus {
     };
   }
 
+  if (params.eventAndConditions.length < 2) {
+    return {
+      success: false,
+      message: 'At least specify 2 event for funnel analysis',
+    };
+  }
+
+  const checkResult = _checkDuplicatedEvent(params);
+  if(checkResult !== undefined ){
+    return checkResult;
+  }
+
   return {
     success,
     message,
@@ -1074,7 +1100,10 @@ export function checkEventAnalysisParameter(params: any): CheckParamsStatus {
   let success = true;
   let message = 'OK';
 
-  _checkCommonPartParameter(params);
+  const commonCheckResult = _checkCommonPartParameter(params);
+  if(commonCheckResult !== undefined ){
+    return commonCheckResult;
+  }
 
   if (params.eventAndConditions === undefined
     || params.groupColumn === undefined
@@ -1093,6 +1122,11 @@ export function checkEventAnalysisParameter(params: any): CheckParamsStatus {
     };
   }
 
+  const checkResult = _checkDuplicatedEvent(params);
+  if(checkResult !== undefined ){
+    return checkResult;
+  }
+
   return {
     success,
     message,
@@ -1103,7 +1137,10 @@ export function checkPathAnalysisParameter(params: any): CheckParamsStatus {
 
   let success = true;
   let message = 'OK';
-  _checkCommonPartParameter(params);
+  const commonCheckResult = _checkCommonPartParameter(params);
+  if(commonCheckResult !== undefined ){
+    return commonCheckResult;
+  }
 
   if (params.eventAndConditions === undefined
     || params.pathAnalysis === undefined
@@ -1159,7 +1196,10 @@ export function checkRetentionAnalysisParameter(params: any): CheckParamsStatus 
   let success = true;
   let message = 'OK';
 
-  _checkCommonPartParameter(params);
+  const commonCheckResult = _checkCommonPartParameter(params);
+  if(commonCheckResult !== undefined ){
+    return commonCheckResult;
+  }
 
   if (params.pairEventAndConditions === undefined
     || (params.pairEventAndConditions !== undefined && params.pairEventAndConditions.length < 1)
@@ -1184,7 +1224,7 @@ export function checkRetentionAnalysisParameter(params: any): CheckParamsStatus 
   };
 }
 
-function _checkCommonPartParameter(params: any): any | void {
+function _checkCommonPartParameter(params: any): CheckParamsStatus | void {
 
   if ( params.viewName === undefined
     || params.projectId === undefined
@@ -1224,11 +1264,14 @@ function _checkCommonPartParameter(params: any): any | void {
     };
   }
 
-  _checkTimeParameters(params);
+  const checkResult = _checkTimeParameters(params);
+  if(checkResult !== undefined ){
+    return checkResult;
+  }
 
 }
 
-function _checkTimeParameters(params: any): any | void {
+function _checkTimeParameters(params: any): CheckParamsStatus | void {
   if (params.timeScopeType !== ExploreTimeScopeType.FIXED && params.timeScopeType !== ExploreTimeScopeType.RELATIVE) {
     return {
       success: false,
@@ -1263,4 +1306,21 @@ function _getMultipleVisualProps(hasGrouping: boolean) {
     suffix,
     smalMultiplesFieldId,
   };
+}
+
+function _checkDuplicatedEvent(params: any): CheckParamsStatus | void {
+
+  const conditions = params.eventAndConditions as EventAndCondition[];
+  const eventNames: string[] = [];
+  for(const condition of conditions){
+
+    if(eventNames.includes(condition.eventName)){
+      return {
+        success: false,
+        message: 'Duplicated event.',
+      };
+    } else {
+      eventNames.push(condition.eventName);
+    }
+  }
 }
