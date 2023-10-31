@@ -35,7 +35,6 @@ build/
 /test-reports/
 junit.xml
 /coverage/
-!/.npmrc
 !/test//
 !/tsconfig.json
 !/tsconfig.dev.json
