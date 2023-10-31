@@ -178,7 +178,7 @@ export class ReportingService {
         Type: 'DECIMAL',
       });
 
-      if(index === 0){
+      if (index === 0) {
         continue;
       }
       if (index === maxIndex) {
@@ -193,7 +193,7 @@ export class ReportingService {
         Name: `${item.eventName}_rate`,
         Type: 'DECIMAL',
       });
-      
+
     }
     datasetPropsArray.push({
       name: '',

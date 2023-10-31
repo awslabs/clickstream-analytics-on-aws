@@ -213,7 +213,7 @@ describe('SQL Builder test', () => {
       count(distinct user_pseudo_id_0) as add_button_click,
       (
         count(distinct user_pseudo_id_2)::decimal / NULLIF(count(distinct user_pseudo_id_0), 0)
-      )::decimal(20, 4) as rate,
+      )::decimal(20, 4) as total_conversion_rate,
       count(distinct user_pseudo_id_1) as note_share,
       (
         count(distinct user_pseudo_id_1)::decimal / NULLIF(count(distinct user_pseudo_id_0), 0)
@@ -425,7 +425,7 @@ describe('SQL Builder test', () => {
       count(distinct event_id_0) as add_button_click,
       (
         count(distinct event_id_2)::decimal / NULLIF(count(distinct event_id_0), 0)
-      )::decimal(20, 4) as rate,
+      )::decimal(20, 4) as total_conversion_rate,
       count(distinct event_id_1) as note_share,
       (
         count(distinct event_id_1)::decimal / NULLIF(count(distinct event_id_0), 0)
@@ -647,7 +647,7 @@ describe('SQL Builder test', () => {
       count(distinct event_id_0) as add_button_click,
       (
         count(distinct event_id_2)::decimal / NULLIF(count(distinct event_id_0), 0)
-      )::decimal(20, 4) as rate,
+      )::decimal(20, 4) as total_conversion_rate,
       count(distinct event_id_1) as note_share,
       (
         count(distinct event_id_1)::decimal / NULLIF(count(distinct event_id_0), 0)
@@ -868,7 +868,7 @@ describe('SQL Builder test', () => {
       count(distinct event_id_0) as add_button_click,
       (
         count(distinct event_id_2)::decimal / NULLIF(count(distinct event_id_0), 0)
-      )::decimal(20, 4) as rate,
+      )::decimal(20, 4) as total_conversion_rate,
       count(distinct event_id_1) as note_share,
       (
         count(distinct event_id_1)::decimal / NULLIF(count(distinct event_id_0), 0)
@@ -1124,7 +1124,7 @@ describe('SQL Builder test', () => {
       count(distinct user_pseudo_id_0) as add_button_click,
       (
         count(distinct user_pseudo_id_2)::decimal / NULLIF(count(distinct user_pseudo_id_0), 0)
-      )::decimal(20, 4) as rate,
+      )::decimal(20, 4) as total_conversion_rate,
       count(distinct user_pseudo_id_1) as note_share,
       (
         count(distinct user_pseudo_id_1)::decimal / NULLIF(count(distinct user_pseudo_id_0), 0)
@@ -4987,7 +4987,7 @@ describe('SQL Builder test', () => {
       count(distinct user_pseudo_id_0) as add_button_click,
       (
         count(distinct user_pseudo_id_2)::decimal / NULLIF(count(distinct user_pseudo_id_0), 0)
-      )::decimal(20, 4) as rate,
+      )::decimal(20, 4) as total_conversion_rate,
       count(distinct user_pseudo_id_1) as note_share,
       (
         count(distinct user_pseudo_id_1)::decimal / NULLIF(count(distinct user_pseudo_id_0), 0)
@@ -5376,7 +5376,7 @@ describe('SQL Builder test', () => {
       count(distinct user_pseudo_id_0) as add_button_click,
       (
         count(distinct user_pseudo_id_2)::decimal / NULLIF(count(distinct user_pseudo_id_0), 0)
-      )::decimal(20, 4) as rate,
+      )::decimal(20, 4) as total_conversion_rate,
       count(distinct user_pseudo_id_1) as note_share,
       (
         count(distinct user_pseudo_id_1)::decimal / NULLIF(count(distinct user_pseudo_id_0), 0)
@@ -6565,7 +6565,7 @@ describe('SQL Builder test', () => {
       count(distinct user_pseudo_id_0) as add_button_click,
       (
         count(distinct user_pseudo_id_2)::decimal / NULLIF(count(distinct user_pseudo_id_0), 0)
-      )::decimal(20, 4) as rate,
+      )::decimal(20, 4) as total_conversion_rate,
       count(distinct user_pseudo_id_1) as note_share,
       (
         count(distinct user_pseudo_id_1)::decimal / NULLIF(count(distinct user_pseudo_id_0), 0)
@@ -12577,7 +12577,7 @@ describe('SQL Builder test', () => {
       count(distinct user_pseudo_id_0) as add_button_click,
       (
         count(distinct user_pseudo_id_2)::decimal / NULLIF(count(distinct user_pseudo_id_0), 0)
-      )::decimal(20, 4) as rate,
+      )::decimal(20, 4) as total_conversion_rate,
       count(distinct user_pseudo_id_1) as note_share,
       (
         count(distinct user_pseudo_id_1)::decimal / NULLIF(count(distinct user_pseudo_id_0), 0)

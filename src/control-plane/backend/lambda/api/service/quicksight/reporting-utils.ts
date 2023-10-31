@@ -33,10 +33,10 @@ import { AssumeRoleCommand, STSClient } from '@aws-sdk/client-sts';
 import Mustache from 'mustache';
 import { v4 as uuidv4 } from 'uuid';
 import { DataSetProps, dataSetActions } from './dashboard-ln';
+import { EventAndCondition } from './sql-builder';
 import { AnalysisType, ExploreConversionIntervalType, ExploreLocales, ExplorePathNodeType, ExplorePathSessionDef, ExploreRelativeTimeUnit, ExploreRequestAction, ExploreTimeScopeType, ExploreVisualName, MetadataValueType, QuickSightChartType } from '../../common/explore-types';
 import { logger } from '../../common/powertools';
 import i18next from '../../i18n';
-import { EventAndCondition } from './sql-builder';
 
 export const TEMP_RESOURCE_NAME_PREFIX = '_tmp_';
 
@@ -606,7 +606,7 @@ export function getFunnelTableVisualDef(visualId: string, viewName: string, even
       Width: '120px',
     });
 
-    if(index === 0){
+    if (index === 0) {
       continue;
     }
 
@@ -1038,7 +1038,7 @@ export function checkFunnelAnalysisParameter(params: any): CheckParamsStatus {
   let message = 'OK';
 
   const commonCheckResult = _checkCommonPartParameter(params);
-  if(commonCheckResult !== undefined ){
+  if (commonCheckResult !== undefined ) {
     return commonCheckResult;
   }
 
@@ -1085,7 +1085,7 @@ export function checkFunnelAnalysisParameter(params: any): CheckParamsStatus {
   }
 
   const checkResult = _checkDuplicatedEvent(params);
-  if(checkResult !== undefined ){
+  if (checkResult !== undefined ) {
     return checkResult;
   }
 
@@ -1101,7 +1101,7 @@ export function checkEventAnalysisParameter(params: any): CheckParamsStatus {
   let message = 'OK';
 
   const commonCheckResult = _checkCommonPartParameter(params);
-  if(commonCheckResult !== undefined ){
+  if (commonCheckResult !== undefined ) {
     return commonCheckResult;
   }
 
@@ -1123,7 +1123,7 @@ export function checkEventAnalysisParameter(params: any): CheckParamsStatus {
   }
 
   const checkResult = _checkDuplicatedEvent(params);
-  if(checkResult !== undefined ){
+  if (checkResult !== undefined ) {
     return checkResult;
   }
 
@@ -1138,7 +1138,7 @@ export function checkPathAnalysisParameter(params: any): CheckParamsStatus {
   let success = true;
   let message = 'OK';
   const commonCheckResult = _checkCommonPartParameter(params);
-  if(commonCheckResult !== undefined ){
+  if (commonCheckResult !== undefined ) {
     return commonCheckResult;
   }
 
@@ -1197,7 +1197,7 @@ export function checkRetentionAnalysisParameter(params: any): CheckParamsStatus 
   let message = 'OK';
 
   const commonCheckResult = _checkCommonPartParameter(params);
-  if(commonCheckResult !== undefined ){
+  if (commonCheckResult !== undefined ) {
     return commonCheckResult;
   }
 
@@ -1265,7 +1265,7 @@ function _checkCommonPartParameter(params: any): CheckParamsStatus | void {
   }
 
   const checkResult = _checkTimeParameters(params);
-  if(checkResult !== undefined ){
+  if (checkResult !== undefined ) {
     return checkResult;
   }
 
@@ -1312,9 +1312,9 @@ function _checkDuplicatedEvent(params: any): CheckParamsStatus | void {
 
   const conditions = params.eventAndConditions as EventAndCondition[];
   const eventNames: string[] = [];
-  for(const condition of conditions){
+  for (const condition of conditions) {
 
-    if(eventNames.includes(condition.eventName)){
+    if (eventNames.includes(condition.eventName)) {
       return {
         success: false,
         message: 'Duplicated event.',
