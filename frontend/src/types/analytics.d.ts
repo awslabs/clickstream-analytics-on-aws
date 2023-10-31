@@ -51,7 +51,7 @@ declare global {
 
     readonly parameterId: string;
     readonly name: string;
-    readonly displayName: string;
+    displayName: string;
     readonly description: string;
     readonly metadataSource: MetadataSource;
     readonly hasData: boolean;
@@ -77,7 +77,7 @@ declare global {
 
     readonly attributeId: string;
     readonly name: string;
-    readonly displayName: string;
+    displayName: string;
     readonly description: string;
     readonly metadataSource: MetadataSource;
     readonly hasData: boolean;

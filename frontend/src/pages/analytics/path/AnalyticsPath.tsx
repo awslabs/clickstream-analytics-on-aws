@@ -658,42 +658,6 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
                 ) : null}
               </div>
             </SpaceBetween>
-            <SpaceBetween direction="vertical" size="xs">
-              <InfoTitle
-                title={t('analytics:labels.includingOtherEvents')}
-                popoverDescription={t(
-                  'analytics:information.pathIncludingOtherEventsInfo'
-                )}
-              />
-              <div className="cs-analytics-config">
-                <Toggle
-                  onChange={({ detail }) =>
-                    setIncludingOtherEvents(detail.checked)
-                  }
-                  checked={includingOtherEvents}
-                >
-                  {includingOtherEvents ? t('yes') : t('no')}
-                </Toggle>
-              </div>
-            </SpaceBetween>
-            <SpaceBetween direction="vertical" size="xs">
-              <InfoTitle
-                title={t('analytics:labels.mergeConsecutiveEvents')}
-                popoverDescription={t(
-                  'analytics:information.pathMergeConsecutiveEventsInfo'
-                )}
-              />
-              <div className="cs-analytics-config">
-                <Toggle
-                  onChange={({ detail }) =>
-                    setMergeConsecutiveEvents(detail.checked)
-                  }
-                  checked={mergeConsecutiveEvents}
-                >
-                  {mergeConsecutiveEvents ? t('yes') : t('no')}
-                </Toggle>
-              </div>
-            </SpaceBetween>
           </div>
           <br />
           <ColumnLayout columns={2} variant="text-grid">
@@ -722,7 +686,7 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
                     const eventParameters = getEventParameters(eventName);
                     const parameterOption = parametersConvertToCategoryItemType(
                       metadataUserAttributes,
-                      eventParameters
+                      eventParameters ?? []
                     );
                     return [
                       {
@@ -835,7 +799,7 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
                   const eventParameters = getEventParameters(eventName);
                   const parameterOption = parametersConvertToCategoryItemType(
                     metadataUserAttributes,
-                    eventParameters
+                    eventParameters ?? []
                   );
                   setEventOptionData((prev) => {
                     const dataObj = cloneDeep(prev);
@@ -852,6 +816,41 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
                   });
                 }}
               />
+
+              <div className="cs-analytics-config">
+                <SpaceBetween direction="vertical" size="xs">
+                  <InfoTitle
+                    title={t('analytics:labels.includingOtherEvents')}
+                    popoverDescription={t(
+                      'analytics:information.pathIncludingOtherEventsInfo'
+                    )}
+                  />
+                  <Toggle
+                    onChange={({ detail }) =>
+                      setIncludingOtherEvents(detail.checked)
+                    }
+                    checked={includingOtherEvents}
+                  >
+                    {includingOtherEvents ? t('yes') : t('no')}
+                  </Toggle>
+                </SpaceBetween>
+                <SpaceBetween direction="vertical" size="xs">
+                  <InfoTitle
+                    title={t('analytics:labels.mergeConsecutiveEvents')}
+                    popoverDescription={t(
+                      'analytics:information.pathMergeConsecutiveEventsInfo'
+                    )}
+                  />
+                  <Toggle
+                    onChange={({ detail }) =>
+                      setMergeConsecutiveEvents(detail.checked)
+                    }
+                    checked={mergeConsecutiveEvents}
+                  >
+                    {mergeConsecutiveEvents ? t('yes') : t('no')}
+                  </Toggle>
+                </SpaceBetween>
+              </div>
             </SpaceBetween>
             <SpaceBetween direction="vertical" size="xs">
               <SectionTitle type="filter" />

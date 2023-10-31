@@ -226,7 +226,7 @@ const AnalyticsExplore: React.FC = () => {
       });
       const conditionOptions = parametersConvertToCategoryItemType(
         presetUserAttributes,
-        publicParameters
+        publicParameters ?? []
       );
       setPresetParameters(conditionOptions);
     } catch (error) {

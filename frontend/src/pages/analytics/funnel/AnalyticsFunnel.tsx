@@ -585,7 +585,7 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
                     const eventParameters = getEventParameters(eventName);
                     const parameterOption = parametersConvertToCategoryItemType(
                       metadataUserAttributes,
-                      eventParameters
+                      eventParameters ?? []
                     );
                     setEventOptionData((prev) => {
                       const dataObj = cloneDeep(prev);

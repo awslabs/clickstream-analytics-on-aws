@@ -114,6 +114,7 @@ const buildEventItem = (item: IMetadataEventParameter) => {
     metadataSource: item.metadataSource,
     valueType: item.valueType,
     category: item.category,
+    platform: item.platform,
     values: item.values,
     modifyTime: item.updateAt ? moment(item.updateAt).format(TIME_FORMAT) : '-',
   };
@@ -121,10 +122,10 @@ const buildEventItem = (item: IMetadataEventParameter) => {
 
 export const parametersConvertToCategoryItemType = (
   userAttributeItems: IMetadataUserAttribute[],
-  parameterItems?: IMetadataEventParameter[]
+  parameterItems: IMetadataEventParameter[]
 ) => {
   //If parameters name are same
-  const parameterNames = parameterItems.
+  patchSameName(userAttributeItems, parameterItems);
   const categoryItems: CategoryItemType[] = [];
   const categoryPublicEventItems: CategoryItemType = {
     categoryName: i18n.t('analytics:labels.publicEventAttribute'),
@@ -167,6 +168,38 @@ export const parametersConvertToCategoryItemType = (
   categoryItems.push(categoryPrivateEventItems);
   categoryItems.push(categoryUserItems);
   return categoryItems;
+};
+
+function patchSameName(
+  userAttributeItems: IMetadataUserAttribute[],
+  parameterItems: IMetadataEventParameter[]
+) {
+  const parameterNames: string[] = [];
+  const duplicatedParameterNames: string[] = [];
+  for (const p of parameterItems) {
+    if (parameterNames.includes(p.name)) {
+      duplicatedParameterNames.push(p.name);
+    }
+    parameterNames.push(p.name);
+  }
+  for (const p of parameterItems) {
+    if (duplicatedParameterNames.includes(p.name)) {
+      p.displayName = `${p.displayName}(${p.valueType})`
+    }
+  }
+  const userAttributeNames: string[] = [];
+  const duplicatedUserAttributeNames: string[] = [];
+  for (const u of userAttributeItems) {
+    if (userAttributeNames.includes(u.name)) {
+      duplicatedUserAttributeNames.push(u.name);
+    }
+    userAttributeNames.push(u.name);
+  }
+  for (const u of userAttributeItems) {
+    if (duplicatedUserAttributeNames.includes(u.name)) {
+      u.displayName = `${u.displayName}(${u.valueType})`
+    }
+  }
 };
 
 export const validEventAnalyticsItem = (item: IEventAnalyticsItem) => {

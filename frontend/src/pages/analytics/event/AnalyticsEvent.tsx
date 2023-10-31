@@ -457,7 +457,7 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
                   const eventParameters = getEventParameters(eventName);
                   const parameterOption = parametersConvertToCategoryItemType(
                     metadataUserAttributes,
-                    eventParameters
+                    eventParameters ?? []
                   );
                   setEventOptionData((prev) => {
                     const dataObj = cloneDeep(prev);

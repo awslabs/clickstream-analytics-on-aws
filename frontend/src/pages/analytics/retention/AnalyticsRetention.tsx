@@ -539,7 +539,7 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
                   const eventParameters = getEventParameters(eventName);
                   const parameterOption = parametersConvertToCategoryItemType(
                     metadataUserAttributes,
-                    eventParameters
+                    eventParameters ?? []
                   );
                   setEventOptionData((prev) => {
                     const dataObj = cloneDeep(prev);
@@ -555,7 +555,7 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
                   const eventParameters = getEventParameters(eventName);
                   const parameterOption = parametersConvertToCategoryItemType(
                     metadataUserAttributes,
-                    eventParameters
+                    eventParameters ?? []
                   );
                   setEventOptionData((prev) => {
                     const dataObj = cloneDeep(prev);
