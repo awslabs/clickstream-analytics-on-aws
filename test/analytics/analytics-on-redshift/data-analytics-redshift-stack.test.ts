@@ -4822,7 +4822,12 @@ describe('Should set metrics widgets', () => {
       },
 
       TreatMissingData: TreatMissingData.NOT_BREACHING,
-      Period: 3600,
+      Period: {
+        'Fn::GetAtt': [
+          Match.anyValue(),
+          'intervalSeconds',
+        ],
+      },
     });
 
     newServerlessTemplate.hasResourceProperties('AWS::CloudWatch::Alarm', {
@@ -4921,7 +4926,12 @@ describe('Should set metrics widgets', () => {
       },
 
       TreatMissingData: TreatMissingData.NOT_BREACHING,
-      Period: 3600,
+      Period: {
+        'Fn::GetAtt': [
+          Match.anyValue(),
+          'intervalSeconds',
+        ],
+      },
     });
 
     existingServerlessTemplate.hasResourceProperties('AWS::CloudWatch::Alarm', {
@@ -5018,7 +5028,12 @@ describe('Should set metrics widgets', () => {
       },
 
       TreatMissingData: TreatMissingData.NOT_BREACHING,
-      Period: 3600,
+      Period: {
+        'Fn::GetAtt': [
+          Match.anyValue(),
+          'intervalSeconds',
+        ],
+      },
     });
 
     provisionTemplate.hasResourceProperties('AWS::CloudWatch::Alarm', {
