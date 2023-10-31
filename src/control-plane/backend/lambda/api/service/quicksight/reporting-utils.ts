@@ -1246,7 +1246,7 @@ function _checkCommonPartParameter(params: any): CheckParamsStatus | void {
     };
   } else if (params.action === ExploreRequestAction.PUBLISH) {
     if (params.chartTitle === undefined
-      || params.chartSubTitle === undefined
+      || params.chartTitle === ''
       || params.dashboardId === undefined
       || params.sheetId === undefined
     ) {

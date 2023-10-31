@@ -4133,8 +4133,6 @@ describe('SQL Builder test', () => {
 
     });
 
-    console.log(sql);
-
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
       base_data as (
