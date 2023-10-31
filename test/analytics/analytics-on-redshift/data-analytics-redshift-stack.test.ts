@@ -305,6 +305,18 @@ describe('DataAnalyticsRedshiftStack common parameter test', () => {
     });
   });
 
+  test('Security group count is 1', () => {
+    if (stack.nestedStacks.redshiftServerlessStack) {
+      const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
+      nestedTemplate.resourceCountIs('AWS::EC2::SecurityGroup', 1);
+    }
+
+    if (stack.nestedStacks.redshiftProvisionedStack) {
+      const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftProvisionedStack);
+      nestedTemplate.resourceCountIs('AWS::EC2::SecurityGroup', 1);
+    }
+  });
+
   test('Should has Resource CreateApplicationSchemasCreateApplicationSchemaRole', () => {
     if (stack.nestedStacks.redshiftServerlessStack) {
       const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);

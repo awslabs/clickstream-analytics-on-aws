@@ -13,7 +13,7 @@
 
 import { Database, Table } from '@aws-cdk/aws-glue-alpha';
 import { Fn, Stack, CfnResource, Duration } from 'aws-cdk-lib';
-import { IVpc, SecurityGroup, SubnetSelection } from 'aws-cdk-lib/aws-ec2';
+import { ISecurityGroup, IVpc, SubnetSelection } from 'aws-cdk-lib/aws-ec2';
 import { Rule, Schedule } from 'aws-cdk-lib/aws-events';
 import { LambdaFunction } from 'aws-cdk-lib/aws-events-targets';
 import { Function } from 'aws-cdk-lib/aws-lambda';
@@ -31,8 +31,9 @@ import { uploadBuiltInSparkJarsAndFiles } from './utils/s3-asset';
 import { GlueUtil } from './utils/utils-glue';
 import { LambdaUtil } from './utils/utils-lambda';
 import { RoleUtil } from './utils/utils-role';
-import { addCfnNagSuppressRules, addCfnNagToSecurityGroup } from '../common/cfn-nag';
+import { addCfnNagSuppressRules } from '../common/cfn-nag';
 import { DATA_PROCESSING_APPLICATION_NAME_PREFIX, TABLE_NAME_INGESTION } from '../common/constant';
+import { createSGForEgressToAwsService } from '../common/sg';
 import { getShortIdOfStack } from '../common/stack';
 
 export enum SinkTableEnum {
@@ -84,12 +85,15 @@ export class DataPipelineConstruct extends Construct {
   private readonly roleUtil: RoleUtil;
   private readonly lambdaUtil: LambdaUtil;
   private readonly glueUtil: GlueUtil;
+  private readonly serviceSecurityGroup: ISecurityGroup;
 
   public readonly emrServerlessApplicationId: string;
 
   constructor(scope: Construct, id: string, props: DataPipelineProps) {
     super(scope, id);
     this.props = props;
+
+    this.serviceSecurityGroup = createSGForEgressToAwsService(this, 'LambdaEgressToAWSServiceSG', props.vpc);
 
     const dlQueue = this.createDLQueue();
 
@@ -207,6 +211,7 @@ export class DataPipelineConstruct extends Construct {
       glueDatabase.databaseName,
       sourceTable.tableName,
       sinkTables,
+      this.serviceSecurityGroup,
     );
     this.scheduleLambda(
       'partitionSyncerScheduler',
@@ -253,6 +258,7 @@ export class DataPipelineConstruct extends Construct {
       sourceTable,
       sinkTables,
       emrApplicationId,
+      this.serviceSecurityGroup,
     );
     new Rule(this, 'jobSubmitterScheduler', {
       schedule: Schedule.expression(this.props.scheduleExpression),
@@ -261,12 +267,7 @@ export class DataPipelineConstruct extends Construct {
   }
 
   private createEmrServerlessApplication() {
-    const emrSg = new SecurityGroup(this, 'emrAppSecurityGroup', {
-      description: 'Security group for EMR application',
-      vpc: this.props.vpc,
-      allowAllOutbound: true,
-    });
-    addCfnNagToSecurityGroup(emrSg, ['W40', 'W5']);
+    const emrSg = this.serviceSecurityGroup;
 
     const emrServerlessAppCr = createEMRServerlessApplicationCustomResource(this, {
       projectId: this.props.projectId,
@@ -285,6 +286,7 @@ export class DataPipelineConstruct extends Construct {
   private createEmrServerlessJobStateEventListener(applicationId: string, dlSQS: Queue) {
     const emrJobStateListenerLambda = this.lambdaUtil.createEmrJobStateListenerLambda(
       applicationId,
+      this.serviceSecurityGroup,
       dlSQS,
     );
     new Rule(this, 'EmrServerlessJobStateEventRule', {

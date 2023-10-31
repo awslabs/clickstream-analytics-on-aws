@@ -18,7 +18,7 @@ import {
   CfnWarmPool,
   HealthCheck,
 } from 'aws-cdk-lib/aws-autoscaling';
-import { SecurityGroup, SubnetType } from 'aws-cdk-lib/aws-ec2';
+import { ISecurityGroup, SubnetType } from 'aws-cdk-lib/aws-ec2';
 import { Platform } from 'aws-cdk-lib/aws-ecr-assets';
 import {
   Cluster,
@@ -37,7 +37,7 @@ import { addPoliciesToAsgRole } from './iam';
 import { IngestionServerProps, RESOURCE_ID_PREFIX } from '../ingestion-server';
 
 export interface ECSClusterProps extends IngestionServerProps {
-  ecsSecurityGroup: SecurityGroup;
+  ecsSecurityGroup: ISecurityGroup;
 }
 
 export interface EcsServiceResult {

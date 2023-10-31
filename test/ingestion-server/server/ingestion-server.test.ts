@@ -825,3 +825,13 @@ test('Check EC2 IMDSv2 Enabled', () => {
   expect(properties.MetadataOptions.HttpTokens == 'required').toBeTruthy();
 });
 
+
+test('Check security group count', () => {
+  const app = new App();
+  const stack = new TestStack(app, 'test', {
+    withS3SinkConfig: true,
+  });
+
+  const template = Template.fromStack(stack);
+  template.resourceCountIs('AWS::EC2::SecurityGroup', 2);
+});
