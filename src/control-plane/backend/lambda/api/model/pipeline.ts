@@ -334,7 +334,7 @@ export class CPipeline {
     this.pipeline.executionName = executionName;
     this.pipeline.templateVersion = this.resources?.solution?.data.version ?? '';
     this.pipeline.workflow = await this.generateWorkflow();
-
+    this.stackManager.setExecWorkflow(this.pipeline.workflow);
     const oldStackNames = this.stackManager.getWorkflowStacks(oldPipeline.workflow?.Workflow!);
     // update workflow
     this.stackManager.upgradeWorkflow(oldStackNames);

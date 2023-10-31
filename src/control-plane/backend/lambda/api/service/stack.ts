@@ -114,19 +114,15 @@ export class StackManager {
     if (!this.execWorkflow || !this.workflow || !this.pipeline.status?.stackDetails) {
       throw new Error('Pipeline workflow or stack information is empty.');
     }
-    const lastAction = this.pipeline.lastAction ?? this.getPipelineLastActionFromStacksStatus(this.pipeline.status.stackDetails);
+    let lastAction = this.pipeline.lastAction;
+    if (!lastAction || lastAction === '') {
+      lastAction = this.getPipelineLastActionFromStacksStatus(this.pipeline.status.stackDetails);
+    }
     const retryStackNames = this._getRetryStackNames();
     this.execWorkflow.Workflow = this.getRetryWorkflow(
       this.execWorkflow.Workflow,
       this.pipeline.status?.stackDetails,
       retryStackNames,
-      false,
-      lastAction);
-    this.workflow.Workflow = this.getRetryWorkflow(
-      this.workflow.Workflow,
-      this.pipeline.status?.stackDetails,
-      retryStackNames,
-      true,
       lastAction);
   }
 
@@ -233,27 +229,27 @@ export class StackManager {
     if (lastAction === 'Upgrade') {
       return lastAction;
     }
-    if (stackStatusPrefixes.includes('Update')) {
+    if (stackStatusPrefixes.includes('UPDATE')) {
       lastAction = 'Update';
-    } else if (stackStatusPrefixes.includes('Delete')) {
+    } else if (stackStatusPrefixes.includes('DELETE')) {
       lastAction = 'Delete';
     }
     return lastAction;
   }
 
   private _getPipelineStatus(executionDetail: DescribeExecutionOutput | undefined, stackStatusDetails: PipelineStatusDetail[]) {
-    const lastAction = this.pipeline.lastAction ?? this.getPipelineLastActionFromStacksStatus(stackStatusDetails);
+    let lastAction = this.pipeline.lastAction;
+    if (!lastAction || lastAction === '') {
+      lastAction = this.getPipelineLastActionFromStacksStatus(stackStatusDetails);
+    }
     let miss: boolean | undefined;
     let status: PipelineStatusType;
     ({ miss, status } = this._getPipelineStatusFromStacks(stackStatusDetails, lastAction));
-    if (miss) {
-      if (executionDetail?.status === ExecutionStatus.FAILED ||
-        executionDetail?.status === ExecutionStatus.TIMED_OUT ||
-        executionDetail?.status === ExecutionStatus.ABORTED) {
-        status = PipelineStatusType.FAILED;
-      } else {
-        status = PipelineStatusType.CREATING;
-      }
+    console.log(miss);
+    if (executionDetail?.status === ExecutionStatus.FAILED ||
+      executionDetail?.status === ExecutionStatus.TIMED_OUT ||
+      executionDetail?.status === ExecutionStatus.ABORTED) {
+      status = PipelineStatusType.FAILED;
     } else if (executionDetail?.status === ExecutionStatus.RUNNING) {
       if (lastAction === 'Create') {
         status = PipelineStatusType.CREATING;
@@ -262,6 +258,30 @@ export class StackManager {
       } else {
         status = PipelineStatusType.UPDATING;
       }
+    }
+    // if (miss) {
+    //   if (executionDetail?.status === ExecutionStatus.FAILED ||
+    //     executionDetail?.status === ExecutionStatus.TIMED_OUT ||
+    //     executionDetail?.status === ExecutionStatus.ABORTED) {
+    //     status = PipelineStatusType.FAILED;
+    //   } else {
+    //     status = PipelineStatusType.CREATING;
+    //   }
+    // } else if (executionDetail?.status === ExecutionStatus.RUNNING) {
+    //   if (lastAction === 'Create') {
+    //     status = PipelineStatusType.CREATING;
+    //   } else if (lastAction === 'Delete') {
+    //     status = PipelineStatusType.DELETING;
+    //   } else {
+    //     status = PipelineStatusType.UPDATING;
+    //   }
+    // } else if (executionDetail?.status === ExecutionStatus.FAILED ||
+    //   executionDetail?.status === ExecutionStatus.TIMED_OUT ||
+    //   executionDetail?.status === ExecutionStatus.ABORTED) {
+    //   status = PipelineStatusType.FAILED;
+    // }
+    if (status === PipelineStatusType.FAILED && (lastAction === 'Update' || lastAction === 'Upgrade')) {
+      status = PipelineStatusType.WARNING;
     }
     return status;
   }
@@ -275,7 +295,9 @@ export class StackManager {
       } else if (s.stackStatus.endsWith('_FAILED')) {
         status = PipelineStatusType.FAILED;
         break;
-      } else if (s.stackStatus.endsWith('_ROLLBACK_COMPLETE')) {
+      } else if (s.stackStatus.endsWith('_ROLLBACK_COMPLETE') ||
+      (s.stackTemplateVersion !== '' && this.pipeline.templateVersion &&
+      this.pipeline.templateVersion !== s.stackTemplateVersion)) {
         status = PipelineStatusType.WARNING;
         break;
       } else if (s.stackStatus.endsWith('_IN_PROGRESS')) {
@@ -370,16 +392,16 @@ export class StackManager {
 
   private getRetryWorkflow(
     state: WorkflowState, stackDetails: PipelineStatusDetail[], retryStackNames: string[],
-    origin: boolean, lastAction: string): WorkflowState {
+    lastAction: string): WorkflowState {
     if (state.Type === WorkflowStateType.PARALLEL) {
       for (let branch of state.Branches as WorkflowParallelBranch[]) {
         for (let key of Object.keys(branch.States)) {
           branch.States[key] = this.getRetryWorkflow(
-            branch.States[key], stackDetails, retryStackNames, origin, lastAction);
+            branch.States[key], stackDetails, retryStackNames, lastAction);
         }
       }
     } else if (state.Type === WorkflowStateType.STACK) {
-      state = this._getRetryState(state, stackDetails, retryStackNames, origin, lastAction);
+      state = this._getRetryState(state, stackDetails, retryStackNames, lastAction);
     }
     return state;
   }
@@ -408,20 +430,17 @@ export class StackManager {
     } else if (status?.endsWith('COMPLETE')) {
       shortStatus = 'COMPLETE';
     }
-    console.log(`${lastAction}+${shortStatus}`);
     return retryActionMap.get(`${lastAction}+${shortStatus}`) ?? '';
   }
 
   private _getRetryState(
     state: WorkflowState, stackDetails: PipelineStatusDetail[], retryStackNames: string[],
-    origin: boolean, lastAction: string): WorkflowState {
-    if (!origin) {
-      if (state.Data?.Input.StackName && retryStackNames.includes(state.Data.Input.StackName)) {
-        const status = this.getStackStatusByName(state.Data?.Input.StackName, stackDetails);
-        state.Data.Input.Action = this._getRetryAction(lastAction, status);
-      } else {
-        state.Type = WorkflowStateType.PASS;
-      }
+    lastAction: string): WorkflowState {
+    if (state.Data?.Input.StackName && retryStackNames.includes(state.Data.Input.StackName)) {
+      const status = this.getStackStatusByName(state.Data?.Input.StackName, stackDetails);
+      state.Data.Input.Action = this._getRetryAction(lastAction, status);
+    } else {
+      state.Type = WorkflowStateType.PASS;
     }
     state.Data!.Callback = {
       BucketName: stackWorkflowS3Bucket ?? '',

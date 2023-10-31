@@ -1706,7 +1706,100 @@ describe('Pipeline test', () => {
       },
     });
   });
-  it('Get pipeline list with stack fail', async () => {
+  it('Get pipeline list with stack create fail', async () => {
+    projectExistedMock(ddbMock, true);
+    pipelineExistedMock(ddbMock, true);
+    ddbMock.on(QueryCommand).resolves({
+      Items: [{ ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW }],
+    });
+    cloudFormationMock.on(DescribeStacksCommand)
+      .resolvesOnce({
+        Stacks: [{
+          StackName: 'test',
+          StackStatus: StackStatus.CREATE_FAILED,
+          StackStatusReason: '',
+          CreationTime: undefined,
+        }],
+      })
+      .resolves({
+        Stacks: [{
+          StackName: 'test',
+          StackStatus: StackStatus.CREATE_IN_PROGRESS,
+          StackStatusReason: '',
+          CreationTime: undefined,
+        }],
+      });
+    ddbMock.on(UpdateCommand).resolves({});
+    sfnMock.on(DescribeExecutionCommand).resolves({
+      executionArn: 'xx',
+      stateMachineArn: 'yy',
+      name: 'exec1',
+      status: ExecutionStatus.SUCCEEDED,
+      output: 'SUCCEEDED',
+    });
+    const res = await request(app)
+      .get(`/api/pipeline?pid=${MOCK_PROJECT_ID}`);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(200);
+    expect(res.body.data.items[0].status).toEqual({
+      executionDetail: {
+        name: 'exec1',
+        status: 'SUCCEEDED',
+      },
+      stackDetails: [
+        {
+          stackName: 'Clickstream-KafkaConnector-6666-6666',
+          stackType: 'KafkaConnector',
+          stackStatus: 'CREATE_FAILED',
+          stackStatusReason: '',
+          stackTemplateVersion: '',
+          outputs: [],
+        },
+        {
+          stackName: 'Clickstream-Ingestion-kafka-6666-6666',
+          stackType: 'Ingestion',
+          stackStatus: 'CREATE_IN_PROGRESS',
+          stackStatusReason: '',
+          stackTemplateVersion: '',
+          outputs: [],
+        },
+        {
+          stackName: 'Clickstream-DataProcessing-6666-6666',
+          stackType: 'DataProcessing',
+          stackStatus: 'CREATE_IN_PROGRESS',
+          stackStatusReason: '',
+          stackTemplateVersion: '',
+          outputs: [],
+        },
+        {
+          stackName: 'Clickstream-Reporting-6666-6666',
+          stackType: 'Reporting',
+          stackStatus: 'CREATE_IN_PROGRESS',
+          stackStatusReason: '',
+          stackTemplateVersion: '',
+          outputs: [],
+        },
+        {
+          stackName: 'Clickstream-DataModelingRedshift-6666-6666',
+          stackType: 'DataModelingRedshift',
+          stackStatus: 'CREATE_IN_PROGRESS',
+          stackStatusReason: '',
+          stackTemplateVersion: '',
+          outputs: [],
+        },
+        {
+          stackName: 'Clickstream-Metrics-6666-6666',
+          stackType: 'Metrics',
+          stackStatus: 'CREATE_IN_PROGRESS',
+          stackStatusReason: '',
+          stackTemplateVersion: '',
+          outputs: [],
+        },
+      ],
+      status: 'Failed',
+    });
+  });
+  it('Get pipeline list with stack update fail', async () => {
     projectExistedMock(ddbMock, true);
     pipelineExistedMock(ddbMock, true);
     ddbMock.on(QueryCommand).resolves({
@@ -1796,7 +1889,7 @@ describe('Pipeline test', () => {
           outputs: [],
         },
       ],
-      status: 'Failed',
+      status: 'Warning',
     });
   });
   it('Get pipeline list with stack creating', async () => {
@@ -2349,7 +2442,7 @@ describe('Pipeline test', () => {
       status: 'Active',
     });
   });
-  it('Get pipeline list with execution fail status and all stack complate', async () => {
+  it('Get pipeline list with execution fail status and all stack complete', async () => {
     projectExistedMock(ddbMock, true);
     pipelineExistedMock(ddbMock, true);
     ddbMock.on(QueryCommand).resolves({
@@ -2431,7 +2524,7 @@ describe('Pipeline test', () => {
           outputs: [],
         },
       ],
-      status: 'Active',
+      status: 'Failed',
     });
   });
   it('Get pipeline list with execution fail status and miss stack', async () => {
@@ -2555,7 +2648,7 @@ describe('Pipeline test', () => {
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body.data.items[0].status).toEqual({
-      status: 'Failed',
+      status: 'Warning',
       stackDetails: [
         {
           stackName: 'Clickstream-KafkaConnector-6666-6666',

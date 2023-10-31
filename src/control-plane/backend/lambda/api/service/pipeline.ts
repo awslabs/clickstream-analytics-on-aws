@@ -152,7 +152,6 @@ export class PipelineServ {
       if (templateInfo.isLatest) {
         return res.status(400).send(new ApiFail('Pipeline is already the latest version.'));
       }
-      newPipeline.templateVersion = templateInfo.solutionVersion;
       await pipeline.upgrade(curPipeline);
       return res.status(201).send(new ApiSuccess({ id }, 'Pipeline upgraded.'));
     } catch (error) {
@@ -187,7 +186,8 @@ export class PipelineServ {
         return res.status(404).send(new ApiFail('Pipeline not found'));
       }
       // Check pipeline status
-      if (ddbPipeline.status?.status !== PipelineStatusType.FAILED) {
+      if (ddbPipeline.status?.status !== PipelineStatusType.FAILED &&
+        ddbPipeline.status?.status !== PipelineStatusType.WARNING) {
         return res.status(400).json(new ApiFail('The pipeline current status does not allow retry.'));
       }
       const pipeline = new CPipeline(ddbPipeline);

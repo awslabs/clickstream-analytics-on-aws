@@ -487,6 +487,7 @@ export class DynamoDbStore implements ClickStreamStore {
               executionName: { S: pipeline.executionName ?? '' },
               executionArn: { S: pipeline.executionArn ?? '' },
               templateVersion: { S: pipeline.templateVersion ?? '' },
+              lastAction: { S: pipeline.lastAction ?? 'Create' },
               version: { S: Date.now().toString() },
               versionTag: { S: 'latest' },
               createAt: { N: Date.now().toString() },

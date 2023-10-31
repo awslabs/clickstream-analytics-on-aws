@@ -2094,7 +2094,7 @@ describe('Workflow test', () => {
       'Clickstream-DataModelingRedshift-6666-6666',
       'Clickstream-Metrics-6666-6666',
     ];
-    const stackManager: StackManager = new StackManager(KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW_FOR_UPGRADE);
+    const stackManager: StackManager = new StackManager({ ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW_FOR_UPGRADE });
     stackManager.upgradeWorkflow(oldStackNames);
     const expected = {
       Version: '2022-03-15',
@@ -2239,7 +2239,7 @@ describe('Workflow test', () => {
       'Clickstream-Reporting-6666-6666',
       'Clickstream-DataModelingRedshift-6666-6666',
     ];
-    const stackManager: StackManager = new StackManager(KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW_FOR_UPGRADE);
+    const stackManager: StackManager = new StackManager({ ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW_FOR_UPGRADE });
     stackManager.upgradeWorkflow(oldStackNames);
     const expected = {
       Version: '2022-03-15',
