@@ -19,5 +19,5 @@ export function createKinesisToS3LambdaSecurityGroup(
   scope: Construct,
   vpc: IVpc,
 ): ISecurityGroup {
-  return createSGForEgressToAwsService(scope, 'FnSg', vpc);
+  return createSGForEgressToAwsService(scope, 'LambdaEgressToAWSServiceSG', vpc);
 }

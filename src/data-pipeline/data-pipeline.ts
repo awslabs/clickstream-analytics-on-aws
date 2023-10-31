@@ -93,7 +93,7 @@ export class DataPipelineConstruct extends Construct {
     super(scope, id);
     this.props = props;
 
-    this.serviceSecurityGroup = createSGForEgressToAwsService(this, 'FnOrEMRSg', props.vpc);
+    this.serviceSecurityGroup = createSGForEgressToAwsService(this, 'LambdaEgressToAWSServiceSG', props.vpc);
 
     const dlQueue = this.createDLQueue();
 

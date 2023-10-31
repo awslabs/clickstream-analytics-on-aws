@@ -91,7 +91,7 @@ export class RedshiftAnalyticsStack extends NestedStack {
 
     this.templateOptions.description = `(${SolutionInfo.SOLUTION_ID}-dmr) ${SolutionInfo.SOLUTION_NAME} - ${featureName} ${SolutionInfo.SOLUTION_VERSION_DETAIL}`;
 
-    const securityGroupForLambda = createSGForEgressToAwsService(this, 'FnSg', props.vpc);
+    const securityGroupForLambda = createSGForEgressToAwsService(this, 'LambdaEgressToAWSServiceSG', props.vpc);
 
     let existingRedshiftServerlessProps: ExistingRedshiftServerlessProps | undefined = props.existingRedshiftServerlessProps;
 
