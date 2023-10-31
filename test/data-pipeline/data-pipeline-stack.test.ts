@@ -504,6 +504,12 @@ describe('DataPipelineStack parameter test', () => {
 });
 
 
+test('Security group count is 1', () => {
+  for (const template of nestedTemplates) {
+    template.resourceCountIs('AWS::EC2::SecurityGroup', 1);
+  }
+});
+
 describe('Glue tables have fixed logic id', () => {
 
   for (const template of nestedTemplates) {

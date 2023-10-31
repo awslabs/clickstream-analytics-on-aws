@@ -28,10 +28,11 @@ def send_events_to_server(user, events):
         device = user.web_device
     else:
         device = user.mobile_device
+    gzip = "gzip" if configure.IS_GZIP else ""
     request_param = {
         "platform": "Android",
         "appId": configure.APP_ID,
-        "compression": "gzip",
+        "compression": gzip,
         "fakeIp": device.ip_address,
         "event_bundle_sequence_id": global_sequence_id
     }
