@@ -242,10 +242,8 @@ export class StackManager {
     if (!lastAction || lastAction === '') {
       lastAction = this.getPipelineLastActionFromStacksStatus(stackStatusDetails);
     }
-    let miss: boolean | undefined;
     let status: PipelineStatusType;
-    ({ miss, status } = this._getPipelineStatusFromStacks(stackStatusDetails, lastAction));
-    console.log(miss);
+    status = this._getPipelineStatusFromStacks(stackStatusDetails, lastAction);
     if (executionDetail?.status === ExecutionStatus.FAILED ||
       executionDetail?.status === ExecutionStatus.TIMED_OUT ||
       executionDetail?.status === ExecutionStatus.ABORTED) {
@@ -259,27 +257,6 @@ export class StackManager {
         status = PipelineStatusType.UPDATING;
       }
     }
-    // if (miss) {
-    //   if (executionDetail?.status === ExecutionStatus.FAILED ||
-    //     executionDetail?.status === ExecutionStatus.TIMED_OUT ||
-    //     executionDetail?.status === ExecutionStatus.ABORTED) {
-    //     status = PipelineStatusType.FAILED;
-    //   } else {
-    //     status = PipelineStatusType.CREATING;
-    //   }
-    // } else if (executionDetail?.status === ExecutionStatus.RUNNING) {
-    //   if (lastAction === 'Create') {
-    //     status = PipelineStatusType.CREATING;
-    //   } else if (lastAction === 'Delete') {
-    //     status = PipelineStatusType.DELETING;
-    //   } else {
-    //     status = PipelineStatusType.UPDATING;
-    //   }
-    // } else if (executionDetail?.status === ExecutionStatus.FAILED ||
-    //   executionDetail?.status === ExecutionStatus.TIMED_OUT ||
-    //   executionDetail?.status === ExecutionStatus.ABORTED) {
-    //   status = PipelineStatusType.FAILED;
-    // }
     if (status === PipelineStatusType.FAILED && (lastAction === 'Update' || lastAction === 'Upgrade')) {
       status = PipelineStatusType.WARNING;
     }
@@ -287,20 +264,17 @@ export class StackManager {
   }
 
   private _getPipelineStatusFromStacks(stackStatusDetails: PipelineStatusDetail[], lastAction: string) {
-    let miss: boolean = false;
     let status: PipelineStatusType = PipelineStatusType.ACTIVE;
     for (let s of stackStatusDetails) {
-      if (s.stackStatus === undefined) {
-        miss = true;
-      } else if (s.stackStatus.endsWith('_FAILED')) {
+      if (s.stackStatus?.endsWith('_FAILED')) {
         status = PipelineStatusType.FAILED;
         break;
-      } else if (s.stackStatus.endsWith('_ROLLBACK_COMPLETE') ||
+      } else if (s.stackStatus?.endsWith('_ROLLBACK_COMPLETE') ||
       (s.stackTemplateVersion !== '' && this.pipeline.templateVersion &&
       this.pipeline.templateVersion !== s.stackTemplateVersion)) {
         status = PipelineStatusType.WARNING;
         break;
-      } else if (s.stackStatus.endsWith('_IN_PROGRESS')) {
+      } else if (s.stackStatus?.endsWith('_IN_PROGRESS')) {
         if (lastAction === 'Create') {
           status = PipelineStatusType.CREATING;
         } else if (lastAction === 'Delete') {
@@ -310,7 +284,7 @@ export class StackManager {
         }
       }
     }
-    return { miss, status };
+    return status;
   }
 
   private async getExecutionDetail(executionArn: string): Promise<DescribeExecutionOutput | undefined> {
