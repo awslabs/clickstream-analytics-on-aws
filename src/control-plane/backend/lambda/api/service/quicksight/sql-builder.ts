@@ -1384,11 +1384,8 @@ function _buildBaseUserDataSql(sqlParameters: SQLParameters, hasNestParams: bool
   `;
 }
 
-function _getAllConditionSql(eventNames: string[], sqlParameters: SQLParameters,
-  isEventPathSQL: boolean = false, simpleVersion: boolean = false) : string {
-
-  const prefix = simpleVersion ? 'event.' : '';
-  let eventNameAndSQLConditions: EventNameAndConditionsSQL[] = [];
+function _fillEventNameAndSQLConditions(eventNames: string[], sqlParameters: SQLParameters,
+  eventNameAndSQLConditions: EventNameAndConditionsSQL[], simpleVersion: boolean) {
   if (simpleVersion) {
     for (const [index, event] of eventNames.entries()) {
       eventNameAndSQLConditions.push({
@@ -1404,6 +1401,15 @@ function _getAllConditionSql(eventNames: string[], sqlParameters: SQLParameters,
       });
     }
   }
+
+}
+
+function _getAllConditionSql(eventNames: string[], sqlParameters: SQLParameters,
+  isEventPathSQL: boolean = false, simpleVersion: boolean = false) : string {
+
+  const prefix = simpleVersion ? 'event.' : '';
+  let eventNameAndSQLConditions: EventNameAndConditionsSQL[] = [];
+  _fillEventNameAndSQLConditions(eventNames, sqlParameters, eventNameAndSQLConditions, simpleVersion);
 
   let allConditionSql = '';
   for (const [index, eventNameAndSQLCondition] of eventNameAndSQLConditions.entries()) {
