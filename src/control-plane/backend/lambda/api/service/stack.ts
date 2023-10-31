@@ -218,13 +218,10 @@ export class StackManager {
     return defaultPipelineStatus;
   }
 
-  public getPipelineLastActionFromStacksStatus(): string {
+  public getPipelineLastActionFromStacksStatus(stackStatusDetails: PipelineStatusDetail[]): string {
     let lastAction: string = 'CREATE';
-    if (!this.pipeline.status?.stackDetails) {
-      return lastAction;
-    }
     const stackStatusPrefixes: string[] = [];
-    this.pipeline.status?.stackDetails.forEach(
+    stackStatusDetails.forEach(
       (d) => {
         if (d.stackStatus) {
           stackStatusPrefixes.push(d.stackStatus?.split('_')[0]);
@@ -246,7 +243,7 @@ export class StackManager {
   }
 
   private _getPipelineStatus(executionDetail: DescribeExecutionOutput | undefined, stackStatusDetails: PipelineStatusDetail[]) {
-    const lastAction = this.pipeline.lastAction ?? this.getPipelineLastActionFromStacksStatus();
+    const lastAction = this.pipeline.lastAction ?? this.getPipelineLastActionFromStacksStatus(stackStatusDetails);
     let miss: boolean | undefined;
     let status: PipelineStatusType;
     ({ miss, status } = this._getPipelineStatusFromStacks(stackStatusDetails, lastAction));

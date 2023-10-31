@@ -46,9 +46,11 @@ import request from 'supertest';
 import {
   createPipelineMock,
   dictionaryMock,
+  MOCK_EXECUTION_ID,
   MOCK_PIPELINE_ID,
   MOCK_PLUGIN_ID,
   MOCK_PROJECT_ID,
+  MOCK_SOLUTION_VERSION,
   MOCK_TOKEN,
   pipelineExistedMock,
   projectExistedMock,
@@ -987,32 +989,41 @@ describe('Pipeline test', () => {
     ddbMock.on(QueryCommand).resolves({
       Items: [{ ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW }],
     });
+    const mockOutputs = [
+      {
+        OutputKey: 'IngestionServerC000IngestionServerURL',
+        OutputValue: 'http://xxx/xxx',
+      },
+      {
+        OutputKey: 'IngestionServerC000IngestionServerDNS',
+        OutputValue: 'http://yyy/yyy',
+      },
+      {
+        OutputKey: 'Dashboards',
+        OutputValue: '[{"appId":"app1","dashboardId":"clickstream_dashboard_v1_notepad_mtzfsocy_app1"},{"appId":"app2","dashboardId":"clickstream_dashboard_v1_notepad_mtzfsocy_app2"}]',
+      },
+      {
+        OutputKey: 'ObservabilityDashboardName',
+        OutputValue: 'clickstream_dashboard_notepad_mtzfsocy',
+      },
+    ];
     cloudFormationMock.on(DescribeStacksCommand).resolves({
       Stacks: [
         {
           StackName: 'xxx',
-          Outputs: [
-            {
-              OutputKey: 'IngestionServerC000IngestionServerURL',
-              OutputValue: 'http://xxx/xxx',
-            },
-            {
-              OutputKey: 'IngestionServerC000IngestionServerDNS',
-              OutputValue: 'http://yyy/yyy',
-            },
-            {
-              OutputKey: 'Dashboards',
-              OutputValue: '[{"appId":"app1","dashboardId":"clickstream_dashboard_v1_notepad_mtzfsocy_app1"},{"appId":"app2","dashboardId":"clickstream_dashboard_v1_notepad_mtzfsocy_app2"}]',
-            },
-            {
-              OutputKey: 'ObservabilityDashboardName',
-              OutputValue: 'clickstream_dashboard_notepad_mtzfsocy',
-            },
-          ],
+          Outputs: mockOutputs,
+          Tags: [{ Key: 'aws-solution/version', Value: MOCK_SOLUTION_VERSION }],
           StackStatus: StackStatus.CREATE_COMPLETE,
           CreationTime: new Date(),
         },
       ],
+    });
+    sfnMock.on(DescribeExecutionCommand).resolves({
+      executionArn: 'xx',
+      stateMachineArn: 'yy',
+      name: MOCK_EXECUTION_ID,
+      status: ExecutionStatus.SUCCEEDED,
+      output: 'SUCCEEDED',
     });
     dictionaryMock(ddbMock);
     ddbMock.on(QueryCommand, {
@@ -1044,6 +1055,35 @@ describe('Pipeline test', () => {
       message: '',
       data: {
         ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
+        status: {
+          ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW.status,
+          stackDetails: [
+            {
+              ...BASE_STATUS.stackDetails[0],
+              outputs: mockOutputs,
+            },
+            {
+              ...BASE_STATUS.stackDetails[1],
+              outputs: mockOutputs,
+            },
+            {
+              ...BASE_STATUS.stackDetails[2],
+              outputs: mockOutputs,
+            },
+            {
+              ...BASE_STATUS.stackDetails[4],
+              outputs: mockOutputs,
+            },
+            {
+              ...BASE_STATUS.stackDetails[3],
+              outputs: mockOutputs,
+            },
+            {
+              ...BASE_STATUS.stackDetails[5],
+              outputs: mockOutputs,
+            },
+          ],
+        },
         dataProcessing: {
           ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW.dataProcessing,
           enrichPlugin: [
@@ -1155,10 +1195,18 @@ describe('Pipeline test', () => {
       Stacks: [
         {
           StackName: 'xxx',
+          Tags: [{ Key: 'aws-solution/version', Value: MOCK_SOLUTION_VERSION }],
           StackStatus: StackStatus.CREATE_COMPLETE,
           CreationTime: new Date(),
         },
       ],
+    });
+    sfnMock.on(DescribeExecutionCommand).resolves({
+      executionArn: 'xx',
+      stateMachineArn: 'yy',
+      name: MOCK_EXECUTION_ID,
+      status: ExecutionStatus.SUCCEEDED,
+      output: 'SUCCEEDED',
     });
     dictionaryMock(ddbMock);
     ddbMock.on(QueryCommand, {
@@ -1190,6 +1238,17 @@ describe('Pipeline test', () => {
       message: '',
       data: {
         ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
+        status: {
+          ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW.status,
+          stackDetails: [
+            { ...BASE_STATUS.stackDetails[0] },
+            { ...BASE_STATUS.stackDetails[1] },
+            { ...BASE_STATUS.stackDetails[2] },
+            { ...BASE_STATUS.stackDetails[4] },
+            { ...BASE_STATUS.stackDetails[3] },
+            { ...BASE_STATUS.stackDetails[5] },
+          ],
+        },
         dataProcessing: {
           ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW.dataProcessing,
           enrichPlugin: [
