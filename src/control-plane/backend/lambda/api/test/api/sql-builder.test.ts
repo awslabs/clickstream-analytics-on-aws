@@ -4066,7 +4066,7 @@ describe('SQL Builder test', () => {
         conditionOperator: 'and',
       },
       timeScopeType: ExploreTimeScopeType.FIXED,
-      groupColumn: ExploreGroupColumn.DAY,
+      groupColumn: ExploreGroupColumn.WEEK,
       timeStart: new Date('2023-06-19'),
       timeEnd: new Date('2023-06-22'),
       pairEventAndConditions: [
@@ -4132,6 +4132,8 @@ describe('SQL Builder test', () => {
       ],
 
     });
+
+    console.log(sql);
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
@@ -4327,8 +4329,8 @@ describe('SQL Builder test', () => {
       )
     select
       grouping,
-      start_event_date,
-      event_date,
+      DATE_TRUNC('week', start_event_date) - INTERVAL '1 day' as start_event_date,
+      DATE_TRUNC('week', event_date) - INTERVAL '1 day' as event_date,
       (
         count(distinct end_user_pseudo_id)::decimal / NULLIF(count(distinct start_user_pseudo_id), 0)
       )::decimal(20, 4) as retention
@@ -14296,321 +14298,312 @@ describe('SQL Builder test', () => {
 
       ],
       timeScopeType: ExploreTimeScopeType.FIXED,
-      timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('2023-10-10'),
-      groupColumn: ExploreGroupColumn.DAY,
+      timeStart: new Date('2023-10-24'),
+      timeEnd: new Date('2023-10-30'),
+      groupColumn: ExploreGroupColumn.MONTH,
     });
 
     const expectResult = `
     with
-    user_base as (
-      select
-        COALESCE(user_id, user_pseudo_id) as user_pseudo_id,
-        user_id,
-        user_first_touch_timestamp,
-        _first_visit_date,
-        _first_referer,
-        _first_traffic_source_type,
-        _first_traffic_medium,
-        _first_traffic_source,
-        _channel,
-        user_properties.key::varchar as user_param_key,
-        user_properties.value.string_value::varchar as user_param_string_value,
-        user_properties.value.int_value::bigint as user_param_int_value,
-        user_properties.value.float_value::double precision as user_param_float_value,
-        user_properties.value.double_value::double precision as user_param_double_value
-      from
-        app1.user_m_view u,
-        u.user_properties as user_properties
-    ),
-    event_base as (
-      select
-        event.event_date,
-        event.event_name,
-        event.event_id,
-        event_bundle_sequence_id::bigint as event_bundle_sequence_id,
-        event_previous_timestamp::bigint as event_previous_timestamp,
-        event_timestamp::bigint as event_timestamp,
-        ingest_timestamp,
-        event_value_in_usd,
-        app_info.app_id::varchar as app_info_app_id,
-        app_info.id::varchar as app_info_package_id,
-        app_info.install_source::varchar as app_info_install_source,
-        app_info.version::varchar as app_info_version,
-        device.vendor_id::varchar as device_id,
-        device.mobile_brand_name::varchar as device_mobile_brand_name,
-        device.mobile_model_name::varchar as device_mobile_model_name,
-        device.manufacturer::varchar as device_manufacturer,
-        device.screen_width::bigint as device_screen_width,
-        device.screen_height::bigint as device_screen_height,
-        device.viewport_height::bigint as device_viewport_height,
-        device.carrier::varchar as device_carrier,
-        device.network_type::varchar as device_network_type,
-        device.operating_system::varchar as device_operating_system,
-        device.operating_system_version::varchar as device_operating_system_version,
-        device.ua_browser::varchar as device_ua_browser,
-        device.ua_browser_version::varchar as device_ua_browser_version,
-        device.ua_os::varchar as device_ua_os,
-        device.ua_os_version::varchar as device_ua_os_version,
-        device.ua_device::varchar as device_ua_device,
-        device.ua_device_category::varchar as device_ua_device_category,
-        device.system_language::varchar as device_system_language,
-        device.time_zone_offset_seconds::bigint as device_time_zone_offset_seconds,
-        device.advertising_id::varchar as device_advertising_id,
-              device.host_name::varchar as device_host_name,
-        geo.continent::varchar as geo_continent,
-        geo.country::varchar as geo_country,
-        geo.city::varchar as geo_city,
-        geo.metro::varchar as geo_metro,
-        geo.region::varchar as geo_region,
-        geo.sub_continent::varchar as geo_sub_continent,
-        geo.locale::varchar as geo_locale,
-        platform,
-        project_id,
-        traffic_source.name::varchar as traffic_source_name,
-        traffic_source.medium::varchar as traffic_source_medium,
-        traffic_source.source::varchar as traffic_source_source,
-        COALESCE(event.user_id, event.user_pseudo_id) as user_pseudo_id,
-        event.user_id,
-        TO_CHAR(
-          TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
-          'YYYY-MM'
-        ) as month,
-        TO_CHAR(
-          date_trunc(
-            'week',
-            TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-          ),
-          'YYYY-MM-DD'
-        ) || ' - ' || TO_CHAR(
-          date_trunc(
-            'week',
-            (
+      user_base as (
+        select
+          COALESCE(user_id, user_pseudo_id) as user_pseudo_id,
+          user_id,
+          user_first_touch_timestamp,
+          _first_visit_date,
+          _first_referer,
+          _first_traffic_source_type,
+          _first_traffic_medium,
+          _first_traffic_source,
+          _channel,
+          user_properties.key::varchar as user_param_key,
+          user_properties.value.string_value::varchar as user_param_string_value,
+          user_properties.value.int_value::bigint as user_param_int_value,
+          user_properties.value.float_value::double precision as user_param_float_value,
+          user_properties.value.double_value::double precision as user_param_double_value
+        from
+          app1.user_m_view u,
+          u.user_properties as user_properties
+      ),
+      event_base as (
+        select
+          event.event_date,
+          event.event_name,
+          event.event_id,
+          event_bundle_sequence_id::bigint as event_bundle_sequence_id,
+          event_previous_timestamp::bigint as event_previous_timestamp,
+          event_timestamp::bigint as event_timestamp,
+          ingest_timestamp,
+          event_value_in_usd,
+          app_info.app_id::varchar as app_info_app_id,
+          app_info.id::varchar as app_info_package_id,
+          app_info.install_source::varchar as app_info_install_source,
+          app_info.version::varchar as app_info_version,
+          device.vendor_id::varchar as device_id,
+          device.mobile_brand_name::varchar as device_mobile_brand_name,
+          device.mobile_model_name::varchar as device_mobile_model_name,
+          device.manufacturer::varchar as device_manufacturer,
+          device.screen_width::bigint as device_screen_width,
+          device.screen_height::bigint as device_screen_height,
+          device.viewport_height::bigint as device_viewport_height,
+          device.carrier::varchar as device_carrier,
+          device.network_type::varchar as device_network_type,
+          device.operating_system::varchar as device_operating_system,
+          device.operating_system_version::varchar as device_operating_system_version,
+          device.ua_browser::varchar as device_ua_browser,
+          device.ua_browser_version::varchar as device_ua_browser_version,
+          device.ua_os::varchar as device_ua_os,
+          device.ua_os_version::varchar as device_ua_os_version,
+          device.ua_device::varchar as device_ua_device,
+          device.ua_device_category::varchar as device_ua_device_category,
+          device.system_language::varchar as device_system_language,
+          device.time_zone_offset_seconds::bigint as device_time_zone_offset_seconds,
+          device.advertising_id::varchar as device_advertising_id,
+          device.host_name::varchar as device_host_name,
+          geo.continent::varchar as geo_continent,
+          geo.country::varchar as geo_country,
+          geo.city::varchar as geo_city,
+          geo.metro::varchar as geo_metro,
+          geo.region::varchar as geo_region,
+          geo.sub_continent::varchar as geo_sub_continent,
+          geo.locale::varchar as geo_locale,
+          platform,
+          project_id,
+          traffic_source.name::varchar as traffic_source_name,
+          traffic_source.medium::varchar as traffic_source_medium,
+          traffic_source.source::varchar as traffic_source_source,
+          COALESCE(event.user_id, event.user_pseudo_id) as user_pseudo_id,
+          event.user_id,
+          TO_CHAR(
+            TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+            'YYYY-MM'
+          ) as month,
+          TO_CHAR(
+            date_trunc(
+              'week',
               TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-            ) + INTERVAL '6 days'
-          ),
-          'YYYY-MM-DD'
-        ) as week,
-        TO_CHAR(
-          TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
-          'YYYY-MM-DD'
-        ) as day,
-        TO_CHAR(
-          TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
-          'YYYY-MM-DD HH24'
-        ) || '00:00' as hour
-      from
-        app1.event as event
-      where
-        event.event_date >= date '2023-10-01'
-        and event.event_date <= date '2023-10-10'
-        and event.event_name in ('add_button_click', 'note_export', 'note_share')
-    ),
-    base_data as (
-      select
-        _user_first_touch_timestamp,
-        _session_duration,
-        event_base.*
-      from
-        event_base
-        join (
-          select
-            event_base.event_id,
-            max(
-              case
-                when event_param_key = '_session_duration' then event_param_int_value
-                else null
-              end
-            ) as _session_duration
-          from
-            event_base
-            join app1.event_parameter as event_param on event_base.event_timestamp = event_param.event_timestamp
-            and event_base.event_id = event_param.event_id
-          group by
-            event_base.event_id
-        ) as event_join_table on event_base.event_id = event_join_table.event_id
-        join (
-          select
-            event_base.user_pseudo_id,
-            max(
-              case
-                when user_param_key = '_user_first_touch_timestamp' then user_param_int_value
-                else null
-              end
-            ) as _user_first_touch_timestamp
-          from
-            event_base
-            join user_base on event_base.user_pseudo_id = user_base.user_pseudo_id
-          group by
-            event_base.user_pseudo_id
-        ) user_join_table on event_base.user_pseudo_id = user_join_table.user_pseudo_id
-      where
-        1 = 1
-        and (
-          platform = 'Android'
-          and geo_country = 'China'
-          and _user_first_touch_timestamp > 1686532526770
-          and _user_first_touch_timestamp > 1686532526780
-        )
-    ),
-    first_date as (
-      select
-        min(event_date) as first_date
-      from
-        base_data
-    ),
-    date_list as (
-      select
-        '2023-10-01'::date as event_date
-      union all
-      select
-        '2023-10-02'::date as event_date
-      union all
-      select
-        '2023-10-03'::date as event_date
-      union all
-      select
-        '2023-10-04'::date as event_date
-      union all
-      select
-        '2023-10-05'::date as event_date
-      union all
-      select
-        '2023-10-06'::date as event_date
-      union all
-      select
-        '2023-10-07'::date as event_date
-      union all
-      select
-        '2023-10-08'::date as event_date
-      union all
-      select
-        '2023-10-09'::date as event_date
-      union all
-      select
-        '2023-10-10'::date as event_date
-    ),
-    first_table_0 as (
-      select
-        event_date,
-        event_name,
-        geo_country,
-        user_pseudo_id
-      from
-        base_data
-        join first_date on base_data.event_date = first_date.first_date
-      where
-        event_name = 'add_button_click'
-        and (
-          platform = 'Android'
-          and geo_country = 'China'
-          and _user_first_touch_timestamp > 1686532526770
-          and _user_first_touch_timestamp > 1686532526780
-        )
-    ),
-    second_table_0 as (
-      select
-        event_date,
-        event_name,
-        geo_country,
-        user_pseudo_id
-      from
-        base_data
-        join first_date on base_data.event_date >= first_date.first_date
-      where
-        event_name = 'note_export'
-        and (
-          platform = 'Android'
-          and geo_country = 'China'
-          and _user_first_touch_timestamp > 1686532526770
-          and _session_duration > 200
-        )
-    ),
-    first_table_1 as (
-      select
-        event_date,
-        event_name,
-        geo_country,
-        user_pseudo_id
-      from
-        base_data
-        join first_date on base_data.event_date = first_date.first_date
-      where
-        event_name = 'add_button_click'
-        and (
-          platform = 'Android'
-          and geo_country = 'China'
-          and _user_first_touch_timestamp > 1686532526770
-          and _user_first_touch_timestamp > 1686532526780
-        )
-    ),
-    second_table_1 as (
-      select
-        event_date,
-        event_name,
-        geo_country,
-        user_pseudo_id
-      from
-        base_data
-        join first_date on base_data.event_date >= first_date.first_date
-      where
-        event_name = 'note_share'
-        and (
-          platform = 'Android'
-          and geo_country = 'China'
-          and _user_first_touch_timestamp > 1686532526770
-          and _session_duration > 200
-        )
-    ),
-    result_table as (
-      select
-        first_table_0.geo_country,
-        first_table_0.event_name || '_' || 0 as grouping,
-        first_table_0.event_date as start_event_date,
-        first_table_0.user_pseudo_id as start_user_pseudo_id,
-        date_list.event_date as event_date,
-        second_table_0.user_pseudo_id as end_user_pseudo_id,
-        second_table_0.event_date as end_event_date
-      from
-        first_table_0
-        join date_list on 1 = 1
-        left join second_table_0 on date_list.event_date = second_table_0.event_date
-        and first_table_0.user_pseudo_id = second_table_0.user_pseudo_id
-        and first_table_0.geo_country = second_table_0.geo_country
-      union all
-      select
-        first_table_1.geo_country,
-        first_table_1.event_name || '_' || 1 as grouping,
-        first_table_1.event_date as start_event_date,
-        first_table_1.user_pseudo_id as start_user_pseudo_id,
-        date_list.event_date as event_date,
-        second_table_1.user_pseudo_id as end_user_pseudo_id,
-        second_table_1.event_date as end_event_date
-      from
-        first_table_1
-        join date_list on 1 = 1
-        left join second_table_1 on date_list.event_date = second_table_1.event_date
-        and first_table_1.user_pseudo_id = second_table_1.user_pseudo_id
-        and first_table_1.geo_country = second_table_1.geo_country
-    )
-  select
-    geo_country as group_col,
-    grouping,
-    start_event_date,
-    event_date,
-    (
-      count(distinct end_user_pseudo_id)::decimal / NULLIF(count(distinct start_user_pseudo_id), 0)
-    )::decimal(20, 4) as retention
-  from
-    result_table
-  group by
-    geo_country,
-    grouping,
-    start_event_date,
-    event_date
-  order by
-    grouping,
-    event_date
+            ),
+            'YYYY-MM-DD'
+          ) || ' - ' || TO_CHAR(
+            date_trunc(
+              'week',
+              (
+                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
+              ) + INTERVAL '6 days'
+            ),
+            'YYYY-MM-DD'
+          ) as week,
+          TO_CHAR(
+            TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+            'YYYY-MM-DD'
+          ) as day,
+          TO_CHAR(
+            TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+            'YYYY-MM-DD HH24'
+          ) || '00:00' as hour
+        from
+          app1.event as event
+        where
+          event.event_date >= date '2023-10-24'
+          and event.event_date <= date '2023-10-30'
+          and event.event_name in ('add_button_click', 'note_export', 'note_share')
+      ),
+      base_data as (
+        select
+          _user_first_touch_timestamp,
+          _session_duration,
+          event_base.*
+        from
+          event_base
+          join (
+            select
+              event_base.event_id,
+              max(
+                case
+                  when event_param_key = '_session_duration' then event_param_int_value
+                  else null
+                end
+              ) as _session_duration
+            from
+              event_base
+              join app1.event_parameter as event_param on event_base.event_timestamp = event_param.event_timestamp
+              and event_base.event_id = event_param.event_id
+            group by
+              event_base.event_id
+          ) as event_join_table on event_base.event_id = event_join_table.event_id
+          join (
+            select
+              event_base.user_pseudo_id,
+              max(
+                case
+                  when user_param_key = '_user_first_touch_timestamp' then user_param_int_value
+                  else null
+                end
+              ) as _user_first_touch_timestamp
+            from
+              event_base
+              join user_base on event_base.user_pseudo_id = user_base.user_pseudo_id
+            group by
+              event_base.user_pseudo_id
+          ) user_join_table on event_base.user_pseudo_id = user_join_table.user_pseudo_id
+        where
+          1 = 1
+          and (
+            platform = 'Android'
+            and geo_country = 'China'
+            and _user_first_touch_timestamp > 1686532526770
+            and _user_first_touch_timestamp > 1686532526780
+          )
+      ),
+      first_date as (
+        select
+          min(event_date) as first_date
+        from
+          base_data
+      ),
+      date_list as (
+        select
+          '2023-10-24'::date as event_date
+        union all
+        select
+          '2023-10-25'::date as event_date
+        union all
+        select
+          '2023-10-26'::date as event_date
+        union all
+        select
+          '2023-10-27'::date as event_date
+        union all
+        select
+          '2023-10-28'::date as event_date
+        union all
+        select
+          '2023-10-29'::date as event_date
+        union all
+        select
+          '2023-10-30'::date as event_date
+      ),
+      first_table_0 as (
+        select
+          event_date,
+          event_name,
+          geo_country,
+          user_pseudo_id
+        from
+          base_data
+          join first_date on base_data.event_date = first_date.first_date
+        where
+          event_name = 'add_button_click'
+          and (
+            platform = 'Android'
+            and geo_country = 'China'
+            and _user_first_touch_timestamp > 1686532526770
+            and _user_first_touch_timestamp > 1686532526780
+          )
+      ),
+      second_table_0 as (
+        select
+          event_date,
+          event_name,
+          geo_country,
+          user_pseudo_id
+        from
+          base_data
+          join first_date on base_data.event_date >= first_date.first_date
+        where
+          event_name = 'note_export'
+          and (
+            platform = 'Android'
+            and geo_country = 'China'
+            and _user_first_touch_timestamp > 1686532526770
+            and _session_duration > 200
+          )
+      ),
+      first_table_1 as (
+        select
+          event_date,
+          event_name,
+          geo_country,
+          user_pseudo_id
+        from
+          base_data
+          join first_date on base_data.event_date = first_date.first_date
+        where
+          event_name = 'add_button_click'
+          and (
+            platform = 'Android'
+            and geo_country = 'China'
+            and _user_first_touch_timestamp > 1686532526770
+            and _user_first_touch_timestamp > 1686532526780
+          )
+      ),
+      second_table_1 as (
+        select
+          event_date,
+          event_name,
+          geo_country,
+          user_pseudo_id
+        from
+          base_data
+          join first_date on base_data.event_date >= first_date.first_date
+        where
+          event_name = 'note_share'
+          and (
+            platform = 'Android'
+            and geo_country = 'China'
+            and _user_first_touch_timestamp > 1686532526770
+            and _session_duration > 200
+          )
+      ),
+      result_table as (
+        select
+          first_table_0.geo_country,
+          first_table_0.event_name || '_' || 0 as grouping,
+          first_table_0.event_date as start_event_date,
+          first_table_0.user_pseudo_id as start_user_pseudo_id,
+          date_list.event_date as event_date,
+          second_table_0.user_pseudo_id as end_user_pseudo_id,
+          second_table_0.event_date as end_event_date
+        from
+          first_table_0
+          join date_list on 1 = 1
+          left join second_table_0 on date_list.event_date = second_table_0.event_date
+          and first_table_0.user_pseudo_id = second_table_0.user_pseudo_id
+          and first_table_0.geo_country = second_table_0.geo_country
+        union all
+        select
+          first_table_1.geo_country,
+          first_table_1.event_name || '_' || 1 as grouping,
+          first_table_1.event_date as start_event_date,
+          first_table_1.user_pseudo_id as start_user_pseudo_id,
+          date_list.event_date as event_date,
+          second_table_1.user_pseudo_id as end_user_pseudo_id,
+          second_table_1.event_date as end_event_date
+        from
+          first_table_1
+          join date_list on 1 = 1
+          left join second_table_1 on date_list.event_date = second_table_1.event_date
+          and first_table_1.user_pseudo_id = second_table_1.user_pseudo_id
+          and first_table_1.geo_country = second_table_1.geo_country
+      )
+    select
+      geo_country as group_col,
+      grouping,
+      DATE_TRUNC('month', start_event_date) as start_event_date,
+      DATE_TRUNC('month', event_date) as event_date,
+      (
+        count(distinct end_user_pseudo_id)::decimal / NULLIF(count(distinct start_user_pseudo_id), 0)
+      )::decimal(20, 4) as retention
+    from
+      result_table
+    group by
+      geo_country,
+      grouping,
+      start_event_date,
+      event_date
+    order by
+      grouping,
+      event_date
     `;
     expect(sql.trim().replace(/ /g, '')).toEqual(expectResult.trim().replace(/ /g, ''));
 

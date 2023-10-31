@@ -962,8 +962,7 @@ export function buildRetentionAnalysisView(sqlParameters: SQLParameters) : strin
     select 
       ${groupingColSql}
       grouping, 
-      start_event_date, 
-      event_date, 
+      ${_getRetentionDateSql(sqlParameters.groupColumn)}
       (count(distinct end_user_pseudo_id)::decimal / NULLIF(count(distinct start_user_pseudo_id), 0)):: decimal(20, 4)  as retention 
     from result_table 
     group by ${groupByColSql} grouping, start_event_date, event_date
@@ -1937,6 +1936,26 @@ function _getRetentionAnalysisViewEventNames(sqlParameters: SQLParameters) : str
   }
 
   return [...new Set(eventNames)];
+}
+
+function _getRetentionDateSql(groupCol: string) {
+  if (groupCol === ExploreGroupColumn.WEEK) {
+    //sunday as first day of week to align with quicksight
+    return `
+      DATE_TRUNC('week', start_event_date) - INTERVAL '1 day' as start_event_date,
+      DATE_TRUNC('week', event_date) - INTERVAL '1 day' as event_date,
+    `;
+  } else if (groupCol === ExploreGroupColumn.MONTH) {
+    return `
+      DATE_TRUNC('month', start_event_date) as start_event_date,
+      DATE_TRUNC('month', event_date) as event_date,
+    `;
+  }
+
+  return `
+    start_event_date,
+    event_date,
+  `;
 }
 
 function _getConditionProps(conditions: Condition[]) {
