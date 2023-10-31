@@ -24,10 +24,11 @@ def send_events_to_server(events):
     time.sleep(configure.REQUEST_SLEEP_TIME)
     headers = {'Content-Type': 'application/json; charset=utf-8'}
     global global_sequence_id
+    gzip = "gzip" if configure.IS_GZIP else ""
     request_param = {
         "platform": "Android",
         "appId": configure.APP_ID,
-        "compression": "gzip",
+        "compression": gzip,
         "fakeIp": utils.get_random_ip(),
         "event_bundle_sequence_id": global_sequence_id
     }
