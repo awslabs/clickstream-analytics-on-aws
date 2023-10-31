@@ -45,9 +45,11 @@ export type UpsertUsersWorkflowData = {
 }
 
 export type ScanMetadataWorkflowData = {
-  readonly scheduleExpression: string;
   readonly clickstreamAnalyticsMetadataDdbArn: string;
   readonly topFrequentPropertiesLimit: string;
+  readonly scanWorkflowMinInterval: string;
+  readonly pipelineS3Bucket: string;
+  readonly pipelineS3Prefix: string;
 }
 
 export type ClearExpiredEventsWorkflowData = {
@@ -150,10 +152,6 @@ export interface ManifestBody {
 }
 
 export interface UpsertUsersBody {
-  readonly appId: string;
-}
-
-export interface ScanMetadataBody {
   readonly appId: string;
 }
 

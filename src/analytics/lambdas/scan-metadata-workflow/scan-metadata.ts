@@ -12,7 +12,6 @@
  */
 
 import { logger } from '../../../common/powertools';
-import { ScanMetadataBody } from '../../private/model';
 import { getRedshiftClient, executeStatements, getRedshiftProps } from '../redshift-data';
 
 const REDSHIFT_DATA_API_ROLE_ARN = process.env.REDSHIFT_DATA_API_ROLE!;
@@ -22,7 +21,9 @@ const REDSHIFT_DATABASE = process.env.REDSHIFT_DATABASE!;
 const redshiftDataApiClient = getRedshiftClient(REDSHIFT_DATA_API_ROLE_ARN);
 
 export interface ScanMetadataEvent {
-  detail: ScanMetadataBody;
+  appId: string;
+  scanEndDate: string;
+  scanStartDate: string;
 }
 
 /**
@@ -36,6 +37,7 @@ export interface ScanMetadataEvent {
   @returns The query_id and relevant properties.
  */
 export const handler = async (event: ScanMetadataEvent) => {
+  logger.debug('request event:', JSON.stringify(event));
   const redshiftProps = getRedshiftProps(
     process.env.REDSHIFT_MODE!,
     REDSHIFT_DATABASE,
@@ -45,14 +47,19 @@ export const handler = async (event: ScanMetadataEvent) => {
     process.env.REDSHIFT_CLUSTER_IDENTIFIER!,
   );
 
-  const schema = event.detail.appId;
+  const schema = event.appId;
   const sqlStatements : string[] = [];
   const topFrequentPropertiesLimit = process.env.TOP_FREQUENT_PROPERTIES_LIMIT;
-  const dayRange = process.env.DAY_RANGE;
-
-  sqlStatements.push(`CALL ${schema}.sp_scan_metadata(${topFrequentPropertiesLimit}, ${dayRange})`);
 
   try {
+    const scanEndDate = event.scanEndDate;
+    const scanStartDate = event.scanStartDate;
+    if (scanStartDate) {
+      sqlStatements.push(`CALL ${schema}.sp_scan_metadata(${topFrequentPropertiesLimit}, '${scanEndDate}', '${scanStartDate}')`);
+    } else {
+      sqlStatements.push(`CALL ${schema}.sp_scan_metadata(${topFrequentPropertiesLimit}, '${scanEndDate}', NULL)`);
+    }
+
     const queryId = await executeStatements(
       redshiftDataApiClient, sqlStatements, redshiftProps.serverlessRedshiftProps, redshiftProps.provisionedRedshiftProps);
 
@@ -61,6 +68,7 @@ export const handler = async (event: ScanMetadataEvent) => {
       detail: {
         appId: schema,
         id: queryId,
+        lastScanEndDate: scanEndDate,
       },
     };
 

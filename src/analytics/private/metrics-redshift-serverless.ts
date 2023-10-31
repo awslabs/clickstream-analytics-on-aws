@@ -23,7 +23,6 @@ export function createMetricsWidgetForRedshiftServerless(scope: Construct, id: s
   projectId: string;
   dataProcessingCronOrRateExpression: string;
   upsertUsersCronOrRateExpression: string;
-  scanMetadataCronOrRateExpression: string;
   redshiftServerlessNamespace?: string;
   redshiftServerlessWorkgroupName: string;
   loadDataWorkflow: IStateMachine;

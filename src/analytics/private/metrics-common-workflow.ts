@@ -27,6 +27,7 @@ export function buildMetricsWidgetForWorkflows(scope: Construct, id: string, pro
   upsertUsersCronOrRateExpression: string;
   loadDataWorkflow: IStateMachine;
   upsertUsersWorkflow: IStateMachine;
+  scanMetadataWorkflow: IStateMachine;
   clearExpiredEventsWorkflow: IStateMachine;
 }) {
 
@@ -46,6 +47,10 @@ export function buildMetricsWidgetForWorkflows(scope: Construct, id: string, pro
 
   const upsertUsersWorkflowDimension = [
     'StateMachineArn', props.upsertUsersWorkflow.stateMachineArn,
+  ];
+
+  const scanMetadataWorkflowDimension = [
+    'StateMachineArn', props.scanMetadataWorkflow.stateMachineArn,
   ];
 
   const clearExpiredEventsWorkflowDimension = [
@@ -80,6 +85,15 @@ export function buildMetricsWidgetForWorkflows(scope: Construct, id: string, pro
   });
   (upsertUsersWorkflowAlarm.node.defaultChild as CfnResource).addPropertyOverride('Period', upsertUsersInterval.getIntervalSeconds());
 
+  const scanMetadataWorkflowAlarm = new Alarm(scope, id + 'ScanMetadataWorkflowAlarm', {
+    comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+    threshold: 1,
+    evaluationPeriods: 1,
+    treatMissingData: TreatMissingData.NOT_BREACHING,
+    metric: props.scanMetadataWorkflow.metricFailed({ period: Duration.hours(1) }),
+    alarmDescription: `Scan metadata workflow failed, projectId: ${props.projectId}`,
+    alarmName: getAlarmName(scope, props.projectId, 'Scan Metadata Workflow'),
+  });
 
   const newFilesCountAlarm = new Alarm(scope, id + 'MaxFileAgeAlarm', {
     comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
@@ -102,8 +116,7 @@ export function buildMetricsWidgetForWorkflows(scope: Construct, id: string, pro
   (newFilesCountAlarm.node.defaultChild as CfnResource).addPropertyOverride('Period', processingJobInterval.getIntervalSeconds());
   (newFilesCountAlarm.node.defaultChild as CfnResource).addPropertyOverride('Threshold', processingJobInterval.getIntervalSeconds());
 
-
-  setCfnNagForAlarms([loadDataWorkflowAlarm, newFilesCountAlarm, upsertUsersWorkflowAlarm]);
+  setCfnNagForAlarms([loadDataWorkflowAlarm, newFilesCountAlarm, upsertUsersWorkflowAlarm, scanMetadataWorkflowAlarm]);
 
   const workflowAlarms: (MetricWidgetElement | AlarmsWidgetElement)[] = [
     {
@@ -123,6 +136,7 @@ export function buildMetricsWidgetForWorkflows(scope: Construct, id: string, pro
     [loadDataWorkflowDimension, 'Load data to redshift tables'],
     [clearExpiredEventsWorkflowDimension, 'Clear expired events'],
     [upsertUsersWorkflowDimension, 'Upsert user'],
+    [scanMetadataWorkflowDimension, 'Scan metadata'],
   ].flatMap(dimName => {
     return [
       {
