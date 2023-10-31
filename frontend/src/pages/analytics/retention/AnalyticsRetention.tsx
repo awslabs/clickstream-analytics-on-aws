@@ -535,7 +535,7 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
                   });
                 }}
                 changeStartEvent={(index, item) => {
-                  const eventName = item?.value;
+                  const eventName = item?.name;
                   const eventParameters = getEventParameters(eventName);
                   const parameterOption = parametersConvertToCategoryItemType(
                     metadataUserAttributes,
@@ -551,7 +551,7 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
                   });
                 }}
                 changeRevisitEvent={(index, item) => {
-                  const eventName = item?.value;
+                  const eventName = item?.name;
                   const eventParameters = getEventParameters(eventName);
                   const parameterOption = parametersConvertToCategoryItemType(
                     metadataUserAttributes,

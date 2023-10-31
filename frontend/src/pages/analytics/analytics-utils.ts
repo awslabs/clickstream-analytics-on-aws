@@ -123,6 +123,8 @@ export const parametersConvertToCategoryItemType = (
   userAttributeItems: IMetadataUserAttribute[],
   parameterItems?: IMetadataEventParameter[]
 ) => {
+  //If parameters name are same
+  const parameterNames = parameterItems.
   const categoryItems: CategoryItemType[] = [];
   const categoryPublicEventItems: CategoryItemType = {
     categoryName: i18n.t('analytics:labels.publicEventAttribute'),
