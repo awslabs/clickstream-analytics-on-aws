@@ -73,6 +73,6 @@ export function createECSSecurityGroup(
   vpc: IVpc,
 ): ISecurityGroup {
 
-  return createSGForEgressToAwsService(scope, `${RESOURCE_ID_PREFIX}ecs-sg`, vpc);
+  return createSGForEgressToAwsService(scope, 'ECSEgressToAWSServiceSG', vpc);
 }
 
