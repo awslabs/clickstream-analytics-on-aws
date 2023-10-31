@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { join } from 'path';
 import i18next from 'i18next';
 import fsBackend from 'i18next-fs-backend';
 import { logger } from './common/powertools';
@@ -21,7 +22,7 @@ i18next
     lng: 'en-US',
     fallbackLng: 'en-US',
     backend: {
-      loadPath: './locales/{{lng}}.json',
+      loadPath: join(__dirname, './locales/{{lng}}.json'),
     },
   }).catch(err => {
     logger.error(`i18next init failed with error: ${err}`);
