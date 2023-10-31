@@ -227,6 +227,8 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
       saveParams = {
         dashboardId: dashboardId,
         dashboardName: dashboardName,
+        analysisId: dashboardId?.replace('-dashboard-', '-analysis-'),
+        analysisName: dashboardName,
         sheetId: sheetId,
         sheetName: sheetName,
         chartTitle: chartTitle,

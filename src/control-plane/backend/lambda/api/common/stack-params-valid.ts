@@ -29,7 +29,7 @@ export const validatePattern = (parameter: string, pattern: string, value: strin
     throw new ClickStreamBadRequestError(`Validation error: ${parameter}: undefined not match ${pattern}. Please check and try again.`);
   }
   const regexp = new RegExp(pattern);
-  const match = value.match(regexp);
+  const match = regexp.exec(value);
   if (!match || value !== match[0]) {
     throw new ClickStreamBadRequestError(`Validation error: ${parameter}: ${value} not match ${pattern}. Please check and try again.`);
   }
@@ -38,7 +38,7 @@ export const validatePattern = (parameter: string, pattern: string, value: strin
 
 export const validateXSS = (data: string) => {
   const regexp = new RegExp(XSS_PATTERN);
-  const match = data.match(regexp);
+  const match = regexp.exec(data);
   return !isEmpty(match);
 };
 

@@ -188,6 +188,8 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
       saveParams = {
         dashboardId: dashboardId,
         dashboardName: dashboardName,
+        analysisId: dashboardId?.replace('-dashboard-', '-analysis-'),
+        analysisName: dashboardName,
         sheetId: sheetId,
         sheetName: sheetName,
         chartTitle: chartTitle,
