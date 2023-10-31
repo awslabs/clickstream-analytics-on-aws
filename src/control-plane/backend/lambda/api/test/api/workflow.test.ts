@@ -53,13 +53,14 @@ import {
   KINESIS_ON_DEMAND_INGESTION_PIPELINE,
   KINESIS_PROVISIONED_INGESTION_PIPELINE,
   MSK_WITH_CONNECTOR_INGESTION_PIPELINE,
-  RETRY_PIPELINE_WITH_WORKFLOW, RETRY_PIPELINE_WITH_WORKFLOW_AND_UNDEFINED_STATUS,
+  RETRY_PIPELINE_WITH_WORKFLOW,
   S3_DATA_PROCESSING_PIPELINE,
   S3_INGESTION_PIPELINE, MSK_DATA_PROCESSING_NEW_SERVERLESS_PIPELINE,
   KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW_FOR_UPGRADE,
   S3_DATA_PROCESSING_WITH_SPECIFY_PREFIX_PIPELINE,
   MSK_DATA_PROCESSING_ATHENA_PIPELINE,
   RETRY_PIPELINE_WITH_WORKFLOW_AND_ROLLBACK_COMPLETE,
+  RETRY_PIPELINE_WITH_WORKFLOW_WHEN_UPDATE_FAILED,
 } from './pipeline-mock';
 import {
   BASE_ATHENA_PARAMETERS,
@@ -90,7 +91,6 @@ import { server } from '../../index';
 import { CPipeline } from '../../model/pipeline';
 import { StackManager } from '../../service/stack';
 import 'aws-sdk-client-mock-jest';
-import { Tag } from '@aws-sdk/client-cloudformation';
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 const kafkaMock = mockClient(KafkaClient);
@@ -1666,14 +1666,13 @@ describe('Workflow test', () => {
 
     expect(wf).toEqual(expected);
   });
-  it('Generate Retry Workflow', async () => {
+  it('Generate Retry Workflow when create failed', async () => {
     dictionaryMock(ddbMock);
     sfnMock.on(StartExecutionCommand).resolves({ executionArn: MOCK_EXECUTION_ID });
-    const pipeline: CPipeline = new CPipeline({ ...RETRY_PIPELINE_WITH_WORKFLOW });
-    const stackTemplateMap = await pipeline.getStackTemplateNameUrlMap();
+    // KafkaConnector, DataModelingRedshift Failed
+    // Reporting Miss
     const stackManager: StackManager = new StackManager({ ...RETRY_PIPELINE_WITH_WORKFLOW });
-    const tags: Tag[] = [{ Key: 'version', Value: 'v2' }];
-    stackManager.retryWorkflow(stackTemplateMap, tags);
+    stackManager.retryWorkflow();
     const expected = {
       Version: '2022-03-15',
       Workflow: {
@@ -1696,7 +1695,7 @@ describe('Workflow test', () => {
                   },
                 },
                 Next: 'KafkaConnector',
-                Type: 'Stack',
+                Type: 'Pass',
               },
               KafkaConnector: {
                 Data: {
@@ -1705,7 +1704,7 @@ describe('Workflow test', () => {
                     BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
-                    Action: 'Create',
+                    Action: 'Update',
                     Region: 'ap-southeast-1',
                     Parameters: [],
                     StackName: 'Clickstream-KafkaConnector-6666-6666',
@@ -1734,14 +1733,9 @@ describe('Workflow test', () => {
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-pipeline-stack.template.json',
                   },
                 },
-                End: true,
+                Next: 'DataModeling',
                 Type: 'Pass',
               },
-            },
-          },
-          {
-            StartAt: 'DataModeling',
-            States: {
               Reporting: {
                 Type: 'Stack',
                 Data: {
@@ -1766,7 +1760,7 @@ describe('Workflow test', () => {
                     BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
-                    Action: 'Create',
+                    Action: 'Update',
                     Region: 'ap-southeast-1',
                     Parameters: [
                       {
@@ -1812,14 +1806,11 @@ describe('Workflow test', () => {
     };
     expect(stackManager.getExecWorkflow()).toEqual(expected);
   });
-  it('Generate Retry Workflow with undefined stack status', async () => {
+  it('Generate Retry Workflow when update failed', async () => {
     dictionaryMock(ddbMock);
     sfnMock.on(StartExecutionCommand).resolves({ executionArn: MOCK_EXECUTION_ID });
-    const pipeline: CPipeline = new CPipeline({ ...RETRY_PIPELINE_WITH_WORKFLOW_AND_UNDEFINED_STATUS });
-    const stackTemplateMap = await pipeline.getStackTemplateNameUrlMap();
-    const stackManager: StackManager = new StackManager({ ...RETRY_PIPELINE_WITH_WORKFLOW_AND_UNDEFINED_STATUS });
-    const tags: Tag[] = [{ Key: 'version', Value: 'v2' }];
-    stackManager.retryWorkflow(stackTemplateMap, tags);
+    const stackManager: StackManager = new StackManager({ ...RETRY_PIPELINE_WITH_WORKFLOW_WHEN_UPDATE_FAILED });
+    stackManager.retryWorkflow();
     const expected = {
       Version: '2022-03-15',
       Workflow: {
@@ -1834,15 +1825,15 @@ describe('Workflow test', () => {
                     BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
-                    Action: 'Create',
-                    Parameters: [],
+                    Action: 'Update',
                     Region: 'ap-southeast-1',
+                    Parameters: [],
                     StackName: 'Clickstream-Ingestion-kafka-6666-6666',
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/ingestion-server-kafka-stack.template.json',
                   },
                 },
                 Next: 'KafkaConnector',
-                Type: 'Pass',
+                Type: 'Stack',
               },
               KafkaConnector: {
                 Data: {
@@ -1851,15 +1842,15 @@ describe('Workflow test', () => {
                     BucketPrefix: 'clickstream/workflow/main-3333-3333',
                   },
                   Input: {
-                    Action: 'Create',
-                    Parameters: [],
+                    Action: 'Update',
                     Region: 'ap-southeast-1',
+                    Parameters: [],
                     StackName: 'Clickstream-KafkaConnector-6666-6666',
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/kafka-s3-sink-stack.template.json',
                   },
                 },
                 End: true,
-                Type: 'Pass',
+                Type: 'Stack',
               },
             },
           },
@@ -1874,20 +1865,32 @@ describe('Workflow test', () => {
                   },
                   Input: {
                     Action: 'Create',
-                    Parameters: [],
                     Region: 'ap-southeast-1',
+                    Parameters: [],
                     StackName: 'Clickstream-DataProcessing-6666-6666',
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-pipeline-stack.template.json',
                   },
                 },
-                End: true,
+                Next: 'DataModeling',
                 Type: 'Pass',
               },
-            },
-          },
-          {
-            StartAt: 'DataModeling',
-            States: {
+              Reporting: {
+                Type: 'Pass',
+                Data: {
+                  Input: {
+                    Region: 'ap-southeast-1',
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-reporting-quicksight-stack.template.json',
+                    Action: 'Create',
+                    Parameters: [],
+                    StackName: 'Clickstream-Reporting-6666-6666',
+                  },
+                  Callback: {
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
+                  },
+                },
+                End: true,
+              },
               DataModeling: {
                 Data: {
                   Callback: {
@@ -1896,31 +1899,19 @@ describe('Workflow test', () => {
                   },
                   Input: {
                     Action: 'Create',
-                    Parameters: [],
                     Region: 'ap-southeast-1',
+                    Parameters: [
+                      {
+                        ParameterKey: 'DataProcessingCronOrRateExpression',
+                        ParameterValue: 'rate(16 minutes)',
+                      },
+                    ],
                     StackName: 'Clickstream-DataModelingRedshift-6666-6666',
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-analytics-redshift-stack.template.json',
                   },
                 },
                 Next: 'Reporting',
                 Type: 'Pass',
-              },
-              Reporting: {
-                Data: {
-                  Callback: {
-                    BucketName: 'TEST_EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
-                  },
-                  Input: {
-                    Action: 'Create',
-                    Parameters: [],
-                    Region: 'ap-southeast-1',
-                    StackName: 'Clickstream-Reporting-6666-6666',
-                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-reporting-quicksight-stack.template.json',
-                  },
-                },
-                End: true,
-                Type: 'Stack',
               },
             },
           },
@@ -1953,14 +1944,12 @@ describe('Workflow test', () => {
     };
     expect(stackManager.getExecWorkflow()).toEqual(expected);
   });
-  it('Generate Retry Workflow with rollback complete', async () => {
+  it('Generate Retry Workflow when upgrade with rollback complete', async () => {
     dictionaryMock(ddbMock);
     sfnMock.on(StartExecutionCommand).resolves({ executionArn: MOCK_EXECUTION_ID });
-    const pipeline: CPipeline = new CPipeline({ ...RETRY_PIPELINE_WITH_WORKFLOW_AND_ROLLBACK_COMPLETE });
-    const stackTemplateMap = await pipeline.getStackTemplateNameUrlMap();
+    // DataModelingRedshift Rollback
     const stackManager: StackManager = new StackManager({ ...RETRY_PIPELINE_WITH_WORKFLOW_AND_ROLLBACK_COMPLETE });
-    const tags: Tag[] = [{ Key: 'version', Value: 'v2' }];
-    stackManager.retryWorkflow(stackTemplateMap, tags);
+    stackManager.retryWorkflow();
     const expected = {
       Version: '2022-03-15',
       Workflow: {
@@ -1976,8 +1965,8 @@ describe('Workflow test', () => {
                   },
                   Input: {
                     Action: 'Create',
-                    Parameters: [],
                     Region: 'ap-southeast-1',
+                    Parameters: [],
                     StackName: 'Clickstream-Ingestion-kafka-6666-6666',
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/ingestion-server-kafka-stack.template.json',
                   },
@@ -1993,8 +1982,8 @@ describe('Workflow test', () => {
                   },
                   Input: {
                     Action: 'Create',
-                    Parameters: [],
                     Region: 'ap-southeast-1',
+                    Parameters: [],
                     StackName: 'Clickstream-KafkaConnector-6666-6666',
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/kafka-s3-sink-stack.template.json',
                   },
@@ -2015,20 +2004,32 @@ describe('Workflow test', () => {
                   },
                   Input: {
                     Action: 'Create',
-                    Parameters: [],
                     Region: 'ap-southeast-1',
+                    Parameters: [],
                     StackName: 'Clickstream-DataProcessing-6666-6666',
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-pipeline-stack.template.json',
                   },
                 },
-                End: true,
+                Next: 'DataModeling',
                 Type: 'Pass',
               },
-            },
-          },
-          {
-            StartAt: 'DataModeling',
-            States: {
+              Reporting: {
+                Type: 'Stack',
+                Data: {
+                  Input: {
+                    Region: 'ap-southeast-1',
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-reporting-quicksight-stack.template.json',
+                    Action: 'Upgrade',
+                    Parameters: [],
+                    StackName: 'Clickstream-Reporting-6666-6666',
+                  },
+                  Callback: {
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
+                  },
+                },
+                End: true,
+              },
               DataModeling: {
                 Data: {
                   Callback: {
@@ -2037,32 +2038,18 @@ describe('Workflow test', () => {
                   },
                   Input: {
                     Action: 'Upgrade',
-                    Parameters: [],
                     Region: 'ap-southeast-1',
+                    Parameters: [
+                      {
+                        ParameterKey: 'DataProcessingCronOrRateExpression',
+                        ParameterValue: 'rate(16 minutes)',
+                      },
+                    ],
                     StackName: 'Clickstream-DataModelingRedshift-6666-6666',
-                    Tags: [{ Key: 'version', Value: 'v2' }],
-                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-analytics-redshift-stack.template.json',
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-analytics-redshift-stack.template.json',
                   },
                 },
                 Next: 'Reporting',
-                Type: 'Stack',
-              },
-              Reporting: {
-                Data: {
-                  Callback: {
-                    BucketName: 'TEST_EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
-                  },
-                  Input: {
-                    Action: 'Upgrade',
-                    Parameters: [],
-                    Region: 'ap-southeast-1',
-                    StackName: 'Clickstream-Reporting-6666-6666',
-                    Tags: [{ Key: 'version', Value: 'v2' }],
-                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-reporting-quicksight-stack.template.json',
-                  },
-                },
-                End: true,
                 Type: 'Stack',
               },
             },
@@ -2436,7 +2423,7 @@ describe('Workflow test', () => {
             },
           },
           {
-            StartAt: 'DataProcessing',
+            StartAt: 'Reporting',
             States: {
               DataProcessing: {
                 Data: {
@@ -2455,11 +2442,6 @@ describe('Workflow test', () => {
                 End: true,
                 Type: 'Stack',
               },
-            },
-          },
-          {
-            StartAt: 'Reporting',
-            States: {
               Reporting: {
                 Type: 'Stack',
                 Data: {
@@ -2497,7 +2479,7 @@ describe('Workflow test', () => {
                   },
                 },
                 Type: 'Stack',
-                End: true,
+                Next: 'DataProcessing',
               },
             },
           },

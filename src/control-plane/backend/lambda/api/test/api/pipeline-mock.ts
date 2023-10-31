@@ -799,13 +799,8 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW: IPipel
                   BucketName: 'EXAMPLE_BUCKET',
                 },
               },
-              End: true,
+              Next: 'DataModeling',
             },
-          },
-          StartAt: 'DataProcessing',
-        },
-        {
-          States: {
             Reporting: {
               Type: WorkflowStateType.STACK,
               Data: {
@@ -846,7 +841,7 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW: IPipel
               Next: 'Reporting',
             },
           },
-          StartAt: 'DataModeling',
+          StartAt: 'DataProcessing',
         },
         {
           StartAt: 'Metrics',
@@ -1292,33 +1287,6 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_UPDATE_PIPELINE_WITH_WORKFLOW:
   },
 };
 
-export const RETRY_PIPELINE_WITH_WORKFLOW: IPipeline = {
-  ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
-  status: {
-    ...BASE_STATUS,
-    status: PipelineStatusType.FAILED,
-    stackDetails: [
-      BASE_STATUS.stackDetails[0],
-      {
-        ...BASE_STATUS.stackDetails[1],
-        stackStatus: StackStatus.CREATE_FAILED,
-      },
-      BASE_STATUS.stackDetails[2],
-      {
-        ...BASE_STATUS.stackDetails[3],
-        stackStatus: StackStatus.CREATE_FAILED,
-      },
-      BASE_STATUS.stackDetails[3],
-      BASE_STATUS.stackDetails[4],
-      BASE_STATUS.stackDetails[5],
-    ],
-    executionDetail: {
-      name: MOCK_EXECUTION_ID,
-      status: ExecutionStatus.FAILED,
-    },
-  },
-};
-
 export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_QUICKSIGHT_PIPELINE_WITH_WORKFLOW: IPipeline = {
   ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_QUICKSIGHT_PIPELINE,
   status: {
@@ -1457,17 +1425,22 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_QUICKSIGHT_PIPELINE_WITH_WORKF
   },
 };
 
-export const RETRY_PIPELINE_WITH_WORKFLOW_AND_UNDEFINED_STATUS: IPipeline = {
-  ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_QUICKSIGHT_PIPELINE_WITH_WORKFLOW,
-  lastAction: 'UPDATE',
+export const RETRY_PIPELINE_WITH_WORKFLOW: IPipeline = {
+  ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
   status: {
     ...BASE_STATUS,
     status: PipelineStatusType.FAILED,
     stackDetails: [
-      BASE_STATUS.stackDetails[0],
+      {
+        ...BASE_STATUS.stackDetails[0],
+        stackStatus: StackStatus.CREATE_FAILED,
+      },
       BASE_STATUS.stackDetails[1],
       BASE_STATUS.stackDetails[2],
-      BASE_STATUS.stackDetails[3],
+      {
+        ...BASE_STATUS.stackDetails[3],
+        stackStatus: StackStatus.CREATE_FAILED,
+      },
       {
         ...BASE_STATUS.stackDetails[4],
         stackStatus: undefined,
@@ -1481,9 +1454,33 @@ export const RETRY_PIPELINE_WITH_WORKFLOW_AND_UNDEFINED_STATUS: IPipeline = {
   },
 };
 
+export const RETRY_PIPELINE_WITH_WORKFLOW_WHEN_UPDATE_FAILED: IPipeline = {
+  ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
+  lastAction: 'Update',
+  status: {
+    ...BASE_STATUS,
+    status: PipelineStatusType.FAILED,
+    stackDetails: [
+      BASE_STATUS.stackDetails[0],
+      {
+        ...BASE_STATUS.stackDetails[1],
+        stackStatus: StackStatus.UPDATE_FAILED,
+      },
+      BASE_STATUS.stackDetails[2],
+      BASE_STATUS.stackDetails[3],
+      BASE_STATUS.stackDetails[4],
+      BASE_STATUS.stackDetails[5],
+    ],
+    executionDetail: {
+      name: MOCK_EXECUTION_ID,
+      status: ExecutionStatus.FAILED,
+    },
+  },
+};
+
 export const RETRY_PIPELINE_WITH_WORKFLOW_AND_ROLLBACK_COMPLETE: IPipeline = {
-  ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_QUICKSIGHT_PIPELINE_WITH_WORKFLOW,
-  lastAction: 'UPGRADE',
+  ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
+  lastAction: 'Upgrade',
   status: {
     ...BASE_STATUS,
     status: PipelineStatusType.FAILED,

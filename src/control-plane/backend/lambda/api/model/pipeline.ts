@@ -252,7 +252,7 @@ export class CPipeline {
 
   public async create(): Promise<void> {
     // state machine
-    this.pipeline.lastAction = 'CREATE';
+    this.pipeline.lastAction = 'Create';
     this.pipeline.executionName = `main-${uuidv4()}`;
     this.pipeline.workflow = await this.generateWorkflow();
 
@@ -275,7 +275,7 @@ export class CPipeline {
     if (isEmpty(oldPipeline.workflow) || isEmpty(oldPipeline.workflow?.Workflow)) {
       throw new ClickStreamBadRequestError('Pipeline Workflow can not empty.');
     }
-    this.pipeline.lastAction = 'UPDATE';
+    this.pipeline.lastAction = 'Update';
     const executionName = `main-${uuidv4()}`;
     this.pipeline.executionName = executionName;
 
@@ -328,7 +328,7 @@ export class CPipeline {
   }
 
   public async upgrade(oldPipeline: IPipeline): Promise<void> {
-    this.pipeline.lastAction = 'UPGRADE';
+    this.pipeline.lastAction = 'Upgrade';
     validateIngestionServerNum(this.pipeline.ingestionServer.size);
     const executionName = `main-${uuidv4()}`;
     this.pipeline.executionName = executionName;
@@ -351,7 +351,7 @@ export class CPipeline {
   }
 
   public async updateApp(appIds: string[]): Promise<void> {
-    this.pipeline.lastAction = 'UPDATE';
+    this.pipeline.lastAction = 'Update';
     const executionName = `main-${uuidv4()}`;
     this.pipeline.executionName = executionName;
     const ingestionStackName = getStackName(
@@ -372,7 +372,7 @@ export class CPipeline {
   }
 
   public async delete(): Promise<void> {
-    this.pipeline.lastAction = 'DELETE';
+    this.pipeline.lastAction = 'Delete';
     const executionName = `main-${uuidv4()}`;
     this.pipeline.executionName = executionName;
     // update workflow
@@ -398,14 +398,7 @@ export class CPipeline {
   public async retry(): Promise<void> {
     const executionName = `main-${uuidv4()}`;
     this.pipeline.executionName = executionName;
-    // update workflow
-    // update pipeline tags
-    if (!this.resources || !this.stackTags || this.stackTags?.length === 0) {
-      this.patchBuiltInTags();
-      this.stackTags = this.getStackTags();
-    }
-    const stackTemplateMap = await this.getStackTemplateNameUrlMap();
-    this.stackManager.retryWorkflow(stackTemplateMap, this.stackTags);
+    this.stackManager.retryWorkflow();
     // create new execution
     const execWorkflow = this.stackManager.getExecWorkflow();
     this.pipeline.executionArn = await this.stackManager.execute(execWorkflow, executionName);

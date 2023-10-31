@@ -559,6 +559,7 @@ export class DynamoDbStore implements ClickStreamStore {
               executionName: { S: curPipeline.executionName ?? '' },
               executionArn: { S: curPipeline.executionArn ?? '' },
               templateVersion: { S: curPipeline.templateVersion ?? '' },
+              lastAction: { S: curPipeline.lastAction ?? '' },
               version: { S: curPipeline.version },
               versionTag: { S: curPipeline.version },
               createAt: { N: curPipeline.createAt.toString() },
@@ -593,6 +594,7 @@ export class DynamoDbStore implements ClickStreamStore {
               'executionName = :executionName, ' +
               'executionArn = :executionArn, ' +
               'templateVersion = :templateVersion, ' +
+              'lastAction = :lastAction, ' +
               'version = :version, ' +
               'versionTag = :versionTag, ' +
               'updateAt = :updateAt, ' +
@@ -624,6 +626,7 @@ export class DynamoDbStore implements ClickStreamStore {
               ':executionName': { S: pipeline.executionName ?? '' },
               ':executionArn': { S: pipeline.executionArn ?? '' },
               ':templateVersion': { S: pipeline.templateVersion ?? '' },
+              ':lastAction': { S: pipeline.lastAction ?? '' },
               ':version': { S: Date.now().toString() },
               ':versionTag': { S: 'latest' },
               ':updateAt': { N: Date.now().toString() },
@@ -659,6 +662,7 @@ export class DynamoDbStore implements ClickStreamStore {
         'executionName = :executionName, ' +
         'executionArn = :executionArn, ' +
         'templateVersion = :templateVersion, ' +
+        'lastAction = :lastAction, ' +
         'updateAt = :updateAt, ' +
         '#pipelineOperator = :operator ',
       ExpressionAttributeNames: {
@@ -684,6 +688,7 @@ export class DynamoDbStore implements ClickStreamStore {
         ':executionName': pipeline.executionName ?? '',
         ':executionArn': pipeline.executionArn ?? '',
         ':templateVersion': pipeline.templateVersion ?? '',
+        ':lastAction': pipeline.lastAction ?? '',
         ':updateAt': Date.now().toString(),
         ':operator': pipeline.operator,
       },
