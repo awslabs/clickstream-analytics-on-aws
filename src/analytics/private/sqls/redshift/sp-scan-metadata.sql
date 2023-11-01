@@ -121,6 +121,9 @@ BEGIN
 		('geo', 'region'),
 		('geo', 'sub_continent'), 
 		('geo', 'locale'), 
+		('geo', 'latitude'), 
+		('geo', 'longitude'), 
+		('geo', 'accuracy'), 
 		('traffic_source', 'medium'), 
 		('traffic_source', 'name'), 
 		('traffic_source', 'source');
@@ -232,7 +235,7 @@ BEGIN
 
 	INSERT INTO {{schema}}.event_properties_metadata (id, month, prefix, project_id, app_id, day_number, category, event_name, property_name, value_type, value_enum, platform) 
 	SELECT
-		project_id || '#' || app_info_app_id || '#' || event_name || '#' || property_name || '#' || value_type AS id,
+		project_id || '#' || app_info_app_id || '#' || event_name || '#' || property_category || '#' || property_name || '#' || value_type AS id,
 		month,
 		'EVENT_PARAMETER#' || project_id || '#' || app_info_app_id AS prefix,    
 		project_id,
@@ -346,13 +349,13 @@ BEGIN
   -- user attribute
 	INSERT INTO {{schema}}.user_attribute_metadata (id, month, prefix, project_id, app_id, day_number, category, property_name, value_type, value_enum) 
 	SELECT
-		project_id || '#' || app_info_app_id || '#' || property_name || '#' || value_type AS id,
+		project_id || '#' || app_info_app_id || '#' || property_category || '#' || property_name || '#' || value_type AS id,
 		month,
 		'USER_ATTRIBUTE#' || project_id || '#' || app_info_app_id AS prefix,
 		project_id AS project_id,
 		app_info_app_id AS app_id,
 		day_number,
-		'user' AS category,
+		property_category AS category,
 		property_name AS property_name,
 		value_type AS value_type,
 		property_values AS value_enum
