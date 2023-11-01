@@ -15,6 +15,7 @@ import { StackStatus } from '@aws-sdk/client-cloudformation';
 import { ExecutionStatus } from '@aws-sdk/client-sfn';
 import { MOCK_EXECUTION_ID, MOCK_EXECUTION_ID_OLD, MOCK_PIPELINE_ID, MOCK_PLUGIN_ID, MOCK_PROJECT_ID, MOCK_SOLUTION_VERSION } from './ddb-mock';
 import { BASE_METRICS_EMAILS_PARAMETERS, BASE_METRICS_PARAMETERS } from './workflow-mock';
+import { BuiltInTagKeys } from '../../common/model-ln';
 import {
   KinesisStreamMode,
   PipelineServerProtocol,
@@ -24,7 +25,6 @@ import {
   WorkflowStateType,
 } from '../../common/types';
 import { IPipeline } from '../../model/pipeline';
-import { BuiltInTagKeys } from '../../common/model-ln';
 
 const BASE_PIPELINE_ATTRIBUTES = {
   id: MOCK_PROJECT_ID,
