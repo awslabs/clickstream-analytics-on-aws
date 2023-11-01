@@ -52,6 +52,7 @@ nav:
       - Android SDK: sdk-manual/android.md
       - Swift SDK: sdk-manual/swift.md
       - Web SDK: sdk-manual/web.md
+      - Flutter SDK: sdk-manual/flutter.md
       - WeChat Miniprogram SDK: sdk-manual/wechat.md
       - HTTP API: sdk-manual/http-api.md
       - User identifier: sdk-manual/user-identifier.md
