@@ -1,5 +1,3 @@
-DROP MATERIALIZED VIEW IF EXISTS {{schema}}.clickstream_user_dim_view;
-
 CREATE OR REPLACE VIEW {{schema}}.clickstream_user_dim_view 
 AS
 SELECT upid.*,

@@ -1,5 +1,3 @@
-DROP MATERIALIZED VIEW IF EXISTS {{schema}}.clickstream_lifecycle_daily_view;
-
 CREATE MATERIALIZED VIEW {{schema}}.clickstream_lifecycle_daily_view 
 BACKUP NO
 AUTO REFRESH YES

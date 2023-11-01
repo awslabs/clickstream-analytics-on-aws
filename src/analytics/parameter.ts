@@ -62,9 +62,11 @@ export interface RedshiftAnalyticsStackProps {
     processingFilesLimit: number;
   };
   scanMetadataConfiguration: {
-    scheduleExpression: string;
     clickstreamAnalyticsMetadataDdbArn: string;
     topFrequentPropertiesLimit: string;
+    scanWorkflowMinInterval: string;
+    pipelineS3Bucket: string;
+    pipelineS3Prefix: string;
   };
   clearExpiredEventsConfiguration: {
     scheduleExpression: string;
@@ -257,6 +259,16 @@ export function createStackParameters(scope: Construct): {
     default: '',
   });
 
+  const pipelineS3BucketParam = Parameters.createS3BucketParameter(scope, 'PipelineS3Bucket', {
+    description: 'Pipeline S3 bucket name in which to save temporary result',
+    allowedPattern: `^${S3_BUCKET_NAME_PATTERN}$`,
+  });
+
+  const pipelineS3PrefixParam = Parameters.createS3PrefixParameter(scope, 'PipelineS3Prefix', {
+    description: 'Pipeline S3 prefix',
+    default: 'pipeline-temp/',
+  });
+
   new CfnRule(scope, 'S3BucketReadinessRule', {
     assertions: [
       {
@@ -273,6 +285,12 @@ export function createStackParameters(scope: Construct): {
             ),
             Fn.conditionNot(
               Fn.conditionEquals(loadWorkflowBucketPrefixParam.valueAsString, ''),
+            ),
+            Fn.conditionNot(
+              Fn.conditionEquals(pipelineS3BucketParam.valueAsString, ''),
+            ),
+            Fn.conditionNot(
+              Fn.conditionEquals(pipelineS3PrefixParam.valueAsString, ''),
             ),
           ),
         assertDescription:
@@ -571,14 +589,6 @@ export function createStackParameters(scope: Construct): {
   // Set scan metadata job parameters
   const scanMetadataWorkflowParamsGroup = [];
 
-  const scanMetadataWorkflowScheduleExpressionParam = new CfnParameter(scope, 'ScanMetadataScheduleExpression', {
-    description: 'The schedule expression at which the scan metadata job runs regularly. in days.',
-    type: 'String',
-    allowedPattern: SCHEDULE_EXPRESSION_PATTERN,
-    constraintDescription: 'Must be in the format cron(minutes,hours,day-of-month,month,day-of-week,year), when the task should run at any time on everyday.',
-    default: 'cron(0 1 * * ? *)',
-  });
-
   const clickstreamAnalyticsMetadataDdbArnParam = new CfnParameter(scope, 'ClickstreamAnalyticsMetadataDdbArn', {
     description: 'The arn of ClickstreamAnalyticsMetadata Dynamodb table.',
     type: 'String',
@@ -591,24 +601,39 @@ export function createStackParameters(scope: Construct): {
     default: 20,
   });
 
+  const scanWorkflowMinIntervalParam = new CfnParameter(scope, 'ScanWorkflowMinInterval', {
+    description: 'The minimum interval minutes of scan workflow execution (Default 1 day)',
+    type: 'Number',
+    default: '1440',
+    minValue: 60,
+  });
+
   scanMetadataWorkflowParamsGroup.push({
     Label: { default: 'Scan metadata job' },
     Parameters: [
-      scanMetadataWorkflowScheduleExpressionParam.logicalId,
       clickstreamAnalyticsMetadataDdbArnParam.logicalId,
       topFrequentPropertiesLimitParam.logicalId,
+      scanWorkflowMinIntervalParam.logicalId,
+      pipelineS3BucketParam.logicalId,
+      pipelineS3PrefixParam.logicalId,
     ],
   });
 
   const scanMetadataWorkflowParamsLabels = {
-    [scanMetadataWorkflowScheduleExpressionParam.logicalId]: {
-      default: 'Scan metadata schedule expression',
-    },
     [clickstreamAnalyticsMetadataDdbArnParam.logicalId]: {
       default: 'Scan metadata dynamodb table arn',
     },
     [topFrequentPropertiesLimitParam.logicalId]: {
       default: 'The number of top property values',
+    },
+    [scanWorkflowMinIntervalParam.logicalId]: {
+      default: 'The minimum interval minutes of scan workflow execution (Default 1 day)',
+    },
+    [pipelineS3BucketParam.logicalId]: {
+      default: 'Pipeline S3 bucket name',
+    },
+    [pipelineS3PrefixParam.logicalId]: {
+      default: 'Pipeline S3 prefix',
     },
   };
 
@@ -792,9 +817,11 @@ export function createStackParameters(scope: Construct): {
         processingFilesLimit: processingFilesLimitParam.valueAsNumber,
       },
       scanMetadataConfiguration: {
-        scheduleExpression: scanMetadataWorkflowScheduleExpressionParam.valueAsString,
         clickstreamAnalyticsMetadataDdbArn: clickstreamAnalyticsMetadataDdbArnParam.valueAsString,
         topFrequentPropertiesLimit: topFrequentPropertiesLimitParam.valueAsString,
+        scanWorkflowMinInterval: scanWorkflowMinIntervalParam.valueAsString,
+        pipelineS3Bucket: pipelineS3BucketParam.valueAsString,
+        pipelineS3Prefix: pipelineS3PrefixParam.valueAsString,
       },
       clearExpiredEventsConfiguration: {
         scheduleExpression: clearExpiredEventsWorkflowScheduleExpressionParam.valueAsString,

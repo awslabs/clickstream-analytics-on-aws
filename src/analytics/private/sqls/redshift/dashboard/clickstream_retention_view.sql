@@ -1,5 +1,3 @@
-DROP MATERIALIZED VIEW IF EXISTS {{schema}}.clickstream_retention_view;
-
 CREATE MATERIALIZED VIEW {{schema}}.clickstream_retention_view
 BACKUP NO
 SORTKEY(first_date)

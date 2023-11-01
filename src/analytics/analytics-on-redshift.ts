@@ -233,6 +233,7 @@ export class RedshiftAnalyticsStack extends NestedStack {
 
     const scanMetadataWorkflow = new ScanMetadataWorkflow(this, 'ScanMetadataWorkflow', {
       appIds: props.appIds,
+      projectId: props.projectId,
       networkConfig: {
         vpc: props.vpc,
         vpcSubnets: props.subnetSelection,
@@ -294,7 +295,7 @@ export class RedshiftAnalyticsStack extends NestedStack {
       createMetricsWidgetForRedshiftServerless(this, 'newServerless', {
         projectId: props.projectId,
         dataProcessingCronOrRateExpression: props.dataProcessingCronOrRateExpression,
-        scanMetadataCronOrRateExpression: props.scanMetadataWorkflowData.scheduleExpression,
+        scanMetadataCronOrRateExpression: props.dataProcessingCronOrRateExpression,
         redshiftServerlessNamespace: this.redshiftServerlessWorkgroup.workgroup.namespaceName,
         redshiftServerlessWorkgroupName: this.redshiftServerlessWorkgroup.workgroup.workgroupName,
         loadDataWorkflow: loadRedshiftTablesWorkflow.loadDataWorkflow,
@@ -308,7 +309,7 @@ export class RedshiftAnalyticsStack extends NestedStack {
       createMetricsWidgetForRedshiftServerless(this, 'existingServerless', {
         projectId: props.projectId,
         dataProcessingCronOrRateExpression: props.dataProcessingCronOrRateExpression,
-        scanMetadataCronOrRateExpression: props.scanMetadataWorkflowData.scheduleExpression,
+        scanMetadataCronOrRateExpression: props.dataProcessingCronOrRateExpression,
         redshiftServerlessNamespace: props.existingRedshiftServerlessProps.namespaceId,
         redshiftServerlessWorkgroupName: props.existingRedshiftServerlessProps.workgroupName,
         loadDataWorkflow: loadRedshiftTablesWorkflow.loadDataWorkflow,
@@ -321,7 +322,7 @@ export class RedshiftAnalyticsStack extends NestedStack {
       createMetricsWidgetForRedshiftCluster(this, {
         projectId: props.projectId,
         dataProcessingCronOrRateExpression: props.dataProcessingCronOrRateExpression,
-        scanMetadataCronOrRateExpression: props.scanMetadataWorkflowData.scheduleExpression,
+        scanMetadataCronOrRateExpression: props.dataProcessingCronOrRateExpression,
         redshiftClusterIdentifier: props.provisionedRedshiftProps.clusterIdentifier,
         loadDataWorkflow: loadRedshiftTablesWorkflow.loadDataWorkflow,
         scanMetadataWorkflow: scanMetadataWorkflow.scanMetadataWorkflow,
@@ -410,6 +411,20 @@ function addCfnNag(stack: Stack) {
         },
       ],
     },
+
+    {
+      paths_endswith: ['ScanMetadataStateMachine/Role/DefaultPolicy/Resource'],
+      rules_to_suppress: [
+        ...ruleRolePolicyWithWildcardResources(
+          'ScanMetadataStateMachine/Role/DefaultPolicy/Resource',
+          'ScanMetadataWorkflow', 'logs/xray').rules_to_suppress,
+        {
+          id: 'W76',
+          reason: 'ACK: SPCM for IAM policy document is higher than 25',
+        },
+      ],
+    },
+
     {
       paths_endswith: ['CopyDataFromS3Role/DefaultPolicy/Resource'],
       rules_to_suppress: [

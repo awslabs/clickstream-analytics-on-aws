@@ -14,16 +14,14 @@
 import { ExecuteStatementCommand, RedshiftDataClient } from '@aws-sdk/client-redshift-data';
 import { mockClient } from 'aws-sdk-client-mock';
 import { handler, ScanMetadataEvent } from '../../../../../src/analytics/lambdas/scan-metadata-workflow/scan-metadata';
-import { ScanMetadataBody } from '../../../../../src/analytics/private/model';
 import { REDSHIFT_MODE } from '../../../../../src/common/model';
 import 'aws-sdk-client-mock-jest';
 
-const scanMetadataBody: ScanMetadataBody = {
-  appId: 'app1',
-};
 
 const scanMetadataEvent: ScanMetadataEvent = {
-  detail: scanMetadataBody,
+  appId: 'app1',
+  scanEndDate: '2023-10-26',
+  scanStartDate: '2023-10-10',
 };
 
 describe('Lambda - do scan metadata in Redshift Serverless', () => {
@@ -38,6 +36,7 @@ describe('Lambda - do scan metadata in Redshift Serverless', () => {
     // set the env before loading the source
     process.env.REDSHIFT_MODE = REDSHIFT_MODE.SERVERLESS;
     process.env.REDSHIFT_SERVERLESS_WORKGROUP_NAME = workGroupName;
+    process.env.TOP_FREQUENT_PROPERTIES_LIMIT = '20';
   });
 
   test('Executed Redshift scan metadata command', async () => {
@@ -51,6 +50,23 @@ describe('Lambda - do scan metadata in Redshift Serverless', () => {
     });
     expect(redshiftDataMock).toHaveReceivedCommandWith(ExecuteStatementCommand, {
       WorkgroupName: workGroupName,
+      Sql: "CALL app1.sp_scan_metadata(20, '2023-10-26', '2023-10-10')",
+    });
+  });
+
+  test('Executed Redshift scan metadata command with empty scanStartDate', async () => {
+    const exeuteId = 'Id-1';
+    redshiftDataMock.on(ExecuteStatementCommand).resolvesOnce({ Id: exeuteId });
+    scanMetadataEvent.scanStartDate = '';
+    const resp = await handler(scanMetadataEvent);
+    expect(resp).toEqual({
+      detail: expect.objectContaining({
+        id: exeuteId,
+      }),
+    });
+    expect(redshiftDataMock).toHaveReceivedCommandWith(ExecuteStatementCommand, {
+      WorkgroupName: workGroupName,
+      Sql: "CALL app1.sp_scan_metadata(20, '2023-10-26', NULL)",
     });
   });
 

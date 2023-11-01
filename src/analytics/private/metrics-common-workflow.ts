@@ -25,6 +25,7 @@ export function buildMetricsWidgetForWorkflows(scope: Construct, id: string, pro
   projectId: string;
   dataProcessingCronOrRateExpression: string;
   loadDataWorkflow: IStateMachine;
+  scanMetadataWorkflow: IStateMachine;
   clearExpiredEventsWorkflow: IStateMachine;
 }) {
 
@@ -37,6 +38,10 @@ export function buildMetricsWidgetForWorkflows(scope: Construct, id: string, pro
     'StateMachineArn', props.loadDataWorkflow.stateMachineArn,
   ];
 
+
+  const scanMetadataWorkflowDimension = [
+    'StateMachineArn', props.scanMetadataWorkflow.stateMachineArn,
+  ];
 
   const clearExpiredEventsWorkflowDimension = [
     'StateMachineArn', props.clearExpiredEventsWorkflow.stateMachineArn,
@@ -59,6 +64,16 @@ export function buildMetricsWidgetForWorkflows(scope: Construct, id: string, pro
   });
   (loadDataWorkflowAlarm.node.defaultChild as CfnResource).addPropertyOverride('Period', processingJobInterval.getIntervalSeconds());
 
+  const scanMetadataWorkflowAlarm = new Alarm(scope, id + 'ScanMetadataWorkflowAlarm', {
+    comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+    threshold: 1,
+    evaluationPeriods: 1,
+    treatMissingData: TreatMissingData.NOT_BREACHING,
+    metric: props.scanMetadataWorkflow.metricFailed({ period: Duration.hours(24) }),
+    alarmDescription: `Scan metadata workflow failed, projectId: ${props.projectId}`,
+    alarmName: getAlarmName(scope, props.projectId, 'Scan Metadata Workflow'),
+  });
+  (scanMetadataWorkflowAlarm.node.defaultChild as CfnResource).addPropertyOverride('Period', processingJobInterval.getIntervalSeconds());
 
   const newFilesCountAlarm = new Alarm(scope, id + 'MaxFileAgeAlarm', {
     comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
@@ -81,8 +96,7 @@ export function buildMetricsWidgetForWorkflows(scope: Construct, id: string, pro
   (newFilesCountAlarm.node.defaultChild as CfnResource).addPropertyOverride('Period', processingJobInterval.getIntervalSeconds());
   (newFilesCountAlarm.node.defaultChild as CfnResource).addPropertyOverride('Threshold', processingJobInterval.getIntervalSeconds());
 
-
-  setCfnNagForAlarms([loadDataWorkflowAlarm, newFilesCountAlarm]);
+  setCfnNagForAlarms([loadDataWorkflowAlarm, newFilesCountAlarm, scanMetadataWorkflowAlarm]);
 
   const workflowAlarms: (MetricWidgetElement | AlarmsWidgetElement)[] = [
     {
@@ -101,6 +115,7 @@ export function buildMetricsWidgetForWorkflows(scope: Construct, id: string, pro
   const workflowExecMetrics: MetricWidgetElement[] = [
     [loadDataWorkflowDimension, 'Load data to redshift tables'],
     [clearExpiredEventsWorkflowDimension, 'Clear expired events'],
+    [scanMetadataWorkflowDimension, 'Scan metadata'],
   ].flatMap(dimName => {
     return [
       {

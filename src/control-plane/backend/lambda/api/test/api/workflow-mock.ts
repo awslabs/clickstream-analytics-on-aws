@@ -608,6 +608,14 @@ const BASE_DATAANALYTICS_PARAMETERS = [
     ParameterValue: '.snappy.parquet',
   },
   {
+    ParameterKey: 'PipelineS3Bucket',
+    ParameterValue: 'EXAMPLE_BUCKET',
+  },
+  {
+    ParameterKey: 'PipelineS3Prefix',
+    ParameterValue: 'clickstream/project_8888_8888/data/pipeline-temp/',
+  },
+  {
     ParameterKey: 'LoadWorkflowBucket',
     ParameterValue: 'EXAMPLE_BUCKET',
   },

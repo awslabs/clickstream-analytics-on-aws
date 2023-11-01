@@ -23,7 +23,7 @@ import { getRedshiftClient, executeStatementsWithWait, getRedshiftProps, getStat
 const REDSHIFT_DATA_API_ROLE_ARN = process.env.REDSHIFT_DATA_API_ROLE!;
 const REDSHIFT_DATABASE = process.env.REDSHIFT_DATABASE!;
 
-const { ddb_region, ddb_table_name } = parseDynamoDBTableARN(process.env.METADATA_DDB_TABLE_ARN!);
+const { ddbRegion, ddbTableName } = parseDynamoDBTableARN(process.env.METADATA_DDB_TABLE_ARN!);
 
 // Create an Amazon service client object.
 const redshiftDataApiClient = getRedshiftClient(REDSHIFT_DATA_API_ROLE_ARN);
@@ -35,7 +35,7 @@ export interface StoreMetadataEvent {
 // Create an Amazon DynamoDB service client object.
 const ddbClient = new DynamoDBClient({
   ...aws_sdk_client_common_config,
-  region: ddb_region,
+  region: ddbRegion,
 });
 
 const ddbDocClient = DynamoDBDocumentClient.from(ddbClient);
@@ -251,7 +251,7 @@ async function batchWriteIntoDDB(metadataItems: any[]) {
   for (const itemsChunk of chunkedMetadataItems) {
     const inputPara: BatchWriteCommandInput = {
       RequestItems: {
-        [ddb_table_name]: itemsChunk,
+        [ddbTableName]: itemsChunk,
       },
     };
     await ddbDocClient.send(new BatchWriteCommand(inputPara));
@@ -303,11 +303,11 @@ async function queryMetadata(inputSql: string) {
 function parseDynamoDBTableARN(ddbArn: string) {
   const arnComponents = ddbArn.split(':');
   const region = arnComponents[3];
-  const table_name = arnComponents[5].split('/')[1];
+  const tableName = arnComponents[5].split('/')[1];
 
   return {
-    ddb_region: region,
-    ddb_table_name: table_name,
+    ddbRegion: region,
+    ddbTableName: tableName,
   };
 }
 
@@ -339,7 +339,7 @@ async function batchGetDDBItems(allKeys: any[]) {
     const currentBatchKeys = allKeys.slice(i, i + batchSize);
     const request: BatchGetCommandInput = {
       RequestItems: {
-        [ddb_table_name]: {
+        [ddbTableName]: {
           Keys: currentBatchKeys,
         },
       },
@@ -347,7 +347,7 @@ async function batchGetDDBItems(allKeys: any[]) {
     const command = new BatchGetCommand(request);
     try {
       const response: BatchGetCommandOutput = await ddbDocClient.send(command);
-      batchResults.push(...response.Responses![ddb_table_name]);
+      batchResults.push(...response.Responses![ddbTableName]);
     } catch (error) {
       console.error(error);
       return null;

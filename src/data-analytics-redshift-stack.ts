@@ -70,10 +70,6 @@ export class DataAnalyticsRedshiftStack extends Stack {
     addCfnNagForCustomResourceProvider(this.nestedStacks.redshiftProvisionedStack, 'GetInterval', 'dataProcessGetIntervalCustomResourceProvider', '');
     addCfnNagForCustomResourceProvider(this.nestedStacks.redshiftServerlessStack, 'GetInterval', 'dataProcessGetIntervalCustomResourceProvider', '');
 
-    addCfnNagForCustomResourceProvider(this.nestedStacks.newRedshiftServerlessStack, 'upsertUsersGetInterval', 'upsertUsersGetIntervalCustomResourceProvider', '');
-    addCfnNagForCustomResourceProvider(this.nestedStacks.redshiftProvisionedStack, 'upsertUsersGetInterval', 'upsertUsersGetIntervalCustomResourceProvider', '');
-    addCfnNagForCustomResourceProvider(this.nestedStacks.redshiftServerlessStack, 'upsertUsersGetInterval', 'upsertUsersGetIntervalCustomResourceProvider', '');
-
     addCfnNagForLogRetention(this);
     addCfnNagForCustomResourceProvider(this, 'CDK built-in provider for GetSourcePrefixCustomerResource', 'GetSourcePrefixCustomerResourceProvider');
   }
@@ -127,9 +123,11 @@ export function createRedshiftAnalyticsStack(
     workflowBucketInfo,
 
     scanMetadataWorkflowData: {
-      scheduleExpression: props.scanMetadataConfiguration.scheduleExpression,
       clickstreamAnalyticsMetadataDdbArn: props.scanMetadataConfiguration.clickstreamAnalyticsMetadataDdbArn,
       topFrequentPropertiesLimit: props.scanMetadataConfiguration.topFrequentPropertiesLimit,
+      scanWorkflowMinInterval: props.scanMetadataConfiguration.scanWorkflowMinInterval,
+      pipelineS3Bucket: props.scanMetadataConfiguration.pipelineS3Bucket,
+      pipelineS3Prefix: props.scanMetadataConfiguration.pipelineS3Prefix,
     },
     clearExpiredEventsWorkflowData: {
       scheduleExpression: props.clearExpiredEventsConfiguration.scheduleExpression,

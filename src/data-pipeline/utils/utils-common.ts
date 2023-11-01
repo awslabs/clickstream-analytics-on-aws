@@ -10,6 +10,7 @@
  *  OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions
  *  and limitations under the License.
  */
+import { readS3ObjectAsJson } from '../../common/s3';
 
 export function getSinkLocationPrefix(s3Prefix: string, projectId: string): string {
   return `${s3Prefix}${projectId}/`;
@@ -27,4 +28,27 @@ export function getJobInfoKey(config: {pipelineS3Prefix: string; projectId: stri
   // should not include stackId in the file path,
   // when update root stack, the nest stacks might be delete and recreate, so the nested stack id changed.
   return `${config.pipelineS3Prefix}job-info/${config.projectId}/job-${jobId}.json`;
+}
+
+export async function getLatestEmrJobEndTime(pipelineS3BucketName: string, pipelineS3Prefix: string, projectId: string) {
+  try {
+    // get latest job info, get endTimestamp for scan end date.
+    const key = getJobInfoKey(
+      {
+        pipelineS3Prefix: pipelineS3Prefix,
+        projectId: projectId,
+      },
+      'latest');
+    const latestTimestampInfo = await readS3ObjectAsJson(
+      pipelineS3BucketName,
+      key,
+    );
+    if (latestTimestampInfo) {
+      return latestTimestampInfo.endTimestamp;
+    } else {
+      return undefined;
+    }
+  } catch (error) {
+    throw error;
+  }
 }

@@ -18,6 +18,16 @@ export enum JobStatus {
   JOB_PROCESSING = 'PROCESSING',
 }
 
+export enum WorkflowStatus {
+  FAILED = 'FAILED',
+  ABORTED = 'ABORTED',
+  SKIP = 'SKIP',
+  CONTINUE = 'CONTINUE',
+  FINISHED = 'FINISHED',
+  SUCCEED = 'SUCCEED',
+  NO_JOBS = 'NO_JOBS',
+}
+
 export const DYNAMODB_TABLE_INDEX_NAME = 'status_timestamp_index';
 
 export const LEGACY_REDSHIFT_ODS_EVENTS_TABLE_NAME = 'ods_events';

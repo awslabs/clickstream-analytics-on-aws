@@ -1,5 +1,3 @@
-DROP MATERIALIZED VIEW IF EXISTS {{schema}}.clickstream_user_dim_mv_2;
-
 -- recompute refresh
 CREATE MATERIALIZED VIEW {{schema}}.clickstream_user_dim_mv_2 
 BACKUP NO
