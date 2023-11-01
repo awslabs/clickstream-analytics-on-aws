@@ -54,7 +54,7 @@ import { AnalysisType, ExplorePathNodeType, ExploreRequestAction, ExploreTimeSco
 import { logger } from '../common/powertools';
 import { SDKClient } from '../common/sdk-client';
 import { ApiFail, ApiSuccess } from '../common/types';
-import { QuickSightUserArns, generateEmbedUrlForRegisteredUser, getClickstreamUserArn } from '../store/aws/quicksight';
+import { QuickSightUserArns, generateEmbedUrlForRegisteredUser, getClickstreamUserArn, waitDashboardSuccess } from '../store/aws/quicksight';
 
 const sdkClient: SDKClient = new SDKClient();
 
@@ -710,13 +710,16 @@ export class ReportingService {
 
       let dashboardEmbedUrl = '';
       if (query.action === ExploreRequestAction.PREVIEW) {
-        const embedUrl = await generateEmbedUrlForRegisteredUser(
-          dashboardCreateParameters.region,
-          dashboardCreateParameters.allowedDomain,
-          false,
-          query.dashboardId,
-        );
-        dashboardEmbedUrl = embedUrl.EmbedUrl!;
+        const dashboardSuccess = await waitDashboardSuccess(dashboardCreateParameters.region, query.dashboardId);
+        if (dashboardSuccess) {
+          const embedUrl = await generateEmbedUrlForRegisteredUser(
+            dashboardCreateParameters.region,
+            dashboardCreateParameters.allowedDomain,
+            false,
+            query.dashboardId,
+          );
+          dashboardEmbedUrl = embedUrl.EmbedUrl!;
+        }
       }
       result = {
         dashboardId: query.dashboardId,
@@ -809,13 +812,16 @@ export class ReportingService {
 
     let dashboardEmbedUrl = '';
     if (query.action === ExploreRequestAction.PREVIEW) {
-      const embedUrl = await generateEmbedUrlForRegisteredUser(
-        dashboardCreateParameters.region,
-        dashboardCreateParameters.allowedDomain,
-        false,
-        dashboardId,
-      );
-      dashboardEmbedUrl = embedUrl.EmbedUrl!;
+      const dashboardSuccess = await waitDashboardSuccess(dashboardCreateParameters.region, dashboardId);
+      if (dashboardSuccess) {
+        const embedUrl = await generateEmbedUrlForRegisteredUser(
+          dashboardCreateParameters.region,
+          dashboardCreateParameters.allowedDomain,
+          false,
+          dashboardId,
+        );
+        dashboardEmbedUrl = embedUrl.EmbedUrl!;
+      }
     }
     const result = {
       dashboardId,
