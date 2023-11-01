@@ -269,7 +269,7 @@ export function createQuicksightCustomResource(
         tableName: CLICKSTREAM_EVENT_PARAMETER_VIEW_PLACEHOLDER,
         importMode: 'DIRECT_QUERY',
         // customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_EVENT_PARAMETER_VIEW_PLACEHOLDER} where event_date > <<$EventDate>>`,
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_EVENT_PARAMETER_VIEW_PLACEHOLDER} `,
+        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_EVENT_PARAMETER_VIEW_PLACEHOLDER}`,
         columns: clickstream_event_parameter_view_columns,
         projectedColumns: [
           'event_id',
