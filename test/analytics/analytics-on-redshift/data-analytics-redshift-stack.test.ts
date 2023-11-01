@@ -237,8 +237,8 @@ describe('DataAnalyticsRedshiftStack common parameter test', () => {
 
   test('Should has Rules S3BucketReadinessRule', () => {
     const rule = template.toJSON().Rules.S3BucketReadinessRule;
-    expect(rule.Assertions[0].Assert[CFN_FN.AND].length).toEqual(4);
-    const paramList = ['ODSEventBucket', 'ODSEventPrefix', 'LoadWorkflowBucket', 'LoadWorkflowBucketPrefix'];
+    expect(rule.Assertions[0].Assert[CFN_FN.AND].length).toEqual(6);
+    const paramList = ['ODSEventBucket', 'ODSEventPrefix', 'LoadWorkflowBucket', 'LoadWorkflowBucketPrefix', 'PipelineS3Bucket', 'PipelineS3Prefix'];
     var paramCount = 0;
     for (const element of rule.Assertions[0].Assert[CFN_FN.AND]) {
       paramList.forEach(p => {
@@ -340,7 +340,7 @@ describe('DataAnalyticsRedshiftStack common parameter test', () => {
     expect(cfnInterface.ParameterGroups).toBeDefined();
 
     const paramCount = Object.keys(cfnInterface.ParameterLabels).length;
-    expect(paramCount).toEqual(31);
+    expect(paramCount).toEqual(33);
   });
 
   test('Conditions for nested redshift stacks are created as expected', () => {
@@ -389,32 +389,6 @@ describe('DataAnalyticsRedshiftStack common parameter test', () => {
       expect(v).not.toMatch(regex);
     }
   });
-
-  test('Check ScanMetadataScheduleExpression pattern', () => {
-    const param = getParameter(template, 'ScanMetadataScheduleExpression');
-    const pattern = param.AllowedPattern;
-    const regex = new RegExp(`${pattern}`);
-    const validValues = [
-      'cron(0 1 * * ? *)',
-      'cron(59 23 * * ? *)',
-      'cron(0 */4 * * ? *)',
-      'cron(0/30 * * * ? *)',
-      'cron(0/30 */20 * * ? *)',
-    ];
-
-    for (const v of validValues) {
-      expect(v).toMatch(regex);
-    }
-
-    const invalidValues = [
-      '(0 1 * * ? *)',
-      'cron(0 1 * * ? *',
-    ];
-    for (const v of invalidValues) {
-      expect(v).not.toMatch(regex);
-    }
-  });
-
 });
 
 describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
@@ -511,9 +485,11 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
       'RedshiftServerlessNamespaceId',
       'MaxFilesLimit',
       'UpsertUsersScheduleExpression',
-      'ScanMetadataScheduleExpression',
       'ClickstreamAnalyticsMetadataDdbArn',
+      'PipelineS3Bucket',
+      'PipelineS3Prefix',
       'TopFrequentPropertiesLimit',
+      'ScanWorkflowMinInterval',
       'ClearExpiredEventsScheduleExpression',
       'ClearExpiredEventsRetentionRangeDays',
       'EMRServerlessApplicationId',
@@ -670,9 +646,11 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
         scheduleExpression: 'cron(0 1 * * ? *)',
       },
       scanMetadataWorkflowData: {
-        scheduleExpression: 'cron(0 1 * * ? *)',
         clickstreamAnalyticsMetadataDdbArn: 'arn:aws:dynamodb:us-east-1:111122223333:table/ClickstreamAnalyticsMetadata',
         topFrequentPropertiesLimit: '20',
+        scanWorkflowMinInterval: '1440',
+        pipelineS3Bucket: 'pipeline-s3-bucket',
+        pipelineS3Prefix: 'pipelineS3Prefix',
       },
       clearExpiredEventsWorkflowData: {
         scheduleExpression: 'cron(0 17 * * ? *)',
@@ -724,9 +702,11 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
         scheduleExpression: 'cron(0 1 * * ? *)',
       },
       scanMetadataWorkflowData: {
-        scheduleExpression: 'cron(0 1 * * ? *)',
         clickstreamAnalyticsMetadataDdbArn: 'arn:aws:dynamodb:us-east-1:111122223333:table/ClickstreamAnalyticsMetadata',
         topFrequentPropertiesLimit: '20',
+        scanWorkflowMinInterval: '1440',
+        pipelineS3Bucket: 'pipeline-s3-bucket',
+        pipelineS3Prefix: 'pipelineS3Prefix',
       },
       clearExpiredEventsWorkflowData: {
         scheduleExpression: 'cron(0 17 * * ? *)',
@@ -765,9 +745,11 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
         scheduleExpression: 'cron(0 1 * * ? *)',
       },
       scanMetadataWorkflowData: {
-        scheduleExpression: 'cron(0 1 * * ? *)',
         clickstreamAnalyticsMetadataDdbArn: 'arn:aws:dynamodb:us-east-1:111122223333:table/ClickstreamAnalyticsMetadata',
         topFrequentPropertiesLimit: '20',
+        scanWorkflowMinInterval: '1440',
+        pipelineS3Bucket: 'pipeline-s3-bucket',
+        pipelineS3Prefix: 'pipelineS3Prefix',
       },
       clearExpiredEventsWorkflowData: {
         scheduleExpression: 'cron(0 17 * * ? *)',
@@ -3519,15 +3501,15 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
     }
   });
 
-  test('Check ScanMetadataWorkflowCheckScanMetadataJobStatusFnSG', () => {
+  test('Check ScanMetadataWorkflowCheckScanMetadataStatusFnSG', ()=>{
     if (stack.nestedStacks.redshiftServerlessStack) {
       const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
-      const sg = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::EC2::SecurityGroup', 'ScanMetadataWorkflowCheckScanMetadataJobStatusFnSG');
+      const sg = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::EC2::SecurityGroup', 'ScanMetadataWorkflowCheckScanMetadataStatusFnSG');
       expect(sg).toBeDefined();
     }
     if (stack.nestedStacks.redshiftProvisionedStack) {
       const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftProvisionedStack);
-      const sg = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::EC2::SecurityGroup', 'ScanMetadataWorkflowCheckScanMetadataJobStatusFnSG');
+      const sg = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::EC2::SecurityGroup', 'ScanMetadataWorkflowCheckScanMetadataStatusFnSG');
       expect(sg).toBeDefined();
     }
   });
@@ -3535,12 +3517,12 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
   test('Check ScanMetadataWorkflowCheckScanMetadataJobStatusRole', () => {
     if (stack.nestedStacks.redshiftServerlessStack) {
       const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
-      const role = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::IAM::Role', 'ScanMetadataWorkflowCheckScanMetadataJobStatusRole');
+      const role = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::IAM::Role', 'ScanMetadataWorkflowCheckScanMetadataStatusRole');
       expect(role).toBeDefined();
     }
     if (stack.nestedStacks.redshiftProvisionedStack) {
       const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftProvisionedStack);
-      const role = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::IAM::Role', 'ScanMetadataWorkflowCheckScanMetadataJobStatusRole');
+      const role = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::IAM::Role', 'ScanMetadataWorkflowCheckScanMetadataStatusRole');
       expect(role).toBeDefined();
     }
   });
@@ -3571,7 +3553,59 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
     }
   });
 
-  test('Check UpsertUsersWorkflowCheckUpsertJobStatusRoleDefaultPolicy', () => {
+  test('Check ScanMetadataWorkflowCheckWorkflowStartFnSG', ()=>{
+    if (stack.nestedStacks.redshiftServerlessStack) {
+      const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
+      const sg = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::EC2::SecurityGroup', 'ScanMetadataWorkflowCheckWorkflowStartFnSG');
+      expect(sg).toBeDefined();
+    }
+    if (stack.nestedStacks.redshiftProvisionedStack) {
+      const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftProvisionedStack);
+      const sg = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::EC2::SecurityGroup', 'ScanMetadataWorkflowCheckWorkflowStartFnSG');
+      expect(sg).toBeDefined();
+    }
+  });
+
+  test('Check ScanMetadataWorkflowCheckWorkflowRole', ()=>{
+    if (stack.nestedStacks.redshiftServerlessStack) {
+      const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
+      const role = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::IAM::Role', 'ScanMetadataWorkflowCheckWorkflowStartRole');
+      expect(role).toBeDefined();
+    }
+    if (stack.nestedStacks.redshiftProvisionedStack) {
+      const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftProvisionedStack);
+      const role = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::IAM::Role', 'ScanMetadataWorkflowCheckWorkflowStartRole');
+      expect(role).toBeDefined();
+    }
+  });
+
+  test('Check ScanMetadataWorkflowUpdateWorkflowInfoFnSG', ()=>{
+    if (stack.nestedStacks.redshiftServerlessStack) {
+      const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
+      const sg = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::EC2::SecurityGroup', 'ScanMetadataWorkflowUpdateWorkflowInfoFnSG');
+      expect(sg).toBeDefined();
+    }
+    if (stack.nestedStacks.redshiftProvisionedStack) {
+      const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftProvisionedStack);
+      const sg = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::EC2::SecurityGroup', 'ScanMetadataWorkflowUpdateWorkflowInfoFnSG');
+      expect(sg).toBeDefined();
+    }
+  });
+
+  test('Check ScanMetadataWorkflowUpdateWorkflowInfoRole', ()=>{
+    if (stack.nestedStacks.redshiftServerlessStack) {
+      const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
+      const role = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::IAM::Role', 'ScanMetadataWorkflowUpdateWorkflowInfoRole');
+      expect(role).toBeDefined();
+    }
+    if (stack.nestedStacks.redshiftProvisionedStack) {
+      const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftProvisionedStack);
+      const role = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::IAM::Role', 'ScanMetadataWorkflowUpdateWorkflowInfoRole');
+      expect(role).toBeDefined();
+    }
+  });
+
+  test('Check UpsertUsersWorkflowCheckUpsertJobStatusRoleDefaultPolicy', ()=>{
     if (stack.nestedStacks.redshiftServerlessStack) {
       const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
       nestedTemplate.hasResourceProperties('AWS::IAM::Policy', {
@@ -4781,6 +4815,26 @@ describe('Should set metrics widgets', () => {
         'Fn::Join': [
           '',
           [
+            'Scan metadata workflow failed, projectId: ',
+            Match.anyValue(),
+          ],
+        ],
+      },
+
+      TreatMissingData: TreatMissingData.NOT_BREACHING,
+      Period: {
+        'Fn::GetAtt': [
+          Match.anyValue(),
+          'intervalSeconds',
+        ],
+      },
+    });
+
+    newServerlessTemplate.hasResourceProperties('AWS::CloudWatch::Alarm', {
+      AlarmDescription: {
+        'Fn::Join': [
+          '',
+          [
             'Max file age more than ',
             {
               'Fn::GetAtt': [
@@ -4851,6 +4905,26 @@ describe('Should set metrics widgets', () => {
           ],
         ],
       },
+      TreatMissingData: TreatMissingData.NOT_BREACHING,
+      Period: {
+        'Fn::GetAtt': [
+          Match.anyValue(),
+          'intervalSeconds',
+        ],
+      },
+    });
+
+    newServerlessTemplate.hasResourceProperties('AWS::CloudWatch::Alarm', {
+      AlarmDescription: {
+        'Fn::Join': [
+          '',
+          [
+            'Scan metadata workflow failed, projectId: ',
+            Match.anyValue(),
+          ],
+        ],
+      },
+
       TreatMissingData: TreatMissingData.NOT_BREACHING,
       Period: {
         'Fn::GetAtt': [
@@ -4933,6 +5007,26 @@ describe('Should set metrics widgets', () => {
           ],
         ],
       },
+      TreatMissingData: TreatMissingData.NOT_BREACHING,
+      Period: {
+        'Fn::GetAtt': [
+          Match.anyValue(),
+          'intervalSeconds',
+        ],
+      },
+    });
+
+    newServerlessTemplate.hasResourceProperties('AWS::CloudWatch::Alarm', {
+      AlarmDescription: {
+        'Fn::Join': [
+          '',
+          [
+            'Scan metadata workflow failed, projectId: ',
+            Match.anyValue(),
+          ],
+        ],
+      },
+
       TreatMissingData: TreatMissingData.NOT_BREACHING,
       Period: {
         'Fn::GetAtt': [
