@@ -24,6 +24,7 @@ import {
   WorkflowStateType,
 } from '../../common/types';
 import { IPipeline } from '../../model/pipeline';
+import { BuiltInTagKeys } from '../../common/model-ln';
 
 const BASE_PIPELINE_ATTRIBUTES = {
   id: MOCK_PROJECT_ID,
@@ -58,7 +59,7 @@ const BASE_PIPELINE_ATTRIBUTES = {
   tags: [
     { key: 'customerKey1', value: 'tagValue1' },
     { key: 'customerKey2', value: 'tagValue2' },
-    { key: 'aws-solution/version', value: 'tagValue3' },
+    { key: BuiltInTagKeys.AWS_SOLUTION_VERSION, value: 'tagValue3' },
   ],
   templateVersion: MOCK_SOLUTION_VERSION,
   bucket: {

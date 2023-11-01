@@ -89,6 +89,7 @@ import { server } from '../../index';
 import { CPipeline } from '../../model/pipeline';
 import { StackManager } from '../../service/stack';
 import 'aws-sdk-client-mock-jest';
+import { BuiltInTagKeys } from '../../common/model-ln';
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 const kafkaMock = mockClient(KafkaClient);
@@ -111,15 +112,15 @@ const Tags = [
     Value: 'tagValue2',
   },
   {
-    Key: 'aws-solution/name',
+    Key: BuiltInTagKeys.AWS_SOLUTION,
     Value: SolutionInfo.SOLUTION_SHORT_NAME,
   },
   {
-    Key: 'aws-solution/version',
+    Key: BuiltInTagKeys.AWS_SOLUTION_VERSION,
     Value: MOCK_SOLUTION_VERSION,
   },
   {
-    Key: 'aws-solution/clickstream/project',
+    Key: BuiltInTagKeys.CLICKSTREAM_PROJECT,
     Value: MOCK_PROJECT_ID,
   },
 ];

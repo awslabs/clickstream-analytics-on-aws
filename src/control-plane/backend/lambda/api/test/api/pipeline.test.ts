@@ -76,6 +76,7 @@ import { clickStreamTableName, dictionaryTableName, prefixTimeGSIName } from '..
 import { PipelineStatusType } from '../../common/types';
 import { app, server } from '../../index';
 import 'aws-sdk-client-mock-jest';
+import { BuiltInTagKeys } from '../../common/model-ln';
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 const sfnMock = mockClient(SFNClient);
@@ -1020,7 +1021,7 @@ describe('Pipeline test', () => {
         {
           StackName: 'xxx',
           Outputs: mockOutputs,
-          Tags: [{ Key: 'aws-solution/version', Value: MOCK_SOLUTION_VERSION }],
+          Tags: [{ Key: BuiltInTagKeys.AWS_SOLUTION_VERSION, Value: MOCK_SOLUTION_VERSION }],
           StackStatus: StackStatus.CREATE_COMPLETE,
           CreationTime: new Date(),
         },
@@ -1203,7 +1204,7 @@ describe('Pipeline test', () => {
       Stacks: [
         {
           StackName: 'xxx',
-          Tags: [{ Key: 'aws-solution/version', Value: MOCK_SOLUTION_VERSION }],
+          Tags: [{ Key: BuiltInTagKeys.AWS_SOLUTION_VERSION, Value: MOCK_SOLUTION_VERSION }],
           StackStatus: StackStatus.CREATE_COMPLETE,
           CreationTime: new Date(),
         },

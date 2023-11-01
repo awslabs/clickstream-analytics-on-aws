@@ -312,6 +312,13 @@ export const doUpdate = async (region: string, input: UpdateStackCommandInput): 
         RetainExceptOnCreate: true,
       };
       return doUpdate(region, rollbackInput);
+    } else if (err instanceof Error &&
+      err.name === 'ValidationError' &&
+      err.message.includes('No updates are to be performed.')) {
+      return {
+        $metadata: {},
+        StackId: '',
+      };
     }
     throw Error((err as Error).message);
   }

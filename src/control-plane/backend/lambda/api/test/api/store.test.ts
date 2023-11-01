@@ -27,6 +27,7 @@ import { describeSecurityGroupsWithRules, listAvailabilityZones } from '../../st
 import { ClickStreamStore } from '../../store/click-stream-store';
 import { DynamoDbStore } from '../../store/dynamodb/dynamodb-store';
 import 'aws-sdk-client-mock-jest';
+import { BuiltInTagKeys } from '../../common/model-ln';
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 const ec2Mock = mockClient(EC2Client);
@@ -384,7 +385,7 @@ describe('App test', () => {
           {
             M: {
               key: {
-                S: 'aws-solution/version',
+                S: BuiltInTagKeys.AWS_SOLUTION_VERSION,
               },
               value: {
                 S: 'tagValue3',
@@ -643,7 +644,7 @@ describe('App test', () => {
           {
             M: {
               key: {
-                S: 'aws-solution/version',
+                S: BuiltInTagKeys.AWS_SOLUTION_VERSION,
               },
               value: {
                 S: 'tagValue3',
