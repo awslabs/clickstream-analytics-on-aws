@@ -42,8 +42,8 @@ import {
   DescribeDashboardCommandInput,
   DescribeDashboardCommandOutput,
 } from '@aws-sdk/client-quicksight';
-import { v4 as uuidv4 } from 'uuid';
 import { APIRoleName, awsAccountId, awsRegion, QUICKSIGHT_CONTROL_PLANE_REGION, QUICKSIGHT_EMBED_NO_REPLY_EMAIL, QuickSightEmbedRoleArn } from '../../common/constants';
+import { QUICKSIGHT_ANALYSIS_INFIX, QUICKSIGHT_DASHBOARD_INFIX, QUICKSIGHT_DATASET_INFIX } from '../../common/constants-ln';
 import { getPaginatedResults } from '../../common/paginator';
 import { logger } from '../../common/powertools';
 import { SDKClient } from '../../common/sdk-client';
@@ -429,7 +429,7 @@ export const createPublishDashboard = async (
   try {
     const principals = await getClickstreamUserArn();
     // Create dataset in QuickSight
-    const datasetId = `clickstream-dataset-${uuidv4().replace(/-/g, '')}`;
+    const datasetId = dashboard.id.replace(QUICKSIGHT_DASHBOARD_INFIX, QUICKSIGHT_DATASET_INFIX);
     const datasetInput: CreateDataSetCommandInput = {
       AwsAccountId: awsAccountId,
       DataSetId: datasetId,
@@ -506,7 +506,7 @@ export const createPublishDashboard = async (
       Permissions: [dashboardPermission],
     };
     await createDashboard(dashboard.region, dashboardInput);
-    const analysisId = `clickstream-analysis-${uuidv4().replace(/-/g, '')}`;
+    const analysisId = dashboard.id.replace(QUICKSIGHT_DASHBOARD_INFIX, QUICKSIGHT_ANALYSIS_INFIX);
 
     const analysisPermission: ResourcePermission = {
       Principal: principals.publishUserArn,

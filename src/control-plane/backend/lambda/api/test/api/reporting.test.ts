@@ -27,13 +27,13 @@ import {
   UpdateDashboardCommand,
   UpdateDashboardPublishedVersionCommand,
   GenerateEmbedUrlForRegisteredUserCommand,
-  DescribeAnalysisCommand,
   ThrottlingException,
   CreateDataSetCommand,
   ResizeOption,
   SheetContentType,
   DescribeDashboardCommand,
   ResourceStatus,
+  DescribeAnalysisCommand,
 } from '@aws-sdk/client-quicksight';
 import { BatchExecuteStatementCommand, DescribeStatementCommand, RedshiftDataClient, StatusString } from '@aws-sdk/client-redshift-data';
 import { AssumeRoleCommand, STSClient } from '@aws-sdk/client-sts';
@@ -353,12 +353,6 @@ describe('reporting test', () => {
       DashboardId: 'dashboard-aaaaaaaa',
     });
 
-    quickSightMock.on(DescribeAnalysisCommand).resolves({
-      Analysis: {
-        Name: 'test-analysis',
-      },
-    });
-
     const res = await request(app)
       .post('/api/reporting/funnel')
       .send({
@@ -420,6 +414,7 @@ describe('reporting test', () => {
     expect(res.body.data.analysisId).toBeDefined();
     expect(res.body.data.visualIds).toBeDefined();
     expect(res.body.data.visualIds.length).toEqual(2);
+    expect(quickSightMock).toHaveReceivedCommandTimes(DescribeAnalysisCommand, 0);
   });
 
   it('event visual - preview', async () => {
@@ -669,12 +664,6 @@ describe('reporting test', () => {
       DashboardId: 'dashboard-aaaaaaaa',
     });
 
-    quickSightMock.on(DescribeAnalysisCommand).resolves({
-      Analysis: {
-        Name: 'test-analysis',
-      },
-    });
-
     const res = await request(app)
       .post('/api/reporting/event')
       .send({
@@ -738,6 +727,7 @@ describe('reporting test', () => {
     expect(res.body.data.analysisId).toBeDefined();
     expect(res.body.data.visualIds).toBeDefined();
     expect(res.body.data.visualIds.length).toEqual(2);
+    expect(quickSightMock).toHaveReceivedCommandTimes(DescribeAnalysisCommand, 0);
   });
 
   it('path visual - preview', async () => {
@@ -869,11 +859,6 @@ describe('reporting test', () => {
       Arn: 'arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa',
       VersionArn: 'arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa/1',
     });
-    quickSightMock.on(DescribeAnalysisCommand).resolves({
-      Analysis: {
-        Name: 'test-analysis',
-      },
-    });
 
     const res = await request(app)
       .post('/api/reporting/path')
@@ -940,6 +925,7 @@ describe('reporting test', () => {
     expect(res.body.data.dashboardId).toBeDefined();
     expect(res.body.data.visualIds).toBeDefined();
     expect(res.body.data.visualIds.length).toEqual(1);
+    expect(quickSightMock).toHaveReceivedCommandTimes(DescribeAnalysisCommand, 0);
 
   });
 
@@ -966,11 +952,6 @@ describe('reporting test', () => {
     quickSightMock.on(CreateDashboardCommand).resolves({
       Arn: 'arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa',
       VersionArn: 'arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa/1',
-    });
-    quickSightMock.on(DescribeAnalysisCommand).resolves({
-      Analysis: {
-        Name: 'test-analysis',
-      },
     });
 
     const res = await request(app)
@@ -1050,6 +1031,7 @@ describe('reporting test', () => {
     expect(res.body.data.dashboardId).toBeDefined();
     expect(res.body.data.visualIds).toBeDefined();
     expect(res.body.data.visualIds.length).toEqual(2);
+    expect(quickSightMock).toHaveReceivedCommandTimes(DescribeAnalysisCommand, 0);
 
   });
 

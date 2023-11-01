@@ -42,7 +42,6 @@ import {
   TEMP_RESOURCE_NAME_PREFIX,
   getDashboardTitleProps,
   eventVisualColumns,
-  getAnalysisNameFromId,
   checkFunnelAnalysisParameter,
   checkEventAnalysisParameter,
   checkPathAnalysisParameter,
@@ -286,7 +285,7 @@ export class ReportingService {
       });
       logger.debug(`event analysis sql: ${sql}`);
 
-      const hasGrouping = query.groupCondition === undefined ? false: true;
+      const hasGrouping = query.groupCondition !== undefined;
       const projectedColumns = ['event_date', 'event_name', 'count'];
       const datasetColumns = [...eventVisualColumns];
       if (hasGrouping) {
@@ -526,7 +525,7 @@ export class ReportingService {
       });
       logger.debug(`retention analysis sql: ${sql}`);
 
-      const hasGrouping = query.groupCondition === undefined ? false: true;
+      const hasGrouping = query.groupCondition !== undefined;
       const projectedColumns = [
         'grouping',
         'start_event_date',
@@ -687,11 +686,10 @@ export class ReportingService {
       //update QuickSight analysis
       let newAnalysis;
       if (query.analysisId) {
-        const analysisName = await getAnalysisNameFromId(quickSight, awsAccountId!, query.analysisId);
         newAnalysis = await quickSight.updateAnalysis({
           AwsAccountId: awsAccountId,
           AnalysisId: query.analysisId,
-          Name: analysisName,
+          Name: query.analysisName,
           Definition: dashboard as AnalysisDefinition,
         });
       }
