@@ -19,19 +19,19 @@ jobs:
       iam_role_to_assume: ${{ secrets.ROLE_ARN }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.ref }}
           repository: ${{ github.event.pull_request.head.repo.full_name }}
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: 18.17.0
       - name: Install dependencies
         run: yarn install --check-files
       - name: Configure AWS Credentials
         if: ${{ env.iam_role_to_assume != '' }}
-        uses: aws-actions/configure-aws-credentials@v2
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ env.iam_role_to_assume }}
           aws-region: us-east-1
@@ -43,7 +43,7 @@ jobs:
       - name: build
         run: npx projen build
       - name: Publish Test Report
-        uses: mikepenz/action-junit-report@v3
+        uses: mikepenz/action-junit-report@v4
         with:
           check_name: Test results
           report_paths: ./test-reports/junit.xml
@@ -96,7 +96,7 @@ jobs:
     if: always() && needs.build.outputs.self_mutation_happened && !(github.event.pull_request.head.repo.full_name != github.repository)
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           token: ${{ secrets.PROJEN_GITHUB_TOKEN }}
           ref: ${{ github.event.pull_request.head.ref }}

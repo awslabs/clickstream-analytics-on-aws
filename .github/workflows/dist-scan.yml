@@ -11,14 +11,14 @@ jobs:
     env:
       iam_role_to_assume: ${{ secrets.ROLE_ARN }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: 18
       - name: Configure AWS Credentials
         if: ${{ env.iam_role_to_assume != '' }}
-        uses: aws-actions/configure-aws-credentials@v2
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ env.iam_role_to_assume }}
           aws-region: us-east-1
@@ -66,7 +66,7 @@ jobs:
     container:
       image: stelligent/cfn_nag
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/download-artifact@v3
         with:
           name: templates-${{ github.event.pull_request.number }}
@@ -82,13 +82,13 @@ jobs:
     env:
       SOLUTION_NAME: clickstream-analytics-on-aws
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.11'
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: 18
       - uses: actions/download-artifact@v3
