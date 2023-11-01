@@ -875,7 +875,9 @@ describe('Pipeline test', () => {
     const res = await request(app)
       .post('/api/pipeline')
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
-      .send(S3_INGESTION_PIPELINE);
+      .send({
+        ...S3_INGESTION_PIPELINE,
+      });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
     expect(res.body).toEqual({
@@ -897,7 +899,9 @@ describe('Pipeline test', () => {
     const res = await request(app)
       .post('/api/pipeline')
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
-      .send(S3_INGESTION_PIPELINE);
+      .send({
+        ...S3_INGESTION_PIPELINE,
+      });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(500);
     expect(res.body).toEqual({
@@ -944,7 +948,9 @@ describe('Pipeline test', () => {
     const res = await request(app)
       .post('/api/pipeline')
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
-      .send(S3_INGESTION_PIPELINE);
+      .send({
+        ...S3_INGESTION_PIPELINE,
+      });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
     expect(res.body).toEqual({
@@ -967,7 +973,9 @@ describe('Pipeline test', () => {
     const res = await request(app)
       .post('/api/pipeline')
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
-      .send(S3_INGESTION_PIPELINE);
+      .send({
+        ...S3_INGESTION_PIPELINE,
+      });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
     expect(res.body).toEqual({
@@ -1353,7 +1361,9 @@ describe('Pipeline test', () => {
       TableName: clickStreamTableName,
       IndexName: prefixTimeGSIName,
     }).resolves({
-      Items: [S3_INGESTION_PIPELINE],
+      Items: [{
+        ...S3_INGESTION_PIPELINE,
+      }],
     });
     dictionaryMock(ddbMock);
     ddbMock.on(QueryCommand, {
@@ -1387,6 +1397,10 @@ describe('Pipeline test', () => {
       message: '',
       data: {
         ...S3_INGESTION_PIPELINE,
+        status: {
+          ...S3_INGESTION_PIPELINE.status,
+          executionDetail: {},
+        },
         dataProcessing: {
           ...S3_INGESTION_PIPELINE.dataProcessing,
           enrichPlugin: [],
@@ -1554,7 +1568,9 @@ describe('Pipeline test', () => {
     projectExistedMock(ddbMock, true);
     pipelineExistedMock(ddbMock, true);
     ddbMock.on(QueryCommand).resolves({
-      Items: [S3_INGESTION_PIPELINE],
+      Items: [{
+        ...S3_INGESTION_PIPELINE,
+      }],
     });
     ddbMock.on(UpdateCommand).resolves({});
     let res = await request(app)
@@ -1565,9 +1581,13 @@ describe('Pipeline test', () => {
       success: true,
       message: '',
       data: {
-        items: [
-          S3_INGESTION_PIPELINE,
-        ],
+        items: [{
+          ...S3_INGESTION_PIPELINE,
+          status: {
+            ...S3_INGESTION_PIPELINE.status,
+            executionDetail: {},
+          },
+        }],
         totalCount: 1,
       },
     });
@@ -2877,7 +2897,9 @@ describe('Pipeline test', () => {
         subnetsCross3AZ: true,
         subnetsIsolated: true,
         update: true,
-        updatePipeline: KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW_AND_EXPRESSION_UPDATE,
+        updatePipeline: {
+          ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW_AND_EXPRESSION_UPDATE,
+        },
       });
     cloudFormationMock.on(DescribeStacksCommand).resolves({
       Stacks: [
@@ -2910,7 +2932,9 @@ describe('Pipeline test', () => {
     ddbMock.on(TransactWriteItemsCommand).resolves({});
     const res = await request(app)
       .put(`/api/pipeline/${MOCK_PIPELINE_ID}`)
-      .send(KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW_AND_EXPRESSION_UPDATE);
+      .send({
+        ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW_AND_EXPRESSION_UPDATE,
+      });
     expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 6);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(201);
@@ -2932,7 +2956,9 @@ describe('Pipeline test', () => {
         subnetsCross3AZ: true,
         subnetsIsolated: true,
         update: true,
-        updatePipeline: KINESIS_DATA_PROCESSING_NEW_REDSHIFT_UPDATE_PIPELINE_WITH_WORKFLOW,
+        updatePipeline: {
+          ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_UPDATE_PIPELINE_WITH_WORKFLOW,
+        },
       });
     cloudFormationMock.on(DescribeStacksCommand).resolves({
       Stacks: [
@@ -2965,7 +2991,9 @@ describe('Pipeline test', () => {
     ddbMock.on(TransactWriteItemsCommand).resolves({});
     const res = await request(app)
       .put(`/api/pipeline/${MOCK_PIPELINE_ID}`)
-      .send(KINESIS_DATA_PROCESSING_NEW_REDSHIFT_UPDATE_PIPELINE_WITH_WORKFLOW);
+      .send({
+        ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_UPDATE_PIPELINE_WITH_WORKFLOW,
+      });
     expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 6);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(201);

@@ -30,7 +30,6 @@ import {
 } from '@aws-sdk/client-s3';
 import { SecretsManagerClient } from '@aws-sdk/client-secrets-manager';
 import {
-  StartExecutionCommand,
   SFNClient,
 } from '@aws-sdk/client-sfn';
 import { DynamoDBDocumentClient, GetCommand, QueryCommand } from '@aws-sdk/lib-dynamodb';
@@ -39,7 +38,6 @@ import {
   createPipelineMock,
   dictionaryMock,
   MOCK_APP_ID,
-  MOCK_EXECUTION_ID,
   MOCK_PROJECT_ID,
   MOCK_SOLUTION_VERSION,
 } from './ddb-mock';
@@ -146,7 +144,7 @@ describe('Workflow test', () => {
       ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, iamMock, {
         publicAZContainPrivateAZ: true,
       });
-    const pipeline: CPipeline = new CPipeline(S3_INGESTION_PIPELINE);
+    const pipeline: CPipeline = new CPipeline({ ...S3_INGESTION_PIPELINE });
     const wf = await pipeline.generateWorkflow();
     const expected = {
       Version: '2022-03-15',
@@ -211,7 +209,7 @@ describe('Workflow test', () => {
       ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, iamMock, {
         publicAZContainPrivateAZ: true,
       });
-    const pipeline: CPipeline = new CPipeline(KAFKA_INGESTION_PIPELINE);
+    const pipeline: CPipeline = new CPipeline({ ...KAFKA_INGESTION_PIPELINE });
     const wf = await pipeline.generateWorkflow();
     const expected = {
       Version: '2022-03-15',
@@ -276,7 +274,7 @@ describe('Workflow test', () => {
       ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, iamMock, {
         publicAZContainPrivateAZ: true,
       });
-    const pipeline: CPipeline = new CPipeline(KAFKA_WITH_CONNECTOR_INGESTION_PIPELINE);
+    const pipeline: CPipeline = new CPipeline({ ...KAFKA_WITH_CONNECTOR_INGESTION_PIPELINE });
     const wf = await pipeline.generateWorkflow();
     const expected = {
       Version: '2022-03-15',
@@ -360,7 +358,7 @@ describe('Workflow test', () => {
       ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, iamMock, {
         publicAZContainPrivateAZ: true,
       });
-    const pipeline: CPipeline = new CPipeline(MSK_WITH_CONNECTOR_INGESTION_PIPELINE);
+    const pipeline: CPipeline = new CPipeline({ ...MSK_WITH_CONNECTOR_INGESTION_PIPELINE });
     const wf = await pipeline.generateWorkflow();
     const expected = {
       Version: '2022-03-15',
@@ -444,7 +442,7 @@ describe('Workflow test', () => {
       ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, iamMock, {
         publicAZContainPrivateAZ: true,
       });
-    const pipeline: CPipeline = new CPipeline(KINESIS_ON_DEMAND_INGESTION_PIPELINE);
+    const pipeline: CPipeline = new CPipeline({ ...KINESIS_ON_DEMAND_INGESTION_PIPELINE });
     const wf = await pipeline.generateWorkflow();
     const expected = {
       Version: '2022-03-15',
@@ -509,7 +507,7 @@ describe('Workflow test', () => {
       ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, iamMock, {
         publicAZContainPrivateAZ: true,
       });
-    const pipeline: CPipeline = new CPipeline(KINESIS_PROVISIONED_INGESTION_PIPELINE);
+    const pipeline: CPipeline = new CPipeline({ ...KINESIS_PROVISIONED_INGESTION_PIPELINE });
     const wf = await pipeline.generateWorkflow();
     const expected = {
       Version: '2022-03-15',
@@ -574,7 +572,7 @@ describe('Workflow test', () => {
       ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, iamMock, {
         publicAZContainPrivateAZ: true,
       });
-    const pipeline: CPipeline = new CPipeline(S3_DATA_PROCESSING_PIPELINE);
+    const pipeline: CPipeline = new CPipeline({ ...S3_DATA_PROCESSING_PIPELINE });
     const wf = await pipeline.generateWorkflow();
     const expected = {
       Version: '2022-03-15',
@@ -662,7 +660,7 @@ describe('Workflow test', () => {
       ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, iamMock, {
         publicAZContainPrivateAZ: true,
       });
-    const pipeline: CPipeline = new CPipeline(S3_DATA_PROCESSING_WITH_SPECIFY_PREFIX_PIPELINE);
+    const pipeline: CPipeline = new CPipeline({ ...S3_DATA_PROCESSING_WITH_SPECIFY_PREFIX_PIPELINE });
     const wf = await pipeline.generateWorkflow();
     const expected = {
       Version: '2022-03-15',
@@ -752,7 +750,7 @@ describe('Workflow test', () => {
         subnetsIsolated: true,
         subnetsCross3AZ: true,
       });
-    const pipeline: CPipeline = new CPipeline(MSK_DATA_PROCESSING_ATHENA_PIPELINE);
+    const pipeline: CPipeline = new CPipeline({ ...MSK_DATA_PROCESSING_ATHENA_PIPELINE });
     const wf = await pipeline.generateWorkflow();
     const expected = {
       Version: '2022-03-15',
@@ -878,7 +876,7 @@ describe('Workflow test', () => {
         subnetsIsolated: true,
         subnetsCross3AZ: true,
       });
-    const pipeline: CPipeline = new CPipeline(MSK_DATA_PROCESSING_NEW_SERVERLESS_PIPELINE);
+    const pipeline: CPipeline = new CPipeline({ ...MSK_DATA_PROCESSING_NEW_SERVERLESS_PIPELINE });
     const wf = await pipeline.generateWorkflow();
     const expected = {
       Version: '2022-03-15',
@@ -1021,7 +1019,7 @@ describe('Workflow test', () => {
         publicAZContainPrivateAZ: true,
         subnetsCross3AZ: true,
       });
-    const pipeline: CPipeline = new CPipeline(KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE);
+    const pipeline: CPipeline = new CPipeline({ ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE });
     const wf = await pipeline.generateWorkflow();
     const expected = {
       Version: '2022-03-15',
@@ -1127,7 +1125,7 @@ describe('Workflow test', () => {
       ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, iamMock, {
         publicAZContainPrivateAZ: true,
       });
-    const pipeline: CPipeline = new CPipeline(KINESIS_DATA_PROCESSING_PROVISIONED_REDSHIFT_PIPELINE);
+    const pipeline: CPipeline = new CPipeline({ ...KINESIS_DATA_PROCESSING_PROVISIONED_REDSHIFT_PIPELINE });
     const wf = await pipeline.generateWorkflow();
     const expected = {
       Version: '2022-03-15',
@@ -1251,7 +1249,7 @@ describe('Workflow test', () => {
       ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, iamMock, {
         publicAZContainPrivateAZ: true,
       });
-    const pipeline: CPipeline = new CPipeline(KINESIS_DATA_PROCESSING_PROVISIONED_REDSHIFT_QUICKSIGHT_PIPELINE);
+    const pipeline: CPipeline = new CPipeline({ ...KINESIS_DATA_PROCESSING_PROVISIONED_REDSHIFT_QUICKSIGHT_PIPELINE });
     const wf = await pipeline.generateWorkflow();
     const expected = {
       Version: '2022-03-15',
@@ -1394,7 +1392,7 @@ describe('Workflow test', () => {
         publicAZContainPrivateAZ: true,
         subnetsCross3AZ: true,
       });
-    const pipeline: CPipeline = new CPipeline(KINESIS_DATA_PROCESSING_NEW_REDSHIFT_QUICKSIGHT_PIPELINE);
+    const pipeline: CPipeline = new CPipeline({ ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_QUICKSIGHT_PIPELINE });
     const wf = await pipeline.generateWorkflow();
     const expected = {
       Version: '2022-03-15',
@@ -1521,7 +1519,7 @@ describe('Workflow test', () => {
         subnetsIsolated: true,
         noApp: true,
       });
-    const pipeline: CPipeline = new CPipeline(MSK_DATA_PROCESSING_NEW_SERVERLESS_PIPELINE);
+    const pipeline: CPipeline = new CPipeline({ ...MSK_DATA_PROCESSING_NEW_SERVERLESS_PIPELINE });
     const wf = await pipeline.generateWorkflow();
     const expected = {
       Version: '2022-03-15',
@@ -1668,7 +1666,6 @@ describe('Workflow test', () => {
   });
   it('Generate Retry Workflow when create failed', async () => {
     dictionaryMock(ddbMock);
-    sfnMock.on(StartExecutionCommand).resolves({ executionArn: MOCK_EXECUTION_ID });
     // KafkaConnector, DataModelingRedshift Failed
     // Reporting Miss
     const stackManager: StackManager = new StackManager({ ...RETRY_PIPELINE_WITH_WORKFLOW });
@@ -1808,7 +1805,6 @@ describe('Workflow test', () => {
   });
   it('Generate Retry Workflow when update failed', async () => {
     dictionaryMock(ddbMock);
-    sfnMock.on(StartExecutionCommand).resolves({ executionArn: MOCK_EXECUTION_ID });
     const stackManager: StackManager = new StackManager({ ...RETRY_PIPELINE_WITH_WORKFLOW_WHEN_UPDATE_FAILED });
     stackManager.retryWorkflow();
     const expected = {
@@ -1946,7 +1942,6 @@ describe('Workflow test', () => {
   });
   it('Generate Retry Workflow when upgrade with rollback complete', async () => {
     dictionaryMock(ddbMock);
-    sfnMock.on(StartExecutionCommand).resolves({ executionArn: MOCK_EXECUTION_ID });
     // DataModelingRedshift Rollback
     const stackManager: StackManager = new StackManager({ ...RETRY_PIPELINE_WITH_WORKFLOW_AND_ROLLBACK_COMPLETE });
     stackManager.retryWorkflow();
@@ -2085,7 +2080,6 @@ describe('Workflow test', () => {
   });
   it('Generate Upgrade Workflow', async () => {
     dictionaryMock(ddbMock);
-    sfnMock.on(StartExecutionCommand).resolves({ executionArn: MOCK_EXECUTION_ID });
     const oldStackNames: string[] = [
       'Clickstream-Ingestion-kafka-6666-6666',
       'Clickstream-KafkaConnector-6666-6666',
@@ -2156,14 +2150,9 @@ describe('Workflow test', () => {
                     TemplateURL: `https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/${MOCK_SOLUTION_VERSION}/default/data-pipeline-stack.template.json`,
                   },
                 },
-                End: true,
+                Next: 'DataModeling',
                 Type: 'Stack',
               },
-            },
-          },
-          {
-            StartAt: 'DataModeling',
-            States: {
               Reporting: {
                 Type: 'Stack',
                 Data: {
@@ -2231,7 +2220,6 @@ describe('Workflow test', () => {
   });
   it('Generate Upgrade Workflow with stack change', async () => {
     dictionaryMock(ddbMock);
-    sfnMock.on(StartExecutionCommand).resolves({ executionArn: MOCK_EXECUTION_ID });
     const oldStackNames: string[] = [
       'Clickstream-Ingestion-kafka-6666-6666',
       'Clickstream-KafkaConnector-6666-6666',
@@ -2301,14 +2289,9 @@ describe('Workflow test', () => {
                     TemplateURL: `https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/${MOCK_SOLUTION_VERSION}/default/data-pipeline-stack.template.json`,
                   },
                 },
-                End: true,
+                Next: 'DataModeling',
                 Type: 'Stack',
               },
-            },
-          },
-          {
-            StartAt: 'DataModeling',
-            States: {
               Reporting: {
                 Type: 'Stack',
                 Data: {
@@ -2376,7 +2359,7 @@ describe('Workflow test', () => {
   });
   it('Generate Delete Workflow', async () => {
     dictionaryMock(ddbMock);
-    sfnMock.on(StartExecutionCommand).resolves({ executionArn: MOCK_EXECUTION_ID });
+    console.log(JSON.stringify(RETRY_PIPELINE_WITH_WORKFLOW));
     const stackManager: StackManager = new StackManager({ ...RETRY_PIPELINE_WITH_WORKFLOW });
     stackManager.deleteWorkflow();
     const expected = {
@@ -2519,7 +2502,7 @@ describe('Workflow test', () => {
         publicAZContainPrivateAZ: true,
         subnetsCross3AZ: true,
       });
-    const pipeline: CPipeline = new CPipeline(S3_INGESTION_PIPELINE);
+    const pipeline: CPipeline = new CPipeline({ ...S3_INGESTION_PIPELINE });
     await pipeline.generateWorkflow();
     let templateURL = await pipeline.getTemplateUrl('Ingestion_s3');
     expect(templateURL).toEqual('https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-s3-stack.template.json');
@@ -2551,7 +2534,7 @@ describe('Workflow test', () => {
       },
     });
     process.env.AWS_REGION='cn-northwest-1';
-    const pipeline: CPipeline = new CPipeline(S3_INGESTION_PIPELINE);
+    const pipeline: CPipeline = new CPipeline({ ...S3_INGESTION_PIPELINE });
     await pipeline.generateWorkflow();
     let templateURL = await pipeline.getTemplateUrl('Ingestion_s3');
     expect(templateURL).toEqual('https://EXAMPLE-BUCKET.s3.cn-north-1.amazonaws.com/clickstream-branch-main/v1.0.0/cn/ingestion-server-s3-stack.template.json');
@@ -2595,7 +2578,7 @@ describe('Workflow test', () => {
         subnetsCross3AZ: true,
       });
     process.env.AWS_REGION='us-east-1';
-    const pipeline: CPipeline = new CPipeline(S3_INGESTION_PIPELINE);
+    const pipeline: CPipeline = new CPipeline({ ...S3_INGESTION_PIPELINE });
     await pipeline.generateWorkflow();
     let templateURL = await pipeline.getTemplateUrl('Ingestion_s3');
     expect(templateURL).toEqual('https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/ingestion-server-s3-stack.template.json');
@@ -2639,7 +2622,7 @@ describe('Workflow test', () => {
         subnetsCross3AZ: true,
       });
     process.env.AWS_REGION='us-east-1';
-    const pipeline: CPipeline = new CPipeline(S3_INGESTION_PIPELINE);
+    const pipeline: CPipeline = new CPipeline({ ...S3_INGESTION_PIPELINE });
     await pipeline.generateWorkflow();
     let templateURL = await pipeline.getTemplateUrl('Ingestion_s3');
     expect(templateURL).toEqual('https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/ingestion-server-s3-stack.template.json');
@@ -2661,7 +2644,7 @@ describe('Workflow test', () => {
         },
       },
     });
-    const pipeline2: CPipeline = new CPipeline(S3_INGESTION_PIPELINE);
+    const pipeline2: CPipeline = new CPipeline({ ...S3_INGESTION_PIPELINE });
     await pipeline2.generateWorkflow();
     templateURL = await pipeline.getTemplateUrl('Ingestion_s3');
     expect(templateURL).toEqual('https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/ingestion-server-s3-stack.template.json');
@@ -2683,7 +2666,7 @@ describe('Workflow test', () => {
         },
       },
     });
-    const pipeline3: CPipeline = new CPipeline(S3_INGESTION_PIPELINE);
+    const pipeline3: CPipeline = new CPipeline({ ...S3_INGESTION_PIPELINE });
     await pipeline3.generateWorkflow();
     templateURL = await pipeline.getTemplateUrl('Ingestion_s3');
     expect(templateURL).toEqual('https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/ingestion-server-s3-stack.template.json');
@@ -2715,7 +2698,7 @@ describe('Workflow test', () => {
         },
       },
     };
-    const stackManager: StackManager = new StackManager(S3_INGESTION_PIPELINE);
+    const stackManager: StackManager = new StackManager({ ...S3_INGESTION_PIPELINE });
     let res = stackManager.setWorkflowType(workflowTemplate.Workflow, WorkflowStateType.PASS);
     expect(res).toEqual({
       Data: {
@@ -3434,7 +3417,7 @@ describe('Workflow test', () => {
         ],
       },
     };
-    const stackManager: StackManager = new StackManager(S3_INGESTION_PIPELINE);
+    const stackManager: StackManager = new StackManager({ ...S3_INGESTION_PIPELINE });
     const res = stackManager.getWorkflowCurrentAction(workflowTemplate.Workflow);
     expect(res).toEqual('CREATE');
   });

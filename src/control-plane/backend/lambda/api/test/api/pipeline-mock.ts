@@ -937,13 +937,8 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW_AND_EXP
                   BucketName: 'EXAMPLE_BUCKET',
                 },
               },
-              End: true,
+              Next: 'DataModeling',
             },
-          },
-          StartAt: 'DataProcessing',
-        },
-        {
-          States: {
             Reporting: {
               Type: WorkflowStateType.STACK,
               Data: {
@@ -983,6 +978,11 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW_AND_EXP
               },
               Next: 'Reporting',
             },
+          },
+          StartAt: 'DataProcessing',
+        },
+        {
+          States: {
           },
           StartAt: 'DataModeling',
         },
@@ -1080,13 +1080,8 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW_FOR_UPG
                   BucketName: 'EXAMPLE_BUCKET',
                 },
               },
-              End: true,
+              Next: 'DataModeling',
             },
-          },
-          StartAt: 'DataProcessing',
-        },
-        {
-          States: {
             Reporting: {
               Type: WorkflowStateType.STACK,
               Data: {
@@ -1122,7 +1117,7 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW_FOR_UPG
               Next: 'Reporting',
             },
           },
-          StartAt: 'DataModeling',
+          StartAt: 'DataProcessing',
         },
         {
           StartAt: 'Metrics',
@@ -1216,13 +1211,8 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_UPDATE_PIPELINE_WITH_WORKFLOW:
                   BucketName: 'EXAMPLE_BUCKET',
                 },
               },
-              End: true,
+              Next: 'DataModeling',
             },
-          },
-          StartAt: 'DataProcessing',
-        },
-        {
-          States: {
             Reporting: {
               Type: WorkflowStateType.STACK,
               Data: {
@@ -1258,7 +1248,7 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_UPDATE_PIPELINE_WITH_WORKFLOW:
               Next: 'Reporting',
             },
           },
-          StartAt: 'DataModeling',
+          StartAt: 'DataProcessing',
         },
         {
           StartAt: 'Metrics',
@@ -1287,10 +1277,84 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_UPDATE_PIPELINE_WITH_WORKFLOW:
   },
 };
 
-export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_QUICKSIGHT_PIPELINE_WITH_WORKFLOW: IPipeline = {
-  ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_QUICKSIGHT_PIPELINE,
-  status: {
-    ...BASE_STATUS,
+const BASE_RETRY_PIPELINE: IPipeline = {
+  ...BASE_PIPELINE_ATTRIBUTES,
+  ingestionServer: {
+    ...BASE_PIPELINE_ATTRIBUTES.ingestionServer,
+    sinkType: PipelineSinkType.KINESIS,
+    sinkBatch: {
+      size: 10000,
+      intervalSeconds: 180,
+    },
+    sinkKinesis: {
+      kinesisStreamMode: KinesisStreamMode.ON_DEMAND,
+      sinkBucket: {
+        name: 'EXAMPLE_BUCKET',
+        prefix: '',
+      },
+    },
+  },
+  dataProcessing: {
+    dataFreshnessInHour: 7,
+    scheduleExpression: 'rate(6 minutes)',
+    sourceS3Bucket: {
+      name: 'EXAMPLE_BUCKET',
+      prefix: '',
+    },
+    sinkS3Bucket: {
+      name: 'EXAMPLE_BUCKET',
+      prefix: '',
+    },
+    pipelineBucket: {
+      name: 'EXAMPLE_BUCKET',
+      prefix: '',
+    },
+    transformPlugin: 'BUILT-IN-1',
+    enrichPlugin: ['BUILT-IN-2', 'BUILT-IN-3', `${MOCK_PLUGIN_ID}_2`],
+  },
+  dataModeling: {
+    ods: {
+      bucket: {
+        name: 'EXAMPLE_BUCKET',
+        prefix: '',
+      },
+      fileSuffix: '.snappy.parquet',
+    },
+    athena: false,
+    redshift: {
+      dataRange: 'rate(6 months)',
+      newServerless: {
+        network: {
+          vpcId: 'vpc-00000000000000001',
+          subnetIds: [
+            'subnet-00000000000000010',
+            'subnet-00000000000000011',
+            'subnet-00000000000000012',
+            'subnet-00000000000000013',
+          ],
+          securityGroups: [
+            'sg-00000000000000030',
+            'sg-00000000000000031',
+          ],
+        },
+        baseCapacity: 8,
+      },
+    },
+    loadWorkflow: {
+      bucket: {
+        name: 'EXAMPLE_BUCKET',
+        prefix: '',
+      },
+      maxFilesLimit: 50,
+    },
+    upsertUsers: {
+      scheduleExpression: 'rate(5 minutes)',
+    },
+  },
+  reporting: {
+    quickSight: {
+      accountName: 'clickstream-acc-xxx',
+    },
   },
   workflow: {
     Version: '2022-03-15',
@@ -1311,7 +1375,7 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_QUICKSIGHT_PIPELINE_WITH_WORKF
                   StackName: `Clickstream-KafkaConnector-${MOCK_PIPELINE_ID}`,
                 },
                 Callback: {
-                  BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID}`,
+                  BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID_OLD}`,
                   BucketName: 'EXAMPLE_BUCKET',
                 },
               },
@@ -1328,7 +1392,7 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_QUICKSIGHT_PIPELINE_WITH_WORKF
                   StackName: `Clickstream-Ingestion-kafka-${MOCK_PIPELINE_ID}`,
                 },
                 Callback: {
-                  BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID}`,
+                  BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID_OLD}`,
                   BucketName: 'EXAMPLE_BUCKET',
                 },
               },
@@ -1350,17 +1414,12 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_QUICKSIGHT_PIPELINE_WITH_WORKF
                   StackName: `Clickstream-DataProcessing-${MOCK_PIPELINE_ID}`,
                 },
                 Callback: {
-                  BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID}`,
+                  BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID_OLD}`,
                   BucketName: 'EXAMPLE_BUCKET',
                 },
               },
-              End: true,
+              Next: 'DataModeling',
             },
-          },
-          StartAt: 'DataProcessing',
-        },
-        {
-          States: {
             Reporting: {
               Type: WorkflowStateType.STACK,
               Data: {
@@ -1372,8 +1431,8 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_QUICKSIGHT_PIPELINE_WITH_WORKF
                   StackName: `Clickstream-Reporting-${MOCK_PIPELINE_ID}`,
                 },
                 Callback: {
-                  BucketPrefix: 'clickstream/workflow/main-d6e73fc2-6211-4013-8c4d-a539c407f834',
-                  BucketName: 'cloudfront-s3-control-pl-solutionbucketlogbucket3-1d45u2r5l3wkg',
+                  BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID_OLD}`,
+                  BucketName: 'EXAMPLE_BUCKET',
                 },
               },
               End: true,
@@ -1385,18 +1444,23 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_QUICKSIGHT_PIPELINE_WITH_WORKF
                   Region: 'ap-southeast-1',
                   TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-analytics-redshift-stack.template.json',
                   Action: 'Create',
-                  Parameters: [],
+                  Parameters: [
+                    {
+                      ParameterKey: 'DataProcessingCronOrRateExpression',
+                      ParameterValue: 'rate(16 minutes)',
+                    },
+                  ],
                   StackName: `Clickstream-DataModelingRedshift-${MOCK_PIPELINE_ID}`,
                 },
                 Callback: {
-                  BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID}`,
+                  BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID_OLD}`,
                   BucketName: 'EXAMPLE_BUCKET',
                 },
               },
               Next: 'Reporting',
             },
           },
-          StartAt: 'DataModeling',
+          StartAt: 'DataProcessing',
         },
         {
           StartAt: 'Metrics',
@@ -1405,13 +1469,13 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_QUICKSIGHT_PIPELINE_WITH_WORKF
               Data: {
                 Callback: {
                   BucketName: 'EXAMPLE_BUCKET',
-                  BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                  BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID_OLD}`,
                 },
                 Input: {
                   Action: 'Create',
                   Region: 'ap-southeast-1',
                   Parameters: BASE_METRICS_PARAMETERS,
-                  StackName: `Clickstream-Metrics-${MOCK_PIPELINE_ID}`,
+                  StackName: 'Clickstream-Metrics-6666-6666',
                   TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/metrics-stack.template.json',
                 },
               },
@@ -1426,7 +1490,7 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_QUICKSIGHT_PIPELINE_WITH_WORKF
 };
 
 export const RETRY_PIPELINE_WITH_WORKFLOW: IPipeline = {
-  ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
+  ...BASE_RETRY_PIPELINE,
   status: {
     ...BASE_STATUS,
     status: PipelineStatusType.FAILED,
@@ -1455,7 +1519,7 @@ export const RETRY_PIPELINE_WITH_WORKFLOW: IPipeline = {
 };
 
 export const RETRY_PIPELINE_WITH_WORKFLOW_WHEN_UPDATE_FAILED: IPipeline = {
-  ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
+  ...BASE_RETRY_PIPELINE,
   lastAction: 'Update',
   status: {
     ...BASE_STATUS,
@@ -1479,7 +1543,7 @@ export const RETRY_PIPELINE_WITH_WORKFLOW_WHEN_UPDATE_FAILED: IPipeline = {
 };
 
 export const RETRY_PIPELINE_WITH_WORKFLOW_AND_ROLLBACK_COMPLETE: IPipeline = {
-  ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
+  ...BASE_RETRY_PIPELINE,
   lastAction: 'Upgrade',
   status: {
     ...BASE_STATUS,

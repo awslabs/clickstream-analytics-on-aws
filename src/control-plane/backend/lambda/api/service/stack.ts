@@ -45,17 +45,15 @@ export class StackManager {
 
   constructor(pipeline: IPipeline) {
     this.pipeline = pipeline;
-    this.workflow = pipeline.workflow;
     if (pipeline.workflow) {
       // Deep Copy Workflow
+      this.workflow = JSON.parse(JSON.stringify(pipeline.workflow));
       this.execWorkflow = JSON.parse(JSON.stringify(pipeline.workflow));
-      // this.execWorkflow = { ...pipeline.workflow } as WorkflowTemplate;
     }
   }
 
   public setExecWorkflow(workflow: WorkflowTemplate) {
     this.execWorkflow = JSON.parse(JSON.stringify(workflow));
-    // this.execWorkflow = { ...workflow } as WorkflowTemplate;
   }
 
   public getExecWorkflow(): WorkflowTemplate | undefined {
