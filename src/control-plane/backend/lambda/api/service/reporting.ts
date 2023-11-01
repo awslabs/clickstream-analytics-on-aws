@@ -42,7 +42,6 @@ import {
   TEMP_RESOURCE_NAME_PREFIX,
   getDashboardTitleProps,
   eventVisualColumns,
-  getAnalysisNameFromId,
   checkFunnelAnalysisParameter,
   checkEventAnalysisParameter,
   checkPathAnalysisParameter,
@@ -54,7 +53,7 @@ import { AnalysisType, ExplorePathNodeType, ExploreRequestAction, ExploreTimeSco
 import { logger } from '../common/powertools';
 import { SDKClient } from '../common/sdk-client';
 import { ApiFail, ApiSuccess } from '../common/types';
-import { QuickSightUserArns, generateEmbedUrlForRegisteredUser, getClickstreamUserArn } from '../store/aws/quicksight';
+import { QuickSightUserArns, generateEmbedUrlForRegisteredUser, getClickstreamUserArn, waitDashboardSuccess } from '../store/aws/quicksight';
 
 const sdkClient: SDKClient = new SDKClient();
 
@@ -286,7 +285,7 @@ export class ReportingService {
       });
       logger.debug(`event analysis sql: ${sql}`);
 
-      const hasGrouping = query.groupCondition === undefined ? false: true;
+      const hasGrouping = query.groupCondition !== undefined;
       const projectedColumns = ['event_date', 'event_name', 'count'];
       const datasetColumns = [...eventVisualColumns];
       if (hasGrouping) {
@@ -526,7 +525,7 @@ export class ReportingService {
       });
       logger.debug(`retention analysis sql: ${sql}`);
 
-      const hasGrouping = query.groupCondition === undefined ? false: true;
+      const hasGrouping = query.groupCondition !== undefined;
       const projectedColumns = [
         'grouping',
         'start_event_date',
@@ -687,11 +686,10 @@ export class ReportingService {
       //update QuickSight analysis
       let newAnalysis;
       if (query.analysisId) {
-        const analysisName = await getAnalysisNameFromId(quickSight, awsAccountId!, query.analysisId);
         newAnalysis = await quickSight.updateAnalysis({
           AwsAccountId: awsAccountId,
           AnalysisId: query.analysisId,
-          Name: analysisName,
+          Name: query.analysisName,
           Definition: dashboard as AnalysisDefinition,
         });
       }
@@ -710,13 +708,16 @@ export class ReportingService {
 
       let dashboardEmbedUrl = '';
       if (query.action === ExploreRequestAction.PREVIEW) {
-        const embedUrl = await generateEmbedUrlForRegisteredUser(
-          dashboardCreateParameters.region,
-          dashboardCreateParameters.allowedDomain,
-          false,
-          query.dashboardId,
-        );
-        dashboardEmbedUrl = embedUrl.EmbedUrl!;
+        const dashboardSuccess = await waitDashboardSuccess(dashboardCreateParameters.region, query.dashboardId);
+        if (dashboardSuccess) {
+          const embedUrl = await generateEmbedUrlForRegisteredUser(
+            dashboardCreateParameters.region,
+            dashboardCreateParameters.allowedDomain,
+            false,
+            query.dashboardId,
+          );
+          dashboardEmbedUrl = embedUrl.EmbedUrl!;
+        }
       }
       result = {
         dashboardId: query.dashboardId,
@@ -809,13 +810,16 @@ export class ReportingService {
 
     let dashboardEmbedUrl = '';
     if (query.action === ExploreRequestAction.PREVIEW) {
-      const embedUrl = await generateEmbedUrlForRegisteredUser(
-        dashboardCreateParameters.region,
-        dashboardCreateParameters.allowedDomain,
-        false,
-        dashboardId,
-      );
-      dashboardEmbedUrl = embedUrl.EmbedUrl!;
+      const dashboardSuccess = await waitDashboardSuccess(dashboardCreateParameters.region, dashboardId);
+      if (dashboardSuccess) {
+        const embedUrl = await generateEmbedUrlForRegisteredUser(
+          dashboardCreateParameters.region,
+          dashboardCreateParameters.allowedDomain,
+          false,
+          dashboardId,
+        );
+        dashboardEmbedUrl = embedUrl.EmbedUrl!;
+      }
     }
     const result = {
       dashboardId,

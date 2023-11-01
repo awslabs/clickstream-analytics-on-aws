@@ -45,6 +45,7 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { COMMON_ALERT_TYPE } from 'ts/const';
+import { QUICKSIGHT_ANALYSIS_INFIX, QUICKSIGHT_DASHBOARD_INFIX } from 'ts/constant-ln';
 import {
   ExploreComputeMethod,
   ExploreRequestAction,
@@ -364,6 +365,8 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
       saveParams = {
         dashboardId: dashboardId,
         dashboardName: dashboardName,
+        analysisId: dashboardId?.replace(QUICKSIGHT_DASHBOARD_INFIX, QUICKSIGHT_ANALYSIS_INFIX),
+        analysisName: dashboardName,
         sheetId: sheetId,
         sheetName: sheetName,
         chartTitle: chartTitle,

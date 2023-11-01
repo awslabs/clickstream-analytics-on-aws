@@ -327,3 +327,7 @@ export const DEFAULT_DASHBOARD_NAME = 'User lifecycle';
 export const TRANSFORMER_AND_ENRICH_CLASS_NAMES = 'software.aws.solution.clickstream.TransformerV2,software.aws.solution.clickstream.UAEnrichment,software.aws.solution.clickstream.IPEnrichment';
 
 export const EVENT_SOURCE_LOAD_DATA_FLOW = 'LoadDataFlow';
+
+export const QUICKSIGHT_DASHBOARD_INFIX= '-dashboard-';
+export const QUICKSIGHT_ANALYSIS_INFIX= '-analysis-';
+export const QUICKSIGHT_DATASET_INFIX= '-dataset-';

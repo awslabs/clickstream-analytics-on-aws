@@ -81,7 +81,10 @@ const SaveToDashboardModal: React.FC<ISaveToDashboardModalProps> = (
           pageSize: 999,
         });
       if (success) {
-        const dashboardOptions: ISaveToDashboardOption[] = data.items.map(
+        const customDashboards = data.items.filter(
+          (i) => i.operator !== 'Clickstream'
+        );
+        const dashboardOptions: ISaveToDashboardOption[] = customDashboards.map(
           (item) => ({
             label: item.name,
             value: item.id,

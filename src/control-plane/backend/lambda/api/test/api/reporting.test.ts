@@ -27,11 +27,13 @@ import {
   UpdateDashboardCommand,
   UpdateDashboardPublishedVersionCommand,
   GenerateEmbedUrlForRegisteredUserCommand,
-  DescribeAnalysisCommand,
   ThrottlingException,
   CreateDataSetCommand,
   ResizeOption,
   SheetContentType,
+  DescribeDashboardCommand,
+  ResourceStatus,
+  DescribeAnalysisCommand,
 } from '@aws-sdk/client-quicksight';
 import { BatchExecuteStatementCommand, DescribeStatementCommand, RedshiftDataClient, StatusString } from '@aws-sdk/client-redshift-data';
 import { AssumeRoleCommand, STSClient } from '@aws-sdk/client-sts';
@@ -136,6 +138,19 @@ describe('reporting test', () => {
     quickSightMock.on(GenerateEmbedUrlForRegisteredUserCommand).resolves({
       EmbedUrl: 'https://quicksight.aws.amazon.com/embed/4ui7xyvq73/studies/4a05631e-cbe6-477c-915d-1704aec9f101?isauthcode=true&identityprovider=quicksight&code=4a05631e-cbe6-477c-915d-1704aec9f101',
     });
+    quickSightMock.on(DescribeDashboardCommand).resolvesOnce({
+      Dashboard: {
+        Version: {
+          Status: ResourceStatus.CREATION_IN_PROGRESS,
+        },
+      },
+    }).resolves({
+      Dashboard: {
+        Version: {
+          Status: ResourceStatus.CREATION_SUCCESSFUL,
+        },
+      },
+    });
 
     const res = await request(app)
       .post('/api/reporting/funnel')
@@ -194,7 +209,7 @@ describe('reporting test', () => {
     expect(res.body.data.visualIds).toBeDefined();
     expect(res.body.data.visualIds.length).toEqual(2);
     expect(res.body.data.dashboardEmbedUrl).toEqual('https://quicksight.aws.amazon.com/embed/4ui7xyvq73/studies/4a05631e-cbe6-477c-915d-1704aec9f101?isauthcode=true&identityprovider=quicksight&code=4a05631e-cbe6-477c-915d-1704aec9f101');
-
+    expect(quickSightMock).toHaveReceivedCommandTimes(DescribeDashboardCommand, 2);
   });
 
   it('funnel visual - preview', async () => {
@@ -227,6 +242,19 @@ describe('reporting test', () => {
     });
     quickSightMock.on(GenerateEmbedUrlForRegisteredUserCommand).resolves({
       EmbedUrl: 'https://quicksight.aws.amazon.com/embed/4ui7xyvq73/studies/4a05631e-cbe6-477c-915d-1704aec9f101?isauthcode=true&identityprovider=quicksight&code=4a05631e-cbe6-477c-915d-1704aec9f101',
+    });
+    quickSightMock.on(DescribeDashboardCommand).resolvesOnce({
+      Dashboard: {
+        Version: {
+          Status: ResourceStatus.CREATION_IN_PROGRESS,
+        },
+      },
+    }).resolves({
+      Dashboard: {
+        Version: {
+          Status: ResourceStatus.CREATION_FAILED,
+        },
+      },
     });
 
     const res = await request(app)
@@ -286,8 +314,9 @@ describe('reporting test', () => {
     expect(res.body.data.dashboardId).toBeDefined();
     expect(res.body.data.visualIds).toBeDefined();
     expect(res.body.data.visualIds.length).toEqual(2);
-    expect(res.body.data.dashboardEmbedUrl).toEqual('https://quicksight.aws.amazon.com/embed/4ui7xyvq73/studies/4a05631e-cbe6-477c-915d-1704aec9f101?isauthcode=true&identityprovider=quicksight&code=4a05631e-cbe6-477c-915d-1704aec9f101');
-
+    expect(res.body.data.dashboardEmbedUrl).toEqual('');
+    expect(quickSightMock).toHaveReceivedCommandTimes(DescribeDashboardCommand, 2);
+    expect(quickSightMock).toHaveReceivedCommandTimes(GenerateEmbedUrlForRegisteredUserCommand, 0);
   });
 
   it('funnel visual - publish', async () => {
@@ -322,12 +351,6 @@ describe('reporting test', () => {
 
     quickSightMock.on(UpdateDashboardPublishedVersionCommand).resolves({
       DashboardId: 'dashboard-aaaaaaaa',
-    });
-
-    quickSightMock.on(DescribeAnalysisCommand).resolves({
-      Analysis: {
-        Name: 'test-analysis',
-      },
     });
 
     const res = await request(app)
@@ -391,6 +414,7 @@ describe('reporting test', () => {
     expect(res.body.data.analysisId).toBeDefined();
     expect(res.body.data.visualIds).toBeDefined();
     expect(res.body.data.visualIds.length).toEqual(2);
+    expect(quickSightMock).toHaveReceivedCommandTimes(DescribeAnalysisCommand, 0);
   });
 
   it('event visual - preview', async () => {
@@ -419,6 +443,19 @@ describe('reporting test', () => {
     });
     quickSightMock.on(GenerateEmbedUrlForRegisteredUserCommand).resolves({
       EmbedUrl: 'https://quicksight.aws.amazon.com/embed/4ui7xyvq73/studies/4a05631e-cbe6-477c-915d-1704aec9f101?isauthcode=true&identityprovider=quicksight&code=4a05631e-cbe6-477c-915d-1704aec9f101',
+    });
+    quickSightMock.on(DescribeDashboardCommand).resolvesOnce({
+      Dashboard: {
+        Version: {
+          Status: ResourceStatus.CREATION_IN_PROGRESS,
+        },
+      },
+    }).resolves({
+      Dashboard: {
+        Version: {
+          Status: ResourceStatus.CREATION_SUCCESSFUL,
+        },
+      },
     });
 
     const res = await request(app)
@@ -479,8 +516,7 @@ describe('reporting test', () => {
     expect(res.body.data.visualIds).toBeDefined();
     expect(res.body.data.visualIds.length).toEqual(2);
     expect(res.body.data.dashboardEmbedUrl).toEqual('https://quicksight.aws.amazon.com/embed/4ui7xyvq73/studies/4a05631e-cbe6-477c-915d-1704aec9f101?isauthcode=true&identityprovider=quicksight&code=4a05631e-cbe6-477c-915d-1704aec9f101');
-
-
+    expect(quickSightMock).toHaveReceivedCommandTimes(DescribeDashboardCommand, 2);
   });
 
   it('event visual - preview - twice request with group condition', async () => {
@@ -514,6 +550,19 @@ describe('reporting test', () => {
     });
     quickSightMock.on(GenerateEmbedUrlForRegisteredUserCommand).resolves({
       EmbedUrl: 'https://quicksight.aws.amazon.com/embed/4ui7xyvq73/studies/4a05631e-cbe6-477c-915d-1704aec9f101?isauthcode=true&identityprovider=quicksight&code=4a05631e-cbe6-477c-915d-1704aec9f101',
+    });
+    quickSightMock.on(DescribeDashboardCommand).resolvesOnce({
+      Dashboard: {
+        Version: {
+          Status: ResourceStatus.CREATION_IN_PROGRESS,
+        },
+      },
+    }).resolves({
+      Dashboard: {
+        Version: {
+          Status: ResourceStatus.CREATION_SUCCESSFUL,
+        },
+      },
     });
 
     const requestBody = {
@@ -578,6 +627,7 @@ describe('reporting test', () => {
     expect(res2.statusCode).toBe(201);
     expect(res2.body.success).toEqual(true);
     expect(quickSightMock).toHaveReceivedNthSpecificCommandWith(2, CreateDataSetCommand, {});
+    expect(quickSightMock).toHaveReceivedCommandTimes(DescribeDashboardCommand, 3);
   });
 
   it('event visual - publish', async () => {
@@ -612,12 +662,6 @@ describe('reporting test', () => {
 
     quickSightMock.on(UpdateDashboardPublishedVersionCommand).resolves({
       DashboardId: 'dashboard-aaaaaaaa',
-    });
-
-    quickSightMock.on(DescribeAnalysisCommand).resolves({
-      Analysis: {
-        Name: 'test-analysis',
-      },
     });
 
     const res = await request(app)
@@ -683,6 +727,7 @@ describe('reporting test', () => {
     expect(res.body.data.analysisId).toBeDefined();
     expect(res.body.data.visualIds).toBeDefined();
     expect(res.body.data.visualIds.length).toEqual(2);
+    expect(quickSightMock).toHaveReceivedCommandTimes(DescribeAnalysisCommand, 0);
   });
 
   it('path visual - preview', async () => {
@@ -711,6 +756,19 @@ describe('reporting test', () => {
     });
     quickSightMock.on(GenerateEmbedUrlForRegisteredUserCommand).resolves({
       EmbedUrl: 'https://quicksight.aws.amazon.com/embed/4ui7xyvq73/studies/4a05631e-cbe6-477c-915d-1704aec9f101?isauthcode=true&identityprovider=quicksight&code=4a05631e-cbe6-477c-915d-1704aec9f101',
+    });
+    quickSightMock.on(DescribeDashboardCommand).resolvesOnce({
+      Dashboard: {
+        Version: {
+          Status: ResourceStatus.CREATION_IN_PROGRESS,
+        },
+      },
+    }).resolves({
+      Dashboard: {
+        Version: {
+          Status: ResourceStatus.CREATION_SUCCESSFUL,
+        },
+      },
     });
 
     const res = await request(app)
@@ -774,7 +832,7 @@ describe('reporting test', () => {
     expect(res.body.data.visualIds).toBeDefined();
     expect(res.body.data.visualIds.length).toEqual(1);
     expect(res.body.data.dashboardEmbedUrl).toEqual('https://quicksight.aws.amazon.com/embed/4ui7xyvq73/studies/4a05631e-cbe6-477c-915d-1704aec9f101?isauthcode=true&identityprovider=quicksight&code=4a05631e-cbe6-477c-915d-1704aec9f101');
-
+    expect(quickSightMock).toHaveReceivedCommandTimes(DescribeDashboardCommand, 2);
   });
 
   it('path visual - publish', async () => {
@@ -800,11 +858,6 @@ describe('reporting test', () => {
     quickSightMock.on(CreateDashboardCommand).resolves({
       Arn: 'arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa',
       VersionArn: 'arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa/1',
-    });
-    quickSightMock.on(DescribeAnalysisCommand).resolves({
-      Analysis: {
-        Name: 'test-analysis',
-      },
     });
 
     const res = await request(app)
@@ -872,6 +925,7 @@ describe('reporting test', () => {
     expect(res.body.data.dashboardId).toBeDefined();
     expect(res.body.data.visualIds).toBeDefined();
     expect(res.body.data.visualIds.length).toEqual(1);
+    expect(quickSightMock).toHaveReceivedCommandTimes(DescribeAnalysisCommand, 0);
 
   });
 
@@ -898,11 +952,6 @@ describe('reporting test', () => {
     quickSightMock.on(CreateDashboardCommand).resolves({
       Arn: 'arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa',
       VersionArn: 'arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa/1',
-    });
-    quickSightMock.on(DescribeAnalysisCommand).resolves({
-      Analysis: {
-        Name: 'test-analysis',
-      },
     });
 
     const res = await request(app)
@@ -982,6 +1031,7 @@ describe('reporting test', () => {
     expect(res.body.data.dashboardId).toBeDefined();
     expect(res.body.data.visualIds).toBeDefined();
     expect(res.body.data.visualIds.length).toEqual(2);
+    expect(quickSightMock).toHaveReceivedCommandTimes(DescribeAnalysisCommand, 0);
 
   });
 

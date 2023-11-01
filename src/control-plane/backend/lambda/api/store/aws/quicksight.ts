@@ -38,9 +38,12 @@ import {
   SheetDefinition,
   ResourcePermission,
   AnalysisDefinition,
+  DescribeDashboardCommand,
+  DescribeDashboardCommandInput,
+  DescribeDashboardCommandOutput,
 } from '@aws-sdk/client-quicksight';
-import { v4 as uuidv4 } from 'uuid';
 import { APIRoleName, awsAccountId, awsRegion, QUICKSIGHT_CONTROL_PLANE_REGION, QUICKSIGHT_EMBED_NO_REPLY_EMAIL, QuickSightEmbedRoleArn } from '../../common/constants';
+import { QUICKSIGHT_ANALYSIS_INFIX, QUICKSIGHT_DASHBOARD_INFIX, QUICKSIGHT_DATASET_INFIX } from '../../common/constants-ln';
 import { getPaginatedResults } from '../../common/paginator';
 import { logger } from '../../common/powertools';
 import { SDKClient } from '../../common/sdk-client';
@@ -48,6 +51,7 @@ import { QuickSightAccountInfo, QuickSightUser } from '../../common/types';
 import { generateRandomStr } from '../../common/utils-ln';
 import { IDashboard } from '../../model/project';
 import { dataSetActions } from '../../service/quicksight/dashboard-ln';
+import { sleep } from '../../service/quicksight/reporting-utils';
 
 const QUICKSIGHT_NAMESPACE = 'default';
 const QUICKSIGHT_PREFIX = 'Clickstream';
@@ -378,13 +382,54 @@ export const createAnalysis = async (
   }
 };
 
+export const waitDashboardSuccess = async (region: string, dashboardId: string): Promise<boolean> => {
+  let resp = await describeDashboard(
+    region,
+    {
+      AwsAccountId: awsAccountId,
+      DashboardId: dashboardId,
+    },
+  );
+  let count = 0;
+  while (!resp.Dashboard?.Version?.Status?.endsWith('_SUCCESSFUL') &&
+  !resp.Dashboard?.Version?.Status?.endsWith('_FAILED') && count < 4) {
+    await sleep(500);
+    count++;
+    resp = await describeDashboard(
+      region,
+      {
+        AwsAccountId: awsAccountId,
+        DashboardId: dashboardId,
+      },
+    );
+  }
+  const success = resp.Dashboard?.Version?.Status?.endsWith('_SUCCESSFUL') ?? false;
+  return success;
+};
+
+export const describeDashboard = async (
+  region: string,
+  input: DescribeDashboardCommandInput,
+): Promise<DescribeDashboardCommandOutput> => {
+  try {
+    const quickSightClient = sdkClient.QuickSightClient({
+      region: region,
+    });
+    const command: DescribeDashboardCommand = new DescribeDashboardCommand(input);
+    return await quickSightClient.send(command);
+  } catch (err) {
+    logger.error('Describe Dashboard Error.', { err });
+    throw err;
+  }
+};
+
 export const createPublishDashboard = async (
   dashboard: IDashboard,
 ): Promise<any> => {
   try {
     const principals = await getClickstreamUserArn();
     // Create dataset in QuickSight
-    const datasetId = `clickstream-dataset-${uuidv4().replace(/-/g, '')}`;
+    const datasetId = dashboard.id.replace(QUICKSIGHT_DASHBOARD_INFIX, QUICKSIGHT_DATASET_INFIX);
     const datasetInput: CreateDataSetCommandInput = {
       AwsAccountId: awsAccountId,
       DataSetId: datasetId,
@@ -461,7 +506,7 @@ export const createPublishDashboard = async (
       Permissions: [dashboardPermission],
     };
     await createDashboard(dashboard.region, dashboardInput);
-    const analysisId = `clickstream-analysis-${uuidv4().replace(/-/g, '')}`;
+    const analysisId = dashboard.id.replace(QUICKSIGHT_DASHBOARD_INFIX, QUICKSIGHT_ANALYSIS_INFIX);
 
     const analysisPermission: ResourcePermission = {
       Principal: principals.publishUserArn,
