@@ -413,6 +413,7 @@ SELECT
        event_name,
        user_id,
        user_pseudo_id,
+       platform,
        user_first_touch_timestamp,
        user_properties,
        user_ltv,
@@ -443,8 +444,7 @@ WITH user_base_rank AS (
               user_ltv,
               CAST(
                      TIMESTAMP 'epoch' + (user_first_touch_timestamp / 1000) * INTERVAL '1 second' AS date
-              ) AS _first_visit_date,
-              app_info.install_source :: VARCHAR AS _channel,
+              ) AS first_visit_date,
               ROW_NUMBER() OVER (
                      PARTITION BY user_pseudo_id
                      ORDER BY
@@ -461,8 +461,7 @@ user_base AS (
               user_first_touch_timestamp,
               user_properties,
               user_ltv,
-              _first_visit_date,
-              _channel
+              first_visit_date
        FROM
               user_base_rank
        WHERE
@@ -493,9 +492,9 @@ WITH user_traffic_source_rank AS (
 user_traffic_source AS (
        SELECT
               user_pseudo_id,
-              medium AS _first_traffic_medium,
-              name AS _first_traffic_source_type,
-              source AS _first_traffic_source
+              medium AS first_traffic_medium,
+              name AS first_traffic_source_type,
+              source AS first_traffic_source
        FROM
               user_traffic_source_rank
        WHERE
@@ -520,14 +519,14 @@ WITH user_page_referrer_rank AS (
               ods_events_user_temp e,
               e.event_params AS ep
        WHERE
-              event_name = '_page_view'
+              event_name = '_first_open'
               AND ep.key in ('_page_referrer', '_page_referer')
               AND ep.value.string_value IS NOT NULL
 ),
 user_page_referrer AS (
        SELECT
               user_pseudo_id,
-              page_referrer AS _first_referer
+              page_referrer AS first_referer
        FROM
               user_page_referrer_rank
        WHERE
@@ -561,7 +560,37 @@ SELECT
 FROM
        user_device_id_list;
 
-DROP TABLE ods_events_user_temp;
+
+-- user_channel
+WITH user_channel_rank AS (
+       SELECT
+              user_pseudo_id,
+              e.app_info.install_source :: VARCHAR AS channel,
+              ROW_NUMBER() OVER (
+                     PARTITION BY user_pseudo_id
+                     ORDER BY
+                            event_timestamp ASC
+              ) AS et_rank
+       FROM
+              ods_events_user_temp e
+       WHERE
+              event_name IN ('_first_open', '_first_visit', '_profile_set')
+              AND channel IS NOT NULL
+),
+user_channel AS (
+       SELECT
+              user_pseudo_id,
+              channel AS first_channel
+       FROM
+              user_channel_rank
+       WHERE
+              et_rank = 1
+)
+SELECT
+       * INTO temp user_channel_temp
+FROM
+       user_channel;
+
 
 -- user_final_temp
 WITH user_final AS (
@@ -569,21 +598,23 @@ WITH user_final AS (
               u.event_timestamp,
               u.user_id,
               u.user_pseudo_id,
+              u.platform,
               u.user_first_touch_timestamp,
               u.user_properties,
               u.user_ltv,
-              u._first_visit_date,
-              pr._first_referer,
-              ts._first_traffic_source_type,
-              ts._first_traffic_medium,
-              ts._first_traffic_source,
-              de.device_id_list,
-              u._channel
+              u.first_visit_date,
+              pr.first_referer,
+              ts.first_traffic_source_type,
+              ts.first_traffic_medium,
+              ts.first_traffic_source,
+              uc.first_channel,
+              de.device_id_list
        FROM
               user_base_temp u
               LEFT OUTER JOIN user_traffic_source_temp ts ON u.user_pseudo_id = ts.user_pseudo_id
               LEFT OUTER JOIN user_page_referrer_temp pr ON u.user_pseudo_id = pr.user_pseudo_id
               LEFT OUTER JOIN user_device_id_list_temp de ON u.user_pseudo_id = de.user_pseudo_id
+              LEFT OUTER JOIN user_channel_temp uc ON u.user_pseudo_id = uc.user_pseudo_id
 )
 SELECT
        * INTO temp user_final_temp

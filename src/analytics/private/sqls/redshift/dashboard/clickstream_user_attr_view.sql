@@ -3,14 +3,15 @@ AS
 select 
    user_id
   ,user_pseudo_id
+  ,platform
   ,user_first_touch_timestamp
-  ,_first_visit_date
-  ,_first_referer
-  ,_first_traffic_source_type
-  ,_first_traffic_medium
-  ,_first_traffic_source
+  ,first_visit_date
+  ,first_referer
+  ,first_traffic_source_type
+  ,first_traffic_medium
+  ,first_traffic_source
   ,device_id_list
-  ,_channel
+  ,first_channel
   , eu.key::varchar as custom_attr_key
   , coalesce (
        nullif(eu.value.string_value::varchar,'')

@@ -19,16 +19,17 @@ user_new as
 select  
    user_id
   ,user_pseudo_id
+  ,platform
   ,user_first_touch_timestamp
   ,user_properties
   ,user_ltv
-  ,_first_visit_date
-  ,_first_referer
-  ,_first_traffic_source_type
-  ,_first_traffic_medium
-  ,_first_traffic_source
+  ,first_visit_date
+  ,first_referer
+  ,first_traffic_source_type
+  ,first_traffic_medium
+  ,first_traffic_source
+  ,first_channel
   ,device_id_list
-  ,_channel
   ,event_timestamp
   ,eu.key as custom_attr_key
   ,coalesce (

@@ -326,18 +326,22 @@ class ETLRunnerTest extends BaseSparkTest {
         String tableName1 = dataDir + "/" + TransformerV2.TABLE_ETL_USER_TRAFFIC_SOURCE + INCREMENTAL_SUFFIX ;
         String tableName2 = dataDir + "/" + TransformerV2.TABLE_ETL_USER_DEVICE_ID + INCREMENTAL_SUFFIX;
         String tableName3 = dataDir + "/" + TransformerV2.TABLE_ETL_USER_PAGE_REFERER + INCREMENTAL_SUFFIX;
+        String tableName4 = dataDir + "/" + TransformerV2.TABLE_ETL_USER_CHANNEL + INCREMENTAL_SUFFIX;
         Dataset<Row> d1 = spark.read().parquet(tableName1);
         Dataset<Row> d2 = spark.read().parquet(tableName2);
         Dataset<Row> d3 = spark.read().parquet(tableName3);
+        Dataset<Row> d4 = spark.read().parquet(tableName4);
 
         long cc1 = d1.count();
         long cc2 = d2.count();
         long cc3 = d3.count();
+        long cc4 = d4.count();
 
-        System.out.printf("cc1=%s, cc2=%s, cc3=%s%n", cc1, cc2, cc3);
+        System.out.printf("cc1=%s, cc2=%s, cc3=%s, cc4=%sn", cc1, cc2, cc3, cc4);
         Assertions.assertTrue( cc1 >= 1);
         Assertions.assertTrue(cc2 >= 1);
         Assertions.assertTrue(cc3 >= 1);
+        Assertions.assertTrue(cc4 >= 1);
 
         System.setProperty("force.merge", "false");
     }

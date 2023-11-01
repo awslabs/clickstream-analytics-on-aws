@@ -26,6 +26,11 @@
     "nullable" : true,
     "metadata" : { }
   }, {
+    "name" : "platform",
+    "type" : "string",
+    "nullable" : true,
+    "metadata" : { }
+  }, {
     "name" : "user_first_touch_timestamp",
     "type" : "long",
     "nullable" : true,
@@ -99,27 +104,32 @@
     "nullable" : true,
     "metadata" : { }
   }, {
-    "name" : "_first_visit_date",
+    "name" : "first_visit_date",
     "type" : "date",
     "nullable" : true,
     "metadata" : { }
   }, {
-    "name" : "_first_referer",
+    "name" : "first_referer",
     "type" : "string",
     "nullable" : true,
     "metadata" : { }
   }, {
-    "name" : "_first_traffic_source_type",
+    "name" : "first_traffic_source_type",
     "type" : "string",
     "nullable" : true,
     "metadata" : { }
   }, {
-    "name" : "_first_traffic_medium",
+    "name" : "first_traffic_medium",
     "type" : "string",
     "nullable" : true,
     "metadata" : { }
   }, {
-    "name" : "_first_traffic_source",
+    "name" : "first_traffic_source",
+    "type" : "string",
+    "nullable" : true,
+    "metadata" : { }
+  }, {
+    "name" : "first_channel",
     "type" : "string",
     "nullable" : true,
     "metadata" : { }
@@ -130,11 +140,6 @@
       "elementType" : "string",
       "containsNull" : true
     },
-    "nullable" : true,
-    "metadata" : { }
-  }, {
-    "name" : "_channel",
-    "type" : "string",
     "nullable" : true,
     "metadata" : { }
   } ]

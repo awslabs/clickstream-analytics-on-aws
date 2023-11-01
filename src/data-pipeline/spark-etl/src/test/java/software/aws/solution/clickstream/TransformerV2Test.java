@@ -182,30 +182,36 @@ class TransformerV2Test extends BaseSparkTest {
         String tableName1 = dataDir + "/" + TransformerV2.TABLE_ETL_USER_TRAFFIC_SOURCE + FULL_SUFFIX ;
         String tableName2 = dataDir + "/" + TransformerV2.TABLE_ETL_USER_DEVICE_ID + FULL_SUFFIX;
         String tableName3 = dataDir + "/" + TransformerV2.TABLE_ETL_USER_PAGE_REFERER + FULL_SUFFIX;
+        String tableName4 = dataDir + "/" + TransformerV2.TABLE_ETL_USER_CHANNEL + FULL_SUFFIX;
 
         transformer.postTransform(datasetUser);
         Dataset<Row> d1 = spark.read().parquet(tableName1);
         Dataset<Row> d2 = spark.read().parquet(tableName2);
         Dataset<Row> d3 = spark.read().parquet(tableName3);
+        Dataset<Row> d4 = spark.read().parquet(tableName4);
 
         String appId1 = d1.select("app_id").first().getAs(0);
         String appId2 = d2.select("app_id").first().getAs(0);
         String appId3 = d3.select("app_id").first().getAs(0);
-        log.info(String.format("%s, %s, %s", appId1, appId2, appId3));
+        String appId4 = d4.select("app_id").first().getAs(0);
+        log.info(String.format("%s, %s, %s, %s", appId1, appId2, appId3, appId4));
 
         Assertions.assertEquals("uba-app", appId1);
         Assertions.assertEquals("uba-app", appId2);
         Assertions.assertEquals("uba-app", appId3);
+        Assertions.assertEquals("uba-app", appId4);
 
         Integer dateStr1 = d1.select("update_date").orderBy(col("update_date").desc()).first().getAs(0);
         Integer dateStr2 = d2.select("update_date").orderBy(col("update_date").desc()).first().getAs(0);
         Integer dateStr3 = d3.select("update_date").orderBy(col("update_date").desc()).first().getAs(0);
+        Integer dateStr4 = d4.select("update_date").orderBy(col("update_date").desc()).first().getAs(0);
 
-        log.info(String.format("%s, %s, %s", dateStr1, dateStr2, dateStr3));
+        log.info(String.format("%s, %s, %s, %s", dateStr1, dateStr2, dateStr3, dateStr4));
 
         Assertions.assertTrue(dateStr1.toString().matches("\\d{8}"));
-        Assertions.assertTrue(dateStr1.toString().matches("\\d{8}"));
-        Assertions.assertTrue(dateStr1.toString().matches("\\d{8}"));
+        Assertions.assertTrue(dateStr2.toString().matches("\\d{8}"));
+        Assertions.assertTrue(dateStr3.toString().matches("\\d{8}"));
+        Assertions.assertTrue(dateStr4.toString().matches("\\d{8}"));
     }
 
     @Test

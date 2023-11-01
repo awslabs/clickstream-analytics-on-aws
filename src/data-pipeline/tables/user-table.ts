@@ -31,6 +31,10 @@ export function getUserTableColumns(): Column[] {
       type: Schema.STRING,
     },
     {
+      name: 'platform',
+      type: Schema.STRING,
+    },
+    {
       name: 'user_first_touch_timestamp',
       type: Schema.BIG_INT,
     },
@@ -80,38 +84,38 @@ export function getUserTableColumns(): Column[] {
     },
 
     {
-      name: '_first_visit_date',
+      name: 'first_visit_date',
       type: Schema.DATE,
     },
 
     {
-      name: '_first_referer',
+      name: 'first_referer',
       type: Schema.STRING,
     },
 
     {
-      name: '_first_traffic_source_type',
+      name: 'first_traffic_source_type',
       type: Schema.STRING,
     },
 
     {
-      name: '_first_traffic_medium',
+      name: 'first_traffic_medium',
       type: Schema.STRING,
     },
 
     {
-      name: '_first_traffic_source',
+      name: 'first_traffic_source',
+      type: Schema.STRING,
+    },
+
+    {
+      name: 'first_channel',
       type: Schema.STRING,
     },
 
     {
       name: 'device_id_list',
       type: Schema.array(Schema.STRING),
-    },
-
-    {
-      name: '_channel',
-      type: Schema.STRING,
     },
   ];
 }

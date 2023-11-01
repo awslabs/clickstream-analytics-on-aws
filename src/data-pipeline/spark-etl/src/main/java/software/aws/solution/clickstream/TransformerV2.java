@@ -80,6 +80,9 @@ public final class TransformerV2 {
     public static final String TABLE_ETL_USER_TRAFFIC_SOURCE = "etl_user_traffic_source";
     public static final String TABLE_ETL_USER_DEVICE_ID = "etl_user_device_id";
     public static final String TABLE_ETL_USER_PAGE_REFERER = "etl_user_page_referer";
+
+    public static final String TABLE_ETL_USER_CHANNEL = "etl_user_channel";;
+
     public static final String UPDATE_DATE = "update_date";
     public static final String INCREMENTAL_SUFFIX = "_incremental_v1";
     public static final String FULL_SUFFIX = "_full_v1";
@@ -99,8 +102,8 @@ public final class TransformerV2 {
     public static final String EVENT_ID = "event_id";
     public static final String EVENT_PREVIOUS_TIMESTAMP = "event_previous_timestamp";
     public static final String ITEMS = "items";
-    public static final String FIRST_VISIT_DATE = "_first_visit_date";
-    public static final String CHANNEL = "_channel";
+    public static final String FIRST_VISIT_DATE = "first_visit_date";
+    public static final String CHANNEL = "channel";
     public static final String USER_ID = "user_id";
     public static final String DEVICE_ID = "device_id";
     public static final String SNAPPY = "snappy";
@@ -112,6 +115,9 @@ public final class TransformerV2 {
     public static final String REFERER = "_referer";
     public static final String COL_PAGE_REFERER = "_page" + REFERER;
     public static final String PAGE_VIEW = "_page_view";
+    public static final String FIRST_OPEN = "_first_open";
+    public static final String PROFILE_SET = "_profile_set";
+    public static final String FIRST_VISIT = "_first_visit";
     private final Cleaner cleaner = new Cleaner();
     private final EventParamsConverter eventParamsConverter = new EventParamsConverter();
     private final UserPropertiesConverter userPropertiesConverter = new UserPropertiesConverter();
@@ -177,7 +183,7 @@ public final class TransformerV2 {
         SparkSession spark = userDataset.sparkSession();
         String tableName = TABLE_ETL_USER_PAGE_REFERER;
 
-        Dataset<Row> newUserRefererDataset = userDataset.filter(col(EVENT_NAME).equalTo(PAGE_VIEW))
+        Dataset<Row> newUserRefererDataset = userDataset.filter(col(EVENT_NAME).equalTo(FIRST_OPEN))
                 .withColumn(COL_PAGE_REFERER,
                         coalesce(
                                 get_json_object(attributesCol, "$." + PROP_PAGE_REFERRER).cast(DataTypes.StringType),
@@ -255,6 +261,52 @@ public final class TransformerV2 {
         }
     }
 
+    private static Dataset<Row> getAggUserChannelDataset(final Dataset<Row> newUserChannelDataset) {
+        return newUserChannelDataset.groupBy(APP_ID, USER_PSEUDO_ID)
+                .agg(min_by(struct(
+                                col(CHANNEL),
+                                col(EVENT_TIMESTAMP)),
+                        col(EVENT_TIMESTAMP)).alias("c"))
+                .select(col(APP_ID), col(USER_PSEUDO_ID), expr("c.*"))
+                .distinct();
+    }
+
+    private static Dataset<Row> getUserChannelDataset(final Dataset<Row> userDataset,
+                                                      final long newUserCount) {
+        Column dataCol = col("data");
+        Column attributesCol = dataCol.getField(ATTRIBUTES);
+        SparkSession spark = userDataset.sparkSession();
+        String tableName = TABLE_ETL_USER_CHANNEL;
+
+        Dataset<Row> newUserChannelDataset = userDataset.filter(col(EVENT_NAME).isin(FIRST_OPEN, FIRST_VISIT, PROFILE_SET))
+                .withColumn(CHANNEL,
+                        get_json_object(attributesCol, "$._" + CHANNEL).cast(DataTypes.StringType))
+                .filter(col(CHANNEL).isNotNull())
+                .select(APP_ID, USER_PSEUDO_ID, CHANNEL, EVENT_TIMESTAMP);
+
+        long newChannelCount = newUserChannelDataset.count();
+        log.info(NEW_USER_COUNT + "=" + newUserCount + ", newChannelCount=" + newChannelCount);
+
+        setSchemaMap(newUserChannelDataset, tableName);
+
+        if (newChannelCount > 0) {
+            Dataset<Row> newAggUserChannelDataset = getAggUserChannelDataset(newUserChannelDataset);
+            log.info("newAggUserChannelDataset count:" + newAggUserChannelDataset.count());
+            String path = saveIncrementalDatasetWithTableName(tableName, newAggUserChannelDataset);
+            Dataset<Row> allUserChannelDataset = readDatasetFromPath(spark, path, ContextUtil.getUserKeepDays());
+            log.info("allUserChannelDataset count:" + allUserChannelDataset.count());
+            Dataset<Row> aggUserChannelDataset = getAggUserChannelDataset(allUserChannelDataset);
+            log.info("aggTrafficSourceDataset count:" + aggUserChannelDataset.count());
+            saveFullDataset(tableName, aggUserChannelDataset);
+            return aggUserChannelDataset;
+        } else if (newUserCount > 0 && newChannelCount == 0) {
+            String pathFull = getPathForTable(tableName + FULL_SUFFIX);
+            return readDatasetFromPath(spark, pathFull, ContextUtil.getUserKeepDays());
+        } else {
+            return null;
+        }
+    }
+
     private static Dataset<Row> getAggUserDeviceIdDataset(final Dataset<Row> allUserDeviceIdDataset) {
         Map<String, String> aggMap = new HashMap<>();
         aggMap.put(DEVICE_ID_LIST, "collect_set");
@@ -269,7 +321,6 @@ public final class TransformerV2 {
                 .select(APP_ID, USER_PSEUDO_ID, DEVICE_ID_LIST, EVENT_TIMESTAMP)
                 .distinct();
     }
-
 
 
     private static void saveFullDataset(final String tbName, final Dataset<Row> dataset) {
@@ -533,14 +584,13 @@ public final class TransformerV2 {
     private Optional<Dataset<Row>> extractUser(final Dataset<Row> dataset) {
         SparkSession spark = dataset.sparkSession();
         Column dataCol = col("data");
-        Column attributesCol = dataCol.getField(ATTRIBUTES);
         Dataset<Row> userDataset = dataset.filter((col(USER_PSEUDO_ID).isNotNull()));
 
         Dataset<Row> possibleUpdateUserIdDataset = dataset.select(col(APP_ID), col(USER_PSEUDO_ID)).distinct();
 
         Dataset<Row> profileSetDataset = userDataset
                 .filter(col(EVENT_NAME)
-                        .isin("user_profile_set", "_user_profile_set", "_profile_set", "_first_open"));
+                        .isin("user_profile_set", "_user_profile_set", PROFILE_SET, FIRST_OPEN));
 
         long newUserCount = profileSetDataset.count();
         log.info(NEW_USER_COUNT + ":" + newUserCount);
@@ -548,12 +598,13 @@ public final class TransformerV2 {
         Dataset<Row> userReferrerDataset = getPageRefererDataset(userDataset, newUserCount);
         Dataset<Row> userDeviceIdDataset = getUserDeviceIdDataset(userDataset, newUserCount);
         Dataset<Row> userTrafficSourceDataset = getUserTrafficSourceDataset(userDataset, newUserCount);
+        Dataset<Row> userChannelDataset = getUserChannelDataset(userDataset, newUserCount);
 
         Dataset<Row> profileSetDataset1 = this.userPropertiesConverter.transform(profileSetDataset);
 
         Dataset<Row> newUserProfileMainDataset = profileSetDataset1
                 .withColumn(FIRST_VISIT_DATE, to_date(timestamp_seconds(col(USER_FIRST_TOUCH_TIMESTAMP).$div(1000))))
-                .withColumn(CHANNEL, get_json_object(attributesCol, "$._channel").alias("install_source"))
+                .withColumn(PLATFORM, coalesce(col(PLATFORM), dataCol.getField(PLATFORM)))
                 .select(
                         APP_ID,
                         EVENT_DATE,
@@ -564,7 +615,7 @@ public final class TransformerV2 {
                         "user_properties",
                         "user_ltv",
                         FIRST_VISIT_DATE,
-                        CHANNEL
+                        PLATFORM
                 ).distinct();
 
         String tableName = ETLRunner.TableName.USER.name;
@@ -577,6 +628,7 @@ public final class TransformerV2 {
         Objects.requireNonNull(userReferrerDataset);
         Objects.requireNonNull(userDeviceIdDataset);
         Objects.requireNonNull(userTrafficSourceDataset);
+        Objects.requireNonNull(userChannelDataset);
 
         log.info("newUserProfileMainDataset:" + newUserProfileMainDataset.count());
 
@@ -597,12 +649,14 @@ public final class TransformerV2 {
         Column userIdJoinForDeviceId = userPseudoIdCol.equalTo(userDeviceIdDataset.col(USER_PSEUDO_ID)).and(appIdCol.equalTo(userDeviceIdDataset.col(APP_ID)));
         Column userIdJoinForTrafficSource = userPseudoIdCol.equalTo(userTrafficSourceDataset.col(USER_PSEUDO_ID)).and(appIdCol.equalTo(userTrafficSourceDataset.col(APP_ID)));
         Column userIdJoinForPageReferrer = userPseudoIdCol.equalTo(userReferrerDataset.col(USER_PSEUDO_ID)).and(appIdCol.equalTo(userReferrerDataset.col(APP_ID)));
+        Column userIdJoinForUserChannel = userPseudoIdCol.equalTo(userChannelDataset.col(USER_PSEUDO_ID)).and(appIdCol.equalTo(userChannelDataset.col(APP_ID)));
 
         Dataset<Row> joinedPossibleUpdateUserDataset = fullAggUserDataset
                 .join(possibleUpdateUserIdDataset, userIdJoinForPossibleUpdate, "inner")
                 .join(userDeviceIdDataset, userIdJoinForDeviceId, "left")
                 .join(userTrafficSourceDataset, userIdJoinForTrafficSource, "left")
-                .join(userReferrerDataset, userIdJoinForPageReferrer, "left");
+                .join(userReferrerDataset, userIdJoinForPageReferrer, "left")
+                .join(userChannelDataset, userIdJoinForUserChannel, "left");
 
         log.info("joinedPossibleUpdateUserDataset:" + joinedPossibleUpdateUserDataset.count());
         Dataset<Row> joinedPossibleUpdateUserDatasetRt = joinedPossibleUpdateUserDataset.select(appIdCol,
@@ -610,16 +664,18 @@ public final class TransformerV2 {
                 eventTimestampCol,
                 col(USER_ID),
                 userPseudoIdCol,
+                col(PLATFORM),
                 col(USER_FIRST_TOUCH_TIMESTAMP),
                 col("user_properties"),
                 col("user_ltv"),
                 col(FIRST_VISIT_DATE),
-                col(COL_PAGE_REFERER).alias("_first_referer"),
-                col(TRAFFIC_SOURCE_NAME).alias("_first_traffic_source_type"),
-                col(TRAFFIC_SOURCE_MEDIUM).alias("_first_traffic_medium"),
-                col(TRAFFIC_SOURCE_SOURCE).alias("_first_traffic_source"),
-                col(DEVICE_ID_LIST),
-                col(CHANNEL));
+                col(COL_PAGE_REFERER).alias("first_referer"),
+                col(TRAFFIC_SOURCE_NAME).alias("first_traffic_source_type"),
+                col(TRAFFIC_SOURCE_MEDIUM).alias("first_traffic_medium"),
+                col(TRAFFIC_SOURCE_SOURCE).alias("first_traffic_source"),
+                col(CHANNEL).alias("first_channel"),
+                col(DEVICE_ID_LIST)
+        );
 
         return Optional.of(joinedPossibleUpdateUserDatasetRt);
     }
@@ -752,6 +808,9 @@ public final class TransformerV2 {
         });
         l.add(new Object[] {
                 TABLE_ETL_USER_TRAFFIC_SOURCE, userKeepDays
+        });
+        l.add(new Object[] {
+                TABLE_ETL_USER_CHANNEL, userKeepDays
         });
         l.add(new Object[] {
                 ETLRunner.TableName.USER.name, userKeepDays

@@ -23,6 +23,7 @@
 /.gitlab/ci-templates/viperlight.yml linguist-generated
 /.mergify.yml linguist-generated
 /.npmignore linguist-generated
+/.npmrc linguist-generated
 /.projen/** linguist-generated
 /.projen/deps.json linguist-generated
 /.projen/files.json linguist-generated

@@ -4,6 +4,7 @@
   "event_timestamp" : 1682319109447,
   "user_id" : "312121-1",
   "user_pseudo_id" : "uuid1-231jdf",
+  "platform" : "ANDROID",
   "user_first_touch_timestamp" : 1667877267895,
   "user_properties" : [ {
     "key" : "_user_id",
@@ -91,11 +92,11 @@
     "revenue" : 123.45,
     "currency" : "USD"
   },
-  "_first_visit_date" : "2022-11-08",
-  "_first_referer" : null,
-  "_first_traffic_source_type" : "TSN",
-  "_first_traffic_medium" : "TSM",
-  "_first_traffic_source" : "TSS",
-  "device_id_list" : [ "deviceid-1682319109447" ],
-  "_channel" : "C001"
+  "first_visit_date" : "2022-11-08",
+  "first_referer" : null,
+  "first_traffic_source_type" : "TSN",
+  "first_traffic_medium" : "TSM",
+  "first_traffic_source" : "TSS",
+  "first_channel" : null,
+  "device_id_list" : [ "deviceid-1682319109447" ]
 }

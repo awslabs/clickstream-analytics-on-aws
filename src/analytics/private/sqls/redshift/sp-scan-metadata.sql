@@ -131,12 +131,12 @@ BEGIN
 	INSERT INTO 
 		user_column_temp_table (column_name) 
 	VALUES 
-		('_first_visit_date'),
-		('_first_referer'),
-		('_first_traffic_source_type'),
-		('_first_traffic_medium'),
-		('_first_traffic_source'),
-		('_channel');			
+		('first_visit_date'),
+		('first_referer'),
+		('first_traffic_source_type'),
+		('first_traffic_medium'),
+		('first_traffic_source'),
+		('first_channel');			
 
 	CALL {{schema}}.{{sp_clickstream_log}}(log_name, 'info', 'create temp tables successfully.');
 

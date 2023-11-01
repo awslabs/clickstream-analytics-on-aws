@@ -158,6 +158,7 @@ const project = new awscdk.AwsCdkTypeScriptApp({
     'src/data-pipeline/spark-etl/.gradle',
     'src/data-pipeline/spark-etl/build',
     'src/data-pipeline/spark-etl/bin',
+    'src/data-pipeline/spark-etl/metastore_db',
     'src/data-pipeline/spark-etl/?/',
     'code-coverage-results.md',
   ] /* Additional entries to .gitignore. */,
