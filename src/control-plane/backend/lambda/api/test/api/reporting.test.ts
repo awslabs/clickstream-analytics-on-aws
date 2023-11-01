@@ -367,6 +367,7 @@ describe('reporting test', () => {
         appId: 'app1',
         sheetId: 'a410f75d-48d7-4699-83b8-283fce0f8f31',
         analysisId: 'analysis4e448d67-7c0d-4251-9f0f-45dc2c8dcb09',
+        analysisName: 'analysis-aaaa',
         dashboardId: 'dashboard-37933899-0bb6-4e89-bced-cd8b17d3c160',
         computeMethod: 'USER_CNT',
         specifyJoinColumn: true,
@@ -678,7 +679,6 @@ describe('reporting test', () => {
         analysisId: 'analysis4e448d67-7c0d-4251-9f0f-45dc2c8dcb09',
         analysisName: 'analysis-testview0004',
         dashboardId: 'dashboard-37933899-0bb6-4e89-bced-cd8b17d3c160',
-        dashboardName: 'dashboard-testview0003',
         computeMethod: 'USER_CNT',
         specifyJoinColumn: true,
         joinColumn: 'user_pseudo_id',
@@ -718,7 +718,6 @@ describe('reporting test', () => {
     expect(res.statusCode).toBe(201);
     expect(res.body.success).toEqual(true);
     expect(res.body.data.dashboardArn).toEqual('arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa');
-    expect(res.body.data.dashboardName).toEqual('dashboard-testview0003');
     expect(res.body.data.analysisArn).toEqual('arn:aws:quicksight:us-east-1:11111111:analysis/analysis-aaaaaaaa');
     expect(res.body.data.analysisName).toEqual('analysis-testview0004');
     expect(res.body.data.analysisId).toBeDefined();
@@ -885,10 +884,10 @@ describe('reporting test', () => {
         sheetId: 'a410f75d-48d7-4699-83b8-283fce0f8f31',
         dashboardId: 'dashboard-37933899-0bb6-4e89-bced-cd8b17d3c160',
         analysisId: 'analysis4e448d67-7c0d-4251-9f0f-45dc2c8dcb09',
+        analysisName: 'analysis-testview0004',
         projectId: 'project01_wvzh',
         pipelineId: 'pipeline-1111111',
         appId: 'app1',
-        sheetName: 'sheet99',
         computeMethod: 'USER_CNT',
         specifyJoinColumn: true,
         joinColumn: 'user_pseudo_id',
@@ -995,10 +994,10 @@ describe('reporting test', () => {
         sheetId: 'a410f75d-48d7-4699-83b8-283fce0f8f31',
         dashboardId: 'dashboard-37933899-0bb6-4e89-bced-cd8b17d3c160',
         analysisId: 'analysis4e448d67-7c0d-4251-9f0f-45dc2c8dcb09',
+        analysisName: 'analysis-aaaa',
         projectId: 'project01_wvzh',
         pipelineId: 'pipeline-1111111',
         appId: 'app1',
-        sheetName: 'sheet99',
         computeMethod: 'USER_CNT',
         specifyJoinColumn: true,
         joinColumn: 'user_pseudo_id',
