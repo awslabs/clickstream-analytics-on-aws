@@ -357,9 +357,9 @@ function isSqlFileInOldArray(sqlFile: string, oldSqlArray: string[]): boolean {
   // clickstream_lifecycle_daily_view.sql
   // clickstream_lifecycle_weekly_view.sql
 
-  const oldSqlArrayAdj = oldSqlArray.map(f => f.replace('-', '_'));
+  const oldSqlArrayAdj = oldSqlArray.map(f => f.replace(/-/g, '_'));
   oldSqlArrayAdj.push(... oldSqlArray);
-  return oldSqlArrayAdj.includes(sqlFile.replace('-', '_'));
+  return oldSqlArrayAdj.includes(sqlFile.replace(/-/g, '_'));
 }
 
 async function doUpdate(sqlStatementsByApp: Map<string, string[]>, props: ResourcePropertiesType) {
