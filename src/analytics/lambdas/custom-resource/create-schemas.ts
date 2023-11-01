@@ -326,9 +326,9 @@ function getUpdatableSql(sqlOrViewDefs: SQLDef[], oldSqlArray: string[], mustach
   const updateFilesInfo = [];
   const sqlStatements: string[] = [];
   for (const schemaOrViewDef of sqlOrViewDefs) {
-    logger.info(`schemaOrViewDef.updatable: ${schemaOrViewDef.updatable}`);
+    logger.info(`schemaOrViewDef: sqlFile: ${schemaOrViewDef.sqlFile} - updatable: ${schemaOrViewDef.updatable}`);
 
-    if (!oldSqlArray.includes(schemaOrViewDef.sqlFile)) {
+    if (! isSqlFileInOldArray(schemaOrViewDef.sqlFile, oldSqlArray)) {
       logger.info(`new sql: ${schemaOrViewDef.sqlFile}`);
       sqlStatements.push(getSqlContent(schemaOrViewDef.sqlFile, mustacheParam, path));
       updateFilesInfo.push('new: ' + schemaOrViewDef.sqlFile);
@@ -340,10 +340,26 @@ function getUpdatableSql(sqlOrViewDefs: SQLDef[], oldSqlArray: string[], mustach
       logger.info(`skip update ${schemaOrViewDef.sqlFile} due to it is not updatable.`);
     }
 
-    logger.info('getUpdatableSql', { updateFilesInfo });
   }
-
+  logger.info('getUpdatableSql', { updateFilesInfo });
   return sqlStatements;
+}
+
+function isSqlFileInOldArray(sqlFile: string, oldSqlArray: string[]): boolean {
+
+  // some file name changed from v1.0.x to v1.1.x
+
+  // v1.0.x files:
+  // clickstream-lifecycle-weekly-view.sql
+  // clickstream-lifecycle-weekly-view.sql
+
+  // v1.1.x files:
+  // clickstream_lifecycle_daily_view.sql
+  // clickstream_lifecycle_weekly_view.sql
+
+  const oldSqlArrayAdj = oldSqlArray.map(f => f.replace('-', '_'));
+  oldSqlArrayAdj.push(... oldSqlArray);
+  return oldSqlArrayAdj.includes(sqlFile.replace('-', '_'));
 }
 
 async function doUpdate(sqlStatementsByApp: Map<string, string[]>, props: ResourcePropertiesType) {
