@@ -27,9 +27,9 @@ Clickstream Analytics on AWS provides different client-side SDKs, which can make
 
 - [Android][android-sdk]
 - [Swift][swift-sdk]
-- [Flutter][flutter-sdk]
 - [Web][web-sdk]
-- [WeChat Mini Program][we-chat]
+- [Flutter][flutter-sdk]
+- [WeChat Mini Program][wechat-sdk]
 - [HTTP API][http-api]
 
 ## Deployment
