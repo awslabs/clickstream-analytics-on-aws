@@ -786,6 +786,16 @@ export class CDataModelingStack extends JSONObject {
     ODSEventFileSuffix?: string;
 
   @JSONObject.required
+    PipelineS3Bucket?: string;
+
+  @JSONObject.required
+  @JSONObject.custom( (_stack:any, key:string, value:string) => {
+    validatePattern(key, S3_PREFIX_PATTERN, value);
+    return value;
+  })
+    PipelineS3Prefix?: string;
+
+  @JSONObject.required
     LoadWorkflowBucket?: string;
 
   @JSONObject.required
@@ -988,6 +998,9 @@ export class CDataModelingStack extends JSONObject {
       ODSEventBucket: pipeline.dataModeling?.ods?.bucket.name ?? pipeline.bucket.name,
       ODSEventPrefix: getBucketPrefix(pipeline.projectId, BucketPrefix.DATA_ODS, pipeline.dataModeling?.ods?.bucket.prefix),
       ODSEventFileSuffix: pipeline.dataModeling?.ods?.fileSuffix,
+
+      PipelineS3Bucket: pipeline.dataProcessing?.pipelineBucket.name ?? pipeline.bucket.name,
+      PipelineS3Prefix: getBucketPrefix(pipeline.projectId, BucketPrefix.DATA_PIPELINE_TEMP, pipeline.dataProcessing?.pipelineBucket.prefix),
 
       LoadWorkflowBucket: pipeline.dataModeling?.loadWorkflow?.bucket?.name ?? pipeline.bucket.name,
       LoadWorkflowBucketPrefix: getBucketPrefix(pipeline.projectId, BucketPrefix.DATA_ODS, pipeline.dataModeling?.loadWorkflow?.bucket?.prefix),
