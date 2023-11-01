@@ -186,7 +186,8 @@
     "operatorsText": "Operators",
     "clearFiltersText": "Clear filters",
     "applyActionText": "Apply",
-    "clear": "Clear"
+    "clear": "Clear",
+    "fullWindowView": "Full window view"
   },
   "item": "item",
   "items": "items",

@@ -19,6 +19,7 @@ import {
   Link,
   Popover,
   SpaceBetween,
+  Button,
 } from '@cloudscape-design/components';
 import { getAnalyticsDashboard } from 'apis/analytics';
 import Loading from 'components/common/Loading';
@@ -113,6 +114,18 @@ const AnalyticsDashboardDetail: React.FC = () => {
                           </Popover>
                         ) : null}
                       </>
+                    }
+                    actions={
+                      <SpaceBetween size="xs" direction="horizontal">
+                        <Button
+                          href={dashboard.embedUrl}
+                          iconAlign="right"
+                          iconName="external"
+                          target="_blank"
+                        >
+                          {t('common:button.fullWindowView')}
+                        </Button>
+                      </SpaceBetween>
                     }
                   >
                     {dashboard.name}
