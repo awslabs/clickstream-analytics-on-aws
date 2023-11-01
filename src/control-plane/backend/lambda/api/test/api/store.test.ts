@@ -22,12 +22,12 @@ import { mockClient } from 'aws-sdk-client-mock';
 import { MOCK_SOLUTION_VERSION } from './ddb-mock';
 import { S3_INGESTION_PIPELINE } from './pipeline-mock';
 import { marshallOptions } from '../../common/dynamodb-client';
+import { BuiltInTagKeys } from '../../common/model-ln';
 import { paginateData } from '../../common/utils';
 import { describeSecurityGroupsWithRules, listAvailabilityZones } from '../../store/aws/ec2';
 import { ClickStreamStore } from '../../store/click-stream-store';
 import { DynamoDbStore } from '../../store/dynamodb/dynamodb-store';
 import 'aws-sdk-client-mock-jest';
-import { BuiltInTagKeys } from '../../common/model-ln';
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 const ec2Mock = mockClient(EC2Client);

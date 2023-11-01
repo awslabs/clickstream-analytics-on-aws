@@ -83,13 +83,13 @@ import {
   mergeParameters,
 } from './workflow-mock';
 import { dictionaryTableName } from '../../common/constants';
+import { BuiltInTagKeys } from '../../common/model-ln';
 import { SolutionInfo } from '../../common/solution-info-ln';
 import { WorkflowStateType, WorkflowTemplate } from '../../common/types';
 import { server } from '../../index';
 import { CPipeline } from '../../model/pipeline';
 import { StackManager } from '../../service/stack';
 import 'aws-sdk-client-mock-jest';
-import { BuiltInTagKeys } from '../../common/model-ln';
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 const kafkaMock = mockClient(KafkaClient);

@@ -73,10 +73,10 @@ import {
   BASE_STATUS,
 } from './pipeline-mock';
 import { clickStreamTableName, dictionaryTableName, prefixTimeGSIName } from '../../common/constants';
+import { BuiltInTagKeys } from '../../common/model-ln';
 import { PipelineStatusType } from '../../common/types';
 import { app, server } from '../../index';
 import 'aws-sdk-client-mock-jest';
-import { BuiltInTagKeys } from '../../common/model-ln';
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 const sfnMock = mockClient(SFNClient);
