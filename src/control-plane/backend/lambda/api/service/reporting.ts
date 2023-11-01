@@ -89,6 +89,7 @@ export class ReportingService {
         timeUnit: query.timeUnit,
         groupColumn: query.groupColumn,
         groupCondition: query.groupCondition,
+        globalEventCondition: query.globalEventCondition,
       }, query.chartType === QuickSightChartType.BAR);
 
       logger.debug(`funnel sql: ${sql}`);
@@ -108,6 +109,8 @@ export class ReportingService {
         lastN: query.lastN,
         timeUnit: query.timeUnit,
         groupColumn: query.groupColumn,
+        groupCondition: query.groupCondition,
+        globalEventCondition: query.globalEventCondition,
       });
 
       logger.debug(`funnel table chart sql: ${sqlTable}`);
@@ -167,6 +170,7 @@ export class ReportingService {
       Type: 'STRING',
     }];
 
+    const maxIndex = query.eventAndConditions.length - 1;
     for (const [index, item] of query.eventAndConditions.entries()) {
       projectedColumns.push(`${item.eventName}`);
       tableViewCols.push({
@@ -175,18 +179,21 @@ export class ReportingService {
       });
 
       if (index === 0) {
-        projectedColumns.push('rate');
+        continue;
+      }
+      if (index === maxIndex) {
+        projectedColumns.push('total_conversion_rate');
         tableViewCols.push({
-          Name: 'rate',
-          Type: 'DECIMAL',
-        });
-      } else {
-        projectedColumns.push(`${item.eventName}_rate`);
-        tableViewCols.push({
-          Name: `${item.eventName}_rate`,
+          Name: 'total_conversion_rate',
           Type: 'DECIMAL',
         });
       }
+      projectedColumns.push(`${item.eventName}_rate`);
+      tableViewCols.push({
+        Name: `${item.eventName}_rate`,
+        Type: 'DECIMAL',
+      });
+
     }
     datasetPropsArray.push({
       name: '',
@@ -282,6 +289,7 @@ export class ReportingService {
         timeUnit: query.timeUnit,
         groupColumn: query.groupColumn,
         groupCondition: query.groupCondition,
+        globalEventCondition: query.globalEventCondition,
       });
       logger.debug(`event analysis sql: ${sql}`);
 
@@ -390,6 +398,8 @@ export class ReportingService {
           includingOtherEvents: query.pathAnalysis.includingOtherEvents,
           mergeConsecutiveEvents: query.pathAnalysis.mergeConsecutiveEvents,
         },
+        groupCondition: query.groupCondition,
+        globalEventCondition: query.globalEventCondition,
       });
     }
 
@@ -415,6 +425,8 @@ export class ReportingService {
         includingOtherEvents: query.pathAnalysis.includingOtherEvents,
         mergeConsecutiveEvents: query.pathAnalysis.mergeConsecutiveEvents,
       },
+      groupCondition: query.groupCondition,
+      globalEventCondition: query.globalEventCondition,
     });
   }
 
@@ -522,6 +534,7 @@ export class ReportingService {
         groupColumn: query.groupColumn,
         pairEventAndConditions: query.pairEventAndConditions,
         groupCondition: query.groupCondition,
+        globalEventCondition: query.globalEventCondition,
       });
       logger.debug(`retention analysis sql: ${sql}`);
 
@@ -738,7 +751,7 @@ export class ReportingService {
   private async _publishNewVersionDashboard(quickSight: QuickSight, query: any,
     versionNumber: string) {
     let cnt = 0;
-    for (const _i of Array(60).keys()) {
+    for (const _i of Array(100).keys()) {
       cnt += 1;
       try {
         const response = await quickSight.updateDashboardPublishedVersion({
@@ -759,7 +772,7 @@ export class ReportingService {
         }
       }
     }
-    if (cnt >= 60) {
+    if (cnt >= 100) {
       throw new Error(`publish dashboard new version failed after try ${cnt} times`);
     }
   }

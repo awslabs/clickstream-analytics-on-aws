@@ -76,7 +76,7 @@
                 },
                 {
                     "FieldSort":{
-                        "FieldId":"{{smalMultiplesFieldId}}",
+                        "FieldId":"{{dimFieldId}}",
                         "Direction":"ASC"
                     }
                 }
@@ -116,6 +116,7 @@
                             "Visibility":"VISIBLE"
                         }
                     },
+                    
                     {
                         "FieldTooltipItem":{
                             "FieldId":"{{dimFieldId}}",

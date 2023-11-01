@@ -26,7 +26,6 @@ import {
   ColumnTag,
   DeleteDashboardCommandOutput,
   GeoSpatialDataRole,
-  DataSetImportMode,
 } from '@aws-sdk/client-quicksight';
 import { Context, CloudFormationCustomResourceEvent, CloudFormationCustomResourceUpdateEvent, CloudFormationCustomResourceCreateEvent, CloudFormationCustomResourceDeleteEvent, CdkCustomResourceResponse } from 'aws-lambda';
 import Mustache from 'mustache';
@@ -223,7 +222,6 @@ const createQuickSightDashboard = async (quickSight: QuickSight,
 : Promise<CreateDashboardCommandOutput|undefined> => {
 
   const datasetRefs: DataSetReference[] = [];
-  const datasetIds: string[] = [];
   const dataSets = dashboardDef.dataSets;
   const databaseName = dashboardDef.databaseName;
   for ( const dataSet of dataSets) {
@@ -235,7 +233,6 @@ const createQuickSightDashboard = async (quickSight: QuickSight,
       DataSetPlaceholder: dataSet.tableName,
       DataSetArn: createdDataset?.Arn!,
     });
-    datasetIds.push(createdDataset?.DataSetId!);
   }
 
   const sourceEntity = {
@@ -394,7 +391,7 @@ const createDataSet = async (quickSight: QuickSight, awsAccountId: string, princ
         Actions: dataSetActions,
       }],
 
-      ImportMode: props.importMode as DataSetImportMode,
+      ImportMode: props.importMode,
       PhysicalTableMap: {
         PhyTable1: {
           CustomSql: {
@@ -668,7 +665,7 @@ const updateDataSet = async (quickSight: QuickSight, awsAccountId: string,
       DataSetId: datasetId,
       Name: `${identifier.tableNameIdentifier}-${identifier.schemaIdentifier}-${identifier.databaseIdentifier}`,
 
-      ImportMode: props.importMode as DataSetImportMode,
+      ImportMode: props.importMode,
       PhysicalTableMap: {
         PhyTable1: {
           CustomSql: {

@@ -365,12 +365,10 @@ describe('reporting test', () => {
         projectId: 'project01_wvzh',
         pipelineId: '87ea3d080cc34bb398275a27f4e8b113',
         appId: 'app1',
-        sheetName: 'sheet99',
         sheetId: 'a410f75d-48d7-4699-83b8-283fce0f8f31',
         analysisId: 'analysis4e448d67-7c0d-4251-9f0f-45dc2c8dcb09',
-        analysisName: 'analysis-testview0004',
+        analysisName: 'analysis-aaaa',
         dashboardId: 'dashboard-37933899-0bb6-4e89-bced-cd8b17d3c160',
-        dashboardName: 'dashboard-testview0003',
         computeMethod: 'USER_CNT',
         specifyJoinColumn: true,
         joinColumn: 'user_pseudo_id',
@@ -408,11 +406,11 @@ describe('reporting test', () => {
     expect(res.statusCode).toBe(201);
     expect(res.body.success).toEqual(true);
     expect(res.body.data.dashboardArn).toEqual('arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa');
-    expect(res.body.data.dashboardName).toEqual('dashboard-testview0003');
     expect(res.body.data.analysisArn).toEqual('arn:aws:quicksight:us-east-1:11111111:analysis/analysis-aaaaaaaa');
-    expect(res.body.data.analysisName).toEqual('analysis-testview0004');
     expect(res.body.data.analysisId).toBeDefined();
     expect(res.body.data.visualIds).toBeDefined();
+    expect(res.body.data.dashboardVersion).toBeDefined();
+    expect(res.body.data.dashboardEmbedUrl).toEqual('');
     expect(res.body.data.visualIds.length).toEqual(2);
     expect(quickSightMock).toHaveReceivedCommandTimes(DescribeAnalysisCommand, 0);
   });
@@ -681,7 +679,6 @@ describe('reporting test', () => {
         analysisId: 'analysis4e448d67-7c0d-4251-9f0f-45dc2c8dcb09',
         analysisName: 'analysis-testview0004',
         dashboardId: 'dashboard-37933899-0bb6-4e89-bced-cd8b17d3c160',
-        dashboardName: 'dashboard-testview0003',
         computeMethod: 'USER_CNT',
         specifyJoinColumn: true,
         joinColumn: 'user_pseudo_id',
@@ -721,7 +718,6 @@ describe('reporting test', () => {
     expect(res.statusCode).toBe(201);
     expect(res.body.success).toEqual(true);
     expect(res.body.data.dashboardArn).toEqual('arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa');
-    expect(res.body.data.dashboardName).toEqual('dashboard-testview0003');
     expect(res.body.data.analysisArn).toEqual('arn:aws:quicksight:us-east-1:11111111:analysis/analysis-aaaaaaaa');
     expect(res.body.data.analysisName).toEqual('analysis-testview0004');
     expect(res.body.data.analysisId).toBeDefined();
@@ -852,12 +848,28 @@ describe('reporting test', () => {
       Status: StatusString.FINISHED,
     });
 
-    quickSightMock.on(CreateAnalysisCommand).resolves({
-      Arn: 'arn:aws:quicksight:us-east-1:11111111:analysis/analysisaaaaaaaa',
+    quickSightMock.on(DescribeDashboardDefinitionCommand).resolves({
+      Definition: dashboardDef,
+      Name: 'dashboard-test',
     });
-    quickSightMock.on(CreateDashboardCommand).resolves({
+
+    quickSightMock.on(UpdateAnalysisCommand).resolves({
+      Arn: 'arn:aws:quicksight:us-east-1:11111111:analysis/analysis-aaaaaaaa',
+    });
+
+    quickSightMock.on(UpdateDashboardCommand).resolves({
       Arn: 'arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa',
       VersionArn: 'arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa/1',
+    });
+
+    quickSightMock.on(UpdateDashboardPublishedVersionCommand).resolves({
+      DashboardId: 'dashboard-aaaaaaaa',
+    });
+
+    quickSightMock.on(DescribeAnalysisCommand).resolves({
+      Analysis: {
+        Name: 'test-analysis',
+      },
     });
 
     const res = await request(app)
@@ -869,10 +881,13 @@ describe('reporting test', () => {
         chartType: QuickSightChartType.SANKEY,
         chartSubTitle: 'test-subtitle',
         viewName: 'testview0002',
+        sheetId: 'a410f75d-48d7-4699-83b8-283fce0f8f31',
+        dashboardId: 'dashboard-37933899-0bb6-4e89-bced-cd8b17d3c160',
+        analysisId: 'analysis4e448d67-7c0d-4251-9f0f-45dc2c8dcb09',
+        analysisName: 'analysis-testview0004',
         projectId: 'project01_wvzh',
         pipelineId: 'pipeline-1111111',
         appId: 'app1',
-        sheetName: 'sheet99',
         computeMethod: 'USER_CNT',
         specifyJoinColumn: true,
         joinColumn: 'user_pseudo_id',
@@ -918,9 +933,7 @@ describe('reporting test', () => {
     expect(res.statusCode).toBe(201);
     expect(res.body.success).toEqual(true);
     expect(res.body.data.dashboardArn).toEqual('arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa');
-    expect(res.body.data.dashboardName).toEqual('testview0002');
-    expect(res.body.data.analysisArn).toEqual('arn:aws:quicksight:us-east-1:11111111:analysis/analysisaaaaaaaa');
-    expect(res.body.data.analysisName).toEqual('testview0002');
+    expect(res.body.data.analysisArn).toEqual('arn:aws:quicksight:us-east-1:11111111:analysis/analysis-aaaaaaaa');
     expect(res.body.data.analysisId).toBeDefined();
     expect(res.body.data.dashboardId).toBeDefined();
     expect(res.body.data.visualIds).toBeDefined();
@@ -946,12 +959,27 @@ describe('reporting test', () => {
       Status: StatusString.FINISHED,
     });
 
-    quickSightMock.on(CreateAnalysisCommand).resolves({
-      Arn: 'arn:aws:quicksight:us-east-1:11111111:analysis/analysisaaaaaaaa',
+    quickSightMock.on(DescribeDashboardDefinitionCommand).resolves({
+      Definition: dashboardDef,
+      Name: 'dashboard-test',
     });
-    quickSightMock.on(CreateDashboardCommand).resolves({
+
+    quickSightMock.on(UpdateAnalysisCommand).resolves({
+      Arn: 'arn:aws:quicksight:us-east-1:11111111:analysis/analysis-aaaaaaaa',
+    });
+
+    quickSightMock.on(UpdateDashboardCommand).resolves({
       Arn: 'arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa',
       VersionArn: 'arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa/1',
+    });
+
+    quickSightMock.on(UpdateDashboardPublishedVersionCommand).resolves({
+      DashboardId: 'dashboard-aaaaaaaa',
+    });
+    quickSightMock.on(DescribeAnalysisCommand).resolves({
+      Analysis: {
+        Name: 'test-analysis',
+      },
     });
 
     const res = await request(app)
@@ -963,10 +991,13 @@ describe('reporting test', () => {
         chartSubTitle: 'test-subtitle',
         chartType: QuickSightChartType.LINE,
         viewName: 'testview0002',
+        sheetId: 'a410f75d-48d7-4699-83b8-283fce0f8f31',
+        dashboardId: 'dashboard-37933899-0bb6-4e89-bced-cd8b17d3c160',
+        analysisId: 'analysis4e448d67-7c0d-4251-9f0f-45dc2c8dcb09',
+        analysisName: 'analysis-aaaa',
         projectId: 'project01_wvzh',
         pipelineId: 'pipeline-1111111',
         appId: 'app1',
-        sheetName: 'sheet99',
         computeMethod: 'USER_CNT',
         specifyJoinColumn: true,
         joinColumn: 'user_pseudo_id',
@@ -1024,9 +1055,7 @@ describe('reporting test', () => {
     expect(res.statusCode).toBe(201);
     expect(res.body.success).toEqual(true);
     expect(res.body.data.dashboardArn).toEqual('arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa');
-    expect(res.body.data.dashboardName).toEqual('testview0002');
-    expect(res.body.data.analysisArn).toEqual('arn:aws:quicksight:us-east-1:11111111:analysis/analysisaaaaaaaa');
-    expect(res.body.data.analysisName).toEqual('testview0002');
+    expect(res.body.data.analysisArn).toEqual('arn:aws:quicksight:us-east-1:11111111:analysis/analysis-aaaaaaaa');
     expect(res.body.data.analysisId).toBeDefined();
     expect(res.body.data.dashboardId).toBeDefined();
     expect(res.body.data.visualIds).toBeDefined();
@@ -1402,7 +1431,7 @@ describe('reporting test', () => {
         action: 'PUBLISH',
         chartType: QuickSightChartType.BAR,
         sheetId: 'a410f75d-48d7-4699-83b8-283fce0f8f31',
-        dashboardId: 'analysis4e448d67-7c0d-4251-9f0f-45dc2c8dcb09',
+        dashboardId: 'dashboard-37933899-0bb6-4e89-bced-cd8b17d3c160',
         viewName: 'testview0002',
         projectId: 'project01_wvzh',
         pipelineId: 'pipeline-1111111',
@@ -1977,6 +2006,8 @@ describe('reporting test', () => {
         viewName: 'testview0002',
         projectId: 'project01_wvzh',
         pipelineId: 'pipeline-1111111',
+        sheetId: 'a410f75d-48d7-4699-83b8-283fce0f8f31',
+        dashboardId: 'dashboard-37933899-0bb6-4e89-bced-cd8b17d3c160',
         appId: 'app1',
         sheetName: 'sheet99',
         computeMethod: 'USER_CNT',
@@ -2030,6 +2061,8 @@ describe('reporting test', () => {
         chartTitle: 'test-title',
         chartSubTitle: 'test-subtitle',
         chartType: QuickSightChartType.FUNNEL,
+        sheetId: 'a410f75d-48d7-4699-83b8-283fce0f8f31',
+        dashboardId: 'dashboard-37933899-0bb6-4e89-bced-cd8b17d3c160',
         viewName: 'testview0002',
         projectId: 'project01_wvzh',
         pipelineId: 'pipeline-1111111',
