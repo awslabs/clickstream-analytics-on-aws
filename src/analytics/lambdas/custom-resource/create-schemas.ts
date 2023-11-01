@@ -328,7 +328,7 @@ function getUpdatableSql(sqlOrViewDefs: SQLDef[], oldSqlArray: string[], mustach
   for (const schemaOrViewDef of sqlOrViewDefs) {
     logger.info(`schemaOrViewDef: sqlFile: ${schemaOrViewDef.sqlFile} - updatable: ${schemaOrViewDef.updatable}`);
 
-    if (! isSqlFileInOldArray(schemaOrViewDef.sqlFile, oldSqlArray)) {
+    if (! oldSqlArray.includes(schemaOrViewDef.sqlFile)) {
       logger.info(`new sql: ${schemaOrViewDef.sqlFile}`);
       sqlStatements.push(getSqlContent(schemaOrViewDef.sqlFile, mustacheParam, path));
       updateFilesInfo.push('new: ' + schemaOrViewDef.sqlFile);
@@ -343,23 +343,6 @@ function getUpdatableSql(sqlOrViewDefs: SQLDef[], oldSqlArray: string[], mustach
   }
   logger.info('getUpdatableSql', { updateFilesInfo });
   return sqlStatements;
-}
-
-function isSqlFileInOldArray(sqlFile: string, oldSqlArray: string[]): boolean {
-
-  // some file name changed from v1.0.x to v1.1.x
-
-  // v1.0.x files:
-  // clickstream-lifecycle-weekly-view.sql
-  // clickstream-lifecycle-weekly-view.sql
-
-  // v1.1.x files:
-  // clickstream_lifecycle_daily_view.sql
-  // clickstream_lifecycle_weekly_view.sql
-
-  const oldSqlArrayAdj = oldSqlArray.map(f => f.replace(/-/g, '_'));
-  oldSqlArrayAdj.push(... oldSqlArray);
-  return oldSqlArrayAdj.includes(sqlFile.replace(/-/g, '_'));
 }
 
 async function doUpdate(sqlStatementsByApp: Map<string, string[]>, props: ResourcePropertiesType) {

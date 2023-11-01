@@ -1,3 +1,5 @@
+DROP MATERIALIZED VIEW IF EXISTS {{schema}}.clickstream_user_attr_view;
+
 CREATE OR REPLACE VIEW {{schema}}.clickstream_user_attr_view
 AS
 select 

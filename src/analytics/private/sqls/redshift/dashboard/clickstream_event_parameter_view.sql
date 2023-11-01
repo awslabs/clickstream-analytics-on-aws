@@ -1,3 +1,5 @@
+DROP MATERIALIZED VIEW IF EXISTS {{schema}}.clickstream_event_parameter_view;
+
 CREATE MATERIALIZED VIEW {{schema}}.clickstream_event_parameter_view 
 BACKUP NO
 SORTKEY(event_date, event_name)
