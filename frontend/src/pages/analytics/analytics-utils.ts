@@ -67,6 +67,7 @@ export const metadataEventsConvertToCategoryItemType = (
         value: item.id,
         description: item.description,
         metadataSource: item.metadataSource,
+        platform: item.platform,
         modifyTime: moment(item.updateAt).format(TIME_FORMAT) || '-',
       });
     } else if (item.metadataSource === MetadataSource.CUSTOM) {
@@ -76,6 +77,7 @@ export const metadataEventsConvertToCategoryItemType = (
         value: item.id,
         description: item.description,
         metadataSource: item.metadataSource,
+        platform: item.platform,
         modifyTime: moment(item.updateAt).format(TIME_FORMAT) || '-',
       });
     }
