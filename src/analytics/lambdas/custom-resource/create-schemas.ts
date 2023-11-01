@@ -27,6 +27,7 @@ import {
   UpdateSecretCommandInput,
 } from '@aws-sdk/client-secrets-manager';
 import { CdkCustomResourceHandler, CdkCustomResourceEvent, CdkCustomResourceResponse, CloudFormationCustomResourceEvent, Context, CloudFormationCustomResourceUpdateEvent } from 'aws-lambda';
+import { REPORTING_VIEW_VERSION } from '../../../common/constant';
 import { getFunctionTags } from '../../../common/lambda/tags';
 import { BIUserCredential } from '../../../common/model';
 import { logger } from '../../../common/powertools';
@@ -386,11 +387,12 @@ async function createViewForReporting(props: ResourcePropertiesType, biUser: str
       table_event_parameter: odsTableNames.event_parameter,
       table_user: odsTableNames.user,
       table_item: odsTableNames.item,
+      viewVersion: REPORTING_VIEW_VERSION,
       ...SQL_TEMPLATE_PARAMETER,
     };
 
     for (const viewDef of props.reportingViewsDef) {
-      views.push(viewDef.sqlFile.replace('.sql', ''));
+      views.push(viewDef.sqlFile.replace('.sql', '') + REPORTING_VIEW_VERSION);
       sqlStatements.push(getSqlContent(viewDef.sqlFile, mustacheParam, '/opt/dashboard'));
     }
     sqlStatements.push(..._buildGrantSqlStatements(views, app, biUser));
@@ -421,11 +423,12 @@ async function updateViewForReporting(props: ResourcePropertiesType, oldProps: R
       table_event_parameter: odsTableNames.event_parameter,
       table_user: odsTableNames.user,
       table_item: odsTableNames.item,
+      viewVersion: REPORTING_VIEW_VERSION,
       ...SQL_TEMPLATE_PARAMETER,
     };
     const views: string[] = [];
     for (const viewDef of props.reportingViewsDef) {
-      views.push(viewDef.sqlFile.replace('.sql', ''));
+      views.push(viewDef.sqlFile.replace('.sql', '') + REPORTING_VIEW_VERSION);
       sqlStatements.push(getSqlContent(viewDef.sqlFile, mustacheParam, '/opt/dashboard'));
     }
     sqlStatements.push(..._buildGrantSqlStatements(views, app, biUser));
@@ -442,6 +445,7 @@ async function updateViewForReporting(props: ResourcePropertiesType, oldProps: R
       table_event_parameter: odsTableNames.event_parameter,
       table_user: odsTableNames.user,
       table_item: odsTableNames.item,
+      viewVersion: REPORTING_VIEW_VERSION,
       ...SQL_TEMPLATE_PARAMETER,
     };
 
@@ -450,7 +454,7 @@ async function updateViewForReporting(props: ResourcePropertiesType, oldProps: R
     //grant select on views to bi user.
     const views: string[] = [];
     for (const sqlDef of props.reportingViewsDef) {
-      views.push(sqlDef.sqlFile.replace('.sql', ''));
+      views.push(sqlDef.sqlFile.replace('.sql', '') + REPORTING_VIEW_VERSION);
     }
     sqlStatements2.push(..._buildGrantSqlStatements(views, app, biUser));
 

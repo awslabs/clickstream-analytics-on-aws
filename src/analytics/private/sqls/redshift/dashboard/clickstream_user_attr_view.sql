@@ -1,4 +1,4 @@
-CREATE OR REPLACE VIEW {{schema}}.clickstream_user_attr_view
+CREATE OR REPLACE VIEW {{schema}}.clickstream_user_attr_view{{viewVersion}}
 AS
 select 
    user_id
