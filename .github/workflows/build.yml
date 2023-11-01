@@ -31,7 +31,7 @@ jobs:
         run: yarn install --check-files
       - name: Configure AWS Credentials
         if: ${{ env.iam_role_to_assume != '' }}
-        uses: aws-actions/configure-aws-credentials@v2
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ env.iam_role_to_assume }}
           aws-region: us-east-1
