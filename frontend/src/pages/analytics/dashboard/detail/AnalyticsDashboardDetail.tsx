@@ -118,7 +118,7 @@ const AnalyticsDashboardDetail: React.FC = () => {
                     actions={
                       <SpaceBetween size="xs" direction="horizontal">
                         <Button
-                          href={dashboard.embedUrl}
+                          href={`/analytics/${projectId}/app/${appId}/dashboard/full/${dashboard.id}`}
                           iconAlign="right"
                           iconName="external"
                           target="_blank"
