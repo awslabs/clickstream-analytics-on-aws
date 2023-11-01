@@ -13,8 +13,9 @@
 
 import { StackStatus } from '@aws-sdk/client-cloudformation';
 import { ExecutionStatus } from '@aws-sdk/client-sfn';
-import { MOCK_EXECUTION_ID, MOCK_EXECUTION_ID_OLD, MOCK_PIPELINE_ID, MOCK_PLUGIN_ID, MOCK_PROJECT_ID } from './ddb-mock';
+import { MOCK_EXECUTION_ID, MOCK_EXECUTION_ID_OLD, MOCK_PIPELINE_ID, MOCK_PLUGIN_ID, MOCK_PROJECT_ID, MOCK_SOLUTION_VERSION } from './ddb-mock';
 import { BASE_METRICS_EMAILS_PARAMETERS, BASE_METRICS_PARAMETERS } from './workflow-mock';
+import { BuiltInTagKeys } from '../../common/model-ln';
 import {
   KinesisStreamMode,
   PipelineServerProtocol,
@@ -58,8 +59,9 @@ const BASE_PIPELINE_ATTRIBUTES = {
   tags: [
     { key: 'customerKey1', value: 'tagValue1' },
     { key: 'customerKey2', value: 'tagValue2' },
-    { key: 'aws-solution/version', value: 'tagValue3' },
+    { key: BuiltInTagKeys.AWS_SOLUTION_VERSION, value: 'tagValue3' },
   ],
+  templateVersion: MOCK_SOLUTION_VERSION,
   bucket: {
     name: 'EXAMPLE_BUCKET',
     prefix: 'example/',
@@ -673,7 +675,7 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_QUICKSIGHT_PIPELINE: IPipeline
   },
 };
 
-const BASE_STATUS = {
+export const BASE_STATUS = {
   status: PipelineStatusType.ACTIVE,
   stackDetails: [
     {
@@ -681,6 +683,7 @@ const BASE_STATUS = {
       stackType: PipelineStackType.KAFKA_CONNECTOR,
       stackStatus: StackStatus.CREATE_COMPLETE,
       stackStatusReason: '',
+      stackTemplateVersion: MOCK_SOLUTION_VERSION,
       outputs: [],
     },
     {
@@ -688,6 +691,7 @@ const BASE_STATUS = {
       stackType: PipelineStackType.INGESTION,
       stackStatus: StackStatus.CREATE_COMPLETE,
       stackStatusReason: '',
+      stackTemplateVersion: MOCK_SOLUTION_VERSION,
       outputs: [],
     },
     {
@@ -695,6 +699,7 @@ const BASE_STATUS = {
       stackType: PipelineStackType.DATA_PROCESSING,
       stackStatus: StackStatus.CREATE_COMPLETE,
       stackStatusReason: '',
+      stackTemplateVersion: MOCK_SOLUTION_VERSION,
       outputs: [],
     },
     {
@@ -702,6 +707,7 @@ const BASE_STATUS = {
       stackType: PipelineStackType.DATA_MODELING_REDSHIFT,
       stackStatus: StackStatus.CREATE_COMPLETE,
       stackStatusReason: '',
+      stackTemplateVersion: MOCK_SOLUTION_VERSION,
       outputs: [],
     },
     {
@@ -709,6 +715,7 @@ const BASE_STATUS = {
       stackType: PipelineStackType.REPORTING,
       stackStatus: StackStatus.CREATE_COMPLETE,
       stackStatusReason: '',
+      stackTemplateVersion: MOCK_SOLUTION_VERSION,
       outputs: [],
     },
     {
@@ -716,6 +723,7 @@ const BASE_STATUS = {
       stackType: PipelineStackType.METRICS,
       stackStatus: StackStatus.CREATE_COMPLETE,
       stackStatusReason: '',
+      stackTemplateVersion: MOCK_SOLUTION_VERSION,
       outputs: [],
     },
   ],
@@ -792,13 +800,8 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW: IPipel
                   BucketName: 'EXAMPLE_BUCKET',
                 },
               },
-              End: true,
+              Next: 'DataModeling',
             },
-          },
-          StartAt: 'DataProcessing',
-        },
-        {
-          States: {
             Reporting: {
               Type: WorkflowStateType.STACK,
               Data: {
@@ -839,7 +842,7 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW: IPipel
               Next: 'Reporting',
             },
           },
-          StartAt: 'DataModeling',
+          StartAt: 'DataProcessing',
         },
         {
           StartAt: 'Metrics',
@@ -935,13 +938,8 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW_AND_EXP
                   BucketName: 'EXAMPLE_BUCKET',
                 },
               },
-              End: true,
+              Next: 'DataModeling',
             },
-          },
-          StartAt: 'DataProcessing',
-        },
-        {
-          States: {
             Reporting: {
               Type: WorkflowStateType.STACK,
               Data: {
@@ -981,6 +979,11 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW_AND_EXP
               },
               Next: 'Reporting',
             },
+          },
+          StartAt: 'DataProcessing',
+        },
+        {
+          States: {
           },
           StartAt: 'DataModeling',
         },
@@ -1029,7 +1032,7 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW_FOR_UPG
               Data: {
                 Input: {
                   Region: 'ap-southeast-1',
-                  TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/kafka-s3-sink-stack.template.json',
+                  TemplateURL: `https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/${MOCK_SOLUTION_VERSION}/default/kafka-s3-sink-stack.template.json`,
                   Action: 'Create',
                   Parameters: [],
                   StackName: `Clickstream-KafkaConnector-${MOCK_PIPELINE_ID}`,
@@ -1046,7 +1049,7 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW_FOR_UPG
               Data: {
                 Input: {
                   Region: 'ap-southeast-1',
-                  TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/ingestion-server-kafka-stack.template.json',
+                  TemplateURL: `https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/${MOCK_SOLUTION_VERSION}/default/ingestion-server-kafka-stack.template.json`,
                   Action: 'Create',
                   Parameters: [],
                   StackName: `Clickstream-Ingestion-kafka-${MOCK_PIPELINE_ID}`,
@@ -1068,7 +1071,7 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW_FOR_UPG
               Data: {
                 Input: {
                   Region: 'ap-southeast-1',
-                  TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-pipeline-stack.template.json',
+                  TemplateURL: `https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/${MOCK_SOLUTION_VERSION}/default/data-pipeline-stack.template.json`,
                   Action: 'Create',
                   Parameters: [],
                   StackName: `Clickstream-DataProcessing-${MOCK_PIPELINE_ID}`,
@@ -1078,19 +1081,14 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW_FOR_UPG
                   BucketName: 'EXAMPLE_BUCKET',
                 },
               },
-              End: true,
+              Next: 'DataModeling',
             },
-          },
-          StartAt: 'DataProcessing',
-        },
-        {
-          States: {
             Reporting: {
               Type: WorkflowStateType.STACK,
               Data: {
                 Input: {
                   Region: 'ap-southeast-1',
-                  TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-reporting-quicksight-stack.template.json',
+                  TemplateURL: `https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/${MOCK_SOLUTION_VERSION}/default/data-reporting-quicksight-stack.template.json`,
                   Action: 'Create',
                   Parameters: [],
                   StackName: `Clickstream-Reporting-${MOCK_PIPELINE_ID}`,
@@ -1107,7 +1105,7 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW_FOR_UPG
               Data: {
                 Input: {
                   Region: 'ap-southeast-1',
-                  TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-analytics-redshift-stack.template.json',
+                  TemplateURL: `https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/${MOCK_SOLUTION_VERSION}/default/data-analytics-redshift-stack.template.json`,
                   Action: 'Create',
                   Parameters: [],
                   StackName: `Clickstream-DataModelingRedshift-${MOCK_PIPELINE_ID}`,
@@ -1120,7 +1118,7 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW_FOR_UPG
               Next: 'Reporting',
             },
           },
-          StartAt: 'DataModeling',
+          StartAt: 'DataProcessing',
         },
         {
           StartAt: 'Metrics',
@@ -1136,7 +1134,7 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW_FOR_UPG
                   Region: 'ap-southeast-1',
                   Parameters: BASE_METRICS_PARAMETERS,
                   StackName: 'Clickstream-Metrics-6666-6666',
-                  TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/metrics-stack.template.json',
+                  TemplateURL: `https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/${MOCK_SOLUTION_VERSION}/default/metrics-stack.template.json`,
                 },
               },
               End: true,
@@ -1214,13 +1212,8 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_UPDATE_PIPELINE_WITH_WORKFLOW:
                   BucketName: 'EXAMPLE_BUCKET',
                 },
               },
-              End: true,
+              Next: 'DataModeling',
             },
-          },
-          StartAt: 'DataProcessing',
-        },
-        {
-          States: {
             Reporting: {
               Type: WorkflowStateType.STACK,
               Data: {
@@ -1256,7 +1249,7 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_UPDATE_PIPELINE_WITH_WORKFLOW:
               Next: 'Reporting',
             },
           },
-          StartAt: 'DataModeling',
+          StartAt: 'DataProcessing',
         },
         {
           StartAt: 'Metrics',
@@ -1285,32 +1278,84 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_UPDATE_PIPELINE_WITH_WORKFLOW:
   },
 };
 
-export const RETRY_PIPELINE_WITH_WORKFLOW: IPipeline = {
-  ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
-  status: {
-    ...BASE_STATUS,
-    status: PipelineStatusType.FAILED,
-    stackDetails: [
-      {
-        ...BASE_STATUS.stackDetails[0],
-        stackStatus: StackStatus.CREATE_FAILED,
+const BASE_RETRY_PIPELINE: IPipeline = {
+  ...BASE_PIPELINE_ATTRIBUTES,
+  ingestionServer: {
+    ...BASE_PIPELINE_ATTRIBUTES.ingestionServer,
+    sinkType: PipelineSinkType.KINESIS,
+    sinkBatch: {
+      size: 10000,
+      intervalSeconds: 180,
+    },
+    sinkKinesis: {
+      kinesisStreamMode: KinesisStreamMode.ON_DEMAND,
+      sinkBucket: {
+        name: 'EXAMPLE_BUCKET',
+        prefix: '',
       },
-      BASE_STATUS.stackDetails[1],
-      BASE_STATUS.stackDetails[2],
-      BASE_STATUS.stackDetails[3],
-      BASE_STATUS.stackDetails[4],
-    ],
-    executionDetail: {
-      name: MOCK_EXECUTION_ID,
-      status: ExecutionStatus.FAILED,
     },
   },
-};
-
-export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_QUICKSIGHT_PIPELINE_WITH_WORKFLOW: IPipeline = {
-  ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_QUICKSIGHT_PIPELINE,
-  status: {
-    ...BASE_STATUS,
+  dataProcessing: {
+    dataFreshnessInHour: 7,
+    scheduleExpression: 'rate(6 minutes)',
+    sourceS3Bucket: {
+      name: 'EXAMPLE_BUCKET',
+      prefix: '',
+    },
+    sinkS3Bucket: {
+      name: 'EXAMPLE_BUCKET',
+      prefix: '',
+    },
+    pipelineBucket: {
+      name: 'EXAMPLE_BUCKET',
+      prefix: '',
+    },
+    transformPlugin: 'BUILT-IN-1',
+    enrichPlugin: ['BUILT-IN-2', 'BUILT-IN-3', `${MOCK_PLUGIN_ID}_2`],
+  },
+  dataModeling: {
+    ods: {
+      bucket: {
+        name: 'EXAMPLE_BUCKET',
+        prefix: '',
+      },
+      fileSuffix: '.snappy.parquet',
+    },
+    athena: false,
+    redshift: {
+      dataRange: 'rate(6 months)',
+      newServerless: {
+        network: {
+          vpcId: 'vpc-00000000000000001',
+          subnetIds: [
+            'subnet-00000000000000010',
+            'subnet-00000000000000011',
+            'subnet-00000000000000012',
+            'subnet-00000000000000013',
+          ],
+          securityGroups: [
+            'sg-00000000000000030',
+            'sg-00000000000000031',
+          ],
+        },
+        baseCapacity: 8,
+      },
+    },
+    loadWorkflow: {
+      bucket: {
+        name: 'EXAMPLE_BUCKET',
+        prefix: '',
+      },
+      maxFilesLimit: 50,
+    },
+    upsertUsers: {
+      scheduleExpression: 'rate(5 minutes)',
+    },
+  },
+  reporting: {
+    quickSight: {
+      accountName: 'clickstream-acc-xxx',
+    },
   },
   workflow: {
     Version: '2022-03-15',
@@ -1331,7 +1376,7 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_QUICKSIGHT_PIPELINE_WITH_WORKF
                   StackName: `Clickstream-KafkaConnector-${MOCK_PIPELINE_ID}`,
                 },
                 Callback: {
-                  BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID}`,
+                  BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID_OLD}`,
                   BucketName: 'EXAMPLE_BUCKET',
                 },
               },
@@ -1348,7 +1393,7 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_QUICKSIGHT_PIPELINE_WITH_WORKF
                   StackName: `Clickstream-Ingestion-kafka-${MOCK_PIPELINE_ID}`,
                 },
                 Callback: {
-                  BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID}`,
+                  BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID_OLD}`,
                   BucketName: 'EXAMPLE_BUCKET',
                 },
               },
@@ -1370,17 +1415,12 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_QUICKSIGHT_PIPELINE_WITH_WORKF
                   StackName: `Clickstream-DataProcessing-${MOCK_PIPELINE_ID}`,
                 },
                 Callback: {
-                  BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID}`,
+                  BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID_OLD}`,
                   BucketName: 'EXAMPLE_BUCKET',
                 },
               },
-              End: true,
+              Next: 'DataModeling',
             },
-          },
-          StartAt: 'DataProcessing',
-        },
-        {
-          States: {
             Reporting: {
               Type: WorkflowStateType.STACK,
               Data: {
@@ -1389,11 +1429,11 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_QUICKSIGHT_PIPELINE_WITH_WORKF
                   TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-reporting-quicksight-stack.template.json',
                   Action: 'Create',
                   Parameters: [],
-                  StackName: 'Clickstream-Reporting-e9a8f34fbf734ca4950787f1ad818989',
+                  StackName: `Clickstream-Reporting-${MOCK_PIPELINE_ID}`,
                 },
                 Callback: {
-                  BucketPrefix: 'clickstream/workflow/main-d6e73fc2-6211-4013-8c4d-a539c407f834',
-                  BucketName: 'cloudfront-s3-control-pl-solutionbucketlogbucket3-1d45u2r5l3wkg',
+                  BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID_OLD}`,
+                  BucketName: 'EXAMPLE_BUCKET',
                 },
               },
               End: true,
@@ -1405,18 +1445,23 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_QUICKSIGHT_PIPELINE_WITH_WORKF
                   Region: 'ap-southeast-1',
                   TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-analytics-redshift-stack.template.json',
                   Action: 'Create',
-                  Parameters: [],
+                  Parameters: [
+                    {
+                      ParameterKey: 'DataProcessingCronOrRateExpression',
+                      ParameterValue: 'rate(16 minutes)',
+                    },
+                  ],
                   StackName: `Clickstream-DataModelingRedshift-${MOCK_PIPELINE_ID}`,
                 },
                 Callback: {
-                  BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID}`,
+                  BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID_OLD}`,
                   BucketName: 'EXAMPLE_BUCKET',
                 },
               },
               Next: 'Reporting',
             },
           },
-          StartAt: 'DataModeling',
+          StartAt: 'DataProcessing',
         },
         {
           StartAt: 'Metrics',
@@ -1425,7 +1470,7 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_QUICKSIGHT_PIPELINE_WITH_WORKF
               Data: {
                 Callback: {
                   BucketName: 'EXAMPLE_BUCKET',
-                  BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                  BucketPrefix: `clickstream/workflow/${MOCK_EXECUTION_ID_OLD}`,
                 },
                 Input: {
                   Action: 'Create',
@@ -1445,8 +1490,8 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_QUICKSIGHT_PIPELINE_WITH_WORKF
   },
 };
 
-export const RETRY_PIPELINE_WITH_WORKFLOW_AND_UNDEFINED_STATUS: IPipeline = {
-  ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_QUICKSIGHT_PIPELINE_WITH_WORKFLOW,
+export const RETRY_PIPELINE_WITH_WORKFLOW: IPipeline = {
+  ...BASE_RETRY_PIPELINE,
   status: {
     ...BASE_STATUS,
     status: PipelineStatusType.FAILED,
@@ -1455,16 +1500,65 @@ export const RETRY_PIPELINE_WITH_WORKFLOW_AND_UNDEFINED_STATUS: IPipeline = {
         ...BASE_STATUS.stackDetails[0],
         stackStatus: StackStatus.CREATE_FAILED,
       },
-      {
-        ...BASE_STATUS.stackDetails[1],
-        stackStatus: StackStatus.CREATE_IN_PROGRESS,
-      },
+      BASE_STATUS.stackDetails[1],
       BASE_STATUS.stackDetails[2],
-      BASE_STATUS.stackDetails[3],
+      {
+        ...BASE_STATUS.stackDetails[3],
+        stackStatus: StackStatus.CREATE_FAILED,
+      },
       {
         ...BASE_STATUS.stackDetails[4],
         stackStatus: undefined,
       },
+      BASE_STATUS.stackDetails[5],
+    ],
+    executionDetail: {
+      name: MOCK_EXECUTION_ID,
+      status: ExecutionStatus.FAILED,
+    },
+  },
+};
+
+export const RETRY_PIPELINE_WITH_WORKFLOW_WHEN_UPDATE_FAILED: IPipeline = {
+  ...BASE_RETRY_PIPELINE,
+  lastAction: 'Update',
+  status: {
+    ...BASE_STATUS,
+    status: PipelineStatusType.FAILED,
+    stackDetails: [
+      BASE_STATUS.stackDetails[0],
+      {
+        ...BASE_STATUS.stackDetails[1],
+        stackStatus: StackStatus.UPDATE_FAILED,
+      },
+      BASE_STATUS.stackDetails[2],
+      BASE_STATUS.stackDetails[3],
+      BASE_STATUS.stackDetails[4],
+      BASE_STATUS.stackDetails[5],
+    ],
+    executionDetail: {
+      name: MOCK_EXECUTION_ID,
+      status: ExecutionStatus.FAILED,
+    },
+  },
+};
+
+export const RETRY_PIPELINE_WITH_WORKFLOW_AND_ROLLBACK_COMPLETE: IPipeline = {
+  ...BASE_RETRY_PIPELINE,
+  lastAction: 'Upgrade',
+  status: {
+    ...BASE_STATUS,
+    status: PipelineStatusType.FAILED,
+    stackDetails: [
+      BASE_STATUS.stackDetails[0],
+      BASE_STATUS.stackDetails[1],
+      BASE_STATUS.stackDetails[2],
+      {
+        ...BASE_STATUS.stackDetails[3],
+        stackStatus: StackStatus.UPDATE_ROLLBACK_COMPLETE,
+      },
+      BASE_STATUS.stackDetails[4],
+      BASE_STATUS.stackDetails[5],
     ],
     executionDetail: {
       name: MOCK_EXECUTION_ID,

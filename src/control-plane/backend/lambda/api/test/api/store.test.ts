@@ -19,8 +19,10 @@ import {
 import { DynamoDBDocumentClient, GetCommand, QueryCommand } from '@aws-sdk/lib-dynamodb';
 import { marshall } from '@aws-sdk/util-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
+import { MOCK_SOLUTION_VERSION } from './ddb-mock';
 import { S3_INGESTION_PIPELINE } from './pipeline-mock';
 import { marshallOptions } from '../../common/dynamodb-client';
+import { BuiltInTagKeys } from '../../common/model-ln';
 import { paginateData } from '../../common/utils';
 import { describeSecurityGroupsWithRules, listAvailabilityZones } from '../../store/aws/ec2';
 import { ClickStreamStore } from '../../store/click-stream-store';
@@ -199,6 +201,9 @@ describe('App test', () => {
       id: {
         S: 'project_8888_8888',
       },
+      templateVersion: {
+        S: MOCK_SOLUTION_VERSION,
+      },
       ingestionServer: {
         M: {
           domain: {
@@ -380,7 +385,7 @@ describe('App test', () => {
           {
             M: {
               key: {
-                S: 'aws-solution/version',
+                S: BuiltInTagKeys.AWS_SOLUTION_VERSION,
               },
               value: {
                 S: 'tagValue3',
@@ -455,6 +460,9 @@ describe('App test', () => {
       id: {
         S: 'project_8888_8888',
       },
+      templateVersion: {
+        S: MOCK_SOLUTION_VERSION,
+      },
       ingestionServer: {
         M: {
           domain: {
@@ -636,7 +644,7 @@ describe('App test', () => {
           {
             M: {
               key: {
-                S: 'aws-solution/version',
+                S: BuiltInTagKeys.AWS_SOLUTION_VERSION,
               },
               value: {
                 S: 'tagValue3',

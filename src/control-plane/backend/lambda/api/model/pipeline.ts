@@ -205,6 +205,7 @@ export interface IPipeline {
   readonly dataModeling?: DataModeling;
   readonly reporting?: Reporting;
 
+  lastAction?: string;
   status?: PipelineStatus;
   workflow?: WorkflowTemplate;
   executionName?: string;
@@ -251,6 +252,7 @@ export class CPipeline {
 
   public async create(): Promise<void> {
     // state machine
+    this.pipeline.lastAction = 'Create';
     this.pipeline.executionName = `main-${uuidv4()}`;
     this.pipeline.workflow = await this.generateWorkflow();
 
@@ -273,6 +275,7 @@ export class CPipeline {
     if (isEmpty(oldPipeline.workflow) || isEmpty(oldPipeline.workflow?.Workflow)) {
       throw new ClickStreamBadRequestError('Pipeline Workflow can not empty.');
     }
+    this.pipeline.lastAction = 'Update';
     const executionName = `main-${uuidv4()}`;
     this.pipeline.executionName = executionName;
 
@@ -320,27 +323,21 @@ export class CPipeline {
     this.pipeline.workflow = newWorkflow;
     this.pipeline.executionArn = await this.stackManager.execute(execWorkflow, this.pipeline.executionName);
 
-    const templateInfo = await this.getTemplateInfo();
-    this.pipeline.templateVersion = templateInfo.solutionVersion;
+    this.pipeline.templateVersion = oldPipeline.templateVersion;
     await store.updatePipeline(this.pipeline, oldPipeline);
   }
 
   public async upgrade(oldPipeline: IPipeline): Promise<void> {
+    this.pipeline.lastAction = 'Upgrade';
+    validateIngestionServerNum(this.pipeline.ingestionServer.size);
     const executionName = `main-${uuidv4()}`;
     this.pipeline.executionName = executionName;
-    validateIngestionServerNum(this.pipeline.ingestionServer.size);
-    // check quicksight user
-    if (this.pipeline.reporting) {
-      await registerClickstreamUser();
-    }
-    // update pipeline tags
-    if (!this.resources || !this.stackTags || this.stackTags?.length === 0) {
-      this.setTags();
-      this.stackTags = this.getStackTags();
-    }
-    const stackTemplateMap = await this.getStackTemplateMap();
+    this.pipeline.templateVersion = this.resources?.solution?.data.version ?? '';
+    this.pipeline.workflow = await this.generateWorkflow();
+    this.stackManager.setExecWorkflow(this.pipeline.workflow);
+    const oldStackNames = this.stackManager.getWorkflowStacks(oldPipeline.workflow?.Workflow!);
     // update workflow
-    this.stackManager.upgradeWorkflow(stackTemplateMap, this.stackTags);
+    this.stackManager.upgradeWorkflow(oldStackNames);
     // create new execution
     const execWorkflow = this.stackManager.getExecWorkflow();
     this.pipeline.executionArn = await this.stackManager.execute(execWorkflow, executionName);
@@ -354,6 +351,7 @@ export class CPipeline {
   }
 
   public async updateApp(appIds: string[]): Promise<void> {
+    this.pipeline.lastAction = 'Update';
     const executionName = `main-${uuidv4()}`;
     this.pipeline.executionName = executionName;
     const ingestionStackName = getStackName(
@@ -374,6 +372,7 @@ export class CPipeline {
   }
 
   public async delete(): Promise<void> {
+    this.pipeline.lastAction = 'Delete';
     const executionName = `main-${uuidv4()}`;
     this.pipeline.executionName = executionName;
     // update workflow
@@ -399,7 +398,6 @@ export class CPipeline {
   public async retry(): Promise<void> {
     const executionName = `main-${uuidv4()}`;
     this.pipeline.executionName = executionName;
-    // update workflow
     this.stackManager.retryWorkflow();
     // create new execution
     const execWorkflow = this.stackManager.getExecWorkflow();
@@ -415,7 +413,7 @@ export class CPipeline {
     await this._fillResources();
 
     if (!this.stackTags || this.stackTags?.length === 0) {
-      this.setTags();
+      this.patchBuiltInTags();
       this.stackTags = this.getStackTags();
     }
 
@@ -514,7 +512,7 @@ export class CPipeline {
     return appIds;
   }
 
-  public async getStackTemplateMap() {
+  public async getStackTemplateNameUrlMap() {
     const stackNames = this.stackManager.getWorkflowStacks(this.pipeline.workflow?.Workflow!);
     const stackTemplateMap = new Map();
     for (let stackName of stackNames) {
@@ -530,7 +528,7 @@ export class CPipeline {
   };
 
   public async getTemplateUrl(name: string) {
-    if (!this.resources || !this.resources.solution || !this.resources.templates) {
+    if (!this.resources?.solution || !this.resources?.templates) {
       const solution = await store.getDictionary('Solution');
       const templates = await store.getDictionary('Templates');
       this.resources = {
@@ -539,25 +537,22 @@ export class CPipeline {
         templates,
       };
     }
-    if (this.resources?.solution && this.resources?.templates) {
-      if (isEmpty(this.resources?.templates.data[name])) {
-        return undefined;
-      }
-      const solutionName = this.resources?.solution.data.name;
-      const templateName = this.resources?.templates.data[name] as string;
-      // default/ or cn/ or 'null',''
-      const prefix = isEmpty(this.resources?.solution.data.prefix) ? '' : this.resources?.solution.data.prefix;
-      const s3Region = process.env.AWS_REGION?.startsWith('cn') ? 'cn-north-1' : 'us-east-1';
-      const s3Host = `https://${this.resources?.solution.data.dist_output_bucket}.s3.${s3Region}.${awsUrlSuffix}`;
-
-      let version = this.resources?.solution.data.version === 'latest' ?
-        this.resources?.solution.data.target : this.resources?.solution.data.version;
-      return `${s3Host}/${solutionName}/${version}/${prefix}${templateName}`;
+    if (isEmpty(this.resources?.templates?.data[name])) {
+      return undefined;
     }
-    return undefined;
+    const solutionName = this.resources?.solution?.data.name;
+    const templateName = this.resources?.templates?.data[name] as string;
+    // default/ or cn/ or 'null',''
+    const prefix = isEmpty(this.resources?.solution?.data.prefix) ? '' : this.resources?.solution?.data.prefix;
+    const s3Region = process.env.AWS_REGION?.startsWith('cn') ? 'cn-north-1' : 'us-east-1';
+    const s3Host = `https://${this.resources?.solution?.data.dist_output_bucket}.s3.${s3Region}.${awsUrlSuffix}`;
+
+    let version = this.resources?.solution?.data.version === 'latest' ?
+      this.resources?.solution.data.target : this.resources?.solution?.data.version;
+    return `${s3Host}/${solutionName}/${version}/${prefix}${templateName}`;
   };
 
-  private setTags() {
+  private patchBuiltInTags() {
     if (this.resources?.solution) {
       const builtInTagKeys = [
         BuiltInTagKeys.AWS_SOLUTION,
@@ -589,11 +584,13 @@ export class CPipeline {
 
   private getStackTags() {
     const stackTags: Tag[] = [];
-    for (let tag of this.pipeline.tags) {
-      stackTags.push({
-        Key: tag.key,
-        Value: tag.value,
-      });
+    if (this.pipeline.tags) {
+      for (let tag of this.pipeline.tags) {
+        stackTags.push({
+          Key: tag.key,
+          Value: tag.value,
+        });
+      }
     }
     return stackTags;
   };
@@ -941,7 +938,7 @@ export class CPipeline {
   }
 
   public async getPluginsInfo() {
-    if (!this.resources || !this.resources.plugins) {
+    if (!this.resources?.plugins) {
       const plugins = await store.listPlugin('', 'asc');
       this.resources = {
         ...this.resources,
@@ -957,7 +954,7 @@ export class CPipeline {
   };
 
   public async getTemplateInfo() {
-    if (!this.resources || !this.resources.solution) {
+    if (!this.resources?.solution) {
       const solution = await store.getDictionary('Solution');
       this.resources = {
         ...this.resources,

@@ -1846,7 +1846,7 @@ describe('Fetch test', () => {
 
   it('Fetch Pipeline', async () => {
     ddbMock.on(GetCommand).resolves({
-      Item: KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
+      Item: { ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW },
     });
 
     cloudFormationMock.on(DescribeStacksCommand).resolves({

@@ -197,6 +197,7 @@
     "status": "状态",
     "active": "活跃",
     "failed": "失败",
+    "warning": "警告",
     "creating": "正在创建",
     "updating": "正在更新",
     "deleting": "正在删除",

@@ -270,6 +270,7 @@ export interface PipelineStatusDetail {
   readonly stackType: PipelineStackType;
   readonly stackStatus: StackStatus | undefined;
   readonly stackStatusReason: string;
+  readonly stackTemplateVersion: string;
   readonly outputs: Output[];
 }
 
@@ -297,6 +298,7 @@ export enum PipelineStackType {
 export enum PipelineStatusType {
   ACTIVE = 'Active',
   FAILED = 'Failed',
+  WARNING = 'Warning',
   CREATING = 'Creating',
   UPDATING = 'Updating',
   DELETING = 'Deleting',
