@@ -38,6 +38,9 @@ import {
   SheetDefinition,
   ResourcePermission,
   AnalysisDefinition,
+  DescribeDashboardCommand,
+  DescribeDashboardCommandInput,
+  DescribeDashboardCommandOutput,
 } from '@aws-sdk/client-quicksight';
 import { v4 as uuidv4 } from 'uuid';
 import { APIRoleName, awsAccountId, awsRegion, QUICKSIGHT_CONTROL_PLANE_REGION, QUICKSIGHT_EMBED_NO_REPLY_EMAIL, QuickSightEmbedRoleArn } from '../../common/constants';
@@ -48,6 +51,7 @@ import { QuickSightAccountInfo, QuickSightUser } from '../../common/types';
 import { generateRandomStr } from '../../common/utils-ln';
 import { IDashboard } from '../../model/project';
 import { dataSetActions } from '../../service/quicksight/dashboard-ln';
+import { sleep } from '../../service/quicksight/reporting-utils';
 
 const QUICKSIGHT_NAMESPACE = 'default';
 const QUICKSIGHT_PREFIX = 'Clickstream';
@@ -374,6 +378,47 @@ export const createAnalysis = async (
     return await quickSightClient.send(command);
   } catch (err) {
     logger.error('Create Analysis Error.', { err });
+    throw err;
+  }
+};
+
+export const waitDashboardSuccess = async (region: string, dashboardId: string): Promise<boolean> => {
+  let resp = await describeDashboard(
+    region,
+    {
+      AwsAccountId: awsAccountId,
+      DashboardId: dashboardId,
+    },
+  );
+  let count = 0;
+  while (!resp.Dashboard?.Version?.Status?.endsWith('_SUCCESSFUL') &&
+  !resp.Dashboard?.Version?.Status?.endsWith('_FAILED') && count < 4) {
+    await sleep(500);
+    count++;
+    resp = await describeDashboard(
+      region,
+      {
+        AwsAccountId: awsAccountId,
+        DashboardId: dashboardId,
+      },
+    );
+  }
+  const success = resp.Dashboard?.Version?.Status?.endsWith('_SUCCESSFUL') ?? false;
+  return success;
+};
+
+export const describeDashboard = async (
+  region: string,
+  input: DescribeDashboardCommandInput,
+): Promise<DescribeDashboardCommandOutput> => {
+  try {
+    const quickSightClient = sdkClient.QuickSightClient({
+      region: region,
+    });
+    const command: DescribeDashboardCommand = new DescribeDashboardCommand(input);
+    return await quickSightClient.send(command);
+  } catch (err) {
+    logger.error('Describe Dashboard Error.', { err });
     throw err;
   }
 };

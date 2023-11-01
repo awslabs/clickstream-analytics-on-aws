@@ -25,6 +25,9 @@ const ExploreEmbedFrame: React.FC<ExploreEmbedFrameProps> = (
   const { embedType, embedUrl } = props;
 
   const embedContainer = async () => {
+    if (embedUrl === '') {
+      return;
+    }
     const embeddingContext = await createEmbeddingContext();
     switch (embedType) {
       case 'dashboard':
