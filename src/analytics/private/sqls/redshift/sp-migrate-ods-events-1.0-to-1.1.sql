@@ -424,7 +424,8 @@ SELECT
 FROM
        {{schema}}.{{table_ods_events}} e
 WHERE
-       NOT EXISTS (
+       e.event_name IN ('_first_open', '_first_visit', '_profile_set')
+       AND NOT EXISTS (
               SELECT
                      1
               FROM
@@ -519,8 +520,7 @@ WITH user_page_referrer_rank AS (
               ods_events_user_temp e,
               e.event_params AS ep
        WHERE
-              event_name = '_first_open'
-              AND ep.key in ('_page_referrer', '_page_referer')
+              ep.key in ('_page_referrer', '_page_referer')
               AND ep.value.string_value IS NOT NULL
 ),
 user_page_referrer AS (
@@ -574,8 +574,7 @@ WITH user_channel_rank AS (
        FROM
               ods_events_user_temp e
        WHERE
-              event_name IN ('_first_open', '_first_visit', '_profile_set')
-              AND channel IS NOT NULL
+              channel IS NOT NULL
 ),
 user_channel AS (
        SELECT

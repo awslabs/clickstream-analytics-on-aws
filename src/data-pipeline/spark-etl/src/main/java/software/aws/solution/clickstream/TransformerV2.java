@@ -183,7 +183,7 @@ public final class TransformerV2 {
         SparkSession spark = userDataset.sparkSession();
         String tableName = TABLE_ETL_USER_PAGE_REFERER;
 
-        Dataset<Row> newUserRefererDataset = userDataset.filter(col(EVENT_NAME).equalTo(FIRST_OPEN))
+        Dataset<Row> newUserRefererDataset = userDataset
                 .withColumn(COL_PAGE_REFERER,
                         coalesce(
                                 get_json_object(attributesCol, "$." + PROP_PAGE_REFERRER).cast(DataTypes.StringType),
@@ -278,7 +278,7 @@ public final class TransformerV2 {
         SparkSession spark = userDataset.sparkSession();
         String tableName = TABLE_ETL_USER_CHANNEL;
 
-        Dataset<Row> newUserChannelDataset = userDataset.filter(col(EVENT_NAME).isin(FIRST_OPEN, FIRST_VISIT, PROFILE_SET))
+        Dataset<Row> newUserChannelDataset = userDataset
                 .withColumn(CHANNEL,
                         get_json_object(attributesCol, "$._" + CHANNEL).cast(DataTypes.StringType))
                 .filter(col(CHANNEL).isNotNull())
@@ -586,19 +586,17 @@ public final class TransformerV2 {
         Column dataCol = col("data");
         Dataset<Row> userDataset = dataset.filter((col(USER_PSEUDO_ID).isNotNull()));
 
-        Dataset<Row> possibleUpdateUserIdDataset = dataset.select(col(APP_ID), col(USER_PSEUDO_ID)).distinct();
-
         Dataset<Row> profileSetDataset = userDataset
                 .filter(col(EVENT_NAME)
-                        .isin("user_profile_set", "_user_profile_set", PROFILE_SET, FIRST_OPEN));
+                        .isin(PROFILE_SET, FIRST_OPEN, FIRST_VISIT));
 
         long newUserCount = profileSetDataset.count();
         log.info(NEW_USER_COUNT + ":" + newUserCount);
 
-        Dataset<Row> userReferrerDataset = getPageRefererDataset(userDataset, newUserCount);
-        Dataset<Row> userDeviceIdDataset = getUserDeviceIdDataset(userDataset, newUserCount);
-        Dataset<Row> userTrafficSourceDataset = getUserTrafficSourceDataset(userDataset, newUserCount);
-        Dataset<Row> userChannelDataset = getUserChannelDataset(userDataset, newUserCount);
+        Dataset<Row> userReferrerDataset = getPageRefererDataset(profileSetDataset, newUserCount);
+        Dataset<Row> userDeviceIdDataset = getUserDeviceIdDataset(profileSetDataset, newUserCount);
+        Dataset<Row> userTrafficSourceDataset = getUserTrafficSourceDataset(profileSetDataset, newUserCount);
+        Dataset<Row> userChannelDataset = getUserChannelDataset(profileSetDataset, newUserCount);
 
         Dataset<Row> profileSetDataset1 = this.userPropertiesConverter.transform(profileSetDataset);
 
@@ -645,14 +643,12 @@ public final class TransformerV2 {
         Column appIdCol = fullAggUserDataset.col(APP_ID);
         Column eventTimestampCol =  fullAggUserDataset.col(EVENT_TIMESTAMP);
 
-        Column userIdJoinForPossibleUpdate = userPseudoIdCol.equalTo(possibleUpdateUserIdDataset.col(USER_PSEUDO_ID)).and(appIdCol.equalTo(possibleUpdateUserIdDataset.col(APP_ID)));
         Column userIdJoinForDeviceId = userPseudoIdCol.equalTo(userDeviceIdDataset.col(USER_PSEUDO_ID)).and(appIdCol.equalTo(userDeviceIdDataset.col(APP_ID)));
         Column userIdJoinForTrafficSource = userPseudoIdCol.equalTo(userTrafficSourceDataset.col(USER_PSEUDO_ID)).and(appIdCol.equalTo(userTrafficSourceDataset.col(APP_ID)));
         Column userIdJoinForPageReferrer = userPseudoIdCol.equalTo(userReferrerDataset.col(USER_PSEUDO_ID)).and(appIdCol.equalTo(userReferrerDataset.col(APP_ID)));
         Column userIdJoinForUserChannel = userPseudoIdCol.equalTo(userChannelDataset.col(USER_PSEUDO_ID)).and(appIdCol.equalTo(userChannelDataset.col(APP_ID)));
 
         Dataset<Row> joinedPossibleUpdateUserDataset = fullAggUserDataset
-                .join(possibleUpdateUserIdDataset, userIdJoinForPossibleUpdate, "inner")
                 .join(userDeviceIdDataset, userIdJoinForDeviceId, "left")
                 .join(userTrafficSourceDataset, userIdJoinForTrafficSource, "left")
                 .join(userReferrerDataset, userIdJoinForPageReferrer, "left")

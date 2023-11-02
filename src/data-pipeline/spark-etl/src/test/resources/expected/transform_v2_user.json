@@ -97,6 +97,6 @@
   "first_traffic_source_type" : "TSN",
   "first_traffic_medium" : "TSM",
   "first_traffic_source" : "TSS",
-  "first_channel" : null,
+  "first_channel" : "C001",
   "device_id_list" : [ "deviceid-1682319109447" ]
 }

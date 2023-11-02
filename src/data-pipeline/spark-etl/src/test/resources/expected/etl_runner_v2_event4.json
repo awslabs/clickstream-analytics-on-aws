@@ -28,7 +28,7 @@
   "event_bundle_sequence_id" : 111,
   "event_date" : "2023-04-24",
   "event_id" : "1fcd7f5b-9529-4977-a303-e8c7e39db7b898-4",
-  "event_name" : "_user_profile_set",
+  "event_name" : "_profile_set",
   "event_timestamp" : 1682319109447,
   "geo" : {
     "city" : "Singapore",

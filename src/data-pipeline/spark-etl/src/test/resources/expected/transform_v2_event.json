@@ -3,7 +3,7 @@
   "event_date" : "2023-04-24",
   "event_timestamp" : 1682319109447,
   "event_previous_timestamp" : null,
-  "event_name" : "Click3",
+  "event_name" : "_first_open",
   "event_value_in_usd" : null,
   "event_bundle_sequence_id" : 111,
   "ingest_timestamp" : 1682319109403,

@@ -32,7 +32,6 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.Objects;
 
 import static org.apache.spark.sql.functions.udf;
 import static software.aws.solution.clickstream.ContextUtil.DEBUG_LOCAL_PROP;
@@ -68,9 +67,7 @@ public class KvConverter {
                 continue;
             }
             JsonNode attrValueNode = jsonNode.get(attrName);
-            String attrValue = attrValueNode.asText();
-
-            ValueTypeResult result = getValueTypeResult(attrName, attrValue);
+            ValueTypeResult result = getValueTypeResult(attrName, attrValueNode);
 
             list.add(new GenericRow(
                     new Object[]{
@@ -90,21 +87,21 @@ public class KvConverter {
     }
 
     @NotNull
-    public static ValueTypeResult getValueTypeResult(final String attrName, final String attrValue) {
+    public static ValueTypeResult getValueTypeResult(final String attrName, final JsonNode attrValueNode) {
         Double doubleValue = null;
         Long longValue = null;
         String stringValue = null;
-
-        if (Objects.equals("price", attrName)) {
-            doubleValue = Double.parseDouble(attrValue);
-        } else if (attrName.endsWith("_id")) {
-            stringValue = attrValue;
-        } else if (attrValue.matches("^\\d+$")) {
-            longValue = Long.parseLong(attrValue);
-        } else if (attrValue.matches("^\\d+\\.(\\d+)?$")) {
-            doubleValue = Double.parseDouble(attrValue);
-        } else {
-            stringValue = attrValue;
+        try {
+            if ( attrValueNode.isLong() || attrValueNode.isInt() || attrValueNode.isBigInteger() || attrValueNode.isIntegralNumber()) {
+                longValue = attrValueNode.asLong();
+            } else if (attrValueNode.isDouble() || attrValueNode.isFloat() || attrValueNode.isFloatingPointNumber() || attrValueNode.isBigDecimal()) {
+                doubleValue = attrValueNode.asDouble();
+            } else {
+                stringValue = attrValueNode.asText();
+            }
+        } catch (Exception e) {
+            log.warn(e.getMessage());
+            stringValue = attrValueNode.asText();
         }
         return new ValueTypeResult(doubleValue, longValue, stringValue);
     }
