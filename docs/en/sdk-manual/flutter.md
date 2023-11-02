@@ -272,6 +272,12 @@ For iOS: Refer to [Swift SDK event attributes](./swift.md#event-attributes)
 
 [GitHub change log](https://github.com/awslabs/clickstream-flutter/releases)
 
+Native SDK version dependencies
+
+| Flutter SDK Version | Android SDK Version | Swift SDK Version |
+|---------------------|---------------------|-------------------|
+| 0.1.0               | 0.9.0               | 0.8.0             |
+
 ## Reference link
 
 [Source code](https://github.com/awslabs/clickstream-flutter)

@@ -259,6 +259,12 @@ iOS: 参考 [Swift SDK 事件属性](./swift.md#event-attributes)
 
 参考：[GitHub 更新日志](https://github.com/awslabs/clickstream-flutter/releases)
 
+原生 SDK 版本依赖关系
+
+| Flutter SDK 版本 | Android SDK 版本 | Swift SDK 版本      |
+|----------------|----------------|-------------------|
+| 0.1.0          | 0.9.0          | 0.8.0             |
+
 ## 参考链接
 
 [SDK 源码](https://github.com/awslabs/clickstream-flutter)
