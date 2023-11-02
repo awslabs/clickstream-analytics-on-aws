@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { QuickSight } from '@aws-sdk/client-quicksight';
+import { QuickSight, ResourceNotFoundException } from '@aws-sdk/client-quicksight';
 import { v4 as uuidv4 } from 'uuid';
 import { DEFAULT_DASHBOARD_NAME, DEFAULT_SOLUTION_OPERATOR, OUTPUT_REPORT_DASHBOARDS_SUFFIX, QUICKSIGHT_DASHBOARD_INFIX } from '../common/constants-ln';
 import { logger } from '../common/powertools';
@@ -141,10 +141,20 @@ export class ProjectServ {
         region: dashboard.region,
         ...aws_sdk_client_common_config,
       });
-      await quickSightClient.deleteDashboard({
-        AwsAccountId: process.env.AWS_ACCOUNT_ID,
-        DashboardId: dashboardId,
-      });
+      try {
+        await quickSightClient.deleteDashboard({
+          AwsAccountId: process.env.AWS_ACCOUNT_ID,
+          DashboardId: dashboardId,
+        });
+      } catch (err) {
+        //dashboard can be delete by other interface/op, catch this exception to allow clear data in ddb.
+        if (err instanceof ResourceNotFoundException) {
+          logger.warn(`Dashboard ${dashboardId} not exist.`);
+        } else {
+          throw err;
+        }
+      }
+
       await store.deleteDashboard(dashboardId, operator);
       return res.json(new ApiSuccess(null, 'Dashboard deleted.'));
     } catch (error) {
