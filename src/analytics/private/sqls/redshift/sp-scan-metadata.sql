@@ -143,9 +143,9 @@ BEGIN
 	query := 'SELECT column_name FROM property_column_temp_table';
 	FOR rec IN EXECUTE query LOOP
 		IF start_date IS NULL THEN
-			EXECUTE 'INSERT INTO properties_temp_table (SELECT event_name, project_id, app_info.app_id::varchar AS app_info_app_id, event_date, ''other'' AS property_category, ''' || quote_ident(rec.column_name) || ''' AS property_name, ' || quote_ident(rec.column_name) || '::varchar AS property_value, ''string'' AS value_type, platform FROM notepad.event WHERE event_date < ''' || end_date || ''')';
+			EXECUTE 'INSERT INTO properties_temp_table (SELECT event_name, project_id, app_info.app_id::varchar AS app_info_app_id, event_date, ''other'' AS property_category, ''' || quote_ident(rec.column_name) || ''' AS property_name, ' || quote_ident(rec.column_name) || '::varchar AS property_value, ''string'' AS value_type, platform FROM {{schema}}.event WHERE event_date < ''' || end_date || ''')';
 		ELSE
-			EXECUTE 'INSERT INTO properties_temp_table (SELECT event_name, project_id, app_info.app_id::varchar AS app_info_app_id, event_date, ''other'' AS property_category, ''' || quote_ident(rec.column_name) || ''' AS property_name, ' || quote_ident(rec.column_name) || '::varchar AS property_value, ''string'' AS value_type, platform FROM notepad.event WHERE event_date >= ''' || start_date || ''' AND event_date < ''' || end_date || ''')';
+			EXECUTE 'INSERT INTO properties_temp_table (SELECT event_name, project_id, app_info.app_id::varchar AS app_info_app_id, event_date, ''other'' AS property_category, ''' || quote_ident(rec.column_name) || ''' AS property_name, ' || quote_ident(rec.column_name) || '::varchar AS property_value, ''string'' AS value_type, platform FROM {{schema}}.event WHERE event_date >= ''' || start_date || ''' AND event_date < ''' || end_date || ''')';
 		END IF;
 	END LOOP;
 
