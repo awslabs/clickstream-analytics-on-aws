@@ -57,7 +57,12 @@ import {
   ExploreGroupColumn,
   QuickSightChartType,
 } from 'ts/explore-types';
-import { alertMsg, defaultStr, generateStr } from 'ts/utils';
+import {
+  alertMsg,
+  defaultStr,
+  generateStr,
+  getEventParameters,
+} from 'ts/utils';
 import {
   parametersConvertToCategoryItemType,
   validEventAnalyticsItem,
@@ -159,14 +164,6 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
     { value: 'hour', label: t('analytics:options.hourWindowUnit') },
     { value: 'day', label: t('analytics:options.dayWindowUnit') },
   ];
-
-  const getEventParameters = (eventName?: string) => {
-    const event = metadataEvents.find((item) => item.name === eventName);
-    if (event) {
-      return event.associatedParameters;
-    }
-    return [];
-  };
 
   const [dateRangeValue, setDateRangeValue] =
     useState<DateRangePickerProps.Value>(DEFAULT_DAY_RANGE);
@@ -591,10 +588,13 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
                   }}
                   changeCurCategoryOption={(eventIndex, category) => {
                     const eventName = category?.name;
-                    const eventParameters = getEventParameters(eventName);
+                    const eventParameters = getEventParameters(
+                      metadataEvents,
+                      eventName
+                    );
                     const parameterOption = parametersConvertToCategoryItemType(
                       metadataUserAttributes,
-                      eventParameters ?? []
+                      eventParameters
                     );
                     setEventOptionData((prev) => {
                       const dataObj = cloneDeep(prev);

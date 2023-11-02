@@ -199,7 +199,9 @@ const BasicInfo: React.FC<BasicInfoProps> = (props: BasicInfoProps) => {
               <Box variant="awsui-key-label">
                 {t('pipeline:detail.version')}
               </Box>
-              <div>{pipelineInfo?.templateInfo?.pipelineVersion ?? '-'}</div>
+              <div>
+                {defaultStr(pipelineInfo?.templateInfo?.pipelineVersion, '-')}
+              </div>
             </div>
           </SpaceBetween>
 

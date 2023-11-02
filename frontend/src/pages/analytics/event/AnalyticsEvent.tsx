@@ -54,7 +54,7 @@ import {
   ExploreGroupColumn,
   QuickSightChartType,
 } from 'ts/explore-types';
-import { alertMsg, defaultStr, generateStr } from 'ts/utils';
+import { alertMsg, defaultStr, generateStr, getEventParameters } from 'ts/utils';
 import {
   getDashboardCreateParameters,
   getDateRange,
@@ -142,14 +142,6 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
   const [groupOption, setGroupOption] = useState<SelectProps.Option | null>(
     null
   );
-
-  const getEventParameters = (eventName?: string) => {
-    const event = metadataEvents.find((item) => item.name === eventName);
-    if (event) {
-      return event.associatedParameters;
-    }
-    return [];
-  };
 
   const [dateRangeValue, setDateRangeValue] =
     useState<DateRangePickerProps.Value>(DEFAULT_DAY_RANGE);
@@ -457,10 +449,13 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
                 }}
                 changeCurCategoryOption={(eventIndex, category) => {
                   const eventName = category?.name;
-                  const eventParameters = getEventParameters(eventName);
+                    const eventParameters = getEventParameters(
+                      metadataEvents,
+                      eventName
+                    );
                   const parameterOption = parametersConvertToCategoryItemType(
                     metadataUserAttributes,
-                    eventParameters ?? []
+                    eventParameters
                   );
                   setEventOptionData((prev) => {
                     const dataObj = cloneDeep(prev);

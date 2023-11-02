@@ -58,7 +58,12 @@ import {
   MetadataPlatform,
   QuickSightChartType,
 } from 'ts/explore-types';
-import { alertMsg, defaultStr, generateStr } from 'ts/utils';
+import {
+  alertMsg,
+  defaultStr,
+  generateStr,
+  getEventParameters,
+} from 'ts/utils';
 import {
   getDashboardCreateParameters,
   getDateRange,
@@ -245,14 +250,6 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
 
   const [selectedPlatform, setSelectedPlatform] =
     useState<SelectProps.Option | null>(webPlatformOption);
-
-  const getEventParameters = (eventName?: string) => {
-    const event = metadataEvents.find((item) => item.name === eventName);
-    if (event) {
-      return event.associatedParameters;
-    }
-    return [];
-  };
 
   const [dateRangeValue, setDateRangeValue] =
     React.useState<DateRangePickerProps.Value>(DEFAULT_DAY_RANGE);
@@ -689,10 +686,13 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
                       (item, eIndex) => eIndex !== 0
                     );
                     const eventName = option?.name;
-                    const eventParameters = getEventParameters(eventName);
+                    const eventParameters = getEventParameters(
+                      metadataEvents,
+                      eventName
+                    );
                     const parameterOption = parametersConvertToCategoryItemType(
                       metadataUserAttributes,
-                      eventParameters ?? []
+                      eventParameters
                     );
                     return [
                       {
@@ -802,10 +802,13 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
                 }}
                 changeCurCategoryOption={(eventIndex, category) => {
                   const eventName = category?.name;
-                  const eventParameters = getEventParameters(eventName);
+                  const eventParameters = getEventParameters(
+                    metadataEvents,
+                    eventName
+                  );
                   const parameterOption = parametersConvertToCategoryItemType(
                     metadataUserAttributes,
-                    eventParameters ?? []
+                    eventParameters
                   );
                   setEventOptionData((prev) => {
                     const dataObj = cloneDeep(prev);
