@@ -44,6 +44,7 @@ import { useTranslation } from 'react-i18next';
 import { AuthProvider, AuthProviderProps, useAuth } from 'react-oidc-context';
 import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import { CONFIG_URL, IUserRole, PROJECT_CONFIG_JSON } from 'ts/const';
+import { defaultStr } from 'ts/utils';
 import Home from './pages/home/Home';
 
 const LoginCallback: React.FC = () => {
@@ -434,7 +435,7 @@ const App: React.FC = () => {
   const setLocalStorageAfterLoad = async () => {
     if (localStorage.getItem(PROJECT_CONFIG_JSON)) {
       const configData = JSON.parse(
-        localStorage.getItem(PROJECT_CONFIG_JSON) ?? ''
+        defaultStr(localStorage.getItem(PROJECT_CONFIG_JSON))
       );
       setContextData(configData);
       initAuthentication(configData);

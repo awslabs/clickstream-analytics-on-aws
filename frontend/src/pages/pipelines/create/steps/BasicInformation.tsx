@@ -30,7 +30,7 @@ import Tags from 'pages/common/Tags';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AWS_REGION_MAP, SDK_LIST } from 'ts/const';
-import { isDisabled } from 'ts/utils';
+import { defaultStr, isDisabled } from 'ts/utils';
 
 interface BasicInformationProps {
   update?: boolean;
@@ -181,7 +181,7 @@ const BasicInformation: React.FC<BasicInformationProps> = (
               loadingServiceAvailable || isDisabled(update, pipelineInfo)
             }
             filteringType="auto"
-            placeholder={t('pipeline:create.awsRegionPlaceholder') ?? ''}
+            placeholder={defaultStr(t('pipeline:create.awsRegionPlaceholder'))}
             selectedOption={pipelineInfo.selectedRegion}
             options={regionOptionList}
             selectedAriaLabel="Selected"
@@ -227,7 +227,7 @@ const BasicInformation: React.FC<BasicInformationProps> = (
           <Select
             filteringType="auto"
             disabled={isDisabled(update, pipelineInfo)}
-            placeholder={t('pipeline:create.vpcPlaceholder') ?? ''}
+            placeholder={defaultStr(t('pipeline:create.vpcPlaceholder'))}
             selectedOption={pipelineInfo.selectedVPC}
             options={vpcOptionList}
             selectedAriaLabel="Selected"
@@ -245,7 +245,7 @@ const BasicInformation: React.FC<BasicInformationProps> = (
         >
           <Select
             disabled={isDisabled(update, pipelineInfo)}
-            placeholder={t('pipeline:create.dataSDKPlaceholder') ?? ''}
+            placeholder={defaultStr(t('pipeline:create.dataSDKPlaceholder'))}
             selectedOption={pipelineInfo.selectedSDK}
             options={SDK_LIST}
             selectedAriaLabel="Selected"
@@ -276,7 +276,7 @@ const BasicInformation: React.FC<BasicInformationProps> = (
         >
           <Autosuggest
             disabled={isDisabled(update, pipelineInfo)}
-            placeholder={t('pipeline:create.selectS3') ?? ''}
+            placeholder={defaultStr(t('pipeline:create.selectS3'))}
             statusType={loadingBucket ? 'loading' : 'finished'}
             onChange={({ detail }) => changeS3Bucket(detail.value)}
             value={pipelineInfo.ingestionServer.loadBalancer.logS3Bucket.name}

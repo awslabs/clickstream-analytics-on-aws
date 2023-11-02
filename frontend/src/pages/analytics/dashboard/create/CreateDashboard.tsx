@@ -36,7 +36,7 @@ import {
   OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN,
   XSS_PATTERN,
 } from 'ts/constant-ln';
-import { getValueFromStackOutputs } from 'ts/utils';
+import { defaultStr, getValueFromStackOutputs } from 'ts/utils';
 import { v4 as uuidv4 } from 'uuid';
 
 interface CreateDashboardProps {
@@ -182,9 +182,9 @@ const CreateDashboard: React.FC<CreateDashboardProps> = (
               <SpaceBetween direction="vertical" size="s">
                 <Input
                   placeholder={
-                    t('analytics:dashboard.createInputNamePlaceholder') ?? ''
+                    defaultStr(t('analytics:dashboard.createInputNamePlaceholder'))
                   }
-                  value={curDashboard.name ?? ''}
+                  value={defaultStr(curDashboard.name)}
                   onChange={(e) => {
                     setDashboardNameRequiredError(false);
                     setCurDashboard((prev) => {
@@ -204,7 +204,7 @@ const CreateDashboard: React.FC<CreateDashboardProps> = (
             >
               <Textarea
                 placeholder={
-                  t('analytics:dashboard.createDescPlaceholder') ?? ''
+                  defaultStr(t('analytics:dashboard.createDescPlaceholder'))
                 }
                 rows={3}
                 value={curDashboard.description}
@@ -244,7 +244,7 @@ const CreateDashboard: React.FC<CreateDashboardProps> = (
                   onChange={({ detail }) => setSheetName(detail.value)}
                   value={sheetName}
                   placeholder={
-                    t('analytics:dashboard.createSheetsPlaceholder') ?? ''
+                    defaultStr(t('analytics:dashboard.createSheetsPlaceholder'))
                   }
                 />
                 <Button

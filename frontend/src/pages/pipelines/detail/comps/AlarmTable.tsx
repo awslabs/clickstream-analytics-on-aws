@@ -26,6 +26,7 @@ import { disableAlarms, enableAlarms, getAlarmList } from 'apis/resource';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { buildAlarmsLink } from 'ts/url';
+import { defaultStr } from 'ts/utils';
 
 interface AlarmTableProps {
   selectionType?: 'multi' | 'single';
@@ -276,8 +277,8 @@ const AlarmTable: React.FC<AlarmTableProps> = (props: AlarmTableProps) => {
               setCurrentPage(e.detail.currentPageIndex);
             }}
             ariaLabels={{
-              nextPageLabel: t('nextPage') ?? '',
-              previousPageLabel: t('prePage') ?? '',
+              nextPageLabel: defaultStr(t('nextPage')),
+              previousPageLabel: defaultStr(t('prePage')),
               pageLabel: (pageNumber) =>
                 `${t('page')} ${pageNumber} ${t('allPages')}`,
             }}

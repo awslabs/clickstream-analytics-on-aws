@@ -17,6 +17,7 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { ANALYTICS_NAV_STATUS } from 'ts/const';
+import { defaultStr } from 'ts/utils';
 
 interface INavigationProps {
   activeHref: string;
@@ -73,15 +74,15 @@ const AnalyticsNavigation: React.FC<INavigationProps> = (
           <li
             key={item.href}
             className={item.href === activeHref ? 'active' : ''}
-            title={item.text ?? ''}
-            aria-labelledby={item.text ?? ''}
+            title={defaultStr(item.text)}
+            aria-labelledby={defaultStr(item.text)}
           >
-            <a href={item.href} aria-labelledby={item.text ?? ''}>
-              <span className="icon" aria-labelledby={item.text ?? ''}>
+            <a href={item.href} aria-labelledby={defaultStr(item.text)}>
+              <span className="icon" aria-labelledby={defaultStr(item.text)}>
                 {item.icon}
               </span>
               {isExpanded && (
-                <span className="text" aria-labelledby={item.text ?? ''}>
+                <span className="text" aria-labelledby={defaultStr(item.text)}>
                   {item.text}
                 </span>
               )}

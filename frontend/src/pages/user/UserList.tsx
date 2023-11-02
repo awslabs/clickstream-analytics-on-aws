@@ -25,6 +25,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { IUserRole, TIME_FORMAT } from 'ts/const';
 import { XSS_PATTERN } from 'ts/constant-ln';
+import { defaultStr } from 'ts/utils';
 import UserTable from './UserTable';
 
 interface IUserTableItem {
@@ -38,10 +39,16 @@ const UserList: React.FC = () => {
   const { t } = useTranslation();
 
   const roleOptions: SelectProps.Options = [
-    { value: IUserRole.ADMIN, label: t('user:options.admin') ?? '' },
-    { value: IUserRole.OPERATOR, label: t('user:options.operator') ?? '' },
-    { value: IUserRole.ANALYST, label: t('user:options.analyst') ?? '' },
-    { value: IUserRole.NO_IDENTITY, label: t('user:options.noIdentity') ?? '' },
+    { value: IUserRole.ADMIN, label: defaultStr(t('user:options.admin')) },
+    {
+      value: IUserRole.OPERATOR,
+      label: defaultStr(t('user:options.operator')),
+    },
+    { value: IUserRole.ANALYST, label: defaultStr(t('user:options.analyst')) },
+    {
+      value: IUserRole.NO_IDENTITY,
+      label: defaultStr(t('user:options.noIdentity')),
+    },
   ];
 
   const getRoleName = (role: string) => {
@@ -69,7 +76,7 @@ const UserList: React.FC = () => {
         onChange={(item) => {
           setValue(item.detail.value);
         }}
-        placeholder={t('tag.valuePlaceholder') ?? ''}
+        placeholder={defaultStr(t('tag.valuePlaceholder'))}
       />
     );
   };

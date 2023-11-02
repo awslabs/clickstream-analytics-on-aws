@@ -54,7 +54,7 @@ import {
   ExploreRequestAction,
   QuickSightChartType,
 } from 'ts/explore-types';
-import { generateStr, alertMsg } from 'ts/utils';
+import { generateStr, alertMsg, defaultStr } from 'ts/utils';
 import {
   getDashboardCreateParameters,
   getDateRange,
@@ -147,7 +147,7 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
 
   const [timeGranularity, setTimeGranularity] = useState<SelectProps.Option>({
     value: ExploreGroupColumn.DAY,
-    label: t('analytics:options.dayTimeGranularity') ?? '',
+    label: defaultStr(t('analytics:options.dayTimeGranularity')),
   });
 
   const resetConfig = async () => {
@@ -165,7 +165,7 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
     setExploreEmbedUrl('');
     setTimeGranularity({
       value: ExploreGroupColumn.DAY,
-      label: t('analytics:options.dayTimeGranularity') ?? '',
+      label: defaultStr(t('analytics:options.dayTimeGranularity')),
     });
     setLoadingData(false);
   };
@@ -210,7 +210,7 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
       locale: getLngFromLocalStorage(),
       projectId: pipeline.projectId,
       pipelineId: pipeline.pipelineId,
-      appId: appId ?? '',
+      appId: defaultStr(appId),
       sheetName: `retention_sheet_${eventId}`,
       viewName: `retention_view_${eventId}`,
       dashboardCreateParameters: parameters,

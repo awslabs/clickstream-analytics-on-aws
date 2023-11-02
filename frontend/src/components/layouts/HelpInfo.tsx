@@ -16,6 +16,7 @@ import { StateContext } from 'context/StateContext';
 import { HelpPanelType } from 'context/reducer';
 import React, { ReactElement, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
+import { defaultStr } from 'ts/utils';
 import { ExternalLinkGroup } from '../common/ExternalLinkGroup';
 
 interface LinkItemType {
@@ -55,7 +56,7 @@ const HelpInfo: React.FC = () => {
       header={<h2>{dataItem.title}</h2>}
       footer={
         <ExternalLinkGroup
-          header={t('learnMore') ?? ''}
+          header={defaultStr(t('learnMore'))}
           items={dataItem.linkItems}
         />
       }

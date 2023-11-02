@@ -39,6 +39,7 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { MetadataParameterType, MetadataSource } from 'ts/explore-types';
+import { defaultStr } from 'ts/utils';
 import {
   metadataEventsConvertToCategoryItemType,
   getWarmUpParameters,
@@ -55,28 +56,40 @@ const AnalyticsExplore: React.FC = () => {
 
   const [selectedOption, setSelectedOption] =
     useState<SelectProps.Option | null>({
-      label: t('analytics:explore.funnelAnalysis') ?? '',
+      label: defaultStr(t('analytics:explore.funnelAnalysis')),
       value: 'Funnel',
     });
 
   const analyticsModelOptions: SelectProps.Options = [
     {
-      label: t('analytics:explore.exploitativeAnalytics') ?? '',
+      label: defaultStr(t('analytics:explore.exploitativeAnalytics')),
       options: [
-        { label: t('analytics:explore.funnelAnalysis') ?? '', value: 'Funnel' },
-        { label: t('analytics:explore.eventAnalysis') ?? '', value: 'Event' },
-        { label: t('analytics:explore.pathAnalysis') ?? '', value: 'Path' },
         {
-          label: t('analytics:explore.retentionAnalysis') ?? '',
+          label: defaultStr(t('analytics:explore.funnelAnalysis')),
+          value: 'Funnel',
+        },
+        {
+          label: defaultStr(t('analytics:explore.eventAnalysis')),
+          value: 'Event',
+        },
+        {
+          label: defaultStr(t('analytics:explore.pathAnalysis')),
+          value: 'Path',
+        },
+        {
+          label: defaultStr(t('analytics:explore.retentionAnalysis')),
           value: 'Retention',
         },
       ],
     },
     {
-      label: t('analytics:explore.userAnalytics') ?? '',
+      label: defaultStr(t('analytics:explore.userAnalytics')),
       disabled: true,
       options: [
-        { label: t('analytics:explore.userSearch') ?? '', value: 'UserSearch' },
+        {
+          label: defaultStr(t('analytics:explore.userSearch')),
+          value: 'UserSearch',
+        },
       ],
     },
   ];
@@ -125,8 +138,8 @@ const AnalyticsExplore: React.FC = () => {
   const getAllPathNodes = async () => {
     try {
       const { success, data }: ApiResponse<any> = await getPathNodes(
-        projectId ?? '',
-        appId ?? ''
+        defaultStr(projectId),
+        defaultStr(appId)
       );
       if (success) {
         setPathNodes(data);
@@ -143,8 +156,8 @@ const AnalyticsExplore: React.FC = () => {
         data,
       }: ApiResponse<ResponseTableData<IMetadataUserAttribute>> =
         await getMetadataUserAttributesList({
-          projectId: projectId ?? '',
-          appId: appId ?? '',
+          projectId: defaultStr(projectId),
+          appId: defaultStr(appId),
         });
       if (success) {
         setMetadataUserAttributes(data.items);
@@ -163,8 +176,8 @@ const AnalyticsExplore: React.FC = () => {
         data,
       }: ApiResponse<ResponseTableData<IMetadataEventParameter>> =
         await getMetadataParametersList({
-          projectId: projectId ?? '',
-          appId: appId ?? '',
+          projectId: defaultStr(projectId),
+          appId: defaultStr(appId),
         });
       if (success) {
         setMetadataEventParameters(data.items);
@@ -181,8 +194,8 @@ const AnalyticsExplore: React.FC = () => {
     try {
       const { success, data }: ApiResponse<ResponseTableData<IMetadataEvent>> =
         await getMetadataEventsList({
-          projectId: projectId ?? '',
-          appId: appId ?? '',
+          projectId: defaultStr(projectId),
+          appId: defaultStr(appId),
           attribute: true,
         });
       if (success) {
@@ -200,10 +213,14 @@ const AnalyticsExplore: React.FC = () => {
   const loadPipeline = async () => {
     try {
       const { success, data }: ApiResponse<IPipeline> =
-        await getPipelineDetailByProjectId(projectId ?? '');
+        await getPipelineDetailByProjectId(defaultStr(projectId));
       if (success) {
         setPipeline(data);
-        const params = getWarmUpParameters(projectId ?? '', appId ?? '', data);
+        const params = getWarmUpParameters(
+          defaultStr(projectId),
+          defaultStr(appId),
+          data
+        );
         if (params) {
           await warmup(params);
           await clean(params.dashboardCreateParameters.region);

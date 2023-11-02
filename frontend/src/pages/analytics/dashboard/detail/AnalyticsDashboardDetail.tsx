@@ -30,6 +30,7 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { DEFAULT_DASHBOARD_NAME } from 'ts/constant-ln';
+import { defaultStr } from 'ts/utils';
 
 const AnalyticsDashboardDetail: React.FC = () => {
   const { t } = useTranslation();
@@ -43,9 +44,9 @@ const AnalyticsDashboardDetail: React.FC = () => {
     try {
       const { success, data }: ApiResponse<IAnalyticsDashboard> =
         await getAnalyticsDashboard(
-          projectId ?? '',
-          appId ?? '',
-          dashboardId ?? '',
+          defaultStr(projectId),
+          defaultStr(appId),
+          defaultStr(dashboardId),
           window.location.origin
         );
       if (success && data.embedUrl) {

@@ -195,7 +195,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
       ? updatePipeline
       : {
           ...INIT_EXT_PIPELINE_DATA,
-          projectId: projectId ?? ''.toString(),
+          projectId: defaultStr(projectId),
           tags: [
             {
               key: 'aws-solution/name',
@@ -982,8 +982,8 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
         previousButton: defaultStr(t('button.previous')),
         nextButton: defaultStr(t('button.next')),
         submitButton: update
-          ? t('button.save') ?? ''
-          : t('button.create') ?? '',
+          ? defaultStr(t('button.save'))
+          : defaultStr(t('button.create')),
         optional: defaultStr(t('optional'), 'optional'),
       }}
       onNavigate={({ detail }) => {
@@ -2714,8 +2714,8 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
         setLoadingData(true);
         const { success, data }: ApiResponse<IExtPipeline> =
           await getPipelineDetail({
-            id: id ?? '',
-            pid: pid ?? '',
+            id: defaultStr(id),
+            pid: defaultStr(pid),
             cache: true,
           });
         if (success) {

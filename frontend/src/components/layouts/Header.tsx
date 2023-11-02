@@ -22,6 +22,7 @@ import {
   ZH_LANGUAGE_LIST,
   ZH_TEXT,
 } from 'ts/const';
+import { defaultStr } from 'ts/utils';
 
 interface IHeaderProps {
   user: any;
@@ -79,12 +80,12 @@ const Header: React.FC<IHeaderProps> = (props: IHeaderProps) => {
       <TopNavigation
         identity={{
           href: '/',
-          title: t('header.solution') ?? '',
+          title: defaultStr(t('header.solution')),
         }}
         utilities={[
           {
             type: 'button',
-            text: t('header.solutionLibrary') ?? '',
+            text: defaultStr(t('header.solutionLibrary')),
             href: 'https://aws.amazon.com/solutions/',
             external: true,
           },
@@ -115,16 +116,16 @@ const Header: React.FC<IHeaderProps> = (props: IHeaderProps) => {
                 signOut?.();
               }
             },
-            items: [{ id: 'signout', text: t('header.signOut') ?? '' }],
+            items: [{ id: 'signout', text: defaultStr(t('header.signOut')) }],
           },
         ]}
         i18nStrings={{
-          searchIconAriaLabel: t('header.search') ?? '',
-          searchDismissIconAriaLabel: t('header.closeSearch') ?? '',
-          overflowMenuTriggerText: t('header.more') ?? '',
-          overflowMenuTitleText: t('header.all') ?? '',
-          overflowMenuBackIconAriaLabel: t('header.back') ?? '',
-          overflowMenuDismissIconAriaLabel: t('header.closeMenu') ?? '',
+          searchIconAriaLabel: defaultStr(t('header.search')),
+          searchDismissIconAriaLabel: defaultStr(t('header.closeSearch')),
+          overflowMenuTriggerText: defaultStr(t('header.more')),
+          overflowMenuTitleText: defaultStr(t('header.all')),
+          overflowMenuBackIconAriaLabel: defaultStr(t('header.back')),
+          overflowMenuDismissIconAriaLabel: defaultStr(t('header.closeMenu')),
         }}
       />
     </header>

@@ -15,6 +15,7 @@ import { getAnalyticsDashboard } from 'apis/analytics';
 import ExploreEmbedFrame from 'pages/analytics/comps/ExploreEmbedFrame';
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { defaultStr } from 'ts/utils';
 
 const AnalyticsDashboardFullWindow: React.FC = () => {
   const { dashboardId, projectId, appId } = useParams();
@@ -24,9 +25,9 @@ const AnalyticsDashboardFullWindow: React.FC = () => {
     try {
       const { success, data }: ApiResponse<IAnalyticsDashboard> =
         await getAnalyticsDashboard(
-          projectId ?? '',
-          appId ?? '',
-          dashboardId ?? '',
+          defaultStr(projectId),
+          defaultStr(appId),
+          defaultStr(dashboardId),
           window.location.origin
         );
       if (success && data.embedUrl) {

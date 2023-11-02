@@ -186,7 +186,7 @@ function patchSameName(
   }
   for (const p of parameterItems) {
     if (duplicatedParameterNames.includes(p.name)) {
-      p.displayName = `${p.displayName}(${p.valueType})`
+      p.displayName = `${p.displayName}(${p.valueType})`;
     }
   }
   const userAttributeNames: string[] = [];
@@ -199,10 +199,10 @@ function patchSameName(
   }
   for (const u of userAttributeItems) {
     if (duplicatedUserAttributeNames.includes(u.name)) {
-      u.displayName = `${u.displayName}(${u.valueType})`
+      u.displayName = `${u.displayName}(${u.valueType})`;
     }
   }
-};
+}
 
 export const validEventAnalyticsItem = (item: IEventAnalyticsItem) => {
   return (
@@ -468,24 +468,26 @@ export const getDashboardCreateParameters = (
     region: pipeline.region,
     allowedDomain: allowedDomain,
     redshift: {
-      user:
-        redshiftOutputs.get(
-          OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_NAME_SUFFIX
-        ) ?? '',
-      dataApiRole:
+      user: defaultStr(
+        redshiftOutputs.get(OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_NAME_SUFFIX)
+      ),
+      dataApiRole: defaultStr(
         redshiftOutputs.get(
           OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX
-        ) ?? '',
+        )
+      ),
       newServerless: {
-        workgroupName:
+        workgroupName: defaultStr(
           redshiftOutputs.get(
             OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME
-          ) ?? '',
+          )
+        ),
       },
     },
     quickSight: {
-      dataSourceArn:
-        reportingOutputs.get(OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN) ?? '',
+      dataSourceArn: defaultStr(
+        reportingOutputs.get(OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN)
+      ),
     },
   };
 };
@@ -519,15 +521,17 @@ export const getWarmUpParameters = (
     dashboardCreateParameters: {
       region: pipeline.region,
       redshift: {
-        dataApiRole:
+        dataApiRole: defaultStr(
           redshiftOutputs.get(
             OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX
-          ) ?? '',
+          )
+        ),
         newServerless: {
-          workgroupName:
+          workgroupName: defaultStr(
             redshiftOutputs.get(
               OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME
-            ) ?? '',
+            )
+          ),
         },
       },
     },
