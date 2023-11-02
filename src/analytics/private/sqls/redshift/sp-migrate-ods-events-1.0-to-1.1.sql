@@ -630,6 +630,8 @@ DROP TABLE user_page_referrer_temp;
 
 DROP TABLE user_device_id_list_temp;
 
+DROP TABLE ods_events_user_temp;
+
 INSERT INTO
        {{schema}}.{{table_user}} (
               SELECT
