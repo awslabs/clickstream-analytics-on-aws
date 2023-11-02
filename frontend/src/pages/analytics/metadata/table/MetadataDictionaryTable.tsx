@@ -29,7 +29,7 @@ import { useColumnWidths } from 'pages/common/use-column-widths';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DICTIONARY_DISPLAY_PREFIX } from 'ts/const';
-import { alertMsg } from 'ts/utils';
+import { alertMsg, defaultStr } from 'ts/utils';
 import { descriptionRegex, displayNameRegex } from './table-config';
 
 interface MetadataDictionaryTableProps {
@@ -69,7 +69,7 @@ const MetadataDictionaryTable: React.FC<MetadataDictionaryTableProps> = (
         onChange={(event) => {
           setValue(event.detail.value);
         }}
-        placeholder={t('tag.valuePlaceholder') ?? ''}
+        placeholder={defaultStr(t('tag.valuePlaceholder'))}
       />
     );
   };

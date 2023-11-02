@@ -16,6 +16,7 @@ import classNames from 'classnames';
 import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ExploreComputeMethod } from 'ts/explore-types';
+import { defaultStr } from 'ts/utils';
 import { CategoryItemType, IAnalyticsItem } from './AnalyticsType';
 import DropDownContainer from './DropDownContainer';
 
@@ -105,7 +106,7 @@ const EventItem: React.FC<EventItemProps> = (props: EventItemProps) => {
                 setShowDropdown(false);
               }
             }}
-            placeholder={placeholder ?? ''}
+            placeholder={defaultStr(placeholder)}
             selectedOption={categoryOption}
             disabled={disabled}
           />

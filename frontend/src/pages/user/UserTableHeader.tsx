@@ -21,6 +21,7 @@ import {
 import { deleteUser } from 'apis/user';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { defaultStr } from 'ts/utils';
 import CreateUser from './CreateUser';
 import SettingUser from './SettingUser';
 
@@ -45,7 +46,7 @@ export function UserTableHeader({
   const confirmDeleteUser = async () => {
     setLoadingDelete(true);
     try {
-      const resData: ApiResponse<null> = await deleteUser(user?.id ?? '');
+      const resData: ApiResponse<null> = await deleteUser(defaultStr(user?.id));
       if (resData.success) {
         refreshPage();
         setLoadingDelete(false);

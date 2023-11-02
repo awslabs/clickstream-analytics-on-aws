@@ -261,7 +261,7 @@
         },
         {
           "name": "_entrances",
-          "dataType": "string",
+          "dataType": "int",
           "description": {
             "en-US": "The first screen view event in a session is 1, others is 0",
             "zh-CN": "会话中的第一个屏幕浏览事件该值为 1，其他则为 0"
@@ -270,7 +270,7 @@
         },
         {
           "name": "_entrances",
-          "dataType": "string",
+          "dataType": "int",
           "description": {
             "en-US": "The first screen view event in a session is 1, others is 0",
             "zh-CN": "会话中的第一个屏幕浏览事件该值为 1，其他则为 0"

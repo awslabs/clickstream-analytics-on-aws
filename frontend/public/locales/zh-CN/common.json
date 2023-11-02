@@ -187,7 +187,8 @@
     "operatorsText": "操作符",
     "clearFiltersText": "清除过滤器",
     "applyActionText": "应用",
-    "clear": "清除"
+    "clear": "清除",
+    "fullWindowView": "全窗口查看"
   },
   "item": "项目",
   "items": "项目",

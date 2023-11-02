@@ -24,6 +24,7 @@ import { HelpInfoActionType, HelpPanelType } from 'context/reducer';
 import React, { useContext, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
+import { defaultStr } from 'ts/utils';
 
 interface DashboardHeaderProps {
   totalNum: number;
@@ -53,9 +54,9 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = (
     setLoadingDelete(true);
     try {
       const resData: ApiResponse<null> = await deleteAnalyticsDashboard(
-        projectId ?? '',
-        appId ?? '',
-        dashboard?.id ?? ''
+        defaultStr(projectId),
+        defaultStr(appId),
+        defaultStr(dashboard?.id)
       );
       if (resData.success) {
         refreshPage();

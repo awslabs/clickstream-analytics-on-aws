@@ -45,6 +45,7 @@ import i18n from 'i18n';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
+import { defaultStr } from 'ts/utils';
 
 const AnalyticsRealtime: React.FC = () => {
   const { t } = useTranslation();
@@ -170,24 +171,29 @@ const AnalyticsRealtime: React.FC = () => {
                       relativeOptions={relativeOptions}
                       isValidRange={isValidRange}
                       i18nStrings={{
-                        relativeModeTitle:
-                          t('analytics:dateRange.relativeModeTitle') ?? '',
-                        absoluteModeTitle:
-                          t('analytics:dateRange.absoluteModeTitle') ?? '',
-                        relativeRangeSelectionHeading:
-                          t(
-                            'analytics:dateRange.relativeRangeSelectionHeading'
-                          ) ?? '',
-                        cancelButtonLabel:
-                          t('analytics:dateRange.cancelButtonLabel') ?? '',
-                        applyButtonLabel:
-                          t('analytics:dateRange.applyButtonLabel') ?? '',
-                        clearButtonLabel:
-                          t('analytics:dateRange.clearButtonLabel') ?? '',
-                        customRelativeRangeOptionLabel:
+                        relativeModeTitle: defaultStr(
+                          t('analytics:dateRange.relativeModeTitle')
+                        ),
+                        absoluteModeTitle: defaultStr(
+                          t('analytics:dateRange.absoluteModeTitle')
+                        ),
+                        relativeRangeSelectionHeading: defaultStr(
+                          t('analytics:dateRange.relativeRangeSelectionHeading')
+                        ),
+                        cancelButtonLabel: defaultStr(
+                          t('analytics:dateRange.cancelButtonLabel')
+                        ),
+                        applyButtonLabel: defaultStr(
+                          t('analytics:dateRange.applyButtonLabel')
+                        ),
+                        clearButtonLabel: defaultStr(
+                          t('analytics:dateRange.clearButtonLabel')
+                        ),
+                        customRelativeRangeOptionLabel: defaultStr(
                           t(
                             'analytics:dateRange.customRelativeRangeOptionLabel'
-                          ) ?? '',
+                          )
+                        ),
                         formatRelativeRange: (
                           value: DateRangePickerProps.RelativeValue
                         ) => {

@@ -70,8 +70,8 @@ interface RetentionSelectProps {
   ) => void;
   addNewEventAnalyticsItem: () => void;
   removeRetentionEventItem: (index: number) => void;
-  changeStartEvent: (index: number, event: SelectProps.Option | null) => void;
-  changeRevisitEvent: (index: number, event: SelectProps.Option | null) => void;
+  changeStartEvent: (index: number, event: IAnalyticsItem | null) => void;
+  changeRevisitEvent: (index: number, event: IAnalyticsItem | null) => void;
   changeStartRelativeAttribute: (
     index: number,
     attribute: SelectProps.Option | null

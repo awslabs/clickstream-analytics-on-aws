@@ -32,6 +32,7 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { EVENT_PARAMETER_DISPLAY_PREFIX } from 'ts/const';
+import { defaultStr } from 'ts/utils';
 import MetadataPlatformFC from '../comps/MetadataPlatform';
 import MetadataSourceFC from '../comps/MetadataSource';
 import MetadataDetailsTable from '../table/MetadataDetailsTable';
@@ -147,8 +148,8 @@ const MetadataParameterSplitPanel: React.FC<
     try {
       const { success, data }: ApiResponse<IMetadataEventParameter> =
         await getMetadataParametersDetails({
-          projectId: projectId ?? '',
-          appId: appId ?? '',
+          projectId: defaultStr(projectId),
+          appId: defaultStr(appId),
           parameterName: parameter.name,
           parameterType: parameter.valueType,
         });

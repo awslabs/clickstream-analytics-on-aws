@@ -371,3 +371,17 @@ export const defaultGenericsValue = <T>(expectValue: T, defaultValue: T) => {
     return defaultValue;
   }
 };
+
+export const getEventParameters = (
+  metadataEvents: IMetadataEvent[],
+  eventName?: string
+) => {
+  if (!eventName) {
+    return [];
+  }
+  const event = metadataEvents.find((item) => item.name === eventName);
+  if (event) {
+    return event.associatedParameters ?? [];
+  }
+  return [];
+};

@@ -25,6 +25,7 @@ import { addUser } from 'apis/user';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { IUserRole } from 'ts/const';
+import { defaultStr } from 'ts/utils';
 
 interface CreateUserProps {
   openModel: boolean;
@@ -53,14 +54,20 @@ const CreateUser: React.FC<CreateUserProps> = (props: CreateUserProps) => {
   const [userEmailRequiredError, setUserEmailRequiredError] = useState(false);
   const [roleOption, setRoleOption] = useState<SelectProps.Option | null>({
     value: IUserRole.NO_IDENTITY,
-    label: t('user:options.noIdentity') ?? '',
+    label: defaultStr(t('user:options.noIdentity')),
   });
 
   const roleOptions: SelectProps.Options = [
-    { value: IUserRole.ADMIN, label: t('user:options.admin') ?? '' },
-    { value: IUserRole.OPERATOR, label: t('user:options.operator') ?? '' },
-    { value: IUserRole.ANALYST, label: t('user:options.analyst') ?? '' },
-    { value: IUserRole.NO_IDENTITY, label: t('user:options.noIdentity') ?? '' },
+    { value: IUserRole.ADMIN, label: defaultStr(t('user:options.admin')) },
+    {
+      value: IUserRole.OPERATOR,
+      label: defaultStr(t('user:options.operator')),
+    },
+    { value: IUserRole.ANALYST, label: defaultStr(t('user:options.analyst')) },
+    {
+      value: IUserRole.NO_IDENTITY,
+      label: defaultStr(t('user:options.noIdentity')),
+    },
   ];
 
   useEffect(() => {
@@ -127,8 +134,8 @@ const CreateUser: React.FC<CreateUserProps> = (props: CreateUserProps) => {
         }
       >
         <Input
-          placeholder={t('user:labels.createUserEmailPlaceholder') ?? ''}
-          value={curUser.id ?? ''}
+          placeholder={defaultStr(t('user:labels.createUserEmailPlaceholder'))}
+          value={defaultStr(curUser.id)}
           onChange={(e) => {
             setUserEmailRequiredError(false);
             setCurUser((prev) => {
@@ -142,8 +149,8 @@ const CreateUser: React.FC<CreateUserProps> = (props: CreateUserProps) => {
       </FormField>
       <FormField label={t('user:labels.createUserName')}>
         <Input
-          placeholder={t('user:labels.createUserNamePlaceholder') ?? ''}
-          value={curUser.name ?? ''}
+          placeholder={defaultStr(t('user:labels.createUserNamePlaceholder'))}
+          value={defaultStr(curUser.name)}
           onChange={(e) => {
             setCurUser((prev) => {
               return {

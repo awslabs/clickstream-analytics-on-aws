@@ -29,6 +29,7 @@ import {
   ZH_LANGUAGE_LIST,
   ZH_TEXT,
 } from 'ts/const';
+import { defaultStr } from 'ts/utils';
 
 interface IHeaderProps {
   user: any;
@@ -162,7 +163,7 @@ const AnalyticsHeader: React.FC<IHeaderProps> = (props: IHeaderProps) => {
       <TopNavigation
         identity={{
           href: '/analytics',
-          title: t('header.analyticsStudio') ?? '',
+          title: defaultStr(t('header.analyticsStudio')),
         }}
         search={
           <Select
@@ -174,10 +175,10 @@ const AnalyticsHeader: React.FC<IHeaderProps> = (props: IHeaderProps) => {
                 value: `${option.projectId}-${option.appId}`,
               });
               setAnalyticsInfo({
-                projectId: option.projectId ?? '',
-                projectName: option.projectName ?? '',
-                appId: option.appId ?? '',
-                appName: option.appName ?? '',
+                projectId: defaultStr(option.projectId),
+                projectName: defaultStr(option.projectName),
+                appId: defaultStr(option.appId),
+                appName: defaultStr(option.appName),
               });
               window.location.href = `/analytics/${option.projectId}/app/${option.appId}/dashboards`;
             }}
@@ -187,7 +188,7 @@ const AnalyticsHeader: React.FC<IHeaderProps> = (props: IHeaderProps) => {
         utilities={[
           {
             type: 'button',
-            text: t('header.analyticsDocumentation') ?? '',
+            text: defaultStr(t('header.analyticsDocumentation')),
             href: 'https://aws.amazon.com/solutions/',
             external: true,
           },
@@ -218,16 +219,16 @@ const AnalyticsHeader: React.FC<IHeaderProps> = (props: IHeaderProps) => {
                 signOut?.();
               }
             },
-            items: [{ id: 'signout', text: t('header.signOut') ?? '' }],
+            items: [{ id: 'signout', text: defaultStr(t('header.signOut')) }],
           },
         ]}
         i18nStrings={{
-          searchIconAriaLabel: t('header.search') ?? '',
-          searchDismissIconAriaLabel: t('header.closeSearch') ?? '',
-          overflowMenuTriggerText: t('header.more') ?? '',
-          overflowMenuTitleText: t('header.all') ?? '',
-          overflowMenuBackIconAriaLabel: t('header.back') ?? '',
-          overflowMenuDismissIconAriaLabel: t('header.close??Menu') ?? '',
+          searchIconAriaLabel: defaultStr(t('header.search')),
+          searchDismissIconAriaLabel: defaultStr(t('header.closeSearch')),
+          overflowMenuTriggerText: defaultStr(t('header.more')),
+          overflowMenuTitleText: defaultStr(t('header.all')),
+          overflowMenuBackIconAriaLabel: defaultStr(t('header.back')),
+          overflowMenuDismissIconAriaLabel: defaultStr(t('header.close??Menu')),
         }}
       />
     </header>

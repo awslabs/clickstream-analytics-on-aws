@@ -29,6 +29,7 @@ import {
   WEB_ADD_USER_ATTR,
   buildSDKDocumentLink,
 } from 'ts/guideConst';
+import { defaultStr } from 'ts/utils';
 
 interface ConfigSDKProps {
   appInfo?: IApplication;
@@ -66,10 +67,10 @@ const ConfigWebSDK: React.FC<ConfigSDKProps> = (props: ConfigSDKProps) => {
           <CopyCode
             code={WEB_INIT_SDK_TEXT.replace(
               TEMPLATE_APP_ID,
-              appInfo?.appId ?? ''
+              defaultStr(appInfo?.appId)
             ).replace(
               TEMPLATE_SERVER_ENDPOINT,
-              appInfo?.pipeline?.endpoint ?? ''
+              defaultStr(appInfo?.pipeline?.endpoint)
             )}
           />
         </FormField>

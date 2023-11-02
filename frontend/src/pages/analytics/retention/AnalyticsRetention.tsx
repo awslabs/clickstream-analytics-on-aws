@@ -54,7 +54,12 @@ import {
   ExploreRequestAction,
   QuickSightChartType,
 } from 'ts/explore-types';
-import { generateStr, alertMsg } from 'ts/utils';
+import {
+  generateStr,
+  alertMsg,
+  defaultStr,
+  getEventParameters,
+} from 'ts/utils';
 import {
   getDashboardCreateParameters,
   getDateRange,
@@ -134,20 +139,12 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
     null
   );
 
-  const getEventParameters = (eventName?: string) => {
-    const event = metadataEvents.find((item) => item.name === eventName);
-    if (event) {
-      return event.associatedParameters;
-    }
-    return [];
-  };
-
   const [dateRangeValue, setDateRangeValue] =
     useState<DateRangePickerProps.Value>(DEFAULT_DAY_RANGE);
 
   const [timeGranularity, setTimeGranularity] = useState<SelectProps.Option>({
     value: ExploreGroupColumn.DAY,
-    label: t('analytics:options.dayTimeGranularity') ?? '',
+    label: defaultStr(t('analytics:options.dayTimeGranularity')),
   });
 
   const resetConfig = async () => {
@@ -165,7 +162,7 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
     setExploreEmbedUrl('');
     setTimeGranularity({
       value: ExploreGroupColumn.DAY,
-      label: t('analytics:options.dayTimeGranularity') ?? '',
+      label: defaultStr(t('analytics:options.dayTimeGranularity')),
     });
     setLoadingData(false);
   };
@@ -210,7 +207,7 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
       locale: getLngFromLocalStorage(),
       projectId: pipeline.projectId,
       pipelineId: pipeline.pipelineId,
-      appId: appId ?? '',
+      appId: defaultStr(appId),
       sheetName: `retention_sheet_${eventId}`,
       viewName: `retention_view_${eventId}`,
       dashboardCreateParameters: parameters,
@@ -535,8 +532,11 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
                   });
                 }}
                 changeStartEvent={(index, item) => {
-                  const eventName = item?.value;
-                  const eventParameters = getEventParameters(eventName);
+                  const eventName = item?.name;
+                  const eventParameters = getEventParameters(
+                    metadataEvents,
+                    eventName
+                  );
                   const parameterOption = parametersConvertToCategoryItemType(
                     metadataUserAttributes,
                     eventParameters
@@ -551,8 +551,11 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
                   });
                 }}
                 changeRevisitEvent={(index, item) => {
-                  const eventName = item?.value;
-                  const eventParameters = getEventParameters(eventName);
+                  const eventName = item?.name;
+                  const eventParameters = getEventParameters(
+                    metadataEvents,
+                    eventName
+                  );
                   const parameterOption = parametersConvertToCategoryItemType(
                     metadataUserAttributes,
                     eventParameters

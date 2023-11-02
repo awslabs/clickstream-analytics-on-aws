@@ -34,6 +34,7 @@ import { XSS_PATTERN } from 'ts/constant-ln';
 import { INIT_PROJECT_DATA } from 'ts/init';
 import {
   alertMsg,
+  defaultStr,
   generateStr,
   ternary,
   validateEmails,
@@ -84,7 +85,7 @@ const CreateProject: React.FC<CreateProjectProps> = (
   const confirmCreateProject = async () => {
     setLoadingCreate(true);
     try {
-      curProject.environment = selectedEnv?.value ?? '';
+      curProject.environment = defaultStr(selectedEnv?.value);
       const { success, data }: ApiResponse<ResponseCreate> =
         await createProject(curProject);
       if (success && data.id) {
@@ -200,7 +201,9 @@ const CreateProject: React.FC<CreateProjectProps> = (
             >
               <SpaceBetween direction="vertical" size="s">
                 <Input
-                  placeholder={t('project:create.inputNamePlaceholder') ?? ''}
+                  placeholder={defaultStr(
+                    t('project:create.inputNamePlaceholder')
+                  )}
                   value={curProject.name}
                   onChange={(e) => {
                     setProjectNameRequiredError(false);
@@ -279,7 +282,7 @@ const CreateProject: React.FC<CreateProjectProps> = (
             <div className="mt-10">
               <FormField>
                 <Textarea
-                  placeholder={t('project:create.projectDesc') ?? ''}
+                  placeholder={defaultStr(t('project:create.projectDesc'))}
                   rows={3}
                   value={curProject.description}
                   onChange={(e) => {
@@ -318,7 +321,9 @@ const CreateProject: React.FC<CreateProjectProps> = (
               )}
             >
               <Input
-                placeholder={t('project:create.inputEmailPlaceholder') ?? ''}
+                placeholder={defaultStr(
+                  t('project:create.inputEmailPlaceholder')
+                )}
                 value={curProject.emails}
                 onChange={(e) => {
                   setEmailsEmptyError(false);
@@ -346,7 +351,7 @@ const CreateProject: React.FC<CreateProjectProps> = (
                   setCurProject((prev) => {
                     return {
                       ...prev,
-                      environment: e.detail.selectedOption.value ?? '',
+                      environment: defaultStr(e.detail.selectedOption.value),
                     };
                   });
                 }}

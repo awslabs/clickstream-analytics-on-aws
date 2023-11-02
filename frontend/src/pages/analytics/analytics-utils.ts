@@ -67,6 +67,7 @@ export const metadataEventsConvertToCategoryItemType = (
         value: item.id,
         description: item.description,
         metadataSource: item.metadataSource,
+        platform: item.platform,
         modifyTime: moment(item.updateAt).format(TIME_FORMAT) || '-',
       });
     } else if (item.metadataSource === MetadataSource.CUSTOM) {
@@ -76,6 +77,7 @@ export const metadataEventsConvertToCategoryItemType = (
         value: item.id,
         description: item.description,
         metadataSource: item.metadataSource,
+        platform: item.platform,
         modifyTime: moment(item.updateAt).format(TIME_FORMAT) || '-',
       });
     }
@@ -114,6 +116,7 @@ const buildEventItem = (item: IMetadataEventParameter) => {
     metadataSource: item.metadataSource,
     valueType: item.valueType,
     category: item.category,
+    platform: item.platform,
     values: item.values,
     modifyTime: item.updateAt ? moment(item.updateAt).format(TIME_FORMAT) : '-',
   };
@@ -121,8 +124,10 @@ const buildEventItem = (item: IMetadataEventParameter) => {
 
 export const parametersConvertToCategoryItemType = (
   userAttributeItems: IMetadataUserAttribute[],
-  parameterItems?: IMetadataEventParameter[]
+  parameterItems: IMetadataEventParameter[]
 ) => {
+  //If parameters name are same
+  patchSameName(userAttributeItems, parameterItems);
   const categoryItems: CategoryItemType[] = [];
   const categoryPublicEventItems: CategoryItemType = {
     categoryName: i18n.t('analytics:labels.publicEventAttribute'),
@@ -166,6 +171,38 @@ export const parametersConvertToCategoryItemType = (
   categoryItems.push(categoryUserItems);
   return categoryItems;
 };
+
+function patchSameName(
+  userAttributeItems: IMetadataUserAttribute[],
+  parameterItems: IMetadataEventParameter[]
+) {
+  const parameterNames: string[] = [];
+  const duplicatedParameterNames: string[] = [];
+  for (const p of parameterItems) {
+    if (parameterNames.includes(p.name)) {
+      duplicatedParameterNames.push(p.name);
+    }
+    parameterNames.push(p.name);
+  }
+  for (const p of parameterItems) {
+    if (duplicatedParameterNames.includes(p.name)) {
+      p.displayName = `${p.displayName}(${p.valueType})`;
+    }
+  }
+  const userAttributeNames: string[] = [];
+  const duplicatedUserAttributeNames: string[] = [];
+  for (const u of userAttributeItems) {
+    if (userAttributeNames.includes(u.name)) {
+      duplicatedUserAttributeNames.push(u.name);
+    }
+    userAttributeNames.push(u.name);
+  }
+  for (const u of userAttributeItems) {
+    if (duplicatedUserAttributeNames.includes(u.name)) {
+      u.displayName = `${u.displayName}(${u.valueType})`;
+    }
+  }
+}
 
 export const validEventAnalyticsItem = (item: IEventAnalyticsItem) => {
   return (
@@ -431,24 +468,26 @@ export const getDashboardCreateParameters = (
     region: pipeline.region,
     allowedDomain: allowedDomain,
     redshift: {
-      user:
-        redshiftOutputs.get(
-          OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_NAME_SUFFIX
-        ) ?? '',
-      dataApiRole:
+      user: defaultStr(
+        redshiftOutputs.get(OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_NAME_SUFFIX)
+      ),
+      dataApiRole: defaultStr(
         redshiftOutputs.get(
           OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX
-        ) ?? '',
+        )
+      ),
       newServerless: {
-        workgroupName:
+        workgroupName: defaultStr(
           redshiftOutputs.get(
             OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME
-          ) ?? '',
+          )
+        ),
       },
     },
     quickSight: {
-      dataSourceArn:
-        reportingOutputs.get(OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN) ?? '',
+      dataSourceArn: defaultStr(
+        reportingOutputs.get(OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN)
+      ),
     },
   };
 };
@@ -482,15 +521,17 @@ export const getWarmUpParameters = (
     dashboardCreateParameters: {
       region: pipeline.region,
       redshift: {
-        dataApiRole:
+        dataApiRole: defaultStr(
           redshiftOutputs.get(
             OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX
-          ) ?? '',
+          )
+        ),
         newServerless: {
-          workgroupName:
+          workgroupName: defaultStr(
             redshiftOutputs.get(
               OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME
-            ) ?? '',
+            )
+          ),
         },
       },
     },

@@ -21,6 +21,7 @@ import {
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ExploreAnalyticsOperators, MetadataValueType } from 'ts/explore-types';
+import { defaultStr } from 'ts/utils';
 import {
   CategoryItemType,
   IAnalyticsItem,
@@ -160,7 +161,9 @@ const ConditionItem: React.FC<ConditionItemProps> = (
       <div className="condition-event">
         <EventItem
           showMouseoverTitle
-          placeholder={t('analytics:labels.attributeSelectPlaceholder') ?? ''}
+          placeholder={defaultStr(
+            t('analytics:labels.attributeSelectPlaceholder')
+          )}
           categoryOption={item.conditionOption}
           changeCurCategoryOption={(item) => {
             changeCurCategoryOption(item);
@@ -173,7 +176,9 @@ const ConditionItem: React.FC<ConditionItemProps> = (
       <div className="condition-select">
         <Select
           disabled={!item.conditionOption}
-          placeholder={t('analytics:labels.operatorSelectPlaceholder') ?? ''}
+          placeholder={defaultStr(
+            t('analytics:labels.operatorSelectPlaceholder')
+          )}
           selectedOption={item.conditionOperator}
           onChange={(e) => {
             changeConditionOperator(e.detail.selectedOption);
@@ -215,9 +220,9 @@ const ConditionItem: React.FC<ConditionItemProps> = (
                 }}
                 value={inputValue}
                 options={valueOptions}
-                placeholder={
-                  t('analytics:labels.conditionValuePlaceholder') ?? ''
-                }
+                placeholder={defaultStr(
+                  t('analytics:labels.conditionValuePlaceholder')
+                )}
               />
               <TokenGroup
                 onDismiss={({ detail: { itemIndex } }) => {

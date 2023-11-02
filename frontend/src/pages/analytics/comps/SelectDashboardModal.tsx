@@ -25,6 +25,7 @@ import { getAnalyticsDashboardList } from 'apis/analytics';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
+import { defaultStr } from 'ts/utils';
 
 interface ISaveToDashboardModalProps {
   visible: boolean;
@@ -75,8 +76,8 @@ const SaveToDashboardModal: React.FC<ISaveToDashboardModalProps> = (
         data,
       }: ApiResponse<ResponseTableData<IAnalyticsDashboard>> =
         await getAnalyticsDashboardList({
-          projectId: projectId ?? '',
-          appId: appId ?? '',
+          projectId: defaultStr(projectId),
+          appId: defaultStr(appId),
           pageNumber: 1,
           pageSize: 999,
         });
@@ -151,9 +152,9 @@ const SaveToDashboardModal: React.FC<ISaveToDashboardModalProps> = (
                   }
                   save(
                     selectedDashboard.value,
-                    selectedDashboard.label ?? '',
+                    defaultStr(selectedDashboard.label),
                     selectedSheet.value,
-                    selectedSheet.label ?? '',
+                    defaultStr(selectedSheet.label),
                     visualName,
                     visualDescription
                   );
@@ -176,10 +177,10 @@ const SaveToDashboardModal: React.FC<ISaveToDashboardModalProps> = (
             }
           >
             <Input
-              placeholder={
-                t('analytics:header.inputVisualNamePlaceholder') ?? ''
-              }
-              value={visualName ?? ''}
+              placeholder={defaultStr(
+                t('analytics:header.inputVisualNamePlaceholder')
+              )}
+              value={defaultStr(visualName)}
               onChange={(e) => {
                 setInputVisualNameRequiredError(false);
                 setVisualName(e.detail.value);
@@ -188,10 +189,10 @@ const SaveToDashboardModal: React.FC<ISaveToDashboardModalProps> = (
           </FormField>
           <FormField label={t('analytics:header.inputVisualDescription')}>
             <Input
-              placeholder={
-                t('analytics:header.inputVisualDescriptionPlaceholder') ?? ''
-              }
-              value={visualDescription ?? ''}
+              placeholder={defaultStr(
+                t('analytics:header.inputVisualDescriptionPlaceholder')
+              )}
+              value={defaultStr(visualDescription)}
               onChange={(e) => {
                 setVisualDescription(e.detail.value);
               }}
@@ -206,9 +207,9 @@ const SaveToDashboardModal: React.FC<ISaveToDashboardModalProps> = (
             }
           >
             <Select
-              placeholder={
-                t('analytics:header.selectDashboardPlaceholder') ?? ''
-              }
+              placeholder={defaultStr(
+                t('analytics:header.selectDashboardPlaceholder')
+              )}
               selectedOption={selectedDashboard}
               onChange={(e) => {
                 const selectedOption = e.detail
@@ -234,7 +235,9 @@ const SaveToDashboardModal: React.FC<ISaveToDashboardModalProps> = (
             }
           >
             <Select
-              placeholder={t('analytics:header.selectSheetPlaceholder') ?? ''}
+              placeholder={defaultStr(
+                t('analytics:header.selectSheetPlaceholder')
+              )}
               selectedOption={selectedSheet}
               onChange={(e) => {
                 setSelectedSheet(e.detail.selectedOption);

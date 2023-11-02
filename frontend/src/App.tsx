@@ -26,6 +26,7 @@ import AnalyticsHome from 'pages/analytics/AnalyticsHome';
 import AnalyticsAnalyzes from 'pages/analytics/analyzes/AnalyticsAnalyzes';
 import AnalyticsDashboard from 'pages/analytics/dashboard/AnalyticsDashboard';
 import AnalyticsDashboardDetail from 'pages/analytics/dashboard/detail/AnalyticsDashboardDetail';
+import AnalyticsDashboardFullWindow from 'pages/analytics/dashboard/full/AnalyticsDashboardFullWindow';
 import AnalyticsDataManagement from 'pages/analytics/data-management/AnalyticsDataManagement';
 import AnalyticsExplore from 'pages/analytics/explore/AnalyticsExplore';
 import AnalyticsRealtime from 'pages/analytics/realtime/AnalyticsRealtime';
@@ -43,6 +44,7 @@ import { useTranslation } from 'react-i18next';
 import { AuthProvider, AuthProviderProps, useAuth } from 'react-oidc-context';
 import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import { CONFIG_URL, IUserRole, PROJECT_CONFIG_JSON } from 'ts/const';
+import { defaultStr } from 'ts/utils';
 import Home from './pages/home/Home';
 
 const LoginCallback: React.FC = () => {
@@ -352,6 +354,18 @@ const SignedInPage: React.FC = () => {
                   </RoleRoute>
                 }
               />
+              <Route
+                path="/analytics/:projectId/app/:appId/dashboard/full/:dashboardId"
+                element={
+                  <RoleRoute
+                    layout="none"
+                    auth={auth}
+                    roles={[IUserRole.ADMIN, IUserRole.ANALYST]}
+                  >
+                    <AnalyticsDashboardFullWindow />
+                  </RoleRoute>
+                }
+              />
             </Routes>
           </Suspense>
           <CommonAlert />
@@ -421,7 +435,7 @@ const App: React.FC = () => {
   const setLocalStorageAfterLoad = async () => {
     if (localStorage.getItem(PROJECT_CONFIG_JSON)) {
       const configData = JSON.parse(
-        localStorage.getItem(PROJECT_CONFIG_JSON) ?? ''
+        defaultStr(localStorage.getItem(PROJECT_CONFIG_JSON))
       );
       setContextData(configData);
       initAuthentication(configData);

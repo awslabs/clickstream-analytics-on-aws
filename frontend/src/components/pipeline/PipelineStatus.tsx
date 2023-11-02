@@ -24,6 +24,7 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { CLOUDFORMATION_STATUS_MAP, EPipelineStatus } from 'ts/const';
 import { buildCloudFormationStackLink } from 'ts/url';
+import { defaultStr } from 'ts/utils';
 
 const CHECK_TIME_INTERVAL = 5000;
 
@@ -88,8 +89,8 @@ const PipelineStatus: React.FC<PipelineStatusProps> = (
     try {
       const { success, data }: ApiResponse<IExtPipeline> =
         await getPipelineDetail({
-          id: pipelineId ?? '',
-          pid: projectId ?? '',
+          id: defaultStr(pipelineId),
+          pid: defaultStr(projectId),
         });
       if (success) {
         setUpdatedStatus(data.status?.status);

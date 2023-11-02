@@ -29,6 +29,7 @@ import { useTranslation } from 'react-i18next';
 import { COMMON_ALERT_TYPE, EPipelineStatus, SDK_LIST, TIME_FORMAT } from 'ts/const';
 import { buildS3Link, buildVPCLink } from 'ts/url';
 import { alertMsg } from 'ts/utils';
+import { defaultStr } from 'ts/utils';
 
 interface BasicInfoProps {
   pipelineInfo?: IPipeline;
@@ -66,8 +67,8 @@ const BasicInfo: React.FC<BasicInfoProps> = (props: BasicInfoProps) => {
     setLoadingRetry(true);
     try {
       const resData: ApiResponse<null> = await retryPipeline({
-        pid: pipelineInfo?.projectId || '',
-        id: pipelineInfo?.pipelineId || '',
+        pid: defaultStr(pipelineInfo?.projectId),
+        id: defaultStr(pipelineInfo?.pipelineId),
       });
       setLoadingRetry(false);
       if (resData.success) {
@@ -83,8 +84,8 @@ const BasicInfo: React.FC<BasicInfoProps> = (props: BasicInfoProps) => {
     setLoadingUpgrade(true);
     try {
       const resData: ApiResponse<null> = await upgradePipeline({
-        pid: pipelineInfo?.projectId || '',
-        id: pipelineInfo?.pipelineId || '',
+        pid: defaultStr(pipelineInfo?.projectId),
+        id: defaultStr(pipelineInfo?.pipelineId),
       });
       setLoadingUpgrade(false);
       if (resData.success) {
@@ -198,7 +199,9 @@ const BasicInfo: React.FC<BasicInfoProps> = (props: BasicInfoProps) => {
               <Box variant="awsui-key-label">
                 {t('pipeline:detail.version')}
               </Box>
-              <div>{pipelineInfo?.templateInfo?.pipelineVersion || '-'}</div>
+              <div>
+                {defaultStr(pipelineInfo?.templateInfo?.pipelineVersion, '-')}
+              </div>
             </div>
           </SpaceBetween>
 
@@ -213,8 +216,8 @@ const BasicInfo: React.FC<BasicInfoProps> = (props: BasicInfoProps) => {
               <div>
                 {SDK_LIST.find(
                   (element) => element.value === pipelineInfo?.dataCollectionSDK
-                )?.label ||
-                  pipelineInfo?.dataCollectionSDK ||
+                )?.label ??
+                  pipelineInfo?.dataCollectionSDK ??
                   '-'}
               </div>
             </div>
@@ -226,8 +229,8 @@ const BasicInfo: React.FC<BasicInfoProps> = (props: BasicInfoProps) => {
               <Link
                 external
                 href={buildVPCLink(
-                  pipelineInfo?.region || '',
-                  pipelineInfo?.network.vpcId || ''
+                  defaultStr(pipelineInfo?.region),
+                  defaultStr(pipelineInfo?.network.vpcId)
                 )}
               >
                 {pipelineInfo?.network.vpcId}
@@ -240,8 +243,8 @@ const BasicInfo: React.FC<BasicInfoProps> = (props: BasicInfoProps) => {
               <Link
                 external
                 href={buildS3Link(
-                  pipelineInfo?.region || '',
-                  pipelineInfo?.bucket.name || '',
+                  defaultStr(pipelineInfo?.region),
+                  defaultStr(pipelineInfo?.bucket.name),
                   `clickstream/${pipelineInfo?.projectId}/data/`
                 )}
               >
