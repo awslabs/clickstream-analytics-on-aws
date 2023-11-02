@@ -144,9 +144,9 @@ Key assumptions:
 
 | Request Per Second | Fixed hourly cost | Data transfer cost | Total cost(USD) |
 | --------------------- | ----------------- | ------------------ | ---------- |
-| 10RPS           |        18           |          0.3          |       18.3     |
-| 100RPS         |          18         |           3         |      21      |
-| 1000RPS       |            18       |            30        |      38      |
+| 10RPS           |        $18           |          $0.3          |       $18.3     |
+| 100RPS         |          $18         |           $3         |      $21      |
+| 1000RPS       |            $18       |            $30        |      $48      |
 
 ### Application Load Balancer Access log
 
