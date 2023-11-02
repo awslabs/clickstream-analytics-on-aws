@@ -1025,11 +1025,11 @@
           "category": "user_outer",
           "description": {
             "en-US": "The referer when the user first opened the app",
-            "zh-CN": "用户第一次打开应用程序时的referer"
+            "zh-CN": "用户第一次打开应用程序时的外链"
           }
         },
         {
-          "name": "_first_traffic_source_name",
+          "name": "_first_traffic_source_type",
           "dataType": "string",
           "category": "user_outer",
           "description": {
@@ -1038,7 +1038,7 @@
           }
         },
         {
-          "name": "_first_traffic_source_medium",
+          "name": "_first_traffic_medium",
           "dataType": "string",
           "category": "user_outer",
           "description": {
@@ -1047,7 +1047,7 @@
           }
         },
         {
-          "name": "_first_traffic_source_source",
+          "name": "_first_traffic_source",
           "dataType": "string",
           "category": "user_outer",
           "description": {
