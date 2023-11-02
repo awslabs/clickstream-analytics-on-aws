@@ -165,6 +165,25 @@ class TransformerV2Test extends BaseSparkTest {
         Assertions.assertEquals(expectedJson, datasetUser1.first().prettyJson());
         Assertions.assertEquals(1, datasetUser1.count());
     }
+
+    @Test
+    public void should_transform_user_ip() throws IOException {
+        // DOWNLOAD_FILE=0 ./gradlew clean test --info --tests software.aws.solution.clickstream.TransformerV2Test.should_transform_user_ip
+        System.setProperty(APP_IDS_PROP, "uba-app");
+        System.setProperty(PROJECT_ID_PROP, "test_project_id_01");
+
+        Dataset<Row> dataset =
+                spark.read().json(requireNonNull(getClass().getResource("/original_data_with_user_profile_set3.json")).getPath());
+        List<Dataset<Row>> transformedDatasets = transformer.transform(dataset);
+        Dataset<Row> datasetUser = transformedDatasets.get(3);
+
+        String expectedJson = this.resourceFileAsString("/expected/transform_v2_user_ip.json");
+        datasetUser = datasetUser.filter(expr("user_pseudo_id='uuid-profile-set3'"));
+        Assertions.assertEquals(expectedJson, datasetUser.first().prettyJson());
+        Assertions.assertEquals(1, datasetUser.count());
+    }
+
+
     @Test
     public void should_transform_save_state_data_temp_table() throws IOException {
         // DOWNLOAD_FILE=0 ./gradlew clean test --info --tests software.aws.solution.clickstream.TransformerV2Test.should_transform_save_state_data_temp_table
