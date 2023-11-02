@@ -255,7 +255,35 @@ struct YourApp: App {
     [ClickstreamObjc flushEvents];
     ```
 
-#### SDK配置更新
+#### 禁用 SDK
+
+您可以根据需要禁用 SDK 。禁用后 SDK 将不会处理任何事件的记录和发送，同时您可以在需要继续记录事件时再次启用SDK。
+
+=== "Swift"
+
+    ```swift
+    import Clickstream
+    
+    // 禁用 SDK
+    ClickstreamAnalytics.disable()
+    
+    // 启用 SDK
+    ClickstreamAnalytics.enable()
+    ```
+
+=== "Objective-C"
+
+    ```objective-c
+    import Clickstream;
+    
+    // 禁用 SDK
+    [ClickstreamObjc disable];
+    
+    // 启用 SDK
+    [ClickstreamObjc enable];
+    ```
+
+#### SDK 配置更新
 
 在初始化 SDK 后，您可以使用以下代码对其进行自定义配置。
 

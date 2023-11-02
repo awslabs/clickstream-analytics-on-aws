@@ -18,7 +18,7 @@ Add the Clickstream SDK dependency to your `app` module's `build.gradle` file, f
 
 ```groovy
 dependencies {
-    implementation 'software.aws.solution:clickstream:0.7.1'
+    implementation 'software.aws.solution:clickstream:0.9.0'
 }
 ```
 
@@ -156,6 +156,22 @@ Current login user's attributes will be cached in disk, so the next time app lau
 ClickstreamAnalytics.flushEvent();
 ```
 
+#### Disable SDK
+
+You can disable the SDK in the scenario you need. After disabling the SDK, the SDK will not handle the logging and sending of any events. Of course you can enable the SDK when you need to continue logging events.
+
+Please note that the disable and enable code needs to be run in the main thread.
+
+```java
+import software.aws.solution.clickstream.ClickstreamAnalytics;
+
+// disable SDK
+ClickstreamAnalytics.disable();
+
+// enable SDK
+ClickstreamAnalytics.enable();
+```
+
 #### Configuration update
 
 After initializing the SDK, you can use the following code to customize the configuration of the SDK.
@@ -183,19 +199,19 @@ ClickstreamAnalytics.getClickStreamConfiguration()
 
 Here is an explanation of each method.
 
-| Method name                     | Parameter type | Required | Default value | Description                                                                                 |
-|---------------------------------|----------------|----------|---------------|---------------------------------------------------------------------------------------------|
-| withAppId()                     | String         | true     | --            | the app id of your application in web console                                               |
-| withEndpoint()                  | String         | true     | --            | the endpoint path you will upload the event to Clickstream ingestion server                 |
-| withAuthCookie()                | String         | false    | --            | your auth cookie for AWS application load balancer auth cookie                              |
-| withSendEventsInterval()        | long           | false    | 100000        | event sending interval in milliseconds                                                      |
-| withSessionTimeoutDuration()    | long           | false    | 5000          | the duration of the session timeout in milliseconds                                         |
-| withTrackScreenViewEvents()     | boolean        | false    | true          | whether to auto-record screen view events                                                   |
-| withTrackUserEngagementEvents() | boolean        | false    | true          | whether to auto-record user engagement events                                               |
-| withTrackAppExceptionEvents()   | boolean        | false    | true          | whether to auto-record app exception events                                                 |
+| Method name                     | Parameter type | Required | Default value | Description                                                  |
+| ------------------------------- | -------------- | -------- | ------------- | ------------------------------------------------------------ |
+| withAppId()                     | String         | true     | --            | the app id of your application in web console                |
+| withEndpoint()                  | String         | true     | --            | the endpoint path you will upload the event to Clickstream ingestion server |
+| withAuthCookie()                | String         | false    | --            | your auth cookie for AWS application load balancer auth cookie |
+| withSendEventsInterval()        | long           | false    | 1800000       | event sending interval in milliseconds                       |
+| withSessionTimeoutDuration()    | long           | false    | 5000          | the duration of the session timeout in milliseconds          |
+| withTrackScreenViewEvents()     | boolean        | false    | true          | whether to auto-record screen view events                    |
+| withTrackUserEngagementEvents() | boolean        | false    | true          | whether to auto-record user engagement events                |
+| withTrackAppExceptionEvents()   | boolean        | false    | true          | whether to auto-record app exception events                  |
 | withLogEvents()                 | boolean        | false    | true          | whether to automatically print event JSON for debugging events, [Learn more](#debug-events) |
-| withCustomDns()                 | String         | false    | --            | the method for setting your custom DNS, [Learn more](#configure-custom-dns)                 |
-| withCompressEvents()            | boolean        | false    | true          | whether to compress event content by gzip when uploading events.                            |
+| withCustomDns()                 | String         | false    | --            | the method for setting your custom DNS, [Learn more](#configure-custom-dns) |
+| withCompressEvents()            | boolean        | false    | true          | whether to compress event content by gzip when uploading events. |
 
 #### Debug events
 
