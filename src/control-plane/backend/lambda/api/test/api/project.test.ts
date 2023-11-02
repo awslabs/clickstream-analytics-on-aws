@@ -481,7 +481,7 @@ describe('Project test', () => {
       ],
     });
     ddbMock.on(QueryCommand).resolves({
-      Items: [KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW],
+      Items: [{ ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW }],
     });
     sfnMock.on(StartExecutionCommand).resolves({ executionArn: 'xxx' });
     ddbMock.on(UpdateCommand).resolves({});

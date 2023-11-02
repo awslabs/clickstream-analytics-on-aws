@@ -136,7 +136,7 @@ describe('Analytics dashboard test', () => {
         },
       ],
     }).resolves({
-      Items: [KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW],
+      Items: [{ ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW }],
     });
     const res = await request(app)
       .get(`/api/project/${MOCK_PROJECT_ID}/${MOCK_APP_ID}/dashboard`);
@@ -186,7 +186,7 @@ describe('Analytics dashboard test', () => {
       },
     });
     ddbMock.on(QueryCommand).resolves({
-      Items: [KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW],
+      Items: [{ ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW }],
     });
     const res = await request(app)
       .get(`/api/project/${MOCK_PROJECT_ID}/${MOCK_APP_ID}/dashboard/${MOCK_DASHBOARD_ID}`);
@@ -233,7 +233,7 @@ describe('Analytics dashboard test', () => {
       },
     });
     ddbMock.on(QueryCommand).resolves({
-      Items: [KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW],
+      Items: [{ ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW }],
     });
     ddbMock.on(UpdateCommand).resolves({});
     const res = await request(app)

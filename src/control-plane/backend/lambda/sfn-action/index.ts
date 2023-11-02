@@ -260,7 +260,7 @@ export const describe = async (region: string, stackName: string) => {
 };
 
 export const callback = async (event: SfnStackEvent) => {
-  if (!event.Callback || !event.Callback.BucketName || !event.Callback.BucketPrefix || !event.Result) {
+  if (!event.Callback?.BucketName || !event.Callback?.BucketPrefix || !event.Result) {
     logger.error('Save runtime to S3 failed, Parameter error.', {
       event: event,
     });
@@ -312,6 +312,13 @@ export const doUpdate = async (region: string, input: UpdateStackCommandInput): 
         RetainExceptOnCreate: true,
       };
       return doUpdate(region, rollbackInput);
+    } else if (err instanceof Error &&
+      err.name === 'ValidationError' &&
+      err.message.includes('No updates are to be performed.')) {
+      return {
+        $metadata: {},
+        StackId: '',
+      };
     }
     throw Error((err as Error).message);
   }

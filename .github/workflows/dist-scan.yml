@@ -48,19 +48,17 @@ jobs:
         with:
           name: templates-${{ github.event.pull_request.number }}
           path: templates
-      - name: Setup Cloud Formation Linter with 0.81.0
+      - name: Setup Cloud Formation Linter with Latest Version
         uses: scottbrenner/cfn-lint-action@v2
-        with: 
-          version: 0.81.0
       - name: Print the Cloud Formation Linter Version & run Linter.
         id: cfn-lint
         run: |
           cfn-lint --version
           TEMPLATE_ROOT=templates/default
-          cfn-lint -i W3005 W2001 -e -r us-east-1,ap-northeast-1 -t $TEMPLATE_ROOT/*.template.json
-          cfn-lint -i W3005 W2001 -e -r ap-east-1 --ignore-templates $TEMPLATE_ROOT/data-reporting-quicksight-stack.template.json --ignore-templates $TEMPLATE_ROOT/*NewServerlessRedshift*.nested.template.json --ignore-templates $TEMPLATE_ROOT/data-pipeline-stack.template.json --ignore-templates $TEMPLATE_ROOT/datapipeline*.nested.template.json --ignore-templates $TEMPLATE_ROOT/cloudfront-s3-control-plane-stack-global* --ignore-templates $TEMPLATE_ROOT/*cognito-control-plane-stack.template.json --ignore-templates $TEMPLATE_ROOT/public-exist-vpc-custom-domain-control-plane-stack.template.json -t $TEMPLATE_ROOT/*.template.json
+          cfn-lint -i W3005 W2001 W3045 -e -r us-east-1,ap-northeast-1 -t $TEMPLATE_ROOT/*.template.json
+          cfn-lint -i W3005 W2001 W3045 -e -r ap-east-1 --ignore-templates $TEMPLATE_ROOT/data-reporting-quicksight-stack.template.json --ignore-templates $TEMPLATE_ROOT/*NewServerlessRedshift*.nested.template.json --ignore-templates $TEMPLATE_ROOT/data-pipeline-stack.template.json --ignore-templates $TEMPLATE_ROOT/datapipeline*.nested.template.json --ignore-templates $TEMPLATE_ROOT/cloudfront-s3-control-plane-stack-global* --ignore-templates $TEMPLATE_ROOT/*cognito-control-plane-stack.template.json --ignore-templates $TEMPLATE_ROOT/public-exist-vpc-custom-domain-control-plane-stack.template.json -t $TEMPLATE_ROOT/*.template.json
           TEMPLATE_ROOT=templates/cn
-          cfn-lint -i W3005 W2001 -e -r cn-north-1,cn-northwest-1 --ignore-templates $TEMPLATE_ROOT/data-reporting-quicksight-stack.template.json --ignore-templates $TEMPLATE_ROOT/*NewServerlessRedshift*.nested.template.json --ignore-templates $TEMPLATE_ROOT/data-pipeline-stack.template.json --ignore-templates $TEMPLATE_ROOT/datapipeline*.nested.template.json --ignore-templates $TEMPLATE_ROOT/cloudfront-s3-control-plane-stack-global*.json --ignore-templates $TEMPLATE_ROOT/*cognito-control-plane-stack.template.json --ignore-templates $TEMPLATE_ROOT/public-exist-vpc-custom-domain-control-plane-stack.template.json --ignore-templates $TEMPLATE_ROOT/ingestionserver*.nested.template.json  -t $TEMPLATE_ROOT/*.template.json
+          cfn-lint -i W3005 W2001 W3045 -e -r cn-north-1,cn-northwest-1 --ignore-templates $TEMPLATE_ROOT/data-reporting-quicksight-stack.template.json --ignore-templates $TEMPLATE_ROOT/*NewServerlessRedshift*.nested.template.json --ignore-templates $TEMPLATE_ROOT/data-pipeline-stack.template.json --ignore-templates $TEMPLATE_ROOT/datapipeline*.nested.template.json --ignore-templates $TEMPLATE_ROOT/cloudfront-s3-control-plane-stack-global*.json --ignore-templates $TEMPLATE_ROOT/*cognito-control-plane-stack.template.json --ignore-templates $TEMPLATE_ROOT/public-exist-vpc-custom-domain-control-plane-stack.template.json --ignore-templates $TEMPLATE_ROOT/ingestionserver*.nested.template.json  -t $TEMPLATE_ROOT/*.template.json
   cfn-nag-scan:
     name: cfn-nag scan
     needs: build-dist

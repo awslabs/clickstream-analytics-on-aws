@@ -11,8 +11,10 @@
  *  and limitations under the License.
  */
 
-import { CloudFormationClient, DescribeStacksCommand } from '@aws-sdk/client-cloudformation';
+import { CloudFormationClient, DescribeStacksCommand, StackStatus } from '@aws-sdk/client-cloudformation';
 import { aws_sdk_client_common_config } from '../../common/sdk-client-config-ln';
+import { PipelineStackType, PipelineStatusDetail } from '../../common/types';
+import { getVersionFromTags } from '../../common/utils';
 
 export const describeStack = async (region: string, stackName: string) => {
   try {
@@ -30,5 +32,25 @@ export const describeStack = async (region: string, stackName: string) => {
     return undefined;
   } catch (error) {
     return undefined;
+  }
+};
+
+export const getStacksDetailsByNames = async (region: string, stackNames: string[]) => {
+  try {
+    const stackDetails: PipelineStatusDetail[] = [];
+    for (let stackName of stackNames) {
+      const stack = await describeStack(region, stackName);
+      stackDetails.push({
+        stackName: stackName,
+        stackType: stackName.split('-')[1] as PipelineStackType,
+        stackStatus: stack?.StackStatus as StackStatus,
+        stackStatusReason: stack?.StackStatusReason ?? '',
+        stackTemplateVersion: getVersionFromTags(stack?.Tags),
+        outputs: stack?.Outputs ?? [],
+      });
+    }
+    return stackDetails;
+  } catch (error) {
+    return [];
   }
 };
