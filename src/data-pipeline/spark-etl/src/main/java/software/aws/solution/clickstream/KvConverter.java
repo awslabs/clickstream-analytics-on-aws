@@ -92,7 +92,7 @@ public class KvConverter {
         Long longValue = null;
         String stringValue = null;
         try {
-            if ( attrValueNode.isLong() || attrValueNode.isInt() || attrValueNode.isBigInteger() || attrValueNode.isIntegralNumber()) {
+            if (attrValueNode.isLong() || attrValueNode.isInt() || attrValueNode.isBigInteger() || attrValueNode.isIntegralNumber()) {
                 longValue = attrValueNode.asLong();
             } else if (attrValueNode.isDouble() || attrValueNode.isFloat() || attrValueNode.isFloatingPointNumber() || attrValueNode.isBigDecimal()) {
                 doubleValue = attrValueNode.asDouble();
