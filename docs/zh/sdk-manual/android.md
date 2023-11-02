@@ -20,7 +20,7 @@ Clickstream Android SDK 支持 Android 4.1（API 级别 16）及更高版本。
 
 ```groovy
 dependencies {
-    implementation 'software.aws.solution:clickstream:0.7.1'
+    implementation 'software.aws.solution:clickstream:0.9.0'
 }
 ```
 
@@ -159,12 +159,28 @@ api `ClickstreamAnalytics.addUserAttributes()` 在当用户属性改变时来更
 ClickstreamAnalytics.flushEvent();
 ```
 
-#### SDK配置更新
+#### 禁用 SDK
+
+您可以根据需要禁用 SDK 。禁用后 SDK 将不会处理任何事件的记录和发送，同时您可以在需要继续记录事件时再次启用SDK。
+
+请注意，禁用和启用的代码需要在主线程中运行。
+
+```java
+import software.aws.solution.clickstream.ClickstreamAnalytics;
+
+// 禁用 SDK
+ClickstreamAnalytics.disable();
+
+// 启用 SDK
+ClickstreamAnalytics.enable();
+```
+
+#### SDK 配置更新
 
 在初始化 SDK 后，您可以使用以下代码对其进行自定义配置。
 
 !!! info "重要提示"
-此配置将覆盖 `amplifyconfiguration.json` 文件中的默认配置。
+    此配置将覆盖 `amplifyconfiguration.json` 文件中的默认配置。
 
 ```java
 import software.aws.solution.clickstream.ClickstreamAnalytics;
@@ -186,19 +202,19 @@ ClickstreamAnalytics.getClickStreamConfiguration()
 
 以下是每个方法的说明
 
-| 方法名                             | 参数类型    | 是否必需  | 默认值    | 描述                                |
-|---------------------------------|---------|-------|--------|-----------------------------------|
-| withAppId()                     | String  | 是     | --     | 在解决方案控制平面中您应用程序的 ID               |
-| withEndpoint()                  | String  | 是     | --     | 您将事件上传到 Clickstream 摄取服务器的URL请求路径 |
-| withAuthCookie()                | String  | 否     | --     | 您的 AWS 应用程序负载均衡器身份验证 cookie       |
-| withSendEventsInterval()        | long    | 否     | 100000 | 事件发送间隔（毫秒）                        |
-| withSessionTimeoutDuration()    | long    | 否     | 5000   | 会话超时的时长（毫秒）                       |
-| withTrackScreenViewEvents()     | boolean | 否     | true   | 是否自动记录 screen view（屏幕浏览） 事件       |
-| withTrackUserEngagementEvents() | boolean | 否     | true   | 是否自动记录 user engagement（用户参与） 事件   |
-| withTrackAppExceptionEvents()   | boolean | 否     | true   | 是否自动记录应用崩溃事件                      |
-| withLogEvents()                 | boolean | 否     | true   | 是否自动打印事件 json以调试事件, [了解更多](#_8)   |
-| withCustomDns()                 | String  | 否     | --     | 设置自定义 DNS 的方法, [了解更多](#dns)       |
-| withCompressEvents()            | boolean | 否     | true   | 上传事件时是否通过gzip压缩事件内容               |
+| 方法名                          | 参数类型 | 是否必需 | 默认值  | 描述                                               |
+| ------------------------------- | -------- | -------- | ------- | -------------------------------------------------- |
+| withAppId()                     | String   | 是       | --      | 在解决方案控制平面中您应用程序的 ID                |
+| withEndpoint()                  | String   | 是       | --      | 您将事件上传到 Clickstream 摄取服务器的URL请求路径 |
+| withAuthCookie()                | String   | 否       | --      | 您的 AWS 应用程序负载均衡器身份验证 cookie         |
+| withSendEventsInterval()        | long     | 否       | 100000  | 事件发送间隔（毫秒）                               |
+| withSessionTimeoutDuration()    | long     | 否       | 1800000 | 会话超时的时长（毫秒）                             |
+| withTrackScreenViewEvents()     | boolean  | 否       | true    | 是否自动记录 screen view（屏幕浏览） 事件          |
+| withTrackUserEngagementEvents() | boolean  | 否       | true    | 是否自动记录 user engagement（用户参与） 事件      |
+| withTrackAppExceptionEvents()   | boolean  | 否       | true    | 是否自动记录应用崩溃事件                           |
+| withLogEvents()                 | boolean  | 否       | true    | 是否自动打印事件 json以调试事件, [了解更多](#_8)   |
+| withCustomDns()                 | String   | 否       | --      | 设置自定义 DNS 的方法, [了解更多](#dns)            |
+| withCompressEvents()            | boolean  | 否       | true    | 上传事件时是否通过gzip压缩事件内容                 |
 
 #### 调试事件
 
@@ -313,8 +329,7 @@ Clickstream Android SDK 支持以下数据类型：
 
 ### 屏幕浏览定义
 
-在Clickstream Android SDK中，我们将 `_screen_view`
-定义为记录用户屏幕浏览路径的事件，当屏幕切换开始时，满足以下任何条件时将会记录 `_screen_view` 事件：
+在Clickstream Android SDK中，我们将 `_screen_view` 定义为记录用户屏幕浏览路径的事件，当屏幕切换开始时，满足以下任何条件时将会记录 `_screen_view` 事件：
 
 1. 之前没有设置过屏幕。
 2. 新的屏幕类名与之前的屏幕类名不同。
