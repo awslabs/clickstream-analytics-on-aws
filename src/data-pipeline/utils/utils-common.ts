@@ -20,35 +20,33 @@ export function getSinkTableLocationPrefix(s3Prefix: string, projectId: string, 
   return getSinkLocationPrefix(s3Prefix, projectId) + tableName + '/';
 }
 
-export function getPluginS3Prefix(pipelineS3Prefix:string, stackId: string, projectId: string, type: string = 'custom-plugins') {
+export function getPluginS3Prefix(pipelineS3Prefix: string, stackId: string, projectId: string, type: string = 'custom-plugins') {
   return `${pipelineS3Prefix}${stackId}/${projectId}/${type}/`;
 }
 
-export function getJobInfoKey(config: {pipelineS3Prefix: string; projectId: string}, jobId: string) {
+export function getJobInfoKey(config: { pipelineS3Prefix: string; projectId: string }, jobId: string) {
   // should not include stackId in the file path,
   // when update root stack, the nest stacks might be delete and recreate, so the nested stack id changed.
   return `${config.pipelineS3Prefix}job-info/${config.projectId}/job-${jobId}.json`;
 }
 
 export async function getLatestEmrJobEndTime(pipelineS3BucketName: string, pipelineS3Prefix: string, projectId: string) {
-  try {
-    // get latest job info, get endTimestamp for scan end date.
-    const key = getJobInfoKey(
-      {
-        pipelineS3Prefix: pipelineS3Prefix,
-        projectId: projectId,
-      },
-      'latest');
-    const latestTimestampInfo = await readS3ObjectAsJson(
-      pipelineS3BucketName,
-      key,
-    );
-    if (latestTimestampInfo) {
-      return latestTimestampInfo.endTimestamp;
-    } else {
-      return undefined;
-    }
-  } catch (error) {
-    throw error;
+
+  // get latest job info, get endTimestamp for scan end date.
+  const key = getJobInfoKey(
+    {
+      pipelineS3Prefix: pipelineS3Prefix,
+      projectId: projectId,
+    },
+    'latest');
+  const latestTimestampInfo = await readS3ObjectAsJson(
+    pipelineS3BucketName,
+    key,
+  );
+  if (latestTimestampInfo) {
+    return latestTimestampInfo.endTimestamp;
+  } else {
+    return undefined;
   }
+
 }

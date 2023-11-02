@@ -196,6 +196,7 @@
     "status": "Status",
     "active": "Active",
     "failed": "Failed",
+    "warning": "Warning",
     "creating": "Creating",
     "updating": "Updating",
     "deleting": "Deleting",

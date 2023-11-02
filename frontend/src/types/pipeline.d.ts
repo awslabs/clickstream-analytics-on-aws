@@ -26,6 +26,7 @@ declare global {
     stackType: string;
     stackStatus: string;
     stackStatusReason: string;
+    stackTemplateVersion: string;
     outputs: IStackOutput[];
   }
 
@@ -161,6 +162,7 @@ declare global {
       status: string;
       stackDetails: IStackStatus[];
     };
+    templateVersion?: string;
     workflow?: WorkflowTemplate;
     executionName?: string;
     executionArn?: string;

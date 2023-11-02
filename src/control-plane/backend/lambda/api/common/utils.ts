@@ -18,6 +18,7 @@ import jwt, { JwtPayload } from 'jsonwebtoken';
 import { amznRequestContextHeader } from './constants';
 import { ALBLogServiceAccountMapping, CORS_ORIGIN_DOMAIN_PATTERN, EMAIL_PATTERN, IP_PATTERN, ServerlessRedshiftRPUByRegionMapping } from './constants-ln';
 import { ConditionCategory, MetadataValueType } from './explore-types';
+import { BuiltInTagKeys } from './model-ln';
 import { logger } from './powertools';
 import { ALBRegionMappingObject, BucketPrefix, ClickStreamSubnet, IUserRole, PipelineStackType, PipelineStatus, RPURange, RPURegionMappingObject, ReportingDashboardOutput, SubnetType } from './types';
 import { IMetadataRaw, IMetadataRawValue, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute, IMetadataAttributeValue } from '../model/metadata';
@@ -514,6 +515,18 @@ function getStackOutputFromPipelineStatus(status: PipelineStatus, stackType: Pip
   return '';
 }
 
+function getVersionFromTags(tags: Tag[] | undefined) {
+  let version = '';
+  if (!tags) {
+    return version;
+  }
+  const versionTag = tags.filter(t => t.Key === BuiltInTagKeys.AWS_SOLUTION_VERSION);
+  if (versionTag.length > 0) {
+    version = versionTag[0].Value ?? '';
+  }
+  return version;
+}
+
 function getReportingDashboardsUrl(status: PipelineStatus, stackType: PipelineStackType, key: string): ReportingDashboardOutput[] {
   let dashboards: ReportingDashboardOutput[] = [];
   const dashboardsOutputs = getStackOutputFromPipelineStatus(
@@ -850,4 +863,5 @@ export {
   getDataFromLastDay,
   pathNodesToAttribute,
   getCurMonthStr,
+  getVersionFromTags,
 };

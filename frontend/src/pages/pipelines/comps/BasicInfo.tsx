@@ -26,8 +26,9 @@ import PipelineStatus from 'components/pipeline/PipelineStatus';
 import moment from 'moment';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { EPipelineStatus, SDK_LIST, TIME_FORMAT } from 'ts/const';
+import { COMMON_ALERT_TYPE, EPipelineStatus, SDK_LIST, TIME_FORMAT } from 'ts/const';
 import { buildS3Link, buildVPCLink } from 'ts/url';
+import { alertMsg } from 'ts/utils';
 
 interface BasicInfoProps {
   pipelineInfo?: IPipeline;
@@ -44,7 +45,24 @@ const BasicInfo: React.FC<BasicInfoProps> = (props: BasicInfoProps) => {
   const [disableUpgrade, setDisableUpgrade] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
+  const checkStackRollbackFailed = () => {
+    const stackDetails = pipelineInfo?.status?.stackDetails ?? [];
+    for (const detail of stackDetails) {
+      if (detail.stackStatus?.endsWith('_ROLLBACK_FAILED')) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   const startRetryPipeline = async () => {
+    if (!checkStackRollbackFailed()) {
+      alertMsg(
+        t('pipeline:valid.stackRollbackFailed'),
+        COMMON_ALERT_TYPE.Error as AlertType
+      );
+      return;
+    };
     setLoadingRetry(true);
     try {
       const resData: ApiResponse<null> = await retryPipeline({
@@ -124,7 +142,8 @@ const BasicInfo: React.FC<BasicInfoProps> = (props: BasicInfoProps) => {
                     reloadPipeline();
                   }}
                 />
-                {pipelineInfo?.status?.status === EPipelineStatus.Failed && (
+                {(pipelineInfo?.status?.status === EPipelineStatus.Failed ||
+                  pipelineInfo?.status?.status === EPipelineStatus.Warning) && (
                   <Button
                     iconName="redo"
                     disabled={disableRetry}

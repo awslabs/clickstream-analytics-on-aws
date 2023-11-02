@@ -46,7 +46,8 @@
     "redshiftProvisionedClusterEmptyError": "Please select a cluster",
     "redshiftProvisionedDBUserEmptyError": "Please input the database user.",
     "redshiftProvisionedDBUserFormatError": "Database user format error",
-    "emailInvalid": "Email invalid."
+    "emailInvalid": "Email invalid.",
+    "stackRollbackFailed": "Some stacks are ROLLBACK_FAILED and can not be updated."
   },
   "create": {
     "basicInfo": "Basic configuration",

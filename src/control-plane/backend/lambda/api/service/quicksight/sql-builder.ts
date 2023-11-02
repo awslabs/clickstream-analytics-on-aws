@@ -202,7 +202,7 @@ export function buildFunnelTableView(sqlParameters: SQLParameters) : string {
   for (const [index, _item] of eventNames.entries()) {
     resultCntSQL = resultCntSQL.concat(`, count(distinct ${prefix}_${index})  as ${eventNames[index]} \n`);
     if (index === 0) {
-      resultCntSQL = resultCntSQL.concat(`, (count(distinct ${prefix}_${maxIndex}) :: decimal /  NULLIF(count(distinct ${prefix}_0), 0) ):: decimal(20, 4)  as rate \n`);
+      resultCntSQL = resultCntSQL.concat(`, (count(distinct ${prefix}_${maxIndex}) :: decimal /  NULLIF(count(distinct ${prefix}_0), 0) ):: decimal(20, 4)  as total_conversion_rate \n`);
     } else {
       resultCntSQL = resultCntSQL.concat(`, (count(distinct ${prefix}_${index}) :: decimal /  NULLIF(count(distinct ${prefix}_${index-1}), 0) ):: decimal(20, 4)  as ${eventNames[index]}_rate \n`);
     }
@@ -962,8 +962,7 @@ export function buildRetentionAnalysisView(sqlParameters: SQLParameters) : strin
     select 
       ${groupingColSql}
       grouping, 
-      start_event_date, 
-      event_date, 
+      ${_getRetentionDateSql(sqlParameters.groupColumn)}
       (count(distinct end_user_pseudo_id)::decimal / NULLIF(count(distinct start_user_pseudo_id), 0)):: decimal(20, 4)  as retention 
     from result_table 
     group by ${groupByColSql} grouping, start_event_date, event_date
@@ -1385,11 +1384,8 @@ function _buildBaseUserDataSql(sqlParameters: SQLParameters, hasNestParams: bool
   `;
 }
 
-function _getAllConditionSql(eventNames: string[], sqlParameters: SQLParameters,
-  isEventPathSQL: boolean = false, simpleVersion: boolean = false) : string {
-
-  const prefix = simpleVersion ? 'event.' : '';
-  let eventNameAndSQLConditions: EventNameAndConditionsSQL[] = [];
+function _fillEventNameAndSQLConditions(eventNames: string[], sqlParameters: SQLParameters,
+  eventNameAndSQLConditions: EventNameAndConditionsSQL[], simpleVersion: boolean) {
   if (simpleVersion) {
     for (const [index, event] of eventNames.entries()) {
       eventNameAndSQLConditions.push({
@@ -1405,6 +1401,15 @@ function _getAllConditionSql(eventNames: string[], sqlParameters: SQLParameters,
       });
     }
   }
+
+}
+
+function _getAllConditionSql(eventNames: string[], sqlParameters: SQLParameters,
+  isEventPathSQL: boolean = false, simpleVersion: boolean = false) : string {
+
+  const prefix = simpleVersion ? 'event.' : '';
+  let eventNameAndSQLConditions: EventNameAndConditionsSQL[] = [];
+  _fillEventNameAndSQLConditions(eventNames, sqlParameters, eventNameAndSQLConditions, simpleVersion);
 
   let allConditionSql = '';
   for (const [index, eventNameAndSQLCondition] of eventNameAndSQLConditions.entries()) {
@@ -1937,6 +1942,26 @@ function _getRetentionAnalysisViewEventNames(sqlParameters: SQLParameters) : str
   }
 
   return [...new Set(eventNames)];
+}
+
+function _getRetentionDateSql(groupCol: string) {
+  if (groupCol === ExploreGroupColumn.WEEK) {
+    //sunday as first day of week to align with quicksight
+    return `
+      DATE_TRUNC('week', start_event_date) - INTERVAL '1 day' as start_event_date,
+      DATE_TRUNC('week', event_date) - INTERVAL '1 day' as event_date,
+    `;
+  } else if (groupCol === ExploreGroupColumn.MONTH) {
+    return `
+      DATE_TRUNC('month', start_event_date) as start_event_date,
+      DATE_TRUNC('month', event_date) as event_date,
+    `;
+  }
+
+  return `
+    start_event_date,
+    event_date,
+  `;
 }
 
 function _getConditionProps(conditions: Condition[]) {

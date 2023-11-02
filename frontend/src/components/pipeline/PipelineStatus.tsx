@@ -41,6 +41,7 @@ const PipelineStatus: React.FC<PipelineStatusProps> = (
   const [loadingStatus, setLoadingStatus] = useState(false);
   const [updatedStatus, setUpdatedStatus] = useState(status);
   const [pipelineRegion, setPipelineRegion] = useState('');
+  const [pipelineTemplateVersion, setPipelineTemplateVersion] = useState('');
   const [stackStatusList, setStackStatusList] = useState<IStackStatus[]>([]);
   const [displayStatus, setDisplayStatus] = useState('');
   const [indicatorType, setIndicatorType] =
@@ -69,6 +70,9 @@ const PipelineStatus: React.FC<PipelineStatusProps> = (
     } else if (updatedStatus === EPipelineStatus.Active) {
       tmpIndicatorType = 'success';
       tmpDisplayStatus = 'status.active';
+    } else if (updatedStatus === EPipelineStatus.Warning) {
+      tmpIndicatorType = 'warning';
+      tmpDisplayStatus = 'status.warning';
     } else {
       tmpIndicatorType = 'pending';
       tmpDisplayStatus = 'status.pending';
@@ -90,10 +94,12 @@ const PipelineStatus: React.FC<PipelineStatusProps> = (
       if (success) {
         setUpdatedStatus(data.status?.status);
         setPipelineRegion(data.region);
-        setStackStatusList(data.status?.stackDetails || []);
+        setPipelineTemplateVersion(data.templateVersion ?? '');
+        setStackStatusList(data.status?.stackDetails ?? []);
         if (
           data.status?.status === EPipelineStatus.Active ||
-          data.status?.status === EPipelineStatus.Failed
+          data.status?.status === EPipelineStatus.Failed ||
+          data.status?.status === EPipelineStatus.Warning
         ) {
           window.clearInterval(intervalId);
         }
@@ -121,6 +127,22 @@ const PipelineStatus: React.FC<PipelineStatusProps> = (
     }
   }, [status]);
 
+  const getStackStatusIndicatorType = (
+    stackVersion: string,
+    stackStatus: string
+  ) => {
+    let stackIndicatorType: StatusIndicatorProps.Type;
+    if (
+      pipelineTemplateVersion !== '' &&
+      pipelineTemplateVersion !== stackVersion
+    ) {
+      stackIndicatorType = 'warning';
+    } else {
+      stackIndicatorType = CLOUDFORMATION_STATUS_MAP[stackStatus];
+    }
+    return stackIndicatorType;
+  };
+
   return (
     <>
       <Popover
@@ -137,13 +159,13 @@ const PipelineStatus: React.FC<PipelineStatusProps> = (
                 return (
                   <div className="flex flex-1" key={element.stackType}>
                     <StatusIndicator
-                      type={
-                        CLOUDFORMATION_STATUS_MAP[element.stackStatus] ||
-                        'stopped'
-                      }
+                      type={getStackStatusIndicatorType(
+                        element.stackTemplateVersion,
+                        element.stackStatus
+                      )}
                     >
                       <b>{element.stackType}</b>(
-                      {element.stackStatus || t('status.unknown')})
+                      {element.stackStatus ?? t('status.unknown')})
                       {element.stackStatus && (
                         <span className="ml-5">
                           <Link

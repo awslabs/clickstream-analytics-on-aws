@@ -18,12 +18,12 @@ export function mergeParameters(base: Parameter[], attach: Parameter[]) {
   // Deep Copy
   const parameters = JSON.parse(JSON.stringify(base)) as Parameter[];
   const keys = parameters.map(p => p.ParameterKey);
-  for (let i = 0; i < attach.length; i++) {
-    if (keys.indexOf(attach[i].ParameterKey) > -1) {
-      const index = keys.indexOf(attach[i].ParameterKey);
-      parameters[index].ParameterValue = attach[i].ParameterValue;
+  for (let att of attach) {
+    if (keys.indexOf(att.ParameterKey) > -1) {
+      const index = keys.indexOf(att.ParameterKey);
+      parameters[index].ParameterValue = att.ParameterValue;
     } else {
-      parameters.push(attach[i]);
+      parameters.push(att);
     }
   }
   return parameters;

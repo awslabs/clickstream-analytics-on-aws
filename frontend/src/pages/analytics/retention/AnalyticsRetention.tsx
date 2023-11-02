@@ -59,6 +59,7 @@ import {
   getDashboardCreateParameters,
   getDateRange,
   getGlobalEventCondition,
+  getGroupCondition,
   getLngFromLocalStorage,
   getPairEventAndConditions,
   parametersConvertToCategoryItemType,
@@ -220,6 +221,7 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
       globalEventCondition: getGlobalEventCondition(segmentationOptionData),
       timeScopeType: dateRangeParams?.timeScopeType,
       groupColumn: timeGranularity.value,
+      groupCondition: getGroupCondition(groupOption),
       ...dateRangeParams,
       ...saveParams,
     };
