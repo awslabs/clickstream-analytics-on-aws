@@ -73,7 +73,7 @@ const MetadataUserAttributeSplitPanel: React.FC<
 
     try {
       const { success }: ApiResponse<null> = await updateMetadataDisplay({
-        id: `${USER_ATTRIBUTE_DISPLAY_PREFIX}${attributeDetails.projectId}#${attributeDetails.appId}#${attributeDetails.name}#${attributeDetails.valueType}`,
+        id: `${USER_ATTRIBUTE_DISPLAY_PREFIX}${attributeDetails.projectId}#${attributeDetails.appId}#${attributeDetails.category}#${attributeDetails.name}#${attributeDetails.valueType}`,
         projectId: attributeDetails.projectId,
         appId: attributeDetails.appId,
         displayName: attributeDetails.displayName,
