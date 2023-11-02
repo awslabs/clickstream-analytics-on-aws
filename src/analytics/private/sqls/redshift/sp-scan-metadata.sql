@@ -318,7 +318,7 @@ BEGIN
 
 	query := 'SELECT column_name FROM user_column_temp_table';
 	FOR rec IN EXECUTE query LOOP
-		EXECUTE 'INSERT INTO user_attribute_temp_table (SELECT user_id, event_timestamp, ''user_outer'' AS property_category, ''' || quote_ident(rec.column_name) || ''' AS property_name, ' || quote_ident(rec.column_name) || '::varchar AS property_value, ''String'' AS value_type FROM {{schema}}.user)';
+		EXECUTE 'INSERT INTO user_attribute_temp_table (SELECT user_id, event_timestamp, ''user_outer'' AS property_category, ''' || quote_ident(rec.column_name) || ''' AS property_name, ' || quote_ident(rec.column_name) || '::varchar AS property_value, ''string'' AS value_type FROM {{schema}}.user)';
 	END LOOP;	
 
 	INSERT INTO user_attribute_temp_table (
