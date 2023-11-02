@@ -1,4 +1,4 @@
-CREATE MATERIALIZED VIEW {{schema}}.clickstream_retention_view{{viewVersion}}
+CREATE MATERIALIZED VIEW {{schema}}.clickstream_retention_view_v1
 BACKUP NO
 SORTKEY(first_date)
 AUTO REFRESH YES

@@ -1,7 +1,7 @@
 {
     "DataSetConfigurations": [
         {
-            "Placeholder": "clickstream_device_view",
+            "Placeholder": "clickstream_device_view{{viewVersion}}",
             "DataSetSchema": {
                 "ColumnSchemaList": [
                     {
@@ -101,7 +101,7 @@
             "ColumnGroupSchemaList": []
         },
         {
-            "Placeholder": "clickstream_lifecycle_daily_view",
+            "Placeholder": "clickstream_lifecycle_daily_view{{viewVersion}}",
             "DataSetSchema": {
                 "ColumnSchemaList": [
                     {
@@ -121,7 +121,7 @@
             "ColumnGroupSchemaList": []
         },
         {
-            "Placeholder": "clickstream_lifecycle_weekly_view",
+            "Placeholder": "clickstream_lifecycle_weekly_view{{viewVersion}}",
             "DataSetSchema": {
                 "ColumnSchemaList": [
                     {
@@ -141,7 +141,7 @@
             "ColumnGroupSchemaList": []
         },
         {
-            "Placeholder": "clickstream_event_parameter_view",
+            "Placeholder": "clickstream_event_parameter_view{{viewVersion}}",
             "DataSetSchema": {
                 "ColumnSchemaList": [
                     {
@@ -193,7 +193,7 @@
             "ColumnGroupSchemaList": []
         },
         {
-            "Placeholder": "clickstream_event_view",
+            "Placeholder": "clickstream_event_view{{viewVersion}}",
             "DataSetSchema": {
                 "ColumnSchemaList": [
                     {
@@ -277,7 +277,7 @@
             "ColumnGroupSchemaList": []
         },
         {
-            "Placeholder": "clickstream_retention_view",
+            "Placeholder": "clickstream_retention_view{{viewVersion}}",
             "DataSetSchema": {
                 "ColumnSchemaList": [
                     {
@@ -301,7 +301,7 @@
             "ColumnGroupSchemaList": []
         },
         {
-            "Placeholder": "clickstream_session_view",
+            "Placeholder": "clickstream_session_view{{viewVersion}}",
             "DataSetSchema": {
                 "ColumnSchemaList": [
                     {
@@ -349,7 +349,7 @@
             "ColumnGroupSchemaList": []
         },
         {
-            "Placeholder": "clickstream_user_attr_view",
+            "Placeholder": "clickstream_user_attr_view{{viewVersion}}",
             "DataSetSchema": {
                 "ColumnSchemaList": [
                     {
@@ -401,7 +401,7 @@
             "ColumnGroupSchemaList": []
         },
         {
-            "Placeholder": "clickstream_user_dim_view",
+            "Placeholder": "clickstream_user_dim_view{{viewVersion}}",
             "DataSetSchema": {
                 "ColumnSchemaList": [
                     {
@@ -755,7 +755,7 @@
                                         "CategoricalMeasureField": {
                                             "FieldId": "5dd838aa-7ff1-4213-aeee-73cb343d5ec2.user_pseudo_id.0.1684912092146",
                                             "Column": {
-                                                "DataSetIdentifier": "clickstream_user_dim_view",
+                                                "DataSetIdentifier": "clickstream_user_dim_view{{viewVersion}}",
                                                 "ColumnName": "user_pseudo_id"
                                             },
                                             "AggregationFunction": "DISTINCT_COUNT"
@@ -768,7 +768,7 @@
                                         "DateDimensionField": {
                                             "FieldId": "5dd838aa-7ff1-4213-aeee-73cb343d5ec2.first_visit_date.1.1684912098644",
                                             "Column": {
-                                                "DataSetIdentifier": "clickstream_user_dim_view",
+                                                "DataSetIdentifier": "clickstream_user_dim_view{{viewVersion}}",
                                                 "ColumnName": "first_visit_date"
                                             },
                                             "DateGranularity": "WEEK",
@@ -861,7 +861,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "5dd838aa-7ff1-4213-aeee-73cb343d5ec2.first_platform.0.1684910420858",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_user_dim_view",
+                                                    "DataSetIdentifier": "clickstream_user_dim_view{{viewVersion}}",
                                                     "ColumnName": "first_platform"
                                                 }
                                             }
@@ -872,7 +872,7 @@
                                             "CategoricalMeasureField": {
                                                 "FieldId": "5dd838aa-7ff1-4213-aeee-73cb343d5ec2.user_pseudo_id.1.1684910424053",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_user_dim_view",
+                                                    "DataSetIdentifier": "clickstream_user_dim_view{{viewVersion}}",
                                                     "ColumnName": "user_pseudo_id"
                                                 },
                                                 "AggregationFunction": "COUNT"
@@ -958,7 +958,7 @@
                                         "NumericalMeasureField": {
                                             "FieldId": "d9a66755-16d6-4d93-8069-7cf1d938b9ec.0.1684910786039",
                                             "Column": {
-                                                "DataSetIdentifier": "clickstream_user_dim_view",
+                                                "DataSetIdentifier": "clickstream_user_dim_view{{viewVersion}}",
                                                 "ColumnName": "Registered User Number"
                                             }
                                         }
@@ -969,7 +969,7 @@
                                         "CategoricalMeasureField": {
                                             "FieldId": "5dd838aa-7ff1-4213-aeee-73cb343d5ec2.user_pseudo_id.1.1684910787976",
                                             "Column": {
-                                                "DataSetIdentifier": "clickstream_user_dim_view",
+                                                "DataSetIdentifier": "clickstream_user_dim_view{{viewVersion}}",
                                                 "ColumnName": "user_pseudo_id"
                                             },
                                             "AggregationFunction": "COUNT"
@@ -1005,7 +1005,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "5dd838aa-7ff1-4213-aeee-73cb343d5ec2.first_traffic_source_source.0.1684910870038",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_user_dim_view",
+                                                    "DataSetIdentifier": "clickstream_user_dim_view{{viewVersion}}",
                                                     "ColumnName": "first_traffic_source_source"
                                                 }
                                             }
@@ -1016,7 +1016,7 @@
                                             "CategoricalMeasureField": {
                                                 "FieldId": "5dd838aa-7ff1-4213-aeee-73cb343d5ec2.user_pseudo_id.1.1684910880753",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_user_dim_view",
+                                                    "DataSetIdentifier": "clickstream_user_dim_view{{viewVersion}}",
                                                     "ColumnName": "user_pseudo_id"
                                                 },
                                                 "AggregationFunction": "COUNT"
@@ -1099,7 +1099,7 @@
                                         "CategoricalMeasureField": {
                                             "FieldId": "5dd838aa-7ff1-4213-aeee-73cb343d5ec2.user_pseudo_id.0.1684912092146",
                                             "Column": {
-                                                "DataSetIdentifier": "clickstream_user_dim_view",
+                                                "DataSetIdentifier": "clickstream_user_dim_view{{viewVersion}}",
                                                 "ColumnName": "user_pseudo_id"
                                             },
                                             "AggregationFunction": "COUNT"
@@ -1112,7 +1112,7 @@
                                         "DateDimensionField": {
                                             "FieldId": "5dd838aa-7ff1-4213-aeee-73cb343d5ec2.first_visit_date.1.1684912098644",
                                             "Column": {
-                                                "DataSetIdentifier": "clickstream_user_dim_view",
+                                                "DataSetIdentifier": "clickstream_user_dim_view{{viewVersion}}",
                                                 "ColumnName": "first_visit_date"
                                             },
                                             "HierarchyId": "5979e327-d8b1-4eca-a202-8a9bae96ed5f",
@@ -1204,7 +1204,7 @@
                                             "DateDimensionField": {
                                                 "FieldId": "5dd838aa-7ff1-4213-aeee-73cb343d5ec2.first_visit_date.0.1684915077154",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_user_dim_view",
+                                                    "DataSetIdentifier": "clickstream_user_dim_view{{viewVersion}}",
                                                     "ColumnName": "first_visit_date"
                                                 },
                                                 "HierarchyId": "7fe79d54-dc4b-4172-a953-b7dd13ec2ecd",
@@ -1219,7 +1219,7 @@
                                             "CategoricalMeasureField": {
                                                 "FieldId": "5dd838aa-7ff1-4213-aeee-73cb343d5ec2.user_pseudo_id.1.1684915080240",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_user_dim_view",
+                                                    "DataSetIdentifier": "clickstream_user_dim_view{{viewVersion}}",
                                                     "ColumnName": "user_pseudo_id"
                                                 },
                                                 "AggregationFunction": "COUNT"
@@ -1229,7 +1229,7 @@
                                             "NumericalMeasureField": {
                                                 "FieldId": "cb710c27-ae71-4081-b25b-541259bc5aa5.2.1684915570923",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_user_dim_view",
+                                                    "DataSetIdentifier": "clickstream_user_dim_view{{viewVersion}}",
                                                     "ColumnName": "Offset New User Number"
                                                 }
                                             }
@@ -1265,7 +1265,7 @@
                                         "ApplyTo": {
                                             "FieldId": "5dd838aa-7ff1-4213-aeee-73cb343d5ec2.first_visit_date.0.1684915077154",
                                             "Column": {
-                                                "DataSetIdentifier": "clickstream_user_dim_view",
+                                                "DataSetIdentifier": "clickstream_user_dim_view{{viewVersion}}",
                                                 "ColumnName": "first_visit_date"
                                             }
                                         }
@@ -1339,7 +1339,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "5dd838aa-7ff1-4213-aeee-73cb343d5ec2.first_visit_country.0.1684916450325",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_user_dim_view",
+                                                    "DataSetIdentifier": "clickstream_user_dim_view{{viewVersion}}",
                                                     "ColumnName": "first_visit_country"
                                                 }
                                             }
@@ -1350,7 +1350,7 @@
                                             "CategoricalMeasureField": {
                                                 "FieldId": "5dd838aa-7ff1-4213-aeee-73cb343d5ec2.user_pseudo_id.1.1684916454232",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_user_dim_view",
+                                                    "DataSetIdentifier": "clickstream_user_dim_view{{viewVersion}}",
                                                     "ColumnName": "user_pseudo_id"
                                                 },
                                                 "AggregationFunction": "COUNT"
@@ -1419,7 +1419,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "5dd838aa-7ff1-4213-aeee-73cb343d5ec2.first_visit_country.0.1684917472601",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_user_dim_view",
+                                                    "DataSetIdentifier": "clickstream_user_dim_view{{viewVersion}}",
                                                     "ColumnName": "first_visit_country"
                                                 }
                                             }
@@ -1428,7 +1428,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "5dd838aa-7ff1-4213-aeee-73cb343d5ec2.first_visit_city.1.1684917490489",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_user_dim_view",
+                                                    "DataSetIdentifier": "clickstream_user_dim_view{{viewVersion}}",
                                                     "ColumnName": "first_visit_city"
                                                 }
                                             }
@@ -1439,7 +1439,7 @@
                                             "CategoricalMeasureField": {
                                                 "FieldId": "5dd838aa-7ff1-4213-aeee-73cb343d5ec2.user_pseudo_id.2.1684917495232",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_user_dim_view",
+                                                    "DataSetIdentifier": "clickstream_user_dim_view{{viewVersion}}",
                                                     "ColumnName": "user_pseudo_id"
                                                 },
                                                 "AggregationFunction": "COUNT"
@@ -1473,7 +1473,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "5dd838aa-7ff1-4213-aeee-73cb343d5ec2.first_visit_device_language.0.1684917547520",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_user_dim_view",
+                                                    "DataSetIdentifier": "clickstream_user_dim_view{{viewVersion}}",
                                                     "ColumnName": "first_visit_device_language"
                                                 }
                                             }
@@ -1485,7 +1485,7 @@
                                             "CategoricalMeasureField": {
                                                 "FieldId": "5dd838aa-7ff1-4213-aeee-73cb343d5ec2.user_pseudo_id.1.1684917549226",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_user_dim_view",
+                                                    "DataSetIdentifier": "clickstream_user_dim_view{{viewVersion}}",
                                                     "ColumnName": "user_pseudo_id"
                                                 },
                                                 "AggregationFunction": "COUNT"
@@ -1563,7 +1563,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "5dd838aa-7ff1-4213-aeee-73cb343d5ec2.first_visit_install_source.0.1684917599605",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_user_dim_view",
+                                                    "DataSetIdentifier": "clickstream_user_dim_view{{viewVersion}}",
                                                     "ColumnName": "first_visit_install_source"
                                                 }
                                             }
@@ -1574,7 +1574,7 @@
                                             "CategoricalMeasureField": {
                                                 "FieldId": "5dd838aa-7ff1-4213-aeee-73cb343d5ec2.user_pseudo_id.1.1684917610141",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_user_dim_view",
+                                                    "DataSetIdentifier": "clickstream_user_dim_view{{viewVersion}}",
                                                     "ColumnName": "user_pseudo_id"
                                                 },
                                                 "AggregationFunction": "COUNT"
@@ -1659,7 +1659,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "5dd838aa-7ff1-4213-aeee-73cb343d5ec2.user_pseudo_id.0.1684917874447",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_user_dim_view",
+                                                    "DataSetIdentifier": "clickstream_user_dim_view{{viewVersion}}",
                                                     "ColumnName": "user_pseudo_id"
                                                 }
                                             }
@@ -1668,7 +1668,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "5dd838aa-7ff1-4213-aeee-73cb343d5ec2.is_registered.2.1684917880513",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_user_dim_view",
+                                                    "DataSetIdentifier": "clickstream_user_dim_view{{viewVersion}}",
                                                     "ColumnName": "is_registered"
                                                 }
                                             }
@@ -1677,7 +1677,7 @@
                                             "DateDimensionField": {
                                                 "FieldId": "5dd838aa-7ff1-4213-aeee-73cb343d5ec2.first_visit_date.3.1684917883394",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_user_dim_view",
+                                                    "DataSetIdentifier": "clickstream_user_dim_view{{viewVersion}}",
                                                     "ColumnName": "first_visit_date"
                                                 },
                                                 "FormatConfiguration": {
@@ -1689,7 +1689,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "5dd838aa-7ff1-4213-aeee-73cb343d5ec2.first_visit_device_language.4.1684917885894",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_user_dim_view",
+                                                    "DataSetIdentifier": "clickstream_user_dim_view{{viewVersion}}",
                                                     "ColumnName": "first_visit_device_language"
                                                 }
                                             }
@@ -1698,7 +1698,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "5dd838aa-7ff1-4213-aeee-73cb343d5ec2.first_visit_install_source.5.1684917886475",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_user_dim_view",
+                                                    "DataSetIdentifier": "clickstream_user_dim_view{{viewVersion}}",
                                                     "ColumnName": "first_visit_install_source"
                                                 }
                                             }
@@ -1707,7 +1707,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "5dd838aa-7ff1-4213-aeee-73cb343d5ec2.first_traffic_source_source.6.1684917887498",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_user_dim_view",
+                                                    "DataSetIdentifier": "clickstream_user_dim_view{{viewVersion}}",
                                                     "ColumnName": "first_traffic_source_source"
                                                 }
                                             }
@@ -1716,7 +1716,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "5dd838aa-7ff1-4213-aeee-73cb343d5ec2.first_traffic_source_name.7.1684917887978",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_user_dim_view",
+                                                    "DataSetIdentifier": "clickstream_user_dim_view{{viewVersion}}",
                                                     "ColumnName": "first_traffic_source_name"
                                                 }
                                             }
@@ -1725,7 +1725,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "5dd838aa-7ff1-4213-aeee-73cb343d5ec2.first_traffic_source_medium.8.1684917888448",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_user_dim_view",
+                                                    "DataSetIdentifier": "clickstream_user_dim_view{{viewVersion}}",
                                                     "ColumnName": "first_traffic_source_medium"
                                                 }
                                             }
@@ -1734,7 +1734,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "5dd838aa-7ff1-4213-aeee-73cb343d5ec2.first_platform.9.1684917889161",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_user_dim_view",
+                                                    "DataSetIdentifier": "clickstream_user_dim_view{{viewVersion}}",
                                                     "ColumnName": "first_platform"
                                                 }
                                             }
@@ -1743,7 +1743,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "5dd838aa-7ff1-4213-aeee-73cb343d5ec2.first_visit_country.10.1684917889952",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_user_dim_view",
+                                                    "DataSetIdentifier": "clickstream_user_dim_view{{viewVersion}}",
                                                     "ColumnName": "first_visit_country"
                                                 }
                                             }
@@ -1752,7 +1752,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "5dd838aa-7ff1-4213-aeee-73cb343d5ec2.first_visit_city.11.1684917890460",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_user_dim_view",
+                                                    "DataSetIdentifier": "clickstream_user_dim_view{{viewVersion}}",
                                                     "ColumnName": "first_visit_city"
                                                 }
                                             }
@@ -1828,7 +1828,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "881ea837-80c5-465d-95be-157ca5e3b4cd.custom_attr_key.0.1684918044958",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_user_attr_view",
+                                                    "DataSetIdentifier": "clickstream_user_attr_view{{viewVersion}}",
                                                     "ColumnName": "custom_attr_key"
                                                 }
                                             }
@@ -1837,7 +1837,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "881ea837-80c5-465d-95be-157ca5e3b4cd.custom_attr_value.1.1684918046192",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_user_attr_view",
+                                                    "DataSetIdentifier": "clickstream_user_attr_view{{viewVersion}}",
                                                     "ColumnName": "custom_attr_value"
                                                 }
                                             }
@@ -1846,7 +1846,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "881ea837-80c5-465d-95be-157ca5e3b4cd.user_pseudo_id.3.1684923413531",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_user_attr_view",
+                                                    "DataSetIdentifier": "clickstream_user_attr_view{{viewVersion}}",
                                                     "ColumnName": "user_pseudo_id"
                                                 }
                                             }
@@ -1855,7 +1855,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "881ea837-80c5-465d-95be-157ca5e3b4cd.user_id.2.1684923386267",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_user_attr_view",
+                                                    "DataSetIdentifier": "clickstream_user_attr_view{{viewVersion}}",
                                                     "ColumnName": "user_id"
                                                 }
                                             }
@@ -2232,7 +2232,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "6a23257c-5821-416e-b269-eeec6227f912.exit_view.1.1684994922155",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_session_view",
+                                                    "DataSetIdentifier": "clickstream_session_view{{viewVersion}}",
                                                     "ColumnName": "exit_view"
                                                 }
                                             }
@@ -2243,7 +2243,7 @@
                                             "CategoricalMeasureField": {
                                                 "FieldId": "6a23257c-5821-416e-b269-eeec6227f912.session_id.1.1684994847685",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_session_view",
+                                                    "DataSetIdentifier": "clickstream_session_view{{viewVersion}}",
                                                     "ColumnName": "session_id"
                                                 },
                                                 "AggregationFunction": "COUNT"
@@ -2333,7 +2333,7 @@
                                         "NumericalMeasureField": {
                                             "FieldId": "ff71248b-3b1d-49d5-b2e1-63f4fcf77cf5.1.1684924897740",
                                             "Column": {
-                                                "DataSetIdentifier": "clickstream_session_view",
+                                                "DataSetIdentifier": "clickstream_session_view{{viewVersion}}",
                                                 "ColumnName": "Average Engagement Time per Session (min)"
                                             }
                                         }
@@ -2345,7 +2345,7 @@
                                         "DateDimensionField": {
                                             "FieldId": "6a23257c-5821-416e-b269-eeec6227f912.session_date.0.1684924125397",
                                             "Column": {
-                                                "DataSetIdentifier": "clickstream_session_view",
+                                                "DataSetIdentifier": "clickstream_session_view{{viewVersion}}",
                                                 "ColumnName": "session_date"
                                             },
                                             "HierarchyId": "3e9af1e7-c26b-40c6-b40f-3bb308843ffe",
@@ -2421,7 +2421,7 @@
                                         "NumericalMeasureField": {
                                             "FieldId": "6a23257c-5821-416e-b269-eeec6227f912.engaged_session.1.1684991580884",
                                             "Column": {
-                                                "DataSetIdentifier": "clickstream_session_view",
+                                                "DataSetIdentifier": "clickstream_session_view{{viewVersion}}",
                                                 "ColumnName": "engaged_session"
                                             },
                                             "AggregationFunction": {
@@ -2436,7 +2436,7 @@
                                         "DateDimensionField": {
                                             "FieldId": "6a23257c-5821-416e-b269-eeec6227f912.session_date.0.1684924125397",
                                             "Column": {
-                                                "DataSetIdentifier": "clickstream_session_view",
+                                                "DataSetIdentifier": "clickstream_session_view{{viewVersion}}",
                                                 "ColumnName": "session_date"
                                             },
                                             "HierarchyId": "2feea7ea-9887-4220-843f-8557279de4b7",
@@ -2512,7 +2512,7 @@
                                         "NumericalMeasureField": {
                                             "FieldId": "b1f517ee-bd7c-4d2c-a5b6-b0bb92b9b0c0.1.1684924887838",
                                             "Column": {
-                                                "DataSetIdentifier": "clickstream_session_view",
+                                                "DataSetIdentifier": "clickstream_session_view{{viewVersion}}",
                                                 "ColumnName": "Session Duration (minute)"
                                             },
                                             "AggregationFunction": {
@@ -2527,7 +2527,7 @@
                                         "DateDimensionField": {
                                             "FieldId": "6a23257c-5821-416e-b269-eeec6227f912.session_date.0.1684924125397",
                                             "Column": {
-                                                "DataSetIdentifier": "clickstream_session_view",
+                                                "DataSetIdentifier": "clickstream_session_view{{viewVersion}}",
                                                 "ColumnName": "session_date"
                                             },
                                             "HierarchyId": "65842d14-8af0-4cbc-a037-9ae6d041afa2",
@@ -2603,7 +2603,7 @@
                                         "CategoricalMeasureField": {
                                             "FieldId": "6a23257c-5821-416e-b269-eeec6227f912.session_id.1.1684924130512",
                                             "Column": {
-                                                "DataSetIdentifier": "clickstream_session_view",
+                                                "DataSetIdentifier": "clickstream_session_view{{viewVersion}}",
                                                 "ColumnName": "session_id"
                                             },
                                             "AggregationFunction": "DISTINCT_COUNT"
@@ -2616,7 +2616,7 @@
                                         "DateDimensionField": {
                                             "FieldId": "6a23257c-5821-416e-b269-eeec6227f912.session_date.0.1684924125397",
                                             "Column": {
-                                                "DataSetIdentifier": "clickstream_session_view",
+                                                "DataSetIdentifier": "clickstream_session_view{{viewVersion}}",
                                                 "ColumnName": "session_date"
                                             },
                                             "HierarchyId": "0e60a865-96a7-4508-9ee2-61b2f69827a8",
@@ -2692,7 +2692,7 @@
                                         "NumericalMeasureField": {
                                             "FieldId": "11c0fe80-d167-4e8d-b80e-b11b42c8d4cf.0.1684990291101",
                                             "Column": {
-                                                "DataSetIdentifier": "clickstream_session_view",
+                                                "DataSetIdentifier": "clickstream_session_view{{viewVersion}}",
                                                 "ColumnName": "Engagement Rate"
                                             }
                                         }
@@ -2704,7 +2704,7 @@
                                         "DateDimensionField": {
                                             "FieldId": "6a23257c-5821-416e-b269-eeec6227f912.session_date.1.1684990298606",
                                             "Column": {
-                                                "DataSetIdentifier": "clickstream_session_view",
+                                                "DataSetIdentifier": "clickstream_session_view{{viewVersion}}",
                                                 "ColumnName": "session_date"
                                             },
                                             "HierarchyId": "52a5335e-e298-4d0b-8151-0267c1d4be04",
@@ -2786,7 +2786,7 @@
                                             "DateDimensionField": {
                                                 "FieldId": "6a23257c-5821-416e-b269-eeec6227f912.session_date.0.1684990356947",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_session_view",
+                                                    "DataSetIdentifier": "clickstream_session_view{{viewVersion}}",
                                                     "ColumnName": "session_date"
                                                 },
                                                 "HierarchyId": "590d9992-f4dd-4f28-80c1-eebdcf9fce53",
@@ -2801,7 +2801,7 @@
                                             "CategoricalMeasureField": {
                                                 "FieldId": "6a23257c-5821-416e-b269-eeec6227f912.session_id.1.1684990359111",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_session_view",
+                                                    "DataSetIdentifier": "clickstream_session_view{{viewVersion}}",
                                                     "ColumnName": "session_id"
                                                 },
                                                 "AggregationFunction": "COUNT"
@@ -2813,7 +2813,7 @@
                                             "NumericalDimensionField": {
                                                 "FieldId": "6a23257c-5821-416e-b269-eeec6227f912.engaged_session.2.1684990367993",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_session_view",
+                                                    "DataSetIdentifier": "clickstream_session_view{{viewVersion}}",
                                                     "ColumnName": "engaged_session"
                                                 }
                                             }
@@ -2861,7 +2861,7 @@
                                         "ApplyTo": {
                                             "FieldId": "6a23257c-5821-416e-b269-eeec6227f912.session_date.0.1684990356947",
                                             "Column": {
-                                                "DataSetIdentifier": "clickstream_session_view",
+                                                "DataSetIdentifier": "clickstream_session_view{{viewVersion}}",
                                                 "ColumnName": "session_date"
                                             }
                                         }
@@ -2875,7 +2875,7 @@
                                         "ApplyTo": {
                                             "FieldId": "6a23257c-5821-416e-b269-eeec6227f912.session_id.1.1684990359111",
                                             "Column": {
-                                                "DataSetIdentifier": "clickstream_session_view",
+                                                "DataSetIdentifier": "clickstream_session_view{{viewVersion}}",
                                                 "ColumnName": "session_id"
                                             }
                                         }
@@ -2953,7 +2953,7 @@
                                         "NumericalMeasureField": {
                                             "FieldId": "55a04ef3-5a8d-4518-a18f-eea27f15527b.1.1684991207139",
                                             "Column": {
-                                                "DataSetIdentifier": "clickstream_session_view",
+                                                "DataSetIdentifier": "clickstream_session_view{{viewVersion}}",
                                                 "ColumnName": "Average Engagement Time per User"
                                             }
                                         }
@@ -2965,7 +2965,7 @@
                                         "DateDimensionField": {
                                             "FieldId": "6a23257c-5821-416e-b269-eeec6227f912.session_date.1.1684990937158",
                                             "Column": {
-                                                "DataSetIdentifier": "clickstream_session_view",
+                                                "DataSetIdentifier": "clickstream_session_view{{viewVersion}}",
                                                 "ColumnName": "session_date"
                                             },
                                             "HierarchyId": "6bdc5877-f009-4dc2-b3de-65f11ba679c5",
@@ -3041,7 +3041,7 @@
                                         "NumericalMeasureField": {
                                             "FieldId": "a7cc5206-32d1-4a2a-9c10-684574af0684.0.1684991418048",
                                             "Column": {
-                                                "DataSetIdentifier": "clickstream_session_view",
+                                                "DataSetIdentifier": "clickstream_session_view{{viewVersion}}",
                                                 "ColumnName": "Average Engaged Session per User"
                                             }
                                         }
@@ -3053,7 +3053,7 @@
                                         "DateDimensionField": {
                                             "FieldId": "6a23257c-5821-416e-b269-eeec6227f912.session_date.1.1684991420965",
                                             "Column": {
-                                                "DataSetIdentifier": "clickstream_session_view",
+                                                "DataSetIdentifier": "clickstream_session_view{{viewVersion}}",
                                                 "ColumnName": "session_date"
                                             },
                                             "HierarchyId": "85372ec9-73f5-4eb4-a0e9-acb33c690091",
@@ -3129,7 +3129,7 @@
                                         "NumericalMeasureField": {
                                             "FieldId": "a4723126-f940-40c6-9260-9131cabadf4d.0.1684991768261",
                                             "Column": {
-                                                "DataSetIdentifier": "clickstream_session_view",
+                                                "DataSetIdentifier": "clickstream_session_view{{viewVersion}}",
                                                 "ColumnName": "Average View per Session "
                                             }
                                         }
@@ -3141,7 +3141,7 @@
                                         "DateDimensionField": {
                                             "FieldId": "6a23257c-5821-416e-b269-eeec6227f912.session_date.1.1684991772067",
                                             "Column": {
-                                                "DataSetIdentifier": "clickstream_session_view",
+                                                "DataSetIdentifier": "clickstream_session_view{{viewVersion}}",
                                                 "ColumnName": "session_date"
                                             },
                                             "HierarchyId": "0f2f3175-cb5e-4274-af49-939611d75537",
@@ -3218,7 +3218,7 @@
                                             "DateDimensionField": {
                                                 "FieldId": "6a23257c-5821-416e-b269-eeec6227f912.session_date.0.1684991902710",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_session_view",
+                                                    "DataSetIdentifier": "clickstream_session_view{{viewVersion}}",
                                                     "ColumnName": "session_date"
                                                 },
                                                 "HierarchyId": "eab1cfad-4940-4537-a41f-e018af110ef7",
@@ -3233,7 +3233,7 @@
                                             "NumericalMeasureField": {
                                                 "FieldId": "a7cc5206-32d1-4a2a-9c10-684574af0684.1.1684991909633",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_session_view",
+                                                    "DataSetIdentifier": "clickstream_session_view{{viewVersion}}",
                                                     "ColumnName": "Average Engaged Session per User"
                                                 }
                                             }
@@ -3242,7 +3242,7 @@
                                             "NumericalMeasureField": {
                                                 "FieldId": "55a04ef3-5a8d-4518-a18f-eea27f15527b.2.1684991913707",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_session_view",
+                                                    "DataSetIdentifier": "clickstream_session_view{{viewVersion}}",
                                                     "ColumnName": "Average Engagement Time per User"
                                                 }
                                             }
@@ -3251,7 +3251,7 @@
                                             "NumericalMeasureField": {
                                                 "FieldId": "ff71248b-3b1d-49d5-b2e1-63f4fcf77cf5.3.1684991916341",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_session_view",
+                                                    "DataSetIdentifier": "clickstream_session_view{{viewVersion}}",
                                                     "ColumnName": "Average Engagement Time per Session (min)"
                                                 }
                                             }
@@ -3260,7 +3260,7 @@
                                             "NumericalMeasureField": {
                                                 "FieldId": "a4723126-f940-40c6-9260-9131cabadf4d.4.1684991917177",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_session_view",
+                                                    "DataSetIdentifier": "clickstream_session_view{{viewVersion}}",
                                                     "ColumnName": "Average View per Session "
                                                 }
                                             }
@@ -3368,7 +3368,7 @@
                                             "DateDimensionField": {
                                                 "FieldId": "6a23257c-5821-416e-b269-eeec6227f912.session_date.0.1684992414840",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_session_view",
+                                                    "DataSetIdentifier": "clickstream_session_view{{viewVersion}}",
                                                     "ColumnName": "session_date"
                                                 },
                                                 "FormatConfiguration": {
@@ -3382,7 +3382,7 @@
                                             "CategoricalMeasureField": {
                                                 "FieldId": "6a23257c-5821-416e-b269-eeec6227f912.session_id.1.1684992432690",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_session_view",
+                                                    "DataSetIdentifier": "clickstream_session_view{{viewVersion}}",
                                                     "ColumnName": "session_id"
                                                 },
                                                 "AggregationFunction": "COUNT"
@@ -3392,7 +3392,7 @@
                                             "NumericalMeasureField": {
                                                 "FieldId": "11c0fe80-d167-4e8d-b80e-b11b42c8d4cf.2.1684992437261",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_session_view",
+                                                    "DataSetIdentifier": "clickstream_session_view{{viewVersion}}",
                                                     "ColumnName": "Engagement Rate"
                                                 }
                                             }
@@ -3401,7 +3401,7 @@
                                             "NumericalMeasureField": {
                                                 "FieldId": "a7cc5206-32d1-4a2a-9c10-684574af0684.3.1684992441438",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_session_view",
+                                                    "DataSetIdentifier": "clickstream_session_view{{viewVersion}}",
                                                     "ColumnName": "Average Engaged Session per User"
                                                 }
                                             }
@@ -3410,7 +3410,7 @@
                                             "NumericalMeasureField": {
                                                 "FieldId": "55a04ef3-5a8d-4518-a18f-eea27f15527b.4.1684992443496",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_session_view",
+                                                    "DataSetIdentifier": "clickstream_session_view{{viewVersion}}",
                                                     "ColumnName": "Average Engagement Time per User"
                                                 }
                                             }
@@ -3419,7 +3419,7 @@
                                             "NumericalMeasureField": {
                                                 "FieldId": "ff71248b-3b1d-49d5-b2e1-63f4fcf77cf5.5.1684992445079",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_session_view",
+                                                    "DataSetIdentifier": "clickstream_session_view{{viewVersion}}",
                                                     "ColumnName": "Average Engagement Time per Session (min)"
                                                 }
                                             }
@@ -3428,7 +3428,7 @@
                                             "NumericalMeasureField": {
                                                 "FieldId": "a4723126-f940-40c6-9260-9131cabadf4d.6.1684992445817",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_session_view",
+                                                    "DataSetIdentifier": "clickstream_session_view{{viewVersion}}",
                                                     "ColumnName": "Average View per Session "
                                                 }
                                             }
@@ -3499,7 +3499,7 @@
                                             "DateDimensionField": {
                                                 "FieldId": "session_date_Time",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_session_view",
+                                                    "DataSetIdentifier": "clickstream_session_view{{viewVersion}}",
                                                     "ColumnName": "session_date"
                                                 },
                                                 "DateGranularity": "DAY"
@@ -3511,7 +3511,7 @@
                             ]
                         },
                         "Actions": [],
-                        "DataSetIdentifier": "clickstream_session_view"
+                        "DataSetIdentifier": "clickstream_session_view{{viewVersion}}"
                     }
                 },
                 {
@@ -3533,7 +3533,7 @@
                                             "DateDimensionField": {
                                                 "FieldId": "session_date_Time",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_session_view",
+                                                    "DataSetIdentifier": "clickstream_session_view{{viewVersion}}",
                                                     "ColumnName": "session_date"
                                                 },
                                                 "DateGranularity": "DAY"
@@ -3544,7 +3544,7 @@
                             ]
                         },
                         "Actions": [],
-                        "DataSetIdentifier": "clickstream_session_view"
+                        "DataSetIdentifier": "clickstream_session_view{{viewVersion}}"
                     }
                 },
                 {
@@ -3566,7 +3566,7 @@
                                             "DateDimensionField": {
                                                 "FieldId": "session_date_Time",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_session_view",
+                                                    "DataSetIdentifier": "clickstream_session_view{{viewVersion}}",
                                                     "ColumnName": "session_date"
                                                 },
                                                 "DateGranularity": "DAY"
@@ -3578,7 +3578,7 @@
                             ]
                         },
                         "Actions": [],
-                        "DataSetIdentifier": "clickstream_session_view"
+                        "DataSetIdentifier": "clickstream_session_view{{viewVersion}}"
                     }
                 },
                 {
@@ -3601,7 +3601,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "6a23257c-5821-416e-b269-eeec6227f912.entry_view.0.1684994844687",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_session_view",
+                                                    "DataSetIdentifier": "clickstream_session_view{{viewVersion}}",
                                                     "ColumnName": "entry_view"
                                                 }
                                             }
@@ -3612,7 +3612,7 @@
                                             "CategoricalMeasureField": {
                                                 "FieldId": "6a23257c-5821-416e-b269-eeec6227f912.session_id.1.1684994847685",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_session_view",
+                                                    "DataSetIdentifier": "clickstream_session_view{{viewVersion}}",
                                                     "ColumnName": "session_id"
                                                 },
                                                 "AggregationFunction": "COUNT"
@@ -4188,7 +4188,7 @@
                                         "NumericalMeasureField": {
                                             "FieldId": "11b94932-9ee9-4dc8-8903-494895fd51e2.1.1684995862494",
                                             "Column": {
-                                                "DataSetIdentifier": "clickstream_event_view",
+                                                "DataSetIdentifier": "clickstream_event_view{{viewVersion}}",
                                                 "ColumnName": "Views"
                                             }
                                         }
@@ -4200,7 +4200,7 @@
                                         "DateDimensionField": {
                                             "FieldId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.event_date.1.1684995667101",
                                             "Column": {
-                                                "DataSetIdentifier": "clickstream_event_view",
+                                                "DataSetIdentifier": "clickstream_event_view{{viewVersion}}",
                                                 "ColumnName": "event_date"
                                             },
                                             "HierarchyId": "eeb04f54-a270-4cc7-94ac-e370c5a041b7",
@@ -4284,7 +4284,7 @@
                                             "DateDimensionField": {
                                                 "FieldId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.event_date.0.1684995486248",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_event_view",
+                                                    "DataSetIdentifier": "clickstream_event_view{{viewVersion}}",
                                                     "ColumnName": "event_date"
                                                 },
                                                 "HierarchyId": "2473ad50-c27f-4a10-9662-78fa336addc1",
@@ -4299,7 +4299,7 @@
                                             "CategoricalMeasureField": {
                                                 "FieldId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.event_id.1.1684995502599",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_event_view",
+                                                    "DataSetIdentifier": "clickstream_event_view{{viewVersion}}",
                                                     "ColumnName": "event_id"
                                                 },
                                                 "AggregationFunction": "DISTINCT_COUNT"
@@ -4309,7 +4309,7 @@
                                             "NumericalMeasureField": {
                                                 "FieldId": "11b94932-9ee9-4dc8-8903-494895fd51e2.2.1684995600989",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_event_view",
+                                                    "DataSetIdentifier": "clickstream_event_view{{viewVersion}}",
                                                     "ColumnName": "Views"
                                                 }
                                             }
@@ -4404,7 +4404,7 @@
                                         "CategoricalMeasureField": {
                                             "FieldId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.event_id.0.1684995665285",
                                             "Column": {
-                                                "DataSetIdentifier": "clickstream_event_view",
+                                                "DataSetIdentifier": "clickstream_event_view{{viewVersion}}",
                                                 "ColumnName": "event_id"
                                             },
                                             "AggregationFunction": "DISTINCT_COUNT"
@@ -4417,7 +4417,7 @@
                                         "DateDimensionField": {
                                             "FieldId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.event_date.1.1684995667101",
                                             "Column": {
-                                                "DataSetIdentifier": "clickstream_event_view",
+                                                "DataSetIdentifier": "clickstream_event_view{{viewVersion}}",
                                                 "ColumnName": "event_date"
                                             },
                                             "HierarchyId": "f5513097-3d26-4536-a092-baa348f52183",
@@ -4501,7 +4501,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.event_name.0.1684995936012",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_event_view",
+                                                    "DataSetIdentifier": "clickstream_event_view{{viewVersion}}",
                                                     "ColumnName": "event_name"
                                                 }
                                             }
@@ -4512,7 +4512,7 @@
                                             "CategoricalMeasureField": {
                                                 "FieldId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.event_id.1.1684995937897",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_event_view",
+                                                    "DataSetIdentifier": "clickstream_event_view{{viewVersion}}",
                                                     "ColumnName": "event_id"
                                                 },
                                                 "AggregationFunction": "DISTINCT_COUNT"
@@ -4560,7 +4560,7 @@
                                         "ApplyTo": {
                                             "FieldId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.event_name.0.1684995936012",
                                             "Column": {
-                                                "DataSetIdentifier": "clickstream_event_view",
+                                                "DataSetIdentifier": "clickstream_event_view{{viewVersion}}",
                                                 "ColumnName": "event_name"
                                             }
                                         }
@@ -4621,7 +4621,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "6cd8af54-c0b2-4afd-a83f-519acf8483c0.event_param_string_value.0.1684996254887",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_event_parameter_view",
+                                                    "DataSetIdentifier": "clickstream_event_parameter_view{{viewVersion}}",
                                                     "ColumnName": "event_param_string_value"
                                                 }
                                             }
@@ -4632,7 +4632,7 @@
                                             "CategoricalMeasureField": {
                                                 "FieldId": "6cd8af54-c0b2-4afd-a83f-519acf8483c0.event_id.1.1684996256882",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_event_parameter_view",
+                                                    "DataSetIdentifier": "clickstream_event_parameter_view{{viewVersion}}",
                                                     "ColumnName": "event_id"
                                                 },
                                                 "AggregationFunction": "DISTINCT_COUNT"
@@ -4670,7 +4670,7 @@
                                         "ApplyTo": {
                                             "FieldId": "6cd8af54-c0b2-4afd-a83f-519acf8483c0.event_param_string_value.0.1684996254887",
                                             "Column": {
-                                                "DataSetIdentifier": "clickstream_event_parameter_view",
+                                                "DataSetIdentifier": "clickstream_event_parameter_view{{viewVersion}}",
                                                 "ColumnName": "event_param_string_value"
                                             }
                                         }
@@ -4731,7 +4731,7 @@
                                             "DateDimensionField": {
                                                 "FieldId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.event_date.0.1684996894651",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_event_view",
+                                                    "DataSetIdentifier": "clickstream_event_view{{viewVersion}}",
                                                     "ColumnName": "event_date"
                                                 },
                                                 "HierarchyId": "4e6d8d69-a23b-4b04-8bf1-25329e468932",
@@ -4746,7 +4746,7 @@
                                             "CategoricalMeasureField": {
                                                 "FieldId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.event_id.1.1684996902114",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_event_view",
+                                                    "DataSetIdentifier": "clickstream_event_view{{viewVersion}}",
                                                     "ColumnName": "event_id"
                                                 },
                                                 "AggregationFunction": "COUNT"
@@ -4758,7 +4758,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "7aef6e50-2cb2-4aed-bc46-694ed6202d8e.2.1684996910517",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_event_view",
+                                                    "DataSetIdentifier": "clickstream_event_view{{viewVersion}}",
                                                     "ColumnName": "User Type"
                                                 }
                                             }
@@ -4797,7 +4797,7 @@
                                         "ApplyTo": {
                                             "FieldId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.event_id.1.1684996902114",
                                             "Column": {
-                                                "DataSetIdentifier": "clickstream_event_view",
+                                                "DataSetIdentifier": "clickstream_event_view{{viewVersion}}",
                                                 "ColumnName": "event_id"
                                             }
                                         }
@@ -4871,7 +4871,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.app_info_version.1.1684997009521",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_event_view",
+                                                    "DataSetIdentifier": "clickstream_event_view{{viewVersion}}",
                                                     "ColumnName": "app_info_version"
                                                 }
                                             }
@@ -4882,7 +4882,7 @@
                                             "CategoricalMeasureField": {
                                                 "FieldId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.event_id.1.1684997013722",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_event_view",
+                                                    "DataSetIdentifier": "clickstream_event_view{{viewVersion}}",
                                                     "ColumnName": "event_id"
                                                 },
                                                 "AggregationFunction": "COUNT"
@@ -4919,7 +4919,7 @@
                                         "ApplyTo": {
                                             "FieldId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.event_id.1.1684997013722",
                                             "Column": {
-                                                "DataSetIdentifier": "clickstream_event_view",
+                                                "DataSetIdentifier": "clickstream_event_view{{viewVersion}}",
                                                 "ColumnName": "event_id"
                                             }
                                         }
@@ -4978,7 +4978,7 @@
                                             "DateDimensionField": {
                                                 "FieldId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.event_date.0.1684997093562",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_event_view",
+                                                    "DataSetIdentifier": "clickstream_event_view{{viewVersion}}",
                                                     "ColumnName": "event_date"
                                                 },
                                                 "HierarchyId": "24c431b9-3888-4aac-90ab-6967d04bc755",
@@ -4993,7 +4993,7 @@
                                             "CategoricalMeasureField": {
                                                 "FieldId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.event_id.1.1684997098319",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_event_view",
+                                                    "DataSetIdentifier": "clickstream_event_view{{viewVersion}}",
                                                     "ColumnName": "event_id"
                                                 },
                                                 "AggregationFunction": "COUNT"
@@ -5003,7 +5003,7 @@
                                             "NumericalMeasureField": {
                                                 "FieldId": "fc639eb4-07ac-43ff-b62e-cb36d7fd79f2.2.1684997100466",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_event_view",
+                                                    "DataSetIdentifier": "clickstream_event_view{{viewVersion}}",
                                                     "ColumnName": "Activity in Last 7 Days"
                                                 }
                                             }
@@ -5012,7 +5012,7 @@
                                             "NumericalMeasureField": {
                                                 "FieldId": "05706569-487d-4572-b2fa-9fd33966e08a.3.1684997101260",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_event_view",
+                                                    "DataSetIdentifier": "clickstream_event_view{{viewVersion}}",
                                                     "ColumnName": "Activity in Last 30 Days"
                                                 }
                                             }
@@ -5117,7 +5117,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.event_id.0.1684997325042",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_event_view",
+                                                    "DataSetIdentifier": "clickstream_event_view{{viewVersion}}",
                                                     "ColumnName": "event_id"
                                                 }
                                             }
@@ -5126,7 +5126,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.event_name.1.1684997332636",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_event_view",
+                                                    "DataSetIdentifier": "clickstream_event_view{{viewVersion}}",
                                                     "ColumnName": "event_name"
                                                 }
                                             }
@@ -5135,7 +5135,7 @@
                                             "NumericalDimensionField": {
                                                 "FieldId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.event_value_in_usd.2.1684997339714",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_event_view",
+                                                    "DataSetIdentifier": "clickstream_event_view{{viewVersion}}",
                                                     "ColumnName": "event_value_in_usd"
                                                 }
                                             }
@@ -5144,7 +5144,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.user_pseudo_id.3.1684997400572",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_event_view",
+                                                    "DataSetIdentifier": "clickstream_event_view{{viewVersion}}",
                                                     "ColumnName": "user_pseudo_id"
                                                 }
                                             }
@@ -5153,7 +5153,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.user_id.4.1684997402726",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_event_view",
+                                                    "DataSetIdentifier": "clickstream_event_view{{viewVersion}}",
                                                     "ColumnName": "user_id"
                                                 }
                                             }
@@ -5162,7 +5162,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.app_info_version.5.1684997423561",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_event_view",
+                                                    "DataSetIdentifier": "clickstream_event_view{{viewVersion}}",
                                                     "ColumnName": "app_info_version"
                                                 }
                                             }
@@ -5171,7 +5171,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.geo_locale.6.1684997430694",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_event_view",
+                                                    "DataSetIdentifier": "clickstream_event_view{{viewVersion}}",
                                                     "ColumnName": "geo_locale"
                                                 }
                                             }
@@ -5235,7 +5235,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "6cd8af54-c0b2-4afd-a83f-519acf8483c0.event_param_key.0.1684997464507",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_event_parameter_view",
+                                                    "DataSetIdentifier": "clickstream_event_parameter_view{{viewVersion}}",
                                                     "ColumnName": "event_param_key"
                                                 }
                                             }
@@ -5244,7 +5244,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "6cd8af54-c0b2-4afd-a83f-519acf8483c0.event_param_string_value.1.1684997465290",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_event_parameter_view",
+                                                    "DataSetIdentifier": "clickstream_event_parameter_view{{viewVersion}}",
                                                     "ColumnName": "event_param_string_value"
                                                 }
                                             }
@@ -5535,7 +5535,7 @@
                                         "CategoricalMeasureField": {
                                             "FieldId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.user_pseudo_id.0.1685001681727",
                                             "Column": {
-                                                "DataSetIdentifier": "clickstream_event_view",
+                                                "DataSetIdentifier": "clickstream_event_view{{viewVersion}}",
                                                 "ColumnName": "user_pseudo_id"
                                             },
                                             "AggregationFunction": "DISTINCT_COUNT"
@@ -5548,7 +5548,7 @@
                                         "DateDimensionField": {
                                             "FieldId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.event_date.1.1685001692998",
                                             "Column": {
-                                                "DataSetIdentifier": "clickstream_event_view",
+                                                "DataSetIdentifier": "clickstream_event_view{{viewVersion}}",
                                                 "ColumnName": "event_date"
                                             },
                                             "DateGranularity": "MONTH",
@@ -5625,7 +5625,7 @@
                                         "CategoricalMeasureField": {
                                             "FieldId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.user_pseudo_id.0.1685001681727",
                                             "Column": {
-                                                "DataSetIdentifier": "clickstream_event_view",
+                                                "DataSetIdentifier": "clickstream_event_view{{viewVersion}}",
                                                 "ColumnName": "user_pseudo_id"
                                             },
                                             "AggregationFunction": "DISTINCT_COUNT"
@@ -5638,7 +5638,7 @@
                                         "DateDimensionField": {
                                             "FieldId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.event_date.1.1685001692998",
                                             "Column": {
-                                                "DataSetIdentifier": "clickstream_event_view",
+                                                "DataSetIdentifier": "clickstream_event_view{{viewVersion}}",
                                                 "ColumnName": "event_date"
                                             },
                                             "DateGranularity": "WEEK",
@@ -5715,7 +5715,7 @@
                                         "CategoricalMeasureField": {
                                             "FieldId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.user_pseudo_id.0.1685001681727",
                                             "Column": {
-                                                "DataSetIdentifier": "clickstream_event_view",
+                                                "DataSetIdentifier": "clickstream_event_view{{viewVersion}}",
                                                 "ColumnName": "user_pseudo_id"
                                             },
                                             "AggregationFunction": "DISTINCT_COUNT"
@@ -5728,7 +5728,7 @@
                                         "DateDimensionField": {
                                             "FieldId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.event_date.1.1685001692998",
                                             "Column": {
-                                                "DataSetIdentifier": "clickstream_event_view",
+                                                "DataSetIdentifier": "clickstream_event_view{{viewVersion}}",
                                                 "ColumnName": "event_date"
                                             },
                                             "HierarchyId": "3f3e86b9-dd03-4480-a147-3b5d272bc6ff",
@@ -5805,7 +5805,7 @@
                                             "DateDimensionField": {
                                                 "FieldId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.event_date.0.1685001800930",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_event_view",
+                                                    "DataSetIdentifier": "clickstream_event_view{{viewVersion}}",
                                                     "ColumnName": "event_date"
                                                 },
                                                 "HierarchyId": "b5be5e55-2258-4d83-a9cc-4a7933c7a662",
@@ -5820,7 +5820,7 @@
                                             "CategoricalMeasureField": {
                                                 "FieldId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.user_pseudo_id.1.1685001812350",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_event_view",
+                                                    "DataSetIdentifier": "clickstream_event_view{{viewVersion}}",
                                                     "ColumnName": "user_pseudo_id"
                                                 },
                                                 "AggregationFunction": "COUNT"
@@ -5830,7 +5830,7 @@
                                             "CategoricalMeasureField": {
                                                 "FieldId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.user_id.2.1685001815523",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_event_view",
+                                                    "DataSetIdentifier": "clickstream_event_view{{viewVersion}}",
                                                     "ColumnName": "user_id"
                                                 },
                                                 "AggregationFunction": "COUNT"
@@ -5925,7 +5925,7 @@
                                             "DateDimensionField": {
                                                 "FieldId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.event_date.0.1685002366843",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_event_view",
+                                                    "DataSetIdentifier": "clickstream_event_view{{viewVersion}}",
                                                     "ColumnName": "event_date"
                                                 },
                                                 "HierarchyId": "397d716a-1f3a-444f-8201-a319c57023d7",
@@ -5940,7 +5940,7 @@
                                             "NumericalMeasureField": {
                                                 "FieldId": "025ce9da-a5bf-49c6-b02e-b708b1497651.1.1685002371923",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_event_view",
+                                                    "DataSetIdentifier": "clickstream_event_view{{viewVersion}}",
                                                     "ColumnName": "DAU/WAU"
                                                 },
                                                 "FormatConfiguration": {
@@ -5966,7 +5966,7 @@
                                             "NumericalMeasureField": {
                                                 "FieldId": "8e593e76-2317-4dcb-9f2b-c2c30a10812e.2.1685002376189",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_event_view",
+                                                    "DataSetIdentifier": "clickstream_event_view{{viewVersion}}",
                                                     "ColumnName": "DAU/MAU"
                                                 },
                                                 "FormatConfiguration": {
@@ -5992,7 +5992,7 @@
                                             "NumericalMeasureField": {
                                                 "FieldId": "1d4680d0-8264-4073-ac1d-ee42d6188212.3.1685002378575",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_event_view",
+                                                    "DataSetIdentifier": "clickstream_event_view{{viewVersion}}",
                                                     "ColumnName": "WAU/MAU"
                                                 },
                                                 "FormatConfiguration": {
@@ -6111,7 +6111,7 @@
                                             "DateDimensionField": {
                                                 "FieldId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.event_date.1.1685002465496",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_event_view",
+                                                    "DataSetIdentifier": "clickstream_event_view{{viewVersion}}",
                                                     "ColumnName": "event_date"
                                                 },
                                                 "HierarchyId": "3e0f7274-8182-4597-b718-c0b47ad37cb3",
@@ -6126,7 +6126,7 @@
                                             "CategoricalMeasureField": {
                                                 "FieldId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.user_pseudo_id.0.1685002455581",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_event_view",
+                                                    "DataSetIdentifier": "clickstream_event_view{{viewVersion}}",
                                                     "ColumnName": "user_pseudo_id"
                                                 },
                                                 "AggregationFunction": "DISTINCT_COUNT"
@@ -6138,7 +6138,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "7aef6e50-2cb2-4aed-bc46-694ed6202d8e.2.1685002471392",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_event_view",
+                                                    "DataSetIdentifier": "clickstream_event_view{{viewVersion}}",
                                                     "ColumnName": "User Type"
                                                 }
                                             }
@@ -6176,7 +6176,7 @@
                                         "ApplyTo": {
                                             "FieldId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.user_pseudo_id.0.1685002455581",
                                             "Column": {
-                                                "DataSetIdentifier": "clickstream_event_view",
+                                                "DataSetIdentifier": "clickstream_event_view{{viewVersion}}",
                                                 "ColumnName": "user_pseudo_id"
                                             }
                                         }
@@ -6250,7 +6250,7 @@
                                             "DateDimensionField": {
                                                 "FieldId": "c7f17272-e5c8-47f6-9735-65726c4053d3.0.1685003101640",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_event_view",
+                                                    "DataSetIdentifier": "clickstream_event_view{{viewVersion}}",
                                                     "ColumnName": "User First Touch Date"
                                                 }
                                             }
@@ -6261,7 +6261,7 @@
                                             "DateDimensionField": {
                                                 "FieldId": "cc8195cc-70c4-48e6-acd6-6a7abda5cc85.event_date.1.1685003112530",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_event_view",
+                                                    "DataSetIdentifier": "clickstream_event_view{{viewVersion}}",
                                                     "ColumnName": "event_date"
                                                 },
                                                 "FormatConfiguration": {
@@ -6275,7 +6275,7 @@
                                             "NumericalMeasureField": {
                                                 "FieldId": "30028261-e7a8-4f70-8bd1-15aa49582189.2.1685003122261",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_event_view",
+                                                    "DataSetIdentifier": "clickstream_event_view{{viewVersion}}",
                                                     "ColumnName": "Retention Rate"
                                                 },
                                                 "FormatConfiguration": {
@@ -6392,7 +6392,7 @@
                                             "NumericalDimensionField": {
                                                 "FieldId": "133bd28f-48e8-4675-8a07-9ebc9213ba9f.day_diff.0.1685003756386",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_retention_view",
+                                                    "DataSetIdentifier": "clickstream_retention_view{{viewVersion}}",
                                                     "ColumnName": "day_diff"
                                                 }
                                             }
@@ -6403,7 +6403,7 @@
                                             "NumericalMeasureField": {
                                                 "FieldId": "dd0833d2-2bf3-40d8-b430-c58cc03723ed.1.1685003758115",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_retention_view",
+                                                    "DataSetIdentifier": "clickstream_retention_view{{viewVersion}}",
                                                     "ColumnName": "Retention Rate"
                                                 },
                                                 "AggregationFunction": {
@@ -6442,7 +6442,7 @@
                                         "ApplyTo": {
                                             "FieldId": "133bd28f-48e8-4675-8a07-9ebc9213ba9f.day_diff.0.1685003756386",
                                             "Column": {
-                                                "DataSetIdentifier": "clickstream_retention_view",
+                                                "DataSetIdentifier": "clickstream_retention_view{{viewVersion}}",
                                                 "ColumnName": "day_diff"
                                             }
                                         }
@@ -6500,7 +6500,7 @@
                                             "DateDimensionField": {
                                                 "FieldId": "133bd28f-48e8-4675-8a07-9ebc9213ba9f.first_date.0.1685003974524",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_retention_view",
+                                                    "DataSetIdentifier": "clickstream_retention_view{{viewVersion}}",
                                                     "ColumnName": "first_date"
                                                 },
                                                 "HierarchyId": "4c1d95a4-7a9e-4b59-9fba-d910209d5ecb",
@@ -6515,7 +6515,7 @@
                                             "NumericalMeasureField": {
                                                 "FieldId": "dd0833d2-2bf3-40d8-b430-c58cc03723ed.1.1685003979708",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_retention_view",
+                                                    "DataSetIdentifier": "clickstream_retention_view{{viewVersion}}",
                                                     "ColumnName": "Retention Rate"
                                                 },
                                                 "AggregationFunction": {
@@ -6529,7 +6529,7 @@
                                             "NumericalDimensionField": {
                                                 "FieldId": "133bd28f-48e8-4675-8a07-9ebc9213ba9f.day_diff.2.1685003983441",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_retention_view",
+                                                    "DataSetIdentifier": "clickstream_retention_view{{viewVersion}}",
                                                     "ColumnName": "day_diff"
                                                 }
                                             }
@@ -6621,7 +6621,7 @@
                                             "DateDimensionField": {
                                                 "FieldId": "8e2d4741-f967-4674-b354-2728554e7d78.time_period.0.1685004498341",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_lifecycle_weekly_view",
+                                                    "DataSetIdentifier": "clickstream_lifecycle_weekly_view{{viewVersion}}",
                                                     "ColumnName": "time_period"
                                                 },
                                                 "HierarchyId": "46f72fcd-cccc-41d3-b85b-2b0f1c4f9391"
@@ -6633,7 +6633,7 @@
                                             "NumericalMeasureField": {
                                                 "FieldId": "8e2d4741-f967-4674-b354-2728554e7d78.sum.2.1685004508471",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_lifecycle_weekly_view",
+                                                    "DataSetIdentifier": "clickstream_lifecycle_weekly_view{{viewVersion}}",
                                                     "ColumnName": "sum"
                                                 },
                                                 "AggregationFunction": {
@@ -6647,7 +6647,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "8e2d4741-f967-4674-b354-2728554e7d78.this_week_value.1.1685004506154",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_lifecycle_weekly_view",
+                                                    "DataSetIdentifier": "clickstream_lifecycle_weekly_view{{viewVersion}}",
                                                     "ColumnName": "this_week_value"
                                                 }
                                             }
@@ -6686,7 +6686,7 @@
                                         "ApplyTo": {
                                             "FieldId": "8e2d4741-f967-4674-b354-2728554e7d78.sum.2.1685004508471",
                                             "Column": {
-                                                "DataSetIdentifier": "clickstream_lifecycle_weekly_view",
+                                                "DataSetIdentifier": "clickstream_lifecycle_weekly_view{{viewVersion}}",
                                                 "ColumnName": "sum"
                                             }
                                         }
@@ -6757,7 +6757,7 @@
                                             "DateDimensionField": {
                                                 "FieldId": "12978fa6-2b34-4482-87e7-de738f0f0018.time_period.0.1685004534756",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_lifecycle_daily_view",
+                                                    "DataSetIdentifier": "clickstream_lifecycle_daily_view{{viewVersion}}",
                                                     "ColumnName": "time_period"
                                                 },
                                                 "HierarchyId": "f1e157a6-9693-4e9b-9998-7b5860ef73eb"
@@ -6769,7 +6769,7 @@
                                             "NumericalMeasureField": {
                                                 "FieldId": "12978fa6-2b34-4482-87e7-de738f0f0018.sum.2.1685004539123",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_lifecycle_daily_view",
+                                                    "DataSetIdentifier": "clickstream_lifecycle_daily_view{{viewVersion}}",
                                                     "ColumnName": "sum"
                                                 },
                                                 "AggregationFunction": {
@@ -6783,7 +6783,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "12978fa6-2b34-4482-87e7-de738f0f0018.this_day_value.1.1685004537810",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_lifecycle_daily_view",
+                                                    "DataSetIdentifier": "clickstream_lifecycle_daily_view{{viewVersion}}",
                                                     "ColumnName": "this_day_value"
                                                 }
                                             }
@@ -6822,7 +6822,7 @@
                                         "ApplyTo": {
                                             "FieldId": "12978fa6-2b34-4482-87e7-de738f0f0018.sum.2.1685004539123",
                                             "Column": {
-                                                "DataSetIdentifier": "clickstream_lifecycle_daily_view",
+                                                "DataSetIdentifier": "clickstream_lifecycle_daily_view{{viewVersion}}",
                                                 "ColumnName": "sum"
                                             }
                                         }
@@ -7177,7 +7177,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "146b55e1-ef82-4742-947c-6787c837d124.ua_device.1.1685006218818",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_device_view",
+                                                    "DataSetIdentifier": "clickstream_device_view{{viewVersion}}",
                                                     "ColumnName": "ua_device"
                                                 }
                                             }
@@ -7188,7 +7188,7 @@
                                             "CategoricalMeasureField": {
                                                 "FieldId": "146b55e1-ef82-4742-947c-6787c837d124.device_id.1.1685006040598",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_device_view",
+                                                    "DataSetIdentifier": "clickstream_device_view{{viewVersion}}",
                                                     "ColumnName": "device_id"
                                                 },
                                                 "AggregationFunction": "DISTINCT_COUNT"
@@ -7229,7 +7229,7 @@
                                         "ApplyTo": {
                                             "FieldId": "146b55e1-ef82-4742-947c-6787c837d124.device_id.1.1685006040598",
                                             "Column": {
-                                                "DataSetIdentifier": "clickstream_device_view",
+                                                "DataSetIdentifier": "clickstream_device_view{{viewVersion}}",
                                                 "ColumnName": "device_id"
                                             }
                                         }
@@ -7287,7 +7287,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "146b55e1-ef82-4742-947c-6787c837d124.ua_device_category.1.1685006483464",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_device_view",
+                                                    "DataSetIdentifier": "clickstream_device_view{{viewVersion}}",
                                                     "ColumnName": "ua_device_category"
                                                 }
                                             }
@@ -7298,7 +7298,7 @@
                                             "CategoricalMeasureField": {
                                                 "FieldId": "146b55e1-ef82-4742-947c-6787c837d124.device_id.1.1685006040598",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_device_view",
+                                                    "DataSetIdentifier": "clickstream_device_view{{viewVersion}}",
                                                     "ColumnName": "device_id"
                                                 },
                                                 "AggregationFunction": "DISTINCT_COUNT"
@@ -7337,7 +7337,7 @@
                                         "ApplyTo": {
                                             "FieldId": "146b55e1-ef82-4742-947c-6787c837d124.ua_device_category.1.1685006483464",
                                             "Column": {
-                                                "DataSetIdentifier": "clickstream_device_view",
+                                                "DataSetIdentifier": "clickstream_device_view{{viewVersion}}",
                                                 "ColumnName": "ua_device_category"
                                             }
                                         }
@@ -7351,7 +7351,7 @@
                                         "ApplyTo": {
                                             "FieldId": "146b55e1-ef82-4742-947c-6787c837d124.device_id.1.1685006040598",
                                             "Column": {
-                                                "DataSetIdentifier": "clickstream_device_view",
+                                                "DataSetIdentifier": "clickstream_device_view{{viewVersion}}",
                                                 "ColumnName": "device_id"
                                             }
                                         }
@@ -7409,7 +7409,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "146b55e1-ef82-4742-947c-6787c837d124.ua_os.1.1685006181981",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_device_view",
+                                                    "DataSetIdentifier": "clickstream_device_view{{viewVersion}}",
                                                     "ColumnName": "ua_os"
                                                 }
                                             }
@@ -7420,7 +7420,7 @@
                                             "CategoricalMeasureField": {
                                                 "FieldId": "146b55e1-ef82-4742-947c-6787c837d124.device_id.1.1685006040598",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_device_view",
+                                                    "DataSetIdentifier": "clickstream_device_view{{viewVersion}}",
                                                     "ColumnName": "device_id"
                                                 },
                                                 "AggregationFunction": "DISTINCT_COUNT"
@@ -7461,7 +7461,7 @@
                                         "ApplyTo": {
                                             "FieldId": "146b55e1-ef82-4742-947c-6787c837d124.device_id.1.1685006040598",
                                             "Column": {
-                                                "DataSetIdentifier": "clickstream_device_view",
+                                                "DataSetIdentifier": "clickstream_device_view{{viewVersion}}",
                                                 "ColumnName": "device_id"
                                             }
                                         }
@@ -7519,7 +7519,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "146b55e1-ef82-4742-947c-6787c837d124.manufacturer.0.1685005090941",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_device_view",
+                                                    "DataSetIdentifier": "clickstream_device_view{{viewVersion}}",
                                                     "ColumnName": "manufacturer"
                                                 }
                                             }
@@ -7530,7 +7530,7 @@
                                             "CategoricalMeasureField": {
                                                 "FieldId": "146b55e1-ef82-4742-947c-6787c837d124.device_id.1.1685005092238",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_device_view",
+                                                    "DataSetIdentifier": "clickstream_device_view{{viewVersion}}",
                                                     "ColumnName": "device_id"
                                                 },
                                                 "AggregationFunction": "DISTINCT_COUNT"
@@ -7612,7 +7612,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "146b55e1-ef82-4742-947c-6787c837d124.mobile_model_name.0.1685005119064",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_device_view",
+                                                    "DataSetIdentifier": "clickstream_device_view{{viewVersion}}",
                                                     "ColumnName": "mobile_model_name"
                                                 }
                                             }
@@ -7623,7 +7623,7 @@
                                             "CategoricalMeasureField": {
                                                 "FieldId": "146b55e1-ef82-4742-947c-6787c837d124.device_id.1.1685005121620",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_device_view",
+                                                    "DataSetIdentifier": "clickstream_device_view{{viewVersion}}",
                                                     "ColumnName": "device_id"
                                                 },
                                                 "AggregationFunction": "DISTINCT_COUNT"
@@ -7697,7 +7697,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "146b55e1-ef82-4742-947c-6787c837d124.operating_system.0.1685005152311",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_device_view",
+                                                    "DataSetIdentifier": "clickstream_device_view{{viewVersion}}",
                                                     "ColumnName": "operating_system"
                                                 }
                                             }
@@ -7708,7 +7708,7 @@
                                             "CategoricalMeasureField": {
                                                 "FieldId": "146b55e1-ef82-4742-947c-6787c837d124.device_id.1.1685005153636",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_device_view",
+                                                    "DataSetIdentifier": "clickstream_device_view{{viewVersion}}",
                                                     "ColumnName": "device_id"
                                                 },
                                                 "AggregationFunction": "DISTINCT_COUNT"
@@ -7789,7 +7789,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "146b55e1-ef82-4742-947c-6787c837d124.operating_system_version.0.1685005176338",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_device_view",
+                                                    "DataSetIdentifier": "clickstream_device_view{{viewVersion}}",
                                                     "ColumnName": "operating_system_version"
                                                 }
                                             }
@@ -7800,7 +7800,7 @@
                                             "CategoricalMeasureField": {
                                                 "FieldId": "146b55e1-ef82-4742-947c-6787c837d124.device_id.1.1685005177952",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_device_view",
+                                                    "DataSetIdentifier": "clickstream_device_view{{viewVersion}}",
                                                     "ColumnName": "device_id"
                                                 },
                                                 "AggregationFunction": "DISTINCT_COUNT"
@@ -7812,7 +7812,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "146b55e1-ef82-4742-947c-6787c837d124.operating_system.2.1685005180410",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_device_view",
+                                                    "DataSetIdentifier": "clickstream_device_view{{viewVersion}}",
                                                     "ColumnName": "operating_system"
                                                 }
                                             }
@@ -7898,7 +7898,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "146b55e1-ef82-4742-947c-6787c837d124.ua_browser.0.1685006038738",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_device_view",
+                                                    "DataSetIdentifier": "clickstream_device_view{{viewVersion}}",
                                                     "ColumnName": "ua_browser"
                                                 }
                                             }
@@ -7909,7 +7909,7 @@
                                             "CategoricalMeasureField": {
                                                 "FieldId": "146b55e1-ef82-4742-947c-6787c837d124.device_id.1.1685006040598",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_device_view",
+                                                    "DataSetIdentifier": "clickstream_device_view{{viewVersion}}",
                                                     "ColumnName": "device_id"
                                                 },
                                                 "AggregationFunction": "DISTINCT_COUNT"
@@ -7950,7 +7950,7 @@
                                         "ApplyTo": {
                                             "FieldId": "146b55e1-ef82-4742-947c-6787c837d124.device_id.1.1685006040598",
                                             "Column": {
-                                                "DataSetIdentifier": "clickstream_device_view",
+                                                "DataSetIdentifier": "clickstream_device_view{{viewVersion}}",
                                                 "ColumnName": "device_id"
                                             }
                                         }
@@ -8008,7 +8008,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "146b55e1-ef82-4742-947c-6787c837d124.device_id.0.1685006551449",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_device_view",
+                                                    "DataSetIdentifier": "clickstream_device_view{{viewVersion}}",
                                                     "ColumnName": "device_id"
                                                 }
                                             }
@@ -8017,7 +8017,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "146b55e1-ef82-4742-947c-6787c837d124.user_pseudo_id.1.1685006554364",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_device_view",
+                                                    "DataSetIdentifier": "clickstream_device_view{{viewVersion}}",
                                                     "ColumnName": "user_pseudo_id"
                                                 }
                                             }
@@ -8026,7 +8026,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "146b55e1-ef82-4742-947c-6787c837d124.user_id.2.1685006555185",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_device_view",
+                                                    "DataSetIdentifier": "clickstream_device_view{{viewVersion}}",
                                                     "ColumnName": "user_id"
                                                 }
                                             }
@@ -8035,7 +8035,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "146b55e1-ef82-4742-947c-6787c837d124.advertising_id.3.1685006563054",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_device_view",
+                                                    "DataSetIdentifier": "clickstream_device_view{{viewVersion}}",
                                                     "ColumnName": "advertising_id"
                                                 }
                                             }
@@ -8044,7 +8044,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "146b55e1-ef82-4742-947c-6787c837d124.carrier.4.1685006564247",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_device_view",
+                                                    "DataSetIdentifier": "clickstream_device_view{{viewVersion}}",
                                                     "ColumnName": "carrier"
                                                 }
                                             }
@@ -8053,7 +8053,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "146b55e1-ef82-4742-947c-6787c837d124.manufacturer.5.1685006565430",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_device_view",
+                                                    "DataSetIdentifier": "clickstream_device_view{{viewVersion}}",
                                                     "ColumnName": "manufacturer"
                                                 }
                                             }
@@ -8062,7 +8062,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "146b55e1-ef82-4742-947c-6787c837d124.mobile_brand_name.6.1685006566147",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_device_view",
+                                                    "DataSetIdentifier": "clickstream_device_view{{viewVersion}}",
                                                     "ColumnName": "mobile_brand_name"
                                                 }
                                             }
@@ -8071,7 +8071,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "146b55e1-ef82-4742-947c-6787c837d124.mobile_model_name.7.1685006566800",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_device_view",
+                                                    "DataSetIdentifier": "clickstream_device_view{{viewVersion}}",
                                                     "ColumnName": "mobile_model_name"
                                                 }
                                             }
@@ -8080,7 +8080,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "146b55e1-ef82-4742-947c-6787c837d124.network_type.8.1685006567532",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_device_view",
+                                                    "DataSetIdentifier": "clickstream_device_view{{viewVersion}}",
                                                     "ColumnName": "network_type"
                                                 }
                                             }
@@ -8089,7 +8089,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "146b55e1-ef82-4742-947c-6787c837d124.operating_system.9.1685006568181",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_device_view",
+                                                    "DataSetIdentifier": "clickstream_device_view{{viewVersion}}",
                                                     "ColumnName": "operating_system"
                                                 }
                                             }
@@ -8098,7 +8098,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "146b55e1-ef82-4742-947c-6787c837d124.operating_system_version.10.1685006569382",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_device_view",
+                                                    "DataSetIdentifier": "clickstream_device_view{{viewVersion}}",
                                                     "ColumnName": "operating_system_version"
                                                 }
                                             }
@@ -8107,7 +8107,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "775f59cc-c0cb-4515-b661-d2e72148594c.11.1685007579613",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_device_view",
+                                                    "DataSetIdentifier": "clickstream_device_view{{viewVersion}}",
                                                     "ColumnName": "Screen Resolution"
                                                 }
                                             }
@@ -8116,7 +8116,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "146b55e1-ef82-4742-947c-6787c837d124.system_language.12.1685007581022",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_device_view",
+                                                    "DataSetIdentifier": "clickstream_device_view{{viewVersion}}",
                                                     "ColumnName": "system_language"
                                                 }
                                             }
@@ -8125,7 +8125,7 @@
                                             "NumericalDimensionField": {
                                                 "FieldId": "146b55e1-ef82-4742-947c-6787c837d124.time_zone_offset_seconds.13.1685007583384",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_device_view",
+                                                    "DataSetIdentifier": "clickstream_device_view{{viewVersion}}",
                                                     "ColumnName": "time_zone_offset_seconds"
                                                 }
                                             }
@@ -8134,7 +8134,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "146b55e1-ef82-4742-947c-6787c837d124.ua_browser.14.1685007585047",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_device_view",
+                                                    "DataSetIdentifier": "clickstream_device_view{{viewVersion}}",
                                                     "ColumnName": "ua_browser"
                                                 }
                                             }
@@ -8143,7 +8143,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "146b55e1-ef82-4742-947c-6787c837d124.ua_browser_version.15.1685007587202",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_device_view",
+                                                    "DataSetIdentifier": "clickstream_device_view{{viewVersion}}",
                                                     "ColumnName": "ua_browser_version"
                                                 }
                                             }
@@ -8152,7 +8152,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "146b55e1-ef82-4742-947c-6787c837d124.ua_device.16.1685007587838",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_device_view",
+                                                    "DataSetIdentifier": "clickstream_device_view{{viewVersion}}",
                                                     "ColumnName": "ua_device"
                                                 }
                                             }
@@ -8161,7 +8161,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "146b55e1-ef82-4742-947c-6787c837d124.ua_device_category.17.1685007588466",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_device_view",
+                                                    "DataSetIdentifier": "clickstream_device_view{{viewVersion}}",
                                                     "ColumnName": "ua_device_category"
                                                 }
                                             }
@@ -8170,7 +8170,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "146b55e1-ef82-4742-947c-6787c837d124.ua_os.18.1685007589320",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_device_view",
+                                                    "DataSetIdentifier": "clickstream_device_view{{viewVersion}}",
                                                     "ColumnName": "ua_os"
                                                 }
                                             }
@@ -8179,7 +8179,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "146b55e1-ef82-4742-947c-6787c837d124.ua_os_version.19.1685007589988",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_device_view",
+                                                    "DataSetIdentifier": "clickstream_device_view{{viewVersion}}",
                                                     "ColumnName": "ua_os_version"
                                                 }
                                             }
@@ -8190,7 +8190,7 @@
                                             "NumericalMeasureField": {
                                                 "FieldId": "146b55e1-ef82-4742-947c-6787c837d124.usage_num.20.1685007593303",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_device_view",
+                                                    "DataSetIdentifier": "clickstream_device_view{{viewVersion}}",
                                                     "ColumnName": "usage_num"
                                                 },
                                                 "AggregationFunction": {
@@ -8226,7 +8226,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "775f59cc-c0cb-4515-b661-d2e72148594c.0.1685006764364",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_device_view",
+                                                    "DataSetIdentifier": "clickstream_device_view{{viewVersion}}",
                                                     "ColumnName": "Screen Resolution"
                                                 }
                                             }
@@ -8237,7 +8237,7 @@
                                             "CategoricalMeasureField": {
                                                 "FieldId": "146b55e1-ef82-4742-947c-6787c837d124.device_id.1.1685006766796",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_device_view",
+                                                    "DataSetIdentifier": "clickstream_device_view{{viewVersion}}",
                                                     "ColumnName": "device_id"
                                                 },
                                                 "AggregationFunction": "DISTINCT_COUNT"
@@ -8319,7 +8319,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "146b55e1-ef82-4742-947c-6787c837d124.system_language.0.1685006847815",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_device_view",
+                                                    "DataSetIdentifier": "clickstream_device_view{{viewVersion}}",
                                                     "ColumnName": "system_language"
                                                 }
                                             }
@@ -8330,7 +8330,7 @@
                                             "CategoricalMeasureField": {
                                                 "FieldId": "146b55e1-ef82-4742-947c-6787c837d124.device_id.1.1685006850630",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_device_view",
+                                                    "DataSetIdentifier": "clickstream_device_view{{viewVersion}}",
                                                     "ColumnName": "device_id"
                                                 },
                                                 "AggregationFunction": "DISTINCT_COUNT"
@@ -8411,7 +8411,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "146b55e1-ef82-4742-947c-6787c837d124.network_type.0.1685006881913",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_device_view",
+                                                    "DataSetIdentifier": "clickstream_device_view{{viewVersion}}",
                                                     "ColumnName": "network_type"
                                                 }
                                             }
@@ -8422,7 +8422,7 @@
                                             "CategoricalMeasureField": {
                                                 "FieldId": "LogialTable1.device_id.1.1686632089908",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_device_view",
+                                                    "DataSetIdentifier": "clickstream_device_view{{viewVersion}}",
                                                     "ColumnName": "device_id"
                                                 },
                                                 "AggregationFunction": "DISTINCT_COUNT"
@@ -8503,7 +8503,7 @@
                                             "CategoricalDimensionField": {
                                                 "FieldId": "146b55e1-ef82-4742-947c-6787c837d124.carrier.0.1685006922065",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_device_view",
+                                                    "DataSetIdentifier": "clickstream_device_view{{viewVersion}}",
                                                     "ColumnName": "carrier"
                                                 }
                                             }
@@ -8514,7 +8514,7 @@
                                             "CategoricalMeasureField": {
                                                 "FieldId": "LogialTable1.device_id.1.1686632102200",
                                                 "Column": {
-                                                    "DataSetIdentifier": "clickstream_device_view",
+                                                    "DataSetIdentifier": "clickstream_device_view{{viewVersion}}",
                                                     "ColumnName": "device_id"
                                                 },
                                                 "AggregationFunction": "DISTINCT_COUNT"
@@ -8775,97 +8775,97 @@
     ],
     "CalculatedFields": [
         {
-            "DataSetIdentifier": "clickstream_device_view",
+            "DataSetIdentifier": "clickstream_device_view{{viewVersion}}",
             "Name": "Screen Resolution",
             "Expression": "concat(toString({screen_height}),'x',toString({screen_width}))"
         },
         {
-            "DataSetIdentifier": "clickstream_event_view",
+            "DataSetIdentifier": "clickstream_event_view{{viewVersion}}",
             "Name": "Activity in Last 30 Days",
             "Expression": "windowSum(count({event_id}),[{event_date} ASC],29,0)"
         },
         {
-            "DataSetIdentifier": "clickstream_event_view",
+            "DataSetIdentifier": "clickstream_event_view{{viewVersion}}",
             "Name": "Activity in Last 7 Days",
             "Expression": "windowSum(count({event_id}),[{event_date} ASC],6,0)"
         },
         {
-            "DataSetIdentifier": "clickstream_event_view",
+            "DataSetIdentifier": "clickstream_event_view{{viewVersion}}",
             "Name": "DAU/MAU",
             "Expression": "distinct_count({user_pseudo_id})/windowSum(distinct_count({user_pseudo_id}),[{event_date} ASC],29,0)"
         },
         {
-            "DataSetIdentifier": "clickstream_event_view",
+            "DataSetIdentifier": "clickstream_event_view{{viewVersion}}",
             "Name": "DAU/WAU",
             "Expression": "distinct_count({user_pseudo_id})/windowSum(distinct_count({user_pseudo_id}),[{event_date} ASC],6,0)"
         },
         {
-            "DataSetIdentifier": "clickstream_event_view",
+            "DataSetIdentifier": "clickstream_event_view{{viewVersion}}",
             "Name": "Retention Rate",
             "Expression": "distinct_count({user_pseudo_id})/sum(distinct_count({user_pseudo_id},[{User First Touch Date}]))"
         },
         {
-            "DataSetIdentifier": "clickstream_event_view",
+            "DataSetIdentifier": "clickstream_event_view{{viewVersion}}",
             "Name": "User First Touch Date",
             "Expression": "minOver({event_date},[{user_pseudo_id}], PRE_AGG)"
         },
         {
-            "DataSetIdentifier": "clickstream_event_view",
+            "DataSetIdentifier": "clickstream_event_view{{viewVersion}}",
             "Name": "User Type",
             "Expression": "ifelse(\n    dateDiff({event_date}, epochDate({user_first_touch_timestamp}),'DD')=0,'New',\n    'Returning'\n)"
         },
         {
-            "DataSetIdentifier": "clickstream_event_view",
+            "DataSetIdentifier": "clickstream_event_view{{viewVersion}}",
             "Name": "Views",
             "Expression": "distinct_countIf({event_id}, {event_name} = '_screen_view' or {event_name} = '_page_view')"
         },
         {
-            "DataSetIdentifier": "clickstream_event_view",
+            "DataSetIdentifier": "clickstream_event_view{{viewVersion}}",
             "Name": "WAU/MAU",
             "Expression": "windowSum(distinct_count({user_pseudo_id}),[{event_date} ASC],6,0)/windowSum(distinct_count({user_pseudo_id}),[{event_date} ASC],29,0)"
         },
         {
-            "DataSetIdentifier": "clickstream_retention_view",
+            "DataSetIdentifier": "clickstream_retention_view{{viewVersion}}",
             "Name": "Retention Rate",
             "Expression": "{returned_user_count}/{total_users}"
         },
         {
-            "DataSetIdentifier": "clickstream_session_view",
+            "DataSetIdentifier": "clickstream_session_view{{viewVersion}}",
             "Name": "Average Engaged Session per User",
             "Expression": "distinct_countIf({session_id},{engaged_session}=1)/distinct_count({user_pseudo_id})"
         },
         {
-            "DataSetIdentifier": "clickstream_session_view",
+            "DataSetIdentifier": "clickstream_session_view{{viewVersion}}",
             "Name": "Average Engagement Time per Session (min)",
             "Expression": "sum({session_engagement_time})/count({session_id})/60/1000"
         },
         {
-            "DataSetIdentifier": "clickstream_session_view",
+            "DataSetIdentifier": "clickstream_session_view{{viewVersion}}",
             "Name": "Average Engagement Time per User",
             "Expression": "sum({session_engagement_time}/60/1000)/distinct_count({user_pseudo_id})"
         },
         {
-            "DataSetIdentifier": "clickstream_session_view",
+            "DataSetIdentifier": "clickstream_session_view{{viewVersion}}",
             "Name": "Average View per Session ",
             "Expression": "sum({session_views})/distinct_count({session_id})"
         },
         {
-            "DataSetIdentifier": "clickstream_session_view",
+            "DataSetIdentifier": "clickstream_session_view{{viewVersion}}",
             "Name": "Engagement Rate",
             "Expression": "1.0*distinct_countIf({session_id},{engaged_session}=1)/distinct_count({session_id})"
         },
         {
-            "DataSetIdentifier": "clickstream_session_view",
+            "DataSetIdentifier": "clickstream_session_view{{viewVersion}}",
             "Name": "Session Duration (minute)",
             "Expression": "{session_duration}/1000/60"
         },
         {
-            "DataSetIdentifier": "clickstream_user_dim_view",
+            "DataSetIdentifier": "clickstream_user_dim_view{{viewVersion}}",
             "Name": "Offset New User Number",
             "Expression": "ifelse(\n        ${pOffsetPeriod} = 'Year', periodOverPeriodLastValue(distinct_count({user_pseudo_id}),{first_visit_date},YEAR,${pOffsetValue}),\n        ${pOffsetPeriod} = 'Quarter', periodOverPeriodLastValue(distinct_count({user_pseudo_id}),{first_visit_date},QUARTER,${pOffsetValue}),\n        ${pOffsetPeriod} = 'Month', periodOverPeriodLastValue(distinct_count({user_pseudo_id}),{first_visit_date},MONTH,${pOffsetValue}),\n        ${pOffsetPeriod} = 'Day', periodOverPeriodLastValue(distinct_count({user_pseudo_id}),{first_visit_date},DAY,${pOffsetValue}),\n        0)"
         },
         {
-            "DataSetIdentifier": "clickstream_user_dim_view",
+            "DataSetIdentifier": "clickstream_user_dim_view{{viewVersion}}",
             "Name": "Registered User Number",
             "Expression": "countIf({user_pseudo_id}, {is_registered}='Registered')"
         }
@@ -8960,7 +8960,7 @@
                     "TimeRangeFilter": {
                         "FilterId": "63a8b9c1-1f19-47d8-975b-d1dfaa99755a",
                         "Column": {
-                            "DataSetIdentifier": "clickstream_user_dim_view",
+                            "DataSetIdentifier": "clickstream_user_dim_view{{viewVersion}}",
                             "ColumnName": "first_visit_date"
                         },
                         "IncludeMinimum": true,
@@ -8996,7 +8996,7 @@
                     "CategoryFilter": {
                         "FilterId": "4f94ea47-f865-43d9-9181-baed2c60d2e5",
                         "Column": {
-                            "DataSetIdentifier": "clickstream_user_dim_view",
+                            "DataSetIdentifier": "clickstream_user_dim_view{{viewVersion}}",
                             "ColumnName": "first_platform"
                         },
                         "Configuration": {
@@ -9028,7 +9028,7 @@
                     "CategoryFilter": {
                         "FilterId": "14f2f5c9-20fe-4ed2-9103-e93b6e04d968",
                         "Column": {
-                            "DataSetIdentifier": "clickstream_user_dim_view",
+                            "DataSetIdentifier": "clickstream_user_dim_view{{viewVersion}}",
                             "ColumnName": "first_visit_country"
                         },
                         "Configuration": {
@@ -9060,7 +9060,7 @@
                     "CategoryFilter": {
                         "FilterId": "08801aa1-714a-40e4-99cf-4ad1467dcd80",
                         "Column": {
-                            "DataSetIdentifier": "clickstream_user_dim_view",
+                            "DataSetIdentifier": "clickstream_user_dim_view{{viewVersion}}",
                             "ColumnName": "user_pseudo_id"
                         },
                         "Configuration": {
@@ -9095,7 +9095,7 @@
                     "CategoryFilter": {
                         "FilterId": "0a7a8fe0-dde8-4da3-aa02-ce8a38bcd954",
                         "Column": {
-                            "DataSetIdentifier": "clickstream_user_dim_view",
+                            "DataSetIdentifier": "clickstream_user_dim_view{{viewVersion}}",
                             "ColumnName": "user_id"
                         },
                         "Configuration": {
@@ -9130,7 +9130,7 @@
                     "CategoryFilter": {
                         "FilterId": "b5ac66b7-d700-4551-8dd5-71a99af76c21",
                         "Column": {
-                            "DataSetIdentifier": "clickstream_user_dim_view",
+                            "DataSetIdentifier": "clickstream_user_dim_view{{viewVersion}}",
                             "ColumnName": "first_traffic_source_source"
                         },
                         "Configuration": {
@@ -9165,7 +9165,7 @@
                     "CategoryFilter": {
                         "FilterId": "e900df5a-8bd8-4f7a-8ecf-78a141ac3b92",
                         "Column": {
-                            "DataSetIdentifier": "clickstream_user_attr_view",
+                            "DataSetIdentifier": "clickstream_user_attr_view{{viewVersion}}",
                             "ColumnName": "custom_attr_key"
                         },
                         "Configuration": {
@@ -9200,7 +9200,7 @@
                     "CategoryFilter": {
                         "FilterId": "d97c69bf-62ef-49ac-a5e6-5a2d381b9bb6",
                         "Column": {
-                            "DataSetIdentifier": "clickstream_user_attr_view",
+                            "DataSetIdentifier": "clickstream_user_attr_view{{viewVersion}}",
                             "ColumnName": "custom_attr_value"
                         },
                         "Configuration": {
@@ -9235,7 +9235,7 @@
                     "CategoryFilter": {
                         "FilterId": "7a0830b7-1788-4748-9717-04d6bb0f982d",
                         "Column": {
-                            "DataSetIdentifier": "clickstream_user_dim_view",
+                            "DataSetIdentifier": "clickstream_user_dim_view{{viewVersion}}",
                             "ColumnName": "first_visit_device_language"
                         },
                         "Configuration": {
@@ -9270,7 +9270,7 @@
                     "CategoryFilter": {
                         "FilterId": "c6ba8938-c7df-4ed0-a827-2dac73cf6d3b",
                         "Column": {
-                            "DataSetIdentifier": "clickstream_user_dim_view",
+                            "DataSetIdentifier": "clickstream_user_dim_view{{viewVersion}}",
                             "ColumnName": "first_visit_city"
                         },
                         "Configuration": {
@@ -9305,7 +9305,7 @@
                     "TimeRangeFilter": {
                         "FilterId": "a8d56ca0-6c49-47bd-b301-67d800996541",
                         "Column": {
-                            "DataSetIdentifier": "clickstream_session_view",
+                            "DataSetIdentifier": "clickstream_session_view{{viewVersion}}",
                             "ColumnName": "session_date"
                         },
                         "IncludeMinimum": true,
@@ -9341,7 +9341,7 @@
                     "CategoryFilter": {
                         "FilterId": "b3e0783c-8b21-4e81-9d26-7342c714f8e4",
                         "Column": {
-                            "DataSetIdentifier": "clickstream_session_view",
+                            "DataSetIdentifier": "clickstream_session_view{{viewVersion}}",
                             "ColumnName": "platform"
                         },
                         "Configuration": {
@@ -9373,7 +9373,7 @@
                     "TimeRangeFilter": {
                         "FilterId": "b36ced47-8eab-4c5e-94e1-f7ad28dee50e",
                         "Column": {
-                            "DataSetIdentifier": "clickstream_event_view",
+                            "DataSetIdentifier": "clickstream_event_view{{viewVersion}}",
                             "ColumnName": "event_date"
                         },
                         "IncludeMinimum": true,
@@ -9409,7 +9409,7 @@
                     "CategoryFilter": {
                         "FilterId": "18d4cd1d-e664-416b-b16a-368d410c29b1",
                         "Column": {
-                            "DataSetIdentifier": "clickstream_event_view",
+                            "DataSetIdentifier": "clickstream_event_view{{viewVersion}}",
                             "ColumnName": "platform"
                         },
                         "Configuration": {
@@ -9441,7 +9441,7 @@
                     "CategoryFilter": {
                         "FilterId": "9ff3e561-27bb-4c98-803e-f6c00eb7c642",
                         "Column": {
-                            "DataSetIdentifier": "clickstream_event_parameter_view",
+                            "DataSetIdentifier": "clickstream_event_parameter_view{{viewVersion}}",
                             "ColumnName": "event_name"
                         },
                         "Configuration": {
@@ -9478,7 +9478,7 @@
                     "CategoryFilter": {
                         "FilterId": "9cb2cf33-6df5-4099-9f61-f747681e1b66",
                         "Column": {
-                            "DataSetIdentifier": "clickstream_event_parameter_view",
+                            "DataSetIdentifier": "clickstream_event_parameter_view{{viewVersion}}",
                             "ColumnName": "event_param_key"
                         },
                         "Configuration": {
@@ -9515,7 +9515,7 @@
                     "CategoryFilter": {
                         "FilterId": "1e6cd184-8f59-49fe-baa7-432f2c184ff3",
                         "Column": {
-                            "DataSetIdentifier": "clickstream_event_view",
+                            "DataSetIdentifier": "clickstream_event_view{{viewVersion}}",
                             "ColumnName": "event_id"
                         },
                         "Configuration": {
@@ -9550,7 +9550,7 @@
                     "CategoryFilter": {
                         "FilterId": "233cb283-5410-4602-b5d4-e7b77bab02c9",
                         "Column": {
-                            "DataSetIdentifier": "clickstream_event_view",
+                            "DataSetIdentifier": "clickstream_event_view{{viewVersion}}",
                             "ColumnName": "user_pseudo_id"
                         },
                         "Configuration": {
@@ -9585,7 +9585,7 @@
                     "CategoryFilter": {
                         "FilterId": "1b1f3308-8942-443e-a5b7-4419c1c2c791",
                         "Column": {
-                            "DataSetIdentifier": "clickstream_event_view",
+                            "DataSetIdentifier": "clickstream_event_view{{viewVersion}}",
                             "ColumnName": "user_id"
                         },
                         "Configuration": {
@@ -9620,7 +9620,7 @@
                     "CategoryFilter": {
                         "FilterId": "b5b1940e-2c65-4215-b0f6-73fca321b497",
                         "Column": {
-                            "DataSetIdentifier": "clickstream_event_view",
+                            "DataSetIdentifier": "clickstream_event_view{{viewVersion}}",
                             "ColumnName": "app_info_install_source"
                         },
                         "Configuration": {
@@ -9655,7 +9655,7 @@
                     "CategoryFilter": {
                         "FilterId": "8575e9e8-19c5-40fc-94e9-2a79dccf869d",
                         "Column": {
-                            "DataSetIdentifier": "clickstream_event_view",
+                            "DataSetIdentifier": "clickstream_event_view{{viewVersion}}",
                             "ColumnName": "app_info_package_id"
                         },
                         "Configuration": {
@@ -9690,7 +9690,7 @@
                     "CategoryFilter": {
                         "FilterId": "60b7c4ce-48a5-494d-986d-258bbaaf244a",
                         "Column": {
-                            "DataSetIdentifier": "clickstream_event_view",
+                            "DataSetIdentifier": "clickstream_event_view{{viewVersion}}",
                             "ColumnName": "app_info_version"
                         },
                         "Configuration": {
@@ -9725,7 +9725,7 @@
                     "CategoryFilter": {
                         "FilterId": "3803cd75-d0e0-481e-9f65-483feacb7ca9",
                         "Column": {
-                            "DataSetIdentifier": "clickstream_event_view",
+                            "DataSetIdentifier": "clickstream_event_view{{viewVersion}}",
                             "ColumnName": "event_name"
                         },
                         "Configuration": {
@@ -9760,7 +9760,7 @@
                     "CategoryFilter": {
                         "FilterId": "9aa46e60-6a9e-4bec-a251-37e9004ff0c4",
                         "Column": {
-                            "DataSetIdentifier": "clickstream_event_view",
+                            "DataSetIdentifier": "clickstream_event_view{{viewVersion}}",
                             "ColumnName": "User Type"
                         },
                         "Configuration": {
@@ -9795,7 +9795,7 @@
                     "TimeRangeFilter": {
                         "FilterId": "254a27fc-5f9c-442c-b872-e31d700cfb8b",
                         "Column": {
-                            "DataSetIdentifier": "clickstream_event_view",
+                            "DataSetIdentifier": "clickstream_event_view{{viewVersion}}",
                             "ColumnName": "User First Touch Date"
                         },
                         "NullOption": "NON_NULLS_ONLY",
@@ -9826,7 +9826,7 @@
                     "CategoryFilter": {
                         "FilterId": "3bacb119-f23b-4ce0-b5d6-e7db6d1d974e",
                         "Column": {
-                            "DataSetIdentifier": "clickstream_event_parameter_view",
+                            "DataSetIdentifier": "clickstream_event_parameter_view{{viewVersion}}",
                             "ColumnName": "event_param_key"
                         },
                         "Configuration": {
@@ -9861,7 +9861,7 @@
                     "CategoryFilter": {
                         "FilterId": "00a42e44-b792-4b0e-9517-2a597bf64be8",
                         "Column": {
-                            "DataSetIdentifier": "clickstream_event_parameter_view",
+                            "DataSetIdentifier": "clickstream_event_parameter_view{{viewVersion}}",
                             "ColumnName": "event_param_string_value"
                         },
                         "Configuration": {
@@ -9896,7 +9896,7 @@
                     "NumericEqualityFilter": {
                         "FilterId": "07ba35df-4bc6-4ebf-9adb-fc92ac947e9b",
                         "Column": {
-                            "DataSetIdentifier": "clickstream_retention_view",
+                            "DataSetIdentifier": "clickstream_retention_view{{viewVersion}}",
                             "ColumnName": "day_diff"
                         },
                         "Value": 1.0,
@@ -9908,7 +9908,7 @@
                     "NumericEqualityFilter": {
                         "FilterId": "c0000f1c-b294-4c22-be21-2e0b53be8b51",
                         "Column": {
-                            "DataSetIdentifier": "clickstream_retention_view",
+                            "DataSetIdentifier": "clickstream_retention_view{{viewVersion}}",
                             "ColumnName": "day_diff"
                         },
                         "Value": 7.0,
@@ -9920,7 +9920,7 @@
                     "NumericEqualityFilter": {
                         "FilterId": "bac7b395-2119-4640-89e2-080c5b976230",
                         "Column": {
-                            "DataSetIdentifier": "clickstream_retention_view",
+                            "DataSetIdentifier": "clickstream_retention_view{{viewVersion}}",
                             "ColumnName": "day_diff"
                         },
                         "Value": 14.0,
@@ -9952,7 +9952,7 @@
                     "TimeRangeFilter": {
                         "FilterId": "e0992d30-23f1-45cc-81e6-096259397b92",
                         "Column": {
-                            "DataSetIdentifier": "clickstream_retention_view",
+                            "DataSetIdentifier": "clickstream_retention_view{{viewVersion}}",
                             "ColumnName": "first_date"
                         },
                         "IncludeMinimum": true,
@@ -9987,7 +9987,7 @@
                     "TimeRangeFilter": {
                         "FilterId": "39fc3bd0-6353-407e-bdf8-800f5fd0e073",
                         "Column": {
-                            "DataSetIdentifier": "clickstream_event_view",
+                            "DataSetIdentifier": "clickstream_event_view{{viewVersion}}",
                             "ColumnName": "event_date"
                         },
                         "IncludeMinimum": true,
@@ -10023,7 +10023,7 @@
                     "CategoryFilter": {
                         "FilterId": "2e7848de-5fb5-411d-8cdd-167f299ad707",
                         "Column": {
-                            "DataSetIdentifier": "clickstream_event_view",
+                            "DataSetIdentifier": "clickstream_event_view{{viewVersion}}",
                             "ColumnName": "platform"
                         },
                         "Configuration": {
@@ -10055,7 +10055,7 @@
                     "TimeRangeFilter": {
                         "FilterId": "a03dabee-415a-433f-ba6e-a2150246c818",
                         "Column": {
-                            "DataSetIdentifier": "clickstream_lifecycle_weekly_view",
+                            "DataSetIdentifier": "clickstream_lifecycle_weekly_view{{viewVersion}}",
                             "ColumnName": "time_period"
                         },
                         "IncludeMinimum": true,
@@ -10094,7 +10094,7 @@
                     "TimeRangeFilter": {
                         "FilterId": "262d8ddf-d221-48cd-8cd1-e6452c94296f",
                         "Column": {
-                            "DataSetIdentifier": "clickstream_lifecycle_daily_view",
+                            "DataSetIdentifier": "clickstream_lifecycle_daily_view{{viewVersion}}",
                             "ColumnName": "time_period"
                         },
                         "IncludeMinimum": true,
@@ -10133,7 +10133,7 @@
                     "TimeRangeFilter": {
                         "FilterId": "99a66c98-6866-4ca3-b4d9-de2cf6a25a17",
                         "Column": {
-                            "DataSetIdentifier": "clickstream_retention_view",
+                            "DataSetIdentifier": "clickstream_retention_view{{viewVersion}}",
                             "ColumnName": "first_date"
                         },
                         "IncludeMinimum": true,
@@ -10172,7 +10172,7 @@
                     "CategoryFilter": {
                         "FilterId": "0a47c2b8-10d3-4416-9cf9-d9bfd1873fee",
                         "Column": {
-                            "DataSetIdentifier": "clickstream_device_view",
+                            "DataSetIdentifier": "clickstream_device_view{{viewVersion}}",
                             "ColumnName": "device_id"
                         },
                         "Configuration": {
@@ -10207,7 +10207,7 @@
                     "CategoryFilter": {
                         "FilterId": "6f3f950c-ff2c-46b5-a2be-513196dd1671",
                         "Column": {
-                            "DataSetIdentifier": "clickstream_device_view",
+                            "DataSetIdentifier": "clickstream_device_view{{viewVersion}}",
                             "ColumnName": "advertising_id"
                         },
                         "Configuration": {
@@ -10242,7 +10242,7 @@
                     "CategoryFilter": {
                         "FilterId": "61fba5a5-5ae2-419c-9d6a-e1a29e6a1470",
                         "Column": {
-                            "DataSetIdentifier": "clickstream_device_view",
+                            "DataSetIdentifier": "clickstream_device_view{{viewVersion}}",
                             "ColumnName": "user_pseudo_id"
                         },
                         "Configuration": {
@@ -10277,7 +10277,7 @@
                     "CategoryFilter": {
                         "FilterId": "cacc4c7f-3782-44b6-b540-50141dfd6b98",
                         "Column": {
-                            "DataSetIdentifier": "clickstream_device_view",
+                            "DataSetIdentifier": "clickstream_device_view{{viewVersion}}",
                             "ColumnName": "user_id"
                         },
                         "Configuration": {
@@ -10312,7 +10312,7 @@
                     "CategoryFilter": {
                         "FilterId": "dca833e3-d65b-4a0d-9a22-438cbe324134",
                         "Column": {
-                            "DataSetIdentifier": "clickstream_device_view",
+                            "DataSetIdentifier": "clickstream_device_view{{viewVersion}}",
                             "ColumnName": "operating_system"
                         },
                         "Configuration": {
@@ -10344,7 +10344,7 @@
                     "TimeRangeFilter": {
                         "FilterId": "437a88ec-9934-4217-b29b-208478b180fb",
                         "Column": {
-                            "DataSetIdentifier": "clickstream_device_view",
+                            "DataSetIdentifier": "clickstream_device_view{{viewVersion}}",
                             "ColumnName": "event_date"
                         },
                         "IncludeMinimum": true,
@@ -10377,7 +10377,7 @@
     "ColumnConfigurations": [
         {
             "Column": {
-                "DataSetIdentifier": "clickstream_user_dim_view",
+                "DataSetIdentifier": "clickstream_user_dim_view{{viewVersion}}",
                 "ColumnName": "first_visit_install_source"
             },
             "FormatConfiguration": {
@@ -10390,7 +10390,7 @@
         },
         {
             "Column": {
-                "DataSetIdentifier": "clickstream_session_view",
+                "DataSetIdentifier": "clickstream_session_view{{viewVersion}}",
                 "ColumnName": "Engagement Rate"
             },
             "FormatConfiguration": {
@@ -10415,7 +10415,7 @@
         },
         {
             "Column": {
-                "DataSetIdentifier": "clickstream_retention_view",
+                "DataSetIdentifier": "clickstream_retention_view{{viewVersion}}",
                 "ColumnName": "Retention Rate"
             },
             "FormatConfiguration": {
@@ -10440,7 +10440,7 @@
         },
         {
             "Column": {
-                "DataSetIdentifier": "clickstream_retention_view",
+                "DataSetIdentifier": "clickstream_retention_view{{viewVersion}}",
                 "ColumnName": "day_diff"
             },
             "Role": "MEASURE"
