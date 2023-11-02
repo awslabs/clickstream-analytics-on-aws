@@ -563,7 +563,7 @@ FROM
        user_device_id_list;
 
 
--- user_channel
+-- user_channel_temp
 WITH user_channel_rank AS (
        SELECT
               user_pseudo_id,
@@ -629,6 +629,8 @@ DROP TABLE user_traffic_source_temp;
 DROP TABLE user_page_referrer_temp;
 
 DROP TABLE user_device_id_list_temp;
+
+DROP TABLE user_channel_temp;
 
 DROP TABLE ods_events_user_temp;
 
