@@ -75,7 +75,6 @@ export interface IMetadataEventParameter {
 
   readonly valueType: MetadataValueType;
   readonly category: ConditionCategory;
-  readonly hasData: boolean;
   readonly platform: MetadataPlatform[];
 
   displayName?: string;
@@ -99,7 +98,6 @@ export interface IMetadataUserAttribute {
 
   readonly valueType: MetadataValueType;
   readonly category: ConditionCategory;
-  readonly hasData: boolean;
 
   displayName?: string;
   description?: IMetadataDescription;

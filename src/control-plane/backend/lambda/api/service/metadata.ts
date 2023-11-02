@@ -103,9 +103,15 @@ export class MetadataEventParameterServ {
   public async list(req: any, res: any, next: any) {
     try {
       const { projectId, appId } = req.query;
+      console.time('listEventParameters');
       let results = await metadataStore.listEventParameters(projectId, appId);
+      console.timeEnd('listEventParameters');
+      console.time('groupByParameterByName');
       results = groupByParameterByName(results);
+      console.timeEnd('groupByParameterByName');
+      console.time('patch');
       results = await metadataDisplay.patch(projectId, appId, results) as IMetadataEventParameter[];
+      console.timeEnd('patch');
       return res.json(new ApiSuccess({
         totalCount: results.length,
         items: results,

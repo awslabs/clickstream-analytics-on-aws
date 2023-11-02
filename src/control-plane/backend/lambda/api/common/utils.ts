@@ -658,7 +658,6 @@ function getLatestEventByName(metadata: IMetadataRaw[]): IMetadataEvent[] {
 function getLatestParameterById(metadata: IMetadataRaw[]): IMetadataEventParameter[] {
   const latestEventParameters: IMetadataEventParameter[] = [];
   for (let meta of metadata) {
-    const lastDayData = getDataFromLastDay(meta);
     const parameter: IMetadataEventParameter = {
       id: meta.id,
       month: meta.month,
@@ -667,7 +666,6 @@ function getLatestParameterById(metadata: IMetadataRaw[]): IMetadataEventParamet
       appId: meta.appId,
       name: meta.name,
       eventName: meta.eventName ?? '',
-      hasData: lastDayData.hasData,
       platform: meta.summary.platform ?? [],
       category: meta.category ?? ConditionCategory.OTHER,
       valueType: meta.valueType ?? MetadataValueType.STRING,
@@ -747,7 +745,6 @@ function getLatestAttributeByName(metadata: IMetadataRaw[]): IMetadataUserAttrib
       projectId: meta.projectId,
       appId: meta.appId,
       name: meta.name,
-      hasData: meta.summary.hasData ?? false,
       category: meta.category ?? ConditionCategory.OTHER,
       valueType: meta.valueType ?? MetadataValueType.STRING,
       valueEnum: meta.summary.valueEnum ?? [],

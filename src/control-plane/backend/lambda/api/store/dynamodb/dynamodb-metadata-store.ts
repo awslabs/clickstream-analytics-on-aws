@@ -112,19 +112,31 @@ export class DynamoDbMetadataStore implements MetadataStore {
       TableName: analyticsMetadataTable,
       IndexName: prefixMonthGSIName,
       KeyConditionExpression: '#prefix= :prefix',
+      ProjectionExpression: '#id, #month, #prefix, projectId, appId, #name, eventName, category, valueType, summary',
       ExpressionAttributeNames: {
         '#prefix': 'prefix',
+        '#id': 'id',
+        '#month': 'month',
+        '#name': 'name',
       },
       ExpressionAttributeValues: {
         ':prefix': `EVENT_PARAMETER#${projectId}#${appId}`,
       },
       ScanIndexForward: false,
     };
+
+    console.time('----query');
     let records = await query(input) as IMetadataRaw[];
+    console.log(records.length);
+    console.timeEnd('----query');
     if (records.length === 0) {
+      console.time('----queryMetadataRawsFromBuiltInList');
       records = await this.queryMetadataRawsFromBuiltInList(projectId, appId, 'EVENT_PARAMETER');
+      console.timeEnd('----queryMetadataRawsFromBuiltInList');
     }
+    console.time('----getLatestParameterById');
     const parameters = getLatestParameterById(records);
+    console.timeEnd('----getLatestParameterById');
     return parameters;
   };
 
