@@ -127,15 +127,21 @@ const PipelineStatus: React.FC<PipelineStatusProps> = (
     }
   }, [status]);
 
-  const getStackStatusIndicatorType = (stackVersion: string, stackStatus: string) => {
-    let stackIndicatorType = 'stopped';
-    if (pipelineTemplateVersion !== '' && pipelineTemplateVersion !== stackVersion) {
+  const getStackStatusIndicatorType = (
+    stackVersion: string,
+    stackStatus: string
+  ) => {
+    let stackIndicatorType: StatusIndicatorProps.Type;
+    if (
+      pipelineTemplateVersion !== '' &&
+      pipelineTemplateVersion !== stackVersion
+    ) {
       stackIndicatorType = 'warning';
     } else {
       stackIndicatorType = CLOUDFORMATION_STATUS_MAP[stackStatus];
     }
-    return stackIndicatorType as StatusIndicatorProps.Type;
-  }
+    return stackIndicatorType;
+  };
 
   return (
     <>
@@ -153,7 +159,10 @@ const PipelineStatus: React.FC<PipelineStatusProps> = (
                 return (
                   <div className="flex flex-1" key={element.stackType}>
                     <StatusIndicator
-                      type={getStackStatusIndicatorType(element.stackTemplateVersion, element.stackStatus)}
+                      type={getStackStatusIndicatorType(
+                        element.stackTemplateVersion,
+                        element.stackStatus
+                      )}
                     >
                       <b>{element.stackType}</b>(
                       {element.stackStatus ?? t('status.unknown')})
