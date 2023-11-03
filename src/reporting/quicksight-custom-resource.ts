@@ -103,7 +103,10 @@ export function createQuicksightCustomResource(
           'first_traffic_source_source',
           'first_traffic_source_medium',
           'first_traffic_source_name',
-          'is_registered',
+          'first_referer',
+          'first_visit_channel',
+          'registration_status',
+          'device_id',
         ],
         tagColumnOperations: [
           {

@@ -547,7 +547,19 @@ export const clickstream_user_dim_view_columns: InputColumn[] = [
     Type: 'STRING',
   },
   {
-    Name: 'is_registered',
+    Name: 'first_referer',
+    Type: 'STRING',
+  },
+  {
+    Name: 'first_visit_channel',
+    Type: 'STRING',
+  },
+  {
+    Name: 'device_id',
+    Type: 'STRING',
+  },
+  {
+    Name: 'registration_status',
     Type: 'STRING',
   },
 ];
