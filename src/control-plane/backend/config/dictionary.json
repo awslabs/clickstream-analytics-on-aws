@@ -208,6 +208,7 @@
         {
           "name": "_screen_id",
           "dataType": "string",
+          "category": "event",
           "description": {
             "en-US": "The screen ID",
             "zh-CN": "屏幕ID"
@@ -217,6 +218,7 @@
         {
           "name": "_previous_screen_name",
           "dataType": "string",
+          "category": "event",
           "description": {
             "en-US": "The previous screen name",
             "zh-CN": "上一个屏幕名称"
@@ -226,6 +228,7 @@
         {
           "name": "_previous_screen_id",
           "dataType": "string",
+          "category": "event",
           "description": {
             "en-US": "The previous screen ID",
             "zh-CN": "上一个屏幕ID"
@@ -235,6 +238,7 @@
         {
           "name": "_previous_screen_unique_id",
           "dataType": "string",
+          "category": "event",
           "description": {
             "en-US": "The previous screen unique ID",
             "zh-CN": "上一个屏幕唯一ID"
@@ -244,6 +248,7 @@
         {
           "name": "_page_referrer",
           "dataType": "string",
+          "category": "event",
           "description": {
             "en-US": "Last page url",
             "zh-CN": "前一个页面URL"
@@ -253,6 +258,7 @@
         {
           "name": "_page_referrer_title",
           "dataType": "string",
+          "category": "event",
           "description": {
             "en-US": "Last page title",
             "zh-CN": "前一个页面标题"
@@ -262,6 +268,7 @@
         {
           "name": "_entrances",
           "dataType": "int",
+          "category": "event",
           "description": {
             "en-US": "The first screen view event in a session is 1, others is 0",
             "zh-CN": "会话中的第一个屏幕浏览事件该值为 1，其他则为 0"
@@ -271,6 +278,7 @@
         {
           "name": "_entrances",
           "dataType": "int",
+          "category": "event",
           "description": {
             "en-US": "The first screen view event in a session is 1, others is 0",
             "zh-CN": "会话中的第一个屏幕浏览事件该值为 1，其他则为 0"
@@ -280,6 +288,7 @@
         {
           "name": "_previous_timestamp",
           "dataType": "int",
+          "category": "event",
           "description": {
             "en-US": "The timestamp of the previous _screen_view event",
             "zh-CN": "上一个 screen_view 事件的时间戳"
@@ -289,6 +298,7 @@
         {
           "name": "_previous_timestamp",
           "dataType": "int",
+          "category": "event",
           "description": {
             "en-US": "The timestamp of the previous _screen_view event",
             "zh-CN": "上一个 screen_view 事件的时间戳"
@@ -298,6 +308,7 @@
         {
           "name": "_engagement_time_msec",
           "dataType": "int",
+          "category": "event",
           "description": {
             "en-US": "The previous page last engagement milliseconds",
             "zh-CN": "上个屏幕最后一次用户参与事件时长的毫秒数"
@@ -307,6 +318,7 @@
         {
           "name": "_engagement_time_msec",
           "dataType": "int",
+          "category": "event",
           "description": {
             "en-US": "The previous page last engagement milliseconds",
             "zh-CN": "上个屏幕最后一次用户参与事件时长的毫秒数"
@@ -316,6 +328,7 @@
         {
           "name": "_engagement_time_msec",
           "dataType": "int",
+          "category": "event",
           "description": {
             "en-US": "The previous page last engagement milliseconds",
             "zh-CN": "上个屏幕最后一次用户参与事件时长的毫秒数"
@@ -325,6 +338,7 @@
         {
           "name": "_is_first_time",
           "dataType": "string",
+          "category": "event",
           "description": {
             "en-US": "When it is the first _app_start event after the application starts, the value is true",
             "zh-CN": "当应用程序启动后第一个 _app_start 事件时，值为 true"
@@ -334,6 +348,7 @@
         {
           "name": "_exception_message",
           "dataType": "string",
+          "category": "event",
           "description": {
             "en-US": "The message of exception",
             "zh-CN": "异常信息"
@@ -343,6 +358,7 @@
         {
           "name": "_exception_stack",
           "dataType": "string",
+          "category": "event",
           "description": {
             "en-US": "The stack details of exception",
             "zh-CN": "异常堆栈信息"
@@ -352,6 +368,7 @@
         {
           "name": "_previous_app_version",
           "dataType": "string",
+          "category": "event",
           "description": {
             "en-US": "The version of previous app",
             "zh-CN": "上一个应用版本"
@@ -361,6 +378,7 @@
         {
           "name": "_previous_os_version",
           "dataType": "string",
+          "category": "event",
           "description": {
             "en-US": "The version of previous operating system",
             "zh-CN": "上一个操作系统版本"
@@ -370,6 +388,7 @@
         {
           "name": "_error_code",
           "dataType": "string",
+          "category": "event",
           "description": {
             "en-US": "Error code",
             "zh-CN": "错误代码"
@@ -379,6 +398,7 @@
         {
           "name": "_error_message",
           "dataType": "string",
+          "category": "event",
           "description": {
             "en-US": "Error message",
             "zh-CN": "错误信息"
@@ -388,6 +408,7 @@
         {
           "name": "_search_key",
           "dataType": "string",
+          "category": "event",
           "description": {
             "en-US": "The keyword name",
             "zh-CN": "搜索参数名称"
@@ -397,6 +418,7 @@
         {
           "name": "_search_term",
           "dataType": "string",
+          "category": "event",
           "description": {
             "en-US": "The search content",
             "zh-CN": "搜索内容"
@@ -406,6 +428,7 @@
         {
           "name": "_link_classes",
           "dataType": "string",
+          "category": "event",
           "description": {
             "en-US": "The content of class in tag <a>",
             "zh-CN": "标签 <a>中class里的内容"
@@ -415,6 +438,7 @@
         {
           "name": "_link_domain",
           "dataType": "string",
+          "category": "event",
           "description": {
             "en-US": "The domain of href in tag <a>",
             "zh-CN": "标签 <a>中href里的域名"
@@ -424,6 +448,7 @@
         {
           "name": "_link_id",
           "dataType": "string",
+          "category": "event",
           "description": {
             "en-US": "The content of id in tag <a>",
             "zh-CN": "标签 <a>中id里的内容"
@@ -433,6 +458,7 @@
         {
           "name": "_link_url",
           "dataType": "string",
+          "category": "event",
           "description": {
             "en-US": "The content of href in tag <a>",
             "zh-CN": "标签 <a>中href里的内容"
@@ -442,6 +468,7 @@
         {
           "name": "_outbound",
           "dataType": "string",
+          "category": "event",
           "description": {
             "en-US": "If the domain is not in configured domain list, the attribute value is true",
             "zh-CN": "如果该域不在配置的域名列表中，则属性值为true"
@@ -451,6 +478,7 @@
         {
           "name": "_traffic_source_medium",
           "dataType": "string",
+          "category": "event",
           "description": {
             "en-US": "Traffic medium. Use this attribute to store the medium that acquired user when events were logged. Example: Email, Paid search, Search engine",
             "zh-CN": "流量媒介，存储事件记录时获取用户的媒介，例如：电子邮件、付费搜索、搜索引擎"
@@ -459,6 +487,7 @@
         {
           "name": "_traffic_source_name",
           "dataType": "string",
+          "category": "event",
           "description": {
             "en-US": "Traffic name. Use this attribute to store the marketing campaign that acquired user when events were logged. Example: Summer promotion",
             "zh-CN": "流量名称，存储事件记录时获取用户的营销活动，例如：夏季促销"
@@ -467,6 +496,7 @@
         {
           "name": "_traffic_source_source",
           "dataType": "string",
+          "category": "event",
           "description": {
             "en-US": "Traffic source. Name of the network source that acquired the user when the event were reported. Example: Google, Facebook, Bing, Baidu",
             "zh-CN": "流量来源，事件报告时获取的网络来源的名称，例如：Google, Facebook, Bing, Baidu"
@@ -475,6 +505,7 @@
         {
           "name": "_channel",
           "dataType": "string",
+          "category": "event",
           "description": {
             "en-US": "Install source, it is the channel for app was downloaded",
             "zh-CN": "安装源，app下载的渠道"
@@ -483,6 +514,7 @@
         {
           "name": "_session_id",
           "dataType": "string",
+          "category": "event",
           "description": {
             "en-US": "The session ID",
             "zh-CN": "会话ID"
@@ -491,6 +523,7 @@
         {
           "name": "_session_start_timestamp",
           "dataType": "int",
+          "category": "event",
           "description": {
             "en-US": "The session start timestamp",
             "zh-CN": "会话开始时间戳"
@@ -499,6 +532,7 @@
         {
           "name": "_session_duration",
           "dataType": "int",
+          "category": "event",
           "description": {
             "en-US": "The session duration",
             "zh-CN": "会话持续时间"
@@ -507,6 +541,7 @@
         {
           "name": "_session_number",
           "dataType": "int",
+          "category": "event",
           "description": {
             "en-US": "The session number",
             "zh-CN": "会话编号"
@@ -515,6 +550,7 @@
         {
           "name": "_latest_referrer",
           "dataType": "string",
+          "category": "event",
           "description": {
             "en-US": "Last off-site link",
             "zh-CN": "最近一次站外链接"
@@ -523,6 +559,7 @@
         {
           "name": "_latest_referrer_host",
           "dataType": "string",
+          "category": "event",
           "description": {
             "en-US": "Last off-site domain name",
             "zh-CN": "最近一次站外域名"
@@ -531,6 +568,7 @@
         {
           "name": "_screen_name",
           "dataType": "string",
+          "category": "event",
           "description": {
             "en-US": "The screen name",
             "zh-CN": "屏幕名称"
@@ -539,6 +577,7 @@
         {
           "name": "_screen_unique_id",
           "dataType": "string",
+          "category": "event",
           "description": {
             "en-US": "The screen unique ID",
             "zh-CN": "屏幕唯一ID"
@@ -547,6 +586,7 @@
         {
           "name": "_page_title",
           "dataType": "string",
+          "category": "event",
           "description": {
             "en-US": "The page title",
             "zh-CN": "页面标题"
@@ -555,6 +595,7 @@
         {
           "name": "_page_url",
           "dataType": "string",
+          "category": "event",
           "description": {
             "en-US": "The page url",
             "zh-CN": "页面URL"
@@ -563,261 +604,464 @@
       ],
       "PublicEventParameters": [
         {
-          "name": "app_id",
-          "dataType": "string",
-          "description": {
-            "en-US": "The app ID",
-            "zh-CN": "应用ID"
-          }
-        },
-        {
-          "name": "unique_id",
-          "dataType": "string",
-          "description": {
-            "en-US": "The unique ID of the user",
-            "zh-CN": "用户唯一ID"
-          }
-        },
-        {
-          "name": "device_id",
-          "dataType": "string",
-          "description": {
-            "en-US": "The device ID",
-            "zh-CN": "设备ID"
-          }
-        },
-        {
-          "name": "event_type",
-          "dataType": "string",
-          "description": {
-            "en-US": "The event type",
-            "zh-CN": "事件类型"
-          }
-        },
-        {
-          "name": "event_id",
-          "dataType": "string",
-          "description": {
-            "en-US": "The event ID",
-            "zh-CN": "事件ID"
-          }
-        },
-        {
-          "name": "timestamp",
+          "name": "event_timestamp",
           "dataType": "int",
+          "category": "other",
           "description": {
-            "en-US": "The event timestamp",
-            "zh-CN": "事件时间戳"
+            "en-US": "The time (in microseconds, UTC) at which events are recorded on the client",
+            "zh-CN": "客户端上记录事件的时间（以微秒为单位，UTC）"
+          }
+        },
+        {
+          "name": "event_value_in_usd",
+          "dataType": "float",
+          "category": "other",
+          "description": {
+            "en-US": "The currency conversion value of the 'value' parameter of the event (in USD)",
+            "zh-CN": "事件的“值”参数的货币转换值（以USD为单位）"
           }
         },
         {
           "name": "platform",
           "dataType": "string",
+          "category": "other",
           "description": {
             "en-US": "The platform",
             "zh-CN": "平台"
           }
         },
         {
-          "name": "os_version",
+          "name": "project_id",
           "dataType": "string",
+          "category": "other",
           "description": {
-            "en-US": "The OS version",
-            "zh-CN": "操作系统版本"
+            "en-US": "Project ID associated with the application",
+            "zh-CN": "与应用相关联的项目ID"
           }
         },
         {
-          "name": "make",
+          "name": "user_id",
           "dataType": "string",
+          "category": "other",
           "description": {
-            "en-US": "The device make",
-            "zh-CN": "设备制造商"
+            "en-US": "The unique ID assigned to a user through setUserId() API",
+            "zh-CN": "通过 setUserId(）API分配给用户的唯一ID"
           }
         },
         {
-          "name": "brand",
+          "name": "user_pseudo_id",
           "dataType": "string",
+          "category": "other",
           "description": {
-            "en-US": "The device brand",
-            "zh-CN": "设备品牌"
+            "en-US": "The pseudonymous id generated by SDK for the user",
+            "zh-CN": "SDK为用户生成的伪ID"
           }
         },
         {
-          "name": "model",
+          "name": "mobile_brand_name",
           "dataType": "string",
+          "category": "device",
           "description": {
-            "en-US": "The device model",
-            "zh-CN": "设备型号"
+            "en-US": "Device brand name",
+            "zh-CN": "设备品牌名称"
+          }
+        },
+        {
+          "name": "mobile_model_name",
+          "dataType": "string",
+          "category": "device",
+          "description": {
+            "en-US": "Device model name",
+            "zh-CN": "设备型号名称"
+          }
+        },
+        {
+          "name": "manufacturer",
+          "dataType": "string",
+          "category": "device",
+          "description": {
+            "en-US": "Device manufacturer name",
+            "zh-CN": "设备制造商名称"
           }
         },
         {
           "name": "carrier",
           "dataType": "string",
+          "category": "device",
           "description": {
-            "en-US": "The carrier",
-            "zh-CN": "运营商"
+            "en-US": "Device carrier name",
+            "zh-CN": "设备网络提供商名称"
           }
         },
         {
           "name": "network_type",
           "dataType": "string",
+          "category": "device",
           "description": {
-            "en-US": "The network type",
-            "zh-CN": "网络类型"
+            "en-US": "Device network type",
+            "zh-CN": "设备的网络类型"
           }
         },
         {
-          "name": "screen_height",
-          "dataType": "int",
+          "name": "operating_system",
+          "dataType": "string",
+          "category": "device",
           "description": {
-            "en-US": "The screen height",
-            "zh-CN": "屏幕高度"
+            "en-US": "Operating system type",
+            "zh-CN": "操作系统"
+          }
+        },
+        {
+          "name": "operating_system_version",
+          "dataType": "string",
+          "category": "device",
+          "description": {
+            "en-US": "Operating system version",
+            "zh-CN": "操作系统"
+          }
+        },
+        {
+          "name": "system_language",
+          "dataType": "string",
+          "category": "device",
+          "description": {
+            "en-US": "Operating system language",
+            "zh-CN": "操作系统语言"
+          }
+        },
+        {
+          "name": "vendor_id",
+          "dataType": "string",
+          "category": "device",
+          "description": {
+            "en-US": "IDFV (only present when IDFA is not collected)",
+            "zh-CN": "IDFV（仅在未收集 IDFA 时存在）"
+          }
+        },
+        {
+          "name": "advertising_id",
+          "dataType": "string",
+          "category": "device",
+          "description": {
+            "en-US": "Advertising ID/IDFV",
+            "zh-CN": "广告 ID/IDFA"
+          }
+        },
+        {
+          "name": "time_zone_offset_seconds",
+          "dataType": "int",
+          "category": "device",
+          "description": {
+            "en-US": "Offset from GMT in seconds",
+            "zh-CN": "与 GMT 的偏移量（以秒为单位）"
+          }
+        },
+        {
+          "name": "ua_browser",
+          "dataType": "string",
+          "category": "device",
+          "description": {
+            "en-US": "Browser for users to view content, derived from the User Agent string",
+            "zh-CN": "用户查看内容的浏览器，从 User Agent 字符串中派生"
+          }
+        },
+        {
+          "name": "ua_browser_version",
+          "dataType": "string",
+          "category": "device",
+          "description": {
+            "en-US": "The version of browser for users to view content, derived from the User Agent string",
+            "zh-CN": "用户查看内容的浏览器版本，从 User Agent 字符串中派生"
+          }
+        },
+        {
+          "name": "ua_device",
+          "dataType": "string",
+          "category": "device",
+          "description": {
+            "en-US": "Device for users to view content, derived from the User Agent string",
+            "zh-CN": "用户查看内容的设备，从 User Agent 字符串中派生"
+          }
+        },
+        {
+          "name": "ua_device_category",
+          "dataType": "string",
+          "category": "device",
+          "description": {
+            "en-US": "The category of device for users to view content, derived from the User Agent string",
+            "zh-CN": "用户查看内容的设备类别，从 User Agent 字符串中派生"
           }
         },
         {
           "name": "screen_width",
           "dataType": "int",
+          "category": "device",
           "description": {
             "en-US": "The screen width",
             "zh-CN": "屏幕宽度"
           }
         },
         {
-          "name": "viewport_height",
+          "name": "screen_height",
           "dataType": "int",
+          "category": "device",
           "description": {
-            "en-US": "The website viewport height pixel",
-            "zh-CN": "视区高度"
+            "en-US": "The screen height",
+            "zh-CN": "屏幕高度"
           }
         },
         {
           "name": "viewport_width",
           "dataType": "int",
+          "category": "device",
           "description": {
             "en-US": "The website viewport width pixel",
             "zh-CN": "视区宽度"
           }
         },
         {
-          "name": "zone_offset",
+          "name": "viewport_height",
           "dataType": "int",
+          "category": "device",
           "description": {
-            "en-US": "The time zone offset",
-            "zh-CN": "时区偏移"
-          }
-        },
-        {
-          "name": "locale",
-          "dataType": "string",
-          "description": {
-            "en-US": "The locale",
-            "zh-CN": "区域设置"
-          }
-        },
-        {
-          "name": "system_language",
-          "dataType": "string",
-          "description": {
-            "en-US": "The system language",
-            "zh-CN": "系统语言"
-          }
-        },
-        {
-          "name": "country_code",
-          "dataType": "string",
-          "description": {
-            "en-US": "The country code",
-            "zh-CN": "国家代码"
-          }
-        },
-        {
-          "name": "sdk_version",
-          "dataType": "string",
-          "description": {
-            "en-US": "The SDK version",
-            "zh-CN": "SDK版本"
-          }
-        },
-        {
-          "name": "sdk_name",
-          "dataType": "string",
-          "description": {
-            "en-US": "The SDK name",
-            "zh-CN": "SDK名称"
-          }
-        },
-        {
-          "name": "app_version",
-          "dataType": "string",
-          "description": {
-            "en-US": "The app version",
-            "zh-CN": "应用版本"
-          }
-        },
-        {
-          "name": "app_package_name",
-          "dataType": "string",
-          "description": {
-            "en-US": "The app package name",
-            "zh-CN": "应用包名"
-          }
-        },
-        {
-          "name": "app_title",
-          "dataType": "string",
-          "description": {
-            "en-US": "The app title",
-            "zh-CN": "应用标题"
+            "en-US": "The website viewport height pixel",
+            "zh-CN": "视区高度"
           }
         },
         {
           "name": "host_name",
           "dataType": "string",
+          "category": "device",
           "description": {
             "en-US": "The website hostname",
             "zh-CN": "网站主机名"
+          }
+        },
+        {
+          "name": "continent",
+          "dataType": "string",
+          "category": "geo",
+          "description": {
+            "en-US": "The continent that reporting events based on IP addresses",
+            "zh-CN": "基于 IP 地址报告事件的大陆"
+          }
+        },
+        {
+          "name": "sub_continent",
+          "dataType": "string",
+          "category": "geo",
+          "description": {
+            "en-US": "The sub continent that reporting events based on IP addresses",
+            "zh-CN": "基于 IP 地址报告事件的子大陆"
+          }
+        },
+        {
+          "name": "country",
+          "dataType": "string",
+          "category": "geo",
+          "description": {
+            "en-US": "The country that reporting events based on IP addresses",
+            "zh-CN": "基于 IP 地址报告事件的国家"
+          }
+        },
+        {
+          "name": "region",
+          "dataType": "string",
+          "category": "geo",
+          "description": {
+            "en-US": "The region that reporting events based on IP addresses",
+            "zh-CN": "基于 IP 地址报告事件的地区"
+          }
+        },
+        {
+          "name": "city",
+          "dataType": "string",
+          "category": "geo",
+          "description": {
+            "en-US": "The city that reporting events based on IP addresses",
+            "zh-CN": "基于 IP 地址报告事件的城市"
+          }
+        },
+        {
+          "name": "latitude",
+          "dataType": "double",
+          "category": "geo",
+          "description": {
+            "en-US": "The latitude that reporting events based on IP addresses",
+            "zh-CN": "基于 IP 地址报告事件的纬度"
+          }
+        },
+        {
+          "name": "longitude",
+          "dataType": "double",
+          "category": "geo",
+          "description": {
+            "en-US": "The longitude that reporting events based on IP addresses",
+            "zh-CN": "基于 IP 地址报告事件的经度"
+          }
+        },
+        {
+          "name": "accuracy",
+          "dataType": "int",
+          "category": "geo",
+          "description": {
+            "en-US": "The accuracy that reporting events based on IP addresses",
+            "zh-CN": "基于 IP 地址报告事件的精度"
+          }
+        },
+        {
+          "name": "locale",
+          "dataType": "string",
+          "category": "geo",
+          "description": {
+            "en-US": "The locale that reporting events based on IP addresses",
+            "zh-CN": "基于 IP 地址报告事件的地址"
+          }
+        },
+        {
+          "name": "name",
+          "dataType": "string",
+          "category": "traffic_source",
+          "description": {
+            "en-US": "Traffic name. Use this attribute to store the marketing campaign that acquired user when events were logged. Example: Summer promotion",
+            "zh-CN": "流量名称，存储事件记录时获取用户的营销活动，例如：夏季促销"
+          }
+        },
+        {
+          "name": "medium",
+          "dataType": "string",
+          "category": "traffic_source",
+          "description": {
+            "en-US": "Traffic medium. Use this attribute to store the medium that acquired user when events were logged. Example: Email, Paid search, Search engine",
+            "zh-CN": "流量媒介，存储事件记录时获取用户的媒介，例如：电子邮件、付费搜索、搜索引擎"
+          }
+        },
+        {
+          "name": "source",
+          "dataType": "string",
+          "category": "traffic_source",
+          "description": {
+            "en-US": "Traffic source. Name of the network source that acquired the user when the event were reported. Example: Google, Facebook, Bing, Baidu",
+            "zh-CN": "流量来源，事件报告时获取的网络来源的名称，例如：Google, Facebook, Bing, Baidu"
+          }
+        },
+        {
+          "name": "id",
+          "dataType": "string",
+          "category": "app_info",
+          "description": {
+            "en-US": "The package name or Bundle ID of the application",
+            "zh-CN": "应用程序的软件包名称或 Bundle ID"
+          }
+        },
+        {
+          "name": "app_id",
+          "dataType": "string",
+          "category": "app_info",
+          "description": {
+            "en-US": "App ID associated with the application",
+            "zh-CN": "与应用相关联的 App ID"
+          }
+        },
+        {
+          "name": "install_source",
+          "dataType": "string",
+          "category": "app_info",
+          "description": {
+            "en-US": "Store where applications are installed",
+            "zh-CN": "安装应用程序的商店"
+          }
+        },
+        {
+          "name": "version",
+          "dataType": "string",
+          "category": "app_info",
+          "description": {
+            "en-US": "Version Name (Android) or short bundle version of the application",
+            "zh-CN": "应用程序的 versionName（Android）或简短的 bundle 版本"
           }
         }
       ],
       "PresetUserAttributes": [
         {
-          "name": "_user_id",
+          "name": "user_id",
           "dataType": "string",
+          "category": "user_outer",
           "description": {
-            "en-US": "Reserved for user id that is assigned by app",
-            "zh-CN": "用户ID"
+            "en-US": "The unique ID assigned to a user through setUserId() API",
+            "zh-CN": "通过 setUserId(）API分配给用户的唯一ID"
           }
         },
         {
-          "name": "_user_name",
+          "name": "user_pseudo_id",
           "dataType": "string",
+          "category": "user_outer",
           "description": {
-            "en-US": "User name",
-            "zh-CN": "用户名"
+            "en-US": "The pseudonymous id generated by SDK for the user",
+            "zh-CN": "SDK为用户生成的伪ID"
           }
         },
         {
-          "name": "_user_ltv_revenue",
-          "dataType": "string",
-          "description": {
-            "en-US": "Reserved for user lifetime value",
-            "zh-CN": "用户终身价值"
-          }
-        },
-        {
-          "name": "_user_ltv_currency",
-          "dataType": "string",
-          "description": {
-            "en-US": "Reserved for user lifetime value currency",
-            "zh-CN": "用户终身价值货币"
-          }
-        },
-        {
-          "name": "_user_first_touch_timestamp",
+          "name": "user_first_touch_timestamp",
           "dataType": "int",
+          "category": "user_outer",
           "description": {
             "en-US": "Added to the user object for all events. The time (in milliseconds) when the user first opened the app",
             "zh-CN": "用户首次打开应用程序或访问站点的时间（以毫秒为单位），在 user 对象的每个事件中都包含此属性"
+          }
+        },
+        {
+          "name": "_first_visit_date",
+          "dataType": "string",
+          "category": "user_outer",
+          "description": {
+            "en-US": "The date when the user first opened the app",
+            "zh-CN": "用户首次打开应用程序或访问站点的日期"
+          }
+        },
+        {
+          "name": "_first_referer",
+          "dataType": "string",
+          "category": "user_outer",
+          "description": {
+            "en-US": "The referer when the user first opened the app",
+            "zh-CN": "用户第一次打开应用程序时的外链"
+          }
+        },
+        {
+          "name": "_first_traffic_source_type",
+          "dataType": "string",
+          "category": "user_outer",
+          "description": {
+            "en-US": "The first-captured traffic source name",
+            "zh-CN": "第一个捕获的流量源名称"
+          }
+        },
+        {
+          "name": "_first_traffic_medium",
+          "dataType": "string",
+          "category": "user_outer",
+          "description": {
+            "en-US": "The first-captured traffic source medium",
+            "zh-CN": "第一个捕获的流量媒介"
+          }
+        },
+        {
+          "name": "_first_traffic_source",
+          "dataType": "string",
+          "category": "user_outer",
+          "description": {
+            "en-US": "The first-captured traffic source",
+            "zh-CN": "第一个捕获的流量来源"
+          }
+        },
+        {
+          "name": "_channel",
+          "dataType": "string",
+          "category": "user_outer",
+          "description": {
+            "en-US": "The first-captured channel",
+            "zh-CN": "第一个捕获的渠道"
           }
         }
       ]

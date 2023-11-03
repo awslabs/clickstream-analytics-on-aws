@@ -248,7 +248,7 @@ const MetadataParametersTable: React.FC<MetadataParametersTableProps> = (
       const parameter = newItem as IMetadataEventParameter;
       const { success, message }: ApiResponse<null> =
         await updateMetadataDisplay({
-          id: `${EVENT_PARAMETER_DISPLAY_PREFIX}${parameter.projectId}#${parameter.appId}#${parameter.name}#${parameter.valueType}`,
+          id: `${EVENT_PARAMETER_DISPLAY_PREFIX}${parameter.projectId}#${parameter.appId}#${parameter.category}#${parameter.name}#${parameter.valueType}`,
           projectId: parameter.projectId,
           appId: parameter.appId,
           displayName: parameter.displayName,

@@ -11,8 +11,9 @@
  *  and limitations under the License.
  */
 
-import { MetadataParameterType, MetadataSource } from '../common/explore-types';
+import { ConditionCategory, MetadataParameterType, MetadataSource } from '../common/explore-types';
 import { logger } from '../common/powertools';
+import { isEmpty } from '../common/utils';
 import { IMetadataAttributeValue, IMetadataDisplay, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute, IMetadataBuiltInList } from '../model/metadata';
 import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbMetadataStore } from '../store/dynamodb/dynamodb-metadata-store';
@@ -60,7 +61,7 @@ export class CMetadataDisplay {
     }
   }
 
-  private pathEventInfo(event: IMetadataEvent) {
+  private patchEventInfo(event: IMetadataEvent) {
     if (!this.displays) {
       return;
     }
@@ -77,14 +78,14 @@ export class CMetadataDisplay {
     event.description = presetEvent ? presetEvent.description : event.description;
   }
 
-  private pathEventParameterInfo(parameter: IMetadataEventParameter) {
+  private patchEventParameterInfo(parameter: IMetadataEventParameter) {
     if (!this.displays) {
       return;
     }
     const prefix = parameter.prefix.split('#')[0];
-    const key = `${prefix}#${parameter.projectId}#${parameter.appId}#${parameter.name}#${parameter.valueType}`;
+    const key = `${prefix}#${parameter.projectId}#${parameter.appId}#${parameter.category}#${parameter.name}#${parameter.valueType}`;
     const metadataDisplay = this.displays.find((d: IMetadataDisplay) => d.id === key);
-    parameter.displayName = metadataDisplay?.displayName ?? parameter.name;
+    parameter.displayName = this.patchCategoryToDisplayName(parameter.category, parameter.name, metadataDisplay?.displayName);
     parameter.description = metadataDisplay?.description ?? { 'en-US': '', 'zh-CN': '' };
     if (!this.builtList) {
       return;
@@ -98,14 +99,14 @@ export class CMetadataDisplay {
     parameter.parameterType = publicEventParameter ? MetadataParameterType.PUBLIC : MetadataParameterType.PRIVATE;
   }
 
-  private pathUserAttributeInfo(attribute: IMetadataUserAttribute) {
+  private patchUserAttributeInfo(attribute: IMetadataUserAttribute) {
     if (!this.displays) {
       return;
     }
     const prefix = attribute.prefix.split('#')[0];
-    const key = `${prefix}#${attribute.projectId}#${attribute.appId}#${attribute.name}#${attribute.valueType}`;
+    const key = `${prefix}#${attribute.projectId}#${attribute.appId}#${attribute.category}#${attribute.name}#${attribute.valueType}`;
     const metadataDisplay = this.displays.find((d: IMetadataDisplay) => d.id === key);
-    attribute.displayName = metadataDisplay?.displayName ?? attribute.name;
+    attribute.displayName = this.patchCategoryToDisplayName(attribute.category, attribute.name, metadataDisplay?.displayName);
     attribute.description = metadataDisplay?.description ?? { 'en-US': '', 'zh-CN': '' };
     if (!this.builtList) {
       return;
@@ -126,19 +127,19 @@ export class CMetadataDisplay {
         switch (prefix) {
           case 'EVENT':
             let event = metadata as IMetadataEvent;
-            this.pathEventInfo(event);
+            this.patchEventInfo(event);
             event.associatedParameters = this.patchAssociated(event.associatedParameters) as IMetadataEventParameter[];
             event.associatedParameters = this.patchValues(event.associatedParameters) as IMetadataEventParameter[];
             break;
           case 'EVENT_PARAMETER':
             let parameter = metadata as IMetadataEventParameter;
-            this.pathEventParameterInfo(parameter);
+            this.patchEventParameterInfo(parameter);
             parameter.associatedEvents = this.patchAssociated(parameter.associatedEvents) as IMetadataEvent[];
             parameter = this.patchValues([parameter])[0] as IMetadataEventParameter;
             break;
           case 'USER_ATTRIBUTE':
             let userAttribute = metadata as IMetadataUserAttribute;
-            this.pathUserAttributeInfo(userAttribute);
+            this.patchUserAttributeInfo(userAttribute);
             userAttribute = this.patchValues([userAttribute])[0];
             break;
           default:
@@ -160,11 +161,11 @@ export class CMetadataDisplay {
       switch (prefix) {
         case 'EVENT':
           const event = metadata as IMetadataEvent;
-          this.pathEventInfo(event);
+          this.patchEventInfo(event);
           break;
         case 'EVENT_PARAMETER':
           const parameter = metadata as IMetadataEventParameter;
-          this.pathEventParameterInfo(parameter);
+          this.patchEventParameterInfo(parameter);
           break;
         default:
           break;
@@ -182,7 +183,7 @@ export class CMetadataDisplay {
       const valueEnum = parameter.valueEnum ?? [];
       const values: IMetadataAttributeValue[] = [];
       for (let e of valueEnum) {
-        const key = `DICTIONARY#${parameter.projectId}#${parameter.appId}#${parameter.name}#${parameter.valueType}#${e.value}`;
+        const key = `DICTIONARY#${parameter.projectId}#${parameter.appId}#${parameter.category}#${parameter.name}#${parameter.valueType}#${e.value}`;
         const display = displays.find((d: IMetadataDisplay) => d.id === key);
         values.push({
           value: e.value,
@@ -193,5 +194,9 @@ export class CMetadataDisplay {
       parameter.values = values;
     }
     return parameters;
+  }
+
+  private patchCategoryToDisplayName(category: ConditionCategory, name: string, displayName?: string) {
+    return !isEmpty(displayName) ? displayName : `${category}.${name}`;
   }
 }

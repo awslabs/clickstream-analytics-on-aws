@@ -231,7 +231,7 @@ const MetadataUserAttributesTable: React.FC<
       const attribute = newItem as IMetadataUserAttribute;
       const { success, message }: ApiResponse<null> =
         await updateMetadataDisplay({
-          id: `${USER_ATTRIBUTE_DISPLAY_PREFIX}${attribute.projectId}#${attribute.appId}#${attribute.name}#${attribute.valueType}`,
+          id: `${USER_ATTRIBUTE_DISPLAY_PREFIX}${attribute.projectId}#${attribute.appId}#${attribute.category}#${attribute.name}#${attribute.valueType}`,
           projectId: attribute.projectId,
           appId: attribute.appId,
           displayName: attribute.displayName,
