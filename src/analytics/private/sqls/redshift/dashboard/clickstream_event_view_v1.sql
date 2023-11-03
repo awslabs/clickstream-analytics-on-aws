@@ -1,4 +1,4 @@
-CREATE MATERIALIZED VIEW {{schema}}.clickstream_event_view_v1
+CREATE MATERIALIZED VIEW {{schema}}.{{eventViewName}}
 BACKUP NO
 SORTKEY(event_date)
 AUTO REFRESH YES

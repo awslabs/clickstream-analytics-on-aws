@@ -17,39 +17,48 @@ import { CLICKSTREAM_DEVICE_VIEW_NAME, CLICKSTREAM_EVENT_PARAMETER_VIEW_NAME, CL
 export const reportingViewsDef: SQLDef[] = [
   {
     updatable: 'false',
-    sqlFile: `${CLICKSTREAM_EVENT_VIEW_NAME}.sql`,
+    sqlFile: 'clickstream_event_view_v1.sql',
+    viewName: CLICKSTREAM_EVENT_VIEW_NAME,
   },
   {
     updatable: 'false',
-    sqlFile: `${CLICKSTREAM_EVENT_PARAMETER_VIEW_NAME}.sql`,
+    sqlFile: 'clickstream_event_parameter_view_v1.sql',
+    viewName: CLICKSTREAM_EVENT_PARAMETER_VIEW_NAME,
   },
   {
     updatable: 'false',
-    sqlFile: `${CLICKSTREAM_LIFECYCLE_DAILY_VIEW_NAME}.sql`,
+    sqlFile: 'clickstream_lifecycle_daily_view_v1.sql',
+    viewName: CLICKSTREAM_LIFECYCLE_DAILY_VIEW_NAME,
   },
   {
     updatable: 'false',
-    sqlFile: `${CLICKSTREAM_LIFECYCLE_WEEKLY_VIEW_NAME}.sql`,
+    sqlFile: 'clickstream_lifecycle_weekly_view_v1.sql',
+    viewName: CLICKSTREAM_LIFECYCLE_WEEKLY_VIEW_NAME,
   },
   {
     updatable: 'false',
-    sqlFile: `${CLICKSTREAM_USER_DIM_VIEW_NAME}.sql`,
+    sqlFile: 'clickstream_user_dim_view_v1.sql',
+    viewName: CLICKSTREAM_USER_DIM_VIEW_NAME,
   },
   {
     updatable: 'false',
-    sqlFile: `${CLICKSTREAM_SESSION_VIEW_NAME}.sql`,
+    sqlFile: 'clickstream_session_view_v1.sql',
+    viewName: CLICKSTREAM_SESSION_VIEW_NAME,
   },
   {
     updatable: 'false',
-    sqlFile: `${CLICKSTREAM_DEVICE_VIEW_NAME}.sql`,
+    sqlFile: 'clickstream_device_view_v1.sql',
+    viewName: CLICKSTREAM_DEVICE_VIEW_NAME,
   },
   {
     updatable: 'false',
-    sqlFile: `${CLICKSTREAM_RETENTION_VIEW_NAME}.sql`,
+    sqlFile: 'clickstream_retention_view_v1.sql',
+    viewName: CLICKSTREAM_RETENTION_VIEW_NAME,
   },
   {
     updatable: 'false',
-    sqlFile: `${CLICKSTREAM_USER_ATTR_VIEW_NAME}.sql`,
+    sqlFile: 'clickstream_user_attr_view_v1.sql',
+    viewName: CLICKSTREAM_USER_ATTR_VIEW_NAME,
   },
 ];
 

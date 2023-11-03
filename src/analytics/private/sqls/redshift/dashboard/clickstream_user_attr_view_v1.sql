@@ -1,4 +1,4 @@
-CREATE OR REPLACE VIEW {{schema}}.clickstream_user_attr_view_v1
+CREATE OR REPLACE VIEW {{schema}}.{{userAttrViewName}}
 AS
 select 
    user_id

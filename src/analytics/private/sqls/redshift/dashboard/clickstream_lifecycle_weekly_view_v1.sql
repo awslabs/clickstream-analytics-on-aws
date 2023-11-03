@@ -1,4 +1,4 @@
-CREATE MATERIALIZED VIEW {{schema}}.clickstream_lifecycle_weekly_view_v1
+CREATE MATERIALIZED VIEW {{schema}}.{{lifecycleWeeklyViewName}}
 BACKUP NO
 AUTO REFRESH YES
 AS

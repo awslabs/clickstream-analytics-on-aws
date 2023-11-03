@@ -27,6 +27,7 @@ import {
   UpdateSecretCommandInput,
 } from '@aws-sdk/client-secrets-manager';
 import { CdkCustomResourceHandler, CdkCustomResourceEvent, CdkCustomResourceResponse, CloudFormationCustomResourceEvent, Context, CloudFormationCustomResourceUpdateEvent } from 'aws-lambda';
+import { CLICKSTREAM_DEVICE_VIEW_NAME, CLICKSTREAM_EVENT_PARAMETER_VIEW_NAME, CLICKSTREAM_EVENT_VIEW_NAME, CLICKSTREAM_LIFECYCLE_WEEKLY_VIEW_NAME, CLICKSTREAM_RETENTION_VIEW_NAME, CLICKSTREAM_SESSION_VIEW_NAME, CLICKSTREAM_USER_ATTR_VIEW_NAME, CLICKSTREAM_USER_DIM_VIEW_NAME, CLICKSTREAM_LIFECYCLE_DAILY_VIEW_NAME } from '../../../common/constant';
 import { getFunctionTags } from '../../../common/lambda/tags';
 import { BIUserCredential } from '../../../common/model';
 import { logger } from '../../../common/powertools';
@@ -44,6 +45,18 @@ export type ResourcePropertiesType = CreateDatabaseAndSchemas & {
 const secretManagerClient = new SecretsManagerClient({
   ...aws_sdk_client_common_config,
 });
+
+const viewNames = {
+  eventViewName: CLICKSTREAM_EVENT_VIEW_NAME,
+  eventParameterViewName: CLICKSTREAM_EVENT_PARAMETER_VIEW_NAME,
+  sessionViewName: CLICKSTREAM_SESSION_VIEW_NAME,
+  retentionViewName: CLICKSTREAM_RETENTION_VIEW_NAME,
+  lifecycleDailyViewName: CLICKSTREAM_LIFECYCLE_DAILY_VIEW_NAME,
+  lifecycleWeeklyViewName: CLICKSTREAM_LIFECYCLE_WEEKLY_VIEW_NAME,
+  userDimViewName: CLICKSTREAM_USER_DIM_VIEW_NAME,
+  userAttrViewName: CLICKSTREAM_USER_ATTR_VIEW_NAME,
+  deviceViewName: CLICKSTREAM_DEVICE_VIEW_NAME,
+};
 
 export const physicalIdPrefix = 'create-redshift-db-schemas-custom-resource-';
 export const handler: CdkCustomResourceHandler = async (event: CloudFormationCustomResourceEvent, context: Context) => {
@@ -390,7 +403,7 @@ async function createViewForReporting(props: ResourcePropertiesType, biUser: str
     };
 
     for (const viewDef of props.reportingViewsDef) {
-      views.push(viewDef.sqlFile.replace('.sql', ''));
+      views.push(viewDef.viewName!);
       sqlStatements.push(getSqlContent(viewDef.sqlFile, mustacheParam, '/opt/dashboard'));
     }
     sqlStatements.push(..._buildGrantSqlStatements(views, app, biUser));
@@ -422,10 +435,11 @@ async function updateViewForReporting(props: ResourcePropertiesType, oldProps: R
       table_user: odsTableNames.user,
       table_item: odsTableNames.item,
       ...SQL_TEMPLATE_PARAMETER,
+      ...viewNames,
     };
     const views: string[] = [];
     for (const viewDef of props.reportingViewsDef) {
-      views.push(viewDef.sqlFile.replace('.sql', ''));
+      views.push(viewDef.viewName!);
       sqlStatements.push(getSqlContent(viewDef.sqlFile, mustacheParam, '/opt/dashboard'));
     }
     sqlStatements.push(..._buildGrantSqlStatements(views, app, biUser));
@@ -443,6 +457,7 @@ async function updateViewForReporting(props: ResourcePropertiesType, oldProps: R
       table_user: odsTableNames.user,
       table_item: odsTableNames.item,
       ...SQL_TEMPLATE_PARAMETER,
+      ...viewNames,
     };
 
     const sqlStatements2 = getUpdatableSql(props.reportingViewsDef, appUpdateProps.oldViewSqls, mustacheParam, '/opt/dashboard');
@@ -450,7 +465,7 @@ async function updateViewForReporting(props: ResourcePropertiesType, oldProps: R
     //grant select on views to bi user.
     const views: string[] = [];
     for (const sqlDef of props.reportingViewsDef) {
-      views.push(sqlDef.sqlFile.replace('.sql', ''));
+      views.push(sqlDef.viewName!);
     }
     sqlStatements2.push(..._buildGrantSqlStatements(views, app, biUser));
 

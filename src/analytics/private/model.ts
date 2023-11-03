@@ -92,6 +92,7 @@ interface CustomProperties {
 export type SQLDef = {
   readonly updatable: 'true' | 'false';
   readonly sqlFile: string;
+  readonly viewName?: string;
   readonly multipleLine?: 'true' | 'false';
 }
 
@@ -203,4 +204,13 @@ export type MustacheParamType = {
   sp_clickstream_log_non_atomic: string;
   table_clickstream_log: string;
   user_bi?: string;
+  eventViewName?: string;
+  eventParameterViewName?: string;
+  sessionViewName?: string;
+  retentionViewName?: string;
+  lifecycleDailyViewName?: string;
+  lifecycleWeeklyViewName?: string;
+  userDimViewName?: string;
+  userAttrViewName?: string;
+  deviceViewName?: string;
 }

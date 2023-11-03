@@ -1,4 +1,4 @@
-CREATE MATERIALIZED VIEW {{schema}}.clickstream_device_view_v1
+CREATE MATERIALIZED VIEW {{schema}}.{{deviceViewName}}
 BACKUP NO
 SORTKEY(event_date)
 AUTO REFRESH YES
