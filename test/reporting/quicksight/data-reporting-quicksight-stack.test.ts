@@ -891,7 +891,19 @@ describe('DataReportingQuickSightStack resource test', () => {
                 Type: 'STRING',
               },
               {
-                Name: 'is_registered',
+                Name: 'first_referer',
+                Type: 'STRING',
+              },
+              {
+                Name: 'first_visit_channel',
+                Type: 'STRING',
+              },
+              {
+                Name: 'device_id',
+                Type: 'STRING',
+              },
+              {
+                Name: 'registration_status',
                 Type: 'STRING',
               },
             ],
@@ -917,7 +929,10 @@ describe('DataReportingQuickSightStack resource test', () => {
               'first_traffic_source_source',
               'first_traffic_source_medium',
               'first_traffic_source_name',
-              'is_registered',
+              'first_referer',
+              'first_visit_channel',
+              'registration_status',
+              'device_id',
             ],
             tagColumnOperations: [
               {
@@ -1155,6 +1170,14 @@ describe('DataReportingQuickSightStack resource test', () => {
                 Type: 'STRING',
               },
               {
+                Name: 'app_info_sdk_name',
+                Type: 'STRING',
+              },
+              {
+                Name: 'app_info_sdk_version',
+                Type: 'STRING',
+              },
+              {
                 Name: 'device_mobile_brand_name',
                 Type: 'STRING',
               },
@@ -1188,6 +1211,10 @@ describe('DataReportingQuickSightStack resource test', () => {
               },
               {
                 Name: 'device_operating_system_version',
+                Type: 'STRING',
+              },
+              {
+                Name: 'host_name',
                 Type: 'STRING',
               },
               {
@@ -1315,6 +1342,8 @@ describe('DataReportingQuickSightStack resource test', () => {
               'app_info_package_id',
               'app_info_install_source',
               'app_info_version',
+              'app_info_sdk_name',
+              'app_info_sdk_version',
               'device_mobile_brand_name',
               'device_mobile_model_name',
               'device_manufacturer',
@@ -1326,6 +1355,7 @@ describe('DataReportingQuickSightStack resource test', () => {
               'device_operating_system_version',
               'ua_browser',
               'ua_browser_version',
+              'host_name',
               'ua_os',
               'ua_os_version',
               'ua_device',
@@ -1400,6 +1430,10 @@ describe('DataReportingQuickSightStack resource test', () => {
                 Type: 'STRING',
               },
               {
+                Name: 'host_name',
+                Type: 'STRING',
+              },
+              {
                 Name: 'ua_browser',
                 Type: 'STRING',
               },
@@ -1460,6 +1494,7 @@ describe('DataReportingQuickSightStack resource test', () => {
               'network_type',
               'operating_system',
               'operating_system_version',
+              'host_name',
               'ua_browser',
               'ua_browser_version',
               'ua_os',

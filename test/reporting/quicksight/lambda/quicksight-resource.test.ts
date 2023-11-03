@@ -102,7 +102,7 @@ describe('QuickSight Lambda function', () => {
             'first_traffic_source_name',
             'custom_attr_key',
             'custom_attr_value',
-            'is_registered',
+            'registration_status',
           ],
           tagColumnOperations: [
             {

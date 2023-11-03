@@ -36,7 +36,7 @@ export const reportingViewsDef: SQLDef[] = [
     viewName: CLICKSTREAM_LIFECYCLE_WEEKLY_VIEW_NAME,
   },
   {
-    updatable: 'false',
+    updatable: 'true',
     sqlFile: 'clickstream_user_dim_view_v1.sql',
     viewName: CLICKSTREAM_USER_DIM_VIEW_NAME,
   },

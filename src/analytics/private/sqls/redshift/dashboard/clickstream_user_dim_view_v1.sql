@@ -1,7 +1,4 @@
-CREATE MATERIALIZED VIEW {{schema}}.{{userDimViewName}}
-BACKUP NO
-SORTKEY(first_visit_date)
-AUTO REFRESH YES
+CREATE OR REPLACE VIEW {{schema}}.{{userDimViewName}}
 AS
 WITH user_base AS (
   SELECT

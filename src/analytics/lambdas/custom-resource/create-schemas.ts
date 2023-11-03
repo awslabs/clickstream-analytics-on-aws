@@ -400,6 +400,7 @@ async function createViewForReporting(props: ResourcePropertiesType, biUser: str
       table_user: odsTableNames.user,
       table_item: odsTableNames.item,
       ...SQL_TEMPLATE_PARAMETER,
+      ...viewNames,
     };
 
     for (const viewDef of props.reportingViewsDef) {
