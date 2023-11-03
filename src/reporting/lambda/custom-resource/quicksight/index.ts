@@ -172,15 +172,15 @@ const _onUpdate = async (quickSight: QuickSight, awsAccountId: string, principal
     const dashboardDefProps: QuickSightDashboardDefProps = props.dashboardDefProps;
     logger.info('dashboardDefProps', JSON.stringify(dashboardDefProps));
 
-    let principalArn = undefined;
-    if(oldProps.quickSightUser !== props.quickSightUser) {
-      principalArn = props.quickSightPrincipalArn;
-      logger.info(`dashboard user changed, will update dataset/dashboard/analysis permission to new user.`)
+    let newPrincipalArn = undefined;
+    if (oldProps.quickSightUser !== props.quickSightUser) {
+      newPrincipalArn = principalArn;
+      logger.info('dashboard user changed, will update dataset/dashboard/analysis permission to new user.');
     }
 
     const dashboard = await updateQuickSightDashboard(quickSight, awsAccountId,
       schemaName,
-      dashboardDefProps, principalArn);
+      dashboardDefProps, newPrincipalArn);
 
     logger.info(`updated dashboard: ${dashboard?.DashboardId}`);
     dashboards.push({
@@ -287,8 +287,8 @@ const updateQuickSightDashboard = async (quickSight: QuickSight,
   accountId: string,
   schema: string,
   dashboardDef: QuickSightDashboardDefProps,
-  principalArn? : string
-  )
+  principalArn? : string,
+)
 : Promise<CreateDashboardCommandOutput|undefined> => {
 
   const datasetRefs: DataSetReference[] = [];
@@ -585,8 +585,8 @@ const updateDataSet = async (quickSight: QuickSight, awsAccountId: string,
   schema: string,
   databaseName: string,
   props: DataSetProps,
-  principalArn: string|undefined
-  )
+  principalArn: string|undefined,
+)
 : Promise<CreateDataSetCommandOutput|undefined> => {
 
   try {
@@ -681,7 +681,7 @@ const updateDataSet = async (quickSight: QuickSight, awsAccountId: string,
     });
     logger.info(`update dataset finished. Id: ${dataset?.DataSetId}`);
 
-    if(principalArn !== undefined){
+    if (principalArn !== undefined) {
       await quickSight.updateDataSetPermissions({
         AwsAccountId: awsAccountId,
         DataSetId: datasetId,
@@ -689,8 +689,8 @@ const updateDataSet = async (quickSight: QuickSight, awsAccountId: string,
           {
             Principal: principalArn,
             Actions: dataSetPermissionActions,
-          }
-        ]
+          },
+        ],
       });
 
       logger.info(`grant dataset permissions to new principal ${principalArn}`);
@@ -721,7 +721,7 @@ const updateAnalysis = async (quickSight: QuickSight, awsAccountId: string, data
     });
     logger.info(`update analysis finished. Id: ${analysisId}`);
 
-    if(principalArn !== undefined){
+    if (principalArn !== undefined) {
       await quickSight.updateAnalysisPermissions({
         AwsAccountId: awsAccountId,
         AnalysisId: analysisId,
@@ -729,8 +729,8 @@ const updateAnalysis = async (quickSight: QuickSight, awsAccountId: string, data
           {
             Principal: principalArn,
             Actions: analysisPermissionActions,
-          }
-        ]
+          },
+        ],
       });
 
       logger.info(`grant analysis permissions to new principal ${principalArn}`);
@@ -762,7 +762,7 @@ const updateDashboard = async (quickSight: QuickSight, awsAccountId: string, dat
     });
     logger.info(`update dashboard finished. id: ${dashboardId}`);
 
-    if(principalArn !== undefined){
+    if (principalArn !== undefined) {
       await quickSight.updateDashboardPermissions({
         AwsAccountId: awsAccountId,
         DashboardId: dashboardId,
@@ -770,8 +770,8 @@ const updateDashboard = async (quickSight: QuickSight, awsAccountId: string, dat
           {
             Principal: principalArn,
             Actions: dashboardPermissionActions,
-          }
-        ]
+          },
+        ],
       });
 
       logger.info(`grant dashboard permissions to new principal ${principalArn}`);

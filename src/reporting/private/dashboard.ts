@@ -94,7 +94,7 @@ export const analysisPermissionActions = [
   'quicksight:RestoreAnalysis',
   'quicksight:DeleteAnalysis',
   'quicksight:DescribeAnalysisPermissions',
-]
+];
 
 export const dashboardPermissionActions = [
   'quicksight:DescribeDashboard',
@@ -105,7 +105,7 @@ export const dashboardPermissionActions = [
   'quicksight:DeleteDashboard',
   'quicksight:DescribeDashboardPermissions',
   'quicksight:UpdateDashboardPublishedVersion',
-]
+];
 
 export const CLICKSTREAM_RETENTION_VIEW_PLACEHOLDER = 'clickstream_retention_view';
 export const CLICKSTREAM_SESSION_VIEW_PLACEHOLDER = 'clickstream_session_view';
