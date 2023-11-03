@@ -326,18 +326,22 @@ class ETLRunnerTest extends BaseSparkTest {
         String tableName1 = dataDir + "/" + TransformerV2.TABLE_ETL_USER_TRAFFIC_SOURCE + INCREMENTAL_SUFFIX ;
         String tableName2 = dataDir + "/" + TransformerV2.TABLE_ETL_USER_DEVICE_ID + INCREMENTAL_SUFFIX;
         String tableName3 = dataDir + "/" + TransformerV2.TABLE_ETL_USER_PAGE_REFERER + INCREMENTAL_SUFFIX;
+        String tableName4 = dataDir + "/" + TransformerV2.TABLE_ETL_USER_CHANNEL+ INCREMENTAL_SUFFIX;
         Dataset<Row> d1 = spark.read().parquet(tableName1);
         Dataset<Row> d2 = spark.read().parquet(tableName2);
         Dataset<Row> d3 = spark.read().parquet(tableName3);
+        Dataset<Row> d4 = spark.read().parquet(tableName4);
 
         long cc1 = d1.count();
         long cc2 = d2.count();
         long cc3 = d3.count();
+        long cc4 = d4.count();
 
-        System.out.printf("cc1=%s, cc2=%s, cc3=%s%n", cc1, cc2, cc3);
+        System.out.printf("cc1=%s, cc2=%s, cc3=%s cc4=%s %n", cc1, cc2, cc3, cc4);
         Assertions.assertTrue( cc1 >= 1);
         Assertions.assertTrue(cc2 >= 1);
         Assertions.assertTrue(cc3 >= 1);
+        Assertions.assertTrue(cc4 >= 1);
 
         System.setProperty("force.merge", "false");
     }
@@ -358,7 +362,7 @@ class ETLRunnerTest extends BaseSparkTest {
         ETLRunnerConfig config = getRunnerConfig(transformers, "TransformerV2_3");
         ETLRunner runner = new ETLRunner(spark, config);
         Dataset<Row> sourceDataset =
-                spark.read().json(requireNonNull(getClass().getResource("/original_data_with_user_profile_set2.json")).getPath());
+                spark.read().json(requireNonNull(getClass().getResource("/original_data_with_user_etl_runner.json")).getPath());
         assertEquals(sourceDataset.count(), 4);
         runner.writeResultDataset(runner.executeTransformers(sourceDataset, transformers));
         String outputPath = config.getOutputPath();
@@ -368,27 +372,27 @@ class ETLRunnerTest extends BaseSparkTest {
         Dataset<Row> eventParamDataset = spark.read().json(outputPath + ETLRunner.TableName.EVEN_PARAMETER.name);
         String expectedJsonEventParam = this.resourceFileAsString("/expected/etl_runner_v2_event_parameter.json");
         String rowJsonEventParam = datasetToPrettyJson(eventParamDataset
-                .where(expr("event_id='1fcd7f5b-9529-4977-a303-e8c7e39db7b898-1'")).distinct());
+                .where(expr("event_id='1fcd7f5b-9529-4977-a303-e8c7e39db7b898-etl_runner1'")).distinct());
         Assertions.assertEquals(expectedJsonEventParam, rowJsonEventParam);
         Assertions.assertEquals(44, eventParamDataset.count());
 
         Dataset<Row> userDataset = spark.read().json(outputPath + ETLRunner.TableName.USER.name);
-        Dataset<Row> userDataset1 = userDataset.filter(expr("user_pseudo_id='uuid1-9844af32'"));
+        Dataset<Row> userDataset1 = userDataset.filter(expr("user_pseudo_id='uuid1_etl_runner1'"));
         String expectedJsonUser = this.resourceFileAsString("/expected/etl_runner_v2_user.json");
         Assertions.assertEquals(expectedJsonUser, userDataset1.first().prettyJson());
         Assertions.assertEquals(1, userDataset1.count());
 
         Dataset<Row> itemDataset = spark.read().json(outputPath + ETLRunner.TableName.ITEM.name);
-        Dataset<Row> itemDataset1 = itemDataset.filter(expr("id='item_id1'"));
+        Dataset<Row> itemDataset1 = itemDataset.filter(expr("id='item_id_uuid1_etl_runner1'"));
         String expectedJsonItem = this.resourceFileAsString("/expected/etl_runner_v2_item.json");
         Assertions.assertEquals(expectedJsonItem, itemDataset1.first().prettyJson());
         Assertions.assertEquals(1, itemDataset1.count());
 
         Dataset<Row> eventDataset = spark.read().json(outputPath + ETLRunner.TableName.EVENT.name);
         Assertions.assertEquals(4, eventDataset.count());
-        String lastRowJson = eventDataset.takeAsList(4).get(3).prettyJson();
+        String eventJson = datasetToPrettyJson(eventDataset.where(expr("event_id='1fcd7f5b-9529-4977-a303-e8c7e39db7b898-etl_runner1'")));
         String expectedJsonEvent = this.resourceFileAsString("/expected/etl_runner_v2_event4.json");
-        Assertions.assertEquals(expectedJsonEvent, lastRowJson);
+        Assertions.assertEquals(expectedJsonEvent, eventJson);
     }
 
 

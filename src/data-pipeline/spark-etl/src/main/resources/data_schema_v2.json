@@ -180,6 +180,18 @@
       "type": "string",
       "nullable": true,
       "metadata": {}
+    },
+    {
+      "name": "sdk_version",
+      "type": "string",
+      "nullable": true,
+      "metadata": {}
+    },
+    {
+      "name": "sdk_name",
+      "type": "string",
+      "nullable": true,
+      "metadata": {}
     }
   ]
 }
