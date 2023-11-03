@@ -325,11 +325,11 @@ describe('Metadata Event test', () => {
   beforeEach(() => {
     ddbMock.reset();
     displayDataMock(ddbMock);
-  });
-  it('Get metadata event by name', async () => {
     jest
       .useFakeTimers()
       .setSystemTime(new Date('2023-03-02'));
+  });
+  it('Get metadata event by name', async () => {
     ddbMock.on(QueryCommand, {
       TableName: analyticsMetadataTable,
       KeyConditionExpression: '#id= :id AND begins_with(#month, :month)',
@@ -1172,9 +1172,6 @@ describe('Metadata Event Attribute test', () => {
     });
   });
   it('Get metadata event attribute by name when no data in DDB', async () => {
-    jest
-      .useFakeTimers()
-      .setSystemTime(new Date('2023-03-02'));
     ddbMock.on(QueryCommand, {
       TableName: analyticsMetadataTable,
       IndexName: prefixMonthGSIName,

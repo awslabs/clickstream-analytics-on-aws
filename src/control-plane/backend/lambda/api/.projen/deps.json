@@ -266,6 +266,11 @@
       "type": "runtime"
     },
     {
+      "name": "fast-memoize",
+      "version": "^2.5.1",
+      "type": "runtime"
+    },
+    {
       "name": "i18next-fs-backend",
       "version": "^2.2.0",
       "type": "runtime"
