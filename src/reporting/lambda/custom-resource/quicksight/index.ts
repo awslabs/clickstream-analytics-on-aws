@@ -33,7 +33,7 @@ import { logger } from '../../../../common/powertools';
 import { aws_sdk_client_common_config } from '../../../../common/sdk-client-config';
 import {
   QuicksightCustomResourceLambdaProps,
-  dataSetActions,
+  dataSetPermissionActions,
   waitForAnalysisCreateCompleted,
   waitForAnalysisDeleteCompleted,
   waitForDashboardCreateCompleted,
@@ -43,6 +43,8 @@ import {
   QuickSightDashboardDefProps,
   DataSetProps,
   truncateString,
+  analysisPermissionActions,
+  dashboardPermissionActions,
 } from '../../../private/dashboard';
 
 type ResourceEvent = CloudFormationCustomResourceEvent;
@@ -170,9 +172,16 @@ const _onUpdate = async (quickSight: QuickSight, awsAccountId: string, principal
     const dashboardDefProps: QuickSightDashboardDefProps = props.dashboardDefProps;
     logger.info('dashboardDefProps', JSON.stringify(dashboardDefProps));
 
+    let principalArn = undefined;
+    if(oldProps.quickSightUser !== props.quickSightUser) {
+      principalArn = props.quickSightPrincipalArn;
+      logger.info(`dashboard user changed, will update dataset/dashboard/analysis permission to new user.`)
+    }
+
     const dashboard = await updateQuickSightDashboard(quickSight, awsAccountId,
       schemaName,
-      dashboardDefProps);
+      dashboardDefProps, principalArn);
+
     logger.info(`updated dashboard: ${dashboard?.DashboardId}`);
     dashboards.push({
       appId: schemaName,
@@ -277,14 +286,16 @@ const deleteQuickSightDashboard = async (quickSight: QuickSight,
 const updateQuickSightDashboard = async (quickSight: QuickSight,
   accountId: string,
   schema: string,
-  dashboardDef: QuickSightDashboardDefProps)
+  dashboardDef: QuickSightDashboardDefProps,
+  principalArn? : string
+  )
 : Promise<CreateDashboardCommandOutput|undefined> => {
 
   const datasetRefs: DataSetReference[] = [];
   const dataSets = dashboardDef.dataSets;
   const databaseName = dashboardDef.databaseName;
   for ( const dataSet of dataSets) {
-    const createdDataset = await updateDataSet(quickSight, accountId, dashboardDef.dataSourceArn, schema, databaseName, dataSet);
+    const createdDataset = await updateDataSet(quickSight, accountId, dashboardDef.dataSourceArn, schema, databaseName, dataSet, principalArn);
     logger.info(`data set id: ${createdDataset?.DataSetId}`);
 
     datasetRefs.push({
@@ -300,10 +311,10 @@ const updateQuickSightDashboard = async (quickSight: QuickSight,
     },
   };
 
-  const analysis = await updateAnalysis(quickSight, accountId, databaseName, schema, sourceEntity, dashboardDef);
+  const analysis = await updateAnalysis(quickSight, accountId, databaseName, schema, sourceEntity, dashboardDef, principalArn);
   logger.info(`Analysis ${analysis?.AnalysisId} creation completed.`);
 
-  const dashboard = await updateDashboard(quickSight, accountId, databaseName, schema, sourceEntity, dashboardDef);
+  const dashboard = await updateDashboard(quickSight, accountId, databaseName, schema, sourceEntity, dashboardDef, principalArn);
   logger.info(`Dashboard ${dashboard?.DashboardId} creation completed.`);
 
   return dashboard;
@@ -388,7 +399,7 @@ const createDataSet = async (quickSight: QuickSight, awsAccountId: string, princ
       Name: `${props.name}${identifier.tableNameIdentifier}-${identifier.schemaIdentifier}-${identifier.databaseIdentifier}`,
       Permissions: [{
         Principal: principalArn,
-        Actions: dataSetActions,
+        Actions: dataSetPermissionActions,
       }],
 
       ImportMode: props.importMode,
@@ -438,15 +449,7 @@ const createAnalysis = async (quickSight: QuickSight, awsAccountId: string, prin
       Name: `${props.analysisName} - ${identifier.schemaIdentifier} - ${identifier.databaseIdentifier}`,
       Permissions: [{
         Principal: principalArn,
-        Actions: [
-          'quicksight:DescribeAnalysis',
-          'quicksight:UpdateAnalysisPermissions',
-          'quicksight:QueryAnalysis',
-          'quicksight:UpdateAnalysis',
-          'quicksight:RestoreAnalysis',
-          'quicksight:DeleteAnalysis',
-          'quicksight:DescribeAnalysisPermissions',
-        ],
+        Actions: analysisPermissionActions,
       }],
 
       SourceEntity: sourceEntity,
@@ -476,16 +479,7 @@ const createDashboard = async (quickSight: QuickSight, awsAccountId: string, pri
       Name: `${props.dashboardName} - ${identifier.schemaIdentifier} - ${identifier.databaseIdentifier} `,
       Permissions: [{
         Principal: principalArn,
-        Actions: [
-          'quicksight:DescribeDashboard',
-          'quicksight:ListDashboardVersions',
-          'quicksight:UpdateDashboardPermissions',
-          'quicksight:QueryDashboard',
-          'quicksight:UpdateDashboard',
-          'quicksight:DeleteDashboard',
-          'quicksight:DescribeDashboardPermissions',
-          'quicksight:UpdateDashboardPublishedVersion',
-        ],
+        Actions: dashboardPermissionActions,
       }],
 
       SourceEntity: sourceEntity,
@@ -590,7 +584,9 @@ const updateDataSet = async (quickSight: QuickSight, awsAccountId: string,
   dataSourceArn: string,
   schema: string,
   databaseName: string,
-  props: DataSetProps)
+  props: DataSetProps,
+  principalArn: string|undefined
+  )
 : Promise<CreateDataSetCommandOutput|undefined> => {
 
   try {
@@ -685,6 +681,21 @@ const updateDataSet = async (quickSight: QuickSight, awsAccountId: string,
     });
     logger.info(`update dataset finished. Id: ${dataset?.DataSetId}`);
 
+    if(principalArn !== undefined){
+      await quickSight.updateDataSetPermissions({
+        AwsAccountId: awsAccountId,
+        DataSetId: datasetId,
+        GrantPermissions: [
+          {
+            Principal: principalArn,
+            Actions: dataSetPermissionActions,
+          }
+        ]
+      });
+
+      logger.info(`grant dataset permissions to new principal ${principalArn}`);
+    }
+
     return dataset;
 
   } catch (err: any) {
@@ -694,7 +705,7 @@ const updateDataSet = async (quickSight: QuickSight, awsAccountId: string,
 };
 
 const updateAnalysis = async (quickSight: QuickSight, awsAccountId: string, databaseName: string, schema: string,
-  sourceEntity: AnalysisSourceEntity, props: QuickSightDashboardDefProps)
+  sourceEntity: AnalysisSourceEntity, props: QuickSightDashboardDefProps, principalArn: string|undefined)
 : Promise<CreateAnalysisCommandOutput|undefined> => {
 
   try {
@@ -710,6 +721,21 @@ const updateAnalysis = async (quickSight: QuickSight, awsAccountId: string, data
     });
     logger.info(`update analysis finished. Id: ${analysisId}`);
 
+    if(principalArn !== undefined){
+      await quickSight.updateAnalysisPermissions({
+        AwsAccountId: awsAccountId,
+        AnalysisId: analysisId,
+        GrantPermissions: [
+          {
+            Principal: principalArn,
+            Actions: analysisPermissionActions,
+          }
+        ]
+      });
+
+      logger.info(`grant analysis permissions to new principal ${principalArn}`);
+    }
+
     return analysis;
 
   } catch (err: any) {
@@ -719,7 +745,7 @@ const updateAnalysis = async (quickSight: QuickSight, awsAccountId: string, data
 };
 
 const updateDashboard = async (quickSight: QuickSight, awsAccountId: string, databaseName: string, schema: string,
-  sourceEntity: DashboardSourceEntity, props: QuickSightDashboardDefProps)
+  sourceEntity: DashboardSourceEntity, props: QuickSightDashboardDefProps, principalArn: string|undefined)
 : Promise<CreateDashboardCommandOutput|undefined> => {
   try {
     const identifier = buildDashBoardId(databaseName, schema);
@@ -735,6 +761,21 @@ const updateDashboard = async (quickSight: QuickSight, awsAccountId: string, dat
 
     });
     logger.info(`update dashboard finished. id: ${dashboardId}`);
+
+    if(principalArn !== undefined){
+      await quickSight.updateDashboardPermissions({
+        AwsAccountId: awsAccountId,
+        DashboardId: dashboardId,
+        GrantPermissions: [
+          {
+            Principal: principalArn,
+            Actions: dashboardPermissionActions,
+          }
+        ]
+      });
+
+      logger.info(`grant dashboard permissions to new principal ${principalArn}`);
+    }
 
     return dashboard;
 
