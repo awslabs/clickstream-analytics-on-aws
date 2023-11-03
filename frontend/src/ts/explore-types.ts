@@ -113,5 +113,5 @@ export enum QuickSightChartType {
   BAR = 'bar',
   LINE = 'line',
   FUNNEL = 'funnel',
-  SANKEY = 'sankey'
+  SANKEY = 'sankey',
 }

@@ -236,7 +236,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
     return true;
   };
 
-  const validateIngestionServer = () => {
+  const validateIngestionSubnets = () => {
     // Validate public subnets
     if (
       pipelineInfo.selectedPublicSubnet.length < 2 ||
@@ -265,7 +265,10 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
       setPrivateSubnetDiffWithPublicError(true);
       return false;
     }
+    return true;
+  };
 
+  const validIngestionCapacity = () => {
     // Validate ingestion server min capacity
     if (!isPositiveInteger(pipelineInfo.ingestionServer.size.serverMin)) {
       setMinCapacityError(true);
@@ -291,7 +294,10 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
       setWarmPoolError(true);
       return false;
     }
+    return true;
+  };
 
+  const validateIngestionSSL = () => {
     // Validate HTTPs with SSL Certificate
     if (
       pipelineInfo.ingestionServer.loadBalancer.protocol === ProtocalType.HTTPS
@@ -314,6 +320,25 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
         return false;
       }
     }
+    if (
+      pipelineInfo.ingestionServer.loadBalancer.protocol ===
+        ProtocalType.HTTP &&
+      !acknowledgedHTTPSecurity
+    ) {
+      return false;
+    }
+
+    // check secret selected when enable authentication
+    if (pipelineInfo.enableAuthentication) {
+      if (!pipelineInfo.ingestionServer.loadBalancer.authenticationSecretArn) {
+        setSecretEmptyError(true);
+        return false;
+      }
+    }
+    return true;
+  };
+
+  const validateIngestionSinkS3 = () => {
     if (pipelineInfo.ingestionServer.sinkType === SinkType.S3) {
       if (!pipelineInfo.ingestionServer.sinkS3.sinkBucket.name.trim()) {
         setBufferS3BucketEmptyError(true);
@@ -344,121 +369,13 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
         return false;
       }
     }
-    if (
-      pipelineInfo.ingestionServer.loadBalancer.protocol ===
-        ProtocalType.HTTP &&
-      !acknowledgedHTTPSecurity
-    ) {
-      return false;
-    }
+    return true;
+  };
 
-    // check CORS domain when it's not empty
-    if (pipelineInfo.ingestionServer.loadBalancer.serverCorsOrigin.trim()) {
-      if (
-        !checkStringValidRegex(
-          pipelineInfo.ingestionServer.loadBalancer.serverCorsOrigin,
-          new RegExp(CORS_PATTERN)
-        )
-      ) {
-        setCorsFormatError(true);
-        return false;
-      }
-    }
-
-    // check secret selected when enable authentication
-    if (pipelineInfo.enableAuthentication) {
-      if (!pipelineInfo.ingestionServer.loadBalancer.authenticationSecretArn) {
-        setSecretEmptyError(true);
-        return false;
-      }
-    }
-
-    const sinkIntervalNum =
-      pipelineInfo.ingestionServer.sinkBatch?.intervalSeconds;
-    const sinkBatchSize = pipelineInfo.ingestionServer.sinkBatch?.size;
-    if (pipelineInfo.ingestionServer.sinkType === SinkType.KDS) {
-      // check kds batch interval
-      if (
-        sinkIntervalNum < MIN_KDS_SINK_INTERVAL ||
-        sinkIntervalNum > MAX_KDS_SINK_INTERVAL
-      ) {
-        setSinkIntervalError(true);
-        return false;
-      }
-      // check kds batch size
-      if (
-        sinkBatchSize < MIN_KDS_BATCH_SIZE ||
-        sinkBatchSize > MAX_KDS_BATCH_SIZE
-      ) {
-        setSinkBatchSizeError(true);
-        return false;
-      }
-    }
-
-    if (pipelineInfo.ingestionServer.sinkType === SinkType.MSK) {
-      // check msk select when not self hosted
-      if (!pipelineInfo.kafkaSelfHost) {
-        if (!pipelineInfo.ingestionServer.sinkKafka.mskCluster.arn) {
-          setMskEmptyError(true);
-          return false;
-        }
-      }
-      // check kafka when self hosted
-      if (pipelineInfo.kafkaSelfHost) {
-        // Check brokers
-        if (!pipelineInfo.kafkaBrokers) {
-          setBrokerLinkEmptyError(true);
-          return false;
-        }
-        const brokerValidRes: boolean[] = [];
-        pipelineInfo.kafkaBrokers.split(',')?.forEach((element) => {
-          brokerValidRes.push(
-            checkStringValidRegex(element, new RegExp(KAFKA_BROKERS_PATTERN))
-          );
-        });
-        if (brokerValidRes.includes(false)) {
-          setBrokerLinkFormatError(true);
-          return false;
-        }
-
-        // Check security group
-        if (!pipelineInfo.ingestionServer.sinkKafka.securityGroupId) {
-          setKafkaSGEmptyError(true);
-          return false;
-        }
-      }
-
-      // check topic format if not empty
-      if (pipelineInfo.ingestionServer.sinkKafka.topic) {
-        if (
-          !checkStringValidRegex(
-            pipelineInfo.ingestionServer.sinkKafka.topic,
-            new RegExp(KAFKA_TOPIC_PATTERN)
-          )
-        ) {
-          setTopicFormatError(true);
-          return false;
-        }
-      }
-
-      // check msk batch interval
-      if (
-        sinkIntervalNum < MIN_MSK_SINK_INTERVAL ||
-        sinkIntervalNum > MAX_MSK_SINK_INTERVAL
-      ) {
-        setSinkIntervalError(true);
-        return false;
-      }
-      // check msk batch size
-      if (
-        sinkBatchSize < MIN_MSK_BATCH_SIZE ||
-        sinkBatchSize > MAX_MSK_BATCH_SIZE
-      ) {
-        setSinkBatchSizeError(true);
-        return false;
-      }
-    }
-
+  const validateIngestionSinkKDS = (
+    sinkIntervalNum: number,
+    sinkBatchSize: number
+  ) => {
     if (pipelineInfo.ingestionServer.sinkType === SinkType.KDS) {
       // check provisioned mode
       if (!pipelineInfo.seledtedKDKProvisionType?.value) {
@@ -478,8 +395,148 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
           return false;
         }
       }
+      // check kds batch interval
+      if (
+        sinkIntervalNum < MIN_KDS_SINK_INTERVAL ||
+        sinkIntervalNum > MAX_KDS_SINK_INTERVAL
+      ) {
+        setSinkIntervalError(true);
+        return false;
+      }
+      // check kds batch size
+      if (
+        sinkBatchSize < MIN_KDS_BATCH_SIZE ||
+        sinkBatchSize > MAX_KDS_BATCH_SIZE
+      ) {
+        setSinkBatchSizeError(true);
+        return false;
+      }
+    }
+    return true;
+  };
+
+  const validIngestionMSKKafka = () => {
+    if (!pipelineInfo.kafkaSelfHost) {
+      if (!pipelineInfo.ingestionServer.sinkKafka.mskCluster.arn) {
+        setMskEmptyError(true);
+        return false;
+      }
+    }
+    // check kafka when self hosted
+    if (pipelineInfo.kafkaSelfHost) {
+      // Check brokers
+      if (!pipelineInfo.kafkaBrokers) {
+        setBrokerLinkEmptyError(true);
+        return false;
+      }
+      const brokerValidRes: boolean[] = [];
+      pipelineInfo.kafkaBrokers.split(',')?.forEach((element) => {
+        brokerValidRes.push(
+          checkStringValidRegex(element, new RegExp(KAFKA_BROKERS_PATTERN))
+        );
+      });
+      if (brokerValidRes.includes(false)) {
+        setBrokerLinkFormatError(true);
+        return false;
+      }
+
+      // Check security group
+      if (!pipelineInfo.ingestionServer.sinkKafka.securityGroupId) {
+        setKafkaSGEmptyError(true);
+        return false;
+      }
     }
 
+    // check topic format if not empty
+    if (pipelineInfo.ingestionServer.sinkKafka.topic) {
+      if (
+        !checkStringValidRegex(
+          pipelineInfo.ingestionServer.sinkKafka.topic,
+          new RegExp(KAFKA_TOPIC_PATTERN)
+        )
+      ) {
+        setTopicFormatError(true);
+        return false;
+      }
+    }
+    return true;
+  };
+
+  const validateMSKBatchSize = (
+    sinkIntervalNum: number,
+    sinkBatchSize: number
+  ) => {
+    // check msk batch interval
+    if (
+      sinkIntervalNum < MIN_MSK_SINK_INTERVAL ||
+      sinkIntervalNum > MAX_MSK_SINK_INTERVAL
+    ) {
+      setSinkIntervalError(true);
+      return false;
+    }
+    // check msk batch size
+    if (
+      sinkBatchSize < MIN_MSK_BATCH_SIZE ||
+      sinkBatchSize > MAX_MSK_BATCH_SIZE
+    ) {
+      setSinkBatchSizeError(true);
+      return false;
+    }
+    return true;
+  };
+
+  const validateIngestionServer = () => {
+    // validate ingestion server subnets
+    if (!validateIngestionSubnets()) {
+      return false;
+    }
+
+    // validate ingestion server capacity
+    if (!validIngestionCapacity()) {
+      return false;
+    }
+
+    // validate ingestion server ssl
+    if (!validateIngestionSSL()) {
+      return false;
+    }
+
+    // validate ingestion sink s3
+    if (!validateIngestionSinkS3()) {
+      return false;
+    }
+
+    // check CORS domain when it's not empty
+    if (pipelineInfo.ingestionServer.loadBalancer.serverCorsOrigin.trim()) {
+      if (
+        !checkStringValidRegex(
+          pipelineInfo.ingestionServer.loadBalancer.serverCorsOrigin,
+          new RegExp(CORS_PATTERN)
+        )
+      ) {
+        setCorsFormatError(true);
+        return false;
+      }
+    }
+
+    const sinkIntervalNum =
+      pipelineInfo.ingestionServer.sinkBatch?.intervalSeconds;
+    const sinkBatchSize = pipelineInfo.ingestionServer.sinkBatch?.size;
+
+    if (pipelineInfo.ingestionServer.sinkType === SinkType.MSK) {
+      // check msk select when not self hosted
+      if (!validIngestionMSKKafka()) {
+        return false;
+      }
+      if (!validateMSKBatchSize(sinkIntervalNum, sinkBatchSize)) {
+        return false;
+      }
+    }
+
+    // validate ingestion sink kds
+    if (!validateIngestionSinkKDS(sinkIntervalNum, sinkBatchSize)) {
+      return false;
+    }
     return true;
   };
 
@@ -562,6 +619,136 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
     return true;
   };
 
+  const setQuickSightStatus = (quickSightAvailable: boolean) => {
+    // Set QuickSight disabled
+    if (quickSightAvailable) {
+      // Set QuickSight Default Enable when QuickSight Available
+      setPipelineInfo((prev) => {
+        return {
+          ...prev,
+          enableReporting: true,
+        };
+      });
+    } else {
+      setPipelineInfo((prev) => {
+        return {
+          ...prev,
+          enableReporting: false,
+        };
+      });
+    }
+  };
+
+  const setAGAStatus = (agaAvailable: boolean) => {
+    // Set AGA disabled
+    if (!agaAvailable) {
+      // Set AGA Disabled when AGA Not Available
+      setPipelineInfo((prev) => {
+        return {
+          ...prev,
+          ingestionServer: {
+            ...prev.ingestionServer,
+            loadBalancer: {
+              ...prev.ingestionServer.loadBalancer,
+              enableGlobalAccelerator: false,
+            },
+          },
+        };
+      });
+    }
+  };
+
+  const setMSKStatus = (mskAvailable: boolean) => {
+    // Set MSK Disable and Apache Kafka connector Disabled
+    if (mskAvailable) {
+      setPipelineInfo((prev) => {
+        return {
+          ...prev,
+          kafkaSelfHost: false, // Change to MSK as default
+          enableDataProcessing: true, // enable data processing
+          ingestionServer: {
+            ...prev.ingestionServer,
+            sinkKafka: {
+              ...prev.ingestionServer.sinkKafka,
+              kafkaConnector: {
+                enable: true,
+              },
+            },
+          },
+        };
+      });
+    } else {
+      setPipelineInfo((prev) => {
+        return {
+          ...prev,
+          kafkaSelfHost: true, // Change to self hosted as default
+          enableDataProcessing: ternary(
+            pipelineInfo.ingestionServer.sinkType === SinkType.MSK,
+            false,
+            true
+          ), // disabled all data processing when sink type is MSK and MSK not available
+          ingestionServer: {
+            ...prev.ingestionServer,
+            sinkKafka: {
+              ...prev.ingestionServer.sinkKafka,
+              kafkaConnector: {
+                enable: false,
+              },
+            },
+          },
+        };
+      });
+    }
+  };
+
+  const setRedshiftStatus = (redshiftServerlessAvailable: boolean) => {
+    // Set redshift serverless Disabled
+    if (redshiftServerlessAvailable) {
+      setPipelineInfo((prev) => {
+        return {
+          ...prev,
+          redshiftType: 'serverless', // change to serverless as default
+        };
+      });
+    } else {
+      setPipelineInfo((prev) => {
+        return {
+          ...prev,
+          redshiftType: 'provisioned', // change to provisioned as default
+        };
+      });
+    }
+  };
+
+  const setDataProcessorStatus = (emrAvailable: boolean) => {
+    // Set data processing Disabled when emr-serverless not available
+    if (emrAvailable) {
+      setPipelineInfo((prev) => {
+        return {
+          ...prev,
+          enableDataProcessing: true, // Default to enable data processing
+        };
+      });
+    } else {
+      setPipelineInfo((prev) => {
+        return {
+          ...prev,
+          enableDataProcessing: false, // disabled all data processing
+        };
+      });
+    }
+  };
+
+  const findServiceAvailability = (
+    data: ServiceAvailableResponse[],
+    serviceName: string
+  ) => {
+    return (
+      data.find((element) => element.service === serviceName)?.available ??
+      false
+    );
+  };
+
   const validServiceAvailable = async (region: string) => {
     if (region) {
       // Reset Error Message
@@ -577,21 +764,20 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
           await checkServicesAvailable({ region });
         if (success && data) {
           // Set Service available
-          const agaAvailable =
-            data.find((element) => element.service === 'global-accelerator')
-              ?.available || false;
-          const emrAvailable =
-            data.find((element) => element.service === 'emr-serverless')
-              ?.available || false;
-          const redshiftServerlessAvailable =
-            data.find((element) => element.service === 'redshift-serverless')
-              ?.available || false;
-          const mskAvailable =
-            data.find((element) => element.service === 'msk')?.available ||
-            false;
-          const quickSightAvailable =
-            data.find((element) => element.service === 'quicksight')
-              ?.available || false;
+          const agaAvailable = findServiceAvailability(
+            data,
+            'global-accelerator'
+          );
+          const emrAvailable = findServiceAvailability(data, 'emr-serverless');
+          const redshiftServerlessAvailable = findServiceAvailability(
+            data,
+            'redshift-serverless'
+          );
+          const mskAvailable = findServiceAvailability(data, 'msk');
+          const quickSightAvailable = findServiceAvailability(
+            data,
+            'quicksight'
+          );
           if (update) {
             setPipelineInfo((prev) => {
               return {
@@ -670,116 +856,11 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                 };
               });
             }
-
-            // Set QuickSight disabled
-            if (quickSightAvailable) {
-              // Set QuickSight Default Enable when QuickSight Available
-              setPipelineInfo((prev) => {
-                return {
-                  ...prev,
-                  enableReporting: true,
-                };
-              });
-            } else {
-              setPipelineInfo((prev) => {
-                return {
-                  ...prev,
-                  enableReporting: false,
-                };
-              });
-            }
-
-            // Set AGA disabled
-            if (!agaAvailable) {
-              // Set AGA Disabled when AGA Not Available
-              setPipelineInfo((prev) => {
-                return {
-                  ...prev,
-                  ingestionServer: {
-                    ...prev.ingestionServer,
-                    loadBalancer: {
-                      ...prev.ingestionServer.loadBalancer,
-                      enableGlobalAccelerator: false,
-                    },
-                  },
-                };
-              });
-            }
-
-            // Set MSK Disable and Apache Kafka connector Disabled
-            if (mskAvailable) {
-              setPipelineInfo((prev) => {
-                return {
-                  ...prev,
-                  kafkaSelfHost: false, // Change to MSK as default
-                  enableDataProcessing: true, // enable data processing
-                  ingestionServer: {
-                    ...prev.ingestionServer,
-                    sinkKafka: {
-                      ...prev.ingestionServer.sinkKafka,
-                      kafkaConnector: {
-                        enable: true,
-                      },
-                    },
-                  },
-                };
-              });
-            } else {
-              setPipelineInfo((prev) => {
-                return {
-                  ...prev,
-                  kafkaSelfHost: true, // Change to self hosted as default
-                  enableDataProcessing: ternary(
-                    pipelineInfo.ingestionServer.sinkType === SinkType.MSK,
-                    false,
-                    true
-                  ), // disabled all data processing when sink type is MSK and MSK not available
-                  ingestionServer: {
-                    ...prev.ingestionServer,
-                    sinkKafka: {
-                      ...prev.ingestionServer.sinkKafka,
-                      kafkaConnector: {
-                        enable: false,
-                      },
-                    },
-                  },
-                };
-              });
-            }
-
-            // Set redshift serverless Disabled
-            if (redshiftServerlessAvailable) {
-              setPipelineInfo((prev) => {
-                return {
-                  ...prev,
-                  redshiftType: 'serverless', // change to serverless as default
-                };
-              });
-            } else {
-              setPipelineInfo((prev) => {
-                return {
-                  ...prev,
-                  redshiftType: 'provisioned', // change to provisioned as default
-                };
-              });
-            }
-
-            // Set data processing Disabled when emr-serverless not available
-            if (emrAvailable) {
-              setPipelineInfo((prev) => {
-                return {
-                  ...prev,
-                  enableDataProcessing: true, // Default to enable data processing
-                };
-              });
-            } else {
-              setPipelineInfo((prev) => {
-                return {
-                  ...prev,
-                  enableDataProcessing: false, // disabled all data processing
-                };
-              });
-            }
+            setQuickSightStatus(quickSightAvailable);
+            setAGAStatus(agaAvailable);
+            setMSKStatus(mskAvailable);
+            setRedshiftStatus(redshiftServerlessAvailable);
+            setDataProcessorStatus(emrAvailable);
           }
         }
         setLoadingServiceAvailable(false);

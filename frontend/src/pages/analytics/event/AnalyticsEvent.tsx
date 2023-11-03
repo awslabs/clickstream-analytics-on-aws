@@ -54,7 +54,12 @@ import {
   ExploreGroupColumn,
   QuickSightChartType,
 } from 'ts/explore-types';
-import { alertMsg, defaultStr, generateStr, getEventParameters } from 'ts/utils';
+import {
+  alertMsg,
+  defaultStr,
+  generateStr,
+  getEventParameters,
+} from 'ts/utils';
 import {
   getDashboardCreateParameters,
   getDateRange,
@@ -449,10 +454,10 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
                 }}
                 changeCurCategoryOption={(eventIndex, category) => {
                   const eventName = category?.name;
-                    const eventParameters = getEventParameters(
-                      metadataEvents,
-                      eventName
-                    );
+                  const eventParameters = getEventParameters(
+                    metadataEvents,
+                    eventName
+                  );
                   const parameterOption = parametersConvertToCategoryItemType(
                     metadataUserAttributes,
                     eventParameters

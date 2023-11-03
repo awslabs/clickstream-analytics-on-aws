@@ -26,10 +26,14 @@ import PipelineStatus from 'components/pipeline/PipelineStatus';
 import moment from 'moment';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { COMMON_ALERT_TYPE, EPipelineStatus, SDK_LIST, TIME_FORMAT } from 'ts/const';
+import {
+  COMMON_ALERT_TYPE,
+  EPipelineStatus,
+  SDK_LIST,
+  TIME_FORMAT,
+} from 'ts/const';
 import { buildS3Link, buildVPCLink } from 'ts/url';
-import { alertMsg } from 'ts/utils';
-import { defaultStr } from 'ts/utils';
+import { alertMsg, defaultStr } from 'ts/utils';
 
 interface BasicInfoProps {
   pipelineInfo?: IPipeline;
@@ -54,7 +58,7 @@ const BasicInfo: React.FC<BasicInfoProps> = (props: BasicInfoProps) => {
       }
     }
     return true;
-  }
+  };
 
   const startRetryPipeline = async () => {
     if (!checkStackRollbackFailed()) {
@@ -63,7 +67,7 @@ const BasicInfo: React.FC<BasicInfoProps> = (props: BasicInfoProps) => {
         COMMON_ALERT_TYPE.Error as AlertType
       );
       return;
-    };
+    }
     setLoadingRetry(true);
     try {
       const resData: ApiResponse<null> = await retryPipeline({
