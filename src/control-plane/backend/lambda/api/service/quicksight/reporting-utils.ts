@@ -32,7 +32,7 @@ import {
 import { AssumeRoleCommand, STSClient } from '@aws-sdk/client-sts';
 import Mustache from 'mustache';
 import { v4 as uuidv4 } from 'uuid';
-import { DataSetProps, dataSetActions } from './dashboard-ln';
+import { DataSetProps, dataSetPermissionActions } from './dashboard-ln';
 import { EventAndCondition } from './sql-builder';
 import { AnalysisType, ExploreConversionIntervalType, ExploreLocales, ExplorePathNodeType, ExplorePathSessionDef, ExploreRelativeTimeUnit, ExploreRequestAction, ExploreTimeScopeType, ExploreVisualName, MetadataValueType, QuickSightChartType } from '../../common/explore-types';
 import { logger } from '../../common/powertools';
@@ -329,7 +329,7 @@ export const createDataSet = async (quickSight: QuickSight, awsAccountId: string
       Name: `${props.name}dataset-${datasetId}`,
       Permissions: [{
         Principal: principalArn,
-        Actions: dataSetActions,
+        Actions: dataSetPermissionActions,
       }],
 
       ImportMode: props.importMode,
