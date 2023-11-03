@@ -62,14 +62,14 @@ const MOCK_EVENT = {
 };
 
 const MOCK_EVENT_PARAMETER = {
-  id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}#${ConditionCategory.EVENT}#${MOCK_EVENT_PARAMETER_NAME}#${MetadataValueType.STRING}`,
+  id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}#${MOCK_EVENT_PARAMETER_NAME}#${MetadataValueType.STRING}`,
   month: '#202301',
   prefix: `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
   projectId: MOCK_PROJECT_ID,
   appId: MOCK_APP_ID,
   name: MOCK_EVENT_PARAMETER_NAME,
   eventName: MOCK_EVENT_NAME,
-  category: ConditionCategory.EVENT,
+  category: 'event',
   valueType: MetadataValueType.STRING,
   day1: {
     hasData: true,
@@ -123,13 +123,13 @@ const MOCK_EVENT_PARAMETER = {
 };
 
 const MOCK_USER_ATTRIBUTE = {
-  id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${ConditionCategory.USER_OUTER}#${MOCK_USER_ATTRIBUTE_NAME}#${MetadataValueType.STRING}`,
+  id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_USER_ATTRIBUTE_NAME}#${MetadataValueType.STRING}`,
   month: '#202301',
   prefix: `USER_ATTRIBUTE#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
   projectId: MOCK_PROJECT_ID,
   appId: MOCK_APP_ID,
   name: MOCK_USER_ATTRIBUTE_NAME,
-  category: ConditionCategory.USER_OUTER,
+  category: 'user',
   valueType: MetadataValueType.STRING,
   day1: {
     hasData: true,
@@ -210,7 +210,7 @@ function displayDataMock(m: any) {
         },
       },
       {
-        id: `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}#${ConditionCategory.EVENT}#${MOCK_EVENT_PARAMETER_NAME}#${MetadataValueType.STRING}`,
+        id: `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}#${MOCK_EVENT_PARAMETER_NAME}#${MetadataValueType.STRING}`,
         projectId: MOCK_PROJECT_ID,
         appId: MOCK_APP_ID,
         displayName: `display name of event parameter ${MOCK_EVENT_PARAMETER_NAME}(String)`,
@@ -220,25 +220,25 @@ function displayDataMock(m: any) {
         },
       },
       {
-        id: `DICTIONARY#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${ConditionCategory.EVENT}#${MOCK_EVENT_PARAMETER_NAME}#${MetadataValueType.STRING}#value-02`,
+        id: `DICTIONARY#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_PARAMETER_NAME}#${MetadataValueType.STRING}#value-02`,
         projectId: MOCK_PROJECT_ID,
         appId: MOCK_APP_ID,
         displayName: `display name of dictionary ${MOCK_EVENT_PARAMETER_NAME}(String) value-02`,
       },
       {
-        id: `DICTIONARY#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${ConditionCategory.EVENT}#${MOCK_EVENT_PARAMETER_NAME}11#${MetadataValueType.INTEGER}#value-01`,
+        id: `DICTIONARY#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_PARAMETER_NAME}11#${MetadataValueType.INTEGER}#value-01`,
         projectId: MOCK_PROJECT_ID,
         appId: MOCK_APP_ID,
         displayName: `display name of dictionary ${MOCK_EVENT_PARAMETER_NAME}11(Integer) value-01`,
       },
       {
-        id: `DICTIONARY#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${ConditionCategory.EVENT}#${MOCK_EVENT_PARAMETER_NAME}12#${MetadataValueType.DOUBLE}#value-03`,
+        id: `DICTIONARY#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_PARAMETER_NAME}12#${MetadataValueType.DOUBLE}#value-03`,
         projectId: MOCK_PROJECT_ID,
         appId: MOCK_APP_ID,
         displayName: `display name of dictionary ${MOCK_EVENT_PARAMETER_NAME}12(Double) value-03`,
       },
       {
-        id: `USER_ATTRIBUTE#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${ConditionCategory.USER_OUTER}#${MOCK_USER_ATTRIBUTE_NAME}#${MetadataValueType.STRING}`,
+        id: `USER_ATTRIBUTE#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_USER_ATTRIBUTE_NAME}#${MetadataValueType.STRING}`,
         projectId: MOCK_PROJECT_ID,
         appId: MOCK_APP_ID,
         displayName: `display name of user parameter ${MOCK_USER_ATTRIBUTE_NAME}`,
@@ -248,7 +248,7 @@ function displayDataMock(m: any) {
         },
       },
       {
-        id: `DICTIONARY#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${ConditionCategory.USER_OUTER}#${MOCK_USER_ATTRIBUTE_NAME}#${MetadataValueType.STRING}#value-02`,
+        id: `DICTIONARY#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_USER_ATTRIBUTE_NAME}#${MetadataValueType.STRING}#value-02`,
         projectId: MOCK_PROJECT_ID,
         appId: MOCK_APP_ID,
         displayName: `display name of dictionary ${MOCK_USER_ATTRIBUTE_NAME}(String) value-02`,
@@ -279,7 +279,6 @@ function displayDataMock(m: any) {
             name: MOCK_EVENT_PARAMETER_NAME,
             eventName: MOCK_EVENT_NAME,
             dataType: MetadataValueType.STRING,
-            category: ConditionCategory.EVENT,
             description: {
               'en-US': 'mock preset event parameter description in built-in',
               'zh-CN': '内置事件参数的描述',
@@ -290,7 +289,6 @@ function displayDataMock(m: any) {
           {
             name: MOCK_EVENT_PARAMETER_NAME,
             dataType: MetadataValueType.STRING,
-            category: ConditionCategory.GEO,
             description: {
               'en-US': 'mock public event parameter description in built-in',
               'zh-CN': '内置事件参数的描述',
@@ -299,7 +297,6 @@ function displayDataMock(m: any) {
           {
             name: `${MOCK_EVENT_PARAMETER_NAME}11`,
             dataType: MetadataValueType.INTEGER,
-            category: ConditionCategory.DEVICE,
             description: {
               'en-US': 'mock public event parameter description in built-in',
               'zh-CN': '内置事件参数的描述',
@@ -310,7 +307,6 @@ function displayDataMock(m: any) {
           {
             name: MOCK_USER_ATTRIBUTE_NAME,
             dataType: MetadataValueType.STRING,
-            category: ConditionCategory.USER_OUTER,
             description: {
               'en-US': 'mock preset user attribute description in built-in',
               'zh-CN': '内置用户属性的描述',
@@ -320,6 +316,27 @@ function displayDataMock(m: any) {
       },
     },
   });
+}
+
+function getAllEventParametersInput() {
+  const lastDay = `day${new Date().getDate() - 1}`;
+  const allEventParametersInput: QueryCommandInput = {
+    TableName: analyticsMetadataTable,
+    IndexName: prefixMonthGSIName,
+    KeyConditionExpression: '#prefix= :prefix',
+    ProjectionExpression: `#id, #month, #prefix, projectId, appId, #name, eventName, category, valueType, ${lastDay}, summary`,
+    ExpressionAttributeNames: {
+      '#prefix': 'prefix',
+      '#id': 'id',
+      '#month': 'month',
+      '#name': 'name',
+    },
+    ExpressionAttributeValues: {
+      ':prefix': `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
+    },
+    ScanIndexForward: false,
+  };
+  return allEventParametersInput;
 }
 
 describe('Metadata Event test', () => {
@@ -356,18 +373,8 @@ describe('Metadata Event test', () => {
         MOCK_EVENT,
       ],
     });
-    ddbMock.on(QueryCommand, {
-      TableName: analyticsMetadataTable,
-      IndexName: prefixMonthGSIName,
-      KeyConditionExpression: '#prefix= :prefix',
-      ExpressionAttributeNames: {
-        '#prefix': 'prefix',
-      },
-      ExpressionAttributeValues: {
-        ':prefix': `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
-      },
-      ScanIndexForward: false,
-    }).resolves({
+
+    ddbMock.on(QueryCommand, getAllEventParametersInput()).resolves({
       Items: [
         MOCK_EVENT_PARAMETER,
         {
@@ -393,16 +400,16 @@ describe('Metadata Event test', () => {
         month: '#202303',
         associatedParameters: [
           {
-            id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}#${ConditionCategory.EVENT}#${MOCK_EVENT_PARAMETER_NAME}#${MetadataValueType.STRING}`,
+            id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}#${MOCK_EVENT_PARAMETER_NAME}#${MetadataValueType.STRING}`,
             month: '#202303',
             prefix: `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
             projectId: MOCK_PROJECT_ID,
             appId: MOCK_APP_ID,
-            category: ConditionCategory.EVENT,
+            category: 'event',
             metadataSource: MetadataSource.PRESET,
             name: MOCK_EVENT_PARAMETER_NAME,
             eventName: MOCK_EVENT_NAME,
-            displayName: `${ConditionCategory.EVENT}.${MOCK_EVENT_PARAMETER_NAME}`,
+            displayName: MOCK_EVENT_PARAMETER_NAME,
             description: {
               'en-US': 'mock preset event parameter description in built-in',
               'zh-CN': '内置事件参数的描述',
@@ -463,7 +470,7 @@ describe('Metadata Event test', () => {
         month: '#202303',
         associatedParameters: [
           {
-            id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}#${ConditionCategory.EVENT}#${MOCK_EVENT_PARAMETER_NAME}#${MetadataValueType.STRING}`,
+            id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}#${MOCK_EVENT_PARAMETER_NAME}#${MetadataValueType.STRING}`,
             month: '#202303',
             prefix: `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
             projectId: MOCK_PROJECT_ID,
@@ -472,7 +479,7 @@ describe('Metadata Event test', () => {
             metadataSource: MetadataSource.PRESET,
             name: MOCK_EVENT_PARAMETER_NAME,
             eventName: MOCK_EVENT_NAME,
-            displayName: `${ConditionCategory.EVENT}.${MOCK_EVENT_PARAMETER_NAME}`,
+            displayName: MOCK_EVENT_PARAMETER_NAME,
             description: {
               'en-US': 'mock preset event parameter description in built-in',
               'zh-CN': '内置事件参数的描述',
@@ -484,16 +491,16 @@ describe('Metadata Event test', () => {
             values: [],
           },
           {
-            id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}#${ConditionCategory.DEVICE}#${MOCK_EVENT_PARAMETER_NAME}11#${MetadataValueType.INTEGER}`,
+            id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}#${MOCK_EVENT_PARAMETER_NAME}11#${MetadataValueType.INTEGER}`,
             month: '#202303',
             prefix: `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
             projectId: MOCK_PROJECT_ID,
             appId: MOCK_APP_ID,
-            category: ConditionCategory.DEVICE,
+            category: ConditionCategory.EVENT,
             metadataSource: MetadataSource.CUSTOM,
             name: `${MOCK_EVENT_PARAMETER_NAME}11`,
             eventName: MOCK_EVENT_NAME,
-            displayName: `${ConditionCategory.DEVICE}.${MOCK_EVENT_PARAMETER_NAME}11`,
+            displayName: `${MOCK_EVENT_PARAMETER_NAME}11`,
             description: {
               'en-US': '',
               'zh-CN': '',
@@ -849,7 +856,7 @@ describe('Metadata Event test', () => {
                 metadataSource: MetadataSource.CUSTOM,
                 name: `${MOCK_EVENT_PARAMETER_NAME}11`,
                 eventName: `${MOCK_EVENT_NAME}1`,
-                displayName: `${ConditionCategory.EVENT}.${MOCK_EVENT_PARAMETER_NAME}11`,
+                displayName: `${MOCK_EVENT_PARAMETER_NAME}11`,
                 description: {
                   'en-US': '',
                   'zh-CN': '',
@@ -857,7 +864,7 @@ describe('Metadata Event test', () => {
                 parameterType: MetadataParameterType.PUBLIC,
                 platform: [MetadataPlatform.ANDROID],
                 valueType: MetadataValueType.INTEGER,
-                category: ConditionCategory.EVENT,
+                category: 'event',
                 values: [
                   { value: 'value-02', displayValue: 'value-02' },
                   { value: 'value-01', displayValue: `display name of dictionary ${MOCK_EVENT_PARAMETER_NAME}11(Integer) value-01` },
@@ -873,7 +880,7 @@ describe('Metadata Event test', () => {
                 metadataSource: MetadataSource.CUSTOM,
                 name: `${MOCK_EVENT_PARAMETER_NAME}12`,
                 eventName: `${MOCK_EVENT_NAME}1`,
-                displayName: `${ConditionCategory.EVENT}.${MOCK_EVENT_PARAMETER_NAME}12`,
+                displayName: `${MOCK_EVENT_PARAMETER_NAME}12`,
                 description: {
                   'en-US': '',
                   'zh-CN': '',
@@ -881,7 +888,7 @@ describe('Metadata Event test', () => {
                 parameterType: MetadataParameterType.PRIVATE,
                 platform: [MetadataPlatform.IOS],
                 valueType: MetadataValueType.DOUBLE,
-                category: ConditionCategory.EVENT,
+                category: 'event',
                 values: [
                   { value: 'value-03', displayValue: `display name of dictionary ${MOCK_EVENT_PARAMETER_NAME}12(Double) value-03` },
                 ],
@@ -1023,10 +1030,6 @@ describe('Metadata Event test', () => {
     });
   });
 
-  afterEach(() => {
-    server.close();
-  });
-
   afterAll((done) => {
     server.close();
     done();
@@ -1037,29 +1040,20 @@ describe('Metadata Event Attribute test', () => {
   beforeEach(() => {
     ddbMock.reset();
     displayDataMock(ddbMock);
-    jest
-      .useFakeTimers()
-      .setSystemTime(new Date('2023-03-02'));
   });
   it('Get metadata event attribute by name', async () => {
-    const lastDay = `day${new Date().getDate() - 1}`;
-    const input: QueryCommandInput = {
+    ddbMock.on(QueryCommand, {
       TableName: analyticsMetadataTable,
       IndexName: prefixMonthGSIName,
       KeyConditionExpression: '#prefix= :prefix',
-      ProjectionExpression: `#id, #month, #prefix, projectId, appId, #name, eventName, category, valueType, ${lastDay}, summary`,
       ExpressionAttributeNames: {
         '#prefix': 'prefix',
-        '#id': 'id',
-        '#month': 'month',
-        '#name': 'name',
       },
       ExpressionAttributeValues: {
         ':prefix': `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
       },
       ScanIndexForward: false,
-    };
-    ddbMock.on(QueryCommand, input).resolves({
+    }).resolves({
       Items: [
         {
           ...MOCK_EVENT_PARAMETER,
@@ -1143,7 +1137,7 @@ describe('Metadata Event Attribute test', () => {
             },
           },
         ],
-        id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}#${ConditionCategory.EVENT}#${MOCK_EVENT_PARAMETER_NAME}#${MetadataValueType.STRING}`,
+        id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}#${MOCK_EVENT_PARAMETER_NAME}#${MetadataValueType.STRING}`,
         month: '#202302',
         prefix: `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
         projectId: MOCK_PROJECT_ID,
@@ -1153,9 +1147,9 @@ describe('Metadata Event Attribute test', () => {
           'en-US': 'mock preset event parameter description in built-in',
           'zh-CN': '内置事件参数的描述',
         },
-        displayName: `${ConditionCategory.EVENT}.${MOCK_EVENT_PARAMETER_NAME}`,
+        displayName: MOCK_EVENT_PARAMETER_NAME,
         eventName: '',
-        category: ConditionCategory.EVENT,
+        category: 'event',
         metadataSource: MetadataSource.PRESET,
         parameterType: MetadataParameterType.PUBLIC,
         hasData: true,
@@ -1183,6 +1177,9 @@ describe('Metadata Event Attribute test', () => {
     });
   });
   it('Get metadata event attribute by name when no data in DDB', async () => {
+    jest
+      .useFakeTimers()
+      .setSystemTime(new Date('2023-03-02'));
     ddbMock.on(QueryCommand, {
       TableName: analyticsMetadataTable,
       IndexName: prefixMonthGSIName,
@@ -1220,7 +1217,7 @@ describe('Metadata Event Attribute test', () => {
             },
           },
         ],
-        id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}#${ConditionCategory.EVENT}#${MOCK_EVENT_PARAMETER_NAME}#${MetadataValueType.STRING}`,
+        id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}#${MOCK_EVENT_PARAMETER_NAME}#${MetadataValueType.STRING}`,
         month: '#202303',
         prefix: `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
         projectId: MOCK_PROJECT_ID,
@@ -1230,7 +1227,7 @@ describe('Metadata Event Attribute test', () => {
           'en-US': 'mock preset event parameter description in built-in',
           'zh-CN': '内置事件参数的描述',
         },
-        displayName: `${ConditionCategory.EVENT}.${MOCK_EVENT_PARAMETER_NAME}`,
+        displayName: MOCK_EVENT_PARAMETER_NAME,
         eventName: '',
         category: ConditionCategory.EVENT,
         metadataSource: MetadataSource.PRESET,
@@ -1305,7 +1302,7 @@ describe('Metadata Event Attribute test', () => {
         },
         {
           ...MOCK_EVENT_PARAMETER,
-          id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}1#${ConditionCategory.EVENT}#${MOCK_EVENT_PARAMETER_NAME}1#${MetadataValueType.FLOAT}`,
+          id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}1#${MOCK_EVENT_PARAMETER_NAME}1#${MetadataValueType.FLOAT}`,
           month: '#202306',
           name: `${MOCK_EVENT_PARAMETER_NAME}1`,
           eventName: `${MOCK_EVENT_NAME}1`,
@@ -1338,7 +1335,7 @@ describe('Metadata Event Attribute test', () => {
         items: [
           {
             associatedEvents: [],
-            id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}#${ConditionCategory.EVENT}#${MOCK_EVENT_PARAMETER_NAME}#${MetadataValueType.STRING}`,
+            id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}#${MOCK_EVENT_PARAMETER_NAME}#${MetadataValueType.STRING}`,
             month: '#202302',
             prefix: `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
             projectId: MOCK_PROJECT_ID,
@@ -1348,9 +1345,9 @@ describe('Metadata Event Attribute test', () => {
               'en-US': 'mock preset event parameter description in built-in',
               'zh-CN': '内置事件参数的描述',
             },
-            displayName: `${ConditionCategory.EVENT}.${MOCK_EVENT_PARAMETER_NAME}`,
+            displayName: MOCK_EVENT_PARAMETER_NAME,
             eventName: MOCK_EVENT_NAME,
-            category: ConditionCategory.EVENT,
+            category: 'event',
             metadataSource: MetadataSource.PRESET,
             parameterType: MetadataParameterType.PUBLIC,
             hasData: true,
@@ -1364,7 +1361,7 @@ describe('Metadata Event Attribute test', () => {
           },
           {
             associatedEvents: [],
-            id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}1#${ConditionCategory.EVENT}#${MOCK_EVENT_PARAMETER_NAME}1#${MetadataValueType.FLOAT}`,
+            id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}1#${MOCK_EVENT_PARAMETER_NAME}1#${MetadataValueType.FLOAT}`,
             month: '#202306',
             prefix: `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
             projectId: MOCK_PROJECT_ID,
@@ -1374,9 +1371,9 @@ describe('Metadata Event Attribute test', () => {
               'en-US': '',
               'zh-CN': '',
             },
-            displayName: `${ConditionCategory.EVENT}.${MOCK_EVENT_PARAMETER_NAME}1`,
+            displayName: `${MOCK_EVENT_PARAMETER_NAME}1`,
             eventName: `${MOCK_EVENT_NAME}1`,
-            category: ConditionCategory.EVENT,
+            category: 'event',
             metadataSource: MetadataSource.CUSTOM,
             parameterType: MetadataParameterType.PRIVATE,
             hasData: false,
@@ -1433,7 +1430,7 @@ describe('Metadata Event Attribute test', () => {
         items: [
           {
             associatedEvents: [],
-            id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}#${ConditionCategory.EVENT}#${MOCK_EVENT_PARAMETER_NAME}#${MetadataValueType.STRING}`,
+            id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}#${MOCK_EVENT_PARAMETER_NAME}#${MetadataValueType.STRING}`,
             month: '#202302',
             prefix: `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
             projectId: MOCK_PROJECT_ID,
@@ -1443,7 +1440,7 @@ describe('Metadata Event Attribute test', () => {
               'en-US': 'mock preset event parameter description in built-in',
               'zh-CN': '内置事件参数的描述',
             },
-            displayName: `${ConditionCategory.EVENT}.${MOCK_EVENT_PARAMETER_NAME}`,
+            displayName: MOCK_EVENT_PARAMETER_NAME,
             eventName: MOCK_EVENT_NAME,
             category: ConditionCategory.EVENT,
             metadataSource: MetadataSource.PRESET,
@@ -1455,7 +1452,7 @@ describe('Metadata Event Attribute test', () => {
           },
           {
             associatedEvents: [],
-            id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}#${ConditionCategory.DEVICE}#${MOCK_EVENT_PARAMETER_NAME}11#${MetadataValueType.INTEGER}`,
+            id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}#${MOCK_EVENT_PARAMETER_NAME}11#${MetadataValueType.INTEGER}`,
             month: '#202302',
             prefix: `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
             projectId: MOCK_PROJECT_ID,
@@ -1465,9 +1462,9 @@ describe('Metadata Event Attribute test', () => {
               'en-US': '',
               'zh-CN': '',
             },
-            displayName: `${ConditionCategory.DEVICE}.${MOCK_EVENT_PARAMETER_NAME}11`,
+            displayName: `${MOCK_EVENT_PARAMETER_NAME}11`,
             eventName: `${MOCK_EVENT_NAME}`,
-            category: ConditionCategory.DEVICE,
+            category: ConditionCategory.EVENT,
             metadataSource: MetadataSource.CUSTOM,
             parameterType: MetadataParameterType.PUBLIC,
             hasData: false,
@@ -1562,7 +1559,7 @@ describe('Metadata User Attribute test', () => {
         },
         {
           ...MOCK_USER_ATTRIBUTE,
-          id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${ConditionCategory.USER_OUTER}#${MOCK_USER_ATTRIBUTE_NAME}1#${MetadataValueType.FLOAT}`,
+          id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_USER_ATTRIBUTE_NAME}1#${MetadataValueType.FLOAT}`,
           month: '#202312',
           name: `${MOCK_USER_ATTRIBUTE_NAME}1`,
           valueType: MetadataValueType.FLOAT,
@@ -1589,7 +1586,7 @@ describe('Metadata User Attribute test', () => {
       data: {
         items: [
           {
-            id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${ConditionCategory.USER_OUTER}#${MOCK_USER_ATTRIBUTE_NAME}#${MetadataValueType.STRING}`,
+            id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_USER_ATTRIBUTE_NAME}#${MetadataValueType.STRING}`,
             month: '#202302',
             prefix: `USER_ATTRIBUTE#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
             projectId: MOCK_PROJECT_ID,
@@ -1600,7 +1597,7 @@ describe('Metadata User Attribute test', () => {
               'zh-CN': '内置用户属性的描述',
             },
             displayName: 'display name of user parameter user-attribute-mock',
-            category: ConditionCategory.USER_OUTER,
+            category: ConditionCategory.USER,
             hasData: true,
             metadataSource: MetadataSource.PRESET,
             valueType: MetadataValueType.STRING,
@@ -1611,7 +1608,7 @@ describe('Metadata User Attribute test', () => {
             ],
           },
           {
-            id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${ConditionCategory.USER_OUTER}#${MOCK_USER_ATTRIBUTE_NAME}1#${MetadataValueType.FLOAT}`,
+            id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_USER_ATTRIBUTE_NAME}1#${MetadataValueType.FLOAT}`,
             month: '#202312',
             prefix: `USER_ATTRIBUTE#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
             projectId: MOCK_PROJECT_ID,
@@ -1621,8 +1618,8 @@ describe('Metadata User Attribute test', () => {
               'en-US': '',
               'zh-CN': '',
             },
-            displayName: `${ConditionCategory.USER_OUTER}.${MOCK_USER_ATTRIBUTE_NAME}1`,
-            category: ConditionCategory.USER_OUTER,
+            displayName: `${MOCK_USER_ATTRIBUTE_NAME}1`,
+            category: ConditionCategory.USER,
             metadataSource: MetadataSource.CUSTOM,
             valueType: MetadataValueType.FLOAT,
             hasData: false,
@@ -1676,7 +1673,7 @@ describe('Metadata User Attribute test', () => {
       data: {
         items: [
           {
-            id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${ConditionCategory.USER_OUTER}#${MOCK_USER_ATTRIBUTE_NAME}#${MetadataValueType.STRING}`,
+            id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_USER_ATTRIBUTE_NAME}#${MetadataValueType.STRING}`,
             month: '#202302',
             prefix: `USER_ATTRIBUTE#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
             projectId: MOCK_PROJECT_ID,
@@ -1687,7 +1684,7 @@ describe('Metadata User Attribute test', () => {
               'zh-CN': '内置用户属性的描述',
             },
             displayName: 'display name of user parameter user-attribute-mock',
-            category: ConditionCategory.USER_OUTER,
+            category: ConditionCategory.USER,
             hasData: false,
             metadataSource: MetadataSource.PRESET,
             valueType: MetadataValueType.STRING,

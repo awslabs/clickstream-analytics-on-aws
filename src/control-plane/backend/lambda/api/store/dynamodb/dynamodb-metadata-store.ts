@@ -114,7 +114,7 @@ export class DynamoDbMetadataStore implements MetadataStore {
       ExpressionAttributeValues: {
         ':prefix': `EVENT_PARAMETER#${projectId}#${appId}`,
       },
-      ScanIndexForward: true,
+      ScanIndexForward: false,
     };
     let records = await memoizedQuery(input) as IMetadataRaw[];
     if (records.length === 0) {
