@@ -30,6 +30,8 @@ const sfnClient = new SFNClient({
   ...aws_sdk_client_common_config,
 });
 
+interface TableCountInfo { tableName: string; countNew: number; countEnQ: number; countProcessing: number }
+
 export const handler = async (event: {
   execution_id: string;
   eventBucketName: string;
@@ -51,9 +53,13 @@ export const handler = async (event: {
   const eventBucketWithPrefix = `${event.eventBucketName}/${event.eventPrefix}`;
   const odsTableNames = REDSHIFT_TABLE_NAMES;
 
+
   const filesCountInfo = [];
+  let pendingCount = 0;
   for (const odsTableName of odsTableNames) {
-    filesCountInfo.push(await getCountForOdsTable(odsTableName, eventBucketWithPrefix));
+    const tableCountInfo = await getCountForOdsTable(odsTableName, eventBucketWithPrefix);
+    filesCountInfo.push(tableCountInfo);
+    pendingCount += tableCountInfo.countEnQ + tableCountInfo.countProcessing + tableCountInfo.countNew;
   }
 
   let hasRunningWorkflow = false;
@@ -78,13 +84,15 @@ export const handler = async (event: {
 
   const data = {
     HasRunningWorkflow: hasRunningWorkflow,
+    PendingCount: pendingCount,
     FilesCountInfo: filesCountInfo,
+    SkipRunningWorkflow: hasRunningWorkflow || pendingCount == 0,
   };
   logger.info('return data', { data });
   return data;
 };
 
-async function getCountForOdsTable(odsTableName: string, eventBucketWithPrefix: string) {
+async function getCountForOdsTable(odsTableName: string, eventBucketWithPrefix: string): Promise<TableCountInfo> {
   const ddbTableName = DYNAMODB_TABLE_NAME;
   const ddbIndexName = DYNAMODB_TABLE_INDEX_NAME;
 

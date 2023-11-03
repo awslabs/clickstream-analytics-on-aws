@@ -156,9 +156,9 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
 
   private createWorkflow(ddbTable: ITable, props: LoadOdsDataToRedshiftWorkflowProps, copyRole: IRole): IStateMachine {
 
-    const hasRunningWorkflowFn = this.createCheckHasRunningWorkflowFn(ddbTable, props);
-    const checkHasRunningWorkflow = new LambdaInvoke(this, `${this.node.id} - Check Other Running Workflow`, {
-      lambdaFunction: hasRunningWorkflowFn,
+    const skipRunningWorkflowFn = this.createCheckSkippingRunningWorkflowFn(ddbTable, props);
+    const checkSkippingRunningWorkflow = new LambdaInvoke(this, `${this.node.id} - Check Skipping Running Workflow`, {
+      lambdaFunction: skipRunningWorkflowFn,
       payload: TaskInput.fromObject({
         'execution_id.$': '$$.Execution.Id',
         'eventBucketName': props.tablesOdsSource.event.s3Bucket.bucketName,
@@ -167,7 +167,7 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
       outputPath: '$.Payload',
     });
 
-    checkHasRunningWorkflow.addRetry({
+    checkSkippingRunningWorkflow.addRetry({
       errors: ['Lambda.TooManyRequestsException'],
       interval: Duration.seconds(3),
       backoffRate: 2,
@@ -205,6 +205,7 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
             'appId.$': '$.appId',
             'manifestFileName.$': '$.manifestFileName',
             'jobList.$': '$.jobList',
+            'retryCount.$': '$.retryCount',
           },
         }),
         outputPath: '$.Payload',
@@ -249,13 +250,18 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
 
       const finalStatus = new Pass(this, `${odsTableName} - Job completes`);
 
+      const waitAndRetry = new Wait(this, `${odsTableName} - Wait and Retry`, {
+        time: WaitTime.duration(Duration.seconds(120)),
+      }).next(submitJob);
+
       // Create sub chain
       const subDefinition = submitJob
         .next(waitX)
         .next(checkJobStatus)
         .next(new Choice(this, `${odsTableName} - Check if job completes`)
           // Look at the "status" field
-          .when(Condition.stringEquals('$.detail.status', 'FAILED'), jobFailed)
+          .when(Condition.and(Condition.stringEquals('$.detail.status', 'FAILED'), Condition.booleanEquals('$.detail.retry', false)), jobFailed)
+          .when(Condition.and(Condition.stringEquals('$.detail.status', 'FAILED'), Condition.booleanEquals('$.detail.retry', true)), waitAndRetry)
           .when(Condition.stringEquals('$.detail.status', 'ABORTED'), jobFailed)
           .when(Condition.stringEquals('$.detail.status', 'FINISHED'), finalStatus)
           .when(Condition.stringEquals('$.detail.status', 'NO_JOBS'), finalStatus)
@@ -265,7 +271,7 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
         this,
         `${odsTableName} - Do load job`,
         {
-          maxConcurrency: 2,
+          maxConcurrency: 1,
           itemsPath: '$.manifestList',
         },
       );
@@ -360,11 +366,11 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
 
     const ignoreRunFlow = new Pass(this, `${this.node.id} - Ignore Running`).next(allCompleted);
 
-    const hasRunningWorkflowChoice = new Choice(this, `${this.node.id} - Has Other Running Workflow`)
-      .when(Condition.booleanEquals('$.HasRunningWorkflow', false), parallelLoadBranch.next(nexTaskExecChain))
-      .otherwise(ignoreRunFlow);
+    const skipRunningWorkflowChoice = new Choice(this, `${this.node.id} - Skip Running Workflow`)
+      .when(Condition.booleanEquals('$.SkipRunningWorkflow', true), ignoreRunFlow)
+      .otherwise(parallelLoadBranch.next(nexTaskExecChain));
 
-    const definition = checkHasRunningWorkflow.next(hasRunningWorkflowChoice);
+    const definition = checkSkippingRunningWorkflow.next(skipRunningWorkflowChoice);
 
     // Create state machine
     const loadDataStateMachine = new StateMachine(this, 'LoadDataStateMachine', {
@@ -380,7 +386,7 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
       tracingEnabled: true,
     });
 
-    hasRunningWorkflowFn.role?.attachInlinePolicy(new Policy(this, 'stateFlowListPolicy', {
+    skipRunningWorkflowFn.role?.attachInlinePolicy(new Policy(this, 'stateFlowListPolicy', {
       statements: [
         new PolicyStatement({
           actions: [
@@ -562,22 +568,22 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
   }
 
 
-  private createCheckHasRunningWorkflowFn(ddbTable: ITable, props: LoadOdsDataToRedshiftWorkflowProps): IFunction {
+  private createCheckSkippingRunningWorkflowFn(ddbTable: ITable, props: LoadOdsDataToRedshiftWorkflowProps): IFunction {
 
     const fnSG = props.securityGroupForLambda;
 
-    const fn = new SolutionNodejsFunction(this, 'HasRunningWorkflowFn', {
+    const fn = new SolutionNodejsFunction(this, 'CheckSkippingRunningWorkflowFn', {
       runtime: Runtime.NODEJS_18_X,
       entry: join(
         this.lambdaRootPath,
-        'has-running-workflow.ts',
+        'skip-running-workflow.ts',
       ),
       handler: 'handler',
       memorySize: 128,
       timeout: Duration.minutes(2),
       logRetention: RetentionDays.ONE_WEEK,
       reservedConcurrentExecutions: 1,
-      role: createLambdaRole(this, 'HasRunningWorkflowFnRole', true, []),
+      role: createLambdaRole(this, 'CheckSkippingRunningWorkflowFnRole', true, []),
       ...props.networkConfig,
       securityGroups: [fnSG],
       environment: {
