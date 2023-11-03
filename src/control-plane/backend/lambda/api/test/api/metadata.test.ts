@@ -16,6 +16,7 @@ import {
   GetCommand,
   PutCommand,
   QueryCommand,
+  QueryCommandInput,
   ScanCommand,
   UpdateCommand,
 } from '@aws-sdk/lib-dynamodb';
@@ -446,9 +447,6 @@ describe('Metadata Event test', () => {
     });
   });
   it('Get preset event when no data in DDB', async () => {
-    jest
-      .useFakeTimers()
-      .setSystemTime(new Date('2023-03-02'));
     ddbMock.on(QueryCommand).resolves({
       Items: [],
     });
@@ -1025,6 +1023,10 @@ describe('Metadata Event test', () => {
     });
   });
 
+  afterEach(() => {
+    server.close();
+  });
+
   afterAll((done) => {
     server.close();
     done();
@@ -1035,20 +1037,29 @@ describe('Metadata Event Attribute test', () => {
   beforeEach(() => {
     ddbMock.reset();
     displayDataMock(ddbMock);
+    jest
+      .useFakeTimers()
+      .setSystemTime(new Date('2023-03-02'));
   });
   it('Get metadata event attribute by name', async () => {
-    ddbMock.on(QueryCommand, {
+    const lastDay = `day${new Date().getDate() - 1}`;
+    const input: QueryCommandInput = {
       TableName: analyticsMetadataTable,
       IndexName: prefixMonthGSIName,
       KeyConditionExpression: '#prefix= :prefix',
+      ProjectionExpression: `#id, #month, #prefix, projectId, appId, #name, eventName, category, valueType, ${lastDay}, summary`,
       ExpressionAttributeNames: {
         '#prefix': 'prefix',
+        '#id': 'id',
+        '#month': 'month',
+        '#name': 'name',
       },
       ExpressionAttributeValues: {
         ':prefix': `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
       },
       ScanIndexForward: false,
-    }).resolves({
+    };
+    ddbMock.on(QueryCommand, input).resolves({
       Items: [
         {
           ...MOCK_EVENT_PARAMETER,
