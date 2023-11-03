@@ -27,6 +27,7 @@ const loadStatusEvent: CheckLoadStatusEvent = {
     status: '',
     appId: 'app1',
     manifestFileName: 's3://DOC-EXAMPLE-BUCKET/manifest/app150be34be-fdec-4b45-8b14-63c38f910a56.manifest',
+    retryCount: 0,
     jobList: {
       entries:
       [{
@@ -38,6 +39,47 @@ const loadStatusEvent: CheckLoadStatusEvent = {
     },
   },
 };
+
+
+const loadStatusEvent2: CheckLoadStatusEvent = {
+  detail: {
+    id: '70bfb836-c7d5-7cab-75b0-5222e78194ac',
+    status: '',
+    appId: 'app1',
+    manifestFileName: 's3://DOC-EXAMPLE-BUCKET/manifest/app150be34be-fdec-4b45-8b14-63c38f910a56.manifest',
+    retryCount: 3,
+    jobList: {
+      entries:
+      [{
+        url: 's3://DOC-EXAMPLE-BUCKET/project1/ods_external_events/partition_app=app1/partition_year=2023/partition_month=01/partition_day=15/clickstream-1-job_part00000.parquet.snappy',
+        meta: {
+          content_length: 10324001,
+        },
+      }],
+    },
+  },
+};
+
+
+const loadStatusEvent3: CheckLoadStatusEvent = {
+  detail: {
+    id: '70bfb836-c7d5-7cab-75b0-5222e78194ac',
+    status: '',
+    appId: 'app1',
+    manifestFileName: 's3://DOC-EXAMPLE-BUCKET/manifest/app150be34be-fdec-4b45-8b14-63c38f910a56.manifest',
+    retryCount: 5,
+    jobList: {
+      entries:
+      [{
+        url: 's3://DOC-EXAMPLE-BUCKET/project1/ods_external_events/partition_app=app1/partition_year=2023/partition_month=01/partition_day=15/clickstream-1-job_part00000.parquet.snappy',
+        meta: {
+          content_length: 10324001,
+        },
+      }],
+    },
+  },
+};
+
 const context = getMockContext();
 
 describe('Lambda - check the COPY query status in Redshift Serverless', () => {
@@ -108,10 +150,14 @@ describe('Lambda - check the COPY query status in Redshift Serverless', () => {
     });
     dynamoDBClientMock.on(DeleteCommand).resolves({});
     s3ClientMock.on(DeleteObjectCommand).resolves({});
+
     const resp = await handler(loadStatusEvent, context);
+
     expect(resp).toEqual(expect.objectContaining({
       detail: expect.objectContaining({
         status: StatusString.FAILED,
+        retryCount: 1,
+        retry: false,
       }),
     }));
     expect(redshiftDataMock).toHaveReceivedCommandWith(DescribeStatementCommand, {
@@ -119,6 +165,44 @@ describe('Lambda - check the COPY query status in Redshift Serverless', () => {
     });
     expect(dynamoDBClientMock).toHaveReceivedCommandTimes(DeleteCommand, 0);
     expect(s3ClientMock).toHaveReceivedCommandTimes(DeleteObjectCommand, 0);
+  });
+
+
+  test('Check load status with response FAILED and retry', async () => {
+    redshiftDataMock.on(DescribeStatementCommand).resolvesOnce({
+      Status: StatusString.FAILED,
+      Error: 'Error: could not complete because of conflict with concurrent transaction',
+    });
+    dynamoDBClientMock.on(DeleteCommand).resolves({});
+    s3ClientMock.on(DeleteObjectCommand).resolves({});
+    const resp = await handler(loadStatusEvent2, context);
+
+    expect(resp).toEqual(expect.objectContaining({
+      detail: expect.objectContaining({
+        status: StatusString.FAILED,
+        retryCount: 4,
+        retry: true,
+      }),
+    }));
+  });
+
+
+  test('Check load status with response FAILED with max retry count', async () => {
+    redshiftDataMock.on(DescribeStatementCommand).resolvesOnce({
+      Status: StatusString.FAILED,
+      Error: 'Error: could not complete because of conflict with concurrent transaction',
+    });
+    dynamoDBClientMock.on(DeleteCommand).resolves({});
+    s3ClientMock.on(DeleteObjectCommand).resolves({});
+    const resp = await handler(loadStatusEvent3, context);
+
+    expect(resp).toEqual(expect.objectContaining({
+      detail: expect.objectContaining({
+        status: StatusString.FAILED,
+        retryCount: 6,
+        retry: false,
+      }),
+    }));
   });
 
   test('Check load status with response ABORTED', async () => {

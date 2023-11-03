@@ -38,6 +38,8 @@ const s3Client = new S3Client({
 const DYNAMODB_TABLE_NAME = process.env.DYNAMODB_TABLE_NAME;
 const REDSHIFT_DATA_API_ROLE_ARN = process.env.REDSHIFT_DATA_API_ROLE!;
 
+const MAX_RETRY = 5;
+
 type CheckLoadStatusEventDetail = ManifestBody & {
   id: string;
   status: string;
@@ -56,10 +58,11 @@ const redshiftDataApiClient = getRedshiftClient(REDSHIFT_DATA_API_ROLE_ARN);
  * @returns The load results of query_id.
  */
 export const handler = async (event: CheckLoadStatusEvent, context: Context) => {
-  logger.debug('request event:', JSON.stringify(event));
+  logger.debug('request event:', { event });
   logger.debug(`context.awsRequestId:${context.awsRequestId}`);
 
   const queryId = event.detail.id;
+  const retryCount = event.detail.retryCount;
   const appId = event.detail.appId;
   const dynamodbTableName = DYNAMODB_TABLE_NAME!;
   const manifestFileName = event.detail.manifestFileName;
@@ -108,6 +111,8 @@ export const handler = async (event: CheckLoadStatusEvent, context: Context) => 
           appId: appId,
           manifestFileName: manifestFileName,
           jobList: jobList,
+          retry: retryCount < MAX_RETRY && (!!response.Error?.includes('could not complete because of conflict with concurrent transaction')),
+          retryCount: retryCount + 1,
         },
       };
     }
@@ -119,6 +124,7 @@ export const handler = async (event: CheckLoadStatusEvent, context: Context) => 
         appId: appId,
         manifestFileName: manifestFileName,
         jobList: jobList,
+        retryCount,
       },
     };
   } catch (err) {
