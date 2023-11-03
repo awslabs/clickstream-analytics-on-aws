@@ -14,7 +14,7 @@ lag_lead as (
     lag(time_period,1) over (partition by user_pseudo_id order by user_pseudo_id, time_period),
     lead(time_period,1) over (partition by user_pseudo_id order by user_pseudo_id, time_period)
   from weekly_usage),
--- caculate lag and lead size
+-- calculate lag and lead size
 lag_lead_with_diffs as (
   select user_pseudo_id, time_period, lag, lead, 
     datediff(week,lag,time_period) lag_size,
