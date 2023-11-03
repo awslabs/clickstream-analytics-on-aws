@@ -17,6 +17,7 @@ jobs:
       - run: |-
           cd frontend/
           yarn install --check-files --frozen-lockfile
+          yarn run lint
           yarn run build
           yarn run test
       - name: Publish Test Report
