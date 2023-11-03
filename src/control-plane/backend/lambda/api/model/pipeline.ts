@@ -159,9 +159,6 @@ export interface DataModeling {
     readonly bucket?: S3Bucket;
     readonly maxFilesLimit?: number;
   };
-  readonly upsertUsers: {
-    readonly scheduleExpression: string;
-  };
 }
 
 export interface Reporting {

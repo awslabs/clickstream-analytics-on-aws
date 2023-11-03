@@ -135,9 +135,6 @@ export const INIT_EXT_PIPELINE_DATA: IExtPipeline = {
         baseCapacity: 16,
       },
     },
-    upsertUsers: {
-      scheduleExpression: '',
-    },
   },
   reporting: {
     quickSight: {
@@ -187,10 +184,6 @@ export const INIT_EXT_PIPELINE_DATA: IExtPipeline = {
   redshiftServerlessSubnets: [],
   redshiftDataLoadValue: '5',
   redshiftDataLoadUnit: null,
-  redshiftUpsertFreqValue: '1',
-  redshiftUpsertFreqUnit: null,
-  selectedUpsertType: null,
-  upsertCronExp: '',
   selectedDataLoadType: null,
   dataLoadCronExp: '',
   serviceStatus: {

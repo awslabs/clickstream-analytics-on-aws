@@ -172,53 +172,6 @@ const Processing: React.FC<TabContentProps> = (props: TabContentProps) => {
     }
   };
 
-  const buildRedshiftUpsertFreqFixedRate = () => {
-    if (pipelineInfo?.selectedUpsertType?.value === ExecutionType.FIXED_RATE) {
-      return `${pipelineInfo?.redshiftUpsertFreqValue} ${pipelineInfo.redshiftUpsertFreqUnit?.label} `;
-    } else {
-      return `${pipelineInfo?.upsertCronExp}`;
-    }
-  };
-
-  const buildRedshiftUpsertFreqCron = () => {
-    if (
-      pipelineInfo?.dataModeling?.upsertUsers?.scheduleExpression?.startsWith(
-        'cron'
-      )
-    ) {
-      return pipelineInfo?.dataModeling.upsertUsers?.scheduleExpression;
-    } else {
-      const pattern = /rate\((\d+\s\w+)\)/;
-      const match =
-        pipelineInfo?.dataModeling?.upsertUsers?.scheduleExpression?.match(
-          pattern
-        );
-
-      if (match) {
-        const rateValue = match[1];
-        const formattedRateValue = rateValue.replace(/\b\s+(\w)/, (match) =>
-          match.toUpperCase()
-        );
-        return formattedRateValue;
-      }
-    }
-  };
-
-  const getRedshiftUpsertFrequncyDisplay = () => {
-    if (pipelineInfo) {
-      if (pipelineInfo.selectedUpsertType) {
-        return buildRedshiftUpsertFreqFixedRate();
-      } else if (pipelineInfo?.dataModeling?.upsertUsers?.scheduleExpression) {
-        if (pipelineInfo.dataModeling.upsertUsers.scheduleExpression) {
-          return buildRedshiftUpsertFreqCron();
-        } else {
-          return '-';
-        }
-      }
-    }
-    return '-';
-  };
-
   const getEnrichPluginDisplay = () => {
     let renderEnrichPlugins: any = [];
     if (pipelineInfo?.selectedEnrichPlugins) {
@@ -390,13 +343,6 @@ const Processing: React.FC<TabContentProps> = (props: TabContentProps) => {
                     {t('pipeline:detail.dataRange')}
                   </Box>
                   <div>{getRedshiftDataRangeDisplay()}</div>
-                </div>
-
-                <div>
-                  <Box variant="awsui-key-label">
-                    {t('pipeline:detail.redshiftUserTableUpsertFrequency')}
-                  </Box>
-                  <div>{getRedshiftUpsertFrequncyDisplay()}</div>
                 </div>
               </>
             )}

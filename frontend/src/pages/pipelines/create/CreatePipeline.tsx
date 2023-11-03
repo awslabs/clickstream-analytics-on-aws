@@ -817,16 +817,6 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
         pipelineInfo.selectedRedshiftExecutionUnit?.value
       );
 
-    // set redshift upsert frequency express
-    createPipelineObj.dataModeling.upsertUsers.scheduleExpression =
-      generateCronDateRange(
-        pipelineInfo.selectedUpsertType?.value,
-        parseInt(pipelineInfo.redshiftUpsertFreqValue),
-        pipelineInfo.upsertCronExp,
-        pipelineInfo.redshiftUpsertFreqUnit,
-        'upsert'
-      );
-
     // set dataModeling to null when not enable Redshift
     if (!pipelineInfo.enableRedshift) {
       createPipelineObj.dataModeling.redshift = null;
@@ -926,11 +916,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
       'redshiftServerlessSubnets',
       'redshiftDataLoadValue',
       'redshiftDataLoadUnit',
-      'redshiftUpsertFreqValue',
-      'redshiftUpsertFreqUnit',
       'selectedSelfHostedMSKSG',
-      'selectedUpsertType',
-      'upsertCronExp',
       'selectedDataLoadType',
       'dataLoadCronExp',
       'serviceStatus',
@@ -2038,38 +2024,6 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                   };
                 });
               }}
-              changeUpsertUserValue={(value) => {
-                setPipelineInfo((prev) => {
-                  return {
-                    ...prev,
-                    redshiftUpsertFreqValue: value,
-                  };
-                });
-              }}
-              changeUpsertUserUnit={(unit) => {
-                setPipelineInfo((prev) => {
-                  return {
-                    ...prev,
-                    redshiftUpsertFreqUnit: unit,
-                  };
-                });
-              }}
-              changeSelectedUpsertType={(type) => {
-                setPipelineInfo((prev) => {
-                  return {
-                    ...prev,
-                    selectedUpsertType: type,
-                  };
-                });
-              }}
-              changeUpsertCronExp={(cron) => {
-                setPipelineInfo((prev) => {
-                  return {
-                    ...prev,
-                    upsertCronExp: cron,
-                  };
-                });
-              }}
             />
           ),
         },
@@ -2501,24 +2455,6 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
     pipelineInfo.selectedRedshiftExecutionUnit = REDSHIFT_UNIT_LIST.filter(
       (type) => type.value === reverseRedshiftDataRange.unit
     )[0];
-
-    const reverseUpsertUsersScheduleExpression = reverseCronDateRange(
-      pipelineInfo.dataModeling.upsertUsers.scheduleExpression
-    );
-    pipelineInfo.selectedUpsertType = EXECUTION_TYPE_LIST.filter(
-      (type) => type.value === reverseUpsertUsersScheduleExpression.type
-    )[0];
-    if (
-      reverseUpsertUsersScheduleExpression.type === ExecutionType.FIXED_RATE
-    ) {
-      pipelineInfo.redshiftUpsertFreqValue =
-        reverseUpsertUsersScheduleExpression.value;
-      pipelineInfo.redshiftUpsertFreqUnit = EXCUTION_UNIT_LIST.filter(
-        (type) => type.value === reverseUpsertUsersScheduleExpression.unit
-      )[0];
-    } else {
-      pipelineInfo.upsertCronExp = reverseUpsertUsersScheduleExpression.value;
-    }
   };
   const setUpdateReport = async (pipelineInfo: IExtPipeline) => {
     if (!pipelineInfo.enableReporting) {
@@ -2677,11 +2613,6 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
           dataRange: data.dataModeling?.redshift?.dataRange ?? 0,
           provisioned: data.dataModeling?.redshift?.provisioned ?? null,
           newServerless: data.dataModeling?.redshift?.newServerless ?? null,
-        },
-        upsertUsers: {
-          scheduleExpression: defaultStr(
-            data.dataModeling?.upsertUsers?.scheduleExpression
-          ),
         },
       },
       status: {

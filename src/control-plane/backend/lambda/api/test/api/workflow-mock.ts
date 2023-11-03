@@ -628,10 +628,6 @@ const BASE_DATAANALYTICS_PARAMETERS = [
     ParameterValue: '50',
   },
   {
-    ParameterKey: 'UpsertUsersScheduleExpression',
-    ParameterValue: 'rate(5 minutes)',
-  },
-  {
     ParameterKey: 'DataProcessingCronOrRateExpression',
     ParameterValue: 'rate(6 minutes)',
   },
@@ -704,10 +700,6 @@ const BASE_DATAANALYTICS_PARAMETERS = [
 export const MSK_DATA_PROCESSING_EXISTING_SERVERLESS_DATAANALYTICS_PARAMETERS = mergeParameters(
   BASE_DATAANALYTICS_PARAMETERS,
   [
-    {
-      ParameterKey: 'UpsertUsersScheduleExpression',
-      ParameterValue: 'rate(7 minutes)',
-    },
     {
       ParameterKey: 'RedshiftMode',
       ParameterValue: 'Serverless',
