@@ -16,8 +16,6 @@ rm src/control-plane/backend/lambda/api/middle-ware/authorizer.ts
 cp src/control-plane/auth/authorizer.ts src/control-plane/backend/lambda/api/middle-ware/authorizer.ts
 rm src/control-plane/backend/lambda/api/service/quicksight/dashboard-ln.ts
 cp src/reporting/private/dashboard.ts src/control-plane/backend/lambda/api/service/quicksight/dashboard-ln.ts
-rm src/common/constants-ln.ts
-cp src/common/constant.ts src/common/constants-ln.ts
 
 echo "yarn install"
 yarn install --check-files --frozen-lockfile

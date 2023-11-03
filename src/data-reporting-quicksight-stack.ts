@@ -25,17 +25,15 @@ import { PolicyStatement, Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 import { CfnDataSource, CfnTemplate } from 'aws-cdk-lib/aws-quicksight';
 import { Secret } from 'aws-cdk-lib/aws-secretsmanager';
 import { Construct } from 'constructs';
-import Mustache from 'mustache';
 import {
   addCfnNagForLogRetention,
   addCfnNagForCustomResourceProvider,
   addCfnNagToStack,
   addCfnNagForCfnResource,
 } from './common/cfn-nag';
-import { OUTPUT_REPORTING_QUICKSIGHT_DASHBOARDS, OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN, REPORTING_VIEW_VERSION } from './common/constant';
+import { OUTPUT_REPORTING_QUICKSIGHT_DASHBOARDS, OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN } from './common/constant';
 import { SolutionInfo } from './common/solution-info';
 import { getShortIdOfStack } from './common/stack';
-import { MustacheViewParamType } from './control-plane/backend/lambda/api/service/quicksight/reporting-utils';
 import { createStackParametersQuickSight } from './reporting/parameter';
 import { createQuicksightCustomResource } from './reporting/quicksight-custom-resource';
 
@@ -93,11 +91,6 @@ export class DataReportingQuickSightStack extends Stack {
     );
 
     const templateId = `clickstream_template_${stackParams.redshiftDBParam.valueAsString}_${getShortIdOfStack(Stack.of(this))}`;
-
-    const mustacheViewParamType: MustacheViewParamType = {
-      viewVersion: REPORTING_VIEW_VERSION,
-    };
-
     const template = new CfnTemplate(this, 'Clickstream-Template-Def', {
       templateId,
       awsAccountId: Aws.ACCOUNT_ID,
@@ -120,7 +113,7 @@ export class DataReportingQuickSightStack extends Stack {
 
       definition: Fn.conditionIf(useTemplateArnCondition.logicalId,
         Aws.NO_VALUE,
-        JSON.parse(Mustache.render(readFileSync(join(__dirname, 'reporting/private/template-def.json'), 'utf-8'), mustacheViewParamType)),
+        JSON.parse(readFileSync(join(__dirname, 'reporting/private/template-def.json'), 'utf-8')),
       ),
     });
 

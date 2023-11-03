@@ -17,6 +17,19 @@ import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Provider } from 'aws-cdk-lib/custom-resources';
 import { Construct } from 'constructs';
+import { QuickSightDashboardDefProps, QuicksightCustomResourceProps } from './private/dashboard';
+import {
+  clickstream_device_view_columns,
+  clickstream_event_parameter_view_columns,
+  clickstream_lifecycle_daily_view_columns,
+  clickstream_lifecycle_weekly_view_columns,
+  clickstream_event_view_columns,
+  clickstream_retention_view_columns,
+  clickstream_session_view_columns,
+  clickstream_user_attr_view_columns,
+  clickstream_user_dim_view_columns,
+} from './private/dataset-col-def';
+import { createRoleForQuicksightCustomResourceLambda } from './private/iam';
 import {
   CLICKSTREAM_DEVICE_VIEW_PLACEHOLDER,
   CLICKSTREAM_EVENT_PARAMETER_VIEW_PLACEHOLDER,
@@ -38,21 +51,8 @@ import {
   CLICKSTREAM_LIFECYCLE_WEEKLY_VIEW_NAME,
 } from '../common/constant';
 
-import {
-  clickstream_device_view_columns,
-  clickstream_event_parameter_view_columns,
-  clickstream_lifecycle_daily_view_columns,
-  clickstream_lifecycle_weekly_view_columns,
-  clickstream_event_view_columns,
-  clickstream_retention_view_columns,
-  clickstream_session_view_columns,
-  clickstream_user_attr_view_columns,
-  clickstream_user_dim_view_columns,
-} from './private/dataset-col-def';
-import { createRoleForQuicksightCustomResourceLambda } from './private/iam';
 import { POWERTOOLS_ENVS } from '../common/powertools';
 import { SolutionNodejsFunction } from '../private/function';
-import { QuickSightDashboardDefProps, QuicksightCustomResourceProps } from './private/dashboard';
 
 export function createQuicksightCustomResource(
   scope: Construct,

@@ -141,10 +141,6 @@ export interface DashboardDefProps {
   name?: string;
 }
 
-export type MustacheViewParamType = {
-  viewVersion: string;
-}
-
 export type MustacheBaseType = {
   visualId: string;
   dataSetIdentifier: string;
