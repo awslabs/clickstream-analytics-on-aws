@@ -26,7 +26,12 @@ import PipelineStatus from 'components/pipeline/PipelineStatus';
 import moment from 'moment';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { COMMON_ALERT_TYPE, EPipelineStatus, SDK_LIST, TIME_FORMAT} from 'ts/const';
+import {
+  COMMON_ALERT_TYPE,
+  EPipelineStatus,
+  SDK_LIST,
+  TIME_FORMAT,
+} from 'ts/const';
 import { buildS3Link, buildVPCLink } from 'ts/url';
 import { alertMsg, defaultStr } from 'ts/utils';
 
