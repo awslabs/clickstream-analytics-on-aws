@@ -15,6 +15,8 @@ event_date
 , app_info.id::varchar as app_info_package_id
 , app_info.install_source::varchar as app_info_install_source
 , app_info.version::varchar as app_info_version
+, app_info.sdk_name::varchar as app_info_sdk_name
+, app_info.sdk_version::varchar as app_info_sdk_version
 , device.vendor_id::varchar as device_id
 , device.mobile_brand_name::varchar as device_mobile_brand_name
 , device.mobile_model_name::varchar as device_mobile_model_name
@@ -25,6 +27,7 @@ event_date
 , device.network_type::varchar as device_network_type
 , device.operating_system::varchar as device_operating_system
 , device.operating_system_version::varchar as device_operating_system_version
+, device.host_name::varchar
 , device.ua_browser::varchar 
 , device.ua_browser_version::varchar
 , device.ua_os::varchar

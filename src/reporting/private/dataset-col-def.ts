@@ -78,6 +78,14 @@ export const clickstream_event_view_columns: InputColumn[] = [
     Type: 'STRING',
   },
   {
+    Name: 'app_info_sdk_name',
+    Type: 'STRING',
+  },
+  {
+    Name: 'app_info_sdk_version',
+    Type: 'STRING',
+  },
+  {
     Name: 'device_mobile_brand_name',
     Type: 'STRING',
   },
@@ -111,6 +119,10 @@ export const clickstream_event_view_columns: InputColumn[] = [
   },
   {
     Name: 'device_operating_system_version',
+    Type: 'STRING',
+  },
+  {
+    Name: 'host_name',
     Type: 'STRING',
   },
   {
@@ -331,6 +343,10 @@ export const clickstream_device_view_columns: InputColumn[] = [
   },
   {
     Name: 'operating_system_version',
+    Type: 'STRING',
+  },
+  {
+    Name: 'host_name',
     Type: 'STRING',
   },
   {
