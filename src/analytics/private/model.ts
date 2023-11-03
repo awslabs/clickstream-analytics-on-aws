@@ -146,6 +146,7 @@ export interface ManifestItem {
 export interface ManifestBody {
   readonly appId: string;
   readonly manifestFileName: string;
+  readonly retryCount: number;
   readonly jobList: {
     readonly entries: Array<ManifestItem>;
   };

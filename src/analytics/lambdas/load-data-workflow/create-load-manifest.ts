@@ -206,6 +206,7 @@ const doManifestFiles = async (candidateItems: Array<ODSEventItem>,
         appId: appId,
         manifestFileName: manifestFile,
         jobList: entries,
+        retryCount: 0,
       });
     }
   }
