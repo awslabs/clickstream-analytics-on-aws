@@ -113,12 +113,10 @@ public class UserPropertiesConverter {
                 continue;
             }
 
-            String attrValue = attrValueNode.get(VALUE).asText();
+            JsonNode valueNode = attrValueNode.get(VALUE);
             Long setTimestamp = attrValueNode.get("set_timestamp").asLong(0L);
-
             Long setTimestampMicros = setTimestamp * 1000L;
-
-            KvConverter.ValueTypeResult result = getValueTypeResult(attrName, attrValue);
+            KvConverter.ValueTypeResult result = getValueTypeResult(attrName, valueNode);
 
             list.add(new GenericRow(
                     new Object[]{
