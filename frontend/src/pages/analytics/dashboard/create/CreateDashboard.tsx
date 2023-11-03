@@ -181,9 +181,9 @@ const CreateDashboard: React.FC<CreateDashboardProps> = (
             >
               <SpaceBetween direction="vertical" size="s">
                 <Input
-                  placeholder={
-                    defaultStr(t('analytics:dashboard.createInputNamePlaceholder'))
-                  }
+                  placeholder={defaultStr(
+                    t('analytics:dashboard.createInputNamePlaceholder')
+                  )}
                   value={defaultStr(curDashboard.name)}
                   onChange={(e) => {
                     setDashboardNameRequiredError(false);
@@ -203,9 +203,9 @@ const CreateDashboard: React.FC<CreateDashboardProps> = (
               description={t('analytics:dashboard.createDescDec')}
             >
               <Textarea
-                placeholder={
-                  defaultStr(t('analytics:dashboard.createDescPlaceholder'))
-                }
+                placeholder={defaultStr(
+                  t('analytics:dashboard.createDescPlaceholder')
+                )}
                 rows={3}
                 value={curDashboard.description}
                 onChange={(e) => {
@@ -243,9 +243,9 @@ const CreateDashboard: React.FC<CreateDashboardProps> = (
                 <Input
                   onChange={({ detail }) => setSheetName(detail.value)}
                   value={sheetName}
-                  placeholder={
-                    defaultStr(t('analytics:dashboard.createSheetsPlaceholder'))
-                  }
+                  placeholder={defaultStr(
+                    t('analytics:dashboard.createSheetsPlaceholder')
+                  )}
                 />
                 <Button
                   iconName="add-plus"
