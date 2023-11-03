@@ -17,16 +17,15 @@ import {
 } from '@aws-sdk/lib-dynamodb';
 import { DynamoDbStore } from './dynamodb-store';
 import { analyticsMetadataTable, prefixMonthGSIName } from '../../common/constants';
-import { docClient, query } from '../../common/dynamodb-client';
-import { MetadataValueType } from '../../common/explore-types';
+import { docClient, query, memoizedQuery } from '../../common/dynamodb-client';
+import { ConditionCategory, MetadataValueType } from '../../common/explore-types';
 import { KeyVal } from '../../common/types';
-import { getAttributeByNameAndType, getCurMonthStr, getDataFromLastDay, getLatestAttributeByName, getLatestEventByName, getLatestParameterById, getParameterByNameAndType } from '../../common/utils';
+import { getAttributeByNameAndType, getCurMonthStr, getDataFromYesterday, getLatestAttributeByName, getLatestEventByName, getLatestParameterById, getParameterByNameAndType } from '../../common/utils';
 import { IMetadataRaw, IMetadataDisplay, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute, IMetadataDescription, IMetadataBuiltInList } from '../../model/metadata';
 import { ClickStreamStore } from '../click-stream-store';
 import { MetadataStore } from '../metadata-store';
 
 const store: ClickStreamStore = new DynamoDbStore();
-const memoizedQuery = query;
 
 export class DynamoDbMetadataStore implements MetadataStore {
 
@@ -51,7 +50,7 @@ export class DynamoDbMetadataStore implements MetadataStore {
     if (records.length === 0) {
       return;
     }
-    const lastDayData = getDataFromLastDay(records[0]);
+    const lastDayData = getDataFromYesterday(records);
     const event: IMetadataEvent = {
       id: records[0].id,
       month: records[0].month,
@@ -87,10 +86,10 @@ export class DynamoDbMetadataStore implements MetadataStore {
     return events;
   };
 
-  public async getEventParameter(projectId: string, appId: string, parameterName: string, valueType: MetadataValueType):
+  public async getEventParameter(projectId: string, appId: string, parameterName: string, category: ConditionCategory, valueType: MetadataValueType):
   Promise<IMetadataEventParameter | undefined> {
     const records = await this.getAllEventParameters(projectId, appId);
-    return getParameterByNameAndType(records, parameterName, valueType);
+    return getParameterByNameAndType(records, parameterName, category, valueType);
   };
 
   public async listEventParameters(projectId: string, appId: string): Promise<IMetadataEventParameter[]> {

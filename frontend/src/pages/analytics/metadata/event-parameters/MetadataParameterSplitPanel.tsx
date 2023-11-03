@@ -151,6 +151,7 @@ const MetadataParameterSplitPanel: React.FC<
           projectId: defaultStr(projectId),
           appId: defaultStr(appId),
           parameterName: parameter.name,
+          parameterCategory: parameter.category,
           parameterType: parameter.valueType,
         });
       if (success) {

@@ -116,8 +116,8 @@ export class MetadataEventParameterServ {
 
   public async details(req: any, res: any, next: any) {
     try {
-      const { projectId, appId, name, type } = req.query;
-      let parameter = await metadataStore.getEventParameter(projectId, appId, name, type);
+      const { projectId, appId, name, category, type } = req.query;
+      let parameter = await metadataStore.getEventParameter(projectId, appId, name, category, type);
       if (!parameter) {
         return res.status(404).json(new ApiFail('Event attribute not found'));
       }

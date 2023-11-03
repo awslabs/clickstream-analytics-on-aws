@@ -11,14 +11,14 @@
  *  and limitations under the License.
  */
 
-import { MetadataValueType } from '../common/explore-types';
+import { ConditionCategory, MetadataValueType } from '../common/explore-types';
 import { IMetadataDescription, IMetadataDisplay, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute } from '../model/metadata';
 
 export interface MetadataStore {
   getEvent: (projectId: string, appId: string, eventName: string) => Promise<IMetadataEvent | undefined>;
   listEvents: (projectId: string, appId: string) => Promise<IMetadataEvent[]>;
 
-  getEventParameter: (projectId: string, appId: string, parameterName: string, valueType: MetadataValueType) =>
+  getEventParameter: (projectId: string, appId: string, parameterName: string, category: ConditionCategory, valueType: MetadataValueType) =>
   Promise<IMetadataEventParameter | undefined>;
   listEventParameters: (projectId: string, appId: string) => Promise<IMetadataEventParameter[]>;
 
