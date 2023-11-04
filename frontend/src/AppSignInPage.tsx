@@ -10,17 +10,17 @@
  *  OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions
  *  and limitations under the License.
  */
-import { Button } from '@cloudscape-design/components';
+import { Button, Alert, Container } from '@cloudscape-design/components';
 import AppRouter from 'AppRouter';
 import { getUserDetails } from 'apis/user';
 import Loading from 'components/common/Loading';
+import CommonLayout from 'components/layouts/CommonLayout';
 import { UserContext } from 'context/UserContext';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from 'react-oidc-context';
 
 const SignedInPage: React.FC = () => {
-  console.info('aaa:');
   const auth = useAuth();
   const { t } = useTranslation();
   const [currentUser, setCurrentUser] = useState<IUser>();
@@ -45,7 +45,7 @@ const SignedInPage: React.FC = () => {
     if (auth.isAuthenticated) {
       getCurrentUser();
     }
-  }, [auth]);
+  }, [auth.isAuthenticated]);
 
   if (auth.isLoading) {
     return <Loading isPage />;
@@ -53,9 +53,28 @@ const SignedInPage: React.FC = () => {
 
   if (auth.error) {
     return (
-      <div className="text-center pd-20">
-        {t('oops')} {auth.error.message}
-      </div>
+      <CommonLayout auth={auth}>
+        <Container>
+          <div className="mt-10">
+            <Alert
+              action={
+                <Button
+                  onClick={() => {
+                    window.location.reload();
+                  }}
+                >
+                  {t('button.reload')}
+                </Button>
+              }
+              statusIconAriaLabel="Error"
+              type="warning"
+              header={t('header.reSignIn')}
+            >
+              {t('header.reSignInDesc')}
+            </Alert>
+          </div>
+        </Container>
+      </CommonLayout>
     );
   }
 
