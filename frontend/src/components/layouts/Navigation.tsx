@@ -110,16 +110,14 @@ const Navigation: React.FC<INavigationProps> = (props: INavigationProps) => {
   };
 
   return (
-    <>
-      <SideNavigation
-        header={navHeader}
-        items={getNavItems()}
-        activeHref={activeHref}
-        onFollow={(e) => {
-          console.info(e);
-        }}
-      />
-    </>
+    <SideNavigation
+      header={navHeader}
+      items={getNavItems()}
+      activeHref={activeHref}
+      onFollow={(e) => {
+        console.info(e);
+      }}
+    />
   );
 };
 
