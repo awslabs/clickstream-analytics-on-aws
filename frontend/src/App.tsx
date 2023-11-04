@@ -11,109 +11,16 @@
  *  and limitations under the License.
  */
 
-import { Button } from '@cloudscape-design/components';
-import AppRouter from 'AppRouter';
-import { getUserDetails } from 'apis/user';
+import SignedInPage from 'AppSignInPage';
 import Axios from 'axios';
 import Loading from 'components/common/Loading';
 import { AppContext } from 'context/AppContext';
 import { GlobalProvider } from 'context/StateContext';
-import { UserContext } from 'context/UserContext';
 import { WebStorageStateStore } from 'oidc-client-ts';
 import React, { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { AuthProvider, AuthProviderProps, useAuth } from 'react-oidc-context';
+import { AuthProvider, AuthProviderProps } from 'react-oidc-context';
 import { CONFIG_URL, PROJECT_CONFIG_JSON } from 'ts/const';
 import { defaultStr } from 'ts/utils';
-
-const SignedInPage: React.FC = () => {
-  const auth = useAuth();
-  const { t } = useTranslation();
-  const [currentUser, setCurrentUser] = useState<IUser>();
-
-  useEffect(() => {
-    console.info('BBBBBBBBBBBBBBBBBB');
-    console.info('auth.events:', auth.events);
-    // the `return` is important - addAccessTokenExpiring() returns a cleanup function
-    return auth?.events?.addAccessTokenExpiring((event) => {
-      auth.signinSilent();
-    });
-  }, [auth.events, auth.signinSilent]);
-
-  const getCurrentUser = async () => {
-    if (!auth.user?.profile.email) {
-      return;
-    }
-    try {
-      const { success, data }: ApiResponse<IUser> = await getUserDetails(
-        auth.user?.profile.email
-      );
-      if (success) {
-        setCurrentUser(data);
-      }
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
-  useEffect(() => {
-    (async () => {
-      await getCurrentUser();
-    })();
-  }, []);
-
-  useEffect(() => {
-    console.info('authauth:', auth);
-    console.info('AAAAAAAAAAAAAAA');
-    if (auth.activeNavigator === 'signinSilent') {
-      console.info('refresh');
-      // return;
-    }
-    // (async () => {
-    //   await getCurrentUser();
-    // })();
-  }, [auth]);
-
-  if (auth.isLoading || (auth.isAuthenticated && !currentUser)) {
-    return <Loading isPage />;
-  }
-
-  if (auth.error) {
-    return (
-      <div className="text-center pd-20">
-        {t('oops')} {auth.error.message}
-      </div>
-    );
-  }
-
-  if (auth.isAuthenticated) {
-    return (
-      <UserContext.Provider value={currentUser}>
-        <AppRouter auth={auth} />
-      </UserContext.Provider>
-    );
-  }
-
-  return (
-    <div className="oidc-login">
-      <div>
-        <div className="title">{t('welcome')}</div>
-      </div>
-      {
-        <div>
-          <Button
-            variant="primary"
-            onClick={() => {
-              auth.signinRedirect();
-            }}
-          >
-            {t('button.signIn')}
-          </Button>
-        </div>
-      }
-    </div>
-  );
-};
 
 const App: React.FC = () => {
   const [loadingConfig, setLoadingConfig] = useState(true);
@@ -166,7 +73,6 @@ const App: React.FC = () => {
   };
 
   useEffect(() => {
-    console.info('CCCCCCCCCCCCCCCCCCCc');
     const { type } = window.performance.getEntriesByType('navigation')[0];
     if (type === 'reload') {
       getConfig();
