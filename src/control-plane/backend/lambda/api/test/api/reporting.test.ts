@@ -1182,12 +1182,22 @@ describe('reporting test', () => {
     });
 
     quickSightMock.on(ListAnalysesCommand).resolves({
-      AnalysisSummaryList: [{
-        Arn: 'arn:aws:quicksight:us-east-1:11111111:analysis/analysis-aaaaaaaa',
-        Name: '_tmp_aaaaaaa',
-        CreatedTime: new Date((new Date()).getTime() - 80*60*1000),
-        AnalysisId: 'analysis_aaaaaaa',
-      }],
+      AnalysisSummaryList: [
+        {
+          Arn: 'arn:aws:quicksight:us-east-1:11111111:analysis/analysis-aaaaaaaa',
+          Name: '_tmp_aaaaaaa',
+          CreatedTime: new Date((new Date()).getTime() - 80*60*1000),
+          AnalysisId: 'analysis_aaaaaaa',
+          Status: ResourceStatus.UPDATE_SUCCESSFUL,
+        },
+        {
+          Arn: 'arn:aws:quicksight:us-east-1:11111111:analysis/analysis-bbbbbb',
+          Name: '_tmp_bbbbbb',
+          CreatedTime: new Date((new Date()).getTime() - 80*60*1000),
+          AnalysisId: 'analysis_bbbbbb',
+          Status: ResourceStatus.DELETED,
+        },
+      ],
     });
 
     quickSightMock.on(DeleteAnalysisCommand).resolves({
@@ -1221,6 +1231,9 @@ describe('reporting test', () => {
     expect(res.body.data.deletedDashBoards[0]).toEqual('dashboard-aaaaaaaa');
     expect(res.body.data.deletedAnalyses[0]).toEqual('analysis-aaaaaaaa');
     expect(res.body.data.deletedDatasets[0]).toEqual('dataset-aaaaaaaa');
+    expect(quickSightMock).toHaveReceivedCommandTimes(DeleteDashboardCommand, 1);
+    expect(quickSightMock).toHaveReceivedCommandTimes(DeleteAnalysisCommand, 1);
+    expect(quickSightMock).toHaveReceivedCommandTimes(DeleteDataSetCommand, 1);
 
   });
 
