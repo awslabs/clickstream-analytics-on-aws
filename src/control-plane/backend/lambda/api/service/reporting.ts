@@ -13,7 +13,7 @@
 
 import { readFileSync } from 'fs';
 import { join } from 'path';
-import { AnalysisDefinition, ConflictException, DashboardVersionDefinition, DataSetIdentifierDeclaration, InputColumn, QuickSight, ThrottlingException } from '@aws-sdk/client-quicksight';
+import { AnalysisDefinition, ConflictException, DashboardVersionDefinition, DataSetIdentifierDeclaration, InputColumn, QuickSight, ResourceStatus, ThrottlingException } from '@aws-sdk/client-quicksight';
 import { BatchExecuteStatementCommand, DescribeStatementCommand, StatusString } from '@aws-sdk/client-redshift-data';
 import { v4 as uuidv4 } from 'uuid';
 import { DataSetProps } from './quicksight/dashboard-ln';
@@ -972,7 +972,9 @@ async function _deletedAnalyses(quickSight: QuickSight) {
 
   if (analyses.AnalysisSummaryList) {
     for (const [_index, analysis] of analyses.AnalysisSummaryList.entries()) {
-      if (analysis.Name?.startsWith(TEMP_RESOURCE_NAME_PREFIX) && (new Date().getTime() - analysis.CreatedTime!.getTime()) > 60 * 60 * 1000) {
+      if (analysis.Status !== ResourceStatus.DELETED &&
+        analysis.Name?.startsWith(TEMP_RESOURCE_NAME_PREFIX) &&
+        (new Date().getTime() - analysis.CreatedTime!.getTime()) > 60 * 60 * 1000) {
         const deletedRes = await quickSight.deleteAnalysis({
           AwsAccountId: awsAccountId,
           AnalysisId: analysis.AnalysisId,
