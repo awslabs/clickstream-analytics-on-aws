@@ -344,164 +344,6 @@ export function buildEventAnalysisView(sqlParameters: SQLParameters) : string {
   });
 }
 
-function _getMidTableForEventPathAnalysis(eventNames: string[], sqlParameters: SQLParameters, isSessionJoin: boolean) : string {
-
-  if (isSessionJoin) {
-    if (sqlParameters.pathAnalysis?.mergeConsecutiveEvents) {
-      return `
-        mid_table as (
-          select
-            CASE
-            WHEN event_name in ('${eventNames.join('\',\'')}')  THEN event_name 
-            ELSE 'other'
-            END as event_name,
-            user_pseudo_id,
-            event_id,
-            event_timestamp,
-            _session_id
-          from (
-            select 
-              event_name,
-              user_pseudo_id,
-              event_id,
-              event_timestamp,
-              _session_id,
-              ROW_NUMBER() over(partition by event_name, user_pseudo_id, _session_id order by event_timestamp desc) as rk
-            from base_data
-          ) where rk = 1
-        ),
-      `;
-    }
-
-    return `
-      mid_table as (
-        select 
-          CASE
-            WHEN event_name in ('${eventNames.join('\',\'')}')  THEN event_name 
-            ELSE 'other'
-          END as event_name,
-          user_pseudo_id,
-          event_id,
-          event_timestamp,
-          _session_id
-        from base_data
-      ),
-    `;
-  } else {
-    if (sqlParameters.pathAnalysis?.mergeConsecutiveEvents) {
-      return `
-        mid_table as (
-          select
-            CASE
-            WHEN event_name in ('${eventNames.join('\',\'')}')  THEN event_name 
-            ELSE 'other'
-            END as event_name,
-            user_pseudo_id,
-            event_id,
-            event_timestamp
-          from (
-            select 
-              event_name,
-              user_pseudo_id,
-              event_id,
-              event_timestamp,
-              ROW_NUMBER() over(partition by event_name, user_pseudo_id order by event_timestamp desc) as rk
-            from base_data
-          ) where rk = 1
-        ),
-      `;
-    }
-
-    return `
-      mid_table as (
-        select 
-        CASE
-          WHEN event_name in ('${eventNames.join('\',\'')}')  THEN event_name 
-          ELSE 'other'
-        END as event_name,
-        user_pseudo_id,
-        event_id,
-        event_timestamp
-      from base_data base
-      ),
-    `;
-
-  }
-}
-
-function _getMidTableForNodePathAnalysis(sqlParameters: SQLParameters, isSessionJoin: boolean) : string {
-
-  if (isSessionJoin) {
-    if (sqlParameters.pathAnalysis?.mergeConsecutiveEvents) {
-      return `
-        mid_table as (
-          select 
-            event_name,
-            user_pseudo_id,
-            event_id,
-            event_timestamp,
-            _session_id,
-            node
-          from (
-            select 
-              mid_table_1.*,
-              mid_table_2.node,
-              ROW_NUMBER() over(partition by event_name, user_pseudo_id, _session_id, node order by mid_table_1.event_timestamp desc) as rk
-            from 
-              mid_table_1 
-              join mid_table_2 on mid_table_1.event_id = mid_table_2.event_id
-          ) where rk = 1
-        ),
-      `;
-    }
-
-    return `
-      mid_table as (
-        select 
-          mid_table_1.*,
-          mid_table_2.node
-        from 
-          mid_table_1 
-          join mid_table_2 on mid_table_1.event_id = mid_table_2.event_id
-      ),
-    `;
-  } else {
-    if (sqlParameters.pathAnalysis?.mergeConsecutiveEvents) {
-      return `
-      mid_table as (
-        select 
-          event_name,
-          user_pseudo_id,
-          event_id,
-          event_timestamp,
-          node
-        from (
-          select 
-            mid_table_1.*,
-            mid_table_2.node,
-            ROW_NUMBER() over(partition by event_name, user_pseudo_id, node order by mid_table_1.event_timestamp desc) as rk
-          from 
-            mid_table_1 
-            join mid_table_2 on mid_table_1.event_id = mid_table_2.event_id
-        ) where rk = 1
-      ),
-      `;
-    }
-
-    return `
-      mid_table as (
-        select 
-          mid_table_1.*,
-          mid_table_2.node
-        from 
-          mid_table_1 
-          join mid_table_2 on mid_table_1.event_id = mid_table_2.event_id
-      ),
-    `;
-
-  }
-}
-
 export function buildEventPathAnalysisView(sqlParameters: SQLParameters) : string {
 
   const eventNames = _getEventsNameFromConditions(sqlParameters.eventAndConditions!);
@@ -509,8 +351,8 @@ export function buildEventPathAnalysisView(sqlParameters: SQLParameters) : strin
   let midTableSql = '';
   let dataTableSql = '';
   if (sqlParameters.pathAnalysis?.sessionType === ExplorePathSessionDef.SESSION ) {
-    midTableSql = _getMidTableForEventPathAnalysis(eventNames, sqlParameters, true);
-
+    const midTable = _getMidTableForEventPathAnalysis(eventNames, sqlParameters, true);
+    midTableSql = midTable.midTableSql;
     dataTableSql = `data as (
       select 
         *,
@@ -524,7 +366,7 @@ export function buildEventPathAnalysisView(sqlParameters: SQLParameters) : strin
       data._session_id _session_id,
       min(step_1) min_step
       from data
-      where event_name = '${eventNames[0]}'
+      where event_name = '${midTable.prefix}${eventNames[0]}'
       group by user_pseudo_id, _session_id
     ),
     step_table_2 as (
@@ -571,7 +413,8 @@ export function buildEventPathAnalysisView(sqlParameters: SQLParameters) : strin
     `;
 
   } else {
-    midTableSql = _getMidTableForEventPathAnalysis(eventNames, sqlParameters, false);
+    const midTable = _getMidTableForEventPathAnalysis(eventNames, sqlParameters, false);
+    midTableSql = midTable.midTableSql;
 
     dataTableSql = `data_1 as (
       select 
@@ -617,7 +460,7 @@ export function buildEventPathAnalysisView(sqlParameters: SQLParameters) : strin
       from
         data
       where
-        event_name = '${eventNames[0]}'
+        event_name = '${midTable.prefix}${eventNames[0]}'
       group by
         user_pseudo_id,
         group_id
@@ -1096,14 +939,215 @@ function _buildEventAnalysisBaseSql(eventNames: string[], sqlParameters: SQLPara
   return sql;
 };
 
+function _getUnionBaseDataForEventPathAnalysis(eventNames: string[], sqlParameters: SQLParameters, isSessionJoin: boolean = false) {
+  let sql = 'union_base_data as (';
+  for (const [index, eventCondition] of sqlParameters.eventAndConditions!.entries()) {
+    const eventName = eventCondition.eventName;
+    const conditionSql = getConditionSql(eventCondition.sqlCondition);
+
+    if (index > 0) {
+      sql += 'union all';
+    }
+
+    sql += `
+    select 
+      CASE 
+        WHEN event_name in ('${eventNames.join('\',\'')}')  THEN '${index+1}_' || event_name 
+        ELSE 'other' 
+      END as event_name,
+      user_pseudo_id,
+      event_id,
+      event_timestamp
+      ${isSessionJoin ? ',_session_id' : ''}
+    from base_data
+    where event_name = '${eventName}' ${conditionSql !== '' ? ` and (${conditionSql})` : ''}
+    `;
+  }
+  sql += '),';
+
+  return sql;
+
+}
+
+function _getMidTableForEventPathAnalysis(eventNames: string[], sqlParameters: SQLParameters, isSessionJoin: boolean) {
+
+  let baseTable = 'base_data';
+  let unionTableSql = '';
+  let prefix = '';
+  let midTableSql = '';
+  let eventNameClause = `
+    CASE
+      WHEN event_name in ('${eventNames.join('\',\'')}')  THEN event_name 
+      ELSE 'other'
+    END as event_name,
+  `;
+  if (eventNames.length < sqlParameters.eventAndConditions!.length) {//has same event
+    unionTableSql = _getUnionBaseDataForEventPathAnalysis(eventNames, sqlParameters, isSessionJoin);
+    baseTable = 'union_base_data';
+    eventNameClause = 'event_name,';
+    prefix = '1_';
+  }
+
+  if (isSessionJoin) {
+    if (sqlParameters.pathAnalysis?.mergeConsecutiveEvents) {
+      midTableSql = `
+        ${unionTableSql}
+        mid_table as (
+          select
+            ${eventNameClause}
+            user_pseudo_id,
+            event_id,
+            event_timestamp,
+            _session_id
+          from (
+            select 
+              event_name,
+              user_pseudo_id,
+              event_id,
+              event_timestamp,
+              _session_id,
+              ROW_NUMBER() over(partition by event_name, user_pseudo_id, _session_id order by event_timestamp desc) as rk
+            from ${baseTable}
+          ) where rk = 1
+        ),
+      `;
+    } else {
+      midTableSql = `
+        ${unionTableSql}
+        mid_table as (
+          select 
+            ${eventNameClause}
+            user_pseudo_id,
+            event_id,
+            event_timestamp,
+            _session_id
+          from ${baseTable}
+        ),
+     `;
+    }
+  } else {
+    if (sqlParameters.pathAnalysis?.mergeConsecutiveEvents) {
+      midTableSql = `
+        ${unionTableSql}
+        mid_table as (
+          select
+            ${eventNameClause}
+            user_pseudo_id,
+            event_id,
+            event_timestamp
+          from (
+            select 
+              event_name,
+              user_pseudo_id,
+              event_id,
+              event_timestamp,
+              ROW_NUMBER() over(partition by event_name, user_pseudo_id order by event_timestamp desc) as rk
+            from ${baseTable}
+          ) where rk = 1
+        ),
+      `;
+    } else {
+      midTableSql = `
+      ${unionTableSql}
+      mid_table as (
+        select 
+        ${eventNameClause}
+        user_pseudo_id,
+        event_id,
+        event_timestamp
+      from ${baseTable} base
+      ),
+      `;
+    }
+  }
+
+  return {
+    midTableSql,
+    prefix,
+  };
+}
+
+function _getMidTableForNodePathAnalysis(sqlParameters: SQLParameters, isSessionJoin: boolean) : string {
+
+  if (isSessionJoin) {
+    if (sqlParameters.pathAnalysis?.mergeConsecutiveEvents) {
+      return `
+        mid_table as (
+          select 
+            event_name,
+            user_pseudo_id,
+            event_id,
+            event_timestamp,
+            _session_id,
+            node
+          from (
+            select 
+              mid_table_1.*,
+              mid_table_2.node,
+              ROW_NUMBER() over(partition by event_name, user_pseudo_id, _session_id, node order by mid_table_1.event_timestamp desc) as rk
+            from 
+              mid_table_1 
+              join mid_table_2 on mid_table_1.event_id = mid_table_2.event_id
+          ) where rk = 1
+        ),
+      `;
+    }
+
+    return `
+      mid_table as (
+        select 
+          mid_table_1.*,
+          mid_table_2.node
+        from 
+          mid_table_1 
+          join mid_table_2 on mid_table_1.event_id = mid_table_2.event_id
+      ),
+    `;
+  } else {
+    if (sqlParameters.pathAnalysis?.mergeConsecutiveEvents) {
+      return `
+      mid_table as (
+        select 
+          event_name,
+          user_pseudo_id,
+          event_id,
+          event_timestamp,
+          node
+        from (
+          select 
+            mid_table_1.*,
+            mid_table_2.node,
+            ROW_NUMBER() over(partition by event_name, user_pseudo_id, node order by mid_table_1.event_timestamp desc) as rk
+          from 
+            mid_table_1 
+            join mid_table_2 on mid_table_1.event_id = mid_table_2.event_id
+        ) where rk = 1
+      ),
+      `;
+    }
+
+    return `
+      mid_table as (
+        select 
+          mid_table_1.*,
+          mid_table_2.node
+        from 
+          mid_table_1 
+          join mid_table_2 on mid_table_1.event_id = mid_table_2.event_id
+      ),
+    `;
+
+  }
+}
+
 export function _buildCommonPartSql(eventNames: string[], sqlParameters: SQLParameters,
-  isEventPathSQL: boolean = false, isNodePathAnalysis: boolean = false, isRetentionAnalysis: boolean = false) : string {
+  isEventPathAnalysis: boolean = false, isNodePathAnalysis: boolean = false, isRetentionAnalysis: boolean = false) : string {
 
   let resultSql = 'with';
   const commonConditionSql = _getCommonConditionSql(sqlParameters, 'event.');
   let allConditionSql = '';
-  if (!isRetentionAnalysis) {
-    allConditionSql = _getAllConditionSql(eventNames, sqlParameters, isEventPathSQL);
+  if (_shouldAddAllCondition(eventNames, sqlParameters, isEventPathAnalysis, isNodePathAnalysis, isRetentionAnalysis)) {
+    allConditionSql = _getAllConditionSql(eventNames, sqlParameters, isEventPathAnalysis);
   }
 
   const eventConditionProps = _getEventConditionProps(sqlParameters);
@@ -1111,7 +1155,7 @@ export function _buildCommonPartSql(eventNames: string[], sqlParameters: SQLPara
   let baseUserDataSql = '';
   let eventColList: string[] = [];
 
-  const baseEventDataSql = _buildBaseEventDataSql(eventNames, sqlParameters, isEventPathSQL, isNodePathAnalysis);
+  const baseEventDataSql = _buildBaseEventDataSql(eventNames, sqlParameters, isEventPathAnalysis, isNodePathAnalysis);
 
   if (eventConditionProps.hasEventAttribute) {
     const eventAttributes: ColumnAttribute[] = [];
@@ -1166,7 +1210,7 @@ export function _buildCommonPartSql(eventNames: string[], sqlParameters: SQLPara
             ${userOuterCol}
           from
           (
-            ${_buildBaseEventDataTableSQL(eventNames, sqlParameters, isEventPathSQL, isNodePathAnalysis)}
+            ${_buildBaseEventDataTableSQL(eventNames, sqlParameters, isEventPathAnalysis, isNodePathAnalysis)}
           ) as event_base
           ${userOuterSql}
           where 1=1
@@ -1197,6 +1241,20 @@ export function _buildCommonPartSql(eventNames: string[], sqlParameters: SQLPara
   }
 
   return format(resultSql, { language: 'postgresql' });
+}
+
+function _shouldAddAllCondition(eventNames: string[], sqlParameters: SQLParameters,
+  isEventPathAnalysis: boolean, isNodePathAnalysis: boolean, isRetentionAnalysis: boolean): boolean {
+
+  if ( isRetentionAnalysis ) {
+    return false;
+  } else if (isNodePathAnalysis) {
+    return false;
+  } else if (isEventPathAnalysis && eventNames.length < sqlParameters.eventAndConditions!.length ) {
+    return false;
+  }
+
+  return true;
 }
 
 function _buildNodePathSQL(sqlParameters: SQLParameters, nodeType: ExplorePathNodeType) : string {
@@ -1272,7 +1330,7 @@ function _buildEventJoinTable(schema: string, columnsSql: string) {
   `;
 }
 
-function _buildEventNameClause(eventNames: string[], sqlParameters: SQLParameters, isEventPathSQL: boolean, isNodePathSQL: boolean, prefix: string = 'event.') {
+function _buildEventNameClause(eventNames: string[], sqlParameters: SQLParameters, isEventPathAnalysis: boolean, isNodePathSQL: boolean, prefix: string = 'event.') {
 
   const includingOtherEvents: boolean = sqlParameters.pathAnalysis?.includingOtherEvents ? true : false;
   const eventNameInClause = `and ${prefix}event_name in ('${eventNames.join('\',\'')}')`;
@@ -1283,7 +1341,7 @@ function _buildEventNameClause(eventNames: string[], sqlParameters: SQLParameter
     and ${prefix}event_name = '${ (sqlParameters.pathAnalysis?.platform === MetadataPlatform.ANDROID || sqlParameters.pathAnalysis?.platform === MetadataPlatform.IOS) ? '_screen_view' : '_page_view' }'
     ${sqlParameters.pathAnalysis!.platform ? 'and platform = \'' + sqlParameters.pathAnalysis!.platform + '\'' : '' }
     `;
-  } else if (isEventPathSQL && includingOtherEvents) {
+  } else if (isEventPathAnalysis && includingOtherEvents) {
     return `and ${prefix}event_name not in ('${builtInEvents.filter(event => !eventNames.includes(event)).join('\',\'')}')`;
   }
 
@@ -1291,9 +1349,9 @@ function _buildEventNameClause(eventNames: string[], sqlParameters: SQLParameter
 }
 
 function _buildBaseEventDataTableSQL(eventNames: string[], sqlParameters: SQLParameters,
-  isEventPathSQL: boolean = false, isNodePathAnalysis: boolean = false) {
+  isEventPathAnalysis: boolean = false, isNodePathAnalysis: boolean = false) {
   const eventDateSQL = _getEventDateSql(sqlParameters, 'event.');
-  const eventNameClause = _buildEventNameClause(eventNames, sqlParameters, isEventPathSQL, isNodePathAnalysis);
+  const eventNameClause = _buildEventNameClause(eventNames, sqlParameters, isEventPathAnalysis, isNodePathAnalysis);
 
   return `
     select
@@ -1334,11 +1392,11 @@ function _buildBaseEventDataTableSQL(eventNames: string[], sqlParameters: SQLPar
 }
 
 function _buildBaseEventDataSql(eventNames: string[], sqlParameters: SQLParameters,
-  isEventPathSQL: boolean = false, isNodePathAnalysis: boolean = false) {
+  isEventPathAnalysis: boolean = false, isNodePathAnalysis: boolean = false) {
 
   return `
     event_base as (
-      ${_buildBaseEventDataTableSQL(eventNames, sqlParameters, isEventPathSQL, isNodePathAnalysis)}
+      ${_buildBaseEventDataTableSQL(eventNames, sqlParameters, isEventPathAnalysis, isNodePathAnalysis)}
   ),
   `;
 }
@@ -1405,7 +1463,7 @@ function _fillEventNameAndSQLConditions(eventNames: string[], sqlParameters: SQL
 }
 
 function _getAllConditionSql(eventNames: string[], sqlParameters: SQLParameters,
-  isEventPathSQL: boolean = false, simpleVersion: boolean = false) : string {
+  isEventPathAnalysis: boolean = false, simpleVersion: boolean = false) : string {
 
   const prefix = simpleVersion ? 'event.' : '';
   let eventNameAndSQLConditions: EventNameAndConditionsSQL[] = [];
@@ -1424,7 +1482,7 @@ function _getAllConditionSql(eventNames: string[], sqlParameters: SQLParameters,
   }
 
   const includingOtherEvents: boolean = sqlParameters.pathAnalysis?.includingOtherEvents ? true : false;
-  if (isEventPathSQL && includingOtherEvents && allConditionSql !== '' ) {
+  if (isEventPathAnalysis && includingOtherEvents && allConditionSql !== '' ) {
     allConditionSql = allConditionSql + ` or (${prefix}event_name not in ('${eventNames.join('\',\'')}'))`;
   }
 
@@ -1929,7 +1987,7 @@ function _getEventsNameFromConditions(eventAndConditions: EventAndCondition[]) {
   for (const e of eventAndConditions) {
     eventNames.push(e.eventName);
   }
-  return eventNames;
+  return [...new Set(eventNames)];
 }
 
 function _getRetentionAnalysisViewEventNames(sqlParameters: SQLParameters) : string[] {
