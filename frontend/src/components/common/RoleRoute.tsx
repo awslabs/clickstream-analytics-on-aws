@@ -18,7 +18,7 @@ import AccessDenied from 'pages/error-page/AccessDenied';
 import { ReactElement, useContext } from 'react';
 import { AuthContextProps } from 'react-oidc-context';
 import { IUserRole } from 'ts/const';
-import { getUserInfoFormLocalStorage } from 'ts/utils';
+import { getUserInfoFromLocalStorage } from 'ts/utils';
 import Loading from './Loading';
 
 const RoleRoute = ({
@@ -32,7 +32,7 @@ const RoleRoute = ({
   children: ReactElement;
   roles: Array<IUserRole>;
 }) => {
-  const currentUser = useContext(UserContext) ?? getUserInfoFormLocalStorage();
+  const currentUser = useContext(UserContext) ?? getUserInfoFromLocalStorage();
 
   const userHasRequiredRole = !!(
     currentUser && roles.includes(currentUser.role)

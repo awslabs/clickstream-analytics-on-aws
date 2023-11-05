@@ -390,7 +390,7 @@ export const getEventParameters = (
   return [];
 };
 
-export const getUserInfoFormLocalStorage = () => {
+export const getUserInfoFromLocalStorage = () => {
   if (window.localStorage.getItem(CLICK_STREAM_USER_DATA)) {
     return JSON.parse(
       window.localStorage.getItem(CLICK_STREAM_USER_DATA) ?? ''
