@@ -19,11 +19,14 @@ import {
   DeleteDashboardCommand,
   DeleteDataSetCommand,
   DescribeAnalysisCommand,
+  DescribeAnalysisDefinitionCommand,
   DescribeDashboardCommand,
+  DescribeDashboardDefinitionCommand,
   DescribeDataSetCommand,
   QuickSightClient,
   ResourceExistsException,
   ResourceNotFoundException,
+  ResourceStatus,
   UpdateAnalysisCommand,
   UpdateAnalysisPermissionsCommand,
   UpdateDashboardCommand,
@@ -354,20 +357,16 @@ describe('QuickSight Lambda function', () => {
       Status: 200,
     });
 
-    quickSightClientMock.on(DescribeAnalysisCommand).resolves({
-      Analysis: {
-        AnalysisId: 'analysis_0',
-      },
+    quickSightClientMock.on(DescribeAnalysisDefinitionCommand).resolves({
+      ResourceStatus: ResourceStatus.CREATION_SUCCESSFUL,
     });
     quickSightClientMock.on(CreateAnalysisCommand).resolves({
       Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:analysis/analysis_0',
       Status: 200,
     });
 
-    quickSightClientMock.on(DescribeDashboardCommand).resolves({
-      Dashboard: {
-        DashboardId: 'dashboard_0',
-      },
+    quickSightClientMock.on(DescribeDashboardDefinitionCommand).resolves({
+      ResourceStatus: ResourceStatus.CREATION_SUCCESSFUL,
     });
     quickSightClientMock.on(CreateDashboardCommand).resolvesOnce({
       DashboardId: 'dashboard_0',
@@ -375,8 +374,8 @@ describe('QuickSight Lambda function', () => {
     });
 
     const resp = await handler(basicEvent, context) as CdkCustomResourceResponse;
-    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeAnalysisCommand, 1);
-    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDashboardCommand, 1);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeAnalysisDefinitionCommand, 1);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDashboardDefinitionCommand, 1);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDataSetCommand, 2);
 
     expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateDataSetCommand, 2);
@@ -428,14 +427,8 @@ describe('QuickSight Lambda function', () => {
       Status: 200,
     });
 
-    quickSightClientMock.on(DescribeAnalysisCommand).resolvesOnce({
-      Analysis: {
-        AnalysisId: 'analysis_0',
-      },
-    }).resolvesOnce({
-      Analysis: {
-        AnalysisId: 'analysis_1',
-      },
+    quickSightClientMock.on(DescribeAnalysisDefinitionCommand).resolves({
+      ResourceStatus: ResourceStatus.CREATION_SUCCESSFUL,
     });
 
     quickSightClientMock.on(CreateAnalysisCommand).resolvesOnce({
@@ -446,14 +439,10 @@ describe('QuickSight Lambda function', () => {
       Status: 200,
     });
 
-    quickSightClientMock.on(DescribeDashboardCommand).resolvesOnce({
-      Dashboard: {
-        DashboardId: 'dashboard_0',
-      },
+    quickSightClientMock.on(DescribeDashboardDefinitionCommand).resolvesOnce({
+      ResourceStatus: ResourceStatus.CREATION_SUCCESSFUL,
     }).resolvesOnce({
-      Dashboard: {
-        DashboardId: 'dashboard_1',
-      },
+      ResourceStatus: ResourceStatus.CREATION_SUCCESSFUL,
     });
     quickSightClientMock.on(CreateDashboardCommand).resolvesOnce({
       DashboardId: 'dashboard_0',
@@ -464,8 +453,8 @@ describe('QuickSight Lambda function', () => {
     });
 
     const resp = await handler(multiAppIdEvent, context) as CdkCustomResourceResponse;
-    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeAnalysisCommand, 2);
-    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDashboardCommand, 2);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeAnalysisDefinitionCommand, 2);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDashboardDefinitionCommand, 2);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDataSetCommand, 4);
 
     expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateDataSetCommand, 4);
@@ -551,10 +540,8 @@ describe('QuickSight Lambda function', () => {
       Status: 200,
     });
 
-    quickSightClientMock.on(DescribeAnalysisCommand).resolves({
-      Analysis: {
-        AnalysisId: 'analysis_0',
-      },
+    quickSightClientMock.on(DescribeAnalysisDefinitionCommand).resolves({
+      ResourceStatus: ResourceStatus.CREATION_SUCCESSFUL,
     });
     quickSightClientMock.on(CreateAnalysisCommand).resolves({
       Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:analysis/analysis_0',
@@ -570,7 +557,7 @@ describe('QuickSight Lambda function', () => {
       expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateAnalysisCommand, 1);
       expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateDashboardCommand, 1);
       expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDataSetCommand, 2);
-      expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeAnalysisCommand, 1);
+      expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeAnalysisDefinitionCommand, 1);
       return;
     }
     fail('No exception happened when create dashboard when it is already exists');
@@ -582,21 +569,25 @@ describe('QuickSight Lambda function', () => {
     quickSightClientMock.on(DescribeDataSetCommand).rejects(notExistError);
     quickSightClientMock.on(DeleteDataSetCommand).resolves({});
 
-    quickSightClientMock.on(DescribeAnalysisCommand).rejects(notExistError);
+    quickSightClientMock.on(DescribeAnalysisDefinitionCommand).resolves({
+      ResourceStatus: ResourceStatus.DELETED,
+    });
 
     quickSightClientMock.on(DeleteAnalysisCommand).resolves({});
 
-    quickSightClientMock.on(DescribeDashboardCommand).rejects(notExistError);
+    quickSightClientMock.on(DescribeDashboardDefinitionCommand).resolves({
+      ResourceStatus: ResourceStatus.DELETED,
+    });
     quickSightClientMock.on(DeleteDashboardCommand).resolves({});
 
     const resp = await handler(deleteEvent, context) as CdkCustomResourceResponse;
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDataSetCommand, 2);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteDataSetCommand, 2);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateDataSetCommand, 0);
-    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeAnalysisCommand, 1);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeAnalysisDefinitionCommand, 1);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteAnalysisCommand, 1);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateAnalysisCommand, 0);
-    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDashboardCommand, 1);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDashboardDefinitionCommand, 1);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteDashboardCommand, 1);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateDashboardCommand, 0);
 
@@ -613,6 +604,16 @@ describe('QuickSight Lambda function', () => {
       Status: 200,
     });
 
+    quickSightClientMock.on(DescribeDataSetCommand).resolvesOnce({
+      DataSet: {
+        DataSetId: 'dataset_0',
+      },
+    }).resolvesOnce({
+      DataSet: {
+        DataSetId: 'dataset_1',
+      },
+    });
+
     quickSightClientMock.on(UpdateAnalysisCommand).resolves({
       Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:analysis/analysis_0',
       Status: 200,
@@ -624,9 +625,9 @@ describe('QuickSight Lambda function', () => {
     });
 
     const resp = await handler(updateEvent, context) as CdkCustomResourceResponse;
-    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeAnalysisCommand, 0);
-    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDashboardCommand, 0);
-    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDataSetCommand, 0);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDataSetCommand, 2);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeAnalysisDefinitionCommand, 0);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDashboardDefinitionCommand, 0);
 
     expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateDataSetCommand, 0);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateAnalysisCommand, 0);
@@ -656,6 +657,16 @@ describe('QuickSight Lambda function', () => {
       Status: 200,
     });
 
+    quickSightClientMock.on(DescribeDataSetCommand).resolvesOnce({
+      DataSet: {
+        DataSetId: 'dataset_0',
+      },
+    }).resolvesOnce({
+      DataSet: {
+        DataSetId: 'dataset_1',
+      },
+    });
+
     quickSightClientMock.on(UpdateAnalysisCommand).resolves({
       Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:analysis/analysis_0',
       Status: 200,
@@ -666,14 +677,22 @@ describe('QuickSight Lambda function', () => {
       Status: 200,
     });
 
+    quickSightClientMock.on(DescribeAnalysisDefinitionCommand).resolves({
+      ResourceStatus: ResourceStatus.UPDATE_SUCCESSFUL,
+    });
+
+    quickSightClientMock.on(DescribeDashboardDefinitionCommand).resolves({
+      ResourceStatus: ResourceStatus.UPDATE_SUCCESSFUL,
+    });
+
     quickSightClientMock.on(UpdateDataSetPermissionsCommand).resolves({});
     quickSightClientMock.on(UpdateAnalysisPermissionsCommand).resolves({});
     quickSightClientMock.on(UpdateDashboardPermissionsCommand).resolves({});
 
     const resp = await handler(updateEventChangePermission, context) as CdkCustomResourceResponse;
-    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeAnalysisCommand, 0);
-    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDashboardCommand, 0);
-    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDataSetCommand, 0);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDataSetCommand, 2);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeAnalysisDefinitionCommand, 1);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDashboardDefinitionCommand, 1);
 
     expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateDataSetCommand, 0);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateAnalysisCommand, 0);
@@ -728,13 +747,22 @@ describe('QuickSight Lambda function', () => {
 
   test('Update QuickSight dashboard - analysis not exist.', async () => {
 
-    quickSightClientMock.on(UpdateDataSetCommand).rejectsOnce(existError);
     quickSightClientMock.on(UpdateDataSetCommand).resolvesOnce({
       Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:dataset/dataset_0',
       Status: 200,
     }).resolvesOnce({
       Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:dataset/dataset_1',
       Status: 200,
+    });
+
+    quickSightClientMock.on(DescribeDataSetCommand).resolvesOnce({
+      DataSet: {
+        DataSetId: 'dataset_0',
+      },
+    }).resolvesOnce({
+      DataSet: {
+        DataSetId: 'dataset_1',
+      },
     });
 
     quickSightClientMock.on(UpdateAnalysisCommand).rejectsOnce(existError);
@@ -744,7 +772,7 @@ describe('QuickSight Lambda function', () => {
     } catch (err: any) {
       expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeAnalysisCommand, 0);
       expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDashboardCommand, 0);
-      expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDataSetCommand, 0);
+      expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDataSetCommand, 2);
 
       expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateDataSetCommand, 0);
       expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateAnalysisCommand, 0);
@@ -774,6 +802,16 @@ describe('QuickSight Lambda function', () => {
       Status: 200,
     });
 
+    quickSightClientMock.on(DescribeDataSetCommand).resolvesOnce({
+      DataSet: {
+        DataSetId: 'dataset_0',
+      },
+    }).resolvesOnce({
+      DataSet: {
+        DataSetId: 'dataset_1',
+      },
+    });
+
     quickSightClientMock.on(UpdateAnalysisCommand).resolves({
       Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:analysis/analysis_0',
       Status: 200,
@@ -786,7 +824,7 @@ describe('QuickSight Lambda function', () => {
     } catch (err: any) {
       expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeAnalysisCommand, 0);
       expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDashboardCommand, 0);
-      expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDataSetCommand, 0);
+      expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDataSetCommand, 2);
 
       expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateDataSetCommand, 0);
       expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateAnalysisCommand, 0);
@@ -830,24 +868,20 @@ describe('QuickSight Lambda function', () => {
       Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:analysis/analysis_0',
       Status: 200,
     });
-    quickSightClientMock.on(DescribeAnalysisCommand).resolves({
-      Analysis: {
-        AnalysisId: 'analysis_0',
-      },
+    quickSightClientMock.on(DescribeAnalysisDefinitionCommand).resolves({
+      ResourceStatus: ResourceStatus.UPDATE_SUCCESSFUL,
     });
 
     quickSightClientMock.on(CreateDashboardCommand).resolvesOnce({
       DashboardId: 'dashboard_0',
       Status: 200,
     });
-    quickSightClientMock.on(DescribeDashboardCommand).resolves({
-      Dashboard: {
-        DashboardId: 'dashboard_0',
-      },
+    quickSightClientMock.on(DescribeDashboardDefinitionCommand).resolves({
+      ResourceStatus: ResourceStatus.UPDATE_SUCCESSFUL,
     });
     const resp = await handler(updateFromEmptyEvent, context) as CdkCustomResourceResponse;
-    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeAnalysisCommand, 1);
-    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDashboardCommand, 1);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeAnalysisDefinitionCommand, 1);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDashboardDefinitionCommand, 1);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDataSetCommand, 2);
 
     expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateDataSetCommand, 2);
@@ -884,6 +918,24 @@ describe('QuickSight Lambda function', () => {
       Status: 200,
     });
 
+    quickSightClientMock.on(DescribeDataSetCommand).resolvesOnce({
+      DataSet: {
+        DataSetId: 'dataset_0',
+      },
+    }).resolvesOnce({
+      DataSet: {
+        DataSetId: 'dataset_1',
+      },
+    }).resolvesOnce({
+      DataSet: {
+        DataSetId: 'dataset_0',
+      },
+    }).resolvesOnce({
+      DataSet: {
+        DataSetId: 'dataset_1',
+      },
+    });
+
     quickSightClientMock.on(UpdateAnalysisCommand).resolvesOnce({
       Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:analysis/analysis_0',
       Status: 200,
@@ -900,10 +952,18 @@ describe('QuickSight Lambda function', () => {
       Status: 200,
     });
 
+    quickSightClientMock.on(DescribeAnalysisDefinitionCommand).resolves({
+      ResourceStatus: ResourceStatus.UPDATE_SUCCESSFUL,
+    });
+
+    quickSightClientMock.on(DescribeDashboardDefinitionCommand).resolves({
+      ResourceStatus: ResourceStatus.UPDATE_SUCCESSFUL,
+    });
+
     const resp = await handler(multiSchemaUpdateEvent, context) as CdkCustomResourceResponse;
-    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeAnalysisCommand, 0);
-    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDashboardCommand, 0);
-    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDataSetCommand, 0);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDashboardDefinitionCommand, 0);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeAnalysisDefinitionCommand, 0);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDataSetCommand, 4);
 
     expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateDataSetCommand, 0);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateAnalysisCommand, 0);
@@ -933,18 +993,17 @@ describe('QuickSight Lambda function', () => {
       Status: 200,
     });
 
-    quickSightClientMock.on(CreateDataSetCommand).resolvesOnce({
-      Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:dataset/dataset_0',
-      DataSetId: 'dataset_0',
-      Status: 200,
+    quickSightClientMock.on(DescribeDataSetCommand).resolvesOnce({
+      DataSet: {
+        DataSetId: 'dataset_0',
+      },
     }).resolvesOnce({
-      Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:dataset/dataset_1',
-      DataSetId: 'dataset_1',
-      Status: 200,
+      DataSet: {
+        DataSetId: 'dataset_1',
+      },
     });
 
-    quickSightClientMock.on(DeleteDataSetCommand).resolves({});
-    quickSightClientMock.on(DescribeDataSetCommand).rejects(notExistError);
+    quickSightClientMock.on(DeleteDataSetCommand).rejects(notExistError);
 
     quickSightClientMock.on(UpdateAnalysisCommand).resolves({
       Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:analysis/analysis_0',
@@ -952,19 +1011,19 @@ describe('QuickSight Lambda function', () => {
     });
 
     quickSightClientMock.on(DeleteAnalysisCommand).resolvesOnce({});
-    quickSightClientMock.on(DescribeAnalysisCommand).rejectsOnce(notExistError);
+    quickSightClientMock.on(DescribeAnalysisDefinitionCommand).rejectsOnce(notExistError);
 
     quickSightClientMock.on(UpdateDashboardCommand).resolvesOnce({
       DashboardId: 'dashboard_0',
       Status: 200,
     });
     quickSightClientMock.on(DeleteDashboardCommand).resolvesOnce({});
-    quickSightClientMock.on(DescribeDashboardCommand).rejectsOnce(notExistError);
+    quickSightClientMock.on(DescribeDashboardDefinitionCommand).rejectsOnce(notExistError);
 
     const resp = await handler(multiSchemaUpdateWithDeleteEvent, context) as CdkCustomResourceResponse;
 
-    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeAnalysisCommand, 1);
-    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDashboardCommand, 1);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeAnalysisDefinitionCommand, 1);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDashboardDefinitionCommand, 1);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDataSetCommand, 2);
 
     expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateDataSetCommand, 0);
@@ -994,61 +1053,76 @@ describe('QuickSight Lambda function', () => {
       Status: 200,
     });
 
-    quickSightClientMock.on(DeleteDataSetCommand).resolves({});
-    quickSightClientMock.on(DescribeDataSetCommand)
-      .resolvesOnce({
-        DataSet: {
-          DataSetId: 'dataset_0',
-        },
-      }).resolvesOnce({
-        DataSet: {
-          DataSetId: 'dataset_1',
-        },
-      })
-      .rejectsOnce(notExistError)
-      .rejectsOnce(notExistError);
-
-    quickSightClientMock.on(UpdateAnalysisCommand).resolves({
+    quickSightClientMock.on(UpdateAnalysisCommand).resolvesOnce({
       Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:analysis/analysis_0',
       AnalysisId: 'analysis_0',
       Status: 200,
     });
-    quickSightClientMock.on(CreateAnalysisCommand).resolves({
-      Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:analysis/analysis_0',
-      AnalysisId: 'analysis_1',
-      Status: 200,
-    });
-
-    quickSightClientMock.on(DeleteAnalysisCommand).resolvesOnce({});
-    quickSightClientMock.on(DescribeAnalysisCommand).resolvesOnce({
-      Analysis: {
-        AnalysisId: 'analysis_0',
-      },
-    })
-      .rejectsOnce(notExistError);
 
     quickSightClientMock.on(UpdateDashboardCommand).resolvesOnce({
       DashboardId: 'dashboard_0',
       Status: 200,
     });
+
+    quickSightClientMock.on(CreateDataSetCommand).resolvesOnce({
+      Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:dataset/dataset_0',
+      Status: 200,
+    }).resolvesOnce({
+      Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:dataset/dataset_1',
+      Status: 200,
+    });
+
+    quickSightClientMock.on(DescribeDataSetCommand).resolvesOnce({
+      DataSet: {
+        DataSetId: 'dataset_0',
+      },
+    }).resolvesOnce({
+      DataSet: {
+        DataSetId: 'dataset_1',
+      },
+    }).resolvesOnce({
+      DataSet: {
+        DataSetId: 'dataset_0',
+      },
+    }).resolvesOnce({
+      DataSet: {
+        DataSetId: 'dataset_1',
+      },
+    }).rejectsOnce(notExistError)
+      .rejectsOnce(notExistError);;
+
+    quickSightClientMock.on(CreateAnalysisCommand).resolvesOnce({
+      Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:analysis/analysis_0',
+      AnalysisId: 'analysis_1',
+      Status: 200,
+    });
+
     quickSightClientMock.on(CreateDashboardCommand).resolvesOnce({
       DashboardId: 'dashboard_1',
       Status: 200,
     });
 
+    quickSightClientMock.on(DescribeAnalysisDefinitionCommand).resolvesOnce({
+      ResourceStatus: ResourceStatus.CREATION_SUCCESSFUL,
+    }).resolvesOnce({
+      ResourceStatus: ResourceStatus.DELETED,
+    });
+
+
+    quickSightClientMock.on(DeleteDataSetCommand).rejects(notExistError);
+    quickSightClientMock.on(DeleteAnalysisCommand).resolvesOnce({});
+
     quickSightClientMock.on(DeleteDashboardCommand).resolvesOnce({});
-    quickSightClientMock.on(DescribeDashboardCommand)
-      .resolvesOnce({
-        Dashboard: {
-          DashboardId: 'dashboard_1',
-        },
-      })
-      .rejectsOnce(notExistError);
+    quickSightClientMock.on(DescribeDashboardDefinitionCommand).resolvesOnce({
+      ResourceStatus: ResourceStatus.CREATION_SUCCESSFUL,
+    }).resolves({
+      ResourceStatus: ResourceStatus.DELETED,
+    });
 
     const resp = await handler(multiSchemaUpdateWithDeleteAndCreateEvent, context) as CdkCustomResourceResponse;
 
-    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeAnalysisCommand, 2);
-    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDashboardCommand, 2);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeAnalysisDefinitionCommand, 2);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDashboardDefinitionCommand, 2);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDataSetCommand, 4);
 
     expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateDataSetCommand, 2);

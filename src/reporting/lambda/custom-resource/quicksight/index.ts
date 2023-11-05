@@ -34,9 +34,9 @@ import { aws_sdk_client_common_config } from '../../../../common/sdk-client-conf
 import {
   QuicksightCustomResourceLambdaProps,
   dataSetPermissionActions,
-  waitForAnalysisCreateCompleted,
+  waitForAnalysisChangeCompleted,
   waitForAnalysisDeleteCompleted,
-  waitForDashboardCreateCompleted,
+  waitForDashboardChangeCompleted,
   waitForDashboardDeleteCompleted,
   waitForDataSetCreateCompleted,
   waitForDataSetDeleteCompleted,
@@ -454,7 +454,7 @@ const createAnalysis = async (quickSight: QuickSight, awsAccountId: string, prin
 
       SourceEntity: sourceEntity,
     });
-    await waitForAnalysisCreateCompleted(quickSight, awsAccountId, analysisId);
+    await waitForAnalysisChangeCompleted(quickSight, awsAccountId, analysisId);
     logger.info(`Create analysis finished. Id: ${analysisId}`);
 
     return analysis;
@@ -485,7 +485,7 @@ const createDashboard = async (quickSight: QuickSight, awsAccountId: string, pri
       SourceEntity: sourceEntity,
 
     });
-    await waitForDashboardCreateCompleted(quickSight, awsAccountId, dashboardId);
+    await waitForDashboardChangeCompleted(quickSight, awsAccountId, dashboardId);
     logger.info(`Create dashboard finished. Id: ${dashboardId}`);
 
     return dashboard;
@@ -681,6 +681,8 @@ const updateDataSet = async (quickSight: QuickSight, awsAccountId: string,
     });
     logger.info(`update dataset finished. Id: ${dataset?.DataSetId}`);
 
+    await waitForDataSetCreateCompleted(quickSight, awsAccountId, datasetId);
+
     if (principalArn !== undefined) {
       await quickSight.updateDataSetPermissions({
         AwsAccountId: awsAccountId,
@@ -722,6 +724,7 @@ const updateAnalysis = async (quickSight: QuickSight, awsAccountId: string, data
     logger.info(`update analysis finished. Id: ${analysisId}`);
 
     if (principalArn !== undefined) {
+      await waitForAnalysisChangeCompleted(quickSight, awsAccountId, analysisId);
       await quickSight.updateAnalysisPermissions({
         AwsAccountId: awsAccountId,
         AnalysisId: analysisId,
@@ -762,7 +765,9 @@ const updateDashboard = async (quickSight: QuickSight, awsAccountId: string, dat
     });
     logger.info(`update dashboard finished. id: ${dashboardId}`);
 
+
     if (principalArn !== undefined) {
+      await waitForDashboardChangeCompleted(quickSight, awsAccountId, dashboardId);
       await quickSight.updateDashboardPermissions({
         AwsAccountId: awsAccountId,
         DashboardId: dashboardId,
