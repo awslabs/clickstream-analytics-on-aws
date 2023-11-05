@@ -42,11 +42,12 @@ i18n
     ],
     defaultNS: 'common',
     fallbackLng: 'en-US',
-    debug: true,
+    debug: false,
     saveMissing: true,
     interpolation: {
       escapeValue: false, // not needed for react as it escapes by default
     },
+    supportedLngs: ['en-US', 'zh-CN'],
     backend: {
       loadPath: '/locales/{{lng}}/{{ns}}.json',
     },
