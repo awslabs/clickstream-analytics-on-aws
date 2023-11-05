@@ -23,7 +23,7 @@ import { ResourcePropertiesType, TABLES_VIEWS_FOR_REPORTING, handler, physicalId
 import 'aws-sdk-client-mock-jest';
 import { ProvisionedRedshiftProps, SQLViewDef } from '../../../../../src/analytics/private/model';
 import { reportingViewsDef, schemaDefs } from '../../../../../src/analytics/private/sql-def';
-import { TABLE_NAME_EVENT_PARAMETER, TABLE_NAME_ODS_EVENT } from '../../../../../src/common/constant';
+import { CLICKSTREAM_EVENT_VIEW_NAME, CLICKSTREAM_USER_ATTR_VIEW_NAME, TABLE_NAME_EVENT, TABLE_NAME_EVENT_PARAMETER, TABLE_NAME_ODS_EVENT } from '../../../../../src/common/constant';
 import { getMockContext } from '../../../../common/lambda-context';
 import { basicCloudFormationEvent } from '../../../../common/lambda-events';
 
@@ -467,9 +467,9 @@ describe('Custom resource - Create schemas for applications in Redshift database
 
     }).callsFakeOnce(input => {
       console.log('input.Sqls.length-3:' + input.Sqls.length);
-      const expectedSql = 'CREATE MATERIALIZED VIEW app2.clickstream_event_view_v1';
-      const expectedSql2 = 'GRANT SELECT ON app2.clickstream_user_attr_view_v1 TO clickstream_report_user_abcde;';
-      const expectedSql3 = 'GRANT SELECT ON app2.event TO clickstream_report_user_abcde;';
+      const expectedSql = `CREATE MATERIALIZED VIEW app2.${CLICKSTREAM_EVENT_VIEW_NAME}`;
+      const expectedSql2 = `GRANT SELECT ON app2.${CLICKSTREAM_USER_ATTR_VIEW_NAME} TO clickstream_report_user_abcde;`;
+      const expectedSql3 = `GRANT SELECT ON app2.${TABLE_NAME_EVENT} TO clickstream_report_user_abcde;`;
       const expectedSql4 = 'GRANT SELECT ON app2.item_m_view TO clickstream_report_user_abcde;';
       if (input.Sqls.length !== reportingSQLForApp2Count
         || !(input.Sqls[0] as string).startsWith(expectedSql)
@@ -482,8 +482,8 @@ describe('Custom resource - Create schemas for applications in Redshift database
       return { Id: 'Id-1' };
     }).callsFakeOnce(input => {
       console.log('input.Sqls.length-4:' + input.Sqls.length);
-      const expectedSql1 = 'GRANT SELECT ON app1.clickstream_user_attr_view_v1 TO clickstream_report_user_abcde;';
-      const expectedSql2 = 'GRANT SELECT ON app1.event TO clickstream_report_user_abcde;';
+      const expectedSql1 = `GRANT SELECT ON app1.${CLICKSTREAM_USER_ATTR_VIEW_NAME} TO clickstream_report_user_abcde;`;
+      const expectedSql2 = `GRANT SELECT ON app1.${TABLE_NAME_EVENT} TO clickstream_report_user_abcde;`;
       const expectedSql3 = 'GRANT SELECT ON app1.item_m_view TO clickstream_report_user_abcde;';
       if (input.Sqls.length !== reportingSQLForApp1Count
         || !(input.Sqls[reportingSQLForApp1Count - TABLES_VIEWS_FOR_REPORTING.length - 1] as string).startsWith(expectedSql1)
