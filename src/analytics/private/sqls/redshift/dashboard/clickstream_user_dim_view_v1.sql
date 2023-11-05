@@ -1,4 +1,4 @@
-CREATE OR REPLACE VIEW {{schema}}.{{userDimViewName}}
+CREATE OR REPLACE VIEW {{schema}}.{{viewName}}
 AS
 WITH user_base AS (
   SELECT

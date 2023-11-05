@@ -1,4 +1,4 @@
-CREATE MATERIALIZED VIEW {{schema}}.{{deviceViewName}}
+CREATE MATERIALIZED VIEW {{schema}}.{{viewName}}
 BACKUP NO
 SORTKEY(event_date)
 AUTO REFRESH YES

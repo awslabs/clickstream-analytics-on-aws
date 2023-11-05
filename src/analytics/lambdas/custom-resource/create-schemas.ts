@@ -27,14 +27,13 @@ import {
   UpdateSecretCommandInput,
 } from '@aws-sdk/client-secrets-manager';
 import { CdkCustomResourceHandler, CdkCustomResourceEvent, CdkCustomResourceResponse, CloudFormationCustomResourceEvent, Context, CloudFormationCustomResourceUpdateEvent } from 'aws-lambda';
-import { CLICKSTREAM_DEVICE_VIEW_NAME, CLICKSTREAM_EVENT_PARAMETER_VIEW_NAME, CLICKSTREAM_EVENT_VIEW_NAME, CLICKSTREAM_LIFECYCLE_WEEKLY_VIEW_NAME, CLICKSTREAM_RETENTION_VIEW_NAME, CLICKSTREAM_SESSION_VIEW_NAME, CLICKSTREAM_USER_ATTR_VIEW_NAME, CLICKSTREAM_USER_DIM_VIEW_NAME, CLICKSTREAM_LIFECYCLE_DAILY_VIEW_NAME } from '../../../common/constant';
 import { getFunctionTags } from '../../../common/lambda/tags';
 import { BIUserCredential } from '../../../common/model';
 import { logger } from '../../../common/powertools';
 import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
 import { generateRandomStr } from '../../../common/utils';
 import { SQL_TEMPLATE_PARAMETER } from '../../private/constant';
-import { CreateDatabaseAndSchemas, MustacheParamType, SQLDef } from '../../private/model';
+import { CreateDatabaseAndSchemas, MustacheParamType, SQLDef, SQLViewDef } from '../../private/model';
 import { getSqlContent, getSqlContents } from '../../private/utils';
 import { getRedshiftClient, executeStatementsWithWait } from '../redshift-data';
 
@@ -45,18 +44,6 @@ export type ResourcePropertiesType = CreateDatabaseAndSchemas & {
 const secretManagerClient = new SecretsManagerClient({
   ...aws_sdk_client_common_config,
 });
-
-const viewNames = {
-  eventViewName: CLICKSTREAM_EVENT_VIEW_NAME,
-  eventParameterViewName: CLICKSTREAM_EVENT_PARAMETER_VIEW_NAME,
-  sessionViewName: CLICKSTREAM_SESSION_VIEW_NAME,
-  retentionViewName: CLICKSTREAM_RETENTION_VIEW_NAME,
-  lifecycleDailyViewName: CLICKSTREAM_LIFECYCLE_DAILY_VIEW_NAME,
-  lifecycleWeeklyViewName: CLICKSTREAM_LIFECYCLE_WEEKLY_VIEW_NAME,
-  userDimViewName: CLICKSTREAM_USER_DIM_VIEW_NAME,
-  userAttrViewName: CLICKSTREAM_USER_ATTR_VIEW_NAME,
-  deviceViewName: CLICKSTREAM_DEVICE_VIEW_NAME,
-};
 
 export const physicalIdPrefix = 'create-redshift-db-schemas-custom-resource-';
 export const handler: CdkCustomResourceHandler = async (event: CloudFormationCustomResourceEvent, context: Context) => {
@@ -257,9 +244,9 @@ async function createSchemas(props: ResourcePropertiesType, biUsername: string) 
     for (const sqlDef of props.schemaDefs) {
       if (sqlDef.multipleLine !== undefined && sqlDef.multipleLine === 'true') {
         logger.info('multipleLine SQL: ', sqlDef.sqlFile);
-        sqlStatements.push(...getSqlContents(sqlDef.sqlFile, mustacheParam));
+        sqlStatements.push(...getSqlContents(sqlDef, mustacheParam));
       } else {
-        sqlStatements.push(getSqlContent(sqlDef.sqlFile, mustacheParam));
+        sqlStatements.push(getSqlContent(sqlDef, mustacheParam));
       }
     }
     sqlStatementsByApp.set(app, sqlStatements);
@@ -297,10 +284,10 @@ async function updateSchemas(props: ResourcePropertiesType, biUsername: string, 
     for (const sqlDef of props.schemaDefs) {
       if (sqlDef.multipleLine !== undefined && sqlDef.multipleLine === 'true') {
         logger.info('multipleLine SQL: ', sqlDef.sqlFile);
-        sqlStatements.push(...getSqlContents(sqlDef.sqlFile, mustacheParam));
+        sqlStatements.push(...getSqlContents(sqlDef, mustacheParam));
         continue;
       }
-      sqlStatements.push(getSqlContent(sqlDef.sqlFile, mustacheParam));
+      sqlStatements.push(getSqlContent(sqlDef, mustacheParam));
     }
     sqlStatementsByApp.set(app, sqlStatements);
   };
@@ -333,27 +320,22 @@ async function updateSchemas(props: ResourcePropertiesType, biUsername: string, 
 }
 
 
-function getUpdatableSql(sqlOrViewDefs: SQLDef[], oldSqlArray: string[], mustacheParam: MustacheParamType, path: string = '/opt') {
+function getUpdatableSql(sqlOrViewDefs: SQLDef[] | SQLViewDef[], oldSqlArray: string[], mustacheParam: MustacheParamType, path: string = '/opt') {
   logger.info('getUpdatableSql', { sqlOrViewDefs, oldSqlArray });
 
-  const updateFilesInfo = [];
   const sqlStatements: string[] = [];
   for (const schemaOrViewDef of sqlOrViewDefs) {
     logger.info(`schemaOrViewDef.updatable: ${schemaOrViewDef.updatable}`);
 
-    if (!oldSqlArray.includes(schemaOrViewDef.sqlFile)) {
-      logger.info(`new sql: ${schemaOrViewDef.sqlFile}`);
-      sqlStatements.push(getSqlContent(schemaOrViewDef.sqlFile, mustacheParam, path));
-      updateFilesInfo.push('new: ' + schemaOrViewDef.sqlFile);
+    if ('sqlFile' in schemaOrViewDef && !oldSqlArray.includes(schemaOrViewDef.sqlFile)) {
+      logger.info('new sql: ', { schemaOrViewDef });
+      sqlStatements.push(getSqlContent(schemaOrViewDef, mustacheParam, path));
     } else if (schemaOrViewDef.updatable === 'true') {
-      logger.info(`update sql: ${schemaOrViewDef.sqlFile}`);
-      sqlStatements.push(getSqlContent(schemaOrViewDef.sqlFile, mustacheParam, path));
-      updateFilesInfo.push('update: ' + schemaOrViewDef.sqlFile);
+      logger.info('update sql: ', { schemaOrViewDef });
+      sqlStatements.push(getSqlContent(schemaOrViewDef, mustacheParam, path));
     } else {
-      logger.info(`skip update ${schemaOrViewDef.sqlFile} due to it is not updatable.`);
+      logger.info('skip update sql due to it is not updatable.', { schemaOrViewDef });
     }
-
-    logger.info('getUpdatableSql', { updateFilesInfo });
   }
 
   return sqlStatements;
@@ -400,12 +382,11 @@ async function createViewForReporting(props: ResourcePropertiesType, biUser: str
       table_user: odsTableNames.user,
       table_item: odsTableNames.item,
       ...SQL_TEMPLATE_PARAMETER,
-      ...viewNames,
     };
 
     for (const viewDef of props.reportingViewsDef) {
-      views.push(viewDef.viewName!);
-      sqlStatements.push(getSqlContent(viewDef.sqlFile, mustacheParam, '/opt/dashboard'));
+      views.push(viewDef.viewName);
+      sqlStatements.push(getSqlContent(viewDef, mustacheParam, '/opt/dashboard'));
     }
     sqlStatements.push(..._buildGrantSqlStatements(views, app, biUser));
     sqlStatementsByApp.set(app, sqlStatements);
@@ -436,12 +417,11 @@ async function updateViewForReporting(props: ResourcePropertiesType, oldProps: R
       table_user: odsTableNames.user,
       table_item: odsTableNames.item,
       ...SQL_TEMPLATE_PARAMETER,
-      ...viewNames,
     };
     const views: string[] = [];
     for (const viewDef of props.reportingViewsDef) {
-      views.push(viewDef.viewName!);
-      sqlStatements.push(getSqlContent(viewDef.sqlFile, mustacheParam, '/opt/dashboard'));
+      views.push(viewDef.viewName);
+      sqlStatements.push(getSqlContent(viewDef, mustacheParam, '/opt/dashboard'));
     }
     sqlStatements.push(..._buildGrantSqlStatements(views, app, biUser));
 
@@ -458,7 +438,6 @@ async function updateViewForReporting(props: ResourcePropertiesType, oldProps: R
       table_user: odsTableNames.user,
       table_item: odsTableNames.item,
       ...SQL_TEMPLATE_PARAMETER,
-      ...viewNames,
     };
 
     const sqlStatements2 = getUpdatableSql(props.reportingViewsDef, appUpdateProps.oldViewSqls, mustacheParam, '/opt/dashboard');
@@ -466,7 +445,7 @@ async function updateViewForReporting(props: ResourcePropertiesType, oldProps: R
     //grant select on views to bi user.
     const views: string[] = [];
     for (const sqlDef of props.reportingViewsDef) {
-      views.push(sqlDef.viewName!);
+      views.push(sqlDef.viewName);
     }
     sqlStatements2.push(..._buildGrantSqlStatements(views, app, biUser));
 
@@ -553,7 +532,7 @@ function getAppUpdateProps(props: ResourcePropertiesType, oldProps: ResourceProp
     oldAppIdArray.push(...oldProps.appIds.trim().split(','));
   };
   for (const view of oldProps.reportingViewsDef) {
-    oldViewSqlArray.push(view.sqlFile);
+    oldViewSqlArray.push(`${view.viewName}.sql`);
   }
   logger.info(`old sql array: ${oldViewSqlArray}`);
 

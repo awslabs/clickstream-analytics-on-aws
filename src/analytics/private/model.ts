@@ -89,11 +89,17 @@ interface CustomProperties {
   readonly provisionedRedshiftProps?: ProvisionedRedshiftProps;
 }
 
-export type SQLDef = {
+type SQLBasic = {
   readonly updatable: 'true' | 'false';
-  readonly sqlFile: string;
-  readonly viewName?: string;
   readonly multipleLine?: 'true' | 'false';
+}
+
+export type SQLDef = SQLBasic & {
+  readonly sqlFile: string;
+}
+
+export type SQLViewDef = SQLBasic & {
+  readonly viewName: string;
 }
 
 export type CreateDatabaseAndSchemas = CustomProperties & {
@@ -104,7 +110,7 @@ export type CreateDatabaseAndSchemas = CustomProperties & {
   readonly dataAPIRole: string;
   readonly redshiftBIUserParameter: string;
   readonly redshiftBIUsernamePrefix: string;
-  readonly reportingViewsDef: SQLDef[];
+  readonly reportingViewsDef: SQLViewDef[];
   readonly schemaDefs: SQLDef[];
 }
 export type CreateMappingRoleUser = Omit<CustomProperties, 'provisionedRedshiftProps'> & {

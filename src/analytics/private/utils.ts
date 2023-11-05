@@ -14,21 +14,28 @@
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import Mustache from 'mustache';
-import { MustacheParamBaseType } from './model';
+import { MustacheParamBaseType, SQLDef, SQLViewDef } from './model';
 
 export function getSqlContent(
-  sqlFile: string,
+  sqlDef: {
+    sqlFile: string;
+  } | {
+    viewName: string;
+  },
   mustacheParam: MustacheParamBaseType,
   path: string = '/opt',
 ): string {
-  const sqlTemplate = readFileSync(join(path, `${sqlFile}`), 'utf8');
-  return Mustache.render(sqlTemplate, mustacheParam);
+  const sqlTemplate = readFileSync(join(path, ('sqlFile' in sqlDef) ? sqlDef.sqlFile : `${sqlDef.viewName}.sql`), 'utf8');
+  return Mustache.render(sqlTemplate, {
+    ...mustacheParam,
+    viewName: 'viewName' in sqlDef ? sqlDef.viewName : undefined,
+  });
 };
 
 export function getSqlContents(
-  sqlFile: string,
+  sqlDef: SQLDef | SQLViewDef,
   mustacheParam: MustacheParamBaseType,
   path: string = '/opt',
 ): string[] {
-  return getSqlContent(sqlFile, mustacheParam, path).split(';').filter(sql => sql.trim().length > 0).map(sql => sql.trim());
+  return getSqlContent(sqlDef, mustacheParam, path).split(';').filter(sql => sql.trim().length > 0).map(sql => sql.trim());
 };

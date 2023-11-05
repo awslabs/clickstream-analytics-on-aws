@@ -1,4 +1,4 @@
-CREATE MATERIALIZED VIEW {{schema}}.{{sessionViewName}}
+CREATE MATERIALIZED VIEW {{schema}}.{{viewName}}
 BACKUP NO
 SORTKEY(session_date)
 AUTO REFRESH YES

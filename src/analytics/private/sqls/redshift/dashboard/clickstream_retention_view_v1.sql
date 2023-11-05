@@ -1,4 +1,4 @@
-CREATE MATERIALIZED VIEW {{schema}}.{{retentionViewName}}
+CREATE MATERIALIZED VIEW {{schema}}.{{viewName}}
 BACKUP NO
 SORTKEY(first_date)
 AUTO REFRESH YES

@@ -1,4 +1,4 @@
-CREATE MATERIALIZED VIEW {{schema}}.{{lifecycleDailyViewName}}
+CREATE MATERIALIZED VIEW {{schema}}.{{viewName}}
 BACKUP NO
 AUTO REFRESH YES
 AS

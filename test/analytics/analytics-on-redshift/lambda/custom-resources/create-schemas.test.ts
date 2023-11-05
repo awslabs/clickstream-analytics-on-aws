@@ -21,7 +21,7 @@ import mockfs from 'mock-fs';
 import { RedshiftOdsTables } from '../../../../../src/analytics/analytics-on-redshift';
 import { ResourcePropertiesType, TABLES_VIEWS_FOR_REPORTING, handler, physicalIdPrefix } from '../../../../../src/analytics/lambdas/custom-resource/create-schemas';
 import 'aws-sdk-client-mock-jest';
-import { ProvisionedRedshiftProps, SQLDef } from '../../../../../src/analytics/private/model';
+import { ProvisionedRedshiftProps, SQLViewDef } from '../../../../../src/analytics/private/model';
 import { reportingViewsDef, schemaDefs } from '../../../../../src/analytics/private/sql-def';
 import { TABLE_NAME_EVENT_PARAMETER, TABLE_NAME_ODS_EVENT } from '../../../../../src/common/constant';
 import { getMockContext } from '../../../../common/lambda-context';
@@ -120,11 +120,11 @@ describe('Custom resource - Create schemas for applications in Redshift database
     RequestType: 'Update',
   };
 
-  const newReportingView = 'clickstream_new_reporting_view.sql';
-  const testReportingViewsDef2: SQLDef[] = reportingViewsDef.slice();
+  const newReportingView = 'clickstream_new_reporting_view_v0';
+  const testReportingViewsDef2: SQLViewDef[] = reportingViewsDef.slice();
   testReportingViewsDef2.push({
     updatable: 'false',
-    sqlFile: newReportingView,
+    viewName: newReportingView,
   });
 
   const clusterId = 'redshift-cluster-1';
@@ -173,7 +173,7 @@ describe('Custom resource - Create schemas for applications in Redshift database
   };
 
   const defs: { [key: string]: string } = {};
-  defs[`/opt/dashboard/${newReportingView}`] = '';
+  defs[`/opt/dashboard/${newReportingView}.sql`] = '';
   beforeEach(async () => {
     redshiftDataMock.reset();
     smMock.reset();
@@ -184,7 +184,7 @@ describe('Custom resource - Create schemas for applications in Redshift database
         return acc;
       }, {} as { [key: string]: string })),
       ...(reportingViewsDef.reduce((acc, item, _index) => {
-        acc[`/opt/dashboard/${item.sqlFile}`] = testSqlContent(`${rootPath}dashboard/${item.sqlFile}`);
+        acc[`/opt/dashboard/${item.viewName}.sql`] = testSqlContent(`${rootPath}dashboard/${item.viewName}.sql`);
         return acc;
       }, {} as { [key: string]: string })),
       ...defs,

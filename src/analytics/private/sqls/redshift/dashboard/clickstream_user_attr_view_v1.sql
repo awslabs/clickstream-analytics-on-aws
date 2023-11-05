@@ -1,4 +1,4 @@
-CREATE OR REPLACE VIEW {{schema}}.{{userAttrViewName}}
+CREATE OR REPLACE VIEW {{schema}}.{{viewName}}
 AS
 select 
    user_id
