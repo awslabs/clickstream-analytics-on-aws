@@ -253,6 +253,10 @@ export const clickstream_event_parameter_view_columns: InputColumn[] = [
     Type: 'STRING',
   },
   {
+    Name: 'event_param_value',
+    Type: 'STRING',
+  },
+  {
     Name: 'platform',
     Type: 'STRING',
   },
