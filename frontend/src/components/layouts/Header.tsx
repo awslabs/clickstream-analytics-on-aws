@@ -15,6 +15,7 @@ import { TopNavigation } from '@cloudscape-design/components';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
+  CLICK_STREAM_USER_DATA,
   DEFAULT_ZH_LANG,
   EN_TEXT,
   LANGUAGE_ITEMS,
@@ -64,7 +65,7 @@ const Header: React.FC<IHeaderProps> = (props: IHeaderProps) => {
       );
       const queryParams = new URLSearchParams({
         client_id: configJSONObj.oidc_client_id,
-        id_token_hint: user.id_token,
+        id_token_hint: user?.id_token,
         logout_uri: redirectUrl,
         redirect_uri: redirectUrl,
         post_logout_redirect_uri: redirectUrl,
@@ -109,6 +110,7 @@ const Header: React.FC<IHeaderProps> = (props: IHeaderProps) => {
             iconName: 'user-profile',
             onItemClick: (item) => {
               if (item.detail.id === 'signout') {
+                window.localStorage.removeItem(CLICK_STREAM_USER_DATA);
                 if (fullLogoutUrl) {
                   signOut?.();
                   window.location.href = fullLogoutUrl;

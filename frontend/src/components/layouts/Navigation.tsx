@@ -22,6 +22,7 @@ import React, { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import { IUserRole } from 'ts/const';
 import { getDocumentList } from 'ts/url';
+import { getUserInfoFormLocalStorage } from 'ts/utils';
 
 interface INavigationProps {
   activeHref: string;
@@ -30,7 +31,7 @@ interface INavigationProps {
 const Navigation: React.FC<INavigationProps> = (props: INavigationProps) => {
   const { activeHref } = props;
   const { t, i18n } = useTranslation();
-  const currentUser = useContext(UserContext);
+  const currentUser = useContext(UserContext) ?? getUserInfoFormLocalStorage();
 
   const navHeader = {
     text: t('name'),

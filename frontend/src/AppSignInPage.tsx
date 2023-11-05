@@ -19,6 +19,7 @@ import ReSignIn from 'pages/error-page/ReSignIn';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from 'react-oidc-context';
+import { CLICK_STREAM_USER_DATA } from 'ts/const';
 
 const SignedInPage: React.FC = () => {
   const auth = useAuth();
@@ -34,6 +35,10 @@ const SignedInPage: React.FC = () => {
         auth.user?.profile.email
       );
       if (success) {
+        window.localStorage.setItem(
+          CLICK_STREAM_USER_DATA,
+          JSON.stringify(data)
+        );
         setCurrentUser(data);
       }
     } catch (e) {

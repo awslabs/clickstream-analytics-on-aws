@@ -36,10 +36,11 @@ import UserList from 'pages/user/UserList';
 import React, { Suspense, useContext, useEffect } from 'react';
 import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import { IUserRole } from 'ts/const';
+import { getUserInfoFormLocalStorage } from 'ts/utils';
 import Home from './pages/home/Home';
 
 const LoginCallback: React.FC = () => {
-  const currentUser = useContext(UserContext);
+  const currentUser = useContext(UserContext) ?? getUserInfoFormLocalStorage();
 
   useEffect(() => {
     const baseUrl = '/';

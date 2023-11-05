@@ -19,7 +19,11 @@ import { GlobalProvider } from 'context/StateContext';
 import { WebStorageStateStore } from 'oidc-client-ts';
 import React, { useEffect, useState } from 'react';
 import { AuthProvider, AuthProviderProps } from 'react-oidc-context';
-import { CONFIG_URL, PROJECT_CONFIG_JSON } from 'ts/const';
+import {
+  CLICK_STREAM_USER_DATA,
+  CONFIG_URL,
+  PROJECT_CONFIG_JSON,
+} from 'ts/const';
 import { defaultStr } from 'ts/utils';
 
 const App: React.FC = () => {
@@ -75,6 +79,7 @@ const App: React.FC = () => {
   useEffect(() => {
     const { type } = window.performance.getEntriesByType('navigation')[0];
     if (type === 'reload') {
+      window.localStorage.removeItem(CLICK_STREAM_USER_DATA);
       getConfig();
     } else {
       setLocalStorageAfterLoad();
