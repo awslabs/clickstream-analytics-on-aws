@@ -49,7 +49,9 @@
     "app_id" : "uba-app",
     "id" : "com.example.demoapplication",
     "install_source" : "C001",
-    "version" : "1.0"
+    "version" : "1.0",
+    "sdk_version" : "0.2.0",
+    "sdk_name" : "aws-solution-clickstream-sdk"
   },
   "platform" : "ANDROID",
   "project_id" : "test_project_id_01",
