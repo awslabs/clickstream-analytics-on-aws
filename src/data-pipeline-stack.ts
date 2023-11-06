@@ -12,6 +12,7 @@
  */
 
 import { Database, Table } from '@aws-cdk/aws-glue-alpha';
+import { Architecture } from '@aws-sdk/client-emr-serverless';
 import { CfnCondition, CfnOutput, CfnStack, Fn, NestedStack, NestedStackProps, Stack, StackProps } from 'aws-cdk-lib';
 import { SubnetSelection } from 'aws-cdk-lib/aws-ec2';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
@@ -26,6 +27,9 @@ import { SolutionInfo } from './common/solution-info';
 import { getExistVpc } from './common/vpc-utils';
 import { ClickstreamSinkTables, DataPipelineConstruct, DataPipelineProps } from './data-pipeline/data-pipeline';
 import { createStackParameters } from './data-pipeline/parameter';
+
+
+export type EmrApplicationArchitectureType = 'Auto' | Architecture;
 
 export interface DataProcessingStackProps extends StackProps {
 }
@@ -62,6 +66,7 @@ export class DataPipelineStack extends Stack {
         emrApplicationIdleTimeoutMinutesParam,
         userKeepDaysParam,
         itemKeepDaysParam,
+        emrApplicationArchitectureParam,
       },
     } = createStackParameters(this);
 
@@ -142,6 +147,7 @@ export class DataPipelineStack extends Stack {
       emrVersion: emrVersionParam.valueAsString,
       userKeepDays: userKeepDaysParam.valueAsNumber,
       itemKeepDays: itemKeepDaysParam.valueAsNumber,
+      emrApplicationArchitecture: emrApplicationArchitectureParam.valueAsString as EmrApplicationArchitectureType,
     });
 
     (dataPipelineStackWithCustomPlugins.nestedStackResource as CfnStack).cfnOptions.condition = withCustomPluginsCondition;
@@ -197,6 +203,7 @@ export class DataPipelineStack extends Stack {
       emrVersion: emrVersionParam.valueAsString,
       userKeepDays: userKeepDaysParam.valueAsNumber,
       itemKeepDays: itemKeepDaysParam.valueAsNumber,
+      emrApplicationArchitecture: emrApplicationArchitectureParam.valueAsString as EmrApplicationArchitectureType,
     });
 
     (dataPipelineStackWithoutCustomPlugins.nestedStackResource as CfnStack).cfnOptions.condition = withoutCustomPluginsCondition;

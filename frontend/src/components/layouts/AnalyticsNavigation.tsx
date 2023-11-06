@@ -62,7 +62,7 @@ const AnalyticsNavigation: React.FC<INavigationProps> = (
     },
     {
       text: t('nav.analytics.data-management'),
-      icon: <ExtendIcon icon="settings" />,
+      icon: <ExtendIcon icon="BsTagsFill" />,
       href: `/analytics/${projectId}/app/${appId}/data-management`,
     },
   ];

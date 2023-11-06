@@ -53,6 +53,8 @@ test('should create EMR-serverless application when RequestType is Create', asyn
       securityGroupId: 'sg-102392x23df',
       subnetIds: 'subnet-0001,subnet-0002',
       idleTimeoutMinutes: '3',
+      architecture: 'Auto',
+
     },
   };
   const context = getMockContext();
@@ -77,7 +79,7 @@ test('should create EMR-serverless application when RequestType is Create', asyn
   expect(s3ClientMock).toHaveReceivedCommandTimes(PutObjectCommand, 1);
 
   expect(emrClientMock).toHaveReceivedNthCommandWith(1, CreateApplicationCommand, {
-    architecture: 'X86_64',
+    architecture: 'ARM64',
     autoStartConfiguration: {
       enabled: true,
     },
@@ -129,6 +131,7 @@ test('should delete EMR-serverless application when RequestType is Delete', asyn
       securityGroupId: 'sg-102392x23df',
       subnetIds: 'subnet-0001,subnet-0002',
       idleTimeoutMinutes: '6',
+      architecture: 'Auto',
     },
   };
   const context = getMockContext();
@@ -181,6 +184,7 @@ test('should create EMR-serverless application when RequestType is Update ', asy
       securityGroupId: 'sg-102392x23df',
       subnetIds: 'subnet-0001,subnet-0002',
       idleTimeoutMinutes: '6',
+      architecture: 'Auto',
     },
   };
   const context = getMockContext();
@@ -254,6 +258,7 @@ test('should handle delete error', async () => {
       securityGroupId: 'sg-102392x23df',
       subnetIds: 'subnet-0001,subnet-0002',
       idleTimeoutMinutes: '6',
+      architecture: 'Auto',
     },
   };
   const context = getMockContext();
@@ -310,6 +315,7 @@ test('should handle create error', async () => {
       securityGroupId: 'sg-102392x23df',
       subnetIds: 'subnet-0001,subnet-0002',
       idleTimeoutMinutes: '6',
+      architecture: 'Auto',
     },
   };
   const context = getMockContext();

@@ -11,9 +11,10 @@
  *  and limitations under the License.
  */
 
+import { Architecture } from '@aws-sdk/client-emr-serverless';
 import { CfnParameter } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
-import { EMR_VERSION_PATTERN, PARAMETER_GROUP_LABEL_VPC, PARAMETER_LABEL_PRIVATE_SUBNETS, PARAMETER_LABEL_VPCID, S3_BUCKET_NAME_PATTERN, S3_PATH_PLUGIN_FILES_PATTERN, S3_PATH_PLUGIN_JARS_PATTERN, SCHEDULE_EXPRESSION_PATTERN, TRANSFORMER_AND_ENRICH_CLASS_NAMES } from '../common/constant';
+import { EMR_ARCHITECTURE_AUTO, EMR_VERSION_PATTERN, PARAMETER_GROUP_LABEL_VPC, PARAMETER_LABEL_PRIVATE_SUBNETS, PARAMETER_LABEL_VPCID, S3_BUCKET_NAME_PATTERN, S3_PATH_PLUGIN_FILES_PATTERN, S3_PATH_PLUGIN_JARS_PATTERN, SCHEDULE_EXPRESSION_PATTERN, TRANSFORMER_AND_ENRICH_CLASS_NAMES } from '../common/constant';
 import { Parameters, SubnetParameterType } from '../common/parameters';
 
 export function createStackParameters(scope: Construct) {
@@ -135,6 +136,17 @@ export function createStackParameters(scope: Construct) {
     type: 'Number',
   });
 
+  const emrApplicationArchitectureParam = new CfnParameter(scope, 'EmrApplicationArchitecture', {
+    description: 'Emr-Serverless application architecture',
+    default: 'Auto',
+    allowedValues: [
+      EMR_ARCHITECTURE_AUTO,
+      Architecture.ARM64,
+      Architecture.X86_64,
+    ],
+    type: 'String',
+  });
+
   const metadata = {
     'AWS::CloudFormation::Interface': {
       ParameterGroups: [
@@ -193,6 +205,7 @@ export function createStackParameters(scope: Construct) {
         {
           Label: { default: 'EMR serverless application configuration' },
           Parameters: [
+            emrApplicationArchitectureParam.logicalId,
             emrVersionParam.logicalId,
             emrApplicationIdleTimeoutMinutesParam.logicalId,
           ],
@@ -269,6 +282,10 @@ export function createStackParameters(scope: Construct) {
           default: 'Output Format',
         },
 
+        [emrApplicationArchitectureParam.logicalId]: {
+          default: 'EMR serverless application architecture',
+        },
+
         [emrVersionParam.logicalId]: {
           default: 'EMR version',
         },
@@ -304,6 +321,7 @@ export function createStackParameters(scope: Construct) {
       emrApplicationIdleTimeoutMinutesParam,
       userKeepDaysParam,
       itemKeepDaysParam,
+      emrApplicationArchitectureParam,
     },
   };
 }

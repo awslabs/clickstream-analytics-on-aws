@@ -35,6 +35,7 @@ import { addCfnNagSuppressRules } from '../common/cfn-nag';
 import { DATA_PROCESSING_APPLICATION_NAME_PREFIX, TABLE_NAME_INGESTION } from '../common/constant';
 import { createSGForEgressToAwsService } from '../common/sg';
 import { getShortIdOfStack } from '../common/stack';
+import { EmrApplicationArchitectureType } from '../data-pipeline-stack';
 
 export enum SinkTableEnum {
   EVENT='event',
@@ -65,6 +66,7 @@ export interface DataPipelineProps {
   readonly emrApplicationIdleTimeoutMinutes: number;
   readonly userKeepDays: number;
   readonly itemKeepDays: number;
+  readonly emrApplicationArchitecture: EmrApplicationArchitectureType;
 }
 
 export interface ClickstreamSinkTables {
@@ -276,6 +278,7 @@ export class DataPipelineConstruct extends Construct {
       subnetIds: Fn.join(',', this.props.vpcSubnets.subnets!.map((s) => s.subnetId)),
       pipelineS3Bucket: this.props.pipelineS3Bucket,
       pipelineS3Prefix: this.props.pipelineS3Prefix,
+      architecture: this.props.emrApplicationArchitecture,
     });
     const applicationId = emrServerlessAppCr.getAttString('ApplicationId');
     return applicationId;

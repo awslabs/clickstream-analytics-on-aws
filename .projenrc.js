@@ -115,6 +115,7 @@ const depsForApiProject = [
   'sql-formatter@^13.0.0',
   'i18next@^22.4.6',
   'i18next-fs-backend@^2.2.0',
+  'fast-memoize@^2.5.1',
   ...smithyPackagesDeps,
   ...awsSDKPackagesDeps,
   ...awsSDKPackagesDepsForApiProject,
