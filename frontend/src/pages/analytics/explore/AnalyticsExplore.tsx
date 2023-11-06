@@ -15,9 +15,6 @@ import {
   AppLayout,
   ContentLayout,
   FormField,
-  Header,
-  Link,
-  Popover,
   Select,
   SelectProps,
   SpaceBetween,
@@ -45,6 +42,8 @@ import {
   getWarmUpParameters,
   parametersConvertToCategoryItemType,
 } from '../analytics-utils';
+import AnalyticsCustomHeader from '../comps/AnalyticsCustomHeader';
+import AnalyticsCustomHeaderBg from '../comps/AnalyticsCustomHeaderBg';
 import AnalyticsEvent from '../event/AnalyticsEvent';
 import AnalyticsFunnel from '../funnel/AnalyticsFunnel';
 import AnalyticsPath from '../path/AnalyticsPath';
@@ -53,6 +52,7 @@ import AnalyticsRetention from '../retention/AnalyticsRetention';
 const AnalyticsExplore: React.FC = () => {
   const { t } = useTranslation();
   const { projectId, appId } = useParams();
+  const [headerHeight, setHeaderHeight] = useState(100);
 
   const [selectedOption, setSelectedOption] =
     useState<SelectProps.Option | null>({
@@ -79,16 +79,6 @@ const AnalyticsExplore: React.FC = () => {
         {
           label: defaultStr(t('analytics:explore.retentionAnalysis')),
           value: 'Retention',
-        },
-      ],
-    },
-    {
-      label: defaultStr(t('analytics:explore.userAnalytics')),
-      disabled: true,
-      options: [
-        {
-          label: defaultStr(t('analytics:explore.userSearch')),
-          value: 'UserSearch',
         },
       ],
     },
@@ -280,54 +270,37 @@ const AnalyticsExplore: React.FC = () => {
           navigationHide
           content={
             <ContentLayout
-              header={
-                <SpaceBetween direction="vertical" size="xs">
-                  <Header
-                    variant="h1"
-                    info={
-                      <Popover
-                        triggerType="custom"
-                        content={t('analytics:information.exploreInfo')}
-                      >
-                        <Link variant="info">{t('info')}</Link>
-                      </Popover>
-                    }
-                  >
-                    {t('analytics:explore.title')}
-                  </Header>
-                  <div className="custom-description">
-                    {t('analytics:explore.description')}
-                  </div>
-                  <div className="mt-10 flex align-center">
-                    <FormField
-                      label={
-                        <SpaceBetween direction="horizontal" size="xxs">
-                          <div>{t('analytics:explore.analyticsModel')}</div>
-                          <Popover
-                            triggerType="custom"
-                            content={t(
-                              'analytics:information.analyticsModelInfo'
-                            )}
-                          >
-                            <Link variant="info">{t('info')}</Link>
-                          </Popover>
-                        </SpaceBetween>
-                      }
-                    ></FormField>
-                    <div className="m-w-320 ml-10">
-                      <Select
-                        disabled={!pipeline}
-                        selectedOption={selectedOption}
-                        onChange={({ detail }) =>
-                          setSelectedOption(detail.selectedOption)
-                        }
-                        options={analyticsModelOptions}
-                      />
-                    </div>
-                  </div>
-                </SpaceBetween>
-              }
+              header={<AnalyticsCustomHeaderBg height={headerHeight} />}
             >
+              <AnalyticsCustomHeader
+                updateContentHeader={(height) => {
+                  setHeaderHeight(height);
+                }}
+                headerText={defaultStr(t('analytics:explore.title'))}
+                descriptionText={t('analytics:explore.description')}
+              >
+                <div className="mt-20 flex align-center">
+                  <FormField
+                    label={
+                      <SpaceBetween direction="horizontal" size="xxs">
+                        <div className="white-title">
+                          {t('analytics:explore.analyticsModel')}
+                        </div>
+                      </SpaceBetween>
+                    }
+                  ></FormField>
+                  <div className="ml-10" style={{ minWidth: 220 }}>
+                    <Select
+                      disabled={!pipeline}
+                      selectedOption={selectedOption}
+                      onChange={({ detail }) =>
+                        setSelectedOption(detail.selectedOption)
+                      }
+                      options={analyticsModelOptions}
+                    />
+                  </div>
+                </div>
+              </AnalyticsCustomHeader>
               {!pipeline && <Loading />}
               {pipeline && selectedOption?.value === 'Funnel' && (
                 <AnalyticsFunnel

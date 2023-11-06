@@ -50,10 +50,6 @@ code {
   width: 75%;
 }
 
-.m-w-320 {
-  min-width: 320px;
-}
-
 .align-center {
   align-items: center;
 }
@@ -988,6 +984,35 @@ ul.menu-list li.checkbox-item {
   }
   [class^='awsui_breadcrumb'] {
     background-color: #014a87 !important;
+  }
+
+  .analytics-custom-header-bg {
+    background-color: #014a87 !important;
+  }
+
+  // custom header
+  .analytics-custom-header {
+    padding-bottom: 20px;
+    .white-title {
+      color: #d1d5de;
+    }
+    .analytics-custom-title {
+      font-size: 24px;
+      font-weight: bold;
+      line-height: 1em;
+      color: #fff;
+    }
+    .analytics-custom-description {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto',
+        'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans',
+        'Helvetica Neue', sans-serif;
+      -webkit-font-smoothing: antialiased;
+      margin-top: 10px;
+      color: #8d99a8;
+      font-size: 14px;
+      line-height: 20px;
+      font-weight: 400;
+    }
   }
 
   .cs-analytics-header {
