@@ -346,7 +346,7 @@ describe('DataPipelineStack parameter test', () => {
     expect(cfnInterface.ParameterGroups).toBeDefined();
 
     const paramCount = Object.keys(cfnInterface.ParameterLabels).length;
-    expect(paramCount).toEqual(21);
+    expect(paramCount).toEqual(22);
   });
 
 
@@ -500,6 +500,15 @@ describe('DataPipelineStack parameter test', () => {
       expect(v).not.toMatch(regex);
     }
   });
+
+
+  test('Should has parameter EmrApplicationArchitecture', () => {
+    template.hasParameter('EmrApplicationArchitecture', {
+      Type: 'String',
+      Default: 'X86_64',
+    });
+  });
+
 
 });
 

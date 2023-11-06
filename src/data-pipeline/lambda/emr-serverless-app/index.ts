@@ -26,6 +26,7 @@ export interface ResourcePropertiesType {
   securityGroupId: string;
   subnetIds: string;
   idleTimeoutMinutes: string;
+  architecture: 'ARM64' | 'X86_64';
 }
 
 const region = process.env.AWS_REGION!;
@@ -79,7 +80,7 @@ async function createEMRServerlessApp(props: ResourcePropertiesType): Promise<st
     name: props.name,
     releaseLabel: props.version,
     type: 'SPARK',
-    architecture: Architecture.X86_64,
+    architecture: props.architecture == 'ARM64' ? Architecture.ARM64: Architecture.X86_64,
     networkConfiguration: {
       subnetIds: props.subnetIds.split(','),
       securityGroupIds: [props.securityGroupId],

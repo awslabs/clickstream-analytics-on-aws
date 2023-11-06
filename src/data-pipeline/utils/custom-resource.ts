@@ -180,6 +180,7 @@ export interface EMRServerlessApplicationProps {
   idleTimeoutMinutes: number;
   pipelineS3Bucket: IBucket;
   pipelineS3Prefix: string;
+  architecture: 'ARM64' | 'X86_64';
 }
 
 function createEMRServerlessApplicationLambda(

@@ -135,6 +135,16 @@ export function createStackParameters(scope: Construct) {
     type: 'Number',
   });
 
+  const emrApplicationArchitectureParam = new CfnParameter(scope, 'EmrApplicationArchitecture', {
+    description: 'Emr-Serverless application architecture',
+    default: 'X86_64',
+    allowedValues: [
+      'ARM64',
+      'X86_64',
+    ],
+    type: 'String',
+  });
+
   const metadata = {
     'AWS::CloudFormation::Interface': {
       ParameterGroups: [
@@ -193,6 +203,7 @@ export function createStackParameters(scope: Construct) {
         {
           Label: { default: 'EMR serverless application configuration' },
           Parameters: [
+            emrApplicationArchitectureParam.logicalId,
             emrVersionParam.logicalId,
             emrApplicationIdleTimeoutMinutesParam.logicalId,
           ],
@@ -269,6 +280,10 @@ export function createStackParameters(scope: Construct) {
           default: 'Output Format',
         },
 
+        [emrApplicationArchitectureParam.logicalId]: {
+          default: 'EMR serverless application architecture',
+        },
+
         [emrVersionParam.logicalId]: {
           default: 'EMR version',
         },
@@ -304,6 +319,7 @@ export function createStackParameters(scope: Construct) {
       emrApplicationIdleTimeoutMinutesParam,
       userKeepDaysParam,
       itemKeepDaysParam,
+      emrApplicationArchitectureParam,
     },
   };
 }

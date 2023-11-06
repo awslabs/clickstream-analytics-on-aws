@@ -62,6 +62,7 @@ export class DataPipelineStack extends Stack {
         emrApplicationIdleTimeoutMinutesParam,
         userKeepDaysParam,
         itemKeepDaysParam,
+        emrApplicationArchitectureParam,
       },
     } = createStackParameters(this);
 
@@ -142,6 +143,7 @@ export class DataPipelineStack extends Stack {
       emrVersion: emrVersionParam.valueAsString,
       userKeepDays: userKeepDaysParam.valueAsNumber,
       itemKeepDays: itemKeepDaysParam.valueAsNumber,
+      emrApplicationArchitecture: emrApplicationArchitectureParam.valueAsString as 'ARM64' | 'X86_64',
     });
 
     (dataPipelineStackWithCustomPlugins.nestedStackResource as CfnStack).cfnOptions.condition = withCustomPluginsCondition;
@@ -203,6 +205,7 @@ export class DataPipelineStack extends Stack {
       emrVersion: emrVersionParam.valueAsString,
       userKeepDays: userKeepDaysParam.valueAsNumber,
       itemKeepDays: itemKeepDaysParam.valueAsNumber,
+      emrApplicationArchitecture: emrApplicationArchitectureParam.valueAsString as 'ARM64' | 'X86_64',
     });
 
     (dataPipelineStackWithoutCustomPlugins.nestedStackResource as CfnStack).cfnOptions.condition = withoutCustomPluginsCondition;

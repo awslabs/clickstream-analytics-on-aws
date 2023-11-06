@@ -66,6 +66,7 @@ export interface DataPipelineProps {
   readonly emrApplicationIdleTimeoutMinutes: number;
   readonly userKeepDays: number;
   readonly itemKeepDays: number;
+  readonly emrApplicationArchitecture: 'ARM64' | 'X86_64';
 }
 
 export interface ClickstreamSinkTables {
@@ -278,6 +279,7 @@ export class DataPipelineConstruct extends Construct {
       subnetIds: Fn.join(',', this.props.vpcSubnets.subnets!.map((s) => s.subnetId)),
       pipelineS3Bucket: this.props.pipelineS3Bucket,
       pipelineS3Prefix: this.props.pipelineS3Prefix,
+      architecture: this.props.emrApplicationArchitecture,
     });
     const applicationId = emrServerlessAppCr.getAttString('ApplicationId');
     return applicationId;
