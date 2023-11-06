@@ -3138,19 +3138,6 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
     }
   });
 
-  test('Check ScanMetadataWorkflowCheckScanMetadataJobStatusFnSG', () => {
-    if (stack.nestedStacks.redshiftServerlessStack) {
-      const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
-      const sg = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::EC2::SecurityGroup', 'ScanMetadataWorkflowCheckScanMetadataStatusFnSG');
-      expect(sg).toBeDefined();
-    }
-    if (stack.nestedStacks.redshiftProvisionedStack) {
-      const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftProvisionedStack);
-      const sg = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::EC2::SecurityGroup', 'ScanMetadataWorkflowCheckScanMetadataStatusFnSG');
-      expect(sg).toBeDefined();
-    }
-  });
-
   test('Check ScanMetadataWorkflowCheckScanMetadataJobStatusRole', () => {
     if (stack.nestedStacks.redshiftServerlessStack) {
       const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);

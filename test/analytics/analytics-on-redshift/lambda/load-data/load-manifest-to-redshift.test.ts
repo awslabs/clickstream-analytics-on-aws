@@ -63,6 +63,25 @@ const loadManifestEvent: LoadManifestEvent = {
       }],
     },
     manifestFileName: 's3://DOC-EXAMPLE-BUCKET/manifest/app150be34be-fdec-4b45-8b14-63c38f910a56.manifest',
+    retryCount: 0,
+  },
+};
+
+const loadManifestEvent2: LoadManifestEvent = {
+  detail: {
+    execution_id: 'arn:aws:states:us-east-2:xxxxxxxxxxxx:execution:LoadManifestStateMachineAE0969CA-v2ur6ASaxNOQ:12ec840c-6282-4d53-475d-6db473e539c3_70bfb836-c7d5-7cab-75b0-5222e78194ac',
+    appId: 'app2',
+    jobList: {
+      entries:
+      [{
+        url: 's3://DOC-EXAMPLE-BUCKET/project1/ods_external_events/partition_app=app1/partition_year=2023/partition_month=01/partition_day=15/clickstream-1-job_part00000-2.parquet.snappy',
+        meta: {
+          content_length: 10324001,
+        },
+      }],
+    },
+    manifestFileName: 's3://DOC-EXAMPLE-BUCKET/manifest/app150be34be-fdec-4b45-8b14-63c38f910a56-2.manifest',
+    retryCount: 3,
   },
 };
 const context = getMockContext();
@@ -85,14 +104,15 @@ describe('Lambda - do loading manifest to Redshift Serverless via COPY command',
   });
 
   test('Executed Redshift copy command', async () => {
-    const exeuteId = 'Id-1';
+    const executeId = 'Id-1';
     dynamoDBClientMock.on(UpdateCommand).resolvesOnce({});
-    redshiftDataMock.on(ExecuteStatementCommand).resolvesOnce({ Id: exeuteId });
+    redshiftDataMock.on(ExecuteStatementCommand).resolvesOnce({ Id: executeId });
 
     const resp = await handler(loadManifestEvent, context);
     expect(resp).toEqual({
       detail: expect.objectContaining({
-        id: exeuteId,
+        id: executeId,
+        retryCount: 0,
       }),
     });
     expect(dynamoDBClientMock).toHaveReceivedCommandTimes(UpdateCommand, 1);
@@ -104,6 +124,32 @@ describe('Lambda - do loading manifest to Redshift Serverless via COPY command',
       [AnalyticsCustomMetricsName.FILE_LOADED, 'Count', 1],
     ]);
     expect(publishStoredMetricsMock).toBeCalledTimes(1);
+  });
+
+
+  test('retryCount should be passed through', async () => {
+    const executeId = 'Id-1';
+    dynamoDBClientMock.on(UpdateCommand).resolvesOnce({});
+    redshiftDataMock.on(ExecuteStatementCommand).resolvesOnce({ Id: executeId });
+
+    const resp = await handler(loadManifestEvent2, context);
+    expect(resp).toEqual({
+      detail: expect.objectContaining({
+        id: executeId,
+        retryCount: 3,
+        appId: 'app2',
+        jobList: {
+          entries:
+          [{
+            url: 's3://DOC-EXAMPLE-BUCKET/project1/ods_external_events/partition_app=app1/partition_year=2023/partition_month=01/partition_day=15/clickstream-1-job_part00000-2.parquet.snappy',
+            meta: {
+              content_length: 10324001,
+            },
+          }],
+        },
+        manifestFileName: 's3://DOC-EXAMPLE-BUCKET/manifest/app150be34be-fdec-4b45-8b14-63c38f910a56-2.manifest',
+      }),
+    });
   });
 
   test('Update DDB error when doing load Redshift', async () => {
@@ -158,11 +204,11 @@ describe('Lambda - do loading manifest to Provisioned Redshift via COPY command'
   });
 
   test('Executed Redshift copy command', async () => {
-    const exeuteId = 'Id-1';
+    const executeId = 'Id-1';
     dynamoDBClientMock.on(UpdateCommand).resolvesOnce({});
     redshiftDataMock.on(ExecuteStatementCommand).callsFakeOnce(input => {
       if (input as ExecuteStatementCommandInput) {
-        if (input.Sql.includes(`COPY app1.${process.env.REDSHIFT_ODS_TABLE_NAME} FROM `)) {return { Id: exeuteId };}
+        if (input.Sql.includes(`COPY app1.${process.env.REDSHIFT_ODS_TABLE_NAME} FROM `)) {return { Id: executeId };}
       }
       throw new Error(`Sql '${input.Sql}' is not expected.`);
     },
@@ -171,7 +217,8 @@ describe('Lambda - do loading manifest to Provisioned Redshift via COPY command'
     const resp = await handler(loadManifestEvent, context);
     expect(resp).toEqual({
       detail: expect.objectContaining({
-        id: exeuteId,
+        id: executeId,
+        retryCount: 0,
       }),
     });
     expect(dynamoDBClientMock).toHaveReceivedCommandTimes(UpdateCommand, 1);

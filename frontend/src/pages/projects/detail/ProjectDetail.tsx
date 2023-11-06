@@ -25,6 +25,7 @@ import Navigation from 'components/layouts/Navigation';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
+import { defaultStr } from 'ts/utils';
 import NonePipeline from './comp/NonePipeline';
 import ProjectPipeline from './comp/ProjectPipeline';
 
@@ -79,7 +80,7 @@ const ProjectDetail: React.FC = () => {
       href: '/projects',
     },
     {
-      text: projectInfo?.name ?? '',
+      text: defaultStr(projectInfo?.name),
       href: '/',
     },
   ];
@@ -98,7 +99,7 @@ const ProjectDetail: React.FC = () => {
         <ProjectPipeline
           loadingRefresh={loadingPipeline}
           reloadPipeline={() => {
-            getPipelineByProjectId(id ?? '');
+            getPipelineByProjectId(defaultStr(id));
           }}
           pipelineInfo={projectPipeline}
         />

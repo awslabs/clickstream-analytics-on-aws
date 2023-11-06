@@ -80,6 +80,7 @@ public final class TransformerV2 {
     public static final String TABLE_ETL_USER_TRAFFIC_SOURCE = "etl_user_traffic_source";
     public static final String TABLE_ETL_USER_DEVICE_ID = "etl_user_device_id";
     public static final String TABLE_ETL_USER_PAGE_REFERER = "etl_user_page_referer";
+    public static final String TABLE_ETL_USER_CHANNEL = "etl_user_channel";
     public static final String UPDATE_DATE = "update_date";
     public static final String INCREMENTAL_SUFFIX = "_incremental_v1";
     public static final String FULL_SUFFIX = "_full_v1";
@@ -111,7 +112,10 @@ public final class TransformerV2 {
     public static final String PROP_PAGE_REFERRER = "_page" + REFERRER;
     public static final String REFERER = "_referer";
     public static final String COL_PAGE_REFERER = "_page" + REFERER;
-    public static final String PAGE_VIEW = "_page_view";
+    public static final String EVENT_PROFILE_SET = "_profile_set";
+    public static final String EVENT_FIRST_OPEN = "_first_open";
+    public static final String EVENT_FIRST_VISIT = "_first_visit";
+    public static final String APP_INFO = "app_info";
     private final Cleaner cleaner = new Cleaner();
     private final EventParamsConverter eventParamsConverter = new EventParamsConverter();
     private final UserPropertiesConverter userPropertiesConverter = new UserPropertiesConverter();
@@ -177,7 +181,7 @@ public final class TransformerV2 {
         SparkSession spark = userDataset.sparkSession();
         String tableName = TABLE_ETL_USER_PAGE_REFERER;
 
-        Dataset<Row> newUserRefererDataset = userDataset.filter(col(EVENT_NAME).equalTo(PAGE_VIEW))
+        Dataset<Row> newUserRefererDataset = userDataset
                 .withColumn(COL_PAGE_REFERER,
                         coalesce(
                                 get_json_object(attributesCol, "$." + PROP_PAGE_REFERRER).cast(DataTypes.StringType),
@@ -268,6 +272,52 @@ public final class TransformerV2 {
                 .withColumn(DEVICE_ID_LIST, array_sort(array_distinct(flatten(col("device_id_list_list")))))
                 .select(APP_ID, USER_PSEUDO_ID, DEVICE_ID_LIST, EVENT_TIMESTAMP)
                 .distinct();
+    }
+
+    private static Dataset<Row> getAggUserChannelDataset(final Dataset<Row> newUserChannelDataset) {
+        return newUserChannelDataset.groupBy(APP_ID, USER_PSEUDO_ID)
+                .agg(min_by(struct(
+                                col(CHANNEL),
+                                col(EVENT_TIMESTAMP)),
+                        col(EVENT_TIMESTAMP)).alias("c"))
+                .select(col(APP_ID), col(USER_PSEUDO_ID), expr("c.*"))
+                .distinct();
+    }
+
+    private static Dataset<Row> getUserChannelDataset(final Dataset<Row> userDataset,
+                                                      final long newUserCount) {
+        Column dataCol = col("data");
+        Column attributesCol = dataCol.getField(ATTRIBUTES);
+        SparkSession spark = userDataset.sparkSession();
+        String tableName = TABLE_ETL_USER_CHANNEL;
+
+        Dataset<Row> newUserChannelDataset = userDataset
+                .withColumn(CHANNEL,
+                        get_json_object(attributesCol, "$." + CHANNEL).cast(DataTypes.StringType))
+                .filter(col(CHANNEL).isNotNull())
+                .select(APP_ID, USER_PSEUDO_ID, CHANNEL, EVENT_TIMESTAMP);
+
+        long newChannelDatasetCount = newUserChannelDataset.count();
+        log.info(NEW_USER_COUNT + "=" + newUserCount + ", newChannelCount=" + newChannelDatasetCount);
+
+        setSchemaMap(newUserChannelDataset, tableName);
+
+        if (newChannelDatasetCount > 0) {
+            Dataset<Row> newAggUserChannelDataset = getAggUserChannelDataset(newUserChannelDataset);
+            log.info("newAggUserChannelDataset count:" + newAggUserChannelDataset.count());
+            String path = saveIncrementalDatasetWithTableName(tableName, newAggUserChannelDataset);
+            Dataset<Row> allUserChannelDataset = readDatasetFromPath(spark, path, ContextUtil.getUserKeepDays());
+            log.info("allUserChannelDataset count:" + allUserChannelDataset.count());
+            Dataset<Row> aggUserChannelDataset = getAggUserChannelDataset(allUserChannelDataset);
+            log.info("aggUserChannelDataset count:" + aggUserChannelDataset.count());
+            saveFullDataset(tableName, aggUserChannelDataset);
+            return aggUserChannelDataset;
+        } else if (newUserCount > 0 && newChannelDatasetCount == 0) {
+            String pathFull = getPathForTable(tableName + FULL_SUFFIX);
+            return readDatasetFromPath(spark, pathFull, ContextUtil.getUserKeepDays());
+        } else {
+            return null;
+        }
     }
 
 
@@ -433,7 +483,7 @@ public final class TransformerV2 {
                 "device",
                 "geo",
                 "traffic_source",
-                "app_info",
+                APP_INFO,
                 "platform",
                 "project_id",
                 ITEMS,
@@ -532,28 +582,23 @@ public final class TransformerV2 {
 
     private Optional<Dataset<Row>> extractUser(final Dataset<Row> dataset) {
         SparkSession spark = dataset.sparkSession();
-        Column dataCol = col("data");
-        Column attributesCol = dataCol.getField(ATTRIBUTES);
-        Dataset<Row> userDataset = dataset.filter((col(USER_PSEUDO_ID).isNotNull()));
-
-        Dataset<Row> possibleUpdateUserIdDataset = dataset.select(col(APP_ID), col(USER_PSEUDO_ID)).distinct();
-
-        Dataset<Row> profileSetDataset = userDataset
+        Dataset<Row> profileSetDataset =dataset
+                .filter((col(USER_PSEUDO_ID).isNotNull()))
                 .filter(col(EVENT_NAME)
-                        .isin("user_profile_set", "_user_profile_set", "_profile_set", "_first_open"));
+                        .isin("user_profile_set", "_user_profile_set", EVENT_PROFILE_SET, EVENT_FIRST_OPEN, EVENT_FIRST_VISIT));
 
         long newUserCount = profileSetDataset.count();
         log.info(NEW_USER_COUNT + ":" + newUserCount);
 
-        Dataset<Row> userReferrerDataset = getPageRefererDataset(userDataset, newUserCount);
-        Dataset<Row> userDeviceIdDataset = getUserDeviceIdDataset(userDataset, newUserCount);
-        Dataset<Row> userTrafficSourceDataset = getUserTrafficSourceDataset(userDataset, newUserCount);
+        Dataset<Row> userReferrerDataset = getPageRefererDataset(profileSetDataset, newUserCount);
+        Dataset<Row> userDeviceIdDataset = getUserDeviceIdDataset(profileSetDataset, newUserCount);
+        Dataset<Row> userTrafficSourceDataset = getUserTrafficSourceDataset(profileSetDataset, newUserCount);
+        Dataset<Row> userChannelDataset = getUserChannelDataset(profileSetDataset, newUserCount);
 
         Dataset<Row> profileSetDataset1 = this.userPropertiesConverter.transform(profileSetDataset);
 
         Dataset<Row> newUserProfileMainDataset = profileSetDataset1
                 .withColumn(FIRST_VISIT_DATE, to_date(timestamp_seconds(col(USER_FIRST_TOUCH_TIMESTAMP).$div(1000))))
-                .withColumn(CHANNEL, get_json_object(attributesCol, "$._channel").alias("install_source"))
                 .select(
                         APP_ID,
                         EVENT_DATE,
@@ -563,8 +608,7 @@ public final class TransformerV2 {
                         USER_FIRST_TOUCH_TIMESTAMP,
                         "user_properties",
                         "user_ltv",
-                        FIRST_VISIT_DATE,
-                        CHANNEL
+                        FIRST_VISIT_DATE
                 ).distinct();
 
         String tableName = ETLRunner.TableName.USER.name;
@@ -593,16 +637,16 @@ public final class TransformerV2 {
         Column appIdCol = fullAggUserDataset.col(APP_ID);
         Column eventTimestampCol =  fullAggUserDataset.col(EVENT_TIMESTAMP);
 
-        Column userIdJoinForPossibleUpdate = userPseudoIdCol.equalTo(possibleUpdateUserIdDataset.col(USER_PSEUDO_ID)).and(appIdCol.equalTo(possibleUpdateUserIdDataset.col(APP_ID)));
         Column userIdJoinForDeviceId = userPseudoIdCol.equalTo(userDeviceIdDataset.col(USER_PSEUDO_ID)).and(appIdCol.equalTo(userDeviceIdDataset.col(APP_ID)));
         Column userIdJoinForTrafficSource = userPseudoIdCol.equalTo(userTrafficSourceDataset.col(USER_PSEUDO_ID)).and(appIdCol.equalTo(userTrafficSourceDataset.col(APP_ID)));
         Column userIdJoinForPageReferrer = userPseudoIdCol.equalTo(userReferrerDataset.col(USER_PSEUDO_ID)).and(appIdCol.equalTo(userReferrerDataset.col(APP_ID)));
+        Column userIdJoinForChannel= userPseudoIdCol.equalTo(userChannelDataset.col(USER_PSEUDO_ID)).and(appIdCol.equalTo(userChannelDataset.col(APP_ID)));
 
         Dataset<Row> joinedPossibleUpdateUserDataset = fullAggUserDataset
-                .join(possibleUpdateUserIdDataset, userIdJoinForPossibleUpdate, "inner")
                 .join(userDeviceIdDataset, userIdJoinForDeviceId, "left")
                 .join(userTrafficSourceDataset, userIdJoinForTrafficSource, "left")
-                .join(userReferrerDataset, userIdJoinForPageReferrer, "left");
+                .join(userReferrerDataset, userIdJoinForPageReferrer, "left")
+                .join(userChannelDataset, userIdJoinForChannel, "left");
 
         log.info("joinedPossibleUpdateUserDataset:" + joinedPossibleUpdateUserDataset.count());
         Dataset<Row> joinedPossibleUpdateUserDatasetRt = joinedPossibleUpdateUserDataset.select(appIdCol,
@@ -654,11 +698,11 @@ public final class TransformerV2 {
     }
 
 
-    private Dataset<Row> convertUri(final Dataset<Row> dataset, final String fileName, final DataType dataType) {
-        String tmpStrFileName = fileName + "_tmp_";
+    private Dataset<Row> convertUri(final Dataset<Row> dataset, final String fieldName, final DataType dataType) {
+        String tmpStrFileName = fieldName + "_tmp_";
         return dataset
-                .withColumn(tmpStrFileName, regexp_extract(col("uri"), fileName + "=([^&]+)", 1))
-                .withColumn(fileName, expr("nullif (" + tmpStrFileName + ", '')").cast(dataType)).drop(tmpStrFileName);
+                .withColumn(tmpStrFileName, regexp_extract(col("uri"), fieldName + "=([^&]+)", 1))
+                .withColumn(fieldName, expr("nullif (" + tmpStrFileName + ", '')").cast(dataType)).drop(tmpStrFileName);
     }
 
     private Dataset<Row> convertGeo(final Dataset<Row> dataset) {
@@ -689,11 +733,15 @@ public final class TransformerV2 {
         Column attributesCol = dataCol.getField(ATTRIBUTES);
 
         return dataset
-                .withColumn("app_info", struct(
+                .withColumn(APP_INFO, struct(
                         (dataCol.getItem(APP_ID)).alias(APP_ID),
                         (dataCol.getItem("app_package_name")).alias("id"),
-                        get_json_object(attributesCol, "$._channel").alias("install_source"),
-                        (dataCol.getItem("app_version")).alias("version")));
+                        get_json_object(attributesCol, "$." + CHANNEL).alias("install_source"),
+                        (dataCol.getItem("app_version")).alias("version"),
+                        dataCol.getItem("sdk_version").alias("sdk_version"),
+                        dataCol.getItem("sdk_name").alias("sdk_name")
+                        )
+                );
     }
 
     private Dataset<Row> convertDevice(final Dataset<Row> dataset) {
@@ -752,6 +800,9 @@ public final class TransformerV2 {
         });
         l.add(new Object[] {
                 TABLE_ETL_USER_TRAFFIC_SOURCE, userKeepDays
+        });
+        l.add(new Object[] {
+                TABLE_ETL_USER_CHANNEL, userKeepDays
         });
         l.add(new Object[] {
                 ETLRunner.TableName.USER.name, userKeepDays

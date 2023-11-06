@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import MetadataPlatformFC from 'pages/analytics/metadata/comps/MetadataPlatform';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { MetadataSource } from 'ts/explore-types';
@@ -70,6 +71,16 @@ const AttributePreview: React.FC<AttributePreviewProps> = (
               </div>
               <div className="info-value">{previewItem.valueType}</div>
             </div>
+            {previewItem.platform && (
+              <div className="info-tem">
+                <div className="info-key">
+                  {t('analytics:labels.previewPlatform')}
+                </div>
+                <div className="info-value">
+                  <MetadataPlatformFC platform={previewItem.platform ?? []} />
+                </div>
+              </div>
+            )}
             <div className="info-tem">
               <div className="info-key">
                 {t('analytics:labels.previewUpdateTime')}

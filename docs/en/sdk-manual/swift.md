@@ -254,6 +254,34 @@ Current login user's attributes will be cached in disk, so the next time app lau
     [ClickstreamObjc flushEvents];
     ```
 
+#### Disable SDK
+
+You can disable the SDK in the scenario you need. After disabling the SDK, the SDK will not handle the logging and sending of any events. Of course you can enable the SDK when you need to continue logging events.
+
+=== "Swift"
+
+    ```swift
+    import Clickstream
+    
+    // disable SDK
+    ClickstreamAnalytics.disable()
+    
+    // enable SDK
+    ClickstreamAnalytics.enable()
+    ```
+
+=== "Objective-C"
+
+    ```objective-c
+    import Clickstream;
+    
+    // disable SDK
+    [ClickstreamObjc disable];
+    
+    // enable SDK
+    [ClickstreamObjc enable];
+    ```
+
 #### Configuration update
 
 After initializing the SDK, you can use the following code to customize the configuration of the SDK.

@@ -217,11 +217,6 @@ export interface IPipeline {
   readonly deleted: boolean;
 }
 
-export interface IPipelineList {
-  totalCount: number | undefined;
-  items: IPipeline[];
-}
-
 export interface CPipelineResources {
   project?: IProject;
   mskBrokers?: string[];

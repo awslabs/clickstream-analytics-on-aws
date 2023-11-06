@@ -133,6 +133,7 @@ describe('Lambda - Create manifest for Redshift COPY', () => {
           }],
         },
         manifestFileName: `s3://${process.env.MANIFEST_BUCKET}/${process.env.MANIFEST_BUCKET_PREFIX}manifest/app1-${context.awsRequestId}.manifest`,
+        retryCount: 0,
       }],
       count: 1,
     }));
@@ -142,8 +143,8 @@ describe('Lambda - Create manifest for Redshift COPY', () => {
     expect(s3ClientMock).toHaveReceivedCommandTimes(PutObjectCommand, 1);
     expect(addMetricMock).toBeCalledTimes(4);
     expect(publishStoredMetricsMock).toBeCalledTimes(1);
-
   });
+
 
   test('Get 4 new items with different applications from store then create three manifest', async () => {
     dynamoDBClientMock.on(QueryCommand).resolvesOnce({
@@ -218,14 +219,17 @@ describe('Lambda - Create manifest for Redshift COPY', () => {
             ]),
           },
           manifestFileName: `s3://${process.env.MANIFEST_BUCKET}/${process.env.MANIFEST_BUCKET_PREFIX}manifest/app1-${context.awsRequestId}.manifest`,
+          retryCount: 0,
         }),
         expect.objectContaining({
           appId: 'app2',
           manifestFileName: `s3://${process.env.MANIFEST_BUCKET}/${process.env.MANIFEST_BUCKET_PREFIX}manifest/app2-${context.awsRequestId}.manifest`,
+          retryCount: 0,
         }),
         expect.objectContaining({
           appId: 'app3',
           manifestFileName: `s3://${process.env.MANIFEST_BUCKET}/${process.env.MANIFEST_BUCKET_PREFIX}manifest/app3-${context.awsRequestId}.manifest`,
+          retryCount: 0,
         }),
       ]),
       count: 3,

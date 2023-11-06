@@ -303,7 +303,7 @@ project.buildWorkflow.workflow.file?.addOverride(
 project.buildWorkflow.preBuildSteps.push({
   name: 'Configure AWS Credentials',
   if: '${{ env.iam_role_to_assume != \'\' }}',
-  uses: 'aws-actions/configure-aws-credentials@v2',
+  uses: 'aws-actions/configure-aws-credentials@v4',
   with: {
     'role-to-assume': '${{ env.iam_role_to_assume }}',
     'aws-region': 'us-east-1',
@@ -319,7 +319,7 @@ project.buildWorkflow.preBuildSteps.push({
 });
 project.buildWorkflow.addPostBuildSteps({
   name: 'Publish Test Report',
-  uses: 'mikepenz/action-junit-report@v3',
+  uses: 'mikepenz/action-junit-report@v4',
   with: {
     check_name: 'Test results',
     report_paths: './test-reports/junit.xml',
@@ -368,6 +368,9 @@ project.upgradeWorkflow.workflows[0].jobs.upgrade.steps.splice(4, 0, {
   name: 'Upgrade API dependencies',
   run: 'cd src/control-plane/backend/lambda/api/ && npx projen upgrade && cd ../../../../../',
 });
+project.github.actions.set('actions/checkout', 'actions/checkout@v4');
+project.github.actions.set('actions/setup-node', 'actions/setup-node@v4');
+project.github.actions.set('amannn/action-semantic-pull-request', 'amannn/action-semantic-pull-request@v5');
 
 const provisionViperlightScripts = [
   'curl -sL https://deb.nodesource.com/setup_16.x | bash -',

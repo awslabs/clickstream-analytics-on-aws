@@ -22,6 +22,7 @@ import {
 import { getUserSettings, updateUserSettings } from 'apis/user';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { defaultStr } from 'ts/utils';
 
 interface SettingUserProps {
   openModel: boolean;
@@ -109,7 +110,7 @@ const SettingUser: React.FC<SettingUserProps> = (props: SettingUserProps) => {
         description={t('user:labels.settingUserRoleJsonPathDesc')}
       >
         <Input
-          value={curUserSetting.roleJsonPath ?? ''}
+          value={defaultStr(curUserSetting.roleJsonPath)}
           onChange={(e) => {
             setCurUserSetting((prev) => {
               return {
@@ -125,7 +126,7 @@ const SettingUser: React.FC<SettingUserProps> = (props: SettingUserProps) => {
         description={t('user:labels.settingUserOperatorRoleNamesDesc')}
       >
         <Input
-          value={curUserSetting.operatorRoleNames ?? ''}
+          value={defaultStr(curUserSetting.operatorRoleNames)}
           onChange={(e) => {
             setCurUserSetting((prev) => {
               return {
@@ -141,7 +142,7 @@ const SettingUser: React.FC<SettingUserProps> = (props: SettingUserProps) => {
         description={t('user:labels.settingUserAnalystRoleNamesDesc')}
       >
         <Input
-          value={curUserSetting.analystRoleNames ?? ''}
+          value={defaultStr(curUserSetting.analystRoleNames)}
           onChange={(e) => {
             setCurUserSetting((prev) => {
               return {

@@ -12,15 +12,5 @@
  */
 
 import { createContext } from 'react';
-import { IUserRole } from 'ts/const';
-export const UserContext = createContext<IUser | undefined>({
-  id: '',
-  type: 'USER',
-  prefix: 'USER',
-  name: '',
-  role: IUserRole.NO_IDENTITY,
-  createAt: 0,
-  updateAt: 0,
-  operator: '',
-  deleted: false,
-});
+import { INIT_USER_DATA } from 'ts/init';
+export const UserContext = createContext<IUser | undefined>(INIT_USER_DATA);

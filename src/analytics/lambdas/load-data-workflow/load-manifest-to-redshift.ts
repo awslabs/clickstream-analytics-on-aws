@@ -76,8 +76,9 @@ const redshiftDataApiClient = getRedshiftClient(REDSHIFT_DATA_API_ROLE_ARN);
  * @returns The query_id and relevant properties.
  */
 export const handler = async (event: LoadManifestEvent, context: Context) => {
-  logger.debug('requestJson:', JSON.stringify(event, undefined, 2));
+  logger.debug('requestJson:', { event });
   logger.debug(`context.awsRequestId:${context.awsRequestId}`);
+  const retryCount = event.detail.retryCount;
   let appId = event.detail.appId;
   const manifestFileName = event.detail.manifestFileName;
   const jobList = event.detail.jobList;
@@ -135,6 +136,7 @@ export const handler = async (event: LoadManifestEvent, context: Context) => {
         appId: appId,
         manifestFileName: manifestFileName,
         jobList: jobList,
+        retryCount,
       },
     };
   } catch (err) {

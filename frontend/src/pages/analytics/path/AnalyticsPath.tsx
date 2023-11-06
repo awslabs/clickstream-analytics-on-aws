@@ -45,7 +45,10 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { COMMON_ALERT_TYPE } from 'ts/const';
-import { QUICKSIGHT_ANALYSIS_INFIX, QUICKSIGHT_DASHBOARD_INFIX } from 'ts/constant-ln';
+import {
+  QUICKSIGHT_ANALYSIS_INFIX,
+  QUICKSIGHT_DASHBOARD_INFIX,
+} from 'ts/constant-ln';
 import {
   ExploreComputeMethod,
   ExploreRequestAction,
@@ -55,7 +58,12 @@ import {
   MetadataPlatform,
   QuickSightChartType,
 } from 'ts/explore-types';
-import { alertMsg, defaultStr, generateStr } from 'ts/utils';
+import {
+  alertMsg,
+  defaultStr,
+  generateStr,
+  getEventParameters,
+} from 'ts/utils';
 import {
   getDashboardCreateParameters,
   getDateRange,
@@ -243,20 +251,12 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
   const [selectedPlatform, setSelectedPlatform] =
     useState<SelectProps.Option | null>(webPlatformOption);
 
-  const getEventParameters = (eventName?: string) => {
-    const event = metadataEvents.find((item) => item.name === eventName);
-    if (event) {
-      return event.associatedParameters;
-    }
-    return [];
-  };
-
   const [dateRangeValue, setDateRangeValue] =
     React.useState<DateRangePickerProps.Value>(DEFAULT_DAY_RANGE);
 
   const [timeGranularity, setTimeGranularity] = useState<SelectProps.Option>({
     value: ExploreGroupColumn.DAY,
-    label: t('analytics:options.dayTimeGranularity') ?? '',
+    label: defaultStr(t('analytics:options.dayTimeGranularity')),
   });
 
   const [includingOtherEvents, setIncludingOtherEvents] = React.useState(false);
@@ -365,7 +365,10 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
       saveParams = {
         dashboardId: dashboardId,
         dashboardName: dashboardName,
-        analysisId: dashboardId?.replace(QUICKSIGHT_DASHBOARD_INFIX, QUICKSIGHT_ANALYSIS_INFIX),
+        analysisId: dashboardId?.replace(
+          QUICKSIGHT_DASHBOARD_INFIX,
+          QUICKSIGHT_ANALYSIS_INFIX
+        ),
         analysisName: dashboardName,
         sheetId: sheetId,
         sheetName: sheetName,
@@ -658,42 +661,6 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
                 ) : null}
               </div>
             </SpaceBetween>
-            <SpaceBetween direction="vertical" size="xs">
-              <InfoTitle
-                title={t('analytics:labels.includingOtherEvents')}
-                popoverDescription={t(
-                  'analytics:information.pathIncludingOtherEventsInfo'
-                )}
-              />
-              <div className="cs-analytics-config">
-                <Toggle
-                  onChange={({ detail }) =>
-                    setIncludingOtherEvents(detail.checked)
-                  }
-                  checked={includingOtherEvents}
-                >
-                  {includingOtherEvents ? t('yes') : t('no')}
-                </Toggle>
-              </div>
-            </SpaceBetween>
-            <SpaceBetween direction="vertical" size="xs">
-              <InfoTitle
-                title={t('analytics:labels.mergeConsecutiveEvents')}
-                popoverDescription={t(
-                  'analytics:information.pathMergeConsecutiveEventsInfo'
-                )}
-              />
-              <div className="cs-analytics-config">
-                <Toggle
-                  onChange={({ detail }) =>
-                    setMergeConsecutiveEvents(detail.checked)
-                  }
-                  checked={mergeConsecutiveEvents}
-                >
-                  {mergeConsecutiveEvents ? t('yes') : t('no')}
-                </Toggle>
-              </div>
-            </SpaceBetween>
           </div>
           <br />
           <ColumnLayout columns={2} variant="text-grid">
@@ -719,7 +686,10 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
                       (item, eIndex) => eIndex !== 0
                     );
                     const eventName = option?.name;
-                    const eventParameters = getEventParameters(eventName);
+                    const eventParameters = getEventParameters(
+                      metadataEvents,
+                      eventName
+                    );
                     const parameterOption = parametersConvertToCategoryItemType(
                       metadataUserAttributes,
                       eventParameters
@@ -832,7 +802,10 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
                 }}
                 changeCurCategoryOption={(eventIndex, category) => {
                   const eventName = category?.name;
-                  const eventParameters = getEventParameters(eventName);
+                  const eventParameters = getEventParameters(
+                    metadataEvents,
+                    eventName
+                  );
                   const parameterOption = parametersConvertToCategoryItemType(
                     metadataUserAttributes,
                     eventParameters
@@ -852,6 +825,41 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
                   });
                 }}
               />
+
+              <div className="cs-analytics-config">
+                <SpaceBetween direction="vertical" size="xs">
+                  <InfoTitle
+                    title={t('analytics:labels.includingOtherEvents')}
+                    popoverDescription={t(
+                      'analytics:information.pathIncludingOtherEventsInfo'
+                    )}
+                  />
+                  <Toggle
+                    onChange={({ detail }) =>
+                      setIncludingOtherEvents(detail.checked)
+                    }
+                    checked={includingOtherEvents}
+                  >
+                    {includingOtherEvents ? t('yes') : t('no')}
+                  </Toggle>
+                </SpaceBetween>
+                <SpaceBetween direction="vertical" size="xs">
+                  <InfoTitle
+                    title={t('analytics:labels.mergeConsecutiveEvents')}
+                    popoverDescription={t(
+                      'analytics:information.pathMergeConsecutiveEventsInfo'
+                    )}
+                  />
+                  <Toggle
+                    onChange={({ detail }) =>
+                      setMergeConsecutiveEvents(detail.checked)
+                    }
+                    checked={mergeConsecutiveEvents}
+                  >
+                    {mergeConsecutiveEvents ? t('yes') : t('no')}
+                  </Toggle>
+                </SpaceBetween>
+              </div>
             </SpaceBetween>
             <SpaceBetween direction="vertical" size="xs">
               <SectionTitle type="filter" />

@@ -18,7 +18,7 @@ import {
 import { DynamoDbStore } from './dynamodb-store';
 import { analyticsMetadataTable, prefixMonthGSIName } from '../../common/constants';
 import { docClient, query } from '../../common/dynamodb-client';
-import { ConditionCategory, MetadataValueType } from '../../common/explore-types';
+import { MetadataValueType } from '../../common/explore-types';
 import { KeyVal } from '../../common/types';
 import { getAttributeByNameAndType, getCurMonthStr, getDataFromLastDay, getLatestAttributeByName, getLatestEventByName, getLatestParameterById, getParameterByNameAndType } from '../../common/utils';
 import { IMetadataRaw, IMetadataDisplay, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute, IMetadataDescription, IMetadataBuiltInList } from '../../model/metadata';
@@ -278,14 +278,14 @@ export class DynamoDbMetadataStore implements MetadataStore {
       if (!preset.eventName) {
         for (let e of builtInList.PresetEvents) {
           const raw: IMetadataRaw = {
-            id: `${projectId}#${appId}#${e.name}#${preset.name}#${preset.dataType}`,
+            id: `${projectId}#${appId}#${e.name}#${preset.category}#${preset.name}#${preset.dataType}`,
             month: getCurMonthStr(),
             prefix: `EVENT_PARAMETER#${projectId}#${appId}`,
             projectId: projectId,
             appId: appId,
             name: preset.name,
             eventName: e.name,
-            category: ConditionCategory.EVENT,
+            category: preset.category,
             valueType: preset.dataType,
             summary: {
               platform: [],
@@ -296,14 +296,14 @@ export class DynamoDbMetadataStore implements MetadataStore {
         }
       } else {
         const raw: IMetadataRaw = {
-          id: `${projectId}#${appId}#${preset.eventName}#${preset.name}#${preset.dataType}`,
+          id: `${projectId}#${appId}#${preset.eventName}#${preset.category}#${preset.name}#${preset.dataType}`,
           month: getCurMonthStr(),
           prefix: `EVENT_PARAMETER#${projectId}#${appId}`,
           projectId: projectId,
           appId: appId,
           name: preset.name,
           eventName: preset.eventName,
-          category: ConditionCategory.EVENT,
+          category: preset.category,
           valueType: preset.dataType,
           summary: {
             platform: [],
@@ -317,14 +317,14 @@ export class DynamoDbMetadataStore implements MetadataStore {
     for (let pub of publicEventParameters) {
       for (let e of builtInList.PresetEvents) {
         const raw: IMetadataRaw = {
-          id: `${projectId}#${appId}#${e.name}#${pub.name}#${pub.dataType}`,
+          id: `${projectId}#${appId}#${e.name}#${pub.category}#${pub.name}#${pub.dataType}`,
           month: getCurMonthStr(),
           prefix: `EVENT_PARAMETER#${projectId}#${appId}`,
           projectId: projectId,
           appId: appId,
           name: pub.name,
           eventName: e.name,
-          category: ConditionCategory.EVENT,
+          category: pub.category,
           valueType: pub.dataType,
           summary: {
             platform: [],
@@ -363,14 +363,14 @@ export class DynamoDbMetadataStore implements MetadataStore {
       if (!preset.eventName) {
         for (let e of builtInList.PresetEvents) {
           const raw: IMetadataRaw = {
-            id: `${projectId}#${appId}#${e.name}#${preset.name}#${preset.dataType}`,
+            id: `${projectId}#${appId}#${e.name}#${preset.category}#${preset.name}#${preset.dataType}`,
             month: getCurMonthStr(),
             prefix: `EVENT_PARAMETER#${projectId}#${appId}`,
             projectId: projectId,
             appId: appId,
             name: preset.name,
             eventName: e.name,
-            category: ConditionCategory.EVENT,
+            category: preset.category,
             valueType: preset.dataType,
             summary: {
               platform: [],
@@ -381,14 +381,14 @@ export class DynamoDbMetadataStore implements MetadataStore {
         }
       } else {
         const raw: IMetadataRaw = {
-          id: `${projectId}#${appId}#${preset.eventName}#${preset.name}#${preset.dataType}`,
+          id: `${projectId}#${appId}#${preset.eventName}#${preset.category}#${preset.name}#${preset.dataType}`,
           month: getCurMonthStr(),
           prefix: `EVENT_PARAMETER#${projectId}#${appId}`,
           projectId: projectId,
           appId: appId,
           name: preset.name,
           eventName: preset.eventName,
-          category: ConditionCategory.EVENT,
+          category: preset.category,
           valueType: preset.dataType,
           summary: {
             platform: [],
@@ -402,14 +402,14 @@ export class DynamoDbMetadataStore implements MetadataStore {
     for (let pub of builtInList.PublicEventParameters) {
       for (let e of builtInList.PresetEvents) {
         const raw: IMetadataRaw = {
-          id: `${projectId}#${appId}#${e.name}#${pub.name}#${pub.dataType}`,
+          id: `${projectId}#${appId}#${e.name}#${pub.category}#${pub.name}#${pub.dataType}`,
           month: getCurMonthStr(),
           prefix: `EVENT_PARAMETER#${projectId}#${appId}`,
           projectId: projectId,
           appId: appId,
           name: pub.name,
           eventName: e.name,
-          category: ConditionCategory.EVENT,
+          category: pub.category,
           valueType: pub.dataType,
           summary: {
             platform: [],
@@ -426,13 +426,13 @@ export class DynamoDbMetadataStore implements MetadataStore {
     const metadataRaws: IMetadataRaw[] = [];
     for (let attr of builtInList.PresetUserAttributes) {
       const raw: IMetadataRaw = {
-        id: `${projectId}#${appId}#${attr.name}#${attr.dataType}`,
+        id: `${projectId}#${appId}#${attr.category}#${attr.name}#${attr.dataType}`,
         month: getCurMonthStr(),
         prefix: `USER_ATTRIBUTE#${projectId}#${appId}`,
         projectId: projectId,
         appId: appId,
         name: attr.name,
-        category: ConditionCategory.USER,
+        category: attr.category,
         valueType: attr.dataType,
         summary: {
           hasData: false,

@@ -11,7 +11,12 @@
  *  and limitations under the License.
  */
 
-import { ProtocalType, ResourceCreateMethod, SinkType } from './const';
+import {
+  IUserRole,
+  ProtocalType,
+  ResourceCreateMethod,
+  SinkType,
+} from './const';
 
 export const INIT_PROJECT_DATA = {
   id: 'my_project_id',
@@ -196,4 +201,16 @@ export const INIT_EXT_PIPELINE_DATA: IExtPipeline = {
   showServiceStatus: false,
   enrichPluginChanged: false,
   transformPluginChanged: false,
+};
+
+export const INIT_USER_DATA: IUser = {
+  id: '',
+  type: 'USER',
+  prefix: 'USER',
+  name: '',
+  role: IUserRole.NO_IDENTITY,
+  createAt: 0,
+  updateAt: 0,
+  operator: '',
+  deleted: false,
 };

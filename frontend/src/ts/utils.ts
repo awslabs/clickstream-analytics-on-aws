@@ -14,7 +14,11 @@
 import { SelectProps } from '@cloudscape-design/components';
 import { OptionDefinition } from '@cloudscape-design/components/internal/components/option/interfaces';
 import { isEqual } from 'lodash';
-import { EPipelineStatus, ExecutionType } from './const';
+import {
+  CLICK_STREAM_USER_DATA,
+  EPipelineStatus,
+  ExecutionType,
+} from './const';
 import { ServerlessRedshiftRPUByRegionMapping } from './constant-ln';
 
 /**
@@ -366,5 +370,29 @@ export const defaultGenericsValue = <T>(expectValue: T, defaultValue: T) => {
     return expectValue;
   } else {
     return defaultValue;
+  }
+};
+
+export const getEventParameters = (
+  metadataEvents: IMetadataEvent[],
+  eventName?: string
+) => {
+  if (!eventName) {
+    return [];
+  }
+  const event = metadataEvents.find((item) => item.name === eventName);
+  if (event) {
+    return event.associatedParameters ?? [];
+  }
+  return [];
+};
+
+export const getUserInfoFromLocalStorage = () => {
+  if (window.localStorage.getItem(CLICK_STREAM_USER_DATA)) {
+    return JSON.parse(
+      window.localStorage.getItem(CLICK_STREAM_USER_DATA) ?? ''
+    );
+  } else {
+    return null;
   }
 };

@@ -26,6 +26,7 @@ import moment from 'moment';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { TIME_FORMAT } from 'ts/const';
+import { defaultStr } from 'ts/utils';
 import Environment from './comps/Environment';
 import ProjectsHeader from './comps/ProjectsHeader';
 import SplitPanelContent from './comps/SplitPanel';
@@ -142,7 +143,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
         loading={loadingData}
         stickyHeader={false}
         cardDefinition={CARD_DEFINITIONS}
-        loadingText={t('project:list.loading') ?? ''}
+        loadingText={defaultStr(t('project:list.loading'))}
         items={projectList}
         selectionType="single"
         variant="full-page"

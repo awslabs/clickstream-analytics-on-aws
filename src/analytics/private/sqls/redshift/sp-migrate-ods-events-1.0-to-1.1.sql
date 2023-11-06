@@ -423,7 +423,8 @@ SELECT
 FROM
        {{schema}}.{{table_ods_events}} e
 WHERE
-       NOT EXISTS (
+       e.event_name IN ('_first_open', '_first_visit', '_profile_set')
+       AND NOT EXISTS (
               SELECT
                      1
               FROM
@@ -444,7 +445,6 @@ WITH user_base_rank AS (
               CAST(
                      TIMESTAMP 'epoch' + (user_first_touch_timestamp / 1000) * INTERVAL '1 second' AS date
               ) AS _first_visit_date,
-              app_info.install_source :: VARCHAR AS _channel,
               ROW_NUMBER() OVER (
                      PARTITION BY user_pseudo_id
                      ORDER BY
@@ -461,8 +461,7 @@ user_base AS (
               user_first_touch_timestamp,
               user_properties,
               user_ltv,
-              _first_visit_date,
-              _channel
+              _first_visit_date
        FROM
               user_base_rank
        WHERE
@@ -520,8 +519,7 @@ WITH user_page_referrer_rank AS (
               ods_events_user_temp e,
               e.event_params AS ep
        WHERE
-              event_name = '_page_view'
-              AND ep.key in ('_page_referrer', '_page_referer')
+              ep.key in ('_page_referrer', '_page_referer')
               AND ep.value.string_value IS NOT NULL
 ),
 user_page_referrer AS (
@@ -561,6 +559,37 @@ SELECT
 FROM
        user_device_id_list;
 
+
+-- user_channel_temp
+WITH user_channel_rank AS (
+       SELECT
+              user_pseudo_id,
+              e.app_info.install_source :: VARCHAR AS _channel,
+              ROW_NUMBER() OVER (
+                     PARTITION BY user_pseudo_id
+                     ORDER BY
+                            event_timestamp ASC
+              ) AS et_rank
+       FROM
+              ods_events_user_temp e
+       WHERE
+              channel IS NOT NULL
+),
+user_channel AS (
+       SELECT
+              user_pseudo_id,
+              _channel
+       FROM
+              user_channel_rank
+       WHERE
+              et_rank = 1
+)
+SELECT
+       * INTO temp user_channel_temp
+FROM
+       user_channel;
+
+--
 DROP TABLE ods_events_user_temp;
 
 -- user_final_temp
@@ -578,12 +607,13 @@ WITH user_final AS (
               ts._first_traffic_medium,
               ts._first_traffic_source,
               de.device_id_list,
-              u._channel
+              uc._channel
        FROM
               user_base_temp u
               LEFT OUTER JOIN user_traffic_source_temp ts ON u.user_pseudo_id = ts.user_pseudo_id
               LEFT OUTER JOIN user_page_referrer_temp pr ON u.user_pseudo_id = pr.user_pseudo_id
               LEFT OUTER JOIN user_device_id_list_temp de ON u.user_pseudo_id = de.user_pseudo_id
+              LEFT OUTER JOIN user_channel_temp uc ON u.user_pseudo_id = uc.user_pseudo_id
 )
 SELECT
        * INTO temp user_final_temp
@@ -597,6 +627,8 @@ DROP TABLE user_traffic_source_temp;
 DROP TABLE user_page_referrer_temp;
 
 DROP TABLE user_device_id_list_temp;
+
+DROP TABLE user_channel_temp;
 
 INSERT INTO
        {{schema}}.{{table_user}} (

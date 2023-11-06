@@ -14,6 +14,7 @@
 import { SelectProps } from '@cloudscape-design/components';
 import {
   ConditionCategory,
+  MetadataPlatform,
   MetadataSource,
   MetadataValueType,
 } from 'ts/explore-types';
@@ -38,6 +39,7 @@ export interface IAnalyticsItem extends SelectProps.Option {
   metadataSource?: MetadataSource;
   category?: ConditionCategory;
   valueType?: MetadataValueType;
+  platform?: MetadataPlatform[];
   values?: IMetadataAttributeValue[];
 }
 

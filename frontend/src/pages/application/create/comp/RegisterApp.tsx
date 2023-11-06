@@ -32,7 +32,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import { MAX_USER_INPUT_LENGTH } from 'ts/const';
 import { XSS_PATTERN } from 'ts/constant-ln';
-import { validateAppId } from 'ts/utils';
+import { defaultStr, validateAppId } from 'ts/utils';
 
 const RegisterApp: React.FC = () => {
   const { t } = useTranslation();
@@ -41,7 +41,7 @@ const RegisterApp: React.FC = () => {
   const [loadingCreate, setLoadingCreate] = useState(false);
   const [appRegistered, setAppRegistered] = useState(false);
   const [application, setApplication] = useState<IApplication>({
-    projectId: id ?? '',
+    projectId: defaultStr(id),
     appId: '',
     name: '',
     description: '',
@@ -57,8 +57,8 @@ const RegisterApp: React.FC = () => {
     try {
       const { success, data }: ApiResponse<IApplication> =
         await getApplicationDetail({
-          pid: id ?? '',
-          id: appId ?? '',
+          pid: defaultStr(id),
+          id: defaultStr(appId),
         });
       if (success) {
         setApplication(data);

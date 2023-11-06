@@ -19,6 +19,7 @@ import {
   Link,
   Popover,
   SpaceBetween,
+  Button,
 } from '@cloudscape-design/components';
 import { getAnalyticsDashboard } from 'apis/analytics';
 import Loading from 'components/common/Loading';
@@ -29,6 +30,7 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { DEFAULT_DASHBOARD_NAME } from 'ts/constant-ln';
+import { defaultStr } from 'ts/utils';
 
 const AnalyticsDashboardDetail: React.FC = () => {
   const { t } = useTranslation();
@@ -42,9 +44,9 @@ const AnalyticsDashboardDetail: React.FC = () => {
     try {
       const { success, data }: ApiResponse<IAnalyticsDashboard> =
         await getAnalyticsDashboard(
-          projectId ?? '',
-          appId ?? '',
-          dashboardId ?? '',
+          defaultStr(projectId),
+          defaultStr(appId),
+          defaultStr(dashboardId),
           window.location.origin
         );
       if (success && data.embedUrl) {
@@ -113,6 +115,18 @@ const AnalyticsDashboardDetail: React.FC = () => {
                           </Popover>
                         ) : null}
                       </>
+                    }
+                    actions={
+                      <SpaceBetween size="xs" direction="horizontal">
+                        <Button
+                          href={`/analytics/${projectId}/app/${appId}/dashboard/full/${dashboard.id}`}
+                          iconAlign="right"
+                          iconName="external"
+                          target="_blank"
+                        >
+                          {t('common:button.fullWindowView')}
+                        </Button>
+                      </SpaceBetween>
                     }
                   >
                     {dashboard.name}

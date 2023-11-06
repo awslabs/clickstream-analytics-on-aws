@@ -3,24 +3,25 @@ on:
   pull_request: {}
   workflow_dispatch: {}
 jobs:
-  build-frontend:
+  buildFrontend:
     name: build frontend
     runs-on: ubuntu-latest
     permissions:
       contents: read
       checks: write
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: "16"
       - run: |-
           cd frontend/
           yarn install --check-files --frozen-lockfile
+          yarn run format
           yarn run build
           yarn run test
       - name: Publish Test Report
-        uses: mikepenz/action-junit-report@v3
+        uses: mikepenz/action-junit-report@v4
         if: success() || failure() # always run even if the previous step fails
         with:
           check_name: Test results for frontend of web console
@@ -31,13 +32,61 @@ jobs:
           job_name: build frontend
           update_check: true
           include_passed: true
+      - name: Find mutations
+        id: self_mutation
+        run: |-
+          git add .
+          git diff --staged --patch --exit-code > .repo.patch || echo "self_mutation_happened=true" >> $GITHUB_OUTPUT
+      - name: Upload patch
+        if: steps.self_mutation.outputs.self_mutation_happened
+        uses: actions/upload-artifact@v3
+        with:
+          name: .repo.patch
+          path: .repo.patch
+      - name: Fail build on mutation
+        if: steps.self_mutation.outputs.self_mutation_happened
+        run: |-
+          echo "::error::Files were changed during build (see build log). If this was triggered from a fork, you will need to update your branch."
+          cat .repo.patch
+          exit 1
+  self-mutation:
+    needs: buildFrontend
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    if: always() && needs.buildFrontend.outputs.self_mutation_happened && !(github.event.pull_request.head.repo.full_name != github.repository)
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.PROJEN_GITHUB_TOKEN }}
+          ref: ${{ github.event.pull_request.head.ref }}
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+      - name: Download patch
+        uses: actions/download-artifact@v3
+        with:
+          name: .repo.patch
+          path: ${{ runner.temp }}
+      - name: Apply patch
+        run: '[ -s ${{ runner.temp }}/.repo.patch ] && git apply ${{ runner.temp }}/.repo.patch || echo "Empty patch. Skipping."'
+      - name: Set git identity
+        run: |-
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+      - name: Push changes
+        env:
+          PULL_REQUEST_REF: ${{ github.event.pull_request.head.ref }}
+        run: |-
+          git add .
+          git commit -s -m "chore: self mutation"
+          git push origin HEAD:$PULL_REQUEST_REF
   build-data-pipeline:
     name: build data pipeline
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Set up JDK 11
         uses: actions/setup-java@v3
         with:
@@ -53,7 +102,7 @@ jobs:
           gradle clean build
           gradle jacocoAggregatedReport
       - name: Publish Test Report
-        uses: mikepenz/action-junit-report@v3
+        uses: mikepenz/action-junit-report@v4
         if: success() || failure() # always run even if the previous step fails
         with:
           check_name: Test results for data pipeline spark application
@@ -67,7 +116,7 @@ jobs:
       - name: Add coverage to PR
         id: jacoco
         if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.event.pull_request.base.repo.full_name
-        uses: madrapps/jacoco-report@v1.4
+        uses: madrapps/jacoco-report@v1.6
         with:
           paths: ./src/data-pipeline/spark-etl/build/reports/jacoco/jacocoAggregatedReport/jacocoAggregatedReport.xml
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -78,7 +127,7 @@ jobs:
     name: build data pipeline example
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Set up JDK 11
         uses: actions/setup-java@v3
         with:

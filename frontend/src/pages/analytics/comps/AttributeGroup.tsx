@@ -20,6 +20,7 @@ import {
 import EventItem from 'components/eventselect/EventItem';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { defaultStr } from 'ts/utils';
 
 interface AttributeGroupProps {
   presetParameters: CategoryItemType[];
@@ -33,16 +34,17 @@ const AttributeGroup: React.FC<AttributeGroupProps> = (
   props: AttributeGroupProps
 ) => {
   const { t } = useTranslation();
-  const { groupOption, setGroupOption, presetParameters, loading, disabled } = props;
+  const { groupOption, setGroupOption, presetParameters, loading, disabled } =
+    props;
   return (
     <div className="cs-analytics-dropdown">
       <div className="cs-analytics-parameter">
         <div className="flex gap-10 w-75p">
           <div className="flex-1">
             <EventItem
-              placeholder={
-                t('analytics:labels.attributeSelectPlaceholder') ?? ''
-              }
+              placeholder={defaultStr(
+                t('analytics:labels.attributeSelectPlaceholder')
+              )}
               categoryOption={groupOption}
               changeCurCategoryOption={(item) => {
                 setGroupOption(item);

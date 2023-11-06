@@ -46,7 +46,10 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { COMMON_ALERT_TYPE } from 'ts/const';
-import { QUICKSIGHT_ANALYSIS_INFIX, QUICKSIGHT_DASHBOARD_INFIX } from 'ts/constant-ln';
+import {
+  QUICKSIGHT_ANALYSIS_INFIX,
+  QUICKSIGHT_DASHBOARD_INFIX,
+} from 'ts/constant-ln';
 import {
   ExploreComputeMethod,
   ExploreConversionIntervalType,
@@ -54,7 +57,12 @@ import {
   ExploreGroupColumn,
   QuickSightChartType,
 } from 'ts/explore-types';
-import { alertMsg, defaultStr, generateStr } from 'ts/utils';
+import {
+  alertMsg,
+  defaultStr,
+  generateStr,
+  getEventParameters,
+} from 'ts/utils';
 import {
   parametersConvertToCategoryItemType,
   validEventAnalyticsItem,
@@ -157,20 +165,12 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
     { value: 'day', label: t('analytics:options.dayWindowUnit') },
   ];
 
-  const getEventParameters = (eventName?: string) => {
-    const event = metadataEvents.find((item) => item.name === eventName);
-    if (event) {
-      return event.associatedParameters;
-    }
-    return [];
-  };
-
   const [dateRangeValue, setDateRangeValue] =
     useState<DateRangePickerProps.Value>(DEFAULT_DAY_RANGE);
 
   const [timeGranularity, setTimeGranularity] = useState<SelectProps.Option>({
     value: ExploreGroupColumn.DAY,
-    label: t('analytics:options.dayTimeGranularity') ?? '',
+    label: defaultStr(t('analytics:options.dayTimeGranularity')),
   });
   const [selectedMetric, setSelectedMetric] =
     useState<SelectProps.Option | null>(defaultComputeMethodOption);
@@ -229,7 +229,10 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
       saveParams = {
         dashboardId: dashboardId,
         dashboardName: dashboardName,
-        analysisId: dashboardId?.replace(QUICKSIGHT_DASHBOARD_INFIX, QUICKSIGHT_ANALYSIS_INFIX),
+        analysisId: dashboardId?.replace(
+          QUICKSIGHT_DASHBOARD_INFIX,
+          QUICKSIGHT_ANALYSIS_INFIX
+        ),
         analysisName: dashboardName,
         sheetId: sheetId,
         sheetName: sheetName,
@@ -244,7 +247,7 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
       locale: getLngFromLocalStorage(),
       projectId: pipeline.projectId,
       pipelineId: pipeline.pipelineId,
-      appId: appId ?? '',
+      appId: defaultStr(appId),
       sheetName: `funnel_sheet_${funnelId}`,
       viewName: `funnel_view_${funnelId}`,
       dashboardCreateParameters: parameters,
@@ -262,7 +265,10 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
       globalEventCondition: getGlobalEventCondition(segmentationOptionData),
       timeScopeType: dateRangeParams?.timeScopeType,
       groupColumn: timeGranularity.value,
-      groupCondition: chartType === QuickSightChartType.BAR ? getGroupCondition(groupOption) : undefined,
+      groupCondition:
+        chartType === QuickSightChartType.BAR
+          ? getGroupCondition(groupOption)
+          : undefined,
       ...dateRangeParams,
       ...saveParams,
     };
@@ -308,7 +314,7 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
     setSelectedWindowType(customWindowType);
     setSelectedWindowUnit({
       value: 'minute',
-      label: t('analytics:options.minuteWindowUnit') ?? '',
+      label: defaultStr(t('analytics:options.minuteWindowUnit')),
     });
     setAssociateParameterChecked(true);
     setEventOptionData([
@@ -325,7 +331,7 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
     setDateRangeValue(DEFAULT_WEEK_RANGE);
     setTimeGranularity({
       value: ExploreGroupColumn.DAY,
-      label: t('analytics:options.dayTimeGranularity') ?? '',
+      label: defaultStr(t('analytics:options.dayTimeGranularity')),
     });
     setExploreEmbedUrl('');
     setLoadingData(false);
@@ -582,7 +588,10 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
                   }}
                   changeCurCategoryOption={(eventIndex, category) => {
                     const eventName = category?.name;
-                    const eventParameters = getEventParameters(eventName);
+                    const eventParameters = getEventParameters(
+                      metadataEvents,
+                      eventName
+                    );
                     const parameterOption = parametersConvertToCategoryItemType(
                       metadataUserAttributes,
                       eventParameters

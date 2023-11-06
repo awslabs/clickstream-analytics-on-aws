@@ -30,6 +30,7 @@ import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { TIME_FORMAT } from 'ts/const';
 import { DEFAULT_DASHBOARD_NAME } from 'ts/constant-ln';
+import { defaultStr } from 'ts/utils';
 import CreateDashboard from './create/CreateDashboard';
 import DashboardHeader from '../comps/DashboardHeader';
 
@@ -99,8 +100,8 @@ const AnalyticsDashboardCard: React.FC<any> = () => {
         data,
       }: ApiResponse<ResponseTableData<IAnalyticsDashboard>> =
         await getAnalyticsDashboardList({
-          projectId: projectId ?? '',
-          appId: appId ?? '',
+          projectId: defaultStr(projectId),
+          appId: defaultStr(appId),
           pageNumber: currentPage,
           pageSize: pageSize,
         });
@@ -130,7 +131,7 @@ const AnalyticsDashboardCard: React.FC<any> = () => {
         }}
         stickyHeader={false}
         cardDefinition={CARD_DEFINITIONS}
-        loadingText={t('analytics:list.loading') ?? ''}
+        loadingText={defaultStr(t('analytics:list.loading'))}
         items={analyticsDashboardList}
         variant="full-page"
         selectionType="single"
@@ -168,8 +169,8 @@ const AnalyticsDashboardCard: React.FC<any> = () => {
         }
       />
       <CreateDashboard
-        projectId={projectId ?? ''}
-        appId={appId ?? ''}
+        projectId={defaultStr(projectId)}
+        appId={defaultStr(appId)}
         openModel={createDashboardVisible}
         closeModel={() => setCreateDashboardVisible(false)}
         refreshPage={() => {

@@ -43,7 +43,10 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { COMMON_ALERT_TYPE } from 'ts/const';
-import { QUICKSIGHT_ANALYSIS_INFIX, QUICKSIGHT_DASHBOARD_INFIX } from 'ts/constant-ln';
+import {
+  QUICKSIGHT_ANALYSIS_INFIX,
+  QUICKSIGHT_DASHBOARD_INFIX,
+} from 'ts/constant-ln';
 import {
   ExploreComputeMethod,
   ExploreConversionIntervalType,
@@ -51,7 +54,12 @@ import {
   ExploreGroupColumn,
   QuickSightChartType,
 } from 'ts/explore-types';
-import { alertMsg, generateStr } from 'ts/utils';
+import {
+  alertMsg,
+  defaultStr,
+  generateStr,
+  getEventParameters,
+} from 'ts/utils';
 import {
   getDashboardCreateParameters,
   getDateRange,
@@ -140,20 +148,12 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
     null
   );
 
-  const getEventParameters = (eventName?: string) => {
-    const event = metadataEvents.find((item) => item.name === eventName);
-    if (event) {
-      return event.associatedParameters;
-    }
-    return [];
-  };
-
   const [dateRangeValue, setDateRangeValue] =
     useState<DateRangePickerProps.Value>(DEFAULT_DAY_RANGE);
 
   const [timeGranularity, setTimeGranularity] = useState<SelectProps.Option>({
     value: ExploreGroupColumn.DAY,
-    label: t('analytics:options.dayTimeGranularity') ?? '',
+    label: defaultStr(t('analytics:options.dayTimeGranularity')),
   });
 
   const resetConfig = async () => {
@@ -173,7 +173,7 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
     setExploreEmbedUrl('');
     setTimeGranularity({
       value: ExploreGroupColumn.DAY,
-      label: t('analytics:options.dayTimeGranularity') ?? '',
+      label: defaultStr(t('analytics:options.dayTimeGranularity')),
     });
     setLoadingData(false);
   };
@@ -260,7 +260,7 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
       locale: getLngFromLocalStorage(),
       projectId: pipeline.projectId,
       pipelineId: pipeline.pipelineId,
-      appId: appId ?? '',
+      appId: defaultStr(appId),
       sheetName: `event_sheet_${eventId}`,
       viewName: `event_view_${eventId}`,
       dashboardCreateParameters: parameters,
@@ -454,7 +454,10 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
                 }}
                 changeCurCategoryOption={(eventIndex, category) => {
                   const eventName = category?.name;
-                  const eventParameters = getEventParameters(eventName);
+                  const eventParameters = getEventParameters(
+                    metadataEvents,
+                    eventName
+                  );
                   const parameterOption = parametersConvertToCategoryItemType(
                     metadataUserAttributes,
                     eventParameters

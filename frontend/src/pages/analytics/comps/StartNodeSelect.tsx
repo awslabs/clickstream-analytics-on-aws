@@ -18,6 +18,7 @@ import {
 import EventItem from 'components/eventselect/EventItem';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { defaultStr } from 'ts/utils';
 
 interface StartNodeSelectProps {
   nodes: CategoryItemType[];
@@ -37,9 +38,9 @@ const StartNodeSelect: React.FC<StartNodeSelectProps> = (
         <div className="flex gap-10 w-75p">
           <div className="flex-1">
             <EventItem
-              placeholder={
-                t('analytics:labels.attributeSelectPlaceholder') ?? ''
-              }
+              placeholder={defaultStr(
+                t('analytics:labels.attributeSelectPlaceholder')
+              )}
               categoryOption={nodeOption}
               changeCurCategoryOption={(item) => {
                 setNodeOption(item);

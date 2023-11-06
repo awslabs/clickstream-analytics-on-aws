@@ -27,6 +27,7 @@ import Navigation from 'components/layouts/Navigation';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useParams } from 'react-router-dom';
+import { defaultStr } from 'ts/utils';
 import Alarms from './comps/Alarms';
 import Ingestion from './comps/Ingestion';
 import Monitoring from './comps/Monitoring';
@@ -54,8 +55,8 @@ const PipelineDetail: React.FC = () => {
       setLoadingPipeline(true);
       const { success, data }: ApiResponse<IExtPipeline> =
         await getPipelineDetail({
-          id: id ?? '',
-          pid: pid ?? '',
+          id: defaultStr(id),
+          pid: defaultStr(pid),
         });
       if (success) {
         setProjectPipeline(data);
@@ -71,7 +72,7 @@ const PipelineDetail: React.FC = () => {
     setLoadingData(true);
     try {
       const { success, data }: ApiResponse<IProject> = await getProjectDetail({
-        id: pid ?? '',
+        id: defaultStr(pid),
       });
       if (success) {
         setProjectInfo(data);
@@ -88,11 +89,11 @@ const PipelineDetail: React.FC = () => {
       href: '/projects',
     },
     {
-      text: projectInfo?.name ?? '',
+      text: defaultStr(projectInfo?.name),
       href: `/project/detail/${pid}`,
     },
     {
-      text: projectPipeline?.pipelineId || '',
+      text: defaultStr(projectPipeline?.pipelineId),
       href: '/',
     },
   ];

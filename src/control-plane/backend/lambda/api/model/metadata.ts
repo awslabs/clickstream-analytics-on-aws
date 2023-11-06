@@ -126,17 +126,20 @@ export interface IMetadataBuiltInList {
   readonly PresetEventParameters: Array<{
     name: string;
     eventName?: string;
+    category: ConditionCategory;
     dataType: MetadataValueType;
     description: IMetadataDescription;
   }>;
   readonly PublicEventParameters: Array<{
     name: string;
     dataType: MetadataValueType;
+    category: ConditionCategory;
     description: IMetadataDescription;
   }>;
   readonly PresetUserAttributes: Array<{
     name: string;
     dataType: MetadataValueType;
+    category: ConditionCategory;
     description: IMetadataDescription;
   }>;
 }

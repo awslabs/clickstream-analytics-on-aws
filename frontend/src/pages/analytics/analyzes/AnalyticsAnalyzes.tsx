@@ -38,6 +38,7 @@ import CustomBreadCrumb from 'components/layouts/CustomBreadCrumb';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
+import { defaultStr } from 'ts/utils';
 import ExploreEmbedFrame from '../comps/ExploreEmbedFrame';
 
 const AnalyticsAnalyzes: React.FC = () => {
@@ -50,7 +51,7 @@ const AnalyticsAnalyzes: React.FC = () => {
     setLoadingData(true);
     try {
       const { success, data }: ApiResponse<any> = await embedAnalyzesUrl(
-        projectId ?? '',
+        defaultStr(projectId),
         window.location.origin
       );
       if (success && data.EmbedUrl) {

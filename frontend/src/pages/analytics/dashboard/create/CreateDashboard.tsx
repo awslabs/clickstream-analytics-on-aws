@@ -36,7 +36,7 @@ import {
   OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN,
   XSS_PATTERN,
 } from 'ts/constant-ln';
-import { getValueFromStackOutputs } from 'ts/utils';
+import { defaultStr, getValueFromStackOutputs } from 'ts/utils';
 import { v4 as uuidv4 } from 'uuid';
 
 interface CreateDashboardProps {
@@ -181,10 +181,10 @@ const CreateDashboard: React.FC<CreateDashboardProps> = (
             >
               <SpaceBetween direction="vertical" size="s">
                 <Input
-                  placeholder={
-                    t('analytics:dashboard.createInputNamePlaceholder') ?? ''
-                  }
-                  value={curDashboard.name ?? ''}
+                  placeholder={defaultStr(
+                    t('analytics:dashboard.createInputNamePlaceholder')
+                  )}
+                  value={defaultStr(curDashboard.name)}
                   onChange={(e) => {
                     setDashboardNameRequiredError(false);
                     setCurDashboard((prev) => {
@@ -203,9 +203,9 @@ const CreateDashboard: React.FC<CreateDashboardProps> = (
               description={t('analytics:dashboard.createDescDec')}
             >
               <Textarea
-                placeholder={
-                  t('analytics:dashboard.createDescPlaceholder') ?? ''
-                }
+                placeholder={defaultStr(
+                  t('analytics:dashboard.createDescPlaceholder')
+                )}
                 rows={3}
                 value={curDashboard.description}
                 onChange={(e) => {
@@ -243,9 +243,9 @@ const CreateDashboard: React.FC<CreateDashboardProps> = (
                 <Input
                   onChange={({ detail }) => setSheetName(detail.value)}
                   value={sheetName}
-                  placeholder={
-                    t('analytics:dashboard.createSheetsPlaceholder') ?? ''
-                  }
+                  placeholder={defaultStr(
+                    t('analytics:dashboard.createSheetsPlaceholder')
+                  )}
                 />
                 <Button
                   iconName="add-plus"

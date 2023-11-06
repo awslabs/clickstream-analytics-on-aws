@@ -20,6 +20,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { EVENT_PARAMETER_DISPLAY_PREFIX } from 'ts/const';
+import { defaultStr } from 'ts/utils';
 import MetadataPlatformFC from '../comps/MetadataPlatform';
 import MetadataSourceFC from '../comps/MetadataSource';
 import MetadataTable from '../table/MetadataTable';
@@ -49,7 +50,7 @@ const MetadataParametersTable: React.FC<MetadataParametersTableProps> = (
         onChange={(event) => {
           setValue(event.detail.value);
         }}
-        placeholder={t('tag.valuePlaceholder') ?? ''}
+        placeholder={defaultStr(t('tag.valuePlaceholder'))}
       />
     );
   };
@@ -66,7 +67,7 @@ const MetadataParametersTable: React.FC<MetadataParametersTableProps> = (
         onChange={(event) => {
           setValue(event.detail.value);
         }}
-        placeholder={t('tag.valuePlaceholder') ?? ''}
+        placeholder={defaultStr(t('tag.valuePlaceholder'))}
       />
     );
   };
@@ -247,7 +248,7 @@ const MetadataParametersTable: React.FC<MetadataParametersTableProps> = (
       const parameter = newItem as IMetadataEventParameter;
       const { success, message }: ApiResponse<null> =
         await updateMetadataDisplay({
-          id: `${EVENT_PARAMETER_DISPLAY_PREFIX}${parameter.projectId}#${parameter.appId}#${parameter.name}#${parameter.valueType}`,
+          id: `${EVENT_PARAMETER_DISPLAY_PREFIX}${parameter.projectId}#${parameter.appId}#${parameter.category}#${parameter.name}#${parameter.valueType}`,
           projectId: parameter.projectId,
           appId: parameter.appId,
           displayName: parameter.displayName,
@@ -268,8 +269,9 @@ const MetadataParametersTable: React.FC<MetadataParametersTableProps> = (
       tableContentDisplay={CONTENT_DISPLAY}
       tableFilteringProperties={FILTERING_PROPERTIES}
       tableI18nStrings={{
-        infoContent:
-          t('analytics:information.metadataEventParametersInfo') ?? '',
+        infoContent: defaultStr(
+          t('analytics:information.metadataEventParametersInfo')
+        ),
         loadingText: t('analytics:labels.tableLoading') || 'Loading',
         emptyText: t('analytics:labels.tableEmpty'),
         headerTitle: t('analytics:metadata.eventParameter.title'),

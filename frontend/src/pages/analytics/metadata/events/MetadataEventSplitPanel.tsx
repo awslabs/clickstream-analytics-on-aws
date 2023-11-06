@@ -30,6 +30,7 @@ import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { EVENT_DISPLAY_PREFIX } from 'ts/const';
 import { MetadataSource } from 'ts/explore-types';
+import { defaultStr } from 'ts/utils';
 import MetadataPlatformFC from '../comps/MetadataPlatform';
 import MetadataSourceFC from '../comps/MetadataSource';
 import MetadataDetailsTable from '../table/MetadataDetailsTable';
@@ -147,8 +148,8 @@ const MetadataEventSplitPanel: React.FC<MetadataEventSplitPanelProps> = (
     try {
       const { success, data }: ApiResponse<IMetadataEvent> =
         await getMetadataEventDetails({
-          projectId: projectId ?? '',
-          appId: appId ?? '',
+          projectId: defaultStr(projectId),
+          appId: defaultStr(appId),
           eventName: event.name,
         });
       if (success) {
@@ -356,12 +357,8 @@ const MetadataEventSplitPanel: React.FC<MetadataEventSplitPanelProps> = (
                     }
                     tableColumnDefinitions={COLUMN_DEFINITIONS}
                     tableI18nStrings={{
-                      loadingText: t(
-                        'analytics:labels.tableLoading'
-                      ),
-                      emptyText: t(
-                        'analytics:labels.tableEmpty'
-                      ),
+                      loadingText: t('analytics:labels.tableLoading'),
+                      emptyText: t('analytics:labels.tableEmpty'),
                     }}
                   />
                 ),
@@ -386,9 +383,7 @@ const MetadataEventSplitPanel: React.FC<MetadataEventSplitPanelProps> = (
                     }
                     tableColumnDefinitions={COLUMN_DEFINITIONS}
                     tableI18nStrings={{
-                      loadingText: t(
-                        'analytics:labels.tableLoading'
-                      ),
+                      loadingText: t('analytics:labels.tableLoading'),
                       emptyText: t('analytics:labels.tableEmpty'),
                     }}
                   />

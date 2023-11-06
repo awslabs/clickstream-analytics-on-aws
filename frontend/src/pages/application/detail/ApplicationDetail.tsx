@@ -34,6 +34,7 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { TIME_FORMAT } from 'ts/const';
+import { defaultStr } from 'ts/utils';
 import ConfigAndroidSDK from './comp/ConfigAndroidSDK';
 import ConfigIOSSDK from './comp/ConfigIOSSDK';
 import ConfigWebSDK from './comp/ConfigWebSDK';
@@ -52,11 +53,11 @@ const ApplicationDetail: React.FC = () => {
       href: '/projects',
     },
     {
-      text: projectInfo?.name ?? '',
+      text: defaultStr(projectInfo?.name),
       href: `/project/detail/${pid}`,
     },
     {
-      text: applicationInfo?.name ?? '',
+      text: defaultStr(applicationInfo?.name),
       href: '/',
     },
   ];
@@ -65,7 +66,7 @@ const ApplicationDetail: React.FC = () => {
     setLoadingData(true);
     try {
       const { success, data }: ApiResponse<IProject> = await getProjectDetail({
-        id: pid ?? '',
+        id: defaultStr(pid),
       });
       if (success) {
         setProjectInfo(data);
@@ -81,8 +82,8 @@ const ApplicationDetail: React.FC = () => {
     try {
       const { success, data }: ApiResponse<IApplication> =
         await getApplicationDetail({
-          pid: pid ?? '',
-          id: id ?? '',
+          pid: defaultStr(pid),
+          id: defaultStr(id),
         });
       if (success) {
         setApplicationInfo(data);

@@ -295,7 +295,6 @@ export class RedshiftAnalyticsStack extends NestedStack {
       createMetricsWidgetForRedshiftServerless(this, 'newServerless', {
         projectId: props.projectId,
         dataProcessingCronOrRateExpression: props.dataProcessingCronOrRateExpression,
-        scanMetadataCronOrRateExpression: props.dataProcessingCronOrRateExpression,
         redshiftServerlessNamespace: this.redshiftServerlessWorkgroup.workgroup.namespaceName,
         redshiftServerlessWorkgroupName: this.redshiftServerlessWorkgroup.workgroup.workgroupName,
         loadDataWorkflow: loadRedshiftTablesWorkflow.loadDataWorkflow,
@@ -309,7 +308,6 @@ export class RedshiftAnalyticsStack extends NestedStack {
       createMetricsWidgetForRedshiftServerless(this, 'existingServerless', {
         projectId: props.projectId,
         dataProcessingCronOrRateExpression: props.dataProcessingCronOrRateExpression,
-        scanMetadataCronOrRateExpression: props.dataProcessingCronOrRateExpression,
         redshiftServerlessNamespace: props.existingRedshiftServerlessProps.namespaceId,
         redshiftServerlessWorkgroupName: props.existingRedshiftServerlessProps.workgroupName,
         loadDataWorkflow: loadRedshiftTablesWorkflow.loadDataWorkflow,
@@ -322,7 +320,6 @@ export class RedshiftAnalyticsStack extends NestedStack {
       createMetricsWidgetForRedshiftCluster(this, {
         projectId: props.projectId,
         dataProcessingCronOrRateExpression: props.dataProcessingCronOrRateExpression,
-        scanMetadataCronOrRateExpression: props.dataProcessingCronOrRateExpression,
         redshiftClusterIdentifier: props.provisionedRedshiftProps.clusterIdentifier,
         loadDataWorkflow: loadRedshiftTablesWorkflow.loadDataWorkflow,
         scanMetadataWorkflow: scanMetadataWorkflow.scanMetadataWorkflow,
@@ -370,10 +367,6 @@ function addCfnNag(stack: Stack) {
   addCfnNagForCustomResourceProvider(stack, 'Metrics', 'MetricsCustomResourceProvider', '');
 
   addCfnNagToStack(stack, [
-
-    ruleRolePolicyWithWildcardResources(
-      'ScanMetadataWorkflow/ScanMetadataStateMachine/Role/DefaultPolicy/Resource',
-      'ScanMetadataWorkflow', 'logs/xray'),
     ruleRolePolicyWithWildcardResources(
       'ClearExpiredEventsWorkflow/ClearExpiredEventsStateMachine/Role/DefaultPolicy/Resource',
       'ClearExpiredEventsWorkflow', 'logs/xray'),

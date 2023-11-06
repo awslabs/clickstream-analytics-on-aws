@@ -21,6 +21,7 @@ import i18n from 'i18n';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { ExploreGroupColumn } from 'ts/explore-types';
+import { defaultStr } from 'ts/utils';
 
 export const DEFAULT_DAY_RANGE: DateRangePickerProps.RelativeOption = {
   key: 'previous-7-day',
@@ -101,15 +102,15 @@ const ExploreDateRangePicker: React.FC<IExploreDateRangePickerProps> = (
   const timeGranularityOptions: SelectProps.Options = [
     {
       value: ExploreGroupColumn.DAY,
-      label: t('analytics:options.dayTimeGranularity') ?? '',
+      label: defaultStr(t('analytics:options.dayTimeGranularity')),
     },
     {
       value: ExploreGroupColumn.WEEK,
-      label: t('analytics:options.weekTimeGranularity') ?? '',
+      label: defaultStr(t('analytics:options.weekTimeGranularity')),
     },
     {
       value: ExploreGroupColumn.MONTH,
-      label: t('analytics:options.monthTimeGranularity') ?? '',
+      label: defaultStr(t('analytics:options.monthTimeGranularity')),
     },
   ];
 
@@ -159,15 +160,27 @@ const ExploreDateRangePicker: React.FC<IExploreDateRangePickerProps> = (
         relativeOptions={relativeOptions}
         isValidRange={isValidRange}
         i18nStrings={{
-          relativeModeTitle: t('analytics:dateRange.relativeModeTitle') ?? '',
-          absoluteModeTitle: t('analytics:dateRange.absoluteModeTitle') ?? '',
-          relativeRangeSelectionHeading:
-            t('analytics:dateRange.relativeRangeSelectionHeading') ?? '',
-          cancelButtonLabel: t('analytics:dateRange.cancelButtonLabel') ?? '',
-          applyButtonLabel: t('analytics:dateRange.applyButtonLabel') ?? '',
-          clearButtonLabel: t('analytics:dateRange.clearButtonLabel') ?? '',
-          customRelativeRangeOptionLabel:
-            t('analytics:dateRange.customRelativeRangeOptionLabel') ?? '',
+          relativeModeTitle: defaultStr(
+            t('analytics:dateRange.relativeModeTitle')
+          ),
+          absoluteModeTitle: defaultStr(
+            t('analytics:dateRange.absoluteModeTitle')
+          ),
+          relativeRangeSelectionHeading: defaultStr(
+            t('analytics:dateRange.relativeRangeSelectionHeading')
+          ),
+          cancelButtonLabel: defaultStr(
+            t('analytics:dateRange.cancelButtonLabel')
+          ),
+          applyButtonLabel: defaultStr(
+            t('analytics:dateRange.applyButtonLabel')
+          ),
+          clearButtonLabel: defaultStr(
+            t('analytics:dateRange.clearButtonLabel')
+          ),
+          customRelativeRangeOptionLabel: defaultStr(
+            t('analytics:dateRange.customRelativeRangeOptionLabel')
+          ),
           formatRelativeRange: (value: DateRangePickerProps.RelativeValue) => {
             const label = t('analytics:dateRange.formatRelativeRangeLabel');
             const unit = i18n.t(`analytics:dateRange.${value.unit}`);

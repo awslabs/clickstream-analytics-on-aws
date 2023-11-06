@@ -155,7 +155,7 @@ update_dict() {
     sed -i'' -e 's/__DIST_OUTPUT_BUCKET__/'$TEMPLATE_OUTPUT_BUCKET'/g' src/control-plane/backend/config/dictionary.json
     sed -i'' -e 's~__TARGET__~'$target'~g' src/control-plane/backend/config/dictionary.json
     sed -i'' -e 's~__PREFIX__~'$prefix'~g' src/control-plane/backend/config/dictionary.json
-    sed -i'' -e 's/__SOLUTION_VERSION__/'$BUILD_VERSION'/g' src/control-plane/backend/config/dictionary.json
+    sed -i'' -e 's/__SOLUTION_VERSION__/'$VERSION'/g' src/control-plane/backend/config/dictionary.json
     cat src/control-plane/backend/config/dictionary.json
 
     cd $currDir
@@ -361,10 +361,6 @@ done
 echo "------------------------------------------------------------------------------"
 echo "${bold}[Packing] Source code artifacts${normal}"
 echo "------------------------------------------------------------------------------"
-
-# General cleanup of node_modules files
-echo "find $staging_dist_dir -iname "node_modules" -type d -exec rm -rf "{}" \; 2> /dev/null"
-find $staging_dist_dir -iname "node_modules" -type d -exec rm -rf "{}" \; 2> /dev/null
 
 # ... For each asset.* source code artifact in the temporary /staging folder...
 cd $staging_dist_dir

@@ -34,6 +34,7 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { EPipelineStatus, TIME_FORMAT } from 'ts/const';
+import { defaultStr } from 'ts/utils';
 
 interface ProjectPipelineProps {
   pipelineInfo: IPipeline;
@@ -248,7 +249,7 @@ const ProjectPipeline: React.FC<ProjectPipelineProps> = (
         ]}
         loading={loadingApp}
         items={applicationList}
-        loadingText={t('project:pipeline.loading') ?? ''}
+        loadingText={defaultStr(t('project:pipeline.loading'))}
         selectionType="single"
         trackBy="appId"
         empty={
@@ -270,7 +271,7 @@ const ProjectPipeline: React.FC<ProjectPipelineProps> = (
         }
         filter={
           <TextFilter
-            filteringPlaceholder={t('project:pipeline.findApp') ?? ''}
+            filteringPlaceholder={defaultStr(t('project:pipeline.findApp'))}
             filteringText=""
           />
         }
@@ -334,8 +335,8 @@ const ProjectPipeline: React.FC<ProjectPipelineProps> = (
             }}
             pagesCount={Math.floor(totalCount / pageSize)}
             ariaLabels={{
-              nextPageLabel: t('nextPage') ?? '',
-              previousPageLabel: t('prePage') ?? '',
+              nextPageLabel: defaultStr(t('nextPage')),
+              previousPageLabel: defaultStr(t('prePage')),
               pageLabel: (pageNumber) =>
                 `${t('page')} ${pageNumber} ${t('allPages')}`,
             }}

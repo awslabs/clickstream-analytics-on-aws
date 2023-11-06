@@ -68,7 +68,9 @@
     "closeMenu": "关闭菜单",
     "switchSpace": "切换项目",
     "AccessDeniedTitle": "401 未经授权",
-    "AccessDeniedMessage": "您没有访问此页面的权限，请联系管理员。"
+    "AccessDeniedMessage": "您没有访问此页面的权限，请联系管理员。",
+    "reSignIn": "请重新登录",
+    "reSignInDesc": "您已退出帐户。请单击 ‘重新加载’ 重新登录 Web 控制台"
   },
   "tag": {
     "name": "标签",
@@ -131,6 +133,7 @@
     "copyRight": "Amazon Web Services 公司或其关联公司。版权所有。"
   },
   "button": {
+    "reload": "重新加载",
     "cancel": "取消",
     "settings": "设置",
     "createProject": "创建项目",
@@ -187,7 +190,8 @@
     "operatorsText": "操作符",
     "clearFiltersText": "清除过滤器",
     "applyActionText": "应用",
-    "clear": "清除"
+    "clear": "清除",
+    "fullWindowView": "全窗口查看"
   },
   "item": "项目",
   "items": "项目",

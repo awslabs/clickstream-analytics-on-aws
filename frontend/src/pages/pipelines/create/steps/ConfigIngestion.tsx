@@ -286,8 +286,8 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
   useEffect(() => {
     if (!update && pipelineInfo.selectedRegion && pipelineInfo.selectedVPC) {
       getSubnetListByRegionAndVPC(
-        pipelineInfo.selectedRegion.value ?? '',
-        pipelineInfo.selectedVPC.value ?? ''
+        defaultStr(pipelineInfo.selectedRegion.value),
+        defaultStr(pipelineInfo.selectedVPC.value)
       );
     }
   }, [pipelineInfo.selectedRegion, pipelineInfo.selectedVPC]);

@@ -24,6 +24,7 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { CLOUDFORMATION_STATUS_MAP, EPipelineStatus } from 'ts/const';
 import { buildCloudFormationStackLink } from 'ts/url';
+import { defaultStr } from 'ts/utils';
 
 const CHECK_TIME_INTERVAL = 5000;
 
@@ -88,8 +89,8 @@ const PipelineStatus: React.FC<PipelineStatusProps> = (
     try {
       const { success, data }: ApiResponse<IExtPipeline> =
         await getPipelineDetail({
-          id: pipelineId ?? '',
-          pid: projectId ?? '',
+          id: defaultStr(pipelineId),
+          pid: defaultStr(projectId),
         });
       if (success) {
         setUpdatedStatus(data.status?.status);
@@ -127,15 +128,21 @@ const PipelineStatus: React.FC<PipelineStatusProps> = (
     }
   }, [status]);
 
-  const getStackStatusIndicatorType = (stackVersion: string, stackStatus: string) => {
-    let stackIndicatorType = 'stopped';
-    if (pipelineTemplateVersion !== '' && pipelineTemplateVersion !== stackVersion) {
+  const getStackStatusIndicatorType = (
+    stackVersion: string,
+    stackStatus: string
+  ) => {
+    let stackIndicatorType: StatusIndicatorProps.Type;
+    if (
+      pipelineTemplateVersion !== '' &&
+      pipelineTemplateVersion !== stackVersion
+    ) {
       stackIndicatorType = 'warning';
     } else {
       stackIndicatorType = CLOUDFORMATION_STATUS_MAP[stackStatus];
     }
-    return stackIndicatorType as StatusIndicatorProps.Type;
-  }
+    return stackIndicatorType;
+  };
 
   return (
     <>
@@ -153,7 +160,10 @@ const PipelineStatus: React.FC<PipelineStatusProps> = (
                 return (
                   <div className="flex flex-1" key={element.stackType}>
                     <StatusIndicator
-                      type={getStackStatusIndicatorType(element.stackTemplateVersion, element.stackStatus)}
+                      type={getStackStatusIndicatorType(
+                        element.stackTemplateVersion,
+                        element.stackStatus
+                      )}
                     >
                       <b>{element.stackType}</b>(
                       {element.stackStatus ?? t('status.unknown')})

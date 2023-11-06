@@ -21,6 +21,7 @@ import React from 'react';
 import { useParams } from 'react-router-dom';
 import { USER_ATTRIBUTE_DISPLAY_PREFIX } from 'ts/const';
 import { MetadataSource } from 'ts/explore-types';
+import { defaultStr } from 'ts/utils';
 import MetadataSourceFC from '../comps/MetadataSource';
 import MetadataTable from '../table/MetadataTable';
 import { displayNameRegex, descriptionRegex } from '../table/table-config';
@@ -56,7 +57,7 @@ const MetadataUserAttributesTable: React.FC<
         onChange={(event) => {
           setValue(event.detail.value);
         }}
-        placeholder={t('tag.valuePlaceholder') ?? ''}
+        placeholder={defaultStr(t('tag.valuePlaceholder'))}
       />
     );
   };
@@ -73,7 +74,7 @@ const MetadataUserAttributesTable: React.FC<
         onChange={(event) => {
           setValue(event.detail.value);
         }}
-        placeholder={t('tag.valuePlaceholder') ?? ''}
+        placeholder={defaultStr(t('tag.valuePlaceholder'))}
       />
     );
   };
@@ -230,7 +231,7 @@ const MetadataUserAttributesTable: React.FC<
       const attribute = newItem as IMetadataUserAttribute;
       const { success, message }: ApiResponse<null> =
         await updateMetadataDisplay({
-          id: `${USER_ATTRIBUTE_DISPLAY_PREFIX}${attribute.projectId}#${attribute.appId}#${attribute.name}#${attribute.valueType}`,
+          id: `${USER_ATTRIBUTE_DISPLAY_PREFIX}${attribute.projectId}#${attribute.appId}#${attribute.category}#${attribute.name}#${attribute.valueType}`,
           projectId: attribute.projectId,
           appId: attribute.appId,
           displayName: attribute.displayName,
@@ -251,8 +252,9 @@ const MetadataUserAttributesTable: React.FC<
       tableContentDisplay={CONTENT_DISPLAY}
       tableFilteringProperties={FILTERING_PROPERTIES}
       tableI18nStrings={{
-        infoContent:
-          t('analytics:information.metadataUserAttributesInfo') ?? '',
+        infoContent: defaultStr(
+          t('analytics:information.metadataUserAttributesInfo')
+        ),
         loadingText: t('analytics:labels.tableLoading') || 'Loading',
         emptyText: t('analytics:labels.tableEmpty'),
         headerTitle: t('analytics:metadata.userAttribute.title'),

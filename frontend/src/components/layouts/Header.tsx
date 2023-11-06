@@ -15,6 +15,7 @@ import { TopNavigation } from '@cloudscape-design/components';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
+  CLICK_STREAM_USER_DATA,
   DEFAULT_ZH_LANG,
   EN_TEXT,
   LANGUAGE_ITEMS,
@@ -22,6 +23,7 @@ import {
   ZH_LANGUAGE_LIST,
   ZH_TEXT,
 } from 'ts/const';
+import { defaultStr } from 'ts/utils';
 
 interface IHeaderProps {
   user: any;
@@ -63,7 +65,7 @@ const Header: React.FC<IHeaderProps> = (props: IHeaderProps) => {
       );
       const queryParams = new URLSearchParams({
         client_id: configJSONObj.oidc_client_id,
-        id_token_hint: user.id_token,
+        id_token_hint: user?.id_token,
         logout_uri: redirectUrl,
         redirect_uri: redirectUrl,
         post_logout_redirect_uri: redirectUrl,
@@ -79,12 +81,12 @@ const Header: React.FC<IHeaderProps> = (props: IHeaderProps) => {
       <TopNavigation
         identity={{
           href: '/',
-          title: t('header.solution') ?? '',
+          title: defaultStr(t('header.solution')),
         }}
         utilities={[
           {
             type: 'button',
-            text: t('header.solutionLibrary') ?? '',
+            text: defaultStr(t('header.solutionLibrary')),
             href: 'https://aws.amazon.com/solutions/',
             external: true,
           },
@@ -108,6 +110,7 @@ const Header: React.FC<IHeaderProps> = (props: IHeaderProps) => {
             iconName: 'user-profile',
             onItemClick: (item) => {
               if (item.detail.id === 'signout') {
+                window.localStorage.removeItem(CLICK_STREAM_USER_DATA);
                 if (fullLogoutUrl) {
                   signOut?.();
                   window.location.href = fullLogoutUrl;
@@ -115,16 +118,16 @@ const Header: React.FC<IHeaderProps> = (props: IHeaderProps) => {
                 signOut?.();
               }
             },
-            items: [{ id: 'signout', text: t('header.signOut') ?? '' }],
+            items: [{ id: 'signout', text: defaultStr(t('header.signOut')) }],
           },
         ]}
         i18nStrings={{
-          searchIconAriaLabel: t('header.search') ?? '',
-          searchDismissIconAriaLabel: t('header.closeSearch') ?? '',
-          overflowMenuTriggerText: t('header.more') ?? '',
-          overflowMenuTitleText: t('header.all') ?? '',
-          overflowMenuBackIconAriaLabel: t('header.back') ?? '',
-          overflowMenuDismissIconAriaLabel: t('header.closeMenu') ?? '',
+          searchIconAriaLabel: defaultStr(t('header.search')),
+          searchDismissIconAriaLabel: defaultStr(t('header.closeSearch')),
+          overflowMenuTriggerText: defaultStr(t('header.more')),
+          overflowMenuTitleText: defaultStr(t('header.all')),
+          overflowMenuBackIconAriaLabel: defaultStr(t('header.back')),
+          overflowMenuDismissIconAriaLabel: defaultStr(t('header.closeMenu')),
         }}
       />
     </header>
