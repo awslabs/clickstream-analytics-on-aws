@@ -1,6 +1,6 @@
 {
   "_channel" : "C001",
-  "_first_referer" : "http://myhost.com/_page_referer_001",
+  "_first_referer" : "http://myhost.com/_page_referer_003",
   "_first_traffic_medium" : "TSM",
   "_first_traffic_source" : "TSS",
   "_first_traffic_source_type" : "TSN",
@@ -77,7 +77,7 @@
       "string_value" : "device_xx_vv"
     }
   } ],
-  "user_pseudo_id" : "uuid1-9844af32",
+  "user_pseudo_id" : "uuid1_etl_runner1",
   "partition_app" : "uba-app",
   "partition_year" : 2023,
   "partition_month" : 4,

@@ -1,9 +1,9 @@
 {
   "event_id" : "1fcd7f5b-9529-4977-a303-e8c7e39db7b898-1",
   "event_date" : "2023-04-24",
-  "event_timestamp" : 1682319109447,
+  "event_timestamp" : 1682319109441,
   "event_previous_timestamp" : null,
-  "event_name" : "_page_view",
+  "event_name" : "_first_open",
   "event_value_in_usd" : null,
   "event_bundle_sequence_id" : 111,
   "ingest_timestamp" : 1682319109303,
@@ -49,7 +49,9 @@
     "app_id" : "uba-app",
     "id" : "com.example.demoapplication",
     "install_source" : "C001",
-    "version" : "1.0"
+    "version" : "1.0",
+    "sdk_version" : "0.2.0",
+    "sdk_name" : "aws-solution-clickstream-sdk"
   },
   "platform" : "ANDROID",
   "project_id" : "test_project_id_01",
