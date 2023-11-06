@@ -11,9 +11,10 @@
  *  and limitations under the License.
  */
 
+import { Architecture } from '@aws-sdk/client-emr-serverless';
 import { CfnParameter } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
-import { EMR_VERSION_PATTERN, PARAMETER_GROUP_LABEL_VPC, PARAMETER_LABEL_PRIVATE_SUBNETS, PARAMETER_LABEL_VPCID, S3_BUCKET_NAME_PATTERN, S3_PATH_PLUGIN_FILES_PATTERN, S3_PATH_PLUGIN_JARS_PATTERN, SCHEDULE_EXPRESSION_PATTERN, TRANSFORMER_AND_ENRICH_CLASS_NAMES } from '../common/constant';
+import { EMR_ARCHITECTURE_AUTO, EMR_VERSION_PATTERN, PARAMETER_GROUP_LABEL_VPC, PARAMETER_LABEL_PRIVATE_SUBNETS, PARAMETER_LABEL_VPCID, S3_BUCKET_NAME_PATTERN, S3_PATH_PLUGIN_FILES_PATTERN, S3_PATH_PLUGIN_JARS_PATTERN, SCHEDULE_EXPRESSION_PATTERN, TRANSFORMER_AND_ENRICH_CLASS_NAMES } from '../common/constant';
 import { Parameters, SubnetParameterType } from '../common/parameters';
 
 export function createStackParameters(scope: Construct) {
@@ -139,9 +140,9 @@ export function createStackParameters(scope: Construct) {
     description: 'Emr-Serverless application architecture',
     default: 'Auto',
     allowedValues: [
-      'Auto',
-      'ARM64',
-      'X86_64',
+      EMR_ARCHITECTURE_AUTO,
+      Architecture.ARM64,
+      Architecture.X86_64,
     ],
     type: 'String',
   });
