@@ -59,6 +59,7 @@ describe('Custom resource - Create schemas for applications in Redshift database
       redshiftBIUsernamePrefix: biUserNamePrefix,
       reportingViewsDef,
       schemaDefs,
+      lastModifiedTime: 1699345775001,
     },
   };
 

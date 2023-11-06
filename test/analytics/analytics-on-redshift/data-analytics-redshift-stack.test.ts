@@ -3786,6 +3786,7 @@ describe('DataAnalyticsRedshiftStack serverless custom resource test', () => {
         },
         databaseName: RefAnyValue,
         dataAPIRole: RefAnyValue,
+        lastModifiedTime: Match.anyValue(),
         serverlessRedshiftProps: {
           databaseName: RefAnyValue,
           namespaceId: RefAnyValue,
