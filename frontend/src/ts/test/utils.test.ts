@@ -77,17 +77,6 @@ describe('generateCronDateRange', () => {
       expect(interval).toEqual('rate(1 hour)');
     });
 
-    it('should return default value when unit is undefined', () => {
-      const interval = generateCronDateRange(
-        ExecutionType.FIXED_RATE,
-        2,
-        '',
-        null,
-        'upsert'
-      );
-      expect(interval).toEqual('rate(1 day)');
-    });
-
     it('should return rate with hours when fixedValue and unit are defined', () => {
       const interval = generateCronDateRange(
         ExecutionType.FIXED_RATE,
@@ -145,17 +134,6 @@ describe('generateCronDateRange', () => {
   });
 
   describe('when type is ExecutionType.CRON_EXPRESS', () => {
-    it('should return default value when cronExp is undefined', () => {
-      const interval = generateCronDateRange(
-        ExecutionType.CRON_EXPRESS,
-        10,
-        '',
-        null,
-        'upsert'
-      );
-      expect(interval).toEqual('rate(1 day)');
-    });
-
     it('should return default value when cronExp is empty string', () => {
       const interval = generateCronDateRange(
         ExecutionType.CRON_EXPRESS,

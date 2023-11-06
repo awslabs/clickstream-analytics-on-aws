@@ -163,12 +163,9 @@ export const generateCronDateRange = (
   fixedValue: number,
   cronExp: string,
   unit: SelectProps.Option | null,
-  attr: 'processing' | 'upsert' | 'dataload'
+  attr: 'processing' | 'dataload'
 ) => {
   let DEFAULT_VALUE = `rate(1 hour)`;
-  if (attr === 'upsert') {
-    DEFAULT_VALUE = `rate(1 day)`;
-  }
   if (attr === 'dataload') {
     DEFAULT_VALUE = `rate(5 minutes)`;
   }

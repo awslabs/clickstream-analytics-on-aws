@@ -524,9 +524,6 @@ describe('Pipeline test', () => {
             loadJobScheduleIntervalExpression: 'rate(5 minutes)',
             maxFilesLimit: 50,
           },
-          upsertUsers: {
-            scheduleExpression: 'rate(5 minutes)',
-          },
         },
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
@@ -589,9 +586,6 @@ describe('Pipeline test', () => {
             },
             loadJobScheduleIntervalExpression: 'rate(5 minutes)',
             maxFilesLimit: 50,
-          },
-          upsertUsers: {
-            scheduleExpression: 'rate(5 minutes)',
           },
         },
       });

@@ -383,9 +383,6 @@ export const MSK_DATA_PROCESSING_ATHENA_PIPELINE: IPipeline = {
   },
   dataModeling: {
     athena: true,
-    upsertUsers: {
-      scheduleExpression: 'rate(5 minutes)',
-    },
   },
 };
 
@@ -443,9 +440,6 @@ export const MSK_DATA_PROCESSING_NEW_SERVERLESS_PIPELINE: IPipeline = {
         prefix: '',
       },
       maxFilesLimit: 50,
-    },
-    upsertUsers: {
-      scheduleExpression: 'rate(5 minutes)',
     },
   },
 };
@@ -505,9 +499,6 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE: IPipeline = {
       },
       maxFilesLimit: 50,
     },
-    upsertUsers: {
-      scheduleExpression: 'rate(5 minutes)',
-    },
   },
 };
 
@@ -566,9 +557,6 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_WITH_ERROR_RPU_PIPELINE: IPipe
       },
       maxFilesLimit: 50,
     },
-    upsertUsers: {
-      scheduleExpression: 'rate(5 minutes)',
-    },
   },
 };
 
@@ -615,9 +603,6 @@ export const KINESIS_DATA_PROCESSING_PROVISIONED_REDSHIFT_PIPELINE: IPipeline = 
       },
       maxFilesLimit: 50,
     },
-    upsertUsers: {
-      scheduleExpression: 'rate(5 minutes)',
-    },
   },
 };
 
@@ -642,9 +627,6 @@ export const KINESIS_DATA_PROCESSING_PROVISIONED_REDSHIFT_EMPTY_DBUSER_QUICKSIGH
         dbUser: '',
       },
     },
-    upsertUsers: {
-      scheduleExpression: 'rate(5 minutes)',
-    },
   },
 };
 
@@ -659,9 +641,6 @@ export const KINESIS_DATA_PROCESSING_PROVISIONED_REDSHIFT_ERROR_DBUSER_QUICKSIGH
         clusterIdentifier: 'redshift-cluster-1',
         dbUser: 'HGF%$#@BHHGF',
       },
-    },
-    upsertUsers: {
-      scheduleExpression: 'rate(5 minutes)',
     },
   },
 };
@@ -1347,9 +1326,6 @@ const BASE_RETRY_PIPELINE: IPipeline = {
         prefix: '',
       },
       maxFilesLimit: 50,
-    },
-    upsertUsers: {
-      scheduleExpression: 'rate(5 minutes)',
     },
   },
   reporting: {

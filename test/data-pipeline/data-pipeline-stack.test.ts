@@ -13,7 +13,7 @@
 
 import { App } from 'aws-cdk-lib';
 import { Match, Template } from 'aws-cdk-lib/assertions';
-import { EMR_VERSION_PATTERN, OUTPUT_DATA_PROCESSING_EMR_SERVERLESS_APPLICATION_ID_SUFFIX, OUTPUT_DATA_PROCESSING_GLUE_DATABASE_SUFFIX, OUTPUT_DATA_PROCESSING_GLUE_EVENT_TABLE_SUFFIX, TABLE_NAME_EVENT, TABLE_NAME_EVENT_PARAMETER, TABLE_NAME_INGESTION, TABLE_NAME_ITEM, TABLE_NAME_ODS_EVENT, TABLE_NAME_USER } from '../../src/common/constant';
+import { EMR_VERSION_PATTERN, OUTPUT_DATA_PROCESSING_EMR_SERVERLESS_APPLICATION_ID_SUFFIX, OUTPUT_DATA_PROCESSING_GLUE_DATABASE_SUFFIX, OUTPUT_DATA_PROCESSING_GLUE_EVENT_TABLE_SUFFIX, TABLE_NAME_EVENT, TABLE_NAME_EVENT_PARAMETER, TABLE_NAME_INGESTION, TABLE_NAME_ITEM, TABLE_NAME_USER } from '../../src/common/constant';
 import { DataPipelineStack } from '../../src/data-pipeline-stack';
 import { WIDGETS_ORDER } from '../../src/metrics/settings';
 import { validateSubnetsRule } from '../rules';
@@ -522,10 +522,6 @@ test('Security group count is 1', () => {
 describe('Glue tables have fixed logic id', () => {
 
   for (const template of nestedTemplates) {
-    test('Glue table `ods_events` logic id is SinkTable20F355C6', ()=> {
-      const tableResource = getResourceById(template, 'SinkTable20F355C6');
-      expect( tableResource.Properties.TableInput.Name).toEqual('ods_events');
-    });
 
     test('Glue table `ingestion_events` logic id is SourceTable617AB4E1', ()=> {
       const tableResource = getResourceById(template, 'SourceTable617AB4E1');
@@ -563,7 +559,7 @@ describe('DataPipelineStack Glue catalog resources test', () => {
   });
 
   test('Should has source and sink Glue catalog table', () => {
-    template.resourceCountIs('AWS::Glue::Table', 6);
+    template.resourceCountIs('AWS::Glue::Table', 5);
 
 
     template.hasResourceProperties('AWS::Glue::Table', {
@@ -617,15 +613,6 @@ describe('DataPipelineStack Glue catalog resources test', () => {
       },
     });
 
-    template.hasResourceProperties('AWS::Glue::Table', {
-      DatabaseName: {
-        Ref: Match.anyValue(),
-      },
-      TableInput: {
-        Name: TABLE_NAME_ODS_EVENT,
-        TableType: 'EXTERNAL_TABLE',
-      },
-    });
   });
 
 
@@ -716,7 +703,7 @@ describe('DataPipelineStack Glue catalog resources test', () => {
                   ],
                 ],
               },
-              ...[... Array(6)].map(_ => anyGlueTable),
+              ...[... Array(5)].map(_ => anyGlueTable),
             ],
           },
           {
@@ -1164,7 +1151,7 @@ describe('Data Processing job submitter', () => {
                   ],
                 ],
               },
-              ...[... Array(6)].map(_ => anyGlueTable),
+              ...[... Array(5)].map(_ => anyGlueTable),
 
             ],
           },

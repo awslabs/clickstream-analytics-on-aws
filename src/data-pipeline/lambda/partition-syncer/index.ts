@@ -99,7 +99,7 @@ async function _handler(event: EventType, date: Date, context: Context) {
   if (appIds.length > 0) {
     for (let sinkTableName of [SinkTableEnum.EVENT,
       SinkTableEnum.EVENT_PARAMETER, SinkTableEnum.USER,
-      SinkTableEnum.ITEM, SinkTableEnum.ODS_EVENTS]) {
+      SinkTableEnum.ITEM]) {
       await glueClientUtil.addDailyPartitionsForSinkTable(sinkS3Bucket, sinkS3Prefix, databaseName, sinkTableName, projectId, appIds, date);
       logger.info(`Added daily partitions in table: ${sinkTableName} of date:${date.toISOString()}`);
     }

@@ -21,9 +21,10 @@ import mockfs from 'mock-fs';
 import { RedshiftOdsTables } from '../../../../../src/analytics/analytics-on-redshift';
 import { ResourcePropertiesType, TABLES_VIEWS_FOR_REPORTING, handler, physicalIdPrefix } from '../../../../../src/analytics/lambdas/custom-resource/create-schemas';
 import 'aws-sdk-client-mock-jest';
+import { LEGACY_REDSHIFT_ODS_EVENTS_TABLE_NAME } from '../../../../../src/analytics/private/constant';
 import { ProvisionedRedshiftProps, SQLViewDef } from '../../../../../src/analytics/private/model';
 import { reportingViewsDef, schemaDefs } from '../../../../../src/analytics/private/sql-def';
-import { CLICKSTREAM_EVENT_VIEW_NAME, CLICKSTREAM_USER_ATTR_VIEW_NAME, TABLE_NAME_EVENT, TABLE_NAME_EVENT_PARAMETER, TABLE_NAME_ODS_EVENT } from '../../../../../src/common/constant';
+import { CLICKSTREAM_EVENT_VIEW_NAME, CLICKSTREAM_USER_ATTR_VIEW_NAME, TABLE_NAME_EVENT, TABLE_NAME_EVENT_PARAMETER } from '../../../../../src/common/constant';
 import { getMockContext } from '../../../../common/lambda-context';
 import { basicCloudFormationEvent } from '../../../../common/lambda-events';
 
@@ -40,7 +41,6 @@ describe('Custom resource - Create schemas for applications in Redshift database
   const roleName = 'MyRedshiftDBUserRole';
   const biUserNamePrefix = 'clickstream_report_user_';
   const odsTableNames: RedshiftOdsTables = {
-    odsEvents: 'ods_events',
     event: 'event',
     event_parameter: 'event_parameter',
     user: 'user',
@@ -315,7 +315,7 @@ describe('Custom resource - Create schemas for applications in Redshift database
       const sqlStr = input.Sqls.join(';\n');
       if (input as BatchExecuteStatementCommandInput) {
         if (sqlStr.includes('CREATE SCHEMA IF NOT EXISTS app1')
-          && sqlStr.includes(`CREATE TABLE IF NOT EXISTS app1.${TABLE_NAME_ODS_EVENT}(`)) {
+          && sqlStr.includes(`CREATE TABLE IF NOT EXISTS app1.${LEGACY_REDSHIFT_ODS_EVENTS_TABLE_NAME}(`)) {
           return { Id: 'Id-1' };
         }
       }
@@ -408,7 +408,7 @@ describe('Custom resource - Create schemas for applications in Redshift database
       const sqlStr = input.Sqls.join(';\n');
       if (input as BatchExecuteStatementCommandInput) {
         if (sqlStr.includes('CREATE SCHEMA IF NOT EXISTS app2')
-          && sqlStr.includes(`CREATE TABLE IF NOT EXISTS app2.${TABLE_NAME_ODS_EVENT}(`)
+          && sqlStr.includes(`CREATE TABLE IF NOT EXISTS app2.${LEGACY_REDSHIFT_ODS_EVENTS_TABLE_NAME}(`)
           && sqlStr.includes(`GRANT USAGE ON SCHEMA app2 TO ${biUserNamePrefix}abcde`)
           && sqlStr.includes(`ALTER DEFAULT PRIVILEGES IN SCHEMA app2 GRANT SELECT ON TABLES TO ${biUserNamePrefix}abcde`)
         ) {
@@ -510,7 +510,7 @@ describe('Custom resource - Create schemas for applications in Redshift database
       const sqlStr = input.Sqls.join(';\n');
       if (input as BatchExecuteStatementCommandInput) {
         if (sqlStr.includes('CREATE SCHEMA IF NOT EXISTS app2')
-          && sqlStr.includes(`CREATE TABLE IF NOT EXISTS app2.${TABLE_NAME_ODS_EVENT}(`)
+          && sqlStr.includes(`CREATE TABLE IF NOT EXISTS app2.${LEGACY_REDSHIFT_ODS_EVENTS_TABLE_NAME}(`)
           && sqlStr.includes(`GRANT USAGE ON SCHEMA app2 TO ${biUserNamePrefix}abcde`)
           && sqlStr.includes(`ALTER DEFAULT PRIVILEGES IN SCHEMA app2 GRANT SELECT ON TABLES TO ${biUserNamePrefix}abcde`)
         ) {

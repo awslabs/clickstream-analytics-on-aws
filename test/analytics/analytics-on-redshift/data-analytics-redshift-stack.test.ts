@@ -364,31 +364,6 @@ describe('DataAnalyticsRedshiftStack common parameter test', () => {
     expect(condition3[CFN_FN.EQUALS][1]).toEqual('Provisioned');
 
   });
-
-  test('Check UpsertUsersScheduleExpression pattern', () => {
-    const param = getParameter(template, 'UpsertUsersScheduleExpression');
-    const pattern = param.AllowedPattern;
-    const regex = new RegExp(`${pattern}`);
-    const validValues = [
-      'cron(0 1 * * ? *)',
-      'cron(59 23 * * ? *)',
-      'cron(0 */4 * * ? *)',
-      'cron(0/30 * * * ? *)',
-      'cron(0/30 */20 * * ? *)',
-    ];
-
-    for (const v of validValues) {
-      expect(v).toMatch(regex);
-    }
-
-    const invalidValues = [
-      '(0 1 * * ? *)',
-      'cron(0 1 * * ? *',
-    ];
-    for (const v of invalidValues) {
-      expect(v).not.toMatch(regex);
-    }
-  });
 });
 
 describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
@@ -427,11 +402,6 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
 
   const nestStackCommonTablesProps = {
     tablesOdsSource: {
-      ods_events: {
-        s3Bucket: sinkS3Bucket,
-        prefix: 'project1/ods_events/',
-        fileSuffix: '.snappy',
-      },
       event: {
         s3Bucket: sinkS3Bucket,
         prefix: 'project1/event/',
@@ -484,7 +454,6 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
       'LoadWorkflowBucketPrefix',
       'RedshiftServerlessNamespaceId',
       'MaxFilesLimit',
-      'UpsertUsersScheduleExpression',
       'ClickstreamAnalyticsMetadataDdbArn',
       'PipelineS3Bucket',
       'PipelineS3Prefix',
@@ -642,9 +611,6 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
       newRedshiftServerlessProps: undefined,
       existingRedshiftServerlessProps: undefined,
       provisionedRedshiftProps: undefined,
-      upsertUsersWorkflowData: {
-        scheduleExpression: 'cron(0 1 * * ? *)',
-      },
       scanMetadataWorkflowData: {
         clickstreamAnalyticsMetadataDdbArn: 'arn:aws:dynamodb:us-east-1:111122223333:table/ClickstreamAnalyticsMetadata',
         topFrequentPropertiesLimit: '20',
@@ -698,9 +664,6 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
       },
       existingRedshiftServerlessProps: serverlessRedshiftProps,
       provisionedRedshiftProps: provisionedRedshiftProps,
-      upsertUsersWorkflowData: {
-        scheduleExpression: 'cron(0 1 * * ? *)',
-      },
       scanMetadataWorkflowData: {
         clickstreamAnalyticsMetadataDdbArn: 'arn:aws:dynamodb:us-east-1:111122223333:table/ClickstreamAnalyticsMetadata',
         topFrequentPropertiesLimit: '20',
@@ -741,9 +704,6 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
       appIds: 'app1',
       ...nestStackCommonTablesProps,
       existingRedshiftServerlessProps: serverlessRedshiftProps,
-      upsertUsersWorkflowData: {
-        scheduleExpression: 'cron(0 1 * * ? *)',
-      },
       scanMetadataWorkflowData: {
         clickstreamAnalyticsMetadataDdbArn: 'arn:aws:dynamodb:us-east-1:111122223333:table/ClickstreamAnalyticsMetadata',
         topFrequentPropertiesLimit: '20',
@@ -766,12 +726,12 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
   test('Should has 4 StateMachines', () => {
     if (stack.nestedStacks.redshiftServerlessStack) {
       const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
-      nestedTemplate.resourceCountIs( 'AWS::StepFunctions::StateMachine', 4);
+      nestedTemplate.resourceCountIs('AWS::StepFunctions::StateMachine', 3);
     }
 
     if (stack.nestedStacks.redshiftProvisionedStack) {
       const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftProvisionedStack);
-      nestedTemplate.resourceCountIs( 'AWS::StepFunctions::StateMachine', 4);
+      nestedTemplate.resourceCountIs('AWS::StepFunctions::StateMachine', 3);
     }
   });
 
@@ -1273,7 +1233,7 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
                       RefAnyValue,
                       '/',
                       RefAnyValue,
-                      'ods_events/*',
+                      'event/*',
                     ],
                   ],
                 },
@@ -1309,41 +1269,6 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
                       '/',
                       RefAnyValue,
                       '*',
-                    ],
-                  ],
-                },
-              ],
-            },
-            {
-              Action: [
-                's3:GetObject*',
-                's3:GetBucket*',
-                's3:List*',
-              ],
-              Effect: 'Allow',
-              Resource: [
-                {
-                  'Fn::Join': [
-                    '',
-                    [
-                      'arn:',
-                      RefAnyValue,
-                      ':s3:::',
-                      RefAnyValue,
-                    ],
-                  ],
-                },
-                {
-                  'Fn::Join': [
-                    '',
-                    [
-                      'arn:',
-                      RefAnyValue,
-                      ':s3:::',
-                      RefAnyValue,
-                      '/',
-                      RefAnyValue,
-                      'event/*',
                     ],
                   ],
                 },
@@ -1498,12 +1423,13 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
                       RefAnyValue,
                       '/',
                       RefAnyValue,
-                      'ods_events/*',
+                      'event/*',
                     ],
                   ],
                 },
               ],
             },
+
             {
               Action: [
                 's3:GetObject*',
@@ -1534,41 +1460,6 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
                       '/',
                       RefAnyValue,
                       '*',
-                    ],
-                  ],
-                },
-              ],
-            },
-            {
-              Action: [
-                's3:GetObject*',
-                's3:GetBucket*',
-                's3:List*',
-              ],
-              Effect: 'Allow',
-              Resource: [
-                {
-                  'Fn::Join': [
-                    '',
-                    [
-                      'arn:',
-                      RefAnyValue,
-                      ':s3:::',
-                      RefAnyValue,
-                    ],
-                  ],
-                },
-                {
-                  'Fn::Join': [
-                    '',
-                    [
-                      'arn:',
-                      RefAnyValue,
-                      ':s3:::',
-                      RefAnyValue,
-                      '/',
-                      RefAnyValue,
-                      'event/*',
                     ],
                   ],
                 },
@@ -3050,119 +2941,6 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
     }
   });
 
-  test('Check UpsertUsersWorkflowUpsertUsersFnSG', () => {
-    if (stack.nestedStacks.redshiftServerlessStack) {
-      const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
-      const sg = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::EC2::SecurityGroup', 'UpsertUsersWorkflowUpsertUsersFnSG');
-      expect(sg).toBeDefined();
-    }
-    if (stack.nestedStacks.redshiftProvisionedStack) {
-      const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftProvisionedStack);
-      const sg = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::EC2::SecurityGroup', 'UpsertUsersWorkflowUpsertUsersFnSG');
-      expect(sg).toBeDefined();
-    }
-  });
-
-  test('Check UpsertUsersWorkflowUpsertUsersRole', () => {
-    if (stack.nestedStacks.redshiftServerlessStack) {
-      const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
-      const role = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::IAM::Role', 'UpsertUsersWorkflowUpsertUsersRole');
-      expect(role).toBeDefined();
-    }
-    if (stack.nestedStacks.redshiftProvisionedStack) {
-      const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftProvisionedStack);
-      const role = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::IAM::Role', 'UpsertUsersWorkflowUpsertUsersRole');
-      expect(role).toBeDefined();
-    }
-  });
-
-  test('Check UpsertUsersWorkflowUpsertUsersRoleDefaultPolicy', () => {
-    if (stack.nestedStacks.redshiftServerlessStack) {
-      const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
-      nestedTemplate.hasResourceProperties('AWS::IAM::Policy', {
-        PolicyDocument: {
-          Statement: [
-            {
-              Action: [
-                'logs:CreateLogStream',
-                'logs:PutLogEvents',
-                'logs:CreateLogGroup',
-              ],
-              Effect: 'Allow',
-              Resource: '*',
-            },
-            {
-              Action: [
-                'ec2:CreateNetworkInterface',
-                'ec2:DescribeNetworkInterfaces',
-                'ec2:DeleteNetworkInterface',
-                'ec2:AssignPrivateIpAddresses',
-                'ec2:UnassignPrivateIpAddresses',
-              ],
-              Effect: 'Allow',
-              Resource: '*',
-            },
-            {
-              Action: 'sts:AssumeRole',
-              Effect: 'Allow',
-              Resource: RefAnyValue,
-            },
-          ],
-          Version: '2012-10-17',
-        },
-        PolicyName: Match.anyValue(),
-        Roles: [
-          RefAnyValue,
-        ],
-      });
-    }
-
-    if (stack.nestedStacks.redshiftProvisionedStack) {
-      const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftProvisionedStack);
-      nestedTemplate.hasResourceProperties('AWS::IAM::Policy', {
-        PolicyDocument: {
-          Statement: [
-            {
-              Action: [
-                'logs:CreateLogStream',
-                'logs:PutLogEvents',
-                'logs:CreateLogGroup',
-              ],
-              Effect: 'Allow',
-              Resource: '*',
-            },
-            {
-              Action: [
-                'ec2:CreateNetworkInterface',
-                'ec2:DescribeNetworkInterfaces',
-                'ec2:DeleteNetworkInterface',
-                'ec2:AssignPrivateIpAddresses',
-                'ec2:UnassignPrivateIpAddresses',
-              ],
-              Effect: 'Allow',
-              Resource: '*',
-            },
-            {
-              Action: 'sts:AssumeRole',
-              Effect: 'Allow',
-              Resource: {
-                'Fn::GetAtt': [
-                  Match.anyValue(),
-                  'Arn',
-                ],
-              },
-            },
-          ],
-          Version: '2012-10-17',
-        },
-        PolicyName: Match.anyValue(),
-        Roles: [
-          RefAnyValue,
-        ],
-      });
-    }
-  });
-
   test('Check ScanMetadataWorkflowScanMetadataFnSG', () => {
     if (stack.nestedStacks.redshiftServerlessStack) {
       const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
@@ -3360,160 +3138,6 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
     }
   });
 
-  test('Check UpsertUsersWorkflowUpsertUsersFn', () => {
-    if (stack.nestedStacks.redshiftServerlessStack) {
-      const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
-      nestedTemplate.hasResourceProperties('AWS::Lambda::Function', {
-        Code: {
-          S3Bucket: {
-            'Fn::Sub': Match.anyValue(),
-          },
-          S3Key: Match.anyValue(),
-        },
-        Role: {
-          'Fn::GetAtt': [
-            Match.anyValue(),
-            'Arn',
-          ],
-        },
-        Environment: {
-          Variables: {
-            REDSHIFT_MODE: REDSHIFT_MODE.SERVERLESS,
-            REDSHIFT_SERVERLESS_WORKGROUP_NAME: RefAnyValue,
-            REDSHIFT_CLUSTER_IDENTIFIER: '',
-            REDSHIFT_DATABASE: RefAnyValue,
-            REDSHIFT_DB_USER: '',
-            REDSHIFT_DATA_API_ROLE: RefAnyValue,
-            POWERTOOLS_SERVICE_NAME: 'ClickStreamAnalyticsOnAWS',
-            POWERTOOLS_LOGGER_SAMPLE_RATE: '1',
-            POWERTOOLS_LOGGER_LOG_EVENT: 'true',
-            LOG_LEVEL: 'WARN',
-            AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
-          },
-        },
-        Handler: 'index.handler',
-        MemorySize: Match.anyValue(),
-        ReservedConcurrentExecutions: 1,
-        Runtime: Match.anyValue(),
-        Timeout: 120,
-        VpcConfig: {
-          SecurityGroupIds: [
-            {
-              'Fn::GetAtt': [
-                Match.anyValue(),
-                'GroupId',
-              ],
-            },
-          ],
-          SubnetIds: {
-            'Fn::Split': [
-              ',',
-              RefAnyValue,
-            ],
-          },
-        },
-      });
-    }
-
-    if (stack.nestedStacks.redshiftProvisionedStack) {
-      const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftProvisionedStack);
-      nestedTemplate.hasResourceProperties('AWS::Lambda::Function', {
-        Code: {
-          S3Bucket: {
-            'Fn::Sub': Match.anyValue(),
-          },
-          S3Key: Match.anyValue(),
-        },
-        Role: {
-          'Fn::GetAtt': [
-            Match.anyValue(),
-            'Arn',
-          ],
-        },
-        Environment: {
-          Variables: {
-            REDSHIFT_MODE: REDSHIFT_MODE.PROVISIONED,
-            REDSHIFT_SERVERLESS_WORKGROUP_NAME: Match.anyValue(),
-            REDSHIFT_CLUSTER_IDENTIFIER: RefAnyValue,
-            REDSHIFT_DATABASE: RefAnyValue,
-            REDSHIFT_DB_USER: RefAnyValue,
-            REDSHIFT_DATA_API_ROLE: {
-              'Fn::GetAtt': [
-                Match.anyValue(),
-                'Arn',
-              ],
-            },
-            POWERTOOLS_SERVICE_NAME: 'ClickStreamAnalyticsOnAWS',
-            POWERTOOLS_LOGGER_SAMPLE_RATE: '1',
-            POWERTOOLS_LOGGER_LOG_EVENT: 'true',
-            LOG_LEVEL: 'WARN',
-            AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
-          },
-        },
-        Handler: 'index.handler',
-        MemorySize: Match.anyValue(),
-        ReservedConcurrentExecutions: 1,
-        Runtime: Match.anyValue(),
-        Timeout: 120,
-        VpcConfig: {
-          SecurityGroupIds: [
-            {
-              'Fn::GetAtt': [
-                Match.anyValue(),
-                'GroupId',
-              ],
-            },
-          ],
-          SubnetIds: {
-            'Fn::Split': [
-              ',',
-              RefAnyValue,
-            ],
-          },
-        },
-      });
-    }
-  });
-
-  test('Check UpsertUsersWorkflowCheckUpsertJobStatusFnSG', () => {
-    if (stack.nestedStacks.redshiftServerlessStack) {
-      const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
-      const sg = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::EC2::SecurityGroup', 'UpsertUsersWorkflowCheckUpsertJobStatusFnSG');
-      expect(sg).toBeDefined();
-    }
-    if (stack.nestedStacks.redshiftProvisionedStack) {
-      const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftProvisionedStack);
-      const sg = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::EC2::SecurityGroup', 'UpsertUsersWorkflowCheckUpsertJobStatusFnSG');
-      expect(sg).toBeDefined();
-    }
-  });
-
-  test('Check UpsertUsersWorkflowCheckUpsertJobStatusRole', () => {
-    if (stack.nestedStacks.redshiftServerlessStack) {
-      const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
-      const role = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::IAM::Role', 'UpsertUsersWorkflowCheckUpsertJobStatusRole');
-      expect(role).toBeDefined();
-    }
-    if (stack.nestedStacks.redshiftProvisionedStack) {
-      const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftProvisionedStack);
-      const role = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::IAM::Role', 'UpsertUsersWorkflowCheckUpsertJobStatusRole');
-      expect(role).toBeDefined();
-    }
-  });
-
-  test('Check ScanMetadataWorkflowCheckScanMetadataStatusFnSG', ()=>{
-    if (stack.nestedStacks.redshiftServerlessStack) {
-      const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
-      const sg = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::EC2::SecurityGroup', 'ScanMetadataWorkflowCheckScanMetadataStatusFnSG');
-      expect(sg).toBeDefined();
-    }
-    if (stack.nestedStacks.redshiftProvisionedStack) {
-      const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftProvisionedStack);
-      const sg = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::EC2::SecurityGroup', 'ScanMetadataWorkflowCheckScanMetadataStatusFnSG');
-      expect(sg).toBeDefined();
-    }
-  });
-
   test('Check ScanMetadataWorkflowCheckScanMetadataJobStatusRole', () => {
     if (stack.nestedStacks.redshiftServerlessStack) {
       const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
@@ -3602,275 +3226,6 @@ describe('DataAnalyticsRedshiftStack lambda function test', () => {
       const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftProvisionedStack);
       const role = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::IAM::Role', 'ScanMetadataWorkflowUpdateWorkflowInfoRole');
       expect(role).toBeDefined();
-    }
-  });
-
-  test('Check UpsertUsersWorkflowCheckUpsertJobStatusRoleDefaultPolicy', ()=>{
-    if (stack.nestedStacks.redshiftServerlessStack) {
-      const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
-      nestedTemplate.hasResourceProperties('AWS::IAM::Policy', {
-        PolicyDocument: {
-          Statement: [
-            {
-              Action: [
-                'logs:CreateLogStream',
-                'logs:PutLogEvents',
-                'logs:CreateLogGroup',
-              ],
-              Effect: 'Allow',
-              Resource: '*',
-            },
-            {
-              Action: [
-                'ec2:CreateNetworkInterface',
-                'ec2:DescribeNetworkInterfaces',
-                'ec2:DeleteNetworkInterface',
-                'ec2:AssignPrivateIpAddresses',
-                'ec2:UnassignPrivateIpAddresses',
-              ],
-              Effect: 'Allow',
-              Resource: '*',
-            },
-            {
-              Action: 'sts:AssumeRole',
-              Effect: 'Allow',
-              Resource: RefAnyValue,
-            },
-          ],
-          Version: '2012-10-17',
-        },
-        PolicyName: Match.anyValue(),
-        Roles: [
-          RefAnyValue,
-        ],
-      });
-    }
-
-    if (stack.nestedStacks.redshiftProvisionedStack) {
-      const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftProvisionedStack);
-      nestedTemplate.hasResourceProperties('AWS::IAM::Policy', {
-        PolicyDocument: {
-          Statement: [
-            {
-              Action: [
-                'logs:CreateLogStream',
-                'logs:PutLogEvents',
-                'logs:CreateLogGroup',
-              ],
-              Effect: 'Allow',
-              Resource: '*',
-            },
-            {
-              Action: [
-                'ec2:CreateNetworkInterface',
-                'ec2:DescribeNetworkInterfaces',
-                'ec2:DeleteNetworkInterface',
-                'ec2:AssignPrivateIpAddresses',
-                'ec2:UnassignPrivateIpAddresses',
-              ],
-              Effect: 'Allow',
-              Resource: '*',
-            },
-            {
-              Action: 'sts:AssumeRole',
-              Effect: 'Allow',
-              Resource: {
-                'Fn::GetAtt': [
-                  Match.anyValue(),
-                  'Arn',
-                ],
-              },
-            },
-          ],
-          Version: '2012-10-17',
-        },
-        PolicyName: Match.anyValue(),
-        Roles: [
-          RefAnyValue,
-        ],
-      });
-    }
-  });
-
-  test('Check UpsertUsersWorkflowCheckUpsertJobStatusFn', () => {
-    if (stack.nestedStacks.redshiftServerlessStack) {
-      const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
-      nestedTemplate.hasResourceProperties('AWS::Lambda::Function', {
-        Code: {
-          S3Bucket: {
-            'Fn::Sub': Match.anyValue(),
-          },
-          S3Key: Match.anyValue(),
-        },
-        Role: {
-          'Fn::GetAtt': [
-            Match.anyValue(),
-            'Arn',
-          ],
-        },
-        Environment: {
-          Variables: {
-            REDSHIFT_MODE: REDSHIFT_MODE.SERVERLESS,
-            REDSHIFT_SERVERLESS_WORKGROUP_NAME: RefAnyValue,
-            REDSHIFT_CLUSTER_IDENTIFIER: '',
-            REDSHIFT_DATABASE: RefAnyValue,
-            REDSHIFT_DB_USER: '',
-            REDSHIFT_DATA_API_ROLE: RefAnyValue,
-            POWERTOOLS_SERVICE_NAME: 'ClickStreamAnalyticsOnAWS',
-            POWERTOOLS_LOGGER_SAMPLE_RATE: '1',
-            POWERTOOLS_LOGGER_LOG_EVENT: 'true',
-            LOG_LEVEL: 'WARN',
-            AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
-          },
-        },
-        Handler: 'index.handler',
-        MemorySize: Match.anyValue(),
-        ReservedConcurrentExecutions: 1,
-        Runtime: Match.anyValue(),
-        Timeout: 120,
-        VpcConfig: {
-          SecurityGroupIds: [
-            {
-              'Fn::GetAtt': [
-                Match.anyValue(),
-                'GroupId',
-              ],
-            },
-          ],
-          SubnetIds: {
-            'Fn::Split': [
-              ',',
-              RefAnyValue,
-            ],
-          },
-        },
-      });
-    }
-
-    if (stack.nestedStacks.redshiftProvisionedStack) {
-      const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftProvisionedStack);
-      nestedTemplate.hasResourceProperties('AWS::Lambda::Function', {
-        Code: {
-          S3Bucket: {
-            'Fn::Sub': Match.anyValue(),
-          },
-          S3Key: Match.anyValue(),
-        },
-        Role: {
-          'Fn::GetAtt': [
-            Match.anyValue(),
-            'Arn',
-          ],
-        },
-        Environment: {
-          Variables: {
-            REDSHIFT_MODE: REDSHIFT_MODE.PROVISIONED,
-            REDSHIFT_SERVERLESS_WORKGROUP_NAME: Match.anyValue(),
-            REDSHIFT_CLUSTER_IDENTIFIER: RefAnyValue,
-            REDSHIFT_DATABASE: RefAnyValue,
-            REDSHIFT_DB_USER: RefAnyValue,
-            REDSHIFT_DATA_API_ROLE: {
-              'Fn::GetAtt': [
-                Match.anyValue(),
-                'Arn',
-              ],
-            },
-            POWERTOOLS_SERVICE_NAME: 'ClickStreamAnalyticsOnAWS',
-            POWERTOOLS_LOGGER_SAMPLE_RATE: '1',
-            POWERTOOLS_LOGGER_LOG_EVENT: 'true',
-            LOG_LEVEL: 'WARN',
-            AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
-          },
-        },
-        Handler: 'index.handler',
-        MemorySize: Match.anyValue(),
-        ReservedConcurrentExecutions: 1,
-        Runtime: Match.anyValue(),
-        Timeout: 120,
-        VpcConfig: {
-          SecurityGroupIds: [
-            {
-              'Fn::GetAtt': [
-                Match.anyValue(),
-                'GroupId',
-              ],
-            },
-          ],
-          SubnetIds: {
-            'Fn::Split': [
-              ',',
-              RefAnyValue,
-            ],
-          },
-        },
-      });
-    }
-  });
-
-  test('Check UpsertUsersWorkflowUpsertUsersStateMachineRole', () => {
-    if (stack.nestedStacks.redshiftServerlessStack) {
-      const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
-      const role = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::IAM::Role', 'UpsertUsersWorkflowUpsertUsersStateMachineRole');
-      expect(role).toBeDefined();
-    }
-    if (stack.nestedStacks.redshiftProvisionedStack) {
-      const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftProvisionedStack);
-      const role = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::IAM::Role', 'UpsertUsersWorkflowUpsertUsersStateMachineRole');
-      expect(role).toBeDefined();
-    }
-  });
-
-  test('Check UpsertUsersWorkflowUpsertUsersStateMachineRoleDefaultPolicy', () => {
-    if (stack.nestedStacks.redshiftServerlessStack) {
-      const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
-      const policy = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::IAM::Policy', 'UpsertUsersWorkflowUpsertUsersStateMachineRoleDefaultPolicy');
-      expect(policy).toBeDefined();
-    }
-    if (stack.nestedStacks.redshiftProvisionedStack) {
-      const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftProvisionedStack);
-      const policy = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::IAM::Policy', 'UpsertUsersWorkflowUpsertUsersStateMachineRoleDefaultPolicy');
-      expect(policy).toBeDefined();
-    }
-  });
-
-  test('Check UpsertUsersScheduleRule', () => {
-    if (stack.nestedStacks.redshiftServerlessStack) {
-      const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
-      nestedTemplate.hasResourceProperties('AWS::Events::Rule', {
-        ScheduleExpression: RefAnyValue,
-        State: 'ENABLED',
-        Targets: [
-          {
-            Arn: RefAnyValue,
-            Id: Match.anyValue(),
-            RoleArn: {
-              'Fn::GetAtt': [
-                Match.anyValue(),
-                'Arn',
-              ],
-            },
-          },
-        ],
-      });
-    }
-    if (stack.nestedStacks.redshiftProvisionedStack) {
-      const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftProvisionedStack);
-      nestedTemplate.hasResourceProperties('AWS::Events::Rule', {
-        ScheduleExpression: RefAnyValue,
-        State: 'ENABLED',
-        Targets: [
-          {
-            Arn: RefAnyValue,
-            Id: Match.anyValue(),
-            RoleArn: {
-              'Fn::GetAtt': [
-                Match.anyValue(),
-                'Arn',
-              ],
-            },
-          },
-        ],
-      });
     }
   });
 
@@ -4405,9 +3760,9 @@ describe('DataAnalyticsRedshiftStack serverless custom resource test', () => {
   const testId = 'test-4';
   const stack = new DataAnalyticsRedshiftStack(app, testId + '-data-analytics-redshift-stack-serverless', {});
 
-  test('redshiftServerlessStack has 5 CustomResource', () => {
+  test('redshiftServerlessStack has 4 CustomResource', () => {
     if (stack.nestedStacks.redshiftServerlessStack) {
-      Template.fromStack(stack.nestedStacks.redshiftServerlessStack).resourceCountIs('AWS::CloudFormation::CustomResource', 5);
+      Template.fromStack(stack.nestedStacks.redshiftServerlessStack).resourceCountIs('AWS::CloudFormation::CustomResource', 4);
     }
   });
 
@@ -4424,7 +3779,6 @@ describe('DataAnalyticsRedshiftStack serverless custom resource test', () => {
         projectId: RefAnyValue,
         appIds: RefAnyValue,
         odsTableNames: {
-          odsEvents: 'ods_events',
           event: 'event',
           event_parameter: 'event_parameter',
           user: 'user',
@@ -4795,26 +4149,6 @@ describe('Should set metrics widgets', () => {
         'Fn::Join': [
           '',
           [
-            'Upsert users workflow failed, projectId: ',
-            Match.anyValue(),
-          ],
-        ],
-      },
-
-      TreatMissingData: TreatMissingData.NOT_BREACHING,
-      Period: {
-        'Fn::GetAtt': [
-          Match.anyValue(),
-          'intervalSeconds',
-        ],
-      },
-    });
-
-    newServerlessTemplate.hasResourceProperties('AWS::CloudWatch::Alarm', {
-      AlarmDescription: {
-        'Fn::Join': [
-          '',
-          [
             'Scan metadata workflow failed, projectId: ',
             Match.anyValue(),
           ],
@@ -4895,24 +4229,6 @@ describe('Should set metrics widgets', () => {
       },
     });
 
-    existingServerlessTemplate.hasResourceProperties('AWS::CloudWatch::Alarm', {
-      AlarmDescription: {
-        'Fn::Join': [
-          '',
-          [
-            'Upsert users workflow failed, projectId: ',
-            Match.anyValue(),
-          ],
-        ],
-      },
-      TreatMissingData: TreatMissingData.NOT_BREACHING,
-      Period: {
-        'Fn::GetAtt': [
-          Match.anyValue(),
-          'intervalSeconds',
-        ],
-      },
-    });
 
     newServerlessTemplate.hasResourceProperties('AWS::CloudWatch::Alarm', {
       AlarmDescription: {
@@ -4997,24 +4313,6 @@ describe('Should set metrics widgets', () => {
       },
     });
 
-    provisionTemplate.hasResourceProperties('AWS::CloudWatch::Alarm', {
-      AlarmDescription: {
-        'Fn::Join': [
-          '',
-          [
-            'Upsert users workflow failed, projectId: ',
-            Match.anyValue(),
-          ],
-        ],
-      },
-      TreatMissingData: TreatMissingData.NOT_BREACHING,
-      Period: {
-        'Fn::GetAtt': [
-          Match.anyValue(),
-          'intervalSeconds',
-        ],
-      },
-    });
 
     newServerlessTemplate.hasResourceProperties('AWS::CloudWatch::Alarm', {
       AlarmDescription: {

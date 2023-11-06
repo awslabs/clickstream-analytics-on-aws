@@ -61,9 +61,6 @@ export interface RedshiftAnalyticsStackProps {
     maxFilesLimit: number;
     processingFilesLimit: number;
   };
-  upsertUsersConfiguration: {
-    scheduleExpression: string;
-  };
   scanMetadataConfiguration: {
     clickstreamAnalyticsMetadataDdbArn: string;
     topFrequentPropertiesLimit: string;
@@ -569,7 +566,7 @@ export function createStackParameters(scope: Construct): {
   const upsertUsersWorkflowParamsGroup = [];
 
   const upsertUsersWorkflowScheduleExpressionParam = new CfnParameter(scope, 'UpsertUsersScheduleExpression', {
-    description: 'The schedule expression at which the upsert users job runs regularly. in days.',
+    description: 'The schedule expression at which the upsert users job runs regularly. in days(deprecated).',
     type: 'String',
     allowedPattern: SCHEDULE_EXPRESSION_PATTERN,
     constraintDescription: 'Must be in the format cron(minutes,hours,day-of-month,month,day-of-week,year), when the task should run at any time on everyday.',
@@ -577,7 +574,7 @@ export function createStackParameters(scope: Construct): {
   });
 
   upsertUsersWorkflowParamsGroup.push({
-    Label: { default: 'Upsert users job' },
+    Label: { default: 'Upsert users job(deprecated)' },
     Parameters: [
       upsertUsersWorkflowScheduleExpressionParam.logicalId,
     ],
@@ -585,7 +582,7 @@ export function createStackParameters(scope: Construct): {
 
   const upsertUsersWorkflowParamsLabels = {
     [upsertUsersWorkflowScheduleExpressionParam.logicalId]: {
-      default: 'Upsert users schedule expression',
+      default: 'Upsert users schedule expression(deprecated)',
     },
   };
 
@@ -818,9 +815,6 @@ export function createStackParameters(scope: Construct): {
         loadJobScheduleIntervalInMinutes: loadJobScheduleIntervalParam.valueAsString,
         maxFilesLimit: maxFilesLimitParam.valueAsNumber,
         processingFilesLimit: processingFilesLimitParam.valueAsNumber,
-      },
-      upsertUsersConfiguration: {
-        scheduleExpression: upsertUsersWorkflowScheduleExpressionParam.valueAsString,
       },
       scanMetadataConfiguration: {
         clickstreamAnalyticsMetadataDdbArn: clickstreamAnalyticsMetadataDdbArnParam.valueAsString,

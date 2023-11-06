@@ -24,9 +24,7 @@ import { getAlarmName, setCfnNagForAlarms } from '../../metrics/util';
 export function buildMetricsWidgetForWorkflows(scope: Construct, id: string, props: {
   projectId: string;
   dataProcessingCronOrRateExpression: string;
-  upsertUsersCronOrRateExpression: string;
   loadDataWorkflow: IStateMachine;
-  upsertUsersWorkflow: IStateMachine;
   scanMetadataWorkflow: IStateMachine;
   clearExpiredEventsWorkflow: IStateMachine;
 }) {
@@ -35,19 +33,11 @@ export function buildMetricsWidgetForWorkflows(scope: Construct, id: string, pro
     expression: props.dataProcessingCronOrRateExpression,
   });
 
-  const upsertUsersInterval = new GetInterval(scope, 'upsertUsers', {
-    expression: props.upsertUsersCronOrRateExpression,
-  });
-
   const statesNamespace = 'AWS/States';
   const loadDataWorkflowDimension = [
     'StateMachineArn', props.loadDataWorkflow.stateMachineArn,
   ];
 
-
-  const upsertUsersWorkflowDimension = [
-    'StateMachineArn', props.upsertUsersWorkflow.stateMachineArn,
-  ];
 
   const scanMetadataWorkflowDimension = [
     'StateMachineArn', props.scanMetadataWorkflow.stateMachineArn,
@@ -73,17 +63,6 @@ export function buildMetricsWidgetForWorkflows(scope: Construct, id: string, pro
     alarmName: getAlarmName(scope, props.projectId, 'Load Data Workflow'),
   });
   (loadDataWorkflowAlarm.node.defaultChild as CfnResource).addPropertyOverride('Period', processingJobInterval.getIntervalSeconds());
-
-  const upsertUsersWorkflowAlarm = new Alarm(scope, id + 'UpsertUsersWorkflowAlarm', {
-    comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
-    threshold: 1,
-    evaluationPeriods: 1,
-    treatMissingData: TreatMissingData.NOT_BREACHING,
-    metric: props.upsertUsersWorkflow.metricFailed({ period: Duration.hours(24) }), // place-holder value here, Override by addPropertyOverride below
-    alarmDescription: `Upsert users workflow failed, projectId: ${props.projectId}`,
-    alarmName: getAlarmName(scope, props.projectId, 'Upsert User Workflow'),
-  });
-  (upsertUsersWorkflowAlarm.node.defaultChild as CfnResource).addPropertyOverride('Period', upsertUsersInterval.getIntervalSeconds());
 
   const scanMetadataWorkflowAlarm = new Alarm(scope, id + 'ScanMetadataWorkflowAlarm', {
     comparisonOperator: ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
@@ -117,7 +96,7 @@ export function buildMetricsWidgetForWorkflows(scope: Construct, id: string, pro
   (newFilesCountAlarm.node.defaultChild as CfnResource).addPropertyOverride('Period', processingJobInterval.getIntervalSeconds());
   (newFilesCountAlarm.node.defaultChild as CfnResource).addPropertyOverride('Threshold', processingJobInterval.getIntervalSeconds());
 
-  setCfnNagForAlarms([loadDataWorkflowAlarm, newFilesCountAlarm, upsertUsersWorkflowAlarm, scanMetadataWorkflowAlarm]);
+  setCfnNagForAlarms([loadDataWorkflowAlarm, newFilesCountAlarm, scanMetadataWorkflowAlarm]);
 
   const workflowAlarms: (MetricWidgetElement | AlarmsWidgetElement)[] = [
     {
@@ -136,7 +115,6 @@ export function buildMetricsWidgetForWorkflows(scope: Construct, id: string, pro
   const workflowExecMetrics: MetricWidgetElement[] = [
     [loadDataWorkflowDimension, 'Load data to redshift tables'],
     [clearExpiredEventsWorkflowDimension, 'Clear expired events'],
-    [upsertUsersWorkflowDimension, 'Upsert user'],
     [scanMetadataWorkflowDimension, 'Scan metadata'],
   ].flatMap(dimName => {
     return [

@@ -108,19 +108,7 @@ describe('Test update pipeline when not eanble data processing or data modeling'
         changeBaseCapacity={() => {
           return;
         }}
-        changeUpsertUserValue={() => {
-          return;
-        }}
-        changeUpsertUserUnit={() => {
-          return;
-        }}
         changeDBUser={() => {
-          return;
-        }}
-        changeSelectedUpsertType={() => {
-          return;
-        }}
-        changeUpsertCronExp={() => {
           return;
         }}
         changeDataLoadCronExp={() => {
@@ -241,19 +229,7 @@ describe('Test update pipeline when not eanble data processing or data modeling'
         changeBaseCapacity={() => {
           return;
         }}
-        changeUpsertUserValue={() => {
-          return;
-        }}
-        changeUpsertUserUnit={() => {
-          return;
-        }}
         changeDBUser={() => {
-          return;
-        }}
-        changeSelectedUpsertType={() => {
-          return;
-        }}
-        changeUpsertCronExp={() => {
           return;
         }}
         changeDataLoadCronExp={() => {

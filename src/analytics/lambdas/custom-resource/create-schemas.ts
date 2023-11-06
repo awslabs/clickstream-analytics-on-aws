@@ -32,7 +32,7 @@ import { BIUserCredential } from '../../../common/model';
 import { logger } from '../../../common/powertools';
 import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
 import { generateRandomStr } from '../../../common/utils';
-import { SQL_TEMPLATE_PARAMETER } from '../../private/constant';
+import { LEGACY_REDSHIFT_ODS_EVENTS_TABLE_NAME, SQL_TEMPLATE_PARAMETER } from '../../private/constant';
 import { CreateDatabaseAndSchemas, MustacheParamType, SQLDef, SQLViewDef } from '../../private/model';
 import { getSqlContent, getSqlContents } from '../../private/utils';
 import { getRedshiftClient, executeStatementsWithWait } from '../redshift-data';
@@ -231,7 +231,7 @@ async function createSchemas(props: ResourcePropertiesType, biUsername: string) 
     const mustacheParam: MustacheParamType = {
       database_name: props.projectId,
       schema: app,
-      table_ods_events: odsTableNames.odsEvents,
+      table_ods_events: LEGACY_REDSHIFT_ODS_EVENTS_TABLE_NAME,
       table_event: odsTableNames.event,
       table_event_parameter: odsTableNames.event_parameter,
       table_user: odsTableNames.user,
@@ -272,7 +272,7 @@ async function updateSchemas(props: ResourcePropertiesType, biUsername: string, 
     const mustacheParam: MustacheParamType = {
       database_name: props.projectId,
       schema: app,
-      table_ods_events: odsTableNames.odsEvents,
+      table_ods_events: LEGACY_REDSHIFT_ODS_EVENTS_TABLE_NAME,
       table_event: odsTableNames.event,
       table_event_parameter: odsTableNames.event_parameter,
       table_user: odsTableNames.user,
@@ -296,7 +296,7 @@ async function updateSchemas(props: ResourcePropertiesType, biUsername: string, 
     const mustacheParam: MustacheParamType = {
       database_name: props.projectId,
       schema: app,
-      table_ods_events: odsTableNames.odsEvents,
+      table_ods_events: LEGACY_REDSHIFT_ODS_EVENTS_TABLE_NAME,
       table_event: odsTableNames.event,
       table_event_parameter: odsTableNames.event_parameter,
       table_user: odsTableNames.user,
@@ -322,7 +322,8 @@ async function updateSchemas(props: ResourcePropertiesType, biUsername: string, 
 
 function getUpdatableSql(sqlOrViewDefs: SQLDef[] | SQLViewDef[], oldSqlArray: string[], mustacheParam: MustacheParamType, path: string = '/opt') {
   logger.info('getUpdatableSql', { sqlOrViewDefs, oldSqlArray });
-
+  const newFilesInfo = [];
+  const updateFilesInfo = [];
   const sqlStatements: string[] = [];
   for (const schemaOrViewDef of sqlOrViewDefs) {
     logger.info(`schemaOrViewDef.updatable: ${schemaOrViewDef.updatable}`);
@@ -330,13 +331,17 @@ function getUpdatableSql(sqlOrViewDefs: SQLDef[] | SQLViewDef[], oldSqlArray: st
     if ('sqlFile' in schemaOrViewDef && !oldSqlArray.includes(schemaOrViewDef.sqlFile)) {
       logger.info('new sql: ', { schemaOrViewDef });
       sqlStatements.push(getSqlContent(schemaOrViewDef, mustacheParam, path));
+      newFilesInfo.push(schemaOrViewDef);
     } else if (schemaOrViewDef.updatable === 'true') {
       logger.info('update sql: ', { schemaOrViewDef });
       sqlStatements.push(getSqlContent(schemaOrViewDef, mustacheParam, path));
+      updateFilesInfo.push(schemaOrViewDef);
     } else {
       logger.info('skip update sql due to it is not updatable.', { schemaOrViewDef });
     }
   }
+
+  logger.info('getUpdatableSql: new and update files info', { newFilesInfo, updateFilesInfo });
 
   return sqlStatements;
 }
@@ -376,7 +381,7 @@ async function createViewForReporting(props: ResourcePropertiesType, biUser: str
     const mustacheParam: MustacheParamType = {
       database_name: props.projectId,
       schema: app,
-      table_ods_events: odsTableNames.odsEvents,
+      table_ods_events: LEGACY_REDSHIFT_ODS_EVENTS_TABLE_NAME,
       table_event: odsTableNames.event,
       table_event_parameter: odsTableNames.event_parameter,
       table_user: odsTableNames.user,
@@ -411,7 +416,7 @@ async function updateViewForReporting(props: ResourcePropertiesType, oldProps: R
     const mustacheParam: MustacheParamType = {
       database_name: props.projectId,
       schema: app,
-      table_ods_events: odsTableNames.odsEvents,
+      table_ods_events: LEGACY_REDSHIFT_ODS_EVENTS_TABLE_NAME,
       table_event: odsTableNames.event,
       table_event_parameter: odsTableNames.event_parameter,
       table_user: odsTableNames.user,
@@ -432,7 +437,7 @@ async function updateViewForReporting(props: ResourcePropertiesType, oldProps: R
     const mustacheParam: MustacheParamType = {
       database_name: props.projectId,
       schema: app,
-      table_ods_events: odsTableNames.odsEvents,
+      table_ods_events: LEGACY_REDSHIFT_ODS_EVENTS_TABLE_NAME,
       table_event: odsTableNames.event,
       table_event_parameter: odsTableNames.event_parameter,
       table_user: odsTableNames.user,

@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+
 export enum JobStatus {
   JOB_NEW = 'NEW',
   JOB_ENQUEUE = 'ENQUEUE',
@@ -29,7 +30,7 @@ export enum WorkflowStatus {
 
 export const DYNAMODB_TABLE_INDEX_NAME = 'status_timestamp_index';
 
-export const REDSHIFT_ODS_EVENTS_TABLE_NAME = 'ods_events';
+export const LEGACY_REDSHIFT_ODS_EVENTS_TABLE_NAME = 'ods_events';
 export const REDSHIFT_EVENT_TABLE_NAME = 'event';
 export const REDSHIFT_EVENT_PARAMETER_TABLE_NAME = 'event_parameter';
 export const REDSHIFT_USER_TABLE_NAME = 'user';
@@ -38,7 +39,6 @@ export const REDSHIFT_ITEM_TABLE_NAME = 'item';
 export const REDSHIFT_TABLE_NAMES = [
   REDSHIFT_EVENT_TABLE_NAME, REDSHIFT_EVENT_PARAMETER_TABLE_NAME,
   REDSHIFT_ITEM_TABLE_NAME, REDSHIFT_USER_TABLE_NAME,
-  REDSHIFT_ODS_EVENTS_TABLE_NAME,
 ];
 
 export const REDSHIFT_DUPLICATE_DATE_INTERVAL = 3; // Days

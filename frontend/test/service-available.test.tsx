@@ -554,19 +554,7 @@ describe('Test EMR Serverless service available', () => {
         changeBaseCapacity={() => {
           return;
         }}
-        changeUpsertUserValue={() => {
-          return;
-        }}
-        changeUpsertUserUnit={() => {
-          return;
-        }}
         changeDBUser={() => {
-          return;
-        }}
-        changeSelectedUpsertType={() => {
-          return;
-        }}
-        changeUpsertCronExp={() => {
           return;
         }}
         changeDataLoadCronExp={() => {
@@ -677,19 +665,7 @@ describe('Test EMR Serverless service available', () => {
         changeBaseCapacity={() => {
           return;
         }}
-        changeUpsertUserValue={() => {
-          return;
-        }}
-        changeUpsertUserUnit={() => {
-          return;
-        }}
         changeDBUser={() => {
-          return;
-        }}
-        changeSelectedUpsertType={() => {
-          return;
-        }}
-        changeUpsertCronExp={() => {
           return;
         }}
         changeDataLoadCronExp={() => {
@@ -802,19 +778,7 @@ describe('Test Redsfhift Serverless service available', () => {
         changeBaseCapacity={() => {
           return;
         }}
-        changeUpsertUserValue={() => {
-          return;
-        }}
-        changeUpsertUserUnit={() => {
-          return;
-        }}
         changeDBUser={() => {
-          return;
-        }}
-        changeSelectedUpsertType={() => {
-          return;
-        }}
-        changeUpsertCronExp={() => {
           return;
         }}
         changeDataLoadCronExp={() => {
@@ -930,19 +894,7 @@ describe('Test Redsfhift Serverless service available', () => {
         changeBaseCapacity={() => {
           return;
         }}
-        changeUpsertUserValue={() => {
-          return;
-        }}
-        changeUpsertUserUnit={() => {
-          return;
-        }}
         changeDBUser={() => {
-          return;
-        }}
-        changeSelectedUpsertType={() => {
-          return;
-        }}
-        changeUpsertCronExp={() => {
           return;
         }}
         changeDataLoadCronExp={() => {

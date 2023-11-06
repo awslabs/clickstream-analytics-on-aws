@@ -16,7 +16,6 @@ import {
   Button,
   Checkbox,
   Container,
-  ExpandableSection,
   FormField,
   Header,
   Input,
@@ -50,7 +49,6 @@ import {
   EXECUTION_TYPE_LIST,
   ExecutionType,
   MAX_USER_INPUT_LENGTH,
-  REDSHIFT_FREQUENCY_UNIT,
   REDSHIFT_UNIT_LIST,
   SUPPORT_USER_SELECT_REDSHIFT_SERVERLESS,
   SinkType,
@@ -97,11 +95,7 @@ interface DataProcessingProps {
   changeSecurityGroup: (sg: OptionDefinition[]) => void;
   changeReshiftSubnets: (subnets: OptionDefinition[]) => void;
   changeBaseCapacity: (capacity: SelectProps.Option) => void;
-  changeUpsertUserValue: (value: string) => void;
-  changeUpsertUserUnit: (unit: SelectProps.Option) => void;
   changeDBUser: (user: string) => void;
-  changeSelectedUpsertType: (type: SelectProps.Option) => void;
-  changeUpsertCronExp: (cron: string) => void;
   changeDataLoadCronExp: (cron: string) => void;
   dataProcessorIntervalInvalidError: boolean;
   redshiftServerlessVpcEmptyError: boolean;
@@ -140,11 +134,7 @@ const DataProcessing: React.FC<DataProcessingProps> = (
     changeSecurityGroup,
     changeReshiftSubnets,
     changeBaseCapacity,
-    changeUpsertUserValue,
-    changeUpsertUserUnit,
     changeDBUser,
-    changeSelectedUpsertType,
-    changeUpsertCronExp,
     dataProcessorIntervalInvalidError,
     redshiftServerlessVpcEmptyError,
     redshiftServerlessSGEmptyError,
@@ -180,13 +170,6 @@ const DataProcessing: React.FC<DataProcessingProps> = (
     )
   );
 
-  const [selectedUpsertType, setSelectedUpsertType] = useState(
-    defaultSelectOptions(
-      EXECUTION_TYPE_LIST[0],
-      pipelineInfo.selectedUpsertType
-    )
-  );
-
   const [loadingRedshift, setLoadingRedshift] = useState(false);
   const [loading3AZVpc, setLoading3AZVpc] = useState(false);
   const [loadingSG, setLoadingSG] = useState(false);
@@ -218,13 +201,6 @@ const DataProcessing: React.FC<DataProcessingProps> = (
   );
   const [vpcThreeAZSubnetsOptionList, setVpcThreeAZSubnetsOptionList] =
     useState<SelectProps.Options>([]);
-
-  const [upsertUserUnit, setUpsertUserUnit] = useState(
-    defaultSelectOptions(
-      REDSHIFT_FREQUENCY_UNIT[2],
-      pipelineInfo.redshiftUpsertFreqUnit
-    )
-  );
 
   // get redshift clusters by region
   const getServerlessRedshiftClusterList = async () => {
@@ -397,16 +373,8 @@ const DataProcessing: React.FC<DataProcessingProps> = (
   }, [redshiftCapacity]);
 
   useEffect(() => {
-    changeUpsertUserUnit(upsertUserUnit);
-  }, [upsertUserUnit]);
-
-  useEffect(() => {
     changeEventFreshUnit(selectedEventFreshUnit);
   }, [selectedEventFreshUnit]);
-
-  useEffect(() => {
-    changeSelectedUpsertType(selectedUpsertType);
-  }, [selectedUpsertType]);
 
   useEffect(() => {
     if (pipelineInfo.region) {
@@ -1055,81 +1023,6 @@ const DataProcessing: React.FC<DataProcessingProps> = (
                       </div>
                     </div>
                   </FormField>
-
-                  <ExpandableSection
-                    headerText={t('pipeline:create.redshiftAdditionalSettings')}
-                  >
-                    <SpaceBetween direction="vertical" size="s">
-                      <FormField
-                        label={t(
-                          'pipeline:create.redshiftUserTableUpsertFrequency'
-                        )}
-                        description={t(
-                          'pipeline:create.redshiftUserTableUpsertFrequencyDesc'
-                        )}
-                      >
-                        <div className="flex">
-                          <div style={{ width: 200 }}>
-                            <Select
-                              selectedOption={selectedUpsertType}
-                              onChange={({ detail }) => {
-                                setSelectedUpsertType(detail.selectedOption);
-                              }}
-                              options={EXECUTION_TYPE_LIST}
-                            />
-                          </div>
-                          {selectedUpsertType.value ===
-                            ExecutionType.CRON_EXPRESS && (
-                            <div className="flex-1 ml-10">
-                              <SpaceBetween direction="horizontal" size="xs">
-                                <Input
-                                  placeholder="0 1 * * ? *"
-                                  value={pipelineInfo.upsertCronExp}
-                                  onChange={(e) => {
-                                    if (
-                                      new RegExp(XSS_PATTERN).test(
-                                        e.detail.value
-                                      ) ||
-                                      e.detail.value.length >
-                                        MAX_USER_INPUT_LENGTH
-                                    ) {
-                                      return false;
-                                    }
-                                    changeUpsertCronExp(e.detail.value);
-                                  }}
-                                />
-                              </SpaceBetween>
-                            </div>
-                          )}
-
-                          {selectedUpsertType.value ===
-                            ExecutionType.FIXED_RATE && (
-                            <div className="flex  ml-10">
-                              <div style={{ width: 250 }}>
-                                <Input
-                                  type="number"
-                                  placeholder="5"
-                                  value={pipelineInfo.redshiftUpsertFreqValue}
-                                  onChange={(e) => {
-                                    changeUpsertUserValue(e.detail.value);
-                                  }}
-                                />
-                              </div>
-                              <div className="ml-10">
-                                <Select
-                                  selectedOption={upsertUserUnit}
-                                  onChange={({ detail }) => {
-                                    setUpsertUserUnit(detail.selectedOption);
-                                  }}
-                                  options={REDSHIFT_FREQUENCY_UNIT}
-                                />
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      </FormField>
-                    </SpaceBetween>
-                  </ExpandableSection>
                 </>
               )}
 

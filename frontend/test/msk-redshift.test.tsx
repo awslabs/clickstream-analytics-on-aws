@@ -103,19 +103,7 @@ describe('Test data processing settings', () => {
         changeBaseCapacity={() => {
           return;
         }}
-        changeUpsertUserValue={() => {
-          return;
-        }}
-        changeUpsertUserUnit={() => {
-          return;
-        }}
         changeDBUser={() => {
-          return;
-        }}
-        changeSelectedUpsertType={() => {
-          return;
-        }}
-        changeUpsertCronExp={() => {
           return;
         }}
         changeDataLoadCronExp={() => {
@@ -227,19 +215,7 @@ describe('Test redsfhit settings', () => {
         changeBaseCapacity={() => {
           return;
         }}
-        changeUpsertUserValue={() => {
-          return;
-        }}
-        changeUpsertUserUnit={() => {
-          return;
-        }}
         changeDBUser={() => {
-          return;
-        }}
-        changeSelectedUpsertType={() => {
-          return;
-        }}
-        changeUpsertCronExp={() => {
           return;
         }}
         changeDataLoadCronExp={() => {
@@ -353,19 +329,7 @@ describe('Test redsfhit settings', () => {
         changeBaseCapacity={() => {
           return;
         }}
-        changeUpsertUserValue={() => {
-          return;
-        }}
-        changeUpsertUserUnit={() => {
-          return;
-        }}
         changeDBUser={() => {
-          return;
-        }}
-        changeSelectedUpsertType={() => {
-          return;
-        }}
-        changeUpsertCronExp={() => {
           return;
         }}
         changeDataLoadCronExp={() => {
@@ -481,19 +445,7 @@ describe('Test MSK kafkaConnector settings', () => {
         changeBaseCapacity={() => {
           return;
         }}
-        changeUpsertUserValue={() => {
-          return;
-        }}
-        changeUpsertUserUnit={() => {
-          return;
-        }}
         changeDBUser={() => {
-          return;
-        }}
-        changeSelectedUpsertType={() => {
-          return;
-        }}
-        changeUpsertCronExp={() => {
           return;
         }}
         changeDataLoadCronExp={() => {
@@ -618,19 +570,7 @@ describe('Test MSK kafkaConnector settings', () => {
         changeBaseCapacity={() => {
           return;
         }}
-        changeUpsertUserValue={() => {
-          return;
-        }}
-        changeUpsertUserUnit={() => {
-          return;
-        }}
         changeDBUser={() => {
-          return;
-        }}
-        changeSelectedUpsertType={() => {
-          return;
-        }}
-        changeUpsertCronExp={() => {
           return;
         }}
         changeDataLoadCronExp={() => {

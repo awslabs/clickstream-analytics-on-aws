@@ -55,7 +55,7 @@ const cloudFormationCreateEvent: CloudFormationCustomResourceEvent = {
     appIds: 'appCf1,appCf2',
     databaseName: 'testDB_cf',
     sourceTableName: 'ingestion_events',
-    sinkTableName: 'ods_events',
+    sinkTableName: 'event',
   },
 };
 
@@ -116,7 +116,7 @@ describe('Glue catalog add partition test', () => {
 
     expect(response.Status).toEqual('SUCCESS');
     // @ts-ignore
-    expect(glueClientMock).toHaveReceivedCommandTimes(BatchCreatePartitionCommand, 6);
+    expect(glueClientMock).toHaveReceivedCommandTimes(BatchCreatePartitionCommand, 5);
     expect(s3ClientMock).toHaveReceivedCommand(PutObjectCommand);
   });
 
@@ -149,7 +149,7 @@ describe('Glue catalog add partition test', () => {
     );
     expect(response.Status).toEqual('SUCCESS');
     // @ts-ignore
-    expect(glueClientMock).toHaveReceivedCommandTimes(BatchCreatePartitionCommand, 6);
+    expect(glueClientMock).toHaveReceivedCommandTimes(BatchCreatePartitionCommand, 5);
     expect(s3ClientMock).toHaveReceivedCommand(PutObjectCommand);
   });
 
@@ -161,7 +161,7 @@ describe('Glue catalog add partition test', () => {
     );
     expect(response.Status).toEqual('SUCCESS');
     // @ts-ignore
-    expect(glueClientMock).toHaveReceivedCommandTimes(BatchCreatePartitionCommand, 6);
+    expect(glueClientMock).toHaveReceivedCommandTimes(BatchCreatePartitionCommand, 5);
   });
 
 
@@ -175,7 +175,7 @@ describe('Glue catalog add partition test', () => {
     );
     expect(response.Status).toEqual('SUCCESS');
     // @ts-ignore
-    expect(glueClientMock).toHaveReceivedCommandTimes(BatchCreatePartitionCommand, 6);
+    expect(glueClientMock).toHaveReceivedCommandTimes(BatchCreatePartitionCommand, 5);
     expect(s3ClientMock).toHaveReceivedCommand(PutObjectCommand);
   });
 
@@ -218,8 +218,8 @@ describe('Glue catalog add partition test', () => {
 
     expect(response.Status).toEqual('SUCCESS');
     // @ts-ignore
-    expect(glueClientMock).toHaveReceivedCommandTimes(BatchCreatePartitionCommand, 6);
-    expect(s3ClientMock).toHaveReceivedCommandTimes(PutObjectCommand, 34);
+    expect(glueClientMock).toHaveReceivedCommandTimes(BatchCreatePartitionCommand, 5);
+    expect(s3ClientMock).toHaveReceivedCommandTimes(PutObjectCommand, 32);
 
     expect(s3ClientMock).toHaveReceivedNthSpecificCommandWith(1, PutObjectCommand, {
       Body: '',
@@ -246,12 +246,6 @@ describe('Glue catalog add partition test', () => {
       Body: '',
       Bucket: 'sink-test-cf',
       Key: `sink-test-prefix-cf/test_proj_id_cf/item/partition_app=appCf2/partition_year=${yyyy}/partition_month=${MM}/partition_day=${dd}/_.json`,
-    });
-
-    expect(s3ClientMock).toHaveReceivedNthSpecificCommandWith(34, PutObjectCommand, {
-      Body: '',
-      Bucket: 'sink-test-cf',
-      Key: `sink-test-prefix-cf/test_proj_id_cf/ods_events/partition_app=appCf2/partition_year=${yyyy}/partition_month=${MM}/partition_day=${dd}/_.json`,
     });
   });
 });

@@ -23,7 +23,6 @@ import { getEventParameterTableColumns } from '../tables/event-parameter-table';
 import { getEventTableColumns } from '../tables/event-table';
 import { getIngestionEventsTableColumns } from '../tables/ingestion-events-table';
 import { getItemTableColumns } from '../tables/item-table';
-import { getODSEventsTableColumns } from '../tables/ods-events-table';
 import { getUserTableColumns } from '../tables/user-table';
 
 interface Props {
@@ -35,7 +34,6 @@ interface Props {
 
 const glueTablesLogicId = {
   ingestion_events: 'SourceTable617AB4E1',
-  ods_events: 'SinkTable20F355C6',
   event: 'eventSinkTableA33E3CC9',
   event_parameter: 'eventparameterSinkTable03A457D7',
   user: 'userSinkTable993D48C3',
@@ -98,14 +96,12 @@ export class GlueUtil {
       event_parameter: getEventParameterTableColumns(),
       user: getUserTableColumns(),
       item: getItemTableColumns(),
-      ods_events: getODSEventsTableColumns(),
     };
 
     const glueTables = [SinkTableEnum.EVENT,
       SinkTableEnum.EVENT_PARAMETER,
       SinkTableEnum.USER,
-      SinkTableEnum.ITEM,
-      SinkTableEnum.ODS_EVENTS].map(t => {
+      SinkTableEnum.ITEM].map(t => {
       const glueTable = this.createSinkTable(glueDatabase, projectId, t, colMap[t]);
       return glueTable;
     });
@@ -115,7 +111,6 @@ export class GlueUtil {
       eventParameterTable: glueTables[1],
       userTable: glueTables[2],
       itemTable: glueTables[3],
-      odsEventsTable: glueTables[4],
     };
 
   }

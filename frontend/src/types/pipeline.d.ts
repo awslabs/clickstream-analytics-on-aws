@@ -149,9 +149,6 @@ declare global {
           baseCapacity: number;
         };
       };
-      upsertUsers: {
-        scheduleExpression: string;
-      };
     };
     reporting: {
       quickSight: {
@@ -228,11 +225,7 @@ declare global {
     redshiftServerlessSubnets: OptionDefinition[];
     redshiftDataLoadValue: string;
     redshiftDataLoadUnit: SelectProps.Option | null;
-    redshiftUpsertFreqValue: string;
-    redshiftUpsertFreqUnit: SelectProps.Option | null;
 
-    selectedUpsertType: SelectProps.Option | null;
-    upsertCronExp: string;
     selectedDataLoadType: SelectProps.Option | null;
     dataLoadCronExp: string;
 

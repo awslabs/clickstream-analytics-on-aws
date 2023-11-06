@@ -88,7 +88,6 @@ test('Should get all JOB_NEW files', async () => {
       event: 1,
       event_parameter: 1,
       item: 1,
-      ods_events: 1,
       user: 1,
     },
     jobNewCount: 5,
