@@ -505,7 +505,7 @@ describe('DataPipelineStack parameter test', () => {
   test('Should has parameter EmrApplicationArchitecture', () => {
     template.hasParameter('EmrApplicationArchitecture', {
       Type: 'String',
-      Default: 'X86_64',
+      Default: 'Auto',
     });
   });
 

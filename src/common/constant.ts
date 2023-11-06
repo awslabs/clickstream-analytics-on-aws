@@ -333,3 +333,6 @@ export const EVENT_SOURCE_LOAD_DATA_FLOW = 'LoadDataFlow';
 export const QUICKSIGHT_DASHBOARD_INFIX= '-dashboard-';
 export const QUICKSIGHT_ANALYSIS_INFIX= '-analysis-';
 export const QUICKSIGHT_DATASET_INFIX= '-dataset-';
+
+
+export const EMR_ARCHITECTURE_AUTO = 'Auto';

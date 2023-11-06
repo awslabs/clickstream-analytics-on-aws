@@ -14,9 +14,11 @@
 
 import { EMRServerlessClient, CreateApplicationCommand, Architecture, CreateApplicationCommandInput, DeleteApplicationCommand } from '@aws-sdk/client-emr-serverless';
 import { CloudFormationCustomResourceEvent, Context } from 'aws-lambda';
+import { EMR_ARCHITECTURE_AUTO } from '../../../common/constant';
 import { logger } from '../../../common/powertools';
 import { putStringToS3, readS3ObjectAsJson } from '../../../common/s3';
 import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
+import { EmrApplicationArchitectureType } from '../../../data-pipeline-stack';
 
 export interface ResourcePropertiesType {
   ServiceToken: string;
@@ -26,7 +28,7 @@ export interface ResourcePropertiesType {
   securityGroupId: string;
   subnetIds: string;
   idleTimeoutMinutes: string;
-  architecture: 'ARM64' | 'X86_64';
+  architecture: EmrApplicationArchitectureType;
 }
 
 const region = process.env.AWS_REGION!;
@@ -76,11 +78,18 @@ async function _handler(event: CloudFormationCustomResourceEvent, context: Conte
 }
 
 async function createEMRServerlessApp(props: ResourcePropertiesType): Promise<string> {
+  let architecture = props.architecture;
+  if (props.architecture === EMR_ARCHITECTURE_AUTO) {
+    architecture = Architecture.ARM64;
+    if (region.startsWith('cn-')) {
+      architecture = Architecture.X86_64;
+    }
+  }
   const input: CreateApplicationCommandInput = {
     name: props.name,
     releaseLabel: props.version,
     type: 'SPARK',
-    architecture: props.architecture == 'ARM64' ? Architecture.ARM64: Architecture.X86_64,
+    architecture: architecture as Architecture,
     networkConfiguration: {
       subnetIds: props.subnetIds.split(','),
       securityGroupIds: [props.securityGroupId],

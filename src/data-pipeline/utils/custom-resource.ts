@@ -25,6 +25,7 @@ import { addCfnNagSuppressRules, rulesToSuppressForLambdaVPCAndReservedConcurren
 import { LAMBDA_NODEJS_RUNTIME, createLambdaRole } from '../../common/lambda';
 import { POWERTOOLS_ENVS } from '../../common/powertools';
 import { getShortIdOfStack } from '../../common/stack';
+import { EmrApplicationArchitectureType } from '../../data-pipeline-stack';
 import { SolutionNodejsFunction } from '../../private/function';
 
 
@@ -180,7 +181,7 @@ export interface EMRServerlessApplicationProps {
   idleTimeoutMinutes: number;
   pipelineS3Bucket: IBucket;
   pipelineS3Prefix: string;
-  architecture: 'ARM64' | 'X86_64';
+  architecture: EmrApplicationArchitectureType;
 }
 
 function createEMRServerlessApplicationLambda(
@@ -239,6 +240,7 @@ function createEMRServerlessApplicationLambda(
       PROJECT_ID: props.projectId,
       NAME: props.name,
       VERSION: props.version,
+      ARCHITECTURE: props.architecture,
       SECURITYGROUPID: props.securityGroupId,
       SUBNETIDS: props.subnetIds,
       PIPELINE_S3_BUCKET_NAME: props.pipelineS3Bucket.bucketName,
@@ -279,6 +281,7 @@ export function createEMRServerlessApplicationCustomResource(
       idleTimeoutMinutes: props.idleTimeoutMinutes,
       pipelineS3BucketName: props.pipelineS3Bucket.bucketName,
       pipelineS3Prefix: props.pipelineS3Prefix,
+      architecture: props.architecture,
     },
   });
   return cr;

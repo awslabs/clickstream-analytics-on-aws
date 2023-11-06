@@ -137,8 +137,9 @@ export function createStackParameters(scope: Construct) {
 
   const emrApplicationArchitectureParam = new CfnParameter(scope, 'EmrApplicationArchitecture', {
     description: 'Emr-Serverless application architecture',
-    default: 'X86_64',
+    default: 'Auto',
     allowedValues: [
+      'Auto',
       'ARM64',
       'X86_64',
     ],

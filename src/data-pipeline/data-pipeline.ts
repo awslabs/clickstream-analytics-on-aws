@@ -35,6 +35,7 @@ import { addCfnNagSuppressRules } from '../common/cfn-nag';
 import { DATA_PROCESSING_APPLICATION_NAME_PREFIX, TABLE_NAME_INGESTION } from '../common/constant';
 import { createSGForEgressToAwsService } from '../common/sg';
 import { getShortIdOfStack } from '../common/stack';
+import { EmrApplicationArchitectureType } from '../data-pipeline-stack';
 
 export enum SinkTableEnum {
   EVENT='event',
@@ -66,7 +67,7 @@ export interface DataPipelineProps {
   readonly emrApplicationIdleTimeoutMinutes: number;
   readonly userKeepDays: number;
   readonly itemKeepDays: number;
-  readonly emrApplicationArchitecture: 'ARM64' | 'X86_64';
+  readonly emrApplicationArchitecture: EmrApplicationArchitectureType;
 }
 
 export interface ClickstreamSinkTables {
