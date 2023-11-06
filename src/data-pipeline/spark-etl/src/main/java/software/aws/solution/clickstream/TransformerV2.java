@@ -621,6 +621,7 @@ public final class TransformerV2 {
         Objects.requireNonNull(userReferrerDataset);
         Objects.requireNonNull(userDeviceIdDataset);
         Objects.requireNonNull(userTrafficSourceDataset);
+        Objects.requireNonNull(userChannelDataset);
 
         log.info("newUserProfileMainDataset:" + newUserProfileMainDataset.count());
 
