@@ -114,15 +114,15 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
     useState(false);
   const [exploreEmbedUrl, setExploreEmbedUrl] = useState('');
 
-  const defaultChartTypeOption = QuickSightChartType.BAR;
+  const defaultChartTypeOption = QuickSightChartType.FUNNEL;
   const chartTypeOptions: SegmentedControlProps.Option[] = [
-    {
-      id: QuickSightChartType.BAR,
-      iconSvg: <ExtendIcon icon="BsBarChartFill" color="black" />,
-    },
     {
       id: QuickSightChartType.FUNNEL,
       iconSvg: <ExtendIcon icon="BsFilter" color="black" />,
+    },
+    {
+      id: QuickSightChartType.BAR,
+      iconSvg: <ExtendIcon icon="BsBarChartFill" color="black" />,
     },
   ];
   const [chartType, setChartType] = useState(defaultChartTypeOption);
@@ -670,7 +670,6 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
                 presetParameters={presetParameters}
                 groupOption={groupOption}
                 setGroupOption={setGroupOption}
-                disabled={chartType === QuickSightChartType.FUNNEL}
               />
             </SpaceBetween>
           </ColumnLayout>
