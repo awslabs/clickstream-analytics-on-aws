@@ -151,11 +151,12 @@ export const getMetadataParametersDetails = async (params: {
   projectId: string;
   appId: string;
   parameterName: string;
+  parameterCategory: string;
   parameterType: string;
 }) => {
   const result: any = await apiRequest(
     'get',
-    `/metadata/event_parameter?projectId=${params.projectId}&appId=${params.appId}&name=${params.parameterName}&type=${params.parameterType}`
+    `/metadata/event_parameter?projectId=${params.projectId}&appId=${params.appId}&name=${params.parameterName}&category=${params.parameterCategory}&type=${params.parameterType}`
   );
   const localeLng = getLngFromLocalStorage();
   result.data.description = result.data.description[localeLng];

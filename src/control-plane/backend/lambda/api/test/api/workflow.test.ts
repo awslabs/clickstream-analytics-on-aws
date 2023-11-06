@@ -2360,7 +2360,6 @@ describe('Workflow test', () => {
   });
   it('Generate Delete Workflow', async () => {
     dictionaryMock(ddbMock);
-    console.log(JSON.stringify(RETRY_PIPELINE_WITH_WORKFLOW));
     const stackManager: StackManager = new StackManager({ ...RETRY_PIPELINE_WITH_WORKFLOW });
     stackManager.deleteWorkflow();
     const expected = {
