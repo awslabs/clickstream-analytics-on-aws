@@ -891,11 +891,23 @@ describe('DataReportingQuickSightStack resource test', () => {
                 Type: 'STRING',
               },
               {
-                Name: 'is_registered',
+                Name: 'first_referer',
+                Type: 'STRING',
+              },
+              {
+                Name: 'first_visit_channel',
+                Type: 'STRING',
+              },
+              {
+                Name: 'device_id',
+                Type: 'STRING',
+              },
+              {
+                Name: 'registration_status',
                 Type: 'STRING',
               },
             ],
-            customSql: 'SELECT * FROM {{schema}}.clickstream_user_dim_view',
+            customSql: 'SELECT * FROM {{schema}}.clickstream_user_dim_view_v1',
             columnGroups: [
               {
                 geoSpatialColumnGroupName: 'geo',
@@ -917,7 +929,10 @@ describe('DataReportingQuickSightStack resource test', () => {
               'first_traffic_source_source',
               'first_traffic_source_medium',
               'first_traffic_source_name',
-              'is_registered',
+              'first_referer',
+              'first_visit_channel',
+              'registration_status',
+              'device_id',
             ],
             tagColumnOperations: [
               {
@@ -938,7 +953,7 @@ describe('DataReportingQuickSightStack resource test', () => {
             name: '',
             tableName: 'clickstream_retention_view',
             importMode: 'DIRECT_QUERY',
-            customSql: 'SELECT * FROM {{schema}}.clickstream_retention_view',
+            customSql: 'SELECT * FROM {{schema}}.clickstream_retention_view_v1',
             columns: [
               {
                 Name: 'first_date',
@@ -968,7 +983,7 @@ describe('DataReportingQuickSightStack resource test', () => {
             name: '',
             tableName: 'clickstream_session_view',
             importMode: 'DIRECT_QUERY',
-            customSql: 'SELECT * FROM {{schema}}.clickstream_session_view',
+            customSql: 'SELECT * FROM {{schema}}.clickstream_session_view_v1',
             columns: [
               {
                 Name: 'session_id',
@@ -1043,7 +1058,7 @@ describe('DataReportingQuickSightStack resource test', () => {
             name: '',
             tableName: 'clickstream_user_attr_view',
             importMode: 'DIRECT_QUERY',
-            customSql: 'SELECT * FROM {{schema}}.clickstream_user_attr_view',
+            customSql: 'SELECT * FROM {{schema}}.clickstream_user_attr_view_v1',
             columns: [
               {
                 Name: 'user_pseudo_id',
@@ -1108,7 +1123,7 @@ describe('DataReportingQuickSightStack resource test', () => {
             name: '',
             tableName: 'clickstream_event_view',
             importMode: 'DIRECT_QUERY',
-            customSql: 'SELECT * FROM {{schema}}.clickstream_event_view',
+            customSql: 'SELECT * FROM {{schema}}.clickstream_event_view_v1',
             columns: [
               {
                 Name: 'event_date',
@@ -1155,6 +1170,14 @@ describe('DataReportingQuickSightStack resource test', () => {
                 Type: 'STRING',
               },
               {
+                Name: 'app_info_sdk_name',
+                Type: 'STRING',
+              },
+              {
+                Name: 'app_info_sdk_version',
+                Type: 'STRING',
+              },
+              {
                 Name: 'device_mobile_brand_name',
                 Type: 'STRING',
               },
@@ -1188,6 +1211,10 @@ describe('DataReportingQuickSightStack resource test', () => {
               },
               {
                 Name: 'device_operating_system_version',
+                Type: 'STRING',
+              },
+              {
+                Name: 'host_name',
                 Type: 'STRING',
               },
               {
@@ -1315,6 +1342,8 @@ describe('DataReportingQuickSightStack resource test', () => {
               'app_info_package_id',
               'app_info_install_source',
               'app_info_version',
+              'app_info_sdk_name',
+              'app_info_sdk_version',
               'device_mobile_brand_name',
               'device_mobile_model_name',
               'device_manufacturer',
@@ -1326,6 +1355,7 @@ describe('DataReportingQuickSightStack resource test', () => {
               'device_operating_system_version',
               'ua_browser',
               'ua_browser_version',
+              'host_name',
               'ua_os',
               'ua_os_version',
               'ua_device',
@@ -1353,7 +1383,7 @@ describe('DataReportingQuickSightStack resource test', () => {
             name: '',
             tableName: 'clickstream_device_view',
             importMode: 'DIRECT_QUERY',
-            customSql: 'SELECT * FROM {{schema}}.clickstream_device_view',
+            customSql: 'SELECT * FROM {{schema}}.clickstream_device_view_v1',
             columns: [
               {
                 Name: 'device_id',
@@ -1397,6 +1427,10 @@ describe('DataReportingQuickSightStack resource test', () => {
               },
               {
                 Name: 'operating_system_version',
+                Type: 'STRING',
+              },
+              {
+                Name: 'host_name',
                 Type: 'STRING',
               },
               {
@@ -1460,6 +1494,7 @@ describe('DataReportingQuickSightStack resource test', () => {
               'network_type',
               'operating_system',
               'operating_system_version',
+              'host_name',
               'ua_browser',
               'ua_browser_version',
               'ua_os',
@@ -1478,7 +1513,7 @@ describe('DataReportingQuickSightStack resource test', () => {
             name: '',
             tableName: 'clickstream_event_parameter_view',
             importMode: 'DIRECT_QUERY',
-            customSql: 'SELECT * FROM {{schema}}.clickstream_event_parameter_view ',
+            customSql: 'SELECT * FROM {{schema}}.clickstream_event_parameter_view_v1',
             columns: [
               {
                 Name: 'event_id',
@@ -1548,7 +1583,7 @@ describe('DataReportingQuickSightStack resource test', () => {
             name: '',
             tableName: 'clickstream_lifecycle_daily_view',
             importMode: 'DIRECT_QUERY',
-            customSql: 'SELECT * FROM {{schema}}.clickstream_lifecycle_daily_view',
+            customSql: 'SELECT * FROM {{schema}}.clickstream_lifecycle_daily_view_v1',
             columns: [
               {
                 Name: 'time_period',
@@ -1573,7 +1608,7 @@ describe('DataReportingQuickSightStack resource test', () => {
             name: '',
             tableName: 'clickstream_lifecycle_weekly_view',
             importMode: 'DIRECT_QUERY',
-            customSql: 'SELECT * FROM {{schema}}.clickstream_lifecycle_weekly_view',
+            customSql: 'SELECT * FROM {{schema}}.clickstream_lifecycle_weekly_view_v1',
             columns: [
               {
                 Name: 'time_period',

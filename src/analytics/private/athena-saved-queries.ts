@@ -33,7 +33,7 @@ export class AthenaSavedQuery extends Construct {
       new CfnNamedQuery(scope, `Query_${query.id}`, {
         name: `${query.name} - ${props.database}`,
         description: query.description,
-        queryString: getSqlContent(query.sqlFile, mustacheParam, join(__dirname, 'sqls/athena')),
+        queryString: getSqlContent(query, mustacheParam, join(__dirname, 'sqls/athena')),
         workGroup: props.workGroup,
         database: props.database,
       });

@@ -86,16 +86,6 @@ export const dataSetActions = [
   'quicksight:CancelIngestion',
 ];
 
-export const CLICKSTREAM_RETENTION_VIEW_PLACEHOLDER = 'clickstream_retention_view';
-export const CLICKSTREAM_SESSION_VIEW_PLACEHOLDER = 'clickstream_session_view';
-export const CLICKSTREAM_USER_DIM_VIEW_PLACEHOLDER = 'clickstream_user_dim_view';
-export const CLICKSTREAM_EVENT_VIEW_PLACEHOLDER = 'clickstream_event_view';
-export const CLICKSTREAM_DEVICE_VIEW_PLACEHOLDER = 'clickstream_device_view';
-export const CLICKSTREAM_EVENT_PARAMETER_VIEW_PLACEHOLDER = 'clickstream_event_parameter_view';
-export const CLICKSTREAM_LIFECYCLE_DAILY_VIEW_PLACEHOLDER = 'clickstream_lifecycle_daily_view';
-export const CLICKSTREAM_LIFECYCLE_WEEKLY_VIEW_PLACEHOLDER = 'clickstream_lifecycle_weekly_view';
-export const CLICKSTREAM_USER_ATTR_VIEW_PLACEHOLDER = 'clickstream_user_attr_view';
-
 function sleep(ms: number) {
   return new Promise<void>(resolve => setTimeout(() => resolve(), ms));
 };

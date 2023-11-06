@@ -33,7 +33,7 @@ import { logger } from '../../../common/powertools';
 import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
 import { generateRandomStr } from '../../../common/utils';
 import { LEGACY_REDSHIFT_ODS_EVENTS_TABLE_NAME, SQL_TEMPLATE_PARAMETER } from '../../private/constant';
-import { CreateDatabaseAndSchemas, MustacheParamType, SQLDef } from '../../private/model';
+import { CreateDatabaseAndSchemas, MustacheParamType, SQLDef, SQLViewDef } from '../../private/model';
 import { getSqlContent, getSqlContents } from '../../private/utils';
 import { getRedshiftClient, executeStatementsWithWait } from '../redshift-data';
 
@@ -244,9 +244,9 @@ async function createSchemas(props: ResourcePropertiesType, biUsername: string) 
     for (const sqlDef of props.schemaDefs) {
       if (sqlDef.multipleLine !== undefined && sqlDef.multipleLine === 'true') {
         logger.info('multipleLine SQL: ', sqlDef.sqlFile);
-        sqlStatements.push(...getSqlContents(sqlDef.sqlFile, mustacheParam));
+        sqlStatements.push(...getSqlContents(sqlDef, mustacheParam));
       } else {
-        sqlStatements.push(getSqlContent(sqlDef.sqlFile, mustacheParam));
+        sqlStatements.push(getSqlContent(sqlDef, mustacheParam));
       }
     }
     sqlStatementsByApp.set(app, sqlStatements);
@@ -284,10 +284,10 @@ async function updateSchemas(props: ResourcePropertiesType, biUsername: string, 
     for (const sqlDef of props.schemaDefs) {
       if (sqlDef.multipleLine !== undefined && sqlDef.multipleLine === 'true') {
         logger.info('multipleLine SQL: ', sqlDef.sqlFile);
-        sqlStatements.push(...getSqlContents(sqlDef.sqlFile, mustacheParam));
+        sqlStatements.push(...getSqlContents(sqlDef, mustacheParam));
         continue;
       }
-      sqlStatements.push(getSqlContent(sqlDef.sqlFile, mustacheParam));
+      sqlStatements.push(getSqlContent(sqlDef, mustacheParam));
     }
     sqlStatementsByApp.set(app, sqlStatements);
   };
@@ -320,28 +320,29 @@ async function updateSchemas(props: ResourcePropertiesType, biUsername: string, 
 }
 
 
-function getUpdatableSql(sqlOrViewDefs: SQLDef[], oldSqlArray: string[], mustacheParam: MustacheParamType, path: string = '/opt') {
+function getUpdatableSql(sqlOrViewDefs: SQLDef[] | SQLViewDef[], oldSqlArray: string[], mustacheParam: MustacheParamType, path: string = '/opt') {
   logger.info('getUpdatableSql', { sqlOrViewDefs, oldSqlArray });
-
+  const newFilesInfo = [];
   const updateFilesInfo = [];
   const sqlStatements: string[] = [];
   for (const schemaOrViewDef of sqlOrViewDefs) {
-    logger.info(`schemaOrViewDef: sqlFile: ${schemaOrViewDef.sqlFile} - updatable: ${schemaOrViewDef.updatable}`);
+    logger.info(`schemaOrViewDef.updatable: ${schemaOrViewDef.updatable}`);
 
-    if (! oldSqlArray.includes(schemaOrViewDef.sqlFile)) {
-      logger.info(`new sql: ${schemaOrViewDef.sqlFile}`);
-      sqlStatements.push(getSqlContent(schemaOrViewDef.sqlFile, mustacheParam, path));
-      updateFilesInfo.push('new: ' + schemaOrViewDef.sqlFile);
+    if ('sqlFile' in schemaOrViewDef && !oldSqlArray.includes(schemaOrViewDef.sqlFile)) {
+      logger.info('new sql: ', { schemaOrViewDef });
+      sqlStatements.push(getSqlContent(schemaOrViewDef, mustacheParam, path));
+      newFilesInfo.push(schemaOrViewDef);
     } else if (schemaOrViewDef.updatable === 'true') {
-      logger.info(`update sql: ${schemaOrViewDef.sqlFile}`);
-      sqlStatements.push(getSqlContent(schemaOrViewDef.sqlFile, mustacheParam, path));
-      updateFilesInfo.push('update: ' + schemaOrViewDef.sqlFile);
+      logger.info('update sql: ', { schemaOrViewDef });
+      sqlStatements.push(getSqlContent(schemaOrViewDef, mustacheParam, path));
+      updateFilesInfo.push(schemaOrViewDef);
     } else {
-      logger.info(`skip update ${schemaOrViewDef.sqlFile} due to it is not updatable.`);
+      logger.info('skip update sql due to it is not updatable.', { schemaOrViewDef });
     }
-
   }
-  logger.info('getUpdatableSql', { updateFilesInfo });
+
+  logger.info('getUpdatableSql: new and update files info', { newFilesInfo, updateFilesInfo });
+
   return sqlStatements;
 }
 
@@ -389,8 +390,8 @@ async function createViewForReporting(props: ResourcePropertiesType, biUser: str
     };
 
     for (const viewDef of props.reportingViewsDef) {
-      views.push(viewDef.sqlFile.replace('.sql', ''));
-      sqlStatements.push(getSqlContent(viewDef.sqlFile, mustacheParam, '/opt/dashboard'));
+      views.push(viewDef.viewName);
+      sqlStatements.push(getSqlContent(viewDef, mustacheParam, '/opt/dashboard'));
     }
     sqlStatements.push(..._buildGrantSqlStatements(views, app, biUser));
     sqlStatementsByApp.set(app, sqlStatements);
@@ -424,8 +425,8 @@ async function updateViewForReporting(props: ResourcePropertiesType, oldProps: R
     };
     const views: string[] = [];
     for (const viewDef of props.reportingViewsDef) {
-      views.push(viewDef.sqlFile.replace('.sql', ''));
-      sqlStatements.push(getSqlContent(viewDef.sqlFile, mustacheParam, '/opt/dashboard'));
+      views.push(viewDef.viewName);
+      sqlStatements.push(getSqlContent(viewDef, mustacheParam, '/opt/dashboard'));
     }
     sqlStatements.push(..._buildGrantSqlStatements(views, app, biUser));
 
@@ -449,7 +450,7 @@ async function updateViewForReporting(props: ResourcePropertiesType, oldProps: R
     //grant select on views to bi user.
     const views: string[] = [];
     for (const sqlDef of props.reportingViewsDef) {
-      views.push(sqlDef.sqlFile.replace('.sql', ''));
+      views.push(sqlDef.viewName);
     }
     sqlStatements2.push(..._buildGrantSqlStatements(views, app, biUser));
 
@@ -536,7 +537,7 @@ function getAppUpdateProps(props: ResourcePropertiesType, oldProps: ResourceProp
     oldAppIdArray.push(...oldProps.appIds.trim().split(','));
   };
   for (const view of oldProps.reportingViewsDef) {
-    oldViewSqlArray.push(view.sqlFile);
+    oldViewSqlArray.push(`${view.viewName}.sql`);
   }
   logger.info(`old sql array: ${oldViewSqlArray}`);
 
