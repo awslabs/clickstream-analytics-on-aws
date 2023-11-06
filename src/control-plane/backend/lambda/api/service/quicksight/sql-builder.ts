@@ -1248,11 +1248,8 @@ export function _buildCommonPartSql(eventNames: string[], sqlParameters: SQLPara
 function _shouldAddAllCondition(eventNames: string[], sqlParameters: SQLParameters,
   isEventPathAnalysis: boolean, isNodePathAnalysis: boolean, isRetentionAnalysis: boolean): boolean {
 
-  if ( isRetentionAnalysis ) {
-    return false;
-  } else if (isNodePathAnalysis) {
-    return false;
-  } else if (isEventPathAnalysis && eventNames.length < sqlParameters.eventAndConditions!.length ) {
+  if ( isRetentionAnalysis || isNodePathAnalysis
+    || (isEventPathAnalysis && eventNames.length < sqlParameters.eventAndConditions!.length) ) {
     return false;
   }
 
