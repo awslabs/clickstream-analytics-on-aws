@@ -135,11 +135,14 @@ const PipelineStatus: React.FC<PipelineStatusProps> = (
     let stackIndicatorType: StatusIndicatorProps.Type;
     if (
       pipelineTemplateVersion !== '' &&
-      pipelineTemplateVersion !== stackVersion
+      pipelineTemplateVersion !== stackVersion &&
+      updatedStatus !== EPipelineStatus.Creating &&
+      updatedStatus !== EPipelineStatus.Updating &&
+      updatedStatus !== EPipelineStatus.Deleting
     ) {
       stackIndicatorType = 'warning';
     } else {
-      stackIndicatorType = CLOUDFORMATION_STATUS_MAP[stackStatus];
+      stackIndicatorType = CLOUDFORMATION_STATUS_MAP[stackStatus] ?? 'pending';
     }
     return stackIndicatorType;
   };
@@ -166,7 +169,7 @@ const PipelineStatus: React.FC<PipelineStatusProps> = (
                       )}
                     >
                       <b>{element.stackType}</b>(
-                      {element.stackStatus ?? t('status.unknown')})
+                      {element.stackStatus ?? t('status.pending')})
                       {element.stackStatus && (
                         <span className="ml-5">
                           <Link
