@@ -17,19 +17,7 @@ import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Provider } from 'aws-cdk-lib/custom-resources';
 import { Construct } from 'constructs';
-import {
-  CLICKSTREAM_DEVICE_VIEW_PLACEHOLDER,
-  CLICKSTREAM_EVENT_PARAMETER_VIEW_PLACEHOLDER,
-  CLICKSTREAM_LIFECYCLE_DAILY_VIEW_PLACEHOLDER,
-  CLICKSTREAM_LIFECYCLE_WEEKLY_VIEW_PLACEHOLDER,
-  CLICKSTREAM_EVENT_VIEW_PLACEHOLDER,
-  CLICKSTREAM_RETENTION_VIEW_PLACEHOLDER,
-  CLICKSTREAM_SESSION_VIEW_PLACEHOLDER,
-  CLICKSTREAM_USER_ATTR_VIEW_PLACEHOLDER,
-  CLICKSTREAM_USER_DIM_VIEW_PLACEHOLDER,
-  QuickSightDashboardDefProps,
-  QuicksightCustomResourceProps,
-} from './private/dashboard';
+import { QuickSightDashboardDefProps, QuicksightCustomResourceProps } from './private/dashboard';
 import {
   clickstream_device_view_columns,
   clickstream_event_parameter_view_columns,
@@ -42,6 +30,27 @@ import {
   clickstream_user_dim_view_columns,
 } from './private/dataset-col-def';
 import { createRoleForQuicksightCustomResourceLambda } from './private/iam';
+import {
+  CLICKSTREAM_DEVICE_VIEW_PLACEHOLDER,
+  CLICKSTREAM_EVENT_PARAMETER_VIEW_PLACEHOLDER,
+  CLICKSTREAM_LIFECYCLE_DAILY_VIEW_PLACEHOLDER,
+  CLICKSTREAM_LIFECYCLE_WEEKLY_VIEW_PLACEHOLDER,
+  CLICKSTREAM_EVENT_VIEW_PLACEHOLDER,
+  CLICKSTREAM_RETENTION_VIEW_PLACEHOLDER,
+  CLICKSTREAM_SESSION_VIEW_PLACEHOLDER,
+  CLICKSTREAM_USER_ATTR_VIEW_PLACEHOLDER,
+  CLICKSTREAM_USER_DIM_VIEW_PLACEHOLDER,
+  CLICKSTREAM_USER_DIM_VIEW_NAME,
+  CLICKSTREAM_RETENTION_VIEW_NAME,
+  CLICKSTREAM_SESSION_VIEW_NAME,
+  CLICKSTREAM_USER_ATTR_VIEW_NAME,
+  CLICKSTREAM_EVENT_VIEW_NAME,
+  CLICKSTREAM_DEVICE_VIEW_NAME,
+  CLICKSTREAM_EVENT_PARAMETER_VIEW_NAME,
+  CLICKSTREAM_LIFECYCLE_DAILY_VIEW_NAME,
+  CLICKSTREAM_LIFECYCLE_WEEKLY_VIEW_NAME,
+} from '../common/constant';
+
 import { POWERTOOLS_ENVS } from '../common/powertools';
 import { SolutionNodejsFunction } from '../private/function';
 
@@ -72,8 +81,7 @@ export function createQuicksightCustomResource(
         tableName: CLICKSTREAM_USER_DIM_VIEW_PLACEHOLDER,
         importMode: 'DIRECT_QUERY',
         columns: clickstream_user_dim_view_columns,
-        // customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_USER_DIM_VIEW_PLACEHOLDER} where first_visit_date > <<$EventStartDate>>`,
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_USER_DIM_VIEW_PLACEHOLDER}`,
+        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_USER_DIM_VIEW_NAME}`,
         columnGroups: [
           {
             geoSpatialColumnGroupName: 'geo',
@@ -95,7 +103,10 @@ export function createQuicksightCustomResource(
           'first_traffic_source_source',
           'first_traffic_source_medium',
           'first_traffic_source_name',
-          'is_registered',
+          'first_referer',
+          'first_visit_channel',
+          'registration_status',
+          'device_id',
         ],
         tagColumnOperations: [
           {
@@ -112,7 +123,7 @@ export function createQuicksightCustomResource(
         name: '',
         tableName: CLICKSTREAM_RETENTION_VIEW_PLACEHOLDER,
         importMode: 'DIRECT_QUERY',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_RETENTION_VIEW_PLACEHOLDER}`,
+        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_RETENTION_VIEW_NAME}`,
         columns: clickstream_retention_view_columns,
         projectedColumns: [
           'first_date',
@@ -125,8 +136,7 @@ export function createQuicksightCustomResource(
         name: '',
         tableName: CLICKSTREAM_SESSION_VIEW_PLACEHOLDER,
         importMode: 'DIRECT_QUERY',
-        // customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_SESSION_VIEW_PLACEHOLDER} where session_date > <<$SessionDate>>`,
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_SESSION_VIEW_PLACEHOLDER}`,
+        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_SESSION_VIEW_NAME}`,
         columns: clickstream_session_view_columns,
         projectedColumns: [
           'session_id',
@@ -148,7 +158,7 @@ export function createQuicksightCustomResource(
         name: '',
         tableName: CLICKSTREAM_USER_ATTR_VIEW_PLACEHOLDER,
         importMode: 'DIRECT_QUERY',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_USER_ATTR_VIEW_PLACEHOLDER}`,
+        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_USER_ATTR_VIEW_NAME}`,
         columns: clickstream_user_attr_view_columns,
         projectedColumns: [
           'user_pseudo_id',
@@ -168,8 +178,7 @@ export function createQuicksightCustomResource(
         name: '',
         tableName: CLICKSTREAM_EVENT_VIEW_PLACEHOLDER,
         importMode: 'DIRECT_QUERY',
-        // customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_ODS_EVENT_VIEW_PLACEHOLDER}  where event_date > <<$EventDate>>`,
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_EVENT_VIEW_PLACEHOLDER}`,
+        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_EVENT_VIEW_NAME}`,
         columns: clickstream_event_view_columns,
         tagColumnOperations: [
           {
@@ -197,6 +206,8 @@ export function createQuicksightCustomResource(
           'app_info_package_id',
           'app_info_install_source',
           'app_info_version',
+          'app_info_sdk_name',
+          'app_info_sdk_version',
           'device_mobile_brand_name',
           'device_mobile_model_name',
           'device_manufacturer',
@@ -208,6 +219,7 @@ export function createQuicksightCustomResource(
           'device_operating_system_version',
           'ua_browser',
           'ua_browser_version',
+          'host_name',
           'ua_os',
           'ua_os_version',
           'ua_device',
@@ -235,8 +247,7 @@ export function createQuicksightCustomResource(
         name: '',
         tableName: CLICKSTREAM_DEVICE_VIEW_PLACEHOLDER,
         importMode: 'DIRECT_QUERY',
-        // customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_DEVICE_VIEW_PLACEHOLDER} where event_date > <<$EventDate>>`,
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_DEVICE_VIEW_PLACEHOLDER}`,
+        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_DEVICE_VIEW_NAME}`,
         columns: clickstream_device_view_columns,
         projectedColumns: [
           'device_id',
@@ -250,6 +261,7 @@ export function createQuicksightCustomResource(
           'network_type',
           'operating_system',
           'operating_system_version',
+          'host_name',
           'ua_browser',
           'ua_browser_version',
           'ua_os',
@@ -268,8 +280,7 @@ export function createQuicksightCustomResource(
         name: '',
         tableName: CLICKSTREAM_EVENT_PARAMETER_VIEW_PLACEHOLDER,
         importMode: 'DIRECT_QUERY',
-        // customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_EVENT_PARAMETER_VIEW_PLACEHOLDER} where event_date > <<$EventDate>>`,
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_EVENT_PARAMETER_VIEW_PLACEHOLDER} `,
+        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_EVENT_PARAMETER_VIEW_NAME}`,
         columns: clickstream_event_parameter_view_columns,
         projectedColumns: [
           'event_id',
@@ -290,8 +301,7 @@ export function createQuicksightCustomResource(
         name: '',
         tableName: CLICKSTREAM_LIFECYCLE_DAILY_VIEW_PLACEHOLDER,
         importMode: 'DIRECT_QUERY',
-        // customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_LIFECYCLE_DAILY_VIEW_PLACEHOLDER} where time_period > <<$EventDate>>`,
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_LIFECYCLE_DAILY_VIEW_PLACEHOLDER}`,
+        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_LIFECYCLE_DAILY_VIEW_NAME}`,
         columns: clickstream_lifecycle_daily_view_columns,
         projectedColumns: [
           'time_period',
@@ -303,7 +313,7 @@ export function createQuicksightCustomResource(
         name: '',
         tableName: CLICKSTREAM_LIFECYCLE_WEEKLY_VIEW_PLACEHOLDER,
         importMode: 'DIRECT_QUERY',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_LIFECYCLE_WEEKLY_VIEW_PLACEHOLDER}`,
+        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_LIFECYCLE_WEEKLY_VIEW_NAME}`,
         columns: clickstream_lifecycle_weekly_view_columns,
         projectedColumns: [
           'time_period',

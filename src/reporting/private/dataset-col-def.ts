@@ -78,6 +78,14 @@ export const clickstream_event_view_columns: InputColumn[] = [
     Type: 'STRING',
   },
   {
+    Name: 'app_info_sdk_name',
+    Type: 'STRING',
+  },
+  {
+    Name: 'app_info_sdk_version',
+    Type: 'STRING',
+  },
+  {
     Name: 'device_mobile_brand_name',
     Type: 'STRING',
   },
@@ -111,6 +119,10 @@ export const clickstream_event_view_columns: InputColumn[] = [
   },
   {
     Name: 'device_operating_system_version',
+    Type: 'STRING',
+  },
+  {
+    Name: 'host_name',
     Type: 'STRING',
   },
   {
@@ -334,6 +346,10 @@ export const clickstream_device_view_columns: InputColumn[] = [
     Type: 'STRING',
   },
   {
+    Name: 'host_name',
+    Type: 'STRING',
+  },
+  {
     Name: 'ua_browser',
     Type: 'STRING',
   },
@@ -531,7 +547,19 @@ export const clickstream_user_dim_view_columns: InputColumn[] = [
     Type: 'STRING',
   },
   {
-    Name: 'is_registered',
+    Name: 'first_referer',
+    Type: 'STRING',
+  },
+  {
+    Name: 'first_visit_channel',
+    Type: 'STRING',
+  },
+  {
+    Name: 'device_id',
+    Type: 'STRING',
+  },
+  {
+    Name: 'registration_status',
     Type: 'STRING',
   },
 ];

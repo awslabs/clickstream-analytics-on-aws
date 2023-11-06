@@ -426,7 +426,7 @@
                         "DataType": "STRING"
                     },
                     {
-                        "Name": "is_registered",
+                        "Name": "registration_status",
                         "DataType": "STRING"
                     },
                     {
@@ -1666,10 +1666,10 @@
                                         },
                                         {
                                             "CategoricalDimensionField": {
-                                                "FieldId": "5dd838aa-7ff1-4213-aeee-73cb343d5ec2.is_registered.2.1684917880513",
+                                                "FieldId": "5dd838aa-7ff1-4213-aeee-73cb343d5ec2.registration_status.2.1684917880513",
                                                 "Column": {
                                                     "DataSetIdentifier": "clickstream_user_dim_view",
-                                                    "ColumnName": "is_registered"
+                                                    "ColumnName": "registration_status"
                                                 }
                                             }
                                         },
@@ -8867,7 +8867,7 @@
         {
             "DataSetIdentifier": "clickstream_user_dim_view",
             "Name": "Registered User Number",
-            "Expression": "countIf({user_pseudo_id}, {is_registered}='Registered')"
+            "Expression": "countIf({user_pseudo_id}, {registration_status}='Registered')"
         }
     ],
     "ParameterDeclarations": [
