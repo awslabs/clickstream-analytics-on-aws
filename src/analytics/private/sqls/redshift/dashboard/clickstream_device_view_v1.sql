@@ -1,4 +1,4 @@
-CREATE MATERIALIZED VIEW {{schema}}.clickstream_device_view 
+CREATE MATERIALIZED VIEW {{schema}}.{{viewName}}
 BACKUP NO
 SORTKEY(event_date)
 AUTO REFRESH YES
@@ -28,7 +28,7 @@ device.vendor_id::varchar as device_id
 , user_pseudo_id
 , user_id
 , count(event_id) as usage_num
---pleaes update the following schema name with your schema name
+--please update the following schema name with your schema name
 from {{schema}}.event 
 group by
 device_id

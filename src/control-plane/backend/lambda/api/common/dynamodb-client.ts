@@ -14,6 +14,7 @@
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient, QueryCommandInput, ScanCommandInput, paginateQuery, paginateScan } from '@aws-sdk/lib-dynamodb';
 import { NativeAttributeValue } from '@aws-sdk/util-dynamodb';
+import memoize from 'fast-memoize';
 import { aws_sdk_client_common_config } from './sdk-client-config-ln';
 
 // Create DynamoDB Client and patch it for tracing
@@ -43,6 +44,8 @@ const translateConfig = {
 // Create the DynamoDB Document client.
 const docClient = DynamoDBDocumentClient.from(ddbClient, { ...translateConfig });
 
+const memoized = memoize(query);
+
 async function query(input: QueryCommandInput) {
   const records: Record<string, NativeAttributeValue>[] = [];
   for await (const page of paginateQuery({ client: docClient }, input)) {
@@ -59,10 +62,19 @@ async function scan(input: ScanCommandInput) {
   return records;
 }
 
+async function memoizedQuery(input: QueryCommandInput) {
+  const cache = process.env.METADATA_CACHE || 'true';
+  if (cache === 'true') {
+    return memoized(input);
+  }
+  return query(input);
+}
+
 export {
   docClient,
   ddbClient,
   marshallOptions,
   query,
   scan,
+  memoizedQuery,
 };

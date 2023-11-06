@@ -336,3 +336,23 @@ export const QUICKSIGHT_DATASET_INFIX= '-dataset-';
 
 
 export const EMR_ARCHITECTURE_AUTO = 'Auto';
+
+export const CLICKSTREAM_RETENTION_VIEW_PLACEHOLDER = 'clickstream_retention_view';
+export const CLICKSTREAM_SESSION_VIEW_PLACEHOLDER = 'clickstream_session_view';
+export const CLICKSTREAM_USER_DIM_VIEW_PLACEHOLDER = 'clickstream_user_dim_view';
+export const CLICKSTREAM_EVENT_VIEW_PLACEHOLDER = 'clickstream_event_view';
+export const CLICKSTREAM_DEVICE_VIEW_PLACEHOLDER = 'clickstream_device_view';
+export const CLICKSTREAM_EVENT_PARAMETER_VIEW_PLACEHOLDER = 'clickstream_event_parameter_view';
+export const CLICKSTREAM_LIFECYCLE_DAILY_VIEW_PLACEHOLDER = 'clickstream_lifecycle_daily_view';
+export const CLICKSTREAM_LIFECYCLE_WEEKLY_VIEW_PLACEHOLDER = 'clickstream_lifecycle_weekly_view';
+export const CLICKSTREAM_USER_ATTR_VIEW_PLACEHOLDER = 'clickstream_user_attr_view';
+
+export const CLICKSTREAM_RETENTION_VIEW_NAME = 'clickstream_retention_view_v1';
+export const CLICKSTREAM_SESSION_VIEW_NAME = 'clickstream_session_view_v1';
+export const CLICKSTREAM_USER_DIM_VIEW_NAME = 'clickstream_user_dim_view_v1';
+export const CLICKSTREAM_EVENT_VIEW_NAME = 'clickstream_event_view_v1';
+export const CLICKSTREAM_DEVICE_VIEW_NAME = 'clickstream_device_view_v1';
+export const CLICKSTREAM_EVENT_PARAMETER_VIEW_NAME = 'clickstream_event_parameter_view_v1';
+export const CLICKSTREAM_LIFECYCLE_DAILY_VIEW_NAME = 'clickstream_lifecycle_daily_view_v1';
+export const CLICKSTREAM_LIFECYCLE_WEEKLY_VIEW_NAME = 'clickstream_lifecycle_weekly_view_v1';
+export const CLICKSTREAM_USER_ATTR_VIEW_NAME = 'clickstream_user_attr_view_v1';

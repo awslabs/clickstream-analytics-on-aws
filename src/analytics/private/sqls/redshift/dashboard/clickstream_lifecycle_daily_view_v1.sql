@@ -1,4 +1,4 @@
-CREATE MATERIALIZED VIEW {{schema}}.clickstream_lifecycle_daily_view 
+CREATE MATERIALIZED VIEW {{schema}}.{{viewName}}
 BACKUP NO
 AUTO REFRESH YES
 AS
@@ -14,7 +14,7 @@ lag_lead as (
     lag(time_period,1) over (partition by user_pseudo_id order by user_pseudo_id, time_period),
     lead(time_period,1) over (partition by user_pseudo_id order by user_pseudo_id, time_period)
   from daily_usage),
--- caculate lag and lead size
+-- calculate lag and lead size
 lag_lead_with_diffs as (
   select user_pseudo_id, time_period, lag, lead, 
     datediff(day,lag,time_period) lag_size,
