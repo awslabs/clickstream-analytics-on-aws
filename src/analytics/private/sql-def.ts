@@ -11,52 +11,45 @@
  *  and limitations under the License.
  */
 
-import { SQLDef } from './model';
+import { SQLDef, SQLViewDef } from './model';
+import { CLICKSTREAM_DEVICE_VIEW_NAME, CLICKSTREAM_EVENT_PARAMETER_VIEW_NAME, CLICKSTREAM_EVENT_VIEW_NAME, CLICKSTREAM_LIFECYCLE_DAILY_VIEW_NAME, CLICKSTREAM_LIFECYCLE_WEEKLY_VIEW_NAME, CLICKSTREAM_RETENTION_VIEW_NAME, CLICKSTREAM_SESSION_VIEW_NAME, CLICKSTREAM_USER_ATTR_VIEW_NAME, CLICKSTREAM_USER_DIM_VIEW_NAME } from '../../common/constant';
 
-export const reportingViewsDef: SQLDef[] = [
+export const reportingViewsDef: SQLViewDef[] = [
   {
     updatable: 'false',
-    sqlFile: 'clickstream_event_view.sql',
+    viewName: CLICKSTREAM_EVENT_VIEW_NAME,
   },
   {
     updatable: 'false',
-    sqlFile: 'clickstream_event_parameter_view.sql',
+    viewName: CLICKSTREAM_EVENT_PARAMETER_VIEW_NAME,
   },
   {
     updatable: 'false',
-    sqlFile: 'clickstream_lifecycle_daily_view.sql',
+    viewName: CLICKSTREAM_LIFECYCLE_DAILY_VIEW_NAME,
   },
   {
     updatable: 'false',
-    sqlFile: 'clickstream_lifecycle_weekly_view.sql',
-  },
-  {
-    updatable: 'false',
-    sqlFile: 'clickstream_user_dim_mv_1.sql',
-  },
-  {
-    updatable: 'false',
-    sqlFile: 'clickstream_user_dim_mv_2.sql',
+    viewName: CLICKSTREAM_LIFECYCLE_WEEKLY_VIEW_NAME,
   },
   {
     updatable: 'true',
-    sqlFile: 'clickstream_user_dim_view.sql',
+    viewName: CLICKSTREAM_USER_DIM_VIEW_NAME,
   },
   {
     updatable: 'false',
-    sqlFile: 'clickstream_session_view.sql',
+    viewName: CLICKSTREAM_SESSION_VIEW_NAME,
   },
   {
     updatable: 'false',
-    sqlFile: 'clickstream_device_view.sql',
+    viewName: CLICKSTREAM_DEVICE_VIEW_NAME,
   },
   {
     updatable: 'false',
-    sqlFile: 'clickstream_retention_view.sql',
+    viewName: CLICKSTREAM_RETENTION_VIEW_NAME,
   },
   {
     updatable: 'false',
-    sqlFile: 'clickstream_user_attr_view.sql',
+    viewName: CLICKSTREAM_USER_ATTR_VIEW_NAME,
   },
 ];
 

@@ -11,10 +11,11 @@
  *  and limitations under the License.
  */
 
-import { Icon, IconProps } from '@cloudscape-design/components';
+import { Icon } from '@cloudscape-design/components';
 import { HelpPanelType } from 'context/reducer';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import ExtendIcon from '../ExtendIcon';
 import InfoLink from '../InfoLink';
 
 interface SectionTitleProps {
@@ -27,25 +28,34 @@ const SectionTitle: React.FC<SectionTitleProps> = (
 ) => {
   const { type, title } = props;
   const { t } = useTranslation();
-  let iconName: IconProps.Name | undefined;
+
   let displayTitle = '';
   if (type === 'event') {
-    iconName = 'menu';
     displayTitle = title ?? t('analytics:labels.defineMetrics');
   }
   if (type === 'filter') {
-    iconName = 'filter';
     displayTitle = t('analytics:labels.filters');
   }
   if (type === 'group') {
-    iconName = 'keyboard';
     displayTitle = t('analytics:labels.attributeGrouping');
   }
+
+  const getIcon = () => {
+    if (type === 'event') {
+      return <Icon name="menu" />;
+    }
+    if (type === 'filter') {
+      return <Icon name="filter" />;
+    }
+    if (type === 'group') {
+      return <ExtendIcon icon="BsChecksGrid" color="#666" />;
+    }
+  };
 
   return (
     <div className="flex align-center gap-5">
       <div className={`cs-analytics-header ${type}`}>
-        <Icon name={iconName} />
+        {getIcon()}
         <span>{displayTitle}</span>
       </div>
       <InfoLink

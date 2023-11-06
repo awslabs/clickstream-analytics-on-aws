@@ -16,6 +16,7 @@ import {
   GetCommand,
   PutCommand,
   QueryCommand,
+  QueryCommandInput,
   ScanCommand,
   UpdateCommand,
 } from '@aws-sdk/lib-dynamodb';
@@ -99,7 +100,6 @@ const MOCK_EVENT_PARAMETER = {
     ],
   },
   summary: {
-    hasData: true,
     platform: [
       'Android',
       'iOS',
@@ -321,15 +321,37 @@ function displayDataMock(m: any) {
   });
 }
 
+function getAllEventParametersInput() {
+  const lastDay = `day${new Date().getDate() - 1}`;
+  const allEventParametersInput: QueryCommandInput = {
+    TableName: analyticsMetadataTable,
+    IndexName: prefixMonthGSIName,
+    KeyConditionExpression: '#prefix= :prefix',
+    ProjectionExpression: `#id, #month, #prefix, projectId, appId, #name, eventName, category, valueType, ${lastDay}, summary`,
+    ExpressionAttributeNames: {
+      '#prefix': 'prefix',
+      '#id': 'id',
+      '#month': 'month',
+      '#name': 'name',
+    },
+    ExpressionAttributeValues: {
+      ':prefix': `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
+    },
+    ScanIndexForward: false,
+  };
+  return allEventParametersInput;
+}
+
 describe('Metadata Event test', () => {
   beforeEach(() => {
+    process.env.METADATA_CACHE = 'false';
     ddbMock.reset();
     displayDataMock(ddbMock);
-  });
-  it('Get metadata event by name', async () => {
     jest
       .useFakeTimers()
       .setSystemTime(new Date('2023-03-02'));
+  });
+  it('Get metadata event by name', async () => {
     ddbMock.on(QueryCommand, {
       TableName: analyticsMetadataTable,
       KeyConditionExpression: '#id= :id AND begins_with(#month, :month)',
@@ -355,18 +377,7 @@ describe('Metadata Event test', () => {
         MOCK_EVENT,
       ],
     });
-    ddbMock.on(QueryCommand, {
-      TableName: analyticsMetadataTable,
-      IndexName: prefixMonthGSIName,
-      KeyConditionExpression: '#prefix= :prefix',
-      ExpressionAttributeNames: {
-        '#prefix': 'prefix',
-      },
-      ExpressionAttributeValues: {
-        ':prefix': `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
-      },
-      ScanIndexForward: false,
-    }).resolves({
+    ddbMock.on(QueryCommand, getAllEventParametersInput()).resolves({
       Items: [
         MOCK_EVENT_PARAMETER,
         {
@@ -446,9 +457,6 @@ describe('Metadata Event test', () => {
     });
   });
   it('Get preset event when no data in DDB', async () => {
-    jest
-      .useFakeTimers()
-      .setSystemTime(new Date('2023-03-02'));
     ddbMock.on(QueryCommand).resolves({
       Items: [],
     });
@@ -741,18 +749,7 @@ describe('Metadata Event test', () => {
         },
       ],
     });
-    ddbMock.on(QueryCommand, {
-      TableName: analyticsMetadataTable,
-      IndexName: prefixMonthGSIName,
-      KeyConditionExpression: '#prefix= :prefix',
-      ExpressionAttributeNames: {
-        '#prefix': 'prefix',
-      },
-      ExpressionAttributeValues: {
-        ':prefix': `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
-      },
-      ScanIndexForward: false,
-    }).resolves({
+    ddbMock.on(QueryCommand, getAllEventParametersInput()).resolves({
       Items: [
         {
           ...MOCK_EVENT_PARAMETER,
@@ -819,6 +816,7 @@ describe('Metadata Event test', () => {
     const res = await request(app)
       .get(`/api/metadata/events?projectId=${MOCK_PROJECT_ID}&appId=${MOCK_APP_ID}&attribute=true`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(ddbMock).toHaveReceivedCommandTimes(QueryCommand, 2);
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({
       success: true,
@@ -1033,22 +1031,18 @@ describe('Metadata Event test', () => {
 
 describe('Metadata Event Attribute test', () => {
   beforeEach(() => {
+    process.env.METADATA_CACHE = 'false';
     ddbMock.reset();
     displayDataMock(ddbMock);
+    jest
+      .useFakeTimers()
+      .setSystemTime(new Date('2023-03-02'));
   });
   it('Get metadata event attribute by name', async () => {
-    ddbMock.on(QueryCommand, {
-      TableName: analyticsMetadataTable,
-      IndexName: prefixMonthGSIName,
-      KeyConditionExpression: '#prefix= :prefix',
-      ExpressionAttributeNames: {
-        '#prefix': 'prefix',
-      },
-      ExpressionAttributeValues: {
-        ':prefix': `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
-      },
-      ScanIndexForward: false,
-    }).resolves({
+    jest
+      .useFakeTimers()
+      .setSystemTime(new Date('2023-02-02'));
+    ddbMock.on(QueryCommand, getAllEventParametersInput()).resolves({
       Items: [
         {
           ...MOCK_EVENT_PARAMETER,
@@ -1097,7 +1091,7 @@ describe('Metadata Event Attribute test', () => {
       ],
     });
     const res = await request(app)
-      .get(`/api/metadata/event_parameter?projectId=${MOCK_PROJECT_ID}&appId=${MOCK_APP_ID}&name=${MOCK_EVENT_PARAMETER_NAME}&type=${MetadataValueType.STRING}`);
+      .get(`/api/metadata/event_parameter?projectId=${MOCK_PROJECT_ID}&appId=${MOCK_APP_ID}&name=${MOCK_EVENT_PARAMETER_NAME}&category=${ConditionCategory.EVENT}&type=${MetadataValueType.STRING}`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({
@@ -1163,7 +1157,7 @@ describe('Metadata Event Attribute test', () => {
       Items: [],
     });
     const res = await request(app)
-      .get(`/api/metadata/event_parameter?projectId=${MOCK_PROJECT_ID}&appId=${MOCK_APP_ID}&name=${MOCK_EVENT_PARAMETER_NAME}NoExist&type=String`);
+      .get(`/api/metadata/event_parameter?projectId=${MOCK_PROJECT_ID}&appId=${MOCK_APP_ID}&name=${MOCK_EVENT_PARAMETER_NAME}NoExist&category=${ConditionCategory.EVENT}&type=String`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(404);
     expect(res.body).toEqual({
@@ -1172,25 +1166,11 @@ describe('Metadata Event Attribute test', () => {
     });
   });
   it('Get metadata event attribute by name when no data in DDB', async () => {
-    jest
-      .useFakeTimers()
-      .setSystemTime(new Date('2023-03-02'));
-    ddbMock.on(QueryCommand, {
-      TableName: analyticsMetadataTable,
-      IndexName: prefixMonthGSIName,
-      KeyConditionExpression: '#prefix= :prefix',
-      ExpressionAttributeNames: {
-        '#prefix': 'prefix',
-      },
-      ExpressionAttributeValues: {
-        ':prefix': `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
-      },
-      ScanIndexForward: false,
-    }).resolves({
+    ddbMock.on(QueryCommand, getAllEventParametersInput()).resolves({
       Items: [],
     });
     const res = await request(app)
-      .get(`/api/metadata/event_parameter?projectId=${MOCK_PROJECT_ID}&appId=${MOCK_APP_ID}&name=${MOCK_EVENT_PARAMETER_NAME}&type=${MetadataValueType.STRING}`);
+      .get(`/api/metadata/event_parameter?projectId=${MOCK_PROJECT_ID}&appId=${MOCK_APP_ID}&name=${MOCK_EVENT_PARAMETER_NAME}&category=${ConditionCategory.EVENT}&type=${MetadataValueType.STRING}`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({
@@ -1481,6 +1461,7 @@ describe('Metadata Event Attribute test', () => {
 
 describe('Metadata User Attribute test', () => {
   beforeEach(() => {
+    process.env.METADATA_CACHE = 'false';
     ddbMock.reset();
     displayDataMock(ddbMock);
   });
@@ -1689,6 +1670,217 @@ describe('Metadata User Attribute test', () => {
         totalCount: 1,
       },
     });
+  });
+
+  afterAll((done) => {
+    server.close();
+    done();
+  });
+});
+
+describe('Metadata Cache test', () => {
+  beforeEach(() => {
+    ddbMock.reset();
+    displayDataMock(ddbMock);
+    jest
+      .useFakeTimers()
+      .setSystemTime(new Date('2023-03-02'));
+  });
+
+  it('Get metadata event attribute list no cache', async () => {
+    process.env.METADATA_CACHE = 'false';
+    jest
+      .useFakeTimers()
+      .setSystemTime(new Date('2023-02-02'));
+    ddbMock.on(QueryCommand, {
+      TableName: analyticsMetadataTable,
+      IndexName: prefixMonthGSIName,
+      KeyConditionExpression: '#prefix= :prefix',
+      ExpressionAttributeNames: {
+        '#prefix': 'prefix',
+      },
+      ExpressionAttributeValues: {
+        ':prefix': `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
+      },
+      ScanIndexForward: false,
+    }).resolves({
+      Items: [
+        {
+          ...MOCK_EVENT_PARAMETER,
+          month: '#202302',
+        },
+        {
+          ...MOCK_EVENT_PARAMETER,
+          month: '#202301',
+        },
+        {
+          ...MOCK_EVENT_PARAMETER,
+          month: '#202302',
+          eventName: `${MOCK_EVENT_NAME}1`,
+          valueType: MetadataValueType.STRING,
+          summary: {
+            ...MOCK_EVENT_PARAMETER.summary,
+            platform: [
+              'Android',
+            ],
+            valueEnum: [
+              {
+                count: 1032,
+                value: 'value-02',
+              },
+            ],
+          },
+        },
+        {
+          ...MOCK_EVENT_PARAMETER,
+          month: '#202301',
+          eventName: `${MOCK_EVENT_NAME}1`,
+          valueType: MetadataValueType.STRING,
+          summary: {
+            ...MOCK_EVENT_PARAMETER.summary,
+            platform: [
+              'Android',
+            ],
+            valueEnum: [
+              {
+                count: 1032,
+                value: 'value-02',
+              },
+            ],
+          },
+        },
+        {
+          ...MOCK_EVENT_PARAMETER,
+          id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}1#${ConditionCategory.EVENT}#${MOCK_EVENT_PARAMETER_NAME}1#${MetadataValueType.FLOAT}`,
+          month: '#202306',
+          name: `${MOCK_EVENT_PARAMETER_NAME}1`,
+          eventName: `${MOCK_EVENT_NAME}1`,
+          valueType: MetadataValueType.FLOAT,
+          summary: {
+            ...MOCK_EVENT_PARAMETER.summary,
+            platform: [
+              'Android',
+              'Web',
+              'iOS',
+            ],
+            valueEnum: [
+              {
+                count: 555,
+                value: 'value-02',
+              },
+            ],
+          },
+        },
+      ],
+    });
+    const res1 = await request(app)
+      .get(`/api/metadata/event_parameters?projectId=${MOCK_PROJECT_ID}&appId=${MOCK_APP_ID}`);
+    expect(res1.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res1.statusCode).toBe(200);
+    const res2 = await request(app)
+      .get(`/api/metadata/event_parameters?projectId=${MOCK_PROJECT_ID}&appId=${MOCK_APP_ID}`);
+    expect(res2.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res2.statusCode).toBe(200);
+    expect(ddbMock).toHaveReceivedCommandTimes(QueryCommand, 2);
+    process.env.METADATA_CACHE = 'true';
+  });
+
+  it('Get metadata event attribute list with cache', async () => {
+    process.env.METADATA_CACHE = 'true';
+    jest
+      .useFakeTimers()
+      .setSystemTime(new Date('2023-02-02'));
+    ddbMock.on(QueryCommand, {
+      TableName: analyticsMetadataTable,
+      IndexName: prefixMonthGSIName,
+      KeyConditionExpression: '#prefix= :prefix',
+      ExpressionAttributeNames: {
+        '#prefix': 'prefix',
+      },
+      ExpressionAttributeValues: {
+        ':prefix': `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
+      },
+      ScanIndexForward: false,
+    }).resolves({
+      Items: [
+        {
+          ...MOCK_EVENT_PARAMETER,
+          month: '#202302',
+        },
+        {
+          ...MOCK_EVENT_PARAMETER,
+          month: '#202301',
+        },
+        {
+          ...MOCK_EVENT_PARAMETER,
+          month: '#202302',
+          eventName: `${MOCK_EVENT_NAME}1`,
+          valueType: MetadataValueType.STRING,
+          summary: {
+            ...MOCK_EVENT_PARAMETER.summary,
+            platform: [
+              'Android',
+            ],
+            valueEnum: [
+              {
+                count: 1032,
+                value: 'value-02',
+              },
+            ],
+          },
+        },
+        {
+          ...MOCK_EVENT_PARAMETER,
+          month: '#202301',
+          eventName: `${MOCK_EVENT_NAME}1`,
+          valueType: MetadataValueType.STRING,
+          summary: {
+            ...MOCK_EVENT_PARAMETER.summary,
+            platform: [
+              'Android',
+            ],
+            valueEnum: [
+              {
+                count: 1032,
+                value: 'value-02',
+              },
+            ],
+          },
+        },
+        {
+          ...MOCK_EVENT_PARAMETER,
+          id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}1#${ConditionCategory.EVENT}#${MOCK_EVENT_PARAMETER_NAME}1#${MetadataValueType.FLOAT}`,
+          month: '#202306',
+          name: `${MOCK_EVENT_PARAMETER_NAME}1`,
+          eventName: `${MOCK_EVENT_NAME}1`,
+          valueType: MetadataValueType.FLOAT,
+          summary: {
+            ...MOCK_EVENT_PARAMETER.summary,
+            platform: [
+              'Android',
+              'Web',
+              'iOS',
+            ],
+            valueEnum: [
+              {
+                count: 555,
+                value: 'value-02',
+              },
+            ],
+          },
+        },
+      ],
+    });
+    const res1 = await request(app)
+      .get(`/api/metadata/event_parameters?projectId=${MOCK_PROJECT_ID}&appId=${MOCK_APP_ID}`);
+    expect(res1.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res1.statusCode).toBe(200);
+    const res2 = await request(app)
+      .get(`/api/metadata/event_parameters?projectId=${MOCK_PROJECT_ID}&appId=${MOCK_APP_ID}`);
+    expect(res2.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res2.statusCode).toBe(200);
+    expect(ddbMock).toHaveReceivedCommandTimes(QueryCommand, 1);
+    process.env.METADATA_CACHE = 'true';
   });
 
   afterAll((done) => {

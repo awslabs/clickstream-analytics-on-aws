@@ -615,16 +615,25 @@ function getCurMonthStr() {
   return `#${year}${month.toString().padStart(2, '0')}`;
 }
 
-function getDataFromLastDay(metadata: IMetadataRaw) {
-  const curMonth = getCurMonthStr();
-  const lastDay = `day${new Date().getDate() - 1}`;
+function getYesterdayMonthStr() {
+  const today = new Date();
+  const yesterday = new Date(today.setDate(today.getDate()-1));
+  const year = yesterday.getFullYear();
+  const month = yesterday.getMonth() + 1;
+  return `#${year}${month.toString().padStart(2, '0')}`;
+}
+
+function getDataFromYesterday(metadataArray: IMetadataRaw[]) {
+  const yesterdayMonth = getYesterdayMonthStr();
+  const yesterday = `day${new Date().getDate() - 1}`;
   let hasData = false;
   let dataVolumeLastDay = 0;
-  if (metadata.month === curMonth) {
-    const lastDayData = (metadata as any)[lastDay];
-    if (lastDayData) {
-      dataVolumeLastDay = lastDayData.count ?? 0;
-      hasData = lastDayData.hasData ?? false;
+  const yesterdayData = metadataArray.filter(m => m.month === yesterdayMonth);
+  if (yesterdayData.length > 0) {
+    const meta = (yesterdayData[0] as any)[yesterday];
+    if (meta) {
+      dataVolumeLastDay = meta.count ?? 0;
+      hasData = meta.hasData ?? false;
     }
   }
   return { hasData, dataVolumeLastDay };
@@ -633,7 +642,7 @@ function getDataFromLastDay(metadata: IMetadataRaw) {
 function getLatestEventByName(metadata: IMetadataRaw[]): IMetadataEvent[] {
   const latestEvents: IMetadataEvent[] = [];
   for (let meta of metadata) {
-    const lastDayData = getDataFromLastDay(meta);
+    const lastDayData = getDataFromYesterday([meta]);
     const event: IMetadataEvent = {
       id: meta.id,
       month: meta.month,
@@ -658,7 +667,7 @@ function getLatestEventByName(metadata: IMetadataRaw[]): IMetadataEvent[] {
 function getLatestParameterById(metadata: IMetadataRaw[]): IMetadataEventParameter[] {
   const latestEventParameters: IMetadataEventParameter[] = [];
   for (let meta of metadata) {
-    const lastDayData = getDataFromLastDay(meta);
+    const lastDayData = getDataFromYesterday([meta]);
     const parameter: IMetadataEventParameter = {
       id: meta.id,
       month: meta.month,
@@ -700,9 +709,10 @@ function groupByParameterByName(parameters: IMetadataEventParameter[], eventName
   return groupParameters;
 };
 
-function getParameterByNameAndType(metadata: IMetadataRaw[], parameterName: string, valueType: MetadataValueType):
+function getParameterByNameAndType(metadata: IMetadataRaw[], parameterName: string, category: ConditionCategory, valueType: MetadataValueType):
 IMetadataEventParameter | undefined {
-  const filteredMetadata = metadata.filter((r: IMetadataRaw) => r.name === parameterName && r.valueType === valueType);
+  const filteredMetadata = metadata.filter(
+    (r: IMetadataRaw) => r.name === parameterName && r.category === category && r.valueType === valueType);
   if (filteredMetadata.length === 0) {
     return;
   }
@@ -719,7 +729,7 @@ IMetadataEventParameter | undefined {
       } as IMetadataEvent);
     }
   }
-  const lastDayData = getDataFromLastDay(filteredMetadata[0]);
+  const lastDayData = getDataFromYesterday(filteredMetadata);
   return {
     id: filteredMetadata[0].id,
     month: filteredMetadata[0].month,
@@ -769,7 +779,7 @@ IMetadataUserAttribute | undefined {
   if (filteredMetadata.length === 0) {
     return;
   }
-  const lastDayData = getDataFromLastDay(filteredMetadata[0]);
+  const lastDayData = getDataFromYesterday(filteredMetadata);
   return {
     id: filteredMetadata[0].id,
     month: filteredMetadata[0].month,
@@ -860,7 +870,7 @@ export {
   getLatestAttributeByName,
   getParameterByNameAndType,
   getAttributeByNameAndType,
-  getDataFromLastDay,
+  getDataFromYesterday,
   pathNodesToAttribute,
   getCurMonthStr,
   getVersionFromTags,

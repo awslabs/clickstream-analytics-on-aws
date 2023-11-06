@@ -670,7 +670,6 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
                 presetParameters={presetParameters}
                 groupOption={groupOption}
                 setGroupOption={setGroupOption}
-                disabled={chartType === QuickSightChartType.FUNNEL}
               />
             </SpaceBetween>
           </ColumnLayout>
