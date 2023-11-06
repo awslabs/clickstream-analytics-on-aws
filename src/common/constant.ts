@@ -334,6 +334,9 @@ export const QUICKSIGHT_DASHBOARD_INFIX= '-dashboard-';
 export const QUICKSIGHT_ANALYSIS_INFIX= '-analysis-';
 export const QUICKSIGHT_DATASET_INFIX= '-dataset-';
 
+
+export const EMR_ARCHITECTURE_AUTO = 'Auto';
+
 export const CLICKSTREAM_RETENTION_VIEW_PLACEHOLDER = 'clickstream_retention_view';
 export const CLICKSTREAM_SESSION_VIEW_PLACEHOLDER = 'clickstream_session_view';
 export const CLICKSTREAM_USER_DIM_VIEW_PLACEHOLDER = 'clickstream_user_dim_view';
