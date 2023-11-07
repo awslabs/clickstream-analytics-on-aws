@@ -34,10 +34,10 @@ import { defaultStr } from 'ts/utils';
 import CreateDashboard from './create/CreateDashboard';
 import DashboardHeader from '../comps/DashboardHeader';
 
+const PAGE_SIZE = 12;
 const AnalyticsDashboardCard: React.FC<any> = () => {
   const { t } = useTranslation();
   const { projectId, appId } = useParams();
-  const [pageSize] = useState(12);
   const [loadingData, setLoadingData] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
@@ -103,7 +103,7 @@ const AnalyticsDashboardCard: React.FC<any> = () => {
           projectId: defaultStr(projectId),
           appId: defaultStr(appId),
           pageNumber: currentPage,
-          pageSize: pageSize,
+          pageSize: PAGE_SIZE,
         });
       if (success) {
         setAnalyticsDashboardList(data.items);
@@ -161,7 +161,7 @@ const AnalyticsDashboardCard: React.FC<any> = () => {
         pagination={
           <Pagination
             currentPageIndex={currentPage}
-            pagesCount={Math.ceil(totalCount / pageSize)}
+            pagesCount={Math.ceil(totalCount / PAGE_SIZE)}
             onChange={(e) => {
               setCurrentPage(e.detail.currentPageIndex);
             }}
