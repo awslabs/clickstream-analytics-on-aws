@@ -11,14 +11,14 @@
  *  and limitations under the License.
  */
 
-import { SecurityGroupRule, VpcEndpoint } from '@aws-sdk/client-ec2';
+import { NatGateway, SecurityGroupRule, VpcEndpoint } from '@aws-sdk/client-ec2';
 import { CronDate, parseExpression } from 'cron-parser';
 import { XSS_PATTERN } from './constants-ln';
 import { REDSHIFT_MODE } from './model-ln';
 import { ClickStreamBadRequestError, ClickStreamSubnet, IngestionServerSinkBatchProps, IngestionServerSizeProps, PipelineSinkType, Policy, SubnetType } from './types';
 import { checkVpcEndpoint, containRule, getALBLogServiceAccount, getServerlessRedshiftRPU, getSubnetsAZ, isEmpty } from './utils';
 import { CPipelineResources, IPipeline } from '../model/pipeline';
-import { describeSecurityGroupsWithRules, describeSubnetsWithType, describeVpcEndpoints, listAvailabilityZones } from '../store/aws/ec2';
+import { describeNatGateways, describeSecurityGroupsWithRules, describeSubnetsWithType, describeVpcEndpoints, listAvailabilityZones } from '../store/aws/ec2';
 import { simulateCustomPolicy } from '../store/aws/iam';
 import { describeAccountSubscription } from '../store/aws/quicksight';
 import { getS3BucketPolicy } from '../store/aws/s3';
@@ -417,6 +417,7 @@ async function _checkVpcEndpointsForIsolatedSubnets(pipeline: IPipeline, vpcId: 
   }
 }
 
+
 function _validateEndpointsForModules(pipeline: IPipeline, allSubnets: ClickStreamSubnet[], isolatedSubnetsAZ: string[],
   privateSubnet: ClickStreamSubnet, vpcEndpoints: VpcEndpoint[], vpcEndpointSecurityGroupRules: SecurityGroupRule[]) {
   if (pipeline.ingestionServer) {
@@ -510,9 +511,36 @@ async function _checkSubnets(pipeline: IPipeline) {
       'For example, you can not select public subnets in AZ (a, b), while select private subnets in AZ (b, c).',
     );
   }
+  const natGateways = await describeNatGateways(pipeline.region, network.vpcId);
+  if (!_checkNatGatewayInPublicSubnet(natGateways, privateSubnets)) {
+    throw new ClickStreamBadRequestError(
+      'Validate error: the NAT gateway must create in public subnet.',
+    );
+  }
 
   return {
     allSubnets,
     privateSubnets,
   };
+}
+
+function _checkNatGatewayInPublicSubnet(natGateways: NatGateway[], privateSubnets: ClickStreamSubnet[]) {
+  const allSubnetNatGatewayIds: string[] = [];
+  for (let privateSubnet of privateSubnets) {
+    if (privateSubnet.routeTable) {
+      for (let route of privateSubnet.routeTable.Routes!) {
+        if (route.NatGatewayId) {
+          allSubnetNatGatewayIds.push(route.NatGatewayId);
+        }
+      }
+    }
+  }
+  const privateSubnetNatGateways = natGateways.filter(natGateway => allSubnetNatGatewayIds.includes(natGateway.NatGatewayId!));
+  for (let natGateway of privateSubnetNatGateways) {
+    const natInPrivateSubnet = privateSubnets.filter(subnet => subnet.id === natGateway.SubnetId);
+    if (natInPrivateSubnet.length > 0) {
+      return false;
+    }
+  }
+  return true;
 }
