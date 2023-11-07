@@ -51,8 +51,7 @@ const Ingestion: React.FC<TabContentProps> = (props: TabContentProps) => {
         <div>
           S3 (
           <Link href={linkProps['S3'](pipelineInfo)} external>
-            S3://{pipelineInfo.bucket.name}/
-            {pipelineInfo.bucket.prefix}
+            S3://{pipelineInfo.bucket.name}/{pipelineInfo.bucket.prefix}
           </Link>
           )
         </div>
