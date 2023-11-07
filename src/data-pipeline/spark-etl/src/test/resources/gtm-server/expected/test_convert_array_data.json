@@ -1,0 +1,241 @@
+{
+  "appId" : "casetify_clickstream_analytics_aws",
+  "compression" : null,
+  "date" : "2023-09-21T01:54:16+00:00",
+  "fakeIp" : null,
+  "ingest_time" : 1695261266814,
+  "ip" : "34.236.7.28",
+  "method" : "POST",
+  "path" : "/collect",
+  "platform" : null,
+  "rid" : "4a31fde2533e11dd2b0e7800720f6f86",
+  "server_ingest_time" : 1695261256000,
+  "source_type" : "http_server",
+  "timestamp" : "2023-09-21T01:54:16.554048761Z",
+  "ua" : null,
+  "uri" : "/collect?appId=casetify_clickstream_analytics_aws",
+  "dataOut" : {
+    "gtmId" : "G-CCM0Y0Y1RC",
+    "gtmVersion" : "45je39i0",
+    "event_id" : "448657059.1695257753-1695260713-2-0",
+    "user_id" : null,
+    "event_name" : "PDP Clicks",
+    "ip" : "70.123.241.83",
+    "clientId" : "iKnHPfmF/8zea3TUOsTqbFpmAmhkTiNVL6Awhe5b43k=.1695257753",
+    "ua" : "Mozilla/5.0 (iPhone; CPU iPhone OS 16_6_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1",
+    "language" : "en-us",
+    "screenWidth" : 428,
+    "screenHeight" : 926,
+    "pageReferrer" : "https://www.casetify.com/product/screen-protector",
+    "isClientMobile" : null,
+    "clientModel" : null,
+    "clientPlatform" : null,
+    "clientPlatformVersion" : null,
+    "eventParams" : [ {
+      "key" : "x-ga-tfd",
+      "value" : {
+        "double_value" : null,
+        "float_value" : null,
+        "int_value" : 32152,
+        "string_value" : null
+      }
+    }, {
+      "key" : "page_title",
+      "value" : {
+        "double_value" : null,
+        "float_value" : null,
+        "int_value" : null,
+        "string_value" : "Black Kingsnake – CASETiFY"
+      }
+    }, {
+      "key" : "Url",
+      "value" : {
+        "double_value" : null,
+        "float_value" : null,
+        "int_value" : null,
+        "string_value" : ""
+      }
+    }, {
+      "key" : "engagement_time_msec",
+      "value" : {
+        "double_value" : null,
+        "float_value" : null,
+        "int_value" : 1,
+        "string_value" : null
+      }
+    }, {
+      "key" : "x-ga-ur",
+      "value" : {
+        "double_value" : null,
+        "float_value" : null,
+        "int_value" : null,
+        "string_value" : "US-TX"
+      }
+    }, {
+      "key" : "x-sst-system_properties.tft",
+      "value" : {
+        "double_value" : null,
+        "float_value" : null,
+        "int_value" : null,
+        "string_value" : "1695261225665"
+      }
+    }, {
+      "key" : "ga_session_id",
+      "value" : {
+        "double_value" : null,
+        "float_value" : null,
+        "int_value" : null,
+        "string_value" : "1695260713"
+      }
+    }, {
+      "key" : "id",
+      "value" : {
+        "double_value" : null,
+        "float_value" : null,
+        "int_value" : null,
+        "string_value" : ""
+      }
+    }, {
+      "key" : "class",
+      "value" : {
+        "double_value" : null,
+        "float_value" : null,
+        "int_value" : null,
+        "string_value" : ""
+      }
+    }, {
+      "key" : "x-sst-system_properties.gse",
+      "value" : {
+        "double_value" : null,
+        "float_value" : null,
+        "int_value" : null,
+        "string_value" : "1"
+      }
+    }, {
+      "key" : "x-ga-measurement_id",
+      "value" : {
+        "double_value" : null,
+        "float_value" : null,
+        "int_value" : null,
+        "string_value" : "G-CCM0Y0Y1RC"
+      }
+    }, {
+      "key" : "x-ga-request_count",
+      "value" : {
+        "double_value" : null,
+        "float_value" : null,
+        "int_value" : 5,
+        "string_value" : null
+      }
+    }, {
+      "key" : "Text",
+      "value" : {
+        "double_value" : null,
+        "float_value" : null,
+        "int_value" : null,
+        "string_value" : ""
+      }
+    }, {
+      "key" : "ga_session_number",
+      "value" : {
+        "double_value" : null,
+        "float_value" : null,
+        "int_value" : 2,
+        "string_value" : null
+      }
+    }, {
+      "key" : "screen_resolution",
+      "value" : {
+        "double_value" : null,
+        "float_value" : null,
+        "int_value" : null,
+        "string_value" : "428x926"
+      }
+    }, {
+      "key" : "x-ga-page_id",
+      "value" : {
+        "double_value" : null,
+        "float_value" : null,
+        "int_value" : 43700136,
+        "string_value" : null
+      }
+    }, {
+      "key" : "page_location",
+      "value" : {
+        "double_value" : null,
+        "float_value" : null,
+        "int_value" : null,
+        "string_value" : "https://www.casetify.com/product/black-kingsnake/iphone-15-pro-max/recasetify-impact-case?artwork_name=black-kingsnake&device=iphone-15-pro-max&product=ultra-bounce-case-magsafe-compatible"
+      }
+    }, {
+      "key" : "x-ga-protocol_version",
+      "value" : {
+        "double_value" : null,
+        "float_value" : null,
+        "int_value" : null,
+        "string_value" : "2"
+      }
+    }, {
+      "key" : "x-ga-gtm_version",
+      "value" : {
+        "double_value" : null,
+        "float_value" : null,
+        "int_value" : null,
+        "string_value" : "45je39i0"
+      }
+    }, {
+      "key" : "x-sst-system_properties.request_start_time_ms",
+      "value" : {
+        "double_value" : null,
+        "float_value" : null,
+        "int_value" : 1695261256542,
+        "string_value" : null
+      }
+    }, {
+      "key" : "x-ga-mp2-seg",
+      "value" : {
+        "double_value" : null,
+        "float_value" : null,
+        "int_value" : null,
+        "string_value" : "1"
+      }
+    }, {
+      "key" : "page_referrer",
+      "value" : {
+        "double_value" : null,
+        "float_value" : null,
+        "int_value" : null,
+        "string_value" : "https://www.casetify.com/product/screen-protector"
+      }
+    }, {
+      "key" : "x-ga-js_client_id",
+      "value" : {
+        "double_value" : null,
+        "float_value" : null,
+        "int_value" : null,
+        "string_value" : "448657059.1695257753"
+      }
+    }, {
+      "key" : "dataset",
+      "value" : {
+        "double_value" : null,
+        "float_value" : null,
+        "int_value" : null,
+        "string_value" : "{}"
+      }
+    }, {
+      "key" : "x-sst-system_properties.uc",
+      "value" : {
+        "double_value" : null,
+        "float_value" : null,
+        "int_value" : null,
+        "string_value" : "US"
+      }
+    } ],
+    "items" : [ ],
+    "eventItems" : [ ],
+    "user" : null,
+    "requestStartTimeMs" : 1695261256542,
+    "uc" : "US"
+  }
+}

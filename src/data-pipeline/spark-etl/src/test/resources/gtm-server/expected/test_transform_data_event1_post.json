@@ -1,0 +1,61 @@
+{
+  "event_id" : "4a31fde2533e11dd2b0e7800720f6f86-448657059.1695257753-1695260713-2-0",
+  "event_date" : "2023-09-21",
+  "event_timestamp" : 1695261256542,
+  "event_previous_timestamp" : null,
+  "event_name" : "PDP Clicks",
+  "event_value_in_usd" : null,
+  "event_bundle_sequence_id" : null,
+  "ingest_timestamp" : 1695261266814,
+  "device" : {
+    "mobile_brand_name" : null,
+    "mobile_model_name" : null,
+    "manufacturer" : null,
+    "screen_width" : 428,
+    "screen_height" : 926,
+    "carrier" : null,
+    "network_type" : null,
+    "operating_system_version" : null,
+    "operating_system" : null,
+    "ua_browser" : null,
+    "ua_browser_version" : null,
+    "ua_os" : null,
+    "ua_os_version" : null,
+    "ua_device" : null,
+    "ua_device_category" : null,
+    "system_language" : "en-us",
+    "time_zone_offset_seconds" : null,
+    "vendor_id" : "iKnHPfmF/8zea3TUOsTqbFpmAmhkTiNVL6Awhe5b43k=.1695257753",
+    "advertising_id" : null,
+    "host_name" : null,
+    "viewport_width" : null,
+    "viewport_height" : null
+  },
+  "geo" : {
+    "country" : null,
+    "continent" : null,
+    "sub_continent" : null,
+    "locale" : null,
+    "region" : null,
+    "metro" : null,
+    "city" : null
+  },
+  "traffic_source" : {
+    "medium" : null,
+    "name" : null,
+    "source" : null
+  },
+  "app_info" : {
+    "app_id" : "testAllAppId1",
+    "id" : "G-CCM0Y0Y1RC",
+    "install_source" : null,
+    "version" : "45je39i0",
+    "sdk_version" : null,
+    "sdk_name" : "GTM"
+  },
+  "platform" : null,
+  "project_id" : "test_project_id_gtm_server",
+  "items" : [ ],
+  "user_pseudo_id" : "iKnHPfmF/8zea3TUOsTqbFpmAmhkTiNVL6Awhe5b43k=.1695257753",
+  "user_id" : null
+}

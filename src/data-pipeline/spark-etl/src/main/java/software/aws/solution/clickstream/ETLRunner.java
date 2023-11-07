@@ -54,7 +54,7 @@ import static org.apache.spark.sql.functions.date_format;
 import static software.aws.solution.clickstream.ContextUtil.JOB_NAME_PROP;
 import static software.aws.solution.clickstream.ContextUtil.WAREHOUSE_DIR_PROP;
 import static software.aws.solution.clickstream.ContextUtil.OUTPUT_COALESCE_PARTITIONS_PROP;
-import static software.aws.solution.clickstream.Transformer.JOB_NAME_COL;
+import static software.aws.solution.clickstream.DatasetUtil.JOB_NAME_COL;
 
 @Slf4j
 public class ETLRunner {
@@ -70,9 +70,12 @@ public class ETLRunner {
         USER("user"),
         EVENT("event"),
         EVEN_PARAMETER("event_parameter");
-        final String name;
+        private final String name;
         TableName(final String name) {
             this.name = name;
+        }
+        public String getTableName() {
+            return this.name;
         }
     }
     public static final String DEBUG_LOCAL_PATH = System.getProperty("debug.local.path", "/tmp/etl-debug");

@@ -20,7 +20,7 @@ public class ETLMetric {
     private final Long count;
     private final String info;
 
-    ETLMetric(final Dataset<Row> dataset, final String info) {
+    public ETLMetric(final Dataset<Row> dataset, final String info) {
         this.info = info;
         this.count  = dataset.count();
     }

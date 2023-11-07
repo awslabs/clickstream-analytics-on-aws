@@ -91,5 +91,13 @@
       "int_value" : null,
       "string_value" : "Location#003"
     }
+  }, {
+    "key" : "quantity",
+    "value" : {
+      "double_value" : null,
+      "float_value" : null,
+      "int_value" : 19,
+      "string_value" : null
+    }
   } ]
 }

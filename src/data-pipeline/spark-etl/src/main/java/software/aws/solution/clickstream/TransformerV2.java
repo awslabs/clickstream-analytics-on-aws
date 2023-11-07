@@ -17,110 +17,103 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.spark.sql.Column;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
-import org.apache.spark.sql.SaveMode;
-import org.apache.spark.sql.catalyst.expressions.GenericRow;
-import org.apache.spark.sql.types.DataTypes;
-import org.apache.spark.sql.types.DataType;
-import org.apache.spark.sql.types.StructType;
-import org.apache.spark.sql.types.ArrayType;
-import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.SparkSession;
+import org.apache.spark.sql.types.ArrayType;
+import org.apache.spark.sql.types.DataType;
+import org.apache.spark.sql.types.DataTypes;
 
-import org.apache.spark.sql.functions;
-
-import java.nio.file.Paths;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.util.Map;
-import java.util.HashMap;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.Optional;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
-import static org.apache.spark.sql.functions.col;
-import static org.apache.spark.sql.functions.coalesce;
-import static org.apache.spark.sql.functions.struct;
-import static org.apache.spark.sql.functions.lit;
-import static org.apache.spark.sql.functions.expr;
-import static org.apache.spark.sql.functions.get_json_object;
-import static org.apache.spark.sql.functions.to_date;
-import static org.apache.spark.sql.functions.timestamp_seconds;
 import static org.apache.spark.sql.functions.array;
-import static org.apache.spark.sql.functions.regexp_extract;
-import static org.apache.spark.sql.functions.min_by;
-import static org.apache.spark.sql.functions.explode;
-import static org.apache.spark.sql.functions.from_json;
-import static org.apache.spark.sql.functions.array_sort;
 import static org.apache.spark.sql.functions.array_distinct;
+import static org.apache.spark.sql.functions.array_sort;
+import static org.apache.spark.sql.functions.coalesce;
+import static org.apache.spark.sql.functions.col;
+import static org.apache.spark.sql.functions.explode;
+import static org.apache.spark.sql.functions.expr;
 import static org.apache.spark.sql.functions.flatten;
-import static org.apache.spark.sql.functions.max_by;
-
+import static org.apache.spark.sql.functions.from_json;
+import static org.apache.spark.sql.functions.get_json_object;
+import static org.apache.spark.sql.functions.lit;
+import static org.apache.spark.sql.functions.min_by;
+import static org.apache.spark.sql.functions.regexp_extract;
+import static org.apache.spark.sql.functions.struct;
+import static org.apache.spark.sql.functions.timestamp_seconds;
+import static org.apache.spark.sql.functions.to_date;
 import static software.aws.solution.clickstream.ContextUtil.PROJECT_ID_PROP;
-import static software.aws.solution.clickstream.Transformer.GEO_FOR_ENRICH;
-import static software.aws.solution.clickstream.Transformer.TIMESTAMP;
-import static software.aws.solution.clickstream.Transformer.PLATFORM;
-import static software.aws.solution.clickstream.Transformer.ATTRIBUTES;
-import static software.aws.solution.clickstream.Transformer.LOCALE;
-import static software.aws.solution.clickstream.Transformer.UA_BROWSER;
-import static software.aws.solution.clickstream.Transformer.UA_BROWSER_VERSION;
-import static software.aws.solution.clickstream.Transformer.UA_OS;
-import static software.aws.solution.clickstream.Transformer.UA_OS_VERSION;
-import static software.aws.solution.clickstream.Transformer.UA_DEVICE;
-import static software.aws.solution.clickstream.Transformer.UA_DEVICE_CATEGORY;
-import static software.aws.solution.clickstream.Transformer.JOB_NAME_COL;
+import static software.aws.solution.clickstream.DatasetUtil.APP_ID;
+import static software.aws.solution.clickstream.DatasetUtil.APP_INFO;
+import static software.aws.solution.clickstream.DatasetUtil.ATTRIBUTES;
+import static software.aws.solution.clickstream.DatasetUtil.CHANNEL;
+import static software.aws.solution.clickstream.DatasetUtil.COL_PAGE_REFERER;
+import static software.aws.solution.clickstream.DatasetUtil.DATA;
+import static software.aws.solution.clickstream.DatasetUtil.DATA_SCHEMA_V2_FILE_PATH;
+import static software.aws.solution.clickstream.DatasetUtil.DEVICE_ID;
+import static software.aws.solution.clickstream.DatasetUtil.DEVICE_ID_LIST;
+import static software.aws.solution.clickstream.DatasetUtil.EVENT_DATE;
+import static software.aws.solution.clickstream.DatasetUtil.EVENT_FIRST_OPEN;
+import static software.aws.solution.clickstream.DatasetUtil.EVENT_FIRST_VISIT;
+import static software.aws.solution.clickstream.DatasetUtil.EVENT_ID;
+import static software.aws.solution.clickstream.DatasetUtil.EVENT_NAME;
+import static software.aws.solution.clickstream.DatasetUtil.EVENT_PREVIOUS_TIMESTAMP;
+import static software.aws.solution.clickstream.DatasetUtil.EVENT_PROFILE_SET;
+import static software.aws.solution.clickstream.DatasetUtil.EVENT_TIMESTAMP;
+import static software.aws.solution.clickstream.DatasetUtil.EVENT_VALUE_IN_USD;
+import static software.aws.solution.clickstream.DatasetUtil.FIRST_REFERER;
+import static software.aws.solution.clickstream.DatasetUtil.FIRST_VISIT_DATE;
+import static software.aws.solution.clickstream.DatasetUtil.GEO_FOR_ENRICH;
+import static software.aws.solution.clickstream.DatasetUtil.ID;
+import static software.aws.solution.clickstream.DatasetUtil.ITEMS;
+import static software.aws.solution.clickstream.DatasetUtil.LOCALE;
+import static software.aws.solution.clickstream.DatasetUtil.NEW_USER_COUNT;
+import static software.aws.solution.clickstream.DatasetUtil.PLATFORM;
+import static software.aws.solution.clickstream.DatasetUtil.PROPERTIES;
+import static software.aws.solution.clickstream.DatasetUtil.PROP_PAGE_REFERRER;
+import static software.aws.solution.clickstream.DatasetUtil.REFERER;
+import static software.aws.solution.clickstream.DatasetUtil.REFERRER;
+import static software.aws.solution.clickstream.DatasetUtil.TABLE_ETL_USER_CHANNEL;
+import static software.aws.solution.clickstream.DatasetUtil.TABLE_ETL_USER_DEVICE_ID;
+import static software.aws.solution.clickstream.DatasetUtil.TABLE_ETL_USER_PAGE_REFERER;
+import static software.aws.solution.clickstream.DatasetUtil.TABLE_ETL_USER_TRAFFIC_SOURCE;
+import static software.aws.solution.clickstream.DatasetUtil.TIMESTAMP;
+import static software.aws.solution.clickstream.DatasetUtil.TRAFFIC_SOURCE_MEDIUM;
+import static software.aws.solution.clickstream.DatasetUtil.TRAFFIC_SOURCE_NAME;
+import static software.aws.solution.clickstream.DatasetUtil.TRAFFIC_SOURCE_SOURCE;
+import static software.aws.solution.clickstream.DatasetUtil.UA_BROWSER;
+import static software.aws.solution.clickstream.DatasetUtil.UA_BROWSER_VERSION;
+import static software.aws.solution.clickstream.DatasetUtil.UA_DEVICE;
+import static software.aws.solution.clickstream.DatasetUtil.UA_DEVICE_CATEGORY;
+import static software.aws.solution.clickstream.DatasetUtil.UA_OS;
+import static software.aws.solution.clickstream.DatasetUtil.UA_OS_VERSION;
+import static software.aws.solution.clickstream.DatasetUtil.USER_FIRST_TOUCH_TIMESTAMP;
+import static software.aws.solution.clickstream.DatasetUtil.USER_ID;
+import static software.aws.solution.clickstream.DatasetUtil.USER_LTV;
+import static software.aws.solution.clickstream.DatasetUtil.USER_PROPERTIES;
+import static software.aws.solution.clickstream.DatasetUtil.USER_PSEUDO_ID;
+import static software.aws.solution.clickstream.DatasetUtil.addSchemaToMap;
+import static software.aws.solution.clickstream.DatasetUtil.getAggItemDataset;
+import static software.aws.solution.clickstream.DatasetUtil.loadFullItemDataset;
+import static software.aws.solution.clickstream.DatasetUtil.loadFullUserDataset;
+import static software.aws.solution.clickstream.DatasetUtil.loadFullUserRefererDataset;
+import static software.aws.solution.clickstream.DatasetUtil.readDatasetFromPath;
+import static software.aws.solution.clickstream.DatasetUtil.saveFullDatasetToPath;
+import static software.aws.solution.clickstream.DatasetUtil.saveIncrementalDatasetToPath;
 
 
 @Slf4j
 public final class TransformerV2 {
-    public static final String TABLE_ETL_USER_TRAFFIC_SOURCE = "etl_user_traffic_source";
-    public static final String TABLE_ETL_USER_DEVICE_ID = "etl_user_device_id";
-    public static final String TABLE_ETL_USER_PAGE_REFERER = "etl_user_page_referer";
-    public static final String TABLE_ETL_USER_CHANNEL = "etl_user_channel";
-    public static final String UPDATE_DATE = "update_date";
-    public static final String INCREMENTAL_SUFFIX = "_incremental_v1";
-    public static final String FULL_SUFFIX = "_full_v1";
-    public static final String DATA_SCHEMA_V2_FILE_PATH = System.getProperty("data.schema.file.path.v2", "/data_schema_v2.json");
-    public static final String PROPERTIES = "properties";
-    public static final String YYYYMMDD = "yyyyMMdd";
-    public static final String TRAFFIC_SOURCE_MEDIUM = "_traffic_source_medium";
-    public static final String TRAFFIC_SOURCE_NAME = "_traffic_source_name";
-    public static final String TRAFFIC_SOURCE_SOURCE = "_traffic_source_source";
-    public static final String EVENT_TIMESTAMP = "event_timestamp";
-    public static final String NEW_USER_COUNT = "newUserCount";
-    public static final String EVENT_NAME = "event_name";
-    public static final String EVENT_DATE = "event_date";
-    public static final String USER_FIRST_TOUCH_TIMESTAMP = "user_first_touch_timestamp";
-    public static final String COMPRESSION = "compression";
-    public static final String USER_PSEUDO_ID = "user_pseudo_id";
-    public static final String EVENT_ID = "event_id";
-    public static final String EVENT_PREVIOUS_TIMESTAMP = "event_previous_timestamp";
-    public static final String ITEMS = "items";
-    public static final String FIRST_VISIT_DATE = "_first_visit_date";
-    public static final String CHANNEL = "_channel";
-    public static final String USER_ID = "user_id";
-    public static final String DEVICE_ID = "device_id";
-    public static final String SNAPPY = "snappy";
-    public static final String EVENT_VALUE_IN_USD = "event_value_in_usd";
-    public static final String DEVICE_ID_LIST = "device_id_list";
-    public static final String APP_ID = "app_id";
-    public static final String REFERRER = "_referrer";
-    public static final String PROP_PAGE_REFERRER = "_page" + REFERRER;
-    public static final String REFERER = "_referer";
-    public static final String COL_PAGE_REFERER = "_page" + REFERER;
-    public static final String EVENT_PROFILE_SET = "_profile_set";
-    public static final String EVENT_FIRST_OPEN = "_first_open";
-    public static final String EVENT_FIRST_VISIT = "_first_visit";
-    public static final String APP_INFO = "app_info";
+    private static final String TABLE_VERSION_SUFFIX = "_v1";
+
     private final Cleaner cleaner = new Cleaner();
     private final EventParamsConverter eventParamsConverter = new EventParamsConverter();
     private final UserPropertiesConverter userPropertiesConverter = new UserPropertiesConverter();
     private final KvConverter kvConverter = new KvConverter();
-    private static Map<String, StructType> schemaMap = new HashMap<>();
 
     private static Dataset<Row> getUserTrafficSourceDataset(final Dataset<Row> userDataset, final long newUserCount) {
         Column dataCol = col("data");
@@ -143,21 +136,20 @@ public final class TransformerV2 {
         long newTrafficSourceCount = newUserTrafficSourceDataset.count();
         log.info(NEW_USER_COUNT + "=" + newUserCount + ", newTrafficSourceCount=" + newTrafficSourceCount);
 
-        setSchemaMap(newUserTrafficSourceDataset, tableName);
+        DatasetUtil.PathInfo pathInfo = addSchemaToMap(newUserTrafficSourceDataset, tableName, TABLE_VERSION_SUFFIX);
 
         if (newTrafficSourceCount > 0) {
             Dataset<Row> newAggUserTrafficSourceDataset = getAggTrafficSourceDataset(newUserTrafficSourceDataset);
             log.info("newAggUserTrafficSourceDataset count:" + newAggUserTrafficSourceDataset.count());
-            String path = saveIncrementalDatasetWithTableName(tableName, newAggUserTrafficSourceDataset);
+            String path = saveIncrementalDatasetToPath(pathInfo.getIncremental(), newAggUserTrafficSourceDataset);
             Dataset<Row> allTrafficSourceDataset = readDatasetFromPath(spark, path, ContextUtil.getUserKeepDays());
             log.info("allTrafficSourceDataset count:" + allTrafficSourceDataset.count());
             Dataset<Row> aggTrafficSourceDataset = getAggTrafficSourceDataset(allTrafficSourceDataset);
             log.info("aggTrafficSourceDataset count:" + aggTrafficSourceDataset.count());
-            saveFullDataset(tableName, aggTrafficSourceDataset);
+            saveFullDatasetToPath(pathInfo.getFull(), aggTrafficSourceDataset);
             return aggTrafficSourceDataset;
         } else if (newUserCount > 0 && newTrafficSourceCount == 0) {
-            String pathFull = getPathForTable(tableName + FULL_SUFFIX);
-            return readDatasetFromPath(spark, pathFull, ContextUtil.getUserKeepDays());
+            return readDatasetFromPath(spark, pathInfo.getFull(), ContextUtil.getUserKeepDays());
         } else {
             return null;
         }
@@ -195,35 +187,17 @@ public final class TransformerV2 {
         long newRefererCount = newUserRefererDataset.count();
         log.info(NEW_USER_COUNT + "=" + newUserCount + ", newRefererCount=" + newRefererCount);
 
-        setSchemaMap(newUserRefererDataset, tableName);
+        DatasetUtil.PathInfo pathInfo = addSchemaToMap(newUserRefererDataset, tableName, TABLE_VERSION_SUFFIX);
 
         if (newRefererCount > 0) {
-            Dataset<Row> newAggUserRefererDataset = getAggUserRefererDataset(newUserRefererDataset);
-            log.info("newAggUserRefererDataset count:" + newAggUserRefererDataset.count());
-            String path = saveIncrementalDatasetWithTableName(tableName, newAggUserRefererDataset);
-            Dataset<Row> allUserRefererDataset = readDatasetFromPath(spark, path, ContextUtil.getUserKeepDays());
-            log.info("allUserRefererDataset count:" + allUserRefererDataset.count());
-            Dataset<Row> aggUserRefererDataset = getAggUserRefererDataset(allUserRefererDataset);
-            log.info("aggTrafficSourceDataset count:" + aggUserRefererDataset.count());
-            saveFullDataset(tableName, aggUserRefererDataset);
-            return aggUserRefererDataset;
+            return loadFullUserRefererDataset(newUserRefererDataset, pathInfo);
         } else if (newUserCount > 0 && newRefererCount == 0) {
-            String pathFull = getPathForTable(tableName + FULL_SUFFIX);
-            return readDatasetFromPath(spark, pathFull, ContextUtil.getUserKeepDays());
+            return readDatasetFromPath(spark, pathInfo.getFull(), ContextUtil.getUserKeepDays());
         } else {
             return null;
         }
     }
 
-    private static Dataset<Row> getAggUserRefererDataset(final Dataset<Row> allUserRefererDataset) {
-        return allUserRefererDataset.groupBy(APP_ID, USER_PSEUDO_ID)
-                .agg(min_by(struct(
-                                col(COL_PAGE_REFERER),
-                                col(EVENT_TIMESTAMP)),
-                        col(EVENT_TIMESTAMP)).alias("page_referer"))
-                .select(col(APP_ID), col(USER_PSEUDO_ID), expr("page_referer.*"))
-                .distinct();
-    }
 
     private static Dataset<Row> getUserDeviceIdDataset(final Dataset<Row> userDataset, final long newUserCount) {
         Column dataCol = col("data");
@@ -238,22 +212,21 @@ public final class TransformerV2 {
 
         long newDeviceIdCount = newUserDeviceIdDataset.count();
         log.info(NEW_USER_COUNT + "=" + newUserCount + ", newDeviceIdCount=" + newDeviceIdCount);
-        setSchemaMap(newUserDeviceIdDataset, tableName);
+        DatasetUtil.PathInfo pathInfo = addSchemaToMap(newUserDeviceIdDataset, tableName, TABLE_VERSION_SUFFIX);
 
         if (newDeviceIdCount > 0) {
             Dataset<Row> newAggUserDeviceIdDataset = getAggUserDeviceIdDataset(newUserDeviceIdDataset);
             log.info("newAggUserDeviceIdDataset count:" + newAggUserDeviceIdDataset.count());
-            String path = saveIncrementalDatasetWithTableName(tableName, newAggUserDeviceIdDataset);
+            String path = saveIncrementalDatasetToPath(pathInfo.getIncremental(), newAggUserDeviceIdDataset);
             Dataset<Row> allUserDeviceIdDataset = readDatasetFromPath(spark, path,
                     ContextUtil.getUserKeepDays());
             log.info("allUserDeviceIdDataset count:" + allUserDeviceIdDataset.count());
             Dataset<Row> aggUserDeviceIdDataset = getAggUserDeviceIdDataset(allUserDeviceIdDataset);
             log.info("aggUserDeviceIdDataset count:" + allUserDeviceIdDataset.count());
-            saveFullDataset(tableName, aggUserDeviceIdDataset);
+            saveFullDatasetToPath(pathInfo.getFull(), aggUserDeviceIdDataset);
             return aggUserDeviceIdDataset;
         } else if (newUserCount > 0 && newDeviceIdCount == 0) {
-            String pathFull = getPathForTable(tableName + FULL_SUFFIX);
-            return readDatasetFromPath(spark, pathFull, ContextUtil.getUserKeepDays());
+            return readDatasetFromPath(spark, pathInfo.getFull(), ContextUtil.getUserKeepDays());
         } else {
             return null;
         }
@@ -300,52 +273,23 @@ public final class TransformerV2 {
         long newChannelDatasetCount = newUserChannelDataset.count();
         log.info(NEW_USER_COUNT + "=" + newUserCount + ", newChannelCount=" + newChannelDatasetCount);
 
-        setSchemaMap(newUserChannelDataset, tableName);
+        DatasetUtil.PathInfo pathInfo = addSchemaToMap(newUserChannelDataset, tableName, TABLE_VERSION_SUFFIX);
 
         if (newChannelDatasetCount > 0) {
             Dataset<Row> newAggUserChannelDataset = getAggUserChannelDataset(newUserChannelDataset);
             log.info("newAggUserChannelDataset count:" + newAggUserChannelDataset.count());
-            String path = saveIncrementalDatasetWithTableName(tableName, newAggUserChannelDataset);
+            String path = saveIncrementalDatasetToPath(pathInfo.getIncremental(), newAggUserChannelDataset);
             Dataset<Row> allUserChannelDataset = readDatasetFromPath(spark, path, ContextUtil.getUserKeepDays());
             log.info("allUserChannelDataset count:" + allUserChannelDataset.count());
             Dataset<Row> aggUserChannelDataset = getAggUserChannelDataset(allUserChannelDataset);
             log.info("aggUserChannelDataset count:" + aggUserChannelDataset.count());
-            saveFullDataset(tableName, aggUserChannelDataset);
+            saveFullDatasetToPath(pathInfo.getFull(), aggUserChannelDataset);
             return aggUserChannelDataset;
         } else if (newUserCount > 0 && newChannelDatasetCount == 0) {
-            String pathFull = getPathForTable(tableName + FULL_SUFFIX);
-            return readDatasetFromPath(spark, pathFull, ContextUtil.getUserKeepDays());
+            return readDatasetFromPath(spark, pathInfo.getFull(), ContextUtil.getUserKeepDays());
         } else {
             return null;
         }
-    }
-
-
-
-    private static void saveFullDataset(final String tbName, final Dataset<Row> dataset) {
-        String path = getPathForTable(tbName + FULL_SUFFIX);
-        overWriteDataset(path, dataset);
-    }
-
-    private static void overWriteDataset(final String path, final Dataset<Row> dataset) {
-        Date now = new Date();
-        DateFormat dateFormatYMD = new SimpleDateFormat(YYYYMMDD);
-        String yyyyMMdd = dateFormatYMD.format(now);
-        Dataset<Row> dataset1 = dataset.withColumn(UPDATE_DATE, lit(yyyyMMdd).cast(DataTypes.StringType));
-
-        int numPartitions = dataset1.rdd().getNumPartitions();
-        numPartitions = Math.max(Math.min(numPartitions, 10), 1);
-
-        dataset1.coalesce(numPartitions).write()
-                .partitionBy(UPDATE_DATE, APP_ID)
-                .option(COMPRESSION, SNAPPY)
-                .mode(SaveMode.Overwrite)
-                .parquet(path);
-    }
-
-    private static String getPathForTable(final String tableName) {
-        return Paths.get(ContextUtil.getWarehouseDir(), tableName).toString()
-                .replace("s3:/", "s3://");
     }
 
     private static Dataset<Row> explodeKeyValue(final Dataset<Row> dataset2, final String arrColName, final String toColNamePrefix) {
@@ -358,71 +302,31 @@ public final class TransformerV2 {
         return d1.drop(arrColName);
     }
 
-    private static String saveIncrementalDataset(final ETLRunner.TableName tableName, final Dataset<Row> newItemsDataset) {
-        String path = getPathForTable(tableName.name + INCREMENTAL_SUFFIX);
-        saveIncrementalDataset(path, newItemsDataset);
-        return path;
-    }
+    private static void mergeIncrementalTables(final SparkSession sparkSession) {
+        log.info("start merging incremental tables");
+        int userKeepDays = ContextUtil.getUserKeepDays();
+        int itemKeepDays = ContextUtil.getItemKeepDays();
 
-    private static String saveIncrementalDatasetWithTableName(final String tableName, final Dataset<Row> newItemsDataset) {
-        String path = getPathForTable(tableName + INCREMENTAL_SUFFIX);
-        saveIncrementalDataset(path, newItemsDataset);
-        return path;
-    }
-
-    private static String saveIncrementalDataset(final String path, final Dataset<Row> newItemsDataset) {
-        log.info("saveIncrementalDataset path=" + path + ", count:" + newItemsDataset.count());
-        Date now = new Date();
-        DateFormat dateFormatYMD = new SimpleDateFormat(YYYYMMDD);
-        String yyyyMMdd = dateFormatYMD.format(now);
-        Dataset<Row> newItemsDatasetSave = newItemsDataset.withColumn(UPDATE_DATE, lit(yyyyMMdd).cast(DataTypes.StringType));
-        schemaMap.put(path, newItemsDatasetSave.schema());
-
-        newItemsDatasetSave.coalesce(1).write()
-                .partitionBy(UPDATE_DATE, APP_ID)
-                .option(COMPRESSION, SNAPPY)
-                .mode(SaveMode.Append).parquet(path);
-
-        return path;
-    }
-
-    private static Dataset<Row> readDatasetFromPath(final SparkSession spark, final String path,
-                                                    final int fromNDays) {
-        Date nDaysBeforeDate = Date.from(Instant.now().minusSeconds(fromNDays * 24 * 3600L));
-        StructType schemaRead = schemaMap.get(path);
-        DateFormat dateFormatYMD = new SimpleDateFormat(YYYYMMDD);
-        String nDaysBefore = dateFormatYMD.format(nDaysBeforeDate);
-        String pathInfo = "readDatasetFromPath path=" + path;
-        log.info(pathInfo + ", nDaysBefore=" + nDaysBefore + ", fromNDays=" + fromNDays);
-        Dataset<Row> fullItemsDataset;
-        try {
-            Dataset<Row>  fullItemsDatasetRead = spark.read().schema(schemaRead).parquet(path);
-            log.info(pathInfo + ", read count:" + fullItemsDatasetRead.count());
-
-            fullItemsDataset = fullItemsDatasetRead.filter(
-                            expr(String.format("%s >= '%s'", UPDATE_DATE, nDaysBefore)).and(
-                                    expr(String.format("%s >= %s", EVENT_TIMESTAMP, nDaysBeforeDate.getTime()))
-                            ));
-
-        } catch (Exception e) {
-            log.error(e.getMessage());
-            if (e.getMessage().toLowerCase().contains("path does not exist")) {
-                List<Row> dataList = new ArrayList<>();
-                return spark.createDataFrame(dataList, schemaRead);
-            }
-            throw e;
-        }
-        log.info(pathInfo + ", return count:" + fullItemsDataset.count());
-        return fullItemsDataset;
-    }
-
-    private static Dataset<Row> getAggItemDataset(final Dataset<Row> dataset2) {
-        return dataset2.groupBy(APP_ID, "id")
-                .agg(max_by(struct(expr("*")), col(EVENT_TIMESTAMP))
-                        .alias("item"))
-                .select(expr("item.*"))
-                .distinct();
-
+        List<DatasetUtil.TableInfo> l = new ArrayList<>();
+        l.add(new DatasetUtil.TableInfo(
+                TABLE_ETL_USER_DEVICE_ID, TABLE_VERSION_SUFFIX, userKeepDays
+        ));
+        l.add(new DatasetUtil.TableInfo(
+                TABLE_ETL_USER_PAGE_REFERER, TABLE_VERSION_SUFFIX, userKeepDays
+        ));
+        l.add(new DatasetUtil.TableInfo(
+                TABLE_ETL_USER_TRAFFIC_SOURCE, TABLE_VERSION_SUFFIX, userKeepDays
+        ));
+        l.add(new DatasetUtil.TableInfo(
+                TABLE_ETL_USER_CHANNEL, TABLE_VERSION_SUFFIX, userKeepDays
+        ));
+        l.add(new DatasetUtil.TableInfo(
+                ETLRunner.TableName.USER.getTableName(), TABLE_VERSION_SUFFIX, userKeepDays
+        ));
+        l.add(new DatasetUtil.TableInfo(
+                ETLRunner.TableName.ITEM.getTableName(), TABLE_VERSION_SUFFIX, itemKeepDays
+        ));
+        DatasetUtil.mergeIncrementalTables(sparkSession, l);
     }
 
     public List<Dataset<Row>> transform(final Dataset<Row> dataset) {
@@ -515,7 +419,6 @@ public final class TransformerV2 {
     }
 
     private Optional<Dataset<Row>> extractItem(final Dataset<Row> dataset) {
-        SparkSession spark = dataset.sparkSession();
         Column dataCol = col("data");
         ArrayType itemsType = DataTypes.createArrayType(DataTypes.StringType);
         String itemJson = "item_json";
@@ -523,66 +426,38 @@ public final class TransformerV2 {
                 .withColumn(itemJson, explode(from_json(dataCol.getField(ITEMS), itemsType)))
                 .filter(col(itemJson).isNotNull());
 
-        List<String> topFields = Collections.singletonList("id");
-        List<String> ignoreFields = Collections.singletonList("quantity");
-
         List<String> excludedAttributes = new ArrayList<>();
-        excludedAttributes.addAll(topFields);
-        excludedAttributes.addAll(ignoreFields);
+        excludedAttributes.add(ID);
 
         Dataset<Row> dataset1 = kvConverter.transform(datasetItems, col(itemJson), PROPERTIES, excludedAttributes);
-        Dataset<Row> dataset2 = dataset1
-                .withColumn("id", get_json_object(col(itemJson), "$.id").cast(DataTypes.StringType))
-                .filter(col("id").isNotNull())
+        Dataset<Row> newItemsDataset = dataset1
+                .withColumn(ID, get_json_object(col(itemJson), "$." + ID).cast(DataTypes.StringType))
+                .filter(col(ID).isNotNull())
                 .select(
                         APP_ID,
                         EVENT_DATE,
                         EVENT_TIMESTAMP,
-                        "id",
+                        ID,
                         PROPERTIES
                 ).distinct();
 
-        String tableName = ETLRunner.TableName.ITEM.name;
-        setSchemaMap(dataset2, tableName);
+        String tableName = ETLRunner.TableName.ITEM.getTableName();
+        DatasetUtil.PathInfo pathInfo = addSchemaToMap(newItemsDataset, tableName, TABLE_VERSION_SUFFIX);
 
-        if (dataset2.count() == 0) {
+        log.info("newItemsDataset count:" + newItemsDataset.count());
+
+        if (newItemsDataset.count() == 0) {
             return Optional.empty();
         }
 
-        List<String> selectedFields = new ArrayList<>();
-        selectedFields.add(APP_ID);
-        selectedFields.add(EVENT_DATE);
-        selectedFields.add(EVENT_TIMESTAMP);
-        selectedFields.addAll(topFields);
-        selectedFields.add(PROPERTIES);
+        Dataset<Row> newAggeItemsDataset = getAggItemDataset(newItemsDataset);
+        loadFullItemDataset(newItemsDataset, pathInfo);
 
-        Column[] selectCols = selectedFields.stream().map(functions::col).toArray(Column[]::new);
-        Dataset<Row> newItemsDataset = dataset2.select(selectCols);
-        Dataset<Row> newAggItemsDataset = getAggItemDataset(newItemsDataset);
-        long newCount = newAggItemsDataset.count();
-        log.info("newAggItemsDataset count  " + newCount);
-
-        String path = saveIncrementalDataset(ETLRunner.TableName.ITEM, newAggItemsDataset);
-        Dataset<Row> fullItemsDataset = readDatasetFromPath(spark, path,
-                ContextUtil.getItemKeepDays()
-        );
-        Dataset<Row> fullAggItemsDataset = getAggItemDataset(fullItemsDataset);
-        log.info("fullAggItemsDataset count " + fullAggItemsDataset.count());
-        Dataset<Row> fullAggItemsDatasetRt = fullAggItemsDataset.select(
-                APP_ID,
-                EVENT_DATE,
-                EVENT_TIMESTAMP,
-                "id",
-                PROPERTIES
-        );
-        saveFullDataset(ETLRunner.TableName.ITEM.name, fullAggItemsDatasetRt);
-
-        return Optional.of(newAggItemsDataset);
+        return Optional.of(newAggeItemsDataset);
     }
 
     private Optional<Dataset<Row>> extractUser(final Dataset<Row> dataset) {
-        SparkSession spark = dataset.sparkSession();
-        Dataset<Row> profileSetDataset =dataset
+        Dataset<Row> profileSetDataset = dataset
                 .filter((col(USER_PSEUDO_ID).isNotNull()))
                 .filter(col(EVENT_NAME)
                         .isin("user_profile_set", "_user_profile_set", EVENT_PROFILE_SET, EVENT_FIRST_OPEN, EVENT_FIRST_VISIT));
@@ -611,11 +486,14 @@ public final class TransformerV2 {
                         FIRST_VISIT_DATE
                 ).distinct();
 
-        String tableName = ETLRunner.TableName.USER.name;
-        setSchemaMap(newUserProfileMainDataset, tableName);
+        String tableName = ETLRunner.TableName.USER.getTableName();
+        DatasetUtil.PathInfo pathInfo = addSchemaToMap(newUserProfileMainDataset, tableName, TABLE_VERSION_SUFFIX);
+
         if (newUserCount == 0) {
             return Optional.empty();
         }
+
+        Dataset<Row> newUserIdDataset = newUserProfileMainDataset.select(APP_ID, USER_PSEUDO_ID).distinct();
 
         // newUserCount > 0, below dataset should not null
         Objects.requireNonNull(userReferrerDataset);
@@ -623,27 +501,20 @@ public final class TransformerV2 {
         Objects.requireNonNull(userTrafficSourceDataset);
         Objects.requireNonNull(userChannelDataset);
 
-        log.info("newUserProfileMainDataset:" + newUserProfileMainDataset.count());
-
-        Dataset<Row> newAggUserProfileMainDataset = getAggUserDataset(newUserProfileMainDataset);
-        log.info("newAggUserProfileMainDataset count " + newAggUserProfileMainDataset.count());
-
-        String path = saveIncrementalDataset(ETLRunner.TableName.USER, newAggUserProfileMainDataset);
-        Dataset<Row> fullUsersDataset = readDatasetFromPath(spark, path, ContextUtil.getUserKeepDays());
-        Dataset<Row> fullAggUserDataset = getAggUserDataset(fullUsersDataset);
-        log.info("fullAggUserDataset count " + fullAggUserDataset.count());
-        saveFullDataset(ETLRunner.TableName.USER.name, fullAggUserDataset);
+        Dataset<Row> fullAggUserDataset = loadFullUserDataset(newUserProfileMainDataset, pathInfo);
 
         Column userPseudoIdCol = fullAggUserDataset.col(USER_PSEUDO_ID);
         Column appIdCol = fullAggUserDataset.col(APP_ID);
-        Column eventTimestampCol =  fullAggUserDataset.col(EVENT_TIMESTAMP);
+        Column eventTimestampCol = fullAggUserDataset.col(EVENT_TIMESTAMP);
 
+        Column userIdJoinForNewUserId = userPseudoIdCol.equalTo(newUserIdDataset.col(USER_PSEUDO_ID)).and(appIdCol.equalTo(newUserIdDataset.col(APP_ID)));
         Column userIdJoinForDeviceId = userPseudoIdCol.equalTo(userDeviceIdDataset.col(USER_PSEUDO_ID)).and(appIdCol.equalTo(userDeviceIdDataset.col(APP_ID)));
         Column userIdJoinForTrafficSource = userPseudoIdCol.equalTo(userTrafficSourceDataset.col(USER_PSEUDO_ID)).and(appIdCol.equalTo(userTrafficSourceDataset.col(APP_ID)));
         Column userIdJoinForPageReferrer = userPseudoIdCol.equalTo(userReferrerDataset.col(USER_PSEUDO_ID)).and(appIdCol.equalTo(userReferrerDataset.col(APP_ID)));
-        Column userIdJoinForChannel= userPseudoIdCol.equalTo(userChannelDataset.col(USER_PSEUDO_ID)).and(appIdCol.equalTo(userChannelDataset.col(APP_ID)));
+        Column userIdJoinForChannel = userPseudoIdCol.equalTo(userChannelDataset.col(USER_PSEUDO_ID)).and(appIdCol.equalTo(userChannelDataset.col(APP_ID)));
 
         Dataset<Row> joinedPossibleUpdateUserDataset = fullAggUserDataset
+                .join(newUserIdDataset, userIdJoinForNewUserId, "inner")
                 .join(userDeviceIdDataset, userIdJoinForDeviceId, "left")
                 .join(userTrafficSourceDataset, userIdJoinForTrafficSource, "left")
                 .join(userReferrerDataset, userIdJoinForPageReferrer, "left")
@@ -656,10 +527,10 @@ public final class TransformerV2 {
                 col(USER_ID),
                 userPseudoIdCol,
                 col(USER_FIRST_TOUCH_TIMESTAMP),
-                col("user_properties"),
-                col("user_ltv"),
+                col(USER_PROPERTIES),
+                col(USER_LTV),
                 col(FIRST_VISIT_DATE),
-                col(COL_PAGE_REFERER).alias("_first_referer"),
+                col(COL_PAGE_REFERER).alias(FIRST_REFERER),
                 col(TRAFFIC_SOURCE_NAME).alias("_first_traffic_source_type"),
                 col(TRAFFIC_SOURCE_MEDIUM).alias("_first_traffic_medium"),
                 col(TRAFFIC_SOURCE_SOURCE).alias("_first_traffic_source"),
@@ -669,24 +540,9 @@ public final class TransformerV2 {
         return Optional.of(joinedPossibleUpdateUserDatasetRt);
     }
 
-    private static void setSchemaMap(final Dataset<Row> newUserProfileMainDataset, final String tableName) {
-        StructType schema = newUserProfileMainDataset.schema().add(UPDATE_DATE, DataTypes.StringType, true);
-        String pathFull = getPathForTable(tableName + FULL_SUFFIX);
-        String pathIncremental = getPathForTable(tableName + INCREMENTAL_SUFFIX);
-        schemaMap.put(pathFull, schema);
-        schemaMap.put(pathIncremental, schema);
-    }
-
-    private Dataset<Row> getAggUserDataset(final Dataset<Row> newUserDataset) {
-        return newUserDataset.groupBy(APP_ID, USER_PSEUDO_ID)
-                .agg(max_by(struct(expr("*")), col(EVENT_TIMESTAMP)).alias("user"))
-                .select(expr("user.*"))
-                .distinct();
-    }
-
     private Dataset<Row> convertItems(final Dataset<Row> dataset) {
         DataType itemType = DataTypes.createStructType(Arrays.asList(
-                DataTypes.createStructField("id", DataTypes.StringType, true),
+                DataTypes.createStructField(ID, DataTypes.StringType, true),
                 DataTypes.createStructField("quantity", DataTypes.LongType, true),
                 DataTypes.createStructField("price", DataTypes.DoubleType, true),
                 DataTypes.createStructField("currency", DataTypes.StringType, true),
@@ -694,10 +550,9 @@ public final class TransformerV2 {
                 DataTypes.createStructField("creative_slot", DataTypes.StringType, true)));
         DataType itemsType = DataTypes.createArrayType(itemType);
         return dataset.withColumn(ITEMS,
-                from_json(col("data").getField(ITEMS), itemsType));
+                from_json(col(DATA).getField(ITEMS), itemsType));
 
     }
-
 
     private Dataset<Row> convertUri(final Dataset<Row> dataset, final String fieldName, final DataType dataType) {
         String tmpStrFileName = fieldName + "_tmp_";
@@ -707,7 +562,7 @@ public final class TransformerV2 {
     }
 
     private Dataset<Row> convertGeo(final Dataset<Row> dataset) {
-        Column dataCol = col("data");
+        Column dataCol = col(DATA);
         return dataset.withColumn("geo", struct(lit(null).cast(DataTypes.StringType).alias("country"),
                         lit(null).cast(DataTypes.StringType).alias("continent"),
                         lit(null).cast(DataTypes.StringType).alias("sub_continent"),
@@ -719,7 +574,7 @@ public final class TransformerV2 {
     }
 
     private Dataset<Row> convertTrafficSource(final Dataset<Row> dataset) {
-        Column dataCol = col("data");
+        Column dataCol = col(DATA);
         Column attributesCol = dataCol.getField(ATTRIBUTES);
         return dataset
                 .withColumn("traffic_source", struct(
@@ -728,25 +583,24 @@ public final class TransformerV2 {
                         get_json_object(attributesCol, "$._traffic_source_source").alias("source")));
     }
 
-
     private Dataset<Row> convertAppInfo(final Dataset<Row> dataset) {
-        Column dataCol = col("data");
+        Column dataCol = col(DATA);
         Column attributesCol = dataCol.getField(ATTRIBUTES);
 
         return dataset
                 .withColumn(APP_INFO, struct(
-                        (dataCol.getItem(APP_ID)).alias(APP_ID),
-                        (dataCol.getItem("app_package_name")).alias("id"),
-                        get_json_object(attributesCol, "$." + CHANNEL).alias("install_source"),
-                        (dataCol.getItem("app_version")).alias("version"),
-                        dataCol.getItem("sdk_version").alias("sdk_version"),
-                        dataCol.getItem("sdk_name").alias("sdk_name")
+                                (dataCol.getItem(APP_ID)).alias(APP_ID),
+                                (dataCol.getItem("app_package_name")).alias("id"),
+                                get_json_object(attributesCol, "$." + CHANNEL).alias("install_source"),
+                                (dataCol.getItem("app_version")).alias("version"),
+                                dataCol.getItem("sdk_version").alias("sdk_version"),
+                                dataCol.getItem("sdk_name").alias("sdk_name")
                         )
                 );
     }
 
     private Dataset<Row> convertDevice(final Dataset<Row> dataset) {
-        Column dataCol = col("data");
+        Column dataCol = col(DATA);
         return dataset.withColumn("device", struct(
                 (dataCol.getItem("brand")).alias("mobile_brand_name"),
                 (dataCol.getItem("model")).alias("mobile_model_name"),
@@ -781,94 +635,5 @@ public final class TransformerV2 {
         return dataset.drop("ua", GEO_FOR_ENRICH);
     }
 
-    private static void mergeIncrementalTables(final SparkSession sparkSession) {
-        boolean forceMerge = System.getProperty("force.merge", "false").equals("true");
-
-        // run this process daily
-        if (isDatasetMergedToday(sparkSession) && !forceMerge) {
-            return;
-        }
-        log.info("start merging incremental tables");
-        int userKeepDays = ContextUtil.getUserKeepDays();
-        int itemKeepDays = ContextUtil.getItemKeepDays();
-
-        List<Object[]> l = new ArrayList<>();
-        l.add(new Object[] {
-                TABLE_ETL_USER_DEVICE_ID, userKeepDays
-        });
-        l.add(new Object[] {
-                TABLE_ETL_USER_PAGE_REFERER, userKeepDays
-        });
-        l.add(new Object[] {
-                TABLE_ETL_USER_TRAFFIC_SOURCE, userKeepDays
-        });
-        l.add(new Object[] {
-                TABLE_ETL_USER_CHANNEL, userKeepDays
-        });
-        l.add(new Object[] {
-                ETLRunner.TableName.USER.name, userKeepDays
-        });
-        l.add(new Object[] {
-                ETLRunner.TableName.ITEM.name, itemKeepDays
-        });
-
-        l.forEach(it -> {
-            String tableName =(String) it[0];
-            int nDays = (int) it[1];
-            log.info("start merge table: " + tableName);
-            String pathFull = getPathForTable(tableName + FULL_SUFFIX);
-            Dataset<Row> datasetFull = readDatasetFromPath(sparkSession, pathFull, nDays);
-            String pathIncremental = getPathForTable(tableName + INCREMENTAL_SUFFIX);
-            overWriteDataset(pathIncremental, datasetFull);
-        });
-    }
-
-    private static boolean isDatasetMergedToday(final SparkSession sparkSession) {
-        boolean mergedToday = false;
-        Date now = new Date();
-        DateFormat dateFormatYMD = new SimpleDateFormat(YYYYMMDD);
-        String yyyyMMdd = dateFormatYMD.format(now);
-
-        String statePath = getPathForTable("etl_merge_state");
-        StructType schema = DataTypes.createStructType(new StructField[]{
-                DataTypes.createStructField(UPDATE_DATE, DataTypes.StringType, true),
-                DataTypes.createStructField(JOB_NAME_COL, DataTypes.StringType, true),
-                DataTypes.createStructField("createAt", DataTypes.TimestampType, true)
-
-        });
-        Dataset<Row> existingState;
-        try {
-            existingState = sparkSession.read().schema(schema).parquet(statePath);
-        } catch (Exception e) {
-            log.error(e.getMessage());
-            if (e.getMessage().toLowerCase().contains("path does not exist")) {
-                List<Row> emptyList = new ArrayList<>();
-                existingState = sparkSession.createDataFrame(emptyList, schema);
-            } else {
-                throw e;
-            }
-        }
-
-        Dataset<Row> mergedState = existingState.filter(col(UPDATE_DATE).equalTo(lit(yyyyMMdd)));
-
-        mergedToday = mergedState.count() > 0;
-
-        if (!mergedToday) {
-            List<Row> dataList = new ArrayList<>();
-            dataList.add(new GenericRow(new Object[]{
-                    yyyyMMdd, ContextUtil.getJobName(), new java.sql.Timestamp(new Date().getTime())
-            }));
-            Dataset<Row> newState = sparkSession.createDataFrame(dataList, schema);
-            newState.coalesce(1).write()
-                    .partitionBy(UPDATE_DATE)
-                    .option(COMPRESSION, SNAPPY)
-                    .mode(SaveMode.Append).parquet(statePath);
-        }
-
-        if (mergedToday) {
-            log.info("Datasets merged today, detail: " + mergedState.first().json());
-        }
-        return mergedToday;
-    }
 
 }
