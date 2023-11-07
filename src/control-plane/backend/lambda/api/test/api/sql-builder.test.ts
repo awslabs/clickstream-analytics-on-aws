@@ -13794,7 +13794,7 @@ describe('SQL Builder test', () => {
 
   });
 
-  test('buildFunnelTableView', () => {
+  test('buildFunnelTableView - has group Condition', () => {
 
     const sql = buildFunnelTableView({
       schemaName: 'app1',
@@ -14163,7 +14163,7 @@ describe('SQL Builder test', () => {
       )
     select
       DAY,
-      geo_country as group_col,
+      geo_country as country,
       count(distinct user_pseudo_id_0) as add_button_click,
       (
         count(distinct user_pseudo_id_2)::decimal / NULLIF(count(distinct user_pseudo_id_0), 0)

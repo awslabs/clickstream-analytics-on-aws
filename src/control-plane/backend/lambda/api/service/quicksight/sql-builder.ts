@@ -223,7 +223,7 @@ export function buildFunnelTableView(sqlParameters: SQLParameters) : string {
   sql = sql.concat(`
     select 
       ${sqlParameters.groupColumn}
-      ${appendGroupingCol ? `, ${colNameWithPrefix} as group_col` : ''}
+      ${appendGroupingCol ? `, ${colNameWithPrefix} as ${sqlParameters.groupCondition?.property}` : ''}
       ${resultCntSQL}
     from join_table
     group by 

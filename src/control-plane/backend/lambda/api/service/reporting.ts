@@ -143,6 +143,7 @@ export class ReportingService {
       'event_date',
       'x_id',
     ];
+
     const hasGrouping = query.chartType == QuickSightChartType.BAR && query.groupCondition !== undefined;
     if (hasGrouping) {
       datasetColumns.push({
@@ -169,6 +170,17 @@ export class ReportingService {
       Name: query.groupColumn,
       Type: 'STRING',
     }];
+
+    let groupingConditionCol = '';
+    if (query.groupCondition !== undefined) {
+      groupingConditionCol = query.groupCondition;
+      tableViewCols.push({
+        Name: groupingConditionCol,
+        Type: 'STRING',
+      });
+
+      projectedColumns.push(groupingConditionCol);
+    }
 
     const maxIndex = query.eventAndConditions.length - 1;
     for (const [index, item] of query.eventAndConditions.entries()) {
@@ -241,7 +253,8 @@ export class ReportingService {
         percentageCols.push(e.eventName + '_rate');
       }
     }
-    const tableVisualDef = getFunnelTableVisualDef(tableVisualId, tableVisualViewName, eventNames, titleProps, query.groupColumn, hasGrouping);
+    const tableVisualDef = getFunnelTableVisualDef(tableVisualId, tableVisualViewName, eventNames, titleProps,
+      query.groupColumn, groupingConditionCol);
     const columnConfigurations = getFunnelTableVisualRelatedDefs(tableVisualViewName, percentageCols);
 
     visualRelatedParams.filterGroup!.ScopeConfiguration!.SelectedSheets!.SheetVisualScopingConfigurations![0].VisualIds?.push(tableVisualId);

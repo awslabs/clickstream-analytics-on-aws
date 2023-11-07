@@ -560,7 +560,7 @@ function _getFunnelBarChartVisualDef(visualId: string, viewName: string, titlePr
 }
 
 export function getFunnelTableVisualDef(visualId: string, viewName: string, eventNames: string[],
-  titleProps: DashboardTitleProps, groupColumn: string, hasGrouping: boolean): Visual {
+  titleProps: DashboardTitleProps, groupColumn: string, groupingConditionCol: string): Visual {
 
   const visualDef = JSON.parse(readFileSync(join(__dirname, './templates/funnel-table-chart.json'), 'utf8')) as Visual;
   visualDef.TableVisual!.VisualId = visualId;
@@ -606,14 +606,14 @@ export function getFunnelTableVisualDef(visualId: string, viewName: string, even
       Width: '120px',
     });
 
-    if (hasGrouping) {
+    if (groupingConditionCol !== '') {
       const groupColFieldId = uuidv4();
       groupBy.push({
         NumericalDimensionField: {
           FieldId: groupColFieldId,
           Column: {
             DataSetIdentifier: viewName,
-            ColumnName: 'group_col',
+            ColumnName: groupingConditionCol,
           },
         },
       });
