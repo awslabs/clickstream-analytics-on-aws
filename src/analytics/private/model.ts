@@ -106,6 +106,7 @@ export type CreateDatabaseAndSchemas = CustomProperties & {
   readonly redshiftBIUsernamePrefix: string;
   readonly reportingViewsDef: SQLViewDef[];
   readonly schemaDefs: SQLDef[];
+  readonly lastModifiedTime: number;
 }
 export type CreateMappingRoleUser = Omit<CustomProperties, 'provisionedRedshiftProps'> & {
   readonly dataRoleName: string;
