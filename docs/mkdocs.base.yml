@@ -1,15 +1,44 @@
 site_name: Clickstream Analytics on AWS
-repo_url: https://aws-gcr-solutions.pages.aws.dev/incubator/web-analytics-on-aws/clickstream-analytics-on-aws/
+repo_url: !ENV [REPO_URL, 'https://github.com/awslabs/clickstream-analytics-on-aws/']
+site_url: !ENV [SITE_URL, 'https://awslabs.github.io/clickstream-analytics-on-aws/']
 
 theme:
   name: material
+  custom_dir: overrides
   features:
-    - navigation.tabs
+    - navigation.instant
+    - navigation.instant.progress
+    - navigation.tracking
+    - navigation.path
+    - navigation.top
     - search.suggest
     - search.highlight
+    - search.share
     - content.code.copy
     - content.code.select
     - content.code.annotate
+    - content.tabs.link
+  palette: 
+    # Palette toggle for automatic mode
+    - media: "(prefers-color-scheme)"
+      toggle:
+        icon: material/brightness-auto
+        name: Switch to light mode
+
+    # Palette toggle for light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default 
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+
+    # Palette toggle for dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to system preference
+  favicon: images/favicon.ico
 
 extra_css:
   - /stylesheets/extra.css
@@ -19,10 +48,10 @@ extra:
   copyright: Copyright &copy; 2023 Amazon Web Services
   alternate:
     - name: English
-      link: !ENV [LINK_EN, '/en/']
+      link: !ENV [LINK_EN, '/en/1.0.x/']
       lang: en
     - name: 简体中文
-      link: !ENV [LINK_ZH, '/zh/']
+      link: !ENV [LINK_ZH, '/zh/1.0.x/']
       lang: zh
   aws_bucket: solutions-reference
   aws_cn_bucket: aws-gcr-solutions
@@ -34,12 +63,29 @@ extra:
   solution_name: Clickstream Analytics on AWS
   git_repo: https://github.com/awslabs/clickstream-analytics-on-aws.git
   source_repo: https://github.com/awslabs/clickstream-analytics-on-aws
+  analytics:
+    provider: custom
+    version: v0.6.0
+    endpoint: https://pipeline.clickstream.solutions.gcr.aws.dev/collect
+    appId: docs
+  version:
+    provider: mike
+    default: latest
 
 plugins:
   - search
   - include-markdown
   - macros
   - glightbox
+  - mike:
+      # These fields are all optional; the defaults are as below...
+      alias_type: symlink
+      redirect_template: null
+      deploy_prefix: ''
+      canonical_version: null
+      version_selector: true
+      css_dir: css
+      javascript_dir: js
 
 markdown_extensions:
   - tables
@@ -53,8 +99,8 @@ markdown_extensions:
   - pymdownx.tasklist:
       custom_checkbox: true
   - pymdownx.emoji:
-      emoji_index: !!python/name:materialx.emoji.twemoji
-      emoji_generator: !!python/name:materialx.emoji.to_svg
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
   - pymdownx.highlight:
       anchor_linenums: true
       line_spans: __span

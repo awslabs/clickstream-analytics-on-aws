@@ -3,7 +3,11 @@ name: GitHub Pages
 on:
   push:
     branches:
-      - main  # Set a branch name to trigger deployment
+      - v1.0.x
+    paths:
+      - docs/**
+      - src/analytics/private/sqls/**
+      - .github/workflows/ghpage.yml
   pull_request:
 
 jobs:
@@ -12,7 +16,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0    # Fetch all history for .GitInfo and .Lastmod
 
@@ -23,7 +27,7 @@ jobs:
 
       - name: Install mkdocs and material theme
         run: |
-          python3 -m pip install 'mkdocs<1.5' 'mkdocs-material<10' 'mkdocs-material-extensions<1.2' 'mkdocs-include-markdown-plugin<5' 'mkdocs-macros-plugin<1' 'mkdocs-glightbox<1'            # install mkdocs
+          python3 -m pip install 'mkdocs<1.6' 'mkdocs-material<10,>9.4' 'mkdocs-include-markdown-plugin<7' 'mkdocs-macros-plugin<2' 'mkdocs-glightbox<1' mike            # install mkdocs
 
       - name: Build mkdocs
         env:
@@ -32,11 +36,22 @@ jobs:
         run: |
           mkdocs build -f ./docs/mkdocs.en.yml -s --site-dir ../docs/site/en
           mkdocs build -f ./docs/mkdocs.zh.yml -s --site-dir ../docs/site/zh
-          cp -av ./docs/index.html ./docs/site
 
-      - name: Deploy pages
-        uses: peaceiris/actions-gh-pages@v3
-        if: ${{ github.ref == 'refs/heads/main' }}
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./docs/site
+      - name: Publish doc - 1.0.x
+        if: ${{ github.ref == 'refs/heads/v1.0.x' }}
+        env:
+          VERSION: 1.0.x
+          LINK_EN: ${{ vars.LINK_EN }}
+          LINK_ZH: ${{ vars.LINK_ZH }}
+        run: |
+          set -euxo pipefail
+          git fetch origin gh-pages --depth=1
+          git config user.name clickstream-ci-bot
+          git config user.email clickstream-ci-bot@amazon.com
+          ALIAS=$( [ "$VERSION" == "${{ vars.LATEST_VERSION }}" ] && echo "latest" || echo "" )
+          ALIAS=$( [ "$VERSION" == "${{ vars.DEV_VERSION }}" ] && echo "dev" || echo "$ALIAS" )
+          TITLE=$( [ -z "$ALIAS" ] && echo "$VERSION" || echo "$VERSION ($ALIAS)" )
+          LINK_EN=$LINK_EN$VERSION
+          LINK_ZH=$LINK_ZH$VERSION
+          mike deploy --push --update-aliases $VERSION ${ALIAS} -t "$TITLE" --deploy-prefix en/ -F ./docs/mkdocs.en.yml 
+          mike deploy --push --update-aliases $VERSION ${ALIAS} -t "$TITLE" --deploy-prefix zh/ -F ./docs/mkdocs.zh.yml 

@@ -181,7 +181,7 @@ In [Step 2. Launch the stack](#step-2-launch-the-stack), enter the parameters be
 
         !!! info "Important"
             {%
-            include-markdown "tls-note.md"
+            include-markdown "./tls-note.md"
             %}
 
     * If you are launching the solution with custom domain in AWS Regions, this solution has the following additional parameters:
