@@ -305,7 +305,7 @@ async function updateSchemas(props: ResourcePropertiesType, biUsername: string, 
       ...SQL_TEMPLATE_PARAMETER,
     };
 
-    const sqlStatements2 = getUpdatableSql(props.schemaDefs, appUpdateProps.oldSchemaSqlArray, mustacheParam);
+    const sqlStatements2 = getUpdatableSql(props.schemaDefs, appUpdateProps.oldSchemaSqlArray, appUpdateProps.oldViewSqls, mustacheParam);
 
     logger.info('updateSchemas- sqlStatements2, app=' + app, { app, sqlStatements2 });
 
@@ -319,8 +319,16 @@ async function updateSchemas(props: ResourcePropertiesType, biUsername: string, 
   await doUpdate(sqlStatementsByApp, props);
 }
 
+function _viewNameExist(sqlArray: string[], viewName: string): boolean {
+  for (const sql of sqlArray) {
+    if (sql.includes(viewName)) {
+      return true;
+    }
+  }
+  return false;
+}
 
-function getUpdatableSql(sqlOrViewDefs: SQLDef[] | SQLViewDef[], oldSqlArray: string[], mustacheParam: MustacheParamType, path: string = '/opt') {
+function getUpdatableSql(sqlOrViewDefs: SQLDef[] | SQLViewDef[], oldSqlArray: string[], oldViewSqlArray: string[], mustacheParam: MustacheParamType, path: string = '/opt') {
   logger.info('getUpdatableSql', { sqlOrViewDefs, oldSqlArray });
   const newFilesInfo = [];
   const updateFilesInfo = [];
@@ -332,7 +340,12 @@ function getUpdatableSql(sqlOrViewDefs: SQLDef[] | SQLViewDef[], oldSqlArray: st
       logger.info('new sql: ', { schemaOrViewDef });
       sqlStatements.push(getSqlContent(schemaOrViewDef, mustacheParam, path));
       newFilesInfo.push(schemaOrViewDef);
-    } else if (schemaOrViewDef.updatable === 'true') {
+    } else if (schemaOrViewDef.updatable === 'true'
+      || ('viewName' in schemaOrViewDef
+         && (!_viewNameExist(oldSqlArray, schemaOrViewDef.viewName)) //all view sqls is contained in oldSqlArray when upgrade from 1.0.x
+         && (!_viewNameExist(oldViewSqlArray, schemaOrViewDef.viewName))
+      )
+    ) {
       logger.info('update sql: ', { schemaOrViewDef });
       sqlStatements.push(getSqlContent(schemaOrViewDef, mustacheParam, path));
       updateFilesInfo.push(schemaOrViewDef);
@@ -445,7 +458,7 @@ async function updateViewForReporting(props: ResourcePropertiesType, oldProps: R
       ...SQL_TEMPLATE_PARAMETER,
     };
 
-    const sqlStatements2 = getUpdatableSql(props.reportingViewsDef, appUpdateProps.oldViewSqls, mustacheParam, '/opt/dashboard');
+    const sqlStatements2 = getUpdatableSql(props.reportingViewsDef, appUpdateProps.oldViewSqls, appUpdateProps.oldViewSqls, mustacheParam, '/opt/dashboard');
 
     //grant select on views to bi user.
     const views: string[] = [];
