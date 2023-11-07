@@ -113,6 +113,10 @@ const AnalyticsExplore: React.FC = () => {
     []
   );
 
+  const [groupParameters, setGroupParameters] = useState<CategoryItemType[]>(
+    []
+  );
+
   const [pathNodes, setPathNodes] = useState<{
     pageTitles: IMetadataAttributeValue[];
     pageUrls: IMetadataAttributeValue[];
@@ -236,6 +240,11 @@ const AnalyticsExplore: React.FC = () => {
         publicParameters ?? []
       );
       setPresetParameters(conditionOptions);
+      const groupOptions = parametersConvertToCategoryItemType(
+        presetUserAttributes,
+        parameters ?? []
+      );
+      setGroupParameters(groupOptions);
     } catch (error) {
       console.log(error);
     }
@@ -313,6 +322,7 @@ const AnalyticsExplore: React.FC = () => {
                   metadataUserAttributes={metadataUserAttributes}
                   categoryEvents={categoryEvents}
                   presetParameters={presetParameters}
+                  groupParameters={groupParameters}
                 />
               )}
               {pipeline && selectedOption?.value === 'Event' && (
@@ -326,6 +336,7 @@ const AnalyticsExplore: React.FC = () => {
                   metadataUserAttributes={metadataUserAttributes}
                   categoryEvents={categoryEvents}
                   presetParameters={presetParameters}
+                  groupParameters={groupParameters}
                 />
               )}
               {pipeline && selectedOption?.value === 'Path' && (
@@ -352,6 +363,7 @@ const AnalyticsExplore: React.FC = () => {
                   metadataUserAttributes={metadataUserAttributes}
                   categoryEvents={categoryEvents}
                   presetParameters={presetParameters}
+                  groupParameters={groupParameters}
                 />
               )}
             </ContentLayout>
