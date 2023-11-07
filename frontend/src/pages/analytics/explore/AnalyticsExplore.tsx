@@ -56,8 +56,8 @@ const AnalyticsExplore: React.FC = () => {
 
   const [selectedOption, setSelectedOption] =
     useState<SelectProps.Option | null>({
-      label: defaultStr(t('analytics:explore.funnelAnalysis')),
-      value: 'Funnel',
+      label: defaultStr(t('analytics:explore.eventAnalysis')),
+      value: 'Event',
     });
 
   const analyticsModelOptions: SelectProps.Options = [
@@ -65,12 +65,12 @@ const AnalyticsExplore: React.FC = () => {
       label: defaultStr(t('analytics:explore.exploitativeAnalytics')),
       options: [
         {
-          label: defaultStr(t('analytics:explore.funnelAnalysis')),
-          value: 'Funnel',
-        },
-        {
           label: defaultStr(t('analytics:explore.eventAnalysis')),
           value: 'Event',
+        },
+        {
+          label: defaultStr(t('analytics:explore.funnelAnalysis')),
+          value: 'Funnel',
         },
         {
           label: defaultStr(t('analytics:explore.pathAnalysis')),
