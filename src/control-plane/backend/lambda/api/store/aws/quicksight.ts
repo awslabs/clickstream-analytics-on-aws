@@ -50,7 +50,7 @@ import { SDKClient } from '../../common/sdk-client';
 import { QuickSightAccountInfo, QuickSightUser } from '../../common/types';
 import { generateRandomStr } from '../../common/utils-ln';
 import { IDashboard } from '../../model/project';
-import { analysisPermissionActions, dashboardPermissionActions, dataSetPermissionActions } from '../../service/quicksight/dashboard-ln';
+import { analysisPermissionActions, dashboardPermissionActions } from '../../service/quicksight/dashboard-ln';
 import { sleep } from '../../service/quicksight/reporting-utils';
 
 const QUICKSIGHT_NAMESPACE = 'default';
@@ -436,7 +436,18 @@ export const createPublishDashboard = async (
       Name: `dataset-${dashboard.name}-default`,
       Permissions: [{
         Principal: principals.publishUserArn,
-        Actions: dataSetPermissionActions,
+        Actions: [
+          'quicksight:UpdateDataSetPermissions',
+          'quicksight:DescribeDataSet',
+          'quicksight:DescribeDataSetPermissions',
+          'quicksight:PassDataSet',
+          'quicksight:DescribeIngestion',
+          'quicksight:ListIngestions',
+          'quicksight:UpdateDataSet',
+          'quicksight:DeleteDataSet',
+          'quicksight:CreateIngestion',
+          'quicksight:CancelIngestion',
+        ],
       }],
       ImportMode: DataSetImportMode.DIRECT_QUERY,
       PhysicalTableMap: {

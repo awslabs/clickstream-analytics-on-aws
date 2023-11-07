@@ -74,37 +74,29 @@ export interface QuickSightDashboardDefProps {
 };
 
 export const dataSetPermissionActions = [
-  'quicksight:UpdateDataSetPermissions',
   'quicksight:DescribeDataSet',
   'quicksight:DescribeDataSetPermissions',
   'quicksight:PassDataSet',
   'quicksight:DescribeIngestion',
   'quicksight:ListIngestions',
-  'quicksight:UpdateDataSet',
-  'quicksight:DeleteDataSet',
-  'quicksight:CreateIngestion',
-  'quicksight:CancelIngestion',
+  'quicksight:ListDataSets',
+  'quicksight:SearchDataSets',
 ];
 
 export const analysisPermissionActions = [
   'quicksight:DescribeAnalysis',
-  'quicksight:UpdateAnalysisPermissions',
-  'quicksight:QueryAnalysis',
-  'quicksight:UpdateAnalysis',
-  'quicksight:RestoreAnalysis',
-  'quicksight:DeleteAnalysis',
+  'quicksight:ListAnalyses',
+  'quicksight:SearchAnalyses',
   'quicksight:DescribeAnalysisPermissions',
 ];
 
 export const dashboardPermissionActions = [
   'quicksight:DescribeDashboard',
+  'quicksight:ListDashboards',
   'quicksight:ListDashboardVersions',
-  'quicksight:UpdateDashboardPermissions',
-  'quicksight:QueryDashboard',
-  'quicksight:UpdateDashboard',
-  'quicksight:DeleteDashboard',
+  'quicksight:GetDashboardEmbedUrl',
   'quicksight:DescribeDashboardPermissions',
-  'quicksight:UpdateDashboardPublishedVersion',
+  'quicksight:SearchDashboards'
 ];
 
 function sleep(ms: number) {
