@@ -286,7 +286,7 @@ export const S3_DATA_PROCESSING_WITH_SPECIFY_PREFIX_PIPELINE: IPipeline = {
     sinkType: PipelineSinkType.S3,
     sinkS3: {
       sinkBucket: {
-        name: 'EXAMPLE_BUCKET',
+        name: 'EXAMPLE_BUCKET_NEW',
         prefix: 'EXAMPLE_PREFIX/',
       },
       s3BatchMaxBytes: 1000000,
@@ -301,11 +301,11 @@ export const S3_DATA_PROCESSING_WITH_SPECIFY_PREFIX_PIPELINE: IPipeline = {
     dataFreshnessInHour: 7,
     scheduleExpression: 'rate(6 minutes)',
     sourceS3Bucket: {
-      name: 'EXAMPLE_BUCKET',
-      prefix: '',
+      name: 'EXAMPLE_BUCKET_NEW',
+      prefix: 'EXAMPLE_PREFIX/',
     },
     sinkS3Bucket: {
-      name: 'EXAMPLE_BUCKET',
+      name: 'EXAMPLE_BUCKET_NEW',
       prefix: '',
     },
     pipelineBucket: {
@@ -314,6 +314,28 @@ export const S3_DATA_PROCESSING_WITH_SPECIFY_PREFIX_PIPELINE: IPipeline = {
     },
     transformPlugin: `${MOCK_PLUGIN_ID}_1`,
     enrichPlugin: ['BUILT-IN-2', 'BUILT-IN-3', `${MOCK_PLUGIN_ID}_2`],
+  },
+  dataModeling: {
+    athena: false,
+    redshift: {
+      dataRange: 'rate(6 months)',
+      newServerless: {
+        network: {
+          vpcId: 'vpc-00000000000000001',
+          subnetIds: [
+            'subnet-00000000000000010',
+            'subnet-00000000000000011',
+            'subnet-00000000000000012',
+            'subnet-00000000000000013',
+          ],
+          securityGroups: [
+            'sg-00000000000000030',
+            'sg-00000000000000031',
+          ],
+        },
+        baseCapacity: 8,
+      },
+    },
   },
 };
 

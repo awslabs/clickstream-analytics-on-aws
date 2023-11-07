@@ -174,7 +174,7 @@ describe('Pipeline test', () => {
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
-    expect(res.body.message).toEqual('Validation error: Sink bucket inconsistent with data processing.');
+    expect(res.body.message).toEqual('Sink bucket inconsistent with data processing.');
   });
   it('Create pipeline only ingestion', async () => {
     tokenMock(ddbMock, false);

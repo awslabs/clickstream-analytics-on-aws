@@ -20,7 +20,7 @@ import { ALBLogServiceAccountMapping, CORS_ORIGIN_DOMAIN_PATTERN, EMAIL_PATTERN,
 import { ConditionCategory, MetadataValueType } from './explore-types';
 import { BuiltInTagKeys } from './model-ln';
 import { logger } from './powertools';
-import { ALBRegionMappingObject, BucketPrefix, ClickStreamSubnet, IUserRole, PipelineStackType, PipelineStatus, RPURange, RPURegionMappingObject, ReportingDashboardOutput, SubnetType } from './types';
+import { ALBRegionMappingObject, BucketPrefix, ClickStreamSubnet, IUserRole, PipelineSinkType, PipelineStackType, PipelineStatus, RPURange, RPURegionMappingObject, ReportingDashboardOutput, SubnetType } from './types';
 import { IMetadataRaw, IMetadataRawValue, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute, IMetadataAttributeValue } from '../model/metadata';
 import { CPipelineResources, IPipeline } from '../model/pipeline';
 import { IUserSettings } from '../model/user';
@@ -200,11 +200,28 @@ function getBucketPrefix(projectId: string, key: BucketPrefix, value: string | u
     prefixes.set(BucketPrefix.LOGS_KAFKA_CONNECTOR, `clickstream/${projectId}/logs/kafka-connector/`);
     prefixes.set(BucketPrefix.DATA_BUFFER, `clickstream/${projectId}/data/buffer/`);
     prefixes.set(BucketPrefix.DATA_ODS, `clickstream/${projectId}/data/ods/`);
+    prefixes.set(BucketPrefix.LOAD_WORKFLOW, `clickstream/${projectId}/data/load-workflow/`);
     prefixes.set(BucketPrefix.DATA_PIPELINE_TEMP, `clickstream/${projectId}/data/pipeline-temp/`);
     prefixes.set(BucketPrefix.KAFKA_CONNECTOR_PLUGIN, `clickstream/${projectId}/runtime/ingestion/kafka-connector/plugins/`);
     return prefixes.get(key) ?? '';
   }
   return value!;
+}
+
+function getBucketName(pipeline: IPipeline, key: BucketPrefix, value: string | undefined): string {
+  switch (key) {
+    case BucketPrefix.LOGS_KAFKA_CONNECTOR:
+    case BucketPrefix.KAFKA_CONNECTOR_PLUGIN:
+      return pipeline.bucket.name;
+    case BucketPrefix.DATA_BUFFER:
+    case BucketPrefix.DATA_ODS:
+      if (pipeline.ingestionServer.sinkType === PipelineSinkType.S3) {
+        return pipeline.ingestionServer.sinkS3?.sinkBucket.name ?? pipeline.bucket.name;
+      }
+      return value ?? pipeline.bucket.name;
+    default:
+      return value ?? pipeline.bucket.name;
+  }
 }
 
 function getStackName(pipelineId: string, key: PipelineStackType, sinkType: string): string {
@@ -845,6 +862,7 @@ export {
   getEmailFromRequestContext,
   getTokenFromRequestContext,
   getBucketPrefix,
+  getBucketName,
   getStackName,
   getKafkaTopic,
   getPluginInfo,

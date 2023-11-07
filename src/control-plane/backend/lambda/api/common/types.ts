@@ -382,6 +382,7 @@ export enum BucketPrefix {
   DATA_BUFFER = 'data-buffer',
   DATA_ODS = 'data-ods',
   DATA_PIPELINE_TEMP = 'data-pipeline-temp',
+  LOAD_WORKFLOW = 'load-workflow',
   KAFKA_CONNECTOR_PLUGIN = 'kafka-connector-plugin',
 }
 

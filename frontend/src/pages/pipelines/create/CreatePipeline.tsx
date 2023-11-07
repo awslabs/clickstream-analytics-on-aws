@@ -1551,10 +1551,6 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                         ...prev.dataProcessing.sinkS3Bucket,
                         name: bucket,
                       },
-                      pipelineBucket: {
-                        ...prev.dataProcessing.pipelineBucket,
-                        name: bucket,
-                      },
                     },
                   };
                 });
@@ -1578,14 +1574,6 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                       ...prev.dataProcessing,
                       sourceS3Bucket: {
                         ...prev.dataProcessing.sourceS3Bucket,
-                        prefix: prefix,
-                      },
-                      sinkS3Bucket: {
-                        ...prev.dataProcessing.sinkS3Bucket,
-                        prefix: prefix,
-                      },
-                      pipelineBucket: {
-                        ...prev.dataProcessing.pipelineBucket,
                         prefix: prefix,
                       },
                     },
