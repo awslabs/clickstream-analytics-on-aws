@@ -19,6 +19,7 @@ import { Construct } from 'constructs';
 import { addCfnNagForCustomResourceProvider, addCfnNagForLogRetention } from './common/cfn-nag';
 import { EMAIL_PATTERN, OUTPUT_METRICS_OBSERVABILITY_DASHBOARD_NAME, OUTPUT_METRICS_SNS_TOPIC_ARN_NAME, PROJECT_ID_PATTERN } from './common/constant';
 import { SolutionInfo } from './common/solution-info';
+import { associateApplicationWithStack } from './common/stack';
 import { addSubscriptionCustomResource } from './metrics/add-sns-subscription';
 import { MetricAndAlarm } from './metrics/metrics';
 
@@ -119,6 +120,9 @@ export class MetricsStack extends Stack {
     });
 
     addCfnNag(this);
+
+    // Associate Service Catalog AppRegistry application with stack
+    associateApplicationWithStack(this);
   }
 }
 
@@ -133,5 +137,4 @@ function addCfnNag(stack: Stack) {
   addCfnNagForLogRetention(stack);
   addCfnNagForCustomResourceProvider(stack, 'PutDashboard', 'PutDashboardCustomResourceProvider', '');
   addCfnNagForCustomResourceProvider(stack, 'addSubscription', 'addSubscriptionCustomResourceProvider', '');
-};
-
+}

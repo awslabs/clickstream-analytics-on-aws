@@ -33,7 +33,7 @@ import {
 } from './common/cfn-nag';
 import { OUTPUT_REPORTING_QUICKSIGHT_DASHBOARDS, OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN } from './common/constant';
 import { SolutionInfo } from './common/solution-info';
-import { getShortIdOfStack } from './common/stack';
+import { associateApplicationWithStack, getShortIdOfStack } from './common/stack';
 import { createStackParametersQuickSight } from './reporting/parameter';
 import { createQuicksightCustomResource } from './reporting/quicksight-custom-resource';
 
@@ -193,6 +193,9 @@ export class DataReportingQuickSightStack extends Stack {
     }).overrideLogicalId(OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN);
 
     addCfnNag(this);
+
+    // Associate Service Catalog AppRegistry application with stack
+    associateApplicationWithStack(this);
   }
 }
 

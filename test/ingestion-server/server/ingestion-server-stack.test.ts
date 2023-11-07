@@ -1243,3 +1243,49 @@ test('Check there is no Kinesis outputs in S3 tempalte', () => {
   expect(kinesisArnOutput).toBeUndefined();
 });
 
+test('Should has ApplicationArnCondition', () => {
+  s3Template.hasCondition('ApplicationArnCondition', {
+    'Fn::Not': [
+      {
+        'Fn::Equals': [
+          {
+            Ref: 'AppRegistryApplicationArn',
+          },
+          '',
+        ],
+      },
+    ],
+  });
+});
+
+test('Should has AppRegistryAssociation', () => {
+  s3Template.hasResourceProperties('AWS::ServiceCatalogAppRegistry::ResourceAssociation', {
+    Application: {
+      'Fn::Select': [
+        2,
+        {
+          'Fn::Split': [
+            '/',
+            {
+              'Fn::Select': [
+                5,
+                {
+                  'Fn::Split': [
+                    ':',
+                    {
+                      Ref: 'AppRegistryApplicationArn',
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+    Resource: {
+      Ref: 'AWS::StackId',
+    },
+    ResourceType: 'CFN_STACK',
+  });
+});

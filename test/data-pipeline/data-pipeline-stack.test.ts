@@ -1615,3 +1615,50 @@ test('Root template has Cfn Outputs for Glue database and table', () => {
   });
 
 });
+
+test('Should has ApplicationArnCondition', () => {
+  rootTemplate.hasCondition('ApplicationArnCondition', {
+    'Fn::Not': [
+      {
+        'Fn::Equals': [
+          {
+            Ref: 'AppRegistryApplicationArn',
+          },
+          '',
+        ],
+      },
+    ],
+  });
+});
+
+test('Should has AppRegistryAssociation', () => {
+  rootTemplate.hasResourceProperties('AWS::ServiceCatalogAppRegistry::ResourceAssociation', {
+    Application: {
+      'Fn::Select': [
+        2,
+        {
+          'Fn::Split': [
+            '/',
+            {
+              'Fn::Select': [
+                5,
+                {
+                  'Fn::Split': [
+                    ':',
+                    {
+                      Ref: 'AppRegistryApplicationArn',
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+    Resource: {
+      Ref: 'AWS::StackId',
+    },
+    ResourceType: 'CFN_STACK',
+  });
+});

@@ -40,6 +40,7 @@ import {
   TABLE_NAME_ITEM,
 } from './common/constant';
 import { SolutionInfo } from './common/solution-info';
+import { associateApplicationWithStack } from './common/stack';
 import { REDSHIFT_MODE } from '../src/common/model';
 
 export class DataAnalyticsRedshiftStack extends Stack {
@@ -72,6 +73,9 @@ export class DataAnalyticsRedshiftStack extends Stack {
 
     addCfnNagForLogRetention(this);
     addCfnNagForCustomResourceProvider(this, 'CDK built-in provider for GetSourcePrefixCustomerResource', 'GetSourcePrefixCustomerResourceProvider');
+
+    // Associate Service Catalog AppRegistry application with stack
+    associateApplicationWithStack(this);
   }
 }
 

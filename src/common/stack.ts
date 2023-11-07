@@ -11,8 +11,19 @@
  *  and limitations under the License.
  */
 
-import { Fn, Stack } from 'aws-cdk-lib';
+import { Application } from '@aws-cdk/aws-servicecatalogappregistry-alpha';
+import { CfnCondition, CfnResource, Fn, Stack } from 'aws-cdk-lib';
+import { Parameters } from './parameters';
 
 export function getShortIdOfStack(stack: Stack): string {
   return Fn.select(0, Fn.split('-', Fn.select(2, Fn.split('/', stack.stackId))));
+}
+
+export function associateApplicationWithStack(stack: Stack): void {
+  const appRegistryApplicationArn = Parameters.createAppRegistryApplicationArnParameters(stack).valueAsString;
+  const application = Application.fromApplicationArn(stack, 'ServiceCatalogApplication', appRegistryApplicationArn);
+  application.associateApplicationWithStack(stack);
+  (stack.node.findChild('AppRegistryAssociation') as CfnResource).cfnOptions.condition = new CfnCondition(stack, 'ApplicationArnCondition', {
+    expression: Fn.conditionNot(Fn.conditionEquals(appRegistryApplicationArn, '')),
+  });
 }

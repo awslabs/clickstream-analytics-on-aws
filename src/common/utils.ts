@@ -44,4 +44,4 @@ export function generateRandomStr(length: number, charSet?: string): string {
     password += strCharset.charAt(Math.floor(randomInt(0, strCharset.length)));
   }
   return password;
-};
+}

@@ -231,6 +231,7 @@ export const SECRETS_MANAGER_ARN_PATTERN =
   '^$|^arn:aws(-cn|-us-gov)?:secretsmanager:[a-z0-9-]+:[0-9]{12}:secret:[a-zA-Z0-9-\/]+$';
 export const DDB_TABLE_ARN_PATTERN =
   '^arn:aws(-cn|-us-gov)?:dynamodb:[a-z0-9-]+:[0-9]{12}:table\/[a-zA-Z0-9_.-]+$';
+export const SERVICE_CATALOG_APPREGISTRY_ARN_PATTERN = 'arn:aws(-cn|-us-gov)?:servicecatalog:[a-z0-9-]+:[0-9]{12}:\/applications\/[a-zA-Z0-9_.-]+';
 export const SCHEDULE_EXPRESSION_PATTERN =
   '^(rate\\(\\s*\\d+\\s+(hour|minute|day)s?\\s*\\))|(cron\\(.*\\))$';
 

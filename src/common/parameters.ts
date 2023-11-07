@@ -43,6 +43,7 @@ import {
   APP_ID_PATTERN,
   EMAIL_PATTERN,
   S3_PREFIX_PATTERN,
+  SERVICE_CATALOG_APPREGISTRY_ARN_PATTERN,
 } from './constant';
 
 export enum SubnetParameterType {
@@ -454,5 +455,13 @@ export class Parameters {
       appIdsParam,
     };
   }
-}
 
+  public static createAppRegistryApplicationArnParameters(scope: Construct, id?: string) : CfnParameter {
+    return new CfnParameter(scope, id ?? 'AppRegistryApplicationArn', {
+      description: 'Service Catalog AppRegistry Application Arn',
+      type: 'String',
+      allowedPattern: `^(|${SERVICE_CATALOG_APPREGISTRY_ARN_PATTERN})$`,
+      constraintDescription: `Service Catalog AppRegistry application arn parameter can either match pattern ${SERVICE_CATALOG_APPREGISTRY_ARN_PATTERN} or be empty`,
+    });
+  }
+}

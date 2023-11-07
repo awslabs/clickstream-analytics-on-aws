@@ -182,4 +182,50 @@ describe('Athena built-in query test', () => {
     });
   });
 
+  test('Should has ApplicationArnCondition', () => {
+    template.hasCondition('ApplicationArnCondition', {
+      'Fn::Not': [
+        {
+          'Fn::Equals': [
+            {
+              Ref: 'AppRegistryApplicationArn',
+            },
+            '',
+          ],
+        },
+      ],
+    });
+  });
+
+  test('Should has AppRegistryAssociation', () => {
+    template.hasResourceProperties('AWS::ServiceCatalogAppRegistry::ResourceAssociation', {
+      Application: {
+        'Fn::Select': [
+          2,
+          {
+            'Fn::Split': [
+              '/',
+              {
+                'Fn::Select': [
+                  5,
+                  {
+                    'Fn::Split': [
+                      ':',
+                      {
+                        Ref: 'AppRegistryApplicationArn',
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+      Resource: {
+        Ref: 'AWS::StackId',
+      },
+      ResourceType: 'CFN_STACK',
+    });
+  });
 });

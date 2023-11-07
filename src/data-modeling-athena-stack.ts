@@ -11,17 +11,12 @@
  *  and limitations under the License.
  */
 
-import {
-  Stack,
-  StackProps,
-} from 'aws-cdk-lib';
+import { Stack, StackProps } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
-
-import {
-  createAthenaStackParameters,
-} from './analytics/parameter';
+import { createAthenaStackParameters } from './analytics/parameter';
 import { AthenaSavedQuery } from './analytics/private/athena-saved-queries';
 import { SolutionInfo } from './common/solution-info';
+import { associateApplicationWithStack } from './common/stack';
 
 export class DataModelingAthenaStack extends Stack {
 
@@ -46,5 +41,8 @@ export class DataModelingAthenaStack extends Stack {
       eventParamTable: athenaParameters.eventParamTable,
       userTable: athenaParameters.userTable,
     });
+
+    // Associate Service Catalog AppRegistry application with stack
+    associateApplicationWithStack(this);
   }
 }
