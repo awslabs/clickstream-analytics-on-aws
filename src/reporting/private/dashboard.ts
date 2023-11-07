@@ -79,24 +79,22 @@ export const dataSetPermissionActions = [
   'quicksight:PassDataSet',
   'quicksight:DescribeIngestion',
   'quicksight:ListIngestions',
-  'quicksight:ListDataSets',
-  'quicksight:SearchDataSets',
 ];
 
 export const analysisPermissionActions = [
   'quicksight:DescribeAnalysis',
-  'quicksight:ListAnalyses',
-  'quicksight:SearchAnalyses',
+  'quicksight:UpdateAnalysisPermissions',
+  'quicksight:QueryAnalysis',
+  'quicksight:UpdateAnalysis',
+  'quicksight:RestoreAnalysis',
+  'quicksight:DeleteAnalysis',
   'quicksight:DescribeAnalysisPermissions',
 ];
 
 export const dashboardPermissionActions = [
   'quicksight:DescribeDashboard',
-  'quicksight:ListDashboards',
   'quicksight:ListDashboardVersions',
-  'quicksight:GetDashboardEmbedUrl',
-  'quicksight:DescribeDashboardPermissions',
-  'quicksight:SearchDashboards'
+  'quicksight:QueryDashboard',
 ];
 
 function sleep(ms: number) {
@@ -118,6 +116,7 @@ export async function waitForDataSetCreateCompleted(quickSight: QuickSight, acco
       await sleep(1000);
 
     } catch (err: any) {
+      logger.error(`Date set create failed due to ${(err as Error).message}`);
       throw err;
     }
   }
@@ -137,7 +136,7 @@ export async function waitForAnalysisChangeCompleted(quickSight: QuickSight, acc
       } else if ( analysis.ResourceStatus === ResourceStatus.UPDATE_FAILED ) {
         throw new Error('Analysis update failed.');
       } else if ( analysis.ResourceStatus === ResourceStatus.CREATION_FAILED ) {
-        throw new Error('Analysis update failed.');
+        throw new Error('Analysis create failed.');
       }
 
       logger.info('AnalysisUpdate: sleep 1 second');
@@ -164,13 +163,13 @@ export async function waitForDashboardChangeCompleted(quickSight: QuickSight, ac
       } else if ( analysis.ResourceStatus === ResourceStatus.UPDATE_FAILED ) {
         throw new Error('Dashboard update failed.');
       } else if ( analysis.ResourceStatus === ResourceStatus.CREATION_FAILED ) {
-        throw new Error('Dashboard update failed.');
+        throw new Error('Dashboard create failed.');
       }
       logger.info('DashboardUpdate: sleep 1 second');
       await sleep(1000);
 
     } catch (err: any) {
-      logger.error(`Dashboard create/update failed due to ${(err as Error).message}`);
+      logger.error(`Dashboard create/update failed due to ${err}`);
       throw err;
     }
   }
@@ -191,8 +190,8 @@ export async function waitForDataSetDeleteCompleted(quickSight: QuickSight, acco
         return;
       }
 
-      logger.info('delete dataset catch: sleep 1 second');
-      await sleep(1000);
+      logger.error(`delete dataset failed due to ${err}`);
+      throw err;
     }
   }
 };
@@ -216,8 +215,9 @@ export async function waitForAnalysisDeleteCompleted(quickSight: QuickSight, acc
       if ((err as Error) instanceof ResourceNotFoundException) {
         return;
       }
-      logger.info('AnalysisDelete catch: sleep 1 second');
-      await sleep(1000);
+
+      logger.error(`delete analysis failed due to ${err}`);
+      throw err;
     }
   }
 };
@@ -241,8 +241,9 @@ export async function waitForDashboardDeleteCompleted(quickSight: QuickSight, ac
       if ((err as Error) instanceof ResourceNotFoundException) {
         return;
       }
-      logger.info('DashboardDelete catch: sleep 1 second');
-      await sleep(1000);
+
+      logger.error(`delete dashboard failed due to ${err}`);
+      throw err;
     }
   }
 };

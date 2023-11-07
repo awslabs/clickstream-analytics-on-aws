@@ -460,7 +460,7 @@ const createAnalysis = async (quickSight: QuickSight, awsAccountId: string, prin
     return analysis;
 
   } catch (err: any) {
-    logger.error(`Create QuickSight analysis failed due to: ${(err as Error).message}`);
+    logger.error(`Create QuickSight analysis failed due to: ${err}`);
     throw err;
   }
 };

@@ -31,6 +31,7 @@ import {
   UpdateAnalysisPermissionsCommand,
   UpdateDashboardCommand,
   UpdateDashboardPermissionsCommand,
+  UpdateDashboardPermissionsCommandInput,
   UpdateDataSetCommand,
   UpdateDataSetPermissionsCommand,
 } from '@aws-sdk/client-quicksight';
@@ -687,7 +688,15 @@ describe('QuickSight Lambda function', () => {
 
     quickSightClientMock.on(UpdateDataSetPermissionsCommand).resolves({});
     quickSightClientMock.on(UpdateAnalysisPermissionsCommand).resolves({});
-    quickSightClientMock.on(UpdateDashboardPermissionsCommand).resolves({});
+    quickSightClientMock.on(UpdateDashboardPermissionsCommand).callsFakeOnce(input => {
+
+      console.log(input);
+      if ((input as UpdateDashboardPermissionsCommandInput).GrantPermissions![0].Principal === 'test-principal-arn-change') {
+        console.log(input);
+        return {};
+      }
+      throw new Error('New principal is not take effect.');
+    });
 
     const resp = await handler(updateEventChangePermission, context) as CdkCustomResourceResponse;
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDataSetCommand, 2);
