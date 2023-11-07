@@ -241,7 +241,7 @@ export class ReportingService {
         percentageCols.push(e.eventName + '_rate');
       }
     }
-    const tableVisualDef = getFunnelTableVisualDef(tableVisualId, tableVisualViewName, eventNames, titleProps, query.groupColumn);
+    const tableVisualDef = getFunnelTableVisualDef(tableVisualId, tableVisualViewName, eventNames, titleProps, query.groupColumn, hasGrouping);
     const columnConfigurations = getFunnelTableVisualRelatedDefs(tableVisualViewName, percentageCols);
 
     visualRelatedParams.filterGroup!.ScopeConfiguration!.SelectedSheets!.SheetVisualScopingConfigurations![0].VisualIds?.push(tableVisualId);

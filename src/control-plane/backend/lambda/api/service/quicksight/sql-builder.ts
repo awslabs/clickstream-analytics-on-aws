@@ -192,7 +192,17 @@ const USER_TABLE = 'user_m_view';
 export function buildFunnelTableView(sqlParameters: SQLParameters) : string {
 
   let eventNames = _getEventsNameFromConditions(sqlParameters.eventAndConditions!);
-  let sql = _buildFunnelBaseSql(eventNames, sqlParameters);
+  let groupCondition: GroupingCondition | undefined = undefined;
+  let appendGroupingCol = false;
+  let colNameWithPrefix = '';
+
+  if (sqlParameters.groupCondition !== undefined) {
+    colNameWithPrefix = _getColNameWithPrefix(sqlParameters.groupCondition);
+    groupCondition = sqlParameters.groupCondition;
+    appendGroupingCol = true;
+  }
+
+  let sql = _buildFunnelBaseSqlForTableVisual(eventNames, sqlParameters, groupCondition);
 
   let prefix = 'user_pseudo_id';
   if (sqlParameters.computeMethod === ExploreComputeMethod.EVENT_CNT) {
@@ -213,10 +223,15 @@ export function buildFunnelTableView(sqlParameters: SQLParameters) : string {
   sql = sql.concat(`
     select 
       ${sqlParameters.groupColumn}
+      ${appendGroupingCol ? `, ${colNameWithPrefix} as group_col` : ''}
       ${resultCntSQL}
     from join_table
     group by 
       ${sqlParameters.groupColumn}
+      ${appendGroupingCol ? `, ${colNameWithPrefix}` : ''}
+    order by 
+      ${sqlParameters.groupColumn}
+      ,${eventNames[0]} desc
   `);
 
   return format(sql, {
@@ -876,6 +891,101 @@ function _buildFunnelBaseSql(eventNames: string[], sqlParameters: SQLParameters,
     } else {
       joinConditionSQL = joinConditionSQL.concat(`left outer join table_${index} ${joinCondition} and TO_CHAR(TIMESTAMP 'epoch' + cast(table_${index-1}.event_timestamp_${index-1}/1000 as bigint) * INTERVAL '1 second', 'YYYY-MM-DD') = TO_CHAR(TIMESTAMP 'epoch' + cast(table_${index}.event_timestamp_${index}/1000 as bigint) * INTERVAL '1 second', 'YYYY-MM-DD')  \n`);
     }
+  }
+
+  sql = sql.concat(`
+    join_table as (
+      select table_0.*
+        ${joinColumnsSQL}
+      from table_0 
+        ${joinConditionSQL}
+    )`,
+  );
+
+  return sql;
+};
+
+
+function _buildColumnsForFunnelViews(index: number, groupCondition: GroupingCondition | undefined = undefined ) {
+
+  let groupCol = '';
+  let newColumnTemplate = columnTemplate;
+  if (groupCondition !== undefined) {
+    groupCol = `,${_getColNameWithPrefix(groupCondition)}`;
+    newColumnTemplate += `${groupCol}`;
+  }
+
+  const firstTableColumns = `
+      month
+    ,week
+    ,day
+    ,hour
+    ,${newColumnTemplate.replace(/####/g, '_0')}
+  `;
+
+  if (index === 0) {
+    return firstTableColumns;
+  }
+
+  return newColumnTemplate.replace(/####/g, `_${index}`);
+
+}
+
+function _buildJoinSqlForFunnelTableVisual(sqlParameters: SQLParameters, index:number, groupCondition: GroupingCondition | undefined = undefined ) {
+
+  let joinCondition = '';
+  let joinConditionSQL = '';
+  let groupingJoinSQL = '';
+
+  if ( sqlParameters.specifyJoinColumn) {
+    joinCondition = `on table_${index-1}.${sqlParameters.joinColumn}_${index-1} = table_${index}.${sqlParameters.joinColumn}_${index}`;
+  } else {
+    joinCondition = `on table_${index-1}.user_pseudo_id_${index-1} = table_${index}.user_pseudo_id_${index}`;
+  }
+
+  if (groupCondition !== undefined) {
+    groupingJoinSQL = `and table_${index-1}.${_getColNameWithPrefix(groupCondition)} = table_${index}.${_getColNameWithPrefix(groupCondition)}`;
+  }
+
+  if (sqlParameters.conversionIntervalType == 'CUSTOMIZE') {
+    joinConditionSQL = joinConditionSQL.concat(`left outer join table_${index} ${joinCondition} ${groupingJoinSQL} and table_${index}.event_timestamp_${index} - table_${index-1}.event_timestamp_${index-1} > 0 and table_${index}.event_timestamp_${index} - table_${index-1}.event_timestamp_${index-1} < ${sqlParameters.conversionIntervalInSeconds}*1000 \n`);
+  } else {
+    joinConditionSQL = joinConditionSQL.concat(`left outer join table_${index} ${joinCondition} ${groupingJoinSQL} and TO_CHAR(TIMESTAMP 'epoch' + cast(table_${index-1}.event_timestamp_${index-1}/1000 as bigint) * INTERVAL '1 second', 'YYYY-MM-DD') = TO_CHAR(TIMESTAMP 'epoch' + cast(table_${index}.event_timestamp_${index}/1000 as bigint) * INTERVAL '1 second', 'YYYY-MM-DD')  \n`);
+  }
+
+  return joinConditionSQL;
+
+}
+
+function _buildFunnelBaseSqlForTableVisual(eventNames: string[], sqlParameters: SQLParameters,
+  groupCondition: GroupingCondition | undefined = undefined) : string {
+
+  let sql = _buildCommonPartSql(eventNames, sqlParameters);
+
+  for (const [index, event] of eventNames.entries()) {
+    sql = sql.concat(`
+    table_${index} as (
+      select 
+        ${_buildColumnsForFunnelViews(index, groupCondition)}
+      from base_data base
+      where event_name = '${event}'
+    ),
+    `);
+  }
+
+  let joinConditionSQL = '';
+  let joinColumnsSQL = '';
+
+  for (const [index, _item] of eventNames.entries()) {
+    if (index === 0) {
+      continue;
+    }
+    joinColumnsSQL = joinColumnsSQL.concat(`, table_${index}.event_id_${index} \n`);
+    joinColumnsSQL = joinColumnsSQL.concat(`, table_${index}.event_name_${index} \n`);
+    joinColumnsSQL = joinColumnsSQL.concat(`, table_${index}.user_pseudo_id_${index} \n`);
+    joinColumnsSQL = joinColumnsSQL.concat(`, table_${index}.event_timestamp_${index} \n`);
+
+    joinConditionSQL += _buildJoinSqlForFunnelTableVisual(sqlParameters, index, groupCondition);
   }
 
   sql = sql.concat(`
