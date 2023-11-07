@@ -1235,12 +1235,18 @@ test('Check there are Kinesis Arn outputs in Kinesis', () => {
 
 });
 
-test('Check there is no Kinesis outputs in S3 tempalte', () => {
+test('Check there is no Kinesis outputs in S3 template', () => {
   const template = s3Template.toJSON();
 
   const kinesisArnOutput = template.Outputs && Object.keys(template.Outputs).find(key => key.indexOf('KinesisArn') !== -1);
 
   expect(kinesisArnOutput).toBeUndefined();
+});
+
+test('Should has Parameter AppRegistryApplicationArn', () => {
+  s3Template.hasParameter('AppRegistryApplicationArn', {
+    Type: 'String',
+  });
 });
 
 test('Should has ApplicationArnCondition', () => {

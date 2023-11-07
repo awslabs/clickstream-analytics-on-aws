@@ -509,7 +509,11 @@ describe('DataPipelineStack parameter test', () => {
     });
   });
 
-
+  test('Should has Parameter AppRegistryApplicationArn', () => {
+    template.hasParameter('AppRegistryApplicationArn', {
+      Type: 'String',
+    });
+  });
 });
 
 

@@ -73,6 +73,7 @@ test('Parameters settings are as expected', () => {
     ['RotateIntervalMS', 'Number', '3000000'],
     ['FlushSize', 'Number', '50000'],
     ['CustomConnectorConfiguration', 'String', '{}'],
+    ['AppRegistryApplicationArn', 'String'],
   ];
 
   for (const param of params) {

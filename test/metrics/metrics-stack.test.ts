@@ -58,6 +58,12 @@ test('Should has Parameter Emails', () => {
   });
 });
 
+test('Should has Parameter AppRegistryApplicationArn', () => {
+  template.hasParameter('AppRegistryApplicationArn', {
+    Type: 'String',
+  });
+});
+
 test('has Events::Rule', () => {
   template.hasResourceProperties('AWS::Events::Rule', {
     EventPattern: {

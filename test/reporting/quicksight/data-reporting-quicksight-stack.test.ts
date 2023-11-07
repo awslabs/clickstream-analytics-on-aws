@@ -270,6 +270,11 @@ describe('DataReportingQuickSightStack parameter test', () => {
     }
   });
 
+  test('Should has Parameter AppRegistryApplicationArn', () => {
+    template.hasParameter('AppRegistryApplicationArn', {
+      Type: 'String',
+    });
+  });
 });
 
 describe('DataReportingQuickSightStack resource test', () => {

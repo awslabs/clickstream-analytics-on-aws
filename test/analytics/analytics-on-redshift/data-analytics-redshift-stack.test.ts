@@ -364,6 +364,12 @@ describe('DataAnalyticsRedshiftStack common parameter test', () => {
     expect(condition3[CFN_FN.EQUALS][1]).toEqual('Provisioned');
 
   });
+
+  test('Should has Parameter AppRegistryApplicationArn', () => {
+    template.hasParameter('AppRegistryApplicationArn', {
+      Type: 'String',
+    });
+  });
 });
 
 describe('DataAnalyticsRedshiftStack serverless parameter test', () => {

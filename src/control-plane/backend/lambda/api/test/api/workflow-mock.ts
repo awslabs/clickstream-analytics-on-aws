@@ -968,3 +968,13 @@ export const BASE_ATHENA_PARAMETERS = [
     ParameterValue: '#.Clickstream-DataProcessing-6666-6666.GlueEventTable',
   },
 ];
+
+export const APPREGISTRY_APPLICATION_ARN_PARAMETER = {
+  ParameterKey: 'AppRegistryApplicationArn.#',
+  ParameterValue: '#.Clickstream-ServiceCatalogAppRegistry-6666-6666.ServiceCatalogAppRegistryApplicationArn',
+};
+
+export const APPREGISTRY_APPLICATION_EMPTY_ARN_PARAMETER = {
+  ParameterKey: 'AppRegistryApplicationArn',
+  ParameterValue: '',
+};

@@ -27,6 +27,7 @@ describe('Athena built-in query test', () => {
     template.hasParameter('AthenaEventTable', {});
     template.hasParameter('AthenaEventParamTable', {});
     template.hasParameter('AthenaUserTable', {});
+    template.hasParameter('AppRegistryApplicationArn', {});
   });
 
   test('Should have device query', () => {
