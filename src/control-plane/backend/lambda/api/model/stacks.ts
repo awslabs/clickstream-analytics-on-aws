@@ -51,7 +51,7 @@ import {
   PipelineStackType,
   ProjectEnvironment,
 } from '../common/types';
-import { getBucketPrefix, getKafkaTopic, getPluginInfo, isEmpty, getValueFromStackOutputSuffix, isEmail, corsStackInput, getBucketName } from '../common/utils';
+import { getBucketPrefix, getKafkaTopic, getPluginInfo, isEmpty, getValueFromStackOutputSuffix, isEmail, corsStackInput } from '../common/utils';
 
 export function getStackParameters(stack: JSONObject): Parameter[] {
   const parameters: Parameter[] = [];
@@ -394,11 +394,11 @@ export class CIngestionServerStack extends JSONObject {
       EnableAuthentication: pipeline.ingestionServer.loadBalancer.authenticationSecretArn ? 'Yes' : 'No',
       EnableApplicationLoadBalancerAccessLog: pipeline.ingestionServer.loadBalancer.enableApplicationLoadBalancerAccessLog ? 'Yes' : 'No',
       // Log
-      LogS3Bucket: getBucketName(pipeline, BucketPrefix.LOGS_ALB, pipeline.ingestionServer.loadBalancer.logS3Bucket?.name),
-      LogS3Prefix: getBucketPrefix(pipeline.projectId, BucketPrefix.LOGS_ALB, pipeline.ingestionServer.loadBalancer.logS3Bucket?.prefix),
+      LogS3Bucket: pipeline.bucket.name,
+      LogS3Prefix: getBucketPrefix(pipeline.projectId, BucketPrefix.LOGS_ALB, ''),
       // S3 sink
-      S3DataBucket: getBucketName(pipeline, BucketPrefix.DATA_BUFFER, pipeline.ingestionServer.sinkS3?.sinkBucket.name),
-      S3DataPrefix: getBucketPrefix(pipeline.projectId, BucketPrefix.DATA_BUFFER, pipeline.ingestionServer.sinkS3?.sinkBucket.prefix),
+      S3DataBucket: pipeline.bucket.name,
+      S3DataPrefix: getBucketPrefix(pipeline.projectId, BucketPrefix.DATA_BUFFER, ''),
       S3BatchMaxBytes: pipeline.ingestionServer.sinkS3?.s3BatchMaxBytes,
       S3BatchTimeout: pipeline.ingestionServer.sinkS3?.s3BatchTimeout,
       // Kafka sink
@@ -412,8 +412,8 @@ export class CIngestionServerStack extends JSONObject {
       KinesisDataRetentionHours: pipeline.ingestionServer.sinkKinesis?.kinesisDataRetentionHours,
       KinesisBatchSize: pipeline.ingestionServer.sinkBatch?.size,
       KinesisMaxBatchingWindowSeconds: pipeline.ingestionServer.sinkBatch?.intervalSeconds,
-      KinesisDataS3Bucket: getBucketName(pipeline, BucketPrefix.DATA_BUFFER, pipeline.ingestionServer.sinkKinesis?.sinkBucket.name),
-      KinesisDataS3Prefix: getBucketPrefix(pipeline.projectId, BucketPrefix.DATA_BUFFER, pipeline.ingestionServer.sinkKinesis?.sinkBucket.prefix),
+      KinesisDataS3Bucket: pipeline.bucket.name,
+      KinesisDataS3Prefix: getBucketPrefix(pipeline.projectId, BucketPrefix.DATA_BUFFER, ''),
     });
   }
 }
@@ -553,12 +553,11 @@ export class CKafkaConnectorStack extends JSONObject {
       _resources: resources,
 
       ProjectId: pipeline.projectId,
-      DataS3Bucket: getBucketName(pipeline, BucketPrefix.DATA_BUFFER, pipeline.ingestionServer.sinkKafka?.kafkaConnector.sinkBucket?.name),
-      DataS3Prefix: getBucketPrefix(pipeline.projectId, BucketPrefix.DATA_BUFFER,
-        pipeline.ingestionServer.sinkKafka?.kafkaConnector.sinkBucket?.prefix),
-      LogS3Bucket: getBucketName(pipeline, BucketPrefix.LOGS_KAFKA_CONNECTOR, ''),
+      DataS3Bucket: pipeline.bucket.name,
+      DataS3Prefix: getBucketPrefix(pipeline.projectId, BucketPrefix.DATA_BUFFER, ''),
+      LogS3Bucket: pipeline.bucket.name,
       LogS3Prefix: getBucketPrefix(pipeline.projectId, BucketPrefix.LOGS_KAFKA_CONNECTOR, ''),
-      PluginS3Bucket: getBucketName(pipeline, BucketPrefix.KAFKA_CONNECTOR_PLUGIN, ''),
+      PluginS3Bucket: pipeline.bucket.name,
       PluginS3Prefix: getBucketPrefix(pipeline.projectId, BucketPrefix.KAFKA_CONNECTOR_PLUGIN, ''),
       SubnetIds: pipeline.network.privateSubnetIds.join(','),
       SecurityGroupId: pipeline.ingestionServer.sinkKafka?.securityGroupId,
@@ -628,10 +627,7 @@ export class CDataProcessingStack extends JSONObject {
 
   @JSONObject.required
   @JSONObject.custom( (stack:CDataProcessingStack, key:string, value:string) => {
-    if (stack._pipeline?.ingestionServer.sinkType == PipelineSinkType.S3
-      && !isEmpty(stack._pipeline?.ingestionServer.sinkS3?.sinkBucket.prefix)) {
-      value = stack._pipeline?.ingestionServer.sinkS3?.sinkBucket.prefix ?? '';
-    } else if (stack._pipeline?.ingestionServer.sinkType == PipelineSinkType.KAFKA) {
+    if (stack._pipeline?.ingestionServer.sinkType == PipelineSinkType.KAFKA) {
       value = `${value}${stack._kafkaTopic}/`;
     }
     validatePattern(key, S3_PREFIX_PATTERN, value);
@@ -699,14 +695,6 @@ export class CDataProcessingStack extends JSONObject {
   constructor(pipeline: IPipeline, resources: CPipelineResources) {
     const pluginInfo = getPluginInfo(pipeline, resources);
 
-    if (pipeline.ingestionServer.sinkType === PipelineSinkType.S3 && pipeline.dataProcessing) {
-      if (pipeline.ingestionServer.sinkS3?.sinkBucket.name !== pipeline.dataProcessing.sinkS3Bucket.name ||
-        pipeline.ingestionServer.sinkS3?.sinkBucket.name !== pipeline.dataProcessing.sourceS3Bucket.name ||
-        pipeline.ingestionServer.sinkS3?.sinkBucket.prefix !== pipeline.dataProcessing.sourceS3Bucket.prefix) {
-        throw new ClickStreamBadRequestError('Sink bucket inconsistent with data processing.');
-      }
-    }
-
     super({
       _pipeline: pipeline,
       _kafkaTopic: getKafkaTopic(pipeline),
@@ -716,13 +704,13 @@ export class CDataProcessingStack extends JSONObject {
       ProjectId: pipeline.projectId,
       AppIds: resources.appIds?.join(','),
 
-      SourceS3Bucket: getBucketName(pipeline, BucketPrefix.DATA_BUFFER, pipeline.dataProcessing?.sourceS3Bucket.name),
-      SourceS3Prefix: getBucketPrefix(pipeline.projectId, BucketPrefix.DATA_BUFFER, pipeline.dataProcessing?.sourceS3Bucket.prefix),
-      SinkS3Bucket: getBucketName(pipeline, BucketPrefix.DATA_ODS, pipeline.dataProcessing?.sinkS3Bucket.name),
-      SinkS3Prefix: getBucketPrefix(pipeline.projectId, BucketPrefix.DATA_ODS, pipeline.dataProcessing?.sinkS3Bucket.prefix),
+      SourceS3Bucket: pipeline.bucket.name,
+      SourceS3Prefix: getBucketPrefix(pipeline.projectId, BucketPrefix.DATA_BUFFER, ''),
+      SinkS3Bucket: pipeline.bucket.name,
+      SinkS3Prefix: getBucketPrefix(pipeline.projectId, BucketPrefix.DATA_ODS, ''),
 
-      PipelineS3Bucket: getBucketName(pipeline, BucketPrefix.DATA_PIPELINE_TEMP, pipeline.dataProcessing?.pipelineBucket.name),
-      PipelineS3Prefix: getBucketPrefix(pipeline.projectId, BucketPrefix.DATA_PIPELINE_TEMP, pipeline.dataProcessing?.pipelineBucket.prefix),
+      PipelineS3Bucket: pipeline.bucket.name,
+      PipelineS3Prefix: getBucketPrefix(pipeline.projectId, BucketPrefix.DATA_PIPELINE_TEMP, ''),
       DataFreshnessInHour: pipeline.dataProcessing?.dataFreshnessInHour,
       ScheduleExpression: pipeline.dataProcessing?.scheduleExpression,
 
@@ -995,15 +983,15 @@ export class CDataModelingStack extends JSONObject {
       ProjectId: pipeline.projectId,
       AppIds: resources.appIds?.join(','),
 
-      ODSEventBucket: getBucketName(pipeline, BucketPrefix.DATA_ODS, pipeline.dataModeling?.ods?.bucket.name),
-      ODSEventPrefix: getBucketPrefix(pipeline.projectId, BucketPrefix.DATA_ODS, pipeline.dataModeling?.ods?.bucket.prefix),
+      ODSEventBucket: pipeline.bucket.name,
+      ODSEventPrefix: getBucketPrefix(pipeline.projectId, BucketPrefix.DATA_ODS, ''),
       ODSEventFileSuffix: pipeline.dataModeling?.ods?.fileSuffix,
 
-      PipelineS3Bucket: getBucketName(pipeline, BucketPrefix.DATA_PIPELINE_TEMP, pipeline.dataProcessing?.pipelineBucket.name),
-      PipelineS3Prefix: getBucketPrefix(pipeline.projectId, BucketPrefix.DATA_PIPELINE_TEMP, pipeline.dataProcessing?.pipelineBucket.prefix),
+      PipelineS3Bucket: pipeline.bucket.name,
+      PipelineS3Prefix: getBucketPrefix(pipeline.projectId, BucketPrefix.DATA_PIPELINE_TEMP, ''),
 
-      LoadWorkflowBucket: getBucketName(pipeline, BucketPrefix.LOAD_WORKFLOW, pipeline.dataModeling?.loadWorkflow?.bucket?.name),
-      LoadWorkflowBucketPrefix: getBucketPrefix(pipeline.projectId, BucketPrefix.LOAD_WORKFLOW, pipeline.dataModeling?.loadWorkflow?.bucket?.prefix),
+      LoadWorkflowBucket: pipeline.bucket.name,
+      LoadWorkflowBucketPrefix: getBucketPrefix(pipeline.projectId, BucketPrefix.LOAD_WORKFLOW, ''),
       MaxFilesLimit: pipeline.dataModeling?.loadWorkflow?.maxFilesLimit,
       DataProcessingCronOrRateExpression: pipeline.dataProcessing?.scheduleExpression,
 

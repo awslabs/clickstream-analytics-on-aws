@@ -67,11 +67,9 @@ import {
   KINESIS_DATA_PROCESSING_PROVISIONED_REDSHIFT_QUICKSIGHT_PIPELINE,
   S3_INGESTION_HTTP_AUTHENTICATION_PIPELINE,
   KINESIS_DATA_PROCESSING_NEW_REDSHIFT_WITH_ERROR_RPU_PIPELINE,
-  S3_DATA_PROCESSING_WITH_ERROR_PREFIX_PIPELINE,
   KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW_AND_EXPRESSION_UPDATE,
   KINESIS_DATA_PROCESSING_PROVISIONED_REDSHIFT_ERROR_DBUSER_QUICKSIGHT_PIPELINE,
   BASE_STATUS,
-  S3_SINK_BUCKET_INCONSISTENT_WITH_DATA_PROCESSING_PIPELINE,
 } from './pipeline-mock';
 import { clickStreamTableName, dictionaryTableName, prefixTimeGSIName } from '../../common/constants';
 import { BuiltInTagKeys } from '../../common/model-ln';
@@ -133,48 +131,6 @@ describe('Pipeline test', () => {
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSubnetsCommand, 1);
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeRouteTablesCommand, 1);
     expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 1);
-  });
-  it('Create pipeline with error prefix', async () => {
-    tokenMock(ddbMock, false);
-    projectExistedMock(ddbMock, true);
-    dictionaryMock(ddbMock);
-    createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock,
-      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, iamMock, {
-        publicAZContainPrivateAZ: true,
-        subnetsCross3AZ: true,
-        subnetsIsolated: true,
-      });
-    ddbMock.on(PutCommand).resolves({});
-    const res = await request(app)
-      .post('/api/pipeline')
-      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
-      .send({
-        ...S3_DATA_PROCESSING_WITH_ERROR_PREFIX_PIPELINE,
-      });
-    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
-    expect(res.statusCode).toBe(400);
-    expect(res.body.message).toEqual('Validation error: S3DataPrefix: EXAMPLE_PREFIX_ERROR not match ^(|[^/].*/)$. Please check and try again.');
-  });
-  it('Create pipeline sink bucket inconsistent with data processing', async () => {
-    tokenMock(ddbMock, false);
-    projectExistedMock(ddbMock, true);
-    dictionaryMock(ddbMock);
-    createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock,
-      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, iamMock, {
-        publicAZContainPrivateAZ: true,
-        subnetsCross3AZ: true,
-        subnetsIsolated: true,
-      });
-    ddbMock.on(PutCommand).resolves({});
-    const res = await request(app)
-      .post('/api/pipeline')
-      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
-      .send({
-        ...S3_SINK_BUCKET_INCONSISTENT_WITH_DATA_PROCESSING_PIPELINE,
-      });
-    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
-    expect(res.statusCode).toBe(400);
-    expect(res.body.message).toEqual('Sink bucket inconsistent with data processing.');
   });
   it('Create pipeline only ingestion', async () => {
     tokenMock(ddbMock, false);
