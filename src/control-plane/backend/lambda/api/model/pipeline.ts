@@ -424,6 +424,14 @@ export class CPipeline {
         this.pipeline.ingestionServer.loadBalancer.authenticationSecretArn, SECRETS_MANAGER_ARN_PATTERN);
     }
 
+    if (this.pipeline.ingestionServer.sinkType === PipelineSinkType.S3 && this.pipeline.dataProcessing) {
+      if (this.pipeline.ingestionServer.sinkS3?.sinkBucket.name !== this.pipeline.dataProcessing.sinkS3Bucket.name ||
+        this.pipeline.ingestionServer.sinkS3?.sinkBucket.name !== this.pipeline.dataProcessing.pipelineBucket.name ||
+        this.pipeline.ingestionServer.sinkS3?.sinkBucket.name !== this.pipeline.dataProcessing.sourceS3Bucket.name) {
+        throw new ClickStreamBadRequestError('Validation error: Sink bucket inconsistent with data processing.');
+      }
+    }
+
     if (this.pipeline.reporting) {
       const quickSightUser = await registerClickstreamUser();
       this.resources = {

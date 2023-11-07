@@ -1541,6 +1541,21 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                         },
                       },
                     },
+                    dataProcessing: {
+                      ...prev.dataProcessing,
+                      sourceS3Bucket: {
+                        ...prev.dataProcessing.sourceS3Bucket,
+                        name: bucket,
+                      },
+                      sinkS3Bucket: {
+                        ...prev.dataProcessing.sinkS3Bucket,
+                        name: bucket,
+                      },
+                      pipelineBucket: {
+                        ...prev.dataProcessing.pipelineBucket,
+                        name: bucket,
+                      },
+                    },
                   };
                 });
               }}
@@ -1557,6 +1572,21 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                           ...prev.ingestionServer.sinkS3.sinkBucket,
                           prefix: prefix,
                         },
+                      },
+                    },
+                    dataProcessing: {
+                      ...prev.dataProcessing,
+                      sourceS3Bucket: {
+                        ...prev.dataProcessing.sourceS3Bucket,
+                        prefix: prefix,
+                      },
+                      sinkS3Bucket: {
+                        ...prev.dataProcessing.sinkS3Bucket,
+                        prefix: prefix,
+                      },
+                      pipelineBucket: {
+                        ...prev.dataProcessing.pipelineBucket,
+                        prefix: prefix,
                       },
                     },
                   };
