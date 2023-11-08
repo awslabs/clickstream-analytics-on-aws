@@ -27,8 +27,8 @@ session_part_1 AS (
     user_pseudo_id,
     platform,
     MAX(session_duration) AS session_duration,
-    (CASE WHEN (MAX(session_duration) > 10000 OR SUM(view) > 1) THEN 1 ELSE 0 END) AS engaged_session,
-    (CASE WHEN (MAX(session_duration) > 10000 OR SUM(view) > 1) THEN 0 ELSE 1 END) AS bounced_session,
+    (CASE WHEN (MAX(session_duration) >= 10000 OR SUM(view) >= 1) THEN 1 ELSE 0 END) AS engaged_session,
+    (CASE WHEN (MAX(session_duration) >= 10000 OR SUM(view) >= 1) THEN 0 ELSE 1 END) AS bounced_session,
     MIN(session_st) AS session_start_timestamp,
     SUM(view) AS session_views,
     SUM(engagement_time) AS session_engagement_time

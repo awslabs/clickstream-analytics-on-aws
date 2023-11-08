@@ -86,6 +86,10 @@ export const clickstream_event_view_columns: InputColumn[] = [
     Type: 'STRING',
   },
   {
+    Name: 'device_id',
+    Type: 'STRING',
+  },
+  {
     Name: 'device_mobile_brand_name',
     Type: 'STRING',
   },
@@ -405,57 +409,57 @@ export const clickstream_device_view_columns: InputColumn[] = [
 
 export const clickstream_session_view_columns: InputColumn[] = [
   {
-    Name: 'session_id',
-    Type: 'STRING',
+      "Name": "session_id",
+      "Type": "STRING"
   },
   {
-    Name: 'user_pseudo_id',
-    Type: 'STRING',
+      "Name": "user_pseudo_id",
+      "Type": "STRING"
   },
   {
-    Name: 'platform',
-    Type: 'STRING',
+      "Name": "platform",
+      "Type": "STRING"
   },
   {
-    Name: 'session_duration',
-    Type: 'INTEGER',
+      "Name": "session_duration",
+      "Type": "INTEGER"
   },
   {
-    Name: 'session_views',
-    Type: 'INTEGER',
+      "Name": "session_views",
+      "Type": "INTEGER"
   },
   {
-    Name: 'engaged_session',
-    Type: 'INTEGER',
+      "Name": "engaged_session",
+      "Type": "INTEGER"
   },
   {
-    Name: 'bounced_session',
-    Type: 'INTEGER',
+      "Name": "bounced_session",
+      "Type": "INTEGER"
   },
   {
-    Name: 'session_start_timestamp',
-    Type: 'INTEGER',
+      "Name": "session_start_timestamp",
+      "Type": "INTEGER"
   },
   {
-    Name: 'session_engagement_time',
-    Type: 'INTEGER',
+      "Name": "session_engagement_time",
+      "Type": "INTEGER"
   },
   {
-    Name: 'session_date',
-    Type: 'DATETIME',
+      "Name": "session_date",
+      "Type": "DATETIME"
   },
   {
-    Name: 'session_date_hour',
-    Type: 'DATETIME',
+      "Name": "session_date_hour",
+      "Type": "DATETIME"
   },
   {
-    Name: 'entry_view',
-    Type: 'STRING',
+      "Name": "entry_view",
+      "Type": "STRING"
   },
   {
-    Name: 'exit_view',
-    Type: 'STRING',
-  },
+      "Name": "exit_view",
+      "Type": "STRING"
+  }
 ];
 
 export const clickstream_user_attr_view_columns: InputColumn[] = [
@@ -507,63 +511,63 @@ export const clickstream_user_attr_view_columns: InputColumn[] = [
 
 export const clickstream_user_dim_view_columns: InputColumn[] = [
   {
-    Name: 'user_pseudo_id',
-    Type: 'STRING',
+      "Name": "user_pseudo_id",
+      "Type": "STRING"
   },
   {
-    Name: 'user_id',
-    Type: 'STRING',
+      "Name": "user_id",
+      "Type": "STRING"
   },
   {
-    Name: 'first_visit_date',
-    Type: 'DATETIME',
+      "Name": "first_visit_date",
+      "Type": "DATETIME"
   },
   {
-    Name: 'first_visit_install_source',
-    Type: 'STRING',
+      "Name": "first_visit_install_source",
+      "Type": "STRING"
   },
   {
-    Name: 'first_visit_device_language',
-    Type: 'STRING',
+      "Name": "first_visit_device_language",
+      "Type": "STRING"
   },
   {
-    Name: 'first_platform',
-    Type: 'STRING',
+      "Name": "first_platform",
+      "Type": "STRING"
   },
   {
-    Name: 'first_visit_country',
-    Type: 'STRING',
+      "Name": "first_visit_country",
+      "Type": "STRING"
   },
   {
-    Name: 'first_visit_city',
-    Type: 'STRING',
+      "Name": "first_visit_city",
+      "Type": "STRING"
   },
   {
-    Name: 'first_traffic_source_source',
-    Type: 'STRING',
+      "Name": "first_traffic_source_source",
+      "Type": "STRING"
   },
   {
-    Name: 'first_traffic_source_medium',
-    Type: 'STRING',
+      "Name": "first_traffic_source_medium",
+      "Type": "STRING"
   },
   {
-    Name: 'first_traffic_source_name',
-    Type: 'STRING',
+      "Name": "first_traffic_source_name",
+      "Type": "STRING"
   },
   {
-    Name: 'first_referer',
-    Type: 'STRING',
+      "Name": "first_referer",
+      "Type": "STRING"
   },
   {
-    Name: 'first_visit_channel',
-    Type: 'STRING',
+      "Name": "first_visit_channel",
+      "Type": "STRING"
   },
   {
-    Name: 'device_id',
-    Type: 'STRING',
+      "Name": "device_id",
+      "Type": "STRING"
   },
   {
-    Name: 'registration_status',
-    Type: 'STRING',
-  },
+      "Name": "registration_status",
+      "Type": "STRING"
+  }
 ];
