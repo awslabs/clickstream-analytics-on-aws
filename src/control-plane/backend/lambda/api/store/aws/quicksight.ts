@@ -50,7 +50,7 @@ import { SDKClient } from '../../common/sdk-client';
 import { QuickSightAccountInfo, QuickSightUser } from '../../common/types';
 import { generateRandomStr } from '../../common/utils-ln';
 import { IDashboard } from '../../model/project';
-import { dataSetActions } from '../../service/quicksight/dashboard-ln';
+import { analysisPermissionActions, dashboardPermissionActions } from '../../service/quicksight/dashboard-ln';
 import { sleep } from '../../service/quicksight/reporting-utils';
 
 const QUICKSIGHT_NAMESPACE = 'default';
@@ -436,7 +436,18 @@ export const createPublishDashboard = async (
       Name: `dataset-${dashboard.name}-default`,
       Permissions: [{
         Principal: principals.publishUserArn,
-        Actions: dataSetActions,
+        Actions: [
+          'quicksight:UpdateDataSetPermissions',
+          'quicksight:DescribeDataSet',
+          'quicksight:DescribeDataSetPermissions',
+          'quicksight:PassDataSet',
+          'quicksight:DescribeIngestion',
+          'quicksight:ListIngestions',
+          'quicksight:UpdateDataSet',
+          'quicksight:DeleteDataSet',
+          'quicksight:CreateIngestion',
+          'quicksight:CancelIngestion',
+        ],
       }],
       ImportMode: DataSetImportMode.DIRECT_QUERY,
       PhysicalTableMap: {
@@ -475,16 +486,7 @@ export const createPublishDashboard = async (
     }
     const dashboardPermission: ResourcePermission = {
       Principal: principals.publishUserArn,
-      Actions: [
-        'quicksight:DescribeDashboard',
-        'quicksight:ListDashboardVersions',
-        'quicksight:QueryDashboard',
-        'quicksight:UpdateDashboard',
-        'quicksight:DeleteDashboard',
-        'quicksight:UpdateDashboardPermissions',
-        'quicksight:DescribeDashboardPermissions',
-        'quicksight:UpdateDashboardPublishedVersion',
-      ],
+      Actions: dashboardPermissionActions,
     };
     const dashboardDefinition = {
       DataSetIdentifierDeclarations: [
@@ -510,15 +512,7 @@ export const createPublishDashboard = async (
 
     const analysisPermission: ResourcePermission = {
       Principal: principals.publishUserArn,
-      Actions: [
-        'quicksight:DescribeAnalysis',
-        'quicksight:UpdateAnalysisPermissions',
-        'quicksight:QueryAnalysis',
-        'quicksight:UpdateAnalysis',
-        'quicksight:RestoreAnalysis',
-        'quicksight:DeleteAnalysis',
-        'quicksight:DescribeAnalysisPermissions',
-      ],
+      Actions: analysisPermissionActions,
     };
     const analysisInput: CreateAnalysisCommandInput = {
       AwsAccountId: awsAccountId,

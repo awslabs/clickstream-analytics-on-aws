@@ -69,6 +69,7 @@ export function createRoleForQuicksightCustomResourceLambda(
         'quicksight:UpdateDataSet',
         'quicksight:PassDataSet',
         'quicksight:PassDataSource',
+        'quicksight:UpdateDataSetPermissions',
       ],
     }),
 
@@ -82,6 +83,7 @@ export function createRoleForQuicksightCustomResourceLambda(
         'quicksight:DeleteAnalysis',
         'quicksight:CreateAnalysis',
         'quicksight:UpdateAnalysis',
+        'quicksight:UpdateAnalysisPermissions',
       ],
     }),
 
@@ -95,6 +97,7 @@ export function createRoleForQuicksightCustomResourceLambda(
         'quicksight:DeleteDashboard',
         'quicksight:CreateDashboard',
         'quicksight:UpdateDashboard',
+        'quicksight:UpdateDashboardPermissions',
       ],
     }),
 

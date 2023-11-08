@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { DataSetImportMode, InputColumn, QuickSight, ResourceNotFoundException } from '@aws-sdk/client-quicksight';
+import { DataSetImportMode, InputColumn, QuickSight, ResourceNotFoundException, ResourceStatus } from '@aws-sdk/client-quicksight';
 import { logger } from '../../common/powertools';
 
 export interface RedShiftProps {
@@ -73,17 +73,28 @@ export interface QuickSightDashboardDefProps {
   dataSets: DataSetProps[];
 };
 
-export const dataSetActions = [
-  'quicksight:UpdateDataSetPermissions',
+export const dataSetPermissionActions = [
   'quicksight:DescribeDataSet',
   'quicksight:DescribeDataSetPermissions',
   'quicksight:PassDataSet',
   'quicksight:DescribeIngestion',
   'quicksight:ListIngestions',
-  'quicksight:UpdateDataSet',
-  'quicksight:DeleteDataSet',
-  'quicksight:CreateIngestion',
-  'quicksight:CancelIngestion',
+];
+
+export const analysisPermissionActions = [
+  'quicksight:DescribeAnalysis',
+  'quicksight:UpdateAnalysisPermissions',
+  'quicksight:QueryAnalysis',
+  'quicksight:UpdateAnalysis',
+  'quicksight:RestoreAnalysis',
+  'quicksight:DeleteAnalysis',
+  'quicksight:DescribeAnalysisPermissions',
+];
+
+export const dashboardPermissionActions = [
+  'quicksight:DescribeDashboard',
+  'quicksight:ListDashboardVersions',
+  'quicksight:QueryDashboard',
 ];
 
 function sleep(ms: number) {
@@ -105,70 +116,61 @@ export async function waitForDataSetCreateCompleted(quickSight: QuickSight, acco
       await sleep(1000);
 
     } catch (err: any) {
-      logger.info('DataSetCreate catch: sleep 1 second');
-      await sleep(1000);
+      logger.error(`Date set create failed due to ${(err as Error).message}`);
+      throw err;
     }
   }
 };
 
-export async function waitForTemplateCreateCompleted(quickSight: QuickSight, accountId: string, templateId: string) {
+export async function waitForAnalysisChangeCompleted(quickSight: QuickSight, accountId: string, analysisId: string) {
   for (const _i of Array(60).keys()) {
     try {
-      const template = await quickSight.describeTemplate({
-        AwsAccountId: accountId,
-        TemplateId: templateId,
-      });
-
-      if ( template.Template !== undefined && template.Template?.TemplateId !== undefined ) {
-        return;
-      }
-      logger.info('TemplateCreate: sleep 1 second');
-      await sleep(1000);
-
-    } catch (err: any) {
-      logger.info('TemplateCreate catch: sleep 1 second');
-      await sleep(1000);
-    }
-  }
-};
-
-export async function waitForAnalysisCreateCompleted(quickSight: QuickSight, accountId: string, analysisId: string) {
-  for (const _i of Array(60).keys()) {
-    try {
-      const analysis = await quickSight.describeAnalysis({
+      const analysis = await quickSight.describeAnalysisDefinition({
         AwsAccountId: accountId,
         AnalysisId: analysisId,
       });
 
-      if ( analysis.Analysis !== undefined && analysis.Analysis?.AnalysisId !== undefined ) {
+      if ( analysis.ResourceStatus === ResourceStatus.UPDATE_SUCCESSFUL
+        || analysis.ResourceStatus === ResourceStatus.CREATION_SUCCESSFUL) {
         return;
+      } else if ( analysis.ResourceStatus === ResourceStatus.UPDATE_FAILED ) {
+        throw new Error('Analysis update failed.');
+      } else if ( analysis.ResourceStatus === ResourceStatus.CREATION_FAILED ) {
+        throw new Error('Analysis create failed.');
       }
-      logger.info('AnalysisCreate: sleep 1 second');
+
+      logger.info('AnalysisUpdate: sleep 1 second');
       await sleep(1000);
 
     } catch (err: any) {
-      logger.info('AnalysisCreate catch: sleep 1 second');
-      await sleep(1000);
+      logger.error(`Analysis create/update failed due to ${(err as Error).message}`);
+      throw err;
     }
   }
 };
 
-export async function waitForDashboardCreateCompleted(quickSight: QuickSight, accountId: string, dashboardId: string) {
+export async function waitForDashboardChangeCompleted(quickSight: QuickSight, accountId: string, dashboardId: string) {
   for (const _i of Array(60).keys()) {
     try {
-      const dashboard = await quickSight.describeDashboard({
+      const analysis = await quickSight.describeDashboardDefinition({
         AwsAccountId: accountId,
         DashboardId: dashboardId,
       });
-      if ( dashboard.Dashboard !== undefined && dashboard.Dashboard?.DashboardId !== undefined ) {
+
+      if ( analysis.ResourceStatus === ResourceStatus.UPDATE_SUCCESSFUL
+        || analysis.ResourceStatus === ResourceStatus.CREATION_SUCCESSFUL) {
         return;
+      } else if ( analysis.ResourceStatus === ResourceStatus.UPDATE_FAILED ) {
+        throw new Error('Dashboard update failed.');
+      } else if ( analysis.ResourceStatus === ResourceStatus.CREATION_FAILED ) {
+        throw new Error('Dashboard create failed.');
       }
-      logger.info('DashboardCreate: sleep 1 second');
+      logger.info('DashboardUpdate: sleep 1 second');
       await sleep(1000);
 
     } catch (err: any) {
-      logger.info('DashboardCreate catch: sleep 1 second');
-      await sleep(1000);
+      logger.error(`Dashboard create/update failed due to ${err}`);
+      throw err;
     }
   }
 };
@@ -188,29 +190,8 @@ export async function waitForDataSetDeleteCompleted(quickSight: QuickSight, acco
         return;
       }
 
-      logger.info('delete dataset catch: sleep 1 second');
-      await sleep(1000);
-    }
-  }
-};
-
-export async function waitForTemplateDeleteCompleted(quickSight: QuickSight, accountId: string, templateId: string) {
-  for (const _i of Array(60).keys()) {
-    try {
-      await quickSight.describeTemplate({
-        AwsAccountId: accountId,
-        TemplateId: templateId,
-      });
-
-      logger.info('TemplateDelete: sleep 1 second');
-      await sleep(1000);
-
-    } catch (err: any) {
-      if ((err as Error) instanceof ResourceNotFoundException) {
-        return;
-      }
-      logger.info('TemplateDelete catch: sleep 1 second');
-      await sleep(1000);
+      logger.error(`delete dataset failed due to ${err}`);
+      throw err;
     }
   }
 };
@@ -218,10 +199,14 @@ export async function waitForTemplateDeleteCompleted(quickSight: QuickSight, acc
 export async function waitForAnalysisDeleteCompleted(quickSight: QuickSight, accountId: string, analysisId: string) {
   for (const _i of Array(60).keys()) {
     try {
-      await quickSight.describeAnalysis({
+      const analysis = await quickSight.describeAnalysisDefinition({
         AwsAccountId: accountId,
         AnalysisId: analysisId,
       });
+
+      if (analysis.ResourceStatus === ResourceStatus.DELETED) {
+        return;
+      }
 
       logger.info('AnalysisDelete: sleep 1 second');
       await sleep(1000);
@@ -230,8 +215,9 @@ export async function waitForAnalysisDeleteCompleted(quickSight: QuickSight, acc
       if ((err as Error) instanceof ResourceNotFoundException) {
         return;
       }
-      logger.info('AnalysisDelete catch: sleep 1 second');
-      await sleep(1000);
+
+      logger.error(`delete analysis failed due to ${err}`);
+      throw err;
     }
   }
 };
@@ -239,10 +225,14 @@ export async function waitForAnalysisDeleteCompleted(quickSight: QuickSight, acc
 export async function waitForDashboardDeleteCompleted(quickSight: QuickSight, accountId: string, dashboardId: string) {
   for (const _i of Array(60).keys()) {
     try {
-      await quickSight.describeDashboard({
+      const dashboard = await quickSight.describeDashboardDefinition({
         AwsAccountId: accountId,
         DashboardId: dashboardId,
       });
+
+      if (dashboard.ResourceStatus === ResourceStatus.DELETED) {
+        return;
+      }
 
       logger.info('DashboardDelete: sleep 1 second');
       await sleep(1000);
@@ -251,8 +241,9 @@ export async function waitForDashboardDeleteCompleted(quickSight: QuickSight, ac
       if ((err as Error) instanceof ResourceNotFoundException) {
         return;
       }
-      logger.info('DashboardDelete catch: sleep 1 second');
-      await sleep(1000);
+
+      logger.error(`delete dashboard failed due to ${err}`);
+      throw err;
     }
   }
 };
