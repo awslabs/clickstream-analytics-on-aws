@@ -937,6 +937,8 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
               'servicecatalog:GetAssociatedResource',
               'servicecatalog:AssociateResource',
               'servicecatalog:DisassociateResource',
+              'servicecatalog:TagResource',
+              'servicecatalog:UntagResource',
             ],
             Effect: 'Allow',
             Resource: '*',
