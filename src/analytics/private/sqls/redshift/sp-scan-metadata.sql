@@ -146,18 +146,18 @@ BEGIN
 	query := 'SELECT column_name FROM property_column_temp_table';
 	FOR rec IN EXECUTE query LOOP
 		IF start_date IS NULL THEN
-			EXECUTE 'INSERT INTO properties_temp_table (SELECT event_name, project_id, app_info.app_id::varchar AS app_info_app_id, event_date, ''other'' AS property_category, ''' || quote_ident(rec.column_name) || ''' AS property_name, ' || quote_ident(rec.column_name) || '::varchar AS property_value, ''string'' AS value_type, platform FROM {{schema}}.event WHERE event_date < ''' || end_date || ''')';
+			EXECUTE 'INSERT INTO properties_temp_table (SELECT event_name, project_id, app_info.app_id::varchar AS app_info_app_id, event_date, ''other'' AS property_category, ''' || quote_ident(rec.column_name) || ''' AS property_name, LEFT(' || quote_ident(rec.column_name) || '::varchar, 255) AS property_value, ''string'' AS value_type, platform FROM {{schema}}.event WHERE event_date < ''' || end_date || ''')';
 		ELSE
-			EXECUTE 'INSERT INTO properties_temp_table (SELECT event_name, project_id, app_info.app_id::varchar AS app_info_app_id, event_date, ''other'' AS property_category, ''' || quote_ident(rec.column_name) || ''' AS property_name, ' || quote_ident(rec.column_name) || '::varchar AS property_value, ''string'' AS value_type, platform FROM {{schema}}.event WHERE event_date >= ''' || start_date || ''' AND event_date < ''' || end_date || ''')';
+			EXECUTE 'INSERT INTO properties_temp_table (SELECT event_name, project_id, app_info.app_id::varchar AS app_info_app_id, event_date, ''other'' AS property_category, ''' || quote_ident(rec.column_name) || ''' AS property_name, LEFT(' || quote_ident(rec.column_name) || '::varchar, 255) AS property_value, ''string'' AS value_type, platform FROM {{schema}}.event WHERE event_date >= ''' || start_date || ''' AND event_date < ''' || end_date || ''')';
 		END IF;
 	END LOOP;
 
 	query := 'SELECT column_name, property_name FROM property_array_temp_table';
 	FOR rec IN EXECUTE query LOOP
 		IF start_date IS NULL THEN
-			EXECUTE 'INSERT INTO properties_temp_table (SELECT event_name, project_id, app_info.app_id::varchar AS app_info_app_id, event_date, ''' || quote_ident(rec.column_name) || ''' AS property_category, ' || quote_literal(rec.property_name) || ' AS property_name, ' || quote_ident(rec.column_name) || '.' || quote_ident(rec.property_name) || '::varchar AS property_value, CASE WHEN ''' || quote_ident(rec.property_name) || '''::varchar IN (''screen_height'', ''screen_width'', ''viewport_height'', ''viewport_width'', ''time_zone_offset_seconds'') THEN ''int'' ELSE ''string'' END AS value_type, platform FROM {{schema}}.event WHERE event_date < ''' || end_date || ''')';
+			EXECUTE 'INSERT INTO properties_temp_table (SELECT event_name, project_id, app_info.app_id::varchar AS app_info_app_id, event_date, ''' || quote_ident(rec.column_name) || ''' AS property_category, ' || quote_literal(rec.property_name) || ' AS property_name, LEFT(' || quote_ident(rec.column_name) || '.' || quote_ident(rec.property_name) || '::varchar, 255) AS property_value, CASE WHEN ''' || quote_ident(rec.property_name) || '''::varchar IN (''screen_height'', ''screen_width'', ''viewport_height'', ''viewport_width'', ''time_zone_offset_seconds'') THEN ''int'' ELSE ''string'' END AS value_type, platform FROM {{schema}}.event WHERE event_date < ''' || end_date || ''')';
 		ELSE
-			EXECUTE 'INSERT INTO properties_temp_table (SELECT event_name, project_id, app_info.app_id::varchar AS app_info_app_id, event_date, ''' || quote_ident(rec.column_name) || ''' AS property_category, ' || quote_literal(rec.property_name) || ' AS property_name, ' || quote_ident(rec.column_name) || '.' || quote_ident(rec.property_name) || '::varchar AS property_value, CASE WHEN ''' || quote_ident(rec.property_name) || '''::varchar IN (''screen_height'', ''screen_width'', ''viewport_height'', ''viewport_width'', ''time_zone_offset_seconds'') THEN ''int'' ELSE ''string'' END AS value_type, platform FROM {{schema}}.event WHERE event_date >= ''' || start_date || ''' AND event_date < ''' || end_date || ''')';
+			EXECUTE 'INSERT INTO properties_temp_table (SELECT event_name, project_id, app_info.app_id::varchar AS app_info_app_id, event_date, ''' || quote_ident(rec.column_name) || ''' AS property_category, ' || quote_literal(rec.property_name) || ' AS property_name, LEFT(' || quote_ident(rec.column_name) || '.' || quote_ident(rec.property_name) || '::varchar, 255) AS property_value, CASE WHEN ''' || quote_ident(rec.property_name) || '''::varchar IN (''screen_height'', ''screen_width'', ''viewport_height'', ''viewport_width'', ''time_zone_offset_seconds'') THEN ''int'' ELSE ''string'' END AS value_type, platform FROM {{schema}}.event WHERE event_date >= ''' || start_date || ''' AND event_date < ''' || end_date || ''')';
 		END IF;
 	END LOOP;
 
@@ -170,12 +170,15 @@ BEGIN
 				event.event_date AS event_date,
 				'event' AS property_category,
 				parameter.event_param_key::varchar AS property_name,
-			CASE
-					WHEN event_param_double_value IS NOT NULL THEN CAST(event_param_double_value AS varchar)
-					WHEN event_param_float_value  IS NOT NULL THEN CAST(event_param_float_value AS varchar)
-					WHEN event_param_int_value    IS NOT NULL THEN CAST(event_param_int_value AS varchar)
-					WHEN event_param_string_value IS NOT NULL THEN event_param_string_value
-			END AS property_value,
+				LEFT(
+					CASE
+						WHEN event_param_double_value IS NOT NULL THEN CAST(event_param_double_value AS varchar)
+						WHEN event_param_float_value  IS NOT NULL THEN CAST(event_param_float_value AS varchar)
+						WHEN event_param_int_value    IS NOT NULL THEN CAST(event_param_int_value AS varchar)
+						WHEN event_param_string_value IS NOT NULL THEN event_param_string_value
+					END, 
+					255) 
+				AS property_value,
 				CASE
 					WHEN event_param_double_value IS NOT NULL THEN 'double'
 					WHEN event_param_float_value  IS NOT NULL THEN 'float'
@@ -203,12 +206,15 @@ BEGIN
 				event.event_date AS event_date,
 				'event' AS property_category,
 				parameter.event_param_key::varchar AS property_name,
-			CASE
-					WHEN event_param_double_value IS NOT NULL THEN CAST(event_param_double_value AS varchar)
-					WHEN event_param_float_value  IS NOT NULL THEN CAST(event_param_float_value AS varchar)
-					WHEN event_param_int_value    IS NOT NULL THEN CAST(event_param_int_value AS varchar)
-					WHEN event_param_string_value IS NOT NULL THEN event_param_string_value
-			END AS property_value,
+				LEFT(
+					CASE
+						WHEN event_param_double_value IS NOT NULL THEN CAST(event_param_double_value AS varchar)
+						WHEN event_param_float_value  IS NOT NULL THEN CAST(event_param_float_value AS varchar)
+						WHEN event_param_int_value    IS NOT NULL THEN CAST(event_param_int_value AS varchar)
+						WHEN event_param_string_value IS NOT NULL THEN event_param_string_value
+					END, 
+					255) 
+				AS property_value,
 				CASE
 					WHEN event_param_double_value IS NOT NULL THEN 'double'
 					WHEN event_param_float_value  IS NOT NULL THEN 'float'
@@ -318,7 +324,7 @@ BEGIN
 
 	query := 'SELECT column_name FROM user_column_temp_table';
 	FOR rec IN EXECUTE query LOOP
-		EXECUTE 'INSERT INTO user_attribute_temp_table (SELECT user_id, event_timestamp, ''user_outer'' AS property_category, ''' || quote_ident(rec.column_name) || ''' AS property_name, ' || quote_ident(rec.column_name) || '::varchar AS property_value, ''string'' AS value_type FROM {{schema}}.user)';
+		EXECUTE 'INSERT INTO user_attribute_temp_table (SELECT user_id, event_timestamp, ''user_outer'' AS property_category, ''' || quote_ident(rec.column_name) || ''' AS property_name, LEFT(' || quote_ident(rec.column_name) || '::varchar, 255) AS property_value, ''string'' AS value_type FROM {{schema}}.user)';
 	END LOOP;	
 
 	INSERT INTO user_attribute_temp_table (
@@ -327,14 +333,15 @@ BEGIN
 			event_timestamp,
 			'user' AS property_category,
 			user_properties.key::varchar AS property_name,
-			coalesce 
-			(
-			nullif
-				(user_properties.value.string_value::varchar,'')
-				, nullif(user_properties.value.int_value::varchar,'')
-				, nullif(user_properties.value.float_value::varchar,'')
-				, nullif(user_properties.value.double_value::varchar,'')
-			) AS property_value,
+			LEFT(
+				coalesce 
+				(
+					nullif(user_properties.value.string_value::varchar,'')
+					, nullif(user_properties.value.int_value::varchar,'')
+					, nullif(user_properties.value.float_value::varchar,'')
+					, nullif(user_properties.value.double_value::varchar,'')
+				),255) 
+			AS property_value,
 			CASE 
 				WHEN user_properties.value.string_value::varchar IS NOT NULL THEN 'string'
 				WHEN user_properties.value.int_value::varchar IS NOT NULL THEN 'int'
