@@ -174,8 +174,12 @@ export const INGESTION_S3_WITH_SPECIFY_PREFIX_PARAMETERS = mergeParameters(
   INGESTION_S3_PARAMETERS,
   [
     {
+      ParameterKey: 'S3DataBucket',
+      ParameterValue: 'EXAMPLE_BUCKET_NEW',
+    },
+    {
       ParameterKey: 'S3DataPrefix',
-      ParameterValue: 'EXAMPLE_PREFIX/',
+      ParameterValue: 'clickstream/project_8888_8888/data/buffer/',
     },
   ],
 );
@@ -503,11 +507,31 @@ export const DATA_PROCESSING_PLUGIN1_PARAMETERS = mergeParameters(
 );
 
 export const DATA_PROCESSING_WITH_SPECIFY_PREFIX_PLUGIN1_PARAMETERS = mergeParameters(
-  DATA_PROCESSING_PLUGIN1_PARAMETERS,
+  BASE_DATA_PROCESSING_PARAMETERS,
   [
     {
-      ParameterKey: 'SourceS3Prefix',
-      ParameterValue: 'EXAMPLE_PREFIX/',
+      ParameterKey: 'TransformerAndEnrichClassNames',
+      ParameterValue: 'test.aws.solution.main,software.aws.solution.clickstream.UAEnrichment,software.aws.solution.clickstream.IPEnrichment,test.aws.solution.main',
+    },
+    {
+      ParameterKey: 'S3PathPluginJars',
+      ParameterValue: 's3://example-bucket/pipeline/jars/test-transformer-0.1.0.jar,s3://example-bucket/pipeline/jars/test-enrich-0.1.0.jar',
+    },
+    {
+      ParameterKey: 'S3PathPluginFiles',
+      ParameterValue: 's3://example-bucket/pipeline/files/data1.mmdb,s3://example-bucket/pipeline/files/data2.mmdb,s3://example-bucket/pipeline/files/data3.mmdb,s3://example-bucket/pipeline/files/data4.mmdb',
+    },
+    {
+      ParameterKey: 'PipelineS3Bucket',
+      ParameterValue: 'EXAMPLE_BUCKET_NEW',
+    },
+    {
+      ParameterKey: 'SourceS3Bucket',
+      ParameterValue: 'EXAMPLE_BUCKET_NEW',
+    },
+    {
+      ParameterKey: 'SinkS3Bucket',
+      ParameterValue: 'EXAMPLE_BUCKET_NEW',
     },
   ],
 );
@@ -621,7 +645,7 @@ const BASE_DATAANALYTICS_PARAMETERS = [
   },
   {
     ParameterKey: 'LoadWorkflowBucketPrefix',
-    ParameterValue: 'clickstream/project_8888_8888/data/ods/',
+    ParameterValue: 'clickstream/project_8888_8888/data/load-workflow/',
   },
   {
     ParameterKey: 'MaxFilesLimit',
@@ -696,6 +720,44 @@ const BASE_DATAANALYTICS_PARAMETERS = [
     ParameterValue: 'arn:aws:dynamodb:us-east-1:555555555555:table/analytics-metadata-table-name',
   },
 ];
+
+export const DATA_PROCESSING_NEW_SERVERLESS_WITH_SPECIFY_PREFIX_PARAMETERS = mergeParameters(
+  BASE_DATAANALYTICS_PARAMETERS,
+  [
+    {
+      ParameterKey: 'NewRedshiftServerlessWorkgroupName',
+      ParameterValue: 'clickstream-project-8888-8888',
+    },
+    {
+      ParameterKey: 'RedshiftServerlessVPCId',
+      ParameterValue: 'vpc-00000000000000001',
+    },
+    {
+      ParameterKey: 'RedshiftServerlessSubnets',
+      ParameterValue: 'subnet-00000000000000010,subnet-00000000000000011,subnet-00000000000000012,subnet-00000000000000013',
+    },
+    {
+      ParameterKey: 'RedshiftServerlessSGs',
+      ParameterValue: 'sg-00000000000000030,sg-00000000000000031',
+    },
+    {
+      ParameterKey: 'RedshiftServerlessRPU',
+      ParameterValue: '8',
+    },
+    {
+      ParameterKey: 'ODSEventBucket',
+      ParameterValue: 'EXAMPLE_BUCKET_NEW',
+    },
+    {
+      ParameterKey: 'PipelineS3Bucket',
+      ParameterValue: 'EXAMPLE_BUCKET_NEW',
+    },
+    {
+      ParameterKey: 'LoadWorkflowBucket',
+      ParameterValue: 'EXAMPLE_BUCKET_NEW',
+    },
+  ],
+);
 
 export const MSK_DATA_PROCESSING_EXISTING_SERVERLESS_DATAANALYTICS_PARAMETERS = mergeParameters(
   BASE_DATAANALYTICS_PARAMETERS,

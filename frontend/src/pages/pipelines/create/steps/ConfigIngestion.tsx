@@ -81,8 +81,6 @@ interface ConfigIngestionProps {
   changeCertificate: (cert: SelectProps.Option) => void;
   changeSSMSecret: (secret: SelectProps.Option) => void;
   changeBufferType: (type: string) => void;
-  changeBufferS3Bucket: (s3: string) => void;
-  changeBufferS3Prefix: (prefix: string) => void;
   changeS3BufferSize: (size: string) => void;
   changeBufferInterval: (interval: string) => void;
   changeSinkMaxInterval: (interval: string) => void;
@@ -111,7 +109,6 @@ interface ConfigIngestionProps {
   domainNameEmptyError: boolean;
   domainNameFormatError: boolean;
   certificateEmptyError: boolean;
-  bufferS3BucketEmptyError: boolean;
   acknowledgedHTTPSecurity: boolean;
   sinkBatchSizeError: boolean;
   sinkIntervalError: boolean;
@@ -125,7 +122,6 @@ interface ConfigIngestionProps {
   brokerLinkEmptyError: boolean;
   brokerLinkFormatError: boolean;
   kafkaSGEmptyError: boolean;
-  bufferS3PrefixFormatError: boolean;
   bufferS3SizeFormatError: boolean;
   bufferS3IntervalFormatError: boolean;
   bufferKDSModeEmptyError: boolean;
@@ -153,8 +149,6 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
     changeCertificate,
     changeSSMSecret,
     changeBufferType,
-    changeBufferS3Bucket,
-    changeBufferS3Prefix,
     changeS3BufferSize,
     changeBufferInterval,
     changeSinkMaxInterval,
@@ -177,7 +171,6 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
     domainNameEmptyError,
     domainNameFormatError,
     certificateEmptyError,
-    bufferS3BucketEmptyError,
     acknowledgedHTTPSecurity,
     sinkBatchSizeError,
     sinkIntervalError,
@@ -191,7 +184,6 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
     brokerLinkEmptyError,
     brokerLinkFormatError,
     kafkaSGEmptyError,
-    bufferS3PrefixFormatError,
     bufferS3SizeFormatError,
     bufferS3IntervalFormatError,
     bufferKDSModeEmptyError,
@@ -771,16 +763,8 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
             <BufferS3
               update={update}
               pipelineInfo={pipelineInfo}
-              bufferS3BucketEmptyError={bufferS3BucketEmptyError}
-              bufferS3PrefixFormatError={bufferS3PrefixFormatError}
               bufferS3SizeFormatError={bufferS3SizeFormatError}
               bufferS3IntervalFormatError={bufferS3IntervalFormatError}
-              changeS3Bucket={(bucket) => {
-                changeBufferS3Bucket(bucket);
-              }}
-              changeS3Prefix={(prefix) => {
-                changeBufferS3Prefix(prefix);
-              }}
               changeS3BufferSize={(size) => {
                 changeS3BufferSize(size);
               }}
