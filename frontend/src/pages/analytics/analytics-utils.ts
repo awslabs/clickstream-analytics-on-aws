@@ -167,7 +167,9 @@ export const parametersConvertToCategoryItemType = (
     });
   });
   categoryItems.push(categoryPublicEventItems);
-  categoryItems.push(categoryPrivateEventItems);
+  if (categoryPrivateEventItems.itemList.length > 0) {
+    categoryItems.push(categoryPrivateEventItems);
+  }
   categoryItems.push(categoryUserItems);
   return categoryItems;
 };

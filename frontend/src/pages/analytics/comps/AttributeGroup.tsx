@@ -23,7 +23,7 @@ import { useTranslation } from 'react-i18next';
 import { defaultStr } from 'ts/utils';
 
 interface AttributeGroupProps {
-  presetParameters: CategoryItemType[];
+  groupParameters: CategoryItemType[];
   groupOption: IAnalyticsItem | null;
   setGroupOption: (option: OptionDefinition | null) => void;
   loading?: boolean;
@@ -34,7 +34,7 @@ const AttributeGroup: React.FC<AttributeGroupProps> = (
   props: AttributeGroupProps
 ) => {
   const { t } = useTranslation();
-  const { groupOption, setGroupOption, presetParameters, loading, disabled } =
+  const { groupOption, setGroupOption, groupParameters, loading, disabled } =
     props;
   return (
     <div className="cs-analytics-dropdown">
@@ -49,7 +49,7 @@ const AttributeGroup: React.FC<AttributeGroupProps> = (
               changeCurCategoryOption={(item) => {
                 setGroupOption(item);
               }}
-              categories={presetParameters}
+              categories={groupParameters}
               loading={loading}
               disabled={disabled}
             />

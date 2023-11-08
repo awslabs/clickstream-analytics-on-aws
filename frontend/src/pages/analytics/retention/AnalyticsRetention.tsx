@@ -87,6 +87,7 @@ interface AnalyticsRetentionProps {
   metadataUserAttributes: IMetadataUserAttribute[];
   categoryEvents: CategoryItemType[];
   presetParameters: CategoryItemType[];
+  groupParameters: CategoryItemType[];
 }
 
 const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
@@ -100,6 +101,7 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
     metadataUserAttributes,
     categoryEvents,
     presetParameters,
+    groupParameters,
   } = props;
   const { appId } = useParams();
   const [loadingData, setLoadingData] = useState(loading);
@@ -639,7 +641,7 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
               <br />
               <SectionTitle type="group" />
               <AttributeGroup
-                presetParameters={presetParameters}
+                groupParameters={groupParameters}
                 groupOption={groupOption}
                 setGroupOption={setGroupOption}
               />

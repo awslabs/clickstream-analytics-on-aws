@@ -56,8 +56,8 @@ const AnalyticsExplore: React.FC = () => {
 
   const [selectedOption, setSelectedOption] =
     useState<SelectProps.Option | null>({
-      label: defaultStr(t('analytics:explore.funnelAnalysis')),
-      value: 'Funnel',
+      label: defaultStr(t('analytics:explore.eventAnalysis')),
+      value: 'Event',
     });
 
   const analyticsModelOptions: SelectProps.Options = [
@@ -65,12 +65,12 @@ const AnalyticsExplore: React.FC = () => {
       label: defaultStr(t('analytics:explore.exploitativeAnalytics')),
       options: [
         {
-          label: defaultStr(t('analytics:explore.funnelAnalysis')),
-          value: 'Funnel',
-        },
-        {
           label: defaultStr(t('analytics:explore.eventAnalysis')),
           value: 'Event',
+        },
+        {
+          label: defaultStr(t('analytics:explore.funnelAnalysis')),
+          value: 'Funnel',
         },
         {
           label: defaultStr(t('analytics:explore.pathAnalysis')),
@@ -110,6 +110,10 @@ const AnalyticsExplore: React.FC = () => {
   );
 
   const [presetParameters, setPresetParameters] = useState<CategoryItemType[]>(
+    []
+  );
+
+  const [groupParameters, setGroupParameters] = useState<CategoryItemType[]>(
     []
   );
 
@@ -236,6 +240,11 @@ const AnalyticsExplore: React.FC = () => {
         publicParameters ?? []
       );
       setPresetParameters(conditionOptions);
+      const groupOptions = parametersConvertToCategoryItemType(
+        presetUserAttributes,
+        parameters ?? []
+      );
+      setGroupParameters(groupOptions);
     } catch (error) {
       console.log(error);
     }
@@ -313,6 +322,7 @@ const AnalyticsExplore: React.FC = () => {
                   metadataUserAttributes={metadataUserAttributes}
                   categoryEvents={categoryEvents}
                   presetParameters={presetParameters}
+                  groupParameters={groupParameters}
                 />
               )}
               {pipeline && selectedOption?.value === 'Event' && (
@@ -326,6 +336,7 @@ const AnalyticsExplore: React.FC = () => {
                   metadataUserAttributes={metadataUserAttributes}
                   categoryEvents={categoryEvents}
                   presetParameters={presetParameters}
+                  groupParameters={groupParameters}
                 />
               )}
               {pipeline && selectedOption?.value === 'Path' && (
@@ -352,6 +363,7 @@ const AnalyticsExplore: React.FC = () => {
                   metadataUserAttributes={metadataUserAttributes}
                   categoryEvents={categoryEvents}
                   presetParameters={presetParameters}
+                  groupParameters={groupParameters}
                 />
               )}
             </ContentLayout>

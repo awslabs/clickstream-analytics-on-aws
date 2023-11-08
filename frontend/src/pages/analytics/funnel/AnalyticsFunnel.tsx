@@ -91,6 +91,7 @@ interface AnalyticsFunnelProps {
   metadataUserAttributes: IMetadataUserAttribute[];
   categoryEvents: CategoryItemType[];
   presetParameters: CategoryItemType[];
+  groupParameters: CategoryItemType[];
   loadingEvents: boolean;
 }
 
@@ -105,6 +106,7 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
     metadataUserAttributes,
     categoryEvents,
     presetParameters,
+    groupParameters,
     loadingEvents,
   } = props;
   const { appId } = useParams();
@@ -667,7 +669,7 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
               <br />
               <SectionTitle type="group" />
               <AttributeGroup
-                presetParameters={presetParameters}
+                groupParameters={groupParameters}
                 groupOption={groupOption}
                 setGroupOption={setGroupOption}
               />
