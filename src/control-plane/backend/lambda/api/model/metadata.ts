@@ -33,6 +33,8 @@ export interface IMetadataRaw {
 
   readonly summary: {
     readonly platform?: MetadataPlatform[];
+    readonly sdkVersion?: string[];
+    readonly sdkName?: string[];
     readonly valueEnum?: IMetadataRawValue[];
     readonly hasData?: boolean;
   };
@@ -50,6 +52,8 @@ export interface IMetadataEvent {
   readonly dataVolumeLastDay: number;
   readonly hasData: boolean;
   readonly platform: MetadataPlatform[];
+  readonly sdkVersion: string[];
+  readonly sdkName: string[];
 
   displayName?: string;
   description?: IMetadataDescription;
