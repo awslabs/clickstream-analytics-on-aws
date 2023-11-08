@@ -121,6 +121,73 @@ describe('Custom resource - Create schemas for applications in Redshift database
     RequestType: 'Update',
   };
 
+
+  //mock upgrade from 1.0.x
+  const updateServerlessEvent4: CdkCustomResourceEvent = {
+    ...createServerlessEvent,
+    OldResourceProperties: {
+      ...basicCloudFormationEvent.ResourceProperties,
+      ServiceToken: 'token-1',
+      projectId: 'project1',
+      odsTableNames,
+      databaseName: projectDBName,
+      dataAPIRole: `arn:aws:iam::1234567890:role/${roleName}`,
+      redshiftBIUserParameter: '/clickstream/report/user/1111',
+      redshiftBIUsernamePrefix: biUserNamePrefix,
+      reportingViewsDef: [
+        {
+          updatable: 'false',
+          sqlFile: 'clickstream_event_view.sql',
+        },
+        {
+          updatable: 'false',
+          sqlFile: 'clickstream_event_parameter_view.sql',
+        },
+        {
+          updatable: 'false',
+          sqlFile: 'clickstream_lifecycle_daily_view.sql',
+        },
+        {
+          updatable: 'false',
+          sqlFile: 'clickstream_lifecycle_weekly_view_v1.sql',
+        },
+        {
+          updatable: 'true',
+          sqlFile: 'clickstream_user_dim_view.sql',
+        },
+        {
+          updatable: 'false',
+          sqlFile: 'clickstream_session_view.sql',
+        },
+        {
+          updatable: 'false',
+          sqlFile: 'clickstream_device_view.sql',
+        },
+        {
+          updatable: 'false',
+          sqlFile: 'clickstream_retention_view.sql',
+        },
+        {
+          updatable: 'false',
+          sqlFile: 'clickstream_user_attr_view.sql',
+        },
+      ],
+      schemaDefs,
+      appIds: 'app1',
+      serverlessRedshiftProps: {
+        workgroupName: workgroupName,
+        databaseName: defaultDBName,
+        dataAPIRoleArn: 'arn:aws:iam::1234567890:role/RedshiftDBUserRole',
+      },
+    },
+    ResourceProperties: {
+      ...createServerlessEvent.ResourceProperties,
+      appIds: 'app1',
+    },
+    PhysicalResourceId: `${physicalIdPrefix}abcde`,
+    RequestType: 'Update',
+  };
+
   const newReportingView = 'clickstream_new_reporting_view_v0';
   const testReportingViewsDef2: SQLViewDef[] = reportingViewsDef.slice();
   testReportingViewsDef2.push({
@@ -499,6 +566,44 @@ describe('Custom resource - Create schemas for applications in Redshift database
     const resp = await handler(updateServerlessEvent3, context, callback) as CdkCustomResourceResponse;
     expect(resp.Status).toEqual('SUCCESS');
     expect(redshiftDataMock).toHaveReceivedCommandTimes(BatchExecuteStatementCommand, 4);
+
+  });
+
+  test('Validate sqls when upgrade from 1.0.x to 1.1.x', async () => {
+    smMock.onAnyCommand().resolves({});
+    lambdaMock.on(ListTagsCommand).resolves({
+      Tags: { tag_key: 'tag_value' },
+    });
+
+    const schemaSQLForApp1Count = schemaDefs.filter((def) => def.updatable === 'true').length;
+    const reportingSQLForApp1Count = reportingViewsDef.length * 2 + TABLES_VIEWS_FOR_REPORTING.length; // grant to bi user one by one
+
+    redshiftDataMock.on(BatchExecuteStatementCommand).callsFakeOnce(input => {
+      console.log('input.Sqls.length-2:' + input.Sqls.length);
+      const expectedSql = 'CREATE TABLE IF NOT EXISTS app1.clickstream_log';
+      if (input.Sqls.length !== schemaSQLForApp1Count || !(input.Sqls[0] as string).startsWith(expectedSql)) {
+        throw new Error('update schema sqls for app1 are not expected');
+      }
+      return { Id: 'Id-1' };
+    }).callsFakeOnce(input => {
+      console.log('input.Sqls.length-4:' + input.Sqls.length);
+      const expectedSql1 = `GRANT SELECT ON app1.${CLICKSTREAM_EVENT_VIEW_NAME} TO clickstream_report_user_abcde;`;
+      const expectedSql2 = `GRANT SELECT ON app1.${TABLE_NAME_EVENT} TO clickstream_report_user_abcde;`;
+      const expectedSql3 = 'GRANT SELECT ON app1.item_m_view TO clickstream_report_user_abcde;';
+      if (input.Sqls.length !== reportingSQLForApp1Count
+        || !(input.Sqls[(reportingSQLForApp1Count - TABLES_VIEWS_FOR_REPORTING.length)/2] as string).startsWith(expectedSql1)
+        || !(input.Sqls[reportingSQLForApp1Count - TABLES_VIEWS_FOR_REPORTING.length] as string).startsWith(expectedSql2)
+        || !(input.Sqls[reportingSQLForApp1Count - 1] as string).startsWith(expectedSql3)
+      ) {
+        throw new Error('update report view sqls for app1 are not expected');
+      }
+
+      return { Id: 'Id-1' };
+    }).resolves({ Id: 'Id-2' });
+    redshiftDataMock.on(DescribeStatementCommand).resolves({ Status: 'FINISHED' });
+    const resp = await handler(updateServerlessEvent4, context, callback) as CdkCustomResourceResponse;
+    expect(resp.Status).toEqual('SUCCESS');
+    expect(redshiftDataMock).toHaveReceivedCommandTimes(BatchExecuteStatementCommand, 2);
 
   });
 
