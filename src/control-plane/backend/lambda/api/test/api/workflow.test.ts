@@ -64,6 +64,7 @@ import {
   BASE_ATHENA_PARAMETERS,
   BASE_KAFKACONNECTOR_BATCH_MSK_PARAMETERS,
   BASE_KAFKACONNECTOR_BATCH_PARAMETERS, BASE_METRICS_EMAILS_PARAMETERS, BASE_METRICS_PARAMETERS,
+  DATA_PROCESSING_NEW_SERVERLESS_WITH_SPECIFY_PREFIX_PARAMETERS,
   DATA_PROCESSING_PLUGIN1_PARAMETERS,
   DATA_PROCESSING_PLUGIN2_PARAMETERS,
   DATA_PROCESSING_PLUGIN3_PARAMETERS,
@@ -660,6 +661,8 @@ describe('Workflow test', () => {
     createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock,
       ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, iamMock, {
         publicAZContainPrivateAZ: true,
+        subnetsIsolated: true,
+        subnetsCross3AZ: true,
       });
     const pipeline: CPipeline = new CPipeline({ ...S3_DATA_PROCESSING_WITH_SPECIFY_PREFIX_PIPELINE });
     const wf = await pipeline.generateWorkflow();
@@ -706,6 +709,24 @@ describe('Workflow test', () => {
                     StackName: 'Clickstream-DataProcessing-6666-6666',
                     Tags: Tags,
                     TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-pipeline-stack.template.json',
+                  },
+                },
+                Next: 'DataModelingRedshift',
+                Type: 'Stack',
+              },
+              DataModelingRedshift: {
+                Data: {
+                  Callback: {
+                    BucketName: 'TEST_EXAMPLE_BUCKET',
+                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                  },
+                  Input: {
+                    Action: 'Create',
+                    Region: 'ap-southeast-1',
+                    Parameters: DATA_PROCESSING_NEW_SERVERLESS_WITH_SPECIFY_PREFIX_PARAMETERS,
+                    StackName: 'Clickstream-DataModelingRedshift-6666-6666',
+                    Tags: Tags,
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-analytics-redshift-stack.template.json',
                   },
                 },
                 End: true,

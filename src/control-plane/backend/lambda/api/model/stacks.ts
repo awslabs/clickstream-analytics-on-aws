@@ -624,15 +624,36 @@ export class CDataProcessingStack extends JSONObject {
     AppIds?: string;
 
   @JSONObject.required
+  @JSONObject.custom( (stack:CDataProcessingStack, _key:string, value:string) => {
+    if (stack._pipeline?.dataProcessing?.sourceS3Bucket.name) {
+      return stack._pipeline?.dataProcessing?.sourceS3Bucket.name;
+    }
+    if (stack._pipeline?.ingestionServer.sinkType == PipelineSinkType.S3) {
+      value = stack._pipeline?.ingestionServer.sinkS3?.sinkBucket.name ?? stack._pipeline.bucket.name;
+    } else if (stack._pipeline?.ingestionServer.sinkType == PipelineSinkType.KAFKA) {
+      value = stack._pipeline?.ingestionServer.sinkKafka?.kafkaConnector.sinkBucket?.name ?? stack._pipeline.bucket.name;
+    } else if (stack._pipeline?.ingestionServer.sinkType == PipelineSinkType.KINESIS) {
+      value = stack._pipeline?.ingestionServer.sinkKinesis?.sinkBucket?.name ?? stack._pipeline.bucket.name;
+    }
+    return value;
+  })
     SourceS3Bucket?: string;
 
   @JSONObject.required
   @JSONObject.custom( (stack:CDataProcessingStack, key:string, value:string) => {
-    if (stack._pipeline?.ingestionServer.sinkType == PipelineSinkType.S3
-      && !isEmpty(stack._pipeline?.ingestionServer.sinkS3?.sinkBucket.prefix)) {
-      value = stack._pipeline?.ingestionServer.sinkS3?.sinkBucket.prefix ?? '';
+    if (stack._pipeline?.dataProcessing?.sourceS3Bucket.prefix) {
+      return stack._pipeline?.dataProcessing?.sourceS3Bucket.prefix;
+    }
+    if (stack._pipeline?.ingestionServer.sinkType == PipelineSinkType.S3) {
+      value = getBucketPrefix(stack._pipeline.projectId, BucketPrefix.DATA_BUFFER,
+        stack._pipeline?.ingestionServer.sinkS3?.sinkBucket.prefix);
     } else if (stack._pipeline?.ingestionServer.sinkType == PipelineSinkType.KAFKA) {
-      value = `${value}${stack._kafkaTopic}/`;
+      const kafkaPrefix = getBucketPrefix(stack._pipeline.projectId, BucketPrefix.DATA_BUFFER,
+        stack._pipeline?.ingestionServer.sinkKafka?.kafkaConnector.sinkBucket?.prefix);
+      value = `${kafkaPrefix}${stack._kafkaTopic}/`;
+    } else if (stack._pipeline?.ingestionServer.sinkType == PipelineSinkType.KINESIS) {
+      value = getBucketPrefix(stack._pipeline.projectId, BucketPrefix.DATA_BUFFER,
+        stack._pipeline?.ingestionServer.sinkKinesis?.sinkBucket.prefix);
     }
     validatePattern(key, S3_PREFIX_PATTERN, value);
     return value;
@@ -995,7 +1016,7 @@ export class CDataModelingStack extends JSONObject {
       PipelineS3Prefix: getBucketPrefix(pipeline.projectId, BucketPrefix.DATA_PIPELINE_TEMP, pipeline.dataProcessing?.pipelineBucket.prefix),
 
       LoadWorkflowBucket: pipeline.dataModeling?.loadWorkflow?.bucket?.name ?? pipeline.bucket.name,
-      LoadWorkflowBucketPrefix: getBucketPrefix(pipeline.projectId, BucketPrefix.DATA_ODS, pipeline.dataModeling?.loadWorkflow?.bucket?.prefix),
+      LoadWorkflowBucketPrefix: getBucketPrefix(pipeline.projectId, BucketPrefix.LOAD_WORKFLOW, pipeline.dataModeling?.loadWorkflow?.bucket?.prefix),
       MaxFilesLimit: pipeline.dataModeling?.loadWorkflow?.maxFilesLimit,
       DataProcessingCronOrRateExpression: pipeline.dataProcessing?.scheduleExpression,
 

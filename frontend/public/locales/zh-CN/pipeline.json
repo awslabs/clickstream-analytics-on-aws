@@ -109,14 +109,6 @@
       "existingMSKDesc": "该解决方案与同一 VPC 中的 MSK 集群建立连接"
     },
     "s3": {
-      "selectS3": "为数据缓冲区选择 S3 存储桶",
-      "selectS3Desc": "在 Amazon S3 中输入存储数据的目的地。您可以使用所选 S3 存储桶中的数据",
-      "s3URI": "S3 网址",
-      "s3URIFormat": "格式：s3://bucket。",
-      "s3Prefix": "S3 前缀",
-      "s3PrefixDesc": "默认情况下，该解决方案会向数据文件添加 “<project_id>/yyyy/mm/dd/HH”（世界标准时间）的前缀。您可以提供其他前缀，这些前缀将在之前添加<project_id>。",
-      "s3Constraint": "您可以在 S3 存储桶前缀中重复使用相同的密钥。S3 存储桶前缀字符数上限：1024",
-      "enterAdditional": "输入其他前缀",
       "bufferSize": "缓冲区大小",
       "bufferSizeDesc": "在发送到 Amazon S3 之前指定要缓冲的数据大小。缓冲区大小越大，成本可能越低，延迟越高，缓冲区大小越小，交付速度越快，成本越高。最小：1 MiB，最大：50 MiB",
       "bufferInterval": "缓冲间隔",

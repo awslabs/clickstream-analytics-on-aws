@@ -141,11 +141,6 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
   const [brokerLinkFormatError, setBrokerLinkFormatError] = useState(false);
   const [kafkaSGEmptyError, setKafkaSGEmptyError] = useState(false);
 
-  const [bufferS3BucketEmptyError, setBufferS3BucketEmptyError] =
-    useState(false);
-
-  const [bufferS3PrefixFormatError, setBufferS3PrefixFormatError] =
-    useState(false);
   const [bufferS3SizeFormatError, setBufferS3SizeFormatError] = useState(false);
   const [bufferS3IntervalFormatError, setBufferS3IntervalFormatError] =
     useState(false);
@@ -340,17 +335,6 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
 
   const validateIngestionSinkS3 = () => {
     if (pipelineInfo.ingestionServer.sinkType === SinkType.S3) {
-      if (!pipelineInfo.ingestionServer.sinkS3.sinkBucket.name.trim()) {
-        setBufferS3BucketEmptyError(true);
-        return false;
-      }
-
-      // Check prefix length
-      if (pipelineInfo.ingestionServer.sinkS3.sinkBucket.prefix.length > 1024) {
-        setBufferS3PrefixFormatError(true);
-        return false;
-      }
-
       // check buffer size
       if (
         pipelineInfo.ingestionServer.sinkS3.s3BufferSize > 50 ||
@@ -1170,6 +1154,13 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                           name: bucket,
                         },
                       },
+                      sinkS3: {
+                        ...prev.ingestionServer.sinkS3,
+                        sinkBucket: {
+                          ...prev.ingestionServer.sinkS3.sinkBucket,
+                          name: bucket,
+                        },
+                      },
                     },
                     dataProcessing: {
                       ...prev.dataProcessing,
@@ -1214,8 +1205,6 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
               domainNameEmptyError={domainNameEmptyError}
               domainNameFormatError={domainNameFormatError}
               certificateEmptyError={certificateEmptyError}
-              bufferS3BucketEmptyError={bufferS3BucketEmptyError}
-              bufferS3PrefixFormatError={bufferS3PrefixFormatError}
               bufferS3SizeFormatError={bufferS3SizeFormatError}
               bufferS3IntervalFormatError={bufferS3IntervalFormatError}
               acknowledgedHTTPSecurity={acknowledgedHTTPSecurity}
@@ -1521,42 +1510,6 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                       sinkBatch: {
                         ...prev.ingestionServer.sinkBatch,
                         size: parseInt(size),
-                      },
-                    },
-                  };
-                });
-              }}
-              changeBufferS3Bucket={(bucket) => {
-                setBufferS3BucketEmptyError(false);
-                setPipelineInfo((prev) => {
-                  return {
-                    ...prev,
-                    ingestionServer: {
-                      ...prev.ingestionServer,
-                      sinkS3: {
-                        ...prev.ingestionServer.sinkS3,
-                        sinkBucket: {
-                          ...prev.ingestionServer.sinkS3.sinkBucket,
-                          name: bucket,
-                        },
-                      },
-                    },
-                  };
-                });
-              }}
-              changeBufferS3Prefix={(prefix) => {
-                setBufferS3PrefixFormatError(false);
-                setPipelineInfo((prev) => {
-                  return {
-                    ...prev,
-                    ingestionServer: {
-                      ...prev.ingestionServer,
-                      sinkS3: {
-                        ...prev.ingestionServer.sinkS3,
-                        sinkBucket: {
-                          ...prev.ingestionServer.sinkS3.sinkBucket,
-                          prefix: prefix,
-                        },
                       },
                     },
                   };
