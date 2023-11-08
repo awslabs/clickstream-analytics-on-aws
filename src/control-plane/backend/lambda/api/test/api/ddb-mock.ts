@@ -13,7 +13,9 @@
 
 import { TransactWriteItemsCommand } from '@aws-sdk/client-dynamodb';
 import {
+  ConnectivityType,
   DescribeAvailabilityZonesCommand,
+  DescribeNatGatewaysCommand,
   DescribeRouteTablesCommand, DescribeSecurityGroupRulesCommand,
   DescribeSubnetsCommand,
   DescribeVpcEndpointsCommand,
@@ -368,6 +370,7 @@ function createPipelineMock(
     subnetsCross3AZ?: boolean;
     subnetsIsolated?: boolean;
     missVpcEndpoint?: boolean;
+    noVpcEndpoint?: boolean;
     azHasTwoSubnets?: boolean;
     s3EndpointRouteError?: boolean;
     glueEndpointSGError?: boolean;
@@ -630,6 +633,17 @@ function createPipelineMock(
     },
   ];
 
+  ec2Mock.on(DescribeNatGatewaysCommand).
+    resolves({
+      NatGateways: [
+        {
+          NatGatewayId: 'NatGatewayId1',
+          SubnetId: 'subnet-00000000000000010',
+          ConnectivityType: ConnectivityType.PUBLIC,
+        },
+      ],
+    });
+
   let mockSubnets = defaultSubnets;
   if (!props?.publicAZContainPrivateAZ) {
     mockSubnets = [
@@ -815,8 +829,11 @@ function createPipelineMock(
       SubnetIds: defaultSubnets.map(subnet => subnet.SubnetId),
     },
   ];
-  ec2Mock.on(DescribeVpcEndpointsCommand).resolves({
-    VpcEndpoints: props?.missVpcEndpoint ? vpcEndpoints : [
+  let mockVpcEndpoints: any[] = [];
+  if (!props?.noVpcEndpoint && props?.missVpcEndpoint) {
+    mockVpcEndpoints = vpcEndpoints;
+  } else if (!props?.noVpcEndpoint && !props?.missVpcEndpoint) {
+    mockVpcEndpoints = [
       {
         VpcEndpointId: 'vpce-s3',
         ServiceName: 'com.amazonaws.ap-southeast-1.s3',
@@ -838,7 +855,10 @@ function createPipelineMock(
         Groups: [{ GroupId: 'sg-00000000000000031' }],
         SubnetIds: props?.vpcEndpointSubnetErr ? [] : defaultSubnets.map(subnet => subnet.SubnetId),
       },
-    ].concat(vpcEndpoints),
+    ].concat(vpcEndpoints);
+  }
+  ec2Mock.on(DescribeVpcEndpointsCommand).resolves({
+    VpcEndpoints: mockVpcEndpoints,
   });
   secretsManagerMock.on(GetSecretValueCommand).resolves({
     SecretString: '{"issuer":"1","userEndpoint":"2","authorizationEndpoint":"3","tokenEndpoint":"4","appClientId":"5","appClientSecret":"6"}',

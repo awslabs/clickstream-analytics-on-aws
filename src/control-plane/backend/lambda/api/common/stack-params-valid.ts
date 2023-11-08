@@ -421,13 +421,10 @@ async function _checkVpcEndpointsForIsolatedSubnets(pipeline: IPipeline, vpcId: 
         selectedPrivateSubnet,
         vpcEndpoints,
         vpcEndpointSecurityGroupRules,
-        getVpcEndpointServices(pipeline.region, vpcEndpointServices),
+        vpcEndpointServices,
       );
     }
   }
-  throw new ClickStreamBadRequestError(
-    '111111111111111111',
-  );
 }
 
 

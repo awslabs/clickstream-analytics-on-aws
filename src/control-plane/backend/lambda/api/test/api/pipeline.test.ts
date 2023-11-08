@@ -242,6 +242,7 @@ describe('Pipeline test', () => {
       ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, iamMock, {
         publicAZContainPrivateAZ: true,
         subnetsCross3AZ: true,
+        noVpcEndpoint: true,
       });
     ddbMock.on(PutCommand).resolves({});
     const res = await request(app)
@@ -285,6 +286,7 @@ describe('Pipeline test', () => {
         publicAZContainPrivateAZ: true,
         subnetsCross3AZ: true,
         subnetsIsolated: false,
+        noVpcEndpoint: true,
       });
     ddbMock.on(PutCommand).resolves({});
     const res = await request(app)
@@ -298,11 +300,39 @@ describe('Pipeline test', () => {
     expect(res.body.data).toHaveProperty('id');
     expect(res.body.message).toEqual('Pipeline added.');
     expect(res.body.success).toEqual(true);
-    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeVpcEndpointsCommand, 0);
+    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeVpcEndpointsCommand, 1);
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSecurityGroupRulesCommand, 1);
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSubnetsCommand, 1);
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeRouteTablesCommand, 1);
     expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 1);
+  });
+  it('Create pipeline in private subnet with vpc endpoint', async () => {
+    tokenMock(ddbMock, false);
+    projectExistedMock(ddbMock, true);
+    dictionaryMock(ddbMock);
+    createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock,
+      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, iamMock, {
+        publicAZContainPrivateAZ: true,
+        subnetsCross3AZ: true,
+        subnetsIsolated: false,
+        noVpcEndpoint: false,
+        missVpcEndpoint: false,
+      });
+    ddbMock.on(PutCommand).resolves({});
+    const res = await request(app)
+      .post('/api/pipeline')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
+      .send({
+        ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_QUICKSIGHT_PIPELINE,
+      });
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(400);
+    expect(res.body.message).toEqual('Validation error: vpc endpoint error in subnet: subnet-00000000000000011, detail: [{\"service\":\"com.amazonaws.ap-southeast-1.error\",\"reason\":\"The Availability Zones (AZ) of VPC Endpoint (com.amazonaws.ap-southeast-1.error) subnets must contain Availability Zones (AZ) of isolated subnets.\"}].');
+    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeVpcEndpointsCommand, 1);
+    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSecurityGroupRulesCommand, 1);
+    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSubnetsCommand, 1);
+    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeRouteTablesCommand, 1);
+    expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 0);
   });
   it('Create pipeline with ALB policy disable ', async () => {
     tokenMock(ddbMock, false);
@@ -512,6 +542,7 @@ describe('Pipeline test', () => {
       ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, iamMock, {
         publicAZContainPrivateAZ: true,
         twoAZsInRegion: true,
+        noVpcEndpoint: true,
       });
     ddbMock.on(PutCommand).resolves({});
 
@@ -562,7 +593,7 @@ describe('Pipeline test', () => {
     expect(res.body.data).toHaveProperty('id');
     expect(res.body.message).toEqual('Pipeline added.');
     expect(res.body.success).toEqual(true);
-    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeVpcEndpointsCommand, 0);
+    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeVpcEndpointsCommand, 1);
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSecurityGroupRulesCommand, 1);
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSubnetsCommand, 1);
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeRouteTablesCommand, 1);
@@ -576,6 +607,7 @@ describe('Pipeline test', () => {
       ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, iamMock, {
         publicAZContainPrivateAZ: true,
         twoAZsInRegion: true,
+        noVpcEndpoint: true,
       });
     ddbMock.on(PutCommand).resolves({});
 
@@ -687,6 +719,7 @@ describe('Pipeline test', () => {
         publicAZContainPrivateAZ: true,
         subnetsCross3AZ: true,
         sgError: true,
+        noVpcEndpoint: true,
       });
     ddbMock.on(PutCommand).resolves({});
 
@@ -699,7 +732,7 @@ describe('Pipeline test', () => {
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(201);
     expect(quickSightMock).toHaveReceivedCommandTimes(DescribeAccountSubscriptionCommand, 0);
-    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeVpcEndpointsCommand, 0);
+    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeVpcEndpointsCommand, 1);
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSecurityGroupRulesCommand, 1);
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSubnetsCommand, 1);
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeRouteTablesCommand, 1);
@@ -713,6 +746,7 @@ describe('Pipeline test', () => {
         publicAZContainPrivateAZ: true,
         subnetsCross3AZ: true,
         sgError: true,
+        noVpcEndpoint: true,
       });
     ddbMock.on(PutCommand).resolves({});
 
@@ -725,7 +759,7 @@ describe('Pipeline test', () => {
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
     expect(res.body.message).toEqual('Validation error: Provisioned Redshift security groups missing rule for QuickSight access.');
-    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeVpcEndpointsCommand, 0);
+    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeVpcEndpointsCommand, 1);
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSecurityGroupRulesCommand, 1);
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSubnetsCommand, 1);
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeRouteTablesCommand, 1);
@@ -842,6 +876,7 @@ describe('Pipeline test', () => {
       ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, iamMock, {
         publicAZContainPrivateAZ: true,
         subnetsCross3AZ: true,
+        noVpcEndpoint: true,
       });
     ddbMock.on(PutCommand).resolves({});
     const res = await request(app)
@@ -862,6 +897,7 @@ describe('Pipeline test', () => {
       ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, iamMock, {
         publicAZContainPrivateAZ: true,
         subnetsCross3AZ: true,
+        noVpcEndpoint: true,
       });
     ddbMock.on(PutCommand).resolves({});
     const res = await request(app)
@@ -897,6 +933,7 @@ describe('Pipeline test', () => {
     createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock,
       ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, iamMock, {
         publicAZContainPrivateAZ: true,
+        noVpcEndpoint: true,
       });
     const res = await request(app)
       .post('/api/pipeline')
@@ -919,6 +956,7 @@ describe('Pipeline test', () => {
     createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock,
       ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, iamMock, {
         publicAZContainPrivateAZ: true,
+        noVpcEndpoint: true,
       });
     // Mock DynamoDB error
     ddbMock.on(TransactWriteItemsCommand).rejects(new Error('Mock DynamoDB error'));
