@@ -97,6 +97,7 @@ export class ApplicationServ {
         androidPackage: result.androidPackage,
         iosBundleId: result.iosBundleId,
         iosAppStoreId: result.iosAppStoreId,
+        createAt: result.createAt,
         pipeline: {
           id: latestPipelines[0].pipelineId,
           status: latestPipelines[0].status,
