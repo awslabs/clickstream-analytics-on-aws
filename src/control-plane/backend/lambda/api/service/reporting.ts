@@ -173,7 +173,7 @@ export class ReportingService {
 
     let groupingConditionCol = '';
     if (query.groupCondition !== undefined) {
-      groupingConditionCol = query.groupCondition;
+      groupingConditionCol = query.groupCondition.property;
       tableViewCols.push({
         Name: groupingConditionCol,
         Type: 'STRING',

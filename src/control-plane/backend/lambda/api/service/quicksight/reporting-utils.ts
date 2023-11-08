@@ -588,6 +588,23 @@ export function getFunnelTableVisualDef(visualId: string, viewName: string, even
     Width: '120px',
   });
 
+  if (groupingConditionCol !== '') {
+    const groupColFieldId = uuidv4();
+    groupBy.push({
+      CategoricalDimensionField: {
+        FieldId: groupColFieldId,
+        Column: {
+          DataSetIdentifier: viewName,
+          ColumnName: groupingConditionCol,
+        },
+      },
+    });
+    fieldOptions.push({
+      FieldId: groupColFieldId,
+      Width: '120px',
+    });
+  }
+
   const maxIndex = eventNames.length - 1;
   for (const [index, eventName] of eventNames.entries()) {
     const fieldId = uuidv4();
@@ -605,23 +622,6 @@ export function getFunnelTableVisualDef(visualId: string, viewName: string, even
       FieldId: fieldId,
       Width: '120px',
     });
-
-    if (groupingConditionCol !== '') {
-      const groupColFieldId = uuidv4();
-      groupBy.push({
-        NumericalDimensionField: {
-          FieldId: groupColFieldId,
-          Column: {
-            DataSetIdentifier: viewName,
-            ColumnName: groupingConditionCol,
-          },
-        },
-      });
-      fieldOptions.push({
-        FieldId: fieldId,
-        Width: '120px',
-      });
-    }
 
     if (index === 0) {
       continue;
