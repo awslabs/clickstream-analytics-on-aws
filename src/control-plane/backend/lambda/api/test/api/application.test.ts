@@ -504,6 +504,7 @@ describe('Application test', () => {
         androidPackage: 'androidPackage',
         iosAppStoreId: 'iosAppStoreId',
         iosBundleId: 'iosBundleId',
+        createAt: 1674202173912,
         pipeline: {
           customDomain: '',
           endpoint: 'http://xxx/xxx',
