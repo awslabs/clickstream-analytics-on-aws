@@ -338,11 +338,13 @@
                     },
                     {
                         "Name": "geo_country",
-                        "DataType": "STRING"
+                        "DataType": "STRING",
+                        "GeographicRole": "COUNTRY"
                     },
                     {
                         "Name": "geo_city",
-                        "DataType": "STRING"
+                        "DataType": "STRING",
+                        "GeographicRole": "CITY"
                     },
                     {
                         "Name": "geo_metro",
@@ -350,7 +352,9 @@
                     },
                     {
                         "Name": "geo_region",
-                        "DataType": "STRING"
+                        "DataType": "STRING",
+                        "GeographicRole": "STATE"
+                        
                     },
                     {
                         "Name": "geo_sub_continent",
@@ -2403,52 +2407,7 @@
                         },
                         "ConditionalFormatting": {
                             "ConditionalFormattingOptions": [
-                                {
-                                    "ComparisonValue": {
-                                        "TextColor": {
-                                            "Solid": {
-                                                "Expression": "percentDifference({Average Engagement Time per Session (minute)},[{Average Engagement Time per Session (minute)} DESC],1,[]) > 0.0",
-                                                "Color": "#2CAD00"
-                                            }
-                                        }
-                                    }
-                                },
-                                {
-                                    "ComparisonValue": {
-                                        "TextColor": {
-                                            "Solid": {
-                                                "Expression": "percentDifference({Average Engagement Time per Session (minute)},[{Average Engagement Time per Session (minute)} DESC],1,[]) < 0.0",
-                                                "Color": "#DE3B00"
-                                            }
-                                        }
-                                    }
-                                },
-                                {
-                                    "ComparisonValue": {
-                                        "Icon": {
-                                            "CustomCondition": {
-                                                "Expression": "percentDifference({Average Engagement Time per Session (minute)},[{Average Engagement Time per Session (minute)} DESC],1,[]) > 0.0",
-                                                "IconOptions": {
-                                                    "Icon": "CARET_UP"
-                                                },
-                                                "Color": "#2CAD00"
-                                            }
-                                        }
-                                    }
-                                },
-                                {
-                                    "ComparisonValue": {
-                                        "Icon": {
-                                            "CustomCondition": {
-                                                "Expression": "percentDifference({Average Engagement Time per Session (minute)},[{Average Engagement Time per Session (minute)} DESC],1,[]) < 0.0",
-                                                "IconOptions": {
-                                                    "Icon": "CARET_DOWN"
-                                                },
-                                                "Color": "#DE3B00"
-                                            }
-                                        }
-                                    }
-                                }
+                                
                             ]
                         },
                         "Actions": [],
@@ -2540,52 +2499,7 @@
                         },
                         "ConditionalFormatting": {
                             "ConditionalFormattingOptions": [
-                                {
-                                    "ComparisonValue": {
-                                        "TextColor": {
-                                            "Solid": {
-                                                "Expression": "percentDifference(AVG({Session Duration (minute)}),[AVG({Session Duration (minute)}) DESC],1,[]) > 0.0",
-                                                "Color": "#2CAD00"
-                                            }
-                                        }
-                                    }
-                                },
-                                {
-                                    "ComparisonValue": {
-                                        "TextColor": {
-                                            "Solid": {
-                                                "Expression": "percentDifference(AVG({Session Duration (minute)}),[AVG({Session Duration (minute)}) DESC],1,[]) < 0.0",
-                                                "Color": "#DE3B00"
-                                            }
-                                        }
-                                    }
-                                },
-                                {
-                                    "ComparisonValue": {
-                                        "Icon": {
-                                            "CustomCondition": {
-                                                "Expression": "percentDifference(AVG({Session Duration (minute)}),[AVG({Session Duration (minute)}) DESC],1,[]) > 0.0",
-                                                "IconOptions": {
-                                                    "Icon": "CARET_UP"
-                                                },
-                                                "Color": "#2CAD00"
-                                            }
-                                        }
-                                    }
-                                },
-                                {
-                                    "ComparisonValue": {
-                                        "Icon": {
-                                            "CustomCondition": {
-                                                "Expression": "percentDifference(AVG({Session Duration (minute)}),[AVG({Session Duration (minute)}) DESC],1,[]) < 0.0",
-                                                "IconOptions": {
-                                                    "Icon": "CARET_DOWN"
-                                                },
-                                                "Color": "#DE3B00"
-                                            }
-                                        }
-                                    }
-                                }
+                                
                             ]
                         },
                         "Actions": [],
@@ -2809,52 +2723,7 @@
                         },
                         "ConditionalFormatting": {
                             "ConditionalFormattingOptions": [
-                                {
-                                    "ComparisonValue": {
-                                        "TextColor": {
-                                            "Solid": {
-                                                "Expression": "percentDifference({Engagement Rate},[{Engagement Rate} DESC],1,[]) > 0.0",
-                                                "Color": "#2CAD00"
-                                            }
-                                        }
-                                    }
-                                },
-                                {
-                                    "ComparisonValue": {
-                                        "TextColor": {
-                                            "Solid": {
-                                                "Expression": "percentDifference({Engagement Rate},[{Engagement Rate} DESC],1,[]) < 0.0",
-                                                "Color": "#DE3B00"
-                                            }
-                                        }
-                                    }
-                                },
-                                {
-                                    "ComparisonValue": {
-                                        "Icon": {
-                                            "CustomCondition": {
-                                                "Expression": "percentDifference({Engagement Rate},[{Engagement Rate} DESC],1,[]) > 0.0",
-                                                "IconOptions": {
-                                                    "Icon": "CARET_UP"
-                                                },
-                                                "Color": "#2CAD00"
-                                            }
-                                        }
-                                    }
-                                },
-                                {
-                                    "ComparisonValue": {
-                                        "Icon": {
-                                            "CustomCondition": {
-                                                "Expression": "percentDifference({Engagement Rate},[{Engagement Rate} DESC],1,[]) < 0.0",
-                                                "IconOptions": {
-                                                    "Icon": "CARET_DOWN"
-                                                },
-                                                "Color": "#DE3B00"
-                                            }
-                                        }
-                                    }
-                                }
+                                
                             ]
                         },
                         "Actions": [],
@@ -3105,52 +2974,7 @@
                         },
                         "ConditionalFormatting": {
                             "ConditionalFormattingOptions": [
-                                {
-                                    "ComparisonValue": {
-                                        "TextColor": {
-                                            "Solid": {
-                                                "Expression": "percentDifference({Average Engagement Time per User},[{Average Engagement Time per User} DESC],1,[]) > 0.0",
-                                                "Color": "#2CAD00"
-                                            }
-                                        }
-                                    }
-                                },
-                                {
-                                    "ComparisonValue": {
-                                        "TextColor": {
-                                            "Solid": {
-                                                "Expression": "percentDifference({Average Engagement Time per User},[{Average Engagement Time per User} DESC],1,[]) < 0.0",
-                                                "Color": "#DE3B00"
-                                            }
-                                        }
-                                    }
-                                },
-                                {
-                                    "ComparisonValue": {
-                                        "Icon": {
-                                            "CustomCondition": {
-                                                "Expression": "percentDifference({Average Engagement Time per User},[{Average Engagement Time per User} DESC],1,[]) > 0.0",
-                                                "IconOptions": {
-                                                    "Icon": "CARET_UP"
-                                                },
-                                                "Color": "#2CAD00"
-                                            }
-                                        }
-                                    }
-                                },
-                                {
-                                    "ComparisonValue": {
-                                        "Icon": {
-                                            "CustomCondition": {
-                                                "Expression": "percentDifference({Average Engagement Time per User},[{Average Engagement Time per User} DESC],1,[]) < 0.0",
-                                                "IconOptions": {
-                                                    "Icon": "CARET_DOWN"
-                                                },
-                                                "Color": "#DE3B00"
-                                            }
-                                        }
-                                    }
-                                }
+                                
                             ]
                         },
                         "Actions": [],
@@ -3239,52 +3063,7 @@
                         },
                         "ConditionalFormatting": {
                             "ConditionalFormattingOptions": [
-                                {
-                                    "ComparisonValue": {
-                                        "TextColor": {
-                                            "Solid": {
-                                                "Expression": "percentDifference({Average Engaged Session per User},[{Average Engaged Session per User} DESC],1,[]) > 0.0",
-                                                "Color": "#2CAD00"
-                                            }
-                                        }
-                                    }
-                                },
-                                {
-                                    "ComparisonValue": {
-                                        "TextColor": {
-                                            "Solid": {
-                                                "Expression": "percentDifference({Average Engaged Session per User},[{Average Engaged Session per User} DESC],1,[]) < 0.0",
-                                                "Color": "#DE3B00"
-                                            }
-                                        }
-                                    }
-                                },
-                                {
-                                    "ComparisonValue": {
-                                        "Icon": {
-                                            "CustomCondition": {
-                                                "Expression": "percentDifference({Average Engaged Session per User},[{Average Engaged Session per User} DESC],1,[]) > 0.0",
-                                                "IconOptions": {
-                                                    "Icon": "CARET_UP"
-                                                },
-                                                "Color": "#2CAD00"
-                                            }
-                                        }
-                                    }
-                                },
-                                {
-                                    "ComparisonValue": {
-                                        "Icon": {
-                                            "CustomCondition": {
-                                                "Expression": "percentDifference({Average Engaged Session per User},[{Average Engaged Session per User} DESC],1,[]) < 0.0",
-                                                "IconOptions": {
-                                                    "Icon": "CARET_DOWN"
-                                                },
-                                                "Color": "#DE3B00"
-                                            }
-                                        }
-                                    }
-                                }
+                                
                             ]
                         },
                         "Actions": [],
@@ -3667,53 +3446,6 @@
                         "Actions": [],
                         "ColumnHierarchies": []
                     }
-                },
-                {
-                    "InsightVisual": {
-                        "VisualId": "f3e4bcec-a4d3-4828-91ab-541af5d26145_3f9c6858-5a31-42cf-8cc9-1e98a0da06bb",
-                        "Title": {
-                            "Visibility": "VISIBLE"
-                        },
-                        "Subtitle": {
-                            "Visibility": "VISIBLE"
-                        },
-                        "InsightConfiguration": {
-                            "Computations": [
-                                {
-                                    "Forecast": {
-                                        "ComputationId": "f3e4bcec-a4d3-4828-91ab-541af5d26145_0db07b38-95a7-4fe1-84c6-fbb8d8cb58d7",
-                                        "Name": "ForecastInsight",
-                                        "Time": {
-                                            "DateDimensionField": {
-                                                "FieldId": "LogicalTable1.session_date_Time",
-                                                "Column": {
-                                                    "DataSetIdentifier": "Session_view",
-                                                    "ColumnName": "session_date"
-                                                },
-                                                "DateGranularity": "DAY"
-                                            }
-                                        },
-                                        "Value": {
-                                            "CategoricalMeasureField": {
-                                                "FieldId": "LogicalTable1.session_id_Value",
-                                                "Column": {
-                                                    "DataSetIdentifier": "Session_view",
-                                                    "ColumnName": "session_id"
-                                                },
-                                                "AggregationFunction": "COUNT"
-                                            }
-                                        },
-                                        "PeriodsForward": 14,
-                                        "PeriodsBackward": 0,
-                                        "PredictionInterval": 90,
-                                        "Seasonality": "AUTOMATIC"
-                                    }
-                                }
-                            ]
-                        },
-                        "Actions": [],
-                        "DataSetIdentifier": "Session_view"
-                    }
                 }
             ],
             "TextBoxes": [
@@ -3798,14 +3530,6 @@
                                     "ColumnSpan": 24,
                                     "RowIndex": 18,
                                     "RowSpan": 9
-                                },
-                                {
-                                    "ElementId": "f3e4bcec-a4d3-4828-91ab-541af5d26145_3f9c6858-5a31-42cf-8cc9-1e98a0da06bb",
-                                    "ElementType": "VISUAL",
-                                    "ColumnIndex": 24,
-                                    "ColumnSpan": 12,
-                                    "RowIndex": 18,
-                                    "RowSpan": 2
                                 },
                                 {
                                     "ElementId": "f3e4bcec-a4d3-4828-91ab-541af5d26145_01ff51c1-01e1-49f3-8f22-bf763d7584e5",
@@ -10199,52 +9923,6 @@
                         },
                         "ConditionalFormatting": {
                             "ConditionalFormattingOptions": [
-                                {
-                                    "ComparisonValue": {
-                                        "TextColor": {
-                                            "Solid": {
-                                                "Expression": "percentDifference({Crash Rate (by device)},[{Crash Rate (by device)} DESC],1,[]) > 0.0",
-                                                "Color": "#DE3B00"
-                                            }
-                                        }
-                                    }
-                                },
-                                {
-                                    "ComparisonValue": {
-                                        "TextColor": {
-                                            "Solid": {
-                                                "Expression": "percentDifference({Crash Rate (by device)},[{Crash Rate (by device)} DESC],1,[]) < 0.0",
-                                                "Color": "#2CAD00"
-                                            }
-                                        }
-                                    }
-                                },
-                                {
-                                    "ComparisonValue": {
-                                        "Icon": {
-                                            "CustomCondition": {
-                                                "Expression": "percentDifference({Crash Rate (by device)},[{Crash Rate (by device)} DESC],1,[]) > 0.0",
-                                                "IconOptions": {
-                                                    "Icon": "CARET_UP"
-                                                },
-                                                "Color": "#DE3B00"
-                                            }
-                                        }
-                                    }
-                                },
-                                {
-                                    "ComparisonValue": {
-                                        "Icon": {
-                                            "CustomCondition": {
-                                                "Expression": "percentDifference({Crash Rate (by device)},[{Crash Rate (by device)} DESC],1,[]) < 0.0",
-                                                "IconOptions": {
-                                                    "Icon": "CARET_DOWN"
-                                                },
-                                                "Color": "#2CAD00"
-                                            }
-                                        }
-                                    }
-                                }
                             ]
                         },
                         "Actions": [],
@@ -11531,7 +11209,7 @@
                         "Title": {
                             "Visibility": "VISIBLE",
                             "FormatText": {
-                                "RichText": "<visual-title>Crash Message &amp; Stack Trace</visual-title>"
+                                "RichText": "<visual-title>Crash Message and Stack Trace</visual-title>"
                             }
                         },
                         "Subtitle": {
@@ -11988,8 +11666,7 @@
                         "Configuration": {
                             "FilterListConfiguration": {
                                 "MatchOperator": "CONTAINS",
-                                "SelectAllOptions": "FILTER_ALL_VALUES",
-                                "NullOption": "NON_NULLS_ONLY"
+                                "SelectAllOptions": "FILTER_ALL_VALUES"
                             }
                         }
                     }
@@ -12021,8 +11698,7 @@
                         "Configuration": {
                             "FilterListConfiguration": {
                                 "MatchOperator": "CONTAINS",
-                                "SelectAllOptions": "FILTER_ALL_VALUES",
-                                "NullOption": "NON_NULLS_ONLY"
+                                "SelectAllOptions": "FILTER_ALL_VALUES"
                             }
                         }
                     }
@@ -12090,8 +11766,7 @@
                         "Configuration": {
                             "FilterListConfiguration": {
                                 "MatchOperator": "CONTAINS",
-                                "SelectAllOptions": "FILTER_ALL_VALUES",
-                                "NullOption": "NON_NULLS_ONLY"
+                                "SelectAllOptions": "FILTER_ALL_VALUES"
                             }
                         }
                     }
@@ -12159,8 +11834,7 @@
                         "Configuration": {
                             "FilterListConfiguration": {
                                 "MatchOperator": "CONTAINS",
-                                "SelectAllOptions": "FILTER_ALL_VALUES",
-                                "NullOption": "NON_NULLS_ONLY"
+                                "SelectAllOptions": "FILTER_ALL_VALUES"
                             }
                         }
                     }
@@ -12194,8 +11868,7 @@
                                 "MatchOperator": "CONTAINS",
                                 "CategoryValues": [
                                     "_screen_view"
-                                ],
-                                "NullOption": "NON_NULLS_ONLY"
+                                ]
                             }
                         }
                     }
@@ -12232,8 +11905,7 @@
                                 "MatchOperator": "CONTAINS",
                                 "CategoryValues": [
                                     "_screen_name"
-                                ],
-                                "NullOption": "NON_NULLS_ONLY"
+                                ]
                             }
                         }
                     }
@@ -12268,8 +11940,7 @@
                         "Configuration": {
                             "FilterListConfiguration": {
                                 "MatchOperator": "CONTAINS",
-                                "SelectAllOptions": "FILTER_ALL_VALUES",
-                                "NullOption": "NON_NULLS_ONLY"
+                                "SelectAllOptions": "FILTER_ALL_VALUES"
                             }
                         }
                     }
@@ -12304,8 +11975,7 @@
                         "Configuration": {
                             "FilterListConfiguration": {
                                 "MatchOperator": "CONTAINS",
-                                "SelectAllOptions": "FILTER_ALL_VALUES",
-                                "NullOption": "NON_NULLS_ONLY"
+                                "SelectAllOptions": "FILTER_ALL_VALUES"
                             }
                         }
                     }
@@ -12340,8 +12010,7 @@
                         "Configuration": {
                             "FilterListConfiguration": {
                                 "MatchOperator": "CONTAINS",
-                                "SelectAllOptions": "FILTER_ALL_VALUES",
-                                "NullOption": "NON_NULLS_ONLY"
+                                "SelectAllOptions": "FILTER_ALL_VALUES"
                             }
                         }
                     }
@@ -12376,8 +12045,7 @@
                         "Configuration": {
                             "FilterListConfiguration": {
                                 "MatchOperator": "CONTAINS",
-                                "SelectAllOptions": "FILTER_ALL_VALUES",
-                                "NullOption": "NON_NULLS_ONLY"
+                                "SelectAllOptions": "FILTER_ALL_VALUES"
                             }
                         }
                     }
@@ -12412,8 +12080,7 @@
                         "Configuration": {
                             "FilterListConfiguration": {
                                 "MatchOperator": "CONTAINS",
-                                "SelectAllOptions": "FILTER_ALL_VALUES",
-                                "NullOption": "NON_NULLS_ONLY"
+                                "SelectAllOptions": "FILTER_ALL_VALUES"
                             }
                         }
                     }
@@ -12448,8 +12115,7 @@
                         "Configuration": {
                             "FilterListConfiguration": {
                                 "MatchOperator": "CONTAINS",
-                                "SelectAllOptions": "FILTER_ALL_VALUES",
-                                "NullOption": "NON_NULLS_ONLY"
+                                "SelectAllOptions": "FILTER_ALL_VALUES"
                             }
                         }
                     }
@@ -12484,8 +12150,7 @@
                         "Configuration": {
                             "FilterListConfiguration": {
                                 "MatchOperator": "CONTAINS",
-                                "SelectAllOptions": "FILTER_ALL_VALUES",
-                                "NullOption": "NON_NULLS_ONLY"
+                                "SelectAllOptions": "FILTER_ALL_VALUES"
                             }
                         }
                     }
@@ -12520,8 +12185,7 @@
                         "Configuration": {
                             "FilterListConfiguration": {
                                 "MatchOperator": "CONTAINS",
-                                "SelectAllOptions": "FILTER_ALL_VALUES",
-                                "NullOption": "NON_NULLS_ONLY"
+                                "SelectAllOptions": "FILTER_ALL_VALUES"
                             }
                         }
                     }
@@ -12587,8 +12251,7 @@
                         "Configuration": {
                             "FilterListConfiguration": {
                                 "MatchOperator": "CONTAINS",
-                                "SelectAllOptions": "FILTER_ALL_VALUES",
-                                "NullOption": "NON_NULLS_ONLY"
+                                "SelectAllOptions": "FILTER_ALL_VALUES"
                             }
                         }
                     }
@@ -12623,8 +12286,7 @@
                         "Configuration": {
                             "FilterListConfiguration": {
                                 "MatchOperator": "CONTAINS",
-                                "SelectAllOptions": "FILTER_ALL_VALUES",
-                                "NullOption": "NON_NULLS_ONLY"
+                                "SelectAllOptions": "FILTER_ALL_VALUES"
                             }
                         }
                     }
@@ -12786,8 +12448,7 @@
                         "Configuration": {
                             "FilterListConfiguration": {
                                 "MatchOperator": "CONTAINS",
-                                "SelectAllOptions": "FILTER_ALL_VALUES",
-                                "NullOption": "NON_NULLS_ONLY"
+                                "SelectAllOptions": "FILTER_ALL_VALUES"
                             }
                         }
                     }
@@ -12936,8 +12597,7 @@
                         "Configuration": {
                             "FilterListConfiguration": {
                                 "MatchOperator": "CONTAINS",
-                                "SelectAllOptions": "FILTER_ALL_VALUES",
-                                "NullOption": "NON_NULLS_ONLY"
+                                "SelectAllOptions": "FILTER_ALL_VALUES"
                             }
                         }
                     }
@@ -12972,8 +12632,7 @@
                         "Configuration": {
                             "FilterListConfiguration": {
                                 "MatchOperator": "CONTAINS",
-                                "SelectAllOptions": "FILTER_ALL_VALUES",
-                                "NullOption": "NON_NULLS_ONLY"
+                                "SelectAllOptions": "FILTER_ALL_VALUES"
                             }
                         }
                     }
@@ -13008,8 +12667,7 @@
                         "Configuration": {
                             "FilterListConfiguration": {
                                 "MatchOperator": "CONTAINS",
-                                "SelectAllOptions": "FILTER_ALL_VALUES",
-                                "NullOption": "NON_NULLS_ONLY"
+                                "SelectAllOptions": "FILTER_ALL_VALUES"
                             }
                         }
                     }
@@ -13044,8 +12702,7 @@
                         "Configuration": {
                             "FilterListConfiguration": {
                                 "MatchOperator": "CONTAINS",
-                                "SelectAllOptions": "FILTER_ALL_VALUES",
-                                "NullOption": "NON_NULLS_ONLY"
+                                "SelectAllOptions": "FILTER_ALL_VALUES"
                             }
                         }
                     }
@@ -13080,8 +12737,7 @@
                         "Configuration": {
                             "FilterListConfiguration": {
                                 "MatchOperator": "CONTAINS",
-                                "SelectAllOptions": "FILTER_ALL_VALUES",
-                                "NullOption": "NON_NULLS_ONLY"
+                                "SelectAllOptions": "FILTER_ALL_VALUES"
                             }
                         }
                     }
@@ -13188,8 +12844,7 @@
                         "Configuration": {
                             "FilterListConfiguration": {
                                 "MatchOperator": "CONTAINS",
-                                "SelectAllOptions": "FILTER_ALL_VALUES",
-                                "NullOption": "NON_NULLS_ONLY"
+                                "SelectAllOptions": "FILTER_ALL_VALUES"
                             }
                         }
                     }
@@ -13224,8 +12879,7 @@
                         "Configuration": {
                             "FilterListConfiguration": {
                                 "MatchOperator": "CONTAINS",
-                                "SelectAllOptions": "FILTER_ALL_VALUES",
-                                "NullOption": "NON_NULLS_ONLY"
+                                "SelectAllOptions": "FILTER_ALL_VALUES"
                             }
                         }
                     }
@@ -13260,8 +12914,7 @@
                         "Configuration": {
                             "FilterListConfiguration": {
                                 "MatchOperator": "CONTAINS",
-                                "SelectAllOptions": "FILTER_ALL_VALUES",
-                                "NullOption": "NON_NULLS_ONLY"
+                                "SelectAllOptions": "FILTER_ALL_VALUES"
                             }
                         }
                     }
@@ -13296,8 +12949,7 @@
                         "Configuration": {
                             "FilterListConfiguration": {
                                 "MatchOperator": "CONTAINS",
-                                "SelectAllOptions": "FILTER_ALL_VALUES",
-                                "NullOption": "NON_NULLS_ONLY"
+                                "SelectAllOptions": "FILTER_ALL_VALUES"
                             }
                         }
                     }
@@ -13332,8 +12984,7 @@
                         "Configuration": {
                             "FilterListConfiguration": {
                                 "MatchOperator": "CONTAINS",
-                                "SelectAllOptions": "FILTER_ALL_VALUES",
-                                "NullOption": "NON_NULLS_ONLY"
+                                "SelectAllOptions": "FILTER_ALL_VALUES"
                             }
                         }
                     }
@@ -13368,8 +13019,7 @@
                         "Configuration": {
                             "FilterListConfiguration": {
                                 "MatchOperator": "CONTAINS",
-                                "SelectAllOptions": "FILTER_ALL_VALUES",
-                                "NullOption": "NON_NULLS_ONLY"
+                                "SelectAllOptions": "FILTER_ALL_VALUES"
                             }
                         }
                     }
@@ -13404,8 +13054,7 @@
                         "Configuration": {
                             "FilterListConfiguration": {
                                 "MatchOperator": "CONTAINS",
-                                "SelectAllOptions": "FILTER_ALL_VALUES",
-                                "NullOption": "NON_NULLS_ONLY"
+                                "SelectAllOptions": "FILTER_ALL_VALUES"
                             }
                         }
                     }
@@ -13440,8 +13089,7 @@
                         "Configuration": {
                             "FilterListConfiguration": {
                                 "MatchOperator": "CONTAINS",
-                                "SelectAllOptions": "FILTER_ALL_VALUES",
-                                "NullOption": "NON_NULLS_ONLY"
+                                "SelectAllOptions": "FILTER_ALL_VALUES"
                             }
                         }
                     }
@@ -13476,8 +13124,7 @@
                         "Configuration": {
                             "FilterListConfiguration": {
                                 "MatchOperator": "CONTAINS",
-                                "SelectAllOptions": "FILTER_ALL_VALUES",
-                                "NullOption": "NON_NULLS_ONLY"
+                                "SelectAllOptions": "FILTER_ALL_VALUES"
                             }
                         }
                     }
@@ -13514,8 +13161,7 @@
                                 "MatchOperator": "CONTAINS",
                                 "CategoryValues": [
                                     "Android"
-                                ],
-                                "NullOption": "NON_NULLS_ONLY"
+                                ]
                             }
                         }
                     }
@@ -13552,8 +13198,7 @@
                                 "MatchOperator": "CONTAINS",
                                 "CategoryValues": [
                                     "_screen_view"
-                                ],
-                                "NullOption": "NON_NULLS_ONLY"
+                                ]
                             }
                         }
                     }
@@ -13590,8 +13235,7 @@
                                 "MatchOperator": "CONTAINS",
                                 "CategoryValues": [
                                     "_screen_name"
-                                ],
-                                "NullOption": "NON_NULLS_ONLY"
+                                ]
                             }
                         }
                     }
@@ -13628,8 +13272,7 @@
                                 "MatchOperator": "CONTAINS",
                                 "CategoryValues": [
                                     "iOS"
-                                ],
-                                "NullOption": "NON_NULLS_ONLY"
+                                ]
                             }
                         }
                     }
@@ -13666,8 +13309,7 @@
                                 "MatchOperator": "CONTAINS",
                                 "CategoryValues": [
                                     "_page_view"
-                                ],
-                                "NullOption": "NON_NULLS_ONLY"
+                                ]
                             }
                         }
                     }
@@ -13704,8 +13346,7 @@
                                 "MatchOperator": "CONTAINS",
                                 "CategoryValues": [
                                     "_page_title"
-                                ],
-                                "NullOption": "NON_NULLS_ONLY"
+                                ]
                             }
                         }
                     }
@@ -13742,8 +13383,7 @@
                                 "MatchOperator": "CONTAINS",
                                 "CategoryValues": [
                                     "Web"
-                                ],
-                                "NullOption": "NON_NULLS_ONLY"
+                                ]
                             }
                         }
                     }
@@ -13780,8 +13420,7 @@
                                 "MatchOperator": "CONTAINS",
                                 "CategoryValues": [
                                     "_user_engagement"
-                                ],
-                                "NullOption": "NON_NULLS_ONLY"
+                                ]
                             }
                         }
                     }
@@ -13816,8 +13455,7 @@
                         "Configuration": {
                             "FilterListConfiguration": {
                                 "MatchOperator": "CONTAINS",
-                                "SelectAllOptions": "FILTER_ALL_VALUES",
-                                "NullOption": "NON_NULLS_ONLY"
+                                "SelectAllOptions": "FILTER_ALL_VALUES"
                             }
                         }
                     }
@@ -13855,8 +13493,7 @@
                                 "CategoryValues": [
                                     "_page_title",
                                     "_screen_name"
-                                ],
-                                "NullOption": "NON_NULLS_ONLY"
+                                ]
                             }
                         }
                     }
@@ -13893,8 +13530,7 @@
                                 "MatchOperator": "CONTAINS",
                                 "CategoryValues": [
                                     "_app_exception"
-                                ],
-                                "NullOption": "NON_NULLS_ONLY"
+                                ]
                             }
                         }
                     }
@@ -13931,8 +13567,7 @@
                                 "MatchOperator": "CONTAINS",
                                 "CategoryValues": [
                                     "_app_exception"
-                                ],
-                                "NullOption": "NON_NULLS_ONLY"
+                                ]
                             }
                         }
                     }
@@ -13969,8 +13604,7 @@
                                 "MatchOperator": "CONTAINS",
                                 "CategoryValues": [
                                     "_app_exception"
-                                ],
-                                "NullOption": "NON_NULLS_ONLY"
+                                ]
                             }
                         }
                     }
@@ -14007,8 +13641,7 @@
                                 "MatchOperator": "CONTAINS",
                                 "CategoryValues": [
                                     "_app_exception"
-                                ],
-                                "NullOption": "NON_NULLS_ONLY"
+                                ]
                             }
                         }
                     }
@@ -14045,8 +13678,7 @@
                                 "MatchOperator": "CONTAINS",
                                 "CategoryValues": [
                                     "_app_exception"
-                                ],
-                                "NullOption": "NON_NULLS_ONLY"
+                                ]
                             }
                         }
                     }
@@ -14083,8 +13715,7 @@
                                 "MatchOperator": "CONTAINS",
                                 "CategoryValues": [
                                     "_app_exception"
-                                ],
-                                "NullOption": "NON_NULLS_ONLY"
+                                ]
                             }
                         }
                     }
@@ -14121,8 +13752,7 @@
                                 "MatchOperator": "CONTAINS",
                                 "CategoryValues": [
                                     "_app_exception"
-                                ],
-                                "NullOption": "NON_NULLS_ONLY"
+                                ]
                             }
                         }
                     }
@@ -14159,8 +13789,7 @@
                                 "MatchOperator": "CONTAINS",
                                 "CategoryValues": [
                                     "_exception_stack"
-                                ],
-                                "NullOption": "NON_NULLS_ONLY"
+                                ]
                             }
                         }
                     }
@@ -14197,8 +13826,7 @@
                                 "MatchOperator": "CONTAINS",
                                 "CategoryValues": [
                                     "_app_exception"
-                                ],
-                                "NullOption": "NON_NULLS_ONLY"
+                                ]
                             }
                         }
                     }
@@ -14235,8 +13863,7 @@
                                 "MatchOperator": "CONTAINS",
                                 "CategoryValues": [
                                     "_exception_message"
-                                ],
-                                "NullOption": "NON_NULLS_ONLY"
+                                ]
                             }
                         }
                     }
@@ -14273,8 +13900,7 @@
                                 "MatchOperator": "CONTAINS",
                                 "CategoryValues": [
                                     "_app_exception"
-                                ],
-                                "NullOption": "NON_NULLS_ONLY"
+                                ]
                             }
                         }
                     }
@@ -14311,8 +13937,7 @@
                                 "MatchOperator": "CONTAINS",
                                 "CategoryValues": [
                                     "_app_exception"
-                                ],
-                                "NullOption": "NON_NULLS_ONLY"
+                                ]
                             }
                         }
                     }
@@ -14350,8 +13975,7 @@
                                 "CategoryValues": [
                                     "_exception_message",
                                     "_exception_stack"
-                                ],
-                                "NullOption": "NON_NULLS_ONLY"
+                                ]
                             }
                         }
                     }
@@ -14386,8 +14010,7 @@
                         "Configuration": {
                             "FilterListConfiguration": {
                                 "MatchOperator": "CONTAINS",
-                                "SelectAllOptions": "FILTER_ALL_VALUES",
-                                "NullOption": "NON_NULLS_ONLY"
+                                "SelectAllOptions": "FILTER_ALL_VALUES"
                             }
                         }
                     }
@@ -14422,8 +14045,7 @@
                         "Configuration": {
                             "FilterListConfiguration": {
                                 "MatchOperator": "CONTAINS",
-                                "SelectAllOptions": "FILTER_ALL_VALUES",
-                                "NullOption": "NON_NULLS_ONLY"
+                                "SelectAllOptions": "FILTER_ALL_VALUES"
                             }
                         }
                     }
@@ -14489,8 +14111,7 @@
                         "Configuration": {
                             "FilterListConfiguration": {
                                 "MatchOperator": "CONTAINS",
-                                "SelectAllOptions": "FILTER_ALL_VALUES",
-                                "NullOption": "NON_NULLS_ONLY"
+                                "SelectAllOptions": "FILTER_ALL_VALUES"
                             }
                         }
                     }
@@ -14525,8 +14146,7 @@
                         "Configuration": {
                             "FilterListConfiguration": {
                                 "MatchOperator": "CONTAINS",
-                                "SelectAllOptions": "FILTER_ALL_VALUES",
-                                "NullOption": "NON_NULLS_ONLY"
+                                "SelectAllOptions": "FILTER_ALL_VALUES"
                             }
                         }
                     }
@@ -14561,8 +14181,7 @@
                         "Configuration": {
                             "FilterListConfiguration": {
                                 "MatchOperator": "CONTAINS",
-                                "SelectAllOptions": "FILTER_ALL_VALUES",
-                                "NullOption": "NON_NULLS_ONLY"
+                                "SelectAllOptions": "FILTER_ALL_VALUES"
                             }
                         }
                     }
@@ -14597,8 +14216,7 @@
                         "Configuration": {
                             "FilterListConfiguration": {
                                 "MatchOperator": "CONTAINS",
-                                "SelectAllOptions": "FILTER_ALL_VALUES",
-                                "NullOption": "NON_NULLS_ONLY"
+                                "SelectAllOptions": "FILTER_ALL_VALUES"
                             }
                         }
                     }
@@ -14633,8 +14251,7 @@
                         "Configuration": {
                             "FilterListConfiguration": {
                                 "MatchOperator": "CONTAINS",
-                                "SelectAllOptions": "FILTER_ALL_VALUES",
-                                "NullOption": "NON_NULLS_ONLY"
+                                "SelectAllOptions": "FILTER_ALL_VALUES"
                             }
                         }
                     }
@@ -14669,8 +14286,7 @@
                         "Configuration": {
                             "FilterListConfiguration": {
                                 "MatchOperator": "CONTAINS",
-                                "SelectAllOptions": "FILTER_ALL_VALUES",
-                                "NullOption": "NON_NULLS_ONLY"
+                                "SelectAllOptions": "FILTER_ALL_VALUES"
                             }
                         }
                     }
@@ -14705,8 +14321,7 @@
                         "Configuration": {
                             "FilterListConfiguration": {
                                 "MatchOperator": "CONTAINS",
-                                "SelectAllOptions": "FILTER_ALL_VALUES",
-                                "NullOption": "NON_NULLS_ONLY"
+                                "SelectAllOptions": "FILTER_ALL_VALUES"
                             }
                         }
                     }
@@ -14780,8 +14395,7 @@
                         "Configuration": {
                             "FilterListConfiguration": {
                                 "MatchOperator": "CONTAINS",
-                                "SelectAllOptions": "FILTER_ALL_VALUES",
-                                "NullOption": "NON_NULLS_ONLY"
+                                "SelectAllOptions": "FILTER_ALL_VALUES"
                             }
                         }
                     }
@@ -14816,8 +14430,7 @@
                         "Configuration": {
                             "FilterListConfiguration": {
                                 "MatchOperator": "CONTAINS",
-                                "SelectAllOptions": "FILTER_ALL_VALUES",
-                                "NullOption": "NON_NULLS_ONLY"
+                                "SelectAllOptions": "FILTER_ALL_VALUES"
                             }
                         }
                     }
@@ -14852,8 +14465,7 @@
                         "Configuration": {
                             "FilterListConfiguration": {
                                 "MatchOperator": "CONTAINS",
-                                "SelectAllOptions": "FILTER_ALL_VALUES",
-                                "NullOption": "NON_NULLS_ONLY"
+                                "SelectAllOptions": "FILTER_ALL_VALUES"
                             }
                         }
                     }
@@ -14888,8 +14500,7 @@
                         "Configuration": {
                             "FilterListConfiguration": {
                                 "MatchOperator": "CONTAINS",
-                                "SelectAllOptions": "FILTER_ALL_VALUES",
-                                "NullOption": "NON_NULLS_ONLY"
+                                "SelectAllOptions": "FILTER_ALL_VALUES"
                             }
                         }
                     }
@@ -14924,8 +14535,7 @@
                         "Configuration": {
                             "FilterListConfiguration": {
                                 "MatchOperator": "CONTAINS",
-                                "SelectAllOptions": "FILTER_ALL_VALUES",
-                                "NullOption": "NON_NULLS_ONLY"
+                                "SelectAllOptions": "FILTER_ALL_VALUES"
                             }
                         }
                     }
@@ -14960,8 +14570,7 @@
                         "Configuration": {
                             "FilterListConfiguration": {
                                 "MatchOperator": "CONTAINS",
-                                "SelectAllOptions": "FILTER_ALL_VALUES",
-                                "NullOption": "NON_NULLS_ONLY"
+                                "SelectAllOptions": "FILTER_ALL_VALUES"
                             }
                         }
                     }
@@ -14996,8 +14605,7 @@
                         "Configuration": {
                             "FilterListConfiguration": {
                                 "MatchOperator": "CONTAINS",
-                                "SelectAllOptions": "FILTER_ALL_VALUES",
-                                "NullOption": "NON_NULLS_ONLY"
+                                "SelectAllOptions": "FILTER_ALL_VALUES"
                             }
                         }
                     }
@@ -15032,8 +14640,7 @@
                         "Configuration": {
                             "FilterListConfiguration": {
                                 "MatchOperator": "CONTAINS",
-                                "SelectAllOptions": "FILTER_ALL_VALUES",
-                                "NullOption": "NON_NULLS_ONLY"
+                                "SelectAllOptions": "FILTER_ALL_VALUES"
                             }
                         }
                     }
@@ -15068,8 +14675,7 @@
                         "Configuration": {
                             "FilterListConfiguration": {
                                 "MatchOperator": "CONTAINS",
-                                "SelectAllOptions": "FILTER_ALL_VALUES",
-                                "NullOption": "NON_NULLS_ONLY"
+                                "SelectAllOptions": "FILTER_ALL_VALUES"
                             }
                         }
                     }
@@ -15135,8 +14741,7 @@
                         "Configuration": {
                             "FilterListConfiguration": {
                                 "MatchOperator": "CONTAINS",
-                                "SelectAllOptions": "FILTER_ALL_VALUES",
-                                "NullOption": "NON_NULLS_ONLY"
+                                "SelectAllOptions": "FILTER_ALL_VALUES"
                             }
                         }
                     }
@@ -15171,8 +14776,7 @@
                         "Configuration": {
                             "FilterListConfiguration": {
                                 "MatchOperator": "CONTAINS",
-                                "SelectAllOptions": "FILTER_ALL_VALUES",
-                                "NullOption": "NON_NULLS_ONLY"
+                                "SelectAllOptions": "FILTER_ALL_VALUES"
                             }
                         }
                     }
