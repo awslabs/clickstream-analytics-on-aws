@@ -767,7 +767,7 @@ describe('Network test', () => {
   it('Return empty string as Service Catalog AppRegistry application arn', () => {
     const pipeline = {
       ...S3_INGESTION_PIPELINE,
-      region: 'ap-east-1',
+      region: 'cn-north-1',
     };
     expect(getAppRegistryApplicationArn(pipeline)).toEqual('');
   });

@@ -45,7 +45,7 @@ import { mockClient } from 'aws-sdk-client-mock';
 import request from 'supertest';
 import {
   createPipelineMock,
-  createPipelineMockForHKRegion,
+  createPipelineMockForBJSRegion,
   dictionaryMock,
   MOCK_EXECUTION_ID,
   MOCK_PIPELINE_ID,
@@ -194,13 +194,13 @@ describe('Pipeline test', () => {
         subnetsIsolated: true,
       });
     ddbMock.on(PutCommand).resolves({});
-    createPipelineMockForHKRegion(ec2Mock, s3Mock);
+    createPipelineMockForBJSRegion(ec2Mock, s3Mock);
     const res = await request(app)
       .post('/api/pipeline')
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         ...S3_INGESTION_PIPELINE,
-        region: 'ap-east-1',
+        region: 'cn-north-1',
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(201);

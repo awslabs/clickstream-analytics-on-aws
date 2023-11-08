@@ -36,7 +36,7 @@ import { DynamoDBDocumentClient, GetCommand, QueryCommand } from '@aws-sdk/lib-d
 import { mockClient } from 'aws-sdk-client-mock';
 import {
   createPipelineMock,
-  createPipelineMockForHKRegion,
+  createPipelineMockForBJSRegion,
   dictionaryMock,
   MOCK_APP_ID,
   MOCK_PROJECT_ID,
@@ -254,10 +254,10 @@ describe('Workflow test', () => {
       ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, iamMock, {
         publicAZContainPrivateAZ: true,
       });
-    createPipelineMockForHKRegion(ec2Mock, s3Mock);
+    createPipelineMockForBJSRegion(ec2Mock, s3Mock);
     const pipeline: CPipeline = new CPipeline({
       ...S3_INGESTION_PIPELINE,
-      region: 'ap-east-1',
+      region: 'cn-north-1',
     });
     const wf = await pipeline.generateWorkflow();
     const expected = {
@@ -280,7 +280,7 @@ describe('Workflow test', () => {
                           },
                           Input: {
                             Action: 'Create',
-                            Region: 'ap-east-1',
+                            Region: 'cn-north-1',
                             Parameters: [
                               ...INGESTION_S3_PARAMETERS,
                               APPREGISTRY_APPLICATION_EMPTY_ARN_PARAMETER,
@@ -306,7 +306,7 @@ describe('Workflow test', () => {
                           },
                           Input: {
                             Action: 'Create',
-                            Region: 'ap-east-1',
+                            Region: 'cn-north-1',
                             Parameters: [
                               ...BASE_METRICS_EMAILS_PARAMETERS,
                               APPREGISTRY_APPLICATION_EMPTY_ARN_PARAMETER,
@@ -333,7 +333,7 @@ describe('Workflow test', () => {
                   },
                   Input: {
                     Action: 'Create',
-                    Region: 'ap-east-1',
+                    Region: 'cn-north-1',
                     Parameters: [
                       {
                         ParameterKey: 'ProjectId',
@@ -595,10 +595,10 @@ describe('Workflow test', () => {
       ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, iamMock, {
         publicAZContainPrivateAZ: true,
       });
-    createPipelineMockForHKRegion(ec2Mock, s3Mock);
+    createPipelineMockForBJSRegion(ec2Mock, s3Mock);
     const pipeline: CPipeline = new CPipeline({
       ...MSK_WITH_CONNECTOR_INGESTION_PIPELINE,
-      region: 'ap-east-1',
+      region: 'cn-north-1',
     });
     const wf = await pipeline.generateWorkflow();
     const expected = {
@@ -621,7 +621,7 @@ describe('Workflow test', () => {
                           },
                           Input: {
                             Action: 'Create',
-                            Region: 'ap-east-1',
+                            Region: 'cn-north-1',
                             Parameters: [
                               ...INGESTION_MSK_PARAMETERS,
                               APPREGISTRY_APPLICATION_EMPTY_ARN_PARAMETER,
@@ -642,7 +642,7 @@ describe('Workflow test', () => {
                           },
                           Input: {
                             Action: 'Create',
-                            Region: 'ap-east-1',
+                            Region: 'cn-north-1',
                             Parameters: [
                               ...BASE_KAFKACONNECTOR_BATCH_MSK_PARAMETERS,
                               APPREGISTRY_APPLICATION_EMPTY_ARN_PARAMETER,
@@ -668,7 +668,7 @@ describe('Workflow test', () => {
                           },
                           Input: {
                             Action: 'Create',
-                            Region: 'ap-east-1',
+                            Region: 'cn-north-1',
                             Parameters: [
                               ...BASE_METRICS_PARAMETERS,
                               APPREGISTRY_APPLICATION_EMPTY_ARN_PARAMETER,
@@ -695,7 +695,7 @@ describe('Workflow test', () => {
                   },
                   Input: {
                     Action: 'Create',
-                    Region: 'ap-east-1',
+                    Region: 'cn-north-1',
                     Parameters: [
                       {
                         ParameterKey: 'ProjectId',
@@ -831,10 +831,10 @@ describe('Workflow test', () => {
       ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, iamMock, {
         publicAZContainPrivateAZ: true,
       });
-    createPipelineMockForHKRegion(ec2Mock, s3Mock);
+    createPipelineMockForBJSRegion(ec2Mock, s3Mock);
     const pipeline: CPipeline = new CPipeline({
       ...KINESIS_PROVISIONED_INGESTION_PIPELINE,
-      region: 'ap-east-1',
+      region: 'cn-north-1',
     });
     const wf = await pipeline.generateWorkflow();
     const expected = {
@@ -857,7 +857,7 @@ describe('Workflow test', () => {
                           },
                           Input: {
                             Action: 'Create',
-                            Region: 'ap-east-1',
+                            Region: 'cn-north-1',
                             Parameters: [
                               ...INGESTION_KINESIS_PROVISIONED_PARAMETERS,
                               APPREGISTRY_APPLICATION_EMPTY_ARN_PARAMETER,
@@ -883,7 +883,7 @@ describe('Workflow test', () => {
                           },
                           Input: {
                             Action: 'Create',
-                            Region: 'ap-east-1',
+                            Region: 'cn-north-1',
                             Parameters: [
                               ...BASE_METRICS_PARAMETERS,
                               APPREGISTRY_APPLICATION_EMPTY_ARN_PARAMETER,
@@ -910,7 +910,7 @@ describe('Workflow test', () => {
                   },
                   Input: {
                     Action: 'Create',
-                    Region: 'ap-east-1',
+                    Region: 'cn-north-1',
                     Parameters: [
                       {
                         ParameterKey: 'ProjectId',

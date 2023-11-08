@@ -460,6 +460,7 @@ export class Parameters {
     return new CfnParameter(scope, id ?? 'AppRegistryApplicationArn', {
       description: 'Service Catalog AppRegistry Application Arn',
       type: 'String',
+      default: '',
       allowedPattern: `^(|${SERVICE_CATALOG_APPREGISTRY_ARN_PATTERN})$`,
       constraintDescription: `Service Catalog AppRegistry application arn parameter can either match pattern ${SERVICE_CATALOG_APPREGISTRY_ARN_PATTERN} or be empty`,
     });

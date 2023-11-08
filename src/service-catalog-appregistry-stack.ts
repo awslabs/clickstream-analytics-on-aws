@@ -15,7 +15,10 @@ import { Application } from '@aws-cdk/aws-servicecatalogappregistry-alpha';
 import { Aws, CfnCondition, CfnOutput, CfnResource, Fn, Stack, Tags } from 'aws-cdk-lib';
 import { StackProps } from 'aws-cdk-lib/core/lib/stack';
 import { Construct } from 'constructs';
-import { OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_ARN } from './common/constant';
+import {
+  OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_ARN,
+  SERVICE_CATALOG_SUPPORTED_REGIONS,
+} from './common/constant';
 import { Parameters } from './common/parameters';
 import { SolutionInfo } from './common/solution-info';
 
@@ -31,26 +34,9 @@ export class ServiceCatalogAppregistryStack extends Stack {
 
     const projectIdParam = Parameters.createProjectIdParameter(this);
 
+
     const serviceAvailableRegion = new CfnCondition(this, 'ServiceCatalogAvailableRegion', {
-      expression: Fn.conditionOr(
-        Fn.conditionEquals(Aws.REGION, 'us-east-1'),
-        Fn.conditionEquals(Aws.REGION, 'us-east-2'),
-        Fn.conditionEquals(Aws.REGION, 'us-west-1'),
-        Fn.conditionEquals(Aws.REGION, 'us-west-2'),
-        Fn.conditionEquals(Aws.REGION, 'ap-south-1'),
-        Fn.conditionEquals(Aws.REGION, 'ap-northeast-1'),
-        Fn.conditionEquals(Aws.REGION, 'ap-northeast-2'),
-        Fn.conditionEquals(Aws.REGION, 'ap-northeast-3'),
-        Fn.conditionEquals(Aws.REGION, 'ap-southeast-1'),
-        Fn.conditionEquals(Aws.REGION, 'ap-southeast-2'),
-        Fn.conditionEquals(Aws.REGION, 'ca-central-1'),
-        Fn.conditionEquals(Aws.REGION, 'eu-central-1'),
-        Fn.conditionEquals(Aws.REGION, 'eu-west-1'),
-        Fn.conditionEquals(Aws.REGION, 'eu-west-2'),
-        Fn.conditionEquals(Aws.REGION, 'eu-west-3'),
-        Fn.conditionEquals(Aws.REGION, 'eu-north-1'),
-        Fn.conditionEquals(Aws.REGION, 'sa-east-1'),
-      ),
+      expression: Fn.conditionOr(...SERVICE_CATALOG_SUPPORTED_REGIONS.map(region => Fn.conditionEquals(Aws.REGION, region))),
     });
 
     const application = new Application(this, 'ServiceCatalogApplication', {
