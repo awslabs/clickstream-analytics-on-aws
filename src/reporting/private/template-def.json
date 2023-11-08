@@ -177,6 +177,10 @@
                         "DataType": "STRING"
                     },
                     {
+                        "Name": "event_param_value",
+                        "DataType": "STRING"
+                    },
+                    {
                         "Name": "event_param_double_value",
                         "DataType": "DECIMAL"
                     },
@@ -2938,13 +2942,6 @@
                                     "OtherCategories": "INCLUDE"
                                 }
                             },
-                            "ForecastConfigurations": [
-                                {
-                                    "ForecastProperties": {
-                                        "PeriodsForward": 3
-                                    }
-                                }
-                            ],
                             "Type": "AREA",
                             "XAxisDisplayOptions": {
                                 "AxisLineVisibility": "VISIBLE",
@@ -5374,7 +5371,7 @@
                                                 "FieldId": "3cb71a41-7445-4090-ae1d-94a4388a9ba7.3.1699348931031",
                                                 "Column": {
                                                     "DataSetIdentifier": "Event_Parameter_View",
-                                                    "ColumnName": "Event_Param_valuE"
+                                                    "ColumnName": "event_param_value"
                                                 }
                                             }
                                         }
@@ -6771,12 +6768,7 @@
                                                     }
                                                 }
                                             }
-                                        },
-                                        "Scopes": [
-                                            {
-                                                "Role": "FIELD"
-                                            }
-                                        ]
+                                        }
                                     }
                                 }
                             ]
@@ -11133,7 +11125,7 @@
                                                 "FieldId": "3cb71a41-7445-4090-ae1d-94a4388a9ba7.0.1699371701758",
                                                 "Column": {
                                                     "DataSetIdentifier": "Event_Parameter_View",
-                                                    "ColumnName": "Event_Param_valuE"
+                                                    "ColumnName": "event_param_value"
                                                 }
                                             }
                                         }

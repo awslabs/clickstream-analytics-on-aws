@@ -295,7 +295,8 @@ export function createQuicksightCustomResource(
           "event_param_double_value",
           "event_param_float_value",
           "event_param_int_value",
-          "event_param_string_value"
+          "event_param_string_value",
+          "event_param_value",
         ],
       },
       {
