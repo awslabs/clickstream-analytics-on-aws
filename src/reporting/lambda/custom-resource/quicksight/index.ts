@@ -53,6 +53,14 @@ type QuicksightCustomResourceLambdaPropsType = QuicksightCustomResourceLambdaPro
   readonly ServiceToken: string;
 }
 
+type ResourceCommonParams = {
+  awsAccountId: string;
+  databaseName: string;
+  schema: string;
+  ownerPrincipalArn?: string;
+  principalArn?: string;
+}
+
 export type MustacheParamType = {
   schema: string;
 }
@@ -67,11 +75,12 @@ export const handler = async (event: ResourceEvent, _context: Context): Promise<
 
   const awsAccountId = props.awsAccountId;
   const principalArn = props.quickSightPrincipalArn;
+  const ownerPrincipalArn = props.quickSightOwnerPrincipalArn;
 
   if (event.RequestType === 'Create') {
-    return _onCreate(quickSight, awsAccountId, principalArn, event);
+    return _onCreate(quickSight, awsAccountId, principalArn, ownerPrincipalArn, event);
   } else if (event.RequestType === 'Update' ) {
-    return _onUpdate(quickSight, awsAccountId, principalArn, event);
+    return _onUpdate(quickSight, awsAccountId, principalArn, ownerPrincipalArn, event);
   } else if (event.RequestType === 'Delete' ) {
     return _onDelete(quickSight, awsAccountId, event);
   } else {
@@ -80,7 +89,7 @@ export const handler = async (event: ResourceEvent, _context: Context): Promise<
 
 };
 
-const _onCreate = async (quickSight: QuickSight, awsAccountId: string, principalArn: string,
+const _onCreate = async (quickSight: QuickSight, awsAccountId: string, principalArn: string, ownerPrincipalArn: string,
   event: CloudFormationCustomResourceCreateEvent): Promise<CdkCustomResourceResponse> => {
 
   logger.info('receive event', JSON.stringify(event));
@@ -94,7 +103,7 @@ const _onCreate = async (quickSight: QuickSight, awsAccountId: string, principal
       const dashboardDefProps: QuickSightDashboardDefProps = props.dashboardDefProps;
       logger.info('dashboardDefProps', JSON.stringify(dashboardDefProps));
 
-      const dashboard = await createQuickSightDashboard(quickSight, awsAccountId, principalArn,
+      const dashboard = await createQuickSightDashboard(quickSight, awsAccountId, principalArn, ownerPrincipalArn,
         schemaName,
         dashboardDefProps);
       logger.info('created dashboard', JSON.stringify(dashboard));
@@ -134,7 +143,7 @@ const _onDelete = async (quickSight: QuickSight, awsAccountId: string, event: Cl
   }
 };
 
-const _onUpdate = async (quickSight: QuickSight, awsAccountId: string, principalArn: string,
+const _onUpdate = async (quickSight: QuickSight, awsAccountId: string, principalArn: string, ownerPrincipalArn: string,
   event: CloudFormationCustomResourceUpdateEvent): Promise<CdkCustomResourceResponse> => {
 
   logger.info('receive event', JSON.stringify(event));
@@ -172,15 +181,17 @@ const _onUpdate = async (quickSight: QuickSight, awsAccountId: string, principal
     const dashboardDefProps: QuickSightDashboardDefProps = props.dashboardDefProps;
     logger.info('dashboardDefProps', JSON.stringify(dashboardDefProps));
 
+    let newOwnerPrincipalArn = undefined;
     let newPrincipalArn = undefined;
     if (oldProps.quickSightUser !== props.quickSightUser) {
+      newOwnerPrincipalArn = ownerPrincipalArn;
       newPrincipalArn = principalArn;
       logger.info('dashboard user changed, will update dataset/dashboard/analysis permission to new user.');
     }
 
     const dashboard = await updateQuickSightDashboard(quickSight, awsAccountId,
       schemaName,
-      dashboardDefProps, newPrincipalArn);
+      dashboardDefProps, newOwnerPrincipalArn, newPrincipalArn);
 
     logger.info(`updated dashboard: ${dashboard?.DashboardId}`);
     dashboards.push({
@@ -195,7 +206,7 @@ const _onUpdate = async (quickSight: QuickSight, awsAccountId: string, principal
     const dashboardDefProps: QuickSightDashboardDefProps = props.dashboardDefProps;
     logger.info('dashboardDefProps', JSON.stringify(dashboardDefProps));
 
-    const dashboard = await createQuickSightDashboard(quickSight, awsAccountId, principalArn,
+    const dashboard = await createQuickSightDashboard(quickSight, awsAccountId, principalArn, ownerPrincipalArn,
       schemaName,
       dashboardDefProps);
     logger.info(`created dashboard: ${dashboard?.DashboardId}`);
@@ -226,6 +237,7 @@ const _onUpdate = async (quickSight: QuickSight, awsAccountId: string, principal
 const createQuickSightDashboard = async (quickSight: QuickSight,
   accountId: string,
   principalArn: string,
+  ownerPrincipalArn: string,
   schema: string,
   dashboardDef: QuickSightDashboardDefProps)
 : Promise<CreateDashboardCommandOutput|undefined> => {
@@ -234,7 +246,7 @@ const createQuickSightDashboard = async (quickSight: QuickSight,
   const dataSets = dashboardDef.dataSets;
   const databaseName = dashboardDef.databaseName;
   for ( const dataSet of dataSets) {
-    const createdDataset = await createDataSet(quickSight, accountId, principalArn, dashboardDef.dataSourceArn, schema,
+    const createdDataset = await createDataSet(quickSight, accountId, ownerPrincipalArn, dashboardDef.dataSourceArn, schema,
       databaseName, dataSet);
     logger.info(`data set id: ${createdDataset?.DataSetId}`);
 
@@ -251,10 +263,18 @@ const createQuickSightDashboard = async (quickSight: QuickSight,
     },
   };
 
-  const analysis = await createAnalysis(quickSight, accountId, principalArn, databaseName, schema, sourceEntity, dashboardDef);
+  const analysis = await createAnalysis(quickSight, accountId, ownerPrincipalArn, databaseName, schema, sourceEntity, dashboardDef);
   logger.info(`Analysis ${analysis?.AnalysisId} creation completed.`);
 
-  const dashboard = await createDashboard(quickSight, accountId, principalArn, databaseName, schema, sourceEntity, dashboardDef);
+  const commonParams: ResourceCommonParams = {
+    awsAccountId: accountId,
+    ownerPrincipalArn,
+    principalArn,
+    databaseName,
+    schema,
+  }
+
+  const dashboard = await createDashboard(quickSight, commonParams, sourceEntity, dashboardDef);
   logger.info(`Dashboard ${dashboard?.DashboardId} creation completed.`);
   return dashboard;
 
@@ -287,6 +307,7 @@ const updateQuickSightDashboard = async (quickSight: QuickSight,
   accountId: string,
   schema: string,
   dashboardDef: QuickSightDashboardDefProps,
+  ownerPrincipalArn? : string,
   principalArn? : string,
 )
 : Promise<CreateDashboardCommandOutput|undefined> => {
@@ -295,7 +316,7 @@ const updateQuickSightDashboard = async (quickSight: QuickSight,
   const dataSets = dashboardDef.dataSets;
   const databaseName = dashboardDef.databaseName;
   for ( const dataSet of dataSets) {
-    const createdDataset = await updateDataSet(quickSight, accountId, dashboardDef.dataSourceArn, schema, databaseName, dataSet, principalArn);
+    const createdDataset = await updateDataSet(quickSight, accountId, dashboardDef.dataSourceArn, schema, databaseName, dataSet, ownerPrincipalArn);
     logger.info(`data set id: ${createdDataset?.DataSetId}`);
 
     datasetRefs.push({
@@ -311,10 +332,18 @@ const updateQuickSightDashboard = async (quickSight: QuickSight,
     },
   };
 
-  const analysis = await updateAnalysis(quickSight, accountId, databaseName, schema, sourceEntity, dashboardDef, principalArn);
+  const analysis = await updateAnalysis(quickSight, accountId, databaseName, schema, sourceEntity, dashboardDef, ownerPrincipalArn);
   logger.info(`Analysis ${analysis?.AnalysisId} creation completed.`);
 
-  const dashboard = await updateDashboard(quickSight, accountId, databaseName, schema, sourceEntity, dashboardDef, principalArn);
+  const commonParams: ResourceCommonParams = {
+    awsAccountId: accountId,
+    ownerPrincipalArn,
+    principalArn,
+    databaseName,
+    schema,
+  }
+
+  const dashboard = await updateDashboard(quickSight, commonParams, sourceEntity, dashboardDef);
   logger.info(`Dashboard ${dashboard?.DashboardId} creation completed.`);
 
   return dashboard;
@@ -465,27 +494,32 @@ const createAnalysis = async (quickSight: QuickSight, awsAccountId: string, prin
   }
 };
 
-const createDashboard = async (quickSight: QuickSight, awsAccountId: string, principalArn: string, databaseName: string, schema: string,
+const createDashboard = async (quickSight: QuickSight, commonParams: ResourceCommonParams, 
   sourceEntity: DashboardSourceEntity, props: QuickSightDashboardDefProps)
 : Promise<CreateDashboardCommandOutput|undefined> => {
   try {
-    const identifier = buildDashBoardId(databaseName, schema);
+    const identifier = buildDashBoardId(commonParams.databaseName, commonParams.schema);
     const dashboardId = identifier.id;
 
     logger.info(`start to create dashboard ${dashboardId}`);
     const dashboard = await quickSight.createDashboard({
-      AwsAccountId: awsAccountId,
+      AwsAccountId: commonParams.awsAccountId,
       DashboardId: dashboardId,
       Name: `${props.dashboardName} - ${identifier.schemaIdentifier} - ${identifier.databaseIdentifier} `,
       Permissions: [{
-        Principal: principalArn,
-        Actions: dashboardPermissionActions,
-      }],
+          Principal: commonParams.ownerPrincipalArn,
+          Actions: dashboardPermissionActions,
+        },
+        {
+          Principal: commonParams.principalArn,
+          Actions: dashboardPermissionActions,
+        }
+      ],
 
       SourceEntity: sourceEntity,
 
     });
-    await waitForDashboardChangeCompleted(quickSight, awsAccountId, dashboardId);
+    await waitForDashboardChangeCompleted(quickSight, commonParams.awsAccountId, dashboardId);
     logger.info(`Create dashboard finished. Id: ${dashboardId}`);
 
     return dashboard;
@@ -747,16 +781,16 @@ const updateAnalysis = async (quickSight: QuickSight, awsAccountId: string, data
   }
 };
 
-const updateDashboard = async (quickSight: QuickSight, awsAccountId: string, databaseName: string, schema: string,
-  sourceEntity: DashboardSourceEntity, props: QuickSightDashboardDefProps, principalArn: string|undefined)
+const updateDashboard = async (quickSight: QuickSight, commonParams: ResourceCommonParams,
+  sourceEntity: DashboardSourceEntity, props: QuickSightDashboardDefProps)
 : Promise<CreateDashboardCommandOutput|undefined> => {
   try {
-    const identifier = buildDashBoardId(databaseName, schema);
+    const identifier = buildDashBoardId(commonParams.databaseName, commonParams.schema);
     const dashboardId = identifier.id;
 
     logger.info('start to create dashboard');
     const dashboard = await quickSight.updateDashboard({
-      AwsAccountId: awsAccountId,
+      AwsAccountId: commonParams.awsAccountId,
       DashboardId: dashboardId,
       Name: `${props.dashboardName} - ${identifier.schemaIdentifier} - ${identifier.databaseIdentifier}`,
 
@@ -765,21 +799,24 @@ const updateDashboard = async (quickSight: QuickSight, awsAccountId: string, dat
     });
     logger.info(`update dashboard finished. id: ${dashboardId}`);
 
-
-    if (principalArn !== undefined) {
-      await waitForDashboardChangeCompleted(quickSight, awsAccountId, dashboardId);
+    if (commonParams.principalArn !== undefined && commonParams.ownerPrincipalArn !== undefined) {
+      await waitForDashboardChangeCompleted(quickSight, commonParams.awsAccountId, dashboardId);
       await quickSight.updateDashboardPermissions({
-        AwsAccountId: awsAccountId,
+        AwsAccountId: commonParams.awsAccountId,
         DashboardId: dashboardId,
         GrantPermissions: [
           {
-            Principal: principalArn,
+            Principal: commonParams.ownerPrincipalArn,
+            Actions: dashboardPermissionActions,
+          },
+          {
+            Principal: commonParams.principalArn,
             Actions: dashboardPermissionActions,
           },
         ],
       });
 
-      logger.info(`grant dashboard permissions to new principal ${principalArn}`);
+      logger.info(`grant dashboard permissions to new principal ${commonParams.ownerPrincipalArn} and ${commonParams.principalArn}`);
     }
 
     return dashboard;

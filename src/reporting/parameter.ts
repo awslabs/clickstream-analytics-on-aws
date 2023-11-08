@@ -69,8 +69,16 @@ export function createStackParametersQuickSight(scope: Construct, paramGroups?: 
     default: 'Comma Delimited Subnet Ids',
   };
 
-  const quickSightPrincipalParam = new CfnParameter(scope, 'QuickSightPrincipalParam', {
+  const quickSightOwnerPrincipalParam = new CfnParameter(scope, 'QuickSightOwnerPrincipalParam', {
     description: 'Arn of the QuickSight principal, QuickSight resource will be owned by this principal.',
+    type: 'String',
+  });
+  labels[quickSightOwnerPrincipalParam.logicalId] = {
+    default: 'QuickSight Owner Principal Arn',
+  };
+
+  const quickSightPrincipalParam = new CfnParameter(scope, 'QuickSightPrincipalParam', {
+    description: 'Arn of the QuickSight principal, dashboard resource will be share to this principal',
     type: 'String',
   });
   labels[quickSightPrincipalParam.logicalId] = {
@@ -140,6 +148,7 @@ export function createStackParametersQuickSight(scope: Construct, paramGroups?: 
       quickSightUserParam.logicalId,
       quickSightVpcConnectionSGParam.logicalId,
       quickSightVpcConnectionSubnetParam.logicalId,
+      quickSightOwnerPrincipalParam.logicalId,
       quickSightPrincipalParam.logicalId,
       quickSightTemplateArnParam.logicalId,
     ],
@@ -161,6 +170,7 @@ export function createStackParametersQuickSight(scope: Construct, paramGroups?: 
     quickSightNamespaceParam,
     quickSightVpcConnectionSGParam,
     quickSightVpcConnectionSubnetParam,
+    quickSightOwnerPrincipalParam,
     quickSightPrincipalParam,
     quickSightTemplateArnParam,
     redshiftEndpointParam,

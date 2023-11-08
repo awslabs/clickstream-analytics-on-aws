@@ -22,6 +22,7 @@ export interface QuickSightProps {
   namespace: string;
   userName: string;
   principalArn: string;
+  ownerPrincipalArn: string;
 };
 
 export interface QuicksightCustomResourceProps {
@@ -39,6 +40,7 @@ export interface QuicksightCustomResourceLambdaProps {
   readonly quickSightNamespace: string;
   readonly quickSightUser: string;
   readonly quickSightPrincipalArn: string;
+  readonly quickSightOwnerPrincipalArn: string;
   readonly schemas: string;
   readonly dashboardDefProps: QuickSightDashboardDefProps;
 };

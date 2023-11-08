@@ -335,6 +335,7 @@ export function createQuicksightCustomResource(
       quickSightNamespace: props.quickSightProps.namespace,
       quickSightUser: props.quickSightProps.userName,
       quickSightPrincipalArn: props.quickSightProps.principalArn,
+      quickSightOwnerPrincipalArn: props.quickSightProps.ownerPrincipalArn,
       schemas: props.redshiftProps.databaseSchemaNames,
       dashboardDefProps,
     },
