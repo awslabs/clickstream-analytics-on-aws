@@ -1,0 +1,2675 @@
+
+<!doctype html>
+<html lang="zh" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Clickstream Analytics on AWS 解决方案实施指南">
+      
+      
+      
+        <link rel="canonical" href="https://awslabs.github.io/clickstream-analytics-on-aws/1.1.x/deployment/with-oidc/">
+      
+      
+        <link rel="prev" href="../with-cognito/">
+      
+      
+        <link rel="next" href="../within-vpc/">
+      
+      
+      <link rel="icon" href="../../images/favicon.ico">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.4.8">
+    
+    
+      
+        <title>OIDC - Clickstream Analytics on AWS 解决方案</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.4b4a2bd9.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.356b1318.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="/stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+  
+
+
+  <script async src="https://github.com/awslabs/clickstream-web/releases/download/v0.6.0/clickstream-web.min.js"></script>
+<script>
+    window.onload = function() {
+        window.ClickstreamAnalytics.init({
+            appId: 'docs',
+            endpoint: 'https://pipeline.clickstream.solutions.gcr.aws.dev/collect',
+            pageType: window.PageType.multiPageApp,
+        });
+    };
+</script>
+  
+  
+    <script>"undefined"!=typeof __md_analytics&&__md_analytics()</script>
+  
+
+    
+    
+    
+   <link href="../../assets/stylesheets/glightbox.min.css" rel="stylesheet"/><style>
+        html.glightbox-open { overflow: initial; height: 100%; }
+        .gslide-title { margin-top: 0px; user-select: text; }
+        .gslide-desc { color: #666; user-select: text; }
+        .gslide-image img { background: white; }
+        
+            .gscrollbar-fixer { padding-right: 15px; }
+            .gdesc-inner { font-size: 0.75rem; }
+            body[data-md-color-scheme="slate"] .gdesc-inner { background: var(--md-default-bg-color);}
+            body[data-md-color-scheme="slate"] .gslide-title { color: var(--md-default-fg-color);}
+            body[data-md-color-scheme="slate"] .gslide-desc { color: var(--md-default-fg-color);}
+            </style> <script src="../../assets/javascripts/glightbox.min.js"></script></head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&"object"==typeof palette.color)for(var key of Object.keys(palette.color))document.body.setAttribute("data-md-color-"+key,palette.color[key])</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#openid-connect-oidc" class="md-skip">
+          跳转至
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="页眉">
+    <a href="../.." title="Clickstream Analytics on AWS 解决方案" class="md-header__button md-logo" aria-label="Clickstream Analytics on AWS 解决方案" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Clickstream Analytics on AWS 解决方案
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              OIDC
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_3" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m14.3 16-.7-2h-3.2l-.7 2H7.8L11 7h2l3.2 9h-1.9M20 8.69V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69m-9.15 3.96h2.3L12 9l-1.15 3.65Z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_2">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69Z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to system preference"  type="radio" name="__palette" id="__palette_3">
+    
+      <label class="md-header__button md-icon" title="Switch to system preference" for="__palette_2" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12c0-2.42-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69Z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <div class="md-header__option">
+  <div class="md-select">
+    
+    <button class="md-header__button md-icon" aria-label="选择当前语言">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12.87 15.07-2.54-2.51.03-.03A17.52 17.52 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04M18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12m-2.62 7 1.62-4.33L19.12 17h-3.24Z"/></svg>
+    </button>
+    <div class="md-select__inner">
+      <ul class="md-select__list">
+        
+          <li class="md-select__item">
+            <a href="/clickstream-analytics-on-aws/en/1.1.x" hreflang="en" class="md-select__link">
+              English
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="/clickstream-analytics-on-aws/zh/1.1.x" hreflang="zh" class="md-select__link">
+              简体中文
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</div>
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="搜索" placeholder="搜索" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="查找">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="分享" aria-label="分享" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7 0-.24-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91 1.61 0 2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08Z"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="清空当前内容" aria-label="清空当前内容" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            正在初始化搜索引擎
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/awslabs/clickstream-analytics-on-aws/" title="前往仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="导航栏" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Clickstream Analytics on AWS 解决方案" class="md-nav__button md-logo" aria-label="Clickstream Analytics on AWS 解决方案" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    Clickstream Analytics on AWS 解决方案
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/awslabs/clickstream-analytics-on-aws/" title="前往仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+    
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_1" id="__nav_1_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    实施指南
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_1">
+            <span class="md-nav__icon md-icon"></span>
+            实施指南
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_1_1" id="__nav_1_1_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    解决方案概述
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_1_1">
+            <span class="md-nav__icon md-icon"></span>
+            解决方案概述
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../solution-overview/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    概述
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../solution-overview/features-and-benefits/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    特性和优势
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../solution-overview/use-cases/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    使用案例
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_1_2" id="__nav_1_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    架构概述
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_1_2">
+            <span class="md-nav__icon md-icon"></span>
+            架构概述
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    架构图
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../well-architected-pillars/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    AWS符合架构要求的支柱
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_1_3" id="__nav_1_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    架构详细信息
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_1_3">
+            <span class="md-nav__icon md-icon"></span>
+            架构详细信息
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../aws-services/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    解决方案中的AWS服务
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture-details/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    解决方案的工作原理
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_1_4" id="__nav_1_4_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    计划部署
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_1_4">
+            <span class="md-nav__icon md-icon"></span>
+            计划部署
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../plan-deployment/cost/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    成本
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../plan-deployment/security/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    安全
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../plan-deployment/regions/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    支持的AWS区域
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_5" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_1_5" id="__nav_1_5_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    部署
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_5_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_1_5">
+            <span class="md-nav__icon md-icon"></span>
+            部署
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    概述
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../with-cognito/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Cognito
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    OIDC
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    OIDC
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    先决条件
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    部署概述
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-oidc" class="md-nav__link">
+    步骤 1. 创建 OIDC 客户端
+  </a>
+  
+    <nav class="md-nav" aria-label="步骤 1. 创建 OIDC 客户端">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-cognito" class="md-nav__link">
+    (选项 1) 使用来自其他区域的 Cognito 用户池
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-authingcn-oidc" class="md-nav__link">
+    (选项 2) 使用 Authing.cn OIDC 客户端
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-keycloak-oidc" class="md-nav__link">
+    (选项 3) 使用 Keycloak OIDC 客户端
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-adfs-openid-connect" class="md-nav__link">
+    (选项 4) ADFS OpenID Connect 客户端
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2" class="md-nav__link">
+    步骤 2. 启动堆栈
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-oidc-url" class="md-nav__link">
+    步骤 3. 更新 OIDC 客户端的回调 URL
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-dns" class="md-nav__link">
+    步骤 4. 设置 DNS 解析器
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-web" class="md-nav__link">
+    步骤 5. 启动Web控制台
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../within-vpc/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Vpc内部署
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_1_6" id="__nav_1_6_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    入门指南
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_1_6">
+            <span class="md-nav__icon md-icon"></span>
+            入门指南
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    概述
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/1.create-project/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    步骤1. 创建项目
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/2.config-pipeline/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    步骤2. 配置数据管道
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/3.integrate-sdk/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    步骤3. 集成SDK
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/4.view-dashboard/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    步骤4. 查看仪表板
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_1_7" id="__nav_1_7_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    管道管理
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_1_7">
+            <span class="md-nav__icon md-icon"></span>
+            管道管理
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pipeline-mgmt/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    概述
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_7_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_1_7_2" id="__nav_1_7_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    数据摄取
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_1_7_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_1_7_2">
+            <span class="md-nav__icon md-icon"></span>
+            数据摄取
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pipeline-mgmt/ingestion/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    概述
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pipeline-mgmt/ingestion/configure-ingestion-endpoint/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    摄取端点
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pipeline-mgmt/ingestion/create-data-sink-w-kafka/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    数据宿 - Kafka
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pipeline-mgmt/ingestion/create-data-sink-w-kinesis/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    数据宿 - Kinesis
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pipeline-mgmt/ingestion/create-data-sink-w-s3/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    数据宿 - S3
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_7_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_1_7_3" id="__nav_1_7_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    数据处理
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_1_7_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_1_7_3">
+            <span class="md-nav__icon md-icon"></span>
+            数据处理
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pipeline-mgmt/data-processing/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    概述
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pipeline-mgmt/data-processing/data-schema/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    数据模式
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pipeline-mgmt/data-processing/configure-execution-para/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    执行参数
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pipeline-mgmt/data-processing/configure-plugin/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    处理插件
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pipeline-mgmt/data-modeling/configure-data-modeling/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    数据建模
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pipeline-mgmt/quicksight/configure-quicksight/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    报告
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pipeline-mgmt/pipe-mgmt/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    管道管理
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_1_8" id="__nav_1_8_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    SDK手册
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_1_8">
+            <span class="md-nav__icon md-icon"></span>
+            SDK手册
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../sdk-manual/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    概述
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../sdk-manual/android/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Android SDK
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../sdk-manual/swift/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Swift SDK
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../sdk-manual/web/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Web SDK
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../sdk-manual/wechat/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    微信小程序 SDK
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../sdk-manual/http-api/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    HTTP API
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../sdk-manual/user-identifier/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    用户标识
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_1_9" id="__nav_1_9_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    仪表板
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_1_9">
+            <span class="md-nav__icon md-icon"></span>
+            仪表板
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../dashboard/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    概述
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../dashboard/acquisition/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    流量获取报表
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../dashboard/engagement/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    参与度报表
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../dashboard/activity/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    活动报表
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../dashboard/retention/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    留存报表
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../dashboard/device/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    设备报表
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../dashboard/path/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    路径探索报表
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../dashboard/custom-analysis/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    自定义报表
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_1_10" id="__nav_1_10_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    附加资源
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_1_10">
+            <span class="md-nav__icon md-icon"></span>
+            附加资源
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../resources/upload-ssl-certificate/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    上传证书
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../faq/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    常见问题
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../troubleshooting/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    故障排除
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../uninstall/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    卸载解决方案
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_14" >
+        
+          
+          <label class="md-nav__link" for="__nav_1_14" id="__nav_1_14_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    开发者指南
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_14_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_1_14">
+            <span class="md-nav__icon md-icon"></span>
+            开发者指南
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../source/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    源代码
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../revisions/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    修订记录
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../notices/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    注意事项
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    先决条件
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    部署概述
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-oidc" class="md-nav__link">
+    步骤 1. 创建 OIDC 客户端
+  </a>
+  
+    <nav class="md-nav" aria-label="步骤 1. 创建 OIDC 客户端">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-cognito" class="md-nav__link">
+    (选项 1) 使用来自其他区域的 Cognito 用户池
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-authingcn-oidc" class="md-nav__link">
+    (选项 2) 使用 Authing.cn OIDC 客户端
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-keycloak-oidc" class="md-nav__link">
+    (选项 3) 使用 Keycloak OIDC 客户端
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-adfs-openid-connect" class="md-nav__link">
+    (选项 4) ADFS OpenID Connect 客户端
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2" class="md-nav__link">
+    步骤 2. 启动堆栈
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-oidc-url" class="md-nav__link">
+    步骤 3. 更新 OIDC 客户端的回调 URL
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-dns" class="md-nav__link">
+    步骤 4. 设置 DNS 解析器
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-web" class="md-nav__link">
+    步骤 5. 启动Web控制台
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+<h1 id="openid-connect-oidc">使用 OpenID Connect (OIDC) 进行启动</h1>
+<p><strong>部署时间</strong>：大约 30 分钟</p>
+<h2 id="_1">先决条件</h2>
+<div class="admonition info">
+<p class="admonition-title">重要提示</p>
+<p>亚马逊云科技点击流分析 控制台是通过 CloudFront 分发提供的，它被视为一项互联网信息服务。
+如果您在 <strong>AWS 中国区域</strong> 部署解决方案，域名必须具有有效的 <a href="https://www.amazonaws.cn/en/support/icp/?nc2=h_l2_su">ICP 备案</a>。</p>
+</div>
+<ul>
+<li>域名。您将使用该域名访问 亚马逊云科技点击流分析 控制台。对于 AWS 中国区域，这是必需的，而对于 AWS 区域则是可选的。</li>
+<li>在 AWS IAM 中的 SSL 证书。SSL 必须与给定的域名关联。按照 <a href="../../resources/upload-ssl-certificate/">此指南</a> 将 SSL 证书上传到 IAM。这仅适用于 AWS 中国区域。</li>
+</ul>
+<h2 id="_2">部署概述</h2>
+<p>按照以下步骤在 AWS 上部署此解决方案。</p>
+<p><a href="/#1-oidc">步骤 1. 创建 OIDC 客户端</a></p>
+<p><a href="#2">步骤 2. 启动堆栈</a></p>
+<p><a href="#3-oidc-url">步骤 3. 更新 OIDC 客户端的回调 URL</a></p>
+<p><a href="#4-dns">步骤 4. 设置 DNS 解析器</a></p>
+<p><a href="#5-web">步骤 5. 启动 Web 控制台</a></p>
+<h2 id="1-oidc">步骤 1. 创建 OIDC 客户端</h2>
+<p>您可以使用不同类型的 OpenID Connect 提供程序。本部分介绍了选项 1 到选项 4。</p>
+<ul>
+<li>(选项 1) 使用来自其他区域的 Amazon Cognito 作为 OIDC 提供程序。</li>
+<li>(选项 2) <a href="https://www.authing.cn/" target="_blank">Authing</a>，这是一个第三方身份验证提供程序的示例。</li>
+<li>(选项 3) <a href="https://github.com/aws-samples/keycloak-on-aws" target="_blank">Keycloak</a>，这是由 AWS 维护的解决方案，可用作身份验证提供程序。</li>
+<li>(选项 4) <a href="https://docs.microsoft.com/en-us/windows-server/identity/active-directory-federation-services" target="_blank">ADFS</a>，这是 Microsoft 提供的一项服务。</li>
+<li>(选项 5) 其他第三方身份验证平台，如 <a href="https://auth0.com/" target="_blank">Auth0</a>。</li>
+</ul>
+<p>按照以下步骤创建 OIDC 客户端，并获取 <code>client_id</code> 和 <code>issuer</code>。</p>
+<h3 id="1-cognito">(选项 1) 使用来自其他区域的 Cognito 用户池</h3>
+<p>您可以将 <a href="https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-identity-pools.html">Cognito 用户池</a> 作为 OIDC 提供者在受支持的 AWS 区域中使用。</p>
+<ol>
+<li>在 AWS 区域中访问 <a href="https://console.aws.amazon.com/cognito/home">Amazon Cognito 控制台</a>。</li>
+<li>根据此 <a href="https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-pools-app-integration.html#cognito-user-pools-create-an-app-integration">指南</a> 使用 Amazon Cognito 控制台设置托管 UI。请注意以下两个配置：</li>
+<li>在选择 <strong>应用类型</strong> 时选择 <strong>公共客户端</strong>。确保不要更改 <strong>客户端密钥</strong> 的选择 <strong>不生成客户端密钥</strong>。</li>
+<li>在 <strong>OpenID Connect 作用域</strong> 中添加 <strong>Profile</strong>。</li>
+<li>
+<p>使用您的域名为 亚马逊云科技点击流分析 控制台设置 <strong>回调 URL</strong> 和 <strong>登出 URL</strong>。
+    !!! info "注意"
+        如果您未为控制台使用自定义域名，则无法获得控制台的域名。您可以输入一个虚假的域名，例如 <code>clickstream.example.com</code>，然后根据第 3 步中的指南进行更新。</p>
+</li>
+<li>
+<p>如果您的托管 UI 设置完毕，您应该能够看到如下所示的内容。</p>
+<p><a class="glightbox" href="../../images/OIDC/cognito-hostUI-new.jpeg" data-type="image" data-width="100%" data-height="auto" data-desc-position="bottom"><img alt="cognito host ui" src="../../images/OIDC/cognito-hostUI-new.jpeg" /></a></p>
+</li>
+<li>
+<p>将应用客户端 ID、用户池 ID 和 AWS 区域保存到一个文件中，稍后会用到。</p>
+<p><a class="glightbox" href="../../images/OIDC/cognito-new-console-clientID.png" data-type="image" data-width="100%" data-height="auto" data-desc-position="bottom"><img alt="cognito client id" src="../../images/OIDC/cognito-new-console-clientID.png" /></a>
+   <a class="glightbox" href="../../images/OIDC/cognito-new-console-userpoolID.png" data-type="image" data-width="100%" data-height="auto" data-desc-position="bottom"><img alt="cognito userpool id" src="../../images/OIDC/cognito-new-console-userpoolID.png" /></a></p>
+</li>
+</ol>
+<p>在<a href="#2">步骤 2. 启动堆栈</a>中，使用来自您的 Cognito 用户池的以下参数。</p>
+<ul>
+<li><strong>OIDCClientId</strong>: <code>应用客户端 ID</code></li>
+<li><strong>OIDCProvider</strong>: <code>https://cognito-idp.${REGION}.amazonaws.com/${USER_POOL_ID}</code></li>
+</ul>
+<h3 id="2-authingcn-oidc">(选项 2) 使用 Authing.cn OIDC 客户端</h3>
+<ol>
+<li>前往 <a href="https://console.authing.cn/console" target="_blank">Authing 控制台</a>。</li>
+<li>如果您还没有用户池，请创建一个用户池。</li>
+<li>选择用户池。</li>
+<li>在左侧导航栏中，选择 <strong>Applications</strong> 下的 <strong>Self-built App</strong>。</li>
+<li>点击 <strong>Create</strong> 按钮。</li>
+<li>输入 <strong>Application Name</strong> 和 <strong>Subdomain</strong>。</li>
+<li>
+<p>从 Endpoint Information 将 <code>App ID</code>（即 <code>client_id</code>）和 <code>Issuer</code> 保存到一个文本文件中，稍后会用到。</p>
+<p><a class="glightbox" href="../../images/OIDC/authing-endpoint-info.png" data-type="image" data-width="100%" data-height="auto" data-desc-position="bottom"><img alt="authing endpoint info" src="../../images/OIDC/authing-endpoint-info.png" /></a></p>
+</li>
+<li>
+<p>将 <code>Login Callback URL</code> 和 <code>Logout Callback URL</code> 更新为您记录的 IPC 域名。</p>
+</li>
+<li>
+<p>设置授权配置。</p>
+<p><a class="glightbox" href="../../images/OIDC/authing-authorization-configuration.png" data-type="image" data-width="100%" data-height="auto" data-desc-position="bottom"><img alt="authing authorization configuration" src="../../images/OIDC/authing-authorization-configuration.png" /></a></p>
+</li>
+</ol>
+<p>您已成功创建了 Authing 自建应用。</p>
+<p>在<a href="#2">步骤 2. 启动堆栈</a>中，使用来自您的 Authing 用户池的以下参数。</p>
+<ul>
+<li><strong>OIDCClientId</strong>: <code>client id</code></li>
+<li><strong>OIDCProvider</strong>: <code>Issuer</code></li>
+</ul>
+<h3 id="3-keycloak-oidc">(选项 3) 使用 Keycloak OIDC 客户端</h3>
+<ol>
+<li>
+<p>根据 <a href="https://aws-samples.github.io/keycloak-on-aws/en/implementation-guide/deployment/" target="_blank">此指南</a> 在 AWS 中国区部署 Keycloak 解决方案。</p>
+</li>
+<li>
+<p>登录 Keycloak 控制台。</p>
+</li>
+<li>
+<p>在左侧导航栏中，选择 <strong>Add realm</strong>。如果您已经拥有一个 realm，请跳过此步骤。</p>
+</li>
+<li>
+<p>转到 realm 设置页面。选择 <strong>Endpoints</strong>，然后从列表中选择 <strong>OpenID Endpoint Configuration</strong>。</p>
+<p><a class="glightbox" href="../../images/OIDC/keycloak-example-realm.png" data-type="image" data-width="100%" data-height="auto" data-desc-position="bottom"><img alt="keycloak realm" src="../../images/OIDC/keycloak-example-realm.png" /></a></p>
+</li>
+<li>
+<p>在浏览器中打开的 JSON 文件中，记录将在稍后使用的 <strong>issuer</strong> 值。</p>
+<p><a class="glightbox" href="../../images/OIDC/keycloak-OIDC-config.png" data-type="image" data-width="100%" data-height="auto" data-desc-position="bottom"><img alt="keycloak oidc config" src="../../images/OIDC/keycloak-OIDC-config.png" /></a></p>
+</li>
+<li>
+<p>返回 Keycloak 控制台，在左侧导航栏中选择 <strong>Clients</strong>，然后选择 <strong>Create</strong>。</p>
+</li>
+<li>
+<p>输入一个包含字母（不区分大小写）或数字的 Client ID。记录将在稍后使用的 <strong>Client ID</strong>。</p>
+</li>
+<li>
+<p>更改客户端设置。在 <strong>Valid Redirect URIs</strong> 中输入 <code>http[s]://&lt;亚马逊云科技点击流分析 Console domain&gt;/signin</code>，在 <strong>Web Origins</strong> 中输入 <code>&lt;console domain&gt;</code> 和 <code>+</code>。</p>
+<div class="admonition tip">
+<p class="admonition-title">提示</p>
+<p>如果您没有为控制台使用自定义域名，则控制台的域名尚不可用。您可以输入一个虚假的域名，例如 <code>clickstream.example.com</code>，然后在第 3 步中按照指南进行更新。</p>
+</div>
+</li>
+<li>
+<p>在高级设置中，将 <strong>Access Token Lifespan</strong> 设置为至少 5 分钟。</p>
+</li>
+<li>在左侧导航栏中选择 <strong>Users</strong>。</li>
+<li>点击 <strong>Add user</strong> 并输入 <strong>Username</strong>。</li>
+<li>创建用户后，选择 <strong>Credentials</strong>，然后输入 <strong>Password</strong>。</li>
+</ol>
+<p>在<a href="#2">步骤 2. 启动堆栈</a>中，使用来自您的 Keycloak realm 的以下参数。</p>
+<ul>
+<li><strong>OIDCClientId</strong>: <code>client id</code></li>
+<li><strong>OIDCProvider</strong>: <code>https://&lt;KEYCLOAK_DOMAIN_NAME&gt;/auth/realms/&lt;REALM_NAME&gt;</code></li>
+</ul>
+<h3 id="4-adfs-openid-connect">(选项 4) ADFS OpenID Connect 客户端</h3>
+<ol>
+<li>确保已安装 ADFS。有关如何安装 ADFS 的信息，请参考 <a href="https://docs.microsoft.com/en-us/windows-server/identity/ad-fs/deployment/ad-fs-deployment-guide">此指南</a>。</li>
+<li>确保您可以登录到 ADFS 登录页面。URL 应为 <code>https://adfs.domain.com/adfs/ls/idpinitiatedSignOn.aspx</code>，您需要将 <strong>adfs.domain.com</strong> 替换为您实际的 ADFS 域。</li>
+<li>登录到您的 <strong>域控制器</strong>，并打开 <strong>Active Directory Users and Computers</strong>。</li>
+<li>
+<p>为 亚马逊云科技点击流分析 用户创建一个 <strong>安全组</strong>，并将计划中的 亚马逊云科技点击流分析 用户添加到此安全组中。</p>
+</li>
+<li>
+<p>登录到 ADFS 服务器，并打开 <strong>ADFS Management</strong>。</p>
+</li>
+<li>
+<p>右键单击 <strong>Application Groups</strong>，选择 <strong>Application Group</strong>，然后输入 Application Group 的名称。在 <strong>Client-Server Applications</strong> 下选择 <strong>Web browser accessing a web application</strong> 选项，并选择 <strong>Next</strong>。</p>
+</li>
+<li>
+<p>在 <strong>Redirect URI</strong> 下记录 <strong>Client Identifier</strong> (<code>client_id</code>)，输入您的 亚马逊云科技点击流分析 域名（例如 <code>xx.example.com</code>），然后选择 <strong>Add</strong>，再选择 <strong>Next</strong>。</p>
+</li>
+<li>
+<p>在 <strong>Choose Access Control Policy</strong> 窗口中，选择 <strong>Permit specific group</strong>，在 Policy 部分下选择 <strong>parameters</strong>，将在步骤 4 中创建的安全组添加进去，然后点击 <strong>Next</strong>。您可以根据需求配置其他访问控制策略。</p>
+</li>
+<li>
+<p>在摘要窗口下，选择 <strong>Next</strong>，然后选择 <strong>Close</strong>。</p>
+</li>
+<li>
+<p>在 ADFS 服务器上打开 Windows PowerShell，并运行以下命令以配置 ADFS 允许您计划的 URL 的 CORS。</p>
+<div class="language-shell highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>Set-AdfsResponseHeaders<span class="w"> </span>-EnableCORS<span class="w"> </span><span class="nv">$true</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>Set-AdfsResponseHeaders<span class="w"> </span>-CORSTrustedOrigins<span class="w"> </span>https://&lt;your-clickstream-analytics-on-aws-domain&gt;
+</span></code></pre></div>
+</li>
+<li>
+<p>在 ADFS 服务器上的 Windows PowerShell 下，运行以下命令以获取 ADFS 的 Issuer（<code>issuer</code>），类似于 <code>https://adfs.example.com/adfs</code>。</p>
+<div class="language-shell highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>Get-ADFSProperties<span class="w"> </span><span class="p">|</span><span class="w"> </span>Select<span class="w"> </span>IdTokenIssuer
+</span></code></pre></div>
+<p><a class="glightbox" href="../../images/OIDC/adfs-9.png" data-type="image" data-width="100%" data-height="auto" data-desc-position="bottom"><img alt="get adfs properties" src="../../images/OIDC/adfs-9.png" /></a></p>
+</li>
+</ol>
+<p>在<a href="#2">步骤 2. 启动堆栈</a>中，使用来自您的 ADFS 服务器的以下参数。</p>
+<ul>
+<li><strong>OIDCClientId</strong>: <code>client id</code></li>
+<li><strong>OIDCProvider</strong>: 从上述第 11 步中获取发行方（issuer）的服务器</li>
+</ul>
+<h2 id="2">步骤 2. 启动堆栈</h2>
+<ol>
+<li>
+<p>登录到 <a href="https://console.aws.amazon.com/">AWS 管理控制台</a>，并使用下方按钮启动 AWS CloudFormation 模板。</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>在 AWS 控制台中启动</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>在 AWS 区域中启动</td>
+<td><a href="https://console.aws.amazon.com/cloudformation/home#/stacks/new?templateURL=https://solutions-reference.s3.amazonaws.com/clickstream-analytics-on-aws/latest/cloudfront-s3-control-plane-stack-global-oidc.template.json" target="_blank"><img alt="启动堆栈" src="../../images/launch-stack.webp" /></a></td>
+</tr>
+<tr>
+<td>在 AWS 区域中使用自定义域名启动</td>
+<td><a href="https://console.aws.amazon.com/cloudformation/home#/stacks/new?templateURL=https://solutions-reference.s3.amazonaws.com/clickstream-analytics-on-aws/latest/cloudfront-s3-control-plane-stack-global-customdomain-oidc.template.json" target="_blank"><img alt="启动堆栈" src="../../images/launch-stack.webp" /></a></td>
+</tr>
+<tr>
+<td>在 AWS 中国区域中启动</td>
+<td><a href="https://console.amazonaws.cn/cloudformation/home#/stacks/new?templateURL=https://aws-gcr-solutions.s3.cn-north-1.amazonaws.com.cn/clickstream-analytics-on-aws/latest/cn/cloudfront-s3-control-plane-stack-cn.template.json" target="_blank"><img alt="启动堆栈" src="../../images/launch-stack.webp" /></a></td>
+</tr>
+</tbody>
+</table>
+</li>
+<li>
+<p>模板将在您登录到控制台后的默认区域中启动。若要在不同的 AWS 区域中启动 亚马逊云科技点击流分析 解决方案，请使用控制台导航栏中的区域选择器。</p>
+</li>
+<li>在<strong>创建堆栈</strong>页面上，验证<strong>Amazon S3 URL</strong>文本框中显示的正确模板 URL，然后选择<strong>下一步</strong>。</li>
+<li>在<strong>指定堆栈详细信息</strong>页面上，为解决方案堆栈分配一个名称。有关命名字符限制的信息，请参阅<em>AWS 身份和访问管理用户指南</em>中的 <a href="https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_iam-limits.html" target="_blank">IAM 和 AWS STS 限额</a>。</li>
+<li>
+<p>在<strong>参数</strong>下，查看模板的参数，并根据需要进行修改。</p>
+<ul>
+<li>
+<p>此解决方案使用以下参数：</p>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>默认值</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>OIDCClientId</td>
+<td><code>&lt;输入&gt;</code></td>
+<td>OpenID Connect 客户端 ID。</td>
+</tr>
+<tr>
+<td>OIDCProvider</td>
+<td><code>&lt;输入&gt;</code></td>
+<td>OpenID Connect 提供程序发行方。发行方必须以 <code>https://</code> 开头</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition info">
+<p class="admonition-title">重要提示</p>
+<p><!-- BEGIN INCLUDE ./tls-note.md -->
+默认情况下，此部署在CloudFront中使用TLSv1.0和TLSv1.1。但是，我们建议您手动配置CloudFront以使用更安全的TLSv1.2/TLSv1.3，并申请证书和自定义域来启用此功能。我们强烈建议您根据以下建议更新您的TLS配置和密码套件选择：</p>
+<ul>
+<li><strong>传输层安全协议</strong>：升级到TLSv1.2或更高版本</li>
+<li><strong>密钥交换</strong>：ECDHE</li>
+<li><strong>块密码操作模式</strong>：GCM</li>
+<li><strong>身份验证</strong>：ECDSA</li>
+<li><strong>加密密码</strong>：AES256</li>
+<li><strong>消息鉴别</strong>：SHA（256/384/除SHA1以外的任何哈希函数）</li>
+</ul>
+<p>例如，TLSv1.2_2021 可以满足上述建议。
+<!-- END INCLUDE --></p>
+</div>
+</li>
+<li>
+<p>如果您在 AWS 区域中使用自定义域名启动解决方案，则还有以下附加参数：</p>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>默认值</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Hosted Zone ID</td>
+<td><code>&lt;输入&gt;</code></td>
+<td>选择 Amazon Route 53 的公共托管区域的 ID。</td>
+</tr>
+<tr>
+<td>Hosted Zone Name</td>
+<td><code>&lt;输入&gt;</code></td>
+<td>公共托管区域的域名，例如 <code>example.com</code>。</td>
+</tr>
+<tr>
+<td>Record Name</td>
+<td><code>&lt;输入&gt;</code></td>
+<td>控制台的子名称（在 R53 中称为记录名称）。例如，如果您想为控制台使用自定义域名 <code>clickstream.example.com</code>，则输入 <code>clickstream</code>。</td>
+</tr>
+</tbody>
+</table>
+</li>
+<li>
+<p>如果您在 AWS 中国区域中启动解决方案，则还有以下附加参数：</p>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>默认值</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Domain</td>
+<td><code>&lt;输入&gt;</code></td>
+<td>Centralized Logging with OpenSearch 控制台的自定义域名。不要添加 <code>http(s)</code> 前缀。</td>
+</tr>
+<tr>
+<td>IamCertificateID</td>
+<td><code>&lt;输入&gt;</code></td>
+<td>在 IAM 中 SSL 证书的 ID。ID 由 21 个大写字母和数字组成。使用 <a href="https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_server-certs.html#list-server-certificates" target="_blank"><code>list-server-certificates</code></a> 命令检索 ID。</td>
+</tr>
+</tbody>
+</table>
+</li>
+</ul>
+</li>
+<li>
+<p>选择<strong>下一步</strong>。</p>
+</li>
+<li>在<strong>配置堆栈选项</strong>页面上，选择<strong>下一步</strong>。</li>
+<li>在<strong>审核</strong>页面上，检查并确认设置。选中确认模板将创建 AWS Identity and Access Management (IAM) 资源的框。</li>
+<li>选择<strong>创建堆栈</strong>以部署堆栈。</li>
+</ol>
+<p>您可以在 AWS CloudFormation 控制台中查看堆栈的状态列。大约 10 分钟后，您应该会收到<strong>CREATE_COMPLETE</strong>状态。</p>
+<h2 id="3-oidc-url">步骤 3. 更新 OIDC 客户端的回调 URL</h2>
+<div class="admonition info">
+<p class="admonition-title">重要提示</p>
+<p>如果您没有使用自定义域名部署栈，请完成以下步骤。</p>
+</div>
+<ol>
+<li>登录到 <a href="https://console.aws.amazon.com/cloudformation/" target="_blank">AWS CloudFormation 控制台</a>。</li>
+<li>选择解决方案的栈。</li>
+<li>选择 <strong>Outputs</strong> 选项卡。</li>
+<li>获取 <strong>ControlPlaneURL</strong> 作为终结点。</li>
+<li>更新或添加回调 URL 到您的 OIDC。<ol>
+<li>对于 Cognito，请在客户端的 <strong>Allowed callback URL</strong> 中添加或更新 URL，值为 <code>${ControlPlaneURL}/signin</code>。<strong>注意</strong>：URL 必须以 <code>https://</code> 开头。</li>
+<li>对于 Keycloak，请在客户端的 <strong>Valid Redirect URIs</strong> 中添加或更新 URL，值为 <code>${ControlPlaneURL}/signin</code>。</li>
+<li>对于 Authing.cn，请在 <strong>Authentication Configuration</strong> 的 <strong>Login Callback URL</strong> 中添加或更新 URL。</li>
+</ol>
+</li>
+</ol>
+<h2 id="4-dns">步骤 4. 设置 DNS 解析器</h2>
+<div class="admonition info">
+<p class="admonition-title">重要提示</p>
+<p>如果您在 AWS 区域中部署了栈，则可以跳过此步骤。</p>
+</div>
+<p>该解决方案提供了一个 CloudFront 分发，用于访问 亚马逊云科技点击流分析 控制台。</p>
+<ol>
+<li>登录到 <a href="https://console.aws.amazon.com/cloudformation/" target="_blank">AWS CloudFormation 控制台</a>。</li>
+<li>选择解决方案的栈。</li>
+<li>选择 <strong>Outputs</strong> 选项卡。</li>
+<li>获取 <strong>ControlPlaneURL</strong> 和 <strong>CloudFrontDomainName</strong>。</li>
+<li>在 DNS 解析器中为 <strong>ControlPlaneURL</strong> 创建一个 CNAME 记录，该记录指向前面获取到的 <strong>CloudFrontDomainName</strong> 域名。</li>
+</ol>
+<h2 id="5-web">步骤 5. 启动Web控制台</h2>
+<div class="admonition info">
+<p class="admonition-title">重要提示</p>
+<p>您的登录凭据由OIDC提供者管理。在登录亚马逊云科技点击流分析控制台之前，请确保在OIDC提供者的用户池中至少创建了一个用户。</p>
+</div>
+<ol>
+<li>在Web浏览器中使用之前分配的域名或生成的<strong>ControlPlaneURL</strong>。</li>
+<li>选择<strong>登录</strong>，并导航到OIDC提供者。</li>
+<li>输入登录凭据。您可能会被要求根据OIDC提供者的策略更改首次登录时的默认密码。</li>
+<li>验证完成后，系统将打开亚马逊云科技点击流分析的Web控制台。</li>
+</ol>
+<p>一旦您成功登录亚马逊云科技点击流分析控制台，您就可以开始为您的应用程序<a href="../../getting-started/1.create-project/">创建一个项目</a>。</p>
+
+
+  
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var tab,labels=set.querySelector(".tabbed-labels");for(tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12Z"/></svg>
+  回到页面顶部
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+      <div class="md-progress" data-md-component="progress" role="progressbar"></div>
+    
+    
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.instant", "navigation.instant.progress", "navigation.tracking", "navigation.path", "navigation.top", "search.suggest", "search.highlight", "search.share", "content.code.copy", "content.code.select", "content.code.annotate", "content.tabs.link"], "search": "../../assets/javascripts/workers/search.f886a092.min.js", "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}, "version": {"default": "latest", "provider": "mike"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.81fa17fe.min.js"></script>
+      
+    
+  <script>document$.subscribe(() => {const lightbox = GLightbox({"touchNavigation": true, "loop": false, "zoomable": true, "draggable": true, "openEffect": "zoom", "closeEffect": "zoom", "slideEffect": "slide"});})</script></body>
+</html>

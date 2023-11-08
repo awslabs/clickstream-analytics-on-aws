@@ -1,0 +1,3324 @@
+
+<!doctype html>
+<html lang="zh" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Clickstream Analytics on AWS 解决方案实施指南">
+      
+      
+      
+        <link rel="canonical" href="https://awslabs.github.io/clickstream-analytics-on-aws/1.1.x/sdk-manual/wechat/">
+      
+      
+        <link rel="prev" href="../web/">
+      
+      
+        <link rel="next" href="../http-api/">
+      
+      
+      <link rel="icon" href="../../images/favicon.ico">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.4.8">
+    
+    
+      
+        <title>微信小程序 SDK - Clickstream Analytics on AWS 解决方案</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.4b4a2bd9.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.356b1318.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="/stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+  
+
+
+  <script async src="https://github.com/awslabs/clickstream-web/releases/download/v0.6.0/clickstream-web.min.js"></script>
+<script>
+    window.onload = function() {
+        window.ClickstreamAnalytics.init({
+            appId: 'docs',
+            endpoint: 'https://pipeline.clickstream.solutions.gcr.aws.dev/collect',
+            pageType: window.PageType.multiPageApp,
+        });
+    };
+</script>
+  
+  
+    <script>"undefined"!=typeof __md_analytics&&__md_analytics()</script>
+  
+
+    
+    
+    
+   <link href="../../assets/stylesheets/glightbox.min.css" rel="stylesheet"/><style>
+        html.glightbox-open { overflow: initial; height: 100%; }
+        .gslide-title { margin-top: 0px; user-select: text; }
+        .gslide-desc { color: #666; user-select: text; }
+        .gslide-image img { background: white; }
+        
+            .gscrollbar-fixer { padding-right: 15px; }
+            .gdesc-inner { font-size: 0.75rem; }
+            body[data-md-color-scheme="slate"] .gdesc-inner { background: var(--md-default-bg-color);}
+            body[data-md-color-scheme="slate"] .gslide-title { color: var(--md-default-fg-color);}
+            body[data-md-color-scheme="slate"] .gslide-desc { color: var(--md-default-fg-color);}
+            </style> <script src="../../assets/javascripts/glightbox.min.js"></script></head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&"object"==typeof palette.color)for(var key of Object.keys(palette.color))document.body.setAttribute("data-md-color-"+key,palette.color[key])</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#clickstream-sdk" class="md-skip">
+          跳转至
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="页眉">
+    <a href="../.." title="Clickstream Analytics on AWS 解决方案" class="md-header__button md-logo" aria-label="Clickstream Analytics on AWS 解决方案" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Clickstream Analytics on AWS 解决方案
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              微信小程序 SDK
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_3" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m14.3 16-.7-2h-3.2l-.7 2H7.8L11 7h2l3.2 9h-1.9M20 8.69V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69m-9.15 3.96h2.3L12 9l-1.15 3.65Z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_2">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69Z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to system preference"  type="radio" name="__palette" id="__palette_3">
+    
+      <label class="md-header__button md-icon" title="Switch to system preference" for="__palette_2" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12c0-2.42-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69Z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <div class="md-header__option">
+  <div class="md-select">
+    
+    <button class="md-header__button md-icon" aria-label="选择当前语言">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12.87 15.07-2.54-2.51.03-.03A17.52 17.52 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04M18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12m-2.62 7 1.62-4.33L19.12 17h-3.24Z"/></svg>
+    </button>
+    <div class="md-select__inner">
+      <ul class="md-select__list">
+        
+          <li class="md-select__item">
+            <a href="/clickstream-analytics-on-aws/en/1.1.x" hreflang="en" class="md-select__link">
+              English
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="/clickstream-analytics-on-aws/zh/1.1.x" hreflang="zh" class="md-select__link">
+              简体中文
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</div>
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="搜索" placeholder="搜索" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="查找">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="分享" aria-label="分享" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7 0-.24-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91 1.61 0 2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08Z"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="清空当前内容" aria-label="清空当前内容" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            正在初始化搜索引擎
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/awslabs/clickstream-analytics-on-aws/" title="前往仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="导航栏" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Clickstream Analytics on AWS 解决方案" class="md-nav__button md-logo" aria-label="Clickstream Analytics on AWS 解决方案" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    Clickstream Analytics on AWS 解决方案
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/awslabs/clickstream-analytics-on-aws/" title="前往仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+    
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_1" id="__nav_1_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    实施指南
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_1">
+            <span class="md-nav__icon md-icon"></span>
+            实施指南
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_1_1" id="__nav_1_1_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    解决方案概述
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_1_1">
+            <span class="md-nav__icon md-icon"></span>
+            解决方案概述
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../solution-overview/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    概述
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../solution-overview/features-and-benefits/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    特性和优势
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../solution-overview/use-cases/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    使用案例
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_1_2" id="__nav_1_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    架构概述
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_1_2">
+            <span class="md-nav__icon md-icon"></span>
+            架构概述
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    架构图
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../well-architected-pillars/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    AWS符合架构要求的支柱
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_1_3" id="__nav_1_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    架构详细信息
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_1_3">
+            <span class="md-nav__icon md-icon"></span>
+            架构详细信息
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../aws-services/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    解决方案中的AWS服务
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../architecture-details/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    解决方案的工作原理
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_1_4" id="__nav_1_4_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    计划部署
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_1_4">
+            <span class="md-nav__icon md-icon"></span>
+            计划部署
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../plan-deployment/cost/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    成本
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../plan-deployment/security/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    安全
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../plan-deployment/regions/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    支持的AWS区域
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_1_5" id="__nav_1_5_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    部署
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_1_5">
+            <span class="md-nav__icon md-icon"></span>
+            部署
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../deployment/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    概述
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../deployment/with-cognito/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Cognito
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../deployment/with-oidc/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    OIDC
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../deployment/within-vpc/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Vpc内部署
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_1_6" id="__nav_1_6_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    入门指南
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_1_6">
+            <span class="md-nav__icon md-icon"></span>
+            入门指南
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    概述
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/1.create-project/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    步骤1. 创建项目
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/2.config-pipeline/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    步骤2. 配置数据管道
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/3.integrate-sdk/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    步骤3. 集成SDK
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/4.view-dashboard/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    步骤4. 查看仪表板
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_1_7" id="__nav_1_7_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    管道管理
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_1_7">
+            <span class="md-nav__icon md-icon"></span>
+            管道管理
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pipeline-mgmt/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    概述
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_7_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_1_7_2" id="__nav_1_7_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    数据摄取
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_1_7_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_1_7_2">
+            <span class="md-nav__icon md-icon"></span>
+            数据摄取
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pipeline-mgmt/ingestion/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    概述
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pipeline-mgmt/ingestion/configure-ingestion-endpoint/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    摄取端点
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pipeline-mgmt/ingestion/create-data-sink-w-kafka/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    数据宿 - Kafka
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pipeline-mgmt/ingestion/create-data-sink-w-kinesis/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    数据宿 - Kinesis
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pipeline-mgmt/ingestion/create-data-sink-w-s3/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    数据宿 - S3
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_7_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_1_7_3" id="__nav_1_7_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    数据处理
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_1_7_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_1_7_3">
+            <span class="md-nav__icon md-icon"></span>
+            数据处理
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pipeline-mgmt/data-processing/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    概述
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pipeline-mgmt/data-processing/data-schema/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    数据模式
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pipeline-mgmt/data-processing/configure-execution-para/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    执行参数
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pipeline-mgmt/data-processing/configure-plugin/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    处理插件
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pipeline-mgmt/data-modeling/configure-data-modeling/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    数据建模
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pipeline-mgmt/quicksight/configure-quicksight/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    报告
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pipeline-mgmt/pipe-mgmt/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    管道管理
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_8" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_1_8" id="__nav_1_8_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    SDK手册
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_8_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_1_8">
+            <span class="md-nav__icon md-icon"></span>
+            SDK手册
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    概述
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../android/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Android SDK
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../swift/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Swift SDK
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../web/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Web SDK
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    微信小程序 SDK
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    微信小程序 SDK
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    介绍
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    使用说明
+  </a>
+  
+    <nav class="md-nav" aria-label="使用说明">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sdk" class="md-nav__link">
+    初始化SDK
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sdk_1" class="md-nav__link">
+    使用SDK
+  </a>
+  
+    <nav class="md-nav" aria-label="使用SDK">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    添加用户信息
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    记录事件
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    调试事件
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    数据格式定义
+  </a>
+  
+    <nav class="md-nav" aria-label="数据格式定义">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
+    数据类型
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_8" class="md-nav__link">
+    命名规则
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_9" class="md-nav__link">
+    事件和属性限制
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_10" class="md-nav__link">
+    预置事件
+  </a>
+  
+    <nav class="md-nav" aria-label="预置事件">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_11" class="md-nav__link">
+    自动收集的事件
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_12" class="md-nav__link">
+    会话定义
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_13" class="md-nav__link">
+    用户参与度定义
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_14" class="md-nav__link">
+    事件属性
+  </a>
+  
+    <nav class="md-nav" aria-label="事件属性">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_15" class="md-nav__link">
+    通用属性
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_16" class="md-nav__link">
+    保留属性
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#item" class="md-nav__link">
+    Item属性
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_17" class="md-nav__link">
+    事件示例
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_18" class="md-nav__link">
+    更新日志
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_19" class="md-nav__link">
+    参考链接
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../http-api/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    HTTP API
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../user-identifier/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    用户标识
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_1_9" id="__nav_1_9_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    仪表板
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_1_9">
+            <span class="md-nav__icon md-icon"></span>
+            仪表板
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../dashboard/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    概述
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../dashboard/acquisition/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    流量获取报表
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../dashboard/engagement/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    参与度报表
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../dashboard/activity/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    活动报表
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../dashboard/retention/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    留存报表
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../dashboard/device/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    设备报表
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../dashboard/path/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    路径探索报表
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../dashboard/custom-analysis/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    自定义报表
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_1_10" id="__nav_1_10_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    附加资源
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_1_10">
+            <span class="md-nav__icon md-icon"></span>
+            附加资源
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../resources/upload-ssl-certificate/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    上传证书
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../faq/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    常见问题
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../troubleshooting/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    故障排除
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../uninstall/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    卸载解决方案
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_14" >
+        
+          
+          <label class="md-nav__link" for="__nav_1_14" id="__nav_1_14_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    开发者指南
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_14_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_1_14">
+            <span class="md-nav__icon md-icon"></span>
+            开发者指南
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../source/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    源代码
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../revisions/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    修订记录
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../notices/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    注意事项
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    介绍
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    使用说明
+  </a>
+  
+    <nav class="md-nav" aria-label="使用说明">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sdk" class="md-nav__link">
+    初始化SDK
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sdk_1" class="md-nav__link">
+    使用SDK
+  </a>
+  
+    <nav class="md-nav" aria-label="使用SDK">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    添加用户信息
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    记录事件
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    调试事件
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    数据格式定义
+  </a>
+  
+    <nav class="md-nav" aria-label="数据格式定义">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
+    数据类型
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_8" class="md-nav__link">
+    命名规则
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_9" class="md-nav__link">
+    事件和属性限制
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_10" class="md-nav__link">
+    预置事件
+  </a>
+  
+    <nav class="md-nav" aria-label="预置事件">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_11" class="md-nav__link">
+    自动收集的事件
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_12" class="md-nav__link">
+    会话定义
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_13" class="md-nav__link">
+    用户参与度定义
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_14" class="md-nav__link">
+    事件属性
+  </a>
+  
+    <nav class="md-nav" aria-label="事件属性">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_15" class="md-nav__link">
+    通用属性
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_16" class="md-nav__link">
+    保留属性
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#item" class="md-nav__link">
+    Item属性
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_17" class="md-nav__link">
+    事件示例
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_18" class="md-nav__link">
+    更新日志
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_19" class="md-nav__link">
+    参考链接
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+<h1 id="clickstream-sdk">Clickstream 微信小程序 SDK</h1>
+<h2 id="_1">介绍</h2>
+<p>Clickstream 微信小程序SDK可以帮助您轻松地将微信小程序中的点击流数据发送到您的AWS环境中。作为解决方案 亚马逊云科技点击流分析 的一部分，SDK将点击流数据发送到该解决方案创建的数据管道中，并由数据管道处理和导入到AWS的分析服务中，如Amazon S3和Amazon Redshift。</p>
+<p>此SDK基于微信小程序平台及API进行开发，它能够自动收集常见用户事件和属性（如页面浏览、首次打开等）以简化关于用户的数据收集。</p>
+<h2 id="_2">使用说明</h2>
+<h3 id="sdk">初始化SDK</h3>
+<ol>
+<li>从<a href="https://github.com/awslabs/clickstream-wechat/releases">GitHub</a>版本发布页面下载<code>clickstream-wechat.min.js</code>文件，然后拷贝到您的微信小程序项目中。</li>
+<li>为了配合点击流分析解决方案，您需要在使用SDK前进行必要的配置。以TypeScript语言开发的微信小程序为例，将以下代码添加到微信小程序项目的 <em>app.ts</em> 文件中，注意此段代码需要在小程序默认的<code>App()</code>方法之前添加。您可以在Clickstream解决方案控制台应用程序的详情信息页面中找到<code>appId</code>和<code>endpoint</code>，用以配置SDK。</li>
+</ol>
+<div class="language-typescript highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">ClickstreamAnalytics</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s1">&#39;./clickstream-wechat&#39;</span><span class="p">;</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="nx">ClickstreamAnalytics</span><span class="p">.</span><span class="nx">init</span><span class="p">({</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">    </span><span class="nx">appId</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;your appId&quot;</span><span class="p">,</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">    </span><span class="nx">endpoint</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;https://example.com/collect&quot;</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="p">});</span>
+</span></code></pre></div>
+<p><code>appId</code>和<code>endpoint</code>是SDK必需的参数，除此之外您还可以配置其他参数以满足更多定制化的使用。</p>
+<table>
+<thead>
+<tr>
+<th>参数名称</th>
+<th style="text-align: center;">是否必需</th>
+<th>默认值</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>appId</td>
+<td style="text-align: center;">是</td>
+<td>-</td>
+<td>在解决方案控制平台中应用程序的ID</td>
+</tr>
+<tr>
+<td>endpoint</td>
+<td style="text-align: center;">是</td>
+<td>-</td>
+<td>将事件发送到Clickstream摄取服务器的URL请求路径</td>
+</tr>
+<tr>
+<td>sendMode</td>
+<td style="text-align: center;">否</td>
+<td><em>SendMode.Immediate</em></td>
+<td>发送事件模式: <em>SendMode.Immediate</em> （立即发送）, <em>SendMode.Batch</em> （批量发送）</td>
+</tr>
+<tr>
+<td>sendEventsInterval</td>
+<td style="text-align: center;">否</td>
+<td>5000</td>
+<td>事件发送间隔毫秒数，仅在批量发送模式下生效</td>
+</tr>
+<tr>
+<td>autoTrackAppStart</td>
+<td style="text-align: center;">否</td>
+<td>true</td>
+<td>是否自动记录小程序启动事件</td>
+</tr>
+<tr>
+<td>autoTrackAppEnd</td>
+<td style="text-align: center;">否</td>
+<td>true</td>
+<td>是否自动记录小程序结束事件</td>
+</tr>
+<tr>
+<td>autoTrackPageShow</td>
+<td style="text-align: center;">否</td>
+<td>true</td>
+<td>是否自动记录小程序页面浏览事件</td>
+</tr>
+<tr>
+<td>autoTrackUserEngagement</td>
+<td style="text-align: center;">否</td>
+<td>true</td>
+<td>是否自动记录用户参与事件</td>
+</tr>
+<tr>
+<td>autoTrackMPShare</td>
+<td style="text-align: center;">否</td>
+<td>false</td>
+<td>是否自动记录分享小程序事件</td>
+</tr>
+<tr>
+<td>autoTrackMPFavorite</td>
+<td style="text-align: center;">否</td>
+<td>false</td>
+<td>是否自动记录收藏小程序事件</td>
+</tr>
+<tr>
+<td>debug</td>
+<td style="text-align: center;">否</td>
+<td>false</td>
+<td>是否在控制台打印SDK日志</td>
+</tr>
+<tr>
+<td>authCookie</td>
+<td style="text-align: center;">否</td>
+<td>-</td>
+<td>用于应用程序负载均衡器（ALB）身份验证的cookie</td>
+</tr>
+<tr>
+<td>sessionTimeoutDuration</td>
+<td style="text-align: center;">否</td>
+<td>1800000</td>
+<td>会话超时的时长（单位：毫秒）</td>
+</tr>
+</tbody>
+</table>
+<p>您可以在初始化SDK后通过调用<code>configure()</code>方法更新SDK配置</p>
+<div class="language-typescript highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">ClickstreamAnalytics</span><span class="p">,</span><span class="w"> </span><span class="nx">SendMode</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s1">&#39;./clickstream-wechat&#39;</span><span class="p">;</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="nx">ClickstreamAnalytics</span><span class="p">.</span><span class="nx">configure</span><span class="p">({</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">  </span><span class="nx">appId</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;your appId&quot;</span><span class="p">,</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">  </span><span class="nx">endpoint</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;https://example.com/collect&quot;</span><span class="p">,</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">  </span><span class="nx">sendMode</span><span class="o">:</span><span class="w"> </span><span class="kt">SendMode.Batch</span><span class="p">,</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">  </span><span class="nx">debug</span><span class="o">:</span><span class="w"> </span><span class="kt">true</span><span class="p">,</span>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="w">  </span><span class="nx">authCookie</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;auth cookie&#39;</span><span class="p">,</span>
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="w">  </span><span class="nx">autoTrackPageShow</span><span class="o">:</span><span class="w"> </span><span class="kt">false</span>
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="p">});</span>
+</span></code></pre></div>
+<h3 id="sdk_1">使用SDK</h3>
+<h4 id="_3">添加用户信息</h4>
+<div class="language-typescript highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1">// 添加或更新用户属性</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="nx">ClickstreamAnalytics</span><span class="p">.</span><span class="nx">setUserAttributes</span><span class="p">({</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">  </span><span class="nx">name</span><span class="o">:</span><span class="s2">&quot;carl&quot;</span><span class="p">,</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">  </span><span class="nx">age</span><span class="o">:</span><span class="w"> </span><span class="kt">22</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="p">});</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="c1">// 用户登录成功后设置用户ID</span>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="nx">ClickstreamAnalytics</span><span class="p">.</span><span class="nx">setUserId</span><span class="p">(</span><span class="s2">&quot;UserId&quot;</span><span class="p">);</span>
+</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>
+</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="c1">// 用户退出登录后清空用户ID</span>
+</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="nx">ClickstreamAnalytics</span><span class="p">.</span><span class="nx">setUserId</span><span class="p">(</span><span class="kc">null</span><span class="p">);</span>
+</span></code></pre></div>
+<p>当前登录用户的属性会缓存在小程序本地存储空间（wxStorage）中。</p>
+<h4 id="_4">记录事件</h4>
+<p>您可以调用<code>ClickstreamAnalytics.record()</code>方法记录自定义事件。事件中的参数<code>name</code>是必需的，参数<code>attributes</code>和<code>items</code>不是必需的。参数<code>attributes</code>是一个对象，用来记录各种属性。参数<code>items</code>是一个保存<code>item</code>类型对象的数组，请参阅<a href="#item">item属性</a>查看item中的参数。</p>
+<p>记录自定义事件示例：</p>
+<div class="language-typescript highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nx">ClickstreamAnalytics</span><span class="p">.</span><span class="nx">record</span><span class="p">({</span><span class="w"> </span><span class="nx">name</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;albumVisit&#39;</span><span class="w"> </span><span class="p">});</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="nx">ClickstreamAnalytics</span><span class="p">.</span><span class="nx">record</span><span class="p">({</span>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">  </span><span class="nx">name</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;buttonClick&#39;</span><span class="p">,</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">  </span><span class="nx">attributes</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">buttonName</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;confirm&#39;</span><span class="p">,</span><span class="w"> </span><span class="nx">itemNo</span><span class="o">:</span><span class="w"> </span><span class="kt">12345</span><span class="p">,</span><span class="w"> </span><span class="nx">inStock</span><span class="o">:</span><span class="w"> </span><span class="kt">true</span><span class="w"> </span><span class="p">},</span>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">  </span><span class="nx">items</span><span class="o">:</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="w">    </span><span class="p">{</span>
+</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="w">      </span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;p_123&#39;</span><span class="p">,</span>
+</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="w">      </span><span class="nx">name</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;item_name&#39;</span><span class="p">,</span>
+</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="w">      </span><span class="nx">price</span><span class="o">:</span><span class="w"> </span><span class="kt">168.99</span>
+</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-3-12"><a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a><span class="w">  </span><span class="p">]</span>
+</span><span id="__span-3-13"><a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a><span class="p">});</span>
+</span></code></pre></div>
+<h4 id="_5">调试事件</h4>
+<p>您可以按照以下步骤查看事件原始json并调试您的事件：</p>
+<ol>
+<li>调用<code>ClickstreamAnalytics.configure()</code>方法将SDK配置中的 <em>debug</em> 参数设为<code>true</code>，以开启SDK的调试模式。</li>
+<li>集成SDK并在设备上或<a href="https://developers.weixin.qq.com/miniprogram/dev/devtools/devtools.html">微信开发者工具</a>中启动微信小程序。</li>
+<li>在控制台中查看SDK所记录的事件内容。</li>
+</ol>
+<h2 id="_6">数据格式定义</h2>
+<h3 id="_7">数据类型</h3>
+<p>微信小程序SDK支持以下数据类型</p>
+<table>
+<thead>
+<tr>
+<th>数据类型</th>
+<th>范围</th>
+<th>示例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>number</td>
+<td>5e-324~1.79e+308</td>
+<td>12, 26854775808, 3.14</td>
+</tr>
+<tr>
+<td>boolean</td>
+<td>true、false</td>
+<td>true</td>
+</tr>
+<tr>
+<td>string</td>
+<td>最大支持1024个字符</td>
+<td>"clickstream"</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_8">命名规则</h3>
+<ol>
+<li>事件名称和属性名称不能以数字开头，只能包含大小写字母、数字和下划线。如果事件名称不合规，SDK将不会发送此事件。如果事件中的某些属性名称不合规，发送事件时将不包含这些属性。两种情况下都会记录_clickstream_error事件。</li>
+<li>不要使用<code>_</code>作为事件名称或属性名称的前缀，以<code>_</code>为前缀的名称是为点击流分析的预置事件和属性保留的。</li>
+<li>事件名称和属性名称区分大小写。例如，事件<code>Add_to_cart</code>和<code>add_to_cart</code>将被视为两个不同的事件。</li>
+</ol>
+<h3 id="_9">事件和属性限制</h3>
+<p>为了提高查询和分析效率，我们需要对事件进行以下限制</p>
+<table>
+<thead>
+<tr>
+<th>名称</th>
+<th>建议</th>
+<th>限制</th>
+<th>超过限制的处理策略</th>
+<th>错误码</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>EVENT_NAME_INVALID</td>
+<td>--</td>
+<td>--</td>
+<td>丢弃该事件，打印日志并记录_clickstream_error事件</td>
+<td>1001</td>
+</tr>
+<tr>
+<td>EVENT_NAME_LENGTH_EXCEED</td>
+<td>少于25个字符</td>
+<td>50个字符</td>
+<td>丢弃该事件，打印日志并记录_clickstream_error事件</td>
+<td>1002</td>
+</tr>
+<tr>
+<td>ATTRIBUTE_NAME_LENGTH_EXCEED</td>
+<td>少于25个字符</td>
+<td>50个字符</td>
+<td>丢弃该属性，打印日志并记录_clickstream_error事件</td>
+<td>2001</td>
+</tr>
+<tr>
+<td>ATTRIBUTE_NAME_INVALID</td>
+<td>--</td>
+<td>--</td>
+<td>丢弃该属性，打印日志并记录_clickstream_error事件</td>
+<td>2002</td>
+</tr>
+<tr>
+<td>ATTRIBUTE_VALUE_LENGTH_EXCEED</td>
+<td>少于100个字符</td>
+<td>1024个字符</td>
+<td>丢弃该属性，打印日志并记录_clickstream_error事件</td>
+<td>2003</td>
+</tr>
+<tr>
+<td>ATTRIBUTE_SIZE_EXCEED</td>
+<td>少于50个属性</td>
+<td>500个属性</td>
+<td>丢弃超出限制的属性，打印日志并记录_clickstream_error事件</td>
+<td>2004</td>
+</tr>
+<tr>
+<td>USER_ATTRIBUTE_SIZE_EXCEED</td>
+<td>少于25个属性</td>
+<td>100个属性</td>
+<td>丢弃超出限制的属性，打印日志并记录_clickstream_error事件</td>
+<td>3001</td>
+</tr>
+<tr>
+<td>USER_ATTRIBUTE_NAME_LENGTH_EXCEED</td>
+<td>少于25个字符</td>
+<td>50个字符</td>
+<td>丢弃该属性，打印日志并记录_clickstream_error事件</td>
+<td>3002</td>
+</tr>
+<tr>
+<td>USER_ATTRIBUTE_NAME_INVALID</td>
+<td>--</td>
+<td>--</td>
+<td>丢弃该属性，打印日志并记录_clickstream_error事件</td>
+<td>3003</td>
+</tr>
+<tr>
+<td>USER_ATTRIBUTE_VALUE_LENGTH_EXCEED</td>
+<td>少于50个字符</td>
+<td>256个字符</td>
+<td>丢弃该属性，打印日志并记录_clickstream_error事件</td>
+<td>3004</td>
+</tr>
+<tr>
+<td>ITEM_SIZE_EXCEED</td>
+<td>少于50个items</td>
+<td>100个items</td>
+<td>丢弃超出限制的items，打印日志并记录_clickstream_error事件</td>
+<td>4001</td>
+</tr>
+<tr>
+<td>ITEM_VALUE_LENGTH_EXCEED</td>
+<td>少于100个字符</td>
+<td>256个字符</td>
+<td>丢弃该item，打印日志并记录_clickstream_error事件</td>
+<td>4002</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition info">
+<p class="admonition-title">重要提示</p>
+<ul>
+<li>字符限制适用于单宽字符语言（如英语）和双宽字符语言（如中文）。</li>
+<li>事件属性总数限制包括事件中的预设属性。</li>
+<li>如果多次添加相同名称的属性，则属性值将被最后一个值覆盖。</li>
+</ul>
+</div>
+<h2 id="_10">预置事件</h2>
+<h3 id="_11">自动收集的事件</h3>
+<table>
+<thead>
+<tr>
+<th>事件名称</th>
+<th>触发时机</th>
+<th>事件属性</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>_session_start</td>
+<td>当用户首次访问微信小程序或用户关闭微信小程序30分钟后再次打开微信小程序时</td>
+<td>1. <em>_session_id</em> <br>2. <em>_session_start_timestamp</em><br>3. <em>_session_number</em><br />4. <em>_session_duration</em></td>
+<td><em>_session_id</em> 通过<code>uniqueId</code>最后8个字符和起始时间毫秒值生成，例如：dc7a7a18-20230905-131926703</td>
+</tr>
+<tr>
+<td>_screen_view</td>
+<td>当发生页面转换时且满足下列条件之一: <br /> * 上一页面为空<br /> * 新页面名称和上一页面名称不同<br /> * 新页面的类名和上一页面的类名不同<br /> * 新页面的ID和上一页面的ID不同</td>
+<td>1. <em>_screen_name</em><br>2. <em>_screen_id</em><br>3. <em>_previous_screen_name</em><br>4. <em>_previous_screen_id</em><br>5. <em>_engagement_time_msec</em></td>
+<td></td>
+</tr>
+<tr>
+<td>_first_open</td>
+<td>用户第一次启动小程序时</td>
+<td></td>
+<td>只会记录一次</td>
+</tr>
+<tr>
+<td>_app_start</td>
+<td>每一次启动微信小程序时</td>
+<td>1. <em>_is_first_time</em></td>
+<td></td>
+</tr>
+<tr>
+<td>_app_end</td>
+<td>每一次关闭微信小程序时</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>_user_engagement</td>
+<td>当用户离开当前页面或关闭/隐藏微信小程序时</td>
+<td>1. <em>_engagement_time_msec</em><br></td>
+<td>用户参与时间是以微信小程序页面为对象进行计算</td>
+</tr>
+<tr>
+<td>_profile_set</td>
+<td>当调用<code>addUserAttributes()</code>或<code>setUserId()</code>方法时</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>_mp_share</td>
+<td>当用户分享微信小程序时</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>_mp_favorite</td>
+<td>当用户收藏微信小程序时</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>_clickstream_error</td>
+<td>当事件名称，属性名称或属性值不合规时</td>
+<td>1. <em>_error_code</em> <br/>2. _<em>error_message</em></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h3 id="_12">会话定义</h3>
+<p>在微信小程序SDK中，我们不限制会话的总时间，只要小程序最后一次退出和下次进入之间的时间在允许的超时时间内，我们就认为当前会话是连续的。</p>
+<ol>
+<li>_session_start：当用户首次访问微信小程序或用户关闭微信小程序30分钟后再次打开微信小程序时</li>
+<li>_session_duration：我们通过当前事件发生时间减去会话创建时间（<code>_session_start_timestamp</code>）来计算会话持续时间，会话期间的每个事件中都包含该属性。</li>
+<li>_session_number：微信小程序会话的自增数，初始值为1。</li>
+<li>会话超时时间：默认为30分钟，可以自定义。</li>
+</ol>
+<h3 id="_13">用户参与度定义</h3>
+<p>在微信小程序SDK中，我们将<code>_user_engagement</code>定义为记录用户浏览页面时长的事件。<code>_engagement_time_msec</code>以微信小程序页面为对象计算用户停留时长，从浏览页面开始直到页面隐藏、关闭或跳转到其他页面。</p>
+<h2 id="_14">事件属性</h2>
+<h3 id="_15">通用属性</h3>
+<table>
+<thead>
+<tr>
+<th>属性名称</th>
+<th>示例</th>
+<th>说明</th>
+<th>如何生成</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>app_id</td>
+<td>"appId"</td>
+<td>点击流app id，用以区分不同app的事件</td>
+<td>可通过调用SDK的<code>init()</code>或<code>configure()</code>方法进行设置</td>
+</tr>
+<tr>
+<td>unique_id</td>
+<td>"c84ad28d-16a8-4af4-a331-f34cdc7a7a18"</td>
+<td>标识不同用户的唯一性，并关联登录和未登录用户的行为</td>
+<td>可以使用微信用户的 <em>openId</em> 作为<code>unique_id</code></td>
+</tr>
+<tr>
+<td>device_id</td>
+<td>"a843d34c-15a8-2af4-a332-b34cdc4a7a12"</td>
+<td>区分不同设备</td>
+<td>在微信小程序第一次启动时生成uuid，并保存在wxStorage中，之后也不会更改</td>
+</tr>
+<tr>
+<td>event_type</td>
+<td>"_session_start"</td>
+<td>事件名称</td>
+<td>由开发者或SDK设置</td>
+</tr>
+<tr>
+<td>event_id</td>
+<td>"460daa08-0717-4385-8f2e-acb5bd019ee7"</td>
+<td>事件的唯一id</td>
+<td>创建事件时生成uuid</td>
+</tr>
+<tr>
+<td>timestamp</td>
+<td>1667877566697</td>
+<td>事件创建时的时间戳</td>
+<td><code>new Date().getTime()</code> 单位：毫秒</td>
+</tr>
+<tr>
+<td>platform</td>
+<td>"WeChatMP"</td>
+<td>平台名称</td>
+<td>微信小程序固定使用"WeChatMP"</td>
+</tr>
+<tr>
+<td>os_name</td>
+<td>"iOS"</td>
+<td>设备操作系统名称</td>
+<td>由<code>wx.getSystemInfoSync()</code> API获取</td>
+</tr>
+<tr>
+<td>os_version</td>
+<td>"iOS 12.0.1"</td>
+<td>设备操作系统版本</td>
+<td>由<code>wx.getSystemInfoSync()</code> API获取</td>
+</tr>
+<tr>
+<td>wechat_version</td>
+<td>"8.0.5"</td>
+<td>微信版本</td>
+<td>由<code>wx.getSystemInfoSync()</code> API获取</td>
+</tr>
+<tr>
+<td>wechat_sdk_version</td>
+<td>"3.0.0"</td>
+<td>微信SDK版本</td>
+<td>由<code>wx.getSystemInfoSync()</code> API获取</td>
+</tr>
+<tr>
+<td>brand</td>
+<td>Google Inc.</td>
+<td>设备品牌</td>
+<td>由<code>wx.getSystemInfoSync()</code> API获取</td>
+</tr>
+<tr>
+<td>model</td>
+<td>"iPhone 6/7/8"</td>
+<td>设备型号</td>
+<td>由<code>wx.getSystemInfoSync()</code> API获取</td>
+</tr>
+<tr>
+<td>system_language</td>
+<td>"zh"</td>
+<td>设备系统语言</td>
+<td>由<code>wx.getSystemInfoSync()</code> API获取</td>
+</tr>
+<tr>
+<td>screen_height</td>
+<td>667</td>
+<td>屏幕高度像素</td>
+<td>由<code>wx.getSystemInfoSync()</code> API获取</td>
+</tr>
+<tr>
+<td>screen_width</td>
+<td>375</td>
+<td>屏幕宽度像素</td>
+<td>由<code>wx.getSystemInfoSync()</code> API获取</td>
+</tr>
+<tr>
+<td>zone_offset</td>
+<td>28800000</td>
+<td>设备所处时区与GMT的原始偏移量（单位：毫秒）</td>
+<td><code>-currentDate.getTimezoneOffset() * 60 * 1000</code></td>
+</tr>
+<tr>
+<td>network_type</td>
+<td>"wifi"</td>
+<td>设备网络类型</td>
+<td>由<code>wx.getNetworkType()</code> API获取</td>
+</tr>
+<tr>
+<td>sdk_version</td>
+<td>"0.2.0"</td>
+<td>点击流SDK版本</td>
+<td>从 <em>package.json</em> 获取</td>
+</tr>
+<tr>
+<td>sdk_name</td>
+<td>"aws-solution-clickstream-sdk"</td>
+<td>点击流SDK名称</td>
+<td>固定为"aws-solution-clickstream-sdk"</td>
+</tr>
+<tr>
+<td>app_package_name</td>
+<td>"wxbd614036ba3d1f05"</td>
+<td>微信小程序ID</td>
+<td>由<code>wx.getAccountInfoSync()</code> API获取</td>
+</tr>
+<tr>
+<td>app_version</td>
+<td>"1.0.1"</td>
+<td>微信小程序版本</td>
+<td>由<code>wx.getAccountInfoSync()</code> API获取</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_16">保留属性</h3>
+<p><strong>用户属性</strong></p>
+<table>
+<thead>
+<tr>
+<th>属性名称</th>
+<th style="text-align: center;">是否必需</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>_user_id</td>
+<td style="text-align: center;">是</td>
+<td>微信小程序用户ID</td>
+</tr>
+<tr>
+<td>_user_name</td>
+<td style="text-align: center;">是</td>
+<td>微信小程序用户名称</td>
+</tr>
+<tr>
+<td>_user_first_touch_timestamp</td>
+<td style="text-align: center;">是</td>
+<td>微信小程序用户首次使用小程序的时间</td>
+</tr>
+</tbody>
+</table>
+<p><strong>事件属性</strong></p>
+<table>
+<thead>
+<tr>
+<th>属性名称</th>
+<th style="text-align: center;">是否必需</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>_error_code</td>
+<td style="text-align: center;">否</td>
+<td>错误码，用于上报_clickstream_error事件</td>
+</tr>
+<tr>
+<td>_error_message</td>
+<td style="text-align: center;">否</td>
+<td>错误原因，用于上报_clickstream_error事件</td>
+</tr>
+<tr>
+<td>_session_id</td>
+<td style="text-align: center;">是</td>
+<td>会话ID</td>
+</tr>
+<tr>
+<td>_session_start_timestamp</td>
+<td style="text-align: center;">是</td>
+<td>会话起始时间</td>
+</tr>
+<tr>
+<td>_session_duration</td>
+<td style="text-align: center;">是</td>
+<td>会话持续时间</td>
+</tr>
+<tr>
+<td>_session_number</td>
+<td style="text-align: center;">是</td>
+<td>会话自增数，从1开始</td>
+</tr>
+<tr>
+<td>_screen_name</td>
+<td style="text-align: center;">否</td>
+<td>当前页面名称</td>
+</tr>
+<tr>
+<td>_screen_id</td>
+<td style="text-align: center;">否</td>
+<td>当前页面ID</td>
+</tr>
+<tr>
+<td>_screen_route</td>
+<td style="text-align: center;">否</td>
+<td>当前页面URL</td>
+</tr>
+<tr>
+<td>_previous_screen_name</td>
+<td style="text-align: center;">否</td>
+<td>上一页面名称</td>
+</tr>
+<tr>
+<td>_previous_screen_id</td>
+<td style="text-align: center;">否</td>
+<td>上一页面ID</td>
+</tr>
+<tr>
+<td>_previous_screen_route</td>
+<td style="text-align: center;">否</td>
+<td>上一页面URL</td>
+</tr>
+<tr>
+<td>_engagement_time_msec</td>
+<td style="text-align: center;">否</td>
+<td>用户在当前页面停留时间</td>
+</tr>
+<tr>
+<td>_is_first_time</td>
+<td style="text-align: center;">否</td>
+<td>用户首次使用微信小程序时为<code>true</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="item">Item属性</h3>
+<table>
+<thead>
+<tr>
+<th>属性名称</th>
+<th>数据类型</th>
+<th>是否必需</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>id</td>
+<td>string</td>
+<td>否</td>
+<td>item的id</td>
+</tr>
+<tr>
+<td>name</td>
+<td>string</td>
+<td>否</td>
+<td>item的名称</td>
+</tr>
+<tr>
+<td>brand</td>
+<td>string</td>
+<td>否</td>
+<td>item的品牌</td>
+</tr>
+<tr>
+<td>price</td>
+<td>string | number</td>
+<td>否</td>
+<td>item的价格</td>
+</tr>
+<tr>
+<td>quantity</td>
+<td>number</td>
+<td>否</td>
+<td>item的数量</td>
+</tr>
+<tr>
+<td>creative_name</td>
+<td>string</td>
+<td>否</td>
+<td>item的创意名称</td>
+</tr>
+<tr>
+<td>creative_slot</td>
+<td>string</td>
+<td>否</td>
+<td>item的创意槽</td>
+</tr>
+<tr>
+<td>location_id</td>
+<td>string</td>
+<td>否</td>
+<td>item的位置id</td>
+</tr>
+<tr>
+<td>category</td>
+<td>string</td>
+<td>否</td>
+<td>item的类别</td>
+</tr>
+<tr>
+<td>category2</td>
+<td>string</td>
+<td>否</td>
+<td>item的类别2</td>
+</tr>
+<tr>
+<td>category3</td>
+<td>string</td>
+<td>否</td>
+<td>item的类别3</td>
+</tr>
+<tr>
+<td>category4</td>
+<td>string</td>
+<td>否</td>
+<td>item的类别4</td>
+</tr>
+<tr>
+<td>category5</td>
+<td>string</td>
+<td>否</td>
+<td>item的类别5</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_17">事件示例</h3>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="p">{</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">  </span><span class="nt">&quot;app_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;appId&quot;</span><span class="p">,</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">  </span><span class="nt">&quot;unique_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;c84ad28d-16a8-4af4-a331-f34cdc7a7a18&quot;</span><span class="p">,</span>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">  </span><span class="nt">&quot;device_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;be4b3f1e-b2a8-4b7b-9055-4257e3e313c8&quot;</span><span class="p">,</span>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="w">  </span><span class="nt">&quot;event_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;_screen_view&quot;</span><span class="p">,</span>
+</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="w">  </span><span class="nt">&quot;event_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;460daa08-0717-4385-8f2e-acb5bd019ee7&quot;</span><span class="p">,</span>
+</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="w">  </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1667877566697</span><span class="p">,</span>
+</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="w">  </span><span class="nt">&quot;platform&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;WeChatMP&quot;</span><span class="p">,</span>
+</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="w">  </span><span class="nt">&quot;os_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;iOS&quot;</span><span class="p">,</span>
+</span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="w">  </span><span class="nt">&quot;os_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;iOS 12.0.1&quot;</span><span class="p">,</span>
+</span><span id="__span-4-11"><a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a><span class="w">  </span><span class="nt">&quot;wechat_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;8.0.5&quot;</span><span class="p">,</span>
+</span><span id="__span-4-12"><a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a><span class="w">  </span><span class="nt">&quot;wechat_sdk_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;3.0.0&quot;</span><span class="p">,</span>
+</span><span id="__span-4-13"><a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a><span class="w">  </span><span class="nt">&quot;brand&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;devtools&quot;</span><span class="p">,</span>
+</span><span id="__span-4-14"><a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a><span class="w">  </span><span class="nt">&quot;model&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;iPhone 6/7/8&quot;</span><span class="p">,</span>
+</span><span id="__span-4-15"><a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a><span class="w">  </span><span class="nt">&quot;system_language&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;en&quot;</span><span class="p">,</span>
+</span><span id="__span-4-16"><a id="__codelineno-4-16" name="__codelineno-4-16" href="#__codelineno-4-16"></a><span class="w">  </span><span class="nt">&quot;screen_height&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">667</span><span class="p">,</span>
+</span><span id="__span-4-17"><a id="__codelineno-4-17" name="__codelineno-4-17" href="#__codelineno-4-17"></a><span class="w">  </span><span class="nt">&quot;screen_width&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">375</span><span class="p">,</span>
+</span><span id="__span-4-18"><a id="__codelineno-4-18" name="__codelineno-4-18" href="#__codelineno-4-18"></a><span class="w">  </span><span class="nt">&quot;zone_offset&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">28800000</span><span class="p">,</span>
+</span><span id="__span-4-19"><a id="__codelineno-4-19" name="__codelineno-4-19" href="#__codelineno-4-19"></a><span class="w">  </span><span class="nt">&quot;network_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;wifi&quot;</span><span class="p">,</span>
+</span><span id="__span-4-20"><a id="__codelineno-4-20" name="__codelineno-4-20" href="#__codelineno-4-20"></a><span class="w">  </span><span class="nt">&quot;sdk_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0.2.0&quot;</span><span class="p">,</span>
+</span><span id="__span-4-21"><a id="__codelineno-4-21" name="__codelineno-4-21" href="#__codelineno-4-21"></a><span class="w">  </span><span class="nt">&quot;sdk_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;aws-solution-clickstream-sdk&quot;</span><span class="p">,</span>
+</span><span id="__span-4-22"><a id="__codelineno-4-22" name="__codelineno-4-22" href="#__codelineno-4-22"></a><span class="w">  </span><span class="nt">&quot;app_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1.0.1&quot;</span><span class="p">,</span>
+</span><span id="__span-4-23"><a id="__codelineno-4-23" name="__codelineno-4-23" href="#__codelineno-4-23"></a><span class="w">  </span><span class="nt">&quot;app_package_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;wxbd614036ba3d1f05&quot;</span><span class="p">,</span>
+</span><span id="__span-4-24"><a id="__codelineno-4-24" name="__codelineno-4-24" href="#__codelineno-4-24"></a><span class="w">  </span><span class="nt">&quot;user&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-4-25"><a id="__codelineno-4-25" name="__codelineno-4-25" href="#__codelineno-4-25"></a><span class="w">    </span><span class="nt">&quot;_user_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-4-26"><a id="__codelineno-4-26" name="__codelineno-4-26" href="#__codelineno-4-26"></a><span class="w">      </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="s2">&quot;312121&quot;</span><span class="p">,</span>
+</span><span id="__span-4-27"><a id="__codelineno-4-27" name="__codelineno-4-27" href="#__codelineno-4-27"></a><span class="w">      </span><span class="nt">&quot;set_timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1667877566697</span>
+</span><span id="__span-4-28"><a id="__codelineno-4-28" name="__codelineno-4-28" href="#__codelineno-4-28"></a><span class="w">    </span><span class="p">},</span>
+</span><span id="__span-4-29"><a id="__codelineno-4-29" name="__codelineno-4-29" href="#__codelineno-4-29"></a><span class="w">    </span><span class="nt">&quot;_user_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-4-30"><a id="__codelineno-4-30" name="__codelineno-4-30" href="#__codelineno-4-30"></a><span class="w">      </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="s2">&quot;carl&quot;</span><span class="p">,</span>
+</span><span id="__span-4-31"><a id="__codelineno-4-31" name="__codelineno-4-31" href="#__codelineno-4-31"></a><span class="w">      </span><span class="nt">&quot;set_timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1667877566697</span>
+</span><span id="__span-4-32"><a id="__codelineno-4-32" name="__codelineno-4-32" href="#__codelineno-4-32"></a><span class="w">    </span><span class="p">},</span>
+</span><span id="__span-4-33"><a id="__codelineno-4-33" name="__codelineno-4-33" href="#__codelineno-4-33"></a><span class="w">    </span><span class="nt">&quot;_user_first_touch_timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-4-34"><a id="__codelineno-4-34" name="__codelineno-4-34" href="#__codelineno-4-34"></a><span class="w">      </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="mi">1667877267895</span><span class="p">,</span>
+</span><span id="__span-4-35"><a id="__codelineno-4-35" name="__codelineno-4-35" href="#__codelineno-4-35"></a><span class="w">      </span><span class="nt">&quot;set_timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1667877566697</span>
+</span><span id="__span-4-36"><a id="__codelineno-4-36" name="__codelineno-4-36" href="#__codelineno-4-36"></a><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-4-37"><a id="__codelineno-4-37" name="__codelineno-4-37" href="#__codelineno-4-37"></a><span class="w">  </span><span class="p">},</span>
+</span><span id="__span-4-38"><a id="__codelineno-4-38" name="__codelineno-4-38" href="#__codelineno-4-38"></a><span class="w">  </span><span class="nt">&quot;attributes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-4-39"><a id="__codelineno-4-39" name="__codelineno-4-39" href="#__codelineno-4-39"></a><span class="w">    </span><span class="nt">&quot;_session_id&quot;</span><span class="p">:</span><span class="s2">&quot;dc7a7a18-20221108-031926703&quot;</span><span class="p">,</span>
+</span><span id="__span-4-40"><a id="__codelineno-4-40" name="__codelineno-4-40" href="#__codelineno-4-40"></a><span class="w">    </span><span class="nt">&quot;_session_start_timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1667877566703</span><span class="p">,</span>
+</span><span id="__span-4-41"><a id="__codelineno-4-41" name="__codelineno-4-41" href="#__codelineno-4-41"></a><span class="w">    </span><span class="nt">&quot;_session_duration&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">391809</span><span class="p">,</span>
+</span><span id="__span-4-42"><a id="__codelineno-4-42" name="__codelineno-4-42" href="#__codelineno-4-42"></a><span class="w">    </span><span class="nt">&quot;_session_number&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+</span><span id="__span-4-43"><a id="__codelineno-4-43" name="__codelineno-4-43" href="#__codelineno-4-43"></a><span class="w">    </span><span class="nt">&quot;_previous_screen_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pages/category/index&quot;</span><span class="p">,</span>
+</span><span id="__span-4-44"><a id="__codelineno-4-44" name="__codelineno-4-44" href="#__codelineno-4-44"></a><span class="w">    </span><span class="nt">&quot;_screen_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pages/items/11223/detail&quot;</span><span class="p">,</span>
+</span><span id="__span-4-45"><a id="__codelineno-4-45" name="__codelineno-4-45" href="#__codelineno-4-45"></a><span class="w">    </span><span class="nt">&quot;_engagement_time_msec&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">30000</span>
+</span><span id="__span-4-46"><a id="__codelineno-4-46" name="__codelineno-4-46" href="#__codelineno-4-46"></a><span class="w">  </span><span class="p">},</span>
+</span><span id="__span-4-47"><a id="__codelineno-4-47" name="__codelineno-4-47" href="#__codelineno-4-47"></a><span class="w">  </span><span class="nt">&quot;items&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-4-48"><a id="__codelineno-4-48" name="__codelineno-4-48" href="#__codelineno-4-48"></a><span class="w">    </span><span class="p">{</span>
+</span><span id="__span-4-49"><a id="__codelineno-4-49" name="__codelineno-4-49" href="#__codelineno-4-49"></a><span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;p_123&quot;</span><span class="p">,</span>
+</span><span id="__span-4-50"><a id="__codelineno-4-50" name="__codelineno-4-50" href="#__codelineno-4-50"></a><span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;item_name&quot;</span><span class="p">,</span>
+</span><span id="__span-4-51"><a id="__codelineno-4-51" name="__codelineno-4-51" href="#__codelineno-4-51"></a><span class="w">      </span><span class="nt">&quot;price&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">168.99</span>
+</span><span id="__span-4-52"><a id="__codelineno-4-52" name="__codelineno-4-52" href="#__codelineno-4-52"></a><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-4-53"><a id="__codelineno-4-53" name="__codelineno-4-53" href="#__codelineno-4-53"></a><span class="w">  </span><span class="p">]</span>
+</span><span id="__span-4-54"><a id="__codelineno-4-54" name="__codelineno-4-54" href="#__codelineno-4-54"></a><span class="p">}</span>
+</span></code></pre></div>
+<h2 id="_18">更新日志</h2>
+<p><a href="https://github.com/awslabs/clickstream-wechat/releases">GitHub更新日志</a></p>
+<h2 id="_19">参考链接</h2>
+<p><a href="https://github.com/awslabs/clickstream-wechat">SDK源码</a></p>
+<p><a href="https://github.com/awslabs/clickstream-wechat/issues">SDK问题</a></p>
+
+
+  
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var tab,labels=set.querySelector(".tabbed-labels");for(tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12Z"/></svg>
+  回到页面顶部
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+      <div class="md-progress" data-md-component="progress" role="progressbar"></div>
+    
+    
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.instant", "navigation.instant.progress", "navigation.tracking", "navigation.path", "navigation.top", "search.suggest", "search.highlight", "search.share", "content.code.copy", "content.code.select", "content.code.annotate", "content.tabs.link"], "search": "../../assets/javascripts/workers/search.f886a092.min.js", "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}, "version": {"default": "latest", "provider": "mike"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.81fa17fe.min.js"></script>
+      
+    
+  <script>document$.subscribe(() => {const lightbox = GLightbox({"touchNavigation": true, "loop": false, "zoomable": true, "draggable": true, "openEffect": "zoom", "closeEffect": "zoom", "slideEffect": "slide"});})</script></body>
+</html>
