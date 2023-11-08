@@ -31,10 +31,13 @@ import {
 import {
   awsUrlSuffix,
   PIPELINE_STACKS,
-  SERVICE_CATALOG_SUPPORTED_REGIONS,
   stackWorkflowS3Bucket,
 } from '../common/constants';
-import { MULTI_APP_ID_PATTERN, PROJECT_ID_PATTERN, SECRETS_MANAGER_ARN_PATTERN } from '../common/constants-ln';
+import {
+  MULTI_APP_ID_PATTERN,
+  PROJECT_ID_PATTERN,
+  SECRETS_MANAGER_ARN_PATTERN,
+} from '../common/constants-ln';
 import { BuiltInTagKeys } from '../common/model-ln';
 import { SolutionInfo } from '../common/solution-info-ln';
 import {
@@ -287,8 +290,7 @@ export class CPipeline {
       throw new ClickStreamBadRequestError('Pipeline Workflow can not empty.');
     }
     this.pipeline.lastAction = 'Update';
-    const executionName = `main-${uuidv4()}`;
-    this.pipeline.executionName = executionName;
+    this.pipeline.executionName = `main-${uuidv4()}`;
 
     this.pipeline.status = await this.stackManager.getPipelineStatus();
     if (this.pipeline.status.status === PipelineStatusType.CREATING ||
@@ -611,9 +613,7 @@ export class CPipeline {
 
     return {
       Version: WorkflowVersion.V20220315,
-      Workflow: SERVICE_CATALOG_SUPPORTED_REGIONS.includes(this.pipeline.region) ?
-        await this.generateAppRegistryWorkflow() :
-        await this.generatePipelineStacksWorkflow(),
+      Workflow: await this.generateAppRegistryWorkflow(),
     };
   }
 

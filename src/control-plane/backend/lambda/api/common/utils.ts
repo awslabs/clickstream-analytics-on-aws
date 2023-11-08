@@ -15,7 +15,7 @@ import { Route, RouteTable, RouteTableAssociation, Tag, VpcEndpoint, SecurityGro
 import { ipv4 as ip } from 'cidr-block';
 import { JSONPath } from 'jsonpath-plus';
 import jwt, { JwtPayload } from 'jsonwebtoken';
-import { amznRequestContextHeader, SERVICE_CATALOG_SUPPORTED_REGIONS } from './constants';
+import { amznRequestContextHeader } from './constants';
 import {
   ALBLogServiceAccountMapping,
   CORS_ORIGIN_DOMAIN_PATTERN,
@@ -23,6 +23,7 @@ import {
   IP_PATTERN,
   OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_ARN,
   ServerlessRedshiftRPUByRegionMapping,
+  SERVICE_CATALOG_SUPPORTED_REGIONS,
 } from './constants-ln';
 import { ConditionCategory, MetadataValueType } from './explore-types';
 import { BuiltInTagKeys } from './model-ln';
