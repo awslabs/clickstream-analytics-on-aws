@@ -58,7 +58,7 @@ export const AllowIAMUserPutObejectPolicyWithErrorBucket = '{"Version":"2012-10-
 export const AllowIAMUserPutObejectPolicyWithErrorBucketPrefix = '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":"arn:aws:iam::127311923021:root"},"Action":["s3:PutObject","s3:PutObjectLegalHold","s3:PutObjectRetention","s3:PutObjectTagging","s3:PutObjectVersionTagging","s3:Abort*"],"Resource":"arn:aws:s3:::EXAMPLE_BUCKET/*"}]}';
 export const AllowIAMUserPutObejectPolicyWithErrorService = '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"Service":"errorservice.elasticloadbalancing.amazonaws.com"},"Action":["s3:PutObject","s3:PutObjectLegalHold","s3:PutObjectRetention","s3:PutObjectTagging","s3:PutObjectVersionTagging","s3:Abort*"],"Resource":"arn:aws:s3:::EXAMPLE_BUCKET/clickstream/*"}]}';
 export const AllowIAMUserPutObejectPolicyInApSouthEast1 = '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":"arn:aws:iam::027434742980:root"},"Action":["s3:PutObject","s3:PutObjectLegalHold","s3:PutObjectRetention","s3:PutObjectTagging","s3:PutObjectVersionTagging","s3:Abort*"],"Resource":"arn:aws:s3:::EXAMPLE_BUCKET/clickstream/*"},{"Effect":"Allow","Principal":{"AWS":"arn:aws:iam::114774131450:root"},"Action":["s3:PutObject","s3:PutObjectLegalHold","s3:PutObjectRetention","s3:PutObjectTagging","s3:PutObjectVersionTagging","s3:Abort*"],"Resource":"arn:aws:s3:::EXAMPLE_BUCKET/clickstream/*"}]}';
-export const AllowIAMUserPutObejectPolicyInApEast1 = '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":"arn:aws:iam::754344448648:root"},"Action":["s3:PutObject","s3:PutObjectLegalHold","s3:PutObjectRetention","s3:PutObjectTagging","s3:PutObjectVersionTagging","s3:Abort*"],"Resource":"arn:aws:s3:::EXAMPLE_BUCKET/clickstream/*"}]}';
+export const AllowIAMUserPutObjectPolicyInApEast1 = '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":"arn:aws:iam::754344448648:root"},"Action":["s3:PutObject","s3:PutObjectLegalHold","s3:PutObjectRetention","s3:PutObjectTagging","s3:PutObjectVersionTagging","s3:Abort*"],"Resource":"arn:aws:s3:::EXAMPLE_BUCKET/clickstream/*"},{"Effect":"Allow","Principal":{"Service":"logdelivery.elasticloadbalancing.amazonaws.com"},"Action":["s3:PutObject","s3:PutObjectLegalHold","s3:PutObjectRetention","s3:PutObjectTagging","s3:PutObjectVersionTagging","s3:Abort*"],"Resource":"arn:aws:s3:::EXAMPLE_BUCKET/clickstream/*"}]}';
 
 function userMock(ddbMock: any, userId: string, role: IUserRole, existed?: boolean): any {
   if (!existed) {
@@ -1015,7 +1015,7 @@ function createPipelineMockForHKRegion(ec2Mock: any, s3Mock: any) {
       },
     ],
   });
-  s3Mock.on(GetBucketPolicyCommand).resolves({ Policy: AllowIAMUserPutObejectPolicyInApEast1 });
+  s3Mock.on(GetBucketPolicyCommand).resolves({ Policy: AllowIAMUserPutObjectPolicyInApEast1 });
 }
 
 export {
