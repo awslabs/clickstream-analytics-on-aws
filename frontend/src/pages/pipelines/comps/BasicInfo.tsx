@@ -265,6 +265,9 @@ const BasicInfo: React.FC<BasicInfoProps> = (props: BasicInfoProps) => {
                   pipelineId={pipelineInfo?.pipelineId}
                   projectId={pipelineInfo?.projectId}
                   status={pipelineInfo?.status?.status}
+                  updatePipelineStatus={(status) => {
+                    reloadPipeline();
+                  }}
                 />
               </div>
             </div>
