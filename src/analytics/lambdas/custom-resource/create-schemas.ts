@@ -458,7 +458,7 @@ async function updateViewForReporting(props: ResourcePropertiesType, oldProps: R
       ...SQL_TEMPLATE_PARAMETER,
     };
 
-    const sqlStatements2 = getUpdatableSql(props.reportingViewsDef, appUpdateProps.oldViewSqls, appUpdateProps.oldViewSqls, mustacheParam, '/opt/dashboard');
+    const sqlStatements2 = getUpdatableSql(props.reportingViewsDef, appUpdateProps.oldSchemaSqlArray, appUpdateProps.oldViewSqls, mustacheParam, '/opt/dashboard');
 
     //grant select on views to bi user.
     const views: string[] = [];
