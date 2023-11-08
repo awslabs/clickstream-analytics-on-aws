@@ -527,7 +527,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
   const checkDataProcessingInterval = (info: IExtPipeline) => {
     if (
       info.selectedExcutionType?.value === ExecutionType.FIXED_RATE &&
-      parseInt(info.excutionFixedValue) < 3 &&
+      parseInt(info.excutionFixedValue) < 6 &&
       info.selectedExcutionUnit?.value === 'minute'
     ) {
       setDataProcessorIntervalInvalidError(true);

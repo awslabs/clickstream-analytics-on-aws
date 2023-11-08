@@ -20,7 +20,7 @@
     "domainNameEmpty": "Please input domain name",
     "domainNameInvalid": "Domain name format invalid",
     "certificateEmpty": "Please select SSL certificate",
-    "dataProcessorIntervalError": "Data processing interval could not be less than 3 minutes",
+    "dataProcessorIntervalError": "Data processing interval could not be less than 6 minutes",
     "acknowledgeHTTPSecurity": "Please click acknowledge button to continue.",
     "sinkIntervalError": "The interval value must be greater than {{min}} and less than {{max}}",
     "sinkSizeError": "The size value must be greater than {{min}} and less than {{max}}",
