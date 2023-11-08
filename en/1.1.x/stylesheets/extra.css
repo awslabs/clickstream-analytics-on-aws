@@ -1,0 +1,12 @@
+.icon_check {
+    color: green;
+}
+
+.icon_cross {
+    color: red;
+}
+
+/* Maximum space for text block */
+.md-grid {
+    max-width: 100%; /* or 100%, if you want to stretch to full-width */
+}
