@@ -179,7 +179,7 @@ export const INGESTION_S3_WITH_SPECIFY_PREFIX_PARAMETERS = mergeParameters(
     },
     {
       ParameterKey: 'S3DataPrefix',
-      ParameterValue: 'EXAMPLE_PREFIX_NEW/',
+      ParameterValue: 'clickstream/project_8888_8888/data/buffer/',
     },
   ],
 );
@@ -507,15 +507,31 @@ export const DATA_PROCESSING_PLUGIN1_PARAMETERS = mergeParameters(
 );
 
 export const DATA_PROCESSING_WITH_SPECIFY_PREFIX_PLUGIN1_PARAMETERS = mergeParameters(
-  DATA_PROCESSING_PLUGIN1_PARAMETERS,
+  BASE_DATA_PROCESSING_PARAMETERS,
   [
+    {
+      ParameterKey: 'TransformerAndEnrichClassNames',
+      ParameterValue: 'test.aws.solution.main,software.aws.solution.clickstream.UAEnrichment,software.aws.solution.clickstream.IPEnrichment,test.aws.solution.main',
+    },
+    {
+      ParameterKey: 'S3PathPluginJars',
+      ParameterValue: 's3://example-bucket/pipeline/jars/test-transformer-0.1.0.jar,s3://example-bucket/pipeline/jars/test-enrich-0.1.0.jar',
+    },
+    {
+      ParameterKey: 'S3PathPluginFiles',
+      ParameterValue: 's3://example-bucket/pipeline/files/data1.mmdb,s3://example-bucket/pipeline/files/data2.mmdb,s3://example-bucket/pipeline/files/data3.mmdb,s3://example-bucket/pipeline/files/data4.mmdb',
+    },
+    {
+      ParameterKey: 'PipelineS3Bucket',
+      ParameterValue: 'EXAMPLE_BUCKET_NEW',
+    },
     {
       ParameterKey: 'SourceS3Bucket',
       ParameterValue: 'EXAMPLE_BUCKET_NEW',
     },
     {
-      ParameterKey: 'SourceS3Prefix',
-      ParameterValue: 'EXAMPLE_PREFIX_NEW/',
+      ParameterKey: 'SinkS3Bucket',
+      ParameterValue: 'EXAMPLE_BUCKET_NEW',
     },
   ],
 );
@@ -727,6 +743,18 @@ export const DATA_PROCESSING_NEW_SERVERLESS_WITH_SPECIFY_PREFIX_PARAMETERS = mer
     {
       ParameterKey: 'RedshiftServerlessRPU',
       ParameterValue: '8',
+    },
+    {
+      ParameterKey: 'ODSEventBucket',
+      ParameterValue: 'EXAMPLE_BUCKET_NEW',
+    },
+    {
+      ParameterKey: 'PipelineS3Bucket',
+      ParameterValue: 'EXAMPLE_BUCKET_NEW',
+    },
+    {
+      ParameterKey: 'LoadWorkflowBucket',
+      ParameterValue: 'EXAMPLE_BUCKET_NEW',
     },
   ],
 );

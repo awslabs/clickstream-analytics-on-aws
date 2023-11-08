@@ -625,8 +625,15 @@ export class CDataProcessingStack extends JSONObject {
 
   @JSONObject.required
   @JSONObject.custom( (stack:CDataProcessingStack, _key:string, value:string) => {
+    if (stack._pipeline?.dataProcessing?.sourceS3Bucket.name) {
+      return stack._pipeline?.dataProcessing?.sourceS3Bucket.name;
+    }
     if (stack._pipeline?.ingestionServer.sinkType == PipelineSinkType.S3) {
       value = stack._pipeline?.ingestionServer.sinkS3?.sinkBucket.name ?? stack._pipeline.bucket.name;
+    } else if (stack._pipeline?.ingestionServer.sinkType == PipelineSinkType.KAFKA) {
+      value = stack._pipeline?.ingestionServer.sinkKafka?.kafkaConnector.sinkBucket?.name ?? stack._pipeline.bucket.name;
+    } else if (stack._pipeline?.ingestionServer.sinkType == PipelineSinkType.KINESIS) {
+      value = stack._pipeline?.ingestionServer.sinkKinesis?.sinkBucket?.name ?? stack._pipeline.bucket.name;
     }
     return value;
   })
@@ -634,11 +641,19 @@ export class CDataProcessingStack extends JSONObject {
 
   @JSONObject.required
   @JSONObject.custom( (stack:CDataProcessingStack, key:string, value:string) => {
-    if (stack._pipeline?.ingestionServer.sinkType == PipelineSinkType.KAFKA) {
-      value = `${value}${stack._kafkaTopic}/`;
-    } else if (stack._pipeline?.ingestionServer.sinkType == PipelineSinkType.S3) {
+    if (stack._pipeline?.dataProcessing?.sourceS3Bucket.prefix) {
+      return stack._pipeline?.dataProcessing?.sourceS3Bucket.prefix;
+    }
+    if (stack._pipeline?.ingestionServer.sinkType == PipelineSinkType.S3) {
       value = getBucketPrefix(stack._pipeline.projectId, BucketPrefix.DATA_BUFFER,
         stack._pipeline?.ingestionServer.sinkS3?.sinkBucket.prefix);
+    } else if (stack._pipeline?.ingestionServer.sinkType == PipelineSinkType.KAFKA) {
+      const kafkaPrefix = getBucketPrefix(stack._pipeline.projectId, BucketPrefix.DATA_BUFFER,
+        stack._pipeline?.ingestionServer.sinkKafka?.kafkaConnector.sinkBucket?.prefix);
+      value = `${kafkaPrefix}${stack._kafkaTopic}/`;
+    } else if (stack._pipeline?.ingestionServer.sinkType == PipelineSinkType.KINESIS) {
+      value = getBucketPrefix(stack._pipeline.projectId, BucketPrefix.DATA_BUFFER,
+        stack._pipeline?.ingestionServer.sinkKinesis?.sinkBucket.prefix);
     }
     validatePattern(key, S3_PREFIX_PATTERN, value);
     return value;
