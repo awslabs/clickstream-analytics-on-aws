@@ -120,7 +120,7 @@ const BASE_INGESTION_PARAMETERS: Parameter[] = [
   },
   {
     ParameterKey: 'LogS3Prefix',
-    ParameterValue: 'clickstream/project_8888_8888/logs/alb/',
+    ParameterValue: 'logs/',
   },
 ];
 
@@ -172,7 +172,16 @@ export const INGESTION_S3_PARAMETERS = mergeParameters(
 
 export const INGESTION_S3_WITH_SPECIFY_PREFIX_PARAMETERS = mergeParameters(
   INGESTION_S3_PARAMETERS,
-  [],
+  [
+    {
+      ParameterKey: 'S3DataBucket',
+      ParameterValue: 'EXAMPLE_BUCKET_NEW',
+    },
+    {
+      ParameterKey: 'S3DataPrefix',
+      ParameterValue: 'EXAMPLE_PREFIX_NEW/',
+    },
+  ],
 );
 
 export const INGESTION_KAFKA_PARAMETERS = mergeParameters(
@@ -499,7 +508,16 @@ export const DATA_PROCESSING_PLUGIN1_PARAMETERS = mergeParameters(
 
 export const DATA_PROCESSING_WITH_SPECIFY_PREFIX_PLUGIN1_PARAMETERS = mergeParameters(
   DATA_PROCESSING_PLUGIN1_PARAMETERS,
-  [],
+  [
+    {
+      ParameterKey: 'SourceS3Bucket',
+      ParameterValue: 'EXAMPLE_BUCKET_NEW',
+    },
+    {
+      ParameterKey: 'SourceS3Prefix',
+      ParameterValue: 'EXAMPLE_PREFIX_NEW/',
+    },
+  ],
 );
 
 export const DATA_PROCESSING_PLUGIN2_PARAMETERS = mergeParameters(

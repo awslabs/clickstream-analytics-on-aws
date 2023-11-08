@@ -287,7 +287,7 @@ export const S3_DATA_PROCESSING_WITH_SPECIFY_PREFIX_PIPELINE: IPipeline = {
     sinkS3: {
       sinkBucket: {
         name: 'EXAMPLE_BUCKET_NEW',
-        prefix: 'EXAMPLE_PREFIX/',
+        prefix: 'EXAMPLE_PREFIX_NEW/',
       },
       s3BatchMaxBytes: 1000000,
       s3BatchTimeout: 60,
@@ -301,11 +301,11 @@ export const S3_DATA_PROCESSING_WITH_SPECIFY_PREFIX_PIPELINE: IPipeline = {
     dataFreshnessInHour: 7,
     scheduleExpression: 'rate(6 minutes)',
     sourceS3Bucket: {
-      name: 'EXAMPLE_BUCKET_NEW',
-      prefix: 'EXAMPLE_PREFIX/',
+      name: 'EXAMPLE_BUCKET',
+      prefix: '',
     },
     sinkS3Bucket: {
-      name: 'EXAMPLE_BUCKET_NEW',
+      name: 'EXAMPLE_BUCKET',
       prefix: '',
     },
     pipelineBucket: {

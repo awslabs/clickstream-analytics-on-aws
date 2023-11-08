@@ -36,7 +36,11 @@ const Ingestion: React.FC<TabContentProps> = (props: TabContentProps) => {
 
     const linkProps = {
       S3: (info: IExtPipeline) =>
-        buildS3Link(info.region, info.bucket.name, info.bucket.prefix),
+        buildS3Link(
+          info.region,
+          info.ingestionServer.sinkS3.sinkBucket.name,
+          info.ingestionServer.sinkS3.sinkBucket.prefix
+        ),
       MSK: (info: IExtPipeline) =>
         buildMSKLink(
           info.region,
@@ -51,7 +55,8 @@ const Ingestion: React.FC<TabContentProps> = (props: TabContentProps) => {
         <div>
           S3 (
           <Link href={linkProps['S3'](pipelineInfo)} external>
-            S3://{pipelineInfo.bucket.name}/{pipelineInfo.bucket.prefix}
+            S3://{pipelineInfo.ingestionServer.sinkS3.sinkBucket.name}/
+            {pipelineInfo.ingestionServer.sinkS3.sinkBucket.prefix}
           </Link>
           )
         </div>
