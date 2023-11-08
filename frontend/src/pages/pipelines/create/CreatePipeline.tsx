@@ -1154,6 +1154,13 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                           name: bucket,
                         },
                       },
+                      sinkS3: {
+                        ...prev.ingestionServer.sinkS3,
+                        sinkBucket: {
+                          ...prev.ingestionServer.sinkS3.sinkBucket,
+                          name: bucket,
+                        },
+                      },
                     },
                     dataProcessing: {
                       ...prev.dataProcessing,
