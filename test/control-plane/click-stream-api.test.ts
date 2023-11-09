@@ -984,6 +984,22 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
                   ],
                 ],
               },
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    {
+                      Ref: 'AWS::Partition',
+                    },
+                    ':iam::',
+                    {
+                      Ref: 'AWS::AccountId',
+                    },
+                    ':role/aws-service-role/servicecatalog-appregistry.amazonaws.com/AWSServiceRoleForAWSServiceCatalogAppRegistry',
+                  ],
+                ],
+              },
             ],
           },
           {
