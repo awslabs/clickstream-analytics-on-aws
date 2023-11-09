@@ -23,7 +23,12 @@ The solution creates a web service as an ingestion endpoint to collect data sent
         !!! warning "Warning"
 
             Using HTTP protocol is not secure, because data will be sent without any encryption, and there are high risks of data being leaked or tampered during transmission. Please acknowledge the risk to proceed.
-  
+* **Cross-Origin Resource Sharing (CORS)**: You can enable CORS to limit requests to data ingestion API from a specific domain. Note that, you need to input a complete internet address, e.g., https://www.example.com, http://localhost:8080. Use comma to separate domain if you have multiple domain for this setting.
+
+        !!! warning "Warning"
+
+            CORS is a mandatory setting if you are collecting data from a website. If you do not set value for this parameter, the ingestion server to reject all the requests from Web platform.
+
 * Additional Settings
     * Request path: User can input the path of ingestion endpoint to collect data, the default path is "/collect".
     * AWS Global Accelerator: User can choose to create an accelerator to get static IP addresses that act as a global fixed entry point to your ingestion server, which will improves the availability and performance of your ingestion server. 

@@ -42,20 +42,35 @@ Key assumptions include:
 - KDS configuration (on-demand, provision - shard 2)
 - 10/100/1000RPS
 
-| Request Per Second | ALB | EC2 | Buffer type       | Buffer cost | S3   |  Total (USD/Month) |
-| ------------------ | --- | --- | ----------------- | ----------- | ---  |  --------- |
-| 10RPS             |   7  | 122    | Kinesis (On-Demand) |    36         |   3   |     168  |
-|                         |   7  |  122   | Kinesis (Provisioned 2 shard)   |      22       |  3   |   154  |
-|                         |   7  |  122   | MSK (m5.large * 2, connector MCU * 1)   |       417      |   3  |     549   |
-|                         | 7    |  122   | None              |             |  3    |      132   |
-|100RPS           |   43  |  122  |     Kinesis(On-demand)              |      86       |  3   |     254 |
-|                         | 43    |   122  | Kinesis (Provisioned 2 shard)   |      26       | 3    |     194  |
-|           |   43  |  122  |     MSK (m5.large * 2, connector MCU * 1)              |      417       |  3   |     585
-|           |   43  |  122  |     None              |             |  3    |     168
-|1000RPS           |   396  |   122 |     Kinesis(On-demand)              |      576       |  14   |    1108 |
-|                         |  396   |  122   | Kinesis (Provisioned 10 shard)   |    146         |   14  |     678  |
-|           |  396   | 122   |     MSK (m5.large * 2, connector MCU * 2~3)              |      530       |  14  |     1062
-|           |  396   | 122   |     None              |            |  14   |     532
+| Request Per Second | ALB cost | EC2 cost  |  Buffer type      | Buffer cost | S3 cost   |  Total (USD/Month) |
+| ------------------ | --- | ---  |  --------------   | ----------- | ---  |  --------- |
+| 10RPS              |  $7  |  $122 |  Kinesis (On-Demand) |    $36       |   $3  |     $168  |
+|                    |  $7  |  $122 |  Kinesis (Provisioned 2 shard)   |      $22       |  $3   |   $154  |
+|                    |  $7  |  $122 |  MSK (m5.large * 2, connector MCU * 1)   |       $417      |   $3  |     $549   |
+|                         | $7    |  $122 |  None              |             |  $3    |      $132   |
+|100RPS           |  $43  |  $122  |  Kinesis(On-demand)              |      $86       |  $3   |     $254 |
+|                         | $43    |   $122 |  Kinesis (Provisioned 2 shard)   |      $26       | $3    |     $194  |
+|           |   $43  |  $122  |   MSK (m5.large * 2, connector MCU * 1)              |      $417       |  $3   |     $585
+|           |   $43  |  $122 |      None              |             |  $3    |     $168
+|1000RPS           |   $396  |   $122 |      Kinesis(On-demand)              |      $576       |  $14   |    $1108 |
+|                         |  $396   |  $122  |  Kinesis (Provisioned 10 shard)   |    $146         |   $14  |     $678  |
+|           |  $396   | $122  |      MSK (m5.large * 2, connector MCU * 2~3)              |      $530       |  $14  |     $1062
+|           |  $396   | $122   |      None              |            |  $14   |     $532
+
+### Data transfer
+There are associated costs when data is transferred from EC2 to the downstream data sink. Below is an example of data transfer costs based on 1000 RPS and a 1KB request payload.
+
+1. EC2 Network In: This does not incur any costs.
+2. EC2 Network Out: There are three data sink options:
+
+    | Data Sink Type | Way to access data sink |  Dimensions |   Total (USD/Month) |
+    | ------------------ | --- | --- | ---  |  
+    | S3         |  S3 Gateway endpoints | The S3 Gateway endpoints does not incur any costs   | $0  |  
+    | MSK          |  |  Data processed cost ($0.010 per GB in/out/between EC2 AZs)  | $105  |       
+    | KDS          |  NAT |  NAT fixed cost: $64 (2 Availability Zones and a NAT per AZ, $0.045 per NAT Gateway Hour). <br> Data processed cost: $601 ($0.045 per GB Data Processed by NAT Gateways).  | $665  | 
+    | KDS          |  VPC Endpoint |  VPC Endpoint fixed cost: $14.62 (Availability Zones $0.01 per AZ Hour). <br> Data processed cost: $133.5 ($0.01 per GB Data Processed by Interface endpoints).  | $148.1  | 
+
+    We suggest using a [VPC endpoint](https://docs.aws.amazon.com/whitepapers/latest/aws-privatelink/what-are-vpc-endpoints.html) for the KDS data sink. For more information on using the VPC endpoint, please refer to the VPC endpoint documentation. 
 
 ## Data processing & data modeling modules
 
@@ -67,21 +82,21 @@ Data processing & modeling module include the following cost components if you c
 
 Key assumptions include:
 
-- 10/100/1000/10000 RPS
+- 10/100/1000 RPS
 - Data processing interval: hourly/6-hourly/daily
 - EMR running three built-in plugins to process data
 
-| Request Per Second | EMR schedule interval |  EMR Cost | Redshift type            | Redshift cost | Total (USD) |
+| Request Per Second | EMR schedule interval |  EMR Cost | Redshift type            | Redshift cost | Total (USD/Month) |
 | ----------------------- | --------------------- | ---------------- | -------- | ------------------------ |  ----- |
-| 10RPS             | Hourly                |     28     | Serverless (8 based RPU) |     68          |   96    |
-|                         | 6-hourly              |     10.8     | Serverless(8 based RPU)               |       11        |   21.8    |
-|                         | Daily                 |      9.6    | Serverless(8 based RPU)               |     3          |   12.6    |
-| 100RPS             | Hourly                |      105   | Serverless (8 based RPU) |       72        |  177    |
-|                         | 6-hourly              |     99     | Serverless(8 based RPU)               |       17.2        |   116.2    |
-|                         | Daily                 |     140     | Serverless(8 based RPU)               |       16.9        |    156.9   |
-| 1000RPS             | Hourly                |      1362   | Serverless (8 based RPU) |       172        |  1534    |
-|              | 6-Hourly                |      678   | Serverless (8 based RPU) |       176        |  854    |
-|              | Daily                |     873   | Serverless (8 based RPU) |        352       |   1225   |
+| 10RPS             | Hourly                |     $28     | Serverless (8 based RPU) |     $68          |   $96    |
+|                         | 6-hourly              |     $10.8     | Serverless(8 based RPU)               |      $11        |   $21.8    |
+|                         | Daily                 |      $9.6    | Serverless(8 based RPU)               |     $3          |   $12.6    |
+| 100RPS             | Hourly                |      $72   | Serverless (8 based RPU) |       $70        |  $142    |
+|                         | 6-hourly              |     $61.2     | Serverless(8 based RPU)               |       $17.2        |   $78.4    |
+|                         | Daily                 |     $43.7     | Serverless(8 based RPU)               |       $12.4        |    $56.1   |
+| 1000RPS             | Hourly                |      $842   | Serverless (8 based RPU) |       $172        |  $1014    |
+|              | 6-Hourly                |      $579   | Serverless (8 based RPU) |       $137        |  $716    |
+| <span style="background-color: lightgray">The EMR for this case is configured as below.</span>              | Daily               |     $642   | Serverless (8 based RPU) |        $94       |   $736   |
 
 !!! info "Note"
     For the cost of 1000 PRS Daily, we used below EMR configuration.
@@ -89,13 +104,19 @@ Key assumptions include:
     ```json
     {
     "sparkConfig": [
-            "spark.emr-serverless.executor.disk=80g",
-            "spark.executor.instances=8",
+            "spark.emr-serverless.executor.disk=200g",
+            "spark.executor.instances=16",
             "spark.dynamicAllocation.initialExecutors=16",
-            "spark.executor.memory=80g",
-            "spark.executor.cores=16"
+            "spark.executor.memory=100g",
+            "spark.executor.cores=16",
+            "spark.network.timeout=10000000",
+            "spark.executor.heartbeatInterval=10000000",
+            "spark.shuffle.registration.timeout=120000",
+            "spark.shuffle.registration.maxAttempts=5",
+            "spark.shuffle.file.buffer=2m",
+            "spark.shuffle.unsafe.file.output.buffer=1m"
         ],
-        "inputRePartitions": 2000
+        "inputRePartitions": 800
     }
     ```
 
@@ -113,9 +134,9 @@ Key assumptions include
 - **Ten readers** with 22 working days per month, 5% active readers, 50% frequent readers, 25%  occasional readers, 20% inactive readers
 - 10GB SPICE capacity
 
-| Daily data volume/RPS | Authors | Readers | SPICE | Total |
+| Daily data volume/RPS | Authors | Readers | SPICE | Total cost (USD/Month) |
 | --------------------- | ------- | ------- | ----- | ----- |
-| All size              | 48      | 18.80   |   0   | 66.80 |
+| All size              | 48      | 18.80   |   0   | $66.80 |
 
 !!! info "Note"
     All your data pipelines are applied to the above QuickSight costs, even the visualizations managed outside the solution.
@@ -142,18 +163,20 @@ Key assumptions:
 
 - Ingestion deployment in `us-east-1`
 
-| Request Per Second | Fixed hourly cost | Data transfer cost | Total cost(USD) |
+| Request Per Second | Fixed hourly cost | Data transfer cost | Total cost (USD/Month) |
 | --------------------- | ----------------- | ------------------ | ---------- |
-| 10RPS           |        18           |          0.3          |       18.3     |
-| 100RPS         |          18         |           3         |      21      |
-| 1000RPS       |            18       |            30        |      38      |
+| 10RPS           |        $18           |          $0.3          |       $18.3     |
+| 100RPS         |          $18         |           $3         |      $21      |
+| 1000RPS       |            $18       |            $30        |      $48      |
 
 ### Application Load Balancer Access log
 
 You are charged storage costs for Amazon S3, but not charged for the bandwidth used by Elastic Load Balancing to send log files to Amazon S3. For more information about storage costs, see [Amazon S3 pricing](https://aws.amazon.com/s3/pricing/).
 
-| Request Per Second | Log size(GB) | S3 cost(USD) |
+| Request Per Second | Log size(GB) | S3 cost(USD/Month)|
 | --------------------- | -------- | ------- |
-| 10 RPS           |    16.5       |    0.38     |
-| 100 RPS         |     165     |      3.8   |
-| 1000 RPS       |     1650     |    38     |
+| 10 RPS           |    16.5       |    $0.38     |
+| 100 RPS         |     165     |      $3.8   |
+| 1000 RPS       |     1650     |    $38     |
+
+[vpce]: https://docs.aws.amazon.com/whitepapers/latest/aws-privatelink/what-are-vpc-endpoints.html

@@ -51,7 +51,7 @@ ods_event表中的每一列都代表一个特定于事件的参数。注意，�
 | user_properties.value.set_timestamp_micros | BIGINT |         BIGINT          | 用户属性最后设置的时间（以微秒为单位）。 |
 | user_ltv  | SUPER               | ARRAY| 用户的生命周期价值。 |
 | user_ltv.revenue  | DOUBLE PRECISION               | FLOAT| 用户的生命周期价值（收入）。 |
-| user_ltv.revenue  | DOUBLE PRECISION               | FLOAT| 用户的生命周期价值（货币）。 |
+| user_ltv.currency  | DOUBLE PRECISION               | FLOAT| 用户的生命周期价值（货币）。 |
 
 ### 设备字段
 | 字段名称                   | 数据类型 | Athena 数据类型 | 描述                                                                                              |
@@ -85,7 +85,7 @@ ods_event表中的每一列都代表一个特定于事件的参数。注意，�
 | geo.latitude       |     DOUBLE PRECISION | FLOAT                | 基于 IP 地址报告事件的纬度。      |
 | geo.longitude      |     DOUBLE PRECISION | FLOAT                | 基于 IP 地址报告事件的经度。      |
 | geo.accuracy       |     BIGINT          | BIGINT               | 基于 IP 地址报告事件的精度。      |
-                                                                       |
+                                                                       
 ### 流量字段
 | 字段名称               | 数据类型 - Redshift | 数据类型 - Athena | 描述                                                                           |
 | ------------------------ | -------------------- | --------- | ------------------------------------------------------------------------------------- |
