@@ -1,9 +1,99 @@
 {
-  "dashboard": {
+  "dashboardsInfo": {
     "title": "Dashboard",
-    "description": "Dashboard description",
+    "description": "A dashboard is a read-only snapshot of an analysis that you can share with other users for reporting purposes. By default, the solution provides an User Life Cycle dashboard to help you understand each stage in the customer jorney. You can also create custom dashboard by saving explorative analysis that you want to view regularly.",
     "links": {
-      "dashboardDocLinkName": "What is dashboard?"
+      "dashboardDocLinkName": "What is dashboard?",
+      "dashboardDocLink": "https://awslabs.github.io/clickstream-analytics-on-aws/en/dashboard/"
+    }
+  },  
+  "userLifecycleInfo": {
+    "title": "User life cycle dashboard",
+    "description": "The solution comes with pre-built analytics dashboards to help you understand how users use your app or website, including new user acquisition, user engagement, events, retention, devices, and crash analysis。",
+    "links": {
+      "dashboardDocLinkName": "User life cycle dashboard",
+      "dashboardDocLink": "https://awslabs.github.io/clickstream-analytics-on-aws/en/dashboard/"
+    }
+  },  
+  "exploreInfo": {
+    "title": "Explore",
+    "description": "Explore module provides a range of advanced analytical models to help you gain a deeper understanding of user behavior. You can filter and query data from multiple dimensions with Explore to analyze metrics that aren't in pre-built reports. In the Explore module, you can quickly execute ad hoc queries, easily configure and switch analysis models, use filters to focus on the most relevant data, and save the Explore analysis configurations and results in a dashboard.",
+    "links": {
+      "dashboardDocLinkName": "Explore",
+      "dashboardDocLink": "https://awslabs.github.io/clickstream-analytics-on-aws/en/analyticstudio/explore/"
+    }
+  }, 
+  "eventInfo": {
+    "title": "Event analysis",
+    "description": "Event analysis is used to study the frequency of certain behavioral events. You can conduct multi-dimensional analysis of user behavior through custom metrics, groupings, filters, and various visual charts.",
+    "links": {
+      "dashboardDocLinkName": "Event analysis",
+      "dashboardDocLink": "https://awslabs.github.io/clickstream-analytics-on-aws/en/analyticstudio/explore/event/"
+    }
+  },
+  "funnelInfo": {
+    "title": "Funnel analysis",
+    "description": "Funnel analysis, or conversion analysis, is mainly used to analyze the conversion status of users in a specified process. The model first breaks down the entire process into steps and then counts the conversion rate from each step to the next. It can be used to measure the performance of each step. Common usage scenarios include analyzing registration conversion rates, purchase conversion rates, etc.",
+    "links": {
+      "dashboardDocLinkName": "Funnel analysis",
+      "dashboardDocLink": "https://awslabs.github.io/clickstream-analytics-on-aws/en/analyticstudio/explore/funnel/"
+    }
+  },
+  "pathInfo": {
+    "title": "Path analysis",
+    "description": "Path analysis refers to the distribution of the behavior of a group of users after sorting them in sequential order. It is mainly used to analyze and record the distribution ratio of users between pages or events. For example, check how many customers clicked on the product list after opening the app, how many customers viewed the product detail page after visiting landing page, how many customers searched for the product, etc.",
+    "links": {
+      "dashboardDocLinkName": "Path analysis",
+      "dashboardDocLink": "https://awslabs.github.io/clickstream-analytics-on-aws/en/analyticstudio/explore/path/"
+    }
+  },
+  "retentionInfo": {
+    "title": "Retention analysis",
+    "description": "Retention analysis support configuring initial event and returning event to calculate the retention or attrition rate of target user groups. It also supports setting associated attributes for initial event and return event.",
+    "links": {
+      "dashboardDocLinkName": "Retention analysis",
+      "dashboardDocLink": "https://awslabs.github.io/clickstream-analytics-on-aws/en/analyticstudio/explore/retention/"
+    }
+  },
+  "analyzesInfo": {
+    "title": "Analyzes",
+    "description": "The analyzes module is QuickSight's analysis author interface, where you can use all of QuickSight's features for customized analysis. The solution pre-loaded multiple clickstream data sets (such as events, event attributes, user attributes, etc.) for you, and you can also add new data sets to join clickstream data for custom analysis.",
+    "links": {
+      "dashboardDocLinkName": "Analyzes",
+      "dashboardDocLink": "https://awslabs.github.io/clickstream-analytics-on-aws/en/analyticstudio/analyzes/"
+    }
+  },
+  "metadataInfo": {
+    "title": "Data management",
+    "description": "The data management module makes it easy for you to view and manage all events, event attributes, and user attributes by automatically scanning all the clickstream data in your app to generate metadata. You can also modify the display names, descriptions, and data dictionaries for events and attributes to facilitate your filtering use in the Explore Analysis module.",
+    "links": {
+      "dashboardDocLinkName": "Analyzes",
+      "dashboardDocLink": "https://awslabs.github.io/clickstream-analytics-on-aws/en/analyticstudio/analyzes/"
+    }
+  },
+  "metadataEventInfo": {
+    "title": "Event",
+    "description": "'Event' refers to the clickstream data generated by a  user action within an app or website (such as clicking, visiting a page, etc.). Events has two categories: preset events, namely events automatically collected by the SDK, usually start with an underscore '_'; custom events, namely events define and report by app owner, and the report timing and business purpose of the event varies.",
+    "links": {
+      "dashboardDocLinkName": "Event",
+      "dashboardDocLink": "https://awslabs.github.io/clickstream-analytics-on-aws/en/analyticstudio/metadata/"
+    }
+  },
+  "metadataEventParamInfo": {
+    "title": "Event parameters",
+    "description": "'Event parameter' are used to describe the various dimensions of information at the time the event occurred. Event parameters are divided into two categories: public parameter, namely the parameters that all events include, such as user information (user_id), device information (app version, device model, etc.); private parameter, namely parameters that are unique to certain events, such as user-customized parameters.",
+    "links": {
+      "dashboardDocLinkName": "Event parameter",
+      "dashboardDocLink": "https://awslabs.github.io/clickstream-analytics-on-aws/en/analyticstudio/metadata/"
+    }
+  },
+  "metadataUserParamInfo": {
+    "title": "User attributes",
+    "description": "'User Properties' is used to record individual user attributes. User attributes are divided into two categories: preset attributes, that is, attributes collected by SDK presets, such as '_first_visit_date'; custom attributes, that is, user attributes reported by the user themselves, such as 'email_address'.",
+    "links": {
+      "dashboardDocLinkName": "User attributes",
+      "dashboardDocLink": "https://awslabs.github.io/clickstream-analytics-on-aws/en/analyticstudio/metadata/"
     }
   }
+
 }
