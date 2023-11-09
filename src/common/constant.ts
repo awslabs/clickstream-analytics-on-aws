@@ -367,7 +367,7 @@ export const QUICKSIGHT_DATASET_INFIX= '-dataset-';
 export const EMR_ARCHITECTURE_AUTO = 'Auto';
 
 export const CLICKSTREAM_RETENTION_VIEW_PLACEHOLDER = 'Retention_View';
-export const CLICKSTREAM_SESSION_VIEW_PLACEHOLDER = 'Session_view';
+export const CLICKSTREAM_SESSION_VIEW_PLACEHOLDER = 'Session_View';
 export const CLICKSTREAM_USER_DIM_VIEW_PLACEHOLDER = 'User_Dim_View';
 export const CLICKSTREAM_EVENT_VIEW_PLACEHOLDER = 'Event_View';
 export const CLICKSTREAM_DEVICE_VIEW_PLACEHOLDER = 'Device_View';

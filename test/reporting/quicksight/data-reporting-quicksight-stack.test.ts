@@ -990,7 +990,7 @@ describe('DataReportingQuickSightStack resource test', () => {
           },
           {
             name: '',
-            tableName: 'Session_view',
+            tableName: 'Session_View',
             importMode: 'DIRECT_QUERY',
             customSql: 'SELECT * FROM {{schema}}.clickstream_session_view_v1',
             columns: [
