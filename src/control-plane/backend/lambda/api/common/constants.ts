@@ -65,6 +65,7 @@ const PIPELINE_SUPPORTED_REGIONS = [
 const DEFAULT_ROLE_JSON_PATH = '$.payload.cognito:groups';
 const DEFAULT_OPERATOR_ROLE_NAMES = 'ClickstreamOperator';
 const DEFAULT_ANALYST_ROLE_NAMES = 'ClickstreamAnalyst';
+const DEFAULT_ANALYST_READER_ROLE_NAMES = 'ClickstreamAnalystReader';
 const PIPELINE_STACKS = 'PipelineStacks';
 
 export {
@@ -93,5 +94,6 @@ export {
   DEFAULT_ROLE_JSON_PATH,
   DEFAULT_OPERATOR_ROLE_NAMES,
   DEFAULT_ANALYST_ROLE_NAMES,
+  DEFAULT_ANALYST_READER_ROLE_NAMES,
   PIPELINE_STACKS,
 };

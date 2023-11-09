@@ -31,4 +31,5 @@ export interface IUserSettings {
   readonly roleJsonPath: string;
   readonly operatorRoleNames: string;
   readonly analystRoleNames: string;
+  readonly analystReaderRoleNames: string;
 }
