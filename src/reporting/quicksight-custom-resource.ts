@@ -334,7 +334,7 @@ export function createQuicksightCustomResource(
       awsPartition: Aws.PARTITION,
       quickSightNamespace: props.quickSightProps.namespace,
       quickSightUser: props.quickSightProps.userName,
-      quickSightPrincipalArn: props.quickSightProps.principalArn,
+      quickSightSharePrincipalArn: props.quickSightProps.sharePrincipalArn,
       quickSightOwnerPrincipalArn: props.quickSightProps.ownerPrincipalArn,
       schemas: props.redshiftProps.databaseSchemaNames,
       dashboardDefProps,

@@ -21,7 +21,7 @@ export interface RedShiftProps {
 export interface QuickSightProps {
   namespace: string;
   userName: string;
-  principalArn: string;
+  sharePrincipalArn: string;
   ownerPrincipalArn: string;
 };
 
@@ -39,7 +39,7 @@ export interface QuicksightCustomResourceLambdaProps {
   readonly awsPartition: string;
   readonly quickSightNamespace: string;
   readonly quickSightUser: string;
-  readonly quickSightPrincipalArn: string;
+  readonly quickSightSharePrincipalArn: string;
   readonly quickSightOwnerPrincipalArn: string;
   readonly schemas: string;
   readonly dashboardDefProps: QuickSightDashboardDefProps;
@@ -75,7 +75,7 @@ export interface QuickSightDashboardDefProps {
   dataSets: DataSetProps[];
 };
 
-export const dataSetPermissionActions = [
+export const dataSetReaderPermissionActions = [
   'quicksight:DescribeDataSet',
   'quicksight:DescribeDataSetPermissions',
   'quicksight:PassDataSet',
@@ -83,7 +83,26 @@ export const dataSetPermissionActions = [
   'quicksight:ListIngestions',
 ];
 
-export const analysisPermissionActions = [
+export const dataSetAdminPermissionActions = [
+  'quicksight:UpdateDataSetPermissions',
+  'quicksight:DescribeDataSet',
+  'quicksight:DescribeDataSetPermissions',
+  'quicksight:PassDataSet',
+  'quicksight:DescribeIngestion',
+  'quicksight:ListIngestions',
+  'quicksight:UpdateDataSet',
+  'quicksight:DeleteDataSet',
+  'quicksight:CreateIngestion',
+  'quicksight:CancelIngestion',
+];
+
+export const analysisReaderPermissionActions = [
+  'quicksight:DescribeAnalysis',
+  'quicksight:QueryAnalysis',
+  'quicksight:DescribeAnalysisPermissions',
+];
+
+export const analysisAdminPermissionActions = [
   'quicksight:DescribeAnalysis',
   'quicksight:UpdateAnalysisPermissions',
   'quicksight:QueryAnalysis',
@@ -93,10 +112,21 @@ export const analysisPermissionActions = [
   'quicksight:DescribeAnalysisPermissions',
 ];
 
-export const dashboardPermissionActions = [
+export const dashboardReaderPermissionActions = [
   'quicksight:DescribeDashboard',
   'quicksight:ListDashboardVersions',
   'quicksight:QueryDashboard',
+];
+
+export const dashboardAdminPermissionActions = [
+  'quicksight:DescribeDashboard',
+  'quicksight:ListDashboardVersions',
+  'quicksight:QueryDashboard',
+  'quicksight:UpdateDashboard',
+  'quicksight:DeleteDashboard',
+  'quicksight:UpdateDashboardPermissions',
+  'quicksight:DescribeDashboardPermissions',
+  'quicksight:UpdateDashboardPublishedVersion',
 ];
 
 function sleep(ms: number) {

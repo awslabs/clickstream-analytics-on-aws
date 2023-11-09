@@ -165,7 +165,7 @@ export class DataReportingQuickSightStack extends Stack {
       quickSightProps: {
         userName: stackParams.quickSightUserParam.valueAsString,
         namespace: stackParams.quickSightNamespaceParam.valueAsString,
-        principalArn: stackParams.quickSightPrincipalParam.valueAsString,
+        sharePrincipalArn: stackParams.quickSightPrincipalParam.valueAsString,
         ownerPrincipalArn: stackParams.quickSightOwnerPrincipalParam.valueAsString,
       },
       redshiftProps: {
