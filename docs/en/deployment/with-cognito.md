@@ -37,7 +37,7 @@ This AWS CloudFormation template automatically deploys the {{ solution_name }} s
 
         !!! info "Important"
             {%
-             include-markdown "tls-note.md"
+             include-markdown "./tls-note.md"
             %}
 
     - If you are launching the solution with custom domain in AWS regions, this solution uses the additional following parameters:

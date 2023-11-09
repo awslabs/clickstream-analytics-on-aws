@@ -1,0 +1,11 @@
+<script async src="https://github.com/awslabs/clickstream-web/releases/download/{{ config.extra.analytics.version }}/clickstream-web.min.js"></script>
+<script>
+    window.onload = function() {
+        window.ClickstreamAnalytics.init({
+            appId: '{{ config.extra.analytics.appId }}',
+            endpoint: '{{ config.extra.analytics.endpoint }}',
+            pageType: window.PageType.multiPageApp,
+        });
+    };
+</script>
+  

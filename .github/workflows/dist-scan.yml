@@ -4,13 +4,29 @@ on:
   workflow_dispatch: {}
 jobs:
   build-dist:
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.LARGE_RUNNER_S || 'ubuntu-latest' }}
+    permissions:
+      id-token: write
+      contents: read
+    env:
+      iam_role_to_assume: ${{ secrets.ROLE_ARN }}
     steps:
       - uses: actions/checkout@v3
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 16
+      - name: Configure AWS Credentials
+        if: ${{ env.iam_role_to_assume != '' }}
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: ${{ env.iam_role_to_assume }}
+          aws-region: us-east-1
+      - name: Login to Amazon ECR Public
+        if: ${{ env.iam_role_to_assume != '' }}
+        uses: aws-actions/amazon-ecr-login@v1
+        with:
+          registry-type: public
       - name: Test build dist
         run: |-
           chmod +x ./deployment/test-build-dist-1.sh

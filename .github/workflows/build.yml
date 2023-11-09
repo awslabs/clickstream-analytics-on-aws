@@ -6,15 +6,17 @@ on:
   workflow_dispatch: {}
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.LARGE_RUNNER_L || 'ubuntu-latest' }}
     permissions:
       contents: write
       checks: write
       pull-requests: write
+      id-token: write
     outputs:
       self_mutation_happened: ${{ steps.self_mutation.outputs.self_mutation_happened }}
     env:
       CI: "true"
+      iam_role_to_assume: ${{ secrets.ROLE_ARN }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -27,6 +29,17 @@ jobs:
           node-version: 16.18.0
       - name: Install dependencies
         run: yarn install --check-files
+      - name: Configure AWS Credentials
+        if: ${{ env.iam_role_to_assume != '' }}
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: ${{ env.iam_role_to_assume }}
+          aws-region: us-east-1
+      - name: Login to Amazon ECR Public
+        if: ${{ env.iam_role_to_assume != '' }}
+        uses: aws-actions/amazon-ecr-login@v1
+        with:
+          registry-type: public
       - name: build
         run: npx projen build
       - name: Publish Test Report
