@@ -272,7 +272,7 @@ const createQuickSightDashboard = async (quickSight: QuickSight,
     principalArn,
     databaseName,
     schema,
-  }
+  };
 
   const dashboard = await createDashboard(quickSight, commonParams, sourceEntity, dashboardDef);
   logger.info(`Dashboard ${dashboard?.DashboardId} creation completed.`);
@@ -341,7 +341,7 @@ const updateQuickSightDashboard = async (quickSight: QuickSight,
     principalArn,
     databaseName,
     schema,
-  }
+  };
 
   const dashboard = await updateDashboard(quickSight, commonParams, sourceEntity, dashboardDef);
   logger.info(`Dashboard ${dashboard?.DashboardId} creation completed.`);
@@ -494,7 +494,7 @@ const createAnalysis = async (quickSight: QuickSight, awsAccountId: string, prin
   }
 };
 
-const createDashboard = async (quickSight: QuickSight, commonParams: ResourceCommonParams, 
+const createDashboard = async (quickSight: QuickSight, commonParams: ResourceCommonParams,
   sourceEntity: DashboardSourceEntity, props: QuickSightDashboardDefProps)
 : Promise<CreateDashboardCommandOutput|undefined> => {
   try {
@@ -507,14 +507,13 @@ const createDashboard = async (quickSight: QuickSight, commonParams: ResourceCom
       DashboardId: dashboardId,
       Name: `${props.dashboardName} - ${identifier.schemaIdentifier} - ${identifier.databaseIdentifier} `,
       Permissions: [{
-          Principal: commonParams.ownerPrincipalArn,
-          Actions: dashboardPermissionActions,
-        },
-        {
-          Principal: commonParams.principalArn,
-          Actions: dashboardPermissionActions,
-        }
-      ],
+        Principal: commonParams.ownerPrincipalArn,
+        Actions: dashboardPermissionActions,
+      },
+      {
+        Principal: commonParams.principalArn,
+        Actions: dashboardPermissionActions,
+      }],
 
       SourceEntity: sourceEntity,
 
