@@ -11,6 +11,11 @@
  *  and limitations under the License.
  */
 
+interface VersionProps {
+  readonly full: string;
+  readonly short: string;
+  readonly buildId: string;
+};
 
 export class SolutionInfo {
 
@@ -19,30 +24,27 @@ export class SolutionInfo {
   static SOLUTION_SHORT_NAME = 'Clickstream';
   static SOLUTION_VERSION = process.env.SOLUTION_VERSION || 'v1.0.0';
   static SOLUTION_VERSION_DETAIL = versionDetail(SolutionInfo.SOLUTION_VERSION);
-  static SOLUTION_VERSION_SHORT = versionShort(SolutionInfo.SOLUTION_VERSION);
+  static SOLUTION_VERSION_SHORT = parseVersion(SolutionInfo.SOLUTION_VERSION).short;
   static DESCRIPTION = `(${SolutionInfo.SOLUTION_ID}) ${SolutionInfo.SOLUTION_NAME} ${SolutionInfo.SOLUTION_VERSION_DETAIL}`;
   static SOLUTION_TYPE = 'AWS-Solutions';
 }
 
-function versionDetail(version: string): string {
+function parseVersion(version: string): VersionProps {
   const versionPattern = /^(v\d+\.\d+\.\d+)-?(.*)/;
   const match = version.match(versionPattern);
 
   if (match) {
-    const buildId = match[2] ? `(Build ${match[2]})` : '';
-    return `(Version ${match[1]})${buildId}`;
+    return {
+      full: version,
+      short: match[1],
+      buildId: match[2],
+    };
   }
 
   throw new Error(`Illegal version string '${version}'.`);
 }
 
-function versionShort(version: string): string {
-  const versionPattern = /^(v\d+\.\d+\.\d+)-?(.*)/;
-  const match = version.match(versionPattern);
-
-  if (match) {
-    return match[1];
-  }
-
-  throw new Error(`Illegal version string '${version}'.`);
+export function versionDetail(version: string): string {
+  const { short, buildId } = parseVersion(version);
+  return `(Version ${short})${buildId ? `(Build ${buildId})` : ''}`;
 }
