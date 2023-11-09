@@ -32,6 +32,7 @@ import { EVENT_DISPLAY_PREFIX } from 'ts/const';
 import { MetadataSource } from 'ts/explore-types';
 import { defaultStr } from 'ts/utils';
 import MetadataPlatformFC from '../comps/MetadataPlatform';
+import MetadataSdkFC from '../comps/MetadataSDK';
 import MetadataSourceFC from '../comps/MetadataSource';
 import MetadataDetailsTable from '../table/MetadataDetailsTable';
 
@@ -331,6 +332,14 @@ const MetadataEventSplitPanel: React.FC<MetadataEventSplitPanelProps> = (
                 <StatusIndicator type={event.hasData ? 'success' : 'stopped'}>
                   {event.hasData ? 'Yes' : 'No'}
                 </StatusIndicator>
+              </div>
+            </div>
+            <div>
+              <Box variant="awsui-key-label">
+                {t('analytics:metadata.event.tableColumnSdkVersion')}
+              </Box>
+              <div className="mb-10">
+                <MetadataSdkFC sdkVersion={event.sdkVersion} />
               </div>
             </div>
           </ColumnLayout>

@@ -32,6 +32,8 @@ declare global {
     readonly metadataSource: MetadataSource;
     readonly hasData: boolean;
     readonly platform: MetadataPlatform[];
+    readonly sdkVersion: string[];
+    readonly sdkName: string[];
     readonly dataVolumeLastDay: number;
     readonly associatedParameters?: IMetadataEventParameter[];
 

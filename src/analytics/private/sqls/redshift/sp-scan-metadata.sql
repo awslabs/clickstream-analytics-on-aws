@@ -49,7 +49,9 @@ BEGIN
 		day_number BIGINT,
 		count BIGINT,
 		event_name VARCHAR(255),
-		platform VARCHAR(255)
+		platform VARCHAR(255),
+		sdk_version VARCHAR(255),
+		sdk_name VARCHAR(255)
   );    	
 
   CREATE TEMP TABLE IF NOT EXISTS properties_temp_table (
@@ -403,7 +405,7 @@ BEGIN
 	CALL {{schema}}.{{sp_clickstream_log}}(log_name, 'info', 'Insert all user attribute data into user_attribute_metadata table successfully.');
 
 	IF start_date IS NULL THEN
-		INSERT INTO {{schema}}.event_metadata (id, month, prefix, project_id, app_id, day_number, count, event_name, platform)
+		INSERT INTO {{schema}}.event_metadata (id, month, prefix, project_id, app_id, day_number, count, event_name, platform, sdk_version, sdk_name)
 		SELECT 
 				project_id || '#' || app_info_app_id || '#' || event_name AS id,
 				month,
@@ -413,24 +415,40 @@ BEGIN
 				day_number,
 				count,
 				event_name AS event_name,
-				platform AS platform
-		FROM ( 
+				platform AS platform,
+				sdk_version AS sdk_version,
+				sdk_name AS sdk_name
+		FROM (
+			SELECT
+					event_name,
+					project_id,
+					app_info_app_id,
+					month,
+					day_number,
+					LISTAGG(DISTINCT platform, '#') WITHIN GROUP (ORDER BY platform) AS platform,
+					LISTAGG(DISTINCT sdk_version, '#') WITHIN GROUP (ORDER BY platform) AS sdk_version,
+					LISTAGG(DISTINCT sdk_name, '#') WITHIN GROUP (ORDER BY platform) AS sdk_name,
+					count(*) as count
+			FROM (
 				SELECT
-						event_name,
-						project_id,
-						app_info.app_id::varchar AS app_info_app_id,
-						'#' || TO_CHAR(event_date::DATE, 'YYYYMM') AS month,
-						TO_CHAR(event_date::DATE, 'DD')::INTEGER AS day_number,
-						LISTAGG(DISTINCT platform, '#') WITHIN GROUP (ORDER BY platform) AS platform,
-						count(*) as count
-				FROM {{schema}}.event
+					event_name,
+					project_id,
+					app_info.app_id::varchar AS app_info_app_id,
+					'#' || TO_CHAR(event_date::DATE, 'YYYYMM') AS month,
+					TO_CHAR(event_date::DATE, 'DD')::INTEGER AS day_number,
+					platform,
+					app_info.sdk_version::varchar AS sdk_version,
+					app_info.sdk_name::varchar AS sdk_name
+				FROM
+					{{schema}}.event
 				WHERE 
 						event_date < end_date
 						AND event_name != '_' 
-				GROUP BY event_name, project_id, app_info_app_id, month, day_number  
+			)
+			GROUP BY event_name, project_id, app_info_app_id, month, day_number  
 		);
 	ELSE
-		INSERT INTO {{schema}}.event_metadata (id, month, prefix, project_id, app_id, day_number, count, event_name, platform)
+		INSERT INTO {{schema}}.event_metadata (id, month, prefix, project_id, app_id, day_number, count, event_name, platform, sdk_version, sdk_name)
 		SELECT 
 				project_id || '#' || app_info_app_id || '#' || event_name AS id,
 				month,
@@ -440,22 +458,38 @@ BEGIN
 				day_number,
 				count,
 				event_name AS event_name,
-				platform AS platform
-		FROM ( 
+				platform AS platform,
+				sdk_version AS sdk_version,
+				sdk_name AS sdk_name
+		FROM (
+			SELECT
+					event_name,
+					project_id,
+					app_info_app_id,
+					month,
+					day_number,
+					LISTAGG(DISTINCT platform, '#') WITHIN GROUP (ORDER BY platform) AS platform,
+					LISTAGG(DISTINCT sdk_version, '#') WITHIN GROUP (ORDER BY platform) AS sdk_version,
+					LISTAGG(DISTINCT sdk_name, '#') WITHIN GROUP (ORDER BY platform) AS sdk_name,
+					count(*) as count
+			FROM (
 				SELECT
-						event_name,
-						project_id,
-						app_info.app_id::varchar AS app_info_app_id,
-						'#' || TO_CHAR(event_date::DATE, 'YYYYMM') AS month,
-						TO_CHAR(event_date::DATE, 'DD')::INTEGER AS day_number,
-						LISTAGG(DISTINCT platform, '#') WITHIN GROUP (ORDER BY platform) AS platform,
-						count(*) as count
-				FROM {{schema}}.event
+					event_name,
+					project_id,
+					app_info.app_id::varchar AS app_info_app_id,
+					'#' || TO_CHAR(event_date::DATE, 'YYYYMM') AS month,
+					TO_CHAR(event_date::DATE, 'DD')::INTEGER AS day_number,
+					platform,
+					app_info.sdk_version::varchar AS sdk_version,
+					app_info.sdk_name::varchar AS sdk_name
+				FROM
+					{{schema}}.event
 				WHERE 
 						event_date >= start_date
 						AND event_date < end_date
-						AND event_name != '_' 
-				GROUP BY event_name, project_id, app_info_app_id, month, day_number  
+						AND event_name != '_' 						
+			)
+			GROUP BY event_name, project_id, app_info_app_id, month, day_number  
 		);
 	END IF;
 	CALL {{schema}}.{{sp_clickstream_log}}(log_name, 'info', 'Insert all event data into event_metadata table successfully.');	
