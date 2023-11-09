@@ -442,7 +442,7 @@ const createAnalysis = async (quickSight: QuickSight, awsAccountId: string, prin
     const identifier = buildAnalysisId(databaseName, schema);
     const analysisId = identifier.id;
 
-    logger.info('start to create analysis');
+    logger.info(`start to create analysis: ${analysisId}`);
     const analysis = await quickSight.createAnalysis({
       AwsAccountId: awsAccountId,
       AnalysisId: analysisId,
@@ -472,7 +472,7 @@ const createDashboard = async (quickSight: QuickSight, awsAccountId: string, pri
     const identifier = buildDashBoardId(databaseName, schema);
     const dashboardId = identifier.id;
 
-    logger.info('start to create dashboard');
+    logger.info(`start to create dashboard ${dashboardId}`);
     const dashboard = await quickSight.createDashboard({
       AwsAccountId: awsAccountId,
       DashboardId: dashboardId,
