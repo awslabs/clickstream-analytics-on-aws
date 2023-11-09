@@ -26,6 +26,8 @@ import {
   RouteTable, DescribeRegionsCommand,
   DescribeAvailabilityZonesCommand,
   Region,
+  paginateDescribeNatGateways,
+  NatGateway,
 } from '@aws-sdk/client-ec2';
 
 import { SecurityGroupRule } from '@aws-sdk/client-ec2/dist-types/models/models_0';
@@ -104,6 +106,22 @@ export const describeSubnets = async (region: string, vpcId: string) => {
   }];
   for await (const page of paginateDescribeSubnets({ client: ec2Client }, { Filters: filters })) {
     records.push(...page.Subnets as Subnet[]);
+  }
+  return records;
+};
+
+export const describeNatGateways = async (region: string, vpcId: string) => {
+  const ec2Client = new EC2Client({
+    ...aws_sdk_client_common_config,
+    region,
+  });
+  const records: NatGateway[] = [];
+  const filters: Filter[] = [{
+    Name: 'vpc-id',
+    Values: [vpcId],
+  }];
+  for await (const page of paginateDescribeNatGateways({ client: ec2Client }, { Filter: filters })) {
+    records.push(...page.NatGateways as NatGateway[]);
   }
   return records;
 };

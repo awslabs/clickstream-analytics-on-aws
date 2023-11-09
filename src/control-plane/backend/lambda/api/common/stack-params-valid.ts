@@ -11,14 +11,14 @@
  *  and limitations under the License.
  */
 
-import { SecurityGroupRule, VpcEndpoint } from '@aws-sdk/client-ec2';
+import { ConnectivityType, NatGateway, SecurityGroupRule, VpcEndpoint } from '@aws-sdk/client-ec2';
 import { CronDate, parseExpression } from 'cron-parser';
 import { XSS_PATTERN } from './constants-ln';
 import { REDSHIFT_MODE } from './model-ln';
 import { ClickStreamBadRequestError, ClickStreamSubnet, IngestionServerSinkBatchProps, IngestionServerSizeProps, PipelineSinkType, Policy, SubnetType } from './types';
 import { checkVpcEndpoint, containRule, getALBLogServiceAccount, getServerlessRedshiftRPU, getSubnetsAZ, isEmpty } from './utils';
 import { CPipelineResources, IPipeline } from '../model/pipeline';
-import { describeSecurityGroupsWithRules, describeSubnetsWithType, describeVpcEndpoints, listAvailabilityZones } from '../store/aws/ec2';
+import { describeNatGateways, describeSecurityGroupsWithRules, describeSubnetsWithType, describeVpcEndpoints, listAvailabilityZones } from '../store/aws/ec2';
 import { simulateCustomPolicy } from '../store/aws/iam';
 import { describeAccountSubscription } from '../store/aws/quicksight';
 import { getS3BucketPolicy } from '../store/aws/s3';
@@ -138,18 +138,21 @@ export const validateIngestionServerNum = (serverSize: IngestionServerSizeProps)
   return true;
 };
 
-const validateVpcEndpoint = (region: string,
+const getVpcEndpointServices = (region: string, services: string[]) => {
+  let prefix = `com.amazonaws.${region}`;
+  if (region.startsWith('cn')) {
+    prefix = `cn.${prefix}`;
+  }
+  return services.map(s => `${prefix}.${s}`);
+};
+
+const validateVpcEndpoint = (
   allSubnets: ClickStreamSubnet[],
   isolatedSubnetsAZ: string[],
   subnet: ClickStreamSubnet,
   vpcEndpoints: VpcEndpoint[],
   securityGroupsRules: SecurityGroupRule[],
   services: string[]) => {
-  let prefix = `com.amazonaws.${region}`;
-  if (region.startsWith('cn')) {
-    prefix = 'cn.com.amazonaws.cn-northwest-1';
-  }
-  services = services.map(s => `${prefix}.${s}`);
   const invalidServices = checkVpcEndpoint(
     allSubnets,
     isolatedSubnetsAZ,
@@ -389,33 +392,41 @@ async function _checkForRedshiftServerless(redshiftType: string, pipeline: IPipe
 }
 
 async function _checkVpcEndpointsForIsolatedSubnets(pipeline: IPipeline, vpcId: string,
-  privateSubnets: ClickStreamSubnet[], allSubnets: ClickStreamSubnet[]) {
-  const isolatedSubnets = privateSubnets.filter(subnet => subnet.type == SubnetType.ISOLATED);
-  if (isolatedSubnets.length > 0) {
-    const isolatedSubnetsAZ = getSubnetsAZ(isolatedSubnets);
-    const vpcEndpoints = await describeVpcEndpoints(pipeline.region, vpcId);
-    const vpcEndpointSecurityGroups: string[] = _getEndpointSecurityGroups(vpcEndpoints);
+  selectedPrivateSubnets: ClickStreamSubnet[], allSubnets: ClickStreamSubnet[]) {
+  const vpcEndpoints = await describeVpcEndpoints(pipeline.region, vpcId);
+  const vpcEndpointSecurityGroups: string[] = _getEndpointSecurityGroups(vpcEndpoints);
+  const vpcEndpointSecurityGroupRules = await describeSecurityGroupsWithRules(pipeline.region, vpcEndpointSecurityGroups);
 
-    const vpcEndpointSecurityGroupRules = await describeSecurityGroupsWithRules(pipeline.region, vpcEndpointSecurityGroups);
+  const isolatedSubnets = selectedPrivateSubnets.filter(subnet => subnet.type == SubnetType.ISOLATED);
+  const isolatedSubnetsAZ = getSubnetsAZ(isolatedSubnets);
+  const privateSubnets = selectedPrivateSubnets.filter(subnet => subnet.type == SubnetType.PRIVATE);
+  const privateSubnetsAZ = getSubnetsAZ(privateSubnets);
 
-    for (let privateSubnet of privateSubnets) {
-      if (privateSubnet.type === SubnetType.ISOLATED) {
-        validateVpcEndpoint(
-          pipeline.region,
-          allSubnets,
-          isolatedSubnetsAZ,
-          privateSubnet,
-          vpcEndpoints,
-          vpcEndpointSecurityGroupRules,
-          [
-            's3',
-            'logs',
-          ]);
-        _validateEndpointsForModules(pipeline, allSubnets, isolatedSubnetsAZ, privateSubnet, vpcEndpoints, vpcEndpointSecurityGroupRules);
-      }
+  for (let selectedPrivateSubnet of selectedPrivateSubnets) {
+    if (selectedPrivateSubnet.type === SubnetType.ISOLATED) {
+      validateVpcEndpoint(
+        allSubnets,
+        isolatedSubnetsAZ,
+        selectedPrivateSubnet,
+        vpcEndpoints,
+        vpcEndpointSecurityGroupRules,
+        getVpcEndpointServices(pipeline.region, ['s3', 'logs']),
+      );
+      _validateEndpointsForModules(pipeline, allSubnets, isolatedSubnetsAZ, selectedPrivateSubnet, vpcEndpoints, vpcEndpointSecurityGroupRules);
+    } else {
+      const vpcEndpointServices = vpcEndpoints.map(vpce => vpce.ServiceName!);
+      validateVpcEndpoint(
+        allSubnets,
+        privateSubnetsAZ,
+        selectedPrivateSubnet,
+        vpcEndpoints,
+        vpcEndpointSecurityGroupRules,
+        vpcEndpointServices,
+      );
     }
   }
 }
+
 
 function _validateEndpointsForModules(pipeline: IPipeline, allSubnets: ClickStreamSubnet[], isolatedSubnetsAZ: string[],
   privateSubnet: ClickStreamSubnet, vpcEndpoints: VpcEndpoint[], vpcEndpointSecurityGroupRules: SecurityGroupRule[]) {
@@ -431,40 +442,33 @@ function _validateEndpointsForModules(pipeline: IPipeline, allSubnets: ClickStre
       services.push('kinesis-streams');
     }
     validateVpcEndpoint(
-      pipeline.region,
       allSubnets,
       isolatedSubnetsAZ,
       privateSubnet,
       vpcEndpoints,
       vpcEndpointSecurityGroupRules,
-      services);
+      getVpcEndpointServices(pipeline.region, services),
+    );
   }
   if (pipeline.dataProcessing) {
     validateVpcEndpoint(
-      pipeline.region,
       allSubnets,
       isolatedSubnetsAZ,
       privateSubnet,
       vpcEndpoints,
       vpcEndpointSecurityGroupRules,
-      [
-        'emr-serverless',
-        'glue',
-      ]);
+      getVpcEndpointServices(pipeline.region, ['emr-serverless', 'glue']),
+    );
   }
   if (pipeline.dataModeling) {
-    validateVpcEndpoint(pipeline.region,
+    validateVpcEndpoint(
       allSubnets,
       isolatedSubnetsAZ,
       privateSubnet,
       vpcEndpoints,
       vpcEndpointSecurityGroupRules,
-      [
-        'redshift-data',
-        'states',
-        'sts',
-        'dynamodb',
-      ]);
+      getVpcEndpointServices(pipeline.region, ['redshift-data', 'states', 'sts', 'dynamodb']),
+    );
   }
 }
 
@@ -510,9 +514,37 @@ async function _checkSubnets(pipeline: IPipeline) {
       'For example, you can not select public subnets in AZ (a, b), while select private subnets in AZ (b, c).',
     );
   }
+  const natGateways = await describeNatGateways(pipeline.region, network.vpcId);
+
+  if (!_checkNatGatewayInPublicSubnet(natGateways, privateSubnets)) {
+    throw new ClickStreamBadRequestError(
+      'Validate error: the NAT gateway must create in public subnet.',
+    );
+  }
 
   return {
     allSubnets,
     privateSubnets,
   };
+}
+
+function _checkNatGatewayInPublicSubnet(natGateways: NatGateway[], privateSubnets: ClickStreamSubnet[]) {
+  const allSubnetNatGatewayIds: string[] = [];
+  for (let privateSubnet of privateSubnets) {
+    if (privateSubnet.routeTable) {
+      for (let route of privateSubnet.routeTable.Routes!) {
+        if (route.NatGatewayId) {
+          allSubnetNatGatewayIds.push(route.NatGatewayId);
+        }
+      }
+    }
+  }
+  const privateSubnetNatGateways = natGateways.filter(natGateway => allSubnetNatGatewayIds.includes(natGateway.NatGatewayId!));
+  for (let natGateway of privateSubnetNatGateways) {
+    const natInPrivateSubnet = privateSubnets.filter(subnet => subnet.id === natGateway.SubnetId);
+    if (natGateway.ConnectivityType === ConnectivityType.PRIVATE || natInPrivateSubnet.length > 0) {
+      return false;
+    }
+  }
+  return true;
 }
