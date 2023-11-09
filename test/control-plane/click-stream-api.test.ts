@@ -313,6 +313,90 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
     });
   });
 
+  test('QuickSight Embedding role', () => {
+    const roleNames = [
+      'testClickStreamALBApiBatchInsertDDBCustomResourceDicInitCustomResourceRoleD2CDF2CF',
+      'testClickStreamALBApiBatchInsertDDBCustomResourceDicInitCustomResourceProviderframeworkonEventServiceRole256DF90A',
+      'testClickStreamALBApiStackActionStateMachineActionFunctionRoleB3901335',
+      'testClickStreamALBApiStackActionStateMachineRoleE114EFCD',
+      'testClickStreamALBApiStackWorkflowStateMachineWorkflowFunctionRole15F382D1',
+      'testClickStreamALBApiStackWorkflowStateMachineRole7E1D20E5',
+      'testClickStreamALBApiClickStreamApiFunctionRoleAE8AB92D',
+      'testClickStreamALBApiUploadRoleD732B7C0',
+      'LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRole9741ECFB',
+      'AWS679f53fac002430cb0da5b7982bd2287ServiceRoleC1EA0FF2',
+    ];
+    expect(findResourcesName(newALBApiStackTemplate, 'AWS::IAM::Role').sort())
+      .toEqual([
+        ...roleNames,
+        'testClickStreamALBApiQuickSightEmbedRole6CE59BC9',
+      ].sort());
+    expect(findResourcesName(newALBApiStackCNTemplate, 'AWS::IAM::Role').sort())
+      .toEqual(roleNames.sort());
+    newALBApiStackTemplate.hasResourceProperties('AWS::IAM::Role', {
+      AssumeRolePolicyDocument: {
+        Statement: [
+          {
+            Action: 'sts:AssumeRole',
+            Effect: 'Allow',
+            Principal: {
+              Service: 'lambda.amazonaws.com',
+            },
+          },
+        ],
+        Version: '2012-10-17',
+      },
+      Policies: [
+        {
+          PolicyDocument: {
+            Statement: [
+              {
+                Action: 'quicksight:GenerateEmbedUrlForRegisteredUser',
+                Effect: 'Allow',
+                Resource: [
+                  {
+                    'Fn::Join': [
+                      '',
+                      [
+                        'arn:',
+                        {
+                          Ref: 'AWS::Partition',
+                        },
+                        ':quicksight:*:',
+                        {
+                          Ref: 'AWS::AccountId',
+                        },
+                        ':dashboard/Clickstream*',
+                      ],
+                    ],
+                  },
+                  {
+                    'Fn::Join': [
+                      '',
+                      [
+                        'arn:',
+                        {
+                          Ref: 'AWS::Partition',
+                        },
+                        ':quicksight:*:',
+                        {
+                          Ref: 'AWS::AccountId',
+                        },
+                        ':user/*',
+                      ],
+                    ],
+                  },
+                ],
+              },
+            ],
+            Version: '2012-10-17',
+          },
+          PolicyName: 'quickSightEmbedPolicy',
+        },
+      ],
+    });
+  });
+
   test('IAM Resource for Api Lambda', () => {
     // Creates the function's execution role...
     newALBApiStackTemplate.hasResourceProperties('AWS::IAM::Role', {
