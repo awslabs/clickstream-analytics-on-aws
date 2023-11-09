@@ -24,6 +24,7 @@ import {
 } from './common/cfn-nag';
 import { OUTPUT_DATA_PROCESSING_EMR_SERVERLESS_APPLICATION_ID_SUFFIX, OUTPUT_DATA_PROCESSING_GLUE_DATABASE_SUFFIX, OUTPUT_DATA_PROCESSING_GLUE_EVENT_PARAMETER_TABLE_SUFFIX, OUTPUT_DATA_PROCESSING_GLUE_EVENT_TABLE_SUFFIX, OUTPUT_DATA_PROCESSING_GLUE_ITEM_TABLE_SUFFIX, OUTPUT_DATA_PROCESSING_GLUE_USER_TABLE_SUFFIX } from './common/constant';
 import { SolutionInfo } from './common/solution-info';
+import { associateApplicationWithStack } from './common/stack';
 import { getExistVpc } from './common/vpc-utils';
 import { ClickstreamSinkTables, DataPipelineConstruct, DataPipelineProps } from './data-pipeline/data-pipeline';
 import { createStackParameters } from './data-pipeline/parameter';
@@ -238,6 +239,9 @@ export class DataPipelineStack extends Stack {
       description: 'EMR Serverless Application Id',
       value: dataPipelineStackWithoutCustomPlugins.emrServerlessApplicationId,
     }).condition = withoutCustomPluginsCondition;
+
+    // Associate Service Catalog AppRegistry application with stack
+    associateApplicationWithStack(this);
   }
 }
 

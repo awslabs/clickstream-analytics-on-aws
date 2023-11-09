@@ -14,7 +14,11 @@
 import { Parameter } from '@aws-sdk/client-cloudformation';
 import { JSONObject } from 'ts-json-object';
 import { CPipelineResources, IPipeline } from './pipeline';
-import { analyticsMetadataTable, awsAccountId, awsRegion } from '../common/constants';
+import {
+  analyticsMetadataTable,
+  awsAccountId,
+  awsRegion,
+} from '../common/constants';
 import {
   CORS_PATTERN,
   DOMAIN_NAME_PATTERN, MULTI_EMAIL_PATTERN,
@@ -51,7 +55,16 @@ import {
   PipelineStackType,
   ProjectEnvironment,
 } from '../common/types';
-import { getBucketPrefix, getKafkaTopic, getPluginInfo, isEmpty, getValueFromStackOutputSuffix, isEmail, corsStackInput } from '../common/utils';
+import {
+  getBucketPrefix,
+  getKafkaTopic,
+  getPluginInfo,
+  isEmpty,
+  getValueFromStackOutputSuffix,
+  isEmail,
+  corsStackInput,
+  getAppRegistryApplicationArn,
+} from '../common/utils';
 
 export function getStackParameters(stack: JSONObject): Parameter[] {
   const parameters: Parameter[] = [];
@@ -355,6 +368,10 @@ export class CIngestionServerStack extends JSONObject {
   })
     KinesisDataS3Prefix?: string;
 
+  @JSONObject.optional('')
+    AppRegistryApplicationArn?: string;
+
+
   constructor(pipeline: IPipeline, resources: CPipelineResources) {
     if (pipeline.ingestionServer.sinkBatch) {
       validateSinkBatch(pipeline.ingestionServer.sinkType, pipeline.ingestionServer.sinkBatch);
@@ -414,6 +431,8 @@ export class CIngestionServerStack extends JSONObject {
       KinesisMaxBatchingWindowSeconds: pipeline.ingestionServer.sinkBatch?.intervalSeconds,
       KinesisDataS3Bucket: pipeline.ingestionServer.sinkKinesis?.sinkBucket.name ?? pipeline.bucket.name,
       KinesisDataS3Prefix: getBucketPrefix(pipeline.projectId, BucketPrefix.DATA_BUFFER, pipeline.ingestionServer.sinkKinesis?.sinkBucket.prefix),
+      // Service Catalog AppRegistry
+      AppRegistryApplicationArn: getAppRegistryApplicationArn(pipeline),
     });
   }
 }
@@ -543,6 +562,9 @@ export class CKafkaConnectorStack extends JSONObject {
   @JSONObject.lte(50000)
     FlushSize?: number;
 
+  @JSONObject.optional('')
+    AppRegistryApplicationArn?: string;
+
   constructor(pipeline: IPipeline, resources: CPipelineResources) {
     if (pipeline.ingestionServer.sinkBatch) {
       validateSinkBatch(pipeline.ingestionServer.sinkType, pipeline.ingestionServer.sinkBatch);
@@ -572,9 +594,11 @@ export class CKafkaConnectorStack extends JSONObject {
 
       RotateIntervalMS: pipeline.ingestionServer.sinkBatch?.intervalSeconds ? pipeline.ingestionServer.sinkBatch?.intervalSeconds * 1000 : 3000000,
       FlushSize: pipeline.ingestionServer.sinkBatch?.size ?? 50000,
+
+      // Service Catalog AppRegistry
+      AppRegistryApplicationArn: getAppRegistryApplicationArn(pipeline),
     });
   }
-
 }
 
 export class CDataProcessingStack extends JSONObject {
@@ -716,6 +740,8 @@ export class CDataProcessingStack extends JSONObject {
   @JSONObject.optional('parquet')
     OutputFormat?: string;
 
+  @JSONObject.optional('')
+    AppRegistryApplicationArn?: string;
 
   constructor(pipeline: IPipeline, resources: CPipelineResources) {
     const pluginInfo = getPluginInfo(pipeline, resources);
@@ -743,6 +769,9 @@ export class CDataProcessingStack extends JSONObject {
       S3PathPluginJars: pluginInfo.s3PathPluginJars.join(','),
       S3PathPluginFiles: pluginInfo.s3PathPluginFiles.join(','),
       OutputFormat: pipeline.dataProcessing?.outputFormat,
+
+      // Service Catalog AppRegistry
+      AppRegistryApplicationArn: getAppRegistryApplicationArn(pipeline),
     });
   }
 }
@@ -981,6 +1010,9 @@ export class CDataModelingStack extends JSONObject {
   @JSONObject.optional('')
     ClickstreamAnalyticsMetadataDdbArn?: string;
 
+  @JSONObject.optional('')
+    AppRegistryApplicationArn?: string;
+
   constructor(pipeline: IPipeline, resources: CPipelineResources) {
     if (pipeline.dataModeling?.redshift?.provisioned) {
       if (isEmpty(pipeline.dataModeling?.redshift?.provisioned.clusterIdentifier) ||
@@ -1026,7 +1058,8 @@ export class CDataModelingStack extends JSONObject {
         OUTPUT_DATA_PROCESSING_EMR_SERVERLESS_APPLICATION_ID_SUFFIX,
       ),
       ClickstreamAnalyticsMetadataDdbArn: `arn:${partition}:dynamodb:${awsRegion}:${awsAccountId}:table/${analyticsMetadataTable}`,
-
+      // Service Catalog AppRegistry
+      AppRegistryApplicationArn: getAppRegistryApplicationArn(pipeline),
     });
   }
 }
@@ -1127,6 +1160,9 @@ export class CReportingStack extends JSONObject {
   @JSONObject.optional('')
     RedshiftParameterKeyParam?: string;
 
+  @JSONObject.optional('')
+    AppRegistryApplicationArn?: string;
+
   constructor(pipeline: IPipeline, resources: CPipelineResources) {
     if (!pipeline.dataModeling) {
       throw new ClickStreamBadRequestError('To open a QuickSight report,it must enable the Data Analytics engine first.');
@@ -1147,7 +1183,8 @@ export class CReportingStack extends JSONObject {
         PipelineStackType.DATA_MODELING_REDSHIFT,
         OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_CREDENTIAL_PARAMETER_SUFFIX,
       ),
-
+      // Service Catalog AppRegistry
+      AppRegistryApplicationArn: getAppRegistryApplicationArn(pipeline),
     });
   }
 }
@@ -1165,6 +1202,8 @@ export class CAthenaStack extends JSONObject {
   @JSONObject.required
     AthenaEventTable?: string;
 
+  @JSONObject.optional('')
+    AppRegistryApplicationArn?: string;
 
   constructor(pipeline: IPipeline) {
     super({
@@ -1178,6 +1217,8 @@ export class CAthenaStack extends JSONObject {
         PipelineStackType.DATA_PROCESSING,
         OUTPUT_DATA_PROCESSING_GLUE_EVENT_TABLE_SUFFIX,
       ),
+      // Service Catalog AppRegistry
+      AppRegistryApplicationArn: getAppRegistryApplicationArn(pipeline),
     });
   }
 }
@@ -1213,6 +1254,9 @@ export class CMetricsStack extends JSONObject {
   @JSONObject.optional('1')
     Version?: string;
 
+  @JSONObject.optional('')
+    AppRegistryApplicationArn?: string;
+
   constructor(pipeline: IPipeline, resources: CPipelineResources) {
     const projectEmails = resources.project?.emails?.split(',');
     const operators = pipeline.operator.split(',');
@@ -1223,6 +1267,18 @@ export class CMetricsStack extends JSONObject {
     super({
       ProjectId: pipeline.projectId,
       Emails: uniqueEmails?.join(','),
+      AppRegistryApplicationArn: getAppRegistryApplicationArn(pipeline),
+    });
+  }
+}
+
+export class CAppRegistryStack extends JSONObject {
+  @JSONObject.required
+    ProjectId?: string;
+
+  constructor(pipeline: IPipeline) {
+    super({
+      ProjectId: pipeline.projectId,
     });
   }
 }

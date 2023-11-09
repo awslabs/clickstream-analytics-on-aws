@@ -1235,7 +1235,7 @@ test('Check there are Kinesis Arn outputs in Kinesis', () => {
 
 });
 
-test('Check there is no Kinesis outputs in S3 tempalte', () => {
+test('Check there is no Kinesis outputs in S3 template', () => {
   const template = s3Template.toJSON();
 
   const kinesisArnOutput = template.Outputs && Object.keys(template.Outputs).find(key => key.indexOf('KinesisArn') !== -1);
@@ -1243,3 +1243,55 @@ test('Check there is no Kinesis outputs in S3 tempalte', () => {
   expect(kinesisArnOutput).toBeUndefined();
 });
 
+test('Should has Parameter AppRegistryApplicationArn', () => {
+  s3Template.hasParameter('AppRegistryApplicationArn', {
+    Type: 'String',
+  });
+});
+
+test('Should has ApplicationArnCondition', () => {
+  s3Template.hasCondition('ApplicationArnCondition', {
+    'Fn::Not': [
+      {
+        'Fn::Equals': [
+          {
+            Ref: 'AppRegistryApplicationArn',
+          },
+          '',
+        ],
+      },
+    ],
+  });
+});
+
+test('Should has AppRegistryAssociation', () => {
+  s3Template.hasResourceProperties('AWS::ServiceCatalogAppRegistry::ResourceAssociation', {
+    Application: {
+      'Fn::Select': [
+        2,
+        {
+          'Fn::Split': [
+            '/',
+            {
+              'Fn::Select': [
+                5,
+                {
+                  'Fn::Split': [
+                    ':',
+                    {
+                      Ref: 'AppRegistryApplicationArn',
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+    Resource: {
+      Ref: 'AWS::StackId',
+    },
+    ResourceType: 'CFN_STACK',
+  });
+});

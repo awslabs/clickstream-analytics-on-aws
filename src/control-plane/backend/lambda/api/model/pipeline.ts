@@ -17,8 +17,22 @@ import { v4 as uuidv4 } from 'uuid';
 import { IDictionary } from './dictionary';
 import { IPlugin } from './plugin';
 import { IProject } from './project';
-import { CAthenaStack, CDataModelingStack, CDataProcessingStack, CIngestionServerStack, CKafkaConnectorStack, CMetricsStack, CReportingStack, getStackParameters } from './stacks';
-import { awsUrlSuffix, stackWorkflowS3Bucket } from '../common/constants';
+import {
+  CAppRegistryStack,
+  CAthenaStack,
+  CDataModelingStack,
+  CDataProcessingStack,
+  CIngestionServerStack,
+  CKafkaConnectorStack,
+  CMetricsStack,
+  CReportingStack,
+  getStackParameters,
+} from './stacks';
+import {
+  awsUrlSuffix,
+  PIPELINE_STACKS,
+  stackWorkflowS3Bucket,
+} from '../common/constants';
 import {
   MULTI_APP_ID_PATTERN,
   PROJECT_ID_PATTERN,
@@ -26,20 +40,28 @@ import {
 } from '../common/constants-ln';
 import { BuiltInTagKeys } from '../common/model-ln';
 import { SolutionInfo } from '../common/solution-info-ln';
-import { validatePattern, validateSecretModel, validatePipelineNetwork, validateIngestionServerNum } from '../common/stack-params-valid';
+import {
+  validateIngestionServerNum,
+  validatePattern,
+  validatePipelineNetwork,
+  validateSecretModel,
+} from '../common/stack-params-valid';
 import {
   ClickStreamBadRequestError,
+  IngestionServerSinkBatchProps,
+  IngestionServerSizeProps,
   KinesisStreamMode,
   PipelineServerProtocol,
-  PipelineSinkType, PipelineStackType,
+  PipelineSinkType,
+  PipelineStackType,
   PipelineStatus,
+  PipelineStatusType,
   RedshiftInfo,
   WorkflowParallelBranch,
   WorkflowState,
   WorkflowStateType,
   WorkflowTemplate,
   WorkflowVersion,
-  IngestionServerSinkBatchProps, PipelineStatusType, IngestionServerSizeProps,
 } from '../common/types';
 import { getStackName, isEmpty } from '../common/utils';
 import { StackManager } from '../service/stack';
@@ -268,8 +290,7 @@ export class CPipeline {
       throw new ClickStreamBadRequestError('Pipeline Workflow can not empty.');
     }
     this.pipeline.lastAction = 'Update';
-    const executionName = `main-${uuidv4()}`;
-    this.pipeline.executionName = executionName;
+    this.pipeline.executionName = `main-${uuidv4()}`;
 
     this.pipeline.status = await this.stackManager.getPipelineStatus();
     if (this.pipeline.status.status === PipelineStatusType.CREATING ||
@@ -590,32 +611,86 @@ export class CPipeline {
   public async generateWorkflow(): Promise<WorkflowTemplate> {
     await this.resourcesCheck();
 
-    const workflowTemplate: WorkflowTemplate = {
+    return {
       Version: WorkflowVersion.V20220315,
-      Workflow: {
-        Type: WorkflowStateType.PARALLEL,
-        End: true,
-        Branches: [],
-      },
+      Workflow: await this.generateAppRegistryWorkflow(),
+    };
+  }
+
+  private async generatePipelineStacksWorkflow(): Promise<WorkflowState> {
+    const state: WorkflowState = {
+      Type: WorkflowStateType.PARALLEL,
+      End: true,
+      Branches: [],
     };
 
     if (!isEmpty(this.pipeline.ingestionServer)) {
       const branch = await this.getWorkflowStack(PipelineStackType.INGESTION);
       if (branch) {
-        workflowTemplate.Workflow.Branches?.push(branch);
+        state.Branches?.push(branch);
       }
     }
+
     if (!isEmpty(this.pipeline.dataProcessing)) {
       const branch = await this.getWorkflowStack(PipelineStackType.DATA_PROCESSING);
       if (branch) {
-        workflowTemplate.Workflow.Branches?.push(branch);
+        state.Branches?.push(branch);
       }
     }
+
     const metricsBranch = await this.getWorkflowStack(PipelineStackType.METRICS);
     if (metricsBranch) {
-      workflowTemplate.Workflow.Branches?.push(metricsBranch);
+      state.Branches?.push(metricsBranch);
     }
-    return workflowTemplate;
+
+    return state;
+  }
+
+  private async generateAppRegistryWorkflow(): Promise<WorkflowState> {
+    if (!stackWorkflowS3Bucket) {
+      throw new ClickStreamBadRequestError('Stack Workflow S3Bucket can not empty.');
+    }
+
+    const appRegistryTemplateURL = await this.getTemplateUrl(PipelineStackType.APP_REGISTRY);
+    if (!appRegistryTemplateURL) {
+      throw new ClickStreamBadRequestError('Template: AppRegistry not found in dictionary.');
+    }
+
+    const appRegistryStack = new CAppRegistryStack(this.pipeline);
+    const appRegistryParameters = getStackParameters(appRegistryStack);
+    const appRegistryStackName = getStackName(this.pipeline.pipelineId, PipelineStackType.APP_REGISTRY, this.pipeline.ingestionServer.sinkType);
+    const appRegistryState: WorkflowState = {
+      Type: WorkflowStateType.STACK,
+      Data: {
+        Input: {
+          Action: 'Create',
+          Region: this.pipeline.region,
+          StackName: appRegistryStackName,
+          TemplateURL: appRegistryTemplateURL,
+          Parameters: appRegistryParameters,
+          Tags: this.stackTags,
+        },
+        Callback: {
+          BucketName: stackWorkflowS3Bucket,
+          BucketPrefix: `clickstream/workflow/${this.pipeline.executionName}`,
+        },
+      },
+      Next: PIPELINE_STACKS,
+    };
+
+    return {
+      Type: WorkflowStateType.PARALLEL,
+      End: true,
+      Branches: [
+        {
+          StartAt: PipelineStackType.APP_REGISTRY,
+          States: {
+            [PipelineStackType.APP_REGISTRY]: appRegistryState,
+            [PIPELINE_STACKS]: await this.generatePipelineStacksWorkflow(),
+          },
+        },
+      ],
+    };
   }
 
   private async getWorkflowStack(type: PipelineStackType): Promise<WorkflowParallelBranch | undefined> {

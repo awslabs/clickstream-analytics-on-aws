@@ -99,6 +99,7 @@ src/control-plane/backend/lambda/api/test/api/ddb-mock.ts:57
 src/control-plane/backend/lambda/api/test/api/ddb-mock.ts:58
 src/control-plane/backend/lambda/api/test/api/ddb-mock.ts:59
 src/control-plane/backend/lambda/api/test/api/ddb-mock.ts:60
+src/control-plane/backend/lambda/api/test/api/ddb-mock.ts:61
 src/control-plane/backend/lambda/api/common/constants.ts:14
 
 [node-yarnoutdated]

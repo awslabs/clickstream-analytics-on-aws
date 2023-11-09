@@ -13,6 +13,7 @@
 
 import { SecurityGroupRule } from '@aws-sdk/client-ec2';
 import { MOCK_APP_ID, MOCK_PROJECT_ID } from './ddb-mock';
+import { S3_INGESTION_PIPELINE } from './pipeline-mock';
 import {
   MULTI_APP_ID_PATTERN,
   DOMAIN_NAME_PATTERN,
@@ -31,7 +32,7 @@ import {
 } from '../../common/constants-ln';
 import { validateDataProcessingInterval, validatePattern, validateSinkBatch, validateXSS } from '../../common/stack-params-valid';
 import { ClickStreamBadRequestError, PipelineSinkType } from '../../common/types';
-import { containRule, corsStackInput, isEmpty } from '../../common/utils';
+import { containRule, corsStackInput, getAppRegistryApplicationArn, isEmpty } from '../../common/utils';
 
 describe('Utils test', () => {
 
@@ -758,4 +759,16 @@ describe('Network test', () => {
     invalidValues.forEach(v => expect(validateXSS(v)).toEqual(false));
   });
 
+  it('Get valid Service Catalog AppRegistry application arn', () => {
+    expect(getAppRegistryApplicationArn(S3_INGESTION_PIPELINE))
+      .toEqual('#.Clickstream-ServiceCatalogAppRegistry-6666-6666.ServiceCatalogAppRegistryApplicationArn');
+  });
+
+  it('Return empty string as Service Catalog AppRegistry application arn', () => {
+    const pipeline = {
+      ...S3_INGESTION_PIPELINE,
+      region: 'cn-north-1',
+    };
+    expect(getAppRegistryApplicationArn(pipeline)).toEqual('');
+  });
 });

@@ -270,6 +270,11 @@ describe('DataReportingQuickSightStack parameter test', () => {
     }
   });
 
+  test('Should has Parameter AppRegistryApplicationArn', () => {
+    template.hasParameter('AppRegistryApplicationArn', {
+      Type: 'String',
+    });
+  });
 });
 
 describe('DataReportingQuickSightStack resource test', () => {
@@ -1636,5 +1641,52 @@ describe('DataReportingQuickSightStack resource test', () => {
         ],
       },
     }, 1);
+
+  test('Should has ApplicationArnCondition', () => {
+    template.hasCondition('ApplicationArnCondition', {
+      'Fn::Not': [
+        {
+          'Fn::Equals': [
+            {
+              Ref: 'AppRegistryApplicationArn',
+            },
+            '',
+          ],
+        },
+      ],
+    });
+  });
+
+  test('Should has AppRegistryAssociation', () => {
+    template.hasResourceProperties('AWS::ServiceCatalogAppRegistry::ResourceAssociation', {
+      Application: {
+        'Fn::Select': [
+          2,
+          {
+            'Fn::Split': [
+              '/',
+              {
+                'Fn::Select': [
+                  5,
+                  {
+                    'Fn::Split': [
+                      ':',
+                      {
+                        Ref: 'AppRegistryApplicationArn',
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+      Resource: {
+        Ref: 'AWS::StackId',
+      },
+      ResourceType: 'CFN_STACK',
+    });
+  });
 
 });

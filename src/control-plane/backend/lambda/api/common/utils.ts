@@ -16,7 +16,15 @@ import { ipv4 as ip } from 'cidr-block';
 import { JSONPath } from 'jsonpath-plus';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import { amznRequestContextHeader } from './constants';
-import { ALBLogServiceAccountMapping, CORS_ORIGIN_DOMAIN_PATTERN, EMAIL_PATTERN, IP_PATTERN, ServerlessRedshiftRPUByRegionMapping } from './constants-ln';
+import {
+  ALBLogServiceAccountMapping,
+  CORS_ORIGIN_DOMAIN_PATTERN,
+  EMAIL_PATTERN,
+  IP_PATTERN,
+  OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_ARN,
+  ServerlessRedshiftRPUByRegionMapping,
+  SERVICE_CATALOG_SUPPORTED_REGIONS,
+} from './constants-ln';
 import { ConditionCategory, MetadataValueType } from './explore-types';
 import { BuiltInTagKeys } from './model-ln';
 import { logger } from './powertools';
@@ -217,6 +225,7 @@ function getStackName(pipelineId: string, key: PipelineStackType, sinkType: stri
   names.set(PipelineStackType.REPORTING, `Clickstream-${PipelineStackType.REPORTING}-${pipelineId}`);
   names.set(PipelineStackType.METRICS, `Clickstream-${PipelineStackType.METRICS}-${pipelineId}`);
   names.set(PipelineStackType.ATHENA, `Clickstream-${PipelineStackType.ATHENA}-${pipelineId}`);
+  names.set(PipelineStackType.APP_REGISTRY, `Clickstream-${PipelineStackType.APP_REGISTRY}-${pipelineId}`);
   return names.get(key) ?? '';
 }
 
@@ -588,7 +597,7 @@ function groupAssociatedEventsByName(parameters: IMetadataEventParameter[]): IMe
     }
   }
   return groupEvents;
-};
+}
 
 function groupAssociatedEventParametersByName(events: IMetadataEvent[], parameters: IMetadataEventParameter[]): IMetadataEvent[] {
   for (let parameter of parameters) {
@@ -608,7 +617,7 @@ function groupAssociatedEventParametersByName(events: IMetadataEvent[], paramete
     }
   }
   return events;
-};
+}
 
 function getCurMonthStr() {
   const year = new Date().getFullYear();
@@ -663,7 +672,7 @@ function getLatestEventByName(metadata: IMetadataRaw[]): IMetadataEvent[] {
     }
   }
   return latestEvents;
-};
+}
 
 function getLatestParameterById(metadata: IMetadataRaw[]): IMetadataEventParameter[] {
   const latestEventParameters: IMetadataEventParameter[] = [];
@@ -693,7 +702,7 @@ function getLatestParameterById(metadata: IMetadataRaw[]): IMetadataEventParamet
     latestEventParameters.push(parameter);
   }
   return latestEventParameters;
-};
+}
 
 function groupByParameterByName(parameters: IMetadataEventParameter[], eventName?: string): IMetadataEventParameter[] {
   const groupParameters: IMetadataEventParameter[] = [];
@@ -708,7 +717,7 @@ function groupByParameterByName(parameters: IMetadataEventParameter[], eventName
     }
   }
   return groupParameters;
-};
+}
 
 function getParameterByNameAndType(metadata: IMetadataRaw[], parameterName: string, category: ConditionCategory, valueType: MetadataValueType):
 IMetadataEventParameter | undefined {
@@ -746,7 +755,7 @@ IMetadataEventParameter | undefined {
     valueEnum: filteredMetadata[0].summary.valueEnum ?? [],
     associatedEvents: groupEvents,
   } as IMetadataEventParameter;
-};
+}
 
 function getLatestAttributeByName(metadata: IMetadataRaw[]): IMetadataUserAttribute[] {
   const latestUserAttributes: IMetadataUserAttribute[] = [];
@@ -772,7 +781,7 @@ function getLatestAttributeByName(metadata: IMetadataRaw[]): IMetadataUserAttrib
     }
   }
   return latestUserAttributes;
-};
+}
 
 function getAttributeByNameAndType(metadata: IMetadataRaw[], attributeName: string, valueType: MetadataValueType):
 IMetadataUserAttribute | undefined {
@@ -793,7 +802,7 @@ IMetadataUserAttribute | undefined {
     valueType: filteredMetadata[0].valueType ?? MetadataValueType.STRING,
     valueEnum: filteredMetadata[0].summary.valueEnum ?? [],
   } as IMetadataUserAttribute;
-};
+}
 
 function concatEventParameter(
   associated: IMetadataEventParameter[] | undefined, parameters: IMetadataEventParameter[] | undefined): IMetadataEventParameter[] {
@@ -812,7 +821,7 @@ function concatEventParameter(
     }
   }
   return concatEventParameters;
-};
+}
 
 function uniqueParameterValueEnum(e: IMetadataRawValue[] | undefined, n: IMetadataRawValue[] | undefined) {
   const existedValues = e ?? [];
@@ -820,7 +829,7 @@ function uniqueParameterValueEnum(e: IMetadataRawValue[] | undefined, n: IMetada
   const values = existedValues.concat(newValues);
   const res = new Map();
   return values.filter((item) => !res.has(item.value) && res.set(item.value, 1));
-};
+}
 
 function pathNodesToAttribute(nodes: IMetadataRawValue[] | undefined) {
   if (!nodes) {
@@ -834,6 +843,11 @@ function pathNodesToAttribute(nodes: IMetadataRawValue[] | undefined) {
     });
   }
   return pathNodes;
+}
+
+function getAppRegistryApplicationArn(pipeline: IPipeline): string {
+  return SERVICE_CATALOG_SUPPORTED_REGIONS.includes(pipeline.region) ?
+    getValueFromStackOutputSuffix(pipeline, PipelineStackType.APP_REGISTRY, OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_ARN) : '';
 }
 
 export {
@@ -875,4 +889,5 @@ export {
   pathNodesToAttribute,
   getCurMonthStr,
   getVersionFromTags,
+  getAppRegistryApplicationArn,
 };
