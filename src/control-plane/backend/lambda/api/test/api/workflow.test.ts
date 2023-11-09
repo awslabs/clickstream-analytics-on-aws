@@ -36,6 +36,7 @@ import { DynamoDBDocumentClient, GetCommand, QueryCommand } from '@aws-sdk/lib-d
 import { mockClient } from 'aws-sdk-client-mock';
 import {
   createPipelineMock,
+  createPipelineMockForBJSRegion,
   dictionaryMock,
   MOCK_APP_ID,
   MOCK_PROJECT_ID,
@@ -61,9 +62,12 @@ import {
   RETRY_PIPELINE_WITH_WORKFLOW_WHEN_UPDATE_FAILED,
 } from './pipeline-mock';
 import {
+  APPREGISTRY_APPLICATION_ARN_PARAMETER,
+  APPREGISTRY_APPLICATION_EMPTY_ARN_PARAMETER,
   BASE_ATHENA_PARAMETERS,
   BASE_KAFKACONNECTOR_BATCH_MSK_PARAMETERS,
   BASE_KAFKACONNECTOR_BATCH_PARAMETERS, BASE_METRICS_EMAILS_PARAMETERS, BASE_METRICS_PARAMETERS,
+  DATA_PROCESSING_NEW_SERVERLESS_WITH_SPECIFY_PREFIX_PARAMETERS,
   DATA_PROCESSING_PLUGIN1_PARAMETERS,
   DATA_PROCESSING_PLUGIN2_PARAMETERS,
   DATA_PROCESSING_PLUGIN3_PARAMETERS,
@@ -152,9 +156,67 @@ describe('Workflow test', () => {
       Workflow: {
         Branches: [
           {
-            StartAt: 'Ingestion',
+            StartAt: 'ServiceCatalogAppRegistry',
             States: {
-              Ingestion: {
+              PipelineStacks: {
+                Branches: [
+                  {
+                    StartAt: 'Ingestion',
+                    States: {
+                      Ingestion: {
+                        Data: {
+                          Callback: {
+                            BucketName: 'TEST_EXAMPLE_BUCKET',
+                            BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                          },
+                          Input: {
+                            Action: 'Create',
+                            Region: 'ap-southeast-1',
+                            Parameters: [
+                              ...INGESTION_S3_PARAMETERS,
+                              APPREGISTRY_APPLICATION_ARN_PARAMETER,
+                            ],
+                            StackName: 'Clickstream-Ingestion-s3-6666-6666',
+                            Tags: Tags,
+                            TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-s3-stack.template.json',
+                          },
+                        },
+                        End: true,
+                        Type: 'Stack',
+                      },
+                    },
+                  },
+                  {
+                    StartAt: 'Metrics',
+                    States: {
+                      Metrics: {
+                        Data: {
+                          Callback: {
+                            BucketName: 'TEST_EXAMPLE_BUCKET',
+                            BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                          },
+                          Input: {
+                            Action: 'Create',
+                            Region: 'ap-southeast-1',
+                            Parameters: [
+                              ...BASE_METRICS_EMAILS_PARAMETERS,
+                              APPREGISTRY_APPLICATION_ARN_PARAMETER,
+                            ],
+                            StackName: 'Clickstream-Metrics-6666-6666',
+                            Tags: Tags,
+                            TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/metrics-stack.template.json',
+                          },
+                        },
+                        End: true,
+                        Type: 'Stack',
+                      },
+                    },
+                  },
+                ],
+                End: true,
+                Type: 'Parallel',
+              },
+              ServiceCatalogAppRegistry: {
                 Data: {
                   Callback: {
                     BucketName: 'TEST_EXAMPLE_BUCKET',
@@ -163,21 +225,107 @@ describe('Workflow test', () => {
                   Input: {
                     Action: 'Create',
                     Region: 'ap-southeast-1',
-                    Parameters: INGESTION_S3_PARAMETERS,
-                    StackName: 'Clickstream-Ingestion-s3-6666-6666',
+                    Parameters: [
+                      {
+                        ParameterKey: 'ProjectId',
+                        ParameterValue: 'project_8888_8888',
+                      },
+                    ],
+                    StackName: 'Clickstream-ServiceCatalogAppRegistry-6666-6666',
                     Tags: Tags,
-                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-s3-stack.template.json',
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/service-catalog-appregistry-stack.template.json',
                   },
                 },
-                End: true,
+                Next: 'PipelineStacks',
                 Type: 'Stack',
               },
             },
           },
+        ],
+        End: true,
+        Type: 'Parallel',
+      },
+    };
+    expect(wf).toEqual(expected);
+  });
+  it('Generate Workflow ingestion-server-s3 without ServiceCatalogAppRegistry', async () => {
+    dictionaryMock(ddbMock);
+    createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock,
+      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, iamMock, {
+        publicAZContainPrivateAZ: true,
+      });
+    createPipelineMockForBJSRegion(ec2Mock, s3Mock);
+    const pipeline: CPipeline = new CPipeline({
+      ...S3_INGESTION_PIPELINE,
+      region: 'cn-north-1',
+    });
+    const wf = await pipeline.generateWorkflow();
+    const expected = {
+      Version: '2022-03-15',
+      Workflow: {
+        Branches: [
           {
-            StartAt: 'Metrics',
+            StartAt: 'ServiceCatalogAppRegistry',
             States: {
-              Metrics: {
+              PipelineStacks: {
+                Branches: [
+                  {
+                    StartAt: 'Ingestion',
+                    States: {
+                      Ingestion: {
+                        Data: {
+                          Callback: {
+                            BucketName: 'TEST_EXAMPLE_BUCKET',
+                            BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                          },
+                          Input: {
+                            Action: 'Create',
+                            Region: 'cn-north-1',
+                            Parameters: [
+                              ...INGESTION_S3_PARAMETERS,
+                              APPREGISTRY_APPLICATION_EMPTY_ARN_PARAMETER,
+                            ],
+                            StackName: 'Clickstream-Ingestion-s3-6666-6666',
+                            Tags: Tags,
+                            TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-s3-stack.template.json',
+                          },
+                        },
+                        End: true,
+                        Type: 'Stack',
+                      },
+                    },
+                  },
+                  {
+                    StartAt: 'Metrics',
+                    States: {
+                      Metrics: {
+                        Data: {
+                          Callback: {
+                            BucketName: 'TEST_EXAMPLE_BUCKET',
+                            BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                          },
+                          Input: {
+                            Action: 'Create',
+                            Region: 'cn-north-1',
+                            Parameters: [
+                              ...BASE_METRICS_EMAILS_PARAMETERS,
+                              APPREGISTRY_APPLICATION_EMPTY_ARN_PARAMETER,
+                            ],
+                            StackName: 'Clickstream-Metrics-6666-6666',
+                            Tags: Tags,
+                            TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/metrics-stack.template.json',
+                          },
+                        },
+                        End: true,
+                        Type: 'Stack',
+                      },
+                    },
+                  },
+                ],
+                End: true,
+                Type: 'Parallel',
+              },
+              ServiceCatalogAppRegistry: {
                 Data: {
                   Callback: {
                     BucketName: 'TEST_EXAMPLE_BUCKET',
@@ -185,14 +333,19 @@ describe('Workflow test', () => {
                   },
                   Input: {
                     Action: 'Create',
-                    Region: 'ap-southeast-1',
-                    Parameters: BASE_METRICS_EMAILS_PARAMETERS,
-                    StackName: 'Clickstream-Metrics-6666-6666',
+                    Region: 'cn-north-1',
+                    Parameters: [
+                      {
+                        ParameterKey: 'ProjectId',
+                        ParameterValue: 'project_8888_8888',
+                      },
+                    ],
+                    StackName: 'Clickstream-ServiceCatalogAppRegistry-6666-6666',
                     Tags: Tags,
-                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/metrics-stack.template.json',
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/service-catalog-appregistry-stack.template.json',
                   },
                 },
-                End: true,
+                Next: 'PipelineStacks',
                 Type: 'Stack',
               },
             },
@@ -217,32 +370,67 @@ describe('Workflow test', () => {
       Workflow: {
         Branches: [
           {
-            StartAt: 'Ingestion',
+            StartAt: 'ServiceCatalogAppRegistry',
             States: {
-              Ingestion: {
-                Data: {
-                  Callback: {
-                    BucketName: 'TEST_EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
+              PipelineStacks: {
+                Branches: [
+                  {
+                    StartAt: 'Ingestion',
+                    States: {
+                      Ingestion: {
+                        Data: {
+                          Callback: {
+                            BucketName: 'TEST_EXAMPLE_BUCKET',
+                            BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                          },
+                          Input: {
+                            Action: 'Create',
+                            Region: 'ap-southeast-1',
+                            Parameters: [
+                              ...INGESTION_KAFKA_PARAMETERS,
+                              APPREGISTRY_APPLICATION_ARN_PARAMETER,
+                            ],
+                            StackName: 'Clickstream-Ingestion-kafka-6666-6666',
+                            Tags: Tags,
+                            TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-kafka-stack.template.json',
+                          },
+                        },
+                        Type: 'Stack',
+                        End: true,
+                      },
+                    },
                   },
-                  Input: {
-                    Action: 'Create',
-                    Region: 'ap-southeast-1',
-                    Parameters: INGESTION_KAFKA_PARAMETERS,
-                    StackName: 'Clickstream-Ingestion-kafka-6666-6666',
-                    Tags: Tags,
-                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-kafka-stack.template.json',
+                  {
+                    StartAt: 'Metrics',
+                    States: {
+                      Metrics: {
+                        Data: {
+                          Callback: {
+                            BucketName: 'TEST_EXAMPLE_BUCKET',
+                            BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                          },
+                          Input: {
+                            Action: 'Create',
+                            Region: 'ap-southeast-1',
+                            Parameters: [
+                              ...BASE_METRICS_EMAILS_PARAMETERS,
+                              APPREGISTRY_APPLICATION_ARN_PARAMETER,
+                            ],
+                            StackName: 'Clickstream-Metrics-6666-6666',
+                            Tags: Tags,
+                            TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/metrics-stack.template.json',
+                          },
+                        },
+                        End: true,
+                        Type: 'Stack',
+                      },
+                    },
                   },
-                },
-                Type: 'Stack',
+                ],
                 End: true,
+                Type: 'Parallel',
               },
-            },
-          },
-          {
-            StartAt: 'Metrics',
-            States: {
-              Metrics: {
+              ServiceCatalogAppRegistry: {
                 Data: {
                   Callback: {
                     BucketName: 'TEST_EXAMPLE_BUCKET',
@@ -251,13 +439,18 @@ describe('Workflow test', () => {
                   Input: {
                     Action: 'Create',
                     Region: 'ap-southeast-1',
-                    Parameters: BASE_METRICS_PARAMETERS,
-                    StackName: 'Clickstream-Metrics-6666-6666',
+                    Parameters: [
+                      {
+                        ParameterKey: 'ProjectId',
+                        ParameterValue: 'project_8888_8888',
+                      },
+                    ],
+                    StackName: 'Clickstream-ServiceCatalogAppRegistry-6666-6666',
                     Tags: Tags,
-                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/metrics-stack.template.json',
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/service-catalog-appregistry-stack.template.json',
                   },
                 },
-                End: true,
+                Next: 'PipelineStacks',
                 Type: 'Stack',
               },
             },
@@ -282,50 +475,88 @@ describe('Workflow test', () => {
       Workflow: {
         Branches: [
           {
-            StartAt: 'Ingestion',
+            StartAt: 'ServiceCatalogAppRegistry',
             States: {
-              Ingestion: {
-                Data: {
-                  Callback: {
-                    BucketName: 'TEST_EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
+              PipelineStacks: {
+                Branches: [
+                  {
+                    StartAt: 'Ingestion',
+                    States: {
+                      Ingestion: {
+                        Data: {
+                          Callback: {
+                            BucketName: 'TEST_EXAMPLE_BUCKET',
+                            BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                          },
+                          Input: {
+                            Action: 'Create',
+                            Region: 'ap-southeast-1',
+                            Parameters: [
+                              ...INGESTION_KAFKA_PARAMETERS,
+                              APPREGISTRY_APPLICATION_ARN_PARAMETER,
+                            ],
+                            StackName: 'Clickstream-Ingestion-kafka-6666-6666',
+                            Tags: Tags,
+                            TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-kafka-stack.template.json',
+                          },
+                        },
+                        Type: 'Stack',
+                        Next: 'KafkaConnector',
+                      },
+                      KafkaConnector: {
+                        Data: {
+                          Callback: {
+                            BucketName: 'TEST_EXAMPLE_BUCKET',
+                            BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                          },
+                          Input: {
+                            Action: 'Create',
+                            Region: 'ap-southeast-1',
+                            Parameters: [
+                              ...BASE_KAFKACONNECTOR_BATCH_PARAMETERS,
+                              APPREGISTRY_APPLICATION_ARN_PARAMETER,
+                            ],
+                            StackName: 'Clickstream-KafkaConnector-6666-6666',
+                            Tags: Tags,
+                            TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/kafka-s3-sink-stack.template.json',
+                          },
+                        },
+                        End: true,
+                        Type: 'Stack',
+                      },
+                    },
                   },
-                  Input: {
-                    Action: 'Create',
-                    Region: 'ap-southeast-1',
-                    Parameters: INGESTION_KAFKA_PARAMETERS,
-                    StackName: 'Clickstream-Ingestion-kafka-6666-6666',
-                    Tags: Tags,
-                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-kafka-stack.template.json',
+                  {
+                    StartAt: 'Metrics',
+                    States: {
+                      Metrics: {
+                        Data: {
+                          Callback: {
+                            BucketName: 'TEST_EXAMPLE_BUCKET',
+                            BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                          },
+                          Input: {
+                            Action: 'Create',
+                            Region: 'ap-southeast-1',
+                            Parameters: [
+                              ...BASE_METRICS_PARAMETERS,
+                              APPREGISTRY_APPLICATION_ARN_PARAMETER,
+                            ],
+                            StackName: 'Clickstream-Metrics-6666-6666',
+                            Tags: Tags,
+                            TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/metrics-stack.template.json',
+                          },
+                        },
+                        End: true,
+                        Type: 'Stack',
+                      },
+                    },
                   },
-                },
-                Type: 'Stack',
-                Next: 'KafkaConnector',
-              },
-              KafkaConnector: {
-                Data: {
-                  Callback: {
-                    BucketName: 'TEST_EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
-                  },
-                  Input: {
-                    Action: 'Create',
-                    Region: 'ap-southeast-1',
-                    Parameters: BASE_KAFKACONNECTOR_BATCH_PARAMETERS,
-                    StackName: 'Clickstream-KafkaConnector-6666-6666',
-                    Tags: Tags,
-                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/kafka-s3-sink-stack.template.json',
-                  },
-                },
+                ],
                 End: true,
-                Type: 'Stack',
+                Type: 'Parallel',
               },
-            },
-          },
-          {
-            StartAt: 'Metrics',
-            States: {
-              Metrics: {
+              ServiceCatalogAppRegistry: {
                 Data: {
                   Callback: {
                     BucketName: 'TEST_EXAMPLE_BUCKET',
@@ -334,13 +565,18 @@ describe('Workflow test', () => {
                   Input: {
                     Action: 'Create',
                     Region: 'ap-southeast-1',
-                    Parameters: BASE_METRICS_PARAMETERS,
-                    StackName: 'Clickstream-Metrics-6666-6666',
+                    Parameters: [
+                      {
+                        ParameterKey: 'ProjectId',
+                        ParameterValue: 'project_8888_8888',
+                      },
+                    ],
+                    StackName: 'Clickstream-ServiceCatalogAppRegistry-6666-6666',
                     Tags: Tags,
-                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/metrics-stack.template.json',
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/service-catalog-appregistry-stack.template.json',
                   },
                 },
-                End: true,
+                Next: 'PipelineStacks',
                 Type: 'Stack',
               },
             },
@@ -359,57 +595,99 @@ describe('Workflow test', () => {
       ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, iamMock, {
         publicAZContainPrivateAZ: true,
       });
-    const pipeline: CPipeline = new CPipeline({ ...MSK_WITH_CONNECTOR_INGESTION_PIPELINE });
+    createPipelineMockForBJSRegion(ec2Mock, s3Mock);
+    const pipeline: CPipeline = new CPipeline({
+      ...MSK_WITH_CONNECTOR_INGESTION_PIPELINE,
+      region: 'cn-north-1',
+    });
     const wf = await pipeline.generateWorkflow();
     const expected = {
       Version: '2022-03-15',
       Workflow: {
         Branches: [
           {
-            StartAt: 'Ingestion',
+            StartAt: 'ServiceCatalogAppRegistry',
             States: {
-              Ingestion: {
-                Data: {
-                  Callback: {
-                    BucketName: 'TEST_EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
+              PipelineStacks: {
+                Branches: [
+                  {
+                    StartAt: 'Ingestion',
+                    States: {
+                      Ingestion: {
+                        Data: {
+                          Callback: {
+                            BucketName: 'TEST_EXAMPLE_BUCKET',
+                            BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                          },
+                          Input: {
+                            Action: 'Create',
+                            Region: 'cn-north-1',
+                            Parameters: [
+                              ...INGESTION_MSK_PARAMETERS,
+                              APPREGISTRY_APPLICATION_EMPTY_ARN_PARAMETER,
+                            ],
+                            StackName: 'Clickstream-Ingestion-kafka-6666-6666',
+                            Tags: Tags,
+                            TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-kafka-stack.template.json',
+                          },
+                        },
+                        Next: 'KafkaConnector',
+                        Type: 'Stack',
+                      },
+                      KafkaConnector: {
+                        Data: {
+                          Callback: {
+                            BucketName: 'TEST_EXAMPLE_BUCKET',
+                            BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                          },
+                          Input: {
+                            Action: 'Create',
+                            Region: 'cn-north-1',
+                            Parameters: [
+                              ...BASE_KAFKACONNECTOR_BATCH_MSK_PARAMETERS,
+                              APPREGISTRY_APPLICATION_EMPTY_ARN_PARAMETER,
+                            ],
+                            StackName: 'Clickstream-KafkaConnector-6666-6666',
+                            Tags: Tags,
+                            TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/kafka-s3-sink-stack.template.json',
+                          },
+                        },
+                        End: true,
+                        Type: 'Stack',
+                      },
+                    },
                   },
-                  Input: {
-                    Action: 'Create',
-                    Region: 'ap-southeast-1',
-                    Parameters: INGESTION_MSK_PARAMETERS,
-                    StackName: 'Clickstream-Ingestion-kafka-6666-6666',
-                    Tags: Tags,
-                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-kafka-stack.template.json',
+                  {
+                    StartAt: 'Metrics',
+                    States: {
+                      Metrics: {
+                        Data: {
+                          Callback: {
+                            BucketName: 'TEST_EXAMPLE_BUCKET',
+                            BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                          },
+                          Input: {
+                            Action: 'Create',
+                            Region: 'cn-north-1',
+                            Parameters: [
+                              ...BASE_METRICS_PARAMETERS,
+                              APPREGISTRY_APPLICATION_EMPTY_ARN_PARAMETER,
+                            ],
+                            StackName: 'Clickstream-Metrics-6666-6666',
+                            Tags: Tags,
+                            TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/metrics-stack.template.json',
+                          },
+                        },
+                        End: true,
+                        Type: 'Stack',
+                      },
+                    },
                   },
-                },
-                Next: 'KafkaConnector',
-                Type: 'Stack',
-              },
-              KafkaConnector: {
-                Data: {
-                  Callback: {
-                    BucketName: 'TEST_EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
-                  },
-                  Input: {
-                    Action: 'Create',
-                    Region: 'ap-southeast-1',
-                    Parameters: BASE_KAFKACONNECTOR_BATCH_MSK_PARAMETERS,
-                    StackName: 'Clickstream-KafkaConnector-6666-6666',
-                    Tags: Tags,
-                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/kafka-s3-sink-stack.template.json',
-                  },
-                },
+                ],
                 End: true,
-                Type: 'Stack',
+                Type: 'Parallel',
               },
-            },
-          },
-          {
-            StartAt: 'Metrics',
-            States: {
-              Metrics: {
+              ServiceCatalogAppRegistry: {
                 Data: {
                   Callback: {
                     BucketName: 'TEST_EXAMPLE_BUCKET',
@@ -417,14 +695,19 @@ describe('Workflow test', () => {
                   },
                   Input: {
                     Action: 'Create',
-                    Region: 'ap-southeast-1',
-                    Parameters: BASE_METRICS_PARAMETERS,
-                    StackName: 'Clickstream-Metrics-6666-6666',
+                    Region: 'cn-north-1',
+                    Parameters: [
+                      {
+                        ParameterKey: 'ProjectId',
+                        ParameterValue: 'project_8888_8888',
+                      },
+                    ],
+                    StackName: 'Clickstream-ServiceCatalogAppRegistry-6666-6666',
                     Tags: Tags,
-                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/metrics-stack.template.json',
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/service-catalog-appregistry-stack.template.json',
                   },
                 },
-                End: true,
+                Next: 'PipelineStacks',
                 Type: 'Stack',
               },
             },
@@ -450,32 +733,67 @@ describe('Workflow test', () => {
       Workflow: {
         Branches: [
           {
-            StartAt: 'Ingestion',
+            StartAt: 'ServiceCatalogAppRegistry',
             States: {
-              Ingestion: {
-                Data: {
-                  Callback: {
-                    BucketName: 'TEST_EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
+              PipelineStacks: {
+                Branches: [
+                  {
+                    StartAt: 'Ingestion',
+                    States: {
+                      Ingestion: {
+                        Data: {
+                          Callback: {
+                            BucketName: 'TEST_EXAMPLE_BUCKET',
+                            BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                          },
+                          Input: {
+                            Action: 'Create',
+                            Region: 'ap-southeast-1',
+                            Parameters: [
+                              ...INGESTION_KINESIS_ON_DEMAND_PARAMETERS,
+                              APPREGISTRY_APPLICATION_ARN_PARAMETER,
+                            ],
+                            StackName: 'Clickstream-Ingestion-kinesis-6666-6666',
+                            Tags: Tags,
+                            TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-kinesis-stack.template.json',
+                          },
+                        },
+                        End: true,
+                        Type: 'Stack',
+                      },
+                    },
                   },
-                  Input: {
-                    Action: 'Create',
-                    Region: 'ap-southeast-1',
-                    Parameters: INGESTION_KINESIS_ON_DEMAND_PARAMETERS,
-                    StackName: 'Clickstream-Ingestion-kinesis-6666-6666',
-                    Tags: Tags,
-                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-kinesis-stack.template.json',
+                  {
+                    StartAt: 'Metrics',
+                    States: {
+                      Metrics: {
+                        Data: {
+                          Callback: {
+                            BucketName: 'TEST_EXAMPLE_BUCKET',
+                            BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                          },
+                          Input: {
+                            Action: 'Create',
+                            Region: 'ap-southeast-1',
+                            Parameters: [
+                              ...BASE_METRICS_PARAMETERS,
+                              APPREGISTRY_APPLICATION_ARN_PARAMETER,
+                            ],
+                            StackName: 'Clickstream-Metrics-6666-6666',
+                            Tags: Tags,
+                            TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/metrics-stack.template.json',
+                          },
+                        },
+                        End: true,
+                        Type: 'Stack',
+                      },
+                    },
                   },
-                },
+                ],
                 End: true,
-                Type: 'Stack',
+                Type: 'Parallel',
               },
-            },
-          },
-          {
-            StartAt: 'Metrics',
-            States: {
-              Metrics: {
+              ServiceCatalogAppRegistry: {
                 Data: {
                   Callback: {
                     BucketName: 'TEST_EXAMPLE_BUCKET',
@@ -484,13 +802,18 @@ describe('Workflow test', () => {
                   Input: {
                     Action: 'Create',
                     Region: 'ap-southeast-1',
-                    Parameters: BASE_METRICS_PARAMETERS,
-                    StackName: 'Clickstream-Metrics-6666-6666',
+                    Parameters: [
+                      {
+                        ParameterKey: 'ProjectId',
+                        ParameterValue: 'project_8888_8888',
+                      },
+                    ],
+                    StackName: 'Clickstream-ServiceCatalogAppRegistry-6666-6666',
                     Tags: Tags,
-                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/metrics-stack.template.json',
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/service-catalog-appregistry-stack.template.json',
                   },
                 },
-                End: true,
+                Next: 'PipelineStacks',
                 Type: 'Stack',
               },
             },
@@ -508,39 +831,78 @@ describe('Workflow test', () => {
       ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, iamMock, {
         publicAZContainPrivateAZ: true,
       });
-    const pipeline: CPipeline = new CPipeline({ ...KINESIS_PROVISIONED_INGESTION_PIPELINE });
+    createPipelineMockForBJSRegion(ec2Mock, s3Mock);
+    const pipeline: CPipeline = new CPipeline({
+      ...KINESIS_PROVISIONED_INGESTION_PIPELINE,
+      region: 'cn-north-1',
+    });
     const wf = await pipeline.generateWorkflow();
     const expected = {
       Version: '2022-03-15',
       Workflow: {
         Branches: [
           {
-            StartAt: 'Ingestion',
+            StartAt: 'ServiceCatalogAppRegistry',
             States: {
-              Ingestion: {
-                Data: {
-                  Callback: {
-                    BucketName: 'TEST_EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
+              PipelineStacks: {
+                Branches: [
+                  {
+                    StartAt: 'Ingestion',
+                    States: {
+                      Ingestion: {
+                        Data: {
+                          Callback: {
+                            BucketName: 'TEST_EXAMPLE_BUCKET',
+                            BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                          },
+                          Input: {
+                            Action: 'Create',
+                            Region: 'cn-north-1',
+                            Parameters: [
+                              ...INGESTION_KINESIS_PROVISIONED_PARAMETERS,
+                              APPREGISTRY_APPLICATION_EMPTY_ARN_PARAMETER,
+                            ],
+                            StackName: 'Clickstream-Ingestion-kinesis-6666-6666',
+                            Tags: Tags,
+                            TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-kinesis-stack.template.json',
+                          },
+                        },
+                        End: true,
+                        Type: 'Stack',
+                      },
+                    },
                   },
-                  Input: {
-                    Action: 'Create',
-                    Region: 'ap-southeast-1',
-                    Parameters: INGESTION_KINESIS_PROVISIONED_PARAMETERS,
-                    StackName: 'Clickstream-Ingestion-kinesis-6666-6666',
-                    Tags: Tags,
-                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-kinesis-stack.template.json',
+                  {
+                    StartAt: 'Metrics',
+                    States: {
+                      Metrics: {
+                        Data: {
+                          Callback: {
+                            BucketName: 'TEST_EXAMPLE_BUCKET',
+                            BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                          },
+                          Input: {
+                            Action: 'Create',
+                            Region: 'cn-north-1',
+                            Parameters: [
+                              ...BASE_METRICS_PARAMETERS,
+                              APPREGISTRY_APPLICATION_EMPTY_ARN_PARAMETER,
+                            ],
+                            StackName: 'Clickstream-Metrics-6666-6666',
+                            Tags: Tags,
+                            TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/metrics-stack.template.json',
+                          },
+                        },
+                        End: true,
+                        Type: 'Stack',
+                      },
+                    },
                   },
-                },
+                ],
                 End: true,
-                Type: 'Stack',
+                Type: 'Parallel',
               },
-            },
-          },
-          {
-            StartAt: 'Metrics',
-            States: {
-              Metrics: {
+              ServiceCatalogAppRegistry: {
                 Data: {
                   Callback: {
                     BucketName: 'TEST_EXAMPLE_BUCKET',
@@ -548,14 +910,19 @@ describe('Workflow test', () => {
                   },
                   Input: {
                     Action: 'Create',
-                    Region: 'ap-southeast-1',
-                    Parameters: BASE_METRICS_PARAMETERS,
-                    StackName: 'Clickstream-Metrics-6666-6666',
+                    Region: 'cn-north-1',
+                    Parameters: [
+                      {
+                        ParameterKey: 'ProjectId',
+                        ParameterValue: 'project_8888_8888',
+                      },
+                    ],
+                    StackName: 'Clickstream-ServiceCatalogAppRegistry-6666-6666',
                     Tags: Tags,
-                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/metrics-stack.template.json',
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/service-catalog-appregistry-stack.template.json',
                   },
                 },
-                End: true,
+                Next: 'PipelineStacks',
                 Type: 'Stack',
               },
             },
@@ -580,32 +947,93 @@ describe('Workflow test', () => {
       Workflow: {
         Branches: [
           {
-            StartAt: 'Ingestion',
+            StartAt: 'ServiceCatalogAppRegistry',
             States: {
-              Ingestion: {
-                Data: {
-                  Callback: {
-                    BucketName: 'TEST_EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
+              PipelineStacks: {
+                Branches: [
+                  {
+                    StartAt: 'Ingestion',
+                    States: {
+                      Ingestion: {
+                        Data: {
+                          Callback: {
+                            BucketName: 'TEST_EXAMPLE_BUCKET',
+                            BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                          },
+                          Input: {
+                            Action: 'Create',
+                            Region: 'ap-southeast-1',
+                            Parameters: [
+                              ...INGESTION_S3_PARAMETERS,
+                              APPREGISTRY_APPLICATION_ARN_PARAMETER,
+                            ],
+                            StackName: 'Clickstream-Ingestion-s3-6666-6666',
+                            Tags: Tags,
+                            TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-s3-stack.template.json',
+                          },
+                        },
+                        End: true,
+                        Type: 'Stack',
+                      },
+                    },
                   },
-                  Input: {
-                    Action: 'Create',
-                    Region: 'ap-southeast-1',
-                    Parameters: INGESTION_S3_PARAMETERS,
-                    StackName: 'Clickstream-Ingestion-s3-6666-6666',
-                    Tags: Tags,
-                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-s3-stack.template.json',
+                  {
+                    StartAt: 'DataProcessing',
+                    States: {
+                      DataProcessing: {
+                        Data: {
+                          Callback: {
+                            BucketName: 'TEST_EXAMPLE_BUCKET',
+                            BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                          },
+                          Input: {
+                            Action: 'Create',
+                            Region: 'ap-southeast-1',
+                            Parameters: [
+                              ...DATA_PROCESSING_PLUGIN1_PARAMETERS,
+                              APPREGISTRY_APPLICATION_ARN_PARAMETER,
+                            ],
+                            StackName: 'Clickstream-DataProcessing-6666-6666',
+                            Tags: Tags,
+                            TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-pipeline-stack.template.json',
+                          },
+                        },
+                        End: true,
+                        Type: 'Stack',
+                      },
+                    },
                   },
-                },
+                  {
+                    StartAt: 'Metrics',
+                    States: {
+                      Metrics: {
+                        Data: {
+                          Callback: {
+                            BucketName: 'TEST_EXAMPLE_BUCKET',
+                            BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                          },
+                          Input: {
+                            Action: 'Create',
+                            Region: 'ap-southeast-1',
+                            Parameters: [
+                              ...BASE_METRICS_EMAILS_PARAMETERS,
+                              APPREGISTRY_APPLICATION_ARN_PARAMETER,
+                            ],
+                            StackName: 'Clickstream-Metrics-6666-6666',
+                            Tags: Tags,
+                            TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/metrics-stack.template.json',
+                          },
+                        },
+                        End: true,
+                        Type: 'Stack',
+                      },
+                    },
+                  },
+                ],
                 End: true,
-                Type: 'Stack',
+                Type: 'Parallel',
               },
-            },
-          },
-          {
-            StartAt: 'DataProcessing',
-            States: {
-              DataProcessing: {
+              ServiceCatalogAppRegistry: {
                 Data: {
                   Callback: {
                     BucketName: 'TEST_EXAMPLE_BUCKET',
@@ -614,36 +1042,18 @@ describe('Workflow test', () => {
                   Input: {
                     Action: 'Create',
                     Region: 'ap-southeast-1',
-                    Parameters: DATA_PROCESSING_PLUGIN1_PARAMETERS,
-                    StackName: 'Clickstream-DataProcessing-6666-6666',
+                    Parameters: [
+                      {
+                        ParameterKey: 'ProjectId',
+                        ParameterValue: 'project_8888_8888',
+                      },
+                    ],
+                    StackName: 'Clickstream-ServiceCatalogAppRegistry-6666-6666',
                     Tags: Tags,
-                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-pipeline-stack.template.json',
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/service-catalog-appregistry-stack.template.json',
                   },
                 },
-                End: true,
-                Type: 'Stack',
-              },
-            },
-          },
-          {
-            StartAt: 'Metrics',
-            States: {
-              Metrics: {
-                Data: {
-                  Callback: {
-                    BucketName: 'TEST_EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
-                  },
-                  Input: {
-                    Action: 'Create',
-                    Region: 'ap-southeast-1',
-                    Parameters: BASE_METRICS_EMAILS_PARAMETERS,
-                    StackName: 'Clickstream-Metrics-6666-6666',
-                    Tags: Tags,
-                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/metrics-stack.template.json',
-                  },
-                },
-                End: true,
+                Next: 'PipelineStacks',
                 Type: 'Stack',
               },
             },
@@ -660,6 +1070,8 @@ describe('Workflow test', () => {
     createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock,
       ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, iamMock, {
         publicAZContainPrivateAZ: true,
+        subnetsIsolated: true,
+        subnetsCross3AZ: true,
       });
     const pipeline: CPipeline = new CPipeline({ ...S3_DATA_PROCESSING_WITH_SPECIFY_PREFIX_PIPELINE });
     const wf = await pipeline.generateWorkflow();
@@ -668,32 +1080,114 @@ describe('Workflow test', () => {
       Workflow: {
         Branches: [
           {
-            StartAt: 'Ingestion',
+            StartAt: 'ServiceCatalogAppRegistry',
             States: {
-              Ingestion: {
-                Data: {
-                  Callback: {
-                    BucketName: 'TEST_EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
+              PipelineStacks: {
+                Branches: [
+                  {
+                    StartAt: 'Ingestion',
+                    States: {
+                      Ingestion: {
+                        Data: {
+                          Callback: {
+                            BucketName: 'TEST_EXAMPLE_BUCKET',
+                            BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                          },
+                          Input: {
+                            Action: 'Create',
+                            Region: 'ap-southeast-1',
+                            Parameters: [
+                              ...INGESTION_S3_WITH_SPECIFY_PREFIX_PARAMETERS,
+                              APPREGISTRY_APPLICATION_ARN_PARAMETER,
+                            ],
+                            StackName: 'Clickstream-Ingestion-s3-6666-6666',
+                            Tags: Tags,
+                            TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-s3-stack.template.json',
+                          },
+                        },
+                        End: true,
+                        Type: 'Stack',
+                      },
+                    },
                   },
-                  Input: {
-                    Action: 'Create',
-                    Region: 'ap-southeast-1',
-                    Parameters: INGESTION_S3_WITH_SPECIFY_PREFIX_PARAMETERS,
-                    StackName: 'Clickstream-Ingestion-s3-6666-6666',
-                    Tags: Tags,
-                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-s3-stack.template.json',
+                  {
+                    StartAt: 'DataProcessing',
+                    States: {
+                      DataProcessing: {
+                        Data: {
+                          Callback: {
+                            BucketName: 'TEST_EXAMPLE_BUCKET',
+                            BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                          },
+                          Input: {
+                            Action: 'Create',
+                            Region: 'ap-southeast-1',
+                            Parameters: [
+                              ...DATA_PROCESSING_WITH_SPECIFY_PREFIX_PLUGIN1_PARAMETERS,
+                              APPREGISTRY_APPLICATION_ARN_PARAMETER,
+                            ],
+                            StackName: 'Clickstream-DataProcessing-6666-6666',
+                            Tags: Tags,
+                            TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-pipeline-stack.template.json',
+                          },
+                        },
+                        Next: 'DataModelingRedshift',
+                        Type: 'Stack',
+                      },
+                      DataModelingRedshift: {
+                        Data: {
+                          Callback: {
+                            BucketName: 'TEST_EXAMPLE_BUCKET',
+                            BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                          },
+                          Input: {
+                            Action: 'Create',
+                            Region: 'ap-southeast-1',
+                            Parameters: [
+                              ...DATA_PROCESSING_NEW_SERVERLESS_WITH_SPECIFY_PREFIX_PARAMETERS,
+                              APPREGISTRY_APPLICATION_ARN_PARAMETER,
+                            ],
+                            StackName: 'Clickstream-DataModelingRedshift-6666-6666',
+                            Tags: Tags,
+                            TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-analytics-redshift-stack.template.json',
+                          },
+                        },
+                        End: true,
+                        Type: 'Stack',
+                      },
+                    },
                   },
-                },
+                  {
+                    StartAt: 'Metrics',
+                    States: {
+                      Metrics: {
+                        Data: {
+                          Callback: {
+                            BucketName: 'TEST_EXAMPLE_BUCKET',
+                            BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                          },
+                          Input: {
+                            Action: 'Create',
+                            Region: 'ap-southeast-1',
+                            Parameters: [
+                              ...BASE_METRICS_EMAILS_PARAMETERS,
+                              APPREGISTRY_APPLICATION_ARN_PARAMETER,
+                            ],
+                            StackName: 'Clickstream-Metrics-6666-6666',
+                            Tags: Tags,
+                            TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/metrics-stack.template.json',
+                          },
+                        },
+                        End: true,
+                        Type: 'Stack',
+                      },
+                    },
+                  },
+                ],
                 End: true,
-                Type: 'Stack',
+                Type: 'Parallel',
               },
-            },
-          },
-          {
-            StartAt: 'DataProcessing',
-            States: {
-              DataProcessing: {
+              ServiceCatalogAppRegistry: {
                 Data: {
                   Callback: {
                     BucketName: 'TEST_EXAMPLE_BUCKET',
@@ -702,36 +1196,18 @@ describe('Workflow test', () => {
                   Input: {
                     Action: 'Create',
                     Region: 'ap-southeast-1',
-                    Parameters: DATA_PROCESSING_WITH_SPECIFY_PREFIX_PLUGIN1_PARAMETERS,
-                    StackName: 'Clickstream-DataProcessing-6666-6666',
+                    Parameters: [
+                      {
+                        ParameterKey: 'ProjectId',
+                        ParameterValue: 'project_8888_8888',
+                      },
+                    ],
+                    StackName: 'Clickstream-ServiceCatalogAppRegistry-6666-6666',
                     Tags: Tags,
-                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-pipeline-stack.template.json',
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/service-catalog-appregistry-stack.template.json',
                   },
                 },
-                End: true,
-                Type: 'Stack',
-              },
-            },
-          },
-          {
-            StartAt: 'Metrics',
-            States: {
-              Metrics: {
-                Data: {
-                  Callback: {
-                    BucketName: 'TEST_EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
-                  },
-                  Input: {
-                    Action: 'Create',
-                    Region: 'ap-southeast-1',
-                    Parameters: BASE_METRICS_EMAILS_PARAMETERS,
-                    StackName: 'Clickstream-Metrics-6666-6666',
-                    Tags: Tags,
-                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/metrics-stack.template.json',
-                  },
-                },
-                End: true,
+                Next: 'PipelineStacks',
                 Type: 'Stack',
               },
             },
@@ -758,50 +1234,135 @@ describe('Workflow test', () => {
       Workflow: {
         Branches: [
           {
-            StartAt: 'Ingestion',
+            StartAt: 'ServiceCatalogAppRegistry',
             States: {
-              Ingestion: {
-                Data: {
-                  Callback: {
-                    BucketName: 'TEST_EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
+              PipelineStacks: {
+                Branches: [
+                  {
+                    StartAt: 'Ingestion',
+                    States: {
+                      Ingestion: {
+                        Data: {
+                          Callback: {
+                            BucketName: 'TEST_EXAMPLE_BUCKET',
+                            BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                          },
+                          Input: {
+                            Action: 'Create',
+                            Region: 'ap-southeast-1',
+                            Parameters: [
+                              ...INGESTION_MSK_PARAMETERS,
+                              APPREGISTRY_APPLICATION_ARN_PARAMETER,
+                            ],
+                            StackName: 'Clickstream-Ingestion-kafka-6666-6666',
+                            Tags: Tags,
+                            TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-kafka-stack.template.json',
+                          },
+                        },
+                        Next: 'KafkaConnector',
+                        Type: 'Stack',
+                      },
+                      KafkaConnector: {
+                        Data: {
+                          Callback: {
+                            BucketName: 'TEST_EXAMPLE_BUCKET',
+                            BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                          },
+                          Input: {
+                            Action: 'Create',
+                            Region: 'ap-southeast-1',
+                            Parameters: [
+                              ...BASE_KAFKACONNECTOR_BATCH_MSK_PARAMETERS,
+                              APPREGISTRY_APPLICATION_ARN_PARAMETER,
+                            ],
+                            StackName: 'Clickstream-KafkaConnector-6666-6666',
+                            Tags: Tags,
+                            TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/kafka-s3-sink-stack.template.json',
+                          },
+                        },
+                        End: true,
+                        Type: 'Stack',
+                      },
+                    },
                   },
-                  Input: {
-                    Action: 'Create',
-                    Region: 'ap-southeast-1',
-                    Parameters: INGESTION_MSK_PARAMETERS,
-                    StackName: 'Clickstream-Ingestion-kafka-6666-6666',
-                    Tags: Tags,
-                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-kafka-stack.template.json',
+                  {
+                    StartAt: 'DataProcessing',
+                    States: {
+                      DataProcessing: {
+                        Data: {
+                          Callback: {
+                            BucketName: 'TEST_EXAMPLE_BUCKET',
+                            BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                          },
+                          Input: {
+                            Action: 'Create',
+                            Region: 'ap-southeast-1',
+                            Parameters: [
+                              ...DATA_PROCESSING_PLUGIN2_PARAMETERS,
+                              APPREGISTRY_APPLICATION_ARN_PARAMETER,
+                            ],
+                            StackName: 'Clickstream-DataProcessing-6666-6666',
+                            Tags: Tags,
+                            TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-pipeline-stack.template.json',
+                          },
+                        },
+                        Next: 'DataModelingAthena',
+                        Type: 'Stack',
+                      },
+                      DataModelingAthena: {
+                        Data: {
+                          Callback: {
+                            BucketName: 'TEST_EXAMPLE_BUCKET',
+                            BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                          },
+                          Input: {
+                            Action: 'Create',
+                            Region: 'ap-southeast-1',
+                            Parameters: [
+                              ...BASE_ATHENA_PARAMETERS,
+                              APPREGISTRY_APPLICATION_ARN_PARAMETER,
+                            ],
+                            StackName: 'Clickstream-DataModelingAthena-6666-6666',
+                            Tags: Tags,
+                            TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-modeling-athena-stack.template.json',
+                          },
+                        },
+                        End: true,
+                        Type: 'Stack',
+                      },
+                    },
                   },
-                },
-                Next: 'KafkaConnector',
-                Type: 'Stack',
-              },
-              KafkaConnector: {
-                Data: {
-                  Callback: {
-                    BucketName: 'TEST_EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                  {
+                    StartAt: 'Metrics',
+                    States: {
+                      Metrics: {
+                        Data: {
+                          Callback: {
+                            BucketName: 'TEST_EXAMPLE_BUCKET',
+                            BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                          },
+                          Input: {
+                            Action: 'Create',
+                            Region: 'ap-southeast-1',
+                            Parameters: [
+                              ...BASE_METRICS_PARAMETERS,
+                              APPREGISTRY_APPLICATION_ARN_PARAMETER,
+                            ],
+                            StackName: 'Clickstream-Metrics-6666-6666',
+                            Tags: Tags,
+                            TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/metrics-stack.template.json',
+                          },
+                        },
+                        End: true,
+                        Type: 'Stack',
+                      },
+                    },
                   },
-                  Input: {
-                    Action: 'Create',
-                    Region: 'ap-southeast-1',
-                    Parameters: BASE_KAFKACONNECTOR_BATCH_MSK_PARAMETERS,
-                    StackName: 'Clickstream-KafkaConnector-6666-6666',
-                    Tags: Tags,
-                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/kafka-s3-sink-stack.template.json',
-                  },
-                },
+                ],
                 End: true,
-                Type: 'Stack',
+                Type: 'Parallel',
               },
-            },
-          },
-          {
-            StartAt: 'DataProcessing',
-            States: {
-              DataProcessing: {
+              ServiceCatalogAppRegistry: {
                 Data: {
                   Callback: {
                     BucketName: 'TEST_EXAMPLE_BUCKET',
@@ -810,54 +1371,18 @@ describe('Workflow test', () => {
                   Input: {
                     Action: 'Create',
                     Region: 'ap-southeast-1',
-                    Parameters: DATA_PROCESSING_PLUGIN2_PARAMETERS,
-                    StackName: 'Clickstream-DataProcessing-6666-6666',
+                    Parameters: [
+                      {
+                        ParameterKey: 'ProjectId',
+                        ParameterValue: 'project_8888_8888',
+                      },
+                    ],
+                    StackName: 'Clickstream-ServiceCatalogAppRegistry-6666-6666',
                     Tags: Tags,
-                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-pipeline-stack.template.json',
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/service-catalog-appregistry-stack.template.json',
                   },
                 },
-                Next: 'DataModelingAthena',
-                Type: 'Stack',
-              },
-              DataModelingAthena: {
-                Data: {
-                  Callback: {
-                    BucketName: 'TEST_EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
-                  },
-                  Input: {
-                    Action: 'Create',
-                    Region: 'ap-southeast-1',
-                    Parameters: BASE_ATHENA_PARAMETERS,
-                    StackName: 'Clickstream-DataModelingAthena-6666-6666',
-                    Tags: Tags,
-                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-modeling-athena-stack.template.json',
-                  },
-                },
-                End: true,
-                Type: 'Stack',
-              },
-            },
-          },
-          {
-            StartAt: 'Metrics',
-            States: {
-              Metrics: {
-                Data: {
-                  Callback: {
-                    BucketName: 'TEST_EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
-                  },
-                  Input: {
-                    Action: 'Create',
-                    Region: 'ap-southeast-1',
-                    Parameters: BASE_METRICS_PARAMETERS,
-                    StackName: 'Clickstream-Metrics-6666-6666',
-                    Tags: Tags,
-                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/metrics-stack.template.json',
-                  },
-                },
-                End: true,
+                Next: 'PipelineStacks',
                 Type: 'Stack',
               },
             },
@@ -884,50 +1409,156 @@ describe('Workflow test', () => {
       Workflow: {
         Branches: [
           {
-            StartAt: 'Ingestion',
+            StartAt: 'ServiceCatalogAppRegistry',
             States: {
-              Ingestion: {
-                Data: {
-                  Callback: {
-                    BucketName: 'TEST_EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
+              PipelineStacks: {
+                Branches: [
+                  {
+                    StartAt: 'Ingestion',
+                    States: {
+                      Ingestion: {
+                        Data: {
+                          Callback: {
+                            BucketName: 'TEST_EXAMPLE_BUCKET',
+                            BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                          },
+                          Input: {
+                            Action: 'Create',
+                            Region: 'ap-southeast-1',
+                            Parameters: [
+                              ...INGESTION_MSK_PARAMETERS,
+                              APPREGISTRY_APPLICATION_ARN_PARAMETER,
+                            ],
+                            StackName: 'Clickstream-Ingestion-kafka-6666-6666',
+                            Tags: Tags,
+                            TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-kafka-stack.template.json',
+                          },
+                        },
+                        Next: 'KafkaConnector',
+                        Type: 'Stack',
+                      },
+                      KafkaConnector: {
+                        Data: {
+                          Callback: {
+                            BucketName: 'TEST_EXAMPLE_BUCKET',
+                            BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                          },
+                          Input: {
+                            Action: 'Create',
+                            Region: 'ap-southeast-1',
+                            Parameters: [
+                              ...BASE_KAFKACONNECTOR_BATCH_MSK_PARAMETERS,
+                              APPREGISTRY_APPLICATION_ARN_PARAMETER,
+                            ],
+                            StackName: 'Clickstream-KafkaConnector-6666-6666',
+                            Tags: Tags,
+                            TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/kafka-s3-sink-stack.template.json',
+                          },
+                        },
+                        End: true,
+                        Type: 'Stack',
+                      },
+                    },
                   },
-                  Input: {
-                    Action: 'Create',
-                    Region: 'ap-southeast-1',
-                    Parameters: INGESTION_MSK_PARAMETERS,
-                    StackName: 'Clickstream-Ingestion-kafka-6666-6666',
-                    Tags: Tags,
-                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-kafka-stack.template.json',
+                  {
+                    StartAt: 'DataProcessing',
+                    States: {
+                      DataProcessing: {
+                        Data: {
+                          Callback: {
+                            BucketName: 'TEST_EXAMPLE_BUCKET',
+                            BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                          },
+                          Input: {
+                            Action: 'Create',
+                            Region: 'ap-southeast-1',
+                            Parameters: [
+                              ...DATA_PROCESSING_PLUGIN2_PARAMETERS,
+                              APPREGISTRY_APPLICATION_ARN_PARAMETER,
+                            ],
+                            StackName: 'Clickstream-DataProcessing-6666-6666',
+                            Tags: Tags,
+                            TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-pipeline-stack.template.json',
+                          },
+                        },
+                        Next: 'DataModelingAthena',
+                        Type: 'Stack',
+                      },
+                      DataModelingAthena: {
+                        Data: {
+                          Callback: {
+                            BucketName: 'TEST_EXAMPLE_BUCKET',
+                            BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                          },
+                          Input: {
+                            Action: 'Create',
+                            Region: 'ap-southeast-1',
+                            Parameters: [
+                              ...BASE_ATHENA_PARAMETERS,
+                              APPREGISTRY_APPLICATION_ARN_PARAMETER,
+                            ],
+                            StackName: 'Clickstream-DataModelingAthena-6666-6666',
+                            Tags: Tags,
+                            TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-modeling-athena-stack.template.json',
+                          },
+                        },
+                        Next: 'DataModelingRedshift',
+                        Type: 'Stack',
+                      },
+                      DataModelingRedshift: {
+                        Data: {
+                          Callback: {
+                            BucketName: 'TEST_EXAMPLE_BUCKET',
+                            BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                          },
+                          Input: {
+                            Action: 'Create',
+                            Region: 'ap-southeast-1',
+                            Parameters: [
+                              ...MSK_DATA_PROCESSING_NEW_SERVERLESS_DATAANALYTICS_PARAMETERS,
+                              APPREGISTRY_APPLICATION_ARN_PARAMETER,
+                            ],
+                            StackName: 'Clickstream-DataModelingRedshift-6666-6666',
+                            Tags: Tags,
+                            TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-analytics-redshift-stack.template.json',
+                          },
+                        },
+                        End: true,
+                        Type: 'Stack',
+                      },
+                    },
                   },
-                },
-                Next: 'KafkaConnector',
-                Type: 'Stack',
-              },
-              KafkaConnector: {
-                Data: {
-                  Callback: {
-                    BucketName: 'TEST_EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                  {
+                    StartAt: 'Metrics',
+                    States: {
+                      Metrics: {
+                        Data: {
+                          Callback: {
+                            BucketName: 'TEST_EXAMPLE_BUCKET',
+                            BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                          },
+                          Input: {
+                            Action: 'Create',
+                            Region: 'ap-southeast-1',
+                            Parameters: [
+                              ...BASE_METRICS_PARAMETERS,
+                              APPREGISTRY_APPLICATION_ARN_PARAMETER,
+                            ],
+                            StackName: 'Clickstream-Metrics-6666-6666',
+                            Tags: Tags,
+                            TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/metrics-stack.template.json',
+                          },
+                        },
+                        End: true,
+                        Type: 'Stack',
+                      },
+                    },
                   },
-                  Input: {
-                    Action: 'Create',
-                    Region: 'ap-southeast-1',
-                    Parameters: BASE_KAFKACONNECTOR_BATCH_MSK_PARAMETERS,
-                    StackName: 'Clickstream-KafkaConnector-6666-6666',
-                    Tags: Tags,
-                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/kafka-s3-sink-stack.template.json',
-                  },
-                },
+                ],
                 End: true,
-                Type: 'Stack',
+                Type: 'Parallel',
               },
-            },
-          },
-          {
-            StartAt: 'DataProcessing',
-            States: {
-              DataProcessing: {
+              ServiceCatalogAppRegistry: {
                 Data: {
                   Callback: {
                     BucketName: 'TEST_EXAMPLE_BUCKET',
@@ -936,72 +1567,18 @@ describe('Workflow test', () => {
                   Input: {
                     Action: 'Create',
                     Region: 'ap-southeast-1',
-                    Parameters: DATA_PROCESSING_PLUGIN2_PARAMETERS,
-                    StackName: 'Clickstream-DataProcessing-6666-6666',
+                    Parameters: [
+                      {
+                        ParameterKey: 'ProjectId',
+                        ParameterValue: 'project_8888_8888',
+                      },
+                    ],
+                    StackName: 'Clickstream-ServiceCatalogAppRegistry-6666-6666',
                     Tags: Tags,
-                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-pipeline-stack.template.json',
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/service-catalog-appregistry-stack.template.json',
                   },
                 },
-                Next: 'DataModelingAthena',
-                Type: 'Stack',
-              },
-              DataModelingAthena: {
-                Data: {
-                  Callback: {
-                    BucketName: 'TEST_EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
-                  },
-                  Input: {
-                    Action: 'Create',
-                    Region: 'ap-southeast-1',
-                    Parameters: BASE_ATHENA_PARAMETERS,
-                    StackName: 'Clickstream-DataModelingAthena-6666-6666',
-                    Tags: Tags,
-                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-modeling-athena-stack.template.json',
-                  },
-                },
-                Next: 'DataModelingRedshift',
-                Type: 'Stack',
-              },
-              DataModelingRedshift: {
-                Data: {
-                  Callback: {
-                    BucketName: 'TEST_EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
-                  },
-                  Input: {
-                    Action: 'Create',
-                    Region: 'ap-southeast-1',
-                    Parameters: MSK_DATA_PROCESSING_NEW_SERVERLESS_DATAANALYTICS_PARAMETERS,
-                    StackName: 'Clickstream-DataModelingRedshift-6666-6666',
-                    Tags: Tags,
-                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-analytics-redshift-stack.template.json',
-                  },
-                },
-                End: true,
-                Type: 'Stack',
-              },
-            },
-          },
-          {
-            StartAt: 'Metrics',
-            States: {
-              Metrics: {
-                Data: {
-                  Callback: {
-                    BucketName: 'TEST_EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
-                  },
-                  Input: {
-                    Action: 'Create',
-                    Region: 'ap-southeast-1',
-                    Parameters: BASE_METRICS_PARAMETERS,
-                    StackName: 'Clickstream-Metrics-6666-6666',
-                    Tags: Tags,
-                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/metrics-stack.template.json',
-                  },
-                },
-                End: true,
+                Next: 'PipelineStacks',
                 Type: 'Stack',
               },
             },
@@ -1027,32 +1604,114 @@ describe('Workflow test', () => {
       Workflow: {
         Branches: [
           {
-            StartAt: 'Ingestion',
+            StartAt: 'ServiceCatalogAppRegistry',
             States: {
-              Ingestion: {
-                Data: {
-                  Callback: {
-                    BucketName: 'TEST_EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
+              PipelineStacks: {
+                Branches: [
+                  {
+                    StartAt: 'Ingestion',
+                    States: {
+                      Ingestion: {
+                        Data: {
+                          Callback: {
+                            BucketName: 'TEST_EXAMPLE_BUCKET',
+                            BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                          },
+                          Input: {
+                            Action: 'Create',
+                            Region: 'ap-southeast-1',
+                            Parameters: [
+                              ...INGESTION_KINESIS_ON_DEMAND_PARAMETERS,
+                              APPREGISTRY_APPLICATION_ARN_PARAMETER,
+                            ],
+                            StackName: 'Clickstream-Ingestion-kinesis-6666-6666',
+                            Tags: Tags,
+                            TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-kinesis-stack.template.json',
+                          },
+                        },
+                        End: true,
+                        Type: 'Stack',
+                      },
+                    },
                   },
-                  Input: {
-                    Action: 'Create',
-                    Region: 'ap-southeast-1',
-                    Parameters: INGESTION_KINESIS_ON_DEMAND_PARAMETERS,
-                    StackName: 'Clickstream-Ingestion-kinesis-6666-6666',
-                    Tags: Tags,
-                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-kinesis-stack.template.json',
+                  {
+                    StartAt: 'DataProcessing',
+                    States: {
+                      DataProcessing: {
+                        Data: {
+                          Callback: {
+                            BucketName: 'TEST_EXAMPLE_BUCKET',
+                            BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                          },
+                          Input: {
+                            Action: 'Create',
+                            Region: 'ap-southeast-1',
+                            Parameters: [
+                              ...DATA_PROCESSING_PLUGIN3_PARAMETERS,
+                              APPREGISTRY_APPLICATION_ARN_PARAMETER,
+                            ],
+                            StackName: 'Clickstream-DataProcessing-6666-6666',
+                            Tags: Tags,
+                            TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-pipeline-stack.template.json',
+                          },
+                        },
+                        Next: 'DataModelingRedshift',
+                        Type: 'Stack',
+                      },
+                      DataModelingRedshift: {
+                        Data: {
+                          Callback: {
+                            BucketName: 'TEST_EXAMPLE_BUCKET',
+                            BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                          },
+                          Input: {
+                            Action: 'Create',
+                            Region: 'ap-southeast-1',
+                            Parameters: [
+                              ...MSK_DATA_PROCESSING_NEW_SERVERLESS_DATAANALYTICS_PARAMETERS,
+                              APPREGISTRY_APPLICATION_ARN_PARAMETER,
+                            ],
+                            StackName: 'Clickstream-DataModelingRedshift-6666-6666',
+                            Tags: Tags,
+                            TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-analytics-redshift-stack.template.json',
+                          },
+                        },
+                        End: true,
+                        Type: 'Stack',
+                      },
+                    },
                   },
-                },
+                  {
+                    StartAt: 'Metrics',
+                    States: {
+                      Metrics: {
+                        Data: {
+                          Callback: {
+                            BucketName: 'TEST_EXAMPLE_BUCKET',
+                            BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                          },
+                          Input: {
+                            Action: 'Create',
+                            Region: 'ap-southeast-1',
+                            Parameters: [
+                              ...BASE_METRICS_PARAMETERS,
+                              APPREGISTRY_APPLICATION_ARN_PARAMETER,
+                            ],
+                            StackName: 'Clickstream-Metrics-6666-6666',
+                            Tags: Tags,
+                            TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/metrics-stack.template.json',
+                          },
+                        },
+                        End: true,
+                        Type: 'Stack',
+                      },
+                    },
+                  },
+                ],
                 End: true,
-                Type: 'Stack',
+                Type: 'Parallel',
               },
-            },
-          },
-          {
-            StartAt: 'DataProcessing',
-            States: {
-              DataProcessing: {
+              ServiceCatalogAppRegistry: {
                 Data: {
                   Callback: {
                     BucketName: 'TEST_EXAMPLE_BUCKET',
@@ -1061,54 +1720,18 @@ describe('Workflow test', () => {
                   Input: {
                     Action: 'Create',
                     Region: 'ap-southeast-1',
-                    Parameters: DATA_PROCESSING_PLUGIN3_PARAMETERS,
-                    StackName: 'Clickstream-DataProcessing-6666-6666',
+                    Parameters: [
+                      {
+                        ParameterKey: 'ProjectId',
+                        ParameterValue: 'project_8888_8888',
+                      },
+                    ],
+                    StackName: 'Clickstream-ServiceCatalogAppRegistry-6666-6666',
                     Tags: Tags,
-                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-pipeline-stack.template.json',
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/service-catalog-appregistry-stack.template.json',
                   },
                 },
-                Next: 'DataModelingRedshift',
-                Type: 'Stack',
-              },
-              DataModelingRedshift: {
-                Data: {
-                  Callback: {
-                    BucketName: 'TEST_EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
-                  },
-                  Input: {
-                    Action: 'Create',
-                    Region: 'ap-southeast-1',
-                    Parameters: MSK_DATA_PROCESSING_NEW_SERVERLESS_DATAANALYTICS_PARAMETERS,
-                    StackName: 'Clickstream-DataModelingRedshift-6666-6666',
-                    Tags: Tags,
-                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-analytics-redshift-stack.template.json',
-                  },
-                },
-                End: true,
-                Type: 'Stack',
-              },
-            },
-          },
-          {
-            StartAt: 'Metrics',
-            States: {
-              Metrics: {
-                Data: {
-                  Callback: {
-                    BucketName: 'TEST_EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
-                  },
-                  Input: {
-                    Action: 'Create',
-                    Region: 'ap-southeast-1',
-                    Parameters: BASE_METRICS_PARAMETERS,
-                    StackName: 'Clickstream-Metrics-6666-6666',
-                    Tags: Tags,
-                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/metrics-stack.template.json',
-                  },
-                },
-                End: true,
+                Next: 'PipelineStacks',
                 Type: 'Stack',
               },
             },
@@ -1133,32 +1756,135 @@ describe('Workflow test', () => {
       Workflow: {
         Branches: [
           {
-            StartAt: 'Ingestion',
+            StartAt: 'ServiceCatalogAppRegistry',
             States: {
-              Ingestion: {
-                Data: {
-                  Callback: {
-                    BucketName: 'TEST_EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
+              PipelineStacks: {
+                Branches: [
+                  {
+                    StartAt: 'Ingestion',
+                    States: {
+                      Ingestion: {
+                        Data: {
+                          Callback: {
+                            BucketName: 'TEST_EXAMPLE_BUCKET',
+                            BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                          },
+                          Input: {
+                            Action: 'Create',
+                            Region: 'ap-southeast-1',
+                            Parameters: [
+                              ...INGESTION_KINESIS_ON_DEMAND_PARAMETERS,
+                              APPREGISTRY_APPLICATION_ARN_PARAMETER,
+                            ],
+                            StackName: 'Clickstream-Ingestion-kinesis-6666-6666',
+                            Tags: Tags,
+                            TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-kinesis-stack.template.json',
+                          },
+                        },
+                        End: true,
+                        Type: 'Stack',
+                      },
+                    },
                   },
-                  Input: {
-                    Action: 'Create',
-                    Region: 'ap-southeast-1',
-                    Parameters: INGESTION_KINESIS_ON_DEMAND_PARAMETERS,
-                    StackName: 'Clickstream-Ingestion-kinesis-6666-6666',
-                    Tags: Tags,
-                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-kinesis-stack.template.json',
+                  {
+                    StartAt: 'DataProcessing',
+                    States: {
+                      DataProcessing: {
+                        Data: {
+                          Callback: {
+                            BucketName: 'TEST_EXAMPLE_BUCKET',
+                            BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                          },
+                          Input: {
+                            Action: 'Create',
+                            Region: 'ap-southeast-1',
+                            Parameters: [
+                              ...DATA_PROCESSING_PLUGIN3_PARAMETERS,
+                              APPREGISTRY_APPLICATION_ARN_PARAMETER,
+                            ],
+                            StackName: 'Clickstream-DataProcessing-6666-6666',
+                            Tags: Tags,
+                            TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-pipeline-stack.template.json',
+                          },
+                        },
+                        Next: 'DataModelingAthena',
+                        Type: 'Stack',
+                      },
+                      DataModelingAthena: {
+                        Data: {
+                          Callback: {
+                            BucketName: 'TEST_EXAMPLE_BUCKET',
+                            BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                          },
+                          Input: {
+                            Action: 'Create',
+                            Region: 'ap-southeast-1',
+                            Parameters: [
+                              ...BASE_ATHENA_PARAMETERS,
+                              APPREGISTRY_APPLICATION_ARN_PARAMETER,
+                            ],
+                            StackName: 'Clickstream-DataModelingAthena-6666-6666',
+                            Tags: Tags,
+                            TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-modeling-athena-stack.template.json',
+                          },
+                        },
+                        Next: 'DataModelingRedshift',
+                        Type: 'Stack',
+                      },
+                      DataModelingRedshift: {
+                        Data: {
+                          Callback: {
+                            BucketName: 'TEST_EXAMPLE_BUCKET',
+                            BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                          },
+                          Input: {
+                            Action: 'Create',
+                            Region: 'ap-southeast-1',
+                            Parameters: [
+                              ...MSK_DATA_PROCESSING_PROVISIONED_REDSHIFT_DATAANALYTICS_PARAMETERS,
+                              APPREGISTRY_APPLICATION_ARN_PARAMETER,
+                            ],
+                            StackName: 'Clickstream-DataModelingRedshift-6666-6666',
+                            Tags: Tags,
+                            TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-analytics-redshift-stack.template.json',
+                          },
+                        },
+                        End: true,
+                        Type: 'Stack',
+                      },
+                    },
                   },
-                },
+                  {
+                    StartAt: 'Metrics',
+                    States: {
+                      Metrics: {
+                        Data: {
+                          Callback: {
+                            BucketName: 'TEST_EXAMPLE_BUCKET',
+                            BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                          },
+                          Input: {
+                            Action: 'Create',
+                            Region: 'ap-southeast-1',
+                            Parameters: [
+                              ...BASE_METRICS_PARAMETERS,
+                              APPREGISTRY_APPLICATION_ARN_PARAMETER,
+                            ],
+                            StackName: 'Clickstream-Metrics-6666-6666',
+                            Tags: Tags,
+                            TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/metrics-stack.template.json',
+                          },
+                        },
+                        End: true,
+                        Type: 'Stack',
+                      },
+                    },
+                  },
+                ],
                 End: true,
-                Type: 'Stack',
+                Type: 'Parallel',
               },
-            },
-          },
-          {
-            StartAt: 'DataProcessing',
-            States: {
-              DataProcessing: {
+              ServiceCatalogAppRegistry: {
                 Data: {
                   Callback: {
                     BucketName: 'TEST_EXAMPLE_BUCKET',
@@ -1167,72 +1893,18 @@ describe('Workflow test', () => {
                   Input: {
                     Action: 'Create',
                     Region: 'ap-southeast-1',
-                    Parameters: DATA_PROCESSING_PLUGIN3_PARAMETERS,
-                    StackName: 'Clickstream-DataProcessing-6666-6666',
+                    Parameters: [
+                      {
+                        ParameterKey: 'ProjectId',
+                        ParameterValue: 'project_8888_8888',
+                      },
+                    ],
+                    StackName: 'Clickstream-ServiceCatalogAppRegistry-6666-6666',
                     Tags: Tags,
-                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-pipeline-stack.template.json',
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/service-catalog-appregistry-stack.template.json',
                   },
                 },
-                Next: 'DataModelingAthena',
-                Type: 'Stack',
-              },
-              DataModelingAthena: {
-                Data: {
-                  Callback: {
-                    BucketName: 'TEST_EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
-                  },
-                  Input: {
-                    Action: 'Create',
-                    Region: 'ap-southeast-1',
-                    Parameters: BASE_ATHENA_PARAMETERS,
-                    StackName: 'Clickstream-DataModelingAthena-6666-6666',
-                    Tags: Tags,
-                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-modeling-athena-stack.template.json',
-                  },
-                },
-                Next: 'DataModelingRedshift',
-                Type: 'Stack',
-              },
-              DataModelingRedshift: {
-                Data: {
-                  Callback: {
-                    BucketName: 'TEST_EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
-                  },
-                  Input: {
-                    Action: 'Create',
-                    Region: 'ap-southeast-1',
-                    Parameters: MSK_DATA_PROCESSING_PROVISIONED_REDSHIFT_DATAANALYTICS_PARAMETERS,
-                    StackName: 'Clickstream-DataModelingRedshift-6666-6666',
-                    Tags: Tags,
-                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-analytics-redshift-stack.template.json',
-                  },
-                },
-                End: true,
-                Type: 'Stack',
-              },
-            },
-          },
-          {
-            StartAt: 'Metrics',
-            States: {
-              Metrics: {
-                Data: {
-                  Callback: {
-                    BucketName: 'TEST_EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
-                  },
-                  Input: {
-                    Action: 'Create',
-                    Region: 'ap-southeast-1',
-                    Parameters: BASE_METRICS_PARAMETERS,
-                    StackName: 'Clickstream-Metrics-6666-6666',
-                    Tags: Tags,
-                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/metrics-stack.template.json',
-                  },
-                },
-                End: true,
+                Next: 'PipelineStacks',
                 Type: 'Stack',
               },
             },
@@ -1257,32 +1929,156 @@ describe('Workflow test', () => {
       Workflow: {
         Branches: [
           {
-            StartAt: 'Ingestion',
+            StartAt: 'ServiceCatalogAppRegistry',
             States: {
-              Ingestion: {
-                Data: {
-                  Callback: {
-                    BucketName: 'TEST_EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
+              PipelineStacks: {
+                Branches: [
+                  {
+                    StartAt: 'Ingestion',
+                    States: {
+                      Ingestion: {
+                        Data: {
+                          Callback: {
+                            BucketName: 'TEST_EXAMPLE_BUCKET',
+                            BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                          },
+                          Input: {
+                            Action: 'Create',
+                            Region: 'ap-southeast-1',
+                            Parameters: [
+                              ...INGESTION_KINESIS_ON_DEMAND_PARAMETERS,
+                              APPREGISTRY_APPLICATION_ARN_PARAMETER,
+                            ],
+                            StackName: 'Clickstream-Ingestion-kinesis-6666-6666',
+                            Tags: Tags,
+                            TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-kinesis-stack.template.json',
+                          },
+                        },
+                        End: true,
+                        Type: 'Stack',
+                      },
+                    },
                   },
-                  Input: {
-                    Action: 'Create',
-                    Region: 'ap-southeast-1',
-                    Parameters: INGESTION_KINESIS_ON_DEMAND_PARAMETERS,
-                    StackName: 'Clickstream-Ingestion-kinesis-6666-6666',
-                    Tags: Tags,
-                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-kinesis-stack.template.json',
+                  {
+                    StartAt: 'DataProcessing',
+                    States: {
+                      DataProcessing: {
+                        Data: {
+                          Callback: {
+                            BucketName: 'TEST_EXAMPLE_BUCKET',
+                            BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                          },
+                          Input: {
+                            Action: 'Create',
+                            Region: 'ap-southeast-1',
+                            Parameters: [
+                              ...DATA_PROCESSING_PLUGIN3_PARAMETERS,
+                              APPREGISTRY_APPLICATION_ARN_PARAMETER,
+                            ],
+                            StackName: 'Clickstream-DataProcessing-6666-6666',
+                            Tags: Tags,
+                            TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-pipeline-stack.template.json',
+                          },
+                        },
+                        Next: 'DataModelingAthena',
+                        Type: 'Stack',
+                      },
+                      DataModelingAthena: {
+                        Data: {
+                          Callback: {
+                            BucketName: 'TEST_EXAMPLE_BUCKET',
+                            BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                          },
+                          Input: {
+                            Action: 'Create',
+                            Region: 'ap-southeast-1',
+                            Parameters: [
+                              ...BASE_ATHENA_PARAMETERS,
+                              APPREGISTRY_APPLICATION_ARN_PARAMETER,
+                            ],
+                            StackName: 'Clickstream-DataModelingAthena-6666-6666',
+                            Tags: Tags,
+                            TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-modeling-athena-stack.template.json',
+                          },
+                        },
+                        Next: 'DataModelingRedshift',
+                        Type: 'Stack',
+                      },
+                      DataModelingRedshift: {
+                        Data: {
+                          Callback: {
+                            BucketName: 'TEST_EXAMPLE_BUCKET',
+                            BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                          },
+                          Input: {
+                            Action: 'Create',
+                            Region: 'ap-southeast-1',
+                            Parameters: [
+                              ...MSK_DATA_PROCESSING_PROVISIONED_REDSHIFT_DATAANALYTICS_PARAMETERS,
+                              APPREGISTRY_APPLICATION_ARN_PARAMETER,
+                            ],
+                            StackName: 'Clickstream-DataModelingRedshift-6666-6666',
+                            Tags: Tags,
+                            TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-analytics-redshift-stack.template.json',
+                          },
+                        },
+                        Next: 'Reporting',
+                        Type: 'Stack',
+                      },
+                      Reporting: {
+                        Data: {
+                          Callback: {
+                            BucketName: 'TEST_EXAMPLE_BUCKET',
+                            BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                          },
+                          Input: {
+                            Action: 'Create',
+                            Region: 'ap-southeast-1',
+                            Parameters: [
+                              ...REPORTING_WITH_PROVISIONED_REDSHIFT_PARAMETERS,
+                              APPREGISTRY_APPLICATION_ARN_PARAMETER,
+                            ],
+                            StackName: 'Clickstream-Reporting-6666-6666',
+                            Tags: Tags,
+                            TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-reporting-quicksight-stack.template.json',
+                          },
+                        },
+                        End: true,
+                        Type: 'Stack',
+                      },
+                    },
                   },
-                },
+                  {
+                    StartAt: 'Metrics',
+                    States: {
+                      Metrics: {
+                        Data: {
+                          Callback: {
+                            BucketName: 'TEST_EXAMPLE_BUCKET',
+                            BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                          },
+                          Input: {
+                            Action: 'Create',
+                            Region: 'ap-southeast-1',
+                            Parameters: [
+                              ...BASE_METRICS_PARAMETERS,
+                              APPREGISTRY_APPLICATION_ARN_PARAMETER,
+                            ],
+                            StackName: 'Clickstream-Metrics-6666-6666',
+                            Tags: Tags,
+                            TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/metrics-stack.template.json',
+                          },
+                        },
+                        End: true,
+                        Type: 'Stack',
+                      },
+                    },
+                  },
+                ],
                 End: true,
-                Type: 'Stack',
+                Type: 'Parallel',
               },
-            },
-          },
-          {
-            StartAt: 'DataProcessing',
-            States: {
-              DataProcessing: {
+              ServiceCatalogAppRegistry: {
                 Data: {
                   Callback: {
                     BucketName: 'TEST_EXAMPLE_BUCKET',
@@ -1291,90 +2087,18 @@ describe('Workflow test', () => {
                   Input: {
                     Action: 'Create',
                     Region: 'ap-southeast-1',
-                    Parameters: DATA_PROCESSING_PLUGIN3_PARAMETERS,
-                    StackName: 'Clickstream-DataProcessing-6666-6666',
+                    Parameters: [
+                      {
+                        ParameterKey: 'ProjectId',
+                        ParameterValue: 'project_8888_8888',
+                      },
+                    ],
+                    StackName: 'Clickstream-ServiceCatalogAppRegistry-6666-6666',
                     Tags: Tags,
-                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-pipeline-stack.template.json',
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/service-catalog-appregistry-stack.template.json',
                   },
                 },
-                Next: 'DataModelingAthena',
-                Type: 'Stack',
-              },
-              DataModelingAthena: {
-                Data: {
-                  Callback: {
-                    BucketName: 'TEST_EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
-                  },
-                  Input: {
-                    Action: 'Create',
-                    Region: 'ap-southeast-1',
-                    Parameters: BASE_ATHENA_PARAMETERS,
-                    StackName: 'Clickstream-DataModelingAthena-6666-6666',
-                    Tags: Tags,
-                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-modeling-athena-stack.template.json',
-                  },
-                },
-                Next: 'DataModelingRedshift',
-                Type: 'Stack',
-              },
-              DataModelingRedshift: {
-                Data: {
-                  Callback: {
-                    BucketName: 'TEST_EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
-                  },
-                  Input: {
-                    Action: 'Create',
-                    Region: 'ap-southeast-1',
-                    Parameters: MSK_DATA_PROCESSING_PROVISIONED_REDSHIFT_DATAANALYTICS_PARAMETERS,
-                    StackName: 'Clickstream-DataModelingRedshift-6666-6666',
-                    Tags: Tags,
-                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-analytics-redshift-stack.template.json',
-                  },
-                },
-                Next: 'Reporting',
-                Type: 'Stack',
-              },
-              Reporting: {
-                Data: {
-                  Callback: {
-                    BucketName: 'TEST_EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
-                  },
-                  Input: {
-                    Action: 'Create',
-                    Region: 'ap-southeast-1',
-                    Parameters: REPORTING_WITH_PROVISIONED_REDSHIFT_PARAMETERS,
-                    StackName: 'Clickstream-Reporting-6666-6666',
-                    Tags: Tags,
-                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-reporting-quicksight-stack.template.json',
-                  },
-                },
-                End: true,
-                Type: 'Stack',
-              },
-            },
-          },
-          {
-            StartAt: 'Metrics',
-            States: {
-              Metrics: {
-                Data: {
-                  Callback: {
-                    BucketName: 'TEST_EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
-                  },
-                  Input: {
-                    Action: 'Create',
-                    Region: 'ap-southeast-1',
-                    Parameters: BASE_METRICS_PARAMETERS,
-                    StackName: 'Clickstream-Metrics-6666-6666',
-                    Tags: Tags,
-                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/metrics-stack.template.json',
-                  },
-                },
-                End: true,
+                Next: 'PipelineStacks',
                 Type: 'Stack',
               },
             },
@@ -1400,32 +2124,135 @@ describe('Workflow test', () => {
       Workflow: {
         Branches: [
           {
-            StartAt: 'Ingestion',
+            StartAt: 'ServiceCatalogAppRegistry',
             States: {
-              Ingestion: {
-                Data: {
-                  Callback: {
-                    BucketName: 'TEST_EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
+              PipelineStacks: {
+                Branches: [
+                  {
+                    StartAt: 'Ingestion',
+                    States: {
+                      Ingestion: {
+                        Data: {
+                          Callback: {
+                            BucketName: 'TEST_EXAMPLE_BUCKET',
+                            BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                          },
+                          Input: {
+                            Action: 'Create',
+                            Region: 'ap-southeast-1',
+                            Parameters: [
+                              ...INGESTION_KINESIS_ON_DEMAND_PARAMETERS,
+                              APPREGISTRY_APPLICATION_ARN_PARAMETER,
+                            ],
+                            StackName: 'Clickstream-Ingestion-kinesis-6666-6666',
+                            Tags: Tags,
+                            TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-kinesis-stack.template.json',
+                          },
+                        },
+                        End: true,
+                        Type: 'Stack',
+                      },
+                    },
                   },
-                  Input: {
-                    Action: 'Create',
-                    Region: 'ap-southeast-1',
-                    Parameters: INGESTION_KINESIS_ON_DEMAND_PARAMETERS,
-                    StackName: 'Clickstream-Ingestion-kinesis-6666-6666',
-                    Tags: Tags,
-                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-kinesis-stack.template.json',
+                  {
+                    StartAt: 'DataProcessing',
+                    States: {
+                      DataProcessing: {
+                        Data: {
+                          Callback: {
+                            BucketName: 'TEST_EXAMPLE_BUCKET',
+                            BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                          },
+                          Input: {
+                            Action: 'Create',
+                            Region: 'ap-southeast-1',
+                            Parameters: [
+                              ...DATA_PROCESSING_PLUGIN3_PARAMETERS,
+                              APPREGISTRY_APPLICATION_ARN_PARAMETER,
+                            ],
+                            StackName: 'Clickstream-DataProcessing-6666-6666',
+                            Tags: Tags,
+                            TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-pipeline-stack.template.json',
+                          },
+                        },
+                        Next: 'DataModelingRedshift',
+                        Type: 'Stack',
+                      },
+                      DataModelingRedshift: {
+                        Data: {
+                          Callback: {
+                            BucketName: 'TEST_EXAMPLE_BUCKET',
+                            BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                          },
+                          Input: {
+                            Action: 'Create',
+                            Region: 'ap-southeast-1',
+                            Parameters: [
+                              ...MSK_DATA_PROCESSING_NEW_SERVERLESS_DATAANALYTICS_PARAMETERS,
+                              APPREGISTRY_APPLICATION_ARN_PARAMETER,
+                            ],
+                            StackName: 'Clickstream-DataModelingRedshift-6666-6666',
+                            Tags: Tags,
+                            TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-analytics-redshift-stack.template.json',
+                          },
+                        },
+                        Next: 'Reporting',
+                        Type: 'Stack',
+                      },
+                      Reporting: {
+                        Data: {
+                          Callback: {
+                            BucketName: 'TEST_EXAMPLE_BUCKET',
+                            BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                          },
+                          Input: {
+                            Action: 'Create',
+                            Region: 'ap-southeast-1',
+                            Parameters: [
+                              ...REPORTING_WITH_NEW_REDSHIFT_PARAMETERS,
+                              APPREGISTRY_APPLICATION_ARN_PARAMETER,
+                            ],
+                            StackName: 'Clickstream-Reporting-6666-6666',
+                            Tags: Tags,
+                            TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-reporting-quicksight-stack.template.json',
+                          },
+                        },
+                        End: true,
+                        Type: 'Stack',
+                      },
+                    },
                   },
-                },
+                  {
+                    StartAt: 'Metrics',
+                    States: {
+                      Metrics: {
+                        Data: {
+                          Callback: {
+                            BucketName: 'TEST_EXAMPLE_BUCKET',
+                            BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                          },
+                          Input: {
+                            Action: 'Create',
+                            Region: 'ap-southeast-1',
+                            Parameters: [
+                              ...BASE_METRICS_PARAMETERS,
+                              APPREGISTRY_APPLICATION_ARN_PARAMETER,
+                            ],
+                            StackName: 'Clickstream-Metrics-6666-6666',
+                            Tags: Tags,
+                            TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/metrics-stack.template.json',
+                          },
+                        },
+                        End: true,
+                        Type: 'Stack',
+                      },
+                    },
+                  },
+                ],
                 End: true,
-                Type: 'Stack',
+                Type: 'Parallel',
               },
-            },
-          },
-          {
-            StartAt: 'DataProcessing',
-            States: {
-              DataProcessing: {
+              ServiceCatalogAppRegistry: {
                 Data: {
                   Callback: {
                     BucketName: 'TEST_EXAMPLE_BUCKET',
@@ -1434,72 +2261,18 @@ describe('Workflow test', () => {
                   Input: {
                     Action: 'Create',
                     Region: 'ap-southeast-1',
-                    Parameters: DATA_PROCESSING_PLUGIN3_PARAMETERS,
-                    StackName: 'Clickstream-DataProcessing-6666-6666',
+                    Parameters: [
+                      {
+                        ParameterKey: 'ProjectId',
+                        ParameterValue: 'project_8888_8888',
+                      },
+                    ],
+                    StackName: 'Clickstream-ServiceCatalogAppRegistry-6666-6666',
                     Tags: Tags,
-                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-pipeline-stack.template.json',
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/service-catalog-appregistry-stack.template.json',
                   },
                 },
-                Next: 'DataModelingRedshift',
-                Type: 'Stack',
-              },
-              DataModelingRedshift: {
-                Data: {
-                  Callback: {
-                    BucketName: 'TEST_EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
-                  },
-                  Input: {
-                    Action: 'Create',
-                    Region: 'ap-southeast-1',
-                    Parameters: MSK_DATA_PROCESSING_NEW_SERVERLESS_DATAANALYTICS_PARAMETERS,
-                    StackName: 'Clickstream-DataModelingRedshift-6666-6666',
-                    Tags: Tags,
-                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-analytics-redshift-stack.template.json',
-                  },
-                },
-                Next: 'Reporting',
-                Type: 'Stack',
-              },
-              Reporting: {
-                Data: {
-                  Callback: {
-                    BucketName: 'TEST_EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
-                  },
-                  Input: {
-                    Action: 'Create',
-                    Region: 'ap-southeast-1',
-                    Parameters: REPORTING_WITH_NEW_REDSHIFT_PARAMETERS,
-                    StackName: 'Clickstream-Reporting-6666-6666',
-                    Tags: Tags,
-                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-reporting-quicksight-stack.template.json',
-                  },
-                },
-                End: true,
-                Type: 'Stack',
-              },
-            },
-          },
-          {
-            StartAt: 'Metrics',
-            States: {
-              Metrics: {
-                Data: {
-                  Callback: {
-                    BucketName: 'TEST_EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
-                  },
-                  Input: {
-                    Action: 'Create',
-                    Region: 'ap-southeast-1',
-                    Parameters: BASE_METRICS_PARAMETERS,
-                    StackName: 'Clickstream-Metrics-6666-6666',
-                    Tags: Tags,
-                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/metrics-stack.template.json',
-                  },
-                },
-                End: true,
+                Next: 'PipelineStacks',
                 Type: 'Stack',
               },
             },
@@ -1527,117 +2300,162 @@ describe('Workflow test', () => {
       Workflow: {
         Branches: [
           {
-            StartAt: 'Ingestion',
+            StartAt: 'ServiceCatalogAppRegistry',
             States: {
-              Ingestion: {
-                Data: {
-                  Callback: {
-                    BucketName: 'TEST_EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
-                  },
-                  Input: {
-                    Action: 'Create',
-                    Region: 'ap-southeast-1',
-                    Parameters: INGESTION_MSK_WITHOUT_APP_PARAMETERS,
-                    StackName: 'Clickstream-Ingestion-kafka-6666-6666',
-                    Tags: Tags,
-                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-kafka-stack.template.json',
-                  },
-                },
-                Next: 'KafkaConnector',
-                Type: 'Stack',
-              },
-              KafkaConnector: {
-                Data: {
-                  Callback: {
-                    BucketName: 'TEST_EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
-                  },
-                  Input: {
-                    Action: 'Create',
-                    Region: 'ap-southeast-1',
-                    Parameters: BASE_KAFKACONNECTOR_BATCH_MSK_PARAMETERS,
-                    StackName: 'Clickstream-KafkaConnector-6666-6666',
-                    Tags: Tags,
-                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/kafka-s3-sink-stack.template.json',
-                  },
-                },
-                End: true,
-                Type: 'Stack',
-              },
-            },
-          },
-          {
-            StartAt: 'DataProcessing',
-            States: {
-              DataProcessing: {
-                Data: {
-                  Callback: {
-                    BucketName: 'TEST_EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
-                  },
-                  Input: {
-                    Action: 'Create',
-                    Region: 'ap-southeast-1',
-                    Parameters: DATA_PROCESSING_PLUGIN4_PARAMETERS,
-                    StackName: 'Clickstream-DataProcessing-6666-6666',
-                    Tags: Tags,
-                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-pipeline-stack.template.json',
-                  },
-                },
-                Next: 'DataModelingAthena',
-                Type: 'Stack',
-              },
-              DataModelingAthena: {
-                Data: {
-                  Callback: {
-                    BucketName: 'TEST_EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
-                  },
-                  Input: {
-                    Action: 'Create',
-                    Region: 'ap-southeast-1',
-                    Parameters: BASE_ATHENA_PARAMETERS,
-                    StackName: 'Clickstream-DataModelingAthena-6666-6666',
-                    Tags: Tags,
-                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-modeling-athena-stack.template.json',
-                  },
-                },
-                Next: 'DataModelingRedshift',
-                Type: 'Stack',
-              },
-              DataModelingRedshift: {
-                Data: {
-                  Callback: {
-                    BucketName: 'TEST_EXAMPLE_BUCKET',
-                    BucketPrefix: 'clickstream/workflow/main-3333-3333',
-                  },
-                  Input: {
-                    Action: 'Create',
-                    Region: 'ap-southeast-1',
-                    Parameters: mergeParameters(
-                      MSK_DATA_PROCESSING_NEW_SERVERLESS_DATAANALYTICS_PARAMETERS,
-                      [
-                        {
-                          ParameterKey: 'AppIds',
-                          ParameterValue: '',
+              PipelineStacks: {
+                Branches: [
+                  {
+                    StartAt: 'Ingestion',
+                    States: {
+                      Ingestion: {
+                        Data: {
+                          Callback: {
+                            BucketName: 'TEST_EXAMPLE_BUCKET',
+                            BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                          },
+                          Input: {
+                            Action: 'Create',
+                            Region: 'ap-southeast-1',
+                            Parameters: [
+                              ...INGESTION_MSK_WITHOUT_APP_PARAMETERS,
+                              APPREGISTRY_APPLICATION_ARN_PARAMETER,
+                            ],
+                            StackName: 'Clickstream-Ingestion-kafka-6666-6666',
+                            Tags: Tags,
+                            TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/ingestion-server-kafka-stack.template.json',
+                          },
                         },
-                      ],
-                    ),
-                    StackName: 'Clickstream-DataModelingRedshift-6666-6666',
-                    Tags: Tags,
-                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-analytics-redshift-stack.template.json',
+                        Next: 'KafkaConnector',
+                        Type: 'Stack',
+                      },
+                      KafkaConnector: {
+                        Data: {
+                          Callback: {
+                            BucketName: 'TEST_EXAMPLE_BUCKET',
+                            BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                          },
+                          Input: {
+                            Action: 'Create',
+                            Region: 'ap-southeast-1',
+                            Parameters: [
+                              ...BASE_KAFKACONNECTOR_BATCH_MSK_PARAMETERS,
+                              APPREGISTRY_APPLICATION_ARN_PARAMETER,
+                            ],
+                            StackName: 'Clickstream-KafkaConnector-6666-6666',
+                            Tags: Tags,
+                            TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/kafka-s3-sink-stack.template.json',
+                          },
+                        },
+                        End: true,
+                        Type: 'Stack',
+                      },
+                    },
                   },
-                },
+                  {
+                    StartAt: 'DataProcessing',
+                    States: {
+                      DataProcessing: {
+                        Data: {
+                          Callback: {
+                            BucketName: 'TEST_EXAMPLE_BUCKET',
+                            BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                          },
+                          Input: {
+                            Action: 'Create',
+                            Region: 'ap-southeast-1',
+                            Parameters: [
+                              ...DATA_PROCESSING_PLUGIN4_PARAMETERS,
+                              APPREGISTRY_APPLICATION_ARN_PARAMETER,
+                            ],
+                            StackName: 'Clickstream-DataProcessing-6666-6666',
+                            Tags: Tags,
+                            TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-pipeline-stack.template.json',
+                          },
+                        },
+                        Next: 'DataModelingAthena',
+                        Type: 'Stack',
+                      },
+                      DataModelingAthena: {
+                        Data: {
+                          Callback: {
+                            BucketName: 'TEST_EXAMPLE_BUCKET',
+                            BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                          },
+                          Input: {
+                            Action: 'Create',
+                            Region: 'ap-southeast-1',
+                            Parameters: [
+                              ...BASE_ATHENA_PARAMETERS,
+                              APPREGISTRY_APPLICATION_ARN_PARAMETER,
+                            ],
+                            StackName: 'Clickstream-DataModelingAthena-6666-6666',
+                            Tags: Tags,
+                            TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-modeling-athena-stack.template.json',
+                          },
+                        },
+                        Next: 'DataModelingRedshift',
+                        Type: 'Stack',
+                      },
+                      DataModelingRedshift: {
+                        Data: {
+                          Callback: {
+                            BucketName: 'TEST_EXAMPLE_BUCKET',
+                            BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                          },
+                          Input: {
+                            Action: 'Create',
+                            Region: 'ap-southeast-1',
+                            Parameters: mergeParameters(
+                              MSK_DATA_PROCESSING_NEW_SERVERLESS_DATAANALYTICS_PARAMETERS,
+                              [
+                                {
+                                  ParameterKey: 'AppIds',
+                                  ParameterValue: '',
+                                },
+                                APPREGISTRY_APPLICATION_ARN_PARAMETER,
+                              ],
+                            ),
+                            StackName: 'Clickstream-DataModelingRedshift-6666-6666',
+                            Tags: Tags,
+                            TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/data-analytics-redshift-stack.template.json',
+                          },
+                        },
+                        End: true,
+                        Type: 'Stack',
+                      },
+                    },
+                  },
+                  {
+                    StartAt: 'Metrics',
+                    States: {
+                      Metrics: {
+                        Data: {
+                          Callback: {
+                            BucketName: 'TEST_EXAMPLE_BUCKET',
+                            BucketPrefix: 'clickstream/workflow/main-3333-3333',
+                          },
+                          Input: {
+                            Action: 'Create',
+                            Region: 'ap-southeast-1',
+                            Parameters: [
+                              ...BASE_METRICS_PARAMETERS,
+                              APPREGISTRY_APPLICATION_ARN_PARAMETER,
+                            ],
+                            StackName: 'Clickstream-Metrics-6666-6666',
+                            Tags: Tags,
+                            TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/metrics-stack.template.json',
+                          },
+                        },
+                        End: true,
+                        Type: 'Stack',
+                      },
+                    },
+                  },
+                ],
                 End: true,
-                Type: 'Stack',
+                Type: 'Parallel',
               },
-            },
-          },
-          {
-            StartAt: 'Metrics',
-            States: {
-              Metrics: {
+              ServiceCatalogAppRegistry: {
                 Data: {
                   Callback: {
                     BucketName: 'TEST_EXAMPLE_BUCKET',
@@ -1646,13 +2464,18 @@ describe('Workflow test', () => {
                   Input: {
                     Action: 'Create',
                     Region: 'ap-southeast-1',
-                    Parameters: BASE_METRICS_PARAMETERS,
-                    StackName: 'Clickstream-Metrics-6666-6666',
+                    Parameters: [
+                      {
+                        ParameterKey: 'ProjectId',
+                        ParameterValue: 'project_8888_8888',
+                      },
+                    ],
+                    StackName: 'Clickstream-ServiceCatalogAppRegistry-6666-6666',
                     Tags: Tags,
-                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/metrics-stack.template.json',
+                    TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/v1.0.0/default/service-catalog-appregistry-stack.template.json',
                   },
                 },
-                End: true,
+                Next: 'PipelineStacks',
                 Type: 'Stack',
               },
             },

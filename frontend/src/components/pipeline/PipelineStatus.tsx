@@ -32,11 +32,12 @@ interface PipelineStatusProps {
   projectId?: string;
   pipelineId?: string;
   status?: string;
+  updatePipelineStatus?: (status: EPipelineStatus) => void;
 }
 const PipelineStatus: React.FC<PipelineStatusProps> = (
   props: PipelineStatusProps
 ) => {
-  const { status, projectId, pipelineId } = props;
+  const { status, projectId, pipelineId, updatePipelineStatus } = props;
   const { t } = useTranslation();
   let intervalId: any = 0;
   const [loadingStatus, setLoadingStatus] = useState(false);
@@ -103,6 +104,8 @@ const PipelineStatus: React.FC<PipelineStatusProps> = (
           data.status?.status === EPipelineStatus.Warning
         ) {
           window.clearInterval(intervalId);
+          // update pipeline status
+          updatePipelineStatus?.(data.status.status);
         }
         setLoadingStatus(false);
       }
@@ -148,54 +151,52 @@ const PipelineStatus: React.FC<PipelineStatusProps> = (
   };
 
   return (
-    <>
-      <Popover
-        dismissButton={false}
-        position="right"
-        size="large"
-        triggerType="custom"
-        content={
-          loadingStatus ? (
-            <Spinner />
-          ) : (
-            <SpaceBetween direction="vertical" size="xs">
-              {stackStatusList.map((element) => {
-                return (
-                  <div className="flex flex-1" key={element.stackType}>
-                    <StatusIndicator
-                      type={getStackStatusIndicatorType(
-                        element.stackTemplateVersion,
-                        element.stackStatus
-                      )}
-                    >
-                      <b>{element.stackType}</b>(
-                      {element.stackStatus ?? t('status.pending')})
-                      {element.stackStatus && (
-                        <span className="ml-5">
-                          <Link
-                            external
-                            href={buildCloudFormationStackLink(
-                              pipelineRegion,
-                              element.stackName
-                            )}
-                          >
-                            {t('pipeline:detail.stackDetails')}
-                          </Link>
-                        </span>
-                      )}
-                    </StatusIndicator>
-                  </div>
-                );
-              })}
-            </SpaceBetween>
-          )
-        }
-      >
-        <StatusIndicator type={indicatorType}>
-          <span className="stack-status">{t(displayStatus)}</span>
-        </StatusIndicator>
-      </Popover>
-    </>
+    <Popover
+      dismissButton={false}
+      position="right"
+      size="large"
+      triggerType="custom"
+      content={
+        loadingStatus ? (
+          <Spinner />
+        ) : (
+          <SpaceBetween direction="vertical" size="xs">
+            {stackStatusList.map((element) => {
+              return (
+                <div className="flex flex-1" key={element.stackType}>
+                  <StatusIndicator
+                    type={getStackStatusIndicatorType(
+                      element.stackTemplateVersion,
+                      element.stackStatus
+                    )}
+                  >
+                    <b>{element.stackType}</b>(
+                    {element.stackStatus ?? t('status.pending')})
+                    {element.stackStatus && (
+                      <span className="ml-5">
+                        <Link
+                          external
+                          href={buildCloudFormationStackLink(
+                            pipelineRegion,
+                            element.stackName
+                          )}
+                        >
+                          {t('pipeline:detail.stackDetails')}
+                        </Link>
+                      </span>
+                    )}
+                  </StatusIndicator>
+                </div>
+              );
+            })}
+          </SpaceBetween>
+        )
+      }
+    >
+      <StatusIndicator type={indicatorType}>
+        <span className="stack-status">{t(displayStatus)}</span>
+      </StatusIndicator>
+    </Popover>
   );
 };
 

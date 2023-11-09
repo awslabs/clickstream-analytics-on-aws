@@ -364,6 +364,12 @@ describe('DataAnalyticsRedshiftStack common parameter test', () => {
     expect(condition3[CFN_FN.EQUALS][1]).toEqual('Provisioned');
 
   });
+
+  test('Should has Parameter AppRegistryApplicationArn', () => {
+    template.hasParameter('AppRegistryApplicationArn', {
+      Type: 'String',
+    });
+  });
 });
 
 describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
@@ -3786,6 +3792,7 @@ describe('DataAnalyticsRedshiftStack serverless custom resource test', () => {
         },
         databaseName: RefAnyValue,
         dataAPIRole: RefAnyValue,
+        lastModifiedTime: Match.anyValue(),
         serverlessRedshiftProps: {
           databaseName: RefAnyValue,
           namespaceId: RefAnyValue,
@@ -4098,6 +4105,53 @@ describe('DataAnalyticsRedshiftStack tests', () => {
           Value: SolutionInfo.SOLUTION_VERSION,
         }),
       ]),
+    });
+  });
+
+  test('Should has ApplicationArnCondition', () => {
+    stackTemplate.hasCondition('ApplicationArnCondition', {
+      'Fn::Not': [
+        {
+          'Fn::Equals': [
+            {
+              Ref: 'AppRegistryApplicationArn',
+            },
+            '',
+          ],
+        },
+      ],
+    });
+  });
+
+  test('Should has AppRegistryAssociation', () => {
+    stackTemplate.hasResourceProperties('AWS::ServiceCatalogAppRegistry::ResourceAssociation', {
+      Application: {
+        'Fn::Select': [
+          2,
+          {
+            'Fn::Split': [
+              '/',
+              {
+                'Fn::Select': [
+                  5,
+                  {
+                    'Fn::Split': [
+                      ':',
+                      {
+                        Ref: 'AppRegistryApplicationArn',
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+      Resource: {
+        Ref: 'AWS::StackId',
+      },
+      ResourceType: 'CFN_STACK',
     });
   });
 });

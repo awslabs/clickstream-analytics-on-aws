@@ -11,7 +11,6 @@
  *  and limitations under the License.
  */
 
-
 import { CfnParameter, Fn, Stack, StackProps } from 'aws-cdk-lib';
 import { ISecurityGroup, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
 import { Bucket, IBucket } from 'aws-cdk-lib/aws-s3';
@@ -21,10 +20,12 @@ import { addCfnNagForLogRetention, addCfnNagToStack, addCfnNagForCustomResourceP
 import { DOMAIN_NAME_PATTERN } from './common/constant';
 import { Parameters } from './common/parameters';
 import { SolutionInfo } from './common/solution-info';
+import { associateApplicationWithStack } from './common/stack';
 import {
   KafkaS3SinkConnector,
   KafkaS3SinkConnectorProps,
 } from './ingestion-server/kafka-s3-connector/kafka-s3-connector';
+
 const domainNamePattern = DOMAIN_NAME_PATTERN;
 
 export interface KafkaS3SinkConnectorStackProps extends StackProps {}
@@ -198,6 +199,9 @@ export class KafkaS3SinkConnectorStack extends Stack {
     new KafkaS3SinkConnector(this, 'KafkaS3SinkConnector', p);
     addCdkNagToStack(this);
     addCfnNag(this);
+
+    // Associate Service Catalog AppRegistry application with stack
+    associateApplicationWithStack(this);
   }
 }
 

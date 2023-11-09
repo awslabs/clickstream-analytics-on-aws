@@ -190,6 +190,36 @@ export const ServerlessRedshiftRPUByRegionMapping = {
   },
 };
 
+export const SERVICE_CATALOG_SUPPORTED_REGIONS = [
+  'us-east-1',
+  'us-east-2',
+  'us-west-1',
+  'us-west-2',
+  'af-south-1',
+  'ap-east-1',
+  'ap-south-1',
+  'ap-south-2',
+  'ap-northeast-1',
+  'ap-northeast-2',
+  'ap-northeast-3',
+  'ap-southeast-1',
+  'ap-southeast-2',
+  'ap-southeast-3',
+  'ap-southeast-4',
+  'ca-central-1',
+  'eu-central-1',
+  'eu-central-2',
+  'eu-west-1',
+  'eu-west-2',
+  'eu-west-3',
+  'eu-south-1',
+  'eu-south-2',
+  'eu-north-1',
+  'me-south-1',
+  'me-central-1',
+  'sa-east-1',
+];
+
 // regex patterns
 export const SUBNETS_PATTERN = 'subnet-[a-f0-9]+,(subnet-[a-f0-9]+,?)+';
 export const SECURITY_GROUP_PATTERN = 'sg-[a-f0-9]+';
@@ -231,6 +261,7 @@ export const SECRETS_MANAGER_ARN_PATTERN =
   '^$|^arn:aws(-cn|-us-gov)?:secretsmanager:[a-z0-9-]+:[0-9]{12}:secret:[a-zA-Z0-9-\/]+$';
 export const DDB_TABLE_ARN_PATTERN =
   '^arn:aws(-cn|-us-gov)?:dynamodb:[a-z0-9-]+:[0-9]{12}:table\/[a-zA-Z0-9_.-]+$';
+export const SERVICE_CATALOG_APPREGISTRY_ARN_PATTERN = 'arn:aws(-cn|-us-gov)?:servicecatalog:[a-z0-9-]+:[0-9]{12}:\/applications\/[a-zA-Z0-9_.-]+';
 export const SCHEDULE_EXPRESSION_PATTERN =
   '^(rate\\(\\s*\\d+\\s+(hour|minute|day)s?\\s*\\))|(cron\\(.*\\))$';
 
@@ -335,15 +366,15 @@ export const QUICKSIGHT_DATASET_INFIX= '-dataset-';
 
 export const EMR_ARCHITECTURE_AUTO = 'Auto';
 
-export const CLICKSTREAM_RETENTION_VIEW_PLACEHOLDER = 'clickstream_retention_view';
-export const CLICKSTREAM_SESSION_VIEW_PLACEHOLDER = 'clickstream_session_view';
-export const CLICKSTREAM_USER_DIM_VIEW_PLACEHOLDER = 'clickstream_user_dim_view';
-export const CLICKSTREAM_EVENT_VIEW_PLACEHOLDER = 'clickstream_event_view';
-export const CLICKSTREAM_DEVICE_VIEW_PLACEHOLDER = 'clickstream_device_view';
-export const CLICKSTREAM_EVENT_PARAMETER_VIEW_PLACEHOLDER = 'clickstream_event_parameter_view';
-export const CLICKSTREAM_LIFECYCLE_DAILY_VIEW_PLACEHOLDER = 'clickstream_lifecycle_daily_view';
-export const CLICKSTREAM_LIFECYCLE_WEEKLY_VIEW_PLACEHOLDER = 'clickstream_lifecycle_weekly_view';
-export const CLICKSTREAM_USER_ATTR_VIEW_PLACEHOLDER = 'clickstream_user_attr_view';
+export const CLICKSTREAM_RETENTION_VIEW_PLACEHOLDER = 'Retention_View';
+export const CLICKSTREAM_SESSION_VIEW_PLACEHOLDER = 'Session_View';
+export const CLICKSTREAM_USER_DIM_VIEW_PLACEHOLDER = 'User_Dim_View';
+export const CLICKSTREAM_EVENT_VIEW_PLACEHOLDER = 'Event_View';
+export const CLICKSTREAM_DEVICE_VIEW_PLACEHOLDER = 'Device_View';
+export const CLICKSTREAM_EVENT_PARAMETER_VIEW_PLACEHOLDER = 'Event_Parameter_View';
+export const CLICKSTREAM_LIFECYCLE_DAILY_VIEW_PLACEHOLDER = 'Lifecycle_Daily_View';
+export const CLICKSTREAM_LIFECYCLE_WEEKLY_VIEW_PLACEHOLDER = 'Lifecycle_Weekly_View';
+export const CLICKSTREAM_USER_ATTR_VIEW_PLACEHOLDER = 'User_Attr_View';
 
 export const CLICKSTREAM_RETENTION_VIEW_NAME = 'clickstream_retention_view_v1';
 export const CLICKSTREAM_SESSION_VIEW_NAME = 'clickstream_session_view_v1';

@@ -37,7 +37,7 @@
 
         !!! info "重要提示"
             {%
-            include-markdown "tls-note.md"
+            include-markdown "./tls-note.md"
             %}
 
     - 如果在 AWS 区域中使用自定义域启动解决方案，则此解决方案使用以下额外参数：

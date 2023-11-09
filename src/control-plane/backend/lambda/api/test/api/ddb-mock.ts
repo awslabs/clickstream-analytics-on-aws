@@ -58,7 +58,7 @@ export const AllowIAMUserPutObejectPolicyWithErrorBucket = '{"Version":"2012-10-
 export const AllowIAMUserPutObejectPolicyWithErrorBucketPrefix = '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":"arn:aws:iam::127311923021:root"},"Action":["s3:PutObject","s3:PutObjectLegalHold","s3:PutObjectRetention","s3:PutObjectTagging","s3:PutObjectVersionTagging","s3:Abort*"],"Resource":"arn:aws:s3:::EXAMPLE_BUCKET/*"}]}';
 export const AllowIAMUserPutObejectPolicyWithErrorService = '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"Service":"errorservice.elasticloadbalancing.amazonaws.com"},"Action":["s3:PutObject","s3:PutObjectLegalHold","s3:PutObjectRetention","s3:PutObjectTagging","s3:PutObjectVersionTagging","s3:Abort*"],"Resource":"arn:aws:s3:::EXAMPLE_BUCKET/clickstream/*"}]}';
 export const AllowIAMUserPutObejectPolicyInApSouthEast1 = '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":"arn:aws:iam::027434742980:root"},"Action":["s3:PutObject","s3:PutObjectLegalHold","s3:PutObjectRetention","s3:PutObjectTagging","s3:PutObjectVersionTagging","s3:Abort*"],"Resource":"arn:aws:s3:::EXAMPLE_BUCKET/clickstream/*"},{"Effect":"Allow","Principal":{"AWS":"arn:aws:iam::114774131450:root"},"Action":["s3:PutObject","s3:PutObjectLegalHold","s3:PutObjectRetention","s3:PutObjectTagging","s3:PutObjectVersionTagging","s3:Abort*"],"Resource":"arn:aws:s3:::EXAMPLE_BUCKET/clickstream/*"}]}';
-
+export const AllowIAMUserPutObjectPolicyInCnNorth1 = '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":"arn:aws-cn:iam::638102146993:root"},"Action":["s3:PutObject","s3:PutObjectLegalHold","s3:PutObjectRetention","s3:PutObjectTagging","s3:PutObjectVersionTagging","s3:Abort*"],"Resource":"arn:aws-cn:s3:::EXAMPLE_BUCKET/clickstream/*"}]}';
 
 function userMock(ddbMock: any, userId: string, role: IUserRole, existed?: boolean): any {
   if (!existed) {
@@ -323,6 +323,7 @@ function dictionaryMock(ddbMock: any, name?: string): any {
           Reporting: 'data-reporting-quicksight-stack.template.json',
           Metrics: 'metrics-stack.template.json',
           DataModelingAthena: 'data-modeling-athena-stack.template.json',
+          ServiceCatalogAppRegistry: 'service-catalog-appregistry-stack.template.json',
         },
       },
     });
@@ -862,6 +863,161 @@ function createPipelineMock(
   });
 }
 
+function createPipelineMockForBJSRegion(ec2Mock: any, s3Mock: any) {
+  const defaultSubnets = [
+    {
+      SubnetId: 'subnet-00000000000000010',
+      AvailabilityZone: 'cn-north-1a',
+      CidrBlock: '10.0.16.0/20',
+    },
+    {
+      SubnetId: 'subnet-00000000000000011',
+      AvailabilityZone: 'cn-north-1b',
+      CidrBlock: '10.0.32.0/20',
+    },
+    {
+      SubnetId: 'subnet-00000000000000012',
+      AvailabilityZone: 'cn-north-1c',
+      CidrBlock: '10.0.48.0/20',
+    },
+    {
+      SubnetId: 'subnet-00000000000000013',
+      AvailabilityZone: 'cn-north-1d',
+      CidrBlock: '10.0.64.0/20',
+    },
+    {
+      SubnetId: 'subnet-00000000000000021',
+      AvailabilityZone: 'cn-north-1b',
+      CidrBlock: '10.0.64.0/20',
+    },
+    {
+      SubnetId: 'subnet-00000000000000022',
+      AvailabilityZone: 'cn-north-1c',
+      CidrBlock: '10.0.64.0/20',
+    },
+    {
+      SubnetId: 'subnet-00000000000000023',
+      AvailabilityZone: 'cn-north-1d',
+      CidrBlock: '10.0.64.0/20',
+    },
+  ];
+  ec2Mock.on(DescribeSubnetsCommand)
+    .resolves({
+      Subnets: defaultSubnets,
+    });
+  const vpcEndpointsGroups = [{ GroupId: 'sg-00000000000000030' }];
+  ec2Mock.on(DescribeVpcEndpointsCommand).resolves({
+    VpcEndpoints: [
+      {
+        VpcEndpointId: 'vpce-s3',
+        ServiceName: 'cn.com.amazonaws.cn-northwest-1.s3',
+        VpcEndpointType: VpcEndpointType.Gateway,
+        Groups: vpcEndpointsGroups,
+        SubnetIds: defaultSubnets.map(subnet => subnet.SubnetId),
+      },
+      {
+        VpcEndpointId: 'vpce-dynamodb',
+        ServiceName: 'cn.com.amazonaws.cn-northwest-1.dynamodb',
+        VpcEndpointType: VpcEndpointType.Gateway,
+        Groups: vpcEndpointsGroups,
+        SubnetIds: defaultSubnets.map(subnet => subnet.SubnetId),
+      },
+      {
+        VpcEndpointId: 'vpce-glue',
+        ServiceName: 'cn.com.amazonaws.cn-northwest-1.glue',
+        VpcEndpointType: VpcEndpointType.Interface,
+        Groups: [{ GroupId: 'sg-00000000000000031' }],
+        SubnetIds: defaultSubnets.map(subnet => subnet.SubnetId),
+      },
+      {
+        VpcEndpointId: 'vpce-error',
+        ServiceName: 'cn.com.amazonaws.cn-northwest-1.error',
+        VpcEndpointType: VpcEndpointType.Interface,
+        Groups: vpcEndpointsGroups,
+        SubnetIds: [],
+      },
+      {
+        VpcEndpointId: 'vpce-emr-serverless',
+        ServiceName: 'cn.com.amazonaws.cn-northwest-1.emr-serverless',
+        VpcEndpointType: VpcEndpointType.Interface,
+        Groups: vpcEndpointsGroups,
+        SubnetIds: defaultSubnets.map(subnet => subnet.SubnetId),
+      },
+      {
+        VpcEndpointId: 'vpce-states',
+        ServiceName: 'cn.com.amazonaws.cn-northwest-1.states',
+        VpcEndpointType: VpcEndpointType.Interface,
+        Groups: vpcEndpointsGroups,
+        SubnetIds: defaultSubnets.map(subnet => subnet.SubnetId),
+      },
+      {
+        VpcEndpointId: 'vpce-logs',
+        ServiceName: 'cn.com.amazonaws.cn-northwest-1.logs',
+        VpcEndpointType: VpcEndpointType.Interface,
+        Groups: vpcEndpointsGroups,
+        SubnetIds: defaultSubnets.map(subnet => subnet.SubnetId),
+      },
+      {
+        VpcEndpointId: 'vpce-redshift-data',
+        ServiceName: 'cn.com.amazonaws.cn-northwest-1.redshift-data',
+        VpcEndpointType: VpcEndpointType.Interface,
+        Groups: vpcEndpointsGroups,
+        SubnetIds: defaultSubnets.map(subnet => subnet.SubnetId),
+      },
+      {
+        VpcEndpointId: 'vpce-sts',
+        ServiceName: 'cn.com.amazonaws.cn-northwest-1.sts',
+        VpcEndpointType: VpcEndpointType.Interface,
+        Groups: vpcEndpointsGroups,
+        SubnetIds: defaultSubnets.map(subnet => subnet.SubnetId),
+      },
+      {
+        VpcEndpointId: 'vpce-ecr-dkr',
+        ServiceName: 'cn.com.amazonaws.cn-northwest-1.ecr.dkr',
+        VpcEndpointType: VpcEndpointType.Interface,
+        Groups: vpcEndpointsGroups,
+        SubnetIds: defaultSubnets.map(subnet => subnet.SubnetId),
+      },
+      {
+        VpcEndpointId: 'vpce-ecr-api',
+        ServiceName: 'cn.com.amazonaws.cn-northwest-1.ecr.api',
+        VpcEndpointType: VpcEndpointType.Interface,
+        Groups: vpcEndpointsGroups,
+        SubnetIds: defaultSubnets.map(subnet => subnet.SubnetId),
+      },
+      {
+        VpcEndpointId: 'vpce-ecs',
+        ServiceName: 'cn.com.amazonaws.cn-northwest-1.ecs',
+        VpcEndpointType: VpcEndpointType.Interface,
+        Groups: vpcEndpointsGroups,
+        SubnetIds: defaultSubnets.map(subnet => subnet.SubnetId),
+      },
+      {
+        VpcEndpointId: 'vpce-ecs-agent',
+        ServiceName: 'cn.com.amazonaws.cn-northwest-1.ecs-agent',
+        VpcEndpointType: VpcEndpointType.Interface,
+        Groups: vpcEndpointsGroups,
+        SubnetIds: defaultSubnets.map(subnet => subnet.SubnetId),
+      },
+      {
+        VpcEndpointId: 'vpce-ecs-telemetry',
+        ServiceName: 'cn.com.amazonaws.cn-northwest-1.ecs-telemetry',
+        VpcEndpointType: VpcEndpointType.Interface,
+        Groups: vpcEndpointsGroups,
+        SubnetIds: defaultSubnets.map(subnet => subnet.SubnetId),
+      },
+      {
+        VpcEndpointId: 'vpce-kinesis-streams',
+        ServiceName: 'cn.com.amazonaws.cn-northwest-1.kinesis-streams',
+        VpcEndpointType: VpcEndpointType.Interface,
+        Groups: vpcEndpointsGroups,
+        SubnetIds: defaultSubnets.map(subnet => subnet.SubnetId),
+      },
+    ],
+  });
+  s3Mock.on(GetBucketPolicyCommand).resolves({ Policy: AllowIAMUserPutObjectPolicyInCnNorth1 });
+}
+
 export {
   MOCK_TOKEN,
   MOCK_PROJECT_ID,
@@ -887,6 +1043,7 @@ export {
   pluginExistedMock,
   dictionaryMock,
   createPipelineMock,
+  createPipelineMockForBJSRegion,
   metadataEventExistedMock,
   metadataEventAttributeExistedMock,
   metadataUserAttributeExistedMock,

@@ -86,6 +86,10 @@ export const clickstream_event_view_columns: InputColumn[] = [
     Type: 'STRING',
   },
   {
+    Name: 'device_id',
+    Type: 'STRING',
+  },
+  {
     Name: 'device_mobile_brand_name',
     Type: 'STRING',
   },
@@ -250,6 +254,10 @@ export const clickstream_event_parameter_view_columns: InputColumn[] = [
   },
   {
     Name: 'event_param_string_value',
+    Type: 'STRING',
+  },
+  {
+    Name: 'event_param_value',
     Type: 'STRING',
   },
   {

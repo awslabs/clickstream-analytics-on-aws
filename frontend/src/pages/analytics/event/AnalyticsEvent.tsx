@@ -87,6 +87,7 @@ interface AnalyticsEventProps {
   metadataUserAttributes: IMetadataUserAttribute[];
   categoryEvents: CategoryItemType[];
   presetParameters: CategoryItemType[];
+  groupParameters: CategoryItemType[];
   loadingEvents: boolean;
 }
 
@@ -101,6 +102,7 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
     metadataUserAttributes,
     categoryEvents,
     presetParameters,
+    groupParameters,
     loadingEvents,
   } = props;
   const { appId } = useParams();
@@ -532,7 +534,7 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
               <br />
               <SectionTitle type="group" />
               <AttributeGroup
-                presetParameters={presetParameters}
+                groupParameters={groupParameters}
                 groupOption={groupOption}
                 setGroupOption={setGroupOption}
               />

@@ -73,6 +73,7 @@ test('Parameters settings are as expected', () => {
     ['RotateIntervalMS', 'Number', '3000000'],
     ['FlushSize', 'Number', '50000'],
     ['CustomConnectorConfiguration', 'String', '{}'],
+    ['AppRegistryApplicationArn', 'String'],
   ];
 
   for (const param of params) {
@@ -417,3 +418,49 @@ test('Should set metrics widgets', () => {
   });
 });
 
+test('Should has ApplicationArnCondition', () => {
+  template.hasCondition('ApplicationArnCondition', {
+    'Fn::Not': [
+      {
+        'Fn::Equals': [
+          {
+            Ref: 'AppRegistryApplicationArn',
+          },
+          '',
+        ],
+      },
+    ],
+  });
+});
+
+test('Should has AppRegistryAssociation', () => {
+  template.hasResourceProperties('AWS::ServiceCatalogAppRegistry::ResourceAssociation', {
+    Application: {
+      'Fn::Select': [
+        2,
+        {
+          'Fn::Split': [
+            '/',
+            {
+              'Fn::Select': [
+                5,
+                {
+                  'Fn::Split': [
+                    ':',
+                    {
+                      Ref: 'AppRegistryApplicationArn',
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+    Resource: {
+      Ref: 'AWS::StackId',
+    },
+    ResourceType: 'CFN_STACK',
+  });
+});

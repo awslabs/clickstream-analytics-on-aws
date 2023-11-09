@@ -32,7 +32,7 @@ import {
 import { AssumeRoleCommand, STSClient } from '@aws-sdk/client-sts';
 import Mustache from 'mustache';
 import { v4 as uuidv4 } from 'uuid';
-import { DataSetProps, dataSetActions } from './dashboard-ln';
+import { DataSetProps, dataSetPermissionActions } from './dashboard-ln';
 import { EventAndCondition } from './sql-builder';
 import { AnalysisType, ExploreConversionIntervalType, ExploreLocales, ExplorePathNodeType, ExplorePathSessionDef, ExploreRelativeTimeUnit, ExploreRequestAction, ExploreTimeScopeType, ExploreVisualName, MetadataValueType, QuickSightChartType } from '../../common/explore-types';
 import { logger } from '../../common/powertools';
@@ -329,7 +329,7 @@ export const createDataSet = async (quickSight: QuickSight, awsAccountId: string
       Name: `${props.name}dataset-${datasetId}`,
       Permissions: [{
         Principal: principalArn,
-        Actions: dataSetActions,
+        Actions: dataSetPermissionActions,
       }],
 
       ImportMode: props.importMode,
@@ -560,7 +560,7 @@ function _getFunnelBarChartVisualDef(visualId: string, viewName: string, titlePr
 }
 
 export function getFunnelTableVisualDef(visualId: string, viewName: string, eventNames: string[],
-  titleProps: DashboardTitleProps, groupColumn: string): Visual {
+  titleProps: DashboardTitleProps, groupColumn: string, groupingConditionCol: string): Visual {
 
   const visualDef = JSON.parse(readFileSync(join(__dirname, './templates/funnel-table-chart.json'), 'utf8')) as Visual;
   visualDef.TableVisual!.VisualId = visualId;
@@ -587,6 +587,23 @@ export function getFunnelTableVisualDef(visualId: string, viewName: string, even
     FieldId: sortFieldId,
     Width: '120px',
   });
+
+  if (groupingConditionCol !== '') {
+    const groupColFieldId = uuidv4();
+    groupBy.push({
+      CategoricalDimensionField: {
+        FieldId: groupColFieldId,
+        Column: {
+          DataSetIdentifier: viewName,
+          ColumnName: groupingConditionCol,
+        },
+      },
+    });
+    fieldOptions.push({
+      FieldId: groupColFieldId,
+      Width: '120px',
+    });
+  }
 
   const maxIndex = eventNames.length - 1;
   for (const [index, eventName] of eventNames.entries()) {
@@ -1255,6 +1272,13 @@ function _checkCommonPartParameter(params: any): CheckParamsStatus | void {
         message: 'At least missing one of following parameters [dashboardId,sheetId,chartTitle,chartSubTitle].',
       };
     }
+  }
+
+  if (params.groupCondition !== undefined && params.groupCondition.property === '') {
+    return {
+      success: false,
+      message: '\'property\' attribute of grouping condition is empty.',
+    };
   }
 
   if (params.groupCondition !== undefined && params.groupCondition.dataType !== MetadataValueType.STRING) {

@@ -270,6 +270,11 @@ describe('DataReportingQuickSightStack parameter test', () => {
     }
   });
 
+  test('Should has Parameter AppRegistryApplicationArn', () => {
+    template.hasParameter('AppRegistryApplicationArn', {
+      Type: 'String',
+    });
+  });
 });
 
 describe('DataReportingQuickSightStack resource test', () => {
@@ -278,69 +283,45 @@ describe('DataReportingQuickSightStack resource test', () => {
   const stack = new DataReportingQuickSightStack(app, testId+'-data-analytics-quicksight-stack', {});
   const template = Template.fromStack(stack);
 
-  template.resourcePropertiesCountIs('AWS::IAM::Policy', {
-    PolicyDocument: {
-      Statement: [
-        {
-          Action: [
-            'logs:CreateLogStream',
-            'logs:PutLogEvents',
-            'logs:CreateLogGroup',
-          ],
-          Effect: 'Allow',
-          Resource: {
-            'Fn::Join': [
-              '',
-              [
-                'arn:',
-                {
-                  Ref: 'AWS::Partition',
-                },
-                ':logs:',
-                {
-                  Ref: 'AWS::Region',
-                },
-                ':',
-                {
-                  Ref: 'AWS::AccountId',
-                },
-                ':log-group:/aws/lambda/*',
-              ],
+  template.resourcePropertiesCountIs('AWS::IAM::Policy',
+    {
+      PolicyDocument: {
+        Statement: [
+          {
+            Action: [
+              'logs:CreateLogStream',
+              'logs:PutLogEvents',
+              'logs:CreateLogGroup',
             ],
-          },
-        },
-        {
-          Action: [
-            'quicksight:DescribeDataSource',
-            'quicksight:PassDataSource',
-          ],
-          Effect: 'Allow',
-          Resource: {
-            'Fn::Join': [
-              '',
-              [
-                'arn:',
-                {
-                  Ref: 'AWS::Partition',
-                },
-                ':quicksight:',
-                {
-                  Ref: 'AWS::Region',
-                },
-                ':',
-                {
-                  Ref: 'AWS::AccountId',
-                },
-                ':datasource/clickstream_datasource_*',
+            Effect: 'Allow',
+            Resource: {
+              'Fn::Join': [
+                '',
+                [
+                  'arn:',
+                  {
+                    Ref: 'AWS::Partition',
+                  },
+                  ':logs:',
+                  {
+                    Ref: 'AWS::Region',
+                  },
+                  ':',
+                  {
+                    Ref: 'AWS::AccountId',
+                  },
+                  ':log-group:/aws/lambda/*',
+                ],
               ],
-            ],
+            },
           },
-        },
-        {
-          Action: 'quicksight:DescribeTemplate',
-          Effect: 'Allow',
-          Resource: [
-            {
+          {
+            Action: [
+              'quicksight:DescribeDataSource',
+              'quicksight:PassDataSource',
+            ],
+            Effect: 'Allow',
+            Resource: {
               'Fn::Join': [
                 '',
                 [
@@ -356,117 +337,145 @@ describe('DataReportingQuickSightStack resource test', () => {
                   {
                     Ref: 'AWS::AccountId',
                   },
-                  ':template/clickstream_template_*',
+                  ':datasource/clickstream_datasource_*',
                 ],
               ],
             },
-            {
-              'Fn::GetAtt': [
-                'ClickstreamTemplateDef',
-                'Arn',
+          },
+          {
+            Action: 'quicksight:DescribeTemplate',
+            Effect: 'Allow',
+            Resource: [
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    {
+                      Ref: 'AWS::Partition',
+                    },
+                    ':quicksight:',
+                    {
+                      Ref: 'AWS::Region',
+                    },
+                    ':',
+                    {
+                      Ref: 'AWS::AccountId',
+                    },
+                    ':template/clickstream_template_*',
+                  ],
+                ],
+              },
+              {
+                'Fn::GetAtt': [
+                  'ClickstreamTemplateDef',
+                  'Arn',
+                ],
+              },
+            ],
+          },
+          {
+            Action: [
+              'quicksight:DescribeDataSet',
+              'quicksight:DeleteDataSet',
+              'quicksight:CreateDataSet',
+              'quicksight:UpdateDataSet',
+              'quicksight:PassDataSet',
+              'quicksight:PassDataSource',
+              'quicksight:UpdateDataSetPermissions',
+            ],
+            Effect: 'Allow',
+            Resource: {
+              'Fn::Join': [
+                '',
+                [
+                  'arn:',
+                  {
+                    Ref: 'AWS::Partition',
+                  },
+                  ':quicksight:',
+                  {
+                    Ref: 'AWS::Region',
+                  },
+                  ':',
+                  {
+                    Ref: 'AWS::AccountId',
+                  },
+                  ':dataset/clickstream_dataset_*',
+                ],
               ],
             },
-          ],
-        },
-        {
-          Action: [
-            'quicksight:DescribeDataSet',
-            'quicksight:DeleteDataSet',
-            'quicksight:CreateDataSet',
-            'quicksight:UpdateDataSet',
-            'quicksight:PassDataSet',
-            'quicksight:PassDataSource',
-          ],
-          Effect: 'Allow',
-          Resource: {
-            'Fn::Join': [
-              '',
-              [
-                'arn:',
-                {
-                  Ref: 'AWS::Partition',
-                },
-                ':quicksight:',
-                {
-                  Ref: 'AWS::Region',
-                },
-                ':',
-                {
-                  Ref: 'AWS::AccountId',
-                },
-                ':dataset/clickstream_dataset_*',
-              ],
-            ],
           },
-        },
-        {
-          Action: [
-            'quicksight:DescribeAnalysis',
-            'quicksight:DeleteAnalysis',
-            'quicksight:CreateAnalysis',
-            'quicksight:UpdateAnalysis',
-          ],
-          Effect: 'Allow',
-          Resource: {
-            'Fn::Join': [
-              '',
-              [
-                'arn:',
-                {
-                  Ref: 'AWS::Partition',
-                },
-                ':quicksight:',
-                {
-                  Ref: 'AWS::Region',
-                },
-                ':',
-                {
-                  Ref: 'AWS::AccountId',
-                },
-                ':analysis/clickstream_analysis_*',
-              ],
+          {
+            Action: [
+              'quicksight:DescribeAnalysis',
+              'quicksight:DeleteAnalysis',
+              'quicksight:CreateAnalysis',
+              'quicksight:UpdateAnalysis',
+              'quicksight:UpdateAnalysisPermissions',
             ],
-          },
-        },
-        {
-          Action: [
-            'quicksight:DescribeDashboard',
-            'quicksight:DeleteDashboard',
-            'quicksight:CreateDashboard',
-            'quicksight:UpdateDashboard',
-          ],
-          Effect: 'Allow',
-          Resource: {
-            'Fn::Join': [
-              '',
-              [
-                'arn:',
-                {
-                  Ref: 'AWS::Partition',
-                },
-                ':quicksight:',
-                {
-                  Ref: 'AWS::Region',
-                },
-                ':',
-                {
-                  Ref: 'AWS::AccountId',
-                },
-                ':dashboard/clickstream_dashboard_*',
+            Effect: 'Allow',
+            Resource: {
+              'Fn::Join': [
+                '',
+                [
+                  'arn:',
+                  {
+                    Ref: 'AWS::Partition',
+                  },
+                  ':quicksight:',
+                  {
+                    Ref: 'AWS::Region',
+                  },
+                  ':',
+                  {
+                    Ref: 'AWS::AccountId',
+                  },
+                  ':analysis/clickstream_analysis_*',
+                ],
               ],
-            ],
+            },
           },
+          {
+            Action: [
+              'quicksight:DescribeDashboard',
+              'quicksight:DeleteDashboard',
+              'quicksight:CreateDashboard',
+              'quicksight:UpdateDashboard',
+              'quicksight:UpdateDashboardPermissions',
+            ],
+            Effect: 'Allow',
+            Resource: {
+              'Fn::Join': [
+                '',
+                [
+                  'arn:',
+                  {
+                    Ref: 'AWS::Partition',
+                  },
+                  ':quicksight:',
+                  {
+                    Ref: 'AWS::Region',
+                  },
+                  ':',
+                  {
+                    Ref: 'AWS::AccountId',
+                  },
+                  ':dashboard/clickstream_dashboard_*',
+                ],
+              ],
+            },
+          },
+        ],
+        Version: '2012-10-17',
+      },
+      PolicyName: 'QuicksightCustomResourceLambdaRoleDefaultPolicyA0EB8B03',
+      Roles: [
+        {
+          Ref: 'QuicksightCustomResourceLambdaRole58092032',
         },
       ],
-      Version: '2012-10-17',
-    },
-    PolicyName: 'QuicksightCustomResourceLambdaRoleDefaultPolicyA0EB8B03',
-    Roles: [
-      {
-        Ref: 'QuicksightCustomResourceLambdaRole58092032',
-      },
-    ],
-  }, 1);
+    }, 1);
 
   template.resourcePropertiesCountIs('AWS::Lambda::Function', {
     Code: Match.anyValue(),
@@ -843,7 +852,7 @@ describe('DataReportingQuickSightStack resource test', () => {
         dataSets: [
           {
             name: '',
-            tableName: 'clickstream_user_dim_view',
+            tableName: 'User_Dim_View',
             importMode: 'DIRECT_QUERY',
             columns: [
               {
@@ -951,7 +960,7 @@ describe('DataReportingQuickSightStack resource test', () => {
           },
           {
             name: '',
-            tableName: 'clickstream_retention_view',
+            tableName: 'Retention_View',
             importMode: 'DIRECT_QUERY',
             customSql: 'SELECT * FROM {{schema}}.clickstream_retention_view_v1',
             columns: [
@@ -981,7 +990,7 @@ describe('DataReportingQuickSightStack resource test', () => {
           },
           {
             name: '',
-            tableName: 'clickstream_session_view',
+            tableName: 'Session_View',
             importMode: 'DIRECT_QUERY',
             customSql: 'SELECT * FROM {{schema}}.clickstream_session_view_v1',
             columns: [
@@ -1056,7 +1065,7 @@ describe('DataReportingQuickSightStack resource test', () => {
           },
           {
             name: '',
-            tableName: 'clickstream_user_attr_view',
+            tableName: 'User_Attr_View',
             importMode: 'DIRECT_QUERY',
             customSql: 'SELECT * FROM {{schema}}.clickstream_user_attr_view_v1',
             columns: [
@@ -1121,7 +1130,7 @@ describe('DataReportingQuickSightStack resource test', () => {
           },
           {
             name: '',
-            tableName: 'clickstream_event_view',
+            tableName: 'Event_View',
             importMode: 'DIRECT_QUERY',
             customSql: 'SELECT * FROM {{schema}}.clickstream_event_view_v1',
             columns: [
@@ -1175,6 +1184,10 @@ describe('DataReportingQuickSightStack resource test', () => {
               },
               {
                 Name: 'app_info_sdk_version',
+                Type: 'STRING',
+              },
+              {
+                Name: 'device_id',
                 Type: 'STRING',
               },
               {
@@ -1344,6 +1357,7 @@ describe('DataReportingQuickSightStack resource test', () => {
               'app_info_version',
               'app_info_sdk_name',
               'app_info_sdk_version',
+              'device_id',
               'device_mobile_brand_name',
               'device_mobile_model_name',
               'device_manufacturer',
@@ -1381,7 +1395,7 @@ describe('DataReportingQuickSightStack resource test', () => {
           },
           {
             name: '',
-            tableName: 'clickstream_device_view',
+            tableName: 'Device_View',
             importMode: 'DIRECT_QUERY',
             customSql: 'SELECT * FROM {{schema}}.clickstream_device_view_v1',
             columns: [
@@ -1511,7 +1525,7 @@ describe('DataReportingQuickSightStack resource test', () => {
           },
           {
             name: '',
-            tableName: 'clickstream_event_parameter_view',
+            tableName: 'Event_Parameter_View',
             importMode: 'DIRECT_QUERY',
             customSql: 'SELECT * FROM {{schema}}.clickstream_event_parameter_view_v1',
             columns: [
@@ -1548,6 +1562,10 @@ describe('DataReportingQuickSightStack resource test', () => {
                 Type: 'STRING',
               },
               {
+                Name: 'event_param_value',
+                Type: 'STRING',
+              },
+              {
                 Name: 'platform',
                 Type: 'STRING',
               },
@@ -1573,15 +1591,16 @@ describe('DataReportingQuickSightStack resource test', () => {
               'user_pseudo_id',
               'event_timestamp',
               'event_param_key',
-              'event_param_string_value',
               'event_param_double_value',
               'event_param_float_value',
               'event_param_int_value',
+              'event_param_string_value',
+              'event_param_value',
             ],
           },
           {
             name: '',
-            tableName: 'clickstream_lifecycle_daily_view',
+            tableName: 'Lifecycle_Daily_View',
             importMode: 'DIRECT_QUERY',
             customSql: 'SELECT * FROM {{schema}}.clickstream_lifecycle_daily_view_v1',
             columns: [
@@ -1606,7 +1625,7 @@ describe('DataReportingQuickSightStack resource test', () => {
           },
           {
             name: '',
-            tableName: 'clickstream_lifecycle_weekly_view',
+            tableName: 'Lifecycle_Weekly_View',
             importMode: 'DIRECT_QUERY',
             customSql: 'SELECT * FROM {{schema}}.clickstream_lifecycle_weekly_view_v1',
             columns: [
@@ -1632,5 +1651,52 @@ describe('DataReportingQuickSightStack resource test', () => {
         ],
       },
     }, 1);
+
+  test('Should has ApplicationArnCondition', () => {
+    template.hasCondition('ApplicationArnCondition', {
+      'Fn::Not': [
+        {
+          'Fn::Equals': [
+            {
+              Ref: 'AppRegistryApplicationArn',
+            },
+            '',
+          ],
+        },
+      ],
+    });
+  });
+
+  test('Should has AppRegistryAssociation', () => {
+    template.hasResourceProperties('AWS::ServiceCatalogAppRegistry::ResourceAssociation', {
+      Application: {
+        'Fn::Select': [
+          2,
+          {
+            'Fn::Split': [
+              '/',
+              {
+                'Fn::Select': [
+                  5,
+                  {
+                    'Fn::Split': [
+                      ':',
+                      {
+                        Ref: 'AppRegistryApplicationArn',
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+      Resource: {
+        Ref: 'AWS::StackId',
+      },
+      ResourceType: 'CFN_STACK',
+    });
+  });
 
 });

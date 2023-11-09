@@ -58,6 +58,12 @@ test('Should has Parameter Emails', () => {
   });
 });
 
+test('Should has Parameter AppRegistryApplicationArn', () => {
+  template.hasParameter('AppRegistryApplicationArn', {
+    Type: 'String',
+  });
+});
+
 test('has Events::Rule', () => {
   template.hasResourceProperties('AWS::Events::Rule', {
     EventPattern: {
@@ -226,5 +232,52 @@ test('has Key for cloudwatch to Decrypt', () => {
       Version: '2012-10-17',
     },
     EnableKeyRotation: true,
+  });
+});
+
+test('Should has ApplicationArnCondition', () => {
+  template.hasCondition('ApplicationArnCondition', {
+    'Fn::Not': [
+      {
+        'Fn::Equals': [
+          {
+            Ref: 'AppRegistryApplicationArn',
+          },
+          '',
+        ],
+      },
+    ],
+  });
+});
+
+test('Should has AppRegistryAssociation', () => {
+  template.hasResourceProperties('AWS::ServiceCatalogAppRegistry::ResourceAssociation', {
+    Application: {
+      'Fn::Select': [
+        2,
+        {
+          'Fn::Split': [
+            '/',
+            {
+              'Fn::Select': [
+                5,
+                {
+                  'Fn::Split': [
+                    ':',
+                    {
+                      Ref: 'AppRegistryApplicationArn',
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+    Resource: {
+      Ref: 'AWS::StackId',
+    },
+    ResourceType: 'CFN_STACK',
   });
 });

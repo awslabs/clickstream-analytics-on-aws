@@ -313,7 +313,7 @@ project.buildWorkflow.preBuildSteps.push({
 project.buildWorkflow.preBuildSteps.push({
   name: 'Login to Amazon ECR Public',
   if: '${{ env.iam_role_to_assume != \'\' }}',
-  uses: 'aws-actions/amazon-ecr-login@v1',
+  uses: 'aws-actions/amazon-ecr-login@v2',
   with: {
     'registry-type': 'public',
   },
@@ -372,6 +372,7 @@ project.upgradeWorkflow.workflows[0].jobs.upgrade.steps.splice(4, 0, {
 project.github.actions.set('actions/checkout', 'actions/checkout@v4');
 project.github.actions.set('actions/setup-node', 'actions/setup-node@v4');
 project.github.actions.set('amannn/action-semantic-pull-request', 'amannn/action-semantic-pull-request@v5');
+project.github.actions.set('peter-evans/create-pull-request', 'peter-evans/create-pull-request@v5');
 
 const provisionViperlightScripts = [
   'curl -sL https://deb.nodesource.com/setup_16.x | bash -',

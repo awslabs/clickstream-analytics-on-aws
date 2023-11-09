@@ -45,6 +45,7 @@ import { mockClient } from 'aws-sdk-client-mock';
 import request from 'supertest';
 import {
   createPipelineMock,
+  createPipelineMockForBJSRegion,
   dictionaryMock,
   MOCK_EXECUTION_ID,
   MOCK_PIPELINE_ID,
@@ -67,10 +68,10 @@ import {
   KINESIS_DATA_PROCESSING_PROVISIONED_REDSHIFT_QUICKSIGHT_PIPELINE,
   S3_INGESTION_HTTP_AUTHENTICATION_PIPELINE,
   KINESIS_DATA_PROCESSING_NEW_REDSHIFT_WITH_ERROR_RPU_PIPELINE,
-  S3_DATA_PROCESSING_WITH_ERROR_PREFIX_PIPELINE,
   KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW_AND_EXPRESSION_UPDATE,
   KINESIS_DATA_PROCESSING_PROVISIONED_REDSHIFT_ERROR_DBUSER_QUICKSIGHT_PIPELINE,
   BASE_STATUS,
+  S3_DATA_PROCESSING_WITH_ERROR_PREFIX_PIPELINE,
 } from './pipeline-mock';
 import { clickStreamTableName, dictionaryTableName, prefixTimeGSIName } from '../../common/constants';
 import { BuiltInTagKeys } from '../../common/model-ln';
@@ -170,6 +171,36 @@ describe('Pipeline test', () => {
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         ...S3_INGESTION_PIPELINE,
+      });
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(201);
+    expect(res.body.data).toHaveProperty('id');
+    expect(res.body.message).toEqual('Pipeline added.');
+    expect(res.body.success).toEqual(true);
+    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeVpcEndpointsCommand, 1);
+    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSecurityGroupRulesCommand, 1);
+    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSubnetsCommand, 1);
+    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeRouteTablesCommand, 1);
+    expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 1);
+  });
+  it('Create pipeline in the region where Service Catalog service is not available', async () => {
+    tokenMock(ddbMock, false);
+    projectExistedMock(ddbMock, true);
+    dictionaryMock(ddbMock);
+    createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock,
+      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, iamMock, {
+        publicAZContainPrivateAZ: true,
+        subnetsCross3AZ: true,
+        subnetsIsolated: true,
+      });
+    ddbMock.on(PutCommand).resolves({});
+    createPipelineMockForBJSRegion(ec2Mock, s3Mock);
+    const res = await request(app)
+      .post('/api/pipeline')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
+      .send({
+        ...S3_INGESTION_PIPELINE,
+        region: 'cn-north-1',
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(201);
@@ -876,7 +907,7 @@ describe('Pipeline test', () => {
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
     expect(res.body).toEqual({
-      message: 'Template: Ingestion_s3 not found in dictionary.',
+      message: 'Template: AppRegistry not found in dictionary.',
       success: false,
     });
     expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 0);

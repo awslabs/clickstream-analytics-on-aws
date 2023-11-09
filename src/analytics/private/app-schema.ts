@@ -11,7 +11,8 @@
  *  and limitations under the License.
  */
 
-import { join } from 'path';
+import { readdirSync, statSync } from 'fs';
+import { join, resolve } from 'path';
 import { Duration, CustomResource, Arn, ArnFormat, Stack } from 'aws-cdk-lib';
 import { IRole, PolicyStatement, Effect } from 'aws-cdk-lib/aws-iam';
 import { Runtime, Function, LayerVersion, Code } from 'aws-cdk-lib/aws-lambda';
@@ -68,6 +69,8 @@ export class ApplicationSchemas extends Construct {
       },
     );
 
+    // get schemaDefs files last modify timestamp
+    const lastTimestamp = this.getLatestModifyTimestamp();
     const customProps: CreateDatabaseAndSchemas = {
       projectId: props.projectId,
       appIds: props.appIds,
@@ -80,6 +83,7 @@ export class ApplicationSchemas extends Construct {
       redshiftBIUsernamePrefix: 'clickstream_bi_',
       reportingViewsDef,
       schemaDefs,
+      lastModifiedTime: lastTimestamp,
     };
     const cr = new CustomResource(this, 'RedshiftSchemasCustomResource', {
       serviceToken: provider.serviceToken,
@@ -142,5 +146,39 @@ export class ApplicationSchemas extends Construct {
     attachListTagsPolicyForFunction(this, 'CreateSchemaForApplicationsFn', fn);
 
     return fn;
+  }
+
+  private getLatestModifyTimestamp(): number {
+    const schemaPath = resolve(__dirname, 'sqls/redshift');
+    const reportingViewsPath = resolve(__dirname, 'sqls/redshift/dashboard');
+
+    // Get latest timestamp from both directories
+    const latestSchemaTimestamp = this.getLatestTimestampForDirectory(schemaPath, schemaDefs);
+    const latestReportingViewTimestamp = this.getLatestTimestampForDirectory(reportingViewsPath, reportingViewsDef);
+
+    // Return the max of both timestamps
+    const latestTimestamp = Math.max(latestSchemaTimestamp, latestReportingViewTimestamp);
+
+    return latestTimestamp;
+  }
+
+  private getLatestTimestampForDirectory(directory: string, definitions: any[]): number {
+    let latestTimestamp = 0;
+
+    const updatableFiles = definitions
+      .filter(def => def.updatable === 'true')
+      .map(def => def.sqlFile || (def.viewName + '.sql'));
+    const files = readdirSync(directory);
+    files.forEach(file => {
+      if (updatableFiles.includes(file)) {
+        const filePath = join(directory, file);
+        const stats = statSync(filePath);
+        if (stats.isFile()) {
+          latestTimestamp = Math.max(stats.mtime.getTime(), latestTimestamp);
+        }
+      }
+    });
+
+    return latestTimestamp;
   }
 }

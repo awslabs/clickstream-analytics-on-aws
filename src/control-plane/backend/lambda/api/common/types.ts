@@ -293,6 +293,7 @@ export enum PipelineStackType {
   REPORTING = 'Reporting',
   METRICS = 'Metrics',
   ATHENA = 'DataModelingAthena',
+  APP_REGISTRY = 'ServiceCatalogAppRegistry',
 }
 
 export enum PipelineStatusType {
@@ -382,6 +383,7 @@ export enum BucketPrefix {
   DATA_BUFFER = 'data-buffer',
   DATA_ODS = 'data-ods',
   DATA_PIPELINE_TEMP = 'data-pipeline-temp',
+  LOAD_WORKFLOW = 'load-workflow',
   KAFKA_CONNECTOR_PLUGIN = 'kafka-connector-plugin',
 }
 
