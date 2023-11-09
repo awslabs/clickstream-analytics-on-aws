@@ -1183,7 +1183,7 @@
         
   
   <span class="md-ellipsis">
-    Ingeston endpoint
+    Ingestion endpoint
   </span>
   
 
@@ -1540,6 +1540,106 @@
   
   <span class="md-ellipsis">
     Swift SDK
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../sdk-manual/web/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Web SDK
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../sdk-manual/wechat/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    WeChat Miniprogram SDK
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../sdk-manual/http-api/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    HTTP API
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../sdk-manual/user-identifier/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    User identifier
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../sdk-manual/migrate-from-third-party-sdks/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Migrate from third-party SDKs
   </span>
   
 
@@ -2077,7 +2177,12 @@
 </ul>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
-<p>If you don't have a VPC meet the criteria, you can create a VPC by using VPC creation wizard quickly. For more information, see <a href="https://docs.aws.amazon.com/vpc/latest/userguide/create-vpc.html">Create a VPC</a>.</p>
+<p>Please refer <a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/security-best-practices.html">Security best practices for Amazon S3</a> to create and configure Amazon S3 bucket. For example: <strong>Enable Amazon S3 server access logging</strong>, <strong>Enable S3 Versioning</strong> and so on.</p>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>If you don't have a VPC meet the criteria, you can create a VPC by using VPC creation wizard quickly. For more information, see <a href="https://docs.aws.amazon.com/vpc/latest/userguide/create-vpc.html">Create a VPC</a>.
+We also recommend that you refer <a href="https://docs.aws.amazon.com/vpc/latest/userguide/vpc-security-best-practices.html">Security best practices for your VPC</a> to configure your vpc.</p>
 </div>
 </li>
 <li>
@@ -2091,13 +2196,14 @@
 <li>Private Subnets: Select two private subnets in the same AZs as public subnets</li>
 <li>Ingestion capacity: Keep the default values</li>
 <li>Enable HTTPS: Uncheck and then <strong>Acknowledge</strong> the security warning</li>
+<li>Cross-Origin Resource Sharing (CORS): leave it blank</li>
 <li>Additional settings: Keep the default values</li>
 </ul>
 </li>
 <li>Fill in the form of <strong>Data sink settings</strong>.<ul>
 <li>Sink type: <strong><code>Amazon Kinesis Data Stream(KDS)</code></strong></li>
 <li>Provision mode: <strong><code>On-demand</code></strong></li>
-<li>In <strong>Additional Settings</strong>, change <strong>Sink Maximum Interval</strong> to <code>60</code> and <strong>Batch Size</strong> to <code>1000</code></li>
+<li>In <strong>Additional Settings</strong>, change <strong>Sink Maximum Interval</strong> to <code>60</code> and <strong>Batch Size</strong> to <code>1000</code>  </li>
 </ul>
 </li>
 <li>Click <strong>Next</strong> to move to step 3.</li>

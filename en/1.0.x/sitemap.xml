@@ -236,7 +236,32 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://awslabs.github.io/clickstream-analytics-on-aws/1.0.x/sdk-manual/http-api/</loc>
+         <lastmod>2023-11-09</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://awslabs.github.io/clickstream-analytics-on-aws/1.0.x/sdk-manual/migrate-from-third-party-sdks/</loc>
+         <lastmod>2023-11-09</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://awslabs.github.io/clickstream-analytics-on-aws/1.0.x/sdk-manual/swift/</loc>
+         <lastmod>2023-11-09</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://awslabs.github.io/clickstream-analytics-on-aws/1.0.x/sdk-manual/user-identifier/</loc>
+         <lastmod>2023-11-09</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://awslabs.github.io/clickstream-analytics-on-aws/1.0.x/sdk-manual/web/</loc>
+         <lastmod>2023-11-09</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://awslabs.github.io/clickstream-analytics-on-aws/1.0.x/sdk-manual/wechat/</loc>
          <lastmod>2023-11-09</lastmod>
          <changefreq>daily</changefreq>
     </url>

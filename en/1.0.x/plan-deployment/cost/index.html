@@ -723,6 +723,19 @@
     Ingestion module
   </a>
   
+    <nav class="md-nav" aria-label="Ingestion module">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#data-transfer" class="md-nav__link">
+    Data transfer
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -1227,7 +1240,7 @@
         
   
   <span class="md-ellipsis">
-    Ingeston endpoint
+    Ingestion endpoint
   </span>
   
 
@@ -1584,6 +1597,106 @@
   
   <span class="md-ellipsis">
     Swift SDK
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../sdk-manual/web/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Web SDK
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../sdk-manual/wechat/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    WeChat Miniprogram SDK
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../sdk-manual/http-api/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    HTTP API
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../sdk-manual/user-identifier/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    User identifier
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../sdk-manual/migrate-from-third-party-sdks/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Migrate from third-party SDKs
   </span>
   
 
@@ -2069,6 +2182,19 @@
     Ingestion module
   </a>
   
+    <nav class="md-nav" aria-label="Ingestion module">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#data-transfer" class="md-nav__link">
+    Data transfer
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -2190,125 +2316,170 @@
 <thead>
 <tr>
 <th>Request Per Second</th>
-<th>ALB</th>
-<th>EC2</th>
+<th>ALB cost</th>
+<th>EC2 cost</th>
 <th>Buffer type</th>
 <th>Buffer cost</th>
-<th>S3</th>
+<th>S3 cost</th>
 <th>Total (USD/Month)</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>10RPS</td>
-<td>7</td>
-<td>122</td>
+<td>$7</td>
+<td>$122</td>
 <td>Kinesis (On-Demand)</td>
-<td>36</td>
-<td>3</td>
-<td>168</td>
+<td>$36</td>
+<td>$3</td>
+<td>$168</td>
 </tr>
 <tr>
 <td></td>
-<td>7</td>
-<td>122</td>
+<td>$7</td>
+<td>$122</td>
 <td>Kinesis (Provisioned 2 shard)</td>
-<td>22</td>
-<td>3</td>
-<td>154</td>
+<td>$22</td>
+<td>$3</td>
+<td>$154</td>
 </tr>
 <tr>
 <td></td>
-<td>7</td>
-<td>122</td>
+<td>$7</td>
+<td>$122</td>
 <td>MSK (m5.large * 2, connector MCU * 1)</td>
-<td>417</td>
-<td>3</td>
-<td>549</td>
+<td>$417</td>
+<td>$3</td>
+<td>$549</td>
 </tr>
 <tr>
 <td></td>
-<td>7</td>
-<td>122</td>
+<td>$7</td>
+<td>$122</td>
 <td>None</td>
 <td></td>
-<td>3</td>
-<td>132</td>
+<td>$3</td>
+<td>$132</td>
 </tr>
 <tr>
 <td>100RPS</td>
-<td>43</td>
-<td>122</td>
+<td>$43</td>
+<td>$122</td>
 <td>Kinesis(On-demand)</td>
-<td>86</td>
-<td>3</td>
-<td>254</td>
+<td>$86</td>
+<td>$3</td>
+<td>$254</td>
 </tr>
 <tr>
 <td></td>
-<td>43</td>
-<td>122</td>
+<td>$43</td>
+<td>$122</td>
 <td>Kinesis (Provisioned 2 shard)</td>
-<td>26</td>
-<td>3</td>
-<td>194</td>
+<td>$26</td>
+<td>$3</td>
+<td>$194</td>
 </tr>
 <tr>
 <td></td>
-<td>43</td>
-<td>122</td>
+<td>$43</td>
+<td>$122</td>
 <td>MSK (m5.large * 2, connector MCU * 1)</td>
-<td>417</td>
-<td>3</td>
-<td>585</td>
+<td>$417</td>
+<td>$3</td>
+<td>$585</td>
 </tr>
 <tr>
 <td></td>
-<td>43</td>
-<td>122</td>
+<td>$43</td>
+<td>$122</td>
 <td>None</td>
 <td></td>
-<td>3</td>
-<td>168</td>
+<td>$3</td>
+<td>$168</td>
 </tr>
 <tr>
 <td>1000RPS</td>
-<td>396</td>
-<td>122</td>
+<td>$396</td>
+<td>$122</td>
 <td>Kinesis(On-demand)</td>
-<td>576</td>
-<td>14</td>
-<td>1108</td>
+<td>$576</td>
+<td>$14</td>
+<td>$1108</td>
 </tr>
 <tr>
 <td></td>
-<td>396</td>
-<td>122</td>
+<td>$396</td>
+<td>$122</td>
 <td>Kinesis (Provisioned 10 shard)</td>
-<td>146</td>
-<td>14</td>
-<td>678</td>
+<td>$146</td>
+<td>$14</td>
+<td>$678</td>
 </tr>
 <tr>
 <td></td>
-<td>396</td>
-<td>122</td>
+<td>$396</td>
+<td>$122</td>
 <td>MSK (m5.large * 2, connector MCU * 2~3)</td>
-<td>530</td>
-<td>14</td>
-<td>1062</td>
+<td>$530</td>
+<td>$14</td>
+<td>$1062</td>
 </tr>
 <tr>
 <td></td>
-<td>396</td>
-<td>122</td>
+<td>$396</td>
+<td>$122</td>
 <td>None</td>
 <td></td>
-<td>14</td>
-<td>532</td>
+<td>$14</td>
+<td>$532</td>
 </tr>
 </tbody>
 </table>
+<h3 id="data-transfer">Data transfer</h3>
+<p>There are associated costs when data is transferred from EC2 to the downstream data sink. Below is an example of data transfer costs based on 1000 RPS and a 1KB request payload.</p>
+<ol>
+<li>EC2 Network In: This does not incur any costs.</li>
+<li>
+<p>EC2 Network Out: There are three data sink options:</p>
+<table>
+<thead>
+<tr>
+<th>Data Sink Type</th>
+<th>Way to access data sink</th>
+<th>Dimensions</th>
+<th>Total (USD/Month)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>S3</td>
+<td>S3 Gateway endpoints</td>
+<td>The S3 Gateway endpoints does not incur any costs</td>
+<td>$0</td>
+</tr>
+<tr>
+<td>MSK</td>
+<td></td>
+<td>Data processed cost ($0.010 per GB in/out/between EC2 AZs)</td>
+<td>$105</td>
+</tr>
+<tr>
+<td>KDS</td>
+<td>NAT</td>
+<td>NAT fixed cost: $64 (2 Availability Zones and a NAT per AZ, $0.045 per NAT Gateway Hour). <br> Data processed cost: $601 ($0.045 per GB Data Processed by NAT Gateways).</td>
+<td>$665</td>
+</tr>
+<tr>
+<td>KDS</td>
+<td>VPC Endpoint</td>
+<td>VPC Endpoint fixed cost: $14.62 (Availability Zones $0.01 per AZ Hour). <br> Data processed cost: $133.5 ($0.01 per GB Data Processed by Interface endpoints).</td>
+<td>$148.1</td>
+</tr>
+</tbody>
+</table>
+<p>We suggest using a <a href="https://docs.aws.amazon.com/whitepapers/latest/aws-privatelink/what-are-vpc-endpoints.html">VPC endpoint</a> for the KDS data sink. For more information on using the VPC endpoint, please refer to the VPC endpoint documentation. </p>
+</li>
+</ol>
 <h2 id="data-processing-data-modeling-modules">Data processing &amp; data modeling modules</h2>
 <p>Data processing &amp; modeling module include the following cost components if you choose to enable:</p>
 <ul>
@@ -2321,7 +2492,7 @@
 </ul>
 <p>Key assumptions include:</p>
 <ul>
-<li>10/100/1000/10000 RPS</li>
+<li>10/100/1000 RPS</li>
 <li>Data processing interval: hourly/6-hourly/daily</li>
 <li>EMR running three built-in plugins to process data</li>
 </ul>
@@ -2333,81 +2504,81 @@
 <th>EMR Cost</th>
 <th>Redshift type</th>
 <th>Redshift cost</th>
-<th>Total (USD)</th>
+<th>Total (USD/Month)</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>10RPS</td>
 <td>Hourly</td>
-<td>28</td>
+<td>$28</td>
 <td>Serverless (8 based RPU)</td>
-<td>68</td>
-<td>96</td>
+<td>$68</td>
+<td>$96</td>
 </tr>
 <tr>
 <td></td>
 <td>6-hourly</td>
-<td>10.8</td>
+<td>$10.8</td>
 <td>Serverless(8 based RPU)</td>
-<td>11</td>
-<td>21.8</td>
+<td>$11</td>
+<td>$21.8</td>
 </tr>
 <tr>
 <td></td>
 <td>Daily</td>
-<td>9.6</td>
+<td>$9.6</td>
 <td>Serverless(8 based RPU)</td>
-<td>3</td>
-<td>12.6</td>
+<td>$3</td>
+<td>$12.6</td>
 </tr>
 <tr>
 <td>100RPS</td>
 <td>Hourly</td>
-<td>105</td>
+<td>$72</td>
 <td>Serverless (8 based RPU)</td>
-<td>72</td>
-<td>177</td>
+<td>$70</td>
+<td>$142</td>
 </tr>
 <tr>
 <td></td>
 <td>6-hourly</td>
-<td>99</td>
+<td>$61.2</td>
 <td>Serverless(8 based RPU)</td>
-<td>17.2</td>
-<td>116.2</td>
+<td>$17.2</td>
+<td>$78.4</td>
 </tr>
 <tr>
 <td></td>
 <td>Daily</td>
-<td>140</td>
+<td>$43.7</td>
 <td>Serverless(8 based RPU)</td>
-<td>16.9</td>
-<td>156.9</td>
+<td>$12.4</td>
+<td>$56.1</td>
 </tr>
 <tr>
 <td>1000RPS</td>
 <td>Hourly</td>
-<td>1362</td>
+<td>$842</td>
 <td>Serverless (8 based RPU)</td>
-<td>172</td>
-<td>1534</td>
+<td>$172</td>
+<td>$1014</td>
 </tr>
 <tr>
 <td></td>
 <td>6-Hourly</td>
-<td>678</td>
+<td>$579</td>
 <td>Serverless (8 based RPU)</td>
-<td>176</td>
-<td>854</td>
+<td>$137</td>
+<td>$716</td>
 </tr>
 <tr>
-<td></td>
+<td><span style="background-color: lightgray">The EMR for this case is configured as below.</span></td>
 <td>Daily</td>
-<td>873</td>
+<td>$642</td>
 <td>Serverless (8 based RPU)</td>
-<td>352</td>
-<td>1225</td>
+<td>$94</td>
+<td>$736</td>
 </tr>
 </tbody>
 </table>
@@ -2416,14 +2587,20 @@
 <p>For the cost of 1000 PRS Daily, we used below EMR configuration.</p>
 <div class="language-json highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="p">{</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="nt">&quot;sparkConfig&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">        </span><span class="s2">&quot;spark.emr-serverless.executor.disk=80g&quot;</span><span class="p">,</span>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">        </span><span class="s2">&quot;spark.executor.instances=8&quot;</span><span class="p">,</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">        </span><span class="s2">&quot;spark.emr-serverless.executor.disk=200g&quot;</span><span class="p">,</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">        </span><span class="s2">&quot;spark.executor.instances=16&quot;</span><span class="p">,</span>
 </span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">        </span><span class="s2">&quot;spark.dynamicAllocation.initialExecutors=16&quot;</span><span class="p">,</span>
-</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">        </span><span class="s2">&quot;spark.executor.memory=80g&quot;</span><span class="p">,</span>
-</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">        </span><span class="s2">&quot;spark.executor.cores=16&quot;</span>
-</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">    </span><span class="p">],</span>
-</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">    </span><span class="nt">&quot;inputRePartitions&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2000</span>
-</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="p">}</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">        </span><span class="s2">&quot;spark.executor.memory=100g&quot;</span><span class="p">,</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">        </span><span class="s2">&quot;spark.executor.cores=16&quot;</span><span class="p">,</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">        </span><span class="s2">&quot;spark.network.timeout=10000000&quot;</span><span class="p">,</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">        </span><span class="s2">&quot;spark.executor.heartbeatInterval=10000000&quot;</span><span class="p">,</span>
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="w">        </span><span class="s2">&quot;spark.shuffle.registration.timeout=120000&quot;</span><span class="p">,</span>
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="w">        </span><span class="s2">&quot;spark.shuffle.registration.maxAttempts=5&quot;</span><span class="p">,</span>
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="w">        </span><span class="s2">&quot;spark.shuffle.file.buffer=2m&quot;</span><span class="p">,</span>
+</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="w">        </span><span class="s2">&quot;spark.shuffle.unsafe.file.output.buffer=1m&quot;</span>
+</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="w">    </span><span class="p">],</span>
+</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="w">    </span><span class="nt">&quot;inputRePartitions&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">800</span>
+</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="p">}</span>
 </span></code></pre></div>
 </div>
 <h2 id="reporting-module">Reporting module</h2>
@@ -2446,7 +2623,7 @@
 <th>Authors</th>
 <th>Readers</th>
 <th>SPICE</th>
-<th>Total</th>
+<th>Total cost (USD/Month)</th>
 </tr>
 </thead>
 <tbody>
@@ -2455,7 +2632,7 @@
 <td>48</td>
 <td>18.80</td>
 <td>0</td>
-<td>66.80</td>
+<td>$66.80</td>
 </tr>
 </tbody>
 </table>
@@ -2488,27 +2665,27 @@
 <th>Request Per Second</th>
 <th>Fixed hourly cost</th>
 <th>Data transfer cost</th>
-<th>Total cost(USD)</th>
+<th>Total cost (USD/Month)</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>10RPS</td>
-<td>18</td>
-<td>0.3</td>
-<td>18.3</td>
+<td>$18</td>
+<td>$0.3</td>
+<td>$18.3</td>
 </tr>
 <tr>
 <td>100RPS</td>
-<td>18</td>
-<td>3</td>
-<td>21</td>
+<td>$18</td>
+<td>$3</td>
+<td>$21</td>
 </tr>
 <tr>
 <td>1000RPS</td>
-<td>18</td>
-<td>30</td>
-<td>38</td>
+<td>$18</td>
+<td>$30</td>
+<td>$48</td>
 </tr>
 </tbody>
 </table>
@@ -2519,24 +2696,24 @@
 <tr>
 <th>Request Per Second</th>
 <th>Log size(GB)</th>
-<th>S3 cost(USD)</th>
+<th>S3 cost(USD/Month)</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>10 RPS</td>
 <td>16.5</td>
-<td>0.38</td>
+<td>$0.38</td>
 </tr>
 <tr>
 <td>100 RPS</td>
 <td>165</td>
-<td>3.8</td>
+<td>$3.8</td>
 </tr>
 <tr>
 <td>1000 RPS</td>
 <td>1650</td>
-<td>38</td>
+<td>$38</td>
 </tr>
 </tbody>
 </table>
