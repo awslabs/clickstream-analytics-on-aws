@@ -52,7 +52,7 @@ const Reporting: React.FC<TabContentProps> = (props: TabContentProps) => {
     if (pipelineInfo?.templateVersion?.startsWith('v1.0')) {
       return buildQuickSightDashboardLink(
         pipelineInfo.region || '',
-        pipelineInfo.templateVersion
+        dashboardId
       );
     }
     return `/analytics/${pipelineInfo?.projectId}/app/${appId}/dashboard/${dashboardId}`;
