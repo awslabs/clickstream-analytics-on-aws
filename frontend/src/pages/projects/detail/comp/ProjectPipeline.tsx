@@ -42,6 +42,8 @@ interface ProjectPipelineProps {
   reloadPipeline: () => void;
 }
 
+const PAGE_SIZE = 10;
+
 const ProjectPipeline: React.FC<ProjectPipelineProps> = (
   props: ProjectPipelineProps
 ) => {
@@ -50,7 +52,6 @@ const ProjectPipeline: React.FC<ProjectPipelineProps> = (
   const { pipelineInfo, loadingRefresh, reloadPipeline } = props;
   const [selectedItems, setSelectedItems] = useState<IApplication[]>([]);
   const [loadingApp, setLoadingApp] = useState(false);
-  const [pageSize] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
   const [applicationList, setApplicationList] = useState<IApplication[]>([]);
@@ -74,7 +75,7 @@ const ProjectPipeline: React.FC<ProjectPipelineProps> = (
         await getApplicationListByPipeline({
           pid: pipelineInfo.projectId || '',
           pageNumber: currentPage,
-          pageSize: pageSize,
+          pageSize: PAGE_SIZE,
         });
       if (success) {
         setApplicationList(data.items);
@@ -133,6 +134,8 @@ const ProjectPipeline: React.FC<ProjectPipelineProps> = (
       </Link>
     );
   };
+
+  console.info('pipelineInfo:', pipelineInfo);
 
   return (
     <SpaceBetween direction="vertical" size="l">
@@ -205,6 +208,9 @@ const ProjectPipeline: React.FC<ProjectPipelineProps> = (
                   pipelineId={pipelineInfo.pipelineId}
                   projectId={pipelineInfo.projectId}
                   status={pipelineInfo.status?.status}
+                  updatePipelineStatus={() => {
+                    reloadPipeline();
+                  }}
                 />
               </div>
             </div>
@@ -333,7 +339,7 @@ const ProjectPipeline: React.FC<ProjectPipelineProps> = (
             onChange={(e) => {
               setCurrentPage(e.detail.currentPageIndex);
             }}
-            pagesCount={Math.floor(totalCount / pageSize)}
+            pagesCount={Math.floor(totalCount / PAGE_SIZE)}
             ariaLabels={{
               nextPageLabel: defaultStr(t('nextPage')),
               previousPageLabel: defaultStr(t('prePage')),
