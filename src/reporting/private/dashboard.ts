@@ -96,12 +96,6 @@ export const dataSetAdminPermissionActions = [
   'quicksight:CancelIngestion',
 ];
 
-export const analysisReaderPermissionActions = [
-  'quicksight:DescribeAnalysis',
-  'quicksight:QueryAnalysis',
-  'quicksight:DescribeAnalysisPermissions',
-];
-
 export const analysisAdminPermissionActions = [
   'quicksight:DescribeAnalysis',
   'quicksight:UpdateAnalysisPermissions',

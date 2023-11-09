@@ -183,17 +183,9 @@ const _onUpdate = async (quickSight: QuickSight, awsAccountId: string, sharePrin
     const dashboardDefProps: QuickSightDashboardDefProps = props.dashboardDefProps;
     logger.info('dashboardDefProps', JSON.stringify(dashboardDefProps));
 
-    let newOwnerPrincipalArn = undefined;
-    let newPrincipalArn = undefined;
-    if (oldProps.quickSightUser !== props.quickSightUser) {
-      newOwnerPrincipalArn = ownerPrincipalArn;
-      newPrincipalArn = sharePrincipalArn;
-      logger.info('dashboard user changed, will update dataset/dashboard/analysis permission to new user.');
-    }
-
     const dashboard = await updateQuickSightDashboard(quickSight, awsAccountId,
       schemaName,
-      dashboardDefProps, newOwnerPrincipalArn, newPrincipalArn);
+      dashboardDefProps, ownerPrincipalArn, sharePrincipalArn);
 
     logger.info(`updated dashboard: ${dashboard?.DashboardId}`);
     dashboards.push({
@@ -517,7 +509,7 @@ const createDashboard = async (quickSight: QuickSight, commonParams: ResourceCom
       },
       {
         Principal: commonParams.sharePrincipalArn,
-        Actions: dashboardReaderPermissionActions,
+        Actions: dashboardAdminPermissionActions,
       }],
 
       SourceEntity: sourceEntity,
@@ -760,21 +752,19 @@ const updateAnalysis = async (quickSight: QuickSight, commonParams: ResourceComm
     });
     logger.info(`update analysis finished. Id: ${analysisId}`);
 
-    if (commonParams.ownerPrincipalArn !== undefined) {
-      await waitForAnalysisChangeCompleted(quickSight, commonParams.awsAccountId, analysisId);
-      await quickSight.updateAnalysisPermissions({
-        AwsAccountId: commonParams.awsAccountId,
-        AnalysisId: analysisId,
-        GrantPermissions: [
-          {
-            Principal: commonParams.ownerPrincipalArn,
-            Actions: analysisAdminPermissionActions,
-          },
-        ],
-      });
+    await waitForAnalysisChangeCompleted(quickSight, commonParams.awsAccountId, analysisId);
+    await quickSight.updateAnalysisPermissions({
+      AwsAccountId: commonParams.awsAccountId,
+      AnalysisId: analysisId,
+      GrantPermissions: [
+        {
+          Principal: commonParams.ownerPrincipalArn,
+          Actions: analysisAdminPermissionActions,
+        },
+      ],
+    });
 
-      logger.info(`grant analysis permissions to new principal ${commonParams.ownerPrincipalArn}`);
-    }
+    logger.info(`grant analysis permissions to new principal ${commonParams.ownerPrincipalArn}`);
 
     return analysis;
 
@@ -802,25 +792,23 @@ const updateDashboard = async (quickSight: QuickSight, commonParams: ResourceCom
     });
     logger.info(`update dashboard finished. id: ${dashboardId}`);
 
-    if (commonParams.sharePrincipalArn !== undefined && commonParams.ownerPrincipalArn !== undefined) {
-      await waitForDashboardChangeCompleted(quickSight, commonParams.awsAccountId, dashboardId);
-      await quickSight.updateDashboardPermissions({
-        AwsAccountId: commonParams.awsAccountId,
-        DashboardId: dashboardId,
-        GrantPermissions: [
-          {
-            Principal: commonParams.ownerPrincipalArn,
-            Actions: dashboardAdminPermissionActions,
-          },
-          {
-            Principal: commonParams.sharePrincipalArn,
-            Actions: dashboardReaderPermissionActions,
-          },
-        ],
-      });
+    await waitForDashboardChangeCompleted(quickSight, commonParams.awsAccountId, dashboardId);
+    await quickSight.updateDashboardPermissions({
+      AwsAccountId: commonParams.awsAccountId,
+      DashboardId: dashboardId,
+      GrantPermissions: [
+        {
+          Principal: commonParams.ownerPrincipalArn,
+          Actions: dashboardAdminPermissionActions,
+        },
+        {
+          Principal: commonParams.sharePrincipalArn,
+          Actions: dashboardReaderPermissionActions,
+        },
+      ],
+    });
 
-      logger.info(`grant dashboard permissions to new principal ${commonParams.ownerPrincipalArn} and ${commonParams.sharePrincipalArn}`);
-    }
+    logger.info(`grant dashboard permissions to new principal ${commonParams.ownerPrincipalArn} and ${commonParams.sharePrincipalArn}`);
 
     return dashboard;
 
