@@ -989,7 +989,7 @@
         
   
   <span class="md-ellipsis">
-    步骤4. 查看仪表盘
+    步骤4. 查看仪表板
   </span>
   
 
@@ -1377,13 +1377,20 @@
         
           <li class="md-nav__item">
   <a href="#_10" class="md-nav__link">
-    应用信息字段
+    流量字段
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#_11" class="md-nav__link">
+    应用信息字段
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_12" class="md-nav__link">
     其他字段
   </a>
   
@@ -1615,6 +1622,86 @@
 
               
             
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../sdk-manual/web/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Web SDK
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../sdk-manual/wechat/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    微信小程序 SDK
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../sdk-manual/http-api/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    HTTP API
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../sdk-manual/user-identifier/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    用户标识
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -1645,7 +1732,7 @@
             
   
   <span class="md-ellipsis">
-    仪表盘
+    仪表板
   </span>
   
 
@@ -1655,7 +1742,7 @@
         <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_9_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_1_9">
             <span class="md-nav__icon md-icon"></span>
-            仪表盘
+            仪表板
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
             
@@ -2147,13 +2234,20 @@
         
           <li class="md-nav__item">
   <a href="#_10" class="md-nav__link">
-    应用信息字段
+    流量字段
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#_11" class="md-nav__link">
+    应用信息字段
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_12" class="md-nav__link">
     其他字段
   </a>
   
@@ -2407,7 +2501,7 @@
 <td>用户的生命周期价值（收入）。</td>
 </tr>
 <tr>
-<td>user_ltv.revenue</td>
+<td>user_ltv.currency</td>
 <td>DOUBLE PRECISION</td>
 <td>FLOAT</td>
 <td>用户的生命周期价值（货币）。</td>
@@ -2588,30 +2682,19 @@
 <td>BIGINT</td>
 <td>基于 IP 地址报告事件的精度。</td>
 </tr>
+</tbody>
+</table>
+<h3 id="_10">流量字段</h3>
+<table>
+<thead>
 <tr>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
+<th>字段名称</th>
+<th>数据类型 - Redshift</th>
+<th>数据类型 - Athena</th>
+<th>描述</th>
 </tr>
-<tr>
-<td>### 流量字段</td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td>字段名称</td>
-<td>数据类型 - Redshift</td>
-<td>数据类型 - Athena</td>
-<td>描述</td>
-</tr>
-<tr>
-<td>------------------------</td>
-<td>--------------------</td>
-<td>---------</td>
-<td>-------------------------------------------------------------------------------------</td>
-</tr>
+</thead>
+<tbody>
 <tr>
 <td>traffic_source.name</td>
 <td>VARCHAR</td>
@@ -2632,7 +2715,7 @@
 </tr>
 </tbody>
 </table>
-<h3 id="_10">应用信息字段</h3>
+<h3 id="_11">应用信息字段</h3>
 <table>
 <thead>
 <tr>
@@ -2669,7 +2752,7 @@
 </tr>
 </tbody>
 </table>
-<h3 id="_11">其他字段</h3>
+<h3 id="_12">其他字段</h3>
 <table>
 <thead>
 <tr>

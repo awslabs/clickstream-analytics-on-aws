@@ -10,28 +10,28 @@
       
       
       
-        <link rel="canonical" href="https://awslabs.github.io/clickstream-analytics-on-aws/1.0.x/source/">
+        <link rel="canonical" href="https://awslabs.github.io/clickstream-analytics-on-aws/1.0.x/sdk-manual/user-identifier/">
       
       
-        <link rel="prev" href="../uninstall/">
+        <link rel="prev" href="../http-api/">
       
       
-        <link rel="next" href="../revisions/">
+        <link rel="next" href="../../dashboard/">
       
       
-      <link rel="icon" href="../images/favicon.ico">
+      <link rel="icon" href="../../images/favicon.ico">
       <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.4.8">
     
     
       
-        <title>源代码 - Clickstream Analytics on AWS 解决方案</title>
+        <title>用户标识 - Clickstream Analytics on AWS 解决方案</title>
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.4b4a2bd9.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.4b4a2bd9.min.css">
       
         
-        <link rel="stylesheet" href="../assets/stylesheets/palette.356b1318.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.356b1318.min.css">
       
       
 
@@ -52,7 +52,7 @@
     
       <link rel="stylesheet" href="/stylesheets/extra.css">
     
-    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
   
@@ -76,7 +76,7 @@
     
     
     
-   <link href="../assets/stylesheets/glightbox.min.css" rel="stylesheet"/><style>
+   <link href="../../assets/stylesheets/glightbox.min.css" rel="stylesheet"/><style>
         html.glightbox-open { overflow: initial; height: 100%; }
         .gslide-title { margin-top: 0px; user-select: text; }
         .gslide-desc { color: #666; user-select: text; }
@@ -87,7 +87,7 @@
             body[data-md-color-scheme="slate"] .gdesc-inner { background: var(--md-default-bg-color);}
             body[data-md-color-scheme="slate"] .gslide-title { color: var(--md-default-fg-color);}
             body[data-md-color-scheme="slate"] .gslide-desc { color: var(--md-default-fg-color);}
-            </style> <script src="../assets/javascripts/glightbox.min.js"></script></head>
+            </style> <script src="../../assets/javascripts/glightbox.min.js"></script></head>
   
   
     
@@ -108,6 +108,11 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
+        
+        <a href="#_1" class="md-skip">
+          跳转至
+        </a>
+      
     </div>
     <div data-md-component="announce">
       
@@ -124,7 +129,7 @@
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="页眉">
-    <a href=".." title="Clickstream Analytics on AWS 解决方案" class="md-header__button md-logo" aria-label="Clickstream Analytics on AWS 解决方案" data-md-component="logo">
+    <a href="../.." title="Clickstream Analytics on AWS 解决方案" class="md-header__button md-logo" aria-label="Clickstream Analytics on AWS 解决方案" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
@@ -144,7 +149,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              源代码
+              用户标识
             
           </span>
         </div>
@@ -297,7 +302,7 @@
 
 <nav class="md-nav md-nav--primary" aria-label="导航栏" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href=".." title="Clickstream Analytics on AWS 解决方案" class="md-nav__button md-logo" aria-label="Clickstream Analytics on AWS 解决方案" data-md-component="logo">
+    <a href="../.." title="Clickstream Analytics on AWS 解决方案" class="md-nav__button md-logo" aria-label="Clickstream Analytics on AWS 解决方案" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
@@ -400,7 +405,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../solution-overview/" class="md-nav__link">
+      <a href="../../solution-overview/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -420,7 +425,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../solution-overview/features-and-benefits/" class="md-nav__link">
+      <a href="../../solution-overview/features-and-benefits/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -440,7 +445,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../solution-overview/use-cases/" class="md-nav__link">
+      <a href="../../solution-overview/use-cases/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -504,7 +509,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../architecture/" class="md-nav__link">
+      <a href="../../architecture/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -524,7 +529,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../well-architected-pillars/" class="md-nav__link">
+      <a href="../../well-architected-pillars/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -588,7 +593,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../aws-services/" class="md-nav__link">
+      <a href="../../aws-services/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -608,7 +613,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../architecture-details/" class="md-nav__link">
+      <a href="../../architecture-details/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -672,7 +677,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../plan-deployment/cost/" class="md-nav__link">
+      <a href="../../plan-deployment/cost/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -692,7 +697,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../plan-deployment/security/" class="md-nav__link">
+      <a href="../../plan-deployment/security/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -712,7 +717,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../plan-deployment/regions/" class="md-nav__link">
+      <a href="../../plan-deployment/regions/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -776,7 +781,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../deployment/" class="md-nav__link">
+      <a href="../../deployment/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -796,7 +801,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../deployment/with-cognito/" class="md-nav__link">
+      <a href="../../deployment/with-cognito/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -816,7 +821,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../deployment/with-oidc/" class="md-nav__link">
+      <a href="../../deployment/with-oidc/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -836,7 +841,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../deployment/within-vpc/" class="md-nav__link">
+      <a href="../../deployment/within-vpc/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -900,7 +905,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../getting-started/" class="md-nav__link">
+      <a href="../../getting-started/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -920,7 +925,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../getting-started/1.create-project/" class="md-nav__link">
+      <a href="../../getting-started/1.create-project/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -940,7 +945,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../getting-started/2.config-pipeline/" class="md-nav__link">
+      <a href="../../getting-started/2.config-pipeline/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -960,7 +965,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../getting-started/3.integrate-sdk/" class="md-nav__link">
+      <a href="../../getting-started/3.integrate-sdk/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -980,7 +985,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../getting-started/4.view-dashboard/" class="md-nav__link">
+      <a href="../../getting-started/4.view-dashboard/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1044,7 +1049,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../pipeline-mgmt/" class="md-nav__link">
+      <a href="../../pipeline-mgmt/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1100,7 +1105,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../pipeline-mgmt/ingestion/" class="md-nav__link">
+      <a href="../../pipeline-mgmt/ingestion/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1120,7 +1125,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../pipeline-mgmt/ingestion/configure-ingestion-endpoint/" class="md-nav__link">
+      <a href="../../pipeline-mgmt/ingestion/configure-ingestion-endpoint/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1140,7 +1145,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../pipeline-mgmt/ingestion/create-data-sink-w-kafka/" class="md-nav__link">
+      <a href="../../pipeline-mgmt/ingestion/create-data-sink-w-kafka/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1160,7 +1165,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../pipeline-mgmt/ingestion/create-data-sink-w-kinesis/" class="md-nav__link">
+      <a href="../../pipeline-mgmt/ingestion/create-data-sink-w-kinesis/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1180,7 +1185,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../pipeline-mgmt/ingestion/create-data-sink-w-s3/" class="md-nav__link">
+      <a href="../../pipeline-mgmt/ingestion/create-data-sink-w-s3/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1244,7 +1249,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../pipeline-mgmt/data-processing/" class="md-nav__link">
+      <a href="../../pipeline-mgmt/data-processing/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1264,7 +1269,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../pipeline-mgmt/data-processing/data-schema/" class="md-nav__link">
+      <a href="../../pipeline-mgmt/data-processing/data-schema/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1284,7 +1289,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../pipeline-mgmt/data-processing/configure-execution-para/" class="md-nav__link">
+      <a href="../../pipeline-mgmt/data-processing/configure-execution-para/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1304,7 +1309,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../pipeline-mgmt/data-processing/configure-plugin/" class="md-nav__link">
+      <a href="../../pipeline-mgmt/data-processing/configure-plugin/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1332,7 +1337,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../pipeline-mgmt/data-modeling/configure-data-modeling/" class="md-nav__link">
+      <a href="../../pipeline-mgmt/data-modeling/configure-data-modeling/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1352,7 +1357,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../pipeline-mgmt/quicksight/configure-quicksight/" class="md-nav__link">
+      <a href="../../pipeline-mgmt/quicksight/configure-quicksight/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1372,7 +1377,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../pipeline-mgmt/pipe-mgmt/" class="md-nav__link">
+      <a href="../../pipeline-mgmt/pipe-mgmt/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1398,18 +1403,20 @@
                 
   
   
+    
+  
   
     
     
     
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
         
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_8" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_8" checked>
         
           
           <label class="md-nav__link" for="__nav_1_8" id="__nav_1_8_label" tabindex="0">
@@ -1423,7 +1430,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_8_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_8_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_1_8">
             <span class="md-nav__icon md-icon"></span>
             SDK手册
@@ -1436,7 +1443,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../sdk-manual/" class="md-nav__link">
+      <a href="../" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1456,7 +1463,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../sdk-manual/android/" class="md-nav__link">
+      <a href="../android/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1476,7 +1483,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../sdk-manual/swift/" class="md-nav__link">
+      <a href="../swift/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1496,7 +1503,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../sdk-manual/web/" class="md-nav__link">
+      <a href="../web/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1516,7 +1523,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../sdk-manual/wechat/" class="md-nav__link">
+      <a href="../wechat/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1536,7 +1543,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../sdk-manual/http-api/" class="md-nav__link">
+      <a href="../http-api/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1554,9 +1561,29 @@
                 
   
   
+    
   
-    <li class="md-nav__item">
-      <a href="../sdk-manual/user-identifier/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    用户标识
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   <span class="md-ellipsis">
@@ -1565,6 +1592,47 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#id" class="md-nav__link">
+    用户 ID
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#id_1" class="md-nav__link">
+    设备 ID
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#id_2" class="md-nav__link">
+    访客 ID
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1620,7 +1688,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../dashboard/" class="md-nav__link">
+      <a href="../../dashboard/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1640,7 +1708,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../dashboard/acquisition/" class="md-nav__link">
+      <a href="../../dashboard/acquisition/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1660,7 +1728,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../dashboard/engagement/" class="md-nav__link">
+      <a href="../../dashboard/engagement/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1680,7 +1748,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../dashboard/activity/" class="md-nav__link">
+      <a href="../../dashboard/activity/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1700,7 +1768,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../dashboard/retention/" class="md-nav__link">
+      <a href="../../dashboard/retention/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1720,7 +1788,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../dashboard/device/" class="md-nav__link">
+      <a href="../../dashboard/device/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1740,7 +1808,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../dashboard/path/" class="md-nav__link">
+      <a href="../../dashboard/path/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1760,7 +1828,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../dashboard/custom-analysis/" class="md-nav__link">
+      <a href="../../dashboard/custom-analysis/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1824,7 +1892,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../resources/upload-ssl-certificate/" class="md-nav__link">
+      <a href="../../resources/upload-ssl-certificate/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1852,7 +1920,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../faq/" class="md-nav__link">
+      <a href="../../faq/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1872,7 +1940,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../troubleshooting/" class="md-nav__link">
+      <a href="../../troubleshooting/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1892,7 +1960,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../uninstall/" class="md-nav__link">
+      <a href="../../uninstall/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1910,20 +1978,18 @@
                 
   
   
-    
-  
   
     
     
     
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_14" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_14" >
         
           
           <label class="md-nav__link" for="__nav_1_14" id="__nav_1_14_label" tabindex="0">
@@ -1937,7 +2003,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_14_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_14_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_1_14">
             <span class="md-nav__icon md-icon"></span>
             开发者指南
@@ -1948,16 +2014,9 @@
                 
   
   
-    
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../../source/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1966,7 +2025,6 @@
   
 
       </a>
-      
     </li>
   
 
@@ -1986,7 +2044,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../revisions/" class="md-nav__link">
+      <a href="../../revisions/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2006,7 +2064,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../notices/" class="md-nav__link">
+      <a href="../../notices/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2044,6 +2102,37 @@
   
   
   
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#id" class="md-nav__link">
+    用户 ID
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#id_1" class="md-nav__link">
+    设备 ID
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#id_2" class="md-nav__link">
+    访客 ID
+  </a>
+  
+</li>
+      
+    </ul>
   
 </nav>
                   </div>
@@ -2061,9 +2150,177 @@
   
 
 
-  <h1>源代码</h1>
-
-<p>访问我们的<a href="https://github.com/awslabs/clickstream-analytics-on-aws">GitHub代码库</a>以下载此解决方案的源代码。亚马逊云科技点击流分析模板是使用<a href="http://aws.amazon.com/cdk/">AWS Cloud Development Kit (CDK)</a>生成的。请参阅<a href="https://github.com/awslabs/clickstream-analytics-on-aws/blob/main/README.md">README.md</a>文件获取其他信息。</p>
+<h1 id="_1">用户标识</h1>
+<p>当您进行数据分析时，通常您需要根据您业务分析的场景来选择合适的的用户标识来进行分析。这将有助于您提升分析的准确性，尤其是在漏斗、留存、会话等分析场景。</p>
+<p>亚马逊云科技点击流分析解决方案中主要包含三种类型的 ID，分别是：</p>
+<ul>
+<li>用户 ID</li>
+<li>设备 ID</li>
+<li>访客 ID</li>
+</ul>
+<p>下面我们分别来介绍下这三种 ID，同时您将会详细了解我们是如何使用用户 ID 和访客 ID 来进行用户行为的关联。</p>
+<h2 id="id">用户 ID</h2>
+<p>用户 ID 通常是您业务数据库里描述用户的唯一标识，相对来说更准确和唯一。</p>
+<ul>
+<li>当用户未注册或未登录时，用户 ID 的值为空。</li>
+<li>SDK提供 <code>ClickstreamAnalytics.setUserId("your user id")</code> 方法来进行设置用户 ID，退出登录时通过设置 <code>null/nil</code> 来清空用户 ID。</li>
+<li>用户 ID 存在 user 表里的 user_id 字段中。</li>
+</ul>
+<h2 id="id_1">设备 ID</h2>
+<p>我们通过设备 ID 来对用户设备进行标识。</p>
+<ul>
+<li>设备 ID 将在集成 SDK 后的第一次启动时自动生成。</li>
+<li>设备 ID 有可能不是设备的唯一标识符，通常用户在卸载App，或者在网页中清除缓存后设备 ID 将可能重新生成。</li>
+<li>设备 ID 存在 user 表里的 <code>device_id_list</code> 字段中。</li>
+</ul>
+<p>下表将介绍各端SDK如何生成设备 ID。</p>
+<table>
+<thead>
+<tr>
+<th>SDK 类型</th>
+<th>生成规则</th>
+<th>存储位置</th>
+<th>是否唯一</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Android SDK</td>
+<td>默认使用 AndroidId 作为设备 ID，如果 AndroidId 获取不到则使用随机 UUID 代替</td>
+<td>SharedPreference 键值对文件中</td>
+<td>通常 AndroidId 不会因为 App 卸载而改变。 <br>如果获取的是 UUID，则用户卸载 App 后设备 ID 会改变</td>
+</tr>
+<tr>
+<td>Swift SDK</td>
+<td>如果用户已授权获取 IDFA 则使用 IDFA 作为设备 ID，否则默认使用 IDFV 作为设备 ID，如果 IDFV 获取不到则使用随机 UUID</td>
+<td>UserDefault 键值对文件中</td>
+<td>通常 IDFA 不会因为 App 卸载而改变。 <br> IDFV 和 UUID 当用户卸载 App 后，设备 ID 都会改变</td>
+</tr>
+<tr>
+<td>Web SDK</td>
+<td>默认使用随机 UUID 来作为设备 ID</td>
+<td>浏览器的 localStorage 中</td>
+<td>用户清除浏览器缓存后将会重新生成设备 ID</td>
+</tr>
+</tbody>
+</table>
+<h2 id="id_2">访客 ID</h2>
+<p>亚马逊云科技点击流分析解决方案使用访客 ID 来对同一个设备上用户登录与未登录的行为进行关联。</p>
+<ul>
+<li>访客 ID 在所有 SDK 中 都是通过随机 UUID 生成。</li>
+<li>访客 ID 只有在当前设备上登录新用户时才会重新赋值，当切换到当前设备之前已登录过的用户时将恢复为之前用户的访客 ID。</li>
+<li>访客 ID 存储在 user 表的 <code>user_pseudo_id</code> 字段中。</li>
+</ul>
+<p>下表列出了各种情况下设备 ID，用户 ID，访客 ID 的对应关系。</p>
+<table>
+<thead>
+<tr>
+<th>序列</th>
+<th>事件</th>
+<th>设备 ID</th>
+<th>用户 ID</th>
+<th>访客 ID</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>安装 App</td>
+<td>S</td>
+<td>--</td>
+<td>1</td>
+</tr>
+<tr>
+<td>2</td>
+<td>使用 App</td>
+<td>S</td>
+<td>--</td>
+<td>1</td>
+</tr>
+<tr>
+<td>3</td>
+<td>登录用户 A</td>
+<td>S</td>
+<td>A</td>
+<td>1</td>
+</tr>
+<tr>
+<td>4</td>
+<td>使用 App</td>
+<td>S</td>
+<td>A</td>
+<td>1</td>
+</tr>
+<tr>
+<td>5</td>
+<td>退出登录，浏览</td>
+<td>S</td>
+<td>--</td>
+<td>1</td>
+</tr>
+<tr>
+<td>6</td>
+<td>登录用户 B</td>
+<td>S</td>
+<td>B</td>
+<td>2</td>
+</tr>
+<tr>
+<td>7</td>
+<td>使用 App</td>
+<td>S</td>
+<td>B</td>
+<td>2</td>
+</tr>
+<tr>
+<td>8</td>
+<td>退出登录，浏览</td>
+<td>S</td>
+<td>--</td>
+<td>2</td>
+</tr>
+<tr>
+<td>9</td>
+<td>登录用户 A</td>
+<td>S</td>
+<td>A</td>
+<td>1</td>
+</tr>
+<tr>
+<td>10</td>
+<td>使用App</td>
+<td>S</td>
+<td>A</td>
+<td>1</td>
+</tr>
+<tr>
+<td>11</td>
+<td>退出登录，浏览</td>
+<td>S</td>
+<td>--</td>
+<td>1</td>
+</tr>
+<tr>
+<td>12</td>
+<td>登录用户 C</td>
+<td>S</td>
+<td>C</td>
+<td>3</td>
+</tr>
+<tr>
+<td>13</td>
+<td>使用App</td>
+<td>S</td>
+<td>C</td>
+<td>3</td>
+</tr>
+</tbody>
+</table>
+<p>通过上表您可以看到，我们可以通过查找访客 ID=1 来统计到设备 S 上用户 A 两次使用过程中未登录和登录之后的所有行为事件。此外，您也可以使用用户 ID 将用户的点击流数据与您业务系统中的数据进行联合分析，从而构建更完整的客户数据平台。</p>
+<div class="admonition info">
+<p class="admonition-title">提示</p>
+<p>当用户卸载 App 或清除浏览器缓存后，原有的访客 ID 与用户 ID 的关联关系在设备端将清空，同时在设备上会生成新的访客 ID。</p>
+</div>
 
 
   
@@ -2109,10 +2366,10 @@
       <div class="md-progress" data-md-component="progress" role="progressbar"></div>
     
     
-    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.instant", "navigation.instant.progress", "navigation.tracking", "navigation.path", "navigation.top", "search.suggest", "search.highlight", "search.share", "content.code.copy", "content.code.select", "content.code.annotate", "content.tabs.link"], "search": "../assets/javascripts/workers/search.f886a092.min.js", "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}, "version": {"default": "latest", "provider": "mike"}}</script>
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.instant", "navigation.instant.progress", "navigation.tracking", "navigation.path", "navigation.top", "search.suggest", "search.highlight", "search.share", "content.code.copy", "content.code.select", "content.code.annotate", "content.tabs.link"], "search": "../../assets/javascripts/workers/search.f886a092.min.js", "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}, "version": {"default": "latest", "provider": "mike"}}</script>
     
     
-      <script src="../assets/javascripts/bundle.81fa17fe.min.js"></script>
+      <script src="../../assets/javascripts/bundle.81fa17fe.min.js"></script>
       
     
   <script>document$.subscribe(() => {const lightbox = GLightbox({"touchNavigation": true, "loop": false, "zoomable": true, "draggable": true, "openEffect": "zoom", "closeEffect": "zoom", "slideEffect": "slide"});})</script></body>
