@@ -43,6 +43,8 @@ import static org.apache.spark.sql.functions.struct;
 
 @Slf4j
 public final class DatasetUtil {
+    public static final int MAX_PARAM_STRING_VALUE_LEN = 2048;
+    public static final int MAX_STRING_VALUE_LEN = 255;
     public static final String YYYYMMDD = "yyyyMMdd";
     public static final String UPDATE_DATE = "update_date";
     public static final String SNAPPY = "snappy";
@@ -105,6 +107,7 @@ public final class DatasetUtil {
     public static final String REFERER = "_referer";
     public static final String COL_PAGE_REFERER = "_page" + REFERER;
     public static final String EVENT_PROFILE_SET = "_profile_set";
+    public static final String EVENT_PAGE_VIEW = "_page_view";
     public static final String EVENT_FIRST_OPEN = "_first_open";
     public static final String EVENT_FIRST_VISIT = "_first_visit";
     public static final String APP_INFO = "app_info";

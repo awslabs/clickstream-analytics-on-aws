@@ -1,0 +1,17 @@
+{
+  "app_id" : "GMTServerLogin2",
+  "event_date" : "2023-08-29",
+  "event_timestamp" : 1693281865635,
+  "user_id" : "x-0eb41e46-2373-4883-8daf-e1975ccb3821",
+  "user_pseudo_id" : "X-login-1690769179",
+  "user_first_touch_timestamp" : 1693281865635,
+  "user_properties" : null,
+  "user_ltv" : null,
+  "_first_visit_date" : "2023-08-29",
+  "_first_referer" : null,
+  "_first_traffic_source_type" : null,
+  "_first_traffic_medium" : null,
+  "_first_traffic_source" : null,
+  "device_id_list" : null,
+  "_channel" : null
+}

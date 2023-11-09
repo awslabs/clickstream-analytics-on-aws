@@ -44,6 +44,7 @@ import static org.apache.spark.sql.functions.lit;
 import static org.apache.spark.sql.functions.min_by;
 import static org.apache.spark.sql.functions.regexp_extract;
 import static org.apache.spark.sql.functions.struct;
+import static org.apache.spark.sql.functions.substring;
 import static org.apache.spark.sql.functions.timestamp_seconds;
 import static org.apache.spark.sql.functions.to_date;
 import static software.aws.solution.clickstream.ContextUtil.PROJECT_ID_PROP;
@@ -61,6 +62,11 @@ import static software.aws.solution.clickstream.DatasetUtil.EVENT_FIRST_OPEN;
 import static software.aws.solution.clickstream.DatasetUtil.EVENT_FIRST_VISIT;
 import static software.aws.solution.clickstream.DatasetUtil.EVENT_ID;
 import static software.aws.solution.clickstream.DatasetUtil.EVENT_NAME;
+import static software.aws.solution.clickstream.DatasetUtil.EVENT_PARAM_DOUBLE_VALUE;
+import static software.aws.solution.clickstream.DatasetUtil.EVENT_PARAM_FLOAT_VALUE;
+import static software.aws.solution.clickstream.DatasetUtil.EVENT_PARAM_INT_VALUE;
+import static software.aws.solution.clickstream.DatasetUtil.EVENT_PARAM_KEY;
+import static software.aws.solution.clickstream.DatasetUtil.EVENT_PARAM_STRING_VALUE;
 import static software.aws.solution.clickstream.DatasetUtil.EVENT_PREVIOUS_TIMESTAMP;
 import static software.aws.solution.clickstream.DatasetUtil.EVENT_PROFILE_SET;
 import static software.aws.solution.clickstream.DatasetUtil.EVENT_TIMESTAMP;
@@ -71,6 +77,8 @@ import static software.aws.solution.clickstream.DatasetUtil.GEO_FOR_ENRICH;
 import static software.aws.solution.clickstream.DatasetUtil.ID;
 import static software.aws.solution.clickstream.DatasetUtil.ITEMS;
 import static software.aws.solution.clickstream.DatasetUtil.LOCALE;
+import static software.aws.solution.clickstream.DatasetUtil.MAX_PARAM_STRING_VALUE_LEN;
+import static software.aws.solution.clickstream.DatasetUtil.MAX_STRING_VALUE_LEN;
 import static software.aws.solution.clickstream.DatasetUtil.NEW_USER_COUNT;
 import static software.aws.solution.clickstream.DatasetUtil.PLATFORM;
 import static software.aws.solution.clickstream.DatasetUtil.PROPERTIES;
@@ -409,11 +417,17 @@ public final class TransformerV2 {
                 col("event_params"));
 
         return explodeKeyValue(dataset2, "event_params", "event_param_")
-                .select(APP_ID, EVENT_DATE,
-                        EVENT_TIMESTAMP, EVENT_ID, EVENT_NAME,
-                        "event_param_key", "event_param_double_value",
-                        "event_param_float_value", "event_param_int_value",
-                        "event_param_string_value"
+                .select(
+                        col(APP_ID),
+                        col(EVENT_DATE),
+                        col(EVENT_TIMESTAMP),
+                        col(EVENT_ID),
+                        col(EVENT_NAME),
+                        col(EVENT_PARAM_KEY),
+                        col(EVENT_PARAM_DOUBLE_VALUE),
+                        col(EVENT_PARAM_FLOAT_VALUE),
+                        col(EVENT_PARAM_INT_VALUE),
+                        substring(col(EVENT_PARAM_STRING_VALUE), 0, MAX_PARAM_STRING_VALUE_LEN).alias(EVENT_PARAM_STRING_VALUE)
                 );
 
     }
@@ -530,7 +544,7 @@ public final class TransformerV2 {
                 col(USER_PROPERTIES),
                 col(USER_LTV),
                 col(FIRST_VISIT_DATE),
-                col(COL_PAGE_REFERER).alias(FIRST_REFERER),
+                substring(col(COL_PAGE_REFERER), 0, MAX_STRING_VALUE_LEN).alias(FIRST_REFERER),
                 col(TRAFFIC_SOURCE_NAME).alias("_first_traffic_source_type"),
                 col(TRAFFIC_SOURCE_MEDIUM).alias("_first_traffic_medium"),
                 col(TRAFFIC_SOURCE_SOURCE).alias("_first_traffic_source"),

@@ -204,6 +204,7 @@ public class GTMServerDataTransformerTest extends BaseSparkTest {
         System.setProperty(APP_IDS_PROP, "testApp");
         System.setProperty(PROJECT_ID_PROP, "test_project_id_gtm_server");
         System.setProperty(DEBUG_LOCAL_PROP, "true");
+        System.setProperty(WAREHOUSE_DIR_PROP, "/tmp/warehouse/gtm/test_transform_data_item/");
 
         Dataset<Row> dataset =
                 spark.read().json(requireNonNull(getClass().getResource("/gtm-server/server-all.json")).getPath());
@@ -223,6 +224,7 @@ public class GTMServerDataTransformerTest extends BaseSparkTest {
         System.setProperty(APP_IDS_PROP, "testApp");
         System.setProperty(PROJECT_ID_PROP, "test_project_id_gtm_server");
         System.setProperty(DEBUG_LOCAL_PROP, "true");
+        System.setProperty(WAREHOUSE_DIR_PROP, "/tmp/warehouse/gtm/test_transform_data_user/");
 
         Dataset<Row> dataset =
                 spark.read().json(requireNonNull(getClass().getResource("/gtm-server/server-all.json")).getPath());
@@ -231,6 +233,45 @@ public class GTMServerDataTransformerTest extends BaseSparkTest {
         Dataset<Row> resultDataset =datasetList.get(3).filter(col("user_id").isNotNull());
 
         String expectedData = this.resourceFileAsString("/gtm-server/expected/test_transform_data_user.json");
+        Assertions.assertEquals(expectedData, resultDataset.first().prettyJson());
+
+    }
+
+
+    @Test
+    void test_transform_data_user_login() throws IOException {
+        // DOWNLOAD_FILE=0 ./gradlew clean test --info --tests software.aws.solution.clickstream.gtm.GTMServerDataTransformerTest.test_transform_data_user_login
+        System.setProperty(APP_IDS_PROP, "testApp");
+        System.setProperty(PROJECT_ID_PROP, "test_project_id_gtm_server");
+        System.setProperty(DEBUG_LOCAL_PROP, "true");
+        System.setProperty(WAREHOUSE_DIR_PROP, "/tmp/warehouse/gtm/test_transform_data_user_login/");
+
+        Dataset<Row> dataset =
+                spark.read().json(requireNonNull(getClass().getResource("/gtm-server/server-user-login.json")).getPath());
+
+        List<Dataset<Row>> datasetList = transformer.transform(dataset);
+        Dataset<Row> resultDataset =datasetList.get(3).filter(col("user_id").isNotNull());
+
+        String expectedData = this.resourceFileAsString("/gtm-server/expected/test_transform_data_user_login.json");
+        Assertions.assertEquals(expectedData, resultDataset.first().prettyJson());
+
+    }
+
+    @Test
+    void test_transform_data_user_login2() throws IOException {
+        // DOWNLOAD_FILE=0 ./gradlew clean test --info --tests software.aws.solution.clickstream.gtm.GTMServerDataTransformerTest.test_transform_data_user_login2
+        System.setProperty(APP_IDS_PROP, "testApp");
+        System.setProperty(PROJECT_ID_PROP, "test_project_id_gtm_server");
+        System.setProperty(DEBUG_LOCAL_PROP, "true");
+        System.setProperty(WAREHOUSE_DIR_PROP, "/tmp/warehouse/gtm/test_transform_data_user_login2/");
+
+        Dataset<Row> dataset =
+                spark.read().json(requireNonNull(getClass().getResource("/gtm-server/server-user-login2.json")).getPath());
+
+        List<Dataset<Row>> datasetList = transformer.transform(dataset);
+        Dataset<Row> resultDataset =datasetList.get(3).filter(col("user_id").isNotNull());
+
+        String expectedData = this.resourceFileAsString("/gtm-server/expected/test_transform_data_user_login2.json");
         Assertions.assertEquals(expectedData, resultDataset.first().prettyJson());
 
     }

@@ -17,7 +17,7 @@
   "dataOut" : {
     "gtmId" : "G-2ZT210W8J0",
     "gtmVersion" : "45je3820",
-    "event_id" : "807802863.1690769179-1691480516-2-0",
+    "event_id" : "0-1691480516-2-807802863.1690769179",
     "user_id" : null,
     "event_name" : "_page_view",
     "ip" : "52.94.133.137",

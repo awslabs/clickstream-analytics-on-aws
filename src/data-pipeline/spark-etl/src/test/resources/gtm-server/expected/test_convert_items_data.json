@@ -17,7 +17,7 @@
   "dataOut" : {
     "gtmId" : "G-CCM0Y0Y1RC",
     "gtmVersion" : "45je39i0",
-    "event_id" : "1257382463.1695261066-1695261065-1-0",
+    "event_id" : "0-1695261065-1-1257382463.1695261066",
     "user_id" : null,
     "event_name" : "select_item",
     "ip" : "72.255.244.237",

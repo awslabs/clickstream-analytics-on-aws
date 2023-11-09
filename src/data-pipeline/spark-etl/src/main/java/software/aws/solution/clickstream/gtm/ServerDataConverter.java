@@ -49,7 +49,9 @@ import static software.aws.solution.clickstream.DatasetUtil.DOUBLE_VALUE;
 import static software.aws.solution.clickstream.DatasetUtil.EVENT_ID;
 import static software.aws.solution.clickstream.DatasetUtil.EVENT_ITEMS;
 import static software.aws.solution.clickstream.DatasetUtil.EVENT_NAME;
+import static software.aws.solution.clickstream.DatasetUtil.EVENT_PAGE_VIEW;
 import static software.aws.solution.clickstream.DatasetUtil.EVENT_PARAMS;
+import static software.aws.solution.clickstream.DatasetUtil.EVENT_PROFILE_SET;
 import static software.aws.solution.clickstream.DatasetUtil.FLOAT_VALUE;
 import static software.aws.solution.clickstream.DatasetUtil.GTM_ID;
 import static software.aws.solution.clickstream.DatasetUtil.GTM_VERSION;
@@ -60,6 +62,7 @@ import static software.aws.solution.clickstream.DatasetUtil.ITEMS;
 import static software.aws.solution.clickstream.DatasetUtil.ITEM_ID;
 import static software.aws.solution.clickstream.DatasetUtil.KEY;
 import static software.aws.solution.clickstream.DatasetUtil.LANGUAGE;
+import static software.aws.solution.clickstream.DatasetUtil.MAX_STRING_VALUE_LEN;
 import static software.aws.solution.clickstream.DatasetUtil.MOBILE;
 import static software.aws.solution.clickstream.DatasetUtil.MODEL;
 import static software.aws.solution.clickstream.DatasetUtil.PAGE_REFERRER;
@@ -82,6 +85,7 @@ import static software.aws.solution.clickstream.KvConverter.getValueTypeResult;
 
 @Slf4j
 public class ServerDataConverter {
+
     private static UDF1<String, Row[]> convertGTMServerData() {
         return (String value) -> {
             try {
@@ -120,10 +124,13 @@ public class ServerDataConverter {
         RowResult result = parseJsonNode(jsonNode);
 
         String eventId = String.format("%s-%s-%s-%s",
-                result.attrMap.get("x-ga-js_client_id").asText(),
+                index,
                 result.attrMap.get("ga_session_id").asText(),
                 result.attrMap.get("ga_session_number").asText(),
-                index);
+                result.attrMap.get("x-ga-js_client_id").asText()
+                );
+
+        eventId = checkStringValue(eventId, MAX_STRING_VALUE_LEN - 32);
 
         String gtmId = result.attrMap.get("x-ga-measurement_id").asText();
         String gtmVersion = result.attrMap.get("x-ga-gtm_version").asText();
@@ -210,7 +217,7 @@ public class ServerDataConverter {
                 }
 
                 case "client_id": {
-                    clientId = attrValue.asText();
+                    clientId = checkStringValue(attrValue.asText());
                     break;
                 }
 
@@ -220,7 +227,7 @@ public class ServerDataConverter {
                 }
 
                 case "language": {
-                    language = attrValue.asText();
+                    language = checkStringValue(attrValue.asText());
                     break;
                 }
 
@@ -236,7 +243,7 @@ public class ServerDataConverter {
                 }
 
                 case "page_referrer": {
-                    pageReferrer = attrValue.asText();
+                    pageReferrer = checkStringValue(attrValue.asText());
                     addValueToParamsMap(attrMap, attrName, attrValue);
                     break;
                 }
@@ -284,6 +291,7 @@ public class ServerDataConverter {
         }
         if (attrValue.hasNonNull(PLATFORM)) {
             clientPlatform = attrValue.get(PLATFORM).asText();
+            clientPlatform = checkStringValue(clientPlatform);
         }
         if (attrValue.hasNonNull(PLATFORM_VERSION)) {
             clientPlatformVersion = attrValue.get(PLATFORM_VERSION).asText();
@@ -311,10 +319,13 @@ public class ServerDataConverter {
         if (eventName == null) {
             return null;
         }
+        String eventName1 = checkStringValue(eventName);
+
         Map<String, String> eventNameMap = new HashMap<>();
-        eventNameMap.put("page_view", "_page_view");
-        eventNameMap.put("login", "_profile_set");
-        return eventNameMap.getOrDefault(eventName, eventName);
+        eventNameMap.put("page_view", EVENT_PAGE_VIEW);
+        eventNameMap.put("login", EVENT_PROFILE_SET);
+
+        return eventNameMap.getOrDefault(eventName1, eventName1);
     }
 
     private static GenericRow extractUser(final JsonNode userItem) {
@@ -324,6 +335,7 @@ public class ServerDataConverter {
         } else if (userItem.hasNonNull(USER_ID)) {
             userId = userItem.get(USER_ID).asText();
         }
+        userId = checkStringValue(userId);
         List<GenericRow> userPropertiesList = new ArrayList<>();
 
         for (Iterator<String> attrNameIt = userItem.fieldNames(); attrNameIt.hasNext(); ) {
@@ -357,8 +369,9 @@ public class ServerDataConverter {
             String itemId = null;
 
             if (item.hasNonNull(ITEM_ID)) {
-                itemId = item.get(ITEM_ID).asText();
+                itemId = checkStringValue(item.get(ITEM_ID).asText());
             }
+
             List<GenericRow> propertiesList = new ArrayList<>();
             for (Iterator<String> attrNameIt = item.fieldNames(); attrNameIt.hasNext(); ) {
 
@@ -397,7 +410,7 @@ public class ServerDataConverter {
             Double price = null;
 
             if (item.hasNonNull(ITEM_ID)) {
-                id = item.get(ITEM_ID).asText();
+                id = checkStringValue(item.get(ITEM_ID).asText());
             }
             if (item.hasNonNull(PRICE)) {
                 price = item.get(PRICE).asDouble(0);
@@ -412,6 +425,18 @@ public class ServerDataConverter {
             }));
         }
         return list;
+    }
+
+    private static String checkStringValue(final String sValue) {
+        return checkStringValue(sValue, MAX_STRING_VALUE_LEN);
+    }
+
+    private static String checkStringValue(final String sValue, final int len) {
+        String reString = sValue;
+        if (reString != null && reString.length() > len) {
+            reString = reString.substring(0, len);
+        }
+        return reString;
     }
 
     public static void addValueToParamsMap(final Map<String, JsonNode> attrMap, final String attrName, final JsonNode attrValue) {

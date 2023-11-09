@@ -39,6 +39,7 @@ import static org.apache.spark.sql.functions.concat_ws;
 import static org.apache.spark.sql.functions.explode;
 import static org.apache.spark.sql.functions.lit;
 import static org.apache.spark.sql.functions.struct;
+import static org.apache.spark.sql.functions.substring;
 import static org.apache.spark.sql.functions.timestamp_seconds;
 import static org.apache.spark.sql.functions.to_date;
 import static software.aws.solution.clickstream.ContextUtil.DEBUG_LOCAL_PROP;
@@ -82,6 +83,8 @@ import static software.aws.solution.clickstream.DatasetUtil.ITEMS;
 import static software.aws.solution.clickstream.DatasetUtil.KEY;
 import static software.aws.solution.clickstream.DatasetUtil.LANGUAGE;
 import static software.aws.solution.clickstream.DatasetUtil.LOCALE;
+import static software.aws.solution.clickstream.DatasetUtil.MAX_PARAM_STRING_VALUE_LEN;
+import static software.aws.solution.clickstream.DatasetUtil.MAX_STRING_VALUE_LEN;
 import static software.aws.solution.clickstream.DatasetUtil.PAGE_REFERRER;
 import static software.aws.solution.clickstream.DatasetUtil.PLATFORM;
 import static software.aws.solution.clickstream.DatasetUtil.PROPERTIES;
@@ -266,8 +269,6 @@ public class GTMServerDataTransformer {
     }
 
     public List<Dataset<Row>> transform(final Dataset<Row> dataset) {
-
-
         Dataset<Row> dataset0 = serverDataConverter.transform(dataset);
         Column dataCol = dataset0.col(DATA_OUT);
 
@@ -282,7 +283,8 @@ public class GTMServerDataTransformer {
                         to_date(timestamp_seconds(col(EVENT_TIMESTAMP).$div(1000)))
                 )
                 .withColumn(USER_PSEUDO_ID, dataCol.getField(CLIENT_ID))
-                .withColumn(USER_ID, dataCol.getField(USER_ID));
+                .withColumn(USER_ID, dataCol.getField(USER_ID))
+                .withColumn(EVENT_NAME, dataCol.getField(EVENT_NAME));
 
         Dataset<Row> eventDataset = extractEvent(dataset1);
         log.info(new ETLMetric(eventDataset, "eventDataset").toString());
@@ -319,72 +321,60 @@ public class GTMServerDataTransformer {
                 .withColumn(FIRST_VISIT_DATE, to_date(timestamp_seconds(col(USER_FIRST_TOUCH_TIMESTAMP).$div(1000))));
 
         Dataset<Row> newUserDataset = dataset2
-                .withColumn(USER_FIRST_TOUCH_TIMESTAMP, lit(null).cast(DataTypes.LongType))
-                .withColumn(USER, dataCol.getField(USER))
-                .withColumn(USER_PROPERTIES, col(USER).getField(USER_PROPERTIES))
-                .withColumn(FIRST_TRAFFIC_SOURCE_TYPE, lit(null).cast(DataTypes.StringType))
-                .withColumn(FIRST_TRAFFIC_MEDIUM, lit(null).cast(DataTypes.StringType))
-                .withColumn(FIRST_TRAFFIC_SOURCE, lit(null).cast(DataTypes.StringType))
-                .withColumn(DEVICE_ID_LIST, lit(null).cast(deviceIdListType))
-                .withColumn(CHANNEL, lit(null).cast(DataTypes.StringType))
-                .withColumn(USER_LTV, lit(null).cast(userLtvType))
+                .withColumn(USER_PROPERTIES, dataCol.getField(USER).getField(USER_PROPERTIES))
                 .select(
                         col(APP_ID),
                         col(EVENT_DATE),
                         col(EVENT_TIMESTAMP),
                         col(USER_ID),
                         col(USER_PSEUDO_ID),
-                        col(USER_PROPERTIES),
-                        col(FIRST_TRAFFIC_SOURCE_TYPE),
-                        col(FIRST_TRAFFIC_MEDIUM),
-                        col(FIRST_TRAFFIC_SOURCE),
-                        col(DEVICE_ID_LIST),
-                        col(CHANNEL),
-                        col(USER_LTV)
+                        col(USER_PROPERTIES)
                 ).distinct();
 
+        long  newUserDatasetCount =  newUserDataset.count();
+        log.info("newUserDataset count:" + newUserDatasetCount);
+
+        Dataset<Row> newProfileSetUserDataset = newUserDataset.filter(col(USER_PROPERTIES).isNotNull());
+        log.info("newProfileSetUserDataset count:" + newProfileSetUserDataset.count());
+
         String tableName = ETLRunner.TableName.USER.getTableName();
+        DatasetUtil.PathInfo pathInfo = addSchemaToMap(newProfileSetUserDataset, tableName, TABLE_VERSION_SUFFIX);
 
-        DatasetUtil.PathInfo pathInfo = addSchemaToMap(newUserDataset, tableName, TABLE_VERSION_SUFFIX);
-
-        Dataset<Row> newUserIdDataset = newUserDataset.select(APP_ID, USER_PSEUDO_ID).distinct();
-
-        log.info("newUserIdDataset count:" + newUserIdDataset.count());
-        if (newUserIdDataset.count() == 0) {
+        if (newUserDatasetCount== 0) {
             return Optional.empty();
         }
 
-        Dataset<Row> fullAggUserDataset = loadFullUserDataset(newUserDataset, pathInfo);
+        Dataset<Row> fullAggUserDataset = loadFullUserDataset(newProfileSetUserDataset, pathInfo);
 
-        Column userPseudoIdCol = fullAggUserDataset.col(USER_PSEUDO_ID);
-        Column appIdCol = fullAggUserDataset.col(APP_ID);
+        Column userPseudoIdCol = newUserDataset.col(USER_PSEUDO_ID);
+        Column appIdCol = newUserDataset.col(APP_ID);
 
-        Column userIdJoinForNewUserId = userPseudoIdCol.equalTo(newUserIdDataset.col(USER_PSEUDO_ID)).and(appIdCol.equalTo(newUserIdDataset.col(APP_ID)));
+        Column userIdJoinForNewUserId = userPseudoIdCol.equalTo(fullAggUserDataset.col(USER_PSEUDO_ID)).and(appIdCol.equalTo(fullAggUserDataset.col(APP_ID)));
         Column userIdJoinForPageReferrer = userPseudoIdCol.equalTo(userReferrerDataset.col(USER_PSEUDO_ID)).and(appIdCol.equalTo(userReferrerDataset.col(APP_ID)));
         Column userIdJoinForFirstVisit = userPseudoIdCol.equalTo(userFirstVisitDataset.col(USER_PSEUDO_ID)).and(appIdCol.equalTo(userFirstVisitDataset.col(APP_ID)));
 
-        Dataset<Row> userJoinDataset = fullAggUserDataset
-                .join(newUserIdDataset, userIdJoinForNewUserId, "inner")
+        Dataset<Row> userJoinDataset = newUserDataset
+                .join(fullAggUserDataset, userIdJoinForNewUserId, "left")
                 .join(userReferrerDataset, userIdJoinForPageReferrer, "left")
                 .join(userFirstVisitDataset, userIdJoinForFirstVisit, "left");
 
         Dataset<Row> finalUserDataset = userJoinDataset.select(
                 appIdCol,
-                col(EVENT_DATE),
-                fullAggUserDataset.col(EVENT_TIMESTAMP),
-                col(USER_ID),
+                coalesce(fullAggUserDataset.col(EVENT_DATE), newUserDataset.col(EVENT_DATE)).alias(EVENT_DATE),
+                coalesce(fullAggUserDataset.col(EVENT_TIMESTAMP), newUserDataset.col(EVENT_TIMESTAMP)).alias(EVENT_TIMESTAMP),
+                coalesce(fullAggUserDataset.col(USER_ID), newUserDataset.col(USER_ID)).alias(USER_ID),
                 userPseudoIdCol,
-                col(USER_FIRST_TOUCH_TIMESTAMP),
-                col(USER_PROPERTIES),
-                col(USER_LTV),
-                col(FIRST_VISIT_DATE),
-                col(COL_PAGE_REFERER).alias(FIRST_REFERER),
-                col(FIRST_TRAFFIC_SOURCE_TYPE),
-                col(FIRST_TRAFFIC_MEDIUM),
-                col(FIRST_TRAFFIC_SOURCE),
-                col(DEVICE_ID_LIST),
-                col(CHANNEL)
-        );
+                userFirstVisitDataset.col(USER_FIRST_TOUCH_TIMESTAMP).alias(USER_FIRST_TOUCH_TIMESTAMP),
+                fullAggUserDataset.col(USER_PROPERTIES).alias(USER_PROPERTIES),
+                lit(null).cast(userLtvType).alias(USER_LTV),
+                userFirstVisitDataset.col(FIRST_VISIT_DATE).alias(FIRST_VISIT_DATE),
+                substring(userReferrerDataset.col(COL_PAGE_REFERER), 0, MAX_STRING_VALUE_LEN).alias(FIRST_REFERER),
+                lit(null).cast(DataTypes.StringType).alias(FIRST_TRAFFIC_SOURCE_TYPE),
+                lit(null).cast(DataTypes.StringType).alias(FIRST_TRAFFIC_MEDIUM),
+                lit(null).cast(DataTypes.StringType).alias(FIRST_TRAFFIC_SOURCE),
+                lit(null).cast(deviceIdListType).alias(DEVICE_ID_LIST),
+                lit(null).cast(DataTypes.StringType).alias(CHANNEL)
+        ).distinct();
 
         boolean debugLocal = Boolean.parseBoolean(System.getProperty(DEBUG_LOCAL_PROP));
         if (debugLocal) {
@@ -424,16 +414,16 @@ public class GTMServerDataTransformer {
                 .withColumn(EVENT_PARAM_INT_VALUE, col(EVENT_PARAM).getField(VALUE).getField(INT_VALUE))
                 .withColumn(EVENT_PARAM_STRING_VALUE, col(EVENT_PARAM).getField(VALUE).getField(STRING_VALUE))
                 .select(
-                        APP_ID,
-                        EVENT_DATE,
-                        EVENT_TIMESTAMP,
-                        EVENT_ID,
-                        EVENT_NAME,
-                        EVENT_PARAM_KEY,
-                        EVENT_PARAM_DOUBLE_VALUE,
-                        EVENT_PARAM_FLOAT_VALUE,
-                        EVENT_PARAM_INT_VALUE,
-                        EVENT_PARAM_STRING_VALUE
+                        col(APP_ID),
+                        col(EVENT_DATE),
+                        col(EVENT_TIMESTAMP),
+                        col(EVENT_ID),
+                        col(EVENT_NAME),
+                        col(EVENT_PARAM_KEY),
+                        col(EVENT_PARAM_DOUBLE_VALUE),
+                        col(EVENT_PARAM_FLOAT_VALUE),
+                        col(EVENT_PARAM_INT_VALUE),
+                        substring(col(EVENT_PARAM_STRING_VALUE), 0, MAX_PARAM_STRING_VALUE_LEN).alias(EVENT_PARAM_STRING_VALUE)
                 );
 
         boolean debugLocal = Boolean.parseBoolean(System.getProperty(DEBUG_LOCAL_PROP));

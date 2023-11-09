@@ -477,7 +477,7 @@ class ETLRunnerTest extends BaseSparkTest {
         System.setProperty(APP_IDS_PROP, "uba-app");
         System.setProperty(PROJECT_ID_PROP, "test_project_id_01");
         System.setProperty("force.merge", "true");
-        System.setProperty(WAREHOUSE_DIR_PROP, "/tmp/should_executeTransformers_with_GTM_server_transformer");
+        System.setProperty(WAREHOUSE_DIR_PROP, "/tmp/warehouse/etl_runner/should_executeTransformers_with_GTM_server_transformer");
         spark.sparkContext().addFile(requireNonNull(getClass().getResource("/GeoLite2-City.mmdb")).getPath());
 
         List<String> transformers = Lists.newArrayList();
@@ -507,7 +507,7 @@ class ETLRunnerTest extends BaseSparkTest {
         String expectedData = this.resourceFileAsString("/gtm-server/expected/test_etl_runner_data_event.json");
         Assertions.assertEquals(expectedData, eventDataset
                 .filter(col("event_id")
-                        .equalTo("43cc3b89d7dfccbc2c906eb125ea25db-807802863.1690769179-1693281535-11-0"))
+                        .equalTo("43cc3b89d7dfccbc2c906eb125ea25db-0-1693281535-11-807802863.1690769179"))
                 .first().prettyJson());
 
     }
