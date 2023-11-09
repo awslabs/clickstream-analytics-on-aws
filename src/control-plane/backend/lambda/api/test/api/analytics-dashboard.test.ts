@@ -110,21 +110,8 @@ describe('Analytics dashboard test', () => {
           dashboardId: 'dashboard-1',
           name: 'dashboard-1',
           projectId: MOCK_PROJECT_ID,
+          appId: MOCK_APP_ID,
           description: 'Description of dashboard-1',
-          region: 'ap-southeast-1',
-          sheets: [
-            { id: 's1', name: 'sheet1' },
-            { id: 's2', name: 'sheet2' },
-          ],
-          ownerPrincipal: 'arn:aws:quicksight:us-west-2:5555555555555:user/default/user',
-          defaultDataSourceArn: 'arn:aws:quicksight:ap-southeast-1:5555555555555:datasource/clickstream_datasource_project_1',
-          deleted: false,
-        },
-        {
-          dashboardId: 'dashboard-2',
-          name: 'dashboard-2',
-          projectId: 'project-1',
-          description: 'Description of dashboard-2',
           region: 'ap-southeast-1',
           sheets: [
             { id: 's1', name: 'sheet1' },
@@ -152,7 +139,8 @@ describe('Analytics dashboard test', () => {
             description: 'Description of dashboard-1',
             name: 'dashboard-1',
             ownerPrincipal: 'arn:aws:quicksight:us-west-2:5555555555555:user/default/user',
-            projectId: 'project_8888_8888',
+            projectId: MOCK_PROJECT_ID,
+            appId: MOCK_APP_ID,
             region: 'ap-southeast-1',
             sheets: [
               { id: 's1', name: 'sheet1' },

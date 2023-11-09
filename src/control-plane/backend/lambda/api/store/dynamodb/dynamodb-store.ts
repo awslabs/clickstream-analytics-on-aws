@@ -75,23 +75,24 @@ export class DynamoDbStore implements ClickStreamStore {
     return !dashboard.deleted ? dashboard : undefined;
   };
 
-  public async listDashboards(projectId: string, order: string): Promise<IDashboard[]> {
+  public async listDashboards(projectId: string, appId: string, order: string): Promise<IDashboard[]> {
     const input: QueryCommandInput = {
       TableName: clickStreamTableName,
       IndexName: prefixTimeGSIName,
       KeyConditionExpression: '#prefix= :prefix',
-      FilterExpression: 'deleted = :d',
+      FilterExpression: 'deleted = :d AND projectId = :projectId AND appId = :appId',
       ExpressionAttributeNames: {
         '#prefix': 'prefix',
       },
       ExpressionAttributeValues: {
         ':d': false,
         ':prefix': 'DASHBOARD',
+        ':projectId': projectId,
+        ':appId': appId,
       },
       ScanIndexForward: order === 'asc',
     };
-    const records = await query(input) as IDashboard[];
-    return records.filter(d => d.projectId === projectId);
+    return await query(input) as IDashboard[];
   };
 
   public async deleteDashboard(dashboardId: string, operator: string): Promise<void> {
