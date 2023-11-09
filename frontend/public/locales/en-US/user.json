@@ -24,12 +24,15 @@
     "settingUserOperatorRoleNames": "Operator Role Names",
     "settingUserOperatorRoleNamesDesc": "The roles in OIDC are mapped to operators in Click stream, with multiple role names separated by commas, for example: operator,others",
     "settingUserAnalystRoleNames": "Analyst Role Names",
-    "settingUserAnalystRoleNamesDesc": "The roles in OIDC are mapped to analyst in Click stream, with multiple role names separated by commas, for example: analyst,others"
+    "settingUserAnalystRoleNamesDesc": "The roles in OIDC are mapped to analyst in Click stream, with multiple role names separated by commas, for example: analyst,others",
+    "settingUserAnalystReaderRoleNames": "Analyst Reader Role Names",
+    "settingUserAnalystReaderRoleNamesDesc": "The roles in OIDC are mapped to analyst reader in Click stream, with multiple role names separated by commas, for example: analystReader,others"
   },
   "options": {
     "admin": "Administrator",
     "operator": "Operator",
     "analyst": "Analyst",
+    "analystReader": "AnalystReader",
     "noIdentity": "NoIdentity"
   },
   "valid": {
