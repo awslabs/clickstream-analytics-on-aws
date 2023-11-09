@@ -43,6 +43,8 @@ const MOCK_EVENT = {
     platform: [
       'iOS',
     ],
+    sdkName: ['Clickstream SDK'],
+    sdkVersion: ['v1.0.0'],
   },
   day31: {
     count: 2,
@@ -50,6 +52,8 @@ const MOCK_EVENT = {
     platform: [
       'Android',
     ],
+    sdkName: ['Clickstream SDK'],
+    sdkVersion: ['v1.0.1'],
   },
   summary: {
     dataVolumeLastDay: 2048,
@@ -58,6 +62,8 @@ const MOCK_EVENT = {
       'Android',
       'iOS',
     ],
+    sdkName: ['Clickstream SDK'],
+    sdkVersion: ['v1.0.0', 'v1.0.1'],
   },
 };
 
@@ -430,6 +436,8 @@ describe('Metadata Event test', () => {
         ],
         hasData: true,
         platform: [MetadataPlatform.ANDROID, MetadataPlatform.IOS],
+        sdkName: ['Clickstream SDK'],
+        sdkVersion: ['v1.0.0', 'v1.0.1'],
         projectId: MOCK_PROJECT_ID,
         appId: MOCK_APP_ID,
         name: MOCK_EVENT_NAME,
@@ -517,6 +525,8 @@ describe('Metadata Event test', () => {
         ],
         hasData: false,
         platform: [],
+        sdkName: [],
+        sdkVersion: [],
         projectId: MOCK_PROJECT_ID,
         appId: MOCK_APP_ID,
         name: MOCK_EVENT_NAME,
@@ -604,6 +614,8 @@ describe('Metadata Event test', () => {
             dataVolumeLastDay: 1,
             associatedParameters: [],
             platform: [MetadataPlatform.ANDROID, MetadataPlatform.IOS],
+            sdkName: ['Clickstream SDK'],
+            sdkVersion: ['v1.0.0', 'v1.0.1'],
           },
           {
             id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}2`,
@@ -622,6 +634,8 @@ describe('Metadata Event test', () => {
             dataVolumeLastDay: 0,
             associatedParameters: [],
             platform: [MetadataPlatform.WEB],
+            sdkName: ['Clickstream SDK'],
+            sdkVersion: ['v1.0.0', 'v1.0.1'],
           },
         ],
         totalCount: 2,
@@ -695,6 +709,8 @@ describe('Metadata Event test', () => {
             dataVolumeLastDay: 0,
             associatedParameters: [],
             platform: [MetadataPlatform.ANDROID, MetadataPlatform.IOS],
+            sdkName: ['Clickstream SDK'],
+            sdkVersion: ['v1.0.0', 'v1.0.1'],
           },
         ],
         totalCount: 1,
@@ -888,6 +904,8 @@ describe('Metadata Event test', () => {
               },
             ],
             platform: [MetadataPlatform.ANDROID, MetadataPlatform.IOS],
+            sdkName: ['Clickstream SDK'],
+            sdkVersion: ['v1.0.0', 'v1.0.1'],
           },
           {
             id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}2`,
@@ -906,6 +924,8 @@ describe('Metadata Event test', () => {
             month: '#202301',
             associatedParameters: [],
             platform: [MetadataPlatform.ANDROID, MetadataPlatform.WEB, MetadataPlatform.IOS],
+            sdkName: ['Clickstream SDK'],
+            sdkVersion: ['v1.0.0', 'v1.0.1'],
           },
         ],
         totalCount: 2,
@@ -956,6 +976,8 @@ describe('Metadata Event test', () => {
             dataVolumeLastDay: 0,
             associatedParameters: [],
             platform: [],
+            sdkName: [],
+            sdkVersion: [],
           },
         ],
         totalCount: 1,
