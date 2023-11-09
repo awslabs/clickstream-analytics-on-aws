@@ -141,7 +141,7 @@ export const validateIngestionServerNum = (serverSize: IngestionServerSizeProps)
 const getVpcEndpointServices = (region: string, services: string[]) => {
   let prefix = `com.amazonaws.${region}`;
   if (region.startsWith('cn')) {
-    prefix = 'cn.com.amazonaws.cn-northwest-1';
+    prefix = `cn.${prefix}`;
   }
   return services.map(s => `${prefix}.${s}`);
 };
