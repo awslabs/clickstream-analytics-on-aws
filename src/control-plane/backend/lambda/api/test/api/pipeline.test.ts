@@ -190,11 +190,10 @@ describe('Pipeline test', () => {
     createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock,
       ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, iamMock, {
         publicAZContainPrivateAZ: true,
-        subnetsCross3AZ: true,
-        subnetsIsolated: true,
+        noVpcEndpoint: true,
       });
     ddbMock.on(PutCommand).resolves({});
-    createPipelineMockForBJSRegion(ec2Mock, s3Mock);
+    createPipelineMockForBJSRegion(s3Mock);
     const res = await request(app)
       .post('/api/pipeline')
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
@@ -208,9 +207,6 @@ describe('Pipeline test', () => {
     expect(res.body.message).toEqual('Pipeline added.');
     expect(res.body.success).toEqual(true);
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeVpcEndpointsCommand, 1);
-    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSecurityGroupRulesCommand, 1);
-    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSubnetsCommand, 1);
-    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeRouteTablesCommand, 1);
     expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 1);
   });
   it('Create pipeline with error RPU not increments of 8', async () => {

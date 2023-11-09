@@ -415,6 +415,7 @@ async function _checkVpcEndpointsForIsolatedSubnets(pipeline: IPipeline, vpcId: 
       _validateEndpointsForModules(pipeline, allSubnets, isolatedSubnetsAZ, selectedPrivateSubnet, vpcEndpoints, vpcEndpointSecurityGroupRules);
     } else {
       const vpcEndpointServices = vpcEndpoints.map(vpce => vpce.ServiceName!);
+      console.log('vpcEndpointServices', vpcEndpointServices);
       validateVpcEndpoint(
         allSubnets,
         privateSubnetsAZ,
