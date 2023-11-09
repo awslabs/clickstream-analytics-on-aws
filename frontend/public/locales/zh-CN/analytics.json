@@ -264,11 +264,29 @@
   "noDataAvailableTitle": "没有可用于分析的点击流数据",
   "noDataAvailableMessage": "该解决方案尚未找到任何具有点击流数据的项目，请与您的系统管理员联系以开始收集数据。",
   "information": {
+    "dashboardsInfo": "dashboardsInfo",
+    "dashboardSheetInfo": "dashboardSheetInfo",
+    "userLifecycleInfo": "userLifecycleInfo",
+    "realtimeInfo": "realtimeInfo",
+    "dataManagementInfo": "dataManagementInfo",
+    "metadataEventsInfo": "metadataEventsInfo",
+    "metadataEventParametersInfo": "metadataEventParametersInfo",
+    "metadataUserAttributesInfo": "metadataUserAttributesInfo",
+    "exploreInfo": "exploreInfo",
+    "analyticsModelInfo": "analyticsModelInfo",
+    "funnelInfo": "funnelInfo",
     "funnelMetricsInfo": "选择计算的漏斗转化率的主体。",
     "funnelWindowInfo": "窗口期指用户完成转化的时间，用户在设定的窗口期内完成所有的转化步骤才算做转化成功。",
+    "eventInfo": "eventInfo",
     "eventDefineMetricInfo": "请选择事件、计算方式及过滤条件进行查询。您可以为一个事件添加多个过滤条件。",
     "filterInfo": "通过设置过滤条件全局筛选事件，此筛选条件将会作用于所有指标。",
     "groupInfo": "统计结果将按照所选属性值分组计算。",
+    "pathInfo": "pathInfo",
+    "pathSetStartNodeInfo": "pathSetStartNodeInfo",
+    "pathParticipateNodesInfo": "pathParticipateNodesInfo",
+    "pathIncludingOtherEventsInfo": "pathIncludingOtherEventsInfo",
+    "pathMergeConsecutiveEventsInfo": "pathMergeConsecutiveEventsInfo",
+    "retentionInfo": "retentionInfo",
     "pathMetricsInfo": "选择计算的路径分析统计的主体。",
     "pathSessionDefInfo": "设置路径分析的会话长度，只要在会话范围内的事件会被统计。支持使用会话ID和自定义两种模式。",
     "pathNodeTypeInfo": "选择节点类型，支持以事件、屏幕或者页面作为路径节点。",
@@ -278,7 +296,6 @@
     "pathMergeNodeInfo": "同一个会话连续重复的节点将会被合并成一个节点统计。",
     "retentionMetricInfo": "选择起始和回访事件，支持筛选。",
     "introducingAnalyticsHeader": "介绍分析工作坊",
-    "introducingAnalyticsContent": "分析工作坊允许您在易于使用的UI上探索点击流数据，并提供对所有报告和仪表板的访问。",
-    "groupApplyToFirstInfo": "分组将仅应用于第一个步骤，且分组不会应用于后续步骤。"
+    "introducingAnalyticsContent": "分析工作坊允许您在易于使用的UI上探索点击流数据，并提供对所有报告和仪表板的访问。"
   }
 }
