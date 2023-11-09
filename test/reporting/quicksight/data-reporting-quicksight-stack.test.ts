@@ -639,7 +639,7 @@ describe('DataReportingQuickSightStack resource test', () => {
           'quicksight:UpdateTemplate',
         ],
         Principal: {
-          Ref: 'QuickSightPrincipalParam',
+          Ref: 'QuickSightOwnerPrincipalParam',
         },
       },
     ],
@@ -787,7 +787,7 @@ describe('DataReportingQuickSightStack resource test', () => {
           'quicksight:UpdateDataSource',
         ],
         Principal: {
-          Ref: 'QuickSightPrincipalParam',
+          Ref: 'QuickSightOwnerPrincipalParam',
         },
       },
     ],
@@ -825,8 +825,11 @@ describe('DataReportingQuickSightStack resource test', () => {
       quickSightUser: {
         Ref: 'QuickSightUserParam',
       },
-      quickSightPrincipalArn: {
+      quickSightSharePrincipalArn: {
         Ref: 'QuickSightPrincipalParam',
+      },
+      quickSightOwnerPrincipalArn: {
+        Ref: 'QuickSightOwnerPrincipalParam',
       },
       schemas: {
         Ref: 'RedShiftDBSchemaParam',
