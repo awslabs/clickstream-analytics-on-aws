@@ -44,6 +44,7 @@ export const DEFAULT_MONTH_RANGE: DateRangePickerProps.RelativeOption = {
 };
 
 interface IExploreDateRangePickerProps {
+  disableSelect: boolean;
   dateRangeValue: DateRangePickerProps.Value | null;
   timeGranularity: SelectProps.Option;
   timeGranularityVisible: boolean;
@@ -55,6 +56,7 @@ const ExploreDateRangePicker: React.FC<IExploreDateRangePickerProps> = (
   props: IExploreDateRangePickerProps
 ) => {
   const {
+    disableSelect,
     dateRangeValue,
     timeGranularity,
     timeGranularityVisible,
@@ -144,6 +146,7 @@ const ExploreDateRangePicker: React.FC<IExploreDateRangePickerProps> = (
     <div className="cs-analytics-data-range">
       {timeGranularityVisible && (
         <Select
+          disabled={disableSelect}
           selectedOption={timeGranularity}
           options={timeGranularityOptions}
           onChange={(event) => {
@@ -152,6 +155,7 @@ const ExploreDateRangePicker: React.FC<IExploreDateRangePickerProps> = (
         />
       )}
       <DateRangePicker
+        disabled={disableSelect}
         onChange={({ detail }) => {
           setDateRangeValue(detail.value as DateRangePickerProps.Value);
         }}

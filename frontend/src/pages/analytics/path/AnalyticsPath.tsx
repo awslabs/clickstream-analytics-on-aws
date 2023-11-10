@@ -927,6 +927,7 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
         <Container>
           <div className="cs-analytics-data-range">
             <ExploreDateRangePicker
+              disableSelect={loadingChart}
               dateRangeValue={dateRangeValue}
               setDateRangeValue={setDateRangeValue}
               timeGranularity={timeGranularity}

@@ -553,6 +553,7 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
         <Container>
           <div className="cs-analytics-data-range">
             <ExploreDateRangePicker
+              disableSelect={loadingChart}
               dateRangeValue={dateRangeValue}
               setDateRangeValue={setDateRangeValue}
               timeGranularity={timeGranularity}
@@ -564,7 +565,10 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
               onChange={({ detail }) =>
                 setChartType(detail.selectedId as QuickSightChartType)
               }
-              options={chartTypeOptions}
+              options={chartTypeOptions.map((obj) => ({
+                ...obj,
+                disabled: loadingChart,
+              }))}
             />
           </div>
           <br />
