@@ -37,10 +37,7 @@ import static org.apache.spark.sql.functions.get_json_object;
 
 import static software.aws.solution.clickstream.ETLRunner.DEBUG_LOCAL_PATH;
 import static software.aws.solution.clickstream.KvConverter.getValueTypeResult;
-import static software.aws.solution.clickstream.Transformer.DOUBLE_VALUE;
-import static software.aws.solution.clickstream.Transformer.FLOAT_VALUE;
-import static software.aws.solution.clickstream.Transformer.INT_VALUE;
-import static software.aws.solution.clickstream.Transformer.STRING_VALUE;
+
 @Slf4j
 public class UserPropertiesConverter {
 
@@ -166,10 +163,10 @@ public class UserPropertiesConverter {
     public Dataset<Row> transform(final Dataset<Row> dataset) {
 
         StructType valueType = DataTypes.createStructType(new StructField[]{
-                DataTypes.createStructField(DOUBLE_VALUE, DataTypes.DoubleType, true),
-                DataTypes.createStructField(FLOAT_VALUE, DataTypes.FloatType, true),
-                DataTypes.createStructField(INT_VALUE, DataTypes.LongType, true),
-                DataTypes.createStructField(STRING_VALUE, DataTypes.StringType, true),
+                DataTypes.createStructField(DatasetUtil.DOUBLE_VALUE, DataTypes.DoubleType, true),
+                DataTypes.createStructField(DatasetUtil.FLOAT_VALUE, DataTypes.FloatType, true),
+                DataTypes.createStructField(DatasetUtil.INT_VALUE, DataTypes.LongType, true),
+                DataTypes.createStructField(DatasetUtil.STRING_VALUE, DataTypes.StringType, true),
                 DataTypes.createStructField("set_timestamp_micros", DataTypes.LongType, true),
         });
 

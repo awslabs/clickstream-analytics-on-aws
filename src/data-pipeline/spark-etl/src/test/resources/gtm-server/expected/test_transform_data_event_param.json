@@ -1,0 +1,12 @@
+{
+  "app_id" : "testAllAppId1",
+  "event_date" : "2023-09-21",
+  "event_timestamp" : 1695261256542,
+  "event_id" : "4a31fde2533e11dd2b0e7800720f6f86-0-1695260713-2-448657059.1695257753",
+  "event_name" : "PDP Clicks",
+  "event_param_key" : "x-ga-tfd",
+  "event_param_double_value" : null,
+  "event_param_float_value" : null,
+  "event_param_int_value" : 32152,
+  "event_param_string_value" : null
+}

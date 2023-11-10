@@ -34,14 +34,16 @@ import java.util.Iterator;
 
 import static org.apache.spark.sql.functions.udf;
 import static software.aws.solution.clickstream.ContextUtil.DEBUG_LOCAL_PROP;
+import static software.aws.solution.clickstream.DatasetUtil.DATA;
+import static software.aws.solution.clickstream.DatasetUtil.DOUBLE_VALUE;
+import static software.aws.solution.clickstream.DatasetUtil.FLOAT_VALUE;
+import static software.aws.solution.clickstream.DatasetUtil.INT_VALUE;
+import static software.aws.solution.clickstream.DatasetUtil.KEY;
+import static software.aws.solution.clickstream.DatasetUtil.MAX_PARAM_STRING_VALUE_LEN;
+import static software.aws.solution.clickstream.DatasetUtil.STRING_VALUE;
+import static software.aws.solution.clickstream.DatasetUtil.VALUE;
 import static software.aws.solution.clickstream.ETLRunner.DEBUG_LOCAL_PATH;
-import static software.aws.solution.clickstream.Transformer.KEY;
-import static software.aws.solution.clickstream.Transformer.VALUE;
-import static software.aws.solution.clickstream.Transformer.DATA;
-import static software.aws.solution.clickstream.Transformer.DOUBLE_VALUE;
-import static software.aws.solution.clickstream.Transformer.FLOAT_VALUE;
-import static software.aws.solution.clickstream.Transformer.INT_VALUE;
-import static software.aws.solution.clickstream.Transformer.STRING_VALUE;
+
 
 @Slf4j
 public class KvConverter {
@@ -93,12 +95,18 @@ public class KvConverter {
                 longValue = attrValueNode.asLong();
             } else if (attrValueNode.isDouble() || attrValueNode.isFloat() || attrValueNode.isFloatingPointNumber() || attrValueNode.isBigDecimal()) {
                 doubleValue = attrValueNode.asDouble();
+            } else if (attrValueNode.isArray() || attrValueNode.isObject()){
+                stringValue = attrValueNode.toString();
             } else {
                 stringValue = attrValueNode.asText();
             }
         } catch (Exception e) {
             log.warn("Error when parse attrName: " + attrName + ", attrValueNode: " +  attrValueNode.asText() + ", errorMessage: " + e.getMessage());
             stringValue = attrValueNode.asText();
+        }
+
+        if (stringValue!= null && stringValue.length() > MAX_PARAM_STRING_VALUE_LEN) {
+            stringValue = stringValue.substring(0, MAX_PARAM_STRING_VALUE_LEN);
         }
         return new ValueTypeResult(doubleValue, longValue, stringValue);
     }

@@ -23,10 +23,10 @@ import {
 import { deletePlugin, getPluginList } from 'apis/plugin';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
-import { Trans, useTranslation } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { TIME_FORMAT, XMIND_LINK } from 'ts/const';
-import { defaultStr } from 'ts/utils';
+import { defaultStr, getLocaleLngDescription } from 'ts/utils';
 
 interface PluginTableProps {
   pipelineInfo?: IExtPipeline;
@@ -61,6 +61,7 @@ const PluginTable: React.FC<PluginTableProps> = (props: PluginTableProps) => {
   const [selectedItems, setSelectedItems] = useState<IPlugin[]>(
     pluginSelectedItems || []
   );
+
   const [loadingData, setLoadingData] = useState(false);
   const [pageSize] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
@@ -120,7 +121,7 @@ const PluginTable: React.FC<PluginTableProps> = (props: PluginTableProps) => {
         if (pluginType === 'Transform' && hideDefaultTransformPlugin) {
           resultDataItem = data.items.filter((item) => !item.builtIn);
           setPluginList(resultDataItem);
-          setTotalCount(data.totalCount - 1);
+          setTotalCount(resultDataItem.length);
         } else {
           setPluginList(resultDataItem);
           setTotalCount(data.totalCount);
@@ -162,14 +163,6 @@ const PluginTable: React.FC<PluginTableProps> = (props: PluginTableProps) => {
     listPlugins();
   }, [currentPage]);
 
-  const renderDescription = (e: IPlugin) => {
-    return e.id?.startsWith('BUILT-IN') ? (
-      <Trans i18nKey={`plugin:${e.id}`}>{e.description}</Trans>
-    ) : (
-      e.description
-    );
-  };
-
   return (
     <div>
       <Table
@@ -204,7 +197,7 @@ const PluginTable: React.FC<PluginTableProps> = (props: PluginTableProps) => {
           {
             id: 'description',
             header: t('plugin:list.desc'),
-            cell: (e) => renderDescription(e),
+            cell: (e) => getLocaleLngDescription(e.description),
             sortingField: 'desc',
           },
           {

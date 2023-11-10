@@ -26,9 +26,9 @@ import java.util.List;
 import static java.util.Objects.requireNonNull;
 import static org.apache.spark.sql.functions.*;
 import static software.aws.solution.clickstream.ContextUtil.*;
+import static software.aws.solution.clickstream.DatasetUtil.*;
 import static software.aws.solution.clickstream.ETLRunner.TRANSFORM_METHOD_NAME;
-import static software.aws.solution.clickstream.TransformerV2.FULL_SUFFIX;
-import static software.aws.solution.clickstream.TransformerV2.INCREMENTAL_SUFFIX;
+
 
 @Slf4j
 class TransformerV2Test extends BaseSparkTest {
@@ -198,10 +198,10 @@ class TransformerV2Test extends BaseSparkTest {
 
         String dataDir = ContextUtil.getWarehouseDir();
 
-        String tableName1 = dataDir + "/" + TransformerV2.TABLE_ETL_USER_TRAFFIC_SOURCE + FULL_SUFFIX ;
-        String tableName2 = dataDir + "/" + TransformerV2.TABLE_ETL_USER_DEVICE_ID + FULL_SUFFIX;
-        String tableName3 = dataDir + "/" + TransformerV2.TABLE_ETL_USER_PAGE_REFERER + FULL_SUFFIX;
-        String tableName4 = dataDir + "/" + TransformerV2.TABLE_ETL_USER_CHANNEL + FULL_SUFFIX;
+        String tableName1 = dataDir + "/" + TABLE_ETL_USER_TRAFFIC_SOURCE + FULL_SUFFIX  + "_v1";;
+        String tableName2 = dataDir + "/" + TABLE_ETL_USER_DEVICE_ID + FULL_SUFFIX + "_v1";
+        String tableName3 = dataDir + "/" + TABLE_ETL_USER_PAGE_REFERER + FULL_SUFFIX + "_v1";
+        String tableName4 = dataDir + "/" + TABLE_ETL_USER_CHANNEL + FULL_SUFFIX + "_v1";
 
         transformer.postTransform(datasetUser);
         Dataset<Row> d1 = spark.read().parquet(tableName1);
@@ -247,8 +247,8 @@ class TransformerV2Test extends BaseSparkTest {
         transformer.postTransform(datasetUser);
 
         String dirPath = ContextUtil.getWarehouseDir();
-        String pathUser = dirPath + "/user" + INCREMENTAL_SUFFIX;
-        String pathItem = dirPath + "/item" + INCREMENTAL_SUFFIX;
+        String pathUser = dirPath + "/user" + INCREMENTAL_SUFFIX + "_v1";
+        String pathItem = dirPath + "/item" + INCREMENTAL_SUFFIX + "_v1";
 
         Dataset<Row> userDataset = spark.read().parquet(pathUser);
         Dataset<Row> itemDataset = spark.read().parquet(pathItem);

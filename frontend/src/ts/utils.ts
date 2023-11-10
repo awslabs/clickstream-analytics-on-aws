@@ -14,6 +14,7 @@
 import { SelectProps } from '@cloudscape-design/components';
 import { OptionDefinition } from '@cloudscape-design/components/internal/components/option/interfaces';
 import { isEqual } from 'lodash';
+import { getLngFromLocalStorage } from 'pages/analytics/analytics-utils';
 import {
   CLICK_STREAM_USER_DATA,
   EPipelineStatus,
@@ -395,4 +396,11 @@ export const getUserInfoFromLocalStorage = () => {
   } else {
     return null;
   }
+};
+
+export const getLocaleLngDescription = (description: {
+  [key: string]: string;
+}) => {
+  const localeLng = getLngFromLocalStorage();
+  return description[localeLng];
 };

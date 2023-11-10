@@ -56,9 +56,10 @@ import static software.aws.solution.clickstream.ContextUtil.DATA_FRESHNESS_HOUR_
 import static software.aws.solution.clickstream.ContextUtil.DATABASE_PROP;
 import static software.aws.solution.clickstream.ContextUtil.WAREHOUSE_DIR_PROP;
 import static software.aws.solution.clickstream.ContextUtil.JOB_NAME_PROP;
+import static software.aws.solution.clickstream.DatasetUtil.CORRUPT_RECORD;
+import static software.aws.solution.clickstream.DatasetUtil.JOB_NAME_COL;
 import static software.aws.solution.clickstream.ETLRunner.DEBUG_LOCAL_PATH;
-import static software.aws.solution.clickstream.Transformer.CORRUPT_RECORD;
-import static software.aws.solution.clickstream.Transformer.JOB_NAME_COL;
+
 
 @Slf4j
 public class Cleaner {

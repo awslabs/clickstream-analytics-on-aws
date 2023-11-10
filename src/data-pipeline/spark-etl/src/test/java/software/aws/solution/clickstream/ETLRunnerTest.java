@@ -29,10 +29,11 @@ import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Objects.requireNonNull;
+import static org.apache.spark.sql.functions.col;
 import static org.apache.spark.sql.functions.expr;
 import static org.junit.jupiter.api.Assertions.*;
 import static software.aws.solution.clickstream.ContextUtil.*;
-import static software.aws.solution.clickstream.TransformerV2.INCREMENTAL_SUFFIX;
+import static software.aws.solution.clickstream.DatasetUtil.*;
 
 class ETLRunnerTest extends BaseSparkTest {
 
@@ -323,10 +324,10 @@ class ETLRunnerTest extends BaseSparkTest {
 
         String dataDir = ContextUtil.getWarehouseDir();
 
-        String tableName1 = dataDir + "/" + TransformerV2.TABLE_ETL_USER_TRAFFIC_SOURCE + INCREMENTAL_SUFFIX ;
-        String tableName2 = dataDir + "/" + TransformerV2.TABLE_ETL_USER_DEVICE_ID + INCREMENTAL_SUFFIX;
-        String tableName3 = dataDir + "/" + TransformerV2.TABLE_ETL_USER_PAGE_REFERER + INCREMENTAL_SUFFIX;
-        String tableName4 = dataDir + "/" + TransformerV2.TABLE_ETL_USER_CHANNEL+ INCREMENTAL_SUFFIX;
+        String tableName1 = dataDir + "/" + TABLE_ETL_USER_TRAFFIC_SOURCE + INCREMENTAL_SUFFIX + TABLE_VERSION_SUFFIX_V1;
+        String tableName2 = dataDir + "/" + TABLE_ETL_USER_DEVICE_ID + INCREMENTAL_SUFFIX + TABLE_VERSION_SUFFIX_V1;
+        String tableName3 = dataDir + "/" + TABLE_ETL_USER_PAGE_REFERER + INCREMENTAL_SUFFIX + TABLE_VERSION_SUFFIX_V1;
+        String tableName4 = dataDir + "/" + TABLE_ETL_USER_CHANNEL+ INCREMENTAL_SUFFIX + TABLE_VERSION_SUFFIX_V1;
         Dataset<Row> d1 = spark.read().parquet(tableName1);
         Dataset<Row> d2 = spark.read().parquet(tableName2);
         Dataset<Row> d3 = spark.read().parquet(tableName3);
@@ -369,26 +370,26 @@ class ETLRunnerTest extends BaseSparkTest {
 
         System.out.println("outputPath:" + outputPath);
 
-        Dataset<Row> eventParamDataset = spark.read().json(outputPath + ETLRunner.TableName.EVEN_PARAMETER.name);
+        Dataset<Row> eventParamDataset = spark.read().json(outputPath + ETLRunner.TableName.EVEN_PARAMETER.getTableName());
         String expectedJsonEventParam = this.resourceFileAsString("/expected/etl_runner_v2_event_parameter.json");
         String rowJsonEventParam = datasetToPrettyJson(eventParamDataset
                 .where(expr("event_id='1fcd7f5b-9529-4977-a303-e8c7e39db7b898-etl_runner1'")).distinct());
         Assertions.assertEquals(expectedJsonEventParam, rowJsonEventParam);
         Assertions.assertEquals(44, eventParamDataset.count());
 
-        Dataset<Row> userDataset = spark.read().json(outputPath + ETLRunner.TableName.USER.name);
+        Dataset<Row> userDataset = spark.read().json(outputPath + ETLRunner.TableName.USER.getTableName());
         Dataset<Row> userDataset1 = userDataset.filter(expr("user_pseudo_id='uuid1_etl_runner1'"));
         String expectedJsonUser = this.resourceFileAsString("/expected/etl_runner_v2_user.json");
         Assertions.assertEquals(expectedJsonUser, userDataset1.first().prettyJson());
         Assertions.assertEquals(1, userDataset1.count());
 
-        Dataset<Row> itemDataset = spark.read().json(outputPath + ETLRunner.TableName.ITEM.name);
+        Dataset<Row> itemDataset = spark.read().json(outputPath + ETLRunner.TableName.ITEM.getTableName());
         Dataset<Row> itemDataset1 = itemDataset.filter(expr("id='item_id_uuid1_etl_runner1'"));
         String expectedJsonItem = this.resourceFileAsString("/expected/etl_runner_v2_item.json");
         Assertions.assertEquals(expectedJsonItem, itemDataset1.first().prettyJson());
         Assertions.assertEquals(1, itemDataset1.count());
 
-        Dataset<Row> eventDataset = spark.read().json(outputPath + ETLRunner.TableName.EVENT.name);
+        Dataset<Row> eventDataset = spark.read().json(outputPath + ETLRunner.TableName.EVENT.getTableName());
         Assertions.assertEquals(4, eventDataset.count());
         String eventJson = datasetToPrettyJson(eventDataset.where(expr("event_id='1fcd7f5b-9529-4977-a303-e8c7e39db7b898-etl_runner1'")));
         String expectedJsonEvent = this.resourceFileAsString("/expected/etl_runner_v2_event4.json");
@@ -420,11 +421,11 @@ class ETLRunnerTest extends BaseSparkTest {
         String outputPath = config.getOutputPath();
 
         System.out.println("outputPath:" + outputPath);
-        Dataset<Row> eventDataset = spark.read().json(outputPath + ETLRunner.TableName.EVENT.name);
-        Dataset<Row> eventParamDataset = spark.read().json(outputPath + ETLRunner.TableName.EVEN_PARAMETER.name);
-        Dataset<Row> itemDataset = spark.read().json(outputPath + ETLRunner.TableName.ITEM.name);
+        Dataset<Row> eventDataset = spark.read().json(outputPath + ETLRunner.TableName.EVENT.getTableName());
+        Dataset<Row> eventParamDataset = spark.read().json(outputPath + ETLRunner.TableName.EVEN_PARAMETER.getTableName());
+        Dataset<Row> itemDataset = spark.read().json(outputPath + ETLRunner.TableName.ITEM.getTableName());
         try {
-           spark.read().json(outputPath + ETLRunner.TableName.USER.name);
+           spark.read().json(outputPath + ETLRunner.TableName.USER.getTableName());
         } catch (Exception e) {
             Assertions.assertTrue(e.getMessage().contains("Path does not exist"));
         }
@@ -453,20 +454,62 @@ class ETLRunnerTest extends BaseSparkTest {
         String outputPath = config.getOutputPath();
 
         System.out.println("outputPath:" + outputPath);
-        Dataset<Row> eventDataset = spark.read().json(outputPath + ETLRunner.TableName.EVENT.name);
-        Dataset<Row> eventParamDataset = spark.read().json(outputPath + ETLRunner.TableName.EVEN_PARAMETER.name);
+        Dataset<Row> eventDataset = spark.read().json(outputPath + ETLRunner.TableName.EVENT.getTableName());
+        Dataset<Row> eventParamDataset = spark.read().json(outputPath + ETLRunner.TableName.EVEN_PARAMETER.getTableName());
         try {
-            spark.read().json(outputPath + ETLRunner.TableName.USER.name);
+            spark.read().json(outputPath + ETLRunner.TableName.USER.getTableName());
         } catch (Exception e) {
             Assertions.assertTrue(e.getMessage().contains("Path does not exist"));
         }
         try {
-            spark.read().json(outputPath + ETLRunner.TableName.ITEM.name);
+            spark.read().json(outputPath + ETLRunner.TableName.ITEM.getTableName());
         } catch (Exception e) {
             Assertions.assertTrue(e.getMessage().contains("Path does not exist"));
         }
         Assertions.assertEquals(1, eventDataset.count());
         Assertions.assertEquals(11, eventParamDataset.count());
+    }
+
+
+    @Test
+    public void should_executeTransformers_with_GTM_server_transformer() throws IOException {
+        // DOWNLOAD_FILE=1 ./gradlew clean test --info --tests software.aws.solution.clickstream.ETLRunnerTest.should_executeTransformers_with_GTM_server_transformer
+        System.setProperty(APP_IDS_PROP, "uba-app");
+        System.setProperty(PROJECT_ID_PROP, "test_project_id_01");
+        System.setProperty("force.merge", "true");
+        System.setProperty(WAREHOUSE_DIR_PROP, "/tmp/warehouse/etl_runner/should_executeTransformers_with_GTM_server_transformer");
+        spark.sparkContext().addFile(requireNonNull(getClass().getResource("/GeoLite2-City.mmdb")).getPath());
+
+        List<String> transformers = Lists.newArrayList();
+        transformers.add("software.aws.solution.clickstream.gtm.GTMServerDataTransformer");
+        transformers.add("software.aws.solution.clickstream.UAEnrichment");
+        transformers.add("software.aws.solution.clickstream.IPEnrichment");
+
+        ETLRunnerConfig config = getRunnerConfig(transformers, "GTM_server_transformer");
+        ETLRunner runner = new ETLRunner(spark, config);
+        Dataset<Row> sourceDataset =
+                spark.read().json(requireNonNull(getClass().getResource("/gtm-server/server-all.json")).getPath());
+
+        runner.writeResultDataset(runner.executeTransformers(sourceDataset, transformers));
+
+        String outputPath = config.getOutputPath();
+        System.out.println("outputPath:" + outputPath);
+        Dataset<Row> eventDataset = spark.read().json(outputPath + ETLRunner.TableName.EVENT.getTableName());
+        Dataset<Row> eventParamDataset = spark.read().json(outputPath + ETLRunner.TableName.EVEN_PARAMETER.getTableName());
+        Dataset<Row> itemDataset = spark.read().json(outputPath + ETLRunner.TableName.ITEM.getTableName());
+        Dataset<Row> userDataset = spark.read().json(outputPath + ETLRunner.TableName.USER.getTableName());
+
+        Assertions.assertTrue(eventDataset.count() > 0);
+        Assertions.assertTrue( eventParamDataset.count() > 0);
+        Assertions.assertTrue(itemDataset.count() > 0);
+        Assertions.assertTrue(userDataset.count() > 0);
+
+        String expectedData = this.resourceFileAsString("/gtm-server/expected/test_etl_runner_data_event.json");
+        Assertions.assertEquals(expectedData, eventDataset
+                .filter(col("event_id")
+                        .equalTo("43cc3b89d7dfccbc2c906eb125ea25db-0-1693281535-11-807802863.1690769179"))
+                .first().prettyJson());
+
     }
 
     public ETLRunnerConfig getRunnerConfig(List<String> transformers, String name) {

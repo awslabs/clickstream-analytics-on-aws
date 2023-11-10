@@ -18,7 +18,7 @@ export interface IPlugin {
   readonly prefix: string;
 
   readonly name: string;
-  readonly description: string;
+  readonly description: { [key: string]: string };
   readonly jarFile: string;
   readonly dependencyFiles: string[];
   readonly mainFunction: string;
