@@ -49,8 +49,7 @@ jobs:
           git config user.name clickstream-ci-bot
           git config user.email clickstream-ci-bot@amazon.com
           ALIAS=$( [ "$VERSION" == "${{ vars.LATEST_VERSION }}" ] && echo "latest" || echo "" )
-          ALIAS=$( [ "$VERSION" == "${{ vars.DEV_VERSION }}" ] && echo "dev" || echo "$ALIAS" )
-          TITLE=$( [ -z "$ALIAS" ] && echo "$VERSION" || echo "$VERSION ($ALIAS)" )
+          TITLE="$VERSION"
           LINK_EN=$LINK_EN$VERSION
           LINK_ZH=$LINK_ZH$VERSION
           mike deploy --push --update-aliases $VERSION ${ALIAS} -t "$TITLE" --deploy-prefix en/ -F ./docs/mkdocs.en.yml 
