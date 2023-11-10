@@ -356,6 +356,7 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
               <SectionTitle
                 type="event"
                 title={t('analytics:labels.defineMetrics')}
+                description={t('analytics:information.retentionMetricInfo')}
               />
               <RetentionSelect
                 data={eventOptionData}

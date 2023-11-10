@@ -455,7 +455,7 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
               <SectionTitle
                 type="event"
                 title={t('analytics:labels.funnelSteps')}
-                description={t('analytics:information.eventDefineMetricInfo')}
+                description={t('analytics:information.funnelMetricsInfo')}
               />
               <div className="mt-10">
                 <SpaceBetween direction="vertical" size="xs">

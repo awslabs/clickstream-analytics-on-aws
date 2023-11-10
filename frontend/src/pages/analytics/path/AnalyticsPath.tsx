@@ -668,11 +668,12 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
               <SectionTitle
                 type="event"
                 title={t('analytics:labels.nodesSelect')}
+                description={t('analytics:information.pathNodeTypeInfo')}
               />
               <InfoTitle
                 title={t('analytics:labels.setStartNode')}
                 popoverDescription={t(
-                  'analytics:information.pathSetStartNodeInfo'
+                  'analytics:information.pathStartNodeInfo'
                 )}
               />
               <StartNodeSelect
@@ -711,7 +712,7 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
               <InfoTitle
                 title={t('analytics:labels.participateNodes')}
                 popoverDescription={t(
-                  'analytics:information.pathParticipateNodesInfo'
+                  'analytics:information.pathNodeSelectionInfo'
                 )}
               />
               <EventsSelect
@@ -831,7 +832,7 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
                   <InfoTitle
                     title={t('analytics:labels.includingOtherEvents')}
                     popoverDescription={t(
-                      'analytics:information.pathIncludingOtherEventsInfo'
+                      'analytics:information.pathIncludeOtherInfo'
                     )}
                   />
                   <Toggle
@@ -847,7 +848,7 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
                   <InfoTitle
                     title={t('analytics:labels.mergeConsecutiveEvents')}
                     popoverDescription={t(
-                      'analytics:information.pathMergeConsecutiveEventsInfo'
+                      'analytics:information.pathMergeNodeInfo'
                     )}
                   />
                   <Toggle
