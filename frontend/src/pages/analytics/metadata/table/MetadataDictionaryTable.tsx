@@ -20,16 +20,17 @@ import {
   Table,
 } from '@cloudscape-design/components';
 import { updateMetadataDisplay } from 'apis/analytics';
+import { UserContext } from 'context/UserContext';
 import { cloneDeep } from 'lodash';
 import {
   TableEmptyState,
   TableNoMatchState,
 } from 'pages/common/common-components';
 import { useColumnWidths } from 'pages/common/use-column-widths';
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { DICTIONARY_DISPLAY_PREFIX } from 'ts/const';
-import { alertMsg, defaultStr } from 'ts/utils';
+import { DICTIONARY_DISPLAY_PREFIX, IUserRole } from 'ts/const';
+import { alertMsg, defaultStr, getUserInfoFromLocalStorage } from 'ts/utils';
 import { descriptionRegex, displayNameRegex } from './table-config';
 
 interface MetadataDictionaryTableProps {
@@ -55,6 +56,7 @@ const MetadataDictionaryTable: React.FC<MetadataDictionaryTableProps> = (
   props: MetadataDictionaryTableProps
 ) => {
   const { t } = useTranslation();
+  const currentUser = useContext(UserContext) ?? getUserInfoFromLocalStorage();
   const { parameter, tableI18nStrings } = props;
 
   const buildEditCell = (
@@ -74,6 +76,22 @@ const MetadataDictionaryTable: React.FC<MetadataDictionaryTableProps> = (
     );
   };
 
+  const getDisplayValueEditConfig = () => {
+    if (currentUser.role !== IUserRole.ANALYST_READER) {
+      return {
+        validation(item: any, value: any) {
+          return !displayNameRegex.test(value)
+            ? undefined
+            : t('tag.invalidInput');
+        },
+        editingCell: (
+          item: IMetadataAttributeValue,
+          { setValue, currentValue }: any
+        ) => buildEditCell(currentValue, setValue, item),
+      };
+    }
+  };
+
   const COLUMN_DEFINITIONS = [
     {
       id: 'value',
@@ -90,17 +108,7 @@ const MetadataDictionaryTable: React.FC<MetadataDictionaryTableProps> = (
         return e.displayValue;
       },
       minWidth: 180,
-      editConfig: {
-        validation(item: any, value: any) {
-          return !displayNameRegex.test(value)
-            ? undefined
-            : t('tag.invalidInput');
-        },
-        editingCell: (
-          item: IMetadataAttributeValue,
-          { setValue, currentValue }: any
-        ) => buildEditCell(currentValue, setValue, item),
-      },
+      editConfig: getDisplayValueEditConfig(),
     },
   ];
   const CONTENT_DISPLAY = [

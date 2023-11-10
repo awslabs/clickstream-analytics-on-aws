@@ -41,11 +41,12 @@ import {
 } from 'components/eventselect/AnalyticsType';
 import EventsSelect from 'components/eventselect/EventSelect';
 import SegmentationFilter from 'components/eventselect/SegmentationFilter';
+import { UserContext } from 'context/UserContext';
 import { cloneDeep } from 'lodash';
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { COMMON_ALERT_TYPE } from 'ts/const';
+import { COMMON_ALERT_TYPE, IUserRole } from 'ts/const';
 import {
   QUICKSIGHT_ANALYSIS_INFIX,
   QUICKSIGHT_DASHBOARD_INFIX,
@@ -62,6 +63,7 @@ import {
   defaultStr,
   generateStr,
   getEventParameters,
+  getUserInfoFromLocalStorage,
 } from 'ts/utils';
 import {
   parametersConvertToCategoryItemType,
@@ -110,6 +112,7 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
     loadingEvents,
   } = props;
   const { appId } = useParams();
+  const currentUser = useContext(UserContext) ?? getUserInfoFromLocalStorage();
   const [loadingData, setLoadingData] = useState(loading);
   const [loadingChart, setLoadingChart] = useState(false);
   const [selectDashboardModalVisible, setSelectDashboardModalVisible] =
@@ -416,15 +419,17 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
                   >
                     {t('button.reset')}
                   </Button>
-                  <Button
-                    variant="primary"
-                    loading={loadingData}
-                    onClick={() => {
-                      setSelectDashboardModalVisible(true);
-                    }}
-                  >
-                    {t('button.saveToDashboard')}
-                  </Button>
+                  {currentUser.role !== IUserRole.ANALYST_READER && (
+                    <Button
+                      variant="primary"
+                      loading={loadingData}
+                      onClick={() => {
+                        setSelectDashboardModalVisible(true);
+                      }}
+                    >
+                      {t('button.saveToDashboard')}
+                    </Button>
+                  )}
                 </SpaceBetween>
               }
             >

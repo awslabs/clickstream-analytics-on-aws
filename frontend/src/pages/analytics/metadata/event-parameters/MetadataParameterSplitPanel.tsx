@@ -28,11 +28,12 @@ import {
   updateMetadataDisplay,
 } from 'apis/analytics';
 import Loading from 'components/common/Loading';
-import React, { useEffect, useState } from 'react';
+import { UserContext } from 'context/UserContext';
+import React, { useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { EVENT_PARAMETER_DISPLAY_PREFIX } from 'ts/const';
-import { defaultStr } from 'ts/utils';
+import { EVENT_PARAMETER_DISPLAY_PREFIX, IUserRole } from 'ts/const';
+import { defaultStr, getUserInfoFromLocalStorage } from 'ts/utils';
 import MetadataPlatformFC from '../comps/MetadataPlatform';
 import MetadataSourceFC from '../comps/MetadataSource';
 import MetadataDetailsTable from '../table/MetadataDetailsTable';
@@ -47,6 +48,7 @@ const MetadataParameterSplitPanel: React.FC<
 > = (props: MetadataParameterSplitPanelProps) => {
   const { t } = useTranslation();
   const { projectId, appId } = useParams();
+  const currentUser = useContext(UserContext) ?? getUserInfoFromLocalStorage();
   const { parameter } = props;
   const SPLIT_PANEL_I18NSTRINGS = {
     preferencesTitle: t('splitPanel.preferencesTitle'),
@@ -190,62 +192,69 @@ const MetadataParameterSplitPanel: React.FC<
                 {t('analytics:metadata.eventParameter.tableColumnDisplayName')}
               </Box>
               <div>
-                {!isEditingDisplayName && (
+                {currentUser.role === IUserRole.ANALYST_READER && (
                   <div className="flex align-center">
                     <div>{parameterDetails.displayName}</div>
-                    <Button
-                      onClick={() => {
-                        setIsEditingDisplayName(true);
-                      }}
-                      variant="icon"
-                      iconName="edit"
-                    />
                   </div>
                 )}
-                {isEditingDisplayName && (
-                  <div>
-                    <FormField>
-                      <Textarea
-                        rows={3}
-                        value={parameterDetails.displayName}
-                        onChange={(e) => {
-                          setParameterDetails((prev) => {
-                            return {
-                              ...prev,
-                              displayName: e.detail.value,
-                            };
-                          });
+                {currentUser.role !== IUserRole.ANALYST_READER &&
+                  !isEditingDisplayName && (
+                    <div className="flex align-center">
+                      <div>{parameterDetails.displayName}</div>
+                      <Button
+                        onClick={() => {
+                          setIsEditingDisplayName(true);
                         }}
+                        variant="icon"
+                        iconName="edit"
                       />
-                    </FormField>
-                    <div className="mt-5">
-                      <SpaceBetween direction="horizontal" size="xs">
-                        <Button
-                          onClick={() => {
+                    </div>
+                  )}
+                {currentUser.role !== IUserRole.ANALYST_READER &&
+                  isEditingDisplayName && (
+                    <div>
+                      <FormField>
+                        <Textarea
+                          rows={3}
+                          value={parameterDetails.displayName}
+                          onChange={(e) => {
                             setParameterDetails((prev) => {
                               return {
                                 ...prev,
-                                displayName: prevDisplayName,
+                                displayName: e.detail.value,
                               };
                             });
-                            setIsEditingDisplayName(false);
                           }}
-                        >
-                          {t('button.cancel')}
-                        </Button>
-                        <Button
-                          loading={loadingUpdateDisplayName}
-                          variant="primary"
-                          onClick={() => {
-                            updateEventInfo('displayName');
-                          }}
-                        >
-                          {t('button.save')}
-                        </Button>
-                      </SpaceBetween>
+                        />
+                      </FormField>
+                      <div className="mt-5">
+                        <SpaceBetween direction="horizontal" size="xs">
+                          <Button
+                            onClick={() => {
+                              setParameterDetails((prev) => {
+                                return {
+                                  ...prev,
+                                  displayName: prevDisplayName,
+                                };
+                              });
+                              setIsEditingDisplayName(false);
+                            }}
+                          >
+                            {t('button.cancel')}
+                          </Button>
+                          <Button
+                            loading={loadingUpdateDisplayName}
+                            variant="primary"
+                            onClick={() => {
+                              updateEventInfo('displayName');
+                            }}
+                          >
+                            {t('button.save')}
+                          </Button>
+                        </SpaceBetween>
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
               </div>
             </div>
             <div>
@@ -267,62 +276,69 @@ const MetadataParameterSplitPanel: React.FC<
                 {t('analytics:metadata.eventParameter.tableColumnDescription')}
               </Box>
               <div>
-                {!isEditingDesc && (
+                {currentUser.role === IUserRole.ANALYST_READER && (
                   <div className="flex align-center">
                     <div>{parameterDetails.description}</div>
-                    <Button
-                      onClick={() => {
-                        setIsEditingDesc(true);
-                      }}
-                      variant="icon"
-                      iconName="edit"
-                    />
                   </div>
                 )}
-                {isEditingDesc && (
-                  <div>
-                    <FormField>
-                      <Textarea
-                        rows={3}
-                        value={parameterDetails.description}
-                        onChange={(e) => {
-                          setParameterDetails((prev) => {
-                            return {
-                              ...prev,
-                              description: e.detail.value,
-                            };
-                          });
+                {currentUser.role !== IUserRole.ANALYST_READER &&
+                  !isEditingDesc && (
+                    <div className="flex align-center">
+                      <div>{parameterDetails.description}</div>
+                      <Button
+                        onClick={() => {
+                          setIsEditingDesc(true);
                         }}
+                        variant="icon"
+                        iconName="edit"
                       />
-                    </FormField>
-                    <div className="mt-5">
-                      <SpaceBetween direction="horizontal" size="xs">
-                        <Button
-                          onClick={() => {
+                    </div>
+                  )}
+                {currentUser.role !== IUserRole.ANALYST_READER &&
+                  isEditingDesc && (
+                    <div>
+                      <FormField>
+                        <Textarea
+                          rows={3}
+                          value={parameterDetails.description}
+                          onChange={(e) => {
                             setParameterDetails((prev) => {
                               return {
                                 ...prev,
-                                description: prevDesc,
+                                description: e.detail.value,
                               };
                             });
-                            setIsEditingDesc(false);
                           }}
-                        >
-                          {t('button.cancel')}
-                        </Button>
-                        <Button
-                          loading={loadingUpdateDesc}
-                          variant="primary"
-                          onClick={() => {
-                            updateEventInfo('description');
-                          }}
-                        >
-                          {t('button.save')}
-                        </Button>
-                      </SpaceBetween>
+                        />
+                      </FormField>
+                      <div className="mt-5">
+                        <SpaceBetween direction="horizontal" size="xs">
+                          <Button
+                            onClick={() => {
+                              setParameterDetails((prev) => {
+                                return {
+                                  ...prev,
+                                  description: prevDesc,
+                                };
+                              });
+                              setIsEditingDesc(false);
+                            }}
+                          >
+                            {t('button.cancel')}
+                          </Button>
+                          <Button
+                            loading={loadingUpdateDesc}
+                            variant="primary"
+                            onClick={() => {
+                              updateEventInfo('description');
+                            }}
+                          >
+                            {t('button.save')}
+                          </Button>
+                        </SpaceBetween>
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
               </div>
             </div>
             <div>

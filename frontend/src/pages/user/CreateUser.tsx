@@ -64,7 +64,10 @@ const CreateUser: React.FC<CreateUserProps> = (props: CreateUserProps) => {
       label: defaultStr(t('user:options.operator')),
     },
     { value: IUserRole.ANALYST, label: defaultStr(t('user:options.analyst')) },
-    { value: IUserRole.ANALYST_READER, label: defaultStr(t('user:options.analystReader')) },
+    {
+      value: IUserRole.ANALYST_READER,
+      label: defaultStr(t('user:options.analystReader')),
+    },
     {
       value: IUserRole.NO_IDENTITY,
       label: defaultStr(t('user:options.noIdentity')),

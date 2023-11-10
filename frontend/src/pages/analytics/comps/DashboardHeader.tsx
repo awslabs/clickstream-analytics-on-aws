@@ -20,11 +20,13 @@ import {
 import { deleteAnalyticsDashboard } from 'apis/analytics';
 import InfoLink from 'components/common/InfoLink';
 import { DispatchContext } from 'context/StateContext';
+import { UserContext } from 'context/UserContext';
 import { HelpInfoActionType, HelpPanelType } from 'context/reducer';
 import React, { useContext, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { defaultStr } from 'ts/utils';
+import { IUserRole } from 'ts/const';
+import { defaultStr, getUserInfoFromLocalStorage } from 'ts/utils';
 
 interface DashboardHeaderProps {
   totalNum: number;
@@ -46,6 +48,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = (
     refreshPage,
   } = props;
   const { projectId, appId } = useParams();
+  const currentUser = useContext(UserContext) ?? getUserInfoFromLocalStorage();
   const [loadingDelete, setLoadingDelete] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const dispatch = useContext(DispatchContext);
@@ -118,21 +121,25 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = (
         }
         actions={
           <SpaceBetween size="xs" direction="horizontal">
-            <Button
-              disabled={!dashboard?.id}
-              onClick={() => {
-                setShowDeleteModal(true);
-              }}
-            >
-              {t('button.delete')}
-            </Button>
-            <Button
-              data-testid="header-btn-create"
-              variant="primary"
-              onClick={onClickCreate}
-            >
-              {t('common:button.createDashboard')}
-            </Button>
+            {currentUser.role !== IUserRole.ANALYST_READER && (
+              <>
+                <Button
+                  disabled={!dashboard?.id}
+                  onClick={() => {
+                    setShowDeleteModal(true);
+                  }}
+                >
+                  {t('button.delete')}
+                </Button>
+                <Button
+                  data-testid="header-btn-create"
+                  variant="primary"
+                  onClick={onClickCreate}
+                >
+                  {t('common:button.createDashboard')}
+                </Button>
+              </>
+            )}
           </SpaceBetween>
         }
       >
