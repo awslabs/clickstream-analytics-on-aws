@@ -119,10 +119,10 @@
       }
     },
     "eventParameter": {
-      "title": "Event Parameters",
-      "description": "Description of the Event Parameter",
+      "title": "Event Attributes",
+      "description": "Description of the Event Attribute",
       "tableColumnID": "ID",
-      "tableColumnName": "Parameter name",
+      "tableColumnName": "Attribute name",
       "tableColumnDisplayName": "Display name",
       "tableColumnDescription": "Description",
       "tableColumnMetadataSource": "Source",
@@ -130,8 +130,8 @@
       "tableColumnHasData": "Has data",
       "tableColumnPlatform": "Platform",
       "tableColumnDataType": "Data type",
-      "filteringAriaLabel": "Find parameters",
-      "filteringPlaceholder": "Find parameters",
+      "filteringAriaLabel": "Find Attributes",
+      "filteringPlaceholder": "Find Attributes",
       "split": {
         "title": "Event parameter details",
         "associatedEvents": "Associated events",

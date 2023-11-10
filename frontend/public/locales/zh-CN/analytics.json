@@ -119,21 +119,21 @@
       }
     },
     "eventParameter": {
-      "title": "事件参数",
-      "description": "事件参数的描述",
+      "title": "事件属性",
+      "description": "事件属性的描述",
       "tableColumnID": "ID",
-      "tableColumnName": "参数名称",
+      "tableColumnName": "属性名称",
       "tableColumnDisplayName": "显示名称",
       "tableColumnDescription": "描述",
       "tableColumnMetadataSource": "来源",
-      "tableColumnParameterType": "参数类型",
+      "tableColumnParameterType": "属性类型",
       "tableColumnHasData": "有数据",
       "tableColumnPlatform": "平台",
       "tableColumnDataType": "数据类型",
-      "filteringAriaLabel": "查找参数",
-      "filteringPlaceholder": "查找参数",
+      "filteringAriaLabel": "查找属性",
+      "filteringPlaceholder": "查找属性",
       "split": {
-        "title": "事件参数详细信息",
+        "title": "事件属性详细信息",
         "associatedEvents": "关联的事件",
         "dictionary": "字典"
       }
