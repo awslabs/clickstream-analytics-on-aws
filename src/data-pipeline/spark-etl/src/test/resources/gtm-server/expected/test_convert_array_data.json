@@ -1,5 +1,5 @@
 {
-  "appId" : "casetify_clickstream_analytics_aws",
+  "appId" : "example_clickstream_analytics_aws",
   "compression" : null,
   "date" : "2023-09-21T01:54:16+00:00",
   "fakeIp" : null,
@@ -13,7 +13,7 @@
   "source_type" : "http_server",
   "timestamp" : "2023-09-21T01:54:16.554048761Z",
   "ua" : null,
-  "uri" : "/collect?appId=casetify_clickstream_analytics_aws",
+  "uri" : "/collect?appId=example_clickstream_analytics_aws",
   "dataOut" : {
     "gtmId" : "G-CCM0Y0Y1RC",
     "gtmVersion" : "45je39i0",
@@ -26,7 +26,7 @@
     "language" : "en-us",
     "screenWidth" : 428,
     "screenHeight" : 926,
-    "pageReferrer" : "https://www.casetify.com/product/screen-protector",
+    "pageReferrer" : "https://www.example.com/product/screen-protector",
     "isClientMobile" : null,
     "clientModel" : null,
     "clientPlatform" : null,
@@ -45,7 +45,7 @@
         "double_value" : null,
         "float_value" : null,
         "int_value" : null,
-        "string_value" : "Black Kingsnake – CASETiFY"
+        "string_value" : "Black Kingsnake – example"
       }
     }, {
       "key" : "Url",
@@ -165,7 +165,7 @@
         "double_value" : null,
         "float_value" : null,
         "int_value" : null,
-        "string_value" : "https://www.casetify.com/product/black-kingsnake/iphone-15-pro-max/recasetify-impact-case?artwork_name=black-kingsnake&device=iphone-15-pro-max&product=ultra-bounce-case-magsafe-compatible"
+        "string_value" : "https://www.example.com/product/black-kingsnake/iphone-15-pro-max/reexample-impact-case?artwork_name=black-kingsnake&device=iphone-15-pro-max&product=ultra-bounce-case-magsafe-compatible"
       }
     }, {
       "key" : "x-ga-protocol_version",
@@ -205,7 +205,7 @@
         "double_value" : null,
         "float_value" : null,
         "int_value" : null,
-        "string_value" : "https://www.casetify.com/product/screen-protector"
+        "string_value" : "https://www.example.com/product/screen-protector"
       }
     }, {
       "key" : "x-ga-js_client_id",

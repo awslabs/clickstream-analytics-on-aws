@@ -1,5 +1,5 @@
 {
-  "appId" : "casetify_clickstream_analytics_aws",
+  "appId" : "example_clickstream_analytics_aws",
   "compression" : null,
   "date" : "2023-09-21T01:54:21+00:00",
   "fakeIp" : null,
@@ -13,7 +13,7 @@
   "source_type" : "http_server",
   "timestamp" : "2023-09-21T01:54:21.386464853Z",
   "ua" : null,
-  "uri" : "/collect?appId=casetify_clickstream_analytics_aws",
+  "uri" : "/collect?appId=example_clickstream_analytics_aws",
   "dataOut" : {
     "gtmId" : "G-CCM0Y0Y1RC",
     "gtmVersion" : "45je39i0",
@@ -26,7 +26,7 @@
     "language" : "zh-tw",
     "screenWidth" : 1920,
     "screenHeight" : 1200,
-    "pageReferrer" : "https://www.casetify.com/iphone-cases/iphone-15-pro-max-cases?page=2",
+    "pageReferrer" : "https://www.example.com/iphone-cases/iphone-15-pro-max-cases?page=2",
     "isClientMobile" : false,
     "clientModel" : "",
     "clientPlatform" : "Windows",
@@ -45,7 +45,7 @@
         "double_value" : null,
         "float_value" : null,
         "int_value" : null,
-        "string_value" : "Apple Watch保護殼 – CASETiFY"
+        "string_value" : "Apple Watch保護殼 – example"
       }
     }, {
       "key" : "client_hints.platform_version",
@@ -189,7 +189,7 @@
         "double_value" : null,
         "float_value" : null,
         "int_value" : null,
-        "string_value" : "https://www.casetify.com/gadgets/apple-watch-case?DG=Accessories&D_Accessories=Apple+Watch+Case"
+        "string_value" : "https://www.example.com/gadgets/apple-watch-case?DG=Accessories&D_Accessories=Apple+Watch+Case"
       }
     }, {
       "key" : "client_hints.wow64",
@@ -261,7 +261,7 @@
         "double_value" : null,
         "float_value" : null,
         "int_value" : null,
-        "string_value" : "https://www.casetify.com/iphone-cases/iphone-15-pro-max-cases?page=2"
+        "string_value" : "https://www.example.com/iphone-cases/iphone-15-pro-max-cases?page=2"
       }
     }, {
       "key" : "x-ga-js_client_id",
