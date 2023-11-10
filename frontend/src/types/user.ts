@@ -32,5 +32,6 @@ declare global {
     readonly roleJsonPath: string;
     readonly operatorRoleNames: string;
     readonly analystRoleNames: string;
+    readonly analystReaderRoleNames: string;
   }
 }

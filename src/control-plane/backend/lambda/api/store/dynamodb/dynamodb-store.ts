@@ -1195,11 +1195,12 @@ export class DynamoDbStore implements ClickStreamStore {
         type: 'USER_SETTINGS',
       },
       // Define expressions for the new or updated attributes
-      UpdateExpression: 'SET roleJsonPath= :roleJsonPath, operatorRoleNames= :operatorRoleNames, analystRoleNames= :analystRoleNames',
+      UpdateExpression: 'SET roleJsonPath= :roleJsonPath, operatorRoleNames= :operatorRoleNames, analystRoleNames= :analystRoleNames, analystReaderRoleNames= :analystReaderRoleNames',
       ExpressionAttributeValues: {
         ':roleJsonPath': userSettings.roleJsonPath,
         ':operatorRoleNames': userSettings.operatorRoleNames,
         ':analystRoleNames': userSettings.analystRoleNames,
+        ':analystReaderRoleNames': userSettings.analystReaderRoleNames,
       },
       ReturnValues: 'ALL_NEW',
     });

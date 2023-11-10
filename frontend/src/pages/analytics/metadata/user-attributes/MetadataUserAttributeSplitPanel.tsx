@@ -24,9 +24,11 @@ import {
 } from '@cloudscape-design/components';
 import { updateMetadataDisplay } from 'apis/analytics';
 import Loading from 'components/common/Loading';
-import React, { useEffect, useState } from 'react';
+import { UserContext } from 'context/UserContext';
+import React, { useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { USER_ATTRIBUTE_DISPLAY_PREFIX } from 'ts/const';
+import { IUserRole, USER_ATTRIBUTE_DISPLAY_PREFIX } from 'ts/const';
+import { getUserInfoFromLocalStorage } from 'ts/utils';
 import MetadataSourceFC from '../comps/MetadataSource';
 
 interface MetadataUserAttributeSplitPanelProps {
@@ -38,6 +40,7 @@ const MetadataUserAttributeSplitPanel: React.FC<
 > = (props: MetadataUserAttributeSplitPanelProps) => {
   const { t } = useTranslation();
   const { attribute } = props;
+  const currentUser = useContext(UserContext) ?? getUserInfoFromLocalStorage();
   const SPLIT_PANEL_I18NSTRINGS = {
     preferencesTitle: t('splitPanel.preferencesTitle'),
     preferencesPositionLabel: t('splitPanel.preferencesPositionLabel'),
@@ -126,62 +129,69 @@ const MetadataUserAttributeSplitPanel: React.FC<
                 {t('analytics:metadata.userAttribute.tableColumnDisplayName')}
               </Box>
               <div>
-                {!isEditingDisplayName && (
+                {currentUser.role === IUserRole.ANALYST_READER && (
                   <div className="flex align-center">
                     <div>{attributeDetails.displayName}</div>
-                    <Button
-                      onClick={() => {
-                        setIsEditingDisplayName(true);
-                      }}
-                      variant="icon"
-                      iconName="edit"
-                    />
                   </div>
                 )}
-                {isEditingDisplayName && (
-                  <div>
-                    <FormField>
-                      <Textarea
-                        rows={3}
-                        value={attributeDetails.displayName}
-                        onChange={(e) => {
-                          setAttributeDetails((prev) => {
-                            return {
-                              ...prev,
-                              displayName: e.detail.value,
-                            };
-                          });
+                {currentUser.role !== IUserRole.ANALYST_READER &&
+                  !isEditingDisplayName && (
+                    <div className="flex align-center">
+                      <div>{attributeDetails.displayName}</div>
+                      <Button
+                        onClick={() => {
+                          setIsEditingDisplayName(true);
                         }}
+                        variant="icon"
+                        iconName="edit"
                       />
-                    </FormField>
-                    <div className="mt-5">
-                      <SpaceBetween direction="horizontal" size="xs">
-                        <Button
-                          onClick={() => {
+                    </div>
+                  )}
+                {currentUser.role !== IUserRole.ANALYST_READER &&
+                  isEditingDisplayName && (
+                    <div>
+                      <FormField>
+                        <Textarea
+                          rows={3}
+                          value={attributeDetails.displayName}
+                          onChange={(e) => {
                             setAttributeDetails((prev) => {
                               return {
                                 ...prev,
-                                displayName: prevDisplayName,
+                                displayName: e.detail.value,
                               };
                             });
-                            setIsEditingDisplayName(false);
                           }}
-                        >
-                          {t('button.cancel')}
-                        </Button>
-                        <Button
-                          loading={loadingUpdateDisplayName}
-                          variant="primary"
-                          onClick={() => {
-                            updateEventInfo('displayName');
-                          }}
-                        >
-                          {t('button.save')}
-                        </Button>
-                      </SpaceBetween>
+                        />
+                      </FormField>
+                      <div className="mt-5">
+                        <SpaceBetween direction="horizontal" size="xs">
+                          <Button
+                            onClick={() => {
+                              setAttributeDetails((prev) => {
+                                return {
+                                  ...prev,
+                                  displayName: prevDisplayName,
+                                };
+                              });
+                              setIsEditingDisplayName(false);
+                            }}
+                          >
+                            {t('button.cancel')}
+                          </Button>
+                          <Button
+                            loading={loadingUpdateDisplayName}
+                            variant="primary"
+                            onClick={() => {
+                              updateEventInfo('displayName');
+                            }}
+                          >
+                            {t('button.save')}
+                          </Button>
+                        </SpaceBetween>
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
               </div>
             </div>
             <div>

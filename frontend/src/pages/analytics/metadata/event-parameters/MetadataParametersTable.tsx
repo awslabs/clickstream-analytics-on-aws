@@ -16,12 +16,13 @@ import {
   getMetadataParametersList,
   updateMetadataDisplay,
 } from 'apis/analytics';
+import { UserContext } from 'context/UserContext';
 import LabelTag from 'pages/common/LabelTag';
-import React from 'react';
+import React, { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { EVENT_PARAMETER_DISPLAY_PREFIX } from 'ts/const';
-import { defaultStr } from 'ts/utils';
+import { EVENT_PARAMETER_DISPLAY_PREFIX, IUserRole } from 'ts/const';
+import { defaultStr, getUserInfoFromLocalStorage } from 'ts/utils';
 import MetadataPlatformFC from '../comps/MetadataPlatform';
 import MetadataSourceFC from '../comps/MetadataSource';
 import MetadataTable from '../table/MetadataTable';
@@ -36,6 +37,7 @@ const MetadataParametersTable: React.FC<MetadataParametersTableProps> = (
 ) => {
   const { projectId, appId } = useParams();
   const { setShowDetails } = props;
+  const currentUser = useContext(UserContext) ?? getUserInfoFromLocalStorage();
 
   const { t } = useTranslation();
 
@@ -85,6 +87,38 @@ const MetadataParametersTable: React.FC<MetadataParametersTableProps> = (
     return <LabelTag type={e.parameterType}>{e.parameterType}</LabelTag>;
   };
 
+  const getDisplayNameEditConfig = () => {
+    if (currentUser.role !== IUserRole.ANALYST_READER) {
+      return {
+        validation(item: IMetadataEventParameter, value: string) {
+          return !displayNameRegex.test(value)
+            ? undefined
+            : t('tag.invalidInput');
+        },
+        editingCell: (
+          item: IMetadataEventParameter,
+          { setValue, currentValue }: any
+        ) => renderEditNameCell(item, setValue, currentValue),
+      };
+    }
+  };
+
+  const getDescriptionEditConfig = () => {
+    if (currentUser.role !== IUserRole.ANALYST_READER) {
+      return {
+        validation(item: any, value: any) {
+          return !descriptionRegex.test(value)
+            ? undefined
+            : t('tag.invalidInput');
+        },
+        editingCell: (
+          item: IMetadataEventParameter,
+          { setValue, currentValue }: any
+        ) => renderEditDescCell(item, setValue, currentValue),
+      };
+    }
+  };
+
   const COLUMN_DEFINITIONS = [
     {
       id: 'name',
@@ -101,17 +135,7 @@ const MetadataParametersTable: React.FC<MetadataParametersTableProps> = (
         return e.displayName;
       },
       minWidth: 180,
-      editConfig: {
-        validation(item: IMetadataEventParameter, value: string) {
-          return !displayNameRegex.test(value)
-            ? undefined
-            : t('tag.invalidInput');
-        },
-        editingCell: (
-          item: IMetadataEventParameter,
-          { setValue, currentValue }: any
-        ) => renderEditNameCell(item, setValue, currentValue),
-      },
+      editConfig: getDisplayNameEditConfig(),
     },
     {
       id: 'description',
@@ -120,17 +144,7 @@ const MetadataParametersTable: React.FC<MetadataParametersTableProps> = (
         return e.description;
       },
       minWidth: 180,
-      editConfig: {
-        validation(item: any, value: any) {
-          return !descriptionRegex.test(value)
-            ? undefined
-            : t('tag.invalidInput');
-        },
-        editingCell: (
-          item: IMetadataEventParameter,
-          { setValue, currentValue }: any
-        ) => renderEditDescCell(item, setValue, currentValue),
-      },
+      editConfig: getDescriptionEditConfig(),
     },
     {
       id: 'metadataSource',

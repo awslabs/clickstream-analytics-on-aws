@@ -168,7 +168,10 @@ async function getRoleFromToken(decodedToken: any) {
   let oidcRoles: string[] = [];
 
   const userSettings = await userService.getUserSettingsFromDDB();
-  if (isEmpty(userSettings.roleJsonPath) || isEmpty(userSettings.operatorRoleNames) || isEmpty(userSettings.analystRoleNames)) {
+  if (isEmpty(userSettings.roleJsonPath) ||
+    isEmpty(userSettings.operatorRoleNames) ||
+    isEmpty(userSettings.analystRoleNames ||
+    isEmpty(userSettings.analystReaderRoleNames))) {
     return role;
   }
 
@@ -188,6 +191,7 @@ function mapToRole(userSettings: IUserSettings, oidcRoles: string[]) {
   }
   const operatorRoleNames = userSettings.operatorRoleNames.split(',').map(role => role.trim());
   const analystRoleNames = userSettings.analystRoleNames.split(',').map(role => role.trim());
+  const analystReaderRoleNames = userSettings.analystReaderRoleNames.split(',').map(role => role.trim());
 
   if (oidcRoles.some(role => operatorRoleNames.includes(role)) && oidcRoles.some(role => analystRoleNames.includes(role))) {
     return IUserRole.ADMIN;
@@ -197,6 +201,9 @@ function mapToRole(userSettings: IUserSettings, oidcRoles: string[]) {
   }
   if (oidcRoles.some(role => analystRoleNames.includes(role))) {
     return IUserRole.ANALYST;
+  }
+  if (oidcRoles.some(role => analystReaderRoleNames.includes(role))) {
+    return IUserRole.ANALYST_READER;
   }
   return IUserRole.NO_IDENTITY;
 }

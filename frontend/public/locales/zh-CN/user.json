@@ -22,14 +22,17 @@
     "settingUserRoleJsonPath": "获取用户角色的JsonPath",
     "settingUserRoleJsonPathDesc": "从id_token中获取用户角色或者组信息的JsonPath，例如：$.realm_access.roles",
     "settingUserOperatorRoleNames": "操作员角色名称",
-    "settingUserOperatorRoleNamesDesc": "OIDC中的角色映射为Click stream中的操作员，多个角色名称用逗号分隔，例如：operator,operator2",
-    "settingUserAnalystRoleNames": "分析员角色名称",
-    "settingUserAnalystRoleNamesDesc": "OIDC中的角色映射为Click stream中的分析员，多个角色名称用逗号分隔，例如：analyst,analyst2"
+    "settingUserOperatorRoleNamesDesc": "OIDC中的角色映射为Clickstream中的操作员，多个角色名称用逗号分隔，例如：operator,others",
+    "settingUserAnalystRoleNames": "分析师角色名称",
+    "settingUserAnalystRoleNamesDesc": "OIDC中的角色映射为Clickstream中的分析师，多个角色名称用逗号分隔，例如：analyst,others",
+    "settingUserAnalystReaderRoleNames": "分析师读者角色名称",
+    "settingUserAnalystReaderRoleNamesDesc": "OIDC中的角色映射为Clickstream中的分析师读者，多个角色名称用逗号分隔，例如：analystReader,others"
   },
   "options": {
     "admin": "管理员",
     "operator": "IT运维",
     "analyst": "分析师",
+    "analystReader": "分析师读者",
     "noIdentity": "无身份"
   },
   "valid": {

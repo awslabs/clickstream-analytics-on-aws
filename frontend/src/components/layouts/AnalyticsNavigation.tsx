@@ -13,11 +13,12 @@
 
 import { Icon } from '@cloudscape-design/components';
 import ExtendIcon from 'components/common/ExtendIcon';
-import React, { useState } from 'react';
+import { UserContext } from 'context/UserContext';
+import React, { useContext, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { ANALYTICS_NAV_STATUS } from 'ts/const';
-import { defaultStr } from 'ts/utils';
+import { ANALYTICS_NAV_STATUS, IUserRole } from 'ts/const';
+import { defaultStr, getUserInfoFromLocalStorage } from 'ts/utils';
 
 interface INavigationProps {
   activeHref: string;
@@ -34,6 +35,7 @@ const AnalyticsNavigation: React.FC<INavigationProps> = (
 ) => {
   const { activeHref } = props;
   const { t } = useTranslation();
+  const currentUser = useContext(UserContext) ?? getUserInfoFromLocalStorage();
   const { projectId, appId } = useParams();
   const [isExpanded, setIsExpanded] = useState<boolean>(
     localStorage.getItem(ANALYTICS_NAV_STATUS) === 'close' ? false : true
@@ -67,10 +69,17 @@ const AnalyticsNavigation: React.FC<INavigationProps> = (
     },
   ];
 
+  const getNavItems = () => {
+    if (currentUser.role === IUserRole.ANALYST_READER) {
+      return [...analyticsNavItems.slice(0, 2), ...analyticsNavItems.slice(3)];
+    }
+    return analyticsNavItems;
+  };
+
   return (
     <div className={`sidebar ${isExpanded ? 'expanded' : ''}`}>
       <ul>
-        {analyticsNavItems.map((item: IAnalyticsItemType) => (
+        {getNavItems().map((item: IAnalyticsItemType) => (
           <li
             key={item.href}
             className={item.href === activeHref ? 'active' : ''}

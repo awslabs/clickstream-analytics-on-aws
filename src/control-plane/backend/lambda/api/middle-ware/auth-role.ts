@@ -22,20 +22,26 @@ import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
 const store: ClickStreamStore = new DynamoDbStore();
 
 const routerRoles: Map<string, IUserRole[]> = new Map();
-routerRoles.set('GET /api/user/details', [IUserRole.ADMIN, IUserRole.OPERATOR, IUserRole.ANALYST, IUserRole.NO_IDENTITY]);
-routerRoles.set('GET /api/pipeline/:id', [IUserRole.ADMIN, IUserRole.OPERATOR, IUserRole.ANALYST]);
-routerRoles.set('GET /api/app', [IUserRole.ADMIN, IUserRole.OPERATOR, IUserRole.ANALYST]);
-routerRoles.set('GET /api/project', [IUserRole.ADMIN, IUserRole.OPERATOR, IUserRole.ANALYST]);
-routerRoles.set('ALL /api/project/:pid/:aid/dashboard/*', [IUserRole.ADMIN, IUserRole.ANALYST]);
-routerRoles.set('GET /api/project/:pid/analyzes', [IUserRole.ADMIN, IUserRole.ANALYST]);
+routerRoles.set('GET /api/user/details', [IUserRole.ADMIN, IUserRole.OPERATOR, IUserRole.ANALYST, IUserRole.ANALYST_READER, IUserRole.NO_IDENTITY]);
+routerRoles.set('GET /api/pipeline/:id', [IUserRole.ADMIN, IUserRole.OPERATOR, IUserRole.ANALYST, IUserRole.ANALYST_READER]);
+routerRoles.set('GET /api/app', [IUserRole.ADMIN, IUserRole.OPERATOR, IUserRole.ANALYST, IUserRole.ANALYST_READER]);
+routerRoles.set('GET /api/project', [IUserRole.ADMIN, IUserRole.OPERATOR, IUserRole.ANALYST, IUserRole.ANALYST_READER]);
+routerRoles.set('GET /api/project/:pid/:aid/dashboard/*', [IUserRole.ADMIN, IUserRole.ANALYST, IUserRole.ANALYST_READER]);
+routerRoles.set('POST /api/project/:pid/:aid/dashboard/*', [IUserRole.ADMIN, IUserRole.ANALYST]);
+routerRoles.set('PUT /api/project/:pid/:aid/dashboard/*', [IUserRole.ADMIN, IUserRole.ANALYST]);
+routerRoles.set('DELETE /api/project/:pid/:aid/dashboard/*', [IUserRole.ADMIN, IUserRole.ANALYST]);
+routerRoles.set('GET /api/project/:pid/analyzes', [IUserRole.ADMIN, IUserRole.ANALYST, IUserRole.ANALYST_READER]);
 
 routerRoles.set('ALL /api/env/*', [IUserRole.ADMIN, IUserRole.OPERATOR]);
 routerRoles.set('ALL /api/app/*', [IUserRole.ADMIN, IUserRole.OPERATOR]);
 routerRoles.set('ALL /api/pipeline/*', [IUserRole.ADMIN, IUserRole.OPERATOR]);
 routerRoles.set('ALL /api/plugin/*', [IUserRole.ADMIN, IUserRole.OPERATOR]);
 routerRoles.set('ALL /api/project/*', [IUserRole.ADMIN, IUserRole.OPERATOR]);
-routerRoles.set('ALL /api/metadata/*', [IUserRole.ADMIN, IUserRole.ANALYST]);
-routerRoles.set('ALL /api/reporting/*', [IUserRole.ADMIN, IUserRole.ANALYST]);
+routerRoles.set('GET /api/metadata/*', [IUserRole.ADMIN, IUserRole.ANALYST, IUserRole.ANALYST_READER]);
+routerRoles.set('POST /api/metadata/*', [IUserRole.ADMIN, IUserRole.ANALYST]);
+routerRoles.set('PUT /api/metadata/*', [IUserRole.ADMIN, IUserRole.ANALYST]);
+routerRoles.set('DELETE /api/metadata/*', [IUserRole.ADMIN, IUserRole.ANALYST]);
+routerRoles.set('ALL /api/reporting/*', [IUserRole.ADMIN, IUserRole.ANALYST, IUserRole.ANALYST_READER]);
 routerRoles.set('ALL /api/user/*', [IUserRole.ADMIN]);
 
 
