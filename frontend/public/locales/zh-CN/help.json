@@ -4,7 +4,7 @@
     "description": "仪表板是分析的只读快照，您可以与其他用户共享以进行报告。默认情况下，该解决方案提供用户生命周期仪表盘，以帮助您了解客户旅程中的每个阶段。您还可以通过保存要定期查看的探索性分析来创建自定义仪表板。",
     "links": {
       "docLinkName": "什么是仪表板",
-      "docLink": "https://awslabs.github.io/clickstream-analytics-on-aws/en/dashboard/"
+      "docLink": "https://awslabs.github.io/clickstream-analytics-on-aws/zh/latest/dashboard/"
     }
   },
   "userLifecycleInfo": {
@@ -12,7 +12,7 @@
     "description": "解决方案预置分析仪表板，帮助您了解用户如何使用您的App或者网页，包含了新用户获取、用户参与度、事件、留存、设备，以及崩溃分析。",
     "links": {
       "docLinkName": "用户生命周期仪表板",
-      "docLink": "https://awslabs.github.io/clickstream-analytics-on-aws/en/analyticstudio/dashboard/"
+      "docLink": "https://awslabs.github.io/clickstream-analytics-on-aws/zh/latest/analyticstudio/dashboard/"
     }
   },
   "exploreInfo": {
@@ -20,7 +20,7 @@
     "description": "探索分析提供了一系列高级的分析模型帮您更深入地了解用户行为。您可以通过探索功能从多维度筛选和查询数据，从而分析不在预置报表中的指标。在探索模块中， 您可以快速执行临时查询，轻松配置和切换分析模型，使用筛选器专注于最相关的数据，以及将探索分析配置和结果保持到一个仪表板中。",
     "links": {
       "docLinkName": "探索分析",
-      "docLink": "https://awslabs.github.io/clickstream-analytics-on-aws/en/analyticstudio/explore/"
+      "docLink": "https://awslabs.github.io/clickstream-analytics-on-aws/zh/latest/analyticstudio/explore/"
     }
   },
   "eventInfo": {
@@ -28,7 +28,7 @@
     "description": "事件分析用于研究某行为事件的发生频次。通过自定义指标、分组、筛选及多种可视化图表对用户行为进行多维分析。",
     "links": {
       "docLinkName": "事件分析",
-      "docLink": "https://awslabs.github.io/clickstream-analytics-on-aws/en/analyticstudio/explore/event/"
+      "docLink": "https://awslabs.github.io/clickstream-analytics-on-aws/zh/latest/analyticstudio/explore/event/"
     }
   },
   "funnelInfo": {
@@ -36,7 +36,7 @@
     "description": "漏斗分析即转化分析，主要用来分析用户在指定流程中的转化情况。该模型先将整个流程拆分成一个个步骤，然后统计每个步骤到下一个步骤的转化率。可以用来衡量每一个步骤的表现，常见的使用场景有分析注册转化率、下单支付转化率等。",
     "links": {
       "docLinkName": "漏斗分析",
-      "docLink": "https://awslabs.github.io/clickstream-analytics-on-aws/en/analyticstudio/explore/funnel/"
+      "docLink": "https://awslabs.github.io/clickstream-analytics-on-aws/zh/latest/analyticstudio/explore/funnel/"
     }
   },
   "pathInfo": {
@@ -44,7 +44,7 @@
     "description": "路径分析是指将一群用户的行为按照先后顺序排序后的统计分布，主要用于分析和记录用户在页面或事件之间的流转分布比例。比如查看在打开app后，有多少客户点击了商品列表、有多少客户浏览商品详情页、有多少客户搜索了商品等。",
     "links": {
       "docLinkName": "路径分析",
-      "docLink": "https://awslabs.github.io/clickstream-analytics-on-aws/en/analyticstudio/explore/path/"
+      "docLink": "https://awslabs.github.io/clickstream-analytics-on-aws/zh/latest/analyticstudio/explore/path/"
     }
   },
   "retentionInfo": {
@@ -52,7 +52,7 @@
     "description": "留存分析支持定义起始和回访事件来统计目标用户群体的留存、流失率，同时支持配置起始和回访事件的关联属性。",
     "links": {
       "docLinkName": "留存分析",
-      "docLink": "https://awslabs.github.io/clickstream-analytics-on-aws/en/analyticstudio/explore/retention/"
+      "docLink": "https://awslabs.github.io/clickstream-analytics-on-aws/zh/latest/analyticstudio/explore/retention/"
     }
   },
   "analyzesInfo": {
@@ -60,7 +60,7 @@
     "description": "分析模块的底层是QuickSight的分析作者界面，在这里您可以使用QuickSight所有的功能进行定制化分析。方案预置多个点击流数据集（比如事件、事件属性、用户属性等），您也可以增加新的数据集与点击流联合分析。",
     "links": {
       "docLinkName": "分析",
-      "docLink": "https://awslabs.github.io/clickstream-analytics-on-aws/en/analyticstudio/analyzes/"
+      "docLink": "https://awslabs.github.io/clickstream-analytics-on-aws/zh/latest/analyticstudio/analyzes/"
     }
   },
   "metadataInfo": {
@@ -68,7 +68,7 @@
     "description": "数据管理模块通过自动扫描您点击流里的数据以生成元数据，方便您查看和管理所有的事件、事件属性、以及用户属性。您还可以修改事件和属性的显示名、描述和数据字典从而方便您在探索分析模块中的筛选使用。",
     "links": {
       "docLinkName": "分析",
-      "docLink": "https://awslabs.github.io/clickstream-analytics-on-aws/en/analyticstudio/analyzes/"
+      "docLink": "https://awslabs.github.io/clickstream-analytics-on-aws/zh/latest/analyticstudio/analyzes/"
     }
   },
   "metadataEventInfo": {
@@ -76,7 +76,7 @@
     "description": "'事件'是指用户在App或者网站内的一系列动作（比如：点击、访问页面等）产生的点击流数据。 事件分为两类：预置事件，即SDK自动采集的事件，通常事件名以下划线'_' 开头；自定义事件，即用户自行上报事件，上报时机和业务含义由用户自定义。",
     "links": {
       "docLinkName": "事件",
-      "docLink": "https://awslabs.github.io/clickstream-analytics-on-aws/en/analyticstudio/metadata/"
+      "docLink": "https://awslabs.github.io/clickstream-analytics-on-aws/zh/latest/analyticstudio/metadata/"
     }
   },
   "metadataEventParamInfo": {
@@ -84,7 +84,7 @@
     "description": "'事件属性'用于描述事件发生时的各维度信息。事件属性分为两类：公共属性，即所有的事件都会包含的属性，比如用户信息（user_id）、设备信息（app版本、设备型号等）；私有属性，即某些事件独有的属性，比如业务自定义的属性等。",
     "links": {
       "docLinkName": "事件属性",
-      "docLink": "https://awslabs.github.io/clickstream-analytics-on-aws/en/analyticstudio/metadata/"
+      "docLink": "https://awslabs.github.io/clickstream-analytics-on-aws/zh/latest/analyticstudio/metadata/"
     }
   },
   "metadataUserParamInfo": {
@@ -92,7 +92,7 @@
     "description": "'用户属性'用于记录用户各个属性。用户属性分为两类：预置属性，即SDK预置收集的属性，比如_first_visit_date;自定义属性，即即用户自行上报的用户属性，比如邮箱地址。",
     "links": {
       "docLinkName": "用户属性",
-      "docLink": "https://awslabs.github.io/clickstream-analytics-on-aws/en/analyticstudio/metadata/"
+      "docLink": "https://awslabs.github.io/clickstream-analytics-on-aws/zh/latest/analyticstudio/metadata/"
     }
   }
 }
