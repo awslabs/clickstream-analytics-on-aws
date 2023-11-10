@@ -18,7 +18,10 @@ export interface IPlugin {
   readonly prefix: string;
 
   readonly name: string;
-  readonly description: string;
+  readonly description: {
+    'zh-CN': string;
+    'en-US': string;
+  };
   readonly jarFile: string;
   readonly dependencyFiles: string[];
   readonly mainFunction: string;

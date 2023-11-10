@@ -22,8 +22,9 @@ import {
 } from '@cloudscape-design/components';
 import { deletePlugin, getPluginList } from 'apis/plugin';
 import moment from 'moment';
+import { getLngFromLocalStorage } from 'pages/analytics/analytics-utils';
 import React, { useEffect, useState } from 'react';
-import { Trans, useTranslation } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { TIME_FORMAT, XMIND_LINK } from 'ts/const';
 import { defaultStr } from 'ts/utils';
@@ -57,10 +58,12 @@ const PluginTable: React.FC<PluginTableProps> = (props: PluginTableProps) => {
     changePluginSeletedItems,
   } = props;
   const { t } = useTranslation();
+  const localeLng = getLngFromLocalStorage();
   const navigate = useNavigate();
   const [selectedItems, setSelectedItems] = useState<IPlugin[]>(
     pluginSelectedItems || []
   );
+
   const [loadingData, setLoadingData] = useState(false);
   const [pageSize] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
@@ -120,7 +123,7 @@ const PluginTable: React.FC<PluginTableProps> = (props: PluginTableProps) => {
         if (pluginType === 'Transform' && hideDefaultTransformPlugin) {
           resultDataItem = data.items.filter((item) => !item.builtIn);
           setPluginList(resultDataItem);
-          setTotalCount(data.totalCount - 1);
+          setTotalCount(resultDataItem.length);
         } else {
           setPluginList(resultDataItem);
           setTotalCount(data.totalCount);
@@ -158,17 +161,16 @@ const PluginTable: React.FC<PluginTableProps> = (props: PluginTableProps) => {
     }
   };
 
+  const renderDescription = (e: IPlugin) => {
+    if (localeLng === 'zh-CN') {
+      return e.description['zh-CN'];
+    }
+    return e.description['en-US'];
+  };
+
   useEffect(() => {
     listPlugins();
   }, [currentPage]);
-
-  const renderDescription = (e: IPlugin) => {
-    return e.id?.startsWith('BUILT-IN') ? (
-      <Trans i18nKey={`plugin:${e.id}`}>{e.description}</Trans>
-    ) : (
-      e.description
-    );
-  };
 
   return (
     <div>

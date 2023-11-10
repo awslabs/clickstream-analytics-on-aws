@@ -18,6 +18,7 @@ import {
   SpaceBetween,
   StatusIndicator,
 } from '@cloudscape-design/components';
+import { getLngFromLocalStorage } from 'pages/analytics/analytics-utils';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { ExecutionType } from 'ts/const';
@@ -29,6 +30,7 @@ interface TabContentProps {
 const Processing: React.FC<TabContentProps> = (props: TabContentProps) => {
   const { pipelineInfo } = props;
   const { t } = useTranslation();
+  const localeLng = getLngFromLocalStorage();
 
   const buildRedshiftDisplay = (pipelineInfo?: IExtPipeline) => {
     // in creating process
@@ -172,6 +174,13 @@ const Processing: React.FC<TabContentProps> = (props: TabContentProps) => {
     }
   };
 
+  const renderDescription = (e: IPlugin) => {
+    if (localeLng === 'zh-CN') {
+      return e.description['zh-CN'];
+    }
+    return e.description['en-US'];
+  };
+
   const getEnrichPluginDisplay = () => {
     let renderEnrichPlugins: any = [];
     if (pipelineInfo?.selectedEnrichPlugins) {
@@ -185,7 +194,8 @@ const Processing: React.FC<TabContentProps> = (props: TabContentProps) => {
       const returnElement = renderEnrichPlugins.map((element: IPlugin) => {
         return (
           <div key={element.name}>
-            {element.name} <Box variant="small">{element.description}</Box>
+            {element.name}{' '}
+            <Box variant="small">{renderDescription(element)}</Box>
           </div>
         );
       });
@@ -209,7 +219,8 @@ const Processing: React.FC<TabContentProps> = (props: TabContentProps) => {
       const returnElement = renderTransformPlugins.map((element: IPlugin) => {
         return (
           <div key={element.name}>
-            {element.name} <Box variant="small">{element.description}</Box>
+            {element.name}{' '}
+            <Box variant="small">{renderDescription(element)}</Box>
           </div>
         );
       });

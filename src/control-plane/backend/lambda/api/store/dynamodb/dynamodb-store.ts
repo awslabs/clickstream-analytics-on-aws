@@ -990,12 +990,23 @@ export class DynamoDbStore implements ClickStreamStore {
     if (dic) {
       let builtInPlugins: IPlugin[] = [];
       for (let p of dic.data) {
-        p.createAt = +p.createAt;
-        p.updateAt = +p.updateAt;
-        p.bindCount = +p.bindCount;
-        p.builtIn = p.builtIn === 'true';
-        p.deleted = p.deleted === 'true';
-        builtInPlugins.push(p as IPlugin);
+        builtInPlugins.push({
+          id: p.id,
+          type: p.type,
+          prefix: p.prefix,
+          name: p.name,
+          description: p.description,
+          jarFile: p.jarFile,
+          dependencyFiles: p.dependencyFiles,
+          mainFunction: p.mainFunction,
+          pluginType: p.pluginType,
+          builtIn: p.builtIn,
+          bindCount: p.bindCount,
+          createAt: p.createAt,
+          updateAt: p.updateAt,
+          operator: p.operator,
+          deleted: p.deleted,
+        } as IPlugin);
       }
       if (!isEmpty(pluginType)) {
         builtInPlugins = builtInPlugins.filter(p => p.pluginType === pluginType);
