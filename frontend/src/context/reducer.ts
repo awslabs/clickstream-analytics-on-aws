@@ -14,6 +14,7 @@
 export enum HelpPanelType {
   NONE = 'NONE',
   ANALYTICS_DASHBOARD = 'ANALYTICS_DASHBOARD',
+  USER_LIFECYCLE_INFO = 'USER_LIFECYCLE_INFO',
 }
 
 export interface IState {

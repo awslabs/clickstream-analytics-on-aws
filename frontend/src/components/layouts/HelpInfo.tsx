@@ -41,12 +41,23 @@ const HelpInfo: React.FC = () => {
   };
 
   if (state?.helpPanelType === HelpPanelType.ANALYTICS_DASHBOARD) {
-    dataItem.title = t('help:dashboard.title');
-    dataItem.description = <p>{t('help:dashboard.description')}</p>;
+    dataItem.title = t('help:dashboardsInfo.title');
+    dataItem.description = <p>{t('help:dashboardsInfo.description')}</p>;
     dataItem.linkItems = [
       {
-        text: t('help:dashboard.links.dashboardDocLinkName'),
-        href: '/',
+        text: t('help:dashboardsInfo.links.docLinkName'),
+        href: t('help:dashboardsInfo.links.docLink'),
+      },
+    ];
+  }
+
+  if (state?.helpPanelType === HelpPanelType.USER_LIFECYCLE_INFO) {
+    dataItem.title = t('help:userLifecycleInfo.title');
+    dataItem.description = <p>{t('help:userLifecycleInfo.description')}</p>;
+    dataItem.linkItems = [
+      {
+        text: t('help:userLifecycleInfo.links.docLinkName'),
+        href: t('help:userLifecycleInfo.links.docLink'),
       },
     ];
   }
