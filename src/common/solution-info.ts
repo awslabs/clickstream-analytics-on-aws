@@ -46,5 +46,7 @@ function parseVersion(version: string): VersionProps {
 
 export function versionDetail(version: string): string {
   const { short, buildId } = parseVersion(version);
-  return `(Version ${short})${buildId ? `(Build ${buildId})` : ''}`;
+  const buildInfo = buildId ? `(Build ${buildId})` : '';
+
+  return `(Version ${short})${buildInfo}`;
 }
