@@ -167,6 +167,7 @@ export class StackActionStateMachine extends Construct {
             'kms:*',
             'athena:*',
             'servicecatalog:CreateApplication',
+            'servicecatalog:UpdateApplication',
             'servicecatalog:DeleteApplication',
             'servicecatalog:GetApplication',
             'servicecatalog:GetAssociatedResource',

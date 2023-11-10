@@ -1033,6 +1033,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
               'kms:*',
               'athena:*',
               'servicecatalog:CreateApplication',
+              'servicecatalog:UpdateApplication',
               'servicecatalog:DeleteApplication',
               'servicecatalog:GetApplication',
               'servicecatalog:GetAssociatedResource',
