@@ -107,6 +107,39 @@ describe('DataReportingQuickSightStack parameter test', () => {
     }
   });
 
+  test('QuickSightPrincipalArnParam pattern', () => {
+    const param = template.toJSON().Parameters.QuickSightOwnerPrincipalParam;
+    const pattern = param.AllowedPattern;
+    const regex = new RegExp(`${pattern}`);
+
+    const param2 = template.toJSON().Parameters.QuickSightPrincipalParam;
+    const pattern2 = param2.AllowedPattern;
+    const regex2 = new RegExp(`${pattern2}`);
+
+    const validValues = [
+      'arn:aws:quicksight:us-east-1:111111111111:user/default/clickstream',
+      'arn:aws:quicksight:us-east-1:111111111111:user/default/Admin/testuser',
+      'arn:aws:quicksight:us-east-1:111111111111:user/default/Admin/testuser@example.com',
+      'arn:aws-cn:quicksight:cn-north-1:111111111111:user/namespace1/testuser@example.com',
+    ];
+
+    for (const v of validValues) {
+      expect(v).toMatch(regex);
+      expect(v).toMatch(regex2);
+    }
+
+    const invalidValues = [
+      'testArn',
+      'arn:aws:quicksight:us-east-1:2211:user/default/clickstream',
+      'arn:aws:quicksight:us-east-1:111111111111:user/123/Admin/testuser',
+      'arn:aws:quicksight:us-east-1:111111111111:user/default/test;123',
+    ];
+    for (const v of invalidValues) {
+      expect(v).not.toMatch(regex);
+      expect(v).not.toMatch(regex2);
+    }
+  });
+
   test('QuickSightNamespaceParam pattern', () => {
     const param = template.toJSON().Parameters.QuickSightNamespaceParam;
     const pattern = param.AllowedPattern;
@@ -639,7 +672,7 @@ describe('DataReportingQuickSightStack resource test', () => {
           'quicksight:UpdateTemplate',
         ],
         Principal: {
-          Ref: 'QuickSightPrincipalParam',
+          Ref: 'QuickSightOwnerPrincipalParam',
         },
       },
     ],
@@ -787,7 +820,7 @@ describe('DataReportingQuickSightStack resource test', () => {
           'quicksight:UpdateDataSource',
         ],
         Principal: {
-          Ref: 'QuickSightPrincipalParam',
+          Ref: 'QuickSightOwnerPrincipalParam',
         },
       },
     ],
@@ -825,8 +858,11 @@ describe('DataReportingQuickSightStack resource test', () => {
       quickSightUser: {
         Ref: 'QuickSightUserParam',
       },
-      quickSightPrincipalArn: {
+      quickSightSharePrincipalArn: {
         Ref: 'QuickSightPrincipalParam',
+      },
+      quickSightOwnerPrincipalArn: {
+        Ref: 'QuickSightOwnerPrincipalParam',
       },
       schemas: {
         Ref: 'RedShiftDBSchemaParam',
