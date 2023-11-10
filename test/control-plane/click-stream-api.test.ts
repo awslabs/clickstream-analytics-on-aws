@@ -709,6 +709,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
               'ec2:DescribeVpcEndpoints',
               'ec2:DescribeSecurityGroupRules',
               'ec2:DescribeAvailabilityZones',
+              'ec2:DescribeNatGateways',
               'kafka:ListClustersV2',
               'kafka:ListClusters',
               'kafka:ListNodes',
