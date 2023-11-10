@@ -862,7 +862,10 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
               </div>
             </SpaceBetween>
             <SpaceBetween direction="vertical" size="xs">
-              <SectionTitle type="filter" />
+              <SectionTitle
+                type="filter"
+                description={t('analytics:information.filterInfo')}
+              />
               <SegmentationFilter
                 segmentationData={segmentationOptionData}
                 addNewConditionItem={() => {

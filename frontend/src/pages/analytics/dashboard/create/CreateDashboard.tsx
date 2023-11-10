@@ -17,9 +17,7 @@ import {
   ColumnLayout,
   FormField,
   Input,
-  Link,
   Modal,
-  Popover,
   SpaceBetween,
   Textarea,
   TokenGroup,
@@ -224,14 +222,6 @@ const CreateDashboard: React.FC<CreateDashboardProps> = (
 
             <FormField
               label={t('analytics:dashboard.createSheets')}
-              info={
-                <Popover
-                  triggerType="custom"
-                  content={t('analytics:information.dashboardSheetInfo')}
-                >
-                  <Link variant="info">{t('info')}</Link>
-                </Popover>
-              }
               description={t('analytics:dashboard.createSheetsDec')}
               errorText={
                 dashboardSheetTooMuchError

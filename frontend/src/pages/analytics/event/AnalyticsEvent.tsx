@@ -367,6 +367,7 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
               <SectionTitle
                 type="event"
                 title={t('analytics:labels.defineMetrics')}
+                description={t('analytics:information.eventDefineMetricInfo')}
               />
               <EventsSelect
                 loading={loadingEvents}
@@ -481,7 +482,10 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
               />
             </SpaceBetween>
             <SpaceBetween direction="vertical" size="xs">
-              <SectionTitle type="filter" />
+              <SectionTitle
+                type="filter"
+                description={t('analytics:information.filterInfo')}
+              />
               <SegmentationFilter
                 segmentationData={segmentationOptionData}
                 addNewConditionItem={() => {
@@ -532,7 +536,10 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
                 }}
               />
               <br />
-              <SectionTitle type="group" />
+              <SectionTitle
+                type="group"
+                description={t('analytics:information.groupInfo')}
+              />
               <AttributeGroup
                 groupParameters={groupParameters}
                 groupOption={groupOption}

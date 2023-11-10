@@ -588,7 +588,10 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
               />
             </SpaceBetween>
             <SpaceBetween direction="vertical" size="xs">
-              <SectionTitle type="filter" />
+              <SectionTitle
+                type="filter"
+                description={t('analytics:information.filterInfo')}
+              />
               <SegmentationFilter
                 segmentationData={segmentationOptionData}
                 addNewConditionItem={() => {
@@ -639,7 +642,10 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
                 }}
               />
               <br />
-              <SectionTitle type="group" />
+              <SectionTitle
+                type="group"
+                description={t('analytics:information.groupInfo')}
+              />
               <AttributeGroup
                 groupParameters={groupParameters}
                 groupOption={groupOption}

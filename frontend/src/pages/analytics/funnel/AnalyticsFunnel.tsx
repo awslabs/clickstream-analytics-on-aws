@@ -616,7 +616,10 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
               </div>
             </SpaceBetween>
             <SpaceBetween direction="vertical" size="xs">
-              <SectionTitle type="filter" />
+              <SectionTitle
+                type="filter"
+                description={t('analytics:information.filterInfo')}
+              />
               <SegmentationFilter
                 segmentationData={segmentationOptionData}
                 addNewConditionItem={() => {
@@ -667,7 +670,10 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
                 }}
               />
               <br />
-              <SectionTitle type="group" />
+              <SectionTitle
+                type="group"
+                description={t('analytics:information.groupInfo')}
+              />
               <AttributeGroup
                 groupParameters={groupParameters}
                 groupOption={groupOption}

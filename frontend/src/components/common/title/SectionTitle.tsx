@@ -11,22 +11,20 @@
  *  and limitations under the License.
  */
 
-import { Icon } from '@cloudscape-design/components';
-import { HelpPanelType } from 'context/reducer';
+import { Icon, Popover } from '@cloudscape-design/components';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import ExtendIcon from '../ExtendIcon';
-import InfoLink from '../InfoLink';
 
 interface SectionTitleProps {
-  helpInfoType?: HelpPanelType;
   type: 'event' | 'filter' | 'group';
   title?: string | null;
+  description?: string | null;
 }
 const SectionTitle: React.FC<SectionTitleProps> = (
   props: SectionTitleProps
 ) => {
-  const { type, title } = props;
+  const { type, title, description } = props;
   const { t } = useTranslation();
 
   let displayTitle = '';
@@ -58,11 +56,13 @@ const SectionTitle: React.FC<SectionTitleProps> = (
         {getIcon()}
         <span>{displayTitle}</span>
       </div>
-      <InfoLink
-        onFollow={(e) => {
-          console.info(e);
-        }}
-      />
+      {description && (
+        <Popover triggerType="custom" size="small" content={description}>
+          <div>
+            <ExtendIcon icon="Info" color="#666" />
+          </div>
+        </Popover>
+      )}
     </div>
   );
 };
