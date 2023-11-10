@@ -13,6 +13,7 @@
 
 import { Input } from '@cloudscape-design/components';
 import { getMetadataEventsList, updateMetadataDisplay } from 'apis/analytics';
+import { HelpPanelType } from 'context/reducer';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
@@ -232,11 +233,11 @@ const MetadataEventsTable: React.FC<MetadataEventsTableProps> = (
   return (
     <MetadataTable
       resourceName="Event"
+      infoType={HelpPanelType.METADATA_EVENT_INFO}
       tableColumnDefinitions={COLUMN_DEFINITIONS}
       tableContentDisplay={CONTENT_DISPLAY}
       tableFilteringProperties={FILTERING_PROPERTIES}
       tableI18nStrings={{
-        infoContent: defaultStr(t('analytics:information.metadataEventsInfo')),
         loadingText: t('analytics:labels.tableLoading') || 'Loading',
         emptyText: t('analytics:labels.tableEmpty'),
         headerTitle: t('analytics:metadata.event.title'),

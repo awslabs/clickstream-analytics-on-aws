@@ -16,6 +16,7 @@ import {
   getMetadataUserAttributesList,
   updateMetadataDisplay,
 } from 'apis/analytics';
+import { HelpPanelType } from 'context/reducer';
 import { t } from 'i18next';
 import React from 'react';
 import { useParams } from 'react-router-dom';
@@ -248,13 +249,11 @@ const MetadataUserAttributesTable: React.FC<
   return (
     <MetadataTable
       resourceName="UserAttribute"
+      infoType={HelpPanelType.METADATA_USER_PARAM_INFO}
       tableColumnDefinitions={COLUMN_DEFINITIONS}
       tableContentDisplay={CONTENT_DISPLAY}
       tableFilteringProperties={FILTERING_PROPERTIES}
       tableI18nStrings={{
-        infoContent: defaultStr(
-          t('analytics:information.metadataUserAttributesInfo')
-        ),
         loadingText: t('analytics:labels.tableLoading') || 'Loading',
         emptyText: t('analytics:labels.tableEmpty'),
         headerTitle: t('analytics:metadata.userAttribute.title'),

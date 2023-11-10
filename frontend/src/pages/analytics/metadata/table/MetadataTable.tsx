@@ -17,6 +17,7 @@ import Pagination from '@cloudscape-design/components/pagination';
 import PropertyFilter from '@cloudscape-design/components/property-filter';
 import Table from '@cloudscape-design/components/table';
 
+import { HelpPanelType } from 'context/reducer';
 import { cloneDeep } from 'lodash';
 import {
   TableEmptyState,
@@ -29,6 +30,7 @@ import '../../styles/table-select.scss';
 import { descriptionRegex, displayNameRegex } from './table-config';
 
 interface MetadataTableProps {
+  infoType: HelpPanelType;
   resourceName: string;
   tableColumnDefinitions: any[];
   tableContentDisplay: any[];
@@ -37,7 +39,6 @@ interface MetadataTableProps {
     loadingText: string;
     emptyText: string;
     headerTitle: string;
-    infoContent: string;
     headerDescription: string;
     headerRefreshButtonText: string;
     filteringAriaLabel: string;
@@ -60,6 +61,7 @@ const MetadataTable: React.FC<MetadataTableProps> = (
   props: MetadataTableProps
 ) => {
   const {
+    infoType,
     selectionType,
     resourceName,
     tableColumnDefinitions,
@@ -221,7 +223,7 @@ const MetadataTable: React.FC<MetadataTableProps> = (
         header={
           <MetadataTableHeader
             title={tableI18nStrings.headerTitle}
-            infoContent={tableI18nStrings.infoContent}
+            infoType={infoType}
             description={tableI18nStrings.headerDescription}
             selectedItemsCount={collectionProps.selectedItems?.length ?? 0}
             counter={

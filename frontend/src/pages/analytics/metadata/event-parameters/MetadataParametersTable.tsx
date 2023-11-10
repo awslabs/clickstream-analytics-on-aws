@@ -16,6 +16,7 @@ import {
   getMetadataParametersList,
   updateMetadataDisplay,
 } from 'apis/analytics';
+import { HelpPanelType } from 'context/reducer';
 import LabelTag from 'pages/common/LabelTag';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -268,13 +269,11 @@ const MetadataParametersTable: React.FC<MetadataParametersTableProps> = (
   return (
     <MetadataTable
       resourceName="EventParameter"
+      infoType={HelpPanelType.METADATA_EVENT_PARAM_INFO}
       tableColumnDefinitions={COLUMN_DEFINITIONS}
       tableContentDisplay={CONTENT_DISPLAY}
       tableFilteringProperties={FILTERING_PROPERTIES}
       tableI18nStrings={{
-        infoContent: defaultStr(
-          t('analytics:information.metadataEventParametersInfo')
-        ),
         loadingText: t('analytics:labels.tableLoading') || 'Loading',
         emptyText: t('analytics:labels.tableEmpty'),
         headerTitle: t('analytics:metadata.eventParameter.title'),

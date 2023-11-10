@@ -10,34 +10,37 @@
  *  OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions
  *  and limitations under the License.
  */
-import {
-  Header,
-  HeaderProps,
-  Link,
-  Popover,
-} from '@cloudscape-design/components';
-import { useTranslation } from 'react-i18next';
+import { Header, HeaderProps } from '@cloudscape-design/components';
+import InfoLink from 'components/common/InfoLink';
+import { DispatchContext } from 'context/StateContext';
+import { HelpInfoActionType, HelpPanelType } from 'context/reducer';
+import { useContext } from 'react';
 
 interface MetadataTableHeaderProps extends HeaderProps {
   title?: string;
   selectedItemsCount: number;
-  infoContent?: string;
+  infoType?: HelpPanelType;
 }
 
 export function MetadataTableHeader({
   title = '',
   selectedItemsCount,
-  infoContent,
+  infoType,
   ...props
 }: MetadataTableHeaderProps) {
-  const { t } = useTranslation();
+  const dispatch = useContext(DispatchContext);
   return (
     <Header
       variant="awsui-h1-sticky"
       info={
-        <Popover triggerType="custom" content={infoContent}>
-          <Link variant="info">{t('info')}</Link>
-        </Popover>
+        <InfoLink
+          onFollow={() => {
+            dispatch?.({
+              type: HelpInfoActionType.SHOW_HELP_PANEL,
+              payload: infoType,
+            });
+          }}
+        />
       }
       {...props}
     >

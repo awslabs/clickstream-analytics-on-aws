@@ -101,6 +101,11 @@ const AnalyticsDataManagement: React.FC = () => {
             >
               <Container>
                 <Tabs
+                  onChange={() => {
+                    dispatch?.({
+                      type: HelpInfoActionType.HIDE_HELP_PANEL,
+                    });
+                  }}
                   tabs={[
                     {
                       label: t('analytics:metadata.event.title'),
