@@ -42,7 +42,6 @@ import {
   QuickSightDashboardDefProps,
   DataSetProps,
   truncateString,
-  dashboardReaderPermissionActions,
   dashboardAdminPermissionActions,
   dataSetAdminPermissionActions,
   analysisAdminPermissionActions,
@@ -803,7 +802,7 @@ const updateDashboard = async (quickSight: QuickSight, commonParams: ResourceCom
         },
         {
           Principal: commonParams.sharePrincipalArn,
-          Actions: dashboardReaderPermissionActions,
+          Actions: dashboardAdminPermissionActions,
         },
       ],
     });
