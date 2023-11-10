@@ -249,6 +249,7 @@ export class ClickStreamApiConstruct extends Construct {
             'ec2:DescribeVpcEndpoints',
             'ec2:DescribeSecurityGroupRules',
             'ec2:DescribeAvailabilityZones',
+            'ec2:DescribeNatGateways',
             'kafka:ListClustersV2',
             'kafka:ListClusters',
             'kafka:ListNodes',
