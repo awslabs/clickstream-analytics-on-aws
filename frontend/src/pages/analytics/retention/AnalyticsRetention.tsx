@@ -660,6 +660,7 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
         <Container>
           <div className="cs-analytics-data-range">
             <ExploreDateRangePicker
+              disableSelect={loadingChart}
               dateRangeValue={dateRangeValue}
               setDateRangeValue={setDateRangeValue}
               timeGranularity={timeGranularity}
@@ -671,7 +672,10 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
               onChange={({ detail }) =>
                 setChartType(detail.selectedId as QuickSightChartType)
               }
-              options={chartTypeOptions}
+              options={chartTypeOptions.map((obj) => ({
+                ...obj,
+                disabled: loadingChart,
+              }))}
             />
           </div>
           <br />

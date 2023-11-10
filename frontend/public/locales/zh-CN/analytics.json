@@ -103,6 +103,7 @@
       "tableColumnMetadataSource": "来源",
       "tableColumnHasData": "有数据",
       "tableColumnPlatform": "平台",
+      "tableColumnSdkVersion": "SDK版本",
       "tableColumnDataVolumeLastDay": "最近一天的数据量",
       "filteringAriaLabel": "查找事件",
       "filteringPlaceholder": "查找事件",

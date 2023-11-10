@@ -133,6 +133,7 @@ export class StackActionStateMachine extends Construct {
             `arn:${Aws.PARTITION}:iam::${Aws.ACCOUNT_ID}:role/aws-service-role/ecs.amazonaws.com/AWSServiceRoleForECS`,
             `arn:${Aws.PARTITION}:iam::${Aws.ACCOUNT_ID}:role/aws-service-role/elasticloadbalancing.amazonaws.com/AWSServiceRoleForElasticLoadBalancing`,
             `arn:${Aws.PARTITION}:iam::${Aws.ACCOUNT_ID}:role/aws-service-role/globalaccelerator.amazonaws.com/AWSServiceRoleForGlobalAccelerator`,
+            `arn:${Aws.PARTITION}:iam::${Aws.ACCOUNT_ID}:role/aws-service-role/servicecatalog-appregistry.amazonaws.com/AWSServiceRoleForAWSServiceCatalogAppRegistry`,
           ],
         }),
         // This list of actions is to ensure the call stack can be created/updated/deleted successfully.
@@ -166,6 +167,7 @@ export class StackActionStateMachine extends Construct {
             'kms:*',
             'athena:*',
             'servicecatalog:CreateApplication',
+            'servicecatalog:UpdateApplication',
             'servicecatalog:DeleteApplication',
             'servicecatalog:GetApplication',
             'servicecatalog:GetAssociatedResource',

@@ -95,7 +95,7 @@ export class DataReportingQuickSightStack extends Stack {
       templateId,
       awsAccountId: Aws.ACCOUNT_ID,
       permissions: [{
-        principal: stackParams.quickSightPrincipalParam.valueAsString,
+        principal: stackParams.quickSightOwnerPrincipalParam.valueAsString,
         actions: [
           'quicksight:UpdateTemplatePermissions',
           'quicksight:DescribeTemplatePermissions',
@@ -140,7 +140,7 @@ export class DataReportingQuickSightStack extends Stack {
       },
       permissions: [
         {
-          principal: stackParams.quickSightPrincipalParam.valueAsString,
+          principal: stackParams.quickSightOwnerPrincipalParam.valueAsString,
           actions: [
             'quicksight:UpdateDataSourcePermissions',
             'quicksight:DescribeDataSourcePermissions',
@@ -165,7 +165,8 @@ export class DataReportingQuickSightStack extends Stack {
       quickSightProps: {
         userName: stackParams.quickSightUserParam.valueAsString,
         namespace: stackParams.quickSightNamespaceParam.valueAsString,
-        principalArn: stackParams.quickSightPrincipalParam.valueAsString,
+        sharePrincipalArn: stackParams.quickSightPrincipalParam.valueAsString,
+        ownerPrincipalArn: stackParams.quickSightOwnerPrincipalParam.valueAsString,
       },
       redshiftProps: {
         databaseSchemaNames: stackParams.redShiftDBSchemaParam.valueAsString,

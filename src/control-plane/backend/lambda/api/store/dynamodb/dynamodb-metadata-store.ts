@@ -61,6 +61,8 @@ export class DynamoDbMetadataStore implements MetadataStore {
       dataVolumeLastDay: lastDayData.dataVolumeLastDay,
       hasData: lastDayData.hasData,
       platform: records[0].summary.platform ?? [],
+      sdkVersion: records[0].summary.sdkVersion ?? [],
+      sdkName: records[0].summary.sdkName ?? [],
     };
     return event;
   };
@@ -251,6 +253,8 @@ export class DynamoDbMetadataStore implements MetadataStore {
         name: eventName,
         summary: {
           platform: [],
+          sdkVersion: [],
+          sdkName: [],
           hasData: false,
         },
       };

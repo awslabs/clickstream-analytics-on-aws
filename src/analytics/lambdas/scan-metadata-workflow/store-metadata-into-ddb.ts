@@ -85,7 +85,7 @@ async function handleEventMetadata(appId: string, metadataItems: any[]) {
 
   const itemsMap = await getExistingItemsFromDDB(appId, 'event_metadata');
 
-  const inputSql = `SELECT id, month, prefix, project_id, app_id, day_number, count, event_name, platform FROM ${appId}.event_metadata;`;
+  const inputSql = `SELECT id, month, prefix, project_id, app_id, day_number, count, event_name, platform, sdk_version, sdk_name FROM ${appId}.event_metadata;`;
 
   const response = await queryMetadata(inputSql);
 
@@ -97,6 +97,8 @@ async function handleEventMetadata(appId: string, metadataItems: any[]) {
         count: record[6].longValue,
         hasData: true,
         platform: convertToDDBList(record[8].stringValue),
+        sdkVersion: convertToDDBList(record[9].stringValue),
+        sdkName: convertToDDBList(record[10].stringValue),
       };
     } else {
       const item = {
@@ -110,6 +112,8 @@ async function handleEventMetadata(appId: string, metadataItems: any[]) {
           count: record[6].longValue,
           hasData: true,
           platform: convertToDDBList(record[8].stringValue),
+          sdkVersion: convertToDDBList(record[9].stringValue),
+          sdkName: convertToDDBList(record[10].stringValue),
         },
       };
       itemsMap.set(key, item);
@@ -119,14 +123,20 @@ async function handleEventMetadata(appId: string, metadataItems: any[]) {
   // aggregate summary info
   for (const item of itemsMap.values()) {
     const platformSet: Set<string> = new Set();
+    const sdkVersionSet: Set<string> = new Set();
+    const sdkNameSet: Set<string> = new Set();
     for (const key in item) {
       if (key.startsWith('day')) {
         const dayData = item[key];
         dayData.platform.forEach((element: string) => platformSet.add(element));
+        dayData.sdkVersion.forEach((element: string) => sdkVersionSet.add(element));
+        dayData.sdkName.forEach((element: string) => sdkNameSet.add(element));
       }
     }
     item.summary = {
       platform: Array.from(platformSet),
+      sdkVersion: Array.from(sdkVersionSet),
+      sdkName: Array.from(sdkNameSet),
     };
   }
 

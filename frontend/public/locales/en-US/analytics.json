@@ -103,6 +103,7 @@
       "tableColumnMetadataSource": "Source",
       "tableColumnHasData": "Has data",
       "tableColumnPlatform": "Platform",
+      "tableColumnSdkVersion": "SDK version",
       "tableColumnDataVolumeLastDay": "Data volume last day",
       "filteringAriaLabel": "Find events",
       "filteringPlaceholder": "Find events",

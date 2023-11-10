@@ -662,6 +662,8 @@ function getLatestEventByName(metadata: IMetadataRaw[]): IMetadataEvent[] {
       name: meta.name,
       hasData: lastDayData.hasData,
       platform: meta.summary.platform ?? [],
+      sdkVersion: meta.summary.sdkVersion ?? [],
+      sdkName: meta.summary.sdkName ?? [],
       dataVolumeLastDay: lastDayData.dataVolumeLastDay,
     };
     const index = latestEvents.findIndex((e: IMetadataEvent) => e.name === meta.name);

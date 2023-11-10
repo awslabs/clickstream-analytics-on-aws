@@ -52,7 +52,7 @@ export class ServiceCatalogAppregistryStack extends Stack {
     // Add tags for AppRegistry application
     Tags.of(application).add('Solutions:SolutionID', SolutionInfo.SOLUTION_ID);
     Tags.of(application).add('Solutions:SolutionName', SolutionInfo.SOLUTION_NAME);
-    Tags.of(application).add('Solutions:SolutionVersion', SolutionInfo.SOLUTION_VERSION);
+    Tags.of(application).add('Solutions:SolutionVersion', SolutionInfo.SOLUTION_VERSION_SHORT);
     Tags.of(application).add('Solutions:ApplicationType', SolutionInfo.SOLUTION_TYPE);
 
     new CfnOutput(this, OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_ARN, {

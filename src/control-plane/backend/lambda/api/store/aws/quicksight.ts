@@ -36,7 +36,6 @@ import {
   CreateDataSetCommandInput,
   DataSetImportMode,
   SheetDefinition,
-  ResourcePermission,
   AnalysisDefinition,
   DescribeDashboardCommand,
   DescribeDashboardCommandInput,
@@ -50,7 +49,7 @@ import { SDKClient } from '../../common/sdk-client';
 import { QuickSightAccountInfo, QuickSightUser } from '../../common/types';
 import { generateRandomStr } from '../../common/utils-ln';
 import { IDashboard } from '../../model/project';
-import { analysisPermissionActions, dashboardPermissionActions } from '../../service/quicksight/dashboard-ln';
+import { analysisAdminPermissionActions, dashboardAdminPermissionActions, dataSetAdminPermissionActions } from '../../service/quicksight/dashboard-ln';
 import { sleep } from '../../service/quicksight/reporting-utils';
 
 const QUICKSIGHT_NAMESPACE = 'default';
@@ -436,18 +435,7 @@ export const createPublishDashboard = async (
       Name: `dataset-${dashboard.name}-default`,
       Permissions: [{
         Principal: principals.publishUserArn,
-        Actions: [
-          'quicksight:UpdateDataSetPermissions',
-          'quicksight:DescribeDataSet',
-          'quicksight:DescribeDataSetPermissions',
-          'quicksight:PassDataSet',
-          'quicksight:DescribeIngestion',
-          'quicksight:ListIngestions',
-          'quicksight:UpdateDataSet',
-          'quicksight:DeleteDataSet',
-          'quicksight:CreateIngestion',
-          'quicksight:CancelIngestion',
-        ],
+        Actions: dataSetAdminPermissionActions,
       }],
       ImportMode: DataSetImportMode.DIRECT_QUERY,
       PhysicalTableMap: {
@@ -484,10 +472,6 @@ export const createPublishDashboard = async (
       };
       sheets.push(sheetDefinition);
     }
-    const dashboardPermission: ResourcePermission = {
-      Principal: principals.publishUserArn,
-      Actions: dashboardPermissionActions,
-    };
     const dashboardDefinition = {
       DataSetIdentifierDeclarations: [
         {
@@ -505,21 +489,26 @@ export const createPublishDashboard = async (
       DashboardId: dashboard.id,
       Name: dashboard.name,
       Definition: dashboardDefinition,
-      Permissions: [dashboardPermission],
+      Permissions: [
+        {
+          Principal: principals.publishUserArn,
+          Actions: dashboardAdminPermissionActions,
+        },
+      ],
     };
     await createDashboard(dashboard.region, dashboardInput);
     const analysisId = dashboard.id.replace(QUICKSIGHT_DASHBOARD_INFIX, QUICKSIGHT_ANALYSIS_INFIX);
-
-    const analysisPermission: ResourcePermission = {
-      Principal: principals.publishUserArn,
-      Actions: analysisPermissionActions,
-    };
     const analysisInput: CreateAnalysisCommandInput = {
       AwsAccountId: awsAccountId,
       AnalysisId: analysisId,
       Name: dashboard.name,
       Definition: dashboardDefinition as AnalysisDefinition,
-      Permissions: [analysisPermission],
+      Permissions: [
+        {
+          Principal: principals.publishUserArn,
+          Actions: analysisAdminPermissionActions,
+        },
+      ],
     };
     await createAnalysis(dashboard.region, analysisInput);
   } catch (err) {

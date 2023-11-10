@@ -148,6 +148,7 @@ describe('Workflow test', () => {
     createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock,
       ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, iamMock, {
         publicAZContainPrivateAZ: true,
+        noVpcEndpoint: true,
       });
     const pipeline: CPipeline = new CPipeline({ ...S3_INGESTION_PIPELINE });
     const wf = await pipeline.generateWorkflow();
@@ -253,8 +254,9 @@ describe('Workflow test', () => {
     createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock,
       ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, iamMock, {
         publicAZContainPrivateAZ: true,
+        noVpcEndpoint: true,
       });
-    createPipelineMockForBJSRegion(ec2Mock, s3Mock);
+    createPipelineMockForBJSRegion(s3Mock);
     const pipeline: CPipeline = new CPipeline({
       ...S3_INGESTION_PIPELINE,
       region: 'cn-north-1',
@@ -362,6 +364,7 @@ describe('Workflow test', () => {
     createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock,
       ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, iamMock, {
         publicAZContainPrivateAZ: true,
+        noVpcEndpoint: true,
       });
     const pipeline: CPipeline = new CPipeline({ ...KAFKA_INGESTION_PIPELINE });
     const wf = await pipeline.generateWorkflow();
@@ -467,6 +470,7 @@ describe('Workflow test', () => {
     createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock,
       ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, iamMock, {
         publicAZContainPrivateAZ: true,
+        noVpcEndpoint: true,
       });
     const pipeline: CPipeline = new CPipeline({ ...KAFKA_WITH_CONNECTOR_INGESTION_PIPELINE });
     const wf = await pipeline.generateWorkflow();
@@ -594,8 +598,9 @@ describe('Workflow test', () => {
     createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock,
       ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, iamMock, {
         publicAZContainPrivateAZ: true,
+        noVpcEndpoint: true,
       });
-    createPipelineMockForBJSRegion(ec2Mock, s3Mock);
+    createPipelineMockForBJSRegion(s3Mock);
     const pipeline: CPipeline = new CPipeline({
       ...MSK_WITH_CONNECTOR_INGESTION_PIPELINE,
       region: 'cn-north-1',
@@ -725,6 +730,7 @@ describe('Workflow test', () => {
     createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock,
       ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, iamMock, {
         publicAZContainPrivateAZ: true,
+        noVpcEndpoint: true,
       });
     const pipeline: CPipeline = new CPipeline({ ...KINESIS_ON_DEMAND_INGESTION_PIPELINE });
     const wf = await pipeline.generateWorkflow();
@@ -830,8 +836,9 @@ describe('Workflow test', () => {
     createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock,
       ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, iamMock, {
         publicAZContainPrivateAZ: true,
+        noVpcEndpoint: true,
       });
-    createPipelineMockForBJSRegion(ec2Mock, s3Mock);
+    createPipelineMockForBJSRegion(s3Mock);
     const pipeline: CPipeline = new CPipeline({
       ...KINESIS_PROVISIONED_INGESTION_PIPELINE,
       region: 'cn-north-1',
@@ -939,6 +946,7 @@ describe('Workflow test', () => {
     createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock,
       ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, iamMock, {
         publicAZContainPrivateAZ: true,
+        noVpcEndpoint: true,
       });
     const pipeline: CPipeline = new CPipeline({ ...S3_DATA_PROCESSING_PIPELINE });
     const wf = await pipeline.generateWorkflow();
@@ -1596,6 +1604,7 @@ describe('Workflow test', () => {
       ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, iamMock, {
         publicAZContainPrivateAZ: true,
         subnetsCross3AZ: true,
+        noVpcEndpoint: true,
       });
     const pipeline: CPipeline = new CPipeline({ ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE });
     const wf = await pipeline.generateWorkflow();
@@ -1748,6 +1757,7 @@ describe('Workflow test', () => {
     createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock,
       ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, iamMock, {
         publicAZContainPrivateAZ: true,
+        noVpcEndpoint: true,
       });
     const pipeline: CPipeline = new CPipeline({ ...KINESIS_DATA_PROCESSING_PROVISIONED_REDSHIFT_PIPELINE });
     const wf = await pipeline.generateWorkflow();
@@ -1921,6 +1931,7 @@ describe('Workflow test', () => {
     createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock,
       ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, iamMock, {
         publicAZContainPrivateAZ: true,
+        noVpcEndpoint: true,
       });
     const pipeline: CPipeline = new CPipeline({ ...KINESIS_DATA_PROCESSING_PROVISIONED_REDSHIFT_QUICKSIGHT_PIPELINE });
     const wf = await pipeline.generateWorkflow();
@@ -2116,6 +2127,7 @@ describe('Workflow test', () => {
       ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, iamMock, {
         publicAZContainPrivateAZ: true,
         subnetsCross3AZ: true,
+        noVpcEndpoint: true,
       });
     const pipeline: CPipeline = new CPipeline({ ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_QUICKSIGHT_PIPELINE });
     const wf = await pipeline.generateWorkflow();
@@ -3324,6 +3336,7 @@ describe('Workflow test', () => {
       ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, iamMock, {
         publicAZContainPrivateAZ: true,
         subnetsCross3AZ: true,
+        noVpcEndpoint: true,
       });
     const pipeline: CPipeline = new CPipeline({ ...S3_INGESTION_PIPELINE });
     await pipeline.generateWorkflow();
@@ -3338,6 +3351,7 @@ describe('Workflow test', () => {
       ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, iamMock, {
         publicAZContainPrivateAZ: true,
         subnetsCross3AZ: true,
+        noVpcEndpoint: true,
       });
     ddbMock.on(GetCommand, {
       TableName: dictionaryTableName,
@@ -3399,6 +3413,7 @@ describe('Workflow test', () => {
       ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, iamMock, {
         publicAZContainPrivateAZ: true,
         subnetsCross3AZ: true,
+        noVpcEndpoint: true,
       });
     process.env.AWS_REGION='us-east-1';
     const pipeline: CPipeline = new CPipeline({ ...S3_INGESTION_PIPELINE });
@@ -3443,6 +3458,7 @@ describe('Workflow test', () => {
       ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, iamMock, {
         publicAZContainPrivateAZ: true,
         subnetsCross3AZ: true,
+        noVpcEndpoint: true,
       });
     process.env.AWS_REGION='us-east-1';
     const pipeline: CPipeline = new CPipeline({ ...S3_INGESTION_PIPELINE });
