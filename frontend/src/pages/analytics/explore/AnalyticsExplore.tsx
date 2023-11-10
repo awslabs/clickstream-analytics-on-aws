@@ -32,7 +32,10 @@ import Loading from 'components/common/Loading';
 import { CategoryItemType } from 'components/eventselect/AnalyticsType';
 import AnalyticsNavigation from 'components/layouts/AnalyticsNavigation';
 import CustomBreadCrumb from 'components/layouts/CustomBreadCrumb';
-import React, { useEffect, useState } from 'react';
+import HelpInfo from 'components/layouts/HelpInfo';
+import { DispatchContext, StateContext } from 'context/StateContext';
+import { HelpInfoActionType, HelpPanelType } from 'context/reducer';
+import React, { useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { MetadataParameterType, MetadataSource } from 'ts/explore-types';
@@ -53,7 +56,8 @@ const AnalyticsExplore: React.FC = () => {
   const { t } = useTranslation();
   const { projectId, appId } = useParams();
   const [headerHeight, setHeaderHeight] = useState(100);
-
+  const dispatch = useContext(DispatchContext);
+  const state = useContext(StateContext);
   const [selectedOption, setSelectedOption] =
     useState<SelectProps.Option | null>({
       label: defaultStr(t('analytics:explore.eventAnalysis')),
@@ -275,7 +279,21 @@ const AnalyticsExplore: React.FC = () => {
       />
       <div className="flex-1">
         <AppLayout
-          toolsHide
+          toolsOpen={state?.showHelpPanel}
+          onToolsChange={(e) => {
+            if (state?.helpPanelType === HelpPanelType.NONE) {
+              return;
+            }
+            if (!e.detail.open) {
+              dispatch?.({ type: HelpInfoActionType.HIDE_HELP_PANEL });
+            } else {
+              dispatch?.({
+                type: HelpInfoActionType.SHOW_HELP_PANEL,
+                payload: state?.helpPanelType,
+              });
+            }
+          }}
+          tools={<HelpInfo />}
           navigationHide
           content={
             <ContentLayout
@@ -302,9 +320,12 @@ const AnalyticsExplore: React.FC = () => {
                     <Select
                       disabled={!pipeline}
                       selectedOption={selectedOption}
-                      onChange={({ detail }) =>
-                        setSelectedOption(detail.selectedOption)
-                      }
+                      onChange={({ detail }) => {
+                        dispatch?.({
+                          type: HelpInfoActionType.HIDE_HELP_PANEL,
+                        });
+                        setSelectedOption(detail.selectedOption);
+                      }}
                       options={analyticsModelOptions}
                     />
                   </div>

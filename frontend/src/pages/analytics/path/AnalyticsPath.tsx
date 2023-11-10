@@ -18,14 +18,13 @@ import {
   DateRangePickerProps,
   Header,
   Input,
-  Link,
-  Popover,
   Select,
   SelectProps,
   SpaceBetween,
   Toggle,
 } from '@cloudscape-design/components';
 import { previewPath } from 'apis/analytics';
+import InfoLink from 'components/common/InfoLink';
 import Loading from 'components/common/Loading';
 import InfoTitle from 'components/common/title/InfoTitle';
 import SectionTitle from 'components/common/title/SectionTitle';
@@ -40,8 +39,10 @@ import {
 } from 'components/eventselect/AnalyticsType';
 import EventsSelect from 'components/eventselect/EventSelect';
 import SegmentationFilter from 'components/eventselect/SegmentationFilter';
+import { DispatchContext } from 'context/StateContext';
+import { HelpInfoActionType, HelpPanelType } from 'context/reducer';
 import { cloneDeep } from 'lodash';
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { COMMON_ALERT_TYPE } from 'ts/const';
@@ -125,6 +126,7 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
   const [disableAddCondition, setDisableAddCondition] = useState(false);
   const [categoryEventsData, setCategoryEventsData] =
     useState<CategoryItemType[]>(categoryEvents);
+  const dispatch = useContext(DispatchContext);
 
   const defaultComputeMethodOption: SelectProps.Option = {
     value: ExploreComputeMethod.USER_ID_CNT,
@@ -544,12 +546,14 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
             <Header
               variant="h2"
               info={
-                <Popover
-                  triggerType="custom"
-                  content={t('analytics:information.pathInfo')}
-                >
-                  <Link variant="info">{t('info')}</Link>
-                </Popover>
+                <InfoLink
+                  onFollow={() => {
+                    dispatch?.({
+                      type: HelpInfoActionType.SHOW_HELP_PANEL,
+                      payload: HelpPanelType.EXPLORE_PATH_INFO,
+                    });
+                  }}
+                />
               }
               actions={
                 <SpaceBetween direction="horizontal" size="xs">

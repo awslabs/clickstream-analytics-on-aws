@@ -17,8 +17,6 @@ import {
   Container,
   Header,
   Input,
-  Link,
-  Popover,
   SegmentedControl,
   SegmentedControlProps,
   Select,
@@ -28,6 +26,7 @@ import {
 import { DateRangePickerProps } from '@cloudscape-design/components/date-range-picker/interfaces';
 import { previewFunnel } from 'apis/analytics';
 import ExtendIcon from 'components/common/ExtendIcon';
+import InfoLink from 'components/common/InfoLink';
 import Loading from 'components/common/Loading';
 import InfoTitle from 'components/common/title/InfoTitle';
 import SectionTitle from 'components/common/title/SectionTitle';
@@ -41,8 +40,10 @@ import {
 } from 'components/eventselect/AnalyticsType';
 import EventsSelect from 'components/eventselect/EventSelect';
 import SegmentationFilter from 'components/eventselect/SegmentationFilter';
+import { DispatchContext } from 'context/StateContext';
+import { HelpInfoActionType, HelpPanelType } from 'context/reducer';
 import { cloneDeep } from 'lodash';
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { COMMON_ALERT_TYPE } from 'ts/const';
@@ -115,6 +116,7 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
   const [selectDashboardModalVisible, setSelectDashboardModalVisible] =
     useState(false);
   const [exploreEmbedUrl, setExploreEmbedUrl] = useState('');
+  const dispatch = useContext(DispatchContext);
 
   const defaultChartTypeOption = QuickSightChartType.FUNNEL;
   const chartTypeOptions: SegmentedControlProps.Option[] = [
@@ -400,12 +402,14 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
             <Header
               variant="h2"
               info={
-                <Popover
-                  triggerType="custom"
-                  content={t('analytics:information.funnelInfo')}
-                >
-                  <Link variant="info">{t('info')}</Link>
-                </Popover>
+                <InfoLink
+                  onFollow={() => {
+                    dispatch?.({
+                      type: HelpInfoActionType.SHOW_HELP_PANEL,
+                      payload: HelpPanelType.EXPLORE_FUNNEL_INFO,
+                    });
+                  }}
+                />
               }
               actions={
                 <SpaceBetween direction="horizontal" size="xs">

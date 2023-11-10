@@ -32,10 +32,14 @@ import {
   SpaceBetween,
 } from '@cloudscape-design/components';
 import { embedAnalyzesUrl } from 'apis/analytics';
+import InfoLink from 'components/common/InfoLink';
 import Loading from 'components/common/Loading';
 import AnalyticsNavigation from 'components/layouts/AnalyticsNavigation';
 import CustomBreadCrumb from 'components/layouts/CustomBreadCrumb';
-import React, { useEffect, useState } from 'react';
+import HelpInfo from 'components/layouts/HelpInfo';
+import { DispatchContext, StateContext } from 'context/StateContext';
+import { HelpInfoActionType, HelpPanelType } from 'context/reducer';
+import React, { useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { defaultStr } from 'ts/utils';
@@ -46,6 +50,8 @@ const AnalyticsAnalyzes: React.FC = () => {
   const { projectId, appId } = useParams();
   const [loadingData, setLoadingData] = useState(false);
   const [dashboardEmbedUrl, setDashboardEmbedUrl] = useState('');
+  const dispatch = useContext(DispatchContext);
+  const state = useContext(StateContext);
 
   const getAnalyzes = async () => {
     setLoadingData(true);
@@ -87,7 +93,21 @@ const AnalyticsAnalyzes: React.FC = () => {
       />
       <div className="flex-1">
         <AppLayout
-          toolsHide
+          toolsOpen={state?.showHelpPanel}
+          onToolsChange={(e) => {
+            if (state?.helpPanelType === HelpPanelType.NONE) {
+              return;
+            }
+            if (!e.detail.open) {
+              dispatch?.({ type: HelpInfoActionType.HIDE_HELP_PANEL });
+            } else {
+              dispatch?.({
+                type: HelpInfoActionType.SHOW_HELP_PANEL,
+                payload: state?.helpPanelType,
+              });
+            }
+          }}
+          tools={<HelpInfo />}
           navigationHide
           content={
             <ContentLayout
@@ -96,6 +116,16 @@ const AnalyticsAnalyzes: React.FC = () => {
                   <Header
                     variant="h1"
                     description={t('analytics:analyzes.description')}
+                    info={
+                      <InfoLink
+                        onFollow={() => {
+                          dispatch?.({
+                            type: HelpInfoActionType.SHOW_HELP_PANEL,
+                            payload: HelpPanelType.ANALYTICS_ANALYZES,
+                          });
+                        }}
+                      />
+                    }
                   >
                     {t('analytics:analyzes.title')}
                   </Header>

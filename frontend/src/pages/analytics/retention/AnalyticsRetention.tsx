@@ -17,8 +17,6 @@ import {
   Container,
   DateRangePickerProps,
   Header,
-  Link,
-  Popover,
   SegmentedControl,
   SegmentedControlProps,
   SelectProps,
@@ -26,6 +24,7 @@ import {
 } from '@cloudscape-design/components';
 import { previewRetention } from 'apis/analytics';
 import ExtendIcon from 'components/common/ExtendIcon';
+import InfoLink from 'components/common/InfoLink';
 import Loading from 'components/common/Loading';
 import SectionTitle from 'components/common/title/SectionTitle';
 import {
@@ -39,8 +38,10 @@ import {
 } from 'components/eventselect/AnalyticsType';
 import RetentionSelect from 'components/eventselect/RetentionSelect';
 import SegmentationFilter from 'components/eventselect/SegmentationFilter';
+import { DispatchContext } from 'context/StateContext';
+import { HelpInfoActionType, HelpPanelType } from 'context/reducer';
 import { cloneDeep } from 'lodash';
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { COMMON_ALERT_TYPE } from 'ts/const';
@@ -109,6 +110,7 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
   const [selectDashboardModalVisible, setSelectDashboardModalVisible] =
     useState(false);
   const [exploreEmbedUrl, setExploreEmbedUrl] = useState('');
+  const dispatch = useContext(DispatchContext);
 
   const defaultChartTypeOption = QuickSightChartType.LINE;
   const chartTypeOptions: SegmentedControlProps.Option[] = [
@@ -318,12 +320,14 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
             <Header
               variant="h2"
               info={
-                <Popover
-                  triggerType="custom"
-                  content={t('analytics:information.retentionInfo')}
-                >
-                  <Link variant="info">{t('info')}</Link>
-                </Popover>
+                <InfoLink
+                  onFollow={() => {
+                    dispatch?.({
+                      type: HelpInfoActionType.SHOW_HELP_PANEL,
+                      payload: HelpPanelType.EXPLORE_RETENTION_INFO,
+                    });
+                  }}
+                />
               }
               actions={
                 <SpaceBetween direction="horizontal" size="xs">

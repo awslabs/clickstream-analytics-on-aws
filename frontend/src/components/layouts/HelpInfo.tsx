@@ -34,30 +34,38 @@ const HelpInfo: React.FC = () => {
   const { t } = useTranslation();
   const state = useContext(StateContext);
 
+  const helpPanelMappings: any = {
+    [HelpPanelType.ANALYTICS_DASHBOARD]: 'dashboardsInfo',
+    [HelpPanelType.USER_LIFECYCLE_INFO]: 'userLifecycleInfo',
+    [HelpPanelType.ANALYTICS_EXPLORE]: 'exploreInfo',
+    [HelpPanelType.EXPLORE_EVENT_INFO]: 'eventInfo',
+    [HelpPanelType.EXPLORE_FUNNEL_INFO]: 'funnelInfo',
+    [HelpPanelType.EXPLORE_PATH_INFO]: 'pathInfo',
+    [HelpPanelType.EXPLORE_RETENTION_INFO]: 'retentionInfo',
+    [HelpPanelType.ANALYTICS_ANALYZES]: 'analyzesInfo',
+    [HelpPanelType.ANALYTICS_METADATA]: 'metadataInfo',
+    [HelpPanelType.METADATA_EVENT_INFO]: 'metadataEventInfo',
+    [HelpPanelType.METADATA_EVENT_PARAM_INFO]: 'metadataEventParamInfo',
+    [HelpPanelType.METADATA_USER_PARAM_INFO]: 'metadataUserParamInfo',
+  };
+
   const dataItem: HelpInfoProps = {
     title: '',
     description: '',
     linkItems: [],
   };
 
-  if (state?.helpPanelType === HelpPanelType.ANALYTICS_DASHBOARD) {
-    dataItem.title = t('help:dashboardsInfo.title');
-    dataItem.description = <p>{t('help:dashboardsInfo.description')}</p>;
-    dataItem.linkItems = [
-      {
-        text: t('help:dashboardsInfo.links.docLinkName'),
-        href: t('help:dashboardsInfo.links.docLink'),
-      },
-    ];
-  }
+  const currentHelpPanelKey = helpPanelMappings[state?.helpPanelType ?? ''];
 
-  if (state?.helpPanelType === HelpPanelType.USER_LIFECYCLE_INFO) {
-    dataItem.title = t('help:userLifecycleInfo.title');
-    dataItem.description = <p>{t('help:userLifecycleInfo.description')}</p>;
+  if (currentHelpPanelKey) {
+    dataItem.title = t(`help:${currentHelpPanelKey}.title`);
+    dataItem.description = (
+      <p>{t(`help:${currentHelpPanelKey}.description`)}</p>
+    );
     dataItem.linkItems = [
       {
-        text: t('help:userLifecycleInfo.links.docLinkName'),
-        href: t('help:userLifecycleInfo.links.docLink'),
+        text: t(`help:${currentHelpPanelKey}.links.docLinkName`),
+        href: t(`help:${currentHelpPanelKey}.links.docLink`),
       },
     ];
   }
