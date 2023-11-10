@@ -117,13 +117,13 @@ public final class DatasetUtil {
     public static final String ITEM_ID = "item_id";
     public static final String PRICE = "price";
     public static final String CLIENT_ID = "clientId";
-    public static final String SCREEN_WIDTH = "screenWidth";
-    public static final String SCREEN_HEIGHT = "screenHeight";
-    public static final String CLIENT_PLATFORM_VERSION = "clientPlatformVersion";
-    public static final String CLIENT_PLATFORM = "clientPlatform";
-    public static final String REQUEST_START_TIME_MS = "requestStartTimeMs";
-    public static final String LANGUAGE = "language";
-    public static final String UC = "uc";
+    public static final String GTM_SCREEN_WIDTH = "screenWidth";
+    public static final String GTM_SCREEN_HEIGHT = "screenHeight";
+    public static final String GTM_CLIENT_PLATFORM_VERSION = "clientPlatformVersion";
+    public static final String GTM_CLIENT_PLATFORM = "clientPlatform";
+    public static final String GTM_REQUEST_START_TIME_MS = "requestStartTimeMs";
+    public static final String GTM_LANGUAGE = "language";
+    public static final String GTM_UC = "uc";
     public static final String GTM_ID = "gtmId";
     public static final String GTM_VERSION = "gtmVersion";
     public static final String EVENT_ITEMS = "eventItems";
@@ -152,6 +152,13 @@ public final class DatasetUtil {
     public static final String TABLE_NAME_ETL_GTM_USER_VISIT = "etl_gtm_user_visit";
     public static final String TABLE_NAME_ETL_GTM_USER_REFERRER = "etl_gtm_user_referrer";
     public static final String TABLE_NAME_ETL_MERGE_STATE = "etl_merge_state";
+    public static final String TABLE_VERSION_SUFFIX_V1 = "_v1";
+    public static final String TABLE_REGEX = String.format("^(%s)|((%s|%s|(etl_[^/]+))(%s|%s)_v\\d+)$",
+            TABLE_NAME_ETL_MERGE_STATE,
+            ETLRunner.TableName.ITEM.getTableName(),
+            ETLRunner.TableName.USER.getTableName(),
+            FULL_SUFFIX,
+            INCREMENTAL_SUFFIX);
     private static final Map<String, StructType> SCHEMA_MAP = new HashMap<>();
 
     public static Map<String, StructType> getSchemaMap() {
@@ -238,14 +245,7 @@ public final class DatasetUtil {
 
 
     private static String getPathForTable(final String tableName) {
-        String tableRegex = String.format("^(%s)|((%s|%s|(etl_[^/]+))(%s|%s)_v\\d+)$",
-                TABLE_NAME_ETL_MERGE_STATE,
-                ETLRunner.TableName.ITEM.getTableName(),
-                ETLRunner.TableName.USER.getTableName(),
-                FULL_SUFFIX,
-                INCREMENTAL_SUFFIX);
-
-        if (!tableName.matches(tableRegex)) {
+        if (!tableName.matches(TABLE_REGEX)) {
             throw new ExecuteTransformerException("getPathForTable invalid tableName: " + tableName);
         }
         return Paths.get(ContextUtil.getWarehouseDir(), tableName).toString().replace("s3:/", "s3://");

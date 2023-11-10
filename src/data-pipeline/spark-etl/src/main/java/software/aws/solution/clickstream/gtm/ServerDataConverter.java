@@ -41,8 +41,8 @@ import static org.apache.spark.sql.functions.explode;
 import static org.apache.spark.sql.functions.udf;
 import static software.aws.solution.clickstream.ContextUtil.DEBUG_LOCAL_PROP;
 import static software.aws.solution.clickstream.DatasetUtil.CLIENT_ID;
-import static software.aws.solution.clickstream.DatasetUtil.CLIENT_PLATFORM;
-import static software.aws.solution.clickstream.DatasetUtil.CLIENT_PLATFORM_VERSION;
+import static software.aws.solution.clickstream.DatasetUtil.GTM_CLIENT_PLATFORM;
+import static software.aws.solution.clickstream.DatasetUtil.GTM_CLIENT_PLATFORM_VERSION;
 import static software.aws.solution.clickstream.DatasetUtil.DATA;
 import static software.aws.solution.clickstream.DatasetUtil.DATA_OUT;
 import static software.aws.solution.clickstream.DatasetUtil.DOUBLE_VALUE;
@@ -61,7 +61,7 @@ import static software.aws.solution.clickstream.DatasetUtil.IP;
 import static software.aws.solution.clickstream.DatasetUtil.ITEMS;
 import static software.aws.solution.clickstream.DatasetUtil.ITEM_ID;
 import static software.aws.solution.clickstream.DatasetUtil.KEY;
-import static software.aws.solution.clickstream.DatasetUtil.LANGUAGE;
+import static software.aws.solution.clickstream.DatasetUtil.GTM_LANGUAGE;
 import static software.aws.solution.clickstream.DatasetUtil.MAX_STRING_VALUE_LEN;
 import static software.aws.solution.clickstream.DatasetUtil.MOBILE;
 import static software.aws.solution.clickstream.DatasetUtil.MODEL;
@@ -70,12 +70,12 @@ import static software.aws.solution.clickstream.DatasetUtil.PLATFORM;
 import static software.aws.solution.clickstream.DatasetUtil.PLATFORM_VERSION;
 import static software.aws.solution.clickstream.DatasetUtil.PRICE;
 import static software.aws.solution.clickstream.DatasetUtil.PROPERTIES;
-import static software.aws.solution.clickstream.DatasetUtil.REQUEST_START_TIME_MS;
-import static software.aws.solution.clickstream.DatasetUtil.SCREEN_HEIGHT;
-import static software.aws.solution.clickstream.DatasetUtil.SCREEN_WIDTH;
+import static software.aws.solution.clickstream.DatasetUtil.GTM_REQUEST_START_TIME_MS;
+import static software.aws.solution.clickstream.DatasetUtil.GTM_SCREEN_HEIGHT;
+import static software.aws.solution.clickstream.DatasetUtil.GTM_SCREEN_WIDTH;
 import static software.aws.solution.clickstream.DatasetUtil.STRING_VALUE;
 import static software.aws.solution.clickstream.DatasetUtil.UA;
-import static software.aws.solution.clickstream.DatasetUtil.UC;
+import static software.aws.solution.clickstream.DatasetUtil.GTM_UC;
 import static software.aws.solution.clickstream.DatasetUtil.USER;
 import static software.aws.solution.clickstream.DatasetUtil.USER_ID;
 import static software.aws.solution.clickstream.DatasetUtil.USER_PROPERTIES;
@@ -91,9 +91,8 @@ public class ServerDataConverter {
             try {
                 return getGenericRows(value);
             } catch (Exception e) {
-                log.warn("cannot convert data: " + value + ", error: " + e.getMessage());
+                log.error("cannot convert data: " + value + ", error: " + e.getMessage());
                 if (ContextUtil.isDebugLocal()) {
-                    e.printStackTrace();
                     throw e;
                 }
                 return null;
@@ -519,20 +518,20 @@ public class ServerDataConverter {
                 DataTypes.createStructField(IP, DataTypes.StringType, true),
                 DataTypes.createStructField(CLIENT_ID, DataTypes.StringType, true),
                 DataTypes.createStructField(UA, DataTypes.StringType, true),
-                DataTypes.createStructField(LANGUAGE, DataTypes.StringType, true),
-                DataTypes.createStructField(SCREEN_WIDTH, DataTypes.LongType, true),
-                DataTypes.createStructField(SCREEN_HEIGHT, DataTypes.LongType, true),
+                DataTypes.createStructField(GTM_LANGUAGE, DataTypes.StringType, true),
+                DataTypes.createStructField(GTM_SCREEN_WIDTH, DataTypes.LongType, true),
+                DataTypes.createStructField(GTM_SCREEN_HEIGHT, DataTypes.LongType, true),
                 DataTypes.createStructField(PAGE_REFERRER, DataTypes.StringType, true),
                 DataTypes.createStructField("isClientMobile", DataTypes.BooleanType, true),
                 DataTypes.createStructField("clientModel", DataTypes.StringType, true),
-                DataTypes.createStructField(CLIENT_PLATFORM, DataTypes.StringType, true),
-                DataTypes.createStructField(CLIENT_PLATFORM_VERSION, DataTypes.StringType, true),
+                DataTypes.createStructField(GTM_CLIENT_PLATFORM, DataTypes.StringType, true),
+                DataTypes.createStructField(GTM_CLIENT_PLATFORM_VERSION, DataTypes.StringType, true),
                 DataTypes.createStructField(EVENT_PARAMS, keyValueType, true),
                 DataTypes.createStructField(ITEMS, itemsType, true),
                 DataTypes.createStructField(EVENT_ITEMS, eventItemsType, true),
                 DataTypes.createStructField(USER, userType, true),
-                DataTypes.createStructField(REQUEST_START_TIME_MS, DataTypes.LongType, true),
-                DataTypes.createStructField(UC, DataTypes.StringType, true),
+                DataTypes.createStructField(GTM_REQUEST_START_TIME_MS, DataTypes.LongType, true),
+                DataTypes.createStructField(GTM_UC, DataTypes.StringType, true),
         });
 
         ArrayType dataItemArrayType = DataTypes.createArrayType(dataItemType);

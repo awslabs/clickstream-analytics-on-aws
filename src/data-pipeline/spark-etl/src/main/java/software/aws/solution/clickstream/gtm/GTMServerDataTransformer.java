@@ -48,8 +48,8 @@ import static software.aws.solution.clickstream.DatasetUtil.APP_ID;
 import static software.aws.solution.clickstream.DatasetUtil.APP_INFO;
 import static software.aws.solution.clickstream.DatasetUtil.CHANNEL;
 import static software.aws.solution.clickstream.DatasetUtil.CLIENT_ID;
-import static software.aws.solution.clickstream.DatasetUtil.CLIENT_PLATFORM;
-import static software.aws.solution.clickstream.DatasetUtil.CLIENT_PLATFORM_VERSION;
+import static software.aws.solution.clickstream.DatasetUtil.GTM_CLIENT_PLATFORM;
+import static software.aws.solution.clickstream.DatasetUtil.GTM_CLIENT_PLATFORM_VERSION;
 import static software.aws.solution.clickstream.DatasetUtil.COL_PAGE_REFERER;
 import static software.aws.solution.clickstream.DatasetUtil.DATA_OUT;
 import static software.aws.solution.clickstream.DatasetUtil.DEVICE_ID_LIST;
@@ -81,19 +81,20 @@ import static software.aws.solution.clickstream.DatasetUtil.IP;
 import static software.aws.solution.clickstream.DatasetUtil.ITEM;
 import static software.aws.solution.clickstream.DatasetUtil.ITEMS;
 import static software.aws.solution.clickstream.DatasetUtil.KEY;
-import static software.aws.solution.clickstream.DatasetUtil.LANGUAGE;
+import static software.aws.solution.clickstream.DatasetUtil.GTM_LANGUAGE;
 import static software.aws.solution.clickstream.DatasetUtil.LOCALE;
 import static software.aws.solution.clickstream.DatasetUtil.MAX_PARAM_STRING_VALUE_LEN;
 import static software.aws.solution.clickstream.DatasetUtil.MAX_STRING_VALUE_LEN;
 import static software.aws.solution.clickstream.DatasetUtil.PAGE_REFERRER;
 import static software.aws.solution.clickstream.DatasetUtil.PLATFORM;
 import static software.aws.solution.clickstream.DatasetUtil.PROPERTIES;
-import static software.aws.solution.clickstream.DatasetUtil.REQUEST_START_TIME_MS;
-import static software.aws.solution.clickstream.DatasetUtil.SCREEN_HEIGHT;
-import static software.aws.solution.clickstream.DatasetUtil.SCREEN_WIDTH;
+import static software.aws.solution.clickstream.DatasetUtil.GTM_REQUEST_START_TIME_MS;
+import static software.aws.solution.clickstream.DatasetUtil.GTM_SCREEN_HEIGHT;
+import static software.aws.solution.clickstream.DatasetUtil.GTM_SCREEN_WIDTH;
 import static software.aws.solution.clickstream.DatasetUtil.STRING_VALUE;
 import static software.aws.solution.clickstream.DatasetUtil.TABLE_NAME_ETL_GTM_USER_REFERRER;
 import static software.aws.solution.clickstream.DatasetUtil.TABLE_NAME_ETL_GTM_USER_VISIT;
+import static software.aws.solution.clickstream.DatasetUtil.TABLE_VERSION_SUFFIX_V1;
 import static software.aws.solution.clickstream.DatasetUtil.UA;
 import static software.aws.solution.clickstream.DatasetUtil.UA_BROWSER;
 import static software.aws.solution.clickstream.DatasetUtil.UA_BROWSER_VERSION;
@@ -118,11 +119,8 @@ import static software.aws.solution.clickstream.DatasetUtil.saveFullDatasetToPat
 import static software.aws.solution.clickstream.DatasetUtil.saveIncrementalDatasetToPath;
 import static software.aws.solution.clickstream.ETLRunner.DEBUG_LOCAL_PATH;
 import static software.aws.solution.clickstream.ETLRunner.EVENT_DATE;
-
-
 @Slf4j
 public class GTMServerDataTransformer {
-    private static final String TABLE_VERSION_SUFFIX = "_v1";
     ServerDataConverter serverDataConverter = new ServerDataConverter();
 
     private static Dataset<Row> getAggVisitDataset(final Dataset<Row> newVisitDataset) {
@@ -140,7 +138,7 @@ public class GTMServerDataTransformer {
                 APP_ID, EVENT_TIMESTAMP, USER_PSEUDO_ID, COL_PAGE_REFERER
         ).filter(col(COL_PAGE_REFERER).isNotNull());
 
-        DatasetUtil.PathInfo pathInfo = addSchemaToMap(newPageReferrerDataset, tableName, TABLE_VERSION_SUFFIX);
+        DatasetUtil.PathInfo pathInfo = addSchemaToMap(newPageReferrerDataset, tableName, TABLE_VERSION_SUFFIX_V1);
 
         return loadFullUserRefererDataset(newPageReferrerDataset, pathInfo);
     }
@@ -159,12 +157,12 @@ public class GTMServerDataTransformer {
                         lit(null).cast(DataTypes.StringType).alias("mobile_brand_name"),
                         lit(null).cast(DataTypes.StringType).alias("mobile_model_name"),
                         lit(null).cast(DataTypes.StringType).alias("manufacturer"),
-                        dataCol.getField(SCREEN_WIDTH).cast(DataTypes.LongType).alias("screen_width"),
-                        dataCol.getField(SCREEN_HEIGHT).cast(DataTypes.LongType).alias("screen_height"),
+                        dataCol.getField(GTM_SCREEN_WIDTH).cast(DataTypes.LongType).alias("screen_width"),
+                        dataCol.getField(GTM_SCREEN_HEIGHT).cast(DataTypes.LongType).alias("screen_height"),
                         lit(null).cast(DataTypes.StringType).alias("carrier"),
                         lit(null).cast(DataTypes.StringType).alias("network_type"),
-                        dataCol.getField(CLIENT_PLATFORM_VERSION).cast(DataTypes.StringType).alias("operating_system_version"),
-                        dataCol.getField(CLIENT_PLATFORM).cast(DataTypes.StringType).alias("operating_system"),
+                        dataCol.getField(GTM_CLIENT_PLATFORM_VERSION).cast(DataTypes.StringType).alias("operating_system_version"),
+                        dataCol.getField(GTM_CLIENT_PLATFORM).cast(DataTypes.StringType).alias("operating_system"),
 
                         // placeholder for ua enrich fields
                         lit(null).cast(DataTypes.StringType).alias(UA_BROWSER),
@@ -174,7 +172,7 @@ public class GTMServerDataTransformer {
                         lit(null).cast(DataTypes.StringType).alias(UA_DEVICE),
                         lit(null).cast(DataTypes.StringType).alias(UA_DEVICE_CATEGORY),
 
-                        dataCol.getField(LANGUAGE).cast(DataTypes.StringType).alias("system_language"),
+                        dataCol.getField(GTM_LANGUAGE).cast(DataTypes.StringType).alias("system_language"),
                         lit(null).cast(DataTypes.LongType).alias("time_zone_offset_seconds"),
                         dataCol.getField(CLIENT_ID).cast(DataTypes.StringType).alias("vendor_id"),
 
@@ -205,7 +203,7 @@ public class GTMServerDataTransformer {
                         lit(null).cast(DataTypes.StringType).alias("sdk_version"),
                         lit("GTM").alias("sdk_name"))
                 )
-                .withColumn("platform", dataCol.getField(CLIENT_PLATFORM))
+                .withColumn("platform", dataCol.getField(GTM_CLIENT_PLATFORM))
                 .withColumn("project_id", lit(projectId))
                 .withColumn(ITEMS, dataCol.getField(EVENT_ITEMS))
 
@@ -252,17 +250,17 @@ public class GTMServerDataTransformer {
         List<DatasetUtil.TableInfo> l = new ArrayList<>();
 
         l.add(new DatasetUtil.TableInfo(
-                TABLE_NAME_ETL_GTM_USER_REFERRER, TABLE_VERSION_SUFFIX, userKeepDays
+                TABLE_NAME_ETL_GTM_USER_REFERRER, TABLE_VERSION_SUFFIX_V1, userKeepDays
         ));
 
         l.add(new DatasetUtil.TableInfo(
-                TABLE_NAME_ETL_GTM_USER_VISIT, TABLE_VERSION_SUFFIX, userKeepDays
+                TABLE_NAME_ETL_GTM_USER_VISIT, TABLE_VERSION_SUFFIX_V1, userKeepDays
         ));
         l.add(new DatasetUtil.TableInfo(
-                ETLRunner.TableName.USER.getTableName(), TABLE_VERSION_SUFFIX, userKeepDays
+                ETLRunner.TableName.USER.getTableName(), TABLE_VERSION_SUFFIX_V1, userKeepDays
         ));
         l.add(new DatasetUtil.TableInfo(
-                ETLRunner.TableName.ITEM.getTableName(), TABLE_VERSION_SUFFIX, itemKeepDays
+                ETLRunner.TableName.ITEM.getTableName(), TABLE_VERSION_SUFFIX_V1, itemKeepDays
         ));
 
         DatasetUtil.mergeIncrementalTables(sparkSession, l);
@@ -277,7 +275,7 @@ public class GTMServerDataTransformer {
                 .withColumn(EVENT_ID,
                         concat_ws("-", col("rid"), dataCol.getField(EVENT_ID)))
                 .withColumn(EVENT_TIMESTAMP, coalesce(
-                        dataCol.getItem(REQUEST_START_TIME_MS),
+                        dataCol.getItem(GTM_REQUEST_START_TIME_MS),
                         col("ingest_time")))
                 .withColumn(EVENT_DATE,
                         to_date(timestamp_seconds(col(EVENT_TIMESTAMP).$div(1000)))
@@ -338,7 +336,7 @@ public class GTMServerDataTransformer {
         log.info("newProfileSetUserDataset count:" + newProfileSetUserDataset.count());
 
         String tableName = ETLRunner.TableName.USER.getTableName();
-        DatasetUtil.PathInfo pathInfo = addSchemaToMap(newProfileSetUserDataset, tableName, TABLE_VERSION_SUFFIX);
+        DatasetUtil.PathInfo pathInfo = addSchemaToMap(newProfileSetUserDataset, tableName, TABLE_VERSION_SUFFIX_V1);
 
         if (newUserDatasetCount== 0) {
             return Optional.empty();
@@ -390,7 +388,7 @@ public class GTMServerDataTransformer {
         Dataset<Row> newVisitDataset = dataset2.select(
                 APP_ID, USER_PSEUDO_ID, EVENT_TIMESTAMP
         );
-        DatasetUtil.PathInfo pathInfo = addSchemaToMap(newVisitDataset, tableName, TABLE_VERSION_SUFFIX);
+        DatasetUtil.PathInfo pathInfo = addSchemaToMap(newVisitDataset, tableName, TABLE_VERSION_SUFFIX_V1);
 
         Dataset<Row> newAggVisitDataset = getAggVisitDataset(newVisitDataset);
         log.info("newAggVisitDataset count:" + newAggVisitDataset.count());
@@ -457,7 +455,7 @@ public class GTMServerDataTransformer {
                 .distinct();
 
         String tableName = ETLRunner.TableName.ITEM.getTableName();
-        DatasetUtil.PathInfo pathInfo = addSchemaToMap(newItemDataset, tableName, TABLE_VERSION_SUFFIX);
+        DatasetUtil.PathInfo pathInfo = addSchemaToMap(newItemDataset, tableName, TABLE_VERSION_SUFFIX_V1);
         log.info("newItemsDataset count:" + newItemDataset.count());
 
         if (newItemDataset.count() == 0) {

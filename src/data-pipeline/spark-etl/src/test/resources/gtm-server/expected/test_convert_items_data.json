@@ -15,7 +15,7 @@
   "ua" : null,
   "uri" : "/collect?appId=example_clickstream_analytics_aws",
   "dataOut" : {
-    "gtmId" : "G-CCM0Y0Y1RC",
+    "gtmId" : "G-000000002",
     "gtmVersion" : "45je39i0",
     "event_id" : "0-1695261065-1-1257382463.1695261066",
     "user_id" : null,
@@ -109,7 +109,7 @@
         "double_value" : null,
         "float_value" : null,
         "int_value" : null,
-        "string_value" : "G-CCM0Y0Y1RC"
+        "string_value" : "G-000000002"
       }
     }, {
       "key" : "client_hints.mobile",

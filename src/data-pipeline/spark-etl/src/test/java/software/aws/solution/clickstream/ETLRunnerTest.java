@@ -324,10 +324,10 @@ class ETLRunnerTest extends BaseSparkTest {
 
         String dataDir = ContextUtil.getWarehouseDir();
 
-        String tableName1 = dataDir + "/" + TABLE_ETL_USER_TRAFFIC_SOURCE + INCREMENTAL_SUFFIX + "_v1";
-        String tableName2 = dataDir + "/" + TABLE_ETL_USER_DEVICE_ID + INCREMENTAL_SUFFIX + "_v1";
-        String tableName3 = dataDir + "/" + TABLE_ETL_USER_PAGE_REFERER + INCREMENTAL_SUFFIX + "_v1";
-        String tableName4 = dataDir + "/" + TABLE_ETL_USER_CHANNEL+ INCREMENTAL_SUFFIX + "_v1";
+        String tableName1 = dataDir + "/" + TABLE_ETL_USER_TRAFFIC_SOURCE + INCREMENTAL_SUFFIX + TABLE_VERSION_SUFFIX_V1;
+        String tableName2 = dataDir + "/" + TABLE_ETL_USER_DEVICE_ID + INCREMENTAL_SUFFIX + TABLE_VERSION_SUFFIX_V1;
+        String tableName3 = dataDir + "/" + TABLE_ETL_USER_PAGE_REFERER + INCREMENTAL_SUFFIX + TABLE_VERSION_SUFFIX_V1;
+        String tableName4 = dataDir + "/" + TABLE_ETL_USER_CHANNEL+ INCREMENTAL_SUFFIX + TABLE_VERSION_SUFFIX_V1;
         Dataset<Row> d1 = spark.read().parquet(tableName1);
         Dataset<Row> d2 = spark.read().parquet(tableName2);
         Dataset<Row> d3 = spark.read().parquet(tableName3);

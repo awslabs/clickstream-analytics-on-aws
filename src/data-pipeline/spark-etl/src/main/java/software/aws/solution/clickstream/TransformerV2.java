@@ -89,6 +89,7 @@ import static software.aws.solution.clickstream.DatasetUtil.TABLE_ETL_USER_CHANN
 import static software.aws.solution.clickstream.DatasetUtil.TABLE_ETL_USER_DEVICE_ID;
 import static software.aws.solution.clickstream.DatasetUtil.TABLE_ETL_USER_PAGE_REFERER;
 import static software.aws.solution.clickstream.DatasetUtil.TABLE_ETL_USER_TRAFFIC_SOURCE;
+import static software.aws.solution.clickstream.DatasetUtil.TABLE_VERSION_SUFFIX_V1;
 import static software.aws.solution.clickstream.DatasetUtil.TIMESTAMP;
 import static software.aws.solution.clickstream.DatasetUtil.TRAFFIC_SOURCE_MEDIUM;
 import static software.aws.solution.clickstream.DatasetUtil.TRAFFIC_SOURCE_NAME;
@@ -116,8 +117,6 @@ import static software.aws.solution.clickstream.DatasetUtil.saveIncrementalDatas
 
 @Slf4j
 public final class TransformerV2 {
-    private static final String TABLE_VERSION_SUFFIX = "_v1";
-
     private final Cleaner cleaner = new Cleaner();
     private final EventParamsConverter eventParamsConverter = new EventParamsConverter();
     private final UserPropertiesConverter userPropertiesConverter = new UserPropertiesConverter();
@@ -144,7 +143,7 @@ public final class TransformerV2 {
         long newTrafficSourceCount = newUserTrafficSourceDataset.count();
         log.info(NEW_USER_COUNT + "=" + newUserCount + ", newTrafficSourceCount=" + newTrafficSourceCount);
 
-        DatasetUtil.PathInfo pathInfo = addSchemaToMap(newUserTrafficSourceDataset, tableName, TABLE_VERSION_SUFFIX);
+        DatasetUtil.PathInfo pathInfo = addSchemaToMap(newUserTrafficSourceDataset, tableName, TABLE_VERSION_SUFFIX_V1);
 
         if (newTrafficSourceCount > 0) {
             Dataset<Row> newAggUserTrafficSourceDataset = getAggTrafficSourceDataset(newUserTrafficSourceDataset);
@@ -195,7 +194,7 @@ public final class TransformerV2 {
         long newRefererCount = newUserRefererDataset.count();
         log.info(NEW_USER_COUNT + "=" + newUserCount + ", newRefererCount=" + newRefererCount);
 
-        DatasetUtil.PathInfo pathInfo = addSchemaToMap(newUserRefererDataset, tableName, TABLE_VERSION_SUFFIX);
+        DatasetUtil.PathInfo pathInfo = addSchemaToMap(newUserRefererDataset, tableName, TABLE_VERSION_SUFFIX_V1);
 
         if (newRefererCount > 0) {
             return loadFullUserRefererDataset(newUserRefererDataset, pathInfo);
@@ -220,7 +219,7 @@ public final class TransformerV2 {
 
         long newDeviceIdCount = newUserDeviceIdDataset.count();
         log.info(NEW_USER_COUNT + "=" + newUserCount + ", newDeviceIdCount=" + newDeviceIdCount);
-        DatasetUtil.PathInfo pathInfo = addSchemaToMap(newUserDeviceIdDataset, tableName, TABLE_VERSION_SUFFIX);
+        DatasetUtil.PathInfo pathInfo = addSchemaToMap(newUserDeviceIdDataset, tableName, TABLE_VERSION_SUFFIX_V1);
 
         if (newDeviceIdCount > 0) {
             Dataset<Row> newAggUserDeviceIdDataset = getAggUserDeviceIdDataset(newUserDeviceIdDataset);
@@ -281,7 +280,7 @@ public final class TransformerV2 {
         long newChannelDatasetCount = newUserChannelDataset.count();
         log.info(NEW_USER_COUNT + "=" + newUserCount + ", newChannelCount=" + newChannelDatasetCount);
 
-        DatasetUtil.PathInfo pathInfo = addSchemaToMap(newUserChannelDataset, tableName, TABLE_VERSION_SUFFIX);
+        DatasetUtil.PathInfo pathInfo = addSchemaToMap(newUserChannelDataset, tableName, TABLE_VERSION_SUFFIX_V1);
 
         if (newChannelDatasetCount > 0) {
             Dataset<Row> newAggUserChannelDataset = getAggUserChannelDataset(newUserChannelDataset);
@@ -317,22 +316,22 @@ public final class TransformerV2 {
 
         List<DatasetUtil.TableInfo> l = new ArrayList<>();
         l.add(new DatasetUtil.TableInfo(
-                TABLE_ETL_USER_DEVICE_ID, TABLE_VERSION_SUFFIX, userKeepDays
+                TABLE_ETL_USER_DEVICE_ID, TABLE_VERSION_SUFFIX_V1, userKeepDays
         ));
         l.add(new DatasetUtil.TableInfo(
-                TABLE_ETL_USER_PAGE_REFERER, TABLE_VERSION_SUFFIX, userKeepDays
+                TABLE_ETL_USER_PAGE_REFERER, TABLE_VERSION_SUFFIX_V1, userKeepDays
         ));
         l.add(new DatasetUtil.TableInfo(
-                TABLE_ETL_USER_TRAFFIC_SOURCE, TABLE_VERSION_SUFFIX, userKeepDays
+                TABLE_ETL_USER_TRAFFIC_SOURCE, TABLE_VERSION_SUFFIX_V1, userKeepDays
         ));
         l.add(new DatasetUtil.TableInfo(
-                TABLE_ETL_USER_CHANNEL, TABLE_VERSION_SUFFIX, userKeepDays
+                TABLE_ETL_USER_CHANNEL, TABLE_VERSION_SUFFIX_V1, userKeepDays
         ));
         l.add(new DatasetUtil.TableInfo(
-                ETLRunner.TableName.USER.getTableName(), TABLE_VERSION_SUFFIX, userKeepDays
+                ETLRunner.TableName.USER.getTableName(), TABLE_VERSION_SUFFIX_V1, userKeepDays
         ));
         l.add(new DatasetUtil.TableInfo(
-                ETLRunner.TableName.ITEM.getTableName(), TABLE_VERSION_SUFFIX, itemKeepDays
+                ETLRunner.TableName.ITEM.getTableName(), TABLE_VERSION_SUFFIX_V1, itemKeepDays
         ));
         DatasetUtil.mergeIncrementalTables(sparkSession, l);
     }
@@ -456,7 +455,7 @@ public final class TransformerV2 {
                 ).distinct();
 
         String tableName = ETLRunner.TableName.ITEM.getTableName();
-        DatasetUtil.PathInfo pathInfo = addSchemaToMap(newItemsDataset, tableName, TABLE_VERSION_SUFFIX);
+        DatasetUtil.PathInfo pathInfo = addSchemaToMap(newItemsDataset, tableName, TABLE_VERSION_SUFFIX_V1);
 
         log.info("newItemsDataset count:" + newItemsDataset.count());
 
@@ -501,7 +500,7 @@ public final class TransformerV2 {
                 ).distinct();
 
         String tableName = ETLRunner.TableName.USER.getTableName();
-        DatasetUtil.PathInfo pathInfo = addSchemaToMap(newUserProfileMainDataset, tableName, TABLE_VERSION_SUFFIX);
+        DatasetUtil.PathInfo pathInfo = addSchemaToMap(newUserProfileMainDataset, tableName, TABLE_VERSION_SUFFIX_V1);
 
         if (newUserCount == 0) {
             return Optional.empty();

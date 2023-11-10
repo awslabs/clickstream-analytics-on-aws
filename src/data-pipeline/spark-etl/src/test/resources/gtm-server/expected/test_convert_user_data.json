@@ -15,7 +15,7 @@
   "ua" : null,
   "uri" : "/collect?appId=GMTServer",
   "dataOut" : {
-    "gtmId" : "G-7W7D6ZHG1T",
+    "gtmId" : "G-000000003",
     "gtmVersion" : "45je38n0",
     "event_id" : "0-1693281535-11-807802863.1690769179",
     "user_id" : "0eb41e46-2373-4883-8daf-e1975ccb3821",
@@ -109,7 +109,7 @@
         "double_value" : null,
         "float_value" : null,
         "int_value" : null,
-        "string_value" : "G-7W7D6ZHG1T"
+        "string_value" : "G-000000003"
       }
     }, {
       "key" : "x-ga-request_count",

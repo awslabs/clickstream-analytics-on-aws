@@ -15,7 +15,7 @@
   "ua" : null,
   "uri" : "/collect?appId=testGTM",
   "dataOut" : {
-    "gtmId" : "G-2ZT210W8J0",
+    "gtmId" : "G-000000001",
     "gtmVersion" : "45je3820",
     "event_id" : "0-1691480516-2-807802863.1690769179",
     "user_id" : null,
@@ -157,7 +157,7 @@
         "double_value" : null,
         "float_value" : null,
         "int_value" : null,
-        "string_value" : "G-2ZT210W8J0"
+        "string_value" : "G-000000001"
       }
     }, {
       "key" : "x-sst-system_properties.ngs",
