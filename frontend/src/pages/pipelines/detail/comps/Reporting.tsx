@@ -48,6 +48,16 @@ const Reporting: React.FC<TabContentProps> = (props: TabContentProps) => {
     return false;
   };
 
+  const getReportingDashboardLink = (appId: string, dashboardId: string) => {
+    if (pipelineInfo?.templateVersion?.startsWith('v1.0')) {
+      return buildQuickSightDashboardLink(
+        pipelineInfo.region || '',
+        dashboardId
+      );
+    }
+    return `/analytics/${pipelineInfo?.projectId}/app/${appId}/dashboard/${dashboardId}`;
+  };
+
   return (
     <ColumnLayout columns={3} variant="text-grid">
       <SpaceBetween direction="vertical" size="l">
@@ -74,8 +84,8 @@ const Reporting: React.FC<TabContentProps> = (props: TabContentProps) => {
                       <div key={element.appId}>
                         <Link
                           external
-                          href={buildQuickSightDashboardLink(
-                            pipelineInfo.region || '',
+                          href={getReportingDashboardLink(
+                            element.appId,
                             element.dashboardId
                           )}
                         >

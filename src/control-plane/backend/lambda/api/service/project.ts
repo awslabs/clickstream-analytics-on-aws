@@ -67,7 +67,7 @@ export class ProjectServ {
     try {
       const { order, pageNumber, pageSize } = req.query;
       const { projectId, appId } = req.params;
-      let result = await store.listDashboards(projectId, order);
+      let result = await store.listDashboards(projectId, appId, order);
       const presetAppDashboard = await this.getPresetAppDashboard(projectId, appId);
       if (presetAppDashboard) {
         result = [presetAppDashboard, ...result];
