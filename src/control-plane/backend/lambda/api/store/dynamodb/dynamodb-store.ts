@@ -1000,12 +1000,12 @@ export class DynamoDbStore implements ClickStreamStore {
           dependencyFiles: p.dependencyFiles,
           mainFunction: p.mainFunction,
           pluginType: p.pluginType,
-          builtIn: p.builtIn,
-          bindCount: p.bindCount,
-          createAt: p.createAt,
-          updateAt: p.updateAt,
+          builtIn: p.builtIn === 'true',
+          bindCount: Number(p.bindCount),
+          createAt: Number(p.createAt),
+          updateAt: Number(p.updateAt),
           operator: p.operator,
-          deleted: p.deleted,
+          deleted: p.deleted === 'true',
         } as IPlugin);
       }
       if (!isEmpty(pluginType)) {
