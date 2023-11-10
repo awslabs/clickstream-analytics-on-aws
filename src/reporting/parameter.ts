@@ -21,6 +21,7 @@ import {
   DOMAIN_NAME_PATTERN,
   SECURITY_GROUP_PATTERN,
   SUBNETS_PATTERN,
+  QUICKSIGHT_USER_ARN_PATTERN,
 } from '../common/constant';
 
 export function createStackParametersQuickSight(scope: Construct, paramGroups?: any[], paramLabels?: any) {
@@ -72,6 +73,7 @@ export function createStackParametersQuickSight(scope: Construct, paramGroups?: 
   const quickSightOwnerPrincipalParam = new CfnParameter(scope, 'QuickSightOwnerPrincipalParam', {
     description: 'Arn of the QuickSight principal, QuickSight resource will be owned by this principal.',
     type: 'String',
+    allowedPattern: QUICKSIGHT_USER_ARN_PATTERN,
   });
   labels[quickSightOwnerPrincipalParam.logicalId] = {
     default: 'QuickSight Owner Principal Arn',
@@ -80,6 +82,7 @@ export function createStackParametersQuickSight(scope: Construct, paramGroups?: 
   const quickSightPrincipalParam = new CfnParameter(scope, 'QuickSightPrincipalParam', {
     description: 'Arn of the QuickSight principal, dashboard resource will be share to this principal',
     type: 'String',
+    allowedPattern: QUICKSIGHT_USER_ARN_PATTERN,
   });
   labels[quickSightPrincipalParam.logicalId] = {
     default: 'QuickSight Principal Arn',

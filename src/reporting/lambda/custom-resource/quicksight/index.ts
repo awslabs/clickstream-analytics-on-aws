@@ -59,8 +59,8 @@ type ResourceCommonParams = {
   awsAccountId: string;
   databaseName: string;
   schema: string;
-  sharePrincipalArn?: string;
-  ownerPrincipalArn?: string;
+  sharePrincipalArn: string;
+  ownerPrincipalArn: string;
 }
 
 export type MustacheParamType = {
@@ -300,8 +300,8 @@ const updateQuickSightDashboard = async (quickSight: QuickSight,
   accountId: string,
   schema: string,
   dashboardDef: QuickSightDashboardDefProps,
-  ownerPrincipalArn? : string,
-  sharePrincipalArn? : string,
+  ownerPrincipalArn : string,
+  sharePrincipalArn : string,
 )
 : Promise<CreateDashboardCommandOutput|undefined> => {
 

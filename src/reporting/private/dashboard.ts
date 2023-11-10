@@ -84,12 +84,8 @@ export const dataSetReaderPermissionActions = [
 ];
 
 export const dataSetAdminPermissionActions = [
+  ...dataSetReaderPermissionActions,
   'quicksight:UpdateDataSetPermissions',
-  'quicksight:DescribeDataSet',
-  'quicksight:DescribeDataSetPermissions',
-  'quicksight:PassDataSet',
-  'quicksight:DescribeIngestion',
-  'quicksight:ListIngestions',
   'quicksight:UpdateDataSet',
   'quicksight:DeleteDataSet',
   'quicksight:CreateIngestion',
@@ -113,9 +109,7 @@ export const dashboardReaderPermissionActions = [
 ];
 
 export const dashboardAdminPermissionActions = [
-  'quicksight:DescribeDashboard',
-  'quicksight:ListDashboardVersions',
-  'quicksight:QueryDashboard',
+  ...dashboardReaderPermissionActions,
   'quicksight:UpdateDashboard',
   'quicksight:DeleteDashboard',
   'quicksight:UpdateDashboardPermissions',
