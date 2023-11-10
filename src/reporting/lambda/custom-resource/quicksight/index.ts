@@ -26,6 +26,10 @@ import {
   ColumnTag,
   DeleteDashboardCommandOutput,
   GeoSpatialDataRole,
+  DeleteDataSetCommandOutput,
+  UpdateDashboardCommandOutput,
+  DeleteAnalysisCommandOutput,
+  UpdateDataSetCommandOutput,
 } from '@aws-sdk/client-quicksight';
 import { Context, CloudFormationCustomResourceEvent, CloudFormationCustomResourceUpdateEvent, CloudFormationCustomResourceCreateEvent, CloudFormationCustomResourceDeleteEvent, CdkCustomResourceResponse } from 'aws-lambda';
 import Mustache from 'mustache';
@@ -182,9 +186,12 @@ const _onUpdate = async (quickSight: QuickSight, awsAccountId: string, sharePrin
     const dashboardDefProps: QuickSightDashboardDefProps = props.dashboardDefProps;
     logger.info('dashboardDefProps', JSON.stringify(dashboardDefProps));
 
+    const oldDashboardDefProps: QuickSightDashboardDefProps = oldProps.dashboardDefProps;
+    logger.info('oldDashboardDefProps', JSON.stringify(oldDashboardDefProps));
+
     const dashboard = await updateQuickSightDashboard(quickSight, awsAccountId,
       schemaName,
-      dashboardDefProps, ownerPrincipalArn, sharePrincipalArn);
+      dashboardDefProps, oldDashboardDefProps, ownerPrincipalArn, sharePrincipalArn);
 
     logger.info(`updated dashboard: ${dashboard?.DashboardId}`);
     dashboards.push({
@@ -276,7 +283,7 @@ const deleteQuickSightDashboard = async (quickSight: QuickSight,
   accountId: string,
   schema: string,
   dashboardDef: QuickSightDashboardDefProps)
-: Promise<CreateDashboardCommandOutput|undefined> => {
+: Promise<DeleteDashboardCommandOutput|undefined> => {
 
   // Delete Dashboard
   const result = deleteDashboard(quickSight, accountId, dashboardDef.databaseName, schema);
@@ -299,13 +306,15 @@ const updateQuickSightDashboard = async (quickSight: QuickSight,
   accountId: string,
   schema: string,
   dashboardDef: QuickSightDashboardDefProps,
+  oldDashboardDef: QuickSightDashboardDefProps,
   ownerPrincipalArn : string,
   sharePrincipalArn : string,
 )
-: Promise<CreateDashboardCommandOutput|undefined> => {
+: Promise<UpdateDashboardCommandOutput|undefined> => {
 
   const datasetRefs: DataSetReference[] = [];
   const dataSets = dashboardDef.dataSets;
+  const oldDataSets = oldDashboardDef.dataSets;
   const databaseName = dashboardDef.databaseName;
   const commonParams: ResourceCommonParams = {
     awsAccountId: accountId,
@@ -314,14 +323,37 @@ const updateQuickSightDashboard = async (quickSight: QuickSight,
     databaseName,
     schema,
   };
-  for ( const dataSet of dataSets) {
-    const createdDataset = await updateDataSet(quickSight, commonParams, dashboardDef.dataSourceArn, dataSet);
-    logger.info(`data set id: ${createdDataset?.DataSetId}`);
 
+  const oldDataSetTableNames: string[] = [];
+  const dataSetTableNames: string[] = [];
+  for (const dataset of dataSets) {
+    dataSetTableNames.push(dataset.tableName);
+  }
+  for (const dataset of oldDataSets) {
+    oldDataSetTableNames.push(dataset.tableName);
+  }
+
+  const needDeleteDataSets = oldDataSets.filter(item => !dataSetTableNames.includes(item.tableName));
+  const needUpdateDataSetTableNames = dataSetTableNames.filter(item => oldDataSetTableNames.includes(item));
+  for ( const dataSet of dataSets) {
+    let createdDataset = null;
+    if (needUpdateDataSetTableNames.includes(dataSet.tableName)) {
+      createdDataset = await updateDataSet(quickSight, commonParams, dashboardDef.dataSourceArn, dataSet);
+      logger.info(`data set id: ${createdDataset?.DataSetId} updated.`);
+    } else {
+      createdDataset = await createDataSet(quickSight, commonParams, dashboardDef.dataSourceArn, dataSet);
+      logger.info(`data set id: ${createdDataset?.DataSetId} created.`);
+    }
     datasetRefs.push({
       DataSetPlaceholder: dataSet.tableName,
       DataSetArn: createdDataset?.Arn!,
     });
+  }
+
+  //remove unused datasets
+  for (const dataSet of needDeleteDataSets) {
+    const deletedDataset = await deleteDataSet(quickSight, accountId, schema, databaseName, dataSet);
+    logger.info(`data set id: ${deletedDataset?.DataSetId} deleted.`);
   }
 
   const sourceEntity = {
@@ -413,7 +445,7 @@ const createDataSet = async (quickSight: QuickSight, commonParams: ResourceCommo
     const datasetParams = {
       AwsAccountId: commonParams.awsAccountId,
       DataSetId: datasetId,
-      Name: `${props.name}${identifier.tableNameIdentifier}-${identifier.schemaIdentifier}-${identifier.databaseIdentifier}`,
+      Name: `${identifier.tableNameIdentifier}-${identifier.schemaIdentifier}-${identifier.databaseIdentifier}`,
       Permissions: [
         {
           Principal: commonParams.ownerPrincipalArn,
@@ -554,7 +586,7 @@ const deleteDashboard = async (quickSight: QuickSight, awsAccountId: string, dat
 };
 
 const deleteAnalysis = async (quickSight: QuickSight, awsAccountId: string, databaseName: string, schema: string)
-: Promise<CreateAnalysisCommandOutput|undefined> => {
+: Promise<DeleteAnalysisCommandOutput|undefined> => {
 
   let result = undefined;
   const identifier = buildAnalysisId(databaseName, schema);
@@ -585,7 +617,7 @@ const deleteDataSet = async (quickSight: QuickSight, awsAccountId: string,
   schema: string,
   databaseName: string,
   props: DataSetProps)
-: Promise<CreateDataSetCommandOutput|undefined> => {
+: Promise<DeleteDataSetCommandOutput|undefined> => {
 
   let result = undefined;
   const identifier = buildDataSetId(databaseName, schema, props.tableName);
@@ -613,10 +645,9 @@ const updateDataSet = async (quickSight: QuickSight, commonParams: ResourceCommo
   dataSourceArn: string,
   props: DataSetProps,
 )
-: Promise<CreateDataSetCommandOutput|undefined> => {
+: Promise<UpdateDataSetCommandOutput|undefined> => {
 
   try {
-
     const identifier = buildDataSetId(commonParams.databaseName, commonParams.schema, props.tableName);
     const datasetId = identifier.id;
 
@@ -775,7 +806,7 @@ const updateAnalysis = async (quickSight: QuickSight, commonParams: ResourceComm
 
 const updateDashboard = async (quickSight: QuickSight, commonParams: ResourceCommonParams,
   sourceEntity: DashboardSourceEntity, props: QuickSightDashboardDefProps)
-: Promise<CreateDashboardCommandOutput|undefined> => {
+: Promise<UpdateDashboardCommandOutput|undefined> => {
   try {
     const identifier = buildDashBoardId(commonParams.databaseName, commonParams.schema);
     const dashboardId = identifier.id;

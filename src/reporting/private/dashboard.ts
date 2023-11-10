@@ -56,7 +56,6 @@ export interface ColumnGroupsProps {
 };
 
 export interface DataSetProps {
-  name: string;
   tableName: string;
   columns: InputColumn[];
   importMode: DataSetImportMode;

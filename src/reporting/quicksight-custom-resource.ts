@@ -77,7 +77,6 @@ export function createQuicksightCustomResource(
     databaseName: databaseName,
     dataSets: [
       {
-        name: '',
         tableName: CLICKSTREAM_USER_DIM_VIEW_PLACEHOLDER,
         importMode: 'DIRECT_QUERY',
         columns: clickstream_user_dim_view_columns,
@@ -120,7 +119,6 @@ export function createQuicksightCustomResource(
         ],
       },
       {
-        name: '',
         tableName: CLICKSTREAM_RETENTION_VIEW_PLACEHOLDER,
         importMode: 'DIRECT_QUERY',
         customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_RETENTION_VIEW_NAME}`,
@@ -133,7 +131,6 @@ export function createQuicksightCustomResource(
         ],
       },
       {
-        name: '',
         tableName: CLICKSTREAM_SESSION_VIEW_PLACEHOLDER,
         importMode: 'DIRECT_QUERY',
         customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_SESSION_VIEW_NAME}`,
@@ -155,7 +152,6 @@ export function createQuicksightCustomResource(
         ],
       },
       {
-        name: '',
         tableName: CLICKSTREAM_USER_ATTR_VIEW_PLACEHOLDER,
         importMode: 'DIRECT_QUERY',
         customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_USER_ATTR_VIEW_NAME}`,
@@ -175,7 +171,6 @@ export function createQuicksightCustomResource(
         ],
       },
       {
-        name: '',
         tableName: CLICKSTREAM_EVENT_VIEW_PLACEHOLDER,
         importMode: 'DIRECT_QUERY',
         customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_EVENT_VIEW_NAME}`,
@@ -245,7 +240,6 @@ export function createQuicksightCustomResource(
         ],
       },
       {
-        name: '',
         tableName: CLICKSTREAM_DEVICE_VIEW_PLACEHOLDER,
         importMode: 'DIRECT_QUERY',
         customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_DEVICE_VIEW_NAME}`,
@@ -278,7 +272,6 @@ export function createQuicksightCustomResource(
         ],
       },
       {
-        name: '',
         tableName: CLICKSTREAM_EVENT_PARAMETER_VIEW_PLACEHOLDER,
         importMode: 'DIRECT_QUERY',
         customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_EVENT_PARAMETER_VIEW_NAME}`,
@@ -300,7 +293,6 @@ export function createQuicksightCustomResource(
         ],
       },
       {
-        name: '',
         tableName: CLICKSTREAM_LIFECYCLE_DAILY_VIEW_PLACEHOLDER,
         importMode: 'DIRECT_QUERY',
         customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_LIFECYCLE_DAILY_VIEW_NAME}`,
@@ -312,7 +304,6 @@ export function createQuicksightCustomResource(
         ],
       },
       {
-        name: '',
         tableName: CLICKSTREAM_LIFECYCLE_WEEKLY_VIEW_PLACEHOLDER,
         importMode: 'DIRECT_QUERY',
         customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_LIFECYCLE_WEEKLY_VIEW_NAME}`,
