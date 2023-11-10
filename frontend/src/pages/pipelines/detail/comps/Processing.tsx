@@ -18,11 +18,11 @@ import {
   SpaceBetween,
   StatusIndicator,
 } from '@cloudscape-design/components';
-import { getLngFromLocalStorage } from 'pages/analytics/analytics-utils';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { ExecutionType } from 'ts/const';
 import { buildReshiftLink } from 'ts/url';
+import { getLocaleLngDescription } from 'ts/utils';
 
 interface TabContentProps {
   pipelineInfo?: IExtPipeline;
@@ -30,7 +30,6 @@ interface TabContentProps {
 const Processing: React.FC<TabContentProps> = (props: TabContentProps) => {
   const { pipelineInfo } = props;
   const { t } = useTranslation();
-  const localeLng = getLngFromLocalStorage();
 
   const buildRedshiftDisplay = (pipelineInfo?: IExtPipeline) => {
     // in creating process
@@ -174,13 +173,6 @@ const Processing: React.FC<TabContentProps> = (props: TabContentProps) => {
     }
   };
 
-  const renderDescription = (e: IPlugin) => {
-    if (localeLng === 'zh-CN') {
-      return e.description['zh-CN'];
-    }
-    return e.description['en-US'];
-  };
-
   const getEnrichPluginDisplay = () => {
     let renderEnrichPlugins: any = [];
     if (pipelineInfo?.selectedEnrichPlugins) {
@@ -195,7 +187,9 @@ const Processing: React.FC<TabContentProps> = (props: TabContentProps) => {
         return (
           <div key={element.name}>
             {element.name}{' '}
-            <Box variant="small">{renderDescription(element)}</Box>
+            <Box variant="small">
+              {getLocaleLngDescription(element.description)}
+            </Box>
           </div>
         );
       });
@@ -220,7 +214,9 @@ const Processing: React.FC<TabContentProps> = (props: TabContentProps) => {
         return (
           <div key={element.name}>
             {element.name}{' '}
-            <Box variant="small">{renderDescription(element)}</Box>
+            <Box variant="small">
+              {getLocaleLngDescription(element.description)}
+            </Box>
           </div>
         );
       });
