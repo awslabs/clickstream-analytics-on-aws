@@ -117,10 +117,10 @@ describe('DataReportingQuickSightStack parameter test', () => {
     const regex2 = new RegExp(`${pattern2}`);
 
     const validValues = [
-      'arn:aws:quicksight:us-east-1:222222222211:user/default/clickstream',
-      'arn:aws:quicksight:us-east-1:222222222211:user/default/Admin/testuser',
-      'arn:aws:quicksight:us-east-1:222222222211:user/default/Admin/testuser@example.com',
-      'arn:aws-cn:quicksight:cn-north-1:222222222211:user/namespace1/testuser@example.com',
+      'arn:aws:quicksight:us-east-1:111111111111:user/default/clickstream',
+      'arn:aws:quicksight:us-east-1:111111111111:user/default/Admin/testuser',
+      'arn:aws:quicksight:us-east-1:111111111111:user/default/Admin/testuser@example.com',
+      'arn:aws-cn:quicksight:cn-north-1:111111111111:user/namespace1/testuser@example.com',
     ];
 
     for (const v of validValues) {
@@ -131,8 +131,8 @@ describe('DataReportingQuickSightStack parameter test', () => {
     const invalidValues = [
       'testArn',
       'arn:aws:quicksight:us-east-1:2211:user/default/clickstream',
-      'arn:aws:quicksight:us-east-1:222222222211:user/123/Admin/testuser',
-      'arn:aws:quicksight:us-east-1:222222222211:user/default/test;123',
+      'arn:aws:quicksight:us-east-1:111111111111:user/123/Admin/testuser',
+      'arn:aws:quicksight:us-east-1:111111111111:user/default/test;123',
     ];
     for (const v of invalidValues) {
       expect(v).not.toMatch(regex);
