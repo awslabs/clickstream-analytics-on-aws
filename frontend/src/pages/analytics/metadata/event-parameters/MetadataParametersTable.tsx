@@ -16,6 +16,7 @@ import {
   getMetadataParametersList,
   updateMetadataDisplay,
 } from 'apis/analytics';
+import LabelTag from 'pages/common/LabelTag';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
@@ -80,6 +81,10 @@ const MetadataParametersTable: React.FC<MetadataParametersTableProps> = (
     return <MetadataPlatformFC platform={e.platform} />;
   };
 
+  const renderType = (e: IMetadataEventParameter) => {
+    return <LabelTag type={e.parameterType}>{e.parameterType}</LabelTag>;
+  };
+
   const COLUMN_DEFINITIONS = [
     {
       id: 'name',
@@ -135,9 +140,7 @@ const MetadataParametersTable: React.FC<MetadataParametersTableProps> = (
     {
       id: 'parameterType',
       header: t('analytics:metadata.eventParameter.tableColumnParameterType'),
-      cell: (e: IMetadataEventParameter) => {
-        return e.parameterType;
-      },
+      cell: (e: IMetadataEventParameter) => renderType(e),
     },
     {
       id: 'valueType',
