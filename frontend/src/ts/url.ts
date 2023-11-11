@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { ZH_LANGUAGE_LIST } from './const';
+import { PROJECT_CONFIG_JSON, ZH_LANGUAGE_LIST } from './const';
 
 const CONSOLE_CHINA_DOMAIN = 'console.amazonaws.cn';
 const CONSOLE_GLOABL_DOMAIN = 'console.aws.amazon.com';
@@ -27,7 +27,7 @@ export const PIPELINE_SINK_CONNECTOR_GUIDE =
 export const SOLUTION_DOCUMENTS_DOMAIN_EN =
   'https://docs.aws.amazon.com/solutions/latest/clickstream-analytics-on-aws';
 export const SOLUTION_DOCUMENTS_DOMAIN_CN =
-  'https://awslabs.github.io/clickstream-analytics-on-aws/zh/1.1.x';
+  'https://awslabs.github.io/clickstream-analytics-on-aws/zh';
 
 export const PIPELINE_ACCESS_LOG_PERMISSION_LINK_CN =
   '/pipeline-mgmt/ingestion/configure-ingestion-endpoint/';
@@ -62,13 +62,20 @@ export const GETTING_STARTED_LINK_EN = '/getting-started.html';
 export const SUBMMIT_ISSUE_LINK =
   'https://github.com/awslabs/clickstream-analytics-on-aws/issues';
 
+export const getSolutionVersion = () => {
+  const configJSONObj: ConfigType = JSON.parse(
+    localStorage.getItem(PROJECT_CONFIG_JSON) || '{}'
+  );
+  return configJSONObj?.solution_version ?? 'latest';
+};
+
 export const buildDocumentLink = (
   lang: string,
   enUrl?: string,
   cnUrl?: string
 ) => {
   if (ZH_LANGUAGE_LIST.includes(lang)) {
-    return SOLUTION_DOCUMENTS_DOMAIN_CN + (cnUrl ?? '');
+    return `${SOLUTION_DOCUMENTS_DOMAIN_CN}/${getSolutionVersion()}${cnUrl}`;
   }
   return SOLUTION_DOCUMENTS_DOMAIN_EN + (enUrl ?? '');
 };
@@ -178,9 +185,9 @@ export const buildMSKLink = (region: string, arn: string) => {
 };
 
 // Document link
-export const getDocumentList = (lang: string) => {
+export const getDocumentLink = (lang: string) => {
   if (ZH_LANGUAGE_LIST.includes(lang)) {
-    return `${SOLUTION_DOCUMENTS_DOMAIN_CN}`;
+    return `${SOLUTION_DOCUMENTS_DOMAIN_CN}/${getSolutionVersion()}`;
   }
   return `${SOLUTION_DOCUMENTS_DOMAIN_EN}/solution-overview.html`;
 };
