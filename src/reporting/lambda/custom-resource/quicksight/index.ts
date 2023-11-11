@@ -335,14 +335,17 @@ const updateQuickSightDashboard = async (quickSight: QuickSight,
 
   const needDeleteDataSets = oldDataSets.filter(item => !dataSetTableNames.includes(item.tableName));
   const needUpdateDataSetTableNames = dataSetTableNames.filter(item => oldDataSetTableNames.includes(item));
+
+  logger.info(`needDeleteDataSets: ${JSON.stringify(needDeleteDataSets)}`);
+  logger.info(`needUpdateDataSetTableNames: ${needUpdateDataSetTableNames}`);
   for ( const dataSet of dataSets) {
-    let createdDataset = null;
+    let createdDataset;
     if (needUpdateDataSetTableNames.includes(dataSet.tableName)) {
+      logger.info(`update data set : ${dataSet.tableName}`);
       createdDataset = await updateDataSet(quickSight, commonParams, dashboardDef.dataSourceArn, dataSet);
-      logger.info(`data set id: ${createdDataset?.DataSetId} updated.`);
     } else {
+      logger.info(`create data set : ${dataSet.tableName}`);
       createdDataset = await createDataSet(quickSight, commonParams, dashboardDef.dataSourceArn, dataSet);
-      logger.info(`data set id: ${createdDataset?.DataSetId} created.`);
     }
     datasetRefs.push({
       DataSetPlaceholder: dataSet.tableName,
@@ -352,8 +355,8 @@ const updateQuickSightDashboard = async (quickSight: QuickSight,
 
   //remove unused datasets
   for (const dataSet of needDeleteDataSets) {
-    const deletedDataset = await deleteDataSet(quickSight, accountId, schema, databaseName, dataSet);
-    logger.info(`data set id: ${deletedDataset?.DataSetId} deleted.`);
+    logger.info(`delete data set : ${dataSet.tableName}`);
+    await deleteDataSet(quickSight, accountId, schema, databaseName, dataSet);
   }
 
   const sourceEntity = {
@@ -712,7 +715,7 @@ const updateDataSet = async (quickSight: QuickSight, commonParams: ResourceCommo
     }
 
     logger.info('start to update dataset');
-    let dataset: CreateDataSetCommandOutput | undefined = undefined;
+    let dataset: UpdateDataSetCommandOutput | undefined = undefined;
     dataset = await quickSight.updateDataSet({
       AwsAccountId: commonParams.awsAccountId,
       DataSetId: datasetId,
