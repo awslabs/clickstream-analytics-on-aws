@@ -27,7 +27,7 @@ export const PIPELINE_SINK_CONNECTOR_GUIDE =
 export const SOLUTION_DOCUMENTS_DOMAIN_EN =
   'https://docs.aws.amazon.com/solutions/latest/clickstream-analytics-on-aws';
 export const SOLUTION_DOCUMENTS_DOMAIN_CN =
-  'https://awslabs.github.io/clickstream-analytics-on-aws/zh/latest';
+  'https://awslabs.github.io/clickstream-analytics-on-aws/zh/1.1.x';
 
 export const PIPELINE_ACCESS_LOG_PERMISSION_LINK_CN =
   '/pipeline-mgmt/ingestion/configure-ingestion-endpoint/';

@@ -16,6 +16,7 @@ import { StateContext } from 'context/StateContext';
 import { HelpPanelType } from 'context/reducer';
 import React, { ReactElement, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
+import { buildDocumentLink } from 'ts/url';
 import { defaultStr } from 'ts/utils';
 import { ExternalLinkGroup } from '../common/ExternalLinkGroup';
 
@@ -31,7 +32,7 @@ interface HelpInfoProps {
 }
 
 const HelpInfo: React.FC = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const state = useContext(StateContext);
 
   const helpPanelMappings: any = {
@@ -65,7 +66,11 @@ const HelpInfo: React.FC = () => {
     dataItem.linkItems = [
       {
         text: t(`help:${currentHelpPanelKey}.links.docLinkName`),
-        href: t(`help:${currentHelpPanelKey}.links.docLink`),
+        href: buildDocumentLink(
+          i18n.language,
+          defaultStr(t(`help:${currentHelpPanelKey}.links.docLink`)),
+          defaultStr(t(`help:${currentHelpPanelKey}.links.docLink`))
+        ),
       },
     ];
   }
