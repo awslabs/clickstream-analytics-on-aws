@@ -77,9 +77,13 @@ function Content() {
   >([]);
 
   const [s3Client, setS3Client] = useState<any>();
+  const [curDescription, setCurDescription] = useState<string>('');
   const [curPlugin, setCurPlugin] = useState<IPlugin>({
     name: '',
-    description: '',
+    description: {
+      'en-US': '',
+      'zh-CN': '',
+    },
     pluginType: '',
     mainFunction: '',
     jarFile: '',
@@ -388,7 +392,7 @@ function Content() {
               >
                 <Textarea
                   placeholder={t('plugin:create.pluginDesc') || ''}
-                  value={curPlugin.description}
+                  value={curDescription}
                   onChange={(e) => {
                     if (
                       new RegExp(XSS_PATTERN).test(e.detail.value) ||
@@ -397,9 +401,13 @@ function Content() {
                       return false;
                     }
                     setCurPlugin((prev) => {
+                      setCurDescription(e.detail.value);
                       return {
                         ...prev,
-                        description: e.detail.value,
+                        description: {
+                          'en-US': e.detail.value,
+                          'zh-CN': e.detail.value,
+                        },
                       };
                     });
                   }}

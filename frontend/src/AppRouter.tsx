@@ -222,7 +222,11 @@ const AppRouter: React.FC<AppRouterProps> = (props: AppRouterProps) => {
               <RoleRoute
                 layout="none"
                 auth={auth}
-                roles={[IUserRole.ADMIN, IUserRole.ANALYST]}
+                roles={[
+                  IUserRole.ADMIN,
+                  IUserRole.ANALYST,
+                  IUserRole.ANALYST_READER,
+                ]}
               >
                 <AnalyticsHome auth={auth} />
               </RoleRoute>
@@ -234,7 +238,11 @@ const AppRouter: React.FC<AppRouterProps> = (props: AppRouterProps) => {
               <RoleRoute
                 layout="analytics"
                 auth={auth}
-                roles={[IUserRole.ADMIN, IUserRole.ANALYST]}
+                roles={[
+                  IUserRole.ADMIN,
+                  IUserRole.ANALYST,
+                  IUserRole.ANALYST_READER,
+                ]}
               >
                 <AnalyticsDataManagement />
               </RoleRoute>
@@ -246,7 +254,11 @@ const AppRouter: React.FC<AppRouterProps> = (props: AppRouterProps) => {
               <RoleRoute
                 layout="analytics"
                 auth={auth}
-                roles={[IUserRole.ADMIN, IUserRole.ANALYST]}
+                roles={[
+                  IUserRole.ADMIN,
+                  IUserRole.ANALYST,
+                  IUserRole.ANALYST_READER,
+                ]}
               >
                 <AnalyticsRealtime />
               </RoleRoute>
@@ -258,7 +270,11 @@ const AppRouter: React.FC<AppRouterProps> = (props: AppRouterProps) => {
               <RoleRoute
                 layout="analytics"
                 auth={auth}
-                roles={[IUserRole.ADMIN, IUserRole.ANALYST]}
+                roles={[
+                  IUserRole.ADMIN,
+                  IUserRole.ANALYST,
+                  IUserRole.ANALYST_READER,
+                ]}
               >
                 <AnalyticsExplore />
               </RoleRoute>
@@ -282,7 +298,11 @@ const AppRouter: React.FC<AppRouterProps> = (props: AppRouterProps) => {
               <RoleRoute
                 layout="analytics"
                 auth={auth}
-                roles={[IUserRole.ADMIN, IUserRole.ANALYST]}
+                roles={[
+                  IUserRole.ADMIN,
+                  IUserRole.ANALYST,
+                  IUserRole.ANALYST_READER,
+                ]}
               >
                 <AnalyticsDashboard />
               </RoleRoute>
@@ -294,7 +314,11 @@ const AppRouter: React.FC<AppRouterProps> = (props: AppRouterProps) => {
               <RoleRoute
                 layout="analytics"
                 auth={auth}
-                roles={[IUserRole.ADMIN, IUserRole.ANALYST]}
+                roles={[
+                  IUserRole.ADMIN,
+                  IUserRole.ANALYST,
+                  IUserRole.ANALYST_READER,
+                ]}
               >
                 <AnalyticsDashboardDetail />
               </RoleRoute>
@@ -306,7 +330,11 @@ const AppRouter: React.FC<AppRouterProps> = (props: AppRouterProps) => {
               <RoleRoute
                 layout="none"
                 auth={auth}
-                roles={[IUserRole.ADMIN, IUserRole.ANALYST]}
+                roles={[
+                  IUserRole.ADMIN,
+                  IUserRole.ANALYST,
+                  IUserRole.ANALYST_READER,
+                ]}
               >
                 <AnalyticsDashboardFullWindow />
               </RoleRoute>

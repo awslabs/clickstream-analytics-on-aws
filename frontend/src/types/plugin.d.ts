@@ -16,7 +16,7 @@ declare global {
   interface IPlugin {
     id?: string;
     name: string;
-    description: string;
+    description: { [key: string]: string };
     pluginType: string;
     mainFunction: string;
     jarFile: string;

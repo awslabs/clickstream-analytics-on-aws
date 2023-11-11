@@ -37,6 +37,7 @@ const SettingUser: React.FC<SettingUserProps> = (props: SettingUserProps) => {
     roleJsonPath: '',
     operatorRoleNames: '',
     analystRoleNames: '',
+    analystReaderRoleNames: '',
   } as IUserSettings;
   const [curUserSetting, setCurUserSetting] =
     useState<IUserSettings>(defaultUserSetting);
@@ -148,6 +149,22 @@ const SettingUser: React.FC<SettingUserProps> = (props: SettingUserProps) => {
               return {
                 ...prev,
                 analystRoleNames: e.detail.value,
+              };
+            });
+          }}
+        />
+      </FormField>
+      <FormField
+        label={t('user:labels.settingUserAnalystReaderRoleNames')}
+        description={t('user:labels.settingUserAnalystReaderRoleNamesDesc')}
+      >
+        <Input
+          value={defaultStr(curUserSetting.analystReaderRoleNames)}
+          onChange={(e) => {
+            setCurUserSetting((prev) => {
+              return {
+                ...prev,
+                analystReaderRoleNames: e.detail.value,
               };
             });
           }}

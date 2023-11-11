@@ -990,12 +990,23 @@ export class DynamoDbStore implements ClickStreamStore {
     if (dic) {
       let builtInPlugins: IPlugin[] = [];
       for (let p of dic.data) {
-        p.createAt = +p.createAt;
-        p.updateAt = +p.updateAt;
-        p.bindCount = +p.bindCount;
-        p.builtIn = p.builtIn === 'true';
-        p.deleted = p.deleted === 'true';
-        builtInPlugins.push(p as IPlugin);
+        builtInPlugins.push({
+          id: p.id,
+          type: p.type,
+          prefix: p.prefix,
+          name: p.name,
+          description: p.description,
+          jarFile: p.jarFile,
+          dependencyFiles: p.dependencyFiles,
+          mainFunction: p.mainFunction,
+          pluginType: p.pluginType,
+          builtIn: p.builtIn === 'true',
+          bindCount: Number(p.bindCount),
+          createAt: Number(p.createAt),
+          updateAt: Number(p.updateAt),
+          operator: p.operator,
+          deleted: p.deleted === 'true',
+        } as IPlugin);
       }
       if (!isEmpty(pluginType)) {
         builtInPlugins = builtInPlugins.filter(p => p.pluginType === pluginType);
@@ -1184,11 +1195,12 @@ export class DynamoDbStore implements ClickStreamStore {
         type: 'USER_SETTINGS',
       },
       // Define expressions for the new or updated attributes
-      UpdateExpression: 'SET roleJsonPath= :roleJsonPath, operatorRoleNames= :operatorRoleNames, analystRoleNames= :analystRoleNames',
+      UpdateExpression: 'SET roleJsonPath= :roleJsonPath, operatorRoleNames= :operatorRoleNames, analystRoleNames= :analystRoleNames, analystReaderRoleNames= :analystReaderRoleNames',
       ExpressionAttributeValues: {
         ':roleJsonPath': userSettings.roleJsonPath,
         ':operatorRoleNames': userSettings.operatorRoleNames,
         ':analystRoleNames': userSettings.analystRoleNames,
+        ':analystReaderRoleNames': userSettings.analystReaderRoleNames,
       },
       ReturnValues: 'ALL_NEW',
     });

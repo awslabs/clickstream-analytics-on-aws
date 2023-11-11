@@ -21,7 +21,7 @@ import {
 import { mockClient } from 'aws-sdk-client-mock';
 import request from 'supertest';
 import { MOCK_TOKEN, MOCK_USER_ID, tokenMock } from './ddb-mock';
-import { DEFAULT_ANALYST_ROLE_NAMES, DEFAULT_OPERATOR_ROLE_NAMES, DEFAULT_ROLE_JSON_PATH, amznRequestContextHeader, clickStreamTableName } from '../../common/constants';
+import { DEFAULT_ANALYST_READER_ROLE_NAMES, DEFAULT_ANALYST_ROLE_NAMES, DEFAULT_OPERATOR_ROLE_NAMES, DEFAULT_ROLE_JSON_PATH, amznRequestContextHeader, clickStreamTableName } from '../../common/constants';
 import { DEFAULT_SOLUTION_OPERATOR } from '../../common/constants-ln';
 import { IUserRole } from '../../common/types';
 import { getRoleFromToken } from '../../common/utils';
@@ -218,10 +218,12 @@ describe('User test', () => {
         roleJsonPath: DEFAULT_ROLE_JSON_PATH,
         operatorRoleNames: DEFAULT_OPERATOR_ROLE_NAMES,
         analystRoleNames: DEFAULT_ANALYST_ROLE_NAMES,
+        analystReaderRoleNames: DEFAULT_ANALYST_READER_ROLE_NAMES,
       },
     });
     const operator = ['ClickstreamOperator'];
     const analyst = ['ClickstreamAnalyst'];
+    const analystReader = ['ClickstreamAnalystReader'];
     const admin = ['ClickstreamOperator', 'ClickstreamAnalyst'];
     const cognitoDecodedToken = {
       header: { kid: 'dTNaMHJMl6wOxsfattN5pTBbEggNA93P4X5Umjmr0mk=', alg: 'RS256' },
@@ -256,6 +258,13 @@ describe('User test', () => {
         'cognito:groups': analyst,
       },
     };
+    const cognitoDecodedTokenAnalystReader = {
+      ...cognitoDecodedToken,
+      payload: {
+        ...cognitoDecodedToken.payload,
+        'cognito:groups': analystReader,
+      },
+    };
     const cognitoDecodedTokenAdmin = {
       ...cognitoDecodedToken,
       payload: {
@@ -266,6 +275,7 @@ describe('User test', () => {
     expect(await getRoleFromToken(cognitoDecodedToken)).toEqual(IUserRole.NO_IDENTITY);
     expect(await getRoleFromToken(cognitoDecodedTokenOperator)).toEqual(IUserRole.OPERATOR);
     expect(await getRoleFromToken(cognitoDecodedTokenAnalyst)).toEqual(IUserRole.ANALYST);
+    expect(await getRoleFromToken(cognitoDecodedTokenAnalystReader)).toEqual(IUserRole.ANALYST_READER);
     expect(await getRoleFromToken(cognitoDecodedTokenAdmin)).toEqual(IUserRole.ADMIN);
   });
 
@@ -283,6 +293,7 @@ describe('User test', () => {
         roleJsonPath: '$.payload.any_keys.roles',
         operatorRoleNames: DEFAULT_OPERATOR_ROLE_NAMES,
         analystRoleNames: DEFAULT_ANALYST_ROLE_NAMES,
+        analystReaderRoleNames: DEFAULT_ANALYST_READER_ROLE_NAMES,
       },
     });
     const operator = ['ClickstreamOperator'];
@@ -334,6 +345,7 @@ describe('User test', () => {
         roleJsonPath: '$.payload.any_keys.roles',
         operatorRoleNames: `${DEFAULT_OPERATOR_ROLE_NAMES} , Operator1 , Operator2 `,
         analystRoleNames: `${DEFAULT_ANALYST_ROLE_NAMES} , Analyst1 , Analyst2 `,
+        analystReaderRoleNames: `${DEFAULT_ANALYST_READER_ROLE_NAMES} , AnalystReader1 , AnalystReader2 `,
       },
     });
     const decodedToken = {
@@ -390,6 +402,17 @@ describe('User test', () => {
       },
     };
     expect(await getRoleFromToken(decodedTokenAnalyst)).toEqual(IUserRole.ANALYST);
+    const analystReader = ['AnalystReader2', 'others'];
+    const decodedTokenAnalystReader = {
+      ...decodedToken,
+      payload: {
+        ...decodedToken.payload,
+        any_keys: {
+          roles: analystReader,
+        },
+      },
+    };
+    expect(await getRoleFromToken(decodedTokenAnalystReader)).toEqual(IUserRole.ANALYST_READER);
     const admin = ['Analyst2', 'Operator2', 'others'];
     const decodedTokenAdmin = {
       ...decodedToken,
@@ -414,6 +437,7 @@ describe('User test', () => {
         data: {
           analystRoleNames: DEFAULT_ANALYST_ROLE_NAMES,
           operatorRoleNames: DEFAULT_OPERATOR_ROLE_NAMES,
+          analystReaderRoleNames: DEFAULT_ANALYST_READER_ROLE_NAMES,
           roleJsonPath: '$.payload.cognito:groups',
         },
         message: '',
@@ -437,6 +461,7 @@ describe('User test', () => {
         roleJsonPath: '$.payload.any_keys.roles',
         operatorRoleNames: `${DEFAULT_OPERATOR_ROLE_NAMES} , Operator1 , Operator2 `,
         analystRoleNames: `${DEFAULT_ANALYST_ROLE_NAMES} , Analyst1 , Analyst2 `,
+        analystReaderRoleNames: `${DEFAULT_ANALYST_READER_ROLE_NAMES} , AnalystReader1 , AnalystReader2 `,
       },
     });
     const res = await request(app)
@@ -451,6 +476,7 @@ describe('User test', () => {
           roleJsonPath: '$.payload.any_keys.roles',
           operatorRoleNames: `${DEFAULT_OPERATOR_ROLE_NAMES} , Operator1 , Operator2 `,
           analystRoleNames: `${DEFAULT_ANALYST_ROLE_NAMES} , Analyst1 , Analyst2 `,
+          analystReaderRoleNames: `${DEFAULT_ANALYST_READER_ROLE_NAMES} , AnalystReader1 , AnalystReader2 `,
         },
         message: '',
         success: true,
@@ -471,6 +497,7 @@ describe('User test', () => {
         roleJsonPath: '$.payload.any_keys.roles',
         operatorRoleNames: `${DEFAULT_OPERATOR_ROLE_NAMES} , Operator1 , Operator2 `,
         analystRoleNames: `${DEFAULT_ANALYST_ROLE_NAMES} , Analyst1 , Analyst2 `,
+        analystReaderRoleNames: `${DEFAULT_ANALYST_READER_ROLE_NAMES} , AnalystReader1 , AnalystReader2 `,
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);

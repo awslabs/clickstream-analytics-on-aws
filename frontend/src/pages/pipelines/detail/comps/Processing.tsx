@@ -22,6 +22,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { ExecutionType } from 'ts/const';
 import { buildReshiftLink } from 'ts/url';
+import { getLocaleLngDescription } from 'ts/utils';
 
 interface TabContentProps {
   pipelineInfo?: IExtPipeline;
@@ -185,7 +186,10 @@ const Processing: React.FC<TabContentProps> = (props: TabContentProps) => {
       const returnElement = renderEnrichPlugins.map((element: IPlugin) => {
         return (
           <div key={element.name}>
-            {element.name} <Box variant="small">{element.description}</Box>
+            {element.name}{' '}
+            <Box variant="small">
+              {getLocaleLngDescription(element.description)}
+            </Box>
           </div>
         );
       });
@@ -209,7 +213,10 @@ const Processing: React.FC<TabContentProps> = (props: TabContentProps) => {
       const returnElement = renderTransformPlugins.map((element: IPlugin) => {
         return (
           <div key={element.name}>
-            {element.name} <Box variant="small">{element.description}</Box>
+            {element.name}{' '}
+            <Box variant="small">
+              {getLocaleLngDescription(element.description)}
+            </Box>
           </div>
         );
       });

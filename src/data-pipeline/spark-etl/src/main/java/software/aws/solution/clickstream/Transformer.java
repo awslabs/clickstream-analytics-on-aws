@@ -35,35 +35,31 @@ import static org.apache.spark.sql.functions.expr;
 import static org.apache.spark.sql.functions.get_json_object;
 
 import static software.aws.solution.clickstream.ContextUtil.PROJECT_ID_PROP;
+import static software.aws.solution.clickstream.DatasetUtil.ATTRIBUTES;
+import static software.aws.solution.clickstream.DatasetUtil.DATA;
+import static software.aws.solution.clickstream.DatasetUtil.DOUBLE_VALUE;
+import static software.aws.solution.clickstream.DatasetUtil.FLOAT_VALUE;
+import static software.aws.solution.clickstream.DatasetUtil.GEO_FOR_ENRICH;
+import static software.aws.solution.clickstream.DatasetUtil.INT_VALUE;
+import static software.aws.solution.clickstream.DatasetUtil.KEY;
+import static software.aws.solution.clickstream.DatasetUtil.LOCALE;
+import static software.aws.solution.clickstream.DatasetUtil.PLATFORM;
+import static software.aws.solution.clickstream.DatasetUtil.STRING_VALUE;
+import static software.aws.solution.clickstream.DatasetUtil.TIMESTAMP;
+import static software.aws.solution.clickstream.DatasetUtil.UA_BROWSER;
+import static software.aws.solution.clickstream.DatasetUtil.UA_BROWSER_VERSION;
+import static software.aws.solution.clickstream.DatasetUtil.UA_DEVICE;
+import static software.aws.solution.clickstream.DatasetUtil.UA_DEVICE_CATEGORY;
+import static software.aws.solution.clickstream.DatasetUtil.UA_OS;
+import static software.aws.solution.clickstream.DatasetUtil.UA_OS_VERSION;
+import static software.aws.solution.clickstream.DatasetUtil.VALUE;
 import static software.aws.solution.clickstream.ETLRunner.DEBUG_LOCAL_PATH;
 import static software.aws.solution.clickstream.ETLRunner.getDistFields;
 
 @Slf4j
 public final class Transformer {
 
-    public static final String GEO_FOR_ENRICH = "geo_for_enrich";
-    public static final String TIMESTAMP = "timestamp";
-    public static final String PLATFORM = "platform";
-    public static final String LOCALE = "locale";
-    public static final String ATTRIBUTES = "attributes";
-    public static final String DOUBLE_VALUE = "double_value";
-    public static final String FLOAT_VALUE = "float_value";
-    public static final String INT_VALUE = "int_value";
-    public static final String STRING_VALUE = "string_value";
 
-    public static final String UA_BROWSER = "ua_browser";
-    public static final String UA_BROWSER_VERSION = "ua_browser_version";
-    public static final String UA_OS = "ua_os";
-    public static final String UA_OS_VERSION = "ua_os_version";
-    public static final String UA_DEVICE = "ua_device";
-    public static final String UA_DEVICE_CATEGORY = "ua_device_category";
-    public static final String UA_ENRICH = "ua_enrich";
-
-    public static final String CORRUPT_RECORD = "_corrupt_record";
-    public static final String JOB_NAME_COL = "jobName";
-    public static final String DATA = "data";
-    public static final String KEY = "key";
-    public static final String VALUE = "value";
     public static final String DATA_SCHEMA_FILE_PATH = System.getProperty("data.schema.file.path", "/data_schema.json");
 
     private final Cleaner cleaner = new Cleaner();

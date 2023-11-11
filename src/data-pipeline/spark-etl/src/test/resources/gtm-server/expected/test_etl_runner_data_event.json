@@ -1,0 +1,40 @@
+{
+  "app_info" : {
+    "app_id" : "testAllAppId1",
+    "id" : "G-000000003",
+    "sdk_name" : "GTM",
+    "version" : "45je38n0"
+  },
+  "device" : {
+    "operating_system" : "\"macOS\"",
+    "operating_system_version" : null,
+    "screen_height" : 1440,
+    "screen_width" : 3440,
+    "system_language" : "en-us",
+    "ua_browser" : "Edge",
+    "ua_browser_version" : "116.116.1938",
+    "ua_device" : "Mac",
+    "ua_os" : "Mac OS X",
+    "ua_os_version" : "10.10.7",
+    "vendor_id" : "rzKifeYdYvmoWzeYcdcv9CyGY9NAPpL4vm7QxoxTPnM=.1690769179"
+  },
+  "event_date" : "2023-08-29",
+  "event_id" : "43cc3b89d7dfccbc2c906eb125ea25db-0-1693281535-11-807802863.1690769179",
+  "event_name" : "_profile_set",
+  "event_timestamp" : 1693281865635,
+  "geo" : {
+    "city" : "Ashburn",
+    "continent" : "North America",
+    "country" : "United States"
+  },
+  "ingest_timestamp" : 1693281865000,
+  "items" : [ ],
+  "platform" : "\"macOS\"",
+  "project_id" : "test_project_id_01",
+  "user_id" : "0eb41e46-2373-4883-8daf-e1975ccb3821",
+  "user_pseudo_id" : "rzKifeYdYvmoWzeYcdcv9CyGY9NAPpL4vm7QxoxTPnM=.1690769179",
+  "partition_app" : "testAllAppId1",
+  "partition_year" : 2023,
+  "partition_month" : 8,
+  "partition_day" : 29
+}

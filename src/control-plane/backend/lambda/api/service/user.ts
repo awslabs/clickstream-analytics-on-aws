@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { DEFAULT_ANALYST_ROLE_NAMES, DEFAULT_OPERATOR_ROLE_NAMES, DEFAULT_ROLE_JSON_PATH } from '../common/constants';
+import { DEFAULT_ANALYST_READER_ROLE_NAMES, DEFAULT_ANALYST_ROLE_NAMES, DEFAULT_OPERATOR_ROLE_NAMES, DEFAULT_ROLE_JSON_PATH } from '../common/constants';
 import { ApiFail, ApiSuccess } from '../common/types';
 import { getRoleFromToken, getTokenFromRequest } from '../common/utils';
 import { IUser, IUserSettings } from '../model/user';
@@ -107,6 +107,7 @@ export class UserService {
         roleJsonPath: DEFAULT_ROLE_JSON_PATH,
         operatorRoleNames: DEFAULT_OPERATOR_ROLE_NAMES,
         analystRoleNames: DEFAULT_ANALYST_ROLE_NAMES,
+        analystReaderRoleNames: DEFAULT_ANALYST_READER_ROLE_NAMES,
       } as IUserSettings;
       return defaultSettings;
     }

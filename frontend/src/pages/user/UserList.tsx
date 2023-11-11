@@ -46,6 +46,10 @@ const UserList: React.FC = () => {
     },
     { value: IUserRole.ANALYST, label: defaultStr(t('user:options.analyst')) },
     {
+      value: IUserRole.ANALYST_READER,
+      label: defaultStr(t('user:options.analystReader')),
+    },
+    {
       value: IUserRole.NO_IDENTITY,
       label: defaultStr(t('user:options.noIdentity')),
     },
@@ -59,6 +63,8 @@ const UserList: React.FC = () => {
         return t('user:options.operator');
       case IUserRole.ANALYST:
         return t('user:options.analyst');
+      case IUserRole.ANALYST_READER:
+        return t('user:options.analystReader');
       default:
         return t('user:options.noIdentity');
     }

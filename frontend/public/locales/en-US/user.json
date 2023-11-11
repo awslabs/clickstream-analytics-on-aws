@@ -22,14 +22,17 @@
     "settingUserRoleJsonPath": "User Role Json Path",
     "settingUserRoleJsonPathDesc": "Obtain user role or group information from id_token, for example: $.realm_access.roles",
     "settingUserOperatorRoleNames": "Operator Role Names",
-    "settingUserOperatorRoleNamesDesc": "The roles in OIDC are mapped to operators in Click stream, with multiple role names separated by commas, for example: operator,others",
+    "settingUserOperatorRoleNamesDesc": "The roles in OIDC are mapped to operators in Clickstream, with multiple role names separated by commas, for example: operator,others",
     "settingUserAnalystRoleNames": "Analyst Role Names",
-    "settingUserAnalystRoleNamesDesc": "The roles in OIDC are mapped to analyst in Click stream, with multiple role names separated by commas, for example: analyst,others"
+    "settingUserAnalystRoleNamesDesc": "The roles in OIDC are mapped to analyst in Clickstream, with multiple role names separated by commas, for example: analyst,others",
+    "settingUserAnalystReaderRoleNames": "Analyst Reader Role Names",
+    "settingUserAnalystReaderRoleNamesDesc": "The roles in OIDC are mapped to analyst reader in Clickstream, with multiple role names separated by commas, for example: analystReader,others"
   },
   "options": {
     "admin": "Administrator",
     "operator": "Operator",
     "analyst": "Analyst",
+    "analystReader": "AnalystReader",
     "noIdentity": "NoIdentity"
   },
   "valid": {

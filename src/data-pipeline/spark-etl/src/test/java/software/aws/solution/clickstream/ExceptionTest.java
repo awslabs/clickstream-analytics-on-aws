@@ -42,4 +42,15 @@ public class ExceptionTest {
         }
         Assertions.assertNotNull(ee);
     }
+
+    @Test
+    public void testExecuteTransformerExceptionWithStringMessage() {
+        Exception ee = null;
+        try {
+            throw new ExecuteTransformerException("error");
+        } catch (RuntimeException e) {
+            ee = e;
+        }
+        Assertions.assertNotNull(ee);
+    }
 }

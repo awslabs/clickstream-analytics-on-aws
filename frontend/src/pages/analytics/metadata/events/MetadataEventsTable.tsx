@@ -13,13 +13,14 @@
 
 import { Input } from '@cloudscape-design/components';
 import { getMetadataEventsList, updateMetadataDisplay } from 'apis/analytics';
+import { UserContext } from 'context/UserContext';
 import { HelpPanelType } from 'context/reducer';
-import React from 'react';
+import React, { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { EVENT_DISPLAY_PREFIX } from 'ts/const';
+import { EVENT_DISPLAY_PREFIX, IUserRole } from 'ts/const';
 import { MetadataPlatform, MetadataSource } from 'ts/explore-types';
-import { defaultStr } from 'ts/utils';
+import { defaultStr, getUserInfoFromLocalStorage } from 'ts/utils';
 import MetadataDataVolumeFC from '../comps/MetadataDataVolume';
 import MetadataPlatformFC from '../comps/MetadataPlatform';
 import MetadataSourceFC from '../comps/MetadataSource';
@@ -45,6 +46,7 @@ const MetadataEventsTable: React.FC<MetadataEventsTableProps> = (
 ) => {
   const { projectId, appId } = useParams();
   const { t } = useTranslation();
+  const currentUser = useContext(UserContext) ?? getUserInfoFromLocalStorage();
   const { setShowDetails } = props;
 
   const renderEditNameCell = (
@@ -93,6 +95,34 @@ const MetadataEventsTable: React.FC<MetadataEventsTableProps> = (
     return <MetadataDataVolumeFC dataVolume={e.dataVolumeLastDay} />;
   };
 
+  const getDisplayNameEditConfig = () => {
+    if (currentUser.role !== IUserRole.ANALYST_READER) {
+      return {
+        validation(item: IEventTableItem, value: string) {
+          return !displayNameRegex.test(value)
+            ? undefined
+            : t('tag.invalidInput');
+        },
+        editingCell: (item: IEventTableItem, { setValue, currentValue }: any) =>
+          renderEditNameCell(item, setValue, currentValue),
+      };
+    }
+  };
+
+  const getDescriptionEditConfig = () => {
+    if (currentUser.role !== IUserRole.ANALYST_READER) {
+      return {
+        validation(item: IEventTableItem, value: string) {
+          return !descriptionRegex.test(value)
+            ? undefined
+            : t('tag.invalidInput');
+        },
+        editingCell: (item: IEventTableItem, { setValue, currentValue }: any) =>
+          renderEditDescCell(item, setValue, currentValue),
+      };
+    }
+  };
+
   const COLUMN_DEFINITIONS = [
     {
       id: 'name',
@@ -108,15 +138,7 @@ const MetadataEventsTable: React.FC<MetadataEventsTableProps> = (
         return e.displayName;
       },
       minWidth: 180,
-      editConfig: {
-        validation(item: IEventTableItem, value: string) {
-          return !displayNameRegex.test(value)
-            ? undefined
-            : t('tag.invalidInput');
-        },
-        editingCell: (item: IEventTableItem, { setValue, currentValue }: any) =>
-          renderEditNameCell(item, setValue, currentValue),
-      },
+      editConfig: getDisplayNameEditConfig(),
     },
     {
       id: 'description',
@@ -125,15 +147,7 @@ const MetadataEventsTable: React.FC<MetadataEventsTableProps> = (
         return e.description;
       },
       minWidth: 180,
-      editConfig: {
-        validation(item: IEventTableItem, value: string) {
-          return !descriptionRegex.test(value)
-            ? undefined
-            : t('tag.invalidInput');
-        },
-        editingCell: (item: IEventTableItem, { setValue, currentValue }: any) =>
-          renderEditDescCell(item, setValue, currentValue),
-      },
+      editConfig: getDescriptionEditConfig(),
     },
     {
       id: 'metadataSource',

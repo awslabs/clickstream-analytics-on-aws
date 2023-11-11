@@ -17,4 +17,7 @@ public class ExecuteTransformerException extends RuntimeException{
     public ExecuteTransformerException(final Exception e) {
         super(e);
     }
+    public ExecuteTransformerException(final String err) {
+        super(err);
+    }
 }
