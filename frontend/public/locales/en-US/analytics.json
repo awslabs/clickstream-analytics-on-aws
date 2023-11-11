@@ -33,7 +33,7 @@
     "title": "Explore",
     "description": "The Explore module provides a range of advanced analytical models to enable you to dynamically query and analyze clickstream data. Select an analysis model to begin.",
     "analyticsModel": "Analytics model",
-    "exploitativeAnalytics": "Exploratory analytsis",
+    "exploitativeAnalytics": "Exploratory analysis",
     "funnelAnalysis": "Funnel analysis",
     "eventAnalysis": "Event analysis",
     "pathAnalysis": "Path analysis",
@@ -259,7 +259,7 @@
   "noDataAvailableTitle": "No clickstream data available for analytics",
   "noDataAvailableMessage": "The solution did not find any project has clickstream data yet, please contact your system admin to start collecting data.",
   "information": {
-    "funnelMetricsInfo": "Select a entity of the calculated funnel conversion rate.",
+    "funnelMetricsInfo": "Select an entity of the calculated funnel conversion rate.",
     "funnelWindowInfo": "The funnel Window refers to the time for the user to complete the entire process. Only when the user completes all the selected steps within the set window period is considered a successful conversion.",
     "eventDefineMetricInfo": "Please select events, calculation methods, and filter conditions to query. You can add multiple filters for one event.",
     "filterInfo": "You can filter events globally by setting this filter, and this filter will apply to all metrics.",
