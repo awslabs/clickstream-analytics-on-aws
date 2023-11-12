@@ -1376,9 +1376,6 @@ describe('QuickSight Lambda function', () => {
       return {};
     });
 
-
-    
-
     quickSightClientMock.on(DescribeDataSetCommand).resolvesOnce({
       DataSet: {
         DataSetId: 'dataset_0',
