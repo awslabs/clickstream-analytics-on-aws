@@ -17,8 +17,6 @@ import {
   Container,
   Header,
   Input,
-  Link,
-  Popover,
   SegmentedControl,
   SegmentedControlProps,
   Select,
@@ -28,6 +26,7 @@ import {
 import { DateRangePickerProps } from '@cloudscape-design/components/date-range-picker/interfaces';
 import { previewFunnel } from 'apis/analytics';
 import ExtendIcon from 'components/common/ExtendIcon';
+import InfoLink from 'components/common/InfoLink';
 import Loading from 'components/common/Loading';
 import InfoTitle from 'components/common/title/InfoTitle';
 import SectionTitle from 'components/common/title/SectionTitle';
@@ -41,7 +40,9 @@ import {
 } from 'components/eventselect/AnalyticsType';
 import EventsSelect from 'components/eventselect/EventSelect';
 import SegmentationFilter from 'components/eventselect/SegmentationFilter';
+import { DispatchContext } from 'context/StateContext';
 import { UserContext } from 'context/UserContext';
+import { HelpInfoActionType, HelpPanelType } from 'context/reducer';
 import { cloneDeep } from 'lodash';
 import React, { useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -118,6 +119,7 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
   const [selectDashboardModalVisible, setSelectDashboardModalVisible] =
     useState(false);
   const [exploreEmbedUrl, setExploreEmbedUrl] = useState('');
+  const dispatch = useContext(DispatchContext);
 
   const defaultChartTypeOption = QuickSightChartType.FUNNEL;
   const chartTypeOptions: SegmentedControlProps.Option[] = [
@@ -403,12 +405,14 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
             <Header
               variant="h2"
               info={
-                <Popover
-                  triggerType="custom"
-                  content={t('analytics:information.funnelInfo')}
-                >
-                  <Link variant="info">{t('info')}</Link>
-                </Popover>
+                <InfoLink
+                  onFollow={() => {
+                    dispatch?.({
+                      type: HelpInfoActionType.SHOW_HELP_PANEL,
+                      payload: HelpPanelType.EXPLORE_FUNNEL_INFO,
+                    });
+                  }}
+                />
               }
               actions={
                 <SpaceBetween direction="horizontal" size="xs">
@@ -460,6 +464,7 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
               <SectionTitle
                 type="event"
                 title={t('analytics:labels.funnelSteps')}
+                description={t('analytics:information.funnelMetricsInfo')}
               />
               <div className="mt-10">
                 <SpaceBetween direction="vertical" size="xs">
@@ -621,7 +626,10 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
               </div>
             </SpaceBetween>
             <SpaceBetween direction="vertical" size="xs">
-              <SectionTitle type="filter" />
+              <SectionTitle
+                type="filter"
+                description={t('analytics:information.filterInfo')}
+              />
               <SegmentationFilter
                 segmentationData={segmentationOptionData}
                 addNewConditionItem={() => {
@@ -672,7 +680,10 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
                 }}
               />
               <br />
-              <SectionTitle type="group" />
+              <SectionTitle
+                type="group"
+                description={t('analytics:information.groupInfo')}
+              />
               <AttributeGroup
                 groupParameters={groupParameters}
                 groupOption={groupOption}

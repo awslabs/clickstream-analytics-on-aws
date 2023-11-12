@@ -16,13 +16,15 @@ import {
   Container,
   ContentLayout,
   Header,
-  Link,
-  Popover,
   Tabs,
 } from '@cloudscape-design/components';
+import InfoLink from 'components/common/InfoLink';
 import AnalyticsNavigation from 'components/layouts/AnalyticsNavigation';
 import CustomBreadCrumb from 'components/layouts/CustomBreadCrumb';
-import React, { useState } from 'react';
+import HelpInfo from 'components/layouts/HelpInfo';
+import { DispatchContext, StateContext } from 'context/StateContext';
+import { HelpInfoActionType, HelpPanelType } from 'context/reducer';
+import React, { useContext, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import MetadataDetails from './MetadataDetails';
@@ -39,6 +41,8 @@ const AnalyticsDataManagement: React.FC = () => {
   const [curType, setCurType] = useState<
     'event' | 'eventParameter' | 'userAttribute'
   >('event');
+  const dispatch = useContext(DispatchContext);
+  const state = useContext(StateContext);
 
   const breadcrumbItems = [
     {
@@ -58,7 +62,21 @@ const AnalyticsDataManagement: React.FC = () => {
       />
       <div className="flex-1">
         <AppLayout
-          toolsHide
+          toolsOpen={state?.showHelpPanel}
+          onToolsChange={(e) => {
+            if (state?.helpPanelType === HelpPanelType.NONE) {
+              return;
+            }
+            if (!e.detail.open) {
+              dispatch?.({ type: HelpInfoActionType.HIDE_HELP_PANEL });
+            } else {
+              dispatch?.({
+                type: HelpInfoActionType.SHOW_HELP_PANEL,
+                payload: state?.helpPanelType,
+              });
+            }
+          }}
+          tools={<HelpInfo />}
           navigationHide
           content={
             <ContentLayout
@@ -66,12 +84,14 @@ const AnalyticsDataManagement: React.FC = () => {
                 <Header
                   variant="h1"
                   info={
-                    <Popover
-                      triggerType="custom"
-                      content={t('analytics:information.dataManagementInfo')}
-                    >
-                      <Link variant="info">{t('info')}</Link>
-                    </Popover>
+                    <InfoLink
+                      onFollow={() => {
+                        dispatch?.({
+                          type: HelpInfoActionType.SHOW_HELP_PANEL,
+                          payload: HelpPanelType.ANALYTICS_METADATA,
+                        });
+                      }}
+                    />
                   }
                   description={t('analytics:metadata.description')}
                 >
@@ -81,6 +101,11 @@ const AnalyticsDataManagement: React.FC = () => {
             >
               <Container>
                 <Tabs
+                  onChange={() => {
+                    dispatch?.({
+                      type: HelpInfoActionType.HIDE_HELP_PANEL,
+                    });
+                  }}
                   tabs={[
                     {
                       label: t('analytics:metadata.event.title'),

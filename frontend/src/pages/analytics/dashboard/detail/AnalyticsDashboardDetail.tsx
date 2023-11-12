@@ -16,17 +16,19 @@ import {
   Container,
   ContentLayout,
   Header,
-  Link,
-  Popover,
   SpaceBetween,
   Button,
 } from '@cloudscape-design/components';
 import { getAnalyticsDashboard } from 'apis/analytics';
+import InfoLink from 'components/common/InfoLink';
 import Loading from 'components/common/Loading';
 import AnalyticsNavigation from 'components/layouts/AnalyticsNavigation';
 import CustomBreadCrumb from 'components/layouts/CustomBreadCrumb';
+import HelpInfo from 'components/layouts/HelpInfo';
+import { DispatchContext, StateContext } from 'context/StateContext';
+import { HelpInfoActionType, HelpPanelType } from 'context/reducer';
 import ExploreEmbedFrame from 'pages/analytics/comps/ExploreEmbedFrame';
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { DEFAULT_DASHBOARD_NAME } from 'ts/constant-ln';
@@ -38,7 +40,8 @@ const AnalyticsDashboardDetail: React.FC = () => {
   const [loadingData, setLoadingData] = useState(false);
   const [dashboardEmbedUrl, setDashboardEmbedUrl] = useState('');
   const [dashboard, setDashboard] = useState({} as IAnalyticsDashboard);
-
+  const dispatch = useContext(DispatchContext);
+  const state = useContext(StateContext);
   const getAnalyticsDashboardDetails = async () => {
     setLoadingData(true);
     try {
@@ -93,7 +96,21 @@ const AnalyticsDashboardDetail: React.FC = () => {
       />
       <div className="flex-1">
         <AppLayout
-          toolsHide
+          toolsOpen={state?.showHelpPanel}
+          onToolsChange={(e) => {
+            if (state?.helpPanelType === HelpPanelType.NONE) {
+              return;
+            }
+            if (!e.detail.open) {
+              dispatch?.({ type: HelpInfoActionType.HIDE_HELP_PANEL });
+            } else {
+              dispatch?.({
+                type: HelpInfoActionType.SHOW_HELP_PANEL,
+                payload: state?.helpPanelType,
+              });
+            }
+          }}
+          tools={<HelpInfo />}
           navigationHide
           content={
             <ContentLayout
@@ -105,14 +122,14 @@ const AnalyticsDashboardDetail: React.FC = () => {
                     info={
                       <>
                         {dashboard.name === DEFAULT_DASHBOARD_NAME ? (
-                          <Popover
-                            triggerType="custom"
-                            content={t(
-                              'analytics:information.userLifecycleInfo'
-                            )}
-                          >
-                            <Link variant="info">{t('info')}</Link>
-                          </Popover>
+                          <InfoLink
+                            onFollow={() => {
+                              dispatch?.({
+                                type: HelpInfoActionType.SHOW_HELP_PANEL,
+                                payload: HelpPanelType.USER_LIFECYCLE_INFO,
+                              });
+                            }}
+                          />
                         ) : null}
                       </>
                     }

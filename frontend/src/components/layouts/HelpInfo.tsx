@@ -16,6 +16,7 @@ import { StateContext } from 'context/StateContext';
 import { HelpPanelType } from 'context/reducer';
 import React, { ReactElement, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
+import { buildDocumentLink } from 'ts/url';
 import { defaultStr } from 'ts/utils';
 import { ExternalLinkGroup } from '../common/ExternalLinkGroup';
 
@@ -31,8 +32,23 @@ interface HelpInfoProps {
 }
 
 const HelpInfo: React.FC = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const state = useContext(StateContext);
+
+  const helpPanelMappings: any = {
+    [HelpPanelType.ANALYTICS_DASHBOARD]: 'dashboardsInfo',
+    [HelpPanelType.USER_LIFECYCLE_INFO]: 'userLifecycleInfo',
+    [HelpPanelType.ANALYTICS_EXPLORE]: 'exploreInfo',
+    [HelpPanelType.EXPLORE_EVENT_INFO]: 'eventInfo',
+    [HelpPanelType.EXPLORE_FUNNEL_INFO]: 'funnelInfo',
+    [HelpPanelType.EXPLORE_PATH_INFO]: 'pathInfo',
+    [HelpPanelType.EXPLORE_RETENTION_INFO]: 'retentionInfo',
+    [HelpPanelType.ANALYTICS_ANALYZES]: 'analyzesInfo',
+    [HelpPanelType.ANALYTICS_METADATA]: 'metadataInfo',
+    [HelpPanelType.METADATA_EVENT_INFO]: 'metadataEventInfo',
+    [HelpPanelType.METADATA_EVENT_PARAM_INFO]: 'metadataEventParamInfo',
+    [HelpPanelType.METADATA_USER_PARAM_INFO]: 'metadataUserParamInfo',
+  };
 
   const dataItem: HelpInfoProps = {
     title: '',
@@ -40,13 +56,21 @@ const HelpInfo: React.FC = () => {
     linkItems: [],
   };
 
-  if (state?.helpPanelType === HelpPanelType.ANALYTICS_DASHBOARD) {
-    dataItem.title = t('help:dashboard.title');
-    dataItem.description = <p>{t('help:dashboard.description')}</p>;
+  const currentHelpPanelKey = helpPanelMappings[state?.helpPanelType ?? ''];
+
+  if (currentHelpPanelKey) {
+    dataItem.title = t(`help:${currentHelpPanelKey}.title`);
+    dataItem.description = (
+      <p>{t(`help:${currentHelpPanelKey}.description`)}</p>
+    );
     dataItem.linkItems = [
       {
-        text: t('help:dashboard.links.dashboardDocLinkName'),
-        href: '/',
+        text: t(`help:${currentHelpPanelKey}.links.docLinkName`),
+        href: buildDocumentLink(
+          i18n.language,
+          defaultStr(t(`help:${currentHelpPanelKey}.links.docLink`)),
+          defaultStr(t(`help:${currentHelpPanelKey}.links.docLink`))
+        ),
       },
     ];
   }

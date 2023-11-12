@@ -18,14 +18,13 @@ import {
   DateRangePickerProps,
   Header,
   Input,
-  Link,
-  Popover,
   Select,
   SelectProps,
   SpaceBetween,
   Toggle,
 } from '@cloudscape-design/components';
 import { previewPath } from 'apis/analytics';
+import InfoLink from 'components/common/InfoLink';
 import Loading from 'components/common/Loading';
 import InfoTitle from 'components/common/title/InfoTitle';
 import SectionTitle from 'components/common/title/SectionTitle';
@@ -40,7 +39,9 @@ import {
 } from 'components/eventselect/AnalyticsType';
 import EventsSelect from 'components/eventselect/EventSelect';
 import SegmentationFilter from 'components/eventselect/SegmentationFilter';
+import { DispatchContext } from 'context/StateContext';
 import { UserContext } from 'context/UserContext';
+import { HelpInfoActionType, HelpPanelType } from 'context/reducer';
 import { cloneDeep } from 'lodash';
 import React, { useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -128,6 +129,7 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
   const [disableAddCondition, setDisableAddCondition] = useState(false);
   const [categoryEventsData, setCategoryEventsData] =
     useState<CategoryItemType[]>(categoryEvents);
+  const dispatch = useContext(DispatchContext);
 
   const defaultComputeMethodOption: SelectProps.Option = {
     value: ExploreComputeMethod.USER_ID_CNT,
@@ -547,12 +549,14 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
             <Header
               variant="h2"
               info={
-                <Popover
-                  triggerType="custom"
-                  content={t('analytics:information.pathInfo')}
-                >
-                  <Link variant="info">{t('info')}</Link>
-                </Popover>
+                <InfoLink
+                  onFollow={() => {
+                    dispatch?.({
+                      type: HelpInfoActionType.SHOW_HELP_PANEL,
+                      payload: HelpPanelType.EXPLORE_PATH_INFO,
+                    });
+                  }}
+                />
               }
               actions={
                 <SpaceBetween direction="horizontal" size="xs">
@@ -673,11 +677,12 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
               <SectionTitle
                 type="event"
                 title={t('analytics:labels.nodesSelect')}
+                description={t('analytics:information.pathNodeTypeInfo')}
               />
               <InfoTitle
                 title={t('analytics:labels.setStartNode')}
                 popoverDescription={t(
-                  'analytics:information.pathSetStartNodeInfo'
+                  'analytics:information.pathStartNodeInfo'
                 )}
               />
               <StartNodeSelect
@@ -716,7 +721,7 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
               <InfoTitle
                 title={t('analytics:labels.participateNodes')}
                 popoverDescription={t(
-                  'analytics:information.pathParticipateNodesInfo'
+                  'analytics:information.pathNodeSelectionInfo'
                 )}
               />
               <EventsSelect
@@ -836,7 +841,7 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
                   <InfoTitle
                     title={t('analytics:labels.includingOtherEvents')}
                     popoverDescription={t(
-                      'analytics:information.pathIncludingOtherEventsInfo'
+                      'analytics:information.pathIncludeOtherInfo'
                     )}
                   />
                   <Toggle
@@ -852,7 +857,7 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
                   <InfoTitle
                     title={t('analytics:labels.mergeConsecutiveEvents')}
                     popoverDescription={t(
-                      'analytics:information.pathMergeConsecutiveEventsInfo'
+                      'analytics:information.pathMergeNodeInfo'
                     )}
                   />
                   <Toggle
@@ -867,7 +872,10 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
               </div>
             </SpaceBetween>
             <SpaceBetween direction="vertical" size="xs">
-              <SectionTitle type="filter" />
+              <SectionTitle
+                type="filter"
+                description={t('analytics:information.filterInfo')}
+              />
               <SegmentationFilter
                 segmentationData={segmentationOptionData}
                 addNewConditionItem={() => {

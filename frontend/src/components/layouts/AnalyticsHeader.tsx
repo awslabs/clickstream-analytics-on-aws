@@ -29,6 +29,7 @@ import {
   ZH_LANGUAGE_LIST,
   ZH_TEXT,
 } from 'ts/const';
+import { getDocumentLink } from 'ts/url';
 import { defaultStr } from 'ts/utils';
 
 interface IHeaderProps {
@@ -189,7 +190,7 @@ const AnalyticsHeader: React.FC<IHeaderProps> = (props: IHeaderProps) => {
           {
             type: 'button',
             text: defaultStr(t('header.analyticsDocumentation')),
-            href: 'https://aws.amazon.com/solutions/',
+            href: getDocumentLink(i18n.language),
             external: true,
           },
           {

@@ -21,7 +21,7 @@ import { UserContext } from 'context/UserContext';
 import React, { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import { IUserRole } from 'ts/const';
-import { getDocumentList } from 'ts/url';
+import { getDocumentLink } from 'ts/url';
 import { getUserInfoFromLocalStorage } from 'ts/utils';
 
 interface INavigationProps {
@@ -91,7 +91,7 @@ const Navigation: React.FC<INavigationProps> = (props: INavigationProps) => {
     {
       type: 'link',
       text: t('nav.doc'),
-      href: getDocumentList(i18n.language),
+      href: getDocumentLink(i18n.language),
       external: true,
     },
   ];

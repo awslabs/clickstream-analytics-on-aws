@@ -17,8 +17,6 @@ import {
   Container,
   DateRangePickerProps,
   Header,
-  Link,
-  Popover,
   SegmentedControl,
   SegmentedControlProps,
   SelectProps,
@@ -26,6 +24,7 @@ import {
 } from '@cloudscape-design/components';
 import { previewEvent } from 'apis/analytics';
 import ExtendIcon from 'components/common/ExtendIcon';
+import InfoLink from 'components/common/InfoLink';
 import Loading from 'components/common/Loading';
 import SectionTitle from 'components/common/title/SectionTitle';
 import {
@@ -38,7 +37,10 @@ import {
 } from 'components/eventselect/AnalyticsType';
 import EventsSelect from 'components/eventselect/EventSelect';
 import SegmentationFilter from 'components/eventselect/SegmentationFilter';
+import { DispatchContext } from 'context/StateContext';
 import { UserContext } from 'context/UserContext';
+import { HelpInfoActionType, HelpPanelType } from 'context/reducer';
+
 import { cloneDeep } from 'lodash';
 import React, { useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -114,6 +116,7 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
   const [selectDashboardModalVisible, setSelectDashboardModalVisible] =
     useState(false);
   const [exploreEmbedUrl, setExploreEmbedUrl] = useState('');
+  const dispatch = useContext(DispatchContext);
 
   const defaultChartTypeOption = QuickSightChartType.LINE;
   const chartTypeOptions: SegmentedControlProps.Option[] = [
@@ -333,12 +336,14 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
             <Header
               variant="h2"
               info={
-                <Popover
-                  triggerType="custom"
-                  content={t('analytics:information.eventInfo')}
-                >
-                  <Link variant="info">{t('info')}</Link>
-                </Popover>
+                <InfoLink
+                  onFollow={() => {
+                    dispatch?.({
+                      type: HelpInfoActionType.SHOW_HELP_PANEL,
+                      payload: HelpPanelType.EXPLORE_EVENT_INFO,
+                    });
+                  }}
+                />
               }
               actions={
                 <SpaceBetween direction="horizontal" size="xs">
@@ -372,6 +377,7 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
               <SectionTitle
                 type="event"
                 title={t('analytics:labels.defineMetrics')}
+                description={t('analytics:information.eventDefineMetricInfo')}
               />
               <EventsSelect
                 loading={loadingEvents}
@@ -486,7 +492,10 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
               />
             </SpaceBetween>
             <SpaceBetween direction="vertical" size="xs">
-              <SectionTitle type="filter" />
+              <SectionTitle
+                type="filter"
+                description={t('analytics:information.filterInfo')}
+              />
               <SegmentationFilter
                 segmentationData={segmentationOptionData}
                 addNewConditionItem={() => {
@@ -537,7 +546,10 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
                 }}
               />
               <br />
-              <SectionTitle type="group" />
+              <SectionTitle
+                type="group"
+                description={t('analytics:information.groupInfo')}
+              />
               <AttributeGroup
                 groupParameters={groupParameters}
                 groupOption={groupOption}

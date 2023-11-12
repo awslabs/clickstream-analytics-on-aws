@@ -11,10 +11,17 @@
  *  and limitations under the License.
  */
 
-import { Link, Popover } from '@cloudscape-design/components';
+import InfoLink from 'components/common/InfoLink';
+import { DispatchContext } from 'context/StateContext';
+import { HelpInfoActionType, HelpPanelType } from 'context/reducer';
 import { debounce } from 'lodash';
-import React, { ReactElement, useEffect, useRef, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import React, {
+  ReactElement,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 
 interface AnalyticsCustomHeaderProps {
   headerText: string;
@@ -28,9 +35,9 @@ const AnalyticsCustomHeader: React.FC<AnalyticsCustomHeaderProps> = (
   props: AnalyticsCustomHeaderProps
 ) => {
   const { headerText, descriptionText, updateContentHeader, children } = props;
-  const { t } = useTranslation();
   const [divHeight, setDivHeight] = useState(0);
   const divRef = useRef<HTMLDivElement>(null);
+  const dispatch = useContext(DispatchContext);
 
   // Update height function
   const updateHeight = () => {
@@ -64,12 +71,14 @@ const AnalyticsCustomHeader: React.FC<AnalyticsCustomHeaderProps> = (
     >
       <div className="analytics-custom-title">
         <span className="mr-5">{headerText}</span>
-        <Popover
-          triggerType="custom"
-          content={t('analytics:information.exploreInfo')}
-        >
-          <Link variant="info">{t('info')}</Link>
-        </Popover>
+        <InfoLink
+          onFollow={() => {
+            dispatch?.({
+              type: HelpInfoActionType.SHOW_HELP_PANEL,
+              payload: HelpPanelType.ANALYTICS_EXPLORE,
+            });
+          }}
+        />
       </div>
       <div className="analytics-custom-description">{descriptionText}</div>
       {children}
