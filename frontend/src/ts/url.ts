@@ -14,7 +14,7 @@
 import { PROJECT_CONFIG_JSON, ZH_LANGUAGE_LIST } from './const';
 
 const CONSOLE_CHINA_DOMAIN = 'console.amazonaws.cn';
-const CONSOLE_GLOABL_DOMAIN = 'console.aws.amazon.com';
+const CONSOLE_GLOBAL_DOMAIN = 'console.aws.amazon.com';
 
 export const PIPELINE_QUICKSIGHT_GUIDE_LINK =
   'https://docs.aws.amazon.com/quicksight/latest/user/signing-up.html';
@@ -66,7 +66,15 @@ export const getSolutionVersion = () => {
   const configJSONObj: ConfigType = JSON.parse(
     localStorage.getItem(PROJECT_CONFIG_JSON) || '{}'
   );
-  return configJSONObj?.solution_version ?? 'latest';
+  const parts = configJSONObj?.solution_version
+    ?.replace(/[^0-9.]/g, '')
+    ?.split('.');
+  let docVersion = 'latest';
+  if (parts?.length >= 2) {
+    const majorVersion = `${parts[0]}.${parts[1]}`;
+    docVersion = majorVersion + '.x';
+  }
+  return docVersion;
 };
 
 export const buildDocumentLink = (
@@ -84,7 +92,7 @@ export const buildVPCLink = (region: string, vpcId: string): string => {
   if (region.startsWith('cn')) {
     return `https://${region}.${CONSOLE_CHINA_DOMAIN}/vpc/home?region=${region}#vpcs:VpcId=${vpcId}`;
   }
-  return `https://${region}.${CONSOLE_GLOABL_DOMAIN}/vpc/home?region=${region}#vpcs:VpcId=${vpcId}`;
+  return `https://${region}.${CONSOLE_GLOBAL_DOMAIN}/vpc/home?region=${region}#vpcs:VpcId=${vpcId}`;
 };
 
 const getDirPrefixByPrefixStr = (prefix: string) => {
@@ -112,17 +120,17 @@ export const buildS3Link = (
   if (prefix) {
     const resPrefix = getDirPrefixByPrefixStr(prefix);
     if (resPrefix.endsWith('/')) {
-      return `https://s3.${CONSOLE_GLOABL_DOMAIN}/s3/buckets/${bucketName}?region=${region}&prefix=${resPrefix}`;
+      return `https://s3.${CONSOLE_GLOBAL_DOMAIN}/s3/buckets/${bucketName}?region=${region}&prefix=${resPrefix}`;
     }
   }
-  return `https://s3.${CONSOLE_GLOABL_DOMAIN}/s3/buckets/${bucketName}`;
+  return `https://s3.${CONSOLE_GLOBAL_DOMAIN}/s3/buckets/${bucketName}`;
 };
 
 export const buildSubnetLink = (region: string, subnetId: string): string => {
   if (region.startsWith('cn')) {
     return `https://${region}.${CONSOLE_CHINA_DOMAIN}/vpc/home?region=${region}#subnets:subnetId=${subnetId}`;
   }
-  return `https://${region}.${CONSOLE_GLOABL_DOMAIN}/vpc/home?region=${region}#subnets:subnetId=${subnetId}`;
+  return `https://${region}.${CONSOLE_GLOBAL_DOMAIN}/vpc/home?region=${region}#subnets:subnetId=${subnetId}`;
 };
 
 export const buildReshiftLink = (
@@ -134,9 +142,9 @@ export const buildReshiftLink = (
     return `https://${region}.${CONSOLE_CHINA_DOMAIN}/redshiftv2/home?region=${region}#cluster-details?cluster=${cluster}`;
   }
   if (type === 'serverless') {
-    return `https://${region}.${CONSOLE_GLOABL_DOMAIN}/redshiftv2/home?region=${region}#serverless-dashboard`;
+    return `https://${region}.${CONSOLE_GLOBAL_DOMAIN}/redshiftv2/home?region=${region}#serverless-dashboard`;
   }
-  return `https://${region}.${CONSOLE_GLOABL_DOMAIN}/redshiftv2/home?region=${region}#cluster-details?cluster=${cluster}`;
+  return `https://${region}.${CONSOLE_GLOBAL_DOMAIN}/redshiftv2/home?region=${region}#cluster-details?cluster=${cluster}`;
 };
 
 export const buildQuickSightDashboardLink = (
@@ -153,7 +161,7 @@ export const buildMetricsDashboardLink = (
   if (region.startsWith('cn')) {
     return `https://${region}.${CONSOLE_CHINA_DOMAIN}/cloudwatch/home?region=${region}#dashboards:name=${dashboardName}`;
   }
-  return `https://${region}.${CONSOLE_GLOABL_DOMAIN}/cloudwatch/home?region=${region}#dashboards:name=${dashboardName}`;
+  return `https://${region}.${CONSOLE_GLOBAL_DOMAIN}/cloudwatch/home?region=${region}#dashboards:name=${dashboardName}`;
 };
 
 export const buildQuickSightSubscriptionLink = (): string => {
@@ -164,7 +172,7 @@ export const buildAlarmsLink = (region: string, projectId: string): string => {
   if (region.startsWith('cn')) {
     return `https://${region}.${CONSOLE_CHINA_DOMAIN}/cloudwatch/home?region=${region}#alarmsV2:?~(search~'Clickstream*7c${projectId})`;
   }
-  return `https://${region}.${CONSOLE_GLOABL_DOMAIN}/cloudwatch/home?region=${region}#alarmsV2:?~(search~'Clickstream*7c${projectId})`;
+  return `https://${region}.${CONSOLE_GLOBAL_DOMAIN}/cloudwatch/home?region=${region}#alarmsV2:?~(search~'Clickstream*7c${projectId})`;
 };
 
 export const buildCloudFormationStackLink = (
@@ -174,14 +182,14 @@ export const buildCloudFormationStackLink = (
   if (region.startsWith('cn')) {
     return `https://${region}.${CONSOLE_CHINA_DOMAIN}/cloudformation/home?region=${region}#/stacks/stackinfo?stackId=${stackId}`;
   }
-  return `https://${region}.${CONSOLE_GLOABL_DOMAIN}/cloudformation/home?region=${region}#/stacks/stackinfo?stackId=${stackId}`;
+  return `https://${region}.${CONSOLE_GLOBAL_DOMAIN}/cloudformation/home?region=${region}#/stacks/stackinfo?stackId=${stackId}`;
 };
 
 export const buildMSKLink = (region: string, arn: string) => {
   if (region.startsWith('cn')) {
     return `https://${region}.${CONSOLE_CHINA_DOMAIN}/msk/home?region=${region}#/cluster/${arn}/view`;
   }
-  return `https://${region}.${CONSOLE_GLOABL_DOMAIN}/msk/home?region=${region}#/cluster/${arn}/view`;
+  return `https://${region}.${CONSOLE_GLOBAL_DOMAIN}/msk/home?region=${region}#/cluster/${arn}/view`;
 };
 
 // Document link
