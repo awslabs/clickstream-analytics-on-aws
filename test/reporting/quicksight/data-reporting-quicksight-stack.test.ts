@@ -59,6 +59,12 @@ describe('DataReportingQuickSightStack parameter test', () => {
     });
   });
 
+  test('Should has Parameter QuickSightOwnerPrincipalParam', () => {
+    template.hasParameter('QuickSightOwnerPrincipalParam', {
+      Type: 'String',
+    });
+  });
+
   test('Should has Parameter redshiftEndpointParam', () => {
     template.hasParameter('RedshiftEndpointParam', {
       Type: 'String',
