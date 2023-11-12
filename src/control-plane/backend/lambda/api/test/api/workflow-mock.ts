@@ -842,6 +842,10 @@ const BASE_REPORTING_PARAMETERS = [
     ParameterValue: 'arn:aws:quicksight:us-east-1:555555555555:user/default/QuickSightEmbeddingRole/ClickstreamPublishUser',
   },
   {
+    ParameterKey: 'QuickSightOwnerPrincipalParam',
+    ParameterValue: 'arn:aws:quicksight:us-east-1:555555555555:user/default/QuickSightEmbeddingRole/ClickstreamExploreUser',
+  },
+  {
     ParameterKey: 'RedshiftDBParam',
     ParameterValue: 'project_8888_8888',
   },
@@ -868,7 +872,7 @@ const BASE_REPORTING_PARAMETERS = [
 ];
 
 export const REPORTING_WITH_PROVISIONED_REDSHIFT_PARAMETERS = [
-  ...BASE_REPORTING_PARAMETERS.slice(0, 6),
+  ...BASE_REPORTING_PARAMETERS.slice(0, 7),
   {
     ParameterKey: 'RedshiftEndpointParam',
     ParameterValue: 'https://redshift/xxx/yyy',
@@ -877,7 +881,7 @@ export const REPORTING_WITH_PROVISIONED_REDSHIFT_PARAMETERS = [
     ParameterKey: 'RedshiftPortParam',
     ParameterValue: '5002',
   },
-  ...BASE_REPORTING_PARAMETERS.slice(6, BASE_REPORTING_PARAMETERS.length),
+  ...BASE_REPORTING_PARAMETERS.slice(7, BASE_REPORTING_PARAMETERS.length),
 ];
 
 export const REPORTING_WITH_NEW_REDSHIFT_PARAMETERS = [
@@ -892,6 +896,10 @@ export const REPORTING_WITH_NEW_REDSHIFT_PARAMETERS = [
   {
     ParameterKey: 'QuickSightPrincipalParam',
     ParameterValue: 'arn:aws:quicksight:us-east-1:555555555555:user/default/QuickSightEmbeddingRole/ClickstreamPublishUser',
+  },
+  {
+    ParameterKey: 'QuickSightOwnerPrincipalParam',
+    ParameterValue: 'arn:aws:quicksight:us-east-1:555555555555:user/default/QuickSightEmbeddingRole/ClickstreamExploreUser',
   },
   {
     ParameterKey: 'RedshiftDBParam',
