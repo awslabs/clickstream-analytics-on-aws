@@ -326,7 +326,7 @@ export const createDataSet = async (quickSight: QuickSight, awsAccountId: string
     const dataset = await quickSight.createDataSet({
       AwsAccountId: awsAccountId,
       DataSetId: datasetId,
-      Name: `${props.name}dataset-${datasetId}`,
+      Name: `dataset-${datasetId}`,
       Permissions: [{
         Principal: principalArn,
         Actions: dataSetAdminPermissionActions,
