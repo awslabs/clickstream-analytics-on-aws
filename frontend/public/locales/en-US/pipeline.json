@@ -47,7 +47,8 @@
     "redshiftProvisionedDBUserEmptyError": "Please input the database user.",
     "redshiftProvisionedDBUserFormatError": "Database user format error",
     "emailInvalid": "Email invalid.",
-    "stackRollbackFailed": "Some stacks are ROLLBACK_FAILED and can not be updated."
+    "stackRollbackFailed": "Some stacks are ROLLBACK_FAILED and can not be updated.",
+    "transformPluginEmptyError": "Please select transform plugin when use Third-party SDK."
   },
   "create": {
     "basicInfo": "Basic configuration",

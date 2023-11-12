@@ -42,6 +42,7 @@ import {
   DEFAULT_KDS_SINK_INTERVAL,
   DEFAULT_MSK_BATCH_SIZE,
   DEFAULT_MSK_SINK_INTERVAL,
+  DEFAULT_TRANSFORM_SDK_IDS,
   EXCUTION_UNIT_LIST,
   EXECUTION_TYPE_LIST,
   ExecutionType,
@@ -182,6 +183,9 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
 
   const [acknowledgedHTTPSecurity, setAcknowledgedHTTPSecurity] =
     useState(true);
+
+  const [transformPluginEmptyError, setTransformPluginEmptyError] =
+    useState(false);
 
   const [unSupportedServices, setUnSupportedServices] = useState('');
 
@@ -536,6 +540,17 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
     return true;
   };
 
+  const checkTransformPluginEmpty = (info: IExtPipeline) => {
+    if (
+      !DEFAULT_TRANSFORM_SDK_IDS.includes(info.dataCollectionSDK) &&
+      info.selectedTransformPlugins.length < 1
+    ) {
+      setTransformPluginEmptyError(true);
+      return false;
+    }
+    return true;
+  };
+
   const checkRedshiftServerlessConfig = (info: IExtPipeline) => {
     if (!info.redshiftServerlessVPC?.value) {
       setRedshiftServerlessVpcEmptyError(true);
@@ -581,6 +596,10 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
     }
 
     if (!checkDataProcessingInterval(pipelineInfo)) {
+      return false;
+    }
+
+    if (!checkTransformPluginEmpty(pipelineInfo)) {
       return false;
     }
 
@@ -1731,6 +1750,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
             <DataProcessing
               update={update}
               pipelineInfo={pipelineInfo}
+              transformPluginEmptyError={transformPluginEmptyError}
               dataProcessorIntervalInvalidError={
                 dataProcessorIntervalInvalidError
               }
@@ -1838,6 +1858,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                 });
               }}
               changeTransformPlugins={(plugins) => {
+                setTransformPluginEmptyError(false);
                 setPipelineInfo((prev) => {
                   return {
                     ...prev,

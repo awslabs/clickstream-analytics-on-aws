@@ -22,7 +22,7 @@ import {
 } from '@cloudscape-design/components';
 import { deletePlugin, getPluginList } from 'apis/plugin';
 import moment from 'moment';
-import React, { useEffect, useState } from 'react';
+import React, { ReactElement, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { TIME_FORMAT, XMIND_LINK } from 'ts/const';
@@ -40,8 +40,10 @@ interface PluginTableProps {
   pluginSelectedItems?: IPlugin[];
   selectBuitInPlugins?: boolean;
   changePluginSeletedItems?: (items: IPlugin[]) => void;
+  footer?: ReactElement;
 }
 
+const PAGE_SIZE = 10;
 const PluginTable: React.FC<PluginTableProps> = (props: PluginTableProps) => {
   const {
     pipelineInfo,
@@ -55,6 +57,7 @@ const PluginTable: React.FC<PluginTableProps> = (props: PluginTableProps) => {
     pluginSelectedItems,
     selectBuitInPlugins,
     changePluginSeletedItems,
+    footer,
   } = props;
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -63,7 +66,6 @@ const PluginTable: React.FC<PluginTableProps> = (props: PluginTableProps) => {
   );
 
   const [loadingData, setLoadingData] = useState(false);
-  const [pageSize] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
   const [pluginList, setPluginList] = useState<IPlugin[]>([]);
@@ -113,7 +115,7 @@ const PluginTable: React.FC<PluginTableProps> = (props: PluginTableProps) => {
       const { success, data }: ApiResponse<ResponseTableData<IPlugin>> =
         await getPluginList({
           pageNumber: currentPage,
-          pageSize: pageSize,
+          pageSize: PAGE_SIZE,
           type: pluginType,
         });
       if (success) {
@@ -298,7 +300,7 @@ const PluginTable: React.FC<PluginTableProps> = (props: PluginTableProps) => {
         pagination={
           <Pagination
             currentPageIndex={currentPage}
-            pagesCount={Math.ceil(totalCount / pageSize)}
+            pagesCount={Math.ceil(totalCount / PAGE_SIZE)}
             onChange={(e) => {
               setCurrentPage(e.detail.currentPageIndex);
             }}
@@ -310,6 +312,7 @@ const PluginTable: React.FC<PluginTableProps> = (props: PluginTableProps) => {
             }}
           />
         }
+        footer={footer}
       />
     </div>
   );
