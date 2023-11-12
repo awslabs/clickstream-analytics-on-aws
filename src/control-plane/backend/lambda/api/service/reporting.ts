@@ -157,7 +157,6 @@ export class ReportingService {
     //create quicksight dataset
     const datasetPropsArray: DataSetProps[] = [];
     datasetPropsArray.push({
-      name: '',
       tableName: viewName,
       columns: datasetColumns,
       importMode: 'DIRECT_QUERY',
@@ -208,7 +207,6 @@ export class ReportingService {
 
     }
     datasetPropsArray.push({
-      name: '',
       tableName: tableVisualViewName,
       columns: tableViewCols,
       importMode: 'DIRECT_QUERY',
@@ -320,7 +318,6 @@ export class ReportingService {
 
       const datasetPropsArray: DataSetProps[] = [];
       datasetPropsArray.push({
-        name: '',
         tableName: viewName,
         columns: datasetColumns,
         importMode: 'DIRECT_QUERY',
@@ -461,7 +458,6 @@ export class ReportingService {
 
       const datasetPropsArray: DataSetProps[] = [];
       datasetPropsArray.push({
-        name: '',
         tableName: viewName,
         columns: pathAnalysisVisualColumns,
         importMode: 'DIRECT_QUERY',
@@ -570,7 +566,6 @@ export class ReportingService {
 
       const datasetPropsArray: DataSetProps[] = [];
       datasetPropsArray.push({
-        name: '',
         tableName: viewName,
         columns: datasetColumns,
         importMode: 'DIRECT_QUERY',

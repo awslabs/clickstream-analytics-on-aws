@@ -37,10 +37,10 @@ import {
 } from '@aws-sdk/client-quicksight';
 import { CdkCustomResourceResponse } from 'aws-lambda';
 import { mockClient } from 'aws-sdk-client-mock';
-import { CLICKSTREAM_SESSION_VIEW_PLACEHOLDER, CLICKSTREAM_USER_DIM_VIEW_PLACEHOLDER, CLICKSTREAM_SESSION_VIEW_NAME, CLICKSTREAM_USER_DIM_VIEW_NAME } from '../../../../src/common/constant';
+import { CLICKSTREAM_SESSION_VIEW_PLACEHOLDER, CLICKSTREAM_USER_DIM_VIEW_PLACEHOLDER, CLICKSTREAM_SESSION_VIEW_NAME, CLICKSTREAM_USER_DIM_VIEW_NAME, CLICKSTREAM_LIFECYCLE_DAILY_VIEW_PLACEHOLDER, CLICKSTREAM_LIFECYCLE_DAILY_VIEW_NAME } from '../../../../src/common/constant';
 import { logger } from '../../../../src/common/powertools';
 import { handler } from '../../../../src/reporting/lambda/custom-resource/quicksight/index';
-import { clickstream_session_view_columns, clickstream_user_dim_view_columns } from '../../../../src/reporting/private/dataset-col-def';
+import { clickstream_lifecycle_daily_view_columns, clickstream_session_view_columns, clickstream_user_dim_view_columns } from '../../../../src/reporting/private/dataset-col-def';
 import { getMockContext } from '../../../common/lambda-context';
 import 'aws-sdk-client-mock-jest';
 import {
@@ -129,6 +129,162 @@ describe('QuickSight Lambda function', () => {
           importMode: 'DIRECT_QUERY',
           customSql: `select * from {{schema}}.${CLICKSTREAM_SESSION_VIEW_NAME}`,
           columns: clickstream_session_view_columns,
+        },
+      ],
+    },
+  };
+
+  const testProps2 = {
+    awsAccountId: 'xxxxxxxxxx',
+    awsRegion: 'us-east-1',
+    awsPartition: 'aws',
+    quickSightNamespace: 'default',
+    quickSightUser: 'clickstream',
+    quickSightPrincipalArn: 'test-principal-arn',
+    quickSightOwnerPrincipalArn: 'test-principal-arn',
+    databaseName: 'test-database',
+    templateArn: 'test-template-arn',
+    vpcConnectionArn: 'arn:aws:quicksight:ap-southeast-1:xxxxxxxxxx:vpcConnection/test',
+
+    dashboardDefProps: {
+      analysisName: 'Clickstream Analysis',
+      dashboardName: 'Clickstream Dashboard',
+      templateArn: 'test-template-arn',
+      databaseName: 'test-database-name',
+      dataSourceArn: 'test-datasource',
+      dataSets: [
+        {
+          tableName: CLICKSTREAM_USER_DIM_VIEW_PLACEHOLDER,
+          importMode: 'DIRECT_QUERY',
+          columns: clickstream_user_dim_view_columns,
+          customSql: `select * from {{schema}}.${CLICKSTREAM_USER_DIM_VIEW_NAME}`,
+          columnGroups: [
+            {
+              geoSpatialColumnGroupName: 'geo',
+              geoSpatialColumnGroupColumns: [
+                'first_visit_country',
+                'first_visit_city',
+              ],
+            },
+          ],
+          projectedColumns: [
+            'user_pseudo_id',
+            'user_id',
+            'first_visit_date',
+            'first_visit_install_source',
+            'first_visit_device_language',
+            'first_platform',
+            'first_visit_country',
+            'first_visit_city',
+            'first_traffic_source_source',
+            'first_traffic_source_medium',
+            'first_traffic_source_name',
+            'custom_attr_key',
+            'custom_attr_value',
+            'registration_status',
+          ],
+          tagColumnOperations: [
+            {
+              columnName: 'first_visit_city',
+              columnGeographicRoles: ['CITY'],
+            },
+            {
+              columnName: 'first_visit_country',
+              columnGeographicRoles: ['COUNTRY'],
+            },
+          ],
+        },
+        {
+          tableName: CLICKSTREAM_SESSION_VIEW_PLACEHOLDER,
+          importMode: 'DIRECT_QUERY',
+          customSql: `select * from {{schema}}.${CLICKSTREAM_SESSION_VIEW_NAME}`,
+          columns: clickstream_session_view_columns,
+        },
+        {
+          tableName: CLICKSTREAM_LIFECYCLE_DAILY_VIEW_PLACEHOLDER,
+          importMode: 'DIRECT_QUERY',
+          customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_LIFECYCLE_DAILY_VIEW_NAME}`,
+          columns: clickstream_lifecycle_daily_view_columns,
+          projectedColumns: [
+            'time_period',
+            'this_day_value',
+            'sum',
+          ],
+        },
+      ],
+    },
+  };
+
+  const testProps3 = {
+    awsAccountId: 'xxxxxxxxxx',
+    awsRegion: 'us-east-1',
+    awsPartition: 'aws',
+    quickSightNamespace: 'default',
+    quickSightUser: 'clickstream',
+    quickSightPrincipalArn: 'test-principal-arn',
+    quickSightOwnerPrincipalArn: 'test-principal-arn',
+    databaseName: 'test-database',
+    templateArn: 'test-template-arn',
+    vpcConnectionArn: 'arn:aws:quicksight:ap-southeast-1:xxxxxxxxxx:vpcConnection/test',
+
+    dashboardDefProps: {
+      analysisName: 'Clickstream Analysis',
+      dashboardName: 'Clickstream Dashboard',
+      templateArn: 'test-template-arn',
+      databaseName: 'test-database-name',
+      dataSourceArn: 'test-datasource',
+      dataSets: [
+        {
+          tableName: 'clickstream_user_dim_view',
+          importMode: 'DIRECT_QUERY',
+          columns: clickstream_user_dim_view_columns,
+          customSql: `select * from {{schema}}.${CLICKSTREAM_USER_DIM_VIEW_NAME}`,
+          columnGroups: [
+            {
+              geoSpatialColumnGroupName: 'geo',
+              geoSpatialColumnGroupColumns: [
+                'first_visit_country',
+                'first_visit_city',
+              ],
+            },
+          ],
+          projectedColumns: [
+            'user_pseudo_id',
+            'user_id',
+            'first_visit_date',
+            'first_visit_install_source',
+            'first_visit_device_language',
+            'first_platform',
+            'first_visit_country',
+            'first_visit_city',
+            'first_traffic_source_source',
+            'first_traffic_source_medium',
+            'first_traffic_source_name',
+            'custom_attr_key',
+            'custom_attr_value',
+            'registration_status',
+          ],
+          tagColumnOperations: [
+            {
+              columnName: 'first_visit_city',
+              columnGeographicRoles: ['CITY'],
+            },
+            {
+              columnName: 'first_visit_country',
+              columnGeographicRoles: ['COUNTRY'],
+            },
+          ],
+        },
+        {
+          tableName: CLICKSTREAM_LIFECYCLE_DAILY_VIEW_PLACEHOLDER,
+          importMode: 'DIRECT_QUERY',
+          customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_LIFECYCLE_DAILY_VIEW_NAME}`,
+          columns: clickstream_lifecycle_daily_view_columns,
+          projectedColumns: [
+            'time_period',
+            'this_day_value',
+            'sum',
+          ],
         },
       ],
     },
@@ -258,6 +414,20 @@ describe('QuickSight Lambda function', () => {
     OldResourceProperties: {
       ...basicCloudFormationUpdateEvent.ResourceProperties,
       ...commonProps,
+      schemas: 'test1',
+    },
+  };
+
+  const updateEventWithNewDataSet = {
+    ...basicCloudFormationUpdateEvent,
+    ResourceProperties: {
+      ...basicCloudFormationUpdateEvent.ResourceProperties,
+      ...testProps2,
+      schemas: 'test1',
+    },
+    OldResourceProperties: {
+      ...basicCloudFormationUpdateEvent.ResourceProperties,
+      ...testProps3,
       schemas: 'test1',
     },
   };
@@ -1177,6 +1347,90 @@ describe('QuickSight Lambda function', () => {
     logger.info(`#dashboards#:${resp.Data?.dashboards}`);
     expect(JSON.parse(resp.Data?.dashboards)[0].dashboardId).toEqual('dashboard_0');
     expect(JSON.parse(resp.Data?.dashboards)[1].dashboardId).toEqual('dashboard_1');
+  });
+
+  test('Update QuickSight dashboard - with new dateset or upgrade from older version', async () => {
+
+    quickSightClientMock.on(UpdateDataSetCommand).callsFakeOnce(input => {
+      if (input.DataSetId !== 'clickstream_dataset_test-database-n_test1_Lifecycle_Daily_View_c0f9155d') {
+        throw new Error('update data set id is not the expected one.');
+      }
+      return {
+        Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:dataset/dataset_0',
+        Status: 200,
+      };
+    });
+
+    quickSightClientMock.on(CreateDataSetCommand).resolvesOnce({
+      Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:dataset/dataset_1',
+      Status: 200,
+    }).on(CreateDataSetCommand).resolvesOnce({
+      Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:dataset/dataset_1',
+      Status: 200,
+    });
+
+    quickSightClientMock.on(DeleteDataSetCommand).callsFakeOnce(input => {
+      if (input.DataSetId !== 'clickstream_dataset_test-database-n_test1_user_dim_view_83ab211d') {
+        throw new Error('delete data set id is not the expected one.');
+      }
+      return {};
+    });
+
+    quickSightClientMock.on(DescribeDataSetCommand).resolvesOnce({
+      DataSet: {
+        DataSetId: 'dataset_0',
+      },
+    }).resolvesOnce({
+      DataSet: {
+        DataSetId: 'dataset_1',
+      },
+    }).resolvesOnce({
+      DataSet: {
+        DataSetId: 'dataset_2',
+      },
+    }).rejectsOnce(notExistError);
+
+    quickSightClientMock.on(UpdateAnalysisCommand).resolves({
+      Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:analysis/analysis_0',
+      Status: 200,
+    });
+
+    quickSightClientMock.on(UpdateDashboardCommand).resolvesOnce({
+      DashboardId: 'dashboard_0',
+      Status: 200,
+    });
+
+    quickSightClientMock.on(DescribeAnalysisDefinitionCommand).resolves({
+      ResourceStatus: ResourceStatus.UPDATE_SUCCESSFUL,
+    });
+    quickSightClientMock.on(DescribeDashboardDefinitionCommand).resolves({
+      ResourceStatus: ResourceStatus.UPDATE_SUCCESSFUL,
+    });
+    quickSightClientMock.on(UpdateDataSetPermissionsCommand).resolves({});
+    quickSightClientMock.on(UpdateAnalysisPermissionsCommand).resolves({});
+    quickSightClientMock.on(UpdateDashboardPermissionsCommand).resolves({});
+
+    const resp = await handler(updateEventWithNewDataSet, context) as CdkCustomResourceResponse;
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDataSetCommand, 4);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeAnalysisDefinitionCommand, 1);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDashboardDefinitionCommand, 1);
+
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateAnalysisCommand, 0);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateDashboardCommand, 0);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(UpdateDataSetCommand, 1);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateDataSetCommand, 2);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteDataSetCommand, 1);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(UpdateAnalysisCommand, 1);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(UpdateDashboardCommand, 1);
+
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteAnalysisCommand, 0);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteDashboardCommand, 0);
+
+    expect(resp.Data?.dashboards).toBeDefined();
+    expect(JSON.parse(resp.Data?.dashboards)).toHaveLength(1);
+    logger.info(`#dashboards#:${resp.Data?.dashboards}`);
+    expect(JSON.parse(resp.Data?.dashboards)[0].dashboardId).toEqual('dashboard_0');
+
   });
 
 });
