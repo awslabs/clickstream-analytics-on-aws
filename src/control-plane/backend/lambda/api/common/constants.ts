@@ -68,21 +68,15 @@ const DEFAULT_ANALYST_ROLE_NAMES = 'ClickstreamAnalyst';
 const DEFAULT_ANALYST_READER_ROLE_NAMES = 'ClickstreamAnalystReader';
 const PIPELINE_STACKS = 'PipelineStacks';
 
+const SOLUTION_COMMON_VPC_ENDPOINTS = ['s3', 'logs'];
+const SOLUTION_INGESTION_VPC_ENDPOINTS = ['ecr.dkr', 'ecr.api', 'ecs', 'ecs-agent', 'ecs-telemetry', 'kinesis-streams'];
+const SOLUTION_DATA_PROCESSING_VPC_ENDPOINTS = ['emr-serverless', 'glue'];
+const SOLUTION_DATA_MODELING_VPC_ENDPOINTS = ['redshift-data', 'states', 'sts', 'dynamodb'];
 const SOLUTION_VPC_ENDPOINTS = [
-  's3',
-  'logs',
-  'ecr.dkr',
-  'ecr.api',
-  'ecs',
-  'ecs-agent',
-  'ecs-telemetry',
-  'kinesis-streams',
-  'emr-serverless',
-  'glue',
-  'redshift-data',
-  'states',
-  'sts',
-  'dynamodb',
+  ...SOLUTION_COMMON_VPC_ENDPOINTS,
+  ...SOLUTION_INGESTION_VPC_ENDPOINTS,
+  ...SOLUTION_DATA_PROCESSING_VPC_ENDPOINTS,
+  ...SOLUTION_DATA_MODELING_VPC_ENDPOINTS,
 ];
 
 export {
@@ -113,5 +107,9 @@ export {
   DEFAULT_ANALYST_ROLE_NAMES,
   DEFAULT_ANALYST_READER_ROLE_NAMES,
   PIPELINE_STACKS,
+  SOLUTION_COMMON_VPC_ENDPOINTS,
+  SOLUTION_INGESTION_VPC_ENDPOINTS,
+  SOLUTION_DATA_PROCESSING_VPC_ENDPOINTS,
+  SOLUTION_DATA_MODELING_VPC_ENDPOINTS,
   SOLUTION_VPC_ENDPOINTS,
 };
