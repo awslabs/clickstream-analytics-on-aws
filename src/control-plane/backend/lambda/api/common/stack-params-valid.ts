@@ -13,6 +13,7 @@
 
 import { ConnectivityType, NatGateway, SecurityGroupRule, VpcEndpoint } from '@aws-sdk/client-ec2';
 import { CronDate, parseExpression } from 'cron-parser';
+import { SOLUTION_COMMON_VPC_ENDPOINTS, SOLUTION_DATA_MODELING_VPC_ENDPOINTS, SOLUTION_DATA_PROCESSING_VPC_ENDPOINTS, SOLUTION_INGESTION_VPC_ENDPOINTS, SOLUTION_VPC_ENDPOINTS } from './constants';
 import { XSS_PATTERN } from './constants-ln';
 import { REDSHIFT_MODE } from './model-ln';
 import { ClickStreamBadRequestError, ClickStreamSubnet, IngestionServerSinkBatchProps, IngestionServerSizeProps, PipelineSinkType, Policy, SubnetType } from './types';
@@ -410,11 +411,11 @@ async function _checkVpcEndpointsForIsolatedSubnets(pipeline: IPipeline, vpcId: 
         selectedPrivateSubnet,
         vpcEndpoints,
         vpcEndpointSecurityGroupRules,
-        getVpcEndpointServices(pipeline.region, ['s3', 'logs']),
+        getVpcEndpointServices(pipeline.region, SOLUTION_COMMON_VPC_ENDPOINTS),
       );
       _validateEndpointsForModules(pipeline, allSubnets, isolatedSubnetsAZ, selectedPrivateSubnet, vpcEndpoints, vpcEndpointSecurityGroupRules);
     } else {
-      const vpcEndpointServices = vpcEndpoints.map(vpce => vpce.ServiceName!);
+      const vpcEndpointServices = vpcEndpoints.map(vpce => vpce.ServiceName!).filter(s => SOLUTION_VPC_ENDPOINTS.includes(s));
       validateVpcEndpoint(
         allSubnets,
         privateSubnetsAZ,
@@ -431,13 +432,7 @@ async function _checkVpcEndpointsForIsolatedSubnets(pipeline: IPipeline, vpcId: 
 function _validateEndpointsForModules(pipeline: IPipeline, allSubnets: ClickStreamSubnet[], isolatedSubnetsAZ: string[],
   privateSubnet: ClickStreamSubnet, vpcEndpoints: VpcEndpoint[], vpcEndpointSecurityGroupRules: SecurityGroupRule[]) {
   if (pipeline.ingestionServer) {
-    const services = [
-      'ecr.dkr',
-      'ecr.api',
-      'ecs',
-      'ecs-agent',
-      'ecs-telemetry',
-    ];
+    const services = SOLUTION_INGESTION_VPC_ENDPOINTS.slice(0, 5);
     if (pipeline.ingestionServer.sinkType === PipelineSinkType.KINESIS) {
       services.push('kinesis-streams');
     }
@@ -457,7 +452,7 @@ function _validateEndpointsForModules(pipeline: IPipeline, allSubnets: ClickStre
       privateSubnet,
       vpcEndpoints,
       vpcEndpointSecurityGroupRules,
-      getVpcEndpointServices(pipeline.region, ['emr-serverless', 'glue']),
+      getVpcEndpointServices(pipeline.region, SOLUTION_DATA_PROCESSING_VPC_ENDPOINTS),
     );
   }
   if (pipeline.dataModeling) {
@@ -467,7 +462,7 @@ function _validateEndpointsForModules(pipeline: IPipeline, allSubnets: ClickStre
       privateSubnet,
       vpcEndpoints,
       vpcEndpointSecurityGroupRules,
-      getVpcEndpointServices(pipeline.region, ['redshift-data', 'states', 'sts', 'dynamodb']),
+      getVpcEndpointServices(pipeline.region, SOLUTION_DATA_MODELING_VPC_ENDPOINTS),
     );
   }
 }

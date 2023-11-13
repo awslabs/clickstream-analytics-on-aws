@@ -302,7 +302,7 @@ describe('Pipeline test', () => {
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeRouteTablesCommand, 1);
     expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 1);
   });
-  it('Create pipeline in private subnet with vpc endpoint', async () => {
+  it('Create pipeline in private subnet with vpc endpoint not required for our solution', async () => {
     tokenMock(ddbMock, false);
     projectExistedMock(ddbMock, true);
     dictionaryMock(ddbMock);
@@ -322,13 +322,15 @@ describe('Pipeline test', () => {
         ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_QUICKSIGHT_PIPELINE,
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
-    expect(res.statusCode).toBe(400);
-    expect(res.body.message).toEqual('Validation error: vpc endpoint error in subnet: subnet-00000000000000011, detail: [{\"service\":\"com.amazonaws.ap-southeast-1.error\",\"reason\":\"The Availability Zones (AZ) of VPC Endpoint (com.amazonaws.ap-southeast-1.error) subnets must contain Availability Zones (AZ) of isolated subnets.\"}].');
+    expect(res.statusCode).toBe(201);
+    expect(res.body.data).toHaveProperty('id');
+    expect(res.body.message).toEqual('Pipeline added.');
+    expect(res.body.success).toEqual(true);
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeVpcEndpointsCommand, 1);
-    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSecurityGroupRulesCommand, 1);
+    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSecurityGroupRulesCommand, 2);
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSubnetsCommand, 1);
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeRouteTablesCommand, 1);
-    expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 0);
+    expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 1);
   });
   it('Create pipeline with ALB policy disable ', async () => {
     tokenMock(ddbMock, false);
