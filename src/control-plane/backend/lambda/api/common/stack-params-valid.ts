@@ -13,6 +13,7 @@
 
 import { ConnectivityType, NatGateway, SecurityGroupRule, VpcEndpoint } from '@aws-sdk/client-ec2';
 import { CronDate, parseExpression } from 'cron-parser';
+import { SOLUTION_VPC_ENDPOINTS } from './constants';
 import { XSS_PATTERN } from './constants-ln';
 import { REDSHIFT_MODE } from './model-ln';
 import { ClickStreamBadRequestError, ClickStreamSubnet, IngestionServerSinkBatchProps, IngestionServerSizeProps, PipelineSinkType, Policy, SubnetType } from './types';
@@ -23,7 +24,6 @@ import { simulateCustomPolicy } from '../store/aws/iam';
 import { describeAccountSubscription } from '../store/aws/quicksight';
 import { getS3BucketPolicy } from '../store/aws/s3';
 import { getSecretValue } from '../store/aws/secretsmanager';
-import { SOLUTION_VPC_ENDPOINTS } from './constants';
 
 export const validatePattern = (parameter: string, pattern: string, value: string | undefined) => {
   if (!value) {
