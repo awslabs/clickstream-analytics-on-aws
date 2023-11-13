@@ -105,6 +105,7 @@ interface DataProcessingProps {
   redshiftProvisionedClusterEmptyError: boolean;
   redshiftProvisionedDBUserEmptyError: boolean;
   redshiftProvisionedDBUserFormatError: boolean;
+  transformPluginEmptyError: boolean;
 }
 
 const DataProcessing: React.FC<DataProcessingProps> = (
@@ -143,6 +144,7 @@ const DataProcessing: React.FC<DataProcessingProps> = (
     redshiftProvisionedClusterEmptyError,
     redshiftProvisionedDBUserEmptyError,
     redshiftProvisionedDBUserFormatError,
+    transformPluginEmptyError,
   } = props;
 
   const [selectedExecution, setSelectedExecution] = useState(
@@ -580,6 +582,15 @@ const DataProcessing: React.FC<DataProcessingProps> = (
                   ) {t('pipeline:create.transformDesc2')}
                 </div>
               }
+              footer={ternary(
+                transformPluginEmptyError,
+                <div className="mt-m15">
+                  <FormField
+                    errorText={t('pipeline:valid.transformPluginEmptyError')}
+                  />
+                </div>,
+                undefined
+              )}
             />
           )}
 

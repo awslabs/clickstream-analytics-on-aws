@@ -116,6 +116,7 @@ describe('Test data processing settings', () => {
         redshiftServerlessSubnetInvalidError={false}
         redshiftProvisionedClusterEmptyError={false}
         redshiftProvisionedDBUserEmptyError={false}
+        transformPluginEmptyError={false}
       />
     );
 
@@ -228,6 +229,7 @@ describe('Test redsfhit settings', () => {
         redshiftServerlessSubnetInvalidError={false}
         redshiftProvisionedClusterEmptyError={false}
         redshiftProvisionedDBUserEmptyError={false}
+        transformPluginEmptyError={false}
       />
     );
 
@@ -342,6 +344,7 @@ describe('Test redsfhit settings', () => {
         redshiftServerlessSubnetInvalidError={false}
         redshiftProvisionedClusterEmptyError={false}
         redshiftProvisionedDBUserEmptyError={false}
+        transformPluginEmptyError={false}
       />
     );
 
@@ -458,6 +461,7 @@ describe('Test MSK kafkaConnector settings', () => {
         redshiftServerlessSubnetInvalidError={false}
         redshiftProvisionedClusterEmptyError={false}
         redshiftProvisionedDBUserEmptyError={false}
+        transformPluginEmptyError={false}
       />
     );
 
@@ -583,6 +587,7 @@ describe('Test MSK kafkaConnector settings', () => {
         redshiftServerlessSubnetInvalidError={false}
         redshiftProvisionedClusterEmptyError={false}
         redshiftProvisionedDBUserEmptyError={false}
+        transformPluginEmptyError={false}
       />
     );
 

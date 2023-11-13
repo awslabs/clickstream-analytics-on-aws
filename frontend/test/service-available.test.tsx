@@ -563,6 +563,7 @@ describe('Test EMR Serverless service available', () => {
         redshiftServerlessSubnetInvalidError={false}
         redshiftProvisionedClusterEmptyError={false}
         redshiftProvisionedDBUserEmptyError={false}
+        transformPluginEmptyError={false}
       />
     );
 
@@ -674,6 +675,7 @@ describe('Test EMR Serverless service available', () => {
         redshiftServerlessSubnetInvalidError={false}
         redshiftProvisionedClusterEmptyError={false}
         redshiftProvisionedDBUserEmptyError={false}
+        transformPluginEmptyError={false}
       />
     );
 
@@ -787,6 +789,7 @@ describe('Test Redsfhift Serverless service available', () => {
         redshiftServerlessSubnetInvalidError={false}
         redshiftProvisionedClusterEmptyError={false}
         redshiftProvisionedDBUserEmptyError={false}
+        transformPluginEmptyError={false}
       />
     );
 
@@ -903,6 +906,7 @@ describe('Test Redsfhift Serverless service available', () => {
         redshiftServerlessSubnetInvalidError={false}
         redshiftProvisionedClusterEmptyError={false}
         redshiftProvisionedDBUserEmptyError={false}
+        transformPluginEmptyError={false}
       />
     );
 

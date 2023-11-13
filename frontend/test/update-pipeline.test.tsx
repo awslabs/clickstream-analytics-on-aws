@@ -121,6 +121,7 @@ describe('Test update pipeline when not eanble data processing or data modeling'
         redshiftServerlessSubnetInvalidError={false}
         redshiftProvisionedClusterEmptyError={false}
         redshiftProvisionedDBUserEmptyError={false}
+        transformPluginEmptyError={false}
       />
     );
 
@@ -242,6 +243,7 @@ describe('Test update pipeline when not eanble data processing or data modeling'
         redshiftServerlessSubnetInvalidError={false}
         redshiftProvisionedClusterEmptyError={false}
         redshiftProvisionedDBUserEmptyError={false}
+        transformPluginEmptyError={false}
       />
     );
 

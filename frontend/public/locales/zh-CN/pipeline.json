@@ -47,7 +47,8 @@
     "redshiftProvisionedDBUserEmptyError": "请输入数据库用户。",
     "redshiftProvisionedDBUserFormatError": "数据库用户格式错误",
     "emailInvalid": "电子邮件无效。",
-    "stackRollbackFailed": "某些堆栈处于 ROLLBACK_FAILED 状态，无法更新。"
+    "stackRollbackFailed": "某些堆栈处于 ROLLBACK_FAILED 状态，无法更新。",
+    "transformPluginEmptyError": "使用第三方 SDK 时需选择转换插件。"
   },
   "create": {
     "basicInfo": "基本配置",
