@@ -68,6 +68,23 @@ const DEFAULT_ANALYST_ROLE_NAMES = 'ClickstreamAnalyst';
 const DEFAULT_ANALYST_READER_ROLE_NAMES = 'ClickstreamAnalystReader';
 const PIPELINE_STACKS = 'PipelineStacks';
 
+const SOLUTION_VPC_ENDPOINTS = [
+  's3',
+  'logs',
+  'ecr.dkr',
+  'ecr.api',
+  'ecs',
+  'ecs-agent',
+  'ecs-telemetry',
+  'kinesis-streams',
+  'emr-serverless',
+  'glue',
+  'redshift-data',
+  'states',
+  'sts',
+  'dynamodb',
+];
+
 export {
   clickStreamTableName,
   dictionaryTableName,
@@ -96,4 +113,5 @@ export {
   DEFAULT_ANALYST_ROLE_NAMES,
   DEFAULT_ANALYST_READER_ROLE_NAMES,
   PIPELINE_STACKS,
+  SOLUTION_VPC_ENDPOINTS,
 };

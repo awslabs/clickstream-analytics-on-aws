@@ -23,6 +23,7 @@ import { simulateCustomPolicy } from '../store/aws/iam';
 import { describeAccountSubscription } from '../store/aws/quicksight';
 import { getS3BucketPolicy } from '../store/aws/s3';
 import { getSecretValue } from '../store/aws/secretsmanager';
+import { SOLUTION_VPC_ENDPOINTS } from './constants';
 
 export const validatePattern = (parameter: string, pattern: string, value: string | undefined) => {
   if (!value) {
@@ -414,7 +415,7 @@ async function _checkVpcEndpointsForIsolatedSubnets(pipeline: IPipeline, vpcId: 
       );
       _validateEndpointsForModules(pipeline, allSubnets, isolatedSubnetsAZ, selectedPrivateSubnet, vpcEndpoints, vpcEndpointSecurityGroupRules);
     } else {
-      const vpcEndpointServices = vpcEndpoints.map(vpce => vpce.ServiceName!);
+      const vpcEndpointServices = vpcEndpoints.map(vpce => vpce.ServiceName!).filter(s => SOLUTION_VPC_ENDPOINTS.includes(s));
       validateVpcEndpoint(
         allSubnets,
         privateSubnetsAZ,
