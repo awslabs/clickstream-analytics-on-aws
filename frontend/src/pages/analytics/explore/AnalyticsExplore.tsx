@@ -272,6 +272,10 @@ const AnalyticsExplore: React.FC = () => {
     }
   }, [selectedOption]);
 
+  useEffect(() => {
+    console.info('metadataEventParameters:', metadataEventParameters);
+  }, [metadataEventParameters]);
+
   return (
     <div className="flex">
       <AnalyticsNavigation
@@ -336,10 +340,8 @@ const AnalyticsExplore: React.FC = () => {
                 <AnalyticsFunnel
                   loadingEvents={loadingMetadataEvent}
                   loading={false}
-                  loadFunc={loadData}
                   pipeline={pipeline}
                   metadataEvents={metadataEvents}
-                  metadataEventParameters={metadataEventParameters}
                   metadataUserAttributes={metadataUserAttributes}
                   categoryEvents={categoryEvents}
                   presetParameters={presetParameters}
@@ -350,10 +352,8 @@ const AnalyticsExplore: React.FC = () => {
                 <AnalyticsEvent
                   loadingEvents={loadingMetadataEvent}
                   loading={false}
-                  loadFunc={loadData}
                   pipeline={pipeline}
                   metadataEvents={metadataEvents}
-                  metadataEventParameters={metadataEventParameters}
                   metadataUserAttributes={metadataUserAttributes}
                   categoryEvents={categoryEvents}
                   presetParameters={presetParameters}
@@ -364,10 +364,8 @@ const AnalyticsExplore: React.FC = () => {
                 <AnalyticsPath
                   loadingEvents={loadingMetadataEvent}
                   loading={false}
-                  loadFunc={loadData}
                   pipeline={pipeline}
                   metadataEvents={metadataEvents}
-                  metadataEventParameters={metadataEventParameters}
                   metadataUserAttributes={metadataUserAttributes}
                   categoryEvents={categoryEvents}
                   presetParameters={presetParameters}

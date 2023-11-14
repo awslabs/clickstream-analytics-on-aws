@@ -36,15 +36,15 @@ import {
   DEFAULT_EVENT_ITEM,
   IEventAnalyticsItem,
   INIT_SEGMENTATION_DATA,
-  SegmentationFilterDataType,
 } from 'components/eventselect/AnalyticsType';
 import EventsSelect from 'components/eventselect/EventSelect';
-import SegmentationFilter from 'components/eventselect/SegmentationFilter';
+import AnalyticsSegmentFilter from 'components/eventselect/reducer/AnalyticsSegmentFilter';
+import { analyticsSegmentFilterReducer } from 'components/eventselect/reducer/analyticsSegmentFilterReducer';
 import { DispatchContext } from 'context/StateContext';
 import { UserContext } from 'context/UserContext';
 import { HelpInfoActionType, HelpPanelType } from 'context/reducer';
 import { cloneDeep } from 'lodash';
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useReducer, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { COMMON_ALERT_TYPE, IUserRole } from 'ts/const';
@@ -87,10 +87,8 @@ import SaveToDashboardModal from '../comps/SelectDashboardModal';
 
 interface AnalyticsFunnelProps {
   loading: boolean;
-  loadFunc: () => void;
   pipeline: IPipeline;
   metadataEvents: IMetadataEvent[];
-  metadataEventParameters: IMetadataEventParameter[];
   metadataUserAttributes: IMetadataUserAttribute[];
   categoryEvents: CategoryItemType[];
   presetParameters: CategoryItemType[];
@@ -203,11 +201,13 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
     ]
   );
 
-  const [segmentationOptionData, setSegmentationOptionData] =
-    useState<SegmentationFilterDataType>({
+  const [filterOptionData, filterOptionDataDispatch] = useReducer(
+    analyticsSegmentFilterReducer,
+    {
       ...INIT_SEGMENTATION_DATA,
       conditionOptions: presetParameters,
-    });
+    }
+  );
 
   const [groupOption, setGroupOption] = useState<SelectProps.Option | null>(
     null
@@ -269,7 +269,7 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
         windowValue
       ),
       eventAndConditions: getEventAndConditions(eventOptionData),
-      globalEventCondition: getGlobalEventCondition(segmentationOptionData),
+      globalEventCondition: getGlobalEventCondition(filterOptionData),
       timeScopeType: dateRangeParams?.timeScopeType,
       groupColumn: timeGranularity.value,
       groupCondition:
@@ -331,9 +331,9 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
         enableChangeRelation: true,
       },
     ]);
-    setSegmentationOptionData({
-      ...INIT_SEGMENTATION_DATA,
-      conditionOptions: presetParameters,
+    filterOptionDataDispatch({
+      type: 'resetFilterData',
+      presetParameters,
     });
     setDateRangeValue(DEFAULT_WEEK_RANGE);
     setTimeGranularity({
@@ -387,9 +387,9 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
   };
 
   useEffect(() => {
-    setSegmentationOptionData({
-      ...INIT_SEGMENTATION_DATA,
-      conditionOptions: presetParameters,
+    filterOptionDataDispatch({
+      type: 'resetFilterData',
+      presetParameters,
     });
   }, [presetParameters]);
 
@@ -630,54 +630,9 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
                 type="filter"
                 description={t('analytics:information.filterInfo')}
               />
-              <SegmentationFilter
-                segmentationData={segmentationOptionData}
-                addNewConditionItem={() => {
-                  setSegmentationOptionData((prev) => {
-                    const dataObj = cloneDeep(prev);
-                    dataObj.data.push(DEFAULT_CONDITION_DATA);
-                    return dataObj;
-                  });
-                }}
-                removeEventCondition={(index) => {
-                  setSegmentationOptionData((prev) => {
-                    const dataObj = cloneDeep(prev);
-                    const newCondition = dataObj.data.filter(
-                      (item, i) => i !== index
-                    );
-                    dataObj.data = newCondition;
-                    return dataObj;
-                  });
-                }}
-                changeConditionCategoryOption={(index, category) => {
-                  setSegmentationOptionData((prev) => {
-                    const dataObj = cloneDeep(prev);
-                    dataObj.data[index].conditionOption = category;
-                    dataObj.data[index].conditionValue = [];
-                    return dataObj;
-                  });
-                }}
-                changeConditionOperator={(index, operator) => {
-                  setSegmentationOptionData((prev) => {
-                    const dataObj = cloneDeep(prev);
-                    dataObj.data[index].conditionOperator = operator;
-                    return dataObj;
-                  });
-                }}
-                changeConditionValue={(index, value) => {
-                  setSegmentationOptionData((prev) => {
-                    const dataObj = cloneDeep(prev);
-                    dataObj.data[index].conditionValue = value;
-                    return dataObj;
-                  });
-                }}
-                changeCurRelationShip={(relation) => {
-                  setSegmentationOptionData((prev) => {
-                    const dataObj = cloneDeep(prev);
-                    dataObj.conditionRelationShip = relation;
-                    return dataObj;
-                  });
-                }}
+              <AnalyticsSegmentFilter
+                filterDataState={filterOptionData}
+                filterDataDispatch={filterOptionDataDispatch}
               />
               <br />
               <SectionTitle

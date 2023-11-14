@@ -35,15 +35,15 @@ import {
   IAnalyticsItem,
   IEventAnalyticsItem,
   INIT_SEGMENTATION_DATA,
-  SegmentationFilterDataType,
 } from 'components/eventselect/AnalyticsType';
 import EventsSelect from 'components/eventselect/EventSelect';
-import SegmentationFilter from 'components/eventselect/SegmentationFilter';
+import AnalyticsSegmentFilter from 'components/eventselect/reducer/AnalyticsSegmentFilter';
+import { analyticsSegmentFilterReducer } from 'components/eventselect/reducer/analyticsSegmentFilterReducer';
 import { DispatchContext } from 'context/StateContext';
 import { UserContext } from 'context/UserContext';
 import { HelpInfoActionType, HelpPanelType } from 'context/reducer';
 import { cloneDeep } from 'lodash';
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useReducer, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { COMMON_ALERT_TYPE, IUserRole } from 'ts/const';
@@ -89,10 +89,8 @@ import StartNodeSelect from '../comps/StartNodeSelect';
 
 interface AnalyticsPathProps {
   loading: boolean;
-  loadFunc: () => void;
   pipeline: IPipeline;
   metadataEvents: IMetadataEvent[];
-  metadataEventParameters: IMetadataEventParameter[];
   metadataUserAttributes: IMetadataUserAttribute[];
   categoryEvents: CategoryItemType[];
   presetParameters: CategoryItemType[];
@@ -242,11 +240,13 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
     ]
   );
 
-  const [segmentationOptionData, setSegmentationOptionData] =
-    useState<SegmentationFilterDataType>({
+  const [filterOptionData, filterOptionDataDispatch] = useReducer(
+    analyticsSegmentFilterReducer,
+    {
       ...INIT_SEGMENTATION_DATA,
       conditionOptions: presetParameters,
-    });
+    }
+  );
 
   const [platformOptions, setPlatformOptions] = useState<SelectProps.Options>([
     webPlatformOption,
@@ -281,9 +281,9 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
         disabled: true,
       },
     ]);
-    setSegmentationOptionData({
-      ...INIT_SEGMENTATION_DATA,
-      conditionOptions: presetParameters,
+    filterOptionDataDispatch({
+      type: 'resetFilterData',
+      presetParameters,
     });
     setDateRangeValue(DEFAULT_WEEK_RANGE);
     setTimeGranularity({
@@ -422,7 +422,7 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
         ExploreComputeMethod.USER_ID_CNT
       ),
       eventAndConditions: getEventAndConditions(eventOptionData),
-      globalEventCondition: getGlobalEventCondition(segmentationOptionData),
+      globalEventCondition: getGlobalEventCondition(filterOptionData),
       maxStep: 10,
       pathAnalysis: pathAnalysisParameter,
       timeScopeType: dateRangeParams?.timeScopeType,
@@ -475,9 +475,9 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
         disabled: true,
       },
     ]);
-    setSegmentationOptionData({
-      ...INIT_SEGMENTATION_DATA,
-      conditionOptions: presetParameters,
+    filterOptionDataDispatch({
+      type: 'resetFilterData',
+      presetParameters,
     });
     switch (event.detail.selectedOption?.value) {
       case ExplorePathNodeType.EVENT:
@@ -531,9 +531,9 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
   }, [selectedNodeType]);
 
   useEffect(() => {
-    setSegmentationOptionData({
-      ...INIT_SEGMENTATION_DATA,
-      conditionOptions: presetParameters,
+    filterOptionDataDispatch({
+      type: 'resetFilterData',
+      presetParameters,
     });
   }, [presetParameters]);
 
@@ -876,54 +876,9 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
                 type="filter"
                 description={t('analytics:information.filterInfo')}
               />
-              <SegmentationFilter
-                segmentationData={segmentationOptionData}
-                addNewConditionItem={() => {
-                  setSegmentationOptionData((prev) => {
-                    const dataObj = cloneDeep(prev);
-                    dataObj.data.push(DEFAULT_CONDITION_DATA);
-                    return dataObj;
-                  });
-                }}
-                removeEventCondition={(index) => {
-                  setSegmentationOptionData((prev) => {
-                    const dataObj = cloneDeep(prev);
-                    const newCondition = dataObj.data.filter(
-                      (item, i) => i !== index
-                    );
-                    dataObj.data = newCondition;
-                    return dataObj;
-                  });
-                }}
-                changeConditionCategoryOption={(index, category) => {
-                  setSegmentationOptionData((prev) => {
-                    const dataObj = cloneDeep(prev);
-                    dataObj.data[index].conditionOption = category;
-                    dataObj.data[index].conditionValue = [];
-                    return dataObj;
-                  });
-                }}
-                changeConditionOperator={(index, operator) => {
-                  setSegmentationOptionData((prev) => {
-                    const dataObj = cloneDeep(prev);
-                    dataObj.data[index].conditionOperator = operator;
-                    return dataObj;
-                  });
-                }}
-                changeConditionValue={(index, value) => {
-                  setSegmentationOptionData((prev) => {
-                    const dataObj = cloneDeep(prev);
-                    dataObj.data[index].conditionValue = value;
-                    return dataObj;
-                  });
-                }}
-                changeCurRelationShip={(relation) => {
-                  setSegmentationOptionData((prev) => {
-                    const dataObj = cloneDeep(prev);
-                    dataObj.conditionRelationShip = relation;
-                    return dataObj;
-                  });
-                }}
+              <AnalyticsSegmentFilter
+                filterDataState={filterOptionData}
+                filterDataDispatch={filterOptionDataDispatch}
               />
             </SpaceBetween>
           </ColumnLayout>
