@@ -11,8 +11,10 @@
  *  and limitations under the License.
  */
 
-package com.example.clickstream.transformer;
+package com.example.clickstream.transformer.v1;
 
+import com.example.clickstream.transformer.BaseSparkTest;
+import com.example.clickstream.transformer.v1.MyTransformer;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.junit.jupiter.api.Test;
