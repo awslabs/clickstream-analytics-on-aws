@@ -377,10 +377,8 @@ const AnalyticsExplore: React.FC = () => {
               {pipeline && selectedOption?.value === 'Retention' && (
                 <AnalyticsRetention
                   loading={false}
-                  loadFunc={loadData}
                   pipeline={pipeline}
                   metadataEvents={metadataEvents}
-                  metadataEventParameters={metadataEventParameters}
                   metadataUserAttributes={metadataUserAttributes}
                   categoryEvents={categoryEvents}
                   presetParameters={presetParameters}
