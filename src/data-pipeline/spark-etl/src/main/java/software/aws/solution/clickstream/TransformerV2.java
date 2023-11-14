@@ -57,6 +57,7 @@ import static software.aws.solution.clickstream.DatasetUtil.DATA;
 import static software.aws.solution.clickstream.DatasetUtil.DATA_SCHEMA_V2_FILE_PATH;
 import static software.aws.solution.clickstream.DatasetUtil.DEVICE_ID;
 import static software.aws.solution.clickstream.DatasetUtil.DEVICE_ID_LIST;
+import static software.aws.solution.clickstream.DatasetUtil.EVENT_APP_END;
 import static software.aws.solution.clickstream.DatasetUtil.EVENT_DATE;
 import static software.aws.solution.clickstream.DatasetUtil.EVENT_FIRST_OPEN;
 import static software.aws.solution.clickstream.DatasetUtil.EVENT_FIRST_VISIT;
@@ -470,22 +471,39 @@ public final class TransformerV2 {
     }
 
     private Optional<Dataset<Row>> extractUser(final Dataset<Row> dataset) {
-        Dataset<Row> profileSetDataset = dataset
-                .filter((col(USER_PSEUDO_ID).isNotNull()))
-                .filter(col(EVENT_NAME)
-                        .isin("user_profile_set", "_user_profile_set", EVENT_PROFILE_SET, EVENT_FIRST_OPEN, EVENT_FIRST_VISIT));
 
-        long newUserCount = profileSetDataset.count();
-        log.info(NEW_USER_COUNT + ":" + newUserCount);
+        Dataset<Row> newUserEventDataset = dataset
+                .filter(col(USER_PSEUDO_ID).isNotNull().and(
+                        col(EVENT_NAME).isin(
+                                "user_profile_set",
+                                "_user_profile_set",
+                                EVENT_PROFILE_SET,
+                                EVENT_FIRST_OPEN,
+                                EVENT_FIRST_VISIT,
+                                EVENT_APP_END)
+                ));
+
+        Dataset<Row> newUserIdDataset = newUserEventDataset.select(APP_ID, USER_PSEUDO_ID).distinct();
+        long newUserCount = newUserIdDataset.count();
+        log.info("newUserIdDataset: " + newUserCount);
+
+        Dataset<Row> profileSetDataset = newUserEventDataset
+                .filter(col(EVENT_NAME).isin("user_profile_set", "_user_profile_set", EVENT_PROFILE_SET, EVENT_FIRST_OPEN, EVENT_FIRST_VISIT));
+        log.info("profileSetDataset count: " + profileSetDataset.count());
+
+        Dataset<Row> appEndDataset = newUserEventDataset
+                .filter(col(EVENT_NAME).equalTo(EVENT_APP_END));
+        log.info("appEndDataset count: " + appEndDataset.count());
 
         Dataset<Row> userReferrerDataset = getPageRefererDataset(profileSetDataset, newUserCount);
-        Dataset<Row> userDeviceIdDataset = getUserDeviceIdDataset(profileSetDataset, newUserCount);
-        Dataset<Row> userTrafficSourceDataset = getUserTrafficSourceDataset(profileSetDataset, newUserCount);
         Dataset<Row> userChannelDataset = getUserChannelDataset(profileSetDataset, newUserCount);
 
-        Dataset<Row> profileSetDataset1 = this.userPropertiesConverter.transform(profileSetDataset);
+        Dataset<Row> userDeviceIdDataset = getUserDeviceIdDataset(newUserEventDataset, newUserCount);
+        Dataset<Row> userTrafficSourceDataset = getUserTrafficSourceDataset(appEndDataset, newUserCount);
 
-        Dataset<Row> newUserProfileMainDataset = profileSetDataset1
+        Dataset<Row> newProfileSetDataset = this.userPropertiesConverter.transform(newUserEventDataset);
+
+        Dataset<Row> newUserProfileMainDataset = newProfileSetDataset
                 .withColumn(FIRST_VISIT_DATE, to_date(timestamp_seconds(col(USER_FIRST_TOUCH_TIMESTAMP).$div(1000))))
                 .select(
                         APP_ID,
@@ -505,8 +523,6 @@ public final class TransformerV2 {
         if (newUserCount == 0) {
             return Optional.empty();
         }
-
-        Dataset<Row> newUserIdDataset = newUserProfileMainDataset.select(APP_ID, USER_PSEUDO_ID).distinct();
 
         // newUserCount > 0, below dataset should not null
         Objects.requireNonNull(userReferrerDataset);

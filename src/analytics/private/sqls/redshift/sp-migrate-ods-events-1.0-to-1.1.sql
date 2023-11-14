@@ -423,7 +423,7 @@ SELECT
 FROM
        {{schema}}.{{table_ods_events}} e
 WHERE
-       e.event_name IN ('_first_open', '_first_visit', '_profile_set')
+       e.event_name IN ('_first_open', '_first_visit', '_profile_set', '_app_end')
        AND NOT EXISTS (
               SELECT
                      1
@@ -452,6 +452,7 @@ WITH user_base_rank AS (
               ) AS et_rank
        FROM
               ods_events_user_temp e
+              AND e.event_name IN ('_first_open', '_first_visit', '_profile_set')
 ),
 user_base AS (
        SELECT
@@ -488,6 +489,7 @@ WITH user_traffic_source_rank AS (
               ods_events_user_temp
        WHERE
               source IS NOT NULL
+              AND event_name = '_app_end'
 ),
 user_traffic_source AS (
        SELECT
@@ -521,6 +523,7 @@ WITH user_page_referrer_rank AS (
        WHERE
               ep.key in ('_page_referrer', '_page_referer')
               AND ep.value.string_value IS NOT NULL
+              AND e.event_name IN ('_first_open', '_first_visit', '_profile_set')
 ),
 user_page_referrer AS (
        SELECT
@@ -574,6 +577,7 @@ WITH user_channel_rank AS (
               ods_events_user_temp e
        WHERE
               channel IS NOT NULL
+              AND e.event_name IN ('_first_open', '_first_visit', '_profile_set')
 ),
 user_channel AS (
        SELECT

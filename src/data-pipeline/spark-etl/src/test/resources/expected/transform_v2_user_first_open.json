@@ -93,9 +93,9 @@
   },
   "_first_visit_date" : "2022-11-08",
   "_first_referer" : null,
-  "_first_traffic_source_type" : "TSN",
-  "_first_traffic_medium" : "TSM",
-  "_first_traffic_source" : "TSS",
+  "_first_traffic_source_type" : null,
+  "_first_traffic_medium" : null,
+  "_first_traffic_source" : null,
   "device_id_list" : [ "deviceid-1682319109447" ],
   "_channel" : "C001"
 }
