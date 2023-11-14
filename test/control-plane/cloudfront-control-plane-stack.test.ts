@@ -962,6 +962,15 @@ describe('CloudFrontS3PortalStack - China region', () => {
       },
     }, 1);
   });
+
+  test('Switch off InstallLatestAwsSdk in China regions', () => {
+    const template = Template.fromStack(portalStack);
+
+    template.resourceCountIs('Custom::AWS', 1);
+    template.resourcePropertiesCountIs('Custom::AWS', {
+      InstallLatestAwsSdk: 'false',
+    }, 1);
+  });
 });
 
 describe('CloudFrontS3PortalStack - existing OIDC provider', () => {
