@@ -16,6 +16,7 @@ import {
   CategoryItemType,
   DEFAULT_CONDITION_DATA,
   ERelationShip,
+  INIT_SEGMENTATION_DATA,
   SegmentationFilterDataType,
 } from '../AnalyticsType';
 
@@ -70,31 +71,32 @@ export const analyticsSegmentFilterReducer = (
   action: AnalyticsFilterAction
 ): SegmentationFilterDataType => {
   switch (action.type) {
-    case 'resetFilterData':
-      console.info('action.presetParameters:', action.presetParameters);
+    case 'resetFilterData': {
       return {
-        ...state,
+        ...INIT_SEGMENTATION_DATA,
         conditionOptions: action.presetParameters,
+        enableChangeRelation: true,
       };
-    case 'changeRelationShip':
+    }
+    case 'changeRelationShip': {
       return {
         ...state,
         conditionRelationShip: action.relation,
       };
-    case 'addEventCondition':
+    }
+    case 'addEventCondition': {
       return {
         ...state,
         data: [...state.data, DEFAULT_CONDITION_DATA],
       };
-    case 'removeEventCondition':
+    }
+    case 'removeEventCondition': {
       return {
         ...state,
-        data: [
-          ...state.data.slice(0, action.index),
-          ...state.data.slice(action.index + 1),
-        ],
+        data: state.data.filter((_, i) => i !== action.index),
       };
-    case 'changeConditionCategoryOption':
+    }
+    case 'changeConditionCategoryOption': {
       return {
         ...state,
         data: [
@@ -107,7 +109,8 @@ export const analyticsSegmentFilterReducer = (
           }),
         ],
       };
-    case 'changeConditionOperator':
+    }
+    case 'changeConditionOperator': {
       return {
         ...state,
         data: [
@@ -120,7 +123,8 @@ export const analyticsSegmentFilterReducer = (
           }),
         ],
       };
-    case 'changeConditionValue':
+    }
+    case 'changeConditionValue': {
       return {
         ...state,
         data: [
@@ -133,6 +137,7 @@ export const analyticsSegmentFilterReducer = (
           }),
         ],
       };
+    }
     default:
       return state;
   }
