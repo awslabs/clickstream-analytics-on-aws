@@ -12,7 +12,7 @@
  */
 
 
-package com.example.clickstream.transformer;
+package com.example.clickstream.transformer.v1;
 
 
 import com.google.common.base.Charsets;
@@ -31,7 +31,7 @@ import java.util.Map;
 import static java.util.Objects.requireNonNull;
 import static org.apache.spark.sql.functions.*;
 import static org.apache.spark.sql.types.DataTypes.StringType;
-import static com.example.clickstream.transformer.Constants.DEBUG_LOCAL_PATH;
+import static com.example.clickstream.transformer.v1.Constants.DEBUG_LOCAL_PATH;
 
 @Slf4j
 public class Cleaner {

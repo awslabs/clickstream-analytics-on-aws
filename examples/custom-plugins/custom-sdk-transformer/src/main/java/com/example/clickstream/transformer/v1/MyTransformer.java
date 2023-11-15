@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-package com.example.clickstream.transformer;
+package com.example.clickstream.transformer.v1;
 
 
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +22,7 @@ import org.apache.spark.sql.SaveMode;
 import org.apache.spark.sql.types.DataTypes;
 
 import static org.apache.spark.sql.functions.*;
-import static com.example.clickstream.transformer.Constants.DEBUG_LOCAL_PATH;
+import static com.example.clickstream.transformer.v1.Constants.DEBUG_LOCAL_PATH;
 
 @Slf4j
 public final class MyTransformer {
