@@ -178,6 +178,23 @@ describe('User test', () => {
     expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 1);
   });
 
+  it('Get details of user that url encode', async () => {
+    tokenMock(ddbMock, false);
+    ddbMock.on(GetCommand).resolves({
+      Item: {
+        id: 'fake+test@example.com',
+        role: IUserRole.OPERATOR,
+        deleted: false,
+      },
+    });
+    const res = await request(app)
+      .get('/api/user/details?id=fake%2Btest@example.com');
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({ data: { deleted: false, role: 'Operator', id: 'fake+test@example.com' }, message: '', success: true });
+    expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 1);
+  });
+
   it('Get details of user that is not exist', async () => {
     tokenMock(ddbMock, false);
     ddbMock.on(GetCommand).resolves({});

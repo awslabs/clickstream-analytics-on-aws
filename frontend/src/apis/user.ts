@@ -24,17 +24,27 @@ export const addUser = async (user: IUser) => {
 };
 
 export const updateUser = async (user: IUser) => {
-  const result: any = await apiRequest('put', `/user/${user.id}`, user);
+  const result: any = await apiRequest(
+    'put',
+    `/user/${encodeURIComponent(user.id)}`,
+    user
+  );
   return result;
 };
 
 export const deleteUser = async (uid: string) => {
-  const result: any = await apiRequest('delete', `/user/${uid}`);
+  const result: any = await apiRequest(
+    'delete',
+    `/user/${encodeURIComponent(uid)}`
+  );
   return result;
 };
 
 export const getUserDetails = async (uid: string) => {
-  const result: any = await apiRequest('get', `/user/details?id=${uid}`);
+  const result: any = await apiRequest(
+    'get',
+    `/user/details?id=${encodeURIComponent(uid)}`
+  );
   return result;
 };
 

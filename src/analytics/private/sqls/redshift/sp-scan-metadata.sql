@@ -67,7 +67,6 @@ BEGIN
   );
 
   CREATE TEMP TABLE IF NOT EXISTS user_attribute_temp_table (
-		user_id VARCHAR(255),
 		event_timestamp BIGINT,
     property_category VARCHAR(20),
     property_name VARCHAR(255),
@@ -326,12 +325,11 @@ BEGIN
 
 	query := 'SELECT column_name FROM user_column_temp_table';
 	FOR rec IN EXECUTE query LOOP
-		EXECUTE 'INSERT INTO user_attribute_temp_table (SELECT user_id, event_timestamp, ''user_outer'' AS property_category, ''' || quote_ident(rec.column_name) || ''' AS property_name, LEFT(' || quote_ident(rec.column_name) || '::varchar, 255) AS property_value, ''string'' AS value_type FROM {{schema}}.user)';
+		EXECUTE 'INSERT INTO user_attribute_temp_table (SELECT event_timestamp, ''user_outer'' AS property_category, ''' || quote_ident(rec.column_name) || ''' AS property_name, LEFT(' || quote_ident(rec.column_name) || '::varchar, 255) AS property_value, ''string'' AS value_type FROM {{schema}}.user_m_view)';
 	END LOOP;	
 
 	INSERT INTO user_attribute_temp_table (
 		SELECT
-			user_id,
 			event_timestamp,
 			'user' AS property_category,
 			user_properties.key::varchar AS property_name,
@@ -352,7 +350,7 @@ BEGIN
 			ELSE 'None'
 			END AS value_type
 		FROM 
-			{{schema}}.user u, u.user_properties AS user_properties
+			{{schema}}.user_m_view u, u.user_properties AS user_properties
 	);	
 
   -- user attribute
@@ -384,20 +382,32 @@ BEGIN
 				property_name,
 				property_value,
 				value_type,
-				count(*) AS parameter_count
+				parameter_count
 			FROM (
 				SELECT
-					*,
-					ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY event_timestamp DESC) AS rank
-				FROM
-					user_attribute_temp_table
+					property_category,
+					property_name,
+					property_value,
+					value_type,
+					parameter_count,
+					ROW_NUMBER() OVER (PARTITION BY property_category, property_name, value_type ORDER BY parameter_count DESC) AS row_num
+				FROM (
+					SELECT
+						property_category,
+						property_name,
+						property_value,
+						value_type,
+						count(*) AS parameter_count
+					FROM
+						user_attribute_temp_table
+					WHERE 
+						property_name NOT LIKE '%timestamp%'
+						AND property_value IS NOT NULL
+						AND property_value != ''
+					GROUP BY property_category, property_name, property_value, value_type
+				)
 			)
-			WHERE 
-				property_name NOT LIKE '%timestamp%'
-				AND rank = 1 
-				AND property_value IS NOT NULL
-				AND property_value != ''
-			GROUP BY property_category, property_name, property_value, value_type
+			WHERE row_num <= top_frequent_properties_limit
 		)
 		GROUP BY project_id, app_info_app_id, month, day_number, property_category, property_name, value_type
 	);
