@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-package com.example.clickstream.transformer;
+package com.example.clickstream.transformer.v1;
 
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;

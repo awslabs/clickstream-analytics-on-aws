@@ -11,8 +11,24 @@
  *  and limitations under the License.
  */
 
-package com.example.clickstream.transformer;
+package com.example.clickstream.transformer.v2.model;
 
-public class Constants {
-   public static final String DEBUG_LOCAL_PATH = "/tmp/";
+
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Getter
+@Setter
+@NoArgsConstructor
+public class EventParameter {
+    private String appId;
+    private Long eventTimestamp;
+    private String eventId;
+    private String eventName;
+    private String eventParamKey;
+    private Double eventParamDoubleValue;
+    private Float eventParamFloatValue;
+    private Long eventParamIntValue;
+    private String eventParamStringValue;
 }
