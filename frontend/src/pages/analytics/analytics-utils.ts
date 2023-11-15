@@ -155,7 +155,7 @@ export const parametersConvertToCategoryItemType = (
   }
   userAttributeItems.forEach((item) => {
     categoryUserItems.itemList.push({
-      label: item.displayName,
+      label: item.displayName.replace(ConditionCategory.USER_OUTER, ConditionCategory.USER),
       name: item.name,
       value: item.id,
       description: item.description,

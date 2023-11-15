@@ -22,7 +22,7 @@ import { t } from 'i18next';
 import React, { useContext } from 'react';
 import { useParams } from 'react-router-dom';
 import { IUserRole, USER_ATTRIBUTE_DISPLAY_PREFIX } from 'ts/const';
-import { MetadataSource } from 'ts/explore-types';
+import { ConditionCategory, MetadataSource } from 'ts/explore-types';
 import { defaultStr, getUserInfoFromLocalStorage } from 'ts/utils';
 import MetadataSourceFC from '../comps/MetadataSource';
 import MetadataTable from '../table/MetadataTable';
@@ -131,7 +131,10 @@ const MetadataUserAttributesTable: React.FC<
       id: 'displayName',
       header: t('analytics:metadata.userAttribute.tableColumnDisplayName'),
       cell: (e: IAttributeTableItem) => {
-        return e.displayName;
+        return e.displayName.replace(
+          ConditionCategory.USER_OUTER,
+          ConditionCategory.USER
+        );
       },
       minWidth: 180,
       editConfig: getDisplayNameEditConfig(),
