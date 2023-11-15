@@ -1022,22 +1022,16 @@ ul.menu-list li.checkbox-item {
   .cs-analytics-header {
     display: inline-flex;
     border-radius: 20px;
-    color: #0972d3;
     padding: 6px 20px;
     gap: 8px;
+    color: #0972d3;
+    background-color: #d3e7f9;
     span {
       display: inline-block;
     }
-    &.event {
-      background-color: #d3e7f9;
-    }
-    &.filter {
-      color: #fff;
-      background-color: #67a353;
-    }
-    &.group {
+    &.disable {
       background-color: #b1b4b1;
-      color: #fff;
+      color: #eee;
     }
   }
 
