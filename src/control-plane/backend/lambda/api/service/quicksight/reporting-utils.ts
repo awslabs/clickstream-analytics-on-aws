@@ -33,7 +33,7 @@ import { AssumeRoleCommand, STSClient } from '@aws-sdk/client-sts';
 import Mustache from 'mustache';
 import { v4 as uuidv4 } from 'uuid';
 import { DataSetProps, dataSetAdminPermissionActions } from './dashboard-ln';
-import { EventAndCondition } from './sql-builder';
+import { EventAndCondition, PairEventAndCondition, SQLCondition } from './sql-builder';
 import { AnalysisType, ExploreConversionIntervalType, ExploreLocales, ExplorePathNodeType, ExplorePathSessionDef, ExploreRelativeTimeUnit, ExploreRequestAction, ExploreTimeScopeType, ExploreVisualName, MetadataValueType, QuickSightChartType } from '../../common/explore-types';
 import { logger } from '../../common/powertools';
 import i18next from '../../i18n';
@@ -1106,6 +1106,11 @@ export function checkFunnelAnalysisParameter(params: any): CheckParamsStatus {
     return checkResult;
   }
 
+  const checkNodesLimit = _checkNodesLimit(params);
+  if (checkNodesLimit !== undefined ) {
+    return checkNodesLimit;
+  }
+
   return {
     success,
     message,
@@ -1347,4 +1352,32 @@ function _checkDuplicatedEvent(params: any): CheckParamsStatus | void {
       eventNames.push(condition.eventName);
     }
   }
+}
+
+function _checkNodesLimit(params: any): CheckParamsStatus | void {
+
+  const eventAndConditions = params.eventAndConditions as EventAndCondition[];
+  if (eventAndConditions?.length > 10) {
+    return {
+      success: false,
+      message: 'The maximum number of event conditions is 10.',
+    };
+  }
+
+  const globalEventCondition = params.globalEventCondition as SQLCondition;
+  if (globalEventCondition?.conditions?.length > 10) {
+    return {
+      success: false,
+      message: 'The maximum number of global filter conditions is 10.',
+    };
+  }
+
+  const pairEventAndConditions = params.pairEventAndConditions as PairEventAndCondition[];
+  if (pairEventAndConditions?.length > 5) {
+    return {
+      success: false,
+      message: 'The maximum number of pair event conditions is 5.',
+    };
+  }
+
 }

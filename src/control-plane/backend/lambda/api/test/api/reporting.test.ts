@@ -44,6 +44,7 @@ import { tokenMock } from './ddb-mock';
 import { ConditionCategory, ExploreLocales, ExplorePathNodeType, ExplorePathSessionDef, MetadataPlatform, MetadataValueType, QuickSightChartType } from '../../common/explore-types';
 import { app, server } from '../../index';
 import 'aws-sdk-client-mock-jest';
+import { EventAndCondition, PairEventAndCondition, SQLCondition } from '../../service/quicksight/sql-builder';
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 const cloudFormationMock = mockClient(CloudFormationClient);
@@ -1384,6 +1385,120 @@ describe('reporting test', () => {
 
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
+
+  });
+
+  it('common parameter check - limit conditions', async () => {
+    const funnelBody = {
+      action: 'PREVIEW',
+      chartType: QuickSightChartType.BAR,
+      viewName: 'testview0002',
+      projectId: 'project01_wvzh',
+      pipelineId: 'pipeline-1111111',
+      appId: 'app1',
+      sheetName: 'sheet99',
+      computeMethod: 'USER_CNT',
+      specifyJoinColumn: true,
+      joinColumn: 'user_pseudo_id',
+      conversionIntervalType: 'CUSTOMIZE',
+      conversionIntervalInSeconds: 7200,
+      eventAndConditions: [
+        {
+          eventName: 'add_button_click',
+        },
+        {
+          eventName: 'note_share',
+        },
+        {
+          eventName: 'note_export',
+        },
+      ],
+      timeScopeType: 'RELATIVE',
+      lastN: 4,
+      timeUnit: 'WK',
+      groupColumn: 'week',
+      dashboardCreateParameters: {
+        region: 'us-east-1',
+        allowDomain: 'https://example.com',
+        quickSight: {
+          principal: 'arn:aws:quicksight:us-east-1:11111:user/default/testuser',
+          dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
+          redshiftUser: 'test_redshift_user',
+        },
+        redshift: {
+          dataApiRole: 'arn:aws:iam::11111111:role/test_api_role',
+          newServerless: {
+            workgroupName: 'clickstream-project01-wvzh',
+          },
+        },
+      },
+    };
+
+    const eventAndConditions: EventAndCondition[] = [];
+
+    const globalEventConditions: SQLCondition = {
+      conditions: [],
+      conditionOperator: 'and',
+    };
+
+    const pairEventAndConditions: PairEventAndCondition[] = [];
+
+    for (let i = 0; i < 11; i++) {
+      eventAndConditions.push({
+        eventName: `event${i}`,
+      });
+      globalEventConditions.conditions.push({
+        category: ConditionCategory.OTHER,
+        property: `atrri${i}`,
+        operator: '=',
+        value: ['Android'],
+        dataType: MetadataValueType.STRING,
+      });
+      pairEventAndConditions.push({
+        startEvent: {
+          eventName: `eventStart${i}`,
+        },
+        backEvent: {
+          eventName: `eventEnd${i}`,
+        },
+      });
+    }
+    const res1 = await request(app)
+      .post('/api/reporting/funnel')
+      .send({
+        ...funnelBody,
+        eventAndConditions: eventAndConditions,
+      });
+    console.log({
+      ...funnelBody,
+      eventAndConditions: eventAndConditions,
+    });
+
+    expect(res1.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res1.statusCode).toBe(400);
+    expect(res1.body.message).toBe('The maximum number of event conditions is 10.');
+
+    const res2 = await request(app)
+      .post('/api/reporting/funnel')
+      .send({
+        ...funnelBody,
+        globalEventCondition: globalEventConditions,
+      });
+
+    expect(res2.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res2.statusCode).toBe(400);
+    expect(res2.body.message).toBe('The maximum number of global filter conditions is 10.');
+
+    const res3 = await request(app)
+      .post('/api/reporting/funnel')
+      .send({
+        ...funnelBody,
+        pairEventAndConditions: pairEventAndConditions,
+      });
+
+    expect(res3.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res3.statusCode).toBe(400);
+    expect(res3.body.message).toBe('The maximum number of pair event conditions is 5.');
 
   });
 
