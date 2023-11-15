@@ -85,8 +85,9 @@ async function createEMRServerlessApp(props: ResourcePropertiesType): Promise<st
       architecture = Architecture.X86_64;
     }
   }
+
   const input: CreateApplicationCommandInput = {
-    name: props.name,
+    name: props.name.slice(0, 64), // serverless app name length should not more than 64
     releaseLabel: props.version,
     type: 'SPARK',
     architecture: architecture as Architecture,
