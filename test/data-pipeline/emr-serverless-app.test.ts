@@ -350,3 +350,54 @@ test('should handle create error', async () => {
   }
 });
 
+test('EMR-serverless application name should not more than 64', async () => {
+  const event: CloudFormationCustomResourceEvent = {
+    ...basicCloudFormationEvent,
+    RequestType: 'Create',
+    ResourceProperties: {
+      ServiceToken: 'ServiceToken1',
+      projectId: 'test-stack-id',
+      name: 'spark-test-app-name-12345678901234567890123456789012345678901234567890123456789012345678901234567890',
+      version: 'emr-6.10.0',
+      securityGroupId: 'sg-102392x23df',
+      subnetIds: 'subnet-0001,subnet-0002',
+      idleTimeoutMinutes: '3',
+      architecture: 'Auto',
+    },
+  };
+  const context = getMockContext();
+
+  emrClientMock.on(CreateApplicationCommand).resolvesOnce({
+    applicationId: 'applicationId-001',
+  });
+
+  s3ClientMock.on(GetObjectCommand).resolves({
+    Body: undefined,
+  } as any);
+
+  await handler(event, context);
+
+  expect(emrClientMock).toHaveReceivedNthCommandWith(1, CreateApplicationCommand, {
+    architecture: 'ARM64',
+    autoStartConfiguration: {
+      enabled: true,
+    },
+    autoStopConfiguration: {
+      enabled: true,
+      idleTimeoutMinutes: 3,
+    },
+    name: 'spark-test-app-name-12345678901234567890123456789012345678901234',
+    networkConfiguration: {
+      securityGroupIds: [
+        'sg-102392x23df',
+      ],
+      subnetIds: [
+        'subnet-0001',
+        'subnet-0002',
+      ],
+    },
+    releaseLabel: 'emr-6.10.0',
+    type: 'SPARK',
+  });
+
+});

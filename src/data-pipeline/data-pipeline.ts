@@ -271,7 +271,7 @@ export class DataPipelineConstruct extends Construct {
 
     const emrServerlessAppCr = createEMRServerlessApplicationCustomResource(this, {
       projectId: this.props.projectId,
-      name: `${DATA_PROCESSING_APPLICATION_NAME_PREFIX}-Spark-APP-${this.props.projectId}`,
+      name: `${DATA_PROCESSING_APPLICATION_NAME_PREFIX}-${this.props.projectId}`,
       version: this.props.emrVersion,
       securityGroupId: emrSg.securityGroupId,
       idleTimeoutMinutes: this.props.emrApplicationIdleTimeoutMinutes,
