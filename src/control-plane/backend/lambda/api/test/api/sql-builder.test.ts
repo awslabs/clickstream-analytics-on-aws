@@ -7334,7 +7334,7 @@ describe('SQL Builder test', () => {
               ) as _session_duration,
               max(
                 case
-                  when event_param_key = '_session_id' then event_param_int_value
+                  when event_param_key = '_session_id' then event_param_string_value
                   else null
                 end
               ) as _session_id
@@ -8306,7 +8306,7 @@ describe('SQL Builder test', () => {
               ) as _session_duration,
               max(
                 case
-                  when event_param_key = '_session_id' then event_param_int_value
+                  when event_param_key = '_session_id' then event_param_string_value
                   else null
                 end
               ) as _session_id
@@ -9831,7 +9831,7 @@ describe('SQL Builder test', () => {
     select
       day::date as event_date,
       event_name,
-      _session_id as group_col,
+      _session_id::varchar as group_col,
       x_id as count
     from
       join_table
@@ -9840,7 +9840,7 @@ describe('SQL Builder test', () => {
     group by
       day,
       event_name,
-      _session_id,
+      _session_id::varchar,
       x_id
   `.trim().replace(/ /g, ''),
     );
@@ -10131,7 +10131,7 @@ describe('SQL Builder test', () => {
     select
       day::date as event_date,
       event_name,
-      geo_country as group_col,
+      geo_country::varchar as group_col,
       x_id as count
     from
       join_table
@@ -10140,7 +10140,7 @@ describe('SQL Builder test', () => {
     group by
       day,
       event_name,
-      geo_country,
+      geo_country::varchar,
       x_id
   `.trim().replace(/ /g, ''),
     );
@@ -10231,8 +10231,8 @@ describe('SQL Builder test', () => {
           app_info.id::varchar as app_info_package_id,
           app_info.install_source::varchar as app_info_install_source,
           app_info.version::varchar as app_info_version,
-              app_info.sdk_name::varchar as app_info_sdk_name,
-              app_info.sdk_version::varchar as app_info_sdk_version,
+          app_info.sdk_name::varchar as app_info_sdk_name,
+          app_info.sdk_version::varchar as app_info_sdk_version,
           device.vendor_id::varchar as device_id,
           device.mobile_brand_name::varchar as device_mobile_brand_name,
           device.mobile_model_name::varchar as device_mobile_model_name,
@@ -10253,7 +10253,7 @@ describe('SQL Builder test', () => {
           device.system_language::varchar as device_system_language,
           device.time_zone_offset_seconds::bigint as device_time_zone_offset_seconds,
           device.advertising_id::varchar as device_advertising_id,
-              device.host_name::varchar as device_host_name,
+          device.host_name::varchar as device_host_name,
           geo.continent::varchar as geo_continent,
           geo.country::varchar as geo_country,
           geo.city::varchar as geo_city,
@@ -10366,7 +10366,7 @@ describe('SQL Builder test', () => {
           event_id as event_id_0,
           user_id as user_id_0,
           user_pseudo_id as user_pseudo_id_0,
-          _session_id as _session_id_0
+          COALESCE(_session_id::varchar,'null') as _session_id_0
         from
           base_data base
         where
@@ -10380,7 +10380,7 @@ describe('SQL Builder test', () => {
           event_id as event_id_1,
           user_id as user_id_1,
           user_pseudo_id as user_pseudo_id_1,
-          _session_id as _session_id_1
+          COALESCE(_session_id::varchar,'null') as _session_id_1
         from
           base_data base
         where
@@ -10394,7 +10394,7 @@ describe('SQL Builder test', () => {
           event_id as event_id_2,
           user_id as user_id_2,
           user_pseudo_id as user_pseudo_id_2,
-          _session_id as _session_id_2
+          COALESCE(_session_id::varchar,'null') as _session_id_2
         from
           base_data base
         where
@@ -10588,8 +10588,8 @@ describe('SQL Builder test', () => {
           app_info.id::varchar as app_info_package_id,
           app_info.install_source::varchar as app_info_install_source,
           app_info.version::varchar as app_info_version,
-              app_info.sdk_name::varchar as app_info_sdk_name,
-              app_info.sdk_version::varchar as app_info_sdk_version,
+          app_info.sdk_name::varchar as app_info_sdk_name,
+          app_info.sdk_version::varchar as app_info_sdk_version,
           device.vendor_id::varchar as device_id,
           device.mobile_brand_name::varchar as device_mobile_brand_name,
           device.mobile_model_name::varchar as device_mobile_model_name,
@@ -10610,7 +10610,7 @@ describe('SQL Builder test', () => {
           device.system_language::varchar as device_system_language,
           device.time_zone_offset_seconds::bigint as device_time_zone_offset_seconds,
           device.advertising_id::varchar as device_advertising_id,
-              device.host_name::varchar as device_host_name,
+          device.host_name::varchar as device_host_name,
           geo.continent::varchar as geo_continent,
           geo.country::varchar as geo_country,
           geo.city::varchar as geo_city,
@@ -10706,7 +10706,7 @@ describe('SQL Builder test', () => {
           event_id as event_id_0,
           user_id as user_id_0,
           user_pseudo_id as user_pseudo_id_0,
-          geo_country as geo_country_0
+          COALESCE(geo_country::varchar,'null') as geo_country_0
         from
           base_data base
         where
@@ -10720,7 +10720,7 @@ describe('SQL Builder test', () => {
           event_id as event_id_1,
           user_id as user_id_1,
           user_pseudo_id as user_pseudo_id_1,
-          geo_country as geo_country_1
+          COALESCE(geo_country::varchar,'null') as geo_country_1
         from
           base_data base
         where
@@ -10734,7 +10734,7 @@ describe('SQL Builder test', () => {
           event_id as event_id_2,
           user_id as user_id_2,
           user_pseudo_id as user_pseudo_id_2,
-          geo_country as geo_country_2
+          COALESCE(geo_country::varchar,'null') as geo_country_2
         from
           base_data base
         where
@@ -12358,7 +12358,7 @@ describe('SQL Builder test', () => {
               ) as _user_first_touch_timestamp,
               max(
                 case
-                  when user_param_key = '_user_name' then user_param_int_value
+                  when user_param_key = '_user_name' then user_param_string_value
                   else null
                 end
               ) as _user_name
@@ -12925,7 +12925,7 @@ describe('SQL Builder test', () => {
               ) as _user_first_touch_timestamp,
               max(
                 case
-                  when user_param_key = '_user_name' then user_param_int_value
+                  when user_param_key = '_user_name' then user_param_string_value
                   else null
                 end
               ) as _user_name
@@ -13132,7 +13132,7 @@ describe('SQL Builder test', () => {
           app_info.id::varchar as app_info_package_id,
           app_info.install_source::varchar as app_info_install_source,
           app_info.version::varchar as app_info_version,
-              app_info.sdk_name::varchar as app_info_sdk_name,
+          app_info.sdk_name::varchar as app_info_sdk_name,
               app_info.sdk_version::varchar as app_info_sdk_version,
           device.vendor_id::varchar as device_id,
           device.mobile_brand_name::varchar as device_mobile_brand_name,
@@ -13283,7 +13283,7 @@ describe('SQL Builder test', () => {
           event_id as event_id_0,
           user_id as user_id_0,
           user_pseudo_id as user_pseudo_id_0,
-          geo_country as geo_country_0
+          COALESCE(geo_country::varchar,'null') as geo_country_0
         from
           base_data base
         where
@@ -13297,7 +13297,7 @@ describe('SQL Builder test', () => {
           event_id as event_id_1,
           user_id as user_id_1,
           user_pseudo_id as user_pseudo_id_1,
-          geo_country as geo_country_1
+          COALESCE(geo_country::varchar,'null') as geo_country_1
         from
           base_data base
         where
@@ -13311,7 +13311,7 @@ describe('SQL Builder test', () => {
           event_id as event_id_2,
           user_id as user_id_2,
           user_pseudo_id as user_pseudo_id_2,
-          geo_country as geo_country_2
+          COALESCE(geo_country::varchar,'null') as geo_country_2
         from
           base_data base
         where
@@ -13797,7 +13797,7 @@ describe('SQL Builder test', () => {
   test('buildFunnelTableView - has group Condition', () => {
 
     const sql = buildFunnelTableView({
-      schemaName: 'app1',
+      schemaName: 'shop',
       computeMethod: ExploreComputeMethod.USER_CNT,
       specifyJoinColumn: true,
       joinColumn: 'user_pseudo_id',
@@ -13837,7 +13837,7 @@ describe('SQL Builder test', () => {
       },
       eventAndConditions: [
         {
-          eventName: 'add_button_click',
+          eventName: 'view_item',
           computeMethod: ExploreComputeMethod.EVENT_CNT,
           sqlCondition: {
             conditionOperator: 'and',
@@ -13867,11 +13867,11 @@ describe('SQL Builder test', () => {
           },
         },
         {
-          eventName: 'note_share',
+          eventName: 'add_to_cart',
           computeMethod: ExploreComputeMethod.EVENT_CNT,
         },
         {
-          eventName: 'note_export',
+          eventName: 'purchase',
           computeMethod: ExploreComputeMethod.USER_CNT,
           sqlCondition: {
             conditionOperator: 'and',
@@ -13909,13 +13909,13 @@ describe('SQL Builder test', () => {
         },
       ],
       groupCondition: {
-        category: ConditionCategory.GEO,
-        property: 'country',
+        category: ConditionCategory.EVENT,
+        property: 'category',
         dataType: MetadataValueType.STRING,
       },
       timeScopeType: ExploreTimeScopeType.FIXED,
-      timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('2023-10-10'),
+      timeStart: new Date('2023-11-01'),
+      timeEnd: new Date('2023-11-15'),
       groupColumn: ExploreGroupColumn.DAY,
     });
 
@@ -13938,7 +13938,7 @@ describe('SQL Builder test', () => {
           user_properties.value.float_value::double precision as user_param_float_value,
           user_properties.value.double_value::double precision as user_param_double_value
         from
-          app1.user_m_view u,
+          shop.user_m_view u,
           u.user_properties as user_properties
       ),
       event_base as (
@@ -14020,16 +14020,17 @@ describe('SQL Builder test', () => {
             'YYYY-MM-DD HH24'
           ) || '00:00' as hour
         from
-          app1.event as event
+          shop.event as event
         where
-          event.event_date >= date '2023-10-01'
-          and event.event_date <= date '2023-10-10'
-          and event.event_name in ('add_button_click', 'note_share', 'note_export')
+          event.event_date >= date '2023-11-01'
+          and event.event_date <= date '2023-11-15'
+          and event.event_name in ('view_item', 'add_to_cart', 'purchase')
       ),
       base_data as (
         select
           _user_first_touch_timestamp,
           _session_duration,
+          category,
           event_base.*
         from
           event_base
@@ -14041,10 +14042,16 @@ describe('SQL Builder test', () => {
                   when event_param_key = '_session_duration' then event_param_int_value
                   else null
                 end
-              ) as _session_duration
+              ) as _session_duration,
+              max(
+                case
+                  when event_param_key = 'category' then event_param_string_value
+                  else null
+                end
+              ) as category
             from
               event_base
-              join app1.event_parameter as event_param on event_base.event_timestamp = event_param.event_timestamp
+              join shop.event_parameter as event_param on event_base.event_timestamp = event_param.event_timestamp
               and event_base.event_id = event_param.event_id
             group by
               event_base.event_id
@@ -14074,16 +14081,16 @@ describe('SQL Builder test', () => {
           )
           and (
             (
-              event_name = 'add_button_click'
+              event_name = 'view_item'
               and (
                 platform = 'Android'
                 and _user_first_touch_timestamp > 1686532526770
                 and _user_first_touch_timestamp > 1686532526780
               )
             )
-            or (event_name = 'note_share')
+            or (event_name = 'add_to_cart')
             or (
-              event_name = 'note_export'
+              event_name = 'purchase'
               and (
                 platform = 'Android'
                 and geo_country = 'China'
@@ -14105,11 +14112,11 @@ describe('SQL Builder test', () => {
           event_id as event_id_0,
           user_id as user_id_0,
           user_pseudo_id as user_pseudo_id_0,
-          geo_country
+          COALESCE(category::varchar, 'null') as category
         from
           base_data base
         where
-          event_name = 'add_button_click'
+          event_name = 'view_item'
       ),
       table_1 as (
         select
@@ -14119,11 +14126,11 @@ describe('SQL Builder test', () => {
           event_id as event_id_1,
           user_id as user_id_1,
           user_pseudo_id as user_pseudo_id_1,
-          geo_country
+          COALESCE(category::varchar, 'null') as category
         from
           base_data base
         where
-          event_name = 'note_share'
+          event_name = 'add_to_cart'
       ),
       table_2 as (
         select
@@ -14133,11 +14140,11 @@ describe('SQL Builder test', () => {
           event_id as event_id_2,
           user_id as user_id_2,
           user_pseudo_id as user_pseudo_id_2,
-          geo_country
+          COALESCE(category::varchar, 'null') as category
         from
           base_data base
         where
-          event_name = 'note_export'
+          event_name = 'purchase'
       ),
       join_table as (
         select
@@ -14153,37 +14160,37 @@ describe('SQL Builder test', () => {
         from
           table_0
           left outer join table_1 on table_0.user_pseudo_id_0 = table_1.user_pseudo_id_1
-          and table_0.geo_country = table_1.geo_country
+          and table_0.category = table_1.category
           and table_1.event_timestamp_1 - table_0.event_timestamp_0 > 0
           and table_1.event_timestamp_1 - table_0.event_timestamp_0 < 600 * 1000
           left outer join table_2 on table_1.user_pseudo_id_1 = table_2.user_pseudo_id_2
-          and table_1.geo_country = table_2.geo_country
+          and table_1.category = table_2.category
           and table_2.event_timestamp_2 - table_1.event_timestamp_1 > 0
           and table_2.event_timestamp_2 - table_1.event_timestamp_1 < 600 * 1000
       )
     select
       DAY,
-      geo_country as country,
-      count(distinct user_pseudo_id_0) as add_button_click,
+      category as category,
+      count(distinct user_pseudo_id_0) as view_item,
       (
         count(distinct user_pseudo_id_2)::decimal / NULLIF(count(distinct user_pseudo_id_0), 0)
       )::decimal(20, 4) as total_conversion_rate,
-      count(distinct user_pseudo_id_1) as note_share,
+      count(distinct user_pseudo_id_1) as add_to_cart,
       (
         count(distinct user_pseudo_id_1)::decimal / NULLIF(count(distinct user_pseudo_id_0), 0)
-      )::decimal(20, 4) as note_share_rate,
-      count(distinct user_pseudo_id_2) as note_export,
+      )::decimal(20, 4) as add_to_cart_rate,
+      count(distinct user_pseudo_id_2) as purchase,
       (
         count(distinct user_pseudo_id_2)::decimal / NULLIF(count(distinct user_pseudo_id_1), 0)
-      )::decimal(20, 4) as note_export_rate
+      )::decimal(20, 4) as purchase_rate
     from
       join_table
     group by
       DAY,
-      geo_country
+      category
     order by
       DAY,
-      add_button_click desc
+      view_item desc
   `.trim().replace(/ /g, ''),
     );
 
@@ -14357,8 +14364,8 @@ describe('SQL Builder test', () => {
           app_info.id::varchar as app_info_package_id,
           app_info.install_source::varchar as app_info_install_source,
           app_info.version::varchar as app_info_version,
-              app_info.sdk_name::varchar as app_info_sdk_name,
-              app_info.sdk_version::varchar as app_info_sdk_version,
+          app_info.sdk_name::varchar as app_info_sdk_name,
+          app_info.sdk_version::varchar as app_info_sdk_version,
           device.vendor_id::varchar as device_id,
           device.mobile_brand_name::varchar as device_mobile_brand_name,
           device.mobile_model_name::varchar as device_mobile_model_name,
@@ -14379,7 +14386,7 @@ describe('SQL Builder test', () => {
           device.system_language::varchar as device_system_language,
           device.time_zone_offset_seconds::bigint as device_time_zone_offset_seconds,
           device.advertising_id::varchar as device_advertising_id,
-              device.host_name::varchar as device_host_name,
+          device.host_name::varchar as device_host_name,
           geo.continent::varchar as geo_continent,
           geo.country::varchar as geo_country,
           geo.city::varchar as geo_city,
@@ -14590,7 +14597,7 @@ describe('SQL Builder test', () => {
     select
       day::date as event_date,
       event_name,
-      geo_country as group_col,
+      geo_country::varchar as group_col,
       x_id as count
     from
       join_table
@@ -14599,7 +14606,7 @@ describe('SQL Builder test', () => {
     group by
       day,
       event_name,
-      geo_country,
+      geo_country::varchar,
       x_id
   `.trim().replace(/ /g, ''),
     );
@@ -14863,7 +14870,7 @@ describe('SQL Builder test', () => {
               ) as _session_duration,
               max(
                 case
-                  when event_param_key = '_session_id' then event_param_int_value
+                  when event_param_key = '_session_id' then event_param_string_value
                   else null
                 end
               ) as _session_id
@@ -15530,7 +15537,7 @@ describe('SQL Builder test', () => {
               ) as _session_duration,
               max(
                 case
-                  when event_param_key = '_session_id' then event_param_int_value
+                  when event_param_key = '_session_id' then event_param_string_value
                   else null
                 end
               ) as _session_id
@@ -16189,7 +16196,7 @@ describe('SQL Builder test', () => {
           and first_table_1.geo_country = second_table_1.geo_country
       )
     select
-      geo_country as group_col,
+      geo_country::varchar as group_col,
       grouping,
       DATE_TRUNC('month', start_event_date) as start_event_date,
       DATE_TRUNC('month', event_date) as event_date,
@@ -16199,7 +16206,7 @@ describe('SQL Builder test', () => {
     from
       result_table
     group by
-      geo_country,
+      geo_country::varchar,
       grouping,
       start_event_date,
       event_date
@@ -16809,7 +16816,7 @@ describe('SQL Builder test', () => {
               ) as _session_duration,
               max(
                 case
-                  when event_param_key = '_session_id' then event_param_int_value
+                  when event_param_key = '_session_id' then event_param_string_value
                   else null
                 end
               ) as _session_id

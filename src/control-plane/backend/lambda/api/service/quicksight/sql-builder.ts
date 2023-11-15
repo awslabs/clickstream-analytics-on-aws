@@ -336,8 +336,8 @@ export function buildEventAnalysisView(sqlParameters: SQLParameters) : string {
 
   if (sqlParameters.groupCondition !== undefined) {
     const colName = _getColNameWithPrefix(sqlParameters.groupCondition);
-    groupColSQL = `${colName} as group_col,`;
-    groupCol = `${colName},`;
+    groupColSQL = `${colName}::varchar as group_col,`;
+    groupCol = `${colName}::varchar,`;
   }
 
   resultSql = resultSql.concat(`
@@ -806,9 +806,9 @@ export function buildRetentionAnalysisView(sqlParameters: SQLParameters) : strin
   let groupingColSql = '';
   let groupByColSql = '';
   if (sqlParameters.groupCondition !== undefined) {
-    groupByColSql = `${_getColNameWithPrefix(sqlParameters.groupCondition)},`;
+    groupByColSql = `${_getColNameWithPrefix(sqlParameters.groupCondition)}::varchar,`;
     groupingCol = _getColNameWithPrefix(sqlParameters.groupCondition);
-    groupingColSql = `${groupingCol} as group_col,`;
+    groupingColSql = `${groupingCol}::varchar as group_col,`;
   }
 
   const sql = `
@@ -841,7 +841,7 @@ function _buildFunnelBaseSql(eventNames: string[], sqlParameters: SQLParameters,
   let groupCol = '';
   let newColumnTemplate = columnTemplate;
   if (groupCondition !== undefined) {
-    groupCol = `,${_getColNameWithPrefix(groupCondition)}`;
+    groupCol = `,COALESCE(${_getColNameWithPrefix(groupCondition)}::varchar, 'null')`;
     newColumnTemplate += `${groupCol} as ${_getColNameWithPrefix(groupCondition)}####`;
   }
 
@@ -911,7 +911,7 @@ function _buildColumnsForFunnelViews(index: number, groupCondition: GroupingCond
   let groupCol = '';
   let newColumnTemplate = columnTemplate;
   if (groupCondition !== undefined) {
-    groupCol = `,${_getColNameWithPrefix(groupCondition)}`;
+    groupCol = `,COALESCE(${_getColNameWithPrefix(groupCondition)}::varchar, 'null') as ${_getColNameWithPrefix(groupCondition)}`;
     newColumnTemplate += `${groupCol}`;
   }
 
@@ -1389,11 +1389,11 @@ function _buildCommonColumnsSql(columns: ColumnAttribute[], key: string, value: 
     if (columnList.includes(col.property)) {
       continue;
     }
-    value = value.replace(/{{}}/g, col.dataType);
+    const val = value.replace(/{{}}/g, col.dataType);
     if (col.category === ConditionCategory.USER_OUTER) {
       columnsSql += `max(${col.property}) as ${col.property},`;
     } else {
-      columnsSql += `max(case when ${key} = '${col.property}' then ${value} else null end) as ${col.property},`;
+      columnsSql += `max(case when ${key} = '${col.property}' then ${val} else null end) as ${col.property},`;
     }
 
     columnList.push(col.property);
