@@ -54,6 +54,7 @@ export function createRoleForQuicksightCustomResourceLambda(
       ],
       actions: [
         'quicksight:DescribeTemplate',
+        'quicksight:ListTemplateVersions',
       ],
     }),
 
@@ -98,6 +99,7 @@ export function createRoleForQuicksightCustomResourceLambda(
         'quicksight:CreateDashboard',
         'quicksight:UpdateDashboard',
         'quicksight:UpdateDashboardPermissions',
+        'quicksight:UpdateDashboardPublishedVersion',
       ],
     }),
 

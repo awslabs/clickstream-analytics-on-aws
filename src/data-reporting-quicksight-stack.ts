@@ -160,6 +160,7 @@ export class DataReportingQuickSightStack extends Stack {
 
     const cr = createQuicksightCustomResource(this, {
       templateArn: template.attrArn,
+      templateId: template.templateId,
       dataSourceArn: dataSource.attrArn,
       databaseName: stackParams.redshiftDBParam.valueAsString,
       quickSightProps: {
