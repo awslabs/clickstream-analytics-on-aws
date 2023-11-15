@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-package com.example.clickstream.transformer;
+package com.example.clickstream.transformer.v1;
 
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -33,7 +33,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import static com.example.clickstream.transformer.Constants.DEBUG_LOCAL_PATH;
+import static com.example.clickstream.transformer.v1.Constants.DEBUG_LOCAL_PATH;
 import static org.apache.spark.sql.functions.*;
 
 @Slf4j
