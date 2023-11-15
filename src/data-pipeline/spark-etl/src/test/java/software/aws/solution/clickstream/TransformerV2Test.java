@@ -302,4 +302,21 @@ class TransformerV2Test extends BaseSparkTest {
         Assertions.assertEquals(1, datasetUser.count());
     }
 
+    @Test
+    public void should_transform_user_with_traffic_source() throws IOException {
+        // DOWNLOAD_FILE=0 ./gradlew clean test --info --tests software.aws.solution.clickstream.TransformerV2Test.should_transform_user_with_traffic_source
+        System.setProperty(APP_IDS_PROP, "uba-app");
+        System.setProperty(PROJECT_ID_PROP, "test_project_id_01");
+
+        Dataset<Row> dataset =
+                spark.read().json(requireNonNull(getClass().getResource("/original_data_with_traffic_source.json")).getPath());
+        List<Dataset<Row>> transformedDatasets = transformer.transform(dataset);
+        Dataset<Row> datasetUser = transformedDatasets.get(3);
+
+        String expectedJson = this.resourceFileAsString("/expected/transform_v2_user_traffic_source.json");
+        datasetUser = datasetUser.filter(expr("user_pseudo_id='uu_p3121211_ts1'"));
+        Assertions.assertEquals(expectedJson, datasetUser.first().prettyJson());
+        Assertions.assertEquals(1, datasetUser.count());
+    }
+
 }

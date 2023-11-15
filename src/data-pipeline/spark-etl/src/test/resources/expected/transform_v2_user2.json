@@ -1,7 +1,7 @@
 {
   "app_id" : "uba-app",
   "event_date" : "2023-04-24",
-  "event_timestamp" : 1682319109447,
+  "event_timestamp" : 1682319109448,
   "user_id" : "p3121211",
   "user_pseudo_id" : "uuid1-9844af32",
   "user_first_touch_timestamp" : 1667877267895,
@@ -96,6 +96,6 @@
   "_first_traffic_source_type" : "TSN",
   "_first_traffic_medium" : "TSM",
   "_first_traffic_source" : "TSS",
-  "device_id_list" : [ "deviceid-1", "deviceid-3", "deviceid-4" ],
+  "device_id_list" : [ "deviceid-1", "deviceid-3", "deviceid-4", "deviceid-5" ],
   "_channel" : "C001"
 }
