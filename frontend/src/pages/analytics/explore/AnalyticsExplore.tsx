@@ -102,9 +102,7 @@ const AnalyticsExplore: React.FC = () => {
   const [pipeline, setPipeline] = useState<IPipeline | null>(null);
   const [loadingMetadataEvent, setLoadingMetadataEvent] = useState(false);
   const [metadataEvents, setMetadataEvents] = useState<IMetadataEvent[]>([]);
-  const [metadataEventParameters, setMetadataEventParameters] = useState<
-    IMetadataEventParameter[]
-  >([]);
+
   const [metadataUserAttributes, setMetadataUserAttributes] = useState<
     IMetadataUserAttribute[]
   >([]);
@@ -178,7 +176,6 @@ const AnalyticsExplore: React.FC = () => {
           appId: defaultStr(appId),
         });
       if (success) {
-        setMetadataEventParameters(data.items);
         return data.items;
       }
     } catch (error) {
@@ -271,10 +268,6 @@ const AnalyticsExplore: React.FC = () => {
       getAllPathNodes();
     }
   }, [selectedOption]);
-
-  useEffect(() => {
-    console.info('metadataEventParameters:', metadataEventParameters);
-  }, [metadataEventParameters]);
 
   return (
     <div className="flex">

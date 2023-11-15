@@ -161,7 +161,6 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
   });
 
   const resetConfig = async () => {
-    setLoadingData(true);
     eventDataDispatch({
       type: 'resetEventData',
       defaultComputeMethodOption: defaultComputeMethodOption,
@@ -178,7 +177,6 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
       value: ExploreGroupColumn.DAY,
       label: defaultStr(t('analytics:options.dayTimeGranularity')),
     });
-    setLoadingData(false);
   };
 
   const saveToDashboard = async (
