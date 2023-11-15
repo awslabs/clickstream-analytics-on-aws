@@ -37,6 +37,8 @@ interface EventsSelectProps {
   loading: boolean;
   eventOptionList: CategoryItemType[];
   defaultComputeMethodOption: OptionDefinition;
+  isMultiSelect: boolean;
+  enableChangeRelation: boolean;
   metadataEvents: IMetadataEvent[];
   metadataUserAttributes: IMetadataUserAttribute[];
 }
@@ -51,6 +53,8 @@ const AnalyticsEventSelect: React.FC<EventsSelectProps> = (
     addEventButtonLabel,
     eventOptionList,
     defaultComputeMethodOption,
+    isMultiSelect,
+    enableChangeRelation,
     metadataEvents,
     metadataUserAttributes,
     loading,
@@ -211,6 +215,8 @@ const AnalyticsEventSelect: React.FC<EventsSelectProps> = (
             eventDataDispatch({
               type: 'addNewEventAnalyticsItem',
               defaultComputeMethodOption,
+              isMultiSelect,
+              enableChangeRelation,
             });
           }}
           disabled={eventDataState.length >= (maxSelectNum ?? 10)}

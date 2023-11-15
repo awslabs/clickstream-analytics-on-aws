@@ -25,12 +25,23 @@ import {
 
 export type ResetEventData = {
   type: 'resetEventData';
-  defaultComputeMethodOption: OptionDefinition;
+  defaultComputeMethodOption?: OptionDefinition;
+  isMultiSelect: boolean;
+  enableChangeRelation: boolean;
+  disabled?: boolean;
+};
+
+export type UpdateEventData = {
+  type: 'updateEventData';
+  eventData: IEventAnalyticsItem[];
 };
 
 export type AddNewEventAnalyticsItem = {
   type: 'addNewEventAnalyticsItem';
   defaultComputeMethodOption: OptionDefinition;
+  isMultiSelect: boolean;
+  enableChangeRelation: boolean;
+  disable?: boolean;
 };
 
 export type RemoveEventItem = {
@@ -91,6 +102,7 @@ export type ChangeCurRelationShip = {
 };
 
 export type AnalyticsFilterAction =
+  | UpdateEventData
   | ResetEventData
   | AddNewEventAnalyticsItem
   | RemoveEventItem
@@ -111,12 +123,17 @@ export const analyticsEventSelectReducer = (
 ): IEventAnalyticsItem[] => {
   const newState = cloneDeep(state);
   switch (action.type) {
+    case 'updateEventData': {
+      return [...action.eventData];
+    }
     case 'resetEventData': {
       return [
         {
           ...DEFAULT_EVENT_ITEM,
           calculateMethodOption: action.defaultComputeMethodOption,
-          enableChangeRelation: true,
+          enableChangeRelation: action.enableChangeRelation,
+          isMultiSelect: action.isMultiSelect,
+          disabled: action.disabled,
         },
       ];
     }
@@ -126,7 +143,9 @@ export const analyticsEventSelectReducer = (
         {
           ...DEFAULT_EVENT_ITEM,
           calculateMethodOption: action.defaultComputeMethodOption,
-          enableChangeRelation: true,
+          enableChangeRelation: action.enableChangeRelation,
+          isMultiSelect: action.isMultiSelect,
+          disabled: action.disable,
         },
       ];
     }

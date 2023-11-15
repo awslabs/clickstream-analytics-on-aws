@@ -165,6 +165,8 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
     eventDataDispatch({
       type: 'resetEventData',
       defaultComputeMethodOption: defaultComputeMethodOption,
+      isMultiSelect: true,
+      enableChangeRelation: true,
     });
     filterOptionDataDispatch({
       type: 'resetFilterData',
@@ -381,6 +383,8 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
                 defaultComputeMethodOption={defaultComputeMethodOption}
                 metadataEvents={metadataEvents}
                 metadataUserAttributes={metadataUserAttributes}
+                enableChangeRelation={true}
+                isMultiSelect={true}
               />
             </SpaceBetween>
             <SpaceBetween direction="vertical" size="xs">
