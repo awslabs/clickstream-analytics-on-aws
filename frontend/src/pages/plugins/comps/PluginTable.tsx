@@ -121,7 +121,9 @@ const PluginTable: React.FC<PluginTableProps> = (props: PluginTableProps) => {
       if (success) {
         let resultDataItem: IPlugin[] = data.items;
         if (pluginType === 'Transform' && hideDefaultTransformPlugin) {
-          resultDataItem = data.items.filter((item) => !item.builtIn);
+          resultDataItem = data.items.filter(
+            (item) => item.id !== 'BUILT-IN-1'
+          );
           setPluginList(resultDataItem);
           setTotalCount(resultDataItem.length);
         } else {

@@ -105,7 +105,7 @@ export class CloudFrontControlPlaneStack extends Stack {
         iamCertificateId: iamCertificateId.valueAsString,
       };
 
-      Aspects.of(this).add(new InjectCustomResourceConfig('true'));
+      Aspects.of(this).add(new InjectCustomResourceConfig('false'));
 
       this.addToParamGroups(
         'Domain Information',
