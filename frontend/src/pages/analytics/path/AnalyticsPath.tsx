@@ -229,15 +229,6 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
     null
   );
 
-  // const [eventOptionData, setEventOptionData] = useState<IEventAnalyticsItem[]>(
-  //   [
-  //     {
-  //       ...DEFAULT_EVENT_ITEM,
-  //       isMultiSelect: false,
-  //       disabled: true,
-  //     },
-  //   ]
-  // );
   const [eventDataState, eventDataDispatch] = useReducer(
     analyticsEventSelectReducer,
     [
