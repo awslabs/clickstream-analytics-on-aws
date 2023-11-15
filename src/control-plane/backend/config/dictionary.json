@@ -822,6 +822,15 @@
           }
         },
         {
+          "name": "ua_os",
+          "dataType": "string",
+          "category": "device",
+          "description": {
+            "en-US": "The operating system of device for users to view content, derived from the User Agent string",
+            "zh-CN": "用户查看内容的设备操作系统，从 User Agent 字符串中派生"
+          }
+        },
+        {
           "name": "screen_width",
           "dataType": "int",
           "category": "device",

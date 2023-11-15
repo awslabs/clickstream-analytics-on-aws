@@ -315,7 +315,7 @@ class ETLRunnerTest extends BaseSparkTest {
 
         Dataset<Row> sourceDataset =
                 spark.read().json(requireNonNull(getClass().getResource("/original_data_with_user_profile_set2.json")).getPath());
-        assertEquals(sourceDataset.count(), 4);
+        assertEquals(sourceDataset.count(), 5);
         Dataset<Row> dataset = runner.executeTransformers(sourceDataset, transformers);
         dataset.printSchema();
         System.out.println(dataset.first().prettyJson());

@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { getUserDetails } from 'apis/user';
 import Loading from 'components/common/Loading';
 import RoleRoute from 'components/common/RoleRoute';
 import CommonAlert from 'components/common/alert';
@@ -34,22 +35,52 @@ import Projects from 'pages/projects/Projects';
 import ProjectDetail from 'pages/projects/detail/ProjectDetail';
 import UserList from 'pages/user/UserList';
 import React, { Suspense, useContext, useEffect } from 'react';
+import { AuthContextProps } from 'react-oidc-context';
 import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import { IUserRole } from 'ts/const';
 import { getUserInfoFromLocalStorage } from 'ts/utils';
 import Home from './pages/home/Home';
 
-const LoginCallback: React.FC = () => {
+interface LoginCallbackProps {
+  auth: AuthContextProps;
+}
+
+const BASE_URL = '/';
+const ANALYTICS_ROLE = [IUserRole.ANALYST, IUserRole.ANALYST_READER];
+const LoginCallback: React.FC<LoginCallbackProps> = (
+  props: LoginCallbackProps
+) => {
+  const { auth } = props;
   const currentUser = useContext(UserContext) ?? getUserInfoFromLocalStorage();
 
-  useEffect(() => {
-    const baseUrl = '/';
-    if (currentUser?.role === IUserRole.ANALYST) {
-      window.location.href = `${baseUrl}analytics`;
+  const gotoBasePage = () => {
+    window.location.href = `${BASE_URL}`;
+  };
+  const gotoAnalyticsPage = () => {
+    window.location.href = `${BASE_URL}analytics`;
+  };
+
+  const getUserInfo = async () => {
+    const { success, data }: ApiResponse<IUser> = await getUserDetails(
+      auth.user?.profile.email ?? ''
+    );
+    if (success && ANALYTICS_ROLE.includes(data.role)) {
+      gotoAnalyticsPage();
     } else {
-      window.location.href = baseUrl;
+      gotoBasePage();
+    }
+  };
+
+  useEffect(() => {
+    if (!currentUser) {
+      getUserInfo();
+    } else if (ANALYTICS_ROLE.includes(currentUser.role)) {
+      gotoAnalyticsPage();
+    } else {
+      gotoBasePage();
     }
   }, []);
+
   return <Loading isPage />;
 };
 
@@ -63,7 +94,7 @@ const AppRouter: React.FC<AppRouterProps> = (props: AppRouterProps) => {
     <Router>
       <Suspense fallback={null}>
         <Routes>
-          <Route path="/signin" element={<LoginCallback />} />
+          <Route path="/signin" element={<LoginCallback auth={auth} />} />
           <Route
             path="/"
             element={
