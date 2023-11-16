@@ -53,7 +53,9 @@ export interface ColumnAttribute {
 }
 
 export type RetentionJoinColumn = ColumnAttribute;
-export type GroupingCondition = ColumnAttribute;
+export type GroupingCondition = ColumnAttribute & {
+  readonly applyTo?: 'FIRST' | 'ALL';
+};
 
 export interface PairEventAndCondition {
   readonly startEvent: EventAndCondition;
@@ -834,35 +836,53 @@ export function buildRetentionAnalysisView(sqlParameters: SQLParameters) : strin
   });
 }
 
-function _buildFunnelBaseSql(eventNames: string[], sqlParameters: SQLParameters, groupCondition: GroupingCondition | undefined = undefined) : string {
+function _buildTableListColumnSql(eventNames: string[], groupCondition: GroupingCondition|undefined, columnTemplate: string) {
 
-  let sql = _buildCommonPartSql(eventNames, sqlParameters);
-
-  let groupCol = '';
-  let newColumnTemplate = columnTemplate;
-  if (groupCondition !== undefined) {
-    groupCol = `,COALESCE(${_getColNameWithPrefix(groupCondition)}::varchar, 'null')`;
-    newColumnTemplate += `${groupCol} as ${_getColNameWithPrefix(groupCondition)}####`;
-  }
-
-  for (const [index, event] of eventNames.entries()) {
-    let firstTableColumns = `
+  let firstTableColumns = '';
+  let sql = '';
+  if(groupCondition !== undefined && groupCondition.applyTo === 'FIRST') {
+    firstTableColumns = `
        month
       ,week
       ,day
       ,hour
-      ,${newColumnTemplate.replace(/####/g, '_0')}
+      ,COALESCE(${_getColNameWithPrefix(groupCondition)}::varchar, 'null') as ${_getColNameWithPrefix(groupCondition)}
     `;
+  } else {
+    firstTableColumns = `
+       month
+      ,week
+      ,day
+      ,hour
+      ,${columnTemplate.replace(/####/g, '_0')}
+    `;
+  }
 
+  for (const [index, event] of eventNames.entries()) {
     sql = sql.concat(`
     table_${index} as (
       select 
-        ${ index === 0 ? firstTableColumns : newColumnTemplate.replace(/####/g, `_${index}`)}
+        ${ index === 0 ? firstTableColumns : columnTemplate.replace(/####/g, `_${index}`)}
       from base_data base
       where event_name = '${event}'
     ),
     `);
   }
+  return sql;
+}
+
+function _buildFunnelBaseSql(eventNames: string[], sqlParameters: SQLParameters, groupCondition: GroupingCondition | undefined = undefined) : string {
+
+  let sql = _buildCommonPartSql(eventNames, sqlParameters);
+
+  let groupCol = '';
+  
+  let newColumnTemplate = columnTemplate;
+  if (groupCondition !== undefined && groupCondition.applyTo === 'ALL') {
+    groupCol = `,COALESCE(${_getColNameWithPrefix(groupCondition)}::varchar, 'null')`;
+    newColumnTemplate += `${groupCol} as ${_getColNameWithPrefix(groupCondition)}####`;
+  }
+  sql = sql.concat(_buildTableListColumnSql(eventNames, groupCondition, newColumnTemplate));
 
   let joinConditionSQL = '';
   let joinColumnsSQL = '';
@@ -875,7 +895,7 @@ function _buildFunnelBaseSql(eventNames: string[], sqlParameters: SQLParameters,
     joinColumnsSQL = joinColumnsSQL.concat(`, table_${index}.event_name_${index} \n`);
     joinColumnsSQL = joinColumnsSQL.concat(`, table_${index}.user_pseudo_id_${index} \n`);
     joinColumnsSQL = joinColumnsSQL.concat(`, table_${index}.event_timestamp_${index} \n`);
-    if (groupCondition !== undefined) {
+    if (groupCondition !== undefined && groupCondition.applyTo === 'ALL') {
       joinColumnsSQL = joinColumnsSQL.concat(`, table_${index}.${_getColNameWithPrefix(groupCondition)}_${index} \n`);
     }
 
