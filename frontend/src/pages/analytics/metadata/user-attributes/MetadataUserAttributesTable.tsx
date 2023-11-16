@@ -23,7 +23,7 @@ import { userAttributeDisplayname } from 'pages/analytics/analytics-utils';
 import React, { useContext } from 'react';
 import { useParams } from 'react-router-dom';
 import { IUserRole, USER_ATTRIBUTE_DISPLAY_PREFIX } from 'ts/const';
-import { ConditionCategory, MetadataSource } from 'ts/explore-types';
+import { MetadataSource } from 'ts/explore-types';
 import { defaultStr, getUserInfoFromLocalStorage } from 'ts/utils';
 import MetadataSourceFC from '../comps/MetadataSource';
 import MetadataTable from '../table/MetadataTable';
