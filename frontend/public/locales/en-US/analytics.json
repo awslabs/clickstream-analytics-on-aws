@@ -178,6 +178,7 @@
     "year": "year"
   },
   "valid": {
+    "please": "Please ",
     "projectSelectError": "Must select a project",
     "appSelectError": "Must select an application",
     "dashboardNameEmptyError": "Please input dashboard name.",
@@ -187,7 +188,8 @@
     "sheetSelectError": "Must select a sheet",
     "dateRangeIncomplete": "The selected date range is incomplete. Select a start date and a end date for the date range.",
     "dateRangeInvalid": "The selected date range is invalid. The start date must be before the end date.",
-    "inputVisualNameError": "Please input visualization name."
+    "inputVisualNameError": "Please input visualization name.",
+    "selectTwoEvent": "Please select at least two steps"
   },
   "operators": {
     "null": "is null",

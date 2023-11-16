@@ -326,6 +326,9 @@ const AnalyticsExplore: React.FC = () => {
                         dispatch?.({
                           type: StateActionType.HIDE_HELP_PANEL,
                         });
+                        dispatch?.({
+                          type: StateActionType.RESET_VALID_ERROR,
+                        });
                         setSelectedOption(detail.selectedOption);
                       }}
                       options={analyticsModelOptions}

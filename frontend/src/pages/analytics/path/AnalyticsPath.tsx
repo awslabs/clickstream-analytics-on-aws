@@ -77,6 +77,7 @@ import {
   parametersConvertToCategoryItemType,
   pathNodesConvertToCategoryItemType,
   validEventAnalyticsItem,
+  validMultipleEventAnalyticsItems,
 } from '../analytics-utils';
 import ExploreDateRangePicker, {
   DEFAULT_DAY_RANGE,
@@ -458,6 +459,8 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
         setExploreEmbedUrl(data.dashboardEmbedUrl);
       }
     } catch (error) {
+      setLoadingData(false);
+      setLoadingChart(false);
       console.log(error);
     }
   };
@@ -795,7 +798,18 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
           <Button
             variant="primary"
             iconName="search"
-            onClick={clickPreview}
+            onClick={() => {
+              if (!validMultipleEventAnalyticsItems(eventDataState)) {
+                dispatch?.({
+                  type: StateActionType.SHOW_EVENT_VALID_ERROR,
+                });
+              } else {
+                dispatch?.({
+                  type: StateActionType.HIDE_EVENT_VALID_ERROR,
+                });
+                clickPreview();
+              }
+            }}
             loading={loadingData}
           >
             {t('button.query')}

@@ -128,7 +128,9 @@ const EventItem: React.FC<EventItemProps> = (props: EventItemProps) => {
             !categoryOption &&
             ((type === 'attribute' && state?.showAttributeError) ||
               (type === 'event' && state?.showEventError)) && (
-              <ErrorText text={`${t('valid.please')}${placeholder}`} />
+              <ErrorText
+                text={`${t('analytics:valid.please')}${placeholder}`}
+              />
             )}
         </div>
         {isMultiSelect && (

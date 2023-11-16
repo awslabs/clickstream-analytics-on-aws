@@ -178,6 +178,7 @@
     "year": "年"
   },
   "valid": {
+    "please": "请",
     "projectSelectError": "必须选择一个项目",
     "appSelectError": "必须选择一个应用程序",
     "dashboardNameEmptyError": "请输入仪表板名称",
@@ -187,7 +188,8 @@
     "sheetSelectError": "必须选择一个工作表",
     "dateRangeIncomplete": "所选日期范围不完整。请为日期范围选择开始和结束日期。",
     "dateRangeInvalid": "所选日期范围无效。开始日期必须在结束日期之前。",
-    "inputVisualNameError": "请输入图表名称"
+    "inputVisualNameError": "请输入图表名称",
+    "selectTwoEvent": "请最少选择 2 个步骤"
   },
   "operators": {
     "null": "空",

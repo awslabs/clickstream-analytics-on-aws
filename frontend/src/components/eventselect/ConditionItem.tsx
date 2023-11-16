@@ -195,7 +195,7 @@ const ConditionItem: React.FC<ConditionItemProps> = (
         />
         {!item.conditionOperator && state?.showAttributeOperatorError && (
           <ErrorText
-            text={`${t('valid.please')}${t(
+            text={`${t('analytics:valid.please')}${t(
               'analytics:labels.operatorSelectPlaceholder'
             )}`}
           />
@@ -247,7 +247,7 @@ const ConditionItem: React.FC<ConditionItemProps> = (
               {(!labelValues || labelValues.length <= 0) &&
                 state?.showAttributeValueError && (
                   <ErrorText
-                    text={`${t('valid.please')}${t(
+                    text={`${t('analytics:valid.please')}${t(
                       'analytics:labels.conditionValuePlaceholder'
                     )}`}
                   />

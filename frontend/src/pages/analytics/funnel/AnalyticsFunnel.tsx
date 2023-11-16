@@ -72,6 +72,7 @@ import {
   getGlobalEventCondition,
   getLngFromLocalStorage,
   getGroupCondition,
+  validMultipleEventAnalyticsItems,
 } from '../analytics-utils';
 import AttributeGroup from '../comps/AttributeGroup';
 import ExploreDateRangePicker, {
@@ -192,6 +193,7 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
     [
       {
         ...DEFAULT_EVENT_ITEM,
+        isMultiSelect: false,
       },
     ]
   );
@@ -303,6 +305,8 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
         setExploreEmbedUrl(data.dashboardEmbedUrl);
       }
     } catch (error) {
+      setLoadingChart(false);
+      setLoadingData(false);
       console.log(error);
     }
   };
@@ -548,7 +552,26 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
           <Button
             variant="primary"
             iconName="search"
-            onClick={clickPreview}
+            onClick={() => {
+              if (
+                eventDataState.length === 0 ||
+                !validMultipleEventAnalyticsItems(eventDataState)
+              ) {
+                dispatch?.({
+                  type: StateActionType.SHOW_EVENT_VALID_ERROR,
+                });
+              } else if (eventDataState.length < 2) {
+                dispatch?.({
+                  type: StateActionType.HIDE_EVENT_VALID_ERROR,
+                });
+                alertMsg(t('analytics:valid.selectTwoEvent'), 'error');
+              } else {
+                dispatch?.({
+                  type: StateActionType.HIDE_EVENT_VALID_ERROR,
+                });
+                clickPreview();
+              }
+            }}
             loading={loadingData}
           >
             {t('button.query')}

@@ -39,6 +39,9 @@ export interface IState {
 export enum StateActionType {
   SHOW_HELP_PANEL = 'SHOW_HELP_PANEL',
   HIDE_HELP_PANEL = 'HIDE_HELP_PANEL',
+  RESET_VALID_ERROR = 'RESET_VALID_ERROR',
+  SHOW_EVENT_VALID_ERROR = 'SHOW_EVENT_VALID_ERROR',
+  HIDE_EVENT_VALID_ERROR = 'HIDE_EVENT_VALID_ERROR',
 }
 
 export type Action = { type: StateActionType; payload: any };
@@ -54,13 +57,36 @@ export const initialState: IState = {
 
 export const reducer = (state: IState, action: Action): IState => {
   switch (action.type) {
-    case StateActionType.SHOW_HELP_PANEL:
+    case StateActionType.SHOW_HELP_PANEL: {
       return { ...state, showHelpPanel: true, helpPanelType: action.payload };
-    case StateActionType.HIDE_HELP_PANEL:
+    }
+    case StateActionType.HIDE_HELP_PANEL: {
       return {
         ...state,
         showHelpPanel: false,
       };
+    }
+    case StateActionType.RESET_VALID_ERROR: {
+      return {
+        ...state,
+        showEventError: false,
+        showAttributeError: false,
+        showAttributeOperatorError: false,
+        showAttributeValueError: false,
+      };
+    }
+    case StateActionType.SHOW_EVENT_VALID_ERROR: {
+      return {
+        ...state,
+        showEventError: true,
+      };
+    }
+    case StateActionType.HIDE_EVENT_VALID_ERROR: {
+      return {
+        ...state,
+        showEventError: false,
+      };
+    }
 
     default:
       return state;

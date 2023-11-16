@@ -71,6 +71,7 @@ import {
   getLngFromLocalStorage,
   getPairEventAndConditions,
   parametersConvertToCategoryItemType,
+  validMultipleRetentionAnalyticsItem,
   validRetentionAnalyticsItem,
 } from '../analytics-utils';
 import AttributeGroup from '../comps/AttributeGroup';
@@ -302,6 +303,8 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
         setExploreEmbedUrl(data.dashboardEmbedUrl);
       }
     } catch (error) {
+      setLoadingData(false);
+      setLoadingChart(false);
       console.log(error);
     }
   };
@@ -625,7 +628,18 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
           <Button
             variant="primary"
             iconName="search"
-            onClick={clickPreview}
+            onClick={() => {
+              if (!validMultipleRetentionAnalyticsItem(eventOptionData)) {
+                dispatch?.({
+                  type: StateActionType.SHOW_EVENT_VALID_ERROR,
+                });
+              } else {
+                dispatch?.({
+                  type: StateActionType.HIDE_EVENT_VALID_ERROR,
+                });
+                clickPreview();
+              }
+            }}
             loading={loadingData}
           >
             {t('button.query')}

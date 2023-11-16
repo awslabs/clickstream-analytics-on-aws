@@ -69,6 +69,7 @@ import {
   getGroupCondition,
   getLngFromLocalStorage,
   validEventAnalyticsItem,
+  validMultipleEventAnalyticsItems,
 } from '../analytics-utils';
 import AttributeGroup from '../comps/AttributeGroup';
 import ExploreDateRangePicker, {
@@ -306,6 +307,8 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
         setExploreEmbedUrl(data.dashboardEmbedUrl);
       }
     } catch (error) {
+      setLoadingChart(false);
+      setLoadingData(false);
       console.log(error);
     }
   };
@@ -411,7 +414,18 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
           <Button
             variant="primary"
             iconName="search"
-            onClick={clickPreview}
+            onClick={() => {
+              if (!validMultipleEventAnalyticsItems(eventDataState)) {
+                dispatch?.({
+                  type: StateActionType.SHOW_EVENT_VALID_ERROR,
+                });
+              } else {
+                dispatch?.({
+                  type: StateActionType.HIDE_EVENT_VALID_ERROR,
+                });
+                clickPreview();
+              }
+            }}
             loading={loadingData}
           >
             {t('button.query')}
