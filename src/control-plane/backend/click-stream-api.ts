@@ -279,6 +279,7 @@ export class ClickStreamApiConstruct extends Construct {
             'quicksight:UpdateDashboardPublishedVersion',
             'quicksight:CreateAnalysis',
             'quicksight:ListAnalyses',
+            'quicksight:UpdateAnalysis',
             'quicksight:DeleteAnalysis',
             'ds:AuthorizeApplication',
             'ds:UnauthorizeApplication',

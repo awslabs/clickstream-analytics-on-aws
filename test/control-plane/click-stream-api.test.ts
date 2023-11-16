@@ -739,6 +739,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
               'quicksight:UpdateDashboardPublishedVersion',
               'quicksight:CreateAnalysis',
               'quicksight:ListAnalyses',
+              'quicksight:UpdateAnalysis',
               'quicksight:DeleteAnalysis',
               'ds:AuthorizeApplication',
               'ds:UnauthorizeApplication',
