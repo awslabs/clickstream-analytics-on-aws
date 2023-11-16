@@ -39,7 +39,6 @@ import {
   retentionAnalysisVisualColumns,
   VisualMapProps,
   getTempResourceName,
-  TEMP_RESOURCE_NAME_PREFIX,
   getDashboardTitleProps,
   eventVisualColumns,
   checkFunnelAnalysisParameter,
@@ -49,6 +48,7 @@ import {
 } from './quicksight/reporting-utils';
 import { buildEventAnalysisView, buildEventPathAnalysisView, buildFunnelTableView, buildFunnelView, buildNodePathAnalysisView, buildRetentionAnalysisView } from './quicksight/sql-builder';
 import { awsAccountId } from '../common/constants';
+import { QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX } from '../common/constants-ln';
 import { AnalysisType, ExplorePathNodeType, ExploreRequestAction, ExploreTimeScopeType, ExploreVisualName, QuickSightChartType } from '../common/explore-types';
 import { logger } from '../common/powertools';
 import { SDKClient } from '../common/sdk-client';
@@ -959,7 +959,8 @@ async function _deletedDatasets(quickSight: QuickSight) {
 
   if (datasets.DataSetSummaries) {
     for (const [_index, dataset] of datasets.DataSetSummaries.entries()) {
-      if (dataset.Name?.startsWith(TEMP_RESOURCE_NAME_PREFIX) && (new Date().getTime() - dataset.CreatedTime!.getTime()) > 60 * 60 * 1000) {
+      if (dataset.Name?.startsWith(QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX) &&
+      (new Date().getTime() - dataset.CreatedTime!.getTime()) > 60 * 60 * 1000) {
         const deletedRes = await quickSight.deleteDataSet({
           AwsAccountId: awsAccountId,
           DataSetId: dataset.DataSetId,
@@ -981,11 +982,12 @@ async function _deletedAnalyses(quickSight: QuickSight) {
   if (analyses.AnalysisSummaryList) {
     for (const [_index, analysis] of analyses.AnalysisSummaryList.entries()) {
       if (analysis.Status !== ResourceStatus.DELETED &&
-        analysis.Name?.startsWith(TEMP_RESOURCE_NAME_PREFIX) &&
+        analysis.Name?.startsWith(QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX) &&
         (new Date().getTime() - analysis.CreatedTime!.getTime()) > 60 * 60 * 1000) {
         const deletedRes = await quickSight.deleteAnalysis({
           AwsAccountId: awsAccountId,
           AnalysisId: analysis.AnalysisId,
+          ForceDeleteWithoutRecovery: true,
         });
         deletedAnalyses.push(deletedRes.AnalysisId!);
         logger.info(`analysis ${analysis.Name} removed`);
@@ -1003,7 +1005,8 @@ async function _cleanedDashboard(quickSight: QuickSight) {
 
   if (dashBoards.DashboardSummaryList) {
     for (const [_index, dashboard] of dashBoards.DashboardSummaryList.entries()) {
-      if (dashboard.Name?.startsWith(TEMP_RESOURCE_NAME_PREFIX) && (new Date().getTime() - dashboard.CreatedTime!.getTime()) > 60 * 60 * 1000) {
+      if (dashboard.Name?.startsWith(QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX) &&
+      (new Date().getTime() - dashboard.CreatedTime!.getTime()) > 60 * 60 * 1000) {
         const deletedRes = await quickSight.deleteDashboard({
           AwsAccountId: awsAccountId,
           DashboardId: dashboard.DashboardId,

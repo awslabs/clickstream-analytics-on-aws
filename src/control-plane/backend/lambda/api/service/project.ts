@@ -13,7 +13,7 @@
 
 import { QuickSight, ResourceNotFoundException } from '@aws-sdk/client-quicksight';
 import { v4 as uuidv4 } from 'uuid';
-import { DEFAULT_DASHBOARD_NAME, DEFAULT_SOLUTION_OPERATOR, OUTPUT_REPORT_DASHBOARDS_SUFFIX, QUICKSIGHT_DASHBOARD_INFIX } from '../common/constants-ln';
+import { DEFAULT_DASHBOARD_NAME, DEFAULT_SOLUTION_OPERATOR, OUTPUT_REPORT_DASHBOARDS_SUFFIX, QUICKSIGHT_DASHBOARD_INFIX, QUICKSIGHT_RESOURCE_NAME_PREFIX } from '../common/constants-ln';
 import { logger } from '../common/powertools';
 import { aws_sdk_client_common_config } from '../common/sdk-client-config-ln';
 import { ApiFail, ApiSuccess, PipelineStackType } from '../common/types';
@@ -84,7 +84,7 @@ export class ProjectServ {
 
   public async createDashboard(req: any, res: any, next: any) {
     try {
-      const dashboardId = `clickstream${QUICKSIGHT_DASHBOARD_INFIX}${uuidv4().replace(/-/g, '')}`;
+      const dashboardId = `${QUICKSIGHT_RESOURCE_NAME_PREFIX}${QUICKSIGHT_DASHBOARD_INFIX}${uuidv4().replace(/-/g, '')}`;
       req.body.id = dashboardId;
       req.body.operator = res.get('X-Click-Stream-Operator');
       const dashboard: IDashboard = req.body;

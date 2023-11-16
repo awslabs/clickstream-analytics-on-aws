@@ -362,11 +362,6 @@ export const TRANSFORMER_AND_ENRICH_CLASS_NAMES = 'software.aws.solution.clickst
 
 export const EVENT_SOURCE_LOAD_DATA_FLOW = 'LoadDataFlow';
 
-export const QUICKSIGHT_DASHBOARD_INFIX= '-dashboard-';
-export const QUICKSIGHT_ANALYSIS_INFIX= '-analysis-';
-export const QUICKSIGHT_DATASET_INFIX= '-dataset-';
-
-
 export const EMR_ARCHITECTURE_AUTO = 'Auto';
 
 export const CLICKSTREAM_RETENTION_VIEW_PLACEHOLDER = 'Retention_View';
@@ -388,3 +383,9 @@ export const CLICKSTREAM_EVENT_PARAMETER_VIEW_NAME = 'clickstream_event_paramete
 export const CLICKSTREAM_LIFECYCLE_DAILY_VIEW_NAME = 'clickstream_lifecycle_daily_view_v1';
 export const CLICKSTREAM_LIFECYCLE_WEEKLY_VIEW_NAME = 'clickstream_lifecycle_weekly_view_v1';
 export const CLICKSTREAM_USER_ATTR_VIEW_NAME = 'clickstream_user_attr_view_v1';
+
+export const QUICKSIGHT_RESOURCE_NAME_PREFIX = 'clickstream';
+export const QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX = '_tmp_';
+export const QUICKSIGHT_DASHBOARD_INFIX= '-dashboard-';
+export const QUICKSIGHT_ANALYSIS_INFIX= '-analysis-';
+export const QUICKSIGHT_DATASET_INFIX= '-dataset-';
