@@ -267,7 +267,7 @@ export const createDataSet = async (quickSight: QuickSight, awsAccountId: string
 : Promise<CreateDataSetCommandOutput|undefined> => {
 
   try {
-    let datasetId = uuidv4();
+    let datasetId = uuidv4().replace(/-/g, '');
     if (requestAction === ExploreRequestAction.PREVIEW) {
       datasetId = `${QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX}${datasetId}`;
     }
