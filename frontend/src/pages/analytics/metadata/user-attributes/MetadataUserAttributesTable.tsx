@@ -164,7 +164,6 @@ const MetadataUserAttributesTable: React.FC<
     { id: 'displayName', visible: true },
     { id: 'description', visible: true },
     { id: 'metadataSource', visible: true },
-    { id: 'hasData', visible: true },
     { id: 'valueType', visible: true },
   ];
   const FILTERING_PROPERTIES = [
