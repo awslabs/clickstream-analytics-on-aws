@@ -269,7 +269,7 @@ export const createDataSet = async (quickSight: QuickSight, awsAccountId: string
   try {
     let datasetId = `${QUICKSIGHT_RESOURCE_NAME_PREFIX}${QUICKSIGHT_DATASET_INFIX}${uuidv4().replace(/-/g, '')}`;
     if (requestAction === ExploreRequestAction.PREVIEW) {
-      datasetId = `${QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX}${datasetId}`;
+      datasetId = `${QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX}${uuidv4().replace(/-/g, '')}`;
     }
 
     let colGroups: ColumnGroup[] = [];
