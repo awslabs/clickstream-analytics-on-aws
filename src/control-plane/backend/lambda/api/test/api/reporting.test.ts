@@ -41,11 +41,11 @@ import { DynamoDBDocumentClient, GetCommand } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
 import request from 'supertest';
 import { MOCK_TOKEN, tokenMock } from './ddb-mock';
+import { clickStreamTableName } from '../../common/constants';
 import { ConditionCategory, ExploreLocales, ExplorePathNodeType, ExplorePathSessionDef, MetadataPlatform, MetadataValueType, QuickSightChartType } from '../../common/explore-types';
 import { app, server } from '../../index';
 import 'aws-sdk-client-mock-jest';
 import { EventAndCondition, PairEventAndCondition, SQLCondition } from '../../service/quicksight/sql-builder';
-import { clickStreamTableName } from '../../common/constants';
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 const cloudFormationMock = mockClient(CloudFormationClient);
