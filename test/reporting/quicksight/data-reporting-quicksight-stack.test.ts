@@ -382,7 +382,10 @@ describe('DataReportingQuickSightStack resource test', () => {
             },
           },
           {
-            Action: 'quicksight:DescribeTemplate',
+            Action: [
+              'quicksight:DescribeTemplate',
+              'quicksight:ListTemplateVersions',
+            ],
             Effect: 'Allow',
             Resource: [
               {
@@ -482,6 +485,7 @@ describe('DataReportingQuickSightStack resource test', () => {
               'quicksight:CreateDashboard',
               'quicksight:UpdateDashboard',
               'quicksight:UpdateDashboardPermissions',
+              'quicksight:UpdateDashboardPublishedVersion',
             ],
             Effect: 'Allow',
             Resource: {
@@ -945,10 +949,6 @@ describe('DataReportingQuickSightStack resource test', () => {
                 Type: 'STRING',
               },
               {
-                Name: 'first_visit_channel',
-                Type: 'STRING',
-              },
-              {
                 Name: 'device_id',
                 Type: 'STRING',
               },
@@ -980,7 +980,6 @@ describe('DataReportingQuickSightStack resource test', () => {
               'first_traffic_source_medium',
               'first_traffic_source_name',
               'first_referer',
-              'first_visit_channel',
               'registration_status',
               'device_id',
             ],
