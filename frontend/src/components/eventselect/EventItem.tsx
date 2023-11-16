@@ -104,7 +104,6 @@ const EventItem: React.FC<EventItemProps> = (props: EventItemProps) => {
           className="flex-1 cs-dropdown-event-input"
           onClick={() => setShowDropdown((prev) => !prev)}
           onKeyDown={(e) => {
-            console.info(e);
             if (e.key === 'Enter') {
               setShowDropdown((prev) => !prev);
             }
