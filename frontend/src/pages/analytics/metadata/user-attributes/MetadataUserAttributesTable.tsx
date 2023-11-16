@@ -196,26 +196,10 @@ const MetadataUserAttributesTable: React.FC<
       operators: [':', '!:', '=', '!='],
     },
     {
-      propertyLabel: t('analytics:metadata.userAttribute.tableColumnHasData'),
-      key: 'hasData',
-      groupValuesLabel: t(
-        'analytics:metadata.userAttribute.tableColumnHasData'
-      ),
-      operators: [':', '!:', '=', '!='],
-    },
-    {
       propertyLabel: t('analytics:metadata.userAttribute.tableColumnDataType'),
       key: 'valueType',
       groupValuesLabel: t(
         'analytics:metadata.userAttribute.tableColumnDataType'
-      ),
-      operators: [':', '!:', '=', '!='],
-    },
-    {
-      propertyLabel: t('analytics:metadata.userAttribute.tableColumnPlatform'),
-      key: 'platform',
-      groupValuesLabel: t(
-        'analytics:metadata.userAttribute.tableColumnPlatform'
       ),
       operators: [':', '!:', '=', '!='],
     },
