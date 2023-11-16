@@ -19,6 +19,7 @@ import {
 import { UserContext } from 'context/UserContext';
 import { HelpPanelType } from 'context/reducer';
 import { t } from 'i18next';
+import { userAttributeDisplayname } from 'pages/analytics/analytics-utils';
 import React, { useContext } from 'react';
 import { useParams } from 'react-router-dom';
 import { IUserRole, USER_ATTRIBUTE_DISPLAY_PREFIX } from 'ts/const';
@@ -131,10 +132,7 @@ const MetadataUserAttributesTable: React.FC<
       id: 'displayName',
       header: t('analytics:metadata.userAttribute.tableColumnDisplayName'),
       cell: (e: IAttributeTableItem) => {
-        return e.displayName.replace(
-          ConditionCategory.USER_OUTER,
-          ConditionCategory.USER
-        );
+        return userAttributeDisplayname(e.displayName);
       },
       minWidth: 180,
       editConfig: getDisplayNameEditConfig(),
