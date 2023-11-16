@@ -12,7 +12,9 @@
  */
 
 import express from 'express';
+import { body, header } from 'express-validator';
 import { logger } from '../common/powertools';
+import { isRequestIdExisted, isXSSRequest, validate } from '../common/request-valid';
 import { ReportingService } from '../service/reporting';
 
 const reporting_project = express.Router();
@@ -20,6 +22,10 @@ const reportingServ: ReportingService = new ReportingService();
 
 reporting_project.post(
   '/funnel',
+  validate([
+    body().custom(isXSSRequest),
+    header('X-Click-Stream-Request-Id').custom(isRequestIdExisted),
+  ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
 
     logger.info('start to create quicksight funnel report');
@@ -28,6 +34,10 @@ reporting_project.post(
 
 reporting_project.post(
   '/event',
+  validate([
+    body().custom(isXSSRequest),
+    header('X-Click-Stream-Request-Id').custom(isRequestIdExisted),
+  ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
 
     logger.info('start to create quicksight event report');
@@ -36,6 +46,10 @@ reporting_project.post(
 
 reporting_project.post(
   '/path',
+  validate([
+    body().custom(isXSSRequest),
+    header('X-Click-Stream-Request-Id').custom(isRequestIdExisted),
+  ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
 
     logger.info('start to create quicksight path analysis report');
@@ -44,6 +58,10 @@ reporting_project.post(
 
 reporting_project.post(
   '/retention',
+  validate([
+    body().custom(isXSSRequest),
+    header('X-Click-Stream-Request-Id').custom(isRequestIdExisted),
+  ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
 
     logger.info('start to create quicksight path analysis report');
@@ -52,12 +70,20 @@ reporting_project.post(
 
 reporting_project.post(
   '/warmup',
+  validate([
+    body().custom(isXSSRequest),
+    header('X-Click-Stream-Request-Id').custom(isRequestIdExisted),
+  ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return reportingServ.warmup(req, res, next);
   });
 
 reporting_project.post(
   '/clean',
+  validate([
+    body().custom(isXSSRequest),
+    header('X-Click-Stream-Request-Id').custom(isRequestIdExisted),
+  ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return reportingServ.cleanQuickSightResources(req, res, next);
   });
