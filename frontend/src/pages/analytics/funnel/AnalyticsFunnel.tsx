@@ -507,6 +507,9 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
                 </SpaceBetween>
                 <br />
                 <AnalyticsEventSelect
+                  eventPlaceholder={t(
+                    'analytics:labels.eventSelectPlaceholder'
+                  )}
                   loading={loadingEvents}
                   eventDataState={eventDataState}
                   eventDataDispatch={eventDataDispatch}

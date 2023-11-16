@@ -15,7 +15,6 @@ import { Button } from '@cloudscape-design/components';
 import { OptionDefinition } from '@cloudscape-design/components/internal/components/option/interfaces';
 import { identity } from 'lodash';
 import React from 'react';
-import { useTranslation } from 'react-i18next';
 import { ALPHABETS } from 'ts/const';
 import { AnalyticsDispatchFunction } from './analyticsEventSelectReducer';
 import {
@@ -29,6 +28,7 @@ import RelationAnd from '../comps/RelationAnd';
 import RelationOr from '../comps/RelationOr';
 
 interface EventsSelectProps {
+  eventPlaceholder: string;
   eventDataState: IEventAnalyticsItem[];
   eventDataDispatch: AnalyticsDispatchFunction;
   maxSelectNum?: number;
@@ -46,6 +46,7 @@ const AnalyticsEventSelect: React.FC<EventsSelectProps> = (
   props: EventsSelectProps
 ) => {
   const {
+    eventPlaceholder,
     eventDataState,
     eventDataDispatch,
     maxSelectNum,
@@ -59,7 +60,6 @@ const AnalyticsEventSelect: React.FC<EventsSelectProps> = (
     metadataUserAttributes,
     loading,
   } = props;
-  const { t } = useTranslation();
 
   return (
     <div className="cs-analytics-dropdown">
@@ -75,7 +75,7 @@ const AnalyticsEventSelect: React.FC<EventsSelectProps> = (
               </div>
               <div className="flex-1">
                 <EventItem
-                  placeholder={t('analytics:labels.eventSelectPlaceholder')}
+                  placeholder={eventPlaceholder}
                   calcMethodOption={element.calculateMethodOption}
                   categoryOption={element.selectedEventOption}
                   changeCurCategoryOption={(item) => {

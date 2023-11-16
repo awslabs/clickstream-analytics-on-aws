@@ -373,6 +373,7 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
                 description={t('analytics:information.eventDefineMetricInfo')}
               />
               <AnalyticsEventSelect
+                eventPlaceholder={t('analytics:labels.eventSelectPlaceholder')}
                 loading={loadingEvents}
                 eventDataState={eventDataState}
                 eventDataDispatch={eventDataDispatch}

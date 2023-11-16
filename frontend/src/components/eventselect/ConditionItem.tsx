@@ -18,6 +18,7 @@ import {
   SelectProps,
   TokenGroup,
 } from '@cloudscape-design/components';
+import ErrorText from 'components/common/ErrorText';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ExploreAnalyticsOperators, MetadataValueType } from 'ts/explore-types';
@@ -189,6 +190,13 @@ const ConditionItem: React.FC<ConditionItemProps> = (
               : CONDITION_NUMBER_OPERATORS
           }
         />
+        {!item.conditionOperator && (
+          <ErrorText
+            text={`${t('valid.please')}${t(
+              'analytics:labels.operatorSelectPlaceholder'
+            )}`}
+          />
+        )}
       </div>
       <div className="flex-1">
         {item.conditionOperator?.value !== ANALYTICS_OPERATORS.is_null.value &&
@@ -233,6 +241,13 @@ const ConditionItem: React.FC<ConditionItemProps> = (
                 }}
                 items={labelValues.map((value) => ({ label: value }))}
               />
+              {(!labelValues || labelValues.length <= 0) && (
+                <ErrorText
+                  text={`${t('valid.please')}${t(
+                    'analytics:labels.conditionValuePlaceholder'
+                  )}`}
+                />
+              )}
             </div>
           )}
       </div>

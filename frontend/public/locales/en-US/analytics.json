@@ -240,6 +240,7 @@
     "associatedProperties": "Associated parameter",
     "retentionMetrics": "Retention metric",
     "eventSelectPlaceholder": "Select event",
+    "nodeSelectPlaceholder": "Select node",
     "attributeSelectPlaceholder": "Select attribute",
     "operatorSelectPlaceholder": "Select operator",
     "conditionValuePlaceholder": "Input value",

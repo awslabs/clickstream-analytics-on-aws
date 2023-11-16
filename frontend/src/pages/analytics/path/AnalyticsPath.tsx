@@ -731,11 +731,12 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
               />
 
               <AnalyticsEventSelect
+                eventPlaceholder={t('analytics:labels.nodeSelectPlaceholder')}
                 loading={loadingEvents}
                 disableAddCondition={disableAddCondition}
                 eventDataState={eventDataState}
                 eventDataDispatch={eventDataDispatch}
-                addEventButtonLabel={t('common:button.addEvent')}
+                addEventButtonLabel={t('common:button.addNode')}
                 eventOptionList={categoryEvents}
                 defaultComputeMethodOption={defaultComputeMethodOption}
                 metadataEvents={metadataEvents}

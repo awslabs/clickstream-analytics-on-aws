@@ -39,7 +39,7 @@ const StartNodeSelect: React.FC<StartNodeSelectProps> = (
           <div className="flex-1">
             <EventItem
               placeholder={defaultStr(
-                t('analytics:labels.attributeSelectPlaceholder')
+                t('analytics:labels.nodeSelectPlaceholder')
               )}
               categoryOption={nodeOption}
               changeCurCategoryOption={(item) => {

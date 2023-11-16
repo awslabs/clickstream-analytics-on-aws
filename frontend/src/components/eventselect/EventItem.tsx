@@ -13,6 +13,7 @@
 
 import { Select, SelectProps } from '@cloudscape-design/components';
 import classNames from 'classnames';
+import ErrorText from 'components/common/ErrorText';
 import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ExploreComputeMethod } from 'ts/explore-types';
@@ -22,7 +23,7 @@ import DropDownContainer from './DropDownContainer';
 
 interface EventItemProps {
   showMouseoverTitle?: boolean;
-  placeholder?: string | null;
+  placeholder: string | null;
   isMultiSelect?: boolean;
   hasTab?: boolean;
   categoryOption: IAnalyticsItem | null;
@@ -98,6 +99,12 @@ const EventItem: React.FC<EventItemProps> = (props: EventItemProps) => {
         <div
           className="flex-1 cs-dropdown-event-input"
           onClick={() => setShowDropdown((prev) => !prev)}
+          onKeyDown={(e) => {
+            console.info(e);
+            if (e.key === 'Enter') {
+              setShowDropdown((prev) => !prev);
+            }
+          }}
         >
           <Select
             onBlur={(e) => {
@@ -112,6 +119,9 @@ const EventItem: React.FC<EventItemProps> = (props: EventItemProps) => {
           />
           {categoryOption?.label && showMouseoverTitle && (
             <div className="custom-popover">{categoryOption?.label}</div>
+          )}
+          {!showDropdown && !categoryOption && (
+            <ErrorText text={`${t('valid.please')}${placeholder}`} />
           )}
         </div>
         {isMultiSelect && (
