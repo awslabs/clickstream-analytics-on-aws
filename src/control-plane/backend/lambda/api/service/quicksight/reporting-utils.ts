@@ -263,11 +263,15 @@ export const retentionAnalysisVisualColumns: InputColumn[] = [
 
 export const createDataSet = async (quickSight: QuickSight, awsAccountId: string, principalArn: string,
   dataSourceArn: string,
-  props: DataSetProps)
+  props: DataSetProps, requestAction: ExploreRequestAction)
 : Promise<CreateDataSetCommandOutput|undefined> => {
 
   try {
-    const datasetId = `${QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX}${uuidv4()}`;
+    let datasetId = uuidv4();
+    if (requestAction === ExploreRequestAction.PREVIEW) {
+      datasetId = `${QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX}${datasetId}`;
+    }
+
     let colGroups: ColumnGroup[] = [];
     if (props.columnGroups !== undefined) {
       for (const columnsGroup of props.columnGroups ) {

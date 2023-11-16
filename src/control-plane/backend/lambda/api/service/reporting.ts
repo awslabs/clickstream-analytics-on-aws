@@ -646,6 +646,7 @@ export class ReportingService {
         principals.exploreUserArn,
         dashboardCreateParameters.quickSight.dataSourceArn,
         datasetProps,
+        query.action as ExploreRequestAction,
       );
 
       dataSetIdentifierDeclaration.push({
