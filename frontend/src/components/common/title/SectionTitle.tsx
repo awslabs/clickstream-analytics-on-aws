@@ -17,6 +17,7 @@ import { useTranslation } from 'react-i18next';
 import ExtendIcon from '../ExtendIcon';
 
 interface SectionTitleProps {
+  disabled?: boolean;
   type: 'event' | 'filter' | 'group';
   title?: string | null;
   description?: string | null;
@@ -24,7 +25,7 @@ interface SectionTitleProps {
 const SectionTitle: React.FC<SectionTitleProps> = (
   props: SectionTitleProps
 ) => {
-  const { type, title, description } = props;
+  const { disabled, type, title, description } = props;
   const { t } = useTranslation();
 
   let displayTitle = '';
@@ -52,7 +53,7 @@ const SectionTitle: React.FC<SectionTitleProps> = (
 
   return (
     <div className="flex align-center gap-5">
-      <div className={`cs-analytics-header ${type}`}>
+      <div className={`cs-analytics-header ${type} ${disabled && 'disable'}`}>
         {getIcon()}
         <span>{displayTitle}</span>
       </div>

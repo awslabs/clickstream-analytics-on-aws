@@ -115,7 +115,7 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
     useState(false);
   const [exploreEmbedUrl, setExploreEmbedUrl] = useState('');
   const dispatch = useContext(DispatchContext);
-
+  const [groupDisabled, setGroupDisabled] = useState(false);
   const defaultChartTypeOption = QuickSightChartType.FUNNEL;
   const chartTypeOptions: SegmentedControlProps.Option[] = [
     {
@@ -395,6 +395,16 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
     clickPreview();
   }, [timeGranularity, dateRangeValue, chartType]);
 
+  useEffect(() => {
+    console.info('chartType:', chartType);
+    if (chartType === 'funnel') {
+      setGroupDisabled(true);
+      setGroupOption(null);
+    } else {
+      setGroupDisabled(false);
+    }
+  }, [chartType]);
+
   return (
     <>
       <SpaceBetween direction="vertical" size="l">
@@ -538,10 +548,12 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
               />
               <br />
               <SectionTitle
+                disabled={groupDisabled}
                 type="group"
                 description={t('analytics:information.groupInfo')}
               />
               <AttributeGroup
+                disabled={groupDisabled}
                 groupParameters={groupParameters}
                 groupOption={groupOption}
                 setGroupOption={setGroupOption}
