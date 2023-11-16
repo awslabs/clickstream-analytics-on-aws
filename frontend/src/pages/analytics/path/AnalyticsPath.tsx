@@ -477,6 +477,7 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
       type: 'resetFilterData',
       presetParameters,
     });
+    setStartNodeOption(null);
     switch (event.detail.selectedOption?.value) {
       case ExplorePathNodeType.EVENT:
         setCategoryEventsData(
@@ -527,6 +528,10 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
       }
     }
   }, [selectedNodeType]);
+
+  useEffect(() => {
+    setCategoryEventsData(categoryEvents);
+  }, [categoryEvents]);
 
   useEffect(() => {
     filterOptionDataDispatch({
@@ -684,6 +689,7 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
                 )}
               />
               <StartNodeSelect
+                loading={loadingEvents}
                 nodes={categoryEventsData}
                 nodeOption={startNodeOption}
                 setNodeOption={(option) => {

@@ -89,6 +89,7 @@ interface AnalyticsRetentionProps {
   categoryEvents: CategoryItemType[];
   presetParameters: CategoryItemType[];
   groupParameters: CategoryItemType[];
+  loadingEvents: boolean;
 }
 
 const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
@@ -103,6 +104,7 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
     categoryEvents,
     presetParameters,
     groupParameters,
+    loadingEvents,
   } = props;
   const { appId } = useParams();
   const currentUser = useContext(UserContext) ?? getUserInfoFromLocalStorage();
@@ -368,6 +370,7 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
                 description={t('analytics:information.retentionMetricInfo')}
               />
               <RetentionSelect
+                loading={loadingEvents}
                 data={eventOptionData}
                 eventOptionList={categoryEvents}
                 addEventButtonLabel={t('analytics:labels.retentionMetrics')}

@@ -184,8 +184,14 @@ const AnalyticsExplore: React.FC = () => {
     }
   };
 
+  const warnAndClean = async (params: any) => {
+    await Promise.all([
+      warmup(params),
+      clean(params.dashboardCreateParameters.region),
+    ]);
+  };
+
   const listMetadataEvents = async () => {
-    setLoadingMetadataEvent(true);
     try {
       const { success, data }: ApiResponse<ResponseTableData<IMetadataEvent>> =
         await getMetadataEventsList({
@@ -197,29 +203,6 @@ const AnalyticsExplore: React.FC = () => {
         setMetadataEvents(data.items);
         const events = metadataEventsConvertToCategoryItemType(data.items);
         setCategoryEvents(events);
-      }
-      setLoadingMetadataEvent(false);
-    } catch (error) {
-      setLoadingMetadataEvent(false);
-      console.log(error);
-    }
-  };
-
-  const loadPipeline = async () => {
-    try {
-      const { success, data }: ApiResponse<IPipeline> =
-        await getPipelineDetailByProjectId(defaultStr(projectId));
-      if (success) {
-        setPipeline(data);
-        const params = getWarmUpParameters(
-          defaultStr(projectId),
-          defaultStr(appId),
-          data
-        );
-        if (params) {
-          await warmup(params);
-          await clean(params.dashboardCreateParameters.region);
-        }
       }
     } catch (error) {
       console.log(error);
@@ -251,15 +234,37 @@ const AnalyticsExplore: React.FC = () => {
     }
   };
 
-  const loadData = () => {
-    loadPipeline();
-    listMetadataEvents();
-    listAllAttributes();
+  const getEventParamsAndAttributes = async () => {
+    setLoadingMetadataEvent(true);
+    await Promise.all([listMetadataEvents(), listAllAttributes()]);
+    setLoadingMetadataEvent(false);
+  };
+
+  const loadPipeline = async () => {
+    try {
+      const { success, data }: ApiResponse<IPipeline> =
+        await getPipelineDetailByProjectId(defaultStr(projectId));
+      if (success) {
+        setPipeline(data);
+        const params = getWarmUpParameters(
+          defaultStr(projectId),
+          defaultStr(appId),
+          data
+        );
+        if (params) {
+          // async to call warm and clean
+          warnAndClean(params);
+        }
+        await getEventParamsAndAttributes();
+      }
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   useEffect(() => {
     if (projectId && appId) {
-      loadData();
+      loadPipeline();
     }
   }, [projectId, appId]);
 
@@ -367,6 +372,7 @@ const AnalyticsExplore: React.FC = () => {
               )}
               {pipeline && selectedOption?.value === 'Retention' && (
                 <AnalyticsRetention
+                  loadingEvents={loadingMetadataEvent}
                   loading={false}
                   pipeline={pipeline}
                   metadataEvents={metadataEvents}
