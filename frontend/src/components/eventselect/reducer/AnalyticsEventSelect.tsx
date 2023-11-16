@@ -11,8 +11,7 @@
  *  and limitations under the License.
  */
 
-import { Button } from '@cloudscape-design/components';
-import { OptionDefinition } from '@cloudscape-design/components/internal/components/option/interfaces';
+import { Button, SelectProps } from '@cloudscape-design/components';
 import { identity } from 'lodash';
 import React from 'react';
 import { ALPHABETS } from 'ts/const';
@@ -36,7 +35,7 @@ interface EventsSelectProps {
   addEventButtonLabel: string;
   loading: boolean;
   eventOptionList: CategoryItemType[];
-  defaultComputeMethodOption: OptionDefinition;
+  defaultComputeMethodOption: SelectProps.Option;
   isMultiSelect: boolean;
   enableChangeRelation: boolean;
   metadataEvents: IMetadataEvent[];

@@ -183,9 +183,9 @@ declare global {
     selectedRegion: SelectProps.Option | null;
     selectedVPC: SelectProps.Option | null;
     selectedSDK: SelectProps.Option | null;
-    selectedPublicSubnet: OptionDefinition[];
+    selectedPublicSubnet: SelectProps.Option[];
 
-    selectedPrivateSubnet: OptionDefinition[];
+    selectedPrivateSubnet: SelectProps.Option[];
     selectedCertificate: SelectProps.Option | null;
     selectedSecret: SelectProps.Option | null;
     mskCreateMethod: string;
@@ -221,8 +221,8 @@ declare global {
     redshiftType: string; // 'provisioned' | 'serverless';
     redshiftServerlessVPC: SelectProps.Option | null;
     redshiftBaseCapacity: SelectProps.Option | null;
-    redshiftServerlessSG: OptionDefinition[];
-    redshiftServerlessSubnets: OptionDefinition[];
+    redshiftServerlessSG: SelectProps.Option[];
+    redshiftServerlessSubnets: SelectProps.Option[];
     redshiftDataLoadValue: string;
     redshiftDataLoadUnit: SelectProps.Option | null;
 

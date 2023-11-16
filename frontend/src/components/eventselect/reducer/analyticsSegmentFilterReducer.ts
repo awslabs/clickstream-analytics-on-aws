@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { OptionDefinition } from '@cloudscape-design/components/internal/components/option/interfaces';
+import { SelectProps } from '@cloudscape-design/components';
 import {
   CategoryItemType,
   DEFAULT_CONDITION_DATA,
@@ -42,13 +42,13 @@ export type RemoveEventCondition = {
 export type ChangeConditionCategoryOption = {
   type: 'changeConditionCategoryOption';
   index: number;
-  option: OptionDefinition | null;
+  option: SelectProps.Option | null;
 };
 
 export type ChangeConditionOperator = {
   type: 'changeConditionOperator';
   index: number;
-  operator: OptionDefinition | null;
+  operator: SelectProps.Option | null;
 };
 
 export type ChangeConditionValue = {

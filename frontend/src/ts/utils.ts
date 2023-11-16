@@ -12,7 +12,6 @@
  */
 
 import { SelectProps } from '@cloudscape-design/components';
-import { OptionDefinition } from '@cloudscape-design/components/internal/components/option/interfaces';
 import { isEqual } from 'lodash';
 import { getLngFromLocalStorage } from 'pages/analytics/analytics-utils';
 import {
@@ -294,7 +293,7 @@ export const isDisabled = (update?: boolean, pipelineInfo?: IExtPipeline) => {
 
 // Validate subnets cross N AZs
 export const validateSubnetCrossInAZs = (
-  subnets: OptionDefinition[],
+  subnets: SelectProps.Option[],
   nAZ: number
 ) => {
   const subnetsAZs = subnets.map(
@@ -309,8 +308,8 @@ export const validateSubnetCrossInAZs = (
 
 // Validate Private Subnet in same AZ with Public Subnets
 export const validatePublicSubnetInSameAZWithPrivateSubnets = (
-  publicSubnets: OptionDefinition[],
-  privateSubnets: OptionDefinition[]
+  publicSubnets: SelectProps.Option[],
+  privateSubnets: SelectProps.Option[]
 ) => {
   const publicSubnetsAZs = publicSubnets.map(
     (element) => element?.description?.split(':')[0]

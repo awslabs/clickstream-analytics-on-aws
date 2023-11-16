@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { OptionDefinition } from '@cloudscape-design/components/internal/components/option/interfaces';
+import { SelectProps } from '@cloudscape-design/components';
 import cloneDeep from 'lodash/cloneDeep';
 import { parametersConvertToCategoryItemType } from 'pages/analytics/analytics-utils';
 import { getEventParameters } from 'ts/utils';
@@ -25,7 +25,7 @@ import {
 
 export type ResetEventData = {
   type: 'resetEventData';
-  defaultComputeMethodOption?: OptionDefinition;
+  defaultComputeMethodOption?: SelectProps.Option;
   isMultiSelect: boolean;
   enableChangeRelation: boolean;
   disabled?: boolean;
@@ -38,7 +38,7 @@ export type UpdateEventData = {
 
 export type AddNewEventAnalyticsItem = {
   type: 'addNewEventAnalyticsItem';
-  defaultComputeMethodOption: OptionDefinition;
+  defaultComputeMethodOption: SelectProps.Option;
   isMultiSelect: boolean;
   enableChangeRelation: boolean;
   disable?: boolean;
@@ -64,14 +64,14 @@ export type ChangeConditionCategoryOption = {
   type: 'changeConditionCategoryOption';
   eventIndex: number;
   conditionIndex: number;
-  conditionOption: OptionDefinition | null;
+  conditionOption: SelectProps.Option | null;
 };
 
 export type ChangeConditionOperator = {
   type: 'changeConditionOperator';
   eventIndex: number;
   conditionIndex: number;
-  conditionOperator: OptionDefinition | null;
+  conditionOperator: SelectProps.Option | null;
 };
 
 export type ChangeConditionValue = {
@@ -84,7 +84,7 @@ export type ChangeConditionValue = {
 export type ChangeCurCalcMethodOption = {
   type: 'changeCurCalcMethodOption';
   eventIndex: number;
-  methodOption: OptionDefinition | null;
+  methodOption: SelectProps.Option | null;
 };
 
 export type ChangeCurCategoryOption = {
