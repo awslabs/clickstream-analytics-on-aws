@@ -34,7 +34,7 @@ import Mustache from 'mustache';
 import { v4 as uuidv4 } from 'uuid';
 import { DataSetProps, dataSetAdminPermissionActions } from './dashboard-ln';
 import { EventAndCondition, PairEventAndCondition, SQLCondition } from './sql-builder';
-import { QUICKSIGHT_DATASET_INFIX, QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX } from '../../common/constants-ln';
+import { QUICKSIGHT_DATASET_INFIX, QUICKSIGHT_RESOURCE_NAME_PREFIX, QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX } from '../../common/constants-ln';
 import { AnalysisType, ExploreConversionIntervalType, ExploreLocales, ExplorePathNodeType, ExplorePathSessionDef, ExploreRelativeTimeUnit, ExploreRequestAction, ExploreTimeScopeType, ExploreVisualName, MetadataValueType, QuickSightChartType } from '../../common/explore-types';
 import { logger } from '../../common/powertools';
 import i18next from '../../i18n';
@@ -267,9 +267,9 @@ export const createDataSet = async (quickSight: QuickSight, awsAccountId: string
 : Promise<CreateDataSetCommandOutput|undefined> => {
 
   try {
-    let datasetId = uuidv4().replace(/-/g, '');
+    let datasetId = `${QUICKSIGHT_RESOURCE_NAME_PREFIX}${QUICKSIGHT_DATASET_INFIX}${uuidv4().replace(/-/g, '')}`;
     if (requestAction === ExploreRequestAction.PREVIEW) {
-      datasetId = `${QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX}${QUICKSIGHT_DATASET_INFIX}${datasetId}`;
+      datasetId = `${QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX}${datasetId}`;
     }
 
     let colGroups: ColumnGroup[] = [];
