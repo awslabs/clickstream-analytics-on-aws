@@ -752,24 +752,18 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
           },
           {
             Action: [
-              'quicksight:ListUsers',
               'quicksight:DescribeAccountSubscription',
-              'quicksight:RegisterUser',
-              'quicksight:GenerateEmbedUrlForRegisteredUser',
               'quicksight:UpdateDashboardPermissions',
               'quicksight:CreateDataSet',
-              'quicksight:ListDataSets',
               'quicksight:DeleteDataSet',
               'quicksight:PassDataSet',
               'quicksight:PassDataSource',
               'quicksight:CreateDashboard',
-              'quicksight:ListDashboards',
               'quicksight:DeleteDashboard',
               'quicksight:UpdateDashboard',
               'quicksight:DescribeDashboard',
               'quicksight:UpdateDashboardPublishedVersion',
               'quicksight:CreateAnalysis',
-              'quicksight:ListAnalyses',
               'quicksight:UpdateAnalysis',
               'quicksight:DeleteAnalysis',
             ],
@@ -783,7 +777,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
                     {
                       Ref: 'AWS::Partition',
                     },
-                    ':quicksight::',
+                    ':quicksight:*:',
                     {
                       Ref: 'AWS::AccountId',
                     },
@@ -799,7 +793,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
                     {
                       Ref: 'AWS::Partition',
                     },
-                    ':quicksight::',
+                    ':quicksight:*:',
                     {
                       Ref: 'AWS::AccountId',
                     },
@@ -815,7 +809,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
                     {
                       Ref: 'AWS::Partition',
                     },
-                    ':quicksight::',
+                    ':quicksight:*:',
                     {
                       Ref: 'AWS::AccountId',
                     },
@@ -831,7 +825,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
                     {
                       Ref: 'AWS::Partition',
                     },
-                    ':quicksight::',
+                    ':quicksight:*:',
                     {
                       Ref: 'AWS::AccountId',
                     },
@@ -847,7 +841,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
                     {
                       Ref: 'AWS::Partition',
                     },
-                    ':quicksight::',
+                    ':quicksight:*:',
                     {
                       Ref: 'AWS::AccountId',
                     },
@@ -863,7 +857,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
                     {
                       Ref: 'AWS::Partition',
                     },
-                    ':quicksight::',
+                    ':quicksight:*:',
                     {
                       Ref: 'AWS::AccountId',
                     },
@@ -879,11 +873,40 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
                     {
                       Ref: 'AWS::Partition',
                     },
-                    ':quicksight::',
+                    ':quicksight:*:',
                     {
                       Ref: 'AWS::AccountId',
                     },
                     ':dataset/_tmp_*',
+                  ],
+                ],
+              },
+            ],
+          },
+          {
+            Action: [
+              'quicksight:GenerateEmbedUrlForRegisteredUser',
+              'quicksight:RegisterUser',
+              'quicksight:ListUsers',
+              'quicksight:ListDataSets',
+              'quicksight:ListDashboards',
+              'quicksight:ListAnalyses',
+            ],
+            Effect: 'Allow',
+            Resource: [
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    {
+                      Ref: 'AWS::Partition',
+                    },
+                    ':quicksight:*:',
+                    {
+                      Ref: 'AWS::AccountId',
+                    },
+                    ':analysis/*',
                   ],
                 ],
               },
@@ -895,7 +918,39 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
                     {
                       Ref: 'AWS::Partition',
                     },
-                    ':quicksight::',
+                    ':quicksight:*:',
+                    {
+                      Ref: 'AWS::AccountId',
+                    },
+                    ':dashboard/*',
+                  ],
+                ],
+              },
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    {
+                      Ref: 'AWS::Partition',
+                    },
+                    ':quicksight:*:',
+                    {
+                      Ref: 'AWS::AccountId',
+                    },
+                    ':dataset/*',
+                  ],
+                ],
+              },
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    {
+                      Ref: 'AWS::Partition',
+                    },
+                    ':quicksight:*:',
                     {
                       Ref: 'AWS::AccountId',
                     },
