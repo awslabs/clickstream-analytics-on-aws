@@ -85,7 +85,45 @@ Example input data:
       "_session_id": "see000201912dk-23u92-1df0020",
       "_session_start_timestamp": 1667963966697,
       "_session_duration": 690000
-    }
+    },
+    "items": [
+      {
+        "id": "item_id1",
+        "name": "French Press1",
+        "category": "housewares",
+        "price": 52.99,
+        "brand": "Brand1",
+        "category2": "Category-2",
+        "category3": "Category-3",
+        "category4": "Category-4",
+        "category5": "Category-5",
+        "creative_name": "Creative Name",
+        "creative_slot": "Creative Slot",
+        "location_id": "Location#001",
+        "quantity": 42
+      },
+      {
+        "id": "d3b237aekdme3l",
+        "name": "French Press",
+        "category": "housewares",
+        "price": 52.99
+      },
+      {
+        "id": "item_id034394ldmf3",
+        "name": "French Press3",
+        "category": "housewares3",
+        "price": 42.33,
+        "brand": "Brand-3",
+        "category2": "Category-2 3",
+        "category3": "Category-3 3",
+        "category4": "Category-4 3",
+        "category5": "Category-5 3",
+        "creative_name": "Creative Name 3",
+        "creative_slot": "Creative Slot 3",
+        "location_id": "Location#003",
+        "quantity": 19
+      }
+    ]
   }
 ]
 ```
@@ -94,37 +132,640 @@ Input data, schema of item in data array:
 
 [schema.json](./src/main/resources/schema.json)
 
-Output data schema:
+Output datasets schema:
 
-```sql
+- event
+```json
+{
+  "type" : "struct",
+  "fields" : [ {
+    "name" : "event_id",
+    "type" : "string",
+    "nullable" : true,
+    "metadata" : { }
+  }, {
+    "name" : "event_date",
+    "type" : "date",
+    "nullable" : true,
+    "metadata" : { }
+  }, {
+    "name" : "event_timestamp",
+    "type" : "long",
+    "nullable" : true,
+    "metadata" : { }
+  }, {
+    "name" : "event_previous_timestamp",
+    "type" : "long",
+    "nullable" : true,
+    "metadata" : { }
+  }, {
+    "name" : "event_name",
+    "type" : "string",
+    "nullable" : true,
+    "metadata" : { }
+  }, {
+    "name" : "event_value_in_usd",
+    "type" : "float",
+    "nullable" : true,
+    "metadata" : { }
+  }, {
+    "name" : "event_bundle_sequence_id",
+    "type" : "long",
+    "nullable" : true,
+    "metadata" : { }
+  }, {
+    "name" : "ingest_timestamp",
+    "type" : "long",
+    "nullable" : true,
+    "metadata" : { }
+  }, {
+    "name" : "device",
+    "type" : {
+      "type" : "struct",
+      "fields" : [ {
+        "name" : "mobile_brand_name",
+        "type" : "string",
+        "nullable" : true,
+        "metadata" : { }
+      }, {
+        "name" : "mobile_model_name",
+        "type" : "string",
+        "nullable" : true,
+        "metadata" : { }
+      }, {
+        "name" : "manufacturer",
+        "type" : "string",
+        "nullable" : true,
+        "metadata" : { }
+      }, {
+        "name" : "screen_width",
+        "type" : "long",
+        "nullable" : true,
+        "metadata" : { }
+      }, {
+        "name" : "screen_height",
+        "type" : "long",
+        "nullable" : true,
+        "metadata" : { }
+      }, {
+        "name" : "carrier",
+        "type" : "string",
+        "nullable" : true,
+        "metadata" : { }
+      }, {
+        "name" : "network_type",
+        "type" : "string",
+        "nullable" : true,
+        "metadata" : { }
+      }, {
+        "name" : "operating_system_version",
+        "type" : "string",
+        "nullable" : true,
+        "metadata" : { }
+      }, {
+        "name" : "operating_system",
+        "type" : "string",
+        "nullable" : true,
+        "metadata" : { }
+      }, {
+        "name" : "ua_browser",
+        "type" : "string",
+        "nullable" : true,
+        "metadata" : { }
+      }, {
+        "name" : "ua_browser_version",
+        "type" : "string",
+        "nullable" : true,
+        "metadata" : { }
+      }, {
+        "name" : "ua_os",
+        "type" : "string",
+        "nullable" : true,
+        "metadata" : { }
+      }, {
+        "name" : "ua_os_version",
+        "type" : "string",
+        "nullable" : true,
+        "metadata" : { }
+      }, {
+        "name" : "ua_device",
+        "type" : "string",
+        "nullable" : true,
+        "metadata" : { }
+      }, {
+        "name" : "ua_device_category",
+        "type" : "string",
+        "nullable" : true,
+        "metadata" : { }
+      }, {
+        "name" : "system_language",
+        "type" : "string",
+        "nullable" : true,
+        "metadata" : { }
+      }, {
+        "name" : "time_zone_offset_seconds",
+        "type" : "long",
+        "nullable" : true,
+        "metadata" : { }
+      }, {
+        "name" : "vendor_id",
+        "type" : "string",
+        "nullable" : true,
+        "metadata" : { }
+      }, {
+        "name" : "advertising_id",
+        "type" : "string",
+        "nullable" : true,
+        "metadata" : { }
+      }, {
+        "name" : "host_name",
+        "type" : "string",
+        "nullable" : true,
+        "metadata" : { }
+      }, {
+        "name" : "viewport_width",
+        "type" : "long",
+        "nullable" : true,
+        "metadata" : { }
+      }, {
+        "name" : "viewport_height",
+        "type" : "long",
+        "nullable" : true,
+        "metadata" : { }
+      } ]
+    },
+    "nullable" : false,
+    "metadata" : { }
+  }, {
+    "name" : "geo",
+    "type" : {
+      "type" : "struct",
+      "fields" : [ {
+        "name" : "country",
+        "type" : "string",
+        "nullable" : true,
+        "metadata" : { }
+      }, {
+        "name" : "continent",
+        "type" : "string",
+        "nullable" : true,
+        "metadata" : { }
+      }, {
+        "name" : "sub_continent",
+        "type" : "string",
+        "nullable" : true,
+        "metadata" : { }
+      }, {
+        "name" : "locale",
+        "type" : "string",
+        "nullable" : true,
+        "metadata" : { }
+      }, {
+        "name" : "region",
+        "type" : "string",
+        "nullable" : true,
+        "metadata" : { }
+      }, {
+        "name" : "metro",
+        "type" : "string",
+        "nullable" : true,
+        "metadata" : { }
+      }, {
+        "name" : "city",
+        "type" : "string",
+        "nullable" : true,
+        "metadata" : { }
+      } ]
+    },
+    "nullable" : false,
+    "metadata" : { }
+  }, {
+    "name" : "traffic_source",
+    "type" : {
+      "type" : "struct",
+      "fields" : [ {
+        "name" : "medium",
+        "type" : "string",
+        "nullable" : true,
+        "metadata" : { }
+      }, {
+        "name" : "name",
+        "type" : "string",
+        "nullable" : true,
+        "metadata" : { }
+      }, {
+        "name" : "source",
+        "type" : "string",
+        "nullable" : true,
+        "metadata" : { }
+      } ]
+    },
+    "nullable" : false,
+    "metadata" : { }
+  }, {
+    "name" : "app_info",
+    "type" : {
+      "type" : "struct",
+      "fields" : [ {
+        "name" : "app_id",
+        "type" : "string",
+        "nullable" : true,
+        "metadata" : { }
+      }, {
+        "name" : "id",
+        "type" : "string",
+        "nullable" : true,
+        "metadata" : { }
+      }, {
+        "name" : "install_source",
+        "type" : "string",
+        "nullable" : true,
+        "metadata" : { }
+      }, {
+        "name" : "version",
+        "type" : "string",
+        "nullable" : true,
+        "metadata" : { }
+      }, {
+        "name" : "sdk_version",
+        "type" : "string",
+        "nullable" : true,
+        "metadata" : { }
+      }, {
+        "name" : "sdk_name",
+        "type" : "string",
+        "nullable" : true,
+        "metadata" : { }
+      } ]
+    },
+    "nullable" : false,
+    "metadata" : { }
+  }, {
+    "name" : "platform",
+    "type" : "string",
+    "nullable" : true,
+    "metadata" : { }
+  }, {
+    "name" : "project_id",
+    "type" : "string",
+    "nullable" : false,
+    "metadata" : { }
+  }, {
+    "name" : "items",
+    "type" : {
+      "type" : "array",
+      "elementType" : {
+        "type" : "struct",
+        "fields" : [ {
+          "name" : "id",
+          "type" : "string",
+          "nullable" : true,
+          "metadata" : { }
+        }, {
+          "name" : "quantity",
+          "type" : "long",
+          "nullable" : true,
+          "metadata" : { }
+        }, {
+          "name" : "price",
+          "type" : "double",
+          "nullable" : true,
+          "metadata" : { }
+        }, {
+          "name" : "currency",
+          "type" : "string",
+          "nullable" : true,
+          "metadata" : { }
+        }, {
+          "name" : "creative_name",
+          "type" : "string",
+          "nullable" : true,
+          "metadata" : { }
+        }, {
+          "name" : "creative_slot",
+          "type" : "string",
+          "nullable" : true,
+          "metadata" : { }
+        } ]
+      },
+      "containsNull" : true
+    },
+    "nullable" : true,
+    "metadata" : { }
+  }, {
+    "name" : "user_pseudo_id",
+    "type" : "string",
+    "nullable" : true,
+    "metadata" : { }
+  }, {
+    "name" : "user_id",
+    "type" : "string",
+    "nullable" : true,
+    "metadata" : { }
+  }, {
+    "name" : "ua",
+    "type" : "string",
+    "nullable" : true,
+    "metadata" : { }
+  }, {
+    "name" : "geo_for_enrich",
+    "type" : {
+      "type" : "struct",
+      "fields" : [ {
+        "name" : "ip",
+        "type" : "string",
+        "nullable" : true,
+        "metadata" : { }
+      }, {
+        "name" : "locale",
+        "type" : "string",
+        "nullable" : true,
+        "metadata" : { }
+      } ]
+    },
+    "nullable" : false,
+    "metadata" : { }
+  } ]
+}
 
-CREATE EXTERNAL TABLE `ods_events`(
-  `app_info` struct<app_id:string,id:string,install_source:string,version:string>, 
-  `device` struct<mobile_brand_name:string,mobile_model_name:string,manufacturer:string,screen_width:bigint,screen_height:bigint,carrier:string,network_type:string,operating_system_version:string,operating_system:string,ua_browser:string,ua_browser_version:string,ua_os:string,ua_os_version:string,ua_device:string,ua_device_category:string,system_language:string,time_zone_offset_seconds:bigint,vendor_id:string,advertising_id:string>, 
-  `ecommerce` struct<total_item_quantity:bigint,purchase_revenue_in_usd:double,purchase_revenue:double,refund_value_in_usd:double,refund_value:double,shipping_value_in_usd:double,shipping_value:double,tax_value_in_usd:double,tax_value:double,transaction_id:string,unique_items:bigint>, 
-  `event_bundle_sequence_id` bigint, 
-  `event_date` date,
-  `event_dimensions` array<struct<key:string,value:struct<double_value:double,float_value:float,int_value:bigint,string_value:string>>>, 
-  `event_id` string, 
-  `event_name` string, 
-  `event_params` array<struct<key:string,value:struct<double_value:double,float_value:float,int_value:bigint,string_value:string>>>, 
-  `event_previous_timestamp` bigint, 
-  `event_server_timestamp_offset` bigint, 
-  `event_timestamp` bigint, 
-  `event_value_in_usd` float, 
-  `geo` struct<city:string,continent:string,country:string,metro:string,region:string,sub_continent:string,locale:string>, 
-  `ingest_timestamp` bigint, 
-  `items` struct<item_id:string,item_name:string,item_brand:string,item_variant:string,item_category:string,item_category2:string,item_category3:string,item_category4:string,item_category5:string,price_in_usd:double,price:double,quantity:bigint,item_revenue_in_usd:double,item_revenue:double,item_refund_in_usd:double,item_refund:double,coupon:string,affiliation:string,location_id:string,item_list_id:string,item_list_name:string,item_list_index:string,promotion_id:string,promotion_name:string,creative_name:string,creative_slot:string>, 
-  `platform` string, 
-  `privacy_info` array<struct<key:string,value:struct<double_value:double,float_value:float,int_value:bigint,string_value:string>>>, 
-  `project_id` string, 
-  `traffic_source` struct<medium:string,name:string,source:string>, 
-  `user_first_touch_timestamp` bigint, 
-  `user_id` string, 
-  `user_ltv` struct<revenue:double,currency:string>, 
-  `user_properties` array<struct<key:string,value:struct<double_value:double,float_value:float,int_value:bigint,string_value:string,set_timestamp_micros:bigint>>>, 
-  `user_pseudo_id` string)
+```
 
+- event_parameter
+```json
+{
+  "type" : "struct",
+  "fields" : [ {
+    "name" : "app_id",
+    "type" : "string",
+    "nullable" : true,
+    "metadata" : { }
+  }, {
+    "name" : "event_date",
+    "type" : "date",
+    "nullable" : true,
+    "metadata" : { }
+  }, {
+    "name" : "event_timestamp",
+    "type" : "long",
+    "nullable" : true,
+    "metadata" : { }
+  }, {
+    "name" : "event_id",
+    "type" : "string",
+    "nullable" : true,
+    "metadata" : { }
+  }, {
+    "name" : "event_name",
+    "type" : "string",
+    "nullable" : true,
+    "metadata" : { }
+  }, {
+    "name" : "event_param_key",
+    "type" : "string",
+    "nullable" : true,
+    "metadata" : { }
+  }, {
+    "name" : "event_param_double_value",
+    "type" : "double",
+    "nullable" : true,
+    "metadata" : { }
+  }, {
+    "name" : "event_param_float_value",
+    "type" : "float",
+    "nullable" : true,
+    "metadata" : { }
+  }, {
+    "name" : "event_param_int_value",
+    "type" : "long",
+    "nullable" : true,
+    "metadata" : { }
+  }, {
+    "name" : "event_param_string_value",
+    "type" : "string",
+    "nullable" : true,
+    "metadata" : { }
+  } ]
+}
+
+```
+
+- item
+```json
+{
+  "type" : "struct",
+  "fields" : [ {
+    "name" : "app_id",
+    "type" : "string",
+    "nullable" : true,
+    "metadata" : { }
+  }, {
+    "name" : "event_date",
+    "type" : "date",
+    "nullable" : true,
+    "metadata" : { }
+  }, {
+    "name" : "event_timestamp",
+    "type" : "long",
+    "nullable" : true,
+    "metadata" : { }
+  }, {
+    "name" : "id",
+    "type" : "string",
+    "nullable" : true,
+    "metadata" : { }
+  }, {
+    "name" : "properties",
+    "type" : {
+      "type" : "array",
+      "elementType" : {
+        "type" : "struct",
+        "fields" : [ {
+          "name" : "key",
+          "type" : "string",
+          "nullable" : true,
+          "metadata" : { }
+        }, {
+          "name" : "value",
+          "type" : {
+            "type" : "struct",
+            "fields" : [ {
+              "name" : "double_value",
+              "type" : "double",
+              "nullable" : true,
+              "metadata" : { }
+            }, {
+              "name" : "float_value",
+              "type" : "float",
+              "nullable" : true,
+              "metadata" : { }
+            }, {
+              "name" : "int_value",
+              "type" : "long",
+              "nullable" : true,
+              "metadata" : { }
+            }, {
+              "name" : "string_value",
+              "type" : "string",
+              "nullable" : true,
+              "metadata" : { }
+            } ]
+          },
+          "nullable" : true,
+          "metadata" : { }
+        } ]
+      },
+      "containsNull" : true
+    },
+    "nullable" : true,
+    "metadata" : { }
+  } ]
+}
+
+```
+
+- user 
+```json
+{
+  "type" : "struct",
+  "fields" : [ {
+    "name" : "app_id",
+    "type" : "string",
+    "nullable" : true,
+    "metadata" : { }
+  }, {
+    "name" : "event_date",
+    "type" : "date",
+    "nullable" : true,
+    "metadata" : { }
+  }, {
+    "name" : "event_timestamp",
+    "type" : "long",
+    "nullable" : true,
+    "metadata" : { }
+  }, {
+    "name" : "user_id",
+    "type" : "string",
+    "nullable" : true,
+    "metadata" : { }
+  }, {
+    "name" : "user_pseudo_id",
+    "type" : "string",
+    "nullable" : true,
+    "metadata" : { }
+  }, {
+    "name" : "user_first_touch_timestamp",
+    "type" : "long",
+    "nullable" : true,
+    "metadata" : { }
+  }, {
+    "name" : "user_properties",
+    "type" : {
+      "type" : "array",
+      "elementType" : {
+        "type" : "struct",
+        "fields" : [ {
+          "name" : "key",
+          "type" : "string",
+          "nullable" : true,
+          "metadata" : { }
+        }, {
+          "name" : "value",
+          "type" : {
+            "type" : "struct",
+            "fields" : [ {
+              "name" : "double_value",
+              "type" : "double",
+              "nullable" : true,
+              "metadata" : { }
+            }, {
+              "name" : "float_value",
+              "type" : "float",
+              "nullable" : true,
+              "metadata" : { }
+            }, {
+              "name" : "int_value",
+              "type" : "long",
+              "nullable" : true,
+              "metadata" : { }
+            }, {
+              "name" : "string_value",
+              "type" : "string",
+              "nullable" : true,
+              "metadata" : { }
+            }, {
+              "name" : "set_timestamp_micros",
+              "type" : "long",
+              "nullable" : true,
+              "metadata" : { }
+            } ]
+          },
+          "nullable" : true,
+          "metadata" : { }
+        } ]
+      },
+      "containsNull" : true
+    },
+    "nullable" : true,
+    "metadata" : { }
+  }, {
+    "name" : "user_ltv",
+    "type" : {
+      "type" : "struct",
+      "fields" : [ {
+        "name" : "revenue",
+        "type" : "double",
+        "nullable" : true,
+        "metadata" : { }
+      }, {
+        "name" : "currency",
+        "type" : "string",
+        "nullable" : true,
+        "metadata" : { }
+      } ]
+    },
+    "nullable" : true,
+    "metadata" : { }
+  }, {
+    "name" : "_first_visit_date",
+    "type" : "date",
+    "nullable" : true,
+    "metadata" : { }
+  }, {
+    "name" : "_first_referer",
+    "type" : "string",
+    "nullable" : true,
+    "metadata" : { }
+  }, {
+    "name" : "_first_traffic_source_type",
+    "type" : "string",
+    "nullable" : true,
+    "metadata" : { }
+  }, {
+    "name" : "_first_traffic_medium",
+    "type" : "string",
+    "nullable" : true,
+    "metadata" : { }
+  }, {
+    "name" : "_first_traffic_source",
+    "type" : "string",
+    "nullable" : true,
+    "metadata" : { }
+  }, {
+    "name" : "device_id_list",
+    "type" : {
+      "type" : "array",
+      "elementType" : "string",
+      "containsNull" : true
+    },
+    "nullable" : true,
+    "metadata" : { }
+  }, {
+    "name" : "_channel",
+    "type" : "string",
+    "nullable" : true,
+    "metadata" : { }
+  } ]
+}
 ```
 
 ## Build custom plugin jar
@@ -141,13 +782,13 @@ cd custom-sdk-transformer/
 
 ```sh
 
-ls -l ./build/libs/custom-sdk-transformer-1.0.0.jar
+ls -l ./build/libs/custom-sdk-transformer-1.1.0.jar
 
 ```
 
 ## Plugin class names
 
-- Transformer: `com.example.clickstream.transformer`
+- Transformer: `com.example.clickstream.transformer.v2.MyTransformerV2`
 
 ## Use Plugin in solution
 
@@ -155,13 +796,13 @@ Please refer the [deployment guide](../../../docs/en/pipeline-mgmt/data-processi
 
 ## Use Plugin in solution (update cloudformation directly)
 
-1. Upload the jar file to your S3 bucket, e.g. `s3://<bucket>/pipeline/jars/custom-sdk-transformer-1.0.0.jar`
+1. Upload the jar file to your S3 bucket, e.g. `s3://<bucket>/pipeline/jars/custom-sdk-transformer-1.1.0.jar`
 
 2. Update ETL cloudformation parameters:
 
 | Parameter name                  | Value                                                |
 |---------------------------------|------------------------------------------------------|
-| **Class name list for plugins** | `com.example.clickstream.transformer.MyTransformer,software.aws.solution.clickstream.UAEnrichment,software.aws.solution.clickstream.IPEnrichment` |
+| **Class name list for plugins** | `com.example.clickstream.transformer.v2.MyTransformerV2,software.aws.solution.clickstream.UAEnrichment,software.aws.solution.clickstream.IPEnrichment` |
 | **Plugin jars**                 | `s3://<bucket>/pipeline/jars/custom-sdk-transformer-1.0.0.jar`                       |
 
 ## Run Test

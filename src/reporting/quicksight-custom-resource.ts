@@ -73,6 +73,7 @@ export function createQuicksightCustomResource(
     analysisName: 'Clickstream Analysis',
     dashboardName: 'Clickstream Dashboard',
     templateArn: props.templateArn,
+    templateId: props.templateId,
     dataSourceArn: props.dataSourceArn,
     databaseName: databaseName,
     dataSets: [
@@ -103,7 +104,6 @@ export function createQuicksightCustomResource(
           'first_traffic_source_medium',
           'first_traffic_source_name',
           'first_referer',
-          'first_visit_channel',
           'registration_status',
           'device_id',
         ],

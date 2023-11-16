@@ -155,7 +155,7 @@ export const parametersConvertToCategoryItemType = (
   }
   userAttributeItems.forEach((item) => {
     categoryUserItems.itemList.push({
-      label: item.displayName,
+      label: userAttributeDisplayname(item.displayName),
       name: item.name,
       value: item.id,
       description: item.description,
@@ -565,4 +565,11 @@ export const getWarmUpParameters = (
 
 export const getLngFromLocalStorage = () => {
   return localStorage.getItem('i18nextLng') ?? DEFAULT_EN_LANG;
+};
+
+export const userAttributeDisplayname = (displayName: string) => {
+  return displayName.replace(
+    ConditionCategory.USER_OUTER,
+    ConditionCategory.USER
+  );
 };

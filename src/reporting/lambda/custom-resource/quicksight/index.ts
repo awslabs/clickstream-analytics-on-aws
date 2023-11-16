@@ -30,6 +30,7 @@ import {
   UpdateDashboardCommandOutput,
   DeleteAnalysisCommandOutput,
   UpdateDataSetCommandOutput,
+  ConflictException,
 } from '@aws-sdk/client-quicksight';
 import { Context, CloudFormationCustomResourceEvent, CloudFormationCustomResourceUpdateEvent, CloudFormationCustomResourceCreateEvent, CloudFormationCustomResourceDeleteEvent, CdkCustomResourceResponse } from 'aws-lambda';
 import Mustache from 'mustache';
@@ -50,6 +51,8 @@ import {
   dataSetAdminPermissionActions,
   analysisAdminPermissionActions,
   dataSetReaderPermissionActions,
+  sleep,
+  waitForTemplateChangeCompleted,
 } from '../../../private/dashboard';
 
 type ResourceEvent = CloudFormationCustomResourceEvent;
@@ -111,7 +114,7 @@ const _onCreate = async (quickSight: QuickSight, awsAccountId: string, sharePrin
       const dashboard = await createQuickSightDashboard(quickSight, awsAccountId, sharePrincipalArn, ownerPrincipalArn,
         schemaName,
         dashboardDefProps);
-      logger.info('created dashboard', JSON.stringify(dashboard));
+
       dashboards.push({
         appId: schemaName,
         dashboardId: dashboard?.DashboardId,
@@ -193,7 +196,6 @@ const _onUpdate = async (quickSight: QuickSight, awsAccountId: string, sharePrin
       schemaName,
       dashboardDefProps, oldDashboardDefProps, ownerPrincipalArn, sharePrincipalArn);
 
-    logger.info(`updated dashboard: ${dashboard?.DashboardId}`);
     dashboards.push({
       appId: schemaName,
       dashboardId: dashboard?.DashboardId,
@@ -302,6 +304,29 @@ const deleteQuickSightDashboard = async (quickSight: QuickSight,
 
 };
 
+
+const getLatestTemplateVersion = async (quickSight: QuickSight,
+  accountId: string, templateId: string): Promise<number> => {
+  await waitForTemplateChangeCompleted(quickSight, accountId, templateId);
+
+  const versions = await quickSight.listTemplateVersions({
+    TemplateId: templateId,
+    AwsAccountId: accountId,
+  });
+
+  let maxNumber = 1;
+  if (versions.TemplateVersionSummaryList) {
+    for (const version of versions.TemplateVersionSummaryList) {
+      const number = version.VersionNumber ?? 1;
+      if (number > maxNumber) {
+        maxNumber = number;
+      }
+    }
+  }
+
+  return maxNumber;
+};
+
 const updateQuickSightDashboard = async (quickSight: QuickSight,
   accountId: string,
   schema: string,
@@ -359,18 +384,23 @@ const updateQuickSightDashboard = async (quickSight: QuickSight,
     await deleteDataSet(quickSight, accountId, schema, databaseName, dataSet);
   }
 
+  const latestVersion = await getLatestTemplateVersion(quickSight, accountId, dashboardDef.templateId);
+  logger.info(`templateId: ${dashboardDef.templateId}`);
+  logger.info(`templateArn: ${dashboardDef.templateArn}`);
+  logger.info(`template latestVersion: ${latestVersion}`);
+
   const sourceEntity = {
     SourceTemplate: {
-      Arn: dashboardDef.templateArn,
+      Arn: dashboardDef.templateArn + `/version/${latestVersion}`,
       DataSetReferences: datasetRefs,
     },
   };
 
   const analysis = await updateAnalysis(quickSight, commonParams, sourceEntity, dashboardDef);
-  logger.info(`Analysis ${analysis?.AnalysisId} creation completed.`);
+  logger.info(`Analysis ${analysis?.AnalysisId} update completed.`);
 
   const dashboard = await updateDashboard(quickSight, commonParams, sourceEntity, dashboardDef);
-  logger.info(`Dashboard ${dashboard?.DashboardId} creation completed.`);
+  logger.info(`Dashboard ${dashboard?.DashboardId} update completed.`);
 
   return dashboard;
 
@@ -807,6 +837,35 @@ const updateAnalysis = async (quickSight: QuickSight, commonParams: ResourceComm
   }
 };
 
+const publishNewVersionDashboard = async(quickSight: QuickSight, dashboardId: string,
+  versionNumber: string, awsAccountId: string) => {
+  let cnt = 0;
+  for (const _i of Array(100).keys()) {
+    cnt += 1;
+    try {
+      const response = await quickSight.updateDashboardPublishedVersion({
+        AwsAccountId: awsAccountId,
+        DashboardId: dashboardId,
+        VersionNumber: Number.parseInt(versionNumber),
+      });
+
+      if (response.DashboardId) {
+        break;
+      }
+    } catch (err: any) {
+      if (err instanceof ConflictException ) {
+        logger.warn('sleep 100ms to wait publish new dashboard version finish');
+        await sleep(100);
+      } else {
+        throw err;
+      }
+    }
+  }
+  if (cnt >= 100) {
+    throw new Error(`publish dashboard new version failed after try ${cnt} times`);
+  }
+};
+
 const updateDashboard = async (quickSight: QuickSight, commonParams: ResourceCommonParams,
   sourceEntity: DashboardSourceEntity, props: QuickSightDashboardDefProps)
 : Promise<UpdateDashboardCommandOutput|undefined> => {
@@ -814,7 +873,8 @@ const updateDashboard = async (quickSight: QuickSight, commonParams: ResourceCom
     const identifier = buildDashBoardId(commonParams.databaseName, commonParams.schema);
     const dashboardId = identifier.id;
 
-    logger.info('start to create dashboard');
+    logger.info('start to update dashboard');
+    logger.info(`sourceEntity: ${JSON.stringify(sourceEntity)}`);
     const dashboard = await quickSight.updateDashboard({
       AwsAccountId: commonParams.awsAccountId,
       DashboardId: dashboardId,
@@ -826,6 +886,12 @@ const updateDashboard = async (quickSight: QuickSight, commonParams: ResourceCom
     logger.info(`update dashboard finished. id: ${dashboardId}`);
 
     await waitForDashboardChangeCompleted(quickSight, commonParams.awsAccountId, dashboardId);
+
+    const versionNumber = dashboard.VersionArn?.substring(dashboard.VersionArn?.lastIndexOf('/') + 1);
+    logger.info(`quicksight versionNumber: ${versionNumber}`);
+    await publishNewVersionDashboard(quickSight, dashboardId, versionNumber!, commonParams.awsAccountId);
+    logger.info('Publish new dashboard version finished.');
+
     await quickSight.updateDashboardPermissions({
       AwsAccountId: commonParams.awsAccountId,
       DashboardId: dashboardId,

@@ -62,10 +62,6 @@ export const schemaDefs: SQLDef[] = [
   },
   {
     updatable: 'true',
-    sqlFile: 'ods-events.sql',
-  },
-  {
-    updatable: 'true',
     sqlFile: 'event.sql',
   },
   {
@@ -103,10 +99,6 @@ export const schemaDefs: SQLDef[] = [
   {
     updatable: 'true',
     sqlFile: 'grant-permissions-to-bi-user-2.sql',
-  },
-  {
-    updatable: 'true',
-    sqlFile: 'sp-upsert-users.sql',
   },
   {
     updatable: 'true',

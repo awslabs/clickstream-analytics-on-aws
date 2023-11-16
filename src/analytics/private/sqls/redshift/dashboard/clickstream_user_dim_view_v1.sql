@@ -12,7 +12,6 @@ WITH user_base AS (
     END AS first_traffic_source_source,
     _first_traffic_medium AS first_traffic_source_medium,
     _first_traffic_source_type AS first_traffic_source_name,
-    _channel AS first_visit_channel,
     CASE
       WHEN user_id IS NOT NULL THEN 'Registered'
       ELSE 'Non-registered'

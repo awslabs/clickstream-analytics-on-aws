@@ -192,17 +192,15 @@ export type MustacheParamBaseType = {
 export type MustacheParamType = {
   database_name: string;
   schema: string;
-  table_ods_events: string;
   table_event: string;
   table_event_parameter: string;
   table_user: string;
   table_item: string;
-  sp_upsert_users: string;
   sp_scan_metadata: string;
-  table_ods_users: string;
-  table_dim_users: string;
   sp_clickstream_log: string;
   sp_clickstream_log_non_atomic: string;
   table_clickstream_log: string;
+  table_ods_events: string;
   user_bi?: string;
+
 }

@@ -100,6 +100,7 @@ export enum ExploreAnalyticsOperators {
 }
 
 export enum ConditionCategory {
+  USER_OUTER = 'user_outer',
   USER = 'user',
   EVENT = 'event',
   DEVICE = 'device',

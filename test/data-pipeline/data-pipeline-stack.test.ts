@@ -1274,7 +1274,7 @@ test('Nested stack has CreateEMRServerlessApplicationCustomResource', () => {
       'Fn::Join': [
         '',
         [
-          'Clickstream-Spark-APP-',
+          'Clickstream-',
           RefAnyValue,
         ],
       ],

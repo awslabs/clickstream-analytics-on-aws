@@ -591,10 +591,6 @@
                         "DataType": "STRING"
                     },
                     {
-                        "Name": "first_visit_channel",
-                        "DataType": "STRING"
-                    },
-                    {
                         "Name": "device_id",
                         "DataType": "STRING"
                     },

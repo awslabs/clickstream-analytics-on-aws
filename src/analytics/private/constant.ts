@@ -30,7 +30,6 @@ export enum WorkflowStatus {
 
 export const DYNAMODB_TABLE_INDEX_NAME = 'status_timestamp_index';
 
-export const LEGACY_REDSHIFT_ODS_EVENTS_TABLE_NAME = 'ods_events';
 export const REDSHIFT_EVENT_TABLE_NAME = 'event';
 export const REDSHIFT_EVENT_PARAMETER_TABLE_NAME = 'event_parameter';
 export const REDSHIFT_USER_TABLE_NAME = 'user';
@@ -43,17 +42,14 @@ export const REDSHIFT_TABLE_NAMES = [
 
 export const REDSHIFT_DUPLICATE_DATE_INTERVAL = 3; // Days
 
-export const SP_UPSERT_USERS = 'sp_upsert_users';
 export const SP_SCAN_METADATA = 'scan_metadata';
 export const SP_CLEAR_EXPIRED_EVENTS = 'sp_clear_expired_events';
 
 export const SQL_TEMPLATE_PARAMETER = {
-  sp_upsert_users: 'sp_upsert_users',
   sp_scan_metadata: 'sp_scan_metadata',
-  table_ods_users: 'ods_users',
-  table_dim_users: 'dim_users',
   sp_clickstream_log: 'sp_clickstream_log',
   sp_clickstream_log_non_atomic: 'sp_clickstream_log_non_atomic',
   table_clickstream_log: 'clickstream_log',
+  table_ods_events: 'ods_events',
 };
 

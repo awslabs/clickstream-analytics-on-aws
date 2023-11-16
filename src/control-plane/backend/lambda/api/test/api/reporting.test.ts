@@ -37,13 +37,15 @@ import {
 } from '@aws-sdk/client-quicksight';
 import { BatchExecuteStatementCommand, DescribeStatementCommand, RedshiftDataClient, StatusString } from '@aws-sdk/client-redshift-data';
 import { AssumeRoleCommand, STSClient } from '@aws-sdk/client-sts';
-import { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb';
+import { DynamoDBDocumentClient, GetCommand } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
 import request from 'supertest';
-import { tokenMock } from './ddb-mock';
+import { MOCK_TOKEN, tokenMock } from './ddb-mock';
+import { clickStreamTableName } from '../../common/constants';
 import { ConditionCategory, ExploreLocales, ExplorePathNodeType, ExplorePathSessionDef, MetadataPlatform, MetadataValueType, QuickSightChartType } from '../../common/explore-types';
 import { app, server } from '../../index';
 import 'aws-sdk-client-mock-jest';
+import { EventAndCondition, PairEventAndCondition, SQLCondition } from '../../service/quicksight/sql-builder';
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 const cloudFormationMock = mockClient(CloudFormationClient);
@@ -105,6 +107,7 @@ describe('reporting test', () => {
     quickSightMock.reset();
     redshiftClientMock.reset();
     stsClientMock.reset();
+    tokenMock(ddbMock, false);
   });
 
   it('funnel bar visual - preview', async () => {
@@ -154,6 +157,7 @@ describe('reporting test', () => {
 
     const res = await request(app)
       .post('/api/reporting/funnel')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PREVIEW',
         chartType: QuickSightChartType.BAR,
@@ -259,6 +263,7 @@ describe('reporting test', () => {
 
     const res = await request(app)
       .post('/api/reporting/funnel')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PREVIEW',
         locale: ExploreLocales.ZH_CN,
@@ -355,6 +360,7 @@ describe('reporting test', () => {
 
     const res = await request(app)
       .post('/api/reporting/funnel')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PUBLISH',
         locale: ExploreLocales.ZH_CN,
@@ -415,6 +421,60 @@ describe('reporting test', () => {
     expect(quickSightMock).toHaveReceivedCommandTimes(DescribeAnalysisCommand, 0);
   });
 
+  it('funnel visual - XSS check', async () => {
+    tokenMock(ddbMock, false);
+    const res = await request(app)
+      .post('/api/reporting/funnel')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
+      .send({
+        action: 'PREVIEW',
+        locale: ExploreLocales.ZH_CN,
+        chartType: QuickSightChartType.FUNNEL,
+        viewName: 'testview0002',
+        projectId: 'project01_wvzh',
+        pipelineId: 'pipeline-1111111',
+        appId: 'app1',
+        sheetName: 'sheet99',
+        computeMethod: 'USER_CNT',
+        specifyJoinColumn: true,
+        joinColumn: 'user_pseudo_id',
+        conversionIntervalType: 'CUSTOMIZE',
+        conversionIntervalInSeconds: 7200,
+        eventAndConditions: [{
+          eventName: '<script>alert(1)</script>',
+        },
+        {
+          eventName: 'note_share',
+        },
+        {
+          eventName: 'note_export',
+        }],
+        timeScopeType: 'RELATIVE',
+        lastN: 4,
+        timeUnit: 'WK',
+        groupColumn: 'week',
+        dashboardCreateParameters: {
+          region: 'us-east-1',
+          allowDomain: 'https://example.com',
+          quickSight: {
+            principal: 'arn:aws:quicksight:us-east-1:11111:user/default/testuser',
+            dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
+            redshiftUser: 'test_redshift_user',
+          },
+          redshift: {
+            dataApiRole: 'arn:aws:iam::11111111:role/test_api_role',
+            newServerless: {
+              workgroupName: 'clickstream-project01-wvzh',
+            },
+          },
+        },
+      });
+
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(400);
+    expect(res.body.message).toEqual('Parameter verification failed.');
+  });
+
   it('event visual - preview', async () => {
     tokenMock(ddbMock, false);
     stsClientMock.on(AssumeRoleCommand).resolves({
@@ -458,6 +518,7 @@ describe('reporting test', () => {
 
     const res = await request(app)
       .post('/api/reporting/event')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PREVIEW',
         locale: ExploreLocales.ZH_CN,
@@ -563,6 +624,14 @@ describe('reporting test', () => {
       },
     });
 
+    ddbMock.on(GetCommand, {
+      TableName: clickStreamTableName,
+      Key: {
+        id: MOCK_TOKEN,
+        type: 'REQUESTID',
+      },
+    }, true).resolves({});
+
     const requestBody = {
       action: 'PREVIEW',
       locale: ExploreLocales.ZH_CN,
@@ -613,6 +682,7 @@ describe('reporting test', () => {
     };
     const res = await request(app)
       .post('/api/reporting/event')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send(requestBody);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(201);
@@ -620,6 +690,7 @@ describe('reporting test', () => {
 
     const res2 = await request(app)
       .post('/api/reporting/event')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send(requestBody);
     expect(res2.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res2.statusCode).toBe(201);
@@ -664,6 +735,7 @@ describe('reporting test', () => {
 
     const res = await request(app)
       .post('/api/reporting/event')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PUBLISH',
         locale: ExploreLocales.EN_US,
@@ -769,6 +841,7 @@ describe('reporting test', () => {
 
     const res = await request(app)
       .post('/api/reporting/path')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PREVIEW',
         viewName: 'testview0002',
@@ -874,6 +947,7 @@ describe('reporting test', () => {
 
     const res = await request(app)
       .post('/api/reporting/path')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PUBLISH',
         locale: ExploreLocales.EN_US,
@@ -984,6 +1058,7 @@ describe('reporting test', () => {
 
     const res = await request(app)
       .post('/api/reporting/retention')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PUBLISH',
         locale: ExploreLocales.EN_US,
@@ -1088,6 +1163,7 @@ describe('reporting test', () => {
 
     const res = await request(app)
       .post('/api/reporting/warmup')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         projectId: 'project01_wvzh',
         appId: 'app1',
@@ -1156,6 +1232,7 @@ describe('reporting test', () => {
 
     const res = await request(app)
       .post('/api/reporting/clean')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         region: 'us-east-1',
       });
@@ -1221,6 +1298,7 @@ describe('reporting test', () => {
 
     const res = await request(app)
       .post('/api/reporting/clean')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         region: 'us-east-1',
       });
@@ -1240,6 +1318,7 @@ describe('reporting test', () => {
   it('common parameter check - invalid parameter', async () => {
     const res = await request(app)
       .post('/api/reporting/funnel')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PREVIEW',
         chartType: QuickSightChartType.BAR,
@@ -1289,6 +1368,7 @@ describe('reporting test', () => {
   it('common parameter check - fixed timeScope', async () => {
     const res = await request(app)
       .post('/api/reporting/event')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PREVIEW',
         chartType: QuickSightChartType.FUNNEL,
@@ -1340,6 +1420,7 @@ describe('reporting test', () => {
   it('common parameter check - relative timeScope', async () => {
     const res = await request(app)
       .post('/api/reporting/event')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PREVIEW',
         chartType: QuickSightChartType.FUNNEL,
@@ -1387,9 +1468,136 @@ describe('reporting test', () => {
 
   });
 
+  it('common parameter check - limit conditions', async () => {
+    const funnelBody = {
+      action: 'PREVIEW',
+      chartType: QuickSightChartType.BAR,
+      viewName: 'testview0002',
+      projectId: 'project01_wvzh',
+      pipelineId: 'pipeline-1111111',
+      appId: 'app1',
+      sheetName: 'sheet99',
+      computeMethod: 'USER_CNT',
+      specifyJoinColumn: true,
+      joinColumn: 'user_pseudo_id',
+      conversionIntervalType: 'CUSTOMIZE',
+      conversionIntervalInSeconds: 7200,
+      eventAndConditions: [
+        {
+          eventName: 'add_button_click',
+        },
+        {
+          eventName: 'note_share',
+        },
+        {
+          eventName: 'note_export',
+        },
+      ],
+      timeScopeType: 'RELATIVE',
+      lastN: 4,
+      timeUnit: 'WK',
+      groupColumn: 'week',
+      dashboardCreateParameters: {
+        region: 'us-east-1',
+        allowDomain: 'https://example.com',
+        quickSight: {
+          principal: 'arn:aws:quicksight:us-east-1:11111:user/default/testuser',
+          dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
+          redshiftUser: 'test_redshift_user',
+        },
+        redshift: {
+          dataApiRole: 'arn:aws:iam::11111111:role/test_api_role',
+          newServerless: {
+            workgroupName: 'clickstream-project01-wvzh',
+          },
+        },
+      },
+    };
+
+    const eventAndConditions: EventAndCondition[] = [];
+
+    const globalEventConditions: SQLCondition = {
+      conditions: [],
+      conditionOperator: 'and',
+    };
+
+    const pairEventAndConditions: PairEventAndCondition[] = [];
+
+    for (let i = 0; i < 11; i++) {
+      eventAndConditions.push({
+        eventName: `event${i}`,
+      });
+      globalEventConditions.conditions.push({
+        category: ConditionCategory.OTHER,
+        property: `atrri${i}`,
+        operator: '=',
+        value: ['Android'],
+        dataType: MetadataValueType.STRING,
+      });
+      pairEventAndConditions.push({
+        startEvent: {
+          eventName: `eventStart${i}`,
+        },
+        backEvent: {
+          eventName: `eventEnd${i}`,
+        },
+      });
+    }
+
+    ddbMock.on(GetCommand, {
+      TableName: clickStreamTableName,
+      Key: {
+        id: MOCK_TOKEN,
+        type: 'REQUESTID',
+      },
+    }, true).resolves({});
+
+    const res1 = await request(app)
+      .post('/api/reporting/funnel')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
+      .send({
+        ...funnelBody,
+        eventAndConditions: eventAndConditions,
+      });
+    console.log({
+      ...funnelBody,
+      eventAndConditions: eventAndConditions,
+    });
+
+    expect(res1.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res1.statusCode).toBe(400);
+    expect(res1.body.message).toBe('The maximum number of event conditions is 10.');
+
+    const res2 = await request(app)
+      .post('/api/reporting/funnel')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
+      .send({
+        ...funnelBody,
+        globalEventCondition: globalEventConditions,
+      });
+
+    expect(res2.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res2.statusCode).toBe(400);
+    expect(res2.body.message).toBe('The maximum number of global filter conditions is 10.');
+
+    const res3 = await request(app)
+      .post('/api/reporting/funnel')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
+      .send({
+        ...funnelBody,
+        pairEventAndConditions: pairEventAndConditions,
+      });
+
+    expect(res3.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res3.statusCode).toBe(400);
+    expect(res3.body.message).toBe('The maximum number of pair event conditions is 5.');
+
+  });
+
   it('funnel analysis - relative timeScope', async () => {
     const res = await request(app)
       .post('/api/reporting/event')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PREVIEW',
         chartType: QuickSightChartType.FUNNEL,
@@ -1440,6 +1648,7 @@ describe('reporting test', () => {
   it('common parameter check - missing chart title', async () => {
     const res = await request(app)
       .post('/api/reporting/funnel')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PUBLISH',
         chartType: QuickSightChartType.BAR,
@@ -1493,6 +1702,7 @@ describe('reporting test', () => {
   it('funnel analysis parameter check - unsupported chart type', async () => {
     const res = await request(app)
       .post('/api/reporting/funnel')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PREVIEW',
         chartType: QuickSightChartType.LINE,
@@ -1544,6 +1754,7 @@ describe('reporting test', () => {
   it('funnel analysis parameter check - joinColumn', async () => {
     const res = await request(app)
       .post('/api/reporting/funnel')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PREVIEW',
         chartType: QuickSightChartType.FUNNEL,
@@ -1594,6 +1805,7 @@ describe('reporting test', () => {
   it('funnel analysis parameter check - eventAndConditions', async () => {
     const res = await request(app)
       .post('/api/reporting/funnel')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PREVIEW',
         chartType: QuickSightChartType.FUNNEL,
@@ -1637,6 +1849,7 @@ describe('reporting test', () => {
   it('event analysis parameter check -invalid request action', async () => {
     const res = await request(app)
       .post('/api/reporting/event')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'SAVE',
         locale: ExploreLocales.ZH_CN,
@@ -1689,6 +1902,7 @@ describe('reporting test', () => {
   it('event analysis parameter check - unsupported chart type', async () => {
     const res = await request(app)
       .post('/api/reporting/event')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PREVIEW',
         locale: ExploreLocales.ZH_CN,
@@ -1741,6 +1955,7 @@ describe('reporting test', () => {
   it('path analysis parameter check - pathAnalysis', async () => {
     const res = await request(app)
       .post('/api/reporting/path')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PREVIEW',
         viewName: 'testview0002',
@@ -1791,6 +2006,7 @@ describe('reporting test', () => {
   it('path analysis parameter check - lagSeconds', async () => {
     const res = await request(app)
       .post('/api/reporting/path')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PREVIEW',
         viewName: 'testview0002',
@@ -1845,6 +2061,7 @@ describe('reporting test', () => {
   it('path analysis parameter check - nodes', async () => {
     const res = await request(app)
       .post('/api/reporting/path')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PREVIEW',
         viewName: 'testview0002',
@@ -1901,6 +2118,7 @@ describe('reporting test', () => {
   it('path analysis parameter check - chart type', async () => {
     const res = await request(app)
       .post('/api/reporting/path')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PREVIEW',
         viewName: 'testview0002',
@@ -1955,6 +2173,7 @@ describe('reporting test', () => {
   it('path analysis parameter check - chart type', async () => {
     const res = await request(app)
       .post('/api/reporting/path')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PREVIEW',
         viewName: 'testview0002',
@@ -2010,6 +2229,7 @@ describe('reporting test', () => {
   it('retention analysis parameter check - pairEventAndConditions', async () => {
     const res = await request(app)
       .post('/api/reporting/retention')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PUBLISH',
         locale: ExploreLocales.EN_US,
@@ -2068,6 +2288,7 @@ describe('reporting test', () => {
   it('retention analysis parameter check - unsupported chart type', async () => {
     const res = await request(app)
       .post('/api/reporting/retention')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         action: 'PUBLISH',
         locale: ExploreLocales.EN_US,

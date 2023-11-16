@@ -27,6 +27,7 @@ export interface QuickSightProps {
 
 export interface QuicksightCustomResourceProps {
   readonly templateArn: string;
+  readonly templateId: string;
   readonly dataSourceArn: string;
   readonly databaseName: string;
   readonly quickSightProps: QuickSightProps;
@@ -69,6 +70,7 @@ export interface QuickSightDashboardDefProps {
   dashboardName: string;
   analysisName: string;
   templateArn: string;
+  templateId: string;
   dataSourceArn: string;
   databaseName: string;
   dataSets: DataSetProps[];
@@ -116,7 +118,7 @@ export const dashboardAdminPermissionActions = [
   'quicksight:UpdateDashboardPublishedVersion',
 ];
 
-function sleep(ms: number) {
+export function sleep(ms: number) {
   return new Promise<void>(resolve => setTimeout(() => resolve(), ms));
 };
 
@@ -163,6 +165,33 @@ export async function waitForAnalysisChangeCompleted(quickSight: QuickSight, acc
 
     } catch (err: any) {
       logger.error(`Analysis create/update failed due to ${(err as Error).message}`);
+      throw err;
+    }
+  }
+};
+
+export async function waitForTemplateChangeCompleted(quickSight: QuickSight, accountId: string, templateId: string) {
+  for (const _i of Array(60).keys()) {
+    try {
+      const analysis = await quickSight.describeTemplateDefinition({
+        AwsAccountId: accountId,
+        TemplateId: templateId,
+      });
+
+      if ( analysis.ResourceStatus === ResourceStatus.UPDATE_SUCCESSFUL
+        || analysis.ResourceStatus === ResourceStatus.CREATION_SUCCESSFUL) {
+        return;
+      } else if ( analysis.ResourceStatus === ResourceStatus.UPDATE_FAILED ) {
+        throw new Error('Template update failed.');
+      } else if ( analysis.ResourceStatus === ResourceStatus.CREATION_FAILED ) {
+        throw new Error('Template create failed.');
+      }
+
+      logger.info('Template change: sleep 1 second');
+      await sleep(1000);
+
+    } catch (err: any) {
+      logger.error(`Template create/update failed due to ${(err as Error).message}`);
       throw err;
     }
   }
