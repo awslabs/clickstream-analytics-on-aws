@@ -13,7 +13,9 @@
 
 import { Select, SelectProps } from '@cloudscape-design/components';
 import classNames from 'classnames';
-import React, { useEffect, useRef, useState } from 'react';
+import ErrorText from 'components/common/ErrorText';
+import { StateContext } from 'context/StateContext';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ExploreComputeMethod } from 'ts/explore-types';
 import { defaultStr } from 'ts/utils';
@@ -21,8 +23,9 @@ import { CategoryItemType, IAnalyticsItem } from './AnalyticsType';
 import DropDownContainer from './DropDownContainer';
 
 interface EventItemProps {
+  type: 'event' | 'attribute';
   showMouseoverTitle?: boolean;
-  placeholder?: string | null;
+  placeholder: string | null;
   isMultiSelect?: boolean;
   hasTab?: boolean;
   categoryOption: IAnalyticsItem | null;
@@ -36,6 +39,7 @@ interface EventItemProps {
 
 const EventItem: React.FC<EventItemProps> = (props: EventItemProps) => {
   const {
+    type,
     showMouseoverTitle,
     placeholder,
     hasTab,
@@ -49,6 +53,7 @@ const EventItem: React.FC<EventItemProps> = (props: EventItemProps) => {
     disabled,
   } = props;
   const { t } = useTranslation();
+  const state = useContext(StateContext);
   const [showDropdown, setShowDropdown] = useState(false);
   const [clickedOutside, setClickedOutside] = useState(false);
   const defaultComputeMethodOption: SelectProps.Option = {
@@ -98,6 +103,11 @@ const EventItem: React.FC<EventItemProps> = (props: EventItemProps) => {
         <div
           className="flex-1 cs-dropdown-event-input"
           onClick={() => setShowDropdown((prev) => !prev)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              setShowDropdown((prev) => !prev);
+            }
+          }}
         >
           <Select
             onBlur={(e) => {
@@ -113,6 +123,14 @@ const EventItem: React.FC<EventItemProps> = (props: EventItemProps) => {
           {categoryOption?.label && showMouseoverTitle && (
             <div className="custom-popover">{categoryOption?.label}</div>
           )}
+          {!showDropdown &&
+            !categoryOption &&
+            ((type === 'attribute' && state?.showAttributeError) ||
+              (type === 'event' && state?.showEventError)) && (
+              <ErrorText
+                text={`${t('analytics:valid.please')}${placeholder}`}
+              />
+            )}
         </div>
         {isMultiSelect && (
           <div className="second-select-option" title={calcMethodOption?.label}>

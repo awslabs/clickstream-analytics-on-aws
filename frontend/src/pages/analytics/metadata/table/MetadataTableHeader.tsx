@@ -13,7 +13,7 @@
 import { Header, HeaderProps } from '@cloudscape-design/components';
 import InfoLink from 'components/common/InfoLink';
 import { DispatchContext } from 'context/StateContext';
-import { HelpInfoActionType, HelpPanelType } from 'context/reducer';
+import { StateActionType, HelpPanelType } from 'context/reducer';
 import { useContext } from 'react';
 
 interface MetadataTableHeaderProps extends HeaderProps {
@@ -36,7 +36,7 @@ export function MetadataTableHeader({
         <InfoLink
           onFollow={() => {
             dispatch?.({
-              type: HelpInfoActionType.SHOW_HELP_PANEL,
+              type: StateActionType.SHOW_HELP_PANEL,
               payload: infoType,
             });
           }}

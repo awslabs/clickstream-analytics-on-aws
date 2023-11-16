@@ -29,7 +29,6 @@ import {
   SpaceBetween,
   Tiles,
 } from '@cloudscape-design/components';
-import { OptionDefinition } from '@cloudscape-design/components/internal/components/option/interfaces';
 import { getCertificates, getSSMSecrets, getSubnetList } from 'apis/resource';
 import { defaultTo } from 'lodash';
 import React, { useEffect, useState } from 'react';
@@ -67,8 +66,8 @@ import BufferS3 from './buffer/BufferS3';
 interface ConfigIngestionProps {
   update?: boolean;
   pipelineInfo: IExtPipeline;
-  changePublicSubnets: (subnets: OptionDefinition[]) => void;
-  changePrivateSubnets: (subnets: OptionDefinition[]) => void;
+  changePublicSubnets: (subnets: SelectProps.Option[]) => void;
+  changePrivateSubnets: (subnets: SelectProps.Option[]) => void;
   changeServerMin: (min: string) => void;
   changeServerMax: (max: string) => void;
   changeWarmSize: (size: string) => void;

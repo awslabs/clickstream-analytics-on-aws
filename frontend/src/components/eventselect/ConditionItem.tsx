@@ -18,7 +18,9 @@ import {
   SelectProps,
   TokenGroup,
 } from '@cloudscape-design/components';
-import React, { useState } from 'react';
+import ErrorText from 'components/common/ErrorText';
+import { StateContext } from 'context/StateContext';
+import React, { useContext, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ExploreAnalyticsOperators, MetadataValueType } from 'ts/explore-types';
 import { defaultStr } from 'ts/utils';
@@ -43,6 +45,7 @@ const ConditionItem: React.FC<ConditionItemProps> = (
   props: ConditionItemProps
 ) => {
   const { t } = useTranslation();
+  const state = useContext(StateContext);
   const {
     item,
     conditionOptions,
@@ -160,6 +163,7 @@ const ConditionItem: React.FC<ConditionItemProps> = (
     <div className="cs-analytics-condition-item">
       <div className="condition-event">
         <EventItem
+          type="attribute"
           showMouseoverTitle
           placeholder={defaultStr(
             t('analytics:labels.attributeSelectPlaceholder')
@@ -189,6 +193,13 @@ const ConditionItem: React.FC<ConditionItemProps> = (
               : CONDITION_NUMBER_OPERATORS
           }
         />
+        {!item.conditionOperator && state?.showAttributeOperatorError && (
+          <ErrorText
+            text={`${t('analytics:valid.please')}${t(
+              'analytics:labels.operatorSelectPlaceholder'
+            )}`}
+          />
+        )}
       </div>
       <div className="flex-1">
         {item.conditionOperator?.value !== ANALYTICS_OPERATORS.is_null.value &&
@@ -233,6 +244,14 @@ const ConditionItem: React.FC<ConditionItemProps> = (
                 }}
                 items={labelValues.map((value) => ({ label: value }))}
               />
+              {(!labelValues || labelValues.length <= 0) &&
+                state?.showAttributeValueError && (
+                  <ErrorText
+                    text={`${t('analytics:valid.please')}${t(
+                      'analytics:labels.conditionValuePlaceholder'
+                    )}`}
+                  />
+                )}
             </div>
           )}
       </div>

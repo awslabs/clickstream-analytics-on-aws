@@ -14,81 +14,55 @@
 import { Button, SelectProps } from '@cloudscape-design/components';
 import { identity } from 'lodash';
 import React from 'react';
-import { useTranslation } from 'react-i18next';
 import { ALPHABETS } from 'ts/const';
+import { AnalyticsDispatchFunction } from './analyticsEventSelectReducer';
 import {
   CategoryItemType,
   ERelationShip,
-  IAnalyticsItem,
   IEventAnalyticsItem,
-} from './AnalyticsType';
-import ConditionItem from './ConditionItem';
-import EventItem from './EventItem';
-import RelationAnd from './comps/RelationAnd';
-import RelationOr from './comps/RelationOr';
+} from '../AnalyticsType';
+import ConditionItem from '../ConditionItem';
+import EventItem from '../EventItem';
+import RelationAnd from '../comps/RelationAnd';
+import RelationOr from '../comps/RelationOr';
 
 interface EventsSelectProps {
-  data: IEventAnalyticsItem[];
-  eventOptionList: CategoryItemType[];
+  eventPlaceholder: string;
+  eventDataState: IEventAnalyticsItem[];
+  eventDataDispatch: AnalyticsDispatchFunction;
   maxSelectNum?: number;
   disableAddCondition?: boolean;
   addEventButtonLabel: string;
-  addNewEventAnalyticsItem: () => void;
-  removeEventItem: (index: number) => void;
-  addNewConditionItem: (index: number) => void;
-  removeEventCondition: (eventIndex: number, conditionIndex: number) => void;
-  changeConditionOperator: (
-    eventIndex: number,
-    conditionIndex: number,
-    operator: SelectProps.Option | null
-  ) => void;
-  changeConditionCategoryOption: (
-    eventIndex: number,
-    conditionIndex: number,
-    category: IAnalyticsItem | null
-  ) => void;
-  changeConditionValue: (
-    eventIndex: number,
-    conditionIndex: number,
-    value: string[]
-  ) => void;
-  changeCurCategoryOption: (
-    eventIndex: number,
-    category: IAnalyticsItem | null
-  ) => void;
-  changeCurCalcMethodOption?: (
-    eventIndex: number,
-    calcMethod: SelectProps.Option | null
-  ) => void;
-  changeCurRelationShip?: (eventIndex: number, relation: ERelationShip) => void;
-  loading?: boolean;
+  loading: boolean;
+  eventOptionList: CategoryItemType[];
+  defaultComputeMethodOption: SelectProps.Option;
+  isMultiSelect: boolean;
+  enableChangeRelation: boolean;
+  metadataEvents: IMetadataEvent[];
+  metadataUserAttributes: IMetadataUserAttribute[];
 }
-const EventsSelect: React.FC<EventsSelectProps> = (
+const AnalyticsEventSelect: React.FC<EventsSelectProps> = (
   props: EventsSelectProps
 ) => {
   const {
-    data,
-    eventOptionList,
+    eventPlaceholder,
+    eventDataState,
+    eventDataDispatch,
     maxSelectNum,
     disableAddCondition,
     addEventButtonLabel,
-    addNewEventAnalyticsItem,
-    removeEventItem,
-    addNewConditionItem,
-    removeEventCondition,
-    changeConditionOperator,
-    changeConditionValue,
-    changeCurCategoryOption,
-    changeConditionCategoryOption,
-    changeCurCalcMethodOption,
-    changeCurRelationShip,
+    eventOptionList,
+    defaultComputeMethodOption,
+    isMultiSelect,
+    enableChangeRelation,
+    metadataEvents,
+    metadataUserAttributes,
     loading,
   } = props;
-  const { t } = useTranslation();
 
   return (
     <div className="cs-analytics-dropdown">
-      {data.map((element, index) => {
+      {eventDataState.map((element, index) => {
         return (
           <div key={identity(index)}>
             <div className="cs-analytics-parameter">
@@ -100,14 +74,25 @@ const EventsSelect: React.FC<EventsSelectProps> = (
               </div>
               <div className="flex-1">
                 <EventItem
-                  placeholder={t('analytics:labels.eventSelectPlaceholder')}
+                  type="event"
+                  placeholder={eventPlaceholder}
                   calcMethodOption={element.calculateMethodOption}
                   categoryOption={element.selectedEventOption}
                   changeCurCategoryOption={(item) => {
-                    changeCurCategoryOption(index, item);
+                    eventDataDispatch({
+                      type: 'changeCurCategoryOption',
+                      eventIndex: index,
+                      categoryOption: item,
+                      metadataEvents,
+                      metadataUserAttributes,
+                    });
                   }}
                   changeCurCalcMethodOption={(method) => {
-                    changeCurCalcMethodOption?.(index, method);
+                    eventDataDispatch({
+                      type: 'changeCurCalcMethodOption',
+                      eventIndex: index,
+                      methodOption: method,
+                    });
                   }}
                   hasTab={element.hasTab}
                   isMultiSelect={element.isMultiSelect}
@@ -120,7 +105,10 @@ const EventsSelect: React.FC<EventsSelectProps> = (
                 <div className="ml-5">
                   <Button
                     onClick={() => {
-                      addNewConditionItem(index);
+                      eventDataDispatch({
+                        type: 'addNewConditionItem',
+                        index,
+                      });
                     }}
                     variant="link"
                     iconName="filter"
@@ -128,11 +116,14 @@ const EventsSelect: React.FC<EventsSelectProps> = (
                 </div>
               )}
               <div className="event-delete">
-                {data.length > 1 && (
+                {eventDataState.length > 1 && (
                   <span className="remove-icon">
                     <Button
                       onClick={() => {
-                        removeEventItem(index);
+                        eventDataDispatch({
+                          type: 'removeEventItem',
+                          index,
+                        });
                       }}
                       variant="link"
                       iconName="close"
@@ -148,8 +139,11 @@ const EventsSelect: React.FC<EventsSelectProps> = (
                     enableChangeRelation={element.enableChangeRelation}
                     onClick={() => {
                       element.enableChangeRelation &&
-                        changeCurRelationShip &&
-                        changeCurRelationShip(index, ERelationShip.OR);
+                        eventDataDispatch({
+                          type: 'changeCurRelationShip',
+                          eventIndex: index,
+                          relation: ERelationShip.OR,
+                        });
                     }}
                   />
                 )}
@@ -159,8 +153,11 @@ const EventsSelect: React.FC<EventsSelectProps> = (
                     enableChangeRelation={element.enableChangeRelation}
                     onClick={() => {
                       element.enableChangeRelation &&
-                        changeCurRelationShip &&
-                        changeCurRelationShip(index, ERelationShip.AND);
+                        eventDataDispatch({
+                          type: 'changeCurRelationShip',
+                          eventIndex: index,
+                          relation: ERelationShip.AND,
+                        });
                     }}
                   />
                 )}
@@ -173,20 +170,35 @@ const EventsSelect: React.FC<EventsSelectProps> = (
                         conditionOptions={element.conditionOptions}
                         key={identity(cIndex)}
                         removeConditionItem={() => {
-                          removeEventCondition(index, cIndex);
+                          eventDataDispatch({
+                            type: 'removeEventCondition',
+                            eventIndex: index,
+                            conditionIndex: cIndex,
+                          });
                         }}
                         changeCurCategoryOption={(category) => {
-                          changeConditionCategoryOption(
-                            index,
-                            cIndex,
-                            category
-                          );
+                          eventDataDispatch({
+                            type: 'changeConditionCategoryOption',
+                            eventIndex: index,
+                            conditionIndex: cIndex,
+                            conditionOption: category,
+                          });
                         }}
                         changeConditionOperator={(item) => {
-                          changeConditionOperator(index, cIndex, item);
+                          eventDataDispatch({
+                            type: 'changeConditionOperator',
+                            eventIndex: index,
+                            conditionIndex: cIndex,
+                            conditionOperator: item,
+                          });
                         }}
                         changeConditionValue={(value) => {
-                          changeConditionValue(index, cIndex, value);
+                          eventDataDispatch({
+                            type: 'changeConditionValue',
+                            eventIndex: index,
+                            conditionIndex: cIndex,
+                            value,
+                          });
                         }}
                       />
                     );
@@ -199,8 +211,15 @@ const EventsSelect: React.FC<EventsSelectProps> = (
       <div className="mt-10">
         <Button
           iconName="add-plus"
-          onClick={addNewEventAnalyticsItem}
-          disabled={data.length >= (maxSelectNum ?? 10)}
+          onClick={() => {
+            eventDataDispatch({
+              type: 'addNewEventAnalyticsItem',
+              defaultComputeMethodOption,
+              isMultiSelect,
+              enableChangeRelation,
+            });
+          }}
+          disabled={eventDataState.length >= (maxSelectNum ?? 10)}
         >
           {addEventButtonLabel}
         </Button>
@@ -209,4 +228,4 @@ const EventsSelect: React.FC<EventsSelectProps> = (
   );
 };
 
-export default EventsSelect;
+export default AnalyticsEventSelect;

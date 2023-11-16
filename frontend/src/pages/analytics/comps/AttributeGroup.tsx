@@ -11,8 +11,7 @@
  *  and limitations under the License.
  */
 
-import { Button } from '@cloudscape-design/components';
-import { OptionDefinition } from '@cloudscape-design/components/internal/components/option/interfaces';
+import { Button, SelectProps } from '@cloudscape-design/components';
 import {
   CategoryItemType,
   IAnalyticsItem,
@@ -25,7 +24,7 @@ import { defaultStr } from 'ts/utils';
 interface AttributeGroupProps {
   groupParameters: CategoryItemType[];
   groupOption: IAnalyticsItem | null;
-  setGroupOption: (option: OptionDefinition | null) => void;
+  setGroupOption: (option: SelectProps.Option | null) => void;
   loading?: boolean;
   disabled?: boolean;
 }
@@ -42,6 +41,7 @@ const AttributeGroup: React.FC<AttributeGroupProps> = (
         <div className="flex gap-10 w-75p">
           <div className="flex-1">
             <EventItem
+              type="attribute"
               placeholder={defaultStr(
                 t('analytics:labels.attributeSelectPlaceholder')
               )}
