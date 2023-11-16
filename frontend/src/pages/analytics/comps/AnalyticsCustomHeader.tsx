@@ -13,7 +13,7 @@
 
 import InfoLink from 'components/common/InfoLink';
 import { DispatchContext } from 'context/StateContext';
-import { HelpInfoActionType, HelpPanelType } from 'context/reducer';
+import { StateActionType, HelpPanelType } from 'context/reducer';
 import { debounce } from 'lodash';
 import React, {
   ReactElement,
@@ -74,7 +74,7 @@ const AnalyticsCustomHeader: React.FC<AnalyticsCustomHeaderProps> = (
         <InfoLink
           onFollow={() => {
             dispatch?.({
-              type: HelpInfoActionType.SHOW_HELP_PANEL,
+              type: StateActionType.SHOW_HELP_PANEL,
               payload: HelpPanelType.ANALYTICS_EXPLORE,
             });
           }}

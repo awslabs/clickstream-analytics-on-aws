@@ -34,7 +34,7 @@ import AnalyticsNavigation from 'components/layouts/AnalyticsNavigation';
 import CustomBreadCrumb from 'components/layouts/CustomBreadCrumb';
 import HelpInfo from 'components/layouts/HelpInfo';
 import { DispatchContext, StateContext } from 'context/StateContext';
-import { HelpInfoActionType, HelpPanelType } from 'context/reducer';
+import { StateActionType, HelpPanelType } from 'context/reducer';
 import React, { useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
@@ -287,10 +287,10 @@ const AnalyticsExplore: React.FC = () => {
               return;
             }
             if (!e.detail.open) {
-              dispatch?.({ type: HelpInfoActionType.HIDE_HELP_PANEL });
+              dispatch?.({ type: StateActionType.HIDE_HELP_PANEL });
             } else {
               dispatch?.({
-                type: HelpInfoActionType.SHOW_HELP_PANEL,
+                type: StateActionType.SHOW_HELP_PANEL,
                 payload: state?.helpPanelType,
               });
             }
@@ -324,7 +324,7 @@ const AnalyticsExplore: React.FC = () => {
                       selectedOption={selectedOption}
                       onChange={({ detail }) => {
                         dispatch?.({
-                          type: HelpInfoActionType.HIDE_HELP_PANEL,
+                          type: StateActionType.HIDE_HELP_PANEL,
                         });
                         setSelectedOption(detail.selectedOption);
                       }}

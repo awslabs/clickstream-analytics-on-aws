@@ -38,7 +38,7 @@ import { analyticsEventSelectReducer } from 'components/eventselect/reducer/anal
 import { analyticsSegmentFilterReducer } from 'components/eventselect/reducer/analyticsSegmentFilterReducer';
 import { DispatchContext } from 'context/StateContext';
 import { UserContext } from 'context/UserContext';
-import { HelpInfoActionType, HelpPanelType } from 'context/reducer';
+import { StateActionType, HelpPanelType } from 'context/reducer';
 
 import React, { useContext, useEffect, useReducer, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -332,7 +332,7 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
                 <InfoLink
                   onFollow={() => {
                     dispatch?.({
-                      type: HelpInfoActionType.SHOW_HELP_PANEL,
+                      type: StateActionType.SHOW_HELP_PANEL,
                       payload: HelpPanelType.EXPLORE_EVENT_INFO,
                     });
                   }}

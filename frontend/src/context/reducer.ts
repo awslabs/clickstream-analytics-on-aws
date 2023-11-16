@@ -30,25 +30,33 @@ export enum HelpPanelType {
 export interface IState {
   showHelpPanel: boolean;
   helpPanelType: HelpPanelType;
+  showEventError: boolean;
+  showAttributeError: boolean;
+  showAttributeOperatorError: boolean;
+  showAttributeValueError: boolean;
 }
 
-export enum HelpInfoActionType {
+export enum StateActionType {
   SHOW_HELP_PANEL = 'SHOW_HELP_PANEL',
   HIDE_HELP_PANEL = 'HIDE_HELP_PANEL',
 }
 
-export type Action = { type: HelpInfoActionType; payload: any };
+export type Action = { type: StateActionType; payload: any };
 
 export const initialState: IState = {
   showHelpPanel: false,
   helpPanelType: HelpPanelType.NONE,
+  showEventError: false,
+  showAttributeError: false,
+  showAttributeOperatorError: false,
+  showAttributeValueError: false,
 };
 
 export const reducer = (state: IState, action: Action): IState => {
   switch (action.type) {
-    case HelpInfoActionType.SHOW_HELP_PANEL:
+    case StateActionType.SHOW_HELP_PANEL:
       return { ...state, showHelpPanel: true, helpPanelType: action.payload };
-    case HelpInfoActionType.HIDE_HELP_PANEL:
+    case StateActionType.HIDE_HELP_PANEL:
       return {
         ...state,
         showHelpPanel: false,

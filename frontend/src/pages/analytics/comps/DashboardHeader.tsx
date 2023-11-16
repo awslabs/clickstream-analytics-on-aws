@@ -21,7 +21,7 @@ import { deleteAnalyticsDashboard } from 'apis/analytics';
 import InfoLink from 'components/common/InfoLink';
 import { DispatchContext } from 'context/StateContext';
 import { UserContext } from 'context/UserContext';
-import { HelpInfoActionType, HelpPanelType } from 'context/reducer';
+import { StateActionType, HelpPanelType } from 'context/reducer';
 import React, { useContext, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
@@ -113,7 +113,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = (
           <InfoLink
             onFollow={() => {
               dispatch?.({
-                type: HelpInfoActionType.SHOW_HELP_PANEL,
+                type: StateActionType.SHOW_HELP_PANEL,
                 payload: HelpPanelType.ANALYTICS_DASHBOARD,
               });
             }}

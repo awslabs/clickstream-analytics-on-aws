@@ -88,6 +88,7 @@ const RetentionItem: React.FC<RetentionItemProps> = (
         <div className="cs-para-name">{label}</div>
         <div className="flex-1">
           <EventItem
+            type="event"
             placeholder={t('analytics:labels.eventSelectPlaceholder')}
             categoryOption={value}
             changeCurCategoryOption={(item) => {
@@ -167,6 +168,7 @@ const RetentionItem: React.FC<RetentionItemProps> = (
             </div>
             <div className="flex-1">
               <EventItem
+                type="attribute"
                 placeholder={t('analytics:labels.attributeSelectPlaceholder')}
                 categoryOption={attributeValue}
                 changeCurCategoryOption={(item) => {

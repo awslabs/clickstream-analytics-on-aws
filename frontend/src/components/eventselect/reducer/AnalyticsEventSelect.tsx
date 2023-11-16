@@ -75,6 +75,7 @@ const AnalyticsEventSelect: React.FC<EventsSelectProps> = (
               </div>
               <div className="flex-1">
                 <EventItem
+                  type="event"
                   placeholder={eventPlaceholder}
                   calcMethodOption={element.calculateMethodOption}
                   categoryOption={element.selectedEventOption}
