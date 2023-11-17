@@ -127,6 +127,9 @@ export class ReportingService {
 
       const result = await this._buildFunnelQuickSightDashboard(viewName, sql, tableVisualViewName,
         sqlTable, query, sheetId);
+      if (result.dashboardEmbedUrl === '' && query.action === ExploreRequestAction.PREVIEW) {
+        return res.status(500).json(new ApiFail('Failed to create resources, please try again later.'));
+      }
       return res.status(201).json(new ApiSuccess(result));
 
     } catch (error) {
@@ -378,6 +381,9 @@ export class ReportingService {
       const result: CreateDashboardResult = await this.create(
         sheetId, viewName, query, datasetPropsArray, [visualProps, tableVisualProps]);
 
+      if (result.dashboardEmbedUrl === '' && query.action === ExploreRequestAction.PREVIEW) {
+        return res.status(500).json(new ApiFail('Failed to create resources, please try again later.'));
+      }
       return res.status(201).json(new ApiSuccess(result));
     } catch (error) {
       next(error);
@@ -507,6 +513,9 @@ export class ReportingService {
       const result: CreateDashboardResult = await this.create(
         sheetId, viewName, query, datasetPropsArray, [visualProps]);
 
+      if (result.dashboardEmbedUrl === '' && query.action === ExploreRequestAction.PREVIEW) {
+        return res.status(500).json(new ApiFail('Failed to create resources, please try again later.'));
+      }
       return res.status(201).json(new ApiSuccess(result));
     } catch (error) {
       next(error);
@@ -625,6 +634,9 @@ export class ReportingService {
       const result: CreateDashboardResult = await this.create(
         sheetId, viewName, query, datasetPropsArray, [visualProps, tableVisualProps]);
 
+      if (result.dashboardEmbedUrl === '' && query.action === ExploreRequestAction.PREVIEW) {
+        return res.status(500).json(new ApiFail('Failed to create resources, please try again later.'));
+      }
       return res.status(201).json(new ApiSuccess(result));
     } catch (error) {
       next(error);
@@ -729,25 +741,12 @@ export class ReportingService {
       // publish new version
       await this._publishNewVersionDashboard(quickSight, query, versionNumber!);
 
-      let dashboardEmbedUrl = '';
-      if (query.action === ExploreRequestAction.PREVIEW) {
-        const dashboardSuccess = await waitDashboardSuccess(dashboardCreateParameters.region, query.dashboardId);
-        if (dashboardSuccess) {
-          const embedUrl = await generateEmbedUrlForRegisteredUser(
-            dashboardCreateParameters.region,
-            dashboardCreateParameters.allowedDomain,
-            false,
-            query.dashboardId,
-          );
-          dashboardEmbedUrl = embedUrl.EmbedUrl!;
-        }
-      }
       result = {
         dashboardId: query.dashboardId,
         dashboardArn: newDashboard.Arn!,
         dashboardName: query.dashboardName,
         dashboardVersion: Number.parseInt(versionNumber!),
-        dashboardEmbedUrl: dashboardEmbedUrl,
+        dashboardEmbedUrl: '',
         analysisId: query.analysisId,
         analysisArn: newAnalysis?.Arn!,
         analysisName: query.analysisName,
@@ -910,12 +909,12 @@ export class ReportingService {
       }
 
       //warm up quicksight
-      const dashBoards = await quickSight.listDashboards({
+      await quickSight.listDashboards({
         AwsAccountId: awsAccountId,
       });
 
       logger.info('end of warm up reporting service');
-      return res.status(201).json(new ApiSuccess(dashBoards.DashboardSummaryList));
+      return res.status(201).json(new ApiSuccess('OK'));
     } catch (error) {
       next(`Warmup redshift serverless with error: ${error}`);
     }
