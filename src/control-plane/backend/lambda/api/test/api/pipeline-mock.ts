@@ -112,7 +112,7 @@ export const S3_INGESTION_PIPELINE: IPipeline = {
   ingestionServer: {
     ...BASE_PIPELINE_ATTRIBUTES.ingestionServer,
     size: {
-      serverMax: 1,
+      serverMax: 2,
       warmPoolSize: 0,
       serverMin: 1,
       scaleOnCpuUtilizationPercent: 50,
@@ -139,7 +139,7 @@ export const S3_INGESTION_HTTP_AUTHENTICATION_PIPELINE: IPipeline = {
   ingestionServer: {
     ...BASE_PIPELINE_ATTRIBUTES.ingestionServer,
     size: {
-      serverMax: 1,
+      serverMax: 2,
       warmPoolSize: 0,
       serverMin: 1,
       scaleOnCpuUtilizationPercent: 50,
@@ -278,7 +278,7 @@ export const S3_DATA_PROCESSING_WITH_ERROR_PREFIX_PIPELINE: IPipeline = {
   ingestionServer: {
     ...BASE_PIPELINE_ATTRIBUTES.ingestionServer,
     size: {
-      serverMax: 1,
+      serverMax: 2,
       warmPoolSize: 0,
       serverMin: 1,
       scaleOnCpuUtilizationPercent: 50,
@@ -326,7 +326,7 @@ export const S3_DATA_PROCESSING_WITH_SPECIFY_PREFIX_PIPELINE: IPipeline = {
   ingestionServer: {
     ...BASE_PIPELINE_ATTRIBUTES.ingestionServer,
     size: {
-      serverMax: 1,
+      serverMax: 2,
       warmPoolSize: 0,
       serverMin: 1,
       scaleOnCpuUtilizationPercent: 50,

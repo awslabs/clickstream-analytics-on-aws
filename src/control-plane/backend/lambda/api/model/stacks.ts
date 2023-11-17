@@ -196,6 +196,12 @@ export class CIngestionServerStack extends JSONObject {
 
   @JSONObject.required
   @JSONObject.gt(0)
+  @JSONObject.custom( (_stack:CIngestionServerStack, _key:string, value:number) => {
+    if (value === 1) {
+      throw new ClickStreamBadRequestError('ServerMax must greater than 1.');
+    }
+    return value;
+  })
     ServerMax?: number;
 
   @JSONObject.required
