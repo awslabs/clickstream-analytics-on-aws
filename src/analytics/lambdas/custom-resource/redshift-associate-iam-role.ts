@@ -31,15 +31,21 @@ type ResourcePropertiesType = CustomProperties & {
 }
 
 function strToIamRole(str: string): ClusterIamRole {
-  const matches = str.match(/IamRole\(applyStatus=(.*), iamRoleArn=(.*)\)/);
+  logger.debug('Parsing IAM role string: ', { str });
 
-  if (!matches || matches.length < 3) {
-    throw new Error('Invalid IamRole string');
+  const statusMatches = str.match(/applyStatus=([^,]+)[,|\)]/);
+  if (!statusMatches || statusMatches.length < 2) {
+    throw new Error(`Invalid IamRole String ($str), can not extract status.`);
+  }
+
+  const roleMatches = str.match(/iamRoleArn=([^,]+)[,|\)]/);
+  if (!roleMatches || roleMatches.length < 2) {
+    throw new Error(`Invalid IamRole String ($str), can not extract role arn.`);
   }
 
   return {
-    ApplyStatus: matches[1] as 'in-sync' | 'removing' | 'adding',
-    IamRoleArn: matches[2],
+    ApplyStatus: statusMatches[1] as 'in-sync' | 'removing' | 'adding',
+    IamRoleArn: roleMatches[1],
   };
 }
 
