@@ -23,6 +23,7 @@ import {
   DeleteObjectsCommand,
   ObjectIdentifier,
   NoSuchKey,
+  _Object,
 } from '@aws-sdk/client-s3';
 import { logger } from './powertools';
 import { aws_sdk_client_common_config } from './sdk-client-config';
@@ -166,6 +167,36 @@ export async function deleteObjectsByPrefix(
     `${delCount} objects were deleted in bucket=${bucketName}, prefix=${prefix}`,
   );
   return delCount;
+}
+
+
+export async function listObjectsByPrefix(
+  bucketName: string,
+  prefix: string,
+  process: (obj: _Object) => void,
+) {
+  let listObjectsCommand = new ListObjectsV2Command({
+    Bucket: bucketName,
+    Prefix: prefix,
+  });
+
+  while (true) {
+    const output =
+      await s3Client.send(listObjectsCommand);
+    if (output.Contents) {
+      output.Contents.forEach(obj => process(obj));
+    } else {
+      break;
+    }
+    if (!output.IsTruncated) {
+      break;
+    }
+    listObjectsCommand = new ListObjectsV2Command({
+      Bucket: bucketName,
+      Prefix: prefix,
+      ContinuationToken: output.NextContinuationToken,
+    });
+  }
 }
 
 // @ts-ignore
