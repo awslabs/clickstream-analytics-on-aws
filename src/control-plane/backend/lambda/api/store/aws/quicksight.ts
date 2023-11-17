@@ -382,6 +382,7 @@ export const createAnalysis = async (
 };
 
 export const waitDashboardSuccess = async (region: string, dashboardId: string): Promise<boolean> => {
+  await sleep(300);
   let resp = await describeDashboard(
     region,
     {

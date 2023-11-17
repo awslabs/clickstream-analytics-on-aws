@@ -366,15 +366,19 @@ export const getPairEventAndConditions = (
 
 export const getGroupCondition = (
   option: IAnalyticsItem | null,
-  groupApplyToFirst: boolean
+  groupApplyToFirst: boolean | null
 ) => {
-  console.error('getGroupCondition', option, groupApplyToFirst);
-  const groupingCondition: GroupingCondition = {
+  let groupingCondition: GroupingCondition = {
     category: defaultStr(option?.category, ConditionCategory.OTHER),
     property: defaultStr(option?.name, ''),
     dataType: defaultStr(option?.valueType, MetadataValueType.STRING),
-    applyTo: groupApplyToFirst ? 'FIRST' : 'ALL',
   };
+  if (groupApplyToFirst !== null) {
+    groupingCondition = {
+      ...groupingCondition,
+      applyTo: groupApplyToFirst ? 'FIRST' : 'ALL',
+    };
+  }
   if (groupingCondition.property === '') {
     return undefined;
   }

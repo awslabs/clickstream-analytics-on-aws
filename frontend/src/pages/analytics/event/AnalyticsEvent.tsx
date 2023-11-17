@@ -21,13 +21,11 @@ import {
   SegmentedControlProps,
   SelectProps,
   SpaceBetween,
-  Toggle,
 } from '@cloudscape-design/components';
 import { previewEvent } from 'apis/analytics';
 import ExtendIcon from 'components/common/ExtendIcon';
 import InfoLink from 'components/common/InfoLink';
 import Loading from 'components/common/Loading';
-import InfoTitle from 'components/common/title/InfoTitle';
 import SectionTitle from 'components/common/title/SectionTitle';
 import {
   CategoryItemType,
@@ -163,8 +161,6 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
     label: defaultStr(t('analytics:options.dayTimeGranularity')),
   });
 
-  const [groupApplyToFirst, setGroupApplyToFirst] = React.useState(false);
-
   const resetConfig = async () => {
     eventDataDispatch({
       type: 'resetEventData',
@@ -278,7 +274,7 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
       globalEventCondition: getGlobalEventCondition(filterOptionData),
       timeScopeType: dateRangeParams?.timeScopeType,
       groupColumn: timeGranularity.value,
-      groupCondition: getGroupCondition(groupOption, groupApplyToFirst),
+      groupCondition: getGroupCondition(groupOption, null),
       ...dateRangeParams,
       ...saveParams,
     };
@@ -412,19 +408,6 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
                 groupOption={groupOption}
                 setGroupOption={setGroupOption}
               />
-
-              <InfoTitle
-                title={t('analytics:labels.groupApplyToFirst')}
-                popoverDescription={t(
-                  'analytics:information.groupApplyToFirstInfo'
-                )}
-              />
-              <Toggle
-                onChange={({ detail }) => setGroupApplyToFirst(detail.checked)}
-                checked={groupApplyToFirst}
-              >
-                {groupApplyToFirst ? t('yes') : t('no')}
-              </Toggle>
             </SpaceBetween>
           </ColumnLayout>
           <br />

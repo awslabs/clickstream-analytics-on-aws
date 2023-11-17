@@ -399,10 +399,10 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
   }, [timeGranularity, dateRangeValue, chartType]);
 
   useEffect(() => {
-    console.info('chartType:', chartType);
     if (chartType === 'funnel') {
       setGroupDisabled(true);
       setGroupOption(null);
+      setGroupApplyToFirst(false);
     } else {
       setGroupDisabled(false);
     }
@@ -571,6 +571,7 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
               <Toggle
                 onChange={({ detail }) => setGroupApplyToFirst(detail.checked)}
                 checked={groupApplyToFirst}
+                disabled={groupDisabled}
               >
                 {groupApplyToFirst ? t('yes') : t('no')}
               </Toggle>

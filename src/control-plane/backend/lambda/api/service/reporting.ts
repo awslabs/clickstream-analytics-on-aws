@@ -644,6 +644,7 @@ export class ReportingService {
       const datasetOutput = await createDataSet(
         quickSight, awsAccountId!,
         principals.exploreUserArn,
+        principals.publishUserArn,
         dashboardCreateParameters.quickSight.dataSourceArn,
         datasetProps,
         query.action as ExploreRequestAction,
