@@ -58,7 +58,7 @@ jest.mock('../../src/common/s3', () => {
           LastModified: new Date(startTimestamp),
         },
         {
-          Key: 'test/file3.json',
+          Key: 'test/file3.gz',
           Size: 1024,
           LastModified: new Date(startTimestamp),
         },
@@ -72,10 +72,9 @@ jest.mock('../../src/common/s3', () => {
   };
 });
 
-import exp from 'constants';
 import { LambdaClient, ListTagsCommand } from '@aws-sdk/client-lambda';
 import { mockClient } from 'aws-sdk-client-mock';
-import { CustomSparkConfig, EMRServerlessUtil, getEstimatedSparkConfig } from '../../src/data-pipeline/lambda/emr-job-submitter/emr-client-util';
+import { CustomSparkConfig, EMRServerlessUtil, getDatePrefixList, getEstimatedSparkConfig } from '../../src/data-pipeline/lambda/emr-job-submitter/emr-client-util';
 import { getMockContext } from '../common/lambda-context';
 import 'aws-sdk-client-mock-jest';
 
@@ -124,13 +123,14 @@ describe('Data Process -- EMR Serverless job submitter function', () => {
     lambdaMock.on(ListTagsCommand).resolves({ Tags: {} });
     const jobInfo = await EMRServerlessUtil.start({
       startTimestamp,
+      endTimestamp,
     }, context);
     expect(emrMock.StartJobRunCommand.mock.calls.length).toEqual(1);
     expect(jobInfo).toEqual({
       jobRunId: 'jobId007',
       objectsInfo: {
-        objectCount: 2,
-        sizeTotal: 2048,
+        objectCount: 4,
+        sizeTotal: 43008,
       },
     });
   });
@@ -138,7 +138,7 @@ describe('Data Process -- EMR Serverless job submitter function', () => {
   test('ignore starting data processing job when no files found', async () => {
     lambdaMock.on(ListTagsCommand).resolves({ Tags: {} });
     const jobInfo = await EMRServerlessUtil.start({
-      startTimestamp: new Date(startTimestamp).getTime - 1000,
+      startTimestamp: new Date(startTimestamp).getTime() + 1000,
     }, context);
     expect(emrMock.StartJobRunCommand.mock.calls.length).toEqual(0);
     expect(jobInfo).toEqual({
@@ -309,7 +309,7 @@ describe('Data Process -- EMR Serverless job submitter function', () => {
     try {
       await EMRServerlessUtil.start({
         startTimestamp,
-        endTimestamp: new Date(startTimestamp) - 1,
+        endTimestamp: new Date(startTimestamp).getTime() - 1,
       }, context);
     } catch (e: any) {
       errMsg = e.message;
@@ -357,6 +357,30 @@ describe('Data Process -- EMR Serverless job submitter function', () => {
       expect(config.inputRePartitions).toBeGreaterThan(9);
       expect(config.outputPartitions).toEqual(-1);
     });
+  });
+
+  test('test getDatePrefixList()', () => {
+
+    const prefixList1 = getDatePrefixList('abc/test_prefix', new Date('2023-11-20T01:00:00.000Z').getTime(), new Date('2023-11-22T01:00:00.000Z').getTime());
+
+    expect(prefixList1).toEqual([
+      'abc/test_prefix/year=2023/month=11/days=20/',
+      'abc/test_prefix/year=2023/month=11/days=21/',
+      'abc/test_prefix/year=2023/month=11/days=22/',
+    ]);
+
+    const prefixList2 = getDatePrefixList('abc/test_prefix', new Date(startTimestamp).getTime(), new Date(endTimestamp).getTime());
+
+    expect(prefixList2).toEqual([
+      'abc/test_prefix/year=2023/month=03/days=12/',
+      'abc/test_prefix/year=2023/month=03/days=13/',
+    ]);
+
+    const prefixList3 = getDatePrefixList('abc/test_prefix/', new Date('2023-11-20T01:00:00.000Z').getTime(), new Date('2023-11-20T02:00:00.000Z').getTime());
+    expect(prefixList3).toEqual([
+      'abc/test_prefix/year=2023/month=11/days=20/',
+    ]);
+
   });
 
 });

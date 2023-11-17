@@ -39,7 +39,7 @@ interface ObjectsInfo {
 }
 
 export interface CustomSparkConfig {
-  sparkConfig : string [];
+  sparkConfig: string[];
   outputPartitions: number;
   inputRePartitions: number;
 }
@@ -216,7 +216,7 @@ export class EMRServerlessUtil {
 
     // https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/metastore-config.html
     // https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/jobs-spark.html
-    const defaultConfig =[
+    const defaultConfig = [
       'spark.hadoop.hive.metastore.client.factory.class=com.amazonaws.glue.catalog.metastore.AWSGlueDataCatalogHiveClientFactory',
       'spark.driver.cores=4',
       'spark.driver.memory=14g',
@@ -225,7 +225,7 @@ export class EMRServerlessUtil {
     ];
 
     const configMap = new Map<string, string>();
-    for (let it of [...defaultConfig, ... estimatedSparkConfig.sparkConfig, ...sparkConfigS3, ...sparkConfigEvent]) {
+    for (let it of [...defaultConfig, ...estimatedSparkConfig.sparkConfig, ...sparkConfigS3, ...sparkConfigEvent]) {
       const configs = it.split('=', 2);
       if (configs.length == 2) {
         const key = configs[0];
@@ -383,25 +383,62 @@ function getTimestampFromEvent(inputTimestamp: string | number): number {
 async function calculateObjects(bucketName: string, prefix: string, startTimestamp: number, endTimestamp: number) {
   let objectCount = 0;
   let sizeTotal = 0;
-  await listObjectsByPrefix(bucketName, prefix, (obj) => {
-    if (obj.Key
-      && !obj.Key.endsWith('/_.json')
-      && obj.Size
-      && obj.LastModified
-      && obj.LastModified.getTime() >= startTimestamp
-      && obj.LastModified.getTime() < endTimestamp) {
-      objectCount++;
-      if (obj.Key.endsWith('.gz')) {
-        sizeTotal += obj.Size * 20;
-      } else {
-        sizeTotal += obj.Size;
+
+  const datePrefixList = getDatePrefixList(prefix, startTimestamp, endTimestamp);
+
+  for (const datePrefix of datePrefixList) {
+    await listObjectsByPrefix(bucketName, datePrefix, (obj) => {
+      if (obj.Key
+        && !obj.Key.endsWith('/_.json')
+        && obj.Size
+        && obj.LastModified
+        && obj.LastModified.getTime() >= startTimestamp
+        && obj.LastModified.getTime() < endTimestamp) {
+        objectCount++;
+        if (obj.Key.endsWith('.gz')) {
+          sizeTotal += obj.Size * 20;
+        } else {
+          sizeTotal += obj.Size;
+        }
       }
-    }
-  });
+    });
+  }
   return {
     objectCount,
     sizeTotal,
   };
+}
+
+export function getDatePrefixList(prefix: string, startTimestamp: number, endTimestamp: number): string[] {
+  if (!prefix.endsWith('/')) {
+    prefix = prefix + '/';
+  }
+  let aTime = startTimestamp;
+  const oneDay = 24 * 60 * 60 * 1000;
+
+  const padTo2Digits = (num: number) => {
+    return num.toString().padStart(2, '0');
+  };
+  const dataPrefixList: string[] = [];
+
+  while (aTime <= endTimestamp) {
+    const currentDate = new Date(aTime);
+    const yyyy = currentDate.getUTCFullYear();
+    const mm = currentDate.getUTCMonth() + 1;
+    const dd = currentDate.getUTCDate();
+    dataPrefixList.push(
+      `${prefix}year=${yyyy}/month=${padTo2Digits(mm)}/days=${padTo2Digits(dd)}/`,
+    );
+    aTime += oneDay;
+  }
+  logger.info(`dataPrefixList for ${new Date(startTimestamp).toISOString()} to ${new Date(endTimestamp).toISOString()}`,
+    {
+      start: dataPrefixList[0],
+      end: dataPrefixList[dataPrefixList.length -1],
+      length: dataPrefixList.length,
+    });
+  return dataPrefixList;
+
 }
 
 export function getEstimatedSparkConfig(objectsInfo: ObjectsInfo): CustomSparkConfig {
