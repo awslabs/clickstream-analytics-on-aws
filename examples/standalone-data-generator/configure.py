@@ -48,8 +48,8 @@ ACTION_TIMES = range(0, 30)
 PER_ACTION_DURATION_REALTIME = range(0, 5)
 
 # shopping configure
-ALL_USER_SHOPPING = 30000
-RANDOM_DAU_SHOPPING = range(3000, 6000)
+ALL_USER_SHOPPING = 10000
+RANDOM_DAU_SHOPPING = range(1000, 2000)
 PLATFORM = enums.Platform.All
 
 # following value will be replaced by amplifyconfiguration.json file.

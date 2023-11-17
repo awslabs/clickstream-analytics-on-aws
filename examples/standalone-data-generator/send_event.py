@@ -54,7 +54,7 @@ def send_events_of_batch(events_of_batch):
     events_of_day_arr = [events_of_batch[i:i + n] for i in range(0, len(events_of_batch), n)]
     for event_arr in events_of_day_arr:
         executor = ThreadPoolExecutor(configure.MAX_UPLOAD_THREAD_NUMBER)
-        day_event_lines = utils.convert_to_gzip_events_process_pool(event_arr)
+        day_event_lines = utils.convert_to_gzip_events(event_arr)
         if configure.IS_GZIP:
             print("gzip events cost: " + str(utils.current_timestamp() - start_time) + "ms")
         else:
