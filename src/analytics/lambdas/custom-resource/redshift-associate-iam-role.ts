@@ -35,12 +35,12 @@ function strToIamRole(str: string): ClusterIamRole {
 
   const statusMatches = str.match(/applyStatus=([^,]+)[,|\)]/);
   if (!statusMatches || statusMatches.length < 2) {
-    throw new Error(`Invalid IamRole String ($str), can not extract status.`);
+    throw new Error('Invalid IamRole String ($str), can not extract status.');
   }
 
   const roleMatches = str.match(/iamRoleArn=([^,]+)[,|\)]/);
   if (!roleMatches || roleMatches.length < 2) {
-    throw new Error(`Invalid IamRole String ($str), can not extract role arn.`);
+    throw new Error('Invalid IamRole String ($str), can not extract role arn.');
   }
 
   return {
