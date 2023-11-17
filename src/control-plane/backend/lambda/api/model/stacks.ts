@@ -1073,6 +1073,8 @@ export class CReportingStack extends JSONObject {
       'RedShiftDBSchemaParam',
       'QuickSightVpcConnectionSubnetParam',
       'RedshiftParameterKeyParam',
+      'QuickSightPrincipalParam',
+      'QuickSightOwnerPrincipalParam',
     ];
     return allowedList;
   }
