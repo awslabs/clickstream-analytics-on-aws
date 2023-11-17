@@ -51,7 +51,7 @@ export const INIT_EXT_PIPELINE_DATA: IExtPipeline = {
     size: {
       serverMin: 2,
       serverMax: 4,
-      warmPoolSize: 1,
+      warmPoolSize: 0,
       scaleOnCpuUtilizationPercent: 50,
     },
     domain: {

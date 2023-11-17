@@ -721,25 +721,6 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
               'redshift-serverless:GetNamespace',
               'redshift-data:BatchExecuteStatement',
               's3:ListBucket',
-              'quicksight:ListUsers',
-              'quicksight:DescribeAccountSubscription',
-              'quicksight:RegisterUser',
-              'quicksight:GenerateEmbedUrlForRegisteredUser',
-              'quicksight:UpdateDashboardPermissions',
-              'quicksight:CreateDataSet',
-              'quicksight:ListDataSets',
-              'quicksight:DeleteDataSet',
-              'quicksight:PassDataSet',
-              'quicksight:PassDataSource',
-              'quicksight:CreateDashboard',
-              'quicksight:ListDashboards',
-              'quicksight:DeleteDashboard',
-              'quicksight:UpdateDashboard',
-              'quicksight:DescribeDashboard',
-              'quicksight:UpdateDashboardPublishedVersion',
-              'quicksight:CreateAnalysis',
-              'quicksight:ListAnalyses',
-              'quicksight:DeleteAnalysis',
               'ds:AuthorizeApplication',
               'ds:UnauthorizeApplication',
               'ds:CheckAlias',
@@ -768,6 +749,216 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
             ],
             Effect: 'Allow',
             Resource: '*',
+          },
+          {
+            Action: [
+              'quicksight:DescribeAccountSubscription',
+              'quicksight:UpdateDashboardPermissions',
+              'quicksight:CreateDataSet',
+              'quicksight:DeleteDataSet',
+              'quicksight:PassDataSet',
+              'quicksight:PassDataSource',
+              'quicksight:CreateDashboard',
+              'quicksight:DeleteDashboard',
+              'quicksight:UpdateDashboard',
+              'quicksight:DescribeDashboard',
+              'quicksight:UpdateDashboardPublishedVersion',
+              'quicksight:CreateAnalysis',
+              'quicksight:UpdateAnalysis',
+              'quicksight:DeleteAnalysis',
+            ],
+            Effect: 'Allow',
+            Resource: [
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    {
+                      Ref: 'AWS::Partition',
+                    },
+                    ':quicksight:*:',
+                    {
+                      Ref: 'AWS::AccountId',
+                    },
+                    ':analysis/clickstream*',
+                  ],
+                ],
+              },
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    {
+                      Ref: 'AWS::Partition',
+                    },
+                    ':quicksight:*:',
+                    {
+                      Ref: 'AWS::AccountId',
+                    },
+                    ':dashboard/clickstream*',
+                  ],
+                ],
+              },
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    {
+                      Ref: 'AWS::Partition',
+                    },
+                    ':quicksight:*:',
+                    {
+                      Ref: 'AWS::AccountId',
+                    },
+                    ':dataset/clickstream*',
+                  ],
+                ],
+              },
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    {
+                      Ref: 'AWS::Partition',
+                    },
+                    ':quicksight:*:',
+                    {
+                      Ref: 'AWS::AccountId',
+                    },
+                    ':datasource/clickstream*',
+                  ],
+                ],
+              },
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    {
+                      Ref: 'AWS::Partition',
+                    },
+                    ':quicksight:*:',
+                    {
+                      Ref: 'AWS::AccountId',
+                    },
+                    ':analysis/_tmp_*',
+                  ],
+                ],
+              },
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    {
+                      Ref: 'AWS::Partition',
+                    },
+                    ':quicksight:*:',
+                    {
+                      Ref: 'AWS::AccountId',
+                    },
+                    ':dashboard/_tmp_*',
+                  ],
+                ],
+              },
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    {
+                      Ref: 'AWS::Partition',
+                    },
+                    ':quicksight:*:',
+                    {
+                      Ref: 'AWS::AccountId',
+                    },
+                    ':dataset/_tmp_*',
+                  ],
+                ],
+              },
+            ],
+          },
+          {
+            Action: [
+              'quicksight:GenerateEmbedUrlForRegisteredUser',
+              'quicksight:RegisterUser',
+              'quicksight:ListUsers',
+              'quicksight:ListDataSets',
+              'quicksight:ListDashboards',
+              'quicksight:ListAnalyses',
+            ],
+            Effect: 'Allow',
+            Resource: [
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    {
+                      Ref: 'AWS::Partition',
+                    },
+                    ':quicksight:*:',
+                    {
+                      Ref: 'AWS::AccountId',
+                    },
+                    ':analysis/*',
+                  ],
+                ],
+              },
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    {
+                      Ref: 'AWS::Partition',
+                    },
+                    ':quicksight:*:',
+                    {
+                      Ref: 'AWS::AccountId',
+                    },
+                    ':dashboard/*',
+                  ],
+                ],
+              },
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    {
+                      Ref: 'AWS::Partition',
+                    },
+                    ':quicksight:*:',
+                    {
+                      Ref: 'AWS::AccountId',
+                    },
+                    ':dataset/*',
+                  ],
+                ],
+              },
+              {
+                'Fn::Join': [
+                  '',
+                  [
+                    'arn:',
+                    {
+                      Ref: 'AWS::Partition',
+                    },
+                    ':quicksight:*:',
+                    {
+                      Ref: 'AWS::AccountId',
+                    },
+                    ':user/*',
+                  ],
+                ],
+              },
+            ],
           },
           {
             Action: 'sts:AssumeRole',

@@ -164,9 +164,7 @@ const MetadataUserAttributesTable: React.FC<
     { id: 'displayName', visible: true },
     { id: 'description', visible: true },
     { id: 'metadataSource', visible: true },
-    { id: 'hasData', visible: true },
     { id: 'valueType', visible: true },
-    { id: 'platform', visible: true },
   ];
   const FILTERING_PROPERTIES = [
     {
@@ -196,26 +194,10 @@ const MetadataUserAttributesTable: React.FC<
       operators: [':', '!:', '=', '!='],
     },
     {
-      propertyLabel: t('analytics:metadata.userAttribute.tableColumnHasData'),
-      key: 'hasData',
-      groupValuesLabel: t(
-        'analytics:metadata.userAttribute.tableColumnHasData'
-      ),
-      operators: [':', '!:', '=', '!='],
-    },
-    {
       propertyLabel: t('analytics:metadata.userAttribute.tableColumnDataType'),
       key: 'valueType',
       groupValuesLabel: t(
         'analytics:metadata.userAttribute.tableColumnDataType'
-      ),
-      operators: [':', '!:', '=', '!='],
-    },
-    {
-      propertyLabel: t('analytics:metadata.userAttribute.tableColumnPlatform'),
-      key: 'platform',
-      groupValuesLabel: t(
-        'analytics:metadata.userAttribute.tableColumnPlatform'
       ),
       operators: [':', '!:', '=', '!='],
     },

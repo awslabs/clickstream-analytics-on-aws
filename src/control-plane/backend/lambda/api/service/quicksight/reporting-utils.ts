@@ -34,11 +34,11 @@ import Mustache from 'mustache';
 import { v4 as uuidv4 } from 'uuid';
 import { DataSetProps, dataSetAdminPermissionActions } from './dashboard-ln';
 import { EventAndCondition, PairEventAndCondition, SQLCondition } from './sql-builder';
+import { QUICKSIGHT_DATASET_INFIX, QUICKSIGHT_RESOURCE_NAME_PREFIX, QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX } from '../../common/constants-ln';
 import { AnalysisType, ExploreConversionIntervalType, ExploreLocales, ExplorePathNodeType, ExplorePathSessionDef, ExploreRelativeTimeUnit, ExploreRequestAction, ExploreTimeScopeType, ExploreVisualName, MetadataValueType, QuickSightChartType } from '../../common/explore-types';
 import { logger } from '../../common/powertools';
 import i18next from '../../i18n';
 
-export const TEMP_RESOURCE_NAME_PREFIX = '_tmp_';
 
 export interface VisualProps {
   readonly sheetId: string;
@@ -263,11 +263,15 @@ export const retentionAnalysisVisualColumns: InputColumn[] = [
 
 export const createDataSet = async (quickSight: QuickSight, awsAccountId: string, principalArn: string,
   dataSourceArn: string,
-  props: DataSetProps)
+  props: DataSetProps, requestAction: ExploreRequestAction)
 : Promise<CreateDataSetCommandOutput|undefined> => {
 
   try {
-    const datasetId = uuidv4();
+    let datasetId = `${QUICKSIGHT_RESOURCE_NAME_PREFIX}${QUICKSIGHT_DATASET_INFIX}${uuidv4().replace(/-/g, '')}`;
+    if (requestAction === ExploreRequestAction.PREVIEW) {
+      datasetId = `${QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX}${uuidv4().replace(/-/g, '')}`;
+    }
+
     let colGroups: ColumnGroup[] = [];
     if (props.columnGroups !== undefined) {
       for (const columnsGroup of props.columnGroups ) {
@@ -1008,7 +1012,7 @@ export function getQuickSightUnitFromTimeUnit(timeUnit: string) : string {
 
 export function getTempResourceName(resourceName: string, action: ExploreRequestAction) : string {
   if (action === ExploreRequestAction.PREVIEW) {
-    return TEMP_RESOURCE_NAME_PREFIX + resourceName;
+    return QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX + resourceName;
   }
 
   return resourceName;

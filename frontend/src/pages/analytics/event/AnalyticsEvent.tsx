@@ -29,20 +29,18 @@ import Loading from 'components/common/Loading';
 import SectionTitle from 'components/common/title/SectionTitle';
 import {
   CategoryItemType,
-  DEFAULT_CONDITION_DATA,
   DEFAULT_EVENT_ITEM,
-  IEventAnalyticsItem,
   INIT_SEGMENTATION_DATA,
-  SegmentationFilterDataType,
 } from 'components/eventselect/AnalyticsType';
-import EventsSelect from 'components/eventselect/EventSelect';
-import SegmentationFilter from 'components/eventselect/SegmentationFilter';
+import AnalyticsEventSelect from 'components/eventselect/reducer/AnalyticsEventSelect';
+import AnalyticsSegmentFilter from 'components/eventselect/reducer/AnalyticsSegmentFilter';
+import { analyticsEventSelectReducer } from 'components/eventselect/reducer/analyticsEventSelectReducer';
+import { analyticsSegmentFilterReducer } from 'components/eventselect/reducer/analyticsSegmentFilterReducer';
 import { DispatchContext } from 'context/StateContext';
 import { UserContext } from 'context/UserContext';
-import { HelpInfoActionType, HelpPanelType } from 'context/reducer';
+import { StateActionType, HelpPanelType } from 'context/reducer';
 
-import { cloneDeep } from 'lodash';
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useReducer, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { COMMON_ALERT_TYPE, IUserRole } from 'ts/const';
@@ -61,7 +59,6 @@ import {
   alertMsg,
   defaultStr,
   generateStr,
-  getEventParameters,
   getUserInfoFromLocalStorage,
 } from 'ts/utils';
 import {
@@ -71,8 +68,8 @@ import {
   getGlobalEventCondition,
   getGroupCondition,
   getLngFromLocalStorage,
-  parametersConvertToCategoryItemType,
   validEventAnalyticsItem,
+  validMultipleEventAnalyticsItems,
 } from '../analytics-utils';
 import AttributeGroup from '../comps/AttributeGroup';
 import ExploreDateRangePicker, {
@@ -84,10 +81,8 @@ import SaveToDashboardModal from '../comps/SelectDashboardModal';
 
 interface AnalyticsEventProps {
   loading: boolean;
-  loadFunc: () => void;
   pipeline: IPipeline;
   metadataEvents: IMetadataEvent[];
-  metadataEventParameters: IMetadataEventParameter[];
   metadataUserAttributes: IMetadataUserAttribute[];
   categoryEvents: CategoryItemType[];
   presetParameters: CategoryItemType[];
@@ -136,7 +131,8 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
     label: t('analytics:options.eventNumber') ?? 'Event number',
   };
 
-  const [eventOptionData, setEventOptionData] = useState<IEventAnalyticsItem[]>(
+  const [eventDataState, eventDataDispatch] = useReducer(
+    analyticsEventSelectReducer,
     [
       {
         ...DEFAULT_EVENT_ITEM,
@@ -145,12 +141,13 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
       },
     ]
   );
-
-  const [segmentationOptionData, setSegmentationOptionData] =
-    useState<SegmentationFilterDataType>({
+  const [filterOptionData, filterOptionDataDispatch] = useReducer(
+    analyticsSegmentFilterReducer,
+    {
       ...INIT_SEGMENTATION_DATA,
       conditionOptions: presetParameters,
-    });
+    }
+  );
 
   const [groupOption, setGroupOption] = useState<SelectProps.Option | null>(
     null
@@ -165,17 +162,15 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
   });
 
   const resetConfig = async () => {
-    setLoadingData(true);
-    setEventOptionData([
-      {
-        ...DEFAULT_EVENT_ITEM,
-        calculateMethodOption: defaultComputeMethodOption,
-        enableChangeRelation: true,
-      },
-    ]);
-    setSegmentationOptionData({
-      ...INIT_SEGMENTATION_DATA,
-      conditionOptions: presetParameters,
+    eventDataDispatch({
+      type: 'resetEventData',
+      defaultComputeMethodOption: defaultComputeMethodOption,
+      isMultiSelect: true,
+      enableChangeRelation: true,
+    });
+    filterOptionDataDispatch({
+      type: 'resetFilterData',
+      presetParameters,
     });
     setDateRangeValue(DEFAULT_WEEK_RANGE);
     setExploreEmbedUrl('');
@@ -183,7 +178,6 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
       value: ExploreGroupColumn.DAY,
       label: defaultStr(t('analytics:options.dayTimeGranularity')),
     });
-    setLoadingData(false);
   };
 
   const saveToDashboard = async (
@@ -195,8 +189,8 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
     chartSubTitle: string
   ) => {
     if (
-      eventOptionData.length === 0 ||
-      !validEventAnalyticsItem(eventOptionData[0])
+      eventDataState.length === 0 ||
+      !validEventAnalyticsItem(eventDataState[0])
     ) {
       return;
     }
@@ -276,8 +270,8 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
       conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
       conversionIntervalInSeconds: 60 * 60 * 24,
       computeMethod: ExploreComputeMethod.USER_ID_CNT,
-      eventAndConditions: getEventAndConditions(eventOptionData),
-      globalEventCondition: getGlobalEventCondition(segmentationOptionData),
+      eventAndConditions: getEventAndConditions(eventDataState),
+      globalEventCondition: getGlobalEventCondition(filterOptionData),
       timeScopeType: dateRangeParams?.timeScopeType,
       groupColumn: timeGranularity.value,
       groupCondition: getGroupCondition(groupOption),
@@ -289,8 +283,8 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
 
   const clickPreview = async () => {
     if (
-      eventOptionData.length === 0 ||
-      !validEventAnalyticsItem(eventOptionData[0])
+      eventDataState.length === 0 ||
+      !validEventAnalyticsItem(eventDataState[0])
     ) {
       return;
     }
@@ -313,14 +307,16 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
         setExploreEmbedUrl(data.dashboardEmbedUrl);
       }
     } catch (error) {
+      setLoadingChart(false);
+      setLoadingData(false);
       console.log(error);
     }
   };
 
   useEffect(() => {
-    setSegmentationOptionData({
-      ...INIT_SEGMENTATION_DATA,
-      conditionOptions: presetParameters,
+    filterOptionDataDispatch({
+      type: 'resetFilterData',
+      presetParameters,
     });
   }, [presetParameters]);
 
@@ -339,7 +335,7 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
                 <InfoLink
                   onFollow={() => {
                     dispatch?.({
-                      type: HelpInfoActionType.SHOW_HELP_PANEL,
+                      type: StateActionType.SHOW_HELP_PANEL,
                       payload: HelpPanelType.EXPLORE_EVENT_INFO,
                     });
                   }}
@@ -379,116 +375,18 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
                 title={t('analytics:labels.defineMetrics')}
                 description={t('analytics:information.eventDefineMetricInfo')}
               />
-              <EventsSelect
+              <AnalyticsEventSelect
+                eventPlaceholder={t('analytics:labels.eventSelectPlaceholder')}
                 loading={loadingEvents}
-                data={eventOptionData}
-                eventOptionList={categoryEvents}
+                eventDataState={eventDataState}
+                eventDataDispatch={eventDataDispatch}
                 addEventButtonLabel={t('common:button.addEvent')}
-                addNewEventAnalyticsItem={() => {
-                  setEventOptionData((prev) => {
-                    const preEventList = cloneDeep(prev);
-                    return [
-                      ...preEventList,
-                      {
-                        ...DEFAULT_EVENT_ITEM,
-                        calculateMethodOption: defaultComputeMethodOption,
-                        enableChangeRelation: true,
-                      },
-                    ];
-                  });
-                }}
-                removeEventItem={(index) => {
-                  setEventOptionData((prev) => {
-                    const dataObj = cloneDeep(prev);
-                    return dataObj.filter((item, eIndex) => eIndex !== index);
-                  });
-                }}
-                addNewConditionItem={(index: number) => {
-                  setEventOptionData((prev) => {
-                    const dataObj = cloneDeep(prev);
-                    dataObj[index].conditionList.push(DEFAULT_CONDITION_DATA);
-                    return dataObj;
-                  });
-                }}
-                removeEventCondition={(eventIndex, conditionIndex) => {
-                  setEventOptionData((prev) => {
-                    const dataObj = cloneDeep(prev);
-                    const newCondition = dataObj[
-                      eventIndex
-                    ].conditionList.filter((item, i) => i !== conditionIndex);
-                    dataObj[eventIndex].conditionList = newCondition;
-                    return dataObj;
-                  });
-                }}
-                changeConditionCategoryOption={(
-                  eventIndex,
-                  conditionIndex,
-                  category
-                ) => {
-                  setEventOptionData((prev) => {
-                    const dataObj = cloneDeep(prev);
-                    dataObj[eventIndex].conditionList[
-                      conditionIndex
-                    ].conditionOption = category;
-                    dataObj[eventIndex].conditionList[
-                      conditionIndex
-                    ].conditionValue = [];
-                    return dataObj;
-                  });
-                }}
-                changeConditionOperator={(
-                  eventIndex,
-                  conditionIndex,
-                  operator
-                ) => {
-                  setEventOptionData((prev) => {
-                    const dataObj = cloneDeep(prev);
-                    dataObj[eventIndex].conditionList[
-                      conditionIndex
-                    ].conditionOperator = operator;
-                    return dataObj;
-                  });
-                }}
-                changeConditionValue={(eventIndex, conditionIndex, value) => {
-                  setEventOptionData((prev) => {
-                    const dataObj = cloneDeep(prev);
-                    dataObj[eventIndex].conditionList[
-                      conditionIndex
-                    ].conditionValue = value;
-                    return dataObj;
-                  });
-                }}
-                changeCurCalcMethodOption={(eventIndex, method) => {
-                  setEventOptionData((prev) => {
-                    const dataObj = cloneDeep(prev);
-                    dataObj[eventIndex].calculateMethodOption = method;
-                    return dataObj;
-                  });
-                }}
-                changeCurCategoryOption={(eventIndex, category) => {
-                  const eventName = category?.name;
-                  const eventParameters = getEventParameters(
-                    metadataEvents,
-                    eventName
-                  );
-                  const parameterOption = parametersConvertToCategoryItemType(
-                    metadataUserAttributes,
-                    eventParameters
-                  );
-                  setEventOptionData((prev) => {
-                    const dataObj = cloneDeep(prev);
-                    dataObj[eventIndex].selectedEventOption = category;
-                    dataObj[eventIndex].conditionOptions = parameterOption;
-                    return dataObj;
-                  });
-                }}
-                changeCurRelationShip={(eventIndex, relation) => {
-                  setEventOptionData((prev) => {
-                    const dataObj = cloneDeep(prev);
-                    dataObj[eventIndex].conditionRelationShip = relation;
-                    return dataObj;
-                  });
-                }}
+                eventOptionList={categoryEvents}
+                defaultComputeMethodOption={defaultComputeMethodOption}
+                metadataEvents={metadataEvents}
+                metadataUserAttributes={metadataUserAttributes}
+                enableChangeRelation={true}
+                isMultiSelect={true}
               />
             </SpaceBetween>
             <SpaceBetween direction="vertical" size="xs">
@@ -496,54 +394,9 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
                 type="filter"
                 description={t('analytics:information.filterInfo')}
               />
-              <SegmentationFilter
-                segmentationData={segmentationOptionData}
-                addNewConditionItem={() => {
-                  setSegmentationOptionData((prev) => {
-                    const dataObj = cloneDeep(prev);
-                    dataObj.data.push(DEFAULT_CONDITION_DATA);
-                    return dataObj;
-                  });
-                }}
-                removeEventCondition={(index) => {
-                  setSegmentationOptionData((prev) => {
-                    const dataObj = cloneDeep(prev);
-                    const newCondition = dataObj.data.filter(
-                      (item, i) => i !== index
-                    );
-                    dataObj.data = newCondition;
-                    return dataObj;
-                  });
-                }}
-                changeConditionCategoryOption={(index, category) => {
-                  setSegmentationOptionData((prev) => {
-                    const dataObj = cloneDeep(prev);
-                    dataObj.data[index].conditionOption = category;
-                    dataObj.data[index].conditionValue = [];
-                    return dataObj;
-                  });
-                }}
-                changeConditionOperator={(index, operator) => {
-                  setSegmentationOptionData((prev) => {
-                    const dataObj = cloneDeep(prev);
-                    dataObj.data[index].conditionOperator = operator;
-                    return dataObj;
-                  });
-                }}
-                changeConditionValue={(index, value) => {
-                  setSegmentationOptionData((prev) => {
-                    const dataObj = cloneDeep(prev);
-                    dataObj.data[index].conditionValue = value;
-                    return dataObj;
-                  });
-                }}
-                changeCurRelationShip={(relation) => {
-                  setSegmentationOptionData((prev) => {
-                    const dataObj = cloneDeep(prev);
-                    dataObj.conditionRelationShip = relation;
-                    return dataObj;
-                  });
-                }}
+              <AnalyticsSegmentFilter
+                filterDataState={filterOptionData}
+                filterDataDispatch={filterOptionDataDispatch}
               />
               <br />
               <SectionTitle
@@ -561,7 +414,18 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
           <Button
             variant="primary"
             iconName="search"
-            onClick={clickPreview}
+            onClick={() => {
+              if (!validMultipleEventAnalyticsItems(eventDataState)) {
+                dispatch?.({
+                  type: StateActionType.SHOW_EVENT_VALID_ERROR,
+                });
+              } else {
+                dispatch?.({
+                  type: StateActionType.HIDE_EVENT_VALID_ERROR,
+                });
+                clickPreview();
+              }
+            }}
             loading={loadingData}
           >
             {t('button.query')}

@@ -72,6 +72,7 @@ if __name__ == '__main__':
                     send_event.send_events_of_batch(events_of_day)
                     events_of_day = []
             if len(events_of_day) > 0:
+                print(day_str + " total user count: " + str(users_count) + ", left: 0")
                 day_events_count += len(events_of_day)
                 send_event.send_events_of_batch(events_of_day)
             total_events_count += day_events_count

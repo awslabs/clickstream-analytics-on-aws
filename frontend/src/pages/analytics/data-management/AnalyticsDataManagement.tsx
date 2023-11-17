@@ -23,7 +23,7 @@ import AnalyticsNavigation from 'components/layouts/AnalyticsNavigation';
 import CustomBreadCrumb from 'components/layouts/CustomBreadCrumb';
 import HelpInfo from 'components/layouts/HelpInfo';
 import { DispatchContext, StateContext } from 'context/StateContext';
-import { HelpInfoActionType, HelpPanelType } from 'context/reducer';
+import { StateActionType, HelpPanelType } from 'context/reducer';
 import React, { useContext, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
@@ -68,10 +68,10 @@ const AnalyticsDataManagement: React.FC = () => {
               return;
             }
             if (!e.detail.open) {
-              dispatch?.({ type: HelpInfoActionType.HIDE_HELP_PANEL });
+              dispatch?.({ type: StateActionType.HIDE_HELP_PANEL });
             } else {
               dispatch?.({
-                type: HelpInfoActionType.SHOW_HELP_PANEL,
+                type: StateActionType.SHOW_HELP_PANEL,
                 payload: state?.helpPanelType,
               });
             }
@@ -87,7 +87,7 @@ const AnalyticsDataManagement: React.FC = () => {
                     <InfoLink
                       onFollow={() => {
                         dispatch?.({
-                          type: HelpInfoActionType.SHOW_HELP_PANEL,
+                          type: StateActionType.SHOW_HELP_PANEL,
                           payload: HelpPanelType.ANALYTICS_METADATA,
                         });
                       }}
@@ -103,7 +103,7 @@ const AnalyticsDataManagement: React.FC = () => {
                 <Tabs
                   onChange={() => {
                     dispatch?.({
-                      type: HelpInfoActionType.HIDE_HELP_PANEL,
+                      type: StateActionType.HIDE_HELP_PANEL,
                     });
                   }}
                   tabs={[

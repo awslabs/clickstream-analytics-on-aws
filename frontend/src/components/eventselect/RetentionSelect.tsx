@@ -29,6 +29,7 @@ interface RetentionSelectProps {
   eventOptionList: CategoryItemType[];
   addEventButtonLabel: string;
   maxSelectNum?: number;
+  loading: boolean;
   addStartNewConditionItem: (index: number) => void;
   addRevisitNewConditionItem: (index: number) => void;
   changeStartRelationShip: (index: number, relationShip: ERelationShip) => void;
@@ -90,6 +91,7 @@ const RetentionSelect: React.FC<RetentionSelectProps> = (
     eventOptionList,
     addEventButtonLabel,
     maxSelectNum,
+    loading,
     addStartNewConditionItem,
     addRevisitNewConditionItem,
     changeStartRelationShip,
@@ -145,6 +147,7 @@ const RetentionSelect: React.FC<RetentionSelectProps> = (
               </div>
             </div>
             <RetentionItem
+              loading={loading}
               label={t('analytics:labels.retentionStart')}
               showRelation={element.showRelation}
               eventOptionList={eventOptionList}
@@ -187,6 +190,7 @@ const RetentionSelect: React.FC<RetentionSelectProps> = (
               }}
             />
             <RetentionItem
+              loading={loading}
               label={t('analytics:labels.retentionRevisit')}
               showRelation={element.showRelation}
               eventOptionList={eventOptionList}

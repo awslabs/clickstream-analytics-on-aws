@@ -19,7 +19,6 @@ import configure
 import enums as enums
 import gzip
 import base64
-import multiprocessing
 
 
 def get_device_id():
@@ -133,15 +132,13 @@ def get_gzip(event_str):
     return base64.b64encode(compressed_data).decode('utf-8')
 
 
-def convert_to_gzip_events_process_pool(events_of_day):
+def convert_to_gzip_events(events_of_day):
     n = configure.EVENTS_PER_REQUEST
     small_arr = [events_of_day[i:i + n] for i in range(0, len(events_of_day), n)]
-    manager = multiprocessing.Manager()
-    day_event_lines = manager.list()
-    pool = multiprocessing.Pool(processes=configure.PROCESS_NUMBER)
-    day_event_lines = pool.starmap(get_gzipped_line, [(configure.IS_GZIP, small_arr[i]) for i in range(len(small_arr))])
-    pool.close()
-    pool.join()
+    day_event_lines = []
+    for small_event_arr in small_arr:
+        gzipped_lines = get_gzipped_line(configure.IS_GZIP, small_event_arr)
+        day_event_lines.append(gzipped_lines)
     return day_event_lines
 
 

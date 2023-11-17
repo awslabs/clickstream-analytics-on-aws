@@ -34,7 +34,7 @@ import AnalyticsNavigation from 'components/layouts/AnalyticsNavigation';
 import CustomBreadCrumb from 'components/layouts/CustomBreadCrumb';
 import HelpInfo from 'components/layouts/HelpInfo';
 import { DispatchContext, StateContext } from 'context/StateContext';
-import { HelpInfoActionType, HelpPanelType } from 'context/reducer';
+import { StateActionType, HelpPanelType } from 'context/reducer';
 import React, { useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
@@ -102,9 +102,7 @@ const AnalyticsExplore: React.FC = () => {
   const [pipeline, setPipeline] = useState<IPipeline | null>(null);
   const [loadingMetadataEvent, setLoadingMetadataEvent] = useState(false);
   const [metadataEvents, setMetadataEvents] = useState<IMetadataEvent[]>([]);
-  const [metadataEventParameters, setMetadataEventParameters] = useState<
-    IMetadataEventParameter[]
-  >([]);
+
   const [metadataUserAttributes, setMetadataUserAttributes] = useState<
     IMetadataUserAttribute[]
   >([]);
@@ -178,7 +176,6 @@ const AnalyticsExplore: React.FC = () => {
           appId: defaultStr(appId),
         });
       if (success) {
-        setMetadataEventParameters(data.items);
         return data.items;
       }
     } catch (error) {
@@ -187,8 +184,14 @@ const AnalyticsExplore: React.FC = () => {
     }
   };
 
+  const warnAndClean = async (params: any) => {
+    await Promise.all([
+      warmup(params),
+      clean(params.dashboardCreateParameters.region),
+    ]);
+  };
+
   const listMetadataEvents = async () => {
-    setLoadingMetadataEvent(true);
     try {
       const { success, data }: ApiResponse<ResponseTableData<IMetadataEvent>> =
         await getMetadataEventsList({
@@ -200,29 +203,6 @@ const AnalyticsExplore: React.FC = () => {
         setMetadataEvents(data.items);
         const events = metadataEventsConvertToCategoryItemType(data.items);
         setCategoryEvents(events);
-      }
-      setLoadingMetadataEvent(false);
-    } catch (error) {
-      setLoadingMetadataEvent(false);
-      console.log(error);
-    }
-  };
-
-  const loadPipeline = async () => {
-    try {
-      const { success, data }: ApiResponse<IPipeline> =
-        await getPipelineDetailByProjectId(defaultStr(projectId));
-      if (success) {
-        setPipeline(data);
-        const params = getWarmUpParameters(
-          defaultStr(projectId),
-          defaultStr(appId),
-          data
-        );
-        if (params) {
-          await warmup(params);
-          await clean(params.dashboardCreateParameters.region);
-        }
       }
     } catch (error) {
       console.log(error);
@@ -254,15 +234,37 @@ const AnalyticsExplore: React.FC = () => {
     }
   };
 
-  const loadData = () => {
-    loadPipeline();
-    listMetadataEvents();
-    listAllAttributes();
+  const getEventParamsAndAttributes = async () => {
+    setLoadingMetadataEvent(true);
+    await Promise.all([listMetadataEvents(), listAllAttributes()]);
+    setLoadingMetadataEvent(false);
+  };
+
+  const loadPipeline = async () => {
+    try {
+      const { success, data }: ApiResponse<IPipeline> =
+        await getPipelineDetailByProjectId(defaultStr(projectId));
+      if (success) {
+        setPipeline(data);
+        const params = getWarmUpParameters(
+          defaultStr(projectId),
+          defaultStr(appId),
+          data
+        );
+        if (params) {
+          // async to call warm and clean
+          warnAndClean(params);
+        }
+        await getEventParamsAndAttributes();
+      }
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   useEffect(() => {
     if (projectId && appId) {
-      loadData();
+      loadPipeline();
     }
   }, [projectId, appId]);
 
@@ -285,10 +287,10 @@ const AnalyticsExplore: React.FC = () => {
               return;
             }
             if (!e.detail.open) {
-              dispatch?.({ type: HelpInfoActionType.HIDE_HELP_PANEL });
+              dispatch?.({ type: StateActionType.HIDE_HELP_PANEL });
             } else {
               dispatch?.({
-                type: HelpInfoActionType.SHOW_HELP_PANEL,
+                type: StateActionType.SHOW_HELP_PANEL,
                 payload: state?.helpPanelType,
               });
             }
@@ -322,7 +324,10 @@ const AnalyticsExplore: React.FC = () => {
                       selectedOption={selectedOption}
                       onChange={({ detail }) => {
                         dispatch?.({
-                          type: HelpInfoActionType.HIDE_HELP_PANEL,
+                          type: StateActionType.HIDE_HELP_PANEL,
+                        });
+                        dispatch?.({
+                          type: StateActionType.RESET_VALID_ERROR,
                         });
                         setSelectedOption(detail.selectedOption);
                       }}
@@ -336,10 +341,8 @@ const AnalyticsExplore: React.FC = () => {
                 <AnalyticsFunnel
                   loadingEvents={loadingMetadataEvent}
                   loading={false}
-                  loadFunc={loadData}
                   pipeline={pipeline}
                   metadataEvents={metadataEvents}
-                  metadataEventParameters={metadataEventParameters}
                   metadataUserAttributes={metadataUserAttributes}
                   categoryEvents={categoryEvents}
                   presetParameters={presetParameters}
@@ -350,10 +353,8 @@ const AnalyticsExplore: React.FC = () => {
                 <AnalyticsEvent
                   loadingEvents={loadingMetadataEvent}
                   loading={false}
-                  loadFunc={loadData}
                   pipeline={pipeline}
                   metadataEvents={metadataEvents}
-                  metadataEventParameters={metadataEventParameters}
                   metadataUserAttributes={metadataUserAttributes}
                   categoryEvents={categoryEvents}
                   presetParameters={presetParameters}
@@ -364,10 +365,8 @@ const AnalyticsExplore: React.FC = () => {
                 <AnalyticsPath
                   loadingEvents={loadingMetadataEvent}
                   loading={false}
-                  loadFunc={loadData}
                   pipeline={pipeline}
                   metadataEvents={metadataEvents}
-                  metadataEventParameters={metadataEventParameters}
                   metadataUserAttributes={metadataUserAttributes}
                   categoryEvents={categoryEvents}
                   presetParameters={presetParameters}
@@ -376,11 +375,10 @@ const AnalyticsExplore: React.FC = () => {
               )}
               {pipeline && selectedOption?.value === 'Retention' && (
                 <AnalyticsRetention
+                  loadingEvents={loadingMetadataEvent}
                   loading={false}
-                  loadFunc={loadData}
                   pipeline={pipeline}
                   metadataEvents={metadataEvents}
-                  metadataEventParameters={metadataEventParameters}
                   metadataUserAttributes={metadataUserAttributes}
                   categoryEvents={categoryEvents}
                   presetParameters={presetParameters}

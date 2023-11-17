@@ -27,7 +27,6 @@ import {
   Tiles,
   Toggle,
 } from '@cloudscape-design/components';
-import { OptionDefinition } from '@cloudscape-design/components/internal/components/option/interfaces';
 import {
   getRedshiftCluster,
   getRedshiftServerlessWorkgroup,
@@ -92,8 +91,8 @@ interface DataProcessingProps {
 
   changeRedshiftType: (type: string) => void;
   changeServerlessRedshiftVPC: (vpc: SelectProps.Option) => void;
-  changeSecurityGroup: (sg: OptionDefinition[]) => void;
-  changeReshiftSubnets: (subnets: OptionDefinition[]) => void;
+  changeSecurityGroup: (sg: SelectProps.Option[]) => void;
+  changeReshiftSubnets: (subnets: SelectProps.Option[]) => void;
   changeBaseCapacity: (capacity: SelectProps.Option) => void;
   changeDBUser: (user: string) => void;
   changeDataLoadCronExp: (cron: string) => void;

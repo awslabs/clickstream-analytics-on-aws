@@ -212,6 +212,16 @@ export const validEventAnalyticsItem = (item: IEventAnalyticsItem) => {
   );
 };
 
+export const validMultipleEventAnalyticsItems = (
+  items: IEventAnalyticsItem[]
+) => {
+  return items.every((item) => {
+    return (
+      item.selectedEventOption && item.selectedEventOption.value?.trim() !== ''
+    );
+  });
+};
+
 export const validRetentionAnalyticsItem = (item: IRetentionAnalyticsItem) => {
   return (
     item.startEventOption &&
@@ -219,6 +229,19 @@ export const validRetentionAnalyticsItem = (item: IRetentionAnalyticsItem) => {
     item.revisitEventOption &&
     item.revisitEventOption?.value?.trim() !== ''
   );
+};
+
+export const validMultipleRetentionAnalyticsItem = (
+  items: IRetentionAnalyticsItem[]
+) => {
+  return items.every((item) => {
+    return (
+      item.startEventOption &&
+      item.startEventOption?.value?.trim() !== '' &&
+      item.revisitEventOption &&
+      item.revisitEventOption?.value?.trim() !== ''
+    );
+  });
 };
 
 export const validConditionItemType = (condition: IConditionItemType) => {
