@@ -960,28 +960,24 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
             ],
           },
           {
-            Action: [
-              'quicksight:DescribeAccountSubscription',
-            ],
+            Action: 'quicksight:DescribeAccountSubscription',
             Effect: 'Allow',
-            Resource: [
-              {
-                'Fn::Join': [
-                  '',
-                  [
-                    'arn:',
-                    {
-                      Ref: 'AWS::Partition',
-                    },
-                    ':quicksight:*:',
-                    {
-                      Ref: 'AWS::AccountId',
-                    },
-                    ':*',
-                  ],
+            Resource: {
+              'Fn::Join': [
+                '',
+                [
+                  'arn:',
+                  {
+                    Ref: 'AWS::Partition',
+                  },
+                  ':quicksight:*:',
+                  {
+                    Ref: 'AWS::AccountId',
+                  },
+                  ':*',
                 ],
-              },
-            ],
+              ],
+            },
           },
           {
             Action: 'sts:AssumeRole',
