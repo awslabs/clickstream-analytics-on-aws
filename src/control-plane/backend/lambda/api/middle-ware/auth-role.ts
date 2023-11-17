@@ -30,7 +30,7 @@ routerRoles.set('GET /api/project/:pid/:aid/dashboard/*', [IUserRole.ADMIN, IUse
 routerRoles.set('POST /api/project/:pid/:aid/dashboard/*', [IUserRole.ADMIN, IUserRole.ANALYST]);
 routerRoles.set('PUT /api/project/:pid/:aid/dashboard/*', [IUserRole.ADMIN, IUserRole.ANALYST]);
 routerRoles.set('DELETE /api/project/:pid/:aid/dashboard/*', [IUserRole.ADMIN, IUserRole.ANALYST]);
-routerRoles.set('GET /api/project/:pid/analyzes', [IUserRole.ADMIN, IUserRole.ANALYST, IUserRole.ANALYST_READER]);
+routerRoles.set('GET /api/project/:pid/analyzes', [IUserRole.ADMIN, IUserRole.ANALYST]);
 
 routerRoles.set('ALL /api/env/*', [IUserRole.ADMIN, IUserRole.OPERATOR]);
 routerRoles.set('ALL /api/app/*', [IUserRole.ADMIN, IUserRole.OPERATOR]);
