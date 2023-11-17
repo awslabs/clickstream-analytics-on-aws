@@ -493,7 +493,6 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
                   )}
                 >
                   <Input
-                    disabled={isDisabled(update, pipelineInfo)}
                     placeholder="example.domain.com"
                     value={pipelineInfo.ingestionServer.domain.domainName}
                     onChange={(e) => {
@@ -518,7 +517,6 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
                   )}
                 >
                   <Select
-                    disabled={isDisabled(update, pipelineInfo)}
                     statusType={ternary(
                       loadingCertificate,
                       'loading',
@@ -611,10 +609,7 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
 
               <Checkbox
                 controlId="test-aga-id"
-                disabled={checkDisable(
-                  isDisabled(update, pipelineInfo),
-                  !pipelineInfo.serviceStatus.AGA
-                )}
+                disabled={!pipelineInfo.serviceStatus.AGA}
                 onChange={({ detail }) => {
                   changeEnableAGA(detail.checked);
                 }}
@@ -629,7 +624,6 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
 
               <div>
                 <Checkbox
-                  disabled={isDisabled(update, pipelineInfo)}
                   onChange={({ detail }) =>
                     changeEnableALBAuthentication(detail.checked)
                   }
@@ -652,7 +646,6 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
                         <div className="flex-1">
                           <Select
                             filteringType="auto"
-                            disabled={isDisabled(update, pipelineInfo)}
                             statusType={ternary(
                               loadingSecret,
                               'loading',
@@ -684,7 +677,6 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
               </div>
 
               <Checkbox
-                disabled={isDisabled(update, pipelineInfo)}
                 onChange={({ detail }) =>
                   changeEnableALBAccessLog(detail.checked)
                 }
