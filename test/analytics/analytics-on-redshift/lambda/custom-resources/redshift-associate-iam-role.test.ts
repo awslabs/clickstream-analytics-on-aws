@@ -98,7 +98,7 @@ describe('Custom resource - Associate IAM role to redshift cluster', () => {
     }).resolvesOnce({
       namespace: {
         namespaceName,
-        iamRoles: [`IamRole(applyStatus=in-sync, iamRoleArn=${copyRole})`],
+        iamRoles: [`IamRole(iamRoleArn=${copyRole}, applyStatus=in-sync)`],
       },
     });
     redshiftServerlessMock.on(UpdateNamespaceCommand).resolvesOnce({});
@@ -131,7 +131,7 @@ describe('Custom resource - Associate IAM role to redshift cluster', () => {
       namespaceName,
     }).resolvesOnce({
       namespace: {
-        iamRoles: existingIAMRoles.map(role => `IamRole(applyStatus=in-sync, iamRoleArn=${role})`),
+        iamRoles: existingIAMRoles.map(role => `IamRole(iamRoleArn=${role}, applyStatus=in-sync)`),
         defaultIamRoleArn: existingIAMRoles[1],
       },
     }).resolvesOnce({
