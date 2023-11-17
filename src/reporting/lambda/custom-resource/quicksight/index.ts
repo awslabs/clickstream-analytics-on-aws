@@ -12,6 +12,7 @@
  */
 
 import crypto from 'crypto';
+import { v4 as uuidv4 } from 'uuid';
 import {
   QuickSight,
   DashboardSourceEntity,
@@ -33,6 +34,8 @@ import {
   ConflictException,
   paginateListTemplateVersions,
   TemplateVersionSummary,
+  ParameterValueType,
+  DatasetParameter,
 } from '@aws-sdk/client-quicksight';
 import { Context, CloudFormationCustomResourceEvent, CloudFormationCustomResourceUpdateEvent, CloudFormationCustomResourceCreateEvent, CloudFormationCustomResourceDeleteEvent, CdkCustomResourceResponse } from 'aws-lambda';
 import Mustache from 'mustache';
@@ -514,6 +517,23 @@ const createDataSet = async (quickSight: QuickSight, commonParams: ResourceCommo
       };
     }
 
+    let datasetParameters: DatasetParameter[] | undefined = undefined;
+    if(props.dateTimeDatasetParameter !== undefined) {
+      datasetParameters = []
+      for(const param of props.dateTimeDatasetParameter){
+        datasetParameters.push({
+          DateTimeDatasetParameter: {
+            Id: uuidv4(),
+            Name: param.name,
+            ValueType: ParameterValueType.SINGLE_VALUED,
+            TimeGranularity: param.timeGranularity,
+          }
+        })
+      }
+    }
+
+    logger.info(`datasetParameters: ${JSON.stringify(datasetParameters)}`)
+
     logger.info('start to create dataset');
     const datasetParams = {
       AwsAccountId: commonParams.awsAccountId,
@@ -529,7 +549,7 @@ const createDataSet = async (quickSight: QuickSight, commonParams: ResourceCommo
           Actions: dataSetReaderPermissionActions,
         },
       ],
-
+      DatasetParameters: datasetParameters,
       ImportMode: props.importMode,
       PhysicalTableMap: {
         PhyTable1: {
@@ -547,6 +567,7 @@ const createDataSet = async (quickSight: QuickSight, commonParams: ResourceCommo
         DisableUseAsDirectQuerySource: false,
         DisableUseAsImportedSource: false,
       },
+      
     };
     logger.info(`dataset params: ${JSON.stringify(datasetParams)}`);
     const dataset = await quickSight.createDataSet(datasetParams);

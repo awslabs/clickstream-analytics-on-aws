@@ -53,6 +53,7 @@ import {
 
 import { POWERTOOLS_ENVS } from '../common/powertools';
 import { SolutionNodejsFunction } from '../private/function';
+import { TimeGranularity } from '@aws-sdk/client-quicksight';
 
 export function createQuicksightCustomResource(
   scope: Construct,
@@ -242,8 +243,18 @@ export function createQuicksightCustomResource(
       {
         tableName: CLICKSTREAM_DEVICE_VIEW_PLACEHOLDER,
         importMode: 'DIRECT_QUERY',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_DEVICE_VIEW_NAME}`,
+        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_DEVICE_VIEW_NAME} where event_date >= <<$startDate>> and event_date <= <<$endDate>>`,
         columns: clickstream_device_view_columns,
+        dateTimeDatasetParameter:[
+          {
+            name: 'startDate',
+            timeGranularity: TimeGranularity.DAY,
+          },
+          {
+            name: 'endDate',
+            timeGranularity: TimeGranularity.DAY,
+          },
+        ],
         projectedColumns: [
           'device_id',
           'event_date',

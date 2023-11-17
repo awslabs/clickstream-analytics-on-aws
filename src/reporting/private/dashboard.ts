@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { AnalysisSummary, DashboardSummary, DataSetImportMode, InputColumn, QuickSight, ResourceNotFoundException, ResourceStatus, paginateListAnalyses, paginateListDashboards } from '@aws-sdk/client-quicksight';
+import { AnalysisSummary, DashboardSummary, DataSetImportMode, InputColumn, QuickSight, ResourceNotFoundException, ResourceStatus, TimeGranularity, paginateListAnalyses, paginateListDashboards } from '@aws-sdk/client-quicksight';
 import { logger } from '../../common/powertools';
 
 export interface RedShiftProps {
@@ -56,6 +56,11 @@ export interface ColumnGroupsProps {
   geoSpatialColumnGroupColumns: string[];
 };
 
+export interface DateTimeParameter {
+  name: string;
+  timeGranularity: TimeGranularity;
+};
+
 export interface DataSetProps {
   tableName: string;
   columns: InputColumn[];
@@ -64,6 +69,7 @@ export interface DataSetProps {
   projectedColumns?: string[];
   tagColumnOperations?: TagColumnOperationProps[];
   customSql: string;
+  dateTimeDatasetParameter?: DateTimeParameter[];
 };
 
 export interface QuickSightDashboardDefProps {
