@@ -364,12 +364,21 @@ export const getPairEventAndConditions = (
   return pairEventAndConditions;
 };
 
-export const getGroupCondition = (option: IAnalyticsItem | null) => {
-  const groupingCondition: GroupingCondition = {
+export const getGroupCondition = (
+  option: IAnalyticsItem | null,
+  groupApplyToFirst: boolean | null
+) => {
+  let groupingCondition: GroupingCondition = {
     category: defaultStr(option?.category, ConditionCategory.OTHER),
     property: defaultStr(option?.name, ''),
     dataType: defaultStr(option?.valueType, MetadataValueType.STRING),
   };
+  if (groupApplyToFirst !== null) {
+    groupingCondition = {
+      ...groupingCondition,
+      applyTo: groupApplyToFirst ? 'FIRST' : 'ALL',
+    };
+  }
   if (groupingCondition.property === '') {
     return undefined;
   }
