@@ -278,7 +278,7 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
       globalEventCondition: getGlobalEventCondition(filterOptionData),
       timeScopeType: dateRangeParams?.timeScopeType,
       groupColumn: timeGranularity.value,
-      groupCondition: getGroupCondition(groupOption),
+      groupCondition: getGroupCondition(groupOption, groupApplyToFirst),
       ...dateRangeParams,
       ...saveParams,
     };

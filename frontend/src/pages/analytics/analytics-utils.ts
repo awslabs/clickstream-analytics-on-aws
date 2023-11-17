@@ -364,11 +364,16 @@ export const getPairEventAndConditions = (
   return pairEventAndConditions;
 };
 
-export const getGroupCondition = (option: IAnalyticsItem | null) => {
+export const getGroupCondition = (
+  option: IAnalyticsItem | null,
+  groupApplyToFirst: boolean
+) => {
+  console.error('getGroupCondition', option, groupApplyToFirst);
   const groupingCondition: GroupingCondition = {
     category: defaultStr(option?.category, ConditionCategory.OTHER),
     property: defaultStr(option?.name, ''),
     dataType: defaultStr(option?.valueType, MetadataValueType.STRING),
+    applyTo: groupApplyToFirst ? 'FIRST' : 'ALL',
   };
   if (groupingCondition.property === '') {
     return undefined;
