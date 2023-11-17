@@ -10416,6 +10416,7 @@ describe('SQL Builder test', () => {
         from
           table_0
           left outer join table_1 on table_0.user_pseudo_id_0 = table_1.user_pseudo_id_1
+          and table_0._session_id_0 = table_1._session_id_1
           and TO_CHAR(
             TIMESTAMP 'epoch' + cast(table_0.event_timestamp_0 / 1000 as bigint) * INTERVAL '1 second',
             'YYYY-MM-DD'
@@ -10424,6 +10425,7 @@ describe('SQL Builder test', () => {
             'YYYY-MM-DD'
           )
           left outer join table_2 on table_1.user_pseudo_id_1 = table_2.user_pseudo_id_2
+          and table_1._session_id_1 = table_2._session_id_2
           and TO_CHAR(
             TIMESTAMP 'epoch' + cast(table_1.event_timestamp_1 / 1000 as bigint) * INTERVAL '1 second',
             'YYYY-MM-DD'
@@ -10756,6 +10758,7 @@ describe('SQL Builder test', () => {
         from
           table_0
           left outer join table_1 on table_0.user_pseudo_id_0 = table_1.user_pseudo_id_1
+          and table_0.geo_country_0 = table_1.geo_country_1
           and TO_CHAR(
             TIMESTAMP 'epoch' + cast(table_0.event_timestamp_0 / 1000 as bigint) * INTERVAL '1 second',
             'YYYY-MM-DD'
@@ -10764,6 +10767,7 @@ describe('SQL Builder test', () => {
             'YYYY-MM-DD'
           )
           left outer join table_2 on table_1.user_pseudo_id_1 = table_2.user_pseudo_id_2
+          and table_1.geo_country_1 = table_2.geo_country_2
           and TO_CHAR(
             TIMESTAMP 'epoch' + cast(table_1.event_timestamp_1 / 1000 as bigint) * INTERVAL '1 second',
             'YYYY-MM-DD'
@@ -13666,9 +13670,11 @@ describe('SQL Builder test', () => {
         from
           table_0
           left outer join table_1 on table_0.user_pseudo_id_0 = table_1.user_pseudo_id_1
+          and table_0.geo_country_0 = table_1.geo_country_1
           and table_1.event_timestamp_1 - table_0.event_timestamp_0 > 0
           and table_1.event_timestamp_1 - table_0.event_timestamp_0 < 600 * 1000
           left outer join table_2 on table_1.user_pseudo_id_1 = table_2.user_pseudo_id_2
+          andt able_1.geo_country_1 = table_2.geo_country_2
           and table_2.event_timestamp_2 - table_1.event_timestamp_1 > 0
           and table_2.event_timestamp_2 - table_1.event_timestamp_1 < 600 * 1000
       ),
@@ -14245,6 +14251,7 @@ describe('SQL Builder test', () => {
         category: ConditionCategory.EVENT,
         property: 'category',
         dataType: MetadataValueType.STRING,
+        applyTo: 'ALL',
       },
       timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: new Date('2023-11-01'),
@@ -14529,7 +14536,7 @@ describe('SQL Builder test', () => {
 
   });
 
-  test('buildFunnelTableView - has group Condition - apply to fisrt event', () => {
+  test('buildFunnelTableView - has group Condition - apply to first event', () => {
 
     const sql = buildFunnelTableView({
       schemaName: 'shop',
