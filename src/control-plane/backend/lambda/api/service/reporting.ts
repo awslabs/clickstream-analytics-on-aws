@@ -128,6 +128,7 @@ export class ReportingService {
       const result = await this._buildFunnelQuickSightDashboard(viewName, sql, tableVisualViewName,
         sqlTable, query, sheetId);
       if (result.dashboardEmbedUrl === '' && query.action === ExploreRequestAction.PREVIEW) {
+        console.log(result);
         return res.status(500).json(new ApiFail('Failed to create resources, please try again later.'));
       }
       return res.status(201).json(new ApiSuccess(result));

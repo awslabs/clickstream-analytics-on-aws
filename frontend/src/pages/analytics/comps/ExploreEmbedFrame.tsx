@@ -13,9 +13,8 @@
 import { Box, SpaceBetween } from '@cloudscape-design/components';
 import { createEmbeddingContext } from 'amazon-quicksight-embedding-sdk';
 import ExtendIcon from 'components/common/ExtendIcon';
-import i18n from 'i18n';
-import { t } from 'i18next';
 import React, { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface ExploreEmbedFrameProps {
   embedType: 'dashboard' | 'visual' | 'console';
@@ -26,6 +25,7 @@ const ExploreEmbedFrame: React.FC<ExploreEmbedFrameProps> = (
   props: ExploreEmbedFrameProps
 ) => {
   const { embedType, embedUrl } = props;
+  const { t, i18n } = useTranslation();
 
   const embedContainer = async () => {
     if (embedUrl === '') {
@@ -77,7 +77,7 @@ const ExploreEmbedFrame: React.FC<ExploreEmbedFrameProps> = (
   }, [embedUrl]);
 
   return (
-    <div id={'EmbedId'} className="iframe-explore">
+    <div id="EmbedId" className="iframe-explore">
       {embedUrl === '' && (
         <div>
           <Box margin={{ vertical: 'xs' }} textAlign="center" color="inherit">
