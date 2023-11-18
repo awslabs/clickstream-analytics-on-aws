@@ -36,7 +36,8 @@ import {
   DescribeAnalysisCommand,
 } from '@aws-sdk/client-quicksight';
 import { BatchExecuteStatementCommand, DescribeStatementCommand, RedshiftDataClient, StatusString } from '@aws-sdk/client-redshift-data';
-import { AssumeRoleCommand, STSClient } from '@aws-sdk/client-sts';
+import { AssumeRoleCommand, STSClient, STSServiceException } from '@aws-sdk/client-sts';
+import { fromTemporaryCredentials } from '@aws-sdk/credential-providers';
 import { DynamoDBDocumentClient, GetCommand } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
 import request from 'supertest';
@@ -47,6 +48,7 @@ import { app, server } from '../../index';
 import 'aws-sdk-client-mock-jest';
 import { EventAndCondition, PairEventAndCondition, SQLCondition } from '../../service/quicksight/sql-builder';
 
+jest.mock('@aws-sdk/credential-providers');
 const ddbMock = mockClient(DynamoDBDocumentClient);
 const cloudFormationMock = mockClient(CloudFormationClient);
 const quickSightMock = mockClient(QuickSightClient);
@@ -1238,16 +1240,7 @@ describe('reporting test', () => {
 
   });
 
-  it('warmup', async () => {
-    stsClientMock.on(AssumeRoleCommand).resolves({
-      Credentials: {
-        AccessKeyId: '1111',
-        SecretAccessKey: '22222',
-        SessionToken: '33333',
-        Expiration: new Date(),
-      },
-    });
-
+  it('warmup - STSServiceException', async () => {
     redshiftClientMock.on(BatchExecuteStatementCommand).resolves({
     });
     redshiftClientMock.on(DescribeStatementCommand).resolves({
@@ -1258,6 +1251,66 @@ describe('reporting test', () => {
       DashboardSummaryList: [{
         Arn: 'arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa',
       }],
+    });
+
+    const mockFromTemporaryCredentials = fromTemporaryCredentials as jest.MockedFunction<any>;
+    mockFromTemporaryCredentials.mockImplementation(() => {
+      throw new STSServiceException({
+        $fault: 'client',
+        $metadata: {
+          httpStatusCode: 403,
+          requestId: 'f70ba724-8fb9-4ec1-a1ae-244ba7de5afd',
+          extendedRequestId: undefined,
+          cfId: undefined,
+          attempts: 1,
+          totalRetryDelay: 0,
+        },
+        name: 'AccessDenied',
+      });
+    });
+    const res = await request(app)
+      .post('/api/reporting/warmup')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
+      .send({
+        projectId: 'project01_wvzh',
+        appId: 'app1',
+        dashboardCreateParameters: {
+          region: 'us-east-1',
+          redshift: {
+            dataApiRole: 'arn:aws:iam::11111111:role/test_api_role',
+            newServerless: {
+              workgroupName: 'clickstream-project01-wvzh',
+            },
+          },
+        },
+      });
+
+    expect(mockFromTemporaryCredentials.mock.calls.length).toEqual(1);
+    expect(mockFromTemporaryCredentials.mock.calls[0][0]).toEqual({ params: { RoleArn: 'arn:aws:iam::11111111:role/test_api_role' } });
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(400);
+    expect(res.body.message).toEqual('Warmup redshift serverless with request parameter error.');
+
+  });
+
+  it('warmup', async () => {
+    redshiftClientMock.on(BatchExecuteStatementCommand).resolves({
+    });
+    redshiftClientMock.on(DescribeStatementCommand).resolves({
+      Status: StatusString.FINISHED,
+    });
+
+    quickSightMock.on(ListDashboardsCommand).resolves({
+      DashboardSummaryList: [{
+        Arn: 'arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa',
+      }],
+    });
+
+    const mockFromTemporaryCredentials = fromTemporaryCredentials as jest.MockedFunction<any>;
+    mockFromTemporaryCredentials.mockReturnValue({
+      accessKeyId: '1111',
+      secretAccessKey: '22222',
+      sessionToken: '33333',
     });
 
     const res = await request(app)
@@ -1277,6 +1330,8 @@ describe('reporting test', () => {
         },
       });
 
+    expect(mockFromTemporaryCredentials.mock.calls.length).toEqual(1);
+    expect(mockFromTemporaryCredentials.mock.calls[0][0]).toEqual({ params: { RoleArn: 'arn:aws:iam::11111111:role/test_api_role' } });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(201);
     expect(res.body.success).toEqual(true);

@@ -14,7 +14,8 @@
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import { AnalysisDefinition, ConflictException, DashboardVersionDefinition, DataSetIdentifierDeclaration, InputColumn, QuickSight, ResourceStatus, ThrottlingException } from '@aws-sdk/client-quicksight';
-import { BatchExecuteStatementCommand, DescribeStatementCommand, StatusString } from '@aws-sdk/client-redshift-data';
+import { BatchExecuteStatementCommand, DescribeStatementCommand, StatusString, ValidationException } from '@aws-sdk/client-redshift-data';
+import { STSServiceException } from '@aws-sdk/client-sts';
 import { v4 as uuidv4 } from 'uuid';
 import { DataSetProps, analysisAdminPermissionActions, dashboardAdminPermissionActions } from './quicksight/dashboard-ln';
 import {
@@ -899,7 +900,11 @@ export class ReportingService {
       logger.info('end of warm up reporting service');
       return res.status(201).json(new ApiSuccess('OK'));
     } catch (error) {
-      next(`Warmup redshift serverless with error: ${error}`);
+      logger.warn(`Warmup redshift serverless with error: ${error}`);
+      if ( error instanceof ValidationException || error instanceof STSServiceException) {
+        return res.status(400).json(new ApiFail('Warmup redshift serverless with request parameter error.'));
+      }
+      next(error);
     }
   };
 
