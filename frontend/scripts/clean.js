@@ -19,7 +19,6 @@ const regex =
   /"@click-stream\/shared-lib@file:\.\.\/packages\/shared-lib":\n\s+version "0\.0\.0"\n/gm;
 
 // 测试是否找到匹配的文本
-console.info('yarnLock:', yarnLock);
 const isMatchFound = regex.test(yarnLock);
 console.log(`Match found: ${isMatchFound}`);
 
