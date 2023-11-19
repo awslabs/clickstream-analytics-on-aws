@@ -97,6 +97,21 @@ function getServerlessRedshiftRPU(region: string): RPURange {
   return { min: 0, max: 0 } as RPURange;
 }
 
+function deserializeContext(contextStr: string | undefined) {
+  let context;
+  try {
+    if (contextStr) {
+      context = JSON.parse(contextStr);
+    }
+  } catch (err) {
+    logger.warn('Invalid context', {
+      contextStr,
+      err,
+    });
+  }
+  return context;
+}
+
 function getEmailFromRequestContext(requestContext: string | undefined) {
   let email = '';
   try {
@@ -899,4 +914,5 @@ export {
   getCurMonthStr,
   getVersionFromTags,
   getAppRegistryApplicationArn,
+  deserializeContext,
 };

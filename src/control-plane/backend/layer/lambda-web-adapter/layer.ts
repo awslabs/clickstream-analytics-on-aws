@@ -23,7 +23,7 @@ export interface LambdaAdapterLayerProps {
 
 export class LambdaAdapterLayer extends LayerVersion {
   constructor(scope: Construct, id: string, props?: LambdaAdapterLayerProps) {
-    const defaultVersion = props?.arch ?? '0.7.0';
+    const defaultVersion = props?.arch ?? '0.7.1';
     const defaultPlatform = props?.platform ?? 'linux/amd64';
     const defaultArch = props?.arch ?? 'x86_64';
 

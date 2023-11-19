@@ -16,6 +16,7 @@ import { accessLog } from './middle-ware/access-log';
 import { authOIDC } from './middle-ware/auth-oidc';
 import { authRole } from './middle-ware/auth-role';
 import { errorHandler } from './middle-ware/error-handler';
+import { injectContext } from './middle-ware/inject-context';
 import { responseTime } from './middle-ware/response-time';
 import { router_app } from './router/application';
 import { router_env } from './router/environment';
@@ -31,6 +32,8 @@ app.disable('x-powered-by');
 const port = process.env.PORT || 8080;
 
 app.use(express.json({ limit: '384kb' }));
+
+app.use(injectContext);
 
 app.use(accessLog);
 
