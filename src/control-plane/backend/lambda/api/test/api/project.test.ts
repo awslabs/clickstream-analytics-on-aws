@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { CreateAnalysisCommand, CreateDashboardCommand, CreateDataSetCommand, DeleteDashboardCommand, GenerateEmbedUrlForRegisteredUserCommand, ListUsersCommand, QuickSightClient, ResourceNotFoundException } from '@aws-sdk/client-quicksight';
+import { CreateAnalysisCommand, CreateDashboardCommand, CreateDataSetCommand, DeleteAnalysisCommand, DeleteDashboardCommand, GenerateEmbedUrlForRegisteredUserCommand, ListUsersCommand, QuickSightClient, ResourceNotFoundException } from '@aws-sdk/client-quicksight';
 import { SFNClient, StartExecutionCommand } from '@aws-sdk/client-sfn';
 import {
   DeleteCommand,
@@ -720,11 +720,14 @@ describe('Project test', () => {
     ddbMock.on(DeleteCommand).resolves({});
 
     quickSightClientMock.on(DeleteDashboardCommand).resolves({});
+    quickSightClientMock.on(DeleteAnalysisCommand).resolves({});
 
     const res = await request(app)
       .delete(`/api/project/${MOCK_PROJECT_ID}/${MOCK_APP_ID}/dashboard/test-dashboard-8888`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteDashboardCommand, 1);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteAnalysisCommand, 1);
   });
 
   it('Delete dashboard - dashboard not exist', async () => {
