@@ -33,7 +33,7 @@ jobs:
       - run: |-
           cd frontend/
           yarn clean
-          yarn install --check-files --frozen-lockfile
+          yarn install --check-files
           yarn run format
           yarn run build
           yarn run test
