@@ -398,7 +398,6 @@ export class ClickStreamApiConstruct extends Construct {
         ISSUER: props.authProps?.issuer ?? '',
         AUTHORIZER_TABLE_NAME: props.authProps?.authorizerTable.tableName ?? '',
         STS_UPLOAD_ROLE_ARN: uploadRole.roleArn,
-        API_ROLE_NAME: clickStreamApiFunctionRole.roleName,
         QUICKSIGHT_EMBED_ROLE_ARN: this.getQuickSightEmbedRoleArn(props.targetToCNRegions),
         HEALTH_CHECK_PATH: props.healthCheckPath,
         QUICKSIGHT_CONTROL_PLANE_REGION: props.targetToCNRegions ? 'cn-north-1' : 'us-east-1',
@@ -503,7 +502,7 @@ export class ClickStreamApiConstruct extends Construct {
             new iam.PolicyStatement({
               effect: iam.Effect.ALLOW,
               resources: [
-                `arn:${Aws.PARTITION}:quicksight:*:${Aws.ACCOUNT_ID}:dashboard/Clickstream*`,
+                `arn:${Aws.PARTITION}:quicksight:*:${Aws.ACCOUNT_ID}:dashboard/clickstream*`,
                 `arn:${Aws.PARTITION}:quicksight:*:${Aws.ACCOUNT_ID}:user/*`,
               ],
               actions: [

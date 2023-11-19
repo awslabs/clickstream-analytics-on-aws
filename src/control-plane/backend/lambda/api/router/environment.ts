@@ -131,22 +131,6 @@ router_env.get(
   });
 
 router_env.get(
-  '/quicksight/users',
-  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-    return environmentServ.listQuickSightUsers(req, res, next);
-  });
-
-router_env.post(
-  '/quicksight/user',
-  validate([
-    body('email').isEmail(),
-    header('X-Click-Stream-Request-Id').custom(isRequestIdExisted),
-  ]),
-  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-    return environmentServ.registerQuickSightUser(req, res, next);
-  });
-
-router_env.get(
   '/quicksight/ping',
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return environmentServ.quickSightIsSubscribed(req, res, next);
