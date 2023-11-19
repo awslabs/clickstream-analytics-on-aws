@@ -88,6 +88,7 @@
     "workbox-webpack-plugin": "^6.4.1"
   },
   "scripts": {
+    "preinstall": "node scripts/clean.js",
     "start": "node scripts/start.js",
     "build": "node scripts/build.js",
     "crabuild": "node scripts/build.js",
