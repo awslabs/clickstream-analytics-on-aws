@@ -32,7 +32,8 @@ jobs:
           node-version: "16"
       - run: |-
           cd frontend/
-          yarn install
+          yarn clean
+          yarn install --check-files --frozen-lockfile
           yarn run format
           yarn run build
           yarn run test
