@@ -231,6 +231,11 @@
       "type": "runtime"
     },
     {
+      "name": "@click-stream/shared-lib",
+      "version": "file:../../../../../packages/shared-lib",
+      "type": "runtime"
+    },
+    {
       "name": "@smithy/node-http-handler",
       "version": "^2.0.7",
       "type": "runtime"

@@ -238,9 +238,20 @@ project.eslint?.addRules({
 });
 project.addFields({ version });
 
+// Shared Project
+new typescript.TypeScriptProject({
+  parent: project,
+  name: '@click-stream/shared-lib',
+  outdir: './packages/shared-lib',
+  defaultReleaseBranch: defaultBranch,
+  sampleCode: false,
+  packageManager: project.package.packageManager,
+});
+
 const apiProject = new typescript.TypeScriptProject({
   deps: [
     ...depsForApiProject,
+    '@click-stream/shared-lib@file:../../../../../packages/shared-lib',
   ],
   devDeps: [
     ...devDepsForApiProject,

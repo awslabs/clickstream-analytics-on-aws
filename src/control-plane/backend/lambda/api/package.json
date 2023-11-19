@@ -67,6 +67,7 @@
     "@aws-sdk/lib-dynamodb": "^3.405.0",
     "@aws-sdk/types": "^3.398.0",
     "@aws-sdk/util-dynamodb": "^3.398.0",
+    "@click-stream/shared-lib": "file:../../../../../packages/shared-lib",
     "@smithy/node-http-handler": "^2.0.7",
     "@smithy/util-stream-node": "^2.0.7",
     "@types/aws-lambda": "^8.10.110",
