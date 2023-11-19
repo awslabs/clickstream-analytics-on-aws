@@ -18,6 +18,7 @@ jobs:
           node-version: "16"
       - run: |-
           cd packages/shared-lib/
+          yarn install --check-files --frozen-lockfile
           yarn run build
   build:
     needs: sharedLibBuild
