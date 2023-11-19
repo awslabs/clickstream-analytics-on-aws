@@ -301,7 +301,6 @@ export class ClickStreamApiConstruct extends Construct {
             `arn:${Aws.PARTITION}:quicksight:*:${Aws.ACCOUNT_ID}:dataset/${QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX}*`,
           ],
           actions: [
-            'quicksight:DescribeAccountSubscription',
             'quicksight:UpdateDashboardPermissions',
             'quicksight:CreateDataSet',
             'quicksight:DeleteDataSet',
@@ -332,6 +331,15 @@ export class ClickStreamApiConstruct extends Construct {
             'quicksight:ListDataSets',
             'quicksight:ListDashboards',
             'quicksight:ListAnalyses',
+          ],
+        }),
+        new iam.PolicyStatement({
+          effect: iam.Effect.ALLOW,
+          resources: [
+            `arn:${Aws.PARTITION}:quicksight:*:${Aws.ACCOUNT_ID}:*`,
+          ],
+          actions: [
+            'quicksight:DescribeAccountSubscription',
           ],
         }),
         new iam.PolicyStatement({

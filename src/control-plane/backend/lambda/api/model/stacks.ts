@@ -114,6 +114,12 @@ export class CIngestionServerStack extends JSONObject {
       'KinesisMaxBatchingWindowSeconds',
       'KinesisDataS3Bucket',
       'KinesisDataS3Prefix',
+      'DomainName',
+      'ACMCertificateArn',
+      'EnableGlobalAccelerator',
+      'EnableAuthentication',
+      'AuthenticationSecretArn',
+      'EnableApplicationLoadBalancerAccessLog',
     ];
     return allowedList;
   }
@@ -1073,6 +1079,8 @@ export class CReportingStack extends JSONObject {
       'RedShiftDBSchemaParam',
       'QuickSightVpcConnectionSubnetParam',
       'RedshiftParameterKeyParam',
+      'QuickSightPrincipalParam',
+      'QuickSightOwnerPrincipalParam',
     ];
     return allowedList;
   }

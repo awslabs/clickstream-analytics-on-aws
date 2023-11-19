@@ -752,7 +752,6 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
           },
           {
             Action: [
-              'quicksight:DescribeAccountSubscription',
               'quicksight:UpdateDashboardPermissions',
               'quicksight:CreateDataSet',
               'quicksight:DeleteDataSet',
@@ -959,6 +958,26 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
                 ],
               },
             ],
+          },
+          {
+            Action: 'quicksight:DescribeAccountSubscription',
+            Effect: 'Allow',
+            Resource: {
+              'Fn::Join': [
+                '',
+                [
+                  'arn:',
+                  {
+                    Ref: 'AWS::Partition',
+                  },
+                  ':quicksight:*:',
+                  {
+                    Ref: 'AWS::AccountId',
+                  },
+                  ':*',
+                ],
+              ],
+            },
           },
           {
             Action: 'sts:AssumeRole',

@@ -228,7 +228,7 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
       globalEventCondition: getGlobalEventCondition(filterOptionData),
       timeScopeType: dateRangeParams?.timeScopeType,
       groupColumn: timeGranularity.value,
-      groupCondition: getGroupCondition(groupOption),
+      groupCondition: getGroupCondition(groupOption, null),
       ...dateRangeParams,
       ...saveParams,
     };
