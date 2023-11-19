@@ -3,7 +3,22 @@ on:
   pull_request: {}
   workflow_dispatch: {}
 jobs:
+  sharedLibBuild:
+    name: build shared library
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      checks: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "16"
+      - run: |-
+          cd packages/shared-lib/
+          yarn run build
   buildFrontend:
+    needs: sharedLibBuild
     name: build frontend
     runs-on: ubuntu-latest
     permissions:
