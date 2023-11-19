@@ -133,7 +133,7 @@ export const validateSinkBatch = (sinkType: PipelineSinkType, sinkBatch: Ingesti
 export const validateIngestionServerNum = (serverSize: IngestionServerSizeProps) => {
   if (serverSize.serverMin === 1 && serverSize.serverMax === 1) {
     throw new ClickStreamBadRequestError(
-      'Validation error: this pipeline not allow to upgrade with the server size minimum and maximum are 1.',
+      'Validation error: this pipeline not allow to update with the server size minimum and maximum are 1.',
     );
   }
   return true;

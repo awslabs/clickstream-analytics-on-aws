@@ -3397,7 +3397,7 @@ describe('Pipeline test', () => {
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.body).toEqual({
       success: false,
-      message: 'Validation error: this pipeline not allow to upgrade with the server size minimum and maximum are 1.',
+      message: 'Validation error: this pipeline not allow to update with the server size minimum and maximum are 1.',
     });
   });
   it('Upgrade pipeline with error status', async () => {

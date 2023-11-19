@@ -280,7 +280,7 @@ describe('App test', () => {
                 N: '50',
               },
               serverMax: {
-                N: '1',
+                N: '2',
               },
               serverMin: {
                 N: '1',
@@ -539,7 +539,7 @@ describe('App test', () => {
                 N: '50',
               },
               serverMax: {
-                N: '1',
+                N: '2',
               },
               serverMin: {
                 N: '1',

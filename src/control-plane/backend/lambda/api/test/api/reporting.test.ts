@@ -256,7 +256,7 @@ describe('reporting test', () => {
     }).resolves({
       Dashboard: {
         Version: {
-          Status: ResourceStatus.CREATION_FAILED,
+          Status: ResourceStatus.CREATION_SUCCESSFUL,
         },
       },
     });
@@ -319,7 +319,106 @@ describe('reporting test', () => {
     expect(res.body.data.dashboardId).toBeDefined();
     expect(res.body.data.visualIds).toBeDefined();
     expect(res.body.data.visualIds.length).toEqual(2);
-    expect(res.body.data.dashboardEmbedUrl).toEqual('');
+    expect(res.body.data.dashboardEmbedUrl).toEqual('https://quicksight.aws.amazon.com/embed/4ui7xyvq73/studies/4a05631e-cbe6-477c-915d-1704aec9f101?isauthcode=true&identityprovider=quicksight&code=4a05631e-cbe6-477c-915d-1704aec9f101');
+    expect(quickSightMock).toHaveReceivedCommandTimes(DescribeDashboardCommand, 2);
+    expect(quickSightMock).toHaveReceivedCommandTimes(GenerateEmbedUrlForRegisteredUserCommand, 1);
+  });
+
+  it('funnel visual - preview - resources create failed', async () => {
+    tokenMock(ddbMock, false);
+    stsClientMock.on(AssumeRoleCommand).resolves({
+      Credentials: {
+        AccessKeyId: '1111',
+        SecretAccessKey: '22222',
+        SessionToken: '33333',
+        Expiration: new Date(),
+      },
+    });
+
+    redshiftClientMock.on(BatchExecuteStatementCommand).resolves({
+    });
+    redshiftClientMock.on(DescribeStatementCommand).resolves({
+      Status: StatusString.FINISHED,
+    });
+
+    redshiftClientMock.on(DescribeStatementCommand).resolves({
+      Status: StatusString.FINISHED,
+    });
+
+    quickSightMock.on(CreateAnalysisCommand).resolves({
+      Arn: 'arn:aws:quicksight:us-east-1:11111111:analysis/analysisaaaaaaaa',
+    });
+    quickSightMock.on(CreateDashboardCommand).resolves({
+      Arn: 'arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa',
+      VersionArn: 'arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa/1',
+    });
+    quickSightMock.on(GenerateEmbedUrlForRegisteredUserCommand).resolves({
+      EmbedUrl: 'https://quicksight.aws.amazon.com/embed/4ui7xyvq73/studies/4a05631e-cbe6-477c-915d-1704aec9f101?isauthcode=true&identityprovider=quicksight&code=4a05631e-cbe6-477c-915d-1704aec9f101',
+    });
+    quickSightMock.on(DescribeDashboardCommand).resolvesOnce({
+      Dashboard: {
+        Version: {
+          Status: ResourceStatus.CREATION_IN_PROGRESS,
+        },
+      },
+    }).resolves({
+      Dashboard: {
+        Version: {
+          Status: ResourceStatus.CREATION_FAILED,
+        },
+      },
+    });
+
+    const res = await request(app)
+      .post('/api/reporting/funnel')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
+      .send({
+        action: 'PREVIEW',
+        locale: ExploreLocales.ZH_CN,
+        chartType: QuickSightChartType.FUNNEL,
+        viewName: 'testview0002',
+        projectId: 'project01_wvzh',
+        pipelineId: 'pipeline-1111111',
+        appId: 'app1',
+        sheetName: 'sheet99',
+        computeMethod: 'USER_CNT',
+        specifyJoinColumn: true,
+        joinColumn: 'user_pseudo_id',
+        conversionIntervalType: 'CUSTOMIZE',
+        conversionIntervalInSeconds: 7200,
+        eventAndConditions: [{
+          eventName: 'add_button_click',
+        },
+        {
+          eventName: 'note_share',
+        },
+        {
+          eventName: 'note_export',
+        }],
+        timeScopeType: 'RELATIVE',
+        lastN: 4,
+        timeUnit: 'WK',
+        groupColumn: 'week',
+        dashboardCreateParameters: {
+          region: 'us-east-1',
+          allowDomain: 'https://example.com',
+          quickSight: {
+            principal: 'arn:aws:quicksight:us-east-1:11111:user/default/testuser',
+            dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
+            redshiftUser: 'test_redshift_user',
+          },
+          redshift: {
+            dataApiRole: 'arn:aws:iam::11111111:role/test_api_role',
+            newServerless: {
+              workgroupName: 'clickstream-project01-wvzh',
+            },
+          },
+        },
+      });
+
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(500);
+    expect(res.body.success).toEqual(false);
     expect(quickSightMock).toHaveReceivedCommandTimes(DescribeDashboardCommand, 2);
     expect(quickSightMock).toHaveReceivedCommandTimes(GenerateEmbedUrlForRegisteredUserCommand, 0);
   });
@@ -1181,8 +1280,7 @@ describe('reporting test', () => {
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(201);
     expect(res.body.success).toEqual(true);
-    expect(res.body.data.length).toEqual(1);
-    expect(res.body.data[0].Arn).toEqual('arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa');
+    expect(res.body.data).toEqual('OK');
 
   });
 
