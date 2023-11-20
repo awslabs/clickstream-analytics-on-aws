@@ -21,7 +21,7 @@
     "user_id" : null,
     "event_name" : "select_item",
     "ip" : "72.255.244.237",
-    "clientId" : "oEzstqb1SUkULygCXFzTFuOZPnG9GItyNJIo8t9tCi0=.1695261066",
+    "client_id" : "oEzstqb1SUkULygCXFzTFuOZPnG9GItyNJIo8t9tCi0=.1695261066",
     "ua" : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36",
     "language" : "zh-tw",
     "screenWidth" : 1920,

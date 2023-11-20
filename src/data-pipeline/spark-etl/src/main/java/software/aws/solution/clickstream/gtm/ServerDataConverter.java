@@ -29,8 +29,10 @@ import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
 import software.aws.solution.clickstream.ContextUtil;
 import software.aws.solution.clickstream.KvConverter;
+import software.aws.solution.clickstream.exception.ExecuteTransformerException;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -41,6 +43,8 @@ import static org.apache.spark.sql.functions.explode;
 import static org.apache.spark.sql.functions.udf;
 import static software.aws.solution.clickstream.ContextUtil.DEBUG_LOCAL_PROP;
 import static software.aws.solution.clickstream.DatasetUtil.CLIENT_ID;
+import static software.aws.solution.clickstream.DatasetUtil.GA_SESSION_ID;
+import static software.aws.solution.clickstream.DatasetUtil.GA_SESSION_NUMBER;
 import static software.aws.solution.clickstream.DatasetUtil.GTM_CLIENT_PLATFORM;
 import static software.aws.solution.clickstream.DatasetUtil.GTM_CLIENT_PLATFORM_VERSION;
 import static software.aws.solution.clickstream.DatasetUtil.DATA;
@@ -80,11 +84,13 @@ import static software.aws.solution.clickstream.DatasetUtil.USER;
 import static software.aws.solution.clickstream.DatasetUtil.USER_ID;
 import static software.aws.solution.clickstream.DatasetUtil.USER_PROPERTIES;
 import static software.aws.solution.clickstream.DatasetUtil.VALUE;
+import static software.aws.solution.clickstream.DatasetUtil.X_GA_JS_CLIENT_ID;
 import static software.aws.solution.clickstream.ETLRunner.DEBUG_LOCAL_PATH;
 import static software.aws.solution.clickstream.KvConverter.getValueTypeResult;
 
 @Slf4j
 public class ServerDataConverter {
+
 
     private static UDF1<String, Row[]> convertGTMServerData() {
         return (String value) -> {
@@ -122,11 +128,30 @@ public class ServerDataConverter {
 
         RowResult result = parseJsonNode(jsonNode);
 
+        String clientId = result.eventInfo.clientId;
+        if (result.attrMap.containsKey(X_GA_JS_CLIENT_ID)) {
+            clientId = result.attrMap.get(X_GA_JS_CLIENT_ID).asText();
+        }
+        if (clientId == null) {
+            throw new ExecuteTransformerException("client_id is empty");
+        }
+
+        String sessionId;
+        if (result.attrMap.containsKey(GA_SESSION_ID)) {
+            sessionId = result.attrMap.get(GA_SESSION_ID).asText();
+        } else {
+            sessionId = String.valueOf(new Date().getTime());
+        }
+        String sessionNum = "";
+        if (result.attrMap.containsKey(GA_SESSION_NUMBER)) {
+            sessionNum =  result.attrMap.get(GA_SESSION_NUMBER).asText();
+        }
+
         String eventId = String.format("%s-%s-%s-%s",
                 index,
-                result.attrMap.get("ga_session_id").asText(),
-                result.attrMap.get("ga_session_number").asText(),
-                result.attrMap.get("x-ga-js_client_id").asText()
+                sessionId,
+                sessionNum,
+                clientId
                 );
 
         eventId = checkStringValue(eventId, MAX_STRING_VALUE_LEN - 32);
@@ -215,7 +240,7 @@ public class ServerDataConverter {
                     break;
                 }
 
-                case "client_id": {
+                case CLIENT_ID: {
                     clientId = checkStringValue(attrValue.asText());
                     break;
                 }
