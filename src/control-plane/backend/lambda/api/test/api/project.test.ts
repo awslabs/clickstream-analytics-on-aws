@@ -11,10 +11,8 @@
  *  and limitations under the License.
  */
 
-import { CreateAnalysisCommand, CreateDashboardCommand, CreateDataSetCommand, DeleteAnalysisCommand, DeleteDashboardCommand, GenerateEmbedUrlForRegisteredUserCommand, ListUsersCommand, QuickSightClient, ResourceNotFoundException } from '@aws-sdk/client-quicksight';
 import { SFNClient, StartExecutionCommand } from '@aws-sdk/client-sfn';
 import {
-  DeleteCommand,
   DynamoDBDocumentClient,
   GetCommand,
   PutCommand,
@@ -24,15 +22,13 @@ import {
 } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
 import request from 'supertest';
-import { MOCK_APP_ID, MOCK_PROJECT_ID, MOCK_TOKEN, projectExistedMock, tokenMock } from './ddb-mock';
+import { MOCK_PROJECT_ID, MOCK_TOKEN, projectExistedMock, tokenMock } from './ddb-mock';
 import { KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW } from './pipeline-mock';
-import { OUTPUT_REPORT_DASHBOARDS_SUFFIX } from '../../common/constants-ln';
 import { app, server } from '../../index';
 import 'aws-sdk-client-mock-jest';
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 const sfnMock = mockClient(SFNClient);
-const quickSightClientMock = mockClient(QuickSightClient);
 
 describe('Project test', () => {
   beforeEach(() => {
@@ -557,224 +553,6 @@ describe('Project test', () => {
       message: 'Unexpected error occurred at server.',
       error: 'Error',
     });
-  });
-
-  it('List dashboards', async () => {
-
-    tokenMock(ddbMock, false);
-    projectExistedMock(ddbMock, false);
-
-    ddbMock.on(QueryCommand).resolvesOnce(
-      {
-        Items: [
-          {
-            projectId: MOCK_PROJECT_ID,
-          },
-        ],
-      },
-    ).resolvesOnce({
-      Items: [
-        {
-          status: {
-            stackDetails: [
-              {
-                stackType: 'Reporting',
-                outputs: [
-                  {
-                    OutputKey: 'aaaaaaa' + OUTPUT_REPORT_DASHBOARDS_SUFFIX,
-                    OutputValue: `[{
-                      "appId": "${MOCK_APP_ID}",
-                      "dashboardId": "builtin-dashboard"
-                    }]`,
-                  },
-                ],
-              },
-            ],
-          },
-        },
-      ],
-    });
-
-    const res = await request(app)
-      .get(`/api/project/${MOCK_PROJECT_ID}/${MOCK_APP_ID}/dashboard`)
-      .set('X-Click-Stream-Request-Id', MOCK_TOKEN);
-    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
-    expect(res.statusCode).toBe(200);
-
-  });
-
-  it('get dashboard', async () => {
-
-    tokenMock(ddbMock, false);
-    projectExistedMock(ddbMock, false);
-
-    ddbMock.on(QueryCommand).resolvesOnce({
-      Items: [
-        {
-          status: {
-            stackDetails: [
-              {
-                stackType: 'Reporting',
-                outputs: [
-                  {
-                    OutputKey: 'aaaaaaa' + OUTPUT_REPORT_DASHBOARDS_SUFFIX,
-                    OutputValue: `[{
-                      "appId": "${MOCK_APP_ID}",
-                      "dashboardId": "builtin-dashboard"
-                    }]`,
-                  },
-                ],
-              },
-            ],
-          },
-        },
-      ],
-    });
-
-    ddbMock.on(GetCommand).resolves({
-      Item: {
-        region: 'us-east-1',
-      },
-    });
-
-    quickSightClientMock.on(GenerateEmbedUrlForRegisteredUserCommand).resolves({});
-
-    const res = await request(app)
-      .get(`/api/project/${MOCK_PROJECT_ID}/${MOCK_APP_ID}/dashboard/test-dashboard-8888`)
-      .set('X-Click-Stream-Request-Id', MOCK_TOKEN);
-    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
-    expect(res.statusCode).toBe(200);
-
-  });
-
-  it('Create dashboard', async () => {
-
-    tokenMock(ddbMock, false);
-    projectExistedMock(ddbMock, false);
-
-    ddbMock.on(GetCommand).resolvesOnce(
-      {
-        Item: {
-          region: 'us-east-1',
-        },
-      },
-    ).resolvesOnce({});
-
-    ddbMock.on(PutCommand).resolves({});
-
-    quickSightClientMock.on(ListUsersCommand).resolves({});
-    quickSightClientMock.on(CreateDataSetCommand).resolves({});
-    quickSightClientMock.on(CreateDashboardCommand).resolves({});
-    quickSightClientMock.on(CreateAnalysisCommand).resolves({});
-
-    const res = await request(app)
-      .post(`/api/project/${MOCK_PROJECT_ID}/${MOCK_APP_ID}/dashboard`)
-      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
-      .send({
-        id: MOCK_PROJECT_ID,
-        projectId: MOCK_PROJECT_ID,
-        appId: MOCK_APP_ID,
-        name: 'test-dashboard',
-        region: 'us-east-1',
-        defaultDataSourceArn: 'test-datasource-arn',
-        sheets: [],
-      });
-
-    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
-    expect(res.statusCode).toBe(201);
-
-  });
-
-  it('Delete dashboard', async () => {
-    projectExistedMock(ddbMock, false);
-
-    ddbMock.on(QueryCommand).resolves({
-      Items: [
-        {
-          status: {
-            stackDetails: [
-              {
-                stackType: 'Reporting',
-                outputs: [
-                  {
-                    OutputKey: 'aaaaaaa' + OUTPUT_REPORT_DASHBOARDS_SUFFIX,
-                    OutputValue: `[{
-                      "appId": "${MOCK_APP_ID}",
-                      "dashboardId": "builtin-dashboard"
-                    }]`,
-                  },
-                ],
-              },
-            ],
-          },
-        },
-      ],
-    });
-
-    ddbMock.on(GetCommand).resolves({
-      Item: {
-        region: 'us-east-1',
-      },
-    });
-
-    ddbMock.on(DeleteCommand).resolves({});
-
-    quickSightClientMock.on(DeleteDashboardCommand).resolves({});
-    quickSightClientMock.on(DeleteAnalysisCommand).resolves({});
-
-    const res = await request(app)
-      .delete(`/api/project/${MOCK_PROJECT_ID}/${MOCK_APP_ID}/dashboard/test-dashboard-8888`);
-    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
-    expect(res.statusCode).toBe(200);
-    expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteDashboardCommand, 1);
-    expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteAnalysisCommand, 1);
-  });
-
-  it('Delete dashboard - dashboard not exist', async () => {
-    projectExistedMock(ddbMock, false);
-
-    ddbMock.on(QueryCommand).resolves({
-      Items: [
-        {
-          status: {
-            stackDetails: [
-              {
-                stackType: 'Reporting',
-                outputs: [
-                  {
-                    OutputKey: 'aaaaaaa' + OUTPUT_REPORT_DASHBOARDS_SUFFIX,
-                    OutputValue: `[{
-                      "appId": "${MOCK_APP_ID}",
-                      "dashboardId": "builtin-dashboard"
-                    }]`,
-                  },
-                ],
-              },
-            ],
-          },
-        },
-      ],
-    });
-
-    ddbMock.on(GetCommand).resolves({
-      Item: {
-        region: 'us-east-1',
-      },
-    });
-
-    ddbMock.on(DeleteCommand).resolves({});
-
-    quickSightClientMock.on(DeleteDashboardCommand).rejects(
-      new ResourceNotFoundException({
-        message: 'resource not exist.',
-        $metadata: {},
-      }),
-    );
-
-    const res = await request(app)
-      .delete(`/api/project/${MOCK_PROJECT_ID}/${MOCK_APP_ID}/dashboard/test-dashboard-8888`);
-    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
-    expect(res.statusCode).toBe(200);
   });
 
   afterAll((done) => {

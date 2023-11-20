@@ -385,7 +385,7 @@ export const CLICKSTREAM_LIFECYCLE_WEEKLY_VIEW_NAME = 'clickstream_lifecycle_wee
 export const CLICKSTREAM_USER_ATTR_VIEW_NAME = 'clickstream_user_attr_view_v1';
 
 export const QUICKSIGHT_RESOURCE_NAME_PREFIX = 'clickstream';
-export const QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX = '_tmp';
+export const QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX = '_tmp_';
 export const QUICKSIGHT_DASHBOARD_INFIX= '-dashboard-';
 export const QUICKSIGHT_ANALYSIS_INFIX= '-analysis-';
 export const QUICKSIGHT_DATASET_INFIX= '-dataset-';

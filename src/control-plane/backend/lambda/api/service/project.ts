@@ -21,7 +21,7 @@ import { getReportingDashboardsUrl, isEmpty, paginateData } from '../common/util
 import { IApplication } from '../model/application';
 import { CPipeline, IPipeline } from '../model/pipeline';
 import { IDashboard, IProject } from '../model/project';
-import { createPublishDashboard, generateEmbedUrlForRegisteredUser } from '../store/aws/quicksight';
+import { createPublishDashboard, deleteDatasetOfPublishDashboard, generateEmbedUrlForRegisteredUser } from '../store/aws/quicksight';
 import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
 
@@ -142,6 +142,7 @@ export class ProjectServ {
         ...aws_sdk_client_common_config,
       });
       try {
+        await deleteDatasetOfPublishDashboard(dashboard.region, dashboardId);
         await quickSightClient.deleteDashboard({
           AwsAccountId: process.env.AWS_ACCOUNT_ID,
           DashboardId: dashboardId,
