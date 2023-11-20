@@ -117,7 +117,10 @@ public final class DatasetUtil {
     public static final String PLATFORM_VERSION = "platform_version";
     public static final String ITEM_ID = "item_id";
     public static final String PRICE = "price";
-    public static final String CLIENT_ID = "clientId";
+    public static final String CLIENT_ID = "client_id";
+    public static final String GA_SESSION_ID = "ga_session_id";
+    public static final String GA_SESSION_NUMBER = "ga_session_number";
+    public static final String X_GA_JS_CLIENT_ID = "x-ga-js_client_id";
     public static final String GTM_SCREEN_WIDTH = "screenWidth";
     public static final String GTM_SCREEN_HEIGHT = "screenHeight";
     public static final String GTM_CLIENT_PLATFORM_VERSION = "clientPlatformVersion";

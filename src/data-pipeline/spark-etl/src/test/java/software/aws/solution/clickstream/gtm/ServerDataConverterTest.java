@@ -86,4 +86,19 @@ public class ServerDataConverterTest extends BaseSparkTest {
         Assertions.assertEquals(expectedJson, outDataset.first().prettyJson());
     }
 
+    @Test
+    void test_convert_no_js_client_id() throws IOException {
+        // DOWNLOAD_FILE=0 ./gradlew clean test --info --tests software.aws.solution.clickstream.gtm.ServerDataConverterTest.test_convert_no_js_client_id
+        System.setProperty(APP_IDS_PROP, "testApp");
+        System.setProperty(PROJECT_ID_PROP, "gtm_server_demo_https");
+        System.setProperty(DEBUG_LOCAL_PROP, "false");
+
+        Dataset<Row> dataset =
+                spark.read().json(requireNonNull(getClass().getResource("/gtm-server/test-convert-no-js-client-id.json")).getPath());
+        Dataset<Row> outDataset = converter.transform(dataset);
+        String expectedJson = resourceFileAsString("/gtm-server/expected/test_convert_no_js_client_id.json");
+        Assertions.assertEquals(expectedJson, outDataset.first().prettyJson());
+        Assertions.assertEquals(3, outDataset.count());
+    }
+
 }
