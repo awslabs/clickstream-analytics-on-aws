@@ -54,7 +54,7 @@ axios.interceptors.request.use(
     } as any;
     // set x-click-stream-request-id
     if (!config.headers[REQUEST_ID_KEY]) {
-      config.headers[REQUEST_ID_KEY] = requestId || generateStr(18);
+      config.headers[REQUEST_ID_KEY] = generateStr(18);
       requestId = config.headers[REQUEST_ID_KEY];
     }
     return config;
