@@ -12,7 +12,7 @@
  */
 
 import { DEFAULT_ANALYST_READER_ROLE_NAMES, DEFAULT_ANALYST_ROLE_NAMES, DEFAULT_OPERATOR_ROLE_NAMES, DEFAULT_ROLE_JSON_PATH } from '../common/constants';
-import { ApiFail, ApiSuccess } from '../common/types';
+import { ApiFail, ApiSuccess, IUserRole } from '../common/types';
 import { getRoleFromToken, getTokenFromRequest } from '../common/utils';
 import { IUser, IUserSettings } from '../model/user';
 import { ClickStreamStore } from '../store/click-stream-store';
@@ -51,6 +51,20 @@ export class UserService {
   public async details(req: any, res: any, next: any) {
     try {
       const { id } = req.query;
+      if (!id) {
+        const noIdentityUser: IUser = {
+          id: id,
+          type: 'USER',
+          prefix: 'USER',
+          name: id,
+          role: IUserRole.NO_IDENTITY,
+          createAt: Date.now(),
+          updateAt: Date.now(),
+          operator: 'FromToken',
+          deleted: false,
+        };
+        return res.json(new ApiSuccess(noIdentityUser));
+      }
       const ddbUser = await store.getUser(id);
       if (ddbUser) {
         return res.json(new ApiSuccess(ddbUser));
