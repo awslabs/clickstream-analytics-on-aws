@@ -427,7 +427,7 @@ export function getDatePrefixList(prefix: string, startTimestamp: number, endTim
     const mm = currentDate.getUTCMonth() + 1;
     const dd = currentDate.getUTCDate();
     dataPrefixList.push(
-      `${prefix}year=${yyyy}/month=${padTo2Digits(mm)}/days=${padTo2Digits(dd)}/`,
+      `${prefix}year=${yyyy}/month=${padTo2Digits(mm)}/day=${padTo2Digits(dd)}/`,
     );
     aTime += oneDay;
   }

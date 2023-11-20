@@ -364,21 +364,21 @@ describe('Data Process -- EMR Serverless job submitter function', () => {
     const prefixList1 = getDatePrefixList('abc/test_prefix', new Date('2023-11-20T01:00:00.000Z').getTime(), new Date('2023-11-22T01:00:00.000Z').getTime());
 
     expect(prefixList1).toEqual([
-      'abc/test_prefix/year=2023/month=11/days=20/',
-      'abc/test_prefix/year=2023/month=11/days=21/',
-      'abc/test_prefix/year=2023/month=11/days=22/',
+      'abc/test_prefix/year=2023/month=11/day=20/',
+      'abc/test_prefix/year=2023/month=11/day=21/',
+      'abc/test_prefix/year=2023/month=11/day=22/',
     ]);
 
     const prefixList2 = getDatePrefixList('abc/test_prefix', new Date(startTimestamp).getTime(), new Date(endTimestamp).getTime());
 
     expect(prefixList2).toEqual([
-      'abc/test_prefix/year=2023/month=03/days=12/',
-      'abc/test_prefix/year=2023/month=03/days=13/',
+      'abc/test_prefix/year=2023/month=03/day=12/',
+      'abc/test_prefix/year=2023/month=03/day=13/',
     ]);
 
     const prefixList3 = getDatePrefixList('abc/test_prefix/', new Date('2023-11-20T01:00:00.000Z').getTime(), new Date('2023-11-20T02:00:00.000Z').getTime());
     expect(prefixList3).toEqual([
-      'abc/test_prefix/year=2023/month=11/days=20/',
+      'abc/test_prefix/year=2023/month=11/day=20/',
     ]);
 
   });
