@@ -58,9 +58,8 @@ describe('Project test', () => {
     expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 2);
   });
   it('Create project with id exist', async () => {
-    tokenMock(ddbMock, false);
+    tokenMock(ddbMock, false).resolvesOnce({});
     projectExistedMock(ddbMock, true);
-    ddbMock.on(PutCommand).resolvesOnce({});
     const res = await request(app)
       .post('/api/project')
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
@@ -76,13 +75,11 @@ describe('Project test', () => {
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
     expect(res.body).toEqual({ error: [{ location: 'body', msg: 'Project resource existed.', param: 'id', value: MOCK_PROJECT_ID }], message: 'Parameter verification failed.', success: false });
-    expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 0);
+    expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 1);
   });
   it('Create project with mock error', async () => {
-    tokenMock(ddbMock, false);
+    tokenMock(ddbMock, false).rejectsOnce(new Error('Mock DynamoDB error'));
     projectExistedMock(ddbMock, false);
-    // Mock DynamoDB error
-    ddbMock.on(PutCommand).rejects(new Error('Mock DynamoDB error'));
     const res = await request(app)
       .post('/api/project')
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
@@ -102,7 +99,7 @@ describe('Project test', () => {
       message: 'Unexpected error occurred at server.',
       error: 'Error',
     });
-    expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 1);
+    expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 2);
   });
   it('Create project 400', async () => {
     tokenMock(ddbMock, false);
@@ -169,7 +166,7 @@ describe('Project test', () => {
         },
       ],
     });
-    expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 0);
+    expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 1);
   });
   it('Get project by ID', async () => {
     ddbMock.on(GetCommand).resolves({

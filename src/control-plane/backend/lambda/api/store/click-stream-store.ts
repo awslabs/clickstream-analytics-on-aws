@@ -69,5 +69,5 @@ export interface ClickStreamStore {
 
   isRequestIdExisted: (id: string) => Promise<boolean>;
   saveRequestId: (id: string) => Promise<void>;
-
+  deleteRequestId: (id: string) => Promise<void>;
 }

@@ -12,6 +12,7 @@
  */
 
 import {
+  DeleteCommand,
   DynamoDBDocumentClient,
   PutCommand,
   QueryCommand,
@@ -121,9 +122,7 @@ describe('Plugin test', () => {
     });
   });
   it('Create plugin with mock error', async () => {
-    tokenMock(ddbMock, false);
-    // Mock DynamoDB error
-    ddbMock.on(PutCommand).rejects(new Error('Mock DynamoDB error'));;
+    tokenMock(ddbMock, false).rejectsOnce(new Error('Mock DynamoDB error'));
     const res = await request(app)
       .post('/api/plugin')
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
@@ -142,7 +141,8 @@ describe('Plugin test', () => {
       message: 'Unexpected error occurred at server.',
       error: 'Error',
     });
-    expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 1);
+    expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 2);
+    expect(ddbMock).toHaveReceivedCommandTimes(DeleteCommand, 1);
   });
   it('Create plugin 400', async () => {
     tokenMock(ddbMock, false);
@@ -206,7 +206,7 @@ describe('Plugin test', () => {
         },
       ],
     });
-    expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 0);
+    expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 1);
   });
   it('Create plugin without jar or main function', async () => {
     tokenMock(ddbMock, false);

@@ -86,14 +86,13 @@ describe('User test', () => {
   });
 
   it('Update user', async () => {
-    tokenMock(ddbMock, false);
+    tokenMock(ddbMock, false).resolvesOnce({});
     ddbMock.on(GetCommand).resolvesOnce({
       Item: {
         id: MOCK_USER_ID,
         deleted: false,
       },
     });
-    ddbMock.on(PutCommand).resolvesOnce({});
     const res = await request(app)
       .put(`/api/user/${MOCK_USER_ID}`)
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
@@ -114,14 +113,13 @@ describe('User test', () => {
   });
 
   it('Update user no allow', async () => {
-    tokenMock(ddbMock, false);
+    tokenMock(ddbMock, false).resolvesOnce({});
     ddbMock.on(GetCommand).resolvesOnce({
       Item: {
         id: MOCK_USER_ID,
         deleted: false,
       },
     });
-    ddbMock.on(PutCommand).resolvesOnce({});
     const res = await request(app)
       .put(`/api/user/${MOCK_USER_ID}`)
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
@@ -137,7 +135,7 @@ describe('User test', () => {
     expect(res.body.message).toEqual('This user not allow to be modified.');
     expect(res.body.success).toEqual(false);
     expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 1);
-    expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 0);
+    expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 1);
   });
 
   it('Delete user', async () => {
@@ -562,7 +560,8 @@ describe('User test', () => {
     expect(res.statusCode).toBe(200);
     expect(res.body.message).toEqual('User settings updated.');
     expect(res.body.success).toEqual(true);
-    expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 1);
+    expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 0);
+    expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 1);
     expect(ddbMock).toHaveReceivedCommandTimes(UpdateCommand, 1);
   });
 
