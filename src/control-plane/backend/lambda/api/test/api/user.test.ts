@@ -178,6 +178,15 @@ describe('User test', () => {
     expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 1);
   });
 
+  it('Get details of user that id is empty', async () => {
+    tokenMock(ddbMock, false);
+    const res = await request(app)
+      .get('/api/user/details?id=');
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(200);
+    expect(res.body.data.role).toEqual(IUserRole.NO_IDENTITY);
+  });
+
   it('Get details of user that url encode', async () => {
     tokenMock(ddbMock, false);
     ddbMock.on(GetCommand).resolves({
