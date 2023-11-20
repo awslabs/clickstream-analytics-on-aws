@@ -36,23 +36,20 @@ import {
   DescribeAnalysisCommand,
 } from '@aws-sdk/client-quicksight';
 import { BatchExecuteStatementCommand, DescribeStatementCommand, RedshiftDataClient, StatusString } from '@aws-sdk/client-redshift-data';
-import { AssumeRoleCommand, STSClient, STSServiceException } from '@aws-sdk/client-sts';
-import { fromTemporaryCredentials } from '@aws-sdk/credential-providers';
-import { DynamoDBDocumentClient, GetCommand } from '@aws-sdk/lib-dynamodb';
+import { DynamoDBDocumentClient, GetCommand, QueryCommand } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
 import request from 'supertest';
 import { MOCK_TOKEN, tokenMock } from './ddb-mock';
+import { KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW } from './pipeline-mock';
 import { clickStreamTableName } from '../../common/constants';
 import { ConditionCategory, ExploreLocales, ExplorePathNodeType, ExplorePathSessionDef, MetadataPlatform, MetadataValueType, QuickSightChartType } from '../../common/explore-types';
 import { app, server } from '../../index';
 import 'aws-sdk-client-mock-jest';
 import { EventAndCondition, PairEventAndCondition, SQLCondition } from '../../service/quicksight/sql-builder';
 
-jest.mock('@aws-sdk/credential-providers');
 const ddbMock = mockClient(DynamoDBDocumentClient);
 const cloudFormationMock = mockClient(CloudFormationClient);
 const quickSightMock = mockClient(QuickSightClient);
-const stsClientMock = mockClient(STSClient);
 const redshiftClientMock = mockClient(RedshiftDataClient);
 
 const dashboardDef =
@@ -108,31 +105,11 @@ describe('reporting test', () => {
     cloudFormationMock.reset();
     quickSightMock.reset();
     redshiftClientMock.reset();
-    stsClientMock.reset();
     tokenMock(ddbMock, false);
   });
 
   it('funnel bar visual - preview', async () => {
     tokenMock(ddbMock, false);
-    stsClientMock.on(AssumeRoleCommand).resolves({
-      Credentials: {
-        AccessKeyId: '1111',
-        SecretAccessKey: '22222',
-        SessionToken: '33333',
-        Expiration: new Date(),
-      },
-    });
-
-    redshiftClientMock.on(BatchExecuteStatementCommand).resolves({
-    });
-    redshiftClientMock.on(DescribeStatementCommand).resolves({
-      Status: StatusString.FINISHED,
-    });
-
-    redshiftClientMock.on(DescribeStatementCommand).resolves({
-      Status: StatusString.FINISHED,
-    });
-
     quickSightMock.on(CreateAnalysisCommand).resolves({
       Arn: 'arn:aws:quicksight:us-east-1:11111111:analysis/analysisaaaaaaaa',
     });
@@ -190,15 +167,7 @@ describe('reporting test', () => {
           region: 'us-east-1',
           allowDomain: 'https://example.com',
           quickSight: {
-            principal: 'arn:aws:quicksight:us-east-1:11111:user/default/testuser',
             dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
-            redshiftUser: 'test_redshift_user',
-          },
-          redshift: {
-            dataApiRole: 'arn:aws:iam::11111111:role/test_api_role',
-            newServerless: {
-              workgroupName: 'clickstream-project01-wvzh',
-            },
           },
         },
       });
@@ -220,14 +189,87 @@ describe('reporting test', () => {
 
   it('funnel visual - preview', async () => {
     tokenMock(ddbMock, false);
-    stsClientMock.on(AssumeRoleCommand).resolves({
-      Credentials: {
-        AccessKeyId: '1111',
-        SecretAccessKey: '22222',
-        SessionToken: '33333',
-        Expiration: new Date(),
+    quickSightMock.on(CreateAnalysisCommand).resolves({
+      Arn: 'arn:aws:quicksight:us-east-1:11111111:analysis/analysisaaaaaaaa',
+    });
+    quickSightMock.on(CreateDashboardCommand).resolves({
+      Arn: 'arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa',
+      VersionArn: 'arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa/1',
+    });
+    quickSightMock.on(GenerateEmbedUrlForRegisteredUserCommand).resolves({
+      EmbedUrl: 'https://quicksight.aws.amazon.com/embed/4ui7xyvq73/studies/4a05631e-cbe6-477c-915d-1704aec9f101?isauthcode=true&identityprovider=quicksight&code=4a05631e-cbe6-477c-915d-1704aec9f101',
+    });
+    quickSightMock.on(DescribeDashboardCommand).resolvesOnce({
+      Dashboard: {
+        Version: {
+          Status: ResourceStatus.CREATION_IN_PROGRESS,
+        },
+      },
+    }).resolves({
+      Dashboard: {
+        Version: {
+          Status: ResourceStatus.CREATION_SUCCESSFUL,
+        },
       },
     });
+
+    const res = await request(app)
+      .post('/api/reporting/funnel')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
+      .send({
+        action: 'PREVIEW',
+        locale: ExploreLocales.ZH_CN,
+        chartType: QuickSightChartType.FUNNEL,
+        viewName: 'testview0002',
+        projectId: 'project01_wvzh',
+        pipelineId: 'pipeline-1111111',
+        appId: 'app1',
+        sheetName: 'sheet99',
+        computeMethod: 'USER_CNT',
+        specifyJoinColumn: true,
+        joinColumn: 'user_pseudo_id',
+        conversionIntervalType: 'CUSTOMIZE',
+        conversionIntervalInSeconds: 7200,
+        eventAndConditions: [{
+          eventName: 'add_button_click',
+        },
+        {
+          eventName: 'note_share',
+        },
+        {
+          eventName: 'note_export',
+        }],
+        timeScopeType: 'RELATIVE',
+        lastN: 4,
+        timeUnit: 'WK',
+        groupColumn: 'week',
+        dashboardCreateParameters: {
+          region: 'us-east-1',
+          allowDomain: 'https://example.com',
+          quickSight: {
+            dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
+          },
+        },
+      });
+
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(201);
+    expect(res.body.success).toEqual(true);
+    expect(res.body.data.dashboardArn).toEqual('arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa');
+    expect(res.body.data.dashboardName).toEqual('_tmp_testview0002');
+    expect(res.body.data.analysisArn).toEqual('arn:aws:quicksight:us-east-1:11111111:analysis/analysisaaaaaaaa');
+    expect(res.body.data.analysisName).toEqual('_tmp_testview0002');
+    expect(res.body.data.analysisId).toBeDefined();
+    expect(res.body.data.dashboardId).toBeDefined();
+    expect(res.body.data.visualIds).toBeDefined();
+    expect(res.body.data.visualIds.length).toEqual(2);
+    expect(res.body.data.dashboardEmbedUrl).toEqual('https://quicksight.aws.amazon.com/embed/4ui7xyvq73/studies/4a05631e-cbe6-477c-915d-1704aec9f101?isauthcode=true&identityprovider=quicksight&code=4a05631e-cbe6-477c-915d-1704aec9f101');
+    expect(quickSightMock).toHaveReceivedCommandTimes(DescribeDashboardCommand, 2);
+    expect(quickSightMock).toHaveReceivedCommandTimes(GenerateEmbedUrlForRegisteredUserCommand, 1);
+  });
+
+  it('funnel visual - preview - resources create failed', async () => {
+    tokenMock(ddbMock, false);
 
     redshiftClientMock.on(BatchExecuteStatementCommand).resolves({
     });
@@ -297,123 +339,7 @@ describe('reporting test', () => {
           region: 'us-east-1',
           allowDomain: 'https://example.com',
           quickSight: {
-            principal: 'arn:aws:quicksight:us-east-1:11111:user/default/testuser',
             dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
-            redshiftUser: 'test_redshift_user',
-          },
-          redshift: {
-            dataApiRole: 'arn:aws:iam::11111111:role/test_api_role',
-            newServerless: {
-              workgroupName: 'clickstream-project01-wvzh',
-            },
-          },
-        },
-      });
-
-    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
-    expect(res.statusCode).toBe(201);
-    expect(res.body.success).toEqual(true);
-    expect(res.body.data.dashboardArn).toEqual('arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa');
-    expect(res.body.data.dashboardName).toEqual('_tmp_testview0002');
-    expect(res.body.data.analysisArn).toEqual('arn:aws:quicksight:us-east-1:11111111:analysis/analysisaaaaaaaa');
-    expect(res.body.data.analysisName).toEqual('_tmp_testview0002');
-    expect(res.body.data.analysisId).toBeDefined();
-    expect(res.body.data.dashboardId).toBeDefined();
-    expect(res.body.data.visualIds).toBeDefined();
-    expect(res.body.data.visualIds.length).toEqual(2);
-    expect(res.body.data.dashboardEmbedUrl).toEqual('https://quicksight.aws.amazon.com/embed/4ui7xyvq73/studies/4a05631e-cbe6-477c-915d-1704aec9f101?isauthcode=true&identityprovider=quicksight&code=4a05631e-cbe6-477c-915d-1704aec9f101');
-    expect(quickSightMock).toHaveReceivedCommandTimes(DescribeDashboardCommand, 2);
-    expect(quickSightMock).toHaveReceivedCommandTimes(GenerateEmbedUrlForRegisteredUserCommand, 1);
-  });
-
-  it('funnel visual - preview - resources create failed', async () => {
-    tokenMock(ddbMock, false);
-    stsClientMock.on(AssumeRoleCommand).resolves({
-      Credentials: {
-        AccessKeyId: '1111',
-        SecretAccessKey: '22222',
-        SessionToken: '33333',
-        Expiration: new Date(),
-      },
-    });
-
-    redshiftClientMock.on(BatchExecuteStatementCommand).resolves({
-    });
-    redshiftClientMock.on(DescribeStatementCommand).resolves({
-      Status: StatusString.FINISHED,
-    });
-
-    redshiftClientMock.on(DescribeStatementCommand).resolves({
-      Status: StatusString.FINISHED,
-    });
-
-    quickSightMock.on(CreateAnalysisCommand).resolves({
-      Arn: 'arn:aws:quicksight:us-east-1:11111111:analysis/analysisaaaaaaaa',
-    });
-    quickSightMock.on(CreateDashboardCommand).resolves({
-      Arn: 'arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa',
-      VersionArn: 'arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa/1',
-    });
-    quickSightMock.on(GenerateEmbedUrlForRegisteredUserCommand).resolves({
-      EmbedUrl: 'https://quicksight.aws.amazon.com/embed/4ui7xyvq73/studies/4a05631e-cbe6-477c-915d-1704aec9f101?isauthcode=true&identityprovider=quicksight&code=4a05631e-cbe6-477c-915d-1704aec9f101',
-    });
-    quickSightMock.on(DescribeDashboardCommand).resolvesOnce({
-      Dashboard: {
-        Version: {
-          Status: ResourceStatus.CREATION_IN_PROGRESS,
-        },
-      },
-    }).resolves({
-      Dashboard: {
-        Version: {
-          Status: ResourceStatus.CREATION_FAILED,
-        },
-      },
-    });
-
-    const res = await request(app)
-      .post('/api/reporting/funnel')
-      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
-      .send({
-        action: 'PREVIEW',
-        locale: ExploreLocales.ZH_CN,
-        chartType: QuickSightChartType.FUNNEL,
-        viewName: 'testview0002',
-        projectId: 'project01_wvzh',
-        pipelineId: 'pipeline-1111111',
-        appId: 'app1',
-        sheetName: 'sheet99',
-        computeMethod: 'USER_CNT',
-        specifyJoinColumn: true,
-        joinColumn: 'user_pseudo_id',
-        conversionIntervalType: 'CUSTOMIZE',
-        conversionIntervalInSeconds: 7200,
-        eventAndConditions: [{
-          eventName: 'add_button_click',
-        },
-        {
-          eventName: 'note_share',
-        },
-        {
-          eventName: 'note_export',
-        }],
-        timeScopeType: 'RELATIVE',
-        lastN: 4,
-        timeUnit: 'WK',
-        groupColumn: 'week',
-        dashboardCreateParameters: {
-          region: 'us-east-1',
-          allowDomain: 'https://example.com',
-          quickSight: {
-            principal: 'arn:aws:quicksight:us-east-1:11111:user/default/testuser',
-            dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
-            redshiftUser: 'test_redshift_user',
-          },
-          redshift: {
-            dataApiRole: 'arn:aws:iam::11111111:role/test_api_role',
-            newServerless: {
-              workgroupName: 'clickstream-project01-wvzh',
-            },
           },
         },
       });
@@ -427,20 +353,6 @@ describe('reporting test', () => {
 
   it('funnel visual - publish', async () => {
     tokenMock(ddbMock, false);
-    stsClientMock.on(AssumeRoleCommand).resolves({
-      Credentials: {
-        AccessKeyId: '1111',
-        SecretAccessKey: '22222',
-        SessionToken: '33333',
-        Expiration: new Date(),
-      },
-    });
-
-    redshiftClientMock.on(BatchExecuteStatementCommand).resolves({
-    });
-    redshiftClientMock.on(DescribeStatementCommand).resolves({
-      Status: StatusString.FINISHED,
-    });
 
     quickSightMock.on(DescribeDashboardDefinitionCommand).resolves({
       Definition: dashboardDef,
@@ -500,12 +412,6 @@ describe('reporting test', () => {
           quickSight: {
             dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
           },
-          redshift: {
-            dataApiRole: 'arn:aws:iam::11111111:role/test_api_role',
-            newServerless: {
-              workgroupName: 'clickstream-project01-wvzh',
-            },
-          },
         },
       });
 
@@ -558,15 +464,7 @@ describe('reporting test', () => {
           region: 'us-east-1',
           allowDomain: 'https://example.com',
           quickSight: {
-            principal: 'arn:aws:quicksight:us-east-1:11111:user/default/testuser',
             dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
-            redshiftUser: 'test_redshift_user',
-          },
-          redshift: {
-            dataApiRole: 'arn:aws:iam::11111111:role/test_api_role',
-            newServerless: {
-              workgroupName: 'clickstream-project01-wvzh',
-            },
           },
         },
       });
@@ -578,21 +476,6 @@ describe('reporting test', () => {
 
   it('event visual - preview', async () => {
     tokenMock(ddbMock, false);
-    stsClientMock.on(AssumeRoleCommand).resolves({
-      Credentials: {
-        AccessKeyId: '1111',
-        SecretAccessKey: '22222',
-        SessionToken: '33333',
-        Expiration: new Date(),
-      },
-    });
-
-    redshiftClientMock.on(BatchExecuteStatementCommand).resolves({
-    });
-    redshiftClientMock.on(DescribeStatementCommand).resolves({
-      Status: StatusString.FINISHED,
-    });
-
     quickSightMock.on(CreateAnalysisCommand).resolves({
       Arn: 'arn:aws:quicksight:us-east-1:11111111:analysis/analysisaaaaaaaa',
     });
@@ -651,15 +534,7 @@ describe('reporting test', () => {
           region: 'us-east-1',
           allowDomain: 'https://example.com',
           quickSight: {
-            principal: 'arn:aws:quicksight:us-east-1:11111:user/default/testuser',
             dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
-            redshiftUser: 'test_redshift_user',
-          },
-          redshift: {
-            dataApiRole: 'arn:aws:iam::11111111:role/test_api_role',
-            newServerless: {
-              workgroupName: 'clickstream-project01-wvzh',
-            },
           },
         },
       });
@@ -681,20 +556,6 @@ describe('reporting test', () => {
 
   it('event visual - preview - twice request with group condition', async () => {
     tokenMock(ddbMock, false);
-    stsClientMock.on(AssumeRoleCommand).resolves({
-      Credentials: {
-        AccessKeyId: '1111',
-        SecretAccessKey: '22222',
-        SessionToken: '33333',
-        Expiration: new Date(),
-      },
-    });
-
-    redshiftClientMock.on(BatchExecuteStatementCommand).resolves({
-    });
-    redshiftClientMock.on(DescribeStatementCommand).resolves({
-      Status: StatusString.FINISHED,
-    });
 
     quickSightMock.on(CreateDataSetCommand).callsFake(input => {
       expect(
@@ -769,15 +630,7 @@ describe('reporting test', () => {
         region: 'us-east-1',
         allowDomain: 'https://example.com',
         quickSight: {
-          principal: 'arn:aws:quicksight:us-east-1:11111:user/default/testuser',
           dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
-          redshiftUser: 'test_redshift_user',
-        },
-        redshift: {
-          dataApiRole: 'arn:aws:iam::11111111:role/test_api_role',
-          newServerless: {
-            workgroupName: 'clickstream-project01-wvzh',
-          },
         },
       },
     };
@@ -802,21 +655,6 @@ describe('reporting test', () => {
 
   it('event visual - publish', async () => {
     tokenMock(ddbMock, false);
-    stsClientMock.on(AssumeRoleCommand).resolves({
-      Credentials: {
-        AccessKeyId: '1111',
-        SecretAccessKey: '22222',
-        SessionToken: '33333',
-        Expiration: new Date(),
-      },
-    });
-
-    redshiftClientMock.on(BatchExecuteStatementCommand).resolves({
-    });
-    redshiftClientMock.on(DescribeStatementCommand).resolves({
-      Status: StatusString.FINISHED,
-    });
-
     quickSightMock.on(DescribeDashboardDefinitionCommand).resolves({
       Definition: dashboardDef,
     });
@@ -874,15 +712,7 @@ describe('reporting test', () => {
           region: 'us-east-1',
           allowDomain: 'https://example.com',
           quickSight: {
-            principal: 'arn:aws:quicksight:us-east-1:11111:user/default/testuser',
             dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
-            redshiftUser: 'test_redshift_user',
-          },
-          redshift: {
-            dataApiRole: 'arn:aws:iam::11111111:role/test_api_role',
-            newServerless: {
-              workgroupName: 'clickstream-project01-wvzh',
-            },
           },
         },
       });
@@ -901,21 +731,6 @@ describe('reporting test', () => {
 
   it('path visual - preview', async () => {
     tokenMock(ddbMock, false);
-    stsClientMock.on(AssumeRoleCommand).resolves({
-      Credentials: {
-        AccessKeyId: '1111',
-        SecretAccessKey: '22222',
-        SessionToken: '33333',
-        Expiration: new Date(),
-      },
-    });
-
-    redshiftClientMock.on(BatchExecuteStatementCommand).resolves({
-    });
-    redshiftClientMock.on(DescribeStatementCommand).resolves({
-      Status: StatusString.FINISHED,
-    });
-
     quickSightMock.on(CreateAnalysisCommand).resolves({
       Arn: 'arn:aws:quicksight:us-east-1:11111111:analysis/analysisaaaaaaaa',
     });
@@ -973,15 +788,7 @@ describe('reporting test', () => {
           region: 'us-east-1',
           allowDomain: 'https://example.com',
           quickSight: {
-            principal: 'arn:aws:quicksight:us-east-1:11111:user/default/testuser',
             dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
-            redshiftUser: 'test_redshift_user',
-          },
-          redshift: {
-            dataApiRole: 'arn:aws:iam::11111111:role/test_api_role',
-            newServerless: {
-              workgroupName: 'clickstream-project01-wvzh',
-            },
           },
         },
         pathAnalysis: {
@@ -1007,21 +814,6 @@ describe('reporting test', () => {
 
   it('path visual - publish', async () => {
     tokenMock(ddbMock, false);
-    stsClientMock.on(AssumeRoleCommand).resolves({
-      Credentials: {
-        AccessKeyId: '1111',
-        SecretAccessKey: '22222',
-        SessionToken: '33333',
-        Expiration: new Date(),
-      },
-    });
-
-    redshiftClientMock.on(BatchExecuteStatementCommand).resolves({
-    });
-    redshiftClientMock.on(DescribeStatementCommand).resolves({
-      Status: StatusString.FINISHED,
-    });
-
     quickSightMock.on(DescribeDashboardDefinitionCommand).resolves({
       Definition: dashboardDef,
       Name: 'dashboard-test',
@@ -1085,15 +877,7 @@ describe('reporting test', () => {
           region: 'us-east-1',
           allowDomain: 'https://example.com',
           quickSight: {
-            principal: 'arn:aws:quicksight:us-east-1:11111:user/default/testuser',
             dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
-            redshiftUser: 'test_redshift_user',
-          },
-          redshift: {
-            dataApiRole: 'arn:aws:iam::11111111:role/test_api_role',
-            newServerless: {
-              workgroupName: 'clickstream-project01-wvzh',
-            },
           },
         },
         pathAnalysis: {
@@ -1119,21 +903,6 @@ describe('reporting test', () => {
 
   it('retention visual - publish', async () => {
     tokenMock(ddbMock, false);
-    stsClientMock.on(AssumeRoleCommand).resolves({
-      Credentials: {
-        AccessKeyId: '1111',
-        SecretAccessKey: '22222',
-        SessionToken: '33333',
-        Expiration: new Date(),
-      },
-    });
-
-    redshiftClientMock.on(BatchExecuteStatementCommand).resolves({
-    });
-    redshiftClientMock.on(DescribeStatementCommand).resolves({
-      Status: StatusString.FINISHED,
-    });
-
     quickSightMock.on(DescribeDashboardDefinitionCommand).resolves({
       Definition: dashboardDef,
       Name: 'dashboard-test',
@@ -1196,15 +965,7 @@ describe('reporting test', () => {
           region: 'us-east-1',
           allowDomain: 'https://example.com',
           quickSight: {
-            principal: 'arn:aws:quicksight:us-east-1:11111:user/default/testuser',
             dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
-            redshiftUser: 'test_redshift_user',
-          },
-          redshift: {
-            dataApiRole: 'arn:aws:iam::11111111:role/test_api_role',
-            newServerless: {
-              workgroupName: 'clickstream-project01-wvzh',
-            },
           },
         },
         pairEventAndConditions: [
@@ -1240,59 +1001,6 @@ describe('reporting test', () => {
 
   });
 
-  it('warmup - STSServiceException', async () => {
-    redshiftClientMock.on(BatchExecuteStatementCommand).resolves({
-    });
-    redshiftClientMock.on(DescribeStatementCommand).resolves({
-      Status: StatusString.FINISHED,
-    });
-
-    quickSightMock.on(ListDashboardsCommand).resolves({
-      DashboardSummaryList: [{
-        Arn: 'arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa',
-      }],
-    });
-
-    const mockFromTemporaryCredentials = fromTemporaryCredentials as jest.MockedFunction<any>;
-    mockFromTemporaryCredentials.mockImplementation(() => {
-      throw new STSServiceException({
-        $fault: 'client',
-        $metadata: {
-          httpStatusCode: 403,
-          requestId: 'f70ba724-8fb9-4ec1-a1ae-244ba7de5afd',
-          extendedRequestId: undefined,
-          cfId: undefined,
-          attempts: 1,
-          totalRetryDelay: 0,
-        },
-        name: 'AccessDenied',
-      });
-    });
-    const res = await request(app)
-      .post('/api/reporting/warmup')
-      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
-      .send({
-        projectId: 'project01_wvzh',
-        appId: 'app1',
-        dashboardCreateParameters: {
-          region: 'us-east-1',
-          redshift: {
-            dataApiRole: 'arn:aws:iam::11111111:role/test_api_role',
-            newServerless: {
-              workgroupName: 'clickstream-project01-wvzh',
-            },
-          },
-        },
-      });
-
-    expect(mockFromTemporaryCredentials.mock.calls.length).toEqual(1);
-    expect(mockFromTemporaryCredentials.mock.calls[0][0]).toEqual({ params: { RoleArn: 'arn:aws:iam::11111111:role/test_api_role' } });
-    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
-    expect(res.statusCode).toBe(400);
-    expect(res.body.message).toEqual('Warmup redshift serverless with request parameter error.');
-
-  });
-
   it('warmup', async () => {
     redshiftClientMock.on(BatchExecuteStatementCommand).resolves({
     });
@@ -1300,17 +1008,14 @@ describe('reporting test', () => {
       Status: StatusString.FINISHED,
     });
 
+    ddbMock.on(QueryCommand).resolves({
+      Items: [{ ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW }],
+    });
+
     quickSightMock.on(ListDashboardsCommand).resolves({
       DashboardSummaryList: [{
         Arn: 'arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa',
       }],
-    });
-
-    const mockFromTemporaryCredentials = fromTemporaryCredentials as jest.MockedFunction<any>;
-    mockFromTemporaryCredentials.mockReturnValue({
-      accessKeyId: '1111',
-      secretAccessKey: '22222',
-      sessionToken: '33333',
     });
 
     const res = await request(app)
@@ -1319,23 +1024,16 @@ describe('reporting test', () => {
       .send({
         projectId: 'project01_wvzh',
         appId: 'app1',
-        dashboardCreateParameters: {
-          region: 'us-east-1',
-          redshift: {
-            dataApiRole: 'arn:aws:iam::11111111:role/test_api_role',
-            newServerless: {
-              workgroupName: 'clickstream-project01-wvzh',
-            },
-          },
-        },
+        region: 'us-east-1',
       });
 
-    expect(mockFromTemporaryCredentials.mock.calls.length).toEqual(1);
-    expect(mockFromTemporaryCredentials.mock.calls[0][0]).toEqual({ params: { RoleArn: 'arn:aws:iam::11111111:role/test_api_role' } });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(201);
     expect(res.body.success).toEqual(true);
     expect(res.body.data).toEqual('OK');
+    expect(redshiftClientMock).toHaveReceivedCommandTimes(BatchExecuteStatementCommand, 1);
+    expect(redshiftClientMock).toHaveReceivedCommandTimes(DescribeStatementCommand, 1);
+    expect(quickSightMock).toHaveReceivedCommandTimes(ListDashboardsCommand, 1);
 
   });
 
@@ -1500,15 +1198,7 @@ describe('reporting test', () => {
           region: 'us-east-1',
           allowDomain: 'https://example.com',
           quickSight: {
-            principal: 'arn:aws:quicksight:us-east-1:11111:user/default/testuser',
             dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
-            redshiftUser: 'test_redshift_user',
-          },
-          redshift: {
-            dataApiRole: 'arn:aws:iam::11111111:role/test_api_role',
-            newServerless: {
-              workgroupName: 'clickstream-project01-wvzh',
-            },
           },
         },
       });
@@ -1552,15 +1242,7 @@ describe('reporting test', () => {
           region: 'us-east-1',
           allowDomain: 'https://example.com',
           quickSight: {
-            principal: 'arn:aws:quicksight:us-east-1:11111:user/default/testuser',
             dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
-            redshiftUser: 'test_redshift_user',
-          },
-          redshift: {
-            dataApiRole: 'arn:aws:iam::11111111:role/test_api_role',
-            newServerless: {
-              workgroupName: 'clickstream-project01-wvzh',
-            },
           },
         },
       });
@@ -1603,15 +1285,7 @@ describe('reporting test', () => {
           region: 'us-east-1',
           allowDomain: 'https://example.com',
           quickSight: {
-            principal: 'arn:aws:quicksight:us-east-1:11111:user/default/testuser',
             dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
-            redshiftUser: 'test_redshift_user',
-          },
-          redshift: {
-            dataApiRole: 'arn:aws:iam::11111111:role/test_api_role',
-            newServerless: {
-              workgroupName: 'clickstream-project01-wvzh',
-            },
           },
         },
       });
@@ -1654,15 +1328,7 @@ describe('reporting test', () => {
         region: 'us-east-1',
         allowDomain: 'https://example.com',
         quickSight: {
-          principal: 'arn:aws:quicksight:us-east-1:11111:user/default/testuser',
           dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
-          redshiftUser: 'test_redshift_user',
-        },
-        redshift: {
-          dataApiRole: 'arn:aws:iam::11111111:role/test_api_role',
-          newServerless: {
-            workgroupName: 'clickstream-project01-wvzh',
-          },
         },
       },
     };
@@ -1712,10 +1378,6 @@ describe('reporting test', () => {
         ...funnelBody,
         eventAndConditions: eventAndConditions,
       });
-    console.log({
-      ...funnelBody,
-      eventAndConditions: eventAndConditions,
-    });
 
     expect(res1.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res1.statusCode).toBe(400);
@@ -1780,15 +1442,7 @@ describe('reporting test', () => {
           region: 'us-east-1',
           allowDomain: 'https://example.com',
           quickSight: {
-            principal: 'arn:aws:quicksight:us-east-1:11111:user/default/testuser',
             dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
-            redshiftUser: 'test_redshift_user',
-          },
-          redshift: {
-            dataApiRole: 'arn:aws:iam::11111111:role/test_api_role',
-            newServerless: {
-              workgroupName: 'clickstream-project01-wvzh',
-            },
           },
         },
       });
@@ -1834,15 +1488,7 @@ describe('reporting test', () => {
           region: 'us-east-1',
           allowDomain: 'https://example.com',
           quickSight: {
-            principal: 'arn:aws:quicksight:us-east-1:11111:user/default/testuser',
             dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
-            redshiftUser: 'test_redshift_user',
-          },
-          redshift: {
-            dataApiRole: 'arn:aws:iam::11111111:role/test_api_role',
-            newServerless: {
-              workgroupName: 'clickstream-project01-wvzh',
-            },
           },
         },
       });
@@ -1886,15 +1532,7 @@ describe('reporting test', () => {
           region: 'us-east-1',
           allowDomain: 'https://example.com',
           quickSight: {
-            principal: 'arn:aws:quicksight:us-east-1:11111:user/default/testuser',
             dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
-            redshiftUser: 'test_redshift_user',
-          },
-          redshift: {
-            dataApiRole: 'arn:aws:iam::11111111:role/test_api_role',
-            newServerless: {
-              workgroupName: 'clickstream-project01-wvzh',
-            },
           },
         },
       });
@@ -1937,15 +1575,7 @@ describe('reporting test', () => {
           region: 'us-east-1',
           allowDomain: 'https://example.com',
           quickSight: {
-            principal: 'arn:aws:quicksight:us-east-1:11111:user/default/testuser',
             dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
-            redshiftUser: 'test_redshift_user',
-          },
-          redshift: {
-            dataApiRole: 'arn:aws:iam::11111111:role/test_api_role',
-            newServerless: {
-              workgroupName: 'clickstream-project01-wvzh',
-            },
           },
         },
       });
@@ -1981,15 +1611,7 @@ describe('reporting test', () => {
           region: 'us-east-1',
           allowDomain: 'https://example.com',
           quickSight: {
-            principal: 'arn:aws:quicksight:us-east-1:11111:user/default/testuser',
             dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
-            redshiftUser: 'test_redshift_user',
-          },
-          redshift: {
-            dataApiRole: 'arn:aws:iam::11111111:role/test_api_role',
-            newServerless: {
-              workgroupName: 'clickstream-project01-wvzh',
-            },
           },
         },
       });
@@ -2034,15 +1656,7 @@ describe('reporting test', () => {
           region: 'us-east-1',
           allowDomain: 'https://example.com',
           quickSight: {
-            principal: 'arn:aws:quicksight:us-east-1:11111:user/default/testuser',
             dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
-            redshiftUser: 'test_redshift_user',
-          },
-          redshift: {
-            dataApiRole: 'arn:aws:iam::11111111:role/test_api_role',
-            newServerless: {
-              workgroupName: 'clickstream-project01-wvzh',
-            },
           },
         },
       });
@@ -2086,15 +1700,7 @@ describe('reporting test', () => {
           region: 'us-east-1',
           allowDomain: 'https://example.com',
           quickSight: {
-            principal: 'arn:aws:quicksight:us-east-1:11111:user/default/testuser',
             dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
-            redshiftUser: 'test_redshift_user',
-          },
-          redshift: {
-            dataApiRole: 'arn:aws:iam::11111111:role/test_api_role',
-            newServerless: {
-              workgroupName: 'clickstream-project01-wvzh',
-            },
           },
         },
       });
@@ -2139,15 +1745,7 @@ describe('reporting test', () => {
           region: 'us-east-1',
           allowDomain: 'https://example.com',
           quickSight: {
-            principal: 'arn:aws:quicksight:us-east-1:11111:user/default/testuser',
             dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
-            redshiftUser: 'test_redshift_user',
-          },
-          redshift: {
-            dataApiRole: 'arn:aws:iam::11111111:role/test_api_role',
-            newServerless: {
-              workgroupName: 'clickstream-project01-wvzh',
-            },
           },
         },
       });
@@ -2190,15 +1788,7 @@ describe('reporting test', () => {
           region: 'us-east-1',
           allowDomain: 'https://example.com',
           quickSight: {
-            principal: 'arn:aws:quicksight:us-east-1:11111:user/default/testuser',
             dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
-            redshiftUser: 'test_redshift_user',
-          },
-          redshift: {
-            dataApiRole: 'arn:aws:iam::11111111:role/test_api_role',
-            newServerless: {
-              workgroupName: 'clickstream-project01-wvzh',
-            },
           },
         },
         pathAnalysis: {
@@ -2245,15 +1835,7 @@ describe('reporting test', () => {
           region: 'us-east-1',
           allowDomain: 'https://example.com',
           quickSight: {
-            principal: 'arn:aws:quicksight:us-east-1:11111:user/default/testuser',
             dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
-            redshiftUser: 'test_redshift_user',
-          },
-          redshift: {
-            dataApiRole: 'arn:aws:iam::11111111:role/test_api_role',
-            newServerless: {
-              workgroupName: 'clickstream-project01-wvzh',
-            },
           },
         },
         pathAnalysis: {
@@ -2302,15 +1884,7 @@ describe('reporting test', () => {
           region: 'us-east-1',
           allowDomain: 'https://example.com',
           quickSight: {
-            principal: 'arn:aws:quicksight:us-east-1:11111:user/default/testuser',
             dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
-            redshiftUser: 'test_redshift_user',
-          },
-          redshift: {
-            dataApiRole: 'arn:aws:iam::11111111:role/test_api_role',
-            newServerless: {
-              workgroupName: 'clickstream-project01-wvzh',
-            },
           },
         },
         pathAnalysis: {
@@ -2357,15 +1931,7 @@ describe('reporting test', () => {
           region: 'us-east-1',
           allowDomain: 'https://example.com',
           quickSight: {
-            principal: 'arn:aws:quicksight:us-east-1:11111:user/default/testuser',
             dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
-            redshiftUser: 'test_redshift_user',
-          },
-          redshift: {
-            dataApiRole: 'arn:aws:iam::11111111:role/test_api_role',
-            newServerless: {
-              workgroupName: 'clickstream-project01-wvzh',
-            },
           },
         },
         pathAnalysis: {
@@ -2418,15 +1984,7 @@ describe('reporting test', () => {
           region: 'us-east-1',
           allowDomain: 'https://example.com',
           quickSight: {
-            principal: 'arn:aws:quicksight:us-east-1:11111:user/default/testuser',
             dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
-            redshiftUser: 'test_redshift_user',
-          },
-          redshift: {
-            dataApiRole: 'arn:aws:iam::11111111:role/test_api_role',
-            newServerless: {
-              workgroupName: 'clickstream-project01-wvzh',
-            },
           },
         },
         pairEventAndConditions: [
@@ -2477,15 +2035,7 @@ describe('reporting test', () => {
           region: 'us-east-1',
           allowDomain: 'https://example.com',
           quickSight: {
-            principal: 'arn:aws:quicksight:us-east-1:11111:user/default/testuser',
             dataSourceArn: 'arn:aws:quicksight:us-east-1:11111111:datasource/clickstream_datasource_aaaaaaa',
-            redshiftUser: 'test_redshift_user',
-          },
-          redshift: {
-            dataApiRole: 'arn:aws:iam::11111111:role/test_api_role',
-            newServerless: {
-              workgroupName: 'clickstream-project01-wvzh',
-            },
           },
         },
         pairEventAndConditions: [

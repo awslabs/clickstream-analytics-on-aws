@@ -26,12 +26,7 @@ import {
 import i18n from 'i18n';
 import moment from 'moment';
 import { DEFAULT_EN_LANG, TIME_FORMAT } from 'ts/const';
-import {
-  OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME,
-  OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX,
-  OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_NAME_SUFFIX,
-  OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN,
-} from 'ts/constant-ln';
+import { OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN } from 'ts/constant-ln';
 import {
   ConditionCategory,
   ExploreComputeMethod,
@@ -474,100 +469,19 @@ export const getDashboardCreateParameters = (
   pipeline: IPipeline,
   allowedDomain: string
 ) => {
-  const redshiftOutputs = getValueFromStackOutputs(
-    pipeline,
-    'DataModelingRedshift',
-    [
-      OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME,
-      OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX,
-      OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_NAME_SUFFIX,
-    ]
-  );
   const reportingOutputs = getValueFromStackOutputs(pipeline, 'Reporting', [
     OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN,
   ]);
-  if (
-    !redshiftOutputs.get(
-      OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME
-    ) ||
-    !redshiftOutputs.get(
-      OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX
-    ) ||
-    !redshiftOutputs.get(OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_NAME_SUFFIX) ||
-    !reportingOutputs.get(OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN)
-  ) {
+  if (!reportingOutputs.get(OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN)) {
     return undefined;
   }
   return {
     region: pipeline.region,
     allowedDomain: allowedDomain,
-    redshift: {
-      user: defaultStr(
-        redshiftOutputs.get(OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_NAME_SUFFIX)
-      ),
-      dataApiRole: defaultStr(
-        redshiftOutputs.get(
-          OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX
-        )
-      ),
-      newServerless: {
-        workgroupName: defaultStr(
-          redshiftOutputs.get(
-            OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME
-          )
-        ),
-      },
-    },
     quickSight: {
       dataSourceArn: defaultStr(
         reportingOutputs.get(OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN)
       ),
-    },
-  };
-};
-
-export const getWarmUpParameters = (
-  projectId: string,
-  appId: string,
-  pipeline: IPipeline
-) => {
-  const redshiftOutputs = getValueFromStackOutputs(
-    pipeline,
-    'DataModelingRedshift',
-    [
-      OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME,
-      OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX,
-    ]
-  );
-  if (
-    !projectId ||
-    !appId ||
-    !redshiftOutputs.get(
-      OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME
-    ) ||
-    !redshiftOutputs.get(OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX)
-  ) {
-    return undefined;
-  }
-  return {
-    projectId: projectId,
-    appId: appId,
-    dashboardCreateParameters: {
-      region: pipeline.region,
-      redshift: {
-        dataApiRole: defaultStr(
-          redshiftOutputs.get(
-            OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX
-          )
-        ),
-        newServerless: {
-          workgroupName: defaultStr(
-            redshiftOutputs.get(
-              OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME
-            )
-          ),
-        },
-      },
     },
   };
 };
