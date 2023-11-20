@@ -502,7 +502,7 @@ export class ClickStreamApiConstruct extends Construct {
             new iam.PolicyStatement({
               effect: iam.Effect.ALLOW,
               resources: [
-                `arn:${Aws.PARTITION}:quicksight:*:${Aws.ACCOUNT_ID}:dashboard/clickstream*`,
+                `arn:${Aws.PARTITION}:quicksight:*:${Aws.ACCOUNT_ID}:dashboard/${QUICKSIGHT_RESOURCE_NAME_PREFIX}*`,
                 `arn:${Aws.PARTITION}:quicksight:*:${Aws.ACCOUNT_ID}:user/*`,
               ],
               actions: [
