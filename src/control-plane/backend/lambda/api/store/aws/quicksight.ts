@@ -12,8 +12,6 @@
  */
 
 import {
-  ListUsersCommand,
-  User,
   DescribeAccountSubscriptionCommand,
   RegisterUserCommand,
   IdentityType,
@@ -41,66 +39,20 @@ import {
   DescribeDashboardCommandInput,
   DescribeDashboardCommandOutput,
 } from '@aws-sdk/client-quicksight';
-import { APIRoleName, awsAccountId, awsRegion, QUICKSIGHT_CONTROL_PLANE_REGION, QUICKSIGHT_EMBED_NO_REPLY_EMAIL, QuickSightEmbedRoleArn } from '../../common/constants';
+import { awsAccountId, awsRegion, QUICKSIGHT_CONTROL_PLANE_REGION, QUICKSIGHT_EMBED_NO_REPLY_EMAIL, QuickSightEmbedRoleArn } from '../../common/constants';
 import { QUICKSIGHT_ANALYSIS_INFIX, QUICKSIGHT_DASHBOARD_INFIX, QUICKSIGHT_DATASET_INFIX } from '../../common/constants-ln';
-import { getPaginatedResults } from '../../common/paginator';
 import { logger } from '../../common/powertools';
 import { SDKClient } from '../../common/sdk-client';
-import { QuickSightAccountInfo, QuickSightUser } from '../../common/types';
-import { generateRandomStr } from '../../common/utils-ln';
+import { QuickSightAccountInfo } from '../../common/types';
 import { IDashboard } from '../../model/project';
 import { analysisAdminPermissionActions, dashboardAdminPermissionActions, dataSetAdminPermissionActions } from '../../service/quicksight/dashboard-ln';
 import { sleep } from '../../service/quicksight/reporting-utils';
 
 const QUICKSIGHT_NAMESPACE = 'default';
-const QUICKSIGHT_PREFIX = 'Clickstream';
-const QUICKSIGHT_DEFAULT_USER = `${QUICKSIGHT_PREFIX}-User-${generateRandomStr(8, 'abcdefghijklmnopqrstuvwxyz')}`;
 const QUICKSIGHT_EXPLORE_USER_NAME = 'ClickstreamExploreUser';
 const QUICKSIGHT_PUBLISH_USER_NAME = 'ClickstreamPublishUser';
 
 const sdkClient: SDKClient = new SDKClient();
-
-export const listQuickSightUsers = async () => {
-  const identityRegion = await sdkClient.QuickSightIdentityRegion();
-  return listQuickSightUsersByRegion(identityRegion);
-};
-
-export const listQuickSightUsersByRegion = async (region: string) => {
-  const users: QuickSightUser[] = [];
-  const quickSightClient = sdkClient.QuickSightClient({
-    region: region,
-  });
-  const records = await getPaginatedResults(async (NextToken: any) => {
-    const params: ListUsersCommand = new ListUsersCommand({
-      AwsAccountId: awsAccountId,
-      Namespace: QUICKSIGHT_NAMESPACE,
-      NextToken,
-    });
-    const queryResponse = await quickSightClient.send(params);
-    return {
-      marker: queryResponse.NextToken,
-      results: queryResponse.UserList,
-    };
-  });
-  for (let user of records as User[]) {
-    if (!user.UserName?.startsWith(APIRoleName!)) {
-      users.push({
-        userName: user.UserName ?? '',
-        arn: user.Arn ?? '',
-        email: user.Email ?? '',
-        role: user.Role ?? '',
-        active: user.Active ?? false,
-      });
-    }
-  }
-  return users;
-};
-
-// Creates an Amazon QuickSight user
-export const registerQuickSightUser = async (email: string, username?: string) => {
-  const identityRegion = await sdkClient.QuickSightIdentityRegion();
-  return registerQuickSightUserByRegion(identityRegion, email, username);
-};
 
 export const registerClickstreamUser = async () => {
   const identityRegion = await sdkClient.QuickSightIdentityRegion();
@@ -123,29 +75,6 @@ export const registerClickstreamUser = async () => {
     SessionName: QUICKSIGHT_EXPLORE_USER_NAME,
   });
   return getClickstreamUserArn();
-};
-
-export const registerQuickSightUserByRegion = async (region: string, email: string, username?: string) => {
-  try {
-    const quickSightClient = sdkClient.QuickSightClient({
-      region: region,
-    });
-    const command: RegisterUserCommand = new RegisterUserCommand({
-      IdentityType: IdentityType.QUICKSIGHT,
-      AwsAccountId: awsAccountId,
-      Email: email,
-      UserName: username ?? QUICKSIGHT_DEFAULT_USER,
-      UserRole: UserRole.ADMIN,
-      Namespace: QUICKSIGHT_NAMESPACE,
-    });
-    const response = await quickSightClient.send(command);
-    return response.UserInvitationUrl;
-  } catch (err) {
-    if (err instanceof ResourceExistsException) {
-      return '';
-    }
-    throw err;
-  }
 };
 
 export const registerUserByRegion = async (

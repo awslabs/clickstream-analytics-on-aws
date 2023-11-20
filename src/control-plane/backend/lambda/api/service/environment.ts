@@ -28,9 +28,7 @@ import { listRoles } from '../store/aws/iam';
 import { listMSKCluster, mskPing } from '../store/aws/kafka';
 import {
   describeClickstreamAccountSubscription,
-  listQuickSightUsers,
   quickSightIsSubscribed, quickSightPing,
-  registerQuickSightUser,
 } from '../store/aws/quicksight';
 import { describeRedshiftClusters, listRedshiftServerlessWorkgroups, redshiftServerlessPing } from '../store/aws/redshift';
 import { listHostedZones } from '../store/aws/route53';
@@ -181,28 +179,6 @@ export class EnvironmentServ {
   public async quickSightIsSubscribed(_req: any, res: any, next: any) {
     try {
       const result = await quickSightIsSubscribed();
-      return res.json(new ApiSuccess(result));
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  public async listQuickSightUsers(_req: any, res: any, next: any) {
-    try {
-      const result = await listQuickSightUsers();
-      return res.json(new ApiSuccess(result));
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  public async registerQuickSightUser(req: any, res: any, next: any) {
-    try {
-      const {
-        email,
-        username,
-      } = req.body;
-      const result = await registerQuickSightUser(email, username);
       return res.json(new ApiSuccess(result));
     } catch (error) {
       next(error);

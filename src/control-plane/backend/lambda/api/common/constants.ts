@@ -26,7 +26,6 @@ const awsPartition = process.env.AWS_PARTITION;
 const awsAccountId = process.env.AWS_ACCOUNT_ID;
 const awsUrlSuffix = process.env.AWS_URL_SUFFIX;
 const STSUploadRole = process.env.STS_UPLOAD_ROLE_ARN;
-const APIRoleName = process.env.API_ROLE_NAME;
 const QuickSightEmbedRoleArn = process.env.QUICKSIGHT_EMBED_ROLE_ARN;
 const amznRequestContextHeader = 'x-amzn-request-context';
 const amznLambdaContextHeader = 'x-amzn-lambda-context';
@@ -95,7 +94,6 @@ export {
   awsAccountId,
   awsUrlSuffix,
   STSUploadRole,
-  APIRoleName,
   QuickSightEmbedRoleArn,
   amznRequestContextHeader,
   amznLambdaContextHeader,
