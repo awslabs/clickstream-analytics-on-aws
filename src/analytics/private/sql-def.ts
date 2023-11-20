@@ -48,7 +48,7 @@ export const reportingViewsDef: SQLViewDef[] = [
     viewName: CLICKSTREAM_RETENTION_VIEW_NAME,
   },
   {
-    updatable: 'false',
+    updatable: 'true',
     viewName: CLICKSTREAM_USER_ATTR_VIEW_NAME,
   },
 ];

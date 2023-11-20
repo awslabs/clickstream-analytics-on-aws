@@ -9726,6 +9726,62 @@
         {
             "SheetId": "d4cf5b55-1e86-43f8-982f-d6002abc9ee2",
             "Name": "Crash",
+            "ParameterControls": [
+                {
+                    "DateTimePicker": {
+                        "ParameterControlId": "52c574f1-c2a9-4486-b833-133e6bd7f5ca",
+                        "Title": "Start date",
+                        "SourceParameterName": "EventStartDate",
+                        "DisplayOptions": {
+                            "TitleOptions": {
+                                "Visibility": "VISIBLE",
+                                "FontConfiguration": {
+                                    "FontSize": {
+                                        "Relative": "MEDIUM"
+                                    }
+                                }
+                            },
+                            "DateTimeFormat": "YYYY/MM/DD",
+                            "InfoIconLabelOptions": {
+                                "Visibility": "HIDDEN"
+                            }
+                        }
+                    }
+                },
+                {
+                    "DateTimePicker": {
+                        "ParameterControlId": "0588b81e-9e6d-41af-a162-81135a8af12f",
+                        "Title": "End date",
+                        "SourceParameterName": "EventEndDate",
+                        "DisplayOptions": {
+                            "TitleOptions": {
+                                "Visibility": "VISIBLE",
+                                "FontConfiguration": {
+                                    "FontSize": {
+                                        "Relative": "MEDIUM"
+                                    }
+                                }
+                            },
+                            "DateTimeFormat": "YYYY/MM/DD"
+                        }
+                    }
+                }
+            ],
+            "FilterControls": [
+                {
+                    "Dropdown": {
+                        "FilterControlId": "deed6b7d-02af-48f7-94a4-9b26e0dadac4",
+                        "Title": "platform equals",
+                        "SourceFilterId": "3b42fadf-6f2d-402c-af1d-b50b9d5f5408",
+                        "DisplayOptions": {
+                            "SelectAllOptions": {
+                                "Visibility": "VISIBLE"
+                            }
+                        },
+                        "Type": "MULTI_SELECT"
+                    }
+                }
+            ],
             "Visuals": [
                 {
                     "LineChartVisual": {
@@ -9883,11 +9939,14 @@
                         "Title": {
                             "Visibility": "VISIBLE",
                             "FormatText": {
-                                "RichText": "<visual-title>\n  <inline font-size=\"16px\">Crash user</inline>\n</visual-title>"
+                                "RichText": "<visual-title>\n  <inline font-size=\"16px\">Crash rate</inline>\n</visual-title>"
                             }
                         },
                         "Subtitle": {
-                            "Visibility": "VISIBLE"
+                            "Visibility": "VISIBLE",
+                            "FormatText": {
+                                "RichText": "<visual-subtitle>Impacted device number over total active device number</visual-subtitle>"
+                            }
                         },
                         "ChartConfiguration": {
                             "FieldWells": {
@@ -11461,6 +11520,34 @@
                                     "OptimizedViewPortWidth": "1600px"
                                 }
                             }
+                        }
+                    }
+                }
+            ],
+            "SheetControlLayouts": [
+                {
+                    "Configuration": {
+                        "GridLayout": {
+                            "Elements": [
+                                {
+                                    "ElementId": "52c574f1-c2a9-4486-b833-133e6bd7f5ca",
+                                    "ElementType": "PARAMETER_CONTROL",
+                                    "ColumnSpan": 2,
+                                    "RowSpan": 1
+                                },
+                                {
+                                    "ElementId": "0588b81e-9e6d-41af-a162-81135a8af12f",
+                                    "ElementType": "PARAMETER_CONTROL",
+                                    "ColumnSpan": 2,
+                                    "RowSpan": 1
+                                },
+                                {
+                                    "ElementId": "deed6b7d-02af-48f7-94a4-9b26e0dadac4",
+                                    "ElementType": "FILTER_CONTROL",
+                                    "ColumnSpan": 2,
+                                    "RowSpan": 1
+                                }
+                            ]
                         }
                     }
                 }
@@ -14861,6 +14948,104 @@
             },
             "Status": "ENABLED",
             "CrossDataset": "SINGLE_DATASET"
+        },
+        {
+            "FilterGroupId": "af969bc3-c3b7-4703-a6b5-332914bb5094",
+            "Filters": [
+                {
+                    "TimeRangeFilter": {
+                        "FilterId": "a9c3ad57-bd7d-490f-986d-dbaf7e05b582",
+                        "Column": {
+                            "DataSetIdentifier": "Event_View",
+                            "ColumnName": "event_date"
+                        },
+                        "IncludeMinimum": true,
+                        "IncludeMaximum": true,
+                        "RangeMinimumValue": {
+                            "Parameter": "EventStartDate"
+                        },
+                        "RangeMaximumValue": {
+                            "Parameter": "EventEndDate"
+                        },
+                        "NullOption": "NON_NULLS_ONLY",
+                        "TimeGranularity": "DAY"
+                    }
+                }
+            ],
+            "ScopeConfiguration": {
+                "SelectedSheets": {
+                    "SheetVisualScopingConfigurations": [
+                        {
+                            "SheetId": "d4cf5b55-1e86-43f8-982f-d6002abc9ee2",
+                            "Scope": "SELECTED_VISUALS",
+                            "VisualIds": [
+                                "f0657db7-2586-46fc-857c-0087c681a6d0",
+                                "3789571a-a5f9-4c27-aed2-0ee87e3aad55",
+                                "3e9efc64-3f7e-4e34-8316-fbf72c75fdf4",
+                                "a6587390-047a-4a73-94e4-a6a015d8f9c9",
+                                "9dc09e60-3ee6-4e01-9bce-c38fd1fa8be7",
+                                "c20f2803-b75a-450b-91e9-6fc30c444b1b",
+                                "50fc4754-625b-47d5-865f-3a4f7e854e9c",
+                                "647c3efe-580b-4a8c-a1e3-ed41683f46de",
+                                "36199217-7ddc-42bd-ae22-d974610dfe49",
+                                "de9c8aae-95a3-43f5-9a53-51a64fa30f8e",
+                                "a331d4ce-72e4-408a-8da2-8614fdf39f09",
+                                "b49d5c9d-d5fa-4b71-98a0-651e26841842",
+                                "4b854119-05c2-470f-8414-f4cd49abd82e"
+                            ]
+                        }
+                    ]
+                }
+            },
+            "Status": "ENABLED",
+            "CrossDataset": "ALL_DATASETS"
+        },
+        {
+            "FilterGroupId": "9fa29eb2-4e4a-4a68-a5b8-a9f609a22fe8",
+            "Filters": [
+                {
+                    "CategoryFilter": {
+                        "FilterId": "3b42fadf-6f2d-402c-af1d-b50b9d5f5408",
+                        "Column": {
+                            "DataSetIdentifier": "Event_View",
+                            "ColumnName": "platform"
+                        },
+                        "Configuration": {
+                            "FilterListConfiguration": {
+                                "MatchOperator": "CONTAINS",
+                                "SelectAllOptions": "FILTER_ALL_VALUES"
+                            }
+                        }
+                    }
+                }
+            ],
+            "ScopeConfiguration": {
+                "SelectedSheets": {
+                    "SheetVisualScopingConfigurations": [
+                        {
+                            "SheetId": "d4cf5b55-1e86-43f8-982f-d6002abc9ee2",
+                            "Scope": "SELECTED_VISUALS",
+                            "VisualIds": [
+                                "f0657db7-2586-46fc-857c-0087c681a6d0",
+                                "3789571a-a5f9-4c27-aed2-0ee87e3aad55",
+                                "3e9efc64-3f7e-4e34-8316-fbf72c75fdf4",
+                                "a6587390-047a-4a73-94e4-a6a015d8f9c9",
+                                "9dc09e60-3ee6-4e01-9bce-c38fd1fa8be7",
+                                "c20f2803-b75a-450b-91e9-6fc30c444b1b",
+                                "50fc4754-625b-47d5-865f-3a4f7e854e9c",
+                                "647c3efe-580b-4a8c-a1e3-ed41683f46de",
+                                "36199217-7ddc-42bd-ae22-d974610dfe49",
+                                "de9c8aae-95a3-43f5-9a53-51a64fa30f8e",
+                                "a331d4ce-72e4-408a-8da2-8614fdf39f09",
+                                "b49d5c9d-d5fa-4b71-98a0-651e26841842",
+                                "4b854119-05c2-470f-8414-f4cd49abd82e"
+                            ]
+                        }
+                    ]
+                }
+            },
+            "Status": "ENABLED",
+            "CrossDataset": "ALL_DATASETS"
         }
     ],
     "ColumnConfigurations": [
