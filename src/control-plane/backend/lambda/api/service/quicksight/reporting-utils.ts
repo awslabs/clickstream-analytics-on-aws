@@ -328,21 +328,23 @@ export const createDataSet = async (quickSight: QuickSight, awsAccountId: string
     }
 
     logger.info('start to create dataset');
+    const datasetPermissionActions = [
+      {
+        Principal: exploreUserArn,
+        Actions: dataSetAdminPermissionActions,
+      },
+    ];
+    if (requestAction === ExploreRequestAction.PUBLISH) {
+      datasetPermissionActions.push({
+        Principal: publishUserArn,
+        Actions: dataSetReaderPermissionActions,
+      });
+    }
     const dataset = await quickSight.createDataSet({
       AwsAccountId: awsAccountId,
       DataSetId: datasetId,
-      Name: `dataset-${datasetId}`,
-      Permissions: [
-        {
-          Principal: exploreUserArn,
-          Actions: dataSetAdminPermissionActions,
-        },
-        {
-          Principal: publishUserArn,
-          Actions: dataSetReaderPermissionActions,
-        },
-      ],
-
+      Name: datasetId,
+      Permissions: datasetPermissionActions,
       ImportMode: props.importMode,
       PhysicalTableMap: {
         PhyTable1: {

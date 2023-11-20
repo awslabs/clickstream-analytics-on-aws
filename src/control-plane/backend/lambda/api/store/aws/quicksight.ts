@@ -38,6 +38,8 @@ import {
   DescribeDashboardCommand,
   DescribeDashboardCommandInput,
   DescribeDashboardCommandOutput,
+  DescribeDashboardDefinitionCommand,
+  DeleteDataSetCommand,
 } from '@aws-sdk/client-quicksight';
 import { awsAccountId, awsRegion, QUICKSIGHT_CONTROL_PLANE_REGION, QUICKSIGHT_EMBED_NO_REPLY_EMAIL, QuickSightEmbedRoleArn } from '../../common/constants';
 import { QUICKSIGHT_ANALYSIS_INFIX, QUICKSIGHT_DASHBOARD_INFIX, QUICKSIGHT_DATASET_INFIX } from '../../common/constants-ln';
@@ -443,6 +445,33 @@ export const createPublishDashboard = async (
     await createAnalysis(dashboard.region, analysisInput);
   } catch (err) {
     logger.error('Create Publish Dashboard Error.', { err });
+    throw err;
+  }
+};
+
+export const deleteDatasetOfPublishDashboard = async (
+  region: string,
+  dashboardId: string,
+): Promise<any> => {
+  try {
+    const quickSightClient = sdkClient.QuickSightClient({
+      region: region,
+    });
+    const command: DescribeDashboardDefinitionCommand = new DescribeDashboardDefinitionCommand({
+      AwsAccountId: awsAccountId,
+      DashboardId: dashboardId,
+    });
+    const dashboardDefinition = await quickSightClient.send(command);
+    dashboardDefinition.Definition?.DataSetIdentifierDeclarations?.forEach(async (dataset) => {
+      const datasetId = dataset.DataSetArn?.split('/')[1];
+      const delCommand: DeleteDataSetCommand = new DeleteDataSetCommand({
+        AwsAccountId: awsAccountId,
+        DataSetId: datasetId,
+      });
+      await quickSightClient.send(delCommand);
+    });
+  } catch (err) {
+    logger.error('Delete dataset of publish dashboard error.', { err });
     throw err;
   }
 };

@@ -11,8 +11,9 @@
  *  and limitations under the License.
  */
 
-import { CreateDashboardCommand, CreateDataSetCommand, QuickSightClient } from '@aws-sdk/client-quicksight';
+import { CreateAnalysisCommand, CreateDashboardCommand, CreateDataSetCommand, DeleteAnalysisCommand, DeleteDashboardCommand, DeleteDataSetCommand, DescribeDashboardDefinitionCommand, QuickSightClient, ResourceNotFoundException } from '@aws-sdk/client-quicksight';
 import {
+  DeleteCommand,
   DynamoDBDocumentClient,
   GetCommand,
   PutCommand,
@@ -23,8 +24,10 @@ import { mockClient } from 'aws-sdk-client-mock';
 import request from 'supertest';
 import { MOCK_APP_ID, MOCK_DASHBOARD_ID, MOCK_PROJECT_ID, MOCK_TOKEN, projectExistedMock, tokenMock } from './ddb-mock';
 import { KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW } from './pipeline-mock';
+import { OUTPUT_REPORT_DASHBOARDS_SUFFIX } from '../../common/constants-ln';
 import { app, server } from '../../index';
 import 'aws-sdk-client-mock-jest';
+
 const ddbMock = mockClient(DynamoDBDocumentClient);
 const quickSightMock = mockClient(QuickSightClient);
 
@@ -40,6 +43,8 @@ describe('Analytics dashboard test', () => {
     ddbMock.on(PutCommand).resolvesOnce({});
     quickSightMock.on(CreateDataSetCommand).resolvesOnce({});
     quickSightMock.on(CreateDashboardCommand).resolvesOnce({});
+    quickSightMock.on(CreateDashboardCommand).resolves({});
+    quickSightMock.on(CreateAnalysisCommand).resolves({});
     const res = await request(app)
       .post(`/api/project/${MOCK_PROJECT_ID}/${MOCK_APP_ID}/dashboard`)
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
@@ -61,6 +66,7 @@ describe('Analytics dashboard test', () => {
     expect(res.body.success).toEqual(true);
     expect(quickSightMock).toHaveReceivedCommandTimes(CreateDataSetCommand, 1);
     expect(quickSightMock).toHaveReceivedCommandTimes(CreateDashboardCommand, 1);
+    expect(quickSightMock).toHaveReceivedCommandTimes(CreateAnalysisCommand, 1);
     expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 2);
     expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 2);
   });
@@ -71,6 +77,7 @@ describe('Analytics dashboard test', () => {
     ddbMock.on(PutCommand).resolvesOnce({});
     quickSightMock.on(CreateDataSetCommand).resolvesOnce({});
     quickSightMock.on(CreateDashboardCommand).resolvesOnce({});
+    quickSightMock.on(CreateAnalysisCommand).resolves({});
     const res = await request(app)
       .post(`/api/project/${MOCK_PROJECT_ID}/${MOCK_APP_ID}/dashboard`)
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
@@ -99,6 +106,7 @@ describe('Analytics dashboard test', () => {
     });
     expect(quickSightMock).toHaveReceivedCommandTimes(CreateDataSetCommand, 0);
     expect(quickSightMock).toHaveReceivedCommandTimes(CreateDashboardCommand, 0);
+    expect(quickSightMock).toHaveReceivedCommandTimes(CreateAnalysisCommand, 0);
     expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 2);
     expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 0);
   });
@@ -204,26 +212,60 @@ describe('Analytics dashboard test', () => {
   });
 
   it('delete dashboard', async () => {
+    ddbMock.on(QueryCommand).resolves({
+      Items: [
+        {
+          status: {
+            stackDetails: [
+              {
+                stackType: 'Reporting',
+                outputs: [
+                  {
+                    OutputKey: 'aaaaaaa' + OUTPUT_REPORT_DASHBOARDS_SUFFIX,
+                    OutputValue: `[{
+                      "appId": "${MOCK_APP_ID}",
+                      "dashboardId": "builtin-dashboard"
+                    }]`,
+                  },
+                ],
+              },
+            ],
+          },
+        },
+      ],
+    });
+
     ddbMock.on(GetCommand).resolves({
       Item: {
-        dashboardId: MOCK_DASHBOARD_ID,
-        name: 'dashboard-1',
-        projectId: MOCK_PROJECT_ID,
-        description: 'Description of dashboard-1',
-        region: 'ap-southeast-1',
-        sheets: [
-          { id: 's1', name: 'sheet1' },
-          { id: 's2', name: 'sheet2' },
-        ],
-        ownerPrincipal: 'arn:aws:quicksight:us-west-2:5555555555555:user/default/user',
-        defaultDataSourceArn: 'arn:aws:quicksight:ap-southeast-1:5555555555555:datasource/clickstream_datasource_project_1',
-        deleted: false,
+        region: 'us-east-1',
       },
     });
-    ddbMock.on(QueryCommand).resolves({
-      Items: [{ ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW }],
+
+    quickSightMock.on(DeleteDashboardCommand).resolves({});
+    quickSightMock.on(DeleteAnalysisCommand).resolves({});
+
+    const dashboardDef =
+    {
+      DataSetIdentifierDeclarations: [
+        {
+          Identifier: 'test-dataset-name1',
+          DataSetArn: 'arn:aws:quicksight:ap-northeast-1:555555555555:dataset/0042ffe51',
+        },
+        {
+          Identifier: 'test-dataset-name2',
+          DataSetArn: 'arn:aws:quicksight:ap-northeast-1:555555555555:dataset/0042ffe52',
+        },
+      ],
+      Sheets: [],
+      CalculatedFields: [],
+      ParameterDeclarations: [],
+      FilterGroups: [],
+    };
+    quickSightMock.on(DescribeDashboardDefinitionCommand).resolves({
+      Definition: dashboardDef,
     });
-    ddbMock.on(UpdateCommand).resolves({});
+    quickSightMock.on(DeleteDataSetCommand).resolves({});
+
     const res = await request(app)
       .delete(`/api/project/${MOCK_PROJECT_ID}/${MOCK_APP_ID}/dashboard/${MOCK_DASHBOARD_ID}`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
@@ -232,6 +274,71 @@ describe('Analytics dashboard test', () => {
       { data: null, message: 'Dashboard deleted.', success: true });
     expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 1);
     expect(ddbMock).toHaveReceivedCommandTimes(UpdateCommand, 1);
+    expect(quickSightMock).toHaveReceivedCommandTimes(DeleteDashboardCommand, 1);
+    expect(quickSightMock).toHaveReceivedCommandTimes(DeleteAnalysisCommand, 1);
+    expect(quickSightMock).toHaveReceivedCommandTimes(DescribeDashboardDefinitionCommand, 1);
+    expect(quickSightMock).toHaveReceivedCommandTimes(DeleteDataSetCommand, 2);
+  });
+
+  it('Delete dashboard - dashboard not exist', async () => {
+    projectExistedMock(ddbMock, false);
+
+    ddbMock.on(QueryCommand).resolves({
+      Items: [
+        {
+          status: {
+            stackDetails: [
+              {
+                stackType: 'Reporting',
+                outputs: [
+                  {
+                    OutputKey: 'aaaaaaa' + OUTPUT_REPORT_DASHBOARDS_SUFFIX,
+                    OutputValue: `[{
+                      "appId": "${MOCK_APP_ID}",
+                      "dashboardId": "builtin-dashboard"
+                    }]`,
+                  },
+                ],
+              },
+            ],
+          },
+        },
+      ],
+    });
+
+    ddbMock.on(GetCommand).resolves({
+      Item: {
+        region: 'us-east-1',
+      },
+    });
+
+    ddbMock.on(DeleteCommand).resolves({});
+
+    quickSightMock.on(DeleteDashboardCommand).rejects(
+      new ResourceNotFoundException({
+        message: 'resource not exist.',
+        $metadata: {},
+      }),
+    );
+
+    quickSightMock.on(DescribeDashboardDefinitionCommand).rejects(
+      new ResourceNotFoundException({
+        message: 'resource not exist.',
+        $metadata: {},
+      }),
+    );
+    quickSightMock.on(DeleteDataSetCommand).resolves({});
+
+    const res = await request(app)
+      .delete(`/api/project/${MOCK_PROJECT_ID}/${MOCK_APP_ID}/dashboard/${MOCK_DASHBOARD_ID}`);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(200);
+    expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 1);
+    expect(ddbMock).toHaveReceivedCommandTimes(UpdateCommand, 1);
+    expect(quickSightMock).toHaveReceivedCommandTimes(DeleteDashboardCommand, 0);
+    expect(quickSightMock).toHaveReceivedCommandTimes(DeleteAnalysisCommand, 0);
+    expect(quickSightMock).toHaveReceivedCommandTimes(DescribeDashboardDefinitionCommand, 1);
+    expect(quickSightMock).toHaveReceivedCommandTimes(DeleteDataSetCommand, 0);
   });
 
   afterAll((done) => {

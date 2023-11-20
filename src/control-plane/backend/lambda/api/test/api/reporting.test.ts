@@ -1347,13 +1347,13 @@ describe('reporting test', () => {
         Arn: 'arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa',
         Name: '_tmp_aaaaaaa',
         CreatedTime: new Date((new Date()).getTime() - 80*60*1000),
-        DashboardId: 'dashboard-aaaaaaaa',
+        DashboardId: '_tmp_dashboard-aaaaaaaa',
       }],
     });
 
     quickSightMock.on(DeleteDashboardCommand).resolves({
       Status: 200,
-      DashboardId: 'dashboard-aaaaaaaa',
+      DashboardId: '_tmp_dashboard-aaaaaaaa',
     });
 
     quickSightMock.on(ListAnalysesCommand).resolves({
@@ -1362,14 +1362,14 @@ describe('reporting test', () => {
           Arn: 'arn:aws:quicksight:us-east-1:11111111:analysis/analysis-aaaaaaaa',
           Name: '_tmp_aaaaaaa',
           CreatedTime: new Date((new Date()).getTime() - 80*60*1000),
-          AnalysisId: 'analysis_aaaaaaa',
+          AnalysisId: '_tmp_analysis_aaaaaaa',
           Status: ResourceStatus.UPDATE_SUCCESSFUL,
         },
         {
           Arn: 'arn:aws:quicksight:us-east-1:11111111:analysis/analysis-bbbbbb',
           Name: '_tmp_bbbbbb',
           CreatedTime: new Date((new Date()).getTime() - 80*60*1000),
-          AnalysisId: 'analysis_bbbbbb',
+          AnalysisId: '_tmp_analysis_bbbbbb',
           Status: ResourceStatus.DELETED,
         },
       ],
@@ -1377,7 +1377,7 @@ describe('reporting test', () => {
 
     quickSightMock.on(DeleteAnalysisCommand).resolves({
       Status: 200,
-      AnalysisId: 'analysis-aaaaaaaa',
+      AnalysisId: '_tmp_analysis-aaaaaaaa',
     });
 
     quickSightMock.on(ListDataSetsCommand).resolves({
@@ -1385,13 +1385,13 @@ describe('reporting test', () => {
         Arn: 'arn:aws:quicksight:us-east-1:11111111:dataset/dataset-aaaaaaaa',
         Name: '_tmp_aaaaaaa',
         CreatedTime: new Date((new Date()).getTime() - 80*60*1000),
-        DataSetId: 'dataset_aaaaaaa',
+        DataSetId: '_tmp_dataset_aaaaaaa',
       }],
     });
 
     quickSightMock.on(DeleteDataSetCommand).resolves({
       Status: 200,
-      DataSetId: 'dataset-aaaaaaaa',
+      DataSetId: '_tmp_dataset-aaaaaaaa',
     });
 
     const res = await request(app)
@@ -1404,9 +1404,9 @@ describe('reporting test', () => {
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(201);
     expect(res.body.success).toEqual(true);
-    expect(res.body.data.deletedDashBoards[0]).toEqual('dashboard-aaaaaaaa');
-    expect(res.body.data.deletedAnalyses[0]).toEqual('analysis-aaaaaaaa');
-    expect(res.body.data.deletedDatasets[0]).toEqual('dataset-aaaaaaaa');
+    expect(res.body.data.deletedDashBoards[0]).toEqual('_tmp_dashboard-aaaaaaaa');
+    expect(res.body.data.deletedAnalyses[0]).toEqual('_tmp_analysis-aaaaaaaa');
+    expect(res.body.data.deletedDatasets[0]).toEqual('_tmp_dataset-aaaaaaaa');
     expect(quickSightMock).toHaveReceivedCommandTimes(DeleteDashboardCommand, 1);
     expect(quickSightMock).toHaveReceivedCommandTimes(DeleteAnalysisCommand, 1);
     expect(quickSightMock).toHaveReceivedCommandTimes(DeleteDataSetCommand, 1);
