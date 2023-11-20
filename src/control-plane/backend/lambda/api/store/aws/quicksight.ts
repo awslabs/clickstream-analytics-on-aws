@@ -360,8 +360,7 @@ export const createPublishDashboard = async (
   try {
     const principals = await getClickstreamUserArn();
     // Create dataset in QuickSight
-    const datasetIdPrefix = dashboard.id.replace(QUICKSIGHT_DASHBOARD_INFIX, QUICKSIGHT_DATASET_INFIX);
-    const datasetId = `${datasetIdPrefix}-default`;
+    const datasetId = dashboard.id.replace(QUICKSIGHT_DASHBOARD_INFIX, QUICKSIGHT_DATASET_INFIX);
     const datasetInput: CreateDataSetCommandInput = {
       AwsAccountId: awsAccountId,
       DataSetId: datasetId,
