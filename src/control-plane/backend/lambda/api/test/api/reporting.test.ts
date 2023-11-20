@@ -300,7 +300,7 @@ describe('reporting test', () => {
     }).resolves({
       Dashboard: {
         Version: {
-          Status: ResourceStatus.CREATION_SUCCESSFUL,
+          Status: ResourceStatus.CREATION_FAILED,
         },
       },
     });
