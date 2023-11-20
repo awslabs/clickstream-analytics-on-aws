@@ -1677,7 +1677,7 @@ describe('SQL Builder test', () => {
     select
       day::date as event_date,
       event_name,
-      x_id as count
+      x_id as id
     from
       join_table
     where
@@ -7043,7 +7043,7 @@ describe('SQL Builder test', () => {
     select
       day::date as event_date,
       event_name,
-      x_id as count
+      x_id as id
     from
       join_table
     where
@@ -9832,7 +9832,7 @@ describe('SQL Builder test', () => {
       day::date as event_date,
       event_name,
       _session_id::varchar as group_col,
-      x_id as count
+      x_id as id
     from
       join_table
     where
@@ -10132,7 +10132,7 @@ describe('SQL Builder test', () => {
       day::date as event_date,
       event_name,
       geo_country::varchar as group_col,
-      x_id as count
+      x_id as id
     from
       join_table
     where
@@ -15337,7 +15337,7 @@ describe('SQL Builder test', () => {
       day::date as event_date,
       event_name,
       geo_country::varchar as group_col,
-      x_id as count
+      x_id as id
     from
       join_table
     where
