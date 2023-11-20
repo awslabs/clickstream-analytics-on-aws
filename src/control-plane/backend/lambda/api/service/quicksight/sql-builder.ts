@@ -373,7 +373,7 @@ export function buildEventAnalysisView(sqlParameters: SQLParameters) : string {
         day::date as event_date, 
         event_name, 
         ${groupColSQL}
-        x_id as count
+        x_id as id
       from join_table 
       where x_id is not null
       group by

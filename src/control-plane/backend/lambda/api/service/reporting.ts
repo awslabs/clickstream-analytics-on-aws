@@ -49,7 +49,7 @@ import {
 import { buildEventAnalysisView, buildEventPathAnalysisView, buildFunnelTableView, buildFunnelView, buildNodePathAnalysisView, buildRetentionAnalysisView } from './quicksight/sql-builder';
 import { awsAccountId } from '../common/constants';
 import { OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX, OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME, QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX } from '../common/constants-ln';
-import { AnalysisType, ExplorePathNodeType, ExploreRequestAction, ExploreTimeScopeType, ExploreVisualName, QuickSightChartType } from '../common/explore-types';
+import { ExploreLocales, AnalysisType, ExplorePathNodeType, ExploreRequestAction, ExploreTimeScopeType, ExploreVisualName, QuickSightChartType } from '../common/explore-types';
 import { logger } from '../common/powertools';
 import { SDKClient } from '../common/sdk-client';
 import { ApiFail, ApiSuccess, PipelineStackType } from '../common/types';
@@ -222,10 +222,11 @@ export class ReportingService {
     });
 
     const visualId = uuidv4();
+    const locale = query.locale ?? ExploreLocales.EN_US;
     const titleProps = await getDashboardTitleProps(AnalysisType.FUNNEL, query);
     const quickSightChartType = query.chartType;
     const visualDef = getFunnelVisualDef(visualId, viewName, titleProps, quickSightChartType, query.groupColumn, hasGrouping);
-    const visualRelatedParams = getVisualRelatedDefs({
+    const visualRelatedParams = await getVisualRelatedDefs({
       timeScopeType: query.timeScopeType,
       sheetId,
       visualId,
@@ -234,7 +235,7 @@ export class ReportingService {
       timeUnit: query.timeUnit,
       timeStart: query.timeStart,
       timeEnd: query.timeEnd,
-    });
+    }, locale);
 
     const visualProps = {
       sheetId: sheetId,
@@ -312,7 +313,7 @@ export class ReportingService {
       logger.debug(`event analysis sql: ${sql}`);
 
       const hasGrouping = query.groupCondition !== undefined;
-      const projectedColumns = ['event_date', 'event_name', 'count'];
+      const projectedColumns = ['event_date', 'event_name', 'id'];
       const datasetColumns = [...eventVisualColumns];
       if (hasGrouping) {
         datasetColumns.push({
@@ -342,12 +343,12 @@ export class ReportingService {
         sheetId = query.sheetId;
       }
 
-
+      const locale = query.locale ?? ExploreLocales.EN_US;
       const visualId = uuidv4();
       const titleProps = await getDashboardTitleProps(AnalysisType.EVENT, query);
       const quickSightChartType = query.chartType;
       const visualDef = getEventChartVisualDef(visualId, viewName, titleProps, quickSightChartType, query.groupColumn, hasGrouping);
-      const visualRelatedParams = getVisualRelatedDefs({
+      const visualRelatedParams = await getVisualRelatedDefs({
         timeScopeType: query.timeScopeType,
         sheetId,
         visualId,
@@ -356,7 +357,7 @@ export class ReportingService {
         timeUnit: query.timeUnit,
         timeStart: query.timeStart,
         timeEnd: query.timeEnd,
-      });
+      }, locale);
 
       const visualProps = {
         sheetId: sheetId,
@@ -491,8 +492,9 @@ export class ReportingService {
 
       const titleProps = await getDashboardTitleProps(AnalysisType.PATH, query);
       const visualId = uuidv4();
+      const locale = query.locale ?? ExploreLocales.EN_US;
       const visualDef = getPathAnalysisChartVisualDef(visualId, viewName, titleProps);
-      const visualRelatedParams = getVisualRelatedDefs({
+      const visualRelatedParams = await getVisualRelatedDefs({
         timeScopeType: query.timeScopeType,
         sheetId,
         visualId,
@@ -501,7 +503,7 @@ export class ReportingService {
         timeUnit: query.timeUnit,
         timeStart: query.timeStart,
         timeEnd: query.timeEnd,
-      });
+      }, locale);
 
       const visualProps: VisualProps = {
         sheetId: sheetId,
@@ -598,9 +600,10 @@ export class ReportingService {
 
       const titleProps = await getDashboardTitleProps(AnalysisType.RETENTION, query);
       const visualId = uuidv4();
+      const locale = query.locale ?? ExploreLocales.EN_US;
       const quickSightChartType = query.chartType;
       const visualDef = getRetentionChartVisualDef(visualId, viewName, titleProps, quickSightChartType, hasGrouping);
-      const visualRelatedParams = getVisualRelatedDefs({
+      const visualRelatedParams = await getVisualRelatedDefs({
         timeScopeType: query.timeScopeType,
         sheetId,
         visualId,
@@ -609,7 +612,7 @@ export class ReportingService {
         timeUnit: query.timeUnit,
         timeStart: query.timeStart,
         timeEnd: query.timeEnd,
-      });
+      }, locale);
 
       const visualProps = {
         sheetId: sheetId,

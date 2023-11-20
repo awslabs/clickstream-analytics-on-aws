@@ -211,7 +211,7 @@ export const eventVisualColumns: InputColumn[] = [
     Type: 'STRING',
   },
   {
-    Name: 'count',
+    Name: 'id',
     Type: 'STRING',
   },
 ];
@@ -710,7 +710,7 @@ export function getFunnelTableVisualDef(visualId: string, viewName: string, even
   return visualDef;
 }
 
-export function getVisualRelatedDefs(props: VisualRelatedDefProps) : VisualRelatedDefParams {
+export async function getVisualRelatedDefs(props: VisualRelatedDefProps, locale: string) : Promise<VisualRelatedDefParams> {
 
   const filterControlId = uuidv4();
   const sourceFilterId = uuidv4();
@@ -719,6 +719,8 @@ export function getVisualRelatedDefs(props: VisualRelatedDefProps) : VisualRelat
   let filterControl: FilterControl;
   const parameterDeclarations = [];
   let filterGroup: FilterGroup;
+  const t = await i18next.changeLanguage(locale);
+  const filterInfoText = t('dashboard.filter.scope');
 
   if (props.timeScopeType === ExploreTimeScopeType.FIXED) {
 
@@ -726,6 +728,7 @@ export function getVisualRelatedDefs(props: VisualRelatedDefProps) : VisualRelat
     filterControl.DateTimePicker!.FilterControlId = filterControlId;
     filterControl.DateTimePicker!.Title = 'event_date between';
     filterControl.DateTimePicker!.SourceFilterId = sourceFilterId;
+    filterControl.DateTimePicker!.DisplayOptions!.InfoIconLabelOptions!.InfoIconText = filterInfoText;
 
     const filterGroupDef = readFileSync(join(__dirname, './templates/filter-group.template'), 'utf8');
     const mustacheFilterGroupType: MustacheFilterGroupType = {
@@ -744,6 +747,7 @@ export function getVisualRelatedDefs(props: VisualRelatedDefProps) : VisualRelat
     filterControl.RelativeDateTime!.FilterControlId = filterControlId;
     filterControl.RelativeDateTime!.Title = 'event_date';
     filterControl.RelativeDateTime!.SourceFilterId = sourceFilterId;
+    filterControl.RelativeDateTime!.DisplayOptions!.InfoIconLabelOptions!.InfoIconText = filterInfoText;
 
     const parameterDeclarationStart = JSON.parse(readFileSync(join(__dirname, './templates/datetime-parameter.json'), 'utf8')) as ParameterDeclaration;
     parameterDeclarationStart.DateTimeParameterDeclaration!.Name = `dateStart${parameterSuffix}`;
