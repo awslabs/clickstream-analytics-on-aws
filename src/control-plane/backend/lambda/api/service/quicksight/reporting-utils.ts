@@ -65,17 +65,6 @@ export interface DashboardAction {
 export interface DashboardCreateParameters {
   readonly region: string;
   readonly allowedDomain: string;
-  readonly redshift: {
-    readonly user: string;
-    readonly dataApiRole: string;
-    readonly newServerless?: {
-      readonly workgroupName: string;
-    };
-    readonly provisioned?: {
-      readonly clusterIdentifier: string;
-      readonly dbUser: string;
-    };
-  };
   readonly quickSight: {
     readonly dataSourceArn: string;
   };

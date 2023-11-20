@@ -42,7 +42,6 @@ import { MetadataParameterType, MetadataSource } from 'ts/explore-types';
 import { defaultStr } from 'ts/utils';
 import {
   metadataEventsConvertToCategoryItemType,
-  getWarmUpParameters,
   parametersConvertToCategoryItemType,
 } from '../analytics-utils';
 import AnalyticsCustomHeader from '../comps/AnalyticsCustomHeader';
@@ -184,10 +183,18 @@ const AnalyticsExplore: React.FC = () => {
     }
   };
 
-  const warnAndClean = async (params: any) => {
+  const warnAndClean = async (
+    projectId: string,
+    appId: string,
+    region: string
+  ) => {
     await Promise.all([
-      warmup(params),
-      clean(params.dashboardCreateParameters.region),
+      warmup({
+        projectId: projectId,
+        appId: appId,
+        region: region,
+      }),
+      clean(region),
     ]);
   };
 
@@ -246,15 +253,12 @@ const AnalyticsExplore: React.FC = () => {
         await getPipelineDetailByProjectId(defaultStr(projectId));
       if (success) {
         setPipeline(data);
-        const params = getWarmUpParameters(
+        // async to call warm and clean
+        warnAndClean(
           defaultStr(projectId),
           defaultStr(appId),
-          data
+          defaultStr(data.region)
         );
-        if (params) {
-          // async to call warm and clean
-          warnAndClean(params);
-        }
         await getEventParamsAndAttributes();
       }
     } catch (error) {

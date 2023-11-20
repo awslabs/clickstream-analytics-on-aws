@@ -48,14 +48,18 @@ import {
 } from './quicksight/reporting-utils';
 import { buildEventAnalysisView, buildEventPathAnalysisView, buildFunnelTableView, buildFunnelView, buildNodePathAnalysisView, buildRetentionAnalysisView } from './quicksight/sql-builder';
 import { awsAccountId } from '../common/constants';
-import { QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX } from '../common/constants-ln';
+import { OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX, OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME, QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX } from '../common/constants-ln';
 import { AnalysisType, ExplorePathNodeType, ExploreRequestAction, ExploreTimeScopeType, ExploreVisualName, QuickSightChartType } from '../common/explore-types';
 import { logger } from '../common/powertools';
 import { SDKClient } from '../common/sdk-client';
-import { ApiFail, ApiSuccess } from '../common/types';
+import { ApiFail, ApiSuccess, PipelineStackType } from '../common/types';
+import { getStackOutputFromPipelineStatus } from '../common/utils';
 import { QuickSightUserArns, generateEmbedUrlForRegisteredUser, getClickstreamUserArn, waitDashboardSuccess } from '../store/aws/quicksight';
+import { ClickStreamStore } from '../store/click-stream-store';
+import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
 
 const sdkClient: SDKClient = new SDKClient();
+const store: ClickStreamStore = new DynamoDbStore();
 
 export class ReportingService {
 
@@ -848,9 +852,20 @@ export class ReportingService {
 
       const projectId = req.body.projectId;
       const appId = req.body.appId;
-      const dashboardCreateParameters = req.body.dashboardCreateParameters as DashboardCreateParameters;
-      const region = dashboardCreateParameters.region;
-      const dataApiRole = dashboardCreateParameters.redshift.dataApiRole;
+      const region = req.body.region;
+
+      const latestPipelines = await store.listPipeline(projectId, 'latest', 'asc');
+      if (latestPipelines.length === 0) {
+        return res.status(404).send(new ApiFail('Pipeline not found'));
+      }
+      const latestPipeline = latestPipelines[0];
+      if (latestPipeline.status === undefined) {
+        return res.status(404).send(new ApiFail('Pipeline status not found'));
+      }
+      const dataApiRole = getStackOutputFromPipelineStatus(
+        latestPipeline.status,
+        PipelineStackType.DATA_MODELING_REDSHIFT,
+        OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX);
       const redshiftDataClient = sdkClient.RedshiftDataClient(
         {
           region: region,
@@ -863,10 +878,14 @@ export class ReportingService {
       await getClickstreamUserArn();
 
       //warm up redshift serverless
-      if (dashboardCreateParameters.redshift.newServerless) {
+      if (latestPipeline.dataModeling?.redshift?.newServerless) {
+        const workgroupName = getStackOutputFromPipelineStatus(
+          latestPipeline.status,
+          PipelineStackType.DATA_MODELING_REDSHIFT,
+          OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME);
         const input = {
           Sqls: [`select * from ${appId}.ods_events limit 1`],
-          WorkgroupName: dashboardCreateParameters.redshift.newServerless.workgroupName,
+          WorkgroupName: workgroupName,
           Database: projectId,
           WithEvent: false,
         };
@@ -899,7 +918,8 @@ export class ReportingService {
       logger.info('end of warm up reporting service');
       return res.status(201).json(new ApiSuccess('OK'));
     } catch (error) {
-      next(`Warmup redshift serverless with error: ${error}`);
+      logger.warn(`Warmup redshift serverless with error: ${error}`);
+      next(error);
     }
   };
 
