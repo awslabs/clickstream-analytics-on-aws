@@ -19,11 +19,16 @@ class TimeoutError extends Error {
   }
 }
 
+
+const startTimestamp = '2023-03-12T09:33:26.572Z';
+const endTimestamp = '2023-03-13T09:33:26.572Z';
+
 const emrMock = {
   EMRServerlessClient: jest.fn(() => {
     return {
       send: jest.fn(() => {
         return {
+          jobRunId: 'jobId007',
           applicationId: 'testApplicationId',
           tags: {
             project_id: 'project_007',
@@ -45,12 +50,31 @@ jest.mock('../../src/common/s3', () => {
   return {
     readS3ObjectAsJson: jest.fn(() => undefined),
     putStringToS3: jest.fn(() => { }),
+    listObjectsByPrefix: jest.fn((b, k, f) => {
+      [
+        {
+          Key: 'test/file2.json',
+          Size: 1024,
+          LastModified: new Date(startTimestamp),
+        },
+        {
+          Key: 'test/file3.gz',
+          Size: 1024,
+          LastModified: new Date(startTimestamp),
+        },
+        {
+          Key: 'test/_.json',
+          Size: 0,
+          LastModified: new Date(startTimestamp),
+        },
+      ].forEach(o => f(o));
+    }),
   };
 });
 
 import { LambdaClient, ListTagsCommand } from '@aws-sdk/client-lambda';
 import { mockClient } from 'aws-sdk-client-mock';
-import { EMRServerlessUtil } from '../../src/data-pipeline/lambda/emr-job-submitter/emr-client-util';
+import { CustomSparkConfig, EMRServerlessUtil, getDatePrefixList, getEstimatedSparkConfig } from '../../src/data-pipeline/lambda/emr-job-submitter/emr-client-util';
 import { getMockContext } from '../common/lambda-context';
 import 'aws-sdk-client-mock-jest';
 
@@ -93,20 +117,45 @@ describe('Data Process -- EMR Serverless job submitter function', () => {
 
   beforeEach(() => {
     lambdaMock.reset();
-
   });
 
   test('start data processing job', async () => {
     lambdaMock.on(ListTagsCommand).resolves({ Tags: {} });
-    await EMRServerlessUtil.start({}, context);
+    const jobInfo = await EMRServerlessUtil.start({
+      startTimestamp,
+      endTimestamp,
+    }, context);
     expect(emrMock.StartJobRunCommand.mock.calls.length).toEqual(1);
+    expect(jobInfo).toEqual({
+      jobRunId: 'jobId007',
+      objectsInfo: {
+        objectCount: 4,
+        sizeTotal: 43008,
+      },
+    });
+  });
+
+  test('ignore starting data processing job when no files found', async () => {
+    lambdaMock.on(ListTagsCommand).resolves({ Tags: {} });
+    const jobInfo = await EMRServerlessUtil.start({
+      startTimestamp: new Date(startTimestamp).getTime() + 1000,
+    }, context);
+    expect(emrMock.StartJobRunCommand.mock.calls.length).toEqual(0);
+    expect(jobInfo).toEqual({
+      jobRunId: undefined,
+      objectsInfo: {
+        objectCount: 0,
+        sizeTotal: 0,
+      },
+    });
   });
 
   test('start data processing job with timestamp - string', async () => {
     lambdaMock.on(ListTagsCommand).resolves({ Tags: functionTags });
+
     await EMRServerlessUtil.start({
-      startTimestamp: '2023-03-12T09:33:26.572Z',
-      endTimestamp: '2023-03-13T09:33:26.572Z',
+      startTimestamp,
+      endTimestamp,
     }, context);
     expect(emrMock.StartJobRunCommand.mock.calls.length).toEqual(1);
 
@@ -131,8 +180,8 @@ describe('Data Process -- EMR Serverless job submitter function', () => {
             'app1,app2',
             '24',
             'json',
-            '128',
-            '96',
+            '-1',
+            '10',
             '10',
             '12',
           ],
@@ -140,8 +189,14 @@ describe('Data Process -- EMR Serverless job submitter function', () => {
 --jars s3://test/main.jar,s3://test/test1.jar,s3://test/test2.jar \
 --files s3://test/test1.txt,s3://test/test2.txt \
 --conf spark.hadoop.hive.metastore.client.factory.class=com.amazonaws.glue.catalog.metastore.AWSGlueDataCatalogHiveClientFactory \
---conf spark.driver.cores=4 --conf spark.driver.memory=14g \
---conf spark.executor.cores=4 --conf spark.executor.memory=14g',
+--conf spark.driver.cores=4 \
+--conf spark.driver.memory=14g \
+--conf spark.executor.cores=4 \
+--conf spark.executor.memory=14g \
+--conf spark.emr-serverless.driver.disk=20g \
+--conf spark.emr-serverless.executor.disk=20g \
+--conf spark.dynamicAllocation.enabled=true \
+--conf spark.dynamicAllocation.initialExecutors=3 --conf spark.executor.instances=3',
         },
       },
       tags: functionTags,
@@ -163,10 +218,11 @@ describe('Data Process -- EMR Serverless job submitter function', () => {
 
   test('start data processing job with event input jobName, sparkConfig and partitions', async () => {
     lambdaMock.on(ListTagsCommand).resolves({ Tags: functionTags });
+
     await EMRServerlessUtil.start({
       jobName: 'test-sparkConfig-job',
-      startTimestamp: '2023-03-12T09:33:26.572Z',
-      endTimestamp: '2023-03-13T09:33:26.572Z',
+      startTimestamp,
+      endTimestamp,
       sparkConfig: [
         'spark.executor.memory=50g',
         'spark.executor.cores=8',
@@ -207,8 +263,15 @@ describe('Data Process -- EMR Serverless job submitter function', () => {
 --jars s3://test/main.jar,s3://test/test1.jar,s3://test/test2.jar \
 --files s3://test/test1.txt,s3://test/test2.txt \
 --conf spark.hadoop.hive.metastore.client.factory.class=com.amazonaws.glue.catalog.metastore.AWSGlueDataCatalogHiveClientFactory \
---conf spark.driver.cores=4 --conf spark.driver.memory=14g \
---conf spark.executor.cores=8 --conf spark.executor.memory=50g \
+--conf spark.driver.cores=4 \
+--conf spark.driver.memory=14g \
+--conf spark.executor.cores=8 \
+--conf spark.executor.memory=50g \
+--conf spark.emr-serverless.driver.disk=20g \
+--conf spark.emr-serverless.executor.disk=20g \
+--conf spark.dynamicAllocation.enabled=true \
+--conf spark.dynamicAllocation.initialExecutors=3 \
+--conf spark.executor.instances=3 \
 --conf spark.executor.test=test001',
         },
       },
@@ -230,8 +293,9 @@ describe('Data Process -- EMR Serverless job submitter function', () => {
 
   test('start data processing job with timestamp - number', async () => {
     lambdaMock.on(ListTagsCommand).resolves({ Tags: {} });
+
     await EMRServerlessUtil.start({
-      startTimestamp: '1678700304279',
+      startTimestamp: new Date(startTimestamp).getTime(),
     }, context);
     expect(emrMock.StartJobRunCommand.mock.calls.length).toEqual(1);
     //@ts-ignore
@@ -244,8 +308,8 @@ describe('Data Process -- EMR Serverless job submitter function', () => {
     let errMsg = '';
     try {
       await EMRServerlessUtil.start({
-        startTimestamp: '2023-03-13T09:33:26.572Z',
-        endTimestamp: '2023-03-10T09:33:26.572Z',
+        startTimestamp,
+        endTimestamp: new Date(startTimestamp).getTime() - 1,
       }, context);
     } catch (e: any) {
       errMsg = e.message;
@@ -258,6 +322,7 @@ describe('Data Process -- EMR Serverless job submitter function', () => {
     lambdaMock.on(ListTagsCommand).rejects(new TimeoutError());
 
     await EMRServerlessUtil.start({
+      startTimestamp,
     }, context);
 
     //@ts-ignore
@@ -267,14 +332,54 @@ describe('Data Process -- EMR Serverless job submitter function', () => {
 
   test('start ETL job get function tags error', async () => {
     lambdaMock.on(ListTagsCommand).rejects(new Error('ListTagsCommand error'));
+
     let errMsg = '';
     try {
       await EMRServerlessUtil.start({
+        startTimestamp,
       }, context);
     } catch (e: any) {
       errMsg = e.message;
     }
     expect(errMsg).toEqual('ListTagsCommand error');
+
+  });
+
+  test('test getEstimatedSparkConfig()', () => {
+    const size_1G = 1024 * 1024 * 1024;
+
+    [1, 11, 31, 51, 101, 201, 501, 1001, 2001].forEach(n => {
+      let config: CustomSparkConfig = getEstimatedSparkConfig({
+        sizeTotal: size_1G * n,
+        objectCount: 10 * n,
+      });
+      expect(config.sparkConfig as string[]).toHaveLength(9);
+      expect(config.inputRePartitions).toBeGreaterThan(9);
+      expect(config.outputPartitions).toEqual(-1);
+    });
+  });
+
+  test('test getDatePrefixList()', () => {
+
+    const prefixList1 = getDatePrefixList('abc/test_prefix', new Date('2023-11-20T01:00:00.000Z').getTime(), new Date('2023-11-22T01:00:00.000Z').getTime());
+
+    expect(prefixList1).toEqual([
+      'abc/test_prefix/year=2023/month=11/day=20/',
+      'abc/test_prefix/year=2023/month=11/day=21/',
+      'abc/test_prefix/year=2023/month=11/day=22/',
+    ]);
+
+    const prefixList2 = getDatePrefixList('abc/test_prefix', new Date(startTimestamp).getTime(), new Date(endTimestamp).getTime());
+
+    expect(prefixList2).toEqual([
+      'abc/test_prefix/year=2023/month=03/day=12/',
+      'abc/test_prefix/year=2023/month=03/day=13/',
+    ]);
+
+    const prefixList3 = getDatePrefixList('abc/test_prefix/', new Date('2023-11-20T01:00:00.000Z').getTime(), new Date('2023-11-20T02:00:00.000Z').getTime());
+    expect(prefixList3).toEqual([
+      'abc/test_prefix/year=2023/month=11/day=20/',
+    ]);
 
   });
 

@@ -173,7 +173,7 @@ export class LambdaUtil {
         ...POWERTOOLS_ENVS,
       },
       ...functionSettings,
-      memorySize: 256,
+      memorySize: 1024,
     });
     attachListTagsPolicyForFunction(this.scope, 'EmrSparkJobSubmitterFunction', fn);
     return fn;

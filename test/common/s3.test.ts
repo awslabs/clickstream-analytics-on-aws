@@ -14,10 +14,10 @@
 import { Readable, PassThrough } from 'stream';
 import util from 'util';
 import zlib from 'zlib';
-import { CopyObjectCommand, DeleteObjectsCommand, GetObjectCommand, ListObjectsV2Command, NoSuchKey, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { CopyObjectCommand, DeleteObjectsCommand, GetObjectCommand, ListObjectsV2Command, NoSuchKey, PutObjectCommand, S3Client, _Object } from '@aws-sdk/client-s3';
 import { sdkStreamMixin } from '@smithy/util-stream-node';
 import { mockClient } from 'aws-sdk-client-mock';
-import { copyS3Object, deleteObjectsByPrefix, processS3GzipObjectLineByLine, putStringToS3, readS3ObjectAsJson } from '../../src/common/s3';
+import { copyS3Object, deleteObjectsByPrefix, listObjectsByPrefix, processS3GzipObjectLineByLine, putStringToS3, readS3ObjectAsJson } from '../../src/common/s3';
 import 'aws-sdk-client-mock-jest';
 
 const gzip = util.promisify(zlib.gzip);
@@ -168,4 +168,47 @@ test('processS3GzipObjectLineByLine()', async ()=> {
 
 });
 
+test('listObjectsByPrefix()', async ()=> {
+  s3ClientMock.on(ListObjectsV2Command).resolvesOnce({
+    IsTruncated: true,
+    Contents: [
+      {
+        Key: 'test/file.json',
+        Size: 1024,
+        LastModified: new Date(),
+      },
+    ],
+  }).resolvesOnce(
+    {
+      IsTruncated: false,
+      Contents: [
+        {
+          Key: 'test/file2.json',
+          Size: 1024,
+          LastModified: new Date(),
+        },
+        {
+          Key: 'test/file3.json',
+          Size: 1024,
+          LastModified: new Date(),
+        },
+        {
+          Key: 'test/_.json',
+          Size: 0,
+          LastModified: new Date(),
+        },
+      ],
+    },
+  );
+
+  let objectCount = 0;
+  let totalSize = 0;
+  await listObjectsByPrefix(testBucketName, testPrefix, (obj: _Object) => {
+    objectCount++;
+    totalSize +=obj.Size!;
+  });
+
+  expect(objectCount).toEqual(4);
+  expect(totalSize).toEqual(3072);
+});
 
