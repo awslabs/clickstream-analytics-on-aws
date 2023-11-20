@@ -121,6 +121,8 @@ def get_page_events(user, event, page_name):
         return get_login_page_events(event, user)
     if page_name == Page.SIGN_UP:
         return get_sign_up_page_events(event, user)
+    if page_name == Page.LIVE:
+        return get_live_page_events(event, user)
 
 
 def get_main_page_events(event, user):
@@ -188,8 +190,8 @@ def get_search_page_events(event, user):
     for i in range(search_times):
         search_category = enums.product_category.get_random_item()
         search_event = ShoppingApp.clean_event(event)
-        search_event['_search_key'] = 's'
-        search_event['_search_term'] = search_category
+        search_event['attributes']['_search_key'] = 's'
+        search_event['attributes']['_search_term'] = search_category
         events.append(ShoppingApp.get_final_event(user, EventType.SEARCH, search_event))
         search_products = Products.get_random_category_product(search_category, 4)
         events.extend(Products.get_exposure_events(user, search_products, event, enums.Feature.search))
@@ -338,4 +340,22 @@ def get_sign_up_page_events(event, user):
     if next_page == ShoppingScreen.Page.MAIN:
         # sign up success
         events.append(ShoppingApp.get_final_event(user, EventType.SIGN_UP, ShoppingApp.clean_event(event)))
+    return events, next_page
+
+
+def get_live_page_events(event, user):
+    global current_feature, clicked_product
+    events = []
+    live_id = random.randint(1, 5)
+    view_duration = live_id * random.randint(1, 60)
+    user.current_timestamp += view_duration * 1000
+    next_page = ShoppingScreen.get_next_page(Page.LIVE)
+    # view_live
+    event = ShoppingApp.clean_event(event)
+    event['attributes']["live_id"] = "live_" + str(live_id)
+    event['attributes']["view_duration"] = view_duration
+    events.append(ShoppingApp.get_final_event(user, EventType.VIEW_LIVE, event))
+    if next_page == Page.DETAIL:
+        current_feature = enums.Feature.live
+        clicked_product = Products.get_random_live_product()
     return events, next_page

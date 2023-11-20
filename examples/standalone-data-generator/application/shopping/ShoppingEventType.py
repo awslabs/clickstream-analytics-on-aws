@@ -40,3 +40,4 @@ class EventType:
     BEGIN_CHECKOUT = 'begin_checkout'
     PURCHASE = 'purchase'
     SEARCH = 'search'
+    VIEW_LIVE = 'view_live'
