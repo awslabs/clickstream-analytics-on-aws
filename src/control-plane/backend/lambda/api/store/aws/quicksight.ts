@@ -382,6 +382,7 @@ export const createAnalysis = async (
 };
 
 export const waitDashboardSuccess = async (region: string, dashboardId: string): Promise<boolean> => {
+  await sleep(300);
   let resp = await describeDashboard(
     region,
     {
@@ -391,8 +392,8 @@ export const waitDashboardSuccess = async (region: string, dashboardId: string):
   );
   let count = 0;
   while (!resp.Dashboard?.Version?.Status?.endsWith('_SUCCESSFUL') &&
-  !resp.Dashboard?.Version?.Status?.endsWith('_FAILED') && count < 4) {
-    await sleep(500);
+  !resp.Dashboard?.Version?.Status?.endsWith('_FAILED') && count < 10) {
+    await sleep(1000);
     count++;
     resp = await describeDashboard(
       region,

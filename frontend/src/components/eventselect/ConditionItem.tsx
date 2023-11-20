@@ -221,7 +221,16 @@ const ConditionItem: React.FC<ConditionItemProps> = (
                   setInputValue('');
                 }}
                 onKeyDown={({ detail }) => {
-                  if (detail.key === 'Enter') {
+                  if (inputValue && detail.key === 'Enter') {
+                    setConditionValues(
+                      [...values, inputValue],
+                      [...labelValues, inputValue]
+                    );
+                    setInputValue('');
+                  }
+                }}
+                onBlur={() => {
+                  if (inputValue) {
                     setConditionValues(
                       [...values, inputValue],
                       [...labelValues, inputValue]

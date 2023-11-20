@@ -290,6 +290,7 @@ export class CPipeline {
       throw new ClickStreamBadRequestError('Pipeline Workflow can not empty.');
     }
     this.pipeline.lastAction = 'Update';
+    validateIngestionServerNum(this.pipeline.ingestionServer.size);
     this.pipeline.executionName = `main-${uuidv4()}`;
 
     this.pipeline.status = await this.stackManager.getPipelineStatus();

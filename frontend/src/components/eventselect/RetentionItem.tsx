@@ -107,7 +107,7 @@ const RetentionItem: React.FC<RetentionItemProps> = (
                 addNewConditionItem();
               }}
               variant="link"
-              iconName="add-plus"
+              iconName="filter"
             />
           </div>
         )}

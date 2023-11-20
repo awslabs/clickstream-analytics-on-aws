@@ -22,6 +22,7 @@ import {
   Select,
   SelectProps,
   SpaceBetween,
+  Toggle,
 } from '@cloudscape-design/components';
 import { DateRangePickerProps } from '@cloudscape-design/components/date-range-picker/interfaces';
 import { previewFunnel } from 'apis/analytics';
@@ -116,15 +117,15 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
   const [exploreEmbedUrl, setExploreEmbedUrl] = useState('');
   const dispatch = useContext(DispatchContext);
   const [groupDisabled, setGroupDisabled] = useState(false);
-  const defaultChartTypeOption = QuickSightChartType.FUNNEL;
+  const defaultChartTypeOption = QuickSightChartType.BAR;
   const chartTypeOptions: SegmentedControlProps.Option[] = [
-    {
-      id: QuickSightChartType.FUNNEL,
-      iconSvg: <ExtendIcon icon="BsFilter" color="black" />,
-    },
     {
       id: QuickSightChartType.BAR,
       iconSvg: <ExtendIcon icon="BsBarChartFill" color="black" />,
+    },
+    {
+      id: QuickSightChartType.FUNNEL,
+      iconSvg: <ExtendIcon icon="BsFilter" color="black" />,
     },
   ];
   const [chartType, setChartType] = useState(defaultChartTypeOption);
@@ -210,6 +211,8 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
     null
   );
 
+  const [groupApplyToFirst, setGroupApplyToFirst] = React.useState(false);
+
   const getFunnelRequest = (
     action: ExploreRequestAction,
     dashboardId?: string,
@@ -271,7 +274,7 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
       groupColumn: timeGranularity.value,
       groupCondition:
         chartType === QuickSightChartType.BAR
-          ? getGroupCondition(groupOption)
+          ? getGroupCondition(groupOption, groupApplyToFirst)
           : undefined,
       ...dateRangeParams,
       ...saveParams,
@@ -396,10 +399,10 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
   }, [timeGranularity, dateRangeValue, chartType]);
 
   useEffect(() => {
-    console.info('chartType:', chartType);
     if (chartType === 'funnel') {
       setGroupDisabled(true);
       setGroupOption(null);
+      setGroupApplyToFirst(false);
     } else {
       setGroupDisabled(false);
     }
@@ -558,6 +561,20 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
                 groupOption={groupOption}
                 setGroupOption={setGroupOption}
               />
+
+              <InfoTitle
+                title={t('analytics:labels.groupApplyToFirst')}
+                popoverDescription={t(
+                  'analytics:information.groupApplyToFirstInfo'
+                )}
+              />
+              <Toggle
+                onChange={({ detail }) => setGroupApplyToFirst(detail.checked)}
+                checked={groupApplyToFirst}
+                disabled={groupDisabled}
+              >
+                {groupApplyToFirst ? t('yes') : t('no')}
+              </Toggle>
             </SpaceBetween>
           </ColumnLayout>
           <br />

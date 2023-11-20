@@ -32,7 +32,7 @@ import {
 import { AssumeRoleCommand, STSClient } from '@aws-sdk/client-sts';
 import Mustache from 'mustache';
 import { v4 as uuidv4 } from 'uuid';
-import { DataSetProps, dataSetAdminPermissionActions } from './dashboard-ln';
+import { DataSetProps, dataSetAdminPermissionActions, dataSetReaderPermissionActions } from './dashboard-ln';
 import { EventAndCondition, PairEventAndCondition, SQLCondition } from './sql-builder';
 import { QUICKSIGHT_DATASET_INFIX, QUICKSIGHT_RESOURCE_NAME_PREFIX, QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX } from '../../common/constants-ln';
 import { AnalysisType, ExploreConversionIntervalType, ExploreLocales, ExplorePathNodeType, ExplorePathSessionDef, ExploreRelativeTimeUnit, ExploreRequestAction, ExploreTimeScopeType, ExploreVisualName, MetadataValueType, QuickSightChartType } from '../../common/explore-types';
@@ -261,7 +261,8 @@ export const retentionAnalysisVisualColumns: InputColumn[] = [
   },
 ];
 
-export const createDataSet = async (quickSight: QuickSight, awsAccountId: string, principalArn: string,
+export const createDataSet = async (quickSight: QuickSight, awsAccountId: string,
+  exploreUserArn: string, publishUserArn: string,
   dataSourceArn: string,
   props: DataSetProps, requestAction: ExploreRequestAction)
 : Promise<CreateDataSetCommandOutput|undefined> => {
@@ -331,10 +332,16 @@ export const createDataSet = async (quickSight: QuickSight, awsAccountId: string
       AwsAccountId: awsAccountId,
       DataSetId: datasetId,
       Name: `dataset-${datasetId}`,
-      Permissions: [{
-        Principal: principalArn,
-        Actions: dataSetAdminPermissionActions,
-      }],
+      Permissions: [
+        {
+          Principal: exploreUserArn,
+          Actions: dataSetAdminPermissionActions,
+        },
+        {
+          Principal: publishUserArn,
+          Actions: dataSetReaderPermissionActions,
+        },
+      ],
 
       ImportMode: props.importMode,
       PhysicalTableMap: {

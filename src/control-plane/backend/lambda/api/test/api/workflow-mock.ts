@@ -129,7 +129,7 @@ export const INGESTION_S3_PARAMETERS = mergeParameters(
   [
     {
       ParameterKey: 'ServerMax',
-      ParameterValue: '1',
+      ParameterValue: '2',
     },
     {
       ParameterKey: 'ServerMin',

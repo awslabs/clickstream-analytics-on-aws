@@ -209,23 +209,6 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
     label: defaultStr(t('analytics:options.platformWeb')),
   };
 
-  const defaultMobilePlatformOption: SelectProps.Option = {
-    value: MetadataPlatform.ANDROID,
-    label: defaultStr(t('analytics:options.platformAndroid')),
-  };
-
-  const mobilePlatformOption: SelectProps.Options = [
-    defaultMobilePlatformOption,
-    {
-      value: MetadataPlatform.IOS,
-      label: defaultStr(t('analytics:options.platformIOS')),
-    },
-    {
-      value: MetadataPlatform.WECHAT_MINIPROGRAM,
-      label: defaultStr(t('analytics:options.platformWechatMinPro')),
-    },
-  ];
-
   const [startNodeOption, setStartNodeOption] = useState<IAnalyticsItem | null>(
     null
   );
@@ -248,11 +231,6 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
       conditionOptions: presetParameters,
     }
   );
-
-  const [platformOptions, setPlatformOptions] = useState<SelectProps.Options>([
-    webPlatformOption,
-    ...mobilePlatformOption,
-  ]);
 
   const [selectedPlatform, setSelectedPlatform] =
     useState<SelectProps.Option | null>(webPlatformOption);
@@ -513,26 +491,6 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
   };
 
   useEffect(() => {
-    // Update platform Options by node type
-    if (selectedNodeType?.value) {
-      if (
-        selectedNodeType.value === ExplorePathNodeType.SCREEN_NAME ||
-        selectedNodeType.value === ExplorePathNodeType.SCREEN_ID
-      ) {
-        setPlatformOptions(mobilePlatformOption);
-        setSelectedPlatform(defaultMobilePlatformOption);
-      }
-      if (
-        selectedNodeType?.value === ExplorePathNodeType.PAGE_TITLE ||
-        selectedNodeType?.value === ExplorePathNodeType.PAGE_URL
-      ) {
-        setPlatformOptions([webPlatformOption]);
-        setSelectedPlatform(webPlatformOption);
-      }
-    }
-  }, [selectedNodeType]);
-
-  useEffect(() => {
     setCategoryEventsData(categoryEvents);
   }, [categoryEvents]);
 
@@ -663,17 +621,6 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
                     onChange={onNodeTypeChange}
                   />
                 </div>
-                {selectedNodeType?.value !== defaultNodeTypeOption?.value ? (
-                  <div className="cs-analytics-session-window-unit">
-                    <Select
-                      selectedOption={selectedPlatform}
-                      options={platformOptions}
-                      onChange={(event) => {
-                        setSelectedPlatform(event.detail.selectedOption);
-                      }}
-                    />
-                  </div>
-                ) : null}
               </div>
             </SpaceBetween>
           </div>
@@ -740,7 +687,7 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
                 eventDataState={eventDataState}
                 eventDataDispatch={eventDataDispatch}
                 addEventButtonLabel={t('common:button.addNode')}
-                eventOptionList={categoryEvents}
+                eventOptionList={categoryEventsData}
                 defaultComputeMethodOption={defaultComputeMethodOption}
                 metadataEvents={metadataEvents}
                 metadataUserAttributes={metadataUserAttributes}

@@ -255,7 +255,8 @@
     "setStartNode": "Set start node",
     "participateNodes": "Select nodes to participate in the analysis",
     "includingOtherEvents": "Including Other Events",
-    "mergeConsecutiveEvents": "Merge Consecutive Events"
+    "mergeConsecutiveEvents": "Merge Consecutive Events",
+    "groupApplyToFirst": "Apply grouping to the first step only"
   },
   "emptyData": "No Data",
   "emptyDataMessage": "Please configure the metrics to query",
@@ -276,6 +277,7 @@
     "pathMergeNodeInfo": "Nodes that are repeated continuously in the same session will be merged into a single node statistic.",
     "retentionMetricInfo": "Select starting and returning events, support filtering event with parameter.",
     "introducingAnalyticsHeader": "Introducing analytics",
-    "introducingAnalyticsContent": "Analytics allow you explore the clickstream data on an easy-to-use UI, and provides access to all reports and dashboards."
+    "introducingAnalyticsContent": "Analytics allow you explore the clickstream data on an easy-to-use UI, and provides access to all reports and dashboards.",
+    "groupApplyToFirstInfo": "The grouping will be applied to the first step only, and the grouping will not be applied to the subsequent steps."
   }
 }
