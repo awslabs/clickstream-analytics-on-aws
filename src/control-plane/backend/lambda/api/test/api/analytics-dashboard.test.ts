@@ -24,9 +24,10 @@ import { mockClient } from 'aws-sdk-client-mock';
 import request from 'supertest';
 import { MOCK_APP_ID, MOCK_DASHBOARD_ID, MOCK_PROJECT_ID, MOCK_TOKEN, projectExistedMock, tokenMock } from './ddb-mock';
 import { KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW } from './pipeline-mock';
+import { OUTPUT_REPORT_DASHBOARDS_SUFFIX } from '../../common/constants-ln';
 import { app, server } from '../../index';
 import 'aws-sdk-client-mock-jest';
-import { OUTPUT_REPORT_DASHBOARDS_SUFFIX } from '../../common/constants-ln';
+
 const ddbMock = mockClient(DynamoDBDocumentClient);
 const quickSightMock = mockClient(QuickSightClient);
 
