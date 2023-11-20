@@ -16,7 +16,7 @@ import { join } from 'path';
 import { AnalysisDefinition, ConflictException, DashboardVersionDefinition, DataSetIdentifierDeclaration, InputColumn, QuickSight, ResourceStatus, ThrottlingException } from '@aws-sdk/client-quicksight';
 import { BatchExecuteStatementCommand, DescribeStatementCommand, StatusString } from '@aws-sdk/client-redshift-data';
 import { v4 as uuidv4 } from 'uuid';
-import { DataSetProps } from './quicksight/dashboard-ln';
+import { DataSetProps, analysisAdminPermissionActions, dashboardAdminPermissionActions } from './quicksight/dashboard-ln';
 import {
   createDataSet,
   funnelVisualColumns,
@@ -788,44 +788,27 @@ export class ReportingService {
 
   private async _createDashboard(quickSight: QuickSight, resourceName: string, principals: QuickSightUserArns,
     dashboard: DashboardVersionDefinition, query: any, dashboardCreateParameters: DashboardCreateParameters, sheetId: string) {
-    const analysisId = `clickstream-ext-${uuidv4()}`;
+    const analysisId = `${QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX}${uuidv4()}`;
     const newAnalysis = await quickSight.createAnalysis({
       AwsAccountId: awsAccountId,
       AnalysisId: analysisId,
       Name: `${resourceName}`,
       Permissions: [{
         Principal: principals.exploreUserArn,
-        Actions: [
-          'quicksight:DescribeAnalysis',
-          'quicksight:QueryAnalysis',
-          'quicksight:UpdateAnalysis',
-          'quicksight:RestoreAnalysis',
-          'quicksight:DeleteAnalysis',
-          'quicksight:UpdateAnalysisPermissions',
-          'quicksight:DescribeAnalysisPermissions',
-        ],
+        Actions: analysisAdminPermissionActions,
       }],
       Definition: dashboard as AnalysisDefinition,
     });
 
     //create QuickSight dashboard
-    const dashboardId = `clickstream-ext-${uuidv4()}`;
+    const dashboardId = `${QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX}${uuidv4()}`;
     const newDashboard = await quickSight.createDashboard({
       AwsAccountId: awsAccountId,
       DashboardId: dashboardId,
       Name: `${resourceName}`,
       Permissions: [{
         Principal: principals.exploreUserArn,
-        Actions: [
-          'quicksight:DescribeDashboard',
-          'quicksight:ListDashboardVersions',
-          'quicksight:QueryDashboard',
-          'quicksight:UpdateDashboard',
-          'quicksight:DeleteDashboard',
-          'quicksight:UpdateDashboardPermissions',
-          'quicksight:DescribeDashboardPermissions',
-          'quicksight:UpdateDashboardPublishedVersion',
-        ],
+        Actions: dashboardAdminPermissionActions,
       }],
       Definition: dashboard,
     });
@@ -960,7 +943,7 @@ async function _deletedDatasets(quickSight: QuickSight) {
 
   if (datasets.DataSetSummaries) {
     for (const [_index, dataset] of datasets.DataSetSummaries.entries()) {
-      if (dataset.Name?.startsWith(QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX) &&
+      if (dataset.DataSetId?.startsWith(QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX) &&
       (new Date().getTime() - dataset.CreatedTime!.getTime()) > 60 * 60 * 1000) {
         const deletedRes = await quickSight.deleteDataSet({
           AwsAccountId: awsAccountId,
@@ -983,7 +966,7 @@ async function _deletedAnalyses(quickSight: QuickSight) {
   if (analyses.AnalysisSummaryList) {
     for (const [_index, analysis] of analyses.AnalysisSummaryList.entries()) {
       if (analysis.Status !== ResourceStatus.DELETED &&
-        analysis.Name?.startsWith(QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX) &&
+        analysis.AnalysisId?.startsWith(QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX) &&
         (new Date().getTime() - analysis.CreatedTime!.getTime()) > 60 * 60 * 1000) {
         const deletedRes = await quickSight.deleteAnalysis({
           AwsAccountId: awsAccountId,
@@ -1006,7 +989,7 @@ async function _cleanedDashboard(quickSight: QuickSight) {
 
   if (dashBoards.DashboardSummaryList) {
     for (const [_index, dashboard] of dashBoards.DashboardSummaryList.entries()) {
-      if (dashboard.Name?.startsWith(QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX) &&
+      if (dashboard.DashboardId?.startsWith(QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX) &&
       (new Date().getTime() - dashboard.CreatedTime!.getTime()) > 60 * 60 * 1000) {
         const deletedRes = await quickSight.deleteDashboard({
           AwsAccountId: awsAccountId,
