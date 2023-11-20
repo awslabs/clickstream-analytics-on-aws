@@ -312,7 +312,7 @@ export class ReportingService {
       logger.debug(`event analysis sql: ${sql}`);
 
       const hasGrouping = query.groupCondition !== undefined;
-      const projectedColumns = ['event_date', 'event_name', 'count'];
+      const projectedColumns = ['event_date', 'event_name', 'id'];
       const datasetColumns = [...eventVisualColumns];
       if (hasGrouping) {
         datasetColumns.push({

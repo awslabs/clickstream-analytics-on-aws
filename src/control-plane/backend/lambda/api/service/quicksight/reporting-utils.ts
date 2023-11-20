@@ -211,7 +211,7 @@ export const eventVisualColumns: InputColumn[] = [
     Type: 'STRING',
   },
   {
-    Name: 'count',
+    Name: 'id',
     Type: 'STRING',
   },
 ];
