@@ -35,7 +35,7 @@
     "mock-fs": "^5.2.0",
     "nodemon": "^2.0.20",
     "npm-check-updates": "^16",
-    "projen": "^0.76.27",
+    "projen": "^0.77.1",
     "supertest": "^6.3.3",
     "ts-jest": "^29.1.1",
     "ts-node": "^10.9.1",
