@@ -6,6 +6,9 @@
       "pathAnalysis": "路径分析",
       "retentionAnalysis": "留存分析",
       "tableChart": "详细信息"
+    },
+    "filter": {
+      "scope": "该时间筛选器的作用范围基于此分析保存时的选择。例如保存此分析时选择的时间范围为过去7天则无法选择7天之前的数据。"
     }
   }
 }

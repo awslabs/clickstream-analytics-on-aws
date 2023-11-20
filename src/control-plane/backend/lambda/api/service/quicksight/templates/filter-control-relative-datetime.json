@@ -2,6 +2,21 @@
   "RelativeDateTime": {
       "FilterControlId": "",
       "Title": "",
-      "SourceFilterId": ""
+      "SourceFilterId": "",
+      "DisplayOptions": {
+        "TitleOptions": {
+            "Visibility": "VISIBLE",
+            "FontConfiguration": {
+                "FontSize": {
+                    "Relative": "MEDIUM"
+                }
+            }
+        },
+        "DateTimeFormat": "YYYY/MM/DD HH:mm:ss",
+        "InfoIconLabelOptions": {
+            "Visibility": "VISIBLE",
+            "InfoIconText": ""
+        }
+      }
   }
 }
