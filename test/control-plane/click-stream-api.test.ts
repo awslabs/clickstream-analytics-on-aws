@@ -366,7 +366,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
                         {
                           Ref: 'AWS::AccountId',
                         },
-                        ':dashboard/Clickstream*',
+                        ':dashboard/clickstream*',
                       ],
                     ],
                   },
@@ -1653,9 +1653,6 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
               'testClickStreamCloudfrontApiUploadRole7D6ED157',
               'Arn',
             ],
-          },
-          API_ROLE_NAME: {
-            Ref: 'testClickStreamCloudfrontApiClickStreamApiFunctionRoleFDC21CDD',
           },
           HEALTH_CHECK_PATH: '/',
           POWERTOOLS_SERVICE_NAME: 'ClickStreamAnalyticsOnAWS',

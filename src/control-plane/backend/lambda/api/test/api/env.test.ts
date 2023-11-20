@@ -33,10 +33,7 @@ import { ClientBroker, KafkaClient, ListClustersV2Command } from '@aws-sdk/clien
 import { KafkaConnectClient, ListConnectorsCommand } from '@aws-sdk/client-kafkaconnect';
 import {
   QuickSightClient,
-  ListUsersCommand,
-  RegisterUserCommand,
   DescribeAccountSubscriptionCommand,
-  AccessDeniedException,
 } from '@aws-sdk/client-quicksight';
 import { RedshiftClient, DescribeClustersCommand } from '@aws-sdk/client-redshift';
 import { RedshiftServerlessClient, ListWorkgroupsCommand } from '@aws-sdk/client-redshift-serverless';
@@ -47,7 +44,7 @@ import { mockClient } from 'aws-sdk-client-mock';
 import 'aws-sdk-client-mock-jest';
 import fetch, { Response } from 'node-fetch';
 import request from 'supertest';
-import { MOCK_PROJECT_ID, MOCK_TOKEN, projectExistedMock, tokenMock } from './ddb-mock';
+import { MOCK_PROJECT_ID, MOCK_TOKEN, projectExistedMock } from './ddb-mock';
 import { KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW } from './pipeline-mock';
 import { app, server } from '../../index';
 
@@ -1086,127 +1083,6 @@ describe('Account Env test', () => {
           status: 'AVAILABLE',
         },
       ],
-    });
-  });
-  it('List QuickSight Users', async () => {
-    quickSightClient.on(ListUsersCommand).resolves({
-      UserList: [
-        {
-          UserName: 'Admin/fake',
-          Arn: 'arn:aws:quicksight:us-east-1:111122223333:user/default/Admin/fake',
-          Email: 'fake@example.com',
-          Role: 'ADMIN',
-          Active: true,
-        },
-        {
-          UserName: 'api-role-name/fake',
-          Arn: 'arn:aws:quicksight:us-east-1:111122223333:user/default/api-role-name/fake',
-          Email: 'fake@example.com',
-          Role: 'ADMIN',
-          Active: true,
-        },
-      ],
-    });
-    let res = await request(app).get('/api/env/quicksight/users');
-    expect(quickSightClient).toHaveReceivedCommandTimes(ListUsersCommand, 2);
-    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toEqual({
-      success: true,
-      message: '',
-      data: [
-        {
-          userName: 'Admin/fake',
-          arn: 'arn:aws:quicksight:us-east-1:111122223333:user/default/Admin/fake',
-          email: 'fake@example.com',
-          role: 'ADMIN',
-          active: true,
-        },
-      ],
-    });
-  });
-  it('List QuickSight Users in error region', async () => {
-    quickSightClient.on(ListUsersCommand).resolves({
-      UserList: [
-        {
-          UserName: 'Admin/fake',
-          Arn: 'arn:aws:quicksight:us-east-1:111122223333:user/default/Admin/fake',
-          Email: 'fake@example.com',
-          Role: 'ADMIN',
-          Active: true,
-        },
-        {
-          UserName: 'api-role-name/fake',
-          Arn: 'arn:aws:quicksight:us-east-1:111122223333:user/default/api-role-name/fake',
-          Email: 'fake@example.com',
-          Role: 'ADMIN',
-          Active: true,
-        },
-      ],
-    });
-    let res = await request(app).get('/api/env/quicksight/users');
-    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toEqual({
-      success: true,
-      message: '',
-      data: [
-        {
-          userName: 'Admin/fake',
-          arn: 'arn:aws:quicksight:us-east-1:111122223333:user/default/Admin/fake',
-          email: 'fake@example.com',
-          role: 'ADMIN',
-          active: true,
-        },
-      ],
-    });
-  });
-  it('Create QuickSight User', async () => {
-    tokenMock(ddbMock, false);
-    quickSightClient.on(RegisterUserCommand).resolves({
-      UserInvitationUrl: 'http://xxx',
-    });
-    let res = await request(app)
-      .post('/api/env/quicksight/user')
-      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
-      .send({
-        email: 'fake@example.com',
-        username: 'Clickstream-User-xxx',
-      });
-    expect(quickSightClient).toHaveReceivedCommandTimes(RegisterUserCommand, 1);
-    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toEqual({
-      success: true,
-      message: '',
-      data: 'http://xxx',
-    });
-  });
-  it('Create QuickSight User in error region', async () => {
-    tokenMock(ddbMock, false);
-    quickSightClient.on(ListUsersCommand).rejectsOnce(
-      new AccessDeniedException({
-        $metadata: { requestId: '' },
-        message: 'Operation is being called from endpoint us-east-1, but your identity region is us-west-2. Please use the us-west-2 endpoint.',
-      }),
-    );
-    quickSightClient.on(RegisterUserCommand).resolves({
-      UserInvitationUrl: 'http://xxx',
-    });
-    let res = await request(app)
-      .post('/api/env/quicksight/user')
-      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
-      .send({
-        email: 'fake@example.com',
-        username: 'Clickstream-User-xxx',
-      });
-    expect(quickSightClient).toHaveReceivedCommandTimes(RegisterUserCommand, 1);
-    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toEqual({
-      success: true,
-      message: '',
-      data: 'http://xxx',
     });
   });
   it('Describe QuickSight', async () => {
