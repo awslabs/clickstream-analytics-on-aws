@@ -462,8 +462,6 @@ export function getEstimatedSparkConfig(objectsInfo: ObjectsInfo): CustomSparkCo
     executorCore = 8;
     executorMem = 50;
     executorDisk = 50;
-    initialExecutors = 3;
-    inputRePartitions = 10;
   } else if (objectsInfo.sizeTotal < 50 * size_1G) {
     driverCore = 8;
     driverMem = 50;
