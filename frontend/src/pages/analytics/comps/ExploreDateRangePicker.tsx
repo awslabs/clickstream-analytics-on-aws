@@ -144,16 +144,6 @@ const ExploreDateRangePicker: React.FC<IExploreDateRangePickerProps> = (
 
   return (
     <div className="cs-analytics-data-range">
-      {timeGranularityVisible && (
-        <Select
-          disabled={disableSelect}
-          selectedOption={timeGranularity}
-          options={timeGranularityOptions}
-          onChange={(event) => {
-            setTimeGranularity(event.detail.selectedOption);
-          }}
-        />
-      )}
       <DateRangePicker
         disabled={disableSelect}
         onChange={({ detail }) => {
@@ -192,6 +182,16 @@ const ExploreDateRangePicker: React.FC<IExploreDateRangePickerProps> = (
           },
         }}
       />
+      {timeGranularityVisible && (
+        <Select
+          disabled={disableSelect}
+          selectedOption={timeGranularity}
+          options={timeGranularityOptions}
+          onChange={(event) => {
+            setTimeGranularity(event.detail.selectedOption);
+          }}
+        />
+      )}
     </div>
   );
 };

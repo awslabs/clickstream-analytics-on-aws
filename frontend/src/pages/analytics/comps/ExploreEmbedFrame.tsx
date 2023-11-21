@@ -80,10 +80,14 @@ const ExploreEmbedFrame: React.FC<ExploreEmbedFrameProps> = (
     <div id="EmbedId" className="iframe-explore">
       {embedUrl === '' && (
         <div>
-          <Box margin={{ vertical: 'xs' }} textAlign="center" color="inherit">
+          <Box
+            margin={{ vertical: 'xs' }}
+            textAlign="center"
+            color="text-status-inactive"
+          >
             <ExtendIcon icon="ClipboardData" color="#666" />
             <SpaceBetween size="m">
-              <b>{t('analytics:emptyDataMessage')}</b>
+              {t('analytics:emptyDataMessage')}
             </SpaceBetween>
           </Box>
         </div>
