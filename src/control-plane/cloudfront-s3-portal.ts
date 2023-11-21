@@ -211,7 +211,7 @@ export class CloudFrontS3Portal extends Construct {
     if (props.domainProps != undefined) {
       domainName = Fn.join('.', [props.domainProps.recordName, props.domainProps.hostZone.zoneName]);
       if (props.domainProps?.certificate === undefined) {
-        certificate = new DnsValidatedCertificate(this, 'certificate', {
+        certificate = new DnsValidatedCertificate(this, 'certificate', { //NOSONAR
           domainName: Fn.join('.', [props.domainProps.recordName, props.domainProps.hostZone.zoneName]),
           hostedZone: props.domainProps.hostZone,
           region: 'us-east-1',
