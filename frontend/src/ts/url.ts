@@ -192,6 +192,13 @@ export const buildMSKLink = (region: string, arn: string) => {
   return `https://${region}.${CONSOLE_GLOBAL_DOMAIN}/msk/home?region=${region}#/cluster/${arn}/view`;
 };
 
+export const buildSecurityGroupLink = (region: string, sgId: string) => {
+  if (region.startsWith('cn')) {
+    return `https://${region}.${CONSOLE_CHINA_DOMAIN}/ec2/home?region=${region}#SecurityGroup:securityGroupId=${sgId}`;
+  }
+  return `https://${region}.${CONSOLE_GLOBAL_DOMAIN}/ec2/home?region=${region}#SecurityGroup:securityGroupId=${sgId}`;
+};
+
 // Document link
 export const getDocumentLink = (lang: string) => {
   if (ZH_LANGUAGE_LIST.includes(lang)) {

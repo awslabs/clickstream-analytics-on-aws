@@ -21,8 +21,12 @@ import {
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { ExecutionType } from 'ts/const';
-import { buildReshiftLink } from 'ts/url';
-import { getLocaleLngDescription } from 'ts/utils';
+import {
+  buildReshiftLink,
+  buildSecurityGroupLink,
+  buildSubnetLink,
+} from 'ts/url';
+import { defaultStr, getLocaleLngDescription, ternary } from 'ts/utils';
 
 interface TabContentProps {
   pipelineInfo?: IExtPipeline;
@@ -335,15 +339,114 @@ const Processing: React.FC<TabContentProps> = (props: TabContentProps) => {
                   <div>{buildRedshiftDisplay(pipelineInfo)}</div>
                 </div>
 
-                <div>
-                  <Box variant="awsui-key-label">
-                    {t('pipeline:detail.redshiftPermission')}
-                  </Box>
+                {ternary(
+                  pipelineInfo?.redshiftType === 'serverless' ||
+                    (pipelineInfo?.pipelineId &&
+                      pipelineInfo?.dataModeling?.redshift?.newServerless),
+                  <>
+                    <div>
+                      <Box variant="awsui-key-label">
+                        {t('pipeline:create.redshiftBaseCapacity')}
+                      </Box>
+                      <div>
+                        {
+                          pipelineInfo?.dataModeling?.redshift?.newServerless
+                            ?.baseCapacity
+                        }
+                      </div>
+                    </div>
+                    <div>
+                      <Box variant="awsui-key-label">
+                        {t('pipeline:create.vpc')}
+                      </Box>
+                      <div>
+                        <Link
+                          external
+                          href={buildSubnetLink(
+                            pipelineInfo?.region ?? '',
+                            pipelineInfo?.dataModeling?.redshift?.newServerless
+                              ?.network?.vpcId
+                          )}
+                        >
+                          {
+                            pipelineInfo?.dataModeling?.redshift?.newServerless
+                              ?.network?.vpcId
+                          }
+                        </Link>
+                      </div>
+                    </div>
+                    <div>
+                      <Box variant="awsui-key-label">
+                        {t('pipeline:create.securityGroup')}
+                      </Box>
+                      <div>
+                        {pipelineInfo?.dataModeling?.redshift?.newServerless
+                          ?.network?.securityGroups &&
+                        pipelineInfo?.dataModeling?.redshift?.newServerless
+                          ?.network.securityGroups.length > 0
+                          ? pipelineInfo?.dataModeling?.redshift?.newServerless?.network?.securityGroups?.map(
+                              (element) => {
+                                return (
+                                  <div key={element}>
+                                    <Link
+                                      external
+                                      href={buildSecurityGroupLink(
+                                        pipelineInfo.region || '',
+                                        element
+                                      )}
+                                    >
+                                      {element}
+                                    </Link>
+                                  </div>
+                                );
+                              }
+                            )
+                          : '-'}
+                      </div>
+                    </div>
+                    <div>
+                      <Box variant="awsui-key-label">
+                        {t('pipeline:create.subnet')}
+                      </Box>
+                      <div>
+                        {pipelineInfo?.dataModeling?.redshift?.newServerless
+                          ?.network?.subnetIds &&
+                        pipelineInfo?.dataModeling?.redshift?.newServerless
+                          ?.network?.subnetIds?.length > 0
+                          ? pipelineInfo?.dataModeling?.redshift.newServerless.network.subnetIds?.map(
+                              (element) => {
+                                return (
+                                  <div key={element}>
+                                    <Link
+                                      external
+                                      href={buildSubnetLink(
+                                        pipelineInfo.region || '',
+                                        element
+                                      )}
+                                    >
+                                      {element}
+                                    </Link>
+                                  </div>
+                                );
+                              }
+                            )
+                          : '-'}
+                      </div>
+                    </div>
+                  </>,
                   <div>
-                    {pipelineInfo?.dataModeling?.redshift?.provisioned
-                      ?.dbUser || '-'}
+                    <Box variant="awsui-key-label">
+                      {t('pipeline:detail.redshiftPermission')}
+                    </Box>
+                    <div>
+                      {defaultStr(
+                        pipelineInfo?.dataModeling?.redshift?.provisioned
+                          ?.dbUser,
+                        '-'
+                      )}
+                    </div>
                   </div>
-                </div>
+                )}
 
                 <div>
                   <Box variant="awsui-key-label">
