@@ -205,10 +205,10 @@ describe('SQL Builder test', () => {
           table_0
           left outer join table_1 on table_0.user_pseudo_id_0 = table_1.user_pseudo_id_1
           and table_1.event_timestamp_1 - table_0.event_timestamp_0 > 0
-          and table_1.event_timestamp_1 - table_0.event_timestamp_0 < 600 * 1000
+          and table_1.event_timestamp_1 - table_0.event_timestamp_0 <= 600 * 1000
           left outer join table_2 on table_1.user_pseudo_id_1 = table_2.user_pseudo_id_2
           and table_2.event_timestamp_2 - table_1.event_timestamp_1 > 0
-          and table_2.event_timestamp_2 - table_1.event_timestamp_1 < 600 * 1000
+          and table_2.event_timestamp_2 - table_0.event_timestamp_0 <= 600 * 1000
       )
     select
       DAY,
@@ -422,10 +422,10 @@ describe('SQL Builder test', () => {
           table_0
           left outer join table_1 on table_0.user_pseudo_id_0 = table_1.user_pseudo_id_1
           and table_1.event_timestamp_1 - table_0.event_timestamp_0 > 0
-          and table_1.event_timestamp_1 - table_0.event_timestamp_0 < 600 * 1000
+          and table_1.event_timestamp_1 - table_0.event_timestamp_0 <= 600 * 1000
           left outer join table_2 on table_1.user_pseudo_id_1 = table_2.user_pseudo_id_2
           and table_2.event_timestamp_2 - table_1.event_timestamp_1 > 0
-          and table_2.event_timestamp_2 - table_1.event_timestamp_1 < 600 * 1000
+          and table_2.event_timestamp_2 - table_0.event_timestamp_0 <= 600 * 1000
       )
     select
       DAY,
@@ -638,6 +638,7 @@ describe('SQL Builder test', () => {
         from
           table_0
           left outer join table_1 on table_0.user_pseudo_id_0 = table_1.user_pseudo_id_1
+          and table_1.event_timestamp_1 - table_0.event_timestamp_0 > 0
           and TO_CHAR(
             TIMESTAMP 'epoch' + cast(table_0.event_timestamp_0 / 1000 as bigint) * INTERVAL '1 second',
             'YYYY-MM-DD'
@@ -646,6 +647,7 @@ describe('SQL Builder test', () => {
             'YYYY-MM-DD'
           )
           left outer join table_2 on table_1.user_pseudo_id_1 = table_2.user_pseudo_id_2
+          and table_2.event_timestamp_2 - table_1.event_timestamp_1 > 0
           and TO_CHAR(
             TIMESTAMP 'epoch' + cast(table_1.event_timestamp_1 / 1000 as bigint) * INTERVAL '1 second',
             'YYYY-MM-DD'
@@ -864,6 +866,7 @@ describe('SQL Builder test', () => {
         from
           table_0
           left outer join table_1 on table_0.user_pseudo_id_0 = table_1.user_pseudo_id_1
+          and table_1.event_timestamp_1 - table_0.event_timestamp_0 > 0
           and TO_CHAR(
             TIMESTAMP 'epoch' + cast(table_0.event_timestamp_0 / 1000 as bigint) * INTERVAL '1 second',
             'YYYY-MM-DD'
@@ -872,6 +875,7 @@ describe('SQL Builder test', () => {
             'YYYY-MM-DD'
           )
           left outer join table_2 on table_1.user_pseudo_id_1 = table_2.user_pseudo_id_2
+          and table_2.event_timestamp_2 - table_1.event_timestamp_1 > 0
           and TO_CHAR(
             TIMESTAMP 'epoch' + cast(table_1.event_timestamp_1 / 1000 as bigint) * INTERVAL '1 second',
             'YYYY-MM-DD'
@@ -1136,10 +1140,10 @@ describe('SQL Builder test', () => {
           table_0
           left outer join table_1 on table_0.user_pseudo_id_0 = table_1.user_pseudo_id_1
           and table_1.event_timestamp_1 - table_0.event_timestamp_0 > 0
-          and table_1.event_timestamp_1 - table_0.event_timestamp_0 < 600 * 1000
+          and table_1.event_timestamp_1 - table_0.event_timestamp_0 <= 600 * 1000
           left outer join table_2 on table_1.user_pseudo_id_1 = table_2.user_pseudo_id_2
           and table_2.event_timestamp_2 - table_1.event_timestamp_1 > 0
-          and table_2.event_timestamp_2 - table_1.event_timestamp_1 < 600 * 1000
+          and table_2.event_timestamp_2 - table_0.event_timestamp_0 <= 600 * 1000
       )
     select
       DAY,
@@ -1397,10 +1401,10 @@ describe('SQL Builder test', () => {
           table_0
           left outer join table_1 on table_0.user_pseudo_id_0 = table_1.user_pseudo_id_1
           and table_1.event_timestamp_1 - table_0.event_timestamp_0 > 0
-          and table_1.event_timestamp_1 - table_0.event_timestamp_0 < 600 * 1000
+          and table_1.event_timestamp_1 - table_0.event_timestamp_0 <= 600 * 1000
           left outer join table_2 on table_1.user_pseudo_id_1 = table_2.user_pseudo_id_2
           and table_2.event_timestamp_2 - table_1.event_timestamp_1 > 0
-          and table_2.event_timestamp_2 - table_1.event_timestamp_1 < 600 * 1000
+          and table_2.event_timestamp_2 - table_0.event_timestamp_0 <= 600 * 1000
       ),
       final_table as (
         select
@@ -5028,10 +5032,10 @@ describe('SQL Builder test', () => {
           table_0
           left outer join table_1 on table_0.user_pseudo_id_0 = table_1.user_pseudo_id_1
           and table_1.event_timestamp_1 - table_0.event_timestamp_0 > 0
-          and table_1.event_timestamp_1 - table_0.event_timestamp_0 < 600 * 1000
+          and table_1.event_timestamp_1 - table_0.event_timestamp_0 <= 600 * 1000
           left outer join table_2 on table_1.user_pseudo_id_1 = table_2.user_pseudo_id_2
           and table_2.event_timestamp_2 - table_1.event_timestamp_1 > 0
-          and table_2.event_timestamp_2 - table_1.event_timestamp_1 < 600 * 1000
+          and table_2.event_timestamp_2 - table_0.event_timestamp_0 <= 600 * 1000
       )
     select
       DAY,
@@ -5422,10 +5426,10 @@ describe('SQL Builder test', () => {
           table_0
           left outer join table_1 on table_0.user_pseudo_id_0 = table_1.user_pseudo_id_1
           and table_1.event_timestamp_1 - table_0.event_timestamp_0 > 0
-          and table_1.event_timestamp_1 - table_0.event_timestamp_0 < 600 * 1000
+          and table_1.event_timestamp_1 - table_0.event_timestamp_0 <= 600 * 1000
           left outer join table_2 on table_1.user_pseudo_id_1 = table_2.user_pseudo_id_2
           and table_2.event_timestamp_2 - table_1.event_timestamp_1 > 0
-          and table_2.event_timestamp_2 - table_1.event_timestamp_1 < 600 * 1000
+          and table_2.event_timestamp_2 - table_0.event_timestamp_0 <= 600 * 1000
       )
     select
       DAY,
@@ -6194,10 +6198,10 @@ describe('SQL Builder test', () => {
           table_0
           left outer join table_1 on table_0.user_pseudo_id_0 = table_1.user_pseudo_id_1
           and table_1.event_timestamp_1 - table_0.event_timestamp_0 > 0
-          and table_1.event_timestamp_1 - table_0.event_timestamp_0 < 600 * 1000
+          and table_1.event_timestamp_1 - table_0.event_timestamp_0 <= 600 * 1000
           left outer join table_2 on table_1.user_pseudo_id_1 = table_2.user_pseudo_id_2
           and table_2.event_timestamp_2 - table_1.event_timestamp_1 > 0
-          and table_2.event_timestamp_2 - table_1.event_timestamp_1 < 600 * 1000
+          and table_2.event_timestamp_2 - table_0.event_timestamp_0 <= 600 * 1000
       ),
       final_table as (
         select
@@ -6622,10 +6626,10 @@ describe('SQL Builder test', () => {
           table_0
           left outer join table_1 on table_0.user_pseudo_id_0 = table_1.user_pseudo_id_1
           and table_1.event_timestamp_1 - table_0.event_timestamp_0 > 0
-          and table_1.event_timestamp_1 - table_0.event_timestamp_0 < 600 * 1000
+          and table_1.event_timestamp_1 - table_0.event_timestamp_0 <= 600 * 1000
           left outer join table_2 on table_1.user_pseudo_id_1 = table_2.user_pseudo_id_2
           and table_2.event_timestamp_2 - table_1.event_timestamp_1 > 0
-          and table_2.event_timestamp_2 - table_1.event_timestamp_1 < 600 * 1000
+          and table_2.event_timestamp_2 - table_0.event_timestamp_0 <= 600 * 1000
       )
     select
       DAY,
@@ -10417,6 +10421,7 @@ describe('SQL Builder test', () => {
           table_0
           left outer join table_1 on table_0.user_pseudo_id_0 = table_1.user_pseudo_id_1
           and table_0._session_id_0 = table_1._session_id_1
+          and table_1.event_timestamp_1 - table_0.event_timestamp_0 > 0
           and TO_CHAR(
             TIMESTAMP 'epoch' + cast(table_0.event_timestamp_0 / 1000 as bigint) * INTERVAL '1 second',
             'YYYY-MM-DD'
@@ -10426,6 +10431,7 @@ describe('SQL Builder test', () => {
           )
           left outer join table_2 on table_1.user_pseudo_id_1 = table_2.user_pseudo_id_2
           and table_1._session_id_1 = table_2._session_id_2
+          and table_2.event_timestamp_2 - table_1.event_timestamp_1 > 0
           and TO_CHAR(
             TIMESTAMP 'epoch' + cast(table_1.event_timestamp_1 / 1000 as bigint) * INTERVAL '1 second',
             'YYYY-MM-DD'
@@ -10759,6 +10765,7 @@ describe('SQL Builder test', () => {
           table_0
           left outer join table_1 on table_0.user_pseudo_id_0 = table_1.user_pseudo_id_1
           and table_0.geo_country_0 = table_1.geo_country_1
+          and table_1.event_timestamp_1 - table_0.event_timestamp_0 > 0
           and TO_CHAR(
             TIMESTAMP 'epoch' + cast(table_0.event_timestamp_0 / 1000 as bigint) * INTERVAL '1 second',
             'YYYY-MM-DD'
@@ -10768,6 +10775,7 @@ describe('SQL Builder test', () => {
           )
           left outer join table_2 on table_1.user_pseudo_id_1 = table_2.user_pseudo_id_2
           and table_1.geo_country_1 = table_2.geo_country_2
+          and table_2.event_timestamp_2 - table_1.event_timestamp_1 > 0
           and TO_CHAR(
             TIMESTAMP 'epoch' + cast(table_1.event_timestamp_1 / 1000 as bigint) * INTERVAL '1 second',
             'YYYY-MM-DD'
@@ -11097,6 +11105,7 @@ describe('SQL Builder test', () => {
         from
           table_0
           left outer join table_1 on table_0.user_pseudo_id_0 = table_1.user_pseudo_id_1
+          and table_1.event_timestamp_1 - table_0.event_timestamp_0 > 0
           and TO_CHAR(
             TIMESTAMP 'epoch' + cast(table_0.event_timestamp_0 / 1000 as bigint) * INTERVAL '1 second',
             'YYYY-MM-DD'
@@ -11105,6 +11114,7 @@ describe('SQL Builder test', () => {
             'YYYY-MM-DD'
           )
           left outer join table_2 on table_1.user_pseudo_id_1 = table_2.user_pseudo_id_2
+          and table_2.event_timestamp_2 - table_1.event_timestamp_1 > 0
           and TO_CHAR(
             TIMESTAMP 'epoch' + cast(table_1.event_timestamp_1 / 1000 as bigint) * INTERVAL '1 second',
             'YYYY-MM-DD'
@@ -13672,11 +13682,11 @@ describe('SQL Builder test', () => {
           left outer join table_1 on table_0.user_pseudo_id_0 = table_1.user_pseudo_id_1
           and table_0.geo_country_0 = table_1.geo_country_1
           and table_1.event_timestamp_1 - table_0.event_timestamp_0 > 0
-          and table_1.event_timestamp_1 - table_0.event_timestamp_0 < 600 * 1000
+          and table_1.event_timestamp_1 - table_0.event_timestamp_0 <= 600 * 1000
           left outer join table_2 on table_1.user_pseudo_id_1 = table_2.user_pseudo_id_2
-          andt able_1.geo_country_1 = table_2.geo_country_2
+          and table_1.geo_country_1 = table_2.geo_country_2
           and table_2.event_timestamp_2 - table_1.event_timestamp_1 > 0
-          and table_2.event_timestamp_2 - table_1.event_timestamp_1 < 600 * 1000
+          and table_2.event_timestamp_2 - table_0.event_timestamp_0 <= 600 * 1000
       ),
       final_table as (
         select
@@ -14102,10 +14112,10 @@ describe('SQL Builder test', () => {
           table_0
           left outer join table_1 on table_0.user_pseudo_id_0 = table_1.user_pseudo_id_1
           and table_1.event_timestamp_1 - table_0.event_timestamp_0 > 0
-          and table_1.event_timestamp_1 - table_0.event_timestamp_0 < 600 * 1000
+          and table_1.event_timestamp_1 - table_0.event_timestamp_0 <= 600 * 1000
           left outer join table_2 on table_1.user_pseudo_id_1 = table_2.user_pseudo_id_2
           and table_2.event_timestamp_2 - table_1.event_timestamp_1 > 0
-          and table_2.event_timestamp_2 - table_1.event_timestamp_1 < 600 * 1000
+          and table_2.event_timestamp_2 - table_0.event_timestamp_0 <= 600 * 1000
       )
     select
       DAY,
@@ -14502,11 +14512,11 @@ describe('SQL Builder test', () => {
           left outer join table_1 on table_0.user_pseudo_id_0 = table_1.user_pseudo_id_1
           and table_0.category = table_1.category
           and table_1.event_timestamp_1 - table_0.event_timestamp_0 > 0
-          and table_1.event_timestamp_1 - table_0.event_timestamp_0 < 600 * 1000
+          and table_1.event_timestamp_1 - table_0.event_timestamp_0 <= 600 * 1000
           left outer join table_2 on table_1.user_pseudo_id_1 = table_2.user_pseudo_id_2
           and table_1.category = table_2.category
           and table_2.event_timestamp_2 - table_1.event_timestamp_1 > 0
-          and table_2.event_timestamp_2 - table_1.event_timestamp_1 < 600 * 1000
+          and table_2.event_timestamp_2 - table_0.event_timestamp_0 <= 600 * 1000
       )
     select
       DAY,
@@ -14902,10 +14912,10 @@ describe('SQL Builder test', () => {
           table_0
           left outer join table_1 on table_0.user_pseudo_id_0 = table_1.user_pseudo_id_1
           and table_1.event_timestamp_1 - table_0.event_timestamp_0 > 0
-          and table_1.event_timestamp_1 - table_0.event_timestamp_0 < 600 * 1000
+          and table_1.event_timestamp_1 - table_0.event_timestamp_0 <= 600 * 1000
           left outer join table_2 on table_1.user_pseudo_id_1 = table_2.user_pseudo_id_2
           and table_2.event_timestamp_2 - table_1.event_timestamp_1 > 0
-          and table_2.event_timestamp_2 - table_1.event_timestamp_1 < 600 * 1000
+          and table_2.event_timestamp_2 - table_0.event_timestamp_0 <= 600 * 1000
       )
     select
       DAY,
@@ -17209,10 +17219,10 @@ describe('SQL Builder test', () => {
           table_0
           left outer join table_1 on table_0.user_pseudo_id_0 = table_1.user_pseudo_id_1
           and table_1.event_timestamp_1 - table_0.event_timestamp_0 > 0
-          and table_1.event_timestamp_1 - table_0.event_timestamp_0 < 600 * 1000
+          and table_1.event_timestamp_1 - table_0.event_timestamp_0 <= 600 * 1000
           left outer join table_2 on table_1.user_pseudo_id_1 = table_2.user_pseudo_id_2
           and table_2.event_timestamp_2 - table_1.event_timestamp_1 > 0
-          and table_2.event_timestamp_2 - table_1.event_timestamp_1 < 600 * 1000
+          and table_2.event_timestamp_2 - table_0.event_timestamp_0 <= 600 * 1000
       ),
       final_table as (
         select
