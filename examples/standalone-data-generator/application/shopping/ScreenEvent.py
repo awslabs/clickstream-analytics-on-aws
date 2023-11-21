@@ -346,7 +346,7 @@ def get_sign_up_page_events(event, user):
 def get_live_page_events(event, user):
     global current_feature, clicked_product
     events = []
-    live_id = random.randint(1, 5)
+    live_id = random.randint(1, 4)
     view_duration = live_id * random.randint(1, 60)
     user.current_timestamp += view_duration * 1000
     next_page = ShoppingScreen.get_next_page(Page.LIVE)
