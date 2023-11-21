@@ -73,7 +73,7 @@ import {
   BASE_STATUS,
   S3_DATA_PROCESSING_WITH_ERROR_PREFIX_PIPELINE,
 } from './pipeline-mock';
-import { clickStreamTableName, dictionaryTableName, prefixTimeGSIName } from '../../common/constants';
+import { FULL_SOLUTION_VERSION, clickStreamTableName, dictionaryTableName, prefixTimeGSIName } from '../../common/constants';
 import { BuiltInTagKeys } from '../../common/model-ln';
 import { PipelineStatusType } from '../../common/types';
 import { app, server } from '../../index';
@@ -1235,9 +1235,9 @@ describe('Pipeline test', () => {
           },
         ],
         templateInfo: {
-          isLatest: true,
-          pipelineVersion: 'v1.0.0',
-          solutionVersion: 'v1.0.0',
+          isLatest: false,
+          pipelineVersion: MOCK_SOLUTION_VERSION,
+          solutionVersion: FULL_SOLUTION_VERSION,
         },
         metricsDashboardName: 'clickstream_dashboard_notepad_mtzfsocy',
       },
@@ -1401,9 +1401,9 @@ describe('Pipeline test', () => {
         dashboards: [],
         metricsDashboardName: '',
         templateInfo: {
-          isLatest: true,
-          pipelineVersion: 'v1.0.0',
-          solutionVersion: 'v1.0.0',
+          isLatest: false,
+          pipelineVersion: MOCK_SOLUTION_VERSION,
+          solutionVersion: FULL_SOLUTION_VERSION,
         },
       },
     });
@@ -1491,9 +1491,9 @@ describe('Pipeline test', () => {
         dashboards: [],
         metricsDashboardName: '',
         templateInfo: {
-          isLatest: true,
-          pipelineVersion: 'v1.0.0',
-          solutionVersion: 'v1.0.0',
+          isLatest: false,
+          pipelineVersion: MOCK_SOLUTION_VERSION,
+          solutionVersion: FULL_SOLUTION_VERSION,
         },
       },
     });

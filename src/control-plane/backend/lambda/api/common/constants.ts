@@ -31,6 +31,7 @@ const amznRequestContextHeader = 'x-amzn-request-context';
 const amznLambdaContextHeader = 'x-amzn-lambda-context';
 const ALLOW_UPLOADED_FILE_TYPES = process.env.ALLOW_UPLOADED_FILE_TYPES ?? 'jar,mmdb';
 const QUICKSIGHT_CONTROL_PLANE_REGION = process.env.QUICKSIGHT_CONTROL_PLANE_REGION ?? 'us-east-1';
+const FULL_SOLUTION_VERSION = process.env.FULL_SOLUTION_VERSION ?? 'v1.0.0';
 const SDK_MAVEN_VERSION_API_LINK =
   'https://search.maven.org/solrsearch/select?q=g:%22software.aws.solution%22+AND+a:%22clickstream%22&wt=json';
 const PIPELINE_SUPPORTED_REGIONS = [
@@ -112,4 +113,5 @@ export {
   SOLUTION_DATA_PROCESSING_VPC_ENDPOINTS,
   SOLUTION_DATA_MODELING_VPC_ENDPOINTS,
   SOLUTION_VPC_ENDPOINTS,
+  FULL_SOLUTION_VERSION,
 };
