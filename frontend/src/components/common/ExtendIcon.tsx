@@ -17,9 +17,11 @@ import React from 'react';
 interface ExtendIconProps {
   icon: string;
   color?: string;
+  width?: string;
+  height?: string;
 }
 const ExtendIcon: React.FC<ExtendIconProps> = (props: ExtendIconProps) => {
-  const { icon, color } = props;
+  const { icon, color, width, height } = props;
 
   const switchIcon = () => {
     switch (icon) {
@@ -180,8 +182,8 @@ const ExtendIcon: React.FC<ExtendIconProps> = (props: ExtendIconProps) => {
         return (
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
+            width={width ?? '48'}
+            height={height ?? '48'}
             fill={color ?? 'currentColor'}
             className="bi bi-clipboard-data"
             viewBox="0 0 16 16"
