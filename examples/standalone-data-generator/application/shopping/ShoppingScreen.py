@@ -182,6 +182,8 @@ class iOSScreen:
             return iOSScreen.BUY_RESULT
         elif screen_name == Page.PROFILE:
             return iOSScreen.PROFILE
+        elif screen_name == Page.LIVE:
+            return iOSScreen.LIVE
         else:
             return iOSScreen.EXIT
 
@@ -222,5 +224,7 @@ class WebScreen:
             return WebScreen.RESULT
         elif screen_name == Page.PROFILE:
             return WebScreen.PROFILE
+        elif screen_name == Page.LIVE:
+            return WebScreen.LIVE
         else:
             return iOSScreen.EXIT
