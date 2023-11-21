@@ -34,6 +34,7 @@ class Feature:
     search = "search"
     cart = "cart"
     category = "category"
+    live = "live"
 
 
 random_platform = WeightedArray([(Platform.Android, 35), (Platform.iOS, 45), (Platform.Web, 20)])

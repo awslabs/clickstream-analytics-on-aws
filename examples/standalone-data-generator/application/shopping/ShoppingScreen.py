@@ -28,6 +28,7 @@ class Page:
     EXIT = "exit"
     # can't manually reach page
     SPLASH = "splash"
+    LIVE = "live"
 
 
 def get_next_page(page_name):
@@ -52,6 +53,8 @@ def get_next_page(page_name):
         next_page = next_page_of_login.get_random_item()
     if page_name == Page.SIGN_UP:
         next_page = next_page_of_signup.get_random_item()
+    if page_name == Page.LIVE:
+        next_page = next_page_of_live.get_random_item()
     return next_page
 
 
@@ -60,7 +63,8 @@ next_page_of_login = WeightedArray(
 next_page_of_signup = WeightedArray(
     [(Page.MAIN, 70), (Page.LOGIN, 20), (Page.EXIT, 10)])
 next_page_of_main = WeightedArray(
-    [(Page.SEARCH, 18), (Page.CATEGORY, 21), (Page.DETAIL, 43), (Page.CART, 12), (Page.PROFILE, 6), (Page.EXIT, 1)])
+    [(Page.SEARCH, 12), (Page.CATEGORY, 18), (Page.LIVE, 25), (Page.DETAIL, 43), (Page.CART, 12), (Page.PROFILE, 6),
+     (Page.EXIT, 1)])
 next_page_of_category = WeightedArray(
     [(Page.SEARCH, 12), (Page.DETAIL, 45), (Page.MAIN, 20), (Page.PROFILE, 5), (Page.CART, 16), (Page.EXIT, 1)])
 next_page_of_search = WeightedArray(
@@ -81,6 +85,8 @@ next_page_of_result = WeightedArray(
     [(Page.MAIN, 40), (Page.PROFILE, 40), (Page.EXIT, 1)])
 next_page_of_profile = WeightedArray(
     [(Page.MAIN, 20), (Page.CATEGORY, 20), (Page.CART, 15), (Page.LOGIN, 5), (Page.EXIT, 1)])
+next_page_of_live = WeightedArray(
+    [(Page.MAIN, 20), (Page.DETAIL, 80), (Page.EXIT, 1)])
 
 
 def get_page_by_platform(page, platform):
@@ -104,6 +110,7 @@ class AndroidScreen:
     CHECKOUT = ("CheckoutActivity", "com.example.shopping.CheckoutActivity")
     BUY_RESULT = ("BuyResultActivity", "com.example.shopping.BuyResultActivity")
     PROFILE = ("ProfileActivity", "com.example.shopping.ProfileActivity")
+    LIVE = ("LiveActivity", "com.example.shopping.LiveActivity")
     EXIT = ("", "")
 
     @staticmethod
@@ -130,6 +137,8 @@ class AndroidScreen:
             return AndroidScreen.BUY_RESULT
         elif screen_name == Page.PROFILE:
             return AndroidScreen.PROFILE
+        elif screen_name == Page.LIVE:
+            return AndroidScreen.LIVE
         else:
             return AndroidScreen.EXIT
 
@@ -146,6 +155,7 @@ class iOSScreen:
     CHECKOUT = ("CheckoutVC", "com.example.shopping.CheckoutVC")
     BUY_RESULT = ("BuyResultVC", "com.example.shopping.BuyResultVC")
     PROFILE = ("ProfileVC", "com.example.shopping.ProfileVC")
+    LIVE = ("LiveVC", "com.example.shopping.LiveVC")
     EXIT = ("", "")
 
     @staticmethod
@@ -187,6 +197,7 @@ class WebScreen:
     CHECKOUT = ("checkoutPage", enums.host_name + "/checkout")
     RESULT = ("resultPage", enums.host_name + "/result")
     PROFILE = ("profilePage", enums.host_name + "/profile")
+    LIVE = ("livePage", enums.host_name + "/live")
     EXIT = ("", "")
 
     @staticmethod
