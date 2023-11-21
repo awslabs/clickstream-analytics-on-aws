@@ -603,7 +603,54 @@ export const KINESIS_DATA_PROCESSING_PROVISIONED_REDSHIFT_PIPELINE: IPipeline = 
       name: 'EXAMPLE_BUCKET',
       prefix: '',
     },
-    transformPlugin: 'BUILT-IN_1',
+    transformPlugin: 'BUILT-IN-1',
+    enrichPlugin: ['BUILT-IN-2', 'BUILT-IN-3', `${MOCK_PLUGIN_ID}_2`],
+  },
+  dataModeling: {
+    ods: {
+      bucket: {
+        name: 'EXAMPLE_BUCKET',
+        prefix: '',
+      },
+      fileSuffix: '.snappy.parquet',
+    },
+    athena: true,
+    redshift: {
+      dataRange: 'rate(6 months)',
+      provisioned: {
+        clusterIdentifier: 'redshift-cluster-1',
+        dbUser: 'clickstream',
+      },
+    },
+    loadWorkflow: {
+      bucket: {
+        name: 'EXAMPLE_BUCKET',
+        prefix: '',
+      },
+      maxFilesLimit: 50,
+    },
+  },
+};
+
+export const KINESIS_DATA_PROCESSING_PROVISIONED_REDSHIFT_THIRDPARTY_PIPELINE: IPipeline = {
+  ...KINESIS_ON_DEMAND_INGESTION_PIPELINE,
+  dataCollectionSDK: 'thirdparty',
+  dataProcessing: {
+    dataFreshnessInHour: 7,
+    scheduleExpression: 'rate(6 minutes)',
+    sourceS3Bucket: {
+      name: 'EXAMPLE_BUCKET',
+      prefix: '',
+    },
+    sinkS3Bucket: {
+      name: 'EXAMPLE_BUCKET',
+      prefix: '',
+    },
+    pipelineBucket: {
+      name: 'EXAMPLE_BUCKET',
+      prefix: '',
+    },
+    transformPlugin: 'BUILT-IN-4',
     enrichPlugin: ['BUILT-IN-2', 'BUILT-IN-3', `${MOCK_PLUGIN_ID}_2`],
   },
   dataModeling: {

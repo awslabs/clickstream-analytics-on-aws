@@ -321,10 +321,10 @@ describe('Plugin test', () => {
             updateAt: 1667355960000,
           },
           {
-            id: 'THIRD-PARTY-1',
-            type: 'PLUGIN#THIRD-PARTY-1',
+            id: 'BUILT-IN-4',
+            type: 'PLUGIN#BUILT-IN-4',
             prefix: 'PLUGIN',
-            name: 'GTMTransformer',
+            name: 'GTMServerDataTransformer',
             description: {
               'en-US': 'Convert the GTM server data format into the data format in the data warehouse',
               'zh-CN': '把GTM服务的数据格式，转换成数据仓库中的数据格式',
@@ -404,10 +404,10 @@ describe('Plugin test', () => {
             updateAt: 1667355960000,
           },
           {
-            id: 'THIRD-PARTY-1',
-            type: 'PLUGIN#THIRD-PARTY-1',
+            id: 'BUILT-IN-4',
+            type: 'PLUGIN#BUILT-IN-4',
             prefix: 'PLUGIN',
-            name: 'GTMTransformer',
+            name: 'GTMServerDataTransformer',
             description: {
               'en-US': 'Convert the GTM server data format into the data format in the data warehouse',
               'zh-CN': '把GTM服务的数据格式，转换成数据仓库中的数据格式',
@@ -571,10 +571,10 @@ describe('Plugin test', () => {
             updateAt: 1667355960000,
           },
           {
-            id: 'THIRD-PARTY-1',
-            type: 'PLUGIN#THIRD-PARTY-1',
+            id: 'BUILT-IN-4',
+            type: 'PLUGIN#BUILT-IN-4',
             prefix: 'PLUGIN',
-            name: 'GTMTransformer',
+            name: 'GTMServerDataTransformer',
             description: {
               'en-US': 'Convert the GTM server data format into the data format in the data warehouse',
               'zh-CN': '把GTM服务的数据格式，转换成数据仓库中的数据格式',

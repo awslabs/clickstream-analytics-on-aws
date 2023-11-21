@@ -28,7 +28,7 @@ import {
 import { ConditionCategory, MetadataValueType } from './explore-types';
 import { BuiltInTagKeys } from './model-ln';
 import { logger } from './powertools';
-import { ALBRegionMappingObject, BucketPrefix, ClickStreamSubnet, IUserRole, PipelineStackType, PipelineStatus, RPURange, RPURegionMappingObject, ReportingDashboardOutput, SubnetType } from './types';
+import { ALBRegionMappingObject, BucketPrefix, ClickStreamBadRequestError, ClickStreamSubnet, DataCollectionSDK, IUserRole, PipelineStackType, PipelineStatus, RPURange, RPURegionMappingObject, ReportingDashboardOutput, SubnetType } from './types';
 import { IMetadataRaw, IMetadataRawValue, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute, IMetadataAttributeValue } from '../model/metadata';
 import { CPipelineResources, IPipeline } from '../model/pipeline';
 import { IUserSettings } from '../model/user';
@@ -312,27 +312,44 @@ function _getEnrichPluginInfo(resources: CPipelineResources, enrichPluginId: str
 }
 
 function _getTransformerPluginInfo(pipeline: IPipeline, resources: CPipelineResources) {
-  const transformerClassNames: string[] = [];
-  const transformerPluginJars: string[] = [];
-  const transformerPluginFiles: string[] = [];
-  if (!isEmpty(pipeline.dataProcessing?.transformPlugin) && !pipeline.dataProcessing?.transformPlugin?.startsWith('BUILT-IN')) {
-    const transformer = resources.plugins?.filter(p => p.id === pipeline.dataProcessing?.transformPlugin)[0];
-    if (transformer?.mainFunction) {
-      transformerClassNames.push(transformer?.mainFunction);
-    }
-    if (transformer?.jarFile) {
-      transformerPluginJars.push(transformer?.jarFile);
-    }
-    if (transformer?.dependencyFiles) {
-      transformerPluginFiles.push(...transformer?.dependencyFiles);
+  let transformerClassNames: string[] = [];
+  let transformerPluginJars: string[] = [];
+  let transformerPluginFiles: string[] = [];
+  if (!pipeline.dataProcessing?.transformPlugin ) {
+    if (pipeline.dataCollectionSDK === DataCollectionSDK.CLICKSTREAM) {
+      const defaultTransformer = resources.plugins?.filter(p => p.id === 'BUILT-IN-1')[0];
+      if (defaultTransformer?.mainFunction) {
+        transformerClassNames.push(defaultTransformer?.mainFunction);
+      }
+    } else {
+      throw new ClickStreamBadRequestError('Transform plugin is required.');
     }
   } else {
-    let defaultTransformer = resources.plugins?.filter(p => p.id === 'BUILT-IN-1')[0];
-    if (defaultTransformer?.mainFunction) {
-      transformerClassNames.push(defaultTransformer?.mainFunction);
-    }
+    const { classNames, pluginJars, pluginFiles } = _getTransformerPluginInfoFromResources(resources, pipeline.dataProcessing?.transformPlugin);
+    transformerClassNames= transformerClassNames.concat(classNames);
+    transformerPluginJars = transformerPluginJars.concat(pluginJars);
+    transformerPluginFiles = transformerPluginFiles.concat(pluginFiles);
   }
   return { transformerClassNames, transformerPluginJars, transformerPluginFiles };
+}
+
+function _getTransformerPluginInfoFromResources(resources: CPipelineResources, transformPluginId: string) {
+  const classNames: string[] = [];
+  const pluginJars: string[] = [];
+  const pluginFiles: string[] = [];
+  const transform = resources.plugins?.filter(p => p.id === transformPluginId)[0];
+  if (!transform?.id.startsWith('BUILT-IN')) {
+    if (transform?.jarFile) {
+      pluginJars.push(transform?.jarFile);
+    }
+    if (transform?.dependencyFiles) {
+      pluginFiles.push(...transform?.dependencyFiles);
+    }
+  }
+  if (transform?.mainFunction) {
+    classNames.push(transform?.mainFunction);
+  }
+  return { classNames, pluginJars, pluginFiles };
 }
 
 function getSubnetType(routeTable: RouteTable) {
