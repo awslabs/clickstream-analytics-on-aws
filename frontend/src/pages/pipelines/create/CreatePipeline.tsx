@@ -1146,6 +1146,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                     ...prev,
                     selectedSDK: sdk,
                     dataCollectionSDK: defaultStr(sdk.value),
+                    selectedTransformPlugins: [],
                   };
                 });
               }}
