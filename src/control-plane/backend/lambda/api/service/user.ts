@@ -115,16 +115,13 @@ export class UserService {
   };
 
   public async getUserSettingsFromDDB() {
-    const userSettings = await store.getUserSettings();
-    if (!userSettings) {
-      const defaultSettings = {
-        roleJsonPath: DEFAULT_ROLE_JSON_PATH,
-        operatorRoleNames: DEFAULT_OPERATOR_ROLE_NAMES,
-        analystRoleNames: DEFAULT_ANALYST_ROLE_NAMES,
-        analystReaderRoleNames: DEFAULT_ANALYST_READER_ROLE_NAMES,
-      } as IUserSettings;
-      return defaultSettings;
-    }
+    const ddbData = await store.getUserSettings();
+    const userSettings = {
+      roleJsonPath: ddbData?.roleJsonPath || DEFAULT_ROLE_JSON_PATH,
+      operatorRoleNames: ddbData?.operatorRoleNames || DEFAULT_OPERATOR_ROLE_NAMES,
+      analystRoleNames: ddbData?.analystRoleNames || DEFAULT_ANALYST_ROLE_NAMES,
+      analystReaderRoleNames: ddbData?.analystReaderRoleNames || DEFAULT_ANALYST_READER_ROLE_NAMES,
+    };
     return userSettings;
   }
 

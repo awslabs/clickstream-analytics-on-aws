@@ -473,6 +473,41 @@ describe('User test', () => {
     expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 1);
   });
 
+  it('Get user settings miss some attributes', async () => {
+    ddbMock.on(GetCommand, {
+      TableName: clickStreamTableName,
+      Key: {
+        id: 'USER_SETTINGS',
+        type: 'USER_SETTINGS',
+      },
+    }).resolves({
+      Item: {
+        id: 'USER_SETTINGS',
+        type: 'USER_SETTINGS',
+        roleJsonPath: '$.payload.any_keys.roles',
+        operatorRoleNames: `${DEFAULT_OPERATOR_ROLE_NAMES} , Operator1 , Operator2 `,
+        analystRoleNames: `${DEFAULT_ANALYST_ROLE_NAMES} , Analyst1 , Analyst2 `,
+      },
+    });
+    const res = await request(app)
+      .get('/api/user/settings');
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual(
+      {
+        data: {
+          roleJsonPath: '$.payload.any_keys.roles',
+          operatorRoleNames: `${DEFAULT_OPERATOR_ROLE_NAMES} , Operator1 , Operator2 `,
+          analystRoleNames: `${DEFAULT_ANALYST_ROLE_NAMES} , Analyst1 , Analyst2 `,
+          analystReaderRoleNames: DEFAULT_ANALYST_READER_ROLE_NAMES,
+        },
+        message: '',
+        success: true,
+      },
+    );
+    expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 1);
+  });
+
   it('Get user settings', async () => {
     ddbMock.on(GetCommand, {
       TableName: clickStreamTableName,
@@ -497,8 +532,6 @@ describe('User test', () => {
     expect(res.body).toEqual(
       {
         data: {
-          id: 'USER_SETTINGS',
-          type: 'USER_SETTINGS',
           roleJsonPath: '$.payload.any_keys.roles',
           operatorRoleNames: `${DEFAULT_OPERATOR_ROLE_NAMES} , Operator1 , Operator2 `,
           analystRoleNames: `${DEFAULT_ANALYST_ROLE_NAMES} , Analyst1 , Analyst2 `,
