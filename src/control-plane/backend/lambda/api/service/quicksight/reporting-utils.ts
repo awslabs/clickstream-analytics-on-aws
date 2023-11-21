@@ -257,10 +257,7 @@ export const createDataSet = async (quickSight: QuickSight, awsAccountId: string
 : Promise<CreateDataSetCommandOutput|undefined> => {
 
   try {
-    let datasetId = `${QUICKSIGHT_RESOURCE_NAME_PREFIX}${QUICKSIGHT_DATASET_INFIX}${uuidv4().replace(/-/g, '')}`;
-    if (requestAction === ExploreRequestAction.PREVIEW) {
-      datasetId = `${QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX}${uuidv4().replace(/-/g, '')}`;
-    }
+    const datasetId = _getDataSetId(requestAction);
 
     let colGroups: ColumnGroup[] = [];
     if (props.columnGroups !== undefined) {
@@ -361,6 +358,14 @@ export const createDataSet = async (quickSight: QuickSight, awsAccountId: string
     logger.error(`Create QuickSight dataset failed due to: ${(err as Error).message}`);
     throw err;
   }
+};
+
+const _getDataSetId = (requestAction: ExploreRequestAction) : string => {
+  let datasetId = `${QUICKSIGHT_RESOURCE_NAME_PREFIX}${QUICKSIGHT_DATASET_INFIX}${uuidv4().replace(/-/g, '')}`;
+  if (requestAction === ExploreRequestAction.PREVIEW) {
+    datasetId = `${QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX}${uuidv4().replace(/-/g, '')}`;
+  }
+  return datasetId;
 };
 
 export const getDashboardDefinitionFromArn = async (quickSight: QuickSight, awsAccountId: string, dashboardId: string)
