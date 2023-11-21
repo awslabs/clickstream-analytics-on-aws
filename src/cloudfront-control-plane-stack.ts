@@ -122,7 +122,7 @@ export class CloudFrontControlPlaneStack extends Stack {
           zoneName: domainParameters.hostedZoneName.valueAsString,
         });
 
-        const certificate = new DnsValidatedCertificate(this, 'certificate', {
+        const certificate = new DnsValidatedCertificate(this, 'certificate', { //NOSONAR
           domainName: Fn.join('.', [domainParameters.recordName.valueAsString, domainParameters.hostedZoneName.valueAsString]),
           hostedZone: hostedZone,
           region: 'us-east-1',
