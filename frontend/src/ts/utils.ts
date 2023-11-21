@@ -35,8 +35,7 @@ export const defaultStr = (
 };
 
 export const generateStr = (length: number) => {
-  const validCharacters =
-    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  const validCharacters = 'abcdefghijklmnopqrstuvwxyz';
   const array = new Uint8Array(length);
   window.crypto.getRandomValues(array);
   let randomString = '';

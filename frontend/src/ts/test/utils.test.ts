@@ -40,8 +40,7 @@ global.crypto = {
 } as any;
 
 describe('generateStr', () => {
-  const validCharacters =
-    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  const validCharacters = 'abcdefghijklmnopqrstuvwxyz';
 
   test('generates string of correct length', () => {
     const length = 10;
