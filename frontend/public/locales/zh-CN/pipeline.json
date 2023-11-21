@@ -313,7 +313,7 @@
     "domainName": "域名",
     "dns": "DNS",
     "endpoint": "端点",
-    "acm": "ACM",
+    "acm": "SSL 证书",
     "enableAGA": "启用全球加速器",
     "enableAuth": "启用身份验证",
     "dataBuffer": "数据缓冲层",

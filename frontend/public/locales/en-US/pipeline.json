@@ -313,7 +313,7 @@
     "domainName": "Domain name",
     "dns": "DNS",
     "endpoint": "Endpoint",
-    "acm": "ACM",
+    "acm": "SSL Certificate",
     "enableAGA": "Enable Global Accelerator",
     "enableAuth": "Enable Authentication",
     "dataBuffer": "Data Buffer",
