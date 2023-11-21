@@ -53,6 +53,7 @@ import { QUICKSIGHT_RESOURCE_NAME_PREFIX, QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX }
 import { cloudWatchSendLogs, createENI } from '../../common/lambda';
 import { createLogGroup } from '../../common/logs';
 import { POWERTOOLS_ENVS } from '../../common/powertools';
+import { SolutionInfo } from '../../common/solution-info';
 
 export interface DicItem {
   readonly name: string;
@@ -402,6 +403,7 @@ export class ClickStreamApiConstruct extends Construct {
         HEALTH_CHECK_PATH: props.healthCheckPath,
         QUICKSIGHT_CONTROL_PLANE_REGION: props.targetToCNRegions ? 'cn-north-1' : 'us-east-1',
         WITH_VALIDATE_ROLE: 'true',
+        FULL_SOLUTION_VERSION: SolutionInfo.SOLUTION_VERSION,
         ... POWERTOOLS_ENVS,
       },
       timeout: Duration.seconds(30),

@@ -55,7 +55,7 @@ export class PipelineServ {
       const body: IPipeline = req.body;
       const pipeline = new CPipeline(body);
       await pipeline.create();
-      const templateInfo = await pipeline.getTemplateInfo();
+      const templateInfo = pipeline.getTemplateInfo();
       body.templateVersion = templateInfo.solutionVersion;
       body.status = {
         status: PipelineStatusType.CREATING,
@@ -84,7 +84,7 @@ export class PipelineServ {
         latestPipeline.status = await stackManager.getPipelineStatus();
         await store.updatePipelineAtCurrentVersion(latestPipeline);
         const pluginsInfo = await pipeline.getPluginsInfo();
-        const templateInfo = await pipeline.getTemplateInfo();
+        const templateInfo = pipeline.getTemplateInfo();
         return res.json(new ApiSuccess({
           ...latestPipeline,
           dataProcessing: {
@@ -148,7 +148,7 @@ export class PipelineServ {
       }
       const newPipeline = { ...curPipeline };
       const pipeline = new CPipeline(newPipeline);
-      const templateInfo = await pipeline.getTemplateInfo();
+      const templateInfo = pipeline.getTemplateInfo();
       if (templateInfo.isLatest) {
         return res.status(400).send(new ApiFail('Pipeline is already the latest version.'));
       }

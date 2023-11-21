@@ -30,6 +30,7 @@ import {
 } from './stacks';
 import {
   awsUrlSuffix,
+  FULL_SOLUTION_VERSION,
   PIPELINE_STACKS,
   stackWorkflowS3Bucket,
 } from '../common/constants';
@@ -270,7 +271,7 @@ export class CPipeline {
     this.pipeline.executionName = `main-${uuidv4()}`;
     this.pipeline.workflow = await this.generateWorkflow();
 
-    this.pipeline.templateVersion = this.resources?.solution?.data.version ?? '';
+    this.pipeline.templateVersion = FULL_SOLUTION_VERSION;
 
     this.pipeline.executionArn = await this.stackManager.execute(this.pipeline.workflow, this.pipeline.executionName);
     // bind plugin
@@ -346,7 +347,7 @@ export class CPipeline {
     validateIngestionServerNum(this.pipeline.ingestionServer.size);
     const executionName = `main-${uuidv4()}`;
     this.pipeline.executionName = executionName;
-    this.pipeline.templateVersion = this.resources?.solution?.data.version ?? '';
+    this.pipeline.templateVersion = FULL_SOLUTION_VERSION;
     this.pipeline.workflow = await this.generateWorkflow();
     this.stackManager.setExecWorkflow(this.pipeline.workflow);
     const oldStackNames = this.stackManager.getWorkflowStacks(oldPipeline.workflow?.Workflow!);
@@ -1021,21 +1022,11 @@ export class CPipeline {
     };
   };
 
-  public async getTemplateInfo() {
-    if (!this.resources?.solution) {
-      const solution = await store.getDictionary('Solution');
-      this.resources = {
-        ...this.resources,
-        solution,
-      };
-    }
-    if (!this.resources?.solution?.data.version) {
-      throw new ClickStreamBadRequestError('Error in obtaining the latest template version number.');
-    }
+  public getTemplateInfo() {
     return {
-      isLatest: this.pipeline.templateVersion === this.resources?.solution?.data.version,
+      isLatest: this.pipeline.templateVersion === FULL_SOLUTION_VERSION,
       pipelineVersion: this.pipeline.templateVersion,
-      solutionVersion: this.resources?.solution?.data.version,
+      solutionVersion: FULL_SOLUTION_VERSION,
     };
   };
 }
