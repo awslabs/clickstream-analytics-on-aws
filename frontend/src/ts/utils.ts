@@ -35,15 +35,14 @@ export const defaultStr = (
 };
 
 export const generateStr = (length: number) => {
-  const characters = 'abcdefghijklmnopqrstuvwxyz';
+  const validCharacters =
+    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  const array = new Uint8Array(length);
+  window.crypto.getRandomValues(array);
   let randomString = '';
-  let seed = new Date().getTime();
-
-  while (randomString.length < length) {
-    seed = (seed * 9301 + 49297) % 233280;
-    const randomIndex = Math.floor((seed / 233280) * characters.length);
-    randomString += characters.charAt(randomIndex);
-  }
+  array.forEach((value) => {
+    randomString += validCharacters.charAt(value % validCharacters.length);
+  });
   return randomString;
 };
 

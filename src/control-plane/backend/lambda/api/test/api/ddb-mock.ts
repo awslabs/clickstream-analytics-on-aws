@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { TransactWriteItemsCommand } from '@aws-sdk/client-dynamodb';
+import { ConditionalCheckFailedException, TransactWriteItemsCommand } from '@aws-sdk/client-dynamodb';
 import {
   ConnectivityType,
   DescribeAvailabilityZonesCommand,
@@ -29,7 +29,8 @@ import { GetNamespaceCommand, GetWorkgroupCommand } from '@aws-sdk/client-redshi
 import { GetBucketPolicyCommand } from '@aws-sdk/client-s3';
 import { GetSecretValueCommand } from '@aws-sdk/client-secrets-manager';
 import { StartExecutionCommand } from '@aws-sdk/client-sfn';
-import { GetCommand, GetCommandInput, QueryCommand, QueryCommandInput } from '@aws-sdk/lib-dynamodb';
+import { DynamoDBDocumentClient, GetCommand, GetCommandInput, PutCommand, PutCommandOutput, QueryCommand, QueryCommandInput } from '@aws-sdk/lib-dynamodb';
+import { AwsClientStub } from 'aws-sdk-client-mock';
 import { analyticsMetadataTable, clickStreamTableName, dictionaryTableName, prefixTimeGSIName } from '../../common/constants';
 import { IUserRole, ProjectEnvironment } from '../../common/types';
 import { IPipeline } from '../../model/pipeline';
@@ -89,27 +90,64 @@ function userMock(ddbMock: any, userId: string, role: IUserRole, existed?: boole
   });
 }
 
-function tokenMock(ddbMock: any, expect: boolean): any {
-  if (!expect) {
-    return ddbMock.on(GetCommand, {
-      TableName: clickStreamTableName,
-      Key: {
-        id: MOCK_TOKEN,
-        type: 'REQUESTID',
-      },
-    }, true).resolvesOnce({});
+function tokenMock(ddbMock: AwsClientStub<DynamoDBDocumentClient>, existed: boolean): any {
+  if (existed) {
+    return ddbMock.on(PutCommand).callsFakeOnce(input => {
+      if (
+        input.TableName === clickStreamTableName &&
+        input.Item.id === MOCK_TOKEN &&
+        input.Item.type === 'REQUESTID' &&
+        input.ConditionExpression === 'attribute_not_exists(#id)'
+      ) {
+        throw new ConditionalCheckFailedException(
+          {
+            message: 'ConditionalCheckFailedException',
+            $metadata: {},
+          },
+        );
+      }
+    });
   }
-  return ddbMock.on(GetCommand, {
-    TableName: clickStreamTableName,
-    Key: {
-      id: MOCK_TOKEN,
-      type: 'REQUESTID',
-    },
-  }, true).resolvesOnce({
-    Item: {
-      id: MOCK_TOKEN,
-      type: 'REQUESTID',
-    },
+  return ddbMock.on(PutCommand).callsFakeOnce(input => {
+    if (
+      input.TableName === clickStreamTableName &&
+      input.Item.id === MOCK_TOKEN &&
+      input.Item.type === 'REQUESTID' &&
+      input.ConditionExpression === 'attribute_not_exists(#id)'
+    ) {
+      return {} as PutCommandOutput;
+    } else {
+      throw new Error('mocked token id rejection');
+    }
+  });
+}
+
+function tokenMockTwice(ddbMock: AwsClientStub<DynamoDBDocumentClient>): any {
+  return ddbMock.on(PutCommand).callsFakeOnce(input => {
+    if (
+      input.TableName === clickStreamTableName &&
+      input.Item.id === MOCK_TOKEN &&
+      input.Item.type === 'REQUESTID' &&
+      input.ConditionExpression === 'attribute_not_exists(#id)'
+    ) {
+      return {} as PutCommandOutput;
+    } else {
+      throw new Error('mocked token id rejection');
+    }
+  }).callsFake(input => {
+    if (
+      input.TableName === clickStreamTableName &&
+      input.Item.id === MOCK_TOKEN &&
+      input.Item.type === 'REQUESTID' &&
+      input.ConditionExpression === 'attribute_not_exists(#id)'
+    ) {
+      throw new ConditionalCheckFailedException(
+        {
+          message: 'ConditionalCheckFailedException',
+          $metadata: {},
+        },
+      );
+    }
   });
 }
 
@@ -931,6 +969,7 @@ export {
   MOCK_DASHBOARD_ID,
   MOCK_USER_ID,
   tokenMock,
+  tokenMockTwice,
   userMock,
   projectExistedMock,
   appExistedMock,

@@ -945,7 +945,7 @@ describe('Pipeline test', () => {
       message: 'Template: AppRegistry not found in dictionary.',
       success: false,
     });
-    expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 0);
+    expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 1);
   });
   it('Create pipeline with mock error', async () => {
     tokenMock(ddbMock, false);
@@ -971,7 +971,7 @@ describe('Pipeline test', () => {
       message: 'Unexpected error occurred at server.',
       error: 'Error',
     });
-    expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 0);
+    expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 1);
   });
   it('Create pipeline 400', async () => {
     tokenMock(ddbMock, false);
@@ -1027,7 +1027,7 @@ describe('Pipeline test', () => {
         },
       ],
     });
-    expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 0);
+    expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 1);
   });
   it('Create pipeline with non-existent project', async () => {
     tokenMock(ddbMock, false);
@@ -1052,7 +1052,7 @@ describe('Pipeline test', () => {
         },
       ],
     });
-    expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 0);
+    expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 1);
   });
   it('Get pipeline by ID', async () => {
     projectExistedMock(ddbMock, true);

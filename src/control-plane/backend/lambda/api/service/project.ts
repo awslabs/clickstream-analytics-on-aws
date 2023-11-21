@@ -286,4 +286,8 @@ export class ProjectServ {
     await store.saveRequestId(id);
   };
 
+  public async deleteRequestId(id: string) {
+    await store.deleteRequestId(id);
+  };
+
 }

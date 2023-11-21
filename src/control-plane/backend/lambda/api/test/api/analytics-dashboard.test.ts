@@ -67,7 +67,7 @@ describe('Analytics dashboard test', () => {
     expect(quickSightMock).toHaveReceivedCommandTimes(CreateDataSetCommand, 1);
     expect(quickSightMock).toHaveReceivedCommandTimes(CreateDashboardCommand, 1);
     expect(quickSightMock).toHaveReceivedCommandTimes(CreateAnalysisCommand, 1);
-    expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 2);
+    expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 1);
     expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 2);
   });
 
@@ -107,8 +107,8 @@ describe('Analytics dashboard test', () => {
     expect(quickSightMock).toHaveReceivedCommandTimes(CreateDataSetCommand, 0);
     expect(quickSightMock).toHaveReceivedCommandTimes(CreateDashboardCommand, 0);
     expect(quickSightMock).toHaveReceivedCommandTimes(CreateAnalysisCommand, 0);
-    expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 2);
-    expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 0);
+    expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 1);
+    expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 1);
   });
 
   it('List dashboards of project', async () => {

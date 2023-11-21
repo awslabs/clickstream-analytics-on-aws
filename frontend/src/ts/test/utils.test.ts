@@ -22,7 +22,57 @@ import {
   validateProjectId,
 } from '../utils';
 
+global.crypto = {
+  getRandomValues: <T extends ArrayBufferView | null>(buffer: T): T => {
+    if (buffer === null) {
+      return buffer;
+    }
+    const bytes = new Uint8Array(
+      buffer.buffer,
+      buffer.byteOffset,
+      buffer.byteLength
+    );
+    for (let i = 0; i < bytes.length; i++) {
+      bytes[i] = Math.floor(Math.random() * 256);
+    }
+    return buffer;
+  },
+} as any;
+
 describe('generateStr', () => {
+  const validCharacters =
+    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+
+  test('generates string of correct length', () => {
+    const length = 10;
+    const randomString = generateStr(length);
+    expect(randomString).toHaveLength(length);
+  });
+
+  test('contains only valid characters', () => {
+    const randomString = generateStr(20);
+    for (const char of randomString) {
+      expect(validCharacters.includes(char)).toBe(true);
+    }
+  });
+
+  test('generates different strings on subsequent calls', () => {
+    const string1 = generateStr(15);
+    const string2 = generateStr(15);
+    expect(string1).not.toEqual(string2);
+  });
+
+  test('handles zero length', () => {
+    const randomString = generateStr(0);
+    expect(randomString).toBe('');
+  });
+
+  test('handles very large length', () => {
+    const length = 1000;
+    const randomString = generateStr(length);
+    expect(randomString).toHaveLength(length);
+  });
+
   it('generate 8 characters string', () => {
     const result = generateStr(8);
     expect(result.length).toBe(8);
