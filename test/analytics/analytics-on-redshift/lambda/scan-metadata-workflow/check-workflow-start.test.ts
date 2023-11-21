@@ -13,6 +13,7 @@
 
 import { Readable } from 'stream';
 import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
+import { SFNClient, ListExecutionsCommand } from '@aws-sdk/client-sfn';
 import { sdkStreamMixin } from '@smithy/util-stream-node';
 import { mockClient } from 'aws-sdk-client-mock';
 import { handler, CheckMetadataWorkflowEvent } from '../../../../../src/analytics/lambdas/scan-metadata-workflow/check-metadata-workflow-start';
@@ -20,13 +21,18 @@ import { WorkflowStatus } from '../../../../../src/analytics/private/constant';
 import 'aws-sdk-client-mock-jest';
 
 const checkMetadataWorkflowEvent: CheckMetadataWorkflowEvent = {
-  eventSource: 'LoadDataFlow',
-  scanStartDate: '2023-10-10',
-  scanEndDate: '2023-10-20',
+  originalInput: {
+    eventSource: 'LoadDataFlow',
+    scanStartDate: '2023-10-10',
+    scanEndDate: '2023-10-20',
+  },
+  executionId: 'arn:aws:states:us-east-1:xxxxxxxxx:execution:stateMachineNameTest:exec_id_1',
 };
 
 describe('Lambda - check workflow start', () => {
   const s3ClientMock = mockClient(S3Client);
+
+  const snfClientMock = mockClient(SFNClient);
 
   beforeEach(() => {
     s3ClientMock.reset();
@@ -49,6 +55,15 @@ describe('Lambda - check workflow start', () => {
       )
       .resolvesOnce({},
       );
+
+    snfClientMock.on(ListExecutionsCommand).resolves({
+      executions: [
+        //@ts-ignore
+        {
+          executionArn: 'arn:aws:states:us-east-1:xxxxxxxxx:execution:stateMachineNameTest:exec_id_1',
+        },
+      ],
+    });    
 
     const resp = await handler(checkMetadataWorkflowEvent);
     expect(resp).toEqual({
@@ -91,6 +106,15 @@ describe('Lambda - check workflow start', () => {
         },
       );
 
+    snfClientMock.on(ListExecutionsCommand).resolves({
+      executions: [
+        //@ts-ignore
+        {
+          executionArn: 'arn:aws:states:us-east-1:xxxxxxxxx:execution:stateMachineNameTest:exec_id_1',
+        },
+      ],
+    });        
+
     const resp = await handler(checkMetadataWorkflowEvent);
     expect(resp).toEqual({
       status: WorkflowStatus.SKIP,
@@ -129,6 +153,15 @@ describe('Lambda - check workflow start', () => {
         },
       );
 
+    snfClientMock.on(ListExecutionsCommand).resolves({
+      executions: [
+        //@ts-ignore
+        {
+          executionArn: 'arn:aws:states:us-east-1:xxxxxxxxx:execution:stateMachineNameTest:exec_id_1',
+        },
+      ],
+    });       
+
     const resp = await handler(checkMetadataWorkflowEvent);
     expect(resp).toEqual({
       status: WorkflowStatus.CONTINUE,
@@ -140,7 +173,16 @@ describe('Lambda - check workflow start', () => {
 
   test('workflow is triggered manually with input', async () => {
     jest.useFakeTimers().setSystemTime(new Date(1698416923914));
-    checkMetadataWorkflowEvent.eventSource = '';
+    checkMetadataWorkflowEvent.originalInput.eventSource = '';
+    snfClientMock.on(ListExecutionsCommand).resolves({
+      executions: [
+        //@ts-ignore
+        {
+          executionArn: 'arn:aws:states:us-east-1:xxxxxxxxx:execution:stateMachineNameTest:exec_id_1',
+        },
+      ],
+    });  
+
     const resp = await handler(checkMetadataWorkflowEvent);
     expect(resp).toEqual({
       status: WorkflowStatus.CONTINUE,
@@ -152,9 +194,17 @@ describe('Lambda - check workflow start', () => {
 
   test('workflow is triggered manually, without input content', async () => {
     jest.useFakeTimers().setSystemTime(new Date(1698416923914));
-    checkMetadataWorkflowEvent.eventSource = '';
-    checkMetadataWorkflowEvent.scanEndDate = '';
-    checkMetadataWorkflowEvent.scanStartDate = '';
+    checkMetadataWorkflowEvent.originalInput.eventSource = '';
+    checkMetadataWorkflowEvent.originalInput.scanEndDate = '';
+    checkMetadataWorkflowEvent.originalInput.scanStartDate = '';
+    snfClientMock.on(ListExecutionsCommand).resolves({
+      executions: [
+        //@ts-ignore
+        {
+          executionArn: 'arn:aws:states:us-east-1:xxxxxxxxx:execution:stateMachineNameTest:exec_id_1',
+        },
+      ],
+    });    
     const resp = await handler(checkMetadataWorkflowEvent);
     expect(resp).toEqual({
       status: WorkflowStatus.CONTINUE,
@@ -166,9 +216,37 @@ describe('Lambda - check workflow start', () => {
 
   test('workflow is triggered manually, with invalid input content', async () => {
     jest.useFakeTimers().setSystemTime(new Date(1698416923914));
-    checkMetadataWorkflowEvent.eventSource = '';
-    checkMetadataWorkflowEvent.scanEndDate = '2023-10-271';
-    checkMetadataWorkflowEvent.scanStartDate = 'addd';
+    checkMetadataWorkflowEvent.originalInput.eventSource = '';
+    checkMetadataWorkflowEvent.originalInput.scanEndDate = '2023-10-271';
+    checkMetadataWorkflowEvent.originalInput.scanStartDate = 'addd';
+    snfClientMock.on(ListExecutionsCommand).resolves({
+      executions: [
+        //@ts-ignore
+        {
+          executionArn: 'arn:aws:states:us-east-1:xxxxxxxxx:execution:stateMachineNameTest:exec_id_1',
+        },
+      ],
+    });     
     await expect(handler(checkMetadataWorkflowEvent)).rejects.toThrow('input scan date format is not yyyy-mm-dd');
   });
+
+  test('workflow is skipped due to another workflow is running', async () => {
+    jest.useFakeTimers().setSystemTime(new Date(1698416923914));
+    snfClientMock.on(ListExecutionsCommand).resolves({
+      executions: [
+        //@ts-ignore
+        {
+          executionArn: 'arn:aws:states:us-east-1:xxxxxxxxx:execution:stateMachineNameTest:exec_id_1',
+        },
+        //@ts-ignore
+        {
+          executionArn: 'arn:aws:states:us-east-1:xxxxxxxxx:execution:stateMachineNameTest:exec_id_2',
+        },        
+      ],
+    });     
+    const resp = await handler(checkMetadataWorkflowEvent);
+    expect(resp).toEqual({
+      status: WorkflowStatus.SKIP,
+    });   
+  });  
 });
