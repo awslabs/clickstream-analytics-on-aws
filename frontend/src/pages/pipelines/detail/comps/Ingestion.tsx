@@ -17,6 +17,7 @@ import {
   SpaceBetween,
   Link,
 } from '@cloudscape-design/components';
+import InfoTitle from 'components/common/title/InfoTitle';
 import DomainNameWithStatus from 'pages/common/DomainNameWithStatus';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -185,21 +186,29 @@ const Ingestion: React.FC<TabContentProps> = (props: TabContentProps) => {
       </SpaceBetween>
 
       <SpaceBetween direction="vertical" size="l">
-        <div>
-          <Box variant="awsui-key-label">{t('pipeline:detail.domainName')}</Box>
-          <DomainNameWithStatus
-            type="domain"
-            projectId={pipelineInfo?.projectId}
-            pipelineId={pipelineInfo?.pipelineId}
-            customDomain={pipelineInfo?.ingestionServer.domain.domainName}
-            fetch={ternary(pipelineInfo?.pipelineId, true, false)}
-          />
-        </div>
+        {pipelineInfo?.ingestionServer.loadBalancer.protocol ===
+          ProtocalType.HTTPS && (
+          <div>
+            <Box variant="awsui-key-label">
+              {t('pipeline:detail.domainName')}
+            </Box>
+            <DomainNameWithStatus
+              type="domain"
+              projectId={pipelineInfo?.projectId}
+              pipelineId={pipelineInfo?.pipelineId}
+              customDomain={pipelineInfo?.ingestionServer.domain.domainName}
+              fetch={ternary(pipelineInfo?.pipelineId, true, false)}
+            />
+          </div>
+        )}
 
         {pipelineInfo?.pipelineId && (
           <>
             <div>
-              <Box variant="awsui-key-label">{t('pipeline:detail.dns')}</Box>
+              <InfoTitle
+                title={t('pipeline:detail.dns')}
+                popoverDescription={t('pipeline:detail.dnsInfo')}
+              />
               <DomainNameWithStatus
                 type="dns"
                 projectId={pipelineInfo?.projectId}
@@ -210,9 +219,10 @@ const Ingestion: React.FC<TabContentProps> = (props: TabContentProps) => {
             </div>
 
             <div>
-              <Box variant="awsui-key-label">
-                {t('pipeline:detail.endpoint')}
-              </Box>
+              <InfoTitle
+                title={t('pipeline:detail.endpoint')}
+                popoverDescription={t('pipeline:detail.endpointInfo')}
+              />
               <DomainNameWithStatus
                 type="endpoint"
                 projectId={pipelineInfo?.projectId}
@@ -223,6 +233,26 @@ const Ingestion: React.FC<TabContentProps> = (props: TabContentProps) => {
             </div>
           </>
         )}
+
+        <div>
+          <Box variant="awsui-key-label">{t('pipeline:create.cors')}</Box>
+          <div>
+            {defaultStr(
+              pipelineInfo?.ingestionServer?.loadBalancer?.serverCorsOrigin
+            )}
+          </div>
+        </div>
+
+        <div>
+          <Box variant="awsui-key-label">
+            {t('pipeline:create.requestPath')}
+          </Box>
+          <div>
+            {defaultStr(
+              pipelineInfo?.ingestionServer?.loadBalancer?.serverEndpointPath
+            )}
+          </div>
+        </div>
 
         <div>
           <Box variant="awsui-key-label">{t('pipeline:detail.enableAGA')}</Box>

@@ -25,6 +25,7 @@ import {
 import { getApplicationDetail } from 'apis/application';
 import { getProjectDetail } from 'apis/project';
 import Loading from 'components/common/Loading';
+import InfoTitle from 'components/common/title/InfoTitle';
 import CustomBreadCrumb from 'components/layouts/CustomBreadCrumb';
 import Navigation from 'components/layouts/Navigation';
 import PipelineStatus from 'components/pipeline/PipelineStatus';
@@ -201,7 +202,7 @@ const ApplicationDetail: React.FC = () => {
                   <SpaceBetween direction="vertical" size="l">
                     <div>
                       <Box variant="awsui-key-label">
-                        {t('application:detail.serverDomain')}
+                        {t('pipeline:detail.domainName')}
                       </Box>
                       <DomainNameWithStatus
                         type="domain"
@@ -213,9 +214,10 @@ const ApplicationDetail: React.FC = () => {
                     </div>
 
                     <div>
-                      <Box variant="awsui-key-label">
-                        {t('pipeline:detail.dns')}
-                      </Box>
+                      <InfoTitle
+                        title={t('pipeline:detail.dns')}
+                        popoverDescription={t('pipeline:detail.dnsInfo')}
+                      />
                       <DomainNameWithStatus
                         type="dns"
                         projectId={applicationInfo?.projectId}
@@ -226,9 +228,10 @@ const ApplicationDetail: React.FC = () => {
                     </div>
 
                     <div>
-                      <Box variant="awsui-key-label">
-                        {t('application:detail.serverEdp')}
-                      </Box>
+                      <InfoTitle
+                        title={t('pipeline:detail.endpoint')}
+                        popoverDescription={t('pipeline:detail.endpointInfo')}
+                      />
                       <DomainNameWithStatus
                         type="endpoint"
                         projectId={applicationInfo?.projectId}
