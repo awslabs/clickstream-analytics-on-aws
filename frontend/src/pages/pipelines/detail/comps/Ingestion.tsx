@@ -185,16 +185,21 @@ const Ingestion: React.FC<TabContentProps> = (props: TabContentProps) => {
       </SpaceBetween>
 
       <SpaceBetween direction="vertical" size="l">
-        <div>
-          <Box variant="awsui-key-label">{t('pipeline:detail.domainName')}</Box>
-          <DomainNameWithStatus
-            type="domain"
-            projectId={pipelineInfo?.projectId}
-            pipelineId={pipelineInfo?.pipelineId}
-            customDomain={pipelineInfo?.ingestionServer.domain.domainName}
-            fetch={ternary(pipelineInfo?.pipelineId, true, false)}
-          />
-        </div>
+        {pipelineInfo?.ingestionServer.loadBalancer.protocol ===
+          ProtocalType.HTTPS && (
+          <div>
+            <Box variant="awsui-key-label">
+              {t('pipeline:detail.domainName')}
+            </Box>
+            <DomainNameWithStatus
+              type="domain"
+              projectId={pipelineInfo?.projectId}
+              pipelineId={pipelineInfo?.pipelineId}
+              customDomain={pipelineInfo?.ingestionServer.domain.domainName}
+              fetch={ternary(pipelineInfo?.pipelineId, true, false)}
+            />
+          </div>
+        )}
 
         {pipelineInfo?.pipelineId && (
           <>
@@ -223,6 +228,26 @@ const Ingestion: React.FC<TabContentProps> = (props: TabContentProps) => {
             </div>
           </>
         )}
+
+        <div>
+          <Box variant="awsui-key-label">{t('pipeline:create.cors')}</Box>
+          <div>
+            {defaultStr(
+              pipelineInfo?.ingestionServer?.loadBalancer?.serverCorsOrigin
+            )}
+          </div>
+        </div>
+
+        <div>
+          <Box variant="awsui-key-label">
+            {t('pipeline:create.requestPath')}
+          </Box>
+          <div>
+            {defaultStr(
+              pipelineInfo?.ingestionServer?.loadBalancer?.serverEndpointPath
+            )}
+          </div>
+        </div>
 
         <div>
           <Box variant="awsui-key-label">{t('pipeline:detail.enableAGA')}</Box>
