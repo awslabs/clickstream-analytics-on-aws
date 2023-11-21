@@ -63,7 +63,7 @@ describe('Lambda - check workflow start', () => {
           executionArn: 'arn:aws:states:us-east-1:xxxxxxxxx:execution:stateMachineNameTest:exec_id_1',
         },
       ],
-    });    
+    });
 
     const resp = await handler(checkMetadataWorkflowEvent);
     expect(resp).toEqual({
@@ -113,7 +113,7 @@ describe('Lambda - check workflow start', () => {
           executionArn: 'arn:aws:states:us-east-1:xxxxxxxxx:execution:stateMachineNameTest:exec_id_1',
         },
       ],
-    });        
+    });
 
     const resp = await handler(checkMetadataWorkflowEvent);
     expect(resp).toEqual({
@@ -160,7 +160,7 @@ describe('Lambda - check workflow start', () => {
           executionArn: 'arn:aws:states:us-east-1:xxxxxxxxx:execution:stateMachineNameTest:exec_id_1',
         },
       ],
-    });       
+    });
 
     const resp = await handler(checkMetadataWorkflowEvent);
     expect(resp).toEqual({
@@ -181,7 +181,7 @@ describe('Lambda - check workflow start', () => {
           executionArn: 'arn:aws:states:us-east-1:xxxxxxxxx:execution:stateMachineNameTest:exec_id_1',
         },
       ],
-    });  
+    });
 
     const resp = await handler(checkMetadataWorkflowEvent);
     expect(resp).toEqual({
@@ -204,7 +204,7 @@ describe('Lambda - check workflow start', () => {
           executionArn: 'arn:aws:states:us-east-1:xxxxxxxxx:execution:stateMachineNameTest:exec_id_1',
         },
       ],
-    });    
+    });
     const resp = await handler(checkMetadataWorkflowEvent);
     expect(resp).toEqual({
       status: WorkflowStatus.CONTINUE,
@@ -226,7 +226,7 @@ describe('Lambda - check workflow start', () => {
           executionArn: 'arn:aws:states:us-east-1:xxxxxxxxx:execution:stateMachineNameTest:exec_id_1',
         },
       ],
-    });     
+    });
     await expect(handler(checkMetadataWorkflowEvent)).rejects.toThrow('input scan date format is not yyyy-mm-dd');
   });
 
@@ -241,12 +241,12 @@ describe('Lambda - check workflow start', () => {
         //@ts-ignore
         {
           executionArn: 'arn:aws:states:us-east-1:xxxxxxxxx:execution:stateMachineNameTest:exec_id_2',
-        },        
+        },
       ],
-    });     
+    });
     const resp = await handler(checkMetadataWorkflowEvent);
     expect(resp).toEqual({
       status: WorkflowStatus.SKIP,
-    });   
-  });  
+    });
+  });
 });
