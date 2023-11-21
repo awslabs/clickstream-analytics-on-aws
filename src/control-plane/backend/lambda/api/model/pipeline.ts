@@ -588,7 +588,7 @@ export class CPipeline {
       });
       this.pipeline.tags.push({
         key: BuiltInTagKeys.AWS_SOLUTION_VERSION,
-        value: this.resources?.solution.data.version,
+        value: FULL_SOLUTION_VERSION,
       });
       this.pipeline.tags.push({
         key: BuiltInTagKeys.CLICKSTREAM_PROJECT,
