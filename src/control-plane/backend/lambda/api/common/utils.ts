@@ -326,7 +326,6 @@ function _getTransformerPluginInfo(pipeline: IPipeline, resources: CPipelineReso
     }
   } else {
     const { classNames, pluginJars, pluginFiles } = _getTransformerPluginInfoFromResources(resources, pipeline.dataProcessing?.transformPlugin);
-    console.log('classNames', pipeline.dataProcessing?.transformPlugin, classNames);
     transformerClassNames= transformerClassNames.concat(classNames);
     transformerPluginJars = transformerPluginJars.concat(pluginJars);
     transformerPluginFiles = transformerPluginFiles.concat(pluginFiles);
