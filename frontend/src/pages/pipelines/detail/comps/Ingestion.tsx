@@ -17,6 +17,7 @@ import {
   SpaceBetween,
   Link,
 } from '@cloudscape-design/components';
+import InfoTitle from 'components/common/title/InfoTitle';
 import DomainNameWithStatus from 'pages/common/DomainNameWithStatus';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -204,7 +205,10 @@ const Ingestion: React.FC<TabContentProps> = (props: TabContentProps) => {
         {pipelineInfo?.pipelineId && (
           <>
             <div>
-              <Box variant="awsui-key-label">{t('pipeline:detail.dns')}</Box>
+              <InfoTitle
+                title={t('pipeline:detail.dns')}
+                popoverDescription={t('pipeline:detail.dnsInfo')}
+              />
               <DomainNameWithStatus
                 type="dns"
                 projectId={pipelineInfo?.projectId}
@@ -215,9 +219,10 @@ const Ingestion: React.FC<TabContentProps> = (props: TabContentProps) => {
             </div>
 
             <div>
-              <Box variant="awsui-key-label">
-                {t('pipeline:detail.endpoint')}
-              </Box>
+              <InfoTitle
+                title={t('pipeline:detail.endpoint')}
+                popoverDescription={t('pipeline:detail.endpointInfo')}
+              />
               <DomainNameWithStatus
                 type="endpoint"
                 projectId={pipelineInfo?.projectId}
