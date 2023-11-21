@@ -314,7 +314,7 @@
     "dns": "DNS 记录值",
     "dnsInfo": "请在您的 DNS 里创建一个记录（Alias 或者 CNAME）指向该 DNS 记录值",
     "endpoint": "摄取端点 URL",
-    "endpointInfo": "请配置 SDK 端将数据发送到此 UR",
+    "endpointInfo": "请配置 SDK 端将数据发送到此 URL",
     "acm": "SSL 证书",
     "enableAGA": "启用全球加速器",
     "enableAuth": "启用身份验证",
