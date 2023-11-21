@@ -183,13 +183,6 @@ async function getRoleFromToken(decodedToken: any) {
   let oidcRoles: string[] = [];
 
   const userSettings = await userService.getUserSettingsFromDDB();
-  if (isEmpty(userSettings.roleJsonPath) ||
-    isEmpty(userSettings.operatorRoleNames) ||
-    isEmpty(userSettings.analystRoleNames ||
-    isEmpty(userSettings.analystReaderRoleNames))) {
-    return role;
-  }
-
   const values = JSONPath({ path: userSettings.roleJsonPath, json: decodedToken });
   if (Array.prototype.isPrototypeOf(values) && values.length > 0) {
     oidcRoles = values[0] as string[];
