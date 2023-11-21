@@ -89,7 +89,7 @@ import {
   REPORTING_WITH_PROVISIONED_REDSHIFT_PARAMETERS,
   mergeParameters,
 } from './workflow-mock';
-import { dictionaryTableName } from '../../common/constants';
+import { FULL_SOLUTION_VERSION, dictionaryTableName } from '../../common/constants';
 import { BuiltInTagKeys } from '../../common/model-ln';
 import { SolutionInfo } from '../../common/solution-info-ln';
 import { WorkflowStateType, WorkflowTemplate } from '../../common/types';
@@ -124,7 +124,7 @@ const Tags = [
   },
   {
     Key: BuiltInTagKeys.AWS_SOLUTION_VERSION,
-    Value: MOCK_SOLUTION_VERSION,
+    Value: FULL_SOLUTION_VERSION,
   },
   {
     Key: BuiltInTagKeys.CLICKSTREAM_PROJECT,
