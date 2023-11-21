@@ -25,6 +25,7 @@ import {
   buildReshiftLink,
   buildSecurityGroupLink,
   buildSubnetLink,
+  buildVPCLink,
 } from 'ts/url';
 import { defaultStr, getLocaleLngDescription, ternary } from 'ts/utils';
 
@@ -362,7 +363,7 @@ const Processing: React.FC<TabContentProps> = (props: TabContentProps) => {
                       <div>
                         <Link
                           external
-                          href={buildSubnetLink(
+                          href={buildVPCLink(
                             pipelineInfo?.region ?? '',
                             pipelineInfo?.dataModeling?.redshift?.newServerless
                               ?.network?.vpcId
