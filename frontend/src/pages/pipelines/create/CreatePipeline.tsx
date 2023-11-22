@@ -2553,7 +2553,7 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
           ),
           warmPoolSize: defaultGenericsValue(
             data.ingestionServer.size.warmPoolSize,
-            0
+            1
           ),
           scaleOnCpuUtilizationPercent: defaultGenericsValue(
             data.ingestionServer.size.scaleOnCpuUtilizationPercent,
