@@ -381,6 +381,11 @@ describe('Data Process -- EMR Serverless job submitter function', () => {
       'abc/test_prefix/year=2023/month=11/day=20/',
     ]);
 
+    const prefixList4 = getDatePrefixList('abc/test_prefix/', new Date('2023-11-21T09:13:14.893Z').getTime(), new Date('2023-11-22T02:23:14.860Z').getTime());
+    expect(prefixList4).toEqual([
+      'abc/test_prefix/year=2023/month=11/day=21/',
+      'abc/test_prefix/year=2023/month=11/day=22/',
+    ]);
   });
 
 });
