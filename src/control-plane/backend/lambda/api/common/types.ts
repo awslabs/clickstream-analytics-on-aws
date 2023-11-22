@@ -377,6 +377,12 @@ export interface IngestionServerSizeProps {
   readonly scaleOnCpuUtilizationPercent?: number;
 }
 
+export interface StackUpdateParameter {
+  readonly stackName: string;
+  readonly parameterKey: string;
+  readonly parameterValue: any;
+}
+
 export enum BucketPrefix {
   LOGS_ALB = 'logs-alb',
   LOGS_KAFKA_CONNECTOR = 'logs-kafka-connector',

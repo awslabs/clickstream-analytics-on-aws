@@ -59,7 +59,7 @@ const BASE_PIPELINE_ATTRIBUTES = {
   tags: [
     { key: 'customerKey1', value: 'tagValue1' },
     { key: 'customerKey2', value: 'tagValue2' },
-    { key: BuiltInTagKeys.AWS_SOLUTION_VERSION, value: 'tagValue3' },
+    { key: BuiltInTagKeys.AWS_SOLUTION_VERSION, value: MOCK_SOLUTION_VERSION },
   ],
   templateVersion: MOCK_SOLUTION_VERSION,
   bucket: {
@@ -1273,7 +1273,16 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_UPDATE_PIPELINE_WITH_WORKFLOW:
                   Region: 'ap-southeast-1',
                   TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-reporting-quicksight-stack.template.json',
                   Action: 'Create',
-                  Parameters: [],
+                  Parameters: [
+                    {
+                      ParameterKey: 'QuickSightUserParam',
+                      ParameterValue: 'Admin/fakeUser',
+                    },
+                    {
+                      ParameterKey: 'QuickSightPrincipalParam',
+                      ParameterValue: 'arn:aws:quicksight:us-west-2:555555555555:user/default/Admin/fakeUser',
+                    },
+                  ],
                   StackName: `Clickstream-Reporting-${MOCK_PIPELINE_ID}`,
                 },
                 Callback: {

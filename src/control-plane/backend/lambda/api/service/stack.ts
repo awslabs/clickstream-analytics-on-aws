@@ -60,6 +60,10 @@ export class StackManager {
     return this.execWorkflow;
   }
 
+  public getWorkflow(): WorkflowTemplate | undefined {
+    return this.workflow;
+  }
+
   public updateWorkflowForApp(
     appIds: string[],
     ingestionStackName: string,
@@ -163,7 +167,21 @@ export class StackManager {
     return Array.from(new Set(retryStackNames));
   }
 
-  public updateWorkflow(editStacks: string[]): void {
+
+  public updateWorkflowParameters(editedParameters: {stackName: string; parameterKey: string; parameterValue: any}[]): void {
+    if (!this.execWorkflow || !this.workflow) {
+      throw new Error('Pipeline workflow is empty.');
+    }
+
+    for (let param of editedParameters) {
+      this.execWorkflow.Workflow = this.updateStackParameter(
+        this.execWorkflow.Workflow, param.stackName, param.parameterKey, param.parameterValue, 'Update');
+      this.workflow.Workflow = this.updateStackParameter(
+        this.workflow.Workflow, param.stackName, param.parameterKey, param.parameterValue, 'Create');
+    }
+  }
+
+  public updateWorkflowAction(editStacks: string[]): void {
     if (!this.execWorkflow || !this.pipeline.status?.stackDetails) {
       throw new Error('Pipeline workflow or stack information is empty.');
     }
