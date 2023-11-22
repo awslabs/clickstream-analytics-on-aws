@@ -1313,11 +1313,11 @@ describe('Account Env test', () => {
           available: false,
         },
         {
-          service: 'emr-serverless',
-          available: true,
+          service: 'quicksight',
+          available: false,
         },
         {
-          service: 'quicksight',
+          service: 'emr-serverless',
           available: true,
         },
         {
@@ -1369,15 +1369,15 @@ describe('Account Env test', () => {
           available: false,
         },
         {
+          service: 'quicksight',
+          available: false,
+        },
+        {
           service: 'redshift-serverless',
           available: false,
         },
         {
           service: 'emr-serverless',
-          available: true,
-        },
-        {
-          service: 'quicksight',
           available: true,
         },
         {
@@ -1416,15 +1416,15 @@ describe('Account Env test', () => {
           available: false,
         },
         {
+          service: 'quicksight',
+          available: false,
+        },
+        {
           service: 'emr-serverless',
           available: false,
         },
         {
           service: 'msk',
-          available: false,
-        },
-        {
-          service: 'quicksight',
           available: false,
         },
         {
