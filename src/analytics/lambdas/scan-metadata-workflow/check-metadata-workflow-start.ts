@@ -11,8 +11,10 @@
  *  and limitations under the License.
  */
 
+import { SFNClient, ListExecutionsCommand, ListExecutionsCommandOutput } from '@aws-sdk/client-sfn';
 import { logger } from '../../../common/powertools';
 import { readS3ObjectAsJson } from '../../../common/s3';
+import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
 import { getLatestEmrJobEndTime } from '../../../data-pipeline/utils/utils-common';
 import { WorkflowStatus } from '../../private/constant';
 
@@ -20,10 +22,20 @@ const pipelineS3BucketName = process.env.PIPELINE_S3_BUCKET_NAME!;
 const pipelineS3Prefix = process.env.PIPELINE_S3_PREFIX!;
 const projectId = process.env.PROJECT_ID!;
 
+const REGION = process.env.AWS_REGION; //e.g. "us-east-1"
+
+const sfnClient = new SFNClient({
+  region: REGION,
+  ...aws_sdk_client_common_config,
+});
+
 export interface CheckMetadataWorkflowEvent {
-  eventSource: string;
-  scanStartDate: string;
-  scanEndDate: string;
+  originalInput: {
+    eventSource: string;
+    scanStartDate: string;
+    scanEndDate: string;
+  };
+  executionId: string;
 }
 
 /**
@@ -45,21 +57,28 @@ export interface CheckMetadataWorkflowEvent {
 export const handler = async (event: CheckMetadataWorkflowEvent) => {
   logger.debug('request event:', JSON.stringify(event));
   try {
-    const eventSource = event.eventSource;
-    // workflow is triggered from upstream workflow
-    if (eventSource === 'LoadDataFlow') {
-      return await handleEventFromUpstreamWorkflow();
+    const eventSource = event.originalInput.eventSource;
+    const hasRunningExecution: boolean = await hasOtherRunningExecutions(event.executionId);
+    if (!hasRunningExecution) {
+      // workflow is triggered from upstream workflow
+      if (eventSource === 'LoadDataFlow') {
+        return await handleEventFromUpstreamWorkflow();
+      } else {
+        const inputScanEndDate = formatScanDate(event.originalInput.scanEndDate);
+        const inputScanStartDate = formatScanDate(event.originalInput.scanStartDate);
+        const currentTimestamp = Date.now();
+        const scanEndDate = getScanEndDate(inputScanEndDate, getDateFromTimestamp(currentTimestamp));
+        let scanStartDate = inputScanStartDate;
+        return {
+          status: WorkflowStatus.CONTINUE,
+          scanEndDate: scanEndDate,
+          jobStartTimestamp: currentTimestamp,
+          scanStartDate: scanStartDate,
+        };
+      }
     } else {
-      const inputScanEndDate = formatScanDate(event.scanEndDate);
-      const inputScanStartDate = formatScanDate(event.scanStartDate);
-      const currentTimestamp = Date.now();
-      const scanEndDate = getScanEndDate(inputScanEndDate, getDateFromTimestamp(currentTimestamp));
-      let scanStartDate = inputScanStartDate;
       return {
-        status: WorkflowStatus.CONTINUE,
-        scanEndDate: scanEndDate,
-        jobStartTimestamp: currentTimestamp,
-        scanStartDate: scanStartDate,
+        status: WorkflowStatus.SKIP,
       };
     }
   } catch (err) {
@@ -103,6 +122,35 @@ async function handleEventFromUpstreamWorkflow() {
     };
   }
   return result;
+}
+
+async function hasOtherRunningExecutions(executionArn: string) {
+  const tempArr: string[] = executionArn.split(':');
+  tempArr.pop();
+  const stateMachineArn = tempArr.join(':').replace(':execution:', ':stateMachine:');
+
+  logger.info('ListExecutionsCommand, stateMachineArn=' + stateMachineArn);
+  const res: ListExecutionsCommandOutput = await sfnClient.send(new ListExecutionsCommand({
+    stateMachineArn,
+    statusFilter: 'RUNNING',
+  }));
+
+  let otherRunningExecutionsCount = 0;
+
+  let hasRunningWorkflow = false;
+  if (res.executions) {
+    logger.info('totalExecutionsCount=' + res.executions.length);
+    otherRunningExecutionsCount = res.executions.filter(e => e.executionArn != executionArn).length;
+  }
+
+  logger.info('otherRunningExecutionsCount=' + otherRunningExecutionsCount);
+
+  if (otherRunningExecutionsCount > 0) {
+    hasRunningWorkflow = true;
+  }
+
+  return hasRunningWorkflow;
+
 }
 
 async function getWorkflowInfoFromS3() {
