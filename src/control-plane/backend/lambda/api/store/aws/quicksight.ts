@@ -196,6 +196,9 @@ export const quickSightIsSubscribed = async (): Promise<boolean> => {
 
 export const quickSightPing = async (region: string): Promise<boolean> => {
   try {
+    if (region.startsWith('cn')) {
+      return false;
+    }
     const quickSightClient = sdkClient.QuickSightClient({
       maxAttempts: 1,
       region: region,
