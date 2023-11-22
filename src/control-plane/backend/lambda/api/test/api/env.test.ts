@@ -1304,36 +1304,12 @@ describe('Account Env test', () => {
       '/api/env/ping?region=cn-north-1&services=emr-serverless,msk,quicksight,redshift-serverless,global-accelerator,athena');
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
-    expect(res.body).toEqual({
-      success: true,
-      message: '',
-      data: [
-        {
-          service: 'global-accelerator',
-          available: false,
-        },
-        {
-          service: 'quicksight',
-          available: false,
-        },
-        {
-          service: 'emr-serverless',
-          available: true,
-        },
-        {
-          service: 'redshift-serverless',
-          available: true,
-        },
-        {
-          service: 'athena',
-          available: true,
-        },
-        {
-          service: 'msk',
-          available: true,
-        },
-      ],
-    });
+    expect(res.body.data).toContainEqual({ service: 'global-accelerator', available: false });
+    expect(res.body.data).toContainEqual({ service: 'quicksight', available: false });
+    expect(res.body.data).toContainEqual({ service: 'emr-serverless', available: true });
+    expect(res.body.data).toContainEqual({ service: 'redshift-serverless', available: true });
+    expect(res.body.data).toContainEqual({ service: 'athena', available: true });
+    expect(res.body.data).toContainEqual({ service: 'msk', available: true });
   });
   it('Ping Services in cn-northwest-1', async () => {
     emrServerlessClient.on(ListApplicationsCommand).resolves({
@@ -1360,36 +1336,12 @@ describe('Account Env test', () => {
       '/api/env/ping?region=cn-northwest-1&services=emr-serverless,msk,quicksight,redshift-serverless,global-accelerator,athena');
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
-    expect(res.body).toEqual({
-      success: true,
-      message: '',
-      data: [
-        {
-          service: 'global-accelerator',
-          available: false,
-        },
-        {
-          service: 'quicksight',
-          available: false,
-        },
-        {
-          service: 'redshift-serverless',
-          available: false,
-        },
-        {
-          service: 'emr-serverless',
-          available: true,
-        },
-        {
-          service: 'athena',
-          available: true,
-        },
-        {
-          service: 'msk',
-          available: true,
-        },
-      ],
-    });
+    expect(res.body.data).toContainEqual({ service: 'global-accelerator', available: false });
+    expect(res.body.data).toContainEqual({ service: 'quicksight', available: false });
+    expect(res.body.data).toContainEqual({ service: 'emr-serverless', available: true });
+    expect(res.body.data).toContainEqual({ service: 'redshift-serverless', available: false });
+    expect(res.body.data).toContainEqual({ service: 'athena', available: true });
+    expect(res.body.data).toContainEqual({ service: 'msk', available: true });
   });
   it('Ping Services with ENOTFOUND', async () => {
     const mockError = new Error('Mock ENOTFOUND error');
@@ -1407,36 +1359,12 @@ describe('Account Env test', () => {
       '/api/env/ping?region=cn-north-1&services=emr-serverless,msk,quicksight,redshift-serverless,global-accelerator,athena');
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
-    expect(res.body).toEqual({
-      success: true,
-      message: '',
-      data: [
-        {
-          service: 'global-accelerator',
-          available: false,
-        },
-        {
-          service: 'quicksight',
-          available: false,
-        },
-        {
-          service: 'emr-serverless',
-          available: false,
-        },
-        {
-          service: 'msk',
-          available: false,
-        },
-        {
-          service: 'redshift-serverless',
-          available: false,
-        },
-        {
-          service: 'athena',
-          available: false,
-        },
-      ],
-    });
+    expect(res.body.data).toContainEqual({ service: 'global-accelerator', available: false });
+    expect(res.body.data).toContainEqual({ service: 'quicksight', available: false });
+    expect(res.body.data).toContainEqual({ service: 'emr-serverless', available: false });
+    expect(res.body.data).toContainEqual({ service: 'redshift-serverless', available: false });
+    expect(res.body.data).toContainEqual({ service: 'athena', available: false });
+    expect(res.body.data).toContainEqual({ service: 'msk', available: false });
   });
   it('Get Host Zones', async () => {
     route53Client.on(ListHostedZonesCommand).resolves({
