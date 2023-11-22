@@ -3014,7 +3014,7 @@ describe('Pipeline test', () => {
       expect(
         input.TransactItems[0].Put.Item.templateVersion.S === 'v0.0.0' &&
         input.TransactItems[1].Update.ExpressionAttributeValues[':templateVersion'].S === 'v0.0.0' &&
-        input.TransactItems[1].Update.ExpressionAttributeValues[':tags'].L[2].M.value.S === 'tagValue3',
+        input.TransactItems[1].Update.ExpressionAttributeValues[':tags'].L[2].M.value.S === MOCK_SOLUTION_VERSION,
       ).toBeTruthy();
     });
     const res = await request(app)

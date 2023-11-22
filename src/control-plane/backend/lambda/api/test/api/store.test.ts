@@ -388,7 +388,7 @@ describe('App test', () => {
                 S: BuiltInTagKeys.AWS_SOLUTION_VERSION,
               },
               value: {
-                S: 'tagValue3',
+                S: MOCK_SOLUTION_VERSION,
               },
             },
           },

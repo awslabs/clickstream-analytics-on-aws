@@ -59,7 +59,7 @@ const BASE_PIPELINE_ATTRIBUTES = {
   tags: [
     { key: 'customerKey1', value: 'tagValue1' },
     { key: 'customerKey2', value: 'tagValue2' },
-    { key: BuiltInTagKeys.AWS_SOLUTION_VERSION, value: 'tagValue3' },
+    { key: BuiltInTagKeys.AWS_SOLUTION_VERSION, value: MOCK_SOLUTION_VERSION },
   ],
   templateVersion: MOCK_SOLUTION_VERSION,
   bucket: {
