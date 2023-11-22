@@ -1313,6 +1313,62 @@ describe('Account Env test', () => {
           available: false,
         },
         {
+          service: 'emr-serverless',
+          available: true,
+        },
+        {
+          service: 'quicksight',
+          available: true,
+        },
+        {
+          service: 'redshift-serverless',
+          available: true,
+        },
+        {
+          service: 'athena',
+          available: true,
+        },
+        {
+          service: 'msk',
+          available: true,
+        },
+      ],
+    });
+  });
+  it('Ping Services in cn-northwest-1', async () => {
+    emrServerlessClient.on(ListApplicationsCommand).resolves({
+      applications: [],
+    });
+    kafkaClient.on(ListClustersV2Command).resolves({
+      ClusterInfoList: [],
+    });
+    kafkaConnectClient.on(ListConnectorsCommand).resolves({
+      connectors: [],
+    });
+    redshiftServerlessClient.on(ListWorkgroupsCommand).resolves({
+      workgroups: [],
+    });
+    athenaClient.on(ListWorkGroupsCommand).resolves({
+      WorkGroups: [],
+    });
+    quickSightClient.on(DescribeAccountSubscriptionCommand).resolves({
+      AccountInfo: {
+        AccountName: '',
+      },
+    });
+    const res = await request(app).get(
+      '/api/env/ping?region=cn-northwest-1&services=emr-serverless,msk,quicksight,redshift-serverless,global-accelerator,athena');
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({
+      success: true,
+      message: '',
+      data: [
+        {
+          service: 'global-accelerator',
+          available: false,
+        },
+        {
           service: 'redshift-serverless',
           available: false,
         },
@@ -1360,10 +1416,6 @@ describe('Account Env test', () => {
           available: false,
         },
         {
-          service: 'redshift-serverless',
-          available: false,
-        },
-        {
           service: 'emr-serverless',
           available: false,
         },
@@ -1373,6 +1425,10 @@ describe('Account Env test', () => {
         },
         {
           service: 'quicksight',
+          available: false,
+        },
+        {
+          service: 'redshift-serverless',
           available: false,
         },
         {
