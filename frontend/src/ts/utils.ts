@@ -34,8 +34,12 @@ export const defaultStr = (
   return expectStr ?? defaultValue ?? '';
 };
 
-export const generateStr = (length: number) => {
-  const validCharacters = 'abcdefghijklmnopqrstuvwxyz';
+export const generateStr = (length: number, onlyLowerCase = false) => {
+  let validCharacters =
+    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  if (onlyLowerCase) {
+    validCharacters = 'abcdefghijklmnopqrstuvwxyz';
+  }
   const array = new Uint8Array(length);
   window.crypto.getRandomValues(array);
   let randomString = '';
