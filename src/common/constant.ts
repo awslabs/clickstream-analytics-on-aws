@@ -181,12 +181,12 @@ export const ServerlessRedshiftRPUByRegionMapping = {
     max: 0,
   },
   'cn-north-1': {
-    min: 0,
-    max: 0,
+    min: 8,
+    max: 512,
   },
   'cn-northwest-1': {
-    min: 0,
-    max: 0,
+    min: 8,
+    max: 512,
   },
 };
 
