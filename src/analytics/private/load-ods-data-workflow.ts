@@ -254,8 +254,8 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
         time: WaitTime.duration(Duration.seconds(120)),
       }).next(
         new Pass(this, `${odsTableName} - Set parameters`, {
-          outputPath: "$.detail"
-        })
+          outputPath: '$.detail',
+        }),
       ).next(submitJob);
 
       // Create sub chain
