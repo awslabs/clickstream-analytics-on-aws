@@ -368,7 +368,7 @@ export const checkDisable = (condOne?: boolean, condTwo?: boolean) => {
 };
 
 export const defaultGenericsValue = <T>(expectValue: T, defaultValue: T) => {
-  if (expectValue) {
+  if (expectValue || expectValue === 0) {
     return expectValue;
   } else {
     return defaultValue;
