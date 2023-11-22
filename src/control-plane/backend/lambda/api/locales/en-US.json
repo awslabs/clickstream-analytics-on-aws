@@ -8,7 +8,7 @@
       "tableChart": "Detail information"
     },
     "filter": {
-      "scope": "The scope of this time filter is based on the selection made at the time of saving this analysis. For example, if the time range selected at the time of saving this analysis is the past 7 days, then it is not possible to choose data from more than 7 days ago."
+      "scope": "Time filter scope is based on saved settings. Data out of scope can not be fetched."
     }
   }
 }
