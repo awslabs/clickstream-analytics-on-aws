@@ -416,21 +416,20 @@ export function getDatePrefixList(prefix: string, startTimestamp: number, endTim
   let aTime = startTimestamp;
   const oneDay = 24 * 60 * 60 * 1000;
 
-  const padTo2Digits = (num: number) => {
-    return num.toString().padStart(2, '0');
-  };
   const dataPrefixList: string[] = [];
 
   while (aTime <= endTimestamp) {
-    const currentDate = new Date(aTime);
-    const yyyy = currentDate.getUTCFullYear();
-    const mm = currentDate.getUTCMonth() + 1;
-    const dd = currentDate.getUTCDate();
     dataPrefixList.push(
-      `${prefix}year=${yyyy}/month=${padTo2Digits(mm)}/day=${padTo2Digits(dd)}/`,
+      `${prefix}${getYMDPrefix(aTime)}`,
     );
     aTime += oneDay;
   }
+  const endDayPrefix = `${prefix}${getYMDPrefix(endTimestamp)}`;
+
+  if (!dataPrefixList.includes(endDayPrefix)) {
+    dataPrefixList.push(endDayPrefix);
+  }
+
   logger.info(`dataPrefixList for ${new Date(startTimestamp).toISOString()} to ${new Date(endTimestamp).toISOString()}`,
     {
       start: dataPrefixList[0],
@@ -438,7 +437,18 @@ export function getDatePrefixList(prefix: string, startTimestamp: number, endTim
       length: dataPrefixList.length,
     });
   return dataPrefixList;
+}
 
+function getYMDPrefix(aTime: number) {
+  const padTo2Digits = (num: number) => {
+    return num.toString().padStart(2, '0');
+  };
+  const currentDate = new Date(aTime);
+  const yyyy = padTo2Digits(currentDate.getUTCFullYear());
+  const mm = padTo2Digits(currentDate.getUTCMonth() + 1);
+  const dd = padTo2Digits(currentDate.getUTCDate());
+
+  return `year=${yyyy}/month=${mm}/day=${dd}/`;
 }
 
 export function getEstimatedSparkConfig(objectsInfo: ObjectsInfo): CustomSparkConfig {
