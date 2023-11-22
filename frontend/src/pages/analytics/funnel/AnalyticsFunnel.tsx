@@ -222,7 +222,7 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
     chartTitle?: string,
     chartSubTitle?: string
   ) => {
-    const funnelId = generateStr(6);
+    const funnelId = generateStr(6, true);
     const parameters = getDashboardCreateParameters(
       pipeline,
       window.location.origin

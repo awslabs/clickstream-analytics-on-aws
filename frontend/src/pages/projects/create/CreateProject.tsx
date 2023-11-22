@@ -214,7 +214,7 @@ const CreateProject: React.FC<CreateProjectProps> = (
                         name: e.detail.value,
                         id: `${e.detail.value
                           ?.toLocaleLowerCase()
-                          ?.replace(/[^\w]/g, '_')}_${generateStr(4)}`,
+                          ?.replace(/[^\w]/g, '_')}_${generateStr(4, true)}`,
                       };
                     });
                   }}

@@ -334,7 +334,7 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
     chartTitle?: string,
     chartSubTitle?: string
   ) => {
-    const eventId = generateStr(6);
+    const eventId = generateStr(6, true);
     const parameters = getDashboardCreateParameters(
       pipeline,
       window.location.origin

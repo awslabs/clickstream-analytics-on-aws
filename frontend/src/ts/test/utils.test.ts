@@ -90,6 +90,20 @@ describe('generateStr', () => {
       .some((char, index, array) => char !== array[0]);
     expect(isNotAllSame).toBe(true);
   });
+
+  it('should generate a random string with lowercase characters only if onlyLowerCase is true', () => {
+    const length = 10;
+    const result = generateStr(length, true);
+    const lowercaseRegex = /^[a-z]+$/;
+    expect(lowercaseRegex.test(result)).toBe(true);
+  });
+
+  it('should generate a random string with a mix of uppercase, lowercase, and numeric characters if onlyLowerCase is false', () => {
+    const length = 10;
+    const result = generateStr(length, false);
+    const mixedRegex = /^[a-zA-Z0-9]+$/;
+    expect(mixedRegex.test(result)).toBe(true);
+  });
 });
 
 describe('validateEmails', () => {
