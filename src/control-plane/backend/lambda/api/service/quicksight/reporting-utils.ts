@@ -33,7 +33,7 @@ import { AssumeRoleCommand, STSClient } from '@aws-sdk/client-sts';
 import Mustache from 'mustache';
 import { v4 as uuidv4 } from 'uuid';
 import { DataSetProps, dataSetAdminPermissionActions, dataSetReaderPermissionActions } from './dashboard-ln';
-import { EventAndCondition, PairEventAndCondition, SQLCondition } from './sql-builder';
+import { Condition, EventAndCondition, PairEventAndCondition, SQLCondition } from './sql-builder';
 import { QUICKSIGHT_DATASET_INFIX, QUICKSIGHT_RESOURCE_NAME_PREFIX, QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX } from '../../common/constants-ln';
 import { AnalysisType, ExploreConversionIntervalType, ExploreLocales, ExplorePathNodeType, ExplorePathSessionDef, ExploreRelativeTimeUnit, ExploreRequestAction, ExploreTimeScopeType, ExploreVisualName, MetadataValueType, QuickSightChartType } from '../../common/explore-types';
 import { logger } from '../../common/powertools';
@@ -809,7 +809,7 @@ export function getFunnelTableVisualRelatedDefs(viewName: string, colNames: stri
 export function getEventChartVisualDef(visualId: string, viewName: string, titleProps: DashboardTitleProps,
   quickSightChartType: QuickSightChartType, groupColumn: string, hasGrouping: boolean) : Visual {
 
-  if (quickSightChartType != QuickSightChartType.LINE && quickSightChartType != QuickSightChartType.BAR) {
+  if (quickSightChartType !== QuickSightChartType.LINE && quickSightChartType !== QuickSightChartType.BAR) {
     const errorMessage = `Event analysis: unsupported quicksight chart type ${quickSightChartType}`;
     logger.warn(errorMessage);
     throw new Error(errorMessage);
@@ -874,7 +874,7 @@ export function getRetentionChartVisualDef(visualId: string, viewName: string,
   titleProps: DashboardTitleProps,
   quickSightChartType: QuickSightChartType, hasGrouping: boolean) : Visual {
 
-  if (quickSightChartType != QuickSightChartType.LINE && quickSightChartType != QuickSightChartType.BAR) {
+  if (quickSightChartType !== QuickSightChartType.LINE && quickSightChartType !== QuickSightChartType.BAR) {
     const errorMessage = `Retention analysis: unsupported quicksight chart type ${quickSightChartType}`;
     logger.warn(errorMessage);
     throw new Error(errorMessage);
@@ -1308,6 +1308,11 @@ function _checkCommonPartParameter(params: any): CheckParamsStatus | void {
     };
   }
 
+  const filterCheckResult = _checkCondition(params);
+  if (filterCheckResult !== undefined ) {
+    return filterCheckResult;
+  }
+
   const checkResult = _checkTimeParameters(params);
   if (checkResult !== undefined ) {
     return checkResult;
@@ -1315,27 +1320,64 @@ function _checkCommonPartParameter(params: any): CheckParamsStatus | void {
 
 }
 
-function _checkTimeParameters(params: any): CheckParamsStatus | void {
-  if (params.timeScopeType !== ExploreTimeScopeType.FIXED && params.timeScopeType !== ExploreTimeScopeType.RELATIVE) {
-    return {
-      success: false,
-      message: 'Invalid parameter [timeScopeType].',
-    };
-  } else if (params.timeScopeType === ExploreTimeScopeType.FIXED) {
-    if (params.timeStart === undefined || params.timeEnd === undefined ) {
+function _checkCondition(params: any): CheckParamsStatus | void {
+
+  const allConditions:Condition[] = [];
+  const eventAndConditions = params.eventAndConditions;
+  if (eventAndConditions !== undefined) {
+    for (const eventCondition of eventAndConditions) {
+      if (eventCondition.sqlCondition?.conditions !== undefined) {
+        allConditions.push(...eventCondition.sqlCondition.conditions);
+      }
+    }
+  }
+
+  const globalEventCondition = params.globalEventCondition;
+  if (globalEventCondition !== undefined && globalEventCondition.conditions !== undefined) {
+    allConditions.push(...globalEventCondition.conditions);
+  }
+
+  const pairEventAndConditions = params.pairEventAndConditions;
+  if (pairEventAndConditions !== undefined) {
+    for (const pairCondition of pairEventAndConditions) {
+      if (pairCondition.startEvent.sqlCondition?.conditions !== undefined) {
+        allConditions.push(...pairCondition.startEvent.sqlCondition.conditions);
+      }
+      if (pairCondition.backEvent.sqlCondition?.conditions !== undefined) {
+        allConditions.push(...pairCondition.backEvent.sqlCondition.conditions);
+      }
+    }
+  }
+
+  for (const condition of allConditions) {
+
+    if (condition.category === undefined
+      || condition.property === undefined || condition.property === ''
+      ||condition.operator === undefined || condition.operator === ''
+      || condition.value === undefined) {
+
       return {
         success: false,
-        message: 'At least missing one of following parameters [timeStart, timeEnd].',
+        message: 'Incomplete filter conditions.',
       };
     }
-  } else if (params.timeScopeType === ExploreTimeScopeType.RELATIVE) {
-    if (params.lastN === undefined || params.timeUnit === undefined ) {
+  }
+}
+
+function _checkTimeParameters(params: any): CheckParamsStatus | void {
+
+  const conditions = params.eventAndConditions as EventAndCondition[];
+  const eventNames: string[] = [];
+  for (const condition of conditions) {
+
+    if (eventNames.includes(condition.eventName)) {
       return {
         success: false,
         message: 'At least missing one of following parameters [lastN, timeUnit].',
       };
     }
   }
+
 }
 
 function _getMultipleVisualProps(hasGrouping: boolean) {
