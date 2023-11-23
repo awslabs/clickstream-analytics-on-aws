@@ -1922,6 +1922,7 @@ describe('SQL Builder test', () => {
           user_pseudo_id,
           event_id,
           event_timestamp,
+          event_date,
           _session_id
         from
           base_data
@@ -1971,6 +1972,7 @@ describe('SQL Builder test', () => {
       data_final as (
         select
           event_name,
+          event_date,
           user_pseudo_id,
           event_id,
           event_timestamp,
@@ -1995,6 +1997,7 @@ describe('SQL Builder test', () => {
           step_table_2
       )
     select
+      a.event_date,
       a.event_name || '_' || a.step_1 as source,
       CASE
         WHEN b.event_name is not null THEN b.event_name || '_' || a.step_2
@@ -2198,7 +2201,8 @@ describe('SQL Builder test', () => {
           END as event_name,
           user_pseudo_id,
           event_id,
-          event_timestamp
+          event_timestamp,
+          event_date
         from
           base_data base
       ),
@@ -2226,6 +2230,7 @@ describe('SQL Builder test', () => {
           a.user_pseudo_id,
           a.event_id,
           a.event_timestamp,
+          a.event_date,
           case
             when (
               b.event_timestamp - a.event_timestamp < 3600000
@@ -2256,6 +2261,7 @@ describe('SQL Builder test', () => {
           user_pseudo_id,
           event_id,
           event_timestamp,
+          event_date,
           group_id,
           ROW_NUMBER() OVER (
             PARTITION BY
@@ -2278,7 +2284,8 @@ describe('SQL Builder test', () => {
         select
           data.user_pseudo_id user_pseudo_id,
           group_id,
-          min(step_1) min_step
+          min(step_1) min_step,
+          min(event_timestamp) event_timestamp
         from
           data
         where
@@ -2299,6 +2306,7 @@ describe('SQL Builder test', () => {
       data_final as (
         select
           event_name,
+          event_date,
           user_pseudo_id,
           event_id,
           group_id,
@@ -2322,6 +2330,7 @@ describe('SQL Builder test', () => {
           step_table_2
       )
     select
+      a.event_date event_date,
       a.event_name || '_' || a.step_1 as source,
       CASE
         WHEN b.event_name is not null THEN b.event_name || '_' || a.step_2
@@ -2479,6 +2488,7 @@ describe('SQL Builder test', () => {
       mid_table_1 as (
         select
           event_name,
+          event_date,
           user_pseudo_id,
           event_id,
           event_timestamp,
@@ -2512,6 +2522,7 @@ describe('SQL Builder test', () => {
       data as (
         select
           event_name,
+          event_date,
           user_pseudo_id,
           event_id,
           event_timestamp,
@@ -2567,6 +2578,7 @@ describe('SQL Builder test', () => {
       data_final as (
         select
           event_name,
+          event_date,
           user_pseudo_id,
           event_id,
           event_timestamp,
@@ -2592,6 +2604,7 @@ describe('SQL Builder test', () => {
           step_table_2
       )
     select
+      a.event_date event_date,
       a.node || '_' || a.step_1 as source,
       CASE
         WHEN b.node is not null THEN b.node || '_' || a.step_2
@@ -2749,6 +2762,7 @@ describe('SQL Builder test', () => {
       mid_table_1 as (
         select
           event_name,
+          event_date,
           user_pseudo_id,
           event_id,
           event_timestamp,
@@ -2774,6 +2788,7 @@ describe('SQL Builder test', () => {
       mid_table as (
         select
           event_name,
+          event_date,
           user_pseudo_id,
           event_id,
           event_timestamp,
@@ -2803,6 +2818,7 @@ describe('SQL Builder test', () => {
       data as (
         select
           event_name,
+          event_date,
           user_pseudo_id,
           event_id,
           event_timestamp,
@@ -2858,6 +2874,7 @@ describe('SQL Builder test', () => {
       data_final as (
         select
           event_name,
+          event_date,
           user_pseudo_id,
           event_id,
           event_timestamp,
@@ -2883,6 +2900,7 @@ describe('SQL Builder test', () => {
           step_table_2
       )
     select
+      a.event_date event_date,
       a.node || '_' || a.step_1 as source,
       CASE
         WHEN b.node is not null THEN b.node || '_' || a.step_2
@@ -3039,6 +3057,7 @@ describe('SQL Builder test', () => {
       mid_table_1 as (
         select
           event_name,
+          event_date,
           user_pseudo_id,
           event_id,
           event_timestamp,
@@ -3072,6 +3091,7 @@ describe('SQL Builder test', () => {
       data as (
         select
           event_name,
+          event_date,
           user_pseudo_id,
           event_id,
           event_timestamp,
@@ -3134,6 +3154,7 @@ describe('SQL Builder test', () => {
       data_final as (
         select
           event_name,
+          event_date,
           user_pseudo_id,
           event_id,
           event_timestamp,
@@ -3159,6 +3180,7 @@ describe('SQL Builder test', () => {
           step_table_2
       )
     select
+      a.event_date event_date,
       a.node || '_' || a.step_1 as source,
       CASE
         WHEN b.node is not null THEN b.node || '_' || a.step_2
@@ -3294,6 +3316,7 @@ describe('SQL Builder test', () => {
       mid_table_1 as (
         select
           event_name,
+          event_date,
           user_pseudo_id,
           event_id,
           event_timestamp
@@ -3327,6 +3350,7 @@ describe('SQL Builder test', () => {
         select
           user_pseudo_id,
           event_id,
+          event_date,
           event_timestamp,
           case
             when node in (
@@ -3358,6 +3382,7 @@ describe('SQL Builder test', () => {
           a.user_pseudo_id,
           a.event_id,
           a.event_timestamp,
+          a.event_date,
           case
             when (
               b.event_timestamp - a.event_timestamp < 3600000
@@ -3387,6 +3412,7 @@ describe('SQL Builder test', () => {
           node,
           user_pseudo_id,
           event_id,
+          event_date,
           event_timestamp,
           group_id,
           ROW_NUMBER() OVER (
@@ -3410,7 +3436,8 @@ describe('SQL Builder test', () => {
         select
           data.user_pseudo_id user_pseudo_id,
           group_id,
-          min(step_1) min_step
+          min(step_1) min_step,
+          min(event_timestamp) event_timestamp
         from
           data
         where
@@ -3433,6 +3460,7 @@ describe('SQL Builder test', () => {
           node,
           user_pseudo_id,
           event_id,
+          event_date,
           group_id,
           ROW_NUMBER() OVER (
             PARTITION BY
@@ -3454,6 +3482,7 @@ describe('SQL Builder test', () => {
           step_table_2
       )
     select
+      a.event_date event_date,
       a.node || '_' || a.step_1 as source,
       CASE
         WHEN b.node is not null THEN b.node || '_' || a.step_2
@@ -3590,6 +3619,7 @@ describe('SQL Builder test', () => {
       mid_table_1 as (
         select
           event_name,
+          event_date,
           user_pseudo_id,
           event_id,
           event_timestamp
@@ -3614,6 +3644,7 @@ describe('SQL Builder test', () => {
       mid_table as (
         select
           event_name,
+          event_date,
           user_pseudo_id,
           event_id,
           event_timestamp,
@@ -3642,6 +3673,7 @@ describe('SQL Builder test', () => {
         select
           user_pseudo_id,
           event_id,
+          event_date,
           event_timestamp,
           case
             when node in (
@@ -3673,6 +3705,7 @@ describe('SQL Builder test', () => {
           a.user_pseudo_id,
           a.event_id,
           a.event_timestamp,
+          a.event_date,
           case
             when (
               b.event_timestamp - a.event_timestamp < 3600000
@@ -3702,6 +3735,7 @@ describe('SQL Builder test', () => {
           node,
           user_pseudo_id,
           event_id,
+          event_date,
           event_timestamp,
           group_id,
           ROW_NUMBER() OVER (
@@ -3725,7 +3759,8 @@ describe('SQL Builder test', () => {
         select
           data.user_pseudo_id user_pseudo_id,
           group_id,
-          min(step_1) min_step
+          min(step_1) min_step,
+          min(event_timestamp) event_timestamp
         from
           data
         where
@@ -3748,6 +3783,7 @@ describe('SQL Builder test', () => {
           node,
           user_pseudo_id,
           event_id,
+          event_date,
           group_id,
           ROW_NUMBER() OVER (
             PARTITION BY
@@ -3769,6 +3805,7 @@ describe('SQL Builder test', () => {
           step_table_2
       )
     select
+      a.event_date event_date,
       a.node || '_' || a.step_1 as source,
       CASE
         WHEN b.node is not null THEN b.node || '_' || a.step_2
@@ -3904,6 +3941,7 @@ describe('SQL Builder test', () => {
       mid_table_1 as (
         select
           event_name,
+          event_date,
           user_pseudo_id,
           event_id,
           event_timestamp
@@ -3937,6 +3975,7 @@ describe('SQL Builder test', () => {
         select
           user_pseudo_id,
           event_id,
+          event_date,
           event_timestamp,
           case
             when node in (
@@ -3975,6 +4014,7 @@ describe('SQL Builder test', () => {
           a.user_pseudo_id,
           a.event_id,
           a.event_timestamp,
+          a.event_date,
           case
             when (
               b.event_timestamp - a.event_timestamp < 3600000
@@ -4004,6 +4044,7 @@ describe('SQL Builder test', () => {
           node,
           user_pseudo_id,
           event_id,
+          event_date,
           event_timestamp,
           group_id,
           ROW_NUMBER() OVER (
@@ -4027,7 +4068,8 @@ describe('SQL Builder test', () => {
         select
           data.user_pseudo_id user_pseudo_id,
           group_id,
-          min(step_1) min_step
+          min(step_1) min_step,
+          min(event_timestamp) event_timestamp
         from
           data
         where
@@ -4050,6 +4092,7 @@ describe('SQL Builder test', () => {
           node,
           user_pseudo_id,
           event_id,
+          event_date,
           group_id,
           ROW_NUMBER() OVER (
             PARTITION BY
@@ -4071,6 +4114,7 @@ describe('SQL Builder test', () => {
           step_table_2
       )
     select
+      a.event_date event_date,
       a.node || '_' || a.step_1 as source,
       CASE
         WHEN b.node is not null THEN b.node || '_' || a.step_2
@@ -7406,6 +7450,7 @@ describe('SQL Builder test', () => {
           user_pseudo_id,
           event_id,
           event_timestamp,
+          event_date,
           _session_id
         from
           base_data
@@ -7455,6 +7500,7 @@ describe('SQL Builder test', () => {
       data_final as (
         select
           event_name,
+          event_date,
           user_pseudo_id,
           event_id,
           event_timestamp,
@@ -7479,6 +7525,7 @@ describe('SQL Builder test', () => {
           step_table_2
       )
     select
+      a.event_date,
       a.event_name || '_' || a.step_1 as source,
       CASE
         WHEN b.event_name is not null THEN b.event_name || '_' || a.step_2
@@ -7835,7 +7882,8 @@ describe('SQL Builder test', () => {
           END as event_name,
           user_pseudo_id,
           event_id,
-          event_timestamp
+          event_timestamp,
+          event_date
         from
           base_data base
       ),
@@ -7863,6 +7911,7 @@ describe('SQL Builder test', () => {
           a.user_pseudo_id,
           a.event_id,
           a.event_timestamp,
+          a.event_date,
           case
             when (
               b.event_timestamp - a.event_timestamp < 3600000
@@ -7893,6 +7942,7 @@ describe('SQL Builder test', () => {
           user_pseudo_id,
           event_id,
           event_timestamp,
+          event_date,
           group_id,
           ROW_NUMBER() OVER (
             PARTITION BY
@@ -7915,7 +7965,8 @@ describe('SQL Builder test', () => {
         select
           data.user_pseudo_id user_pseudo_id,
           group_id,
-          min(step_1) min_step
+          min(step_1) min_step,
+          min(event_timestamp) event_timestamp
         from
           data
         where
@@ -7936,6 +7987,7 @@ describe('SQL Builder test', () => {
       data_final as (
         select
           event_name,
+          event_date,
           user_pseudo_id,
           event_id,
           group_id,
@@ -7959,6 +8011,7 @@ describe('SQL Builder test', () => {
           step_table_2
       )
     select
+      a.event_date event_date,
       a.event_name || '_' || a.step_1 as source,
       CASE
         WHEN b.event_name is not null THEN b.event_name || '_' || a.step_2
@@ -8354,6 +8407,7 @@ describe('SQL Builder test', () => {
           user_pseudo_id,
           event_id,
           event_timestamp,
+          event_date,
           _session_id
         from
           base_data
@@ -8374,6 +8428,7 @@ describe('SQL Builder test', () => {
           user_pseudo_id,
           event_id,
           event_timestamp,
+          event_date,
           _session_id
         from
           base_data
@@ -8393,6 +8448,7 @@ describe('SQL Builder test', () => {
           user_pseudo_id,
           event_id,
           event_timestamp,
+          event_date,
           _session_id
         from
           base_data
@@ -8412,6 +8468,7 @@ describe('SQL Builder test', () => {
           user_pseudo_id,
           event_id,
           event_timestamp,
+          event_date,
           _session_id
         from
           base_data
@@ -8430,6 +8487,7 @@ describe('SQL Builder test', () => {
           user_pseudo_id,
           event_id,
           event_timestamp,
+          event_date,
           _session_id
         from
           union_base_data
@@ -8479,6 +8537,7 @@ describe('SQL Builder test', () => {
       data_final as (
         select
           event_name,
+          event_date,
           user_pseudo_id,
           event_id,
           event_timestamp,
@@ -8503,6 +8562,7 @@ describe('SQL Builder test', () => {
           step_table_2
       )
     select
+      a.event_date,
       a.event_name || '_' || a.step_1 as source,
       CASE
         WHEN b.event_name is not null THEN b.event_name || '_' || a.step_2
@@ -8855,7 +8915,8 @@ describe('SQL Builder test', () => {
           END as event_name,
           user_pseudo_id,
           event_id,
-          event_timestamp
+          event_timestamp,
+          event_date
         from
           base_data
         where
@@ -8874,7 +8935,8 @@ describe('SQL Builder test', () => {
           END as event_name,
           user_pseudo_id,
           event_id,
-          event_timestamp
+          event_timestamp,
+          event_date
         from
           base_data
         where
@@ -8892,7 +8954,8 @@ describe('SQL Builder test', () => {
           END as event_name,
           user_pseudo_id,
           event_id,
-          event_timestamp
+          event_timestamp,
+          event_date
         from
           base_data
         where
@@ -8910,7 +8973,8 @@ describe('SQL Builder test', () => {
           END as event_name,
           user_pseudo_id,
           event_id,
-          event_timestamp
+          event_timestamp,
+          event_date
         from
           base_data
         where
@@ -8921,7 +8985,8 @@ describe('SQL Builder test', () => {
           event_name,
           user_pseudo_id,
           event_id,
-          event_timestamp
+          event_timestamp,
+          event_date
         from
           union_base_data base
       ),
@@ -8949,6 +9014,7 @@ describe('SQL Builder test', () => {
           a.user_pseudo_id,
           a.event_id,
           a.event_timestamp,
+          a.event_date,
           case
             when (
               b.event_timestamp - a.event_timestamp < 3600000
@@ -8979,6 +9045,7 @@ describe('SQL Builder test', () => {
           user_pseudo_id,
           event_id,
           event_timestamp,
+          event_date,
           group_id,
           ROW_NUMBER() OVER (
             PARTITION BY
@@ -9001,7 +9068,8 @@ describe('SQL Builder test', () => {
         select
           data.user_pseudo_id user_pseudo_id,
           group_id,
-          min(step_1) min_step
+          min(step_1) min_step,
+          min(event_timestamp) event_timestamp
         from
           data
         where
@@ -9022,6 +9090,7 @@ describe('SQL Builder test', () => {
       data_final as (
         select
           event_name,
+          event_date,
           user_pseudo_id,
           event_id,
           group_id,
@@ -9045,6 +9114,7 @@ describe('SQL Builder test', () => {
           step_table_2
       )
     select
+      a.event_date event_date,
       a.event_name || '_' || a.step_1 as source,
       CASE
         WHEN b.event_name is not null THEN b.event_name || '_' || a.step_2
@@ -9356,6 +9426,7 @@ describe('SQL Builder test', () => {
       mid_table_1 as (
         select
           event_name,
+          event_date,
           user_pseudo_id,
           event_id,
           event_timestamp
@@ -9389,6 +9460,7 @@ describe('SQL Builder test', () => {
         select
           user_pseudo_id,
           event_id,
+          event_date,
           event_timestamp,
           case
             when node in (
@@ -9420,6 +9492,7 @@ describe('SQL Builder test', () => {
           a.user_pseudo_id,
           a.event_id,
           a.event_timestamp,
+          a.event_date,
           case
             when (
               b.event_timestamp - a.event_timestamp < 3600000
@@ -9449,6 +9522,7 @@ describe('SQL Builder test', () => {
           node,
           user_pseudo_id,
           event_id,
+          event_date,
           event_timestamp,
           group_id,
           ROW_NUMBER() OVER (
@@ -9472,7 +9546,8 @@ describe('SQL Builder test', () => {
         select
           data.user_pseudo_id user_pseudo_id,
           group_id,
-          min(step_1) min_step
+          min(step_1) min_step,
+          min(event_timestamp) event_timestamp
         from
           data
         where
@@ -9495,6 +9570,7 @@ describe('SQL Builder test', () => {
           node,
           user_pseudo_id,
           event_id,
+          event_date,
           group_id,
           ROW_NUMBER() OVER (
             PARTITION BY
@@ -9516,6 +9592,7 @@ describe('SQL Builder test', () => {
           step_table_2
       )
     select
+      a.event_date event_date,
       a.node || '_' || a.step_1 as source,
       CASE
         WHEN b.node is not null THEN b.node || '_' || a.step_2
@@ -15684,6 +15761,7 @@ describe('SQL Builder test', () => {
           user_pseudo_id,
           event_id,
           event_timestamp,
+          event_date,
           _session_id
         from
           base_data
@@ -15733,6 +15811,7 @@ describe('SQL Builder test', () => {
       data_final as (
         select
           event_name,
+          event_date,
           user_pseudo_id,
           event_id,
           event_timestamp,
@@ -15757,6 +15836,7 @@ describe('SQL Builder test', () => {
           step_table_2
       )
     select
+      a.event_date,
       a.event_name || '_' || a.step_1 as source,
       CASE
         WHEN b.event_name is not null THEN b.event_name || '_' || a.step_2
@@ -15934,6 +16014,7 @@ describe('SQL Builder test', () => {
           user_pseudo_id,
           event_id,
           event_timestamp,
+          event_date,
           _session_id
         from
           base_data
@@ -15983,6 +16064,7 @@ describe('SQL Builder test', () => {
       data_final as (
         select
           event_name,
+          event_date,
           user_pseudo_id,
           event_id,
           event_timestamp,
@@ -16007,6 +16089,7 @@ describe('SQL Builder test', () => {
           step_table_2
       )
     select
+      a.event_date,
       a.event_name || '_' || a.step_1 as source,
       CASE
         WHEN b.event_name is not null THEN b.event_name || '_' || a.step_2
@@ -16324,6 +16407,7 @@ describe('SQL Builder test', () => {
       mid_table_1 as (
         select
           event_name,
+          event_date,
           user_pseudo_id,
           event_id,
           event_timestamp,
@@ -16357,6 +16441,7 @@ describe('SQL Builder test', () => {
       data as (
         select
           event_name,
+          event_date,
           user_pseudo_id,
           event_id,
           event_timestamp,
@@ -16412,6 +16497,7 @@ describe('SQL Builder test', () => {
       data_final as (
         select
           event_name,
+          event_date,
           user_pseudo_id,
           event_id,
           event_timestamp,
@@ -16437,6 +16523,7 @@ describe('SQL Builder test', () => {
           step_table_2
       )
     select
+      a.event_date event_date,
       a.node || '_' || a.step_1 as source,
       CASE
         WHEN b.node is not null THEN b.node || '_' || a.step_2
@@ -17633,6 +17720,7 @@ describe('SQL Builder test', () => {
           user_pseudo_id,
           event_id,
           event_timestamp,
+          event_date,
           _session_id
         from
           (
@@ -17641,6 +17729,7 @@ describe('SQL Builder test', () => {
               user_pseudo_id,
               event_id,
               event_timestamp,
+              event_date,
               _session_id,
               ROW_NUMBER() over (
                 partition by
@@ -17701,6 +17790,7 @@ describe('SQL Builder test', () => {
       data_final as (
         select
           event_name,
+          event_date,
           user_pseudo_id,
           event_id,
           event_timestamp,
@@ -17725,6 +17815,7 @@ describe('SQL Builder test', () => {
           step_table_2
       )
     select
+      a.event_date,
       a.event_name || '_' || a.step_1 as source,
       CASE
         WHEN b.event_name is not null THEN b.event_name || '_' || a.step_2

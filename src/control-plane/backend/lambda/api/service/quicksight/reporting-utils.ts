@@ -218,6 +218,10 @@ export const eventVisualColumns: InputColumn[] = [
 
 export const pathAnalysisVisualColumns: InputColumn[] = [
   {
+    Name: 'event_date',
+    Type: 'DATETIME',
+  },
+  {
     Name: 'source',
     Type: 'STRING',
   },
