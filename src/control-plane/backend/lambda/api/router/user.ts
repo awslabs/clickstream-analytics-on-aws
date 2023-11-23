@@ -71,6 +71,7 @@ router_user.get(
 router_user.post(
   '/settings',
   validate([
+    body().custom(isXSSRequest),
     header('X-Click-Stream-Request-Id').custom(isRequestIdExisted),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {

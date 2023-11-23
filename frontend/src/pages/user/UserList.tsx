@@ -14,7 +14,7 @@
 import {
   AppLayout,
   Input,
-  Select,
+  Multiselect,
   SelectProps,
 } from '@cloudscape-design/components';
 import { getAllUsers, updateUser } from 'apis/user';
@@ -31,7 +31,7 @@ import UserTable from './UserTable';
 interface IUserTableItem {
   id: string;
   name: string;
-  role: IUserRole;
+  roles: IUserRole[];
   createAt: string;
 }
 
@@ -49,13 +49,16 @@ const UserList: React.FC = () => {
       value: IUserRole.ANALYST_READER,
       label: defaultStr(t('user:options.analystReader')),
     },
-    {
-      value: IUserRole.NO_IDENTITY,
-      label: defaultStr(t('user:options.noIdentity')),
-    },
   ];
+  const getRolesLabel = (roles: IUserRole[]) => {
+    const roleLabels = [];
+    for (const role of roles) {
+      roleLabels.push(getRoleName(role));
+    }
+    return roleLabels.join(',');
+  };
 
-  const getRoleName = (role: string) => {
+  const getRoleName = (role: IUserRole) => {
     switch (role) {
       case IUserRole.ADMIN:
         return t('user:options.admin');
@@ -66,7 +69,7 @@ const UserList: React.FC = () => {
       case IUserRole.ANALYST_READER:
         return t('user:options.analystReader');
       default:
-        return t('user:options.noIdentity');
+        return '';
     }
   };
 
@@ -87,25 +90,45 @@ const UserList: React.FC = () => {
     );
   };
 
+  const getRoleEditOptions = (
+    item: IUserTableItem,
+    currentValue: SelectProps.Option[] | undefined
+  ) => {
+    const options: SelectProps.Option[] = [];
+    if (!currentValue) {
+      for (const r of item.roles) {
+        options.push({
+          value: r,
+          label: getRoleName(r),
+        });
+      }
+    } else {
+      console.log('currentValue', currentValue);
+      for (const v of currentValue) {
+        options.push({
+          value: v.value,
+          label: getRoleName(v.value as IUserRole),
+        });
+      }
+    }
+    return options;
+  };
+
   const renderEditRoleCell = (
     item: IUserTableItem,
     setValue: any,
-    currentValue: string
+    currentValue: SelectProps.Option[]
   ) => {
     return (
-      <Select
+      <Multiselect
+        placeholder={defaultStr(t('user:labels.selectUserRolePlaceholder'))}
         autoFocus={true}
         expandToViewport={true}
         options={roleOptions}
-        onChange={(event: any) => {
-          setValue(event.detail.selectedOption.value);
+        onChange={({ detail }) => {
+          setValue(detail.selectedOptions);
         }}
-        selectedOption={
-          roleOptions.find(
-            (option: SelectProps.Option) =>
-              option.value === (currentValue ?? item.role)
-          ) ?? roleOptions[0]
-        }
+        selectedOptions={getRoleEditOptions(item, currentValue)}
       />
     );
   };
@@ -124,7 +147,7 @@ const UserList: React.FC = () => {
       cell: (e: IUserTableItem) => {
         return e.name;
       },
-      minWidth: 180,
+      minWidth: 140,
       editConfig: {
         validation(item: IUserTableItem, value: any) {
           return !new RegExp(XSS_PATTERN).test(value)
@@ -136,15 +159,15 @@ const UserList: React.FC = () => {
       },
     },
     {
-      id: 'role',
+      id: 'roles',
       header: t('user:labels.tableColumnRole'),
-      minWidth: 200,
+      minWidth: 240,
       editConfig: {
         editingCell: (item: IUserTableItem, { setValue, currentValue }: any) =>
           renderEditRoleCell(item, setValue, currentValue),
       },
-      cell: (e: { role: string }) => {
-        return getRoleName(e.role);
+      cell: (e: { roles: IUserRole[] }) => {
+        return getRolesLabel(e.roles);
       },
     },
     {
@@ -159,7 +182,7 @@ const UserList: React.FC = () => {
   const CONTENT_DISPLAY = [
     { id: 'id', visible: true },
     { id: 'name', visible: true },
-    { id: 'role', visible: true },
+    { id: 'roles', visible: true },
     { id: 'createAt', visible: true },
   ];
 
@@ -178,7 +201,7 @@ const UserList: React.FC = () => {
     },
     {
       propertyLabel: t('user:labels.tableColumnRole'),
-      key: 'role',
+      key: 'roles',
       groupValuesLabel: t('user:labels.tableColumnRole'),
       operators: [':', '!:', '=', '!='],
     },

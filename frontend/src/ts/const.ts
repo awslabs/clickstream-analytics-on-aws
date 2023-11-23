@@ -415,7 +415,6 @@ export enum IUserRole {
   OPERATOR = 'Operator',
   ANALYST = 'Analyst',
   ANALYST_READER = 'AnalystReader',
-  NO_IDENTITY = 'NoIdentity',
 }
 
 export const EVENT_DISPLAY_PREFIX = 'EVENT#';

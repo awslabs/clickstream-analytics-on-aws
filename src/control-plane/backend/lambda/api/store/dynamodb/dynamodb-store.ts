@@ -1097,7 +1097,7 @@ export class DynamoDbStore implements ClickStreamStore {
         type: 'USER',
         prefix: 'USER',
         name: user.name ?? '',
-        role: user.roles ?? [],
+        roles: user.roles ?? [],
         createAt: Date.now(),
         updateAt: Date.now(),
         operator: user.operator?? '',
@@ -1138,9 +1138,9 @@ export class DynamoDbStore implements ClickStreamStore {
       expressionAttributeNames['#name'] = 'name';
     }
     if (user.roles) {
-      updateExpression = `${updateExpression}, #role= :role`;
-      expressionAttributeValues.set(':role', user.roles);
-      expressionAttributeNames['#role'] = 'role';
+      updateExpression = `${updateExpression}, #roles= :roles`;
+      expressionAttributeValues.set(':roles', user.roles);
+      expressionAttributeNames['#roles'] = 'roles';
     }
     const params: UpdateCommand = new UpdateCommand({
       TableName: clickStreamTableName,
@@ -1216,9 +1216,10 @@ export class DynamoDbStore implements ClickStreamStore {
         type: 'USER_SETTINGS',
       },
       // Define expressions for the new or updated attributes
-      UpdateExpression: 'SET roleJsonPath= :roleJsonPath, operatorRoleNames= :operatorRoleNames, analystRoleNames= :analystRoleNames, analystReaderRoleNames= :analystReaderRoleNames',
+      UpdateExpression: 'SET roleJsonPath= :roleJsonPath, adminRoleNames= :adminRoleNames, operatorRoleNames= :operatorRoleNames, analystRoleNames= :analystRoleNames, analystReaderRoleNames= :analystReaderRoleNames',
       ExpressionAttributeValues: {
         ':roleJsonPath': userSettings.roleJsonPath,
+        ':adminRoleNames': userSettings.adminRoleNames,
         ':operatorRoleNames': userSettings.operatorRoleNames,
         ':analystRoleNames': userSettings.analystRoleNames,
         ':analystReaderRoleNames': userSettings.analystReaderRoleNames,

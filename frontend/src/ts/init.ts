@@ -11,12 +11,7 @@
  *  and limitations under the License.
  */
 
-import {
-  IUserRole,
-  ProtocalType,
-  ResourceCreateMethod,
-  SinkType,
-} from './const';
+import { ProtocalType, ResourceCreateMethod, SinkType } from './const';
 
 export const INIT_PROJECT_DATA = {
   id: 'my_project_id',
@@ -208,7 +203,7 @@ export const INIT_USER_DATA: IUser = {
   type: 'USER',
   prefix: 'USER',
   name: '',
-  role: IUserRole.NO_IDENTITY,
+  roles: [],
   createAt: 0,
   updateAt: 0,
   operator: '',

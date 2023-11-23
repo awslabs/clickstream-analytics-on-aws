@@ -22,8 +22,8 @@ import LabelTag from 'pages/common/LabelTag';
 import React, { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { EVENT_PARAMETER_DISPLAY_PREFIX, IUserRole } from 'ts/const';
-import { defaultStr, getUserInfoFromLocalStorage } from 'ts/utils';
+import { EVENT_PARAMETER_DISPLAY_PREFIX } from 'ts/const';
+import { defaultStr, getUserInfoFromLocalStorage, isAnalystAuthorRole } from 'ts/utils';
 import MetadataPlatformFC from '../comps/MetadataPlatform';
 import MetadataSourceFC from '../comps/MetadataSource';
 import MetadataTable from '../table/MetadataTable';
@@ -89,7 +89,7 @@ const MetadataParametersTable: React.FC<MetadataParametersTableProps> = (
   };
 
   const getDisplayNameEditConfig = () => {
-    if (currentUser.role !== IUserRole.ANALYST_READER) {
+    if (isAnalystAuthorRole(currentUser?.roles)) {
       return {
         validation(item: IMetadataEventParameter, value: string) {
           return !displayNameRegex.test(value)
@@ -105,7 +105,7 @@ const MetadataParametersTable: React.FC<MetadataParametersTableProps> = (
   };
 
   const getDescriptionEditConfig = () => {
-    if (currentUser.role !== IUserRole.ANALYST_READER) {
+    if (isAnalystAuthorRole(currentUser?.roles)) {
       return {
         validation(item: any, value: any) {
           return !descriptionRegex.test(value)

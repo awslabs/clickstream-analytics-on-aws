@@ -27,8 +27,8 @@ import Loading from 'components/common/Loading';
 import { UserContext } from 'context/UserContext';
 import React, { useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { IUserRole, USER_ATTRIBUTE_DISPLAY_PREFIX } from 'ts/const';
-import { getUserInfoFromLocalStorage } from 'ts/utils';
+import { USER_ATTRIBUTE_DISPLAY_PREFIX } from 'ts/const';
+import { getUserInfoFromLocalStorage, isAnalystAuthorRole } from 'ts/utils';
 import MetadataSourceFC from '../comps/MetadataSource';
 
 interface MetadataUserAttributeSplitPanelProps {
@@ -129,12 +129,12 @@ const MetadataUserAttributeSplitPanel: React.FC<
                 {t('analytics:metadata.userAttribute.tableColumnDisplayName')}
               </Box>
               <div>
-                {currentUser.role === IUserRole.ANALYST_READER && (
+                {!isAnalystAuthorRole(currentUser?.roles) && (
                   <div className="flex align-center">
                     <div>{attributeDetails.displayName}</div>
                   </div>
                 )}
-                {currentUser.role !== IUserRole.ANALYST_READER &&
+                {isAnalystAuthorRole(currentUser?.roles) &&
                   !isEditingDisplayName && (
                     <div className="flex align-center">
                       <div>{attributeDetails.displayName}</div>
@@ -147,7 +147,7 @@ const MetadataUserAttributeSplitPanel: React.FC<
                       />
                     </div>
                   )}
-                {currentUser.role !== IUserRole.ANALYST_READER &&
+                {isAnalystAuthorRole(currentUser?.roles) &&
                   isEditingDisplayName && (
                     <div>
                       <FormField>

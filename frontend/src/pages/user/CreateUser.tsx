@@ -17,7 +17,7 @@ import {
   FormField,
   Input,
   Modal,
-  Select,
+  Multiselect,
   SelectProps,
   SpaceBetween,
 } from '@cloudscape-design/components';
@@ -43,7 +43,7 @@ const CreateUser: React.FC<CreateUserProps> = (props: CreateUserProps) => {
     type: 'USER',
     prefix: 'USER',
     name: '',
-    role: IUserRole.NO_IDENTITY,
+    roles: [],
     createAt: 0,
     updateAt: 0,
     operator: '',
@@ -52,10 +52,8 @@ const CreateUser: React.FC<CreateUserProps> = (props: CreateUserProps) => {
   const [curUser, setCurUser] = useState<IUser>(defaultUser);
 
   const [userEmailRequiredError, setUserEmailRequiredError] = useState(false);
-  const [roleOption, setRoleOption] = useState<SelectProps.Option | null>({
-    value: IUserRole.NO_IDENTITY,
-    label: defaultStr(t('user:options.noIdentity')),
-  });
+  const [selectedRoleOptions, setSelectedRoleOptions] =
+    useState<SelectProps.Options>([]);
 
   const roleOptions: SelectProps.Options = [
     { value: IUserRole.ADMIN, label: defaultStr(t('user:options.admin')) },
@@ -67,10 +65,6 @@ const CreateUser: React.FC<CreateUserProps> = (props: CreateUserProps) => {
     {
       value: IUserRole.ANALYST_READER,
       label: defaultStr(t('user:options.analystReader')),
-    },
-    {
-      value: IUserRole.NO_IDENTITY,
-      label: defaultStr(t('user:options.noIdentity')),
     },
   ];
 
@@ -166,18 +160,20 @@ const CreateUser: React.FC<CreateUserProps> = (props: CreateUserProps) => {
         />
       </FormField>
       <FormField label={t('user:labels.createUserRole')}>
-        <Select
+        <Multiselect
           options={roleOptions}
-          onChange={(e) => {
-            setRoleOption(e.detail.selectedOption);
+          placeholder={defaultStr(t('user:labels.selectUserRolePlaceholder'))}
+          onChange={({ detail }) => {
+            setSelectedRoleOptions(detail.selectedOptions);
             setCurUser((prev) => {
               return {
                 ...prev,
-                role: e.detail.selectedOption.value as IUserRole,
+                roles: detail.selectedOptions.map((option) => option.value) as IUserRole[],
               };
             });
+            console.log(detail.selectedOptions);
           }}
-          selectedOption={roleOption}
+          selectedOptions={selectedRoleOptions}
         />
       </FormField>
     </Modal>

@@ -23,6 +23,7 @@ import {
 } from 'pages/common/common-components';
 import { useColumnWidths } from 'pages/common/use-column-widths';
 import React, { useEffect, useState } from 'react';
+import { IUserRole } from 'ts/const';
 import { XSS_PATTERN } from 'ts/constant-ln';
 import { UserTableHeader } from './UserTableHeader';
 
@@ -141,7 +142,10 @@ const UserTable: React.FC<UserTableProps> = (props: UserTableProps) => {
     if (column.id === 'name' && new RegExp(XSS_PATTERN).test(value)) {
       throw new Error('Inline error');
     }
-    const newItem = { ...currentItem, [column.id]: value };
+    const newItem = {
+      ...currentItem,
+      [column.id]: value.map((option: any) => option.value) as IUserRole[],
+    };
     await fetchUpdateFunc(newItem);
     let fullCollection = data;
 

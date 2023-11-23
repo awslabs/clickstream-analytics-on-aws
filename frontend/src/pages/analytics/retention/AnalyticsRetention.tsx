@@ -45,7 +45,7 @@ import { cloneDeep } from 'lodash';
 import React, { useContext, useEffect, useReducer, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { COMMON_ALERT_TYPE, IUserRole } from 'ts/const';
+import { COMMON_ALERT_TYPE } from 'ts/const';
 import {
   QUICKSIGHT_ANALYSIS_INFIX,
   QUICKSIGHT_DASHBOARD_INFIX,
@@ -63,6 +63,7 @@ import {
   getEventParameters,
   getUserInfoFromLocalStorage,
   getAbsoluteStartEndRange,
+  isAnalystAuthorRole,
 } from 'ts/utils';
 import {
   getDashboardCreateParameters,
@@ -344,7 +345,7 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
                   >
                     {t('button.reset')}
                   </Button>
-                  {currentUser.role !== IUserRole.ANALYST_READER && (
+                  {isAnalystAuthorRole(currentUser?.roles) && (
                     <Button
                       variant="primary"
                       loading={loadingData}
