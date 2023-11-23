@@ -80,7 +80,6 @@ import {
   validMultipleEventAnalyticsItems,
 } from '../analytics-utils';
 import ExploreDateRangePicker, {
-  DEFAULT_DAY_RANGE,
   DEFAULT_WEEK_RANGE,
 } from '../comps/ExploreDateRangePicker';
 import ExploreEmbedFrame from '../comps/ExploreEmbedFrame';
@@ -236,7 +235,7 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
     useState<SelectProps.Option | null>(webPlatformOption);
 
   const [dateRangeValue, setDateRangeValue] =
-    React.useState<DateRangePickerProps.Value>(DEFAULT_DAY_RANGE);
+    React.useState<DateRangePickerProps.Value>(DEFAULT_WEEK_RANGE);
 
   const [timeGranularity, setTimeGranularity] = useState<SelectProps.Option>({
     value: ExploreGroupColumn.DAY,
@@ -500,10 +499,6 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
       presetParameters,
     });
   }, [presetParameters]);
-
-  useEffect(() => {
-    clickPreview();
-  }, [dateRangeValue]);
 
   return (
     <>

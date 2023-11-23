@@ -77,7 +77,6 @@ import {
 } from '../analytics-utils';
 import AttributeGroup from '../comps/AttributeGroup';
 import ExploreDateRangePicker, {
-  DEFAULT_DAY_RANGE,
   DEFAULT_WEEK_RANGE,
 } from '../comps/ExploreDateRangePicker';
 import ExploreEmbedFrame from '../comps/ExploreEmbedFrame';
@@ -169,7 +168,7 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
   ];
 
   const [dateRangeValue, setDateRangeValue] =
-    useState<DateRangePickerProps.Value>(DEFAULT_DAY_RANGE);
+    useState<DateRangePickerProps.Value>(DEFAULT_WEEK_RANGE);
 
   const [timeGranularity, setTimeGranularity] = useState<SelectProps.Option>({
     value: ExploreGroupColumn.DAY,
@@ -396,7 +395,7 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
 
   useEffect(() => {
     clickPreview();
-  }, [timeGranularity, dateRangeValue, chartType]);
+  }, [chartType]);
 
   useEffect(() => {
     if (chartType === 'funnel') {
