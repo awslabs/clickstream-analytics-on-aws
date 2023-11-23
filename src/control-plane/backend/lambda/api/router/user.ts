@@ -29,7 +29,6 @@ router_user.post(
   '',
   validate([
     body().custom(isValidEmpty).custom(isXSSRequest),
-    body('role').custom(isValidEmpty),
     body('id').custom(isEmails),
     header('X-Click-Stream-Request-Id').custom(isRequestIdExisted),
   ]),

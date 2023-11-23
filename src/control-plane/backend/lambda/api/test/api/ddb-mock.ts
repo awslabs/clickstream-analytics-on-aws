@@ -64,7 +64,7 @@ export const AllowIAMUserPutObejectPolicyInApSouthEast1 = '{"Version":"2012-10-1
 export const AllowIAMUserPutObjectPolicyInCnNorth1 = '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":"arn:aws-cn:iam::638102146993:root"},"Action":["s3:PutObject","s3:PutObjectLegalHold","s3:PutObjectRetention","s3:PutObjectTagging","s3:PutObjectVersionTagging","s3:Abort*"],"Resource":"arn:aws-cn:s3:::EXAMPLE_BUCKET/clickstream/*"}]}';
 
 
-function userMock(ddbMock: any, userId: string, role: IUserRole, existed?: boolean): any {
+function userMock(ddbMock: any, userId: string, roles: IUserRole[], existed?: boolean): any {
   if (!existed) {
     return ddbMock.on(GetCommand, {
       TableName: clickStreamTableName,
@@ -84,7 +84,7 @@ function userMock(ddbMock: any, userId: string, role: IUserRole, existed?: boole
   }, true).resolves({
     Item: {
       id: userId,
-      role: role,
+      roles: roles,
       deleted: false,
     },
   });

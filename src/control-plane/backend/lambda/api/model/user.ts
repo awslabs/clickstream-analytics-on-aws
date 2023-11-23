@@ -19,7 +19,7 @@ export interface IUser {
   readonly prefix: string;
 
   readonly name?: string;
-  readonly role: IUserRole;
+  readonly roles: IUserRole[];
 
   readonly createAt: number;
   readonly updateAt: number;
@@ -29,6 +29,7 @@ export interface IUser {
 
 export interface IUserSettings {
   readonly roleJsonPath: string;
+  readonly adminRoleNames: string;
   readonly operatorRoleNames: string;
   readonly analystRoleNames: string;
   readonly analystReaderRoleNames: string;

@@ -22,7 +22,7 @@ import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
 const store: ClickStreamStore = new DynamoDbStore();
 
 const routerRoles: Map<string, IUserRole[]> = new Map();
-routerRoles.set('GET /api/user/details', [IUserRole.ADMIN, IUserRole.OPERATOR, IUserRole.ANALYST, IUserRole.ANALYST_READER, IUserRole.NO_IDENTITY]);
+routerRoles.set('GET /api/user/details', []);
 routerRoles.set('GET /api/pipeline/:id', [IUserRole.ADMIN, IUserRole.OPERATOR, IUserRole.ANALYST, IUserRole.ANALYST_READER]);
 routerRoles.set('GET /api/app', [IUserRole.ADMIN, IUserRole.OPERATOR, IUserRole.ANALYST, IUserRole.ANALYST_READER]);
 routerRoles.set('GET /api/project', [IUserRole.ADMIN, IUserRole.OPERATOR, IUserRole.ANALYST, IUserRole.ANALYST_READER]);
@@ -85,20 +85,35 @@ export async function authRole(req: express.Request, res: express.Response, next
     }
 
     const user = await store.getUser(uid);
-    let userRole;
-    if (user && user.role) {
-      userRole = user.role;
+    let userRoles: IUserRole[] = [];
+    if (user && user.roles) {
+      userRoles = user.roles;
     } else {
-      userRole = await getRoleFromToken(token);
+      userRoles = await getRoleFromToken(token);
     }
 
     const requestKey = `${req.method} ${req.path}`;
     const accessRoles = matchRouter(requestKey);
-    if (!accessRoles || !accessRoles.includes(userRole)) {
+    if (!accessRoles) {
+      logger.warn('No access roles found.');
+      return res.status(403).json(new ApiFail(FORBIDDEN_MESSAGE));
+    }
+    if (!checkUserRoles(userRoles, accessRoles)) {
       logger.warn(FORBIDDEN_MESSAGE);
       return res.status(403).json(new ApiFail(FORBIDDEN_MESSAGE));
     }
   }
 
   return next();
+}
+
+function checkUserRoles(userRoles: IUserRole[], accessRoles: IUserRole[]) {
+  if (accessRoles.length === 0) {
+    return true;
+  }
+  return intersectArrays(userRoles, accessRoles).length !== 0;
+}
+
+function intersectArrays(a: any[], b: any[]) {
+  return [...new Set(a)].filter(x => new Set(b).has(x));
 }

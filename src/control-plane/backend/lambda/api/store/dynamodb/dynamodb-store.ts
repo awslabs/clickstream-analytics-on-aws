@@ -1097,7 +1097,7 @@ export class DynamoDbStore implements ClickStreamStore {
         type: 'USER',
         prefix: 'USER',
         name: user.name ?? '',
-        role: user.role,
+        role: user.roles ?? [],
         createAt: Date.now(),
         updateAt: Date.now(),
         operator: user.operator?? '',
@@ -1137,9 +1137,9 @@ export class DynamoDbStore implements ClickStreamStore {
       expressionAttributeValues.set(':n', user.name);
       expressionAttributeNames['#name'] = 'name';
     }
-    if (user.role) {
+    if (user.roles) {
       updateExpression = `${updateExpression}, #role= :role`;
-      expressionAttributeValues.set(':role', user.role);
+      expressionAttributeValues.set(':role', user.roles);
       expressionAttributeNames['#role'] = 'role';
     }
     const params: UpdateCommand = new UpdateCommand({

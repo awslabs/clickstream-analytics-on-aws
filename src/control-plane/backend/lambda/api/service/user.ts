@@ -11,8 +11,8 @@
  *  and limitations under the License.
  */
 
-import { DEFAULT_ANALYST_READER_ROLE_NAMES, DEFAULT_ANALYST_ROLE_NAMES, DEFAULT_OPERATOR_ROLE_NAMES, DEFAULT_ROLE_JSON_PATH } from '../common/constants';
-import { ApiFail, ApiSuccess, IUserRole } from '../common/types';
+import { DEFAULT_ADMIN_ROLE_NAMES, DEFAULT_ANALYST_READER_ROLE_NAMES, DEFAULT_ANALYST_ROLE_NAMES, DEFAULT_OPERATOR_ROLE_NAMES, DEFAULT_ROLE_JSON_PATH } from '../common/constants';
+import { ApiFail, ApiSuccess } from '../common/types';
 import { getRoleFromToken, getTokenFromRequest } from '../common/utils';
 import { IUser, IUserSettings } from '../model/user';
 import { ClickStreamStore } from '../store/click-stream-store';
@@ -57,7 +57,7 @@ export class UserService {
           type: 'USER',
           prefix: 'USER',
           name: id,
-          role: IUserRole.NO_IDENTITY,
+          roles: [],
           createAt: Date.now(),
           updateAt: Date.now(),
           operator: 'FromToken',
@@ -70,13 +70,13 @@ export class UserService {
         return res.json(new ApiSuccess(ddbUser));
       } else {
         const decodedToken = getTokenFromRequest(req);
-        const roleInToken = await getRoleFromToken(decodedToken);
+        const rolesInToken = await getRoleFromToken(decodedToken);
         const tokenUser: IUser = {
           id: id,
           type: 'USER',
           prefix: 'USER',
           name: id,
-          role: roleInToken,
+          roles: rolesInToken,
           createAt: Date.now(),
           updateAt: Date.now(),
           operator: 'FromToken',
@@ -118,6 +118,7 @@ export class UserService {
     const ddbData = await store.getUserSettings();
     const userSettings = {
       roleJsonPath: ddbData?.roleJsonPath || DEFAULT_ROLE_JSON_PATH,
+      adminRoleNames: ddbData?.adminRoleNames || DEFAULT_ADMIN_ROLE_NAMES,
       operatorRoleNames: ddbData?.operatorRoleNames || DEFAULT_OPERATOR_ROLE_NAMES,
       analystRoleNames: ddbData?.analystRoleNames || DEFAULT_ANALYST_ROLE_NAMES,
       analystReaderRoleNames: ddbData?.analystReaderRoleNames || DEFAULT_ANALYST_READER_ROLE_NAMES,
