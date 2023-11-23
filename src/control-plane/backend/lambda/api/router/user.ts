@@ -13,7 +13,7 @@
 
 import express from 'express';
 import { body, header, param } from 'express-validator';
-import { isRequestIdExisted, isUserValid, isValidEmpty, isXSSRequest, validate } from '../common/request-valid';
+import { isEmails, isRequestIdExisted, isUserValid, isValidEmpty, isXSSRequest, validate } from '../common/request-valid';
 import { UserService } from '../service/user';
 
 const router_user = express.Router();
@@ -30,6 +30,7 @@ router_user.post(
   validate([
     body().custom(isValidEmpty).custom(isXSSRequest),
     body('role').custom(isValidEmpty),
+    body('id').custom(isEmails),
     header('X-Click-Stream-Request-Id').custom(isRequestIdExisted),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
@@ -45,7 +46,7 @@ router_user.get(
 router_user.put(
   '/:id',
   validate([
-    body('id').custom(isUserValid),
+    body('id').custom(isEmails).custom(isUserValid),
     header('X-Click-Stream-Request-Id').custom(isRequestIdExisted),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
@@ -55,7 +56,7 @@ router_user.put(
 router_user.delete(
   '/:id',
   validate([
-    param('id').custom(isUserValid),
+    param('id').custom(isEmails).custom(isUserValid),
     header('X-Click-Stream-Request-Id').custom(isRequestIdExisted),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {

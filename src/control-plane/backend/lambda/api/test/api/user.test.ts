@@ -66,7 +66,7 @@ describe('User test', () => {
     ddbMock.on(GetCommand, {
       TableName: clickStreamTableName,
       Key: {
-        id: 'id-02',
+        id: MOCK_USER_ID,
         type: 'USER',
       },
     }).resolves({});
@@ -75,7 +75,7 @@ describe('User test', () => {
       .post('/api/user')
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
-        id: 'id-02',
+        id: MOCK_USER_ID,
         role: IUserRole.OPERATOR,
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
@@ -83,6 +83,21 @@ describe('User test', () => {
     expect(res.body.message).toEqual('User created.');
     expect(res.body.success).toEqual(true);
     expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 2);
+  });
+
+  it('Add user with invalid email', async () => {
+    tokenMock(ddbMock, false);
+    const res = await request(app)
+      .post('/api/user')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
+      .send({
+        id: `${MOCK_USER_ID} `,
+        role: IUserRole.OPERATOR,
+      });
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(400);
+    expect(res.body.message).toEqual('Parameter verification failed.');
+    expect(res.body.success).toEqual(false);
   });
 
   it('Update user', async () => {
@@ -172,7 +187,7 @@ describe('User test', () => {
       .get(`/api/user/details?id=${MOCK_USER_ID}`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
-    expect(res.body).toEqual({ data: { deleted: false, role: 'Operator', id: 'user-0000' }, message: '', success: true });
+    expect(res.body).toEqual({ data: { deleted: false, role: 'Operator', id: MOCK_USER_ID }, message: '', success: true });
     expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 1);
   });
 
