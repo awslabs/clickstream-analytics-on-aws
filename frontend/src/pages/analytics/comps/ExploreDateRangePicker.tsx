@@ -23,12 +23,6 @@ import { useTranslation } from 'react-i18next';
 import { ExploreGroupColumn } from 'ts/explore-types';
 import { defaultStr } from 'ts/utils';
 
-export const DEFAULT_DAY_RANGE: DateRangePickerProps.RelativeOption = {
-  key: 'previous-7-day',
-  amount: 7,
-  unit: 'day',
-  type: 'relative',
-};
 export const DEFAULT_WEEK_RANGE: DateRangePickerProps.RelativeOption = {
   key: 'previous-1-week',
   amount: 1,
@@ -72,7 +66,6 @@ const ExploreDateRangePicker: React.FC<IExploreDateRangePickerProps> = (
       unit: 'day',
       type: 'relative',
     },
-    DEFAULT_DAY_RANGE,
     DEFAULT_WEEK_RANGE,
     {
       key: 'previous-2-week',
