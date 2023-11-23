@@ -56,7 +56,7 @@ router_user.put(
 router_user.delete(
   '/:id',
   validate([
-    param('id').custom(isUserValid),
+    param('id').custom(isEmails).custom(isUserValid),
     header('X-Click-Stream-Request-Id').custom(isRequestIdExisted),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
