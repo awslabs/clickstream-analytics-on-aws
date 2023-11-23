@@ -11747,7 +11747,7 @@
                 "DefaultValues": {
                     "StaticValues": [],
                     "RollingDate": {
-                        "Expression": "addDateTime(1, 'DD', truncDate('DD', now()))"
+                        "Expression": "truncDate('DD', now())"
                     }
                 },
                 "TimeGranularity": "DAY"
