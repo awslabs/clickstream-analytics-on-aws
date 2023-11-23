@@ -75,7 +75,9 @@ export class CMetadataDisplay {
     }
     const presetEvent = this.builtList.PresetEvents.find((e: any) => e.name === event.name);
     event.metadataSource = presetEvent ? MetadataSource.PRESET : MetadataSource.CUSTOM;
-    event.description = presetEvent ? presetEvent.description : event.description;
+    if (!metadataDisplay && presetEvent) {
+      event.description = presetEvent ? presetEvent.description : event.description;
+    }
   }
 
   private patchEventParameterInfo(parameter: IMetadataEventParameter) {
@@ -94,8 +96,10 @@ export class CMetadataDisplay {
       (e: any) => e.name === parameter.name && e.dataType === parameter.valueType);
     const publicEventParameter = this.builtList.PublicEventParameters.find(
       (e: any) => e.name === parameter.name && e.dataType === parameter.valueType);
+    if (!metadataDisplay && presetEventParameter) {
+      parameter.description = presetEventParameter ? presetEventParameter.description : parameter.description;
+    }
     parameter.metadataSource = presetEventParameter ? MetadataSource.PRESET : MetadataSource.CUSTOM;
-    parameter.description = presetEventParameter ? presetEventParameter.description : parameter.description;
     parameter.parameterType = publicEventParameter ? MetadataParameterType.PUBLIC : MetadataParameterType.PRIVATE;
   }
 
@@ -114,7 +118,9 @@ export class CMetadataDisplay {
     const presetUserAttribute = this.builtList.PresetUserAttributes.find(
       (e: any) => e.name === attribute.name && e.dataType === attribute.valueType);
     attribute.metadataSource = presetUserAttribute ? MetadataSource.PRESET : MetadataSource.CUSTOM;
-    attribute.description = presetUserAttribute ? presetUserAttribute.description : attribute.description;
+    if (!metadataDisplay && presetUserAttribute) {
+      attribute.description = presetUserAttribute ? presetUserAttribute.description : attribute.description;
+    }
   }
 
   public async patch(projectId: string, appId: string,
