@@ -66,7 +66,7 @@ describe('User test', () => {
     ddbMock.on(GetCommand, {
       TableName: clickStreamTableName,
       Key: {
-        id: 'fake@test.com',
+        id: MOCK_USER_ID,
         type: 'USER',
       },
     }).resolves({});
@@ -75,7 +75,7 @@ describe('User test', () => {
       .post('/api/user')
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
-        id: 'fake@test.com',
+        id: MOCK_USER_ID,
         role: IUserRole.OPERATOR,
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
@@ -91,7 +91,7 @@ describe('User test', () => {
       .post('/api/user')
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
-        id: 'fake@test.com ',
+        id: `${MOCK_USER_ID} `,
         role: IUserRole.OPERATOR,
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
