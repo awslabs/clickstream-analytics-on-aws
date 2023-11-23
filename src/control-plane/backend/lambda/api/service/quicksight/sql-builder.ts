@@ -1557,14 +1557,6 @@ function _buildBaseEventDataTableSQL(eventNames: string[], sqlParameters: SQLPar
           TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
       ),
       'YYYY-MM-DD'
-      ) || ' - ' || TO_CHAR(
-      date_trunc(
-          'week',
-          (
-          TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-          ) + INTERVAL '6 days'
-      ),
-      'YYYY-MM-DD'
       ) as week,
       TO_CHAR(
       TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
