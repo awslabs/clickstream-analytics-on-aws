@@ -500,10 +500,6 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
     });
   }, [presetParameters]);
 
-  useEffect(() => {
-    clickPreview();
-  }, []);
-
   return (
     <>
       <SpaceBetween direction="vertical" size="l">
