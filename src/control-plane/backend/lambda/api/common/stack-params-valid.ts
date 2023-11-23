@@ -339,7 +339,7 @@ async function _getRedshiftServerlessConfiguration(pipeline: IPipeline, vpcSubne
 async function _checkForReporting(pipeline: IPipeline, quickSightSubnets: ClickStreamSubnet[],
   portOfRedshift: number, redshiftSecurityGroups: string[], redshiftSecurityGroupsRules: SecurityGroupRule[],
   redshiftType: string) {
-  if (pipeline.reporting) {
+  if (pipeline.reporting?.quickSight) {
     const accountInfo = await describeAccountSubscription();
     if (!accountInfo.AccountInfo?.Edition?.includes('ENTERPRISE')) {
       throw new ClickStreamBadRequestError(
