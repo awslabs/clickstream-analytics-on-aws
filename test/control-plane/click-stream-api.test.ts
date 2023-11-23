@@ -1055,6 +1055,8 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
               'iam:ListPolicies',
               'iam:ListRoles',
               'iam:UpdateRoleDescription',
+              'iam:TagRole',
+              'iam:UntagRole',
             ],
             Effect: 'Allow',
             Resource: [
