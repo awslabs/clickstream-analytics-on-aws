@@ -48,34 +48,39 @@ export const handler: APIGatewayTokenAuthorizerHandler = async (event: APIGatewa
     issuer: issuerInput,
     dynamodbTableName: authorizerTable,
   });
-  const authResult = await authorizer.auth(event.authorizationToken);
-  if (!authResult.success) {
-    logger.warn(`authentication failed. Request ID: ${context.awsRequestId}`);
+  try {
+    const authResult = await authorizer.auth(event.authorizationToken);
+    if (!authResult.success) {
+      logger.warn(`authentication failed. Request ID: ${context.awsRequestId}`);
+      return denyResult;
+    }
+
+    logger.info('authentication success.');
+    const principalId = !isEmpty((authResult.jwtPayload as JwtPayload).sub) ? (authResult.jwtPayload as JwtPayload).sub : '';
+    const email = !isEmpty((authResult.jwtPayload as JwtPayload).email) ? (authResult.jwtPayload as JwtPayload).email.toString() : '';
+    const username = !isEmpty((authResult.jwtPayload as JwtPayload).username) ? (authResult.jwtPayload as JwtPayload).username.toString() : '';
+
+    return {
+      principalId: principalId,
+      context: {
+        email: email,
+        username: username,
+        authorizationToken: event.authorizationToken,
+      },
+      policyDocument: {
+        Version: '2012-10-17',
+        Statement: [
+          {
+            Action: 'execute-api:Invoke',
+            Effect: 'Allow',
+            Resource: event.methodArn,
+          },
+        ],
+      },
+    } as APIGatewayAuthorizerResult;
+  } catch (err) {
+    logger.error(`authentication failed. Request ID: ${context.awsRequestId}. Error: ${err}`);
     return denyResult;
   }
-
-  logger.info('authentication success.');
-  const principalId = !isEmpty((authResult.jwtPayload as JwtPayload).sub) ? (authResult.jwtPayload as JwtPayload).sub : '';
-  const email = !isEmpty((authResult.jwtPayload as JwtPayload).email) ? (authResult.jwtPayload as JwtPayload).email.toString() : '';
-  const username = !isEmpty((authResult.jwtPayload as JwtPayload).username) ? (authResult.jwtPayload as JwtPayload).username.toString() : '';
-
-  return {
-    principalId: principalId,
-    context: {
-      email: email,
-      username: username,
-      authorizationToken: event.authorizationToken,
-    },
-    policyDocument: {
-      Version: '2012-10-17',
-      Statement: [
-        {
-          Action: 'execute-api:Invoke',
-          Effect: 'Allow',
-          Resource: event.methodArn,
-        },
-      ],
-    },
-  } as APIGatewayAuthorizerResult;
 };
 
