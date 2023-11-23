@@ -422,6 +422,7 @@ export function buildEventPathAnalysisView(sqlParameters: SQLParameters) : strin
     data_final as (
       select
         event_name,
+        event_date,
         user_pseudo_id,
         event_id,
         event_timestamp,
@@ -444,6 +445,7 @@ export function buildEventPathAnalysisView(sqlParameters: SQLParameters) : strin
         step_table_2
     )
     select 
+      a.event_date,
       a.event_name || '_' || a.step_1 as source,
       CASE
         WHEN b.event_name is not null THEN b.event_name || '_' || a.step_2
@@ -474,6 +476,7 @@ export function buildEventPathAnalysisView(sqlParameters: SQLParameters) : strin
         a.user_pseudo_id,
         a.event_id,
         a.event_timestamp,
+        a.event_date,
         case when (b.event_timestamp - a.event_timestamp < ${sqlParameters.pathAnalysis!.lagSeconds! * 1000} and b.event_timestamp - a.event_timestamp >=0) then 0 else 1 end as group_start
       from data_1 a left join data_1 b 
         on a.user_pseudo_id = b.user_pseudo_id 
@@ -492,6 +495,7 @@ export function buildEventPathAnalysisView(sqlParameters: SQLParameters) : strin
         user_pseudo_id,
         event_id,
         event_timestamp,
+        event_date,
         group_id,
         ROW_NUMBER() OVER (PARTITION BY user_pseudo_id, group_id ORDER BY event_timestamp asc) as step_1,
         ROW_NUMBER() OVER (PARTITION BY user_pseudo_id, group_id ORDER BY event_timestamp asc) + 1 as step_2
@@ -501,7 +505,8 @@ export function buildEventPathAnalysisView(sqlParameters: SQLParameters) : strin
       select
         data.user_pseudo_id user_pseudo_id,
         group_id,
-        min(step_1) min_step
+        min(step_1) min_step,
+        min(event_timestamp) event_timestamp
       from
         data
       where
@@ -521,6 +526,7 @@ export function buildEventPathAnalysisView(sqlParameters: SQLParameters) : strin
     data_final as (
       select
         event_name,
+        event_date,
         user_pseudo_id,
         event_id,
         group_id,
@@ -544,6 +550,7 @@ export function buildEventPathAnalysisView(sqlParameters: SQLParameters) : strin
         step_table_2
     )
     select 
+      a.event_date event_date,
       a.event_name || '_' || a.step_1 as source,
       CASE
         WHEN b.event_name is not null THEN b.event_name || '_' || a.step_2
@@ -580,6 +587,7 @@ export function buildNodePathAnalysisView(sqlParameters: SQLParameters) : string
       mid_table_1 as (
         select 
           event_name,
+          event_date,
           user_pseudo_id,
           event_id,
           event_timestamp,
@@ -593,6 +601,7 @@ export function buildNodePathAnalysisView(sqlParameters: SQLParameters) : string
       data as (
         select
         event_name,
+        event_date,
         user_pseudo_id,
         event_id,
         event_timestamp,
@@ -644,6 +653,7 @@ export function buildNodePathAnalysisView(sqlParameters: SQLParameters) : string
     data_final as (
       select        
         event_name,
+        event_date,
         user_pseudo_id,
         event_id,
         event_timestamp,
@@ -669,6 +679,7 @@ export function buildNodePathAnalysisView(sqlParameters: SQLParameters) : string
         step_table_2
     )
     select 
+      a.event_date event_date,
       a.node || '_' || a.step_1 as source,
       CASE 
         WHEN b.node is not null THEN b.node || '_' || a.step_2
@@ -687,6 +698,7 @@ export function buildNodePathAnalysisView(sqlParameters: SQLParameters) : string
     mid_table_1 as (
       select 
         event_name,
+        event_date,
         user_pseudo_id,
         event_id,
         event_timestamp
@@ -702,6 +714,7 @@ export function buildNodePathAnalysisView(sqlParameters: SQLParameters) : string
       select 
         user_pseudo_id,
         event_id,
+        event_date,
         event_timestamp,
         case 
           when node in ('${sqlParameters.pathAnalysis?.nodes?.join('\',\'')}') then node 
@@ -718,6 +731,7 @@ export function buildNodePathAnalysisView(sqlParameters: SQLParameters) : string
         a.user_pseudo_id,
         a.event_id,
         a.event_timestamp,
+        a.event_date,
         case
           when (
             b.event_timestamp - a.event_timestamp < 3600000
@@ -746,6 +760,7 @@ export function buildNodePathAnalysisView(sqlParameters: SQLParameters) : string
         node,
         user_pseudo_id,
         event_id,
+        event_date,
         event_timestamp,
         group_id,
         ROW_NUMBER() OVER (PARTITION BY user_pseudo_id, group_id ORDER BY event_timestamp asc) as step_1,
@@ -756,7 +771,8 @@ export function buildNodePathAnalysisView(sqlParameters: SQLParameters) : string
       select
         data.user_pseudo_id user_pseudo_id,
         group_id,
-        min(step_1) min_step
+        min(step_1) min_step,
+        min(event_timestamp) event_timestamp
       from
         data
       where
@@ -779,6 +795,7 @@ export function buildNodePathAnalysisView(sqlParameters: SQLParameters) : string
         node,
         user_pseudo_id,
         event_id,
+        event_date,
         group_id,
         ROW_NUMBER() OVER (
           PARTITION BY
@@ -800,6 +817,7 @@ export function buildNodePathAnalysisView(sqlParameters: SQLParameters) : string
         step_table_2
     )
     select 
+      a.event_date event_date,
       a.node || '_' || a.step_1 as source,
       CASE 
         WHEN b.node is not null THEN b.node || '_' || a.step_2
@@ -937,9 +955,9 @@ function _buildFunnelBaseSql(eventNames: string[], sqlParameters: SQLParameters,
     }
 
     if (sqlParameters.conversionIntervalType == 'CUSTOMIZE') {
-      joinConditionSQL = joinConditionSQL.concat(`left outer join table_${index} ${joinCondition} and table_${index}.event_timestamp_${index} - table_${index-1}.event_timestamp_${index-1} > 0 and table_${index}.event_timestamp_${index} - table_${index-1}.event_timestamp_${index-1} < ${sqlParameters.conversionIntervalInSeconds}*1000 \n`);
+      joinConditionSQL = joinConditionSQL.concat(`left outer join table_${index} ${joinCondition} and table_${index}.event_timestamp_${index} - table_${index-1}.event_timestamp_${index-1} > 0 and table_${index}.event_timestamp_${index} - table_0.event_timestamp_0 <= ${sqlParameters.conversionIntervalInSeconds}*1000 \n`);
     } else {
-      joinConditionSQL = joinConditionSQL.concat(`left outer join table_${index} ${joinCondition} and TO_CHAR(TIMESTAMP 'epoch' + cast(table_${index-1}.event_timestamp_${index-1}/1000 as bigint) * INTERVAL '1 second', 'YYYY-MM-DD') = TO_CHAR(TIMESTAMP 'epoch' + cast(table_${index}.event_timestamp_${index}/1000 as bigint) * INTERVAL '1 second', 'YYYY-MM-DD')  \n`);
+      joinConditionSQL = joinConditionSQL.concat(`left outer join table_${index} ${joinCondition} and table_${index}.event_timestamp_${index} - table_${index-1}.event_timestamp_${index-1} > 0 and TO_CHAR(TIMESTAMP 'epoch' + cast(table_${index-1}.event_timestamp_${index-1}/1000 as bigint) * INTERVAL '1 second', 'YYYY-MM-DD') = TO_CHAR(TIMESTAMP 'epoch' + cast(table_${index}.event_timestamp_${index}/1000 as bigint) * INTERVAL '1 second', 'YYYY-MM-DD')  \n`);
     }
   }
 
@@ -1001,9 +1019,9 @@ function _buildJoinSqlForFunnelTableVisual(sqlParameters: SQLParameters, index:n
   }
 
   if (sqlParameters.conversionIntervalType == 'CUSTOMIZE') {
-    joinConditionSQL = joinConditionSQL.concat(`left outer join table_${index} ${joinCondition} ${groupingJoinSQL} and table_${index}.event_timestamp_${index} - table_${index-1}.event_timestamp_${index-1} > 0 and table_${index}.event_timestamp_${index} - table_${index-1}.event_timestamp_${index-1} < ${sqlParameters.conversionIntervalInSeconds}*1000 \n`);
+    joinConditionSQL = joinConditionSQL.concat(`left outer join table_${index} ${joinCondition} ${groupingJoinSQL} and table_${index}.event_timestamp_${index} - table_${index-1}.event_timestamp_${index-1} > 0 and table_${index}.event_timestamp_${index} - table_0.event_timestamp_0 <= ${sqlParameters.conversionIntervalInSeconds}*1000 \n`);
   } else {
-    joinConditionSQL = joinConditionSQL.concat(`left outer join table_${index} ${joinCondition} ${groupingJoinSQL} and TO_CHAR(TIMESTAMP 'epoch' + cast(table_${index-1}.event_timestamp_${index-1}/1000 as bigint) * INTERVAL '1 second', 'YYYY-MM-DD') = TO_CHAR(TIMESTAMP 'epoch' + cast(table_${index}.event_timestamp_${index}/1000 as bigint) * INTERVAL '1 second', 'YYYY-MM-DD')  \n`);
+    joinConditionSQL = joinConditionSQL.concat(`left outer join table_${index} ${joinCondition} ${groupingJoinSQL} and table_${index}.event_timestamp_${index} - table_${index-1}.event_timestamp_${index-1} > 0 and TO_CHAR(TIMESTAMP 'epoch' + cast(table_${index-1}.event_timestamp_${index-1}/1000 as bigint) * INTERVAL '1 second', 'YYYY-MM-DD') = TO_CHAR(TIMESTAMP 'epoch' + cast(table_${index}.event_timestamp_${index}/1000 as bigint) * INTERVAL '1 second', 'YYYY-MM-DD')  \n`);
   }
 
   return joinConditionSQL;
@@ -1124,7 +1142,8 @@ function _getUnionBaseDataForEventPathAnalysis(eventNames: string[], sqlParamete
       END as event_name,
       user_pseudo_id,
       event_id,
-      event_timestamp
+      event_timestamp,
+      event_date
       ${isSessionJoin ? ',_session_id' : ''}
     from base_data
     where event_name = '${eventName}' ${conditionSql !== '' ? ` and (${conditionSql})` : ''}
@@ -1165,6 +1184,7 @@ function _getMidTableForEventPathAnalysis(eventNames: string[], sqlParameters: S
             user_pseudo_id,
             event_id,
             event_timestamp,
+            event_date,
             _session_id
           from (
             select 
@@ -1172,6 +1192,7 @@ function _getMidTableForEventPathAnalysis(eventNames: string[], sqlParameters: S
               user_pseudo_id,
               event_id,
               event_timestamp,
+              event_date,
               _session_id,
               ROW_NUMBER() over(partition by event_name, user_pseudo_id, _session_id order by event_timestamp desc) as rk
             from ${baseTable}
@@ -1187,6 +1208,7 @@ function _getMidTableForEventPathAnalysis(eventNames: string[], sqlParameters: S
             user_pseudo_id,
             event_id,
             event_timestamp,
+            event_date,
             _session_id
           from ${baseTable}
         ),
@@ -1201,13 +1223,15 @@ function _getMidTableForEventPathAnalysis(eventNames: string[], sqlParameters: S
             ${eventNameClause}
             user_pseudo_id,
             event_id,
-            event_timestamp
+            event_timestamp,
+            event_date
           from (
             select 
               event_name,
               user_pseudo_id,
               event_id,
               event_timestamp,
+              event_date,
               ROW_NUMBER() over(partition by event_name, user_pseudo_id order by event_timestamp desc) as rk
             from ${baseTable}
           ) where rk = 1
@@ -1221,7 +1245,8 @@ function _getMidTableForEventPathAnalysis(eventNames: string[], sqlParameters: S
         ${eventNameClause}
         user_pseudo_id,
         event_id,
-        event_timestamp
+        event_timestamp,
+        event_date
       from ${baseTable} base
       ),
       `;
@@ -1242,6 +1267,7 @@ function _getMidTableForNodePathAnalysis(sqlParameters: SQLParameters, isSession
         mid_table as (
           select 
             event_name,
+            event_date,
             user_pseudo_id,
             event_id,
             event_timestamp,
@@ -1276,6 +1302,7 @@ function _getMidTableForNodePathAnalysis(sqlParameters: SQLParameters, isSession
       mid_table as (
         select 
           event_name,
+          event_date,
           user_pseudo_id,
           event_id,
           event_timestamp,
@@ -1528,14 +1555,6 @@ function _buildBaseEventDataTableSQL(eventNames: string[], sqlParameters: SQLPar
       date_trunc(
           'week',
           TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-      ),
-      'YYYY-MM-DD'
-      ) || ' - ' || TO_CHAR(
-      date_trunc(
-          'week',
-          (
-          TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-          ) + INTERVAL '6 days'
       ),
       'YYYY-MM-DD'
       ) as week,

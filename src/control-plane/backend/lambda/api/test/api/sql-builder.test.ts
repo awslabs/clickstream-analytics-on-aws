@@ -115,14 +115,6 @@ describe('SQL Builder test', () => {
                   TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
                 ),
                 'YYYY-MM-DD'
-              ) || ' - ' || TO_CHAR(
-                date_trunc(
-                  'week',
-                  (
-                    TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-                  ) + INTERVAL '6 days'
-                ),
-                'YYYY-MM-DD'
               ) as week,
               TO_CHAR(
                 TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -205,10 +197,10 @@ describe('SQL Builder test', () => {
           table_0
           left outer join table_1 on table_0.user_pseudo_id_0 = table_1.user_pseudo_id_1
           and table_1.event_timestamp_1 - table_0.event_timestamp_0 > 0
-          and table_1.event_timestamp_1 - table_0.event_timestamp_0 < 600 * 1000
+          and table_1.event_timestamp_1 - table_0.event_timestamp_0 <= 600 * 1000
           left outer join table_2 on table_1.user_pseudo_id_1 = table_2.user_pseudo_id_2
           and table_2.event_timestamp_2 - table_1.event_timestamp_1 > 0
-          and table_2.event_timestamp_2 - table_1.event_timestamp_1 < 600 * 1000
+          and table_2.event_timestamp_2 - table_0.event_timestamp_0 <= 600 * 1000
       )
     select
       DAY,
@@ -332,14 +324,6 @@ describe('SQL Builder test', () => {
                   TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
                 ),
                 'YYYY-MM-DD'
-              ) || ' - ' || TO_CHAR(
-                date_trunc(
-                  'week',
-                  (
-                    TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-                  ) + INTERVAL '6 days'
-                ),
-                'YYYY-MM-DD'
               ) as week,
               TO_CHAR(
                 TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -422,10 +406,10 @@ describe('SQL Builder test', () => {
           table_0
           left outer join table_1 on table_0.user_pseudo_id_0 = table_1.user_pseudo_id_1
           and table_1.event_timestamp_1 - table_0.event_timestamp_0 > 0
-          and table_1.event_timestamp_1 - table_0.event_timestamp_0 < 600 * 1000
+          and table_1.event_timestamp_1 - table_0.event_timestamp_0 <= 600 * 1000
           left outer join table_2 on table_1.user_pseudo_id_1 = table_2.user_pseudo_id_2
           and table_2.event_timestamp_2 - table_1.event_timestamp_1 > 0
-          and table_2.event_timestamp_2 - table_1.event_timestamp_1 < 600 * 1000
+          and table_2.event_timestamp_2 - table_0.event_timestamp_0 <= 600 * 1000
       )
     select
       DAY,
@@ -549,14 +533,6 @@ describe('SQL Builder test', () => {
                   TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
                 ),
                 'YYYY-MM-DD'
-              ) || ' - ' || TO_CHAR(
-                date_trunc(
-                  'week',
-                  (
-                    TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-                  ) + INTERVAL '6 days'
-                ),
-                'YYYY-MM-DD'
               ) as week,
               TO_CHAR(
                 TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -638,6 +614,7 @@ describe('SQL Builder test', () => {
         from
           table_0
           left outer join table_1 on table_0.user_pseudo_id_0 = table_1.user_pseudo_id_1
+          and table_1.event_timestamp_1 - table_0.event_timestamp_0 > 0
           and TO_CHAR(
             TIMESTAMP 'epoch' + cast(table_0.event_timestamp_0 / 1000 as bigint) * INTERVAL '1 second',
             'YYYY-MM-DD'
@@ -646,6 +623,7 @@ describe('SQL Builder test', () => {
             'YYYY-MM-DD'
           )
           left outer join table_2 on table_1.user_pseudo_id_1 = table_2.user_pseudo_id_2
+          and table_2.event_timestamp_2 - table_1.event_timestamp_1 > 0
           and TO_CHAR(
             TIMESTAMP 'epoch' + cast(table_1.event_timestamp_1 / 1000 as bigint) * INTERVAL '1 second',
             'YYYY-MM-DD'
@@ -775,14 +753,6 @@ describe('SQL Builder test', () => {
                   TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
                 ),
                 'YYYY-MM-DD'
-              ) || ' - ' || TO_CHAR(
-                date_trunc(
-                  'week',
-                  (
-                    TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-                  ) + INTERVAL '6 days'
-                ),
-                'YYYY-MM-DD'
               ) as week,
               TO_CHAR(
                 TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -864,6 +834,7 @@ describe('SQL Builder test', () => {
         from
           table_0
           left outer join table_1 on table_0.user_pseudo_id_0 = table_1.user_pseudo_id_1
+          and table_1.event_timestamp_1 - table_0.event_timestamp_0 > 0
           and TO_CHAR(
             TIMESTAMP 'epoch' + cast(table_0.event_timestamp_0 / 1000 as bigint) * INTERVAL '1 second',
             'YYYY-MM-DD'
@@ -872,6 +843,7 @@ describe('SQL Builder test', () => {
             'YYYY-MM-DD'
           )
           left outer join table_2 on table_1.user_pseudo_id_1 = table_2.user_pseudo_id_2
+          and table_2.event_timestamp_2 - table_1.event_timestamp_1 > 0
           and TO_CHAR(
             TIMESTAMP 'epoch' + cast(table_1.event_timestamp_1 / 1000 as bigint) * INTERVAL '1 second',
             'YYYY-MM-DD'
@@ -1034,14 +1006,6 @@ describe('SQL Builder test', () => {
                   TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
                 ),
                 'YYYY-MM-DD'
-              ) || ' - ' || TO_CHAR(
-                date_trunc(
-                  'week',
-                  (
-                    TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-                  ) + INTERVAL '6 days'
-                ),
-                'YYYY-MM-DD'
               ) as week,
               TO_CHAR(
                 TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -1136,10 +1100,10 @@ describe('SQL Builder test', () => {
           table_0
           left outer join table_1 on table_0.user_pseudo_id_0 = table_1.user_pseudo_id_1
           and table_1.event_timestamp_1 - table_0.event_timestamp_0 > 0
-          and table_1.event_timestamp_1 - table_0.event_timestamp_0 < 600 * 1000
+          and table_1.event_timestamp_1 - table_0.event_timestamp_0 <= 600 * 1000
           left outer join table_2 on table_1.user_pseudo_id_1 = table_2.user_pseudo_id_2
           and table_2.event_timestamp_2 - table_1.event_timestamp_1 > 0
-          and table_2.event_timestamp_2 - table_1.event_timestamp_1 < 600 * 1000
+          and table_2.event_timestamp_2 - table_0.event_timestamp_0 <= 600 * 1000
       )
     select
       DAY,
@@ -1295,14 +1259,6 @@ describe('SQL Builder test', () => {
                   TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
                 ),
                 'YYYY-MM-DD'
-              ) || ' - ' || TO_CHAR(
-                date_trunc(
-                  'week',
-                  (
-                    TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-                  ) + INTERVAL '6 days'
-                ),
-                'YYYY-MM-DD'
               ) as week,
               TO_CHAR(
                 TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -1397,10 +1353,10 @@ describe('SQL Builder test', () => {
           table_0
           left outer join table_1 on table_0.user_pseudo_id_0 = table_1.user_pseudo_id_1
           and table_1.event_timestamp_1 - table_0.event_timestamp_0 > 0
-          and table_1.event_timestamp_1 - table_0.event_timestamp_0 < 600 * 1000
+          and table_1.event_timestamp_1 - table_0.event_timestamp_0 <= 600 * 1000
           left outer join table_2 on table_1.user_pseudo_id_1 = table_2.user_pseudo_id_2
           and table_2.event_timestamp_2 - table_1.event_timestamp_1 > 0
-          and table_2.event_timestamp_2 - table_1.event_timestamp_1 < 600 * 1000
+          and table_2.event_timestamp_2 - table_0.event_timestamp_0 <= 600 * 1000
       ),
       final_table as (
         select
@@ -1555,14 +1511,6 @@ describe('SQL Builder test', () => {
                 date_trunc(
                   'week',
                   TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-                ),
-                'YYYY-MM-DD'
-              ) || ' - ' || TO_CHAR(
-                date_trunc(
-                  'week',
-                  (
-                    TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-                  ) + INTERVAL '6 days'
                 ),
                 'YYYY-MM-DD'
               ) as week,
@@ -1821,14 +1769,6 @@ describe('SQL Builder test', () => {
               TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
             ),
             'YYYY-MM-DD'
-          ) || ' - ' || TO_CHAR(
-            date_trunc(
-              'week',
-              (
-                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-              ) + INTERVAL '6 days'
-            ),
-            'YYYY-MM-DD'
           ) as week,
           TO_CHAR(
             TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -1918,6 +1858,7 @@ describe('SQL Builder test', () => {
           user_pseudo_id,
           event_id,
           event_timestamp,
+          event_date,
           _session_id
         from
           base_data
@@ -1967,6 +1908,7 @@ describe('SQL Builder test', () => {
       data_final as (
         select
           event_name,
+          event_date,
           user_pseudo_id,
           event_id,
           event_timestamp,
@@ -1991,6 +1933,7 @@ describe('SQL Builder test', () => {
           step_table_2
       )
     select
+      a.event_date,
       a.event_name || '_' || a.step_1 as source,
       CASE
         WHEN b.event_name is not null THEN b.event_name || '_' || a.step_2
@@ -2142,14 +2085,6 @@ describe('SQL Builder test', () => {
                   TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
                 ),
                 'YYYY-MM-DD'
-              ) || ' - ' || TO_CHAR(
-                date_trunc(
-                  'week',
-                  (
-                    TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-                  ) + INTERVAL '6 days'
-                ),
-                'YYYY-MM-DD'
               ) as week,
               TO_CHAR(
                 TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -2194,7 +2129,8 @@ describe('SQL Builder test', () => {
           END as event_name,
           user_pseudo_id,
           event_id,
-          event_timestamp
+          event_timestamp,
+          event_date
         from
           base_data base
       ),
@@ -2222,6 +2158,7 @@ describe('SQL Builder test', () => {
           a.user_pseudo_id,
           a.event_id,
           a.event_timestamp,
+          a.event_date,
           case
             when (
               b.event_timestamp - a.event_timestamp < 3600000
@@ -2252,6 +2189,7 @@ describe('SQL Builder test', () => {
           user_pseudo_id,
           event_id,
           event_timestamp,
+          event_date,
           group_id,
           ROW_NUMBER() OVER (
             PARTITION BY
@@ -2274,7 +2212,8 @@ describe('SQL Builder test', () => {
         select
           data.user_pseudo_id user_pseudo_id,
           group_id,
-          min(step_1) min_step
+          min(step_1) min_step,
+          min(event_timestamp) event_timestamp
         from
           data
         where
@@ -2295,6 +2234,7 @@ describe('SQL Builder test', () => {
       data_final as (
         select
           event_name,
+          event_date,
           user_pseudo_id,
           event_id,
           group_id,
@@ -2318,6 +2258,7 @@ describe('SQL Builder test', () => {
           step_table_2
       )
     select
+      a.event_date event_date,
       a.event_name || '_' || a.step_1 as source,
       CASE
         WHEN b.event_name is not null THEN b.event_name || '_' || a.step_2
@@ -2422,14 +2363,6 @@ describe('SQL Builder test', () => {
               TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
             ),
             'YYYY-MM-DD'
-          ) || ' - ' || TO_CHAR(
-            date_trunc(
-              'week',
-              (
-                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-              ) + INTERVAL '6 days'
-            ),
-            'YYYY-MM-DD'
           ) as week,
           TO_CHAR(
             TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -2475,6 +2408,7 @@ describe('SQL Builder test', () => {
       mid_table_1 as (
         select
           event_name,
+          event_date,
           user_pseudo_id,
           event_id,
           event_timestamp,
@@ -2508,6 +2442,7 @@ describe('SQL Builder test', () => {
       data as (
         select
           event_name,
+          event_date,
           user_pseudo_id,
           event_id,
           event_timestamp,
@@ -2563,6 +2498,7 @@ describe('SQL Builder test', () => {
       data_final as (
         select
           event_name,
+          event_date,
           user_pseudo_id,
           event_id,
           event_timestamp,
@@ -2588,6 +2524,7 @@ describe('SQL Builder test', () => {
           step_table_2
       )
     select
+      a.event_date event_date,
       a.node || '_' || a.step_1 as source,
       CASE
         WHEN b.node is not null THEN b.node || '_' || a.step_2
@@ -2692,14 +2629,6 @@ describe('SQL Builder test', () => {
               TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
             ),
             'YYYY-MM-DD'
-          ) || ' - ' || TO_CHAR(
-            date_trunc(
-              'week',
-              (
-                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-              ) + INTERVAL '6 days'
-            ),
-            'YYYY-MM-DD'
           ) as week,
           TO_CHAR(
             TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -2745,6 +2674,7 @@ describe('SQL Builder test', () => {
       mid_table_1 as (
         select
           event_name,
+          event_date,
           user_pseudo_id,
           event_id,
           event_timestamp,
@@ -2770,6 +2700,7 @@ describe('SQL Builder test', () => {
       mid_table as (
         select
           event_name,
+          event_date,
           user_pseudo_id,
           event_id,
           event_timestamp,
@@ -2799,6 +2730,7 @@ describe('SQL Builder test', () => {
       data as (
         select
           event_name,
+          event_date,
           user_pseudo_id,
           event_id,
           event_timestamp,
@@ -2854,6 +2786,7 @@ describe('SQL Builder test', () => {
       data_final as (
         select
           event_name,
+          event_date,
           user_pseudo_id,
           event_id,
           event_timestamp,
@@ -2879,6 +2812,7 @@ describe('SQL Builder test', () => {
           step_table_2
       )
     select
+      a.event_date event_date,
       a.node || '_' || a.step_1 as source,
       CASE
         WHEN b.node is not null THEN b.node || '_' || a.step_2
@@ -2982,14 +2916,6 @@ describe('SQL Builder test', () => {
               TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
             ),
             'YYYY-MM-DD'
-          ) || ' - ' || TO_CHAR(
-            date_trunc(
-              'week',
-              (
-                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-              ) + INTERVAL '6 days'
-            ),
-            'YYYY-MM-DD'
           ) as week,
           TO_CHAR(
             TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -3035,6 +2961,7 @@ describe('SQL Builder test', () => {
       mid_table_1 as (
         select
           event_name,
+          event_date,
           user_pseudo_id,
           event_id,
           event_timestamp,
@@ -3068,6 +2995,7 @@ describe('SQL Builder test', () => {
       data as (
         select
           event_name,
+          event_date,
           user_pseudo_id,
           event_id,
           event_timestamp,
@@ -3130,6 +3058,7 @@ describe('SQL Builder test', () => {
       data_final as (
         select
           event_name,
+          event_date,
           user_pseudo_id,
           event_id,
           event_timestamp,
@@ -3155,6 +3084,7 @@ describe('SQL Builder test', () => {
           step_table_2
       )
     select
+      a.event_date event_date,
       a.node || '_' || a.step_1 as source,
       CASE
         WHEN b.node is not null THEN b.node || '_' || a.step_2
@@ -3259,14 +3189,6 @@ describe('SQL Builder test', () => {
                   TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
                 ),
                 'YYYY-MM-DD'
-              ) || ' - ' || TO_CHAR(
-                date_trunc(
-                  'week',
-                  (
-                    TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-                  ) + INTERVAL '6 days'
-                ),
-                'YYYY-MM-DD'
               ) as week,
               TO_CHAR(
                 TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -3290,6 +3212,7 @@ describe('SQL Builder test', () => {
       mid_table_1 as (
         select
           event_name,
+          event_date,
           user_pseudo_id,
           event_id,
           event_timestamp
@@ -3323,6 +3246,7 @@ describe('SQL Builder test', () => {
         select
           user_pseudo_id,
           event_id,
+          event_date,
           event_timestamp,
           case
             when node in (
@@ -3354,6 +3278,7 @@ describe('SQL Builder test', () => {
           a.user_pseudo_id,
           a.event_id,
           a.event_timestamp,
+          a.event_date,
           case
             when (
               b.event_timestamp - a.event_timestamp < 3600000
@@ -3383,6 +3308,7 @@ describe('SQL Builder test', () => {
           node,
           user_pseudo_id,
           event_id,
+          event_date,
           event_timestamp,
           group_id,
           ROW_NUMBER() OVER (
@@ -3406,7 +3332,8 @@ describe('SQL Builder test', () => {
         select
           data.user_pseudo_id user_pseudo_id,
           group_id,
-          min(step_1) min_step
+          min(step_1) min_step,
+          min(event_timestamp) event_timestamp
         from
           data
         where
@@ -3429,6 +3356,7 @@ describe('SQL Builder test', () => {
           node,
           user_pseudo_id,
           event_id,
+          event_date,
           group_id,
           ROW_NUMBER() OVER (
             PARTITION BY
@@ -3450,6 +3378,7 @@ describe('SQL Builder test', () => {
           step_table_2
       )
     select
+      a.event_date event_date,
       a.node || '_' || a.step_1 as source,
       CASE
         WHEN b.node is not null THEN b.node || '_' || a.step_2
@@ -3555,14 +3484,6 @@ describe('SQL Builder test', () => {
                   TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
                 ),
                 'YYYY-MM-DD'
-              ) || ' - ' || TO_CHAR(
-                date_trunc(
-                  'week',
-                  (
-                    TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-                  ) + INTERVAL '6 days'
-                ),
-                'YYYY-MM-DD'
               ) as week,
               TO_CHAR(
                 TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -3586,6 +3507,7 @@ describe('SQL Builder test', () => {
       mid_table_1 as (
         select
           event_name,
+          event_date,
           user_pseudo_id,
           event_id,
           event_timestamp
@@ -3610,6 +3532,7 @@ describe('SQL Builder test', () => {
       mid_table as (
         select
           event_name,
+          event_date,
           user_pseudo_id,
           event_id,
           event_timestamp,
@@ -3638,6 +3561,7 @@ describe('SQL Builder test', () => {
         select
           user_pseudo_id,
           event_id,
+          event_date,
           event_timestamp,
           case
             when node in (
@@ -3669,6 +3593,7 @@ describe('SQL Builder test', () => {
           a.user_pseudo_id,
           a.event_id,
           a.event_timestamp,
+          a.event_date,
           case
             when (
               b.event_timestamp - a.event_timestamp < 3600000
@@ -3698,6 +3623,7 @@ describe('SQL Builder test', () => {
           node,
           user_pseudo_id,
           event_id,
+          event_date,
           event_timestamp,
           group_id,
           ROW_NUMBER() OVER (
@@ -3721,7 +3647,8 @@ describe('SQL Builder test', () => {
         select
           data.user_pseudo_id user_pseudo_id,
           group_id,
-          min(step_1) min_step
+          min(step_1) min_step,
+          min(event_timestamp) event_timestamp
         from
           data
         where
@@ -3744,6 +3671,7 @@ describe('SQL Builder test', () => {
           node,
           user_pseudo_id,
           event_id,
+          event_date,
           group_id,
           ROW_NUMBER() OVER (
             PARTITION BY
@@ -3765,6 +3693,7 @@ describe('SQL Builder test', () => {
           step_table_2
       )
     select
+      a.event_date event_date,
       a.node || '_' || a.step_1 as source,
       CASE
         WHEN b.node is not null THEN b.node || '_' || a.step_2
@@ -3869,14 +3798,6 @@ describe('SQL Builder test', () => {
                   TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
                 ),
                 'YYYY-MM-DD'
-              ) || ' - ' || TO_CHAR(
-                date_trunc(
-                  'week',
-                  (
-                    TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-                  ) + INTERVAL '6 days'
-                ),
-                'YYYY-MM-DD'
               ) as week,
               TO_CHAR(
                 TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -3900,6 +3821,7 @@ describe('SQL Builder test', () => {
       mid_table_1 as (
         select
           event_name,
+          event_date,
           user_pseudo_id,
           event_id,
           event_timestamp
@@ -3933,6 +3855,7 @@ describe('SQL Builder test', () => {
         select
           user_pseudo_id,
           event_id,
+          event_date,
           event_timestamp,
           case
             when node in (
@@ -3971,6 +3894,7 @@ describe('SQL Builder test', () => {
           a.user_pseudo_id,
           a.event_id,
           a.event_timestamp,
+          a.event_date,
           case
             when (
               b.event_timestamp - a.event_timestamp < 3600000
@@ -4000,6 +3924,7 @@ describe('SQL Builder test', () => {
           node,
           user_pseudo_id,
           event_id,
+          event_date,
           event_timestamp,
           group_id,
           ROW_NUMBER() OVER (
@@ -4023,7 +3948,8 @@ describe('SQL Builder test', () => {
         select
           data.user_pseudo_id user_pseudo_id,
           group_id,
-          min(step_1) min_step
+          min(step_1) min_step,
+          min(event_timestamp) event_timestamp
         from
           data
         where
@@ -4046,6 +3972,7 @@ describe('SQL Builder test', () => {
           node,
           user_pseudo_id,
           event_id,
+          event_date,
           group_id,
           ROW_NUMBER() OVER (
             PARTITION BY
@@ -4067,6 +3994,7 @@ describe('SQL Builder test', () => {
           step_table_2
       )
     select
+      a.event_date event_date,
       a.node || '_' || a.step_1 as source,
       CASE
         WHEN b.node is not null THEN b.node || '_' || a.step_2
@@ -4243,14 +4171,6 @@ describe('SQL Builder test', () => {
                 date_trunc(
                   'week',
                   TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-                ),
-                'YYYY-MM-DD'
-              ) || ' - ' || TO_CHAR(
-                date_trunc(
-                  'week',
-                  (
-                    TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-                  ) + INTERVAL '6 days'
                 ),
                 'YYYY-MM-DD'
               ) as week,
@@ -4555,14 +4475,6 @@ describe('SQL Builder test', () => {
                 date_trunc(
                   'week',
                   TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-                ),
-                'YYYY-MM-DD'
-              ) || ' - ' || TO_CHAR(
-                date_trunc(
-                  'week',
-                  (
-                    TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-                  ) + INTERVAL '6 days'
                 ),
                 'YYYY-MM-DD'
               ) as week,
@@ -4881,14 +4793,6 @@ describe('SQL Builder test', () => {
               TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
             ),
             'YYYY-MM-DD'
-          ) || ' - ' || TO_CHAR(
-            date_trunc(
-              'week',
-              (
-                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-              ) + INTERVAL '6 days'
-            ),
-            'YYYY-MM-DD'
           ) as week,
           TO_CHAR(
             TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -5028,10 +4932,10 @@ describe('SQL Builder test', () => {
           table_0
           left outer join table_1 on table_0.user_pseudo_id_0 = table_1.user_pseudo_id_1
           and table_1.event_timestamp_1 - table_0.event_timestamp_0 > 0
-          and table_1.event_timestamp_1 - table_0.event_timestamp_0 < 600 * 1000
+          and table_1.event_timestamp_1 - table_0.event_timestamp_0 <= 600 * 1000
           left outer join table_2 on table_1.user_pseudo_id_1 = table_2.user_pseudo_id_2
           and table_2.event_timestamp_2 - table_1.event_timestamp_1 > 0
-          and table_2.event_timestamp_2 - table_1.event_timestamp_1 < 600 * 1000
+          and table_2.event_timestamp_2 - table_0.event_timestamp_0 <= 600 * 1000
       )
     select
       DAY,
@@ -5270,14 +5174,6 @@ describe('SQL Builder test', () => {
               TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
             ),
             'YYYY-MM-DD'
-          ) || ' - ' || TO_CHAR(
-            date_trunc(
-              'week',
-              (
-                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-              ) + INTERVAL '6 days'
-            ),
-            'YYYY-MM-DD'
           ) as week,
           TO_CHAR(
             TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -5422,10 +5318,10 @@ describe('SQL Builder test', () => {
           table_0
           left outer join table_1 on table_0.user_pseudo_id_0 = table_1.user_pseudo_id_1
           and table_1.event_timestamp_1 - table_0.event_timestamp_0 > 0
-          and table_1.event_timestamp_1 - table_0.event_timestamp_0 < 600 * 1000
+          and table_1.event_timestamp_1 - table_0.event_timestamp_0 <= 600 * 1000
           left outer join table_2 on table_1.user_pseudo_id_1 = table_2.user_pseudo_id_2
           and table_2.event_timestamp_2 - table_1.event_timestamp_1 > 0
-          and table_2.event_timestamp_2 - table_1.event_timestamp_1 < 600 * 1000
+          and table_2.event_timestamp_2 - table_0.event_timestamp_0 <= 600 * 1000
       )
     select
       DAY,
@@ -5579,14 +5475,6 @@ describe('SQL Builder test', () => {
             date_trunc(
               'week',
               TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-            ),
-            'YYYY-MM-DD'
-          ) || ' - ' || TO_CHAR(
-            date_trunc(
-              'week',
-              (
-                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-              ) + INTERVAL '6 days'
             ),
             'YYYY-MM-DD'
           ) as week,
@@ -5765,14 +5653,6 @@ describe('SQL Builder test', () => {
             date_trunc(
               'week',
               TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-            ),
-            'YYYY-MM-DD'
-          ) || ' - ' || TO_CHAR(
-            date_trunc(
-              'week',
-              (
-                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-              ) + INTERVAL '6 days'
             ),
             'YYYY-MM-DD'
           ) as week,
@@ -6044,14 +5924,6 @@ describe('SQL Builder test', () => {
               TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
             ),
             'YYYY-MM-DD'
-          ) || ' - ' || TO_CHAR(
-            date_trunc(
-              'week',
-              (
-                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-              ) + INTERVAL '6 days'
-            ),
-            'YYYY-MM-DD'
           ) as week,
           TO_CHAR(
             TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -6194,10 +6066,10 @@ describe('SQL Builder test', () => {
           table_0
           left outer join table_1 on table_0.user_pseudo_id_0 = table_1.user_pseudo_id_1
           and table_1.event_timestamp_1 - table_0.event_timestamp_0 > 0
-          and table_1.event_timestamp_1 - table_0.event_timestamp_0 < 600 * 1000
+          and table_1.event_timestamp_1 - table_0.event_timestamp_0 <= 600 * 1000
           left outer join table_2 on table_1.user_pseudo_id_1 = table_2.user_pseudo_id_2
           and table_2.event_timestamp_2 - table_1.event_timestamp_1 > 0
-          and table_2.event_timestamp_2 - table_1.event_timestamp_1 < 600 * 1000
+          and table_2.event_timestamp_2 - table_0.event_timestamp_0 <= 600 * 1000
       ),
       final_table as (
         select
@@ -6472,14 +6344,6 @@ describe('SQL Builder test', () => {
               TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
             ),
             'YYYY-MM-DD'
-          ) || ' - ' || TO_CHAR(
-            date_trunc(
-              'week',
-              (
-                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-              ) + INTERVAL '6 days'
-            ),
-            'YYYY-MM-DD'
           ) as week,
           TO_CHAR(
             TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -6622,10 +6486,10 @@ describe('SQL Builder test', () => {
           table_0
           left outer join table_1 on table_0.user_pseudo_id_0 = table_1.user_pseudo_id_1
           and table_1.event_timestamp_1 - table_0.event_timestamp_0 > 0
-          and table_1.event_timestamp_1 - table_0.event_timestamp_0 < 600 * 1000
+          and table_1.event_timestamp_1 - table_0.event_timestamp_0 <= 600 * 1000
           left outer join table_2 on table_1.user_pseudo_id_1 = table_2.user_pseudo_id_2
           and table_2.event_timestamp_2 - table_1.event_timestamp_1 > 0
-          and table_2.event_timestamp_2 - table_1.event_timestamp_1 < 600 * 1000
+          and table_2.event_timestamp_2 - table_0.event_timestamp_0 <= 600 * 1000
       )
     select
       DAY,
@@ -6861,14 +6725,6 @@ describe('SQL Builder test', () => {
             date_trunc(
               'week',
               TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-            ),
-            'YYYY-MM-DD'
-          ) || ' - ' || TO_CHAR(
-            date_trunc(
-              'week',
-              (
-                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-              ) + INTERVAL '6 days'
             ),
             'YYYY-MM-DD'
           ) as week,
@@ -7272,14 +7128,6 @@ describe('SQL Builder test', () => {
               TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
             ),
             'YYYY-MM-DD'
-          ) || ' - ' || TO_CHAR(
-            date_trunc(
-              'week',
-              (
-                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-              ) + INTERVAL '6 days'
-            ),
-            'YYYY-MM-DD'
           ) as week,
           TO_CHAR(
             TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -7402,6 +7250,7 @@ describe('SQL Builder test', () => {
           user_pseudo_id,
           event_id,
           event_timestamp,
+          event_date,
           _session_id
         from
           base_data
@@ -7451,6 +7300,7 @@ describe('SQL Builder test', () => {
       data_final as (
         select
           event_name,
+          event_date,
           user_pseudo_id,
           event_id,
           event_timestamp,
@@ -7475,6 +7325,7 @@ describe('SQL Builder test', () => {
           step_table_2
       )
     select
+      a.event_date,
       a.event_name || '_' || a.step_1 as source,
       CASE
         WHEN b.event_name is not null THEN b.event_name || '_' || a.step_2
@@ -7709,14 +7560,6 @@ describe('SQL Builder test', () => {
               TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
             ),
             'YYYY-MM-DD'
-          ) || ' - ' || TO_CHAR(
-            date_trunc(
-              'week',
-              (
-                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-              ) + INTERVAL '6 days'
-            ),
-            'YYYY-MM-DD'
           ) as week,
           TO_CHAR(
             TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -7831,7 +7674,8 @@ describe('SQL Builder test', () => {
           END as event_name,
           user_pseudo_id,
           event_id,
-          event_timestamp
+          event_timestamp,
+          event_date
         from
           base_data base
       ),
@@ -7859,6 +7703,7 @@ describe('SQL Builder test', () => {
           a.user_pseudo_id,
           a.event_id,
           a.event_timestamp,
+          a.event_date,
           case
             when (
               b.event_timestamp - a.event_timestamp < 3600000
@@ -7889,6 +7734,7 @@ describe('SQL Builder test', () => {
           user_pseudo_id,
           event_id,
           event_timestamp,
+          event_date,
           group_id,
           ROW_NUMBER() OVER (
             PARTITION BY
@@ -7911,7 +7757,8 @@ describe('SQL Builder test', () => {
         select
           data.user_pseudo_id user_pseudo_id,
           group_id,
-          min(step_1) min_step
+          min(step_1) min_step,
+          min(event_timestamp) event_timestamp
         from
           data
         where
@@ -7932,6 +7779,7 @@ describe('SQL Builder test', () => {
       data_final as (
         select
           event_name,
+          event_date,
           user_pseudo_id,
           event_id,
           group_id,
@@ -7955,6 +7803,7 @@ describe('SQL Builder test', () => {
           step_table_2
       )
     select
+      a.event_date event_date,
       a.event_name || '_' || a.step_1 as source,
       CASE
         WHEN b.event_name is not null THEN b.event_name || '_' || a.step_2
@@ -8244,14 +8093,6 @@ describe('SQL Builder test', () => {
               TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
             ),
             'YYYY-MM-DD'
-          ) || ' - ' || TO_CHAR(
-            date_trunc(
-              'week',
-              (
-                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-              ) + INTERVAL '6 days'
-            ),
-            'YYYY-MM-DD'
           ) as week,
           TO_CHAR(
             TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -8350,6 +8191,7 @@ describe('SQL Builder test', () => {
           user_pseudo_id,
           event_id,
           event_timestamp,
+          event_date,
           _session_id
         from
           base_data
@@ -8370,6 +8212,7 @@ describe('SQL Builder test', () => {
           user_pseudo_id,
           event_id,
           event_timestamp,
+          event_date,
           _session_id
         from
           base_data
@@ -8389,6 +8232,7 @@ describe('SQL Builder test', () => {
           user_pseudo_id,
           event_id,
           event_timestamp,
+          event_date,
           _session_id
         from
           base_data
@@ -8408,6 +8252,7 @@ describe('SQL Builder test', () => {
           user_pseudo_id,
           event_id,
           event_timestamp,
+          event_date,
           _session_id
         from
           base_data
@@ -8426,6 +8271,7 @@ describe('SQL Builder test', () => {
           user_pseudo_id,
           event_id,
           event_timestamp,
+          event_date,
           _session_id
         from
           union_base_data
@@ -8475,6 +8321,7 @@ describe('SQL Builder test', () => {
       data_final as (
         select
           event_name,
+          event_date,
           user_pseudo_id,
           event_id,
           event_timestamp,
@@ -8499,6 +8346,7 @@ describe('SQL Builder test', () => {
           step_table_2
       )
     select
+      a.event_date,
       a.event_name || '_' || a.step_1 as source,
       CASE
         WHEN b.event_name is not null THEN b.event_name || '_' || a.step_2
@@ -8756,14 +8604,6 @@ describe('SQL Builder test', () => {
               TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
             ),
             'YYYY-MM-DD'
-          ) || ' - ' || TO_CHAR(
-            date_trunc(
-              'week',
-              (
-                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-              ) + INTERVAL '6 days'
-            ),
-            'YYYY-MM-DD'
           ) as week,
           TO_CHAR(
             TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -8851,7 +8691,8 @@ describe('SQL Builder test', () => {
           END as event_name,
           user_pseudo_id,
           event_id,
-          event_timestamp
+          event_timestamp,
+          event_date
         from
           base_data
         where
@@ -8870,7 +8711,8 @@ describe('SQL Builder test', () => {
           END as event_name,
           user_pseudo_id,
           event_id,
-          event_timestamp
+          event_timestamp,
+          event_date
         from
           base_data
         where
@@ -8888,7 +8730,8 @@ describe('SQL Builder test', () => {
           END as event_name,
           user_pseudo_id,
           event_id,
-          event_timestamp
+          event_timestamp,
+          event_date
         from
           base_data
         where
@@ -8906,7 +8749,8 @@ describe('SQL Builder test', () => {
           END as event_name,
           user_pseudo_id,
           event_id,
-          event_timestamp
+          event_timestamp,
+          event_date
         from
           base_data
         where
@@ -8917,7 +8761,8 @@ describe('SQL Builder test', () => {
           event_name,
           user_pseudo_id,
           event_id,
-          event_timestamp
+          event_timestamp,
+          event_date
         from
           union_base_data base
       ),
@@ -8945,6 +8790,7 @@ describe('SQL Builder test', () => {
           a.user_pseudo_id,
           a.event_id,
           a.event_timestamp,
+          a.event_date,
           case
             when (
               b.event_timestamp - a.event_timestamp < 3600000
@@ -8975,6 +8821,7 @@ describe('SQL Builder test', () => {
           user_pseudo_id,
           event_id,
           event_timestamp,
+          event_date,
           group_id,
           ROW_NUMBER() OVER (
             PARTITION BY
@@ -8997,7 +8844,8 @@ describe('SQL Builder test', () => {
         select
           data.user_pseudo_id user_pseudo_id,
           group_id,
-          min(step_1) min_step
+          min(step_1) min_step,
+          min(event_timestamp) event_timestamp
         from
           data
         where
@@ -9018,6 +8866,7 @@ describe('SQL Builder test', () => {
       data_final as (
         select
           event_name,
+          event_date,
           user_pseudo_id,
           event_id,
           group_id,
@@ -9041,6 +8890,7 @@ describe('SQL Builder test', () => {
           step_table_2
       )
     select
+      a.event_date event_date,
       a.event_name || '_' || a.step_1 as source,
       CASE
         WHEN b.event_name is not null THEN b.event_name || '_' || a.step_2
@@ -9277,14 +9127,6 @@ describe('SQL Builder test', () => {
               TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
             ),
             'YYYY-MM-DD'
-          ) || ' - ' || TO_CHAR(
-            date_trunc(
-              'week',
-              (
-                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-              ) + INTERVAL '6 days'
-            ),
-            'YYYY-MM-DD'
           ) as week,
           TO_CHAR(
             TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -9352,6 +9194,7 @@ describe('SQL Builder test', () => {
       mid_table_1 as (
         select
           event_name,
+          event_date,
           user_pseudo_id,
           event_id,
           event_timestamp
@@ -9385,6 +9228,7 @@ describe('SQL Builder test', () => {
         select
           user_pseudo_id,
           event_id,
+          event_date,
           event_timestamp,
           case
             when node in (
@@ -9416,6 +9260,7 @@ describe('SQL Builder test', () => {
           a.user_pseudo_id,
           a.event_id,
           a.event_timestamp,
+          a.event_date,
           case
             when (
               b.event_timestamp - a.event_timestamp < 3600000
@@ -9445,6 +9290,7 @@ describe('SQL Builder test', () => {
           node,
           user_pseudo_id,
           event_id,
+          event_date,
           event_timestamp,
           group_id,
           ROW_NUMBER() OVER (
@@ -9468,7 +9314,8 @@ describe('SQL Builder test', () => {
         select
           data.user_pseudo_id user_pseudo_id,
           group_id,
-          min(step_1) min_step
+          min(step_1) min_step,
+          min(event_timestamp) event_timestamp
         from
           data
         where
@@ -9491,6 +9338,7 @@ describe('SQL Builder test', () => {
           node,
           user_pseudo_id,
           event_id,
+          event_date,
           group_id,
           ROW_NUMBER() OVER (
             PARTITION BY
@@ -9512,6 +9360,7 @@ describe('SQL Builder test', () => {
           step_table_2
       )
     select
+      a.event_date event_date,
       a.node || '_' || a.step_1 as source,
       CASE
         WHEN b.node is not null THEN b.node || '_' || a.step_2
@@ -9659,14 +9508,6 @@ describe('SQL Builder test', () => {
             date_trunc(
               'week',
               TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-            ),
-            'YYYY-MM-DD'
-          ) || ' - ' || TO_CHAR(
-            date_trunc(
-              'week',
-              (
-                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-              ) + INTERVAL '6 days'
             ),
             'YYYY-MM-DD'
           ) as week,
@@ -9978,14 +9819,6 @@ describe('SQL Builder test', () => {
               TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
             ),
             'YYYY-MM-DD'
-          ) || ' - ' || TO_CHAR(
-            date_trunc(
-              'week',
-              (
-                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-              ) + INTERVAL '6 days'
-            ),
-            'YYYY-MM-DD'
           ) as week,
           TO_CHAR(
             TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -10278,14 +10111,6 @@ describe('SQL Builder test', () => {
               TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
             ),
             'YYYY-MM-DD'
-          ) || ' - ' || TO_CHAR(
-            date_trunc(
-              'week',
-              (
-                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-              ) + INTERVAL '6 days'
-            ),
-            'YYYY-MM-DD'
           ) as week,
           TO_CHAR(
             TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -10417,6 +10242,7 @@ describe('SQL Builder test', () => {
           table_0
           left outer join table_1 on table_0.user_pseudo_id_0 = table_1.user_pseudo_id_1
           and table_0._session_id_0 = table_1._session_id_1
+          and table_1.event_timestamp_1 - table_0.event_timestamp_0 > 0
           and TO_CHAR(
             TIMESTAMP 'epoch' + cast(table_0.event_timestamp_0 / 1000 as bigint) * INTERVAL '1 second',
             'YYYY-MM-DD'
@@ -10426,6 +10252,7 @@ describe('SQL Builder test', () => {
           )
           left outer join table_2 on table_1.user_pseudo_id_1 = table_2.user_pseudo_id_2
           and table_1._session_id_1 = table_2._session_id_2
+          and table_2.event_timestamp_2 - table_1.event_timestamp_1 > 0
           and TO_CHAR(
             TIMESTAMP 'epoch' + cast(table_1.event_timestamp_1 / 1000 as bigint) * INTERVAL '1 second',
             'YYYY-MM-DD'
@@ -10637,14 +10464,6 @@ describe('SQL Builder test', () => {
               TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
             ),
             'YYYY-MM-DD'
-          ) || ' - ' || TO_CHAR(
-            date_trunc(
-              'week',
-              (
-                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-              ) + INTERVAL '6 days'
-            ),
-            'YYYY-MM-DD'
           ) as week,
           TO_CHAR(
             TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -10759,6 +10578,7 @@ describe('SQL Builder test', () => {
           table_0
           left outer join table_1 on table_0.user_pseudo_id_0 = table_1.user_pseudo_id_1
           and table_0.geo_country_0 = table_1.geo_country_1
+          and table_1.event_timestamp_1 - table_0.event_timestamp_0 > 0
           and TO_CHAR(
             TIMESTAMP 'epoch' + cast(table_0.event_timestamp_0 / 1000 as bigint) * INTERVAL '1 second',
             'YYYY-MM-DD'
@@ -10768,6 +10588,7 @@ describe('SQL Builder test', () => {
           )
           left outer join table_2 on table_1.user_pseudo_id_1 = table_2.user_pseudo_id_2
           and table_1.geo_country_1 = table_2.geo_country_2
+          and table_2.event_timestamp_2 - table_1.event_timestamp_1 > 0
           and TO_CHAR(
             TIMESTAMP 'epoch' + cast(table_1.event_timestamp_1 / 1000 as bigint) * INTERVAL '1 second',
             'YYYY-MM-DD'
@@ -10980,14 +10801,6 @@ describe('SQL Builder test', () => {
               TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
             ),
             'YYYY-MM-DD'
-          ) || ' - ' || TO_CHAR(
-            date_trunc(
-              'week',
-              (
-                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-              ) + INTERVAL '6 days'
-            ),
-            'YYYY-MM-DD'
           ) as week,
           TO_CHAR(
             TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -11097,6 +10910,7 @@ describe('SQL Builder test', () => {
         from
           table_0
           left outer join table_1 on table_0.user_pseudo_id_0 = table_1.user_pseudo_id_1
+          and table_1.event_timestamp_1 - table_0.event_timestamp_0 > 0
           and TO_CHAR(
             TIMESTAMP 'epoch' + cast(table_0.event_timestamp_0 / 1000 as bigint) * INTERVAL '1 second',
             'YYYY-MM-DD'
@@ -11105,6 +10919,7 @@ describe('SQL Builder test', () => {
             'YYYY-MM-DD'
           )
           left outer join table_2 on table_1.user_pseudo_id_1 = table_2.user_pseudo_id_2
+          and table_2.event_timestamp_2 - table_1.event_timestamp_1 > 0
           and TO_CHAR(
             TIMESTAMP 'epoch' + cast(table_1.event_timestamp_1 / 1000 as bigint) * INTERVAL '1 second',
             'YYYY-MM-DD'
@@ -11276,14 +11091,6 @@ describe('SQL Builder test', () => {
                   TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
                 ),
                 'YYYY-MM-DD'
-              ) || ' - ' || TO_CHAR(
-                date_trunc(
-                  'week',
-                  (
-                    TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-                  ) + INTERVAL '6 days'
-                ),
-                'YYYY-MM-DD'
               ) as week,
               TO_CHAR(
                 TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -11423,14 +11230,6 @@ describe('SQL Builder test', () => {
                 date_trunc(
                   'week',
                   TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-                ),
-                'YYYY-MM-DD'
-              ) || ' - ' || TO_CHAR(
-                date_trunc(
-                  'week',
-                  (
-                    TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-                  ) + INTERVAL '6 days'
                 ),
                 'YYYY-MM-DD'
               ) as week,
@@ -11583,14 +11382,6 @@ describe('SQL Builder test', () => {
             date_trunc(
               'week',
               TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-            ),
-            'YYYY-MM-DD'
-          ) || ' - ' || TO_CHAR(
-            date_trunc(
-              'week',
-              (
-                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-              ) + INTERVAL '6 days'
             ),
             'YYYY-MM-DD'
           ) as week,
@@ -11786,14 +11577,6 @@ describe('SQL Builder test', () => {
             date_trunc(
               'week',
               TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-            ),
-            'YYYY-MM-DD'
-          ) || ' - ' || TO_CHAR(
-            date_trunc(
-              'week',
-              (
-                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-              ) + INTERVAL '6 days'
             ),
             'YYYY-MM-DD'
           ) as week,
@@ -12004,14 +11787,6 @@ describe('SQL Builder test', () => {
               TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
             ),
             'YYYY-MM-DD'
-          ) || ' - ' || TO_CHAR(
-            date_trunc(
-              'week',
-              (
-                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-              ) + INTERVAL '6 days'
-            ),
-            'YYYY-MM-DD'
           ) as week,
           TO_CHAR(
             TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -12206,14 +11981,6 @@ describe('SQL Builder test', () => {
               TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
             ),
             'YYYY-MM-DD'
-          ) || ' - ' || TO_CHAR(
-            date_trunc(
-              'week',
-              (
-                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-              ) + INTERVAL '6 days'
-            ),
-            'YYYY-MM-DD'
           ) as week,
           TO_CHAR(
             TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -12405,14 +12172,6 @@ describe('SQL Builder test', () => {
             date_trunc(
               'week',
               TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-            ),
-            'YYYY-MM-DD'
-          ) || ' - ' || TO_CHAR(
-            date_trunc(
-              'week',
-              (
-                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-              ) + INTERVAL '6 days'
             ),
             'YYYY-MM-DD'
           ) as week,
@@ -12634,14 +12393,6 @@ describe('SQL Builder test', () => {
             date_trunc(
               'week',
               TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-            ),
-            'YYYY-MM-DD'
-          ) || ' - ' || TO_CHAR(
-            date_trunc(
-              'week',
-              (
-                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-              ) + INTERVAL '6 days'
             ),
             'YYYY-MM-DD'
           ) as week,
@@ -12905,14 +12656,6 @@ describe('SQL Builder test', () => {
             date_trunc(
               'week',
               TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-            ),
-            'YYYY-MM-DD'
-          ) || ' - ' || TO_CHAR(
-            date_trunc(
-              'week',
-              (
-                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-              ) + INTERVAL '6 days'
             ),
             'YYYY-MM-DD'
           ) as week,
@@ -13192,14 +12935,6 @@ describe('SQL Builder test', () => {
             date_trunc(
               'week',
               TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-            ),
-            'YYYY-MM-DD'
-          ) || ' - ' || TO_CHAR(
-            date_trunc(
-              'week',
-              (
-                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-              ) + INTERVAL '6 days'
             ),
             'YYYY-MM-DD'
           ) as week,
@@ -13516,14 +13251,6 @@ describe('SQL Builder test', () => {
               TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
             ),
             'YYYY-MM-DD'
-          ) || ' - ' || TO_CHAR(
-            date_trunc(
-              'week',
-              (
-                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-              ) + INTERVAL '6 days'
-            ),
-            'YYYY-MM-DD'
           ) as week,
           TO_CHAR(
             TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -13672,11 +13399,11 @@ describe('SQL Builder test', () => {
           left outer join table_1 on table_0.user_pseudo_id_0 = table_1.user_pseudo_id_1
           and table_0.geo_country_0 = table_1.geo_country_1
           and table_1.event_timestamp_1 - table_0.event_timestamp_0 > 0
-          and table_1.event_timestamp_1 - table_0.event_timestamp_0 < 600 * 1000
+          and table_1.event_timestamp_1 - table_0.event_timestamp_0 <= 600 * 1000
           left outer join table_2 on table_1.user_pseudo_id_1 = table_2.user_pseudo_id_2
-          andt able_1.geo_country_1 = table_2.geo_country_2
+          and table_1.geo_country_1 = table_2.geo_country_2
           and table_2.event_timestamp_2 - table_1.event_timestamp_1 > 0
-          and table_2.event_timestamp_2 - table_1.event_timestamp_1 < 600 * 1000
+          and table_2.event_timestamp_2 - table_0.event_timestamp_0 <= 600 * 1000
       ),
       final_table as (
         select
@@ -13953,14 +13680,6 @@ describe('SQL Builder test', () => {
               TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
             ),
             'YYYY-MM-DD'
-          ) || ' - ' || TO_CHAR(
-            date_trunc(
-              'week',
-              (
-                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-              ) + INTERVAL '6 days'
-            ),
-            'YYYY-MM-DD'
           ) as week,
           TO_CHAR(
             TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -14102,10 +13821,10 @@ describe('SQL Builder test', () => {
           table_0
           left outer join table_1 on table_0.user_pseudo_id_0 = table_1.user_pseudo_id_1
           and table_1.event_timestamp_1 - table_0.event_timestamp_0 > 0
-          and table_1.event_timestamp_1 - table_0.event_timestamp_0 < 600 * 1000
+          and table_1.event_timestamp_1 - table_0.event_timestamp_0 <= 600 * 1000
           left outer join table_2 on table_1.user_pseudo_id_1 = table_2.user_pseudo_id_2
           and table_2.event_timestamp_2 - table_1.event_timestamp_1 > 0
-          and table_2.event_timestamp_2 - table_1.event_timestamp_1 < 600 * 1000
+          and table_2.event_timestamp_2 - table_0.event_timestamp_0 <= 600 * 1000
       )
     select
       DAY,
@@ -14342,14 +14061,6 @@ describe('SQL Builder test', () => {
               TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
             ),
             'YYYY-MM-DD'
-          ) || ' - ' || TO_CHAR(
-            date_trunc(
-              'week',
-              (
-                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-              ) + INTERVAL '6 days'
-            ),
-            'YYYY-MM-DD'
           ) as week,
           TO_CHAR(
             TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -14502,11 +14213,11 @@ describe('SQL Builder test', () => {
           left outer join table_1 on table_0.user_pseudo_id_0 = table_1.user_pseudo_id_1
           and table_0.category = table_1.category
           and table_1.event_timestamp_1 - table_0.event_timestamp_0 > 0
-          and table_1.event_timestamp_1 - table_0.event_timestamp_0 < 600 * 1000
+          and table_1.event_timestamp_1 - table_0.event_timestamp_0 <= 600 * 1000
           left outer join table_2 on table_1.user_pseudo_id_1 = table_2.user_pseudo_id_2
           and table_1.category = table_2.category
           and table_2.event_timestamp_2 - table_1.event_timestamp_1 > 0
-          and table_2.event_timestamp_2 - table_1.event_timestamp_1 < 600 * 1000
+          and table_2.event_timestamp_2 - table_0.event_timestamp_0 <= 600 * 1000
       )
     select
       DAY,
@@ -14745,14 +14456,6 @@ describe('SQL Builder test', () => {
               TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
             ),
             'YYYY-MM-DD'
-          ) || ' - ' || TO_CHAR(
-            date_trunc(
-              'week',
-              (
-                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-              ) + INTERVAL '6 days'
-            ),
-            'YYYY-MM-DD'
           ) as week,
           TO_CHAR(
             TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -14902,10 +14605,10 @@ describe('SQL Builder test', () => {
           table_0
           left outer join table_1 on table_0.user_pseudo_id_0 = table_1.user_pseudo_id_1
           and table_1.event_timestamp_1 - table_0.event_timestamp_0 > 0
-          and table_1.event_timestamp_1 - table_0.event_timestamp_0 < 600 * 1000
+          and table_1.event_timestamp_1 - table_0.event_timestamp_0 <= 600 * 1000
           left outer join table_2 on table_1.user_pseudo_id_1 = table_2.user_pseudo_id_2
           and table_2.event_timestamp_2 - table_1.event_timestamp_1 > 0
-          and table_2.event_timestamp_2 - table_1.event_timestamp_1 < 600 * 1000
+          and table_2.event_timestamp_2 - table_0.event_timestamp_0 <= 600 * 1000
       )
     select
       DAY,
@@ -15148,14 +14851,6 @@ describe('SQL Builder test', () => {
             date_trunc(
               'week',
               TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-            ),
-            'YYYY-MM-DD'
-          ) || ' - ' || TO_CHAR(
-            date_trunc(
-              'week',
-              (
-                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-              ) + INTERVAL '6 days'
             ),
             'YYYY-MM-DD'
           ) as week,
@@ -15566,14 +15261,6 @@ describe('SQL Builder test', () => {
               TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
             ),
             'YYYY-MM-DD'
-          ) || ' - ' || TO_CHAR(
-            date_trunc(
-              'week',
-              (
-                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-              ) + INTERVAL '6 days'
-            ),
-            'YYYY-MM-DD'
           ) as week,
           TO_CHAR(
             TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -15674,6 +15361,7 @@ describe('SQL Builder test', () => {
           user_pseudo_id,
           event_id,
           event_timestamp,
+          event_date,
           _session_id
         from
           base_data
@@ -15723,6 +15411,7 @@ describe('SQL Builder test', () => {
       data_final as (
         select
           event_name,
+          event_date,
           user_pseudo_id,
           event_id,
           event_timestamp,
@@ -15747,6 +15436,7 @@ describe('SQL Builder test', () => {
           step_table_2
       )
     select
+      a.event_date,
       a.event_name || '_' || a.step_1 as source,
       CASE
         WHEN b.event_name is not null THEN b.event_name || '_' || a.step_2
@@ -15861,14 +15551,6 @@ describe('SQL Builder test', () => {
               TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
             ),
             'YYYY-MM-DD'
-          ) || ' - ' || TO_CHAR(
-            date_trunc(
-              'week',
-              (
-                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-              ) + INTERVAL '6 days'
-            ),
-            'YYYY-MM-DD'
           ) as week,
           TO_CHAR(
             TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -15924,6 +15606,7 @@ describe('SQL Builder test', () => {
           user_pseudo_id,
           event_id,
           event_timestamp,
+          event_date,
           _session_id
         from
           base_data
@@ -15973,6 +15656,7 @@ describe('SQL Builder test', () => {
       data_final as (
         select
           event_name,
+          event_date,
           user_pseudo_id,
           event_id,
           event_timestamp,
@@ -15997,6 +15681,7 @@ describe('SQL Builder test', () => {
           step_table_2
       )
     select
+      a.event_date,
       a.event_name || '_' || a.step_1 as source,
       CASE
         WHEN b.event_name is not null THEN b.event_name || '_' || a.step_2
@@ -16232,14 +15917,6 @@ describe('SQL Builder test', () => {
               TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
             ),
             'YYYY-MM-DD'
-          ) || ' - ' || TO_CHAR(
-            date_trunc(
-              'week',
-              (
-                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-              ) + INTERVAL '6 days'
-            ),
-            'YYYY-MM-DD'
           ) as week,
           TO_CHAR(
             TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -16314,6 +15991,7 @@ describe('SQL Builder test', () => {
       mid_table_1 as (
         select
           event_name,
+          event_date,
           user_pseudo_id,
           event_id,
           event_timestamp,
@@ -16347,6 +16025,7 @@ describe('SQL Builder test', () => {
       data as (
         select
           event_name,
+          event_date,
           user_pseudo_id,
           event_id,
           event_timestamp,
@@ -16402,6 +16081,7 @@ describe('SQL Builder test', () => {
       data_final as (
         select
           event_name,
+          event_date,
           user_pseudo_id,
           event_id,
           event_timestamp,
@@ -16427,6 +16107,7 @@ describe('SQL Builder test', () => {
           step_table_2
       )
     select
+      a.event_date event_date,
       a.node || '_' || a.step_1 as source,
       CASE
         WHEN b.node is not null THEN b.node || '_' || a.step_2
@@ -16730,14 +16411,6 @@ describe('SQL Builder test', () => {
             date_trunc(
               'week',
               TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-            ),
-            'YYYY-MM-DD'
-          ) || ' - ' || TO_CHAR(
-            date_trunc(
-              'week',
-              (
-                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-              ) + INTERVAL '6 days'
             ),
             'YYYY-MM-DD'
           ) as week,
@@ -17085,14 +16758,6 @@ describe('SQL Builder test', () => {
               TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
             ),
             'YYYY-MM-DD'
-          ) || ' - ' || TO_CHAR(
-            date_trunc(
-              'week',
-              (
-                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-              ) + INTERVAL '6 days'
-            ),
-            'YYYY-MM-DD'
           ) as week,
           TO_CHAR(
             TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -17209,10 +16874,10 @@ describe('SQL Builder test', () => {
           table_0
           left outer join table_1 on table_0.user_pseudo_id_0 = table_1.user_pseudo_id_1
           and table_1.event_timestamp_1 - table_0.event_timestamp_0 > 0
-          and table_1.event_timestamp_1 - table_0.event_timestamp_0 < 600 * 1000
+          and table_1.event_timestamp_1 - table_0.event_timestamp_0 <= 600 * 1000
           left outer join table_2 on table_1.user_pseudo_id_1 = table_2.user_pseudo_id_2
           and table_2.event_timestamp_2 - table_1.event_timestamp_1 > 0
-          and table_2.event_timestamp_2 - table_1.event_timestamp_1 < 600 * 1000
+          and table_2.event_timestamp_2 - table_0.event_timestamp_0 <= 600 * 1000
       ),
       final_table as (
         select
@@ -17493,14 +17158,6 @@ describe('SQL Builder test', () => {
               TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
             ),
             'YYYY-MM-DD'
-          ) || ' - ' || TO_CHAR(
-            date_trunc(
-              'week',
-              (
-                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-              ) + INTERVAL '6 days'
-            ),
-            'YYYY-MM-DD'
           ) as week,
           TO_CHAR(
             TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -17623,6 +17280,7 @@ describe('SQL Builder test', () => {
           user_pseudo_id,
           event_id,
           event_timestamp,
+          event_date,
           _session_id
         from
           (
@@ -17631,6 +17289,7 @@ describe('SQL Builder test', () => {
               user_pseudo_id,
               event_id,
               event_timestamp,
+              event_date,
               _session_id,
               ROW_NUMBER() over (
                 partition by
@@ -17691,6 +17350,7 @@ describe('SQL Builder test', () => {
       data_final as (
         select
           event_name,
+          event_date,
           user_pseudo_id,
           event_id,
           event_timestamp,
@@ -17715,6 +17375,7 @@ describe('SQL Builder test', () => {
           step_table_2
       )
     select
+      a.event_date,
       a.event_name || '_' || a.step_1 as source,
       CASE
         WHEN b.event_name is not null THEN b.event_name || '_' || a.step_2

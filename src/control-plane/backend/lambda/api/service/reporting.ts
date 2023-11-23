@@ -474,6 +474,7 @@ export class ReportingService {
         importMode: 'DIRECT_QUERY',
         customSql: sql,
         projectedColumns: [
+          'event_date',
           'source',
           'target',
           'x_id',

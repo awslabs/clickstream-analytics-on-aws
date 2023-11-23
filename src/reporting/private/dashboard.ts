@@ -163,6 +163,7 @@ export async function waitForAnalysisChangeCompleted(quickSight: QuickSight, acc
       logger.info('AnalysisUpdate: sleep 1 second');
       await sleep(1000);
 
+
     } catch (err: any) {
       logger.error(`Analysis create/update failed due to ${(err as Error).message}`);
       throw err;
@@ -301,4 +302,82 @@ export function truncateString(source: string, length: number): string {
     return source.substring(0, length);
   }
   return source;
+};
+
+export const existAnalysis = async (quickSight: QuickSight, accountId: string, analysisId: string) => {
+
+  try {
+    await quickSight.describeAnalysis({
+      AwsAccountId: accountId,
+      AnalysisId: analysisId,
+    });
+    return true;
+  } catch (err: any) {
+    if ((err as Error) instanceof ResourceNotFoundException) {
+      return false;
+    } else {
+      throw err;
+    }
+  }
+};
+
+export const existDashboard = async (quickSight: QuickSight, accountId: string, dashboardId: string) => {
+
+  try {
+    await quickSight.describeDashboard({
+      AwsAccountId: accountId,
+      DashboardId: dashboardId,
+    });
+    return true;
+  } catch (err: any) {
+    if ((err as Error) instanceof ResourceNotFoundException) {
+      return false;
+    } else {
+      throw err;
+    }
+  }
+};
+
+export const findDashboardWithPrefix = async (quickSight: QuickSight, accountId: string, prefix: string, excludeDashboardId: string|undefined) => {
+  try {
+    const dashboards = await quickSight.listDashboards({
+      AwsAccountId: accountId,
+    });
+    if (dashboards.DashboardSummaryList === undefined) {
+      return undefined;
+    }
+
+    for (const dashboard of dashboards.DashboardSummaryList) {
+      if (dashboard.DashboardId?.startsWith(prefix) && dashboard.DashboardId !== excludeDashboardId ) {
+        return dashboard.DashboardId;
+      }
+    }
+
+    return undefined;
+  } catch (err: any) {
+    logger.warn('find dashboard failed.');
+    return undefined;
+  }
+};
+
+export const findAnalysisWithPrefix = async (quickSight: QuickSight, accountId: string, prefix: string, excludeAnalysisId: string|undefined) => {
+  try {
+    const analyses = await quickSight.listAnalyses({
+      AwsAccountId: accountId,
+    });
+    if (analyses.AnalysisSummaryList === undefined) {
+      return undefined;
+    }
+
+    for (const analysis of analyses.AnalysisSummaryList) {
+      if (analysis.AnalysisId?.startsWith(prefix) && analysis.AnalysisId !== excludeAnalysisId ) {
+        return analysis.AnalysisId;
+      }
+    }
+
+    return undefined;
+  } catch (err: any) {
+    logger.warn('find analysis failed.');
+    return undefined;
+  }
 };
