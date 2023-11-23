@@ -88,9 +88,9 @@ async function _authToken(req: express.Request, res: express.Response, authoriza
     }
     logger.error(err);
     return {
-      status: res.status(500).send({
+      status: res.status(403).send({
         auth: false,
-        message: 'internal error.',
+        message: 'Authentication failed.',
       }),
     };
   }
