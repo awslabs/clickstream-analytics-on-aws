@@ -187,7 +187,7 @@ describe('User test', () => {
       .get(`/api/user/details?id=${MOCK_USER_ID}`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
-    expect(res.body).toEqual({ data: { deleted: false, role: 'Operator', id: 'user-0000' }, message: '', success: true });
+    expect(res.body).toEqual({ data: { deleted: false, role: 'Operator', id: MOCK_USER_ID }, message: '', success: true });
     expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 1);
   });
 

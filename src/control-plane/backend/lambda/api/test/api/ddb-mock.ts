@@ -50,7 +50,7 @@ const MOCK_EVENT_NAME = 'event-mock';
 const MOCK_EVENT_PARAMETER_NAME = 'event-attribute-mock';
 const MOCK_USER_ATTRIBUTE_NAME = 'user-attribute-mock';
 const MOCK_DASHBOARD_ID = 'dash_6666_6666';
-const MOCK_USER_ID = 'user-0000';
+const MOCK_USER_ID = 'fake@test.com';
 
 export const AllowIAMUserPutObejectPolicy = '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":"arn:aws:iam::127311923021:root"},"Action":["s3:PutObject","s3:PutObjectLegalHold","s3:PutObjectRetention","s3:PutObjectTagging","s3:PutObjectVersionTagging","s3:Abort*"],"Resource":"arn:aws:s3:::EXAMPLE_BUCKET/clickstream/*"}]}';
 export const AllowLogDeliveryPutObejectPolicy = '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"Service":"logdelivery.elasticloadbalancing.amazonaws.com"},"Action":["s3:PutObject","s3:PutObjectLegalHold","s3:PutObjectRetention","s3:PutObjectTagging","s3:PutObjectVersionTagging","s3:Abort*"],"Resource":"arn:aws:s3:::EXAMPLE_BUCKET/clickstream/*"}]}';

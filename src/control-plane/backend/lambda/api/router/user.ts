@@ -46,7 +46,7 @@ router_user.get(
 router_user.put(
   '/:id',
   validate([
-    body('id').custom(isUserValid),
+    body('id').custom(isEmails).custom(isUserValid),
     header('X-Click-Stream-Request-Id').custom(isRequestIdExisted),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
