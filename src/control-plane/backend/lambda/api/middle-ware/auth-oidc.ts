@@ -56,10 +56,8 @@ function _fetchUsernameFromToken(authResult: JWTAuthorizerResponse) {
 async function _authToken(req: express.Request, res: express.Response, authorization: string) {
   try {
     const issuerInput = process.env.ISSUER ?? '';
-    const authorizerTable = process.env.AUTHORIZER_TABLE ?? '';
     const authorizer = new JWTAuthorizer({
       issuer: issuerInput,
-      dynamodbTableName: authorizerTable,
     });
 
     const authResult = await authorizer.auth(authorization);

@@ -1649,7 +1649,6 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
           },
           WITH_AUTH_MIDDLEWARE: 'false',
           ISSUER: '',
-          AUTHORIZER_TABLE_NAME: '',
           STS_UPLOAD_ROLE_ARN: {
             'Fn::GetAtt': [
               'testClickStreamCloudfrontApiUploadRole7D6ED157',

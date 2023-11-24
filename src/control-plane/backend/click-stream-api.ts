@@ -68,7 +68,6 @@ export interface ApplicationLoadBalancerProps {
 
 export interface AuthProps {
   readonly issuer: string;
-  readonly authorizerTable: Table;
 }
 
 export interface ApiGatewayProps {
@@ -397,7 +396,6 @@ export class ClickStreamApiConstruct extends Construct {
         AWS_URL_SUFFIX: Aws.URL_SUFFIX,
         WITH_AUTH_MIDDLEWARE: props.fronting === 'alb' ? 'true' : 'false',
         ISSUER: props.authProps?.issuer ?? '',
-        AUTHORIZER_TABLE_NAME: props.authProps?.authorizerTable.tableName ?? '',
         STS_UPLOAD_ROLE_ARN: uploadRole.roleArn,
         QUICKSIGHT_EMBED_ROLE_ARN: this.getQuickSightEmbedRoleArn(props.targetToCNRegions),
         HEALTH_CHECK_PATH: props.healthCheckPath,
@@ -415,9 +413,6 @@ export class ClickStreamApiConstruct extends Construct {
     dictionaryTable.grantReadWriteData(this.clickStreamApiFunction);
     clickStreamTable.grantReadWriteData(this.clickStreamApiFunction);
     analyticsMetadataTable.grantReadWriteData(this.clickStreamApiFunction);
-    if (props.authProps?.authorizerTable) {
-      props.authProps?.authorizerTable.grantReadWriteData(this.clickStreamApiFunction);
-    }
 
     cloudWatchSendLogs('api-func-logs', this.clickStreamApiFunction);
     createENI('api-func-eni', this.clickStreamApiFunction);
