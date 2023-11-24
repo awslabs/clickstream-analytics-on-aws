@@ -1320,6 +1320,24 @@ function _checkCommonPartParameter(params: any): CheckParamsStatus | void {
 
 }
 
+function _getRetentionAnalysisConditions(params: any) {
+
+  const allPairConditions:Condition[] = [];
+  const pairEventAndConditions = params.pairEventAndConditions;
+  if (pairEventAndConditions !== undefined) {
+    for (const pairCondition of pairEventAndConditions) {
+      if (pairCondition.startEvent.sqlCondition?.conditions !== undefined) {
+        allPairConditions.push(...pairCondition.startEvent.sqlCondition.conditions);
+      }
+      if (pairCondition.backEvent.sqlCondition?.conditions !== undefined) {
+        allPairConditions.push(...pairCondition.backEvent.sqlCondition.conditions);
+      }
+    }
+  }
+
+  return allPairConditions;
+}
+
 function _checkCondition(params: any): CheckParamsStatus | void {
 
   const allConditions:Condition[] = [];
@@ -1337,17 +1355,7 @@ function _checkCondition(params: any): CheckParamsStatus | void {
     allConditions.push(...globalEventCondition.conditions);
   }
 
-  const pairEventAndConditions = params.pairEventAndConditions;
-  if (pairEventAndConditions !== undefined) {
-    for (const pairCondition of pairEventAndConditions) {
-      if (pairCondition.startEvent.sqlCondition?.conditions !== undefined) {
-        allConditions.push(...pairCondition.startEvent.sqlCondition.conditions);
-      }
-      if (pairCondition.backEvent.sqlCondition?.conditions !== undefined) {
-        allConditions.push(...pairCondition.backEvent.sqlCondition.conditions);
-      }
-    }
-  }
+  allConditions.push(..._getRetentionAnalysisConditions(params));
 
   for (const condition of allConditions) {
 
@@ -1365,19 +1373,26 @@ function _checkCondition(params: any): CheckParamsStatus | void {
 }
 
 function _checkTimeParameters(params: any): CheckParamsStatus | void {
-
-  const conditions = params.eventAndConditions as EventAndCondition[];
-  const eventNames: string[] = [];
-  for (const condition of conditions) {
-
-    if (eventNames.includes(condition.eventName)) {
+  if (params.timeScopeType !== ExploreTimeScopeType.FIXED && params.timeScopeType !== ExploreTimeScopeType.RELATIVE) {
+    return {
+      success: false,
+      message: 'Invalid parameter [timeScopeType].',
+    };
+  } else if (params.timeScopeType === ExploreTimeScopeType.FIXED) {
+    if (params.timeStart === undefined || params.timeEnd === undefined ) {
+      return {
+        success: false,
+        message: 'At least missing one of following parameters [timeStart, timeEnd].',
+      };
+    }
+  } else if (params.timeScopeType === ExploreTimeScopeType.RELATIVE) {
+    if (params.lastN === undefined || params.timeUnit === undefined ) {
       return {
         success: false,
         message: 'At least missing one of following parameters [lastN, timeUnit].',
       };
     }
   }
-
 }
 
 function _getMultipleVisualProps(hasGrouping: boolean) {
