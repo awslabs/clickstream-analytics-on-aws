@@ -39,7 +39,7 @@ export const DEFAULT_MONTH_RANGE: DateRangePickerProps.RelativeOption = {
 
 interface IExploreDateRangePickerProps {
   disableSelect: boolean;
-  dateRangeValue: DateRangePickerProps.Value | null;
+  dateRangeValue: DateRangePickerProps.Value;
   timeGranularity: SelectProps.Option;
   timeGranularityVisible: boolean;
   setDateRangeValue: (value: DateRangePickerProps.Value) => void;
