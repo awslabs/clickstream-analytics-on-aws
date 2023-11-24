@@ -143,6 +143,34 @@ export async function waitForDataSetCreateCompleted(quickSight: QuickSight, acco
   }
 };
 
+export async function waitForDataSourceChangeCompleted(quickSight: QuickSight, accountId: string, dataSourceId: string) {
+  for (const _i of Array(60).keys()) {
+    try {
+      const dataSource = await quickSight.describeDataSource({
+        AwsAccountId: accountId,
+        DataSourceId: dataSourceId,
+      });
+
+      if ( dataSource.DataSource?.Status === ResourceStatus.UPDATE_SUCCESSFUL
+        || dataSource.DataSource?.Status === ResourceStatus.CREATION_SUCCESSFUL) {
+        return;
+      } else if ( dataSource.DataSource?.Status === ResourceStatus.UPDATE_FAILED ) {
+        throw new Error('Data source update failed.');
+      } else if ( dataSource.DataSource?.Status === ResourceStatus.CREATION_FAILED ) {
+        throw new Error('Data source create failed.');
+      }
+
+      logger.info('waitForDataSourceChangeCompleted: sleep 1 second');
+      await sleep(1000);
+
+
+    } catch (err: any) {
+      logger.error(`Data source create/update failed due to ${(err as Error).message}`);
+      throw err;
+    }
+  }
+};
+
 export async function waitForAnalysisChangeCompleted(quickSight: QuickSight, accountId: string, analysisId: string) {
   for (const _i of Array(60).keys()) {
     try {

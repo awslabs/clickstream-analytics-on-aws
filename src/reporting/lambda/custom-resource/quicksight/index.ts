@@ -57,6 +57,7 @@ import {
   existAnalysis,
   findAnalysisWithPrefix,
   findDashboardWithPrefix,
+  waitForDataSourceChangeCompleted,
 } from '../../../private/dashboard';
 
 type ResourceEvent = CloudFormationCustomResourceEvent;
@@ -259,6 +260,8 @@ const createQuickSightDashboard = async (quickSight: QuickSight,
     schema,
   };
 
+  await grantDataSourcePermission(quickSight, dashboardDef.dataSourceArn, commonParams.awsAccountId, ownerPrincipalArn);
+
   for ( const dataSet of dataSets) {
     const createdDataset = await createDataSet(quickSight, commonParams, dashboardDef.dataSourceArn, dataSet);
     logger.info(`data set id: ${createdDataset?.DataSetId}`);
@@ -310,7 +313,6 @@ const deleteQuickSightDashboard = async (quickSight: QuickSight,
 
 };
 
-
 const getLatestTemplateVersion = async (quickSight: QuickSight,
   accountId: string, templateId: string): Promise<number> => {
   await waitForTemplateChangeCompleted(quickSight, accountId, templateId);
@@ -354,6 +356,8 @@ const updateQuickSightDashboard = async (quickSight: QuickSight,
     databaseName,
     schema,
   };
+
+  await grantDataSourcePermission(quickSight, dashboardDef.dataSourceArn, commonParams.awsAccountId, ownerPrincipalArn);
 
   const oldDataSetTableNames: string[] = [];
   const dataSetTableNames: string[] = [];
@@ -942,6 +946,29 @@ const updateDashboard = async (quickSight: QuickSight, commonParams: ResourceCom
     logger.error(`update QuickSight dashboard failed due to: ${(err as Error).message}`);
     throw err;
   }
+};
+
+const grantDataSourcePermission = async (quickSight: QuickSight, dataSourceArn: string, awsAccountId: string, ownerPrincipalArn: string) => {
+  const arnSplits = dataSourceArn.split('/');
+  const dataSourceId = arnSplits[arnSplits.length - 1];
+  await waitForDataSourceChangeCompleted(quickSight, awsAccountId, dataSourceId);
+  await quickSight.updateDataSourcePermissions({
+    AwsAccountId: awsAccountId,
+    DataSourceId: dataSourceId,
+    GrantPermissions: [
+      {
+        Principal: ownerPrincipalArn,
+        Actions: [
+          'quicksight:UpdateDataSourcePermissions',
+          'quicksight:DescribeDataSourcePermissions',
+          'quicksight:PassDataSource',
+          'quicksight:DescribeDataSource',
+          'quicksight:DeleteDataSource',
+          'quicksight:UpdateDataSource',
+        ],
+      },
+    ],
+  });
 };
 
 const buildDashBoardId = function (databaseName: string, schema: string): Identifier {
