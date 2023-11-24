@@ -39,6 +39,7 @@ interface ConditionItemProps {
   changeCurCategoryOption: (category: SelectProps.Option | null) => void;
   changeConditionValue: (value: string[]) => void;
   loading?: boolean;
+  disableValidate?: boolean;
 }
 
 const ConditionItem: React.FC<ConditionItemProps> = (
@@ -54,6 +55,7 @@ const ConditionItem: React.FC<ConditionItemProps> = (
     changeConditionOperator,
     changeConditionValue,
     loading,
+    disableValidate,
   } = props;
 
   const [valueOptions, setValueOptions] = useState<SelectProps.Options>([]);
@@ -163,6 +165,7 @@ const ConditionItem: React.FC<ConditionItemProps> = (
     <div className="cs-analytics-condition-item">
       <div className="condition-event">
         <EventItem
+          disableValidate={disableValidate}
           type="attribute"
           showMouseoverTitle
           placeholder={defaultStr(
