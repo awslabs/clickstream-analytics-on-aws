@@ -39,7 +39,7 @@ export const DEFAULT_MONTH_RANGE: DateRangePickerProps.RelativeOption = {
 
 interface IExploreDateRangePickerProps {
   disableSelect: boolean;
-  dateRangeValue: DateRangePickerProps.Value | null;
+  dateRangeValue: DateRangePickerProps.Value;
   timeGranularity: SelectProps.Option;
   timeGranularityVisible: boolean;
   setDateRangeValue: (value: DateRangePickerProps.Value) => void;
@@ -142,7 +142,7 @@ const ExploreDateRangePicker: React.FC<IExploreDateRangePickerProps> = (
         onChange={({ detail }) => {
           setDateRangeValue(detail.value as DateRangePickerProps.Value);
         }}
-        value={dateRangeValue ?? null}
+        value={dateRangeValue}
         dateOnly
         relativeOptions={relativeOptions}
         isValidRange={isValidRange}
