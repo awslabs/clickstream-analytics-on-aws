@@ -38,9 +38,7 @@ const Navigation: React.FC<INavigationProps> = (props: INavigationProps) => {
 
   const navHeader = {
     text: t('name'),
-    href: isAnalystRole(currentUser?.roles)
-        ? '/analytics'
-        : '/',
+    href: isAnalystRole(currentUser?.roles) ? '/analytics' : '/',
   };
   const pipelineNavItems: SideNavigationProps.Item[] = [
     { type: 'link', text: t('nav.home'), href: '/' },

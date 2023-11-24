@@ -168,7 +168,9 @@ const CreateUser: React.FC<CreateUserProps> = (props: CreateUserProps) => {
             setCurUser((prev) => {
               return {
                 ...prev,
-                roles: detail.selectedOptions.map((option) => option.value) as IUserRole[],
+                roles: detail.selectedOptions.map(
+                  (option) => option.value
+                ) as IUserRole[],
               };
             });
             console.log(detail.selectedOptions);
