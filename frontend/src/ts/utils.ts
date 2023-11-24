@@ -16,6 +16,7 @@ import {
   SelectProps,
 } from '@cloudscape-design/components';
 import { isEqual } from 'lodash';
+import moment from 'moment';
 import { getLngFromLocalStorage } from 'pages/analytics/analytics-utils';
 import {
   CLICK_STREAM_USER_DATA,
@@ -410,13 +411,11 @@ export const getLocaleLngDescription = (description: {
 };
 
 export const getAbsoluteStartEndRange = () => {
-  const endDate = new Date();
-  const startDate = new Date();
-  startDate.setDate(startDate.getDate() - 7);
-  endDate.setDate(endDate.getDate());
+  const endDate = moment();
+  const startDate = moment().subtract(7, 'days');
   return {
     type: 'absolute',
-    startDate: startDate.toISOString().split('T')[0],
-    endDate: endDate.toISOString().split('T')[0],
+    startDate: startDate.format('YYYY-MM-DD'),
+    endDate: endDate.format('YYYY-MM-DD'),
   } as DateRangePickerProps.AbsoluteValue;
 };
