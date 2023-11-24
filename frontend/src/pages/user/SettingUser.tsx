@@ -35,6 +35,7 @@ const SettingUser: React.FC<SettingUserProps> = (props: SettingUserProps) => {
   const [loadingCreate, setLoadingCreate] = useState(false);
   const defaultUserSetting = {
     roleJsonPath: '',
+    adminRoleNames: '',
     operatorRoleNames: '',
     analystRoleNames: '',
     analystReaderRoleNames: '',
@@ -117,6 +118,22 @@ const SettingUser: React.FC<SettingUserProps> = (props: SettingUserProps) => {
               return {
                 ...prev,
                 roleJsonPath: e.detail.value,
+              };
+            });
+          }}
+        />
+      </FormField>
+      <FormField
+        label={t('user:labels.settingUserAdminRoleNames')}
+        description={t('user:labels.settingUserAdminRoleNamesDesc')}
+      >
+        <Input
+          value={defaultStr(curUserSetting.adminRoleNames)}
+          onChange={(e) => {
+            setCurUserSetting((prev) => {
+              return {
+                ...prev,
+                adminRoleNames: e.detail.value,
               };
             });
           }}

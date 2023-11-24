@@ -29,8 +29,13 @@ import {
 import { useColumnWidths } from 'pages/common/use-column-widths';
 import React, { useContext, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { DICTIONARY_DISPLAY_PREFIX, IUserRole } from 'ts/const';
-import { alertMsg, defaultStr, getUserInfoFromLocalStorage } from 'ts/utils';
+import { DICTIONARY_DISPLAY_PREFIX } from 'ts/const';
+import {
+  alertMsg,
+  defaultStr,
+  getUserInfoFromLocalStorage,
+  isAnalystAuthorRole,
+} from 'ts/utils';
 import { descriptionRegex, displayNameRegex } from './table-config';
 
 interface MetadataDictionaryTableProps {
@@ -77,7 +82,7 @@ const MetadataDictionaryTable: React.FC<MetadataDictionaryTableProps> = (
   };
 
   const getDisplayValueEditConfig = () => {
-    if (currentUser.role !== IUserRole.ANALYST_READER) {
+    if (isAnalystAuthorRole(currentUser?.roles)) {
       return {
         validation(item: any, value: any) {
           return !displayNameRegex.test(value)

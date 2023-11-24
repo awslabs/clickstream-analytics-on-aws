@@ -22,6 +22,7 @@ import {
   CLICK_STREAM_USER_DATA,
   EPipelineStatus,
   ExecutionType,
+  IUserRole,
 } from './const';
 import { ServerlessRedshiftRPUByRegionMapping } from './constant-ln';
 
@@ -397,7 +398,7 @@ export const getUserInfoFromLocalStorage = () => {
   if (window.localStorage.getItem(CLICK_STREAM_USER_DATA)) {
     return JSON.parse(
       window.localStorage.getItem(CLICK_STREAM_USER_DATA) ?? ''
-    );
+    ) as IUser;
   } else {
     return null;
   }
@@ -418,4 +419,33 @@ export const getAbsoluteStartEndRange = () => {
     startDate: startDate.format('YYYY-MM-DD'),
     endDate: endDate.format('YYYY-MM-DD'),
   } as DateRangePickerProps.AbsoluteValue;
+};
+
+export const getIntersectArrays = (a: any[], b: any[]) => {
+  return [...new Set(a)].filter((x) => new Set(b).has(x));
+};
+
+export const isAdminRole = (roles: IUserRole[] | undefined) => {
+  if (!roles) {
+    return false;
+  }
+  return roles.some((role) => role === IUserRole.ADMIN);
+};
+
+export const isAnalystRole = (roles: IUserRole[] | undefined) => {
+  if (!roles) {
+    return false;
+  }
+  return roles.some(
+    (role) => role === IUserRole.ANALYST || role === IUserRole.ANALYST_READER
+  );
+};
+
+export const isAnalystAuthorRole = (roles: IUserRole[] | undefined) => {
+  if (!roles) {
+    return false;
+  }
+  return roles.some(
+    (role) => role === IUserRole.ANALYST || role === IUserRole.ADMIN
+  );
 };

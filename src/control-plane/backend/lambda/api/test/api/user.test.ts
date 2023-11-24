@@ -21,7 +21,7 @@ import {
 import { mockClient } from 'aws-sdk-client-mock';
 import request from 'supertest';
 import { MOCK_TOKEN, MOCK_USER_ID, tokenMock } from './ddb-mock';
-import { DEFAULT_ANALYST_READER_ROLE_NAMES, DEFAULT_ANALYST_ROLE_NAMES, DEFAULT_OPERATOR_ROLE_NAMES, DEFAULT_ROLE_JSON_PATH, amznRequestContextHeader, clickStreamTableName } from '../../common/constants';
+import { DEFAULT_ADMIN_ROLE_NAMES, DEFAULT_ANALYST_READER_ROLE_NAMES, DEFAULT_ANALYST_ROLE_NAMES, DEFAULT_OPERATOR_ROLE_NAMES, DEFAULT_ROLE_JSON_PATH, amznRequestContextHeader, clickStreamTableName } from '../../common/constants';
 import { DEFAULT_SOLUTION_OPERATOR } from '../../common/constants-ln';
 import { IUserRole } from '../../common/types';
 import { getRoleFromToken } from '../../common/utils';
@@ -41,13 +41,13 @@ describe('User test', () => {
       Items: [
         {
           id: 'id-01',
-          role: IUserRole.ADMIN,
+          roles: [IUserRole.ADMIN],
           operator: 'operator-01',
           deleted: false,
         },
         {
           id: 'id-02',
-          role: IUserRole.OPERATOR,
+          roles: [IUserRole.OPERATOR, IUserRole.ANALYST_READER],
           operator: 'operator-02',
           deleted: false,
         },
@@ -57,7 +57,17 @@ describe('User test', () => {
       .get('/api/user');
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
-    expect(res.body).toEqual({ data: { items: [{ deleted: false, operator: 'operator-01', role: 'Admin', id: 'id-01' }, { deleted: false, operator: 'operator-02', role: 'Operator', id: 'id-02' }], totalCount: 2 }, message: '', success: true });
+    expect(res.body).toEqual({
+      data: {
+        items: [
+          { deleted: false, operator: 'operator-01', roles: [IUserRole.ADMIN], id: 'id-01' },
+          { deleted: false, operator: 'operator-02', roles: [IUserRole.OPERATOR, IUserRole.ANALYST_READER], id: 'id-02' },
+        ],
+        totalCount: 2,
+      },
+      message: '',
+      success: true,
+    });
     expect(ddbMock).toHaveReceivedCommandTimes(QueryCommand, 1);
   });
 
@@ -76,7 +86,7 @@ describe('User test', () => {
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         id: MOCK_USER_ID,
-        role: IUserRole.OPERATOR,
+        roles: [IUserRole.OPERATOR, IUserRole.ANALYST_READER],
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(201);
@@ -114,7 +124,7 @@ describe('User test', () => {
       .send({
         id: MOCK_USER_ID,
         name: 'name-02',
-        role: IUserRole.OPERATOR,
+        roles: [],
         operator: 'operator-02',
         deleted: false,
       });
@@ -141,7 +151,7 @@ describe('User test', () => {
       .send({
         id: MOCK_USER_ID,
         name: 'name-02',
-        role: IUserRole.OPERATOR,
+        roles: [IUserRole.OPERATOR],
         operator: DEFAULT_SOLUTION_OPERATOR,
         deleted: false,
       });
@@ -179,7 +189,7 @@ describe('User test', () => {
     ddbMock.on(GetCommand).resolves({
       Item: {
         id: MOCK_USER_ID,
-        role: IUserRole.OPERATOR,
+        roles: [IUserRole.OPERATOR, IUserRole.ANALYST_READER],
         deleted: false,
       },
     });
@@ -187,7 +197,11 @@ describe('User test', () => {
       .get(`/api/user/details?id=${MOCK_USER_ID}`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
-    expect(res.body).toEqual({ data: { deleted: false, role: 'Operator', id: MOCK_USER_ID }, message: '', success: true });
+    expect(res.body).toEqual({
+      data: { deleted: false, roles: [IUserRole.OPERATOR, IUserRole.ANALYST_READER], id: MOCK_USER_ID },
+      message: '',
+      success: true,
+    });
     expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 1);
   });
 
@@ -197,7 +211,7 @@ describe('User test', () => {
       .get('/api/user/details?id=');
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
-    expect(res.body.data.role).toEqual(IUserRole.NO_IDENTITY);
+    expect(res.body.data.roles).toEqual([]);
   });
 
   it('Get details of user that url encode', async () => {
@@ -205,7 +219,7 @@ describe('User test', () => {
     ddbMock.on(GetCommand).resolves({
       Item: {
         id: 'fake+test@example.com',
-        role: IUserRole.OPERATOR,
+        roles: [IUserRole.OPERATOR],
         deleted: false,
       },
     });
@@ -213,7 +227,11 @@ describe('User test', () => {
       .get('/api/user/details?id=fake%2Btest@example.com');
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
-    expect(res.body).toEqual({ data: { deleted: false, role: 'Operator', id: 'fake+test@example.com' }, message: '', success: true });
+    expect(res.body).toEqual({
+      data: { deleted: false, roles: [IUserRole.OPERATOR], id: 'fake+test@example.com' },
+      message: '',
+      success: true,
+    });
     expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 1);
   });
 
@@ -224,7 +242,7 @@ describe('User test', () => {
       .get(`/api/user/details?id=${MOCK_USER_ID}`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
-    expect(res.body.data.role).toEqual(IUserRole.NO_IDENTITY);
+    expect(res.body.data.roles).toEqual([]);
     expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 1);
   });
 
@@ -238,7 +256,7 @@ describe('User test', () => {
       .set(amznRequestContextHeader, context);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
-    expect(res.body.data.role).toEqual(IUserRole.OPERATOR);
+    expect(res.body.data.roles).toEqual([IUserRole.OPERATOR]);
     expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 2);
     expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 0);
   });
@@ -255,15 +273,16 @@ describe('User test', () => {
         id: 'USER_SETTINGS',
         type: 'USER_SETTINGS',
         roleJsonPath: DEFAULT_ROLE_JSON_PATH,
+        adminRoleNames: DEFAULT_ADMIN_ROLE_NAMES,
         operatorRoleNames: DEFAULT_OPERATOR_ROLE_NAMES,
         analystRoleNames: DEFAULT_ANALYST_ROLE_NAMES,
         analystReaderRoleNames: DEFAULT_ANALYST_READER_ROLE_NAMES,
       },
     });
+    const admin = ['ClickstreamAdmin'];
     const operator = ['ClickstreamOperator'];
     const analyst = ['ClickstreamAnalyst'];
     const analystReader = ['ClickstreamAnalystReader'];
-    const admin = ['ClickstreamOperator', 'ClickstreamAnalyst'];
     const cognitoDecodedToken = {
       header: { kid: 'dTNaMHJMl6wOxsfattN5pTBbEggNA93P4X5Umjmr0mk=', alg: 'RS256' },
       payload: {
@@ -311,11 +330,22 @@ describe('User test', () => {
         'cognito:groups': admin,
       },
     };
-    expect(await getRoleFromToken(cognitoDecodedToken)).toEqual(IUserRole.NO_IDENTITY);
-    expect(await getRoleFromToken(cognitoDecodedTokenOperator)).toEqual(IUserRole.OPERATOR);
-    expect(await getRoleFromToken(cognitoDecodedTokenAnalyst)).toEqual(IUserRole.ANALYST);
-    expect(await getRoleFromToken(cognitoDecodedTokenAnalystReader)).toEqual(IUserRole.ANALYST_READER);
-    expect(await getRoleFromToken(cognitoDecodedTokenAdmin)).toEqual(IUserRole.ADMIN);
+    const cognitoDecodedTokenOperatorAndAnalyst = {
+      ...cognitoDecodedToken,
+      payload: {
+        ...cognitoDecodedToken.payload,
+        'cognito:groups': [
+          ...operator,
+          ...analyst,
+        ],
+      },
+    };
+    expect(await getRoleFromToken(cognitoDecodedToken)).toEqual([]);
+    expect(await getRoleFromToken(cognitoDecodedTokenOperator)).toEqual([IUserRole.OPERATOR]);
+    expect(await getRoleFromToken(cognitoDecodedTokenAnalyst)).toEqual([IUserRole.ANALYST]);
+    expect(await getRoleFromToken(cognitoDecodedTokenAnalystReader)).toEqual([IUserRole.ANALYST_READER]);
+    expect(await getRoleFromToken(cognitoDecodedTokenAdmin)).toEqual([IUserRole.ADMIN]);
+    expect(await getRoleFromToken(cognitoDecodedTokenOperatorAndAnalyst)).toEqual([IUserRole.OPERATOR, IUserRole.ANALYST]);
   });
 
   it('Get role from others decoded token', async () => {
@@ -330,6 +360,7 @@ describe('User test', () => {
         id: 'USER_SETTINGS',
         type: 'USER_SETTINGS',
         roleJsonPath: '$.payload.any_keys.roles',
+        adminRoleNames: DEFAULT_ADMIN_ROLE_NAMES,
         operatorRoleNames: DEFAULT_OPERATOR_ROLE_NAMES,
         analystRoleNames: DEFAULT_ANALYST_ROLE_NAMES,
         analystReaderRoleNames: DEFAULT_ANALYST_READER_ROLE_NAMES,
@@ -366,7 +397,7 @@ describe('User test', () => {
         },
       },
     };
-    expect(await getRoleFromToken(decodedTokenOperator)).toEqual(IUserRole.OPERATOR);
+    expect(await getRoleFromToken(decodedTokenOperator)).toEqual([IUserRole.OPERATOR]);
   });
 
   it('Get role from others decoded token with map mutil role name', async () => {
@@ -382,6 +413,7 @@ describe('User test', () => {
         id: 'USER_SETTINGS',
         type: 'USER_SETTINGS',
         roleJsonPath: '$.payload.any_keys.roles',
+        adminRoleNames: `${DEFAULT_ADMIN_ROLE_NAMES} , Admin1 , Admin2 `,
         operatorRoleNames: `${DEFAULT_OPERATOR_ROLE_NAMES} , Operator1 , Operator2 `,
         analystRoleNames: `${DEFAULT_ANALYST_ROLE_NAMES} , Analyst1 , Analyst2 `,
         analystReaderRoleNames: `${DEFAULT_ANALYST_READER_ROLE_NAMES} , AnalystReader1 , AnalystReader2 `,
@@ -418,7 +450,7 @@ describe('User test', () => {
         },
       },
     };
-    expect(await getRoleFromToken(decodedTokenNoIdentity)).toEqual(IUserRole.NO_IDENTITY);
+    expect(await getRoleFromToken(decodedTokenNoIdentity)).toEqual([]);
     const operator = ['Operator1', 'others'];
     const decodedTokenOperator = {
       ...decodedToken,
@@ -429,7 +461,7 @@ describe('User test', () => {
         },
       },
     };
-    expect(await getRoleFromToken(decodedTokenOperator)).toEqual(IUserRole.OPERATOR);
+    expect(await getRoleFromToken(decodedTokenOperator)).toEqual([IUserRole.OPERATOR]);
     const analyst = ['Analyst2', 'others'];
     const decodedTokenAnalyst = {
       ...decodedToken,
@@ -440,7 +472,7 @@ describe('User test', () => {
         },
       },
     };
-    expect(await getRoleFromToken(decodedTokenAnalyst)).toEqual(IUserRole.ANALYST);
+    expect(await getRoleFromToken(decodedTokenAnalyst)).toEqual([IUserRole.ANALYST]);
     const analystReader = ['AnalystReader2', 'others'];
     const decodedTokenAnalystReader = {
       ...decodedToken,
@@ -451,8 +483,8 @@ describe('User test', () => {
         },
       },
     };
-    expect(await getRoleFromToken(decodedTokenAnalystReader)).toEqual(IUserRole.ANALYST_READER);
-    const admin = ['Analyst2', 'Operator2', 'others'];
+    expect(await getRoleFromToken(decodedTokenAnalystReader)).toEqual([IUserRole.ANALYST_READER]);
+    const admin = ['Admin2', 'others'];
     const decodedTokenAdmin = {
       ...decodedToken,
       payload: {
@@ -462,7 +494,7 @@ describe('User test', () => {
         },
       },
     };
-    expect(await getRoleFromToken(decodedTokenAdmin)).toEqual(IUserRole.ADMIN);
+    expect(await getRoleFromToken(decodedTokenAdmin)).toEqual([IUserRole.ADMIN]);
   });
 
   it('Get user settings by default', async () => {
@@ -474,6 +506,7 @@ describe('User test', () => {
     expect(res.body).toEqual(
       {
         data: {
+          adminRoleNames: DEFAULT_ADMIN_ROLE_NAMES,
           analystRoleNames: DEFAULT_ANALYST_ROLE_NAMES,
           operatorRoleNames: DEFAULT_OPERATOR_ROLE_NAMES,
           analystReaderRoleNames: DEFAULT_ANALYST_READER_ROLE_NAMES,
@@ -510,6 +543,7 @@ describe('User test', () => {
       {
         data: {
           roleJsonPath: '$.payload.any_keys.roles',
+          adminRoleNames: DEFAULT_ADMIN_ROLE_NAMES,
           operatorRoleNames: `${DEFAULT_OPERATOR_ROLE_NAMES} , Operator1 , Operator2 `,
           analystRoleNames: `${DEFAULT_ANALYST_ROLE_NAMES} , Analyst1 , Analyst2 `,
           analystReaderRoleNames: DEFAULT_ANALYST_READER_ROLE_NAMES,
@@ -533,6 +567,7 @@ describe('User test', () => {
         id: 'USER_SETTINGS',
         type: 'USER_SETTINGS',
         roleJsonPath: '$.payload.any_keys.roles',
+        adminRoleNames: `${DEFAULT_ADMIN_ROLE_NAMES} , Admin1 , Admin2 `,
         operatorRoleNames: `${DEFAULT_OPERATOR_ROLE_NAMES} , Operator1 , Operator2 `,
         analystRoleNames: `${DEFAULT_ANALYST_ROLE_NAMES} , Analyst1 , Analyst2 `,
         analystReaderRoleNames: `${DEFAULT_ANALYST_READER_ROLE_NAMES} , AnalystReader1 , AnalystReader2 `,
@@ -546,6 +581,7 @@ describe('User test', () => {
       {
         data: {
           roleJsonPath: '$.payload.any_keys.roles',
+          adminRoleNames: `${DEFAULT_ADMIN_ROLE_NAMES} , Admin1 , Admin2 `,
           operatorRoleNames: `${DEFAULT_OPERATOR_ROLE_NAMES} , Operator1 , Operator2 `,
           analystRoleNames: `${DEFAULT_ANALYST_ROLE_NAMES} , Analyst1 , Analyst2 `,
           analystReaderRoleNames: `${DEFAULT_ANALYST_READER_ROLE_NAMES} , AnalystReader1 , AnalystReader2 `,
@@ -567,6 +603,7 @@ describe('User test', () => {
         id: 'USER_SETTINGS',
         type: 'USER_SETTINGS',
         roleJsonPath: '$.payload.any_keys.roles',
+        adminRoleNames: `${DEFAULT_ADMIN_ROLE_NAMES} , Admin1 , Admin2 `,
         operatorRoleNames: `${DEFAULT_OPERATOR_ROLE_NAMES} , Operator1 , Operator2 `,
         analystRoleNames: `${DEFAULT_ANALYST_ROLE_NAMES} , Analyst1 , Analyst2 `,
         analystReaderRoleNames: `${DEFAULT_ANALYST_READER_ROLE_NAMES} , AnalystReader1 , AnalystReader2 `,

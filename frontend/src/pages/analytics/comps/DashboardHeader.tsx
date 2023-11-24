@@ -25,8 +25,11 @@ import { StateActionType, HelpPanelType } from 'context/reducer';
 import React, { useContext, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { IUserRole } from 'ts/const';
-import { defaultStr, getUserInfoFromLocalStorage } from 'ts/utils';
+import {
+  defaultStr,
+  getUserInfoFromLocalStorage,
+  isAnalystAuthorRole,
+} from 'ts/utils';
 
 interface DashboardHeaderProps {
   totalNum: number;
@@ -121,7 +124,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = (
         }
         actions={
           <SpaceBetween size="xs" direction="horizontal">
-            {currentUser.role !== IUserRole.ANALYST_READER && (
+            {isAnalystAuthorRole(currentUser?.roles) && (
               <>
                 <Button
                   disabled={!dashboard?.id}

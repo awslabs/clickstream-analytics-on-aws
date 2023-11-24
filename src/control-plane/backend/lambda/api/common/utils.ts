@@ -175,9 +175,8 @@ function getTokenFromRequest(req: any) {
 }
 
 async function getRoleFromToken(decodedToken: any) {
-  let role = IUserRole.NO_IDENTITY;
   if (!decodedToken) {
-    return role;
+    return [];
   }
 
   let oidcRoles: string[] = [];
@@ -187,33 +186,35 @@ async function getRoleFromToken(decodedToken: any) {
   if (Array.prototype.isPrototypeOf(values) && values.length > 0) {
     oidcRoles = values[0] as string[];
   } else {
-    return role;
+    return [];
   }
 
-  return mapToRole(userSettings, oidcRoles);
+  return mapToRoles(userSettings, oidcRoles);
 }
 
-function mapToRole(userSettings: IUserSettings, oidcRoles: string[]) {
+function mapToRoles(userSettings: IUserSettings, oidcRoles: string[]) {
+  const userRoles: IUserRole[] = [];
   if (isEmpty(oidcRoles)) {
-    return IUserRole.NO_IDENTITY;
+    return userRoles;
   }
+  const adminRoleNames = userSettings.adminRoleNames.split(',').map(role => role.trim());
   const operatorRoleNames = userSettings.operatorRoleNames.split(',').map(role => role.trim());
   const analystRoleNames = userSettings.analystRoleNames.split(',').map(role => role.trim());
   const analystReaderRoleNames = userSettings.analystReaderRoleNames.split(',').map(role => role.trim());
 
-  if (oidcRoles.some(role => operatorRoleNames.includes(role)) && oidcRoles.some(role => analystRoleNames.includes(role))) {
-    return IUserRole.ADMIN;
+  if (oidcRoles.some(role => adminRoleNames.includes(role))) {
+    userRoles.push(IUserRole.ADMIN);
   }
   if (oidcRoles.some(role => operatorRoleNames.includes(role))) {
-    return IUserRole.OPERATOR;
+    userRoles.push(IUserRole.OPERATOR);
   }
   if (oidcRoles.some(role => analystRoleNames.includes(role))) {
-    return IUserRole.ANALYST;
+    userRoles.push(IUserRole.ANALYST);
   }
   if (oidcRoles.some(role => analystReaderRoleNames.includes(role))) {
-    return IUserRole.ANALYST_READER;
+    userRoles.push(IUserRole.ANALYST_READER);
   }
-  return IUserRole.NO_IDENTITY;
+  return userRoles;
 }
 
 function getBucketPrefix(projectId: string, key: BucketPrefix, value: string | undefined): string {
