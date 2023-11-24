@@ -27,7 +27,7 @@ import org.apache.spark.sql.types.ArrayType;
 import org.apache.spark.sql.types.DataTypes;
 import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
-import software.aws.solution.clickstream.ContextUtil;
+import software.aws.solution.clickstream.ETLMetric;
 import software.aws.solution.clickstream.KvConverter;
 import software.aws.solution.clickstream.exception.ExecuteTransformerException;
 
@@ -40,11 +40,21 @@ import java.util.Map;
 
 import static org.apache.spark.sql.functions.col;
 import static org.apache.spark.sql.functions.explode;
+import static org.apache.spark.sql.functions.lit;
 import static org.apache.spark.sql.functions.udf;
 import static software.aws.solution.clickstream.ContextUtil.DEBUG_LOCAL_PROP;
+import static software.aws.solution.clickstream.ContextUtil.JOB_NAME_PROP;
+import static software.aws.solution.clickstream.ContextUtil.WAREHOUSE_DIR_PROP;
 import static software.aws.solution.clickstream.DatasetUtil.CLIENT_ID;
+import static software.aws.solution.clickstream.DatasetUtil.CORRUPT_RECORD;
+import static software.aws.solution.clickstream.DatasetUtil.GTM_BRAND;
+import static software.aws.solution.clickstream.DatasetUtil.GTM_BRANDS;
+import static software.aws.solution.clickstream.DatasetUtil.GTM_PAGE_LOCATION;
+import static software.aws.solution.clickstream.DatasetUtil.GTM_PAGE_REFERRER;
+import static software.aws.solution.clickstream.DatasetUtil.GTM_PAGE_TITLE;
 import static software.aws.solution.clickstream.DatasetUtil.GA_SESSION_ID;
 import static software.aws.solution.clickstream.DatasetUtil.GA_SESSION_NUMBER;
+import static software.aws.solution.clickstream.DatasetUtil.GTM_CLIENT_BRAND;
 import static software.aws.solution.clickstream.DatasetUtil.GTM_CLIENT_PLATFORM;
 import static software.aws.solution.clickstream.DatasetUtil.GTM_CLIENT_PLATFORM_VERSION;
 import static software.aws.solution.clickstream.DatasetUtil.DATA;
@@ -64,12 +74,15 @@ import static software.aws.solution.clickstream.DatasetUtil.INT_VALUE;
 import static software.aws.solution.clickstream.DatasetUtil.IP;
 import static software.aws.solution.clickstream.DatasetUtil.ITEMS;
 import static software.aws.solution.clickstream.DatasetUtil.ITEM_ID;
+import static software.aws.solution.clickstream.DatasetUtil.JOB_NAME_COL;
 import static software.aws.solution.clickstream.DatasetUtil.KEY;
 import static software.aws.solution.clickstream.DatasetUtil.GTM_LANGUAGE;
 import static software.aws.solution.clickstream.DatasetUtil.MAX_STRING_VALUE_LEN;
 import static software.aws.solution.clickstream.DatasetUtil.MOBILE;
 import static software.aws.solution.clickstream.DatasetUtil.MODEL;
 import static software.aws.solution.clickstream.DatasetUtil.PAGE_REFERRER;
+import static software.aws.solution.clickstream.DatasetUtil.PAGE_TITLE;
+import static software.aws.solution.clickstream.DatasetUtil.PAGE_URL;
 import static software.aws.solution.clickstream.DatasetUtil.PLATFORM;
 import static software.aws.solution.clickstream.DatasetUtil.PLATFORM_VERSION;
 import static software.aws.solution.clickstream.DatasetUtil.PRICE;
@@ -77,6 +90,8 @@ import static software.aws.solution.clickstream.DatasetUtil.PROPERTIES;
 import static software.aws.solution.clickstream.DatasetUtil.GTM_REQUEST_START_TIME_MS;
 import static software.aws.solution.clickstream.DatasetUtil.GTM_SCREEN_HEIGHT;
 import static software.aws.solution.clickstream.DatasetUtil.GTM_SCREEN_WIDTH;
+import static software.aws.solution.clickstream.DatasetUtil.PROP_PAGE_REFERRER;
+import static software.aws.solution.clickstream.DatasetUtil.SESSION_ID;
 import static software.aws.solution.clickstream.DatasetUtil.STRING_VALUE;
 import static software.aws.solution.clickstream.DatasetUtil.UA;
 import static software.aws.solution.clickstream.DatasetUtil.GTM_UC;
@@ -90,7 +105,8 @@ import static software.aws.solution.clickstream.KvConverter.getValueTypeResult;
 
 @Slf4j
 public class ServerDataConverter {
-
+    public static final Map<String, String> PROPS_NAME_MAP = createPropNameMap();
+    public static final Map<String, String> EVENT_NAME_MAP = createEventNameMap();
 
     private static UDF1<String, Row[]> convertGTMServerData() {
         return (String value) -> {
@@ -98,11 +114,39 @@ public class ServerDataConverter {
                 return getGenericRows(value);
             } catch (Exception e) {
                 log.error("cannot convert data: " + value + ", error: " + e.getMessage());
-                if (ContextUtil.isDebugLocal()) {
-                    throw e;
-                }
-                return null;
+                return getCorruptGenericRows(value, e);
             }
+        };
+    }
+
+    private static GenericRow[] getCorruptGenericRows(final String value, final Exception e) {
+        return new GenericRow[]{
+                new GenericRow(new Object[]{
+                        "error:" + e.getClass().getName() + ":" + e.getMessage() + ", data:" + value,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                })
         };
     }
 
@@ -137,8 +181,8 @@ public class ServerDataConverter {
         }
 
         String sessionId;
-        if (result.attrMap.containsKey(GA_SESSION_ID)) {
-            sessionId = result.attrMap.get(GA_SESSION_ID).asText();
+        if (result.attrMap.containsKey(SESSION_ID)) {
+            sessionId = result.attrMap.get(SESSION_ID).asText();
         } else {
             sessionId = String.valueOf(new Date().getTime());
         }
@@ -147,15 +191,12 @@ public class ServerDataConverter {
             sessionNum =  result.attrMap.get(GA_SESSION_NUMBER).asText();
         }
 
-        String eventId = String.format("%s-%s-%s-%s",
+        String eventId = String.format("%s-%s-%s",
                 index,
                 sessionId,
-                sessionNum,
-                clientId
-                );
-
+                sessionNum
+        );
         eventId = checkStringValue(eventId, MAX_STRING_VALUE_LEN - 32);
-
         String gtmId = result.attrMap.get("x-ga-measurement_id").asText();
         String gtmVersion = result.attrMap.get("x-ga-gtm_version").asText();
 
@@ -184,6 +225,7 @@ public class ServerDataConverter {
         String clickstreamEventName = mapEventNameToClickstream(result.eventInfo.eventName);
 
         return new GenericRow(new Object[]{
+                null,
                 gtmId,
                 gtmVersion,
                 eventId,
@@ -200,6 +242,7 @@ public class ServerDataConverter {
                 result.clientHint.clientModel,
                 result.clientHint.clientPlatform,
                 result.clientHint.clientPlatformVersion,
+                result.clientHint.clientBrand,
                 eventParams.toArray(new GenericRow[0]),
                 result.items.toArray(new GenericRow[0]),
                 result.eventItems.toArray(new GenericRow[0]),
@@ -219,7 +262,7 @@ public class ServerDataConverter {
         String pageReferrer = null;
 
         ScreenResolution screenResolution = new ScreenResolution(null, null);
-        ClientHint clientHint = new ClientHint(null, null, null, null);
+        ClientHint clientHint = new ClientHint(null, null, null, null, null);
 
         Map<String, JsonNode> attrMap = new HashMap<>();
         List<GenericRow> items = new ArrayList<>();
@@ -266,7 +309,7 @@ public class ServerDataConverter {
                     break;
                 }
 
-                case "page_referrer": {
+                case GTM_PAGE_REFERRER: {
                     pageReferrer = checkStringValue(attrValue.asText());
                     addValueToParamsMap(attrMap, attrName, attrValue);
                     break;
@@ -306,6 +349,8 @@ public class ServerDataConverter {
         String clientModel = null;
         String clientPlatform = null;
         String clientPlatformVersion = null;
+        String clientBrand = null;
+        List<String> brands = new ArrayList<>();
 
         if (attrValue.hasNonNull(MOBILE)) {
             isClientMobile = attrValue.get(MOBILE).asBoolean(false);
@@ -320,7 +365,21 @@ public class ServerDataConverter {
         if (attrValue.hasNonNull(PLATFORM_VERSION)) {
             clientPlatformVersion = attrValue.get(PLATFORM_VERSION).asText();
         }
-        return new ClientHint(isClientMobile, clientModel, clientPlatform, clientPlatformVersion);
+        if (attrValue.hasNonNull(GTM_BRANDS)) {
+           JsonNode brandsArr = attrValue.get(GTM_BRANDS);
+           if (brandsArr.isArray()) {
+               for (Iterator<JsonNode> els = brandsArr.elements(); els.hasNext();) {
+                   JsonNode brandObj =  els.next();
+                   if (brandObj.hasNonNull(GTM_BRAND)) {
+                       brands.add(brandObj.get(GTM_BRAND).asText());
+                   }
+               }
+           }
+        }
+        if (!brands.isEmpty()) {
+            clientBrand = String.join("|", brands);
+        }
+        return new ClientHint(isClientMobile, clientModel, clientPlatform, clientPlatformVersion, clientBrand);
     }
 
     private static ScreenResolution getScreenResolution(final JsonNode attrValue) {
@@ -344,12 +403,28 @@ public class ServerDataConverter {
             return null;
         }
         String eventName1 = checkStringValue(eventName);
+        return EVENT_NAME_MAP.getOrDefault(eventName1, eventName1);
+    }
 
+    private static String mapPropNameToClickstream(final String gaPropName) {
+        String gaPropName1 = checkStringValue(gaPropName);
+        return PROPS_NAME_MAP.getOrDefault(gaPropName, gaPropName1);
+    }
+
+    private static Map<String, String> createEventNameMap() {
         Map<String, String> eventNameMap = new HashMap<>();
         eventNameMap.put("page_view", EVENT_PAGE_VIEW);
         eventNameMap.put("login", EVENT_PROFILE_SET);
+        return eventNameMap;
+    }
 
-        return eventNameMap.getOrDefault(eventName1, eventName1);
+    private static Map<String, String> createPropNameMap() {
+        Map<String, String> propsNameMap = new HashMap<>();
+        propsNameMap.put(GA_SESSION_ID, SESSION_ID);
+        propsNameMap.put(GTM_PAGE_TITLE, PAGE_TITLE);
+        propsNameMap.put(GTM_PAGE_LOCATION, PAGE_URL);
+        propsNameMap.put(GTM_PAGE_REFERRER,  PROP_PAGE_REFERRER); // _page_referrer
+        return propsNameMap;
     }
 
     private static GenericRow extractUser(final JsonNode userItem) {
@@ -469,18 +544,19 @@ public class ServerDataConverter {
             for (Iterator<String> ait = attrValue.fieldNames(); ait.hasNext(); ) {
                 String fieldName = ait.next();
                 JsonNode fieldValue = attrValue.get(fieldName);
-                attrMap.put(attrName + "." + fieldName, fieldValue);
+                attrMap.put(mapPropNameToClickstream(attrName + "." + fieldName), fieldValue);
             }
         } else if (attrValue.isArray()) {
             int index = 0;
             for (Iterator<JsonNode> eIt = attrValue.elements(); eIt.hasNext(); ) {
                 JsonNode eleValue = eIt.next();
-                attrMap.put(attrName + "." + index, eleValue);
+                attrMap.put(mapPropNameToClickstream(attrName + "." + index), eleValue);
             }
         } else {
-            attrMap.put(attrName, attrValue);
+            attrMap.put(mapPropNameToClickstream(attrName), attrValue);
         }
     }
+
 
     public Dataset<Row> transform(final Dataset<Row> dataset) {
 
@@ -535,6 +611,7 @@ public class ServerDataConverter {
         ArrayType eventItemsType = DataTypes.createArrayType(eventItemType);
 
         StructType dataItemType = DataTypes.createStructType(new StructField[]{
+                DataTypes.createStructField(CORRUPT_RECORD, DataTypes.StringType, true),
                 DataTypes.createStructField(GTM_ID, DataTypes.StringType, true),
                 DataTypes.createStructField(GTM_VERSION, DataTypes.StringType, true),
                 DataTypes.createStructField(EVENT_ID, DataTypes.StringType, true),
@@ -551,6 +628,7 @@ public class ServerDataConverter {
                 DataTypes.createStructField("clientModel", DataTypes.StringType, true),
                 DataTypes.createStructField(GTM_CLIENT_PLATFORM, DataTypes.StringType, true),
                 DataTypes.createStructField(GTM_CLIENT_PLATFORM_VERSION, DataTypes.StringType, true),
+                DataTypes.createStructField(GTM_CLIENT_BRAND, DataTypes.StringType, true),
                 DataTypes.createStructField(EVENT_PARAMS, keyValueType, true),
                 DataTypes.createStructField(ITEMS, itemsType, true),
                 DataTypes.createStructField(EVENT_ITEMS, eventItemsType, true),
@@ -569,7 +647,27 @@ public class ServerDataConverter {
         if (debugLocal) {
             convertedKeyValueDataset.write().mode(SaveMode.Overwrite).json(DEBUG_LOCAL_PATH + "/ServerDataConverter/");
         }
-        return convertedKeyValueDataset;
+        Dataset<Row> okDataset = convertedKeyValueDataset.filter(col(DATA_OUT).getField(CORRUPT_RECORD).isNull());
+        Dataset<Row> corruptDataset = convertedKeyValueDataset.filter(col(DATA_OUT).getField(CORRUPT_RECORD).isNotNull());
+        long corruptDatasetCount = corruptDataset.count();
+        if (corruptDatasetCount > 0) {
+            saveCorruptDataset(corruptDataset, corruptDatasetCount);
+        }
+        return okDataset;
+    }
+
+    private static void saveCorruptDataset(final Dataset<Row> corruptDataset, final long corruptDatasetCount) {
+        log.info(new ETLMetric(corruptDatasetCount, "GMTServerDataConverter corruptDataset").toString());
+        String jobName = System.getProperty(JOB_NAME_PROP);
+        String s3FilePath = System.getProperty(WAREHOUSE_DIR_PROP) + "/etl_gtm_corrupted_json_data";
+        log.info("save corruptedDataset to " + s3FilePath);
+        corruptDataset
+                .withColumn(JOB_NAME_COL, lit(jobName))
+                .write()
+                .partitionBy(JOB_NAME_COL)
+                .option("compression", "gzip")
+                .mode(SaveMode.Append)
+                .json(s3FilePath);
     }
 
     private static class EventInfo {
@@ -603,12 +701,14 @@ public class ServerDataConverter {
         public final String clientModel;
         public final String clientPlatform;
         public final String clientPlatformVersion;
-
-        ClientHint(final Boolean isClientMobile, final String clientModel, final String clientPlatform, final String clientPlatformVersion) {
+        public final String clientBrand;
+        ClientHint(final Boolean isClientMobile, final String clientModel, final String clientPlatform, final String clientPlatformVersion,
+                   final String clientBrand) {
             this.isClientMobile = isClientMobile;
             this.clientModel = clientModel;
             this.clientPlatform = clientPlatform;
             this.clientPlatformVersion = clientPlatformVersion;
+            this.clientBrand = clientBrand;
         }
     }
 

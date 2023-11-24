@@ -27,6 +27,7 @@ import java.util.Map;
 
 import static java.util.Objects.requireNonNull;
 import static org.apache.spark.sql.functions.col;
+import static org.apache.spark.sql.functions.exp;
 import static software.aws.solution.clickstream.ContextUtil.*;
 
 public class GTMServerDataTransformerTest extends BaseSparkTest {
@@ -172,12 +173,27 @@ public class GTMServerDataTransformerTest extends BaseSparkTest {
         Assertions.assertEquals(expectedData1, datasetList.get(0).first().prettyJson());
 
         Dataset<Row> eventDataset = transformer.postTransform(datasetList.get(0));
-
-        String expectedData2 = this.resourceFileAsString("/gtm-server/expected/test_transform_data_event1_post.json");
-        Assertions.assertEquals(expectedData2, eventDataset.first().prettyJson());
+        String expectedDataPost = this.resourceFileAsString("/gtm-server/expected/test_transform_data_event1_post.json");
+        Assertions.assertEquals(expectedDataPost, eventDataset.first().prettyJson());
 
     }
 
+    @Test
+    void test_transform_data_event_brand() throws IOException {
+        // DOWNLOAD_FILE=0 ./gradlew clean test --info --tests software.aws.solution.clickstream.gtm.GTMServerDataTransformerTest.test_transform_data_event_brand
+        System.setProperty(APP_IDS_PROP, "testApp");
+        System.setProperty(PROJECT_ID_PROP, "test_project_id_gtm_server");
+        System.setProperty(DEBUG_LOCAL_PROP, "true");
+        System.setProperty("force.merge", "true");
+
+        Dataset<Row> dataset =
+                spark.read().json(requireNonNull(getClass().getResource("/gtm-server/server-brand.json")).getPath());
+
+        List<Dataset<Row>> datasetList = transformer.transform(dataset);
+
+        String expectedData1 = this.resourceFileAsString("/gtm-server/expected/test_transform_data_brand.json");
+        Assertions.assertEquals(expectedData1, datasetList.get(0).first().prettyJson());
+    }
 
     @Test
     void test_transform_data_event_parameter() throws IOException {

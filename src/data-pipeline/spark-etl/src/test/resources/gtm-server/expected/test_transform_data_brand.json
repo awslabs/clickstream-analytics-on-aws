@@ -1,22 +1,22 @@
 {
-  "event_id" : "4a31fde2533e11dd2b0e7800720f6f86-0-1695260713-2",
-  "event_date" : "2023-09-21",
-  "event_timestamp" : 1695261256542,
+  "event_id" : "43cc3b89d7dfccbc2c906eb125ea25dbbrand-0-1693281535-11",
+  "event_date" : "2023-08-29",
+  "event_timestamp" : 1693281865635,
   "event_previous_timestamp" : null,
-  "event_name" : "PDP Clicks",
+  "event_name" : "_profile_set",
   "event_value_in_usd" : null,
   "event_bundle_sequence_id" : null,
-  "ingest_timestamp" : 1695261266814,
+  "ingest_timestamp" : 1693281865000,
   "device" : {
-    "mobile_brand_name" : null,
+    "mobile_brand_name" : "Chromium|Not)A;Brand|Microsoft Edge",
     "mobile_model_name" : null,
     "manufacturer" : null,
-    "screen_width" : 428,
-    "screen_height" : 926,
+    "screen_width" : 3440,
+    "screen_height" : 1440,
     "carrier" : null,
     "network_type" : null,
     "operating_system_version" : null,
-    "operating_system" : null,
+    "operating_system" : "\"macOS\"",
     "ua_browser" : null,
     "ua_browser_version" : null,
     "ua_os" : null,
@@ -25,7 +25,7 @@
     "ua_device_category" : null,
     "system_language" : "en-us",
     "time_zone_offset_seconds" : null,
-    "vendor_id" : "iKnHPfmF/8zea3TUOsTqbFpmAmhkTiNVL6Awhe5b43k=.1695257753",
+    "vendor_id" : "rzKifeYdYvmoWzeYcdcv9CyGY9NAPpL4vm7QxoxTPnM=.1690769179",
     "advertising_id" : null,
     "host_name" : null,
     "viewport_width" : null,
@@ -46,16 +46,21 @@
     "source" : null
   },
   "app_info" : {
-    "app_id" : "testAllAppId1",
-    "id" : "G-000000002",
+    "app_id" : "brandAppId1",
+    "id" : "G-000000003",
     "install_source" : null,
-    "version" : "45je39i0",
+    "version" : "45je38n0",
     "sdk_version" : null,
     "sdk_name" : "GTM"
   },
-  "platform" : null,
+  "platform" : "\"macOS\"",
   "project_id" : "test_project_id_gtm_server",
   "items" : [ ],
-  "user_pseudo_id" : "iKnHPfmF/8zea3TUOsTqbFpmAmhkTiNVL6Awhe5b43k=.1695257753",
-  "user_id" : null
+  "user_pseudo_id" : "rzKifeYdYvmoWzeYcdcv9CyGY9NAPpL4vm7QxoxTPnM=.1690769179",
+  "user_id" : "0eb41e46-2373-4883-8daf-e1975ccb3821",
+  "ua" : "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36 Edg/116.0.1938.62",
+  "geo_for_enrich" : {
+    "ip" : "72.21.198.67",
+    "locale" : null
+  }
 }

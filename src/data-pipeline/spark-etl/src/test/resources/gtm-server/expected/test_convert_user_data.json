@@ -15,9 +15,10 @@
   "ua" : null,
   "uri" : "/collect?appId=GMTServer",
   "dataOut" : {
+    "_corrupt_record" : null,
     "gtmId" : "G-000000003",
     "gtmVersion" : "45je38n0",
-    "event_id" : "0-1693281535-11-807802863.1690769179",
+    "event_id" : "0-1693281535-11",
     "user_id" : "0eb41e46-2373-4883-8daf-e1975ccb3821",
     "event_name" : "_profile_set",
     "ip" : "72.21.198.67",
@@ -31,6 +32,7 @@
     "clientModel" : null,
     "clientPlatform" : "\"macOS\"",
     "clientPlatformVersion" : null,
+    "clientBrand" : "Chromium|Not)A;Brand|Microsoft Edge",
     "eventParams" : [ {
       "key" : "lastName",
       "value" : {
@@ -46,14 +48,6 @@
         "float_value" : null,
         "int_value" : null,
         "string_value" : ""
-      }
-    }, {
-      "key" : "page_title",
-      "value" : {
-        "double_value" : null,
-        "float_value" : null,
-        "int_value" : null,
-        "string_value" : "Retail Demo Store"
       }
     }, {
       "key" : "origin",
@@ -72,20 +66,20 @@
         "string_value" : "fEj96vkOHt5jN-csBLEy_A"
       }
     }, {
+      "key" : "_page_title",
+      "value" : {
+        "double_value" : null,
+        "float_value" : null,
+        "int_value" : null,
+        "string_value" : "Retail Demo Store"
+      }
+    }, {
       "key" : "engagement_time_msec",
       "value" : {
         "double_value" : null,
         "float_value" : null,
         "int_value" : 8129,
         "string_value" : null
-      }
-    }, {
-      "key" : "ga_session_id",
-      "value" : {
-        "double_value" : null,
-        "float_value" : null,
-        "int_value" : null,
-        "string_value" : "1693281535"
       }
     }, {
       "key" : "x-ga-system_properties.ee",
@@ -184,20 +178,20 @@
         "string_value" : "[{\"brand\":\"Chromium\",\"version\":\"116\"},{\"brand\":\"Not)A;Brand\",\"version\":\"24\"},{\"brand\":\"Microsoft Edge\",\"version\":\"116\"}]"
       }
     }, {
+      "key" : "_session_id",
+      "value" : {
+        "double_value" : null,
+        "float_value" : null,
+        "int_value" : null,
+        "string_value" : "1693281535"
+      }
+    }, {
       "key" : "firstName",
       "value" : {
         "double_value" : null,
         "float_value" : null,
         "int_value" : null,
         "string_value" : ""
-      }
-    }, {
-      "key" : "page_location",
-      "value" : {
-        "double_value" : null,
-        "float_value" : null,
-        "int_value" : null,
-        "string_value" : "http://d3mpqdtjegq8im.cloudfront.net/"
       }
     }, {
       "key" : "TestBy",
@@ -214,6 +208,14 @@
         "float_value" : null,
         "int_value" : null,
         "string_value" : "2"
+      }
+    }, {
+      "key" : "_page_url",
+      "value" : {
+        "double_value" : null,
+        "float_value" : null,
+        "int_value" : null,
+        "string_value" : "http://d3mpqdtjegq8im.cloudfront.net/"
       }
     }, {
       "key" : "x-ga-gtm_version",
