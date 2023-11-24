@@ -173,7 +173,6 @@ const CreateUser: React.FC<CreateUserProps> = (props: CreateUserProps) => {
                 ) as IUserRole[],
               };
             });
-            console.log(detail.selectedOptions);
           }}
           selectedOptions={selectedRoleOptions}
         />

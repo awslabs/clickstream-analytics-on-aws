@@ -103,7 +103,6 @@ const UserList: React.FC = () => {
         });
       }
     } else {
-      console.log('currentValue', currentValue);
       for (const v of currentValue) {
         options.push({
           value: v.value,
