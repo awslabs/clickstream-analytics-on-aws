@@ -24,7 +24,6 @@ import { logger } from '../../common/powertools';
 import { isEmpty } from '../../common/utils';
 
 const issuerInput = process.env.ISSUER ?? '';
-const authorizerTable = process.env.AUTHORIZER_TABLE ?? '';
 
 const denyResult: APIGatewayAuthorizerResult = {
   principalId: 'anonymous',
@@ -46,7 +45,6 @@ const denyResult: APIGatewayAuthorizerResult = {
 export const handler: APIGatewayTokenAuthorizerHandler = async (event: APIGatewayTokenAuthorizerEvent, context: Context)=> {
   const authorizer = new JWTAuthorizer({
     issuer: issuerInput,
-    dynamodbTableName: authorizerTable,
   });
   try {
     const authResult = await authorizer.auth(event.authorizationToken);

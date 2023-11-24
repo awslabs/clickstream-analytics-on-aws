@@ -12,7 +12,7 @@
  */
 
 import { join } from 'path';
-import { Aspects, Aws, CfnOutput, CfnResource, DockerImage, Duration, Fn, IAspect, RemovalPolicy, Stack, StackProps, aws_dynamodb } from 'aws-cdk-lib';
+import { Aspects, Aws, CfnOutput, CfnResource, DockerImage, Duration, Fn, IAspect, Stack, StackProps } from 'aws-cdk-lib';
 import { IAuthorizer, TokenAuthorizer } from 'aws-cdk-lib/aws-apigateway';
 import { DnsValidatedCertificate } from 'aws-cdk-lib/aws-certificatemanager';
 import {
@@ -30,7 +30,6 @@ import {
 } from 'aws-cdk-lib/aws-cloudfront';
 import { AddBehaviorOptions } from 'aws-cdk-lib/aws-cloudfront/lib/distribution';
 import { FunctionAssociation } from 'aws-cdk-lib/aws-cloudfront/lib/function';
-import { TableEncryption } from 'aws-cdk-lib/aws-dynamodb';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { HostedZone } from 'aws-cdk-lib/aws-route53';
@@ -353,32 +352,18 @@ export class CloudFrontControlPlaneStack extends Stack {
   }
 
   private createAuthorizer(oidcInfo: OIDCInfo): TokenAuthorizer {
-    const authorizerTable = new aws_dynamodb.Table(this, 'AuthorizerCache', {
-      partitionKey: {
-        name: 'id',
-        type: aws_dynamodb.AttributeType.STRING,
-      },
-      billingMode: aws_dynamodb.BillingMode.PAY_PER_REQUEST,
-      removalPolicy: RemovalPolicy.DESTROY,
-      pointInTimeRecovery: true,
-      encryption: TableEncryption.AWS_MANAGED,
-      timeToLiveAttribute: 'ttl',
-    });
-
     const authFunction = new SolutionNodejsFunction(this, 'AuthorizerFunction', {
       runtime: Runtime.NODEJS_18_X,
       handler: 'handler',
       entry: './src/control-plane/auth/index.ts',
       environment: {
         ISSUER: oidcInfo.issuer,
-        AUTHORIZER_TABLE: authorizerTable.tableName,
         ... POWERTOOLS_ENVS,
       },
       timeout: Duration.seconds(15),
       memorySize: 512,
       logRetention: RetentionDays.TEN_YEARS,
     });
-    authorizerTable.grantReadWriteData(authFunction);
     addCfnNagSuppressRules(authFunction.node.defaultChild as CfnResource, [
       ...rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions('AuthorizerFunction'),
     ]);
