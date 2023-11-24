@@ -142,7 +142,7 @@ const ExploreDateRangePicker: React.FC<IExploreDateRangePickerProps> = (
         onChange={({ detail }) => {
           setDateRangeValue(detail.value as DateRangePickerProps.Value);
         }}
-        value={dateRangeValue ?? null}
+        value={dateRangeValue}
         dateOnly
         relativeOptions={relativeOptions}
         isValidRange={isValidRange}

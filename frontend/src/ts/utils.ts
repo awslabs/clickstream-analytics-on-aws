@@ -11,7 +11,10 @@
  *  and limitations under the License.
  */
 
-import { SelectProps } from '@cloudscape-design/components';
+import {
+  DateRangePickerProps,
+  SelectProps,
+} from '@cloudscape-design/components';
 import { isEqual } from 'lodash';
 import { getLngFromLocalStorage } from 'pages/analytics/analytics-utils';
 import {
@@ -404,4 +407,16 @@ export const getLocaleLngDescription = (description: {
 }) => {
   const localeLng = getLngFromLocalStorage();
   return description[localeLng];
+};
+
+export const getAbsoluteStartEndRange = () => {
+  const endDate = new Date();
+  const startDate = new Date();
+  startDate.setDate(startDate.getDate() - 7);
+  endDate.setDate(endDate.getDate());
+  return {
+    type: 'absolute',
+    startDate: startDate.toISOString().split('T')[0],
+    endDate: endDate.toISOString().split('T')[0],
+  } as DateRangePickerProps.AbsoluteValue;
 };

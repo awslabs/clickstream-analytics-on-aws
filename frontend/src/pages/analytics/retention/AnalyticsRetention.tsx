@@ -62,6 +62,7 @@ import {
   defaultStr,
   getEventParameters,
   getUserInfoFromLocalStorage,
+  getAbsoluteStartEndRange,
 } from 'ts/utils';
 import {
   getDashboardCreateParameters,
@@ -75,9 +76,7 @@ import {
   validRetentionAnalyticsItem,
 } from '../analytics-utils';
 import AttributeGroup from '../comps/AttributeGroup';
-import ExploreDateRangePicker, {
-  DEFAULT_WEEK_RANGE,
-} from '../comps/ExploreDateRangePicker';
+import ExploreDateRangePicker from '../comps/ExploreDateRangePicker';
 import ExploreEmbedFrame from '../comps/ExploreEmbedFrame';
 import SaveToDashboardModal from '../comps/SelectDashboardModal';
 
@@ -149,7 +148,7 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
   );
 
   const [dateRangeValue, setDateRangeValue] =
-    useState<DateRangePickerProps.Value>(DEFAULT_WEEK_RANGE);
+    useState<DateRangePickerProps.Value>(getAbsoluteStartEndRange());
 
   const [timeGranularity, setTimeGranularity] = useState<SelectProps.Option>({
     value: ExploreGroupColumn.DAY,
@@ -167,7 +166,7 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
       type: 'resetFilterData',
       presetParameters,
     });
-    setDateRangeValue(DEFAULT_WEEK_RANGE);
+    setDateRangeValue(getAbsoluteStartEndRange());
     setExploreEmbedUrl('');
     setTimeGranularity({
       value: ExploreGroupColumn.DAY,
