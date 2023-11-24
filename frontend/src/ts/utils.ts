@@ -449,12 +449,3 @@ export const isAnalystAuthorRole = (roles: IUserRole[] | undefined) => {
     (role) => role === IUserRole.ANALYST || role === IUserRole.ADMIN
   );
 };
-
-export const isOperatorRole = (roles: IUserRole[] | undefined) => {
-  if (!roles) {
-    return false;
-  }
-  return (
-    roles.some((role) => role === IUserRole.OPERATOR) && !isAdminRole(roles)
-  );
-};

@@ -165,7 +165,7 @@ const UserList: React.FC = () => {
         editingCell: (item: IUserTableItem, { setValue, currentValue }: any) =>
           renderEditRoleCell(item, setValue, currentValue),
       },
-      cell: (e: { roles: IUserRole[] }) => {
+      cell: (e: IUserTableItem) => {
         return getRolesLabel(e.roles);
       },
     },
