@@ -15,9 +15,10 @@
   "ua" : null,
   "uri" : "/collect?appId=testGTM",
   "dataOut" : {
+    "_corrupt_record" : null,
     "gtmId" : "G-000000001",
     "gtmVersion" : "45je3820",
-    "event_id" : "0-1691480516-2-807802863.1690769179",
+    "event_id" : "0-1691480516-2",
     "user_id" : null,
     "event_name" : "_page_view",
     "ip" : "52.94.133.137",
@@ -31,21 +32,22 @@
     "clientModel" : null,
     "clientPlatform" : "\"macOS\"",
     "clientPlatformVersion" : null,
+    "clientBrand" : "Not/A)Brand|Microsoft Edge|Chromium",
     "eventParams" : [ {
-      "key" : "page_title",
-      "value" : {
-        "double_value" : null,
-        "float_value" : null,
-        "int_value" : null,
-        "string_value" : "Retail Demo Store"
-      }
-    }, {
       "key" : "ga_session_number",
       "value" : {
         "double_value" : null,
         "float_value" : null,
         "int_value" : 2,
         "string_value" : null
+      }
+    }, {
+      "key" : "_page_title",
+      "value" : {
+        "double_value" : null,
+        "float_value" : null,
+        "int_value" : null,
+        "string_value" : "Retail Demo Store"
       }
     }, {
       "key" : "screen_resolution",
@@ -72,12 +74,20 @@
         "string_value" : "[{\"brand\":\"Not/A)Brand\",\"version\":\"99\"},{\"brand\":\"Microsoft Edge\",\"version\":\"115\"},{\"brand\":\"Chromium\",\"version\":\"115\"}]"
       }
     }, {
-      "key" : "page_location",
+      "key" : "_session_id",
       "value" : {
         "double_value" : null,
         "float_value" : null,
         "int_value" : null,
-        "string_value" : "http://d3mpqdtjegq8im.cloudfront.net/?gtm_debug=1691481790745"
+        "string_value" : "1691480516"
+      }
+    }, {
+      "key" : "_page_referrer",
+      "value" : {
+        "double_value" : null,
+        "float_value" : null,
+        "int_value" : null,
+        "string_value" : "https://tagassistant.google.com/"
       }
     }, {
       "key" : "x-ga-system_properties.dbg",
@@ -96,12 +106,12 @@
         "string_value" : "2"
       }
     }, {
-      "key" : "ga_session_id",
+      "key" : "_page_url",
       "value" : {
         "double_value" : null,
         "float_value" : null,
         "int_value" : null,
-        "string_value" : "1691480516"
+        "string_value" : "http://d3mpqdtjegq8im.cloudfront.net/?gtm_debug=1691481790745"
       }
     }, {
       "key" : "x-ga-gtm_version",
@@ -118,14 +128,6 @@
         "float_value" : null,
         "int_value" : null,
         "string_value" : "1"
-      }
-    }, {
-      "key" : "page_referrer",
-      "value" : {
-        "double_value" : null,
-        "float_value" : null,
-        "int_value" : null,
-        "string_value" : "https://tagassistant.google.com/"
       }
     }, {
       "key" : "x-ga-js_client_id",

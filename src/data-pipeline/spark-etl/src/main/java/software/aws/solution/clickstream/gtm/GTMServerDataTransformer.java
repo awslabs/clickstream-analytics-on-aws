@@ -48,6 +48,7 @@ import static software.aws.solution.clickstream.DatasetUtil.APP_ID;
 import static software.aws.solution.clickstream.DatasetUtil.APP_INFO;
 import static software.aws.solution.clickstream.DatasetUtil.CHANNEL;
 import static software.aws.solution.clickstream.DatasetUtil.CLIENT_ID;
+import static software.aws.solution.clickstream.DatasetUtil.GTM_CLIENT_BRAND;
 import static software.aws.solution.clickstream.DatasetUtil.GTM_CLIENT_PLATFORM;
 import static software.aws.solution.clickstream.DatasetUtil.GTM_CLIENT_PLATFORM_VERSION;
 import static software.aws.solution.clickstream.DatasetUtil.COL_PAGE_REFERER;
@@ -154,7 +155,7 @@ public class GTMServerDataTransformer {
                 .withColumn("event_bundle_sequence_id", lit(null).cast(DataTypes.LongType))
                 .withColumn(INGEST_TIMESTAMP, col("ingest_time"))
                 .withColumn("device", struct(
-                        lit(null).cast(DataTypes.StringType).alias("mobile_brand_name"),
+                        dataCol.getField(GTM_CLIENT_BRAND).cast(DataTypes.StringType).alias("mobile_brand_name"),
                         lit(null).cast(DataTypes.StringType).alias("mobile_model_name"),
                         lit(null).cast(DataTypes.StringType).alias("manufacturer"),
                         dataCol.getField(GTM_SCREEN_WIDTH).cast(DataTypes.LongType).alias("screen_width"),

@@ -507,7 +507,7 @@ class ETLRunnerTest extends BaseSparkTest {
         String expectedData = this.resourceFileAsString("/gtm-server/expected/test_etl_runner_data_event.json");
         Assertions.assertEquals(expectedData, eventDataset
                 .filter(col("event_id")
-                        .equalTo("43cc3b89d7dfccbc2c906eb125ea25db-0-1693281535-11-807802863.1690769179"))
+                        .equalTo("43cc3b89d7dfccbc2c906eb125ea25db-0-1693281535-11"))
                 .first().prettyJson());
 
     }

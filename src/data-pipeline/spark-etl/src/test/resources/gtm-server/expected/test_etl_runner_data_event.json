@@ -6,6 +6,7 @@
     "version" : "45je38n0"
   },
   "device" : {
+    "mobile_brand_name" : "Chromium|Not)A;Brand|Microsoft Edge",
     "operating_system" : "\"macOS\"",
     "operating_system_version" : null,
     "screen_height" : 1440,
@@ -19,7 +20,7 @@
     "vendor_id" : "rzKifeYdYvmoWzeYcdcv9CyGY9NAPpL4vm7QxoxTPnM=.1690769179"
   },
   "event_date" : "2023-08-29",
-  "event_id" : "43cc3b89d7dfccbc2c906eb125ea25db-0-1693281535-11-807802863.1690769179",
+  "event_id" : "43cc3b89d7dfccbc2c906eb125ea25db-0-1693281535-11",
   "event_name" : "_profile_set",
   "event_timestamp" : 1693281865635,
   "geo" : {
