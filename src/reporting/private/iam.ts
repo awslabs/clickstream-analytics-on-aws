@@ -43,6 +43,8 @@ export function createRoleForQuicksightCustomResourceLambda(
       actions: [
         'quicksight:DescribeDataSource',
         'quicksight:PassDataSource',
+        'quicksight:DescribeDataSourcePermissions',
+        'quicksight:UpdateDataSourcePermissions',
       ],
     }),
 

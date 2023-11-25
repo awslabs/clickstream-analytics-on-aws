@@ -358,6 +358,8 @@ describe('DataReportingQuickSightStack resource test', () => {
             Action: [
               'quicksight:DescribeDataSource',
               'quicksight:PassDataSource',
+              'quicksight:DescribeDataSourcePermissions',
+              'quicksight:UpdateDataSourcePermissions',
             ],
             Effect: 'Allow',
             Resource: {
@@ -819,21 +821,6 @@ describe('DataReportingQuickSightStack resource test', () => {
         ],
       ],
     },
-    Permissions: [
-      {
-        Actions: [
-          'quicksight:UpdateDataSourcePermissions',
-          'quicksight:DescribeDataSourcePermissions',
-          'quicksight:PassDataSource',
-          'quicksight:DescribeDataSource',
-          'quicksight:DeleteDataSource',
-          'quicksight:UpdateDataSource',
-        ],
-        Principal: {
-          Ref: 'QuickSightOwnerPrincipalParam',
-        },
-      },
-    ],
     Type: 'REDSHIFT',
     VpcConnectionProperties: {
       VpcConnectionArn: {
