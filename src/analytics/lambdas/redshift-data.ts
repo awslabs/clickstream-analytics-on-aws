@@ -40,7 +40,7 @@ export function getRedshiftClient(roleArn: string) {
   });
 }
 
-const GET_STATUS_TIMEOUT = 150; // second
+const GET_STATUS_TIMEOUT = parseInt(process.env.REDSHIFT_DATA_WAIT_TIMEOUT ?? '180', 10); // second
 
 export const executeStatements = async (client: RedshiftDataClient, sqlStatements: string[],
   serverlessRedshiftProps?: ExistingRedshiftServerlessCustomProps, provisionedRedshiftProps?: ProvisionedRedshiftProps,
@@ -101,18 +101,20 @@ export const executeStatementsWithWait = async (client: RedshiftDataClient, sqlS
     Id: queryId,
   });
   let response = await client.send(checkParams);
-  logger.info(`Get statement status: ${response.Status}`, JSON.stringify(response));
+  logger.info(`Got statement query '${queryId}' with status: ${response.Status} after submitting it`);
   let count = 0;
   while (response.Status != StatusString.FINISHED && response.Status != StatusString.FAILED && count < GET_STATUS_TIMEOUT) {
     await Sleep(1000);
     count++;
     response = await client.send(checkParams);
-    logger.info(`Get statement status: ${response.Status}`, JSON.stringify(response));
+    logger.info(`Got statement query '${queryId}' with status: ${response.Status} in ${count} seconds`);
   }
   if (response.Status == StatusString.FAILED) {
-    logger.error('Error: '+ response.Status, JSON.stringify(response));
-    logger.info('executeStatementsWithWait: SQL:' + sqlStatements.join('\n'));
-    throw new Error(JSON.stringify(response));
+    logger.error(`Got statement query '${queryId}' with status: ${response.Status} in ${count} seconds`, { response });
+    throw new Error(`Statement query '${queryId}' with status ${response.Status}`);
+  } else if (count == GET_STATUS_TIMEOUT) {
+    logger.error('Wait status timeout: '+ response.Status, { response });
+    throw new Error(`Wait statement query '${queryId}' with status ${response.Status} timeout in ${GET_STATUS_TIMEOUT} seconds`);
   }
   return queryId;
 };
@@ -140,7 +142,7 @@ export const getStatementResult = async (client: RedshiftDataClient, queryId: st
     Records: aggregatedRecords,
     TotalNumRows: totalNumRows,
   };
-  logger.info(`Get statement result: ${finalResponse.TotalNumRows}`, JSON.stringify(finalResponse));
+  logger.info(`Got statement result: ${finalResponse.TotalNumRows}`, { finalResponse });
   return finalResponse;
 };
 
@@ -151,9 +153,9 @@ export const describeStatement = async (client: RedshiftDataClient, queryId: str
   try {
     const response = await client.send(params);
     if (response.Status == StatusString.FAILED) {
-      logger.error(`Fail to get status of executing statement[s]: ${response.Status}`, JSON.stringify(response));
+      logger.error(`Failed to get status of executing statement[s]: ${response.Status}`);
     } else {
-      logger.info(`Get status of executing statement[s]: ${response.Status}`, JSON.stringify(response));
+      logger.info(`Got status of executing statement[s]: ${response.Status}`, { response });
     }
     return response;
   } catch (err) {
