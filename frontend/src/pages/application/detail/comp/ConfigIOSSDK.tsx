@@ -32,8 +32,8 @@ import {
   TEMPLATE_SERVER_ENDPOINT,
   TEMPLATE_APP_ID,
   CLICKSTREAM_IOS_REPO_LINK,
-  buildSDKDocumentLink,
 } from 'ts/guideConst';
+import { buildDocumentLink } from 'ts/url';
 import { alertMsg, generateFileDownloadLink } from 'ts/utils';
 
 interface ConfigSDKProps {
@@ -146,7 +146,11 @@ const ConfigIOSSDK: React.FC<ConfigSDKProps> = (props: ConfigSDKProps) => {
             sdkType: 'iOS',
           })}
           <Link
-            href={buildSDKDocumentLink(i18n.language, '/sdk-manual/swift')}
+            href={buildDocumentLink(
+              i18n.language,
+              '/swift-sdk.html',
+              '/sdk-manual/swift'
+            )}
             external
           >
             {t('application:sdkGuide.devGuide')}
