@@ -14,22 +14,27 @@
 const fs = require('fs');
 const path = require('path');
 
-function copyDirectory(src, dest) {
-    fs.mkdirSync(dest, { recursive: true });
-    const entries = fs.readdirSync(src, { withFileTypes: true });
-    for (let entry of entries) {
-        const srcPath = path.join(src, entry.name);
-        const destPath = path.join(dest, entry.name);
-        if (entry.isDirectory()) {
-            copyDirectory(srcPath, destPath);
-        } else {
-            fs.copyFileSync(srcPath, destPath);
+async function copyDirectory(src, dest) {
+    try {
+        await fs.promises.mkdir(dest, { recursive: true });
+        const entries = await fs.promises.readdir(src, { withFileTypes: true });
+        
+        for (let entry of entries) {
+            const srcPath = path.join(src, entry.name);
+            const destPath = path.join(dest, entry.name);
+            
+            if (entry.isDirectory()) {
+                await copyDirectory(srcPath, destPath);
+            } else {
+                await fs.promises.copyFile(srcPath, destPath);
+            }
         }
+    } catch (err) {
+        console.error('error:', err);
     }
 }
 
 const sourceDir = './';
-// 目标目录路径
-const targetDir = '../control-plane/backend/lambda/api';
-// 调用函数以复制目录
+const targetDir = '../control-plane/backend/lambda/api/node_modules/@clickstream/base-lib';
+
 copyDirectory(sourceDir, targetDir);
