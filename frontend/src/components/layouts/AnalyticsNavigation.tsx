@@ -16,7 +16,7 @@ import ExtendIcon from 'components/common/ExtendIcon';
 import { UserContext } from 'context/UserContext';
 import React, { useContext, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { ANALYTICS_NAV_STATUS } from 'ts/const';
 import {
   defaultStr,
@@ -90,7 +90,7 @@ const AnalyticsNavigation: React.FC<INavigationProps> = (
             title={defaultStr(item.text)}
             aria-labelledby={defaultStr(item.text)}
           >
-            <a href={item.href} aria-labelledby={defaultStr(item.text)}>
+            <Link to={item.href} aria-labelledby={defaultStr(item.text)}>
               <span className="icon" aria-labelledby={defaultStr(item.text)}>
                 {item.icon}
               </span>
@@ -99,7 +99,7 @@ const AnalyticsNavigation: React.FC<INavigationProps> = (
                   {item.text}
                 </span>
               )}
-            </a>
+            </Link>
           </li>
         ))}
       </ul>
