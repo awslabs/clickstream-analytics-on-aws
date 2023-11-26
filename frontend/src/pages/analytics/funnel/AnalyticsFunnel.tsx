@@ -76,6 +76,7 @@ import {
   getLngFromLocalStorage,
   getGroupCondition,
   validMultipleEventAnalyticsItems,
+  validateFilterConditions,
 } from '../analytics-utils';
 import AttributeGroup from '../comps/AttributeGroup';
 import ExploreDateRangePicker from '../comps/ExploreDateRangePicker';
@@ -281,6 +282,57 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
     return body;
   };
 
+  const validateEventSelection = () => {
+    if (
+      eventDataState.length === 0 ||
+      !validMultipleEventAnalyticsItems(eventDataState)
+    ) {
+      dispatch?.({
+        type: StateActionType.SHOW_EVENT_VALID_ERROR,
+      });
+      return false;
+    }
+    if (eventDataState.length < 2) {
+      dispatch?.({
+        type: StateActionType.HIDE_EVENT_VALID_ERROR,
+      });
+      alertMsg(t('analytics:valid.selectTwoEvent'), 'error');
+      return false;
+    }
+    dispatch?.({
+      type: StateActionType.HIDE_EVENT_VALID_ERROR,
+    });
+    return true;
+  };
+
+  const validateFilterSelection = () => {
+    if (
+      filterOptionData.data.length <= 0 ||
+      (filterOptionData.data.length === 1 &&
+        !filterOptionData.data[0]?.conditionOption)
+    ) {
+      return true;
+    } else {
+      dispatch?.({
+        type: StateActionType.VALIDATE_FILTER_CONDITIONS,
+        payload: filterOptionData.data,
+      });
+      const {
+        hasValidConditionOption,
+        hasValidConditionOperator,
+        hasValidConditionValue,
+      } = validateFilterConditions(filterOptionData.data);
+      if (
+        !hasValidConditionOption ||
+        !hasValidConditionOperator ||
+        !hasValidConditionValue
+      ) {
+        return false;
+      }
+      return true;
+    }
+  };
+
   const clickPreview = async () => {
     if (
       eventDataState.length === 0 ||
@@ -288,6 +340,7 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
     ) {
       return;
     }
+
     try {
       const body = getFunnelRequest(ExploreRequestAction.PREVIEW);
       if (!body) {
@@ -581,22 +634,7 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
             variant="primary"
             iconName="search"
             onClick={() => {
-              if (
-                eventDataState.length === 0 ||
-                !validMultipleEventAnalyticsItems(eventDataState)
-              ) {
-                dispatch?.({
-                  type: StateActionType.SHOW_EVENT_VALID_ERROR,
-                });
-              } else if (eventDataState.length < 2) {
-                dispatch?.({
-                  type: StateActionType.HIDE_EVENT_VALID_ERROR,
-                });
-                alertMsg(t('analytics:valid.selectTwoEvent'), 'error');
-              } else {
-                dispatch?.({
-                  type: StateActionType.HIDE_EVENT_VALID_ERROR,
-                });
+              if (validateEventSelection() && validateFilterSelection()) {
                 clickPreview();
               }
             }}

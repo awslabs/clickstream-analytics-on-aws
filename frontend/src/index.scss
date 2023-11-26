@@ -1144,3 +1144,18 @@ ul.menu-list li.checkbox-item {
   gap: 4px;
   color: #d91515;
 }
+
+.clickstream-link-style {
+  a {
+    color: #0972d3;
+    -webkit-font-smoothing: auto;
+    text-decoration-color: initial;
+    text-decoration-line: underline;
+    line-height: 22px;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.25em;
+    &:hover {
+      color: #12305d;
+    }
+  }
+}

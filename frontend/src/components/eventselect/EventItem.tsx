@@ -35,6 +35,7 @@ interface EventItemProps {
   categories: CategoryItemType[];
   loading?: boolean;
   disabled?: boolean;
+  disableValidate?: boolean;
 }
 
 const EventItem: React.FC<EventItemProps> = (props: EventItemProps) => {
@@ -51,6 +52,7 @@ const EventItem: React.FC<EventItemProps> = (props: EventItemProps) => {
     categories,
     loading,
     disabled,
+    disableValidate,
   } = props;
   const { t } = useTranslation();
   const state = useContext(StateContext);
@@ -123,7 +125,8 @@ const EventItem: React.FC<EventItemProps> = (props: EventItemProps) => {
           {categoryOption?.label && showMouseoverTitle && (
             <div className="custom-popover">{categoryOption?.label}</div>
           )}
-          {!showDropdown &&
+          {!disableValidate &&
+            !showDropdown &&
             !categoryOption &&
             ((type === 'attribute' && state?.showAttributeError) ||
               (type === 'event' && state?.showEventError)) && (
