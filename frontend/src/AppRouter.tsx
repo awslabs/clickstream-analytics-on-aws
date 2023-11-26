@@ -38,7 +38,7 @@ import React, { Suspense, useContext, useEffect } from 'react';
 import { AuthContextProps } from 'react-oidc-context';
 import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import { IUserRole } from 'ts/const';
-import { getUserInfoFromLocalStorage } from 'ts/utils';
+import { getIntersectArrays, getUserInfoFromLocalStorage } from 'ts/utils';
 import Home from './pages/home/Home';
 
 interface LoginCallbackProps {
@@ -64,7 +64,7 @@ const LoginCallback: React.FC<LoginCallbackProps> = (
     const { success, data }: ApiResponse<IUser> = await getUserDetails(
       auth.user?.profile.email ?? ''
     );
-    if (success && ANALYTICS_ROLE.includes(data.role)) {
+    if (success && getIntersectArrays(ANALYTICS_ROLE, data.roles).length > 0) {
       gotoAnalyticsPage();
     } else {
       gotoBasePage();
@@ -74,7 +74,9 @@ const LoginCallback: React.FC<LoginCallbackProps> = (
   useEffect(() => {
     if (!currentUser) {
       getUserInfo();
-    } else if (ANALYTICS_ROLE.includes(currentUser.role)) {
+    } else if (
+      getIntersectArrays(ANALYTICS_ROLE, currentUser.roles).length > 0
+    ) {
       gotoAnalyticsPage();
     } else {
       gotoBasePage();

@@ -278,7 +278,8 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
     if (
       !isPositiveInteger(pipelineInfo.ingestionServer.size.serverMax) ||
       pipelineInfo.ingestionServer.size.serverMax <
-        pipelineInfo.ingestionServer.size.serverMin
+        pipelineInfo.ingestionServer.size.serverMin ||
+      pipelineInfo.ingestionServer.size.serverMax === 1
     ) {
       setMaxCapacityError(true);
       return false;
@@ -1145,6 +1146,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                     ...prev,
                     selectedSDK: sdk,
                     dataCollectionSDK: defaultStr(sdk.value),
+                    selectedTransformPlugins: [],
                   };
                 });
               }}

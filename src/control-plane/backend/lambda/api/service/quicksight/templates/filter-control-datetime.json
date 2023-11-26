@@ -3,6 +3,21 @@
       "FilterControlId": "",
       "Title": "",
       "SourceFilterId": "",
-      "Type": "DATE_RANGE"
+      "Type": "DATE_RANGE",
+      "DisplayOptions": {
+        "TitleOptions": {
+            "Visibility": "VISIBLE",
+            "FontConfiguration": {
+                "FontSize": {
+                    "Relative": "MEDIUM"
+                }
+            }
+        },
+        "DateTimeFormat": "YYYY/MM/DD HH:mm:ss",
+        "InfoIconLabelOptions": {
+            "Visibility": "VISIBLE",
+            "InfoIconText": ""
+        }
+      }
   }
 }

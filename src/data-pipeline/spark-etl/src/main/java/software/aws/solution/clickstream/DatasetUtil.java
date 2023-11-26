@@ -117,7 +117,10 @@ public final class DatasetUtil {
     public static final String PLATFORM_VERSION = "platform_version";
     public static final String ITEM_ID = "item_id";
     public static final String PRICE = "price";
-    public static final String CLIENT_ID = "clientId";
+    public static final String CLIENT_ID = "client_id";
+    public static final String GA_SESSION_ID = "ga_session_id";
+    public static final String GA_SESSION_NUMBER = "ga_session_number";
+    public static final String X_GA_JS_CLIENT_ID = "x-ga-js_client_id";
     public static final String GTM_SCREEN_WIDTH = "screenWidth";
     public static final String GTM_SCREEN_HEIGHT = "screenHeight";
     public static final String GTM_CLIENT_PLATFORM_VERSION = "clientPlatformVersion";
@@ -154,6 +157,16 @@ public final class DatasetUtil {
     public static final String TABLE_NAME_ETL_GTM_USER_REFERRER = "etl_gtm_user_referrer";
     public static final String TABLE_NAME_ETL_MERGE_STATE = "etl_merge_state";
     public static final String TABLE_VERSION_SUFFIX_V1 = "_v1";
+    public static final String GTM_PAGE_TITLE = "page_title";
+    public static final String GTM_PAGE_LOCATION = "page_location";
+    public static final String GTM_PAGE_REFERRER = "page_referrer";
+    public static final String SESSION_ID = "_session_id";
+    public static final String PAGE_TITLE = "_page_title";
+    public static final String PAGE_URL = "_page_url";
+    public static final String GTM_BRANDS = "brands";
+    public static final String GTM_BRAND = "brand";
+    public static final String GTM_CLIENT_BRAND = "clientBrand";
+
     public static final String TABLE_REGEX = String.format("^(%s)|((%s|%s|(etl_[^/]+))(%s|%s)_v\\d+)$",
             TABLE_NAME_ETL_MERGE_STATE,
             ETLRunner.TableName.ITEM.getTableName(),

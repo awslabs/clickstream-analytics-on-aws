@@ -20,9 +20,12 @@ import {
 import { UserContext } from 'context/UserContext';
 import React, { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
-import { IUserRole } from 'ts/const';
 import { getDocumentLink } from 'ts/url';
-import { getUserInfoFromLocalStorage } from 'ts/utils';
+import {
+  getUserInfoFromLocalStorage,
+  isAdminRole,
+  isAnalystRole,
+} from 'ts/utils';
 
 interface INavigationProps {
   activeHref: string;
@@ -35,7 +38,7 @@ const Navigation: React.FC<INavigationProps> = (props: INavigationProps) => {
 
   const navHeader = {
     text: t('name'),
-    href: currentUser?.role === IUserRole.ANALYST ? '/analytics' : '/',
+    href: isAnalystRole(currentUser?.roles) ? '/analytics' : '/',
   };
   const pipelineNavItems: SideNavigationProps.Item[] = [
     { type: 'link', text: t('nav.home'), href: '/' },
@@ -97,9 +100,9 @@ const Navigation: React.FC<INavigationProps> = (props: INavigationProps) => {
   ];
 
   const getNavItems = () => {
-    if (currentUser?.role === IUserRole.ADMIN) {
+    if (isAdminRole(currentUser?.roles)) {
       return [...pipelineNavItems, ...systemNavItems, ...docNavItems];
-    } else if (currentUser?.role === IUserRole.ANALYST) {
+    } else if (isAnalystRole(currentUser?.roles)) {
       return [...pipelineNavItems, ...docNavItems];
     } else {
       return [

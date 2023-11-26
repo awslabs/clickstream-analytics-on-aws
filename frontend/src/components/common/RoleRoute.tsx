@@ -18,7 +18,7 @@ import AccessDenied from 'pages/error-page/AccessDenied';
 import { ReactElement, useContext } from 'react';
 import { AuthContextProps } from 'react-oidc-context';
 import { IUserRole } from 'ts/const';
-import { getUserInfoFromLocalStorage } from 'ts/utils';
+import { getIntersectArrays, getUserInfoFromLocalStorage } from 'ts/utils';
 import Loading from './Loading';
 
 const RoleRoute = ({
@@ -35,7 +35,7 @@ const RoleRoute = ({
   const currentUser = useContext(UserContext) ?? getUserInfoFromLocalStorage();
 
   const userHasRequiredRole = !!(
-    currentUser && roles.includes(currentUser.role)
+    currentUser && getIntersectArrays(roles, currentUser.roles).length > 0
   );
 
   if (!currentUser) {

@@ -138,19 +138,6 @@ export class DataReportingQuickSightStack extends Stack {
           port: stackParams.redshiftPortParam.valueAsNumber,
         },
       },
-      permissions: [
-        {
-          principal: stackParams.quickSightOwnerPrincipalParam.valueAsString,
-          actions: [
-            'quicksight:UpdateDataSourcePermissions',
-            'quicksight:DescribeDataSourcePermissions',
-            'quicksight:PassDataSource',
-            'quicksight:DescribeDataSource',
-            'quicksight:DeleteDataSource',
-            'quicksight:UpdateDataSource',
-          ],
-        },
-      ],
       vpcConnectionProperties: {
         vpcConnectionArn,
       },

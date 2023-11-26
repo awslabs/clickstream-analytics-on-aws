@@ -24,8 +24,8 @@ export async function responseTime(req: express.Request, res: express.Response, 
   // @ts-ignore
   res.end = async (chunk: any, encoding: BufferEncoding, cb?: () => void) => {
     const requestId = req.get('X-Click-Stream-Request-Id');
-    if (requestId && res.statusCode >= 200 && res.statusCode <= 299) {
-      await projectServ.saveRequestId(requestId);
+    if (requestId && res.statusCode >= 500) {
+      await projectServ.deleteRequestId(requestId);
     }
     duration = Date.now() - start;
     res.setHeader('X-Click-Stream-Response-Time', duration);

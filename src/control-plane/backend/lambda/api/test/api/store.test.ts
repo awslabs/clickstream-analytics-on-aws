@@ -280,7 +280,7 @@ describe('App test', () => {
                 N: '50',
               },
               serverMax: {
-                N: '1',
+                N: '2',
               },
               serverMin: {
                 N: '1',
@@ -388,7 +388,7 @@ describe('App test', () => {
                 S: BuiltInTagKeys.AWS_SOLUTION_VERSION,
               },
               value: {
-                S: 'tagValue3',
+                S: MOCK_SOLUTION_VERSION,
               },
             },
           },
@@ -539,7 +539,7 @@ describe('App test', () => {
                 N: '50',
               },
               serverMax: {
-                N: '1',
+                N: '2',
               },
               serverMin: {
                 N: '1',
@@ -647,7 +647,7 @@ describe('App test', () => {
                 S: BuiltInTagKeys.AWS_SOLUTION_VERSION,
               },
               value: {
-                S: 'tagValue3',
+                S: MOCK_SOLUTION_VERSION,
               },
             },
           },

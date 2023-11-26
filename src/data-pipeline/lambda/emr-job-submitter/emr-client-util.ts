@@ -20,7 +20,7 @@ import { Context } from 'aws-lambda';
 import { v4 as uuid } from 'uuid';
 import { getFunctionTags } from '../../../common/lambda/tags';
 import { logger } from '../../../common/powertools';
-import { putStringToS3, readS3ObjectAsJson } from '../../../common/s3';
+import { listObjectsByPrefix, putStringToS3, readS3ObjectAsJson } from '../../../common/s3';
 import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
 import { getJobInfoKey, getSinkLocationPrefix } from '../../utils/utils-common';
 
@@ -29,31 +29,40 @@ const emrClient = new EMRServerlessClient({
 });
 
 interface EMRJobInfo {
-  jobId: string;
+  jobId?: string;
+  objectsInfo: ObjectsInfo;
+}
+
+interface ObjectsInfo {
+  objectCount: number;
+  sizeTotal: number;
+}
+
+export interface CustomSparkConfig {
+  sparkConfig: string[];
+  outputPartitions: number;
+  inputRePartitions: number;
 }
 
 export class EMRServerlessUtil {
-  public static async start(event: any, context: Context): Promise<EMRJobInfo> {
+  public static async start(event: any, context: Context): Promise<EMRJobInfo | undefined> {
     try {
       logger.info('enter start');
       const config = this.getConfig();
       logger.info('config', { config });
       if (!config.appIds) {
         logger.warn('appIds is empty, please check env: APP_IDS');
-        return {
-          jobId: '',
-        };
+        return;
       }
-      const jobId = await EMRServerlessUtil.startJobRun(
+      const runJobInfo = await EMRServerlessUtil.startJobRun(
         event,
         config,
         context,
       );
-      logger.info('started job:', { jobId });
+      logger.info('started job:', { runJobInfo });
 
-      return {
-        jobId,
-      };
+      return runJobInfo;
+
     } catch (error) {
       logger.error(
         'Unexpected error occurred while trying to start EMR Serverless Application',
@@ -90,7 +99,15 @@ export class EMRServerlessUtil {
       config,
     );
 
-    const { startJobRunCommandInput } = await this.getJobRunCommandInput(event, config, startTimestamp, endTimestamp, funcTags);
+    const objectsInfo = await calculateObjects(config.sourceBucketName, config.sourceS3Prefix, startTimestamp, endTimestamp);
+
+    logger.info('objectsInfo', { objectsInfo });
+    if (objectsInfo.objectCount == 0) {
+      logger.info('No files to process');
+      return { objectsInfo };
+    }
+
+    const { startJobRunCommandInput } = await this.getJobRunCommandInput(event, config, startTimestamp, endTimestamp, funcTags, objectsInfo);
 
     const startJobRunCommand = new StartJobRunCommand(startJobRunCommandInput);
     let jobInfo = await emrClient.send(startJobRunCommand);
@@ -117,11 +134,14 @@ export class EMRServerlessUtil {
 
     logger.info('jobInfo', { jobInfo });
 
-    return jobInfo.jobRunId!;
+    return {
+      jobRunId: jobInfo.jobRunId!,
+      objectsInfo,
+    };
   }
 
   private static async getJobRunCommandInput(event: any, config: any, startTimestamp: number, endTimestamp: number,
-    funcTags: Record<string, string> | undefined) {
+    funcTags: Record<string, string> | undefined, objectsInfo: ObjectsInfo) {
 
     let sparkConfigEvent: string[] = event.sparkConfig || [];
     let sparkConfigS3: string[] = [];
@@ -141,8 +161,10 @@ export class EMRServerlessUtil {
       s3InputRePartitions = sparkConfigS3Obj.inputRePartitions;
     }
 
-    const outputPartitions = (event.outputPartitions || s3OutputPartitions || config.outputPartitions) + '';
-    const rePartitions = (event.inputRePartitions || s3InputRePartitions || config.rePartitions) + '';
+    const estimatedSparkConfig = getEstimatedSparkConfig(objectsInfo);
+
+    const outputPartitions = (event.outputPartitions || s3OutputPartitions || estimatedSparkConfig.outputPartitions || config.outputPartitions) + '';
+    const rePartitions = (event.inputRePartitions || s3InputRePartitions || estimatedSparkConfig.inputRePartitions || config.rePartitions) + '';
 
     const jobName = event.jobName || process.env.JOB_NAME || `${startTimestamp}-${uuid()}`;
 
@@ -203,7 +225,7 @@ export class EMRServerlessUtil {
     ];
 
     const configMap = new Map<string, string>();
-    for (let it of [...defaultConfig, ...sparkConfigS3, ...sparkConfigEvent]) {
+    for (let it of [...defaultConfig, ...estimatedSparkConfig.sparkConfig, ...sparkConfigS3, ...sparkConfigEvent]) {
       const configs = it.split('=', 2);
       if (configs.length == 2) {
         const key = configs[0];
@@ -303,11 +325,12 @@ export class EMRServerlessUtil {
    * @returns { startTimestamp, endTimestamp }
    */
   private static async getJobTimestamps(event: any, config: any) {
-    logger.info('getJobTimestamps enter');
-    const dataBufferedSeconds = parseInt(config.dataBufferedSeconds);
+    logger.info('getJobTimestamps enter', { event });
+    const dataBufferedSeconds = parseInt(config.dataBufferedSeconds || 5);
     let now = new Date();
     let startTimestamp = (new Date(now.toDateString())).getTime();
     let endTimestamp = now.getTime() - dataBufferedSeconds * 1000;
+
     if (event.startTimestamp) {
       startTimestamp = getTimestampFromEvent(event.startTimestamp);
     } else {
@@ -355,4 +378,171 @@ function getTimestampFromEvent(inputTimestamp: string | number): number {
   }
 
   throw new Error('Invalid input timestamp:' + inputTimestamp);
+}
+
+async function calculateObjects(bucketName: string, prefix: string, startTimestamp: number, endTimestamp: number) {
+  let objectCount = 0;
+  let sizeTotal = 0;
+
+  const datePrefixList = getDatePrefixList(prefix, startTimestamp, endTimestamp);
+
+  for (const datePrefix of datePrefixList) {
+    await listObjectsByPrefix(bucketName, datePrefix, (obj) => {
+      if (obj.Key
+        && !obj.Key.endsWith('/_.json')
+        && obj.Size
+        && obj.LastModified
+        && obj.LastModified.getTime() >= startTimestamp
+        && obj.LastModified.getTime() < endTimestamp) {
+        objectCount++;
+        if (obj.Key.endsWith('.gz')) {
+          sizeTotal += obj.Size * 20;
+        } else {
+          sizeTotal += obj.Size;
+        }
+      }
+    });
+  }
+  return {
+    objectCount,
+    sizeTotal,
+  };
+}
+
+export function getDatePrefixList(prefix: string, startTimestamp: number, endTimestamp: number): string[] {
+  if (!prefix.endsWith('/')) {
+    prefix = prefix + '/';
+  }
+  let aTime = startTimestamp;
+  const oneDay = 24 * 60 * 60 * 1000;
+
+  const dataPrefixList: string[] = [];
+
+  while (aTime <= endTimestamp) {
+    dataPrefixList.push(
+      `${prefix}${getYMDPrefix(aTime)}`,
+    );
+    aTime += oneDay;
+  }
+  const endDayPrefix = `${prefix}${getYMDPrefix(endTimestamp)}`;
+
+  if (!dataPrefixList.includes(endDayPrefix)) {
+    dataPrefixList.push(endDayPrefix);
+  }
+
+  logger.info(`dataPrefixList for ${new Date(startTimestamp).toISOString()} to ${new Date(endTimestamp).toISOString()}`,
+    {
+      start: dataPrefixList[0],
+      end: dataPrefixList[dataPrefixList.length -1],
+      length: dataPrefixList.length,
+    });
+  return dataPrefixList;
+}
+
+function getYMDPrefix(aTime: number) {
+  const padTo2Digits = (num: number) => {
+    return num.toString().padStart(2, '0');
+  };
+  const currentDate = new Date(aTime);
+  const yyyy = padTo2Digits(currentDate.getUTCFullYear());
+  const mm = padTo2Digits(currentDate.getUTCMonth() + 1);
+  const dd = padTo2Digits(currentDate.getUTCDate());
+
+  return `year=${yyyy}/month=${mm}/day=${dd}/`;
+}
+
+export function getEstimatedSparkConfig(objectsInfo: ObjectsInfo): CustomSparkConfig {
+  // https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/jobs-spark.html
+  // https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/app-behavior.html
+  const size_1G = 1024 * 1024 * 1024;
+  logger.info('getEstimatedSparkConfig ', { objectsInfo });
+
+  let driverCore = 4;
+  let driverMem = 14;
+  let driverDisk = 20;
+  let executorCore = 4;
+  let executorMem = 14;
+  let executorDisk = 20;
+  let initialExecutors = 3;
+  let inputRePartitions = 10;
+
+  if (objectsInfo.sizeTotal < 1 * size_1G) {
+    logger.info('use default settings');
+  } else if (objectsInfo.sizeTotal < 10 * size_1G) {
+    executorCore = 8;
+    executorMem = 50;
+    executorDisk = 50;
+  } else if (objectsInfo.sizeTotal < 50 * size_1G) {
+    driverCore = 8;
+    driverMem = 50;
+    driverDisk = 50;
+    executorCore = 16;
+    executorMem = 100;
+    executorDisk = 200;
+    initialExecutors = 6;
+    inputRePartitions = 200;
+  } else if (objectsInfo.sizeTotal < 100 * size_1G) {
+    driverCore = 8;
+    driverMem = 50;
+    driverDisk = 50;
+    executorCore = 16;
+    executorMem = 100;
+    executorDisk = 200;
+    initialExecutors = 10;
+    inputRePartitions = 200;
+  } else if (objectsInfo.sizeTotal < 200 * size_1G) {
+    driverCore = 8;
+    driverMem = 50;
+    driverDisk = 50;
+    executorCore = 16;
+    executorMem = 100;
+    executorDisk = 200;
+    initialExecutors = 10;
+    inputRePartitions = 500;
+
+  } else if (objectsInfo.sizeTotal < 500 * size_1G) {
+    driverCore = 16;
+    driverMem = 60;
+    driverDisk = 60;
+    executorCore = 16;
+    executorMem = 100;
+    executorDisk = 200;
+    initialExecutors = 10;
+    inputRePartitions = 1000;
+  } else if (objectsInfo.sizeTotal < 1000 * size_1G) {
+    driverCore = 16;
+    driverMem = 60;
+    driverDisk = 60;
+    executorCore = 16;
+    executorMem = 100;
+    executorDisk = 200;
+    initialExecutors = 15;
+    inputRePartitions = 1000;
+  } else {
+    driverCore = 16;
+    driverMem = 60;
+    driverDisk = 60;
+    executorCore = 16;
+    executorMem = 100;
+    executorDisk = 200;
+    initialExecutors = 25;
+    inputRePartitions = 2000;
+  }
+
+  return {
+    outputPartitions: -1,
+    inputRePartitions,
+    sparkConfig: [
+      `spark.driver.cores=${driverCore}`,
+      `spark.driver.memory=${driverMem}g`,
+      `spark.emr-serverless.driver.disk=${driverDisk}g`,
+      `spark.executor.cores=${executorCore}`,
+      `spark.executor.memory=${executorMem}g`,
+      `spark.emr-serverless.executor.disk=${executorDisk}g`,
+      'spark.dynamicAllocation.enabled=true',
+      `spark.dynamicAllocation.initialExecutors=${initialExecutors}`,
+      `spark.executor.instances=${initialExecutors}`,
+    ],
+  };
+
 }

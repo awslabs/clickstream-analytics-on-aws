@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { TransactWriteItemsCommand } from '@aws-sdk/client-dynamodb';
+import { ConditionalCheckFailedException, TransactWriteItemsCommand } from '@aws-sdk/client-dynamodb';
 import {
   GetCommand,
   GetCommandOutput,
@@ -19,6 +19,7 @@ import {
   UpdateCommand,
   ScanCommandInput,
   QueryCommandInput,
+  DeleteCommand,
 } from '@aws-sdk/lib-dynamodb';
 import { marshall } from '@aws-sdk/util-dynamodb';
 import { clickStreamTableName, dictionaryTableName, prefixTimeGSIName } from '../../common/constants';
@@ -828,18 +829,27 @@ export class DynamoDbStore implements ClickStreamStore {
   };
 
   public async isRequestIdExisted(id: string): Promise<boolean> {
-    const params: GetCommand = new GetCommand({
-      TableName: clickStreamTableName,
-      Key: {
-        id: id,
-        type: 'REQUESTID',
-      },
-    });
-    const result: GetCommandOutput = await docClient.send(params);
-    if (!result.Item) {
-      return false;
+    try {
+      const params: PutCommand = new PutCommand({
+        TableName: clickStreamTableName,
+        Item: {
+          id: id,
+          type: 'REQUESTID',
+          ttl: Date.now() / 1000 + 600,
+        },
+        ConditionExpression: 'attribute_not_exists(#id)',
+        ExpressionAttributeNames: {
+          '#id': 'id',
+        },
+      });
+      await docClient.send(params);
+    } catch (err) {
+      if (err instanceof ConditionalCheckFailedException) {
+        return true;
+      }
+      throw err;
     }
-    return true;
+    return false;
   };
 
   public async saveRequestId(id: string): Promise<void> {
@@ -849,6 +859,17 @@ export class DynamoDbStore implements ClickStreamStore {
         id: id,
         type: 'REQUESTID',
         ttl: Date.now() / 1000 + 600,
+      },
+    });
+    await docClient.send(params);
+  };
+
+  public async deleteRequestId(id: string): Promise<void> {
+    const params: DeleteCommand = new DeleteCommand({
+      TableName: clickStreamTableName,
+      Key: {
+        id: id,
+        type: 'REQUESTID',
       },
     });
     await docClient.send(params);
@@ -1076,7 +1097,7 @@ export class DynamoDbStore implements ClickStreamStore {
         type: 'USER',
         prefix: 'USER',
         name: user.name ?? '',
-        role: user.role,
+        roles: user.roles ?? [],
         createAt: Date.now(),
         updateAt: Date.now(),
         operator: user.operator?? '',
@@ -1116,10 +1137,10 @@ export class DynamoDbStore implements ClickStreamStore {
       expressionAttributeValues.set(':n', user.name);
       expressionAttributeNames['#name'] = 'name';
     }
-    if (user.role) {
-      updateExpression = `${updateExpression}, #role= :role`;
-      expressionAttributeValues.set(':role', user.role);
-      expressionAttributeNames['#role'] = 'role';
+    if (user.roles) {
+      updateExpression = `${updateExpression}, #roles= :roles`;
+      expressionAttributeValues.set(':roles', user.roles);
+      expressionAttributeNames['#roles'] = 'roles';
     }
     const params: UpdateCommand = new UpdateCommand({
       TableName: clickStreamTableName,
@@ -1195,9 +1216,10 @@ export class DynamoDbStore implements ClickStreamStore {
         type: 'USER_SETTINGS',
       },
       // Define expressions for the new or updated attributes
-      UpdateExpression: 'SET roleJsonPath= :roleJsonPath, operatorRoleNames= :operatorRoleNames, analystRoleNames= :analystRoleNames, analystReaderRoleNames= :analystReaderRoleNames',
+      UpdateExpression: 'SET roleJsonPath= :roleJsonPath, adminRoleNames= :adminRoleNames, operatorRoleNames= :operatorRoleNames, analystRoleNames= :analystRoleNames, analystReaderRoleNames= :analystReaderRoleNames',
       ExpressionAttributeValues: {
         ':roleJsonPath': userSettings.roleJsonPath,
+        ':adminRoleNames': userSettings.adminRoleNames,
         ':operatorRoleNames': userSettings.operatorRoleNames,
         ':analystRoleNames': userSettings.analystRoleNames,
         ':analystReaderRoleNames': userSettings.analystReaderRoleNames,

@@ -25,7 +25,7 @@ public class ETLMetric {
         this.count  = dataset.count();
     }
 
-    ETLMetric(final long count, final String info) {
+    public ETLMetric(final long count, final String info) {
         this.count = count;
         this.info = info;
     }

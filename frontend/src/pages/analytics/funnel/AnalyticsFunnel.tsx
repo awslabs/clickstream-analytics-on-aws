@@ -46,7 +46,7 @@ import { StateActionType, HelpPanelType } from 'context/reducer';
 import React, { useContext, useEffect, useReducer, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { COMMON_ALERT_TYPE, IUserRole } from 'ts/const';
+import { COMMON_ALERT_TYPE } from 'ts/const';
 import {
   QUICKSIGHT_ANALYSIS_INFIX,
   QUICKSIGHT_DASHBOARD_INFIX,
@@ -62,7 +62,9 @@ import {
   alertMsg,
   defaultStr,
   generateStr,
+  getAbsoluteStartEndRange,
   getUserInfoFromLocalStorage,
+  isAnalystAuthorRole,
 } from 'ts/utils';
 import {
   validEventAnalyticsItem,
@@ -76,10 +78,7 @@ import {
   validMultipleEventAnalyticsItems,
 } from '../analytics-utils';
 import AttributeGroup from '../comps/AttributeGroup';
-import ExploreDateRangePicker, {
-  DEFAULT_DAY_RANGE,
-  DEFAULT_WEEK_RANGE,
-} from '../comps/ExploreDateRangePicker';
+import ExploreDateRangePicker from '../comps/ExploreDateRangePicker';
 import ExploreEmbedFrame from '../comps/ExploreEmbedFrame';
 import SaveToDashboardModal from '../comps/SelectDashboardModal';
 
@@ -117,15 +116,15 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
   const [exploreEmbedUrl, setExploreEmbedUrl] = useState('');
   const dispatch = useContext(DispatchContext);
   const [groupDisabled, setGroupDisabled] = useState(false);
-  const defaultChartTypeOption = QuickSightChartType.FUNNEL;
+  const defaultChartTypeOption = QuickSightChartType.BAR;
   const chartTypeOptions: SegmentedControlProps.Option[] = [
-    {
-      id: QuickSightChartType.FUNNEL,
-      iconSvg: <ExtendIcon icon="BsFilter" color="black" />,
-    },
     {
       id: QuickSightChartType.BAR,
       iconSvg: <ExtendIcon icon="BsBarChartFill" color="black" />,
+    },
+    {
+      id: QuickSightChartType.FUNNEL,
+      iconSvg: <ExtendIcon icon="BsFilter" color="black" />,
     },
   ];
   const [chartType, setChartType] = useState(defaultChartTypeOption);
@@ -169,7 +168,7 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
   ];
 
   const [dateRangeValue, setDateRangeValue] =
-    useState<DateRangePickerProps.Value>(DEFAULT_DAY_RANGE);
+    useState<DateRangePickerProps.Value>(getAbsoluteStartEndRange());
 
   const [timeGranularity, setTimeGranularity] = useState<SelectProps.Option>({
     value: ExploreGroupColumn.DAY,
@@ -222,7 +221,7 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
     chartTitle?: string,
     chartSubTitle?: string
   ) => {
-    const funnelId = generateStr(6);
+    const funnelId = generateStr(6, true);
     const parameters = getDashboardCreateParameters(
       pipeline,
       window.location.origin
@@ -336,7 +335,7 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
       type: 'resetFilterData',
       presetParameters,
     });
-    setDateRangeValue(DEFAULT_WEEK_RANGE);
+    setDateRangeValue(getAbsoluteStartEndRange());
     setTimeGranularity({
       value: ExploreGroupColumn.DAY,
       label: defaultStr(t('analytics:options.dayTimeGranularity')),
@@ -396,7 +395,7 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
 
   useEffect(() => {
     clickPreview();
-  }, [timeGranularity, dateRangeValue, chartType]);
+  }, [chartType]);
 
   useEffect(() => {
     if (chartType === 'funnel') {
@@ -434,7 +433,7 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
                   >
                     {t('button.reset')}
                   </Button>
-                  {currentUser.role !== IUserRole.ANALYST_READER && (
+                  {isAnalystAuthorRole(currentUser?.roles) && (
                     <Button
                       variant="primary"
                       loading={loadingData}

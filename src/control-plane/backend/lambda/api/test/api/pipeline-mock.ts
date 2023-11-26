@@ -59,7 +59,7 @@ const BASE_PIPELINE_ATTRIBUTES = {
   tags: [
     { key: 'customerKey1', value: 'tagValue1' },
     { key: 'customerKey2', value: 'tagValue2' },
-    { key: BuiltInTagKeys.AWS_SOLUTION_VERSION, value: 'tagValue3' },
+    { key: BuiltInTagKeys.AWS_SOLUTION_VERSION, value: MOCK_SOLUTION_VERSION },
   ],
   templateVersion: MOCK_SOLUTION_VERSION,
   bucket: {
@@ -112,7 +112,7 @@ export const S3_INGESTION_PIPELINE: IPipeline = {
   ingestionServer: {
     ...BASE_PIPELINE_ATTRIBUTES.ingestionServer,
     size: {
-      serverMax: 1,
+      serverMax: 2,
       warmPoolSize: 0,
       serverMin: 1,
       scaleOnCpuUtilizationPercent: 50,
@@ -139,7 +139,7 @@ export const S3_INGESTION_HTTP_AUTHENTICATION_PIPELINE: IPipeline = {
   ingestionServer: {
     ...BASE_PIPELINE_ATTRIBUTES.ingestionServer,
     size: {
-      serverMax: 1,
+      serverMax: 2,
       warmPoolSize: 0,
       serverMin: 1,
       scaleOnCpuUtilizationPercent: 50,
@@ -278,7 +278,7 @@ export const S3_DATA_PROCESSING_WITH_ERROR_PREFIX_PIPELINE: IPipeline = {
   ingestionServer: {
     ...BASE_PIPELINE_ATTRIBUTES.ingestionServer,
     size: {
-      serverMax: 1,
+      serverMax: 2,
       warmPoolSize: 0,
       serverMin: 1,
       scaleOnCpuUtilizationPercent: 50,
@@ -326,7 +326,7 @@ export const S3_DATA_PROCESSING_WITH_SPECIFY_PREFIX_PIPELINE: IPipeline = {
   ingestionServer: {
     ...BASE_PIPELINE_ATTRIBUTES.ingestionServer,
     size: {
-      serverMax: 1,
+      serverMax: 2,
       warmPoolSize: 0,
       serverMin: 1,
       scaleOnCpuUtilizationPercent: 50,
@@ -603,7 +603,54 @@ export const KINESIS_DATA_PROCESSING_PROVISIONED_REDSHIFT_PIPELINE: IPipeline = 
       name: 'EXAMPLE_BUCKET',
       prefix: '',
     },
-    transformPlugin: 'BUILT-IN_1',
+    transformPlugin: 'BUILT-IN-1',
+    enrichPlugin: ['BUILT-IN-2', 'BUILT-IN-3', `${MOCK_PLUGIN_ID}_2`],
+  },
+  dataModeling: {
+    ods: {
+      bucket: {
+        name: 'EXAMPLE_BUCKET',
+        prefix: '',
+      },
+      fileSuffix: '.snappy.parquet',
+    },
+    athena: true,
+    redshift: {
+      dataRange: 'rate(6 months)',
+      provisioned: {
+        clusterIdentifier: 'redshift-cluster-1',
+        dbUser: 'clickstream',
+      },
+    },
+    loadWorkflow: {
+      bucket: {
+        name: 'EXAMPLE_BUCKET',
+        prefix: '',
+      },
+      maxFilesLimit: 50,
+    },
+  },
+};
+
+export const KINESIS_DATA_PROCESSING_PROVISIONED_REDSHIFT_THIRDPARTY_PIPELINE: IPipeline = {
+  ...KINESIS_ON_DEMAND_INGESTION_PIPELINE,
+  dataCollectionSDK: 'thirdparty',
+  dataProcessing: {
+    dataFreshnessInHour: 7,
+    scheduleExpression: 'rate(6 minutes)',
+    sourceS3Bucket: {
+      name: 'EXAMPLE_BUCKET',
+      prefix: '',
+    },
+    sinkS3Bucket: {
+      name: 'EXAMPLE_BUCKET',
+      prefix: '',
+    },
+    pipelineBucket: {
+      name: 'EXAMPLE_BUCKET',
+      prefix: '',
+    },
+    transformPlugin: 'BUILT-IN-4',
     enrichPlugin: ['BUILT-IN-2', 'BUILT-IN-3', `${MOCK_PLUGIN_ID}_2`],
   },
   dataModeling: {
@@ -1226,7 +1273,16 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_UPDATE_PIPELINE_WITH_WORKFLOW:
                   Region: 'ap-southeast-1',
                   TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-reporting-quicksight-stack.template.json',
                   Action: 'Create',
-                  Parameters: [],
+                  Parameters: [
+                    {
+                      ParameterKey: 'QuickSightUserParam',
+                      ParameterValue: 'Admin/fakeUser',
+                    },
+                    {
+                      ParameterKey: 'QuickSightPrincipalParam',
+                      ParameterValue: 'arn:aws:quicksight:us-west-2:555555555555:user/default/Admin/fakeUser',
+                    },
+                  ],
                   StackName: `Clickstream-Reporting-${MOCK_PIPELINE_ID}`,
                 },
                 Callback: {

@@ -23,7 +23,10 @@ import {
   DescribeDashboardCommand,
   DescribeDashboardDefinitionCommand,
   DescribeDataSetCommand,
+  DescribeDataSourceCommand,
   DescribeTemplateDefinitionCommand,
+  ListAnalysesCommand,
+  ListDashboardsCommand,
   ListTemplateVersionsCommand,
   QuickSightClient,
   ResourceExistsException,
@@ -37,6 +40,7 @@ import {
   UpdateDashboardPublishedVersionCommand,
   UpdateDataSetCommand,
   UpdateDataSetPermissionsCommand,
+  UpdateDataSourcePermissionsCommand,
 } from '@aws-sdk/client-quicksight';
 import { CdkCustomResourceResponse } from 'aws-lambda';
 import { mockClient } from 'aws-sdk-client-mock';
@@ -515,6 +519,13 @@ describe('QuickSight Lambda function', () => {
 
   test('Create QuickSight dashboard - One app id', async () => {
 
+    quickSightClientMock.on(DescribeDataSourceCommand).resolves({
+      DataSource: {
+        Status: ResourceStatus.CREATION_SUCCESSFUL,
+      },
+    });
+    quickSightClientMock.on(UpdateDataSourcePermissionsCommand).resolves({});
+
     quickSightClientMock.on(DescribeDataSetCommand).resolvesOnce({
       DataSet: {
         DataSetId: 'dataset_0',
@@ -570,6 +581,13 @@ describe('QuickSight Lambda function', () => {
   });
 
   test('Create QuickSight dashboard - Multiple app id', async () => {
+
+    quickSightClientMock.on(DescribeDataSourceCommand).resolves({
+      DataSource: {
+        Status: ResourceStatus.CREATION_SUCCESSFUL,
+      },
+    });
+    quickSightClientMock.on(UpdateDataSourcePermissionsCommand).resolves({});
 
     quickSightClientMock.on(DescribeDataSetCommand).resolvesOnce({
       DataSet: {
@@ -650,6 +668,12 @@ describe('QuickSight Lambda function', () => {
   });
 
   test('Create QuickSight dashboard - dataset already exist', async () => {
+    quickSightClientMock.on(DescribeDataSourceCommand).resolves({
+      DataSource: {
+        Status: ResourceStatus.CREATION_SUCCESSFUL,
+      },
+    });
+    quickSightClientMock.on(UpdateDataSourcePermissionsCommand).resolves({});
     quickSightClientMock.on(CreateDataSetCommand).rejectsOnce(existError);
     try {
       await handler(basicEvent, context);
@@ -664,6 +688,13 @@ describe('QuickSight Lambda function', () => {
   });
 
   test('Create QuickSight dashboard - analysis already exist', async () => {
+
+    quickSightClientMock.on(DescribeDataSourceCommand).resolves({
+      DataSource: {
+        Status: ResourceStatus.CREATION_SUCCESSFUL,
+      },
+    });
+    quickSightClientMock.on(UpdateDataSourcePermissionsCommand).resolves({});
     quickSightClientMock.on(DescribeDataSetCommand).resolvesOnce({
       DataSet: {
         DataSetId: 'dataset_0',
@@ -698,6 +729,12 @@ describe('QuickSight Lambda function', () => {
   });
 
   test('Create QuickSight dashboard - dashboard already exist', async () => {
+    quickSightClientMock.on(DescribeDataSourceCommand).resolves({
+      DataSource: {
+        Status: ResourceStatus.CREATION_SUCCESSFUL,
+      },
+    });
+    quickSightClientMock.on(UpdateDataSourcePermissionsCommand).resolves({});
     quickSightClientMock.on(DescribeDataSetCommand).resolvesOnce({
       DataSet: {
         DataSetId: 'dataset_0',
@@ -771,6 +808,13 @@ describe('QuickSight Lambda function', () => {
   });
 
   test('Update QuickSight dashboard - One app id', async () => {
+
+    quickSightClientMock.on(DescribeDataSourceCommand).resolves({
+      DataSource: {
+        Status: ResourceStatus.UPDATE_SUCCESSFUL,
+      },
+    });
+    quickSightClientMock.on(UpdateDataSourcePermissionsCommand).resolves({});
 
     quickSightClientMock.on(UpdateDataSetCommand).resolvesOnce({
       Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:dataset/dataset_0',
@@ -850,6 +894,13 @@ describe('QuickSight Lambda function', () => {
   });
 
   test('Update QuickSight dashboard - template change', async () => {
+
+    quickSightClientMock.on(DescribeDataSourceCommand).resolves({
+      DataSource: {
+        Status: ResourceStatus.UPDATE_SUCCESSFUL,
+      },
+    });
+    quickSightClientMock.on(UpdateDataSourcePermissionsCommand).resolves({});
 
     quickSightClientMock.on(UpdateDataSetCommand).resolvesOnce({
       Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:dataset/dataset_0',
@@ -934,6 +985,13 @@ describe('QuickSight Lambda function', () => {
   });
 
   test('Update QuickSight dashboard - permission update', async () => {
+
+    quickSightClientMock.on(DescribeDataSourceCommand).resolves({
+      DataSource: {
+        Status: ResourceStatus.UPDATE_SUCCESSFUL,
+      },
+    });
+    quickSightClientMock.on(UpdateDataSourcePermissionsCommand).resolves({});
 
     quickSightClientMock.on(UpdateDataSetCommand).resolvesOnce({
       Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:dataset/dataset_0',
@@ -1023,6 +1081,13 @@ describe('QuickSight Lambda function', () => {
 
   test('Update QuickSight dashboard - dataset not exist.', async () => {
 
+    quickSightClientMock.on(DescribeDataSourceCommand).resolves({
+      DataSource: {
+        Status: ResourceStatus.UPDATE_SUCCESSFUL,
+      },
+    });
+    quickSightClientMock.on(UpdateDataSourcePermissionsCommand).resolves({});
+
     quickSightClientMock.on(UpdateDataSetCommand).rejectsOnce(existError);
 
     try {
@@ -1051,6 +1116,13 @@ describe('QuickSight Lambda function', () => {
   });
 
   test('Update QuickSight dashboard - analysis not exist.', async () => {
+
+    quickSightClientMock.on(DescribeDataSourceCommand).resolves({
+      DataSource: {
+        Status: ResourceStatus.UPDATE_SUCCESSFUL,
+      },
+    });
+    quickSightClientMock.on(UpdateDataSourcePermissionsCommand).resolves({});
 
     quickSightClientMock.on(UpdateDataSetCommand).resolvesOnce({
       Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:dataset/dataset_0',
@@ -1091,7 +1163,7 @@ describe('QuickSight Lambda function', () => {
     try {
       await handler(updateEvent, context);
     } catch (err: any) {
-      expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeAnalysisCommand, 0);
+      expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeAnalysisCommand, 1);
       expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDashboardCommand, 0);
       expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDataSetCommand, 2);
 
@@ -1114,6 +1186,13 @@ describe('QuickSight Lambda function', () => {
   });
 
   test('Update QuickSight dashboard - dashboard not exist.', async () => {
+
+    quickSightClientMock.on(DescribeDataSourceCommand).resolves({
+      DataSource: {
+        Status: ResourceStatus.UPDATE_SUCCESSFUL,
+      },
+    });
+    quickSightClientMock.on(UpdateDataSourcePermissionsCommand).resolves({});
 
     quickSightClientMock.on(UpdateDataSetCommand).resolvesOnce({
       Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:dataset/dataset_0',
@@ -1142,6 +1221,10 @@ describe('QuickSight Lambda function', () => {
       ResourceStatus: ResourceStatus.UPDATE_SUCCESSFUL,
     });
 
+    quickSightClientMock.on(DescribeAnalysisDefinitionCommand).resolves({
+      ResourceStatus: ResourceStatus.UPDATE_SUCCESSFUL,
+    });
+
     quickSightClientMock.on(ListTemplateVersionsCommand).resolves({
       TemplateVersionSummaryList: [
         {
@@ -1159,8 +1242,8 @@ describe('QuickSight Lambda function', () => {
     try {
       await handler(updateEvent, context);
     } catch (err: any) {
-      expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeAnalysisCommand, 0);
-      expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDashboardCommand, 0);
+      expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeAnalysisCommand, 1);
+      expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDashboardCommand, 1);
       expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDataSetCommand, 2);
 
       expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateDataSetCommand, 0);
@@ -1168,7 +1251,7 @@ describe('QuickSight Lambda function', () => {
       expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateDashboardCommand, 0);
       expect(quickSightClientMock).toHaveReceivedCommandTimes(UpdateDataSetCommand, 2);
       expect(quickSightClientMock).toHaveReceivedCommandTimes(UpdateAnalysisCommand, 1);
-      expect(quickSightClientMock).toHaveReceivedCommandTimes(UpdateDashboardCommand, 0);
+      expect(quickSightClientMock).toHaveReceivedCommandTimes(UpdateDashboardCommand, 1);
 
       expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteDataSetCommand, 0);
       expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteAnalysisCommand, 0);
@@ -1182,6 +1265,13 @@ describe('QuickSight Lambda function', () => {
   });
 
   test('Update QuickSight dashboard - One app id from empty app id', async () => {
+
+    quickSightClientMock.on(DescribeDataSourceCommand).resolves({
+      DataSource: {
+        Status: ResourceStatus.UPDATE_SUCCESSFUL,
+      },
+    });
+    quickSightClientMock.on(UpdateDataSourcePermissionsCommand).resolves({});
 
     quickSightClientMock.on(CreateDataSetCommand).resolvesOnce({
       Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:dataset/dataset_0',
@@ -1240,6 +1330,13 @@ describe('QuickSight Lambda function', () => {
   });
 
   test('Update QuickSight dashboard - Multiple app id', async () => {
+
+    quickSightClientMock.on(DescribeDataSourceCommand).resolves({
+      DataSource: {
+        Status: ResourceStatus.UPDATE_SUCCESSFUL,
+      },
+    });
+    quickSightClientMock.on(UpdateDataSourcePermissionsCommand).resolves({});
 
     quickSightClientMock.on(UpdateDataSetCommand).resolvesOnce({
       Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:dataset/dataset_0',
@@ -1338,6 +1435,13 @@ describe('QuickSight Lambda function', () => {
 
   test('Update QuickSight dashboard - Multiple app id with delete app', async () => {
 
+    quickSightClientMock.on(DescribeDataSourceCommand).resolves({
+      DataSource: {
+        Status: ResourceStatus.UPDATE_SUCCESSFUL,
+      },
+    });
+    quickSightClientMock.on(UpdateDataSourcePermissionsCommand).resolves({});
+
     quickSightClientMock.on(UpdateDataSetCommand).resolvesOnce({
       Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:dataset/dataset_0',
       Status: 200,
@@ -1421,6 +1525,13 @@ describe('QuickSight Lambda function', () => {
   });
 
   test('Update QuickSight dashboard - Multiple app id with delete and create app', async () => {
+
+    quickSightClientMock.on(DescribeDataSourceCommand).resolves({
+      DataSource: {
+        Status: ResourceStatus.UPDATE_SUCCESSFUL,
+      },
+    });
+    quickSightClientMock.on(UpdateDataSourcePermissionsCommand).resolves({});
 
     quickSightClientMock.on(UpdateDataSetCommand).resolvesOnce({
       Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:dataset/dataset_0',
@@ -1550,6 +1661,13 @@ describe('QuickSight Lambda function', () => {
 
   test('Update QuickSight dashboard - with new dateset or upgrade from older version', async () => {
 
+    quickSightClientMock.on(DescribeDataSourceCommand).resolves({
+      DataSource: {
+        Status: ResourceStatus.UPDATE_SUCCESSFUL,
+      },
+    });
+    quickSightClientMock.on(UpdateDataSourcePermissionsCommand).resolves({});
+
     quickSightClientMock.on(UpdateDataSetCommand).callsFakeOnce(input => {
       if (input.DataSetId !== 'clickstream_dataset_test-database-n_test1_Lifecycle_Daily_View_c0f9155d') {
         throw new Error('update data set id is not the expected one.');
@@ -1625,10 +1743,26 @@ describe('QuickSight Lambda function', () => {
       DashboardId: 'dashboard_0',
     });
 
+    quickSightClientMock.on(DescribeAnalysisCommand).resolves({
+      Analysis: {
+        AnalysisId: 'analysis_0',
+      },
+    });
+
+    quickSightClientMock.on(DescribeDashboardCommand).resolves({
+      Dashboard: {
+        DashboardId: 'dashboard_0',
+      },
+    });
+
+
     const resp = await handler(updateEventWithNewDataSet, context) as CdkCustomResourceResponse;
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDataSetCommand, 4);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeAnalysisDefinitionCommand, 1);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDashboardDefinitionCommand, 1);
+
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeAnalysisCommand, 1);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDashboardCommand, 1);
 
     expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateAnalysisCommand, 0);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateDashboardCommand, 0);
@@ -1640,6 +1774,142 @@ describe('QuickSight Lambda function', () => {
 
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteAnalysisCommand, 0);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteDashboardCommand, 0);
+
+    expect(resp.Data?.dashboards).toBeDefined();
+    expect(JSON.parse(resp.Data?.dashboards)).toHaveLength(1);
+    logger.info(`#dashboards#:${resp.Data?.dashboards}`);
+    expect(JSON.parse(resp.Data?.dashboards)[0].dashboardId).toEqual('dashboard_0');
+
+  });
+
+  test('Update QuickSight dashboard - with analysis id and dashboard id changed', async () => {
+
+    quickSightClientMock.on(DescribeDataSourceCommand).resolves({
+      DataSource: {
+        Status: ResourceStatus.UPDATE_SUCCESSFUL,
+      },
+    });
+    quickSightClientMock.on(UpdateDataSourcePermissionsCommand).resolves({});
+
+    quickSightClientMock.on(UpdateDataSetCommand).callsFakeOnce(input => {
+      if (input.DataSetId !== 'clickstream_dataset_test-database-n_test1_Lifecycle_Daily_View_c0f9155d') {
+        throw new Error('update data set id is not the expected one.');
+      }
+      return {
+        Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:dataset/dataset_0',
+        Status: 200,
+      };
+    });
+
+    quickSightClientMock.on(CreateDataSetCommand).resolvesOnce({
+      Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:dataset/dataset_1',
+      Status: 200,
+    }).on(CreateDataSetCommand).resolvesOnce({
+      Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:dataset/dataset_1',
+      Status: 200,
+    });
+
+    quickSightClientMock.on(DeleteDataSetCommand).callsFakeOnce(input => {
+      if (input.DataSetId !== 'clickstream_dataset_test-database-n_test1_user_dim_view_83ab211d') {
+        throw new Error('delete data set id is not the expected one.');
+      }
+      return {};
+    });
+
+    quickSightClientMock.on(DescribeDataSetCommand).resolvesOnce({
+      DataSet: {
+        DataSetId: 'dataset_0',
+      },
+    }).resolvesOnce({
+      DataSet: {
+        DataSetId: 'dataset_1',
+      },
+    }).resolvesOnce({
+      DataSet: {
+        DataSetId: 'dataset_2',
+      },
+    }).rejectsOnce(notExistError);
+
+    quickSightClientMock.on(CreateAnalysisCommand).resolves({
+      AnalysisId: 'clickstream_analysis_test-database-name_test1_6c5318b3',
+      Status: 200,
+    });
+
+    quickSightClientMock.on(CreateDashboardCommand).resolvesOnce({
+      DashboardId: 'dashboard_0',
+      Status: 200,
+    });
+
+    quickSightClientMock.on(DescribeAnalysisDefinitionCommand).resolvesOnce({
+      ResourceStatus: ResourceStatus.UPDATE_SUCCESSFUL,
+    }).rejectsOnce(notExistError);
+    quickSightClientMock.on(DescribeDashboardDefinitionCommand).resolvesOnce({
+      ResourceStatus: ResourceStatus.UPDATE_SUCCESSFUL,
+    }).rejectsOnce(notExistError);
+    quickSightClientMock.on(UpdateDataSetPermissionsCommand).resolves({});
+    quickSightClientMock.on(UpdateAnalysisPermissionsCommand).resolves({});
+    quickSightClientMock.on(UpdateDashboardPermissionsCommand).resolves({});
+
+    quickSightClientMock.on(DescribeTemplateDefinitionCommand).resolves({
+      ResourceStatus: ResourceStatus.UPDATE_SUCCESSFUL,
+    });
+
+    quickSightClientMock.on(ListTemplateVersionsCommand).resolves({
+      TemplateVersionSummaryList: [
+        {
+          VersionNumber: 1,
+        },
+      ],
+    });
+
+    quickSightClientMock.on(UpdateDashboardPublishedVersionCommand).resolves({
+      DashboardId: 'dashboard_0',
+    });
+
+    quickSightClientMock.on(DescribeAnalysisCommand).rejectsOnce(notExistError);
+    quickSightClientMock.on(DescribeDashboardCommand).rejectsOnce(notExistError);
+
+    quickSightClientMock.on(ListAnalysesCommand).resolvesOnce({
+      AnalysisSummaryList: [
+        {
+          AnalysisId: 'clickstream_analysis_test-database-name_test1_6c5318b3_tttttt',
+        },
+      ],
+    });
+
+    quickSightClientMock.on(ListDashboardsCommand).resolvesOnce({
+      DashboardSummaryList: [
+        {
+          DashboardId: 'clickstream_dashboard_test-database-name_test1_6c5318b3_tttttt',
+        },
+      ],
+    });
+
+    quickSightClientMock.on(DeleteAnalysisCommand).resolvesOnce({
+
+    });
+    quickSightClientMock.on(DeleteDashboardCommand).resolvesOnce({
+
+    });
+
+    const resp = await handler(updateEventWithNewDataSet, context) as CdkCustomResourceResponse;
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDataSetCommand, 4);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeAnalysisDefinitionCommand, 2);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDashboardDefinitionCommand, 2);
+
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeAnalysisCommand, 1);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDashboardCommand, 1);
+
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateAnalysisCommand, 1);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateDashboardCommand, 1);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(UpdateDataSetCommand, 1);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateDataSetCommand, 2);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteDataSetCommand, 1);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(UpdateAnalysisCommand, 0);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(UpdateDashboardCommand, 0);
+
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteAnalysisCommand, 1);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteDashboardCommand, 1);
 
     expect(resp.Data?.dashboards).toBeDefined();
     expect(JSON.parse(resp.Data?.dashboards)).toHaveLength(1);

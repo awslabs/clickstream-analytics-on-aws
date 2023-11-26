@@ -30,6 +30,7 @@ import {
 } from './stacks';
 import {
   awsUrlSuffix,
+  FULL_SOLUTION_VERSION,
   PIPELINE_STACKS,
   stackWorkflowS3Bucket,
 } from '../common/constants';
@@ -57,6 +58,7 @@ import {
   PipelineStatus,
   PipelineStatusType,
   RedshiftInfo,
+  StackUpdateParameter,
   WorkflowParallelBranch,
   WorkflowState,
   WorkflowStateType,
@@ -215,7 +217,7 @@ export interface IPipeline {
   readonly pipelineId: string;
   readonly region: string;
   readonly dataCollectionSDK: string;
-  readonly tags: ITag[];
+  tags: ITag[];
 
   readonly network: NetworkProps;
   readonly bucket: S3Bucket;
@@ -270,7 +272,7 @@ export class CPipeline {
     this.pipeline.executionName = `main-${uuidv4()}`;
     this.pipeline.workflow = await this.generateWorkflow();
 
-    this.pipeline.templateVersion = this.resources?.solution?.data.version ?? '';
+    this.pipeline.templateVersion = FULL_SOLUTION_VERSION;
 
     this.pipeline.executionArn = await this.stackManager.execute(this.pipeline.workflow, this.pipeline.executionName);
     // bind plugin
@@ -290,6 +292,7 @@ export class CPipeline {
       throw new ClickStreamBadRequestError('Pipeline Workflow can not empty.');
     }
     this.pipeline.lastAction = 'Update';
+    validateIngestionServerNum(this.pipeline.ingestionServer.size);
     this.pipeline.executionName = `main-${uuidv4()}`;
 
     this.pipeline.status = await this.stackManager.getPipelineStatus();
@@ -298,6 +301,22 @@ export class CPipeline {
       this.pipeline.status.status === PipelineStatusType.UPDATING) {
       throw new ClickStreamBadRequestError('Pipeline status can not allow update.');
     }
+    const { editStacks, editParameters } = await this._getEditStacksAndParameters(oldPipeline);
+    // update workflow
+    this.stackManager.updateWorkflowParameters(editParameters);
+    this.stackManager.updateWorkflowAction(editStacks);
+    // create new execution
+    const execWorkflow = this.stackManager.getExecWorkflow();
+    this.pipeline.executionArn = await this.stackManager.execute(execWorkflow, this.pipeline.executionName);
+    this.pipeline.templateVersion = oldPipeline.templateVersion;
+    this.pipeline.tags = oldPipeline.tags;
+    this.pipeline.workflow = this.stackManager.getWorkflow();
+
+    await store.updatePipeline(this.pipeline, oldPipeline);
+  }
+
+  private async _getEditStacksAndParameters(oldPipeline: IPipeline):
+  Promise<{ editStacks: string[]; editParameters: StackUpdateParameter[] }> {
     const newWorkflow = await this.generateWorkflow();
     const newStackParameters = this.stackManager.getWorkflowStackParametersMap(newWorkflow.Workflow);
     const oldStackParameters = this.stackManager.getWorkflowStackParametersMap(oldPipeline.workflow?.Workflow!);
@@ -315,29 +334,34 @@ export class CPipeline {
     const editKeys = diffParameters.edited.map(p => p[0]);
     const notAllowEdit: string[] = [];
     const editStacks: string[] = [];
+    const editParameters: StackUpdateParameter[] = [];
     for (let key of editKeys) {
       const stackName = key.split('.')[0];
       const paramName = key.split('.')[1];
+      if (stackName.startsWith(`Clickstream-${PipelineStackType.REPORTING}`) && oldPipeline.templateVersion?.startsWith('v1.0')) {
+        continue; // skip reporting stack when template version is v1.0
+      }
       if (!editStacks.includes(stackName)) {
         editStacks.push(stackName);
       }
       if (!AllowedList.includes(paramName)) {
         notAllowEdit.push(paramName);
+      } else {
+        editParameters.push({
+          stackName: stackName,
+          parameterKey: paramName,
+          parameterValue: diffParameters.edited.find(p => p[0] === key)?.[1],
+        });
       }
     }
     if (!isEmpty(notAllowEdit)) {
       throw new ClickStreamBadRequestError(`Property modification not allowed: ${notAllowEdit.join(',')}.`);
     }
-    // update workflow
-    this.stackManager.setExecWorkflow(newWorkflow);
-    this.stackManager.updateWorkflow(editStacks);
-    // create new execution
-    const execWorkflow = this.stackManager.getExecWorkflow();
-    this.pipeline.workflow = newWorkflow;
-    this.pipeline.executionArn = await this.stackManager.execute(execWorkflow, this.pipeline.executionName);
 
-    this.pipeline.templateVersion = oldPipeline.templateVersion;
-    await store.updatePipeline(this.pipeline, oldPipeline);
+    return {
+      editStacks,
+      editParameters,
+    };
   }
 
   public async upgrade(oldPipeline: IPipeline): Promise<void> {
@@ -345,7 +369,7 @@ export class CPipeline {
     validateIngestionServerNum(this.pipeline.ingestionServer.size);
     const executionName = `main-${uuidv4()}`;
     this.pipeline.executionName = executionName;
-    this.pipeline.templateVersion = this.resources?.solution?.data.version ?? '';
+    this.pipeline.templateVersion = FULL_SOLUTION_VERSION;
     this.pipeline.workflow = await this.generateWorkflow();
     this.stackManager.setExecWorkflow(this.pipeline.workflow);
     const oldStackNames = this.stackManager.getWorkflowStacks(oldPipeline.workflow?.Workflow!);
@@ -586,7 +610,7 @@ export class CPipeline {
       });
       this.pipeline.tags.push({
         key: BuiltInTagKeys.AWS_SOLUTION_VERSION,
-        value: this.resources?.solution.data.version,
+        value: FULL_SOLUTION_VERSION,
       });
       this.pipeline.tags.push({
         key: BuiltInTagKeys.CLICKSTREAM_PROJECT,
@@ -1020,21 +1044,11 @@ export class CPipeline {
     };
   };
 
-  public async getTemplateInfo() {
-    if (!this.resources?.solution) {
-      const solution = await store.getDictionary('Solution');
-      this.resources = {
-        ...this.resources,
-        solution,
-      };
-    }
-    if (!this.resources?.solution?.data.version) {
-      throw new ClickStreamBadRequestError('Error in obtaining the latest template version number.');
-    }
+  public getTemplateInfo() {
     return {
-      isLatest: this.pipeline.templateVersion === this.resources?.solution?.data.version,
+      isLatest: this.pipeline.templateVersion === FULL_SOLUTION_VERSION,
       pipelineVersion: this.pipeline.templateVersion,
-      solutionVersion: this.resources?.solution?.data.version,
+      solutionVersion: FULL_SOLUTION_VERSION,
     };
   };
 }

@@ -45,7 +45,7 @@ import { cloneDeep } from 'lodash';
 import React, { useContext, useEffect, useReducer, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { COMMON_ALERT_TYPE, IUserRole } from 'ts/const';
+import { COMMON_ALERT_TYPE } from 'ts/const';
 import {
   QUICKSIGHT_ANALYSIS_INFIX,
   QUICKSIGHT_DASHBOARD_INFIX,
@@ -63,8 +63,10 @@ import {
   alertMsg,
   defaultStr,
   generateStr,
+  getAbsoluteStartEndRange,
   getEventParameters,
   getUserInfoFromLocalStorage,
+  isAnalystAuthorRole,
 } from 'ts/utils';
 import {
   getDashboardCreateParameters,
@@ -79,10 +81,7 @@ import {
   validEventAnalyticsItem,
   validMultipleEventAnalyticsItems,
 } from '../analytics-utils';
-import ExploreDateRangePicker, {
-  DEFAULT_DAY_RANGE,
-  DEFAULT_WEEK_RANGE,
-} from '../comps/ExploreDateRangePicker';
+import ExploreDateRangePicker from '../comps/ExploreDateRangePicker';
 import ExploreEmbedFrame from '../comps/ExploreEmbedFrame';
 import SaveToDashboardModal from '../comps/SelectDashboardModal';
 import StartNodeSelect from '../comps/StartNodeSelect';
@@ -209,23 +208,6 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
     label: defaultStr(t('analytics:options.platformWeb')),
   };
 
-  const defaultMobilePlatformOption: SelectProps.Option = {
-    value: MetadataPlatform.ANDROID,
-    label: defaultStr(t('analytics:options.platformAndroid')),
-  };
-
-  const mobilePlatformOption: SelectProps.Options = [
-    defaultMobilePlatformOption,
-    {
-      value: MetadataPlatform.IOS,
-      label: defaultStr(t('analytics:options.platformIOS')),
-    },
-    {
-      value: MetadataPlatform.WECHAT_MINIPROGRAM,
-      label: defaultStr(t('analytics:options.platformWechatMinPro')),
-    },
-  ];
-
   const [startNodeOption, setStartNodeOption] = useState<IAnalyticsItem | null>(
     null
   );
@@ -249,16 +231,11 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
     }
   );
 
-  const [platformOptions, setPlatformOptions] = useState<SelectProps.Options>([
-    webPlatformOption,
-    ...mobilePlatformOption,
-  ]);
-
   const [selectedPlatform, setSelectedPlatform] =
     useState<SelectProps.Option | null>(webPlatformOption);
 
   const [dateRangeValue, setDateRangeValue] =
-    React.useState<DateRangePickerProps.Value>(DEFAULT_DAY_RANGE);
+    React.useState<DateRangePickerProps.Value>(getAbsoluteStartEndRange());
 
   const [timeGranularity, setTimeGranularity] = useState<SelectProps.Option>({
     value: ExploreGroupColumn.DAY,
@@ -285,7 +262,7 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
       type: 'resetFilterData',
       presetParameters,
     });
-    setDateRangeValue(DEFAULT_WEEK_RANGE);
+    setDateRangeValue(getAbsoluteStartEndRange());
     setTimeGranularity({
       value: ExploreGroupColumn.DAY,
       label: defaultStr(t('analytics:options.dayTimeGranularity')),
@@ -356,7 +333,7 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
     chartTitle?: string,
     chartSubTitle?: string
   ) => {
-    const eventId = generateStr(6);
+    const eventId = generateStr(6, true);
     const parameters = getDashboardCreateParameters(
       pipeline,
       window.location.origin
@@ -513,26 +490,6 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
   };
 
   useEffect(() => {
-    // Update platform Options by node type
-    if (selectedNodeType?.value) {
-      if (
-        selectedNodeType.value === ExplorePathNodeType.SCREEN_NAME ||
-        selectedNodeType.value === ExplorePathNodeType.SCREEN_ID
-      ) {
-        setPlatformOptions(mobilePlatformOption);
-        setSelectedPlatform(defaultMobilePlatformOption);
-      }
-      if (
-        selectedNodeType?.value === ExplorePathNodeType.PAGE_TITLE ||
-        selectedNodeType?.value === ExplorePathNodeType.PAGE_URL
-      ) {
-        setPlatformOptions([webPlatformOption]);
-        setSelectedPlatform(webPlatformOption);
-      }
-    }
-  }, [selectedNodeType]);
-
-  useEffect(() => {
     setCategoryEventsData(categoryEvents);
   }, [categoryEvents]);
 
@@ -542,10 +499,6 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
       presetParameters,
     });
   }, [presetParameters]);
-
-  useEffect(() => {
-    clickPreview();
-  }, [dateRangeValue]);
 
   return (
     <>
@@ -573,7 +526,7 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
                   >
                     {t('button.reset')}
                   </Button>
-                  {currentUser.role !== IUserRole.ANALYST_READER && (
+                  {isAnalystAuthorRole(currentUser?.roles) && (
                     <Button
                       variant="primary"
                       loading={loadingData}
@@ -663,17 +616,6 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
                     onChange={onNodeTypeChange}
                   />
                 </div>
-                {selectedNodeType?.value !== defaultNodeTypeOption?.value ? (
-                  <div className="cs-analytics-session-window-unit">
-                    <Select
-                      selectedOption={selectedPlatform}
-                      options={platformOptions}
-                      onChange={(event) => {
-                        setSelectedPlatform(event.detail.selectedOption);
-                      }}
-                    />
-                  </div>
-                ) : null}
               </div>
             </SpaceBetween>
           </div>
@@ -740,7 +682,7 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
                 eventDataState={eventDataState}
                 eventDataDispatch={eventDataDispatch}
                 addEventButtonLabel={t('common:button.addNode')}
-                eventOptionList={categoryEvents}
+                eventOptionList={categoryEventsData}
                 defaultComputeMethodOption={defaultComputeMethodOption}
                 metadataEvents={metadataEvents}
                 metadataUserAttributes={metadataUserAttributes}

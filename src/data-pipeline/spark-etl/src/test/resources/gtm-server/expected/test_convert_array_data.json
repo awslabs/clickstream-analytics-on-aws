@@ -15,13 +15,14 @@
   "ua" : null,
   "uri" : "/collect?appId=example_clickstream_analytics_aws",
   "dataOut" : {
+    "_corrupt_record" : null,
     "gtmId" : "G-000000002",
     "gtmVersion" : "45je39i0",
-    "event_id" : "0-1695260713-2-448657059.1695257753",
+    "event_id" : "0-1695260713-2",
     "user_id" : null,
     "event_name" : "PDP Clicks",
     "ip" : "70.123.241.83",
-    "clientId" : "iKnHPfmF/8zea3TUOsTqbFpmAmhkTiNVL6Awhe5b43k=.1695257753",
+    "client_id" : "iKnHPfmF/8zea3TUOsTqbFpmAmhkTiNVL6Awhe5b43k=.1695257753",
     "ua" : "Mozilla/5.0 (iPhone; CPU iPhone OS 16_6_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1",
     "language" : "en-us",
     "screenWidth" : 428,
@@ -31,6 +32,7 @@
     "clientModel" : null,
     "clientPlatform" : null,
     "clientPlatformVersion" : null,
+    "clientBrand" : null,
     "eventParams" : [ {
       "key" : "x-ga-tfd",
       "value" : {
@@ -40,7 +42,7 @@
         "string_value" : null
       }
     }, {
-      "key" : "page_title",
+      "key" : "_page_title",
       "value" : {
         "double_value" : null,
         "float_value" : null,
@@ -54,6 +56,14 @@
         "float_value" : null,
         "int_value" : null,
         "string_value" : ""
+      }
+    }, {
+      "key" : "_page_referrer",
+      "value" : {
+        "double_value" : null,
+        "float_value" : null,
+        "int_value" : null,
+        "string_value" : "https://www.example.com/product/screen-protector"
       }
     }, {
       "key" : "engagement_time_msec",
@@ -78,14 +88,6 @@
         "float_value" : null,
         "int_value" : null,
         "string_value" : "1695261225665"
-      }
-    }, {
-      "key" : "ga_session_id",
-      "value" : {
-        "double_value" : null,
-        "float_value" : null,
-        "int_value" : null,
-        "string_value" : "1695260713"
       }
     }, {
       "key" : "id",
@@ -160,12 +162,12 @@
         "string_value" : null
       }
     }, {
-      "key" : "page_location",
+      "key" : "_session_id",
       "value" : {
         "double_value" : null,
         "float_value" : null,
         "int_value" : null,
-        "string_value" : "https://www.example.com/product/black-kingsnake/iphone-15-pro-max/reexample-impact-case?artwork_name=black-kingsnake&device=iphone-15-pro-max&product=ultra-bounce-case-magsafe-compatible"
+        "string_value" : "1695260713"
       }
     }, {
       "key" : "x-ga-protocol_version",
@@ -174,6 +176,14 @@
         "float_value" : null,
         "int_value" : null,
         "string_value" : "2"
+      }
+    }, {
+      "key" : "_page_url",
+      "value" : {
+        "double_value" : null,
+        "float_value" : null,
+        "int_value" : null,
+        "string_value" : "https://www.example.com/product/black-kingsnake/iphone-15-pro-max/reexample-impact-case?artwork_name=black-kingsnake&device=iphone-15-pro-max&product=ultra-bounce-case-magsafe-compatible"
       }
     }, {
       "key" : "x-ga-gtm_version",
@@ -198,14 +208,6 @@
         "float_value" : null,
         "int_value" : null,
         "string_value" : "1"
-      }
-    }, {
-      "key" : "page_referrer",
-      "value" : {
-        "double_value" : null,
-        "float_value" : null,
-        "int_value" : null,
-        "string_value" : "https://www.example.com/product/screen-protector"
       }
     }, {
       "key" : "x-ga-js_client_id",

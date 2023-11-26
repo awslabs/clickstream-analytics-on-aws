@@ -445,8 +445,8 @@ describe('Metadata Event test', () => {
         dataVolumeLastDay: 1,
         displayName: `display name of event ${MOCK_EVENT_NAME}`,
         description: {
-          'en-US': 'mock event description in built-in',
-          'zh-CN': '内置事件的描述',
+          'en-US': 'Description of event event-mock',
+          'zh-CN': 'event-mock说明',
         },
       },
     });
@@ -534,8 +534,8 @@ describe('Metadata Event test', () => {
         dataVolumeLastDay: 0,
         displayName: `display name of event ${MOCK_EVENT_NAME}`,
         description: {
-          'en-US': 'mock event description in built-in',
-          'zh-CN': '内置事件的描述',
+          'en-US': 'Description of event event-mock',
+          'zh-CN': 'event-mock说明',
         },
       },
     });
@@ -968,8 +968,8 @@ describe('Metadata Event test', () => {
             name: `${MOCK_EVENT_NAME}`,
             displayName: `display name of event ${MOCK_EVENT_NAME}`,
             description: {
-              'en-US': 'mock event description in built-in',
-              'zh-CN': '内置事件的描述',
+              'en-US': 'Description of event event-mock',
+              'zh-CN': 'event-mock说明',
             },
             metadataSource: MetadataSource.PRESET,
             hasData: false,
@@ -1130,8 +1130,8 @@ describe('Metadata Event Attribute test', () => {
             metadataSource: MetadataSource.PRESET,
             displayName: `display name of event ${MOCK_EVENT_NAME}`,
             description: {
-              'en-US': 'mock event description in built-in',
-              'zh-CN': '内置事件的描述',
+              'en-US': 'Description of event event-mock',
+              'zh-CN': 'event-mock说明',
             },
           },
           {
@@ -1209,8 +1209,8 @@ describe('Metadata Event Attribute test', () => {
             metadataSource: MetadataSource.PRESET,
             displayName: `display name of event ${MOCK_EVENT_NAME}`,
             description: {
-              'en-US': 'mock event description in built-in',
-              'zh-CN': '内置事件的描述',
+              'en-US': 'Description of event event-mock',
+              'zh-CN': 'event-mock说明',
             },
           },
         ],
@@ -1591,8 +1591,8 @@ describe('Metadata User Attribute test', () => {
             appId: MOCK_APP_ID,
             name: MOCK_USER_ATTRIBUTE_NAME,
             description: {
-              'en-US': 'mock preset user attribute description in built-in',
-              'zh-CN': '内置用户属性的描述',
+              'en-US': 'Description of user parameter user-attribute-mock',
+              'zh-CN': 'user-attribute-mock参数说明',
             },
             displayName: 'display name of user parameter user-attribute-mock',
             category: ConditionCategory.USER_OUTER,
@@ -1678,8 +1678,8 @@ describe('Metadata User Attribute test', () => {
             appId: MOCK_APP_ID,
             name: MOCK_USER_ATTRIBUTE_NAME,
             description: {
-              'en-US': 'mock preset user attribute description in built-in',
-              'zh-CN': '内置用户属性的描述',
+              'en-US': 'Description of user parameter user-attribute-mock',
+              'zh-CN': 'user-attribute-mock参数说明',
             },
             displayName: 'display name of user parameter user-attribute-mock',
             category: ConditionCategory.USER_OUTER,

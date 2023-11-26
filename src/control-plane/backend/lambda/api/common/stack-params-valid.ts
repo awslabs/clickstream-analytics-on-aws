@@ -133,7 +133,7 @@ export const validateSinkBatch = (sinkType: PipelineSinkType, sinkBatch: Ingesti
 export const validateIngestionServerNum = (serverSize: IngestionServerSizeProps) => {
   if (serverSize.serverMin === 1 && serverSize.serverMax === 1) {
     throw new ClickStreamBadRequestError(
-      'Validation error: this pipeline not allow to upgrade with the server size minimum and maximum are 1.',
+      'Validation error: this pipeline not allow to update with the server size minimum and maximum are 1.',
     );
   }
   return true;
@@ -339,7 +339,7 @@ async function _getRedshiftServerlessConfiguration(pipeline: IPipeline, vpcSubne
 async function _checkForReporting(pipeline: IPipeline, quickSightSubnets: ClickStreamSubnet[],
   portOfRedshift: number, redshiftSecurityGroups: string[], redshiftSecurityGroupsRules: SecurityGroupRule[],
   redshiftType: string) {
-  if (pipeline.reporting) {
+  if (pipeline.reporting?.quickSight) {
     const accountInfo = await describeAccountSubscription();
     if (!accountInfo.AccountInfo?.Edition?.includes('ENTERPRISE')) {
       throw new ClickStreamBadRequestError(

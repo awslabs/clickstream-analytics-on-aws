@@ -26,11 +26,12 @@ const awsPartition = process.env.AWS_PARTITION;
 const awsAccountId = process.env.AWS_ACCOUNT_ID;
 const awsUrlSuffix = process.env.AWS_URL_SUFFIX;
 const STSUploadRole = process.env.STS_UPLOAD_ROLE_ARN;
-const APIRoleName = process.env.API_ROLE_NAME;
 const QuickSightEmbedRoleArn = process.env.QUICKSIGHT_EMBED_ROLE_ARN;
 const amznRequestContextHeader = 'x-amzn-request-context';
+const amznLambdaContextHeader = 'x-amzn-lambda-context';
 const ALLOW_UPLOADED_FILE_TYPES = process.env.ALLOW_UPLOADED_FILE_TYPES ?? 'jar,mmdb';
 const QUICKSIGHT_CONTROL_PLANE_REGION = process.env.QUICKSIGHT_CONTROL_PLANE_REGION ?? 'us-east-1';
+const FULL_SOLUTION_VERSION = process.env.FULL_SOLUTION_VERSION ?? 'v1.0.0';
 const SDK_MAVEN_VERSION_API_LINK =
   'https://search.maven.org/solrsearch/select?q=g:%22software.aws.solution%22+AND+a:%22clickstream%22&wt=json';
 const PIPELINE_SUPPORTED_REGIONS = [
@@ -63,6 +64,7 @@ const PIPELINE_SUPPORTED_REGIONS = [
 ];
 
 const DEFAULT_ROLE_JSON_PATH = '$.payload.cognito:groups';
+const DEFAULT_ADMIN_ROLE_NAMES = 'ClickstreamAdmin';
 const DEFAULT_OPERATOR_ROLE_NAMES = 'ClickstreamOperator';
 const DEFAULT_ANALYST_ROLE_NAMES = 'ClickstreamAnalyst';
 const DEFAULT_ANALYST_READER_ROLE_NAMES = 'ClickstreamAnalystReader';
@@ -94,15 +96,16 @@ export {
   awsAccountId,
   awsUrlSuffix,
   STSUploadRole,
-  APIRoleName,
   QuickSightEmbedRoleArn,
   amznRequestContextHeader,
+  amznLambdaContextHeader,
   QUICKSIGHT_CONTROL_PLANE_REGION,
   SDK_MAVEN_VERSION_API_LINK,
   PIPELINE_SUPPORTED_REGIONS,
   ALLOW_UPLOADED_FILE_TYPES,
   QUICKSIGHT_EMBED_NO_REPLY_EMAIL,
   DEFAULT_ROLE_JSON_PATH,
+  DEFAULT_ADMIN_ROLE_NAMES,
   DEFAULT_OPERATOR_ROLE_NAMES,
   DEFAULT_ANALYST_ROLE_NAMES,
   DEFAULT_ANALYST_READER_ROLE_NAMES,
@@ -112,4 +115,5 @@ export {
   SOLUTION_DATA_PROCESSING_VPC_ENDPOINTS,
   SOLUTION_DATA_MODELING_VPC_ENDPOINTS,
   SOLUTION_VPC_ENDPOINTS,
+  FULL_SOLUTION_VERSION,
 };

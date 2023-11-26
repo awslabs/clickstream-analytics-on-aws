@@ -6,6 +6,9 @@
       "pathAnalysis": "Path analysis",
       "retentionAnalysis": "Retention analysis",
       "tableChart": "Detail information"
+    },
+    "filter": {
+      "scope": "Time filter scope is based on saved settings. Data out of scope can not be fetched."
     }
   }
 }

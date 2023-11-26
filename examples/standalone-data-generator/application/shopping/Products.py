@@ -47,6 +47,10 @@ def get_random_category_product(category, number):
     return product_list
 
 
+def get_random_live_product():
+    return random.sample(live, 1)[0]
+
+
 def get_exposure_events(user, products, event, feature):
     events = []
     for product in products:
@@ -162,6 +166,32 @@ def get_purchase_event(user, products, event):
     return ShoppingApp.get_final_event(user, EventType.PURCHASE, purchase_event)
 
 
+live = [
+    {
+        "id": "9d1be460-7c75-4627-990d-1f1a6731dc3e",
+        "name": "Camera Tripod",
+        "category": "tools",
+        "style": "camera",
+        "price": 49,
+        "current_stock": 10
+    },
+    {
+        "id": "638012bd-b70e-4035-bf83-fbb777c7a6ea",
+        "name": "Grandma's Mascara",
+        "category": "beauty",
+        "style": "grooming",
+        "price": 18,
+        "current_stock": 13
+    },
+    {
+        "id": "79fc3af3-c071-4e26-9062-b869f2ec128d",
+        "name": "Nice Stripy Blouse",
+        "category": "jewelry",
+        "style": "shirt",
+        "price": 39,
+        "current_stock": 10
+    }
+]
 books = [
     {
         "id": "e53a6570-3a3f-4ca8-b6dc-8ff378bca757",

@@ -252,7 +252,11 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
 
       const waitAndRetry = new Wait(this, `${odsTableName} - Wait and Retry`, {
         time: WaitTime.duration(Duration.seconds(120)),
-      }).next(submitJob);
+      }).next(
+        new Pass(this, `${odsTableName} - Set parameters`, {
+          outputPath: '$.detail',
+        }),
+      ).next(submitJob);
 
       // Create sub chain
       const subDefinition = submitJob

@@ -73,7 +73,7 @@ import {
   BASE_STATUS,
   S3_DATA_PROCESSING_WITH_ERROR_PREFIX_PIPELINE,
 } from './pipeline-mock';
-import { clickStreamTableName, dictionaryTableName, prefixTimeGSIName } from '../../common/constants';
+import { FULL_SOLUTION_VERSION, clickStreamTableName, dictionaryTableName, prefixTimeGSIName } from '../../common/constants';
 import { BuiltInTagKeys } from '../../common/model-ln';
 import { PipelineStatusType } from '../../common/types';
 import { app, server } from '../../index';
@@ -945,7 +945,7 @@ describe('Pipeline test', () => {
       message: 'Template: AppRegistry not found in dictionary.',
       success: false,
     });
-    expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 0);
+    expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 1);
   });
   it('Create pipeline with mock error', async () => {
     tokenMock(ddbMock, false);
@@ -971,7 +971,7 @@ describe('Pipeline test', () => {
       message: 'Unexpected error occurred at server.',
       error: 'Error',
     });
-    expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 0);
+    expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 1);
   });
   it('Create pipeline 400', async () => {
     tokenMock(ddbMock, false);
@@ -1027,7 +1027,7 @@ describe('Pipeline test', () => {
         },
       ],
     });
-    expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 0);
+    expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 1);
   });
   it('Create pipeline with non-existent project', async () => {
     tokenMock(ddbMock, false);
@@ -1052,7 +1052,7 @@ describe('Pipeline test', () => {
         },
       ],
     });
-    expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 0);
+    expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 1);
   });
   it('Get pipeline by ID', async () => {
     projectExistedMock(ddbMock, true);
@@ -1235,9 +1235,9 @@ describe('Pipeline test', () => {
           },
         ],
         templateInfo: {
-          isLatest: true,
-          pipelineVersion: 'v1.0.0',
-          solutionVersion: 'v1.0.0',
+          isLatest: false,
+          pipelineVersion: MOCK_SOLUTION_VERSION,
+          solutionVersion: FULL_SOLUTION_VERSION,
         },
         metricsDashboardName: 'clickstream_dashboard_notepad_mtzfsocy',
       },
@@ -1401,9 +1401,9 @@ describe('Pipeline test', () => {
         dashboards: [],
         metricsDashboardName: '',
         templateInfo: {
-          isLatest: true,
-          pipelineVersion: 'v1.0.0',
-          solutionVersion: 'v1.0.0',
+          isLatest: false,
+          pipelineVersion: MOCK_SOLUTION_VERSION,
+          solutionVersion: FULL_SOLUTION_VERSION,
         },
       },
     });
@@ -1491,9 +1491,9 @@ describe('Pipeline test', () => {
         dashboards: [],
         metricsDashboardName: '',
         templateInfo: {
-          isLatest: true,
-          pipelineVersion: 'v1.0.0',
-          solutionVersion: 'v1.0.0',
+          isLatest: false,
+          pipelineVersion: MOCK_SOLUTION_VERSION,
+          solutionVersion: FULL_SOLUTION_VERSION,
         },
       },
     });
@@ -3013,7 +3013,8 @@ describe('Pipeline test', () => {
     ddbMock.on(TransactWriteItemsCommand).callsFake(input => {
       expect(
         input.TransactItems[0].Put.Item.templateVersion.S === 'v0.0.0' &&
-        input.TransactItems[1].Update.ExpressionAttributeValues[':templateVersion'].S === 'v0.0.0',
+        input.TransactItems[1].Update.ExpressionAttributeValues[':templateVersion'].S === 'v0.0.0' &&
+        input.TransactItems[1].Update.ExpressionAttributeValues[':tags'].L[2].M.value.S === MOCK_SOLUTION_VERSION,
       ).toBeTruthy();
     });
     const res = await request(app)
@@ -3136,6 +3137,78 @@ describe('Pipeline test', () => {
     });
 
     ddbMock.on(TransactWriteItemsCommand).resolves({});
+    const res = await request(app)
+      .put(`/api/pipeline/${MOCK_PIPELINE_ID}`)
+      .send({
+        ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_UPDATE_PIPELINE_WITH_WORKFLOW,
+      });
+    expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 6);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(201);
+    expect(res.body).toEqual({
+      data: {
+        id: MOCK_PIPELINE_ID,
+      },
+      success: true,
+      message: 'Pipeline updated.',
+    });
+  });
+  it('Update pipeline v1.0 on v1.1 control plane', async () => {
+    tokenMock(ddbMock, false);
+    projectExistedMock(ddbMock, true);
+    dictionaryMock(ddbMock);
+    createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock,
+      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, iamMock, {
+        publicAZContainPrivateAZ: true,
+        subnetsCross3AZ: true,
+        subnetsIsolated: true,
+        update: true,
+        updatePipeline: {
+          ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_UPDATE_PIPELINE_WITH_WORKFLOW,
+          templateVersion: 'v1.0.0',
+          tags: [
+            { key: BuiltInTagKeys.AWS_SOLUTION_VERSION, value: 'v1.0.0' },
+          ],
+        },
+      });
+    cloudFormationMock.on(DescribeStacksCommand).resolves({
+      Stacks: [
+        {
+          StackName: 'xxx',
+          Outputs: [
+            {
+              OutputKey: 'IngestionServerC000IngestionServerURL',
+              OutputValue: 'http://xxx/xxx',
+            },
+            {
+              OutputKey: 'IngestionServerC000IngestionServerDNS',
+              OutputValue: 'http://yyy/yyy',
+            },
+            {
+              OutputKey: 'Dashboards',
+              OutputValue: '[{"appId":"app1","dashboardId":"clickstream_dashboard_v1_notepad_mtzfsocy_app1"},{"appId":"app2","dashboardId":"clickstream_dashboard_v1_notepad_mtzfsocy_app2"}]',
+            },
+            {
+              OutputKey: 'ObservabilityDashboardName',
+              OutputValue: 'clickstream_dashboard_notepad_mtzfsocy',
+            },
+          ],
+          StackStatus: StackStatus.CREATE_COMPLETE,
+          CreationTime: new Date(),
+        },
+      ],
+    });
+
+    ddbMock.on(TransactWriteItemsCommand).callsFake(input => {
+      const expressionAttributeValues = input.TransactItems[1].Update.ExpressionAttributeValues;
+      const reportInput = expressionAttributeValues[':workflow'].M.Workflow.M.Branches.L[1].M.States.M.Reporting.M.Data.M.Input;
+      expect(
+        expressionAttributeValues[':templateVersion'].S === 'v1.0.0' &&
+        expressionAttributeValues[':tags'].L[0].M.value.S === 'v1.0.0' &&
+        reportInput.M.Parameters.L[0].M.ParameterValue.S === 'Admin/fakeUser' &&
+        reportInput.M.Parameters.L[1].M.ParameterValue.S === 'arn:aws:quicksight:us-west-2:555555555555:user/default/Admin/fakeUser',
+      ).toBeTruthy();
+    });
     const res = await request(app)
       .put(`/api/pipeline/${MOCK_PIPELINE_ID}`)
       .send({
@@ -3397,8 +3470,48 @@ describe('Pipeline test', () => {
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.body).toEqual({
       success: false,
-      message: 'Validation error: this pipeline not allow to upgrade with the server size minimum and maximum are 1.',
+      message: 'Validation error: this pipeline not allow to update with the server size minimum and maximum are 1.',
     });
+  });
+  it('Upgrade pipeline with empty reporting object', async () => {
+    tokenMock(ddbMock, false);
+    projectExistedMock(ddbMock, true);
+    dictionaryMock(ddbMock);
+    createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock,
+      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, iamMock, {
+        publicAZContainPrivateAZ: true,
+        subnetsCross3AZ: true,
+        subnetsIsolated: true,
+        update: true,
+        updatePipeline: {
+          ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW_FOR_UPGRADE,
+          reporting: {},
+        },
+      });
+    cloudFormationMock.on(DescribeStacksCommand).resolves({
+      Stacks: [
+        {
+          StackName: 'xxx',
+          StackStatus: StackStatus.CREATE_COMPLETE,
+          CreationTime: new Date(),
+        },
+      ],
+    });
+    sfnMock.on(StartExecutionCommand).resolves({ executionArn: 'xxx' });
+    ddbMock.on(TransactWriteItemsCommand).resolves({});
+    quickSightMock.on(DescribeAccountSubscriptionCommand).resolves({});
+    let res = await request(app)
+      .post(`/api/pipeline/${MOCK_PIPELINE_ID}/upgrade?pid=${MOCK_PROJECT_ID}`)
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.body).toEqual({
+      data: {
+        id: MOCK_PIPELINE_ID,
+      },
+      success: true,
+      message: 'Pipeline upgraded.',
+    });
+    expect(quickSightMock).toHaveReceivedCommandTimes(DescribeAccountSubscriptionCommand, 0);
   });
   it('Upgrade pipeline with error status', async () => {
     tokenMock(ddbMock, false);

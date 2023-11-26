@@ -129,7 +129,7 @@ export const INGESTION_S3_PARAMETERS = mergeParameters(
   [
     {
       ParameterKey: 'ServerMax',
-      ParameterValue: '1',
+      ParameterValue: '2',
     },
     {
       ParameterKey: 'ServerMin',
@@ -257,6 +257,44 @@ export const INGESTION_MSK_WITHOUT_APP_PARAMETERS = mergeParameters(
 export const INGESTION_KINESIS_ON_DEMAND_PARAMETERS = mergeParameters(
   BASE_INGESTION_PARAMETERS,
   [
+    {
+      ParameterKey: 'KinesisStreamMode',
+      ParameterValue: 'ON_DEMAND',
+    },
+    {
+      ParameterKey: 'KinesisShardCount',
+      ParameterValue: '3',
+    },
+    {
+      ParameterKey: 'KinesisDataRetentionHours',
+      ParameterValue: '24',
+    },
+    {
+      ParameterKey: 'KinesisBatchSize',
+      ParameterValue: '10000',
+    },
+    {
+      ParameterKey: 'KinesisMaxBatchingWindowSeconds',
+      ParameterValue: '180',
+    },
+    {
+      ParameterKey: 'KinesisDataS3Bucket',
+      ParameterValue: 'EXAMPLE_BUCKET',
+    },
+    {
+      ParameterKey: 'KinesisDataS3Prefix',
+      ParameterValue: 'clickstream/project_8888_8888/data/buffer/',
+    },
+  ],
+);
+
+export const INGESTION_THIRDPARTY_SDK_KINESIS_ON_DEMAND_PARAMETERS = mergeParameters(
+  BASE_INGESTION_PARAMETERS,
+  [
+    {
+      ParameterKey: 'ClickStreamSDK',
+      ParameterValue: 'No',
+    },
     {
       ParameterKey: 'KinesisStreamMode',
       ParameterValue: 'ON_DEMAND',
@@ -564,6 +602,24 @@ export const DATA_PROCESSING_PLUGIN3_PARAMETERS = mergeParameters(
     {
       ParameterKey: 'TransformerAndEnrichClassNames',
       ParameterValue: 'software.aws.solution.clickstream.TransformerV2,software.aws.solution.clickstream.UAEnrichment,software.aws.solution.clickstream.IPEnrichment,test.aws.solution.main',
+    },
+    {
+      ParameterKey: 'S3PathPluginJars',
+      ParameterValue: 's3://example-bucket/pipeline/jars/test-enrich-0.1.0.jar',
+    },
+    {
+      ParameterKey: 'S3PathPluginFiles',
+      ParameterValue: 's3://example-bucket/pipeline/files/data3.mmdb,s3://example-bucket/pipeline/files/data4.mmdb',
+    },
+  ],
+);
+
+export const DATA_PROCESSING_THIRDPARTY_SDK_PLUGIN3_PARAMETERS = mergeParameters(
+  BASE_DATA_PROCESSING_PARAMETERS,
+  [
+    {
+      ParameterKey: 'TransformerAndEnrichClassNames',
+      ParameterValue: 'software.aws.solution.clickstream.gtm.GTMServerDataTransformer,software.aws.solution.clickstream.UAEnrichment,software.aws.solution.clickstream.IPEnrichment,test.aws.solution.main',
     },
     {
       ParameterKey: 'S3PathPluginJars',

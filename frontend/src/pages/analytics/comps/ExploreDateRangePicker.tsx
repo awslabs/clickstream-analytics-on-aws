@@ -23,12 +23,6 @@ import { useTranslation } from 'react-i18next';
 import { ExploreGroupColumn } from 'ts/explore-types';
 import { defaultStr } from 'ts/utils';
 
-export const DEFAULT_DAY_RANGE: DateRangePickerProps.RelativeOption = {
-  key: 'previous-7-day',
-  amount: 7,
-  unit: 'day',
-  type: 'relative',
-};
 export const DEFAULT_WEEK_RANGE: DateRangePickerProps.RelativeOption = {
   key: 'previous-1-week',
   amount: 1,
@@ -45,7 +39,7 @@ export const DEFAULT_MONTH_RANGE: DateRangePickerProps.RelativeOption = {
 
 interface IExploreDateRangePickerProps {
   disableSelect: boolean;
-  dateRangeValue: DateRangePickerProps.Value | null;
+  dateRangeValue: DateRangePickerProps.Value;
   timeGranularity: SelectProps.Option;
   timeGranularityVisible: boolean;
   setDateRangeValue: (value: DateRangePickerProps.Value) => void;
@@ -72,7 +66,6 @@ const ExploreDateRangePicker: React.FC<IExploreDateRangePickerProps> = (
       unit: 'day',
       type: 'relative',
     },
-    DEFAULT_DAY_RANGE,
     DEFAULT_WEEK_RANGE,
     {
       key: 'previous-2-week',
@@ -144,22 +137,12 @@ const ExploreDateRangePicker: React.FC<IExploreDateRangePickerProps> = (
 
   return (
     <div className="cs-analytics-data-range">
-      {timeGranularityVisible && (
-        <Select
-          disabled={disableSelect}
-          selectedOption={timeGranularity}
-          options={timeGranularityOptions}
-          onChange={(event) => {
-            setTimeGranularity(event.detail.selectedOption);
-          }}
-        />
-      )}
       <DateRangePicker
         disabled={disableSelect}
         onChange={({ detail }) => {
           setDateRangeValue(detail.value as DateRangePickerProps.Value);
         }}
-        value={dateRangeValue ?? null}
+        value={dateRangeValue}
         dateOnly
         relativeOptions={relativeOptions}
         isValidRange={isValidRange}
@@ -192,6 +175,16 @@ const ExploreDateRangePicker: React.FC<IExploreDateRangePickerProps> = (
           },
         }}
       />
+      {timeGranularityVisible && (
+        <Select
+          disabled={disableSelect}
+          selectedOption={timeGranularity}
+          options={timeGranularityOptions}
+          onChange={(event) => {
+            setTimeGranularity(event.detail.selectedOption);
+          }}
+        />
+      )}
     </div>
   );
 };

@@ -23,6 +23,7 @@ import software.aws.solution.clickstream.BaseSparkTest;
 import java.io.IOException;
 
 import static java.util.Objects.requireNonNull;
+import static org.apache.spark.sql.functions.col;
 import static software.aws.solution.clickstream.ContextUtil.*;
 
 public class ServerDataConverterTest extends BaseSparkTest {
@@ -37,7 +38,8 @@ public class ServerDataConverterTest extends BaseSparkTest {
 
         Dataset<Row> dataset =
                 spark.read().json(requireNonNull(getClass().getResource("/gtm-server/server-single.json")).getPath());
-        Dataset<Row> outDataset = converter.transform(dataset);
+        Dataset<Row> outDataset = converter.transform(dataset)
+                .filter(col("rid").equalTo("7da14049fe2aca7ea98c9f4b2b3c6f4a"));
         String expectedJson = resourceFileAsString("/gtm-server/expected/test_convert_single_data.json");
         Assertions.assertEquals(expectedJson, outDataset.first().prettyJson());
     }
@@ -52,7 +54,8 @@ public class ServerDataConverterTest extends BaseSparkTest {
 
         Dataset<Row> dataset =
                 spark.read().json(requireNonNull(getClass().getResource("/gtm-server/server-array.json")).getPath());
-        Dataset<Row> outDataset = converter.transform(dataset);
+        Dataset<Row> outDataset = converter.transform(dataset)
+                .filter(col("rid").equalTo("4a31fde2533e11dd2b0e7800720f6f86"));
         String expectedJson = resourceFileAsString("/gtm-server/expected/test_convert_array_data.json");
         Assertions.assertEquals(expectedJson, outDataset.first().prettyJson());
     }
@@ -67,7 +70,8 @@ public class ServerDataConverterTest extends BaseSparkTest {
 
         Dataset<Row> dataset =
                 spark.read().json(requireNonNull(getClass().getResource("/gtm-server/server-user.json")).getPath());
-        Dataset<Row> outDataset = converter.transform(dataset);
+        Dataset<Row> outDataset = converter.transform(dataset)
+                .filter(col("rid").equalTo("43cc3b89d7dfccbc2c906eb125ea25db"));
         String expectedJson = resourceFileAsString("/gtm-server/expected/test_convert_user_data.json");
         Assertions.assertEquals(expectedJson, outDataset.first().prettyJson());
     }
@@ -81,9 +85,42 @@ public class ServerDataConverterTest extends BaseSparkTest {
 
         Dataset<Row> dataset =
                 spark.read().json(requireNonNull(getClass().getResource("/gtm-server/server-items.json")).getPath());
-        Dataset<Row> outDataset = converter.transform(dataset);
+        Dataset<Row> outDataset = converter.transform(dataset)
+                .filter(col("rid").equalTo("25aefd4cb653fd0fcbac33e24fd3f0ba"));
         String expectedJson = resourceFileAsString("/gtm-server/expected/test_convert_items_data.json");
         Assertions.assertEquals(expectedJson, outDataset.first().prettyJson());
+    }
+
+    @Test
+    void test_convert_no_js_client_id() throws IOException {
+        // DOWNLOAD_FILE=0 ./gradlew clean test --info --tests software.aws.solution.clickstream.gtm.ServerDataConverterTest.test_convert_no_js_client_id
+        System.setProperty(APP_IDS_PROP, "testApp");
+        System.setProperty(PROJECT_ID_PROP, "gtm_server_demo_https");
+        System.setProperty(DEBUG_LOCAL_PROP, "false");
+
+        Dataset<Row> dataset =
+                spark.read().json(requireNonNull(getClass().getResource("/gtm-server/test-convert-no-js-client-id.json")).getPath());
+        Dataset<Row> outDataset = converter.transform(dataset)
+                .filter(col("rid").equalTo("7aec82f779dc4d911c272e704aa5e68c"));
+        String expectedJson = resourceFileAsString("/gtm-server/expected/test_convert_no_js_client_id.json");
+        Assertions.assertEquals(expectedJson, outDataset.first().prettyJson());
+        Assertions.assertEquals(3, outDataset.count());
+    }
+
+    @Test
+    void test_convert_corrupt_data() {
+        // DOWNLOAD_FILE=0 ./gradlew clean test --info --tests software.aws.solution.clickstream.gtm.ServerDataConverterTest.test_convert_corrupt_data
+        System.setProperty(APP_IDS_PROP, "testApp");
+        System.setProperty(PROJECT_ID_PROP, "gtm_server_demo_https");
+        System.setProperty(DEBUG_LOCAL_PROP, "false");
+
+        Dataset<Row> dataset =
+                spark.read().json(requireNonNull(getClass().getResource("/gtm-server/test-convert-corrupt.json")).getPath());
+        Dataset<Row> outDataset = converter.transform(dataset);
+        Assertions.assertEquals(0, outDataset.count());
+        Dataset<Row> corrupDataset =
+                spark.read().json("/tmp/warehouse/etl_gtm_corrupted_json_data");
+        Assertions.assertTrue(corrupDataset.count() > 0);
     }
 
 }

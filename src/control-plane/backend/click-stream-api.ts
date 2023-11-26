@@ -53,6 +53,7 @@ import { QUICKSIGHT_RESOURCE_NAME_PREFIX, QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX }
 import { cloudWatchSendLogs, createENI } from '../../common/lambda';
 import { createLogGroup } from '../../common/logs';
 import { POWERTOOLS_ENVS } from '../../common/powertools';
+import { SolutionInfo } from '../../common/solution-info';
 
 export interface DicItem {
   readonly name: string;
@@ -67,7 +68,6 @@ export interface ApplicationLoadBalancerProps {
 
 export interface AuthProps {
   readonly issuer: string;
-  readonly authorizerTable: Table;
 }
 
 export interface ApiGatewayProps {
@@ -396,13 +396,12 @@ export class ClickStreamApiConstruct extends Construct {
         AWS_URL_SUFFIX: Aws.URL_SUFFIX,
         WITH_AUTH_MIDDLEWARE: props.fronting === 'alb' ? 'true' : 'false',
         ISSUER: props.authProps?.issuer ?? '',
-        AUTHORIZER_TABLE_NAME: props.authProps?.authorizerTable.tableName ?? '',
         STS_UPLOAD_ROLE_ARN: uploadRole.roleArn,
-        API_ROLE_NAME: clickStreamApiFunctionRole.roleName,
         QUICKSIGHT_EMBED_ROLE_ARN: this.getQuickSightEmbedRoleArn(props.targetToCNRegions),
         HEALTH_CHECK_PATH: props.healthCheckPath,
         QUICKSIGHT_CONTROL_PLANE_REGION: props.targetToCNRegions ? 'cn-north-1' : 'us-east-1',
         WITH_VALIDATE_ROLE: 'true',
+        FULL_SOLUTION_VERSION: SolutionInfo.SOLUTION_VERSION,
         ... POWERTOOLS_ENVS,
       },
       timeout: Duration.seconds(30),
@@ -414,9 +413,6 @@ export class ClickStreamApiConstruct extends Construct {
     dictionaryTable.grantReadWriteData(this.clickStreamApiFunction);
     clickStreamTable.grantReadWriteData(this.clickStreamApiFunction);
     analyticsMetadataTable.grantReadWriteData(this.clickStreamApiFunction);
-    if (props.authProps?.authorizerTable) {
-      props.authProps?.authorizerTable.grantReadWriteData(this.clickStreamApiFunction);
-    }
 
     cloudWatchSendLogs('api-func-logs', this.clickStreamApiFunction);
     createENI('api-func-eni', this.clickStreamApiFunction);
@@ -503,7 +499,7 @@ export class ClickStreamApiConstruct extends Construct {
             new iam.PolicyStatement({
               effect: iam.Effect.ALLOW,
               resources: [
-                `arn:${Aws.PARTITION}:quicksight:*:${Aws.ACCOUNT_ID}:dashboard/Clickstream*`,
+                `arn:${Aws.PARTITION}:quicksight:*:${Aws.ACCOUNT_ID}:dashboard/${QUICKSIGHT_RESOURCE_NAME_PREFIX}*`,
                 `arn:${Aws.PARTITION}:quicksight:*:${Aws.ACCOUNT_ID}:user/*`,
               ],
               actions: [

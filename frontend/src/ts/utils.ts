@@ -11,13 +11,18 @@
  *  and limitations under the License.
  */
 
-import { SelectProps } from '@cloudscape-design/components';
+import {
+  DateRangePickerProps,
+  SelectProps,
+} from '@cloudscape-design/components';
 import { isEqual } from 'lodash';
+import moment from 'moment';
 import { getLngFromLocalStorage } from 'pages/analytics/analytics-utils';
 import {
   CLICK_STREAM_USER_DATA,
   EPipelineStatus,
   ExecutionType,
+  IUserRole,
 } from './const';
 import { ServerlessRedshiftRPUByRegionMapping } from './constant-ln';
 
@@ -34,16 +39,18 @@ export const defaultStr = (
   return expectStr ?? defaultValue ?? '';
 };
 
-export const generateStr = (length: number) => {
-  const characters = 'abcdefghijklmnopqrstuvwxyz';
-  let randomString = '';
-  let seed = new Date().getTime();
-
-  while (randomString.length < length) {
-    seed = (seed * 9301 + 49297) % 233280;
-    const randomIndex = Math.floor((seed / 233280) * characters.length);
-    randomString += characters.charAt(randomIndex);
+export const generateStr = (length: number, onlyLowerCase = false) => {
+  let validCharacters =
+    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  if (onlyLowerCase) {
+    validCharacters = 'abcdefghijklmnopqrstuvwxyz';
   }
+  const array = new Uint8Array(length);
+  window.crypto.getRandomValues(array);
+  let randomString = '';
+  array.forEach((value) => {
+    randomString += validCharacters.charAt(value % validCharacters.length);
+  });
   return randomString;
 };
 
@@ -366,7 +373,7 @@ export const checkDisable = (condOne?: boolean, condTwo?: boolean) => {
 };
 
 export const defaultGenericsValue = <T>(expectValue: T, defaultValue: T) => {
-  if (expectValue) {
+  if (expectValue || expectValue === 0) {
     return expectValue;
   } else {
     return defaultValue;
@@ -391,7 +398,7 @@ export const getUserInfoFromLocalStorage = () => {
   if (window.localStorage.getItem(CLICK_STREAM_USER_DATA)) {
     return JSON.parse(
       window.localStorage.getItem(CLICK_STREAM_USER_DATA) ?? ''
-    );
+    ) as IUser;
   } else {
     return null;
   }
@@ -402,4 +409,43 @@ export const getLocaleLngDescription = (description: {
 }) => {
   const localeLng = getLngFromLocalStorage();
   return description[localeLng];
+};
+
+export const getAbsoluteStartEndRange = () => {
+  const endDate = moment();
+  const startDate = moment().subtract(7, 'days');
+  return {
+    type: 'absolute',
+    startDate: startDate.format('YYYY-MM-DD'),
+    endDate: endDate.format('YYYY-MM-DD'),
+  } as DateRangePickerProps.AbsoluteValue;
+};
+
+export const getIntersectArrays = (a: any[], b: any[]) => {
+  return [...new Set(a)].filter((x) => new Set(b).has(x));
+};
+
+export const isAdminRole = (roles: IUserRole[] | undefined) => {
+  if (!roles) {
+    return false;
+  }
+  return roles.some((role) => role === IUserRole.ADMIN);
+};
+
+export const isAnalystRole = (roles: IUserRole[] | undefined) => {
+  if (!roles) {
+    return false;
+  }
+  return roles.some(
+    (role) => role === IUserRole.ANALYST || role === IUserRole.ANALYST_READER
+  );
+};
+
+export const isAnalystAuthorRole = (roles: IUserRole[] | undefined) => {
+  if (!roles) {
+    return false;
+  }
+  return roles.some(
+    (role) => role === IUserRole.ANALYST || role === IUserRole.ADMIN
+  );
 };

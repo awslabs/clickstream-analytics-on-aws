@@ -212,7 +212,7 @@ const BufferMSK: React.FC<BufferMSKProps> = (props: BufferMSKProps) => {
                                 filteringType="auto"
                               />
                             </div>
-                            {update ? (
+                            {!update ? (
                               <div className="ml-20">
                                 <Button
                                   loading={loadingMSK}

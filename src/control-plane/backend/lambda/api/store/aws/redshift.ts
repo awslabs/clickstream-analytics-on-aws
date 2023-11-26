@@ -185,7 +185,7 @@ export const getSubnetsByClusterSubnetGroup = async (region: string, clusterSubn
 
 export const redshiftServerlessPing = async (region: string): Promise<boolean> => {
   try {
-    if (region.startsWith('cn')) {
+    if (region === 'cn-northwest-1') {
       return false;
     }
     const redshiftServerlessClient = new RedshiftServerlessClient({

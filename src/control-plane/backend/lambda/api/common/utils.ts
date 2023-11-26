@@ -28,7 +28,7 @@ import {
 import { ConditionCategory, MetadataValueType } from './explore-types';
 import { BuiltInTagKeys } from './model-ln';
 import { logger } from './powertools';
-import { ALBRegionMappingObject, BucketPrefix, ClickStreamSubnet, IUserRole, PipelineStackType, PipelineStatus, RPURange, RPURegionMappingObject, ReportingDashboardOutput, SubnetType } from './types';
+import { ALBRegionMappingObject, BucketPrefix, ClickStreamBadRequestError, ClickStreamSubnet, DataCollectionSDK, IUserRole, PipelineStackType, PipelineStatus, RPURange, RPURegionMappingObject, ReportingDashboardOutput, SubnetType } from './types';
 import { IMetadataRaw, IMetadataRawValue, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute, IMetadataAttributeValue } from '../model/metadata';
 import { CPipelineResources, IPipeline } from '../model/pipeline';
 import { IUserSettings } from '../model/user';
@@ -97,6 +97,21 @@ function getServerlessRedshiftRPU(region: string): RPURange {
   return { min: 0, max: 0 } as RPURange;
 }
 
+function deserializeContext(contextStr: string | undefined) {
+  let context;
+  try {
+    if (contextStr) {
+      context = JSON.parse(contextStr);
+    }
+  } catch (err) {
+    logger.warn('Invalid context', {
+      contextStr,
+      err,
+    });
+  }
+  return context;
+}
+
 function getEmailFromRequestContext(requestContext: string | undefined) {
   let email = '';
   try {
@@ -160,52 +175,46 @@ function getTokenFromRequest(req: any) {
 }
 
 async function getRoleFromToken(decodedToken: any) {
-  let role = IUserRole.NO_IDENTITY;
   if (!decodedToken) {
-    return role;
+    return [];
   }
 
   let oidcRoles: string[] = [];
 
   const userSettings = await userService.getUserSettingsFromDDB();
-  if (isEmpty(userSettings.roleJsonPath) ||
-    isEmpty(userSettings.operatorRoleNames) ||
-    isEmpty(userSettings.analystRoleNames ||
-    isEmpty(userSettings.analystReaderRoleNames))) {
-    return role;
-  }
-
   const values = JSONPath({ path: userSettings.roleJsonPath, json: decodedToken });
   if (Array.prototype.isPrototypeOf(values) && values.length > 0) {
     oidcRoles = values[0] as string[];
   } else {
-    return role;
+    return [];
   }
 
-  return mapToRole(userSettings, oidcRoles);
+  return mapToRoles(userSettings, oidcRoles);
 }
 
-function mapToRole(userSettings: IUserSettings, oidcRoles: string[]) {
+function mapToRoles(userSettings: IUserSettings, oidcRoles: string[]) {
+  const userRoles: IUserRole[] = [];
   if (isEmpty(oidcRoles)) {
-    return IUserRole.NO_IDENTITY;
+    return userRoles;
   }
+  const adminRoleNames = userSettings.adminRoleNames.split(',').map(role => role.trim());
   const operatorRoleNames = userSettings.operatorRoleNames.split(',').map(role => role.trim());
   const analystRoleNames = userSettings.analystRoleNames.split(',').map(role => role.trim());
   const analystReaderRoleNames = userSettings.analystReaderRoleNames.split(',').map(role => role.trim());
 
-  if (oidcRoles.some(role => operatorRoleNames.includes(role)) && oidcRoles.some(role => analystRoleNames.includes(role))) {
-    return IUserRole.ADMIN;
+  if (oidcRoles.some(role => adminRoleNames.includes(role))) {
+    userRoles.push(IUserRole.ADMIN);
   }
   if (oidcRoles.some(role => operatorRoleNames.includes(role))) {
-    return IUserRole.OPERATOR;
+    userRoles.push(IUserRole.OPERATOR);
   }
   if (oidcRoles.some(role => analystRoleNames.includes(role))) {
-    return IUserRole.ANALYST;
+    userRoles.push(IUserRole.ANALYST);
   }
   if (oidcRoles.some(role => analystReaderRoleNames.includes(role))) {
-    return IUserRole.ANALYST_READER;
+    userRoles.push(IUserRole.ANALYST_READER);
   }
-  return IUserRole.NO_IDENTITY;
+  return userRoles;
 }
 
 function getBucketPrefix(projectId: string, key: BucketPrefix, value: string | undefined): string {
@@ -297,27 +306,44 @@ function _getEnrichPluginInfo(resources: CPipelineResources, enrichPluginId: str
 }
 
 function _getTransformerPluginInfo(pipeline: IPipeline, resources: CPipelineResources) {
-  const transformerClassNames: string[] = [];
-  const transformerPluginJars: string[] = [];
-  const transformerPluginFiles: string[] = [];
-  if (!isEmpty(pipeline.dataProcessing?.transformPlugin) && !pipeline.dataProcessing?.transformPlugin?.startsWith('BUILT-IN')) {
-    const transformer = resources.plugins?.filter(p => p.id === pipeline.dataProcessing?.transformPlugin)[0];
-    if (transformer?.mainFunction) {
-      transformerClassNames.push(transformer?.mainFunction);
-    }
-    if (transformer?.jarFile) {
-      transformerPluginJars.push(transformer?.jarFile);
-    }
-    if (transformer?.dependencyFiles) {
-      transformerPluginFiles.push(...transformer?.dependencyFiles);
+  let transformerClassNames: string[] = [];
+  let transformerPluginJars: string[] = [];
+  let transformerPluginFiles: string[] = [];
+  if (!pipeline.dataProcessing?.transformPlugin ) {
+    if (pipeline.dataCollectionSDK === DataCollectionSDK.CLICKSTREAM) {
+      const defaultTransformer = resources.plugins?.filter(p => p.id === 'BUILT-IN-1')[0];
+      if (defaultTransformer?.mainFunction) {
+        transformerClassNames.push(defaultTransformer?.mainFunction);
+      }
+    } else {
+      throw new ClickStreamBadRequestError('Transform plugin is required.');
     }
   } else {
-    let defaultTransformer = resources.plugins?.filter(p => p.id === 'BUILT-IN-1')[0];
-    if (defaultTransformer?.mainFunction) {
-      transformerClassNames.push(defaultTransformer?.mainFunction);
-    }
+    const { classNames, pluginJars, pluginFiles } = _getTransformerPluginInfoFromResources(resources, pipeline.dataProcessing?.transformPlugin);
+    transformerClassNames= transformerClassNames.concat(classNames);
+    transformerPluginJars = transformerPluginJars.concat(pluginJars);
+    transformerPluginFiles = transformerPluginFiles.concat(pluginFiles);
   }
   return { transformerClassNames, transformerPluginJars, transformerPluginFiles };
+}
+
+function _getTransformerPluginInfoFromResources(resources: CPipelineResources, transformPluginId: string) {
+  const classNames: string[] = [];
+  const pluginJars: string[] = [];
+  const pluginFiles: string[] = [];
+  const transform = resources.plugins?.filter(p => p.id === transformPluginId)[0];
+  if (!transform?.id.startsWith('BUILT-IN')) {
+    if (transform?.jarFile) {
+      pluginJars.push(transform?.jarFile);
+    }
+    if (transform?.dependencyFiles) {
+      pluginFiles.push(...transform?.dependencyFiles);
+    }
+  }
+  if (transform?.mainFunction) {
+    classNames.push(transform?.mainFunction);
+  }
+  return { classNames, pluginJars, pluginFiles };
 }
 
 function getSubnetType(routeTable: RouteTable) {
@@ -899,4 +925,5 @@ export {
   getCurMonthStr,
   getVersionFromTags,
   getAppRegistryApplicationArn,
+  deserializeContext,
 };

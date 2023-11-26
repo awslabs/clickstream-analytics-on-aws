@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { TransactWriteItemsCommand } from '@aws-sdk/client-dynamodb';
+import { ConditionalCheckFailedException, TransactWriteItemsCommand } from '@aws-sdk/client-dynamodb';
 import {
   ConnectivityType,
   DescribeAvailabilityZonesCommand,
@@ -23,13 +23,14 @@ import {
 } from '@aws-sdk/client-ec2';
 import { PolicyEvaluationDecisionType, SimulateCustomPolicyCommand } from '@aws-sdk/client-iam';
 import { ListNodesCommand } from '@aws-sdk/client-kafka';
-import { DescribeAccountSubscriptionCommand, Edition, ListUsersCommand, RegisterUserCommand } from '@aws-sdk/client-quicksight';
+import { DescribeAccountSubscriptionCommand, Edition } from '@aws-sdk/client-quicksight';
 import { DescribeClustersCommand, DescribeClusterSubnetGroupsCommand } from '@aws-sdk/client-redshift';
 import { GetNamespaceCommand, GetWorkgroupCommand } from '@aws-sdk/client-redshift-serverless';
 import { GetBucketPolicyCommand } from '@aws-sdk/client-s3';
 import { GetSecretValueCommand } from '@aws-sdk/client-secrets-manager';
 import { StartExecutionCommand } from '@aws-sdk/client-sfn';
-import { GetCommand, GetCommandInput, QueryCommand, QueryCommandInput } from '@aws-sdk/lib-dynamodb';
+import { DynamoDBDocumentClient, GetCommand, GetCommandInput, PutCommand, PutCommandOutput, QueryCommand, QueryCommandInput } from '@aws-sdk/lib-dynamodb';
+import { AwsClientStub } from 'aws-sdk-client-mock';
 import { analyticsMetadataTable, clickStreamTableName, dictionaryTableName, prefixTimeGSIName } from '../../common/constants';
 import { IUserRole, ProjectEnvironment } from '../../common/types';
 import { IPipeline } from '../../model/pipeline';
@@ -49,7 +50,7 @@ const MOCK_EVENT_NAME = 'event-mock';
 const MOCK_EVENT_PARAMETER_NAME = 'event-attribute-mock';
 const MOCK_USER_ATTRIBUTE_NAME = 'user-attribute-mock';
 const MOCK_DASHBOARD_ID = 'dash_6666_6666';
-const MOCK_USER_ID = 'user-0000';
+const MOCK_USER_ID = 'fake@example.com';
 
 export const AllowIAMUserPutObejectPolicy = '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":"arn:aws:iam::127311923021:root"},"Action":["s3:PutObject","s3:PutObjectLegalHold","s3:PutObjectRetention","s3:PutObjectTagging","s3:PutObjectVersionTagging","s3:Abort*"],"Resource":"arn:aws:s3:::EXAMPLE_BUCKET/clickstream/*"}]}';
 export const AllowLogDeliveryPutObejectPolicy = '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"Service":"logdelivery.elasticloadbalancing.amazonaws.com"},"Action":["s3:PutObject","s3:PutObjectLegalHold","s3:PutObjectRetention","s3:PutObjectTagging","s3:PutObjectVersionTagging","s3:Abort*"],"Resource":"arn:aws:s3:::EXAMPLE_BUCKET/clickstream/*"}]}';
@@ -63,7 +64,7 @@ export const AllowIAMUserPutObejectPolicyInApSouthEast1 = '{"Version":"2012-10-1
 export const AllowIAMUserPutObjectPolicyInCnNorth1 = '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":"arn:aws-cn:iam::638102146993:root"},"Action":["s3:PutObject","s3:PutObjectLegalHold","s3:PutObjectRetention","s3:PutObjectTagging","s3:PutObjectVersionTagging","s3:Abort*"],"Resource":"arn:aws-cn:s3:::EXAMPLE_BUCKET/clickstream/*"}]}';
 
 
-function userMock(ddbMock: any, userId: string, role: IUserRole, existed?: boolean): any {
+function userMock(ddbMock: any, userId: string, roles: IUserRole[], existed?: boolean): any {
   if (!existed) {
     return ddbMock.on(GetCommand, {
       TableName: clickStreamTableName,
@@ -83,33 +84,70 @@ function userMock(ddbMock: any, userId: string, role: IUserRole, existed?: boole
   }, true).resolves({
     Item: {
       id: userId,
-      role: role,
+      roles: roles,
       deleted: false,
     },
   });
 }
 
-function tokenMock(ddbMock: any, expect: boolean): any {
-  if (!expect) {
-    return ddbMock.on(GetCommand, {
-      TableName: clickStreamTableName,
-      Key: {
-        id: MOCK_TOKEN,
-        type: 'REQUESTID',
-      },
-    }, true).resolvesOnce({});
+function tokenMock(ddbMock: AwsClientStub<DynamoDBDocumentClient>, existed: boolean): any {
+  if (existed) {
+    return ddbMock.on(PutCommand).callsFakeOnce(input => {
+      if (
+        input.TableName === clickStreamTableName &&
+        input.Item.id === MOCK_TOKEN &&
+        input.Item.type === 'REQUESTID' &&
+        input.ConditionExpression === 'attribute_not_exists(#id)'
+      ) {
+        throw new ConditionalCheckFailedException(
+          {
+            message: 'ConditionalCheckFailedException',
+            $metadata: {},
+          },
+        );
+      }
+    });
   }
-  return ddbMock.on(GetCommand, {
-    TableName: clickStreamTableName,
-    Key: {
-      id: MOCK_TOKEN,
-      type: 'REQUESTID',
-    },
-  }, true).resolvesOnce({
-    Item: {
-      id: MOCK_TOKEN,
-      type: 'REQUESTID',
-    },
+  return ddbMock.on(PutCommand).callsFakeOnce(input => {
+    if (
+      input.TableName === clickStreamTableName &&
+      input.Item.id === MOCK_TOKEN &&
+      input.Item.type === 'REQUESTID' &&
+      input.ConditionExpression === 'attribute_not_exists(#id)'
+    ) {
+      return {} as PutCommandOutput;
+    } else {
+      throw new Error('mocked token id rejection');
+    }
+  });
+}
+
+function tokenMockTwice(ddbMock: AwsClientStub<DynamoDBDocumentClient>): any {
+  return ddbMock.on(PutCommand).callsFakeOnce(input => {
+    if (
+      input.TableName === clickStreamTableName &&
+      input.Item.id === MOCK_TOKEN &&
+      input.Item.type === 'REQUESTID' &&
+      input.ConditionExpression === 'attribute_not_exists(#id)'
+    ) {
+      return {} as PutCommandOutput;
+    } else {
+      throw new Error('mocked token id rejection');
+    }
+  }).callsFake(input => {
+    if (
+      input.TableName === clickStreamTableName &&
+      input.Item.id === MOCK_TOKEN &&
+      input.Item.type === 'REQUESTID' &&
+      input.ConditionExpression === 'attribute_not_exists(#id)'
+    ) {
+      throw new ConditionalCheckFailedException(
+        {
+          message: 'ConditionalCheckFailedException',
+          $metadata: {},
+        },
+      );
+    }
   });
 }
 
@@ -313,10 +351,10 @@ function dictionaryMock(ddbMock: any, name?: string): any {
             updateAt: '1667355960000',
           },
           {
-            id: 'THIRD-PARTY-1',
-            type: 'PLUGIN#THIRD-PARTY-1',
+            id: 'BUILT-IN-4',
+            type: 'PLUGIN#BUILT-IN-4',
             prefix: 'PLUGIN',
-            name: 'GTMTransformer',
+            name: 'GTMServerDataTransformer',
             description: {
               'en-US': 'Convert the GTM server data format into the data format in the data warehouse',
               'zh-CN': '把GTM服务的数据格式，转换成数据仓库中的数据格式',
@@ -903,13 +941,6 @@ function createPipelineMock(
       Edition: props?.quickSightStandard ? Edition.STANDARD : Edition.ENTERPRISE,
     },
   });
-  quickSightMock.on(ListUsersCommand).resolves({
-    UserList: [],
-  });
-  quickSightMock.on(RegisterUserCommand).resolves({
-    User: {},
-    UserInvitationUrl: '',
-  });
   s3Mock.on(GetBucketPolicyCommand).resolves({
     Policy: props?.albPolicyDisable ? AllowIAMUserPutObejectPolicyWithErrorService
       :AllowIAMUserPutObejectPolicyInApSouthEast1,
@@ -938,6 +969,7 @@ export {
   MOCK_DASHBOARD_ID,
   MOCK_USER_ID,
   tokenMock,
+  tokenMockTwice,
   userMock,
   projectExistedMock,
   appExistedMock,

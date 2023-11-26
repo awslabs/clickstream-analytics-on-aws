@@ -45,7 +45,7 @@ import { cloneDeep } from 'lodash';
 import React, { useContext, useEffect, useReducer, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { COMMON_ALERT_TYPE, IUserRole } from 'ts/const';
+import { COMMON_ALERT_TYPE } from 'ts/const';
 import {
   QUICKSIGHT_ANALYSIS_INFIX,
   QUICKSIGHT_DASHBOARD_INFIX,
@@ -62,6 +62,8 @@ import {
   defaultStr,
   getEventParameters,
   getUserInfoFromLocalStorage,
+  getAbsoluteStartEndRange,
+  isAnalystAuthorRole,
 } from 'ts/utils';
 import {
   getDashboardCreateParameters,
@@ -75,10 +77,7 @@ import {
   validRetentionAnalyticsItem,
 } from '../analytics-utils';
 import AttributeGroup from '../comps/AttributeGroup';
-import ExploreDateRangePicker, {
-  DEFAULT_DAY_RANGE,
-  DEFAULT_WEEK_RANGE,
-} from '../comps/ExploreDateRangePicker';
+import ExploreDateRangePicker from '../comps/ExploreDateRangePicker';
 import ExploreEmbedFrame from '../comps/ExploreEmbedFrame';
 import SaveToDashboardModal from '../comps/SelectDashboardModal';
 
@@ -150,7 +149,7 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
   );
 
   const [dateRangeValue, setDateRangeValue] =
-    useState<DateRangePickerProps.Value>(DEFAULT_DAY_RANGE);
+    useState<DateRangePickerProps.Value>(getAbsoluteStartEndRange());
 
   const [timeGranularity, setTimeGranularity] = useState<SelectProps.Option>({
     value: ExploreGroupColumn.DAY,
@@ -168,7 +167,7 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
       type: 'resetFilterData',
       presetParameters,
     });
-    setDateRangeValue(DEFAULT_WEEK_RANGE);
+    setDateRangeValue(getAbsoluteStartEndRange());
     setExploreEmbedUrl('');
     setTimeGranularity({
       value: ExploreGroupColumn.DAY,
@@ -186,7 +185,7 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
     chartTitle?: string,
     chartSubTitle?: string
   ) => {
-    const eventId = generateStr(6);
+    const eventId = generateStr(6, true);
     const parameters = getDashboardCreateParameters(
       pipeline,
       window.location.origin
@@ -318,7 +317,7 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
 
   useEffect(() => {
     clickPreview();
-  }, [timeGranularity, dateRangeValue, chartType]);
+  }, [chartType]);
 
   return (
     <>
@@ -346,7 +345,7 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
                   >
                     {t('button.reset')}
                   </Button>
-                  {currentUser.role !== IUserRole.ANALYST_READER && (
+                  {isAnalystAuthorRole(currentUser?.roles) && (
                     <Button
                       variant="primary"
                       loading={loadingData}

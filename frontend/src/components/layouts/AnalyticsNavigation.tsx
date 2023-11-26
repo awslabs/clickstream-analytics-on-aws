@@ -17,8 +17,12 @@ import { UserContext } from 'context/UserContext';
 import React, { useContext, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { ANALYTICS_NAV_STATUS, IUserRole } from 'ts/const';
-import { defaultStr, getUserInfoFromLocalStorage } from 'ts/utils';
+import { ANALYTICS_NAV_STATUS } from 'ts/const';
+import {
+  defaultStr,
+  getUserInfoFromLocalStorage,
+  isAnalystAuthorRole,
+} from 'ts/utils';
 
 interface INavigationProps {
   activeHref: string;
@@ -70,7 +74,7 @@ const AnalyticsNavigation: React.FC<INavigationProps> = (
   ];
 
   const getNavItems = () => {
-    if (currentUser.role === IUserRole.ANALYST_READER) {
+    if (!isAnalystAuthorRole(currentUser?.roles)) {
       return [...analyticsNavItems.slice(0, 2), ...analyticsNavItems.slice(3)];
     }
     return analyticsNavItems;

@@ -14,9 +14,6 @@
 import {
   Logger,
 } from '@aws-lambda-powertools/logger';
-import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-import { DynamoDBDocumentClient, GetCommand, GetCommandOutput, PutCommand } from '@aws-sdk/lib-dynamodb';
-import { NodeHttpHandler } from '@smithy/node-http-handler';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import jwksClient from 'jwks-rsa';
 import NodeCache from 'node-cache';
@@ -29,21 +26,8 @@ export const ERR_OPENID_CONFIGURATION = 'Get openid configuration error.';
 const OPENID_CONFIGURATION_KEY = 'OPENID_CONFIGURATION';
 const CACHE_TTL = 60 * 60 * 24;
 
-// Create DynamoDB Client and patch it for tracing
-const ddbClient = new DynamoDBClient({
-  maxAttempts: 3,
-  requestHandler: new NodeHttpHandler({
-    connectionTimeout: 5000,
-    requestTimeout: 5000,
-  }),
-});
-
-// Create the DynamoDB Document client.
-const docClient = DynamoDBDocumentClient.from(ddbClient);
-
 interface JWTAuthorizerProps {
   readonly issuer: string;
-  readonly dynamodbTableName: string;
 }
 
 export interface JWTAuthorizerResponse {
@@ -59,14 +43,12 @@ interface OpenidConfiguration {
 export class JWTAuthorizer {
 
   private issuer?: string;
-  private dynamodbTableName?: string;
   private openidConfigurationKey: string;
   private cacheTtl: number;
 
   constructor(props: JWTAuthorizerProps) {
     this.openidConfigurationKey = OPENID_CONFIGURATION_KEY;
     this.cacheTtl = CACHE_TTL;
-    this.dynamodbTableName = props.dynamodbTableName;
     this.issuer = props.issuer;
   }
 
@@ -141,62 +123,20 @@ export class JWTAuthorizer {
       if (localCache) {
         return localCache as OpenidConfiguration;
       } else {
-        const ddbCache = await this.getOpenidConfigurationFromDDB();
-        if (ddbCache) {
-          nodeCache.set(this.openidConfigurationKey, ddbCache, this.cacheTtl);
-          return ddbCache;
-        } else {
-          let jwksUriSuffix = '.well-known/openid-configuration';
-          if (!this.issuer?.endsWith('/')) {
-            jwksUriSuffix = `/${jwksUriSuffix}`;
-          }
-          const response = await fetch(`${this.issuer}${jwksUriSuffix}`, {
-            method: 'GET',
-          });
-          const data = await response.json();
-          await this.setOpenidConfigurationToDDB(this.openidConfigurationKey, data, this.cacheTtl);
-          nodeCache.set(this.openidConfigurationKey, data, this.cacheTtl);
-          return data as OpenidConfiguration;
+        let jwksUriSuffix = '.well-known/openid-configuration';
+        if (!this.issuer?.endsWith('/')) {
+          jwksUriSuffix = `/${jwksUriSuffix}`;
         }
+        const response = await fetch(`${this.issuer}${jwksUriSuffix}`, {
+          method: 'GET',
+        });
+        const data = await response.json();
+        nodeCache.set(this.openidConfigurationKey, data, this.cacheTtl);
+        return data as OpenidConfiguration;
       }
     } catch (error) {
       logger.error('fetch openid-configuration error', { error });
       return undefined;
-    }
-  }
-
-  private async getOpenidConfigurationFromDDB(): Promise<OpenidConfiguration | undefined> {
-    try {
-      const params: GetCommand = new GetCommand({
-        TableName: this.dynamodbTableName,
-        Key: {
-          id: this.openidConfigurationKey,
-        },
-      });
-      const result: GetCommandOutput = await docClient.send(params);
-      if (result.Item) {
-        return result.Item.data as OpenidConfiguration;
-      }
-      return undefined;
-    } catch (error) {
-      logger.error('get openid configuration from DDB error', { error });
-      return undefined;
-    }
-  }
-
-  private async setOpenidConfigurationToDDB(key: string, data: OpenidConfiguration, ttl: number): Promise<void> {
-    try {
-      const params: PutCommand = new PutCommand({
-        TableName: this.dynamodbTableName,
-        Item: {
-          id: key,
-          ttl: Date.now() / 1000 + ttl,
-          data: data,
-        },
-      });
-      await docClient.send(params);
-    } catch (error) {
-      logger.error('set openid configuration to DDB error', { error });
     }
   }
 }

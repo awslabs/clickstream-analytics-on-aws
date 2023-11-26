@@ -18,9 +18,13 @@ import { HelpPanelType } from 'context/reducer';
 import React, { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { EVENT_DISPLAY_PREFIX, IUserRole } from 'ts/const';
+import { EVENT_DISPLAY_PREFIX } from 'ts/const';
 import { MetadataPlatform, MetadataSource } from 'ts/explore-types';
-import { defaultStr, getUserInfoFromLocalStorage } from 'ts/utils';
+import {
+  defaultStr,
+  getUserInfoFromLocalStorage,
+  isAnalystAuthorRole,
+} from 'ts/utils';
 import MetadataDataVolumeFC from '../comps/MetadataDataVolume';
 import MetadataPlatformFC from '../comps/MetadataPlatform';
 import MetadataSourceFC from '../comps/MetadataSource';
@@ -96,7 +100,7 @@ const MetadataEventsTable: React.FC<MetadataEventsTableProps> = (
   };
 
   const getDisplayNameEditConfig = () => {
-    if (currentUser.role !== IUserRole.ANALYST_READER) {
+    if (isAnalystAuthorRole(currentUser?.roles)) {
       return {
         validation(item: IEventTableItem, value: string) {
           return !displayNameRegex.test(value)
@@ -110,7 +114,7 @@ const MetadataEventsTable: React.FC<MetadataEventsTableProps> = (
   };
 
   const getDescriptionEditConfig = () => {
-    if (currentUser.role !== IUserRole.ANALYST_READER) {
+    if (isAnalystAuthorRole(currentUser?.roles)) {
       return {
         validation(item: IEventTableItem, value: string) {
           return !descriptionRegex.test(value)

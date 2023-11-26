@@ -366,7 +366,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
                         {
                           Ref: 'AWS::AccountId',
                         },
-                        ':dashboard/Clickstream*',
+                        ':dashboard/clickstream*',
                       ],
                     ],
                   },
@@ -1055,6 +1055,8 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
               'iam:ListPolicies',
               'iam:ListRoles',
               'iam:UpdateRoleDescription',
+              'iam:TagRole',
+              'iam:UntagRole',
             ],
             Effect: 'Allow',
             Resource: [
@@ -1647,15 +1649,11 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
           },
           WITH_AUTH_MIDDLEWARE: 'false',
           ISSUER: '',
-          AUTHORIZER_TABLE_NAME: '',
           STS_UPLOAD_ROLE_ARN: {
             'Fn::GetAtt': [
               'testClickStreamCloudfrontApiUploadRole7D6ED157',
               'Arn',
             ],
-          },
-          API_ROLE_NAME: {
-            Ref: 'testClickStreamCloudfrontApiClickStreamApiFunctionRoleFDC21CDD',
           },
           HEALTH_CHECK_PATH: '/',
           POWERTOOLS_SERVICE_NAME: 'ClickStreamAnalyticsOnAWS',

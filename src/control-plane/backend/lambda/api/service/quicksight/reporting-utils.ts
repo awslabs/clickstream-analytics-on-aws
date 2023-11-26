@@ -33,7 +33,7 @@ import { AssumeRoleCommand, STSClient } from '@aws-sdk/client-sts';
 import Mustache from 'mustache';
 import { v4 as uuidv4 } from 'uuid';
 import { DataSetProps, dataSetAdminPermissionActions, dataSetReaderPermissionActions } from './dashboard-ln';
-import { EventAndCondition, PairEventAndCondition, SQLCondition } from './sql-builder';
+import { Condition, EventAndCondition, PairEventAndCondition, SQLCondition } from './sql-builder';
 import { QUICKSIGHT_DATASET_INFIX, QUICKSIGHT_RESOURCE_NAME_PREFIX, QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX } from '../../common/constants-ln';
 import { AnalysisType, ExploreConversionIntervalType, ExploreLocales, ExplorePathNodeType, ExplorePathSessionDef, ExploreRelativeTimeUnit, ExploreRequestAction, ExploreTimeScopeType, ExploreVisualName, MetadataValueType, QuickSightChartType } from '../../common/explore-types';
 import { logger } from '../../common/powertools';
@@ -65,17 +65,6 @@ export interface DashboardAction {
 export interface DashboardCreateParameters {
   readonly region: string;
   readonly allowedDomain: string;
-  readonly redshift: {
-    readonly user: string;
-    readonly dataApiRole: string;
-    readonly newServerless?: {
-      readonly workgroupName: string;
-    };
-    readonly provisioned?: {
-      readonly clusterIdentifier: string;
-      readonly dbUser: string;
-    };
-  };
   readonly quickSight: {
     readonly dataSourceArn: string;
   };
@@ -222,12 +211,16 @@ export const eventVisualColumns: InputColumn[] = [
     Type: 'STRING',
   },
   {
-    Name: 'count',
+    Name: 'id',
     Type: 'STRING',
   },
 ];
 
 export const pathAnalysisVisualColumns: InputColumn[] = [
+  {
+    Name: 'event_date',
+    Type: 'DATETIME',
+  },
   {
     Name: 'source',
     Type: 'STRING',
@@ -268,10 +261,7 @@ export const createDataSet = async (quickSight: QuickSight, awsAccountId: string
 : Promise<CreateDataSetCommandOutput|undefined> => {
 
   try {
-    let datasetId = `${QUICKSIGHT_RESOURCE_NAME_PREFIX}${QUICKSIGHT_DATASET_INFIX}${uuidv4().replace(/-/g, '')}`;
-    if (requestAction === ExploreRequestAction.PREVIEW) {
-      datasetId = `${QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX}${uuidv4().replace(/-/g, '')}`;
-    }
+    const datasetId = _getDataSetId(requestAction);
 
     let colGroups: ColumnGroup[] = [];
     if (props.columnGroups !== undefined) {
@@ -328,21 +318,23 @@ export const createDataSet = async (quickSight: QuickSight, awsAccountId: string
     }
 
     logger.info('start to create dataset');
+    const datasetPermissionActions = [
+      {
+        Principal: exploreUserArn,
+        Actions: dataSetAdminPermissionActions,
+      },
+    ];
+    if (requestAction === ExploreRequestAction.PUBLISH) {
+      datasetPermissionActions.push({
+        Principal: publishUserArn,
+        Actions: dataSetReaderPermissionActions,
+      });
+    }
     const dataset = await quickSight.createDataSet({
       AwsAccountId: awsAccountId,
       DataSetId: datasetId,
-      Name: `dataset-${datasetId}`,
-      Permissions: [
-        {
-          Principal: exploreUserArn,
-          Actions: dataSetAdminPermissionActions,
-        },
-        {
-          Principal: publishUserArn,
-          Actions: dataSetReaderPermissionActions,
-        },
-      ],
-
+      Name: datasetId,
+      Permissions: datasetPermissionActions,
       ImportMode: props.importMode,
       PhysicalTableMap: {
         PhyTable1: {
@@ -370,6 +362,14 @@ export const createDataSet = async (quickSight: QuickSight, awsAccountId: string
     logger.error(`Create QuickSight dataset failed due to: ${(err as Error).message}`);
     throw err;
   }
+};
+
+const _getDataSetId = (requestAction: ExploreRequestAction) : string => {
+  let datasetId = `${QUICKSIGHT_RESOURCE_NAME_PREFIX}${QUICKSIGHT_DATASET_INFIX}${uuidv4().replace(/-/g, '')}`;
+  if (requestAction === ExploreRequestAction.PREVIEW) {
+    datasetId = `${QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX}${uuidv4().replace(/-/g, '')}`;
+  }
+  return datasetId;
 };
 
 export const getDashboardDefinitionFromArn = async (quickSight: QuickSight, awsAccountId: string, dashboardId: string)
@@ -719,7 +719,7 @@ export function getFunnelTableVisualDef(visualId: string, viewName: string, even
   return visualDef;
 }
 
-export function getVisualRelatedDefs(props: VisualRelatedDefProps) : VisualRelatedDefParams {
+export async function getVisualRelatedDefs(props: VisualRelatedDefProps, locale: string) : Promise<VisualRelatedDefParams> {
 
   const filterControlId = uuidv4();
   const sourceFilterId = uuidv4();
@@ -728,6 +728,8 @@ export function getVisualRelatedDefs(props: VisualRelatedDefProps) : VisualRelat
   let filterControl: FilterControl;
   const parameterDeclarations = [];
   let filterGroup: FilterGroup;
+  const t = await i18next.changeLanguage(locale);
+  const filterInfoText = t('dashboard.filter.scope');
 
   if (props.timeScopeType === ExploreTimeScopeType.FIXED) {
 
@@ -735,6 +737,7 @@ export function getVisualRelatedDefs(props: VisualRelatedDefProps) : VisualRelat
     filterControl.DateTimePicker!.FilterControlId = filterControlId;
     filterControl.DateTimePicker!.Title = 'event_date between';
     filterControl.DateTimePicker!.SourceFilterId = sourceFilterId;
+    filterControl.DateTimePicker!.DisplayOptions!.InfoIconLabelOptions!.InfoIconText = filterInfoText;
 
     const filterGroupDef = readFileSync(join(__dirname, './templates/filter-group.template'), 'utf8');
     const mustacheFilterGroupType: MustacheFilterGroupType = {
@@ -753,6 +756,7 @@ export function getVisualRelatedDefs(props: VisualRelatedDefProps) : VisualRelat
     filterControl.RelativeDateTime!.FilterControlId = filterControlId;
     filterControl.RelativeDateTime!.Title = 'event_date';
     filterControl.RelativeDateTime!.SourceFilterId = sourceFilterId;
+    filterControl.RelativeDateTime!.DisplayOptions!.InfoIconLabelOptions!.InfoIconText = filterInfoText;
 
     const parameterDeclarationStart = JSON.parse(readFileSync(join(__dirname, './templates/datetime-parameter.json'), 'utf8')) as ParameterDeclaration;
     parameterDeclarationStart.DateTimeParameterDeclaration!.Name = `dateStart${parameterSuffix}`;
@@ -805,7 +809,7 @@ export function getFunnelTableVisualRelatedDefs(viewName: string, colNames: stri
 export function getEventChartVisualDef(visualId: string, viewName: string, titleProps: DashboardTitleProps,
   quickSightChartType: QuickSightChartType, groupColumn: string, hasGrouping: boolean) : Visual {
 
-  if (quickSightChartType != QuickSightChartType.LINE && quickSightChartType != QuickSightChartType.BAR) {
+  if (quickSightChartType !== QuickSightChartType.LINE && quickSightChartType !== QuickSightChartType.BAR) {
     const errorMessage = `Event analysis: unsupported quicksight chart type ${quickSightChartType}`;
     logger.warn(errorMessage);
     throw new Error(errorMessage);
@@ -870,7 +874,7 @@ export function getRetentionChartVisualDef(visualId: string, viewName: string,
   titleProps: DashboardTitleProps,
   quickSightChartType: QuickSightChartType, hasGrouping: boolean) : Visual {
 
-  if (quickSightChartType != QuickSightChartType.LINE && quickSightChartType != QuickSightChartType.BAR) {
+  if (quickSightChartType !== QuickSightChartType.LINE && quickSightChartType !== QuickSightChartType.BAR) {
     const errorMessage = `Retention analysis: unsupported quicksight chart type ${quickSightChartType}`;
     logger.warn(errorMessage);
     throw new Error(errorMessage);
@@ -1304,11 +1308,68 @@ function _checkCommonPartParameter(params: any): CheckParamsStatus | void {
     };
   }
 
+  const filterCheckResult = _checkCondition(params);
+  if (filterCheckResult !== undefined ) {
+    return filterCheckResult;
+  }
+
   const checkResult = _checkTimeParameters(params);
   if (checkResult !== undefined ) {
     return checkResult;
   }
 
+}
+
+function _getRetentionAnalysisConditions(params: any) {
+
+  const allPairConditions:Condition[] = [];
+  const pairEventAndConditions = params.pairEventAndConditions;
+  if (pairEventAndConditions !== undefined) {
+    for (const pairCondition of pairEventAndConditions) {
+      if (pairCondition.startEvent.sqlCondition?.conditions !== undefined) {
+        allPairConditions.push(...pairCondition.startEvent.sqlCondition.conditions);
+      }
+      if (pairCondition.backEvent.sqlCondition?.conditions !== undefined) {
+        allPairConditions.push(...pairCondition.backEvent.sqlCondition.conditions);
+      }
+    }
+  }
+
+  return allPairConditions;
+}
+
+function _checkCondition(params: any): CheckParamsStatus | void {
+
+  const allConditions:Condition[] = [];
+  const eventAndConditions = params.eventAndConditions;
+  if (eventAndConditions !== undefined) {
+    for (const eventCondition of eventAndConditions) {
+      if (eventCondition.sqlCondition?.conditions !== undefined) {
+        allConditions.push(...eventCondition.sqlCondition.conditions);
+      }
+    }
+  }
+
+  const globalEventCondition = params.globalEventCondition;
+  if (globalEventCondition !== undefined && globalEventCondition.conditions !== undefined) {
+    allConditions.push(...globalEventCondition.conditions);
+  }
+
+  allConditions.push(..._getRetentionAnalysisConditions(params));
+
+  for (const condition of allConditions) {
+
+    if (condition.category === undefined
+      || condition.property === undefined || condition.property === ''
+      ||condition.operator === undefined || condition.operator === ''
+      || condition.value === undefined) {
+
+      return {
+        success: false,
+        message: 'Incomplete filter conditions.',
+      };
+    }
+  }
 }
 
 function _checkTimeParameters(params: any): CheckParamsStatus | void {

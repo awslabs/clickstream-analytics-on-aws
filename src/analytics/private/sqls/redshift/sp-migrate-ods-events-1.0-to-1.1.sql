@@ -63,6 +63,9 @@ ANALYZE {{schema}}.{{table_event}};
 --------------------------------
 -- backfill table: event_parameter
 --------------------------------
+-- ods_events_params_candidate
+DROP TABLE IF EXISTS ods_events_params_candidate;
+
 SELECT
        event_timestamp,
        event_id,
@@ -114,6 +117,8 @@ ANALYZE {{schema}}.{{table_event_parameter}};
 --------------------------------
 
 -- item_all_temp
+DROP TABLE IF EXISTS item_all_temp;
+
 WITH item_all_with_id AS (
        SELECT
               e.event_timestamp,
@@ -129,6 +134,8 @@ FROM
        item_all_with_id;
 
 -- ods_events_item_candidate
+DROP TABLE ods_events_item_candidate;
+
 SELECT
        event_timestamp,
        items INTO temp ods_events_item_candidate
@@ -147,6 +154,8 @@ WHERE
 DROP TABLE item_all_temp;
 
 -- item_final_temp
+DROP TABLE IF EXISTS item_final_temp;
+
 WITH item_rank AS (
        SELECT
               e.event_timestamp,
@@ -407,6 +416,8 @@ ANALYZE {{schema}}.{{table_item}};
 -- backfill table: user
 --------------------------------
 -- ods_events_user_temp
+DROP TABLE IF EXISTS ods_events_user_temp;
+
 SELECT
        event_timestamp,
        event_id,
@@ -433,7 +444,10 @@ WHERE
                      e.user_pseudo_id = u2.user_pseudo_id
        );
 
+
 -- user_base_temp
+DROP TABLE IF EXISTS user_base_temp;
+
 WITH user_base_rank AS (
        SELECT
               event_timestamp,
@@ -452,7 +466,7 @@ WITH user_base_rank AS (
               ) AS et_rank
        FROM
               ods_events_user_temp e
-              AND e.event_name IN ('_first_open', '_first_visit', '_profile_set')
+       WHERE  e.event_name IN ('_first_open', '_first_visit', '_profile_set')
 ),
 user_base AS (
        SELECT
@@ -474,6 +488,8 @@ FROM
        user_base;
 
 -- user_traffic_source_temp 
+DROP TABLE IF EXISTS user_traffic_source_temp;
+
 WITH user_traffic_source_rank AS (
        SELECT
               user_pseudo_id,
@@ -508,6 +524,8 @@ FROM
        user_traffic_source;
 
 -- user_page_referrer_temp
+DROP TABLE IF EXISTS user_page_referrer_temp;
+
 WITH user_page_referrer_rank AS (
        SELECT
               user_pseudo_id,
@@ -540,6 +558,8 @@ FROM
        user_page_referrer;
 
 -- user_device_id_list_temp
+DROP TABLE IF EXISTS user_device_id_list_temp;
+
 WITH user_device_id_list AS (
        SELECT
               user_pseudo_id,
@@ -564,6 +584,8 @@ FROM
 
 
 -- user_channel_temp
+DROP TABLE IF EXISTS user_channel_temp;
+
 WITH user_channel_rank AS (
        SELECT
               user_pseudo_id,
@@ -597,6 +619,8 @@ FROM
 DROP TABLE ods_events_user_temp;
 
 -- user_final_temp
+DROP TABLE IF EXISTS user_final_temp;
+
 WITH user_final AS (
        SELECT
               u.event_timestamp,

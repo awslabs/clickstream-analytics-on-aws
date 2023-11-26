@@ -98,26 +98,6 @@ const getQuickSightStatus = async () => {
   return result;
 };
 
-const unsubscribQuickSight = async () => {
-  const result: any = await apiRequest(
-    'post',
-    `/env/quicksight/unsubscription`
-  );
-  return result;
-};
-
-const subscribQuickSight = async (params: {
-  email: string;
-  accountName: string;
-}) => {
-  const result: any = await apiRequest(
-    'post',
-    `/env/quicksight/subscription`,
-    params
-  );
-  return result;
-};
-
 const getSSMSecrets = async (params: { region: string }) => {
   const result: any = await apiRequest('get', '/env/ssm/secrets', params);
   return result;
@@ -194,8 +174,6 @@ export {
   getServiceRolesByAccount,
   getSubnetList,
   getVPCList,
-  subscribQuickSight,
-  unsubscribQuickSight,
   getSTSUploadRole,
   getAlarmList,
   disableAlarms,

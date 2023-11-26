@@ -16,7 +16,7 @@ import { join } from 'path';
 import { AnalysisDefinition, ConflictException, DashboardVersionDefinition, DataSetIdentifierDeclaration, InputColumn, QuickSight, ResourceStatus, ThrottlingException } from '@aws-sdk/client-quicksight';
 import { BatchExecuteStatementCommand, DescribeStatementCommand, StatusString } from '@aws-sdk/client-redshift-data';
 import { v4 as uuidv4 } from 'uuid';
-import { DataSetProps } from './quicksight/dashboard-ln';
+import { DataSetProps, analysisAdminPermissionActions, dashboardAdminPermissionActions } from './quicksight/dashboard-ln';
 import {
   createDataSet,
   funnelVisualColumns,
@@ -48,14 +48,18 @@ import {
 } from './quicksight/reporting-utils';
 import { buildEventAnalysisView, buildEventPathAnalysisView, buildFunnelTableView, buildFunnelView, buildNodePathAnalysisView, buildRetentionAnalysisView } from './quicksight/sql-builder';
 import { awsAccountId } from '../common/constants';
-import { QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX } from '../common/constants-ln';
-import { AnalysisType, ExplorePathNodeType, ExploreRequestAction, ExploreTimeScopeType, ExploreVisualName, QuickSightChartType } from '../common/explore-types';
+import { OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX, OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME, QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX } from '../common/constants-ln';
+import { ExploreLocales, AnalysisType, ExplorePathNodeType, ExploreRequestAction, ExploreTimeScopeType, ExploreVisualName, QuickSightChartType } from '../common/explore-types';
 import { logger } from '../common/powertools';
 import { SDKClient } from '../common/sdk-client';
-import { ApiFail, ApiSuccess } from '../common/types';
+import { ApiFail, ApiSuccess, PipelineStackType } from '../common/types';
+import { getStackOutputFromPipelineStatus } from '../common/utils';
 import { QuickSightUserArns, generateEmbedUrlForRegisteredUser, getClickstreamUserArn, waitDashboardSuccess } from '../store/aws/quicksight';
+import { ClickStreamStore } from '../store/click-stream-store';
+import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
 
 const sdkClient: SDKClient = new SDKClient();
+const store: ClickStreamStore = new DynamoDbStore();
 
 export class ReportingService {
 
@@ -127,6 +131,9 @@ export class ReportingService {
 
       const result = await this._buildFunnelQuickSightDashboard(viewName, sql, tableVisualViewName,
         sqlTable, query, sheetId);
+      if (result.dashboardEmbedUrl === '' && query.action === ExploreRequestAction.PREVIEW) {
+        return res.status(500).json(new ApiFail('Failed to create resources, please try again later.'));
+      }
       return res.status(201).json(new ApiSuccess(result));
 
     } catch (error) {
@@ -215,10 +222,11 @@ export class ReportingService {
     });
 
     const visualId = uuidv4();
+    const locale = query.locale ?? ExploreLocales.EN_US;
     const titleProps = await getDashboardTitleProps(AnalysisType.FUNNEL, query);
     const quickSightChartType = query.chartType;
     const visualDef = getFunnelVisualDef(visualId, viewName, titleProps, quickSightChartType, query.groupColumn, hasGrouping);
-    const visualRelatedParams = getVisualRelatedDefs({
+    const visualRelatedParams = await getVisualRelatedDefs({
       timeScopeType: query.timeScopeType,
       sheetId,
       visualId,
@@ -227,7 +235,7 @@ export class ReportingService {
       timeUnit: query.timeUnit,
       timeStart: query.timeStart,
       timeEnd: query.timeEnd,
-    });
+    }, locale);
 
     const visualProps = {
       sheetId: sheetId,
@@ -305,7 +313,7 @@ export class ReportingService {
       logger.debug(`event analysis sql: ${sql}`);
 
       const hasGrouping = query.groupCondition !== undefined;
-      const projectedColumns = ['event_date', 'event_name', 'count'];
+      const projectedColumns = ['event_date', 'event_name', 'id'];
       const datasetColumns = [...eventVisualColumns];
       if (hasGrouping) {
         datasetColumns.push({
@@ -335,12 +343,12 @@ export class ReportingService {
         sheetId = query.sheetId;
       }
 
-
+      const locale = query.locale ?? ExploreLocales.EN_US;
       const visualId = uuidv4();
       const titleProps = await getDashboardTitleProps(AnalysisType.EVENT, query);
       const quickSightChartType = query.chartType;
       const visualDef = getEventChartVisualDef(visualId, viewName, titleProps, quickSightChartType, query.groupColumn, hasGrouping);
-      const visualRelatedParams = getVisualRelatedDefs({
+      const visualRelatedParams = await getVisualRelatedDefs({
         timeScopeType: query.timeScopeType,
         sheetId,
         visualId,
@@ -349,7 +357,7 @@ export class ReportingService {
         timeUnit: query.timeUnit,
         timeStart: query.timeStart,
         timeEnd: query.timeEnd,
-      });
+      }, locale);
 
       const visualProps = {
         sheetId: sheetId,
@@ -378,6 +386,9 @@ export class ReportingService {
       const result: CreateDashboardResult = await this.create(
         sheetId, viewName, query, datasetPropsArray, [visualProps, tableVisualProps]);
 
+      if (result.dashboardEmbedUrl === '' && query.action === ExploreRequestAction.PREVIEW) {
+        return res.status(500).json(new ApiFail('Failed to create resources, please try again later.'));
+      }
       return res.status(201).json(new ApiSuccess(result));
     } catch (error) {
       next(error);
@@ -463,6 +474,7 @@ export class ReportingService {
         importMode: 'DIRECT_QUERY',
         customSql: sql,
         projectedColumns: [
+          'event_date',
           'source',
           'target',
           'x_id',
@@ -481,8 +493,9 @@ export class ReportingService {
 
       const titleProps = await getDashboardTitleProps(AnalysisType.PATH, query);
       const visualId = uuidv4();
+      const locale = query.locale ?? ExploreLocales.EN_US;
       const visualDef = getPathAnalysisChartVisualDef(visualId, viewName, titleProps);
-      const visualRelatedParams = getVisualRelatedDefs({
+      const visualRelatedParams = await getVisualRelatedDefs({
         timeScopeType: query.timeScopeType,
         sheetId,
         visualId,
@@ -491,7 +504,7 @@ export class ReportingService {
         timeUnit: query.timeUnit,
         timeStart: query.timeStart,
         timeEnd: query.timeEnd,
-      });
+      }, locale);
 
       const visualProps: VisualProps = {
         sheetId: sheetId,
@@ -507,6 +520,9 @@ export class ReportingService {
       const result: CreateDashboardResult = await this.create(
         sheetId, viewName, query, datasetPropsArray, [visualProps]);
 
+      if (result.dashboardEmbedUrl === '' && query.action === ExploreRequestAction.PREVIEW) {
+        return res.status(500).json(new ApiFail('Failed to create resources, please try again later.'));
+      }
       return res.status(201).json(new ApiSuccess(result));
     } catch (error) {
       next(error);
@@ -585,9 +601,10 @@ export class ReportingService {
 
       const titleProps = await getDashboardTitleProps(AnalysisType.RETENTION, query);
       const visualId = uuidv4();
+      const locale = query.locale ?? ExploreLocales.EN_US;
       const quickSightChartType = query.chartType;
       const visualDef = getRetentionChartVisualDef(visualId, viewName, titleProps, quickSightChartType, hasGrouping);
-      const visualRelatedParams = getVisualRelatedDefs({
+      const visualRelatedParams = await getVisualRelatedDefs({
         timeScopeType: query.timeScopeType,
         sheetId,
         visualId,
@@ -596,7 +613,7 @@ export class ReportingService {
         timeUnit: query.timeUnit,
         timeStart: query.timeStart,
         timeEnd: query.timeEnd,
-      });
+      }, locale);
 
       const visualProps = {
         sheetId: sheetId,
@@ -625,6 +642,9 @@ export class ReportingService {
       const result: CreateDashboardResult = await this.create(
         sheetId, viewName, query, datasetPropsArray, [visualProps, tableVisualProps]);
 
+      if (result.dashboardEmbedUrl === '' && query.action === ExploreRequestAction.PREVIEW) {
+        return res.status(500).json(new ApiFail('Failed to create resources, please try again later.'));
+      }
       return res.status(201).json(new ApiSuccess(result));
     } catch (error) {
       next(error);
@@ -729,25 +749,12 @@ export class ReportingService {
       // publish new version
       await this._publishNewVersionDashboard(quickSight, query, versionNumber!);
 
-      let dashboardEmbedUrl = '';
-      if (query.action === ExploreRequestAction.PREVIEW) {
-        const dashboardSuccess = await waitDashboardSuccess(dashboardCreateParameters.region, query.dashboardId);
-        if (dashboardSuccess) {
-          const embedUrl = await generateEmbedUrlForRegisteredUser(
-            dashboardCreateParameters.region,
-            dashboardCreateParameters.allowedDomain,
-            false,
-            query.dashboardId,
-          );
-          dashboardEmbedUrl = embedUrl.EmbedUrl!;
-        }
-      }
       result = {
         dashboardId: query.dashboardId,
         dashboardArn: newDashboard.Arn!,
         dashboardName: query.dashboardName,
         dashboardVersion: Number.parseInt(versionNumber!),
-        dashboardEmbedUrl: dashboardEmbedUrl,
+        dashboardEmbedUrl: '',
         analysisId: query.analysisId,
         analysisArn: newAnalysis?.Arn!,
         analysisName: query.analysisName,
@@ -789,44 +796,27 @@ export class ReportingService {
 
   private async _createDashboard(quickSight: QuickSight, resourceName: string, principals: QuickSightUserArns,
     dashboard: DashboardVersionDefinition, query: any, dashboardCreateParameters: DashboardCreateParameters, sheetId: string) {
-    const analysisId = `clickstream-ext-${uuidv4()}`;
+    const analysisId = `${QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX}${uuidv4()}`;
     const newAnalysis = await quickSight.createAnalysis({
       AwsAccountId: awsAccountId,
       AnalysisId: analysisId,
       Name: `${resourceName}`,
       Permissions: [{
         Principal: principals.exploreUserArn,
-        Actions: [
-          'quicksight:DescribeAnalysis',
-          'quicksight:QueryAnalysis',
-          'quicksight:UpdateAnalysis',
-          'quicksight:RestoreAnalysis',
-          'quicksight:DeleteAnalysis',
-          'quicksight:UpdateAnalysisPermissions',
-          'quicksight:DescribeAnalysisPermissions',
-        ],
+        Actions: analysisAdminPermissionActions,
       }],
       Definition: dashboard as AnalysisDefinition,
     });
 
     //create QuickSight dashboard
-    const dashboardId = `clickstream-ext-${uuidv4()}`;
+    const dashboardId = `${QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX}${uuidv4()}`;
     const newDashboard = await quickSight.createDashboard({
       AwsAccountId: awsAccountId,
       DashboardId: dashboardId,
       Name: `${resourceName}`,
       Permissions: [{
         Principal: principals.exploreUserArn,
-        Actions: [
-          'quicksight:DescribeDashboard',
-          'quicksight:ListDashboardVersions',
-          'quicksight:QueryDashboard',
-          'quicksight:UpdateDashboard',
-          'quicksight:DeleteDashboard',
-          'quicksight:UpdateDashboardPermissions',
-          'quicksight:DescribeDashboardPermissions',
-          'quicksight:UpdateDashboardPublishedVersion',
-        ],
+        Actions: dashboardAdminPermissionActions,
       }],
       Definition: dashboard,
     });
@@ -866,9 +856,20 @@ export class ReportingService {
 
       const projectId = req.body.projectId;
       const appId = req.body.appId;
-      const dashboardCreateParameters = req.body.dashboardCreateParameters as DashboardCreateParameters;
-      const region = dashboardCreateParameters.region;
-      const dataApiRole = dashboardCreateParameters.redshift.dataApiRole;
+      const region = req.body.region;
+
+      const latestPipelines = await store.listPipeline(projectId, 'latest', 'asc');
+      if (latestPipelines.length === 0) {
+        return res.status(404).send(new ApiFail('Pipeline not found'));
+      }
+      const latestPipeline = latestPipelines[0];
+      if (latestPipeline.status === undefined) {
+        return res.status(404).send(new ApiFail('Pipeline status not found'));
+      }
+      const dataApiRole = getStackOutputFromPipelineStatus(
+        latestPipeline.status,
+        PipelineStackType.DATA_MODELING_REDSHIFT,
+        OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX);
       const redshiftDataClient = sdkClient.RedshiftDataClient(
         {
           region: region,
@@ -881,10 +882,14 @@ export class ReportingService {
       await getClickstreamUserArn();
 
       //warm up redshift serverless
-      if (dashboardCreateParameters.redshift.newServerless) {
+      if (latestPipeline.dataModeling?.redshift?.newServerless) {
+        const workgroupName = getStackOutputFromPipelineStatus(
+          latestPipeline.status,
+          PipelineStackType.DATA_MODELING_REDSHIFT,
+          OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME);
         const input = {
           Sqls: [`select * from ${appId}.ods_events limit 1`],
-          WorkgroupName: dashboardCreateParameters.redshift.newServerless.workgroupName,
+          WorkgroupName: workgroupName,
           Database: projectId,
           WithEvent: false,
         };
@@ -910,14 +915,15 @@ export class ReportingService {
       }
 
       //warm up quicksight
-      const dashBoards = await quickSight.listDashboards({
+      await quickSight.listDashboards({
         AwsAccountId: awsAccountId,
       });
 
       logger.info('end of warm up reporting service');
-      return res.status(201).json(new ApiSuccess(dashBoards.DashboardSummaryList));
+      return res.status(201).json(new ApiSuccess('OK'));
     } catch (error) {
-      next(`Warmup redshift serverless with error: ${error}`);
+      logger.warn(`Warmup redshift serverless with error: ${error}`);
+      next(error);
     }
   };
 
@@ -961,7 +967,7 @@ async function _deletedDatasets(quickSight: QuickSight) {
 
   if (datasets.DataSetSummaries) {
     for (const [_index, dataset] of datasets.DataSetSummaries.entries()) {
-      if (dataset.Name?.startsWith(QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX) &&
+      if (dataset.DataSetId?.startsWith(QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX) &&
       (new Date().getTime() - dataset.CreatedTime!.getTime()) > 60 * 60 * 1000) {
         const deletedRes = await quickSight.deleteDataSet({
           AwsAccountId: awsAccountId,
@@ -984,7 +990,7 @@ async function _deletedAnalyses(quickSight: QuickSight) {
   if (analyses.AnalysisSummaryList) {
     for (const [_index, analysis] of analyses.AnalysisSummaryList.entries()) {
       if (analysis.Status !== ResourceStatus.DELETED &&
-        analysis.Name?.startsWith(QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX) &&
+        analysis.AnalysisId?.startsWith(QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX) &&
         (new Date().getTime() - analysis.CreatedTime!.getTime()) > 60 * 60 * 1000) {
         const deletedRes = await quickSight.deleteAnalysis({
           AwsAccountId: awsAccountId,
@@ -1007,7 +1013,7 @@ async function _cleanedDashboard(quickSight: QuickSight) {
 
   if (dashBoards.DashboardSummaryList) {
     for (const [_index, dashboard] of dashBoards.DashboardSummaryList.entries()) {
-      if (dashboard.Name?.startsWith(QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX) &&
+      if (dashboard.DashboardId?.startsWith(QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX) &&
       (new Date().getTime() - dashboard.CreatedTime!.getTime()) > 60 * 60 * 1000) {
         const deletedRes = await quickSight.deleteDashboard({
           AwsAccountId: awsAccountId,

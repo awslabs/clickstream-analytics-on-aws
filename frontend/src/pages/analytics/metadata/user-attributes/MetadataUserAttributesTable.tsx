@@ -22,9 +22,13 @@ import { t } from 'i18next';
 import { userAttributeDisplayname } from 'pages/analytics/analytics-utils';
 import React, { useContext } from 'react';
 import { useParams } from 'react-router-dom';
-import { IUserRole, USER_ATTRIBUTE_DISPLAY_PREFIX } from 'ts/const';
+import { USER_ATTRIBUTE_DISPLAY_PREFIX } from 'ts/const';
 import { MetadataSource } from 'ts/explore-types';
-import { defaultStr, getUserInfoFromLocalStorage } from 'ts/utils';
+import {
+  defaultStr,
+  getUserInfoFromLocalStorage,
+  isAnalystAuthorRole,
+} from 'ts/utils';
 import MetadataSourceFC from '../comps/MetadataSource';
 import MetadataTable from '../table/MetadataTable';
 import { displayNameRegex, descriptionRegex } from '../table/table-config';
@@ -88,7 +92,7 @@ const MetadataUserAttributesTable: React.FC<
   };
 
   const getDisplayNameEditConfig = () => {
-    if (currentUser.role !== IUserRole.ANALYST_READER) {
+    if (isAnalystAuthorRole(currentUser?.roles)) {
       return {
         validation(item: IAttributeTableItem, value: any) {
           return !displayNameRegex.test(value)
@@ -104,7 +108,7 @@ const MetadataUserAttributesTable: React.FC<
   };
 
   const getDescriptionEditConfig = () => {
-    if (currentUser.role !== IUserRole.ANALYST_READER) {
+    if (isAnalystAuthorRole(currentUser?.roles)) {
       return {
         validation(item: IAttributeTableItem, value: any) {
           return !descriptionRegex.test(value)

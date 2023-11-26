@@ -13,7 +13,7 @@
 
 import { QuickSight, ResourceNotFoundException } from '@aws-sdk/client-quicksight';
 import { v4 as uuidv4 } from 'uuid';
-import { DEFAULT_DASHBOARD_NAME, DEFAULT_SOLUTION_OPERATOR, OUTPUT_REPORT_DASHBOARDS_SUFFIX, QUICKSIGHT_DASHBOARD_INFIX, QUICKSIGHT_RESOURCE_NAME_PREFIX } from '../common/constants-ln';
+import { DEFAULT_DASHBOARD_NAME, DEFAULT_SOLUTION_OPERATOR, OUTPUT_REPORT_DASHBOARDS_SUFFIX, QUICKSIGHT_ANALYSIS_INFIX, QUICKSIGHT_DASHBOARD_INFIX, QUICKSIGHT_RESOURCE_NAME_PREFIX } from '../common/constants-ln';
 import { logger } from '../common/powertools';
 import { aws_sdk_client_common_config } from '../common/sdk-client-config-ln';
 import { ApiFail, ApiSuccess, PipelineStackType } from '../common/types';
@@ -21,7 +21,7 @@ import { getReportingDashboardsUrl, isEmpty, paginateData } from '../common/util
 import { IApplication } from '../model/application';
 import { CPipeline, IPipeline } from '../model/pipeline';
 import { IDashboard, IProject } from '../model/project';
-import { createPublishDashboard, generateEmbedUrlForRegisteredUser } from '../store/aws/quicksight';
+import { createPublishDashboard, deleteDatasetOfPublishDashboard, generateEmbedUrlForRegisteredUser } from '../store/aws/quicksight';
 import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
 
@@ -142,9 +142,14 @@ export class ProjectServ {
         ...aws_sdk_client_common_config,
       });
       try {
+        await deleteDatasetOfPublishDashboard(dashboard.region, dashboardId);
         await quickSightClient.deleteDashboard({
           AwsAccountId: process.env.AWS_ACCOUNT_ID,
           DashboardId: dashboardId,
+        });
+        await quickSightClient.deleteAnalysis({
+          AwsAccountId: process.env.AWS_ACCOUNT_ID,
+          AnalysisId: dashboardId.replace(QUICKSIGHT_DASHBOARD_INFIX, QUICKSIGHT_ANALYSIS_INFIX),
         });
       } catch (err) {
         //dashboard can be delete by other interface/op, catch this exception to allow clear data in ddb.
@@ -279,6 +284,10 @@ export class ProjectServ {
 
   public async saveRequestId(id: string) {
     await store.saveRequestId(id);
+  };
+
+  public async deleteRequestId(id: string) {
+    await store.deleteRequestId(id);
   };
 
 }

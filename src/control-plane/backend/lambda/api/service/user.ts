@@ -10,8 +10,8 @@
  *  OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions
  *  and limitations under the License.
  */
-import { sayHello } from '@click-stream/shared-lib';
-import { DEFAULT_ANALYST_READER_ROLE_NAMES, DEFAULT_ANALYST_ROLE_NAMES, DEFAULT_OPERATOR_ROLE_NAMES, DEFAULT_ROLE_JSON_PATH } from '../common/constants';
+
+import { DEFAULT_ADMIN_ROLE_NAMES, DEFAULT_ANALYST_READER_ROLE_NAMES, DEFAULT_ANALYST_ROLE_NAMES, DEFAULT_OPERATOR_ROLE_NAMES, DEFAULT_ROLE_JSON_PATH } from '../common/constants';
 import { ApiFail, ApiSuccess } from '../common/types';
 import { getRoleFromToken, getTokenFromRequest } from '../common/utils';
 import { IUser, IUserSettings } from '../model/user';
@@ -22,7 +22,6 @@ const store: ClickStreamStore = new DynamoDbStore();
 
 export class UserService {
   public async list(_req: any, res: any, next: any) {
-    sayHello();
     try {
       const result = await store.listUser();
       return res.json(new ApiSuccess({
@@ -52,18 +51,32 @@ export class UserService {
   public async details(req: any, res: any, next: any) {
     try {
       const { id } = req.query;
+      if (!id) {
+        const noIdentityUser: IUser = {
+          id: id,
+          type: 'USER',
+          prefix: 'USER',
+          name: id,
+          roles: [],
+          createAt: Date.now(),
+          updateAt: Date.now(),
+          operator: 'FromToken',
+          deleted: false,
+        };
+        return res.json(new ApiSuccess(noIdentityUser));
+      }
       const ddbUser = await store.getUser(id);
       if (ddbUser) {
         return res.json(new ApiSuccess(ddbUser));
       } else {
         const decodedToken = getTokenFromRequest(req);
-        const roleInToken = await getRoleFromToken(decodedToken);
+        const rolesInToken = await getRoleFromToken(decodedToken);
         const tokenUser: IUser = {
           id: id,
           type: 'USER',
           prefix: 'USER',
           name: id,
-          role: roleInToken,
+          roles: rolesInToken,
           createAt: Date.now(),
           updateAt: Date.now(),
           operator: 'FromToken',
@@ -102,16 +115,14 @@ export class UserService {
   };
 
   public async getUserSettingsFromDDB() {
-    const userSettings = await store.getUserSettings();
-    if (!userSettings) {
-      const defaultSettings = {
-        roleJsonPath: DEFAULT_ROLE_JSON_PATH,
-        operatorRoleNames: DEFAULT_OPERATOR_ROLE_NAMES,
-        analystRoleNames: DEFAULT_ANALYST_ROLE_NAMES,
-        analystReaderRoleNames: DEFAULT_ANALYST_READER_ROLE_NAMES,
-      } as IUserSettings;
-      return defaultSettings;
-    }
+    const ddbData = await store.getUserSettings();
+    const userSettings = {
+      roleJsonPath: ddbData?.roleJsonPath || DEFAULT_ROLE_JSON_PATH,
+      adminRoleNames: ddbData?.adminRoleNames || DEFAULT_ADMIN_ROLE_NAMES,
+      operatorRoleNames: ddbData?.operatorRoleNames || DEFAULT_OPERATOR_ROLE_NAMES,
+      analystRoleNames: ddbData?.analystRoleNames || DEFAULT_ANALYST_ROLE_NAMES,
+      analystReaderRoleNames: ddbData?.analystReaderRoleNames || DEFAULT_ANALYST_READER_ROLE_NAMES,
+    };
     return userSettings;
   }
 

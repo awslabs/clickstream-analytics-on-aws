@@ -14,7 +14,7 @@
 import { join } from 'path';
 import { Duration } from 'aws-cdk-lib';
 import { ISecurityGroup, IVpc, SubnetSelection } from 'aws-cdk-lib/aws-ec2';
-import { IRole, PolicyStatement } from 'aws-cdk-lib/aws-iam';
+import { IRole, Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { IFunction, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Bucket, IBucket } from 'aws-cdk-lib/aws-s3';
@@ -63,6 +63,13 @@ export class ScanMetadataWorkflow extends Construct {
         'detail.$': '$.detail',
       }),
       outputPath: '$.Payload',
+    });
+
+    checkScanMetadataStatusJob.addRetry({
+      errors: ['Lambda.TooManyRequestsException'],
+      interval: Duration.seconds(3),
+      backoffRate: 2,
+      maxAttempts: 6,
     });
 
     const waitX = new Wait(this, `${this.node.id} - Wait seconds`, {
@@ -166,6 +173,10 @@ export class ScanMetadataWorkflow extends Construct {
     const checkWorkflowStartFn = this.checkWorkflowStartFn(props, bucket);
     const checkWorkflowStartJob = new LambdaInvoke(this, `${this.node.id} - Check whether scan metadata should start`, {
       lambdaFunction: checkWorkflowStartFn,
+      payload: TaskInput.fromObject({
+        'originalInput.$': '$',
+        'executionId.$': '$$.Execution.Id',
+      }),
       resultPath: '$.workflowInfo',
     });
 
@@ -191,6 +202,19 @@ export class ScanMetadataWorkflow extends Construct {
       tracingEnabled: true,
       comment: 'This state machine is responsible for aggregating events, parameters and user data and store the aggregated data in DynamoDB',
     });
+
+    checkWorkflowStartFn.role?.attachInlinePolicy(new Policy(this, 'stateFlowListPolicy', {
+      statements: [
+        new PolicyStatement({
+          actions: [
+            'states:ListExecutions',
+          ],
+          resources: [
+            scanMetadataStateMachine.stateMachineArn,
+          ],
+        }),
+      ],
+    }));
 
     return scanMetadataStateMachine;
   }
