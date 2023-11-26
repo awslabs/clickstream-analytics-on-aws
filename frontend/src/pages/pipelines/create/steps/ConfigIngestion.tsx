@@ -47,6 +47,8 @@ import {
   MIN_KDS_SINK_INTERVAL,
   MIN_MSK_BATCH_SIZE,
   MIN_MSK_SINK_INTERVAL,
+  POSITIVE_INTEGER_REGEX,
+  POSITIVE_INTEGER_REGEX_INCLUDE_ZERO,
   ProtocalType,
   SinkType,
 } from 'ts/const';
@@ -381,6 +383,11 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
                   type="number"
                   value={pipelineInfo.ingestionServer.size.serverMin.toString()}
                   onChange={(e) => {
+                    if (
+                      !POSITIVE_INTEGER_REGEX_INCLUDE_ZERO.test(e.detail.value)
+                    ) {
+                      return false;
+                    }
                     changeServerMin(e.detail.value);
                   }}
                 />
@@ -398,6 +405,11 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
                   type="number"
                   value={pipelineInfo.ingestionServer.size.serverMax.toString()}
                   onChange={(e) => {
+                    if (
+                      !POSITIVE_INTEGER_REGEX_INCLUDE_ZERO.test(e.detail.value)
+                    ) {
+                      return false;
+                    }
                     changeServerMax(e.detail.value);
                   }}
                 />
@@ -415,6 +427,11 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
                   type="number"
                   value={pipelineInfo.ingestionServer.size.warmPoolSize.toString()}
                   onChange={(e) => {
+                    if (
+                      !POSITIVE_INTEGER_REGEX_INCLUDE_ZERO.test(e.detail.value)
+                    ) {
+                      return false;
+                    }
                     changeWarmSize(e.detail.value);
                   }}
                 />
@@ -895,6 +912,9 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
                     )}
                     value={pipelineInfo.ingestionServer.sinkBatch?.intervalSeconds.toString()}
                     onChange={(e) => {
+                      if (!POSITIVE_INTEGER_REGEX.test(e.detail.value)) {
+                        return false;
+                      }
                       changeSinkMaxInterval(e.detail.value);
                     }}
                   />
@@ -928,6 +948,9 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
                     )}
                     value={pipelineInfo.ingestionServer.sinkBatch.size.toString()}
                     onChange={(e) => {
+                      if (!POSITIVE_INTEGER_REGEX.test(e.detail.value)) {
+                        return false;
+                      }
                       changeSinkBatchSize(e.detail.value);
                     }}
                   />

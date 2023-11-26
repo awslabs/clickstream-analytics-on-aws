@@ -45,7 +45,7 @@ import { cloneDeep } from 'lodash';
 import React, { useContext, useEffect, useReducer, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { COMMON_ALERT_TYPE } from 'ts/const';
+import { COMMON_ALERT_TYPE, POSITIVE_INTEGER_REGEX } from 'ts/const';
 import {
   QUICKSIGHT_ANALYSIS_INFIX,
   QUICKSIGHT_DASHBOARD_INFIX,
@@ -627,6 +627,11 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
                         placeholder="5"
                         value={windowValue}
                         onChange={(event) => {
+                          if (
+                            !POSITIVE_INTEGER_REGEX.test(event.detail.value)
+                          ) {
+                            return false;
+                          }
                           setWindowValue(event.detail.value);
                         }}
                       />

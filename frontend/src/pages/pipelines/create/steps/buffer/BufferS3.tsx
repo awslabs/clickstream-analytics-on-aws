@@ -14,6 +14,7 @@
 import { FormField, Input, SpaceBetween } from '@cloudscape-design/components';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { POSITIVE_INTEGER_REGEX } from 'ts/const';
 
 interface BufferS3Props {
   update?: boolean;
@@ -48,6 +49,9 @@ const BufferS3: React.FC<BufferS3Props> = (props: BufferS3Props) => {
           placeholder="10"
           value={pipelineInfo.ingestionServer.sinkS3.s3BufferSize.toString()}
           onChange={(e) => {
+            if (!POSITIVE_INTEGER_REGEX.test(e.detail.value)) {
+              return false;
+            }
             changeS3BufferSize(e.detail.value);
           }}
         />
@@ -67,6 +71,9 @@ const BufferS3: React.FC<BufferS3Props> = (props: BufferS3Props) => {
           type="number"
           value={pipelineInfo.ingestionServer.sinkS3.s3BufferInterval.toString()}
           onChange={(e) => {
+            if (!POSITIVE_INTEGER_REGEX.test(e.detail.value)) {
+              return false;
+            }
             changeBufferInterval(e.detail.value);
           }}
         />
