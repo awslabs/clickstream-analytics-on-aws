@@ -21,7 +21,7 @@ import {
   SpaceBetween,
   Table,
   TextFilter,
-  Link as HrefLink,
+  Link as CloudScapeLink,
 } from '@cloudscape-design/components';
 import {
   deleteApplication,
@@ -190,13 +190,13 @@ const ProjectPipeline: React.FC<ProjectPipelineProps> = (
                 {t('project:pipeline.pipeline')}
               </Box>
               <div>
-                <HrefLink
+                <CloudScapeLink
                   external
                   externalIconAriaLabel="Opens in a new tab"
                   href={`/project/${pipelineInfo.projectId}/pipeline/${pipelineInfo.pipelineId}`}
                 >
                   {pipelineInfo.pipelineId}
-                </HrefLink>
+                </CloudScapeLink>
               </div>
             </div>
           </SpaceBetween>
