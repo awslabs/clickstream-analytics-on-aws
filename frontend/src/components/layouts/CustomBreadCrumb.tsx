@@ -13,6 +13,7 @@
 
 import { BreadcrumbGroup } from '@cloudscape-design/components';
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
 type BreadCrumbType = {
   text: string;
@@ -27,11 +28,16 @@ const CustomBreadCrumb: React.FC<ICustomBreadCrumbProps> = (
   props: ICustomBreadCrumbProps
 ) => {
   const { breadcrumbItems } = props;
+  const navigate = useNavigate();
   return (
     <BreadcrumbGroup
       items={breadcrumbItems}
       expandAriaLabel="Show path"
       ariaLabel="Breadcrumbs"
+      onFollow={(e) => {
+        e.preventDefault();
+        navigate(e.detail.href);
+      }}
     />
   );
 };

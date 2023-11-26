@@ -47,12 +47,15 @@ const GetStarted: React.FC = () => {
         </Link>
       </Box>
       <Box padding={{ vertical: 'xs' }}>
-        <Link href={getWorkingWithRedshiftLink(i18n.language)}>
+        <Link href={getWorkingWithRedshiftLink(i18n.language)} target="_blank">
           {t('home:getStarted.link4')}
         </Link>
       </Box>
       <Box padding={{ vertical: 'xs' }}>
-        <Link href={getWorkingWithQuickSightLink(i18n.language)}>
+        <Link
+          href={getWorkingWithQuickSightLink(i18n.language)}
+          target="_blank"
+        >
           {t('home:getStarted.link5')}
         </Link>
       </Box>

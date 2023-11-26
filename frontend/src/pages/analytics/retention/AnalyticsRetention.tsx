@@ -75,6 +75,7 @@ import {
   parametersConvertToCategoryItemType,
   validMultipleRetentionAnalyticsItem,
   validRetentionAnalyticsItem,
+  validateFilterConditions,
 } from '../analytics-utils';
 import AttributeGroup from '../comps/AttributeGroup';
 import ExploreDateRangePicker from '../comps/ExploreDateRangePicker';
@@ -274,6 +275,46 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
       console.log(error);
     }
     setLoadingData(false);
+  };
+
+  const validateEventSelection = () => {
+    if (!validMultipleRetentionAnalyticsItem(eventOptionData)) {
+      dispatch?.({
+        type: StateActionType.SHOW_EVENT_VALID_ERROR,
+      });
+      return false;
+    }
+    dispatch?.({
+      type: StateActionType.HIDE_EVENT_VALID_ERROR,
+    });
+    return true;
+  };
+  const validateFilterSelection = () => {
+    if (
+      filterOptionData.data.length <= 0 ||
+      (filterOptionData.data.length === 1 &&
+        !filterOptionData.data[0]?.conditionOption)
+    ) {
+      return true;
+    } else {
+      dispatch?.({
+        type: StateActionType.VALIDATE_FILTER_CONDITIONS,
+        payload: filterOptionData.data,
+      });
+      const {
+        hasValidConditionOption,
+        hasValidConditionOperator,
+        hasValidConditionValue,
+      } = validateFilterConditions(filterOptionData.data);
+      if (
+        !hasValidConditionOption ||
+        !hasValidConditionOperator ||
+        !hasValidConditionValue
+      ) {
+        return false;
+      }
+      return true;
+    }
   };
 
   const clickPreview = async () => {
@@ -628,14 +669,7 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
             variant="primary"
             iconName="search"
             onClick={() => {
-              if (!validMultipleRetentionAnalyticsItem(eventOptionData)) {
-                dispatch?.({
-                  type: StateActionType.SHOW_EVENT_VALID_ERROR,
-                });
-              } else {
-                dispatch?.({
-                  type: StateActionType.HIDE_EVENT_VALID_ERROR,
-                });
+              if (validateEventSelection() && validateFilterSelection()) {
                 clickPreview();
               }
             }}

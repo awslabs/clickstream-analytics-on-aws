@@ -16,7 +16,6 @@ import {
   Box,
   Button,
   Cards,
-  Link,
   Pagination,
 } from '@cloudscape-design/components';
 import { getProjectList } from 'apis/project';
@@ -25,6 +24,7 @@ import Navigation from 'components/layouts/Navigation';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
 import { TIME_FORMAT } from 'ts/const';
 import { defaultStr } from 'ts/utils';
 import Environment from './comps/Environment';
@@ -50,10 +50,8 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
 
   const renderCardHeader = (item: IProject) => {
     return (
-      <div>
-        <Link fontSize="heading-m" href={`/project/detail/${item.id}`}>
-          {item.name}
-        </Link>
+      <div className="clickstream-link-style">
+        <Link to={`/project/detail/${item.id}`}>{item.name}</Link>
       </div>
     );
   };

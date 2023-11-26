@@ -29,6 +29,7 @@ import { DEFAULT_EN_LANG, TIME_FORMAT } from 'ts/const';
 import { OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN } from 'ts/constant-ln';
 import {
   ConditionCategory,
+  ExploreAnalyticsOperators,
   ExploreComputeMethod,
   ExploreConversionIntervalType,
   ExplorePathSessionDef,
@@ -201,6 +202,33 @@ function patchSameName(
   }
 }
 
+export const validateFilterConditions = (conditions: IConditionItemType[]) => {
+  const hasValidConditionOption = conditions.every(
+    (item) =>
+      item.conditionOption && Object.keys(item.conditionOption).length > 0
+  );
+  const hasValidConditionOperator = conditions.every(
+    (item) => item.conditionOperator !== null
+  );
+  const hasValidConditionValue = conditions.every((item) => {
+    if (
+      item.conditionOperator?.value &&
+      [
+        ExploreAnalyticsOperators.NULL,
+        ExploreAnalyticsOperators.NOT_NULL,
+      ].includes(item.conditionOperator.value as ExploreAnalyticsOperators)
+    ) {
+      return true;
+    }
+    return Array.isArray(item.conditionValue) && item.conditionValue.length > 0;
+  });
+  return {
+    hasValidConditionOption,
+    hasValidConditionOperator,
+    hasValidConditionValue,
+  };
+};
+
 export const validEventAnalyticsItem = (item: IEventAnalyticsItem) => {
   return (
     item.selectedEventOption && item.selectedEventOption.value?.trim() !== ''
@@ -240,10 +268,19 @@ export const validMultipleRetentionAnalyticsItem = (
 };
 
 export const validConditionItemType = (condition: IConditionItemType) => {
+  const isValidConditionOption =
+    condition.conditionOption && condition.conditionOption.name?.trim() !== '';
+  const shouldCheckConditionValue =
+    condition.conditionOperator?.value &&
+    ![
+      ExploreAnalyticsOperators.NULL,
+      ExploreAnalyticsOperators.NOT_NULL,
+    ].includes(condition.conditionOperator.value as ExploreAnalyticsOperators);
   return (
-    condition.conditionOption &&
-    condition.conditionOption?.name?.trim() !== '' &&
-    condition.conditionValue.length > 0
+    isValidConditionOption &&
+    (!shouldCheckConditionValue ||
+      (Array.isArray(condition.conditionValue) &&
+        condition.conditionValue.length > 0))
   );
 };
 
