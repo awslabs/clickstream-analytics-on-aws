@@ -20,6 +20,7 @@ import {
 import { UserContext } from 'context/UserContext';
 import React, { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import { getDocumentLink } from 'ts/url';
 import {
   getUserInfoFromLocalStorage,
@@ -33,6 +34,7 @@ interface INavigationProps {
 
 const Navigation: React.FC<INavigationProps> = (props: INavigationProps) => {
   const { activeHref } = props;
+  const navigate = useNavigate();
   const { t, i18n } = useTranslation();
   const currentUser = useContext(UserContext) ?? getUserInfoFromLocalStorage();
 
@@ -119,7 +121,8 @@ const Navigation: React.FC<INavigationProps> = (props: INavigationProps) => {
       items={getNavItems()}
       activeHref={activeHref}
       onFollow={(e) => {
-        console.info(e);
+        e.preventDefault();
+        navigate(e.detail.href);
       }}
     />
   );

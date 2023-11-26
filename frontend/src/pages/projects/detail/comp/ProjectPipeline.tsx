@@ -17,11 +17,11 @@ import {
   ColumnLayout,
   Container,
   Header,
-  Link,
   Pagination,
   SpaceBetween,
   Table,
   TextFilter,
+  Link as HrefLink,
 } from '@cloudscape-design/components';
 import {
   deleteApplication,
@@ -32,7 +32,7 @@ import PipelineStatus from 'components/pipeline/PipelineStatus';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { EPipelineStatus, TIME_FORMAT } from 'ts/const';
 import { defaultStr } from 'ts/utils';
 
@@ -127,11 +127,13 @@ const ProjectPipeline: React.FC<ProjectPipelineProps> = (
 
   const renderAppName = (e: IApplication) => {
     return (
-      <Link
-        href={`/project/${pipelineInfo.projectId}/application/detail/${e.appId}`}
-      >
-        {e.name}
-      </Link>
+      <div className="clickstream-link-style">
+        <Link
+          to={`/project/${pipelineInfo.projectId}/application/detail/${e.appId}`}
+        >
+          {e.name}
+        </Link>
+      </div>
     );
   };
 
@@ -188,13 +190,13 @@ const ProjectPipeline: React.FC<ProjectPipelineProps> = (
                 {t('project:pipeline.pipeline')}
               </Box>
               <div>
-                <Link
+                <HrefLink
                   external
                   externalIconAriaLabel="Opens in a new tab"
                   href={`/project/${pipelineInfo.projectId}/pipeline/${pipelineInfo.pipelineId}`}
                 >
                   {pipelineInfo.pipelineId}
-                </Link>
+                </HrefLink>
               </div>
             </div>
           </SpaceBetween>

@@ -15,7 +15,6 @@ import {
   AppLayout,
   Box,
   Cards,
-  Link,
   Pagination,
 } from '@cloudscape-design/components';
 import { getAnalyticsDashboardList } from 'apis/analytics';
@@ -27,7 +26,7 @@ import { StateActionType, HelpPanelType } from 'context/reducer';
 import moment from 'moment';
 import React, { useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { TIME_FORMAT } from 'ts/const';
 import { DEFAULT_DASHBOARD_NAME } from 'ts/constant-ln';
 import { defaultStr } from 'ts/utils';
@@ -49,24 +48,22 @@ const AnalyticsDashboardCard: React.FC<any> = () => {
 
   const buildCardHeader = (item: IAnalyticsDashboard) => {
     return (
-      <Link
-        variant="secondary"
-        fontSize="heading-m"
-        href={`/analytics/${projectId}/app/${appId}/dashboard/${item.id}`}
-      >
-        {item.name === DEFAULT_DASHBOARD_NAME ? (
-          <>
-            {t('analytics:dashboard.defaultUserLifecycle')} -
-            {
-              <small>
-                <i> {t('analytics:dashboard.defaultTag')}</i>
-              </small>
-            }
-          </>
-        ) : (
-          item.name
-        )}
-      </Link>
+      <div className="clickstream-link-style">
+        <Link to={`/analytics/${projectId}/app/${appId}/dashboard/${item.id}`}>
+          {item.name === DEFAULT_DASHBOARD_NAME ? (
+            <>
+              {t('analytics:dashboard.defaultUserLifecycle')} -
+              {
+                <small>
+                  <i> {t('analytics:dashboard.defaultTag')}</i>
+                </small>
+              }
+            </>
+          ) : (
+            item.name
+          )}
+        </Link>
+      </div>
     );
   };
 
