@@ -238,20 +238,22 @@ project.eslint?.addRules({
 });
 project.addFields({ version });
 
-// Shared Project
-new typescript.TypeScriptProject({
+// Base Project
+const baseProject = new typescript.TypeScriptProject({
   parent: project,
-  name: '@click-stream/shared-lib',
-  outdir: './packages/shared-lib',
+  name: '@clickstream/base-lib',
+  outdir: './src/base-lib',
   defaultReleaseBranch: defaultBranch,
   sampleCode: false,
   packageManager: project.package.packageManager,
 });
+baseProject.addFields({ version });
+apiProject.setScript('postbuild', 'node src/build.js');
 
 const apiProject = new typescript.TypeScriptProject({
   deps: [
     ...depsForApiProject,
-    '@click-stream/shared-lib@file:../../../../../packages/shared-lib',
+    '@clickstream/base-lib@file:../../../../base-lib',
   ],
   devDeps: [
     ...devDepsForApiProject,

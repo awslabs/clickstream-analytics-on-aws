@@ -231,8 +231,8 @@
       "type": "runtime"
     },
     {
-      "name": "@click-stream/shared-lib",
-      "version": "file:../../../../../packages/shared-lib",
+      "name": "@clickstream/base-lib",
+      "version": "file:../../../../base-lib",
       "type": "runtime"
     },
     {
