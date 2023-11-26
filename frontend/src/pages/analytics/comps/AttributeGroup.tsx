@@ -41,6 +41,7 @@ const AttributeGroup: React.FC<AttributeGroupProps> = (
         <div className="flex gap-10 w-75p">
           <div className="flex-1">
             <EventItem
+              disableValidate
               type="attribute"
               placeholder={defaultStr(
                 t('analytics:labels.attributeSelectPlaceholder')
