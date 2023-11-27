@@ -105,8 +105,8 @@ import static software.aws.solution.clickstream.KvConverter.getValueTypeResult;
 
 @Slf4j
 public class ServerDataConverter {
-    public static final Map<String, String> PROPS_NAME_MAP = createPropNameMap();
-    public static final Map<String, String> EVENT_NAME_MAP = createEventNameMap();
+    protected static final Map<String, String> PROPS_NAME_MAP = createPropNameMap();
+    protected static final Map<String, String> EVENT_NAME_MAP = createEventNameMap();
 
     private static UDF1<String, Row[]> convertGTMServerData() {
         return (String value) -> {
