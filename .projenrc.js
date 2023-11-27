@@ -248,7 +248,6 @@ const baseProject = new typescript.TypeScriptProject({
   packageManager: project.package.packageManager,
 });
 baseProject.addFields({ version });
-baseProject.setScript('postbuild', 'node scripts/copy.js');
 
 const apiProject = new typescript.TypeScriptProject({
   deps: [
