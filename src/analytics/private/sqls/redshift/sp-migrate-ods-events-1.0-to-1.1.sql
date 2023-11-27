@@ -12,6 +12,18 @@ log_name VARCHAR(50) := 'sp_migrate_ods_events';
 
 BEGIN 
 
+DROP TABLE IF EXISTS ods_events_params_candidate;
+DROP TABLE IF EXISTS item_all_temp;
+DROP TABLE IF EXISTS ods_events_item_candidate;
+DROP TABLE IF EXISTS item_final_temp;
+DROP TABLE IF EXISTS ods_events_user_temp;
+DROP TABLE IF EXISTS user_traffic_source_temp;
+DROP TABLE IF EXISTS user_base_temp;
+DROP TABLE IF EXISTS user_page_referrer_temp;
+DROP TABLE IF EXISTS user_device_id_list_temp;
+DROP TABLE IF EXISTS user_final_temp;
+DROP TABLE IF EXISTS user_channel_temp;
+
 --------------------------------
 -- backfill table: event
 --------------------------------
@@ -64,7 +76,6 @@ ANALYZE {{schema}}.{{table_event}};
 -- backfill table: event_parameter
 --------------------------------
 -- ods_events_params_candidate
-DROP TABLE IF EXISTS ods_events_params_candidate;
 
 SELECT
        event_timestamp,
@@ -117,7 +128,6 @@ ANALYZE {{schema}}.{{table_event_parameter}};
 --------------------------------
 
 -- item_all_temp
-DROP TABLE IF EXISTS item_all_temp;
 
 WITH item_all_with_id AS (
        SELECT
@@ -134,7 +144,6 @@ FROM
        item_all_with_id;
 
 -- ods_events_item_candidate
-DROP TABLE ods_events_item_candidate;
 
 SELECT
        event_timestamp,
@@ -151,10 +160,8 @@ WHERE
                      e.id = it2.id
        );
 
-DROP TABLE item_all_temp;
 
 -- item_final_temp
-DROP TABLE IF EXISTS item_final_temp;
 
 WITH item_rank AS (
        SELECT
@@ -406,8 +413,8 @@ CALL {{schema}}.{{sp_clickstream_log_non_atomic}}(
        'insert ' || record_number || ' FROM {{schema}}.{{table_item}}'
 );
 
+DROP TABLE item_all_temp;
 DROP TABLE item_final_temp;
-
 DROP TABLE ods_events_item_candidate;
 
 ANALYZE {{schema}}.{{table_item}};
@@ -416,7 +423,6 @@ ANALYZE {{schema}}.{{table_item}};
 -- backfill table: user
 --------------------------------
 -- ods_events_user_temp
-DROP TABLE IF EXISTS ods_events_user_temp;
 
 SELECT
        event_timestamp,
@@ -446,7 +452,6 @@ WHERE
 
 
 -- user_base_temp
-DROP TABLE IF EXISTS user_base_temp;
 
 WITH user_base_rank AS (
        SELECT
@@ -488,7 +493,6 @@ FROM
        user_base;
 
 -- user_traffic_source_temp 
-DROP TABLE IF EXISTS user_traffic_source_temp;
 
 WITH user_traffic_source_rank AS (
        SELECT
@@ -524,7 +528,6 @@ FROM
        user_traffic_source;
 
 -- user_page_referrer_temp
-DROP TABLE IF EXISTS user_page_referrer_temp;
 
 WITH user_page_referrer_rank AS (
        SELECT
@@ -558,7 +561,6 @@ FROM
        user_page_referrer;
 
 -- user_device_id_list_temp
-DROP TABLE IF EXISTS user_device_id_list_temp;
 
 WITH user_device_id_list AS (
        SELECT
@@ -584,7 +586,6 @@ FROM
 
 
 -- user_channel_temp
-DROP TABLE IF EXISTS user_channel_temp;
 
 WITH user_channel_rank AS (
        SELECT
@@ -615,11 +616,7 @@ SELECT
 FROM
        user_channel;
 
---
-DROP TABLE ods_events_user_temp;
-
 -- user_final_temp
-DROP TABLE IF EXISTS user_final_temp;
 
 WITH user_final AS (
        SELECT
@@ -648,15 +645,6 @@ SELECT
 FROM
        user_final;
 
-DROP TABLE user_base_temp;
-
-DROP TABLE user_traffic_source_temp;
-
-DROP TABLE user_page_referrer_temp;
-
-DROP TABLE user_device_id_list_temp;
-
-DROP TABLE user_channel_temp;
 
 INSERT INTO
        {{schema}}.{{table_user}} (
@@ -682,6 +670,19 @@ CALL {{schema}}.{{sp_clickstream_log_non_atomic}}(
        'info',
        'insert ' || record_number || ' FROM {{schema}}.{{table_user}}'
 );
+
+
+DROP TABLE ods_events_user_temp;
+
+DROP TABLE user_base_temp;
+
+DROP TABLE user_traffic_source_temp;
+
+DROP TABLE user_page_referrer_temp;
+
+DROP TABLE user_device_id_list_temp;
+
+DROP TABLE user_channel_temp;
 
 DROP TABLE user_final_temp;
 
