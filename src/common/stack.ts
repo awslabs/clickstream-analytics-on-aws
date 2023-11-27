@@ -19,7 +19,7 @@ export function getShortIdOfStack(stack: Stack): string {
   return Fn.select(0, Fn.split('-', Fn.select(2, Fn.split('/', stack.stackId))));
 }
 
-export function getShortIdOfStackWithRegin(stack: Stack): string {
+export function getShortIdOfStackWithRegion(stack: Stack): string {
   return `${Aws.REGION}-${Fn.select(0, Fn.split('-', Fn.select(2, Fn.split('/', stack.stackId))))}`;
 }
 
