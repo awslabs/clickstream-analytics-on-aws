@@ -34,7 +34,7 @@ async function copyDirectory(src, dest) {
     }
 }
 
-const sourceDir = '../../../../src/base-lib';
-const targetDir = './node_modules/@clickstream/base-lib';
+const sourceDir = 'src/base-lib';
+const targetDir = 'src/control-plane/backend/lambda/api/node_modules/@clickstream/base-lib';
 
 copyDirectory(sourceDir, targetDir);
