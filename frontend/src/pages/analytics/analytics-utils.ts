@@ -374,7 +374,7 @@ export const getPairEventAndConditions = (
         }
       });
 
-      const pairEventAndCondition: IPairEventAndCondition = {
+      let pairEventAndCondition: IPairEventAndCondition = {
         startEvent: {
           eventName: defaultStr(item.startEventOption?.name, ''),
           sqlCondition: {
@@ -390,6 +390,39 @@ export const getPairEventAndConditions = (
           },
         },
       };
+      if (item.startEventRelationAttribute) {
+        pairEventAndCondition = {
+          ...pairEventAndCondition,
+          startEvent: {
+            ...pairEventAndCondition.startEvent,
+            retentionJoinColumn: {
+              category: defaultStr(
+                item.startEventRelationAttribute?.category,
+                ConditionCategory.OTHER
+              ),
+              property: defaultStr(item.startEventRelationAttribute?.name, ''),
+            },
+          },
+        };
+      }
+      if (item.revisitEventRelationAttribute) {
+        pairEventAndCondition = {
+          ...pairEventAndCondition,
+          backEvent: {
+            ...pairEventAndCondition.backEvent,
+            retentionJoinColumn: {
+              category: defaultStr(
+                item.revisitEventRelationAttribute?.category,
+                ConditionCategory.OTHER
+              ),
+              property: defaultStr(
+                item.revisitEventRelationAttribute?.name,
+                ''
+              ),
+            },
+          },
+        };
+      }
       pairEventAndConditions.push(pairEventAndCondition);
     }
   });
