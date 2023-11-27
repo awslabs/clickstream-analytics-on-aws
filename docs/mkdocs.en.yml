@@ -66,6 +66,7 @@ nav:
       - Path explorer: dashboard/path.md
       - Custom report: dashboard/custom-analysis.md
     - Identity Management: identity-mgmt.md
+    - Upgrade the solution: upgrade.md
     - Additional resources:
       - Upload Certificate: resources/upload-ssl-certificate.md
     - FAQ: faq.md

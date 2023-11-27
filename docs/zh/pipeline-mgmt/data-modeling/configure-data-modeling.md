@@ -53,31 +53,3 @@
     * **用户表插入更新频率**：由于所有版本的用户属性都保存在 Redshift 中。我们在 DWD 层创建了一个用户范围的自定义维度表 `dim_users`，以便 BI 仪表板可以报告最新的用户属性。工作流按计划运行以插入更新（更新和插入）用户。
 
 * **Athena**：选择 Athena 使用在 Glue 数据目录中创建的表查询 S3 上的所有数据。
-
-
-## 升级
-
-### 从1.0.x升级到1.1.x
-
-当您将管道从v1.0.x升级到v1.1.x时，您需要执行以下操作，以将数据从旧表`ods_events`迁移到新表`event`、`event_parameter`、`user`和`item`：
-
-1. 打开[Redshift query editor v2](https://aws.amazon.com/redshift/query-editor-v2/)，您可以参考AWS文档[Working with query editor v2](https://docs.aws.amazon.com/redshift/latest/mgmt/query-editor-v2-using.html)登录并使用Redshift查询编辑器v2查询数据。
-
-2. 选择`workgroup-<project-id>`->`<project-id>`->`<app-id>`->Tables，确保应用程序的数据表在其中列出。
-
-3. 创建一个新的SQL编辑器。
-
-4. 在编辑器中执行以下SQL：
-```sql 
--- 请将 `<app-id>` 替换为您的实际应用ID
-CALL <app-id>.sp_migrate_ods_events_1_0_to_1_1();
-```
-
-5. 等待SQL执行完成，执行时间取决于表`ods_events`中的数据量。
-
-6. 执行以下SQL以检查存储过程执行日志，确保没有错误：
-```sql
--- 请将 `<app-id>` 替换为您的实际应用ID
-SELECT * FROM "<app-id>"."clickstream_log" WHERE log_name = 'sp_migrate_ods_events' ORDER BY log_date DESC;
-```
-

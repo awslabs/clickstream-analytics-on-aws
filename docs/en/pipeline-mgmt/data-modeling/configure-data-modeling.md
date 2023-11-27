@@ -51,32 +51,3 @@ You can set below configurations for Redshift.
     * **User table upsert frequency**: Since all versions of user properties are saved in Redshift. We create a user-scoped custom dimension table `dim_users` in DWD layer so the BI dashboard can report on the latest user property. The workflow run on schedule to upsert (update and insert) users.
 
 * **Athena**: Choose Athena to query all data on S3 using the table created in the Glue Data Catalog.
-
-## Upgrade
-
-### Upgrade from 1.0.x to 1.1.x
-
-When you upgraded the pipeline from v1.0.x to v1.1.x, you need to perform below actions to migrate data from old table `ods_events` to new tables `event`, `event_parameter`, `user` and `item`:
-
-1. Open [Redshift query editor v2](https://aws.amazon.com/redshift/query-editor-v2/), you can refer to AWS doc [Working with query editor v2](https://docs.aws.amazon.com/redshift/latest/mgmt/query-editor-v2-using.html) to login and query data using Redshift query editor v2.
-
-2. Select you `workgroup-<project-id>`->`<project-id>`->`<app-id>`->Tables, make sure tables for the appId are listed there.
-
-3. Create a new SQL Editor。
-
-4. Execute below SQL in editor:
-
-```sql
--- please replace `<app-id>` with your actual app id
-CALL <app-id>.sp_migrate_ods_events_1_0_to_1_1();
-```
-
-5. Wait the SQL to complete, the execution time depends on the volume of data in table `ods_events`
-
-6. Execute below SQL to check the stored procedure execution log, make sure no errors there.
-
-```sql 
--- please replace `<app-id>` with your actual app id
-SELECT * FROM  "<app-id>"."clickstream_log" where log_name = 'sp_migrate_ods_events' order by log_date desc;
-```
-
