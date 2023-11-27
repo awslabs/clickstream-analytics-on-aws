@@ -40,6 +40,9 @@ import {
   DescribeDashboardCommandOutput,
   DescribeDashboardDefinitionCommand,
   DeleteDataSetCommand,
+  DeleteUserCommand,
+  DeleteUserCommandInput,
+  ResourceNotFoundException,
 } from '@aws-sdk/client-quicksight';
 import { awsAccountId, awsRegion, QUICKSIGHT_CONTROL_PLANE_REGION, QUICKSIGHT_EMBED_NO_REPLY_EMAIL, QuickSightEmbedRoleArn } from '../../common/constants';
 import { QUICKSIGHT_ANALYSIS_INFIX, QUICKSIGHT_DASHBOARD_INFIX, QUICKSIGHT_DATASET_INFIX } from '../../common/constants-ln';
@@ -95,6 +98,40 @@ export const registerUserByRegion = async (
       return true;
     }
     logger.error('Register User Error.', { err });
+    return false;
+  }
+};
+
+export const deleteClickstreamUser = async () => {
+  const identityRegion = await sdkClient.QuickSightIdentityRegion();
+  await deleteUserByRegion(identityRegion, {
+    AwsAccountId: awsAccountId,
+    Namespace: QUICKSIGHT_NAMESPACE,
+    UserName: QUICKSIGHT_PUBLISH_USER_NAME,
+  });
+  await deleteUserByRegion(identityRegion, {
+    AwsAccountId: awsAccountId,
+    Namespace: QUICKSIGHT_NAMESPACE,
+    UserName: QUICKSIGHT_EXPLORE_USER_NAME,
+  });
+};
+
+export const deleteUserByRegion = async (
+  region: string,
+  user: DeleteUserCommandInput,
+) => {
+  try {
+    const quickSightClient = sdkClient.QuickSightClient({
+      region: region,
+    });
+    const command: DeleteUserCommand = new DeleteUserCommand(user);
+    await quickSightClient.send(command);
+    return true;
+  } catch (err) {
+    if (err instanceof ResourceNotFoundException) {
+      return true;
+    }
+    logger.error('Delete User Error.', { err });
     return false;
   }
 };

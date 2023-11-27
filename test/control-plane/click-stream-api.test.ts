@@ -885,6 +885,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
             Action: [
               'quicksight:GenerateEmbedUrlForRegisteredUser',
               'quicksight:RegisterUser',
+              'quicksight:DeleteUser',
               'quicksight:ListUsers',
               'quicksight:ListDataSets',
               'quicksight:ListDashboards',
