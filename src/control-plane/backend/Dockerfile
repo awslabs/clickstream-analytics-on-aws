@@ -2,6 +2,7 @@ FROM public.ecr.aws/docker/library/node:18
 RUN mkdir -p /home/node/app
 WORKDIR /home/node/app
 COPY ./src ./src
+RUN cd src/base-lib && yarn install && yarn run build
 RUN cd src/control-plane/backend/lambda/api && yarn install && yarn build
 RUN cd src/control-plane/backend/lambda/api && rm -rf node_modules && yarn install --production
 
