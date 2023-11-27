@@ -70,6 +70,8 @@ nav:
       - 自定义报表: dashboard/custom-analysis.md
     - 附加资源:
       - 上传证书: resources/upload-ssl-certificate.md
+    - 权限管理:
+      - 用户于角色: permission-mgmt/users-and-roles.md
     - 常见问题: faq.md
     - 故障排除: troubleshooting.md
     - 卸载解决方案: uninstall.md
