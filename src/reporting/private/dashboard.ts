@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { DataSetImportMode, InputColumn, QuickSight, ResourceNotFoundException, ResourceStatus } from '@aws-sdk/client-quicksight';
+import { AnalysisSummary, DashboardSummary, DataSetImportMode, InputColumn, QuickSight, ResourceNotFoundException, ResourceStatus, paginateListAnalyses, paginateListDashboards } from '@aws-sdk/client-quicksight';
 import { logger } from '../../common/powertools';
 
 export interface RedShiftProps {
@@ -368,16 +368,18 @@ export const existDashboard = async (quickSight: QuickSight, accountId: string, 
 
 export const findDashboardWithPrefix = async (quickSight: QuickSight, accountId: string, prefix: string, excludeDashboardId: string|undefined) => {
   try {
-    const dashboards = await quickSight.listDashboards({
+    const dashboardSummaries: DashboardSummary[] = [];
+    for await (const page of paginateListDashboards({ client: quickSight }, {
       AwsAccountId: accountId,
-    });
-    if (dashboards.DashboardSummaryList === undefined) {
-      return undefined;
+    })) {
+      if (page.DashboardSummaryList !== undefined) {
+        dashboardSummaries.push(...page.DashboardSummaryList);
+      }
     }
 
-    for (const dashboard of dashboards.DashboardSummaryList) {
-      if (dashboard.DashboardId?.startsWith(prefix) && dashboard.DashboardId !== excludeDashboardId ) {
-        return dashboard.DashboardId;
+    for (const dashboardSummary of dashboardSummaries) {
+      if (dashboardSummary.DashboardId?.startsWith(prefix) && dashboardSummary.DashboardId !== excludeDashboardId ) {
+        return dashboardSummary.DashboardId;
       }
     }
 
@@ -390,16 +392,19 @@ export const findDashboardWithPrefix = async (quickSight: QuickSight, accountId:
 
 export const findAnalysisWithPrefix = async (quickSight: QuickSight, accountId: string, prefix: string, excludeAnalysisId: string|undefined) => {
   try {
-    const analyses = await quickSight.listAnalyses({
+
+    const analysisSummaries: AnalysisSummary[] = [];
+    for await (const page of paginateListAnalyses({ client: quickSight }, {
       AwsAccountId: accountId,
-    });
-    if (analyses.AnalysisSummaryList === undefined) {
-      return undefined;
+    })) {
+      if (page.AnalysisSummaryList !== undefined) {
+        analysisSummaries.push(...page.AnalysisSummaryList);
+      }
     }
 
-    for (const analysis of analyses.AnalysisSummaryList) {
-      if (analysis.AnalysisId?.startsWith(prefix) && analysis.AnalysisId !== excludeAnalysisId ) {
-        return analysis.AnalysisId;
+    for (const analysisSummary of analysisSummaries) {
+      if (analysisSummary.AnalysisId?.startsWith(prefix) && analysisSummary.AnalysisId !== excludeAnalysisId ) {
+        return analysisSummary.AnalysisId;
       }
     }
 

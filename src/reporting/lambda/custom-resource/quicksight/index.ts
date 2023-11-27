@@ -31,6 +31,8 @@ import {
   DeleteAnalysisCommandOutput,
   UpdateDataSetCommandOutput,
   ConflictException,
+  paginateListTemplateVersions,
+  TemplateVersionSummary,
 } from '@aws-sdk/client-quicksight';
 import { Context, CloudFormationCustomResourceEvent, CloudFormationCustomResourceUpdateEvent, CloudFormationCustomResourceCreateEvent, CloudFormationCustomResourceDeleteEvent, CdkCustomResourceResponse } from 'aws-lambda';
 import Mustache from 'mustache';
@@ -317,18 +319,21 @@ const getLatestTemplateVersion = async (quickSight: QuickSight,
   accountId: string, templateId: string): Promise<number> => {
   await waitForTemplateChangeCompleted(quickSight, accountId, templateId);
 
-  const versions = await quickSight.listTemplateVersions({
+  const templateVersionSummaries: TemplateVersionSummary[] = [];
+  for await (const page of paginateListTemplateVersions({ client: quickSight }, {
     TemplateId: templateId,
     AwsAccountId: accountId,
-  });
+  })) {
+    if (page.TemplateVersionSummaryList !== undefined) {
+      templateVersionSummaries.push(...page.TemplateVersionSummaryList);
+    }
+  }
 
   let maxNumber = 1;
-  if (versions.TemplateVersionSummaryList) {
-    for (const version of versions.TemplateVersionSummaryList) {
-      const number = version.VersionNumber ?? 1;
-      if (number > maxNumber) {
-        maxNumber = number;
-      }
+  for (const version of templateVersionSummaries) {
+    const number = version.VersionNumber ?? 1;
+    if (number > maxNumber) {
+      maxNumber = number;
     }
   }
 
