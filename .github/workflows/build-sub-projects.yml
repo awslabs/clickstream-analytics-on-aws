@@ -19,8 +19,8 @@ jobs:
           yarn install --check-files --frozen-lockfile
           yarn run build
           cd ../../frontend/
-          yarn clean
-          yarn install --check-files
+          yarn copy
+          yarn install --check-files --frozen-lockfile
           yarn run format
           yarn run build
           yarn run test
