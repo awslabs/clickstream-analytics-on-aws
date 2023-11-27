@@ -4,14 +4,14 @@
 
 | 功能 | 管理员 | IT运维 | 分析师 | 分析师读者 |
 |-------|-------|-------|-------|-------|
-| 项目管理          | :white_check_mark | :white_check_mark | :white_large_square | :white_large_square |
-| 运维告警          | :white_check_mark | :white_check_mark | :white_large_square | :white_large_square |
-| 插件管理          | :white_check_mark | :white_check_mark | :white_large_square | :white_large_square |
-| 用户管理          | :white_check_mark | :white_large_square  | :white_large_square | :white_large_square |
-| 分析工作坊-仪表板  | :white_large_square  | :white_large_square | :white_check_mark | :white_check_mark |
-| 分析工作坊-探索    | :white_check_mark | :white_large_square  | :white_check_mark | :white_check_mark |
-| 分析工作坊-分析    | :white_check_mark | :white_large_square | :white_check_mark | :white_large_square |
-| 分析工作坊-数据管理 | :white_check_mark | :white_large_square | :white_check_mark | :white_check_mark |
+| 项目管理          | [x] | [x] | [ ] | [ ] |
+| 运维告警          | [x] | [x] | [ ] | [ ] |
+| 插件管理          | [x] | [x] | [ ] | [ ] |
+| 用户管理          | [x] | [ ]  | [ ] | [ ] |
+| 分析工作坊-仪表板  | [ ]  | [ ] | [x] | [x] |
+| 分析工作坊-探索    | [x] | [ ]  | [x] | [x] |
+| 分析工作坊-分析    | [x] | [ ] | [x] | [ ] |
+| 分析工作坊-数据管理 | [x] | [ ] | [x] | [x] |
 
 ## 角色获取流程
 用户登录系统后获取角色的流程图如下：

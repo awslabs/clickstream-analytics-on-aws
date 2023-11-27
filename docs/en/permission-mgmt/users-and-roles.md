@@ -4,14 +4,14 @@
 
 | Feature | Administrator | Operator | Analyst | Analyst Reader |
 |-------|-------|-------|-------|-------|
-| Project management          | :white_check_mark | :white_check_mark | :white_large_square | :white_large_square |
-| Operation and Alarm         | :white_check_mark | :white_check_mark | :white_large_square | :white_large_square |
-| Plugin Management           | :white_check_mark | :white_check_mark | :white_large_square | :white_large_square |
-| User Management             | :white_check_mark | :white_large_square  | :white_large_square | :white_large_square |
-| Analytics Studio - Dashboards  | :white_large_square  | :white_large_square | :white_check_mark | :white_check_mark |
-| Analytics Studio - Explore    | :white_check_mark | :white_large_square  | :white_check_mark | :white_check_mark |
-| Analytics Studio - Analyzes    | :white_check_mark | :white_large_square | :white_check_mark | :white_large_square |
-| Analytics Studio - Data Management | :white_check_mark | :white_large_square | :white_check_mark | :white_check_mark |
+| Project management          | [x] | [x] | [] | [] |
+| Operation and Alarm         | [x] | [x] | [] | [] |
+| Plugin Management           | [x] | [x] | [] | [] |
+| User Management             | [x] | []  | [] | [] |
+| Analytics Studio - Dashboards  | []  | [] | [x] | [x] |
+| Analytics Studio - Explore    | [x] | []  | [x] | [x] |
+| Analytics Studio - Analyzes    | [x] | [] | [x] | [] |
+| Analytics Studio - Data Management | [x] | [] | [x] | [x] |
 
 ## Role acquisition process
 The flowchart for obtaining roles after login into the system is as follows:
