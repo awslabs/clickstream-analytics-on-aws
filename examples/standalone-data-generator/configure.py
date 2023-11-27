@@ -14,7 +14,7 @@ import json
 import enums
 
 # application type, you can switch to `enums.Application.Shopping` to send shopping events.
-APP_TYPE = enums.Application.NotePad
+APP_TYPE = enums.Application.Shopping
 
 # for history event consts
 DURATION_OF_DAYS = 30
@@ -25,7 +25,7 @@ MAX_BATCH_REQUEST_NUMBER = 20
 PROCESS_NUMBER = 50
 # control the speed for event send.
 MAX_UPLOAD_THREAD_NUMBER = 1
-REQUEST_SLEEP_TIME = 0.2
+REQUEST_SLEEP_TIME = 0.1
 GZIP_TIMES_PER_DAY = 1
 
 # for real-time event consts
