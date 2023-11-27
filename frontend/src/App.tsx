@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { sayHello } from '@click-stream/shared-lib';
+import { sayHello } from '@clickstream/base-lib';
 import SignedInPage from 'AppSignInPage';
 import Axios from 'axios';
 import Loading from 'components/common/Loading';

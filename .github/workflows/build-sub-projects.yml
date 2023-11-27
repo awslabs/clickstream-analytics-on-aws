@@ -15,7 +15,7 @@ jobs:
         with:
           node-version: "16"
       - run: |-
-          cd packages/shared-lib/
+          cd src/base-lib/
           yarn install --check-files --frozen-lockfile
           yarn run build
           cd ../../frontend/
