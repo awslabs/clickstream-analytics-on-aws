@@ -13,7 +13,7 @@
 
 import { readFileSync } from 'fs';
 import { join } from 'path';
-import { AnalysisDefinition, ConflictException, DashboardVersionDefinition, DataSetIdentifierDeclaration, InputColumn, QuickSight, ResourceStatus, ThrottlingException } from '@aws-sdk/client-quicksight';
+import { AnalysisDefinition, AnalysisSummary, ConflictException, DashboardSummary, DashboardVersionDefinition, DataSetIdentifierDeclaration, DataSetSummary, InputColumn, QuickSight, ResourceStatus, ThrottlingException, paginateListAnalyses, paginateListDashboards, paginateListDataSets } from '@aws-sdk/client-quicksight';
 import { BatchExecuteStatementCommand, DescribeStatementCommand, StatusString } from '@aws-sdk/client-redshift-data';
 import { v4 as uuidv4 } from 'uuid';
 import { DataSetProps, analysisAdminPermissionActions, dashboardAdminPermissionActions } from './quicksight/dashboard-ln';
@@ -937,9 +937,9 @@ export class ReportingService {
 
       const deletedDashBoards = await _cleanedDashboard(quickSight);
 
-      const deletedAnalyses = await _deletedAnalyses(quickSight);
+      const deletedAnalyses = await _cleanAnalyses(quickSight);
 
-      const deletedDatasets = await _deletedDatasets(quickSight);
+      const deletedDatasets = await _cleanDatasets(quickSight);
 
       const result = {
         deletedDashBoards,
@@ -959,70 +959,97 @@ export class ReportingService {
 
 }
 
-async function _deletedDatasets(quickSight: QuickSight) {
+async function _cleanDatasets(quickSight: QuickSight) {
   const deletedDatasets: string[] = [];
-  const datasets = await quickSight.listDataSets({
-    AwsAccountId: awsAccountId,
-  });
 
-  if (datasets.DataSetSummaries) {
-    for (const [_index, dataset] of datasets.DataSetSummaries.entries()) {
-      if (dataset.DataSetId?.startsWith(QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX) &&
-      (new Date().getTime() - dataset.CreatedTime!.getTime()) > 60 * 60 * 1000) {
-        const deletedRes = await quickSight.deleteDataSet({
-          AwsAccountId: awsAccountId,
-          DataSetId: dataset.DataSetId,
-        });
-        deletedDatasets.push(deletedRes.DataSetId!);
-        logger.info(`dataset ${dataset.Name} removed`);
-      }
+  const dataSetSummaries: DataSetSummary[] = [];
+  for await (const page of paginateListDataSets({ client: quickSight }, {
+    AwsAccountId: awsAccountId,
+  })) {
+    if (page.DataSetSummaries !== undefined) {
+      dataSetSummaries.push(...page.DataSetSummaries);
     }
   }
+
+  for (const dataSetSummary of dataSetSummaries) {
+    if (
+      dataSetSummary.DataSetId?.startsWith(QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX)
+      && dataSetSummary.CreatedTime !== undefined
+      && (new Date().getTime() - dataSetSummary.CreatedTime.getTime()) > 1 * 1 * 1000
+    ) {
+
+      const dataSetId = dataSetSummary.DataSetId;
+      logger.info(`deleting data set: ${ dataSetId }`);
+      const deletedRes = await quickSight.deleteDataSet({
+        AwsAccountId: awsAccountId,
+        DataSetId: dataSetId,
+      });
+      deletedDatasets.push(deletedRes.DataSetId!);
+      logger.info(`dataset ${dataSetSummary.Name} removed`);
+    }
+  }
+
   return deletedDatasets;
 }
 
-async function _deletedAnalyses(quickSight: QuickSight) {
+async function _cleanAnalyses(quickSight: QuickSight) {
   const deletedAnalyses: string[] = [];
-  const analyses = await quickSight.listAnalyses({
-    AwsAccountId: awsAccountId,
-  });
 
-  if (analyses.AnalysisSummaryList) {
-    for (const [_index, analysis] of analyses.AnalysisSummaryList.entries()) {
-      if (analysis.Status !== ResourceStatus.DELETED &&
-        analysis.AnalysisId?.startsWith(QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX) &&
-        (new Date().getTime() - analysis.CreatedTime!.getTime()) > 60 * 60 * 1000) {
-        const deletedRes = await quickSight.deleteAnalysis({
-          AwsAccountId: awsAccountId,
-          AnalysisId: analysis.AnalysisId,
-          ForceDeleteWithoutRecovery: true,
-        });
-        deletedAnalyses.push(deletedRes.AnalysisId!);
-        logger.info(`analysis ${analysis.Name} removed`);
-      }
+  const analysisSummaries: AnalysisSummary[] = [];
+  for await (const page of paginateListAnalyses({ client: quickSight }, {
+    AwsAccountId: awsAccountId,
+  })) {
+    if (page.AnalysisSummaryList !== undefined) {
+      analysisSummaries.push(...page.AnalysisSummaryList);
     }
   }
+
+  for (const analysisSummary of analysisSummaries) {
+    const analysisId = analysisSummary.AnalysisId;
+    if (analysisSummary.Status !== ResourceStatus.DELETED
+      && analysisSummary.CreatedTime !== undefined
+      && analysisSummary.AnalysisId?.startsWith(QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX) &&
+      (new Date().getTime() - analysisSummary.CreatedTime.getTime()) > 1 * 1 * 1000
+    ) {
+      await quickSight.deleteAnalysis({
+        AwsAccountId: awsAccountId,
+        AnalysisId: analysisId,
+        ForceDeleteWithoutRecovery: true,
+      });
+      deletedAnalyses.push(analysisId!);
+      logger.info(`analysis ${analysisSummary.Name} removed`);
+    }
+  }
+
   return deletedAnalyses;
 }
 
 async function _cleanedDashboard(quickSight: QuickSight) {
   const deletedDashBoards: string[] = [];
-  const dashBoards = await quickSight.listDashboards({
-    AwsAccountId: awsAccountId,
-  });
 
-  if (dashBoards.DashboardSummaryList) {
-    for (const [_index, dashboard] of dashBoards.DashboardSummaryList.entries()) {
-      if (dashboard.DashboardId?.startsWith(QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX) &&
-      (new Date().getTime() - dashboard.CreatedTime!.getTime()) > 60 * 60 * 1000) {
-        const deletedRes = await quickSight.deleteDashboard({
-          AwsAccountId: awsAccountId,
-          DashboardId: dashboard.DashboardId,
-        });
-        deletedDashBoards.push(deletedRes.DashboardId!);
-        logger.info(`dashboard ${dashboard.Name} removed`);
-      }
+  const dashboardSummaries: DashboardSummary[] = [];
+  for await (const page of paginateListDashboards({ client: quickSight }, {
+    AwsAccountId: awsAccountId,
+  })) {
+    if (page.DashboardSummaryList !== undefined) {
+      dashboardSummaries.push(...page.DashboardSummaryList);
     }
   }
+
+  for (const dashboardSummary of dashboardSummaries) {
+    const dashboardId = dashboardSummary.DashboardId;
+    if (dashboardSummary.DashboardId?.startsWith(QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX)
+      && dashboardSummary.CreatedTime !== undefined
+      && (new Date().getTime() - dashboardSummary.CreatedTime.getTime()) > 1 * 1 * 1000
+    ) {
+      await quickSight.deleteDashboard({
+        AwsAccountId: awsAccountId,
+        DashboardId: dashboardId,
+      });
+      deletedDashBoards.push(dashboardId!);
+      logger.info(`dashboard ${dashboardSummary.Name} removed`);
+    }
+  }
+
   return deletedDashBoards;
 }
