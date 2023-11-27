@@ -44,7 +44,7 @@
 ## 示例仪表板
 以下图片是一个示例仪表板供您参考。
 
-![qs-acquisition](../images/dashboard/acquisition.jpg)
+![qs-acquisition](../images/analytics/dashboard/acquisition.png)
 
 
 

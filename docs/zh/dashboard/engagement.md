@@ -47,4 +47,4 @@
 ## 示例仪表板
 以下图片是一个示例仪表板供您参考。
 
-![qs-engagement](../images/dashboard/engagement.jpg)
+![qs-engagement](../images/analytics/dashboard/engagement.png)

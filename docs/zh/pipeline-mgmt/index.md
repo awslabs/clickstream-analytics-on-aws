@@ -23,7 +23,7 @@
 
 下面是一个图解，以帮助您更好地理解这些概念及其在 AWS 上下文中的关系。
 
-![概念](../images/pipe-mgmt/concepts.jpg)
+![概念](../images/pipe-mgmt/concepts-v11.png)
 
 ## 先决条件
 您可以在所有 AWS 区域中配置管道。对于需要选择的区域，您需要首先[启用它们][可选区域]。
