@@ -18,7 +18,6 @@ import {
   FormField,
   SpaceBetween,
   SplitPanel,
-  StatusIndicator,
   Tabs,
   TextContent,
   Textarea,
@@ -340,16 +339,6 @@ const MetadataEventSplitPanel: React.FC<MetadataEventSplitPanelProps> = (
                     </div>
                   </div>
                 )}
-              </div>
-            </div>
-            <div>
-              <Box variant="awsui-key-label">
-                {t('analytics:metadata.event.tableColumnHasData')}
-              </Box>
-              <div className="mb-10">
-                <StatusIndicator type={event.hasData ? 'success' : 'stopped'}>
-                  {event.hasData ? 'Yes' : 'No'}
-                </StatusIndicator>
               </div>
             </div>
             <div>

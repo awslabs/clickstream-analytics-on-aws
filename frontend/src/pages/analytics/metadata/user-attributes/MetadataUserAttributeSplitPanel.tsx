@@ -18,7 +18,6 @@ import {
   FormField,
   SpaceBetween,
   SplitPanel,
-  StatusIndicator,
   TextContent,
   Textarea,
 } from '@cloudscape-design/components';
@@ -199,18 +198,6 @@ const MetadataUserAttributeSplitPanel: React.FC<
                 {t('analytics:metadata.userAttribute.tableColumnDataType')}
               </Box>
               <div className="mb-10">{attribute.valueType}</div>
-            </div>
-            <div>
-              <Box variant="awsui-key-label">
-                {t('analytics:metadata.userAttribute.tableColumnHasData')}
-              </Box>
-              <div className="mb-10">
-                <StatusIndicator
-                  type={attribute.hasData ? 'success' : 'stopped'}
-                >
-                  {attribute.hasData ? 'Yes' : 'No'}
-                </StatusIndicator>
-              </div>
             </div>
             <div>
               <Box variant="awsui-key-label">
