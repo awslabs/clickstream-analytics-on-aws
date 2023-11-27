@@ -4,14 +4,14 @@
 
 | Feature | Administrator | Operator | Analyst | Analyst Reader |
 |-------|-------|-------|-------|-------|
-| Project management          | [x] | [x] | [] | [] |
-| Operation and Alarm         | [x] | [x] | [] | [] |
-| Plugin Management           | [x] | [x] | [] | [] |
-| User Management             | [x] | []  | [] | [] |
-| Analytics Studio - Dashboards  | []  | [] | [x] | [x] |
-| Analytics Studio - Explore    | [x] | []  | [x] | [x] |
-| Analytics Studio - Analyzes    | [x] | [] | [x] | [] |
-| Analytics Studio - Data Management | [x] | [] | [x] | [x] |
+| Project management          | Yes | Yes | No | No |
+| Operation and Alarm         | Yes | Yes | No | No |
+| Plugin Management           | Yes | Yes | No | No |
+| User Management             | Yes | No  | No | No |
+| Analytics Studio - Dashboards  | No  | No | Yes | Yes |
+| Analytics Studio - Explore    | Yes | No  | Yes | Yes |
+| Analytics Studio - Analyzes    | Yes | No | Yes | No |
+| Analytics Studio - Data Management | Yes | No | Yes | Yes |
 
 ## Role acquisition process
 The flowchart for obtaining roles after login into the system is as follows:
