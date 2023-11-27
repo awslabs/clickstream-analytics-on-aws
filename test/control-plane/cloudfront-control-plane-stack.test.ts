@@ -57,6 +57,10 @@ describe('CloudFrontS3PortalStack - Default stack props for common features', ()
             [
               'ApiGatewayOriginRequestPolicy-',
               {
+                Ref: 'AWS::Region',
+              },
+              '-',
+              {
                 'Fn::Select': [
                   0,
                   {
@@ -587,6 +591,10 @@ describe('CloudFrontS3PortalStack - Default stack props for common features', ()
             '',
             [
               'clickstream-response_header-policy-',
+              {
+                Ref: 'AWS::Region',
+              },
+              '-',
               {
                 'Fn::Select': [
                   0,

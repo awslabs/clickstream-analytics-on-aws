@@ -43,7 +43,7 @@ import { Parameters } from './common/parameters';
 import { POWERTOOLS_ENVS } from './common/powertools';
 import { SolutionBucket } from './common/solution-bucket';
 import { SolutionInfo } from './common/solution-info';
-import { getShortIdOfStack } from './common/stack';
+import { getShortIdOfStackWithRegin } from './common/stack';
 import { ClickStreamApiConstruct } from './control-plane/backend/click-stream-api';
 import { CloudFrontS3Portal, CNCloudFrontS3PortalProps, DomainProps } from './control-plane/cloudfront-s3-portal';
 import { Constant } from './control-plane/private/constant';
@@ -139,7 +139,7 @@ export class CloudFrontControlPlaneStack extends Stack {
     if (!props?.targetToCNRegions) {
       functionAssociations.push({
         function: new CloudFrontFunction(this, 'FrontRewriteFunction', {
-          functionName: `FrontRewriteFunction-${Aws.REGION}-${getShortIdOfStack(this)}`,
+          functionName: `FrontRewriteFunction-${getShortIdOfStackWithRegin(this)}`,
           code: FunctionCode.fromInline(`function handler(event) {
   var request = event.request;
   var uri = request.uri;
@@ -176,7 +176,7 @@ export class CloudFrontControlPlaneStack extends Stack {
 
     if (createCognitoUserPool) {
       responseHeadersPolicy = new ResponseHeadersPolicy(this, 'response_headers_policy', {
-        responseHeadersPolicyName: `clickstream-response_header-policy-${getShortIdOfStack(this)}`,
+        responseHeadersPolicyName: `clickstream-response_header-policy-${getShortIdOfStackWithRegin(this)}`,
         securityHeadersBehavior: {
           contentSecurityPolicy: {
             contentSecurityPolicy: `default-src 'self' data:; upgrade-insecure-requests; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self'; connect-src 'self' ${cspUrl}; frame-src ${frameCSPUrl};`,
@@ -234,7 +234,7 @@ export class CloudFrontControlPlaneStack extends Stack {
       behaviorOptions = {
         originRequestPolicy: new OriginRequestPolicy(this, 'ApiGatewayOriginRequestPolicy', {
           comment: 'Policy to forward all parameters in viewer requests except for the Host header',
-          originRequestPolicyName: `ApiGatewayOriginRequestPolicy-${getShortIdOfStack(this)}`,
+          originRequestPolicyName: `ApiGatewayOriginRequestPolicy-${getShortIdOfStackWithRegin(this)}`,
           cookieBehavior: OriginRequestCookieBehavior.all(),
           headerBehavior: {
             behavior: 'allExcept',
