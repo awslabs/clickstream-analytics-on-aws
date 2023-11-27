@@ -14,7 +14,7 @@
     "upgrade": "npx projen upgrade",
     "watch": "npx projen watch",
     "projen": "npx projen",
-    "postbuild": "node src/build.js"
+    "postbuild": "node scripts/build.js"
   },
   "devDependencies": {
     "@types/jest": "^29.5.10",
