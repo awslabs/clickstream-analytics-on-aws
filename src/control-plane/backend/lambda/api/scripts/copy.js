@@ -14,6 +14,18 @@
 const fs = require('fs');
 const path = require('path');
 
+async function deleteDirectoryIfExists(directory) {
+    try {
+        await fs.promises.rmdir(directory, { recursive: true });
+        console.log(`${directory} deleted.`);
+    } catch (err) {
+        if (err.code !== 'ENOENT') { 
+            console.error(`Delete ${directory} error : ${err}`);
+            throw err;
+        }
+    }
+}
+
 async function copyDirectory(src, dest) {
     try {
         await fs.promises.mkdir(dest, { recursive: true });
@@ -37,4 +49,6 @@ async function copyDirectory(src, dest) {
 const sourceDir = '../../../../base-lib';
 const targetDir = './node_modules/@clickstream/base-lib';
 
-copyDirectory(sourceDir, targetDir);
+deleteDirectoryIfExists(targetDir)
+    .then(() => copyDirectory(sourceDir, targetDir))
+    .catch(err => console.error(err));

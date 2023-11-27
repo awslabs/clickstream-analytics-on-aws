@@ -15,7 +15,8 @@
     "watch": "npx projen watch",
     "projen": "npx projen",
     "dev": "nodemon --watch 'src' -e ts --exec 'ts-node' ./index.ts",
-    "start": "node dist/index.js"
+    "start": "node dist/index.js",
+    "postinstall": "node scripts/copy.js"
   },
   "devDependencies": {
     "@types/express": "^4.17.16",
