@@ -599,7 +599,7 @@ WITH user_channel_rank AS (
        FROM
               ods_events_user_temp e
        WHERE
-              channel IS NOT NULL
+              _channel IS NOT NULL
               AND e.event_name IN ('_first_open', '_first_visit', '_profile_set')
 ),
 user_channel AS (
