@@ -49,4 +49,4 @@
 ## 示例仪表板
 以下图片是一个示例仪表板供您参考。
 
-![qs-activity](../images/dashboard/activity.jpg)
+![qs-activity](../images/analytics/dashboard/activity.png)

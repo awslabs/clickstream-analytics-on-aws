@@ -57,4 +57,4 @@
 ## 示例仪表板
 以下图片是一个示例仪表板供您参考。
 
-![qs-device](../images/dashboard/device.jpg)
+![qs-device](../images/analytics/dashboard/device.png)
