@@ -48,6 +48,7 @@ import {
   EXECUTION_TYPE_LIST,
   ExecutionType,
   MAX_USER_INPUT_LENGTH,
+  POSITIVE_INTEGER_REGEX,
   REDSHIFT_UNIT_LIST,
   SUPPORT_USER_SELECT_REDSHIFT_SERVERLESS,
   SinkType,
@@ -502,6 +503,9 @@ const DataProcessing: React.FC<DataProcessingProps> = (
                           placeholder="1"
                           value={pipelineInfo.excutionFixedValue}
                           onChange={(e) => {
+                            if (!POSITIVE_INTEGER_REGEX.test(e.detail.value)) {
+                              return false;
+                            }
                             changeExecutionFixedValue(e.detail.value);
                           }}
                         />
@@ -531,6 +535,9 @@ const DataProcessing: React.FC<DataProcessingProps> = (
                       placeholder="3"
                       value={pipelineInfo.eventFreshValue}
                       onChange={(e) => {
+                        if (!POSITIVE_INTEGER_REGEX.test(e.detail.value)) {
+                          return false;
+                        }
                         changeEventFreshValue(e.detail.value);
                       }}
                     />
@@ -1015,6 +1022,9 @@ const DataProcessing: React.FC<DataProcessingProps> = (
                           type="number"
                           value={pipelineInfo.redshiftExecutionValue}
                           onChange={(e) => {
+                            if (!POSITIVE_INTEGER_REGEX.test(e.detail.value)) {
+                              return false;
+                            }
                             changeRedshiftExecutionDuration(e.detail.value);
                           }}
                         />
