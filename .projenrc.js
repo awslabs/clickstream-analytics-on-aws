@@ -248,7 +248,7 @@ const baseProject = new typescript.TypeScriptProject({
   packageManager: project.package.packageManager,
 });
 baseProject.addFields({ version });
-baseProject.setScript('postbuild', 'node scripts/build.js');
+baseProject.setScript('postbuild', 'node scripts/copy.js');
 
 const apiProject = new typescript.TypeScriptProject({
   deps: [
@@ -292,6 +292,7 @@ const apiProject = new typescript.TypeScriptProject({
 });
 apiProject.setScript('dev', 'nodemon --watch \'src\' -e ts --exec \'ts-node\' ./index.ts');
 apiProject.setScript('start', 'node dist/index.js');
+apiProject.setScript('postinstall', 'node scripts/copy.js');
 apiProject.addFields({ version });
 
 project.buildWorkflow.buildTask._env = {
