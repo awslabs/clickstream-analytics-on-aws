@@ -314,6 +314,12 @@ project.buildWorkflow.workflow.file?.addOverride(
   'jobs.build.env.iam_role_to_assume',
   '${{ secrets.ROLE_ARN }}',
 );
+
+project.buildWorkflow.preBuildSteps.push({
+  name: 'Build base project and copy',
+  run: 'cd src/base-lib && yarn install --check-files --frozen-lockfile && yarn run build && cd ../../',
+});
+
 project.buildWorkflow.preBuildSteps.push({
   name: 'Configure AWS Credentials',
   if: '${{ env.iam_role_to_assume != \'\' }}',

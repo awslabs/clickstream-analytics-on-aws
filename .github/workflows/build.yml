@@ -29,6 +29,8 @@ jobs:
           node-version: 18.17.0
       - name: Install dependencies
         run: yarn install --check-files
+      - name: Build base project and copy
+        run: cd src/base-lib && yarn install --check-files --frozen-lockfile && yarn run build && cd ../../
       - name: Configure AWS Credentials
         if: ${{ env.iam_role_to_assume != '' }}
         uses: aws-actions/configure-aws-credentials@v4
