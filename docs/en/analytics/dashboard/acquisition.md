@@ -27,7 +27,7 @@ The report includes the following dimensions and metrics. You can add more dimen
 |----------|---|---------|--------------------|
 |`user_pseudo_id`| Dimension | A SDK-generated unique id for the user | Query from analytics engine|
 |`user_id`| Dimension | The user ID set via the setUserId API in SDK  | Query from analytics engine|
-|`device_id`| Dimension | The unique ID for the device, please refer to [SDK Manual](../sdk-manual/index.md) for how the device id was obtained| Query from analytics engine|
+|`device_id`| Dimension | The unique ID for the device, please refer to [SDK Manual](../../sdk-manual/index.md) for how the device id was obtained| Query from analytics engine|
 |`first_visit_date`| Dimension | The date that the user first visited your website or first opened the app  | Query from analytics engine|
 |`first_visit_install_source`| Dimension | The installation source when user first opened your app. Blank for web  | Query from analytics engine|
 |`first_traffic_source_source`| Dimension | The traffic source for the user when first visit the app or web  | Query from analytics engine|

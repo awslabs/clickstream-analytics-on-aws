@@ -30,7 +30,7 @@ The report includes the following dimensions and metrics. You can add more dimen
 |----------|---|---------|--------------------|
 |`user_pseudo_id`| Dimension | A SDK-generated unique id for the user | Query from analytics engine|
 |`user_id`| Dimension | The user ID set via the setUserId API in SDK  | Query from analytics engine|
-|`device_id`| Dimension | The unique ID for the device, please refer to [SDK Manual](../sdk-manual/index.md) for how the device id was obtained| Query from analytics engine|
+|`device_id`| Dimension | The unique ID for the device, please refer to [SDK Manual](../../sdk-manual/index.md) for how the device id was obtained| Query from analytics engine|
 |`Event Time (HH:MM:SS)`| Dimension |The time in MMDDYYYY HH:MM:SS format when the event was recorded in the client  | Calculated field in QuickSight|
 |`event_id`| Dimension | A SDK-generated unique id for the event user triggered when using your websites and apps | Query from analytics engine|
 |`event_name`| Dimension |The name of the event  | Query from analytics engine|
