@@ -33,7 +33,7 @@ The report includes the following dimensions and metrics. You can add more dimen
 
 |Field | Type| What is it | How it's populated|
 |----------|---|---------|--------------------|
-|`device_id`| Dimension | The unique ID for the device, please refer to [SDK Manual](../sdk-manual/index.md) for how the device id was obtained| Query from analytics engine|
+|`device_id`| Dimension | The unique ID for the device, please refer to [SDK Manual](../../sdk-manual/index.md) for how the device id was obtained| Query from analytics engine|
 |`user_pseudo_id`| Dimension | A SDK-generated unique id for the user | Query from analytics engine|
 |`user_id`| Dimension | The user ID set via the setUserId API in SDK  | Query from analytics engine|
 |`event_date`| Dimension | The event data of when the device information was logged | Query from analytics engine|
