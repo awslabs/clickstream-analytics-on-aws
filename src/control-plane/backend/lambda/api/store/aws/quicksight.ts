@@ -194,30 +194,6 @@ export const quickSightIsSubscribed = async (): Promise<boolean> => {
   return true;
 };
 
-export const quickSightPing = async (region: string): Promise<boolean> => {
-  try {
-    if (region.startsWith('cn')) {
-      return false;
-    }
-    const quickSightClient = sdkClient.QuickSightClient({
-      maxAttempts: 1,
-      region: region,
-    });
-    const command: DescribeAccountSubscriptionCommand = new DescribeAccountSubscriptionCommand({
-      AwsAccountId: awsAccountId,
-    });
-    await quickSightClient.send(command);
-  } catch (err) {
-    if ((err as Error).name === 'TimeoutError' ||
-    (err as Error).message.includes('getaddrinfo ENOTFOUND') ||
-    (err as Error).name === 'UnrecognizedClientException' ||
-    (err as Error).name === 'InternalFailure') {
-      return false;
-    }
-  }
-  return true;
-};
-
 export const describeAccountSubscription = async (): Promise<DescribeAccountSubscriptionCommandOutput> => {
   const quickSightClient = sdkClient.QuickSightClient({
     region: QUICKSIGHT_CONTROL_PLANE_REGION,

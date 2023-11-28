@@ -91,15 +91,12 @@ const awsSDKServicesDepsForApiProject = [
   '@aws-sdk/client-dynamodb',
   '@aws-sdk/client-cloudformation',
   '@aws-sdk/client-route-53',
-  '@aws-sdk/client-athena',
   '@aws-sdk/client-iam',
   '@aws-sdk/client-acm',
   '@aws-sdk/client-secrets-manager',
   '@aws-sdk/client-sts',
   '@aws-sdk/client-cloudwatch',
   '@aws-sdk/lib-dynamodb',
-  '@aws-sdk/client-emr-serverless',
-  '@aws-sdk/client-kafkaconnect',
 ].map(dep => `${dep}@^${awsSDKServicesVersion}`);
 
 const depsForApiProject = [

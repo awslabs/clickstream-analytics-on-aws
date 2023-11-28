@@ -12,25 +12,22 @@
  */
 
 import fetch from 'node-fetch';
-import pLimit from 'p-limit';
 import { SDK_MAVEN_VERSION_API_LINK } from '../common/constants';
 import { OUTPUT_INGESTION_SERVER_DNS_SUFFIX, OUTPUT_INGESTION_SERVER_URL_SUFFIX } from '../common/constants-ln';
 import { ApiFail, ApiSuccess, FetchType, PipelineStackType } from '../common/types';
 import { paginateData } from '../common/utils';
 import { CPipeline } from '../model/pipeline';
 import { ListCertificates } from '../store/aws/acm';
-import { agaPing } from '../store/aws/aga';
-import { athenaPing } from '../store/aws/athena';
+import { listAWSResourceTypes } from '../store/aws/cloudformation';
 import { describeAlarmsByProjectId, disableAlarms, enableAlarms } from '../store/aws/cloudwatch';
 import { describeVpcs, listRegions, describeSubnetsWithType, describeVpcs3AZ, describeVpcSecurityGroups } from '../store/aws/ec2';
-import { emrServerlessPing } from '../store/aws/emr';
 import { listRoles } from '../store/aws/iam';
-import { listMSKCluster, mskPing } from '../store/aws/kafka';
+import { listMSKCluster } from '../store/aws/kafka';
 import {
   describeClickstreamAccountSubscription,
-  quickSightIsSubscribed, quickSightPing,
+  quickSightIsSubscribed,
 } from '../store/aws/quicksight';
-import { describeRedshiftClusters, listRedshiftServerlessWorkgroups, redshiftServerlessPing } from '../store/aws/redshift';
+import { describeRedshiftClusters, listRedshiftServerlessWorkgroups } from '../store/aws/redshift';
 import { listHostedZones } from '../store/aws/route53';
 import { listBuckets } from '../store/aws/s3';
 import { listSecrets } from '../store/aws/secretsmanager';
@@ -285,74 +282,64 @@ export class EnvironmentServ {
         services,
       } = req.query;
       const result: any[] = [];
+      const awsResources = await listAWSResourceTypes(region, 'AWS::');
+      const awsResourcePrefixes = awsResources.map(r => r.TypeName?.split('::')[1]);
       if (services) {
         const serviceNames = services.split(',');
-        const promisePool = pLimit(serviceNames.length);
-        const reqs = [];
         for (let serviceName of serviceNames) {
-          if (serviceName === 'emr-serverless') {
-            reqs.push(
-              promisePool(
-                () => emrServerlessPing(region)
-                  .then(available => {
-                    result.push({
-                      service: 'emr-serverless',
-                      available: available,
-                    });
-                  },
-                  )));
-          } else if (serviceName === 'msk') {
-            reqs.push(
-              promisePool(
-                () => mskPing(region)
-                  .then(available => {
-                    result.push({
-                      service: 'msk',
-                      available: available,
-                    });
-                  },
-                  )));
-          } else if (serviceName === 'redshift-serverless') {
-            reqs.push(
-              promisePool(
-                () => redshiftServerlessPing(region)
-                  .then(available => {
-                    result.push({
-                      service: 'redshift-serverless',
-                      available: available,
-                    });
-                  },
-                  )));
-          } else if (serviceName === 'quicksight') {
-            reqs.push(
-              promisePool(
-                () => quickSightPing(region)
-                  .then(available => {
-                    result.push({
-                      service: 'quicksight',
-                      available: available,
-                    });
-                  },
-                  )));
-          } else if (serviceName === 'athena') {
-            reqs.push(
-              promisePool(
-                () => athenaPing(region)
-                  .then(available => {
-                    result.push({
-                      service: 'athena',
-                      available: available,
-                    });
-                  },
-                  )));
-          } else if (serviceName === 'global-accelerator') {
-            result.push({
-              service: 'global-accelerator',
-              available: agaPing(region),
-            });
+          switch (serviceName) {
+            case 'emr-serverless':
+              result.push(
+                {
+                  service: serviceName,
+                  available: awsResourcePrefixes.includes('EMRServerless'),
+                },
+              );
+              break;
+            case 'msk':
+              result.push(
+                {
+                  service: serviceName,
+                  available: awsResourcePrefixes.includes('MSK') && awsResourcePrefixes.includes('KafkaConnect'),
+                },
+              );
+              break;
+            case 'redshift-serverless':
+              result.push(
+                {
+                  service: serviceName,
+                  available: awsResourcePrefixes.includes('RedshiftServerless'),
+                },
+              );
+              break;
+            case 'quicksight':
+              result.push(
+                {
+                  service: serviceName,
+                  available: awsResourcePrefixes.includes('QuickSight'),
+                },
+              );
+              break;
+            case 'athena':
+              result.push(
+                {
+                  service: serviceName,
+                  available: awsResourcePrefixes.includes('Athena'),
+                },
+              );
+              break;
+            case 'global-accelerator':
+              result.push(
+                {
+                  service: serviceName,
+                  available: awsResourcePrefixes.includes('GlobalAccelerator'),
+                },
+              );
+              break;
+            default:
+              break;
           }
         }
-        await Promise.all(reqs);
       }
       return res.json(new ApiSuccess(result));
     } catch (error) {
