@@ -12,6 +12,7 @@
  */
 
 import { Category, CloudFormationClient, DescribeStacksCommand, StackStatus, TypeSummary, paginateListTypes } from '@aws-sdk/client-cloudformation';
+import { logger } from '../../common/powertools';
 import { aws_sdk_client_common_config } from '../../common/sdk-client-config-ln';
 import { PipelineStackType, PipelineStatusDetail } from '../../common/types';
 import { getVersionFromTags } from '../../common/utils';
@@ -73,7 +74,7 @@ export const listAWSResourceTypes = async (region: string, typeNamePrefix: strin
     }
     return records;
   } catch (error) {
-    console.log(error);
+    logger.error('List AWS Resource Types Error', { error });
     return [];
   }
 };
