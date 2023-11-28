@@ -69,6 +69,7 @@ nav:
       - 路径探索报表: dashboard/path.md
       - 自定义报表: dashboard/custom-analysis.md
     - 身份管理: identity-mgmt.md
+    - 升级解决方案: upgrade.md
     - 附加资源:
       - 上传证书: resources/upload-ssl-certificate.md
     - 常见问题: faq.md
