@@ -13,15 +13,16 @@
 
 import { QuickSight, ResourceNotFoundException } from '@aws-sdk/client-quicksight';
 import { v4 as uuidv4 } from 'uuid';
+import { StackManager } from './stack';
 import { DEFAULT_DASHBOARD_NAME, DEFAULT_SOLUTION_OPERATOR, OUTPUT_REPORT_DASHBOARDS_SUFFIX, QUICKSIGHT_ANALYSIS_INFIX, QUICKSIGHT_DASHBOARD_INFIX, QUICKSIGHT_RESOURCE_NAME_PREFIX } from '../common/constants-ln';
 import { logger } from '../common/powertools';
 import { aws_sdk_client_common_config } from '../common/sdk-client-config-ln';
-import { ApiFail, ApiSuccess, PipelineStackType } from '../common/types';
+import { ApiFail, ApiSuccess, PipelineStackType, PipelineStatusType } from '../common/types';
 import { getReportingDashboardsUrl, isEmpty, paginateData } from '../common/utils';
 import { IApplication } from '../model/application';
 import { CPipeline, IPipeline } from '../model/pipeline';
 import { IDashboard, IProject } from '../model/project';
-import { createPublishDashboard, deleteDatasetOfPublishDashboard, generateEmbedUrlForRegisteredUser } from '../store/aws/quicksight';
+import { createPublishDashboard, deleteClickstreamUser, deleteDatasetOfPublishDashboard, generateEmbedUrlForRegisteredUser } from '../store/aws/quicksight';
 import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
 
@@ -262,7 +263,16 @@ export class ProjectServ {
       if (latestPipelines.length === 1) {
         const latestPipeline = latestPipelines[0];
         const pipeline = new CPipeline(latestPipeline);
+        const stackManager: StackManager = new StackManager(latestPipeline);
+        const latestPipelineStatus = await stackManager.getPipelineStatus();
+        if (latestPipelineStatus.status !== PipelineStatusType.ACTIVE) {
+          return res.status(400).json(new ApiFail('The pipeline current status does not allow delete.'));
+        }
         await pipeline.delete();
+      }
+      const existProjects = await store.listProjects('asc');
+      if (existProjects.length === 1) {
+        await deleteClickstreamUser();
       }
       const operator = res.get('X-Click-Stream-Operator');
       await store.deleteProject(id, operator);

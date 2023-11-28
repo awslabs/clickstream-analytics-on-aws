@@ -326,6 +326,7 @@ export class ClickStreamApiConstruct extends Construct {
           actions: [
             'quicksight:GenerateEmbedUrlForRegisteredUser',
             'quicksight:RegisterUser',
+            'quicksight:DeleteUser',
             'quicksight:ListUsers',
             'quicksight:ListDataSets',
             'quicksight:ListDashboards',
