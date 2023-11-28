@@ -14,6 +14,7 @@ Use this navigation table to quickly find answers to these questions:
 | Know which AWS Regions are supported for this solution | [Supported AWS Regions](../plan-deployment/regions.md) |
 | Get started with the solution quickly to build an end-to-end data pipeline, send data into the pipeline, and then view the out-of-the-box dashboards | [Getting Started](../getting-started/index.md) |
 | Learn the concepts related to pipeline, and how to manage a data pipeline throughout its lifecycle | [Pipeline Management](../pipeline-mgmt/index.md) |
+| Learn to use Analytics Studio to uncover insights from clickstream data | [Analytics Stuido](../analytics/index.md) |
 
 
 The guide is intended for IT architects, data engineers, developers, DevOps, and data product managers with practical experience architecting in the AWS Cloud.

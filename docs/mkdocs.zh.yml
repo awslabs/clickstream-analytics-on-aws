@@ -1,6 +1,6 @@
 INHERIT: ./mkdocs.base.yml
-site_name: Clickstream Analytics on AWS 解决方案
-site_description: Clickstream Analytics on AWS 解决方案实施指南
+site_name: 亚马逊云科技点击流分析解决方案
+site_description: 亚马逊云科技点击流分析解决方案实施指南
 docs_dir: zh
 site_dir: ./site/zh
 edit_uri: edit/main/docs/zh/
@@ -59,15 +59,28 @@ nav:
       - 微信小程序 SDK: sdk-manual/wechat.md
       - HTTP API: sdk-manual/http-api.md
       - 用户标识: sdk-manual/user-identifier.md
-    - 仪表板:
-      - 概述: dashboard/index.md
-      - 流量获取报表: dashboard/acquisition.md
-      - 参与度报表: dashboard/engagement.md
-      - 活动报表: dashboard/activity.md
-      - 留存报表: dashboard/retention.md
-      - 设备报表: dashboard/device.md
-      - 路径探索报表: dashboard/path.md
-      - 自定义报表: dashboard/custom-analysis.md
+    - 分析工作坊:
+      - 概述: analytics/index.md
+      - 仪表板:
+        - 概述: analytics/dashboard/index.md
+        - 获取报告: analytics/dashboard/acquisition.md
+        - 参与度报告: analytics/dashboard/engagement.md
+        - 活动报告: analytics/dashboard/activity.md
+        - 留存报告: analytics/dashboard/retention.md
+        - 设备报告: analytics/dashboard/device.md
+        - 用户报告: analytics/dashboard/user.md
+        - 崩溃报告: analytics/dashboard/crash.md
+        - 自定义报告: analytics/dashboard/custom-analysis.md
+      - 探索:
+        - 概述: analytics/explore/index.md
+        - 事件分析: analytics/explore/event.md
+        - 转化分析: analytics/explore/funnel.md
+        - 路径分析: analytics/explore/path.md
+        - 留存分析: analytics/explore/retention.md
+      - 分析:
+        - 概述: analytics/analyzes/index.md        
+      - 数据管理:
+        - 概述: analytics/data-mgmt/index.md       
     - 附加资源:
       - 上传证书: resources/upload-ssl-certificate.md
     - 常见问题: faq.md

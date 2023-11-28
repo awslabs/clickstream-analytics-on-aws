@@ -9,7 +9,7 @@ Note: This article describes the default report. You can customize the report by
 2. In the dashboard, click on the sheet with name of **`Acquisition`**.
 
 ## Where the data comes from
-Acquisistion report are created based on the QuickSight dataset of `User_Dim_View-<app>-<project>`, which connects to the `clickstream_user_dim_view_v1` view in analytics engine (i.e., Redshift). Below is the SQL command that generates the view.
+Acquisition report are created based on the QuickSight dataset of `User_Dim_View-<app>-<project>`, which connects to the `clickstream_user_dim_view_v1` view in analytics engine (i.e., Redshift). Below is the SQL command that generates the view.
 ??? example "SQL Commands"
     === "Redshift"
         ```sql title="clickstream-user-dim-view_v1.sql"
@@ -31,7 +31,7 @@ The report includes the following dimensions and metrics. You can add more dimen
 |`first_visit_date`| Dimension | The date that the user first visited your website or first opened the app  | Query from analytics engine|
 |`first_visit_install_source`| Dimension | The installation source when user first opened your app. Blank for web  | Query from analytics engine|
 |`first_traffic_source_source`| Dimension | The traffic source for the user when first visit the app or web  | Query from analytics engine|
-|`first_traffic_source_meidum`| Dimension | The traffic medium for the user when first visit the app or web  | Query from analytics engine|
+|`first_traffic_source_medium`| Dimension | The traffic medium for the user when first visit the app or web  | Query from analytics engine|
 |`first_traffic_source_name`| Dimension | The traffic campaign name for the user when first visit the app or web  | Query from analytics engine|
 |`first_visit_device_language`| Dimension | The system language of the device user used when they first opened your app or first visited your website.  | Query from analytics engine|
 |`first_visit_device_language`| Dimension | The system language of the device user used when they first opened your app or first visited your website.  | Query from analytics engine|
@@ -41,7 +41,7 @@ The report includes the following dimensions and metrics. You can add more dimen
 |`first_visit_city`| Dimension | The city where user first visited your website or first opened your app.  | Query from analytics engine|
 |`custom_attr_key`| Dimension | The name of the custom attribute key of the user.  | Query from analytics engine|
 |`custom_attr_value`| Dimension | The value of the custom attribute key of the user.  | Query from analytics engine|
-|`registration_status`| Dimension | If user had registed or not  | Query from analytics engine|
+|`registration_status`| Dimension | If user had registered or not  | Query from analytics engine|
 |`Logged-in Rate`| Metric | Number of distinct user_id divide by number of distinct user_pseudo_id | Calculated field in QuickSight |
   
 ## Sample dashboard
