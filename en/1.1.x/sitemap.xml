@@ -51,6 +51,11 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://awslabs.github.io/clickstream-analytics-on-aws/1.1.x/upgrade/</loc>
+         <lastmod>2023-11-28</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://awslabs.github.io/clickstream-analytics-on-aws/1.1.x/well-architected-pillars/</loc>
          <lastmod>2023-11-28</lastmod>
          <changefreq>daily</changefreq>
