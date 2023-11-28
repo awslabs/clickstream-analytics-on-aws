@@ -669,7 +669,7 @@
           }
         },
         {
-          "name": "user_id",
+          "name": "_user_id",
           "dataType": "string",
           "category": "event",
           "description": {
@@ -678,7 +678,7 @@
           }
         },
         {
-          "name": "user_pseudo_id",
+          "name": "_user_pseudo_id",
           "dataType": "string",
           "category": "event",
           "description": {
