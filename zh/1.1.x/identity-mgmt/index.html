@@ -10,28 +10,28 @@
       
       
       
-        <link rel="canonical" href="https://awslabs.github.io/clickstream-analytics-on-aws/1.1.x/deployment/with-oidc/">
+        <link rel="canonical" href="https://awslabs.github.io/clickstream-analytics-on-aws/1.1.x/identity-mgmt/">
       
       
-        <link rel="prev" href="../with-cognito/">
+        <link rel="prev" href="../dashboard/custom-analysis/">
       
       
-        <link rel="next" href="../within-vpc/">
+        <link rel="next" href="../resources/upload-ssl-certificate/">
       
       
-      <link rel="icon" href="../../images/favicon.ico">
+      <link rel="icon" href="../images/favicon.ico">
       <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.4.14">
     
     
       
-        <title>OIDC - Clickstream Analytics on AWS 解决方案</title>
+        <title>身份管理 - Clickstream Analytics on AWS 解决方案</title>
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.fad675c6.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.fad675c6.min.css">
       
         
-        <link rel="stylesheet" href="../../assets/stylesheets/palette.356b1318.min.css">
+        <link rel="stylesheet" href="../assets/stylesheets/palette.356b1318.min.css">
       
       
 
@@ -52,7 +52,7 @@
     
       <link rel="stylesheet" href="/stylesheets/extra.css">
     
-    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
   
@@ -76,7 +76,7 @@
     
     
     
-   <link href="../../assets/stylesheets/glightbox.min.css" rel="stylesheet"/><style>
+   <link href="../assets/stylesheets/glightbox.min.css" rel="stylesheet"/><style>
         html.glightbox-open { overflow: initial; height: 100%; }
         .gslide-title { margin-top: 0px; user-select: text; }
         .gslide-desc { color: #666; user-select: text; }
@@ -87,7 +87,7 @@
             body[data-md-color-scheme="slate"] .gdesc-inner { background: var(--md-default-bg-color);}
             body[data-md-color-scheme="slate"] .gslide-title { color: var(--md-default-fg-color);}
             body[data-md-color-scheme="slate"] .gslide-desc { color: var(--md-default-fg-color);}
-            </style> <script src="../../assets/javascripts/glightbox.min.js"></script></head>
+            </style> <script src="../assets/javascripts/glightbox.min.js"></script></head>
   
   
     
@@ -109,7 +109,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#openid-connect-oidc" class="md-skip">
+        <a href="#_1" class="md-skip">
           跳转至
         </a>
       
@@ -129,7 +129,7 @@
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="页眉">
-    <a href="../.." title="Clickstream Analytics on AWS 解决方案" class="md-header__button md-logo" aria-label="Clickstream Analytics on AWS 解决方案" data-md-component="logo">
+    <a href=".." title="Clickstream Analytics on AWS 解决方案" class="md-header__button md-logo" aria-label="Clickstream Analytics on AWS 解决方案" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
@@ -149,7 +149,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              OIDC
+              身份管理
             
           </span>
         </div>
@@ -302,7 +302,7 @@
 
 <nav class="md-nav md-nav--primary" aria-label="导航栏" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../.." title="Clickstream Analytics on AWS 解决方案" class="md-nav__button md-logo" aria-label="Clickstream Analytics on AWS 解决方案" data-md-component="logo">
+    <a href=".." title="Clickstream Analytics on AWS 解决方案" class="md-nav__button md-logo" aria-label="Clickstream Analytics on AWS 解决方案" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
@@ -408,7 +408,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../solution-overview/" class="md-nav__link">
+      <a href="../solution-overview/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -429,7 +429,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../solution-overview/features-and-benefits/" class="md-nav__link">
+      <a href="../solution-overview/features-and-benefits/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -450,7 +450,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../solution-overview/use-cases/" class="md-nav__link">
+      <a href="../solution-overview/use-cases/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -516,7 +516,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../architecture/" class="md-nav__link">
+      <a href="../architecture/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -537,7 +537,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../well-architected-pillars/" class="md-nav__link">
+      <a href="../well-architected-pillars/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -603,7 +603,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../aws-services/" class="md-nav__link">
+      <a href="../aws-services/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -624,7 +624,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../architecture-details/" class="md-nav__link">
+      <a href="../architecture-details/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -690,7 +690,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../plan-deployment/cost/" class="md-nav__link">
+      <a href="../plan-deployment/cost/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -711,7 +711,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../plan-deployment/security/" class="md-nav__link">
+      <a href="../plan-deployment/security/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -732,7 +732,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../plan-deployment/regions/" class="md-nav__link">
+      <a href="../plan-deployment/regions/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -758,21 +758,19 @@
                 
   
   
-    
   
   
-  
     
     
     
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_5" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_5" >
         
           
           <label class="md-nav__link" for="__nav_1_5" id="__nav_1_5_label" tabindex="0">
@@ -786,7 +784,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_5_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_5_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_1_5">
             <span class="md-nav__icon md-icon"></span>
             部署
@@ -800,7 +798,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../" class="md-nav__link">
+      <a href="../deployment/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -821,7 +819,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../with-cognito/" class="md-nav__link">
+      <a href="../deployment/with-cognito/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -839,30 +837,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  <span class="md-ellipsis">
-    OIDC
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../deployment/with-oidc/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -871,131 +849,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="目录">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      目录
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#_1" class="md-nav__link">
-    <span class="md-ellipsis">
-      先决条件
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#_2" class="md-nav__link">
-    <span class="md-ellipsis">
-      部署概述
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#1-oidc" class="md-nav__link">
-    <span class="md-ellipsis">
-      步骤 1. 创建 OIDC 客户端
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="步骤 1. 创建 OIDC 客户端">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#1-cognito" class="md-nav__link">
-    <span class="md-ellipsis">
-      (选项 1) 使用来自其他区域的 Cognito 用户池
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#2-authingcn-oidc" class="md-nav__link">
-    <span class="md-ellipsis">
-      (选项 2) 使用 Authing.cn OIDC 客户端
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#3-keycloak-oidc" class="md-nav__link">
-    <span class="md-ellipsis">
-      (选项 3) 使用 Keycloak OIDC 客户端
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#4-adfs-openid-connect" class="md-nav__link">
-    <span class="md-ellipsis">
-      (选项 4) ADFS OpenID Connect 客户端
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#2" class="md-nav__link">
-    <span class="md-ellipsis">
-      步骤 2. 启动堆栈
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#3-oidc-url" class="md-nav__link">
-    <span class="md-ellipsis">
-      步骤 3. 更新 OIDC 客户端的回调 URL
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#4-dns" class="md-nav__link">
-    <span class="md-ellipsis">
-      步骤 4. 设置 DNS 解析器
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#5-web" class="md-nav__link">
-    <span class="md-ellipsis">
-      步骤 5. 启动Web控制台
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1008,7 +861,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../within-vpc/" class="md-nav__link">
+      <a href="../deployment/within-vpc/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1074,7 +927,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../getting-started/" class="md-nav__link">
+      <a href="../getting-started/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1095,7 +948,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../getting-started/1.create-project/" class="md-nav__link">
+      <a href="../getting-started/1.create-project/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1116,7 +969,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../getting-started/2.config-pipeline/" class="md-nav__link">
+      <a href="../getting-started/2.config-pipeline/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1137,7 +990,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../getting-started/3.integrate-sdk/" class="md-nav__link">
+      <a href="../getting-started/3.integrate-sdk/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1158,7 +1011,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../getting-started/4.view-dashboard/" class="md-nav__link">
+      <a href="../getting-started/4.view-dashboard/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1224,7 +1077,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../pipeline-mgmt/" class="md-nav__link">
+      <a href="../pipeline-mgmt/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1282,7 +1135,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../pipeline-mgmt/ingestion/" class="md-nav__link">
+      <a href="../pipeline-mgmt/ingestion/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1303,7 +1156,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../pipeline-mgmt/ingestion/configure-ingestion-endpoint/" class="md-nav__link">
+      <a href="../pipeline-mgmt/ingestion/configure-ingestion-endpoint/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1324,7 +1177,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../pipeline-mgmt/ingestion/create-data-sink-w-kafka/" class="md-nav__link">
+      <a href="../pipeline-mgmt/ingestion/create-data-sink-w-kafka/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1345,7 +1198,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../pipeline-mgmt/ingestion/create-data-sink-w-kinesis/" class="md-nav__link">
+      <a href="../pipeline-mgmt/ingestion/create-data-sink-w-kinesis/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1366,7 +1219,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../pipeline-mgmt/ingestion/create-data-sink-w-s3/" class="md-nav__link">
+      <a href="../pipeline-mgmt/ingestion/create-data-sink-w-s3/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1432,7 +1285,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../pipeline-mgmt/data-processing/" class="md-nav__link">
+      <a href="../pipeline-mgmt/data-processing/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1453,7 +1306,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../pipeline-mgmt/data-processing/data-schema/" class="md-nav__link">
+      <a href="../pipeline-mgmt/data-processing/data-schema/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1474,7 +1327,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../pipeline-mgmt/data-processing/configure-execution-para/" class="md-nav__link">
+      <a href="../pipeline-mgmt/data-processing/configure-execution-para/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1495,7 +1348,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../pipeline-mgmt/data-processing/configure-plugin/" class="md-nav__link">
+      <a href="../pipeline-mgmt/data-processing/configure-plugin/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1524,7 +1377,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../pipeline-mgmt/data-modeling/configure-data-modeling/" class="md-nav__link">
+      <a href="../pipeline-mgmt/data-modeling/configure-data-modeling/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1545,7 +1398,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../pipeline-mgmt/quicksight/configure-quicksight/" class="md-nav__link">
+      <a href="../pipeline-mgmt/quicksight/configure-quicksight/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1566,7 +1419,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../pipeline-mgmt/pipe-mgmt/" class="md-nav__link">
+      <a href="../pipeline-mgmt/pipe-mgmt/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1632,7 +1485,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../sdk-manual/" class="md-nav__link">
+      <a href="../sdk-manual/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1653,7 +1506,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../sdk-manual/android/" class="md-nav__link">
+      <a href="../sdk-manual/android/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1674,7 +1527,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../sdk-manual/swift/" class="md-nav__link">
+      <a href="../sdk-manual/swift/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1695,7 +1548,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../sdk-manual/web/" class="md-nav__link">
+      <a href="../sdk-manual/web/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1716,7 +1569,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../sdk-manual/wechat/" class="md-nav__link">
+      <a href="../sdk-manual/wechat/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1737,7 +1590,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../sdk-manual/http-api/" class="md-nav__link">
+      <a href="../sdk-manual/http-api/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1758,7 +1611,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../sdk-manual/user-identifier/" class="md-nav__link">
+      <a href="../sdk-manual/user-identifier/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1824,7 +1677,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../dashboard/" class="md-nav__link">
+      <a href="../dashboard/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1845,7 +1698,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../dashboard/acquisition/" class="md-nav__link">
+      <a href="../dashboard/acquisition/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1866,7 +1719,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../dashboard/engagement/" class="md-nav__link">
+      <a href="../dashboard/engagement/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1887,7 +1740,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../dashboard/activity/" class="md-nav__link">
+      <a href="../dashboard/activity/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1908,7 +1761,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../dashboard/retention/" class="md-nav__link">
+      <a href="../dashboard/retention/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1929,7 +1782,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../dashboard/device/" class="md-nav__link">
+      <a href="../dashboard/device/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1950,7 +1803,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../dashboard/path/" class="md-nav__link">
+      <a href="../dashboard/path/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1971,7 +1824,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../dashboard/custom-analysis/" class="md-nav__link">
+      <a href="../dashboard/custom-analysis/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1997,10 +1850,30 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../../identity-mgmt/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    身份管理
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   <span class="md-ellipsis">
@@ -2009,6 +1882,74 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      用户
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="用户">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      用户管理
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      用户身份
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="用户身份">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      用户角色管理
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -2058,7 +1999,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../resources/upload-ssl-certificate/" class="md-nav__link">
+      <a href="../resources/upload-ssl-certificate/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2087,7 +2028,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../faq/" class="md-nav__link">
+      <a href="../faq/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2108,7 +2049,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../troubleshooting/" class="md-nav__link">
+      <a href="../troubleshooting/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2129,7 +2070,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../uninstall/" class="md-nav__link">
+      <a href="../uninstall/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2187,7 +2128,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../source/" class="md-nav__link">
+      <a href="../source/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2216,7 +2157,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../revisions/" class="md-nav__link">
+      <a href="../revisions/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2237,7 +2178,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../notices/" class="md-nav__link">
+      <a href="../notices/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2285,64 +2226,19 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#_1" class="md-nav__link">
-    <span class="md-ellipsis">
-      先决条件
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
-      部署概述
+      用户
     </span>
   </a>
   
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#1-oidc" class="md-nav__link">
-    <span class="md-ellipsis">
-      步骤 1. 创建 OIDC 客户端
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="步骤 1. 创建 OIDC 客户端">
+    <nav class="md-nav" aria-label="用户">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#1-cognito" class="md-nav__link">
+  <a href="#_3" class="md-nav__link">
     <span class="md-ellipsis">
-      (选项 1) 使用来自其他区域的 Cognito 用户池
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#2-authingcn-oidc" class="md-nav__link">
-    <span class="md-ellipsis">
-      (选项 2) 使用 Authing.cn OIDC 客户端
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#3-keycloak-oidc" class="md-nav__link">
-    <span class="md-ellipsis">
-      (选项 3) 使用 Keycloak OIDC 客户端
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#4-adfs-openid-connect" class="md-nav__link">
-    <span class="md-ellipsis">
-      (选项 4) ADFS OpenID Connect 客户端
+      用户管理
     </span>
   </a>
   
@@ -2354,38 +2250,26 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#2" class="md-nav__link">
+  <a href="#_4" class="md-nav__link">
     <span class="md-ellipsis">
-      步骤 2. 启动堆栈
+      用户身份
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="用户身份">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      用户角色管理
     </span>
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#3-oidc-url" class="md-nav__link">
-    <span class="md-ellipsis">
-      步骤 3. 更新 OIDC 客户端的回调 URL
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#4-dns" class="md-nav__link">
-    <span class="md-ellipsis">
-      步骤 4. 设置 DNS 解析器
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#5-web" class="md-nav__link">
-    <span class="md-ellipsis">
-      步骤 5. 启动Web控制台
-    </span>
-  </a>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -2407,352 +2291,173 @@
   
 
 
-<h1 id="openid-connect-oidc">使用 OpenID Connect (OIDC) 进行启动</h1>
-<p><strong>部署时间</strong>：大约 30 分钟</p>
-<h2 id="_1">先决条件</h2>
-<div class="admonition info">
-<p class="admonition-title">重要提示</p>
-<p>亚马逊云科技点击流分析 控制台是通过 CloudFront 分发提供的，它被视为一项互联网信息服务。
-如果您在 <strong>AWS 中国区域</strong> 部署解决方案，域名必须具有有效的 <a href="https://www.amazonaws.cn/en/support/icp/?nc2=h_l2_su">ICP 备案</a>。</p>
-</div>
-<ul>
-<li>域名。您将使用该域名访问 亚马逊云科技点击流分析 控制台。对于 AWS 中国区域，这是必需的，而对于 AWS 区域则是可选的。</li>
-<li>在 AWS IAM 中的 SSL 证书。SSL 必须与给定的域名关联。按照 <a href="../../resources/upload-ssl-certificate/">此指南</a> 将 SSL 证书上传到 IAM。这仅适用于 AWS 中国区域。</li>
-</ul>
-<h2 id="_2">部署概述</h2>
-<p>按照以下步骤在 AWS 上部署此解决方案。</p>
-<p><a href="/#1-oidc">步骤 1. 创建 OIDC 客户端</a></p>
-<p><a href="#2">步骤 2. 启动堆栈</a></p>
-<p><a href="#3-oidc-url">步骤 3. 更新 OIDC 客户端的回调 URL</a></p>
-<p><a href="#4-dns">步骤 4. 设置 DNS 解析器</a></p>
-<p><a href="#5-web">步骤 5. 启动 Web 控制台</a></p>
-<h2 id="1-oidc">步骤 1. 创建 OIDC 客户端</h2>
-<p>您可以使用不同类型的 OpenID Connect 提供程序。本部分介绍了选项 1 到选项 4。</p>
-<ul>
-<li>(选项 1) 使用来自其他区域的 Amazon Cognito 作为 OIDC 提供程序。</li>
-<li>(选项 2) <a href="https://www.authing.cn/" target="_blank">Authing</a>，这是一个第三方身份验证提供程序的示例。</li>
-<li>(选项 3) <a href="https://github.com/aws-samples/keycloak-on-aws" target="_blank">Keycloak</a>，这是由 AWS 维护的解决方案，可用作身份验证提供程序。</li>
-<li>(选项 4) <a href="https://docs.microsoft.com/en-us/windows-server/identity/active-directory-federation-services" target="_blank">ADFS</a>，这是 Microsoft 提供的一项服务。</li>
-<li>(选项 5) 其他第三方身份验证平台，如 <a href="https://auth0.com/" target="_blank">Auth0</a>。</li>
-</ul>
-<p>按照以下步骤创建 OIDC 客户端，并获取 <code>client_id</code> 和 <code>issuer</code>。</p>
-<h3 id="1-cognito">(选项 1) 使用来自其他区域的 Cognito 用户池</h3>
-<p>您可以将 <a href="https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-identity-pools.html">Cognito 用户池</a> 作为 OIDC 提供者在受支持的 AWS 区域中使用。</p>
+<h1 id="_1">身份管理</h1>
+<h2 id="_2">用户</h2>
+<p>亚马逊云科技点击流分析 支持内置 Cognito 用户池或第三方 OpenID Connect (OIDC)，以便根据您的<a href="../deployment/">部署方式</a>进行用户管理。</p>
+<h3 id="_3">用户管理</h3>
+<p>如果您使用内置 Cognito 进行用户管理，您可以在部署区域中找到以 <code>userPoolDC9497E0</code> 开头的 <a href="https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-identity-pools.html">Cognito 用户池</a>。 当您部署解决方案的 Web 控制台时，将创建具有所需电子邮件地址的用户作为第一个具有管理员权限的用户。 按照<a href="https://docs.aws.amazon.com/cognito/latest/developerguide/managing-users.html">本文档</a>，您可以管理其他用户。 您还可以按照<a href="https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-pools-identity-federation.html">本文档</a>添加联合第三方登录，例如 SAML 和 OIDC。</p>
+<p>如果您使用 OIDC 提供商进行用户管理，则需要按照 OIDC 提供商的文档来管理用户。</p>
+<h2 id="_4">用户身份</h2>
+<p>您可以向用户分配四种不同类型的角色：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">角色</th>
+<th style="text-align: left;">描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">管理员</td>
+<td style="text-align: left;">对解决方案的完全访问权限，包括身份管理</td>
+</tr>
+<tr>
+<td style="text-align: left;">操作员</td>
+<td style="text-align: left;">管理项目、告警和插件</td>
+</tr>
+<tr>
+<td style="text-align: left;">分析师</td>
+<td style="text-align: left;">在分析工作坊中查看和更新</td>
+</tr>
+<tr>
+<td style="text-align: left;">分析师读者</td>
+<td style="text-align: left;">在分析工作坊中查看</td>
+</tr>
+</tbody>
+</table>
+<p>角色的具体功能如下表所示：</p>
+<table>
+<thead>
+<tr>
+<th>功能</th>
+<th>管理员</th>
+<th>操作员</th>
+<th>分析师</th>
+<th>分析师读者</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>项目管理</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>No</td>
+<td>No</td>
+</tr>
+<tr>
+<td>运维和告警</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>No</td>
+<td>No</td>
+</tr>
+<tr>
+<td>插件管理</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>No</td>
+<td>No</td>
+</tr>
+<tr>
+<td>身份管理</td>
+<td>Yes</td>
+<td>No</td>
+<td>No</td>
+<td>No</td>
+</tr>
+<tr>
+<td>分析工作坊 - 仪表板</td>
+<td>Yes</td>
+<td>No</td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>分析工作坊 - 探索</td>
+<td>Yes</td>
+<td>No</td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>分析工作坊 - 分析</td>
+<td>Yes</td>
+<td>No</td>
+<td>Yes</td>
+<td>No</td>
+</tr>
+<tr>
+<td>分析工作坊 - 数据管理</td>
+<td>Yes</td>
+<td>No</td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_5">用户角色管理</h3>
+<p>默认情况下，经过身份验证的用户在解决方案中没有角色。 您可以通过以下两种方式来管理解决方案中的用户角色：</p>
 <ol>
-<li>在 AWS 区域中访问 <a href="https://console.aws.amazon.com/cognito/home">Amazon Cognito 控制台</a>。</li>
-<li>根据此 <a href="https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-pools-app-integration.html#cognito-user-pools-create-an-app-integration">指南</a> 使用 Amazon Cognito 控制台设置托管 UI。请注意以下两个配置：</li>
-<li>在选择 <strong>应用类型</strong> 时选择 <strong>公共客户端</strong>。确保不要更改 <strong>客户端密钥</strong> 的选择 <strong>不生成客户端密钥</strong>。</li>
-<li>在 <strong>OpenID Connect 作用域</strong> 中添加 <strong>Profile</strong>。</li>
-<li>
-<p>使用您的域名为 亚马逊云科技点击流分析 控制台设置 <strong>回调 URL</strong> 和 <strong>登出 URL</strong>。
-    !!! info "注意"
-        如果您未为控制台使用自定义域名，则无法获得控制台的域名。您可以输入一个虚假的域名，例如 <code>clickstream.example.com</code>，然后根据第 3 步中的指南进行更新。</p>
-</li>
-<li>
-<p>如果您的托管 UI 设置完毕，您应该能够看到如下所示的内容。</p>
-<p><a class="glightbox" href="../../images/OIDC/cognito-hostUI-new.jpeg" data-type="image" data-width="100%" data-height="auto" data-desc-position="bottom"><img alt="cognito host ui" src="../../images/OIDC/cognito-hostUI-new.jpeg" /></a></p>
-</li>
-<li>
-<p>将应用客户端 ID、用户池 ID 和 AWS 区域保存到一个文件中，稍后会用到。</p>
-<p><a class="glightbox" href="../../images/OIDC/cognito-new-console-clientID.png" data-type="image" data-width="100%" data-height="auto" data-desc-position="bottom"><img alt="cognito client id" src="../../images/OIDC/cognito-new-console-clientID.png" /></a>
-   <a class="glightbox" href="../../images/OIDC/cognito-new-console-userpoolID.png" data-type="image" data-width="100%" data-height="auto" data-desc-position="bottom"><img alt="cognito userpool id" src="../../images/OIDC/cognito-new-console-userpoolID.png" /></a></p>
-</li>
+<li>用“管理员”用户在解决方案的 Web 控制台中选择<strong>系统</strong> - <strong>用户</strong>，添加、更新或删除用户角色。 此设置优先于其他设置。</li>
+<li>在解决方案的 Web 控制台中，以“管理员”用户身份单击<strong>系统</strong> - <strong>用户</strong>中的<strong>设置</strong>。 配置映射到 OIDC 提供商中的组或角色的解决方案角色。</li>
 </ol>
-<p>在<a href="#2">步骤 2. 启动堆栈</a>中，使用来自您的 Cognito 用户池的以下参数。</p>
-<ul>
-<li><strong>OIDCClientId</strong>: <code>应用客户端 ID</code></li>
-<li><strong>OIDCProvider</strong>: <code>https://cognito-idp.${REGION}.amazonaws.com/${USER_POOL_ID}</code></li>
-</ul>
-<h3 id="2-authingcn-oidc">(选项 2) 使用 Authing.cn OIDC 客户端</h3>
-<ol>
-<li>前往 <a href="https://console.authing.cn/console" target="_blank">Authing 控制台</a>。</li>
-<li>如果您还没有用户池，请创建一个用户池。</li>
-<li>选择用户池。</li>
-<li>在左侧导航栏中，选择 <strong>Applications</strong> 下的 <strong>Self-built App</strong>。</li>
-<li>点击 <strong>Create</strong> 按钮。</li>
-<li>输入 <strong>Application Name</strong> 和 <strong>Subdomain</strong>。</li>
-<li>
-<p>从 Endpoint Information 将 <code>App ID</code>（即 <code>client_id</code>）和 <code>Issuer</code> 保存到一个文本文件中，稍后会用到。</p>
-<p><a class="glightbox" href="../../images/OIDC/authing-endpoint-info.png" data-type="image" data-width="100%" data-height="auto" data-desc-position="bottom"><img alt="authing endpoint info" src="../../images/OIDC/authing-endpoint-info.png" /></a></p>
-</li>
-<li>
-<p>将 <code>Login Callback URL</code> 和 <code>Logout Callback URL</code> 更新为您记录的 IPC 域名。</p>
-</li>
-<li>
-<p>设置授权配置。</p>
-<p><a class="glightbox" href="../../images/OIDC/authing-authorization-configuration.png" data-type="image" data-width="100%" data-height="auto" data-desc-position="bottom"><img alt="authing authorization configuration" src="../../images/OIDC/authing-authorization-configuration.png" /></a></p>
-</li>
-</ol>
-<p>您已成功创建了 Authing 自建应用。</p>
-<p>在<a href="#2">步骤 2. 启动堆栈</a>中，使用来自您的 Authing 用户池的以下参数。</p>
-<ul>
-<li><strong>OIDCClientId</strong>: <code>client id</code></li>
-<li><strong>OIDCProvider</strong>: <code>Issuer</code></li>
-</ul>
-<h3 id="3-keycloak-oidc">(选项 3) 使用 Keycloak OIDC 客户端</h3>
-<ol>
-<li>
-<p>根据 <a href="https://aws-samples.github.io/keycloak-on-aws/en/implementation-guide/deployment/" target="_blank">此指南</a> 在 AWS 中国区部署 Keycloak 解决方案。</p>
-</li>
-<li>
-<p>登录 Keycloak 控制台。</p>
-</li>
-<li>
-<p>在左侧导航栏中，选择 <strong>Add realm</strong>。如果您已经拥有一个 realm，请跳过此步骤。</p>
-</li>
-<li>
-<p>转到 realm 设置页面。选择 <strong>Endpoints</strong>，然后从列表中选择 <strong>OpenID Endpoint Configuration</strong>。</p>
-<p><a class="glightbox" href="../../images/OIDC/keycloak-example-realm.png" data-type="image" data-width="100%" data-height="auto" data-desc-position="bottom"><img alt="keycloak realm" src="../../images/OIDC/keycloak-example-realm.png" /></a></p>
-</li>
-<li>
-<p>在浏览器中打开的 JSON 文件中，记录将在稍后使用的 <strong>issuer</strong> 值。</p>
-<p><a class="glightbox" href="../../images/OIDC/keycloak-OIDC-config.png" data-type="image" data-width="100%" data-height="auto" data-desc-position="bottom"><img alt="keycloak oidc config" src="../../images/OIDC/keycloak-OIDC-config.png" /></a></p>
-</li>
-<li>
-<p>返回 Keycloak 控制台，在左侧导航栏中选择 <strong>Clients</strong>，然后选择 <strong>Create</strong>。</p>
-</li>
-<li>
-<p>输入一个包含字母（不区分大小写）或数字的 Client ID。记录将在稍后使用的 <strong>Client ID</strong>。</p>
-</li>
-<li>
-<p>更改客户端设置。在 <strong>Valid Redirect URIs</strong> 中输入 <code>http[s]://&lt;亚马逊云科技点击流分析 Console domain&gt;/signin</code>，在 <strong>Web Origins</strong> 中输入 <code>&lt;console domain&gt;</code> 和 <code>+</code>。</p>
-<div class="admonition tip">
-<p class="admonition-title">提示</p>
-<p>如果您没有为控制台使用自定义域名，则控制台的域名尚不可用。您可以输入一个虚假的域名，例如 <code>clickstream.example.com</code>，然后在第 3 步中按照指南进行更新。</p>
-</div>
-</li>
-<li>
-<p>在高级设置中，将 <strong>Access Token Lifespan</strong> 设置为至少 5 分钟。</p>
-</li>
-<li>在左侧导航栏中选择 <strong>Users</strong>。</li>
-<li>点击 <strong>Add user</strong> 并输入 <strong>Username</strong>。</li>
-<li>创建用户后，选择 <strong>Credentials</strong>，然后输入 <strong>Password</strong>。</li>
-</ol>
-<p>在<a href="#2">步骤 2. 启动堆栈</a>中，使用来自您的 Keycloak realm 的以下参数。</p>
-<ul>
-<li><strong>OIDCClientId</strong>: <code>client id</code></li>
-<li><strong>OIDCProvider</strong>: <code>https://&lt;KEYCLOAK_DOMAIN_NAME&gt;/auth/realms/&lt;REALM_NAME&gt;</code></li>
-</ul>
-<h3 id="4-adfs-openid-connect">(选项 4) ADFS OpenID Connect 客户端</h3>
-<ol>
-<li>确保已安装 ADFS。有关如何安装 ADFS 的信息，请参考 <a href="https://docs.microsoft.com/en-us/windows-server/identity/ad-fs/deployment/ad-fs-deployment-guide">此指南</a>。</li>
-<li>确保您可以登录到 ADFS 登录页面。URL 应为 <code>https://adfs.domain.com/adfs/ls/idpinitiatedSignOn.aspx</code>，您需要将 <strong>adfs.domain.com</strong> 替换为您实际的 ADFS 域。</li>
-<li>登录到您的 <strong>域控制器</strong>，并打开 <strong>Active Directory Users and Computers</strong>。</li>
-<li>
-<p>为 亚马逊云科技点击流分析 用户创建一个 <strong>安全组</strong>，并将计划中的 亚马逊云科技点击流分析 用户添加到此安全组中。</p>
-</li>
-<li>
-<p>登录到 ADFS 服务器，并打开 <strong>ADFS Management</strong>。</p>
-</li>
-<li>
-<p>右键单击 <strong>Application Groups</strong>，选择 <strong>Application Group</strong>，然后输入 Application Group 的名称。在 <strong>Client-Server Applications</strong> 下选择 <strong>Web browser accessing a web application</strong> 选项，并选择 <strong>Next</strong>。</p>
-</li>
-<li>
-<p>在 <strong>Redirect URI</strong> 下记录 <strong>Client Identifier</strong> (<code>client_id</code>)，输入您的 亚马逊云科技点击流分析 域名（例如 <code>xx.example.com</code>），然后选择 <strong>Add</strong>，再选择 <strong>Next</strong>。</p>
-</li>
-<li>
-<p>在 <strong>Choose Access Control Policy</strong> 窗口中，选择 <strong>Permit specific group</strong>，在 Policy 部分下选择 <strong>parameters</strong>，将在步骤 4 中创建的安全组添加进去，然后点击 <strong>Next</strong>。您可以根据需求配置其他访问控制策略。</p>
-</li>
-<li>
-<p>在摘要窗口下，选择 <strong>Next</strong>，然后选择 <strong>Close</strong>。</p>
-</li>
-<li>
-<p>在 ADFS 服务器上打开 Windows PowerShell，并运行以下命令以配置 ADFS 允许您计划的 URL 的 CORS。</p>
-<div class="language-shell highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>Set-AdfsResponseHeaders<span class="w"> </span>-EnableCORS<span class="w"> </span><span class="nv">$true</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>Set-AdfsResponseHeaders<span class="w"> </span>-CORSTrustedOrigins<span class="w"> </span>https://&lt;your-clickstream-analytics-on-aws-domain&gt;
+<p>默认情况下，该解决方案支持将 <a href="https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-pools-user-groups.html">Cognito 用户池中的组信息</a> 映射到解决方案中的多个角色，规则如下：</p>
+<table>
+<thead>
+<tr>
+<th>Cognito 中的组名称</th>
+<th>解决方案角色</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ClickstreamAdmin</td>
+<td>管理员</td>
+</tr>
+<tr>
+<td>ClickstreamOperator</td>
+<td>操作员</td>
+</tr>
+<tr>
+<td>ClickstreamAnalyst</td>
+<td>分析师</td>
+</tr>
+<tr>
+<td>ClickstreamAnalystReader</td>
+<td>分析师读者</td>
+</tr>
+</tbody>
+</table>
+<p>例如，您创建一个名为“ClickstreamAnalyst”的组，然后将用户池中的用户添加到该组。 这些用户登录到解决方案后，该用户将具有分析师角色来访问分析工作坊。</p>
+<p>支持将多个组映射到单个系统角色，各个组名称以逗号分隔。 例如，通过修改<strong>操作员角色名称</strong>：<code>Group1,Group2</code>，即可将两个用户组映射到系统的<strong>操作员</strong>角色。</p>
+<p>如果需要支持其他OIDC提供商，请修改<strong>用户角色Json路径</strong>。</p>
+<p>示例：修改<strong>用户角色的Json Path</strong>为<code>$.payload.realm_access.roles</code>，可以支持<a href="../deployment/with-oidc/#option-3-keycloak-oidc-client">Keycloak</a>角色到解决方案角色的映射，其中 Keycloak 的 token 格式如下 ：</p>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="p">{</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">  </span><span class="nt">&quot;exp&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1701070445</span><span class="p">,</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">  </span><span class="nt">&quot;iat&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1701063245</span><span class="p">,</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">  </span><span class="nt">&quot;auth_time&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1701062050</span><span class="p">,</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">  </span><span class="nt">&quot;jti&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;4a892061-56e1-4997-a5f3-84a5d38215f0&quot;</span><span class="p">,</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">  </span><span class="nt">&quot;iss&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://keycloak.xxxx.cn/auth/realms/xxx&quot;</span><span class="p">,</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">  </span><span class="nt">&quot;aud&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;P****************Y&quot;</span><span class="p">,</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">  </span><span class="nt">&quot;sub&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;29563a2d-****-43bb-b861-c163da7fe984&quot;</span><span class="p">,</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">  </span><span class="nt">&quot;typ&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ID&quot;</span><span class="p">,</span>
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="w">  </span><span class="nt">&quot;azp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;P****************Y&quot;</span><span class="p">,</span>
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="w">  </span><span class="nt">&quot;session_state&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;4df36df4-****-4e53-9c1a-43e6d27ffbb9&quot;</span><span class="p">,</span>
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="w">  </span><span class="nt">&quot;at_hash&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;P****************Y&quot;</span><span class="p">,</span>
+</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="w">  </span><span class="nt">&quot;acr&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0&quot;</span><span class="p">,</span>
+</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="w">  </span><span class="nt">&quot;sid&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;4df36df4-****-4e53-9c1a-43e6d27ffbb9&quot;</span><span class="p">,</span>
+</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="w">  </span><span class="nt">&quot;email_verified&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="w">  </span><span class="nt">&quot;realm_access&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="w">    </span><span class="nt">&quot;roles&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a><span class="w">      </span><span class="s2">&quot;role1&quot;</span><span class="p">,</span>
+</span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a><span class="w">      </span><span class="s2">&quot;role2&quot;</span><span class="p">,</span>
+</span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a><span class="w">      </span><span class="s2">&quot;role3&quot;</span><span class="p">,</span>
+</span><span id="__span-0-21"><a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a><span class="w">    </span><span class="p">]</span>
+</span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a><span class="w">  </span><span class="p">},</span>
+</span><span id="__span-0-23"><a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a><span class="w">  </span><span class="nt">&quot;preferred_username&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;your name&quot;</span><span class="p">,</span>
+</span><span id="__span-0-24"><a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a><span class="w">  </span><span class="nt">&quot;email&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;your-name@example.com&quot;</span>
+</span><span id="__span-0-25"><a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a><span class="p">}</span>
 </span></code></pre></div>
-</li>
-<li>
-<p>在 ADFS 服务器上的 Windows PowerShell 下，运行以下命令以获取 ADFS 的 Issuer（<code>issuer</code>），类似于 <code>https://adfs.example.com/adfs</code>。</p>
-<div class="language-shell highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>Get-ADFSProperties<span class="w"> </span><span class="p">|</span><span class="w"> </span>Select<span class="w"> </span>IdTokenIssuer
-</span></code></pre></div>
-<p><a class="glightbox" href="../../images/OIDC/adfs-9.png" data-type="image" data-width="100%" data-height="auto" data-desc-position="bottom"><img alt="get adfs properties" src="../../images/OIDC/adfs-9.png" /></a></p>
-</li>
-</ol>
-<p>在<a href="#2">步骤 2. 启动堆栈</a>中，使用来自您的 ADFS 服务器的以下参数。</p>
-<ul>
-<li><strong>OIDCClientId</strong>: <code>client id</code></li>
-<li><strong>OIDCProvider</strong>: 从上述第 11 步中获取发行方（issuer）的服务器</li>
-</ul>
-<h2 id="2">步骤 2. 启动堆栈</h2>
-<ol>
-<li>
-<p>登录到 <a href="https://console.aws.amazon.com/">AWS 管理控制台</a>，并使用下方按钮启动 AWS CloudFormation 模板。</p>
-<table>
-<thead>
-<tr>
-<th></th>
-<th>在 AWS 控制台中启动</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>在 AWS 区域中启动</td>
-<td><a href="https://console.aws.amazon.com/cloudformation/home#/stacks/new?templateURL=https://solutions-reference.s3.amazonaws.com/clickstream-analytics-on-aws/latest/cloudfront-s3-control-plane-stack-global-oidc.template.json" target="_blank"><img alt="启动堆栈" src="../../images/launch-stack.webp" /></a></td>
-</tr>
-<tr>
-<td>在 AWS 区域中使用自定义域名启动</td>
-<td><a href="https://console.aws.amazon.com/cloudformation/home#/stacks/new?templateURL=https://solutions-reference.s3.amazonaws.com/clickstream-analytics-on-aws/latest/cloudfront-s3-control-plane-stack-global-customdomain-oidc.template.json" target="_blank"><img alt="启动堆栈" src="../../images/launch-stack.webp" /></a></td>
-</tr>
-<tr>
-<td>在 AWS 中国区域中启动</td>
-<td><a href="https://console.amazonaws.cn/cloudformation/home#/stacks/new?templateURL=https://aws-gcr-solutions.s3.cn-north-1.amazonaws.com.cn/clickstream-analytics-on-aws/latest/cn/cloudfront-s3-control-plane-stack-cn.template.json" target="_blank"><img alt="启动堆栈" src="../../images/launch-stack.webp" /></a></td>
-</tr>
-</tbody>
-</table>
-</li>
-<li>
-<p>模板将在您登录到控制台后的默认区域中启动。若要在不同的 AWS 区域中启动 亚马逊云科技点击流分析 解决方案，请使用控制台导航栏中的区域选择器。</p>
-</li>
-<li>在<strong>创建堆栈</strong>页面上，验证<strong>Amazon S3 URL</strong>文本框中显示的正确模板 URL，然后选择<strong>下一步</strong>。</li>
-<li>在<strong>指定堆栈详细信息</strong>页面上，为解决方案堆栈分配一个名称。有关命名字符限制的信息，请参阅<em>AWS 身份和访问管理用户指南</em>中的 <a href="https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_iam-limits.html" target="_blank">IAM 和 AWS STS 限额</a>。</li>
-<li>
-<p>在<strong>参数</strong>下，查看模板的参数，并根据需要进行修改。</p>
-<ul>
-<li>
-<p>此解决方案使用以下参数：</p>
-<table>
-<thead>
-<tr>
-<th>参数</th>
-<th>默认值</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>OIDCClientId</td>
-<td><code>&lt;输入&gt;</code></td>
-<td>OpenID Connect 客户端 ID。</td>
-</tr>
-<tr>
-<td>OIDCProvider</td>
-<td><code>&lt;输入&gt;</code></td>
-<td>OpenID Connect 提供程序发行方。发行方必须以 <code>https://</code> 开头</td>
-</tr>
-</tbody>
-</table>
-<div class="admonition info">
-<p class="admonition-title">重要提示</p>
-<p><!-- BEGIN INCLUDE ./tls-note.md -->
-默认情况下，此部署在CloudFront中使用TLSv1.0和TLSv1.1。但是，我们建议您手动配置CloudFront以使用更安全的TLSv1.2/TLSv1.3，并申请证书和自定义域来启用此功能。我们强烈建议您根据以下建议更新您的TLS配置和密码套件选择：</p>
-<ul>
-<li><strong>传输层安全协议</strong>：升级到TLSv1.2或更高版本</li>
-<li><strong>密钥交换</strong>：ECDHE</li>
-<li><strong>块密码操作模式</strong>：GCM</li>
-<li><strong>身份验证</strong>：ECDSA</li>
-<li><strong>加密密码</strong>：AES256</li>
-<li><strong>消息鉴别</strong>：SHA（256/384/除SHA1以外的任何哈希函数）</li>
-</ul>
-<p>例如，TLSv1.2_2021 可以满足上述建议。
-<!-- END INCLUDE --></p>
-</div>
-</li>
-<li>
-<p>如果您在 AWS 区域中使用自定义域名启动解决方案，则还有以下附加参数：</p>
-<table>
-<thead>
-<tr>
-<th>参数</th>
-<th>默认值</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Hosted Zone ID</td>
-<td><code>&lt;输入&gt;</code></td>
-<td>选择 Amazon Route 53 的公共托管区域的 ID。</td>
-</tr>
-<tr>
-<td>Hosted Zone Name</td>
-<td><code>&lt;输入&gt;</code></td>
-<td>公共托管区域的域名，例如 <code>example.com</code>。</td>
-</tr>
-<tr>
-<td>Record Name</td>
-<td><code>&lt;输入&gt;</code></td>
-<td>控制台的子名称（在 R53 中称为记录名称）。例如，如果您想为控制台使用自定义域名 <code>clickstream.example.com</code>，则输入 <code>clickstream</code>。</td>
-</tr>
-</tbody>
-</table>
-</li>
-<li>
-<p>如果您在 AWS 中国区域中启动解决方案，则还有以下附加参数：</p>
-<table>
-<thead>
-<tr>
-<th>参数</th>
-<th>默认值</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Domain</td>
-<td><code>&lt;输入&gt;</code></td>
-<td>Centralized Logging with OpenSearch 控制台的自定义域名。不要添加 <code>http(s)</code> 前缀。</td>
-</tr>
-<tr>
-<td>IamCertificateID</td>
-<td><code>&lt;输入&gt;</code></td>
-<td>在 IAM 中 SSL 证书的 ID。ID 由 21 个大写字母和数字组成。使用 <a href="https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_server-certs.html#list-server-certificates" target="_blank"><code>list-server-certificates</code></a> 命令检索 ID。</td>
-</tr>
-</tbody>
-</table>
-</li>
-</ul>
-</li>
-<li>
-<p>选择<strong>下一步</strong>。</p>
-</li>
-<li>在<strong>配置堆栈选项</strong>页面上，选择<strong>下一步</strong>。</li>
-<li>在<strong>审核</strong>页面上，检查并确认设置。选中确认模板将创建 AWS Identity and Access Management (IAM) 资源的框。</li>
-<li>选择<strong>创建堆栈</strong>以部署堆栈。</li>
-</ol>
-<p>您可以在 AWS CloudFormation 控制台中查看堆栈的状态列。大约 10 分钟后，您应该会收到<strong>CREATE_COMPLETE</strong>状态。</p>
-<h2 id="3-oidc-url">步骤 3. 更新 OIDC 客户端的回调 URL</h2>
-<div class="admonition info">
-<p class="admonition-title">重要提示</p>
-<p>如果您没有使用自定义域名部署栈，请完成以下步骤。</p>
-</div>
-<ol>
-<li>登录到 <a href="https://console.aws.amazon.com/cloudformation/" target="_blank">AWS CloudFormation 控制台</a>。</li>
-<li>选择解决方案的栈。</li>
-<li>选择 <strong>Outputs</strong> 选项卡。</li>
-<li>获取 <strong>ControlPlaneURL</strong> 作为终结点。</li>
-<li>更新或添加回调 URL 到您的 OIDC。<ol>
-<li>对于 Cognito，请在客户端的 <strong>Allowed callback URL</strong> 中添加或更新 URL，值为 <code>${ControlPlaneURL}/signin</code>。<strong>注意</strong>：URL 必须以 <code>https://</code> 开头。</li>
-<li>对于 Keycloak，请在客户端的 <strong>Valid Redirect URIs</strong> 中添加或更新 URL，值为 <code>${ControlPlaneURL}/signin</code>。</li>
-<li>对于 Authing.cn，请在 <strong>Authentication Configuration</strong> 的 <strong>Login Callback URL</strong> 中添加或更新 URL。</li>
-</ol>
-</li>
-</ol>
-<h2 id="4-dns">步骤 4. 设置 DNS 解析器</h2>
-<div class="admonition info">
-<p class="admonition-title">重要提示</p>
-<p>如果您在 AWS 区域中部署了栈，则可以跳过此步骤。</p>
-</div>
-<p>该解决方案提供了一个 CloudFront 分发，用于访问 亚马逊云科技点击流分析 控制台。</p>
-<ol>
-<li>登录到 <a href="https://console.aws.amazon.com/cloudformation/" target="_blank">AWS CloudFormation 控制台</a>。</li>
-<li>选择解决方案的栈。</li>
-<li>选择 <strong>Outputs</strong> 选项卡。</li>
-<li>获取 <strong>ControlPlaneURL</strong> 和 <strong>CloudFrontDomainName</strong>。</li>
-<li>在 DNS 解析器中为 <strong>ControlPlaneURL</strong> 创建一个 CNAME 记录，该记录指向前面获取到的 <strong>CloudFrontDomainName</strong> 域名。</li>
-</ol>
-<h2 id="5-web">步骤 5. 启动Web控制台</h2>
-<div class="admonition info">
-<p class="admonition-title">重要提示</p>
-<p>您的登录凭据由OIDC提供者管理。在登录亚马逊云科技点击流分析控制台之前，请确保在OIDC提供者的用户池中至少创建了一个用户。</p>
-</div>
-<ol>
-<li>在Web浏览器中使用之前分配的域名或生成的<strong>ControlPlaneURL</strong>。</li>
-<li>选择<strong>登录</strong>，并导航到OIDC提供者。</li>
-<li>输入登录凭据。您可能会被要求根据OIDC提供者的策略更改首次登录时的默认密码。</li>
-<li>验证完成后，系统将打开亚马逊云科技点击流分析的Web控制台。</li>
-</ol>
-<p>一旦您成功登录亚马逊云科技点击流分析控制台，您就可以开始为您的应用程序<a href="../../getting-started/1.create-project/">创建一个项目</a>。</p>
 
 
   
@@ -2798,10 +2503,10 @@
       <div class="md-progress" data-md-component="progress" role="progressbar"></div>
     
     
-    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.instant", "navigation.instant.progress", "navigation.tracking", "navigation.path", "navigation.top", "search.suggest", "search.highlight", "search.share", "content.code.copy", "content.code.select", "content.code.annotate", "content.tabs.link"], "search": "../../assets/javascripts/workers/search.f886a092.min.js", "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}, "version": {"default": "latest", "provider": "mike"}}</script>
+    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.instant", "navigation.instant.progress", "navigation.tracking", "navigation.path", "navigation.top", "search.suggest", "search.highlight", "search.share", "content.code.copy", "content.code.select", "content.code.annotate", "content.tabs.link"], "search": "../assets/javascripts/workers/search.f886a092.min.js", "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}, "version": {"default": "latest", "provider": "mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.cd18aaf1.min.js"></script>
+      <script src="../assets/javascripts/bundle.cd18aaf1.min.js"></script>
       
     
   <script>document$.subscribe(() => {const lightbox = GLightbox({"touchNavigation": true, "loop": false, "zoomable": true, "draggable": true, "openEffect": "zoom", "closeEffect": "zoom", "slideEffect": "slide"});})</script></body>
