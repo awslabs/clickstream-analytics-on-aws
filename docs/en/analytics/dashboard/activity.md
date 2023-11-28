@@ -22,7 +22,7 @@ Below is the SQL command that generates the related views.
         ```
     === "Athena"
         ```sql title="clickstream-ods-events-query.sql"
-        --8<-- "src/analytics/private/sqls/athena/clickstream-ods-events-query.sql"
+        --8<-- "src/analytics/private/sqls/athena/clickstream-event-query.sql"
         ```
 
 ## Dimensions and metrics

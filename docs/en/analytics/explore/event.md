@@ -29,7 +29,7 @@ Event analysis are commonly used when analyzing user behaviors, for example:
 
 > Calculate the daily page views (PV - Page View) and active user count (UV - Unique Visitor) on the web from different countries over the past month, requiring active users to have a session duration of at least 30000 millisecond.
 
-### Stepsxz
+### Steps
 
 1. Select the **Event Analysis** model.
 2. In the left **Define Metrics** area, choose `_page_view` as the metric for calculating events and select `Event number` as the metric type.

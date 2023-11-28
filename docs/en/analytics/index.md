@@ -1,10 +1,10 @@
 # Analytics Studio
-Analytics Studio is a unified web interface for business analysts or data analysts to view and create dashboard, query and explore clickstream data, and manage metadata. Below are the modules included in the Analytics Studio.
+Analytics Studio is a unified web interface for business analysts or data analysts to view and create dashboard, query and explore clickstream data, and manage metadata. 
 
 ## Modules 
-
+Below are the modules included in the Analytics Studio：
 - [Dashboard](./dashboard/index.md). View out-of-the-box dashboard and custom dashboards.
-- [Explore](./explore/index.md). Advance analytics models for user to query clickstream data beyond the out-of-the-box dashboard.
+- [Explorations](./explore/index.md). Advance analytics models for user to uncover insights beyond the out-of-the-box dashboard.
 - [Analyses](./analyzes/index.md). Author interface for creating and modifying dashboard, as well as managing datasets.
 - [Data management](./data-mgmt/index.md). View and manage the metadata for clickstream data.  
 

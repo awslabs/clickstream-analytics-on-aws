@@ -4,7 +4,7 @@ This article explains the data schema and format in {{solution_name}}. This solu
 ## Database and table
 For each project, the solution creates a database with name of `<project-id>` in Redshift and Athena. Each App will have a schema with name of `app_id`, within which event-related data are stored in `event` and `event_parameter` tables, user-related data are stored in `user` table, item-related data are stored in `item` table. In Athena, all tables are added partitions of app_id, year, month, and day. Below diagram illustrates the table relationship.
 
-![table-relationship](../images/../../images/pipe-mgmt/table_relationship.png)
+![table-relationship](../../images/pipe-mgmt/table_relationship.png)
 
 
 ## Columns
@@ -63,6 +63,7 @@ Each column in the tables represents a specific parameter for a event, user, or 
 |---------------------------|--------------------|------------------------|---------------------------------------------------------|
 | event_timestamp          | BIGINT             |     STRING         | The time (in microseconds, UTC) when the event was logged on the client.                        |
 | event_id          | VARCHAR             |     BIGINT         | Unique ID for the event.                        |
+|event_name| VARCHAR | STRING | The name of the event.|
 | event_params_key          | VARCHAR             |     STRING         | The name of the event parameter.                        |
 | event_params_string_value  |     VARCHAR          | STRING          | If the event parameter is represented by a string, such as a URL or campaign name, it is populated in this field. |
 | event_params_int_value	 |         BIGINT           | INTEGER                | If the event parameter is represented by an integer, it is populated in this field. |

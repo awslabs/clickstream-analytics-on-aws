@@ -8,9 +8,9 @@ When you want to explore the clickstream data in more detail, you can use explor
 - group metrics by dimension to make it easy to compare
 - easily switch visualization type and drill down or up into data
 - view and export summary data into the excel or csv
-- save the explorative analytics results into a dashboard for share or regular use
+- save the exploration analytics results into a dashboard for share or regular use
 
-
+s
 ## Access Explorations
 To access Explorations, follow below steps:
 

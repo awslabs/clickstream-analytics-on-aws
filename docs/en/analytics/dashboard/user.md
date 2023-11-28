@@ -34,7 +34,7 @@ The report includes the following dimensions and metrics. You can add more dimen
 |`first_visit_date`| Dimension | The date that the user first visited your website or first opened the app  | Query from analytics engine|
 |`first_visit_install_source`| Dimension | The installation source when user first opened your app. Blank for web  | Query from analytics engine|
 |`first_traffic_source_source`| Dimension | The traffic source for the user when first visit the app or web  | Query from analytics engine|
-|`first_traffic_source_meidum`| Dimension | The traffic medium for the user when first visit the app or web  | Query from analytics engine|
+|`first_traffic_source_medium`| Dimension | The traffic medium for the user when first visit the app or web  | Query from analytics engine|
 |`first_traffic_source_name`| Dimension | The traffic campaign name for the user when first visit the app or web  | Query from analytics engine|
 |`first_visit_device_language`| Dimension | The system language of the device user used when they first opened your app or first visited your website.  | Query from analytics engine|
 |`first_visit_device_language`| Dimension | The system language of the device user used when they first opened your app or first visited your website.  | Query from analytics engine|
@@ -44,14 +44,14 @@ The report includes the following dimensions and metrics. You can add more dimen
 |`first_visit_city`| Dimension | The city where user first visited your website or first opened your app.  | Query from analytics engine|
 |`custom_attr_key`| Dimension | The name of the custom attribute key of the user.  | Query from analytics engine|
 |`custom_attr_value`| Dimension | The value of the custom attribute key of the user.  | Query from analytics engine|
-|`registration_status`| Dimension | If user had registed or not  | Query from analytics engine|
+|`registration_status`| Dimension | If user had registered or not  | Query from analytics engine|
 |`Event Time (HH:MM:SS)`| Dimension |The time in MMDDYYYY HH:MM:SS format when the event was recorded in the client  | Calculated field in QuickSight|
 |`event_id`| Dimension | A SDK-generated unique id for the event user triggered when using your websites and apps | Query from analytics engine|
 |`event_name`| Dimension |The name of the event  | Query from analytics engine|
 |`platform`| Dimension | The platform user used during the session  | Query from analytics engine|
 |`event_value_in_usd`| Metric | The value in USD associated with the event  | Query from analytics engine|
 |`app_info_version`| Dimension | The app version associated with the event  | Query from analytics engine|
-|`geo_locale`| Dimension | The geo and locale information associted with the event  | Query from analytics engine|
+|`geo_locale`| Dimension | The geo and locale information associated with the event  | Query from analytics engine|
 |`event_parameter_key`| Dimension | The key of the event parameter  | Query from analytics engine|
 |`event_parameter_key`| Dimension | The value of the event parameter  | Query from analytics engine|
 |`event_date`| Metric | The date when the event was logged (YYYYMMDD format in UTC).  | Query from analytics engine|
