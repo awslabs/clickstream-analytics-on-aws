@@ -9,7 +9,7 @@
 
 ### 升级 Web 控制台堆栈
 
-1. 登录到 [AWS CloudFormation 控制台][cloudformation]，选择您现有的 [Web 控制台堆栈][console-stack]，然后选择 **更新**。
+1. 登录到 [AWS CloudFormation 控制台][cloudformation]，选择您现有的 [Web 控制台堆栈][console-stack]，然后选择**更新**。
 2. 选择**替换当前模板**。
 3. 在**指定模板**下：
      - 选择 Amazon S3 URL。
