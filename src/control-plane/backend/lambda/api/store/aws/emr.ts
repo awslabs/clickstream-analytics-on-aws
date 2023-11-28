@@ -11,24 +11,9 @@
  *  and limitations under the License.
  */
 
-import { EMRServerlessClient, ListApplicationsCommand } from '@aws-sdk/client-emr-serverless';
-import { aws_sdk_client_common_config } from '../../common/sdk-client-config-ln';
+import { listAWSResourceTypes } from './cloudformation';
 
 export const emrServerlessPing = async (region: string): Promise<boolean> => {
-  try {
-    const emrServerlessClient = new EMRServerlessClient({
-      ...aws_sdk_client_common_config,
-      maxAttempts: 1,
-      region,
-    });
-    const params: ListApplicationsCommand = new ListApplicationsCommand({});
-    await emrServerlessClient.send(params);
-  } catch (err) {
-    if ((err as Error).name === 'TimeoutError' ||
-    (err as Error).name === 'AccessDeniedException' ||
-    (err as Error).message.includes('getaddrinfo ENOTFOUND')) {
-      return false;
-    }
-  }
-  return true;
+  const resources = await listAWSResourceTypes(region, 'AWS::EMRServerless::');
+  return resources.length > 0;
 };

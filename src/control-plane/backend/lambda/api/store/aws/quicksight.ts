@@ -41,6 +41,7 @@ import {
   DescribeDashboardDefinitionCommand,
   DeleteDataSetCommand,
 } from '@aws-sdk/client-quicksight';
+import { listAWSResourceTypes } from './cloudformation';
 import { awsAccountId, awsRegion, QUICKSIGHT_CONTROL_PLANE_REGION, QUICKSIGHT_EMBED_NO_REPLY_EMAIL, QuickSightEmbedRoleArn } from '../../common/constants';
 import { QUICKSIGHT_ANALYSIS_INFIX, QUICKSIGHT_DASHBOARD_INFIX, QUICKSIGHT_DATASET_INFIX } from '../../common/constants-ln';
 import { logger } from '../../common/powertools';
@@ -195,27 +196,8 @@ export const quickSightIsSubscribed = async (): Promise<boolean> => {
 };
 
 export const quickSightPing = async (region: string): Promise<boolean> => {
-  try {
-    if (region.startsWith('cn')) {
-      return false;
-    }
-    const quickSightClient = sdkClient.QuickSightClient({
-      maxAttempts: 1,
-      region: region,
-    });
-    const command: DescribeAccountSubscriptionCommand = new DescribeAccountSubscriptionCommand({
-      AwsAccountId: awsAccountId,
-    });
-    await quickSightClient.send(command);
-  } catch (err) {
-    if ((err as Error).name === 'TimeoutError' ||
-    (err as Error).message.includes('getaddrinfo ENOTFOUND') ||
-    (err as Error).name === 'UnrecognizedClientException' ||
-    (err as Error).name === 'InternalFailure') {
-      return false;
-    }
-  }
-  return true;
+  const resources = await listAWSResourceTypes(region, 'AWS::QuickSight::');
+  return resources.length > 0;
 };
 
 export const describeAccountSubscription = async (): Promise<DescribeAccountSubscriptionCommandOutput> => {

@@ -23,9 +23,9 @@ import {
   GetWorkgroupCommand,
   Workgroup,
   GetNamespaceCommand,
-  ListWorkgroupsCommand,
   paginateListWorkgroups,
 } from '@aws-sdk/client-redshift-serverless';
+import { listAWSResourceTypes } from './cloudformation';
 import { aws_sdk_client_common_config } from '../../common/sdk-client-config-ln';
 import { RedshiftCluster, RedshiftInfo, RedshiftWorkgroup } from '../../common/types';
 
@@ -184,22 +184,6 @@ export const getSubnetsByClusterSubnetGroup = async (region: string, clusterSubn
 };
 
 export const redshiftServerlessPing = async (region: string): Promise<boolean> => {
-  try {
-    if (region === 'cn-northwest-1') {
-      return false;
-    }
-    const redshiftServerlessClient = new RedshiftServerlessClient({
-      ...aws_sdk_client_common_config,
-      maxAttempts: 1,
-      region,
-    });
-    const params: ListWorkgroupsCommand = new ListWorkgroupsCommand({});
-    await redshiftServerlessClient.send(params);
-  } catch (err) {
-    if ((err as Error).name === 'TimeoutError' ||
-    (err as Error).message.includes('getaddrinfo ENOTFOUND')) {
-      return false;
-    }
-  }
-  return true;
+  const resources = await listAWSResourceTypes(region, 'AWS::RedshiftServerless::');
+  return resources.length > 0;
 };

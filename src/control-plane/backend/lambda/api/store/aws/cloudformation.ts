@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { Category, CloudFormationClient, DescribeStacksCommand, ListTypesCommand, StackStatus, TypeSummary, paginateListTypes } from '@aws-sdk/client-cloudformation';
+import { Category, CloudFormationClient, DescribeStacksCommand, StackStatus, TypeSummary, paginateListTypes } from '@aws-sdk/client-cloudformation';
 import { aws_sdk_client_common_config } from '../../common/sdk-client-config-ln';
 import { PipelineStackType, PipelineStatusDetail } from '../../common/types';
 import { getVersionFromTags } from '../../common/utils';

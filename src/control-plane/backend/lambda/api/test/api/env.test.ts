@@ -12,8 +12,7 @@
  */
 
 import { ACMClient, CertificateStatus, KeyAlgorithm, ListCertificatesCommand } from '@aws-sdk/client-acm';
-import { AthenaClient, ListWorkGroupsCommand } from '@aws-sdk/client-athena';
-import { CloudFormationClient, DescribeStacksCommand, StackStatus } from '@aws-sdk/client-cloudformation';
+import { CloudFormationClient, DescribeStacksCommand, ListTypesCommand, ListTypesCommandInput, StackStatus } from '@aws-sdk/client-cloudformation';
 import {
   CloudWatchClient,
   DescribeAlarmsCommand,
@@ -27,10 +26,8 @@ import {
   DescribeRouteTablesCommand,
   DescribeSecurityGroupsCommand,
 } from '@aws-sdk/client-ec2';
-import { EMRServerlessClient, ListApplicationsCommand } from '@aws-sdk/client-emr-serverless';
 import { IAMClient, ListRolesCommand } from '@aws-sdk/client-iam';
 import { ClientBroker, KafkaClient, ListClustersV2Command } from '@aws-sdk/client-kafka';
-import { KafkaConnectClient, ListConnectorsCommand } from '@aws-sdk/client-kafkaconnect';
 import {
   QuickSightClient,
   DescribeAccountSubscriptionCommand,
@@ -58,12 +55,9 @@ const redshiftClient = mockClient(RedshiftClient);
 const redshiftServerlessClient = mockClient(RedshiftServerlessClient);
 const quickSightClient = mockClient(QuickSightClient);
 const route53Client = mockClient(Route53Client);
-const athenaClient = mockClient(AthenaClient);
 const iamClient = mockClient(IAMClient);
 const acmClient = mockClient(ACMClient);
 const cloudWatchClient = mockClient(CloudWatchClient);
-const emrServerlessClient = mockClient(EMRServerlessClient);
-const kafkaConnectClient = mockClient(KafkaConnectClient);
 const cloudFormationMock = mockClient(CloudFormationClient);
 
 describe('Account Env test', () => {
@@ -75,12 +69,9 @@ describe('Account Env test', () => {
     redshiftClient.reset();
     quickSightClient.reset();
     route53Client.reset();
-    athenaClient.reset();
     iamClient.reset();
     acmClient.reset();
     cloudWatchClient.reset();
-    emrServerlessClient.reset();
-    kafkaConnectClient.reset();
   });
   it('Get regions', async () => {
     ec2ClientMock.on(DescribeRegionsCommand).resolves({
@@ -1280,90 +1271,121 @@ describe('Account Env test', () => {
     });
   });
   it('Ping Services', async () => {
-    emrServerlessClient.on(ListApplicationsCommand).resolves({
-      applications: [],
-    });
-    kafkaClient.on(ListClustersV2Command).resolves({
-      ClusterInfoList: [],
-    });
-    kafkaConnectClient.on(ListConnectorsCommand).resolves({
-      connectors: [],
-    });
-    redshiftServerlessClient.on(ListWorkgroupsCommand).resolves({
-      workgroups: [],
-    });
-    athenaClient.on(ListWorkGroupsCommand).resolves({
-      WorkGroups: [],
-    });
-    quickSightClient.on(DescribeAccountSubscriptionCommand).resolves({
-      AccountInfo: {
-        AccountName: '',
+    const input: ListTypesCommandInput = {
+      Filters: {
+        Category: 'AWS_TYPES',
       },
+      Visibility: 'PUBLIC',
+    };
+    cloudFormationMock.on(ListTypesCommand, {
+      ...input,
+      Filters: {
+        ...input.Filters,
+        TypeNamePrefix: 'AWS::GlobalAccelerator::',
+      },
+    }).resolves({
+      TypeSummaries: [
+        {
+          Type: 'RESOURCE',
+          TypeName: 'AWS::GlobalAccelerator::XXX',
+        },
+      ],
+    });
+
+    cloudFormationMock.on(ListTypesCommand, {
+      ...input,
+      Filters: {
+        ...input.Filters,
+        TypeNamePrefix: 'AWS::EMRServerless::',
+      },
+    }).resolves({
+      TypeSummaries: [
+        {
+          Type: 'RESOURCE',
+          TypeName: 'AWS::EMRServerless::XXX',
+        },
+      ],
+    });
+
+    cloudFormationMock.on(ListTypesCommand, {
+      ...input,
+      Filters: {
+        ...input.Filters,
+        TypeNamePrefix: 'AWS::MSK::',
+      },
+    }).resolves({
+      TypeSummaries: [
+        {
+          Type: 'RESOURCE',
+          TypeName: 'AWS::MSK::XXX',
+        },
+      ],
+    });
+
+    cloudFormationMock.on(ListTypesCommand, {
+      ...input,
+      Filters: {
+        ...input.Filters,
+        TypeNamePrefix: 'AWS::QuickSight::',
+      },
+    }).resolves({
+      TypeSummaries: [
+        {
+          Type: 'RESOURCE',
+          TypeName: 'AWS::QuickSight::XXX',
+        },
+      ],
+    });
+
+    cloudFormationMock.on(ListTypesCommand, {
+      ...input,
+      Filters: {
+        ...input.Filters,
+        TypeNamePrefix: 'AWS::RedshiftServerless::',
+      },
+    }).resolves({
+      TypeSummaries: [
+        {
+          Type: 'RESOURCE',
+          TypeName: 'AWS::RedshiftServerless::XXX',
+        },
+      ],
+    });
+
+    cloudFormationMock.on(ListTypesCommand, {
+      ...input,
+      Filters: {
+        ...input.Filters,
+        TypeNamePrefix: 'AWS::Athena::',
+      },
+    }).resolves({
+      TypeSummaries: [
+        {
+          Type: 'RESOURCE',
+          TypeName: 'AWS::Athena::XXX',
+        },
+      ],
+    });
+
+    cloudFormationMock.on(ListTypesCommand, {
+      ...input,
+      Filters: {
+        ...input.Filters,
+        TypeNamePrefix: 'AWS::KafkaConnect::',
+      },
+    }).resolves({
+      TypeSummaries: [],
     });
     const res = await request(app).get(
       '/api/env/ping?region=cn-north-1&services=emr-serverless,msk,quicksight,redshift-serverless,global-accelerator,athena');
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(cloudFormationMock).toHaveReceivedCommandTimes(ListTypesCommand, 7);
     expect(res.statusCode).toBe(200);
-    expect(res.body.data).toContainEqual({ service: 'global-accelerator', available: false });
-    expect(res.body.data).toContainEqual({ service: 'quicksight', available: false });
+    expect(res.body.data).toContainEqual({ service: 'global-accelerator', available: true });
+    expect(res.body.data).toContainEqual({ service: 'quicksight', available: true });
     expect(res.body.data).toContainEqual({ service: 'emr-serverless', available: true });
     expect(res.body.data).toContainEqual({ service: 'redshift-serverless', available: true });
     expect(res.body.data).toContainEqual({ service: 'athena', available: true });
-    expect(res.body.data).toContainEqual({ service: 'msk', available: true });
-  });
-  it('Ping Services in cn-northwest-1', async () => {
-    emrServerlessClient.on(ListApplicationsCommand).resolves({
-      applications: [],
-    });
-    kafkaClient.on(ListClustersV2Command).resolves({
-      ClusterInfoList: [],
-    });
-    kafkaConnectClient.on(ListConnectorsCommand).resolves({
-      connectors: [],
-    });
-    redshiftServerlessClient.on(ListWorkgroupsCommand).resolves({
-      workgroups: [],
-    });
-    athenaClient.on(ListWorkGroupsCommand).resolves({
-      WorkGroups: [],
-    });
-    quickSightClient.on(DescribeAccountSubscriptionCommand).resolves({
-      AccountInfo: {
-        AccountName: '',
-      },
-    });
-    const res = await request(app).get(
-      '/api/env/ping?region=cn-northwest-1&services=emr-serverless,msk,quicksight,redshift-serverless,global-accelerator,athena');
-    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
-    expect(res.statusCode).toBe(200);
-    expect(res.body.data).toContainEqual({ service: 'global-accelerator', available: false });
-    expect(res.body.data).toContainEqual({ service: 'quicksight', available: false });
-    expect(res.body.data).toContainEqual({ service: 'emr-serverless', available: true });
-    expect(res.body.data).toContainEqual({ service: 'redshift-serverless', available: false });
-    expect(res.body.data).toContainEqual({ service: 'athena', available: true });
-    expect(res.body.data).toContainEqual({ service: 'msk', available: true });
-  });
-  it('Ping Services with ENOTFOUND', async () => {
-    const mockError = new Error('Mock ENOTFOUND error');
-    mockError.message = 'Error: getaddrinfo ENOTFOUND xxx.sa-east-1.amazonaws.com';
-    emrServerlessClient.on(ListApplicationsCommand).rejects(mockError);
-    kafkaClient.on(ListClustersV2Command).rejects(mockError);
-    kafkaConnectClient.on(ListConnectorsCommand).rejects(mockError);
-    redshiftServerlessClient.on(ListWorkgroupsCommand).rejects(mockError);
-    athenaClient.on(ListWorkGroupsCommand).rejects(mockError);
-
-    const mockUnrecognizedClientException = new Error('Mock UnrecognizedClientException error');
-    mockUnrecognizedClientException.name = 'UnrecognizedClientException';
-    quickSightClient.on(DescribeAccountSubscriptionCommand).rejects(mockUnrecognizedClientException);
-    let res = await request(app).get(
-      '/api/env/ping?region=cn-north-1&services=emr-serverless,msk,quicksight,redshift-serverless,global-accelerator,athena');
-    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
-    expect(res.statusCode).toBe(200);
-    expect(res.body.data).toContainEqual({ service: 'global-accelerator', available: false });
-    expect(res.body.data).toContainEqual({ service: 'quicksight', available: false });
-    expect(res.body.data).toContainEqual({ service: 'emr-serverless', available: false });
-    expect(res.body.data).toContainEqual({ service: 'redshift-serverless', available: false });
-    expect(res.body.data).toContainEqual({ service: 'athena', available: false });
     expect(res.body.data).toContainEqual({ service: 'msk', available: false });
   });
   it('Get Host Zones', async () => {

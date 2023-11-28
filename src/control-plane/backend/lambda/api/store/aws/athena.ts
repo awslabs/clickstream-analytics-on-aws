@@ -11,22 +11,9 @@
  *  and limitations under the License.
  */
 
-import { AthenaClient, ListWorkGroupsCommand } from '@aws-sdk/client-athena';
-import { aws_sdk_client_common_config } from '../../common/sdk-client-config-ln';
+import { listAWSResourceTypes } from './cloudformation';
 
 export const athenaPing = async (region: string): Promise<boolean> => {
-  try {
-    const athenaClient = new AthenaClient({
-      ...aws_sdk_client_common_config,
-      region,
-    });
-    const params: ListWorkGroupsCommand = new ListWorkGroupsCommand({});
-    await athenaClient.send(params);
-  } catch (err) {
-    if ((err as Error).name === 'TimeoutError' ||
-    (err as Error).message.includes('getaddrinfo ENOTFOUND')) {
-      return false;
-    }
-  }
-  return true;
+  const resources = await listAWSResourceTypes(region, 'AWS::Athena::');
+  return resources.length > 0;
 };
