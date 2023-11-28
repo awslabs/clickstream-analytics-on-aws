@@ -16,11 +16,11 @@ Crash report are created based on the following QuickSight datasets:
 ??? example "SQL Commands"
     === "Redshift"
         ```sql title="clickstream_event_view_v1.sql"
-        --8<-- "src/analytics/private/sqls/redshift/dashboard/clickstream-events-view_v1.sql:3"
+        --8<-- "src/analytics/private/sqls/redshift/dashboard/clickstream_event_view_v1.sql:3"
         ```
     === "Athena"
-        ```sql title="clickstream-ods-events-query.sql"
-        --8<-- "src/analytics/private/sqls/athena/clickstream-ods-events-query.sql"
+        ```sql title="clickstream-event-query.sql"
+        --8<-- "src/analytics/private/sqls/athena/clickstream-event-query.sql"
         ```
 
 ## 维度和度量
