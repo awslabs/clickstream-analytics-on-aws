@@ -65,6 +65,7 @@ nav:
       - Device report: dashboard/device.md
       - Path explorer: dashboard/path.md
       - Custom report: dashboard/custom-analysis.md
+    - Identity Management: identity-mgmt.md
     - Additional resources:
       - Upload Certificate: resources/upload-ssl-certificate.md
     - Permission management:

@@ -68,6 +68,7 @@ nav:
       - 设备报表: dashboard/device.md
       - 路径探索报表: dashboard/path.md
       - 自定义报表: dashboard/custom-analysis.md
+    - 身份管理: identity-mgmt.md
     - 附加资源:
       - 上传证书: resources/upload-ssl-certificate.md
     - 权限管理:
