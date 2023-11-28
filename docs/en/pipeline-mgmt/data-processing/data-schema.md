@@ -2,47 +2,82 @@
 This article explains the data schema and format in {{solution_name}}. This solution uses an **event-based** data model to store and analyze clickstream data, every activity (e.g., click, view) on the clients is modeled as an event with multiple dimensions. Dimensions are common for all events, but customers have the flexibility to use JSON object to store values into some dimensions (e.g., event parameters, user attributes), which will cater for the need of collecting information that are specific for their business. Those JSON will be stored in special data types which allow customers to unnest the values in the analytics engines.
 
 ## Database and table
-For each project, the solution creates a database with name of `<project-id>` in Redshift and Athena. In Redshift, each App will have a schema with name of `app_id`, within which event data are stored in `ods_event` tables, user-related attributes are stored in `dim_user` table. In Athena, data from all apps in the project will be stored in `ods_event` table with partitions of app_id, year, month, and day.
+For each project, the solution creates a database with name of `<project-id>` in Redshift and Athena. Each App will have a schema with name of `app_id`, within which event-related data are stored in `event` and `event_parameter` tables, user-related data are stored in `user` table, item-related data are stored in `item` table. In Athena, all tables are added partitions of app_id, year, month, and day. Below diagram illustrates the table relationship.
+
+![table-relationship](../../images/pipe-mgmt/table_relationship.png)
 
 
 ## Columns
-Each column in the ods_event table represents an event-specific parameter. Note that some parameters are nested within a Super field in Redshift or Array in Athena, and those fields (e.g., items and event_params) contains parameters that are repeatable. Table columns are described below.
+Each column in the tables represents a specific parameter for a event, user, or item. Note that some parameters are nested within a Super field in Redshift or Array in Athena, and those fields (e.g., items, user_properties, and item properties) contains parameters that are repeatable. Table columns are described below.
 
-### Event fields
+### Event table fields
 |**Field Name**| **Data Type - Redshift** | **Data Type - Athena** | **Description** |
 |--------------|------------------------|------------------------|-------------------|
 |event_id| VARCHAR | STRING | Unique ID for the event.|
 |event_date| DATE | DATE | The date when the event was logged (YYYYMMDD format in UTC).|
-|event_timestame| BIGINT | BIGINT | The time (in microseconds, UTC) when the event was logged on the client.|
+|event_timestamp| BIGINT | BIGINT | The time (in microseconds, UTC) when the event was logged on the client.|
 |event_previous_timestamp| BIGINT | BIGINT | The time (in microseconds, UTC) when the event was previously logged on the client.|
 |event_name| VARCHAR | STRING | The name of the event.|
 |event_value_in_usd| BIGINT | BIGINT | The currency-converted value (in USD) of the event's "value" parameter.|
 |event_bundle_sequence_id| BIGINT | BIGINT | The sequential ID of the bundle in which these events were uploaded.|
 |ingest_timestamp| BIGINT | BIGINT | Timestamp offset between collection time and upload time in micros.|
+| device.mobile_brand_name             | VARCHAR    |     STRING     | The device brand name.                                                                                   |
+| device.mobile_model_name             | VARCHAR    |      STRING       | The device model name.                                                                                   |
+| device.manufacturer                  | VARCHAR    |      STRING    | The device manufacturer name.                                                                               |
+| device.carrier                       | VARCHAR    |     STRING       | The device network provider name.                              |
+| device.network_type                  | VARCHAR    |     STRING      | The network_type of the device, e.g., WIFI, 5G                                                                     |
+| device.operating_system              | VARCHAR    |    STRING        | The operating system of the device.                                                                                          |
+| device.operating_system_version      | VARCHAR    |     STRING         | The OS version.                                                                                          |
+| device.vendor_id                     | VARCHAR    |     STRING       | IDFV (present only if IDFA is not collected).                                                            |
+| device.advertising_id                | VARCHAR    |      STRING        | Advertising ID/IDFA.                                                                                     |
+| device.system_language               | VARCHAR    |    STRING        | The OS language.                                                                                         |
+| device.time_zone_offset_seconds      | BIGINT   |       BIGINT     | The offset from GMT in seconds.                                                                          |
+| device.ua_browser                    | VARCHAR    |     STRING       | The browser in which the user viewed content, derived from User Agent string                                                            |
+| device.ua_browser_version      | VARCHAR    |       STRING      | The version of the browser in which the user viewed content, derive from User Agent                                            |
+| device.ua_device            | VARCHAR    |            STRING    | The device in which user viewed content, derive from User Agent.                                                           |
+| device.ua_device_category             | VARCHAR    |    STRING               | The device category in which user viewed content, derive from User Agent.                                                           |
+| device.screen_width             | VARCHAR    |        STRING           | The screen width of the device.                                                           |
+| device.screen_height             | VARCHAR    |       STRING            | The screen height of the device.   
+| geo.continent       |     VARCHAR      | STRING               | The continent from which events were reported, based on IP address.       |
+| geo.sub_continent   |     VARCHAR         | STRING               | The subcontinent from which events were reported, based on IP address.    |
+| geo.country         |      VARCHAR      | STRING               | The country from which events were reported, based on IP address.         |
+| geo.region          |      VARCHAR        | STRING               | The region from which events were reported, based on IP address.          |
+| geo.metro           |      VARCHAR      | STRING               | The metro from which events were reported, based on IP address.           |
+| geo.city            |      VARCHAR       | STRING               | The city from which events were reported, based on IP address.            |
+| geo.locale          |      VARCHAR       | STRING               | The locale information obtained from device.            | 
+| traffic_source.name      | VARCHAR               |   STRING   | Name of the marketing campaign that acquired the user when the events were reported.  |
+| traffic_source.medium    | VARCHAR               |  STRING  | Name of the medium (paid search, organic search, email, etc.) that  acquired the user when the events were reported.  |
+| traffic_source.source    | VARCHAR               |   STRING   | Name of the network source that acquired the user when the event were reported.  | 
+| app_info.id                  | VARCHAR               | STRING  | The package name or bundle ID of the app.                                    |
+| app_info.app_id     | VARCHAR               | STRING    | The App ID (created by this solution) associated with the app.                                 |
+| app_info.install_source      | VARCHAR               | STRING    | The store that installed the app.                                            |
+| app_info.version             | VARCHAR               | STRING    | The app's versionName (Android) or short bundle version.                     |
+| platform                 | VARCHAR               | STRING  | The data stream platform (Web, IOS or Android) from which the event originated.                                    |
+| project_id     | VARCHAR               | STRING    | The project id associated with the app.                                 |
+| items      | SUPER               | ARRAY    | Key-value records contain information about items associated with the event                                            |
+| user_id                     | VARCHAR    | STRING| The unique ID assigned to a user through `setUserId()` API.                                            |
+| user_pseudo_id              | VARCHAR    | STRING| The pseudonymous id generated by SDK for the user.                     |
 
-### Event parameter fields
+### Event_parameter table fields
 |**Field Name**| **Data Type - Redshift** | **Data Type - Athena** | **Description** |
 |---------------------------|--------------------|------------------------|---------------------------------------------------------|
-| event_params          | SUPER             |     ARRAY         | Event parameters.                        |
-| event_params.key          | VARCHAR             |     STRING         | The name of the event parameter.                        |
-| event_params.value        | SUPER             |   ARRAY                     | A record containing the event parameter's value.         |
-| event_params.value.string_value  |     VARCHAR          | STRING          | If the event parameter is represented by a string, such as a URL or campaign name, it is populated in this field. |
-| event_params.value.int_value	 |         BIGINT           | INTEGER                | If the event parameter is represented by an integer, it is populated in this field. |
-| event_params.value.double_value  |   DOUBLE PRECISION  | FLOAT       | If the event parameter is represented by a double value, it is populated in this field. |
-| event_params.value.float_value  |    DOUBLE PRECISION  | FLOAT          | If the event parameter is represented by a floating point value, it is populated in this field. This field is not currently in use. |
+| event_timestamp          | BIGINT             |     STRING         | The time (in microseconds, UTC) when the event was logged on the client.                        |
+| event_id          | VARCHAR             |     BIGINT         | Unique ID for the event.                        |
+|event_name| VARCHAR | STRING | The name of the event.|
+| event_params_key          | VARCHAR             |     STRING         | The name of the event parameter.                        |
+| event_params_string_value  |     VARCHAR          | STRING          | If the event parameter is represented by a string, such as a URL or campaign name, it is populated in this field. |
+| event_params_int_value	 |         BIGINT           | INTEGER                | If the event parameter is represented by an integer, it is populated in this field. |
+| event_params_double_value  |   DOUBLE PRECISION  | FLOAT       | If the event parameter is represented by a double value, it is populated in this field. |
+| event_params_float_value  |    DOUBLE PRECISION  | FLOAT          | If the event parameter is represented by a floating point value, it is populated in this field. This field is not currently in use. |
 
 
-### User fields
+### User table fields
 | Field name                  | Data type - Redshift | Data type - Athena | Description                                                                  |
 |-----------------------------|-----------|--------|----------------------------------------------------------------------|
+| event_timestamp          | BIGINT             |     STRING         | The timestamp of when the user attributes was collected.                        |
 | user_id                     | VARCHAR    | STRING| The unique ID assigned to a user through `setUserId()` API.                                            |
 | user_pseudo_id              | VARCHAR    | STRING| The pseudonymous id generated by SDK for the user.                     |
 | user_first_touch_timestamp  | BIGINT   | BIGINT| The time (in microseconds) at which the user first opened the app or visited the site. |
-
-
-### User property fields
-| Field name                          | Data type - RedShift | Data type - Athena | Description                                               |
-| ----------------------------------- | --------- | ----------------- | --------------------------------------------------------- |
 | user_properties                 | SUPER    |     ARRAY        | Properties of the user.                            |
 | user_properties.key                 | VARCHAR    |     STRING        | The name of the user property.                            |
 | user_properties.value               | SUPER     |     ARRAY         | A record for the user property value.                      |
@@ -50,12 +85,27 @@ Each column in the ods_event table represents an event-specific parameter. Note 
 | user_properties.value.int_value     | BIGINT   |          BIGINT         | The integer value of the user property.                   |
 | user_properties.value.double_value  | DOUBLE PRECISION     |           FLOAT        | The double value of the user property.                    |
 | user_properties.value.float_value   | DOUBLE PRECISION     |         FLOAT          | This field is currently unused.                           |
-| user_properties.value.set_timestamp_micros | BIGINT |         BIGINT          | The time (in microseconds) at which the user property was last set. |
 | user_ltv  | SUPER    | ARRAY| The Lifetime Value of the user. |
-| user_ltv.revenue  | DOUBLE PRECISION    | FLOAT| The Lifetime Value (revenue) of the user. |
-| user_ltv.currency  | DOUBLE PRECISION    | FLOAT| The Lifetime Value (currency) of the user. |
+| _first_visit_date                 | Date    |     Date        | Date of the user's first visit                            |
+| _first_referer                | VARCHAR    |     STRING        | The first referer detected for the user                          |
+| _first_traffic_source_type               | VARCHAR    |     STRING        | The the network source that acquired the user that was first detected for the user, e.g., Google, Baidu                         |
+| _first_traffic_source_medium              | VARCHAR    |     STRING        | The medium of the network source that acquired the user that was first detected for the user, e.g., paid search, organic search, email, etc.                          |
+| _first_traffic_source_name              | VARCHAR    |     STRING        | The name of the marketing campaign that acquired the user that was first detected for the user.                          |
+| device_id_list             | SUPER     |     ARRAY         | A record of all device_id associated with the user_pseudo_id                     |
+| _channel             | VARCHAR     |     STRING         | The install channel for the user, e.g., Google Play                     |
 
-### Device fields
+### Item table fields
+| Field name                          | Data type - RedShift | Data type - Athena | Description                                               |
+| ----------------------------------- | --------- | ----------------- | --------------------------------------------------------- |
+| event_timestamp          | BIGINT             |     STRING         | The timestamp of when the item attributes was collected.                        |
+| id               | VARCHAR    |     STRING        | The id for the item                           |
+| properties               | SUPER     |     ARRAY         | A record for the item property value.                      |
+| properties.value.string_value  | VARCHAR    |       STRING            | The string value of the item property.                    |
+| properties.value.int_value     | BIGINT   |          BIGINT         | The integer value of the item property.                   |
+| properties.value.double_value  | DOUBLE PRECISION     |           FLOAT        | The double value of the item property.                    |
+| properties.value.float_value | DOUBLE PRECISION  |         FLOAT          | The float_value of the item property. |
+
+<!-- ### Device fields
 | Field name                           | Data type | Data type - Athena | Description                                                                                              |
 | ------------------------------------ | --------- | ----------------- | -------------------------------------------------------------------------------------------------------- |
 | device.mobile_brand_name             | VARCHAR    |     STRING     | The device brand name.                                                                                   |
@@ -104,12 +154,12 @@ Each column in the ods_event table represents an event-specific parameter. Note 
 | app_info.version             | VARCHAR               | STRING    | The app's versionName (Android) or short bundle version.                     |
 
 
-### Other fields
-| Field name                   | Data type - Redshift | Data type - Athena | Description                                                                  |
+### Other fields -->
+<!-- | Field name                   | Data type - Redshift | Data type - Athena | Description                                                                  |
 | ---------------------------- | -------------------- | --------- | ---------------------------------------------------------------------------- |
 | platform                 | VARCHAR               | STRING  | The data stream platform (Web, IOS or Android) from which the event originated.                                    |
 | project_id     | VARCHAR               | STRING    | The project id associated with the app.                                 |
 | items      | SUPER               | ARRAY    | Key-value records contain information about items associated with the event                                            |
 | ecommerce             | SUPER               | ARRAY    | Key-value records contain information about ecommerce-specify attributes associated with the events                      |
 | event_dimensions             | SUPER               | ARRAY    | Key-value records contain information about additional dimensions associated with the events                      |
-| privacy_info             | SUPER               | ARRAY    | Key-value records contain information about user privacy setting associated with the events                      |
+| privacy_info             | SUPER               | ARRAY    | Key-value records contain information about user privacy setting associated with the events                      | -->

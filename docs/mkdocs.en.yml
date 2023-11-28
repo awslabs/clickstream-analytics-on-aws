@@ -56,15 +56,28 @@ nav:
       - HTTP API: sdk-manual/http-api.md
       - User identifier: sdk-manual/user-identifier.md
       - Migrate from third-party SDKs: sdk-manual/migrate-from-third-party-sdks.md
-    - Dashboards:
-      - Overview: dashboard/index.md
-      - Acquisition report: dashboard/acquisition.md
-      - Engagement report: dashboard/engagement.md
-      - Activity report: dashboard/activity.md
-      - Retention report: dashboard/retention.md
-      - Device report: dashboard/device.md
-      - Path explorer: dashboard/path.md
-      - Custom report: dashboard/custom-analysis.md
+    - Analytics Studio:
+      - Overview: analytics/index.md
+      - Dashboard:
+        - Overview: analytics/dashboard/index.md
+        - Acquisition report: analytics/dashboard/acquisition.md
+        - Engagement report: analytics/dashboard/engagement.md
+        - Activity report: analytics/dashboard/activity.md
+        - Retention report: analytics/dashboard/retention.md
+        - Device report: analytics/dashboard/device.md
+        - User report: analytics/dashboard/user.md
+        - Crash report: analytics/dashboard/crash.md
+        - Custom report: analytics/dashboard/custom-analysis.md
+      - Explore:
+        - Overview: analytics/explore/index.md
+        - Event: analytics/explore/event.md
+        - Funnel: analytics/explore/funnel.md
+        - Path: analytics/explore/path.md
+        - Retention: analytics/explore/retention.md
+      - Analyzes:
+        - Overview: analytics/analyzes/index.md        
+      - Data management:
+        - Overview: analytics/data-mgmt/index.md
     - Identity Management: identity-mgmt.md
     - Upgrade the solution: upgrade.md
     - Additional resources:
