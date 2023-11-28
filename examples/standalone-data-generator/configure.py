@@ -14,7 +14,7 @@ import json
 import enums
 
 # application type, you can switch to `enums.Application.Shopping` to send shopping events.
-APP_TYPE = enums.Application.NotePad
+APP_TYPE = enums.Application.Shopping
 
 # for history event consts
 DURATION_OF_DAYS = 30
