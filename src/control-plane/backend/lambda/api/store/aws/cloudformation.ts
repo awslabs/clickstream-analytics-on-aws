@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { CloudFormationClient, DescribeStacksCommand, StackStatus } from '@aws-sdk/client-cloudformation';
+import { Category, CloudFormationClient, DescribeStacksCommand, ListTypesCommand, StackStatus, TypeSummary, paginateListTypes } from '@aws-sdk/client-cloudformation';
 import { aws_sdk_client_common_config } from '../../common/sdk-client-config-ln';
 import { PipelineStackType, PipelineStatusDetail } from '../../common/types';
 import { getVersionFromTags } from '../../common/utils';
@@ -50,6 +50,28 @@ export const getStacksDetailsByNames = async (region: string, stackNames: string
       });
     }
     return stackDetails;
+  } catch (error) {
+    return [];
+  }
+};
+
+export const listAWSResourceTypes = async (region: string, typeNamePrefix: string) => {
+  try {
+    const cloudFormationClient = new CloudFormationClient({
+      ...aws_sdk_client_common_config,
+      region,
+    });
+    const records: TypeSummary[] = [];
+    for await (const page of paginateListTypes({ client: cloudFormationClient }, {
+      Visibility: 'PUBLIC',
+      Filters: {
+        TypeNamePrefix: typeNamePrefix,
+        Category: Category.AWS_TYPES,
+      },
+    })) {
+      records.push(...page.TypeSummaries as TypeSummary[]);
+    }
+    return records;
   } catch (error) {
     return [];
   }
