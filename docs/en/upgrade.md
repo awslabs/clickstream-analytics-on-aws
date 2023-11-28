@@ -83,6 +83,12 @@ When you upgraded the pipeline from v1.0.x, you need to perform the below action
 
     ```sql 
     -- please replace `<app-id>` with your actual app id
+    DROP TABLE "<app-id>".dim_users CASCADE;
+    DROP TABLE "<app-id>".ods_events CASCADE;
+
+    DROP PROCEDURE  "<app-id>".sp_clear_expired_events(retention_range_days integer);
+    DROP PROCEDURE  "<app-id>".sp_upsert_users();
+    DROP PROCEDURE  "<app-id>".sp_migrate_ods_events_1_0_to_1_1();
     ```
 
 [quicksight-assets-export]: https://docs.aws.amazon.com/quicksight/latest/developerguide/assetbundle-export.html
