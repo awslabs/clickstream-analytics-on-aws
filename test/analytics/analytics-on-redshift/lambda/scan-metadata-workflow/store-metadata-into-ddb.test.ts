@@ -528,7 +528,7 @@ describe('Lambda - store the metadata into DDB from Redshift', () => {
       ClusterIdentifier: undefined,
       Database: 'project1',
       DbUser: undefined,
-      Sql: 'SELECT distinct id, month FROM app1.event_properties_metadata;',
+      Sql: 'SELECT distinct id, month FROM app1.event_parameter_metadata;',
       WithEvent: true,
       WorkgroupName: 'demo',
     });
@@ -536,7 +536,7 @@ describe('Lambda - store the metadata into DDB from Redshift', () => {
       ClusterIdentifier: undefined,
       Database: 'project1',
       DbUser: undefined,
-      Sql: 'SELECT id, month, prefix, project_id, app_id, day_number, category, event_name, property_name, value_type, value_enum, platform FROM app1.event_properties_metadata;',
+      Sql: 'SELECT id, month, prefix, project_id, app_id, day_number, category, event_name, property_name, value_type, value_enum, platform FROM app1.event_parameter_metadata;',
       WithEvent: true,
       WorkgroupName: 'demo',
     });
