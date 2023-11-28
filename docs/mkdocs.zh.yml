@@ -80,7 +80,9 @@ nav:
       - 分析:
         - 概述: analytics/analyzes/index.md        
       - 数据管理:
-        - 概述: analytics/data-mgmt/index.md       
+        - 概述: analytics/data-mgmt/index.md
+    - 身份管理: identity-mgmt.md
+    - 升级解决方案: upgrade.md
     - 附加资源:
       - 上传证书: resources/upload-ssl-certificate.md
     - 常见问题: faq.md

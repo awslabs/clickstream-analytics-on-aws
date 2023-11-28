@@ -77,7 +77,9 @@ nav:
       - Analyzes:
         - Overview: analytics/analyzes/index.md        
       - Data management:
-        - Overview: analytics/data-mgmt/index.md               
+        - Overview: analytics/data-mgmt/index.md
+    - Identity Management: identity-mgmt.md
+    - Upgrade the solution: upgrade.md
     - Additional resources:
       - Upload Certificate: resources/upload-ssl-certificate.md
     - FAQ: faq.md
