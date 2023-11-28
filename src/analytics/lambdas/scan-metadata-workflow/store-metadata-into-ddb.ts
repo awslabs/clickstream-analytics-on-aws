@@ -144,10 +144,10 @@ async function handleEventMetadata(appId: string, metadataItems: any[]) {
 }
 
 async function handlePropertiesMetadata(appId: string, metadataItems: any[]) {
-  const itemsMap = await getExistingItemsFromDDB(appId, 'event_properties_metadata');
+  const itemsMap = await getExistingItemsFromDDB(appId, 'event_parameter_metadata');
 
   const inputSql =
-    `SELECT id, month, prefix, project_id, app_id, day_number, category, event_name, property_name, value_type, value_enum, platform FROM ${appId}.event_properties_metadata;`;
+    `SELECT id, month, prefix, project_id, app_id, day_number, category, event_name, property_name, value_type, value_enum, platform FROM ${appId}.event_parameter_metadata;`;
 
   const response = await queryMetadata(inputSql);
 
