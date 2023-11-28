@@ -1835,8 +1835,9 @@ function _buildJoinSQL(pair: PairEventAndCondition, index: number) {
   let joinColLeft = '';
   let joinColRight = '';
   if (pair.startEvent.retentionJoinColumn && pair.backEvent.retentionJoinColumn) {
-    let prefixLeft = pair.startEvent.retentionJoinColumn.category as string;
-    let prefixRight = pair.backEvent.retentionJoinColumn.category as string;
+    let prefixLeft = pair.startEvent.retentionJoinColumn.category as string + '_';
+    let prefixRight = pair.backEvent.retentionJoinColumn.category as string + '_';
+
     if (pair.startEvent.retentionJoinColumn.category === ConditionCategory.OTHER
       || pair.startEvent.retentionJoinColumn.category === ConditionCategory.USER
       || pair.startEvent.retentionJoinColumn.category === ConditionCategory.USER_OUTER
@@ -1855,11 +1856,11 @@ function _buildJoinSQL(pair: PairEventAndCondition, index: number) {
       prefixRight = '';
     }
 
-    joinColLeft = `${prefixLeft}_${pair.startEvent.retentionJoinColumn.property},`;
-    joinColRight = `${prefixRight}_${pair.backEvent.retentionJoinColumn.property},`;
+    joinColLeft = `${prefixLeft}${pair.startEvent.retentionJoinColumn.property},`;
+    joinColRight = `${prefixRight}${pair.backEvent.retentionJoinColumn.property},`;
 
     joinSql = `
-      and first_table_${index}.${prefixLeft}_${pair.startEvent.retentionJoinColumn.property} = second_table_${index}.${prefixRight}_${pair.backEvent.retentionJoinColumn.property}
+      and first_table_${index}.${prefixLeft}${pair.startEvent.retentionJoinColumn.property} = second_table_${index}.${prefixRight}${pair.backEvent.retentionJoinColumn.property}
     `;
   }
   return { joinColLeft, joinColRight, joinSql };
