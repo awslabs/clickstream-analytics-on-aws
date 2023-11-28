@@ -12,11 +12,15 @@
  */
 
 import { Application } from '@aws-cdk/aws-servicecatalogappregistry-alpha';
-import { CfnCondition, CfnResource, Fn, Stack } from 'aws-cdk-lib';
+import { Aws, CfnCondition, CfnResource, Fn, Stack } from 'aws-cdk-lib';
 import { Parameters } from './parameters';
 
 export function getShortIdOfStack(stack: Stack): string {
   return Fn.select(0, Fn.split('-', Fn.select(2, Fn.split('/', stack.stackId))));
+}
+
+export function getShortIdOfStackWithRegion(stack: Stack): string {
+  return `${Aws.REGION}-${getShortIdOfStack(stack)}`;
 }
 
 export function associateApplicationWithStack(stack: Stack): void {
