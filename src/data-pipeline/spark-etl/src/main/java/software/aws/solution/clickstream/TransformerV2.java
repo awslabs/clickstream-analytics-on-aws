@@ -41,6 +41,7 @@ import static org.apache.spark.sql.functions.flatten;
 import static org.apache.spark.sql.functions.from_json;
 import static org.apache.spark.sql.functions.get_json_object;
 import static org.apache.spark.sql.functions.lit;
+import static org.apache.spark.sql.functions.max;
 import static org.apache.spark.sql.functions.min_by;
 import static org.apache.spark.sql.functions.regexp_extract;
 import static org.apache.spark.sql.functions.struct;
@@ -58,6 +59,7 @@ import static software.aws.solution.clickstream.DatasetUtil.DATA_SCHEMA_V2_FILE_
 import static software.aws.solution.clickstream.DatasetUtil.DEVICE_ID;
 import static software.aws.solution.clickstream.DatasetUtil.DEVICE_ID_LIST;
 import static software.aws.solution.clickstream.DatasetUtil.EVENT_APP_END;
+import static software.aws.solution.clickstream.DatasetUtil.EVENT_APP_START;
 import static software.aws.solution.clickstream.DatasetUtil.EVENT_DATE;
 import static software.aws.solution.clickstream.DatasetUtil.EVENT_FIRST_OPEN;
 import static software.aws.solution.clickstream.DatasetUtil.EVENT_FIRST_VISIT;
@@ -480,28 +482,45 @@ public final class TransformerV2 {
                                 EVENT_PROFILE_SET,
                                 EVENT_FIRST_OPEN,
                                 EVENT_FIRST_VISIT,
-                                EVENT_APP_END)
+                                EVENT_APP_END,
+                                EVENT_APP_START
+                        )
                 ));
 
-        Dataset<Row> newUserIdDataset = newUserEventDataset.select(APP_ID, USER_PSEUDO_ID).distinct();
-        long newUserCount = newUserIdDataset.count();
-        log.info("newUserIdDataset: " + newUserCount);
+        long newUserEventCount = newUserEventDataset.count();
+        log.info("newUserEventDataset: " + newUserEventCount);
 
-        Dataset<Row> profileSetDataset = newUserEventDataset
-                .filter(col(EVENT_NAME).isin("user_profile_set", "_user_profile_set", EVENT_PROFILE_SET, EVENT_FIRST_OPEN, EVENT_FIRST_VISIT));
-        log.info("profileSetDataset count: " + profileSetDataset.count());
+        Dataset<Row> newUniqueUserDataset = newUserEventDataset
+                .select(col(APP_ID), col(USER_PSEUDO_ID), col(EVENT_DATE), col(EVENT_TIMESTAMP))
+                .groupBy(col(APP_ID), col(USER_PSEUDO_ID))
+                .agg(max(EVENT_TIMESTAMP).alias(EVENT_TIMESTAMP), max(EVENT_DATE).alias(EVENT_DATE))
+                .select(col(APP_ID), col(EVENT_DATE), col(USER_PSEUDO_ID), col(EVENT_TIMESTAMP));
 
-        Dataset<Row> appEndDataset = newUserEventDataset
-                .filter(col(EVENT_NAME).equalTo(EVENT_APP_END));
+        long newUserCount = newUniqueUserDataset.count();
+        log.info("newUniqueUserDataset: " + newUserCount);
+
+        // for `DeviceId` get from event: _app_start
+        Dataset<Row> appStartDataset = newUserEventDataset.filter(col(EVENT_NAME).isin(EVENT_APP_START));
+        log.info("appStartDataset count: " + appStartDataset.count());
+        Dataset<Row> userDeviceIdDataset = getUserDeviceIdDataset(appStartDataset, newUserCount);
+
+        // for `PageReferer` and `Channel` get from events: _first_open, _first_visit
+        Dataset<Row> refererAndChannelDataset = newUserEventDataset.filter(col(EVENT_NAME).isin(EVENT_FIRST_OPEN, EVENT_FIRST_VISIT));
+        log.info("refererAndChannelDataset count: " + refererAndChannelDataset.count());
+        Dataset<Row> userReferrerDataset = getPageRefererDataset(refererAndChannelDataset, newUserCount);
+        Dataset<Row> userChannelDataset = getUserChannelDataset(refererAndChannelDataset, newUserCount);
+
+        // for `TrafficSource` get from event: _app_end
+        Dataset<Row> appEndDataset = newUserEventDataset.filter(col(EVENT_NAME).equalTo(EVENT_APP_END));
         log.info("appEndDataset count: " + appEndDataset.count());
-
-        Dataset<Row> userReferrerDataset = getPageRefererDataset(profileSetDataset, newUserCount);
-        Dataset<Row> userChannelDataset = getUserChannelDataset(profileSetDataset, newUserCount);
-
-        Dataset<Row> userDeviceIdDataset = getUserDeviceIdDataset(newUserEventDataset, newUserCount);
         Dataset<Row> userTrafficSourceDataset = getUserTrafficSourceDataset(appEndDataset, newUserCount);
 
-        Dataset<Row> newProfileSetDataset = this.userPropertiesConverter.transform(newUserEventDataset);
+        // for user_properties and others get from _profile_set
+        Dataset<Row> profileSetDataset = newUserEventDataset
+                .filter(col(EVENT_NAME).isin("user_profile_set", "_user_profile_set", EVENT_PROFILE_SET));
+        log.info("profileSetDataset count: " + profileSetDataset.count());
+
+        Dataset<Row> newProfileSetDataset = this.userPropertiesConverter.transform(profileSetDataset);
 
         Dataset<Row> newUserProfileMainDataset = newProfileSetDataset
                 .withColumn(FIRST_VISIT_DATE, to_date(timestamp_seconds(col(USER_FIRST_TOUCH_TIMESTAMP).$div(1000))))
@@ -530,20 +549,27 @@ public final class TransformerV2 {
         Objects.requireNonNull(userTrafficSourceDataset);
         Objects.requireNonNull(userChannelDataset);
 
-        Dataset<Row> fullAggUserDataset = loadFullUserDataset(newUserProfileMainDataset, pathInfo);
+        userReferrerDataset = reRepartitionUserDataset(userReferrerDataset);
+        userDeviceIdDataset = reRepartitionUserDataset(userDeviceIdDataset);
+        userTrafficSourceDataset = reRepartitionUserDataset(userTrafficSourceDataset);
+        userChannelDataset = reRepartitionUserDataset(userChannelDataset);
 
-        Column userPseudoIdCol = fullAggUserDataset.col(USER_PSEUDO_ID);
-        Column appIdCol = fullAggUserDataset.col(APP_ID);
-        Column eventTimestampCol = fullAggUserDataset.col(EVENT_TIMESTAMP);
+        Dataset<Row> userPropsDataset = loadFullUserDataset(newUserProfileMainDataset, pathInfo);
+        userPropsDataset = reRepartitionUserDataset(userPropsDataset);
 
-        Column userIdJoinForNewUserId = userPseudoIdCol.equalTo(newUserIdDataset.col(USER_PSEUDO_ID)).and(appIdCol.equalTo(newUserIdDataset.col(APP_ID)));
+        Column userPseudoIdCol = newUniqueUserDataset.col(USER_PSEUDO_ID);
+        Column appIdCol = newUniqueUserDataset.col(APP_ID);
+        Column eventTimestampCol = newUniqueUserDataset.col(EVENT_TIMESTAMP);
+        Column eventDataCol = newUniqueUserDataset.col(EVENT_DATE);
+
+        Column userIdJoinForUserPropertiesUserId = userPseudoIdCol.equalTo(userPropsDataset.col(USER_PSEUDO_ID)).and(appIdCol.equalTo(userPropsDataset.col(APP_ID)));
         Column userIdJoinForDeviceId = userPseudoIdCol.equalTo(userDeviceIdDataset.col(USER_PSEUDO_ID)).and(appIdCol.equalTo(userDeviceIdDataset.col(APP_ID)));
         Column userIdJoinForTrafficSource = userPseudoIdCol.equalTo(userTrafficSourceDataset.col(USER_PSEUDO_ID)).and(appIdCol.equalTo(userTrafficSourceDataset.col(APP_ID)));
         Column userIdJoinForPageReferrer = userPseudoIdCol.equalTo(userReferrerDataset.col(USER_PSEUDO_ID)).and(appIdCol.equalTo(userReferrerDataset.col(APP_ID)));
         Column userIdJoinForChannel = userPseudoIdCol.equalTo(userChannelDataset.col(USER_PSEUDO_ID)).and(appIdCol.equalTo(userChannelDataset.col(APP_ID)));
 
-        Dataset<Row> joinedPossibleUpdateUserDataset = fullAggUserDataset
-                .join(newUserIdDataset, userIdJoinForNewUserId, "inner")
+        Dataset<Row> joinedPossibleUpdateUserDataset = newUniqueUserDataset
+                .join(userPropsDataset, userIdJoinForUserPropertiesUserId, "left")
                 .join(userDeviceIdDataset, userIdJoinForDeviceId, "left")
                 .join(userTrafficSourceDataset, userIdJoinForTrafficSource, "left")
                 .join(userReferrerDataset, userIdJoinForPageReferrer, "left")
@@ -551,7 +577,7 @@ public final class TransformerV2 {
 
         log.info("joinedPossibleUpdateUserDataset:" + joinedPossibleUpdateUserDataset.count());
         Dataset<Row> joinedPossibleUpdateUserDatasetRt = joinedPossibleUpdateUserDataset.select(appIdCol,
-                col(EVENT_DATE),
+                eventDataCol,
                 eventTimestampCol,
                 col(USER_ID),
                 userPseudoIdCol,
@@ -567,6 +593,10 @@ public final class TransformerV2 {
                 col(CHANNEL));
 
         return Optional.of(joinedPossibleUpdateUserDatasetRt);
+    }
+
+    private static Dataset<Row> reRepartitionUserDataset(final Dataset<Row> userDataset) {
+        return userDataset.repartition(col(APP_ID), col(USER_PSEUDO_ID));
     }
 
     private Dataset<Row> convertItems(final Dataset<Row> dataset) {

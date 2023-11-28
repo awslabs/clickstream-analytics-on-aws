@@ -96,6 +96,6 @@
   "_first_traffic_source_type" : null,
   "_first_traffic_medium" : null,
   "_first_traffic_source" : null,
-  "device_id_list" : [ "deviceid-3", "deviceid-4" ],
+  "device_id_list" : null,
   "_channel" : "C001"
 }
