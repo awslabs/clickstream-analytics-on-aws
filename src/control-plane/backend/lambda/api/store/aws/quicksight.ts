@@ -41,7 +41,6 @@ import {
   DescribeDashboardDefinitionCommand,
   DeleteDataSetCommand,
 } from '@aws-sdk/client-quicksight';
-import { listAWSResourceTypes } from './cloudformation';
 import { awsAccountId, awsRegion, QUICKSIGHT_CONTROL_PLANE_REGION, QUICKSIGHT_EMBED_NO_REPLY_EMAIL, QuickSightEmbedRoleArn } from '../../common/constants';
 import { QUICKSIGHT_ANALYSIS_INFIX, QUICKSIGHT_DASHBOARD_INFIX, QUICKSIGHT_DATASET_INFIX } from '../../common/constants-ln';
 import { logger } from '../../common/powertools';
@@ -193,11 +192,6 @@ export const quickSightIsSubscribed = async (): Promise<boolean> => {
     throw err;
   }
   return true;
-};
-
-export const quickSightPing = async (region: string): Promise<boolean> => {
-  const resources = await listAWSResourceTypes(region, 'AWS::QuickSight::');
-  return resources.length > 0;
 };
 
 export const describeAccountSubscription = async (): Promise<DescribeAccountSubscriptionCommandOutput> => {

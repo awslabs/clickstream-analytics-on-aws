@@ -25,7 +25,6 @@ import {
   GetNamespaceCommand,
   paginateListWorkgroups,
 } from '@aws-sdk/client-redshift-serverless';
-import { listAWSResourceTypes } from './cloudformation';
 import { aws_sdk_client_common_config } from '../../common/sdk-client-config-ln';
 import { RedshiftCluster, RedshiftInfo, RedshiftWorkgroup } from '../../common/types';
 
@@ -181,9 +180,4 @@ export const getSubnetsByClusterSubnetGroup = async (region: string, clusterSubn
     }
   }
   return subnetIds;
-};
-
-export const redshiftServerlessPing = async (region: string): Promise<boolean> => {
-  const resources = await listAWSResourceTypes(region, 'AWS::RedshiftServerless::');
-  return resources.length > 0;
 };

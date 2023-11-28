@@ -12,7 +12,6 @@
  */
 
 import { Cluster, ClusterType, KafkaClient, paginateListClustersV2, paginateListNodes, NodeInfo, ClientAuthentication } from '@aws-sdk/client-kafka';
-import { listAWSResourceTypes } from './cloudformation';
 import { getSubnet } from './ec2';
 import { aws_sdk_client_common_config } from '../../common/sdk-client-config-ln';
 import { MSKCluster } from '../../common/types';
@@ -106,14 +105,6 @@ export const listMSKClusterBrokers = async (region: string, clusterArn: string |
   }
   return nodeEndpoints;
 
-};
-
-export const mskPing = async (region: string): Promise<boolean> => {
-  const mskResources = await listAWSResourceTypes(region, 'AWS::MSK::');
-  const kafkaConnectResources = await listAWSResourceTypes(region, 'AWS::KafkaConnect::');
-  console.log(mskResources, kafkaConnectResources);
-
-  return mskResources.length > 0 && kafkaConnectResources.length > 0;
 };
 
 function _getAuthenticationMethods(clientAuth?: ClientAuthentication) {

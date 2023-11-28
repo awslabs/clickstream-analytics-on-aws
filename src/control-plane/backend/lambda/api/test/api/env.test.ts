@@ -12,7 +12,7 @@
  */
 
 import { ACMClient, CertificateStatus, KeyAlgorithm, ListCertificatesCommand } from '@aws-sdk/client-acm';
-import { CloudFormationClient, DescribeStacksCommand, ListTypesCommand, ListTypesCommandInput, StackStatus } from '@aws-sdk/client-cloudformation';
+import { CloudFormationClient, DescribeStacksCommand, ListTypesCommand, StackStatus } from '@aws-sdk/client-cloudformation';
 import {
   CloudWatchClient,
   DescribeAlarmsCommand,
@@ -1271,115 +1271,38 @@ describe('Account Env test', () => {
     });
   });
   it('Ping Services', async () => {
-    const input: ListTypesCommandInput = {
-      Filters: {
-        Category: 'AWS_TYPES',
-      },
-      Visibility: 'PUBLIC',
-    };
-    cloudFormationMock.on(ListTypesCommand, {
-      ...input,
-      Filters: {
-        ...input.Filters,
-        TypeNamePrefix: 'AWS::GlobalAccelerator::',
-      },
-    }).resolves({
+    cloudFormationMock.on(ListTypesCommand).resolves({
       TypeSummaries: [
         {
           Type: 'RESOURCE',
           TypeName: 'AWS::GlobalAccelerator::XXX',
         },
-      ],
-    });
-
-    cloudFormationMock.on(ListTypesCommand, {
-      ...input,
-      Filters: {
-        ...input.Filters,
-        TypeNamePrefix: 'AWS::EMRServerless::',
-      },
-    }).resolves({
-      TypeSummaries: [
         {
           Type: 'RESOURCE',
           TypeName: 'AWS::EMRServerless::XXX',
         },
-      ],
-    });
-
-    cloudFormationMock.on(ListTypesCommand, {
-      ...input,
-      Filters: {
-        ...input.Filters,
-        TypeNamePrefix: 'AWS::MSK::',
-      },
-    }).resolves({
-      TypeSummaries: [
-        {
-          Type: 'RESOURCE',
-          TypeName: 'AWS::MSK::XXX',
-        },
-      ],
-    });
-
-    cloudFormationMock.on(ListTypesCommand, {
-      ...input,
-      Filters: {
-        ...input.Filters,
-        TypeNamePrefix: 'AWS::QuickSight::',
-      },
-    }).resolves({
-      TypeSummaries: [
         {
           Type: 'RESOURCE',
           TypeName: 'AWS::QuickSight::XXX',
         },
-      ],
-    });
-
-    cloudFormationMock.on(ListTypesCommand, {
-      ...input,
-      Filters: {
-        ...input.Filters,
-        TypeNamePrefix: 'AWS::RedshiftServerless::',
-      },
-    }).resolves({
-      TypeSummaries: [
+        {
+          Type: 'RESOURCE',
+          TypeName: 'AWS::MSK::XXX',
+        },
         {
           Type: 'RESOURCE',
           TypeName: 'AWS::RedshiftServerless::XXX',
         },
-      ],
-    });
-
-    cloudFormationMock.on(ListTypesCommand, {
-      ...input,
-      Filters: {
-        ...input.Filters,
-        TypeNamePrefix: 'AWS::Athena::',
-      },
-    }).resolves({
-      TypeSummaries: [
         {
           Type: 'RESOURCE',
           TypeName: 'AWS::Athena::XXX',
         },
       ],
     });
-
-    cloudFormationMock.on(ListTypesCommand, {
-      ...input,
-      Filters: {
-        ...input.Filters,
-        TypeNamePrefix: 'AWS::KafkaConnect::',
-      },
-    }).resolves({
-      TypeSummaries: [],
-    });
     const res = await request(app).get(
       '/api/env/ping?region=cn-north-1&services=emr-serverless,msk,quicksight,redshift-serverless,global-accelerator,athena');
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
-    expect(cloudFormationMock).toHaveReceivedCommandTimes(ListTypesCommand, 7);
+    expect(cloudFormationMock).toHaveReceivedCommandTimes(ListTypesCommand, 1);
     expect(res.statusCode).toBe(200);
     expect(res.body.data).toContainEqual({ service: 'global-accelerator', available: true });
     expect(res.body.data).toContainEqual({ service: 'quicksight', available: true });

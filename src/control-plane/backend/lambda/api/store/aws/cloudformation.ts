@@ -73,6 +73,7 @@ export const listAWSResourceTypes = async (region: string, typeNamePrefix: strin
     }
     return records;
   } catch (error) {
+    console.log(error);
     return [];
   }
 };
