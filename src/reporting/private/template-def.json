@@ -13586,41 +13586,6 @@
             "CrossDataset": "SINGLE_DATASET"
         },
         {
-            "FilterGroupId": "ad5c6299-c600-4829-bcc5-70a7bdaec70c",
-            "Filters": [
-                {
-                    "CategoryFilter": {
-                        "FilterId": "519e9463-05f7-4b3b-bb1a-0d080ee9aa59",
-                        "Column": {
-                            "DataSetIdentifier": "Event_Parameter_View",
-                            "ColumnName": "event_param_key"
-                        },
-                        "Configuration": {
-                            "FilterListConfiguration": {
-                                "MatchOperator": "CONTAINS",
-                                "SelectAllOptions": "FILTER_ALL_VALUES"
-                            }
-                        }
-                    }
-                }
-            ],
-            "ScopeConfiguration": {
-                "SelectedSheets": {
-                    "SheetVisualScopingConfigurations": [
-                        {
-                            "SheetId": "ad968d33-3bfa-4ea1-9cd3-429240ba0bb0",
-                            "Scope": "SELECTED_VISUALS",
-                            "VisualIds": [
-                                "158901ee-4541-41ea-bdf8-fc3cee6f6d00"
-                            ]
-                        }
-                    ]
-                }
-            },
-            "Status": "ENABLED",
-            "CrossDataset": "SINGLE_DATASET"
-        },
-        {
             "FilterGroupId": "4f39fde2-2b64-4df5-8721-f509eecc9d58",
             "Filters": [
                 {

@@ -54,8 +54,8 @@ SELECT
   d.device_id
 FROM
   user_base u
-JOIN
+LEFT JOIN
   first_visit_attr f ON u.user_pseudo_id = f.user_pseudo_id
-JOIN
+LEFT JOIN
   device_id d ON u.user_pseudo_id = d.user_pseudo_id
 ;
