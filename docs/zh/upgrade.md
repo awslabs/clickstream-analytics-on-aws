@@ -3,6 +3,7 @@
 ## 规划和准备
 
 1. **数据处理间隔**：管道升级大约需要20分钟； 确保升级现有管道时没有数据处理作业正在运行。 您可以更新现有管道，增加间隔时间，并在控制台查看EMR Serverless应用是否有无正在运行的作业。
+2. **备份修改后的 QuickSight 分析和仪表板**：解决方案升级可能会更新方案提供的分析和仪表板。 如果您更改了它，请按照[本文档][quicksight-assets-export]进行备份。
 
 ## 升级过程
 
@@ -12,9 +13,20 @@
 2. 选择**替换当前模板**。
 3. 在**指定模板**下：
      - 选择 Amazon S3 URL。
-     - 根据您的部署类型复制最新模板的链接。
+     - 请参阅下表查找适合您的部署类型的链接。
      - 将链接粘贴到 Amazon S3 URL 框中。
      - 再次选择**下一步**。
+
+    | 模板      | 描述                          |
+    | :---------- | :----------------------------------- |
+    | [使用 Cognito 进行身份验证][cloudfront-s3-template]     | 在 AWS 区域中部署为公开服务  |
+    | [使用 Cognito 通过自定义域进行身份验证][cloudfront-s3-custom-domain-template]     | 在 AWS 区域中部署为具有自定义域名的公开服务  |
+    | [使用 OIDC 进行身份验证][cloudfront-s3-oidc-template]   | 在 AWS 区域中部署为公开服务 |
+    | [使用 OIDC 通过自定义域进行身份验证][cloudfront-s3-oidc-custom-domain-template]    | 在 AWS 区域中部署为具有自定义域名的公开服务  |
+    | [在 VPC 内使用 OIDC 进行身份验证][intranet-template]   | 在 AWS 区域的 VPC 内部署为私有服务  |
+    | [在 AWS 中国使用 OIDC 对自定义域进行身份验证][cloudfront-s3-oidc-cn-template]    | 在 AWS 中国区域中部署为具有自定义域名的公开服务 |
+    | [在 AWS 中国的 VPC 内使用 OIDC 进行身份验证][intranet-cn-template]   | 在 AWS 中国区域的 VPC 内部署为私有服务  |
+
 4. 在**参数**下，查看模板的参数并根据需要进行修改。 参数详情请参考[部署][console-stack]。
 5. 选择**下一步**。
 6. 在 **配置堆栈选项** 页面上，选择 **下一步**。
@@ -73,7 +85,15 @@
     -- 请将 `<app-id>` 替换为您的实际应用 ID
     ```
 
+[quicksight-assets-export]: https://docs.aws.amazon.com/quicksight/latest/developerguide/assetbundle-export.html
 [cloudformation]: https://console.aws.amazon.com/cloudfromation/
 [console-stack]: ./deployment/index.md
 [query-editor]: https://aws.amazon.com/redshift/query-editor-v2/
 [working-with-query-editor]: https://docs.aws.amazon.com/redshift/latest/mgmt/query-editor-v2-using.html
+[cloudfront-s3-template]: https://{{ aws_bucket }}.s3.amazonaws.com/{{ aws_prefix }}/{{ aws_version }}/cloudfront-s3-control-plane-stack-global.template.json
+[cloudfront-s3-custom-domain-template]: https://{{ aws_bucket }}.s3.amazonaws.com/{{ aws_prefix }}/{{ aws_version }}/cloudfront-s3-control-plane-stack-global-customdomain.template.json
+[cloudfront-s3-oidc-template]: https://{{ aws_bucket }}.s3.amazonaws.com/{{ aws_prefix }}/{{ aws_version }}/cloudfront-s3-control-plane-stack-global-oidc.template.json
+[cloudfront-s3-oidc-custom-domain-template]: https://{{ aws_bucket }}.s3.amazonaws.com/{{ aws_prefix }}/{{ aws_version }}/cloudfront-s3-control-plane-stack-global-customdomain-oidc.template.json
+[cloudfront-s3-oidc-cn-template]: https://{{ aws_cn_bucket }}.s3.cn-north-1.amazonaws.com.cn/{{ aws_cn_prefix }}/{{ aws_cn_version }}/cloudfront-s3-control-plane-stack-cn.template.json
+[intranet-template]: https://{{ aws_bucket }}.s3.amazonaws.com/{{ aws_prefix }}/{{ aws_version }}/private-exist-vpc-control-plane-stack.template.json
+[intranet-cn-template]: https://{{ aws_cn_bucket }}.s3.cn-north-1.amazonaws.com.cn/{{ aws_cn_prefix }}/{{ aws_cn_version }}/private-exist-vpc-control-plane-stack.template.json
