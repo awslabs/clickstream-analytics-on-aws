@@ -152,10 +152,7 @@ declare global {
     readonly dataType: MetadataValueType;
   }
 
-  interface IRetentionJoinColumn {
-    readonly category: string;
-    readonly property: string;
-  }
+  type IRetentionJoinColumn = ColumnAttribute;
 
   interface IEventAndCondition {
     readonly eventName: string;

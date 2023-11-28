@@ -561,6 +561,7 @@ export class ReportingService {
         groupCondition: query.groupCondition,
         globalEventCondition: query.globalEventCondition,
       });
+      console.log(`retention analysis sql: ${sql}`);
       logger.debug(`retention analysis sql: ${sql}`);
 
       const hasGrouping = query.groupCondition !== undefined;

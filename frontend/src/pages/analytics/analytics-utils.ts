@@ -401,6 +401,10 @@ export const getPairEventAndConditions = (
                 ConditionCategory.OTHER
               ),
               property: defaultStr(item.startEventRelationAttribute?.name, ''),
+              dataType: defaultStr(
+                item.startEventRelationAttribute?.valueType,
+                MetadataValueType.STRING
+              ),
             },
           },
         };
@@ -418,6 +422,10 @@ export const getPairEventAndConditions = (
               property: defaultStr(
                 item.revisitEventRelationAttribute?.name,
                 ''
+              ),
+              dataType: defaultStr(
+                item.revisitEventRelationAttribute?.valueType,
+                MetadataValueType.STRING
               ),
             },
           },
