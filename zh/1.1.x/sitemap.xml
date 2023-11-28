@@ -61,42 +61,87 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://awslabs.github.io/clickstream-analytics-on-aws/1.1.x/dashboard/</loc>
+         <loc>https://awslabs.github.io/clickstream-analytics-on-aws/1.1.x/analytics/</loc>
          <lastmod>2023-11-28</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://awslabs.github.io/clickstream-analytics-on-aws/1.1.x/dashboard/acquisition/</loc>
+         <loc>https://awslabs.github.io/clickstream-analytics-on-aws/1.1.x/analytics/analyzes/</loc>
          <lastmod>2023-11-28</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://awslabs.github.io/clickstream-analytics-on-aws/1.1.x/dashboard/activity/</loc>
+         <loc>https://awslabs.github.io/clickstream-analytics-on-aws/1.1.x/analytics/dashboard/</loc>
          <lastmod>2023-11-28</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://awslabs.github.io/clickstream-analytics-on-aws/1.1.x/dashboard/custom-analysis/</loc>
+         <loc>https://awslabs.github.io/clickstream-analytics-on-aws/1.1.x/analytics/dashboard/acquisition/</loc>
          <lastmod>2023-11-28</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://awslabs.github.io/clickstream-analytics-on-aws/1.1.x/dashboard/device/</loc>
+         <loc>https://awslabs.github.io/clickstream-analytics-on-aws/1.1.x/analytics/dashboard/activity/</loc>
          <lastmod>2023-11-28</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://awslabs.github.io/clickstream-analytics-on-aws/1.1.x/dashboard/engagement/</loc>
+         <loc>https://awslabs.github.io/clickstream-analytics-on-aws/1.1.x/analytics/dashboard/crash/</loc>
          <lastmod>2023-11-28</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://awslabs.github.io/clickstream-analytics-on-aws/1.1.x/dashboard/path/</loc>
+         <loc>https://awslabs.github.io/clickstream-analytics-on-aws/1.1.x/analytics/dashboard/custom-analysis/</loc>
          <lastmod>2023-11-28</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://awslabs.github.io/clickstream-analytics-on-aws/1.1.x/dashboard/retention/</loc>
+         <loc>https://awslabs.github.io/clickstream-analytics-on-aws/1.1.x/analytics/dashboard/device/</loc>
+         <lastmod>2023-11-28</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://awslabs.github.io/clickstream-analytics-on-aws/1.1.x/analytics/dashboard/engagement/</loc>
+         <lastmod>2023-11-28</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://awslabs.github.io/clickstream-analytics-on-aws/1.1.x/analytics/dashboard/retention/</loc>
+         <lastmod>2023-11-28</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://awslabs.github.io/clickstream-analytics-on-aws/1.1.x/analytics/dashboard/user/</loc>
+         <lastmod>2023-11-28</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://awslabs.github.io/clickstream-analytics-on-aws/1.1.x/analytics/data-mgmt/</loc>
+         <lastmod>2023-11-28</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://awslabs.github.io/clickstream-analytics-on-aws/1.1.x/analytics/explore/</loc>
+         <lastmod>2023-11-28</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://awslabs.github.io/clickstream-analytics-on-aws/1.1.x/analytics/explore/event/</loc>
+         <lastmod>2023-11-28</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://awslabs.github.io/clickstream-analytics-on-aws/1.1.x/analytics/explore/funnel/</loc>
+         <lastmod>2023-11-28</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://awslabs.github.io/clickstream-analytics-on-aws/1.1.x/analytics/explore/path/</loc>
+         <lastmod>2023-11-28</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://awslabs.github.io/clickstream-analytics-on-aws/1.1.x/analytics/explore/retention/</loc>
          <lastmod>2023-11-28</lastmod>
          <changefreq>daily</changefreq>
     </url>
