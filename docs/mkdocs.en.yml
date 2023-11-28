@@ -68,8 +68,6 @@ nav:
     - Identity Management: identity-mgmt.md
     - Additional resources:
       - Upload Certificate: resources/upload-ssl-certificate.md
-    - Permission management:
-      - Users and Roles: permission-mgmt/users-and-roles.md
     - FAQ: faq.md
     - Troubleshooting: troubleshooting.md
     - Uninstall the solution: uninstall.md
