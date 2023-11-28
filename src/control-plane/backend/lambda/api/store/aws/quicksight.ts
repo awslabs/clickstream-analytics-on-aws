@@ -104,15 +104,16 @@ export const registerUserByRegion = async (
 
 export const deleteClickstreamUser = async () => {
   const identityRegion = await sdkClient.QuickSightIdentityRegion();
+  const quickSightEmbedRoleName = QuickSightEmbedRoleArn?.split(':role/')[1];
   await deleteUserByRegion(identityRegion, {
     AwsAccountId: awsAccountId,
     Namespace: QUICKSIGHT_NAMESPACE,
-    UserName: QUICKSIGHT_PUBLISH_USER_NAME,
+    UserName: `${quickSightEmbedRoleName}/${QUICKSIGHT_PUBLISH_USER_NAME}`,
   });
   await deleteUserByRegion(identityRegion, {
     AwsAccountId: awsAccountId,
     Namespace: QUICKSIGHT_NAMESPACE,
-    UserName: QUICKSIGHT_EXPLORE_USER_NAME,
+    UserName: `${quickSightEmbedRoleName}/${QUICKSIGHT_EXPLORE_USER_NAME}`,
   });
 };
 
