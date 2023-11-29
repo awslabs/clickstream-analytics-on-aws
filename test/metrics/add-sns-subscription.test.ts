@@ -16,7 +16,7 @@ process.env.AWS_REGION = 'us-east-1';
 process.env.EMAILS = 'test1#test.com,test2#test.com';
 process.env.SNS_TOPIC_ARN = 'arn:aws:sns:us-east-1:1111111111:metrics-alarmNotificationSnsTopic123456';
 
-import { SNSClient, SubscribeCommand } from '@aws-sdk/client-sns';
+import { SNSClient, SubscribeCommand, ListSubscriptionsByTopicCommand } from '@aws-sdk/client-sns';
 
 import { CloudFormationCustomResourceEvent } from 'aws-lambda';
 import { mockClient } from 'aws-sdk-client-mock';
@@ -33,37 +33,107 @@ beforeEach(() => {
   snsClientMock.reset();
 });
 
-test('should create emails subscription for create action', async () => {
-  const event: CloudFormationCustomResourceEvent = {
-    RequestType: 'Create',
+const createEvent: CloudFormationCustomResourceEvent = {
+  RequestType: 'Create',
+  ServiceToken: 'arn:aws:lambda:us-east-1:11111111111:function:testFn',
+  ResponseURL:
+      'https://cloudformation-custom-resource-response-useast1.s3.amazonaws.com/testUrl',
+  StackId:
+      'arn:aws:cloudformation:us-east-1:111111111111:stack/test/54bce910-a6c8-11ed-8ff3-1212426f2299',
+  RequestId: '6ffb9981-d1af-4177-aac1-34e11cdcccd8',
+  LogicalResourceId: 'create-test-custom-resource',
+  ResourceType: 'AWS::CloudFormation::CustomResource',
+  ResourceProperties: {
     ServiceToken: 'arn:aws:lambda:us-east-1:11111111111:function:testFn',
-    ResponseURL:
-        'https://cloudformation-custom-resource-response-useast1.s3.amazonaws.com/testUrl',
-    StackId:
-        'arn:aws:cloudformation:us-east-1:111111111111:stack/test/54bce910-a6c8-11ed-8ff3-1212426f2299',
-    RequestId: '6ffb9981-d1af-4177-aac1-34e11cdcccd8',
-    LogicalResourceId: 'create-test-custom-resource',
-    ResourceType: 'AWS::CloudFormation::CustomResource',
-    ResourceProperties: {
-      ServiceToken: 'arn:aws:lambda:us-east-1:11111111111:function:testFn',
-    },
-  };
+  },
+};
 
-  //@ts-ignore
+test('should create emails subscription for create action', async () => {
+  snsClientMock.on(ListSubscriptionsByTopicCommand).resolves({
+    Subscriptions: [],
+  });
   snsClientMock.on(SubscribeCommand).resolves({
-    //@ts-ignore
     SubscriptionArn: 'test:SubscriptionArn',
   });
-  await handler(event, c);
-  //@ts-ignore
+  await handler(createEvent, c);
+  expect(snsClientMock).toHaveReceivedCommandTimes(ListSubscriptionsByTopicCommand, 1);
   expect(snsClientMock).toHaveReceivedCommandTimes(SubscribeCommand, 2);
-  //@ts-ignore
-  expect(snsClientMock).toHaveReceivedNthCommandWith(2, SubscribeCommand, {
+  expect(snsClientMock).toHaveReceivedNthCommandWith(3, SubscribeCommand, {
     Endpoint: 'test2#test.com',
     Protocol: 'email',
     ReturnSubscriptionArn: true,
     TopicArn: 'arn:aws:sns:us-east-1:1111111111:metrics-alarmNotificationSnsTopic123456',
   });
+});
+
+
+test('should create subscriptions for new email - New Event', async () => {
+  snsClientMock.on(ListSubscriptionsByTopicCommand).resolves({
+    Subscriptions: [{
+      Endpoint: 'test2#test.com',
+      Protocol: 'email',
+    }],
+  });
+  snsClientMock.on(SubscribeCommand).resolves({
+    SubscriptionArn: 'test:SubscriptionArn',
+  });
+  await handler(createEvent, c);
+  expect(snsClientMock).toHaveReceivedCommandTimes(ListSubscriptionsByTopicCommand, 1);
+  expect(snsClientMock).toHaveReceivedCommandTimes(SubscribeCommand, 1);
+  expect(snsClientMock).toHaveReceivedNthCommandWith(2, SubscribeCommand, {
+    Endpoint: 'test1#test.com',
+    Protocol: 'email',
+    ReturnSubscriptionArn: true,
+    TopicArn: 'arn:aws:sns:us-east-1:1111111111:metrics-alarmNotificationSnsTopic123456',
+  });
+});
+
+
+test('should create subscriptions for new email - Update event', async () => {
+  snsClientMock.on(ListSubscriptionsByTopicCommand).resolves({
+    Subscriptions: [{
+      Endpoint: 'test2#test.com',
+      Protocol: 'email',
+    }],
+  });
+  snsClientMock.on(SubscribeCommand).resolves({
+    SubscriptionArn: 'test:SubscriptionArn',
+  });
+  const updateEvent = {
+    ... createEvent,
+    RequestType: 'Update',
+  } as CloudFormationCustomResourceEvent;
+
+  await handler(updateEvent, c);
+  expect(snsClientMock).toHaveReceivedCommandTimes(ListSubscriptionsByTopicCommand, 1);
+  expect(snsClientMock).toHaveReceivedCommandTimes(SubscribeCommand, 1);
+  expect(snsClientMock).toHaveReceivedNthCommandWith(2, SubscribeCommand, {
+    Endpoint: 'test1#test.com',
+    Protocol: 'email',
+    ReturnSubscriptionArn: true,
+    TopicArn: 'arn:aws:sns:us-east-1:1111111111:metrics-alarmNotificationSnsTopic123456',
+  });
+});
+
+test('should not create subscriptions if subscription already exists', async () => {
+  snsClientMock.on(ListSubscriptionsByTopicCommand).resolvesOnce({
+    NextToken: '1',
+    Subscriptions: [{
+      Endpoint: 'test2#test.com',
+      Protocol: 'email',
+    }],
+  }).resolves({
+    Subscriptions: [{
+      Endpoint: 'test1#test.com',
+      Protocol: 'email',
+    }],
+  });
+  snsClientMock.on(SubscribeCommand).resolves({
+    SubscriptionArn: 'test:SubscriptionArn',
+  });
+  await handler(createEvent, c);
+  expect(snsClientMock).toHaveReceivedCommandTimes(ListSubscriptionsByTopicCommand, 2);
+  expect(snsClientMock).toHaveReceivedCommandTimes(SubscribeCommand, 0);
 });
 
 
