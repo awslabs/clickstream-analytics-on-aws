@@ -675,7 +675,7 @@ describe('Pipeline test', () => {
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
-    expect(res.body.message).toEqual('Validation error: vpc endpoint error in subnet: subnet-00000000000000011, detail: [{\"service\":\"com.amazonaws.ap-southeast-1.logs\",\"reason\":\"The traffic is not allowed by security group rules\"}].');
+    expect(res.body.message).toEqual('Validation error: vpc endpoint error in subnet: subnet-00000000000000011, detail: [{\"service\":\"com.amazonaws.ap-southeast-1.logs\",\"reason\":\"The traffic is not allowed by security group rules\"},{\"service\":\"com.amazonaws.ap-southeast-1.logs\",\"reason\":\"The ingress traffic from subnet(subnet-00000000000000011) is not allowed by security group rules\"}].');
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeVpcEndpointsCommand, 1);
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSecurityGroupRulesCommand, 1);
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSubnetsCommand, 1);

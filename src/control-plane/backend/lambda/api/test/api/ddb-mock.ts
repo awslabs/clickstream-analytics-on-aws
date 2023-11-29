@@ -630,7 +630,7 @@ function createPipelineMock(
           IpProtocol: '-1',
           FromPort: -1,
           ToPort: -1,
-          CidrIpv4: props?.sgError ? '11.11.11.11/32' : '0.0.0.0/0',
+          CidrIpv4: props?.sgError ? '11.11.11.11/32' : '10.0.0.0/16',
         },
         {
           GroupId: 'sg-00000000000000031',
@@ -638,7 +638,7 @@ function createPipelineMock(
           IpProtocol: '-1',
           FromPort: -1,
           ToPort: -1,
-          CidrIpv4: props?.glueEndpointSGError || props?.sgError ? '11.11.11.11/32' : '0.0.0.0/0',
+          CidrIpv4: props?.glueEndpointSGError || props?.sgError ? '11.11.11.11/32' : '10.0.0.0/16',
         },
       ],
     });

@@ -435,7 +435,7 @@ function _checkInterfaceEndpoint(allSubnets: ClickStreamSubnet[], isolatedSubnet
       reason: 'The traffic is not allowed by security group rules',
     });
   }
-  if (service.includes('glue') && !_isAllowAllIngressTrafficFromSubnets(vpcEndpointSGRules, subnet)) {
+  if (!_isAllowAllIngressTrafficFromSubnets(vpcEndpointSGRules, subnet)) {
     invalidServices.push({
       service: service,
       reason: `The ingress traffic from subnet(${subnet.id}) is not allowed by security group rules`,
