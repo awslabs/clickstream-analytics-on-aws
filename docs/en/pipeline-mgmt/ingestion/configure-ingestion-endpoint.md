@@ -10,20 +10,25 @@ The solution creates a web service as an ingestion endpoint to collect data sent
         The availability zones where the public subnets are located must be consistent with those of the private subnets.
 
 * **Ingestion capacity**: This configuration sets the capacity of the ingestion server, and the ingestion server will automatically scale up or down based on the utilization of the processing CPU.
+    * Ingestion Capacity Unit (ICU): A single Ingestion Compute Unit (ICU) represents billable compute and memory units, approximately 8 gigabytes (GB) of memory and 2 vCPUs. 1 ICU generally can support 4000~6000 requests per second.
     * Minimum capacity: The minimum capacity to which the ingestion server will scale down.
     * Maximum capacity: The maximum capacity to which the ingestion server will scale up.
-    * Warm pool: Warm pool gives you the ability to decrease latency for your applications that have exceptionally long boot time. For more information, please refer to [Warm pools for Amazon EC2 Auto Scaling](https://docs.aws.amazon.com/autoscaling/ec2/userguide/ec2-auto-scaling-warm-pools.html).
+    * Warm pool: Warm pool gives you the ability to decrease latency of ingestion service scale up. For more information, please refer to [Warm pools for Amazon EC2 Auto Scaling](https://docs.aws.amazon.com/autoscaling/ec2/userguide/ec2-auto-scaling-warm-pools.html).
 
 * **Enable HTTPS**: Users can choose HTTPS/HTTP protocol for the Ingestion endpoint.
     * Enable HTTPS: If users choose to enable HTTPS, the ingestion server will provide HTTPS endpoint. 
-        * Domain name: input a domain name. Once the ingestion server is created, use the custom endpoint to create an alias or CNAME mapping in your Domain Name System (DNS) for the custom endpoint. 
+        * Domain name: input a domain name.  
+         
+        !!! note "Note"
+
+            Once the ingestion server is created, use the custom endpoint to create an alias or CNAME mapping in your Domain Name System (DNS) for the custom endpoint.
         * SSL Certificate: User need to select an ACM certificate corresponding to the domain name that you input. If there is no ACM certificate, please refer [create public certificate](https://docs.aws.amazon.com/acm/latest/userguide/gs-acm-request-public.html) to create it.
     * Disable HTTPS: If users choose to disable HTTPS, the ingestion server will provide HTTP endpoint.
 
         !!! warning "Warning"
 
-            Using HTTP protocol is not secure, because data will be sent without any encryption, and there are high risks of data being leaked or tampered during transmission. Please acknowledge the risk to proceed.
-* **Cross-Origin Resource Sharing (CORS)**: You can enable CORS to limit requests to data ingestion API from a specific domain. Note that, you need to input a complete internet address, e.g., https://www.example.com, http://localhost:8080. Use comma to separate domain if you have multiple domain for this setting.
+            DO NOT use HTTP in production, because data will be sent without any encryption, and there are high risks of data being leaked or tampered during transmission. Please acknowledge the risk to proceed.
+* **Cross-Origin Resource Sharing (CORS)**: You can enable CORS to limit requests to data ingestion API from a specific domain. Note that, you need to input a complete internet address, e.g., `https://www.example.com`, `http://localhost:8080`. Use comma to separate domain if you have multiple domain for this setting.
 
         !!! warning "Warning"
 

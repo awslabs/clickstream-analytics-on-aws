@@ -89,6 +89,12 @@ describe('Lambda - store the metadata into DDB from Redshift', () => {
           ClickstreamAnalyticsMetadata: [
             {
               ...eventDDBCommonData,
+              // without sdkVersion and sdkName
+              day3: {
+                count: 40,
+                hasData: true,
+                platform: ['WEB1'],
+              },
               day7: {
                 count: 40,
                 hasData: true,
@@ -206,9 +212,9 @@ describe('Lambda - store the metadata into DDB from Redshift', () => {
             { longValue: 9 },
             { longValue: 40 },
             { stringValue: 'eventName' },
-            { stringValue: 'ANDROID#IOS' },
-            { stringValue: 'Version3#Version4' },
-            { stringValue: 'Name3#Name4' },
+            { stringValue: 'ANDROID#|!|#IOS' },
+            { stringValue: 'Version3#|!|#Version4' },
+            { stringValue: 'Name3#|!|#Name4' },
           ],
           [
             { stringValue: 'projectId#appId#eventName' },
@@ -219,9 +225,9 @@ describe('Lambda - store the metadata into DDB from Redshift', () => {
             { longValue: 11 },
             { longValue: 30 },
             { stringValue: 'eventName' },
-            { stringValue: 'ANDROID#WEB' },
-            { stringValue: 'Version3#Version5' },
-            { stringValue: 'Name3#Name5' },
+            { stringValue: 'ANDROID#|!|#WEB' },
+            { stringValue: 'Version3#|!|#Version5' },
+            { stringValue: 'Name3#|!|#Name5' },
           ],
         ],
       })
@@ -246,8 +252,8 @@ describe('Lambda - store the metadata into DDB from Redshift', () => {
             { stringValue: 'eventName' },
             { stringValue: 'propertyName' },
             { stringValue: 'String' },
-            { stringValue: 'value1_20#value2_40#value_30' },
-            { stringValue: 'ANDROID#IOS' },
+            { stringValue: 'value1_20#|!|#value2_40#|!|#value_30' },
+            { stringValue: 'ANDROID#|!|#IOS' },
           ],
           [
             { stringValue: 'projectId#appId#eventName#propertyName#valueType' },
@@ -260,8 +266,8 @@ describe('Lambda - store the metadata into DDB from Redshift', () => {
             { stringValue: 'eventName' },
             { stringValue: 'propertyName' },
             { stringValue: 'String' },
-            { stringValue: 'value3_20#value2_10#value_20' },
-            { stringValue: 'WEB#IOS' },
+            { stringValue: 'value3_20#|!|#value2_10#|!|#value_20' },
+            { stringValue: 'WEB#|!|#IOS' },
           ],
         ],
       })
@@ -285,8 +291,8 @@ describe('Lambda - store the metadata into DDB from Redshift', () => {
             { stringValue: 'category' },
             { stringValue: 'userattributename' },
             { stringValue: 'String' },
-            { stringValue: 'value1_10#value2_15#value3_25' },
-            { stringValue: 'ANDROID#IOS' },
+            { stringValue: 'value1_10#|!|#value2_15#|!|#value3_25' },
+            { stringValue: 'ANDROID#|!|#IOS' },
           ],
         ],
       });
@@ -336,6 +342,11 @@ describe('Lambda - store the metadata into DDB from Redshift', () => {
             PutRequest: {
               Item: {
                 ...eventDDBCommonData,
+                day3: {
+                  count: 40,
+                  hasData: true,
+                  platform: ['WEB1'],
+                },
                 day7: {
                   count: 40,
                   hasData: true,
@@ -358,7 +369,7 @@ describe('Lambda - store the metadata into DDB from Redshift', () => {
                   sdkName: ['Name3', 'Name5'],
                 },
                 summary: {
-                  platform: ['APP', 'ANDROID', 'IOS', 'WEB'],
+                  platform: ['WEB1', 'APP', 'ANDROID', 'IOS', 'WEB'],
                   sdkVersion: ['Version1', 'Version2', 'Version3', 'Version4', 'Version5'],
                   sdkName: ['Name1', 'Name2', 'Name3', 'Name4', 'Name5'],
                 },
@@ -528,7 +539,7 @@ describe('Lambda - store the metadata into DDB from Redshift', () => {
       ClusterIdentifier: undefined,
       Database: 'project1',
       DbUser: undefined,
-      Sql: 'SELECT distinct id, month FROM app1.event_properties_metadata;',
+      Sql: 'SELECT distinct id, month FROM app1.event_parameter_metadata;',
       WithEvent: true,
       WorkgroupName: 'demo',
     });
@@ -536,7 +547,7 @@ describe('Lambda - store the metadata into DDB from Redshift', () => {
       ClusterIdentifier: undefined,
       Database: 'project1',
       DbUser: undefined,
-      Sql: 'SELECT id, month, prefix, project_id, app_id, day_number, category, event_name, property_name, value_type, value_enum, platform FROM app1.event_properties_metadata;',
+      Sql: 'SELECT id, month, prefix, project_id, app_id, day_number, category, event_name, property_name, value_type, value_enum, platform FROM app1.event_parameter_metadata;',
       WithEvent: true,
       WorkgroupName: 'demo',
     });

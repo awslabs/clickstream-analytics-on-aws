@@ -7,12 +7,12 @@ DECLARE
 	log_name varchar(50) := 'sp_scan_metadata';
 BEGIN
 
-	-- Drop event_properties_metadata and event_metadata table, the data should be moved into DDB
-	DROP TABLE IF EXISTS {{schema}}.event_properties_metadata;
+	-- Drop event_parameter_metadata and event_metadata table, the data should be moved into DDB
+	DROP TABLE IF EXISTS {{schema}}.event_parameter_metadata;
 	DROP TABLE IF EXISTS {{schema}}.event_metadata;
 	DROP TABLE IF EXISTS {{schema}}.user_attribute_metadata;
 
-  CREATE TABLE IF NOT EXISTS {{schema}}.event_properties_metadata (
+  CREATE TABLE IF NOT EXISTS {{schema}}.event_parameter_metadata (
     id VARCHAR(255),
 		month VARCHAR(255),
     prefix VARCHAR(255),
@@ -240,7 +240,7 @@ BEGIN
 
 	CALL {{schema}}.{{sp_clickstream_log}}(log_name, 'info', 'Insert data into properties_temp_table table successfully.');
 
-	INSERT INTO {{schema}}.event_properties_metadata (id, month, prefix, project_id, app_id, day_number, category, event_name, property_name, value_type, value_enum, platform) 
+	INSERT INTO {{schema}}.event_parameter_metadata (id, month, prefix, project_id, app_id, day_number, category, event_name, property_name, value_type, value_enum, platform) 
 	SELECT
 		project_id || '#' || app_info_app_id || '#' || event_name || '#' || property_category || '#' || property_name || '#' || value_type AS id,
 		month,
@@ -264,7 +264,7 @@ BEGIN
 			day_number, 
 			property_name, 
 			value_type, 
-			LISTAGG(property_value || '_' || parameter_count, '#') WITHIN GROUP (ORDER BY property_value) as property_values,
+			LISTAGG(property_value || '_' || parameter_count, '#|!|#') WITHIN GROUP (ORDER BY property_value) as property_values,
 			platform
 		FROM (
 			SELECT
@@ -304,7 +304,7 @@ BEGIN
 						property_name,
 						property_value, 
 						value_type, 
-						LISTAGG(DISTINCT platform, '#') WITHIN GROUP (ORDER BY platform) AS platform, 
+						LISTAGG(DISTINCT platform, '#|!|#') WITHIN GROUP (ORDER BY platform) AS platform, 
 						count(*) AS parameter_count 
 					FROM properties_temp_table
 					WHERE 
@@ -321,7 +321,7 @@ BEGIN
 		GROUP BY event_name, project_id, app_info_app_id, property_category, month, day_number, property_name, value_type, platform
 	);
 
-	CALL {{schema}}.{{sp_clickstream_log}}(log_name, 'info', 'Insert all parameters data into event_properties_metadata table successfully.');	
+	CALL {{schema}}.{{sp_clickstream_log}}(log_name, 'info', 'Insert all parameters data into event_parameter_metadata table successfully.');	
 
 	query := 'SELECT column_name FROM user_column_temp_table';
 	FOR rec IN EXECUTE query LOOP
@@ -375,7 +375,7 @@ BEGIN
 			property_category,
 			property_name,
 			value_type, 
-			LISTAGG(property_value || '_' || parameter_count, '#') WITHIN GROUP (ORDER BY property_value) as property_values
+			LISTAGG(property_value || '_' || parameter_count, '#|!|#') WITHIN GROUP (ORDER BY property_value) as property_values
 		FROM (
 			SELECT
 				property_category,
@@ -435,9 +435,9 @@ BEGIN
 					app_info_app_id,
 					month,
 					day_number,
-					LISTAGG(DISTINCT platform, '#') WITHIN GROUP (ORDER BY platform) AS platform,
-					LISTAGG(DISTINCT sdk_version, '#') WITHIN GROUP (ORDER BY platform) AS sdk_version,
-					LISTAGG(DISTINCT sdk_name, '#') WITHIN GROUP (ORDER BY platform) AS sdk_name,
+					LISTAGG(DISTINCT platform, '#|!|#') WITHIN GROUP (ORDER BY platform) AS platform,
+					LISTAGG(DISTINCT sdk_version, '#|!|#') WITHIN GROUP (ORDER BY platform) AS sdk_version,
+					LISTAGG(DISTINCT sdk_name, '#|!|#') WITHIN GROUP (ORDER BY platform) AS sdk_name,
 					count(*) as count
 			FROM (
 				SELECT
@@ -478,9 +478,9 @@ BEGIN
 					app_info_app_id,
 					month,
 					day_number,
-					LISTAGG(DISTINCT platform, '#') WITHIN GROUP (ORDER BY platform) AS platform,
-					LISTAGG(DISTINCT sdk_version, '#') WITHIN GROUP (ORDER BY platform) AS sdk_version,
-					LISTAGG(DISTINCT sdk_name, '#') WITHIN GROUP (ORDER BY platform) AS sdk_name,
+					LISTAGG(DISTINCT platform, '#|!|#') WITHIN GROUP (ORDER BY platform) AS platform,
+					LISTAGG(DISTINCT sdk_version, '#|!|#') WITHIN GROUP (ORDER BY platform) AS sdk_version,
+					LISTAGG(DISTINCT sdk_name, '#|!|#') WITHIN GROUP (ORDER BY platform) AS sdk_name,
 					count(*) as count
 			FROM (
 				SELECT

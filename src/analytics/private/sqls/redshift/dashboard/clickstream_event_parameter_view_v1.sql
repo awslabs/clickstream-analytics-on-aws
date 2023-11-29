@@ -21,6 +21,7 @@ coalesce (
   ,nullif(event_parameter.event_param_int_value::varchar,'')
   ,nullif(event_parameter.event_param_float_value::varchar,'')
   ,nullif(event_parameter.event_param_double_value::varchar,'')
+  ,'null'
 ) as event_param_value
 from {{schema}}.event
 join {{schema}}.event_parameter on event.event_timestamp = event_parameter.event_timestamp and event.event_id = event_parameter.event_id

@@ -286,10 +286,8 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
   }, [pipelineInfo.selectedRegion, pipelineInfo.selectedVPC]);
 
   useEffect(() => {
-    if (!update) {
-      getCertificateListByRegion();
-      getSSMSecretListByRegion();
-    }
+    getCertificateListByRegion();
+    getSSMSecretListByRegion();
   }, []);
 
   return (
@@ -441,7 +439,6 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
 
           <FormField>
             <Checkbox
-              disabled={isDisabled(update, pipelineInfo)}
               onChange={({ detail }) =>
                 changeProtocal(
                   detail.checked ? ProtocalType.HTTPS : ProtocalType.HTTP

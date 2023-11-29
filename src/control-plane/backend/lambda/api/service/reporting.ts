@@ -975,7 +975,7 @@ async function _cleanDatasets(quickSight: QuickSight) {
     if (
       dataSetSummary.DataSetId?.startsWith(QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX)
       && dataSetSummary.CreatedTime !== undefined
-      && (new Date().getTime() - dataSetSummary.CreatedTime.getTime()) > 1 * 1 * 1000
+      && (new Date().getTime() - dataSetSummary.CreatedTime.getTime()) > 60 * 60 * 1000
     ) {
 
       const dataSetId = dataSetSummary.DataSetId;
@@ -1009,7 +1009,7 @@ async function _cleanAnalyses(quickSight: QuickSight) {
     if (analysisSummary.Status !== ResourceStatus.DELETED
       && analysisSummary.CreatedTime !== undefined
       && analysisSummary.AnalysisId?.startsWith(QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX) &&
-      (new Date().getTime() - analysisSummary.CreatedTime.getTime()) > 1 * 1 * 1000
+      (new Date().getTime() - analysisSummary.CreatedTime.getTime()) > 60 * 60 * 1000
     ) {
       await quickSight.deleteAnalysis({
         AwsAccountId: awsAccountId,
@@ -1040,7 +1040,7 @@ async function _cleanedDashboard(quickSight: QuickSight) {
     const dashboardId = dashboardSummary.DashboardId;
     if (dashboardSummary.DashboardId?.startsWith(QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX)
       && dashboardSummary.CreatedTime !== undefined
-      && (new Date().getTime() - dashboardSummary.CreatedTime.getTime()) > 1 * 1 * 1000
+      && (new Date().getTime() - dashboardSummary.CreatedTime.getTime()) > 60 * 60 * 1000
     ) {
       await quickSight.deleteDashboard({
         AwsAccountId: awsAccountId,

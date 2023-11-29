@@ -1255,10 +1255,30 @@ export function checkRetentionAnalysisParameter(params: any): CheckParamsStatus 
     };
   }
 
+  const retentionJoinColumnResult = _checkRetentionJoinColumn(params.pairEventAndConditions);
+  if (retentionJoinColumnResult !== undefined ) {
+    return retentionJoinColumnResult;
+  }
+
   return {
     success,
     message,
   };
+}
+
+function _checkRetentionJoinColumn(pairEventAndConditions: PairEventAndCondition[]): CheckParamsStatus | void {
+  const sameType = pairEventAndConditions.every((item) => {
+    return (
+      item.startEvent.retentionJoinColumn?.dataType ===
+      item.backEvent.retentionJoinColumn?.dataType
+    );
+  });
+  if (!sameType) {
+    return {
+      success: false,
+      message: 'The data type for each set of associated parameter in retention analysis must be the same.',
+    };
+  }
 }
 
 function _checkCommonPartParameter(params: any): CheckParamsStatus | void {

@@ -688,6 +688,9 @@ DROP TABLE user_final_temp;
 
 ANALYZE {{schema}}.{{table_user}};
 
+REFRESH MATERIALIZED VIEW {{schema}}.user_m_view;
+REFRESH MATERIALIZED VIEW {{schema}}.item_m_view;  
+
 EXCEPTION
 WHEN OTHERS THEN CALL {{schema}}.{{sp_clickstream_log_non_atomic}}(log_name, 'error', 'error message:' || SQLERRM);
 
