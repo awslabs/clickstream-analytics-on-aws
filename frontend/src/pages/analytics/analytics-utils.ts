@@ -254,6 +254,17 @@ export const validRetentionAnalyticsItem = (item: IRetentionAnalyticsItem) => {
   );
 };
 
+export const validRetentionJoinColumnDatatype = (
+  items: IRetentionAnalyticsItem[]
+) => {
+  return items.every((item) => {
+    return (
+      item.startEventRelationAttribute?.valueType ===
+      item.revisitEventRelationAttribute?.valueType
+    );
+  });
+};
+
 export const validMultipleRetentionAnalyticsItem = (
   items: IRetentionAnalyticsItem[]
 ) => {

@@ -189,7 +189,8 @@
     "dateRangeIncomplete": "The selected date range is incomplete. Select a start date and a end date for the date range.",
     "dateRangeInvalid": "The selected date range is invalid. The start date must be before the end date.",
     "inputVisualNameError": "Please input visualization name.",
-    "selectTwoEvent": "Please select at least two steps"
+    "selectTwoEvent": "Query metrics error: Please select at least two steps",
+    "retentionJoinColumnDatatype": "Query metrics error: The data type for each set of associated parameter in retention analysis must be the same"
   },
   "operators": {
     "null": "is null",
