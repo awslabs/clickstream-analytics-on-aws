@@ -264,7 +264,7 @@ BEGIN
 			day_number, 
 			property_name, 
 			value_type, 
-			LISTAGG(property_value || '_' || parameter_count, '#') WITHIN GROUP (ORDER BY property_value) as property_values,
+			LISTAGG(property_value || '_' || parameter_count, '#|!|#') WITHIN GROUP (ORDER BY property_value) as property_values,
 			platform
 		FROM (
 			SELECT
@@ -304,7 +304,7 @@ BEGIN
 						property_name,
 						property_value, 
 						value_type, 
-						LISTAGG(DISTINCT platform, '#') WITHIN GROUP (ORDER BY platform) AS platform, 
+						LISTAGG(DISTINCT platform, '#|!|#') WITHIN GROUP (ORDER BY platform) AS platform, 
 						count(*) AS parameter_count 
 					FROM properties_temp_table
 					WHERE 
@@ -375,7 +375,7 @@ BEGIN
 			property_category,
 			property_name,
 			value_type, 
-			LISTAGG(property_value || '_' || parameter_count, '#') WITHIN GROUP (ORDER BY property_value) as property_values
+			LISTAGG(property_value || '_' || parameter_count, '#|!|#') WITHIN GROUP (ORDER BY property_value) as property_values
 		FROM (
 			SELECT
 				property_category,
@@ -435,9 +435,9 @@ BEGIN
 					app_info_app_id,
 					month,
 					day_number,
-					LISTAGG(DISTINCT platform, '#') WITHIN GROUP (ORDER BY platform) AS platform,
-					LISTAGG(DISTINCT sdk_version, '#') WITHIN GROUP (ORDER BY platform) AS sdk_version,
-					LISTAGG(DISTINCT sdk_name, '#') WITHIN GROUP (ORDER BY platform) AS sdk_name,
+					LISTAGG(DISTINCT platform, '#|!|#') WITHIN GROUP (ORDER BY platform) AS platform,
+					LISTAGG(DISTINCT sdk_version, '#|!|#') WITHIN GROUP (ORDER BY platform) AS sdk_version,
+					LISTAGG(DISTINCT sdk_name, '#|!|#') WITHIN GROUP (ORDER BY platform) AS sdk_name,
 					count(*) as count
 			FROM (
 				SELECT
@@ -478,9 +478,9 @@ BEGIN
 					app_info_app_id,
 					month,
 					day_number,
-					LISTAGG(DISTINCT platform, '#') WITHIN GROUP (ORDER BY platform) AS platform,
-					LISTAGG(DISTINCT sdk_version, '#') WITHIN GROUP (ORDER BY platform) AS sdk_version,
-					LISTAGG(DISTINCT sdk_name, '#') WITHIN GROUP (ORDER BY platform) AS sdk_name,
+					LISTAGG(DISTINCT platform, '#|!|#') WITHIN GROUP (ORDER BY platform) AS platform,
+					LISTAGG(DISTINCT sdk_version, '#|!|#') WITHIN GROUP (ORDER BY platform) AS sdk_version,
+					LISTAGG(DISTINCT sdk_name, '#|!|#') WITHIN GROUP (ORDER BY platform) AS sdk_name,
 					count(*) as count
 			FROM (
 				SELECT
