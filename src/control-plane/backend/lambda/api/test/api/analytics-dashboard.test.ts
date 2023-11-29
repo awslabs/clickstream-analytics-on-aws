@@ -11,7 +11,9 @@
  *  and limitations under the License.
  */
 
+import { CloudFormationClient, DescribeStacksCommand, StackStatus } from '@aws-sdk/client-cloudformation';
 import { CreateAnalysisCommand, CreateDashboardCommand, CreateDataSetCommand, DeleteAnalysisCommand, DeleteDashboardCommand, DeleteDataSetCommand, DescribeDashboardDefinitionCommand, QuickSightClient, ResourceNotFoundException } from '@aws-sdk/client-quicksight';
+import { DescribeExecutionCommand, ExecutionStatus, SFNClient } from '@aws-sdk/client-sfn';
 import {
   DeleteCommand,
   DynamoDBDocumentClient,
@@ -22,24 +24,60 @@ import {
 } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
 import request from 'supertest';
-import { MOCK_APP_ID, MOCK_DASHBOARD_ID, MOCK_PROJECT_ID, MOCK_TOKEN, projectExistedMock, tokenMock } from './ddb-mock';
+import { MOCK_APP_ID, MOCK_DASHBOARD_ID, MOCK_EXECUTION_ID, MOCK_PROJECT_ID, MOCK_SOLUTION_VERSION, MOCK_TOKEN, projectExistedMock, tokenMock } from './ddb-mock';
 import { KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW } from './pipeline-mock';
 import { OUTPUT_REPORT_DASHBOARDS_SUFFIX } from '../../common/constants-ln';
+import { BuiltInTagKeys } from '../../common/model-ln';
 import { app, server } from '../../index';
 import 'aws-sdk-client-mock-jest';
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 const quickSightMock = mockClient(QuickSightClient);
+const cloudFormationMock = mockClient(CloudFormationClient);
+const sfnMock = mockClient(SFNClient);
 
 describe('Analytics dashboard test', () => {
   beforeEach(() => {
     ddbMock.reset();
     quickSightMock.reset();
+    cloudFormationMock.reset();
+    sfnMock.reset();
   });
 
   it('Create dashboard', async () => {
     tokenMock(ddbMock, false);
     projectExistedMock(ddbMock, true);
+    ddbMock.on(QueryCommand).resolves({
+      Items: [{ ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW }],
+    });
+    const mockOutputs = [
+      {
+        OutputKey: 'Dashboards',
+        OutputValue: '[{"appId":"app1","dashboardId":"clickstream_dashboard_v1_notepad_mtzfsocy_app1"},{"appId":"app2","dashboardId":"clickstream_dashboard_v1_notepad_mtzfsocy_app2"}]',
+      },
+      {
+        OutputKey: 'DataSourceArn',
+        OutputValue: 'arn:aws:quicksight:ap-northeast-1:555555555555:datasource/clickstream_datasource_adfsd_uqqk_d84e29f0',
+      },
+    ];
+    cloudFormationMock.on(DescribeStacksCommand).resolves({
+      Stacks: [
+        {
+          StackName: 'xxx',
+          Outputs: mockOutputs,
+          Tags: [{ Key: BuiltInTagKeys.AWS_SOLUTION_VERSION, Value: MOCK_SOLUTION_VERSION }],
+          StackStatus: StackStatus.CREATE_COMPLETE,
+          CreationTime: new Date(),
+        },
+      ],
+    });
+    sfnMock.on(DescribeExecutionCommand).resolves({
+      executionArn: 'xx',
+      stateMachineArn: 'yy',
+      name: MOCK_EXECUTION_ID,
+      status: ExecutionStatus.SUCCEEDED,
+      output: 'SUCCEEDED',
+    });
     ddbMock.on(PutCommand).resolvesOnce({});
     quickSightMock.on(CreateDataSetCommand).resolvesOnce({});
     quickSightMock.on(CreateDashboardCommand).resolvesOnce({});
@@ -57,8 +95,6 @@ describe('Analytics dashboard test', () => {
           { id: 's1', name: 'sheet1' },
           { id: 's2', name: 'sheet2' },
         ],
-        ownerPrincipal: 'arn:aws:quicksight:us-west-2:5555555555555:user/default/user',
-        defaultDataSourceArn: 'arn:aws:quicksight:ap-southeast-1:5555555555555:datasource/clickstream_datasource_project_1',
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(201);
@@ -74,9 +110,41 @@ describe('Analytics dashboard test', () => {
   it('Create dashboard with empty parameters', async () => {
     tokenMock(ddbMock, false);
     projectExistedMock(ddbMock, true);
+    ddbMock.on(QueryCommand).resolves({
+      Items: [{ ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW }],
+    });
+    const mockOutputs = [
+      {
+        OutputKey: 'Dashboards',
+        OutputValue: '[{"appId":"app1","dashboardId":"clickstream_dashboard_v1_notepad_mtzfsocy_app1"},{"appId":"app2","dashboardId":"clickstream_dashboard_v1_notepad_mtzfsocy_app2"}]',
+      },
+      {
+        OutputKey: 'DataSourceArn',
+        OutputValue: '',
+      },
+    ];
+    cloudFormationMock.on(DescribeStacksCommand).resolves({
+      Stacks: [
+        {
+          StackName: 'xxx',
+          Outputs: mockOutputs,
+          Tags: [{ Key: BuiltInTagKeys.AWS_SOLUTION_VERSION, Value: MOCK_SOLUTION_VERSION }],
+          StackStatus: StackStatus.CREATE_COMPLETE,
+          CreationTime: new Date(),
+        },
+      ],
+    });
+    sfnMock.on(DescribeExecutionCommand).resolves({
+      executionArn: 'xx',
+      stateMachineArn: 'yy',
+      name: MOCK_EXECUTION_ID,
+      status: ExecutionStatus.SUCCEEDED,
+      output: 'SUCCEEDED',
+    });
     ddbMock.on(PutCommand).resolvesOnce({});
     quickSightMock.on(CreateDataSetCommand).resolvesOnce({});
     quickSightMock.on(CreateDashboardCommand).resolvesOnce({});
+    quickSightMock.on(CreateDashboardCommand).resolves({});
     quickSightMock.on(CreateAnalysisCommand).resolves({});
     const res = await request(app)
       .post(`/api/project/${MOCK_PROJECT_ID}/${MOCK_APP_ID}/dashboard`)
@@ -93,17 +161,7 @@ describe('Analytics dashboard test', () => {
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
-    expect(res.body).toEqual({
-      success: false,
-      message: 'Parameter verification failed.',
-      error: [
-        {
-          location: 'body',
-          msg: 'Value is empty.',
-          param: 'defaultDataSourceArn',
-        },
-      ],
-    });
+    expect(res.body.message).toEqual('Default data source ARN and owner principal is required.');
     expect(quickSightMock).toHaveReceivedCommandTimes(CreateDataSetCommand, 0);
     expect(quickSightMock).toHaveReceivedCommandTimes(CreateDashboardCommand, 0);
     expect(quickSightMock).toHaveReceivedCommandTimes(CreateAnalysisCommand, 0);

@@ -14,11 +14,11 @@
 import { QuickSight, ResourceNotFoundException } from '@aws-sdk/client-quicksight';
 import { v4 as uuidv4 } from 'uuid';
 import { StackManager } from './stack';
-import { DEFAULT_DASHBOARD_NAME, DEFAULT_SOLUTION_OPERATOR, OUTPUT_REPORT_DASHBOARDS_SUFFIX, QUICKSIGHT_ANALYSIS_INFIX, QUICKSIGHT_DASHBOARD_INFIX, QUICKSIGHT_RESOURCE_NAME_PREFIX } from '../common/constants-ln';
+import { DEFAULT_DASHBOARD_NAME, DEFAULT_SOLUTION_OPERATOR, OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN, OUTPUT_REPORT_DASHBOARDS_SUFFIX, QUICKSIGHT_ANALYSIS_INFIX, QUICKSIGHT_DASHBOARD_INFIX, QUICKSIGHT_RESOURCE_NAME_PREFIX } from '../common/constants-ln';
 import { logger } from '../common/powertools';
 import { aws_sdk_client_common_config } from '../common/sdk-client-config-ln';
 import { ApiFail, ApiSuccess, PipelineStackType, PipelineStatusType } from '../common/types';
-import { getReportingDashboardsUrl, isEmpty, paginateData } from '../common/utils';
+import { getReportingDashboardsUrl, getStackOutputFromPipelineStatus, isEmpty, paginateData } from '../common/utils';
 import { IApplication } from '../model/application';
 import { CPipeline, IPipeline } from '../model/pipeline';
 import { IDashboard, IProject } from '../model/project';
@@ -47,8 +47,6 @@ export class ProjectServ {
         description: 'Out-of-the-box user lifecycle analysis dashboard created by solution.',
         region: pipeline.region,
         sheets: [],
-        ownerPrincipal: '',
-        defaultDataSourceArn: '',
         createAt: pipeline.createAt,
         updateAt: pipeline.updateAt,
         operator: DEFAULT_SOLUTION_OPERATOR,
@@ -88,11 +86,31 @@ export class ProjectServ {
       const dashboardId = `${QUICKSIGHT_RESOURCE_NAME_PREFIX}${QUICKSIGHT_DASHBOARD_INFIX}${uuidv4().replace(/-/g, '')}`;
       req.body.id = dashboardId;
       req.body.operator = res.get('X-Click-Stream-Operator');
-      const dashboard: IDashboard = req.body;
-      if (isEmpty(dashboard.defaultDataSourceArn)) {
+
+      const latestPipelines = await store.listPipeline(req.body.projectId, 'latest', 'asc');
+      if (latestPipelines.length === 0) {
+        return res.status(404).send(new ApiFail('Pipeline not found'));
+      }
+      const latestPipeline = latestPipelines[0];
+      if (latestPipeline.status === undefined) {
+        return res.status(404).send(new ApiFail('Pipeline status not found'));
+      }
+      const stackManager: StackManager = new StackManager(latestPipeline);
+      const status = await stackManager.getPipelineStatus();
+
+      const defaultDataSourceArn = getStackOutputFromPipelineStatus(
+        status,
+        PipelineStackType.REPORTING,
+        OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN);
+
+      if (isEmpty(defaultDataSourceArn)) {
         return res.status(400).json(new ApiFail('Default data source ARN and owner principal is required.'));
       }
-      await createPublishDashboard(dashboard);
+      const dashboard: IDashboard = req.body;
+      if (dashboard.sheets.length === 0) {
+        return res.status(400).json(new ApiFail('Dashboard sheets is required.'));
+      }
+      await createPublishDashboard(dashboard, defaultDataSourceArn);
       const id = await store.createDashboard(dashboard);
       return res.status(201).json(new ApiSuccess({ id }, 'Dashboard created.'));
     } catch (error) {
