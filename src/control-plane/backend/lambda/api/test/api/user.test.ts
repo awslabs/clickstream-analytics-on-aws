@@ -102,7 +102,7 @@ describe('User test', () => {
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         id: `${MOCK_USER_ID} `,
-        role: IUserRole.OPERATOR,
+        roles: [IUserRole.OPERATOR],
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
@@ -110,6 +110,27 @@ describe('User test', () => {
     expect(res.body.success).toEqual(false);
   });
 
+  it('Add user with name too long', async () => {
+    tokenMock(ddbMock, false);
+    ddbMock.on(GetCommand, {
+      TableName: clickStreamTableName,
+      Key: {
+        id: MOCK_USER_ID,
+        type: 'USER',
+      },
+    }).resolves({});
+    const res = await request(app)
+      .post('/api/user')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
+      .send({
+        id: MOCK_USER_ID,
+        name: Array(102).join('a'),
+        roles: [IUserRole.OPERATOR],
+      });
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(400);
+    expect(res.body.message).toEqual('Parameter verification failed.');
+  });
   it('Update user', async () => {
     tokenMock(ddbMock, false).resolvesOnce({});
     ddbMock.on(GetCommand).resolvesOnce({

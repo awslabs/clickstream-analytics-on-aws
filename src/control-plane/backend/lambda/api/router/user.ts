@@ -30,6 +30,7 @@ router_user.post(
   validate([
     body().custom(isValidEmpty).custom(isXSSRequest),
     body('id').custom(isEmails),
+    body('name').isLength({ max: 100 }),
     header('X-Click-Stream-Request-Id').custom(isRequestIdExisted),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
@@ -46,6 +47,7 @@ router_user.put(
   '/:id',
   validate([
     body('id').custom(isEmails).custom(isUserValid),
+    body('name').isLength({ max: 100 }),
     header('X-Click-Stream-Request-Id').custom(isRequestIdExisted),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
