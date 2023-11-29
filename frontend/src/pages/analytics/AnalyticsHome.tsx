@@ -41,7 +41,7 @@ const AnalyticsHome: React.FC<AnalyticsHomeProps> = (
     }
   );
 
-  const gotoFirstProjectApp = async () => {
+  const gotoProjectApp = async () => {
     setLoading(true);
     try {
       const apps = [];
@@ -65,8 +65,21 @@ const AnalyticsHome: React.FC<AnalyticsHomeProps> = (
         }
       }
       if (apps.length > 0) {
-        setAnalyticsInfo(apps[0]);
-        window.location.href = `/analytics/${apps[0].projectId}/app/${apps[0].appId}/dashboards`;
+        // data already in local storage and match in app list
+        if (
+          analyticsInfo.projectId &&
+          analyticsInfo.appId &&
+          apps.some(
+            (item) =>
+              item.projectId === analyticsInfo.projectId &&
+              item.appId === analyticsInfo.appId
+          )
+        ) {
+          window.location.href = `/analytics/${analyticsInfo.projectId}/app/${analyticsInfo.appId}/dashboards`;
+        } else {
+          setAnalyticsInfo(apps[0]);
+          window.location.href = `/analytics/${apps[0].projectId}/app/${apps[0].appId}/dashboards`;
+        }
       } else {
         setLoading(false);
       }
@@ -77,11 +90,7 @@ const AnalyticsHome: React.FC<AnalyticsHomeProps> = (
   };
 
   useEffect(() => {
-    if (analyticsInfo.projectId && analyticsInfo.appId) {
-      window.location.href = `/analytics/${analyticsInfo.projectId}/app/${analyticsInfo.appId}/dashboards`;
-    } else {
-      gotoFirstProjectApp();
-    }
+    gotoProjectApp();
   }, []);
 
   if (loading) {
