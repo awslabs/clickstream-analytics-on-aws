@@ -189,7 +189,8 @@
     "dateRangeIncomplete": "所选日期范围不完整。请为日期范围选择开始和结束日期。",
     "dateRangeInvalid": "所选日期范围无效。开始日期必须在结束日期之前。",
     "inputVisualNameError": "请输入图表名称",
-    "selectTwoEvent": "请最少选择 2 个步骤"
+    "selectTwoEvent": "查询指标错误: 请最少选择 2 个步骤",
+    "retentionJoinColumnDatatype": "查询指标错误: 留存分析每一组关联属性的数据类型必须相同"
   },
   "operators": {
     "null": "空",

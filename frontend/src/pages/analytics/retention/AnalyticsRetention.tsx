@@ -75,6 +75,7 @@ import {
   parametersConvertToCategoryItemType,
   validMultipleRetentionAnalyticsItem,
   validRetentionAnalyticsItem,
+  validRetentionJoinColumnDatatype,
   validateFilterConditions,
 } from '../analytics-utils';
 import AttributeGroup from '../comps/AttributeGroup';
@@ -277,6 +278,13 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
     setLoadingData(false);
   };
 
+  const validateRetentionJoinColumnDatatype = () => {
+    if (!validRetentionJoinColumnDatatype(eventOptionData)) {
+      alertMsg(t('analytics:valid.retentionJoinColumnDatatype'), 'error');
+      return false;
+    }
+    return true;
+  };
   const validateEventSelection = () => {
     if (!validMultipleRetentionAnalyticsItem(eventOptionData)) {
       dispatch?.({
@@ -669,7 +677,11 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
             variant="primary"
             iconName="search"
             onClick={() => {
-              if (validateEventSelection() && validateFilterSelection()) {
+              if (
+                validateRetentionJoinColumnDatatype() &&
+                validateEventSelection() &&
+                validateFilterSelection()
+              ) {
                 clickPreview();
               }
             }}
