@@ -689,7 +689,15 @@ DROP TABLE user_final_temp;
 ANALYZE {{schema}}.{{table_user}};
 
 REFRESH MATERIALIZED VIEW {{schema}}.user_m_view;
-REFRESH MATERIALIZED VIEW {{schema}}.item_m_view;  
+REFRESH MATERIALIZED VIEW {{schema}}.item_m_view; 
+
+REFRESH MATERIALIZED VIEW {{schema}}.clickstream_event_view_v1;
+REFRESH MATERIALIZED VIEW {{schema}}.clickstream_event_parameter_view_v1;
+REFRESH MATERIALIZED VIEW {{schema}}.clickstream_session_view_v1;
+REFRESH MATERIALIZED VIEW {{schema}}.clickstream_device_view_v1;
+REFRESH MATERIALIZED VIEW {{schema}}.clickstream_lifecycle_daily_view_v1;
+REFRESH MATERIALIZED VIEW {{schema}}.clickstream_lifecycle_weekly_view_v1;
+REFRESH MATERIALIZED VIEW {{schema}}.clickstream_retention_view_v1;
 
 EXCEPTION
 WHEN OTHERS THEN CALL {{schema}}.{{sp_clickstream_log_non_atomic}}(log_name, 'error', 'error message:' || SQLERRM);
