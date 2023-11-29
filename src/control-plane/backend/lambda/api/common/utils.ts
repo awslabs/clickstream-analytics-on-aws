@@ -435,6 +435,12 @@ function _checkInterfaceEndpoint(allSubnets: ClickStreamSubnet[], isolatedSubnet
       reason: 'The traffic is not allowed by security group rules',
     });
   }
+  if (service.includes('glue') && !_isAllowAllIngressTrafficFromSubnets(vpcEndpointSGRules, subnet)) {
+    invalidServices.push({
+      service: service,
+      reason: `The ingress traffic from subnet(${subnet.id}) is not allowed by security group rules`,
+    });
+  }
   return invalidServices;
 }
 
@@ -461,15 +467,21 @@ function checkRoutesGatewayId(routes: Route[], gatewayId: string) {
 
 function containRule(securityGroups: string[], securityGroupsRules: SecurityGroupRule[], rule: SecurityGroupRule) {
   for (let securityGroupsRule of securityGroupsRules) {
-    if (securityGroupsRule.IsEgress === rule.IsEgress
-      && securityGroupsRule.IpProtocol === '-1'
-      && securityGroupsRule.FromPort === -1
-      && securityGroupsRule.ToPort === -1
-      && securityGroupsRule.CidrIpv4 === '0.0.0.0/0') {
+    if (allowAllTraffic(securityGroupsRule, rule.IsEgress ?? false)) {
       return true;
     }
     if (!_isRuleMatch(securityGroupsRule, rule, securityGroups)) {continue;}
+    return true;
+  }
+  return false;
+}
 
+function allowAllTraffic(securityGroupsRule: SecurityGroupRule, isEgress: boolean) {
+  if (securityGroupsRule.IsEgress === isEgress
+    && securityGroupsRule.IpProtocol === '-1'
+    && securityGroupsRule.FromPort === -1
+    && securityGroupsRule.ToPort === -1
+    && securityGroupsRule.CidrIpv4 === '0.0.0.0/0') {
     return true;
   }
   return false;
@@ -507,6 +519,17 @@ function _isRulesMatch2(securityGroupsRule: SecurityGroupRule, rule: SecurityGro
   }
 
   return true;
+}
+
+function _isAllowAllIngressTrafficFromSubnets(securityGroupsRules: SecurityGroupRule[], subnet: ClickStreamSubnet) {
+  const subnetCidrRule: SecurityGroupRule = {
+    IsEgress: false,
+    IpProtocol: 'tcp',
+    FromPort: 443,
+    ToPort: 443,
+    CidrIpv4: subnet.cidr,
+  };
+  return containRule([], securityGroupsRules, subnetCidrRule);
 }
 
 function getSubnetsAZ(subnets: ClickStreamSubnet[]) {
