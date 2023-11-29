@@ -26,6 +26,13 @@ interface AnalyticsHomeProps {
   auth: AuthContextProps;
 }
 
+interface AppType {
+  projectId: string;
+  projectName: string;
+  appId: string;
+  appName: string;
+}
+
 const AnalyticsHome: React.FC<AnalyticsHomeProps> = (
   props: AnalyticsHomeProps
 ) => {
@@ -41,10 +48,28 @@ const AnalyticsHome: React.FC<AnalyticsHomeProps> = (
     }
   );
 
+  const redirectToProjectApp = (apps: AppType[]) => {
+    // data already in local storage and match in app list
+    if (
+      analyticsInfo.projectId &&
+      analyticsInfo.appId &&
+      apps.some(
+        (item) =>
+          item.projectId === analyticsInfo.projectId &&
+          item.appId === analyticsInfo.appId
+      )
+    ) {
+      window.location.href = `/analytics/${analyticsInfo.projectId}/app/${analyticsInfo.appId}/dashboards`;
+    } else {
+      setAnalyticsInfo(apps[0]);
+      window.location.href = `/analytics/${apps[0].projectId}/app/${apps[0].appId}/dashboards`;
+    }
+  };
+
   const gotoProjectApp = async () => {
     setLoading(true);
     try {
-      const apps = [];
+      const apps: AppType[] = [];
       const { success, data }: ApiResponse<ResponseTableData<IProject>> =
         await getProjectList({
           pageNumber: 1,
@@ -65,21 +90,7 @@ const AnalyticsHome: React.FC<AnalyticsHomeProps> = (
         }
       }
       if (apps.length > 0) {
-        // data already in local storage and match in app list
-        if (
-          analyticsInfo.projectId &&
-          analyticsInfo.appId &&
-          apps.some(
-            (item) =>
-              item.projectId === analyticsInfo.projectId &&
-              item.appId === analyticsInfo.appId
-          )
-        ) {
-          window.location.href = `/analytics/${analyticsInfo.projectId}/app/${analyticsInfo.appId}/dashboards`;
-        } else {
-          setAnalyticsInfo(apps[0]);
-          window.location.href = `/analytics/${apps[0].projectId}/app/${apps[0].appId}/dashboards`;
-        }
+        redirectToProjectApp(apps);
       } else {
         setLoading(false);
       }
@@ -106,15 +117,13 @@ const AnalyticsHome: React.FC<AnalyticsHomeProps> = (
             toolsHide
             navigationHide
             content={
-              <>
-                <Alert
-                  statusIconAriaLabel="Error"
-                  type="error"
-                  header={t('analytics:noDataAvailableTitle')}
-                >
-                  {t('analytics:noDataAvailableMessage')}
-                </Alert>
-              </>
+              <Alert
+                statusIconAriaLabel="Error"
+                type="error"
+                header={t('analytics:noDataAvailableTitle')}
+              >
+                {t('analytics:noDataAvailableMessage')}
+              </Alert>
             }
             headerSelector="#header"
           />
