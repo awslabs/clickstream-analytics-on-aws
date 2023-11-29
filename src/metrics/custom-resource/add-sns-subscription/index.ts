@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { SNSClient, SubscribeCommand } from '@aws-sdk/client-sns';
+import { ListSubscriptionsByTopicCommand, ListSubscriptionsByTopicCommandOutput, SNSClient, SubscribeCommand } from '@aws-sdk/client-sns';
 import { CloudFormationCustomResourceEvent, Context } from 'aws-lambda';
 import { logger } from '../../../common/powertools';
 import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
@@ -30,16 +30,15 @@ export const handler = async (
   event: CloudFormationCustomResourceEvent,
   context: Context,
 ) => {
-  logger.info(JSON.stringify(event));
   try {
-    return await _handler(event, context);
+    await doWork(event, context);
   } catch (e: any) {
     logger.error(e);
     throw e;
   }
 };
 
-async function _handler(
+async function doWork(
   event: CloudFormationCustomResourceEvent,
   context: Context,
 ) {
@@ -60,17 +59,45 @@ async function _handler(
     return;
   }
 
-  const subscriptionResponses = await Promise.all(emails.split(',').map(email => {
-    logger.info('subscribe for email: ' + email.replace(/[a-zA-Z]/g, '#') );
-    return snsClient.send(new SubscribeCommand({
-      TopicArn: snsTopicArn,
-      Protocol: 'email',
-      Endpoint: email,
-      ReturnSubscriptionArn: true,
-    }));
-  }));
-  subscriptionResponses.forEach(r => {
-    logger.info(r.SubscriptionArn!);
-  });
+  const subscriptionEmails = await getSubscriptionEmails();
 
+  const emailList = emails.split(',');
+  for (const email of emailList) {
+    const maskedEmail = email.replace(/[a-zA-Z]/g, '#');
+
+    if (subscriptionEmails.includes(email)) {
+      logger.info('subscription already existed for email: ' + maskedEmail);
+    } else {
+      const res = await snsClient.send(new SubscribeCommand({
+        TopicArn: snsTopicArn,
+        Protocol: 'email',
+        Endpoint: email,
+        ReturnSubscriptionArn: true,
+      }));
+      logger.info(`created new subscription for ${maskedEmail}, arn: ${res.SubscriptionArn}`);
+    }
+  }
+}
+
+async function getSubscriptionEmails() {
+  const subscriptionEmails = [];
+  let nextToken = undefined;
+  while (true) {
+    let subsResult: ListSubscriptionsByTopicCommandOutput = await snsClient.send(new ListSubscriptionsByTopicCommand({
+      TopicArn: snsTopicArn,
+      NextToken: nextToken,
+    }));
+    nextToken = subsResult.NextToken;
+    if (subsResult.Subscriptions) {
+      for (const sub of subsResult.Subscriptions) {
+        if (sub.Protocol == 'email') {
+          subscriptionEmails.push(sub.Endpoint);
+        }
+      }
+    }
+    if (!nextToken) {
+      break;
+    }
+  }
+  return subscriptionEmails;
 }
