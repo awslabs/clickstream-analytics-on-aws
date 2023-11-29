@@ -373,6 +373,7 @@ export const describeDashboard = async (
 
 export const createPublishDashboard = async (
   dashboard: IDashboard,
+  defaultDataSourceArn: string,
 ): Promise<any> => {
   try {
     const principals = await getClickstreamUserArn();
@@ -390,7 +391,7 @@ export const createPublishDashboard = async (
       PhysicalTableMap: {
         PhyTable0: {
           CustomSql: {
-            DataSourceArn: dashboard.defaultDataSourceArn,
+            DataSourceArn: defaultDataSourceArn,
             Name: 'event',
             SqlQuery: `select * from ${dashboard.appId}.event`,
             Columns: [

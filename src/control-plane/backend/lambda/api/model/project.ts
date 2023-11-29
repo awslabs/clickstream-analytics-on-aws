@@ -52,8 +52,6 @@ export interface IDashboard {
   readonly description: string;
   readonly region: string;
   readonly sheets: IDashboardSheet[];
-  readonly ownerPrincipal: string;
-  readonly defaultDataSourceArn: string;
   embedUrl?: string;
 
   readonly createAt: number;

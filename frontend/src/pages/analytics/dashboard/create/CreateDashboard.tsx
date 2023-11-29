@@ -30,11 +30,8 @@ import Loading from 'components/common/Loading';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { MAX_USER_INPUT_LENGTH } from 'ts/const';
-import {
-  OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN,
-  XSS_PATTERN,
-} from 'ts/constant-ln';
-import { defaultStr, getValueFromStackOutputs } from 'ts/utils';
+import { XSS_PATTERN } from 'ts/constant-ln';
+import { defaultStr } from 'ts/utils';
 import { v4 as uuidv4 } from 'uuid';
 
 interface CreateDashboardProps {
@@ -74,17 +71,11 @@ const CreateDashboard: React.FC<CreateDashboardProps> = (
   const confirmCreateDashboard = async () => {
     setLoadingCreate(true);
     try {
-      const reportingOutputs = getValueFromStackOutputs(pipeline, 'Reporting', [
-        OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN,
-      ]);
       const params: IAnalyticsDashboard = {
         ...curDashboard,
         projectId: projectId,
         appId: appId,
         region: pipeline.region,
-        defaultDataSourceArn:
-          reportingOutputs.get(OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN) ??
-          '',
         sheets: sheetNames.map((item) => {
           return { id: uuidv4().replace(/-/g, ''), name: item.label };
         }),
