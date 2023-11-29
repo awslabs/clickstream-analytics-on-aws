@@ -286,10 +286,8 @@ const ConfigIngestion: React.FC<ConfigIngestionProps> = (
   }, [pipelineInfo.selectedRegion, pipelineInfo.selectedVPC]);
 
   useEffect(() => {
-    if (!update) {
-      getCertificateListByRegion();
-      getSSMSecretListByRegion();
-    }
+    getCertificateListByRegion();
+    getSSMSecretListByRegion();
   }, []);
 
   return (
