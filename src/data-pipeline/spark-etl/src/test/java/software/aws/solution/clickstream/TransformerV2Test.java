@@ -16,6 +16,7 @@ package software.aws.solution.clickstream;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
+import org.apache.spark.sql.SaveMode;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -40,6 +41,7 @@ class TransformerV2Test extends BaseSparkTest {
         // DOWNLOAD_FILE=0 ./gradlew clean test --info --tests software.aws.solution.clickstream.TransformerV2Test.should_transform_event
         System.setProperty(APP_IDS_PROP, "uba-app");
         System.setProperty(PROJECT_ID_PROP, "test_project_id_01");
+        System.setProperty(WAREHOUSE_DIR_PROP, "/tmp/warehouse/should_transform_event/");
 
         Dataset<Row> dataset =
                 spark.read().json(requireNonNull(getClass().getResource("/original_data_with_items.json")).getPath());
@@ -61,6 +63,7 @@ class TransformerV2Test extends BaseSparkTest {
         // DOWNLOAD_FILE=0 ./gradlew clean test --info --tests software.aws.solution.clickstream.TransformerV2Test.should_transform_event_params
         System.setProperty(APP_IDS_PROP, "uba-app");
         System.setProperty(PROJECT_ID_PROP, "test_project_id_01");
+        System.setProperty(WAREHOUSE_DIR_PROP, "/tmp/warehouse/should_transform_event_params/");
 
         Dataset<Row> dataset =
                 spark.read().json(requireNonNull(getClass().getResource("/original_data_with_items.json")).getPath());
@@ -84,6 +87,7 @@ class TransformerV2Test extends BaseSparkTest {
         // DOWNLOAD_FILE=0 ./gradlew clean test --info --tests software.aws.solution.clickstream.TransformerV2Test.should_transform_items
         System.setProperty(APP_IDS_PROP, "uba-app");
         System.setProperty(PROJECT_ID_PROP, "test_project_id_01");
+        System.setProperty(WAREHOUSE_DIR_PROP, "/tmp/warehouse/should_transform_items/");
 
         Dataset<Row> dataset =
                 spark.read().json(requireNonNull(getClass().getResource("/original_data_with_items.json")).getPath());
@@ -106,6 +110,7 @@ class TransformerV2Test extends BaseSparkTest {
         // DOWNLOAD_FILE=0 ./gradlew clean test --info --tests software.aws.solution.clickstream.TransformerV2Test.should_transform_user
         System.setProperty(APP_IDS_PROP, "uba-app");
         System.setProperty(PROJECT_ID_PROP, "test_project_id_01");
+        System.setProperty(WAREHOUSE_DIR_PROP, "/tmp/warehouse/should_transform_user/");
 
         Dataset<Row> dataset =
                 spark.read().json(requireNonNull(getClass().getResource("/original_data_with_user_profile_set.json")).getPath());
@@ -127,6 +132,7 @@ class TransformerV2Test extends BaseSparkTest {
         // DOWNLOAD_FILE=0 ./gradlew clean test --info --tests software.aws.solution.clickstream.TransformerV2Test.should_transform_user_with_page_referer1
         System.setProperty(APP_IDS_PROP, "uba-app");
         System.setProperty(PROJECT_ID_PROP, "test_project_id_01");
+        System.setProperty(WAREHOUSE_DIR_PROP, "/tmp/warehouse/should_transform_user_with_page_referer1/");
 
         Dataset<Row> dataset =
                 spark.read().json(requireNonNull(getClass().getResource("/original_data_with_user_profile_set2.json")).getPath());
@@ -149,6 +155,7 @@ class TransformerV2Test extends BaseSparkTest {
         // DOWNLOAD_FILE=0 ./gradlew clean test --info --tests software.aws.solution.clickstream.TransformerV2Test.should_transform_user_with_page_referrer2
         System.setProperty(APP_IDS_PROP, "uba-app");
         System.setProperty(PROJECT_ID_PROP, "test_project_id_01");
+        System.setProperty(WAREHOUSE_DIR_PROP, "/tmp/warehouse/should_transform_user_with_page_referrer2/");
 
         Dataset<Row> dataset =
                 spark.read().json(requireNonNull(getClass().getResource("/original_data_with_user_referrer.json")).getPath());
@@ -171,6 +178,7 @@ class TransformerV2Test extends BaseSparkTest {
         // DOWNLOAD_FILE=0 ./gradlew clean test --info --tests software.aws.solution.clickstream.TransformerV2Test.should_transform_user_ip
         System.setProperty(APP_IDS_PROP, "uba-app");
         System.setProperty(PROJECT_ID_PROP, "test_project_id_01");
+        System.setProperty(WAREHOUSE_DIR_PROP, "/tmp/warehouse/should_transform_user_ip/");
 
         Dataset<Row> dataset =
                 spark.read().json(requireNonNull(getClass().getResource("/original_data_with_user_profile_set3.json")).getPath());
@@ -190,6 +198,7 @@ class TransformerV2Test extends BaseSparkTest {
         System.setProperty(APP_IDS_PROP, "uba-app");
         System.setProperty(PROJECT_ID_PROP, "test_project_id_01");
         System.setProperty("force.merge", "false");
+        System.setProperty(WAREHOUSE_DIR_PROP, "/tmp/warehouse/should_transform_save_state_data_temp_table/");
 
         Dataset<Row> dataset =
                 spark.read().json(requireNonNull(getClass().getResource("/original_data_with_user_profile_set2.json")).getPath());
@@ -239,6 +248,7 @@ class TransformerV2Test extends BaseSparkTest {
         System.setProperty(APP_IDS_PROP, "uba-app");
         System.setProperty(PROJECT_ID_PROP, "test_project_id_01");
         System.setProperty("force.merge", "true");
+        System.setProperty(WAREHOUSE_DIR_PROP, "/tmp/warehouse/should_transform_save_state_data_incremental/");
 
         Dataset<Row> dataset =
                 spark.read().json(requireNonNull(getClass().getResource("/original_data_with_user_profile_set2.json")).getPath());
@@ -289,6 +299,7 @@ class TransformerV2Test extends BaseSparkTest {
         // DOWNLOAD_FILE=0 ./gradlew clean test --info --tests software.aws.solution.clickstream.TransformerV2Test.should_transform_user_with_first_open
         System.setProperty(APP_IDS_PROP, "uba-app");
         System.setProperty(PROJECT_ID_PROP, "test_project_id_01");
+        System.setProperty(WAREHOUSE_DIR_PROP, "/tmp/warehouse/should_transform_user_with_first_open/");
 
         Dataset<Row> dataset =
                 spark.read().json(requireNonNull(getClass().getResource("/original_data_with_first_open.json")).getPath());
@@ -307,6 +318,7 @@ class TransformerV2Test extends BaseSparkTest {
         // DOWNLOAD_FILE=0 ./gradlew clean test --info --tests software.aws.solution.clickstream.TransformerV2Test.should_transform_user_with_traffic_source
         System.setProperty(APP_IDS_PROP, "uba-app");
         System.setProperty(PROJECT_ID_PROP, "test_project_id_01");
+        System.setProperty(WAREHOUSE_DIR_PROP, "/tmp/warehouse/should_transform_user_with_traffic_source/");
 
         Dataset<Row> dataset =
                 spark.read().json(requireNonNull(getClass().getResource("/original_data_with_traffic_source.json")).getPath());
@@ -317,6 +329,33 @@ class TransformerV2Test extends BaseSparkTest {
         datasetUser = datasetUser.filter(expr("user_pseudo_id='uu_p3121211_ts1'"));
         Assertions.assertEquals(expectedJson, datasetUser.first().prettyJson());
         Assertions.assertEquals(1, datasetUser.count());
+    }
+
+    @Test
+    public void should_transform_user_with_event_app_start() throws IOException {
+        // DOWNLOAD_FILE=0 ./gradlew clean test --info --tests software.aws.solution.clickstream.TransformerV2Test.should_transform_user_with_event_app_start
+        System.setProperty(APP_IDS_PROP, "appStartTest");
+        System.setProperty(PROJECT_ID_PROP, "test_project_id_01");
+        System.setProperty(WAREHOUSE_DIR_PROP, "/tmp/warehouse/should_transform_user_with_event_app_start/");
+
+        Dataset<Row> dataset =
+                spark.read().json(requireNonNull(getClass().getResource("/original_data_with_app_start.json")).getPath());
+        List<Dataset<Row>> transformedDatasets = transformer.transform(dataset);
+        Dataset<Row> datasetUserAll = transformedDatasets.get(3);
+
+        datasetUserAll.write().mode(SaveMode.Overwrite).json("/tmp/should_transform_user_with_event_app_start/");
+
+        Assertions.assertEquals(2, datasetUserAll.count());
+
+        String expectedJson1 = this.resourceFileAsString("/expected/transform_v2_user_app_start1.json");
+        Dataset<Row> datasetUser1 = datasetUserAll.filter(expr("user_pseudo_id='uuid1'"));
+
+        Assertions.assertEquals(expectedJson1, datasetUser1.first().prettyJson());
+
+        String expectedJson2 = this.resourceFileAsString("/expected/transform_v2_user_app_start2.json");
+        Dataset<Row>  datasetUser2 = datasetUserAll.filter(expr("user_pseudo_id='uuid2'"));
+        Assertions.assertEquals(expectedJson2, datasetUser2.first().prettyJson());
+
     }
 
 }

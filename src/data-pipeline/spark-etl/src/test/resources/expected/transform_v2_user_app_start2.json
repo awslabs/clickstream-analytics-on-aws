@@ -1,9 +1,9 @@
 {
-  "app_id" : "uba-app",
+  "app_id" : "appStartTest",
   "event_date" : "2023-04-24",
   "event_timestamp" : 1682319109447,
-  "user_id" : "312121-1",
-  "user_pseudo_id" : "uuid-profile-set3",
+  "user_id" : "profilesetUser1",
+  "user_pseudo_id" : "uuid2",
   "user_first_touch_timestamp" : 1667877267895,
   "user_properties" : [ {
     "key" : "_user_id",
@@ -11,7 +11,7 @@
       "double_value" : null,
       "float_value" : null,
       "int_value" : null,
-      "string_value" : "312121-1",
+      "string_value" : "profilesetUser1",
       "set_timestamp_micros" : 1667877566697000
     }
   }, {
@@ -78,12 +78,12 @@
       "set_timestamp_micros" : 1667877566697000
     }
   }, {
-    "key" : "device_ip",
+    "key" : "device_xx",
     "value" : {
       "double_value" : null,
       "float_value" : null,
       "int_value" : null,
-      "string_value" : "127.9.9.9",
+      "string_value" : "device_xx_vv",
       "set_timestamp_micros" : 1667877566697000
     }
   } ],
@@ -92,10 +92,10 @@
     "currency" : "USD"
   },
   "_first_visit_date" : "2022-11-08",
-  "_first_referer" : null,
-  "_first_traffic_source_type" : null,
-  "_first_traffic_medium" : null,
-  "_first_traffic_source" : null,
-  "device_id_list" : null,
-  "_channel" : null
+  "_first_referer" : "http://myhost.com/_page_referrer_001",
+  "_first_traffic_source_type" : "TSN",
+  "_first_traffic_medium" : "TSM",
+  "_first_traffic_source" : "TSS",
+  "device_id_list" : [ "deviceid-1", "deviceid-2" ],
+  "_channel" : "C001"
 }

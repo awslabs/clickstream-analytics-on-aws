@@ -440,7 +440,7 @@ SELECT
 FROM
        {{schema}}.{{table_ods_events}} e
 WHERE
-       e.event_name IN ('_first_open', '_first_visit', '_profile_set', '_app_end')
+       e.event_name IN ('_first_open', '_first_visit', '_profile_set', '_app_end', '_app_start')
        AND NOT EXISTS (
               SELECT
                      1
