@@ -89,6 +89,12 @@ describe('Lambda - store the metadata into DDB from Redshift', () => {
           ClickstreamAnalyticsMetadata: [
             {
               ...eventDDBCommonData,
+              // without sdkVersion and sdkName
+              day3: {
+                count: 40,
+                hasData: true,
+                platform: ['WEB1'],
+              },
               day7: {
                 count: 40,
                 hasData: true,
@@ -336,6 +342,11 @@ describe('Lambda - store the metadata into DDB from Redshift', () => {
             PutRequest: {
               Item: {
                 ...eventDDBCommonData,
+                day3: {
+                  count: 40,
+                  hasData: true,
+                  platform: ['WEB1'],
+                },
                 day7: {
                   count: 40,
                   hasData: true,
@@ -358,7 +369,7 @@ describe('Lambda - store the metadata into DDB from Redshift', () => {
                   sdkName: ['Name3', 'Name5'],
                 },
                 summary: {
-                  platform: ['APP', 'ANDROID', 'IOS', 'WEB'],
+                  platform: ['WEB1', 'APP', 'ANDROID', 'IOS', 'WEB'],
                   sdkVersion: ['Version1', 'Version2', 'Version3', 'Version4', 'Version5'],
                   sdkName: ['Name1', 'Name2', 'Name3', 'Name4', 'Name5'],
                 },
