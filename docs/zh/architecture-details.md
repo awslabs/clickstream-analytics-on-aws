@@ -49,7 +49,12 @@
 
 #### 报表模块
 
-报表模块使用开箱即用的点击流报表查询 Redshift 中的数据。
+报告模块连接到存储在数据仓库（即 Redshift）中的已处理数据，以提供以下数据查询和报告功能：
+
+- 提供预先扫描的用户生命周期仪表板。
+- 提供探索性分析模型来查询和分析点击流数据。
+- 支持以拖放方式创建自定义分析和可视化
+- 自动生成点击流数据的元数据，支持元数据管理
 
 [clickstream-swift]: https://github.com/awslabs/clickstream-swift
 [clickstream -andriod]: https://github.com/awslabs/clickstream-android

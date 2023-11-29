@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { DeleteUserCommand, QuickSightClient } from '@aws-sdk/client-quicksight';
 import { SFNClient, StartExecutionCommand } from '@aws-sdk/client-sfn';
 import {
   DynamoDBDocumentClient,
@@ -29,11 +30,13 @@ import 'aws-sdk-client-mock-jest';
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 const sfnMock = mockClient(SFNClient);
+const quickSightMock = mockClient(QuickSightClient);
 
 describe('Project test', () => {
   beforeEach(() => {
     ddbMock.reset();
     sfnMock.reset();
+    quickSightMock.reset();
   });
   it('Create project', async () => {
     tokenMock(ddbMock, false);
@@ -476,14 +479,21 @@ describe('Project test', () => {
     ddbMock.on(ScanCommand).resolves({
       Items: [
         { type: 'project-01' },
+        { type: 'project-02' },
       ],
     });
-    ddbMock.on(QueryCommand).resolves({
+    ddbMock.on(QueryCommand).resolvesOnce({
       Items: [{ ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW }],
+    }).resolvesOnce({
+      Items: [
+        { name: 'Project-01', id: '1' },
+        { name: 'Project-02', id: '2' },
+      ],
     });
     sfnMock.on(StartExecutionCommand).resolves({ executionArn: 'xxx' });
     ddbMock.on(UpdateCommand).resolves({});
-    let res = await request(app)
+    quickSightMock.on(DeleteUserCommand).resolves({});
+    const res = await request(app)
       .delete(`/api/project/${MOCK_PROJECT_ID}`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
@@ -492,10 +502,48 @@ describe('Project test', () => {
       success: true,
       message: 'Project deleted.',
     });
-
+    expect(quickSightMock).toHaveReceivedCommandTimes(DeleteUserCommand, 0);
+  });
+  it('Delete project last one', async () => {
+    projectExistedMock(ddbMock, true);
+    ddbMock.on(ScanCommand).resolves({
+      Items: [
+        { type: 'project-01' },
+        { type: 'project-02' },
+      ],
+    });
+    ddbMock.on(QueryCommand).resolvesOnce({
+      Items: [{ ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW }],
+    }).resolvesOnce({
+      Items: [
+        { name: 'Project-01', id: '1' },
+      ],
+    });
+    sfnMock.on(StartExecutionCommand).resolves({ executionArn: 'xxx' });
+    ddbMock.on(UpdateCommand).resolves({});
+    quickSightMock.on(DeleteUserCommand).resolves({});
+    const res = await request(app)
+      .delete(`/api/project/${MOCK_PROJECT_ID}`);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({
+      data: null,
+      success: true,
+      message: 'Project deleted.',
+    });
+    expect(quickSightMock).toHaveReceivedCommandTimes(DeleteUserCommand, 2);
+  });
+  it('Delete project with ddb exception', async () => {
+    projectExistedMock(ddbMock, true);
+    ddbMock.on(QueryCommand).resolves({
+      Items: [{ ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW }],
+    });
+    sfnMock.on(StartExecutionCommand).resolves({ executionArn: 'xxx' });
+    ddbMock.on(UpdateCommand).resolves({});
+    quickSightMock.on(DeleteUserCommand).resolves({});
     // Mock DynamoDB error
     ddbMock.on(ScanCommand).rejects(new Error('Mock DynamoDB error'));
-    res = await request(app)
+    const res = await request(app)
       .delete(`/api/project/${MOCK_PROJECT_ID}`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(500);

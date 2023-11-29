@@ -50,7 +50,12 @@ The data modeling module loads the processed data into data lakehouse. It suppor
 
 #### Reporting module
 
-The reporting module queries the data in Redshift with out-of-the-box Clickstream reports.
+The reporting module connects to the processed data stored in data warehouse (i.e., Redshift) to provide the following data query and reporting features:
+
+- provide pre-canned user life cycle dashboard.
+- provide explorative analytics model to query and analyze clickstream data.
+- support creating custom analysis and visualization in drag-and-drop manner
+- auto-generate metadata for clickstream data, support metadata management
 
 [clickstream-swift]: https://github.com/awslabs/clickstream-swift
 [clickstream-andriod]: https://github.com/awslabs/clickstream-android
