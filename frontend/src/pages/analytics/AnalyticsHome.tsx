@@ -64,7 +64,6 @@ const AnalyticsHome: React.FC<AnalyticsHomeProps> = (
           }
         }
       }
-      console.info('apps:', JSON.stringify(apps));
       if (apps.length > 0) {
         // data already in local storage and match in app list
         if (
