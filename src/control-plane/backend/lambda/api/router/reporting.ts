@@ -14,7 +14,7 @@
 import express from 'express';
 import { body, header } from 'express-validator';
 import { logger } from '../common/powertools';
-import { isRequestIdExisted, isXSSRequest, validate } from '../common/request-valid';
+import { isProjectId, isRequestIdExisted, isXSSRequest, validate } from '../common/request-valid';
 import { ReportingService } from '../service/reporting';
 
 const reporting_project = express.Router();
@@ -72,6 +72,7 @@ reporting_project.post(
   '/warmup',
   validate([
     body().custom(isXSSRequest),
+    body('projectId').custom(isProjectId),
     header('X-Click-Stream-Request-Id').custom(isRequestIdExisted),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {

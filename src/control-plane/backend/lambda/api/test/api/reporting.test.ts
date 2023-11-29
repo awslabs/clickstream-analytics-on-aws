@@ -1037,6 +1037,32 @@ describe('reporting test', () => {
 
   });
 
+  it('warmup with error id', async () => {
+    const res = await request(app)
+      .post('/api/reporting/warmup')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
+      .send({
+        projectId: '\\x98',
+        appId: 'app1',
+        region: 'us-east-1',
+      });
+
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(400);
+    expect(res.body).toEqual({
+      error: [
+        {
+          location: 'body',
+          msg: 'Validation error: projectId: \\x98 not match [a-z][a-z0-9_]{0,126}. Please check and try again.',
+          param: 'projectId',
+          value: '\\x98',
+        },
+      ],
+      message: 'Parameter verification failed.',
+      success: false,
+    });
+  });
+
   it('clean - ThrottlingException', async () => {
 
     quickSightMock.on(ListDashboardsCommand).resolves({
