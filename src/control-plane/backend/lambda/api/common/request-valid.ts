@@ -232,7 +232,32 @@ export const isEmails: CustomValidator = value => {
   const regexp = new RegExp(MULTI_EMAIL_PATTERN);
   const match = value.match(regexp);
   if (!match || value !== match[0]) {
-    return Promise.reject(`Validation error: projectId: ${value} not match ${MULTI_EMAIL_PATTERN}. Please check and try again.`);
+    return Promise.reject(`Validation error: value: ${value} not match ${MULTI_EMAIL_PATTERN}. Please check and try again.`);
+  }
+  return true;
+};
+
+export const isProjectId: CustomValidator = value => {
+  if (isEmpty(value)) {
+    return Promise.reject('Value is empty.');
+  }
+  const regexp = new RegExp(PROJECT_ID_PATTERN);
+  const match = value.match(regexp);
+  if (!match || value !== match[0]) {
+    return Promise.reject(`Validation error: projectId: ${value} not match ${PROJECT_ID_PATTERN}. Please check and try again.`);
+  }
+  return true;
+};
+
+export const isAppId: CustomValidator = value => {
+  if (isEmpty(value)) {
+    return Promise.reject('Value is empty.');
+  }
+  const regexp = new RegExp(APP_ID_PATTERN);
+  const match = value.match(regexp);
+  console.log(match);
+  if (!match || value !== match[0]) {
+    return Promise.reject(`Validation error: appId: ${value} not match ${APP_ID_PATTERN}. Please check and try again.`);
   }
   return true;
 };
