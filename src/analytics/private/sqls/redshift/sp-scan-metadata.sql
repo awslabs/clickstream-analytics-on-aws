@@ -299,17 +299,33 @@ BEGIN
 						project_id, 
 						app_info_app_id, 
 						property_category, 
-						'#' || TO_CHAR(event_date::DATE, 'YYYYMM') AS month,
-						TO_CHAR(event_date::DATE, 'DD')::INTEGER AS day_number,
+						month,
+						day_number,
 						property_name,
 						property_value, 
-						value_type, 
-						LISTAGG(DISTINCT platform, '#|!|#') WITHIN GROUP (ORDER BY platform) AS platform, 
-						count(*) AS parameter_count 
-					FROM properties_temp_table
-					WHERE 
-						property_value IS NOT NULL AND
-						property_value != ''
+						value_type,
+						LISTAGG(platform, '#|!|#') WITHIN GROUP (ORDER BY platform) AS platform, 
+						SUM(parameter_count) AS parameter_count 
+					FROM (
+						SELECT
+							event_name, 
+							project_id, 
+							app_info_app_id, 
+							property_category, 
+							'#' || TO_CHAR(event_date::DATE, 'YYYYMM') AS month,
+							TO_CHAR(event_date::DATE, 'DD')::INTEGER AS day_number,
+							property_name,
+							property_value, 
+							value_type, 
+							platform,
+							count(*) AS parameter_count
+						FROM
+							properties_temp_table
+						WHERE 
+							property_value IS NOT NULL AND
+							property_value != ''
+						GROUP BY event_name, project_id, app_info_app_id, property_category, month, day_number, property_name, property_value, value_type, platform									
+					)
 					GROUP BY event_name, project_id, app_info_app_id, property_category, month, day_number, property_name, property_value, value_type
 				)
 			)
