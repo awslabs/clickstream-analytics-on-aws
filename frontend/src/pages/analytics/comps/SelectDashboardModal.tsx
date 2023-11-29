@@ -68,9 +68,11 @@ const SaveToDashboardModal: React.FC<ISaveToDashboardModalProps> = (
     useState(false);
   const [dashboardRequiredError, setDashboardRequiredError] = useState(false);
   const [sheetRequiredError, setSheetRequiredError] = useState(false);
+  const [loadingDashboard, setLoadingDashboard] = useState(false);
 
   const listDashboards = async () => {
     try {
+      setLoadingDashboard(true);
       const {
         success,
         data,
@@ -93,8 +95,10 @@ const SaveToDashboardModal: React.FC<ISaveToDashboardModalProps> = (
           })
         );
         setDashboardOptions(dashboardOptions);
+        setLoadingDashboard(false);
       }
     } catch (error) {
+      setLoadingDashboard(false);
       console.log(error);
     }
   };
@@ -167,7 +171,7 @@ const SaveToDashboardModal: React.FC<ISaveToDashboardModalProps> = (
         }
         header={t('analytics:header.saveToDashboardModalTitle')}
       >
-        <SpaceBetween direction="vertical" size="xs">
+        <SpaceBetween direction="vertical" size="m">
           <FormField
             label={t('analytics:header.inputVisualName')}
             errorText={
@@ -206,27 +210,39 @@ const SaveToDashboardModal: React.FC<ISaveToDashboardModalProps> = (
                 : ''
             }
           >
-            <Select
-              placeholder={defaultStr(
-                t('analytics:header.selectDashboardPlaceholder')
-              )}
-              selectedOption={selectedDashboard}
-              onChange={(e) => {
-                const selectedOption = e.detail
-                  .selectedOption as ISaveToDashboardOption;
-                setSelectedDashboard(e.detail.selectedOption);
-                setSelectedSheet(null);
-                if (selectedOption.sheets) {
-                  setSheetOptions(
-                    selectedOption.sheets.map((item) => ({
-                      label: item.name,
-                      value: item.id,
-                    }))
-                  );
-                }
-              }}
-              options={dashboardOptions}
-            />
+            <div className="flex gap-10">
+              <div className="flex-1">
+                <Select
+                  statusType={loadingDashboard ? 'loading' : 'finished'}
+                  placeholder={defaultStr(
+                    t('analytics:header.selectDashboardPlaceholder')
+                  )}
+                  selectedOption={selectedDashboard}
+                  onChange={(e) => {
+                    const selectedOption = e.detail
+                      .selectedOption as ISaveToDashboardOption;
+                    setSelectedDashboard(e.detail.selectedOption);
+                    setSelectedSheet(null);
+                    if (selectedOption.sheets) {
+                      setSheetOptions(
+                        selectedOption.sheets.map((item) => ({
+                          label: item.name,
+                          value: item.id,
+                        }))
+                      );
+                    }
+                  }}
+                  options={dashboardOptions}
+                />
+              </div>
+              <Button
+                loading={loadingDashboard}
+                iconName="refresh"
+                onClick={() => {
+                  listDashboards();
+                }}
+              />
+            </div>
           </FormField>
           <FormField
             label={t('analytics:header.selectSheetTitle')}
@@ -235,6 +251,7 @@ const SaveToDashboardModal: React.FC<ISaveToDashboardModalProps> = (
             }
           >
             <Select
+              disabled={loadingDashboard}
               placeholder={defaultStr(
                 t('analytics:header.selectSheetPlaceholder')
               )}
