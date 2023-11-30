@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { Category, CloudFormationClient, DescribeStacksCommand, StackStatus, TypeSummary, paginateListTypes } from '@aws-sdk/client-cloudformation';
+import { CloudFormationClient, DescribeStacksCommand, DescribeTypeCommand, StackStatus } from '@aws-sdk/client-cloudformation';
 import { logger } from '../../common/powertools';
 import { aws_sdk_client_common_config } from '../../common/sdk-client-config-ln';
 import { PipelineStackType, PipelineStatusDetail } from '../../common/types';
@@ -56,25 +56,51 @@ export const getStacksDetailsByNames = async (region: string, stackNames: string
   }
 };
 
-export const listAWSResourceTypes = async (region: string, typeNamePrefix: string) => {
+export const describeType = async (region: string, typeName: string) => {
   try {
     const cloudFormationClient = new CloudFormationClient({
       ...aws_sdk_client_common_config,
       region,
     });
-    const records: TypeSummary[] = [];
-    for await (const page of paginateListTypes({ client: cloudFormationClient }, {
-      Visibility: 'PUBLIC',
-      Filters: {
-        TypeNamePrefix: typeNamePrefix,
-        Category: Category.AWS_TYPES,
-      },
-    })) {
-      records.push(...page.TypeSummaries as TypeSummary[]);
-    }
-    return records;
+    const params: DescribeTypeCommand = new DescribeTypeCommand({
+      Type: 'RESOURCE',
+      TypeName: typeName,
+    });
+    return await cloudFormationClient.send(params);
   } catch (error) {
-    logger.error('List AWS Resource Types Error', { error });
-    return [];
+    logger.error('Describe AWS Resource Types Error', { error });
+    return undefined;
   }
+};
+
+export const pingServiceResource = async (region: string, service: string) => {
+  let resourceName = '';
+  switch (service) {
+    case 'emr-serverless':
+      resourceName = 'AWS::EMRServerless::Application';
+      break;
+    case 'msk':
+      resourceName = 'AWS::KafkaConnect::Connector';
+      break;
+    case 'redshift-serverless':
+      resourceName = 'AWS::RedshiftServerless::Workgroup';
+      break;
+    case 'quicksight':
+      resourceName = 'AWS::QuickSight::Dashboard';
+      break;
+    case 'athena':
+      resourceName = 'AWS::Athena::WorkGroup';
+      break;
+    case 'global-accelerator':
+      resourceName = 'AWS::GlobalAccelerator::Accelerator';
+      break;
+    default:
+      break;
+  };
+  if (!resourceName) return false;
+  if (service === 'quicksight' && region.startsWith('cn-')) {
+    return false;
+  }
+  const resource = await describeType(region, resourceName);
+  return resource?.Arn ? true : false;
 };

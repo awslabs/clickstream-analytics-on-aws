@@ -739,7 +739,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
               'states:DescribeExecution',
               'acm:ListCertificates',
               'cloudformation:DescribeStacks',
-              'cloudformation:ListTypes',
+              'cloudformation:DescribeType',
               'secretsmanager:ListSecrets',
               'secretsmanager:GetSecretValue',
               'cloudwatch:DescribeAlarms',

@@ -12,13 +12,14 @@
  */
 
 import fetch from 'node-fetch';
+import pLimit from 'p-limit';
 import { SDK_MAVEN_VERSION_API_LINK } from '../common/constants';
 import { OUTPUT_INGESTION_SERVER_DNS_SUFFIX, OUTPUT_INGESTION_SERVER_URL_SUFFIX } from '../common/constants-ln';
 import { ApiFail, ApiSuccess, FetchType, PipelineStackType } from '../common/types';
 import { paginateData } from '../common/utils';
 import { CPipeline } from '../model/pipeline';
 import { ListCertificates } from '../store/aws/acm';
-import { listAWSResourceTypes } from '../store/aws/cloudformation';
+import { pingServiceResource } from '../store/aws/cloudformation';
 import { describeAlarmsByProjectId, disableAlarms, enableAlarms } from '../store/aws/cloudwatch';
 import { describeVpcs, listRegions, describeSubnetsWithType, describeVpcs3AZ, describeVpcSecurityGroups } from '../store/aws/ec2';
 import { listRoles } from '../store/aws/iam';
@@ -282,64 +283,23 @@ export class EnvironmentServ {
         services,
       } = req.query;
       const result: any[] = [];
-      const awsResources = await listAWSResourceTypes(region, 'AWS::');
-      const awsResourcePrefixes = awsResources.map(r => r.TypeName?.split('::')[1]);
       if (services) {
         const serviceNames = services.split(',');
+        const promisePool = pLimit(3);
+        const reqs = [];
         for (let serviceName of serviceNames) {
-          switch (serviceName) {
-            case 'emr-serverless':
-              result.push(
-                {
-                  service: serviceName,
-                  available: awsResourcePrefixes.includes('EMRServerless'),
+          reqs.push(
+            promisePool(
+              () => pingServiceResource(region, serviceName)
+                .then(available => {
+                  result.push({
+                    service: serviceName,
+                    available: available,
+                  });
                 },
-              );
-              break;
-            case 'msk':
-              result.push(
-                {
-                  service: serviceName,
-                  available: awsResourcePrefixes.includes('MSK') && awsResourcePrefixes.includes('KafkaConnect'),
-                },
-              );
-              break;
-            case 'redshift-serverless':
-              result.push(
-                {
-                  service: serviceName,
-                  available: awsResourcePrefixes.includes('RedshiftServerless'),
-                },
-              );
-              break;
-            case 'quicksight':
-              result.push(
-                {
-                  service: serviceName,
-                  available: awsResourcePrefixes.includes('QuickSight'),
-                },
-              );
-              break;
-            case 'athena':
-              result.push(
-                {
-                  service: serviceName,
-                  available: awsResourcePrefixes.includes('Athena'),
-                },
-              );
-              break;
-            case 'global-accelerator':
-              result.push(
-                {
-                  service: serviceName,
-                  available: awsResourcePrefixes.includes('GlobalAccelerator'),
-                },
-              );
-              break;
-            default:
-              break;
-          }
+                )));
         }
+        await Promise.all(reqs);
       }
       return res.json(new ApiSuccess(result));
     } catch (error) {
