@@ -20,7 +20,7 @@
 
  ## 配置Spark作业参数
 
-默认情况下，Clickstream 会智能地评估处理数据集并适当设置EMR作业参数。在大多数情况下，您不需要调整 EMR 作业参数，但如果您想覆盖 EMR 作业参数，您可以将 `spark-config.json` 文件放入S3存储桶以设置您自己的参数。
+默认情况下，Clickstream 会智能地根据需要处理的数据集的大小并适当设置EMR作业参数。在大多数情况下，您不需要调整 EMR 作业参数，但如果您想覆盖 EMR 作业参数，您可以将 `spark-config.json` 文件放入S3存储桶以设置您自己的参数。
 
 要添加自定义的 EMR 作业参数，您可以在 S3 存储桶中添加一个文件 `s3://{PipelineS3Bucket}/{PipelineS3Prefix}{ProjectId}/config/spark-config.json`，请使用数据流水线中的值替换 `{PipelineS3Bucket}`， `{PipelineS3Prefix}`， 和 `{ProjectId}` 。 这些值可以在`Clickstream-DataProcessing-<uuid>` 堆栈的 **参数**界面中找到。
 
