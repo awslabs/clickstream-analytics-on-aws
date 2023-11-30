@@ -1,5 +1,5 @@
-# Data pipeline management 
-This solution provides three features to help you manage and operate the data pipeline after it gets created.
+# Data pipeline maintenance 
+This solution provides three features to help you manage and maintain the data pipeline after it gets created.
 
 ## Monitoring and Alarms
 The solution collects metrics from each resource in the data pipeline and creates monitoring dashboards in CloudWatch, which provides you a comprehensive view into the pipeline status. It also provides a set of alarms that will notify project owner if anything goes abnormal. 
