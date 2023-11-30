@@ -283,7 +283,7 @@ export class ProjectServ {
         const pipeline = new CPipeline(latestPipeline);
         const stackManager: StackManager = new StackManager(latestPipeline);
         const latestPipelineStatus = await stackManager.getPipelineStatus();
-        if (latestPipelineStatus.status !== PipelineStatusType.ACTIVE) {
+        if (latestPipelineStatus.status !== PipelineStatusType.ACTIVE && latestPipelineStatus.status !== PipelineStatusType.FAILED) {
           return res.status(400).json(new ApiFail('The pipeline current status does not allow delete.'));
         }
         await pipeline.delete();
