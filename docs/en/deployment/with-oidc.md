@@ -46,6 +46,7 @@ You can leverage the [Cognito User Pool][cognito] in a supported AWS Region as t
       - Choose **Public client** when selecting the **App type**. Make sure don't change the selection **Don't generate a client secret** for **Client secret**.
       - Add **Profile** in **OpenID Connect scopes**.
 3. Enter the **Callback URL** and **Sign out URL** using your domain name for {{ solution_name }} console. 
+
     !!! info "Note"
         If you're not using custom domain for the console, you don't know the domain name of console. You can input a fake one, for example, `clickstream.example.com`. Then update it following guidelines in Step 3.
 
@@ -53,7 +54,7 @@ You can leverage the [Cognito User Pool][cognito] in a supported AWS Region as t
 
        ![cognito host ui](../images/OIDC/cognito-hostUI-new.jpeg)
 
-6. Save the App client ID, User pool ID and the AWS Region to a file, which will be used later.
+5. Save the App client ID, User pool ID and the AWS Region to a file, which will be used later.
 
        ![cognito client id](../images/OIDC/cognito-new-console-clientID.png)
        ![cognito userpool id](../images/OIDC/cognito-new-console-userpoolID.png)
@@ -77,7 +78,7 @@ In [Step 2. Launch the stack](#step-2-launch-the-stack), enter the parameters be
 
 8. Update the `Login Callback URL` and `Logout Callback URL` to your IPC recorded domain name.
 
-9. Set the Authorization Configuration.
+9.  Set the Authorization Configuration.
 
     ![authing authorization configuration](../images/OIDC/authing-authorization-configuration.png)
 
