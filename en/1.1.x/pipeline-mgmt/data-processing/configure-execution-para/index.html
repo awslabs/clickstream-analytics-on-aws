@@ -2777,9 +2777,8 @@
 <p><code>cron(minutes hours day-of-month month day-of-week year)</code></p>
 <p>For more information, refer to <a href="https://docs.aws.amazon.com/scheduler/latest/UserGuide/schedule-types.html?icmpid=docs_console_unmapped#cron-based">Cron-based schedules</a>.</p>
 <h2 id="config-spark-job-parameters">Config Spark job parameters</h2>
-<p>By default, the EMR Serverless job is configured with <a href="https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/jobs-spark.html">default settings</a>, which is suitable for most cases, e.g., hourly processing.</p>
-<p>If your data volume is enormous, e.g., total row counts of a batch exceed 100,000,000, the default settings may not fit this situation, which will cause the EMR job to fail. It would help if you changed the configuration of your EMR Spark job.</p>
-<p>You can configure the resources used by the EMR spark job by adding the file <code>s3://{PipelineS3Bucket}/{PipelineS3Prefix}{ProjectId}/config/spark-config.json</code> in the S3 bucket.</p>
+<p>By default, the Clickstream pipeline automatically adjusts EMR job parameters based on the dataset volume that requires processing. In most of time, you do not need to adjust the EMR job parameters, but if you want to override the EMR job parameters, you can put <code>spark-config.json</code> file in S3 bucket to set your job parameters.</p>
+<p>To add your customized the EMR job parameters, you can add a file <code>s3://{PipelineS3Bucket}/{PipelineS3Prefix}{ProjectId}/config/spark-config.json</code> in the S3 bucket.</p>
 <p>Please replace <code>{PipelineS3Bucket}</code>, <code>{PipelineS3Prefix}</code>, and <code>{ProjectId}</code> with the values of your data pipeline. These values are found in the <code>Clickstream-DataProcessing-&lt;uuid&gt;</code> stack's <strong>Parameters</strong>.</p>
 <p>Also, you can get these values by running the below commands,</p>
 <div class="language-sh highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nv">stackNames</span><span class="o">=</span><span class="k">$(</span>aws<span class="w"> </span>cloudformation<span class="w"> </span>list-stacks<span class="w"> </span>--stack-status-filter<span class="w"> </span>CREATE_COMPLETE<span class="w"> </span>UPDATE_COMPLETE<span class="w"> </span>--no-paginate<span class="w">  </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span>-r<span class="w"> </span><span class="s1">&#39;.StackSummaries[].StackName&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w">  </span>Clickstream-DataProcessing<span class="w">  </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-v<span class="w"> </span>Nested<span class="k">)</span>
@@ -2788,7 +2787,7 @@
 </span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">    </span>aws<span class="w"> </span>cloudformation<span class="w"> </span>describe-stacks<span class="w"> </span>--stack-name<span class="w"> </span><span class="nv">$stackName</span><span class="w">  </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span><span class="s1">&#39;.Stacks[].Parameters&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span><span class="s1">&#39;map(select(.ParameterKey == &quot;PipelineS3Bucket&quot; or .ParameterKey == &quot;PipelineS3Prefix&quot; or .ParameterKey == &quot;ProjectId&quot;))&#39;</span>
 </span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="k">done</span>
 </span></code></pre></div>
-<p>The data processing job took about 25 minutes to process 600,000,000 rows (200,000,000 requests, 170G gzip data) in solution benchmark testing via below configuration:</p>
+<p>Here is an example of the file <code>spark-config.json</code>:</p>
 <div class="language-json highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="p">{</span>
 </span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">   </span><span class="nt">&quot;sparkConfig&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 </span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">        </span><span class="s2">&quot;spark.emr-serverless.executor.disk=200g&quot;</span><span class="p">,</span>
@@ -2807,7 +2806,7 @@
 </span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a><span class="p">}</span>
 </span></code></pre></div>
 <p>Please make sure your account has enough emr-serverless quotas, you can view the quotas via <a href="https://us-east-1.console.aws.amazon.com/servicequotas/home/services/emr-serverless/quotas/L-D05C8A75">emr-serverless-quotas</a> in region us-east-1.
-For more configurations, please refer to <a href="https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/jobs-spark.html#spark-defaults">Spark job properties</a> and application <a href="https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/application-capacity.html#worker-configs">worker config</a>.</p>
+For more configurations, please refer to <a href="https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/jobs-spark.html#spark-defaults">Spark job properties</a> and application <a href="https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/app-behavior.html#worker-configs">worker config</a>.</p>
 
 
   
