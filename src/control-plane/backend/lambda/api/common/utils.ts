@@ -429,9 +429,6 @@ function _checkInterfaceEndpoint(allSubnets: ClickStreamSubnet[], isolatedSubnet
     ToPort: 443,
     CidrIpv4: subnet.cidr,
   };
-  if (service.endsWith('.ecs')) {
-    console.log(subnet);
-  }
   if (!containRule([], vpcEndpointSGRules, vpcEndpointRule)) {
     invalidServices.push({
       service: service,
@@ -531,17 +528,6 @@ function _isAllowSecurityGroup(securityGroupsRule: SecurityGroupRule, rule: Secu
   }
   return false;
 }
-
-// function _isAllowAllIngressTrafficFromSubnets(securityGroupsRules: SecurityGroupRule[], subnet: ClickStreamSubnet) {
-//   const subnetCidrRule: SecurityGroupRule = {
-//     IsEgress: false,
-//     IpProtocol: 'tcp',
-//     FromPort: 443,
-//     ToPort: 443,
-//     CidrIpv4: subnet.cidr,
-//   };
-//   return containRule([], securityGroupsRules, subnetCidrRule);
-// }
 
 function getSubnetsAZ(subnets: ClickStreamSubnet[]) {
   const azArray = new Array<string>();
