@@ -28,6 +28,9 @@ Clickstream Analytics on AWS provides different client-side SDKs, which can make
 - [Android][android-sdk]
 - [Swift][swift-sdk]
 - [Web][web-sdk]
+- [Flutter][flutter-sdk]
+- [WeChat Mini Program][wechat-sdk]
+- [HTTP API][http-api]
 
 ## Deployment
 
@@ -155,7 +158,10 @@ Upon successfully cloning the repository into your local development environment
 
 [android-sdk]: https://github.com/awslabs/clickstream-android
 [swift-sdk]: https://github.com/awslabs/clickstream-swift
+[flutter-sdk]: https://github.com/awslabs/clickstream-flutter
 [web-sdk]: https://github.com/awslabs/clickstream-web
+[wechat-sdk]: https://github.com/awslabs/clickstream-wechat
+[http-api]: https://awslabs.github.io/clickstream-analytics-on-aws/en/latest/sdk-manual/http-api/
 [configure-aws-cli]: https://docs.aws.amazon.com/zh_cn/cli/latest/userguide/cli-chap-configure.html
 [aws-cdk]: https://aws.amazon.com/cdk/
 [doc-arch]: https://docs.aws.amazon.com/solutions/latest/clickstream-analytics-on-aws/architecture-overview.html

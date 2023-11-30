@@ -2,7 +2,7 @@
 
 ## Introduction
 
-Clickstream Web SDK can help you easily collect click stream data from browser to your AWS environments through the data pipeline provisioned by this solution. This SDK is part of an AWS solution - {{ solution_name }}, which provisions data pipeline to ingest and process event data into AWS services such as S3, Redshift.
+Clickstream Web SDK can help you easily collect click stream data from browser to your AWS environments through the data pipeline provisioned by this solution.
 
 The SDK is based on the amplify-js SDK core library and developed according to the amplify-js SDK plug-in specification. In addition, the SDK provides features that automatically collect common user events and attributes (for example, page view and first open) to accelerate data collection for users.
 
