@@ -280,7 +280,7 @@ export class ClickStreamApiConstruct extends Construct {
             'states:DescribeExecution',
             'acm:ListCertificates',
             'cloudformation:DescribeStacks',
-            'cloudformation:ListTypes',
+            'cloudformation:DescribeType',
             'secretsmanager:ListSecrets',
             'secretsmanager:GetSecretValue',
             'cloudwatch:DescribeAlarms',
