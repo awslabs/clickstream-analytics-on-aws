@@ -1,3 +1,6 @@
+-- run following command to load latest partition
+-- msck repair table {{database}}.{{eventTable}};
+
 select
    device.vendor_id as device_id
   ,event_date 
