@@ -1298,7 +1298,7 @@
         <li class="md-nav__item">
   <a href="#_1" class="md-nav__link">
     <span class="md-ellipsis">
-      连接器
+      自托管集群:
     </span>
   </a>
   
@@ -1306,6 +1306,15 @@
       
         <li class="md-nav__item">
   <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      连接器
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
     <span class="md-ellipsis">
       其他设置：
     </span>
@@ -2690,7 +2699,7 @@
         <li class="md-nav__item">
   <a href="#_1" class="md-nav__link">
     <span class="md-ellipsis">
-      连接器
+      自托管集群:
     </span>
   </a>
   
@@ -2698,6 +2707,15 @@
       
         <li class="md-nav__item">
   <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      连接器
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
     <span class="md-ellipsis">
       其他设置：
     </span>
@@ -2725,7 +2743,7 @@
 
 <h1 id="apache-kafka">Apache Kafka</h1>
 <p>该数据宿将从摄取端点收集的点击流数据流式传输到 Kafka 集群中的一个主题。
-目前，该解决方案支持 Amazon Managed Streaming for Apache Kafka (Amazon MSK)。</p>
+目前，该解决方案支持 Amazon Managed Streaming for Apache Kafka (Amazon MSK)和自托管 Kafka 集群。</p>
 <h2 id="amazon-msk">Amazon MSK</h2>
 <ul>
 <li>
@@ -2743,9 +2761,22 @@
 <p><strong>主题：</strong> 用户可以指定主题名称。默认情况下，该解决方案将创建一个名为“project-id”的主题。</p>
 </li>
 </ul>
-<h2 id="_1">连接器</h2>
+<h2 id="_1">自托管集群:</h2>
+<p>用户还可以使用自托管的Kafka集群。为了将解决方案与Kafka集群集成，请提供以下配置:</p>
+<ul>
+<li><strong>Broker 链接</strong>: 输入您要连接的Kafka集群的brokers链接，Kafka集群需要满足以下要求：</li>
+<li>Kafka集群和本方案需要在同一个VPC</li>
+<li>
+<p>Kafka集群broker数量不能少于2个</p>
+</li>
+<li>
+<p><strong>主题</strong>: 用户可以指定存储数据的主题。</p>
+</li>
+<li><strong>Security Group</strong>: 该VPC安全组定义了哪些子网和IP范围可以访问Kafka集群。</li>
+</ul>
+<h2 id="_2">连接器</h2>
 <p>启用解决方案创建 Kafka 连接器和自定义插件。此连接器将从 Kafka 集群中的数据汇入 S3 存储桶中。</p>
-<h2 id="_2">其他设置：</h2>
+<h2 id="_3">其他设置：</h2>
 <ul>
 <li><strong>接收器最大间隔：</strong> 指定在流式传输到 AWS 服务之前记录应缓冲的最长时间（以秒为单位）。</li>
 <li><strong>批处理大小：</strong> 在单个批次中传送的记录数的最大值。</li>
