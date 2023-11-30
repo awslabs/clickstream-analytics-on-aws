@@ -429,7 +429,7 @@ function _checkInterfaceEndpoint(allSubnets: ClickStreamSubnet[], isolatedSubnet
     ToPort: 443,
     CidrIpv4: subnet.cidr,
   };
-  if (!containRule(vpcEndpointSGIds ?? [], vpcEndpointSGRules, vpcEndpointRule)) {
+  if (!containRule([], vpcEndpointSGRules, vpcEndpointRule)) {
     invalidServices.push({
       service: service,
       reason: 'The traffic is not allowed by security group rules',
@@ -461,40 +461,15 @@ function checkRoutesGatewayId(routes: Route[], gatewayId: string) {
 
 function containRule(securityGroups: string[], securityGroupsRules: SecurityGroupRule[], rule: SecurityGroupRule) {
   for (let securityGroupsRule of securityGroupsRules) {
-    if (securityGroupsRule.IsEgress === rule.IsEgress
-      && securityGroupsRule.IpProtocol === '-1'
-      && securityGroupsRule.FromPort === -1
-      && securityGroupsRule.ToPort === -1
-      && securityGroupsRule.CidrIpv4 === '0.0.0.0/0') {
-      return true;
+    if (!_isAllowCidr(securityGroupsRule, rule) && !_isAllowSecurityGroup(securityGroupsRule, rule, securityGroups)) {
+      continue;
     }
-    if (!_isRuleMatch(securityGroupsRule, rule, securityGroups)) {continue;}
-
     return true;
   }
   return false;
 }
 
-function _isRuleMatch(securityGroupsRule: SecurityGroupRule, rule: SecurityGroupRule, securityGroups?: string[]) {
-  if (!_isRulesMatch2(securityGroupsRule, rule)) {return false;}
-
-  if (securityGroupsRule.CidrIpv4 !== '0.0.0.0/0') {
-    if (securityGroupsRule.CidrIpv4 && rule.CidrIpv4) {
-      const securityGroupsRuleCidr = ip.cidr(securityGroupsRule.CidrIpv4);
-      const ruleCidr = ip.cidr(rule.CidrIpv4);
-      if (!securityGroupsRuleCidr.includes(ruleCidr.firstUsableIp) || !securityGroupsRuleCidr.includes(ruleCidr.lastUsableIp)) {
-        return false;
-      }
-    } else if (securityGroupsRule.ReferencedGroupInfo?.GroupId) {
-      if (!securityGroups?.includes(securityGroupsRule.ReferencedGroupInfo.GroupId)) {
-        return false;
-      }
-    }
-  }
-  return true;
-}
-
-function _isRulesMatch2(securityGroupsRule: SecurityGroupRule, rule: SecurityGroupRule) {
+function _checkRulesMatchBaseInfo(securityGroupsRule: SecurityGroupRule, rule: SecurityGroupRule) {
   if (securityGroupsRule.IsEgress !== rule.IsEgress) {
     return false;
   }
@@ -507,6 +482,51 @@ function _isRulesMatch2(securityGroupsRule: SecurityGroupRule, rule: SecurityGro
   }
 
   return true;
+}
+
+function _isAllowAllTraffic(securityGroupsRule: SecurityGroupRule, isEgress: boolean) {
+  if (securityGroupsRule.IsEgress === isEgress
+    && securityGroupsRule.IpProtocol === '-1'
+    && securityGroupsRule.FromPort === -1
+    && securityGroupsRule.ToPort === -1
+    && securityGroupsRule.CidrIpv4 === '0.0.0.0/0') {
+    return true;
+  }
+  return false;
+}
+
+function _isAllowCidr(securityGroupsRule: SecurityGroupRule, rule: SecurityGroupRule) {
+  if (_isAllowAllTraffic(securityGroupsRule, rule.IsEgress ?? false)) {
+    return true;
+  }
+  if (!_checkRulesMatchBaseInfo(securityGroupsRule, rule)) {
+    return false;
+  }
+  if (securityGroupsRule.CidrIpv4 && rule.CidrIpv4) {
+    if (securityGroupsRule.CidrIpv4 === '0.0.0.0/0') {
+      return true;
+    }
+    const securityGroupsRuleCidr = ip.cidr(securityGroupsRule.CidrIpv4);
+    const ruleCidr = ip.cidr(rule.CidrIpv4);
+    if (securityGroupsRuleCidr.includes(ruleCidr.firstUsableIp) && securityGroupsRuleCidr.includes(ruleCidr.lastUsableIp)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function _isAllowSecurityGroup(securityGroupsRule: SecurityGroupRule, rule: SecurityGroupRule, securityGroups?: string[]) {
+  if (_isAllowAllTraffic(securityGroupsRule, rule.IsEgress ?? false)) {
+    return true;
+  }
+  if (!_checkRulesMatchBaseInfo(securityGroupsRule, rule)) {
+    return false;
+  }
+  if (securityGroupsRule.ReferencedGroupInfo?.GroupId &&
+    securityGroups?.includes(securityGroupsRule.ReferencedGroupInfo.GroupId)) {
+    return true;
+  }
+  return false;
 }
 
 function getSubnetsAZ(subnets: ClickStreamSubnet[]) {
