@@ -16,6 +16,7 @@
     "deleteTip1": "Are you sure you want to delete the dashboard ",
     "deleteTip2": " delete dashboard will delete all data in QuickSight.",
     "defaultUserLifecycle": "User life cycle",
+    "defaultUserLifecycleDescription":"Out-of-the-box user lifecycle analysis dashboard created by solution.",
     "defaultTag": "default"
   },
   "realtime": {
