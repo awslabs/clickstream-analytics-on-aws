@@ -110,6 +110,12 @@ export const builtInEvents = [
   '_app_end',
 ];
 
+export const keyIdColumn = [
+  'event_id',
+  'user_id',
+  'user_pseudo_id',
+];
+
 export enum ExploreAnalyticsOperators {
   NULL = 'is_null',
   NOT_NULL = 'is_not_null',
@@ -1392,7 +1398,7 @@ export function _buildCommonPartSql(eventNames: string[], sqlParameters: SQLPara
         (
           ${_buildBaseUserDataTableSql(sqlParameters, false)}
         ) as user_base
-        on event_base.user_pseudo_id = user_base.user_pseudo_id
+        on event_base.user_pseudo_id = user_base.user_pseudo_id_join
     `;
     }
 
@@ -1468,7 +1474,7 @@ function _buildCommonColumnsSql(columns: ColumnAttribute[], key: string, value: 
   const columnList: string[] = [];
   for ( const col of columns) {
 
-    if (columnList.includes(col.property)) {
+    if (columnList.includes(col.property) || keyIdColumn.includes(col.property)) {
       continue;
     }
     const val = value.replace(/{{}}/g, col.dataType);
@@ -1494,14 +1500,14 @@ function _buildUserJoinTable(columnsSql: any) {
   return `
   join (
     select
-        event_base.user_pseudo_id,
+        event_base.user_pseudo_id as user_pseudo_id_join,
         ${columnsSql}
     from
         event_base
-        join user_base on event_base.user_pseudo_id = user_base.user_pseudo_id
+        join user_base on event_base.user_pseudo_id = user_base.user_pseudo_id_join
     group by
         event_base.user_pseudo_id
-    ) user_join_table on event_base.user_pseudo_id = user_join_table.user_pseudo_id
+    ) user_join_table on event_base.user_pseudo_id = user_join_table.user_pseudo_id_join
   `;
 }
 
@@ -1510,14 +1516,14 @@ function _buildEventJoinTable(schema: string, columnsSql: string) {
   join
   (
     select 
-    event_base.event_id,
+    event_base.event_id as event_id_join,
     ${columnsSql}
     from event_base
     join ${schema}.event_parameter as event_param on event_base.event_timestamp = event_param.event_timestamp 
       and event_base.event_id = event_param.event_id
     group by
       event_base.event_id
-  ) as event_join_table on event_base.event_id = event_join_table.event_id
+  ) as event_join_table on event_base.event_id = event_join_table.event_id_join
   `;
 }
 
@@ -1601,8 +1607,7 @@ function _buildBaseUserDataTableSql(sqlParameters: SQLParameters, hasNestParams:
 
   return `
     select
-      COALESCE(user_id, user_pseudo_id) as user_pseudo_id,
-      user_id,
+      COALESCE(user_id, user_pseudo_id) as user_pseudo_id_join,
       user_first_touch_timestamp,
       _first_visit_date,
       _first_referer,
