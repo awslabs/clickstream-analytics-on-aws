@@ -46,8 +46,4 @@ You can set below configurations for Redshift.
 
     * **Data range**: Considering the cost performance issue of having Redshift to save all the data, we recommend that Redshift save hot data and that all data are stored in S3. It is necessary to delete expired data in Redshift on a regular basis.
 
-* **Additional Settings**
-
-    * **User table upsert frequency**: Since all versions of user properties are saved in Redshift. We create a user-scoped custom dimension table `dim_users` in DWD layer so the BI dashboard can report on the latest user property. The workflow run on schedule to upsert (update and insert) users.
-
 * **Athena**: Choose Athena to query all data on S3 using the table created in the Glue Data Catalog.
