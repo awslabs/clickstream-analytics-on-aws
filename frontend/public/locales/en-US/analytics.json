@@ -175,7 +175,9 @@
     "day": "day",
     "week": "week",
     "month": "month",
-    "year": "year"
+    "year": "year",
+    "startDate": "Start date",
+    "revisitDate": "Revisit date"
   },
   "valid": {
     "please": "Please ",

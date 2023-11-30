@@ -175,7 +175,9 @@
     "day": "天",
     "week": "周",
     "month": "个月",
-    "year": "年"
+    "year": "年",
+    "startDate": "开始日期",
+    "revisitDate": "回访日期"
   },
   "valid": {
     "please": "请",

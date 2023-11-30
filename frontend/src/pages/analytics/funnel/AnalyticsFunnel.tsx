@@ -62,7 +62,6 @@ import {
   alertMsg,
   defaultStr,
   generateStr,
-  getAbsoluteStartEndRange,
   getUserInfoFromLocalStorage,
   isAnalystAuthorRole,
 } from 'ts/utils';
@@ -79,7 +78,9 @@ import {
   validateFilterConditions,
 } from '../analytics-utils';
 import AttributeGroup from '../comps/AttributeGroup';
-import ExploreDateRangePicker from '../comps/ExploreDateRangePicker';
+import ExploreDateRangePicker, {
+  DEFAULT_WEEK_RANGE,
+} from '../comps/ExploreDateRangePicker';
 import ExploreEmbedFrame from '../comps/ExploreEmbedFrame';
 import SaveToDashboardModal from '../comps/SelectDashboardModal';
 
@@ -169,7 +170,7 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
   ];
 
   const [dateRangeValue, setDateRangeValue] =
-    useState<DateRangePickerProps.Value>(getAbsoluteStartEndRange());
+    useState<DateRangePickerProps.Value>(DEFAULT_WEEK_RANGE);
 
   const [timeGranularity, setTimeGranularity] = useState<SelectProps.Option>({
     value: ExploreGroupColumn.DAY,
@@ -388,7 +389,7 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
       type: 'resetFilterData',
       presetParameters,
     });
-    setDateRangeValue(getAbsoluteStartEndRange());
+    setDateRangeValue(DEFAULT_WEEK_RANGE);
     setTimeGranularity({
       value: ExploreGroupColumn.DAY,
       label: defaultStr(t('analytics:options.dayTimeGranularity')),
