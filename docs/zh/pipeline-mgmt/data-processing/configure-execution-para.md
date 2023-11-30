@@ -20,13 +20,9 @@
 
  ## 配置Spark作业参数
 
-默认情况下，EMR Serverless作业配置为[默认设置][jobs-spark]，适用于大多数情况，例如按小时处理。
+默认情况下，Clickstream 会智能地评估处理数据集并适当设置EMR作业参数。在大多数情况下，您不需要调整 EMR 作业参数，但如果您想覆盖 EMR 作业参数，您可以将 `spark-config.json` 文件放入S3存储桶以设置您自己的参数。
 
-如果您的数据量巨大，例如单批次处理的数据行数超过1亿，则默认设置可能不适用于此情况，会导致EMR作业失败。您需要更改EMR Spark作业的配置。
-
-您可以通过在S3存储桶中添加文件 `s3://{PipelineS3Bucket}/{PipelineS3Prefix}{ProjectId}/config/spark-config.json` 来配置EMR Spark作业使用的资源。
-
-请使用数据流水线中的值替换 `{PipelineS3Bucket}`, `{PipelineS3Prefix}`, 和 `{ProjectId}` 。 这些值可以在`Clickstream-DataProcessing-<uuid>` 堆栈的 **参数**界面中找到。
+要添加自定义的 EMR 作业参数，您可以在 S3 存储桶中添加一个文件 `s3://{PipelineS3Bucket}/{PipelineS3Prefix}{ProjectId}/config/spark-config.json`，请使用数据流水线中的值替换 `{PipelineS3Bucket}`， `{PipelineS3Prefix}`， 和 `{ProjectId}` 。 这些值可以在`Clickstream-DataProcessing-<uuid>` 堆栈的 **参数**界面中找到。
 
 此外，您可以通过运行以下命令获取这些值：
 
@@ -38,7 +34,7 @@ echo -e "$stackNames" | while read stackName; do
 done
 ```
 
-使用下面配置，在解决方案的基准测试中，数据处理作业处理600,000,000行数据（200,000,000请求， 数据大小：170G gzip）大约花费了25分钟的时间。
+下面是一个设置 `spark-config.json` 的例子：
 
 ```json
 {
@@ -64,5 +60,5 @@ done
 
 [jobs-spark]: https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/jobs-spark.html
 [spark-defaults]: https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/jobs-spark.html#spark-defaults
-[worker-configs]: https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/application-capacity.html#worker-configs
+[worker-configs]: https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/app-behavior.html#worker-configs
 [emr-serverless-quotas]: https://us-east-1.console.aws.amazon.com/servicequotas/home/services/emr-serverless/quotas/L-D05C8A75
