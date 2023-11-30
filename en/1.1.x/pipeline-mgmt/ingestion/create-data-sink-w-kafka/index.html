@@ -1294,6 +1294,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#self-hosted" class="md-nav__link">
+    <span class="md-ellipsis">
+      Self-hosted:
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#connector" class="md-nav__link">
     <span class="md-ellipsis">
       Connector
@@ -2707,6 +2716,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#self-hosted" class="md-nav__link">
+    <span class="md-ellipsis">
+      Self-hosted:
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#connector" class="md-nav__link">
     <span class="md-ellipsis">
       Connector
@@ -2744,7 +2762,7 @@
 
 <h1 id="apache-kafka">Apache Kafka</h1>
 <p>This data sink will stream the clickstream data collected by the ingestion endpoint into an topic in a Kafka cluster.
-Currently, solution support Amazon Managed Streaming for Apache Kafka (Amazon MSK).</p>
+Currently, solution support Amazon Managed Streaming for Apache Kafka (Amazon MSK) and Self-hosted Kafka cluster.</p>
 <h2 id="amazon-msk">Amazon MSK</h2>
 <ul>
 <li>
@@ -2762,13 +2780,19 @@ Currently, solution support Amazon Managed Streaming for Apache Kafka (Amazon MS
 <p><strong>Topic</strong>: The user can specify a topic name. By default, the solution will create a topic with "project-id".</p>
 </li>
 </ul>
-<!-- ## Self-hosted:
-Users can also use self-hosted Kafka clusters. In order to integrate the solution with Kafka clusters, provide the following configurations:
-
-* **Broker link**: Enter the  brokers link of Kafka cluster that you wish to connect to.
-* **Topic**: User can specify the topic for storing the data
-* **Security Group**: This VPC security group defines which subnets and IP ranges can access the Kafka cluster. -->
-
+<h2 id="self-hosted">Self-hosted:</h2>
+<p>Users can also use self-hosted Kafka clusters. In order to integrate the solution with Kafka clusters, provide the following configurations:</p>
+<ul>
+<li><strong>Broker link</strong>: Enter the brokers link of Kafka cluster that you wish to connect to, the Kafka cluster needs to meet the following requirements:</li>
+<li>The Kafka cluster and this solution need to be in the same VPC</li>
+<li>
+<p>The number of Kafka cluster brokers cannot be less than two</p>
+</li>
+<li>
+<p><strong>Topic</strong>: User can specify the topic for storing the data. </p>
+</li>
+<li><strong>Security Group</strong>: This VPC security group defines which subnets and IP ranges can access the Kafka cluster.</li>
+</ul>
 <h2 id="connector">Connector</h2>
 <p>Enable solution to create Kafka connector and a custom plugin for this connector. This connector will sink the data from Kafka cluster to S3 bucket.</p>
 <h2 id="additional-settings">Additional Settings:</h2>
