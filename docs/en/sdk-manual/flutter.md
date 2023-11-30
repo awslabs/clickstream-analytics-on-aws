@@ -41,10 +41,10 @@ app to a data pipeline in the Clickstream Analytics solution console.
 import 'package:clickstream_analytics/clickstream_analytics.dart';
 
 final analytics = ClickstreamAnalytics();
-analytics.init({
-   appId: "your appId",
-   endpoint: "https://example.com/collect"
-});
+analytics.init(
+  appId: "your appId",
+  endpoint: "https://example.com/collect"
+);
 ```
 
 !!! info "Important"
@@ -243,7 +243,7 @@ In order to improve the efficiency of querying and analysis, we apply limits to 
 | Length of event attribute name  | under 25 characters  | 50 characters        | discard the attribute,  print log and record error in event attribute              | 2001       |
 | Attribute name invalid          | --                   | --                   | discard the attribute,  print log and record error in event attribute              | 2002       |
 | Length of event attribute value | under 100 characters | 1024 characters      | discard the attribute,  print log and record error in event attribute              | 2003       |
-| Event attribute per event       | under 50 attributes  | 500 evnet attributes | discard the attribute that exceed, print log and record error in event attribute   | 2004       |
+| Event attribute per event       | under 50 attributes  | 500 event attributes | discard the attribute that exceed, print log and record error in event attribute   | 2004       |
 | User attribute number           | under 25 attributes  | 100 user attributes  | discard the attribute that exceed, print log and record `_clickstream_error` event | 3001       |
 | Length of User attribute name   | under 25 characters  | 50 characters        | discard the attribute, print log and record `_clickstream_error` event             | 3002       |
 | User attribute name invalid     | --                   | --                   | discard the attribute, print log and record `_clickstream_error` event             | 3003       |

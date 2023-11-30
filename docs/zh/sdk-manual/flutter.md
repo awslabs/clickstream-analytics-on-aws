@@ -38,10 +38,10 @@ appId 和 endpoint 的值。
 import 'package:clickstream_analytics/clickstream_analytics.dart';
 
 final analytics = ClickstreamAnalytics();
-analytics.init({
-   appId: "your appId",
-   endpoint: "https://example.com/collect"
-});
+analytics.init(
+  appId: "your appId",
+  endpoint: "https://example.com/collect"
+);
 ```
 
 !!! info "Important"
@@ -230,7 +230,7 @@ Clickstream Flutter SDK 支持以下数据类型：
 | 事件属性名称的长度 | 25 个字符以下   | 50 个字符       | 丢弃该属性、打印日志并在事件属性中记录错误                   | 2001  |
 | 属性名称合规    | --         | --           | 丢弃该属性、打印日志并在事件属性中记录错误                   | 2002  |
 | 事件属性值的长度  | 少于 100 个字符 | 1024 个字符     | 丢弃该属性、打印日志并在事件属性中记录错误                   | 2003  |
-| 每个事件的事件属性 | 50 属性以下    | 500 evnet 属性 | 丢弃超过限制的属性、打印日志并在事件属性中记录错误               | 2004  |
+| 每个事件的事件属性 | 50 属性以下    | 500 event 属性 | 丢弃超过限制的属性、打印日志并在事件属性中记录错误               | 2004  |
 | 用户属性数     | 25岁以下属性    | 100个用户属性     | 丢弃超过限制的属性、打印日志并记录`_clickstream_error`事件 | 3001  |
 | 用户属性名称的长度 | 25 个字符以下   | 50 个字符       | 丢弃该属性、打印日志并记录`_clickstream_error`事件     | 3002  |
 | 用户属性名称合规  | --         | --           | 丢弃该属性、打印日志并记录`_clickstream_error`事件     | 3003  |
