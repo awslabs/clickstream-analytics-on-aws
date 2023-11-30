@@ -2,8 +2,7 @@
 
 ## 简介
 
-Clickstream Flutter SDK 可以帮助您轻松地从移动设备收集和报告应用内事件到 AWS。作为解决方案 {{ solution_name }}
-的一部分，解决方案提供了数据管道，用于将事件数据导入和处理到 AWS 服务，如 Amazon S3 和 Amazon Redshift。
+Clickstream Flutter SDK 可以帮助您轻松地从移动设备收集和发送应用内事件到您配置的解决方案数据管道。
 
 该 SDK 基于 [Clickstream Android SDK](./android.md) 和 [Clickstream Swift SDK](./swift.md) 构建. 因此, flutter
 SDK 还支持自动收集常见的用户事件和属性（例如会话开始、首次打开）。 此外，我们还添加了易于使用的 API 来简化 Flutter

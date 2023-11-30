@@ -3,9 +3,7 @@
 ## Introduction
 
 Clickstream Flutter SDK can help you easily collect in-app click stream data from mobile devices to your AWS
-environments through the data pipeline provisioned by this solution. This SDK is part of an AWS solution - {{
-solution_name }}, which provisions data pipeline to ingest and process event data into AWS services such as S3,
-Redshift.
+environments through the data pipeline provisioned by this solution.
 
 The SDK is relies on the [Clickstream Android SDK](./android.md) and [Clickstream Swift SDK](./swift.md). Therefore,
 flutter SDK also supports automatically collect common user events and attributes (e.g., session start, first open). In

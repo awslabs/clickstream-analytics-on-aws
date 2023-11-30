@@ -2,8 +2,7 @@
 
 ## 简介
 
-Clickstream Android SDK 可以帮助您轻松地从 Android 设备收集和报告应用内事件到 AWS。作为解决方案 {{ solution_name }}
-的一部分，解决方案提供了数据管道，用于将事件数据导入和处理到 AWS 服务，如 Amazon S3 和 Amazon Redshift。
+Clickstream Android SDK 可以帮助您轻松地从 Android 设备收集和发送应用内事件到您配置的解决方案数据管道。
 
 该 SDK 基于 Amplify for Android SDK 核心库开发，并根据 Amplify Android SDK 插件规范进行了扩展。此外，该 SDK
 还具有自动收集常见用户事件和属性（例如，屏幕查看和首次打开）的功能，以简化用户的数据收集过程。
