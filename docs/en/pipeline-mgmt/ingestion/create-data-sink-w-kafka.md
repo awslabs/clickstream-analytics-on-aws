@@ -1,6 +1,6 @@
 # Apache Kafka
 This data sink will stream the clickstream data collected by the ingestion endpoint into an topic in a Kafka cluster.
-Currently, solution support Amazon Managed Streaming for Apache Kafka (Amazon MSK).
+Currently, solution support Amazon Managed Streaming for Apache Kafka (Amazon MSK) and Self-hosted Kafka cluster.
 
 ## Amazon MSK
 * **Select an existing Amazon MSK cluster.** Select an MSK cluster from the drop-down list, the MSK cluster needs to meet the following requirements:
@@ -14,12 +14,15 @@ Currently, solution support Amazon Managed Streaming for Apache Kafka (Amazon MS
 
 * **Topic**: The user can specify a topic name. By default, the solution will create a topic with "project-id".
 
-<!-- ## Self-hosted:
+## Self-hosted:
 Users can also use self-hosted Kafka clusters. In order to integrate the solution with Kafka clusters, provide the following configurations:
 
-* **Broker link**: Enter the  brokers link of Kafka cluster that you wish to connect to.
-* **Topic**: User can specify the topic for storing the data
-* **Security Group**: This VPC security group defines which subnets and IP ranges can access the Kafka cluster. -->
+* **Broker link**: Enter the brokers link of Kafka cluster that you wish to connect to, the Kafka cluster needs to meet the following requirements:
+  * The Kafka cluster and this solution need to be in the same VPC
+  * The number of Kafka cluster brokers cannot be less than two
+
+* **Topic**: User can specify the topic for storing the data. 
+* **Security Group**: This VPC security group defines which subnets and IP ranges can access the Kafka cluster.
 
 ## Connector
 Enable solution to create Kafka connector and a custom plugin for this connector. This connector will sink the data from Kafka cluster to S3 bucket.
