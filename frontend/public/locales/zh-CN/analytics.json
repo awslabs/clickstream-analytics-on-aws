@@ -16,6 +16,7 @@
     "deleteTip1": "您确定要删除该仪表板吗 ",
     "deleteTip2": " 删除仪表板将删除 QuickSight 中的相关的仪表板。",
     "defaultUserLifecycle": "用户生命周期报表",
+    "defaultUserLifecycleDescription": "由解决方案创建的开箱即用的用户生命周期分析面板。",
     "defaultTag": "预置"
   },
   "realtime": {
