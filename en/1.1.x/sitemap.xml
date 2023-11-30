@@ -291,6 +291,11 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://awslabs.github.io/clickstream-analytics-on-aws/1.1.x/sdk-manual/flutter/</loc>
+         <lastmod>2023-11-30</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://awslabs.github.io/clickstream-analytics-on-aws/1.1.x/sdk-manual/http-api/</loc>
          <lastmod>2023-11-30</lastmod>
          <changefreq>daily</changefreq>
