@@ -488,24 +488,29 @@ async function _checkSubnets(pipeline: IPipeline) {
   }
   if (network.publicSubnetIds.length < 2 || network.privateSubnetIds.length < 2) {
     throw new ClickStreamBadRequestError(
-      'Validate error: you must select at least two public subnets and at least two private subnets for the ingestion endpoint.',
+      'Validation error: you must select at least two public subnets and at least two private subnets for the ingestion endpoint.',
     );
   }
 
   const allSubnets = await describeSubnetsWithType(pipeline.region, network.vpcId, SubnetType.ALL);
   const privateSubnets = allSubnets.filter(subnet => network.privateSubnetIds.includes(subnet.id));
   const publicSubnets = allSubnets.filter(subnet => network.publicSubnetIds.includes(subnet.id));
+  if (privateSubnets.length === 0 || publicSubnets.length === 0) {
+    throw new ClickStreamBadRequestError(
+      'Validation error: region does not match VPC or subnets, please check parameters.',
+    );
+  }
   const privateSubnetsAZ = getSubnetsAZ(privateSubnets);
   const publicSubnetsAZ = getSubnetsAZ(publicSubnets);
   if (publicSubnetsAZ.length < 2 || privateSubnetsAZ.length < 2) {
     throw new ClickStreamBadRequestError(
-      'Validate error: the public and private subnets for the ingestion endpoint must locate in at least two Availability Zones (AZ).',
+      'Validation error: the public and private subnets for the ingestion endpoint must locate in at least two Availability Zones (AZ).',
     );
   }
   const azInPublic = publicSubnetsAZ.filter(az => privateSubnetsAZ.includes(az));
   if (azInPublic.length !== privateSubnetsAZ.length) {
     throw new ClickStreamBadRequestError(
-      'Validate error: the public subnets and private subnets for ingestion endpoint must be in the same Availability Zones (AZ). '+
+      'Validation error: the public subnets and private subnets for ingestion endpoint must be in the same Availability Zones (AZ). '+
       'For example, you can not select public subnets in AZ (a, b), while select private subnets in AZ (b, c).',
     );
   }
@@ -513,7 +518,7 @@ async function _checkSubnets(pipeline: IPipeline) {
 
   if (!_checkNatGatewayInPublicSubnet(natGateways, privateSubnets)) {
     throw new ClickStreamBadRequestError(
-      'Validate error: the NAT gateway must create in public subnet.',
+      'Validation error: the NAT gateway must create in public subnet.',
     );
   }
 
