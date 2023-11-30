@@ -1294,9 +1294,9 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#self-hosted" class="md-nav__link">
+  <a href="#self-hosted-kafka" class="md-nav__link">
     <span class="md-ellipsis">
-      Self-hosted:
+      Self-hosted Kafka
     </span>
   </a>
   
@@ -2737,9 +2737,9 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#self-hosted" class="md-nav__link">
+  <a href="#self-hosted-kafka" class="md-nav__link">
     <span class="md-ellipsis">
-      Self-hosted:
+      Self-hosted Kafka
     </span>
   </a>
   
@@ -2801,13 +2801,15 @@ Currently, solution support Amazon Managed Streaming for Apache Kafka (Amazon MS
 <p><strong>Topic</strong>: The user can specify a topic name. By default, the solution will create a topic with "project-id".</p>
 </li>
 </ul>
-<h2 id="self-hosted">Self-hosted:</h2>
+<h2 id="self-hosted-kafka">Self-hosted Kafka</h2>
 <p>Users can also use self-hosted Kafka clusters. In order to integrate the solution with Kafka clusters, provide the following configurations:</p>
 <ul>
-<li><strong>Broker link</strong>: Enter the brokers link of Kafka cluster that you wish to connect to, the Kafka cluster needs to meet the following requirements:</li>
-<li>The Kafka cluster and this solution need to be in the same VPC</li>
 <li>
-<p>The number of Kafka cluster brokers cannot be less than two</p>
+<p><strong>Broker link</strong>: Enter the brokers link of Kafka cluster that you wish to connect to, the Kafka cluster needs to meet the following requirements:</p>
+<ul>
+<li>The Kafka cluster and this solution need to be in the same VPC</li>
+<li>The number of Kafka cluster brokers cannot be less than two</li>
+</ul>
 </li>
 <li>
 <p><strong>Topic</strong>: User can specify the topic for storing the data. </p>
