@@ -97,7 +97,6 @@ export const pingServiceResource = async (region: string, service: string) => {
     default:
       break;
   };
-  console.log('pingServiceResource', { region, service, resourceName });
   if (!resourceName) return false;
   if (service === 'quicksight' && region.startsWith('cn-')) {
     return false;
