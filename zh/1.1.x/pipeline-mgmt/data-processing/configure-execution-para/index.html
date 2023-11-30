@@ -2740,10 +2740,8 @@
 <p><code>cron(分钟 小时 月中的天 月 周中的天 年)</code></p>
 <p>有关更多信息，请参阅 <a href="https://docs.aws.amazon.com/scheduler/latest/UserGuide/schedule-types.html?icmpid=docs_console_unmapped#cron-based">基于 Cron 的计划</a>。</p>
 <p>## 配置Spark作业参数</p>
-<p>默认情况下，EMR Serverless作业配置为<a href="https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/jobs-spark.html">默认设置</a>，适用于大多数情况，例如按小时处理。</p>
-<p>如果您的数据量巨大，例如单批次处理的数据行数超过1亿，则默认设置可能不适用于此情况，会导致EMR作业失败。您需要更改EMR Spark作业的配置。</p>
-<p>您可以通过在S3存储桶中添加文件 <code>s3://{PipelineS3Bucket}/{PipelineS3Prefix}{ProjectId}/config/spark-config.json</code> 来配置EMR Spark作业使用的资源。</p>
-<p>请使用数据流水线中的值替换 <code>{PipelineS3Bucket}</code>, <code>{PipelineS3Prefix}</code>, 和 <code>{ProjectId}</code> 。 这些值可以在<code>Clickstream-DataProcessing-&lt;uuid&gt;</code> 堆栈的 <strong>参数</strong>界面中找到。</p>
+<p>默认情况下，Clickstream 会智能地根据需要处理的数据集的大小并适当设置EMR作业参数。在大多数情况下，您不需要调整 EMR 作业参数，但如果您想覆盖 EMR 作业参数，您可以将 <code>spark-config.json</code> 文件放入S3存储桶以设置您自己的参数。</p>
+<p>要添加自定义的 EMR 作业参数，您可以在 S3 存储桶中添加一个文件 <code>s3://{PipelineS3Bucket}/{PipelineS3Prefix}{ProjectId}/config/spark-config.json</code>，请使用数据流水线中的值替换 <code>{PipelineS3Bucket}</code>， <code>{PipelineS3Prefix}</code>， 和 <code>{ProjectId}</code> 。 这些值可以在<code>Clickstream-DataProcessing-&lt;uuid&gt;</code> 堆栈的 <strong>参数</strong>界面中找到。</p>
 <p>此外，您可以通过运行以下命令获取这些值：</p>
 <div class="language-sh highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nv">stackNames</span><span class="o">=</span><span class="k">$(</span>aws<span class="w"> </span>cloudformation<span class="w"> </span>list-stacks<span class="w"> </span>--stack-status-filter<span class="w"> </span>CREATE_COMPLETE<span class="w"> </span>UPDATE_COMPLETE<span class="w"> </span>--no-paginate<span class="w">  </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span>-r<span class="w"> </span><span class="s1">&#39;.StackSummaries[].StackName&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w">  </span>Clickstream-DataProcessing<span class="w">  </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-v<span class="w"> </span>Nested<span class="k">)</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
@@ -2751,7 +2749,7 @@
 </span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">    </span>aws<span class="w"> </span>cloudformation<span class="w"> </span>describe-stacks<span class="w"> </span>--stack-name<span class="w"> </span><span class="nv">$stackName</span><span class="w">  </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span><span class="s1">&#39;.Stacks[].Parameters&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span><span class="s1">&#39;map(select(.ParameterKey == &quot;PipelineS3Bucket&quot; or .ParameterKey == &quot;PipelineS3Prefix&quot; or .ParameterKey == &quot;ProjectId&quot;))&#39;</span>
 </span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="k">done</span>
 </span></code></pre></div>
-<p>使用下面配置，在解决方案的基准测试中，数据处理作业处理600,000,000行数据（200,000,000请求， 数据大小：170G gzip）大约花费了25分钟的时间。</p>
+<p>下面是一个设置 <code>spark-config.json</code> 的例子：</p>
 <div class="language-json highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="p">{</span>
 </span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">   </span><span class="nt">&quot;sparkConfig&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 </span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">        </span><span class="s2">&quot;spark.emr-serverless.executor.disk=200g&quot;</span><span class="p">,</span>
@@ -2770,7 +2768,7 @@
 </span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a><span class="p">}</span>
 </span></code></pre></div>
 <p>请确保您有足够的 emr-serverless 配额，在 us-east-1 区域，您可以通过<a href="https://us-east-1.console.aws.amazon.com/servicequotas/home/services/emr-serverless/quotas/L-D05C8A75">emr-serverless-quotas</a>查看配额。
-更多信息请参阅 <a href="https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/jobs-spark.html#spark-defaults">Spark作业参数</a>和应用<a href="https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/application-capacity.html#worker-configs">工作节点设置</a>。</p>
+更多信息请参阅 <a href="https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/jobs-spark.html#spark-defaults">Spark作业参数</a>和应用<a href="https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/app-behavior.html#worker-configs">工作节点设置</a>。</p>
 
 
   
