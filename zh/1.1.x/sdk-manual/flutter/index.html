@@ -10,28 +10,28 @@
       
       
       
-        <link rel="canonical" href="https://awslabs.github.io/clickstream-analytics-on-aws/1.1.x/pipeline-mgmt/data-modeling/configure-data-modeling/">
+        <link rel="canonical" href="https://awslabs.github.io/clickstream-analytics-on-aws/1.1.x/sdk-manual/flutter/">
       
       
-        <link rel="prev" href="../../data-processing/configure-plugin/">
+        <link rel="prev" href="../web/">
       
       
-        <link rel="next" href="../../quicksight/configure-quicksight/">
+        <link rel="next" href="../wechat/">
       
       
-      <link rel="icon" href="../../../images/favicon.ico">
+      <link rel="icon" href="../../images/favicon.ico">
       <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.4.14">
     
     
       
-        <title>数据建模 - 亚马逊云科技点击流分析解决方案</title>
+        <title>Flutter SDK - 亚马逊云科技点击流分析解决方案</title>
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.fad675c6.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.fad675c6.min.css">
       
         
-        <link rel="stylesheet" href="../../../assets/stylesheets/palette.356b1318.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.356b1318.min.css">
       
       
 
@@ -52,7 +52,7 @@
     
       <link rel="stylesheet" href="/stylesheets/extra.css">
     
-    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
   
@@ -76,7 +76,7 @@
     
     
     
-   <link href="../../../assets/stylesheets/glightbox.min.css" rel="stylesheet"/><style>
+   <link href="../../assets/stylesheets/glightbox.min.css" rel="stylesheet"/><style>
         html.glightbox-open { overflow: initial; height: 100%; }
         .gslide-title { margin-top: 0px; user-select: text; }
         .gslide-desc { color: #666; user-select: text; }
@@ -87,7 +87,7 @@
             body[data-md-color-scheme="slate"] .gdesc-inner { background: var(--md-default-bg-color);}
             body[data-md-color-scheme="slate"] .gslide-title { color: var(--md-default-fg-color);}
             body[data-md-color-scheme="slate"] .gslide-desc { color: var(--md-default-fg-color);}
-            </style> <script src="../../../assets/javascripts/glightbox.min.js"></script></head>
+            </style> <script src="../../assets/javascripts/glightbox.min.js"></script></head>
   
   
     
@@ -109,7 +109,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#_1" class="md-skip">
+        <a href="#clickstream-flutter-sdk" class="md-skip">
           跳转至
         </a>
       
@@ -127,7 +127,7 @@
 
 <header class="md-header" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="页眉">
-    <a href="../../.." title="亚马逊云科技点击流分析解决方案" class="md-header__button md-logo" aria-label="亚马逊云科技点击流分析解决方案" data-md-component="logo">
+    <a href="../.." title="亚马逊云科技点击流分析解决方案" class="md-header__button md-logo" aria-label="亚马逊云科技点击流分析解决方案" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
@@ -147,7 +147,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              数据建模
+              Flutter SDK
             
           </span>
         </div>
@@ -306,7 +306,7 @@
     
     
       <li class="md-tabs__item md-tabs__item--active">
-        <a href="../../../solution-overview/" class="md-tabs__link">
+        <a href="../../solution-overview/" class="md-tabs__link">
           
   
   实施指南
@@ -359,7 +359,7 @@
 
 <nav class="md-nav md-nav--primary md-nav--lifted" aria-label="导航栏" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../../.." title="亚马逊云科技点击流分析解决方案" class="md-nav__button md-logo" aria-label="亚马逊云科技点击流分析解决方案" data-md-component="logo">
+    <a href="../.." title="亚马逊云科技点击流分析解决方案" class="md-nav__button md-logo" aria-label="亚马逊云科技点击流分析解决方案" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
@@ -468,7 +468,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../solution-overview/" class="md-nav__link">
+      <a href="../../solution-overview/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -489,7 +489,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../solution-overview/features-and-benefits/" class="md-nav__link">
+      <a href="../../solution-overview/features-and-benefits/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -510,7 +510,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../solution-overview/use-cases/" class="md-nav__link">
+      <a href="../../solution-overview/use-cases/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -576,7 +576,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../architecture/" class="md-nav__link">
+      <a href="../../architecture/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -597,7 +597,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../well-architected-pillars/" class="md-nav__link">
+      <a href="../../well-architected-pillars/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -663,7 +663,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../aws-services/" class="md-nav__link">
+      <a href="../../aws-services/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -684,7 +684,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../architecture-details/" class="md-nav__link">
+      <a href="../../architecture-details/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -750,7 +750,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../plan-deployment/cost/" class="md-nav__link">
+      <a href="../../plan-deployment/cost/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -771,7 +771,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../plan-deployment/security/" class="md-nav__link">
+      <a href="../../plan-deployment/security/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -792,7 +792,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../plan-deployment/regions/" class="md-nav__link">
+      <a href="../../plan-deployment/regions/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -858,7 +858,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../deployment/" class="md-nav__link">
+      <a href="../../deployment/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -879,7 +879,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../deployment/with-cognito/" class="md-nav__link">
+      <a href="../../deployment/with-cognito/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -900,7 +900,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../deployment/with-oidc/" class="md-nav__link">
+      <a href="../../deployment/with-oidc/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -921,7 +921,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../deployment/within-vpc/" class="md-nav__link">
+      <a href="../../deployment/within-vpc/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -987,7 +987,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../getting-started/" class="md-nav__link">
+      <a href="../../getting-started/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1008,7 +1008,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../getting-started/1.create-project/" class="md-nav__link">
+      <a href="../../getting-started/1.create-project/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1029,7 +1029,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../getting-started/2.config-pipeline/" class="md-nav__link">
+      <a href="../../getting-started/2.config-pipeline/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1050,7 +1050,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../getting-started/3.integrate-sdk/" class="md-nav__link">
+      <a href="../../getting-started/3.integrate-sdk/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1071,7 +1071,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../getting-started/4.view-dashboard/" class="md-nav__link">
+      <a href="../../getting-started/4.view-dashboard/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1097,21 +1097,19 @@
                 
   
   
-    
   
   
-  
     
     
     
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_7" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_7" >
         
           
           <label class="md-nav__link" for="__nav_1_7" id="__nav_1_7_label" tabindex="0">
@@ -1125,7 +1123,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_7_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_7_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_1_7">
             <span class="md-nav__icon md-icon"></span>
             管道管理
@@ -1139,7 +1137,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../" class="md-nav__link">
+      <a href="../../pipeline-mgmt/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1197,7 +1195,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../ingestion/" class="md-nav__link">
+      <a href="../../pipeline-mgmt/ingestion/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1218,7 +1216,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../ingestion/configure-ingestion-endpoint/" class="md-nav__link">
+      <a href="../../pipeline-mgmt/ingestion/configure-ingestion-endpoint/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1239,7 +1237,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../ingestion/create-data-sink-w-kafka/" class="md-nav__link">
+      <a href="../../pipeline-mgmt/ingestion/create-data-sink-w-kafka/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1260,7 +1258,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../ingestion/create-data-sink-w-kinesis/" class="md-nav__link">
+      <a href="../../pipeline-mgmt/ingestion/create-data-sink-w-kinesis/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1281,7 +1279,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../ingestion/create-data-sink-w-s3/" class="md-nav__link">
+      <a href="../../pipeline-mgmt/ingestion/create-data-sink-w-s3/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1347,7 +1345,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../data-processing/" class="md-nav__link">
+      <a href="../../pipeline-mgmt/data-processing/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1368,7 +1366,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../data-processing/data-schema/" class="md-nav__link">
+      <a href="../../pipeline-mgmt/data-processing/data-schema/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1389,7 +1387,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../data-processing/configure-execution-para/" class="md-nav__link">
+      <a href="../../pipeline-mgmt/data-processing/configure-execution-para/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1410,7 +1408,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../data-processing/configure-plugin/" class="md-nav__link">
+      <a href="../../pipeline-mgmt/data-processing/configure-plugin/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1436,30 +1434,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  <span class="md-ellipsis">
-    数据建模
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../../pipeline-mgmt/data-modeling/configure-data-modeling/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1468,35 +1446,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="目录">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      目录
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#_2" class="md-nav__link">
-    <span class="md-ellipsis">
-      预设数据视图
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1509,7 +1458,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../quicksight/configure-quicksight/" class="md-nav__link">
+      <a href="../../pipeline-mgmt/quicksight/configure-quicksight/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1530,7 +1479,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../pipe-mgmt/" class="md-nav__link">
+      <a href="../../pipeline-mgmt/pipe-mgmt/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1556,19 +1505,21 @@
                 
   
   
+    
   
   
+  
     
     
     
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
         
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_8" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_8" checked>
         
           
           <label class="md-nav__link" for="__nav_1_8" id="__nav_1_8_label" tabindex="0">
@@ -1582,7 +1533,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_8_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_8_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_1_8">
             <span class="md-nav__icon md-icon"></span>
             SDK手册
@@ -1596,7 +1547,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../sdk-manual/" class="md-nav__link">
+      <a href="../" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1617,7 +1568,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../sdk-manual/android/" class="md-nav__link">
+      <a href="../android/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1638,7 +1589,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../sdk-manual/swift/" class="md-nav__link">
+      <a href="../swift/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1659,7 +1610,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../sdk-manual/web/" class="md-nav__link">
+      <a href="../web/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1677,10 +1628,30 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../../../sdk-manual/flutter/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Flutter SDK
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   <span class="md-ellipsis">
@@ -1689,6 +1660,257 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      简介
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="简介">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      平台支持
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sdk" class="md-nav__link">
+    <span class="md-ellipsis">
+      集成 SDK
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="集成 SDK">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-sdk" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. 添加 SDK
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-sdk" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. 初始化 SDK
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. 开始使用
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. 开始使用">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      记录事件
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      登录和登出
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      添加用户属性
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      添加全局属性
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      其他配置项
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      更新配置
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      实时发送事件
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sdk_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      禁用 SDK
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      调试事件
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_11" class="md-nav__link">
+    <span class="md-ellipsis">
+      数据格式定义
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="数据格式定义">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_12" class="md-nav__link">
+    <span class="md-ellipsis">
+      数据类型
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_13" class="md-nav__link">
+    <span class="md-ellipsis">
+      命名规则
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_14" class="md-nav__link">
+    <span class="md-ellipsis">
+      事件和属性限制
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_15" class="md-nav__link">
+    <span class="md-ellipsis">
+      预置事件
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_16" class="md-nav__link">
+    <span class="md-ellipsis">
+      事件属性
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sdk_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      SDK更新日志
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_17" class="md-nav__link">
+    <span class="md-ellipsis">
+      参考链接
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1701,7 +1923,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../sdk-manual/wechat/" class="md-nav__link">
+      <a href="../wechat/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1722,7 +1944,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../sdk-manual/http-api/" class="md-nav__link">
+      <a href="../http-api/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1743,7 +1965,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../sdk-manual/user-identifier/" class="md-nav__link">
+      <a href="../user-identifier/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1809,7 +2031,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../analytics/" class="md-nav__link">
+      <a href="../../analytics/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1867,7 +2089,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../analytics/dashboard/" class="md-nav__link">
+      <a href="../../analytics/dashboard/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1888,7 +2110,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../analytics/dashboard/acquisition/" class="md-nav__link">
+      <a href="../../analytics/dashboard/acquisition/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1909,7 +2131,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../analytics/dashboard/engagement/" class="md-nav__link">
+      <a href="../../analytics/dashboard/engagement/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1930,7 +2152,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../analytics/dashboard/activity/" class="md-nav__link">
+      <a href="../../analytics/dashboard/activity/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1951,7 +2173,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../analytics/dashboard/retention/" class="md-nav__link">
+      <a href="../../analytics/dashboard/retention/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1972,7 +2194,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../analytics/dashboard/device/" class="md-nav__link">
+      <a href="../../analytics/dashboard/device/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1993,7 +2215,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../analytics/dashboard/user/" class="md-nav__link">
+      <a href="../../analytics/dashboard/user/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2014,7 +2236,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../analytics/dashboard/crash/" class="md-nav__link">
+      <a href="../../analytics/dashboard/crash/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2035,7 +2257,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../analytics/dashboard/custom-analysis/" class="md-nav__link">
+      <a href="../../analytics/dashboard/custom-analysis/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2101,7 +2323,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../analytics/explore/" class="md-nav__link">
+      <a href="../../analytics/explore/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2122,7 +2344,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../analytics/explore/event/" class="md-nav__link">
+      <a href="../../analytics/explore/event/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2143,7 +2365,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../analytics/explore/funnel/" class="md-nav__link">
+      <a href="../../analytics/explore/funnel/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2164,7 +2386,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../analytics/explore/path/" class="md-nav__link">
+      <a href="../../analytics/explore/path/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2185,7 +2407,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../analytics/explore/retention/" class="md-nav__link">
+      <a href="../../analytics/explore/retention/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2251,7 +2473,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../analytics/analyzes/" class="md-nav__link">
+      <a href="../../analytics/analyzes/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2317,7 +2539,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../analytics/data-mgmt/" class="md-nav__link">
+      <a href="../../analytics/data-mgmt/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2354,7 +2576,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../identity-mgmt/" class="md-nav__link">
+      <a href="../../identity-mgmt/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2375,7 +2597,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../upgrade/" class="md-nav__link">
+      <a href="../../upgrade/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2433,7 +2655,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../resources/upload-ssl-certificate/" class="md-nav__link">
+      <a href="../../resources/upload-ssl-certificate/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2462,7 +2684,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../faq/" class="md-nav__link">
+      <a href="../../faq/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2483,7 +2705,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../troubleshooting/" class="md-nav__link">
+      <a href="../../troubleshooting/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2504,7 +2726,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../uninstall/" class="md-nav__link">
+      <a href="../../uninstall/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2562,7 +2784,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../source/" class="md-nav__link">
+      <a href="../../source/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2591,7 +2813,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../revisions/" class="md-nav__link">
+      <a href="../../revisions/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2612,7 +2834,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../notices/" class="md-nav__link">
+      <a href="../../notices/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2680,9 +2902,231 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      简介
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="简介">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
   <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
-      预设数据视图
+      平台支持
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sdk" class="md-nav__link">
+    <span class="md-ellipsis">
+      集成 SDK
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="集成 SDK">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-sdk" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. 添加 SDK
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-sdk" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. 初始化 SDK
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. 开始使用
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. 开始使用">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      记录事件
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      登录和登出
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      添加用户属性
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      添加全局属性
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      其他配置项
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      更新配置
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      实时发送事件
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sdk_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      禁用 SDK
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      调试事件
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_11" class="md-nav__link">
+    <span class="md-ellipsis">
+      数据格式定义
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="数据格式定义">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_12" class="md-nav__link">
+    <span class="md-ellipsis">
+      数据类型
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_13" class="md-nav__link">
+    <span class="md-ellipsis">
+      命名规则
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_14" class="md-nav__link">
+    <span class="md-ellipsis">
+      事件和属性限制
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_15" class="md-nav__link">
+    <span class="md-ellipsis">
+      预置事件
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_16" class="md-nav__link">
+    <span class="md-ellipsis">
+      事件属性
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sdk_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      SDK更新日志
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_17" class="md-nav__link">
+    <span class="md-ellipsis">
+      参考链接
     </span>
   </a>
   
@@ -2706,128 +3150,388 @@
   
 
 
-<h1 id="_1">数据建模设置</h1>
-<p>数据管道处理完事件数据后，您可以将数据加载到分析引擎进行数据建模，比如Redshift或Athena，其中数据将被汇总并组织成不同的视图（如事件、设备、会话），以及常用的计算指标。以下是如果你选择启用数据建模模块，此解决方案提供的预设数据视图。</p>
-<h2 id="_2">预设数据视图</h2>
+<h1 id="clickstream-flutter-sdk">Clickstream Flutter SDK</h1>
+<h2 id="_1">简介</h2>
+<p>Clickstream Flutter SDK 可以帮助您轻松地从移动设备收集和发送应用内事件到您配置的解决方案数据管道。</p>
+<p>该 SDK 基于 <a href="../android/">Clickstream Android SDK</a> 和 <a href="../swift/">Clickstream Swift SDK</a> 构建. 因此, flutter
+SDK 还支持自动收集常见的用户事件和属性（例如会话开始、首次打开）。 此外，我们还添加了易于使用的 API 来简化 Flutter
+应用程序中的数据收集。</p>
+<h3 id="_2">平台支持</h3>
+<p><strong>Android</strong>: 4.1（API 级别 16）及更高版本。</p>
+<p><strong>iOS</strong>: 13 及更高版本。</p>
+<h2 id="sdk">集成 SDK</h2>
+<h3 id="1-sdk">1. 添加 SDK</h3>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>flutter<span class="w"> </span>pub<span class="w"> </span>add<span class="w"> </span>clickstream_analytics
+</span></code></pre></div>
+<p>完成后，使用如下命令重新构建您的 Flutter 应用程序：</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>flutter<span class="w"> </span>run
+</span></code></pre></div>
+<h3 id="2-sdk">2. 初始化 SDK</h3>
+<p>从点击流解决方案 Web 控制台复制配置代码，配置代码应如下所示。 在解决方案控制台中将应用程序注册到数据管道后，您还可以手动添加此代码段并替换
+appId 和 endpoint 的值。</p>
+<div class="language-dart highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="k">import</span><span class="w"> </span><span class="s1">&#39;package:clickstream_analytics/clickstream_analytics.dart&#39;</span><span class="p">;</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="kd">final</span><span class="w"> </span><span class="n">analytics</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ClickstreamAnalytics</span><span class="p">();</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="n">analytics</span><span class="p">.</span><span class="n">init</span><span class="p">(</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">  </span><span class="nl">appId:</span><span class="w"> </span><span class="s2">&quot;your appId&quot;</span><span class="p">,</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">  </span><span class="nl">endpoint:</span><span class="w"> </span><span class="s2">&quot;https://example.com/collect&quot;</span>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="p">);</span>
+</span></code></pre></div>
+<div class="admonition info">
+<p class="admonition-title">Important</p>
+<ul>
+<li>您的 appId 和 endpoint 已在其中设置好了。</li>
+<li>我们只需要在应用程序启动后初始化一次SDK。 建议您在应用程序的主函数中执行此操作。</li>
+<li>我们可以使用 <code>bool result = await analytics.init()</code> 来获取初始化结果的布尔值。</li>
+</ul>
+</div>
+<h3 id="3">3. 开始使用</h3>
+<h4 id="_3">记录事件</h4>
+<p>在需要记录事件的地方添加以下代码。</p>
+<div class="language-dart highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="k">import</span><span class="w"> </span><span class="s1">&#39;package:clickstream_analytics/clickstream_analytics.dart&#39;</span><span class="p">;</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="kd">final</span><span class="w"> </span><span class="n">analytics</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ClickstreamAnalytics</span><span class="p">();</span>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="c1">// 记录带属性的事件</span>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="n">analytics</span><span class="p">.</span><span class="n">record</span><span class="p">(</span><span class="nl">name:</span><span class="w"> </span><span class="s1">&#39;button_click&#39;</span><span class="p">,</span><span class="w"> </span><span class="nl">attributes:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="w">  </span><span class="s2">&quot;event_category&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;shoes&quot;</span><span class="p">,</span>
+</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="w">  </span><span class="s2">&quot;currency&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;CNY&quot;</span><span class="p">,</span>
+</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="w">  </span><span class="s2">&quot;value&quot;</span><span class="o">:</span><span class="w"> </span><span class="m">279.9</span>
+</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="p">});</span>
+</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>
+</span><span id="__span-3-12"><a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a><span class="c1">// 记录只带有事件名的事件</span>
+</span><span id="__span-3-13"><a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a><span class="n">analytics</span><span class="p">.</span><span class="n">record</span><span class="p">(</span><span class="nl">name:</span><span class="w"> </span><span class="s2">&quot;button_click&quot;</span><span class="p">);</span>
+</span></code></pre></div>
+<h4 id="_4">登录和登出</h4>
+<div class="language-dart highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1">// 当用户登录成功后调用</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="n">analytics</span><span class="p">.</span><span class="n">setUserId</span><span class="p">(</span><span class="s2">&quot;userId&quot;</span><span class="p">);</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="c1">// 当用户退出登录时调用</span>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="n">analytics</span><span class="p">.</span><span class="n">setUserId</span><span class="p">(</span><span class="kc">null</span><span class="p">);</span>
+</span></code></pre></div>
+<h4 id="_5">添加用户属性</h4>
+<div class="language-dart highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">analytics</span><span class="p">.</span><span class="n">setUserAttributes</span><span class="p">({</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="w">  </span><span class="s2">&quot;userName&quot;</span><span class="o">:</span><span class="s2">&quot;carl&quot;</span><span class="p">,</span>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">  </span><span class="s2">&quot;userAge&quot;</span><span class="o">:</span><span class="w"> </span><span class="m">22</span>
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="p">});</span>
+</span></code></pre></div>
+<p>当前登录用户的属性会进行缓存，因此在下次App打开时不需要再次设置所有的用户属性，当然您可以使用相同的
+api <code>analytics.setUserAttributes()</code> 在当用户属性改变时来更新当前用户的属性。</p>
+<h4 id="_6">添加全局属性</h4>
+<div class="language-dart highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="n">analytics</span><span class="p">.</span><span class="n">addGlobalAttributes</span><span class="p">({</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="w">  </span><span class="s2">&quot;_traffic_source_medium&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Search engine&quot;</span><span class="p">,</span>
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="w">  </span><span class="s2">&quot;_traffic_source_name&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Summer promotion&quot;</span><span class="p">,</span>
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="w">  </span><span class="s2">&quot;level&quot;</span><span class="o">:</span><span class="w"> </span><span class="m">10</span>
+</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="p">});</span>
+</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="c1">// 删除全局属性</span>
+</span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="n">analytics</span><span class="p">.</span><span class="n">deleteGlobalAttributes</span><span class="p">([</span><span class="s2">&quot;level&quot;</span><span class="p">]);</span>
+</span></code></pre></div>
+<p>建议每次 SDK 初始化后设置全局属性，全局属性将包含在设置后产生的所有事件中。</p>
+<h4 id="_7">其他配置项</h4>
+<p>除了必需的 <code>appId</code> 和 <code>endpoint</code> 之外，您还可以配置其他参数以满足更多定制化的使用：</p>
+<div class="language-dart highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="kd">final</span><span class="w"> </span><span class="n">analytics</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ClickstreamAnalytics</span><span class="p">();</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="n">analytics</span><span class="p">.</span><span class="n">init</span><span class="p">(</span>
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="w">  </span><span class="nl">appId:</span><span class="w"> </span><span class="s2">&quot;your appId&quot;</span><span class="p">,</span>
+</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="w">  </span><span class="nl">endpoint:</span><span class="w"> </span><span class="s2">&quot;https://example.com/collect&quot;</span><span class="p">,</span>
+</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="w">  </span><span class="nl">isLogEvents:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="w">  </span><span class="nl">isCompressEvents:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+</span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="w">  </span><span class="nl">sendEventsInterval:</span><span class="w"> </span><span class="m">10000</span><span class="p">,</span>
+</span><span id="__span-7-8"><a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="w">  </span><span class="nl">isTrackScreenViewEvents:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+</span><span id="__span-7-9"><a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a><span class="w">  </span><span class="nl">isTrackUserEngagementEvents:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+</span><span id="__span-7-10"><a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a><span class="w">  </span><span class="nl">isTrackAppExceptionEvents:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+</span><span id="__span-7-11"><a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a><span class="w">  </span><span class="nl">authCookie:</span><span class="w"> </span><span class="s2">&quot;your auth cookie&quot;</span><span class="p">,</span>
+</span><span id="__span-7-12"><a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a><span class="w">  </span><span class="nl">sessionTimeoutDuration:</span><span class="w"> </span><span class="m">1800000</span>
+</span><span id="__span-7-13"><a id="__codelineno-7-13" name="__codelineno-7-13" href="#__codelineno-7-13"></a><span class="p">);</span>
+</span></code></pre></div>
+<p>以下是每个参数的说明</p>
 <table>
 <thead>
 <tr>
-<th>数据模型名称</th>
-<th>Redshift</th>
-<th>Athena</th>
-<th>描述</th>
+<th>参数名称</th>
+<th>是否必需</th>
+<th>默认值</th>
+<th>解释</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>clickstream_ods_event_rt_view</td>
-<td>物化视图</td>
-<td>视图</td>
-<td>包含所有事件维度的视图。</td>
+<td>appId</td>
+<td>是</td>
+<td>--</td>
+<td>在解决方案控制平面中您应用程序的 ID</td>
 </tr>
 <tr>
-<td>clickstream_ods_event_parameter_rt_view</td>
-<td>物化视图</td>
-<td>视图</td>
-<td>包含所有事件参数的视图。</td>
+<td>endpoint</td>
+<td>是</td>
+<td>--</td>
+<td>您将事件上传到 Clickstream 摄取服务器的 URL 请求路径</td>
 </tr>
 <tr>
-<td>clickstream_user_dim_view</td>
-<td>物化视图</td>
-<td>视图</td>
-<td>包含所有用户维度的视图。</td>
+<td>isLogEvents</td>
+<td>否</td>
+<td>false</td>
+<td>是否自动打印事件 JSON 以调试事件，<a href="#_10">了解更多</a></td>
 </tr>
 <tr>
-<td>clickstream_user_attr_view</td>
-<td>物化视图</td>
-<td>视图</td>
-<td>包含所有用户自定义属性的视图。</td>
+<td>isCompressEvents</td>
+<td>否</td>
+<td>true</td>
+<td>上传事件时是否通过gzip压缩事件内容</td>
 </tr>
 <tr>
-<td>clickstream_session_view</td>
-<td>物化视图</td>
-<td>视图</td>
-<td>包含所有会话维度和相关度量，例如，会话持续时间，会话视图。</td>
+<td>sendEventsInterval</td>
+<td>否</td>
+<td>10000</td>
+<td>事件发送间隔（毫秒）</td>
 </tr>
 <tr>
-<td>clickstream_retention_view</td>
-<td>物化视图</td>
-<td>视图</td>
-<td>包含按日期和返回日度量的保留指标的视图。</td>
+<td>isTrackScreenViewEvents</td>
+<td>否</td>
+<td>true</td>
+<td>是否自动记录 screen view（屏幕浏览） 事件</td>
 </tr>
 <tr>
-<td>clickstream_lifecycle_daily_view</td>
-<td>物化视图</td>
-<td>视图</td>
-<td>包含按生命周期阶段划分的用户数量的度量指标的日视图，即，新用户，活跃用户，返回用户，流失用户。</td>
+<td>isTrackUserEngagementEvents</td>
+<td>否</td>
+<td>true</td>
+<td>是否自动记录 user engagement（用户参与） 事件</td>
 </tr>
 <tr>
-<td>clickstream_lifecycle_weekly_view</td>
-<td>物化视图</td>
-<td>视图</td>
-<td>包含按生命周期阶段划分的用户数量的度量指标的周视图，即，新用户，活跃用户，返回用户，流失用户。</td>
+<td>isTrackAppExceptionEvents</td>
+<td>否</td>
+<td>false</td>
+<td>是否自动记录应用崩溃事件</td>
 </tr>
 <tr>
-<td>clickstream_path_view</td>
-<td>物化视图</td>
-<td>视图</td>
-<td>包含关于每个会话中用户旅程的信息的视图。</td>
+<td>authCookie</td>
+<td>否</td>
+<td>--</td>
+<td>您的 AWS 应用程序负载均衡器身份验证 cookie</td>
+</tr>
+<tr>
+<td>sessionTimeoutDuration</td>
+<td>否</td>
+<td>1800000</td>
+<td>会话超时的时长（毫秒）</td>
 </tr>
 </tbody>
 </table>
-<p>您可以选择使用Redshift或Athena，或两者都用。</p>
-<div class="admonition tip">
-<p class="admonition-title">提示</p>
-<p>我们建议你选择两者都用，也就是说，使用Redshift进行热数据建模，并使用Athena进行全时间数据分析。</p>
+<h4 id="_8">更新配置</h4>
+<p>您可以在初始化 SDK 后更新默认配置，以下是您可以更新的配置参数。</p>
+<div class="language-dart highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="kd">final</span><span class="w"> </span><span class="n">analytics</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ClickstreamAnalytics</span><span class="p">();</span>
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="n">analytics</span><span class="p">.</span><span class="n">updateConfigure</span><span class="p">(</span>
+</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="w">    </span><span class="nl">appId:</span><span class="w"> </span><span class="s2">&quot;your appId&quot;</span><span class="p">,</span>
+</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="w">    </span><span class="nl">endpoint:</span><span class="w"> </span><span class="s2">&quot;https://example.com/collect&quot;</span><span class="p">,</span>
+</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="w">    </span><span class="nl">isLogEvents:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+</span><span id="__span-8-6"><a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="w">    </span><span class="nl">isCompressEvents:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+</span><span id="__span-8-7"><a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="w">    </span><span class="nl">isTrackScreenViewEvents:</span><span class="w"> </span><span class="kc">false</span>
+</span><span id="__span-8-8"><a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a><span class="w">    </span><span class="nl">isTrackUserEngagementEvents:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+</span><span id="__span-8-9"><a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a><span class="w">    </span><span class="nl">isTrackAppExceptionEvents:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+</span><span id="__span-8-10"><a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a><span class="w">    </span><span class="nl">sessionTimeoutDuration:</span><span class="w"> </span><span class="m">100000</span><span class="p">,</span>
+</span><span id="__span-8-11"><a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a><span class="w">    </span><span class="nl">authCookie:</span><span class="w"> </span><span class="s2">&quot;test cookie&quot;</span><span class="p">);</span>
+</span></code></pre></div>
+<h4 id="_9">实时发送事件</h4>
+<div class="language-dart highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="kd">final</span><span class="w"> </span><span class="n">analytics</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ClickstreamAnalytics</span><span class="p">();</span>
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="n">analytics</span><span class="p">.</span><span class="n">flushEvents</span><span class="p">();</span>
+</span></code></pre></div>
+<h4 id="sdk_1">禁用 SDK</h4>
+<p>您可以根据需要禁用该SDK。禁用 SDK 后，SDK 将不会处理日志记录和发送任何事件。当然，当您需要继续记录事件时，您可以再次启用 SDK。</p>
+<div class="language-dart highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="kd">final</span><span class="w"> </span><span class="n">analytics</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ClickstreamAnalytics</span><span class="p">();</span>
+</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>
+</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="c1">// 禁用 SDK</span>
+</span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="n">analytics</span><span class="p">.</span><span class="n">disable</span><span class="p">();</span>
+</span><span id="__span-10-5"><a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a>
+</span><span id="__span-10-6"><a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a><span class="c1">// 启用 SDK</span>
+</span><span id="__span-10-7"><a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a><span class="n">analytics</span><span class="p">.</span><span class="n">enable</span><span class="p">();</span>
+</span></code></pre></div>
+<h4 id="_10">调试事件</h4>
+<p>您可以按照以下步骤查看事件原始 JSON 并调试您的事件。</p>
+<ol>
+<li>
+<p>使用 <code>analytics.updateConfigure()</code> 并在调试模式下将 <code>isLogEvents</code> 设置成为 true, 例如:
+    <div class="language-dart highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="c1">// 在调试模式下打开事件 JSON 内容的打印</span>
+</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="n">analytics</span><span class="p">.</span><span class="n">updateConfigure</span><span class="p">(</span><span class="nl">isLogEvents:</span><span class="w"> </span><span class="kc">true</span><span class="p">);</span>
+</span></code></pre></div></p>
+</li>
+<li>
+<p>集成 SDK 并启动您的应用程序。</p>
+<ol>
+<li>对于Android应用程序日志，我们可以直接在终端窗口中看到。 您还可以使用 Android Studio <strong>Logcat</strong> 窗口中的过滤器来查看日志。</li>
+<li>对于iOS应用程序日志，我们需要通过 Xcode 启动 App 后并打开日志面板来查看它。</li>
+</ol>
+</li>
+<li>
+<p>在 filter 中输入 <code>EventRecorder</code>，您将看到 Clickstream Flutter SDK 记录的所有事件的 JSON 内容。</p>
+</li>
+</ol>
+<h2 id="_11">数据格式定义</h2>
+<h3 id="_12">数据类型</h3>
+<p>Clickstream Flutter SDK 支持以下数据类型：</p>
+<table>
+<thead>
+<tr>
+<th>数据类型</th>
+<th>范围</th>
+<th>示例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>int</td>
+<td>-9223372036854775808 ～ 9223372036854775807</td>
+<td>12</td>
+</tr>
+<tr>
+<td>double</td>
+<td>5e-324 ~ 1.79e+308</td>
+<td>3.14</td>
+</tr>
+<tr>
+<td>bool</td>
+<td>true, false</td>
+<td>true</td>
+</tr>
+<tr>
+<td>String</td>
+<td>max 1024 characters</td>
+<td>"Clickstream"</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_13">命名规则</h3>
+<ol>
+<li>
+<p>事件名称和属性名称不能以数字开头，只能包含大写字母、小写字母、数字和下划线，如果属性名称或用户属性名称无效，将丢弃该属性并记录错误。</p>
+</li>
+<li>
+<p>不要在事件名称或属性名称前使用 <code>_</code> 作为前缀，因为 <code>_</code> 前缀保留给解决方案使用。</p>
+</li>
+<li>
+<p>事件名称和属性名称区分大小写，因此 <code>Add_to_cart</code> 和 <code>add_to_cart</code> 将被识别为两个不同的事件名称。</p>
+</li>
+</ol>
+<h3 id="_14">事件和属性限制</h3>
+<p>为了提高查询和分析的效率，我们需要对事件进行以下限制：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">名称</th>
+<th style="text-align: left;">建议</th>
+<th style="text-align: left;">硬限制</th>
+<th style="text-align: left;">超过限制的处理策略</th>
+<th style="text-align: left;">错误码</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">事件名称合规</td>
+<td style="text-align: left;">--</td>
+<td style="text-align: left;">--</td>
+<td style="text-align: left;">丢弃该事件，打印日志并记录<code>_clickstream_error</code>事件</td>
+<td style="text-align: left;">1001</td>
+</tr>
+<tr>
+<td style="text-align: left;">事件名称长度</td>
+<td style="text-align: left;">25 个字符以下</td>
+<td style="text-align: left;">50 个字符</td>
+<td style="text-align: left;">丢弃该事件，打印日志并记录<code>_clickstream_error</code>事件</td>
+<td style="text-align: left;">1002</td>
+</tr>
+<tr>
+<td style="text-align: left;">事件属性名称的长度</td>
+<td style="text-align: left;">25 个字符以下</td>
+<td style="text-align: left;">50 个字符</td>
+<td style="text-align: left;">丢弃该属性、打印日志并在事件属性中记录错误</td>
+<td style="text-align: left;">2001</td>
+</tr>
+<tr>
+<td style="text-align: left;">属性名称合规</td>
+<td style="text-align: left;">--</td>
+<td style="text-align: left;">--</td>
+<td style="text-align: left;">丢弃该属性、打印日志并在事件属性中记录错误</td>
+<td style="text-align: left;">2002</td>
+</tr>
+<tr>
+<td style="text-align: left;">事件属性值的长度</td>
+<td style="text-align: left;">少于 100 个字符</td>
+<td style="text-align: left;">1024 个字符</td>
+<td style="text-align: left;">丢弃该属性、打印日志并在事件属性中记录错误</td>
+<td style="text-align: left;">2003</td>
+</tr>
+<tr>
+<td style="text-align: left;">每个事件的事件属性</td>
+<td style="text-align: left;">50 属性以下</td>
+<td style="text-align: left;">500 event 属性</td>
+<td style="text-align: left;">丢弃超过限制的属性、打印日志并在事件属性中记录错误</td>
+<td style="text-align: left;">2004</td>
+</tr>
+<tr>
+<td style="text-align: left;">用户属性数</td>
+<td style="text-align: left;">25岁以下属性</td>
+<td style="text-align: left;">100个用户属性</td>
+<td style="text-align: left;">丢弃超过限制的属性、打印日志并记录<code>_clickstream_error</code>事件</td>
+<td style="text-align: left;">3001</td>
+</tr>
+<tr>
+<td style="text-align: left;">用户属性名称的长度</td>
+<td style="text-align: left;">25 个字符以下</td>
+<td style="text-align: left;">50 个字符</td>
+<td style="text-align: left;">丢弃该属性、打印日志并记录<code>_clickstream_error</code>事件</td>
+<td style="text-align: left;">3002</td>
+</tr>
+<tr>
+<td style="text-align: left;">用户属性名称合规</td>
+<td style="text-align: left;">--</td>
+<td style="text-align: left;">--</td>
+<td style="text-align: left;">丢弃该属性、打印日志并记录<code>_clickstream_error</code>事件</td>
+<td style="text-align: left;">3003</td>
+</tr>
+<tr>
+<td style="text-align: left;">用户属性值的长度</td>
+<td style="text-align: left;">50 个字符以下</td>
+<td style="text-align: left;">256 个字符</td>
+<td style="text-align: left;">丢弃该属性、打印日志并记录<code>_clickstream_error</code>事件</td>
+<td style="text-align: left;">3004</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition info">
+<p class="admonition-title">重要提示</p>
+<ul>
+<li>字符限制对于单字节字符语言（例如英语）和双字节字符语言（例如中文）是相同的。</li>
+<li>事件属性数包括事件中公共属性和预设属性。</li>
+<li>如果添加了具有相同名称的属性或用户属性超过两次，将使用最新的值。</li>
+<li>超过限制的所有错误都会在事件attributes里记录 <code>_error_code</code> 和 <code>_error_message</code> 这两个字段。</li>
+</ul>
 </div>
-<p>您可以为 Redshift 设置以下配置。</p>
-<ul>
-<li>
-<p><strong>Redshift 模式</strong>：选择 Redshift 无服务器或预设模式。</p>
-<ul>
-<li>
-<p><strong>无服务器模式</strong></p>
-<ul>
-<li>
-<p><strong>基础 RPU</strong>：RPU 代表 Redshift 处理单元。Amazon Redshift Serverless 以 RPU 计算数据仓库容量，这些是处理工作负载所使用的资源。基础容量指定 Amazon Redshift 用于服务查询的基础数据仓库容量，并以 RPU 表示。提高基础容量可以改善查询性能，尤其是对于消耗大量资源的数据处理工作。</p>
-</li>
-<li>
-<p><strong>VPC</strong>：基于 Amazon VPC 服务的虚拟私有云（VPC）是您在 AWS 云中的私有、逻辑隔离的网络。</p>
-<blockquote>
-<p><strong>注意</strong>：如部署在逻辑隔离的网络中，VPC 必须为 S3，Logs，Dynamodb，STS，States, Redshift 以及 Redshift-data 服务拥有 VPC 终端。</p>
-</blockquote>
-</li>
-<li>
-<p><strong>安全组</strong>：此 VPC 安全组定义了可以在 VPC 中使用的哪些子网和 IP 范围可访问 Redshift 服务端点。</p>
-</li>
-<li>
-<p><strong>子网</strong>：选择至少三个现有的 VPC 子网。</p>
-<blockquote>
-<p><strong>注意</strong>：我们建议出于最佳安全实践使用私有子网进行部署。</p>
-</blockquote>
-</li>
-</ul>
-</li>
-<li>
-<p><strong>预设模式</strong></p>
-<ul>
-<li>
-<p><strong>Redshift 集群</strong>: 使用预设模式的 Amazon Redshift 集群，您可以使用符合成本和性能规格的节点类型构建集群。您必须设置、调整和管理 Amazon Redshift 预设模式的集群。</p>
-</li>
-<li>
-<p><strong>数据库用户</strong>: 该解决方案需要权限才能在 Redshift 集群中访问和创建数据库。默认情况下，它授予 Redshift Data API 管理员用户执行命令以创建数据库、表和视图以及加载数据的权限。</p>
-</li>
-</ul>
-</li>
-<li>
-<p><strong>数据范围</strong>：考虑到让 Redshift 保存所有数据的成本效益问题，我们建议 Redshift 仅保存热数据，而所有数据都存储在 S3 中。需要定期在 Redshift 中删除过期数据。</p>
-</li>
-</ul>
-</li>
-<li>
-<p><strong>Athena</strong>：选择 Athena 使用在 Glue 数据目录中创建的表查询 S3 上的所有数据。</p>
-</li>
-</ul>
+<h2 id="_15">预置事件</h2>
+<p>Android: 参考 <a href="../android/#preset-events">Android SDK 预置事件</a></p>
+<p>iOS: 参考 <a href="../swift/#preset-events">Swift SDK 预置事件</a></p>
+<h2 id="_16">事件属性</h2>
+<p>Android: 参考 <a href="../android/#event-attributes">Android SDK 事件属性</a></p>
+<p>iOS: 参考 <a href="../swift/#event-attributes">Swift SDK 事件属性</a></p>
+<h2 id="sdk_2">SDK更新日志</h2>
+<p>参考：<a href="https://github.com/awslabs/clickstream-flutter/releases">GitHub 更新日志</a></p>
+<p>原生 SDK 版本依赖关系</p>
+<table>
+<thead>
+<tr>
+<th>Flutter SDK 版本</th>
+<th>Android SDK 版本</th>
+<th>Swift SDK 版本</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0.1.0</td>
+<td>0.9.0</td>
+<td>0.8.0</td>
+</tr>
+</tbody>
+</table>
+<h2 id="_17">参考链接</h2>
+<p><a href="https://github.com/awslabs/clickstream-flutter">SDK 源码</a></p>
+<p><a href="https://github.com/awslabs/clickstream-flutter/issues">SDK 问题</a></p>
 
 
   
@@ -2873,10 +3577,10 @@
       <div class="md-progress" data-md-component="progress" role="progressbar"></div>
     
     
-    <script id="__config" type="application/json">{"base": "../../..", "features": ["navigation.instant", "navigation.instant.progress", "navigation.tabs", "navigation.tracking", "navigation.path", "navigation.top", "search.suggest", "search.highlight", "search.share", "content.code.copy", "content.code.select", "content.code.annotate", "content.tabs.link"], "search": "../../../assets/javascripts/workers/search.f886a092.min.js", "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}, "version": {"default": "latest", "provider": "mike"}}</script>
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.instant", "navigation.instant.progress", "navigation.tabs", "navigation.tracking", "navigation.path", "navigation.top", "search.suggest", "search.highlight", "search.share", "content.code.copy", "content.code.select", "content.code.annotate", "content.tabs.link"], "search": "../../assets/javascripts/workers/search.f886a092.min.js", "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}, "version": {"default": "latest", "provider": "mike"}}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.cd18aaf1.min.js"></script>
+      <script src="../../assets/javascripts/bundle.cd18aaf1.min.js"></script>
       
     
   <script>document$.subscribe(() => {const lightbox = GLightbox({"touchNavigation": true, "loop": false, "zoomable": true, "draggable": true, "openEffect": "zoom", "closeEffect": "zoom", "slideEffect": "slide"});})</script></body>
