@@ -675,7 +675,7 @@ describe('Pipeline test', () => {
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
-    expect(res.body.message).toEqual('Validation error: vpc endpoint error in subnet: subnet-00000000000000011, detail: [{\"service\":\"com.amazonaws.ap-southeast-1.logs\",\"reason\":\"The traffic is not allowed by security group rules\"},{\"service\":\"com.amazonaws.ap-southeast-1.logs\",\"reason\":\"The ingress traffic from subnet(subnet-00000000000000011) is not allowed by security group rules\"}].');
+    expect(res.body.message).toEqual('Validation error: vpc endpoint error in subnet: subnet-00000000000000011, detail: [{\"service\":\"com.amazonaws.ap-southeast-1.logs\",\"reason\":\"The traffic is not allowed by security group rules\"}].');
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeVpcEndpointsCommand, 1);
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSecurityGroupRulesCommand, 1);
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSubnetsCommand, 1);
@@ -835,9 +835,61 @@ describe('Pipeline test', () => {
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
-    expect(res.body.message).toEqual('Validation error: vpc endpoint error in subnet: subnet-00000000000000011, detail: [{\"service\":\"com.amazonaws.ap-southeast-1.glue\",\"reason\":\"The traffic is not allowed by security group rules\"},{\"service\":\"com.amazonaws.ap-southeast-1.glue\",\"reason\":\"The ingress traffic from subnet(subnet-00000000000000011) is not allowed by security group rules\"}].');
+    expect(res.body.message).toEqual('Validation error: vpc endpoint error in subnet: subnet-00000000000000011, detail: [{\"service\":\"com.amazonaws.ap-southeast-1.glue\",\"reason\":\"The traffic is not allowed by security group rules\"}].');
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeVpcEndpointsCommand, 1);
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSecurityGroupRulesCommand, 1);
+    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSubnetsCommand, 1);
+    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeRouteTablesCommand, 1);
+  });
+  it('Create pipeline in the isolated subnets with inbound rules only allow one of subnet cidr', async () => {
+    tokenMock(ddbMock, false);
+    projectExistedMock(ddbMock, true);
+    dictionaryMock(ddbMock);
+    createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock,
+      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, iamMock, {
+        publicAZContainPrivateAZ: true,
+        subnetsCross3AZ: true,
+        subnetsIsolated: true,
+        ecsEndpointSGAllowOneSubnet: true,
+      });
+    ddbMock.on(PutCommand).resolves({});
+    const res = await request(app)
+      .post('/api/pipeline')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
+      .send({
+        ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE,
+      });
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(400);
+    expect(res.body.message).toEqual('Validation error: vpc endpoint error in subnet: subnet-00000000000000012, detail: [{\"service\":\"com.amazonaws.ap-southeast-1.ecs\",\"reason\":\"The traffic is not allowed by security group rules\"}].');
+    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeVpcEndpointsCommand, 1);
+    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSecurityGroupRulesCommand, 1);
+    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSubnetsCommand, 1);
+    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeRouteTablesCommand, 1);
+  });
+  it('Create pipeline in the isolated subnets with inbound rules allow all subnet cidr', async () => {
+    tokenMock(ddbMock, false);
+    projectExistedMock(ddbMock, true);
+    dictionaryMock(ddbMock);
+    createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock,
+      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, iamMock, {
+        publicAZContainPrivateAZ: true,
+        subnetsCross3AZ: true,
+        subnetsIsolated: true,
+        ecsEndpointSGAllowAllSubnets: true,
+      });
+    ddbMock.on(PutCommand).resolves({});
+    const res = await request(app)
+      .post('/api/pipeline')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
+      .send({
+        ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE,
+      });
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(201);
+    expect(res.body.message).toEqual('Pipeline added.');
+    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeVpcEndpointsCommand, 1);
+    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSecurityGroupRulesCommand, 2);
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSubnetsCommand, 1);
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeRouteTablesCommand, 1);
   });

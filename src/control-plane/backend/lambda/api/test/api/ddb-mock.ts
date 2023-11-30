@@ -442,6 +442,8 @@ function createPipelineMock(
     azHasTwoSubnets?: boolean;
     s3EndpointRouteError?: boolean;
     glueEndpointSGError?: boolean;
+    ecsEndpointSGAllowOneSubnet?: boolean;
+    ecsEndpointSGAllowAllSubnets?: boolean;
     sgError?: boolean;
     vpcEndpointSubnetErr?: boolean;
     twoAZsInRegion?: boolean;
@@ -621,26 +623,76 @@ function createPipelineMock(
       },
     ],
   });
+  const mockSecurityGroupRules = [
+    {
+      GroupId: 'sg-00000000000000030',
+      IsEgress: false,
+      IpProtocol: '-1',
+      FromPort: -1,
+      ToPort: -1,
+      CidrIpv4: '10.0.0.0/16',
+    },
+    {
+      GroupId: 'sg-00000000000000031',
+      IsEgress: false,
+      IpProtocol: '-1',
+      FromPort: -1,
+      ToPort: -1,
+      CidrIpv4: '10.0.0.0/16',
+    },
+    {
+      GroupId: 'sg-00000000000000032',
+      IsEgress: false,
+      IpProtocol: '-1',
+      FromPort: -1,
+      ToPort: -1,
+      CidrIpv4: '10.0.0.0/16',
+    },
+  ];
+  if (props?.sgError) {
+    mockSecurityGroupRules[0].CidrIpv4 = '11.11.11.11/32';
+    mockSecurityGroupRules[1].CidrIpv4 = '11.11.11.11/32';
+    mockSecurityGroupRules[2].CidrIpv4 = '11.11.11.11/32';
+  } else if (props?.glueEndpointSGError) {
+    mockSecurityGroupRules[1].CidrIpv4 = '11.11.11.11/32';
+  } else if (props?.ecsEndpointSGAllowOneSubnet) {
+    mockSecurityGroupRules[2] = {
+      GroupId: 'sg-00000000000000032',
+      IsEgress: false,
+      IpProtocol: '-1',
+      FromPort: -1,
+      ToPort: -1,
+      CidrIpv4: '10.0.32.0/20',
+    };
+  } else if (props?.ecsEndpointSGAllowAllSubnets) {
+    mockSecurityGroupRules[2] = {
+      GroupId: 'sg-00000000000000032',
+      IsEgress: false,
+      IpProtocol: '-1',
+      FromPort: -1,
+      ToPort: -1,
+      CidrIpv4: '10.0.32.0/20',
+    };
+    mockSecurityGroupRules.push({
+      GroupId: 'sg-00000000000000032',
+      IsEgress: false,
+      IpProtocol: '-1',
+      FromPort: -1,
+      ToPort: -1,
+      CidrIpv4: '10.0.48.0/20',
+    });
+    mockSecurityGroupRules.push({
+      GroupId: 'sg-00000000000000032',
+      IsEgress: false,
+      IpProtocol: '-1',
+      FromPort: -1,
+      ToPort: -1,
+      CidrIpv4: '10.0.64.0/20',
+    });
+  };
   ec2Mock.on(DescribeSecurityGroupRulesCommand).
     resolves({
-      SecurityGroupRules: [
-        {
-          GroupId: 'sg-00000000000000030',
-          IsEgress: false,
-          IpProtocol: '-1',
-          FromPort: -1,
-          ToPort: -1,
-          CidrIpv4: props?.sgError ? '11.11.11.11/32' : '10.0.0.0/16',
-        },
-        {
-          GroupId: 'sg-00000000000000031',
-          IsEgress: false,
-          IpProtocol: '-1',
-          FromPort: -1,
-          ToPort: -1,
-          CidrIpv4: props?.glueEndpointSGError || props?.sgError ? '11.11.11.11/32' : '10.0.0.0/16',
-        },
-      ],
+      SecurityGroupRules: mockSecurityGroupRules,
     });
   ec2Mock.on(DescribeAvailabilityZonesCommand).
     resolves({
@@ -777,7 +829,7 @@ function createPipelineMock(
       VpcEndpointId: 'vpce-ecs',
       ServiceName: 'com.amazonaws.ap-southeast-1.ecs',
       VpcEndpointType: VpcEndpointType.Interface,
-      Groups: vpcEndpointsGroups,
+      Groups: [{ GroupId: 'sg-00000000000000032' }],
       SubnetIds: defaultSubnets.map(subnet => subnet.SubnetId),
     },
     {
