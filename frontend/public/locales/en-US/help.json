@@ -19,7 +19,7 @@
     "title": "Explorations",
     "description": "Explorations provides a range of advanced analytical models to help you gain a deeper understanding of user behavior. You can filter and query data from multiple dimensions to create metrics that aren't in pre-built reports. In Explorations, you can quickly execute ad hoc queries, easily configure and switch analysis models, use filters to focus on the most relevant data, and save the analysis results in a dashboard.",
     "links": {
-      "docLinkName": "Explore",
+      "docLinkName": "Explorations",
       "docLink": "/need-to-confirm/analyticstudio/explore.html"
     }
   },

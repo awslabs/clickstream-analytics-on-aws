@@ -111,8 +111,8 @@
       "filteringPlaceholder": "Find events",
       "split": {
         "title": "Event details",
-        "associatedPresetParameters": "Associate preset parameters",
-        "associatedCustomParameters": "Associate custom parameters",
+        "associatedPresetParameters": "Associated preset parameters",
+        "associatedCustomParameters": "Associated custom parameters",
         "parameterName": "Parameter name",
         "displayName": "Display name",
         "description": "Description",
