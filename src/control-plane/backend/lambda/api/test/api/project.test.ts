@@ -12,7 +12,7 @@
  */
 
 import { DeleteUserCommand, QuickSightClient } from '@aws-sdk/client-quicksight';
-import { SFNClient, StartExecutionCommand } from '@aws-sdk/client-sfn';
+import { DescribeExecutionCommand, ExecutionStatus, SFNClient, StartExecutionCommand } from '@aws-sdk/client-sfn';
 import {
   DynamoDBDocumentClient,
   GetCommand,
@@ -23,7 +23,7 @@ import {
 } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
 import request from 'supertest';
-import { MOCK_PROJECT_ID, MOCK_TOKEN, projectExistedMock, tokenMock } from './ddb-mock';
+import { MOCK_EXECUTION_ID, MOCK_PROJECT_ID, MOCK_TOKEN, projectExistedMock, tokenMock } from './ddb-mock';
 import { KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW } from './pipeline-mock';
 import { app, server } from '../../index';
 import 'aws-sdk-client-mock-jest';
@@ -489,6 +489,43 @@ describe('Project test', () => {
         { name: 'Project-01', id: '1' },
         { name: 'Project-02', id: '2' },
       ],
+    });
+    sfnMock.on(StartExecutionCommand).resolves({ executionArn: 'xxx' });
+    ddbMock.on(UpdateCommand).resolves({});
+    quickSightMock.on(DeleteUserCommand).resolves({});
+    const res = await request(app)
+      .delete(`/api/project/${MOCK_PROJECT_ID}`);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({
+      data: null,
+      success: true,
+      message: 'Project deleted.',
+    });
+    expect(quickSightMock).toHaveReceivedCommandTimes(DeleteUserCommand, 0);
+  });
+  it('Delete project and it status is failed', async () => {
+    projectExistedMock(ddbMock, true);
+    ddbMock.on(ScanCommand).resolves({
+      Items: [
+        { type: 'project-01' },
+        { type: 'project-02' },
+      ],
+    });
+    ddbMock.on(QueryCommand).resolvesOnce({
+      Items: [{ ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW }],
+    }).resolvesOnce({
+      Items: [
+        { name: 'Project-01', id: '1' },
+        { name: 'Project-02', id: '2' },
+      ],
+    });
+    sfnMock.on(DescribeExecutionCommand).resolves({
+      executionArn: 'xx',
+      stateMachineArn: 'yy',
+      name: MOCK_EXECUTION_ID,
+      status: ExecutionStatus.FAILED,
+      output: 'FAILED',
     });
     sfnMock.on(StartExecutionCommand).resolves({ executionArn: 'xxx' });
     ddbMock.on(UpdateCommand).resolves({});
