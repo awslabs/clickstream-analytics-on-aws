@@ -78,7 +78,7 @@ In [Step 2. Launch the stack](#step-2-launch-the-stack), enter the parameters be
 
 8. Update the `Login Callback URL` and `Logout Callback URL` to your IPC recorded domain name.
 
-9.  Set the Authorization Configuration.
+9. Set the Authorization Configuration.
 
     ![authing authorization configuration](../images/OIDC/authing-authorization-configuration.png)
 
