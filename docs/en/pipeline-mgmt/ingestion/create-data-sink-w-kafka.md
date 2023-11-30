@@ -14,12 +14,12 @@ Currently, solution support Amazon Managed Streaming for Apache Kafka (Amazon MS
 
 * **Topic**: The user can specify a topic name. By default, the solution will create a topic with "project-id".
 
-## Self-hosted:
+## Self-hosted Kafka
 Users can also use self-hosted Kafka clusters. In order to integrate the solution with Kafka clusters, provide the following configurations:
 
 * **Broker link**: Enter the brokers link of Kafka cluster that you wish to connect to, the Kafka cluster needs to meet the following requirements:
-  * The Kafka cluster and this solution need to be in the same VPC
-  * The number of Kafka cluster brokers cannot be less than two
+    * The Kafka cluster and this solution need to be in the same VPC
+    * The number of Kafka cluster brokers cannot be less than two
 
 * **Topic**: User can specify the topic for storing the data. 
 * **Security Group**: This VPC security group defines which subnets and IP ranges can access the Kafka cluster.
