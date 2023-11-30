@@ -1298,7 +1298,7 @@
         <li class="md-nav__item">
   <a href="#_1" class="md-nav__link">
     <span class="md-ellipsis">
-      自托管集群:
+      自托管集群
     </span>
   </a>
   
@@ -2720,7 +2720,7 @@
         <li class="md-nav__item">
   <a href="#_1" class="md-nav__link">
     <span class="md-ellipsis">
-      自托管集群:
+      自托管集群
     </span>
   </a>
   
@@ -2782,13 +2782,15 @@
 <p><strong>主题：</strong> 用户可以指定主题名称。默认情况下，该解决方案将创建一个名为“project-id”的主题。</p>
 </li>
 </ul>
-<h2 id="_1">自托管集群:</h2>
-<p>用户还可以使用自托管的Kafka集群。为了将解决方案与Kafka集群集成，请提供以下配置:</p>
+<h2 id="_1">自托管集群</h2>
+<p>用户还可以使用自托管的Kafka集群。为了将解决方案与Kafka集群集成，请提供以下配置：</p>
 <ul>
-<li><strong>Broker 链接</strong>: 输入您要连接的Kafka集群的brokers链接，Kafka集群需要满足以下要求：</li>
-<li>Kafka集群和本方案需要在同一个VPC</li>
 <li>
-<p>Kafka集群broker数量不能少于2个</p>
+<p><strong>Broker 链接</strong>: 输入您要连接的Kafka集群的brokers链接，Kafka集群需要满足以下要求：</p>
+<ul>
+<li>Kafka集群和本方案需要在同一个VPC</li>
+<li>Kafka集群broker数量不能少于2个</li>
+</ul>
 </li>
 <li>
 <p><strong>主题</strong>: 用户可以指定存储数据的主题。</p>
