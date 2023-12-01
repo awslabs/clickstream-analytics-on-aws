@@ -83,9 +83,11 @@ export const getMetadataEventsList = async (params: {
   );
   const localeLng = getLngFromLocalStorage();
   for (const event of result.data.items) {
+    event.displayName = event.displayName[localeLng];
     event.description = event.description[localeLng];
     if (event.associatedParameters) {
       for (const parameter of event.associatedParameters) {
+        parameter.displayName = parameter.displayName[localeLng];
         parameter.description = parameter.description[localeLng];
       }
     }
@@ -103,9 +105,11 @@ export const getMetadataEventDetails = async (params: {
     `/metadata/event/${params.eventName}?projectId=${params.projectId}&appId=${params.appId}`
   );
   const localeLng = getLngFromLocalStorage();
+  result.data.displayName = result.data.displayName[localeLng];
   result.data.description = result.data.description[localeLng];
   if (result.data.associatedParameters) {
     for (const parameter of result.data.associatedParameters) {
+      parameter.displayName = parameter.displayName[localeLng];
       parameter.description = parameter.description[localeLng];
     }
   }
@@ -117,8 +121,12 @@ export const updateMetadataDisplay = async (data: {
   projectId: string;
   appId: string;
   description: any;
-  displayName: string;
+  displayName: any;
 }) => {
+  data.displayName = {
+    'en-US': data.displayName,
+    'zh-CN': data.displayName,
+  };
   data.description = {
     'en-US': data.description,
     'zh-CN': data.description,
@@ -137,9 +145,11 @@ export const getMetadataParametersList = async (params: {
   );
   const localeLng = getLngFromLocalStorage();
   for (const parameter of result.data.items) {
+    parameter.displayName = parameter.displayName[localeLng];
     parameter.description = parameter.description[localeLng];
     if (parameter.associatedEvents) {
       for (const event of parameter.associatedEvents) {
+        event.displayName = event.displayName[localeLng];
         event.description = event.description[localeLng];
       }
     }
@@ -159,9 +169,11 @@ export const getMetadataParametersDetails = async (params: {
     `/metadata/event_parameter?projectId=${params.projectId}&appId=${params.appId}&name=${params.parameterName}&category=${params.parameterCategory}&type=${params.parameterType}`
   );
   const localeLng = getLngFromLocalStorage();
+  result.data.displayName = result.data.displayName[localeLng];
   result.data.description = result.data.description[localeLng];
   if (result.data.associatedEvents) {
     for (const event of result.data.associatedEvents) {
+      event.displayName = event.displayName[localeLng];
       event.description = event.description[localeLng];
     }
   }
@@ -178,6 +190,7 @@ export const getMetadataUserAttributesList = async (params: {
   );
   const localeLng = getLngFromLocalStorage();
   for (const attribute of result.data.items) {
+    attribute.displayName = attribute.displayName[localeLng];
     attribute.description = attribute.description[localeLng];
   }
   return result;

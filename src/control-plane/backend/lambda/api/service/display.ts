@@ -14,7 +14,7 @@
 import { ConditionCategory, MetadataParameterType, MetadataSource } from '../common/explore-types';
 import { logger } from '../common/powertools';
 import { isEmpty } from '../common/utils';
-import { IMetadataAttributeValue, IMetadataDisplay, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute, IMetadataBuiltInList } from '../model/metadata';
+import { IMetadataAttributeValue, IMetadataDisplay, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute, IMetadataBuiltInList, IMetadataDisplayNameAndDescription } from '../model/metadata';
 import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbMetadataStore } from '../store/dynamodb/dynamodb-metadata-store';
 import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
@@ -68,7 +68,7 @@ export class CMetadataDisplay {
     const prefix = event.prefix.split('#')[0];
     const key = `${prefix}#${event.projectId}#${event.appId}#${event.name}`;
     const metadataDisplay = this.displays.find((d: IMetadataDisplay) => d.id === key);
-    event.displayName = metadataDisplay?.displayName ?? event.name;
+    event.displayName = metadataDisplay?.displayName ?? { 'en-US': event.name, 'zh-CN': event.name };
     event.description = metadataDisplay?.description ?? { 'en-US': '', 'zh-CN': '' };
     if (!this.builtList) {
       return;
@@ -76,6 +76,7 @@ export class CMetadataDisplay {
     const presetEvent = this.builtList.PresetEvents.find((e: any) => e.name === event.name);
     event.metadataSource = presetEvent ? MetadataSource.PRESET : MetadataSource.CUSTOM;
     if (!metadataDisplay && presetEvent) {
+      event.displayName = presetEvent ? presetEvent.displayName : event.displayName;
       event.description = presetEvent ? presetEvent.description : event.description;
     }
   }
@@ -97,7 +98,11 @@ export class CMetadataDisplay {
     const publicEventParameter = this.builtList.PublicEventParameters.find(
       (e: any) => e.name === parameter.name && e.dataType === parameter.valueType);
     if (!metadataDisplay && presetEventParameter) {
+      parameter.displayName = presetEventParameter ? presetEventParameter.displayName : parameter.displayName;
       parameter.description = presetEventParameter ? presetEventParameter.description : parameter.description;
+    } else if (!metadataDisplay && publicEventParameter) {
+      parameter.displayName = publicEventParameter ? publicEventParameter.displayName : parameter.displayName;
+      parameter.description = publicEventParameter ? publicEventParameter.description : parameter.description;
     }
     parameter.metadataSource = presetEventParameter ? MetadataSource.PRESET : MetadataSource.CUSTOM;
     parameter.parameterType = publicEventParameter ? MetadataParameterType.PUBLIC : MetadataParameterType.PRIVATE;
@@ -119,6 +124,7 @@ export class CMetadataDisplay {
       (e: any) => e.name === attribute.name && e.dataType === attribute.valueType);
     attribute.metadataSource = presetUserAttribute ? MetadataSource.PRESET : MetadataSource.CUSTOM;
     if (!metadataDisplay && presetUserAttribute) {
+      attribute.displayName = presetUserAttribute ? presetUserAttribute.displayName : attribute.displayName;
       attribute.description = presetUserAttribute ? presetUserAttribute.description : attribute.description;
     }
   }
@@ -193,7 +199,7 @@ export class CMetadataDisplay {
         const display = displays.find((d: IMetadataDisplay) => d.id === key);
         values.push({
           value: e.value,
-          displayValue: display?.displayName ?? e.value,
+          displayValue: display?.displayName['en-US'] ?? e.value,
         });
       }
       parameter.valueEnum = undefined;
@@ -202,7 +208,10 @@ export class CMetadataDisplay {
     return parameters;
   }
 
-  private patchCategoryToDisplayName(category: ConditionCategory, name: string, displayName?: string) {
-    return !isEmpty(displayName) ? displayName : `${category}.${name}`;
+  private patchCategoryToDisplayName(category: ConditionCategory, name: string, displayName?: IMetadataDisplayNameAndDescription) {
+    return {
+      'en-US': !isEmpty(displayName?.['en-US']) ? displayName?.['en-US'] : `${category}.${name}`,
+      'zh-CN': !isEmpty(displayName?.['zh-CN']) ? displayName?.['zh-CN'] : `${category}.${name}`,
+    } as IMetadataDisplayNameAndDescription;
   }
 }
