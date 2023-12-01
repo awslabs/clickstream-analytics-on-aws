@@ -47,7 +47,8 @@
     "iosInitSDKDesc": "配置参数后，需要在 AppDelegate 应用程序 () 方法中对其进行初始化才能使用 SDK。",
     "webInstallSDK": "1. 安装 Clickstream SDK",
     "webInstallSDKDesc": "请使用 npm 或 yarn 等包管理器来安装 Clickstream SDK。",
-    "webSDKSetupDesc": "将初始化代码添加到您的应用的入口文件，例如 React 中的 index.js/app.tsx 或 Vue/Angular 中的 main.ts。"
+    "webSDKSetupDesc": "将初始化代码添加到您的应用的入口文件，例如 React 中的 index.js/app.tsx 或 Vue/Angular 中的 main.ts。",
+    "flutterSDKSetupDesc": "从 Clickstream Analytics 解决方案 Web 控制台复制配置代码，配置代码应如下所示。 在 Clickstream Analytics 解决方案控制台中将应用程序注册到数据管道后，您可以手动添加此代码段并替换 appId 和 endpoint 的值。"
   },
   "detail": {
     "basicInfo": "基本信息",
@@ -55,6 +56,7 @@
     "android": "Android",
     "ios": "iOS",
     "web": "Web",
+    "flutter": "Flutter",
     "pipelineInfo": "数据管道信息",
     "serverEdp": "服务器端点",
     "serverDomain": "服务器域"

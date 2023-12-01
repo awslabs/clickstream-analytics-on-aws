@@ -37,6 +37,7 @@ import { useParams } from 'react-router-dom';
 import { TIME_FORMAT } from 'ts/const';
 import { defaultStr } from 'ts/utils';
 import ConfigAndroidSDK from './comp/ConfigAndroidSDK';
+import ConfigFlutterSDK from './comp/ConfigFlutterSDK';
 import ConfigIOSSDK from './comp/ConfigIOSSDK';
 import ConfigWebSDK from './comp/ConfigWebSDK';
 
@@ -292,6 +293,15 @@ const ApplicationDetail: React.FC = () => {
                       content: (
                         <div className="pd-20">
                           <ConfigWebSDK appInfo={applicationInfo} />
+                        </div>
+                      ),
+                    },
+                    {
+                      label: t('application:detail.flutter'),
+                      id: 'flutter',
+                      content: (
+                        <div className="pd-20">
+                          <ConfigFlutterSDK appInfo={applicationInfo} />
                         </div>
                       ),
                     },
