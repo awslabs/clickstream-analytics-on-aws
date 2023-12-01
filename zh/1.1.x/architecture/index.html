@@ -2852,9 +2852,24 @@
 <li>加载所有对象后，工作流程结束。</li>
 </ol>
 <figure>
-<p><a class="glightbox" href="../images/architecture/05-architecture-data-modeling-athena.png" data-type="image" data-width="100%" data-height="auto" data-desc-position="bottom"><img alt="data-modeling-in-athena" loading="lazy" src="../images/architecture/05-architecture-data-modeling-athena.png" /></a>
+<p><a class="glightbox" href="../images/architecture/05-architecture-data-modeling-scan-metadata.png" data-type="image" data-width="100%" data-height="auto" data-desc-position="bottom"><img alt="data-modeling-in-redshift" loading="lazy" src="../images/architecture/05-architecture-data-modeling-scan-metadata.png" /></a>
    </p>
-<figcaption>图 5：Athena 架构中的数据建模</figcaption>
+<figcaption>图 5：扫描元数据流程</figcaption>
+</figure>
+<ol>
+<li>加载数据工作流程完成之后，扫描元数据工作流程将会被触发。</li>
+<li>Lambda 函数检查工作流程是否需要继续。如果与上一次工作流程开启的间隔小于一天或者仍然有之前的工作流程正在运行，则当前工作流程将会被跳过。</li>
+<li>如果满足继续工作流程的条件，<code>submit job</code> Lambda 函数将会被触发。</li>
+<li><code>submit job</code> Lambda 函数提交一个扫描元数据的存储过程任务，开启元数据扫描过程。</li>
+<li>等待几秒钟后，<code>check status</code> Lambda 函数开始检查扫描任务是否完成。</li>
+<li>如果扫描任务仍然在运行，<code>check status</code> Lambda 函数则继续等待几秒钟后再试。</li>
+<li>一旦扫描任务完成，<code>store metadata</code> Lambda 函数将会被触发。</li>
+<li><code>store metadata</code> Lambda 函数会将元数据保存到 DynamoDB 表中, 工作流程结束。</li>
+</ol>
+<figure>
+<p><a class="glightbox" href="../images/architecture/06-architecture-data-modeling-athena.png" data-type="image" data-width="100%" data-height="auto" data-desc-position="bottom"><img alt="data-modeling-in-athena" loading="lazy" src="../images/architecture/06-architecture-data-modeling-athena.png" /></a>
+   </p>
+<figcaption>图 6：Athena 架构中的数据建模</figcaption>
 </figure>
 <p>假设您在解决方案中创建了数据管道并在 Amazon Athena 中启用了数据建模。此解决方案在您的云账户中部署 Amazon CloudFormation 模板并完成以下设置。</p>
 <ol>
@@ -2866,9 +2881,9 @@
 </ol>
 <h3 id="_5">报表模块</h3>
 <figure>
-<p><a class="glightbox" href="../images/architecture/06-architecture-reporting.png" data-type="image" data-width="100%" data-height="auto" data-desc-position="bottom"><img alt="dashboard" loading="lazy" src="../images/architecture/06-architecture-reporting.png" /></a>
+<p><a class="glightbox" href="../images/architecture/07-architecture-reporting.png" data-type="image" data-width="100%" data-height="auto" data-desc-position="bottom"><img alt="dashboard" loading="lazy" src="../images/architecture/07-architecture-reporting.png" /></a>
    </p>
-<figcaption>图 6：报表模块架构</figcaption>
+<figcaption>图 7：报表模块架构</figcaption>
 </figure>
 <p>假设您在解决方案中创建了一个数据管道，在 Amazon Redshift 中启用数据建模，然后在 Amazon QuickSight 中启用报表模块。此解决方案在您的云账户中部署 Amazon CloudFormation 模板并完成以下设置。</p>
 <ol>
