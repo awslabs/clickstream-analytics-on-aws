@@ -11801,10 +11801,6 @@
                     {
                         "DataSetIdentifier": "Lifecycle_Weekly_View",
                         "DataSetParameterName": "startDate"
-                    },
-                    {
-                        "DataSetIdentifier": "User_Dim_View",
-                        "DataSetParameterName": "startDate"
                     }
                 ]
             }
@@ -11842,10 +11838,6 @@
                     },
                     {
                         "DataSetIdentifier": "Lifecycle_Weekly_View",
-                        "DataSetParameterName": "endDate"
-                    },
-                    {
-                        "DataSetIdentifier": "User_Dim_View",
                         "DataSetParameterName": "endDate"
                     }
                 ]

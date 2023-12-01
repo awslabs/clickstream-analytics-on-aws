@@ -812,6 +812,8 @@ const updateDataSet = async (quickSight: QuickSight, commonParams: ResourceCommo
       };
     }
 
+    const datasetParameters = buildDataSetParameter(props.dateTimeDatasetParameter);
+    
     logger.info('start to update dataset');
     let dataset: UpdateDataSetCommandOutput | undefined = undefined;
     dataset = await quickSight.updateDataSet({
@@ -830,6 +832,7 @@ const updateDataSet = async (quickSight: QuickSight, commonParams: ResourceCommo
           },
         },
       },
+      DatasetParameters: datasetParameters,
       LogicalTableMap: needLogicalMap ? logicalMap : undefined,
       ColumnGroups: colGroups.length > 0 ? colGroups : undefined,
       DataSetUsageConfiguration: {

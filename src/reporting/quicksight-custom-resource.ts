@@ -82,7 +82,7 @@ export function createQuicksightCustomResource(
         tableName: CLICKSTREAM_USER_DIM_VIEW_PLACEHOLDER,
         importMode: 'DIRECT_QUERY',
         columns: clickstream_user_dim_view_columns,
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_USER_DIM_VIEW_NAME} where first_visit_date >= <<$startDate>> and first_visit_date <= <<$endDate>>`,
+        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_USER_DIM_VIEW_NAME}`,
         columnGroups: [
           {
             geoSpatialColumnGroupName: 'geo',
@@ -90,16 +90,6 @@ export function createQuicksightCustomResource(
               'first_visit_country',
               'first_visit_city',
             ],
-          },
-        ],
-        dateTimeDatasetParameter: [
-          {
-            name: 'startDate',
-            timeGranularity: TimeGranularity.DAY,
-          },
-          {
-            name: 'endDate',
-            timeGranularity: TimeGranularity.DAY,
           },
         ],
         projectedColumns: [
@@ -144,7 +134,7 @@ export function createQuicksightCustomResource(
       {
         tableName: CLICKSTREAM_SESSION_VIEW_PLACEHOLDER,
         importMode: 'DIRECT_QUERY',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_SESSION_VIEW_NAME} where session_date >= <<$startDate>> and session_date <= <<$endDate>>`,
+        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_SESSION_VIEW_NAME} where session_date >= <<$startDate>> and session_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate>>))`,
         columns: clickstream_session_view_columns,
         dateTimeDatasetParameter: [
           {
@@ -194,7 +184,7 @@ export function createQuicksightCustomResource(
       {
         tableName: CLICKSTREAM_EVENT_VIEW_PLACEHOLDER,
         importMode: 'DIRECT_QUERY',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_EVENT_VIEW_NAME} where event_date >= <<$startDate>> and event_date <= <<$endDate>>`,
+        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_EVENT_VIEW_NAME} where event_date >= <<$startDate>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate>>))`,
         columns: clickstream_event_view_columns,
         dateTimeDatasetParameter: [
           {
@@ -273,7 +263,7 @@ export function createQuicksightCustomResource(
       {
         tableName: CLICKSTREAM_DEVICE_VIEW_PLACEHOLDER,
         importMode: 'DIRECT_QUERY',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_DEVICE_VIEW_NAME} where event_date >= <<$startDate>> and event_date <= <<$endDate>>`,
+        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_DEVICE_VIEW_NAME} where event_date >= <<$startDate>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate>>))`,
         columns: clickstream_device_view_columns,
         dateTimeDatasetParameter: [
           {
@@ -315,7 +305,7 @@ export function createQuicksightCustomResource(
       {
         tableName: CLICKSTREAM_EVENT_PARAMETER_VIEW_PLACEHOLDER,
         importMode: 'DIRECT_QUERY',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_EVENT_PARAMETER_VIEW_NAME} where event_date >= <<$startDate>> and event_date <= <<$endDate>>`,
+        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_EVENT_PARAMETER_VIEW_NAME} where event_date >= <<$startDate>> and event_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate>>))`,
         columns: clickstream_event_parameter_view_columns,
         dateTimeDatasetParameter: [
           {
@@ -346,7 +336,7 @@ export function createQuicksightCustomResource(
       {
         tableName: CLICKSTREAM_LIFECYCLE_DAILY_VIEW_PLACEHOLDER,
         importMode: 'DIRECT_QUERY',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_LIFECYCLE_DAILY_VIEW_NAME}  where time_period >= <<$startDate>> and time_period <= <<$endDate>>`,
+        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_LIFECYCLE_DAILY_VIEW_NAME}  where time_period >= <<$startDate>> and time_period < DATEADD(DAY, 1, date_trunc('day', <<$endDate>>))`,
         columns: clickstream_lifecycle_daily_view_columns,
         dateTimeDatasetParameter: [
           {
@@ -367,7 +357,7 @@ export function createQuicksightCustomResource(
       {
         tableName: CLICKSTREAM_LIFECYCLE_WEEKLY_VIEW_PLACEHOLDER,
         importMode: 'DIRECT_QUERY',
-        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_LIFECYCLE_WEEKLY_VIEW_NAME} where time_period >= <<$startDate>> and time_period <= <<$endDate>>`,
+        customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_LIFECYCLE_WEEKLY_VIEW_NAME} where time_period >= <<$startDate>> and time_period < DATEADD(DAY, 1, date_trunc('day', <<$endDate>>))`,
         columns: clickstream_lifecycle_weekly_view_columns,
         dateTimeDatasetParameter: [
           {
