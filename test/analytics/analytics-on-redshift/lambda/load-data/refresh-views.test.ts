@@ -45,27 +45,20 @@ describe('Lambda - refresh MATERIALIZED views in Redshift Serverless', () => {
     });
 
     const resp = await handler({}, context);
-    expect(resp.queryIds).toHaveLength(3);
+    expect(resp.execInfo).toHaveLength(3);
   });
 
 
-  test('Should throw exception if failed', async () => {
+  test('Not fail the whole workflow if the refresh failed', async () => {
     redshiftDataMock.on(BatchExecuteStatementCommand).resolves({
       Id: 'id1',
     });
 
-    redshiftDataMock.on(DescribeStatementCommand).resolvesOnce({
+    redshiftDataMock.on(DescribeStatementCommand).resolves({
       Status: 'FAILED',
     });
 
-    let error = false;
-    try {
-      await handler({}, context);
-    } catch (e) {
-      error = true;
-    }
-
-    expect(error).toBeTruthy();
+    await handler({}, context);
 
   });
 

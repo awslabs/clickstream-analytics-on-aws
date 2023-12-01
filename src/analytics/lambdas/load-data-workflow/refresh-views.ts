@@ -67,19 +67,19 @@ REFRESH MATERIALIZED VIEW ${schema}.${CLICKSTREAM_RETENTION_VIEW_NAME};
     }
   }
 
+  const execInfo = [];
   await Sleep(1000 * parseInt(SLEEP_SEC));
 
   for (const queryId of queryIds) {
-    logger.info(`check queryId: ${queryId}`);
-
     const statusRes = await checkLoadStatus(queryId);
-    if (statusRes.Status == 'FAILED') {
-      throw new Error('Error when REFRESH MATERIALIZED VIEW');
-    }
+    logger.info(`queryId: ${queryId} ${statusRes.Status}`);
+    execInfo.push({
+      queryId,
+      status: statusRes.Status,
+    });
   }
-
   return {
-    queryIds,
+    execInfo,
   };
 
 };
