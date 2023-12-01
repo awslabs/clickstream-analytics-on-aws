@@ -66,6 +66,17 @@ const AnalyticsDashboardCard: React.FC<any> = () => {
       </div>
     );
   };
+  const buildCardDescription = (item: IAnalyticsDashboard) => {
+    return (
+      <>
+        {item.name === DEFAULT_DASHBOARD_NAME ? (
+          <>{t('analytics:dashboard.defaultUserLifecycleDescription')}</>
+        ) : (
+          item.description || '-'
+        )}
+      </>
+    );
+  };
 
   const CARD_DEFINITIONS = {
     header: (item: IAnalyticsDashboard) => buildCardHeader(item),
@@ -73,7 +84,7 @@ const AnalyticsDashboardCard: React.FC<any> = () => {
       {
         id: 'description',
         header: '',
-        content: (item: IAnalyticsDashboard) => item.description || '-',
+        content: (item: IAnalyticsDashboard) => buildCardDescription(item),
       },
       {
         id: 'createAt',

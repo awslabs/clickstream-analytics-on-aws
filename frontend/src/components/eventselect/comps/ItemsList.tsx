@@ -81,10 +81,8 @@ const ItemsList: React.FC<ItemsListProps> = (props: ItemsListProps) => {
       return (
         item?.label
           ?.toLocaleLowerCase()
-          .includes(filterText.toLocaleLowerCase()) ??
-        item?.value
-          ?.toLocaleLowerCase()
-          .includes(filterText.toLocaleLowerCase())
+          .includes(filterText.toLocaleLowerCase()) ||
+        item?.name?.toLocaleLowerCase().includes(filterText.toLocaleLowerCase())
       );
     });
   };

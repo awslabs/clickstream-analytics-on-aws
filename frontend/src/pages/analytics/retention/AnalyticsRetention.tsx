@@ -15,7 +15,6 @@ import {
   Button,
   ColumnLayout,
   Container,
-  DateRangePickerProps,
   Header,
   SegmentedControl,
   SegmentedControlProps,
@@ -54,6 +53,7 @@ import {
   ExploreComputeMethod,
   ExploreGroupColumn,
   ExploreRequestAction,
+  ExploreTimeScopeType,
   QuickSightChartType,
 } from 'ts/explore-types';
 import {
@@ -62,12 +62,11 @@ import {
   defaultStr,
   getEventParameters,
   getUserInfoFromLocalStorage,
-  getAbsoluteStartEndRange,
   isAnalystAuthorRole,
+  getAbsoluteStartEndRange,
 } from 'ts/utils';
 import {
   getDashboardCreateParameters,
-  getDateRange,
   getGlobalEventCondition,
   getGroupCondition,
   getLngFromLocalStorage,
@@ -79,7 +78,7 @@ import {
   validateFilterConditions,
 } from '../analytics-utils';
 import AttributeGroup from '../comps/AttributeGroup';
-import ExploreDateRangePicker from '../comps/ExploreDateRangePicker';
+import ExploreDatePicker from '../comps/ExploreDatePicker';
 import ExploreEmbedFrame from '../comps/ExploreEmbedFrame';
 import SaveToDashboardModal from '../comps/SelectDashboardModal';
 
@@ -150,8 +149,13 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
     null
   );
 
-  const [dateRangeValue, setDateRangeValue] =
-    useState<DateRangePickerProps.Value>(getAbsoluteStartEndRange());
+  const [startDate, setStartDate] = useState<string>(
+    getAbsoluteStartEndRange().startDate
+  );
+
+  const [revisitDate, setRevisitDate] = useState<string>(
+    getAbsoluteStartEndRange().endDate
+  );
 
   const [timeGranularity, setTimeGranularity] = useState<SelectProps.Option>({
     value: ExploreGroupColumn.DAY,
@@ -169,7 +173,8 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
       type: 'resetFilterData',
       presetParameters,
     });
-    setDateRangeValue(getAbsoluteStartEndRange());
+    setStartDate(getAbsoluteStartEndRange().startDate);
+    setRevisitDate(getAbsoluteStartEndRange().endDate);
     setExploreEmbedUrl('');
     setTimeGranularity({
       value: ExploreGroupColumn.DAY,
@@ -195,7 +200,11 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
     if (!parameters) {
       return;
     }
-    const dateRangeParams = getDateRange(dateRangeValue);
+    const dateRangeParams = {
+      timeScopeType: ExploreTimeScopeType.FIXED,
+      timeStart: startDate,
+      timeEnd: revisitDate,
+    };
     let saveParams = {};
     if (action === ExploreRequestAction.PUBLISH) {
       saveParams = {
@@ -227,7 +236,6 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
       eventAndConditions: [],
       pairEventAndConditions: getPairEventAndConditions(eventOptionData),
       globalEventCondition: getGlobalEventCondition(filterOptionData),
-      timeScopeType: dateRangeParams?.timeScopeType,
       groupColumn: timeGranularity.value,
       groupCondition: getGroupCondition(groupOption, null),
       ...dateRangeParams,
@@ -692,13 +700,15 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
         </Container>
         <Container>
           <div className="cs-analytics-data-range">
-            <ExploreDateRangePicker
+            <ExploreDatePicker
               disableSelect={loadingChart}
-              dateRangeValue={dateRangeValue}
-              setDateRangeValue={setDateRangeValue}
+              startDate={startDate}
+              revisitDate={revisitDate}
               timeGranularity={timeGranularity}
               timeGranularityVisible={true}
               setTimeGranularity={setTimeGranularity}
+              setStartDate={setStartDate}
+              setRevisitDate={setRevisitDate}
             />
             <SegmentedControl
               selectedId={chartType}

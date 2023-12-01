@@ -22,11 +22,9 @@ Syntax
 
 ## Config Spark job parameters
 
-By default, the EMR Serverless job is configured with [default settings][jobs-spark], which is suitable for most cases, e.g., hourly processing.
+By default, the Clickstream pipeline automatically adjusts EMR job parameters based on the dataset volume that requires processing. In most of time, you do not need to adjust the EMR job parameters, but if you want to override the EMR job parameters, you can put `spark-config.json` file in S3 bucket to set your job parameters.
 
-If your data volume is enormous, e.g., total row counts of a batch exceed 100,000,000, the default settings may not fit this situation, which will cause the EMR job to fail. It would help if you changed the configuration of your EMR Spark job.
-
-You can configure the resources used by the EMR spark job by adding the file `s3://{PipelineS3Bucket}/{PipelineS3Prefix}{ProjectId}/config/spark-config.json` in the S3 bucket.
+To add your customized the EMR job parameters, you can add a file `s3://{PipelineS3Bucket}/{PipelineS3Prefix}{ProjectId}/config/spark-config.json` in the S3 bucket.
 
 Please replace `{PipelineS3Bucket}`, `{PipelineS3Prefix}`, and `{ProjectId}` with the values of your data pipeline. These values are found in the `Clickstream-DataProcessing-<uuid>` stack's **Parameters**.
 
@@ -40,7 +38,7 @@ echo -e "$stackNames" | while read stackName; do
 done
 ```
 
-The data processing job took about 25 minutes to process 600,000,000 rows (200,000,000 requests, 170G gzip data) in solution benchmark testing via below configuration:
+Here is an example of the file `spark-config.json`:
 
 ```json
 {
@@ -66,5 +64,5 @@ For more configurations, please refer to [Spark job properties][spark-defaults] 
 
 [jobs-spark]: https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/jobs-spark.html
 [spark-defaults]: https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/jobs-spark.html#spark-defaults
-[worker-configs]: https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/application-capacity.html#worker-configs
+[worker-configs]: https://docs.aws.amazon.com/emr/latest/EMR-Serverless-UserGuide/app-behavior.html#worker-configs
 [emr-serverless-quotas]: https://us-east-1.console.aws.amazon.com/servicequotas/home/services/emr-serverless/quotas/L-D05C8A75

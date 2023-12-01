@@ -1,6 +1,6 @@
 # Getting Started
 
-After [deploying the solution](../deployment/index.md), refer to this chapter to get started with the {{ solution_name }} to collect and analyse clickstream data from your app. This charpter show you how to create a serverless data pipeline to collect data from an application, and use the Analytics Studio to view out-of-the-box user life cycle dashboards and query the clickstream data with explorative analytics. 
+After [deploying the solution](../deployment/index.md), refer to this chapter to get started with the {{ solution_name }} to collect and analyze clickstream data from your app. This chapter show you how to create a serverless data pipeline to collect data from an application, and use the Analytics Studio to view out-of-the-box user life cycle dashboards and query the clickstream data with exploration analytics. 
 
 ## Steps 
 

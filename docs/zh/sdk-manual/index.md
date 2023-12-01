@@ -3,6 +3,8 @@
 - [Android](./android.md)
 - [Swift](./swift.md)
 - [Web](./web.md)
+- [Flutter](./flutter.md)
+- [WeChat Miniprogram](./wechat.md)
 
 另外，我们还提供了 [HTTP API](./http-api.md)，让您可以通过http请求来收集其他平台（例如：服务端）的数据。
 

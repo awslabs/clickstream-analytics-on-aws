@@ -255,7 +255,6 @@ export const isAppId: CustomValidator = value => {
   }
   const regexp = new RegExp(APP_ID_PATTERN);
   const match = value.match(regexp);
-  console.log(match);
   if (!match || value !== match[0]) {
     return Promise.reject(`Validation error: appId: ${value} not match ${APP_ID_PATTERN}. Please check and try again.`);
   }

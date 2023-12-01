@@ -70,8 +70,16 @@ const AnalyticsDashboardDetail: React.FC = () => {
 
   const getDashboardName = () => {
     return dashboard.name === DEFAULT_DASHBOARD_NAME
-      ? `${DEFAULT_DASHBOARD_NAME} - default`
+      ? `${t('analytics:dashboard.defaultUserLifecycle')} - ${t(
+          'analytics:dashboard.defaultTag'
+        )}`
       : dashboard.name;
+  };
+
+  const getDashboardDescription = () => {
+    return dashboard.name === DEFAULT_DASHBOARD_NAME
+      ? `${t('analytics:dashboard.defaultUserLifecycleDescription')}`
+      : dashboard.description;
   };
 
   const breadcrumbItems = [
@@ -118,7 +126,7 @@ const AnalyticsDashboardDetail: React.FC = () => {
                 <SpaceBetween size="m">
                   <Header
                     variant="h1"
-                    description={dashboard.description}
+                    description={getDashboardDescription()}
                     info={
                       <>
                         {dashboard.name === DEFAULT_DASHBOARD_NAME ? (
@@ -146,7 +154,7 @@ const AnalyticsDashboardDetail: React.FC = () => {
                       </SpaceBetween>
                     }
                   >
-                    {dashboard.name}
+                    {getDashboardName()}
                   </Header>
                 </SpaceBetween>
               }
