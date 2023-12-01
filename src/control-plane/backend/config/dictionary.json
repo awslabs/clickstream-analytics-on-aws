@@ -131,8 +131,8 @@
             "zh-CN": "会话开始"
           },
           "description": {
-            "en-US": "A new session start when a user first open the App/Web or a user returns to the app after 30 minutes of inactivity period",
-            "zh-CN": "当用户首次打开App/Web或用户不活跃超过30分钟后返回App时会新生成一个会话"
+            "en-US": "A new session start when a user first open the App/Web or a user returns to the app after the `sessionTimeoutDuration` (default value is 30 minutes) of inactivity period",
+            "zh-CN": "当用户首次打开App/Web或用户不活跃超过 `sessionTimeoutDuration` (默认为30分钟）后返回App时会新生成一个会话"
           }
         },
         {
@@ -153,8 +153,8 @@
             "zh-CN": "用户互动"
           },
           "description": {
-            "en-US": "User engagement record the amount of time a user spends with your web page or app screen in focus(at least 1 second) in the foreground",
-            "zh-CN": "用户互动事件记录用户在前台聚焦在网页或应用程序屏幕所花费的时间（至少 1 秒）"
+            "en-US": "User engagement record the amount of time a user spends with your web page or app screen in focus (at least 1 second) in the foreground",
+            "zh-CN": "用户互动事件记录用户聚焦在Web/App 页面在前台时的时间（至少 1 秒）"
           }
         },
         {
@@ -392,7 +392,7 @@
           "category": "event",
           "displayName": {
             "en-US": "Session entry page or not",
-            "zh-CN": "是否会话进入页面"
+            "zh-CN": "是否为会话进入页面"
           },
           "description": {
             "en-US": "The first screen view event in a session is 1, others is 0",
@@ -620,7 +620,7 @@
           },
           "description": {
             "en-US": "The content of class in tag <a>",
-            "zh-CN": "标签 <a>中class里的内容"
+            "zh-CN": "标签<a>中class里的内容"
           },
           "eventName": "_click"
         },
@@ -1055,8 +1055,8 @@
             "zh-CN": "设备ID"
           },
           "description": {
-            "en-US": "For iOS, this is the IDFV or UUID when only present when IDFV is not able to access; For Android, this is the AndroidId or UUID when AndroidId is not able to access",
-            "zh-CN": "IDFV（仅在未收集 IDFA 时存在）"
+            "en-US": "For iOS, this is the IDFV or UUID (only if IDFV is not available); For Android, this is the AndroidId or UUID (if AndroidId is not available)",
+            "zh-CN": "对于 iOS，这是 IDFV 或 UUID (仅当 IDFV 不可用)；对于安卓来说，这是 AndroidId 或 UUID (仅当 AndroidId 不可用)"
           }
         },
         {
@@ -1419,8 +1419,8 @@
             "zh-CN": "应用程序版本"
           },
           "description": {
-            "en-US": "Version Name (Android) or short bundle version of the application",
-            "zh-CN": "应用程序的 versionName（Android）或简短的 bundle 版本"
+            "en-US": "Version Name of the application",
+            "zh-CN": "应用程序的版本号"
           }
         }
       ],
@@ -1448,7 +1448,7 @@
           },
           "description": {
             "en-US": "Added to the user object for all events. The time (in milliseconds) when the user first opened the app",
-            "zh-CN": "用户首次打开应用程序或访问站点的时间（以毫秒为单位），在 user 对象的每个事件中都包含此属性"
+            "zh-CN": "用户首次打开应用程序或访问站点的时间（以毫秒为单位），每个事件的 user 对象的都包含此属性"
           }
         },
         {
