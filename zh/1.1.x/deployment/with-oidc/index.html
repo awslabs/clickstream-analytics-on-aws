@@ -2935,9 +2935,15 @@
 <li>在选择 <strong>应用类型</strong> 时选择 <strong>公共客户端</strong>。确保不要更改 <strong>客户端密钥</strong> 的选择 <strong>不生成客户端密钥</strong>。</li>
 <li>在 <strong>OpenID Connect 作用域</strong> 中添加 <strong>Profile</strong>。</li>
 <li>
-<p>使用您的域名为 亚马逊云科技点击流分析 控制台设置 <strong>回调 URL</strong> 和 <strong>登出 URL</strong>。
-    !!! info "注意"
-        如果您未为控制台使用自定义域名，则无法获得控制台的域名。您可以输入一个虚假的域名，例如 <code>clickstream.example.com</code>，然后根据第 3 步中的指南进行更新。</p>
+<p>使用您的域名为 亚马逊云科技点击流分析 控制台设置 <strong>回调 URL</strong> 和 <strong>登出 URL</strong>。</p>
+<ul>
+<li><strong>回调 URL</strong>: <code>http[s]://&lt;domain-name&gt;/signin</code></li>
+<li><strong>登出 URL</strong>: <code>http[s]://&lt;domain-name&gt;</code></li>
+</ul>
+<div class="admonition info">
+<p class="admonition-title">注意</p>
+<p>如果您未为控制台使用自定义域名，则无法获得控制台的域名。您可以输入一个虚假的域名，例如 <code>clickstream.example.com</code>，然后根据第 3 步中的指南进行更新。</p>
+</div>
 </li>
 <li>
 <p>如果您的托管 UI 设置完毕，您应该能够看到如下所示的内容。</p>
@@ -2967,7 +2973,11 @@
 <p><a class="glightbox" href="../../images/OIDC/authing-endpoint-info.png" data-type="image" data-width="100%" data-height="auto" data-desc-position="bottom"><img alt="authing endpoint info" src="../../images/OIDC/authing-endpoint-info.png" /></a></p>
 </li>
 <li>
-<p>将 <code>Login Callback URL</code> 和 <code>Logout Callback URL</code> 更新为您记录的 IPC 域名。</p>
+<p>将 <code>Login Callback URL</code> 和 <code>Logout Callback URL</code> 更新, 注意，您需要在<code>Login Callback URL</code>里添加 <strong><code>/signin</code></strong>， 如下:</p>
+<ul>
+<li><strong>回调 URL</strong>: <code>http[s]://&lt;domain-name&gt;/signin</code></li>
+<li><strong>登出 URL</strong>: <code>http[s]://&lt;domain-name&gt;</code></li>
+</ul>
 </li>
 <li>
 <p>设置授权配置。</p>
