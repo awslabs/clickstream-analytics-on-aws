@@ -542,7 +542,7 @@ const createDataSet = async (quickSight: QuickSight, commonParams: ResourceCommo
     }
 
     const datasetParameters = buildDataSetParameter(props.dateTimeDatasetParameter);
-    logger.info('datasetParameters: ', {datasetParameters});
+    logger.info('datasetParameters: ', { datasetParameters });
 
     logger.info('start to create dataset');
     const datasetParams = {
@@ -812,7 +812,7 @@ const updateDataSet = async (quickSight: QuickSight, commonParams: ResourceCommo
     }
 
     const datasetParameters = buildDataSetParameter(props.dateTimeDatasetParameter);
-    logger.info('datasetParameters: ', {datasetParameters});
+    logger.info('datasetParameters: ', { datasetParameters });
 
     logger.info('start to update dataset');
     let dataset: UpdateDataSetCommandOutput | undefined = undefined;
