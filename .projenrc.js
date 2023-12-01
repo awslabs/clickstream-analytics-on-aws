@@ -357,6 +357,9 @@ const runner = 'LARGE_RUNNER_L';
 project.buildWorkflow.workflow.file?.patch(
   JsonPatch.replace('/jobs/build/runs-on', `$\{\{ vars.${runner} || 'ubuntu-latest' }}`),
 );
+project.buildWorkflow.workflow.file?.patch(
+  JsonPatch.replace('/on/merge_group', {}),
+);
 
 project.upgradeWorkflow.workflows[0].jobs.upgrade.steps.splice(4, 0, {
   name: 'Upgrade frontend dependencies',
