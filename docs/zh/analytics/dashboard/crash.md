@@ -34,7 +34,7 @@
 |----------|---|---------|--------------------|
 |`user_pseudo_id`| 维度 | 用户的SDK生成的唯一ID | 从分析引擎查询|
 |`user_id`| 维度 | 通过SDK中的setUserId API设置的用户ID | 从分析引擎查询|
-|`device_id`| 维度 | 设备的唯一ID，请参考[SDK手册](../../sdk-manual/index.md)了解如何获取设备ID | 从分析引擎查询|
+|`device_id`| 维度 | 设备的唯一ID，请参考[SDK手册](../../sdk-manual/user-identifier.md)了解如何获取设备ID | 从分析引擎查询|
 |`Event Time (HH:MM:SS)`| 维度 | 事件在客户端记录时的MMDDYYYY HH:MM:SS格式的时间 | 在QuickSight中的计算字段|
 |`event_id`| 维度 | 用户在使用您的网站和应用程序时触发的事件的SDK生成的唯一ID | 从分析引擎查询|
 |`event_name`| 维度 | 事件的名称 | 从分析引擎查询|
