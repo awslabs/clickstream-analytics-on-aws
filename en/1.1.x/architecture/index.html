@@ -2872,9 +2872,24 @@
 <li>After all objects are loaded, the workflow ends.</li>
 </ol>
 <figure>
-<p><a class="glightbox" href="../images/architecture/05-architecture-data-modeling-athena.png" data-type="image" data-width="100%" data-height="auto" data-desc-position="bottom"><img alt="data-modeling-in-athena" loading="lazy" src="../images/architecture/05-architecture-data-modeling-athena.png" /></a>
+<p><a class="glightbox" href="../images/architecture/05-architecture-data-modeling-scan-metadata.png" data-type="image" data-width="100%" data-height="auto" data-desc-position="bottom"><img alt="data-modeling-in-redshift" loading="lazy" src="../images/architecture/05-architecture-data-modeling-scan-metadata.png" /></a>
    </p>
-<figcaption>Figure 5: Data modeling in Athena architecture</figcaption>
+<figcaption>Figure 5: Scan metadata architecture</figcaption>
+</figure>
+<ol>
+<li>Once the load data workflow is completed, the scan metadata workflow will be triggered.</li>
+<li>The Lambda function checks whether the workflow should be started or not. If the interval since the last workflow initiation is less than one day or if the previous workflow has not yet finished, the current workflow is skipped.</li>
+<li>If it is necessary to start the current workflow, the <code>submit job</code> Lambda function is triggered.</li>
+<li>The Lambda function submits the stored procedure of scan metadata job, initiating the metadata scanning process.</li>
+<li>After a few seconds, the <code>check status</code> Lambda function starts to check the status of the scan job.</li>
+<li>If the scan is still in progress, the <code>check status</code> Lambda function waits for a few more seconds.</li>
+<li>Once the data scanning is completed, the <code>store metadata</code> Lambda function is triggered.</li>
+<li>The Lambda function saves the metadata to the DynamoDB table, the workflow ends.</li>
+</ol>
+<figure>
+<p><a class="glightbox" href="../images/architecture/06-architecture-data-modeling-athena.png" data-type="image" data-width="100%" data-height="auto" data-desc-position="bottom"><img alt="data-modeling-in-athena" loading="lazy" src="../images/architecture/06-architecture-data-modeling-athena.png" /></a>
+   </p>
+<figcaption>Figure 6: Data modeling in Athena architecture</figcaption>
 </figure>
 <p>Suppose you create a data pipeline in the solution and enable data modeling in Amazon Athena. This solution deploys the Amazon CloudFormation template in your AWS Cloud account and completes the following settings.</p>
 <ol>
@@ -2886,9 +2901,9 @@
 </ol>
 <h3 id="reporting-module">Reporting module</h3>
 <figure>
-<p><a class="glightbox" href="../images/architecture/06-architecture-reporting.png" data-type="image" data-width="100%" data-height="auto" data-desc-position="bottom"><img alt="dashboard" loading="lazy" src="../images/architecture/06-architecture-reporting.png" /></a>
+<p><a class="glightbox" href="../images/architecture/07-architecture-reporting.png" data-type="image" data-width="100%" data-height="auto" data-desc-position="bottom"><img alt="dashboard" loading="lazy" src="../images/architecture/07-architecture-reporting.png" /></a>
    </p>
-<figcaption>Figure 6: Reporting module architecture</figcaption>
+<figcaption>Figure 7: Reporting module architecture</figcaption>
 </figure>
 <p>Suppose you create a data pipeline in the solution, enable data modeling in Amazon Redshift, and enable reporting in Amazon QuickSight. This solution deploys the Amazon CloudFormation template in your AWS Cloud account and completes the following settings.</p>
 <ol>
