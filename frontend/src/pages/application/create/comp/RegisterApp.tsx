@@ -295,7 +295,7 @@ const RegisterApp: React.FC = () => {
               },
               {
                 label: t('application:detail.flutter'),
-                id: 'web',
+                id: 'flutter',
                 content: (
                   <div className="pd-20">
                     <ConfigFlutterSDK appInfo={application} />
