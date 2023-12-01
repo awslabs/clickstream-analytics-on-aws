@@ -12,7 +12,6 @@
  */
 
 import crypto from 'crypto';
-import { v4 as uuidv4 } from 'uuid';
 import {
   QuickSight,
   DashboardSourceEntity,
@@ -39,6 +38,7 @@ import {
 } from '@aws-sdk/client-quicksight';
 import { Context, CloudFormationCustomResourceEvent, CloudFormationCustomResourceUpdateEvent, CloudFormationCustomResourceCreateEvent, CloudFormationCustomResourceDeleteEvent, CdkCustomResourceResponse } from 'aws-lambda';
 import Mustache from 'mustache';
+import { v4 as uuidv4 } from 'uuid';
 import { logger } from '../../../../common/powertools';
 import { aws_sdk_client_common_config } from '../../../../common/sdk-client-config';
 import {
@@ -518,21 +518,24 @@ const createDataSet = async (quickSight: QuickSight, commonParams: ResourceCommo
     }
 
     let datasetParameters: DatasetParameter[] | undefined = undefined;
-    if(props.dateTimeDatasetParameter !== undefined) {
-      datasetParameters = []
-      for(const param of props.dateTimeDatasetParameter){
+    if (props.dateTimeDatasetParameter !== undefined) {
+      datasetParameters = [];
+      for (const param of props.dateTimeDatasetParameter) {
         datasetParameters.push({
           DateTimeDatasetParameter: {
             Id: uuidv4(),
             Name: param.name,
             ValueType: ParameterValueType.SINGLE_VALUED,
             TimeGranularity: param.timeGranularity,
-          }
-        })
+            DefaultValues: {
+              StaticValues: [new Date()],
+            },
+          },
+        });
       }
     }
 
-    logger.info(`datasetParameters: ${JSON.stringify(datasetParameters)}`)
+    logger.info(`datasetParameters: ${JSON.stringify(datasetParameters)}`);
 
     logger.info('start to create dataset');
     const datasetParams = {
@@ -567,7 +570,7 @@ const createDataSet = async (quickSight: QuickSight, commonParams: ResourceCommo
         DisableUseAsDirectQuerySource: false,
         DisableUseAsImportedSource: false,
       },
-      
+
     };
     logger.info(`dataset params: ${JSON.stringify(datasetParams)}`);
     const dataset = await quickSight.createDataSet(datasetParams);

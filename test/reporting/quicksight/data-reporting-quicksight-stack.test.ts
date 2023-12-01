@@ -873,6 +873,41 @@ describe('DataReportingQuickSightStack resource test', () => {
             'Arn',
           ],
         },
+        templateId: {
+          'Fn::Join': [
+            '',
+            [
+              'clickstream_template_',
+              {
+                Ref: 'RedshiftDBParam',
+              },
+              '_',
+              {
+                'Fn::Select': [
+                  0,
+                  {
+                    'Fn::Split': [
+                      '-',
+                      {
+                        'Fn::Select': [
+                          2,
+                          {
+                            'Fn::Split': [
+                              '/',
+                              {
+                                Ref: 'AWS::StackId',
+                              },
+                            ],
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          ],
+        },
         dataSourceArn: {
           'Fn::GetAtt': [
             'ClickstreamDataSource',
@@ -944,7 +979,7 @@ describe('DataReportingQuickSightStack resource test', () => {
                 Type: 'STRING',
               },
             ],
-            customSql: 'SELECT * FROM {{schema}}.clickstream_user_dim_view_v1',
+            customSql: 'SELECT * FROM {{schema}}.clickstream_user_dim_view_v1 where first_visit_date >= <<$startDate>> and first_visit_date <= <<$endDate>>',
             columnGroups: [
               {
                 geoSpatialColumnGroupName: 'geo',
@@ -952,6 +987,16 @@ describe('DataReportingQuickSightStack resource test', () => {
                   'first_visit_country',
                   'first_visit_city',
                 ],
+              },
+            ],
+            dateTimeDatasetParameter: [
+              {
+                name: 'startDate',
+                timeGranularity: 'DAY',
+              },
+              {
+                name: 'endDate',
+                timeGranularity: 'DAY',
               },
             ],
             projectedColumns: [
@@ -1017,7 +1062,7 @@ describe('DataReportingQuickSightStack resource test', () => {
           {
             tableName: 'Session_View',
             importMode: 'DIRECT_QUERY',
-            customSql: 'SELECT * FROM {{schema}}.clickstream_session_view_v1',
+            customSql: 'SELECT * FROM {{schema}}.clickstream_session_view_v1 where session_date >= <<$startDate>> and session_date <= <<$endDate>>',
             columns: [
               {
                 Name: 'session_id',
@@ -1070,6 +1115,16 @@ describe('DataReportingQuickSightStack resource test', () => {
               {
                 Name: 'exit_view',
                 Type: 'STRING',
+              },
+            ],
+            dateTimeDatasetParameter: [
+              {
+                name: 'startDate',
+                timeGranularity: 'DAY',
+              },
+              {
+                name: 'endDate',
+                timeGranularity: 'DAY',
               },
             ],
             projectedColumns: [
@@ -1155,7 +1210,7 @@ describe('DataReportingQuickSightStack resource test', () => {
           {
             tableName: 'Event_View',
             importMode: 'DIRECT_QUERY',
-            customSql: 'SELECT * FROM {{schema}}.clickstream_event_view_v1',
+            customSql: 'SELECT * FROM {{schema}}.clickstream_event_view_v1 where event_date >= <<$startDate>> and event_date <= <<$endDate>>',
             columns: [
               {
                 Name: 'event_date',
@@ -1346,6 +1401,16 @@ describe('DataReportingQuickSightStack resource test', () => {
                 Type: 'STRING',
               },
             ],
+            dateTimeDatasetParameter: [
+              {
+                name: 'startDate',
+                timeGranularity: 'DAY',
+              },
+              {
+                name: 'endDate',
+                timeGranularity: 'DAY',
+              },
+            ],
             tagColumnOperations: [
               {
                 columnName: 'geo_country',
@@ -1419,7 +1484,7 @@ describe('DataReportingQuickSightStack resource test', () => {
           {
             tableName: 'Device_View',
             importMode: 'DIRECT_QUERY',
-            customSql: 'SELECT * FROM {{schema}}.clickstream_device_view_v1',
+            customSql: 'SELECT * FROM {{schema}}.clickstream_device_view_v1 where event_date >= <<$startDate>> and event_date <= <<$endDate>>',
             columns: [
               {
                 Name: 'device_id',
@@ -1518,6 +1583,16 @@ describe('DataReportingQuickSightStack resource test', () => {
                 Type: 'INTEGER',
               },
             ],
+            dateTimeDatasetParameter: [
+              {
+                name: 'startDate',
+                timeGranularity: 'DAY',
+              },
+              {
+                name: 'endDate',
+                timeGranularity: 'DAY',
+              },
+            ],
             projectedColumns: [
               'device_id',
               'event_date',
@@ -1548,7 +1623,7 @@ describe('DataReportingQuickSightStack resource test', () => {
           {
             tableName: 'Event_Parameter_View',
             importMode: 'DIRECT_QUERY',
-            customSql: 'SELECT * FROM {{schema}}.clickstream_event_parameter_view_v1',
+            customSql: 'SELECT * FROM {{schema}}.clickstream_event_parameter_view_v1 where event_date >= <<$startDate>> and event_date <= <<$endDate>>',
             columns: [
               {
                 Name: 'event_id',
@@ -1603,6 +1678,16 @@ describe('DataReportingQuickSightStack resource test', () => {
                 Type: 'INTEGER',
               },
             ],
+            dateTimeDatasetParameter: [
+              {
+                name: 'startDate',
+                timeGranularity: 'DAY',
+              },
+              {
+                name: 'endDate',
+                timeGranularity: 'DAY',
+              },
+            ],
             projectedColumns: [
               'event_id',
               'event_name',
@@ -1622,7 +1707,7 @@ describe('DataReportingQuickSightStack resource test', () => {
           {
             tableName: 'Lifecycle_Daily_View',
             importMode: 'DIRECT_QUERY',
-            customSql: 'SELECT * FROM {{schema}}.clickstream_lifecycle_daily_view_v1',
+            customSql: 'SELECT * FROM {{schema}}.clickstream_lifecycle_daily_view_v1  where time_period >= <<$startDate>> and time_period <= <<$endDate>>',
             columns: [
               {
                 Name: 'time_period',
@@ -1637,6 +1722,16 @@ describe('DataReportingQuickSightStack resource test', () => {
                 Type: 'INTEGER',
               },
             ],
+            dateTimeDatasetParameter: [
+              {
+                name: 'startDate',
+                timeGranularity: 'DAY',
+              },
+              {
+                name: 'endDate',
+                timeGranularity: 'DAY',
+              },
+            ],
             projectedColumns: [
               'time_period',
               'this_day_value',
@@ -1646,7 +1741,7 @@ describe('DataReportingQuickSightStack resource test', () => {
           {
             tableName: 'Lifecycle_Weekly_View',
             importMode: 'DIRECT_QUERY',
-            customSql: 'SELECT * FROM {{schema}}.clickstream_lifecycle_weekly_view_v1',
+            customSql: 'SELECT * FROM {{schema}}.clickstream_lifecycle_weekly_view_v1 where time_period >= <<$startDate>> and time_period <= <<$endDate>>',
             columns: [
               {
                 Name: 'time_period',
@@ -1659,6 +1754,16 @@ describe('DataReportingQuickSightStack resource test', () => {
               {
                 Name: 'sum',
                 Type: 'INTEGER',
+              },
+            ],
+            dateTimeDatasetParameter: [
+              {
+                name: 'startDate',
+                timeGranularity: 'DAY',
+              },
+              {
+                name: 'endDate',
+                timeGranularity: 'DAY',
               },
             ],
             projectedColumns: [
