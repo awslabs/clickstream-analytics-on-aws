@@ -83,8 +83,22 @@
 10. 加载所有对象后，工作流程结束。
 
 <figure markdown>
-   ![data-modeling-in-athena](./images/architecture/05-architecture-data-modeling-athena.png){ loading=lazy }
-   <figcaption>图 5：Athena 架构中的数据建模</figcaption>
+   ![data-modeling-in-redshift](./images/architecture/05-architecture-data-modeling-scan-metadata.png){ loading=lazy }
+   <figcaption>图 5：扫描元数据流程</figcaption>
+</figure>
+
+1. 加载数据工作流程完成之后，扫描元数据工作流程将会被触发。
+2. Lambda 函数检查工作流程是否需要继续。如果与上一次工作流程开启的间隔小于一天或者仍然有之前的工作流程正在运行，则当前工作流程将会被跳过。
+3. 如果满足继续工作流程的条件，`submit job` Lambda 函数将会被触发。
+4. `submit job` Lambda 函数提交一个扫描元数据的存储过程任务，开启元数据扫描过程。
+5. 等待几秒钟后，`check status` Lambda 函数开始检查扫描任务是否完成。
+6. 如果扫描任务仍然在运行，`check status` Lambda 函数则继续等待几秒钟后再试。
+7. 一旦扫描任务完成，`store metadata` Lambda 函数将会被触发。
+8. `store metadata` Lambda 函数会将元数据保存到 DynamoDB 表中, 工作流程结束。
+
+<figure markdown>
+   ![data-modeling-in-athena](./images/architecture/06-architecture-data-modeling-athena.png){ loading=lazy }
+   <figcaption>图 6：Athena 架构中的数据建模</figcaption>
 </figure>
 
 假设您在解决方案中创建了数据管道并在 Amazon Athena 中启用了数据建模。此解决方案在您的云账户中部署 Amazon CloudFormation 模板并完成以下设置。
@@ -98,8 +112,8 @@
 ### 报表模块
 
 <figure markdown>
-   ![dashboard](./images/architecture/06-architecture-reporting.png){ loading=lazy }
-   <figcaption>图 6：报表模块架构</figcaption>
+   ![dashboard](./images/architecture/07-architecture-reporting.png){ loading=lazy }
+   <figcaption>图 7：报表模块架构</figcaption>
 </figure>
 
 假设您在解决方案中创建了一个数据管道，在 Amazon Redshift 中启用数据建模，然后在 Amazon QuickSight 中启用报表模块。此解决方案在您的云账户中部署 Amazon CloudFormation 模板并完成以下设置。

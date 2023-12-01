@@ -84,8 +84,22 @@ Suppose you create a data pipeline in the solution and enable data modeling in A
 10. After all objects are loaded, the workflow ends.
 
 <figure markdown>
-   ![data-modeling-in-athena](./images/architecture/05-architecture-data-modeling-athena.png){ loading=lazy }
-   <figcaption>Figure 5: Data modeling in Athena architecture</figcaption>
+   ![data-modeling-in-redshift](./images/architecture/05-architecture-data-modeling-scan-metadata.png){ loading=lazy }
+   <figcaption>Figure 5: Scan metadata architecture</figcaption>
+</figure>
+
+1. Once the load data workflow is completed, the scan metadata workflow will be triggered.
+2. The Lambda function checks whether the workflow should be started or not. If the interval since the last workflow initiation is less than one day or if the previous workflow has not yet finished, the current workflow is skipped.
+3. If it is necessary to start the current workflow, the `submit job` Lambda function is triggered.
+4. The Lambda function submits the stored procedure of scan metadata job, initiating the metadata scanning process.
+5. After a few seconds, the `check status` Lambda function starts to check the status of the scan job.
+6. If the scan is still in progress, the `check status` Lambda function waits for a few more seconds.
+7. Once the data scanning is completed, the `store metadata` Lambda function is triggered.
+8. The Lambda function saves the metadata to the DynamoDB table, the workflow ends.
+
+<figure markdown>
+   ![data-modeling-in-athena](./images/architecture/06-architecture-data-modeling-athena.png){ loading=lazy }
+   <figcaption>Figure 6: Data modeling in Athena architecture</figcaption>
 </figure>
 
 Suppose you create a data pipeline in the solution and enable data modeling in Amazon Athena. This solution deploys the Amazon CloudFormation template in your AWS Cloud account and completes the following settings.
@@ -99,8 +113,8 @@ Suppose you create a data pipeline in the solution and enable data modeling in A
 ### Reporting module
 
 <figure markdown>
-   ![dashboard](./images/architecture/06-architecture-reporting.png){ loading=lazy }
-   <figcaption>Figure 6: Reporting module architecture</figcaption>
+   ![dashboard](./images/architecture/07-architecture-reporting.png){ loading=lazy }
+   <figcaption>Figure 7: Reporting module architecture</figcaption>
 </figure>
 
 Suppose you create a data pipeline in the solution, enable data modeling in Amazon Redshift, and enable reporting in Amazon QuickSight. This solution deploys the Amazon CloudFormation template in your AWS Cloud account and completes the following settings.
