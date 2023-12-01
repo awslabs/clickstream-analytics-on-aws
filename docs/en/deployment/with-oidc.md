@@ -46,8 +46,8 @@ You can leverage the [Cognito User Pool][cognito] in a supported AWS Region as t
       - Choose **Public client** when selecting the **App type**. Make sure don't change the selection **Don't generate a client secret** for **Client secret**.
       - Add **Profile** in **OpenID Connect scopes**.
 3. Enter the **Callback URL** and **Sign out URL** using your domain name for {{ solution_name }} console as the following:
-      -  **Callback URL**: `http[s]://domain-name>/signin`
-      -  **Sign out URL**: `http[s]://domain-name>`
+      -  **Callback URL**: `http[s]://<domain-name>/signin`
+      -  **Sign out URL**: `http[s]://<domain-name>`
 
     !!! info "Note"
         If you're not using custom domain for the console, you don't know the domain name of console. You can input a fake one, for example, `clickstream.example.com`. Then update it following guidelines in Step 3.
@@ -79,8 +79,8 @@ In [Step 2. Launch the stack](#step-2-launch-the-stack), enter the parameters be
     ![authing endpoint info](../images/OIDC/authing-endpoint-info.png)
 
 8. Update the `Login Callback URL` and `Logout Callback URL`, note that you need to add **`/signin`** to your domain name for `Login Callback URL` as follow:
-      -  **Callback URL**: `http[s]://domain-name>/signin`
-      -  **Sign out URL**: `http[s]://domain-name>`
+      -  **Callback URL**: `http[s]://<domain-name>/signin`
+      -  **Sign out URL**: `http[s]://<domain-name>`
 
 9. Set the Authorization Configuration.
 
