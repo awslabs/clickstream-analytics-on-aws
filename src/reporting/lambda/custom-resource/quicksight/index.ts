@@ -63,6 +63,7 @@ import {
   findAnalysisWithPrefix,
   findDashboardWithPrefix,
   waitForDataSourceChangeCompleted,
+  DateTimeParameter,
 } from '../../../private/dashboard';
 
 type ResourceEvent = CloudFormationCustomResourceEvent;
@@ -449,6 +450,29 @@ const updateQuickSightDashboard = async (quickSight: QuickSight,
   return dashboard;
 };
 
+const buildDataSetParameter = function (dateTimeDatasetParameter: DateTimeParameter[] | undefined): DatasetParameter[] | undefined {
+
+  let datasetParameters: DatasetParameter[] | undefined = undefined;
+  if (dateTimeDatasetParameter !== undefined) {
+    datasetParameters = [];
+    for (const param of dateTimeDatasetParameter) {
+      datasetParameters.push({
+        DateTimeDatasetParameter: {
+          Id: uuidv4(),
+          Name: param.name,
+          ValueType: ParameterValueType.SINGLE_VALUED,
+          TimeGranularity: param.timeGranularity,
+          DefaultValues: {
+            StaticValues: [new Date()],
+          },
+        },
+      });
+    }
+  }
+
+  return datasetParameters;
+};
+
 const createDataSet = async (quickSight: QuickSight, commonParams: ResourceCommonParams,
   dataSourceArn: string,
   props: DataSetProps)
@@ -517,23 +541,7 @@ const createDataSet = async (quickSight: QuickSight, commonParams: ResourceCommo
       };
     }
 
-    let datasetParameters: DatasetParameter[] | undefined = undefined;
-    if (props.dateTimeDatasetParameter !== undefined) {
-      datasetParameters = [];
-      for (const param of props.dateTimeDatasetParameter) {
-        datasetParameters.push({
-          DateTimeDatasetParameter: {
-            Id: uuidv4(),
-            Name: param.name,
-            ValueType: ParameterValueType.SINGLE_VALUED,
-            TimeGranularity: param.timeGranularity,
-            DefaultValues: {
-              StaticValues: [new Date()],
-            },
-          },
-        });
-      }
-    }
+    const datasetParameters = buildDataSetParameter(props.dateTimeDatasetParameter);
 
     logger.info(`datasetParameters: ${JSON.stringify(datasetParameters)}`);
 
