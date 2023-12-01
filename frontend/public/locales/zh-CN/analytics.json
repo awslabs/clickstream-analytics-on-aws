@@ -44,8 +44,8 @@
     "userSegmentation": "用户分群"
   },
   "list": {
-    "loading": "正在加载仪表板。",
-    "noDashboard": "您还没有任何点击流分析仪表板。",
+    "loading": "正在加载仪表板",
+    "noDashboard": "您还没有任何点击流分析仪表板",
     "id": "ID",
     "description": "描述",
     "createAt": "创建时间",
@@ -185,7 +185,7 @@
     "projectSelectError": "必须选择一个项目",
     "appSelectError": "必须选择一个应用程序",
     "dashboardNameEmptyError": "请输入仪表板名称",
-    "dashboardSheetTooMuchError": "工作表不能超过10个",
+    "dashboardSheetNumError": "工作表不能超过10个，并且不能为空",
     "funnelPipelineVersionError": "缺少参数，请升级当前项目对应的数据管道",
     "dashboardSelectError": "必须选择一个仪表板",
     "sheetSelectError": "必须选择一个工作表",
@@ -193,7 +193,9 @@
     "dateRangeInvalid": "所选日期范围无效。开始日期必须在结束日期之前。",
     "inputVisualNameError": "请输入图表名称",
     "selectTwoEvent": "查询指标错误: 请最少选择 2 个步骤",
-    "retentionJoinColumnDatatype": "查询指标错误: 留存分析每一组关联属性的数据类型必须相同"
+    "retentionJoinColumnDatatype": "查询指标错误: 留存分析每一组关联属性的数据类型必须相同",
+    "errorProjectOrApp": "不存在的的项目或应用程序: ",
+    "notSupportProjectOrApp": "当前项目或应用程序不支持分析工作坊: "
   },
   "operators": {
     "null": "空",
@@ -256,6 +258,7 @@
     "realtimeStopped": "实时流已停止",
     "realtimeStarted": "实时流已启动",
     "reportingNotEnabled": "Reporting模块未启用",
+    "pipelineVersionNotSupport": "数据管道版本不支持",
     "setStartNode": "设置起始节点",
     "participateNodes": "选择参与分析的节点",
     "includingOtherEvents": "包括其他事件",
@@ -264,6 +267,8 @@
   },
   "emptyData": "无数据",
   "emptyDataMessage": "请配置指标进行查询",
+  "emptyExploreMessage": "当前项目没有任何探索模块可用",
+  "emptyAnalyzeMessage": "当前项目尚未找到任何分析数据",
   "noDataAvailableTitle": "没有可用于分析的点击流数据",
   "noDataAvailableMessage": "尚未找到任何具有点击流数据的项目，请与您的系统管理员联系以开始收集数据。",
   "information": {

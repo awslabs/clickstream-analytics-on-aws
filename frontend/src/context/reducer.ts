@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { SelectProps } from '@cloudscape-design/components';
 import { IConditionItemType } from 'components/eventselect/AnalyticsType';
 import { validateFilterConditions } from 'pages/analytics/analytics-utils';
 
@@ -37,6 +38,7 @@ export interface IState {
   showAttributeError: boolean;
   showAttributeOperatorError: boolean;
   showAttributeValueError: boolean;
+  projectOptions: SelectProps.Options;
 }
 
 export enum StateActionType {
@@ -46,6 +48,7 @@ export enum StateActionType {
   SHOW_EVENT_VALID_ERROR = 'SHOW_EVENT_VALID_ERROR',
   HIDE_EVENT_VALID_ERROR = 'HIDE_EVENT_VALID_ERROR',
   VALIDATE_FILTER_CONDITIONS = 'VALIDATE_FILTER_CONDITIONS',
+  SET_PROJECT_OPTIONS = 'SET_PROJECT_OPTIONS',
 }
 
 export type Action = { type: StateActionType; payload: any };
@@ -57,10 +60,14 @@ export const initialState: IState = {
   showAttributeError: false,
   showAttributeOperatorError: false,
   showAttributeValueError: false,
+  projectOptions: [],
 };
 
 export const reducer = (state: IState, action: Action): IState => {
   switch (action.type) {
+    case StateActionType.SET_PROJECT_OPTIONS: {
+      return { ...state, projectOptions: action.payload };
+    }
     case StateActionType.SHOW_HELP_PANEL: {
       return { ...state, showHelpPanel: true, helpPanelType: action.payload };
     }

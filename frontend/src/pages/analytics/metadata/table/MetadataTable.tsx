@@ -17,6 +17,7 @@ import Pagination from '@cloudscape-design/components/pagination';
 import PropertyFilter from '@cloudscape-design/components/property-filter';
 import Table from '@cloudscape-design/components/table';
 
+import { analysisEnable } from 'apis/analytics';
 import { HelpPanelType } from 'context/reducer';
 import { cloneDeep } from 'lodash';
 import {
@@ -25,6 +26,8 @@ import {
 } from 'pages/common/common-components';
 import { useColumnWidths } from 'pages/common/use-column-widths';
 import React, { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
+import { defaultStr } from 'ts/utils';
 import { MetadataTableHeader } from './MetadataTableHeader';
 import '../../styles/table-select.scss';
 import { descriptionRegex, displayNameRegex } from './table-config';
@@ -73,6 +76,7 @@ const MetadataTable: React.FC<MetadataTableProps> = (
     fetchUpdateFunc,
   } = props;
 
+  const { projectId, appId } = useParams();
   const [loadingData, setLoadingData] = useState(false);
   const [data, setData] = useState<any[]>([]);
   const [itemsSnap, setItemsSnap] = useState<any[]>([]);
@@ -98,8 +102,25 @@ const MetadataTable: React.FC<MetadataTableProps> = (
     }
   };
 
+  const checkProjectEnableAndLoadData = async (loadDataFunc: any) => {
+    setLoadingData(true);
+    try {
+      const { success, data }: ApiResponse<{ reportingEnabled: boolean }> =
+        await analysisEnable(defaultStr(projectId));
+      if (success && data?.reportingEnabled) {
+        loadDataFunc();
+      } else {
+        setLoadingData(false);
+      }
+    } catch (error) {
+      setLoadingData(false);
+    }
+  };
+
   useEffect(() => {
-    fetchData();
+    if (projectId && appId) {
+      checkProjectEnableAndLoadData(fetchData);
+    }
   }, []);
 
   const {

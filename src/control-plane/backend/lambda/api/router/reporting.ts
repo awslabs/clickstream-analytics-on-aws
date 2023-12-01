@@ -89,6 +89,12 @@ reporting_project.post(
     return reportingServ.cleanQuickSightResources(req, res, next);
   });
 
+reporting_project.get(
+  '/enable',
+  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    return reportingServ.enable(req, res, next);
+  });
+
 
 export {
   reporting_project,

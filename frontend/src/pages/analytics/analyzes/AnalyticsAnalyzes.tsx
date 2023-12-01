@@ -31,7 +31,7 @@ import {
   Header,
   SpaceBetween,
 } from '@cloudscape-design/components';
-import { embedAnalyzesUrl } from 'apis/analytics';
+import { analysisEnable, embedAnalyzesUrl } from 'apis/analytics';
 import InfoLink from 'components/common/InfoLink';
 import Loading from 'components/common/Loading';
 import AnalyticsNavigation from 'components/layouts/AnalyticsNavigation';
@@ -69,9 +69,24 @@ const AnalyticsAnalyzes: React.FC = () => {
     setLoadingData(false);
   };
 
+  const checkProjectEnableAndLoadData = async (loadDataFunc: any) => {
+    setLoadingData(true);
+    try {
+      const { success, data }: ApiResponse<{ reportingEnabled: boolean }> =
+        await analysisEnable(defaultStr(projectId));
+      if (success && data?.reportingEnabled) {
+        loadDataFunc();
+      } else {
+        setLoadingData(false);
+      }
+    } catch (error) {
+      setLoadingData(false);
+    }
+  };
+
   useEffect(() => {
-    if (projectId) {
-      getAnalyzes();
+    if (projectId && appId) {
+      checkProjectEnableAndLoadData(getAnalyzes);
     }
   }, [projectId]);
 

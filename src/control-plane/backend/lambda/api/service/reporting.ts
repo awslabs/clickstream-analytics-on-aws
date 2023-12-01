@@ -48,10 +48,11 @@ import {
 } from './quicksight/reporting-utils';
 import { buildEventAnalysisView, buildEventPathAnalysisView, buildFunnelTableView, buildFunnelView, buildNodePathAnalysisView, buildRetentionAnalysisView } from './quicksight/sql-builder';
 import { awsAccountId } from '../common/constants';
-import { OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX, OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME, QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX } from '../common/constants-ln';
+import { OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX, OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME, PROJECT_ID_PATTERN, QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX } from '../common/constants-ln';
 import { ExploreLocales, AnalysisType, ExplorePathNodeType, ExploreRequestAction, ExploreTimeScopeType, ExploreVisualName, QuickSightChartType } from '../common/explore-types';
 import { logger } from '../common/powertools';
 import { SDKClient } from '../common/sdk-client';
+import { validatePattern } from '../common/stack-params-valid';
 import { ApiFail, ApiSuccess, PipelineStackType } from '../common/types';
 import { getStackOutputFromPipelineStatus } from '../common/utils';
 import { QuickSightUserArns, generateEmbedUrlForRegisteredUser, getClickstreamUserArn, waitDashboardSuccess } from '../store/aws/quicksight';
@@ -953,6 +954,24 @@ export class ReportingService {
       if ( error instanceof ThrottlingException) {
         return res.status(201).json(new ApiSuccess(null, 'resource cleaning finished with error'));
       }
+      next(error);
+    }
+  };
+
+  async enable(req: any, res: any, next: any) {
+    try {
+      const { projectId } = req.query;
+      validatePattern('ProjectId', PROJECT_ID_PATTERN, projectId);
+      const latestPipelines = await store.listPipeline(projectId, 'latest', 'asc');
+      if (latestPipelines.length === 0) {
+        return res.status(200).json(new ApiSuccess({ reportingEnabled: false }));
+      }
+      const latestPipeline = latestPipelines[0];
+      if (latestPipeline.reporting?.quickSight?.accountName && !latestPipeline.templateVersion?.startsWith('v1.0')) {
+        return res.status(200).json(new ApiSuccess({ reportingEnabled: true }));
+      }
+      return res.status(200).json(new ApiSuccess({ reportingEnabled: false }));
+    } catch (error) {
       next(error);
     }
   };

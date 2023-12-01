@@ -12,14 +12,20 @@
  */
 
 import {
+  Flashbar,
+  FlashbarProps,
   Select,
   SelectProps,
   TopNavigation,
 } from '@cloudscape-design/components';
 import { getProjectList } from 'apis/project';
+import { IProjectSelectItem } from 'components/eventselect/AnalyticsType';
+import { DispatchContext } from 'context/StateContext';
+import { StateActionType } from 'context/reducer';
 import { useLocalStorage } from 'pages/common/use-local-storage';
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useParams } from 'react-router-dom';
 import {
   ANALYTICS_INFO_KEY,
   DEFAULT_ZH_LANG,
@@ -30,27 +36,23 @@ import {
   ZH_TEXT,
 } from 'ts/const';
 import { getDocumentLink } from 'ts/url';
-import { defaultStr } from 'ts/utils';
+import { defaultStr, getProjectAppFromOptions } from 'ts/utils';
 
 interface IHeaderProps {
   user: any;
   signOut: any;
 }
-interface IProjectSelectItem extends SelectProps.Option {
-  projectId?: string;
-  projectName?: string;
-  appId?: string;
-  appName?: string;
-}
 
 const AnalyticsHeader: React.FC<IHeaderProps> = (props: IHeaderProps) => {
   const { t, i18n } = useTranslation();
   const { user, signOut } = props;
+  const { projectId, appId } = useParams();
+  const dispatch = useContext(DispatchContext);
   const [displayName, setDisplayName] = useState('');
   const [fullLogoutUrl, setFullLogoutUrl] = useState('');
   const [allProjectOptions, setAllProjectOptions] =
     useState<SelectProps.Options>([]);
-  const [selectedOption, setSelectedOption] = React.useState<any>(null);
+  const [selectedOption, setSelectedOption] = useState<any>(null);
   const [analyticsInfo, setAnalyticsInfo] = useLocalStorage(
     ANALYTICS_INFO_KEY,
     {
@@ -60,15 +62,79 @@ const AnalyticsHeader: React.FC<IHeaderProps> = (props: IHeaderProps) => {
       appName: '',
     }
   );
+  const [items, setItems] = useState<FlashbarProps.MessageDefinition[]>([]);
 
   const changeLanguage = (lng: string) => {
     i18n.changeLanguage(lng);
   };
 
-  const getSelectLabelByReportingEnable = (label: string, enable: boolean) => {
-    return enable
-      ? label
-      : `${label} (${t('analytics:labels.reportingNotEnabled')})`;
+  const getSelectLabel = (
+    label: string,
+    version: string | undefined,
+    reportingEnabled: boolean
+  ) => {
+    if (!version || version === '' || version.startsWith('v1.0')) {
+      return `${label} (${t('analytics:labels.pipelineVersionNotSupport')})`;
+    } else if (!reportingEnabled) {
+      return `${label} (${t('analytics:labels.reportingNotEnabled')})`;
+    }
+    return label;
+  };
+
+  const getSelectEnable = (version: string | undefined, enable: boolean) => {
+    if (!version || version === '') {
+      return false;
+    }
+    return !enable || version.startsWith('v1.0');
+  };
+
+  const setSelectOptionFromParams = (projectOptions: SelectProps.Options) => {
+    if (projectId && appId) {
+      const option = getProjectAppFromOptions(projectId, appId, projectOptions);
+      if (!option) {
+        setItems([
+          {
+            type: 'warning',
+            content: `${t(
+              'analytics:valid.errorProjectOrApp'
+            )}${projectId} / ${appId}`,
+            dismissible: true,
+            onDismiss: () => setItems([]),
+            id: 'message',
+          },
+        ]);
+        setSelectedOption(null);
+      } else if (option.disabled) {
+        setItems([
+          {
+            type: 'warning',
+            content: `${t(
+              'analytics:valid.notSupportProjectOrApp'
+            )}${projectId} / ${appId}`,
+            dismissible: true,
+            onDismiss: () => setItems([]),
+            id: 'message',
+          },
+        ]);
+        setSelectedOption(null);
+      } else {
+        setSelectedOption({
+          label: `${option.projectName} / ${option.appName}`,
+          value: `${option.projectId}_${option.appId}`,
+        });
+        if (
+          analyticsInfo.projectId !== option.projectId ||
+          analyticsInfo.appId !== option.appId
+        ) {
+          setAnalyticsInfo({
+            projectId: defaultStr(option.projectId),
+            projectName: defaultStr(option.projectName),
+            appId: defaultStr(option.appId),
+            appName: defaultStr(option.appName),
+          });
+        }
+      }
+    }
   };
 
   const listProjects = async () => {
@@ -81,12 +147,16 @@ const AnalyticsHeader: React.FC<IHeaderProps> = (props: IHeaderProps) => {
       if (success) {
         const projectOptions: SelectProps.Options = data.items.map(
           (element) => ({
-            label: getSelectLabelByReportingEnable(
+            label: getSelectLabel(
               element.name,
+              element.pipelineVersion,
               element.reportingEnabled ?? false
             ),
             value: element.id,
-            disabled: !element.reportingEnabled,
+            disabled: getSelectEnable(
+              element.pipelineVersion,
+              element.reportingEnabled ?? false
+            ),
             options: element.applications?.map(
               (app) =>
                 ({
@@ -100,24 +170,15 @@ const AnalyticsHeader: React.FC<IHeaderProps> = (props: IHeaderProps) => {
             ),
           })
         );
+        dispatch?.({
+          type: StateActionType.SET_PROJECT_OPTIONS,
+          payload: projectOptions,
+        });
         setAllProjectOptions(projectOptions);
+        setSelectOptionFromParams(projectOptions);
       }
     } catch (error) {
       console.log(error);
-    }
-  };
-
-  const setCurOption = () => {
-    if (
-      analyticsInfo.projectId &&
-      analyticsInfo.appId &&
-      analyticsInfo.projectName &&
-      analyticsInfo.appName
-    ) {
-      setSelectedOption({
-        label: `${analyticsInfo.projectName} / ${analyticsInfo.appName}`,
-        value: `${analyticsInfo.projectId}-${analyticsInfo.appId}`,
-      });
     }
   };
 
@@ -130,7 +191,6 @@ const AnalyticsHeader: React.FC<IHeaderProps> = (props: IHeaderProps) => {
         user?.profile?.sub ||
         ''
     );
-    setCurOption();
     listProjects();
   }, [user]);
 
@@ -232,6 +292,9 @@ const AnalyticsHeader: React.FC<IHeaderProps> = (props: IHeaderProps) => {
           overflowMenuDismissIconAriaLabel: defaultStr(t('header.close??Menu')),
         }}
       />
+      <div className="flex center">
+        <Flashbar items={items} />
+      </div>
     </header>
   );
 };

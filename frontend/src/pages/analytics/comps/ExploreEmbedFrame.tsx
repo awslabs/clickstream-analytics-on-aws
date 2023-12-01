@@ -86,9 +86,17 @@ const ExploreEmbedFrame: React.FC<ExploreEmbedFrameProps> = (
             color="text-status-inactive"
           >
             <ExtendIcon icon="ClipboardData" color="#666" />
-            <SpaceBetween size="m">
-              {t('analytics:emptyDataMessage')}
-            </SpaceBetween>
+            {embedType === 'dashboard' ||
+              (embedType === 'visual' && (
+                <SpaceBetween size="m">
+                  {t('analytics:emptyDataMessage')}
+                </SpaceBetween>
+              ))}
+            {embedType === 'console' && (
+              <SpaceBetween size="m">
+                {t('analytics:emptyAnalyzeMessage')}
+              </SpaceBetween>
+            )}
           </Box>
         </div>
       )}

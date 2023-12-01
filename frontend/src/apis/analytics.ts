@@ -248,6 +248,14 @@ export const clean = async (region: string) => {
   return result;
 };
 
+export const analysisEnable = async (projectId: string) => {
+  const result: any = await apiRequest(
+    'get',
+    `/reporting/enable?projectId=${projectId}`
+  );
+  return result;
+};
+
 export const embedAnalyzesUrl = async (
   projectId: string,
   allowedDomain: string

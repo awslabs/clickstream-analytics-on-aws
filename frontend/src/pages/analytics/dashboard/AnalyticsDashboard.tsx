@@ -17,7 +17,7 @@ import {
   Cards,
   Pagination,
 } from '@cloudscape-design/components';
-import { getAnalyticsDashboardList } from 'apis/analytics';
+import { analysisEnable, getAnalyticsDashboardList } from 'apis/analytics';
 import AnalyticsNavigation from 'components/layouts/AnalyticsNavigation';
 import CustomBreadCrumb from 'components/layouts/CustomBreadCrumb';
 import HelpInfo from 'components/layouts/HelpInfo';
@@ -116,6 +116,22 @@ const AnalyticsDashboardCard: React.FC<any> = () => {
       if (success) {
         setAnalyticsDashboardList(data.items);
         setTotalCount(data.totalCount);
+      }
+      setLoadingData(false);
+    } catch (error) {
+      setLoadingData(false);
+      console.log(error);
+    }
+  };
+
+  const checkProjectEnableAndLoadData = async (loadDataFunc: any) => {
+    setLoadingData(true);
+    try {
+      const { success, data }: ApiResponse<{ reportingEnabled: boolean }> =
+        await analysisEnable(defaultStr(projectId));
+      if (success && data?.reportingEnabled) {
+        loadDataFunc();
+      } else {
         setLoadingData(false);
       }
     } catch (error) {
@@ -125,7 +141,7 @@ const AnalyticsDashboardCard: React.FC<any> = () => {
 
   useEffect(() => {
     if (projectId && appId) {
-      listAnalyticsDashboards();
+      checkProjectEnableAndLoadData(listAnalyticsDashboards);
     }
   }, [currentPage]);
 
