@@ -963,6 +963,7 @@ export class ReportingService {
       const { projectId } = req.query;
       validatePattern('ProjectId', PROJECT_ID_PATTERN, projectId);
       const latestPipelines = await store.listPipeline(projectId, 'latest', 'asc');
+      console.log(latestPipelines);
       if (latestPipelines.length === 0) {
         return res.status(200).json(new ApiSuccess({ reportingEnabled: false }));
       }

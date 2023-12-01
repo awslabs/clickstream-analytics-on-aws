@@ -20,10 +20,8 @@ import {
 } from '@cloudscape-design/components';
 import { getProjectList } from 'apis/project';
 import { IProjectSelectItem } from 'components/eventselect/AnalyticsType';
-import { DispatchContext } from 'context/StateContext';
-import { StateActionType } from 'context/reducer';
 import { useLocalStorage } from 'pages/common/use-local-storage';
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import {
@@ -47,7 +45,6 @@ const AnalyticsHeader: React.FC<IHeaderProps> = (props: IHeaderProps) => {
   const { t, i18n } = useTranslation();
   const { user, signOut } = props;
   const { projectId, appId } = useParams();
-  const dispatch = useContext(DispatchContext);
   const [displayName, setDisplayName] = useState('');
   const [fullLogoutUrl, setFullLogoutUrl] = useState('');
   const [allProjectOptions, setAllProjectOptions] =
@@ -170,10 +167,6 @@ const AnalyticsHeader: React.FC<IHeaderProps> = (props: IHeaderProps) => {
             ),
           })
         );
-        dispatch?.({
-          type: StateActionType.SET_PROJECT_OPTIONS,
-          payload: projectOptions,
-        });
         setAllProjectOptions(projectOptions);
         setSelectOptionFromParams(projectOptions);
       }
