@@ -12,7 +12,7 @@
  */
 
 import { ConditionCategory, MetadataValueType } from '../common/explore-types';
-import { IMetadataDescription, IMetadataDisplay, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute } from '../model/metadata';
+import { IMetadataDisplay, IMetadataDisplayNameAndDescription, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute } from '../model/metadata';
 
 export interface MetadataStore {
   getEvent: (projectId: string, appId: string, eventName: string) => Promise<IMetadataEvent | undefined>;
@@ -27,5 +27,6 @@ export interface MetadataStore {
   listUserAttributes: (projectId: string, appId: string) => Promise<IMetadataUserAttribute[]>;
 
   getDisplay: (projectId: string, appId: string) => Promise<IMetadataDisplay[]>;
-  updateDisplay: (id: string, projectId: string, appId: string, description: IMetadataDescription, displayName: string) => Promise<void>;
+  updateDisplay: (id: string, projectId: string, appId: string,
+    description: IMetadataDisplayNameAndDescription, displayName: IMetadataDisplayNameAndDescription) => Promise<void>;
 }
