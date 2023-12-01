@@ -447,8 +447,8 @@
           "dataType": "int",
           "category": "event",
           "displayName": {
-            "en-US": "Previous screen exposure time",
-            "zh-CN": "上个界面曝光时长"
+            "en-US": "Previous screen exposure time (msec)",
+            "zh-CN": "上个界面曝光时长(毫秒）"
           },
           "description": {
             "en-US": "Last exposure duration in milliseconds of the previous screen in the foreground",
@@ -461,8 +461,8 @@
           "dataType": "int",
           "category": "event",
           "displayName": {
-            "en-US": "Previous page exposure time",
-            "zh-CN": "上个页面曝光时长"
+            "en-US": "Previous page exposure time(msec)",
+            "zh-CN": "上个页面曝光时长(毫秒）"
           },
           "description": {
             "en-US": "Last exposure duration in milliseconds of the previous page in the foreground",
@@ -475,8 +475,8 @@
           "dataType": "int",
           "category": "event",
           "displayName": {
-            "en-US": "User engagement duration",
-            "zh-CN": "用户互动时长"
+            "en-US": "User engagement duration(msec)",
+            "zh-CN": "用户互动时长(毫秒）"
           },
           "description": {
             "en-US": "User engagement duration in milliseconds on current screen or page",
@@ -763,12 +763,12 @@
           "dataType": "int",
           "category": "event",
           "displayName": {
-            "en-US": "Session duration",
-            "zh-CN": "会话时长"
+            "en-US": "Session duration(msec)",
+            "zh-CN": "会话时长(毫秒）"
           },
           "description": {
-            "en-US": "The session duration",
-            "zh-CN": "会话持续时间"
+            "en-US": "The session duration in unit of millisecond",
+            "zh-CN": "会话持续时间,毫秒为单位"
           }
         },
         {
