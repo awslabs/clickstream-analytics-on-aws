@@ -83,8 +83,8 @@
     ![authing endpoint info](../images/OIDC/authing-endpoint-info.png)
 
 8. 将 `Login Callback URL` 和 `Logout Callback URL` 更新, 注意，您需要在`Login Callback URL`里添加 **`/signin`**， 如下:
-      -  **Callback URL**: `http[s]://<domain-name>/signin`
-      -  **Sign out URL**: `http[s]://<domain-name>`
+      -  **回调 URL**: `http[s]://<domain-name>/signin`
+      -  **登出 URL**: `http[s]://<domain-name>`
 
 9.  设置授权配置。
 
