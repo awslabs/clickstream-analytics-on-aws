@@ -813,7 +813,7 @@ const updateDataSet = async (quickSight: QuickSight, commonParams: ResourceCommo
     }
 
     const datasetParameters = buildDataSetParameter(props.dateTimeDatasetParameter);
-    
+
     logger.info('start to update dataset');
     let dataset: UpdateDataSetCommandOutput | undefined = undefined;
     dataset = await quickSight.updateDataSet({
