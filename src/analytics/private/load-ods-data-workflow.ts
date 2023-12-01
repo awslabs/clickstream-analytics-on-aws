@@ -325,7 +325,10 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
     const refreshViewsFn = this.refreshViewsFn(props, copyRole);
     const refreshViewsStep = new LambdaInvoke(this, `${this.node.id} - Refresh materialized views`, {
       lambdaFunction: refreshViewsFn,
-      outputPath: '$.Payload',
+      resultSelector: {
+        'Payload.$': '$.Payload',
+      },
+      resultPath: '$.refreshViewsOut',
     });
     refreshViewsStep.addRetry({
       errors: ['Lambda.TooManyRequestsException'],
@@ -620,9 +623,8 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
   }
 
 
-
   private refreshViewsFn(props: LoadOdsDataToRedshiftWorkflowProps, copyRole: IRole): IFunction {
-    const resourceId = `RefreshViews`;
+    const resourceId = 'RefreshViews';
 
     const fnSG = props.securityGroupForLambda;
     const fn = new SolutionNodejsFunction(this, `${resourceId}Fn`, {

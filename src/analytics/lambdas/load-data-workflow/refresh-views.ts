@@ -13,19 +13,21 @@
 
 import { Context } from 'aws-lambda';
 
+import { checkLoadStatus } from './check-load-status';
 import { logger } from '../../../common/powertools';
 
-import { getRedshiftClient, executeStatements, getRedshiftProps } from '../redshift-data';
-
+import { getRedshiftClient, executeStatements, getRedshiftProps, Sleep } from '../redshift-data';
+import { CLICKSTREAM_DEVICE_VIEW_NAME, CLICKSTREAM_EVENT_PARAMETER_VIEW_NAME, CLICKSTREAM_EVENT_VIEW_NAME, CLICKSTREAM_LIFECYCLE_DAILY_VIEW_NAME, CLICKSTREAM_LIFECYCLE_WEEKLY_VIEW_NAME, CLICKSTREAM_RETENTION_VIEW_NAME, CLICKSTREAM_SESSION_VIEW_NAME } from '../../../common/constant';
 
 const REDSHIFT_DATA_API_ROLE_ARN = process.env.REDSHIFT_DATA_API_ROLE!;
 const REDSHIFT_DATABASE = process.env.REDSHIFT_DATABASE!;
 const APP_IDS = process.env.APP_IDS!;
+const SLEEP_SEC = process.env.SLEEP_SEC?? '30';
 
 const redshiftDataApiClient = getRedshiftClient(REDSHIFT_DATA_API_ROLE_ARN);
 
 export const handler = async (event: any, _: Context) => {
-  logger.debug('requestJson:', { event});
+  logger.debug('requestJson:', { event });
 
   const redshiftProps = getRedshiftProps(
     process.env.REDSHIFT_MODE!,
@@ -36,46 +38,48 @@ export const handler = async (event: any, _: Context) => {
     process.env.REDSHIFT_CLUSTER_IDENTIFIER!,
   );
 
-  const appIds = APP_IDS.split(",");
+  const appIds = APP_IDS.split(',');
 
-  const sqlStatements: string[] = [];
+  const queryIds: string[] = [];
 
-  for (let appId of appIds) {
-    appId = appId.replace(/\./g, '_').replace(/\-/g, '_');
-    logger.info(`appId:${appId}`);
-    const schema = appId;
+  for (let rawAppId of appIds) {
+    const schema = rawAppId.replace(/\./g, '_').replace(/-/g, '_');
+    logger.info(`schema: ${schema}`);
 
     const sqlStatementForApp = `
 REFRESH MATERIALIZED VIEW ${schema}.user_m_view;
 REFRESH MATERIALIZED VIEW ${schema}.item_m_view;
-REFRESH MATERIALIZED VIEW ${schema}.clickstream_event_view_v1;
-REFRESH MATERIALIZED VIEW ${schema}.clickstream_event_parameter_view_v1;
-REFRESH MATERIALIZED VIEW ${schema}.clickstream_session_view_v1;
-REFRESH MATERIALIZED VIEW ${schema}.clickstream_device_view_v1;
-REFRESH MATERIALIZED VIEW ${schema}.clickstream_lifecycle_daily_view_v1;
-REFRESH MATERIALIZED VIEW ${schema}.clickstream_lifecycle_weekly_view_v1;
-REFRESH MATERIALIZED VIEW ${schema}.clickstream_retention_view_v1;
+REFRESH MATERIALIZED VIEW ${schema}.${CLICKSTREAM_EVENT_VIEW_NAME};
+REFRESH MATERIALIZED VIEW ${schema}.${CLICKSTREAM_EVENT_PARAMETER_VIEW_NAME};
+REFRESH MATERIALIZED VIEW ${schema}.${CLICKSTREAM_SESSION_VIEW_NAME};
+REFRESH MATERIALIZED VIEW ${schema}.${CLICKSTREAM_DEVICE_VIEW_NAME};
+REFRESH MATERIALIZED VIEW ${schema}.${CLICKSTREAM_LIFECYCLE_DAILY_VIEW_NAME};
+REFRESH MATERIALIZED VIEW ${schema}.${CLICKSTREAM_LIFECYCLE_WEEKLY_VIEW_NAME};
+REFRESH MATERIALIZED VIEW ${schema}.${CLICKSTREAM_RETENTION_VIEW_NAME};
 `;
 
-    sqlStatements.push(...sqlStatementForApp.split("\n"));
-  }
-
-  logger.info("sqlStatements", { sqlStatements })
-
-  try {
+    const sqlStatements = sqlStatementForApp.split(';').map(s => s.trim()).filter(s => s.length > 0);
+    logger.info('sqlStatements', { sqlStatements });
     const queryId = await executeStatements(
       redshiftDataApiClient, sqlStatements, redshiftProps.serverlessRedshiftProps, redshiftProps.provisionedRedshiftProps);
-    logger.info('executeStatements response:', { queryId });
-    return {
-      detail: {
-        id: queryId,
-      },
-    };
-  } catch (err) {
-    if (err instanceof Error) {
-      logger.error('Error when loading data to Redshift.', err);
+    if (queryId) {
+      queryIds.push(queryId);
     }
-    throw err;
   }
+
+  await Sleep(1000 * parseInt(SLEEP_SEC));
+
+  for (const queryId of queryIds) {
+    logger.info(`check queryId: ${queryId}`);
+
+    const statusRes = await checkLoadStatus(queryId);
+    if (statusRes.Status == 'FAILED') {
+      throw new Error('Error when REFRESH MATERIALIZED VIEW');
+    }
+  }
+
+  return {
+    queryIds,
+  };
 
 };
