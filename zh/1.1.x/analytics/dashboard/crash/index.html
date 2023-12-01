@@ -2031,9 +2031,18 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#sample-dashboard" class="md-nav__link">
+  <a href="#_4" class="md-nav__link">
     <span class="md-ellipsis">
-      Sample dashboard
+      维度和度量
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      示例仪表板
     </span>
   </a>
   
@@ -2718,9 +2727,18 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#sample-dashboard" class="md-nav__link">
+  <a href="#_4" class="md-nav__link">
     <span class="md-ellipsis">
-      Sample dashboard
+      维度和度量
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      示例仪表板
     </span>
   </a>
   
@@ -2902,9 +2920,161 @@
 </div>
 </div>
 </details>
-<h2 id="sample-dashboard">Sample dashboard</h2>
-<p>Below image is a sample dashboard for your reference.</p>
-<p><a class="glightbox" href="../../../images/analytics/dashboard/crash.png" data-type="image" data-width="100%" data-height="auto" data-desc-position="bottom"><img alt="dashboard-crash" src="../../../images/analytics/dashboard/crash.png" /></a></p>
+<h2 id="_4">维度和度量</h2>
+<p>报告包括以下维度和度量。您可以通过在QuickSight数据集中创建“计算字段”来添加更多维度或度量。<a href="https://docs.aws.amazon.com/quicksight/latest/user/adding-a-calculated-field-analysis.html">了解更多</a>。</p>
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th>类型</th>
+<th>是什么</th>
+<th>如何填充</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>user_pseudo_id</code></td>
+<td>维度</td>
+<td>用户的SDK生成的唯一ID</td>
+<td>从分析引擎查询</td>
+</tr>
+<tr>
+<td><code>user_id</code></td>
+<td>维度</td>
+<td>通过SDK中的setUserId API设置的用户ID</td>
+<td>从分析引擎查询</td>
+</tr>
+<tr>
+<td><code>device_id</code></td>
+<td>维度</td>
+<td>设备的唯一ID，请参考<a href="../../../sdk-manual/user-identifier/">SDK手册</a>了解如何获取设备ID</td>
+<td>从分析引擎查询</td>
+</tr>
+<tr>
+<td><code>Event Time (HH:MM:SS)</code></td>
+<td>维度</td>
+<td>事件在客户端记录时的MMDDYYYY HH:MM:SS格式的时间</td>
+<td>在QuickSight中的计算字段</td>
+</tr>
+<tr>
+<td><code>event_id</code></td>
+<td>维度</td>
+<td>用户在使用您的网站和应用程序时触发的事件的SDK生成的唯一ID</td>
+<td>从分析引擎查询</td>
+</tr>
+<tr>
+<td><code>event_name</code></td>
+<td>维度</td>
+<td>事件的名称</td>
+<td>从分析引擎查询</td>
+</tr>
+<tr>
+<td><code>platform</code></td>
+<td>维度</td>
+<td>用户在会话期间使用的平台</td>
+<td>从分析引擎查询</td>
+</tr>
+<tr>
+<td><code>Crash Rate (by device)</code></td>
+<td>度量</td>
+<td>崩溃事件的设备百分比</td>
+<td>在QuickSight中的计算字段</td>
+</tr>
+<tr>
+<td><code>app_info_version</code></td>
+<td>维度</td>
+<td>与事件关联的应用程序版本</td>
+<td>从分析引擎查询</td>
+</tr>
+<tr>
+<td><code>geo_locale</code></td>
+<td>维度</td>
+<td>与事件关联的地理位置和区域信息</td>
+<td>从分析引擎查询</td>
+</tr>
+<tr>
+<td><code>event_parameter_key</code></td>
+<td>维度</td>
+<td>事件参数的键</td>
+<td>从分析引擎查询</td>
+</tr>
+<tr>
+<td><code>event_parameter_key</code></td>
+<td>维度</td>
+<td>事件参数的值</td>
+<td>从分析引擎查询</td>
+</tr>
+<tr>
+<td><code>event_date</code></td>
+<td>度量</td>
+<td>记录事件的日期（UTC格式的YYYYMMDD）</td>
+<td>从分析引擎查询</td>
+</tr>
+<tr>
+<td><code>event_timestamp</code></td>
+<td>维度</td>
+<td>事件在客户端记录时的时间（微秒，UTC）</td>
+<td>从分析引擎查询</td>
+</tr>
+<tr>
+<td><code>app_info_version</code></td>
+<td>维度</td>
+<td>记录事件时应用程序或网站的版本</td>
+<td>从分析引擎查询</td>
+</tr>
+<tr>
+<td><code>app_info_package_id</code></td>
+<td>维度</td>
+<td>记录事件时应用程序或网站的包ID</td>
+<td>从分析引擎查询</td>
+</tr>
+<tr>
+<td><code>app_info_sdk_name</code></td>
+<td>维度</td>
+<td>记录事件时的SDK名称</td>
+<td>从分析引擎查询</td>
+</tr>
+<tr>
+<td><code>app_info_sdk_version</code></td>
+<td>维度</td>
+<td>记录事件时的SDK版本</td>
+<td>从分析引擎查询</td>
+</tr>
+<tr>
+<td><code>app_info_package_id</code></td>
+<td>维度</td>
+<td>记录事件时应用程序或网站的包ID</td>
+<td>从分析引擎查询</td>
+</tr>
+<tr>
+<td><code>device_mobile_model_name</code></td>
+<td>维度</td>
+<td>设备的型号名称</td>
+<td>从分析引擎查询</td>
+</tr>
+<tr>
+<td><code>device_network_type</code></td>
+<td>维度</td>
+<td>用户记录事件时的网络类型</td>
+<td>从分析引擎查询</td>
+</tr>
+<tr>
+<td><code>device_operating_system</code></td>
+<td>维度</td>
+<td>设备的操作系统</td>
+<td>从分析引擎查询</td>
+</tr>
+<tr>
+<td><code>device_operating_system_version</code></td>
+<td>维度</td>
+<td>设备的操作系统版本</td>
+<td>从分析引擎查询</td>
+</tr>
+</tbody>
+</table>
+<h2 id="_5">示例仪表板</h2>
+<p>下面的图像是您参考的示例仪表板。</p>
+<p><a class="glightbox" href="../../../images/analytics/dashboard/crash.png" data-type="image" data-width="100%" data-height="auto" data-desc-position="bottom"><img alt="崩溃仪表板" src="../../../images/analytics/dashboard/crash.png" /></a></p>
 
 
   
