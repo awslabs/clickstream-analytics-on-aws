@@ -26,8 +26,7 @@ const SLEEP_SEC = process.env.SLEEP_SEC?? '30';
 
 const redshiftDataApiClient = getRedshiftClient(REDSHIFT_DATA_API_ROLE_ARN);
 
-export const handler = async (event: any, _: Context) => {
-  logger.debug('requestJson:', { event });
+export const handler = async (_e: any, _c: Context) => {
 
   const redshiftProps = getRedshiftProps(
     process.env.REDSHIFT_MODE!,
