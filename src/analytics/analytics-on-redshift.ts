@@ -263,6 +263,7 @@ export class RedshiftAnalyticsStack extends NestedStack {
 
     const loadDataProps = {
       projectId: props.projectId,
+      appIds: props.appIds,
       networkConfig: {
         vpc: props.vpc,
         vpcSubnets: props.subnetSelection,
