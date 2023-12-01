@@ -2956,7 +2956,11 @@ If you are deploying the solution in <strong>AWS China Regions</strong>, the dom
 </ul>
 </li>
 <li>
-<p>Enter the <strong>Callback URL</strong> and <strong>Sign out URL</strong> using your domain name for Clickstream Analytics on AWS console. </p>
+<p>Enter the <strong>Callback URL</strong> and <strong>Sign out URL</strong> using your domain name for Clickstream Analytics on AWS console as the following:</p>
+<ul>
+<li><strong>Callback URL</strong>: <code>http[s]://&lt;domain-name&gt;/signin</code></li>
+<li><strong>Sign out URL</strong>: <code>http[s]://&lt;domain-name&gt;</code></li>
+</ul>
 <div class="admonition info">
 <p class="admonition-title">Note</p>
 <p>If you're not using custom domain for the console, you don't know the domain name of console. You can input a fake one, for example, <code>clickstream.example.com</code>. Then update it following guidelines in Step 3.</p>
@@ -2990,7 +2994,11 @@ If you are deploying the solution in <strong>AWS China Regions</strong>, the dom
 <p><a class="glightbox" href="../../images/OIDC/authing-endpoint-info.png" data-type="image" data-width="100%" data-height="auto" data-desc-position="bottom"><img alt="authing endpoint info" src="../../images/OIDC/authing-endpoint-info.png" /></a></p>
 </li>
 <li>
-<p>Update the <code>Login Callback URL</code> and <code>Logout Callback URL</code> to your IPC recorded domain name.</p>
+<p>Update the <code>Login Callback URL</code> and <code>Logout Callback URL</code>, note that you need to add <strong><code>/signin</code></strong> to your domain name for <code>Login Callback URL</code> as follow:</p>
+<ul>
+<li><strong>Callback URL</strong>: <code>http[s]://&lt;domain-name&gt;/signin</code></li>
+<li><strong>Sign out URL</strong>: <code>http[s]://&lt;domain-name&gt;</code></li>
+</ul>
 </li>
 <li>
 <p>Set the Authorization Configuration.</p>
