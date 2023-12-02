@@ -69,7 +69,7 @@ const AnalyticsAnalyzes: React.FC = () => {
     setLoadingData(false);
   };
 
-  const checkProjectEnableAndLoadData = async (loadDataFunc: ()=>void) => {
+  const checkProjectEnableAndLoadData = async (loadDataFunc: () => void) => {
     setLoadingData(true);
     try {
       const { success, data }: ApiResponse<{ reportingEnabled: boolean }> =
