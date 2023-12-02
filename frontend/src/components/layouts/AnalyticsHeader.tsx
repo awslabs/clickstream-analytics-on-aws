@@ -47,8 +47,9 @@ const AnalyticsHeader: React.FC<IHeaderProps> = (props: IHeaderProps) => {
   const { projectId, appId } = useParams();
   const [displayName, setDisplayName] = useState('');
   const [fullLogoutUrl, setFullLogoutUrl] = useState('');
-  const [allProjectOptions, setAllProjectOptions] =
-    useState<SelectProps.Options>([]);
+  const [allProjectOptions, setAllProjectOptions] = useState<
+    SelectProps.OptionGroup[]
+  >([]);
   const [selectedOption, setSelectedOption] = useState<any>(null);
   const [analyticsInfo, setAnalyticsInfo] = useLocalStorage(
     ANALYTICS_INFO_KEY,
@@ -67,10 +68,10 @@ const AnalyticsHeader: React.FC<IHeaderProps> = (props: IHeaderProps) => {
 
   const getSelectLabel = (
     label: string,
-    version: string | undefined,
+    version: string,
     reportingEnabled: boolean
   ) => {
-    if (!version || version === '' || version.startsWith('v1.0')) {
+    if (version === '' || version.startsWith('v1.0')) {
       return `${label} (${t('analytics:labels.pipelineVersionNotSupport')})`;
     } else if (!reportingEnabled) {
       return `${label} (${t('analytics:labels.reportingNotEnabled')})`;
@@ -78,41 +79,59 @@ const AnalyticsHeader: React.FC<IHeaderProps> = (props: IHeaderProps) => {
     return label;
   };
 
-  const getSelectEnable = (version: string | undefined, enable: boolean) => {
-    if (!version || version === '') {
+  const getSelectEnable = (version: string, enable: boolean) => {
+    if (version === '') {
       return false;
     }
     return !enable || version.startsWith('v1.0');
   };
 
-  const setSelectOptionFromParams = (projectOptions: SelectProps.Options) => {
+  const getSelectOptions = (element: IProject) => {
+    const options: IProjectSelectItem[] = [];
+    if (!element.applications) {
+      return options;
+    }
+    for (const app of element.applications) {
+      options.push({
+        label: app.name,
+        value: `${element.id}-${app.appId}`,
+        projectId: element.id,
+        projectName: element.name,
+        appId: app.appId,
+        appName: app.name,
+      });
+    }
+    return options;
+  };
+
+  const showWarningMessage = (message: string) => {
+    setItems([
+      {
+        type: 'warning',
+        content: message,
+        dismissible: true,
+        onDismiss: () => setItems([]),
+        id: 'message',
+      },
+    ]);
+  };
+
+  const setSelectOptionFromParams = (
+    projectOptions: SelectProps.OptionGroup[]
+  ) => {
     if (projectId && appId) {
       const option = getProjectAppFromOptions(projectId, appId, projectOptions);
       if (!option) {
-        setItems([
-          {
-            type: 'warning',
-            content: `${t(
-              'analytics:valid.errorProjectOrApp'
-            )}${projectId} / ${appId}`,
-            dismissible: true,
-            onDismiss: () => setItems([]),
-            id: 'message',
-          },
-        ]);
+        showWarningMessage(
+          `${t('analytics:valid.errorProjectOrApp')}${projectId} / ${appId}`
+        );
         setSelectedOption(null);
       } else if (option.disabled) {
-        setItems([
-          {
-            type: 'warning',
-            content: `${t(
-              'analytics:valid.notSupportProjectOrApp'
-            )}${projectId} / ${appId}`,
-            dismissible: true,
-            onDismiss: () => setItems([]),
-            id: 'message',
-          },
-        ]);
+        showWarningMessage(
+          `${t(
+            'analytics:valid.notSupportProjectOrApp'
+          )}${projectId} / ${appId}`
+        );
         setSelectedOption(null);
       } else {
         setSelectedOption({
@@ -142,29 +161,19 @@ const AnalyticsHeader: React.FC<IHeaderProps> = (props: IHeaderProps) => {
           pageSize: 9999,
         });
       if (success) {
-        const projectOptions: SelectProps.Options = data.items.map(
+        const projectOptions: SelectProps.OptionGroup[] = data.items.map(
           (element) => ({
             label: getSelectLabel(
               element.name,
-              element.pipelineVersion,
+              defaultStr(element.pipelineVersion),
               element.reportingEnabled ?? false
             ),
             value: element.id,
             disabled: getSelectEnable(
-              element.pipelineVersion,
+              defaultStr(element.pipelineVersion),
               element.reportingEnabled ?? false
             ),
-            options: element.applications?.map(
-              (app) =>
-                ({
-                  label: app.name,
-                  value: `${element.id}-${app.appId}`,
-                  projectId: element.id,
-                  projectName: element.name,
-                  appId: app.appId,
-                  appName: app.name,
-                } as IProjectSelectItem)
-            ),
+            options: getSelectOptions(element),
           })
         );
         setAllProjectOptions(projectOptions);

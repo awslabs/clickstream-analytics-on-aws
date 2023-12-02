@@ -15,10 +15,7 @@ import {
   DateRangePickerProps,
   SelectProps,
 } from '@cloudscape-design/components';
-import {
-  AnalyticsProjectAppStatus,
-  IProjectSelectItem,
-} from 'components/eventselect/AnalyticsType';
+import { IProjectSelectItem } from 'components/eventselect/AnalyticsType';
 import { isEqual } from 'lodash';
 import moment from 'moment';
 import { getLngFromLocalStorage } from 'pages/analytics/analytics-utils';
@@ -457,9 +454,8 @@ export const isAnalystAuthorRole = (roles: IUserRole[] | undefined) => {
 export const getProjectAppFromOptions = (
   projectId: string,
   appId: string,
-  projectOptions: SelectProps.Options
+  projectGroupOptions: SelectProps.OptionGroup[]
 ) => {
-  const projectGroupOptions = projectOptions as SelectProps.OptionGroup[];
   for (const projectOption of projectGroupOptions) {
     const appOptions = projectOption.options as IProjectSelectItem[];
     for (const appOption of appOptions) {
@@ -471,22 +467,4 @@ export const getProjectAppFromOptions = (
       }
     }
   }
-};
-
-export const getProjectAppStatusFromOptions = (
-  projectId: string,
-  appId: string,
-  projectOptions: SelectProps.Options
-) => {
-  const option = getProjectAppFromOptions(
-    projectId,
-    appId,
-    projectOptions
-  ) as IProjectSelectItem;
-  if (!option) {
-    return AnalyticsProjectAppStatus.NoExist;
-  } else if (option.disabled) {
-    return AnalyticsProjectAppStatus.Disabled;
-  }
-  return AnalyticsProjectAppStatus.Enable;
 };

@@ -269,6 +269,7 @@
   "emptyDataMessage": "请配置指标进行查询",
   "emptyExploreMessage": "当前项目没有任何探索模块可用",
   "emptyAnalyzeMessage": "当前项目尚未找到任何分析数据",
+  "emptyDashboardMessage": "尚未找到对应的仪表板",
   "noDataAvailableTitle": "没有可用于分析的点击流数据",
   "noDataAvailableMessage": "尚未找到任何具有点击流数据的项目，请与您的系统管理员联系以开始收集数据。",
   "information": {

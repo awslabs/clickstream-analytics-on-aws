@@ -124,7 +124,7 @@ const AnalyticsDashboardCard: React.FC<any> = () => {
     }
   };
 
-  const checkProjectEnableAndLoadData = async (loadDataFunc: any) => {
+  const checkProjectEnableAndLoadData = async (loadDataFunc: ()=>void) => {
     setLoadingData(true);
     try {
       const { success, data }: ApiResponse<{ reportingEnabled: boolean }> =

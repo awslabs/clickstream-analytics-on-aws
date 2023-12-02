@@ -272,7 +272,7 @@ const AnalyticsExplore: React.FC = () => {
     }
   };
 
-  const checkProjectEnableAndLoadData = async (loadDataFunc: any) => {
+  const checkProjectEnableAndLoadData = async (loadDataFunc: () => void) => {
     setLoadingData(true);
     try {
       const { success, data }: ApiResponse<{ reportingEnabled: boolean }> =
@@ -298,7 +298,6 @@ const AnalyticsExplore: React.FC = () => {
       getAllPathNodes();
     }
   }, [selectedOption]);
-  console.log('pipeline', loadingData);
 
   return (
     <div className="flex">
