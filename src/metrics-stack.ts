@@ -60,7 +60,7 @@ export class MetricsStack extends Stack {
       description: 'Email list to receive alarms notification',
       type: 'CommaDelimitedList',
       default: '',
-      allowedPattern: `(^${EMAIL_PATTERN}$)?`,
+      allowedPattern: `(${EMAIL_PATTERN}$)?`,
     });
 
     const versionParam = new CfnParameter(this, 'Version', {

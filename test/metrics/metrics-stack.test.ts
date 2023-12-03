@@ -15,6 +15,7 @@ import { App } from 'aws-cdk-lib';
 import { Match, Template } from 'aws-cdk-lib/assertions';
 import { PARAMETERS_DESCRIPTION } from '../../src/metrics/settings';
 import { MetricsStack } from '../../src/metrics-stack';
+import { EMAIL_PATTERN } from '../../src/common/constant';
 
 const app = new App();
 const stack = new MetricsStack(app, 'test-stack');
@@ -54,7 +55,7 @@ test('Should has Parameter Emails', () => {
   template.hasParameter('Emails', {
     Type: 'CommaDelimitedList',
     Default: '',
-    AllowedPattern: '(^\\w+([-+.]\\w+)*@\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*$)?',
+    AllowedPattern: `(${EMAIL_PATTERN}$)?`,
   });
 });
 
