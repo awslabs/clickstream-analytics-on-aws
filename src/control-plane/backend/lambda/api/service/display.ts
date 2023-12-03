@@ -90,6 +90,12 @@ export class CMetadataDisplay {
     const metadataDisplay = this.displays.find((d: IMetadataDisplay) => d.id === key);
     parameter.displayName = this.patchCategoryToDisplayName(parameter.category, parameter.name, metadataDisplay?.displayName);
     parameter.description = metadataDisplay?.description ?? { 'en-US': '', 'zh-CN': '' };
+    this._patchEventParameterInfoFromPresetConfiguration(parameter, metadataDisplay);
+  }
+
+  private _patchEventParameterInfoFromPresetConfiguration(
+    parameter: IMetadataEventParameter,
+    metadataDisplay: IMetadataDisplay | undefined) {
     if (!this.builtList) {
       return;
     }
@@ -98,11 +104,11 @@ export class CMetadataDisplay {
     const publicEventParameter = this.builtList.PublicEventParameters.find(
       (e: any) => e.name === parameter.name && e.dataType === parameter.valueType);
     if (!metadataDisplay && presetEventParameter) {
-      parameter.displayName = presetEventParameter ? presetEventParameter.displayName : parameter.displayName;
-      parameter.description = presetEventParameter ? presetEventParameter.description : parameter.description;
+      parameter.displayName = presetEventParameter.displayName;
+      parameter.description = presetEventParameter.description;
     } else if (!metadataDisplay && publicEventParameter) {
-      parameter.displayName = publicEventParameter ? publicEventParameter.displayName : parameter.displayName;
-      parameter.description = publicEventParameter ? publicEventParameter.description : parameter.description;
+      parameter.displayName = publicEventParameter.displayName;
+      parameter.description = publicEventParameter.description;
     }
     parameter.metadataSource = presetEventParameter ? MetadataSource.PRESET : MetadataSource.CUSTOM;
     parameter.parameterType = publicEventParameter ? MetadataParameterType.PUBLIC : MetadataParameterType.PRIVATE;
