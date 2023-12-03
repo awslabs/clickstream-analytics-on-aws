@@ -42,7 +42,7 @@ import { StateActionType, HelpPanelType } from 'context/reducer';
 import React, { useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { defaultStr, pipelineAnalysisStudioEnable } from 'ts/utils';
+import { defaultStr } from 'ts/utils';
 import ExploreEmbedFrame from '../comps/ExploreEmbedFrame';
 
 const AnalyticsAnalyzes: React.FC = () => {
@@ -74,7 +74,7 @@ const AnalyticsAnalyzes: React.FC = () => {
     try {
       const { success, data }: ApiResponse<IPipeline> =
         await getPipelineDetailByProjectId(defaultStr(projectId));
-      if (success && pipelineAnalysisStudioEnable(data)) {
+      if (success && data.analysisStudioEnabled) {
         await getAnalyzes();
       }
       setLoadingData(false);

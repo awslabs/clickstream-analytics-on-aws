@@ -1326,6 +1326,7 @@ describe('Pipeline test', () => {
           solutionVersion: FULL_SOLUTION_VERSION,
         },
         metricsDashboardName: 'clickstream_dashboard_notepad_mtzfsocy',
+        analysisStudioEnabled: false,
       },
     });
   });
@@ -1348,13 +1349,22 @@ describe('Pipeline test', () => {
         dashboards: null,
         metricsDashboardName: null,
         templateInfo: null,
+        analysisStudioEnabled: false,
       },
     });
   });
   it('Get pipeline by ID with stack no outputs', async () => {
     projectExistedMock(ddbMock, true);
     ddbMock.on(QueryCommand).resolves({
-      Items: [{ ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW }],
+      Items: [{
+        ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
+        templateVersion: 'v1.1.0',
+        reporting: {
+          quickSight: {
+            accountName: 'clickstream-acc-xxx',
+          },
+        },
+      }],
     });
     cloudFormationMock.on(DescribeStacksCommand).resolves({
       Stacks: [
@@ -1405,6 +1415,7 @@ describe('Pipeline test', () => {
         ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
         status: {
           ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW.status,
+          status: 'Warning',
           stackDetails: [
             { ...BASE_STATUS.stackDetails[0] },
             { ...BASE_STATUS.stackDetails[1] },
@@ -1482,15 +1493,22 @@ describe('Pipeline test', () => {
             updateAt: 1667355960000,
           },
         },
+        reporting: {
+          quickSight: {
+            accountName: 'clickstream-acc-xxx',
+          },
+        },
         dns: '',
         endpoint: '',
         dashboards: [],
         metricsDashboardName: '',
         templateInfo: {
           isLatest: false,
-          pipelineVersion: MOCK_SOLUTION_VERSION,
+          pipelineVersion: 'v1.1.0',
           solutionVersion: FULL_SOLUTION_VERSION,
         },
+        templateVersion: 'v1.1.0',
+        analysisStudioEnabled: true,
       },
     });
   });
@@ -1581,6 +1599,7 @@ describe('Pipeline test', () => {
           pipelineVersion: MOCK_SOLUTION_VERSION,
           solutionVersion: FULL_SOLUTION_VERSION,
         },
+        analysisStudioEnabled: false,
       },
     });
   });

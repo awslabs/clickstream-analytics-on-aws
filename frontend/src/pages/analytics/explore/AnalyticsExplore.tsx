@@ -41,7 +41,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { MetadataParameterType, MetadataSource } from 'ts/explore-types';
-import { defaultStr, pipelineAnalysisStudioEnable } from 'ts/utils';
+import { defaultStr } from 'ts/utils';
 import {
   metadataEventsConvertToCategoryItemType,
   parametersConvertToCategoryItemType,
@@ -255,7 +255,7 @@ const AnalyticsExplore: React.FC = () => {
     try {
       const { success, data }: ApiResponse<IPipeline> =
         await getPipelineDetailByProjectId(defaultStr(projectId));
-      if (success && pipelineAnalysisStudioEnable(data)) {
+      if (success && data.analysisStudioEnabled) {
         setPipeline(data);
         // async to call warm and clean
         warnAndClean(

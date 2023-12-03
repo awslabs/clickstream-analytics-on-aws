@@ -32,7 +32,7 @@ import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router-dom';
 import { TIME_FORMAT } from 'ts/const';
 import { DEFAULT_DASHBOARD_NAME } from 'ts/constant-ln';
-import { defaultStr, pipelineAnalysisStudioEnable } from 'ts/utils';
+import { defaultStr } from 'ts/utils';
 import CreateDashboard from './create/CreateDashboard';
 import DashboardHeader from '../comps/DashboardHeader';
 
@@ -132,7 +132,7 @@ const AnalyticsDashboardCard: React.FC<any> = () => {
     try {
       const { success, data }: ApiResponse<IPipeline> =
         await getPipelineDetailByProjectId(defaultStr(projectId));
-      if (success && pipelineAnalysisStudioEnable(data)) {
+      if (success && data.analysisStudioEnabled) {
         await listAnalyticsDashboards();
       }
       setLoadingData(false);

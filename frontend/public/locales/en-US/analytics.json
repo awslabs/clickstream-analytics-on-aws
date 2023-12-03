@@ -185,7 +185,7 @@
     "projectSelectError": "Must select a project",
     "appSelectError": "Must select an application",
     "dashboardNameEmptyError": "Please input dashboard name.",
-    "dashboardSheetNumError": "Dashboard sheet can't be more than 10 and can't be empty.",
+    "dashboardSheetNumError": "The dashboard sheet can't be more than ten and can't be empty.",
     "funnelPipelineVersionError": "Missing parameters, please upgrade the pipeline corresponding to the current project.",
     "dashboardSelectError": "Must select a dashboard",
     "sheetSelectError": "Must select a sheet",
@@ -195,7 +195,7 @@
     "selectTwoEvent": "Query metrics error: Please select at least two steps",
     "retentionJoinColumnDatatype": "Query metrics error: The data type for each set of associated parameter in retention analysis must be the same",
     "errorProjectOrApp": "Non-existent projects or applications: ",
-    "notSupportProjectOrApp": "This project or application not support Analytics Studio: "
+    "notSupportProjectOrApp": "This project or application does not support Analytics Studio: "
   },
   "operators": {
     "null": "is null",
@@ -268,7 +268,7 @@
   "emptyData": "No Data",
   "emptyDataMessage": "Please configure metrics to query",
   "emptyExploreMessage": "There are no explore modules available for the current project",
-  "emptyAnalyzeMessage": "There are no analyzes available for the current project",
+  "emptyAnalyzeMessage": "There are no analyses available for the current project",
   "emptyDashboardMessage": "No dashboard data has been found yet",
   "noDataAvailableTitle": "No clickstream data available for analytics",
   "noDataAvailableMessage": "The solution did not find any project has clickstream data yet, please contact your system admin to start collecting data.",
