@@ -60,7 +60,7 @@ const AnalyticsHome: React.FC<AnalyticsHomeProps> = (
       )
     ) {
       window.location.href = `/analytics/${analyticsInfo.projectId}/app/${analyticsInfo.appId}/dashboards`;
-    } else {
+    } else if (apps.length > 0) {
       setAnalyticsInfo(apps[0]);
       window.location.href = `/analytics/${apps[0].projectId}/app/${apps[0].appId}/dashboards`;
     }
@@ -77,7 +77,11 @@ const AnalyticsHome: React.FC<AnalyticsHomeProps> = (
         });
       if (success) {
         for (const project of data.items) {
-          if (project.applications && project.reportingEnabled) {
+          if (
+            project.applications &&
+            project.reportingEnabled &&
+            !project.pipelineVersion?.startsWith('v1.0')
+          ) {
             for (const app of project.applications) {
               apps.push({
                 projectId: project.id,

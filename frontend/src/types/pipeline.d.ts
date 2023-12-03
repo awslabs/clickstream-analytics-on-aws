@@ -170,6 +170,7 @@ declare global {
       pipelineVersion: string;
       solutionVersion: string;
     };
+    analysisStudioEnabled?: boolean;
     version?: string;
     versionTag?: string;
     createAt?: number;

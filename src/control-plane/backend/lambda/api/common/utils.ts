@@ -905,6 +905,16 @@ function getAppRegistryApplicationArn(pipeline: IPipeline): string {
     getValueFromStackOutputSuffix(pipeline, PipelineStackType.APP_REGISTRY, OUTPUT_SERVICE_CATALOG_APPREGISTRY_APPLICATION_ARN) : '';
 }
 
+function pipelineAnalysisStudioEnabled(pipeline: IPipeline): boolean {
+  if (
+    pipeline?.reporting?.quickSight?.accountName &&
+    !pipeline?.templateVersion?.startsWith('v1.0')
+  ) {
+    return true;
+  }
+  return false;
+};
+
 export {
   isEmpty,
   isEmail,
@@ -946,4 +956,5 @@ export {
   getVersionFromTags,
   getAppRegistryApplicationArn,
   deserializeContext,
+  pipelineAnalysisStudioEnabled,
 };

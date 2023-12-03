@@ -16,7 +16,7 @@
     "deleteTip1": "Are you sure you want to delete the dashboard ",
     "deleteTip2": " delete dashboard will delete all data in QuickSight.",
     "defaultUserLifecycle": "User life cycle",
-    "defaultUserLifecycleDescription":"Out-of-the-box user lifecycle analysis dashboard created by solution.",
+    "defaultUserLifecycleDescription": "Out-of-the-box user lifecycle analysis dashboard created by solution.",
     "defaultTag": "default"
   },
   "realtime": {
@@ -44,8 +44,8 @@
     "userSegmentation": "User Segmentation"
   },
   "list": {
-    "loading": "Loading dashboards.",
-    "noDashboard": "You don’t have any clickstream analytics dashboard yet.",
+    "loading": "Loading dashboards",
+    "noDashboard": "You don’t have any clickstream analytics dashboard yet",
     "id": "ID",
     "description": "Descriptions",
     "createAt": "Creation time",
@@ -185,7 +185,7 @@
     "projectSelectError": "Must select a project",
     "appSelectError": "Must select an application",
     "dashboardNameEmptyError": "Please input dashboard name.",
-    "dashboardSheetTooMuchError": "Dashboard sheet can't be more than 10.",
+    "dashboardSheetNumError": "The dashboard sheet can't be more than ten and can't be empty.",
     "funnelPipelineVersionError": "Missing parameters, please upgrade the pipeline corresponding to the current project.",
     "dashboardSelectError": "Must select a dashboard",
     "sheetSelectError": "Must select a sheet",
@@ -193,7 +193,9 @@
     "dateRangeInvalid": "The selected date range is invalid. The start date must be before the end date.",
     "inputVisualNameError": "Please input visualization name.",
     "selectTwoEvent": "Query metrics error: Please select at least two steps",
-    "retentionJoinColumnDatatype": "Query metrics error: The data type for each set of associated parameter in retention analysis must be the same"
+    "retentionJoinColumnDatatype": "Query metrics error: The data type for each set of associated parameter in retention analysis must be the same",
+    "errorProjectOrApp": "Non-existent projects or applications: ",
+    "notSupportProjectOrApp": "This project or application does not support Analytics Studio: "
   },
   "operators": {
     "null": "is null",
@@ -256,6 +258,7 @@
     "realtimeStopped": "Realtime streaming is stopped",
     "realtimeStarted": "Realtime streaming is started",
     "reportingNotEnabled": "Reporting module is not enabled",
+    "pipelineVersionNotSupport": "The pipeline version is not supported",
     "setStartNode": "Set start node",
     "participateNodes": "Select nodes to participate in the analysis",
     "includingOtherEvents": "Including other events",
@@ -264,6 +267,9 @@
   },
   "emptyData": "No Data",
   "emptyDataMessage": "Please configure metrics to query",
+  "emptyExploreMessage": "There are no explore modules available for the current project",
+  "emptyAnalyzeMessage": "There are no analyses available for the current project",
+  "emptyDashboardMessage": "No dashboard data has been found yet",
   "noDataAvailableTitle": "No clickstream data available for analytics",
   "noDataAvailableMessage": "The solution did not find any project has clickstream data yet, please contact your system admin to start collecting data.",
   "information": {

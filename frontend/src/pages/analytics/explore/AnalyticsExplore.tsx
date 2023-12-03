@@ -13,6 +13,8 @@
 
 import {
   AppLayout,
+  Box,
+  Container,
   ContentLayout,
   FormField,
   Select,
@@ -57,6 +59,7 @@ const AnalyticsExplore: React.FC = () => {
   const [headerHeight, setHeaderHeight] = useState(100);
   const dispatch = useContext(DispatchContext);
   const state = useContext(StateContext);
+  const [loadingData, setLoadingData] = useState(false);
   const [selectedOption, setSelectedOption] =
     useState<SelectProps.Option | null>({
       label: defaultStr(t('analytics:explore.eventAnalysis')),
@@ -248,10 +251,11 @@ const AnalyticsExplore: React.FC = () => {
   };
 
   const loadPipeline = async () => {
+    setLoadingData(true);
     try {
       const { success, data }: ApiResponse<IPipeline> =
         await getPipelineDetailByProjectId(defaultStr(projectId));
-      if (success) {
+      if (success && data.analysisStudioEnabled) {
         setPipeline(data);
         // async to call warm and clean
         warnAndClean(
@@ -261,7 +265,9 @@ const AnalyticsExplore: React.FC = () => {
         );
         await getEventParamsAndAttributes();
       }
+      setLoadingData(false);
     } catch (error) {
+      setLoadingData(false);
       console.log(error);
     }
   };
@@ -340,32 +346,51 @@ const AnalyticsExplore: React.FC = () => {
                   </div>
                 </div>
               </AnalyticsCustomHeader>
-              {!pipeline && <Loading />}
-              {pipeline && selectedOption?.value === 'Funnel' && (
-                <AnalyticsFunnel
-                  loadingEvents={loadingMetadataEvent}
-                  loading={false}
-                  pipeline={pipeline}
-                  metadataEvents={metadataEvents}
-                  metadataUserAttributes={metadataUserAttributes}
-                  categoryEvents={categoryEvents}
-                  presetParameters={presetParameters}
-                  groupParameters={groupParameters}
-                />
+              {loadingData && <Loading />}
+              {!pipeline && !loadingData && (
+                <SpaceBetween direction="vertical" size="xxl">
+                  <Container>
+                    <Box textAlign="center" color="inherit">
+                      <Box
+                        padding={{ bottom: 'xxl' }}
+                        variant="p"
+                        color="text-status-inactive"
+                      >
+                        <b>{t('analytics:emptyExploreMessage')}</b>
+                      </Box>
+                    </Box>
+                  </Container>
+                </SpaceBetween>
               )}
-              {pipeline && selectedOption?.value === 'Event' && (
-                <AnalyticsEvent
-                  loadingEvents={loadingMetadataEvent}
-                  loading={false}
-                  pipeline={pipeline}
-                  metadataEvents={metadataEvents}
-                  metadataUserAttributes={metadataUserAttributes}
-                  categoryEvents={categoryEvents}
-                  presetParameters={presetParameters}
-                  groupParameters={groupParameters}
-                />
-              )}
-              {pipeline && selectedOption?.value === 'Path' && (
+              {pipeline &&
+                !loadingData &&
+                selectedOption?.value === 'Funnel' && (
+                  <AnalyticsFunnel
+                    loadingEvents={loadingMetadataEvent}
+                    loading={false}
+                    pipeline={pipeline}
+                    metadataEvents={metadataEvents}
+                    metadataUserAttributes={metadataUserAttributes}
+                    categoryEvents={categoryEvents}
+                    presetParameters={presetParameters}
+                    groupParameters={groupParameters}
+                  />
+                )}
+              {pipeline &&
+                !loadingData &&
+                selectedOption?.value === 'Event' && (
+                  <AnalyticsEvent
+                    loadingEvents={loadingMetadataEvent}
+                    loading={false}
+                    pipeline={pipeline}
+                    metadataEvents={metadataEvents}
+                    metadataUserAttributes={metadataUserAttributes}
+                    categoryEvents={categoryEvents}
+                    presetParameters={presetParameters}
+                    groupParameters={groupParameters}
+                  />
+                )}
+              {pipeline && !loadingData && selectedOption?.value === 'Path' && (
                 <AnalyticsPath
                   loadingEvents={loadingMetadataEvent}
                   loading={false}
@@ -377,18 +402,20 @@ const AnalyticsExplore: React.FC = () => {
                   nodes={pathNodes}
                 />
               )}
-              {pipeline && selectedOption?.value === 'Retention' && (
-                <AnalyticsRetention
-                  loadingEvents={loadingMetadataEvent}
-                  loading={false}
-                  pipeline={pipeline}
-                  metadataEvents={metadataEvents}
-                  metadataUserAttributes={metadataUserAttributes}
-                  categoryEvents={categoryEvents}
-                  presetParameters={presetParameters}
-                  groupParameters={groupParameters}
-                />
-              )}
+              {pipeline &&
+                !loadingData &&
+                selectedOption?.value === 'Retention' && (
+                  <AnalyticsRetention
+                    loadingEvents={loadingMetadataEvent}
+                    loading={false}
+                    pipeline={pipeline}
+                    metadataEvents={metadataEvents}
+                    metadataUserAttributes={metadataUserAttributes}
+                    categoryEvents={categoryEvents}
+                    presetParameters={presetParameters}
+                    groupParameters={groupParameters}
+                  />
+                )}
             </ContentLayout>
           }
           breadcrumbs={<CustomBreadCrumb breadcrumbItems={breadcrumbItems} />}

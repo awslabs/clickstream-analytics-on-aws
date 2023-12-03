@@ -219,7 +219,7 @@ export const previewRetention = async (data: IExploreRequest) => {
 export const getPipelineDetailByProjectId = async (projectId: string) => {
   const result: any = await apiRequest(
     'get',
-    `/pipeline/${projectId}?pid=${projectId}`
+    `/pipeline/${projectId}?pid=${projectId}&cache=true`
   );
   return result;
 };
