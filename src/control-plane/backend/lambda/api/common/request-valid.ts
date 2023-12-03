@@ -14,7 +14,7 @@
 import express from 'express';
 import { validationResult, ValidationChain, CustomValidator } from 'express-validator';
 import { ALLOW_UPLOADED_FILE_TYPES, awsRegion } from './constants';
-import { APP_ID_PATTERN, MULTI_EMAIL_PATTERN, PROJECT_ID_PATTERN } from './constants-ln';
+import { APP_ID_PATTERN, EMAIL_PATTERN, MULTI_EMAIL_PATTERN, PROJECT_ID_PATTERN } from './constants-ln';
 import { validateXSS } from './stack-params-valid';
 import { ApiFail, AssumeRoleType } from './types';
 import { isEmpty } from './utils';
@@ -233,6 +233,18 @@ export const isEmails: CustomValidator = value => {
   const match = value.match(regexp);
   if (!match || value !== match[0]) {
     return Promise.reject(`Validation error: value: ${value} not match ${MULTI_EMAIL_PATTERN}. Please check and try again.`);
+  }
+  return true;
+};
+
+export const isEmail: CustomValidator = value => {
+  if (isEmpty(value)) {
+    return Promise.reject('Value is empty.');
+  }
+  const regexp = new RegExp(EMAIL_PATTERN);
+  const match = value.match(regexp);
+  if (!match || value !== match[0]) {
+    return Promise.reject(`Validation error: value: ${value} not match ${EMAIL_PATTERN}. Please check and try again.`);
   }
   return true;
 };
