@@ -29,7 +29,6 @@ import {
   warmup,
   clean,
   getPathNodes,
-  analysisEnable,
 } from 'apis/analytics';
 import Loading from 'components/common/Loading';
 import { CategoryItemType } from 'components/eventselect/AnalyticsType';
@@ -42,7 +41,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { MetadataParameterType, MetadataSource } from 'ts/explore-types';
-import { defaultStr } from 'ts/utils';
+import { defaultStr, pipelineAnalysisStudioEnable } from 'ts/utils';
 import {
   metadataEventsConvertToCategoryItemType,
   parametersConvertToCategoryItemType,
@@ -252,10 +251,11 @@ const AnalyticsExplore: React.FC = () => {
   };
 
   const loadPipeline = async () => {
+    setLoadingData(true);
     try {
       const { success, data }: ApiResponse<IPipeline> =
         await getPipelineDetailByProjectId(defaultStr(projectId));
-      if (success) {
+      if (success && pipelineAnalysisStudioEnable(data)) {
         setPipeline(data);
         // async to call warm and clean
         warnAndClean(
@@ -272,24 +272,9 @@ const AnalyticsExplore: React.FC = () => {
     }
   };
 
-  const checkProjectEnableAndLoadData = async (loadDataFunc: () => void) => {
-    setLoadingData(true);
-    try {
-      const { success, data }: ApiResponse<{ reportingEnabled: boolean }> =
-        await analysisEnable(defaultStr(projectId));
-      if (success && data?.reportingEnabled) {
-        loadDataFunc();
-      } else {
-        setLoadingData(false);
-      }
-    } catch (error) {
-      setLoadingData(false);
-    }
-  };
-
   useEffect(() => {
     if (projectId && appId) {
-      checkProjectEnableAndLoadData(loadPipeline);
+      loadPipeline();
     }
   }, [projectId, appId]);
 

@@ -31,7 +31,7 @@ import {
   Header,
   SpaceBetween,
 } from '@cloudscape-design/components';
-import { analysisEnable, embedAnalyzesUrl } from 'apis/analytics';
+import { embedAnalyzesUrl, getPipelineDetailByProjectId } from 'apis/analytics';
 import InfoLink from 'components/common/InfoLink';
 import Loading from 'components/common/Loading';
 import AnalyticsNavigation from 'components/layouts/AnalyticsNavigation';
@@ -42,7 +42,7 @@ import { StateActionType, HelpPanelType } from 'context/reducer';
 import React, { useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { defaultStr } from 'ts/utils';
+import { defaultStr, pipelineAnalysisStudioEnable } from 'ts/utils';
 import ExploreEmbedFrame from '../comps/ExploreEmbedFrame';
 
 const AnalyticsAnalyzes: React.FC = () => {
@@ -69,24 +69,24 @@ const AnalyticsAnalyzes: React.FC = () => {
     setLoadingData(false);
   };
 
-  const checkProjectEnableAndLoadData = async (loadDataFunc: () => void) => {
+  const loadPipeline = async () => {
     setLoadingData(true);
     try {
-      const { success, data }: ApiResponse<{ reportingEnabled: boolean }> =
-        await analysisEnable(defaultStr(projectId));
-      if (success && data?.reportingEnabled) {
-        loadDataFunc();
-      } else {
-        setLoadingData(false);
+      const { success, data }: ApiResponse<IPipeline> =
+        await getPipelineDetailByProjectId(defaultStr(projectId));
+      if (success && pipelineAnalysisStudioEnable(data)) {
+        await getAnalyzes();
       }
+      setLoadingData(false);
     } catch (error) {
       setLoadingData(false);
+      console.log(error);
     }
   };
 
   useEffect(() => {
     if (projectId && appId) {
-      checkProjectEnableAndLoadData(getAnalyzes);
+      loadPipeline();
     }
   }, [projectId]);
 

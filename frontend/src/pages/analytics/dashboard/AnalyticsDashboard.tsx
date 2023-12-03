@@ -17,7 +17,10 @@ import {
   Cards,
   Pagination,
 } from '@cloudscape-design/components';
-import { analysisEnable, getAnalyticsDashboardList } from 'apis/analytics';
+import {
+  getAnalyticsDashboardList,
+  getPipelineDetailByProjectId,
+} from 'apis/analytics';
 import AnalyticsNavigation from 'components/layouts/AnalyticsNavigation';
 import CustomBreadCrumb from 'components/layouts/CustomBreadCrumb';
 import HelpInfo from 'components/layouts/HelpInfo';
@@ -29,7 +32,7 @@ import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router-dom';
 import { TIME_FORMAT } from 'ts/const';
 import { DEFAULT_DASHBOARD_NAME } from 'ts/constant-ln';
-import { defaultStr } from 'ts/utils';
+import { defaultStr, pipelineAnalysisStudioEnable } from 'ts/utils';
 import CreateDashboard from './create/CreateDashboard';
 import DashboardHeader from '../comps/DashboardHeader';
 
@@ -124,24 +127,24 @@ const AnalyticsDashboardCard: React.FC<any> = () => {
     }
   };
 
-  const checkProjectEnableAndLoadData = async (loadDataFunc: () => void) => {
+  const loadPipeline = async () => {
     setLoadingData(true);
     try {
-      const { success, data }: ApiResponse<{ reportingEnabled: boolean }> =
-        await analysisEnable(defaultStr(projectId));
-      if (success && data?.reportingEnabled) {
-        loadDataFunc();
-      } else {
-        setLoadingData(false);
+      const { success, data }: ApiResponse<IPipeline> =
+        await getPipelineDetailByProjectId(defaultStr(projectId));
+      if (success && pipelineAnalysisStudioEnable(data)) {
+        await listAnalyticsDashboards();
       }
+      setLoadingData(false);
     } catch (error) {
       setLoadingData(false);
+      console.log(error);
     }
   };
 
   useEffect(() => {
     if (projectId && appId) {
-      checkProjectEnableAndLoadData(listAnalyticsDashboards);
+      loadPipeline();
     }
   }, [currentPage]);
 

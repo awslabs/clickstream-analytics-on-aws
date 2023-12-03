@@ -219,7 +219,7 @@ export const previewRetention = async (data: IExploreRequest) => {
 export const getPipelineDetailByProjectId = async (projectId: string) => {
   const result: any = await apiRequest(
     'get',
-    `/pipeline/${projectId}?pid=${projectId}`
+    `/pipeline/${projectId}?pid=${projectId}&cache=true`
   );
   return result;
 };
@@ -245,14 +245,6 @@ export const clean = async (region: string) => {
   const result: any = await apiRequest('post', '/reporting/clean', {
     region: region,
   });
-  return result;
-};
-
-export const analysisEnable = async (projectId: string) => {
-  const result: any = await apiRequest(
-    'get',
-    `/reporting/enable?projectId=${projectId}`
-  );
   return result;
 };
 

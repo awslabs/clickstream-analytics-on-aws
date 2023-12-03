@@ -17,7 +17,7 @@ import Pagination from '@cloudscape-design/components/pagination';
 import PropertyFilter from '@cloudscape-design/components/property-filter';
 import Table from '@cloudscape-design/components/table';
 
-import { analysisEnable } from 'apis/analytics';
+import { getPipelineDetailByProjectId } from 'apis/analytics';
 import { HelpPanelType } from 'context/reducer';
 import { cloneDeep } from 'lodash';
 import {
@@ -27,7 +27,7 @@ import {
 import { useColumnWidths } from 'pages/common/use-column-widths';
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { defaultStr } from 'ts/utils';
+import { defaultStr, pipelineAnalysisStudioEnable } from 'ts/utils';
 import { MetadataTableHeader } from './MetadataTableHeader';
 import '../../styles/table-select.scss';
 import { descriptionRegex, displayNameRegex } from './table-config';
@@ -102,24 +102,24 @@ const MetadataTable: React.FC<MetadataTableProps> = (
     }
   };
 
-  const checkProjectEnableAndLoadData = async (loadDataFunc: () => void) => {
+  const loadPipeline = async () => {
     setLoadingData(true);
     try {
-      const { success, data }: ApiResponse<{ reportingEnabled: boolean }> =
-        await analysisEnable(defaultStr(projectId));
-      if (success && data?.reportingEnabled) {
-        loadDataFunc();
-      } else {
-        setLoadingData(false);
+      const { success, data }: ApiResponse<IPipeline> =
+        await getPipelineDetailByProjectId(defaultStr(projectId));
+      if (success && pipelineAnalysisStudioEnable(data)) {
+        await fetchData();
       }
+      setLoadingData(false);
     } catch (error) {
       setLoadingData(false);
+      console.log(error);
     }
   };
 
   useEffect(() => {
     if (projectId && appId) {
-      checkProjectEnableAndLoadData(fetchData);
+      loadPipeline();
     }
   }, []);
 

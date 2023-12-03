@@ -468,3 +468,13 @@ export const getProjectAppFromOptions = (
     }
   }
 };
+
+export const pipelineAnalysisStudioEnable = (pipeline: IPipeline) => {
+  if (
+    pipeline?.reporting?.quickSight?.accountName &&
+    !pipeline?.templateVersion?.startsWith('v1.0')
+  ) {
+    return true;
+  }
+  return false;
+};

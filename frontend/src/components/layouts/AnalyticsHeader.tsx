@@ -104,10 +104,10 @@ const AnalyticsHeader: React.FC<IHeaderProps> = (props: IHeaderProps) => {
     return options;
   };
 
-  const showWarningMessage = (message: string) => {
+  const showWarningMessage = (type: FlashbarProps.Type, message: string) => {
     setItems([
       {
-        type: 'warning',
+        type: type,
         content: message,
         dismissible: true,
         onDismiss: () => setItems([]),
@@ -123,11 +123,13 @@ const AnalyticsHeader: React.FC<IHeaderProps> = (props: IHeaderProps) => {
       const option = getProjectAppFromOptions(projectId, appId, projectOptions);
       if (!option) {
         showWarningMessage(
+          'error',
           `${t('analytics:valid.errorProjectOrApp')}${projectId} / ${appId}`
         );
         setSelectedOption(null);
       } else if (option.disabled) {
         showWarningMessage(
+          'warning',
           `${t(
             'analytics:valid.notSupportProjectOrApp'
           )}${projectId} / ${appId}`
