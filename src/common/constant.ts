@@ -243,9 +243,11 @@ export const OIDC_ISSUER_PATTERN =
 export const OIDC_CLIENT_ID_PATTERN = '^[^ ]+$';
 export const OIDC_JWKS_SUFFIX_PATTERN = '^/[^ ]+$';
 export const MULTI_APP_ID_PATTERN = `^((${APP_ID_PATTERN})(,${APP_ID_PATTERN}){0,})?$`;
-export const EMAIL_PATTERN =
+export const EMAIL_BASE_PATTERN =
   '\\w+([-+.]\\w+)*@\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*';
-export const MULTI_EMAIL_PATTERN = `${EMAIL_PATTERN}(,${EMAIL_PATTERN})*`;
+export const EMAIL_PATTERN =
+  `^(?=.{1,320}$)${EMAIL_BASE_PATTERN}`;
+export const MULTI_EMAIL_PATTERN = `^(?=(?:[^,]{1,320},)*[^,]{1,320}$)\\s*${EMAIL_BASE_PATTERN}\\s*(?:,\\s*${EMAIL_BASE_PATTERN}\\s*)*$`;
 export const POSITIVE_INTEGERS = '^[1-9]\\d*';
 export const S3_PATH_PLUGIN_JARS_PATTERN = `^(s3://${S3_BUCKET_NAME_PATTERN}/[^,]+.jar,?){0,}$`;
 export const S3_PATH_PLUGIN_FILES_PATTERN = `^(s3://${S3_BUCKET_NAME_PATTERN}/[^,]+,?){0,}$`;
