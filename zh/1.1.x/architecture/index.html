@@ -584,6 +584,8 @@
       <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
       
       
+        
+      
       
         <label class="md-nav__link md-nav__link--active" for="__toc">
           
@@ -612,6 +614,8 @@
   
   
   
+    
+  
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
@@ -620,45 +624,60 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#_1" class="md-nav__link">
+  <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
-      解决方案端到端架构
+      数据管道
     </span>
   </a>
   
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#_2" class="md-nav__link">
+    <nav class="md-nav" aria-label="数据管道">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
     <span class="md-ellipsis">
       摄取模块
     </span>
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#_3" class="md-nav__link">
+        
+          <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
     <span class="md-ellipsis">
       数据处理模块
     </span>
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#_4" class="md-nav__link">
+        
+          <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
     <span class="md-ellipsis">
       数据建模模块
     </span>
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#_5" class="md-nav__link">
+        
+          <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
     <span class="md-ellipsis">
       报表模块
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      分析工作坊
     </span>
   </a>
   
@@ -2702,6 +2721,8 @@
   
   
   
+    
+  
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
@@ -2710,45 +2731,60 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#_1" class="md-nav__link">
+  <a href="#_2" class="md-nav__link">
     <span class="md-ellipsis">
-      解决方案端到端架构
+      数据管道
     </span>
   </a>
   
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#_2" class="md-nav__link">
+    <nav class="md-nav" aria-label="数据管道">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
     <span class="md-ellipsis">
       摄取模块
     </span>
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#_3" class="md-nav__link">
+        
+          <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
     <span class="md-ellipsis">
       数据处理模块
     </span>
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#_4" class="md-nav__link">
+        
+          <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
     <span class="md-ellipsis">
       数据建模模块
     </span>
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#_5" class="md-nav__link">
+        
+          <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
     <span class="md-ellipsis">
       报表模块
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      分析工作坊
     </span>
   </a>
   
@@ -2772,9 +2808,7 @@
   
 
 
-  <h1>架构图</h1>
-
-<h3 id="_1">解决方案端到端架构</h3>
+<h1 id="_1">解决方案端到端架构</h1>
 <p>使用默认配置部署此解决方案将构建以下环境：</p>
 <figure>
 <p><a class="glightbox" href="../images/architecture/01-architecture-end-to-end.png" data-type="image" data-width="100%" data-height="auto" data-desc-position="bottom"><img alt="end-to-end" loading="lazy" src="../images/architecture/01-architecture-end-to-end.png" /></a>
@@ -2789,6 +2823,7 @@
 <li><a href="https://aws.amazon.com/step-functions">AWS Step Functions</a>， <a href="https://aws.amazon.com/cloudformation">AWS CloudFormation</a>，AWS Lambda 和 <a href="https://aws.amazon.com/eventbridge">Amazon EventBridge</a> 用于协调数据管道的生命周期管理。</li>
 <li>数据管道在系统操作员指定的区域进行配置。它由Application Load Balancer (ALB)、<a href="https://aws.amazon.com/ecs/">Amazon ECS</a>、<a href="https://aws.amazon.com/msk/">Amazon Managed Streaming for Kafka (Amazon MSK)</a>、<a href="https://aws.amazon.com/kinesis/">Amazon Kinesis</a>、Amazon S3、<a href="https://aws.amazon.com/emr/">Amazon EMR</a> Serverless、<a href="https://aws.amazon.com/redshift/">Amazon Redshift</a> 和 <a href="https://aws.amazon.com/quicksight/">Amazon QuickSight</a> 组成。</li>
 </ol>
+<h2 id="_2">数据管道</h2>
 <p>该解决方案的关键功能是构建数据管道来摄取、处理和分析点击流数据。数据管道由四个模块组成： </p>
 <ul>
 <li>摄取模块 </li>
@@ -2797,7 +2832,7 @@
 <li>报表模块 </li>
 </ul>
 <p>下面介绍每个模块的架构图。</p>
-<h3 id="_2">摄取模块</h3>
+<h3 id="_3">摄取模块</h3>
 <figure>
 <p><a class="glightbox" href="../images/architecture/02-architecture-ingestion-module.png" data-type="image" data-width="100%" data-height="auto" data-desc-position="bottom"><img alt="ingestion" loading="lazy" src="../images/architecture/02-architecture-ingestion-module.png" /></a>
    </p>
@@ -2818,7 +2853,7 @@
 <li>Amazon MSK 作为缓冲区。MSK Connector 配置了 S3 连接器插件，该插件将事件批量发送到 Amazon S3。</li>
 <li>摄取服务器将缓存一批事件，并将它们发送到 Amazon S3。</li>
 </ol>
-<h3 id="_3">数据处理模块</h3>
+<h3 id="_4">数据处理模块</h3>
 <figure>
 <p><a class="glightbox" href="../images/architecture/03-architecture-data-processing.png" data-type="image" data-width="100%" data-height="auto" data-desc-position="bottom"><img alt="etl" loading="lazy" src="../images/architecture/03-architecture-data-processing.png" /></a>
    </p>
@@ -2832,7 +2867,7 @@
 <li>EMR Serverless 应用程序使用可配置的转换器和插件来处理来自源 S3 存储桶的点击流事件。</li>
 <li>处理点击流事件后，EMR Serverless 应用程序会将处理过的事件汇入 S3 存储桶。</li>
 </ol>
-<h3 id="_4">数据建模模块</h3>
+<h3 id="_5">数据建模模块</h3>
 <figure>
 <p><a class="glightbox" href="../images/architecture/04-architecture-data-modeling-redshift.png" data-type="image" data-width="100%" data-height="auto" data-desc-position="bottom"><img alt="data-modeling-in-redshift" loading="lazy" src="../images/architecture/04-architecture-data-modeling-redshift.png" /></a>
    </p>
@@ -2852,7 +2887,7 @@
 <li>加载所有对象后，工作流程结束。</li>
 </ol>
 <figure>
-<p><a class="glightbox" href="../images/architecture/05-architecture-data-modeling-scan-metadata.png" data-type="image" data-width="100%" data-height="auto" data-desc-position="bottom"><img alt="data-modeling-in-redshift" loading="lazy" src="../images/architecture/05-architecture-data-modeling-scan-metadata.png" /></a>
+<p><a class="glightbox" href="../images/architecture/05-architecture-data-modeling-scan-metadata.png" data-type="image" data-width="100%" data-height="auto" data-desc-position="bottom"><img alt="metadata-scan-in-redshift" loading="lazy" src="../images/architecture/05-architecture-data-modeling-scan-metadata.png" /></a>
    </p>
 <figcaption>图 5：扫描元数据流程</figcaption>
 </figure>
@@ -2879,7 +2914,7 @@
 <li>Amazon Athena 用于交互式查询点击流事件。</li>
 <li>处理后的点击流数据通过 Glue 表进行扫描。</li>
 </ol>
-<h3 id="_5">报表模块</h3>
+<h3 id="_6">报表模块</h3>
 <figure>
 <p><a class="glightbox" href="../images/architecture/07-architecture-reporting.png" data-type="image" data-width="100%" data-height="auto" data-desc-position="bottom"><img alt="dashboard" loading="lazy" src="../images/architecture/07-architecture-reporting.png" /></a>
    </p>
@@ -2889,6 +2924,22 @@
 <ol>
 <li>Amazon QuickSight 中的 VPC 连接用于在 VPC 内安全地连接 Redshift。</li>
 <li>数据源、数据集、模板、分析和控制面板均在 Amazon QuickSight 中创建，用于开箱即用的分析和可视化。</li>
+</ol>
+<h2 id="_7">分析工作坊</h2>
+<p>分析工作坊（Analytics Studio）是供业务分析师或数据分析师查看和创建仪表板、查询和探索点击流数据以及管理元数据的统一网页界面。</p>
+<figure>
+<p><a class="glightbox" href="../images/architecture/08-analytics-studio.png" data-type="image" data-width="100%" data-height="auto" data-desc-position="bottom"><img alt="analytics-studio" loading="lazy" src="../images/architecture/08-analytics-studio.png" /></a>
+   </p>
+<figcaption>图 8: 分析工作坊架构</figcaption>
+</figure>
+<ol>
+<li>当分析师访问分析工作坊时，请求会发送到 <a href="https://aws.amazon.com/step-functions">Amazon CloudFront</a>，由其分发网络应用程序。</li>
+<li>当分析师登录分析工作坊时，请求会重定向到 <a href="https://aws.amazon.com/cognito">Amazon Cognito</a> 用户池或 OpenID Connect (OIDC) 进行身份验证。</li>
+<li><a href="https://aws.amazon.com/api-gateway/">Amazon API Gateway</a> 托管后端 API 请求，并使用自定义 Lambda 授权器用 OIDC 的公钥对请求进行授权。</li>
+<li>API Gateway 与 <a href="https://aws.amazon.com/lambda">AWS Lambda</a> 集成，为 API 请求提供服务。</li>
+<li>Lambda 函数使用 <a href="https://aws.amazon.com/dynamodb">Amazon DynamoDB</a> 来检索和持久化数据。</li>
+<li>当分析师创建分析时，Lambda 函数会请求数据管道区域的 <a href="https://aws.amazon.com/quicksight/">Amazon QuickSight</a> 创建资源，并获取嵌入 URL。</li>
+<li>分析师的浏览器访问 QuickSight 嵌入 URL 以查看 QuickSight 仪表板和图表。</li>
 </ol>
 
 
