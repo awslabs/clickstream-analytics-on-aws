@@ -12,6 +12,7 @@
  */
 
 import { DEFAULT_ADMIN_ROLE_NAMES, DEFAULT_ANALYST_READER_ROLE_NAMES, DEFAULT_ANALYST_ROLE_NAMES, DEFAULT_OPERATOR_ROLE_NAMES, DEFAULT_ROLE_JSON_PATH } from '../common/constants';
+import { SolutionInfo } from '../common/solution-info-ln';
 import { ApiFail, ApiSuccess } from '../common/types';
 import { getRoleFromToken, getTokenFromRequest } from '../common/utils';
 import { IUser, IUserSettings } from '../model/user';
@@ -91,8 +92,8 @@ export class UserService {
 
   public async update(req: any, res: any, next: any) {
     try {
-      if (req.body.operator === 'Clickstream') {
-        return res.status(400).json(new ApiFail('This user not allow to be modified.'));
+      if (req.body.operator === SolutionInfo.SOLUTION_SHORT_NAME) {
+        return res.status(400).json(new ApiFail('This user was created by solution and not allow to be modified.'));
       }
       req.body.operator = res.get('X-Click-Stream-Operator');
       const user: IUser = req.body as IUser;
@@ -107,6 +108,10 @@ export class UserService {
     try {
       const { id } = req.params;
       const operator = res.get('X-Click-Stream-Operator');
+      const user = await store.getUser(id);
+      if (user?.operator === SolutionInfo.SOLUTION_SHORT_NAME) {
+        return res.status(400).json(new ApiFail('This user was created by solution and not allow to be deleted.'));
+      }
       await store.deleteUser(id, operator);
       return res.status(200).json(new ApiSuccess(null, 'User deleted.'));
     } catch (error) {

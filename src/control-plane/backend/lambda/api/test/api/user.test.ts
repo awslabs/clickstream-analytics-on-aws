@@ -27,6 +27,7 @@ import { IUserRole } from '../../common/types';
 import { getRoleFromToken } from '../../common/utils';
 import { app, server } from '../../index';
 import 'aws-sdk-client-mock-jest';
+import { SolutionInfo } from '../../common/solution-info-ln';
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 
@@ -178,7 +179,7 @@ describe('User test', () => {
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
-    expect(res.body.message).toEqual('This user not allow to be modified.');
+    expect(res.body.message).toEqual('This user was created by solution and not allow to be modified.');
     expect(res.body.success).toEqual(false);
     expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 1);
     expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 1);
@@ -186,9 +187,15 @@ describe('User test', () => {
 
   it('Delete user', async () => {
     tokenMock(ddbMock, false);
-    ddbMock.on(GetCommand).resolvesOnce({
+    ddbMock.on(GetCommand,
+      {
+        Key: { id: 'fake@example.com', type: 'USER' },
+        TableName: clickStreamTableName,
+      },
+    ).resolves({
       Item: {
         id: MOCK_USER_ID,
+        operator: 'operator-01',
         deleted: false,
       },
     });
@@ -200,10 +207,38 @@ describe('User test', () => {
     expect(res.statusCode).toBe(200);
     expect(res.body.message).toEqual('User deleted.');
     expect(res.body.success).toEqual(true);
-    expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 1);
+    expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 2);
     expect(ddbMock).toHaveReceivedCommandTimes(UpdateCommand, 1);
     expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 1);
   });
+
+  it('Delete user that create by solution', async () => {
+    tokenMock(ddbMock, false);
+    ddbMock.on(GetCommand,
+      {
+        Key: { id: 'fake@example.com', type: 'USER' },
+        TableName: clickStreamTableName,
+      },
+    ).resolves({
+      Item: {
+        id: MOCK_USER_ID,
+        operator: SolutionInfo.SOLUTION_SHORT_NAME,
+        deleted: false,
+      },
+    });
+    ddbMock.on(UpdateCommand).resolvesOnce({});
+    const res = await request(app)
+      .delete(`/api/user/${MOCK_USER_ID}`)
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(400);
+    expect(res.body.message).toEqual('This user was created by solution and not allow to be deleted.');
+    expect(res.body.success).toEqual(false);
+    expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 2);
+    expect(ddbMock).toHaveReceivedCommandTimes(UpdateCommand, 0);
+    expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 1);
+  });
+
 
   it('Get details of user that is exist', async () => {
     tokenMock(ddbMock, false);
