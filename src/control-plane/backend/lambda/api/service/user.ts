@@ -93,7 +93,7 @@ export class UserService {
   public async update(req: any, res: any, next: any) {
     try {
       if (req.body.operator === SolutionInfo.SOLUTION_SHORT_NAME) {
-        return res.status(400).json(new ApiFail('This user was created by solution and not allow to be modified.'));
+        return res.status(400).json(new ApiFail('This user was created by solution and not allowed to be modified.'));
       }
       req.body.operator = res.get('X-Click-Stream-Operator');
       const user: IUser = req.body as IUser;
@@ -110,7 +110,7 @@ export class UserService {
       const operator = res.get('X-Click-Stream-Operator');
       const user = await store.getUser(id);
       if (user?.operator === SolutionInfo.SOLUTION_SHORT_NAME) {
-        return res.status(400).json(new ApiFail('This user was created by solution and not allow to be deleted.'));
+        return res.status(400).json(new ApiFail('This user was created by solution and not allowed to be deleted.'));
       }
       await store.deleteUser(id, operator);
       return res.status(200).json(new ApiSuccess(null, 'User deleted.'));
