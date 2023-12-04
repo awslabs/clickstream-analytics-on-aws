@@ -166,6 +166,7 @@ const AnalyticsDashboardDetail: React.FC = () => {
                   <ExploreEmbedFrame
                     embedType="dashboard"
                     embedUrl={dashboardEmbedUrl}
+                    embedPage="dashboard"
                   />
                 )}
               </Container>
