@@ -3,6 +3,8 @@
   "info": "信息",
   "oops": "错误...",
   "welcome": "欢迎来到亚马逊云科技点击流分析解决方案",
+  "noEmailError": "登录的用户没有设置电子邮箱地址",
+  "unknownError": "未知错误: ",
   "breadCrumb": {
     "name": "点击流分析",
     "pipelines": "数据管道",
