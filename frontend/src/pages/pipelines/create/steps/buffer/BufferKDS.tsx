@@ -20,7 +20,7 @@ import {
 } from '@cloudscape-design/components';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { KDSProvisionType } from 'ts/const';
+import { KDSProvisionType, POSITIVE_INTEGER_REGEX } from 'ts/const';
 import { isDisabled } from 'ts/utils';
 
 interface BufferKDSProps {
@@ -96,6 +96,9 @@ const BufferKDS: React.FC<BufferKDSProps> = (props: BufferKDSProps) => {
             value={pipelineInfo.ingestionServer.sinkKinesis.kinesisShardCount.toString()}
             type="number"
             onChange={(e) => {
+              if (!POSITIVE_INTEGER_REGEX.test(e.detail.value)) {
+                return false;
+              }
               changeKDSShardNumber(e.detail.value);
             }}
           />

@@ -79,11 +79,6 @@
       "type": "build"
     },
     {
-      "name": "npm-check-updates",
-      "version": "^16",
-      "type": "build"
-    },
-    {
       "name": "projen",
       "type": "build"
     },
@@ -121,11 +116,6 @@
       "type": "runtime"
     },
     {
-      "name": "@aws-sdk/client-athena",
-      "version": "^3.405.0",
-      "type": "runtime"
-    },
-    {
       "name": "@aws-sdk/client-cloudformation",
       "version": "^3.405.0",
       "type": "runtime"
@@ -146,22 +136,12 @@
       "type": "runtime"
     },
     {
-      "name": "@aws-sdk/client-emr-serverless",
-      "version": "^3.405.0",
-      "type": "runtime"
-    },
-    {
       "name": "@aws-sdk/client-iam",
       "version": "^3.405.0",
       "type": "runtime"
     },
     {
       "name": "@aws-sdk/client-kafka",
-      "version": "^3.405.0",
-      "type": "runtime"
-    },
-    {
-      "name": "@aws-sdk/client-kafkaconnect",
       "version": "^3.405.0",
       "type": "runtime"
     },

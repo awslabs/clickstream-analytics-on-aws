@@ -23,6 +23,7 @@ import request from 'supertest';
 import { MOCK_TOKEN, MOCK_USER_ID, tokenMock } from './ddb-mock';
 import { DEFAULT_ADMIN_ROLE_NAMES, DEFAULT_ANALYST_READER_ROLE_NAMES, DEFAULT_ANALYST_ROLE_NAMES, DEFAULT_OPERATOR_ROLE_NAMES, DEFAULT_ROLE_JSON_PATH, amznRequestContextHeader, clickStreamTableName } from '../../common/constants';
 import { DEFAULT_SOLUTION_OPERATOR } from '../../common/constants-ln';
+import { SolutionInfo } from '../../common/solution-info-ln';
 import { IUserRole } from '../../common/types';
 import { getRoleFromToken } from '../../common/utils';
 import { app, server } from '../../index';
@@ -102,7 +103,7 @@ describe('User test', () => {
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
       .send({
         id: `${MOCK_USER_ID} `,
-        role: IUserRole.OPERATOR,
+        roles: [IUserRole.OPERATOR],
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
@@ -110,6 +111,27 @@ describe('User test', () => {
     expect(res.body.success).toEqual(false);
   });
 
+  it('Add user with name too long', async () => {
+    tokenMock(ddbMock, false);
+    ddbMock.on(GetCommand, {
+      TableName: clickStreamTableName,
+      Key: {
+        id: MOCK_USER_ID,
+        type: 'USER',
+      },
+    }).resolves({});
+    const res = await request(app)
+      .post('/api/user')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
+      .send({
+        id: MOCK_USER_ID,
+        name: Array(102).join('a'),
+        roles: [IUserRole.OPERATOR],
+      });
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(400);
+    expect(res.body.message).toEqual('Parameter verification failed.');
+  });
   it('Update user', async () => {
     tokenMock(ddbMock, false).resolvesOnce({});
     ddbMock.on(GetCommand).resolvesOnce({
@@ -157,7 +179,7 @@ describe('User test', () => {
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
-    expect(res.body.message).toEqual('This user not allow to be modified.');
+    expect(res.body.message).toEqual('This user was created by solution and not allowed to be modified.');
     expect(res.body.success).toEqual(false);
     expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 1);
     expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 1);
@@ -165,9 +187,15 @@ describe('User test', () => {
 
   it('Delete user', async () => {
     tokenMock(ddbMock, false);
-    ddbMock.on(GetCommand).resolvesOnce({
+    ddbMock.on(GetCommand,
+      {
+        Key: { id: 'fake@example.com', type: 'USER' },
+        TableName: clickStreamTableName,
+      },
+    ).resolves({
       Item: {
         id: MOCK_USER_ID,
+        operator: 'operator-01',
         deleted: false,
       },
     });
@@ -179,10 +207,38 @@ describe('User test', () => {
     expect(res.statusCode).toBe(200);
     expect(res.body.message).toEqual('User deleted.');
     expect(res.body.success).toEqual(true);
-    expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 1);
+    expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 2);
     expect(ddbMock).toHaveReceivedCommandTimes(UpdateCommand, 1);
     expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 1);
   });
+
+  it('Delete user that create by solution', async () => {
+    tokenMock(ddbMock, false);
+    ddbMock.on(GetCommand,
+      {
+        Key: { id: 'fake@example.com', type: 'USER' },
+        TableName: clickStreamTableName,
+      },
+    ).resolves({
+      Item: {
+        id: MOCK_USER_ID,
+        operator: SolutionInfo.SOLUTION_SHORT_NAME,
+        deleted: false,
+      },
+    });
+    ddbMock.on(UpdateCommand).resolvesOnce({});
+    const res = await request(app)
+      .delete(`/api/user/${MOCK_USER_ID}`)
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(400);
+    expect(res.body.message).toEqual('This user was created by solution and not allowed to be deleted.');
+    expect(res.body.success).toEqual(false);
+    expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 2);
+    expect(ddbMock).toHaveReceivedCommandTimes(UpdateCommand, 0);
+    expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 1);
+  });
+
 
   it('Get details of user that is exist', async () => {
     tokenMock(ddbMock, false);

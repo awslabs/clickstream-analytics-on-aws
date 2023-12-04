@@ -25,6 +25,7 @@ export interface IProject {
   readonly region: string;
   readonly environment: ProjectEnvironment | string;
   pipelineId: string;
+  pipelineVersion: string;
   applications: IApplication[];
   reportingEnabled: boolean;
   readonly status: string;
@@ -52,8 +53,6 @@ export interface IDashboard {
   readonly description: string;
   readonly region: string;
   readonly sheets: IDashboardSheet[];
-  readonly ownerPrincipal: string;
-  readonly defaultDataSourceArn: string;
   embedUrl?: string;
 
   readonly createAt: number;

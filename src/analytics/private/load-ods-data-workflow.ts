@@ -37,6 +37,7 @@ import { SolutionNodejsFunction } from '../../private/function';
 
 export interface LoadOdsDataToRedshiftWorkflowProps {
   readonly projectId: string;
+  readonly appIds: string;
   readonly networkConfig: {
     readonly vpc: IVpc;
     readonly vpcSubnets: SubnetSelection;
@@ -318,6 +319,25 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
     };
 
     //
+    // Refresh materialized views
+    //
+
+    const refreshViewsFn = this.refreshViewsFn(props, copyRole);
+    const refreshViewsStep = new LambdaInvoke(this, `${this.node.id} - Refresh materialized views`, {
+      lambdaFunction: refreshViewsFn,
+      resultSelector: {
+        'Payload.$': '$.Payload',
+      },
+      resultPath: '$.refreshViewsOut',
+    });
+    refreshViewsStep.addRetry({
+      errors: ['Lambda.TooManyRequestsException'],
+      interval: Duration.seconds(3),
+      backoffRate: 2,
+      maxAttempts: 6,
+    });
+
+    //
     // Next state machines
     //
 
@@ -372,7 +392,7 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
 
     const skipRunningWorkflowChoice = new Choice(this, `${this.node.id} - Skip Running Workflow`)
       .when(Condition.booleanEquals('$.SkipRunningWorkflow', true), ignoreRunFlow)
-      .otherwise(parallelLoadBranch.next(nexTaskExecChain));
+      .otherwise(parallelLoadBranch.next(refreshViewsStep).next(nexTaskExecChain));
 
     const definition = checkSkippingRunningWorkflow.next(skipRunningWorkflowChoice);
 
@@ -599,6 +619,44 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
 
     });
     ddbTable.grantReadData(fn);
+    return fn;
+  }
+
+
+  private refreshViewsFn(props: LoadOdsDataToRedshiftWorkflowProps, copyRole: IRole): IFunction {
+    const resourceId = 'RefreshViews';
+
+    const fnSG = props.securityGroupForLambda;
+    const fn = new SolutionNodejsFunction(this, `${resourceId}Fn`, {
+      runtime: Runtime.NODEJS_18_X,
+      entry: join(
+        this.lambdaRootPath,
+        'refresh-views.ts',
+      ),
+      handler: 'handler',
+      memorySize: 128,
+      timeout: Duration.minutes(3),
+      logRetention: RetentionDays.ONE_WEEK,
+      reservedConcurrentExecutions: 1,
+      role: createLambdaRole(this, `${resourceId}Role`, true, []),
+      ...props.networkConfig,
+      securityGroups: [fnSG],
+      environment: {
+        PROJECT_ID: props.projectId,
+        APP_IDS: props.appIds,
+
+        REDSHIFT_MODE: props.serverlessRedshift ? REDSHIFT_MODE.SERVERLESS : REDSHIFT_MODE.PROVISIONED,
+        REDSHIFT_SERVERLESS_WORKGROUP_NAME: props.serverlessRedshift?.workgroupName ?? '',
+        REDSHIFT_CLUSTER_IDENTIFIER: props.provisionedRedshift?.clusterIdentifier ?? '',
+        REDSHIFT_DATABASE: props.databaseName,
+        REDSHIFT_DB_USER: props.provisionedRedshift?.dbUser ?? '',
+
+        REDSHIFT_ROLE: copyRole.roleArn,
+        REDSHIFT_DATA_API_ROLE: props.dataAPIRole.roleArn,
+        ...POWERTOOLS_ENVS,
+      },
+    });
+    props.dataAPIRole.grantAssumeRole(fn.grantPrincipal);
     return fn;
   }
 }

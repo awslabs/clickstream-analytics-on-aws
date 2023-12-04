@@ -12,14 +12,18 @@
  */
 
 import {
+  Flashbar,
+  FlashbarProps,
   Select,
   SelectProps,
   TopNavigation,
 } from '@cloudscape-design/components';
 import { getProjectList } from 'apis/project';
+import { IProjectSelectItem } from 'components/eventselect/AnalyticsType';
 import { useLocalStorage } from 'pages/common/use-local-storage';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useParams } from 'react-router-dom';
 import {
   ANALYTICS_INFO_KEY,
   DEFAULT_ZH_LANG,
@@ -30,27 +34,23 @@ import {
   ZH_TEXT,
 } from 'ts/const';
 import { getDocumentLink } from 'ts/url';
-import { defaultStr } from 'ts/utils';
+import { defaultStr, getProjectAppFromOptions } from 'ts/utils';
 
 interface IHeaderProps {
   user: any;
   signOut: any;
 }
-interface IProjectSelectItem extends SelectProps.Option {
-  projectId?: string;
-  projectName?: string;
-  appId?: string;
-  appName?: string;
-}
 
 const AnalyticsHeader: React.FC<IHeaderProps> = (props: IHeaderProps) => {
   const { t, i18n } = useTranslation();
   const { user, signOut } = props;
+  const { projectId, appId } = useParams();
   const [displayName, setDisplayName] = useState('');
   const [fullLogoutUrl, setFullLogoutUrl] = useState('');
-  const [allProjectOptions, setAllProjectOptions] =
-    useState<SelectProps.Options>([]);
-  const [selectedOption, setSelectedOption] = React.useState<any>(null);
+  const [allProjectOptions, setAllProjectOptions] = useState<
+    SelectProps.OptionGroup[]
+  >([]);
+  const [selectedOption, setSelectedOption] = useState<any>(null);
   const [analyticsInfo, setAnalyticsInfo] = useLocalStorage(
     ANALYTICS_INFO_KEY,
     {
@@ -60,15 +60,99 @@ const AnalyticsHeader: React.FC<IHeaderProps> = (props: IHeaderProps) => {
       appName: '',
     }
   );
+  const [items, setItems] = useState<FlashbarProps.MessageDefinition[]>([]);
 
   const changeLanguage = (lng: string) => {
     i18n.changeLanguage(lng);
   };
 
-  const getSelectLabelByReportingEnable = (label: string, enable: boolean) => {
-    return enable
-      ? label
-      : `${label} (${t('analytics:labels.reportingNotEnabled')})`;
+  const getSelectLabel = (
+    label: string,
+    version: string,
+    reportingEnabled: boolean
+  ) => {
+    if (version === '' || version.startsWith('v1.0')) {
+      return `${label} (${t('analytics:labels.pipelineVersionNotSupport')})`;
+    } else if (!reportingEnabled) {
+      return `${label} (${t('analytics:labels.reportingNotEnabled')})`;
+    }
+    return label;
+  };
+
+  const getSelectEnable = (version: string, enable: boolean) => {
+    if (version === '') {
+      return false;
+    }
+    return !enable || version.startsWith('v1.0');
+  };
+
+  const getSelectOptions = (element: IProject) => {
+    const options: IProjectSelectItem[] = [];
+    if (!element.applications) {
+      return options;
+    }
+    for (const app of element.applications) {
+      options.push({
+        label: app.name,
+        value: `${element.id}-${app.appId}`,
+        projectId: element.id,
+        projectName: element.name,
+        appId: app.appId,
+        appName: app.name,
+      });
+    }
+    return options;
+  };
+
+  const showWarningMessage = (type: FlashbarProps.Type, message: string) => {
+    setItems([
+      {
+        type: type,
+        content: message,
+        dismissible: true,
+        onDismiss: () => setItems([]),
+        id: 'message',
+      },
+    ]);
+  };
+
+  const setSelectOptionFromParams = (
+    projectOptions: SelectProps.OptionGroup[]
+  ) => {
+    if (projectId && appId) {
+      const option = getProjectAppFromOptions(projectId, appId, projectOptions);
+      if (!option) {
+        showWarningMessage(
+          'error',
+          `${t('analytics:valid.errorProjectOrApp')}${projectId} / ${appId}`
+        );
+        setSelectedOption(null);
+      } else if (option.disabled) {
+        showWarningMessage(
+          'warning',
+          `${t(
+            'analytics:valid.notSupportProjectOrApp'
+          )}${projectId} / ${appId}`
+        );
+        setSelectedOption(null);
+      } else {
+        setSelectedOption({
+          label: `${option.projectName} / ${option.appName}`,
+          value: `${option.projectId}_${option.appId}`,
+        });
+        if (
+          analyticsInfo.projectId !== option.projectId ||
+          analyticsInfo.appId !== option.appId
+        ) {
+          setAnalyticsInfo({
+            projectId: defaultStr(option.projectId),
+            projectName: defaultStr(option.projectName),
+            appId: defaultStr(option.appId),
+            appName: defaultStr(option.appName),
+          });
+        }
+      }
+    }
   };
 
   const listProjects = async () => {
@@ -79,45 +163,26 @@ const AnalyticsHeader: React.FC<IHeaderProps> = (props: IHeaderProps) => {
           pageSize: 9999,
         });
       if (success) {
-        const projectOptions: SelectProps.Options = data.items.map(
+        const projectOptions: SelectProps.OptionGroup[] = data.items.map(
           (element) => ({
-            label: getSelectLabelByReportingEnable(
+            label: getSelectLabel(
               element.name,
+              defaultStr(element.pipelineVersion),
               element.reportingEnabled ?? false
             ),
             value: element.id,
-            disabled: !element.reportingEnabled,
-            options: element.applications?.map(
-              (app) =>
-                ({
-                  label: app.name,
-                  value: `${element.id}-${app.appId}`,
-                  projectId: element.id,
-                  projectName: element.name,
-                  appId: app.appId,
-                  appName: app.name,
-                } as IProjectSelectItem)
+            disabled: getSelectEnable(
+              defaultStr(element.pipelineVersion),
+              element.reportingEnabled ?? false
             ),
+            options: getSelectOptions(element),
           })
         );
         setAllProjectOptions(projectOptions);
+        setSelectOptionFromParams(projectOptions);
       }
     } catch (error) {
       console.log(error);
-    }
-  };
-
-  const setCurOption = () => {
-    if (
-      analyticsInfo.projectId &&
-      analyticsInfo.appId &&
-      analyticsInfo.projectName &&
-      analyticsInfo.appName
-    ) {
-      setSelectedOption({
-        label: `${analyticsInfo.projectName} / ${analyticsInfo.appName}`,
-        value: `${analyticsInfo.projectId}-${analyticsInfo.appId}`,
-      });
     }
   };
 
@@ -130,7 +195,6 @@ const AnalyticsHeader: React.FC<IHeaderProps> = (props: IHeaderProps) => {
         user?.profile?.sub ||
         ''
     );
-    setCurOption();
     listProjects();
   }, [user]);
 
@@ -200,6 +264,7 @@ const AnalyticsHeader: React.FC<IHeaderProps> = (props: IHeaderProps) => {
             ariaLabel: 'settings',
             onItemClick: (item) => {
               changeLanguage(item.detail.id);
+              window.location.reload();
             },
             items:
               i18n.language === DEFAULT_ZH_LANG
@@ -232,6 +297,9 @@ const AnalyticsHeader: React.FC<IHeaderProps> = (props: IHeaderProps) => {
           overflowMenuDismissIconAriaLabel: defaultStr(t('header.close??Menu')),
         }}
       />
+      <div className="flex center">
+        <Flashbar items={items} />
+      </div>
     </header>
   );
 };

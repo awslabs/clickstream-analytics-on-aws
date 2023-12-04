@@ -15,7 +15,7 @@
 
 按照以下步骤在 AWS 上部署此解决方案。
 
-[步骤 1. 创建 OIDC 客户端](/#1-oidc)
+[步骤 1. 创建 OIDC 客户端](#1-oidc)
 
 [步骤 2. 启动堆栈](#2)
 
@@ -48,6 +48,9 @@
    - 在选择 **应用类型** 时选择 **公共客户端**。确保不要更改 **客户端密钥** 的选择 **不生成客户端密钥**。
    - 在 **OpenID Connect 作用域** 中添加 **Profile**。
 3. 使用您的域名为 {{ solution_name }} 控制台设置 **回调 URL** 和 **登出 URL**。
+      -  **回调 URL**: `http[s]://<domain-name>/signin`
+      -  **登出 URL**: `http[s]://<domain-name>`
+
     !!! info "注意"
         如果您未为控制台使用自定义域名，则无法获得控制台的域名。您可以输入一个虚假的域名，例如 `clickstream.example.com`，然后根据第 3 步中的指南进行更新。
 
@@ -55,7 +58,7 @@
 
        ![cognito host ui](../images/OIDC/cognito-hostUI-new.jpeg)
 
-6. 将应用客户端 ID、用户池 ID 和 AWS 区域保存到一个文件中，稍后会用到。
+5. 将应用客户端 ID、用户池 ID 和 AWS 区域保存到一个文件中，稍后会用到。
 
        ![cognito client id](../images/OIDC/cognito-new-console-clientID.png)
        ![cognito userpool id](../images/OIDC/cognito-new-console-userpoolID.png)
@@ -79,9 +82,11 @@
 
     ![authing endpoint info](../images/OIDC/authing-endpoint-info.png)
 
-8. 将 `Login Callback URL` 和 `Logout Callback URL` 更新为您记录的 IPC 域名。
+8. 将 `Login Callback URL` 和 `Logout Callback URL` 更新, 注意，您需要在`Login Callback URL`里添加 **`/signin`**， 如下:
+      -  **回调 URL**: `http[s]://<domain-name>/signin`
+      -  **登出 URL**: `http[s]://<domain-name>`
 
-9. 设置授权配置。
+9.  设置授权配置。
 
     ![authing authorization configuration](../images/OIDC/authing-authorization-configuration.png)
 

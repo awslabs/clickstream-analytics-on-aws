@@ -2,6 +2,7 @@ name: source scan
 on:
   pull_request: {}
   workflow_dispatch: {}
+  merge_group: {}
 jobs:
   git-secrets-scan:
     runs-on: ubuntu-latest

@@ -28,6 +28,7 @@ declare global {
     region: string;
     description: string;
     pipelineId?: string;
+    pipelineVersion?: string;
     applications?: IApplication[];
     reportingEnabled?: boolean;
     updateAt?: number;
@@ -36,7 +37,6 @@ declare global {
     createAt?: number;
     type?: string;
     status?: string;
-    pipelineId?: string;
   }
 
   interface IAlarmPromiseResult {

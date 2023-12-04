@@ -40,6 +40,9 @@ import {
   DescribeDashboardCommandOutput,
   DescribeDashboardDefinitionCommand,
   DeleteDataSetCommand,
+  DeleteUserCommand,
+  DeleteUserCommandInput,
+  ResourceNotFoundException,
 } from '@aws-sdk/client-quicksight';
 import { awsAccountId, awsRegion, QUICKSIGHT_CONTROL_PLANE_REGION, QUICKSIGHT_EMBED_NO_REPLY_EMAIL, QuickSightEmbedRoleArn } from '../../common/constants';
 import { QUICKSIGHT_ANALYSIS_INFIX, QUICKSIGHT_DASHBOARD_INFIX, QUICKSIGHT_DATASET_INFIX } from '../../common/constants-ln';
@@ -95,6 +98,41 @@ export const registerUserByRegion = async (
       return true;
     }
     logger.error('Register User Error.', { err });
+    return false;
+  }
+};
+
+export const deleteClickstreamUser = async () => {
+  const identityRegion = await sdkClient.QuickSightIdentityRegion();
+  const quickSightEmbedRoleName = QuickSightEmbedRoleArn?.split(':role/')[1];
+  await deleteUserByRegion(identityRegion, {
+    AwsAccountId: awsAccountId,
+    Namespace: QUICKSIGHT_NAMESPACE,
+    UserName: `${quickSightEmbedRoleName}/${QUICKSIGHT_PUBLISH_USER_NAME}`,
+  });
+  await deleteUserByRegion(identityRegion, {
+    AwsAccountId: awsAccountId,
+    Namespace: QUICKSIGHT_NAMESPACE,
+    UserName: `${quickSightEmbedRoleName}/${QUICKSIGHT_EXPLORE_USER_NAME}`,
+  });
+};
+
+export const deleteUserByRegion = async (
+  region: string,
+  user: DeleteUserCommandInput,
+) => {
+  try {
+    const quickSightClient = sdkClient.QuickSightClient({
+      region: region,
+    });
+    const command: DeleteUserCommand = new DeleteUserCommand(user);
+    await quickSightClient.send(command);
+    return true;
+  } catch (err) {
+    if (err instanceof ResourceNotFoundException) {
+      return true;
+    }
+    logger.error('Delete User Error.', { err });
     return false;
   }
 };
@@ -190,30 +228,6 @@ export const quickSightIsSubscribed = async (): Promise<boolean> => {
       return false;
     }
     throw err;
-  }
-  return true;
-};
-
-export const quickSightPing = async (region: string): Promise<boolean> => {
-  try {
-    if (region.startsWith('cn')) {
-      return false;
-    }
-    const quickSightClient = sdkClient.QuickSightClient({
-      maxAttempts: 1,
-      region: region,
-    });
-    const command: DescribeAccountSubscriptionCommand = new DescribeAccountSubscriptionCommand({
-      AwsAccountId: awsAccountId,
-    });
-    await quickSightClient.send(command);
-  } catch (err) {
-    if ((err as Error).name === 'TimeoutError' ||
-    (err as Error).message.includes('getaddrinfo ENOTFOUND') ||
-    (err as Error).name === 'UnrecognizedClientException' ||
-    (err as Error).name === 'InternalFailure') {
-      return false;
-    }
   }
   return true;
 };
@@ -359,6 +373,7 @@ export const describeDashboard = async (
 
 export const createPublishDashboard = async (
   dashboard: IDashboard,
+  defaultDataSourceArn: string,
 ): Promise<any> => {
   try {
     const principals = await getClickstreamUserArn();
@@ -376,7 +391,7 @@ export const createPublishDashboard = async (
       PhysicalTableMap: {
         PhyTable0: {
           CustomSql: {
-            DataSourceArn: dashboard.defaultDataSourceArn,
+            DataSourceArn: defaultDataSourceArn,
             Name: 'event',
             SqlQuery: `select * from ${dashboard.appId}.event`,
             Columns: [

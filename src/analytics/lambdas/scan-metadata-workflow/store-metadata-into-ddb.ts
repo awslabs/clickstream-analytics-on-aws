@@ -128,9 +128,9 @@ async function handleEventMetadata(appId: string, metadataItems: any[]) {
     for (const key in item) {
       if (key.startsWith('day')) {
         const dayData = item[key];
-        dayData.platform.forEach((element: string) => platformSet.add(element));
-        dayData.sdkVersion.forEach((element: string) => sdkVersionSet.add(element));
-        dayData.sdkName.forEach((element: string) => sdkNameSet.add(element));
+        dayData.platform?.forEach((element: string) => platformSet.add(element));
+        dayData.sdkVersion?.forEach((element: string) => sdkVersionSet.add(element));
+        dayData.sdkName?.forEach((element: string) => sdkNameSet.add(element));
       }
     }
     item.summary = {
@@ -144,10 +144,10 @@ async function handleEventMetadata(appId: string, metadataItems: any[]) {
 }
 
 async function handlePropertiesMetadata(appId: string, metadataItems: any[]) {
-  const itemsMap = await getExistingItemsFromDDB(appId, 'event_properties_metadata');
+  const itemsMap = await getExistingItemsFromDDB(appId, 'event_parameter_metadata');
 
   const inputSql =
-    `SELECT id, month, prefix, project_id, app_id, day_number, category, event_name, property_name, value_type, value_enum, platform FROM ${appId}.event_properties_metadata;`;
+    `SELECT id, month, prefix, project_id, app_id, day_number, category, event_name, property_name, value_type, value_enum, platform FROM ${appId}.event_parameter_metadata;`;
 
   const response = await queryMetadata(inputSql);
 
@@ -188,8 +188,8 @@ async function handlePropertiesMetadata(appId: string, metadataItems: any[]) {
     for (const key in item) {
       if (key.startsWith('day')) {
         const dayData = item[key];
-        dayData.platform.forEach((element: string) => platformSet.add(element));
-        dayData.valueEnum.forEach((element: any) => {
+        dayData.platform?.forEach((element: string) => platformSet.add(element));
+        dayData.valueEnum?.forEach((element: any) => {
           if (valueEnumAggregation[element.value]) {
             valueEnumAggregation[element.value] += element.count;
           } else {
@@ -324,7 +324,7 @@ function parseDynamoDBTableARN(ddbArn: string) {
 function convertToDDBList(inputString?: string) {
   let listData: any[] = [];
   if (inputString) {
-    listData = inputString.split('#');
+    listData = inputString.split('#|!|#');
   }
   return listData;
 }
@@ -332,12 +332,15 @@ function convertToDDBList(inputString?: string) {
 function convertValueEnumToDDBList(inputString?: string) {
   let listData: any[] = [];
   if (inputString) {
-    listData = inputString.split('#').map(item => {
+    listData = inputString.split('#|!|#').map(item => {
       const lastUnderscoreIndex = item.lastIndexOf('_');
       const value = item.substring(0, lastUnderscoreIndex);
       const count = parseInt(item.substring(lastUnderscoreIndex + 1));
+      if (!value || isNaN(count)) {
+        return null;
+      }
       return { value, count };
-    });
+    }).filter(item => item !== null);
   }
   return listData;
 }

@@ -421,3 +421,6 @@ export const EVENT_DISPLAY_PREFIX = 'EVENT#';
 export const EVENT_PARAMETER_DISPLAY_PREFIX = 'EVENT_PARAMETER#';
 export const USER_ATTRIBUTE_DISPLAY_PREFIX = 'USER_ATTRIBUTE#';
 export const DICTIONARY_DISPLAY_PREFIX = 'DICTIONARY#';
+
+export const POSITIVE_INTEGER_REGEX = new RegExp(`${'^$|^[1-9]\\d*$'}`);
+export const POSITIVE_INTEGER_REGEX_INCLUDE_ZERO = new RegExp(`${'^$|^\\d+$'}`);

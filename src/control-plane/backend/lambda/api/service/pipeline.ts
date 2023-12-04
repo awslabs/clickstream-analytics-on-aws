@@ -15,7 +15,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { StackManager } from './stack';
 import { OUTPUT_INGESTION_SERVER_DNS_SUFFIX, OUTPUT_INGESTION_SERVER_URL_SUFFIX, OUTPUT_METRICS_OBSERVABILITY_DASHBOARD_NAME, OUTPUT_REPORT_DASHBOARDS_SUFFIX } from '../common/constants-ln';
 import { ApiFail, ApiSuccess, PipelineStackType, PipelineStatusType } from '../common/types';
-import { getStackOutputFromPipelineStatus, getReportingDashboardsUrl, paginateData } from '../common/utils';
+import { getStackOutputFromPipelineStatus, getReportingDashboardsUrl, paginateData, pipelineAnalysisStudioEnabled } from '../common/utils';
 import { IPipeline, CPipeline } from '../model/pipeline';
 import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
@@ -98,6 +98,7 @@ export class PipelineServ {
           metricsDashboardName: getStackOutputFromPipelineStatus(
             latestPipeline.status, PipelineStackType.METRICS, OUTPUT_METRICS_OBSERVABILITY_DASHBOARD_NAME),
           templateInfo,
+          analysisStudioEnabled: pipelineAnalysisStudioEnabled(latestPipeline),
         }));
       }
       return res.json(new ApiSuccess({
@@ -107,6 +108,7 @@ export class PipelineServ {
         dashboards: null,
         metricsDashboardName: null,
         templateInfo: null,
+        analysisStudioEnabled: pipelineAnalysisStudioEnabled(latestPipeline),
       }));
     } catch (error) {
       next(error);

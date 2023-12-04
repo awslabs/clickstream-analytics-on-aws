@@ -142,10 +142,16 @@ const UserTable: React.FC<UserTableProps> = (props: UserTableProps) => {
     if (column.id === 'name' && new RegExp(XSS_PATTERN).test(value)) {
       throw new Error('Inline error');
     }
-    const newItem = {
-      ...currentItem,
-      [column.id]: value.map((option: any) => option.value) as IUserRole[],
-    };
+    let newItem = { ...currentItem };
+    if (column.id === 'name') {
+      newItem = { ...currentItem, [column.id]: value };
+    }
+    if (column.id === 'roles') {
+      newItem = {
+        ...currentItem,
+        [column.id]: value.map((option: any) => option.value) as IUserRole[],
+      };
+    }
     await fetchUpdateFunc(newItem);
     let fullCollection = data;
 

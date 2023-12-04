@@ -25,11 +25,13 @@ const InfoTitle: React.FC<InfoTitleProps> = (props: InfoTitleProps) => {
   return (
     <div className="flex align-center gap-3">
       <Box variant="awsui-key-label">{title}</Box>
-      <Popover triggerType="custom" size="small" content={popoverDescription}>
-        <div>
-          <ExtendIcon icon="Info" color="#666" />
-        </div>
-      </Popover>
+      {popoverDescription && (
+        <Popover triggerType="custom" size="small" content={popoverDescription}>
+          <div>
+            <ExtendIcon icon="Info" color="#666" />
+          </div>
+        </Popover>
+      )}
     </div>
   );
 };

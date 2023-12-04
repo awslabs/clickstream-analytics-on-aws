@@ -111,6 +111,7 @@ public final class DatasetUtil {
     public static final String EVENT_FIRST_OPEN = "_first_open";
     public static final String EVENT_FIRST_VISIT = "_first_visit";
     public static final String EVENT_APP_END = "_app_end";
+    public static final String EVENT_APP_START = "_app_start";
     public static final String APP_INFO = "app_info";
     public static final String MOBILE = "mobile";
     public static final String MODEL = "model";

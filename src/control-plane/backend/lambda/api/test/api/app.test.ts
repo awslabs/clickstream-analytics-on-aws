@@ -29,6 +29,15 @@ describe('App test', () => {
     process.env.WITH_AUTH_MIDDLEWARE = 'false';
     process.env.WITH_VALIDATE_ROLE = 'false';
   });
+  it('invalid uri', async () => {
+    const res = await request(app)
+      .get('/api/user/details%81?id=');
+    expect(res.status).toBe(400);
+    expect(res.body).toEqual({
+      success: false,
+      message: 'Invalid URI.',
+    });
+  });
   it('response headers contain X-Click-Stream-Response-Time', async () => {
     const res = await request(app)
       .get('/');

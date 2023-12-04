@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { Alert } from '@cloudscape-design/components';
 import { getUserDetails } from 'apis/user';
 import Loading from 'components/common/Loading';
 import RoleRoute from 'components/common/RoleRoute';
@@ -34,7 +35,8 @@ import CreatePlugin from 'pages/plugins/create/CreatePlugin';
 import Projects from 'pages/projects/Projects';
 import ProjectDetail from 'pages/projects/detail/ProjectDetail';
 import UserList from 'pages/user/UserList';
-import React, { Suspense, useContext, useEffect } from 'react';
+import React, { Suspense, useContext, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { AuthContextProps } from 'react-oidc-context';
 import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import { IUserRole } from 'ts/const';
@@ -50,8 +52,12 @@ const ANALYTICS_ROLE = [IUserRole.ANALYST, IUserRole.ANALYST_READER];
 const LoginCallback: React.FC<LoginCallbackProps> = (
   props: LoginCallbackProps
 ) => {
+  const { t } = useTranslation();
   const { auth } = props;
   const currentUser = useContext(UserContext) ?? getUserInfoFromLocalStorage();
+  const [noUserEmailError, setNoUserEmailError] = useState(false);
+  const [unexpectedError, setUnexpectedError] = useState(false);
+  const [unexpectedErrorMessage, setUnexpectedErrorMessage] = useState('');
 
   const gotoBasePage = () => {
     window.location.href = `${BASE_URL}`;
@@ -61,13 +67,26 @@ const LoginCallback: React.FC<LoginCallbackProps> = (
   };
 
   const getUserInfo = async () => {
-    const { success, data }: ApiResponse<IUser> = await getUserDetails(
-      auth.user?.profile.email ?? ''
-    );
-    if (success && getIntersectArrays(ANALYTICS_ROLE, data.roles).length > 0) {
-      gotoAnalyticsPage();
-    } else {
-      gotoBasePage();
+    if (!auth.user?.profile.email) {
+      setNoUserEmailError(true);
+      return;
+    }
+    setNoUserEmailError(false);
+    try {
+      const { success, data }: ApiResponse<IUser> = await getUserDetails(
+        auth.user?.profile.email ?? ''
+      );
+      if (
+        success &&
+        getIntersectArrays(ANALYTICS_ROLE, data.roles).length > 0
+      ) {
+        gotoAnalyticsPage();
+      } else {
+        gotoBasePage();
+      }
+    } catch (error: any) {
+      setUnexpectedError(true);
+      setUnexpectedErrorMessage(error.message);
     }
   };
 
@@ -82,6 +101,18 @@ const LoginCallback: React.FC<LoginCallbackProps> = (
       gotoBasePage();
     }
   }, []);
+
+  if (noUserEmailError) {
+    return <Alert type="error">{t('noEmailError')}</Alert>;
+  }
+
+  if (unexpectedError) {
+    return (
+      <Alert type="error">
+        {t('unknownError')} {unexpectedErrorMessage}
+      </Alert>
+    );
+  }
 
   return <Loading isPage />;
 };

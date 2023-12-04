@@ -178,3 +178,39 @@ ClickstreamAnalytics.setUserId("UserId");
 // when user logout
 ClickstreamAnalytics.setUserId(null);
 `;
+
+export const FLUTTER_INSTALL_GUIDE = `// Install SDK
+flutter pub add clickstream_analytics
+
+// After complete, rebuild your Flutter application.
+flutter run`;
+
+export const FLUTTER_INIT_SDK_TEXT = `import 'package:clickstream_analytics/clickstream_analytics.dart';
+
+final analytics = ClickstreamAnalytics();
+analytics.init(
+  appId: "${TEMPLATE_APP_ID}", // Your application ID
+  endpoint: "${TEMPLATE_SERVER_ENDPOINT}" // Your server endpoint
+);
+`;
+
+export const FLUTTER_RECORD_EVENT = `import 'package:clickstream_analytics/clickstream_analytics.dart';
+
+final analytics = ClickstreamAnalytics();
+
+// record event with attributes
+analytics.record(name: 'button_click', attributes: {
+  "event_category": "shoes",
+  "currency": "CNY",
+  "value": 279.9
+});
+
+// record event with name
+analytics.record(name: "button_click");
+`;
+
+export const FLUTTER_ADD_USER_ATTR = `analytics.setUserAttributes({
+  "userName":"carl",
+  "userAge": 22
+});
+`;

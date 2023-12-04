@@ -1,5 +1,5 @@
-# Data pipeline management 
-This solution provides three features to help you manage and operate the data pipeline after it gets created.
+# Data pipeline maintenance 
+This solution provides three features to help you manage and maintain the data pipeline after it gets created.
 
 ## Monitoring and Alarms
 The solution collects metrics from each resource in the data pipeline and creates monitoring dashboards in CloudWatch, which provides you a comprehensive view into the pipeline status. It also provides a set of alarms that will notify project owner if anything goes abnormal. 
@@ -36,11 +36,6 @@ You are able to modify some configuration the data pipeline after it created, fo
 7. You will see pipeline is in `Updating` status.
 
 ## Pipeline upgrade
-As we continue enhance the solution, there will new version of pipeline available for you use after you update the solution control panel.
+See [Upgrade the solution][upgrade] for the detailed procedures.
 
-1. Go to project detail page
-2. Click on `project id` or **View Details** button, which will direct to the pipeline detail page.
-3. In the project details page, click on the **Upgrade** button
-4. You will be prompted to confirm the upgrade action.
-5. Click on **Confirm**, the pipeline will be in `Upgrading` status.
-
+[upgrade]: ../upgrade.md

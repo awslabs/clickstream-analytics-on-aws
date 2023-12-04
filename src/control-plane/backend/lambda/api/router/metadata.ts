@@ -13,7 +13,7 @@
 
 import express from 'express';
 import { body, header, query } from 'express-validator';
-import { defaultOrderValueValid, isRequestIdExisted, isValidEmpty, isXSSRequest, validate } from '../common/request-valid';
+import { defaultOrderValueValid, isAppId, isProjectId, isRequestIdExisted, isValidEmpty, isXSSRequest, validate } from '../common/request-valid';
 import { MetadataEventParameterServ, MetadataEventServ, MetadataUserAttributeServ } from '../service/metadata';
 
 const router_metadata = express.Router();
@@ -25,8 +25,8 @@ router_metadata.put(
   '/display',
   validate([
     body().custom(isValidEmpty).custom(isXSSRequest),
-    body('projectId').custom(isValidEmpty),
-    body('appId').custom(isValidEmpty),
+    body('projectId').custom(isProjectId),
+    body('appId').custom(isAppId),
     body('id').custom(isValidEmpty),
     header('X-Click-Stream-Request-Id').custom(isRequestIdExisted),
   ]),

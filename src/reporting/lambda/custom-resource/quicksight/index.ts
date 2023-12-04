@@ -31,9 +31,14 @@ import {
   DeleteAnalysisCommandOutput,
   UpdateDataSetCommandOutput,
   ConflictException,
+  paginateListTemplateVersions,
+  TemplateVersionSummary,
+  ParameterValueType,
+  DatasetParameter,
 } from '@aws-sdk/client-quicksight';
 import { Context, CloudFormationCustomResourceEvent, CloudFormationCustomResourceUpdateEvent, CloudFormationCustomResourceCreateEvent, CloudFormationCustomResourceDeleteEvent, CdkCustomResourceResponse } from 'aws-lambda';
 import Mustache from 'mustache';
+import { v4 as uuidv4 } from 'uuid';
 import { logger } from '../../../../common/powertools';
 import { aws_sdk_client_common_config } from '../../../../common/sdk-client-config';
 import {
@@ -58,6 +63,7 @@ import {
   findAnalysisWithPrefix,
   findDashboardWithPrefix,
   waitForDataSourceChangeCompleted,
+  DateTimeParameter,
 } from '../../../private/dashboard';
 
 type ResourceEvent = CloudFormationCustomResourceEvent;
@@ -317,18 +323,21 @@ const getLatestTemplateVersion = async (quickSight: QuickSight,
   accountId: string, templateId: string): Promise<number> => {
   await waitForTemplateChangeCompleted(quickSight, accountId, templateId);
 
-  const versions = await quickSight.listTemplateVersions({
+  const templateVersionSummaries: TemplateVersionSummary[] = [];
+  for await (const page of paginateListTemplateVersions({ client: quickSight }, {
     TemplateId: templateId,
     AwsAccountId: accountId,
-  });
+  })) {
+    if (page.TemplateVersionSummaryList !== undefined) {
+      templateVersionSummaries.push(...page.TemplateVersionSummaryList);
+    }
+  }
 
   let maxNumber = 1;
-  if (versions.TemplateVersionSummaryList) {
-    for (const version of versions.TemplateVersionSummaryList) {
-      const number = version.VersionNumber ?? 1;
-      if (number > maxNumber) {
-        maxNumber = number;
-      }
+  for (const version of templateVersionSummaries) {
+    const number = version.VersionNumber ?? 1;
+    if (number > maxNumber) {
+      maxNumber = number;
     }
   }
 
@@ -441,6 +450,29 @@ const updateQuickSightDashboard = async (quickSight: QuickSight,
   return dashboard;
 };
 
+const buildDataSetParameter = function (dateTimeDatasetParameter: DateTimeParameter[] | undefined): DatasetParameter[] | undefined {
+
+  let datasetParameters: DatasetParameter[] | undefined = undefined;
+  if (dateTimeDatasetParameter !== undefined) {
+    datasetParameters = [];
+    for (const param of dateTimeDatasetParameter) {
+      datasetParameters.push({
+        DateTimeDatasetParameter: {
+          Id: uuidv4(),
+          Name: param.name,
+          ValueType: ParameterValueType.SINGLE_VALUED,
+          TimeGranularity: param.timeGranularity,
+          DefaultValues: {
+            StaticValues: [new Date()],
+          },
+        },
+      });
+    }
+  }
+
+  return datasetParameters;
+};
+
 const createDataSet = async (quickSight: QuickSight, commonParams: ResourceCommonParams,
   dataSourceArn: string,
   props: DataSetProps)
@@ -509,6 +541,9 @@ const createDataSet = async (quickSight: QuickSight, commonParams: ResourceCommo
       };
     }
 
+    const datasetParameters = buildDataSetParameter(props.dateTimeDatasetParameter);
+    logger.info('datasetParameters: ', { datasetParameters });
+
     logger.info('start to create dataset');
     const datasetParams = {
       AwsAccountId: commonParams.awsAccountId,
@@ -524,7 +559,7 @@ const createDataSet = async (quickSight: QuickSight, commonParams: ResourceCommo
           Actions: dataSetReaderPermissionActions,
         },
       ],
-
+      DatasetParameters: datasetParameters,
       ImportMode: props.importMode,
       PhysicalTableMap: {
         PhyTable1: {
@@ -542,6 +577,7 @@ const createDataSet = async (quickSight: QuickSight, commonParams: ResourceCommo
         DisableUseAsDirectQuerySource: false,
         DisableUseAsImportedSource: false,
       },
+
     };
     logger.info(`dataset params: ${JSON.stringify(datasetParams)}`);
     const dataset = await quickSight.createDataSet(datasetParams);
@@ -775,6 +811,9 @@ const updateDataSet = async (quickSight: QuickSight, commonParams: ResourceCommo
       };
     }
 
+    const datasetParameters = buildDataSetParameter(props.dateTimeDatasetParameter);
+    logger.info('datasetParameters: ', { datasetParameters });
+
     logger.info('start to update dataset');
     let dataset: UpdateDataSetCommandOutput | undefined = undefined;
     dataset = await quickSight.updateDataSet({
@@ -793,6 +832,7 @@ const updateDataSet = async (quickSight: QuickSight, commonParams: ResourceCommo
           },
         },
       },
+      DatasetParameters: datasetParameters,
       LogicalTableMap: needLogicalMap ? logicalMap : undefined,
       ColumnGroups: colGroups.length > 0 ? colGroups : undefined,
       DataSetUsageConfiguration: {

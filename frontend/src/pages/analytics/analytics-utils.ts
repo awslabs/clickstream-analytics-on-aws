@@ -254,6 +254,17 @@ export const validRetentionAnalyticsItem = (item: IRetentionAnalyticsItem) => {
   );
 };
 
+export const validRetentionJoinColumnDatatype = (
+  items: IRetentionAnalyticsItem[]
+) => {
+  return items.every((item) => {
+    return (
+      item.startEventRelationAttribute?.valueType ===
+      item.revisitEventRelationAttribute?.valueType
+    );
+  });
+};
+
 export const validMultipleRetentionAnalyticsItem = (
   items: IRetentionAnalyticsItem[]
 ) => {
@@ -374,7 +385,7 @@ export const getPairEventAndConditions = (
         }
       });
 
-      const pairEventAndCondition: IPairEventAndCondition = {
+      let pairEventAndCondition: IPairEventAndCondition = {
         startEvent: {
           eventName: defaultStr(item.startEventOption?.name, ''),
           sqlCondition: {
@@ -390,6 +401,47 @@ export const getPairEventAndConditions = (
           },
         },
       };
+      if (item.startEventRelationAttribute) {
+        pairEventAndCondition = {
+          ...pairEventAndCondition,
+          startEvent: {
+            ...pairEventAndCondition.startEvent,
+            retentionJoinColumn: {
+              category: defaultStr(
+                item.startEventRelationAttribute?.category,
+                ConditionCategory.OTHER
+              ),
+              property: defaultStr(item.startEventRelationAttribute?.name, ''),
+              dataType: defaultStr(
+                item.startEventRelationAttribute?.valueType,
+                MetadataValueType.STRING
+              ),
+            },
+          },
+        };
+      }
+      if (item.revisitEventRelationAttribute) {
+        pairEventAndCondition = {
+          ...pairEventAndCondition,
+          backEvent: {
+            ...pairEventAndCondition.backEvent,
+            retentionJoinColumn: {
+              category: defaultStr(
+                item.revisitEventRelationAttribute?.category,
+                ConditionCategory.OTHER
+              ),
+              property: defaultStr(
+                item.revisitEventRelationAttribute?.name,
+                ''
+              ),
+              dataType: defaultStr(
+                item.revisitEventRelationAttribute?.valueType,
+                MetadataValueType.STRING
+              ),
+            },
+          },
+        };
+      }
       pairEventAndConditions.push(pairEventAndCondition);
     }
   });

@@ -33,7 +33,7 @@ export function addSubscriptionCustomResource(
   scope: Construct,
   props: AddSubscriptionCustomResourceProps,
 ) {
-  const fn = createaddSubscriptionLambda(scope, props);
+  const fn = createAddSubscriptionLambda(scope, props);
   const provider = new Provider(
     scope,
     'addSubscriptionCustomResourceProvider',
@@ -54,11 +54,12 @@ export function addSubscriptionCustomResource(
 }
 
 
-function createaddSubscriptionLambda(scope: Construct, props: AddSubscriptionCustomResourceProps): SolutionNodejsFunction {
+function createAddSubscriptionLambda(scope: Construct, props: AddSubscriptionCustomResourceProps): SolutionNodejsFunction {
   const role = createLambdaRole(scope, 'addSubscriptionLambdaRole', false, [
     new PolicyStatement({
       actions: [
         'sns:Subscribe',
+        'sns:ListSubscriptionsByTopic',
       ],
       resources: [props.snsTopic.topicArn],
     }),

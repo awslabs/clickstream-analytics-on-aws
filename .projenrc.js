@@ -91,15 +91,12 @@ const awsSDKServicesDepsForApiProject = [
   '@aws-sdk/client-dynamodb',
   '@aws-sdk/client-cloudformation',
   '@aws-sdk/client-route-53',
-  '@aws-sdk/client-athena',
   '@aws-sdk/client-iam',
   '@aws-sdk/client-acm',
   '@aws-sdk/client-secrets-manager',
   '@aws-sdk/client-sts',
   '@aws-sdk/client-cloudwatch',
   '@aws-sdk/lib-dynamodb',
-  '@aws-sdk/client-emr-serverless',
-  '@aws-sdk/client-kafkaconnect',
 ].map(dep => `${dep}@^${awsSDKServicesVersion}`);
 
 const depsForApiProject = [
@@ -359,6 +356,9 @@ project.buildWorkflow.addPostBuildSteps({
 const runner = 'LARGE_RUNNER_L';
 project.buildWorkflow.workflow.file?.patch(
   JsonPatch.replace('/jobs/build/runs-on', `$\{\{ vars.${runner} || 'ubuntu-latest' }}`),
+);
+project.buildWorkflow.workflow.file?.patch(
+  JsonPatch.replace('/on/merge_group', {}),
 );
 
 project.upgradeWorkflow.workflows[0].jobs.upgrade.steps.splice(4, 0, {

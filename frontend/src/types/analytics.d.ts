@@ -152,10 +152,7 @@ declare global {
     readonly dataType: MetadataValueType;
   }
 
-  interface IRetentionJoinColumn {
-    readonly category: string;
-    readonly property: string;
-  }
+  type IRetentionJoinColumn = ColumnAttribute;
 
   interface IEventAndCondition {
     readonly eventName: string;
@@ -190,7 +187,6 @@ declare global {
     readonly description: string;
     readonly region: string;
     readonly sheets: IAnalyticsDashboardSheet[];
-    readonly defaultDataSourceArn: string;
     readonly embedUrl?: string;
 
     readonly createAt: number;

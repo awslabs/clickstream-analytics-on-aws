@@ -47,7 +47,6 @@ const secretManagerClient = new SecretsManagerClient({
 
 export const physicalIdPrefix = 'create-redshift-db-schemas-custom-resource-';
 export const handler: CdkCustomResourceHandler = async (event: CloudFormationCustomResourceEvent, context: Context) => {
-  logger.info('event', { event });
   const physicalId = ('PhysicalResourceId' in event) ? event.PhysicalResourceId :
     `${physicalIdPrefix}${generateRandomStr(8, 'abcdefghijklmnopqrstuvwxyz0123456789')}`;
   const biUsername = `${(event.ResourceProperties as ResourcePropertiesType).redshiftBIUsernamePrefix}${physicalId.substring(physicalIdPrefix.length)}`;

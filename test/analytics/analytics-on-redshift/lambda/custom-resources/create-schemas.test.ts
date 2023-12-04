@@ -465,6 +465,29 @@ describe('Custom resource - Create schemas for applications in Redshift database
     fail('No exception happened when Redshift DescribeStatementCommand returns FAILED');
   });
 
+  test('Created database, bi user, schemas and views in Redshift serverless - check status succeeded timeout', async () => {
+    smMock.onAnyCommand().resolves({});
+    lambdaMock.on(ListTagsCommand).resolves({
+      Tags: { tag_key: 'tag_value' },
+    });
+    redshiftDataMock.on(ExecuteStatementCommand).resolves({ Id: 'Id-1' });
+    redshiftDataMock.on(BatchExecuteStatementCommand).resolves({ Id: 'Id-2' });
+    redshiftDataMock.on(DescribeStatementCommand)
+      .resolvesOnce({ Status: 'FINISHED' }) // create db
+      .resolvesOnce({ Status: 'FINISHED' }) // create bi user
+      .resolvesOnce({ Status: 'SUBMITTED' }) // create schemas
+      .resolves({ Status: 'PICKED' });
+    try {
+      await handler(createServerlessEvent, context, callback);
+    } catch (e) {
+      expect(redshiftDataMock).toHaveReceivedCommandTimes(ExecuteStatementCommand, 2);
+      expect(redshiftDataMock).toHaveReceivedCommandTimes(BatchExecuteStatementCommand, 1);
+      expect(redshiftDataMock).toHaveReceivedCommandTimes(DescribeStatementCommand, 2 + 1 + 4);
+      return;
+    }
+    fail('No exception happened when timeout happened in waiting for the status Redshift DescribeStatementCommand becoming FINISHED');
+  });
+
   test('Updated schemas and views only in Redshift serverless in update stack', async () => {
     smMock.onAnyCommand().resolves({});
     lambdaMock.on(ListTagsCommand).resolves({

@@ -11,7 +11,8 @@
  *  and limitations under the License.
  */
 
-import { CloudFormationClient, DescribeStacksCommand, StackStatus } from '@aws-sdk/client-cloudformation';
+import { CloudFormationClient, DescribeStacksCommand, DescribeTypeCommand, StackStatus } from '@aws-sdk/client-cloudformation';
+import { logger } from '../../common/powertools';
 import { aws_sdk_client_common_config } from '../../common/sdk-client-config-ln';
 import { PipelineStackType, PipelineStatusDetail } from '../../common/types';
 import { getVersionFromTags } from '../../common/utils';
@@ -53,4 +54,53 @@ export const getStacksDetailsByNames = async (region: string, stackNames: string
   } catch (error) {
     return [];
   }
+};
+
+export const describeType = async (region: string, typeName: string) => {
+  try {
+    const cloudFormationClient = new CloudFormationClient({
+      ...aws_sdk_client_common_config,
+      region,
+    });
+    const params: DescribeTypeCommand = new DescribeTypeCommand({
+      Type: 'RESOURCE',
+      TypeName: typeName,
+    });
+    return await cloudFormationClient.send(params);
+  } catch (error) {
+    logger.error('Describe AWS Resource Types Error', { error });
+    return undefined;
+  }
+};
+
+export const pingServiceResource = async (region: string, service: string) => {
+  let resourceName = '';
+  switch (service) {
+    case 'emr-serverless':
+      resourceName = 'AWS::EMRServerless::Application';
+      break;
+    case 'msk':
+      resourceName = 'AWS::KafkaConnect::Connector';
+      break;
+    case 'redshift-serverless':
+      resourceName = 'AWS::RedshiftServerless::Workgroup';
+      break;
+    case 'quicksight':
+      resourceName = 'AWS::QuickSight::Dashboard';
+      break;
+    case 'athena':
+      resourceName = 'AWS::Athena::WorkGroup';
+      break;
+    case 'global-accelerator':
+      resourceName = 'AWS::GlobalAccelerator::Accelerator';
+      break;
+    default:
+      break;
+  };
+  if (!resourceName) return false;
+  if (service === 'quicksight' && region.startsWith('cn-')) {
+    return false;
+  }
+  const resource = await describeType(region, resourceName);
+  return resource?.Arn ? true : false;
 };

@@ -1,3 +1,6 @@
+-- run following command to load latest partition
+-- msck repair table {{database}}.{{eventTable}};
+
 with daily_usage as (
   select 
     user_pseudo_id, 

@@ -1037,6 +1037,32 @@ describe('reporting test', () => {
 
   });
 
+  it('warmup with error id', async () => {
+    const res = await request(app)
+      .post('/api/reporting/warmup')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
+      .send({
+        projectId: '\\x98',
+        appId: 'app1',
+        region: 'us-east-1',
+      });
+
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(400);
+    expect(res.body).toEqual({
+      error: [
+        {
+          location: 'body',
+          msg: 'Validation error: projectId: \\x98 not match [a-z][a-z0-9_]{0,126}. Please check and try again.',
+          param: 'projectId',
+          value: '\\x98',
+        },
+      ],
+      message: 'Parameter verification failed.',
+      success: false,
+    });
+  });
+
   it('clean - ThrottlingException', async () => {
 
     quickSightMock.on(ListDashboardsCommand).resolves({
@@ -1097,54 +1123,57 @@ describe('reporting test', () => {
 
     quickSightMock.on(ListDashboardsCommand).resolves({
       DashboardSummaryList: [{
-        Arn: 'arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa',
+        Arn: 'arn:aws:quicksight:us-east-1:11111111:dashboard/_tmp_aaaaaaa',
         Name: '_tmp_aaaaaaa',
         CreatedTime: new Date((new Date()).getTime() - 80*60*1000),
-        DashboardId: '_tmp_dashboard-aaaaaaaa',
+        DashboardId: '_tmp_aaaaaaaa',
       }],
     });
 
     quickSightMock.on(DeleteDashboardCommand).resolves({
       Status: 200,
-      DashboardId: '_tmp_dashboard-aaaaaaaa',
+      DashboardId: '_tmp_aaaaaaa',
     });
 
     quickSightMock.on(ListAnalysesCommand).resolves({
       AnalysisSummaryList: [
         {
-          Arn: 'arn:aws:quicksight:us-east-1:11111111:analysis/analysis-aaaaaaaa',
-          Name: '_tmp_aaaaaaa',
+          Arn: 'arn:aws:quicksight:us-east-1:11111111:analysis/_tmp_bbbbbbbb',
+          Name: '_tmp_bbbbbbbb',
           CreatedTime: new Date((new Date()).getTime() - 80*60*1000),
-          AnalysisId: '_tmp_analysis_aaaaaaa',
+          AnalysisId: '_tmp_bbbbbbbb',
           Status: ResourceStatus.UPDATE_SUCCESSFUL,
         },
         {
-          Arn: 'arn:aws:quicksight:us-east-1:11111111:analysis/analysis-bbbbbb',
-          Name: '_tmp_bbbbbb',
+          Arn: 'arn:aws:quicksight:us-east-1:11111111:analysis/_tmp_cccccccc',
+          Name: '_tmp_cccccccc',
           CreatedTime: new Date((new Date()).getTime() - 80*60*1000),
-          AnalysisId: '_tmp_analysis_bbbbbb',
+          AnalysisId: '_tmp_cccccccc',
           Status: ResourceStatus.DELETED,
         },
       ],
     });
 
-    quickSightMock.on(DeleteAnalysisCommand).resolves({
+    quickSightMock.on(DeleteAnalysisCommand).resolvesOnce({
       Status: 200,
-      AnalysisId: '_tmp_analysis-aaaaaaaa',
+      AnalysisId: '_tmp_bbbbbbbb',
+    }).resolvesOnce({
+      Status: 200,
+      AnalysisId: '_tmp_cccccccc',
     });
 
     quickSightMock.on(ListDataSetsCommand).resolves({
       DataSetSummaries: [{
         Arn: 'arn:aws:quicksight:us-east-1:11111111:dataset/dataset-aaaaaaaa',
-        Name: '_tmp_aaaaaaa',
+        Name: '_tmp_dddddddddd',
         CreatedTime: new Date((new Date()).getTime() - 80*60*1000),
-        DataSetId: '_tmp_dataset_aaaaaaa',
+        DataSetId: '_tmp_dddddddddd',
       }],
     });
 
     quickSightMock.on(DeleteDataSetCommand).resolves({
       Status: 200,
-      DataSetId: '_tmp_dataset-aaaaaaaa',
+      DataSetId: '_tmp_dddddddddd',
     });
 
     const res = await request(app)
@@ -1157,9 +1186,9 @@ describe('reporting test', () => {
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(201);
     expect(res.body.success).toEqual(true);
-    expect(res.body.data.deletedDashBoards[0]).toEqual('_tmp_dashboard-aaaaaaaa');
-    expect(res.body.data.deletedAnalyses[0]).toEqual('_tmp_analysis-aaaaaaaa');
-    expect(res.body.data.deletedDatasets[0]).toEqual('_tmp_dataset-aaaaaaaa');
+    expect(res.body.data.deletedDashBoards[0]).toEqual('_tmp_aaaaaaaa');
+    expect(res.body.data.deletedAnalyses[0]).toEqual('_tmp_bbbbbbbb');
+    expect(res.body.data.deletedDatasets[0]).toEqual('_tmp_dddddddddd');
     expect(quickSightMock).toHaveReceivedCommandTimes(DeleteDashboardCommand, 1);
     expect(quickSightMock).toHaveReceivedCommandTimes(DeleteAnalysisCommand, 1);
     expect(quickSightMock).toHaveReceivedCommandTimes(DeleteDataSetCommand, 1);

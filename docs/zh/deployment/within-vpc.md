@@ -60,7 +60,7 @@
 
 ## 步骤 3. 更新 OIDC 客户端的回调 URL
 
-1. 登录 [AWS CloudFormation 控制台](cloudformation){target="_blank"}。
+1. 登录 [AWS CloudFormation 控制台][cloudformation]{target="_blank"}。
 2. 选择解决方案的堆栈。
 3. 选择 **输出** 选项卡。
 4. 获取 **ControlPlaneURL** 作为端点。

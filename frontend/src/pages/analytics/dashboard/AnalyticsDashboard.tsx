@@ -17,7 +17,10 @@ import {
   Cards,
   Pagination,
 } from '@cloudscape-design/components';
-import { getAnalyticsDashboardList } from 'apis/analytics';
+import {
+  getAnalyticsDashboardList,
+  getPipelineDetailByProjectId,
+} from 'apis/analytics';
 import AnalyticsNavigation from 'components/layouts/AnalyticsNavigation';
 import CustomBreadCrumb from 'components/layouts/CustomBreadCrumb';
 import HelpInfo from 'components/layouts/HelpInfo';
@@ -66,6 +69,17 @@ const AnalyticsDashboardCard: React.FC<any> = () => {
       </div>
     );
   };
+  const buildCardDescription = (item: IAnalyticsDashboard) => {
+    return (
+      <>
+        {item.name === DEFAULT_DASHBOARD_NAME ? (
+          <>{t('analytics:dashboard.defaultUserLifecycleDescription')}</>
+        ) : (
+          item.description || '-'
+        )}
+      </>
+    );
+  };
 
   const CARD_DEFINITIONS = {
     header: (item: IAnalyticsDashboard) => buildCardHeader(item),
@@ -73,7 +87,7 @@ const AnalyticsDashboardCard: React.FC<any> = () => {
       {
         id: 'description',
         header: '',
-        content: (item: IAnalyticsDashboard) => item.description || '-',
+        content: (item: IAnalyticsDashboard) => buildCardDescription(item),
       },
       {
         id: 'createAt',
@@ -105,16 +119,32 @@ const AnalyticsDashboardCard: React.FC<any> = () => {
       if (success) {
         setAnalyticsDashboardList(data.items);
         setTotalCount(data.totalCount);
-        setLoadingData(false);
       }
+      setLoadingData(false);
     } catch (error) {
       setLoadingData(false);
+      console.log(error);
+    }
+  };
+
+  const loadPipeline = async () => {
+    setLoadingData(true);
+    try {
+      const { success, data }: ApiResponse<IPipeline> =
+        await getPipelineDetailByProjectId(defaultStr(projectId));
+      if (success && data.analysisStudioEnabled) {
+        await listAnalyticsDashboards();
+      }
+      setLoadingData(false);
+    } catch (error) {
+      setLoadingData(false);
+      console.log(error);
     }
   };
 
   useEffect(() => {
     if (projectId && appId) {
-      listAnalyticsDashboards();
+      loadPipeline();
     }
   }, [currentPage]);
 
@@ -196,6 +226,10 @@ const AnalyticsDashboard: React.FC = () => {
     },
   ];
 
+  useEffect(() => {
+    dispatch?.({ type: StateActionType.CLEAR_HELP_PANEL });
+  }, []);
+
   return (
     <div className="flex">
       <AnalyticsNavigation
@@ -204,16 +238,20 @@ const AnalyticsDashboard: React.FC = () => {
       <div className="flex-1">
         <AppLayout
           onToolsChange={(e) => {
-            if (state?.helpPanelType === HelpPanelType.NONE) {
-              return;
-            }
-            if (!e.detail.open) {
-              dispatch?.({ type: StateActionType.HIDE_HELP_PANEL });
-            } else {
+            if (e.detail.open && state?.helpPanelType === HelpPanelType.NONE) {
               dispatch?.({
                 type: StateActionType.SHOW_HELP_PANEL,
-                payload: state?.helpPanelType,
+                payload: HelpPanelType.ANALYTICS_DASHBOARD,
               });
+            } else {
+              if (!e.detail.open) {
+                dispatch?.({ type: StateActionType.HIDE_HELP_PANEL });
+              } else {
+                dispatch?.({
+                  type: StateActionType.SHOW_HELP_PANEL,
+                  payload: state?.helpPanelType,
+                });
+              }
             }
           }}
           toolsOpen={state?.showHelpPanel}

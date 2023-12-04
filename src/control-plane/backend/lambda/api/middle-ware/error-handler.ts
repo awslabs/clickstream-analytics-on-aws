@@ -26,6 +26,9 @@ export function errorHandler(err: Error, _req: express.Request, res: express.Res
   if (err instanceof ClickStreamBadRequestError) {
     return res.status(400).json(new ApiFail(err.message));
   }
+  if (err instanceof URIError) {
+    return res.status(400).json(new ApiFail('Invalid URI.'));
+  }
   if (err.name === 'TransactionCanceledException') {
     return res.status(400).json(new ApiFail('Update error, check version and retry.'));
   }

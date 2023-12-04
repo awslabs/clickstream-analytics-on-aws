@@ -20,7 +20,7 @@
       "double_value" : null,
       "float_value" : null,
       "int_value" : null,
-      "string_value" : "testName2",
+      "string_value" : "testName1",
       "set_timestamp_micros" : 1667877566697000
     }
   }, {
@@ -28,9 +28,9 @@
     "value" : {
       "double_value" : null,
       "float_value" : null,
-      "int_value" : 23,
+      "int_value" : 22,
       "string_value" : null,
-      "set_timestamp_micros" : 1667877566692000
+      "set_timestamp_micros" : 1667877566691000
     }
   }, {
     "key" : "_user_first_touch_timestamp",
@@ -96,6 +96,6 @@
   "_first_traffic_source_type" : null,
   "_first_traffic_medium" : null,
   "_first_traffic_source" : null,
-  "device_id_list" : [ "deviceid-1682319109447" ],
+  "device_id_list" : null,
   "_channel" : "C001"
 }
