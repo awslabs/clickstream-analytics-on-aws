@@ -45,7 +45,11 @@ const AnalyticsDashboardFullWindow: React.FC = () => {
   }, [dashboardId]);
 
   return (
-    <ExploreEmbedFrame embedType="dashboard" embedUrl={dashboardEmbedUrl} />
+    <ExploreEmbedFrame
+      embedType="dashboard"
+      embedUrl={dashboardEmbedUrl}
+      embedPage="dashboard"
+    />
   );
 };
 

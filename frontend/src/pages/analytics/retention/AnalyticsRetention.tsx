@@ -728,6 +728,7 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
             <ExploreEmbedFrame
               embedType="dashboard"
               embedUrl={exploreEmbedUrl}
+              embedPage="explore"
             />
           )}
         </Container>

@@ -494,6 +494,7 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
             <ExploreEmbedFrame
               embedType="dashboard"
               embedUrl={exploreEmbedUrl}
+              embedPage="explore"
             />
           )}
         </Container>

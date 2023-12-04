@@ -275,6 +275,7 @@
   "information": {
     "funnelMetricsInfo": "Select an entity of the calculated funnel conversion rate.",
     "funnelWindowInfo": "The funnel Window refers to the time for the user to complete the entire process. Only when the user completes all the selected steps within the set window period is considered a successful conversion.",
+    "funnelStepsInfo": "Select events as the steps for the funnel conversion rate.",
     "eventDefineMetricInfo": "Please select events, calculation methods, and filter conditions to query. You can add multiple filters for one event.",
     "filterInfo": "You can filter events globally by setting this filter, and this filter will apply to all metrics.",
     "groupInfo": "Metric will be grouped by the values of the selected event parameter.",

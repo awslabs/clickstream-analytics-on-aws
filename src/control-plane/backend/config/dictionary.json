@@ -720,19 +720,6 @@
           }
         },
         {
-          "name": "_channel",
-          "dataType": "string",
-          "category": "event",
-          "displayName": {
-            "en-US": "App install source",
-            "zh-CN": "应用下载市场"
-          },
-          "description": {
-            "en-US": "Install source, it is the channel for app was downloaded",
-            "zh-CN": "安装源，app下载的渠道"
-          }
-        },
-        {
           "name": "_session_id",
           "dataType": "string",
           "category": "event",

@@ -154,6 +154,7 @@ const AnalyticsAnalyzes: React.FC = () => {
                   <ExploreEmbedFrame
                     embedType="console"
                     embedUrl={dashboardEmbedUrl}
+                    embedPage="analyze"
                   />
                 )}
               </Container>

@@ -86,12 +86,6 @@ const ExploreDateRangePicker: React.FC<IExploreDateRangePickerProps> = (
       unit: 'month',
       type: 'relative',
     },
-    {
-      key: 'previous-1-year',
-      amount: 1,
-      unit: 'year',
-      type: 'relative',
-    },
   ];
 
   const timeGranularityOptions: SelectProps.Options = [

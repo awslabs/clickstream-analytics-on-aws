@@ -275,6 +275,7 @@
   "information": {
     "funnelMetricsInfo": "选择计算的漏斗转化率的主体。",
     "funnelWindowInfo": "窗口期指用户完成转化的时间，用户在设定的窗口期内完成所有的转化步骤才算做转化成功。",
+    "funnelStepsInfo": "选择事件作为转化漏斗的步骤。",
     "eventDefineMetricInfo": "请选择事件、计算方式及过滤条件进行查询。您可以为一个事件添加多个过滤条件。",
     "filterInfo": "通过设置过滤条件全局筛选事件，此筛选条件将会作用于所有指标。",
     "groupInfo": "统计结果将按照所选属性值分组计算。",
