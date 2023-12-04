@@ -173,7 +173,7 @@ const baseColumns = `
 ,traffic_source.name:: varchar as traffic_source_name
 ,traffic_source.medium:: varchar as traffic_source_medium
 ,traffic_source.source:: varchar as traffic_source_source
-,COALESCE(event.user_id, event.user_pseudo_id) as user_pseudo_id
+,COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id
 ,event.user_id
 `;
 
@@ -1568,6 +1568,7 @@ function _buildBaseEventDataTableSQL(eventNames: string[], sqlParameters: SQLPar
       ) || '00:00' as hour
     from
         ${sqlParameters.schemaName}.${EVENT_TABLE} as event
+        join (select user_pseudo_id, user_id from ${sqlParameters.schemaName}.user_m_view group by user_pseudo_id, user_id) as u on event.user_pseudo_id= u.user_pseudo_id
     where
         ${eventDateSQL}
         ${eventNameClause}

@@ -44,7 +44,7 @@ describe('SQL Builder test', () => {
       ],
       timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('22023-10-10'),
+      timeEnd: new Date('2023-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
     });
 
@@ -103,7 +103,7 @@ describe('SQL Builder test', () => {
               traffic_source.name::varchar as traffic_source_name,
               traffic_source.medium::varchar as traffic_source_medium,
               traffic_source.source::varchar as traffic_source_source,
-              COALESCE(event.user_id, event.user_pseudo_id) as user_pseudo_id,
+              COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
               event.user_id,
               TO_CHAR(
                 TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -126,9 +126,19 @@ describe('SQL Builder test', () => {
               ) || '00:00' as hour
             from
               app1.event as event
+          join (
+            select
+              user_pseudo_id,
+              user_id
+            from
+              app1.user_m_view
+            group by
+              user_pseudo_id,
+              user_id
+          ) as u on event.user_pseudo_id = u.user_pseudo_id
             where
               event.event_date >= date '2023-10-01'
-              and event.event_date <= date '22023-10-10'
+              and event.event_date <= date '2023-10-10'
               and event.event_name in ('add_button_click', 'note_share', 'note_export')
           ) as event_base
         where
@@ -252,7 +262,7 @@ describe('SQL Builder test', () => {
       ],
       timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('22023-10-10'),
+      timeEnd: new Date('2023-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
     });
 
@@ -312,7 +322,7 @@ describe('SQL Builder test', () => {
               traffic_source.name::varchar as traffic_source_name,
               traffic_source.medium::varchar as traffic_source_medium,
               traffic_source.source::varchar as traffic_source_source,
-              COALESCE(event.user_id, event.user_pseudo_id) as user_pseudo_id,
+              COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
               event.user_id,
               TO_CHAR(
                 TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -335,9 +345,19 @@ describe('SQL Builder test', () => {
               ) || '00:00' as hour
             from
               app1.event as event
+          join (
+            select
+              user_pseudo_id,
+              user_id
+            from
+              app1.user_m_view
+            group by
+              user_pseudo_id,
+              user_id
+          ) as u on event.user_pseudo_id = u.user_pseudo_id
             where
               event.event_date >= date '2023-10-01'
-              and event.event_date <= date '22023-10-10'
+              and event.event_date <= date '2023-10-10'
               and event.event_name in ('add_button_click', 'note_share', 'note_export')
           ) as event_base
         where
@@ -462,7 +482,7 @@ describe('SQL Builder test', () => {
       ],
       timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('22023-10-10'),
+      timeEnd: new Date('2023-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
     });
 
@@ -521,7 +541,7 @@ describe('SQL Builder test', () => {
               traffic_source.name::varchar as traffic_source_name,
               traffic_source.medium::varchar as traffic_source_medium,
               traffic_source.source::varchar as traffic_source_source,
-              COALESCE(event.user_id, event.user_pseudo_id) as user_pseudo_id,
+              COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
               event.user_id,
               TO_CHAR(
                 TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -544,9 +564,19 @@ describe('SQL Builder test', () => {
               ) || '00:00' as hour
             from
               app1.event as event
+          join (
+            select
+              user_pseudo_id,
+              user_id
+            from
+              app1.user_m_view
+            group by
+              user_pseudo_id,
+              user_id
+          ) as u on event.user_pseudo_id = u.user_pseudo_id
             where
               event.event_date >= date '2023-10-01'
-              and event.event_date <= date '22023-10-10'
+              and event.event_date <= date '2023-10-10'
               and event.event_name in ('add_button_click', 'note_share', 'note_export')
           ) as event_base
         where
@@ -682,7 +712,7 @@ describe('SQL Builder test', () => {
       ],
       timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('22023-10-10'),
+      timeEnd: new Date('2023-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
     });
 
@@ -741,7 +771,7 @@ describe('SQL Builder test', () => {
               traffic_source.name::varchar as traffic_source_name,
               traffic_source.medium::varchar as traffic_source_medium,
               traffic_source.source::varchar as traffic_source_source,
-              COALESCE(event.user_id, event.user_pseudo_id) as user_pseudo_id,
+              COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
               event.user_id,
               TO_CHAR(
                 TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -764,9 +794,19 @@ describe('SQL Builder test', () => {
               ) || '00:00' as hour
             from
               app1.event as event
+          join (
+            select
+              user_pseudo_id,
+              user_id
+            from
+              app1.user_m_view
+            group by
+              user_pseudo_id,
+              user_id
+          ) as u on event.user_pseudo_id = u.user_pseudo_id
             where
               event.event_date >= date '2023-10-01'
-              and event.event_date <= date '22023-10-10'
+              and event.event_date <= date '2023-10-10'
               and event.event_name in ('add_button_click', 'note_share', 'note_export')
           ) as event_base
         where
@@ -935,7 +975,7 @@ describe('SQL Builder test', () => {
       ],
       timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('22023-10-10'),
+      timeEnd: new Date('2023-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
     });
 
@@ -994,7 +1034,7 @@ describe('SQL Builder test', () => {
               traffic_source.name::varchar as traffic_source_name,
               traffic_source.medium::varchar as traffic_source_medium,
               traffic_source.source::varchar as traffic_source_source,
-              COALESCE(event.user_id, event.user_pseudo_id) as user_pseudo_id,
+              COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
               event.user_id,
               TO_CHAR(
                 TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -1017,9 +1057,19 @@ describe('SQL Builder test', () => {
               ) || '00:00' as hour
             from
               app1.event as event
+          join (
+            select
+              user_pseudo_id,
+              user_id
+            from
+              app1.user_m_view
+            group by
+              user_pseudo_id,
+              user_id
+          ) as u on event.user_pseudo_id = u.user_pseudo_id
             where
               event.event_date >= date '2023-10-01'
-              and event.event_date <= date '22023-10-10'
+              and event.event_date <= date '2023-10-10'
               and event.event_name in ('add_button_click', 'note_share', 'note_export')
           ) as event_base
         where
@@ -1188,7 +1238,7 @@ describe('SQL Builder test', () => {
       ],
       timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('22023-10-10'),
+      timeEnd: new Date('2023-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
     });
 
@@ -1247,7 +1297,7 @@ describe('SQL Builder test', () => {
               traffic_source.name::varchar as traffic_source_name,
               traffic_source.medium::varchar as traffic_source_medium,
               traffic_source.source::varchar as traffic_source_source,
-              COALESCE(event.user_id, event.user_pseudo_id) as user_pseudo_id,
+              COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
               event.user_id,
               TO_CHAR(
                 TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -1270,9 +1320,19 @@ describe('SQL Builder test', () => {
               ) || '00:00' as hour
             from
               app1.event as event
+          join (
+            select
+              user_pseudo_id,
+              user_id
+            from
+              app1.user_m_view
+            group by
+              user_pseudo_id,
+              user_id
+          ) as u on event.user_pseudo_id = u.user_pseudo_id
             where
               event.event_date >= date '2023-10-01'
-              and event.event_date <= date '22023-10-10'
+              and event.event_date <= date '2023-10-10'
               and event.event_name in ('add_button_click', 'note_share', 'note_export')
           ) as event_base
         where
@@ -1442,7 +1502,7 @@ describe('SQL Builder test', () => {
       ],
       timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('22023-10-10'),
+      timeEnd: new Date('2023-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
     });
 
@@ -1501,7 +1561,7 @@ describe('SQL Builder test', () => {
               traffic_source.name::varchar as traffic_source_name,
               traffic_source.medium::varchar as traffic_source_medium,
               traffic_source.source::varchar as traffic_source_source,
-              COALESCE(event.user_id, event.user_pseudo_id) as user_pseudo_id,
+              COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
               event.user_id,
               TO_CHAR(
                 TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -1524,9 +1584,19 @@ describe('SQL Builder test', () => {
               ) || '00:00' as hour
             from
               app1.event as event
+          join (
+            select
+              user_pseudo_id,
+              user_id
+            from
+              app1.user_m_view
+            group by
+              user_pseudo_id,
+              user_id
+          ) as u on event.user_pseudo_id = u.user_pseudo_id
             where
               event.event_date >= date '2023-10-01'
-              and event.event_date <= date '22023-10-10'
+              and event.event_date <= date '2023-10-10'
               and event.event_name in ('add_button_click', 'note_share', 'note_export')
           ) as event_base
         where
@@ -1697,7 +1767,7 @@ describe('SQL Builder test', () => {
       timeScopeType: ExploreTimeScopeType.FIXED,
       groupColumn: ExploreGroupColumn.DAY,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('22023-10-10'),
+      timeEnd: new Date('2023-10-10'),
       pathAnalysis: {
         sessionType: ExplorePathSessionDef.SESSION,
         nodeType: ExplorePathNodeType.EVENT,
@@ -1757,7 +1827,7 @@ describe('SQL Builder test', () => {
           traffic_source.name::varchar as traffic_source_name,
           traffic_source.medium::varchar as traffic_source_medium,
           traffic_source.source::varchar as traffic_source_source,
-          COALESCE(event.user_id, event.user_pseudo_id) as user_pseudo_id,
+          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
           event.user_id,
           TO_CHAR(
             TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -1780,9 +1850,19 @@ describe('SQL Builder test', () => {
           ) || '00:00' as hour
         from
           app1.event as event
+          join (
+            select
+              user_pseudo_id,
+              user_id
+            from
+              app1.user_m_view
+            group by
+              user_pseudo_id,
+              user_id
+          ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
-          and event.event_date <= date '22023-10-10'
+          and event.event_date <= date '2023-10-10'
           and event.event_name not in (
             '_session_start',
             '_session_stop',
@@ -2010,7 +2090,7 @@ describe('SQL Builder test', () => {
       timeScopeType: ExploreTimeScopeType.FIXED,
       groupColumn: ExploreGroupColumn.DAY,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('22023-10-10'),
+      timeEnd: new Date('2023-10-10'),
       pathAnalysis: {
         sessionType: ExplorePathSessionDef.CUSTOMIZE,
         nodeType: ExplorePathNodeType.EVENT,
@@ -2073,7 +2153,7 @@ describe('SQL Builder test', () => {
               traffic_source.name::varchar as traffic_source_name,
               traffic_source.medium::varchar as traffic_source_medium,
               traffic_source.source::varchar as traffic_source_source,
-              COALESCE(event.user_id, event.user_pseudo_id) as user_pseudo_id,
+              COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
               event.user_id,
               TO_CHAR(
                 TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -2096,9 +2176,19 @@ describe('SQL Builder test', () => {
               ) || '00:00' as hour
             from
               app1.event as event
+          join (
+            select
+              user_pseudo_id,
+              user_id
+            from
+              app1.user_m_view
+            group by
+              user_pseudo_id,
+              user_id
+          ) as u on event.user_pseudo_id = u.user_pseudo_id
             where
               event.event_date >= date '2023-10-01'
-              and event.event_date <= date '22023-10-10'
+              and event.event_date <= date '2023-10-10'
               and event.event_name in ('add_button_click', 'note_share', 'note_export')
           ) as event_base
         where
@@ -2289,7 +2379,7 @@ describe('SQL Builder test', () => {
       timeScopeType: ExploreTimeScopeType.FIXED,
       groupColumn: ExploreGroupColumn.DAY,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('22023-10-10'),
+      timeEnd: new Date('2023-10-10'),
       pathAnalysis: {
         platform: MetadataPlatform.ANDROID,
         sessionType: ExplorePathSessionDef.SESSION,
@@ -2351,7 +2441,7 @@ describe('SQL Builder test', () => {
           traffic_source.name::varchar as traffic_source_name,
           traffic_source.medium::varchar as traffic_source_medium,
           traffic_source.source::varchar as traffic_source_source,
-          COALESCE(event.user_id, event.user_pseudo_id) as user_pseudo_id,
+          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
           event.user_id,
           TO_CHAR(
             TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -2374,9 +2464,19 @@ describe('SQL Builder test', () => {
           ) || '00:00' as hour
         from
           app1.event as event
+          join (
+            select
+              user_pseudo_id,
+              user_id
+            from
+              app1.user_m_view
+            group by
+              user_pseudo_id,
+              user_id
+          ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
-          and event.event_date <= date '22023-10-10'
+          and event.event_date <= date '2023-10-10'
           and event.event_name = '_screen_view'
           and platform = 'Android'
       ),
@@ -2554,7 +2654,7 @@ describe('SQL Builder test', () => {
       timeScopeType: ExploreTimeScopeType.FIXED,
       groupColumn: ExploreGroupColumn.DAY,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('22023-10-10'),
+      timeEnd: new Date('2023-10-10'),
       pathAnalysis: {
         platform: MetadataPlatform.ANDROID,
         sessionType: ExplorePathSessionDef.SESSION,
@@ -2617,7 +2717,7 @@ describe('SQL Builder test', () => {
           traffic_source.name::varchar as traffic_source_name,
           traffic_source.medium::varchar as traffic_source_medium,
           traffic_source.source::varchar as traffic_source_source,
-          COALESCE(event.user_id, event.user_pseudo_id) as user_pseudo_id,
+          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
           event.user_id,
           TO_CHAR(
             TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -2640,9 +2740,19 @@ describe('SQL Builder test', () => {
           ) || '00:00' as hour
         from
           app1.event as event
+          join (
+            select
+              user_pseudo_id,
+              user_id
+            from
+              app1.user_m_view
+            group by
+              user_pseudo_id,
+              user_id
+          ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
-          and event.event_date <= date '22023-10-10'
+          and event.event_date <= date '2023-10-10'
           and event.event_name = '_screen_view'
           and platform = 'Android'
       ),
@@ -2842,7 +2952,7 @@ describe('SQL Builder test', () => {
       timeScopeType: ExploreTimeScopeType.FIXED,
       groupColumn: ExploreGroupColumn.DAY,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('22023-10-10'),
+      timeEnd: new Date('2023-10-10'),
       pathAnalysis: {
         platform: MetadataPlatform.ANDROID,
         sessionType: ExplorePathSessionDef.SESSION,
@@ -2904,7 +3014,7 @@ describe('SQL Builder test', () => {
           traffic_source.name::varchar as traffic_source_name,
           traffic_source.medium::varchar as traffic_source_medium,
           traffic_source.source::varchar as traffic_source_source,
-          COALESCE(event.user_id, event.user_pseudo_id) as user_pseudo_id,
+          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
           event.user_id,
           TO_CHAR(
             TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -2927,9 +3037,19 @@ describe('SQL Builder test', () => {
           ) || '00:00' as hour
         from
           app1.event as event
+          join (
+            select
+              user_pseudo_id,
+              user_id
+            from
+              app1.user_m_view
+            group by
+              user_pseudo_id,
+              user_id
+          ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
-          and event.event_date <= date '22023-10-10'
+          and event.event_date <= date '2023-10-10'
           and event.event_name = '_screen_view'
           and platform = 'Android'
       ),
@@ -3111,7 +3231,7 @@ describe('SQL Builder test', () => {
       timeScopeType: ExploreTimeScopeType.FIXED,
       groupColumn: ExploreGroupColumn.DAY,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('22023-10-10'),
+      timeEnd: new Date('2023-10-10'),
       pathAnalysis: {
         platform: MetadataPlatform.ANDROID,
         sessionType: ExplorePathSessionDef.CUSTOMIZE,
@@ -3177,7 +3297,7 @@ describe('SQL Builder test', () => {
               traffic_source.name::varchar as traffic_source_name,
               traffic_source.medium::varchar as traffic_source_medium,
               traffic_source.source::varchar as traffic_source_source,
-              COALESCE(event.user_id, event.user_pseudo_id) as user_pseudo_id,
+              COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
               event.user_id,
               TO_CHAR(
                 TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -3200,9 +3320,19 @@ describe('SQL Builder test', () => {
               ) || '00:00' as hour
             from
               app1.event as event
+          join (
+            select
+              user_pseudo_id,
+              user_id
+            from
+              app1.user_m_view
+            group by
+              user_pseudo_id,
+              user_id
+          ) as u on event.user_pseudo_id = u.user_pseudo_id
             where
               event.event_date >= date '2023-10-01'
-              and event.event_date <= date '22023-10-10'
+              and event.event_date <= date '2023-10-10'
               and event.event_name = '_screen_view'
               and platform = 'Android'
           ) as event_base
@@ -3405,7 +3535,7 @@ describe('SQL Builder test', () => {
       timeScopeType: ExploreTimeScopeType.FIXED,
       groupColumn: ExploreGroupColumn.DAY,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('22023-10-10'),
+      timeEnd: new Date('2023-10-10'),
       pathAnalysis: {
         platform: MetadataPlatform.ANDROID,
         sessionType: ExplorePathSessionDef.CUSTOMIZE,
@@ -3472,7 +3602,7 @@ describe('SQL Builder test', () => {
               traffic_source.name::varchar as traffic_source_name,
               traffic_source.medium::varchar as traffic_source_medium,
               traffic_source.source::varchar as traffic_source_source,
-              COALESCE(event.user_id, event.user_pseudo_id) as user_pseudo_id,
+              COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
               event.user_id,
               TO_CHAR(
                 TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -3495,9 +3625,19 @@ describe('SQL Builder test', () => {
               ) || '00:00' as hour
             from
               app1.event as event
+          join (
+            select
+              user_pseudo_id,
+              user_id
+            from
+              app1.user_m_view
+            group by
+              user_pseudo_id,
+              user_id
+          ) as u on event.user_pseudo_id = u.user_pseudo_id
             where
               event.event_date >= date '2023-10-01'
-              and event.event_date <= date '22023-10-10'
+              and event.event_date <= date '2023-10-10'
               and event.event_name = '_screen_view'
               and platform = 'Android'
           ) as event_base
@@ -3720,7 +3860,7 @@ describe('SQL Builder test', () => {
       timeScopeType: ExploreTimeScopeType.FIXED,
       groupColumn: ExploreGroupColumn.DAY,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('22023-10-10'),
+      timeEnd: new Date('2023-10-10'),
       pathAnalysis: {
         platform: MetadataPlatform.ANDROID,
         sessionType: ExplorePathSessionDef.CUSTOMIZE,
@@ -3786,7 +3926,7 @@ describe('SQL Builder test', () => {
               traffic_source.name::varchar as traffic_source_name,
               traffic_source.medium::varchar as traffic_source_medium,
               traffic_source.source::varchar as traffic_source_source,
-              COALESCE(event.user_id, event.user_pseudo_id) as user_pseudo_id,
+              COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
               event.user_id,
               TO_CHAR(
                 TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -3809,9 +3949,19 @@ describe('SQL Builder test', () => {
               ) || '00:00' as hour
             from
               app1.event as event
+          join (
+            select
+              user_pseudo_id,
+              user_id
+            from
+              app1.user_m_view
+            group by
+              user_pseudo_id,
+              user_id
+          ) as u on event.user_pseudo_id = u.user_pseudo_id
             where
               event.event_date >= date '2023-10-01'
-              and event.event_date <= date '22023-10-10'
+              and event.event_date <= date '2023-10-10'
               and event.event_name = '_screen_view'
               and platform = 'Android'
           ) as event_base
@@ -4161,7 +4311,7 @@ describe('SQL Builder test', () => {
               traffic_source.name::varchar as traffic_source_name,
               traffic_source.medium::varchar as traffic_source_medium,
               traffic_source.source::varchar as traffic_source_source,
-              COALESCE(event.user_id, event.user_pseudo_id) as user_pseudo_id,
+              COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
               event.user_id,
               TO_CHAR(
                 TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -4184,6 +4334,16 @@ describe('SQL Builder test', () => {
               ) || '00:00' as hour
             from
               app1.event as event
+          join (
+            select
+              user_pseudo_id,
+              user_id
+            from
+              app1.user_m_view
+            group by
+              user_pseudo_id,
+              user_id
+          ) as u on event.user_pseudo_id = u.user_pseudo_id
             where
               event.event_date >= date '2023-06-19'
               and event.event_date <= date '2023-06-22'
@@ -4465,7 +4625,7 @@ describe('SQL Builder test', () => {
               traffic_source.name::varchar as traffic_source_name,
               traffic_source.medium::varchar as traffic_source_medium,
               traffic_source.source::varchar as traffic_source_source,
-              COALESCE(event.user_id, event.user_pseudo_id) as user_pseudo_id,
+              COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
               event.user_id,
               TO_CHAR(
                 TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -4488,6 +4648,16 @@ describe('SQL Builder test', () => {
               ) || '00:00' as hour
             from
               app1.event as event
+          join (
+            select
+              user_pseudo_id,
+              user_id
+            from
+              app1.user_m_view
+            group by
+              user_pseudo_id,
+              user_id
+          ) as u on event.user_pseudo_id = u.user_pseudo_id
             where
               event.event_date >= date '2023-06-19'
               and event.event_date <= date '2023-06-22'
@@ -4785,7 +4955,7 @@ describe('SQL Builder test', () => {
           traffic_source.name::varchar as traffic_source_name,
           traffic_source.medium::varchar as traffic_source_medium,
           traffic_source.source::varchar as traffic_source_source,
-          COALESCE(event.user_id, event.user_pseudo_id) as user_pseudo_id,
+          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
           event.user_id,
           TO_CHAR(
             TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -4808,6 +4978,16 @@ describe('SQL Builder test', () => {
           ) || '00:00' as hour
         from
           app1.event as event
+          join (
+            select
+              user_pseudo_id,
+              user_id
+            from
+              app1.user_m_view
+            group by
+              user_pseudo_id,
+              user_id
+          ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-06-19'
           and event.event_date <= date '2023-06-22'
@@ -5106,7 +5286,7 @@ describe('SQL Builder test', () => {
           traffic_source.name::varchar as traffic_source_name,
           traffic_source.medium::varchar as traffic_source_medium,
           traffic_source.source::varchar as traffic_source_source,
-          COALESCE(event.user_id, event.user_pseudo_id) as user_pseudo_id,
+          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
           event.user_id,
           TO_CHAR(
             TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -5129,6 +5309,16 @@ describe('SQL Builder test', () => {
           ) || '00:00' as hour
         from
           app1.event as event
+          join (
+            select
+              user_pseudo_id,
+              user_id
+            from
+              app1.user_m_view
+            group by
+              user_pseudo_id,
+              user_id
+          ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-06-19'
           and event.event_date <= date '2023-06-22'
@@ -5369,7 +5559,7 @@ describe('SQL Builder test', () => {
       ],
       timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('22023-10-10'),
+      timeEnd: new Date('2023-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
     });
 
@@ -5444,7 +5634,7 @@ describe('SQL Builder test', () => {
           traffic_source.name::varchar as traffic_source_name,
           traffic_source.medium::varchar as traffic_source_medium,
           traffic_source.source::varchar as traffic_source_source,
-          COALESCE(event.user_id, event.user_pseudo_id) as user_pseudo_id,
+          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
           event.user_id,
           TO_CHAR(
             TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -5467,9 +5657,19 @@ describe('SQL Builder test', () => {
           ) || '00:00' as hour
         from
           app1.event as event
+          join (
+            select
+              user_pseudo_id,
+              user_id
+            from
+              app1.user_m_view
+            group by
+              user_pseudo_id,
+              user_id
+          ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
-          and event.event_date <= date '22023-10-10'
+          and event.event_date <= date '2023-10-10'
           and event.event_name in ('add_button_click', 'note_share', 'note_export')
       ),
       base_data as (
@@ -5750,7 +5950,7 @@ describe('SQL Builder test', () => {
       ],
       timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('22023-10-10'),
+      timeEnd: new Date('2023-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
     });
 
@@ -5825,7 +6025,7 @@ describe('SQL Builder test', () => {
           traffic_source.name::varchar as traffic_source_name,
           traffic_source.medium::varchar as traffic_source_medium,
           traffic_source.source::varchar as traffic_source_source,
-          COALESCE(event.user_id, event.user_pseudo_id) as user_pseudo_id,
+          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
           event.user_id,
           TO_CHAR(
             TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -5848,9 +6048,19 @@ describe('SQL Builder test', () => {
           ) || '00:00' as hour
         from
           app1.event as event
+          join (
+            select
+              user_pseudo_id,
+              user_id
+            from
+              app1.user_m_view
+            group by
+              user_pseudo_id,
+              user_id
+          ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
-          and event.event_date <= date '22023-10-10'
+          and event.event_date <= date '2023-10-10'
           and event.event_name in ('add_button_click', 'note_share', 'note_export')
       ),
       base_data as (
@@ -6053,7 +6263,7 @@ describe('SQL Builder test', () => {
         ],
         timeScopeType: ExploreTimeScopeType.FIXED,
         timeStart: new Date('2023-10-01'),
-        timeEnd: new Date('22023-10-10'),
+        timeEnd: new Date('2023-10-10'),
         groupColumn: ExploreGroupColumn.DAY,
       }, false);
 
@@ -6128,7 +6338,7 @@ describe('SQL Builder test', () => {
           traffic_source.name::varchar as traffic_source_name,
           traffic_source.medium::varchar as traffic_source_medium,
           traffic_source.source::varchar as traffic_source_source,
-          COALESCE(event.user_id, event.user_pseudo_id) as user_pseudo_id,
+          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
           event.user_id,
           TO_CHAR(
             TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -6151,9 +6361,19 @@ describe('SQL Builder test', () => {
           ) || '00:00' as hour
         from
           app1.event as event
+          join (
+            select
+              user_pseudo_id,
+              user_id
+            from
+              app1.user_m_view
+            group by
+              user_pseudo_id,
+              user_id
+          ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
-          and event.event_date <= date '22023-10-10'
+          and event.event_date <= date '2023-10-10'
           and event.event_name in ('add_button_click', 'note_share', 'note_export')
       ),
       base_data as (
@@ -6250,7 +6470,7 @@ describe('SQL Builder test', () => {
         ],
         timeScopeType: ExploreTimeScopeType.FIXED,
         timeStart: new Date('2023-10-01'),
-        timeEnd: new Date('22023-10-10'),
+        timeEnd: new Date('2023-10-10'),
         groupColumn: ExploreGroupColumn.DAY,
       },
       false);
@@ -6306,7 +6526,7 @@ describe('SQL Builder test', () => {
           traffic_source.name::varchar as traffic_source_name,
           traffic_source.medium::varchar as traffic_source_medium,
           traffic_source.source::varchar as traffic_source_source,
-          COALESCE(event.user_id, event.user_pseudo_id) as user_pseudo_id,
+          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
           event.user_id,
           TO_CHAR(
             TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -6329,9 +6549,19 @@ describe('SQL Builder test', () => {
           ) || '00:00' as hour
         from
           app1.event as event
+          join (
+            select
+              user_pseudo_id,
+              user_id
+            from
+              app1.user_m_view
+            group by
+              user_pseudo_id,
+              user_id
+          ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
-          and event.event_date <= date '22023-10-10'
+          and event.event_date <= date '2023-10-10'
           and event.event_name in ('add_button_click', 'note_share', 'note_export')
       ),
       base_data as (
@@ -6500,7 +6730,7 @@ describe('SQL Builder test', () => {
       ],
       timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('22023-10-10'),
+      timeEnd: new Date('2023-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
     });
 
@@ -6575,7 +6805,7 @@ describe('SQL Builder test', () => {
           traffic_source.name::varchar as traffic_source_name,
           traffic_source.medium::varchar as traffic_source_medium,
           traffic_source.source::varchar as traffic_source_source,
-          COALESCE(event.user_id, event.user_pseudo_id) as user_pseudo_id,
+          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
           event.user_id,
           TO_CHAR(
             TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -6598,9 +6828,19 @@ describe('SQL Builder test', () => {
           ) || '00:00' as hour
         from
           app1.event as event
+          join (
+            select
+              user_pseudo_id,
+              user_id
+            from
+              app1.user_m_view
+            group by
+              user_pseudo_id,
+              user_id
+          ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
-          and event.event_date <= date '22023-10-10'
+          and event.event_date <= date '2023-10-10'
           and event.event_name in ('add_button_click', 'note_share', 'note_export')
       ),
       base_data as (
@@ -6920,7 +7160,7 @@ describe('SQL Builder test', () => {
       ],
       timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('22023-10-10'),
+      timeEnd: new Date('2023-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
     });
 
@@ -6995,7 +7235,7 @@ describe('SQL Builder test', () => {
           traffic_source.name::varchar as traffic_source_name,
           traffic_source.medium::varchar as traffic_source_medium,
           traffic_source.source::varchar as traffic_source_source,
-          COALESCE(event.user_id, event.user_pseudo_id) as user_pseudo_id,
+          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
           event.user_id,
           TO_CHAR(
             TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -7018,9 +7258,19 @@ describe('SQL Builder test', () => {
           ) || '00:00' as hour
         from
           app1.event as event
+          join (
+            select
+              user_pseudo_id,
+              user_id
+            from
+              app1.user_m_view
+            group by
+              user_pseudo_id,
+              user_id
+          ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
-          and event.event_date <= date '22023-10-10'
+          and event.event_date <= date '2023-10-10'
           and event.event_name in ('add_button_click', 'note_share', 'note_export')
       ),
       base_data as (
@@ -7303,7 +7553,7 @@ describe('SQL Builder test', () => {
       ],
       timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('22023-10-10'),
+      timeEnd: new Date('2023-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
     });
 
@@ -7378,7 +7628,7 @@ describe('SQL Builder test', () => {
           traffic_source.name::varchar as traffic_source_name,
           traffic_source.medium::varchar as traffic_source_medium,
           traffic_source.source::varchar as traffic_source_source,
-          COALESCE(event.user_id, event.user_pseudo_id) as user_pseudo_id,
+          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
           event.user_id,
           TO_CHAR(
             TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -7401,9 +7651,19 @@ describe('SQL Builder test', () => {
           ) || '00:00' as hour
         from
           app1.event as event
+          join (
+            select
+              user_pseudo_id,
+              user_id
+            from
+              app1.user_m_view
+            group by
+              user_pseudo_id,
+              user_id
+          ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
-          and event.event_date <= date '22023-10-10'
+          and event.event_date <= date '2023-10-10'
           and event.event_name in ('add_button_click', 'note_share', 'note_export')
       ),
       base_data as (
@@ -7704,7 +7964,7 @@ describe('SQL Builder test', () => {
       },
       timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('22023-10-10'),
+      timeEnd: new Date('2023-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
     });
 
@@ -7779,7 +8039,7 @@ describe('SQL Builder test', () => {
           traffic_source.name::varchar as traffic_source_name,
           traffic_source.medium::varchar as traffic_source_medium,
           traffic_source.source::varchar as traffic_source_source,
-          COALESCE(event.user_id, event.user_pseudo_id) as user_pseudo_id,
+          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
           event.user_id,
           TO_CHAR(
             TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -7802,9 +8062,19 @@ describe('SQL Builder test', () => {
           ) || '00:00' as hour
         from
           app1.event as event
+          join (
+            select
+              user_pseudo_id,
+              user_id
+            from
+              app1.user_m_view
+            group by
+              user_pseudo_id,
+              user_id
+          ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
-          and event.event_date <= date '22023-10-10'
+          and event.event_date <= date '2023-10-10'
           and event.event_name not in (
             '_session_start',
             '_session_stop',
@@ -8136,7 +8406,7 @@ describe('SQL Builder test', () => {
       },
       timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('22023-10-10'),
+      timeEnd: new Date('2023-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
     });
 
@@ -8211,7 +8481,7 @@ describe('SQL Builder test', () => {
           traffic_source.name::varchar as traffic_source_name,
           traffic_source.medium::varchar as traffic_source_medium,
           traffic_source.source::varchar as traffic_source_source,
-          COALESCE(event.user_id, event.user_pseudo_id) as user_pseudo_id,
+          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
           event.user_id,
           TO_CHAR(
             TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -8234,9 +8504,19 @@ describe('SQL Builder test', () => {
           ) || '00:00' as hour
         from
           app1.event as event
+          join (
+            select
+              user_pseudo_id,
+              user_id
+            from
+              app1.user_m_view
+            group by
+              user_pseudo_id,
+              user_id
+          ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
-          and event.event_date <= date '22023-10-10'
+          and event.event_date <= date '2023-10-10'
           and event.event_name not in (
             '_session_start',
             '_session_stop',
@@ -8669,7 +8949,7 @@ describe('SQL Builder test', () => {
       },
       timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('22023-10-10'),
+      timeEnd: new Date('2023-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
     });
 
@@ -8744,7 +9024,7 @@ describe('SQL Builder test', () => {
           traffic_source.name::varchar as traffic_source_name,
           traffic_source.medium::varchar as traffic_source_medium,
           traffic_source.source::varchar as traffic_source_source,
-          COALESCE(event.user_id, event.user_pseudo_id) as user_pseudo_id,
+          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
           event.user_id,
           TO_CHAR(
             TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -8767,9 +9047,19 @@ describe('SQL Builder test', () => {
           ) || '00:00' as hour
         from
           app1.event as event
+          join (
+            select
+              user_pseudo_id,
+              user_id
+            from
+              app1.user_m_view
+            group by
+              user_pseudo_id,
+              user_id
+          ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
-          and event.event_date <= date '22023-10-10'
+          and event.event_date <= date '2023-10-10'
           and event.event_name not in (
             '_session_start',
             '_session_stop',
@@ -9255,7 +9545,7 @@ describe('SQL Builder test', () => {
           traffic_source.name::varchar as traffic_source_name,
           traffic_source.medium::varchar as traffic_source_medium,
           traffic_source.source::varchar as traffic_source_source,
-          COALESCE(event.user_id, event.user_pseudo_id) as user_pseudo_id,
+          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
           event.user_id,
           TO_CHAR(
             TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -9278,6 +9568,16 @@ describe('SQL Builder test', () => {
           ) || '00:00' as hour
         from
           app1.event as event
+          join (
+            select
+              user_pseudo_id,
+              user_id
+            from
+              app1.user_m_view
+            group by
+              user_pseudo_id,
+              user_id
+          ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-20'
           and event.event_date <= date '2023-11-04'
@@ -9703,7 +10003,7 @@ describe('SQL Builder test', () => {
       },
       timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('22023-10-10'),
+      timeEnd: new Date('2023-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
     });
 
@@ -9778,7 +10078,7 @@ describe('SQL Builder test', () => {
           traffic_source.name::varchar as traffic_source_name,
           traffic_source.medium::varchar as traffic_source_medium,
           traffic_source.source::varchar as traffic_source_source,
-          COALESCE(event.user_id, event.user_pseudo_id) as user_pseudo_id,
+          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
           event.user_id,
           TO_CHAR(
             TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -9801,9 +10101,19 @@ describe('SQL Builder test', () => {
           ) || '00:00' as hour
         from
           app1.event as event
+          join (
+            select
+              user_pseudo_id,
+              user_id
+            from
+              app1.user_m_view
+            group by
+              user_pseudo_id,
+              user_id
+          ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
-          and event.event_date <= date '22023-10-10'
+          and event.event_date <= date '2023-10-10'
           and event.event_name = '_screen_view'
           and platform = 'Android'
       ),
@@ -10086,7 +10396,7 @@ describe('SQL Builder test', () => {
       ],
       timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('22023-10-10'),
+      timeEnd: new Date('2023-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
     });
 
@@ -10161,7 +10471,7 @@ describe('SQL Builder test', () => {
           traffic_source.name::varchar as traffic_source_name,
           traffic_source.medium::varchar as traffic_source_medium,
           traffic_source.source::varchar as traffic_source_source,
-          COALESCE(event.user_id, event.user_pseudo_id) as user_pseudo_id,
+          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
           event.user_id,
           TO_CHAR(
             TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -10184,9 +10494,19 @@ describe('SQL Builder test', () => {
           ) || '00:00' as hour
         from
           app1.event as event
+          join (
+            select
+              user_pseudo_id,
+              user_id
+            from
+              app1.user_m_view
+            group by
+              user_pseudo_id,
+              user_id
+          ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
-          and event.event_date <= date '22023-10-10'
+          and event.event_date <= date '2023-10-10'
           and event.event_name in ('add_button_click', 'note_share', 'note_export')
       ),
       base_data as (
@@ -10395,7 +10715,7 @@ describe('SQL Builder test', () => {
       ],
       timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('22023-10-10'),
+      timeEnd: new Date('2023-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
     });
 
@@ -10470,7 +10790,7 @@ describe('SQL Builder test', () => {
           traffic_source.name::varchar as traffic_source_name,
           traffic_source.medium::varchar as traffic_source_medium,
           traffic_source.source::varchar as traffic_source_source,
-          COALESCE(event.user_id, event.user_pseudo_id) as user_pseudo_id,
+          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
           event.user_id,
           TO_CHAR(
             TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -10493,9 +10813,19 @@ describe('SQL Builder test', () => {
           ) || '00:00' as hour
         from
           app1.event as event
+          join (
+            select
+              user_pseudo_id,
+              user_id
+            from
+              app1.user_m_view
+            group by
+              user_pseudo_id,
+              user_id
+          ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
-          and event.event_date <= date '22023-10-10'
+          and event.event_date <= date '2023-10-10'
           and event.event_name in ('add_button_click', 'note_share', 'note_export')
       ),
       base_data as (
@@ -10687,7 +11017,7 @@ describe('SQL Builder test', () => {
       ],
       timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('22023-10-10'),
+      timeEnd: new Date('2023-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
     }, true);
 
@@ -10762,7 +11092,7 @@ describe('SQL Builder test', () => {
           traffic_source.name::varchar as traffic_source_name,
           traffic_source.medium::varchar as traffic_source_medium,
           traffic_source.source::varchar as traffic_source_source,
-          COALESCE(event.user_id, event.user_pseudo_id) as user_pseudo_id,
+          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
           event.user_id,
           TO_CHAR(
             TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -10785,9 +11115,19 @@ describe('SQL Builder test', () => {
           ) || '00:00' as hour
         from
           app1.event as event
+          join (
+            select
+              user_pseudo_id,
+              user_id
+            from
+              app1.user_m_view
+            group by
+              user_pseudo_id,
+              user_id
+          ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
-          and event.event_date <= date '22023-10-10'
+          and event.event_date <= date '2023-10-10'
           and event.event_name in ('add_button_click', 'note_share', 'note_export')
       ),
       base_data as (
@@ -11040,7 +11380,7 @@ describe('SQL Builder test', () => {
       ],
       timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('22023-10-10'),
+      timeEnd: new Date('2023-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
     }, true);
 
@@ -11115,7 +11455,7 @@ describe('SQL Builder test', () => {
           traffic_source.name::varchar as traffic_source_name,
           traffic_source.medium::varchar as traffic_source_medium,
           traffic_source.source::varchar as traffic_source_source,
-          COALESCE(event.user_id, event.user_pseudo_id) as user_pseudo_id,
+          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
           event.user_id,
           TO_CHAR(
             TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -11138,9 +11478,19 @@ describe('SQL Builder test', () => {
           ) || '00:00' as hour
         from
           app1.event as event
+          join (
+            select
+              user_pseudo_id,
+              user_id
+            from
+              app1.user_m_view
+            group by
+              user_pseudo_id,
+              user_id
+          ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
-          and event.event_date <= date '22023-10-10'
+          and event.event_date <= date '2023-10-10'
           and event.event_name in ('add_button_click', 'note_share', 'note_export')
       ),
       base_data as (
@@ -11377,7 +11727,7 @@ describe('SQL Builder test', () => {
       ],
       timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('22023-10-10'),
+      timeEnd: new Date('2023-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
     }, true);
 
@@ -11452,7 +11802,7 @@ describe('SQL Builder test', () => {
           traffic_source.name::varchar as traffic_source_name,
           traffic_source.medium::varchar as traffic_source_medium,
           traffic_source.source::varchar as traffic_source_source,
-          COALESCE(event.user_id, event.user_pseudo_id) as user_pseudo_id,
+          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
           event.user_id,
           TO_CHAR(
             TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -11475,9 +11825,19 @@ describe('SQL Builder test', () => {
           ) || '00:00' as hour
         from
           app1.event as event
+          join (
+            select
+              user_pseudo_id,
+              user_id
+            from
+              app1.user_m_view
+            group by
+              user_pseudo_id,
+              user_id
+          ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
-          and event.event_date <= date '22023-10-10'
+          and event.event_date <= date '2023-10-10'
           and event.event_name in ('add_button_click', 'note_share', 'note_export')
       ),
       base_data as (
@@ -11742,7 +12102,7 @@ describe('SQL Builder test', () => {
               traffic_source.name::varchar as traffic_source_name,
               traffic_source.medium::varchar as traffic_source_medium,
               traffic_source.source::varchar as traffic_source_source,
-              COALESCE(event.user_id, event.user_pseudo_id) as user_pseudo_id,
+              COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
               event.user_id,
               TO_CHAR(
                 TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -11765,6 +12125,16 @@ describe('SQL Builder test', () => {
               ) || '00:00' as hour
             from
               app1.event as event
+          join (
+            select
+              user_pseudo_id,
+              user_id
+            from
+              app1.user_m_view
+            group by
+              user_pseudo_id,
+              user_id
+          ) as u on event.user_pseudo_id = u.user_pseudo_id
             where
               event.event_date >= date '2023-10-01'
               and event.event_date <= date '2023-10-10'
@@ -11883,7 +12253,7 @@ describe('SQL Builder test', () => {
               traffic_source.name::varchar as traffic_source_name,
               traffic_source.medium::varchar as traffic_source_medium,
               traffic_source.source::varchar as traffic_source_source,
-              COALESCE(event.user_id, event.user_pseudo_id) as user_pseudo_id,
+              COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
               event.user_id,
               TO_CHAR(
                 TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -11906,6 +12276,16 @@ describe('SQL Builder test', () => {
               ) || '00:00' as hour
             from
               app1.event as event
+          join (
+            select
+              user_pseudo_id,
+              user_id
+            from
+              app1.user_m_view
+            group by
+              user_pseudo_id,
+              user_id
+          ) as u on event.user_pseudo_id = u.user_pseudo_id
             where
               event.event_date >= date '2023-10-01'
               and event.event_date <= date '2023-10-10'
@@ -12035,7 +12415,7 @@ describe('SQL Builder test', () => {
           traffic_source.name::varchar as traffic_source_name,
           traffic_source.medium::varchar as traffic_source_medium,
           traffic_source.source::varchar as traffic_source_source,
-          COALESCE(event.user_id, event.user_pseudo_id) as user_pseudo_id,
+          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
           event.user_id,
           TO_CHAR(
             TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -12058,6 +12438,16 @@ describe('SQL Builder test', () => {
           ) || '00:00' as hour
         from
           app1.event as event
+          join (
+            select
+              user_pseudo_id,
+              user_id
+            from
+              app1.user_m_view
+            group by
+              user_pseudo_id,
+              user_id
+          ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
           and event.event_date <= date '2023-10-10'
@@ -12230,7 +12620,7 @@ describe('SQL Builder test', () => {
           traffic_source.name::varchar as traffic_source_name,
           traffic_source.medium::varchar as traffic_source_medium,
           traffic_source.source::varchar as traffic_source_source,
-          COALESCE(event.user_id, event.user_pseudo_id) as user_pseudo_id,
+          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
           event.user_id,
           TO_CHAR(
             TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -12253,6 +12643,16 @@ describe('SQL Builder test', () => {
           ) || '00:00' as hour
         from
           app1.event as event
+          join (
+            select
+              user_pseudo_id,
+              user_id
+            from
+              app1.user_m_view
+            group by
+              user_pseudo_id,
+              user_id
+          ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
           and event.event_date <= date '2023-10-10'
@@ -12438,7 +12838,7 @@ describe('SQL Builder test', () => {
           traffic_source.name::varchar as traffic_source_name,
           traffic_source.medium::varchar as traffic_source_medium,
           traffic_source.source::varchar as traffic_source_source,
-          COALESCE(event.user_id, event.user_pseudo_id) as user_pseudo_id,
+          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
           event.user_id,
           TO_CHAR(
             TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -12461,6 +12861,16 @@ describe('SQL Builder test', () => {
           ) || '00:00' as hour
         from
           app1.event as event
+          join (
+            select
+              user_pseudo_id,
+              user_id
+            from
+              app1.user_m_view
+            group by
+              user_pseudo_id,
+              user_id
+          ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
           and event.event_date <= date '2023-10-10'
@@ -12625,7 +13035,7 @@ describe('SQL Builder test', () => {
             traffic_source.name::varchar as traffic_source_name,
             traffic_source.medium::varchar as traffic_source_medium,
             traffic_source.source::varchar as traffic_source_source,
-            COALESCE(event.user_id, event.user_pseudo_id) as user_pseudo_id,
+            COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
             event.user_id,
             TO_CHAR(
               TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -12648,6 +13058,16 @@ describe('SQL Builder test', () => {
             ) || '00:00' as hour
           from
             app1.event as event
+          join (
+            select
+              user_pseudo_id,
+              user_id
+            from
+              app1.user_m_view
+            group by
+              user_pseudo_id,
+              user_id
+          ) as u on event.user_pseudo_id = u.user_pseudo_id
           where
             event.event_date >= date '2023-10-01'
             and event.event_date <= date '2023-10-10'
@@ -12714,7 +13134,7 @@ describe('SQL Builder test', () => {
       ],
       timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('22023-10-10'),
+      timeEnd: new Date('2023-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
     });
 
@@ -12774,7 +13194,7 @@ describe('SQL Builder test', () => {
               traffic_source.name::varchar as traffic_source_name,
               traffic_source.medium::varchar as traffic_source_medium,
               traffic_source.source::varchar as traffic_source_source,
-              COALESCE(event.user_id, event.user_pseudo_id) as user_pseudo_id,
+              COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
               event.user_id,
               TO_CHAR(
                 TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -12797,9 +13217,19 @@ describe('SQL Builder test', () => {
               ) || '00:00' as hour
             from
               app1.event as event
+          join (
+            select
+              user_pseudo_id,
+              user_id
+            from
+              app1.user_m_view
+            group by
+              user_pseudo_id,
+              user_id
+          ) as u on event.user_pseudo_id = u.user_pseudo_id
             where
               event.event_date >= date '2023-10-01'
-              and event.event_date <= date '22023-10-10'
+              and event.event_date <= date '2023-10-10'
               and event.event_name in ('add_button_click', 'note_share', 'note_export')
           ) as event_base
           join (
@@ -13033,7 +13463,7 @@ describe('SQL Builder test', () => {
           traffic_source.name::varchar as traffic_source_name,
           traffic_source.medium::varchar as traffic_source_medium,
           traffic_source.source::varchar as traffic_source_source,
-          COALESCE(event.user_id, event.user_pseudo_id) as user_pseudo_id,
+          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
           event.user_id,
           TO_CHAR(
             TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -13056,6 +13486,16 @@ describe('SQL Builder test', () => {
           ) || '00:00' as hour
         from
           app1.event as event
+          join (
+            select
+              user_pseudo_id,
+              user_id
+            from
+              app1.user_m_view
+            group by
+              user_pseudo_id,
+              user_id
+          ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
           and event.event_date <= date '2023-10-10'
@@ -13226,7 +13666,7 @@ describe('SQL Builder test', () => {
           traffic_source.name::varchar as traffic_source_name,
           traffic_source.medium::varchar as traffic_source_medium,
           traffic_source.source::varchar as traffic_source_source,
-          COALESCE(event.user_id, event.user_pseudo_id) as user_pseudo_id,
+          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
           event.user_id,
           TO_CHAR(
             TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -13249,6 +13689,16 @@ describe('SQL Builder test', () => {
           ) || '00:00' as hour
         from
           app1.event as event
+          join (
+            select
+              user_pseudo_id,
+              user_id
+            from
+              app1.user_m_view
+            group by
+              user_pseudo_id,
+              user_id
+          ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
           and event.event_date <= date '2023-10-10'
@@ -13447,7 +13897,7 @@ describe('SQL Builder test', () => {
           traffic_source.name::varchar as traffic_source_name,
           traffic_source.medium::varchar as traffic_source_medium,
           traffic_source.source::varchar as traffic_source_source,
-          COALESCE(event.user_id, event.user_pseudo_id) as user_pseudo_id,
+          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
           event.user_id,
           TO_CHAR(
             TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -13470,6 +13920,16 @@ describe('SQL Builder test', () => {
           ) || '00:00' as hour
         from
           app1.event as event
+          join (
+            select
+              user_pseudo_id,
+              user_id
+            from
+              app1.user_m_view
+            group by
+              user_pseudo_id,
+              user_id
+          ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
           and event.event_date <= date '2023-10-10'
@@ -13710,7 +14170,7 @@ describe('SQL Builder test', () => {
           traffic_source.name::varchar as traffic_source_name,
           traffic_source.medium::varchar as traffic_source_medium,
           traffic_source.source::varchar as traffic_source_source,
-          COALESCE(event.user_id, event.user_pseudo_id) as user_pseudo_id,
+          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
           event.user_id,
           TO_CHAR(
             TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -13733,6 +14193,16 @@ describe('SQL Builder test', () => {
           ) || '00:00' as hour
         from
           app1.event as event
+          join (
+            select
+              user_pseudo_id,
+              user_id
+            from
+              app1.user_m_view
+            group by
+              user_pseudo_id,
+              user_id
+          ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
           and event.event_date <= date '2023-10-10'
@@ -13989,7 +14459,7 @@ describe('SQL Builder test', () => {
           traffic_source.name::varchar as traffic_source_name,
           traffic_source.medium::varchar as traffic_source_medium,
           traffic_source.source::varchar as traffic_source_source,
-          COALESCE(event.user_id, event.user_pseudo_id) as user_pseudo_id,
+          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
           event.user_id,
           TO_CHAR(
             TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -14012,6 +14482,16 @@ describe('SQL Builder test', () => {
           ) || '00:00' as hour
         from
           app1.event as event
+          join (
+            select
+              user_pseudo_id,
+              user_id
+            from
+              app1.user_m_view
+            group by
+              user_pseudo_id,
+              user_id
+          ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
           and event.event_date <= date '2023-10-10'
@@ -14303,7 +14783,7 @@ describe('SQL Builder test', () => {
           traffic_source.name::varchar as traffic_source_name,
           traffic_source.medium::varchar as traffic_source_medium,
           traffic_source.source::varchar as traffic_source_source,
-          COALESCE(event.user_id, event.user_pseudo_id) as user_pseudo_id,
+          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
           event.user_id,
           TO_CHAR(
             TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -14326,6 +14806,16 @@ describe('SQL Builder test', () => {
           ) || '00:00' as hour
         from
           app1.event as event
+          join (
+            select
+              user_pseudo_id,
+              user_id
+            from
+              app1.user_m_view
+            group by
+              user_pseudo_id,
+              user_id
+          ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
           and event.event_date <= date '2023-10-10'
@@ -14732,7 +15222,7 @@ describe('SQL Builder test', () => {
           traffic_source.name::varchar as traffic_source_name,
           traffic_source.medium::varchar as traffic_source_medium,
           traffic_source.source::varchar as traffic_source_source,
-          COALESCE(event.user_id, event.user_pseudo_id) as user_pseudo_id,
+          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
           event.user_id,
           TO_CHAR(
             TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -14755,6 +15245,16 @@ describe('SQL Builder test', () => {
           ) || '00:00' as hour
         from
           app1.event as event
+          join (
+            select
+              user_pseudo_id,
+              user_id
+            from
+              app1.user_m_view
+            group by
+              user_pseudo_id,
+              user_id
+          ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
           and event.event_date <= date '2023-10-10'
@@ -15113,7 +15613,7 @@ describe('SQL Builder test', () => {
           traffic_source.name::varchar as traffic_source_name,
           traffic_source.medium::varchar as traffic_source_medium,
           traffic_source.source::varchar as traffic_source_source,
-          COALESCE(event.user_id, event.user_pseudo_id) as user_pseudo_id,
+          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
           event.user_id,
           TO_CHAR(
             TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -15136,6 +15636,16 @@ describe('SQL Builder test', () => {
           ) || '00:00' as hour
         from
           shop.event as event
+          join (
+            select
+              user_pseudo_id,
+              user_id
+            from
+              shop.user_m_view
+            group by
+              user_pseudo_id,
+              user_id
+          ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-11-01'
           and event.event_date <= date '2023-11-15'
@@ -15508,7 +16018,7 @@ describe('SQL Builder test', () => {
           traffic_source.name::varchar as traffic_source_name,
           traffic_source.medium::varchar as traffic_source_medium,
           traffic_source.source::varchar as traffic_source_source,
-          COALESCE(event.user_id, event.user_pseudo_id) as user_pseudo_id,
+          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
           event.user_id,
           TO_CHAR(
             TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -15531,6 +16041,16 @@ describe('SQL Builder test', () => {
           ) || '00:00' as hour
         from
           shop.event as event
+          join (
+            select
+              user_pseudo_id,
+              user_id
+            from
+              shop.user_m_view
+            group by
+              user_pseudo_id,
+              user_id
+          ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-11-01'
           and event.event_date <= date '2023-11-15'
@@ -15905,7 +16425,7 @@ describe('SQL Builder test', () => {
           traffic_source.name::varchar as traffic_source_name,
           traffic_source.medium::varchar as traffic_source_medium,
           traffic_source.source::varchar as traffic_source_source,
-          COALESCE(event.user_id, event.user_pseudo_id) as user_pseudo_id,
+          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
           event.user_id,
           TO_CHAR(
             TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -15928,6 +16448,16 @@ describe('SQL Builder test', () => {
           ) || '00:00' as hour
         from
           app1.event as event
+          join (
+            select
+              user_pseudo_id,
+              user_id
+            from
+              app1.user_m_view
+            group by
+              user_pseudo_id,
+              user_id
+          ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
           and event.event_date <= date '2023-10-10'
@@ -16313,7 +16843,7 @@ describe('SQL Builder test', () => {
           traffic_source.name::varchar as traffic_source_name,
           traffic_source.medium::varchar as traffic_source_medium,
           traffic_source.source::varchar as traffic_source_source,
-          COALESCE(event.user_id, event.user_pseudo_id) as user_pseudo_id,
+          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
           event.user_id,
           TO_CHAR(
             TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -16336,6 +16866,16 @@ describe('SQL Builder test', () => {
           ) || '00:00' as hour
         from
           app1.event as event
+          join (
+            select
+              user_pseudo_id,
+              user_id
+            from
+              app1.user_m_view
+            group by
+              user_pseudo_id,
+              user_id
+          ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
           and event.event_date <= date '2023-10-10'
@@ -16603,7 +17143,7 @@ describe('SQL Builder test', () => {
           traffic_source.name::varchar as traffic_source_name,
           traffic_source.medium::varchar as traffic_source_medium,
           traffic_source.source::varchar as traffic_source_source,
-          COALESCE(event.user_id, event.user_pseudo_id) as user_pseudo_id,
+          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
           event.user_id,
           TO_CHAR(
             TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -16626,6 +17166,16 @@ describe('SQL Builder test', () => {
           ) || '00:00' as hour
         from
           app1.event as event
+          join (
+            select
+              user_pseudo_id,
+              user_id
+            from
+              app1.user_m_view
+            group by
+              user_pseudo_id,
+              user_id
+          ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
           and event.event_date <= date '2023-10-10'
@@ -16969,7 +17519,7 @@ describe('SQL Builder test', () => {
           traffic_source.name::varchar as traffic_source_name,
           traffic_source.medium::varchar as traffic_source_medium,
           traffic_source.source::varchar as traffic_source_source,
-          COALESCE(event.user_id, event.user_pseudo_id) as user_pseudo_id,
+          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
           event.user_id,
           TO_CHAR(
             TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -16992,6 +17542,16 @@ describe('SQL Builder test', () => {
           ) || '00:00' as hour
         from
           app1.event as event
+          join (
+            select
+              user_pseudo_id,
+              user_id
+            from
+              app1.user_m_view
+            group by
+              user_pseudo_id,
+              user_id
+          ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
           and event.event_date <= date '2023-10-10'
@@ -17465,7 +18025,7 @@ describe('SQL Builder test', () => {
           traffic_source.name::varchar as traffic_source_name,
           traffic_source.medium::varchar as traffic_source_medium,
           traffic_source.source::varchar as traffic_source_source,
-          COALESCE(event.user_id, event.user_pseudo_id) as user_pseudo_id,
+          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
           event.user_id,
           TO_CHAR(
             TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -17488,6 +18048,16 @@ describe('SQL Builder test', () => {
           ) || '00:00' as hour
         from
           app1.event as event
+          join (
+            select
+              user_pseudo_id,
+              user_id
+            from
+              app1.user_m_view
+            group by
+              user_pseudo_id,
+              user_id
+          ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-24'
           and event.event_date <= date '2023-10-30'
@@ -17751,7 +18321,7 @@ describe('SQL Builder test', () => {
       ],
       timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('22023-10-10'),
+      timeEnd: new Date('2023-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
     });
 
@@ -17810,7 +18380,7 @@ describe('SQL Builder test', () => {
           traffic_source.name::varchar as traffic_source_name,
           traffic_source.medium::varchar as traffic_source_medium,
           traffic_source.source::varchar as traffic_source_source,
-          COALESCE(event.user_id, event.user_pseudo_id) as user_pseudo_id,
+          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
           event.user_id,
           TO_CHAR(
             TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -17833,9 +18403,19 @@ describe('SQL Builder test', () => {
           ) || '00:00' as hour
         from
           shopping.event as event
+          join (
+            select
+              user_pseudo_id,
+              user_id
+            from
+              shopping.user_m_view
+            group by
+              user_pseudo_id,
+              user_id
+          ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
-          and event.event_date <= date '22023-10-10'
+          and event.event_date <= date '2023-10-10'
           and event.event_name in ('add_button_click', 'note_share', 'note_export')
       ),
       base_data as (
@@ -18210,7 +18790,7 @@ describe('SQL Builder test', () => {
           traffic_source.name::varchar as traffic_source_name,
           traffic_source.medium::varchar as traffic_source_medium,
           traffic_source.source::varchar as traffic_source_source,
-          COALESCE(event.user_id, event.user_pseudo_id) as user_pseudo_id,
+          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
           event.user_id,
           TO_CHAR(
             TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
@@ -18233,6 +18813,16 @@ describe('SQL Builder test', () => {
           ) || '00:00' as hour
         from
           app1.event as event
+          join (
+            select
+              user_pseudo_id,
+              user_id
+            from
+              app1.user_m_view
+            group by
+              user_pseudo_id,
+              user_id
+          ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
           and event.event_date <= date '2023-10-10'
