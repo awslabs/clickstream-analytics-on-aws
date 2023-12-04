@@ -13072,9 +13072,7 @@
                         "Configuration": {
                             "FilterListConfiguration": {
                                 "MatchOperator": "CONTAINS",
-                                "CategoryValues": [
-                                    "iOS"
-                                ]
+                                "SelectAllOptions": "FILTER_ALL_VALUES"
                             }
                         }
                     }
