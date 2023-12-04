@@ -1390,9 +1390,9 @@ export function _buildCommonPartSql(eventNames: string[], sqlParameters: SQLPara
       userOuterSql = `
       join 
         (
-          ${_buildBaseUserDataTableSql(sqlParameters, false)}
+          ${_buildBaseUserDataTableSql(sqlParameters, false, '_join')}
         ) as user_base
-        on event_base.user_pseudo_id = user_base.user_pseudo_id
+        on event_base.user_pseudo_id = user_base.user_pseudo_id_join
     `;
     }
 
@@ -1584,7 +1584,7 @@ function _buildBaseEventDataSql(eventNames: string[], sqlParameters: SQLParamete
   `;
 }
 
-function _buildBaseUserDataTableSql(sqlParameters: SQLParameters, hasNestParams: boolean) {
+function _buildBaseUserDataTableSql(sqlParameters: SQLParameters, hasNestParams: boolean, suffix: string ='') {
 
   let nestParamSql = '';
   let nextColSQL = '';
@@ -1599,10 +1599,15 @@ function _buildBaseUserDataTableSql(sqlParameters: SQLParameters, hasNestParams:
     nextColSQL = ', u.user_properties as user_properties';
   }
 
+  let userIdSuffix = '';
+  if (suffix !== '') {
+    userIdSuffix = `as user_id${suffix}`;
+  }
+
   return `
     select
-      COALESCE(user_id, user_pseudo_id) as user_pseudo_id,
-      user_id,
+      COALESCE(user_id, user_pseudo_id) as user_pseudo_id${suffix},
+      user_id ${userIdSuffix},
       user_first_touch_timestamp,
       _first_visit_date,
       _first_referer,
