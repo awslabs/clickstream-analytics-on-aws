@@ -264,6 +264,7 @@ const AnalyticsHeader: React.FC<IHeaderProps> = (props: IHeaderProps) => {
             ariaLabel: 'settings',
             onItemClick: (item) => {
               changeLanguage(item.detail.id);
+              window.location.reload();
             },
             items:
               i18n.language === DEFAULT_ZH_LANG
