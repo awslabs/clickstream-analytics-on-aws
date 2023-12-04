@@ -226,6 +226,10 @@ const AnalyticsDashboard: React.FC = () => {
     },
   ];
 
+  useEffect(() => {
+    dispatch?.({ type: StateActionType.CLEAR_HELP_PANEL });
+  }, []);
+
   return (
     <div className="flex">
       <AnalyticsNavigation
@@ -234,16 +238,20 @@ const AnalyticsDashboard: React.FC = () => {
       <div className="flex-1">
         <AppLayout
           onToolsChange={(e) => {
-            if (state?.helpPanelType === HelpPanelType.NONE) {
-              return;
-            }
-            if (!e.detail.open) {
-              dispatch?.({ type: StateActionType.HIDE_HELP_PANEL });
-            } else {
+            if (e.detail.open && state?.helpPanelType === HelpPanelType.NONE) {
               dispatch?.({
                 type: StateActionType.SHOW_HELP_PANEL,
-                payload: state?.helpPanelType,
+                payload: HelpPanelType.ANALYTICS_DASHBOARD,
               });
+            } else {
+              if (!e.detail.open) {
+                dispatch?.({ type: StateActionType.HIDE_HELP_PANEL });
+              } else {
+                dispatch?.({
+                  type: StateActionType.SHOW_HELP_PANEL,
+                  payload: state?.helpPanelType,
+                });
+              }
             }
           }}
           toolsOpen={state?.showHelpPanel}

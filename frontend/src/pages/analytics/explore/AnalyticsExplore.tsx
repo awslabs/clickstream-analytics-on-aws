@@ -284,6 +284,10 @@ const AnalyticsExplore: React.FC = () => {
     }
   }, [selectedOption]);
 
+  useEffect(() => {
+    dispatch?.({ type: StateActionType.CLEAR_HELP_PANEL });
+  }, []);
+
   return (
     <div className="flex">
       <AnalyticsNavigation
@@ -293,16 +297,20 @@ const AnalyticsExplore: React.FC = () => {
         <AppLayout
           toolsOpen={state?.showHelpPanel}
           onToolsChange={(e) => {
-            if (state?.helpPanelType === HelpPanelType.NONE) {
-              return;
-            }
-            if (!e.detail.open) {
-              dispatch?.({ type: StateActionType.HIDE_HELP_PANEL });
-            } else {
+            if (e.detail.open && state?.helpPanelType === HelpPanelType.NONE) {
               dispatch?.({
                 type: StateActionType.SHOW_HELP_PANEL,
-                payload: state?.helpPanelType,
+                payload: HelpPanelType.ANALYTICS_EXPLORE,
               });
+            } else {
+              if (!e.detail.open) {
+                dispatch?.({ type: StateActionType.HIDE_HELP_PANEL });
+              } else {
+                dispatch?.({
+                  type: StateActionType.SHOW_HELP_PANEL,
+                  payload: state?.helpPanelType,
+                });
+              }
             }
           }}
           tools={<HelpInfo />}
