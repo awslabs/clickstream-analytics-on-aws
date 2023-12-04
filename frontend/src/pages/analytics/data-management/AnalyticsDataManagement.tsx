@@ -24,7 +24,7 @@ import CustomBreadCrumb from 'components/layouts/CustomBreadCrumb';
 import HelpInfo from 'components/layouts/HelpInfo';
 import { DispatchContext, StateContext } from 'context/StateContext';
 import { StateActionType, HelpPanelType } from 'context/reducer';
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import MetadataDetails from './MetadataDetails';
@@ -55,6 +55,10 @@ const AnalyticsDataManagement: React.FC = () => {
     },
   ];
 
+  useEffect(() => {
+    dispatch?.({ type: StateActionType.CLEAR_HELP_PANEL });
+  }, []);
+
   return (
     <div className="flex">
       <AnalyticsNavigation
@@ -64,16 +68,20 @@ const AnalyticsDataManagement: React.FC = () => {
         <AppLayout
           toolsOpen={state?.showHelpPanel}
           onToolsChange={(e) => {
-            if (state?.helpPanelType === HelpPanelType.NONE) {
-              return;
-            }
-            if (!e.detail.open) {
-              dispatch?.({ type: StateActionType.HIDE_HELP_PANEL });
-            } else {
+            if (e.detail.open && state?.helpPanelType === HelpPanelType.NONE) {
               dispatch?.({
                 type: StateActionType.SHOW_HELP_PANEL,
-                payload: state?.helpPanelType,
+                payload: HelpPanelType.ANALYTICS_METADATA,
               });
+            } else {
+              if (!e.detail.open) {
+                dispatch?.({ type: StateActionType.HIDE_HELP_PANEL });
+              } else {
+                dispatch?.({
+                  type: StateActionType.SHOW_HELP_PANEL,
+                  payload: state?.helpPanelType,
+                });
+              }
             }
           }}
           tools={<HelpInfo />}
