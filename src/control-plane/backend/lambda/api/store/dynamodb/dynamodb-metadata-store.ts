@@ -96,7 +96,7 @@ export class DynamoDbMetadataStore implements MetadataStore {
 
   public async listEventParameters(projectId: string, appId: string): Promise<IMetadataEventParameter[]> {
     const records = await this.getAllEventParameters(projectId, appId);
-    return getLatestParameterById(records);
+    return getLatestParameterById(records).sort((a, b) => a.category.localeCompare(b.category));
   };
 
   private async getAllEventParameters(projectId: string, appId: string): Promise<IMetadataRaw[]> {
@@ -159,7 +159,7 @@ export class DynamoDbMetadataStore implements MetadataStore {
     if (records.length === 0) {
       records = await this.queryMetadataRawsFromBuiltInList(projectId, appId, 'USER_ATTRIBUTE');
     }
-    const attributes = getLatestAttributeByName(records);
+    const attributes = getLatestAttributeByName(records).sort((a, b) => a.category.localeCompare(b.category));
     return attributes;
   };
 
