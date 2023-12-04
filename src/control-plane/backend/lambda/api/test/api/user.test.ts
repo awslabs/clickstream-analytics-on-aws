@@ -179,7 +179,7 @@ describe('User test', () => {
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
-    expect(res.body.message).toEqual('This user was created by solution and not allow to be modified.');
+    expect(res.body.message).toEqual('This user was created by solution and not allowed to be modified.');
     expect(res.body.success).toEqual(false);
     expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 1);
     expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 1);
@@ -232,7 +232,7 @@ describe('User test', () => {
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
-    expect(res.body.message).toEqual('This user was created by solution and not allow to be deleted.');
+    expect(res.body.message).toEqual('This user was created by solution and not allowed to be deleted.');
     expect(res.body.success).toEqual(false);
     expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 2);
     expect(ddbMock).toHaveReceivedCommandTimes(UpdateCommand, 0);
