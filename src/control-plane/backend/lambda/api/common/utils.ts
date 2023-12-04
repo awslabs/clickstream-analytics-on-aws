@@ -906,14 +906,29 @@ function getAppRegistryApplicationArn(pipeline: IPipeline): string {
 }
 
 function pipelineAnalysisStudioEnabled(pipeline: IPipeline): boolean {
+  const redshiftStackVersion = getStackVersion(pipeline, PipelineStackType.DATA_MODELING_REDSHIFT);
+  const reportStackVersion = getStackVersion(pipeline, PipelineStackType.REPORTING);
   if (
     pipeline?.reporting?.quickSight?.accountName &&
-    !pipeline?.templateVersion?.startsWith('v1.0')
+    !pipeline?.templateVersion?.startsWith('v1.0') &&
+    redshiftStackVersion && !redshiftStackVersion.startsWith('v1.0') &&
+    reportStackVersion && !reportStackVersion.startsWith('v1.0')
   ) {
     return true;
   }
   return false;
 };
+
+function getStackVersion(pipeline: IPipeline, stackType: PipelineStackType): string | undefined {
+  if (pipeline.status?.stackDetails) {
+    for (let stackDetail of pipeline.status?.stackDetails) {
+      if (stackDetail.stackType === stackType) {
+        return stackDetail.stackTemplateVersion;
+      }
+    }
+  }
+  return undefined;
+}
 
 export {
   isEmpty,

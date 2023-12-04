@@ -1508,7 +1508,7 @@ describe('Pipeline test', () => {
           solutionVersion: FULL_SOLUTION_VERSION,
         },
         templateVersion: 'v1.1.0',
-        analysisStudioEnabled: true,
+        analysisStudioEnabled: false,
       },
     });
   });
