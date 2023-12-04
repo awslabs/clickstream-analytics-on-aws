@@ -582,6 +582,8 @@
       <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
       
       
+        
+      
       
         <label class="md-nav__link md-nav__link--active" for="__toc">
           
@@ -610,6 +612,8 @@
   
   
   
+    
+  
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
@@ -618,15 +622,16 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#solution-end-to-end-architecture" class="md-nav__link">
+  <a href="#data-pipeline" class="md-nav__link">
     <span class="md-ellipsis">
-      Solution end-to-end architecture
+      Data Pipeline
     </span>
   </a>
   
-</li>
-      
-        <li class="md-nav__item">
+    <nav class="md-nav" aria-label="Data Pipeline">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
   <a href="#ingestion-module" class="md-nav__link">
     <span class="md-ellipsis">
       Ingestion module
@@ -634,8 +639,8 @@
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#data-processing-module" class="md-nav__link">
     <span class="md-ellipsis">
       Data processing module
@@ -643,8 +648,8 @@
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#data-modeling-module" class="md-nav__link">
     <span class="md-ellipsis">
       Data modeling module
@@ -652,11 +657,25 @@
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#reporting-module" class="md-nav__link">
     <span class="md-ellipsis">
       Reporting module
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#analytics-studio" class="md-nav__link">
+    <span class="md-ellipsis">
+      Analytics Studio
     </span>
   </a>
   
@@ -2721,6 +2740,8 @@
   
   
   
+    
+  
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
@@ -2729,15 +2750,16 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#solution-end-to-end-architecture" class="md-nav__link">
+  <a href="#data-pipeline" class="md-nav__link">
     <span class="md-ellipsis">
-      Solution end-to-end architecture
+      Data Pipeline
     </span>
   </a>
   
-</li>
-      
-        <li class="md-nav__item">
+    <nav class="md-nav" aria-label="Data Pipeline">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
   <a href="#ingestion-module" class="md-nav__link">
     <span class="md-ellipsis">
       Ingestion module
@@ -2745,8 +2767,8 @@
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#data-processing-module" class="md-nav__link">
     <span class="md-ellipsis">
       Data processing module
@@ -2754,8 +2776,8 @@
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#data-modeling-module" class="md-nav__link">
     <span class="md-ellipsis">
       Data modeling module
@@ -2763,11 +2785,25 @@
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#reporting-module" class="md-nav__link">
     <span class="md-ellipsis">
       Reporting module
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#analytics-studio" class="md-nav__link">
+    <span class="md-ellipsis">
+      Analytics Studio
     </span>
   </a>
   
@@ -2791,9 +2827,7 @@
   
 
 
-  <h1>Architecture diagram</h1>
-
-<h3 id="solution-end-to-end-architecture">Solution end-to-end architecture</h3>
+<h1 id="solution-end-to-end-architecture">Solution end-to-end architecture</h1>
 <p>Deploying this solution with the default parameters builds the following environment in AWS:</p>
 <figure>
 <p><a class="glightbox" href="../images/architecture/01-architecture-end-to-end.png" data-type="image" data-width="100%" data-height="auto" data-desc-position="bottom"><img alt="end-to-end" loading="lazy" src="../images/architecture/01-architecture-end-to-end.png" /></a>
@@ -2809,6 +2843,7 @@
 <li>The data pipeline is provisioned in the region specified by the system operator. It consists of Application Load Balancer (ALB),
 <a href="https://aws.amazon.com/ecs/">Amazon ECS</a>, <a href="https://aws.amazon.com/msk/">Amazon Managed Streaming for Kafka (Amazon MSK)</a>, <a href="https://aws.amazon.com/kinesis/">Amazon Kinesis</a> Data Streams, Amazon S3, <a href="https://aws.amazon.com/emr/">Amazon EMR</a> Serverless, <a href="https://aws.amazon.com/redshift/">Amazon Redshift</a>, and <a href="https://aws.amazon.com/quicksight/">Amazon QuickSight</a>.</li>
 </ol>
+<h2 id="data-pipeline">Data Pipeline</h2>
 <p>The key functionality of this solution is to build a data pipeline to collect, process, and analyze their clickstream data. The data pipeline consists of four modules: </p>
 <ul>
 <li>ingestion module </li>
@@ -2872,7 +2907,7 @@
 <li>After all objects are loaded, the workflow ends.</li>
 </ol>
 <figure>
-<p><a class="glightbox" href="../images/architecture/05-architecture-data-modeling-scan-metadata.png" data-type="image" data-width="100%" data-height="auto" data-desc-position="bottom"><img alt="data-modeling-in-redshift" loading="lazy" src="../images/architecture/05-architecture-data-modeling-scan-metadata.png" /></a>
+<p><a class="glightbox" href="../images/architecture/05-architecture-data-modeling-scan-metadata.png" data-type="image" data-width="100%" data-height="auto" data-desc-position="bottom"><img alt="metadata-scan-in-redshift" loading="lazy" src="../images/architecture/05-architecture-data-modeling-scan-metadata.png" /></a>
    </p>
 <figcaption>Figure 5: Scan metadata architecture</figcaption>
 </figure>
@@ -2909,6 +2944,22 @@
 <ol>
 <li>VPC connection in Amazon QuickSight is used for securely connecting your Redshift within VPC.</li>
 <li>The data source, data sets, template, analysis, and dashboard are created in Amazon QuickSight for out-of-the-box analysis and visualization.</li>
+</ol>
+<h2 id="analytics-studio">Analytics Studio</h2>
+<p>Analytics Studio is a unified web interface for business analysts or data analysts to view and create dashboards, query and explore clickstream data, and manage metadata.</p>
+<figure>
+<p><a class="glightbox" href="../images/architecture/08-analytics-studio.png" data-type="image" data-width="100%" data-height="auto" data-desc-position="bottom"><img alt="analytics-studio" loading="lazy" src="../images/architecture/08-analytics-studio.png" /></a>
+   </p>
+<figcaption>Figure 8: Analytics studio architecture</figcaption>
+</figure>
+<ol>
+<li>When analysts access Analytics Studio, requests are sent to <a href="https://aws.amazon.com/cloudfront">Amazon CloudFront</a>, which distributes the web application.</li>
+<li>When the analysts log in to Analytics Studio, the requests are redirected to the <a href="https://aws.amazon.com/cognito">Amazon Cognito</a> user pool or OpenID Connect (OIDC) for authentication.</li>
+<li><a href="https://aws.amazon.com/api-gateway/">Amazon API Gateway</a> hosts the backend API requests and uses the custom Lambda authorizer to authorize the requests with the public key of OIDC.</li>
+<li>API Gateway integrates with <a href="https://aws.amazon.com/lambda">AWS Lambda</a> to serve the API requests.</li>
+<li>The Lambda function uses <a href="https://aws.amazon.com/dynamodb">Amazon DynamoDB</a> to retrieve and persist the data.</li>
+<li>When analysts create analyses, the Lambda function requests <a href="https://aws.amazon.com/quicksight/">Amazon QuickSight</a> to create assets and get the embed URL in the data pipeline region.</li>
+<li>The browser of analysts access the QuickSight embed URL to view the QuickSight dashboards and visuals.</li>
 </ol>
 
 
