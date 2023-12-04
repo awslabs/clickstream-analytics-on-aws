@@ -908,6 +908,9 @@ function getAppRegistryApplicationArn(pipeline: IPipeline): string {
 function pipelineAnalysisStudioEnabled(pipeline: IPipeline): boolean {
   const redshiftStackVersion = getStackVersion(pipeline, PipelineStackType.DATA_MODELING_REDSHIFT);
   const reportStackVersion = getStackVersion(pipeline, PipelineStackType.REPORTING);
+  console.log('redshiftStackVersion', redshiftStackVersion);
+  console.log('reportStackVersion', reportStackVersion);
+  console.log('pipeline.templateVersion', pipeline.templateVersion);
   if (
     pipeline?.reporting?.quickSight?.accountName &&
     !pipeline?.templateVersion?.startsWith('v1.0') &&
@@ -921,6 +924,7 @@ function pipelineAnalysisStudioEnabled(pipeline: IPipeline): boolean {
 
 function getStackVersion(pipeline: IPipeline, stackType: PipelineStackType): string | undefined {
   if (pipeline.status?.stackDetails) {
+    console.log('pipeline.status?.stackDetails', pipeline.status?.stackDetails);
     for (let stackDetail of pipeline.status?.stackDetails) {
       if (stackDetail.stackType === stackType) {
         return stackDetail.stackTemplateVersion;
