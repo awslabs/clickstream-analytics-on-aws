@@ -720,19 +720,6 @@
           }
         },
         {
-          "name": "install_source",
-          "dataType": "string",
-          "category": "app_info",
-          "displayName": {
-            "en-US": "App install source",
-            "zh-CN": "应用程序安装商店"
-          },
-          "description": {
-            "en-US": "Store where applications are installed",
-            "zh-CN": "安装应用程序的商店"
-          }
-        },
-        {
           "name": "_session_id",
           "dataType": "string",
           "category": "event",
