@@ -44,7 +44,7 @@ describe('SQL Builder test', () => {
       ],
       timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('22023-10-10'),
+      timeEnd: new Date('2023-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
     });
 
@@ -138,7 +138,7 @@ describe('SQL Builder test', () => {
           ) as u on event.user_pseudo_id = u.user_pseudo_id
             where
               event.event_date >= date '2023-10-01'
-              and event.event_date <= date '22023-10-10'
+              and event.event_date <= date '2023-10-10'
               and event.event_name in ('add_button_click', 'note_share', 'note_export')
           ) as event_base
         where
@@ -262,7 +262,7 @@ describe('SQL Builder test', () => {
       ],
       timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('22023-10-10'),
+      timeEnd: new Date('2023-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
     });
 
@@ -357,7 +357,7 @@ describe('SQL Builder test', () => {
           ) as u on event.user_pseudo_id = u.user_pseudo_id
             where
               event.event_date >= date '2023-10-01'
-              and event.event_date <= date '22023-10-10'
+              and event.event_date <= date '2023-10-10'
               and event.event_name in ('add_button_click', 'note_share', 'note_export')
           ) as event_base
         where
@@ -482,7 +482,7 @@ describe('SQL Builder test', () => {
       ],
       timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('22023-10-10'),
+      timeEnd: new Date('2023-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
     });
 
@@ -576,7 +576,7 @@ describe('SQL Builder test', () => {
           ) as u on event.user_pseudo_id = u.user_pseudo_id
             where
               event.event_date >= date '2023-10-01'
-              and event.event_date <= date '22023-10-10'
+              and event.event_date <= date '2023-10-10'
               and event.event_name in ('add_button_click', 'note_share', 'note_export')
           ) as event_base
         where
@@ -712,7 +712,7 @@ describe('SQL Builder test', () => {
       ],
       timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('22023-10-10'),
+      timeEnd: new Date('2023-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
     });
 
@@ -806,7 +806,7 @@ describe('SQL Builder test', () => {
           ) as u on event.user_pseudo_id = u.user_pseudo_id
             where
               event.event_date >= date '2023-10-01'
-              and event.event_date <= date '22023-10-10'
+              and event.event_date <= date '2023-10-10'
               and event.event_name in ('add_button_click', 'note_share', 'note_export')
           ) as event_base
         where
@@ -975,7 +975,7 @@ describe('SQL Builder test', () => {
       ],
       timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('22023-10-10'),
+      timeEnd: new Date('2023-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
     });
 
@@ -1069,7 +1069,7 @@ describe('SQL Builder test', () => {
           ) as u on event.user_pseudo_id = u.user_pseudo_id
             where
               event.event_date >= date '2023-10-01'
-              and event.event_date <= date '22023-10-10'
+              and event.event_date <= date '2023-10-10'
               and event.event_name in ('add_button_click', 'note_share', 'note_export')
           ) as event_base
         where
@@ -1238,7 +1238,7 @@ describe('SQL Builder test', () => {
       ],
       timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('22023-10-10'),
+      timeEnd: new Date('2023-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
     });
 
@@ -1332,7 +1332,7 @@ describe('SQL Builder test', () => {
           ) as u on event.user_pseudo_id = u.user_pseudo_id
             where
               event.event_date >= date '2023-10-01'
-              and event.event_date <= date '22023-10-10'
+              and event.event_date <= date '2023-10-10'
               and event.event_name in ('add_button_click', 'note_share', 'note_export')
           ) as event_base
         where
@@ -1502,7 +1502,7 @@ describe('SQL Builder test', () => {
       ],
       timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('22023-10-10'),
+      timeEnd: new Date('2023-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
     });
 
@@ -1596,7 +1596,7 @@ describe('SQL Builder test', () => {
           ) as u on event.user_pseudo_id = u.user_pseudo_id
             where
               event.event_date >= date '2023-10-01'
-              and event.event_date <= date '22023-10-10'
+              and event.event_date <= date '2023-10-10'
               and event.event_name in ('add_button_click', 'note_share', 'note_export')
           ) as event_base
         where
@@ -1767,7 +1767,7 @@ describe('SQL Builder test', () => {
       timeScopeType: ExploreTimeScopeType.FIXED,
       groupColumn: ExploreGroupColumn.DAY,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('22023-10-10'),
+      timeEnd: new Date('2023-10-10'),
       pathAnalysis: {
         sessionType: ExplorePathSessionDef.SESSION,
         nodeType: ExplorePathNodeType.EVENT,
@@ -1862,7 +1862,7 @@ describe('SQL Builder test', () => {
           ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
-          and event.event_date <= date '22023-10-10'
+          and event.event_date <= date '2023-10-10'
           and event.event_name not in (
             '_session_start',
             '_session_stop',
@@ -2090,7 +2090,7 @@ describe('SQL Builder test', () => {
       timeScopeType: ExploreTimeScopeType.FIXED,
       groupColumn: ExploreGroupColumn.DAY,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('22023-10-10'),
+      timeEnd: new Date('2023-10-10'),
       pathAnalysis: {
         sessionType: ExplorePathSessionDef.CUSTOMIZE,
         nodeType: ExplorePathNodeType.EVENT,
@@ -2188,7 +2188,7 @@ describe('SQL Builder test', () => {
           ) as u on event.user_pseudo_id = u.user_pseudo_id
             where
               event.event_date >= date '2023-10-01'
-              and event.event_date <= date '22023-10-10'
+              and event.event_date <= date '2023-10-10'
               and event.event_name in ('add_button_click', 'note_share', 'note_export')
           ) as event_base
         where
@@ -2379,7 +2379,7 @@ describe('SQL Builder test', () => {
       timeScopeType: ExploreTimeScopeType.FIXED,
       groupColumn: ExploreGroupColumn.DAY,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('22023-10-10'),
+      timeEnd: new Date('2023-10-10'),
       pathAnalysis: {
         platform: MetadataPlatform.ANDROID,
         sessionType: ExplorePathSessionDef.SESSION,
@@ -2476,7 +2476,7 @@ describe('SQL Builder test', () => {
           ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
-          and event.event_date <= date '22023-10-10'
+          and event.event_date <= date '2023-10-10'
           and event.event_name = '_screen_view'
           and platform = 'Android'
       ),
@@ -2654,7 +2654,7 @@ describe('SQL Builder test', () => {
       timeScopeType: ExploreTimeScopeType.FIXED,
       groupColumn: ExploreGroupColumn.DAY,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('22023-10-10'),
+      timeEnd: new Date('2023-10-10'),
       pathAnalysis: {
         platform: MetadataPlatform.ANDROID,
         sessionType: ExplorePathSessionDef.SESSION,
@@ -2752,7 +2752,7 @@ describe('SQL Builder test', () => {
           ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
-          and event.event_date <= date '22023-10-10'
+          and event.event_date <= date '2023-10-10'
           and event.event_name = '_screen_view'
           and platform = 'Android'
       ),
@@ -2952,7 +2952,7 @@ describe('SQL Builder test', () => {
       timeScopeType: ExploreTimeScopeType.FIXED,
       groupColumn: ExploreGroupColumn.DAY,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('22023-10-10'),
+      timeEnd: new Date('2023-10-10'),
       pathAnalysis: {
         platform: MetadataPlatform.ANDROID,
         sessionType: ExplorePathSessionDef.SESSION,
@@ -3049,7 +3049,7 @@ describe('SQL Builder test', () => {
           ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
-          and event.event_date <= date '22023-10-10'
+          and event.event_date <= date '2023-10-10'
           and event.event_name = '_screen_view'
           and platform = 'Android'
       ),
@@ -3231,7 +3231,7 @@ describe('SQL Builder test', () => {
       timeScopeType: ExploreTimeScopeType.FIXED,
       groupColumn: ExploreGroupColumn.DAY,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('22023-10-10'),
+      timeEnd: new Date('2023-10-10'),
       pathAnalysis: {
         platform: MetadataPlatform.ANDROID,
         sessionType: ExplorePathSessionDef.CUSTOMIZE,
@@ -3332,7 +3332,7 @@ describe('SQL Builder test', () => {
           ) as u on event.user_pseudo_id = u.user_pseudo_id
             where
               event.event_date >= date '2023-10-01'
-              and event.event_date <= date '22023-10-10'
+              and event.event_date <= date '2023-10-10'
               and event.event_name = '_screen_view'
               and platform = 'Android'
           ) as event_base
@@ -3535,7 +3535,7 @@ describe('SQL Builder test', () => {
       timeScopeType: ExploreTimeScopeType.FIXED,
       groupColumn: ExploreGroupColumn.DAY,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('22023-10-10'),
+      timeEnd: new Date('2023-10-10'),
       pathAnalysis: {
         platform: MetadataPlatform.ANDROID,
         sessionType: ExplorePathSessionDef.CUSTOMIZE,
@@ -3637,7 +3637,7 @@ describe('SQL Builder test', () => {
           ) as u on event.user_pseudo_id = u.user_pseudo_id
             where
               event.event_date >= date '2023-10-01'
-              and event.event_date <= date '22023-10-10'
+              and event.event_date <= date '2023-10-10'
               and event.event_name = '_screen_view'
               and platform = 'Android'
           ) as event_base
@@ -3860,7 +3860,7 @@ describe('SQL Builder test', () => {
       timeScopeType: ExploreTimeScopeType.FIXED,
       groupColumn: ExploreGroupColumn.DAY,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('22023-10-10'),
+      timeEnd: new Date('2023-10-10'),
       pathAnalysis: {
         platform: MetadataPlatform.ANDROID,
         sessionType: ExplorePathSessionDef.CUSTOMIZE,
@@ -3961,7 +3961,7 @@ describe('SQL Builder test', () => {
           ) as u on event.user_pseudo_id = u.user_pseudo_id
             where
               event.event_date >= date '2023-10-01'
-              and event.event_date <= date '22023-10-10'
+              and event.event_date <= date '2023-10-10'
               and event.event_name = '_screen_view'
               and platform = 'Android'
           ) as event_base
@@ -5559,7 +5559,7 @@ describe('SQL Builder test', () => {
       ],
       timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('22023-10-10'),
+      timeEnd: new Date('2023-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
     });
 
@@ -5669,7 +5669,7 @@ describe('SQL Builder test', () => {
           ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
-          and event.event_date <= date '22023-10-10'
+          and event.event_date <= date '2023-10-10'
           and event.event_name in ('add_button_click', 'note_share', 'note_export')
       ),
       base_data as (
@@ -5950,7 +5950,7 @@ describe('SQL Builder test', () => {
       ],
       timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('22023-10-10'),
+      timeEnd: new Date('2023-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
     });
 
@@ -6060,7 +6060,7 @@ describe('SQL Builder test', () => {
           ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
-          and event.event_date <= date '22023-10-10'
+          and event.event_date <= date '2023-10-10'
           and event.event_name in ('add_button_click', 'note_share', 'note_export')
       ),
       base_data as (
@@ -6263,7 +6263,7 @@ describe('SQL Builder test', () => {
         ],
         timeScopeType: ExploreTimeScopeType.FIXED,
         timeStart: new Date('2023-10-01'),
-        timeEnd: new Date('22023-10-10'),
+        timeEnd: new Date('2023-10-10'),
         groupColumn: ExploreGroupColumn.DAY,
       }, false);
 
@@ -6373,7 +6373,7 @@ describe('SQL Builder test', () => {
           ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
-          and event.event_date <= date '22023-10-10'
+          and event.event_date <= date '2023-10-10'
           and event.event_name in ('add_button_click', 'note_share', 'note_export')
       ),
       base_data as (
@@ -6470,7 +6470,7 @@ describe('SQL Builder test', () => {
         ],
         timeScopeType: ExploreTimeScopeType.FIXED,
         timeStart: new Date('2023-10-01'),
-        timeEnd: new Date('22023-10-10'),
+        timeEnd: new Date('2023-10-10'),
         groupColumn: ExploreGroupColumn.DAY,
       },
       false);
@@ -6561,7 +6561,7 @@ describe('SQL Builder test', () => {
           ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
-          and event.event_date <= date '22023-10-10'
+          and event.event_date <= date '2023-10-10'
           and event.event_name in ('add_button_click', 'note_share', 'note_export')
       ),
       base_data as (
@@ -6730,7 +6730,7 @@ describe('SQL Builder test', () => {
       ],
       timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('22023-10-10'),
+      timeEnd: new Date('2023-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
     });
 
@@ -6840,7 +6840,7 @@ describe('SQL Builder test', () => {
           ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
-          and event.event_date <= date '22023-10-10'
+          and event.event_date <= date '2023-10-10'
           and event.event_name in ('add_button_click', 'note_share', 'note_export')
       ),
       base_data as (
@@ -7160,7 +7160,7 @@ describe('SQL Builder test', () => {
       ],
       timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('22023-10-10'),
+      timeEnd: new Date('2023-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
     });
 
@@ -7270,7 +7270,7 @@ describe('SQL Builder test', () => {
           ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
-          and event.event_date <= date '22023-10-10'
+          and event.event_date <= date '2023-10-10'
           and event.event_name in ('add_button_click', 'note_share', 'note_export')
       ),
       base_data as (
@@ -7553,7 +7553,7 @@ describe('SQL Builder test', () => {
       ],
       timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('22023-10-10'),
+      timeEnd: new Date('2023-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
     });
 
@@ -7663,7 +7663,7 @@ describe('SQL Builder test', () => {
           ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
-          and event.event_date <= date '22023-10-10'
+          and event.event_date <= date '2023-10-10'
           and event.event_name in ('add_button_click', 'note_share', 'note_export')
       ),
       base_data as (
@@ -7964,7 +7964,7 @@ describe('SQL Builder test', () => {
       },
       timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('22023-10-10'),
+      timeEnd: new Date('2023-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
     });
 
@@ -8074,7 +8074,7 @@ describe('SQL Builder test', () => {
           ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
-          and event.event_date <= date '22023-10-10'
+          and event.event_date <= date '2023-10-10'
           and event.event_name not in (
             '_session_start',
             '_session_stop',
@@ -8406,7 +8406,7 @@ describe('SQL Builder test', () => {
       },
       timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('22023-10-10'),
+      timeEnd: new Date('2023-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
     });
 
@@ -8516,7 +8516,7 @@ describe('SQL Builder test', () => {
           ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
-          and event.event_date <= date '22023-10-10'
+          and event.event_date <= date '2023-10-10'
           and event.event_name not in (
             '_session_start',
             '_session_stop',
@@ -8949,7 +8949,7 @@ describe('SQL Builder test', () => {
       },
       timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('22023-10-10'),
+      timeEnd: new Date('2023-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
     });
 
@@ -9059,7 +9059,7 @@ describe('SQL Builder test', () => {
           ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
-          and event.event_date <= date '22023-10-10'
+          and event.event_date <= date '2023-10-10'
           and event.event_name not in (
             '_session_start',
             '_session_stop',
@@ -10003,7 +10003,7 @@ describe('SQL Builder test', () => {
       },
       timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('22023-10-10'),
+      timeEnd: new Date('2023-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
     });
 
@@ -10113,7 +10113,7 @@ describe('SQL Builder test', () => {
           ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
-          and event.event_date <= date '22023-10-10'
+          and event.event_date <= date '2023-10-10'
           and event.event_name = '_screen_view'
           and platform = 'Android'
       ),
@@ -10396,7 +10396,7 @@ describe('SQL Builder test', () => {
       ],
       timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('22023-10-10'),
+      timeEnd: new Date('2023-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
     });
 
@@ -10506,7 +10506,7 @@ describe('SQL Builder test', () => {
           ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
-          and event.event_date <= date '22023-10-10'
+          and event.event_date <= date '2023-10-10'
           and event.event_name in ('add_button_click', 'note_share', 'note_export')
       ),
       base_data as (
@@ -10715,7 +10715,7 @@ describe('SQL Builder test', () => {
       ],
       timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('22023-10-10'),
+      timeEnd: new Date('2023-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
     });
 
@@ -10825,7 +10825,7 @@ describe('SQL Builder test', () => {
           ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
-          and event.event_date <= date '22023-10-10'
+          and event.event_date <= date '2023-10-10'
           and event.event_name in ('add_button_click', 'note_share', 'note_export')
       ),
       base_data as (
@@ -11017,7 +11017,7 @@ describe('SQL Builder test', () => {
       ],
       timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('22023-10-10'),
+      timeEnd: new Date('2023-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
     }, true);
 
@@ -11127,7 +11127,7 @@ describe('SQL Builder test', () => {
           ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
-          and event.event_date <= date '22023-10-10'
+          and event.event_date <= date '2023-10-10'
           and event.event_name in ('add_button_click', 'note_share', 'note_export')
       ),
       base_data as (
@@ -11380,7 +11380,7 @@ describe('SQL Builder test', () => {
       ],
       timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('22023-10-10'),
+      timeEnd: new Date('2023-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
     }, true);
 
@@ -11490,7 +11490,7 @@ describe('SQL Builder test', () => {
           ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
-          and event.event_date <= date '22023-10-10'
+          and event.event_date <= date '2023-10-10'
           and event.event_name in ('add_button_click', 'note_share', 'note_export')
       ),
       base_data as (
@@ -11727,7 +11727,7 @@ describe('SQL Builder test', () => {
       ],
       timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('22023-10-10'),
+      timeEnd: new Date('2023-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
     }, true);
 
@@ -11837,7 +11837,7 @@ describe('SQL Builder test', () => {
           ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
-          and event.event_date <= date '22023-10-10'
+          and event.event_date <= date '2023-10-10'
           and event.event_name in ('add_button_click', 'note_share', 'note_export')
       ),
       base_data as (
@@ -13134,7 +13134,7 @@ describe('SQL Builder test', () => {
       ],
       timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('22023-10-10'),
+      timeEnd: new Date('2023-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
     });
 
@@ -13229,7 +13229,7 @@ describe('SQL Builder test', () => {
           ) as u on event.user_pseudo_id = u.user_pseudo_id
             where
               event.event_date >= date '2023-10-01'
-              and event.event_date <= date '22023-10-10'
+              and event.event_date <= date '2023-10-10'
               and event.event_name in ('add_button_click', 'note_share', 'note_export')
           ) as event_base
           join (
@@ -18321,7 +18321,7 @@ describe('SQL Builder test', () => {
       ],
       timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('22023-10-10'),
+      timeEnd: new Date('2023-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
     });
 
@@ -18415,7 +18415,7 @@ describe('SQL Builder test', () => {
           ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
-          and event.event_date <= date '22023-10-10'
+          and event.event_date <= date '2023-10-10'
           and event.event_name in ('add_button_click', 'note_share', 'note_export')
       ),
       base_data as (
