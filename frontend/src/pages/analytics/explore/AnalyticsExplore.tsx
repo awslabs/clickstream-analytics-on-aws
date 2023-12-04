@@ -40,7 +40,7 @@ import { StateActionType, HelpPanelType } from 'context/reducer';
 import React, { useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { MetadataParameterType, MetadataSource } from 'ts/explore-types';
+import { MetadataParameterType } from 'ts/explore-types';
 import { defaultStr } from 'ts/utils';
 import {
   metadataEventsConvertToCategoryItemType,
@@ -226,16 +226,13 @@ const AnalyticsExplore: React.FC = () => {
         (item) => item.parameterType === MetadataParameterType.PUBLIC
       );
       const userAttributes = await getUserAttributes();
-      const presetUserAttributes = userAttributes.filter((item) => {
-        return item.metadataSource === MetadataSource.PRESET;
-      });
       const conditionOptions = parametersConvertToCategoryItemType(
-        presetUserAttributes,
+        userAttributes,
         publicParameters ?? []
       );
       setPresetParameters(conditionOptions);
       const groupOptions = parametersConvertToCategoryItemType(
-        presetUserAttributes,
+        userAttributes,
         parameters ?? []
       );
       setGroupParameters(groupOptions);
