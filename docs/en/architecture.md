@@ -1,4 +1,4 @@
-### Solution end-to-end architecture
+# Solution end-to-end architecture
 
 Deploying this solution with the default parameters builds the following environment in AWS:
 
@@ -9,12 +9,14 @@ Deploying this solution with the default parameters builds the following environ
 
 This solution deploys the Amazon CloudFormation template in your AWS account and completes the following settings.
 
-1. [Amazon CloudFront](https://aws.amazon.com/cloudfront) distributes the frontend web UI assets hosted in the [Amazon S3](https://aws.amazon.com/s3/) bucket, and the backend APIs hosted with [Amazon API Gateway](https://aws.amazon.com/api-gateway/) and [AWS Lambda](https://aws.amazon.com/lambda).
-2. The [Amazon Cognito](https://aws.amazon.com/cognito) user pool or OpenID Connect (OIDC) is used for authentication.
-3. The web UI console uses [Amazon DynamoDB](https://aws.amazon.com/dynamodb) to store persistent data.
-4. [AWS Step Functions](https://aws.amazon.com/step-functions), [AWS CloudFormation](https://aws.amazon.com/cloudformation), AWS Lambda, and [Amazon EventBridge](https://aws.amazon.com/eventbridge) are used for orchestrating the lifecycle management of data pipelines.
+1. [Amazon CloudFront][cloudfront] distributes the frontend web UI assets hosted in the [Amazon S3][s3] bucket, and the backend APIs hosted with [Amazon API Gateway][api-gateway] and [AWS Lambda][lambda].
+2. The [Amazon Cognito][cognito] user pool or OpenID Connect (OIDC) is used for authentication.
+3. The web UI console uses [Amazon DynamoDB][ddb] to store persistent data.
+4. [AWS Step Functions][step-functions], [AWS CloudFormation][cloudformation], AWS Lambda, and [Amazon EventBridge][eventbridge] are used for orchestrating the lifecycle management of data pipelines.
 5. The data pipeline is provisioned in the region specified by the system operator. It consists of Application Load Balancer (ALB),
-[Amazon ECS](https://aws.amazon.com/ecs/), [Amazon Managed Streaming for Kafka (Amazon MSK)](https://aws.amazon.com/msk/), [Amazon Kinesis](https://aws.amazon.com/kinesis/) Data Streams, Amazon S3, [Amazon EMR](https://aws.amazon.com/emr/) Serverless, [Amazon Redshift](https://aws.amazon.com/redshift/), and [Amazon QuickSight](https://aws.amazon.com/quicksight/).
+[Amazon ECS][ecs], [Amazon Managed Streaming for Kafka (Amazon MSK)][msk], [Amazon Kinesis][kinesis] Data Streams, Amazon S3, [Amazon EMR][emr] Serverless, [Amazon Redshift][redshift], and [Amazon QuickSight][quicksight].
+
+## Data Pipeline
 
 The key functionality of this solution is to build a data pipeline to collect, process, and analyze their clickstream data. The data pipeline consists of four modules: 
 
@@ -38,7 +40,7 @@ Suppose you create a data pipeline in the solution. This solution deploys the Am
       The ingestion module supports three types of data sinks.
 
 1. (Optional) The ingestion module creates an AWS global accelerator endpoint to reduce the latency of sending events from your clients (web applications or mobile applications).
-2. [Elastic Load Balancing (ELB)](https://aws.amazon.com/elasticloadbalancing/) is used for load balancing ingestion web servers.
+2. [Elastic Load Balancing (ELB)][elb] is used for load balancing ingestion web servers.
 3. (Optional) If you enable the authenticating feature, the ALB will communicate with the OIDC provider to authenticate the requests.
 4. ALB forwards all authenticated and valid requests to the ingestion servers.
 5. Amazon ECS cluster is hosting the ingestion fleet servers. Each server consists of a proxy and a worker service. The proxy is a facade of the HTTP protocol, and the worker will send the events to a data sink based on your choice.
@@ -84,7 +86,7 @@ Suppose you create a data pipeline in the solution and enable data modeling in A
 10. After all objects are loaded, the workflow ends.
 
 <figure markdown>
-   ![data-modeling-in-redshift](./images/architecture/05-architecture-data-modeling-scan-metadata.png){ loading=lazy }
+   ![metadata-scan-in-redshift](./images/architecture/05-architecture-data-modeling-scan-metadata.png){ loading=lazy }
    <figcaption>Figure 5: Scan metadata architecture</figcaption>
 </figure>
 
@@ -104,9 +106,9 @@ Suppose you create a data pipeline in the solution and enable data modeling in A
 
 Suppose you create a data pipeline in the solution and enable data modeling in Amazon Athena. This solution deploys the Amazon CloudFormation template in your AWS Cloud account and completes the following settings.
 
-1. Amazon EventBridge initiates the data load into [Amazon Athena](https://aws.amazon.com/athena/) periodically.
+1. Amazon EventBridge initiates the data load into [Amazon Athena][athena] periodically.
 2. The configurable time-based scheduler invokes an AWS Lambda function.
-3. The AWS Lambda function creates the partitions of the [AWS Glue](https://aws.amazon.com/glue/) table for the processed clickstream data.
+3. The AWS Lambda function creates the partitions of the [AWS Glue][glue] table for the processed clickstream data.
 4. Amazon Athena is used for interactive querying of clickstream events.
 5. The processed clickstream data is scanned via the Glue table.
 
@@ -122,3 +124,39 @@ Suppose you create a data pipeline in the solution, enable data modeling in Amaz
 1. VPC connection in Amazon QuickSight is used for securely connecting your Redshift within VPC.
 2. The data source, data sets, template, analysis, and dashboard are created in Amazon QuickSight for out-of-the-box analysis and visualization.
 
+## Analytics Studio
+
+Analytics Studio is a unified web interface for business analysts or data analysts to view and create dashboards, query and explore clickstream data, and manage metadata.
+
+<figure markdown>
+   ![analytics-studio](./images/architecture/08-analytics-studio.png){ loading=lazy }
+   <figcaption>Figure 8: Analytics studio architecture</figcaption>
+</figure>
+
+1. When analysts access Analytics Studio, requests are sent to [Amazon CloudFront][cloudfront], which distributes the web application.
+2. When the analysts log in to Analytics Studio, the requests are redirected to the [Amazon Cognito][cognito] user pool or OpenID Connect (OIDC) for authentication.
+3. [Amazon API Gateway][api-gateway] hosts the backend API requests and uses the custom Lambda authorizer to authorize the requests with the public key of OIDC.
+4. API Gateway integrates with [AWS Lambda][lambda] to serve the API requests.
+5. The Lambda function uses [Amazon DynamoDB][ddb] to retrieve and persist the data.
+6. When analysts create analyses, the Lambda function requests [Amazon QuickSight][quicksight] to create assets and get the embed URL in the data pipeline region.
+7. The browser of analysts access the QuickSight embed URL to view the QuickSight dashboards and visuals.
+ 
+
+[cloudfront]: https://aws.amazon.com/cloudfront
+[s3]: https://aws.amazon.com/s3/
+[api-gateway]: https://aws.amazon.com/api-gateway/
+[lambda]: https://aws.amazon.com/lambda
+[cognito]: https://aws.amazon.com/cognito
+[ddb]: https://aws.amazon.com/dynamodb
+[step-functions]: https://aws.amazon.com/step-functions
+[cloudformation]: https://aws.amazon.com/cloudformation
+[eventbridge]: https://aws.amazon.com/eventbridge
+[ecs]: https://aws.amazon.com/ecs/
+[msk]: https://aws.amazon.com/msk/
+[kinesis]: https://aws.amazon.com/kinesis/
+[emr]: https://aws.amazon.com/emr/
+[redshift]: https://aws.amazon.com/redshift/
+[quicksight]: https://aws.amazon.com/quicksight/
+[elb]: https://aws.amazon.com/elasticloadbalancing/
+[athena]: https://aws.amazon.com/athena/
+[glue]: https://aws.amazon.com/glue/
