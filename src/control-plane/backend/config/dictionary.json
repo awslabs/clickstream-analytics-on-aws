@@ -720,16 +720,16 @@
           }
         },
         {
-          "name": "_channel",
+          "name": "install_source",
           "dataType": "string",
-          "category": "event",
+          "category": "app_info",
           "displayName": {
             "en-US": "App install source",
-            "zh-CN": "应用下载市场"
+            "zh-CN": "应用程序安装商店"
           },
           "description": {
-            "en-US": "Install source, it is the channel for app was downloaded",
-            "zh-CN": "安装源，app下载的渠道"
+            "en-US": "Store where applications are installed",
+            "zh-CN": "安装应用程序的商店"
           }
         },
         {
