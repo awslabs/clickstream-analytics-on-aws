@@ -518,7 +518,7 @@ async function _checkSubnets(pipeline: IPipeline) {
 
   if (!_checkNatGatewayInPublicSubnet(natGateways, privateSubnets)) {
     throw new ClickStreamBadRequestError(
-      'Validation error: the NAT gateway must create in public subnet.',
+      'Validation error: the NAT gateway must create in public subnet and connectivity type must be public.',
     );
   }
 
