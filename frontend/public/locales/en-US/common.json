@@ -3,6 +3,8 @@
   "info": "Info",
   "oops": "Oops...",
   "welcome": "Welcome to Clickstream Analytics on AWS",
+  "noEmailError": "The logged in user does not have an email address",
+  "unknownError": "Unknown error:",
   "breadCrumb": {
     "name": "Clickstream Analytics",
     "pipelines": "Pipelines",
