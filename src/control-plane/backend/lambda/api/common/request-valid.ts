@@ -264,8 +264,8 @@ export const isProjectId: CustomValidator = value => {
 
 export const metadataDisplayLength: CustomValidator = value => {
   const display = value as IMetadataDisplay;
-  if (display?.displayName['en-US'].length > 255 || display?.description['zh-CN'].length > 255) {
-    return Promise.reject('Validation error: displayName or description length must less than 255.');
+  if (display?.displayName['en-US'].length > 255 || display?.displayName['zh-CN'].length > 255) {
+    return Promise.reject('Validation error: displayName length must less than 255.');
   }
   if (display?.description['en-US'].length > 1024 || display?.description['zh-CN'].length > 1024) {
     return Promise.reject('Validation error: description length must less than 1024.');
