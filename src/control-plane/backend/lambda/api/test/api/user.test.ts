@@ -111,7 +111,7 @@ describe('User test', () => {
     expect(res.body.success).toEqual(false);
   });
 
-  it('Add user with name too long', async () => {
+  it('Add user with name is too long', async () => {
     tokenMock(ddbMock, false);
     ddbMock.on(GetCommand, {
       TableName: clickStreamTableName,

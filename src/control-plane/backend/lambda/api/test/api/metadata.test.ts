@@ -2017,7 +2017,7 @@ describe('Metadata Display test', () => {
     expect(res.body.message).toEqual('Parameter verification failed.');
   });
 
-  it('Update display name to long', async () => {
+  it('Update display name is too long', async () => {
     tokenMock(ddbMock, false);
     metadataEventExistedMock(ddbMock, MOCK_PROJECT_ID, MOCK_APP_ID, true);
     ddbMock.on(UpdateCommand).resolves({});

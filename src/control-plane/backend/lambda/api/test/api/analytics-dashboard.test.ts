@@ -169,7 +169,7 @@ describe('Analytics dashboard test', () => {
     expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 1);
   });
 
-  it('Create dashboard name too long', async () => {
+  it('Create dashboard name is too long', async () => {
     tokenMock(ddbMock, false);
     projectExistedMock(ddbMock, true);
     let res = await request(app)
