@@ -2462,7 +2462,7 @@ function _getOnePairConditionProps(pairEventAndCondition: PairEventAndCondition)
     userOuterAttributes.push(...conditionProps.userOuterAttributes);
     hasEventAttribute = hasEventAttribute || conditionProps.hasEventAttribute;
     eventAttributes.push(...conditionProps.eventAttributes);
-    hasUserAttribute = hasUserAttribute || backConditionProps.hasUserAttribute;
+    hasUserAttribute = hasUserAttribute || conditionProps.hasUserAttribute;
     userAttributes.push(...conditionProps.userAttributes);
   }
 
