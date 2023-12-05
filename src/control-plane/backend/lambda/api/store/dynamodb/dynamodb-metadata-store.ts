@@ -21,7 +21,7 @@ import { docClient, query, memoizedQuery } from '../../common/dynamodb-client';
 import { ConditionCategory, MetadataValueType } from '../../common/explore-types';
 import { KeyVal } from '../../common/types';
 import { getAttributeByNameAndType, getCurMonthStr, getDataFromYesterday, getLatestAttributeByName, getLatestEventByName, getLatestParameterById, getParameterByNameAndType } from '../../common/utils';
-import { IMetadataRaw, IMetadataDisplay, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute, IMetadataDescription, IMetadataBuiltInList } from '../../model/metadata';
+import { IMetadataRaw, IMetadataDisplay, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute, IMetadataBuiltInList, IMetadataDisplayNameAndDescription } from '../../model/metadata';
 import { ClickStreamStore } from '../click-stream-store';
 import { MetadataStore } from '../metadata-store';
 
@@ -96,7 +96,7 @@ export class DynamoDbMetadataStore implements MetadataStore {
 
   public async listEventParameters(projectId: string, appId: string): Promise<IMetadataEventParameter[]> {
     const records = await this.getAllEventParameters(projectId, appId);
-    return getLatestParameterById(records);
+    return getLatestParameterById(records).sort((a, b) => a.category.localeCompare(b.category));
   };
 
   private async getAllEventParameters(projectId: string, appId: string): Promise<IMetadataRaw[]> {
@@ -159,7 +159,7 @@ export class DynamoDbMetadataStore implements MetadataStore {
     if (records.length === 0) {
       records = await this.queryMetadataRawsFromBuiltInList(projectId, appId, 'USER_ATTRIBUTE');
     }
-    const attributes = getLatestAttributeByName(records);
+    const attributes = getLatestAttributeByName(records).sort((a, b) => a.category.localeCompare(b.category));
     return attributes;
   };
 
@@ -182,7 +182,10 @@ export class DynamoDbMetadataStore implements MetadataStore {
     return records as IMetadataDisplay[];
   };
 
-  public async updateDisplay(id: string, projectId: string, appId: string, description: IMetadataDescription, displayName: string): Promise<void> {
+  public async updateDisplay(
+    id: string, projectId: string, appId: string,
+    description: IMetadataDisplayNameAndDescription,
+    displayName: IMetadataDisplayNameAndDescription): Promise<void> {
     let updateExpression = 'SET #updateAt= :u, projectId= :projectId, appId= :appId, #prefix= :prefix';
     let expressionAttributeValues = new Map();
     let expressionAttributeNames = {} as KeyVal<string>;

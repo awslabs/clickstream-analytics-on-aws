@@ -106,6 +106,7 @@ export class ProjectServ {
       if (isEmpty(defaultDataSourceArn)) {
         return res.status(400).json(new ApiFail('Default data source ARN and owner principal is required.'));
       }
+      req.body.region = latestPipeline.region;
       const dashboard: IDashboard = req.body;
       if (dashboard.sheets.length === 0) {
         return res.status(400).json(new ApiFail('Dashboard sheets is required.'));
@@ -219,9 +220,11 @@ export class ProjectServ {
         const pipeline = pipelines.find((item: IPipeline) => item.projectId === project.id);
         if (pipeline) {
           project.pipelineId = pipeline.pipelineId;
+          project.pipelineVersion = pipeline.templateVersion ?? '';
           project.reportingEnabled = !isEmpty(pipeline.reporting?.quickSight?.accountName);
         } else {
           project.pipelineId = '';
+          project.pipelineVersion = '';
           project.reportingEnabled = false;
         }
         const projectApps = apps.filter((item: IApplication) => item.projectId === project.id);
@@ -283,7 +286,7 @@ export class ProjectServ {
         const pipeline = new CPipeline(latestPipeline);
         const stackManager: StackManager = new StackManager(latestPipeline);
         const latestPipelineStatus = await stackManager.getPipelineStatus();
-        if (latestPipelineStatus.status !== PipelineStatusType.ACTIVE) {
+        if (latestPipelineStatus.status !== PipelineStatusType.ACTIVE && latestPipelineStatus.status !== PipelineStatusType.FAILED) {
           return res.status(400).json(new ApiFail('The pipeline current status does not allow delete.'));
         }
         await pipeline.delete();

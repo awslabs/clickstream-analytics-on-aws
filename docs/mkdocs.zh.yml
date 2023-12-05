@@ -34,7 +34,7 @@ nav:
       - 步骤1. 创建项目: getting-started/1.create-project.md
       - 步骤2. 配置数据管道: getting-started/2.config-pipeline.md
       - 步骤3. 集成SDK: getting-started/3.integrate-sdk.md
-      - 步骤4. 查看仪表板: getting-started/4.view-dashboard.md
+      - 步骤4. 分析数据: getting-started/4.view-dashboard.md
     - 管道管理:
       - 概述: pipeline-mgmt/index.md
       - 数据摄取:
@@ -50,12 +50,13 @@ nav:
         - 处理插件: pipeline-mgmt/data-processing/configure-plugin.md
       - 数据建模: pipeline-mgmt/data-modeling/configure-data-modeling.md
       - 报告: pipeline-mgmt/quicksight/configure-quicksight.md
-      - 管道管理: pipeline-mgmt/pipe-mgmt.md
+      - 管道维护: pipeline-mgmt/pipe-mgmt.md
     - SDK手册:
       - 概述: sdk-manual/index.md
       - Android SDK: sdk-manual/android.md
       - Swift SDK: sdk-manual/swift.md
       - Web SDK: sdk-manual/web.md
+      - Flutter SDK: sdk-manual/flutter.md
       - 微信小程序 SDK: sdk-manual/wechat.md
       - HTTP API: sdk-manual/http-api.md
       - 用户标识: sdk-manual/user-identifier.md

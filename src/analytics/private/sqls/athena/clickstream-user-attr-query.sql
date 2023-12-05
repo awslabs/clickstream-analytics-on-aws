@@ -1,3 +1,6 @@
+-- run following command to load latest partition
+-- msck repair table {{database}}.{{userTable}};
+
 with user_pseudo_id_rank as
 (
 	select  

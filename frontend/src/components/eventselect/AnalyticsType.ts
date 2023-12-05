@@ -43,10 +43,23 @@ export interface IAnalyticsItem extends SelectProps.Option {
   values?: IMetadataAttributeValue[];
 }
 
+export interface IProjectSelectItem extends SelectProps.Option {
+  projectId?: string;
+  projectName?: string;
+  appId?: string;
+  appName?: string;
+}
+
 export interface CategoryItemType {
   categoryName: string;
   categoryType: string;
   itemList: IAnalyticsItem[];
+}
+
+export enum AnalyticsProjectAppStatus {
+  NoExist = 'NoExist',
+  Disabled = 'Disabled',
+  Enable = 'Enable',
 }
 
 export enum ERelationShip {

@@ -1,3 +1,6 @@
+-- run following command to load latest partition
+-- msck repair table {{database}}.{{eventTable}};
+
 with base as (
   select 
     *

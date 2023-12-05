@@ -188,6 +188,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
     useState(false);
 
   const [unSupportedServices, setUnSupportedServices] = useState('');
+  const [quickSightDisabled, setQuickSightDisabled] = useState(false);
 
   const [pipelineInfo, setPipelineInfo] = useState<IExtPipeline>(
     updatePipeline
@@ -1065,6 +1066,13 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
           return;
         }
         if (detail.requestedStepIndex === 3 && !validateDataProcessing()) {
+          return;
+        }
+        if (
+          detail.requestedStepIndex === 4 &&
+          quickSightDisabled &&
+          pipelineInfo.enableReporting
+        ) {
           return;
         }
         setActiveStepIndex(detail.requestedStepIndex);
@@ -2093,6 +2101,9 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
               pipelineInfo={pipelineInfo}
               changeLoadingQuickSight={(loading) => {
                 setloadingQuickSight(loading);
+              }}
+              changeQuickSightDisabled={(disabled) => {
+                setQuickSightDisabled(disabled);
               }}
               changeEnableReporting={(enable) => {
                 setPipelineInfo((prev) => {

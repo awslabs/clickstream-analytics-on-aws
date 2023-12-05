@@ -72,6 +72,7 @@ import {
   KINESIS_DATA_PROCESSING_PROVISIONED_REDSHIFT_ERROR_DBUSER_QUICKSIGHT_PIPELINE,
   BASE_STATUS,
   S3_DATA_PROCESSING_WITH_ERROR_PREFIX_PIPELINE,
+  RETRY_PIPELINE_WITH_WORKFLOW_AND_ROLLBACK_COMPLETE,
 } from './pipeline-mock';
 import { FULL_SOLUTION_VERSION, clickStreamTableName, dictionaryTableName, prefixTimeGSIName } from '../../common/constants';
 import { BuiltInTagKeys } from '../../common/model-ln';
@@ -133,6 +134,40 @@ describe('Pipeline test', () => {
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSubnetsCommand, 1);
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeRouteTablesCommand, 1);
     expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 1);
+  });
+  it('Create pipeline with error region', async () => {
+    tokenMock(ddbMock, false);
+    projectExistedMock(ddbMock, true);
+    dictionaryMock(ddbMock);
+    createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock,
+      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, iamMock, {
+        publicAZContainPrivateAZ: true,
+        subnetsCross3AZ: true,
+        subnetsIsolated: true,
+      });
+    ddbMock.on(PutCommand).resolves({});
+    const res = await request(app)
+      .post('/api/pipeline')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
+      .send({
+        ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_QUICKSIGHT_PIPELINE,
+        network: {
+          publicSubnetIds: [
+            'subnet-10000000000000021',
+            'subnet-10000000000000022',
+            'subnet-10000000000000023',
+          ],
+          vpcId: 'vpc-10000000000000001',
+          privateSubnetIds: [
+            'subnet-10000000000000011',
+            'subnet-10000000000000012',
+            'subnet-10000000000000013',
+          ],
+        },
+      });
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(400);
+    expect(res.body.message).toEqual('Validation error: region does not match VPC or subnets, please check parameters.');
   });
   it('Create pipeline with error prefix', async () => {
     tokenMock(ddbMock, false);
@@ -437,7 +472,7 @@ describe('Pipeline test', () => {
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
-    expect(res.body.message).toEqual('Validate error: the public and private subnets for the ingestion endpoint must locate in at least two Availability Zones (AZ).');
+    expect(res.body.message).toEqual('Validation error: the public and private subnets for the ingestion endpoint must locate in at least two Availability Zones (AZ).');
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSubnetsCommand, 1);
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeRouteTablesCommand, 1);
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeVpcEndpointsCommand, 0);
@@ -501,7 +536,7 @@ describe('Pipeline test', () => {
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
-    expect(res.body.message).toEqual('Validate error: the public subnets and private subnets for ingestion endpoint must be in the same Availability Zones (AZ). For example, you can not select public subnets in AZ (a, b), while select private subnets in AZ (b, c).');
+    expect(res.body.message).toEqual('Validation error: the public subnets and private subnets for ingestion endpoint must be in the same Availability Zones (AZ). For example, you can not select public subnets in AZ (a, b), while select private subnets in AZ (b, c).');
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSubnetsCommand, 1);
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeRouteTablesCommand, 1);
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeVpcEndpointsCommand, 0);
@@ -838,6 +873,58 @@ describe('Pipeline test', () => {
     expect(res.body.message).toEqual('Validation error: vpc endpoint error in subnet: subnet-00000000000000011, detail: [{\"service\":\"com.amazonaws.ap-southeast-1.glue\",\"reason\":\"The traffic is not allowed by security group rules\"}].');
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeVpcEndpointsCommand, 1);
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSecurityGroupRulesCommand, 1);
+    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSubnetsCommand, 1);
+    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeRouteTablesCommand, 1);
+  });
+  it('Create pipeline in the isolated subnets with inbound rules only allow one of subnet cidr', async () => {
+    tokenMock(ddbMock, false);
+    projectExistedMock(ddbMock, true);
+    dictionaryMock(ddbMock);
+    createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock,
+      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, iamMock, {
+        publicAZContainPrivateAZ: true,
+        subnetsCross3AZ: true,
+        subnetsIsolated: true,
+        ecsEndpointSGAllowOneSubnet: true,
+      });
+    ddbMock.on(PutCommand).resolves({});
+    const res = await request(app)
+      .post('/api/pipeline')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
+      .send({
+        ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE,
+      });
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(400);
+    expect(res.body.message).toEqual('Validation error: vpc endpoint error in subnet: subnet-00000000000000012, detail: [{\"service\":\"com.amazonaws.ap-southeast-1.ecs\",\"reason\":\"The traffic is not allowed by security group rules\"}].');
+    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeVpcEndpointsCommand, 1);
+    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSecurityGroupRulesCommand, 1);
+    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSubnetsCommand, 1);
+    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeRouteTablesCommand, 1);
+  });
+  it('Create pipeline in the isolated subnets with inbound rules allow all subnet cidr', async () => {
+    tokenMock(ddbMock, false);
+    projectExistedMock(ddbMock, true);
+    dictionaryMock(ddbMock);
+    createPipelineMock(ddbMock, kafkaMock, redshiftServerlessMock, redshiftMock,
+      ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, iamMock, {
+        publicAZContainPrivateAZ: true,
+        subnetsCross3AZ: true,
+        subnetsIsolated: true,
+        ecsEndpointSGAllowAllSubnets: true,
+      });
+    ddbMock.on(PutCommand).resolves({});
+    const res = await request(app)
+      .post('/api/pipeline')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
+      .send({
+        ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE,
+      });
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(201);
+    expect(res.body.message).toEqual('Pipeline added.');
+    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeVpcEndpointsCommand, 1);
+    expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSecurityGroupRulesCommand, 2);
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeSubnetsCommand, 1);
     expect(ec2Mock).toHaveReceivedCommandTimes(DescribeRouteTablesCommand, 1);
   });
@@ -1240,6 +1327,236 @@ describe('Pipeline test', () => {
           solutionVersion: FULL_SOLUTION_VERSION,
         },
         metricsDashboardName: 'clickstream_dashboard_notepad_mtzfsocy',
+        analysisStudioEnabled: false,
+      },
+    });
+  });
+  it('Get pipeline that analysis studio enabled', async () => {
+    projectExistedMock(ddbMock, true);
+    ddbMock.on(QueryCommand).resolves({
+      Items: [{
+        ...RETRY_PIPELINE_WITH_WORKFLOW_AND_ROLLBACK_COMPLETE,
+        templateVersion: FULL_SOLUTION_VERSION,
+        status: {
+          ...BASE_STATUS,
+          stackDetails: [
+            {
+              ...BASE_STATUS.stackDetails[0],
+              stackTemplateVersion: FULL_SOLUTION_VERSION,
+            },
+            {
+              ...BASE_STATUS.stackDetails[1],
+              stackTemplateVersion: FULL_SOLUTION_VERSION,
+            },
+            {
+              ...BASE_STATUS.stackDetails[2],
+              stackTemplateVersion: FULL_SOLUTION_VERSION,
+            },
+            {
+              ...BASE_STATUS.stackDetails[3],
+              stackTemplateVersion: FULL_SOLUTION_VERSION,
+            },
+            {
+              ...BASE_STATUS.stackDetails[4],
+              stackTemplateVersion: FULL_SOLUTION_VERSION,
+            },
+            {
+              ...BASE_STATUS.stackDetails[5],
+              stackTemplateVersion: FULL_SOLUTION_VERSION,
+            },
+          ],
+        },
+      }],
+    });
+    const mockOutputs = [
+      {
+        OutputKey: 'IngestionServerC000IngestionServerURL',
+        OutputValue: 'http://xxx/xxx',
+      },
+      {
+        OutputKey: 'IngestionServerC000IngestionServerDNS',
+        OutputValue: 'http://yyy/yyy',
+      },
+      {
+        OutputKey: 'Dashboards',
+        OutputValue: '[{"appId":"app1","dashboardId":"clickstream_dashboard_v1_notepad_mtzfsocy_app1"},{"appId":"app2","dashboardId":"clickstream_dashboard_v1_notepad_mtzfsocy_app2"}]',
+      },
+      {
+        OutputKey: 'ObservabilityDashboardName',
+        OutputValue: 'clickstream_dashboard_notepad_mtzfsocy',
+      },
+    ];
+    cloudFormationMock.on(DescribeStacksCommand).resolves({
+      Stacks: [
+        {
+          StackName: 'xxx',
+          Outputs: mockOutputs,
+          Tags: [{ Key: BuiltInTagKeys.AWS_SOLUTION_VERSION, Value: FULL_SOLUTION_VERSION }],
+          StackStatus: StackStatus.CREATE_COMPLETE,
+          CreationTime: new Date(),
+        },
+      ],
+    });
+    sfnMock.on(DescribeExecutionCommand).resolves({
+      executionArn: 'xx',
+      stateMachineArn: 'yy',
+      name: MOCK_EXECUTION_ID,
+      status: ExecutionStatus.SUCCEEDED,
+      output: 'SUCCEEDED',
+    });
+    dictionaryMock(ddbMock);
+    ddbMock.on(QueryCommand, {
+      ExclusiveStartKey: undefined,
+      ExpressionAttributeNames:
+        { '#prefix': 'prefix' },
+      ExpressionAttributeValues: {
+        ':d': false,
+        ':prefix': 'PLUGIN',
+      },
+      FilterExpression: 'deleted = :d',
+      KeyConditionExpression:
+    '#prefix= :prefix',
+      Limit: undefined,
+      ScanIndexForward: true,
+      TableName: clickStreamTableName,
+      IndexName: prefixTimeGSIName,
+    }).resolves({
+      Items: [
+        { id: `${MOCK_PLUGIN_ID}_2`, name: `${MOCK_PLUGIN_ID}_2` },
+      ],
+    });
+    let res = await request(app)
+      .get(`/api/pipeline/${MOCK_PIPELINE_ID}?pid=${MOCK_PROJECT_ID}`);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({
+      success: true,
+      message: '',
+      data: {
+        ...RETRY_PIPELINE_WITH_WORKFLOW_AND_ROLLBACK_COMPLETE,
+        status: {
+          ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW.status,
+          stackDetails: [
+            {
+              ...BASE_STATUS.stackDetails[0],
+              stackTemplateVersion: FULL_SOLUTION_VERSION,
+              outputs: mockOutputs,
+            },
+            {
+              ...BASE_STATUS.stackDetails[1],
+              stackTemplateVersion: FULL_SOLUTION_VERSION,
+              outputs: mockOutputs,
+            },
+            {
+              ...BASE_STATUS.stackDetails[2],
+              stackTemplateVersion: FULL_SOLUTION_VERSION,
+              outputs: mockOutputs,
+            },
+            {
+              ...BASE_STATUS.stackDetails[4],
+              stackTemplateVersion: FULL_SOLUTION_VERSION,
+              outputs: mockOutputs,
+            },
+            {
+              ...BASE_STATUS.stackDetails[3],
+              stackTemplateVersion: FULL_SOLUTION_VERSION,
+              outputs: mockOutputs,
+            },
+            {
+              ...BASE_STATUS.stackDetails[5],
+              stackTemplateVersion: FULL_SOLUTION_VERSION,
+              outputs: mockOutputs,
+            },
+          ],
+        },
+        dataProcessing: {
+          ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW.dataProcessing,
+          enrichPlugin: [
+            {
+              bindCount: 0,
+              builtIn: true,
+              createAt: 1667355960000,
+              deleted: false,
+              dependencyFiles: [],
+              description: {
+                'en-US': 'Derive OS, device, browser information from User Agent string from the HTTP request header',
+                'zh-CN': '从 HTTP 请求标头的用户代理（User Agent)字符串中获取操作系统、设备和浏览器信息',
+              },
+              id: 'BUILT-IN-2',
+              jarFile: '',
+              mainFunction: 'software.aws.solution.clickstream.UAEnrichment',
+              name: 'UAEnrichment',
+              operator: '',
+              pluginType: 'Enrich',
+              prefix: 'PLUGIN',
+              type: 'PLUGIN#BUILT-IN-2',
+              updateAt: 1667355960000,
+            },
+            {
+              bindCount: 0,
+              builtIn: true,
+              createAt: 1667355960000,
+              deleted: false,
+              dependencyFiles: [],
+              description: {
+                'en-US': 'Derive location information (e.g., city, country, region) based on the request source IP',
+                'zh-CN': '根据请求源 IP 获取位置信息（例如，城市、国家、地区）',
+              },
+              id: 'BUILT-IN-3',
+              jarFile: '',
+              mainFunction: 'software.aws.solution.clickstream.IPEnrichment',
+              name: 'IPEnrichment',
+              operator: '',
+              pluginType: 'Enrich',
+              prefix: 'PLUGIN',
+              type: 'PLUGIN#BUILT-IN-3',
+              updateAt: 1667355960000,
+            },
+            {
+              id: `${MOCK_PLUGIN_ID}_2`, name: `${MOCK_PLUGIN_ID}_2`,
+            },
+          ],
+          transformPlugin: {
+            bindCount: 0,
+            builtIn: true,
+            createAt: 1667355960000,
+            deleted: false,
+            dependencyFiles: [],
+            description: {
+              'en-US': 'Convert the data format reported by SDK into the data format in the data warehouse',
+              'zh-CN': '把SDK上报的数据格式，转换成数据仓库中的数据格式',
+            },
+            id: 'BUILT-IN-1',
+            jarFile: '',
+            mainFunction: 'software.aws.solution.clickstream.TransformerV2',
+            name: 'Transformer',
+            operator: '',
+            pluginType: 'Transform',
+            prefix: 'PLUGIN',
+            type: 'PLUGIN#BUILT-IN-1',
+            updateAt: 1667355960000,
+          },
+        },
+        dns: 'http://yyy/yyy',
+        endpoint: 'http://xxx/xxx',
+        dashboards: [
+          {
+            appId: 'app1',
+            dashboardId: 'clickstream_dashboard_v1_notepad_mtzfsocy_app1',
+          },
+          {
+            appId: 'app2',
+            dashboardId: 'clickstream_dashboard_v1_notepad_mtzfsocy_app2',
+          },
+        ],
+        templateInfo: {
+          isLatest: true,
+          pipelineVersion: FULL_SOLUTION_VERSION,
+          solutionVersion: FULL_SOLUTION_VERSION,
+        },
+        templateVersion: FULL_SOLUTION_VERSION,
+        metricsDashboardName: 'clickstream_dashboard_notepad_mtzfsocy',
+        analysisStudioEnabled: true,
       },
     });
   });
@@ -1262,13 +1579,22 @@ describe('Pipeline test', () => {
         dashboards: null,
         metricsDashboardName: null,
         templateInfo: null,
+        analysisStudioEnabled: false,
       },
     });
   });
   it('Get pipeline by ID with stack no outputs', async () => {
     projectExistedMock(ddbMock, true);
     ddbMock.on(QueryCommand).resolves({
-      Items: [{ ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW }],
+      Items: [{
+        ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
+        templateVersion: 'v1.1.0',
+        reporting: {
+          quickSight: {
+            accountName: 'clickstream-acc-xxx',
+          },
+        },
+      }],
     });
     cloudFormationMock.on(DescribeStacksCommand).resolves({
       Stacks: [
@@ -1319,6 +1645,7 @@ describe('Pipeline test', () => {
         ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
         status: {
           ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW.status,
+          status: 'Warning',
           stackDetails: [
             { ...BASE_STATUS.stackDetails[0] },
             { ...BASE_STATUS.stackDetails[1] },
@@ -1396,15 +1723,22 @@ describe('Pipeline test', () => {
             updateAt: 1667355960000,
           },
         },
+        reporting: {
+          quickSight: {
+            accountName: 'clickstream-acc-xxx',
+          },
+        },
         dns: '',
         endpoint: '',
         dashboards: [],
         metricsDashboardName: '',
         templateInfo: {
           isLatest: false,
-          pipelineVersion: MOCK_SOLUTION_VERSION,
+          pipelineVersion: 'v1.1.0',
           solutionVersion: FULL_SOLUTION_VERSION,
         },
+        templateVersion: 'v1.1.0',
+        analysisStudioEnabled: false,
       },
     });
   });
@@ -1495,6 +1829,7 @@ describe('Pipeline test', () => {
           pipelineVersion: MOCK_SOLUTION_VERSION,
           solutionVersion: FULL_SOLUTION_VERSION,
         },
+        analysisStudioEnabled: false,
       },
     });
   });

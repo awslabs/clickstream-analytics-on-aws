@@ -25,6 +25,7 @@ import {
 } from '@cloudscape-design/components';
 import { createApplication, getApplicationDetail } from 'apis/application';
 import ConfigAndroidSDK from 'pages/application/detail/comp/ConfigAndroidSDK';
+import ConfigFlutterSDK from 'pages/application/detail/comp/ConfigFlutterSDK';
 import ConfigIOSSDK from 'pages/application/detail/comp/ConfigIOSSDK';
 import ConfigWebSDK from 'pages/application/detail/comp/ConfigWebSDK';
 import React, { useState } from 'react';
@@ -289,6 +290,15 @@ const RegisterApp: React.FC = () => {
                 content: (
                   <div className="pd-20">
                     <ConfigWebSDK appInfo={application} />
+                  </div>
+                ),
+              },
+              {
+                label: t('application:detail.flutter'),
+                id: 'flutter',
+                content: (
+                  <div className="pd-20">
+                    <ConfigFlutterSDK appInfo={application} />
                   </div>
                 ),
               },

@@ -140,7 +140,7 @@ const baseColumns = `
 ,app_info.version:: varchar as app_info_version
 ,app_info.sdk_name:: varchar as app_info_sdk_name
 ,app_info.sdk_version:: varchar as app_info_sdk_version
-,device.vendor_id:: varchar as device_id
+,device.vendor_id:: varchar as device_vendor_id
 ,device.mobile_brand_name:: varchar as device_mobile_brand_name
 ,device.mobile_model_name:: varchar as device_mobile_model_name
 ,device.manufacturer:: varchar as device_manufacturer
@@ -173,7 +173,7 @@ const baseColumns = `
 ,traffic_source.name:: varchar as traffic_source_name
 ,traffic_source.medium:: varchar as traffic_source_medium
 ,traffic_source.source:: varchar as traffic_source_source
-,COALESCE(event.user_id, event.user_pseudo_id) as user_pseudo_id
+,COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id
 ,event.user_id
 `;
 
@@ -1390,9 +1390,9 @@ export function _buildCommonPartSql(eventNames: string[], sqlParameters: SQLPara
       userOuterSql = `
       join 
         (
-          ${_buildBaseUserDataTableSql(sqlParameters, false)}
+          ${_buildBaseUserDataTableSql(sqlParameters, false, '_join')}
         ) as user_base
-        on event_base.user_pseudo_id = user_base.user_pseudo_id
+        on event_base.user_pseudo_id = user_base.user_pseudo_id_join
     `;
     }
 
@@ -1568,6 +1568,7 @@ function _buildBaseEventDataTableSQL(eventNames: string[], sqlParameters: SQLPar
       ) || '00:00' as hour
     from
         ${sqlParameters.schemaName}.${EVENT_TABLE} as event
+        join (select user_pseudo_id, user_id from ${sqlParameters.schemaName}.user_m_view group by user_pseudo_id, user_id) as u on event.user_pseudo_id= u.user_pseudo_id
     where
         ${eventDateSQL}
         ${eventNameClause}
@@ -1584,7 +1585,7 @@ function _buildBaseEventDataSql(eventNames: string[], sqlParameters: SQLParamete
   `;
 }
 
-function _buildBaseUserDataTableSql(sqlParameters: SQLParameters, hasNestParams: boolean) {
+function _buildBaseUserDataTableSql(sqlParameters: SQLParameters, hasNestParams: boolean, suffix: string ='') {
 
   let nestParamSql = '';
   let nextColSQL = '';
@@ -1599,10 +1600,15 @@ function _buildBaseUserDataTableSql(sqlParameters: SQLParameters, hasNestParams:
     nextColSQL = ', u.user_properties as user_properties';
   }
 
+  let userIdSuffix = '';
+  if (suffix !== '') {
+    userIdSuffix = `as user_id${suffix}`;
+  }
+
   return `
     select
-      COALESCE(user_id, user_pseudo_id) as user_pseudo_id,
-      user_id,
+      COALESCE(user_id, user_pseudo_id) as user_pseudo_id${suffix},
+      user_id ${userIdSuffix},
       user_first_touch_timestamp,
       _first_visit_date,
       _first_referer,

@@ -4,6 +4,8 @@
 - [Android](./android.md) 
 - [Swift](./swift.md)  
 - [Web](./web.md)
+- [Flutter](./flutter.md)
+- [WeChat Miniprogram](./wechat.md)
 
 In addition, we also provide [HTTP API](./http-api.md) to collect clickstream data from other platforms (e.g., server) through http request.
 

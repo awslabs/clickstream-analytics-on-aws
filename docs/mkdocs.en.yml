@@ -30,7 +30,7 @@ nav:
       - Step 1. Create a project: getting-started/1.create-project.md
       - Step 2. Configure data pipeline: getting-started/2.config-pipeline.md
       - Step 3. Integrate SDK: getting-started/3.integrate-sdk.md
-      - Step 4. View dashboard: getting-started/4.view-dashboard.md
+      - Step 4. Analyze data: getting-started/4.view-dashboard.md
     - Pipeline management:
       - Overview: pipeline-mgmt/index.md
       - Data ingestion:
@@ -46,12 +46,13 @@ nav:
         - Processing plugin: pipeline-mgmt/data-processing/configure-plugin.md
       - Data modeling: pipeline-mgmt/data-modeling/configure-data-modeling.md
       - Reporting: pipeline-mgmt/quicksight/configure-quicksight.md
-      - Pipeline management: pipeline-mgmt/pipe-mgmt.md
+      - Pipeline maintenance: pipeline-mgmt/pipe-mgmt.md
     - SDK manual:
       - Overview: sdk-manual/index.md
       - Android SDK: sdk-manual/android.md
       - Swift SDK: sdk-manual/swift.md
       - Web SDK: sdk-manual/web.md
+      - Flutter SDK: sdk-manual/flutter.md
       - WeChat Miniprogram SDK: sdk-manual/wechat.md
       - HTTP API: sdk-manual/http-api.md
       - User identifier: sdk-manual/user-identifier.md

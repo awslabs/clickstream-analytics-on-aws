@@ -243,9 +243,11 @@ export const OIDC_ISSUER_PATTERN =
 export const OIDC_CLIENT_ID_PATTERN = '^[^ ]+$';
 export const OIDC_JWKS_SUFFIX_PATTERN = '^/[^ ]+$';
 export const MULTI_APP_ID_PATTERN = `^((${APP_ID_PATTERN})(,${APP_ID_PATTERN}){0,})?$`;
-export const EMAIL_PATTERN =
+export const EMAIL_BASE_PATTERN =
   '\\w+([-+.]\\w+)*@\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*';
-export const MULTI_EMAIL_PATTERN = `${EMAIL_PATTERN}(,${EMAIL_PATTERN})*`;
+export const EMAIL_PATTERN =
+  `^(?=.{0,320}$)${EMAIL_BASE_PATTERN}`;
+export const MULTI_EMAIL_PATTERN = `^(?=(?:[^,]{0,320},)*[^,]{0,320}$)\\s*${EMAIL_BASE_PATTERN}\\s*(?:,\\s*${EMAIL_BASE_PATTERN}\\s*)*$`;
 export const POSITIVE_INTEGERS = '^[1-9]\\d*';
 export const S3_PATH_PLUGIN_JARS_PATTERN = `^(s3://${S3_BUCKET_NAME_PATTERN}/[^,]+.jar,?){0,}$`;
 export const S3_PATH_PLUGIN_FILES_PATTERN = `^(s3://${S3_BUCKET_NAME_PATTERN}/[^,]+,?){0,}$`;
@@ -377,6 +379,7 @@ export const CLICKSTREAM_USER_ATTR_VIEW_PLACEHOLDER = 'User_Attr_View';
 export const CLICKSTREAM_RETENTION_VIEW_NAME = 'clickstream_retention_view_v1';
 export const CLICKSTREAM_SESSION_VIEW_NAME = 'clickstream_session_view_v1';
 export const CLICKSTREAM_USER_DIM_VIEW_NAME = 'clickstream_user_dim_view_v1';
+export const CLICKSTREAM_USER_FIRST_ATTR_VIEW_NAME = 'clickstream_user_first_attr_view_v1';
 export const CLICKSTREAM_EVENT_VIEW_NAME = 'clickstream_event_view_v1';
 export const CLICKSTREAM_DEVICE_VIEW_NAME = 'clickstream_device_view_v1';
 export const CLICKSTREAM_EVENT_PARAMETER_VIEW_NAME = 'clickstream_event_parameter_view_v1';

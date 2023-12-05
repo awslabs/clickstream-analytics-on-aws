@@ -1,3 +1,7 @@
+-- run following command to load latest partition
+-- msck repair table {{database}}.{{eventTable}};
+-- msck repair table {{database}}.{{eventParamTable}};
+
 with temp_1 as (
   select 
     event.event_id,

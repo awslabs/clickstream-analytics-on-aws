@@ -40,6 +40,7 @@ export interface IState {
 }
 
 export enum StateActionType {
+  CLEAR_HELP_PANEL = 'CLEAR_HELP_PANEL',
   SHOW_HELP_PANEL = 'SHOW_HELP_PANEL',
   HIDE_HELP_PANEL = 'HIDE_HELP_PANEL',
   RESET_VALID_ERROR = 'RESET_VALID_ERROR',
@@ -61,6 +62,13 @@ export const initialState: IState = {
 
 export const reducer = (state: IState, action: Action): IState => {
   switch (action.type) {
+    case StateActionType.CLEAR_HELP_PANEL: {
+      return {
+        ...state,
+        helpPanelType: HelpPanelType.NONE,
+        showHelpPanel: false,
+      };
+    }
     case StateActionType.SHOW_HELP_PANEL: {
       return { ...state, showHelpPanel: true, helpPanelType: action.payload };
     }

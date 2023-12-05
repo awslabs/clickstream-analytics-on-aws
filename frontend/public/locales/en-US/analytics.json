@@ -6,7 +6,7 @@
     "createTitle": "Create Dashboard",
     "createInputName": "Dashboard name",
     "createInputNameDec": "Please input a name for the dashboard.",
-    "createInputNamePlaceholder": "E.g. user lifecycle dashboard",
+    "createInputNamePlaceholder": "E.g. user life cycle dashboard",
     "createDesc": "Description",
     "createDescDec": "Please provide a useful description for the dashboard.",
     "createDescPlaceholder": "E.g. dashboard for the e-commerce department",
@@ -16,6 +16,7 @@
     "deleteTip1": "Are you sure you want to delete the dashboard ",
     "deleteTip2": " delete dashboard will delete all data in QuickSight.",
     "defaultUserLifecycle": "User life cycle",
+    "defaultUserLifecycleDescription": "Out-of-the-box user lifecycle analysis dashboard created by solution.",
     "defaultTag": "default"
   },
   "realtime": {
@@ -25,13 +26,13 @@
     "configProject": "Configure project"
   },
   "analyzes": {
-    "title": "Analyzes",
+    "title": "Analyses",
     "description": "You can create custom analysis and dashboard in a drag-and-drop manner in this module.",
     "comeSoon": "The feature is about to be launched."
   },
   "explore": {
-    "title": "Explore",
-    "description": "The Explore module provides a range of advanced analytical models to enable you to dynamically query and analyze clickstream data. Select an analysis model to begin.",
+    "title": "Explorations",
+    "description": "The Explore module provides a range of advanced analytical models to enable you to dynamically query and analyze clickstream data. Select an analytics model to begin.",
     "analyticsModel": "Analytics model",
     "exploitativeAnalytics": "Exploratory analysis",
     "funnelAnalysis": "Funnel analysis",
@@ -43,8 +44,8 @@
     "userSegmentation": "User Segmentation"
   },
   "list": {
-    "loading": "Loading dashboards.",
-    "noDashboard": "You don’t have any clickstream analytics dashboard yet.",
+    "loading": "Loading dashboards",
+    "noDashboard": "You don’t have any clickstream analytics dashboard yet",
     "id": "ID",
     "description": "Descriptions",
     "createAt": "Creation time",
@@ -93,10 +94,10 @@
     "indirectlyFollowed": "Indirectly followed"
   },
   "metadata": {
-    "description": "You can view and manage metadata for events and attributes here.",
+    "description": "You can view and manage metadata for events and user attributes here.",
     "event": {
       "title": "Events",
-      "description": "This table lists out all the events in the selected clickstream analytics App.",
+      "description": "This table lists out all the events in the selected App.",
       "tableColumnID": "ID",
       "tableColumnName": "Event name",
       "tableColumnDisplayName": "Display name",
@@ -120,7 +121,7 @@
     },
     "eventParameter": {
       "title": "Event Parameters",
-      "description": "Description of the Event Parameters",
+      "description": "The table list out all the Event Parameters in the selected App",
       "tableColumnID": "ID",
       "tableColumnName": "Parameter name",
       "tableColumnDisplayName": "Display name",
@@ -139,8 +140,8 @@
       }
     },
     "userAttribute": {
-      "title": "User Attribute",
-      "description": "Description of the User Attribute",
+      "title": "User Attributes",
+      "description": "This table lists out all the user attributes in the selected App.",
       "tableColumnID": "ID",
       "tableColumnName": "Attribute name",
       "tableColumnDisplayName": "Display name",
@@ -175,14 +176,16 @@
     "day": "day",
     "week": "week",
     "month": "month",
-    "year": "year"
+    "year": "year",
+    "startDate": "Start date",
+    "revisitDate": "Revisit date"
   },
   "valid": {
     "please": "Please ",
     "projectSelectError": "Must select a project",
     "appSelectError": "Must select an application",
     "dashboardNameEmptyError": "Please input dashboard name.",
-    "dashboardSheetTooMuchError": "Dashboard sheet can't be more than 10.",
+    "dashboardSheetNumError": "The dashboard sheet can't be more than ten and can't be empty.",
     "funnelPipelineVersionError": "Missing parameters, please upgrade the pipeline corresponding to the current project.",
     "dashboardSelectError": "Must select a dashboard",
     "sheetSelectError": "Must select a sheet",
@@ -190,7 +193,9 @@
     "dateRangeInvalid": "The selected date range is invalid. The start date must be before the end date.",
     "inputVisualNameError": "Please input visualization name.",
     "selectTwoEvent": "Query metrics error: Please select at least two steps",
-    "retentionJoinColumnDatatype": "Query metrics error: The data type for each set of associated parameter in retention analysis must be the same"
+    "retentionJoinColumnDatatype": "Query metrics error: The data type for each set of associated parameter in retention analysis must be the same",
+    "errorProjectOrApp": "Non-existent projects or applications: ",
+    "notSupportProjectOrApp": "This project or application does not support Analytics Studio: "
   },
   "operators": {
     "null": "is null",
@@ -209,12 +214,12 @@
   "labels": {
     "eventTitle": "Event",
     "attributeTitle": "Attribute",
-    "eventAttribute": "Event attribute",
-    "publicEventAttribute": "Public event attribute",
-    "privateEventAttribute": "Private event attribute",
+    "eventAttribute": "Event parameter",
+    "publicEventAttribute": "Public event parameter",
+    "privateEventAttribute": "Private event parameter",
     "userAttribute": "User attribute",
-    "customAttribute": "Custom attribute",
-    "presetAttribute": "Preset attribute",
+    "customAttribute": "Custom parameter",
+    "presetAttribute": "Preset parameter",
     "customEvent": "Custom event",
     "presetEvent": "Preset event",
     "previewName": "Name",
@@ -240,32 +245,37 @@
     "editError": "Edit error",
     "retentionStart": "Start",
     "retentionRevisit": "Revisit",
-    "associatedProperties": "Associated parameter",
+    "associatedProperties": "Associate parameter",
     "retentionMetrics": "Retention metric",
     "eventSelectPlaceholder": "Select event",
     "nodeSelectPlaceholder": "Select node",
-    "attributeSelectPlaceholder": "Select attribute",
+    "attributeSelectPlaceholder": "Select parameter or attribute",
     "operatorSelectPlaceholder": "Select operator",
     "conditionValuePlaceholder": "Input value",
     "funnelModel": "Funnel model",
-    "attributeGrouping": "Parameter grouping",
+    "attributeGrouping": "Groupings",
     "defineMetrics": "Define metrics",
     "realtimeStopped": "Realtime streaming is stopped",
     "realtimeStarted": "Realtime streaming is started",
     "reportingNotEnabled": "Reporting module is not enabled",
+    "pipelineVersionNotSupport": "The pipeline version is not supported",
     "setStartNode": "Set start node",
     "participateNodes": "Select nodes to participate in the analysis",
-    "includingOtherEvents": "Including Other Events",
-    "mergeConsecutiveEvents": "Merge Consecutive Events",
+    "includingOtherEvents": "Including other events",
+    "mergeConsecutiveEvents": "Merge consecutive events",
     "groupApplyToFirst": "Apply grouping to the first step only"
   },
   "emptyData": "No Data",
-  "emptyDataMessage": "Please configure the metrics to query",
+  "emptyDataMessage": "Please configure metrics to query",
+  "emptyExploreMessage": "There are no explore modules available for the current project",
+  "emptyAnalyzeMessage": "There are no analyses available for the current project",
+  "emptyDashboardMessage": "No dashboard data has been found yet",
   "noDataAvailableTitle": "No clickstream data available for analytics",
   "noDataAvailableMessage": "The solution did not find any project has clickstream data yet, please contact your system admin to start collecting data.",
   "information": {
     "funnelMetricsInfo": "Select an entity of the calculated funnel conversion rate.",
     "funnelWindowInfo": "The funnel Window refers to the time for the user to complete the entire process. Only when the user completes all the selected steps within the set window period is considered a successful conversion.",
+    "funnelStepsInfo": "Select events as the steps for the funnel conversion rate.",
     "eventDefineMetricInfo": "Please select events, calculation methods, and filter conditions to query. You can add multiple filters for one event.",
     "filterInfo": "You can filter events globally by setting this filter, and this filter will apply to all metrics.",
     "groupInfo": "Metric will be grouped by the values of the selected event parameter.",

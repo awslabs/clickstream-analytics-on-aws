@@ -8858,6 +8858,44 @@
         {
             "SheetId": "6197f54b-e3a4-4592-be07-caca1ac07392",
             "Name": "User",
+            "ParameterControls": [
+                {
+                    "DateTimePicker": {
+                        "ParameterControlId": "28743b10-d730-4ade-8af4-f111e81a0d43",
+                        "Title": "Start date",
+                        "SourceParameterName": "EventStartDate",
+                        "DisplayOptions": {
+                            "TitleOptions": {
+                                "Visibility": "VISIBLE",
+                                "FontConfiguration": {
+                                    "FontSize": {
+                                        "Relative": "MEDIUM"
+                                    }
+                                }
+                            },
+                            "DateTimeFormat": "YYYY/MM/DD"
+                        }
+                    }
+                },
+                {
+                    "DateTimePicker": {
+                        "ParameterControlId": "62d65cda-9f74-44de-aaa8-a5ca8428444e",
+                        "Title": "End date",
+                        "SourceParameterName": "EventEndDate",
+                        "DisplayOptions": {
+                            "TitleOptions": {
+                                "Visibility": "VISIBLE",
+                                "FontConfiguration": {
+                                    "FontSize": {
+                                        "Relative": "MEDIUM"
+                                    }
+                                }
+                            },
+                            "DateTimeFormat": "YYYY/MM/DD"
+                        }
+                    }
+                }
+            ],
             "FilterControls": [
                 {
                     "Dropdown": {
@@ -11738,7 +11776,33 @@
                         "Expression": "addDateTime(-4, 'WK', truncDate('WK', now()))"
                     }
                 },
-                "TimeGranularity": "DAY"
+                "TimeGranularity": "DAY",
+                "MappedDataSetParameters": [
+                    {
+                        "DataSetIdentifier": "Device_View",
+                        "DataSetParameterName": "startDate"
+                    },
+                    {
+                        "DataSetIdentifier": "Event_Parameter_View",
+                        "DataSetParameterName": "startDate"
+                    },
+                    {
+                        "DataSetIdentifier": "Event_View",
+                        "DataSetParameterName": "startDate"
+                    },
+                    {
+                        "DataSetIdentifier": "Session_View",
+                        "DataSetParameterName": "startDate"
+                    },
+                    {
+                        "DataSetIdentifier": "Lifecycle_Daily_View",
+                        "DataSetParameterName": "startDate"
+                    },
+                    {
+                        "DataSetIdentifier": "Lifecycle_Weekly_View",
+                        "DataSetParameterName": "startDate"
+                    }
+                ]
             }
         },
         {
@@ -11750,7 +11814,33 @@
                         "Expression": "truncDate('DD', now())"
                     }
                 },
-                "TimeGranularity": "DAY"
+                "TimeGranularity": "DAY",
+                "MappedDataSetParameters": [
+                    {
+                        "DataSetIdentifier": "Device_View",
+                        "DataSetParameterName": "endDate"
+                    },
+                    {
+                        "DataSetIdentifier": "Event_Parameter_View",
+                        "DataSetParameterName": "endDate"
+                    },
+                    {
+                        "DataSetIdentifier": "Event_View",
+                        "DataSetParameterName": "endDate"
+                    },
+                    {
+                        "DataSetIdentifier": "Session_View",
+                        "DataSetParameterName": "endDate"
+                    },
+                    {
+                        "DataSetIdentifier": "Lifecycle_Daily_View",
+                        "DataSetParameterName": "endDate"
+                    },
+                    {
+                        "DataSetIdentifier": "Lifecycle_Weekly_View",
+                        "DataSetParameterName": "endDate"
+                    }
+                ]
             }
         }
     ],
@@ -11766,7 +11856,7 @@
                             "ColumnName": "first_visit_date"
                         },
                         "IncludeMinimum": true,
-                        "IncludeMaximum": false,
+                        "IncludeMaximum": true,
                         "RangeMinimumValue": {
                             "Parameter": "EventStartDate"
                         },
@@ -11934,7 +12024,7 @@
                             "ColumnName": "event_date"
                         },
                         "IncludeMinimum": true,
-                        "IncludeMaximum": false,
+                        "IncludeMaximum": true,
                         "RangeMinimumValue": {
                             "Parameter": "EventStartDate"
                         },
@@ -12616,7 +12706,7 @@
                             "ColumnName": "time_period"
                         },
                         "IncludeMinimum": true,
-                        "IncludeMaximum": false,
+                        "IncludeMaximum": true,
                         "RangeMinimumValue": {
                             "Parameter": "EventStartDate"
                         },
@@ -12655,7 +12745,7 @@
                             "ColumnName": "time_period"
                         },
                         "IncludeMinimum": true,
-                        "IncludeMaximum": false,
+                        "IncludeMaximum": true,
                         "RangeMinimumValue": {
                             "Parameter": "EventStartDate"
                         },
@@ -12694,7 +12784,7 @@
                             "ColumnName": "first_date"
                         },
                         "IncludeMinimum": true,
-                        "IncludeMaximum": false,
+                        "IncludeMaximum": true,
                         "RangeMinimumValue": {
                             "Parameter": "EventStartDate"
                         },
@@ -12941,7 +13031,7 @@
                             "ColumnName": "first_visit_date"
                         },
                         "IncludeMinimum": true,
-                        "IncludeMaximum": false,
+                        "IncludeMaximum": true,
                         "RangeMinimumValue": {
                             "Parameter": "EventStartDate"
                         },
@@ -12982,9 +13072,7 @@
                         "Configuration": {
                             "FilterListConfiguration": {
                                 "MatchOperator": "CONTAINS",
-                                "CategoryValues": [
-                                    "iOS"
-                                ]
+                                "SelectAllOptions": "FILTER_ALL_VALUES"
                             }
                         }
                     }
@@ -14465,7 +14553,7 @@
                             "ColumnName": "event_date"
                         },
                         "IncludeMinimum": true,
-                        "IncludeMaximum": false,
+                        "IncludeMaximum": true,
                         "RangeMinimumValue": {
                             "Parameter": "EventStartDate"
                         },

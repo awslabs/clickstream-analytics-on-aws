@@ -89,7 +89,6 @@ reporting_project.post(
     return reportingServ.cleanQuickSightResources(req, res, next);
   });
 
-
 export {
   reporting_project,
 };
