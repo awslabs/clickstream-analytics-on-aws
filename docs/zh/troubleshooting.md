@@ -71,3 +71,15 @@ aws logs put-resource-policy --policy-name AWSLogDeliveryWrite20150319 \
 **解决方法：**
 
 这是因为replication factor 大于brokers总数造成的，请编辑 MSK 集群配置，设置 **default.replication.factor** 不大于brokers总数。
+
+## 问题: 报表堆栈(Clickstream-Reporting-xxx) 部署失败
+
+如果报表堆栈部署失败并有如下所示的错误消息
+
+> Connection attempt timed out
+
+并且发生在CloudFormation试图创建数据源(AWS::QuickSight::DataSource)的过程中。
+
+**解决方法：**
+
+登录解决方案控制台，在管道详情页点击"重试"按钮。
