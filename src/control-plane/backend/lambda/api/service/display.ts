@@ -110,7 +110,7 @@ export class CMetadataDisplay {
       parameter.displayName = publicEventParameter.displayName;
       parameter.description = publicEventParameter.description;
     }
-    parameter.metadataSource = presetEventParameter ? MetadataSource.PRESET : MetadataSource.CUSTOM;
+    parameter.metadataSource = (presetEventParameter || publicEventParameter) ? MetadataSource.PRESET : MetadataSource.CUSTOM;
     parameter.parameterType = publicEventParameter ? MetadataParameterType.PUBLIC : MetadataParameterType.PRIVATE;
   }
 
@@ -216,8 +216,8 @@ export class CMetadataDisplay {
 
   private patchCategoryToDisplayName(category: ConditionCategory, name: string, displayName?: IMetadataDisplayNameAndDescription) {
     return {
-      'en-US': !isEmpty(displayName?.['en-US']) ? displayName?.['en-US'] : `${category}.${name}`,
-      'zh-CN': !isEmpty(displayName?.['zh-CN']) ? displayName?.['zh-CN'] : `${category}.${name}`,
+      'en-US': !isEmpty(displayName?.['en-US']) ? displayName?.['en-US'] : `[${category}] ${name}`,
+      'zh-CN': !isEmpty(displayName?.['zh-CN']) ? displayName?.['zh-CN'] : `[${category}] ${name}`,
     } as IMetadataDisplayNameAndDescription;
   }
 }

@@ -227,6 +227,7 @@
     "previewDataType": "Data type",
     "previewUpdateTime": "Update time",
     "previewPlatform": "Platform",
+    "previewCategory": "Category",
     "metrics": "Metrics",
     "associateParameter": "Associate parameter",
     "window": "Funnel window",
