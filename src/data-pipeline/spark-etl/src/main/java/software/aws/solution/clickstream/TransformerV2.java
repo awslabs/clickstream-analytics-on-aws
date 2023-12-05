@@ -42,6 +42,7 @@ import static org.apache.spark.sql.functions.from_json;
 import static org.apache.spark.sql.functions.get_json_object;
 import static org.apache.spark.sql.functions.lit;
 import static org.apache.spark.sql.functions.max;
+import static org.apache.spark.sql.functions.min;
 import static org.apache.spark.sql.functions.min_by;
 import static org.apache.spark.sql.functions.regexp_extract;
 import static org.apache.spark.sql.functions.struct;
@@ -351,6 +352,7 @@ public final class TransformerV2 {
                 .withColumn(EVENT_NAME, dataCol.getField("event_type"))
                 .withColumn(EVENT_DATE, to_date(timestamp_seconds(dataCol.getItem(TIMESTAMP).$div(1000))))
                 .withColumn(EVENT_TIMESTAMP, dataCol.getItem(TIMESTAMP))
+                .withColumn(USER_FIRST_TOUCH_TIMESTAMP, get_json_object(dataCol.getField("user"), "$._user_first_touch_timestamp.value").cast(DataTypes.LongType))
                 .withColumn(USER_ID, get_json_object(dataCol.getField("user"), "$._user_id.value").cast(DataTypes.StringType));
         Dataset<Row> dataset1 = convertAppInfo(dataset0);
         Dataset<Row> eventDataset = extractEvent(dataset1);
@@ -491,10 +493,21 @@ public final class TransformerV2 {
         log.info("newUserEventDataset: " + newUserEventCount);
 
         Dataset<Row> newUniqueUserDataset = newUserEventDataset
-                .select(col(APP_ID), col(USER_PSEUDO_ID), col(EVENT_DATE), col(EVENT_TIMESTAMP))
+                .select(col(APP_ID), col(USER_PSEUDO_ID), col(EVENT_DATE), col(EVENT_TIMESTAMP), col(USER_FIRST_TOUCH_TIMESTAMP))
                 .groupBy(col(APP_ID), col(USER_PSEUDO_ID))
-                .agg(max(EVENT_TIMESTAMP).alias(EVENT_TIMESTAMP), max(EVENT_DATE).alias(EVENT_DATE))
-                .select(col(APP_ID), col(EVENT_DATE), col(USER_PSEUDO_ID), col(EVENT_TIMESTAMP));
+                .agg(
+                        max(EVENT_TIMESTAMP).alias(EVENT_TIMESTAMP),
+                        max(EVENT_DATE).alias(EVENT_DATE),
+                        min(USER_FIRST_TOUCH_TIMESTAMP).alias(USER_FIRST_TOUCH_TIMESTAMP)
+                )
+                .select(
+                        col(APP_ID),
+                        col(EVENT_DATE),
+                        col(USER_PSEUDO_ID),
+                        col(EVENT_TIMESTAMP),
+                        col(USER_FIRST_TOUCH_TIMESTAMP),
+                        to_date(timestamp_seconds(col(USER_FIRST_TOUCH_TIMESTAMP).$div(1000))).alias(FIRST_VISIT_DATE)
+                );
 
         long newUserCount = newUniqueUserDataset.count();
         log.info("newUniqueUserDataset: " + newUserCount);
@@ -505,10 +518,10 @@ public final class TransformerV2 {
         Dataset<Row> userDeviceIdDataset = getUserDeviceIdDataset(appStartDataset, newUserCount);
 
         // for `PageReferer` and `Channel` get from events: _first_open, _first_visit
-        Dataset<Row> refererAndChannelDataset = newUserEventDataset.filter(col(EVENT_NAME).isin(EVENT_FIRST_OPEN, EVENT_FIRST_VISIT));
-        log.info("refererAndChannelDataset count: " + refererAndChannelDataset.count());
-        Dataset<Row> userReferrerDataset = getPageRefererDataset(refererAndChannelDataset, newUserCount);
-        Dataset<Row> userChannelDataset = getUserChannelDataset(refererAndChannelDataset, newUserCount);
+        Dataset<Row> firstVisitDataset = newUserEventDataset.filter(col(EVENT_NAME).isin(EVENT_FIRST_OPEN, EVENT_FIRST_VISIT));
+        log.info("firstVisitDataset count: " + firstVisitDataset.count());
+        Dataset<Row> userReferrerDataset = getPageRefererDataset(firstVisitDataset, newUserCount);
+        Dataset<Row> userChannelDataset = getUserChannelDataset(firstVisitDataset, newUserCount);
 
         // for `TrafficSource` get from event: _app_end
         Dataset<Row> appEndDataset = newUserEventDataset.filter(col(EVENT_NAME).equalTo(EVENT_APP_END));
@@ -523,17 +536,14 @@ public final class TransformerV2 {
         Dataset<Row> newProfileSetDataset = this.userPropertiesConverter.transform(profileSetDataset);
 
         Dataset<Row> newUserProfileMainDataset = newProfileSetDataset
-                .withColumn(FIRST_VISIT_DATE, to_date(timestamp_seconds(col(USER_FIRST_TOUCH_TIMESTAMP).$div(1000))))
                 .select(
                         APP_ID,
                         EVENT_DATE,
                         EVENT_TIMESTAMP,
                         USER_ID,
                         USER_PSEUDO_ID,
-                        USER_FIRST_TOUCH_TIMESTAMP,
-                        "user_properties",
-                        "user_ltv",
-                        FIRST_VISIT_DATE
+                        USER_PROPERTIES,
+                        USER_LTV
                 ).distinct();
 
         String tableName = ETLRunner.TableName.USER.getTableName();
@@ -559,8 +569,6 @@ public final class TransformerV2 {
 
         Column userPseudoIdCol = newUniqueUserDataset.col(USER_PSEUDO_ID);
         Column appIdCol = newUniqueUserDataset.col(APP_ID);
-        Column eventTimestampCol = newUniqueUserDataset.col(EVENT_TIMESTAMP);
-        Column eventDataCol = newUniqueUserDataset.col(EVENT_DATE);
 
         Column userIdJoinForUserPropertiesUserId = userPseudoIdCol.equalTo(userPropsDataset.col(USER_PSEUDO_ID)).and(appIdCol.equalTo(userPropsDataset.col(APP_ID)));
         Column userIdJoinForDeviceId = userPseudoIdCol.equalTo(userDeviceIdDataset.col(USER_PSEUDO_ID)).and(appIdCol.equalTo(userDeviceIdDataset.col(APP_ID)));
@@ -576,15 +584,16 @@ public final class TransformerV2 {
                 .join(userChannelDataset, userIdJoinForChannel, "left");
 
         log.info("joinedPossibleUpdateUserDataset:" + joinedPossibleUpdateUserDataset.count());
-        Dataset<Row> joinedPossibleUpdateUserDatasetRt = joinedPossibleUpdateUserDataset.select(appIdCol,
-                eventDataCol,
-                eventTimestampCol,
+        Dataset<Row> joinedPossibleUpdateUserDatasetRt = joinedPossibleUpdateUserDataset.select(
+                appIdCol,
+                newUniqueUserDataset.col(EVENT_DATE),
+                newUniqueUserDataset.col(EVENT_TIMESTAMP),
                 col(USER_ID),
                 userPseudoIdCol,
-                col(USER_FIRST_TOUCH_TIMESTAMP),
+                newUniqueUserDataset.col(USER_FIRST_TOUCH_TIMESTAMP),
                 col(USER_PROPERTIES),
                 col(USER_LTV),
-                col(FIRST_VISIT_DATE),
+                newUniqueUserDataset.col(FIRST_VISIT_DATE),
                 substring(col(COL_PAGE_REFERER), 0, MAX_STRING_VALUE_LEN).alias(FIRST_REFERER),
                 col(TRAFFIC_SOURCE_NAME).alias("_first_traffic_source_type"),
                 col(TRAFFIC_SOURCE_MEDIUM).alias("_first_traffic_medium"),
