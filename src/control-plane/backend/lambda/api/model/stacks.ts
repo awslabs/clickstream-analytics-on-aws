@@ -120,6 +120,7 @@ export class CIngestionServerStack extends JSONObject {
       'EnableAuthentication',
       'AuthenticationSecretArn',
       'EnableApplicationLoadBalancerAccessLog',
+      'Protocol',
     ];
     return allowedList;
   }
