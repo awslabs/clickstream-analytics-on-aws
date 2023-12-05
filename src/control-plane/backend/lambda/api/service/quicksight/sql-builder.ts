@@ -129,50 +129,7 @@ const baseColumns = `
  event.event_date
 ,event.event_name
 ,event.event_id
-,event_bundle_sequence_id:: bigint as event_bundle_sequence_id
-,event_previous_timestamp:: bigint as event_previous_timestamp
 ,event_timestamp::bigint as event_timestamp
-,ingest_timestamp
-,event_value_in_usd
-,app_info.app_id:: varchar as app_info_app_id
-,app_info.id:: varchar as app_info_id
-,app_info.install_source:: varchar as app_info_install_source
-,app_info.version:: varchar as app_info_version
-,app_info.sdk_name:: varchar as app_info_sdk_name
-,app_info.sdk_version:: varchar as app_info_sdk_version
-,device.vendor_id:: varchar as device_vendor_id
-,device.mobile_brand_name:: varchar as device_mobile_brand_name
-,device.mobile_model_name:: varchar as device_mobile_model_name
-,device.manufacturer:: varchar as device_manufacturer
-,device.screen_width:: bigint as device_screen_width
-,device.screen_height:: bigint as device_screen_height
-,device.viewport_height:: bigint as device_viewport_height
-,device.carrier:: varchar as device_carrier
-,device.network_type:: varchar as device_network_type
-,device.operating_system:: varchar as device_operating_system
-,device.operating_system_version:: varchar as device_operating_system_version
-,device.ua_browser:: varchar as device_ua_browser
-,device.ua_browser_version:: varchar as device_ua_browser_version
-,device.ua_os:: varchar as device_ua_os
-,device.ua_os_version:: varchar as device_ua_os_version
-,device.ua_device:: varchar as device_ua_device
-,device.ua_device_category:: varchar as device_ua_device_category
-,device.system_language:: varchar as device_system_language
-,device.time_zone_offset_seconds:: bigint as device_time_zone_offset_seconds
-,device.advertising_id:: varchar as device_advertising_id
-,device.host_name:: varchar as device_host_name
-,geo.continent:: varchar as geo_continent
-,geo.country:: varchar as geo_country
-,geo.city:: varchar as geo_city
-,geo.metro:: varchar as geo_metro
-,geo.region:: varchar as geo_region
-,geo.sub_continent:: varchar as geo_sub_continent
-,geo.locale:: varchar as geo_locale
-,platform
-,project_id
-,traffic_source.name:: varchar as traffic_source_name
-,traffic_source.medium:: varchar as traffic_source_medium
-,traffic_source.source:: varchar as traffic_source_source
 ,COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id
 ,event.user_id
 `;
@@ -185,6 +142,20 @@ const columnTemplate = `
 ,user_id as user_id####
 ,user_pseudo_id as user_pseudo_id####
 `;
+
+export interface EventConditionProps {
+  hasEventAttribute: boolean;
+  eventAttributes: ColumnAttribute[];
+}
+
+const builtInBigintColumns = [
+'event_bundle_sequence_id',
+'event_previous_timestamp',
+'screen_width',
+'screen_height',
+'time_zone_offset_seconds',
+'viewport_height'
+]
 
 const EVENT_TABLE = 'event';
 const EVENT_PARAMETER_TABLE = 'event_parameter';
@@ -1334,6 +1305,28 @@ function _getMidTableForNodePathAnalysis(sqlParameters: SQLParameters, isSession
   }
 }
 
+function _buildNecessaryEventColumnsSql(eventConditionProps: EventConditionProps) : string {
+
+  let sql: string = '';
+  if (eventConditionProps.hasEventAttribute) {
+    return '';
+  }
+
+  for(const props of eventConditionProps.eventAttributes){
+    if(props.category === ConditionCategory.DEVICE
+        || props.category === ConditionCategory.GEO
+        || props.category === ConditionCategory.TRAFFIC_SOURCE
+        || props.category === ConditionCategory.APP_INFO
+    ){
+      sql = sql.concat(`,${props.category}.${props.property}${builtInBigintColumns.includes(props.property) ? '::bigint' : '::varchar'} as ${props.category}_${props.property}`)
+    } else if(props.category === ConditionCategory.OTHER) {
+      sql = sql.concat(`,${props.property}${builtInBigintColumns.includes(props.property) ? '::bigint' : '::varchar'}  as  ${props.property}`)
+    }
+  }
+
+  return baseColumns.concat(sql);
+}
+
 export function _buildCommonPartSql(eventNames: string[], sqlParameters: SQLParameters,
   isEventPathAnalysis: boolean = false, isNodePathAnalysis: boolean = false, isRetentionAnalysis: boolean = false) : string {
 
@@ -1349,7 +1342,8 @@ export function _buildCommonPartSql(eventNames: string[], sqlParameters: SQLPara
   let baseUserDataSql = '';
   let eventColList: string[] = [];
 
-  const baseEventDataSql = _buildBaseEventDataSql(eventNames, sqlParameters, isEventPathAnalysis, isNodePathAnalysis);
+  const eventColumnsSql = _buildNecessaryEventColumnsSql(eventConditionProps);
+  const baseEventDataSql = _buildBaseEventDataSql(eventNames, sqlParameters, eventColumnsSql, isEventPathAnalysis, isNodePathAnalysis);
 
   if (eventConditionProps.hasEventAttribute) {
     const eventAttributes: ColumnAttribute[] = [];
@@ -1404,7 +1398,7 @@ export function _buildCommonPartSql(eventNames: string[], sqlParameters: SQLPara
             ${userOuterCol}
           from
           (
-            ${_buildBaseEventDataTableSQL(eventNames, sqlParameters, isEventPathAnalysis, isNodePathAnalysis)}
+            ${_buildBaseEventDataTableSQL(eventNames, sqlParameters, eventColumnsSql, isEventPathAnalysis, isNodePathAnalysis)}
           ) as event_base
           ${userOuterSql}
           where 1=1
@@ -1539,14 +1533,14 @@ function _buildEventNameClause(eventNames: string[], sqlParameters: SQLParameter
   return eventNameClause;
 }
 
-function _buildBaseEventDataTableSQL(eventNames: string[], sqlParameters: SQLParameters,
+function _buildBaseEventDataTableSQL(eventNames: string[], sqlParameters: SQLParameters, baseColumnsSql: string,
   isEventPathAnalysis: boolean = false, isNodePathAnalysis: boolean = false) {
   const eventDateSQL = _getEventDateSql(sqlParameters, 'event.');
   const eventNameClause = _buildEventNameClause(eventNames, sqlParameters, isEventPathAnalysis, isNodePathAnalysis);
 
   return `
     select
-      ${baseColumns},
+      ${baseColumnsSql},
       TO_CHAR(
       TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
       'YYYY-MM'
@@ -1575,12 +1569,12 @@ function _buildBaseEventDataTableSQL(eventNames: string[], sqlParameters: SQLPar
   `;
 }
 
-function _buildBaseEventDataSql(eventNames: string[], sqlParameters: SQLParameters,
+function _buildBaseEventDataSql(eventNames: string[], sqlParameters: SQLParameters, eventColumnsSql: string,
   isEventPathAnalysis: boolean = false, isNodePathAnalysis: boolean = false) {
 
   return `
     event_base as (
-      ${_buildBaseEventDataTableSQL(eventNames, sqlParameters, isEventPathAnalysis, isNodePathAnalysis)}
+      ${_buildBaseEventDataTableSQL(eventNames, sqlParameters, eventColumnsSql, isEventPathAnalysis, isNodePathAnalysis)}
   ),
   `;
 }
