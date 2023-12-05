@@ -506,7 +506,7 @@ public final class TransformerV2 {
                         col(USER_PSEUDO_ID),
                         col(EVENT_TIMESTAMP),
                         coalesce(col(USER_FIRST_TOUCH_TIMESTAMP), col(EVENT_TIMESTAMP)).alias(USER_FIRST_TOUCH_TIMESTAMP)
-                ).withColumn(FIRST_VISIT_DATE, timestamp_seconds(col(USER_FIRST_TOUCH_TIMESTAMP).$div(1000)));
+                );
 
         long newUserCount = newUniqueUserDataset.count();
         log.info("newUniqueUserDataset: " + newUserCount);
@@ -583,16 +583,17 @@ public final class TransformerV2 {
                 .join(userChannelDataset, userIdJoinForChannel, "left");
 
         log.info("joinedPossibleUpdateUserDataset:" + joinedPossibleUpdateUserDataset.count());
-        Dataset<Row> joinedPossibleUpdateUserDatasetRt = joinedPossibleUpdateUserDataset.select(
+        Dataset<Row> joinedPossibleUpdateUserDatasetRt = joinedPossibleUpdateUserDataset
+                .select(
                 appIdCol,
                 newUniqueUserDataset.col(EVENT_DATE),
                 newUniqueUserDataset.col(EVENT_TIMESTAMP),
                 col(USER_ID),
                 userPseudoIdCol,
-                newUniqueUserDataset.col(USER_FIRST_TOUCH_TIMESTAMP),
+                        newUniqueUserDataset.col(USER_FIRST_TOUCH_TIMESTAMP),
                 col(USER_PROPERTIES),
                 col(USER_LTV),
-                newUniqueUserDataset.col(FIRST_VISIT_DATE),
+                timestamp_seconds(newUniqueUserDataset.col(USER_FIRST_TOUCH_TIMESTAMP).$div(1000)).cast(DataTypes.DateType).alias(FIRST_VISIT_DATE),
                 substring(col(COL_PAGE_REFERER), 0, MAX_STRING_VALUE_LEN).alias(FIRST_REFERER),
                 col(TRAFFIC_SOURCE_NAME).alias("_first_traffic_source_type"),
                 col(TRAFFIC_SOURCE_MEDIUM).alias("_first_traffic_medium"),

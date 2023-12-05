@@ -36,12 +36,14 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.zip.GZIPInputStream;
 
 import static java.util.Objects.requireNonNull;
+import static org.apache.spark.sql.functions.coalesce;
 import static org.apache.spark.sql.functions.col;
 import static org.apache.spark.sql.functions.udf;
 import static org.apache.spark.sql.functions.from_json;
@@ -70,6 +72,9 @@ public class Cleaner {
 
     private static UDF1<String, String> extractData() {
         return data -> {
+            if (data == null) {
+                return "[\"error: data is null\"]";
+            }
             // input data is not compress, is raw json array
             String dataTrim = data.trim();
             if (dataTrim.startsWith("[") && dataTrim.endsWith("]")) {
