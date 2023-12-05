@@ -963,8 +963,8 @@ describe('Metadata Event test', () => {
                 name: `${MOCK_EVENT_PARAMETER_NAME}12`,
                 eventName: `${MOCK_EVENT_NAME}1`,
                 displayName: {
-                  'en-US': `${ConditionCategory.EVENT}.${MOCK_EVENT_PARAMETER_NAME}12`,
-                  'zh-CN': `${ConditionCategory.EVENT}.${MOCK_EVENT_PARAMETER_NAME}12`,
+                  'en-US': `[${ConditionCategory.EVENT}] ${MOCK_EVENT_PARAMETER_NAME}12`,
+                  'zh-CN': `[${ConditionCategory.EVENT}] ${MOCK_EVENT_PARAMETER_NAME}12`,
                 },
                 description: {
                   'en-US': '',
@@ -1409,8 +1409,8 @@ describe('Metadata Event Attribute test', () => {
               'zh-CN': '',
             },
             displayName: {
-              'en-US': `${ConditionCategory.EVENT}.${MOCK_EVENT_PARAMETER_NAME}1`,
-              'zh-CN': `${ConditionCategory.EVENT}.${MOCK_EVENT_PARAMETER_NAME}1`,
+              'en-US': `[${ConditionCategory.EVENT}] ${MOCK_EVENT_PARAMETER_NAME}1`,
+              'zh-CN': `[${ConditionCategory.EVENT}] ${MOCK_EVENT_PARAMETER_NAME}1`,
             },
             eventName: `${MOCK_EVENT_NAME}1`,
             category: ConditionCategory.EVENT,
@@ -1669,8 +1669,8 @@ describe('Metadata User Attribute test', () => {
               'zh-CN': '',
             },
             displayName: {
-              'en-US': `${ConditionCategory.USER_OUTER}.${MOCK_USER_ATTRIBUTE_NAME}1`,
-              'zh-CN': `${ConditionCategory.USER_OUTER}.${MOCK_USER_ATTRIBUTE_NAME}1`,
+              'en-US': `[${ConditionCategory.USER_OUTER}] ${MOCK_USER_ATTRIBUTE_NAME}1`,
+              'zh-CN': `[${ConditionCategory.USER_OUTER}] ${MOCK_USER_ATTRIBUTE_NAME}1`,
             },
             category: ConditionCategory.USER_OUTER,
             metadataSource: MetadataSource.CUSTOM,
