@@ -185,6 +185,32 @@ describe('User test', () => {
     expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 1);
   });
 
+  it('Update user with XSS', async () => {
+    tokenMock(ddbMock, false).resolvesOnce({});
+    ddbMock.on(GetCommand).resolvesOnce({
+      Item: {
+        id: MOCK_USER_ID,
+        deleted: false,
+      },
+    });
+    const res = await request(app)
+      .put(`/api/user/${MOCK_USER_ID}`)
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
+      .send({
+        id: MOCK_USER_ID,
+        name: '<script>alert(1)</script>',
+        roles: [IUserRole.OPERATOR],
+        operator: DEFAULT_SOLUTION_OPERATOR,
+        deleted: false,
+      });
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(400);
+    expect(res.body.message).toEqual('Parameter verification failed.');
+    expect(res.body.success).toEqual(false);
+    expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 1);
+    expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 1);
+  });
+
   it('Delete user', async () => {
     tokenMock(ddbMock, false);
     ddbMock.on(GetCommand,
