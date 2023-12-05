@@ -100,4 +100,4 @@ And it happened when creating DataSource(AWS::QuickSight::DataSource).
 
 **Resolution:**
 
-Login control plane and click "Retry" button in pipeline detail information page
+Login solution web console and click "Retry" button in pipeline detail information page
