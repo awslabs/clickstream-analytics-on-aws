@@ -78,7 +78,7 @@ aws logs put-resource-policy --policy-name AWSLogDeliveryWrite20150319 \
 
 > Connection attempt timed out
 
-并且发生在CloudFormation试图创建数据源的过程中(AWS::QuickSight::DataSource)。
+并且发生在CloudFormation试图创建数据源(AWS::QuickSight::DataSource)的过程中。
 
 **解决方法：**
 
