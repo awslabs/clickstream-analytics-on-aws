@@ -17,8 +17,8 @@ import { StackManager } from './stack';
 import { DEFAULT_DASHBOARD_NAME, DEFAULT_SOLUTION_OPERATOR, OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN, OUTPUT_REPORT_DASHBOARDS_SUFFIX, QUICKSIGHT_ANALYSIS_INFIX, QUICKSIGHT_DASHBOARD_INFIX, QUICKSIGHT_RESOURCE_NAME_PREFIX } from '../common/constants-ln';
 import { logger } from '../common/powertools';
 import { aws_sdk_client_common_config } from '../common/sdk-client-config-ln';
-import { ApiFail, ApiSuccess, PipelineStackType, PipelineStatusType } from '../common/types';
-import { getReportingDashboardsUrl, getStackOutputFromPipelineStatus, isEmpty, paginateData } from '../common/utils';
+import { ApiFail, ApiSuccess, PipelineStackType } from '../common/types';
+import { getReportingDashboardsUrl, getStackOutputFromPipelineStatus, isEmpty, isFinallyPipelineStatus, paginateData } from '../common/utils';
 import { IApplication } from '../model/application';
 import { CPipeline, IPipeline } from '../model/pipeline';
 import { IDashboard, IProject } from '../model/project';
@@ -286,7 +286,7 @@ export class ProjectServ {
         const pipeline = new CPipeline(latestPipeline);
         const stackManager: StackManager = new StackManager(latestPipeline);
         const latestPipelineStatus = await stackManager.getPipelineStatus();
-        if (latestPipelineStatus.status !== PipelineStatusType.ACTIVE && latestPipelineStatus.status !== PipelineStatusType.FAILED) {
+        if (!isFinallyPipelineStatus(latestPipelineStatus.status)) {
           return res.status(400).json(new ApiFail('The pipeline current status does not allow delete.'));
         }
         await pipeline.delete();

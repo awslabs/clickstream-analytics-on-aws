@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { CloudFormationClient, DescribeStacksCommand, StackStatus } from '@aws-sdk/client-cloudformation';
 import { DeleteUserCommand, QuickSightClient } from '@aws-sdk/client-quicksight';
 import { DescribeExecutionCommand, ExecutionStatus, SFNClient, StartExecutionCommand } from '@aws-sdk/client-sfn';
 import {
@@ -31,12 +32,14 @@ import 'aws-sdk-client-mock-jest';
 const ddbMock = mockClient(DynamoDBDocumentClient);
 const sfnMock = mockClient(SFNClient);
 const quickSightMock = mockClient(QuickSightClient);
+const cloudFormationMock = mockClient(CloudFormationClient);
 
 describe('Project test', () => {
   beforeEach(() => {
     ddbMock.reset();
     sfnMock.reset();
     quickSightMock.reset();
+    cloudFormationMock.reset();
   });
   it('Create project', async () => {
     tokenMock(ddbMock, false);
@@ -526,6 +529,56 @@ describe('Project test', () => {
       name: MOCK_EXECUTION_ID,
       status: ExecutionStatus.FAILED,
       output: 'FAILED',
+    });
+    sfnMock.on(StartExecutionCommand).resolves({ executionArn: 'xxx' });
+    ddbMock.on(UpdateCommand).resolves({});
+    quickSightMock.on(DeleteUserCommand).resolves({});
+    const res = await request(app)
+      .delete(`/api/project/${MOCK_PROJECT_ID}`);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({
+      data: null,
+      success: true,
+      message: 'Project deleted.',
+    });
+    expect(quickSightMock).toHaveReceivedCommandTimes(DeleteUserCommand, 0);
+  });
+  it('Delete project and it status is warning', async () => {
+    projectExistedMock(ddbMock, true);
+    ddbMock.on(ScanCommand).resolves({
+      Items: [
+        { type: 'project-01' },
+        { type: 'project-02' },
+      ],
+    });
+    ddbMock.on(QueryCommand).resolvesOnce({
+      Items: [{
+        ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
+        lastAction: 'Update',
+      }],
+    }).resolvesOnce({
+      Items: [
+        { name: 'Project-01', id: '1' },
+        { name: 'Project-02', id: '2' },
+      ],
+    });
+    sfnMock.on(DescribeExecutionCommand).resolves({
+      executionArn: 'xx',
+      stateMachineArn: 'yy',
+      name: MOCK_EXECUTION_ID,
+      status: ExecutionStatus.FAILED,
+      output: 'FAILED',
+    });
+    cloudFormationMock.on(DescribeStacksCommand).resolves({
+      Stacks: [
+        {
+          StackName: 'test',
+          StackStatus: StackStatus.CREATE_COMPLETE,
+          StackStatusReason: '',
+          CreationTime: undefined,
+        },
+      ],
     });
     sfnMock.on(StartExecutionCommand).resolves({ executionArn: 'xxx' });
     ddbMock.on(UpdateCommand).resolves({});
