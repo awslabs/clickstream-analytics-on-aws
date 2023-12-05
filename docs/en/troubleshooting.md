@@ -92,7 +92,7 @@ You need to tune the EMR job default configuration, and please refer to the [con
 
 ## Problem: Reporting stack(Clickstream-Reporting-xxx) deployment fail
 
-If you found reporting stack deployment failed with message like 
+Reporting stack deployment failed with message like 
 
 > Connection attempt timed out
 
@@ -100,4 +100,4 @@ And it happened when creating DataSource(AWS::QuickSight::DataSource).
 
 **Resolution:**
 
-Login solution web console and click "Retry" button in pipeline detail information page
+Login solution web console and click "Retry" button in pipeline detail information page.
