@@ -13,7 +13,7 @@
 
 import express from 'express';
 import { body, header, query } from 'express-validator';
-import { defaultOrderValueValid, isAppId, isProjectId, isRequestIdExisted, isValidEmpty, isXSSRequest, validate } from '../common/request-valid';
+import { defaultOrderValueValid, isAppId, isProjectId, isRequestIdExisted, isValidEmpty, isXSSRequest, metadataDisplayLength, validate } from '../common/request-valid';
 import { MetadataEventParameterServ, MetadataEventServ, MetadataUserAttributeServ } from '../service/metadata';
 
 const router_metadata = express.Router();
@@ -24,7 +24,7 @@ const metadataUserAttributeServ: MetadataUserAttributeServ = new MetadataUserAtt
 router_metadata.put(
   '/display',
   validate([
-    body().custom(isValidEmpty).custom(isXSSRequest),
+    body().custom(isValidEmpty).custom(metadataDisplayLength).custom(isXSSRequest),
     body('projectId').custom(isProjectId),
     body('appId').custom(isAppId),
     body('id').custom(isValidEmpty),

@@ -28,7 +28,7 @@ export class MetadataEventServ {
       const { projectId, appId, id, displayName, description } = req.body;
       const result = await metadataDisplay.update({ id, projectId, appId, description, displayName } as IMetadataDisplay);
       if (!result) {
-        res.json(new ApiSuccess(null, 'Updated failed.'));
+        res.json(new ApiFail('Updated failed.'));
       }
       return res.json(new ApiSuccess(null, 'Updated success.'));
     } catch (error) {

@@ -17,7 +17,6 @@ import {
   PutCommand,
   QueryCommand,
   QueryCommandInput,
-  ScanCommand,
   UpdateCommand,
 } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
@@ -1067,66 +1066,6 @@ describe('Metadata Event test', () => {
       },
     });
   });
-  it('Update metadata display data', async () => {
-    tokenMock(ddbMock, false);
-    let res = await request(app)
-      .put('/api/metadata/display')
-      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
-      .send({
-        id: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}`,
-        projectId: MOCK_PROJECT_ID,
-        appId: MOCK_APP_ID,
-        description: 'Description of event',
-        displayName: 'display name of event 555',
-      });
-    ddbMock.on(UpdateCommand).resolves({});
-    ddbMock.on(ScanCommand).resolvesOnce({});
-    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toEqual({
-      data: null,
-      success: true,
-      message: 'Updated success.',
-    });
-    expect(ddbMock).toHaveReceivedCommandTimes(UpdateCommand, 1);
-  });
-  it('Update metadata display data with not body', async () => {
-    tokenMock(ddbMock, false);
-    metadataEventExistedMock(ddbMock, MOCK_PROJECT_ID, MOCK_APP_ID, true);
-    ddbMock.on(PutCommand).resolves({});
-    const res = await request(app)
-      .put('/api/metadata/display')
-      .set('X-Click-Stream-Request-Id', MOCK_TOKEN);
-    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
-    expect(res.statusCode).toBe(400);
-    expect(res.body).toEqual({
-      success: false,
-      message: 'Parameter verification failed.',
-      error: [
-        {
-          location: 'body',
-          msg: 'Value is empty.',
-          param: 'projectId',
-        },
-        {
-          location: 'body',
-          msg: 'Value is empty.',
-          param: 'appId',
-        },
-        {
-          location: 'body',
-          msg: 'Value is empty.',
-          param: 'id',
-        },
-        {
-          location: 'body',
-          msg: 'Value is empty.',
-          param: '',
-          value: {},
-        },
-      ],
-    });
-  });
 
   afterAll((done) => {
     server.close();
@@ -2022,6 +1961,86 @@ describe('Metadata Cache test', () => {
     expect(res2.statusCode).toBe(200);
     expect(ddbMock).toHaveReceivedCommandTimes(QueryCommand, 1);
     process.env.METADATA_CACHE = 'true';
+  });
+
+  afterAll((done) => {
+    server.close();
+    done();
+  });
+});
+
+describe('Metadata Display test', () => {
+  beforeEach(() => {
+    ddbMock.reset();
+  });
+
+  it('Update metadata display data', async () => {
+    tokenMock(ddbMock, false);
+    metadataEventExistedMock(ddbMock, MOCK_PROJECT_ID, MOCK_APP_ID, true);
+    ddbMock.on(UpdateCommand).resolves({});
+    ddbMock.on(QueryCommand).resolves({ Items: [] });
+    const res = await request(app)
+      .put('/api/metadata/display')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
+      .send({
+        id: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}`,
+        projectId: MOCK_PROJECT_ID,
+        appId: MOCK_APP_ID,
+        displayName: {
+          'en-US': 'display name of event event-mock',
+          'zh-CN': `${MOCK_EVENT_NAME}显示名称`,
+        },
+        description: {
+          'en-US': `Description of event ${MOCK_EVENT_NAME}`,
+          'zh-CN': `${MOCK_EVENT_NAME}说明`,
+        },
+      });
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({
+      data: null,
+      success: true,
+      message: 'Updated success.',
+    });
+    expect(ddbMock).toHaveReceivedCommandTimes(UpdateCommand, 1);
+    expect(ddbMock).toHaveReceivedCommandTimes(QueryCommand, 1);
+  });
+  it('Update metadata display data with not body', async () => {
+    tokenMock(ddbMock, false);
+    metadataEventExistedMock(ddbMock, MOCK_PROJECT_ID, MOCK_APP_ID, true);
+    ddbMock.on(PutCommand).resolves({});
+    const res = await request(app)
+      .put('/api/metadata/display')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(400);
+    expect(res.body.message).toEqual('Parameter verification failed.');
+  });
+
+  it('Update display name to long', async () => {
+    tokenMock(ddbMock, false);
+    metadataEventExistedMock(ddbMock, MOCK_PROJECT_ID, MOCK_APP_ID, true);
+    ddbMock.on(UpdateCommand).resolves({});
+    ddbMock.on(QueryCommand).resolves({ Items: [] });
+    const res = await request(app)
+      .put('/api/metadata/display')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
+      .send({
+        id: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}`,
+        projectId: MOCK_PROJECT_ID,
+        appId: MOCK_APP_ID,
+        displayName: {
+          'en-US': `${'a'.repeat(1025)}`,
+          'zh-CN': `${MOCK_EVENT_NAME}显示名称`,
+        },
+        description: {
+          'en-US': `Description of event ${MOCK_EVENT_NAME}`,
+          'zh-CN': `${MOCK_EVENT_NAME}说明`,
+        },
+      });
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(400);
+    expect(res.body.message).toEqual('Parameter verification failed.');
   });
 
   afterAll((done) => {
