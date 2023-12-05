@@ -18,6 +18,7 @@ import { APP_ID_PATTERN, EMAIL_PATTERN, MULTI_EMAIL_PATTERN, PROJECT_ID_PATTERN 
 import { validateXSS } from './stack-params-valid';
 import { ApiFail, AssumeRoleType } from './types';
 import { isEmpty } from './utils';
+import { IMetadataDisplay } from '../model/metadata';
 import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
 
@@ -257,6 +258,17 @@ export const isProjectId: CustomValidator = value => {
   const match = value.match(regexp);
   if (!match || value !== match[0]) {
     return Promise.reject(`Validation error: projectId: ${value} not match ${PROJECT_ID_PATTERN}. Please check and try again.`);
+  }
+  return true;
+};
+
+export const metadataDisplayLength: CustomValidator = value => {
+  const display = value as IMetadataDisplay;
+  if (display?.displayName['en-US'].length > 255 || display?.displayName['zh-CN'].length > 255) {
+    return Promise.reject('Validation error: displayName length must be less than 255.');
+  }
+  if (display?.description['en-US'].length > 1024 || display?.description['zh-CN'].length > 1024) {
+    return Promise.reject('Validation error: description length must be less than 1024.');
   }
   return true;
 };

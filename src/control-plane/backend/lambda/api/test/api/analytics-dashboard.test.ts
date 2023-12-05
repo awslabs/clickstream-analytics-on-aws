@@ -169,6 +169,43 @@ describe('Analytics dashboard test', () => {
     expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 1);
   });
 
+  it('Create dashboard name is too long', async () => {
+    tokenMock(ddbMock, false);
+    projectExistedMock(ddbMock, true);
+    let res = await request(app)
+      .post(`/api/project/${MOCK_PROJECT_ID}/${MOCK_APP_ID}/dashboard`)
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
+      .send({
+        name: `${'a'.repeat(256)}`,
+        appId: 'app1',
+        description: 'Description of dd-01',
+        region: 'ap-southeast-1',
+        sheets: [
+          { id: 's1', name: 'sheet1' },
+          { id: 's2', name: 'sheet2' },
+        ],
+      });
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(400);
+    expect(res.body.message).toEqual('Parameter verification failed.');
+
+    res = await request(app)
+      .post(`/api/project/${MOCK_PROJECT_ID}/${MOCK_APP_ID}/dashboard`)
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
+      .send({
+        name: 'name1',
+        appId: 'app1',
+        description: `${'a'.repeat(1025)}`,
+        region: 'ap-southeast-1',
+        sheets: [
+          { id: 's1', name: 'sheet1' },
+          { id: 's2', name: 'sheet2' },
+        ],
+      });
+    expect(res.statusCode).toBe(400);
+    expect(res.body.message).toEqual('Parameter verification failed.');
+  });
+
   it('List dashboards of project', async () => {
     ddbMock.on(QueryCommand).resolvesOnce({
       Items: [
