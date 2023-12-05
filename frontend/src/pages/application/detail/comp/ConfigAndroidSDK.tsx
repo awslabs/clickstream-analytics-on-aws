@@ -36,8 +36,8 @@ import {
   TEMPLATE_SERVER_ENDPOINT,
   TEMPLATE_APP_ID,
   TEMPLATE_ANDROID_SDK_VERSION,
-  buildSDKDocumentLink,
 } from 'ts/guideConst';
+import { buildDocumentLink } from 'ts/url';
 import { alertMsg, generateFileDownloadLink } from 'ts/utils';
 
 interface ConfigSDKProps {
@@ -191,7 +191,11 @@ const ConfigAndroidSDK: React.FC<ConfigSDKProps> = (props: ConfigSDKProps) => {
             sdkType: 'Android',
           })}
           <Link
-            href={buildSDKDocumentLink(i18n.language, '/sdk-manual/android')}
+            href={buildDocumentLink(
+              i18n.language,
+              '/android-sdk.html',
+              '/sdk-manual/android'
+            )}
             external
           >
             {t('application:sdkGuide.devGuide')}

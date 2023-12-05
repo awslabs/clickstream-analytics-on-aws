@@ -27,8 +27,8 @@ import {
   FLUTTER_INIT_SDK_TEXT,
   FLUTTER_RECORD_EVENT,
   FLUTTER_ADD_USER_ATTR,
-  buildSDKDocumentLink,
 } from 'ts/guideConst';
+import { buildDocumentLink } from 'ts/url';
 import { defaultStr } from 'ts/utils';
 
 interface ConfigSDKProps {
@@ -92,7 +92,11 @@ const ConfigFlutterSDK: React.FC<ConfigSDKProps> = (props: ConfigSDKProps) => {
             sdkType: 'Flutter',
           })}
           <Link
-            href={buildSDKDocumentLink(i18n.language, '/sdk-manual/flutter')}
+            href={buildDocumentLink(
+              i18n.language,
+              '/flutter-sdk.html',
+              '/sdk-manual/flutter'
+            )}
             external
           >
             {t('application:sdkGuide.devGuide')}

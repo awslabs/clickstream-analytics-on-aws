@@ -32,7 +32,7 @@ const ReSignIn: React.FC<ReSignInProps> = (props: ReSignInProps) => {
             action={
               <Button
                 onClick={() => {
-                  window.location.reload();
+                  window.location.href = '/';
                 }}
               >
                 {t('button.reload')}
