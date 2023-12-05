@@ -46,6 +46,7 @@ router_user.get(
 router_user.put(
   '/:id',
   validate([
+    body().custom(isValidEmpty).custom(isXSSRequest),
     body('id').custom(isEmail).custom(isUserValid),
     body('name').isLength({ max: 100 }),
     header('X-Click-Stream-Request-Id').custom(isRequestIdExisted),
