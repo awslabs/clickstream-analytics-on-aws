@@ -66,7 +66,7 @@ extra:
   source_repo: https://github.com/awslabs/clickstream-analytics-on-aws
   analytics:
     provider: custom
-    version: v0.6.0
+    version: v0.6.1
     endpoint: https://pipeline.clickstream.solutions.gcr.aws.dev/collect
     appId: docs
   version:

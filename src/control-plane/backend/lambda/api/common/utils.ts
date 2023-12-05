@@ -28,7 +28,7 @@ import {
 import { ConditionCategory, MetadataValueType } from './explore-types';
 import { BuiltInTagKeys } from './model-ln';
 import { logger } from './powertools';
-import { ALBRegionMappingObject, BucketPrefix, ClickStreamBadRequestError, ClickStreamSubnet, DataCollectionSDK, IUserRole, PipelineStackType, PipelineStatus, RPURange, RPURegionMappingObject, ReportingDashboardOutput, SubnetType } from './types';
+import { ALBRegionMappingObject, BucketPrefix, ClickStreamBadRequestError, ClickStreamSubnet, DataCollectionSDK, IUserRole, PipelineStackType, PipelineStatus, PipelineStatusType, RPURange, RPURegionMappingObject, ReportingDashboardOutput, SubnetType } from './types';
 import { IMetadataRaw, IMetadataRawValue, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute, IMetadataAttributeValue } from '../model/metadata';
 import { CPipelineResources, IPipeline } from '../model/pipeline';
 import { IUserSettings } from '../model/user';
@@ -930,6 +930,15 @@ function getStackVersion(pipeline: IPipeline, stackType: PipelineStackType): str
   return undefined;
 }
 
+function isFinallyPipelineStatus(status: PipelineStatusType) {
+  const finallyPipelineStatus = [
+    PipelineStatusType.ACTIVE,
+    PipelineStatusType.FAILED,
+    PipelineStatusType.WARNING,
+  ];
+  return finallyPipelineStatus.includes(status);
+}
+
 export {
   isEmpty,
   isEmail,
@@ -972,4 +981,5 @@ export {
   getAppRegistryApplicationArn,
   deserializeContext,
   pipelineAnalysisStudioEnabled,
+  isFinallyPipelineStatus,
 };

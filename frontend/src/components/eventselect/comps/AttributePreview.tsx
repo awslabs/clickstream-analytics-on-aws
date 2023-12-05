@@ -81,6 +81,14 @@ const AttributePreview: React.FC<AttributePreviewProps> = (
                 </div>
               </div>
             )}
+            {previewItem.category && (
+              <div className="info-tem">
+                <div className="info-key">
+                  {t('analytics:labels.previewCategory')}
+                </div>
+                <div className="info-value">{previewItem.category}</div>
+              </div>
+            )}
             <div className="info-tem">
               <div className="info-key">
                 {t('analytics:labels.previewUpdateTime')}

@@ -44,6 +44,7 @@ if __name__ == '__main__':
     if configure.APP_ID == "" or configure.ENDPOINT == "":
         print("Error: please config your appId and endpoint")
     else:
+        print("Your configuration is:\nappId: " + configure.APP_ID + "\nendpoint: " + configure.ENDPOINT)
         start_time = utils.current_timestamp()
         # init all user
         all_user_count = app_provider.get_all_user_count()
@@ -80,4 +81,5 @@ if __name__ == '__main__':
                 utils.current_timestamp() - start_gen_day_user_event_time) + "\n")
 
         print("job finished, upload " + str(total_events_count) + " events, cost: " +
-              str(utils.current_timestamp() - start_time) + "ms")
+              str(utils.current_timestamp() - start_time) + "ms\n")
+        print("Your configuration is:\nappId: " + configure.APP_ID + "\nendpoint: " + configure.ENDPOINT)
