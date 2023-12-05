@@ -2500,6 +2500,15 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#clickstream-reporting-xxx" class="md-nav__link">
+    <span class="md-ellipsis">
+      问题: 报表堆栈(Clickstream-Reporting-xxx) 部署失败
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -2716,6 +2725,15 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#clickstream-reporting-xxx" class="md-nav__link">
+    <span class="md-ellipsis">
+      问题: 报表堆栈(Clickstream-Reporting-xxx) 部署失败
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -2794,6 +2812,14 @@
 </blockquote>
 <p><strong>解决方法：</strong></p>
 <p>这是因为replication factor 大于brokers总数造成的，请编辑 MSK 集群配置，设置 <strong>default.replication.factor</strong> 不大于brokers总数。</p>
+<h2 id="clickstream-reporting-xxx">问题: 报表堆栈(Clickstream-Reporting-xxx) 部署失败</h2>
+<p>如果报表堆栈部署失败并有如下所示的错误消息</p>
+<blockquote>
+<p>Connection attempt timed out</p>
+</blockquote>
+<p>并且发生在CloudFormation试图创建数据源(AWS::QuickSight::DataSource)的过程中。</p>
+<p><strong>解决方法：</strong></p>
+<p>登录解决方案控制台，在管道详情页点击"重试"按钮。</p>
 
 
   
