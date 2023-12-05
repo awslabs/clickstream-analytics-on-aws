@@ -294,7 +294,7 @@ const AnalyticsHeader: React.FC<IHeaderProps> = (props: IHeaderProps) => {
           overflowMenuTriggerText: defaultStr(t('header.more')),
           overflowMenuTitleText: defaultStr(t('header.all')),
           overflowMenuBackIconAriaLabel: defaultStr(t('header.back')),
-          overflowMenuDismissIconAriaLabel: defaultStr(t('header.close??Menu')),
+          overflowMenuDismissIconAriaLabel: defaultStr(t('header.closeMenu')),
         }}
       />
       <div className="flex center">
