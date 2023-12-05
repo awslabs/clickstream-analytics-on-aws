@@ -536,7 +536,7 @@ describe('Metadata Event test', () => {
             projectId: MOCK_PROJECT_ID,
             appId: MOCK_APP_ID,
             category: ConditionCategory.DEVICE,
-            metadataSource: MetadataSource.CUSTOM,
+            metadataSource: MetadataSource.PRESET,
             name: `${MOCK_EVENT_PARAMETER_NAME}11`,
             eventName: MOCK_EVENT_NAME,
             displayName: {
@@ -932,7 +932,7 @@ describe('Metadata Event test', () => {
                 appId: MOCK_APP_ID,
                 projectId: MOCK_PROJECT_ID,
                 hasData: true,
-                metadataSource: MetadataSource.CUSTOM,
+                metadataSource: MetadataSource.PRESET,
                 name: `${MOCK_EVENT_PARAMETER_NAME}11`,
                 eventName: `${MOCK_EVENT_NAME}1`,
                 description: {
@@ -1486,7 +1486,7 @@ describe('Metadata Event Attribute test', () => {
             },
             eventName: `${MOCK_EVENT_NAME}`,
             category: ConditionCategory.DEVICE,
-            metadataSource: MetadataSource.CUSTOM,
+            metadataSource: MetadataSource.PRESET,
             parameterType: MetadataParameterType.PUBLIC,
             hasData: false,
             platform: [],

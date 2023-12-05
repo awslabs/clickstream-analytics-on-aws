@@ -110,7 +110,7 @@ export class CMetadataDisplay {
       parameter.displayName = publicEventParameter.displayName;
       parameter.description = publicEventParameter.description;
     }
-    parameter.metadataSource = presetEventParameter ? MetadataSource.PRESET : MetadataSource.CUSTOM;
+    parameter.metadataSource = (presetEventParameter || publicEventParameter) ? MetadataSource.PRESET : MetadataSource.CUSTOM;
     parameter.parameterType = publicEventParameter ? MetadataParameterType.PUBLIC : MetadataParameterType.PRIVATE;
   }
 
