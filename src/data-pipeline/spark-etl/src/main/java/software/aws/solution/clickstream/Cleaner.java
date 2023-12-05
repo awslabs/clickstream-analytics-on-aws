@@ -70,6 +70,9 @@ public class Cleaner {
 
     private static UDF1<String, String> extractData() {
         return data -> {
+            if (data == null) {
+                return "[\"error: data is null\"]";
+            }
             // input data is not compress, is raw json array
             String dataTrim = data.trim();
             if (dataTrim.startsWith("[") && dataTrim.endsWith("]")) {
