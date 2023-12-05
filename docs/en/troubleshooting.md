@@ -89,3 +89,15 @@ If the data processing job implemented by EMR serverless fails with the below er
     > Job failed, please check complete logs in configured logging destination. ExitCode: 1. Last few exceptions: org.apache.spark.SparkException: Could not find CoarseGrainedScheduler.
 
 You need to tune the EMR job default configuration, and please refer to the [configure execution parameters](./pipeline-mgmt/data-processing/configure-execution-para.md#config-spark-job-parameters).
+
+## Problem: Reporting stack(Clickstream-Reporting-xxx) deployment fail
+
+If you found reporting stack deployment failed with message like 
+
+> Connection attempt timed out
+
+And it happened when creating DataSource(AWS::QuickSight::DataSource).
+
+**Resolution:**
+
+Login control plane and click "Retry" button in pipeline detail information page
