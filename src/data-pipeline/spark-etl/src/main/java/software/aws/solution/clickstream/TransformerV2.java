@@ -505,9 +505,8 @@ public final class TransformerV2 {
                         col(EVENT_DATE),
                         col(USER_PSEUDO_ID),
                         col(EVENT_TIMESTAMP),
-                        col(USER_FIRST_TOUCH_TIMESTAMP),
-                        to_date(timestamp_seconds(col(USER_FIRST_TOUCH_TIMESTAMP).$div(1000))).alias(FIRST_VISIT_DATE)
-                );
+                        coalesce(col(USER_FIRST_TOUCH_TIMESTAMP), col(EVENT_TIMESTAMP)).alias(USER_FIRST_TOUCH_TIMESTAMP)
+                ).withColumn(FIRST_VISIT_DATE, timestamp_seconds(col(USER_FIRST_TOUCH_TIMESTAMP).$div(1000)));
 
         long newUserCount = newUniqueUserDataset.count();
         log.info("newUniqueUserDataset: " + newUserCount);
