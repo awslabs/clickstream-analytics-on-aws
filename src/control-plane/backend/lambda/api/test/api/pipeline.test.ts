@@ -73,10 +73,11 @@ import {
   BASE_STATUS,
   S3_DATA_PROCESSING_WITH_ERROR_PREFIX_PIPELINE,
   RETRY_PIPELINE_WITH_WORKFLOW_AND_ROLLBACK_COMPLETE,
+  MSK_DATA_PROCESSING_NEW_SERVERLESS_PIPELINE_WITH_WORKFLOW,
 } from './pipeline-mock';
 import { FULL_SOLUTION_VERSION, clickStreamTableName, dictionaryTableName, prefixTimeGSIName } from '../../common/constants';
 import { BuiltInTagKeys } from '../../common/model-ln';
-import { PipelineStatusType } from '../../common/types';
+import { PipelineServerProtocol, PipelineStatusType } from '../../common/types';
 import { app, server } from '../../index';
 import 'aws-sdk-client-mock-jest';
 
@@ -3243,7 +3244,9 @@ describe('Pipeline test', () => {
         subnetsCross3AZ: true,
         subnetsIsolated: true,
         update: true,
-        updatePipeline: { ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW },
+        updatePipeline: {
+          ...MSK_DATA_PROCESSING_NEW_SERVERLESS_PIPELINE_WITH_WORKFLOW,
+        },
       });
     cloudFormationMock.on(DescribeStacksCommand).resolves({
       Stacks: [
@@ -3276,7 +3279,21 @@ describe('Pipeline test', () => {
     ddbMock.on(TransactWriteItemsCommand).resolves({});
     let res = await request(app)
       .put(`/api/pipeline/${MOCK_PIPELINE_ID}`)
-      .send({ ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW });
+      .send({
+        ...MSK_DATA_PROCESSING_NEW_SERVERLESS_PIPELINE_WITH_WORKFLOW,
+        ingestionServer: {
+          ...MSK_DATA_PROCESSING_NEW_SERVERLESS_PIPELINE_WITH_WORKFLOW.ingestionServer,
+          loadBalancer: {
+            ...MSK_DATA_PROCESSING_NEW_SERVERLESS_PIPELINE_WITH_WORKFLOW.ingestionServer.loadBalancer,
+            protocol: PipelineServerProtocol.HTTP,
+            enableApplicationLoadBalancerAccessLog: false,
+            notificationsTopicArn: 'arn:aws:sns:us-east-1:111122223333:test-modify',
+            enableGlobalAccelerator: false,
+            serverCorsOrigin: '*',
+            serverEndpointPath: '/collect-modify',
+          },
+        },
+      });
     expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 6);
     expect(ddbMock).toHaveReceivedCommandTimes(TransactWriteItemsCommand, 1);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
