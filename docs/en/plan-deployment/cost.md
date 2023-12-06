@@ -37,28 +37,28 @@ Ingestion module includes the following cost components:
 
 Key assumptions include:
 
-- Request payload: 1KB (compressed, 1:10 ratio)
+- Compressed request payload: 2KB (10 events per request)
 - MSK configurations (m5.large * 2)
-- KDS configuration (on-demand, provision - shard 2)
+- KDS configuration (on-demand, provision)
 - 10/100/1000RPS
 
 | Request Per Second | ALB cost | EC2 cost  |  Buffer type      | Buffer cost | S3 cost   |  Total (USD/Month) |
 | ------------------ | --- | ---  |  --------------   | ----------- | ---  |  --------- |
-| 10RPS              |  $7  |  $122 |  Kinesis (On-Demand) |    $36       |   $3  |     $168  |
-|                    |  $7  |  $122 |  Kinesis (Provisioned 2 shard)   |      $22       |  $3   |   $154  |
-|                    |  $7  |  $122 |  MSK (m5.large * 2, connector MCU * 1)   |       $417      |   $3  |     $549   |
-|                         | $7    |  $122 |  None              |             |  $3    |      $132   |
-|100RPS           |  $43  |  $122  |  Kinesis(On-demand)              |      $86       |  $3   |     $254 |
-|                         | $43    |   $122 |  Kinesis (Provisioned 2 shard)   |      $26       | $3    |     $194  |
-|           |   $43  |  $122  |   MSK (m5.large * 2, connector MCU * 1)              |      $417       |  $3   |     $585
-|           |   $43  |  $122 |      None              |             |  $3    |     $168
-|1000RPS           |   $396  |   $122 |      Kinesis(On-demand)              |      $576       |  $14   |    $1108 |
-|                         |  $396   |  $122  |  Kinesis (Provisioned 10 shard)   |    $146         |   $14  |     $678  |
-|           |  $396   | $122  |      MSK (m5.large * 2, connector MCU * 2~3)              |      $530       |  $14  |     $1062
-|           |  $396   | $122   |      None              |            |  $14   |     $532
+| 10RPS (49GB/month)             |  $18  |  $122 |  Kinesis (On-Demand) |    $38       |   $3  |     $181  |
+|                    |  $18  |  $122 |  Kinesis (Provisioned 2 shard)   |      $22       |  $3   |   $165  |
+|                    |  $18  |  $122 |  MSK (m5.large * 2, connector MCU * 1)   |       $417      |   $3  |     $560   |
+|                         | $18    |  $122 |  None              |             |  $3    |      $143   |
+|100RPS (490GB/month)          |  $43  |  $122  |  Kinesis(On-demand)              |      $115       |  $4   |     $284 |
+|                         | $43    |   $122 |  Kinesis (Provisioned 2 shard)   |      $26       | $4    |     $195  |
+|           |   $43  |  $122  |   MSK (m5.large * 2, connector MCU * 1)              |      $417       |  $4   |     $586
+|           |   $43  |  $122 |      None              |             |  $4    |     $169
+|1000RPS (4900GB/month)          |   $252  |   $122 |      Kinesis(On-demand)              |      $1051       |  $14   |    $1439 |
+|                         |  $252   |  $122  |  Kinesis (Provisioned 10 shard)   |    $180         |   $14  |     $568  |
+|           |  $252   | $122  |      MSK (m5.large * 2, connector MCU * 2~3)              |      $590       |  $14  |     $978
+|           |  $252   | $122   |      None              |            |  $14   |     $388 
 
 ### Data transfer
-There are associated costs when data is transferred from EC2 to the downstream data sink. Below is an example of data transfer costs based on 1000 RPS and a 1KB request payload.
+There are associated costs when data is transferred from EC2 to the downstream data sink. Below is an example of data transfer costs based on 1000 RPS and a 2KB request payload.
 
 1. EC2 Network In: This does not incur any costs.
 2. EC2 Network Out: There are three data sink options:
@@ -66,9 +66,9 @@ There are associated costs when data is transferred from EC2 to the downstream d
     | Data Sink Type | Way to access data sink |  Dimensions |   Total (USD/Month) |
     | ------------------ | --- | --- | ---  |  
     | S3         |  S3 Gateway endpoints | The S3 Gateway endpoints does not incur any costs   | $0  |  
-    | MSK          |  |  Data processed cost ($0.010 per GB in/out/between EC2 AZs)  | $105  |       
-    | KDS          |  NAT |  NAT fixed cost: $64 (2 Availability Zones and a NAT per AZ, $0.045 per NAT Gateway Hour). <br> Data processed cost: $601 ($0.045 per GB Data Processed by NAT Gateways).  | $665  | 
-    | KDS          |  VPC Endpoint |  VPC Endpoint fixed cost: $14.62 (Availability Zones $0.01 per AZ Hour). <br> Data processed cost: $133.5 ($0.01 per GB Data Processed by Interface endpoints).  | $148.1  | 
+    | MSK          |  |  Data processed cost ($0.010 per GB in/out/between EC2 AZs)  | $210  |       
+    | KDS          |  NAT |  NAT fixed cost: $64 (2 Availability Zones and a NAT per AZ, $0.045 per NAT Gateway Hour). <br> Data processed cost: $1201 ($0.045 per GB Data Processed by NAT Gateways).  | $1266  | 
+    | KDS          |  VPC Endpoint |  VPC Endpoint fixed cost: $14.62 (Availability Zones $0.01 per AZ Hour). <br> Data processed cost: $267 ($0.01 per GB Data Processed by Interface endpoints).  | $281.62  | 
 
     We suggest using a [VPC endpoint](https://docs.aws.amazon.com/whitepapers/latest/aws-privatelink/what-are-vpc-endpoints.html) for the KDS data sink. For more information on using the VPC endpoint, please refer to the VPC endpoint documentation. 
 
@@ -88,37 +88,14 @@ Key assumptions include:
 
 | Request Per Second | EMR schedule interval |  EMR Cost | Redshift type            | Redshift cost | Total (USD/Month) |
 | ----------------------- | --------------------- | ---------------- | -------- | ------------------------ |  ----- |
-| 10RPS             | Hourly                |     $28     | Serverless (8 based RPU) |     $68          |   $96    |
-|                         | 6-hourly              |     $10.8     | Serverless(8 based RPU)               |      $11        |   $21.8    |
-|                         | Daily                 |      $9.6    | Serverless(8 based RPU)               |     $3          |   $12.6    |
-| 100RPS             | Hourly                |      $72   | Serverless (8 based RPU) |       $70        |  $142    |
-|                         | 6-hourly              |     $61.2     | Serverless(8 based RPU)               |       $17.2        |   $78.4    |
-|                         | Daily                 |     $43.7     | Serverless(8 based RPU)               |       $12.4        |    $56.1   |
-| 1000RPS             | Hourly                |      $842   | Serverless (8 based RPU) |       $172        |  $1014    |
-|              | 6-Hourly                |      $579   | Serverless (8 based RPU) |       $137        |  $716    |
-| <span style="background-color: lightgray">The EMR for this case is configured as below.</span>              | Daily               |     $642   | Serverless (8 based RPU) |        $94       |   $736   |
-
-!!! info "Note"
-    For the cost of 1000 PRS Daily, we used below EMR configuration.
-
-    ```json
-    {
-    "sparkConfig": [
-            "spark.emr-serverless.executor.disk=200g",
-            "spark.executor.instances=16",
-            "spark.dynamicAllocation.initialExecutors=16",
-            "spark.executor.memory=100g",
-            "spark.executor.cores=16",
-            "spark.network.timeout=10000000",
-            "spark.executor.heartbeatInterval=10000000",
-            "spark.shuffle.registration.timeout=120000",
-            "spark.shuffle.registration.maxAttempts=5",
-            "spark.shuffle.file.buffer=2m",
-            "spark.shuffle.unsafe.file.output.buffer=1m"
-        ],
-        "inputRePartitions": 800
-    }
-    ```
+| 10RPS             | Hourly                |     $61 ($1.24/GB)    | Serverless (8 based RPU) |     $104          |   $165    |
+|                         | 6-hourly              |     $40.9 ($0.83/GB)     | Serverless(8 based RPU)               |      $16        |   $56.9    |
+|                         | Daily                 |      $34.3 ($0.7/GB)   | Serverless(8 based RPU)               |     $11          |   $45.3    |
+| 100RPS             | Hourly                |      $403 ($0.82/GB)   | Serverless (8 based RPU) |       $170        |  $573    |
+|                         | 6-hourly              |     $192 ($0.39/GB)     | Serverless(8 based RPU)               |       $119        |   $311    |
+|                         | Daily                 |     $245 ($0.5/GB)     | Serverless(8 based RPU)               |       $78        |    $323   |
+| 1000RPS             | Hourly                |      $2815 ($0.57/GB)   | Serverless (32 based RPU) |       $668        |  $3483    |
+|              | 8-Hourly               |      $2604 ($0.53/GB)   | Serverless (32 based RPU) |       $359        |  $2963    |
 
 ## Reporting module
 
@@ -130,13 +107,13 @@ Key assumptions include
 
 - QuickSight Enterprise subscription
 - Exclude Q cost
+- Access through **Analytics Studio**
 - **Two authors** with monthly subscription
-- **Ten readers** with 22 working days per month, 5% active readers, 50% frequent readers, 25%  occasional readers, 20% inactive readers
 - 10GB SPICE capacity
 
-| Daily data volume/RPS | Authors | Readers | SPICE | Total cost (USD/Month) |
-| --------------------- | ------- | ------- | ----- | ----- |
-| All size              | 48      | 18.80   |   0   | $66.80 |
+| Daily data volume/RPS | Authors |  SPICE | Total cost (USD/Month) |
+| --------------------- | ------- |  ----- | ----- |
+| All size              | $48      |    0   | $48 |
 
 !!! info "Note"
     All your data pipelines are applied to the above QuickSight costs, even the visualizations managed outside the solution.
@@ -165,9 +142,9 @@ Key assumptions:
 
 | Request Per Second | Fixed hourly cost | Data transfer cost | Total cost (USD/Month) |
 | --------------------- | ----------------- | ------------------ | ---------- |
-| 10RPS           |        $18           |          $0.3          |       $18.3     |
-| 100RPS         |          $18         |           $3         |      $21      |
-| 1000RPS       |            $18       |            $30        |      $48      |
+| 10RPS           |        $18           |          $0.6          |       $18.6     |
+| 100RPS         |          $18         |           $6         |      $24      |
+| 1000RPS       |            $18       |            $60        |      $78      |
 
 ### Application Load Balancer Access log
 
