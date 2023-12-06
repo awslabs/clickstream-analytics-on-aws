@@ -48,7 +48,6 @@ const emrServerlessClient = new EMRServerlessClient({
 });
 
 export const handler = async (event: CloudFormationCustomResourceEvent, context: Context) => {
-  logger.info(JSON.stringify(event));
   try {
     const res = await _handler(event, context);
     logger.info('lambda returned', { res });

@@ -55,7 +55,6 @@ export interface CheckMetadataWorkflowEvent {
   };
  */
 export const handler = async (event: CheckMetadataWorkflowEvent) => {
-  logger.debug('request event:', JSON.stringify(event));
   try {
     const eventSource = event.originalInput.eventSource;
     const hasRunningExecution: boolean = await hasOtherRunningExecutions(event.executionId);

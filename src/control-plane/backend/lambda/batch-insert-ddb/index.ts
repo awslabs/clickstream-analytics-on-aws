@@ -47,7 +47,6 @@ export const handler = async (
   event: CdkCustomResourceEvent,
   context: Context,
 ): Promise<CdkCustomResourceResponse> => {
-  logger.info('Lambda is invoked', JSON.stringify(event, null, 2));
 
   const response: CdkCustomResourceResponse = {
     StackId: event.StackId,

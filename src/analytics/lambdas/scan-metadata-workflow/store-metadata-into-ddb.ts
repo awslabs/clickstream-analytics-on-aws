@@ -46,8 +46,6 @@ const ddbDocClient = DynamoDBDocumentClient.from(ddbClient);
  * @returns.
  */
 export const handler = async (event: StoreMetadataEvent) => {
-  logger.debug('request event:', JSON.stringify(event));
-
   const appId = event.detail.appId;
   const metadataItems: any[] = [];
   try {

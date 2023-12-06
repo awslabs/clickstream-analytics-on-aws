@@ -42,7 +42,6 @@ interface SfnStackCallback {
 }
 
 export const handler = async (event: any): Promise<any> => {
-  logger.info('Lambda is invoked', JSON.stringify(event, null, 2));
   try {
     const eventData = event.MapRun? event.Data: event;
     if (eventData.Type === 'Pass') {

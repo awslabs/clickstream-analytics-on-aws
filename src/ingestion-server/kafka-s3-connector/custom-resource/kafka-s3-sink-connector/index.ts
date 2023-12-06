@@ -86,7 +86,6 @@ interface ResourcePropertiesType {
 type ResourceEvent = CloudFormationCustomResourceEvent;
 
 export const handler = async (event: ResourceEvent, context: Context) => {
-  logger.info(JSON.stringify(event));
   const { connectorName } = getResourceName(event);
   try {
     await _handler(event, context);
@@ -102,11 +101,9 @@ export const handler = async (event: ResourceEvent, context: Context) => {
   }
 };
 
-async function _handler(event: ResourceEvent, context: Context) {
+async function _handler(event: ResourceEvent, _context: Context) {
+  logger.injectLambdaContext();
   let requestType = event.RequestType;
-  logger.info('functionName: ' + context.functionName);
-
-  logger.info('RequestType: ' + requestType);
   if (requestType == 'Create') {
     await onCreate(event);
   }
@@ -291,7 +288,7 @@ async function createConnector(event: ResourceEvent, customPluginArn: string) {
     },
     serviceExecutionRoleArn: props.s3SinkConnectorRole,
   });
-  logger.info(JSON.stringify(command));
+  logger.info('command', {command});
   let resConnectorArn;
   try {
     let res = await kafkaConnectClient.send(command);
@@ -383,7 +380,7 @@ function getConnectorConfiguration(
     };
   }
 
-  logger.info('configuration:' + JSON.stringify(configuration));
+  logger.info('Configuration:', {configuration})
 
   return configuration;
 }
@@ -391,7 +388,7 @@ function getConnectorConfiguration(
 async function onUpdate(event: CloudFormationCustomResourceEvent) {
   logger.info('onUpdate()');
   const properties = event.ResourceProperties;
-  logger.info(JSON.stringify(properties));
+  logger.info('properties', {properties})
   try {
     await updateConnector(event);
   } catch (e: any) {
@@ -466,7 +463,8 @@ async function updateConnector(event: ResourceEvent) {
 async function onDelete(event: ResourceEvent) {
   logger.info('onDelete()');
   const properties = event.ResourceProperties;
-  logger.info(JSON.stringify(properties));
+
+  logger.info('properties', {properties})
 
   await deleteConnector(event);
   await deletePlugin(event);

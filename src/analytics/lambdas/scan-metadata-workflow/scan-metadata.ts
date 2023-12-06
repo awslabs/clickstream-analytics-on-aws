@@ -37,7 +37,6 @@ export interface ScanMetadataEvent {
   @returns The query_id and relevant properties.
  */
 export const handler = async (event: ScanMetadataEvent) => {
-  logger.debug('request event:', JSON.stringify(event));
   const redshiftProps = getRedshiftProps(
     process.env.REDSHIFT_MODE!,
     REDSHIFT_DATABASE,

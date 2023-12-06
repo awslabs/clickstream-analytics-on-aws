@@ -15,7 +15,6 @@ import parser from 'cron-parser';
 import { logger } from '../../../common/powertools';
 
 export const handler: CdkCustomResourceHandler = async (event) => {
-  logger.info(JSON.stringify(event));
   try {
     return await _handler(event);
   } catch (e) {
