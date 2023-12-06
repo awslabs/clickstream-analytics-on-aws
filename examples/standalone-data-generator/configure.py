@@ -12,6 +12,7 @@ and limitations under the License.
 """
 import json
 import enums
+import os
 
 # application type, you can switch to `enums.Application.Shopping` to send shopping events.
 APP_TYPE = enums.Application.Shopping
@@ -58,9 +59,11 @@ ENDPOINT = ""
 
 
 def init_config():
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    config_path = os.path.join(script_dir, 'amplifyconfiguration.json')
     global APP_ID, ENDPOINT, IS_GZIP, REQUEST_SLEEP_TIME, MAX_UPLOAD_THREAD_NUMBER, EVENTS_PER_REQUEST
     try:
-        with open('amplifyconfiguration.json') as file:
+        with open(config_path) as file:
             data = json.load(file)
             APP_ID = data['analytics']['plugins']['awsClickstreamPlugin']['appId']
             ENDPOINT = data['analytics']['plugins']['awsClickstreamPlugin']['endpoint']
