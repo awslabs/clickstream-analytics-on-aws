@@ -3553,10 +3553,12 @@ describe('Pipeline test', () => {
 
     ddbMock.on(TransactWriteItemsCommand).callsFake(input => {
       const expressionAttributeValues = input.TransactItems[1].Update.ExpressionAttributeValues;
+      const dataProcessingInput = expressionAttributeValues[':workflow'].M.Workflow.M.Branches.L[1].M.States.M.DataProcessing.M.Data.M.Input;
       const reportInput = expressionAttributeValues[':workflow'].M.Workflow.M.Branches.L[1].M.States.M.Reporting.M.Data.M.Input;
       expect(
         expressionAttributeValues[':templateVersion'].S === 'v1.0.0' &&
         expressionAttributeValues[':tags'].L[0].M.value.S === 'v1.0.0' &&
+        dataProcessingInput.M.Parameters.L[0].M.ParameterValue.S === 'software.aws.solution.clickstream.Transformer,software.aws.solution.clickstream.UAEnrichment,software.aws.solution.clickstream.IPEnrichment,test.aws.solution.main' &&
         reportInput.M.Parameters.L[0].M.ParameterValue.S === 'Admin/fakeUser' &&
         reportInput.M.Parameters.L[1].M.ParameterValue.S === 'arn:aws:quicksight:us-west-2:555555555555:user/default/Admin/fakeUser',
       ).toBeTruthy();

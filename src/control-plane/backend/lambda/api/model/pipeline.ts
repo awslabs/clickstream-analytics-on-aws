@@ -341,19 +341,25 @@ export class CPipeline {
       if (stackName.startsWith(`Clickstream-${PipelineStackType.REPORTING}`) && oldPipeline.templateVersion?.startsWith('v1.0')) {
         continue; // skip reporting stack when template version is v1.0
       }
-      if (stackName.startsWith(`Clickstream-${PipelineStackType.DATA_PROCESSING}`) && oldPipeline.templateVersion?.startsWith('v1.0')) {
-        continue; // skip reporting stack when template version is v1.0
-      }
       if (!editStacks.includes(stackName)) {
         editStacks.push(stackName);
       }
       if (!AllowedList.includes(paramName)) {
         notAllowEdit.push(paramName);
       } else {
+        let parameterValue = diffParameters.edited.find(p => p[0] === key)?.[1];
+        if (stackName.startsWith(`Clickstream-${PipelineStackType.DATA_PROCESSING}`) &&
+        paramName === 'TransformerAndEnrichClassNames' &&
+        oldPipeline.templateVersion?.startsWith('v1.0')) {
+          parameterValue = parameterValue.replace(
+            'software.aws.solution.clickstream.TransformerV2',
+            'software.aws.solution.clickstream.Transformer',
+          );
+        }
         editParameters.push({
           stackName: stackName,
           parameterKey: paramName,
-          parameterValue: diffParameters.edited.find(p => p[0] === key)?.[1],
+          parameterValue: parameterValue,
         });
       }
     }

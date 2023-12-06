@@ -1460,7 +1460,12 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_UPDATE_PIPELINE_WITH_WORKFLOW:
                   Region: 'ap-southeast-1',
                   TemplateURL: 'https://EXAMPLE-BUCKET.s3.us-east-1.amazonaws.com/clickstream-branch-main/feature-rel/main/default/data-pipeline-stack.template.json',
                   Action: 'Create',
-                  Parameters: [],
+                  Parameters: [
+                    {
+                      ParameterKey: 'TransformerAndEnrichClassNames',
+                      ParameterValue: 'software.aws.solution.clickstream.Transformer,software.aws.solution.clickstream.UAEnrichment,software.aws.solution.clickstream.IPEnrichment',
+                    },
+                  ],
                   StackName: `Clickstream-DataProcessing-${MOCK_PIPELINE_ID}`,
                 },
                 Callback: {
