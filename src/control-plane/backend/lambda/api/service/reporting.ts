@@ -733,21 +733,24 @@ export class ReportingService {
     } else {
       //update QuickSight analysis
       let newAnalysis;
-      if (query.analysisId) {
-        newAnalysis = await quickSight.updateAnalysis({
-          AwsAccountId: awsAccountId,
-          AnalysisId: query.analysisId,
-          Name: query.analysisName,
-          Definition: dashboard as AnalysisDefinition,
-        });
-      }
+      newAnalysis = await quickSight.updateAnalysis({
+        AwsAccountId: awsAccountId,
+        AnalysisId: query.analysisId,
+        Name: query.analysisName,
+        Definition: dashboard as AnalysisDefinition,
+      });
 
       //update QuickSight dashboard
       const newDashboard = await quickSight.updateDashboard({
         AwsAccountId: awsAccountId,
         DashboardId: query.dashboardId,
         Name: dashboardName,
-        Definition: dashboard,
+        SourceEntity: {
+          SourceTemplate: {
+            Arn: newAnalysis.Arn,
+            DataSetReferences: dataSetReferences,
+          }
+        }
       });
       const versionNumber = newDashboard.VersionArn?.substring(newDashboard.VersionArn?.lastIndexOf('/') + 1);
 
