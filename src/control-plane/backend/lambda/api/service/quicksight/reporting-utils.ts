@@ -28,6 +28,7 @@ import {
   ColumnConfiguration,
   SheetDefinition,
   GeoSpatialDataRole,
+  DataSetReference,
 } from '@aws-sdk/client-quicksight';
 import { AssumeRoleCommand, STSClient } from '@aws-sdk/client-sts';
 import Mustache from 'mustache';
@@ -46,6 +47,7 @@ export interface VisualProps {
   readonly visualId: string;
   readonly visual: Visual;
   readonly dataSetIdentifierDeclaration: DataSetIdentifierDeclaration[];
+  readonly dataSetReferences: DataSetReference[];
   readonly filterControl?: FilterControl;
   readonly parameterDeclarations?: ParameterDeclaration[];
   readonly filterGroup?: FilterGroup;

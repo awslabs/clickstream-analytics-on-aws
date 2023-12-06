@@ -13,10 +13,10 @@
 
 import { readFileSync } from 'fs';
 import { join } from 'path';
-import { AnalysisDefinition, AnalysisSummary, ConflictException, DashboardSummary, DashboardVersionDefinition, DataSetIdentifierDeclaration, DataSetSummary, InputColumn, QuickSight, ResourceStatus, ThrottlingException, paginateListAnalyses, paginateListDashboards, paginateListDataSets } from '@aws-sdk/client-quicksight';
+import { AnalysisDefinition, AnalysisSummary, ConflictException, DashboardSummary, DashboardVersionDefinition, DataSetIdentifierDeclaration, DataSetReference, DataSetSummary, InputColumn, QuickSight, ResourceStatus, ThrottlingException, paginateListAnalyses, paginateListDashboards, paginateListDataSets } from '@aws-sdk/client-quicksight';
 import { BatchExecuteStatementCommand, DescribeStatementCommand, StatusString } from '@aws-sdk/client-redshift-data';
 import { v4 as uuidv4 } from 'uuid';
-import { DataSetProps, analysisAdminPermissionActions, dashboardAdminPermissionActions } from './quicksight/dashboard-ln';
+import { DataSetProps, analysisAdminPermissionActions, dashboardAdminPermissionActions, waitForAnalysisChangeCompleted } from './quicksight/dashboard-ln';
 import {
   createDataSet,
   funnelVisualColumns,
@@ -660,6 +660,7 @@ export class ReportingService {
 
     //create quicksight dataset
     const dataSetIdentifierDeclaration: DataSetIdentifierDeclaration[] = [];
+    const dataSetReferences: DataSetReference[] = [];
     for (const datasetProps of datasetPropsArray) {
       const datasetOutput = await createDataSet(
         quickSight, awsAccountId!,
@@ -674,6 +675,10 @@ export class ReportingService {
         Identifier: datasetProps.tableName,
         DataSetArn: datasetOutput?.Arn,
       });
+      dataSetReferences.push({
+        DataSetArn: datasetOutput?.Arn,
+        DataSetPlaceholder: datasetProps.tableName,
+      })
 
       logger.info(`created dataset arn: ${JSON.stringify(datasetOutput?.Arn)}`);
     }
@@ -683,7 +688,7 @@ export class ReportingService {
     logger.info(`visualPropsArray[0] ${JSON.stringify(visualPropsArray[0])}`);
 
     const result = await this._buildDashboard(query, visualPropsArray, quickSight,
-      sheetId, resourceName, principals, dashboardCreateParameters);
+      sheetId, resourceName, principals, dashboardCreateParameters, dataSetReferences);
     for (let visualProps of visualPropsArray) {
       const visual: VisualMapProps = {
         name: visualProps.name,
@@ -697,7 +702,7 @@ export class ReportingService {
 
   private async _buildDashboard(query: any, visualPropsArray: VisualProps[], quickSight: QuickSight,
     sheetId: string, resourceName: string, principals: QuickSightUserArns,
-    dashboardCreateParameters: DashboardCreateParameters) {
+    dashboardCreateParameters: DashboardCreateParameters, dataSetReferences: DataSetReference[]) {
     // generate dashboard definition
     let dashboardDef: DashboardVersionDefinition;
     let dashboardName: string | undefined;
@@ -724,7 +729,7 @@ export class ReportingService {
     if (!query.dashboardId) {
       //create QuickSight analysis
       result = await this._createDashboard(quickSight, resourceName, principals, dashboard,
-        query, dashboardCreateParameters, sheetId);
+        query, dashboardCreateParameters, sheetId, dataSetReferences);
     } else {
       //update QuickSight analysis
       let newAnalysis;
@@ -795,7 +800,8 @@ export class ReportingService {
   }
 
   private async _createDashboard(quickSight: QuickSight, resourceName: string, principals: QuickSightUserArns,
-    dashboard: DashboardVersionDefinition, query: any, dashboardCreateParameters: DashboardCreateParameters, sheetId: string) {
+    dashboard: DashboardVersionDefinition, query: any, dashboardCreateParameters: DashboardCreateParameters
+    , sheetId: string, dataSetReferences: DataSetReference[]) {
     const analysisId = `${QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX}${uuidv4()}`;
     const newAnalysis = await quickSight.createAnalysis({
       AwsAccountId: awsAccountId,
@@ -808,6 +814,8 @@ export class ReportingService {
       Definition: dashboard as AnalysisDefinition,
     });
 
+    await waitForAnalysisChangeCompleted(quickSight, awsAccountId!, analysisId);
+
     //create QuickSight dashboard
     const dashboardId = `${QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX}${uuidv4()}`;
     const newDashboard = await quickSight.createDashboard({
@@ -818,7 +826,12 @@ export class ReportingService {
         Principal: principals.exploreUserArn,
         Actions: dashboardAdminPermissionActions,
       }],
-      Definition: dashboard,
+      SourceEntity: {
+        SourceTemplate: {
+          Arn: newAnalysis.Arn,
+          DataSetReferences: dataSetReferences,
+        }
+      }
     });
 
     let dashboardEmbedUrl = '';
