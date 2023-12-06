@@ -33,7 +33,7 @@ export interface ClearExpiredEventsEvent {
  * @returns The clear expired events results of query_id.
  */
 export const handler = async (event: ClearExpiredEventsEvent) => {
-  logger.debug('request event:', JSON.stringify(event));
+  logger.debug('request event:', {event});
 
   const queryId = event.detail.id;
   const appId = event.detail.appId;
