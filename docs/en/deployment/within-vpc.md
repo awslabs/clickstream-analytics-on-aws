@@ -49,6 +49,7 @@ You can use existing OpenID Connect (OIDC) provider or following [this guide][oi
     | PrivateSubnets | `<Requires input>` | Select the subnets in which the solution will be deployed. **Note**: You must choose two subnets across two AZs at least. |
     | OIDCClientId | `<Requires input>` | OpenID Connect client Id. |
     | OIDCProvider  | `<Requires input>` | OpenID Connect provider issuer. The issuer must begin with `https://` |
+    | Email | `<Requires input>` | Specify the email of the Administrator. |
 
 6. Choose **Next**.
 7. On the **Configure stack options** page, choose **Next**.

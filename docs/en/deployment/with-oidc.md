@@ -183,6 +183,7 @@ In [Step 2. Launch the stack](#step-2-launch-the-stack), enter the parameters be
         | ---------- | ---------------- | ------------------------------------------------------------ |
         | OIDCClientId | `<Requires input>` | OpenID Connect client Id. |
         | OIDCProvider  | `<Requires input>` | OpenID Connect provider issuer. The issuer must begin with `https://` |
+        | Email | `<Requires input>` | Specify the email of the Administrator. |
 
         !!! info "Important"
             {%
