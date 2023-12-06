@@ -68,7 +68,7 @@ const AnalyticsHeader: React.FC<IHeaderProps> = (props: IHeaderProps) => {
 
   const getSelectLabel = (label: string, analysisStudioEnabled: boolean) => {
     if (!analysisStudioEnabled) {
-      return `${label} (${t('analytics:labels.pipelineVersionNotSupport')})`;
+      return `${label} (${t('analytics:labels.analyticsStudioNotAvailable')})`;
     }
     return label;
   };

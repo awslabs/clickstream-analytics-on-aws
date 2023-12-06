@@ -258,7 +258,7 @@
     "defineMetrics": "定义指标",
     "realtimeStopped": "实时流已停止",
     "realtimeStarted": "实时流已启动",
-    "pipelineVersionNotSupport": "数据管道版本不支持",
+    "analyticsStudioNotAvailable": "分析工作坊不可用",
     "setStartNode": "设置起始节点",
     "participateNodes": "选择参与分析的节点",
     "includingOtherEvents": "包括其他事件",
