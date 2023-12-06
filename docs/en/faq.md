@@ -9,11 +9,7 @@ An AWS Solution that enables customers to build clickstream analytic system on A
 **Q: Can I use other SDK to send data to the pipeline created by this solution**<br>
 Yes, you can. The solution support users using third-party SDK to send data to the pipeline. Note that, if you want to enable data processing and modeling module when using a third-party SDK to send data, you will need to provide an transformation plugin to map third-party SDK's data structure to solution data schema. Please refer to [Custom plugin](./pipeline-mgmt/data-processing/configure-plugin.md) for more details.
 
-## Setup and configuration
-**Q: How can I create more users for this solution?**</br>
-If you launched the solution with Cognito User Pool, go to the AWS console, find the user pool created by the solution,
-and you can create more users. If you launched the solution with OpenID Connect (OIDC), you should add more users in the
-user pool managed by the OIDC provider. Note that all users have the same privileges. 
+## Analytics Studio
 
 **Q: Why is the Analytics Studio is not available?**</br>
 The reason for this prompt is due to the following two situations:
