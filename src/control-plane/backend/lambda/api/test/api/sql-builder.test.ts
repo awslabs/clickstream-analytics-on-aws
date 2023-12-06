@@ -30,21 +30,21 @@ describe('SQL Builder test', () => {
       conversionIntervalInSeconds: 10*60,
       eventAndConditions: [
         {
-          eventName: 'add_button_click',
+          eventName: 'view_item',
 
         },
         {
-          eventName: 'note_share',
+          eventName: 'add_to_cart',
 
         },
         {
-          eventName: 'note_export',
+          eventName: 'purchase',
 
         },
       ],
       timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('2023-10-10'),
+      timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
     });
 
@@ -56,97 +56,67 @@ describe('SQL Builder test', () => {
         from
           (
             select
-              event.event_date,
-              event.event_name,
-              event.event_id,
-              event_bundle_sequence_id::bigint as event_bundle_sequence_id,
-              event_previous_timestamp::bigint as event_previous_timestamp,
+              event_date,
+              event_name,
+              event_id,
               event_timestamp::bigint as event_timestamp,
-              ingest_timestamp,
-              event_value_in_usd,
-              app_info.app_id::varchar as app_info_app_id,
-              app_info.id::varchar as app_info_id,
-              app_info.install_source::varchar as app_info_install_source,
-              app_info.version::varchar as app_info_version,
-              app_info.sdk_name::varchar as app_info_sdk_name,
-              app_info.sdk_version::varchar as app_info_sdk_version,
-              device.vendor_id::varchar as device_vendor_id,
-              device.mobile_brand_name::varchar as device_mobile_brand_name,
-              device.mobile_model_name::varchar as device_mobile_model_name,
-              device.manufacturer::varchar as device_manufacturer,
-              device.screen_width::bigint as device_screen_width,
-              device.screen_height::bigint as device_screen_height,
-              device.viewport_height::bigint as device_viewport_height,
-              device.carrier::varchar as device_carrier,
-              device.network_type::varchar as device_network_type,
-              device.operating_system::varchar as device_operating_system,
-              device.operating_system_version::varchar as device_operating_system_version,
-              device.ua_browser::varchar as device_ua_browser,
-              device.ua_browser_version::varchar as device_ua_browser_version,
-              device.ua_os::varchar as device_ua_os,
-              device.ua_os_version::varchar as device_ua_os_version,
-              device.ua_device::varchar as device_ua_device,
-              device.ua_device_category::varchar as device_ua_device_category,
-              device.system_language::varchar as device_system_language,
-              device.time_zone_offset_seconds::bigint as device_time_zone_offset_seconds,
-              device.advertising_id::varchar as device_advertising_id,
-              device.host_name::varchar as device_host_name,
-              geo.continent::varchar as geo_continent,
-              geo.country::varchar as geo_country,
-              geo.city::varchar as geo_city,
-              geo.metro::varchar as geo_metro,
-              geo.region::varchar as geo_region,
-              geo.sub_continent::varchar as geo_sub_continent,
-              geo.locale::varchar as geo_locale,
-              platform,
-              project_id,
-              traffic_source.name::varchar as traffic_source_name,
-              traffic_source.medium::varchar as traffic_source_medium,
-              traffic_source.source::varchar as traffic_source_source,
-              COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
-              event.user_id,
-              TO_CHAR(
-                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
-                'YYYY-MM'
-              ) as month,
-              TO_CHAR(
-                date_trunc(
-                  'week',
-                  TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-                ),
-                'YYYY-MM-DD'
-              ) as week,
-              TO_CHAR(
-                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
-                'YYYY-MM-DD'
-              ) as day,
-              TO_CHAR(
-                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
-                'YYYY-MM-DD HH24'
-              ) || '00:00' as hour
+              COALESCE(r.user_id, l.user_pseudo_id) as user_pseudo_id,
+              r.user_id,
+              month,
+              week,
+              day,
+              hour
             from
-              app1.event as event
-          join (
-            select
-              user_pseudo_id,
-              user_id
-            from
-              app1.user_m_view
-            group by
-              user_pseudo_id,
-              user_id
-          ) as u on event.user_pseudo_id = u.user_pseudo_id
-            where
-              event.event_date >= date '2023-10-01'
-              and event.event_date <= date '2023-10-10'
-              and event.event_name in ('add_button_click', 'note_share', 'note_export')
+              (
+                select
+                  event_date,
+                  event_name,
+                  event_id,
+                  event_timestamp::bigint as event_timestamp,
+                  user_pseudo_id,
+                  TO_CHAR(
+                    TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+                    'YYYY-MM'
+                  ) as month,
+                  TO_CHAR(
+                    date_trunc(
+                      'week',
+                      TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
+                    ),
+                    'YYYY-MM-DD'
+                  ) as week,
+                  TO_CHAR(
+                    TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+                    'YYYY-MM-DD'
+                  ) as day,
+                  TO_CHAR(
+                    TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+                    'YYYY-MM-DD HH24'
+                  ) || '00:00' as hour
+                from
+                  app1.event as event
+                where
+                  event.event_date >= date '2023-10-01'
+                  and event.event_date <= date '2025-10-10'
+                  and event.event_name in ('view_item', 'add_to_cart', 'purchase')
+              ) as l
+              join (
+                select
+                  user_pseudo_id,
+                  user_id
+                from
+                  app1.user_m_view
+                group by
+                  user_pseudo_id,
+                  user_id
+              ) as r on l.user_pseudo_id = r.user_pseudo_id
           ) as event_base
         where
           1 = 1
           and (
-            (event_name = 'add_button_click')
-            or (event_name = 'note_share')
-            or (event_name = 'note_export')
+            (event_name = 'view_item')
+            or (event_name = 'add_to_cart')
+            or (event_name = 'purchase')
           )
       ),
       table_0 as (
@@ -164,7 +134,7 @@ describe('SQL Builder test', () => {
         from
           base_data base
         where
-          event_name = 'add_button_click'
+          event_name = 'view_item'
       ),
       table_1 as (
         select
@@ -177,7 +147,7 @@ describe('SQL Builder test', () => {
         from
           base_data base
         where
-          event_name = 'note_share'
+          event_name = 'add_to_cart'
       ),
       table_2 as (
         select
@@ -190,7 +160,7 @@ describe('SQL Builder test', () => {
         from
           base_data base
         where
-          event_name = 'note_export'
+          event_name = 'purchase'
       ),
       join_table as (
         select
@@ -214,25 +184,25 @@ describe('SQL Builder test', () => {
       )
     select
       DAY,
-      count(distinct user_pseudo_id_0) as add_button_click,
+      count(distinct user_pseudo_id_0) as view_item,
       (
         count(distinct user_pseudo_id_2)::decimal / NULLIF(count(distinct user_pseudo_id_0), 0)
       )::decimal(20, 4) as total_conversion_rate,
-      count(distinct user_pseudo_id_1) as note_share,
+      count(distinct user_pseudo_id_1) as add_to_cart,
       (
         count(distinct user_pseudo_id_1)::decimal / NULLIF(count(distinct user_pseudo_id_0), 0)
-      )::decimal(20, 4) as note_share_rate,
-      count(distinct user_pseudo_id_2) as note_export,
+      )::decimal(20, 4) as add_to_cart_rate,
+      count(distinct user_pseudo_id_2) as purchase,
       (
         count(distinct user_pseudo_id_2)::decimal / NULLIF(count(distinct user_pseudo_id_1), 0)
-      )::decimal(20, 4) as note_export_rate
+      )::decimal(20, 4) as purchase_rate
     from
       join_table
     group by
       DAY
     order by
       DAY,
-      add_button_click desc
+      view_item desc
     `.trim().replace(/ /g, ''));
 
   });
@@ -248,21 +218,21 @@ describe('SQL Builder test', () => {
       conversionIntervalInSeconds: 10*60,
       eventAndConditions: [
         {
-          eventName: 'add_button_click',
+          eventName: 'view_item',
 
         },
         {
-          eventName: 'note_share',
+          eventName: 'add_to_cart',
 
         },
         {
-          eventName: 'note_export',
+          eventName: 'purchase',
 
         },
       ],
       timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('2023-10-10'),
+      timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
     });
 
@@ -275,97 +245,67 @@ describe('SQL Builder test', () => {
         from
           (
             select
-              event.event_date,
-              event.event_name,
-              event.event_id,
-              event_bundle_sequence_id::bigint as event_bundle_sequence_id,
-              event_previous_timestamp::bigint as event_previous_timestamp,
+              event_date,
+              event_name,
+              event_id,
               event_timestamp::bigint as event_timestamp,
-              ingest_timestamp,
-              event_value_in_usd,
-              app_info.app_id::varchar as app_info_app_id,
-              app_info.id::varchar as app_info_id,
-              app_info.install_source::varchar as app_info_install_source,
-              app_info.version::varchar as app_info_version,
-              app_info.sdk_name::varchar as app_info_sdk_name,
-              app_info.sdk_version::varchar as app_info_sdk_version,
-              device.vendor_id::varchar as device_vendor_id,
-              device.mobile_brand_name::varchar as device_mobile_brand_name,
-              device.mobile_model_name::varchar as device_mobile_model_name,
-              device.manufacturer::varchar as device_manufacturer,
-              device.screen_width::bigint as device_screen_width,
-              device.screen_height::bigint as device_screen_height,
-              device.viewport_height::bigint as device_viewport_height,
-              device.carrier::varchar as device_carrier,
-              device.network_type::varchar as device_network_type,
-              device.operating_system::varchar as device_operating_system,
-              device.operating_system_version::varchar as device_operating_system_version,
-              device.ua_browser::varchar as device_ua_browser,
-              device.ua_browser_version::varchar as device_ua_browser_version,
-              device.ua_os::varchar as device_ua_os,
-              device.ua_os_version::varchar as device_ua_os_version,
-              device.ua_device::varchar as device_ua_device,
-              device.ua_device_category::varchar as device_ua_device_category,
-              device.system_language::varchar as device_system_language,
-              device.time_zone_offset_seconds::bigint as device_time_zone_offset_seconds,
-              device.advertising_id::varchar as device_advertising_id,
-              device.host_name::varchar as device_host_name,
-              geo.continent::varchar as geo_continent,
-              geo.country::varchar as geo_country,
-              geo.city::varchar as geo_city,
-              geo.metro::varchar as geo_metro,
-              geo.region::varchar as geo_region,
-              geo.sub_continent::varchar as geo_sub_continent,
-              geo.locale::varchar as geo_locale,
-              platform,
-              project_id,
-              traffic_source.name::varchar as traffic_source_name,
-              traffic_source.medium::varchar as traffic_source_medium,
-              traffic_source.source::varchar as traffic_source_source,
-              COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
-              event.user_id,
-              TO_CHAR(
-                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
-                'YYYY-MM'
-              ) as month,
-              TO_CHAR(
-                date_trunc(
-                  'week',
-                  TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-                ),
-                'YYYY-MM-DD'
-              ) as week,
-              TO_CHAR(
-                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
-                'YYYY-MM-DD'
-              ) as day,
-              TO_CHAR(
-                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
-                'YYYY-MM-DD HH24'
-              ) || '00:00' as hour
+              COALESCE(r.user_id, l.user_pseudo_id) as user_pseudo_id,
+              r.user_id,
+              month,
+              week,
+              day,
+              hour
             from
-              app1.event as event
-          join (
-            select
-              user_pseudo_id,
-              user_id
-            from
-              app1.user_m_view
-            group by
-              user_pseudo_id,
-              user_id
-          ) as u on event.user_pseudo_id = u.user_pseudo_id
-            where
-              event.event_date >= date '2023-10-01'
-              and event.event_date <= date '2023-10-10'
-              and event.event_name in ('add_button_click', 'note_share', 'note_export')
+              (
+                select
+                  event_date,
+                  event_name,
+                  event_id,
+                  event_timestamp::bigint as event_timestamp,
+                  user_pseudo_id,
+                  TO_CHAR(
+                    TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+                    'YYYY-MM'
+                  ) as month,
+                  TO_CHAR(
+                    date_trunc(
+                      'week',
+                      TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
+                    ),
+                    'YYYY-MM-DD'
+                  ) as week,
+                  TO_CHAR(
+                    TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+                    'YYYY-MM-DD'
+                  ) as day,
+                  TO_CHAR(
+                    TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+                    'YYYY-MM-DD HH24'
+                  ) || '00:00' as hour
+                from
+                  app1.event as event
+                where
+                  event.event_date >= date '2023-10-01'
+                  and event.event_date <= date '2025-10-10'
+                  and event.event_name in ('view_item', 'add_to_cart', 'purchase')
+              ) as l
+              join (
+                select
+                  user_pseudo_id,
+                  user_id
+                from
+                  app1.user_m_view
+                group by
+                  user_pseudo_id,
+                  user_id
+              ) as r on l.user_pseudo_id = r.user_pseudo_id
           ) as event_base
         where
           1 = 1
           and (
-            (event_name = 'add_button_click')
-            or (event_name = 'note_share')
-            or (event_name = 'note_export')
+            (event_name = 'view_item')
+            or (event_name = 'add_to_cart')
+            or (event_name = 'purchase')
           )
       ),
       table_0 as (
@@ -383,7 +323,7 @@ describe('SQL Builder test', () => {
         from
           base_data base
         where
-          event_name = 'add_button_click'
+          event_name = 'view_item'
       ),
       table_1 as (
         select
@@ -396,7 +336,7 @@ describe('SQL Builder test', () => {
         from
           base_data base
         where
-          event_name = 'note_share'
+          event_name = 'add_to_cart'
       ),
       table_2 as (
         select
@@ -409,7 +349,7 @@ describe('SQL Builder test', () => {
         from
           base_data base
         where
-          event_name = 'note_export'
+          event_name = 'purchase'
       ),
       join_table as (
         select
@@ -433,25 +373,25 @@ describe('SQL Builder test', () => {
       )
     select
       DAY,
-      count(distinct event_id_0) as add_button_click,
+      count(distinct event_id_0) as view_item,
       (
         count(distinct event_id_2)::decimal / NULLIF(count(distinct event_id_0), 0)
       )::decimal(20, 4) as total_conversion_rate,
-      count(distinct event_id_1) as note_share,
+      count(distinct event_id_1) as add_to_cart,
       (
         count(distinct event_id_1)::decimal / NULLIF(count(distinct event_id_0), 0)
-      )::decimal(20, 4) as note_share_rate,
-      count(distinct event_id_2) as note_export,
+      )::decimal(20, 4) as add_to_cart_rate,
+      count(distinct event_id_2) as purchase,
       (
         count(distinct event_id_2)::decimal / NULLIF(count(distinct event_id_1), 0)
-      )::decimal(20, 4) as note_export_rate
+      )::decimal(20, 4) as purchase_rate
     from
       join_table
     group by
       DAY
     order by
       DAY,
-      add_button_click desc
+      view_item desc
       `.trim().replace(/ /g, ''),
     );
 
@@ -468,221 +408,191 @@ describe('SQL Builder test', () => {
       conversionIntervalInSeconds: 10*60,
       eventAndConditions: [
         {
-          eventName: 'add_button_click',
+          eventName: 'view_item',
 
         },
         {
-          eventName: 'note_share',
+          eventName: 'add_to_cart',
 
         },
         {
-          eventName: 'note_export',
+          eventName: 'purchase',
 
         },
       ],
       timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('2023-10-10'),
+      timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
     });
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
-      base_data as (
-        select
-          event_base.*
-        from
-          (
-            select
-              event.event_date,
-              event.event_name,
-              event.event_id,
-              event_bundle_sequence_id::bigint as event_bundle_sequence_id,
-              event_previous_timestamp::bigint as event_previous_timestamp,
-              event_timestamp::bigint as event_timestamp,
-              ingest_timestamp,
-              event_value_in_usd,
-              app_info.app_id::varchar as app_info_app_id,
-              app_info.id::varchar as app_info_id,
-              app_info.install_source::varchar as app_info_install_source,
-              app_info.version::varchar as app_info_version,
-              app_info.sdk_name::varchar as app_info_sdk_name,
-              app_info.sdk_version::varchar as app_info_sdk_version,
-              device.vendor_id::varchar as device_vendor_id,
-              device.mobile_brand_name::varchar as device_mobile_brand_name,
-              device.mobile_model_name::varchar as device_mobile_model_name,
-              device.manufacturer::varchar as device_manufacturer,
-              device.screen_width::bigint as device_screen_width,
-              device.screen_height::bigint as device_screen_height,
-              device.viewport_height::bigint as device_viewport_height,
-              device.carrier::varchar as device_carrier,
-              device.network_type::varchar as device_network_type,
-              device.operating_system::varchar as device_operating_system,
-              device.operating_system_version::varchar as device_operating_system_version,
-              device.ua_browser::varchar as device_ua_browser,
-              device.ua_browser_version::varchar as device_ua_browser_version,
-              device.ua_os::varchar as device_ua_os,
-              device.ua_os_version::varchar as device_ua_os_version,
-              device.ua_device::varchar as device_ua_device,
-              device.ua_device_category::varchar as device_ua_device_category,
-              device.system_language::varchar as device_system_language,
-              device.time_zone_offset_seconds::bigint as device_time_zone_offset_seconds,
-              device.advertising_id::varchar as device_advertising_id,
-              device.host_name::varchar as device_host_name,
-              geo.continent::varchar as geo_continent,
-              geo.country::varchar as geo_country,
-              geo.city::varchar as geo_city,
-              geo.metro::varchar as geo_metro,
-              geo.region::varchar as geo_region,
-              geo.sub_continent::varchar as geo_sub_continent,
-              geo.locale::varchar as geo_locale,
-              platform,
-              project_id,
-              traffic_source.name::varchar as traffic_source_name,
-              traffic_source.medium::varchar as traffic_source_medium,
-              traffic_source.source::varchar as traffic_source_source,
-              COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
-              event.user_id,
-              TO_CHAR(
-                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
-                'YYYY-MM'
-              ) as month,
-              TO_CHAR(
-                date_trunc(
-                  'week',
-                  TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-                ),
-                'YYYY-MM-DD'
-              ) as week,
-              TO_CHAR(
-                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
-                'YYYY-MM-DD'
-              ) as day,
-              TO_CHAR(
-                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
-                'YYYY-MM-DD HH24'
-              ) || '00:00' as hour
-            from
-              app1.event as event
-          join (
-            select
-              user_pseudo_id,
-              user_id
-            from
-              app1.user_m_view
-            group by
-              user_pseudo_id,
-              user_id
-          ) as u on event.user_pseudo_id = u.user_pseudo_id
-            where
-              event.event_date >= date '2023-10-01'
-              and event.event_date <= date '2023-10-10'
-              and event.event_name in ('add_button_click', 'note_share', 'note_export')
-          ) as event_base
-        where
-          1 = 1
-          and (
-            (event_name = 'add_button_click')
-            or (event_name = 'note_share')
-            or (event_name = 'note_export')
-          )
-      ),
-      table_0 as (
-        select
-          month,
-          week,
-          day,
-          hour,
-          event_date as event_date_0,
-          event_name as event_name_0,
-          event_timestamp as event_timestamp_0,
-          event_id as event_id_0,
-          user_id as user_id_0,
-          user_pseudo_id as user_pseudo_id_0
-        from
-          base_data base
-        where
-          event_name = 'add_button_click'
-      ),
-      table_1 as (
-        select
-          event_date as event_date_1,
-          event_name as event_name_1,
-          event_timestamp as event_timestamp_1,
-          event_id as event_id_1,
-          user_id as user_id_1,
-          user_pseudo_id as user_pseudo_id_1
-        from
-          base_data base
-        where
-          event_name = 'note_share'
-      ),
-      table_2 as (
-        select
-          event_date as event_date_2,
-          event_name as event_name_2,
-          event_timestamp as event_timestamp_2,
-          event_id as event_id_2,
-          user_id as user_id_2,
-          user_pseudo_id as user_pseudo_id_2
-        from
-          base_data base
-        where
-          event_name = 'note_export'
-      ),
-      join_table as (
-        select
-          table_0.*,
-          table_1.event_id_1,
-          table_1.event_name_1,
-          table_1.user_pseudo_id_1,
-          table_1.event_timestamp_1,
-          table_2.event_id_2,
-          table_2.event_name_2,
-          table_2.user_pseudo_id_2,
-          table_2.event_timestamp_2
-        from
-          table_0
-          left outer join table_1 on table_0.user_pseudo_id_0 = table_1.user_pseudo_id_1
-          and table_1.event_timestamp_1 - table_0.event_timestamp_0 > 0
-          and TO_CHAR(
-            TIMESTAMP 'epoch' + cast(table_0.event_timestamp_0 / 1000 as bigint) * INTERVAL '1 second',
-            'YYYY-MM-DD'
-          ) = TO_CHAR(
-            TIMESTAMP 'epoch' + cast(table_1.event_timestamp_1 / 1000 as bigint) * INTERVAL '1 second',
-            'YYYY-MM-DD'
-          )
-          left outer join table_2 on table_1.user_pseudo_id_1 = table_2.user_pseudo_id_2
-          and table_2.event_timestamp_2 - table_1.event_timestamp_1 > 0
-          and TO_CHAR(
-            TIMESTAMP 'epoch' + cast(table_1.event_timestamp_1 / 1000 as bigint) * INTERVAL '1 second',
-            'YYYY-MM-DD'
-          ) = TO_CHAR(
-            TIMESTAMP 'epoch' + cast(table_2.event_timestamp_2 / 1000 as bigint) * INTERVAL '1 second',
-            'YYYY-MM-DD'
-          )
-      )
-    select
-      DAY,
-      count(distinct event_id_0) as add_button_click,
-      (
-        count(distinct event_id_2)::decimal / NULLIF(count(distinct event_id_0), 0)
-      )::decimal(20, 4) as total_conversion_rate,
-      count(distinct event_id_1) as note_share,
-      (
-        count(distinct event_id_1)::decimal / NULLIF(count(distinct event_id_0), 0)
-      )::decimal(20, 4) as note_share_rate,
-      count(distinct event_id_2) as note_export,
-      (
-        count(distinct event_id_2)::decimal / NULLIF(count(distinct event_id_1), 0)
-      )::decimal(20, 4) as note_export_rate
-    from
-      join_table
-    group by
-      DAY
-    order by
-      DAY,
-      add_button_click desc
+    base_data as (
+      select
+        event_base.*
+      from
+        (
+          select
+            event_date,
+            event_name,
+            event_id,
+            event_timestamp::bigint as event_timestamp,
+            COALESCE(r.user_id, l.user_pseudo_id) as user_pseudo_id,
+            r.user_id,
+            month,
+            week,
+            day,
+            hour
+          from
+            (
+              select
+                event_date,
+                event_name,
+                event_id,
+                event_timestamp::bigint as event_timestamp,
+                user_pseudo_id,
+                TO_CHAR(
+                  TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+                  'YYYY-MM'
+                ) as month,
+                TO_CHAR(
+                  date_trunc(
+                    'week',
+                    TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
+                  ),
+                  'YYYY-MM-DD'
+                ) as week,
+                TO_CHAR(
+                  TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+                  'YYYY-MM-DD'
+                ) as day,
+                TO_CHAR(
+                  TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+                  'YYYY-MM-DD HH24'
+                ) || '00:00' as hour
+              from
+                app1.event as event
+              where
+                event.event_date >= date '2023-10-01'
+                and event.event_date <= date '2025-10-10'
+                and event.event_name in ('view_item', 'add_to_cart', 'purchase')
+            ) as l
+            join (
+              select
+                user_pseudo_id,
+                user_id
+              from
+                app1.user_m_view
+              group by
+                user_pseudo_id,
+                user_id
+            ) as r on l.user_pseudo_id = r.user_pseudo_id
+        ) as event_base
+      where
+        1 = 1
+        and (
+          (event_name = 'view_item')
+          or (event_name = 'add_to_cart')
+          or (event_name = 'purchase')
+        )
+    ),
+    table_0 as (
+      select
+        month,
+        week,
+        day,
+        hour,
+        event_date as event_date_0,
+        event_name as event_name_0,
+        event_timestamp as event_timestamp_0,
+        event_id as event_id_0,
+        user_id as user_id_0,
+        user_pseudo_id as user_pseudo_id_0
+      from
+        base_data base
+      where
+        event_name = 'view_item'
+    ),
+    table_1 as (
+      select
+        event_date as event_date_1,
+        event_name as event_name_1,
+        event_timestamp as event_timestamp_1,
+        event_id as event_id_1,
+        user_id as user_id_1,
+        user_pseudo_id as user_pseudo_id_1
+      from
+        base_data base
+      where
+        event_name = 'add_to_cart'
+    ),
+    table_2 as (
+      select
+        event_date as event_date_2,
+        event_name as event_name_2,
+        event_timestamp as event_timestamp_2,
+        event_id as event_id_2,
+        user_id as user_id_2,
+        user_pseudo_id as user_pseudo_id_2
+      from
+        base_data base
+      where
+        event_name = 'purchase'
+    ),
+    join_table as (
+      select
+        table_0.*,
+        table_1.event_id_1,
+        table_1.event_name_1,
+        table_1.user_pseudo_id_1,
+        table_1.event_timestamp_1,
+        table_2.event_id_2,
+        table_2.event_name_2,
+        table_2.user_pseudo_id_2,
+        table_2.event_timestamp_2
+      from
+        table_0
+        left outer join table_1 on table_0.user_pseudo_id_0 = table_1.user_pseudo_id_1
+        and table_1.event_timestamp_1 - table_0.event_timestamp_0 > 0
+        and TO_CHAR(
+          TIMESTAMP 'epoch' + cast(table_0.event_timestamp_0 / 1000 as bigint) * INTERVAL '1 second',
+          'YYYY-MM-DD'
+        ) = TO_CHAR(
+          TIMESTAMP 'epoch' + cast(table_1.event_timestamp_1 / 1000 as bigint) * INTERVAL '1 second',
+          'YYYY-MM-DD'
+        )
+        left outer join table_2 on table_1.user_pseudo_id_1 = table_2.user_pseudo_id_2
+        and table_2.event_timestamp_2 - table_1.event_timestamp_1 > 0
+        and TO_CHAR(
+          TIMESTAMP 'epoch' + cast(table_1.event_timestamp_1 / 1000 as bigint) * INTERVAL '1 second',
+          'YYYY-MM-DD'
+        ) = TO_CHAR(
+          TIMESTAMP 'epoch' + cast(table_2.event_timestamp_2 / 1000 as bigint) * INTERVAL '1 second',
+          'YYYY-MM-DD'
+        )
+    )
+  select
+    DAY,
+    count(distinct event_id_0) as view_item,
+    (
+      count(distinct event_id_2)::decimal / NULLIF(count(distinct event_id_0), 0)
+    )::decimal(20, 4) as total_conversion_rate,
+    count(distinct event_id_1) as add_to_cart,
+    (
+      count(distinct event_id_1)::decimal / NULLIF(count(distinct event_id_0), 0)
+    )::decimal(20, 4) as add_to_cart_rate,
+    count(distinct event_id_2) as purchase,
+    (
+      count(distinct event_id_2)::decimal / NULLIF(count(distinct event_id_1), 0)
+    )::decimal(20, 4) as purchase_rate
+  from
+    join_table
+  group by
+    DAY
+  order by
+    DAY,
+    view_item desc
   `.trim().replace(/ /g, ''),
     );
 
@@ -698,24 +608,24 @@ describe('SQL Builder test', () => {
       conversionIntervalInSeconds: 10*60,
       eventAndConditions: [
         {
-          eventName: 'add_button_click',
+          eventName: 'view_item',
 
         },
         {
-          eventName: 'note_share',
+          eventName: 'add_to_cart',
 
         },
         {
-          eventName: 'note_export',
+          eventName: 'purchase',
 
         },
       ],
       timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('2023-10-10'),
+      timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
     });
-
+    
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
       base_data as (
@@ -724,97 +634,67 @@ describe('SQL Builder test', () => {
         from
           (
             select
-              event.event_date,
-              event.event_name,
-              event.event_id,
-              event_bundle_sequence_id::bigint as event_bundle_sequence_id,
-              event_previous_timestamp::bigint as event_previous_timestamp,
+              event_date,
+              event_name,
+              event_id,
               event_timestamp::bigint as event_timestamp,
-              ingest_timestamp,
-              event_value_in_usd,
-              app_info.app_id::varchar as app_info_app_id,
-              app_info.id::varchar as app_info_id,
-              app_info.install_source::varchar as app_info_install_source,
-              app_info.version::varchar as app_info_version,
-              app_info.sdk_name::varchar as app_info_sdk_name,
-              app_info.sdk_version::varchar as app_info_sdk_version,
-              device.vendor_id::varchar as device_vendor_id,
-              device.mobile_brand_name::varchar as device_mobile_brand_name,
-              device.mobile_model_name::varchar as device_mobile_model_name,
-              device.manufacturer::varchar as device_manufacturer,
-              device.screen_width::bigint as device_screen_width,
-              device.screen_height::bigint as device_screen_height,
-              device.viewport_height::bigint as device_viewport_height,
-              device.carrier::varchar as device_carrier,
-              device.network_type::varchar as device_network_type,
-              device.operating_system::varchar as device_operating_system,
-              device.operating_system_version::varchar as device_operating_system_version,
-              device.ua_browser::varchar as device_ua_browser,
-              device.ua_browser_version::varchar as device_ua_browser_version,
-              device.ua_os::varchar as device_ua_os,
-              device.ua_os_version::varchar as device_ua_os_version,
-              device.ua_device::varchar as device_ua_device,
-              device.ua_device_category::varchar as device_ua_device_category,
-              device.system_language::varchar as device_system_language,
-              device.time_zone_offset_seconds::bigint as device_time_zone_offset_seconds,
-              device.advertising_id::varchar as device_advertising_id,
-              device.host_name::varchar as device_host_name,
-              geo.continent::varchar as geo_continent,
-              geo.country::varchar as geo_country,
-              geo.city::varchar as geo_city,
-              geo.metro::varchar as geo_metro,
-              geo.region::varchar as geo_region,
-              geo.sub_continent::varchar as geo_sub_continent,
-              geo.locale::varchar as geo_locale,
-              platform,
-              project_id,
-              traffic_source.name::varchar as traffic_source_name,
-              traffic_source.medium::varchar as traffic_source_medium,
-              traffic_source.source::varchar as traffic_source_source,
-              COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
-              event.user_id,
-              TO_CHAR(
-                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
-                'YYYY-MM'
-              ) as month,
-              TO_CHAR(
-                date_trunc(
-                  'week',
-                  TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-                ),
-                'YYYY-MM-DD'
-              ) as week,
-              TO_CHAR(
-                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
-                'YYYY-MM-DD'
-              ) as day,
-              TO_CHAR(
-                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
-                'YYYY-MM-DD HH24'
-              ) || '00:00' as hour
+              COALESCE(r.user_id, l.user_pseudo_id) as user_pseudo_id,
+              r.user_id,
+              month,
+              week,
+              day,
+              hour
             from
-              app1.event as event
-          join (
-            select
-              user_pseudo_id,
-              user_id
-            from
-              app1.user_m_view
-            group by
-              user_pseudo_id,
-              user_id
-          ) as u on event.user_pseudo_id = u.user_pseudo_id
-            where
-              event.event_date >= date '2023-10-01'
-              and event.event_date <= date '2023-10-10'
-              and event.event_name in ('add_button_click', 'note_share', 'note_export')
+              (
+                select
+                  event_date,
+                  event_name,
+                  event_id,
+                  event_timestamp::bigint as event_timestamp,
+                  user_pseudo_id,
+                  TO_CHAR(
+                    TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+                    'YYYY-MM'
+                  ) as month,
+                  TO_CHAR(
+                    date_trunc(
+                      'week',
+                      TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
+                    ),
+                    'YYYY-MM-DD'
+                  ) as week,
+                  TO_CHAR(
+                    TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+                    'YYYY-MM-DD'
+                  ) as day,
+                  TO_CHAR(
+                    TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+                    'YYYY-MM-DD HH24'
+                  ) || '00:00' as hour
+                from
+                  app1.event as event
+                where
+                  event.event_date >= date '2023-10-01'
+                  and event.event_date <= date '2025-10-10'
+                  and event.event_name in ('view_item', 'add_to_cart', 'purchase')
+              ) as l
+              join (
+                select
+                  user_pseudo_id,
+                  user_id
+                from
+                  app1.user_m_view
+                group by
+                  user_pseudo_id,
+                  user_id
+              ) as r on l.user_pseudo_id = r.user_pseudo_id
           ) as event_base
         where
           1 = 1
           and (
-            (event_name = 'add_button_click')
-            or (event_name = 'note_share')
-            or (event_name = 'note_export')
+            (event_name = 'view_item')
+            or (event_name = 'add_to_cart')
+            or (event_name = 'purchase')
           )
       ),
       table_0 as (
@@ -832,7 +712,7 @@ describe('SQL Builder test', () => {
         from
           base_data base
         where
-          event_name = 'add_button_click'
+          event_name = 'view_item'
       ),
       table_1 as (
         select
@@ -845,7 +725,7 @@ describe('SQL Builder test', () => {
         from
           base_data base
         where
-          event_name = 'note_share'
+          event_name = 'add_to_cart'
       ),
       table_2 as (
         select
@@ -858,7 +738,7 @@ describe('SQL Builder test', () => {
         from
           base_data base
         where
-          event_name = 'note_export'
+          event_name = 'purchase'
       ),
       join_table as (
         select
@@ -894,25 +774,25 @@ describe('SQL Builder test', () => {
       )
     select
       DAY,
-      count(distinct event_id_0) as add_button_click,
+      count(distinct event_id_0) as view_item,
       (
         count(distinct event_id_2)::decimal / NULLIF(count(distinct event_id_0), 0)
       )::decimal(20, 4) as total_conversion_rate,
-      count(distinct event_id_1) as note_share,
+      count(distinct event_id_1) as add_to_cart,
       (
         count(distinct event_id_1)::decimal / NULLIF(count(distinct event_id_0), 0)
-      )::decimal(20, 4) as note_share_rate,
-      count(distinct event_id_2) as note_export,
+      )::decimal(20, 4) as add_to_cart_rate,
+      count(distinct event_id_2) as purchase,
       (
         count(distinct event_id_2)::decimal / NULLIF(count(distinct event_id_1), 0)
-      )::decimal(20, 4) as note_export_rate
+      )::decimal(20, 4) as purchase_rate
     from
       join_table
     group by
       DAY
     order by
       DAY,
-      add_button_click desc
+      view_item desc
   `.trim().replace(/ /g, ''),
     );
 
@@ -929,7 +809,7 @@ describe('SQL Builder test', () => {
       conversionIntervalInSeconds: 10*60,
       eventAndConditions: [
         {
-          eventName: 'add_button_click',
+          eventName: 'view_item',
           sqlCondition: {
             conditions: [{
               category: ConditionCategory.OTHER,
@@ -949,7 +829,7 @@ describe('SQL Builder test', () => {
           },
         },
         {
-          eventName: 'note_share',
+          eventName: 'add_to_cart',
           sqlCondition: {
             conditions: [{
               category: ConditionCategory.OTHER,
@@ -970,212 +850,19 @@ describe('SQL Builder test', () => {
 
         },
         {
-          eventName: 'note_export',
+          eventName: 'purchase',
         },
       ],
       timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('2023-10-10'),
+      timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
     });
 
+    console.log(sql)
+
     expect(sql.trim().replace(/ /g, '')).toEqual(`
-    with
-      base_data as (
-        select
-          event_base.*
-        from
-          (
-            select
-              event.event_date,
-              event.event_name,
-              event.event_id,
-              event_bundle_sequence_id::bigint as event_bundle_sequence_id,
-              event_previous_timestamp::bigint as event_previous_timestamp,
-              event_timestamp::bigint as event_timestamp,
-              ingest_timestamp,
-              event_value_in_usd,
-              app_info.app_id::varchar as app_info_app_id,
-              app_info.id::varchar as app_info_id,
-              app_info.install_source::varchar as app_info_install_source,
-              app_info.version::varchar as app_info_version,
-              app_info.sdk_name::varchar as app_info_sdk_name,
-              app_info.sdk_version::varchar as app_info_sdk_version,
-              device.vendor_id::varchar as device_vendor_id,
-              device.mobile_brand_name::varchar as device_mobile_brand_name,
-              device.mobile_model_name::varchar as device_mobile_model_name,
-              device.manufacturer::varchar as device_manufacturer,
-              device.screen_width::bigint as device_screen_width,
-              device.screen_height::bigint as device_screen_height,
-              device.viewport_height::bigint as device_viewport_height,
-              device.carrier::varchar as device_carrier,
-              device.network_type::varchar as device_network_type,
-              device.operating_system::varchar as device_operating_system,
-              device.operating_system_version::varchar as device_operating_system_version,
-              device.ua_browser::varchar as device_ua_browser,
-              device.ua_browser_version::varchar as device_ua_browser_version,
-              device.ua_os::varchar as device_ua_os,
-              device.ua_os_version::varchar as device_ua_os_version,
-              device.ua_device::varchar as device_ua_device,
-              device.ua_device_category::varchar as device_ua_device_category,
-              device.system_language::varchar as device_system_language,
-              device.time_zone_offset_seconds::bigint as device_time_zone_offset_seconds,
-              device.advertising_id::varchar as device_advertising_id,
-              device.host_name::varchar as device_host_name,
-              geo.continent::varchar as geo_continent,
-              geo.country::varchar as geo_country,
-              geo.city::varchar as geo_city,
-              geo.metro::varchar as geo_metro,
-              geo.region::varchar as geo_region,
-              geo.sub_continent::varchar as geo_sub_continent,
-              geo.locale::varchar as geo_locale,
-              platform,
-              project_id,
-              traffic_source.name::varchar as traffic_source_name,
-              traffic_source.medium::varchar as traffic_source_medium,
-              traffic_source.source::varchar as traffic_source_source,
-              COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
-              event.user_id,
-              TO_CHAR(
-                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
-                'YYYY-MM'
-              ) as month,
-              TO_CHAR(
-                date_trunc(
-                  'week',
-                  TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-                ),
-                'YYYY-MM-DD'
-              ) as week,
-              TO_CHAR(
-                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
-                'YYYY-MM-DD'
-              ) as day,
-              TO_CHAR(
-                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
-                'YYYY-MM-DD HH24'
-              ) || '00:00' as hour
-            from
-              app1.event as event
-          join (
-            select
-              user_pseudo_id,
-              user_id
-            from
-              app1.user_m_view
-            group by
-              user_pseudo_id,
-              user_id
-          ) as u on event.user_pseudo_id = u.user_pseudo_id
-            where
-              event.event_date >= date '2023-10-01'
-              and event.event_date <= date '2023-10-10'
-              and event.event_name in ('add_button_click', 'note_share', 'note_export')
-          ) as event_base
-        where
-          1 = 1
-          and (
-            (
-              event_name = 'add_button_click'
-              and (
-                platform = 'Android'
-                and device_screen_height <> 1400
-              )
-            )
-            or (
-              event_name = 'note_share'
-              and (
-                platform = 'Android'
-                and device_screen_height <> 1400
-              )
-            )
-            or (event_name = 'note_export')
-          )
-      ),
-      table_0 as (
-        select
-          month,
-          week,
-          day,
-          hour,
-          event_date as event_date_0,
-          event_name as event_name_0,
-          event_timestamp as event_timestamp_0,
-          event_id as event_id_0,
-          user_id as user_id_0,
-          user_pseudo_id as user_pseudo_id_0
-        from
-          base_data base
-        where
-          event_name = 'add_button_click'
-      ),
-      table_1 as (
-        select
-          event_date as event_date_1,
-          event_name as event_name_1,
-          event_timestamp as event_timestamp_1,
-          event_id as event_id_1,
-          user_id as user_id_1,
-          user_pseudo_id as user_pseudo_id_1
-        from
-          base_data base
-        where
-          event_name = 'note_share'
-      ),
-      table_2 as (
-        select
-          event_date as event_date_2,
-          event_name as event_name_2,
-          event_timestamp as event_timestamp_2,
-          event_id as event_id_2,
-          user_id as user_id_2,
-          user_pseudo_id as user_pseudo_id_2
-        from
-          base_data base
-        where
-          event_name = 'note_export'
-      ),
-      join_table as (
-        select
-          table_0.*,
-          table_1.event_id_1,
-          table_1.event_name_1,
-          table_1.user_pseudo_id_1,
-          table_1.event_timestamp_1,
-          table_2.event_id_2,
-          table_2.event_name_2,
-          table_2.user_pseudo_id_2,
-          table_2.event_timestamp_2
-        from
-          table_0
-          left outer join table_1 on table_0.user_pseudo_id_0 = table_1.user_pseudo_id_1
-          and table_1.event_timestamp_1 - table_0.event_timestamp_0 > 0
-          and table_1.event_timestamp_1 - table_0.event_timestamp_0 <= 600 * 1000
-          left outer join table_2 on table_1.user_pseudo_id_1 = table_2.user_pseudo_id_2
-          and table_2.event_timestamp_2 - table_1.event_timestamp_1 > 0
-          and table_2.event_timestamp_2 - table_0.event_timestamp_0 <= 600 * 1000
-      )
-    select
-      DAY,
-      count(distinct user_pseudo_id_0) as add_button_click,
-      (
-        count(distinct user_pseudo_id_2)::decimal / NULLIF(count(distinct user_pseudo_id_0), 0)
-      )::decimal(20, 4) as total_conversion_rate,
-      count(distinct user_pseudo_id_1) as note_share,
-      (
-        count(distinct user_pseudo_id_1)::decimal / NULLIF(count(distinct user_pseudo_id_0), 0)
-      )::decimal(20, 4) as note_share_rate,
-      count(distinct user_pseudo_id_2) as note_export,
-      (
-        count(distinct user_pseudo_id_2)::decimal / NULLIF(count(distinct user_pseudo_id_1), 0)
-      )::decimal(20, 4) as note_export_rate
-    from
-      join_table
-    group by
-      DAY
-    order by
-      DAY,
-      add_button_click desc
+    
   `.trim().replace(/ /g, ''),
     );
 
@@ -1192,7 +879,7 @@ describe('SQL Builder test', () => {
       conversionIntervalInSeconds: 10*60,
       eventAndConditions: [
         {
-          eventName: 'add_button_click',
+          eventName: 'view_item',
           sqlCondition: {
             conditions: [{
               category: ConditionCategory.OTHER,
@@ -1212,7 +899,7 @@ describe('SQL Builder test', () => {
           },
         },
         {
-          eventName: 'note_share',
+          eventName: 'add_to_cart',
           sqlCondition: {
             conditions: [{
               category: ConditionCategory.OTHER,
@@ -1233,249 +920,17 @@ describe('SQL Builder test', () => {
 
         },
         {
-          eventName: 'note_export',
+          eventName: 'purchase',
         },
       ],
       timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('2023-10-10'),
+      timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
     });
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
-    with
-      base_data as (
-        select
-          event_base.*
-        from
-          (
-            select
-              event.event_date,
-              event.event_name,
-              event.event_id,
-              event_bundle_sequence_id::bigint as event_bundle_sequence_id,
-              event_previous_timestamp::bigint as event_previous_timestamp,
-              event_timestamp::bigint as event_timestamp,
-              ingest_timestamp,
-              event_value_in_usd,
-              app_info.app_id::varchar as app_info_app_id,
-              app_info.id::varchar as app_info_id,
-              app_info.install_source::varchar as app_info_install_source,
-              app_info.version::varchar as app_info_version,
-              app_info.sdk_name::varchar as app_info_sdk_name,
-              app_info.sdk_version::varchar as app_info_sdk_version,
-              device.vendor_id::varchar as device_vendor_id,
-              device.mobile_brand_name::varchar as device_mobile_brand_name,
-              device.mobile_model_name::varchar as device_mobile_model_name,
-              device.manufacturer::varchar as device_manufacturer,
-              device.screen_width::bigint as device_screen_width,
-              device.screen_height::bigint as device_screen_height,
-              device.viewport_height::bigint as device_viewport_height,
-              device.carrier::varchar as device_carrier,
-              device.network_type::varchar as device_network_type,
-              device.operating_system::varchar as device_operating_system,
-              device.operating_system_version::varchar as device_operating_system_version,
-              device.ua_browser::varchar as device_ua_browser,
-              device.ua_browser_version::varchar as device_ua_browser_version,
-              device.ua_os::varchar as device_ua_os,
-              device.ua_os_version::varchar as device_ua_os_version,
-              device.ua_device::varchar as device_ua_device,
-              device.ua_device_category::varchar as device_ua_device_category,
-              device.system_language::varchar as device_system_language,
-              device.time_zone_offset_seconds::bigint as device_time_zone_offset_seconds,
-              device.advertising_id::varchar as device_advertising_id,
-              device.host_name::varchar as device_host_name,
-              geo.continent::varchar as geo_continent,
-              geo.country::varchar as geo_country,
-              geo.city::varchar as geo_city,
-              geo.metro::varchar as geo_metro,
-              geo.region::varchar as geo_region,
-              geo.sub_continent::varchar as geo_sub_continent,
-              geo.locale::varchar as geo_locale,
-              platform,
-              project_id,
-              traffic_source.name::varchar as traffic_source_name,
-              traffic_source.medium::varchar as traffic_source_medium,
-              traffic_source.source::varchar as traffic_source_source,
-              COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
-              event.user_id,
-              TO_CHAR(
-                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
-                'YYYY-MM'
-              ) as month,
-              TO_CHAR(
-                date_trunc(
-                  'week',
-                  TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-                ),
-                'YYYY-MM-DD'
-              ) as week,
-              TO_CHAR(
-                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
-                'YYYY-MM-DD'
-              ) as day,
-              TO_CHAR(
-                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
-                'YYYY-MM-DD HH24'
-              ) || '00:00' as hour
-            from
-              app1.event as event
-          join (
-            select
-              user_pseudo_id,
-              user_id
-            from
-              app1.user_m_view
-            group by
-              user_pseudo_id,
-              user_id
-          ) as u on event.user_pseudo_id = u.user_pseudo_id
-            where
-              event.event_date >= date '2023-10-01'
-              and event.event_date <= date '2023-10-10'
-              and event.event_name in ('add_button_click', 'note_share', 'note_export')
-          ) as event_base
-        where
-          1 = 1
-          and (
-            (
-              event_name = 'add_button_click'
-              and (
-                platform = 'Android'
-                and device_screen_height <> 1400
-              )
-            )
-            or (
-              event_name = 'note_share'
-              and (
-                platform = 'Android'
-                and device_screen_height <> 1400
-              )
-            )
-            or (event_name = 'note_export')
-          )
-      ),
-      table_0 as (
-        select
-          month,
-          week,
-          day,
-          hour,
-          event_date as event_date_0,
-          event_name as event_name_0,
-          event_timestamp as event_timestamp_0,
-          event_id as event_id_0,
-          user_id as user_id_0,
-          user_pseudo_id as user_pseudo_id_0
-        from
-          base_data base
-        where
-          event_name = 'add_button_click'
-      ),
-      table_1 as (
-        select
-          event_date as event_date_1,
-          event_name as event_name_1,
-          event_timestamp as event_timestamp_1,
-          event_id as event_id_1,
-          user_id as user_id_1,
-          user_pseudo_id as user_pseudo_id_1
-        from
-          base_data base
-        where
-          event_name = 'note_share'
-      ),
-      table_2 as (
-        select
-          event_date as event_date_2,
-          event_name as event_name_2,
-          event_timestamp as event_timestamp_2,
-          event_id as event_id_2,
-          user_id as user_id_2,
-          user_pseudo_id as user_pseudo_id_2
-        from
-          base_data base
-        where
-          event_name = 'note_export'
-      ),
-      join_table as (
-        select
-          table_0.*,
-          table_1.event_id_1,
-          table_1.event_name_1,
-          table_1.user_pseudo_id_1,
-          table_1.event_timestamp_1,
-          table_2.event_id_2,
-          table_2.event_name_2,
-          table_2.user_pseudo_id_2,
-          table_2.event_timestamp_2
-        from
-          table_0
-          left outer join table_1 on table_0.user_pseudo_id_0 = table_1.user_pseudo_id_1
-          and table_1.event_timestamp_1 - table_0.event_timestamp_0 > 0
-          and table_1.event_timestamp_1 - table_0.event_timestamp_0 <= 600 * 1000
-          left outer join table_2 on table_1.user_pseudo_id_1 = table_2.user_pseudo_id_2
-          and table_2.event_timestamp_2 - table_1.event_timestamp_1 > 0
-          and table_2.event_timestamp_2 - table_0.event_timestamp_0 <= 600 * 1000
-      ),
-      final_table as (
-        select
-          month,
-          week,
-          day,
-          hour,
-          event_id_0 as e_id_0,
-          '1_' || event_name_0 as e_name_0,
-          user_pseudo_id_0 as u_id_0,
-          event_id_1 as e_id_1,
-          '2_' || event_name_1 as e_name_1,
-          user_pseudo_id_1 as u_id_1,
-          event_id_2 as e_id_2,
-          '3_' || event_name_2 as e_name_2,
-          user_pseudo_id_2 as u_id_2
-        from
-          join_table
-        group by
-          month,
-          week,
-          day,
-          hour,
-          event_id_0,
-          '1_' || event_name_0,
-          user_pseudo_id_0,
-          event_id_1,
-          '2_' || event_name_1,
-          user_pseudo_id_1,
-          event_id_2,
-          '3_' || event_name_2,
-          user_pseudo_id_2
-      )
-    select
-      day::date as event_date,
-      e_name_0::varchar as event_name,
-      u_id_0::varchar as x_id
-    from
-      final_table
-    where
-      u_id_0 is not null
-    union all
-    select
-      day::date as event_date,
-      e_name_1::varchar as event_name,
-      u_id_1::varchar as x_id
-    from
-      final_table
-    where
-      u_id_1 is not null
-    union all
-    select
-      day::date as event_date,
-      e_name_2::varchar as event_name,
-      u_id_2::varchar as x_id
-    from
-      final_table
-    where
-      u_id_2 is not null
+   
   `.trim().replace(/ /g, ''),
     );
 
@@ -1489,221 +944,25 @@ describe('SQL Builder test', () => {
       specifyJoinColumn: false,
       eventAndConditions: [
         {
-          eventName: 'add_button_click',
+          eventName: 'view_item',
           computeMethod: ExploreComputeMethod.USER_CNT,
         },
         {
-          eventName: 'note_share',
+          eventName: 'add_to_cart',
           computeMethod: ExploreComputeMethod.EVENT_CNT,
         },
         {
-          eventName: 'note_export',
+          eventName: 'purchase',
         },
       ],
       timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('2023-10-10'),
+      timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
     });
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
-    with
-      base_data as (
-        select
-          event_base.*
-        from
-          (
-            select
-              event.event_date,
-              event.event_name,
-              event.event_id,
-              event_bundle_sequence_id::bigint as event_bundle_sequence_id,
-              event_previous_timestamp::bigint as event_previous_timestamp,
-              event_timestamp::bigint as event_timestamp,
-              ingest_timestamp,
-              event_value_in_usd,
-              app_info.app_id::varchar as app_info_app_id,
-              app_info.id::varchar as app_info_id,
-              app_info.install_source::varchar as app_info_install_source,
-              app_info.version::varchar as app_info_version,
-              app_info.sdk_name::varchar as app_info_sdk_name,
-              app_info.sdk_version::varchar as app_info_sdk_version,
-              device.vendor_id::varchar as device_vendor_id,
-              device.mobile_brand_name::varchar as device_mobile_brand_name,
-              device.mobile_model_name::varchar as device_mobile_model_name,
-              device.manufacturer::varchar as device_manufacturer,
-              device.screen_width::bigint as device_screen_width,
-              device.screen_height::bigint as device_screen_height,
-              device.viewport_height::bigint as device_viewport_height,
-              device.carrier::varchar as device_carrier,
-              device.network_type::varchar as device_network_type,
-              device.operating_system::varchar as device_operating_system,
-              device.operating_system_version::varchar as device_operating_system_version,
-              device.ua_browser::varchar as device_ua_browser,
-              device.ua_browser_version::varchar as device_ua_browser_version,
-              device.ua_os::varchar as device_ua_os,
-              device.ua_os_version::varchar as device_ua_os_version,
-              device.ua_device::varchar as device_ua_device,
-              device.ua_device_category::varchar as device_ua_device_category,
-              device.system_language::varchar as device_system_language,
-              device.time_zone_offset_seconds::bigint as device_time_zone_offset_seconds,
-              device.advertising_id::varchar as device_advertising_id,
-              device.host_name::varchar as device_host_name,
-              geo.continent::varchar as geo_continent,
-              geo.country::varchar as geo_country,
-              geo.city::varchar as geo_city,
-              geo.metro::varchar as geo_metro,
-              geo.region::varchar as geo_region,
-              geo.sub_continent::varchar as geo_sub_continent,
-              geo.locale::varchar as geo_locale,
-              platform,
-              project_id,
-              traffic_source.name::varchar as traffic_source_name,
-              traffic_source.medium::varchar as traffic_source_medium,
-              traffic_source.source::varchar as traffic_source_source,
-              COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
-              event.user_id,
-              TO_CHAR(
-                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
-                'YYYY-MM'
-              ) as month,
-              TO_CHAR(
-                date_trunc(
-                  'week',
-                  TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-                ),
-                'YYYY-MM-DD'
-              ) as week,
-              TO_CHAR(
-                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
-                'YYYY-MM-DD'
-              ) as day,
-              TO_CHAR(
-                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
-                'YYYY-MM-DD HH24'
-              ) || '00:00' as hour
-            from
-              app1.event as event
-          join (
-            select
-              user_pseudo_id,
-              user_id
-            from
-              app1.user_m_view
-            group by
-              user_pseudo_id,
-              user_id
-          ) as u on event.user_pseudo_id = u.user_pseudo_id
-            where
-              event.event_date >= date '2023-10-01'
-              and event.event_date <= date '2023-10-10'
-              and event.event_name in ('add_button_click', 'note_share', 'note_export')
-          ) as event_base
-        where
-          1 = 1
-          and (
-            (event_name = 'add_button_click')
-            or (event_name = 'note_share')
-            or (event_name = 'note_export')
-          )
-      ),
-      table_0 as (
-        select
-          month,
-          week,
-          day,
-          hour,
-          event_date as event_date_0,
-          event_name as event_name_0,
-          event_timestamp as event_timestamp_0,
-          event_id as event_id_0,
-          user_id as user_id_0,
-          user_pseudo_id as user_pseudo_id_0
-        from
-          base_data base
-        where
-          event_name = 'add_button_click'
-      ),
-      table_1 as (
-        select
-          month,
-          week,
-          day,
-          hour,
-          event_date as event_date_1,
-          event_name as event_name_1,
-          event_timestamp as event_timestamp_1,
-          event_id as event_id_1,
-          user_id as user_id_1,
-          user_pseudo_id as user_pseudo_id_1
-        from
-          base_data base
-        where
-          event_name = 'note_share'
-      ),
-      table_2 as (
-        select
-          month,
-          week,
-          day,
-          hour,
-          event_date as event_date_2,
-          event_name as event_name_2,
-          event_timestamp as event_timestamp_2,
-          event_id as event_id_2,
-          user_id as user_id_2,
-          user_pseudo_id as user_pseudo_id_2
-        from
-          base_data base
-        where
-          event_name = 'note_export'
-      ),
-      join_table as (
-        select
-          table_0.month,
-          table_0.week,
-          table_0.day,
-          table_0.hour,
-          table_0.event_name_0 as event_name,
-          table_0.event_timestamp_0 as event_timestamp,
-          table_0.user_pseudo_id_0 as x_id
-        from
-          table_0
-        union all
-        select
-          table_1.month,
-          table_1.week,
-          table_1.day,
-          table_1.hour,
-          table_1.event_name_1 as event_name,
-          table_1.event_timestamp_1 as event_timestamp,
-          table_1.event_id_1 as x_id
-        from
-          table_1
-        union all
-        select
-          table_2.month,
-          table_2.week,
-          table_2.day,
-          table_2.hour,
-          table_2.event_name_2 as event_name,
-          table_2.event_timestamp_2 as event_timestamp,
-          table_2.event_id_2 as x_id
-        from
-          table_2
-      )
-    select
-      day::date as event_date,
-      event_name,
-      x_id as id
-    from
-      join_table
-    where
-      x_id is not null
-    group by
-      day,
-      event_name,
-      x_id
+    
   `.trim().replace(/ /g, ''),
     );
 
@@ -1720,7 +979,7 @@ describe('SQL Builder test', () => {
       conversionIntervalInSeconds: 10*60,
       eventAndConditions: [
         {
-          eventName: 'add_button_click',
+          eventName: 'view_item',
           sqlCondition: {
             conditions: [{
               category: ConditionCategory.OTHER,
@@ -1740,7 +999,7 @@ describe('SQL Builder test', () => {
           },
         },
         {
-          eventName: 'note_share',
+          eventName: 'add_to_cart',
           sqlCondition: {
             conditions: [{
               category: ConditionCategory.OTHER,
@@ -1761,13 +1020,13 @@ describe('SQL Builder test', () => {
 
         },
         {
-          eventName: 'note_export',
+          eventName: 'purchase',
         },
       ],
       timeScopeType: ExploreTimeScopeType.FIXED,
       groupColumn: ExploreGroupColumn.DAY,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('2023-10-10'),
+      timeEnd: new Date('2025-10-10'),
       pathAnalysis: {
         sessionType: ExplorePathSessionDef.SESSION,
         nodeType: ExplorePathNodeType.EVENT,
@@ -1777,256 +1036,7 @@ describe('SQL Builder test', () => {
     });
 
     expect(sql.trim().replace(/ /g, '')).toEqual(`
-    with
-      event_base as (
-        select
-          event.event_date,
-          event.event_name,
-          event.event_id,
-          event_bundle_sequence_id::bigint as event_bundle_sequence_id,
-          event_previous_timestamp::bigint as event_previous_timestamp,
-          event_timestamp::bigint as event_timestamp,
-          ingest_timestamp,
-          event_value_in_usd,
-          app_info.app_id::varchar as app_info_app_id,
-          app_info.id::varchar as app_info_id,
-          app_info.install_source::varchar as app_info_install_source,
-          app_info.version::varchar as app_info_version,
-          app_info.sdk_name::varchar as app_info_sdk_name,
-          app_info.sdk_version::varchar as app_info_sdk_version,
-          device.vendor_id::varchar as device_vendor_id,
-          device.mobile_brand_name::varchar as device_mobile_brand_name,
-          device.mobile_model_name::varchar as device_mobile_model_name,
-          device.manufacturer::varchar as device_manufacturer,
-          device.screen_width::bigint as device_screen_width,
-          device.screen_height::bigint as device_screen_height,
-          device.viewport_height::bigint as device_viewport_height,
-          device.carrier::varchar as device_carrier,
-          device.network_type::varchar as device_network_type,
-          device.operating_system::varchar as device_operating_system,
-          device.operating_system_version::varchar as device_operating_system_version,
-          device.ua_browser::varchar as device_ua_browser,
-          device.ua_browser_version::varchar as device_ua_browser_version,
-          device.ua_os::varchar as device_ua_os,
-          device.ua_os_version::varchar as device_ua_os_version,
-          device.ua_device::varchar as device_ua_device,
-          device.ua_device_category::varchar as device_ua_device_category,
-          device.system_language::varchar as device_system_language,
-          device.time_zone_offset_seconds::bigint as device_time_zone_offset_seconds,
-          device.advertising_id::varchar as device_advertising_id,
-          device.host_name::varchar as device_host_name,
-          geo.continent::varchar as geo_continent,
-          geo.country::varchar as geo_country,
-          geo.city::varchar as geo_city,
-          geo.metro::varchar as geo_metro,
-          geo.region::varchar as geo_region,
-          geo.sub_continent::varchar as geo_sub_continent,
-          geo.locale::varchar as geo_locale,
-          platform,
-          project_id,
-          traffic_source.name::varchar as traffic_source_name,
-          traffic_source.medium::varchar as traffic_source_medium,
-          traffic_source.source::varchar as traffic_source_source,
-          COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id,
-          event.user_id,
-          TO_CHAR(
-            TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
-            'YYYY-MM'
-          ) as month,
-          TO_CHAR(
-            date_trunc(
-              'week',
-              TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-            ),
-            'YYYY-MM-DD'
-          ) as week,
-          TO_CHAR(
-            TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
-            'YYYY-MM-DD'
-          ) as day,
-          TO_CHAR(
-            TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
-            'YYYY-MM-DD HH24'
-          ) || '00:00' as hour
-        from
-          app1.event as event
-          join (
-            select
-              user_pseudo_id,
-              user_id
-            from
-              app1.user_m_view
-            group by
-              user_pseudo_id,
-              user_id
-          ) as u on event.user_pseudo_id = u.user_pseudo_id
-        where
-          event.event_date >= date '2023-10-01'
-          and event.event_date <= date '2023-10-10'
-          and event.event_name not in (
-            '_session_start',
-            '_session_stop',
-            '_screen_view',
-            '_app_exception',
-            '_app_update',
-            '_first_open',
-            '_os_update',
-            '_user_engagement',
-            '_profile_set',
-            '_page_view',
-            '_app_start',
-            '_scroll',
-            '_search',
-            '_click',
-            '_clickstream_error',
-            '_mp_share',
-            '_mp_favorite',
-            '_app_end'
-          )
-      ),
-      base_data as (
-        select
-          _session_id,
-          event_base.*
-        from
-          event_base
-          join (
-            select
-              event_base.event_id,
-              max(
-                case
-                  when event_param_key = '_session_id' then event_param_string_value
-                  else null
-                end
-              ) as _session_id
-            from
-              event_base
-              join app1.event_parameter as event_param on event_base.event_timestamp = event_param.event_timestamp
-              and event_base.event_id = event_param.event_id
-            group by
-              event_base.event_id
-          ) as event_join_table on event_base.event_id = event_join_table.event_id
-        where
-          1 = 1
-          and (
-            (
-              event_name = 'add_button_click'
-              and (
-                platform = 'Android'
-                and device_screen_height <> 1400
-              )
-            )
-            or (
-              event_name = 'note_share'
-              and (
-                platform = 'Android'
-                or device_screen_height <> 1400
-              )
-            )
-            or (event_name = 'note_export')
-            or (
-              event_name not in ('add_button_click', 'note_share', 'note_export')
-            )
-          )
-      ),
-      mid_table as (
-        select
-          CASE
-            WHEN event_name in ('add_button_click', 'note_share', 'note_export') THEN event_name
-            ELSE 'other'
-          END as event_name,
-          user_pseudo_id,
-          event_id,
-          event_timestamp,
-          event_date,
-          _session_id
-        from
-          base_data
-      ),
-      data as (
-        select
-          *,
-          ROW_NUMBER() OVER (
-            PARTITION BY
-              user_pseudo_id,
-              _session_id
-            ORDER BY
-              event_timestamp asc
-          ) as step_1,
-          ROW_NUMBER() OVER (
-            PARTITION BY
-              user_pseudo_id,
-              _session_id
-            ORDER BY
-              event_timestamp asc
-          ) + 1 as step_2
-        from
-          mid_table
-      ),
-      step_table_1 as (
-        select
-          data.user_pseudo_id user_pseudo_id,
-          data._session_id _session_id,
-          min(step_1) min_step
-        from
-          data
-        where
-          event_name = 'add_button_click'
-        group by
-          user_pseudo_id,
-          _session_id
-      ),
-      step_table_2 as (
-        select
-          data.*
-        from
-          data
-          join step_table_1 on data.user_pseudo_id = step_table_1.user_pseudo_id
-          and data._session_id = step_table_1._session_id
-          and data.step_1 >= step_table_1.min_step
-      ),
-      data_final as (
-        select
-          event_name,
-          event_date,
-          user_pseudo_id,
-          event_id,
-          event_timestamp,
-          _session_id,
-          ROW_NUMBER() OVER (
-            PARTITION BY
-              user_pseudo_id,
-              _session_id
-            ORDER BY
-              step_1 asc,
-              step_2
-          ) as step_1,
-          ROW_NUMBER() OVER (
-            PARTITION BY
-              user_pseudo_id,
-              _session_id
-            ORDER BY
-              step_1 asc,
-              step_2
-          ) + 1 as step_2
-        from
-          step_table_2
-      )
-    select
-      a.event_date,
-      a.event_name || '_' || a.step_1 as source,
-      CASE
-        WHEN b.event_name is not null THEN b.event_name || '_' || a.step_2
-        ELSE 'lost'
-      END as target,
-      a.user_pseudo_id as x_id
-    from
-      data_final a
-      left join data_final b on a.step_2 = b.step_1
-      and a._session_id = b._session_id
-      and a.user_pseudo_id = b.user_pseudo_id
-    where
-      a.step_2 <= 10
+    
   `.trim().replace(/ /g, ''),
     );
 
@@ -2043,7 +1053,7 @@ describe('SQL Builder test', () => {
       conversionIntervalInSeconds: 10*60,
       eventAndConditions: [
         {
-          eventName: 'add_button_click',
+          eventName: 'view_item',
           sqlCondition: {
             conditions: [{
               category: ConditionCategory.OTHER,
@@ -2063,7 +1073,7 @@ describe('SQL Builder test', () => {
           },
         },
         {
-          eventName: 'note_share',
+          eventName: 'add_to_cart',
           sqlCondition: {
             conditions: [{
               category: ConditionCategory.OTHER,
@@ -2084,13 +1094,13 @@ describe('SQL Builder test', () => {
 
         },
         {
-          eventName: 'note_export',
+          eventName: 'purchase',
         },
       ],
       timeScopeType: ExploreTimeScopeType.FIXED,
       groupColumn: ExploreGroupColumn.DAY,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('2023-10-10'),
+      timeEnd: new Date('2025-10-10'),
       pathAnalysis: {
         sessionType: ExplorePathSessionDef.CUSTOMIZE,
         nodeType: ExplorePathNodeType.EVENT,
@@ -2188,33 +1198,33 @@ describe('SQL Builder test', () => {
           ) as u on event.user_pseudo_id = u.user_pseudo_id
             where
               event.event_date >= date '2023-10-01'
-              and event.event_date <= date '2023-10-10'
-              and event.event_name in ('add_button_click', 'note_share', 'note_export')
+              and event.event_date <= date '2025-10-10'
+              and event.event_name in ('view_item', 'add_to_cart', 'purchase')
           ) as event_base
         where
           1 = 1
           and (
             (
-              event_name = 'add_button_click'
+              event_name = 'view_item'
               and (
                 platform = 'Android'
                 and device_screen_height <> 1400
               )
             )
             or (
-              event_name = 'note_share'
+              event_name = 'add_to_cart'
               and (
                 platform = 'Android'
                 or device_screen_height <> 1400
               )
             )
-            or (event_name = 'note_export')
+            or (event_name = 'purchase')
           )
       ),
       mid_table as (
         select
           CASE
-            WHEN event_name in ('add_button_click', 'note_share', 'note_export') THEN event_name
+            WHEN event_name in ('view_item', 'add_to_cart', 'purchase') THEN event_name
             ELSE 'other'
           END as event_name,
           user_pseudo_id,
@@ -2307,7 +1317,7 @@ describe('SQL Builder test', () => {
         from
           data
         where
-          event_name = 'add_button_click'
+          event_name = 'view_item'
         group by
           user_pseudo_id,
           group_id
@@ -2379,7 +1389,7 @@ describe('SQL Builder test', () => {
       timeScopeType: ExploreTimeScopeType.FIXED,
       groupColumn: ExploreGroupColumn.DAY,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('2023-10-10'),
+      timeEnd: new Date('2025-10-10'),
       pathAnalysis: {
         platform: MetadataPlatform.ANDROID,
         sessionType: ExplorePathSessionDef.SESSION,
@@ -2476,7 +1486,7 @@ describe('SQL Builder test', () => {
           ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
-          and event.event_date <= date '2023-10-10'
+          and event.event_date <= date '2025-10-10'
           and event.event_name = '_screen_view'
           and platform = 'Android'
       ),
@@ -2654,7 +1664,7 @@ describe('SQL Builder test', () => {
       timeScopeType: ExploreTimeScopeType.FIXED,
       groupColumn: ExploreGroupColumn.DAY,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('2023-10-10'),
+      timeEnd: new Date('2025-10-10'),
       pathAnalysis: {
         platform: MetadataPlatform.ANDROID,
         sessionType: ExplorePathSessionDef.SESSION,
@@ -2752,7 +1762,7 @@ describe('SQL Builder test', () => {
           ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
-          and event.event_date <= date '2023-10-10'
+          and event.event_date <= date '2025-10-10'
           and event.event_name = '_screen_view'
           and platform = 'Android'
       ),
@@ -2952,7 +1962,7 @@ describe('SQL Builder test', () => {
       timeScopeType: ExploreTimeScopeType.FIXED,
       groupColumn: ExploreGroupColumn.DAY,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('2023-10-10'),
+      timeEnd: new Date('2025-10-10'),
       pathAnalysis: {
         platform: MetadataPlatform.ANDROID,
         sessionType: ExplorePathSessionDef.SESSION,
@@ -3049,7 +2059,7 @@ describe('SQL Builder test', () => {
           ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
-          and event.event_date <= date '2023-10-10'
+          and event.event_date <= date '2025-10-10'
           and event.event_name = '_screen_view'
           and platform = 'Android'
       ),
@@ -3231,7 +2241,7 @@ describe('SQL Builder test', () => {
       timeScopeType: ExploreTimeScopeType.FIXED,
       groupColumn: ExploreGroupColumn.DAY,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('2023-10-10'),
+      timeEnd: new Date('2025-10-10'),
       pathAnalysis: {
         platform: MetadataPlatform.ANDROID,
         sessionType: ExplorePathSessionDef.CUSTOMIZE,
@@ -3332,7 +2342,7 @@ describe('SQL Builder test', () => {
           ) as u on event.user_pseudo_id = u.user_pseudo_id
             where
               event.event_date >= date '2023-10-01'
-              and event.event_date <= date '2023-10-10'
+              and event.event_date <= date '2025-10-10'
               and event.event_name = '_screen_view'
               and platform = 'Android'
           ) as event_base
@@ -3535,7 +2545,7 @@ describe('SQL Builder test', () => {
       timeScopeType: ExploreTimeScopeType.FIXED,
       groupColumn: ExploreGroupColumn.DAY,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('2023-10-10'),
+      timeEnd: new Date('2025-10-10'),
       pathAnalysis: {
         platform: MetadataPlatform.ANDROID,
         sessionType: ExplorePathSessionDef.CUSTOMIZE,
@@ -3637,7 +2647,7 @@ describe('SQL Builder test', () => {
           ) as u on event.user_pseudo_id = u.user_pseudo_id
             where
               event.event_date >= date '2023-10-01'
-              and event.event_date <= date '2023-10-10'
+              and event.event_date <= date '2025-10-10'
               and event.event_name = '_screen_view'
               and platform = 'Android'
           ) as event_base
@@ -3860,7 +2870,7 @@ describe('SQL Builder test', () => {
       timeScopeType: ExploreTimeScopeType.FIXED,
       groupColumn: ExploreGroupColumn.DAY,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('2023-10-10'),
+      timeEnd: new Date('2025-10-10'),
       pathAnalysis: {
         platform: MetadataPlatform.ANDROID,
         sessionType: ExplorePathSessionDef.CUSTOMIZE,
@@ -3961,7 +2971,7 @@ describe('SQL Builder test', () => {
           ) as u on event.user_pseudo_id = u.user_pseudo_id
             where
               event.event_date >= date '2023-10-01'
-              and event.event_date <= date '2023-10-10'
+              and event.event_date <= date '2025-10-10'
               and event.event_name = '_screen_view'
               and platform = 'Android'
           ) as event_base
@@ -4195,7 +3205,7 @@ describe('SQL Builder test', () => {
       pairEventAndConditions: [
         {
           startEvent: {
-            eventName: 'add_button_click',
+            eventName: 'view_item',
             sqlCondition: {
               conditions: [
                 {
@@ -4217,7 +3227,7 @@ describe('SQL Builder test', () => {
             },
           },
           backEvent: {
-            eventName: 'note_share',
+            eventName: 'add_to_cart',
             sqlCondition: {
               conditions: [
                 {
@@ -4234,10 +3244,10 @@ describe('SQL Builder test', () => {
         },
         {
           startEvent: {
-            eventName: 'add_button_click',
+            eventName: 'view_item',
           },
           backEvent: {
-            eventName: 'note_export',
+            eventName: 'purchase',
             sqlCondition: {
               conditions: [
                 {
@@ -4347,7 +3357,7 @@ describe('SQL Builder test', () => {
             where
               event.event_date >= date '2023-06-19'
               and event.event_date <= date '2023-06-22'
-              and event.event_name in ('add_button_click', 'note_share', 'note_export')
+              and event.event_name in ('view_item', 'add_to_cart', 'purchase')
           ) as event_base
         where
           1 = 1
@@ -4384,7 +3394,7 @@ describe('SQL Builder test', () => {
           base_data
           join first_date on base_data.event_date = first_date.first_date
         where
-          event_name = 'add_button_click'
+          event_name = 'view_item'
           and (
             device_screen_height > 1400
             or device_screen_height > 1800
@@ -4399,7 +3409,7 @@ describe('SQL Builder test', () => {
           base_data
           join first_date on base_data.event_date >= first_date.first_date
         where
-          event_name = 'note_share'
+          event_name = 'add_to_cart'
           and (device_screen_height > 1400)
       ),
       first_table_1 as (
@@ -4411,7 +3421,7 @@ describe('SQL Builder test', () => {
           base_data
           join first_date on base_data.event_date = first_date.first_date
         where
-          event_name = 'add_button_click'
+          event_name = 'view_item'
       ),
       second_table_1 as (
         select
@@ -4422,7 +3432,7 @@ describe('SQL Builder test', () => {
           base_data
           join first_date on base_data.event_date >= first_date.first_date
         where
-          event_name = 'note_export'
+          event_name = 'purchase'
           and (device_screen_height > 1400)
       ),
       result_table as (
@@ -4506,7 +3516,7 @@ describe('SQL Builder test', () => {
       pairEventAndConditions: [
         {
           startEvent: {
-            eventName: 'add_button_click',
+            eventName: 'view_item',
             sqlCondition: {
               conditions: [
                 {
@@ -4526,7 +3536,7 @@ describe('SQL Builder test', () => {
             },
           },
           backEvent: {
-            eventName: 'note_share',
+            eventName: 'add_to_cart',
             sqlCondition: {
               conditions: [
                 {
@@ -4548,10 +3558,10 @@ describe('SQL Builder test', () => {
         },
         {
           startEvent: {
-            eventName: 'add_button_click',
+            eventName: 'view_item',
           },
           backEvent: {
-            eventName: 'note_export',
+            eventName: 'purchase',
             sqlCondition: {
               conditions: [
                 {
@@ -4661,7 +3671,7 @@ describe('SQL Builder test', () => {
             where
               event.event_date >= date '2023-06-19'
               and event.event_date <= date '2023-06-22'
-              and event.event_name in ('add_button_click', 'note_share', 'note_export')
+              and event.event_name in ('view_item', 'add_to_cart', 'purchase')
           ) as event_base
         where
           1 = 1
@@ -4699,7 +3709,7 @@ describe('SQL Builder test', () => {
           base_data
           join first_date on base_data.event_date = first_date.first_date
         where
-          event_name = 'add_button_click'
+          event_name = 'view_item'
           and (device_screen_height > 1400)
       ),
       second_table_0 as (
@@ -4712,7 +3722,7 @@ describe('SQL Builder test', () => {
           base_data
           join first_date on base_data.event_date >= first_date.first_date
         where
-          event_name = 'note_share'
+          event_name = 'add_to_cart'
           and (device_screen_height > 1400)
       ),
       first_table_1 as (
@@ -4724,7 +3734,7 @@ describe('SQL Builder test', () => {
           base_data
           join first_date on base_data.event_date = first_date.first_date
         where
-          event_name = 'add_button_click'
+          event_name = 'view_item'
       ),
       second_table_1 as (
         select
@@ -4735,7 +3745,7 @@ describe('SQL Builder test', () => {
           base_data
           join first_date on base_data.event_date >= first_date.first_date
         where
-          event_name = 'note_export'
+          event_name = 'purchase'
           and (device_screen_height > 1400)
       ),
       result_table as (
@@ -4820,7 +3830,7 @@ describe('SQL Builder test', () => {
       pairEventAndConditions: [
         {
           startEvent: {
-            eventName: 'add_button_click',
+            eventName: 'view_item',
             sqlCondition: {
               conditions: [
                 {
@@ -4840,7 +3850,7 @@ describe('SQL Builder test', () => {
             },
           },
           backEvent: {
-            eventName: 'note_share',
+            eventName: 'add_to_cart',
             sqlCondition: {
               conditions: [
                 {
@@ -4862,10 +3872,10 @@ describe('SQL Builder test', () => {
         },
         {
           startEvent: {
-            eventName: 'add_button_click',
+            eventName: 'view_item',
           },
           backEvent: {
-            eventName: 'note_export',
+            eventName: 'purchase',
             sqlCondition: {
               conditions: [
                 {
@@ -4991,7 +4001,7 @@ describe('SQL Builder test', () => {
         where
           event.event_date >= date '2023-06-19'
           and event.event_date <= date '2023-06-22'
-          and event.event_name in ('add_button_click', 'note_share', 'note_export')
+          and event.event_name in ('view_item', 'add_to_cart', 'purchase')
       ),
       base_data as (
         select
@@ -5050,7 +4060,7 @@ describe('SQL Builder test', () => {
           base_data
           join first_date on base_data.event_date = first_date.first_date
         where
-          event_name = 'add_button_click'
+          event_name = 'view_item'
           and (device_screen_height > 1400)
       ),
       second_table_0 as (
@@ -5063,7 +4073,7 @@ describe('SQL Builder test', () => {
           base_data
           join first_date on base_data.event_date >= first_date.first_date
         where
-          event_name = 'note_share'
+          event_name = 'add_to_cart'
           and (device_screen_height > 1400)
       ),
       first_table_1 as (
@@ -5075,7 +4085,7 @@ describe('SQL Builder test', () => {
           base_data
           join first_date on base_data.event_date = first_date.first_date
         where
-          event_name = 'add_button_click'
+          event_name = 'view_item'
       ),
       second_table_1 as (
         select
@@ -5086,7 +4096,7 @@ describe('SQL Builder test', () => {
           base_data
           join first_date on base_data.event_date >= first_date.first_date
         where
-          event_name = 'note_export'
+          event_name = 'purchase'
           and (device_screen_height > 1400)
       ),
       result_table as (
@@ -5171,7 +4181,7 @@ describe('SQL Builder test', () => {
       pairEventAndConditions: [
         {
           startEvent: {
-            eventName: 'add_button_click',
+            eventName: 'view_item',
             sqlCondition: {
               conditions: [
                 {
@@ -5191,7 +4201,7 @@ describe('SQL Builder test', () => {
             },
           },
           backEvent: {
-            eventName: 'note_share',
+            eventName: 'add_to_cart',
             sqlCondition: {
               conditions: [
                 {
@@ -5213,10 +4223,10 @@ describe('SQL Builder test', () => {
         },
         {
           startEvent: {
-            eventName: 'add_button_click',
+            eventName: 'view_item',
           },
           backEvent: {
-            eventName: 'note_export',
+            eventName: 'purchase',
             sqlCondition: {
               conditions: [
                 {
@@ -5322,7 +4332,7 @@ describe('SQL Builder test', () => {
         where
           event.event_date >= date '2023-06-19'
           and event.event_date <= date '2023-06-22'
-          and event.event_name in ('add_button_click', 'note_share', 'note_export')
+          and event.event_name in ('view_item', 'add_to_cart', 'purchase')
       ),
       base_data as (
         select
@@ -5382,7 +4392,7 @@ describe('SQL Builder test', () => {
           base_data
           join first_date on base_data.event_date = first_date.first_date
         where
-          event_name = 'add_button_click'
+          event_name = 'view_item'
           and (device_screen_height > 1400)
       ),
       second_table_0 as (
@@ -5395,7 +4405,7 @@ describe('SQL Builder test', () => {
           base_data
           join first_date on base_data.event_date >= first_date.first_date
         where
-          event_name = 'note_share'
+          event_name = 'add_to_cart'
           and (device_screen_height > 1400)
       ),
       first_table_1 as (
@@ -5407,7 +4417,7 @@ describe('SQL Builder test', () => {
           base_data
           join first_date on base_data.event_date = first_date.first_date
         where
-          event_name = 'add_button_click'
+          event_name = 'view_item'
       ),
       second_table_1 as (
         select
@@ -5418,7 +4428,7 @@ describe('SQL Builder test', () => {
           base_data
           join first_date on base_data.event_date >= first_date.first_date
         where
-          event_name = 'note_export'
+          event_name = 'purchase'
           and (device_screen_height > 1400)
       ),
       result_table as (
@@ -5498,7 +4508,7 @@ describe('SQL Builder test', () => {
       },
       eventAndConditions: [
         {
-          eventName: 'add_button_click',
+          eventName: 'view_item',
           sqlCondition: {
             conditions: [
               {
@@ -5520,7 +4530,7 @@ describe('SQL Builder test', () => {
           },
         },
         {
-          eventName: 'note_share',
+          eventName: 'add_to_cart',
           sqlCondition: {
             conditions: [
               {
@@ -5542,7 +4552,7 @@ describe('SQL Builder test', () => {
           },
         },
         {
-          eventName: 'note_export',
+          eventName: 'purchase',
           sqlCondition: {
             conditions: [
               {
@@ -5559,7 +4569,7 @@ describe('SQL Builder test', () => {
       ],
       timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('2023-10-10'),
+      timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
     });
 
@@ -5669,8 +4679,8 @@ describe('SQL Builder test', () => {
           ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
-          and event.event_date <= date '2023-10-10'
-          and event.event_name in ('add_button_click', 'note_share', 'note_export')
+          and event.event_date <= date '2025-10-10'
+          and event.event_name in ('view_item', 'add_to_cart', 'purchase')
       ),
       base_data as (
         select
@@ -5718,21 +4728,21 @@ describe('SQL Builder test', () => {
           )
           and (
             (
-              event_name = 'add_button_click'
+              event_name = 'view_item'
               and (
                 _session_duration > 200
                 and _user_first_touch_timestamp > 1686532526770
               )
             )
             or (
-              event_name = 'note_share'
+              event_name = 'add_to_cart'
               and (
                 _session_duration > 200
                 and geo_city = 'Shanghai'
               )
             )
             or (
-              event_name = 'note_export'
+              event_name = 'purchase'
               and (device_mobile_brand_name = 'Samsung')
             )
           )
@@ -5752,7 +4762,7 @@ describe('SQL Builder test', () => {
         from
           base_data base
         where
-          event_name = 'add_button_click'
+          event_name = 'view_item'
       ),
       table_1 as (
         select
@@ -5765,7 +4775,7 @@ describe('SQL Builder test', () => {
         from
           base_data base
         where
-          event_name = 'note_share'
+          event_name = 'add_to_cart'
       ),
       table_2 as (
         select
@@ -5778,7 +4788,7 @@ describe('SQL Builder test', () => {
         from
           base_data base
         where
-          event_name = 'note_export'
+          event_name = 'purchase'
       ),
       join_table as (
         select
@@ -5802,25 +4812,25 @@ describe('SQL Builder test', () => {
       )
     select
       DAY,
-      count(distinct user_pseudo_id_0) as add_button_click,
+      count(distinct user_pseudo_id_0) as view_item,
       (
         count(distinct user_pseudo_id_2)::decimal / NULLIF(count(distinct user_pseudo_id_0), 0)
       )::decimal(20, 4) as total_conversion_rate,
-      count(distinct user_pseudo_id_1) as note_share,
+      count(distinct user_pseudo_id_1) as add_to_cart,
       (
         count(distinct user_pseudo_id_1)::decimal / NULLIF(count(distinct user_pseudo_id_0), 0)
-      )::decimal(20, 4) as note_share_rate,
-      count(distinct user_pseudo_id_2) as note_export,
+      )::decimal(20, 4) as add_to_cart_rate,
+      count(distinct user_pseudo_id_2) as purchase,
       (
         count(distinct user_pseudo_id_2)::decimal / NULLIF(count(distinct user_pseudo_id_1), 0)
-      )::decimal(20, 4) as note_export_rate
+      )::decimal(20, 4) as purchase_rate
     from
       join_table
     group by
       DAY
     order by
       DAY,
-      add_button_click desc
+      view_item desc
   `.trim().replace(/ /g, ''),
     );
 
@@ -5875,7 +4885,7 @@ describe('SQL Builder test', () => {
       },
       eventAndConditions: [
         {
-          eventName: 'add_button_click',
+          eventName: 'view_item',
           sqlCondition: {
             conditions: [
               {
@@ -5911,7 +4921,7 @@ describe('SQL Builder test', () => {
           },
         },
         {
-          eventName: 'note_share',
+          eventName: 'add_to_cart',
           sqlCondition: {
             conditions: [
               {
@@ -5933,7 +4943,7 @@ describe('SQL Builder test', () => {
           },
         },
         {
-          eventName: 'note_export',
+          eventName: 'purchase',
           sqlCondition: {
             conditions: [
               {
@@ -5950,7 +4960,7 @@ describe('SQL Builder test', () => {
       ],
       timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('2023-10-10'),
+      timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
     });
 
@@ -6060,8 +5070,8 @@ describe('SQL Builder test', () => {
           ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
-          and event.event_date <= date '2023-10-10'
-          and event.event_name in ('add_button_click', 'note_share', 'note_export')
+          and event.event_date <= date '2025-10-10'
+          and event.event_name in ('view_item', 'add_to_cart', 'purchase')
       ),
       base_data as (
         select
@@ -6112,7 +5122,7 @@ describe('SQL Builder test', () => {
           )
           and (
             (
-              event_name = 'add_button_click'
+              event_name = 'view_item'
               and (
                 _session_duration > 200
                 and _session_duration >= 250
@@ -6121,14 +5131,14 @@ describe('SQL Builder test', () => {
               )
             )
             or (
-              event_name = 'note_share'
+              event_name = 'add_to_cart'
               and (
                 _session_duration > 200
                 and geo_city = 'Shanghai'
               )
             )
             or (
-              event_name = 'note_export'
+              event_name = 'purchase'
               and (device_mobile_brand_name = 'Samsung')
             )
           )
@@ -6148,7 +5158,7 @@ describe('SQL Builder test', () => {
         from
           base_data base
         where
-          event_name = 'add_button_click'
+          event_name = 'view_item'
       ),
       table_1 as (
         select
@@ -6161,7 +5171,7 @@ describe('SQL Builder test', () => {
         from
           base_data base
         where
-          event_name = 'note_share'
+          event_name = 'add_to_cart'
       ),
       table_2 as (
         select
@@ -6174,7 +5184,7 @@ describe('SQL Builder test', () => {
         from
           base_data base
         where
-          event_name = 'note_export'
+          event_name = 'purchase'
       ),
       join_table as (
         select
@@ -6198,25 +5208,25 @@ describe('SQL Builder test', () => {
       )
     select
       DAY,
-      count(distinct user_pseudo_id_0) as add_button_click,
+      count(distinct user_pseudo_id_0) as view_item,
       (
         count(distinct user_pseudo_id_2)::decimal / NULLIF(count(distinct user_pseudo_id_0), 0)
       )::decimal(20, 4) as total_conversion_rate,
-      count(distinct user_pseudo_id_1) as note_share,
+      count(distinct user_pseudo_id_1) as add_to_cart,
       (
         count(distinct user_pseudo_id_1)::decimal / NULLIF(count(distinct user_pseudo_id_0), 0)
-      )::decimal(20, 4) as note_share_rate,
-      count(distinct user_pseudo_id_2) as note_export,
+      )::decimal(20, 4) as add_to_cart_rate,
+      count(distinct user_pseudo_id_2) as purchase,
       (
         count(distinct user_pseudo_id_2)::decimal / NULLIF(count(distinct user_pseudo_id_1), 0)
-      )::decimal(20, 4) as note_export_rate
+      )::decimal(20, 4) as purchase_rate
     from
       join_table
     group by
       DAY
     order by
       DAY,
-      add_button_click desc
+      view_item desc
   `.trim().replace(/ /g, ''),
     );
 
@@ -6224,7 +5234,7 @@ describe('SQL Builder test', () => {
 
   test('_buildCommonPartSql - global condition - two user condition', () => {
 
-    const sql = _buildCommonPartSql(['add_button_click', 'note_share', 'note_export'],
+    const sql = _buildCommonPartSql(['view_item', 'add_to_cart', 'purchase'],
       {
         schemaName: 'app1',
         computeMethod: ExploreComputeMethod.USER_CNT,
@@ -6252,18 +5262,18 @@ describe('SQL Builder test', () => {
         },
         eventAndConditions: [
           {
-            eventName: 'add_button_click',
+            eventName: 'view_item',
           },
           {
-            eventName: 'note_share',
+            eventName: 'add_to_cart',
           },
           {
-            eventName: 'note_export',
+            eventName: 'purchase',
           },
         ],
         timeScopeType: ExploreTimeScopeType.FIXED,
         timeStart: new Date('2023-10-01'),
-        timeEnd: new Date('2023-10-10'),
+        timeEnd: new Date('2025-10-10'),
         groupColumn: ExploreGroupColumn.DAY,
       }, false);
 
@@ -6373,8 +5383,8 @@ describe('SQL Builder test', () => {
           ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
-          and event.event_date <= date '2023-10-10'
-          and event.event_name in ('add_button_click', 'note_share', 'note_export')
+          and event.event_date <= date '2025-10-10'
+          and event.event_name in ('view_item', 'add_to_cart', 'purchase')
       ),
       base_data as (
         select
@@ -6404,9 +5414,9 @@ describe('SQL Builder test', () => {
             and _user_first_touch_timestamp > 1686532526780
           )
           and (
-            (event_name = 'add_button_click')
-            or (event_name = 'note_share')
-            or (event_name = 'note_export')
+            (event_name = 'view_item')
+            or (event_name = 'add_to_cart')
+            or (event_name = 'purchase')
           )
       ),
   `.trim().replace(/ /g, ''),
@@ -6416,7 +5426,7 @@ describe('SQL Builder test', () => {
 
   test('_buildCommonPartSql - event condition - two event condition', () => {
 
-    const sql = _buildCommonPartSql(['add_button_click', 'note_share', 'note_export'],
+    const sql = _buildCommonPartSql(['view_item', 'add_to_cart', 'purchase'],
       {
         schemaName: 'app1',
         computeMethod: ExploreComputeMethod.USER_CNT,
@@ -6426,7 +5436,7 @@ describe('SQL Builder test', () => {
         conversionIntervalInSeconds: 10*60,
         eventAndConditions: [
           {
-            eventName: 'add_button_click',
+            eventName: 'view_item',
             sqlCondition: {
               conditionOperator: 'and',
               conditions: [
@@ -6462,15 +5472,15 @@ describe('SQL Builder test', () => {
             },
           },
           {
-            eventName: 'note_share',
+            eventName: 'add_to_cart',
           },
           {
-            eventName: 'note_export',
+            eventName: 'purchase',
           },
         ],
         timeScopeType: ExploreTimeScopeType.FIXED,
         timeStart: new Date('2023-10-01'),
-        timeEnd: new Date('2023-10-10'),
+        timeEnd: new Date('2025-10-10'),
         groupColumn: ExploreGroupColumn.DAY,
       },
       false);
@@ -6561,8 +5571,8 @@ describe('SQL Builder test', () => {
           ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
-          and event.event_date <= date '2023-10-10'
-          and event.event_name in ('add_button_click', 'note_share', 'note_export')
+          and event.event_date <= date '2025-10-10'
+          and event.event_name in ('view_item', 'add_to_cart', 'purchase')
       ),
       base_data as (
         select
@@ -6590,7 +5600,7 @@ describe('SQL Builder test', () => {
           1 = 1
           and (
             (
-              event_name = 'add_button_click'
+              event_name = 'view_item'
               and (
                 platform = 'Android'
                 and geo_country = 'China'
@@ -6598,8 +5608,8 @@ describe('SQL Builder test', () => {
                 and _session_duration > 220
               )
             )
-            or (event_name = 'note_share')
-            or (event_name = 'note_export')
+            or (event_name = 'add_to_cart')
+            or (event_name = 'purchase')
           )
       ),
   `.trim().replace(/ /g, ''),
@@ -6650,7 +5660,7 @@ describe('SQL Builder test', () => {
       },
       eventAndConditions: [
         {
-          eventName: 'add_button_click',
+          eventName: 'view_item',
           computeMethod: ExploreComputeMethod.EVENT_CNT,
           sqlCondition: {
             conditionOperator: 'and',
@@ -6687,11 +5697,11 @@ describe('SQL Builder test', () => {
           },
         },
         {
-          eventName: 'note_share',
+          eventName: 'add_to_cart',
           computeMethod: ExploreComputeMethod.EVENT_CNT,
         },
         {
-          eventName: 'note_export',
+          eventName: 'purchase',
           computeMethod: ExploreComputeMethod.USER_CNT,
           sqlCondition: {
             conditionOperator: 'and',
@@ -6730,7 +5740,7 @@ describe('SQL Builder test', () => {
       ],
       timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('2023-10-10'),
+      timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
     });
 
@@ -6840,8 +5850,8 @@ describe('SQL Builder test', () => {
           ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
-          and event.event_date <= date '2023-10-10'
-          and event.event_name in ('add_button_click', 'note_share', 'note_export')
+          and event.event_date <= date '2025-10-10'
+          and event.event_name in ('view_item', 'add_to_cart', 'purchase')
       ),
       base_data as (
         select
@@ -6891,7 +5901,7 @@ describe('SQL Builder test', () => {
           )
           and (
             (
-              event_name = 'add_button_click'
+              event_name = 'view_item'
               and (
                 platform = 'Android'
                 and geo_country = 'China'
@@ -6899,9 +5909,9 @@ describe('SQL Builder test', () => {
                 and _user_first_touch_timestamp > 1686532526780
               )
             )
-            or (event_name = 'note_share')
+            or (event_name = 'add_to_cart')
             or (
-              event_name = 'note_export'
+              event_name = 'purchase'
               and (
                 platform = 'Android'
                 and geo_country = 'China'
@@ -6926,7 +5936,7 @@ describe('SQL Builder test', () => {
         from
           base_data base
         where
-          event_name = 'add_button_click'
+          event_name = 'view_item'
       ),
       table_1 as (
         select
@@ -6939,7 +5949,7 @@ describe('SQL Builder test', () => {
         from
           base_data base
         where
-          event_name = 'note_share'
+          event_name = 'add_to_cart'
       ),
       table_2 as (
         select
@@ -6952,7 +5962,7 @@ describe('SQL Builder test', () => {
         from
           base_data base
         where
-          event_name = 'note_export'
+          event_name = 'purchase'
       ),
       join_table as (
         select
@@ -7080,7 +6090,7 @@ describe('SQL Builder test', () => {
       },
       eventAndConditions: [
         {
-          eventName: 'add_button_click',
+          eventName: 'view_item',
           computeMethod: ExploreComputeMethod.EVENT_CNT,
           sqlCondition: {
             conditionOperator: 'and',
@@ -7117,11 +6127,11 @@ describe('SQL Builder test', () => {
           },
         },
         {
-          eventName: 'note_share',
+          eventName: 'add_to_cart',
           computeMethod: ExploreComputeMethod.EVENT_CNT,
         },
         {
-          eventName: 'note_export',
+          eventName: 'purchase',
           computeMethod: ExploreComputeMethod.USER_CNT,
           sqlCondition: {
             conditionOperator: 'and',
@@ -7160,7 +6170,7 @@ describe('SQL Builder test', () => {
       ],
       timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('2023-10-10'),
+      timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
     });
 
@@ -7270,8 +6280,8 @@ describe('SQL Builder test', () => {
           ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
-          and event.event_date <= date '2023-10-10'
-          and event.event_name in ('add_button_click', 'note_share', 'note_export')
+          and event.event_date <= date '2025-10-10'
+          and event.event_name in ('view_item', 'add_to_cart', 'purchase')
       ),
       base_data as (
         select
@@ -7321,7 +6331,7 @@ describe('SQL Builder test', () => {
           )
           and (
             (
-              event_name = 'add_button_click'
+              event_name = 'view_item'
               and (
                 platform = 'Android'
                 and geo_country = 'China'
@@ -7329,9 +6339,9 @@ describe('SQL Builder test', () => {
                 and _user_first_touch_timestamp > 1686532526780
               )
             )
-            or (event_name = 'note_share')
+            or (event_name = 'add_to_cart')
             or (
-              event_name = 'note_export'
+              event_name = 'purchase'
               and (
                 platform = 'Android'
                 and geo_country = 'China'
@@ -7356,7 +6366,7 @@ describe('SQL Builder test', () => {
         from
           base_data base
         where
-          event_name = 'add_button_click'
+          event_name = 'view_item'
       ),
       table_1 as (
         select
@@ -7369,7 +6379,7 @@ describe('SQL Builder test', () => {
         from
           base_data base
         where
-          event_name = 'note_share'
+          event_name = 'add_to_cart'
       ),
       table_2 as (
         select
@@ -7382,7 +6392,7 @@ describe('SQL Builder test', () => {
         from
           base_data base
         where
-          event_name = 'note_export'
+          event_name = 'purchase'
       ),
       join_table as (
         select
@@ -7406,25 +6416,25 @@ describe('SQL Builder test', () => {
       )
     select
       DAY,
-      count(distinct user_pseudo_id_0) as add_button_click,
+      count(distinct user_pseudo_id_0) as view_item,
       (
         count(distinct user_pseudo_id_2)::decimal / NULLIF(count(distinct user_pseudo_id_0), 0)
       )::decimal(20, 4) as total_conversion_rate,
-      count(distinct user_pseudo_id_1) as note_share,
+      count(distinct user_pseudo_id_1) as add_to_cart,
       (
         count(distinct user_pseudo_id_1)::decimal / NULLIF(count(distinct user_pseudo_id_0), 0)
-      )::decimal(20, 4) as note_share_rate,
-      count(distinct user_pseudo_id_2) as note_export,
+      )::decimal(20, 4) as add_to_cart_rate,
+      count(distinct user_pseudo_id_2) as purchase,
       (
         count(distinct user_pseudo_id_2)::decimal / NULLIF(count(distinct user_pseudo_id_1), 0)
-      )::decimal(20, 4) as note_export_rate
+      )::decimal(20, 4) as purchase_rate
     from
       join_table
     group by
       DAY
     order by
       DAY,
-      add_button_click desc
+      view_item desc
   `.trim().replace(/ /g, ''),
     );
 
@@ -7473,7 +6483,7 @@ describe('SQL Builder test', () => {
       },
       eventAndConditions: [
         {
-          eventName: 'add_button_click',
+          eventName: 'view_item',
           computeMethod: ExploreComputeMethod.EVENT_CNT,
           sqlCondition: {
             conditionOperator: 'and',
@@ -7510,11 +6520,11 @@ describe('SQL Builder test', () => {
           },
         },
         {
-          eventName: 'note_share',
+          eventName: 'add_to_cart',
           computeMethod: ExploreComputeMethod.EVENT_CNT,
         },
         {
-          eventName: 'note_export',
+          eventName: 'purchase',
           computeMethod: ExploreComputeMethod.USER_CNT,
           sqlCondition: {
             conditionOperator: 'and',
@@ -7553,7 +6563,7 @@ describe('SQL Builder test', () => {
       ],
       timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('2023-10-10'),
+      timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
     });
 
@@ -7663,8 +6673,8 @@ describe('SQL Builder test', () => {
           ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
-          and event.event_date <= date '2023-10-10'
-          and event.event_name in ('add_button_click', 'note_share', 'note_export')
+          and event.event_date <= date '2025-10-10'
+          and event.event_name in ('view_item', 'add_to_cart', 'purchase')
       ),
       base_data as (
         select
@@ -7714,7 +6724,7 @@ describe('SQL Builder test', () => {
           )
           and (
             (
-              event_name = 'add_button_click'
+              event_name = 'view_item'
               and (
                 platform = 'Android'
                 and geo_country = 'China'
@@ -7722,9 +6732,9 @@ describe('SQL Builder test', () => {
                 and _user_first_touch_timestamp > 1686532526780
               )
             )
-            or (event_name = 'note_share')
+            or (event_name = 'add_to_cart')
             or (
-              event_name = 'note_export'
+              event_name = 'purchase'
               and (
                 platform = 'Android'
                 and geo_country = 'China'
@@ -7749,7 +6759,7 @@ describe('SQL Builder test', () => {
         from
           base_data base
         where
-          event_name = 'add_button_click'
+          event_name = 'view_item'
       ),
       table_1 as (
         select
@@ -7766,7 +6776,7 @@ describe('SQL Builder test', () => {
         from
           base_data base
         where
-          event_name = 'note_share'
+          event_name = 'add_to_cart'
       ),
       table_2 as (
         select
@@ -7783,7 +6793,7 @@ describe('SQL Builder test', () => {
         from
           base_data base
         where
-          event_name = 'note_export'
+          event_name = 'purchase'
       ),
       join_table as (
         select
@@ -7879,7 +6889,7 @@ describe('SQL Builder test', () => {
       },
       eventAndConditions: [
         {
-          eventName: 'add_button_click',
+          eventName: 'view_item',
           computeMethod: ExploreComputeMethod.EVENT_CNT,
           sqlCondition: {
             conditionOperator: 'and',
@@ -7916,11 +6926,11 @@ describe('SQL Builder test', () => {
           },
         },
         {
-          eventName: 'note_share',
+          eventName: 'add_to_cart',
           computeMethod: ExploreComputeMethod.EVENT_CNT,
         },
         {
-          eventName: 'note_export',
+          eventName: 'purchase',
           computeMethod: ExploreComputeMethod.USER_CNT,
           sqlCondition: {
             conditionOperator: 'and',
@@ -7964,7 +6974,7 @@ describe('SQL Builder test', () => {
       },
       timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('2023-10-10'),
+      timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
     });
 
@@ -8074,7 +7084,7 @@ describe('SQL Builder test', () => {
           ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
-          and event.event_date <= date '2023-10-10'
+          and event.event_date <= date '2025-10-10'
           and event.event_name not in (
             '_session_start',
             '_session_stop',
@@ -8151,7 +7161,7 @@ describe('SQL Builder test', () => {
           )
           and (
             (
-              event_name = 'add_button_click'
+              event_name = 'view_item'
               and (
                 platform = 'Android'
                 and geo_country = 'China'
@@ -8159,9 +7169,9 @@ describe('SQL Builder test', () => {
                 and _user_first_touch_timestamp > 1686532526780
               )
             )
-            or (event_name = 'note_share')
+            or (event_name = 'add_to_cart')
             or (
-              event_name = 'note_export'
+              event_name = 'purchase'
               and (
                 platform = 'Android'
                 and geo_country = 'China'
@@ -8170,14 +7180,14 @@ describe('SQL Builder test', () => {
               )
             )
             or (
-              event_name not in ('add_button_click', 'note_share', 'note_export')
+              event_name not in ('view_item', 'add_to_cart', 'purchase')
             )
           )
       ),
       mid_table as (
         select
           CASE
-            WHEN event_name in ('add_button_click', 'note_share', 'note_export') THEN event_name
+            WHEN event_name in ('view_item', 'add_to_cart', 'purchase') THEN event_name
             ELSE 'other'
           END as event_name,
           user_pseudo_id,
@@ -8216,7 +7226,7 @@ describe('SQL Builder test', () => {
         from
           data
         where
-          event_name = 'add_button_click'
+          event_name = 'view_item'
         group by
           user_pseudo_id,
           _session_id
@@ -8320,7 +7330,7 @@ describe('SQL Builder test', () => {
       },
       eventAndConditions: [
         {
-          eventName: 'add_button_click',
+          eventName: 'view_item',
           computeMethod: ExploreComputeMethod.EVENT_CNT,
           sqlCondition: {
             conditionOperator: 'and',
@@ -8357,11 +7367,11 @@ describe('SQL Builder test', () => {
           },
         },
         {
-          eventName: 'note_share',
+          eventName: 'add_to_cart',
           computeMethod: ExploreComputeMethod.EVENT_CNT,
         },
         {
-          eventName: 'note_export',
+          eventName: 'purchase',
           computeMethod: ExploreComputeMethod.USER_CNT,
           sqlCondition: {
             conditionOperator: 'and',
@@ -8406,7 +7416,7 @@ describe('SQL Builder test', () => {
       },
       timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('2023-10-10'),
+      timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
     });
 
@@ -8516,7 +7526,7 @@ describe('SQL Builder test', () => {
           ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
-          and event.event_date <= date '2023-10-10'
+          and event.event_date <= date '2025-10-10'
           and event.event_name not in (
             '_session_start',
             '_session_stop',
@@ -8586,7 +7596,7 @@ describe('SQL Builder test', () => {
           )
           and (
             (
-              event_name = 'add_button_click'
+              event_name = 'view_item'
               and (
                 platform = 'Android'
                 and geo_country = 'China'
@@ -8594,9 +7604,9 @@ describe('SQL Builder test', () => {
                 and _user_first_touch_timestamp > 1686532526780
               )
             )
-            or (event_name = 'note_share')
+            or (event_name = 'add_to_cart')
             or (
-              event_name = 'note_export'
+              event_name = 'purchase'
               and (
                 platform = 'Android'
                 and geo_country = 'China'
@@ -8605,14 +7615,14 @@ describe('SQL Builder test', () => {
               )
             )
             or (
-              event_name not in ('add_button_click', 'note_share', 'note_export')
+              event_name not in ('view_item', 'add_to_cart', 'purchase')
             )
           )
       ),
       mid_table as (
         select
           CASE
-            WHEN event_name in ('add_button_click', 'note_share', 'note_export') THEN event_name
+            WHEN event_name in ('view_item', 'add_to_cart', 'purchase') THEN event_name
             ELSE 'other'
           END as event_name,
           user_pseudo_id,
@@ -8705,7 +7715,7 @@ describe('SQL Builder test', () => {
         from
           data
         where
-          event_name = 'add_button_click'
+          event_name = 'view_item'
         group by
           user_pseudo_id,
           group_id
@@ -8808,7 +7818,7 @@ describe('SQL Builder test', () => {
       },
       eventAndConditions: [
         {
-          eventName: 'add_button_click',
+          eventName: 'view_item',
           computeMethod: ExploreComputeMethod.EVENT_CNT,
           sqlCondition: {
             conditionOperator: 'and',
@@ -8845,7 +7855,7 @@ describe('SQL Builder test', () => {
           },
         },
         {
-          eventName: 'note_share',
+          eventName: 'add_to_cart',
           computeMethod: ExploreComputeMethod.EVENT_CNT,
           sqlCondition: {
             conditionOperator: 'and',
@@ -8875,7 +7885,7 @@ describe('SQL Builder test', () => {
           },
         },
         {
-          eventName: 'note_share',
+          eventName: 'add_to_cart',
           computeMethod: ExploreComputeMethod.EVENT_CNT,
           sqlCondition: {
             conditionOperator: 'and',
@@ -8905,7 +7915,7 @@ describe('SQL Builder test', () => {
           },
         },
         {
-          eventName: 'note_export',
+          eventName: 'purchase',
           computeMethod: ExploreComputeMethod.USER_CNT,
           sqlCondition: {
             conditionOperator: 'and',
@@ -8949,7 +7959,7 @@ describe('SQL Builder test', () => {
       },
       timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('2023-10-10'),
+      timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
     });
 
@@ -9059,7 +8069,7 @@ describe('SQL Builder test', () => {
           ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
-          and event.event_date <= date '2023-10-10'
+          and event.event_date <= date '2025-10-10'
           and event.event_name not in (
             '_session_start',
             '_session_stop',
@@ -9138,7 +8148,7 @@ describe('SQL Builder test', () => {
       union_base_data as (
         select
           CASE
-            WHEN event_name in ('add_button_click', 'note_share', 'note_export') THEN '1_' || event_name
+            WHEN event_name in ('view_item', 'add_to_cart', 'purchase') THEN '1_' || event_name
             ELSE 'other'
           END as event_name,
           user_pseudo_id,
@@ -9149,7 +8159,7 @@ describe('SQL Builder test', () => {
         from
           base_data
         where
-          event_name = 'add_button_click'
+          event_name = 'view_item'
           and (
             platform = 'Android'
             and geo_country = 'China'
@@ -9159,7 +8169,7 @@ describe('SQL Builder test', () => {
         union all
         select
           CASE
-            WHEN event_name in ('add_button_click', 'note_share', 'note_export') THEN '2_' || event_name
+            WHEN event_name in ('view_item', 'add_to_cart', 'purchase') THEN '2_' || event_name
             ELSE 'other'
           END as event_name,
           user_pseudo_id,
@@ -9170,7 +8180,7 @@ describe('SQL Builder test', () => {
         from
           base_data
         where
-          event_name = 'note_share'
+          event_name = 'add_to_cart'
           and (
             platform = 'Android'
             and geo_country = 'China'
@@ -9179,7 +8189,7 @@ describe('SQL Builder test', () => {
         union all
         select
           CASE
-            WHEN event_name in ('add_button_click', 'note_share', 'note_export') THEN '3_' || event_name
+            WHEN event_name in ('view_item', 'add_to_cart', 'purchase') THEN '3_' || event_name
             ELSE 'other'
           END as event_name,
           user_pseudo_id,
@@ -9190,7 +8200,7 @@ describe('SQL Builder test', () => {
         from
           base_data
         where
-          event_name = 'note_share'
+          event_name = 'add_to_cart'
           and (
             platform = 'Android'
             and geo_country = 'China'
@@ -9199,7 +8209,7 @@ describe('SQL Builder test', () => {
         union all
         select
           CASE
-            WHEN event_name in ('add_button_click', 'note_share', 'note_export') THEN '4_' || event_name
+            WHEN event_name in ('view_item', 'add_to_cart', 'purchase') THEN '4_' || event_name
             ELSE 'other'
           END as event_name,
           user_pseudo_id,
@@ -9210,7 +8220,7 @@ describe('SQL Builder test', () => {
         from
           base_data
         where
-          event_name = 'note_export'
+          event_name = 'purchase'
           and (
             platform = 'Android'
             and geo_country = 'China'
@@ -9257,7 +8267,7 @@ describe('SQL Builder test', () => {
         from
           data
         where
-          event_name = '1_add_button_click'
+          event_name = '1_view_item'
         group by
           user_pseudo_id,
           _session_id
@@ -9915,7 +8925,7 @@ describe('SQL Builder test', () => {
       },
       eventAndConditions: [
         {
-          eventName: 'add_button_click',
+          eventName: 'view_item',
           computeMethod: ExploreComputeMethod.EVENT_CNT,
           sqlCondition: {
             conditionOperator: 'and',
@@ -9952,11 +8962,11 @@ describe('SQL Builder test', () => {
           },
         },
         {
-          eventName: 'note_share',
+          eventName: 'add_to_cart',
           computeMethod: ExploreComputeMethod.EVENT_CNT,
         },
         {
-          eventName: 'note_export',
+          eventName: 'purchase',
           computeMethod: ExploreComputeMethod.USER_CNT,
           sqlCondition: {
             conditionOperator: 'and',
@@ -10003,7 +9013,7 @@ describe('SQL Builder test', () => {
       },
       timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('2023-10-10'),
+      timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
     });
 
@@ -10113,7 +9123,7 @@ describe('SQL Builder test', () => {
           ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
-          and event.event_date <= date '2023-10-10'
+          and event.event_date <= date '2025-10-10'
           and event.event_name = '_screen_view'
           and platform = 'Android'
       ),
@@ -10365,7 +9375,7 @@ describe('SQL Builder test', () => {
       },
       eventAndConditions: [
         {
-          eventName: 'add_button_click',
+          eventName: 'view_item',
           sqlCondition: {
             conditions: [
               {
@@ -10388,15 +9398,15 @@ describe('SQL Builder test', () => {
 
         },
         {
-          eventName: 'note_share',
+          eventName: 'add_to_cart',
         },
         {
-          eventName: 'note_export',
+          eventName: 'purchase',
         },
       ],
       timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('2023-10-10'),
+      timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
     });
 
@@ -10506,8 +9516,8 @@ describe('SQL Builder test', () => {
           ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
-          and event.event_date <= date '2023-10-10'
-          and event.event_name in ('add_button_click', 'note_share', 'note_export')
+          and event.event_date <= date '2025-10-10'
+          and event.event_name in ('view_item', 'add_to_cart', 'purchase')
       ),
       base_data as (
         select
@@ -10551,14 +9561,14 @@ describe('SQL Builder test', () => {
           1 = 1
           and (
             (
-              event_name = 'add_button_click'
+              event_name = 'view_item'
               and (
                 _user_first_touch_timestamp > 1686532526770
                 and _user_first_touch_timestamp > 1686532526780
               )
             )
-            or (event_name = 'note_share')
-            or (event_name = 'note_export')
+            or (event_name = 'add_to_cart')
+            or (event_name = 'purchase')
           )
       ),
       table_0 as (
@@ -10577,7 +9587,7 @@ describe('SQL Builder test', () => {
         from
           base_data base
         where
-          event_name = 'add_button_click'
+          event_name = 'view_item'
       ),
       table_1 as (
         select
@@ -10595,7 +9605,7 @@ describe('SQL Builder test', () => {
         from
           base_data base
         where
-          event_name = 'note_share'
+          event_name = 'add_to_cart'
       ),
       table_2 as (
         select
@@ -10613,7 +9623,7 @@ describe('SQL Builder test', () => {
         from
           base_data base
         where
-          event_name = 'note_export'
+          event_name = 'purchase'
       ),
       join_table as (
         select
@@ -10684,7 +9694,7 @@ describe('SQL Builder test', () => {
       },
       eventAndConditions: [
         {
-          eventName: 'add_button_click',
+          eventName: 'view_item',
           sqlCondition: {
             conditions: [
               {
@@ -10707,15 +9717,15 @@ describe('SQL Builder test', () => {
 
         },
         {
-          eventName: 'note_share',
+          eventName: 'add_to_cart',
         },
         {
-          eventName: 'note_export',
+          eventName: 'purchase',
         },
       ],
       timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('2023-10-10'),
+      timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
     });
 
@@ -10825,8 +9835,8 @@ describe('SQL Builder test', () => {
           ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
-          and event.event_date <= date '2023-10-10'
-          and event.event_name in ('add_button_click', 'note_share', 'note_export')
+          and event.event_date <= date '2025-10-10'
+          and event.event_name in ('view_item', 'add_to_cart', 'purchase')
       ),
       base_data as (
         select
@@ -10853,14 +9863,14 @@ describe('SQL Builder test', () => {
           1 = 1
           and (
             (
-              event_name = 'add_button_click'
+              event_name = 'view_item'
               and (
                 _user_first_touch_timestamp > 1686532526770
                 and _user_first_touch_timestamp > 1686532526780
               )
             )
-            or (event_name = 'note_share')
-            or (event_name = 'note_export')
+            or (event_name = 'add_to_cart')
+            or (event_name = 'purchase')
           )
       ),
       table_0 as (
@@ -10879,7 +9889,7 @@ describe('SQL Builder test', () => {
         from
           base_data base
         where
-          event_name = 'add_button_click'
+          event_name = 'view_item'
       ),
       table_1 as (
         select
@@ -10897,7 +9907,7 @@ describe('SQL Builder test', () => {
         from
           base_data base
         where
-          event_name = 'note_share'
+          event_name = 'add_to_cart'
       ),
       table_2 as (
         select
@@ -10915,7 +9925,7 @@ describe('SQL Builder test', () => {
         from
           base_data base
         where
-          event_name = 'note_export'
+          event_name = 'purchase'
       ),
       join_table as (
         select
@@ -10986,7 +9996,7 @@ describe('SQL Builder test', () => {
       },
       eventAndConditions: [
         {
-          eventName: 'add_button_click',
+          eventName: 'view_item',
           sqlCondition: {
             conditions: [
               {
@@ -11009,15 +10019,15 @@ describe('SQL Builder test', () => {
 
         },
         {
-          eventName: 'note_share',
+          eventName: 'add_to_cart',
         },
         {
-          eventName: 'note_export',
+          eventName: 'purchase',
         },
       ],
       timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('2023-10-10'),
+      timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
     }, true);
 
@@ -11127,8 +10137,8 @@ describe('SQL Builder test', () => {
           ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
-          and event.event_date <= date '2023-10-10'
-          and event.event_name in ('add_button_click', 'note_share', 'note_export')
+          and event.event_date <= date '2025-10-10'
+          and event.event_name in ('view_item', 'add_to_cart', 'purchase')
       ),
       base_data as (
         select
@@ -11172,14 +10182,14 @@ describe('SQL Builder test', () => {
           1 = 1
           and (
             (
-              event_name = 'add_button_click'
+              event_name = 'view_item'
               and (
                 _user_first_touch_timestamp > 1686532526770
                 and _user_first_touch_timestamp > 1686532526780
               )
             )
-            or (event_name = 'note_share')
-            or (event_name = 'note_export')
+            or (event_name = 'add_to_cart')
+            or (event_name = 'purchase')
           )
       ),
       table_0 as (
@@ -11198,7 +10208,7 @@ describe('SQL Builder test', () => {
         from
           base_data base
         where
-          event_name = 'add_button_click'
+          event_name = 'view_item'
       ),
       table_1 as (
         select
@@ -11212,7 +10222,7 @@ describe('SQL Builder test', () => {
         from
           base_data base
         where
-          event_name = 'note_share'
+          event_name = 'add_to_cart'
       ),
       table_2 as (
         select
@@ -11226,7 +10236,7 @@ describe('SQL Builder test', () => {
         from
           base_data base
         where
-          event_name = 'note_export'
+          event_name = 'purchase'
       ),
       join_table as (
         select
@@ -11349,7 +10359,7 @@ describe('SQL Builder test', () => {
       },
       eventAndConditions: [
         {
-          eventName: 'add_button_click',
+          eventName: 'view_item',
           sqlCondition: {
             conditions: [
               {
@@ -11372,15 +10382,15 @@ describe('SQL Builder test', () => {
 
         },
         {
-          eventName: 'note_share',
+          eventName: 'add_to_cart',
         },
         {
-          eventName: 'note_export',
+          eventName: 'purchase',
         },
       ],
       timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('2023-10-10'),
+      timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
     }, true);
 
@@ -11490,8 +10500,8 @@ describe('SQL Builder test', () => {
           ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
-          and event.event_date <= date '2023-10-10'
-          and event.event_name in ('add_button_click', 'note_share', 'note_export')
+          and event.event_date <= date '2025-10-10'
+          and event.event_name in ('view_item', 'add_to_cart', 'purchase')
       ),
       base_data as (
         select
@@ -11518,14 +10528,14 @@ describe('SQL Builder test', () => {
           1 = 1
           and (
             (
-              event_name = 'add_button_click'
+              event_name = 'view_item'
               and (
                 _user_first_touch_timestamp > 1686532526770
                 and _user_first_touch_timestamp > 1686532526780
               )
             )
-            or (event_name = 'note_share')
-            or (event_name = 'note_export')
+            or (event_name = 'add_to_cart')
+            or (event_name = 'purchase')
           )
       ),
       table_0 as (
@@ -11544,7 +10554,7 @@ describe('SQL Builder test', () => {
         from
           base_data base
         where
-          event_name = 'add_button_click'
+          event_name = 'view_item'
       ),
       table_1 as (
         select
@@ -11558,7 +10568,7 @@ describe('SQL Builder test', () => {
         from
           base_data base
         where
-          event_name = 'note_share'
+          event_name = 'add_to_cart'
       ),
       table_2 as (
         select
@@ -11572,7 +10582,7 @@ describe('SQL Builder test', () => {
         from
           base_data base
         where
-          event_name = 'note_export'
+          event_name = 'purchase'
       ),
       join_table as (
         select
@@ -11696,7 +10706,7 @@ describe('SQL Builder test', () => {
       },
       eventAndConditions: [
         {
-          eventName: 'add_button_click',
+          eventName: 'view_item',
           sqlCondition: {
             conditions: [
               {
@@ -11719,15 +10729,15 @@ describe('SQL Builder test', () => {
 
         },
         {
-          eventName: 'note_share',
+          eventName: 'add_to_cart',
         },
         {
-          eventName: 'note_export',
+          eventName: 'purchase',
         },
       ],
       timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('2023-10-10'),
+      timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
     }, true);
 
@@ -11837,8 +10847,8 @@ describe('SQL Builder test', () => {
           ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
-          and event.event_date <= date '2023-10-10'
-          and event.event_name in ('add_button_click', 'note_share', 'note_export')
+          and event.event_date <= date '2025-10-10'
+          and event.event_name in ('view_item', 'add_to_cart', 'purchase')
       ),
       base_data as (
         select
@@ -11865,14 +10875,14 @@ describe('SQL Builder test', () => {
           1 = 1
           and (
             (
-              event_name = 'add_button_click'
+              event_name = 'view_item'
               and (
                 _user_first_touch_timestamp > 1686532526770
                 and _user_first_touch_timestamp > 1686532526780
               )
             )
-            or (event_name = 'note_share')
-            or (event_name = 'note_export')
+            or (event_name = 'add_to_cart')
+            or (event_name = 'purchase')
           )
       ),
       table_0 as (
@@ -11891,7 +10901,7 @@ describe('SQL Builder test', () => {
         from
           base_data base
         where
-          event_name = 'add_button_click'
+          event_name = 'view_item'
       ),
       table_1 as (
         select
@@ -11904,7 +10914,7 @@ describe('SQL Builder test', () => {
         from
           base_data base
         where
-          event_name = 'note_share'
+          event_name = 'add_to_cart'
       ),
       table_2 as (
         select
@@ -11917,7 +10927,7 @@ describe('SQL Builder test', () => {
         from
           base_data base
         where
-          event_name = 'note_export'
+          event_name = 'purchase'
       ),
       join_table as (
         select
@@ -12021,7 +11031,7 @@ describe('SQL Builder test', () => {
 
   test('_buildCommonPartSql - no condition', () => {
 
-    const sql = _buildCommonPartSql(['add_button_click', 'note_share', 'note_export'],
+    const sql = _buildCommonPartSql(['view_item', 'add_to_cart', 'purchase'],
       {
         schemaName: 'app1',
         computeMethod: ExploreComputeMethod.USER_CNT,
@@ -12031,18 +11041,18 @@ describe('SQL Builder test', () => {
         conversionIntervalInSeconds: 10*60,
         eventAndConditions: [
           {
-            eventName: 'add_button_click',
+            eventName: 'view_item',
           },
           {
-            eventName: 'note_share',
+            eventName: 'add_to_cart',
           },
           {
-            eventName: 'note_export',
+            eventName: 'purchase',
           },
         ],
         timeScopeType: ExploreTimeScopeType.FIXED,
         timeStart: new Date('2023-10-01'),
-        timeEnd: new Date('2023-10-10'),
+        timeEnd: new Date('2025-10-10'),
         groupColumn: ExploreGroupColumn.DAY,
       },
       false);
@@ -12137,15 +11147,15 @@ describe('SQL Builder test', () => {
           ) as u on event.user_pseudo_id = u.user_pseudo_id
             where
               event.event_date >= date '2023-10-01'
-              and event.event_date <= date '2023-10-10'
-              and event.event_name in ('add_button_click', 'note_share', 'note_export')
+              and event.event_date <= date '2025-10-10'
+              and event.event_name in ('view_item', 'add_to_cart', 'purchase')
           ) as event_base
         where
           1 = 1
           and (
-            (event_name = 'add_button_click')
-            or (event_name = 'note_share')
-            or (event_name = 'note_export')
+            (event_name = 'view_item')
+            or (event_name = 'add_to_cart')
+            or (event_name = 'purchase')
           )
       ),
     `;
@@ -12154,7 +11164,7 @@ describe('SQL Builder test', () => {
 
   test('_buildCommonPartSql - geo and other condition', () => {
 
-    const sql = _buildCommonPartSql(['add_button_click', 'note_share', 'note_export'],
+    const sql = _buildCommonPartSql(['view_item', 'add_to_cart', 'purchase'],
       {
         schemaName: 'app1',
         computeMethod: ExploreComputeMethod.USER_CNT,
@@ -12164,7 +11174,7 @@ describe('SQL Builder test', () => {
         conversionIntervalInSeconds: 10*60,
         eventAndConditions: [
           {
-            eventName: 'add_button_click',
+            eventName: 'view_item',
             sqlCondition: {
               conditionOperator: 'and',
               conditions: [
@@ -12186,15 +11196,15 @@ describe('SQL Builder test', () => {
             },
           },
           {
-            eventName: 'note_share',
+            eventName: 'add_to_cart',
           },
           {
-            eventName: 'note_export',
+            eventName: 'purchase',
           },
         ],
         timeScopeType: ExploreTimeScopeType.FIXED,
         timeStart: new Date('2023-10-01'),
-        timeEnd: new Date('2023-10-10'),
+        timeEnd: new Date('2025-10-10'),
         groupColumn: ExploreGroupColumn.DAY,
       }, false);
 
@@ -12288,21 +11298,21 @@ describe('SQL Builder test', () => {
           ) as u on event.user_pseudo_id = u.user_pseudo_id
             where
               event.event_date >= date '2023-10-01'
-              and event.event_date <= date '2023-10-10'
-              and event.event_name in ('add_button_click', 'note_share', 'note_export')
+              and event.event_date <= date '2025-10-10'
+              and event.event_name in ('view_item', 'add_to_cart', 'purchase')
           ) as event_base
         where
           1 = 1
           and (
             (
-              event_name = 'add_button_click'
+              event_name = 'view_item'
               and (
                 platform = 'Android'
                 and geo_country = 'China'
               )
             )
-            or (event_name = 'note_share')
-            or (event_name = 'note_export')
+            or (event_name = 'add_to_cart')
+            or (event_name = 'purchase')
           )
       ),
       `;
@@ -12312,7 +11322,7 @@ describe('SQL Builder test', () => {
 
   test('_buildCommonPartSql - event,geo and other condition', () => {
 
-    const sql = _buildCommonPartSql(['add_button_click', 'note_share', 'note_export'],
+    const sql = _buildCommonPartSql(['view_item', 'add_to_cart', 'purchase'],
       {
         schemaName: 'app1',
         computeMethod: ExploreComputeMethod.USER_CNT,
@@ -12322,7 +11332,7 @@ describe('SQL Builder test', () => {
         conversionIntervalInSeconds: 10*60,
         eventAndConditions: [
           {
-            eventName: 'add_button_click',
+            eventName: 'view_item',
             sqlCondition: {
               conditionOperator: 'and',
               conditions: [
@@ -12351,15 +11361,15 @@ describe('SQL Builder test', () => {
             },
           },
           {
-            eventName: 'note_share',
+            eventName: 'add_to_cart',
           },
           {
-            eventName: 'note_export',
+            eventName: 'purchase',
           },
         ],
         timeScopeType: ExploreTimeScopeType.FIXED,
         timeStart: new Date('2023-10-01'),
-        timeEnd: new Date('2023-10-10'),
+        timeEnd: new Date('2025-10-10'),
         groupColumn: ExploreGroupColumn.DAY,
       },
       false);
@@ -12450,8 +11460,8 @@ describe('SQL Builder test', () => {
           ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
-          and event.event_date <= date '2023-10-10'
-          and event.event_name in ('add_button_click', 'note_share', 'note_export')
+          and event.event_date <= date '2025-10-10'
+          and event.event_name in ('view_item', 'add_to_cart', 'purchase')
       ),
       base_data as (
         select
@@ -12479,15 +11489,15 @@ describe('SQL Builder test', () => {
           1 = 1
           and (
             (
-              event_name = 'add_button_click'
+              event_name = 'view_item'
               and (
                 platform = 'Android'
                 and geo_country = 'China'
                 and _session_duration > 220
               )
             )
-            or (event_name = 'note_share')
-            or (event_name = 'note_export')
+            or (event_name = 'add_to_cart')
+            or (event_name = 'purchase')
           )
       ),
       `;
@@ -12497,7 +11507,7 @@ describe('SQL Builder test', () => {
 
   test('_buildCommonPartSql - user,geo and other condition', () => {
 
-    const sql = _buildCommonPartSql(['add_button_click', 'note_share', 'note_export'],
+    const sql = _buildCommonPartSql(['view_item', 'add_to_cart', 'purchase'],
       {
         schemaName: 'app1',
         computeMethod: ExploreComputeMethod.USER_CNT,
@@ -12507,7 +11517,7 @@ describe('SQL Builder test', () => {
         conversionIntervalInSeconds: 10*60,
         eventAndConditions: [
           {
-            eventName: 'add_button_click',
+            eventName: 'view_item',
             sqlCondition: {
               conditionOperator: 'and',
               conditions: [
@@ -12536,15 +11546,15 @@ describe('SQL Builder test', () => {
             },
           },
           {
-            eventName: 'note_share',
+            eventName: 'add_to_cart',
           },
           {
-            eventName: 'note_export',
+            eventName: 'purchase',
           },
         ],
         timeScopeType: ExploreTimeScopeType.FIXED,
         timeStart: new Date('2023-10-01'),
-        timeEnd: new Date('2023-10-10'),
+        timeEnd: new Date('2025-10-10'),
         groupColumn: ExploreGroupColumn.DAY,
       },
       false);
@@ -12655,8 +11665,8 @@ describe('SQL Builder test', () => {
           ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
-          and event.event_date <= date '2023-10-10'
-          and event.event_name in ('add_button_click', 'note_share', 'note_export')
+          and event.event_date <= date '2025-10-10'
+          and event.event_name in ('view_item', 'add_to_cart', 'purchase')
       ),
       base_data as (
         select
@@ -12683,15 +11693,15 @@ describe('SQL Builder test', () => {
           1 = 1
           and (
             (
-              event_name = 'add_button_click'
+              event_name = 'view_item'
               and (
                 platform = 'Android'
                 and geo_country = 'China'
                 and _user_name = 'test_user'
               )
             )
-            or (event_name = 'note_share')
-            or (event_name = 'note_export')
+            or (event_name = 'add_to_cart')
+            or (event_name = 'purchase')
           )
       ),
       `;
@@ -12701,7 +11711,7 @@ describe('SQL Builder test', () => {
 
   test('_buildCommonPartSql - user,user_outer,event,geo and other condition', () => {
 
-    const sql = _buildCommonPartSql(['add_button_click', 'note_share', 'note_export'],
+    const sql = _buildCommonPartSql(['view_item', 'add_to_cart', 'purchase'],
       {
         schemaName: 'app1',
         computeMethod: ExploreComputeMethod.USER_CNT,
@@ -12711,7 +11721,7 @@ describe('SQL Builder test', () => {
         conversionIntervalInSeconds: 10*60,
         eventAndConditions: [
           {
-            eventName: 'add_button_click',
+            eventName: 'view_item',
             sqlCondition: {
               conditionOperator: 'and',
               conditions: [
@@ -12754,15 +11764,15 @@ describe('SQL Builder test', () => {
             },
           },
           {
-            eventName: 'note_share',
+            eventName: 'add_to_cart',
           },
           {
-            eventName: 'note_export',
+            eventName: 'purchase',
           },
         ],
         timeScopeType: ExploreTimeScopeType.FIXED,
         timeStart: new Date('2023-10-01'),
-        timeEnd: new Date('2023-10-10'),
+        timeEnd: new Date('2025-10-10'),
         groupColumn: ExploreGroupColumn.DAY,
       },
       false);
@@ -12873,8 +11883,8 @@ describe('SQL Builder test', () => {
           ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
-          and event.event_date <= date '2023-10-10'
-          and event.event_name in ('add_button_click', 'note_share', 'note_export')
+          and event.event_date <= date '2025-10-10'
+          and event.event_name in ('view_item', 'add_to_cart', 'purchase')
       ),
       base_data as (
         select
@@ -12920,7 +11930,7 @@ describe('SQL Builder test', () => {
           1 = 1
           and (
             (
-              event_name = 'add_button_click'
+              event_name = 'view_item'
               and (
                 platform = 'Android'
                 and geo_country = 'China'
@@ -12929,8 +11939,8 @@ describe('SQL Builder test', () => {
                 and _first_visit_date > 1686532526770
               )
             )
-            or (event_name = 'note_share')
-            or (event_name = 'note_export')
+            or (event_name = 'add_to_cart')
+            or (event_name = 'purchase')
           )
       ),
       `;
@@ -12941,7 +11951,7 @@ describe('SQL Builder test', () => {
 
   test('_buildCommonPartSql - only has user_outer condition', () => {
 
-    const sql = _buildCommonPartSql(['add_button_click', 'note_share', 'note_export'],
+    const sql = _buildCommonPartSql(['view_item', 'add_to_cart', 'purchase'],
       {
         schemaName: 'app1',
         computeMethod: ExploreComputeMethod.USER_CNT,
@@ -12951,7 +11961,7 @@ describe('SQL Builder test', () => {
         conversionIntervalInSeconds: 10*60,
         eventAndConditions: [
           {
-            eventName: 'add_button_click',
+            eventName: 'view_item',
             sqlCondition: {
               conditionOperator: 'and',
               conditions: [
@@ -12966,15 +11976,15 @@ describe('SQL Builder test', () => {
             },
           },
           {
-            eventName: 'note_share',
+            eventName: 'add_to_cart',
           },
           {
-            eventName: 'note_export',
+            eventName: 'purchase',
           },
         ],
         timeScopeType: ExploreTimeScopeType.FIXED,
         timeStart: new Date('2023-10-01'),
-        timeEnd: new Date('2023-10-10'),
+        timeEnd: new Date('2025-10-10'),
         groupColumn: ExploreGroupColumn.DAY,
       },
       false);
@@ -13070,8 +12080,8 @@ describe('SQL Builder test', () => {
           ) as u on event.user_pseudo_id = u.user_pseudo_id
           where
             event.event_date >= date '2023-10-01'
-            and event.event_date <= date '2023-10-10'
-            and event.event_name in ('add_button_click', 'note_share', 'note_export')
+            and event.event_date <= date '2025-10-10'
+            and event.event_name in ('view_item', 'add_to_cart', 'purchase')
         ) as event_base
         join (
           select
@@ -13091,11 +12101,11 @@ describe('SQL Builder test', () => {
         1 = 1
         and (
           (
-            event_name = 'add_button_click'
+            event_name = 'view_item'
             and (_channel = 'apple')
           )
-          or (event_name = 'note_share')
-          or (event_name = 'note_export')
+          or (event_name = 'add_to_cart')
+          or (event_name = 'purchase')
         )
     ),
       `;
@@ -13111,7 +12121,7 @@ describe('SQL Builder test', () => {
       specifyJoinColumn: false,
       eventAndConditions: [
         {
-          eventName: 'add_button_click',
+          eventName: 'view_item',
           sqlCondition: {
             conditionOperator: 'and',
             conditions: [
@@ -13126,15 +12136,15 @@ describe('SQL Builder test', () => {
           },
         },
         {
-          eventName: 'note_share',
+          eventName: 'add_to_cart',
         },
         {
-          eventName: 'note_export',
+          eventName: 'purchase',
         },
       ],
       timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('2023-10-10'),
+      timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
     });
 
@@ -13229,8 +12239,8 @@ describe('SQL Builder test', () => {
           ) as u on event.user_pseudo_id = u.user_pseudo_id
             where
               event.event_date >= date '2023-10-01'
-              and event.event_date <= date '2023-10-10'
-              and event.event_name in ('add_button_click', 'note_share', 'note_export')
+              and event.event_date <= date '2025-10-10'
+              and event.event_name in ('view_item', 'add_to_cart', 'purchase')
           ) as event_base
           join (
             select
@@ -13250,11 +12260,11 @@ describe('SQL Builder test', () => {
           1 = 1
           and (
             (
-              event_name = 'add_button_click'
+              event_name = 'view_item'
               and (_channel = 'apple')
             )
-            or (event_name = 'note_share')
-            or (event_name = 'note_export')
+            or (event_name = 'add_to_cart')
+            or (event_name = 'purchase')
           )
       ),
       table_0 as (
@@ -13272,7 +12282,7 @@ describe('SQL Builder test', () => {
         from
           base_data base
         where
-          event_name = 'add_button_click'
+          event_name = 'view_item'
       ),
       table_1 as (
         select
@@ -13289,7 +12299,7 @@ describe('SQL Builder test', () => {
         from
           base_data base
         where
-          event_name = 'note_share'
+          event_name = 'add_to_cart'
       ),
       table_2 as (
         select
@@ -13306,7 +12316,7 @@ describe('SQL Builder test', () => {
         from
           base_data base
         where
-          event_name = 'note_export'
+          event_name = 'purchase'
       ),
       join_table as (
         select
@@ -13361,7 +12371,7 @@ describe('SQL Builder test', () => {
 
   test('_buildCommonPartSql - grouping condition', () => {
 
-    const sql = _buildCommonPartSql(['add_button_click', 'note_share', 'note_export'],
+    const sql = _buildCommonPartSql(['view_item', 'add_to_cart', 'purchase'],
       {
         schemaName: 'app1',
         computeMethod: ExploreComputeMethod.USER_CNT,
@@ -13376,18 +12386,18 @@ describe('SQL Builder test', () => {
         },
         eventAndConditions: [
           {
-            eventName: 'add_button_click',
+            eventName: 'view_item',
           },
           {
-            eventName: 'note_share',
+            eventName: 'add_to_cart',
           },
           {
-            eventName: 'note_export',
+            eventName: 'purchase',
           },
         ],
         timeScopeType: ExploreTimeScopeType.FIXED,
         timeStart: new Date('2023-10-01'),
-        timeEnd: new Date('2023-10-10'),
+        timeEnd: new Date('2025-10-10'),
         groupColumn: ExploreGroupColumn.DAY,
       },
       false);
@@ -13498,8 +12508,8 @@ describe('SQL Builder test', () => {
           ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
-          and event.event_date <= date '2023-10-10'
-          and event.event_name in ('add_button_click', 'note_share', 'note_export')
+          and event.event_date <= date '2025-10-10'
+          and event.event_name in ('view_item', 'add_to_cart', 'purchase')
       ),
       base_data as (
         select
@@ -13525,9 +12535,9 @@ describe('SQL Builder test', () => {
         where
           1 = 1
           and (
-            (event_name = 'add_button_click')
-            or (event_name = 'note_share')
-            or (event_name = 'note_export')
+            (event_name = 'view_item')
+            or (event_name = 'add_to_cart')
+            or (event_name = 'purchase')
           )
       ),
       `;
@@ -13537,7 +12547,7 @@ describe('SQL Builder test', () => {
 
   test('_buildCommonPartSql - global condition', () => {
 
-    const sql = _buildCommonPartSql(['add_button_click', 'note_share', 'note_export'],
+    const sql = _buildCommonPartSql(['view_item', 'add_to_cart', 'purchase'],
       {
         schemaName: 'app1',
         computeMethod: ExploreComputeMethod.USER_CNT,
@@ -13579,18 +12589,18 @@ describe('SQL Builder test', () => {
         },
         eventAndConditions: [
           {
-            eventName: 'add_button_click',
+            eventName: 'view_item',
           },
           {
-            eventName: 'note_share',
+            eventName: 'add_to_cart',
           },
           {
-            eventName: 'note_export',
+            eventName: 'purchase',
           },
         ],
         timeScopeType: ExploreTimeScopeType.FIXED,
         timeStart: new Date('2023-10-01'),
-        timeEnd: new Date('2023-10-10'),
+        timeEnd: new Date('2025-10-10'),
         groupColumn: ExploreGroupColumn.DAY,
       },
       false);
@@ -13701,8 +12711,8 @@ describe('SQL Builder test', () => {
           ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
-          and event.event_date <= date '2023-10-10'
-          and event.event_name in ('add_button_click', 'note_share', 'note_export')
+          and event.event_date <= date '2025-10-10'
+          and event.event_name in ('view_item', 'add_to_cart', 'purchase')
       ),
       base_data as (
         select
@@ -13751,9 +12761,9 @@ describe('SQL Builder test', () => {
             and _session_duration > 220
           )
           and (
-            (event_name = 'add_button_click')
-            or (event_name = 'note_share')
-            or (event_name = 'note_export')
+            (event_name = 'view_item')
+            or (event_name = 'add_to_cart')
+            or (event_name = 'purchase')
           )
       ),
       `;
@@ -13763,7 +12773,7 @@ describe('SQL Builder test', () => {
 
   test('_buildCommonPartSql - global condition and grouping condition', () => {
 
-    const sql = _buildCommonPartSql(['add_button_click', 'note_share', 'note_export'],
+    const sql = _buildCommonPartSql(['view_item', 'add_to_cart', 'purchase'],
       {
         schemaName: 'app1',
         computeMethod: ExploreComputeMethod.USER_CNT,
@@ -13810,18 +12820,18 @@ describe('SQL Builder test', () => {
         },
         eventAndConditions: [
           {
-            eventName: 'add_button_click',
+            eventName: 'view_item',
           },
           {
-            eventName: 'note_share',
+            eventName: 'add_to_cart',
           },
           {
-            eventName: 'note_export',
+            eventName: 'purchase',
           },
         ],
         timeScopeType: ExploreTimeScopeType.FIXED,
         timeStart: new Date('2023-10-01'),
-        timeEnd: new Date('2023-10-10'),
+        timeEnd: new Date('2025-10-10'),
         groupColumn: ExploreGroupColumn.DAY,
       },
       false);
@@ -13932,8 +12942,8 @@ describe('SQL Builder test', () => {
           ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
-          and event.event_date <= date '2023-10-10'
-          and event.event_name in ('add_button_click', 'note_share', 'note_export')
+          and event.event_date <= date '2025-10-10'
+          and event.event_name in ('view_item', 'add_to_cart', 'purchase')
       ),
       base_data as (
         select
@@ -13989,9 +12999,9 @@ describe('SQL Builder test', () => {
             and _session_duration > 220
           )
           and (
-            (event_name = 'add_button_click')
-            or (event_name = 'note_share')
-            or (event_name = 'note_export')
+            (event_name = 'view_item')
+            or (event_name = 'add_to_cart')
+            or (event_name = 'purchase')
           )
       ),
       `;
@@ -14001,7 +13011,7 @@ describe('SQL Builder test', () => {
 
   test('_buildCommonPartSql - global condition and user,user_outer,event,geo and other condition', () => {
 
-    const sql = _buildCommonPartSql(['add_button_click', 'note_share', 'note_export'],
+    const sql = _buildCommonPartSql(['view_item', 'add_to_cart', 'purchase'],
       {
         schemaName: 'app1',
         computeMethod: ExploreComputeMethod.USER_CNT,
@@ -14043,7 +13053,7 @@ describe('SQL Builder test', () => {
         },
         eventAndConditions: [
           {
-            eventName: 'add_button_click',
+            eventName: 'view_item',
             sqlCondition: {
               conditionOperator: 'and',
               conditions: [
@@ -14086,15 +13096,15 @@ describe('SQL Builder test', () => {
             },
           },
           {
-            eventName: 'note_share',
+            eventName: 'add_to_cart',
           },
           {
-            eventName: 'note_export',
+            eventName: 'purchase',
           },
         ],
         timeScopeType: ExploreTimeScopeType.FIXED,
         timeStart: new Date('2023-10-01'),
-        timeEnd: new Date('2023-10-10'),
+        timeEnd: new Date('2025-10-10'),
         groupColumn: ExploreGroupColumn.DAY,
       },
       false);
@@ -14205,8 +13215,8 @@ describe('SQL Builder test', () => {
           ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
-          and event.event_date <= date '2023-10-10'
-          and event.event_name in ('add_button_click', 'note_share', 'note_export')
+          and event.event_date <= date '2025-10-10'
+          and event.event_name in ('view_item', 'add_to_cart', 'purchase')
       ),
       base_data as (
         select
@@ -14265,7 +13275,7 @@ describe('SQL Builder test', () => {
           )
           and (
             (
-              event_name = 'add_button_click'
+              event_name = 'view_item'
               and (
                 platform = 'Android'
                 and geo_country = 'China'
@@ -14274,8 +13284,8 @@ describe('SQL Builder test', () => {
                 and _first_visit_date > 1686532526770
               )
             )
-            or (event_name = 'note_share')
-            or (event_name = 'note_export')
+            or (event_name = 'add_to_cart')
+            or (event_name = 'purchase')
           )
       ),
       `;
@@ -14285,7 +13295,7 @@ describe('SQL Builder test', () => {
 
   test('_buildCommonPartSql - grouping condition and global condition and user,user_outer,event,geo and other condition', () => {
 
-    const sql = _buildCommonPartSql(['add_button_click', 'note_share', 'note_export'],
+    const sql = _buildCommonPartSql(['view_item', 'add_to_cart', 'purchase'],
       {
         schemaName: 'app1',
         computeMethod: ExploreComputeMethod.USER_CNT,
@@ -14332,7 +13342,7 @@ describe('SQL Builder test', () => {
         },
         eventAndConditions: [
           {
-            eventName: 'add_button_click',
+            eventName: 'view_item',
             sqlCondition: {
               conditionOperator: 'and',
               conditions: [
@@ -14375,15 +13385,15 @@ describe('SQL Builder test', () => {
             },
           },
           {
-            eventName: 'note_share',
+            eventName: 'add_to_cart',
           },
           {
-            eventName: 'note_export',
+            eventName: 'purchase',
           },
         ],
         timeScopeType: ExploreTimeScopeType.FIXED,
         timeStart: new Date('2023-10-01'),
-        timeEnd: new Date('2023-10-10'),
+        timeEnd: new Date('2025-10-10'),
         groupColumn: ExploreGroupColumn.DAY,
       },
       false);
@@ -14494,8 +13504,8 @@ describe('SQL Builder test', () => {
           ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
-          and event.event_date <= date '2023-10-10'
-          and event.event_name in ('add_button_click', 'note_share', 'note_export')
+          and event.event_date <= date '2025-10-10'
+          and event.event_name in ('view_item', 'add_to_cart', 'purchase')
       ),
       base_data as (
         select
@@ -14561,7 +13571,7 @@ describe('SQL Builder test', () => {
           )
           and (
             (
-              event_name = 'add_button_click'
+              event_name = 'view_item'
               and (
                 platform = 'Android'
                 and geo_country = 'China'
@@ -14570,8 +13580,8 @@ describe('SQL Builder test', () => {
                 and _first_visit_date > 1686532526770
               )
             )
-            or (event_name = 'note_share')
-            or (event_name = 'note_export')
+            or (event_name = 'add_to_cart')
+            or (event_name = 'purchase')
           )
       ),
       `;
@@ -14628,7 +13638,7 @@ describe('SQL Builder test', () => {
       },
       eventAndConditions: [
         {
-          eventName: 'add_button_click',
+          eventName: 'view_item',
           computeMethod: ExploreComputeMethod.EVENT_CNT,
           sqlCondition: {
             conditionOperator: 'and',
@@ -14665,11 +13675,11 @@ describe('SQL Builder test', () => {
           },
         },
         {
-          eventName: 'note_share',
+          eventName: 'add_to_cart',
           computeMethod: ExploreComputeMethod.EVENT_CNT,
         },
         {
-          eventName: 'note_export',
+          eventName: 'purchase',
           computeMethod: ExploreComputeMethod.USER_CNT,
           sqlCondition: {
             conditionOperator: 'and',
@@ -14708,7 +13718,7 @@ describe('SQL Builder test', () => {
       ],
       timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('2023-10-10'),
+      timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
     }, true);
 
@@ -14818,8 +13828,8 @@ describe('SQL Builder test', () => {
           ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
-          and event.event_date <= date '2023-10-10'
-          and event.event_name in ('add_button_click', 'note_share', 'note_export')
+          and event.event_date <= date '2025-10-10'
+          and event.event_name in ('view_item', 'add_to_cart', 'purchase')
       ),
       base_data as (
         select
@@ -14869,7 +13879,7 @@ describe('SQL Builder test', () => {
           )
           and (
             (
-              event_name = 'add_button_click'
+              event_name = 'view_item'
               and (
                 platform = 'Android'
                 and geo_country = 'China'
@@ -14877,9 +13887,9 @@ describe('SQL Builder test', () => {
                 and _user_first_touch_timestamp > 1686532526780
               )
             )
-            or (event_name = 'note_share')
+            or (event_name = 'add_to_cart')
             or (
-              event_name = 'note_export'
+              event_name = 'purchase'
               and (
                 platform = 'Android'
                 and geo_country = 'China'
@@ -14905,7 +13915,7 @@ describe('SQL Builder test', () => {
         from
           base_data base
         where
-          event_name = 'add_button_click'
+          event_name = 'view_item'
       ),
       table_1 as (
         select
@@ -14919,7 +13929,7 @@ describe('SQL Builder test', () => {
         from
           base_data base
         where
-          event_name = 'note_share'
+          event_name = 'add_to_cart'
       ),
       table_2 as (
         select
@@ -14933,7 +13943,7 @@ describe('SQL Builder test', () => {
         from
           base_data base
         where
-          event_name = 'note_export'
+          event_name = 'purchase'
       ),
       join_table as (
         select
@@ -15074,7 +14084,7 @@ describe('SQL Builder test', () => {
       },
       eventAndConditions: [
         {
-          eventName: 'add_button_click',
+          eventName: 'view_item',
           computeMethod: ExploreComputeMethod.EVENT_CNT,
           sqlCondition: {
             conditionOperator: 'and',
@@ -15104,11 +14114,11 @@ describe('SQL Builder test', () => {
           },
         },
         {
-          eventName: 'note_share',
+          eventName: 'add_to_cart',
           computeMethod: ExploreComputeMethod.EVENT_CNT,
         },
         {
-          eventName: 'note_export',
+          eventName: 'purchase',
           computeMethod: ExploreComputeMethod.USER_CNT,
           sqlCondition: {
             conditionOperator: 'and',
@@ -15147,7 +14157,7 @@ describe('SQL Builder test', () => {
       ],
       timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('2023-10-10'),
+      timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
     });
 
@@ -15257,8 +14267,8 @@ describe('SQL Builder test', () => {
           ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
-          and event.event_date <= date '2023-10-10'
-          and event.event_name in ('add_button_click', 'note_share', 'note_export')
+          and event.event_date <= date '2025-10-10'
+          and event.event_name in ('view_item', 'add_to_cart', 'purchase')
       ),
       base_data as (
         select
@@ -15308,16 +14318,16 @@ describe('SQL Builder test', () => {
           )
           and (
             (
-              event_name = 'add_button_click'
+              event_name = 'view_item'
               and (
                 platform = 'Android'
                 and _user_first_touch_timestamp > 1686532526770
                 and _user_first_touch_timestamp > 1686532526780
               )
             )
-            or (event_name = 'note_share')
+            or (event_name = 'add_to_cart')
             or (
-              event_name = 'note_export'
+              event_name = 'purchase'
               and (
                 platform = 'Android'
                 and geo_country = 'China'
@@ -15342,7 +14352,7 @@ describe('SQL Builder test', () => {
         from
           base_data base
         where
-          event_name = 'add_button_click'
+          event_name = 'view_item'
       ),
       table_1 as (
         select
@@ -15355,7 +14365,7 @@ describe('SQL Builder test', () => {
         from
           base_data base
         where
-          event_name = 'note_share'
+          event_name = 'add_to_cart'
       ),
       table_2 as (
         select
@@ -15368,7 +14378,7 @@ describe('SQL Builder test', () => {
         from
           base_data base
         where
-          event_name = 'note_export'
+          event_name = 'purchase'
       ),
       join_table as (
         select
@@ -15392,25 +14402,25 @@ describe('SQL Builder test', () => {
       )
     select
       DAY,
-      count(distinct user_pseudo_id_0) as add_button_click,
+      count(distinct user_pseudo_id_0) as view_item,
       (
         count(distinct user_pseudo_id_2)::decimal / NULLIF(count(distinct user_pseudo_id_0), 0)
       )::decimal(20, 4) as total_conversion_rate,
-      count(distinct user_pseudo_id_1) as note_share,
+      count(distinct user_pseudo_id_1) as add_to_cart,
       (
         count(distinct user_pseudo_id_1)::decimal / NULLIF(count(distinct user_pseudo_id_0), 0)
-      )::decimal(20, 4) as note_share_rate,
-      count(distinct user_pseudo_id_2) as note_export,
+      )::decimal(20, 4) as add_to_cart_rate,
+      count(distinct user_pseudo_id_2) as purchase,
       (
         count(distinct user_pseudo_id_2)::decimal / NULLIF(count(distinct user_pseudo_id_1), 0)
-      )::decimal(20, 4) as note_export_rate
+      )::decimal(20, 4) as purchase_rate
     from
       join_table
     group by
       DAY
     order by
       DAY,
-      add_button_click desc
+      view_item desc
   `.trim().replace(/ /g, ''),
     );
 
@@ -16270,7 +15280,7 @@ describe('SQL Builder test', () => {
       },
       eventAndConditions: [
         {
-          eventName: 'add_button_click',
+          eventName: 'view_item',
           computeMethod: ExploreComputeMethod.EVENT_CNT,
           sqlCondition: {
             conditionOperator: 'and',
@@ -16307,11 +15317,11 @@ describe('SQL Builder test', () => {
           },
         },
         {
-          eventName: 'note_share',
+          eventName: 'add_to_cart',
           computeMethod: ExploreComputeMethod.EVENT_CNT,
         },
         {
-          eventName: 'note_export',
+          eventName: 'purchase',
           computeMethod: ExploreComputeMethod.USER_CNT,
           sqlCondition: {
             conditionOperator: 'and',
@@ -16350,7 +15360,7 @@ describe('SQL Builder test', () => {
       ],
       timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('2023-10-10'),
+      timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
     });
 
@@ -16460,8 +15470,8 @@ describe('SQL Builder test', () => {
           ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
-          and event.event_date <= date '2023-10-10'
-          and event.event_name in ('add_button_click', 'note_share', 'note_export')
+          and event.event_date <= date '2025-10-10'
+          and event.event_name in ('view_item', 'add_to_cart', 'purchase')
       ),
       base_data as (
         select
@@ -16511,7 +15521,7 @@ describe('SQL Builder test', () => {
           )
           and (
             (
-              event_name = 'add_button_click'
+              event_name = 'view_item'
               and (
                 platform = 'Android'
                 and geo_country = 'China'
@@ -16519,9 +15529,9 @@ describe('SQL Builder test', () => {
                 and _user_first_touch_timestamp > 1686532526780
               )
             )
-            or (event_name = 'note_share')
+            or (event_name = 'add_to_cart')
             or (
-              event_name = 'note_export'
+              event_name = 'purchase'
               and (
                 platform = 'Android'
                 and geo_country = 'China'
@@ -16547,7 +15557,7 @@ describe('SQL Builder test', () => {
         from
           base_data base
         where
-          event_name = 'add_button_click'
+          event_name = 'view_item'
       ),
       table_1 as (
         select
@@ -16565,7 +15575,7 @@ describe('SQL Builder test', () => {
         from
           base_data base
         where
-          event_name = 'note_share'
+          event_name = 'add_to_cart'
       ),
       table_2 as (
         select
@@ -16583,7 +15593,7 @@ describe('SQL Builder test', () => {
         from
           base_data base
         where
-          event_name = 'note_export'
+          event_name = 'purchase'
       ),
       join_table as (
         select
@@ -16684,7 +15694,7 @@ describe('SQL Builder test', () => {
       },
       eventAndConditions: [
         {
-          eventName: 'add_button_click',
+          eventName: 'view_item',
           computeMethod: ExploreComputeMethod.EVENT_CNT,
           sqlCondition: {
             conditionOperator: 'and',
@@ -16721,11 +15731,11 @@ describe('SQL Builder test', () => {
           },
         },
         {
-          eventName: 'note_share',
+          eventName: 'add_to_cart',
           computeMethod: ExploreComputeMethod.EVENT_CNT,
         },
         {
-          eventName: 'note_export',
+          eventName: 'purchase',
           computeMethod: ExploreComputeMethod.USER_CNT,
           sqlCondition: {
             conditionOperator: 'and',
@@ -16768,7 +15778,7 @@ describe('SQL Builder test', () => {
       },
       timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('2023-10-10'),
+      timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
     });
 
@@ -16878,8 +15888,8 @@ describe('SQL Builder test', () => {
           ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
-          and event.event_date <= date '2023-10-10'
-          and event.event_name in ('add_button_click','note_share','note_export')
+          and event.event_date <= date '2025-10-10'
+          and event.event_name in ('view_item','add_to_cart','purchase')
       ),
       base_data as (
         select
@@ -16936,7 +15946,7 @@ describe('SQL Builder test', () => {
           )
           and (
             (
-              event_name = 'add_button_click'
+              event_name = 'view_item'
               and (
                 platform = 'Android'
                 and geo_country = 'China'
@@ -16944,9 +15954,9 @@ describe('SQL Builder test', () => {
                 and _user_first_touch_timestamp > 1686532526780
               )
             )
-            or (event_name = 'note_share')
+            or (event_name = 'add_to_cart')
             or (
-              event_name = 'note_export'
+              event_name = 'purchase'
               and (
                 platform = 'Android'
                 and geo_country = 'China'
@@ -16959,7 +15969,7 @@ describe('SQL Builder test', () => {
       mid_table as (
         select
           CASE
-            WHEN event_name in ('add_button_click', 'note_share', 'note_export') THEN event_name
+            WHEN event_name in ('view_item', 'add_to_cart', 'purchase') THEN event_name
             ELSE 'other'
           END as event_name,
           user_pseudo_id,
@@ -16998,7 +16008,7 @@ describe('SQL Builder test', () => {
         from
           data
         where
-          event_name = 'add_button_click'
+          event_name = 'view_item'
         group by
           user_pseudo_id,
           _session_id
@@ -17070,15 +16080,15 @@ describe('SQL Builder test', () => {
       conversionIntervalInSeconds: 10*60,
       eventAndConditions: [
         {
-          eventName: 'add_button_click',
+          eventName: 'view_item',
           computeMethod: ExploreComputeMethod.EVENT_CNT,
         },
         {
-          eventName: 'note_share',
+          eventName: 'add_to_cart',
           computeMethod: ExploreComputeMethod.EVENT_CNT,
         },
         {
-          eventName: 'note_export',
+          eventName: 'purchase',
           computeMethod: ExploreComputeMethod.USER_CNT,
         },
       ],
@@ -17088,7 +16098,7 @@ describe('SQL Builder test', () => {
       },
       timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('2023-10-10'),
+      timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
     });
 
@@ -17178,8 +16188,8 @@ describe('SQL Builder test', () => {
           ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
-          and event.event_date <= date '2023-10-10'
-          and event.event_name in ('add_button_click','note_share','note_export')
+          and event.event_date <= date '2025-10-10'
+          and event.event_name in ('view_item','add_to_cart','purchase')
       ),
       base_data as (
         select
@@ -17206,15 +16216,15 @@ describe('SQL Builder test', () => {
         where
           1 = 1
           and (
-            (event_name = 'add_button_click')
-            or (event_name = 'note_share')
-            or (event_name = 'note_export')
+            (event_name = 'view_item')
+            or (event_name = 'add_to_cart')
+            or (event_name = 'purchase')
           )
       ),
       mid_table as (
         select
           CASE
-            WHEN event_name in ('add_button_click', 'note_share', 'note_export') THEN event_name
+            WHEN event_name in ('view_item', 'add_to_cart', 'purchase') THEN event_name
             ELSE 'other'
           END as event_name,
           user_pseudo_id,
@@ -17253,7 +16263,7 @@ describe('SQL Builder test', () => {
         from
           data
         where
-          event_name = 'add_button_click'
+          event_name = 'view_item'
         group by
           user_pseudo_id,
           _session_id
@@ -17357,7 +16367,7 @@ describe('SQL Builder test', () => {
       },
       eventAndConditions: [
         {
-          eventName: 'add_button_click',
+          eventName: 'view_item',
           computeMethod: ExploreComputeMethod.EVENT_CNT,
           sqlCondition: {
             conditionOperator: 'and',
@@ -17394,11 +16404,11 @@ describe('SQL Builder test', () => {
           },
         },
         {
-          eventName: 'note_share',
+          eventName: 'add_to_cart',
           computeMethod: ExploreComputeMethod.EVENT_CNT,
         },
         {
-          eventName: 'note_export',
+          eventName: 'purchase',
           computeMethod: ExploreComputeMethod.USER_CNT,
           sqlCondition: {
             conditionOperator: 'and',
@@ -17444,7 +16454,7 @@ describe('SQL Builder test', () => {
       },
       timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('2023-10-10'),
+      timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
     });
 
@@ -17554,7 +16564,7 @@ describe('SQL Builder test', () => {
           ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
-          and event.event_date <= date '2023-10-10'
+          and event.event_date <= date '2025-10-10'
           and event.event_name = '_screen_view'
           and platform = 'Android'
       ),
@@ -17800,7 +16810,7 @@ describe('SQL Builder test', () => {
       pairEventAndConditions: [
         {
           startEvent: {
-            eventName: 'add_button_click',
+            eventName: 'view_item',
             sqlCondition: {
               conditionOperator: 'and',
               conditions: [
@@ -17836,7 +16846,7 @@ describe('SQL Builder test', () => {
             },
           },
           backEvent: {
-            eventName: 'note_export',
+            eventName: 'purchase',
             sqlCondition: {
               conditionOperator: 'and',
               conditions: [
@@ -17874,7 +16884,7 @@ describe('SQL Builder test', () => {
         },
         {
           startEvent: {
-            eventName: 'add_button_click',
+            eventName: 'view_item',
             sqlCondition: {
               conditionOperator: 'and',
               conditions: [
@@ -17910,7 +16920,7 @@ describe('SQL Builder test', () => {
             },
           },
           backEvent: {
-            eventName: 'note_share',
+            eventName: 'add_to_cart',
             sqlCondition: {
               conditionOperator: 'and',
               conditions: [
@@ -18061,7 +17071,7 @@ describe('SQL Builder test', () => {
         where
           event.event_date >= date '2023-10-24'
           and event.event_date <= date '2023-10-30'
-          and event.event_name in ('add_button_click', 'note_export', 'note_share')
+          and event.event_name in ('view_item', 'purchase', 'add_to_cart')
       ),
       base_data as (
         select
@@ -18148,7 +17158,7 @@ describe('SQL Builder test', () => {
           base_data
           join first_date on base_data.event_date = first_date.first_date
         where
-          event_name = 'add_button_click'
+          event_name = 'view_item'
           and (
             platform = 'Android'
             and geo_country = 'China'
@@ -18166,7 +17176,7 @@ describe('SQL Builder test', () => {
           base_data
           join first_date on base_data.event_date >= first_date.first_date
         where
-          event_name = 'note_export'
+          event_name = 'purchase'
           and (
             platform = 'Android'
             and geo_country = 'China'
@@ -18184,7 +17194,7 @@ describe('SQL Builder test', () => {
           base_data
           join first_date on base_data.event_date = first_date.first_date
         where
-          event_name = 'add_button_click'
+          event_name = 'view_item'
           and (
             platform = 'Android'
             and geo_country = 'China'
@@ -18202,7 +17212,7 @@ describe('SQL Builder test', () => {
           base_data
           join first_date on base_data.event_date >= first_date.first_date
         where
-          event_name = 'note_share'
+          event_name = 'add_to_cart'
           and (
             platform = 'Android'
             and geo_country = 'China'
@@ -18275,7 +17285,7 @@ describe('SQL Builder test', () => {
       conversionIntervalInSeconds: 10*60,
       eventAndConditions: [
         {
-          eventName: 'add_button_click',
+          eventName: 'view_item',
           sqlCondition: {
             conditions: [{
               category: ConditionCategory.OTHER,
@@ -18295,7 +17305,7 @@ describe('SQL Builder test', () => {
           },
         },
         {
-          eventName: 'note_share',
+          eventName: 'add_to_cart',
           sqlCondition: {
             conditions: [{
               category: ConditionCategory.OTHER,
@@ -18316,12 +17326,12 @@ describe('SQL Builder test', () => {
 
         },
         {
-          eventName: 'note_export',
+          eventName: 'purchase',
         },
       ],
       timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('2023-10-10'),
+      timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
     });
 
@@ -18415,8 +17425,8 @@ describe('SQL Builder test', () => {
           ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
-          and event.event_date <= date '2023-10-10'
-          and event.event_name in ('add_button_click', 'note_share', 'note_export')
+          and event.event_date <= date '2025-10-10'
+          and event.event_name in ('view_item', 'add_to_cart', 'purchase')
       ),
       base_data as (
         select
@@ -18444,20 +17454,20 @@ describe('SQL Builder test', () => {
           1 = 1
           and (
             (
-              event_name = 'add_button_click'
+              event_name = 'view_item'
               and (
                 platform = 'Android'
                 and _session_duration > 200
               )
             )
             or (
-              event_name = 'note_share'
+              event_name = 'add_to_cart'
               and (
                 platform = 'Android'
                 and device_screen_height <> 1400
               )
             )
-            or (event_name = 'note_export')
+            or (event_name = 'purchase')
           )
       ),
       table_0 as (
@@ -18475,7 +17485,7 @@ describe('SQL Builder test', () => {
         from
           base_data base
         where
-          event_name = 'add_button_click'
+          event_name = 'view_item'
       ),
       table_1 as (
         select
@@ -18488,7 +17498,7 @@ describe('SQL Builder test', () => {
         from
           base_data base
         where
-          event_name = 'note_share'
+          event_name = 'add_to_cart'
       ),
       table_2 as (
         select
@@ -18501,7 +17511,7 @@ describe('SQL Builder test', () => {
         from
           base_data base
         where
-          event_name = 'note_export'
+          event_name = 'purchase'
       ),
       join_table as (
         select
@@ -18629,7 +17639,7 @@ describe('SQL Builder test', () => {
       },
       eventAndConditions: [
         {
-          eventName: 'add_button_click',
+          eventName: 'view_item',
           computeMethod: ExploreComputeMethod.EVENT_CNT,
           sqlCondition: {
             conditionOperator: 'and',
@@ -18666,11 +17676,11 @@ describe('SQL Builder test', () => {
           },
         },
         {
-          eventName: 'note_share',
+          eventName: 'add_to_cart',
           computeMethod: ExploreComputeMethod.EVENT_CNT,
         },
         {
-          eventName: 'note_export',
+          eventName: 'purchase',
           computeMethod: ExploreComputeMethod.USER_CNT,
           sqlCondition: {
             conditionOperator: 'and',
@@ -18715,7 +17725,7 @@ describe('SQL Builder test', () => {
       },
       timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: new Date('2023-10-01'),
-      timeEnd: new Date('2023-10-10'),
+      timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
     });
 
@@ -18825,7 +17835,7 @@ describe('SQL Builder test', () => {
           ) as u on event.user_pseudo_id = u.user_pseudo_id
         where
           event.event_date >= date '2023-10-01'
-          and event.event_date <= date '2023-10-10'
+          and event.event_date <= date '2025-10-10'
           and event.event_name not in (
             '_session_start',
             '_session_stop',
@@ -18902,7 +17912,7 @@ describe('SQL Builder test', () => {
           )
           and (
             (
-              event_name = 'add_button_click'
+              event_name = 'view_item'
               and (
                 platform = 'Android'
                 and geo_country = 'China'
@@ -18910,9 +17920,9 @@ describe('SQL Builder test', () => {
                 and _user_first_touch_timestamp > 1686532526780
               )
             )
-            or (event_name = 'note_share')
+            or (event_name = 'add_to_cart')
             or (
-              event_name = 'note_export'
+              event_name = 'purchase'
               and (
                 platform = 'Android'
                 and geo_country = 'China'
@@ -18921,14 +17931,14 @@ describe('SQL Builder test', () => {
               )
             )
             or (
-              event_name not in ('add_button_click', 'note_share', 'note_export')
+              event_name not in ('view_item', 'add_to_cart', 'purchase')
             )
           )
       ),
       mid_table as (
         select
           CASE
-            WHEN event_name in ('add_button_click', 'note_share', 'note_export') THEN event_name
+            WHEN event_name in ('view_item', 'add_to_cart', 'purchase') THEN event_name
             ELSE 'other'
           END as event_name,
           user_pseudo_id,
@@ -18987,7 +17997,7 @@ describe('SQL Builder test', () => {
         from
           data
         where
-          event_name = 'add_button_click'
+          event_name = 'view_item'
         group by
           user_pseudo_id,
           _session_id
