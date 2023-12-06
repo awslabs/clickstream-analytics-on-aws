@@ -2494,9 +2494,9 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#setup-and-configuration" class="md-nav__link">
+  <a href="#analytics-studio" class="md-nav__link">
     <span class="md-ellipsis">
-      Setup and configuration
+      Analytics Studio
     </span>
   </a>
   
@@ -2742,9 +2742,9 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#setup-and-configuration" class="md-nav__link">
+  <a href="#analytics-studio" class="md-nav__link">
     <span class="md-ellipsis">
-      Setup and configuration
+      Analytics Studio
     </span>
   </a>
   
@@ -2784,11 +2784,13 @@ An AWS Solution that enables customers to build clickstream analytic system on A
 <h2 id="sdk">SDK</h2>
 <p><strong>Q: Can I use other SDK to send data to the pipeline created by this solution</strong><br>
 Yes, you can. The solution support users using third-party SDK to send data to the pipeline. Note that, if you want to enable data processing and modeling module when using a third-party SDK to send data, you will need to provide an transformation plugin to map third-party SDK's data structure to solution data schema. Please refer to <a href="../pipeline-mgmt/data-processing/configure-plugin/">Custom plugin</a> for more details.</p>
-<h2 id="setup-and-configuration">Setup and configuration</h2>
-<p><strong>Q: How can I create more users for this solution?</strong></br>
-If you launched the solution with Cognito User Pool, go to the AWS console, find the user pool created by the solution,
-and you can create more users. If you launched the solution with OpenID Connect (OIDC), you should add more users in the
-user pool managed by the OIDC provider. Note that all users have the same privileges. </p>
+<h2 id="analytics-studio">Analytics Studio</h2>
+<p><strong>Q: Why is the Analytics Studio is not available?</strong></br>
+The reason for this prompt is due to the following two situations:</p>
+<ul>
+<li>The version of the pipeline is not v1.1 or higher. You can try upgrading the pipeline and wait for the upgrade to complete before trying again.</li>
+<li>The reporting module is not enabled on the pipeline.</li>
+</ul>
 <h2 id="pricing">Pricing</h2>
 <p><strong>Q: How will I be charged and billed for the use of this solution?</strong></br>
 The solution is free to use, and you are responsible for the cost of AWS services used while running this solution. 
