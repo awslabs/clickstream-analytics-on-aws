@@ -33,7 +33,7 @@ This AWS CloudFormation template automatically deploys the {{ solution_name }} s
 
         | Parameter  | Default          | Description                                                  |
         | ---------- | ---------------- | ------------------------------------------------------------ |
-        | Admin User Email | `<Requires input>` | Specify the email of the Administrator. This email address will receive a temporary password to access the {{ solution_name }} web console. You can create more users directly in the provisioned Cognito User Pool after launching the solution. |
+        | Email | `<Requires input>` | Specify the email of the Administrator. This email address will receive a temporary password to access the {{ solution_name }} web console. You can create more users directly in the provisioned Cognito User Pool after launching the solution. |
 
         !!! info "Important"
             {%
