@@ -15,6 +15,11 @@ If you launched the solution with Cognito User Pool, go to the AWS console, find
 and you can create more users. If you launched the solution with OpenID Connect (OIDC), you should add more users in the
 user pool managed by the OIDC provider. Note that all users have the same privileges. 
 
+**Q: Why is the Analytics Studio is not available?**</br>
+The reason for this prompt is due to the following two situations:
+
+- The version of the pipeline is not v1.1 or higher. You can try upgrading the pipeline and wait for the upgrade to complete before trying again.
+- The reporting module is not enabled on the pipeline.
 
 ## Pricing
 
