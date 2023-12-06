@@ -2909,9 +2909,9 @@
 </ul>
 <p>主要假设包括：</p>
 <ul>
-<li>请求有效载荷：1KB（压缩后，1:10的比例）</li>
+<li>压缩后的请求有效载荷：2KB（每个请求包含10个事件）</li>
 <li>MSK配置（m5.large * 2）</li>
-<li>KDS配置（按需，预配 - 2 分片数）</li>
+<li>KDS配置（按需，预配）</li>
 <li>10/100/1000 RPS</li>
 </ul>
 <table>
@@ -2928,49 +2928,49 @@
 </thead>
 <tbody>
 <tr>
-<td>10RPS</td>
-<td>$7</td>
+<td>10RPS（49GB/月）</td>
+<td>$18</td>
 <td>$122</td>
 <td>Kinesis（按需）</td>
-<td>$36</td>
+<td>$38</td>
 <td>$3</td>
-<td>$168</td>
+<td>$181</td>
 </tr>
 <tr>
 <td></td>
-<td>$7</td>
+<td>$18</td>
 <td>$122</td>
 <td>Kinesis (预备 2 shard)</td>
 <td>$22</td>
 <td>$3</td>
-<td>$154</td>
+<td>$165</td>
 </tr>
 <tr>
 <td></td>
-<td>$7</td>
+<td>$18</td>
 <td>$122</td>
 <td>MSK (m5.large * 2, connector MCU * 1)</td>
 <td>$417</td>
 <td>$3</td>
-<td>$549</td>
+<td>$560</td>
 </tr>
 <tr>
 <td></td>
-<td>$7</td>
+<td>$18</td>
 <td>$122</td>
 <td>无缓冲</td>
 <td></td>
 <td>$3</td>
-<td>$132</td>
+<td>$143</td>
 </tr>
 <tr>
-<td>100RPS</td>
+<td>100RPS（490GB/月）</td>
 <td>$43</td>
 <td>$122</td>
 <td>Kinesis（按需）</td>
-<td>$86</td>
-<td>$3</td>
-<td>$254</td>
+<td>$115</td>
+<td>$4</td>
+<td>$284</td>
 </tr>
 <tr>
 <td></td>
@@ -2978,8 +2978,8 @@
 <td>$122</td>
 <td>Kinesis (预备 2 shard)</td>
 <td>$26</td>
-<td>$3</td>
-<td>$194</td>
+<td>$4</td>
+<td>$195</td>
 </tr>
 <tr>
 <td></td>
@@ -2987,8 +2987,8 @@
 <td>$122</td>
 <td>MSK (m5.large * 2, connector MCU * 1)</td>
 <td>$417</td>
-<td>$3</td>
-<td>$585</td>
+<td>$4</td>
+<td>$586</td>
 </tr>
 <tr>
 <td></td>
@@ -2996,49 +2996,49 @@
 <td>$122</td>
 <td>无缓冲</td>
 <td></td>
-<td>$3</td>
-<td>$168</td>
+<td>$4</td>
+<td>$169</td>
 </tr>
 <tr>
-<td>1000RPS</td>
-<td>$396</td>
+<td>1000RPS（4900GB/月）</td>
+<td>$252</td>
 <td>$122</td>
 <td>Kinesis（按需）</td>
-<td>$576</td>
+<td>$1051</td>
 <td>$14</td>
-<td>$1108</td>
+<td>$1439</td>
 </tr>
 <tr>
 <td></td>
-<td>$396</td>
+<td>$252</td>
 <td>$122</td>
 <td>Kinesis (预备 10 shard)</td>
-<td>$146</td>
+<td>$180</td>
 <td>$14</td>
-<td>$678</td>
+<td>$568</td>
 </tr>
 <tr>
 <td></td>
-<td>$396</td>
+<td>$252</td>
 <td>$122</td>
 <td>MSK (m5.large * 2, connector MCU * 2~3)</td>
-<td>$530</td>
+<td>$590</td>
 <td>$14</td>
-<td>$1062</td>
+<td>$978</td>
 </tr>
 <tr>
 <td></td>
-<td>$396</td>
+<td>$252</td>
 <td>$122</td>
 <td>无缓冲</td>
 <td></td>
 <td>$14</td>
-<td>$532</td>
+<td>$388</td>
 </tr>
 </tbody>
 </table>
 <h3 id="_2">数据传输</h3>
-<p>当数据通过EC2发送到下游的数据宿，会产生数据的费用。下面是以1000RPS，每个请求的有效载荷为1KB为例的费用。</p>
+<p>当数据通过EC2发送到下游的数据宿，会产生数据的费用。下面是以1000RPS，每个请求的有效载荷为2KB为例的费用。</p>
 <ol>
 <li>EC2 网络输入：此部分不产生费用</li>
 <li>
@@ -3063,19 +3063,19 @@
 <td>MSK</td>
 <td></td>
 <td>数据传输费用（$0.010 per GB in/out/between EC2 AZs）</td>
-<td>$105</td>
+<td>$210</td>
 </tr>
 <tr>
 <td>KDS</td>
 <td>NAT</td>
-<td>NAT 固定费用： $64（2 Availability Zones and a NAT per AZ, $0.045 per NAT Gateway Hour）. <br> 数据传输费用：$601（$0.045 per GB Data Processed by NAT Gateways）.</td>
-<td>$665</td>
+<td>NAT 固定费用： $64（2 Availability Zones and a NAT per AZ, $0.045 per NAT Gateway Hour）. <br> 数据传输费用：$1201（$0.045 per GB Data Processed by NAT Gateways）.</td>
+<td>$1266</td>
 </tr>
 <tr>
 <td>KDS</td>
 <td>VPC Endpoint</td>
-<td>VPC Endpoint 固定费用：$14.62 （Availability Zones $0.01 per AZ Hour）. <br> 数据传输费用: $133.5($0.01 per GB Data Processed by Interface endpoints).</td>
-<td>$148.1</td>
+<td>VPC Endpoint 固定费用：$14.62 （Availability Zones $0.01 per AZ Hour）. <br> 数据传输费用: $267($0.01 per GB Data Processed by Interface endpoints).</td>
+<td>$281.62</td>
 </tr>
 </tbody>
 </table>
@@ -3113,98 +3113,69 @@
 <tr>
 <td>10RPS</td>
 <td>每小时</td>
-<td>$28</td>
+<td>$61（$1.24/GB）</td>
 <td>无服务器 (基于8个RPU)</td>
-<td>$68</td>
-<td>$96</td>
+<td>$104</td>
+<td>$165</td>
 </tr>
 <tr>
 <td></td>
 <td>每6小时</td>
-<td>$10.8</td>
+<td>$40.9（$0.83/GB）</td>
 <td>无服务器 (基于8个RPU)</td>
-<td>$11</td>
-<td>$21.8</td>
+<td>$16</td>
+<td>$56.9</td>
 </tr>
 <tr>
 <td></td>
 <td>每日</td>
-<td>$9.6</td>
+<td>$34.3（$0.7/GB）</td>
 <td>无服务器 (基于8个RPU)</td>
-<td>$3</td>
-<td>$12.6</td>
+<td>$11</td>
+<td>$45.3</td>
 </tr>
 <tr>
 <td>100RPS</td>
 <td>每小时</td>
-<td>$72</td>
+<td>$403（$0.82/GB）</td>
 <td>无服务器 (基于8个RPU)</td>
-<td>$70</td>
-<td>$142</td>
+<td>$170</td>
+<td>$573</td>
 </tr>
 <tr>
 <td></td>
 <td>每6小时</td>
-<td>$61.2</td>
+<td>$192（$0.39/GB）</td>
 <td>无服务器 (基于8个RPU)</td>
-<td>$17.2</td>
-<td>$78.4</td>
+<td>$119</td>
+<td>$311</td>
 </tr>
 <tr>
 <td></td>
 <td>每日</td>
-<td>$43.7</td>
+<td>$245（$0.5/GB）</td>
 <td>无服务器 (基于8个RPU)</td>
-<td>$12.4</td>
-<td>$56.1</td>
+<td>$78</td>
+<td>$323</td>
 </tr>
 <tr>
 <td>1000RPS</td>
 <td>每小时</td>
-<td>$842</td>
-<td>无服务器 (基于8个RPU)</td>
-<td>$172</td>
-<td>$1014</td>
+<td>$2815（$0.57/GB）</td>
+<td>无服务器 (基于32个RPU)</td>
+<td>$668</td>
+<td>$3483</td>
 </tr>
 <tr>
 <td></td>
-<td>每6小时</td>
-<td>$579</td>
-<td>无服务器 (基于8个RPU)</td>
-<td>$137</td>
-<td>$716</td>
-</tr>
-<tr>
-<td><span style="background-color: lightgray">本条目的EMR使用了下面的配置</span></td>
-<td>每日</td>
-<td>$642</td>
-<td>无服务器 (基于8个RPU)</td>
-<td>$94</td>
-<td>$736</td>
+<td>每8小时</td>
+<td>$2604（$0.53/GB）</td>
+<td>无服务器 (基于32个RPU)</td>
+<td>$359</td>
+<td>$2963</td>
 </tr>
 </tbody>
 </table>
-<div class="admonition info">
-<p class="admonition-title">提示</p>
-<p>对于1000 PRS 每日的费用，为使用了如下EMR配置的费用。</p>
-<div class="language-json highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="p">{</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="nt">&quot;sparkConfig&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">        </span><span class="s2">&quot;spark.emr-serverless.executor.disk=200g&quot;</span><span class="p">,</span>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">        </span><span class="s2">&quot;spark.executor.instances=16&quot;</span><span class="p">,</span>
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">        </span><span class="s2">&quot;spark.dynamicAllocation.initialExecutors=16&quot;</span><span class="p">,</span>
-</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">        </span><span class="s2">&quot;spark.executor.memory=100g&quot;</span><span class="p">,</span>
-</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">        </span><span class="s2">&quot;spark.executor.cores=16&quot;</span><span class="p">,</span>
-</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">        </span><span class="s2">&quot;spark.network.timeout=10000000&quot;</span><span class="p">,</span>
-</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">        </span><span class="s2">&quot;spark.executor.heartbeatInterval=10000000&quot;</span><span class="p">,</span>
-</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="w">        </span><span class="s2">&quot;spark.shuffle.registration.timeout=120000&quot;</span><span class="p">,</span>
-</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="w">        </span><span class="s2">&quot;spark.shuffle.registration.maxAttempts=5&quot;</span><span class="p">,</span>
-</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="w">        </span><span class="s2">&quot;spark.shuffle.file.buffer=2m&quot;</span><span class="p">,</span>
-</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="w">        </span><span class="s2">&quot;spark.shuffle.unsafe.file.output.buffer=1m&quot;</span>
-</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="w">    </span><span class="p">],</span>
-</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="w">    </span><span class="nt">&quot;inputRePartitions&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">800</span>
-</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="p">}</span>
-</span></code></pre></div>
-</div>
 <h2 id="_4">仪表板</h2>
 <p>如果您选择启用，仪表板模块包括以下成本组成部分：</p>
 <ul>
@@ -3214,8 +3185,8 @@
 <ul>
 <li>QuickSight企业版</li>
 <li>不包括Q成本</li>
+<li>通过<strong>分析工作坊</strong>访问</li>
 <li><strong>两个作者</strong>每月订阅</li>
-<li><strong>十个读者</strong>，每月工作22天，其中5%为活跃读者，50%为经常读者，25%为偶尔读者，20%为不活跃读者</li>
 <li>10GB的SPICE容量</li>
 </ul>
 <table>
@@ -3223,7 +3194,6 @@
 <tr>
 <th>每日数据量/每秒请求数 (RPS)</th>
 <th>作者</th>
-<th>读者</th>
 <th>SPICE</th>
 <th>总计（美元/月）</th>
 </tr>
@@ -3231,10 +3201,9 @@
 <tbody>
 <tr>
 <td>所有大小</td>
-<td>48</td>
-<td>18.80</td>
+<td>$48</td>
 <td>0</td>
-<td>$66.80</td>
+<td>$48</td>
 </tr>
 </tbody>
 </table>
@@ -3274,20 +3243,20 @@
 <tr>
 <td>10RPS</td>
 <td>$18</td>
-<td>$0.3</td>
-<td>$18.3</td>
+<td>$0.6</td>
+<td>$18.6</td>
 </tr>
 <tr>
 <td>100RPS</td>
 <td>$18</td>
-<td>$3</td>
-<td>$21</td>
+<td>$6</td>
+<td>$24</td>
 </tr>
 <tr>
 <td>1000RPS</td>
 <td>$18</td>
-<td>$30</td>
-<td>$48</td>
+<td>$60</td>
+<td>$78</td>
 </tr>
 </tbody>
 </table>
