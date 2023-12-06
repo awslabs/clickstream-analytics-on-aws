@@ -478,9 +478,12 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
       },
     );
 
-    logger.info(`templateParams: ${JSON.stringify(templateParams)}`);
+    logger.info('templateParams:', {templateParams});
     for (const ep of exceptedParams) {
-      logger.info(`ep: ${ep}, ${templateParams.includes(ep)}`);
+      logger.info('input', {
+        ep: ep,
+        inludesInTemplate: templateParams.includes(ep)
+      });
       expect(templateParams.includes(ep)).toBeTruthy();
     }
     expect(templateParams.length).toEqual(exceptedParams.length + 1);
@@ -589,7 +592,7 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
 
   test('Should has Rules for existing RedshiftServerless', () => {
     const rule = template.toJSON().Rules.ExistingRedshiftServerlessParameters;
-    logger.info(`ExistingRedshiftServerlessParameters:${JSON.stringify(rule.Assertions[0].Assert[CFN_FN.AND])}`);
+    logger.info('Params', {ExistingRedshiftServerlessParameters: rule.Assertions[0].Assert[CFN_FN.AND]})
     for (const e of rule.Assertions[0].Assert[CFN_FN.AND]) {
       expect(e[CFN_FN.NOT][0][CFN_FN.EQUALS][0].Ref === 'RedshiftServerlessWorkgroupName' ||
         e[CFN_FN.NOT][0][CFN_FN.EQUALS][0].Ref === 'RedshiftServerlessIAMRole').toBeTruthy();

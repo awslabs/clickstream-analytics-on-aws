@@ -66,8 +66,7 @@ export class ReportingService {
   async createFunnelVisual(req: any, res: any, next: any) {
 
     try {
-      logger.info('start to create funnel analysis visuals');
-      logger.info(`request: ${JSON.stringify(req.body)}`);
+      logger.info('start to create funnel analysis visuals', {request: req.body});
 
       const query = req.body;
       const checkResult = checkFunnelAnalysisParameter(query);
@@ -280,8 +279,7 @@ export class ReportingService {
 
   async createEventVisual(req: any, res: any, next: any) {
     try {
-      logger.info('start to create event analysis visuals');
-      logger.info(`request: ${JSON.stringify(req.body)}`);
+      logger.info('start to create event analysis visuals', {request: req.body});
 
       const query = req.body;
       const checkResult = checkEventAnalysisParameter(query);
@@ -453,8 +451,7 @@ export class ReportingService {
 
   async createPathAnalysisVisual(req: any, res: any, next: any) {
     try {
-      logger.info('start to create path analysis visuals');
-      logger.info(`request: ${JSON.stringify(req.body)}`);
+      logger.info('start to create path analysis visuals', {request: req.body});
 
       const query = req.body;
       const checkResult = checkPathAnalysisParameter(query);
@@ -531,8 +528,7 @@ export class ReportingService {
 
   async createRetentionVisual(req: any, res: any, next: any) {
     try {
-      logger.info('start to create retention analysis visuals');
-      logger.info(`request: ${JSON.stringify(req.body)}`);
+      logger.info('start to create retention analysis visuals', {request: req.body});
 
       const query = req.body;
       const checkResult = checkRetentionAnalysisParameter(query);
@@ -675,12 +671,12 @@ export class ReportingService {
         DataSetArn: datasetOutput?.Arn,
       });
 
-      logger.info(`created dataset arn: ${JSON.stringify(datasetOutput?.Arn)}`);
+      logger.info('created dataset:', {arn: datasetOutput?.Arn});
     }
 
     visualPropsArray[0].dataSetIdentifierDeclaration.push(...dataSetIdentifierDeclaration);
 
-    logger.info(`visualPropsArray[0] ${JSON.stringify(visualPropsArray[0])}`);
+    logger.info('Got first element of visual props', {visualPropsArray: visualPropsArray[0]});
 
     const result = await this._buildDashboard(query, visualPropsArray, quickSight,
       sheetId, resourceName, principals, dashboardCreateParameters);
@@ -718,7 +714,7 @@ export class ReportingService {
       visuals: visualPropsArray,
       dashboardDef: dashboardDef,
     });
-    logger.info(`final dashboard def: ${JSON.stringify(dashboard)}`);
+    logger.info('final dashboard def:', {dashboard});
 
     let result: CreateDashboardResult;
     if (!query.dashboardId) {
@@ -851,8 +847,7 @@ export class ReportingService {
 
   async warmup(req: any, res: any, next: any) {
     try {
-      logger.info('start to warm up reporting service');
-      logger.info(`request: ${JSON.stringify(req.body)}`);
+      logger.info('start to warm up reporting service', {request: req.body});
 
       const projectId = req.body.projectId;
       const appId = req.body.appId;
@@ -910,7 +905,10 @@ export class ReportingService {
           logger.info(`Get statement status: ${resp.Status}`);
         }
         if (resp.Status == StatusString.FAILED) {
-          logger.warn('Warmup redshift serverless with error: '+ resp.Status, JSON.stringify(resp));
+          logger.warn('Warmup redshift serverless with error,', {
+            status: resp.Status,
+            response: resp
+          });
         }
       }
 
@@ -929,8 +927,7 @@ export class ReportingService {
 
   async cleanQuickSightResources(req: any, res: any, next: any) {
     try {
-      logger.info('start to clean QuickSight temp resources');
-      logger.info(`request: ${JSON.stringify(req.body)}`);
+      logger.info('start to clean QuickSight temp resources', {request: req.body});
 
       const region = req.body.region;
       const quickSight = sdkClient.QuickSight({ region: region });
