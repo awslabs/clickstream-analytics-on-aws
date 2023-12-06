@@ -700,6 +700,8 @@ export class ReportingService {
     return result;
   };
 
+  
+
   private async _buildDashboard(query: any, visualPropsArray: VisualProps[], quickSight: QuickSight,
     sheetId: string, resourceName: string, principals: QuickSightUserArns,
     dashboardCreateParameters: DashboardCreateParameters, dataSetReferences: DataSetReference[]) {
