@@ -859,10 +859,10 @@ export function buildRetentionAnalysisView(sqlParameters: SQLParameters) : strin
 
   const sql = `
     ${_buildCommonPartSql(_getRetentionAnalysisViewEventNames(sqlParameters), sqlParameters, false, false, true)}
-    first_date as (
-      select min(event_date) as first_date from base_data
-    ), 
     ${dateListSql}
+    first_date as (
+      select min(event_date) as first_date from date_list
+    ),
     ${tableSql}
     result_table as (${resultSql})
     select 

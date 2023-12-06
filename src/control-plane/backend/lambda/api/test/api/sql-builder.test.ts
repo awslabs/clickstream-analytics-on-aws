@@ -4356,12 +4356,6 @@ describe('SQL Builder test', () => {
             and device_screen_height <> 1400
           )
       ),
-      first_date as (
-        select
-          min(event_date) as first_date
-        from
-          base_data
-      ),
       date_list as (
         select
           '2023-06-19'::date as event_date
@@ -4374,6 +4368,12 @@ describe('SQL Builder test', () => {
         union all
         select
           '2023-06-22'::date as event_date
+      ),
+      first_date as (
+        select
+          min(event_date) as first_date
+        from
+          date_list
       ),
       first_table_0 as (
         select
@@ -4670,12 +4670,6 @@ describe('SQL Builder test', () => {
             and device_screen_height <> 1400
           )
       ),
-      first_date as (
-        select
-          min(event_date) as first_date
-        from
-          base_data
-      ),
       date_list as (
         select
           '2023-06-19'::date as event_date
@@ -4688,6 +4682,12 @@ describe('SQL Builder test', () => {
         union all
         select
           '2023-06-22'::date as event_date
+      ),
+      first_date as (
+        select
+          min(event_date) as first_date
+        from
+          date_list
       ),
       first_table_0 as (
         select
@@ -5021,12 +5021,6 @@ describe('SQL Builder test', () => {
             and device_screen_height <> 1400
           )
       ),
-      first_date as (
-        select
-          min(event_date) as first_date
-        from
-          base_data
-      ),
       date_list as (
         select
           '2023-06-19'::date as event_date
@@ -5039,6 +5033,12 @@ describe('SQL Builder test', () => {
         union all
         select
           '2023-06-22'::date as event_date
+      ),
+      first_date as (
+        select
+          min(event_date) as first_date
+        from
+          date_list
       ),
       first_table_0 as (
         select
@@ -5353,12 +5353,6 @@ describe('SQL Builder test', () => {
             and device_screen_height <> 1400
           )
       ),
-      first_date as (
-        select
-          min(event_date) as first_date
-        from
-          base_data
-      ),
       date_list as (
         select
           '2023-06-19'::date as event_date
@@ -5371,6 +5365,12 @@ describe('SQL Builder test', () => {
         union all
         select
           '2023-06-22'::date as event_date
+      ),
+      first_date as (
+        select
+          min(event_date) as first_date
+        from
+          date_list
       ),
       first_table_0 as (
         select
@@ -18110,12 +18110,6 @@ describe('SQL Builder test', () => {
             and _user_first_touch_timestamp > 1686532526780
           )
       ),
-      first_date as (
-        select
-          min(event_date) as first_date
-        from
-          base_data
-      ),
       date_list as (
         select
           '2023-10-24'::date as event_date
@@ -18137,6 +18131,12 @@ describe('SQL Builder test', () => {
         union all
         select
           '2023-10-30'::date as event_date
+      ),
+      first_date as (
+        select
+          min(event_date) as first_date
+        from
+          date_list
       ),
       first_table_0 as (
         select
