@@ -2477,7 +2477,7 @@
         <li class="md-nav__item">
   <a href="#_4" class="md-nav__link">
     <span class="md-ellipsis">
-      安装与配置
+      分析工作坊
     </span>
   </a>
   
@@ -2725,7 +2725,7 @@
         <li class="md-nav__item">
   <a href="#_4" class="md-nav__link">
     <span class="md-ellipsis">
-      安装与配置
+      分析工作坊
     </span>
   </a>
   
@@ -2765,9 +2765,13 @@
 <h2 id="_3">开发工具包</h2>
 <p><strong>问：我可以使用其他SDK向该方案创建的管道发送数据吗？</strong><br>
 可以。该方案支持用户使用第三方SDK向数据管道发送数据。需要注意的是，如果您想在使用第三方SDK发送数据时，在数据处理和数据建模模块，您需要提供一个转换插件来将第三方SDK的数据结构映射到解决方案数据结构。 详情请参考<a href="../pipeline-mgmt/data-processing/configure-plugin/">自定义插件</a>。</p>
-<h2 id="_4">安装与配置</h2>
-<p><strong>问：如何为该解决方案创建更多用户？</strong></br>
-如果您使用 Cognito 用户池启动解决方案，请转到 AWS 控制台，找到该解决方案创建的用户池，您可以创建更多用户。 如果您使用 OpenID Connect (OIDC) 启动解决方案，则应在由 OIDC 提供商管理的用户池。 请注意，所有用户都具有相同的权限。</p>
+<h2 id="_4">分析工作坊</h2>
+<p><strong>问：为什么分析工作坊不可用?</strong></br>
+出现此提示的原因有以下两种情况：</p>
+<ul>
+<li>数据管道的版本不是v1.1或更高版本。您可以尝试升级数据管道，等待升级完成后再重试。</li>
+<li>数据管道上未启用报告模块。</li>
+</ul>
 <h2 id="_5">价格</h2>
 <p><strong>问：使用此解决方案如何收费和计费？</strong></br>
 该解决方案可免费使用，您需要承担运行该解决方案时使用的 AWS 服务的费用。
