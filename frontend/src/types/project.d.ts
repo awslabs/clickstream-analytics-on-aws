@@ -30,7 +30,7 @@ declare global {
     pipelineId?: string;
     pipelineVersion?: string;
     applications?: IApplication[];
-    reportingEnabled?: boolean;
+    analysisStudioEnabled?: boolean;
     updateAt?: number;
     operator?: string;
     deleted?: boolean;

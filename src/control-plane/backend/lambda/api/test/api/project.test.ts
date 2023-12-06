@@ -277,11 +277,11 @@ describe('Project test', () => {
       message: '',
       data: {
         items: [
-          { name: 'Project-01', pipelineId: 'pipeline-01', pipelineVersion: '', reportingEnabled: false, applications: [{ name: 'App-01', projectId: '1' }], id: '1' },
-          { name: 'Project-02', pipelineId: 'pipeline-02', pipelineVersion: '', reportingEnabled: false, applications: [{ name: 'App-02', projectId: '2' }], id: '2' },
-          { name: 'Project-03', pipelineId: 'pipeline-03', pipelineVersion: '', reportingEnabled: false, applications: [{ name: 'App-03', projectId: '3' }], id: '3' },
-          { name: 'Project-04', pipelineId: 'pipeline-04', pipelineVersion: '', reportingEnabled: false, applications: [{ name: 'App-04', projectId: '4' }], id: '4' },
-          { name: 'Project-05', pipelineId: 'pipeline-05', pipelineVersion: '', reportingEnabled: false, applications: [{ name: 'App-05', projectId: '5' }], id: '5' },
+          { name: 'Project-01', pipelineId: 'pipeline-01', pipelineVersion: '', analysisStudioEnabled: false, applications: [{ name: 'App-01', projectId: '1' }], id: '1' },
+          { name: 'Project-02', pipelineId: 'pipeline-02', pipelineVersion: '', analysisStudioEnabled: false, applications: [{ name: 'App-02', projectId: '2' }], id: '2' },
+          { name: 'Project-03', pipelineId: 'pipeline-03', pipelineVersion: '', analysisStudioEnabled: false, applications: [{ name: 'App-03', projectId: '3' }], id: '3' },
+          { name: 'Project-04', pipelineId: 'pipeline-04', pipelineVersion: '', analysisStudioEnabled: false, applications: [{ name: 'App-04', projectId: '4' }], id: '4' },
+          { name: 'Project-05', pipelineId: 'pipeline-05', pipelineVersion: '', analysisStudioEnabled: false, applications: [{ name: 'App-05', projectId: '5' }], id: '5' },
         ],
         totalCount: 5,
       },
@@ -343,8 +343,8 @@ describe('Project test', () => {
       message: '',
       data: {
         items: [
-          { name: 'Project-03', pipelineId: 'pipeline-03', pipelineVersion: '', reportingEnabled: false, applications: [{ name: 'App-03', projectId: '3' }], id: '3' },
-          { name: 'Project-04', pipelineId: 'pipeline-04', pipelineVersion: '', reportingEnabled: true, applications: [{ name: 'App-04', projectId: '4' }], id: '4' },
+          { name: 'Project-03', pipelineId: 'pipeline-03', pipelineVersion: '', analysisStudioEnabled: false, applications: [{ name: 'App-03', projectId: '3' }], id: '3' },
+          { name: 'Project-04', pipelineId: 'pipeline-04', pipelineVersion: '', analysisStudioEnabled: false, applications: [{ name: 'App-04', projectId: '4' }], id: '4' },
         ],
         totalCount: 5,
       },

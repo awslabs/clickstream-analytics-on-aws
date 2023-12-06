@@ -18,7 +18,7 @@ import { DEFAULT_DASHBOARD_NAME, DEFAULT_SOLUTION_OPERATOR, OUTPUT_REPORTING_QUI
 import { logger } from '../common/powertools';
 import { aws_sdk_client_common_config } from '../common/sdk-client-config-ln';
 import { ApiFail, ApiSuccess, PipelineStackType } from '../common/types';
-import { getReportingDashboardsUrl, getStackOutputFromPipelineStatus, isEmpty, isFinallyPipelineStatus, paginateData } from '../common/utils';
+import { getReportingDashboardsUrl, getStackOutputFromPipelineStatus, isEmpty, isFinallyPipelineStatus, paginateData, pipelineAnalysisStudioEnabled } from '../common/utils';
 import { IApplication } from '../model/application';
 import { CPipeline, IPipeline } from '../model/pipeline';
 import { IDashboard, IProject } from '../model/project';
@@ -221,11 +221,11 @@ export class ProjectServ {
         if (pipeline) {
           project.pipelineId = pipeline.pipelineId;
           project.pipelineVersion = pipeline.templateVersion ?? '';
-          project.reportingEnabled = !isEmpty(pipeline.reporting?.quickSight?.accountName);
+          project.analysisStudioEnabled = pipelineAnalysisStudioEnabled(pipeline);
         } else {
           project.pipelineId = '';
           project.pipelineVersion = '';
-          project.reportingEnabled = false;
+          project.analysisStudioEnabled = false;
         }
         const projectApps = apps.filter((item: IApplication) => item.projectId === project.id);
         project.applications = projectApps;

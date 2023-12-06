@@ -77,11 +77,7 @@ const AnalyticsHome: React.FC<AnalyticsHomeProps> = (
         });
       if (success) {
         for (const project of data.items) {
-          if (
-            project.applications &&
-            project.reportingEnabled &&
-            !project.pipelineVersion?.startsWith('v1.0')
-          ) {
+          if (project.applications && project.analysisStudioEnabled) {
             for (const app of project.applications) {
               apps.push({
                 projectId: project.id,
