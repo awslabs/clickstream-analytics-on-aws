@@ -27,7 +27,7 @@ export interface IProject {
   pipelineId: string;
   pipelineVersion: string;
   applications: IApplication[];
-  reportingEnabled: boolean;
+  analysisStudioEnabled: boolean;
   readonly status: string;
   readonly createAt: number;
   readonly updateAt: number;

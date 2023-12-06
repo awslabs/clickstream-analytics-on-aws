@@ -258,7 +258,6 @@
     "defineMetrics": "定义指标",
     "realtimeStopped": "实时流已停止",
     "realtimeStarted": "实时流已启动",
-    "reportingNotEnabled": "Reporting模块未启用",
     "pipelineVersionNotSupport": "数据管道版本不支持",
     "setStartNode": "设置起始节点",
     "participateNodes": "选择参与分析的节点",

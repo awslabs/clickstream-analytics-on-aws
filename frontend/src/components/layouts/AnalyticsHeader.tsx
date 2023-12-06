@@ -66,24 +66,11 @@ const AnalyticsHeader: React.FC<IHeaderProps> = (props: IHeaderProps) => {
     i18n.changeLanguage(lng);
   };
 
-  const getSelectLabel = (
-    label: string,
-    version: string,
-    reportingEnabled: boolean
-  ) => {
-    if (version === '' || version.startsWith('v1.0')) {
+  const getSelectLabel = (label: string, analysisStudioEnabled: boolean) => {
+    if (!analysisStudioEnabled) {
       return `${label} (${t('analytics:labels.pipelineVersionNotSupport')})`;
-    } else if (!reportingEnabled) {
-      return `${label} (${t('analytics:labels.reportingNotEnabled')})`;
     }
     return label;
-  };
-
-  const getSelectEnable = (version: string, enable: boolean) => {
-    if (version === '') {
-      return false;
-    }
-    return !enable || version.startsWith('v1.0');
   };
 
   const getSelectOptions = (element: IProject) => {
@@ -167,14 +154,10 @@ const AnalyticsHeader: React.FC<IHeaderProps> = (props: IHeaderProps) => {
           (element) => ({
             label: getSelectLabel(
               element.name,
-              defaultStr(element.pipelineVersion),
-              element.reportingEnabled ?? false
+              element.analysisStudioEnabled ?? false
             ),
             value: element.id,
-            disabled: getSelectEnable(
-              defaultStr(element.pipelineVersion),
-              element.reportingEnabled ?? false
-            ),
+            disabled: !element.analysisStudioEnabled,
             options: getSelectOptions(element),
           })
         );
