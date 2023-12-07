@@ -73,6 +73,8 @@
         ```
       **注意**：在 OIDC 提供程序中，您需要将 `https://<ingestion server endpoint>/oauth2/idpresponse` 添加到“允许回调 URL”。
 
+        **注意**：如果您需要在不手动输入凭据（用户名/密码）的情况下直接获取身份验证令牌，您可以参考[ALB无头身份验证客户端代码][alb-headless-authentication-client]来设置您的客户端以自动获取身份验证令牌。   
+
     * 访问日志：ALB 支持提供其接收的所有请求的详细日志。如果您启用此选项，则解决方案将自动为您启用访问日志，并将日志存储在您之前选择的 S3 存储桶中。
 
         !!! tip "提示"
@@ -153,3 +155,4 @@
 -->
 
 [alb-permission]: https://docs.aws.amazon.com/elasticloadbalancing/latest/application/enable-access-logging.html
+[alb-headless-authentication-client]: https://github.com/aws-samples/alb-headless-authentication-client

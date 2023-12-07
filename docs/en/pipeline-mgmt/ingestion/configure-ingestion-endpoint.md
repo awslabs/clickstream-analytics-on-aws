@@ -59,6 +59,9 @@ The solution creates a web service as an ingestion endpoint to collect data sent
         ```
       **Note**: In the OIDC provider, you need to add `https://<ingestion server endpoint>/oauth2/idpresponse` to "Allowed callback URLs"
 
+        **Note**: If you need to obtain the authentication token directly without inputting credential(username/password) manually, you can refer to [alb headless authentication client code][alb-headless-authentication-client] to setup your client to obtain the authentication token automatically.
+
+
     * Access logs: ALB supports delivering detailed logs of all requests it receives. If you enable this option, the solution will automatically enable access logs for you and store the logs into the S3 bucket you selected in previous step.
 
         !!! tip "Tip"
@@ -139,3 +142,4 @@ The solution creates a web service as an ingestion endpoint to collect data sent
 -->
 
 [alb-permission]: https://docs.aws.amazon.com/elasticloadbalancing/latest/application/enable-access-logging.html
+[alb-headless-authentication-client]: https://github.com/aws-samples/alb-headless-authentication-client
