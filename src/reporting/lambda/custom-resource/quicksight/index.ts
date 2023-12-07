@@ -115,8 +115,8 @@ const _onCreate = async (quickSight: QuickSight, awsAccountId: string, sharePrin
       const dashboardDefProps: QuickSightDashboardDefProps = props.dashboardDefProps;
       logger.info('creating quicksight dashboard with params', {
         schemaName: schemaName,
-        dashboardDefProps: dashboardDefProps
-      })
+        dashboardDefProps: dashboardDefProps,
+      });
 
       const dashboard = await createQuickSightDashboard(quickSight, awsAccountId, sharePrincipalArn, ownerPrincipalArn,
         schemaName,
@@ -147,8 +147,8 @@ const _onDelete = async (quickSight: QuickSight, awsAccountId: string, event: Cl
 
       logger.info('deleting quicksight dashboard with params', {
         schemaName: schemaName,
-        dashboardDefProps: dashboardDefProps
-      })
+        dashboardDefProps: dashboardDefProps,
+      });
 
       const dashboard = await deleteQuickSightDashboard(quickSight, awsAccountId, schemaName, dashboardDefProps);
       logger.info(`delete dashboard: ${dashboard?.DashboardId}`);
@@ -179,8 +179,8 @@ const _onUpdate = async (quickSight: QuickSight, awsAccountId: string, sharePrin
     propsSchemas: props.schemas,
     oldPropsSchemas: oldProps.schemas,
     databaseSchemanameArray: databaseSchemaNameArray,
-    oldDatabaseSchemaNameArray: oldDatabaseSchemaNameArray
-  })
+    oldDatabaseSchemaNameArray: oldDatabaseSchemaNameArray,
+  });
 
   const updateSchemas = databaseSchemaNameArray.filter(item => oldDatabaseSchemaNameArray.includes(item));
   const deleteSchemas = oldDatabaseSchemaNameArray.filter(item => !databaseSchemaNameArray.includes(item));
@@ -189,8 +189,8 @@ const _onUpdate = async (quickSight: QuickSight, awsAccountId: string, sharePrin
   logger.info('schemas to process', {
     updateSchemas: updateSchemas,
     deleteSchemas: deleteSchemas,
-    createSchemas: createSchemas
-  })
+    createSchemas: createSchemas,
+  });
 
   for (const schemaName of updateSchemas) {
     const dashboardDefProps: QuickSightDashboardDefProps = props.dashboardDefProps;
@@ -199,8 +199,8 @@ const _onUpdate = async (quickSight: QuickSight, awsAccountId: string, sharePrin
     logger.info('Updating schema', {
       schemaName: schemaName,
       dashboardDefProps: dashboardDefProps,
-      oldDashboardDefProps: oldDashboardDefProps
-    })
+      oldDashboardDefProps: oldDashboardDefProps,
+    });
 
     const dashboard = await updateQuickSightDashboard(quickSight, awsAccountId,
       schemaName,
@@ -222,8 +222,8 @@ const _onUpdate = async (quickSight: QuickSight, awsAccountId: string, sharePrin
     logger.info('Creating schema', {
       schemaName: schemaName,
       dashboardDefProps: dashboardDefProps,
-      oldDashboardDefProps: dashboard?.DashboardId
-    })
+      oldDashboardDefProps: dashboard?.DashboardId,
+    });
 
     dashboards.push({
       appId: schemaName,
@@ -241,8 +241,8 @@ const _onUpdate = async (quickSight: QuickSight, awsAccountId: string, sharePrin
     logger.info('Deleting schema', {
       schemaName: schemaName,
       dashboardDefProps: dashboardDefProps,
-      oldDashboardDefProps: dashboard?.DashboardId
-    })
+      oldDashboardDefProps: dashboard?.DashboardId,
+    });
 
   };
 
@@ -388,7 +388,7 @@ const updateQuickSightDashboard = async (quickSight: QuickSight,
 
   logger.info('Delete and update dataset and table names', {
     needDeleteDataSets: needDeleteDataSets,
-    needUpdateDataSetTableNames: needUpdateDataSetTableNames
+    needUpdateDataSetTableNames: needUpdateDataSetTableNames,
   });
 
   for ( const dataSet of dataSets) {
@@ -417,8 +417,8 @@ const updateQuickSightDashboard = async (quickSight: QuickSight,
   logger.info('template info', {
     templateId: dashboardDef.templateId,
     templateArn: dashboardDef.templateArn,
-    latestVersion: latestVersion
-  })
+    latestVersion: latestVersion,
+  });
 
   const sourceEntity = {
     SourceTemplate: {
@@ -564,11 +564,11 @@ const createDataSet = async (quickSight: QuickSight, commonParams: ResourceCommo
         DisableUseAsImportedSource: false,
       },
     };
-    logger.info('dataset params', {datasetParams});
+    logger.info('dataset params', { datasetParams });
     const dataset = await quickSight.createDataSet(datasetParams);
 
     await waitForDataSetCreateCompleted(quickSight, commonParams.awsAccountId, datasetId);
-    logger.info('create dataset finished', {datasetId});
+    logger.info('create dataset finished', { datasetId });
 
     return dataset;
 
@@ -601,7 +601,7 @@ const createAnalysis = async (quickSight: QuickSight, commonParams: ResourceComm
       SourceEntity: sourceEntity,
     });
     await waitForAnalysisChangeCompleted(quickSight, commonParams.awsAccountId, analysisId);
-    logger.info('Create analysis finished', {Id: analysisId});
+    logger.info('Create analysis finished', { Id: analysisId });
 
     return analysis;
 
@@ -925,7 +925,7 @@ const updateDashboard = async (quickSight: QuickSight, commonParams: ResourceCom
     const identifier = buildDashBoardId(commonParams.databaseName, commonParams.schema);
     const dashboardId = identifier.id;
 
-    logger.info('start to update dashboard', {sourceEntity});
+    logger.info('start to update dashboard', { sourceEntity });
     const dashboard = await quickSight.updateDashboard({
       AwsAccountId: commonParams.awsAccountId,
       DashboardId: dashboardId,
@@ -934,7 +934,7 @@ const updateDashboard = async (quickSight: QuickSight, commonParams: ResourceCom
       SourceEntity: sourceEntity,
 
     });
-    logger.info('update dashboard finished.', {id: dashboardId});
+    logger.info('update dashboard finished.', { id: dashboardId });
 
     await waitForDashboardChangeCompleted(quickSight, commonParams.awsAccountId, dashboardId);
 

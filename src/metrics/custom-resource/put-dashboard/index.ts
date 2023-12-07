@@ -116,7 +116,7 @@ async function _handler(
     dashboardName: dashboardName,
     proejctId: projectId,
     columnNumber: columnNumber,
-    snsTopicArn: snsTopicArn
+    snsTopicArn: snsTopicArn,
 
   });
 

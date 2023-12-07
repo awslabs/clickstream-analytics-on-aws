@@ -82,7 +82,7 @@ export const handler = async (event: LoadManifestEvent, context: Context) => {
   let appId = event.detail.appId;
   const manifestFileName = event.detail.manifestFileName;
   const jobList = event.detail.jobList;
-  logger.info('Event details',{details: event.detail})
+  logger.info('Event details', { details: event.detail });
   // The appId will be used as the schema of Redshift, '.' and '-' are not supported.
   appId = appId.replace(/\./g, '_').replace(/\-/g, '_');
   logger.debug(`appId:${appId}`);

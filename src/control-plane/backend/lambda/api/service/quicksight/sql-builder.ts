@@ -2020,7 +2020,7 @@ function buildSqlFromCondition(condition: Condition, propertyPrefix?: string) : 
     case MetadataValueType.INTEGER:
       return _buildSqlFromNumberCondition(condition, prefix);
     default:
-      logger.error('unsupported condition', {condition});
+      logger.error('unsupported condition', { condition });
       throw new Error('Unsupported condition');
   }
 }
@@ -2035,7 +2035,7 @@ function buildSqlForUserCondition(condition: Condition, tablePrefix: string = ''
     case MetadataValueType.INTEGER:
       return buildSqlForNestAttributeNumberCondition(condition, `${tablePrefix}custom_attr_key`, `${tablePrefix}custom_attr_value`);
     default:
-      logger.error('unsupported condition', {condition});
+      logger.error('unsupported condition', { condition });
       throw new Error('Unsupported condition');
   }
 }
@@ -2049,7 +2049,7 @@ function buildSqlForEventCondition(condition: Condition, tablePrefix: string = '
     case MetadataValueType.INTEGER:
       return buildSqlForNestAttributeNumberCondition(condition, `${tablePrefix}event_parameter_key`, `${tablePrefix}event_parameter_value`);
     default:
-      logger.error('unsupported condition', {condition});
+      logger.error('unsupported condition', { condition });
       throw new Error('Unsupported condition');
   }
 }
@@ -2078,7 +2078,7 @@ function buildSqlForNestAttributeStringCondition(condition: Condition, propertyK
     case ExploreAnalyticsOperators.NOT_NULL:
       return `(${propertyKey} = '${condition.property}' and ${propertyValue} is not null)`;
     default:
-      logger.error('unsupported condition', {condition});
+      logger.error('unsupported condition', { condition });
       throw new Error('Unsupported condition');
   }
 
@@ -2104,7 +2104,7 @@ function buildSqlForNestAttributeNumberCondition(condition: Condition, propertyK
     case ExploreAnalyticsOperators.NOT_NULL:
       return `(${propertyKey} = '${condition.property}' and ${propertyValue} is not null)`;
     default:
-      logger.error('unsupported condition', {condition});
+      logger.error('unsupported condition', { condition });
       throw new Error('Unsupported condition');
   }
 
@@ -2134,7 +2134,7 @@ function _buildSqlFromStringCondition(condition: Condition, prefix: string) : st
     case ExploreAnalyticsOperators.NOT_NULL:
       return `${prefix}${condition.property} is not null `;
     default:
-      logger.error('unsupported condition', {condition});
+      logger.error('unsupported condition', { condition });
       throw new Error('Unsupported condition');
   }
 
@@ -2160,7 +2160,7 @@ function _buildSqlFromNumberCondition(condition: Condition, prefix: string) : st
     case ExploreAnalyticsOperators.NOT_NULL:
       return `${prefix}${condition.property} is not null `;
     default:
-      logger.error('unsupported condition', {condition});
+      logger.error('unsupported condition', { condition });
       throw new Error('Unsupported condition');
   }
 

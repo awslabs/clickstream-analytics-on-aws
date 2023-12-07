@@ -288,7 +288,7 @@ async function createConnector(event: ResourceEvent, customPluginArn: string) {
     },
     serviceExecutionRoleArn: props.s3SinkConnectorRole,
   });
-  logger.info('command', {command});
+  logger.info('command', { command });
   let resConnectorArn;
   try {
     let res = await kafkaConnectClient.send(command);
@@ -380,7 +380,7 @@ function getConnectorConfiguration(
     };
   }
 
-  logger.info('Configuration:', {configuration})
+  logger.info('Configuration:', { configuration });
 
   return configuration;
 }
@@ -388,7 +388,7 @@ function getConnectorConfiguration(
 async function onUpdate(event: CloudFormationCustomResourceEvent) {
   logger.info('onUpdate()');
   const properties = event.ResourceProperties;
-  logger.info('properties', {properties})
+  logger.info('properties', { properties });
   try {
     await updateConnector(event);
   } catch (e: any) {
@@ -464,7 +464,7 @@ async function onDelete(event: ResourceEvent) {
   logger.info('onDelete()');
   const properties = event.ResourceProperties;
 
-  logger.info('properties', {properties})
+  logger.info('properties', { properties });
 
   await deleteConnector(event);
   await deletePlugin(event);
