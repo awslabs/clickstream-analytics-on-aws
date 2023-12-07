@@ -113,7 +113,7 @@ const _onCreate = async (quickSight: QuickSight, awsAccountId: string, sharePrin
   if ( databaseSchemaNames.trim().length > 0 ) {
     for (const schemaName of databaseSchemaNames.split(',')) {
       const dashboardDefProps: QuickSightDashboardDefProps = props.dashboardDefProps;
-      logger.info('creating quicksigh dashboard with params', {
+      logger.info('creating quicksight dashboard with params', {
         schemaName: schemaName,
         dashboardDefProps: dashboardDefProps
       })
