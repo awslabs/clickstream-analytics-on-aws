@@ -2752,6 +2752,7 @@
 </span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">  </span><span class="p">}</span>
 </span></code></pre></div>
       <strong>Note</strong>: In the OIDC provider, you need to add <code>https://&lt;ingestion server endpoint&gt;/oauth2/idpresponse</code> to "Allowed callback URLs"</p>
+<p><strong>Note</strong>: If you need to obtain the authentication token directly without inputting credential(username/password) manually, you can refer to <a href="https://github.com/aws-samples/alb-headless-authentication-client">alb headless authentication client code</a> to setup your client to obtain the authentication token automatically.</p>
 </li>
 <li>
 <p>Access logs: ALB supports delivering detailed logs of all requests it receives. If you enable this option, the solution will automatically enable access logs for you and store the logs into the S3 bucket you selected in previous step.</p>
