@@ -735,6 +735,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#analytics-studio" class="md-nav__link">
+    <span class="md-ellipsis">
+      Analytics Studio
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#sdks" class="md-nav__link">
     <span class="md-ellipsis">
       SDKs
@@ -2762,6 +2771,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#analytics-studio" class="md-nav__link">
+    <span class="md-ellipsis">
+      Analytics Studio
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#sdks" class="md-nav__link">
     <span class="md-ellipsis">
       SDKs
@@ -2841,15 +2859,25 @@
 
   <h1>How the solution works</h1>
 
-<p>The Clickstream Analytics on AWS solution has three components: a web console, SDKs, and data pipeline.</p>
+<p>The Clickstream Analytics on AWS solution has four components: a web console, Analytics Studio, SDKs, and data pipeline.</p>
 <h3 id="web-console">Web console</h3>
 <p>This solution provides a web console which allows you to create clickstream projects, and configure, deploy, and manage  data pipeline for each clickstream project.</p>
+<h3 id="analytics-studio">Analytics Studio</h3>
+<p>Analytics Studio is a unified web interface for business analysts or data analysts to view and create dashboards, query and explore clickstream data, and manage metadata. It supports the following features:</p>
+<ul>
+<li>provide a pre-canned user life cycle dashboard</li>
+<li>provide an explorative analytics model to query and analyze clickstream data</li>
+<li>support creating custom analysis and visualization in a drag-and-drop manner</li>
+<li>auto-generate metadata for clickstream data, support metadata management</li>
+</ul>
 <h3 id="sdks">SDKs</h3>
 <p>This solution provides native SDKs for help you easily collect and report in-app events from your applications to data pipelines.</p>
 <ul>
 <li><a href="https://github.com/awslabs/clickstream-android">Android SDK</a></li>
 <li><a href="https://github.com/awslabs/clickstream-swift">Swift SDK</a></li>
 <li><a href="https://github.com/awslabs/clickstream-web">Web SDK</a></li>
+<li><a href="https://github.com/awslabs/clickstream-flutter">Flutter SDK</a></li>
+<li><a href="https://github.com/awslabs/clickstream-wechat">WeChat Mini Program SDK</a></li>
 </ul>
 <h3 id="data-pipeline">Data pipeline</h3>
 <p>This solution uses the web console to manage the project and its data pipeline. The data pipeline consists of four modules.</p>
@@ -2875,7 +2903,7 @@
 <li>support third-party enrichment plug-ins</li>
 </ul>
 <h4 id="data-modeling-module">Data modeling module</h4>
-<p>The data modeling module loads the processed data into data lakehouse. It supports the following features:</p>
+<p>The data modeling module loads the processed data into lake house. It supports the following features:</p>
 <ul>
 <li>support both provisioned Redshift and Redshift Serverless as data warehouse</li>
 <li>support the data range for hot data keeping in Redshift</li>
@@ -2883,13 +2911,7 @@
 <li>support use Athena to query the data in data lake</li>
 </ul>
 <h4 id="reporting-module">Reporting module</h4>
-<p>The reporting module connects to the processed data stored in data warehouse (i.e., Redshift) to provide the following data query and reporting features:</p>
-<ul>
-<li>provide pre-canned user life cycle dashboard.</li>
-<li>provide explorative analytics model to query and analyze clickstream data.</li>
-<li>support creating custom analysis and visualization in drag-and-drop manner</li>
-<li>auto-generate metadata for clickstream data, support metadata management</li>
-</ul>
+<p>The reporting module creates a secure connection to the data warehouse and provisions the out-of-box dashboards in business intelligence Amazon QuickSight.</p>
 
 
   
