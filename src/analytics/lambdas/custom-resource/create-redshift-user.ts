@@ -20,7 +20,6 @@ type ResourcePropertiesType = CreateMappingRoleUser & {
 }
 
 export const handler: CdkCustomResourceHandler = async (event) => {
-  logger.info(JSON.stringify(event));
   const response: CdkCustomResourceResponse = {
     PhysicalResourceId: 'create-redshift-db-user-custom-resource',
     Data: {

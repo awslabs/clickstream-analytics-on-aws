@@ -54,7 +54,6 @@ interface HandleClickStreamSDKInput {
 type ResourceEvent = CloudFormationCustomResourceEvent;
 
 export const handler = async (event: ResourceEvent, context: Context) => {
-  logger.info(JSON.stringify(event));
   try {
     await _handler(event, context);
     logger.info('=== complete ===');

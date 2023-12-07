@@ -36,7 +36,6 @@ type ScheduledEvent = EventBridgeEvent<'Scheduled Event', EmptyEventDetail>;
 type EventType = ScheduledEvent | PartitionDateEvent | CloudFormationCustomResourceEvent;
 
 export const handler = async (event: EventType, context: Context) => {
-  logger.info(JSON.stringify(event));
 
   const date = isAnPartitionDate(event) ? new Date(event.year, event.month - 1, event.day) : new Date();
 

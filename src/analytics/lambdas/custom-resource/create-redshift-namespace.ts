@@ -26,8 +26,6 @@ type ResourcePropertiesType = NewNamespaceCustomProperties & {
 }
 
 export const handler: CdkCustomResourceHandler = async (event: CdkCustomResourceEvent, context: Context) => {
-  logger.info(JSON.stringify(event));
-
   const resourceProps = event.ResourceProperties as ResourcePropertiesType;
   const physicalRequestId = `redshift-serverless-namespace-${resourceProps.namespaceName}`;
   let namespace: Namespace | undefined;

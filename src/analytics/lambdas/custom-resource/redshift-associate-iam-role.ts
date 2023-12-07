@@ -74,7 +74,6 @@ function excludeToBeUnassociated(roles: string[], toBeUnasscoiated?: string): st
 }
 
 export const handler: CdkCustomResourceHandler = async (event: CdkCustomResourceEvent) => {
-  logger.info(JSON.stringify(event));
   let physicalRequestId: string | undefined;
   try {
     const resourceProps = event.ResourceProperties as ResourcePropertiesType;

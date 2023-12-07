@@ -66,7 +66,6 @@ const REDSHIFT_ODS_TABLE_NAME = process.env.REDSHIFT_ODS_TABLE_NAME;
  * @returns The result of putting item to dynamodb.
  */
 export const handler = async (event: EventBridgeEvent<'Object Created', S3ObjectCreatedNotificationEventDetail>) => {
-  logger.info('requestJson:', JSON.stringify(event, undefined, 2));
   // Create a Date object from the date string
   let date = new Date(event.time);
   // Get the timestamp as a number

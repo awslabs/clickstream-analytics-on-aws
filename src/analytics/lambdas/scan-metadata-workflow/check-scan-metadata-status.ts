@@ -33,8 +33,6 @@ export interface CheckScanMetadataStatusEvent {
  * @returns The scan metadata results of query_id.
  */
 export const handler = async (event: CheckScanMetadataStatusEvent) => {
-  logger.debug('request event:', JSON.stringify(event));
-
   const queryId = event.detail.id;
   const appId = event.detail.appId;
   logger.debug(`query_id:${queryId}`);

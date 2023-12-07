@@ -48,8 +48,6 @@ export interface UpdateWorkflowInfoEvent {
   @returns.
  */
 export const handler = async (event: UpdateWorkflowInfoEvent) => {
-  logger.debug('request event:', JSON.stringify(event));
-
   try {
     const lastJobStartTimestamp = event.lastJobStartTimestamp;
     const lastScanEndDate = event.lastScanEndDate;
