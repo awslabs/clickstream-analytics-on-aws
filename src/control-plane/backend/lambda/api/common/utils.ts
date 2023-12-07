@@ -313,13 +313,24 @@ function _getTransformerPluginInfo(pipeline: IPipeline, resources: CPipelineReso
     if (pipeline.dataCollectionSDK === DataCollectionSDK.CLICKSTREAM) {
       const defaultTransformer = resources.plugins?.filter(p => p.id === 'BUILT-IN-1')[0];
       if (defaultTransformer?.mainFunction) {
-        transformerClassNames.push(defaultTransformer?.mainFunction);
+        if (pipeline.templateVersion?.startsWith('v1.0')) {
+          transformerClassNames.push(defaultTransformer?.mainFunction.replace(
+            'software.aws.solution.clickstream.TransformerV2',
+            'software.aws.solution.clickstream.Transformer',
+          ));
+        } else {
+          transformerClassNames.push(defaultTransformer?.mainFunction);
+        }
       }
     } else {
       throw new ClickStreamBadRequestError('Transform plugin is required.');
     }
   } else {
-    const { classNames, pluginJars, pluginFiles } = _getTransformerPluginInfoFromResources(resources, pipeline.dataProcessing?.transformPlugin);
+    const { classNames, pluginJars, pluginFiles } = _getTransformerPluginInfoFromResources(
+      resources,
+      pipeline.dataProcessing?.transformPlugin,
+      pipeline.templateVersion,
+    );
     transformerClassNames= transformerClassNames.concat(classNames);
     transformerPluginJars = transformerPluginJars.concat(pluginJars);
     transformerPluginFiles = transformerPluginFiles.concat(pluginFiles);
@@ -327,7 +338,7 @@ function _getTransformerPluginInfo(pipeline: IPipeline, resources: CPipelineReso
   return { transformerClassNames, transformerPluginJars, transformerPluginFiles };
 }
 
-function _getTransformerPluginInfoFromResources(resources: CPipelineResources, transformPluginId: string) {
+function _getTransformerPluginInfoFromResources(resources: CPipelineResources, transformPluginId: string, templateVersion?: string) {
   const classNames: string[] = [];
   const pluginJars: string[] = [];
   const pluginFiles: string[] = [];
@@ -341,7 +352,14 @@ function _getTransformerPluginInfoFromResources(resources: CPipelineResources, t
     }
   }
   if (transform?.mainFunction) {
-    classNames.push(transform?.mainFunction);
+    if (templateVersion?.startsWith('v1.0')) {
+      classNames.push(transform?.mainFunction.replace(
+        'software.aws.solution.clickstream.TransformerV2',
+        'software.aws.solution.clickstream.Transformer',
+      ));
+    } else {
+      classNames.push(transform?.mainFunction);
+    }
   }
   return { classNames, pluginJars, pluginFiles };
 }

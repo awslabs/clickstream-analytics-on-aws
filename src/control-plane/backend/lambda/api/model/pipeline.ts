@@ -292,6 +292,7 @@ export class CPipeline {
       throw new ClickStreamBadRequestError('Pipeline Workflow can not empty.');
     }
     this.pipeline.lastAction = 'Update';
+    this.pipeline.templateVersion = oldPipeline.templateVersion;
     validateIngestionServerNum(this.pipeline.ingestionServer.size);
     this.pipeline.executionName = `main-${uuidv4()}`;
 
@@ -308,7 +309,6 @@ export class CPipeline {
     // create new execution
     const execWorkflow = this.stackManager.getExecWorkflow();
     this.pipeline.executionArn = await this.stackManager.execute(execWorkflow, this.pipeline.executionName);
-    this.pipeline.templateVersion = oldPipeline.templateVersion;
     this.pipeline.tags = oldPipeline.tags;
     this.pipeline.workflow = this.stackManager.getWorkflow();
 
@@ -347,19 +347,10 @@ export class CPipeline {
       if (!AllowedList.includes(paramName)) {
         notAllowEdit.push(paramName);
       } else {
-        let parameterValue = diffParameters.edited.find(p => p[0] === key)?.[1];
-        if (stackName.startsWith(`Clickstream-${PipelineStackType.DATA_PROCESSING}`) &&
-        paramName === 'TransformerAndEnrichClassNames' &&
-        oldPipeline.templateVersion?.startsWith('v1.0')) {
-          parameterValue = parameterValue.replace(
-            'software.aws.solution.clickstream.TransformerV2',
-            'software.aws.solution.clickstream.Transformer',
-          );
-        }
         editParameters.push({
           stackName: stackName,
           parameterKey: paramName,
-          parameterValue: parameterValue,
+          parameterValue: diffParameters.edited.find(p => p[0] === key)?.[1],
         });
       }
     }
