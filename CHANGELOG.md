@@ -5,6 +5,47 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2023-12-08
+
+### Web Console and Data pipeline
+
+#### Added
+
+* support self-hosted Apache Kafka cluster
+* add resource awareness to the Data Processing scheduler
+* add user roles management
+* add metadata scanning workflow
+* add third-party transform plug-in: GTM Server Side plug-in
+
+#### Changed
+
+* update the ingestion configuration of the existing data pipeline
+* data schema updates
+* update out-of-box reporting dashboards
+* improve pipeline status management
+* Improve the reliability of service availability checks
+
+#### Fixed
+
+* check the incorrect configuration of NAT gateway or VPC endpoints for data pipeline
+* gracefully handle with the incomplete user profile
+
+### SDK
+
+#### Added
+
+* add Flutter SDK
+* add Wechat Miniprogram SDK
+
+### Analytics Studio
+
+#### Added
+
+* Dashboard
+* Explore
+* Analyzes
+* Data management
+
 ## [1.0.3] - 2023-10-30
 
 ### Fixed
