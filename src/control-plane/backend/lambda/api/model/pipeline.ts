@@ -236,7 +236,7 @@ export interface IPipeline {
   readonly version: string;
   readonly versionTag: string;
   readonly createAt: number;
-  readonly updateAt: number;
+  updateAt: number;
   readonly operator: string;
   readonly deleted: boolean;
 }
@@ -405,6 +405,7 @@ export class CPipeline {
     const execWorkflow = this.stackManager.getExecWorkflow();
     this.pipeline.executionArn = await this.stackManager.execute(execWorkflow, executionName);
     // update pipeline metadata
+    this.pipeline.updateAt = Date.now();
     await store.updatePipelineAtCurrentVersion(this.pipeline);
   }
 
@@ -418,6 +419,7 @@ export class CPipeline {
     const execWorkflow = this.stackManager.getExecWorkflow();
     this.pipeline.executionArn = await this.stackManager.execute(execWorkflow, executionName);
     // update pipeline metadata
+    this.pipeline.updateAt = Date.now();
     await store.updatePipelineAtCurrentVersion(this.pipeline);
 
     // bind plugin
