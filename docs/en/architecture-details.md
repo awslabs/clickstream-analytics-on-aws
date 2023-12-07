@@ -52,7 +52,7 @@ The data processing module transforms and enriches the ingested data to solution
 
 #### Data modeling module
 
-The data modeling module loads the processed data into data lake house. It supports the following features:
+The data modeling module loads the processed data into lake house. It supports the following features:
 
 - support both provisioned Redshift and Redshift Serverless as data warehouse
   - support the data range for hot data keeping in Redshift
