@@ -313,14 +313,7 @@ function _getTransformerPluginInfo(pipeline: IPipeline, resources: CPipelineReso
     if (pipeline.dataCollectionSDK === DataCollectionSDK.CLICKSTREAM) {
       const defaultTransformer = resources.plugins?.filter(p => p.id === 'BUILT-IN-1')[0];
       if (defaultTransformer?.mainFunction) {
-        if (pipeline.templateVersion?.startsWith('v1.0')) {
-          transformerClassNames.push(defaultTransformer?.mainFunction.replace(
-            'software.aws.solution.clickstream.TransformerV2',
-            'software.aws.solution.clickstream.Transformer',
-          ));
-        } else {
-          transformerClassNames.push(defaultTransformer?.mainFunction);
-        }
+        transformerClassNames.push(_getTransformClassNameByVersion(defaultTransformer?.mainFunction, pipeline.templateVersion));
       }
     } else {
       throw new ClickStreamBadRequestError('Transform plugin is required.');
@@ -352,16 +345,19 @@ function _getTransformerPluginInfoFromResources(resources: CPipelineResources, t
     }
   }
   if (transform?.mainFunction) {
-    if (templateVersion?.startsWith('v1.0')) {
-      classNames.push(transform?.mainFunction.replace(
-        'software.aws.solution.clickstream.TransformerV2',
-        'software.aws.solution.clickstream.Transformer',
-      ));
-    } else {
-      classNames.push(transform?.mainFunction);
-    }
+    classNames.push(_getTransformClassNameByVersion(transform?.mainFunction, templateVersion));
   }
   return { classNames, pluginJars, pluginFiles };
+}
+
+function _getTransformClassNameByVersion(mainFunction: string, templateVersion?: string) {
+  if (templateVersion?.startsWith('v1.0')) {
+    return mainFunction.replace(
+      'software.aws.solution.clickstream.TransformerV2',
+      'software.aws.solution.clickstream.Transformer',
+    );
+  }
+  return mainFunction;
 }
 
 function getSubnetType(routeTable: RouteTable) {
