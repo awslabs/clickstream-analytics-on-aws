@@ -135,7 +135,7 @@ const baseColumns = `
 ,ingest_timestamp
 ,event_value_in_usd
 ,app_info.app_id:: varchar as app_info_app_id
-,app_info.id:: varchar as app_info_package_id
+,app_info.id:: varchar as app_info_id
 ,app_info.install_source:: varchar as app_info_install_source
 ,app_info.version:: varchar as app_info_version
 ,app_info.sdk_name:: varchar as app_info_sdk_name
