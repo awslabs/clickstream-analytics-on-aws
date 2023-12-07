@@ -4,6 +4,7 @@ Currently, solution support Amazon Managed Streaming for Apache Kafka (Amazon MS
 
 ## Amazon MSK
 * **Select an existing Amazon MSK cluster.** Select an MSK cluster from the drop-down list, the MSK cluster needs to meet the following requirements:
+    * Only Provisioned MSK clusters are supported, serverless MSK clusters are not supported.
     * MSK cluster and this solution need to be in the same VPC
     * Enable **Unauthenticated access** in Access control methods
     * Enable **Plaintext** in Encryption
