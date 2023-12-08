@@ -78,12 +78,24 @@ async function _handler(event: CloudFormationCustomResourceEvent, context: Conte
 
 async function createEMRServerlessApp(props: ResourcePropertiesType): Promise<string> {
   let architecture = props.architecture;
+  let javaPathSuffix = 'x86_64';
   if (props.architecture === EMR_ARCHITECTURE_AUTO) {
     architecture = Architecture.ARM64;
     if (region.startsWith('cn-')) {
       architecture = Architecture.X86_64;
     }
   }
+  if (architecture == Architecture.ARM64) {
+    javaPathSuffix = 'aarch64';
+  }
+
+  let javaVersion = 8;
+  if (versionEqOrGT(props.version, 'emr-6.11.0')) {
+    javaVersion = 17;
+  }
+  // "/usr/lib/jvm/java-17-amazon-corretto.x86_64/"
+  // "/usr/lib/jvm/java-17-amazon-corretto.aarch64/"
+  const javaHome = `/usr/lib/jvm/java-${javaVersion}-amazon-corretto.${javaPathSuffix}/`;
 
   const input: CreateApplicationCommandInput = {
     name: props.name.slice(0, 64), // serverless app name length should not more than 64
@@ -101,6 +113,15 @@ async function createEMRServerlessApp(props: ResourcePropertiesType): Promise<st
       enabled: true,
       idleTimeoutMinutes: parseInt(props.idleTimeoutMinutes),
     },
+    runtimeConfiguration: [
+      {
+        classification: 'spark-defaults',
+        properties: {
+          'spark.emr-serverless.driverEnv.JAVA_HOME': javaHome,
+          'spark.executorEnv.JAVA_HOME': javaHome,
+        },
+      },
+    ],
   };
 
   logger.info('CreateApplicationCommand input', { input });
@@ -163,6 +184,29 @@ async function deleteEMRServerlessAppById(appId: string) {
   } catch (err) {
     // if app is 'started' state, which cannot be deleted,  we ignore this error.
     logger.error(err + '');
+  }
+}
+
+function versionEqOrGT(v1: string, v2: string) {
+  // emr-6.11.0
+  if (v1 == v2) {
+    return true;
+  }
+  const versionReg = new RegExp(/emr-(\d+).(\d+).(\d+)/);
+  const v1Parts = versionReg.exec(v1);
+  const v2Parts = versionReg.exec(v2);
+  if (v1Parts && v2Parts) {
+    const v1p1 = parseInt(v1Parts[1]) * 1000_0000_0000;
+    const v1p2 = parseInt(v1Parts[2]) * 1000_0000;
+    const v1p3 = parseInt(v1Parts[3]);
+
+    const v2p1 = parseInt(v2Parts[1]) * 1000_0000_0000;
+    const v2p2 = parseInt(v2Parts[2]) * 1000_0000;
+    const v2p3 = parseInt(v2Parts[3]);
+
+    return v1p1 + v1p2 + v1p3 > v2p1 + v2p2 + v2p3;
+  } else {
+    return v1 > v2;
   }
 }
 

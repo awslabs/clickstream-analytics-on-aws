@@ -41,7 +41,7 @@ beforeEach(() => {
   emrClientMock.reset();
 });
 
-test('should create EMR-serverless application X86_64 architecture', async () => {
+test('should create EMR-serverless application X86_64 architecture with java 17', async () => {
   const event: CloudFormationCustomResourceEvent = {
     ...basicCloudFormationEvent,
     RequestType: 'Create',
@@ -49,7 +49,7 @@ test('should create EMR-serverless application X86_64 architecture', async () =>
       ServiceToken: 'ServiceToken1',
       projectId: 'test-stack-id',
       name: 'spark-test-app-name',
-      version: 'emr-6.10.0',
+      version: 'emr-6.11.0',
       securityGroupId: 'sg-102392x23df',
       subnetIds: 'subnet-0001,subnet-0002',
       idleTimeoutMinutes: '3',
@@ -97,8 +97,17 @@ test('should create EMR-serverless application X86_64 architecture', async () =>
         'subnet-0002',
       ],
     },
-    releaseLabel: 'emr-6.10.0',
+    releaseLabel: 'emr-6.11.0',
     type: 'SPARK',
+    runtimeConfiguration: [
+      {
+        classification: 'spark-defaults',
+        properties: {
+          'spark.emr-serverless.driverEnv.JAVA_HOME': '/usr/lib/jvm/java-17-amazon-corretto.x86_64/',
+          'spark.executorEnv.JAVA_HOME': '/usr/lib/jvm/java-17-amazon-corretto.x86_64/',
+        },
+      },
+    ],
   });
 });
 

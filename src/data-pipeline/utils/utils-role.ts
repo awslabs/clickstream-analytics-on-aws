@@ -92,6 +92,7 @@ export class RoleUtil {
         ],
         actions: [
           'emr-serverless:StartApplication',
+          'emr-serverless:GetApplication',
           'emr-serverless:StartJobRun',
           'emr-serverless:TagResource',
         ],

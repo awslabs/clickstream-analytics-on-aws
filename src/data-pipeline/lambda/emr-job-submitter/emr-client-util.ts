@@ -12,7 +12,9 @@
  */
 
 import {
+  Configuration,
   EMRServerlessClient,
+  GetApplicationCommand,
   StartJobRunCommand,
   StartJobRunCommandInput,
 } from '@aws-sdk/client-emr-serverless';
@@ -122,15 +124,17 @@ export class EMRServerlessUtil {
       startRunTime: new Date().toISOString(),
     });
 
-    await this.recordJobInfo({
-      event,
-      config,
-      jobRunId: 'latest',
-      startTimestamp,
-      endTimestamp,
-      state: 'LAMBDA-SUBMITTED',
-      startRunTime: new Date().toISOString(),
-    });
+    if (!event.reRunJob) {
+      await this.recordJobInfo({
+        event,
+        config,
+        jobRunId: 'latest',
+        startTimestamp,
+        endTimestamp,
+        state: 'LAMBDA-SUBMITTED',
+        startRunTime: new Date().toISOString(),
+      });
+    }
 
     logger.info('jobInfo', { jobInfo });
 
@@ -166,7 +170,10 @@ export class EMRServerlessUtil {
     const outputPartitions = (event.outputPartitions || s3OutputPartitions || estimatedSparkConfig.outputPartitions || config.outputPartitions) + '';
     const rePartitions = (event.inputRePartitions || s3InputRePartitions || estimatedSparkConfig.inputRePartitions || config.rePartitions) + '';
 
-    const jobName = event.jobName || process.env.JOB_NAME || `${startTimestamp}-${uuid()}`;
+    let jobName = event.jobName || process.env.JOB_NAME || `${startTimestamp}-${uuid()}`;
+    if (event.reRunJob) {
+      jobName = `${jobName}-rerun`;
+    }
 
     const sinkPrefix = getSinkLocationPrefix(config.sinkS3Prefix, config.projectId);
 
@@ -240,6 +247,7 @@ export class EMRServerlessUtil {
       sparkSubmitParameters.push('--conf', `${confKey}=${confVal}`);
     }
 
+    const appConfigs: Configuration[] = await this.getEmrApplicationConfig(config.emrServerlessApplicationId!);
     const startJobRunCommandInput: StartJobRunCommandInput = {
       applicationId: config.emrServerlessApplicationId,
       executionRoleArn: config.roleArn,
@@ -257,12 +265,26 @@ export class EMRServerlessUtil {
             logUri: `s3://${config.pipelineS3BucketName}/${config.pipelineS3Prefix}pipeline-logs/${config.projectId}/`,
           },
         },
+        applicationConfiguration: [
+          ...appConfigs,
+        ],
       },
       tags: funcTags, // propagate the tags of function itself to EMR job runs
     };
 
     logger.info('getJobRunCommandInput return', { startJobRunCommandInput, startTimestamp, endTimestamp });
     return { startJobRunCommandInput, startTimestamp, endTimestamp };
+  }
+
+  private static async getEmrApplicationConfig(emrServerlessApplicationId: string): Promise<Configuration[]> {
+    const res = await emrClient.send(new GetApplicationCommand({
+      applicationId: emrServerlessApplicationId,
+    }));
+    if (res.application?.runtimeConfiguration) {
+      return res.application.runtimeConfiguration;
+    } else {
+      return [];
+    }
   }
 
   private static async recordJobInfo(jobInfoObj: {
@@ -433,7 +455,7 @@ export function getDatePrefixList(prefix: string, startTimestamp: number, endTim
   logger.info(`dataPrefixList for ${new Date(startTimestamp).toISOString()} to ${new Date(endTimestamp).toISOString()}`,
     {
       start: dataPrefixList[0],
-      end: dataPrefixList[dataPrefixList.length -1],
+      end: dataPrefixList[dataPrefixList.length - 1],
       length: dataPrefixList.length,
     });
   return dataPrefixList;
