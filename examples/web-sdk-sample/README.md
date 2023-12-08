@@ -28,8 +28,9 @@ Each of the packages have their own `package.json` file, so they define their de
 
 1. Clone this repository locally `$ git clone https://github.com/awslabs/clickstream-analytics-on-aws.git`
 2. Go to this example directory. `$ cd examples/web-sdk-sample/`
-3. Install the dependencies. Inside the root `$ yarn install`
-4. Start sample applications:
+3. Copy `.env.example` to `.env` and update your **AppId** and **EndPoint** which you created in Clickstream Analytics on AWS solution
+4. Install the dependencies. Inside the root `$ yarn install`
+5. Start sample applications:
 
 ```
 // Vue2 Project with server
