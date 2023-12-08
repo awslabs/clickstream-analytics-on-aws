@@ -23,7 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * data schema updates
 * update out-of-box reporting dashboards
 * improve pipeline status management
-* Improve the reliability of service availability checks
+* improve the reliability of service availability checks
 
 #### Fixed
 
