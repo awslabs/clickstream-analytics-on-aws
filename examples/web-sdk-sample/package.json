@@ -1,0 +1,20 @@
+{
+  "name": "web-sdk-sample",
+  "version": "1.0.0",
+  "license": "MIT",
+  "private": true,
+  "engines": {
+    "node": "16.20.1"
+  },
+  "scripts": {
+    "vue2": "yarn workspace vue2 serve",
+    "server": "yarn workspace server start",
+    "start-vue2": "concurrently --kill-others-on-fail \"yarn server\"  \"yarn vue2\""
+  },
+  "workspaces": [
+    "packages/*"
+  ],
+  "dependencies": {
+    "concurrently": "8.2.2"
+  }
+}
