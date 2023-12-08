@@ -27,16 +27,28 @@ class SocketioService {
 
     // 监听断开连接事件
     this.socket.on('disconnect', (reason) => {
+      ClickstreamAnalytics.record({
+        name: 'websocket_disconnect',
+        attributes: { message: reason },
+      });
       console.log('Disconnected from WebSocket server:', reason);
     });
 
     // 监听连接错误事件
     this.socket.on('connect_error', (error) => {
+      ClickstreamAnalytics.record({
+        name: 'websocket_connect_error',
+        attributes: { message: error },
+      });
       console.log('Connection error:', error);
     });
 
     // 监听连接超时事件
     this.socket.on('connect_timeout', (timeout) => {
+      ClickstreamAnalytics.record({
+        name: 'websocket_connect_timeout',
+        attributes: { message: timeout },
+      });
       console.log('Connection timeout:', timeout);
     });
 
