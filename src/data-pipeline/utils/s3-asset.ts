@@ -22,7 +22,7 @@ export function uploadBuiltInSparkJarsAndFiles(
   bucket: IBucket,
   prefix: string,
 ) {
-  const jarFile = 'spark-etl-1.1.0.jar';
+  const jarFile = 'spark-etl-1.1.1.jar';
   let shellCommands = [
     'cd /asset-input/',
     'cp -r ./* /tmp/',
@@ -36,7 +36,7 @@ export function uploadBuiltInSparkJarsAndFiles(
 
   let bundling: BundlingOptions = {
     user: 'gradle',
-    image: DockerImage.fromRegistry('public.ecr.aws/docker/library/gradle:7.6-jdk11'),
+    image: DockerImage.fromRegistry('public.ecr.aws/docker/library/gradle:7.6-jdk17,'),
     command: ['sh', '-c', shellCommands.join(' && ')],
   };
 
