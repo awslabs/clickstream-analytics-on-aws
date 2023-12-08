@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main  # Set a branch name to trigger deployment
+      - v1.1.x
     paths:
       - docs/**
       - src/analytics/private/sqls/**
