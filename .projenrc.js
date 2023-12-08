@@ -12,7 +12,7 @@
  */
 
 const { awscdk, gitlab, javascript, typescript, JsonPatch } = require('projen');
-const version = '1.0.0';
+const version = '1.2.0';
 const cdkVersion = '2.81.0';
 const minNodeVersion = '18.17.0';
 
