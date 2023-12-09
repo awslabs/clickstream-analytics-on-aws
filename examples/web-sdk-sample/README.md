@@ -1,6 +1,6 @@
 # Clickstream web SDK sample project
 
-Creating a monorepo project with React and Express.JS using Yarn Workspaces. This is the source code of a blog post I am writing about this topic.
+Creating a monorepo project with Vue2.x and Express.JS using Yarn Workspaces for Clickstream Analytics on AWS solution web SDK sample.
 
 Read the article: [Yarn Workspaces](https://classic.yarnpkg.com/lang/en/docs/workspaces/)
 
