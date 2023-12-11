@@ -90,7 +90,7 @@ async function createEMRServerlessApp(props: ResourcePropertiesType): Promise<st
   }
 
   let javaVersion = 8;
-  if (versionEqOrGT(props.version, 'emr-6.11.0')) {
+  if (compareVersions(props.version, 'emr-6.11.0') >= 0) {
     javaVersion = 17;
   }
   // "/usr/lib/jvm/java-17-amazon-corretto.x86_64/"
@@ -187,27 +187,25 @@ async function deleteEMRServerlessAppById(appId: string) {
   }
 }
 
-function versionEqOrGT(v1: string, v2: string) {
-  // emr-6.11.0
-  if (v1 == v2) {
-    return true;
-  }
-  const versionReg = new RegExp(/emr-(\d+).(\d+).(\d+)/);
-  const v1Parts = versionReg.exec(v1);
-  const v2Parts = versionReg.exec(v2);
-  if (v1Parts && v2Parts) {
-    const v1p1 = parseInt(v1Parts[1]) * 1000_0000_0000;
-    const v1p2 = parseInt(v1Parts[2]) * 1000_0000;
-    const v1p3 = parseInt(v1Parts[3]);
+function compareVersions(version1: string, version2: string) {
+  // Remove non-numeric prefix
+  version1 = version1.replace(/^[^\d]+/, '');
+  version2 = version2.replace(/^[^\d]+/, '');
 
-    const v2p1 = parseInt(v2Parts[1]) * 1000_0000_0000;
-    const v2p2 = parseInt(v2Parts[2]) * 1000_0000;
-    const v2p3 = parseInt(v2Parts[3]);
+  // Split version strings into parts
+  const parts1 = version1.split('.');
+  const parts2 = version2.split('.');
 
-    return v1p1 + v1p2 + v1p3 > v2p1 + v2p2 + v2p3;
-  } else {
-    return v1 > v2;
+  // Compare each part
+  for (let i = 0; i < Math.max(parts1.length, parts2.length); i++) {
+    const part1 = parseInt(parts1[i] || '0', 10);
+    const part2 = parseInt(parts2[i] || '0', 10);
+
+    if (part1 !== part2) {
+      return part1 - part2;
+    }
   }
+  return 0;
 }
 
 
