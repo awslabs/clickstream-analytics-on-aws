@@ -14,20 +14,20 @@ import axios from 'axios';
 import { Message, Loading } from 'element-ui';
 import { ClickstreamAnalytics } from '@aws/clickstream-web';
 
-const ConfigBaseURL = process.env.VUE_APP_SERVER_API; //默认后端接口地址
+const ConfigBaseURL = process.env.VUE_APP_SERVER_API; //Default backend API address
 
-let loadingInstance = null; //这里是loading
-//使用create方法创建axios实例
+let loadingInstance = null; // loading
+//Create an axios instance using the create method
 export const Service = axios.create({
-  timeout: 7000, // 请求超时时间
+  timeout: 7000, // Request timeout
   baseURL: ConfigBaseURL,
   headers: {
     'Content-Type': 'application/json;charset=UTF-8',
   },
 });
-// 添加请求拦截器
+// Add request interceptor
 Service.interceptors.request.use((config) => {
-  // 记录发送请求的信息
+  // Record the information sent to the request
   ClickstreamAnalytics.record({
     name: 'http_request',
     attributes: {
@@ -43,10 +43,10 @@ Service.interceptors.request.use((config) => {
   return config;
 });
 
-// 添加响应拦截器
+// Add response interceptor
 Service.interceptors.response.use(
   (response) => {
-    // 记录请求响应的信息
+    // Record request response information
     ClickstreamAnalytics.record({
       name: 'http_request',
       attributes: {
@@ -60,7 +60,7 @@ Service.interceptors.response.use(
   (error) => {
     const msg = error.message !== undefined ? error.message : '';
     Message({
-      message: '网络错误' + msg,
+      message: 'Network Error' + msg,
       type: 'error',
       duration: 3 * 1000,
     });

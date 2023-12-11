@@ -10,7 +10,7 @@
             to="/"
             class="nav-link"
             :class="{ 'active-link': isActive('/') }"
-            >HTTP 请求</router-link
+            >HTTP Request</router-link
           >
         </span>
         <span class="nav-item">
@@ -18,7 +18,7 @@
             to="/runtime-error"
             class="nav-link"
             :class="{ 'active-link': isActive('/runtime-error') }"
-            >Vue 运行时错误</router-link
+            >Vue Runtime Error</router-link
           >
         </span>
         <span class="nav-item">

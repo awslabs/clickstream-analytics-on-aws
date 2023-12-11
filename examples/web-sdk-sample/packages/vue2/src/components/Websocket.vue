@@ -49,7 +49,7 @@ export default {
   },
   mounted() {
     this.socket.on('server time', (data) => {
-      // 记录服务端推送的时间
+      // Record the time of server push
       ClickstreamAnalytics.record({
         name: 'server_time',
         attributes: { message: data },

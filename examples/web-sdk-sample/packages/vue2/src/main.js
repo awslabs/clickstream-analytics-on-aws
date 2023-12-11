@@ -18,21 +18,21 @@ import 'element-ui/lib/theme-chalk/index.css';
 import { ClickstreamAnalytics } from '@aws/clickstream-web';
 import { Message } from 'element-ui';
 
-// 初始化 Clickstream Analytics SDK
+// Initialize Clickstream Analytics SDK
 ClickstreamAnalytics.init({
-  // isLogEvents: true, // 是否打印日志
+  // isLogEvents: true, // Print events to console
   appId: process.env.VUE_APP_CLICKSTREAM_APP_ID, // Your application ID
   endpoint: process.env.VUE_APP_CLICKSTREAM_ENDPOINT, // Your server endpoint
 });
 
 Vue.config.productionTip = false;
 
-// 发送 vue 运行时错误信息
+// Send vue Runtime Error
 Vue.config.errorHandler = function (err, vm, info) {
-  // 处理错误
-  // `err` 是错误对象
-  // `vm` 是出错的 Vue 实例
-  // `info` 是 Vue 特定的错误信息，比如错误所在的生命周期钩子
+  // Handle error
+  // `err` Error Object
+  // `vm` Error Vue Instance
+  // `info` is Vue specific error information, such as the life cycle hook where the error occurs
   console.log(`Captured in Vue errorHandler: ${err}, VM: ${vm} Info: ${info}`);
   Message({
     message: err,
@@ -64,7 +64,7 @@ function sendPerformanceData() {
   });
 }
 
-// 定时发送 performance 数据
+// Send performance data regularly
 setInterval(() => {
   sendPerformanceData();
 }, 60000);

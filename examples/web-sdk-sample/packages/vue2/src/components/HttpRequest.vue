@@ -9,19 +9,19 @@
           v-model="keyword"
         />
         <button class="btn btn-secondary" type="button" @click="searchTitle">
-          搜索
+          Search
         </button>
       </div>
     </div>
     <div class="col-md-12">
       <el-table :data="productList" style="width: 100%">
         <el-table-column prop="id" label="ID"> </el-table-column>
-        <el-table-column prop="name" label="名称"> </el-table-column>
-        <el-table-column prop="price" label="价格"> </el-table-column>
-        <el-table-column label="操作" width="100">
+        <el-table-column prop="name" label="Name"> </el-table-column>
+        <el-table-column prop="price" label="Price"> </el-table-column>
+        <el-table-column label="Operation" width="100">
           <template>
             <el-button type="text" size="small" @click="editProduct"
-              >编辑</el-button
+              >Edit</el-button
             >
           </template>
         </el-table-column>
@@ -29,10 +29,10 @@
     </div>
     <div class="col-md-6 mt-10">
       <button class="btn btn-success" type="button" @click="getProductList">
-        刷新
+        Refresh
       </button>
       <button class="btn btn-danger ml-10" type="button" @click="addProduct">
-        添加
+        Add
       </button>
     </div>
   </div>

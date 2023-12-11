@@ -1,12 +1,12 @@
 <template>
   <div class="list row">
     <div class="col-md-12">
-      <h4>运行时错误</h4>
+      <h4>Runtime Error</h4>
       <button class="m-3 btn btn-sm btn-danger" @click="simulateCrash">
-        未定义的方法
+        Undefined Function
       </button>
       <button class="m-3 btn btn-sm btn-danger" @click="undefinedProperty">
-        读取Undefined对象的属性
+        Read the properties of an Undefined object
       </button>
       <button class="m-3 btn btn-sm btn-warning" @click="unsupportedZero">
         1/0
@@ -26,15 +26,15 @@ export default {
   },
   methods: {
     unsupportedZero() {
-      // 除数为0
+      // Divisor is 0
       this.result = 1 / 0;
     },
     simulateCrash() {
-      // 故意制造一个错误
+      // Deliberately create an error
       this.undefinedFunction();
     },
     undefinedProperty() {
-      // 故意制造一个错误
+      // Deliberately create an error
       this.title = this.abc.undefinedProperty;
     },
   },
