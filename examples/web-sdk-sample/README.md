@@ -24,7 +24,7 @@ Each of the packages have their own `package.json` file, so they define their de
 
 ## How to install and execute
 
-> Important! The node version for the project is 16. Make sure you have that version installed in your computer. If you have NVM installed, run `nvm use 16`. If not, install it here: https://github.com/nvm-sh/nvm#install--update-script
+> Important! The node version for the project is 16. Make sure you have that version installed in your computer. If you have NVM installed, run `nvm use 18`. If not, install it here: https://github.com/nvm-sh/nvm#install--update-script
 
 1. Clone this repository locally `$ git clone https://github.com/awslabs/clickstream-analytics-on-aws.git`
 2. Go to this example directory. `$ cd examples/web-sdk-sample/`
