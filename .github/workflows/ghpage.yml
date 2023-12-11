@@ -21,7 +21,7 @@ jobs:
           fetch-depth: 0    # Fetch all history for .GitInfo and .Lastmod
 
       - name: Setup Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
@@ -37,10 +37,10 @@ jobs:
           mkdocs build -f ./docs/mkdocs.en.yml -s --site-dir ../docs/site/en
           mkdocs build -f ./docs/mkdocs.zh.yml -s --site-dir ../docs/site/zh
 
-      - name: Publish doc - 1.1.x
+      - name: Publish doc - 1.2.x
         if: ${{ github.ref == 'refs/heads/main' }}
         env:
-          VERSION: 1.1.x
+          VERSION: 1.2.x
           LINK_EN: ${{ vars.LINK_EN }}
           LINK_ZH: ${{ vars.LINK_ZH }}
         run: |

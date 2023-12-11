@@ -1,0 +1,23 @@
+{
+  "name": "web-sdk-sample",
+  "version": "1.0.0",
+  "license": "Apache-2.0",
+  "private": true,
+  "engines": {
+    "node": "^18.0.0"
+  },
+  "scripts": {
+    "vue2": "yarn workspace vue2-app serve",
+    "server": "yarn workspace demo-server start",
+    "start-vue2": "concurrently --kill-others-on-fail \"yarn server\"  \"yarn vue2\""
+  },
+  "workspaces": [
+    "packages/*"
+  ],
+  "dependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "resolutions": {
+    "@achrinza/node-ipc": "^9.2.8"
+  }
+}

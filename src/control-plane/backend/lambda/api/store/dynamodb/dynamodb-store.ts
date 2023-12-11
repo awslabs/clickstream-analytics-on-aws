@@ -690,7 +690,7 @@ export class DynamoDbStore implements ClickStreamStore {
         ':executionArn': pipeline.executionArn ?? '',
         ':templateVersion': pipeline.templateVersion ?? '',
         ':lastAction': pipeline.lastAction ?? '',
-        ':updateAt': Date.now().toString(),
+        ':updateAt': pipeline.updateAt,
         ':operator': pipeline.operator,
       },
       ReturnValues: 'ALL_NEW',

@@ -1238,7 +1238,10 @@ describe('Workflow test', () => {
         subnetsIsolated: true,
         subnetsCross3AZ: true,
       });
-    const pipeline: CPipeline = new CPipeline({ ...MSK_DATA_PROCESSING_ATHENA_PIPELINE });
+    const pipeline: CPipeline = new CPipeline({
+      ...MSK_DATA_PROCESSING_ATHENA_PIPELINE,
+      templateVersion: FULL_SOLUTION_VERSION,
+    });
     const wf = await pipeline.generateWorkflow();
     const expected = {
       Version: '2022-03-15',
@@ -1413,7 +1416,10 @@ describe('Workflow test', () => {
         subnetsIsolated: true,
         subnetsCross3AZ: true,
       });
-    const pipeline: CPipeline = new CPipeline({ ...MSK_DATA_PROCESSING_NEW_SERVERLESS_PIPELINE });
+    const pipeline: CPipeline = new CPipeline({
+      ...MSK_DATA_PROCESSING_NEW_SERVERLESS_PIPELINE,
+      templateVersion: FULL_SOLUTION_VERSION,
+    });
     const wf = await pipeline.generateWorkflow();
     const expected = {
       Version: '2022-03-15',
@@ -1609,7 +1615,10 @@ describe('Workflow test', () => {
         subnetsCross3AZ: true,
         noVpcEndpoint: true,
       });
-    const pipeline: CPipeline = new CPipeline({ ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE });
+    const pipeline: CPipeline = new CPipeline({
+      ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE,
+      templateVersion: FULL_SOLUTION_VERSION,
+    });
     const wf = await pipeline.generateWorkflow();
     const expected = {
       Version: '2022-03-15',
@@ -1762,7 +1771,10 @@ describe('Workflow test', () => {
         publicAZContainPrivateAZ: true,
         noVpcEndpoint: true,
       });
-    const pipeline: CPipeline = new CPipeline({ ...KINESIS_DATA_PROCESSING_PROVISIONED_REDSHIFT_PIPELINE });
+    const pipeline: CPipeline = new CPipeline({
+      ...KINESIS_DATA_PROCESSING_PROVISIONED_REDSHIFT_PIPELINE,
+      templateVersion: FULL_SOLUTION_VERSION,
+    });
     const wf = await pipeline.generateWorkflow();
     const expected = {
       Version: '2022-03-15',
@@ -1936,7 +1948,10 @@ describe('Workflow test', () => {
         publicAZContainPrivateAZ: true,
         noVpcEndpoint: true,
       });
-    const pipeline: CPipeline = new CPipeline({ ...KINESIS_DATA_PROCESSING_PROVISIONED_REDSHIFT_QUICKSIGHT_PIPELINE });
+    const pipeline: CPipeline = new CPipeline({
+      ...KINESIS_DATA_PROCESSING_PROVISIONED_REDSHIFT_QUICKSIGHT_PIPELINE,
+      templateVersion: FULL_SOLUTION_VERSION,
+    });
     const wf = await pipeline.generateWorkflow();
     const expected = {
       Version: '2022-03-15',
@@ -2306,7 +2321,10 @@ describe('Workflow test', () => {
         subnetsCross3AZ: true,
         noVpcEndpoint: true,
       });
-    const pipeline: CPipeline = new CPipeline({ ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_QUICKSIGHT_PIPELINE });
+    const pipeline: CPipeline = new CPipeline({
+      ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_QUICKSIGHT_PIPELINE,
+      templateVersion: FULL_SOLUTION_VERSION,
+    });
     const wf = await pipeline.generateWorkflow();
     const expected = {
       Version: '2022-03-15',
@@ -2482,7 +2500,10 @@ describe('Workflow test', () => {
         subnetsIsolated: true,
         noApp: true,
       });
-    const pipeline: CPipeline = new CPipeline({ ...MSK_DATA_PROCESSING_NEW_SERVERLESS_PIPELINE });
+    const pipeline: CPipeline = new CPipeline({
+      ...MSK_DATA_PROCESSING_NEW_SERVERLESS_PIPELINE,
+      templateVersion: FULL_SOLUTION_VERSION,
+    });
     const wf = await pipeline.generateWorkflow();
     const expected = {
       Version: '2022-03-15',

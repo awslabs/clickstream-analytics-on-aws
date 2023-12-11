@@ -313,13 +313,17 @@ function _getTransformerPluginInfo(pipeline: IPipeline, resources: CPipelineReso
     if (pipeline.dataCollectionSDK === DataCollectionSDK.CLICKSTREAM) {
       const defaultTransformer = resources.plugins?.filter(p => p.id === 'BUILT-IN-1')[0];
       if (defaultTransformer?.mainFunction) {
-        transformerClassNames.push(defaultTransformer?.mainFunction);
+        transformerClassNames.push(_getTransformClassNameByVersion(defaultTransformer?.mainFunction, pipeline.templateVersion));
       }
     } else {
       throw new ClickStreamBadRequestError('Transform plugin is required.');
     }
   } else {
-    const { classNames, pluginJars, pluginFiles } = _getTransformerPluginInfoFromResources(resources, pipeline.dataProcessing?.transformPlugin);
+    const { classNames, pluginJars, pluginFiles } = _getTransformerPluginInfoFromResources(
+      resources,
+      pipeline.dataProcessing?.transformPlugin,
+      pipeline.templateVersion,
+    );
     transformerClassNames= transformerClassNames.concat(classNames);
     transformerPluginJars = transformerPluginJars.concat(pluginJars);
     transformerPluginFiles = transformerPluginFiles.concat(pluginFiles);
@@ -327,7 +331,7 @@ function _getTransformerPluginInfo(pipeline: IPipeline, resources: CPipelineReso
   return { transformerClassNames, transformerPluginJars, transformerPluginFiles };
 }
 
-function _getTransformerPluginInfoFromResources(resources: CPipelineResources, transformPluginId: string) {
+function _getTransformerPluginInfoFromResources(resources: CPipelineResources, transformPluginId: string, templateVersion?: string) {
   const classNames: string[] = [];
   const pluginJars: string[] = [];
   const pluginFiles: string[] = [];
@@ -341,9 +345,19 @@ function _getTransformerPluginInfoFromResources(resources: CPipelineResources, t
     }
   }
   if (transform?.mainFunction) {
-    classNames.push(transform?.mainFunction);
+    classNames.push(_getTransformClassNameByVersion(transform?.mainFunction, templateVersion));
   }
   return { classNames, pluginJars, pluginFiles };
+}
+
+function _getTransformClassNameByVersion(mainFunction: string, templateVersion?: string) {
+  if (templateVersion?.startsWith('v1.0')) {
+    return mainFunction.replace(
+      'software.aws.solution.clickstream.TransformerV2',
+      'software.aws.solution.clickstream.Transformer',
+    );
+  }
+  return mainFunction;
 }
 
 function getSubnetType(routeTable: RouteTable) {
