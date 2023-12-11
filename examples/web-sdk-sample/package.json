@@ -4,7 +4,7 @@
   "license": "Apache 2.0",
   "private": true,
   "engines": {
-    "node": "16.20.1"
+    "node": "18.17.1"
   },
   "scripts": {
     "vue2": "yarn workspace vue2 serve",
@@ -16,5 +16,8 @@
   ],
   "dependencies": {
     "concurrently": "^8.2.2"
+  },
+  "resolutions": {
+    "@achrinza/node-ipc": "^9.2.8"
   }
 }
