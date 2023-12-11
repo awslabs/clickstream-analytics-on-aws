@@ -36,3 +36,51 @@ Each of the packages have their own `package.json` file, so they define their de
 // Vue2 Project with server
 $ yarn start-vue2
 ```
+
+## Integrate SDK
+
+### Include SDK
+
+```bash
+npm install @aws/clickstream-web
+```
+
+### Initialize the Web SDK
+
+Copy your configuration code from your clickstream solution web console, we recommended you add the code to your app's root entry point, for example `index.js/app.tsx` in React or `main.ts` in Vue/Angular, the configuration code should look like as follows. You can also manually add this code snippet and replace the values of appId and endpoint after you registered app to a data pipeline in the Clickstream Analytics solution console.
+
+```typescript
+import { ClickstreamAnalytics } from '@aws/clickstream-web';
+
+ClickstreamAnalytics.init({
+  appId: 'your appId',
+  endpoint: 'https://example.com/collect',
+});
+```
+
+Your `appId` and `endpoint` are already set up in it.
+
+### Start using
+
+#### Record event
+
+Add the following code where you need to record event.
+
+```typescript
+import { ClickstreamAnalytics } from '@aws/clickstream-web';
+
+// record event with attributes
+ClickstreamAnalytics.record({
+  name: 'button_click',
+  attributes: {
+    event_category: 'shoes',
+    currency: 'CNY',
+    value: 279.9,
+  },
+});
+
+//record event with name
+ClickstreamAnalytics.record({ name: 'button_click' });
+```
+
+Learn more Clickstream Web SDK usage examples please refer to this [document](https://awslabs.github.io/clickstream-analytics-on-aws/en/latest/sdk-manual/web/).
