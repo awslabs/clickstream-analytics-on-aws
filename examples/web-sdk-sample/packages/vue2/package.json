@@ -18,7 +18,7 @@
     "vue-router": "^3.6.5"
   },
   "devDependencies": {
-    "@vue/cli-plugin-babel": "^4.5.19",
+    "@vue/cli-plugin-babel": "^5.0.8",
     "@vue/cli-service": "^4.5.19",
     "vue-template-compiler": "^2.7.15"
   },
