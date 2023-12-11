@@ -159,7 +159,7 @@ const project = new awscdk.AwsCdkTypeScriptApp({
     'src/data-pipeline/spark-etl/?/',
     'code-coverage-results.md',
     'metastore_db',
-    'nohup.out'
+    'nohup.out',
   ] /* Additional entries to .gitignore. */,
 
   deps: [
