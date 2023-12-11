@@ -37,50 +37,89 @@ Each of the packages have their own `package.json` file, so they define their de
 $ yarn start-vue2
 ```
 
-## Integrate SDK
+## Feature Integration
 
-### Include SDK
+### Tracking HTTP Requests
 
-```bash
-npm install @aws/clickstream-web
-```
+Intercept all HTTP requests in your Vue application and record relevant information with the Clickstream SDK:
 
-### Initialize the Web SDK
-
-Copy your configuration code from your clickstream solution web console, we recommended you add the code to your app's root entry point, for example `index.js/app.tsx` in React or `main.ts` in Vue/Angular, the configuration code should look like as follows. You can also manually add this code snippet and replace the values of appId and endpoint after you registered app to a data pipeline in the Clickstream Analytics solution console.
-
-```typescript
-import { ClickstreamAnalytics } from '@aws/clickstream-web';
-
-ClickstreamAnalytics.init({
-  appId: 'your appId',
-  endpoint: 'https://example.com/collect',
+```javascript
+// Add request interceptor
+Service.interceptors.request.use((config) => {
+  // Record the information sent to the request
+  ClickstreamAnalytics.record({
+    name: 'http_request',
+    attributes: {
+      request_url: config.url,
+      request_config: JSON.stringify(config),
+    },
+  });
+  return config;
 });
 ```
 
-Your `appId` and `endpoint` are already set up in it.
+### Capturing Global Vue Errors
 
-### Start using
+Use Vue's global error handler to catch and log errors:
 
-#### Record event
+```javascript
+// Send vue Runtime Error
+Vue.config.errorHandler = function (err, vm, info) {
+  // Handle error
+  ClickstreamAnalytics.record({
+    name: 'runtime_exception',
+    attributes: {
+      error_message: err.toString(),
+      vm: vm.toString(),
+      info: info,
+    },
+  });
+};
+```
 
-Add the following code where you need to record event.
+### Utilizing the Performance API
 
-```typescript
-import { ClickstreamAnalytics } from '@aws/clickstream-web';
+Capture page performance data using the Performance API:
 
-// record event with attributes
-ClickstreamAnalytics.record({
-  name: 'button_click',
-  attributes: {
-    event_category: 'shoes',
-    currency: 'CNY',
-    value: 279.9,
-  },
-});
+```javascript
+function sendPerformanceData() {
+  const tmpPerf = {
+    jsHeapSizeLimit: performance.memory.jsHeapSizeLimit,
+    totalJSHeapSize: performance.memory.jsHeapSizeLimit,
+    usedJSHeapSize: performance.memory.usedJSHeapSize,
+  };
+  ClickstreamAnalytics.record({
+    name: 'app_performance',
+    attributes: { ...tmpPerf, ...performance.getEntriesByType('navigation') },
+  });
+}
+```
 
-//record event with name
-ClickstreamAnalytics.record({ name: 'button_click' });
+### WebSocket Communication Tracking
+
+Record data sent and received during WebSocket communication:
+
+```javascript
+  // Init Websocket connection
+  this.socket = io(process.env.VUE_APP_SERVER_API);
+
+  // Listen for disconnect events
+  this.socket.on('disconnect', (reason) => {
+    ClickstreamAnalytics.record({
+    name: 'websocket_disconnect',
+    attributes: { message: reason },
+    });
+  });
+
+  // Record send message event
+  sendMessage(msg) {
+    ClickstreamAnalytics.record({
+      name: 'send_websocket',
+      attributes: { message: msg },
+    });
+    this.socket.emit('client message', msg);
+  }
+
 ```
 
 Learn more Clickstream Web SDK usage examples please refer to this [document](https://awslabs.github.io/clickstream-analytics-on-aws/en/latest/sdk-manual/web/).
