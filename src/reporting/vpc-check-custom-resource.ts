@@ -12,7 +12,7 @@
  */
 
 import { join } from 'path';
-import { Aws, CustomResource, Duration } from 'aws-cdk-lib';
+import { Aws, CfnResource, CustomResource, Duration } from 'aws-cdk-lib';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Provider } from 'aws-cdk-lib/custom-resources';
@@ -22,6 +22,7 @@ import { createNetworkInterfaceCheckCustomResourceLambda} from './private/iam';
 import { POWERTOOLS_ENVS } from '../common/powertools';
 import { SolutionNodejsFunction } from '../private/function';
 import { NetworkInterfaceCheckCustomResourceProps } from './private/dashboard';
+import { addCfnNagSuppressRules, rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions } from '../common/cfn-nag';
 
 export function createNetworkInterfaceCheckCustomResource(
   scope: Construct,
@@ -71,6 +72,10 @@ function createNetworkInterfaceCheckLambda(
       ...POWERTOOLS_ENVS,
     },
   });
+
+  addCfnNagSuppressRules(fn.node.defaultChild as CfnResource, [
+    ...rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions('addSubscription-custom-resource'),
+  ]);
 
   return fn;
 }
