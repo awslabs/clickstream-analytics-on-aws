@@ -15,14 +15,12 @@ import { join } from 'path';
 import { Duration, Arn, Stack, ArnFormat, Token, CfnCondition, CfnResource, CustomResource } from 'aws-cdk-lib';
 
 import { IRole, Policy, PolicyStatement, Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
-import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Provider } from 'aws-cdk-lib/custom-resources';
 import { Construct } from 'constructs';
 import { getOrCreateNoWorkgroupIdCondition, getOrCreateWithWorkgroupIdCondition, getOrCreateNoNamespaceIdCondition, getOrCreateWithNamespaceIdCondition } from './condition';
 import { AssociateIAMRoleToRedshift, ExistingRedshiftServerlessProps, ProvisionedRedshiftProps } from './model';
 import { createLambdaRole } from '../../common/lambda';
-import { POWERTOOLS_ENVS } from '../../common/powertools';
 import { SolutionNodejsFunction } from '../../private/function';
 
 
@@ -43,7 +41,6 @@ export function createCustomResourceAssociateIAMRole(scope: Construct, props: Re
   });
 
   const fn = new SolutionNodejsFunction(scope, 'AssociateIAMRoleToRedshiftFn', {
-    runtime: Runtime.NODEJS_18_X,
     entry: join(
       __dirname + '/../lambdas/custom-resource',
       'redshift-associate-iam-role.ts',
@@ -61,9 +58,6 @@ export function createCustomResourceAssociateIAMRole(scope: Construct, props: Re
         resources: ['*'], // have to use wildcard for keeping existing associated roles
       }),
     ]),
-    environment: {
-      ...POWERTOOLS_ENVS,
-    },
   });
 
   const provider = new Provider(

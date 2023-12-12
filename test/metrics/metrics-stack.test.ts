@@ -101,7 +101,7 @@ test('has Dashboard', () => {
 });
 
 
-test('has lambda Function to put dashbaord', () => {
+test('has lambda Function to put dashboard', () => {
   template.hasResourceProperties('AWS::Lambda::Function', {
     Environment: {
       Variables: {
@@ -118,6 +118,10 @@ test('has lambda Function to put dashbaord', () => {
           Ref: 'ColumnNumber',
         },
       },
+    },
+    LoggingConfig: {
+      ApplicationLogLevel: 'INFO',
+      LogFormat: 'JSON',
     },
   });
 });

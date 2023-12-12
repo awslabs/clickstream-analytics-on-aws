@@ -16,7 +16,6 @@ import { Aws, aws_iam as iam, aws_lambda, Duration, Stack } from 'aws-cdk-lib';
 import { Table } from 'aws-cdk-lib/aws-dynamodb';
 import { ISecurityGroup, IVpc, SubnetSelection } from 'aws-cdk-lib/aws-ec2';
 import { Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
-import { Architecture, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { IBucket } from 'aws-cdk-lib/aws-s3';
 import { Choice, Condition, DefinitionBody, LogLevel, Pass, StateMachine, TaskInput, Wait, WaitTime } from 'aws-cdk-lib/aws-stepfunctions';
 import { LambdaInvoke } from 'aws-cdk-lib/aws-stepfunctions-tasks';
@@ -29,7 +28,6 @@ import {
 } from '../../common/cfn-nag';
 import { cloudWatchSendLogs, createENI } from '../../common/lambda';
 import { createLogGroup } from '../../common/logs';
-import { POWERTOOLS_ENVS } from '../../common/powertools';
 import { SolutionNodejsFunction } from '../../private/function';
 
 
@@ -63,14 +61,9 @@ export class StackActionStateMachine extends Construct {
       description: 'Lambda function for state machine action of solution Clickstream Analytics on AWS',
       entry: join(__dirname, './lambda/sfn-action/index.ts'),
       handler: 'handler',
-      runtime: Runtime.NODEJS_18_X,
       tracing: aws_lambda.Tracing.ACTIVE,
       role: actionFunctionRole,
-      architecture: Architecture.X86_64,
       timeout: Duration.seconds(15),
-      environment: {
-        ...POWERTOOLS_ENVS,
-      },
       ...props.lambdaFuncProps,
     });
     cloudWatchSendLogs('action-func-logs', this.actionFunction);

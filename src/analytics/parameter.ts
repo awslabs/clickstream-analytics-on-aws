@@ -14,7 +14,6 @@
 import { join } from 'path';
 import { CfnParameter, CfnResource, CfnRule, CustomResource, Duration, Fn } from 'aws-cdk-lib';
 import { IVpc, SubnetSelection } from 'aws-cdk-lib/aws-ec2';
-import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Bucket, IBucket } from 'aws-cdk-lib/aws-s3';
 import { Provider } from 'aws-cdk-lib/custom-resources';
@@ -34,7 +33,6 @@ import {
 import { createLambdaRole } from '../common/lambda';
 import { REDSHIFT_MODE } from '../common/model';
 import { Parameters, SubnetParameterType } from '../common/parameters';
-import { POWERTOOLS_ENVS } from '../common/powertools';
 import { getExistVpc } from '../common/vpc-utils';
 import { SolutionNodejsFunction } from '../private/function';
 
@@ -867,7 +865,6 @@ function getSourcePrefix(scope: Construct, odsEventPrefix: string, projectId: st
 
   const lambdaRootPath = __dirname + '/lambdas/custom-resource';
   const fn = new SolutionNodejsFunction(scope, 'GetSourcePrefixCustomerResourceFn', {
-    runtime: Runtime.NODEJS_18_X,
     entry: join(
       lambdaRootPath,
       'get-source-prefix.ts',
@@ -877,9 +874,6 @@ function getSourcePrefix(scope: Construct, odsEventPrefix: string, projectId: st
     timeout: Duration.minutes(1),
     logRetention: RetentionDays.ONE_WEEK,
     role,
-    environment: {
-      ... POWERTOOLS_ENVS,
-    },
   });
   const provider = new Provider(
     scope,

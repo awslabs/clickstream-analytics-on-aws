@@ -13,7 +13,6 @@
 
 import { join } from 'path';
 import { Aws, CfnResource, CustomResource, Duration } from 'aws-cdk-lib';
-import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Provider } from 'aws-cdk-lib/custom-resources';
 import { Construct } from 'constructs';
@@ -21,7 +20,6 @@ import { NetworkInterfaceCheckCustomResourceProps } from './private/dashboard';
 import { createNetworkInterfaceCheckCustomResourceLambda } from './private/iam';
 
 import { addCfnNagSuppressRules, rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions } from '../common/cfn-nag';
-import { POWERTOOLS_ENVS } from '../common/powertools';
 import { SolutionNodejsFunction } from '../private/function';
 
 export function createNetworkInterfaceCheckCustomResource(
@@ -54,7 +52,6 @@ function createNetworkInterfaceCheckLambda(
 ): SolutionNodejsFunction {
   const role = createNetworkInterfaceCheckCustomResourceLambda(scope);
   const fn = new SolutionNodejsFunction(scope, 'NetworkInterfaceCheckCustomResourceLambda', {
-    runtime: Runtime.NODEJS_18_X,
     entry: join(
       __dirname,
       'lambda',
@@ -66,9 +63,6 @@ function createNetworkInterfaceCheckLambda(
     timeout: Duration.minutes(15),
     logRetention: RetentionDays.ONE_WEEK,
     role,
-    environment: {
-      ...POWERTOOLS_ENVS,
-    },
   });
 
   addCfnNagSuppressRules(fn.node.defaultChild as CfnResource, [

@@ -25,6 +25,10 @@ export const RefAnyValue = {
   Ref: Match.anyValue(),
 };
 
+export const RefGetAtt = {
+  'Fn::GetAtt': Match.anyValue(),
+};
+
 export const JoinAnyValue = {
   'Fn::Join': Match.anyValue(),
 };
@@ -37,7 +41,6 @@ export function findResourceByCondition(template: Template, condition: string) {
       return resource;
     }
   }
-  return;
 }
 
 export function findFirstResourceByKeyPrefix(
