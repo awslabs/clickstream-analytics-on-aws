@@ -18,6 +18,7 @@
     "concurrently": "^8.2.2"
   },
   "resolutions": {
-    "@achrinza/node-ipc": "^9.2.8"
+    "@achrinza/node-ipc": "^9.2.8",
+    "postcss": "^8.4.31"
   }
 }
