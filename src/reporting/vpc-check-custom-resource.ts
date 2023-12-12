@@ -74,7 +74,7 @@ function createNetworkInterfaceCheckLambda(
   });
 
   addCfnNagSuppressRules(fn.node.defaultChild as CfnResource, [
-    ...rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions('addSubscription-custom-resource'),
+    ...rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions('network-interface-check-custom-resource'),
   ]);
 
   return fn;

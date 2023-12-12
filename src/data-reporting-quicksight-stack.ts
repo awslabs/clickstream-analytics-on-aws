@@ -203,6 +203,7 @@ function addCfnNag(stack: Stack) {
 
   addCfnNagForLogRetention(stack);
   addCfnNagForCustomResourceProvider(stack, 'CDK built-in provider for QuicksightCustomResource', 'QuicksightCustomResourceProvider');
+  addCfnNagForCustomResourceProvider(stack, 'CDK built-in provider for NetworkInterfaceCheckCustomResource', 'NetworkInterfaceCheckCustomResourceProvider');
   addCfnNagForCfnResource(stack, 'QuicksightCustomResourceLambda', 'QuicksightCustomResourceLambda' );
   addCfnNagToStack(stack, [
     {
