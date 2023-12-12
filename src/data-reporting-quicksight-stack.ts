@@ -36,6 +36,7 @@ import { SolutionInfo } from './common/solution-info';
 import { associateApplicationWithStack, getShortIdOfStack } from './common/stack';
 import { createStackParametersQuickSight } from './reporting/parameter';
 import { createQuicksightCustomResource } from './reporting/quicksight-custom-resource';
+import { createNetworkInterfaceCheckCustomResource } from './reporting/vpc-check-custom-resource';
 
 export class DataReportingQuickSightStack extends Stack {
 
@@ -80,6 +81,15 @@ export class DataReportingQuickSightStack extends Stack {
     });
     vPCConnectionResource.node.addDependency(vpcConnectionCreateRole);
     const vpcConnectionArn = vPCConnectionResource.getAtt('Arn').toString();
+
+    const networkInterfaces = vPCConnectionResource.getAtt('NetworkInterfaces').toString()
+    const vpcId = vPCConnectionResource.getAtt('VPCId').toString();
+
+    const interfaceCheckCR = createNetworkInterfaceCheckCustomResource(this, {
+      networkInterfaces,
+      vpcId
+    });
+    interfaceCheckCR.node.addDependency(vPCConnectionResource);
 
     const useTemplateArnCondition = new CfnCondition(
       this,
@@ -143,6 +153,7 @@ export class DataReportingQuickSightStack extends Stack {
       },
     });
     dataSource.node.addDependency(vPCConnectionResource);
+    dataSource.node.addDependency(interfaceCheckCR);
     dataSource.node.addDependency(template);
 
     const cr = createQuicksightCustomResource(this, {
