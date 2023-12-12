@@ -39,7 +39,7 @@ export interface NetworkInterfaceCheckCustomResourceProps {
   readonly vpcId: string;
 };
 
-export type NetworkInterfaceCheckCustomResourceLambdaProps =  {
+export type NetworkInterfaceCheckCustomResourceLambdaProps = {
   readonly awsAccountId: string;
   readonly awsRegion: string;
   readonly awsPartition: string;

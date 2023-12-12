@@ -82,12 +82,12 @@ export class DataReportingQuickSightStack extends Stack {
     vPCConnectionResource.node.addDependency(vpcConnectionCreateRole);
     const vpcConnectionArn = vPCConnectionResource.getAtt('Arn').toString();
 
-    const networkInterfaces = vPCConnectionResource.getAtt('NetworkInterfaces').toString()
+    const networkInterfaces = vPCConnectionResource.getAtt('NetworkInterfaces').toString();
     const vpcId = vPCConnectionResource.getAtt('VPCId').toString();
 
     const interfaceCheckCR = createNetworkInterfaceCheckCustomResource(this, {
       networkInterfaces,
-      vpcId
+      vpcId,
     });
     interfaceCheckCR.node.addDependency(vPCConnectionResource);
 

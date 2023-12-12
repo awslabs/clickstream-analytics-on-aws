@@ -113,7 +113,7 @@ export function createRoleForQuicksightCustomResourceLambda(
 }
 
 export function createNetworkInterfaceCheckCustomResourceLambda(
-  scope: Construct
+  scope: Construct,
 ) {
   const logGroupArn = Arn.format(
     {

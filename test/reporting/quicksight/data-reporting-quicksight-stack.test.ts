@@ -1765,30 +1765,30 @@ describe('DataReportingQuickSightStack resource test', () => {
       },
     }, 1);
 
-    template.resourcePropertiesCountIs('AWS::CloudFormation::CustomResource',
+  template.resourcePropertiesCountIs('AWS::CloudFormation::CustomResource',
     {
-      "ServiceToken": {
-       "Fn::GetAtt": [
-        "NetworkInterfaceCheckCustomResourceProviderframeworkonEvent123C1881",
-        "Arn"
-       ]
+      ServiceToken: {
+        'Fn::GetAtt': [
+          'NetworkInterfaceCheckCustomResourceProviderframeworkonEvent123C1881',
+          'Arn',
+        ],
       },
-      "awsAccountId": {
-       "Ref": "AWS::AccountId"
+      awsAccountId: {
+        Ref: 'AWS::AccountId',
       },
-      "awsRegion": {
-       "Ref": "AWS::Region"
+      awsRegion: {
+        Ref: 'AWS::Region',
       },
-      "awsPartition": {
-       "Ref": "AWS::Partition"
+      awsPartition: {
+        Ref: 'AWS::Partition',
       },
-      "networkInterfaces": {
-       "Fn::GetAtt": [
-        "ClickstreamVPCConnectionResource",
-        "NetworkInterfaces"
-       ]
-      }
-     }, 1);
+      networkInterfaces: {
+        'Fn::GetAtt': [
+          'ClickstreamVPCConnectionResource',
+          'NetworkInterfaces',
+        ],
+      },
+    }, 1);
 
   test('Should has ApplicationArnCondition', () => {
     template.hasCondition('ApplicationArnCondition', {

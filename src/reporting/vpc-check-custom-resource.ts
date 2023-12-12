@@ -17,12 +17,12 @@ import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Provider } from 'aws-cdk-lib/custom-resources';
 import { Construct } from 'constructs';
-import { createNetworkInterfaceCheckCustomResourceLambda} from './private/iam';
+import { NetworkInterfaceCheckCustomResourceProps } from './private/dashboard';
+import { createNetworkInterfaceCheckCustomResourceLambda } from './private/iam';
 
+import { addCfnNagSuppressRules, rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions } from '../common/cfn-nag';
 import { POWERTOOLS_ENVS } from '../common/powertools';
 import { SolutionNodejsFunction } from '../private/function';
-import { NetworkInterfaceCheckCustomResourceProps } from './private/dashboard';
-import { addCfnNagSuppressRules, rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions } from '../common/cfn-nag';
 
 export function createNetworkInterfaceCheckCustomResource(
   scope: Construct,
@@ -52,7 +52,7 @@ export function createNetworkInterfaceCheckCustomResource(
 }
 
 function createNetworkInterfaceCheckLambda(
-  scope: Construct
+  scope: Construct,
 ): SolutionNodejsFunction {
   const role = createNetworkInterfaceCheckCustomResourceLambda(scope);
   const fn = new SolutionNodejsFunction(scope, 'NetworkInterfaceCheckCustomResourceLambda', {

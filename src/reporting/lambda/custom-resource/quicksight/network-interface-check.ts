@@ -11,10 +11,10 @@
  *  and limitations under the License.
  */
 
+import { EC2, NetworkInterfaceStatus } from '@aws-sdk/client-ec2';
 import { Context, CloudFormationCustomResourceEvent, CdkCustomResourceResponse } from 'aws-lambda';
 import { logger } from '../../../../common/powertools';
 import { aws_sdk_client_common_config } from '../../../../common/sdk-client-config';
-import { EC2, NetworkInterfaceStatus } from '@aws-sdk/client-ec2'
 import { NetworkInterfaceCheckCustomResourceLambdaProps, sleep } from '../../../private/dashboard';
 
 type ResourceEvent = CloudFormationCustomResourceEvent;
@@ -44,34 +44,34 @@ const _onCreate = async (ec2Client: EC2, props: NetworkInterfaceCheckCustomResou
 
   logger.info(`interface need to check: ${JSON.stringify(props.networkInterfaces)}`);
   const networkInterfaceIds: string[] = [];
-  for(const ni of props.networkInterfaces){
+  for (const ni of props.networkInterfaces) {
     networkInterfaceIds.push(ni.NetworkInterfaceId);
   }
 
-  logger.info(`networkInterfaceIds: ${networkInterfaceIds}`)
+  logger.info(`networkInterfaceIds: ${networkInterfaceIds}`);
   const networkInterfacesDescribeResult = await ec2Client.describeNetworkInterfaces({
     NetworkInterfaceIds: networkInterfaceIds,
-  })
+  });
 
   let isNetworkInterfaceReady: boolean = false;
 
-  if(networkInterfacesDescribeResult.NetworkInterfaces !== undefined) {
+  if (networkInterfacesDescribeResult.NetworkInterfaces !== undefined) {
     let checkCnt = 0;
-    while(!isNetworkInterfaceReady && checkCnt <= 600) {
-      sleep(500);
+    while (!isNetworkInterfaceReady && checkCnt <= 600) {
+      await sleep(500);
       checkCnt += 1;
       let ready = true;
 
-      for(const networkInterface of networkInterfacesDescribeResult.NetworkInterfaces){
+      for (const networkInterface of networkInterfacesDescribeResult.NetworkInterfaces) {
         logger.info(`network interface status: ${networkInterface.NetworkInterfaceId} - ${networkInterface.Status}`);
-        if(networkInterface.Status !== NetworkInterfaceStatus.in_use) {
+        if (networkInterface.Status !== NetworkInterfaceStatus.in_use) {
           ready = false;
         }
       }
       isNetworkInterfaceReady = ready;
     }
   }
-  
+
   return {
     Data: {
       isReady: isNetworkInterfaceReady,
