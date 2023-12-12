@@ -42,7 +42,7 @@ export const handler = async (event: ResourceEvent, _context: Context): Promise<
 
 const _onCreate = async (ec2Client: EC2, props: NetworkInterfaceCheckCustomResourceLambdaPropsType): Promise<CdkCustomResourceResponse> => {
 
-  logger.info(`interface need to check: ${JSON.stringify(props.networkInterfaces)}`);
+  logger.info('interface need to check:', { props } );
   const networkInterfaceIds: string[] = [];
   for (const ni of props.networkInterfaces) {
     networkInterfaceIds.push(ni.NetworkInterfaceId);
