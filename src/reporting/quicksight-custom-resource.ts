@@ -146,12 +146,12 @@ export function createQuicksightCustomResource(
           {
             name: 'startDate',
             timeGranularity: TimeGranularity.DAY,
-            defaultValue: [tenYearsAgo],
+            defaultValue: tenYearsAgo,
           },
           {
             name: 'endDate',
             timeGranularity: TimeGranularity.DAY,
-            defaultValue: [futureDate],
+            defaultValue: futureDate,
           },
         ],
         projectedColumns: [
@@ -198,12 +198,12 @@ export function createQuicksightCustomResource(
           {
             name: 'startDate',
             timeGranularity: TimeGranularity.DAY,
-            defaultValue: [tenYearsAgo],
+            defaultValue: tenYearsAgo,
           },
           {
             name: 'endDate',
             timeGranularity: TimeGranularity.DAY,
-            defaultValue: [futureDate],
+            defaultValue: futureDate,
           },
         ],
         tagColumnOperations: [
@@ -279,12 +279,12 @@ export function createQuicksightCustomResource(
           {
             name: 'startDate',
             timeGranularity: TimeGranularity.DAY,
-            defaultValue: [tenYearsAgo],
+            defaultValue: tenYearsAgo,
           },
           {
             name: 'endDate',
             timeGranularity: TimeGranularity.DAY,
-            defaultValue: [futureDate],
+            defaultValue: futureDate,
           },
         ],
         projectedColumns: [
@@ -323,12 +323,12 @@ export function createQuicksightCustomResource(
           {
             name: 'startDate',
             timeGranularity: TimeGranularity.DAY,
-            defaultValue: [tenYearsAgo],
+            defaultValue: tenYearsAgo,
           },
           {
             name: 'endDate',
             timeGranularity: TimeGranularity.DAY,
-            defaultValue: [futureDate],
+            defaultValue: futureDate,
           },
         ],
         projectedColumns: [
@@ -356,12 +356,12 @@ export function createQuicksightCustomResource(
           {
             name: 'startDate',
             timeGranularity: TimeGranularity.DAY,
-            defaultValue: [tenYearsAgo],
+            defaultValue: tenYearsAgo,
           },
           {
             name: 'endDate',
             timeGranularity: TimeGranularity.DAY,
-            defaultValue: [futureDate],
+            defaultValue: futureDate,
           },
         ],
         projectedColumns: [
@@ -379,12 +379,12 @@ export function createQuicksightCustomResource(
           {
             name: 'startDate',
             timeGranularity: TimeGranularity.DAY,
-            defaultValue: [tenYearsAgo],
+            defaultValue: tenYearsAgo,
           },
           {
             name: 'endDate',
             timeGranularity: TimeGranularity.DAY,
-            defaultValue: [futureDate],
+            defaultValue: futureDate,
           },
         ],
         projectedColumns: [
