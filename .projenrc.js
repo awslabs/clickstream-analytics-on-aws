@@ -678,7 +678,7 @@ gitlabMain.createNestedTemplates({
       'etl-unit-test': {
         stage: 'build',
         image: {
-          name: 'public.ecr.aws/docker/library/gradle:7.6-jdk11',
+          name: 'public.ecr.aws/docker/library/gradle:7.6-jdk17',
         },
         variables: {
         },
@@ -722,7 +722,7 @@ gitlabMain.createNestedTemplates({
       'etl-plugin-samples-unit-test': {
         stage: 'build',
         image: {
-          name: 'public.ecr.aws/docker/library/gradle:7.6-jdk11',
+          name: 'public.ecr.aws/docker/library/gradle:7.6-jdk17',
         },
         variables: {
         },
