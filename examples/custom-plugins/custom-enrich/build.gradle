@@ -73,11 +73,7 @@ var sparkJava17CompatibleJvmArgs = [
 
 tasks.named('test') {
     jvmArgs += sparkJava17CompatibleJvmArgs
-    // Use JUnit Platform for unit tests.
     useJUnitPlatform()
-    filter {
-        // includeTestsMatching "ETL*Test"
-    }
 }
 
 
