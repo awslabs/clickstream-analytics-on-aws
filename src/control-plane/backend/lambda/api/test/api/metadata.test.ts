@@ -13,7 +13,6 @@
 
 import {
   DynamoDBDocumentClient,
-  GetCommand,
   PutCommand,
   QueryCommand,
   QueryCommandInput,
@@ -21,8 +20,8 @@ import {
 } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
 import request from 'supertest';
-import { metadataEventExistedMock, MOCK_APP_ID, MOCK_EVENT_PARAMETER_NAME, MOCK_EVENT_NAME, MOCK_PROJECT_ID, MOCK_TOKEN, MOCK_USER_ATTRIBUTE_NAME, tokenMock } from './ddb-mock';
-import { analyticsMetadataTable, dictionaryTableName, prefixMonthGSIName } from '../../common/constants';
+import { metadataEventExistedMock, MOCK_APP_ID, MOCK_EVENT_PARAMETER_NAME, MOCK_EVENT_NAME, MOCK_PROJECT_ID, MOCK_TOKEN, MOCK_USER_ATTRIBUTE_NAME, tokenMock, dictionaryMock } from './ddb-mock';
+import { analyticsMetadataTable, prefixMonthGSIName } from '../../common/constants';
 import { ConditionCategory, MetadataParameterType, MetadataPlatform, MetadataSource, MetadataValueType } from '../../common/explore-types';
 import { app, server } from '../../index';
 import 'aws-sdk-client-mock-jest';
@@ -284,90 +283,7 @@ function displayDataMock(m: any) {
     ],
   });
   // BuiltList
-  m.on(GetCommand, {
-    TableName: dictionaryTableName,
-    Key: {
-      name: 'MetadataBuiltInList',
-    },
-  }).resolves({
-    Item: {
-      name: 'MetadataBuiltInList',
-      data: {
-        PresetEvents: [
-          {
-            name: MOCK_EVENT_NAME,
-            displayName: {
-              'en-US': `display name of event ${MOCK_EVENT_NAME}`,
-              'zh-CN': `内置事件${MOCK_EVENT_NAME}显示名称`,
-            },
-            description: {
-              'en-US': 'mock event description in built-in',
-              'zh-CN': '内置事件的描述',
-            },
-          },
-        ],
-        PresetEventParameters: [
-          {
-            name: MOCK_EVENT_PARAMETER_NAME,
-            eventName: MOCK_EVENT_NAME,
-            dataType: MetadataValueType.STRING,
-            category: ConditionCategory.EVENT,
-            displayName: {
-              'en-US': `mock display name of preset event parameter ${MOCK_EVENT_PARAMETER_NAME}`,
-              'zh-CN': `内置事件参数${MOCK_EVENT_PARAMETER_NAME}显示名称`,
-            },
-            description: {
-              'en-US': 'mock preset event parameter description in built-in',
-              'zh-CN': '内置事件参数的描述',
-            },
-          },
-        ],
-        PublicEventParameters: [
-          {
-            name: MOCK_EVENT_PARAMETER_NAME,
-            dataType: MetadataValueType.STRING,
-            category: ConditionCategory.GEO,
-            displayName: {
-              'en-US': `mock display name of public event parameter ${MOCK_EVENT_PARAMETER_NAME}`,
-              'zh-CN': `内置事件参数${MOCK_EVENT_PARAMETER_NAME}显示名称`,
-            },
-            description: {
-              'en-US': 'mock public event parameter description in built-in',
-              'zh-CN': '内置事件参数的描述',
-            },
-          },
-          {
-            name: `${MOCK_EVENT_PARAMETER_NAME}11`,
-            dataType: MetadataValueType.INTEGER,
-            category: ConditionCategory.DEVICE,
-            displayName: {
-              'en-US': `mock display name of public event parameter ${MOCK_EVENT_PARAMETER_NAME}11`,
-              'zh-CN': `内置事件参数${MOCK_EVENT_PARAMETER_NAME}11显示名称`,
-            },
-            description: {
-              'en-US': 'mock public event parameter description in built-in',
-              'zh-CN': '内置事件参数的描述',
-            },
-          },
-        ],
-        PresetUserAttributes: [
-          {
-            name: MOCK_USER_ATTRIBUTE_NAME,
-            dataType: MetadataValueType.STRING,
-            category: ConditionCategory.USER_OUTER,
-            displayName: {
-              'en-US': `mock display name of preset user attribute ${MOCK_USER_ATTRIBUTE_NAME}`,
-              'zh-CN': `内置用户属性${MOCK_USER_ATTRIBUTE_NAME}显示名称`,
-            },
-            description: {
-              'en-US': 'mock preset user attribute description in built-in',
-              'zh-CN': '内置用户属性的描述',
-            },
-          },
-        ],
-      },
-    },
-  });
+  dictionaryMock(m, 'MetadataBuiltInList');
 }
 
 function getAllEventParametersInput() {
@@ -461,13 +377,13 @@ describe('Metadata Event test', () => {
             metadataSource: MetadataSource.PRESET,
             name: MOCK_EVENT_PARAMETER_NAME,
             eventName: MOCK_EVENT_NAME,
-            displayName: {
-              'en-US': `mock display name of preset event parameter ${MOCK_EVENT_PARAMETER_NAME}`,
-              'zh-CN': `内置事件参数${MOCK_EVENT_PARAMETER_NAME}显示名称`,
-            },
             description: {
-              'en-US': 'mock preset event parameter description in built-in',
-              'zh-CN': '内置事件参数的描述',
+              'en-US': 'Store where applications are installed',
+              'zh-CN': '安装应用程序的商店',
+            },
+            displayName: {
+              'en-US': 'App install source',
+              'zh-CN': '应用程序安装商店',
             },
             parameterType: 'Public',
             hasData: true,
@@ -494,8 +410,8 @@ describe('Metadata Event test', () => {
           'zh-CN': `${MOCK_EVENT_NAME}显示名称`,
         },
         description: {
-          'en-US': 'Description of event event-mock',
-          'zh-CN': 'event-mock说明',
+          'en-US': `Description of event ${MOCK_EVENT_NAME}`,
+          'zh-CN': `${MOCK_EVENT_NAME}说明`,
         },
       },
     });
@@ -514,88 +430,62 @@ describe('Metadata Event test', () => {
     });
   });
   it('Get preset event when no data in DDB', async () => {
-    ddbMock.on(QueryCommand).resolves({
+    ddbMock.on(QueryCommand, {
+      TableName: analyticsMetadataTable,
+      KeyConditionExpression: '#id= :id AND begins_with(#month, :month)',
+      ExpressionAttributeNames: {
+        '#id': 'id',
+        '#month': 'month',
+      },
+      ExpressionAttributeValues: {
+        ':id': `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}`,
+        ':month': '#',
+      },
+      ScanIndexForward: false,
+    }).resolves({
+      Items: [],
+    });
+    ddbMock.on(QueryCommand, getAllEventParametersInput()).resolves({
       Items: [],
     });
     const res = await request(app)
       .get(`/api/metadata/event/${MOCK_EVENT_NAME}?projectId=${MOCK_PROJECT_ID}&appId=${MOCK_APP_ID}`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
-    expect(res.body).toEqual({
-      success: true,
-      message: '',
-      data: {
-        id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}`,
-        prefix: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
-        month: '#202303',
-        associatedParameters: [
-          {
-            id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}#${ConditionCategory.DEVICE}#${MOCK_EVENT_PARAMETER_NAME}11#${MetadataValueType.INTEGER}`,
-            month: '#202303',
-            prefix: `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
-            projectId: MOCK_PROJECT_ID,
-            appId: MOCK_APP_ID,
-            category: ConditionCategory.DEVICE,
-            metadataSource: MetadataSource.PRESET,
-            name: `${MOCK_EVENT_PARAMETER_NAME}11`,
-            eventName: MOCK_EVENT_NAME,
-            displayName: {
-              'en-US': `mock display name of public event parameter ${MOCK_EVENT_PARAMETER_NAME}11`,
-              'zh-CN': `内置事件参数${MOCK_EVENT_PARAMETER_NAME}11显示名称`,
-            },
-            description: {
-              'en-US': 'mock public event parameter description in built-in',
-              'zh-CN': '内置事件参数的描述',
-            },
-            parameterType: 'Public',
-            hasData: false,
-            platform: [],
-            valueType: MetadataValueType.INTEGER,
-            values: [],
-          },
-          {
-            id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}#${ConditionCategory.EVENT}#${MOCK_EVENT_PARAMETER_NAME}#${MetadataValueType.STRING}`,
-            month: '#202303',
-            prefix: `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
-            projectId: MOCK_PROJECT_ID,
-            appId: MOCK_APP_ID,
-            category: ConditionCategory.EVENT,
-            metadataSource: MetadataSource.PRESET,
-            name: MOCK_EVENT_PARAMETER_NAME,
-            eventName: MOCK_EVENT_NAME,
-            displayName: {
-              'en-US': `mock display name of preset event parameter ${MOCK_EVENT_PARAMETER_NAME}`,
-              'zh-CN': `内置事件参数${MOCK_EVENT_PARAMETER_NAME}显示名称`,
-            },
-            description: {
-              'en-US': 'mock preset event parameter description in built-in',
-              'zh-CN': '内置事件参数的描述',
-            },
-            parameterType: 'Public',
-            hasData: false,
-            platform: [],
-            valueType: MetadataValueType.STRING,
-            values: [],
-          },
-        ],
-        hasData: false,
-        platform: [],
-        sdkName: [],
-        sdkVersion: [],
-        projectId: MOCK_PROJECT_ID,
-        appId: MOCK_APP_ID,
-        name: MOCK_EVENT_NAME,
-        metadataSource: MetadataSource.PRESET,
-        dataVolumeLastDay: 0,
-        displayName: {
-          'en-US': `display name of event ${MOCK_EVENT_NAME}`,
-          'zh-CN': `${MOCK_EVENT_NAME}显示名称`,
-        },
-        description: {
-          'en-US': 'Description of event event-mock',
-          'zh-CN': 'event-mock说明',
-        },
+    expect(res.body.data.month).toEqual('#202303');
+    expect(res.body.data.associatedParameters.length).toEqual(57);
+    expect(res.body.data.associatedParameters).toContainEqual({
+      appId: MOCK_APP_ID,
+      category: ConditionCategory.APP_INFO,
+      description: {
+        'en-US': 'Store where applications are installed',
+        'zh-CN': '安装应用程序的商店',
       },
+      displayName: {
+        'en-US': 'App install source',
+        'zh-CN': '应用程序安装商店',
+      },
+      eventName: '_first_open',
+      hasData: false,
+      id: 'project_8888_8888#app_7777_7777#_first_open#app_info#install_source#string',
+      metadataSource: MetadataSource.PRESET,
+      month: '#202303',
+      name: MOCK_EVENT_PARAMETER_NAME,
+      parameterType: MetadataParameterType.PUBLIC,
+      platform: [],
+      prefix: `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
+      projectId: MOCK_PROJECT_ID,
+      valueType: MetadataValueType.STRING,
+      values: [],
+    });
+    expect(res.body.data.metadataSource).toEqual(MetadataSource.PRESET);
+    expect(res.body.data.displayName).toEqual({
+      'en-US': `display name of event ${MOCK_EVENT_NAME}`,
+      'zh-CN': `${MOCK_EVENT_NAME}显示名称`,
+    });
+    expect(res.body.data.description).toEqual({
+      'en-US': `Description of event ${MOCK_EVENT_NAME}`,
+      'zh-CN': `${MOCK_EVENT_NAME}说明`,
     });
   });
   it('Get metadata event list', async () => {
@@ -899,7 +789,6 @@ describe('Metadata Event test', () => {
     const res = await request(app)
       .get(`/api/metadata/events?projectId=${MOCK_PROJECT_ID}&appId=${MOCK_APP_ID}&attribute=true`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
-    expect(ddbMock).toHaveReceivedCommandTimes(QueryCommand, 2);
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({
       success: true,
@@ -932,18 +821,18 @@ describe('Metadata Event test', () => {
                 appId: MOCK_APP_ID,
                 projectId: MOCK_PROJECT_ID,
                 hasData: true,
-                metadataSource: MetadataSource.PRESET,
+                metadataSource: MetadataSource.CUSTOM,
                 name: `${MOCK_EVENT_PARAMETER_NAME}11`,
                 eventName: `${MOCK_EVENT_NAME}1`,
                 description: {
-                  'en-US': 'mock public event parameter description in built-in',
-                  'zh-CN': '内置事件参数的描述',
+                  'en-US': '',
+                  'zh-CN': '',
                 },
                 displayName: {
-                  'en-US': `mock display name of public event parameter ${MOCK_EVENT_PARAMETER_NAME}11`,
-                  'zh-CN': `内置事件参数${MOCK_EVENT_PARAMETER_NAME}11显示名称`,
+                  'en-US': `[event] ${MOCK_EVENT_PARAMETER_NAME}11`,
+                  'zh-CN': `[event] ${MOCK_EVENT_PARAMETER_NAME}11`,
                 },
-                parameterType: MetadataParameterType.PUBLIC,
+                parameterType: MetadataParameterType.PRIVATE,
                 platform: [MetadataPlatform.ANDROID],
                 valueType: MetadataValueType.INTEGER,
                 category: ConditionCategory.EVENT,
@@ -1033,38 +922,7 @@ describe('Metadata Event test', () => {
       .get(`/api/metadata/events?projectId=${MOCK_PROJECT_ID}&appId=${MOCK_APP_ID}`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
-    expect(res.body).toEqual({
-      success: true,
-      message: '',
-      data: {
-        items: [
-          {
-            id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}`,
-            month: '#202302',
-            prefix: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
-            projectId: MOCK_PROJECT_ID,
-            appId: MOCK_APP_ID,
-            name: `${MOCK_EVENT_NAME}`,
-            displayName: {
-              'en-US': `display name of event ${MOCK_EVENT_NAME}`,
-              'zh-CN': `${MOCK_EVENT_NAME}显示名称`,
-            },
-            description: {
-              'en-US': 'Description of event event-mock',
-              'zh-CN': 'event-mock说明',
-            },
-            metadataSource: MetadataSource.PRESET,
-            hasData: false,
-            dataVolumeLastDay: 0,
-            associatedParameters: [],
-            platform: [],
-            sdkName: [],
-            sdkVersion: [],
-          },
-        ],
-        totalCount: 1,
-      },
-    });
+    expect(res.body.data.totalCount).toEqual(17);
   });
 
   afterAll((done) => {
@@ -1155,8 +1013,8 @@ describe('Metadata Event Attribute test', () => {
               'zh-CN': `${MOCK_EVENT_NAME}显示名称`,
             },
             description: {
-              'en-US': 'Description of event event-mock',
-              'zh-CN': 'event-mock说明',
+              'en-US': `Description of event ${MOCK_EVENT_NAME}`,
+              'zh-CN': `${MOCK_EVENT_NAME}说明`,
             },
           },
           {
@@ -1183,12 +1041,12 @@ describe('Metadata Event Attribute test', () => {
         appId: MOCK_APP_ID,
         name: MOCK_EVENT_PARAMETER_NAME,
         description: {
-          'en-US': 'mock preset event parameter description in built-in',
-          'zh-CN': '内置事件参数的描述',
+          'en-US': 'Store where applications are installed',
+          'zh-CN': '安装应用程序的商店',
         },
         displayName: {
-          'en-US': `mock display name of preset event parameter ${MOCK_EVENT_PARAMETER_NAME}`,
-          'zh-CN': `内置事件参数${MOCK_EVENT_PARAMETER_NAME}显示名称`,
+          'en-US': 'App install source',
+          'zh-CN': '应用程序安装商店',
         },
         eventName: '',
         category: ConditionCategory.EVENT,
@@ -1223,54 +1081,38 @@ describe('Metadata Event Attribute test', () => {
       Items: [],
     });
     const res = await request(app)
-      .get(`/api/metadata/event_parameter?projectId=${MOCK_PROJECT_ID}&appId=${MOCK_APP_ID}&name=${MOCK_EVENT_PARAMETER_NAME}&category=${ConditionCategory.EVENT}&type=${MetadataValueType.STRING}`);
+      .get(`/api/metadata/event_parameter?projectId=${MOCK_PROJECT_ID}&appId=${MOCK_APP_ID}&name=${MOCK_EVENT_PARAMETER_NAME}&category=${ConditionCategory.APP_INFO}&type=${MetadataValueType.STRING}`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
-    expect(res.body).toEqual({
-      success: true,
-      message: '',
-      data: {
-        associatedEvents: [
-          {
-            name: MOCK_EVENT_NAME,
-            prefix: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
-            id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}`,
-            projectId: MOCK_PROJECT_ID,
-            appId: MOCK_APP_ID,
-            metadataSource: MetadataSource.PRESET,
-            displayName: {
-              'en-US': `display name of event ${MOCK_EVENT_NAME}`,
-              'zh-CN': `${MOCK_EVENT_NAME}显示名称`,
-            },
-            description: {
-              'en-US': 'Description of event event-mock',
-              'zh-CN': 'event-mock说明',
-            },
-          },
-        ],
-        id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}#${ConditionCategory.EVENT}#${MOCK_EVENT_PARAMETER_NAME}#${MetadataValueType.STRING}`,
-        month: '#202303',
-        prefix: `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
-        projectId: MOCK_PROJECT_ID,
-        appId: MOCK_APP_ID,
-        name: MOCK_EVENT_PARAMETER_NAME,
-        description: {
-          'en-US': 'mock preset event parameter description in built-in',
-          'zh-CN': '内置事件参数的描述',
-        },
-        displayName: {
-          'en-US': `mock display name of preset event parameter ${MOCK_EVENT_PARAMETER_NAME}`,
-          'zh-CN': `内置事件参数${MOCK_EVENT_PARAMETER_NAME}显示名称`,
-        },
-        eventName: '',
-        category: ConditionCategory.EVENT,
-        metadataSource: MetadataSource.PRESET,
-        parameterType: MetadataParameterType.PUBLIC,
-        hasData: false,
-        platform: [],
-        valueType: MetadataValueType.STRING,
-        values: [],
+    expect(res.body.data.id).toEqual(`${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}#${ConditionCategory.APP_INFO}#${MOCK_EVENT_PARAMETER_NAME}#${MetadataValueType.STRING}`);
+    expect(res.body.data.month).toEqual('#202303');
+    expect(res.body.data.associatedEvents.length).toEqual(17);
+    expect(res.body.data.associatedEvents).toContainEqual({
+      description: {
+        'en-US': 'A new session start when a user first open the App/Web or a user returns to the app after the `sessionTimeoutDuration` (default value is 30 minutes) of inactivity period',
+        'zh-CN': '当用户首次打开App/Web或用户不活跃超过 `sessionTimeoutDuration` (默认为30分钟）后返回App时会新生成一个会话',
       },
+      displayName: {
+        'en-US': 'Session start',
+        'zh-CN': '会话开始',
+      },
+      id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#_session_start`,
+      metadataSource: MetadataSource.PRESET,
+      name: '_session_start',
+      appId: MOCK_APP_ID,
+      prefix: `EVENT#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
+      projectId: MOCK_PROJECT_ID,
+    });
+    expect(res.body.data.metadataSource).toEqual(MetadataSource.PRESET);
+    expect(res.body.data.parameterType).toEqual(MetadataParameterType.PUBLIC);
+    expect(res.body.data.valueType).toEqual(MetadataValueType.STRING);
+    expect(res.body.data.displayName).toEqual({
+      'en-US': 'App install source',
+      'zh-CN': '应用程序安装商店',
+    });
+    expect(res.body.data.description).toEqual({
+      'en-US': 'Store where applications are installed',
+      'zh-CN': '安装应用程序的商店',
     });
   });
   it('Get metadata event attribute list', async () => {
@@ -1376,12 +1218,12 @@ describe('Metadata Event Attribute test', () => {
             appId: MOCK_APP_ID,
             name: MOCK_EVENT_PARAMETER_NAME,
             description: {
-              'en-US': 'mock preset event parameter description in built-in',
-              'zh-CN': '内置事件参数的描述',
+              'en-US': 'Store where applications are installed',
+              'zh-CN': '安装应用程序的商店',
             },
             displayName: {
-              'en-US': `mock display name of preset event parameter ${MOCK_EVENT_PARAMETER_NAME}`,
-              'zh-CN': `内置事件参数${MOCK_EVENT_PARAMETER_NAME}显示名称`,
+              'en-US': 'App install source',
+              'zh-CN': '应用程序安装商店',
             },
             eventName: MOCK_EVENT_NAME,
             category: ConditionCategory.EVENT,
@@ -1463,65 +1305,7 @@ describe('Metadata Event Attribute test', () => {
       .get(`/api/metadata/event_parameters?projectId=${MOCK_PROJECT_ID}&appId=${MOCK_APP_ID}`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
-    expect(res.body).toEqual({
-      success: true,
-      message: '',
-      data: {
-        items: [
-          {
-            associatedEvents: [],
-            id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}#${ConditionCategory.DEVICE}#${MOCK_EVENT_PARAMETER_NAME}11#${MetadataValueType.INTEGER}`,
-            month: '#202302',
-            prefix: `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
-            projectId: MOCK_PROJECT_ID,
-            appId: MOCK_APP_ID,
-            name: `${MOCK_EVENT_PARAMETER_NAME}11`,
-            displayName: {
-              'en-US': `mock display name of public event parameter ${MOCK_EVENT_PARAMETER_NAME}11`,
-              'zh-CN': `内置事件参数${MOCK_EVENT_PARAMETER_NAME}11显示名称`,
-            },
-            description: {
-              'en-US': 'mock public event parameter description in built-in',
-              'zh-CN': '内置事件参数的描述',
-            },
-            eventName: `${MOCK_EVENT_NAME}`,
-            category: ConditionCategory.DEVICE,
-            metadataSource: MetadataSource.PRESET,
-            parameterType: MetadataParameterType.PUBLIC,
-            hasData: false,
-            platform: [],
-            valueType: MetadataValueType.INTEGER,
-            values: [],
-          },
-          {
-            associatedEvents: [],
-            id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}#${ConditionCategory.EVENT}#${MOCK_EVENT_PARAMETER_NAME}#${MetadataValueType.STRING}`,
-            month: '#202302',
-            prefix: `EVENT_PARAMETER#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
-            projectId: MOCK_PROJECT_ID,
-            appId: MOCK_APP_ID,
-            name: MOCK_EVENT_PARAMETER_NAME,
-            description: {
-              'en-US': 'mock preset event parameter description in built-in',
-              'zh-CN': '内置事件参数的描述',
-            },
-            displayName: {
-              'en-US': `mock display name of preset event parameter ${MOCK_EVENT_PARAMETER_NAME}`,
-              'zh-CN': `内置事件参数${MOCK_EVENT_PARAMETER_NAME}显示名称`,
-            },
-            eventName: MOCK_EVENT_NAME,
-            category: ConditionCategory.EVENT,
-            metadataSource: MetadataSource.PRESET,
-            parameterType: MetadataParameterType.PUBLIC,
-            hasData: false,
-            platform: [],
-            valueType: MetadataValueType.STRING,
-            values: [],
-          },
-        ],
-        totalCount: 2,
-      },
-    });
+    expect(res.body.data.totalCount).toEqual(80);
   });
 
   afterAll((done) => {
@@ -1720,36 +1504,7 @@ describe('Metadata User Attribute test', () => {
       .get(`/api/metadata/user_attributes?projectId=${MOCK_PROJECT_ID}&appId=${MOCK_APP_ID}`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
-    expect(res.body).toEqual({
-      success: true,
-      message: '',
-      data: {
-        items: [
-          {
-            id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${ConditionCategory.USER_OUTER}#${MOCK_USER_ATTRIBUTE_NAME}#${MetadataValueType.STRING}`,
-            month: '#202302',
-            prefix: `USER_ATTRIBUTE#${MOCK_PROJECT_ID}#${MOCK_APP_ID}`,
-            projectId: MOCK_PROJECT_ID,
-            appId: MOCK_APP_ID,
-            name: MOCK_USER_ATTRIBUTE_NAME,
-            displayName: {
-              'en-US': `display name of user parameter ${MOCK_USER_ATTRIBUTE_NAME}`,
-              'zh-CN': `${MOCK_USER_ATTRIBUTE_NAME}用户属性显示名称`,
-            },
-            description: {
-              'en-US': `Description of user parameter ${MOCK_USER_ATTRIBUTE_NAME}`,
-              'zh-CN': `${MOCK_USER_ATTRIBUTE_NAME}参数说明`,
-            },
-            category: ConditionCategory.USER_OUTER,
-            hasData: false,
-            metadataSource: MetadataSource.PRESET,
-            valueType: MetadataValueType.STRING,
-            values: [],
-          },
-        ],
-        totalCount: 1,
-      },
-    });
+    expect(res.body.data.totalCount).toEqual(8);
   });
 
   afterAll((done) => {

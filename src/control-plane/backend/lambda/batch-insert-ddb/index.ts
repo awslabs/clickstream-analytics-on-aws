@@ -29,14 +29,30 @@ import {
   Context,
 } from 'aws-lambda';
 import { logger } from '../../../../common/powertools';
+import dictionary from '../../config/dictionary.json';
 import { aws_sdk_client_common_config } from '../api/common/sdk-client-config-ln';
 
-// Create an Amazon DynamoDB service client object.
 const ddbClient = new DynamoDBClient({
   ...aws_sdk_client_common_config,
 });
-// Create the DynamoDB Document client.
-const docClient = DynamoDBDocumentClient.from(ddbClient);
+
+const marshallOptions = {
+  convertEmptyValues: false,
+  removeUndefinedValues: true,
+  convertClassInstanceToMap: true,
+  convertTopLevelContainer: false,
+};
+
+const unmarshallOptions = {
+  wrapNumbers: false,
+};
+
+const translateConfig = {
+  marshallOptions: { ...marshallOptions },
+  unmarshallOptions: { ...unmarshallOptions },
+};
+
+const docClient = DynamoDBDocumentClient.from(ddbClient, { ...translateConfig });
 
 interface DicItem {
   readonly name: string;
@@ -47,7 +63,8 @@ export const handler = async (
   event: CdkCustomResourceEvent,
   context: Context,
 ): Promise<CdkCustomResourceResponse> => {
-
+  logger.debug('request event:', { event });
+  logger.debug('dictionary:', { dictionary });
   const response: CdkCustomResourceResponse = {
     StackId: event.StackId,
     RequestId: event.RequestId,
@@ -81,15 +98,10 @@ async function _handler(event: CdkCustomResourceEvent) {
 
 async function batchInsert(event: CdkCustomResourceEvent): Promise<any> {
   const tableName: string = event.ResourceProperties.tableName;
-  const items: DicItem[] = event.ResourceProperties.items;
+  const items: DicItem[] = dictionary;
   const itemsAsDynamoPutRequest: any[] = [];
   items.forEach(item => {
-    const marshallItem = marshall(item, {
-      convertEmptyValues: false,
-      removeUndefinedValues: true,
-      convertClassInstanceToMap: true,
-      convertTopLevelContainer: false,
-    });
+    const marshallItem = marshall(item, marshallOptions);
     itemsAsDynamoPutRequest.push({
       PutRequest: {
         Item: marshallItem,
