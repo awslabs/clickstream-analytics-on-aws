@@ -63,7 +63,6 @@ export const handler = async (
   event: CdkCustomResourceEvent,
   context: Context,
 ): Promise<CdkCustomResourceResponse> => {
-  logger.debug('request event:', { event });
   logger.debug('dictionary:', { dictionary });
   const response: CdkCustomResourceResponse = {
     StackId: event.StackId,
