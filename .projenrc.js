@@ -158,6 +158,8 @@ const project = new awscdk.AwsCdkTypeScriptApp({
     'src/data-pipeline/spark-etl/bin',
     'src/data-pipeline/spark-etl/?/',
     'code-coverage-results.md',
+    'metastore_db',
+    'nohup.out',
   ] /* Additional entries to .gitignore. */,
 
   deps: [
@@ -676,7 +678,7 @@ gitlabMain.createNestedTemplates({
       'etl-unit-test': {
         stage: 'build',
         image: {
-          name: 'public.ecr.aws/docker/library/gradle:7.6-jdk11',
+          name: 'public.ecr.aws/docker/library/gradle:7.6-jdk17',
         },
         variables: {
         },
@@ -720,7 +722,7 @@ gitlabMain.createNestedTemplates({
       'etl-plugin-samples-unit-test': {
         stage: 'build',
         image: {
-          name: 'public.ecr.aws/docker/library/gradle:7.6-jdk11',
+          name: 'public.ecr.aws/docker/library/gradle:7.6-jdk17',
         },
         variables: {
         },

@@ -51,6 +51,8 @@ src/data-pipeline/spark-etl/build
 src/data-pipeline/spark-etl/bin
 src/data-pipeline/spark-etl/?/
 code-coverage-results.md
+metastore_db
+nohup.out
 !/.projenrc.js
 /test-reports/
 junit.xml
