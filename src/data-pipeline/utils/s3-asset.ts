@@ -16,13 +16,15 @@ import { AssetHashType, BundlingOptions, DockerImage, Fn } from 'aws-cdk-lib';
 import { IBucket } from 'aws-cdk-lib/aws-s3';
 import { BucketDeployment, Source } from 'aws-cdk-lib/aws-s3-deployment';
 import { Construct } from 'constructs';
+import { SolutionInfo } from '../../common/solution-info';
 
 export function uploadBuiltInSparkJarsAndFiles(
   scope: Construct,
   bucket: IBucket,
   prefix: string,
 ) {
-  const jarFile = 'spark-etl-1.1.0.jar';
+  const version = SolutionInfo.SOLUTION_VERSION_SHORT.replace(/^v/, '');
+  const jarFile = `spark-etl-${version}.jar`;
   let shellCommands = [
     'cd /asset-input/',
     'cp -r ./* /tmp/',
@@ -36,7 +38,7 @@ export function uploadBuiltInSparkJarsAndFiles(
 
   let bundling: BundlingOptions = {
     user: 'gradle',
-    image: DockerImage.fromRegistry('public.ecr.aws/docker/library/gradle:7.6-jdk11'),
+    image: DockerImage.fromRegistry('public.ecr.aws/docker/library/gradle:7.6-jdk17'),
     command: ['sh', '-c', shellCommands.join(' && ')],
   };
 

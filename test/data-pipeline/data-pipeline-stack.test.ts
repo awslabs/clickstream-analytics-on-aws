@@ -301,7 +301,7 @@ describe('DataPipelineStack parameter test', () => {
   test('Should has parameter EmrVersion', () => {
     template.hasParameter('EmrVersion', {
       AllowedPattern: EMR_VERSION_PATTERN,
-      Default: 'emr-6.11.0',
+      Default: 'emr-6.15.0',
       Type: 'String',
     });
   });
@@ -1019,6 +1019,7 @@ describe('Data Processing job submitter', () => {
           {
             Action: [
               'emr-serverless:StartApplication',
+              'emr-serverless:GetApplication',
               'emr-serverless:StartJobRun',
               'emr-serverless:TagResource',
             ],
