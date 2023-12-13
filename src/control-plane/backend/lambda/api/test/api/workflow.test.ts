@@ -258,6 +258,10 @@ describe('Workflow test', () => {
       ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, iamMock, {
         publicAZContainPrivateAZ: true,
         noVpcEndpoint: true,
+        mockBucket: {
+          name: 'EXAMPLE_BUCKET',
+          location: 'cn-north-1',
+        },
       });
     createPipelineMockForBJSRegion(s3Mock);
     const pipeline: CPipeline = new CPipeline({
@@ -602,6 +606,10 @@ describe('Workflow test', () => {
       ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, iamMock, {
         publicAZContainPrivateAZ: true,
         noVpcEndpoint: true,
+        mockBucket: {
+          name: 'EXAMPLE_BUCKET',
+          location: 'cn-north-1',
+        },
       });
     createPipelineMockForBJSRegion(s3Mock);
     const pipeline: CPipeline = new CPipeline({
@@ -840,6 +848,10 @@ describe('Workflow test', () => {
       ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, iamMock, {
         publicAZContainPrivateAZ: true,
         noVpcEndpoint: true,
+        mockBucket: {
+          name: 'EXAMPLE_BUCKET',
+          location: 'cn-north-1',
+        },
       });
     createPipelineMockForBJSRegion(s3Mock);
     const pipeline: CPipeline = new CPipeline({
@@ -1083,6 +1095,10 @@ describe('Workflow test', () => {
         publicAZContainPrivateAZ: true,
         subnetsIsolated: true,
         subnetsCross3AZ: true,
+        mockBucket: {
+          name: 'EXAMPLE_BUCKET_NEW',
+          location: 'ap-southeast-1',
+        },
       });
     const pipeline: CPipeline = new CPipeline({ ...S3_DATA_PROCESSING_WITH_SPECIFY_PREFIX_PIPELINE });
     const wf = await pipeline.generateWorkflow();

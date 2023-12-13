@@ -26,7 +26,7 @@ import { ListNodesCommand } from '@aws-sdk/client-kafka';
 import { DescribeAccountSubscriptionCommand, Edition } from '@aws-sdk/client-quicksight';
 import { DescribeClustersCommand, DescribeClusterSubnetGroupsCommand } from '@aws-sdk/client-redshift';
 import { GetNamespaceCommand, GetWorkgroupCommand } from '@aws-sdk/client-redshift-serverless';
-import { GetBucketPolicyCommand } from '@aws-sdk/client-s3';
+import { BucketLocationConstraint, GetBucketLocationCommand, GetBucketPolicyCommand, ListBucketsCommand } from '@aws-sdk/client-s3';
 import { GetSecretValueCommand } from '@aws-sdk/client-secrets-manager';
 import { StartExecutionCommand } from '@aws-sdk/client-sfn';
 import { DynamoDBDocumentClient, GetCommand, GetCommandInput, PutCommand, PutCommandOutput, QueryCommand, QueryCommandInput } from '@aws-sdk/lib-dynamodb';
@@ -362,6 +362,10 @@ function createPipelineMock(
     twoAZsInRegion?: boolean;
     quickSightStandard?: boolean;
     albPolicyDisable?: boolean;
+    mockBucket?: {
+      name: string;
+      location: string;
+    };
   }): any {
   iamMock.on(SimulateCustomPolicyCommand).resolves({
     EvaluationResults: [
@@ -909,6 +913,17 @@ function createPipelineMock(
   s3Mock.on(GetBucketPolicyCommand).resolves({
     Policy: props?.albPolicyDisable ? AllowIAMUserPutObejectPolicyWithErrorService
       :AllowIAMUserPutObejectPolicyInApSouthEast1,
+  });
+  s3Mock.on(ListBucketsCommand).resolves({
+    Buckets: [
+      {
+        Name: props?.mockBucket?.name ?? 'EXAMPLE_BUCKET',
+        CreationDate: new Date(),
+      },
+    ],
+  });
+  s3Mock.on(GetBucketLocationCommand).resolves({
+    LocationConstraint: props?.mockBucket?.location ?? BucketLocationConstraint.ap_southeast_1,
   });
 }
 
