@@ -44,6 +44,7 @@ import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { IBucket } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
 import { BatchInsertDDBCustomResource } from './batch-insert-ddb-custom-resource-construct';
+import { BackendEventBus } from './event-bus-construct';
 import { AddAdminUser } from './insert-admin-user';
 import { LambdaAdapterLayer } from './layer/lambda-web-adapter/layer';
 import { StackActionStateMachine } from './stack-action-state-machine-construct';
@@ -79,6 +80,12 @@ export interface ClickStreamApiProps {
   readonly authProps?: AuthProps;
   readonly healthCheckPath: string;
   readonly adminUserEmail: string;
+}
+
+export interface LambdaFunctionNetworkProps {
+  readonly vpc?: IVpc;
+  readonly vpcSubnets?: SubnetSelection;
+  readonly securityGroups?: ISecurityGroup[];
 }
 
 export class ClickStreamApiConstruct extends Construct {
@@ -168,7 +175,7 @@ export class ClickStreamApiConstruct extends Construct {
       userTable: clickStreamTable,
     });
 
-    let apiFunctionProps = {};
+    let lambdaFunctionNetwork = {};
     if (props.fronting === 'alb') {
       if (!props.applicationLoadBalancer) {
         throw new Error('Application Load Balancer fronting backend api must be have applicationLoadBalancer parameters.');
@@ -186,17 +193,23 @@ export class ClickStreamApiConstruct extends Construct {
       );
       addCfnNagToSecurityGroup(apiLambdaSG, ['W29', 'W27', 'W40', 'W5']);
 
-      apiFunctionProps = {
+      lambdaFunctionNetwork = {
         vpc: props.applicationLoadBalancer.vpc,
         vpcSubnets: [{ subnetType: SubnetType.PRIVATE_WITH_EGRESS }],
         securityGroups: [apiLambdaSG],
       };
     }
 
+    // Create event bus to listen stack status
+    new BackendEventBus(this, 'BackendEventBus', {
+      clickStreamTable,
+      lambdaFunctionNetwork,
+    });
+
     // Create stack action StateMachine
     const stackActionStateMachine = new StackActionStateMachine(this, 'StackActionStateMachine', {
       clickStreamTable,
-      lambdaFuncProps: apiFunctionProps,
+      lambdaFunctionNetwork,
       targetToCNRegions: props.targetToCNRegions ?? false,
       workflowBucket: props.stackWorkflowS3Bucket,
     });
@@ -204,7 +217,7 @@ export class ClickStreamApiConstruct extends Construct {
     // Create stack workflow StateMachine
     const stackWorkflowStateMachine = new StackWorkflowStateMachine(this, 'StackWorkflowStateMachine', {
       stateActionMachine: stackActionStateMachine.stateMachine,
-      lambdaFuncProps: apiFunctionProps,
+      lambdaFunctionNetwork,
       targetToCNRegions: props.targetToCNRegions ?? false,
       workflowBucket: props.stackWorkflowS3Bucket,
     });
@@ -403,7 +416,7 @@ export class ClickStreamApiConstruct extends Construct {
       logRetention: RetentionDays.ONE_MONTH,
       logFormat: 'JSON',
       applicationLogLevel: 'WARN',
-      ...apiFunctionProps,
+      ...lambdaFunctionNetwork,
     });
 
     dictionaryTable.grantReadWriteData(this.clickStreamApiFunction);
