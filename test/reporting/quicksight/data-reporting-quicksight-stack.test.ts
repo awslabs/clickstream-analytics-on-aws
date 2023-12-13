@@ -705,7 +705,6 @@ describe('DataReportingQuickSightStack resource test', () => {
     },
   }, 1);
 
-
   template.resourcePropertiesCountIs('AWS::QuickSight::DataSource', {
     AwsAccountId: {
       Ref: 'AWS::AccountId',

@@ -59,6 +59,7 @@ export interface ColumnGroupsProps {
 export interface DateTimeParameter {
   name: string;
   timeGranularity: TimeGranularity;
+  defaultValue: Date;
 };
 
 export interface DataSetProps {

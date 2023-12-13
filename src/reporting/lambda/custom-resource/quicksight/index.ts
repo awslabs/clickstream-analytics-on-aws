@@ -479,7 +479,7 @@ const buildDataSetParameter = function (dateTimeDatasetParameter: DateTimeParame
           ValueType: ParameterValueType.SINGLE_VALUED,
           TimeGranularity: param.timeGranularity,
           DefaultValues: {
-            StaticValues: [new Date()],
+            StaticValues: [new Date(param.defaultValue)],
           },
         },
       });
