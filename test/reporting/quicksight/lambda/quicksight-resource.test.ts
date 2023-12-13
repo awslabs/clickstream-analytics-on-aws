@@ -32,6 +32,7 @@ import {
   ResourceExistsException,
   ResourceNotFoundException,
   ResourceStatus,
+  TimeGranularity,
   UpdateAnalysisCommand,
   UpdateAnalysisPermissionsCommand,
   UpdateDashboardCommand,
@@ -59,6 +60,8 @@ import {
 describe('QuickSight Lambda function', () => {
   const context = getMockContext();
   const quickSightClientMock = mockClient(QuickSightClient);
+  const tenYearsAgo = new Date('2013-12-12');
+  const futureDate = new Date('2033-12-12');
 
   const existError = new ResourceExistsException({
     message: 'ResourceExistsException',
@@ -134,8 +137,20 @@ describe('QuickSight Lambda function', () => {
           name: 'ODS Flattened Data Set',
           tableName: CLICKSTREAM_SESSION_VIEW_PLACEHOLDER,
           importMode: 'DIRECT_QUERY',
-          customSql: `select * from {{schema}}.${CLICKSTREAM_SESSION_VIEW_NAME}`,
           columns: clickstream_session_view_columns,
+          customSql: `SELECT * FROM {{schema}}.${CLICKSTREAM_SESSION_VIEW_NAME} where session_date >= <<$startDate>> and session_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate>>))`,
+          dateTimeDatasetParameter: [
+            {
+              name: 'startDate',
+              timeGranularity: TimeGranularity.DAY,
+              defaultValue: tenYearsAgo,
+            },
+            {
+              name: 'endDate',
+              timeGranularity: TimeGranularity.DAY,
+              defaultValue: futureDate,
+            },
+          ],
         },
       ],
     },
@@ -204,8 +219,20 @@ describe('QuickSight Lambda function', () => {
         {
           tableName: CLICKSTREAM_SESSION_VIEW_PLACEHOLDER,
           importMode: 'DIRECT_QUERY',
-          customSql: `select * from {{schema}}.${CLICKSTREAM_SESSION_VIEW_NAME}`,
+          customSql: `select * from {{schema}}.${CLICKSTREAM_SESSION_VIEW_NAME} where session_date >= <<$startDate>> and session_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate>>))`,
           columns: clickstream_session_view_columns,
+          dateTimeDatasetParameter: [
+            {
+              name: 'startDate',
+              timeGranularity: TimeGranularity.DAY,
+              defaultValue: tenYearsAgo,
+            },
+            {
+              name: 'endDate',
+              timeGranularity: TimeGranularity.DAY,
+              defaultValue: futureDate,
+            },
+          ],
         },
         {
           tableName: CLICKSTREAM_LIFECYCLE_DAILY_VIEW_PLACEHOLDER,
@@ -362,8 +389,20 @@ describe('QuickSight Lambda function', () => {
           name: 'ODS Flattened Data Set',
           tableName: CLICKSTREAM_SESSION_VIEW_PLACEHOLDER,
           importMode: 'DIRECT_QUERY',
-          customSql: `select * from {{schema}}.${CLICKSTREAM_SESSION_VIEW_PLACEHOLDER}`,
+          customSql: `select * from {{schema}}.${CLICKSTREAM_SESSION_VIEW_PLACEHOLDER} where session_date >= <<$startDate>> and session_date < DATEADD(DAY, 1, date_trunc('day', <<$endDate>>))`,
           columns: clickstream_session_view_columns,
+          dateTimeDatasetParameter: [
+            {
+              name: 'startDate',
+              timeGranularity: TimeGranularity.DAY,
+              defaultValue: tenYearsAgo,
+            },
+            {
+              name: 'endDate',
+              timeGranularity: TimeGranularity.DAY,
+              defaultValue: futureDate,
+            },
+          ],
         },
       ],
     },
@@ -1910,6 +1949,80 @@ describe('QuickSight Lambda function', () => {
 
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteAnalysisCommand, 1);
     expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteDashboardCommand, 1);
+
+    expect(resp.Data?.dashboards).toBeDefined();
+    expect(JSON.parse(resp.Data?.dashboards)).toHaveLength(1);
+    logger.info(`#dashboards#:${resp.Data?.dashboards}`);
+    expect(JSON.parse(resp.Data?.dashboards)[0].dashboardId).toEqual('dashboard_0');
+
+  });
+
+  test('Create QuickSight dashboard - data set parameter default value', async () => {
+
+    quickSightClientMock.on(DescribeDataSourceCommand).resolves({
+      DataSource: {
+        Status: ResourceStatus.CREATION_SUCCESSFUL,
+      },
+    });
+    quickSightClientMock.on(UpdateDataSourcePermissionsCommand).resolves({});
+
+    quickSightClientMock.on(DescribeDataSetCommand).resolvesOnce({
+      DataSet: {
+        DataSetId: 'dataset_0',
+      },
+    }).resolvesOnce({
+      DataSet: {
+        DataSetId: 'dataset_1',
+      },
+    });
+
+    quickSightClientMock.on(CreateDataSetCommand).callsFakeOnce(input => {
+      input;
+      return {
+        Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:dataset/dataset_0',
+        Status: 200,
+      };
+    }).callsFakeOnce(input => {
+      if ( new Date(input.DatasetParameters[0].DateTimeDatasetParameter.DefaultValues.StaticValues[0]).getTime() === 1386806400000
+       && new Date(input.DatasetParameters[1].DateTimeDatasetParameter.DefaultValues.StaticValues[0]).getTime() === 2017958400000
+      ) {
+        return {
+          Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:dataset/dataset_1',
+          Status: 200,
+        };
+      } else {
+        throw new Error('unexpected parameter');
+      }
+    });
+
+    quickSightClientMock.on(DescribeAnalysisDefinitionCommand).resolves({
+      ResourceStatus: ResourceStatus.CREATION_SUCCESSFUL,
+    });
+    quickSightClientMock.on(CreateAnalysisCommand).resolves({
+      Arn: 'arn:aws:quicksight:us-east-1:xxxxxxxxxx:analysis/analysis_0',
+      Status: 200,
+    });
+
+    quickSightClientMock.on(DescribeDashboardDefinitionCommand).resolves({
+      ResourceStatus: ResourceStatus.CREATION_SUCCESSFUL,
+    });
+    quickSightClientMock.on(CreateDashboardCommand).resolvesOnce({
+      DashboardId: 'dashboard_0',
+      Status: 200,
+    });
+
+    const resp = await handler(basicEvent, context) as CdkCustomResourceResponse;
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeAnalysisDefinitionCommand, 1);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDashboardDefinitionCommand, 1);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DescribeDataSetCommand, 2);
+
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateDataSetCommand, 2);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateAnalysisCommand, 1);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(CreateDashboardCommand, 1);
+
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteDataSetCommand, 0);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteAnalysisCommand, 0);
+    expect(quickSightClientMock).toHaveReceivedCommandTimes(DeleteDashboardCommand, 0);
 
     expect(resp.Data?.dashboards).toBeDefined();
     expect(JSON.parse(resp.Data?.dashboards)).toHaveLength(1);
