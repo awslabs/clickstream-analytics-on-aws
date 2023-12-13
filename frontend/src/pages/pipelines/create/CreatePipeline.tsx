@@ -11,7 +11,11 @@
  *  and limitations under the License.
  */
 
-import { AppLayout, Wizard } from '@cloudscape-design/components';
+import {
+  AppLayout,
+  AutosuggestProps,
+  Wizard,
+} from '@cloudscape-design/components';
 import {
   createProjectPipeline,
   getPipelineDetail,
@@ -112,6 +116,11 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
   const [vpcEmptyError, setVPCEmptyError] = useState(false);
   const [sdkEmptyError, setSDKEmptyError] = useState(false);
   const [assetsBucketEmptyError, setAssetsBucketEmptyError] = useState(false);
+
+  const [s3BucketOptionList, setS3BucketOptionList] =
+    useState<AutosuggestProps.Options>([]);
+  const [assetsBucketNoExistError, setAssetsBucketNoExistError] =
+    useState(false);
 
   const [publicSubnetError, setPublicSubnetError] = useState(false);
   const [privateSubnetError, setPrivateSubnetError] = useState(false);
@@ -231,6 +240,15 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
     }
     if (!pipelineInfo.ingestionServer.loadBalancer.logS3Bucket.name) {
       setAssetsBucketEmptyError(true);
+      return false;
+    } else if (
+      !s3BucketOptionList.some(
+        (element) =>
+          element.value ===
+          pipelineInfo.ingestionServer.loadBalancer.logS3Bucket.name
+      )
+    ) {
+      setAssetsBucketNoExistError(true);
       return false;
     }
     return true;
@@ -1106,6 +1124,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
               sdkEmptyError={sdkEmptyError}
               pipelineInfo={pipelineInfo}
               assetsS3BucketEmptyError={assetsBucketEmptyError}
+              assetsBucketNoExistError={assetsBucketNoExistError}
               loadingServiceAvailable={loadingServiceAvailable}
               unSupportedServices={unSupportedServices}
               changeRegion={(region) => {
@@ -1158,8 +1177,10 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                   };
                 });
               }}
-              changeS3Bucket={(bucket) => {
+              changeS3Bucket={(bucket, s3BucketOptionList) => {
                 setAssetsBucketEmptyError(false);
+                setAssetsBucketNoExistError(false);
+                setS3BucketOptionList(s3BucketOptionList);
                 setPipelineInfo((prev) => {
                   return {
                     ...prev,

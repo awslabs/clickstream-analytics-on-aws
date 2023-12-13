@@ -39,11 +39,15 @@ interface BasicInformationProps {
   changeVPC: (vpc: SelectProps.Option) => void;
   changeSDK: (sdk: SelectProps.Option) => void;
   changeTags: (tag: TagEditorProps.Tag[]) => void;
-  changeS3Bucket: (bucket: string) => void;
+  changeS3Bucket: (
+    bucket: string,
+    s3BucketOptionList: AutosuggestProps.Options
+  ) => void;
   regionEmptyError: boolean;
   vpcEmptyError: boolean;
   sdkEmptyError: boolean;
   assetsS3BucketEmptyError: boolean;
+  assetsBucketNoExistError: boolean;
   loadingServiceAvailable: boolean;
   unSupportedServices: string;
 }
@@ -64,6 +68,7 @@ const BasicInformation: React.FC<BasicInformationProps> = (
     vpcEmptyError,
     sdkEmptyError,
     assetsS3BucketEmptyError,
+    assetsBucketNoExistError,
     loadingServiceAvailable,
     unSupportedServices,
   } = props;
@@ -147,6 +152,15 @@ const BasicInformation: React.FC<BasicInformationProps> = (
       setLoadingBucket(false);
     }
   };
+
+  const getS3BucketErrorMessage = () => {
+    if (assetsS3BucketEmptyError) {
+      return t('pipeline:valid.s3BucketEmpty');
+    } else if (assetsBucketNoExistError) {
+      return t('pipeline:valid.s3BucketNoExist');
+    }
+    return '';
+  }
 
   // Monitor region change
   useEffect(() => {
@@ -270,15 +284,15 @@ const BasicInformation: React.FC<BasicInformationProps> = (
               />
             ) : null
           }
-          errorText={
-            assetsS3BucketEmptyError ? t('pipeline:valid.s3BucketEmpty') : ''
-          }
+          errorText={getS3BucketErrorMessage()}
         >
           <Autosuggest
             disabled={isDisabled(update, pipelineInfo)}
             placeholder={defaultStr(t('pipeline:create.selectS3'))}
             statusType={loadingBucket ? 'loading' : 'finished'}
-            onChange={({ detail }) => changeS3Bucket(detail.value)}
+            onChange={({ detail }) =>
+              changeS3Bucket(detail.value, s3BucketOptionList)
+            }
             value={pipelineInfo.ingestionServer.loadBalancer.logS3Bucket.name}
             options={s3BucketOptionList}
             enteredTextLabel={(value) => `${t('use')}: "${value}"`}
