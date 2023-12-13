@@ -3,7 +3,7 @@
 set -euxo pipefail
 
 export SOLUTION_NAME='test-clickstream-001'
-export BUILD_VERSION=v1.0.0-ci-latest
+export BUILD_VERSION=v1.1.1-ci-latest
 
 export BSS_IMAGE_ASSET_REPOSITORY_NAME=clickstream
 export AWS_ASSET_ACCOUNT_ID=555555555555
