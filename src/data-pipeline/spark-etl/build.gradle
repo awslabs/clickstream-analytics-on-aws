@@ -80,9 +80,6 @@ tasks.named('test') {
     jvmArgs += sparkJava17CompatibleJvmArgs
     // Use JUnit Platform for unit tests.
     useJUnitPlatform()
-    filter {
-      // includeTestsMatching "ETL*Test"
-    }
 }
 
 application {
@@ -95,7 +92,6 @@ jacocoTestReport {
             xml.enabled true
             csv.enabled true
             html.enabled true
-            // html.destination "${buildDir}/reports/jacoco/test/"
     }
 }
 
