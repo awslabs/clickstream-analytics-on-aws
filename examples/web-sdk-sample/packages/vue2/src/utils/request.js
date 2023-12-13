@@ -48,7 +48,7 @@ Service.interceptors.response.use(
   (response) => {
     // Record request response information
     ClickstreamAnalytics.record({
-      name: 'http_request',
+      name: 'http_response',
       attributes: {
         response_url: response.request.request_url,
         response_config: JSON.stringify(response),

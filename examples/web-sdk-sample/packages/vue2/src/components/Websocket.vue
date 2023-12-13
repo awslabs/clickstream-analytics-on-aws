@@ -50,10 +50,6 @@ export default {
   mounted() {
     this.socket.on('server time', (data) => {
       // Record the time of server push
-      ClickstreamAnalytics.record({
-        name: 'server_time',
-        attributes: { message: data },
-      });
       this.serverTime = data;
     });
     this.socket.on('client message', (data) => {
