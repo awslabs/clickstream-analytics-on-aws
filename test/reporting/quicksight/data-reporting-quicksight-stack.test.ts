@@ -1773,14 +1773,8 @@ describe('DataReportingQuickSightStack resource test', () => {
           'Arn',
         ],
       },
-      awsAccountId: {
-        Ref: 'AWS::AccountId',
-      },
       awsRegion: {
         Ref: 'AWS::Region',
-      },
-      awsPartition: {
-        Ref: 'AWS::Partition',
       },
       networkInterfaces: {
         'Fn::GetAtt': [

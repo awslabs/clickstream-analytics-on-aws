@@ -42,9 +42,7 @@ export function createNetworkInterfaceCheckCustomResource(
   const cr = new CustomResource(scope, 'NetworkInterfaceCheckCustomResource', {
     serviceToken: provider.serviceToken,
     properties: {
-      awsAccountId: Aws.ACCOUNT_ID,
       awsRegion: Aws.REGION,
-      awsPartition: Aws.PARTITION,
       networkInterfaces: props.networkInterfaces,
     },
   });

@@ -34,9 +34,9 @@ import {
 import { OUTPUT_REPORTING_QUICKSIGHT_DASHBOARDS, OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN } from './common/constant';
 import { SolutionInfo } from './common/solution-info';
 import { associateApplicationWithStack, getShortIdOfStack } from './common/stack';
+import { createNetworkInterfaceCheckCustomResource } from './reporting/network-interface-check-custom-resource';
 import { createStackParametersQuickSight } from './reporting/parameter';
 import { createQuicksightCustomResource } from './reporting/quicksight-custom-resource';
-import { createNetworkInterfaceCheckCustomResource } from './reporting/vpc-check-custom-resource';
 
 export class DataReportingQuickSightStack extends Stack {
 
@@ -81,13 +81,9 @@ export class DataReportingQuickSightStack extends Stack {
     });
     vPCConnectionResource.node.addDependency(vpcConnectionCreateRole);
     const vpcConnectionArn = vPCConnectionResource.getAtt('Arn').toString();
-
     const networkInterfaces = vPCConnectionResource.getAtt('NetworkInterfaces').toString();
-    const vpcId = vPCConnectionResource.getAtt('VPCId').toString();
-
     const interfaceCheckCR = createNetworkInterfaceCheckCustomResource(this, {
       networkInterfaces,
-      vpcId,
     });
     interfaceCheckCR.node.addDependency(vPCConnectionResource);
 
@@ -152,7 +148,6 @@ export class DataReportingQuickSightStack extends Stack {
         vpcConnectionArn,
       },
     });
-    dataSource.node.addDependency(vPCConnectionResource);
     dataSource.node.addDependency(interfaceCheckCR);
     dataSource.node.addDependency(template);
 

@@ -42,26 +42,24 @@ export const handler = async (event: ResourceEvent, _context: Context): Promise<
 
 const _onCreate = async (ec2Client: EC2, props: NetworkInterfaceCheckCustomResourceLambdaPropsType): Promise<CdkCustomResourceResponse> => {
 
-  logger.info('interface need to check:', { props } );
   const networkInterfaceIds: string[] = [];
   for (const ni of props.networkInterfaces) {
     networkInterfaceIds.push(ni.NetworkInterfaceId);
   }
 
   logger.info(`networkInterfaceIds: ${networkInterfaceIds}`);
-  const networkInterfacesDescribeResult = await ec2Client.describeNetworkInterfaces({
-    NetworkInterfaceIds: networkInterfaceIds,
-  });
 
   let isNetworkInterfaceReady: boolean = false;
+  let checkCnt = 0;
+  while (!isNetworkInterfaceReady && checkCnt <= 600) {
+    await sleep(500);
+    const networkInterfacesDescribeResult = await ec2Client.describeNetworkInterfaces({
+      NetworkInterfaceIds: networkInterfaceIds,
+    });
+    checkCnt += 1;
 
-  if (networkInterfacesDescribeResult.NetworkInterfaces !== undefined) {
-    let checkCnt = 0;
-    while (!isNetworkInterfaceReady && checkCnt <= 600) {
-      await sleep(500);
-      checkCnt += 1;
+    if (networkInterfacesDescribeResult.NetworkInterfaces !== undefined) {
       let ready = true;
-
       for (const networkInterface of networkInterfacesDescribeResult.NetworkInterfaces) {
         logger.info(`network interface status: ${networkInterface.NetworkInterfaceId} - ${networkInterface.Status}`);
         if (networkInterface.Status !== NetworkInterfaceStatus.in_use) {
