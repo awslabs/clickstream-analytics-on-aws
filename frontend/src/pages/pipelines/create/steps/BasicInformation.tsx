@@ -160,7 +160,7 @@ const BasicInformation: React.FC<BasicInformationProps> = (
       return t('pipeline:valid.s3BucketNoExist');
     }
     return '';
-  }
+  };
 
   // Monitor region change
   useEffect(() => {
