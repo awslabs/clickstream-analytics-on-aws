@@ -18,7 +18,7 @@
       
       
       <link rel="icon" href="../../images/favicon.ico">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.1">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.2">
     
     
       
@@ -26,7 +26,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.45e1311d.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.50c56a3b.min.css">
       
         
         <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
@@ -3118,9 +3118,11 @@
 <tr>
 <th>Request Per Second</th>
 <th>EMR schedule interval</th>
-<th>EMR Cost</th>
+<th>EMR cost</th>
 <th>Redshift type</th>
-<th>Redshift cost</th>
+<th>Redshift Load cost</th>
+<th>Redshift Storage cost</th>
+<th>S3 cost</th>
 <th>Total (USD/Month)</th>
 </tr>
 </thead>
@@ -3128,69 +3130,79 @@
 <tr>
 <td>10RPS</td>
 <td>Hourly</td>
-<td>$61 ($1.24/GB)</td>
+<td>$72 ($1.47/GB)</td>
 <td>Serverless (8 based RPU)</td>
-<td>$104</td>
-<td>$165</td>
+<td>$74</td>
+<td>$3.4</td>
+<td>$0.36</td>
+<td>$149.76</td>
 </tr>
 <tr>
 <td></td>
 <td>6-hourly</td>
-<td>$40.9 ($0.83/GB)</td>
+<td>$41.5 ($0.84/GB)</td>
 <td>Serverless(8 based RPU)</td>
-<td>$16</td>
-<td>$56.9</td>
+<td>$13</td>
+<td>$3.4</td>
+<td>$0.36</td>
+<td>$58.26</td>
 </tr>
 <tr>
 <td></td>
 <td>Daily</td>
-<td>$34.3 ($0.7/GB)</td>
+<td>$26.7 ($0.54/GB)</td>
 <td>Serverless(8 based RPU)</td>
-<td>$11</td>
-<td>$45.3</td>
+<td>$8</td>
+<td>$3.4</td>
+<td>$0.36</td>
+<td>$38.46</td>
 </tr>
 <tr>
 <td>100RPS</td>
 <td>Hourly</td>
-<td>$403 ($0.82/GB)</td>
+<td>$321 ($0.65/GB)</td>
 <td>Serverless (8 based RPU)</td>
-<td>$170</td>
-<td>$573</td>
+<td>$96</td>
+<td>$34</td>
+<td>$3.6</td>
+<td>$454.6</td>
 </tr>
 <tr>
 <td></td>
 <td>6-hourly</td>
-<td>$192 ($0.39/GB)</td>
+<td>$202 ($0.41/GB)</td>
 <td>Serverless(8 based RPU)</td>
-<td>$119</td>
-<td>$311</td>
+<td>$31</td>
+<td>$34</td>
+<td>$3.6</td>
+<td>$270.6</td>
 </tr>
 <tr>
 <td></td>
 <td>Daily</td>
-<td>$245 ($0.5/GB)</td>
+<td>$281 ($0.57/GB)</td>
 <td>Serverless(8 based RPU)</td>
-<td>$78</td>
-<td>$323</td>
+<td>$21</td>
+<td>$34</td>
+<td>$3.6</td>
+<td>$339.6</td>
 </tr>
 <tr>
 <td>1000RPS</td>
-<td>Hourly</td>
-<td>$2815 ($0.57/GB)</td>
+<td>40 minutes (Recommended)</td>
+<td>$1926 ($0.39/GB)</td>
 <td>Serverless (32 based RPU)</td>
-<td>$668</td>
-<td>$3483</td>
-</tr>
-<tr>
-<td></td>
-<td>8-Hourly</td>
-<td>$2604 ($0.53/GB)</td>
-<td>Serverless (32 based RPU)</td>
-<td>$359</td>
-<td>$2963</td>
+<td>$440</td>
+<td>$340</td>
+<td>$36</td>
+<td>$2742</td>
 </tr>
 </tbody>
 </table>
+<div class="admonition info">
+<p class="admonition-title">Note</p>
+<p>The term <strong>Redshift storage cost</strong> refers to the cost of Redshift storage incurred for one month based on the corresponding RPS (Requests Per Second) specified in the above table. If the data is stored for more than one month, please refer to the <a href="https://aws.amazon.com/redshift/pricing/?nc1=h_ls">Redshift pricing</a> for calculating the pricing.</p>
+</div>
 <h2 id="reporting-module">Reporting module</h2>
 <p>Reporting module include the following cost components if you choose to enable:</p>
 <ul>
