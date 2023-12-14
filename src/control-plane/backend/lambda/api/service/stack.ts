@@ -35,6 +35,7 @@ import {
 import { getStackName, isEmpty } from '../common/utils';
 import { IPipeline } from '../model/pipeline';
 import { getStacksDetailsByNames } from '../store/aws/cloudformation';
+import { logger } from '../common/powertools';
 
 
 export class StackManager {
@@ -304,11 +305,16 @@ export class StackManager {
   }
 
   private async getExecutionDetail(executionArn: string): Promise<DescribeExecutionOutput | undefined> {
-    const params: DescribeExecutionCommand = new DescribeExecutionCommand({
-      executionArn: executionArn,
-    });
-    const result: DescribeExecutionCommandOutput = await sfnClient.send(params);
-    return result;
+    try {
+      const params: DescribeExecutionCommand = new DescribeExecutionCommand({
+        executionArn: executionArn,
+      });
+      const result: DescribeExecutionCommandOutput = await sfnClient.send(params);
+      return result;
+    } catch (error) {
+      logger.error('get execution detail error ', { error });
+      return undefined;
+    }
   }
 
   public setWorkflowType(state: WorkflowState, type: WorkflowStateType): WorkflowState {
