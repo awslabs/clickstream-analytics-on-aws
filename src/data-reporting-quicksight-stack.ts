@@ -34,6 +34,7 @@ import {
 import { OUTPUT_REPORTING_QUICKSIGHT_DASHBOARDS, OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN } from './common/constant';
 import { SolutionInfo } from './common/solution-info';
 import { associateApplicationWithStack, getShortIdOfStack } from './common/stack';
+import { createNetworkInterfaceCheckCustomResource } from './reporting/network-interface-check-custom-resource';
 import { createStackParametersQuickSight } from './reporting/parameter';
 import { createQuicksightCustomResource } from './reporting/quicksight-custom-resource';
 
@@ -80,6 +81,11 @@ export class DataReportingQuickSightStack extends Stack {
     });
     vPCConnectionResource.node.addDependency(vpcConnectionCreateRole);
     const vpcConnectionArn = vPCConnectionResource.getAtt('Arn').toString();
+    const networkInterfaces = vPCConnectionResource.getAtt('NetworkInterfaces').toString();
+    const interfaceCheckCR = createNetworkInterfaceCheckCustomResource(this, {
+      networkInterfaces,
+    });
+    interfaceCheckCR.node.addDependency(vPCConnectionResource);
 
     const useTemplateArnCondition = new CfnCondition(
       this,
@@ -142,7 +148,7 @@ export class DataReportingQuickSightStack extends Stack {
         vpcConnectionArn,
       },
     });
-    dataSource.node.addDependency(vPCConnectionResource);
+    dataSource.node.addDependency(interfaceCheckCR);
     dataSource.node.addDependency(template);
 
     const cr = createQuicksightCustomResource(this, {
@@ -192,6 +198,7 @@ function addCfnNag(stack: Stack) {
 
   addCfnNagForLogRetention(stack);
   addCfnNagForCustomResourceProvider(stack, 'CDK built-in provider for QuicksightCustomResource', 'QuicksightCustomResourceProvider');
+  addCfnNagForCustomResourceProvider(stack, 'CDK built-in provider for NetworkInterfaceCheckCustomResource', 'NetworkInterfaceCheckCustomResourceProvider');
   addCfnNagForCfnResource(stack, 'QuicksightCustomResourceLambda', 'QuicksightCustomResourceLambda' );
   addCfnNagToStack(stack, [
     {
