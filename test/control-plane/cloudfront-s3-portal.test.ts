@@ -256,6 +256,10 @@ describe('CloudFrontS3Portal', () => {
             [
               'clickstream-controlplane-oac-',
               {
+                Ref: 'AWS::Region',
+              },
+              '-',
+              {
                 'Fn::Select': [
                   0,
                   {
@@ -638,6 +642,10 @@ test('test cache policy name uniqueness', () => {
           '',
           [
             'cachepolicy-',
+            {
+              Ref: 'AWS::Region',
+            },
+            '-',
             {
               'Fn::Select': [
                 0,
