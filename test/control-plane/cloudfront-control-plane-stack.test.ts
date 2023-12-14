@@ -238,6 +238,11 @@ describe('CloudFrontS3PortalStack - Default stack props for common features', ()
     commonTemplate.hasResourceProperties('Custom::CDKBucketDeployment', {
       SourceObjectKeys: capture,
     });
+    commonTemplate.hasResourceProperties('Custom::CDKBucketDeployment', {
+      SystemMetadata: {
+        'cache-control': 'max-age=86400',
+      },
+    });
     expect(capture.asArray().length).toBeGreaterThanOrEqual(2);
 
   });

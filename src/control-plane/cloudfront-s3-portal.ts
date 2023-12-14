@@ -61,6 +61,7 @@ import {
 import {
   Source,
   BucketDeployment,
+  CacheControl,
 } from 'aws-cdk-lib/aws-s3-deployment';
 
 import { Construct, IConstruct } from 'constructs';
@@ -188,6 +189,9 @@ export class CloudFrontS3Portal extends Construct {
       prune: false,
       distribution: this.distribution,
       distributionPaths: props.frontendProps.autoInvalidFilePaths,
+      cacheControl: [
+        CacheControl.maxAge(Duration.days(1)),
+      ],
     });
   }
 
