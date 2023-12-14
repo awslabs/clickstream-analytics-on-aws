@@ -72,7 +72,7 @@ import { listMSKClusterBrokers } from '../store/aws/kafka';
 
 import { QuickSightUserArns, registerClickstreamUser } from '../store/aws/quicksight';
 import { getRedshiftInfo } from '../store/aws/redshift';
-import { listBuckets } from '../store/aws/s3';
+import { isBucketExist } from '../store/aws/s3';
 import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
 
@@ -484,8 +484,8 @@ export class CPipeline {
   }
 
   private async _checkExistenceS3Bucket() {
-    const buckets = await listBuckets(this.pipeline.region);
-    if (!buckets.some(b => b.name === this.pipeline.bucket.name)) {
+    const isExisted = await isBucketExist(this.pipeline.region, this.pipeline.bucket.name);
+    if (!isExisted) {
       throw new ClickStreamBadRequestError(`Validation error: bucket ${this.pipeline.bucket.name} not found. Please check and try again.`);
     }
   }

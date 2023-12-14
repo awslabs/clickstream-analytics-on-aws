@@ -145,11 +145,9 @@ describe('Pipeline test', () => {
         publicAZContainPrivateAZ: true,
         subnetsCross3AZ: true,
         subnetsIsolated: true,
-        mockBucket: {
-          name: 'EXAMPLE_BUCKET',
-          location: 'cn-north-1',
-        },
+        bucketNotExist: true,
       });
+
     ddbMock.on(PutCommand).resolves({});
     const res = await request(app)
       .post('/api/pipeline')
@@ -252,10 +250,6 @@ describe('Pipeline test', () => {
       ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, iamMock, {
         publicAZContainPrivateAZ: true,
         noVpcEndpoint: true,
-        mockBucket: {
-          name: 'EXAMPLE_BUCKET',
-          location: 'cn-north-1',
-        },
       });
     ddbMock.on(PutCommand).resolves({});
     createPipelineMockForBJSRegion(s3Mock);
@@ -304,10 +298,6 @@ describe('Pipeline test', () => {
         publicAZContainPrivateAZ: true,
         subnetsCross3AZ: true,
         noVpcEndpoint: true,
-        mockBucket: {
-          name: 'EXAMPLE_BUCKET',
-          location: 'us-west-1',
-        },
       });
     ddbMock.on(PutCommand).resolves({});
     const res = await request(app)
