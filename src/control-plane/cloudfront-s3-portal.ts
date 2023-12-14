@@ -68,7 +68,7 @@ import { Construct, IConstruct } from 'constructs';
 import { Constant } from './private/constant';
 import { LogProps } from '../common/alb';
 import { addCfnNagSuppressRules } from '../common/cfn-nag';
-import { getShortIdOfStack } from '../common/stack';
+import { getShortIdOfStackWithRegion } from '../common/stack';
 import { isEmpty } from '../common/utils';
 
 export interface DistributionProps {
@@ -257,7 +257,7 @@ export class CloudFrontS3Portal extends Construct {
       }
     }
 
-    const shortId = getShortIdOfStack(Stack.of(this));
+    const shortId = getShortIdOfStackWithRegion(Stack.of(this));
     const oac = new CfnOriginAccessControl(this, 'origin_access_control', {
       originAccessControlConfig: {
         name: 'clickstream-controlplane-oac-' + shortId,
