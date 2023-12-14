@@ -902,17 +902,9 @@ export class DynamoDbStore implements ClickStreamStore {
     if (pluginId.startsWith('BUILT-IN')) {
       const dic = await this.getDictionary('BuiltInPlugins');
       if (dic) {
-        let builtInPlugins: IPlugin[] = [];
-        for (let p of dic.data) {
-          p.createAt = +p.createAt;
-          p.updateAt = +p.updateAt;
-          p.bindCount = +p.bindCount;
-          p.builtIn = p.builtIn === 'true';
-          p.deleted = p.deleted === 'true';
-          builtInPlugins.push(p as IPlugin);
-        }
-        builtInPlugins = builtInPlugins.filter(p => p.id === pluginId);
-        return !isEmpty(builtInPlugins) ? builtInPlugins[0] : undefined;
+        const builtInPlugins: IPlugin[] = dic.data;
+        const plugins = builtInPlugins.filter(p => p.id === pluginId);
+        return !isEmpty(plugins) ? plugins[0] : undefined;
       }
     }
     const params: GetCommand = new GetCommand({
@@ -1007,30 +999,12 @@ export class DynamoDbStore implements ClickStreamStore {
     let plugins: IPlugin[] = [];
     const dic = await this.getDictionary('BuiltInPlugins');
     if (dic) {
-      let builtInPlugins: IPlugin[] = [];
-      for (let p of dic.data) {
-        builtInPlugins.push({
-          id: p.id,
-          type: p.type,
-          prefix: p.prefix,
-          name: p.name,
-          description: p.description,
-          jarFile: p.jarFile,
-          dependencyFiles: p.dependencyFiles,
-          mainFunction: p.mainFunction,
-          pluginType: p.pluginType,
-          builtIn: p.builtIn === 'true',
-          bindCount: Number(p.bindCount),
-          createAt: Number(p.createAt),
-          updateAt: Number(p.updateAt),
-          operator: p.operator,
-          deleted: p.deleted === 'true',
-        } as IPlugin);
-      }
+      const builtInPlugins: IPlugin[] = dic.data;
       if (!isEmpty(pluginType)) {
-        builtInPlugins = builtInPlugins.filter(p => p.pluginType === pluginType);
+        plugins = builtInPlugins.filter(p => p.pluginType === pluginType);
+      } else {
+        plugins = builtInPlugins;
       }
-      plugins = builtInPlugins;
     }
 
     const input: QueryCommandInput = {

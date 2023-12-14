@@ -33,6 +33,7 @@ import { DynamoDBDocumentClient, GetCommand, GetCommandInput, PutCommand, PutCom
 import { AwsClientStub } from 'aws-sdk-client-mock';
 import { analyticsMetadataTable, clickStreamTableName, dictionaryTableName, prefixTimeGSIName } from '../../common/constants';
 import { IUserRole, ProjectEnvironment } from '../../common/types';
+import dictionary from '../../config/dictionary.json';
 import { IPipeline } from '../../model/pipeline';
 
 const MOCK_TOKEN = '0000-0000';
@@ -46,9 +47,9 @@ const MOCK_EXECUTION_ID = 'main-3333-3333';
 const MOCK_BUILT_IN_PLUGIN_ID = 'BUILT-IN-1';
 const MOCK_NEW_TEMPLATE_VERSION = '1.0.0-main-sdjes12';
 const MOCK_SOLUTION_VERSION = 'v1.0.0';
-const MOCK_EVENT_NAME = 'event-mock';
-const MOCK_EVENT_PARAMETER_NAME = 'event-attribute-mock';
-const MOCK_USER_ATTRIBUTE_NAME = 'user-attribute-mock';
+const MOCK_EVENT_NAME = '_first_open';
+const MOCK_EVENT_PARAMETER_NAME = 'install_source';
+const MOCK_USER_ATTRIBUTE_NAME = '_user_id';
 const MOCK_DASHBOARD_ID = 'dash_6666_6666';
 const MOCK_USER_ID = 'fake@example.com';
 
@@ -287,91 +288,7 @@ function dictionaryMock(ddbMock: any, name?: string): any {
         name: 'BuiltInPlugins',
       },
     }).resolves({
-      Item: {
-        name: 'BuiltInPlugins',
-        data: [
-          {
-            id: 'BUILT-IN-1',
-            type: 'PLUGIN#BUILT-IN-1',
-            prefix: 'PLUGIN',
-            name: 'Transformer',
-            description: {
-              'en-US': 'Convert the data format reported by SDK into the data format in the data warehouse',
-              'zh-CN': '把SDK上报的数据格式，转换成数据仓库中的数据格式',
-            },
-            builtIn: 'true',
-            mainFunction: 'software.aws.solution.clickstream.TransformerV2',
-            jarFile: '',
-            bindCount: '0',
-            pluginType: 'Transform',
-            dependencyFiles: [],
-            operator: '',
-            deleted: 'false',
-            createAt: '1667355960000',
-            updateAt: '1667355960000',
-          },
-          {
-            id: 'BUILT-IN-2',
-            type: 'PLUGIN#BUILT-IN-2',
-            prefix: 'PLUGIN',
-            name: 'UAEnrichment',
-            description: {
-              'en-US': 'Derive OS, device, browser information from User Agent string from the HTTP request header',
-              'zh-CN': '从 HTTP 请求标头的用户代理（User Agent)字符串中获取操作系统、设备和浏览器信息',
-            },
-            builtIn: 'true',
-            mainFunction: 'software.aws.solution.clickstream.UAEnrichment',
-            jarFile: '',
-            bindCount: '0',
-            pluginType: 'Enrich',
-            dependencyFiles: [],
-            operator: '',
-            deleted: 'false',
-            createAt: '1667355960000',
-            updateAt: '1667355960000',
-          },
-          {
-            id: 'BUILT-IN-3',
-            type: 'PLUGIN#BUILT-IN-3',
-            prefix: 'PLUGIN',
-            name: 'IPEnrichment',
-            description: {
-              'en-US': 'Derive location information (e.g., city, country, region) based on the request source IP',
-              'zh-CN': '根据请求源 IP 获取位置信息（例如，城市、国家、地区）',
-            },
-            builtIn: 'true',
-            mainFunction: 'software.aws.solution.clickstream.IPEnrichment',
-            jarFile: '',
-            bindCount: '0',
-            pluginType: 'Enrich',
-            dependencyFiles: [],
-            operator: '',
-            deleted: 'false',
-            createAt: '1667355960000',
-            updateAt: '1667355960000',
-          },
-          {
-            id: 'BUILT-IN-4',
-            type: 'PLUGIN#BUILT-IN-4',
-            prefix: 'PLUGIN',
-            name: 'GTMServerDataTransformer',
-            description: {
-              'en-US': 'Convert the GTM server data format into the data format in the data warehouse',
-              'zh-CN': '把GTM服务的数据格式，转换成数据仓库中的数据格式',
-            },
-            builtIn: 'false',
-            mainFunction: 'software.aws.solution.clickstream.gtm.GTMServerDataTransformer',
-            jarFile: '',
-            bindCount: '0',
-            pluginType: 'Transform',
-            dependencyFiles: [],
-            operator: '',
-            deleted: 'false',
-            createAt: '1667355960000',
-            updateAt: '1667355960000',
-          },
-        ],
-      },
+      Item: dictionary.find(item => item.name === 'BuiltInPlugins'),
     });
   }
   if (!name || name === 'Templates') {
@@ -381,21 +298,7 @@ function dictionaryMock(ddbMock: any, name?: string): any {
         name: 'Templates',
       },
     }).resolves({
-      Item: {
-        name: 'Templates',
-        data: {
-          Ingestion_s3: 'ingestion-server-s3-stack.template.json',
-          Ingestion_kafka: 'ingestion-server-kafka-stack.template.json',
-          Ingestion_kinesis: 'ingestion-server-kinesis-stack.template.json',
-          KafkaConnector: 'kafka-s3-sink-stack.template.json',
-          DataProcessing: 'data-pipeline-stack.template.json',
-          DataModelingRedshift: 'data-analytics-redshift-stack.template.json',
-          Reporting: 'data-reporting-quicksight-stack.template.json',
-          Metrics: 'metrics-stack.template.json',
-          DataModelingAthena: 'data-modeling-athena-stack.template.json',
-          ServiceCatalogAppRegistry: 'service-catalog-appregistry-stack.template.json',
-        },
-      },
+      Item: dictionary.find(item => item.name === 'Templates'),
     });
   }
   if (!name || name === 'Solution') {
@@ -415,6 +318,16 @@ function dictionaryMock(ddbMock: any, name?: string): any {
           version: MOCK_SOLUTION_VERSION,
         },
       },
+    });
+  }
+  if (!name || name === 'MetadataBuiltInList') {
+    ddbMock.on(GetCommand, {
+      TableName: dictionaryTableName,
+      Key: {
+        name: 'MetadataBuiltInList',
+      },
+    }).resolves({
+      Item: dictionary.find(item => item.name === 'MetadataBuiltInList'),
     });
   }
 }
