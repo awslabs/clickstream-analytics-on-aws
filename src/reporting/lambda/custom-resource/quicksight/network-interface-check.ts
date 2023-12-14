@@ -47,7 +47,7 @@ const _onCreate = async (ec2Client: EC2, props: NetworkInterfaceCheckCustomResou
     networkInterfaceIds.push(ni.NetworkInterfaceId);
   }
 
-  logger.info(`networkInterfaceIds: ${networkInterfaceIds}`);
+  logger.info('networkInterfaceIds:', { networkInterfaceIds });
 
   let isNetworkInterfaceReady: boolean = false;
   let checkCnt = 0;
