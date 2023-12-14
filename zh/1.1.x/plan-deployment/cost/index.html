@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="../../images/favicon.ico">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.1">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.2">
     
     
       
@@ -28,7 +28,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.45e1311d.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.50c56a3b.min.css">
       
         
         <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
@@ -3105,7 +3105,9 @@
 <th>EMR调度间隔</th>
 <th>EMR 费用</th>
 <th>Redshift类型</th>
-<th>Redshift 费用</th>
+<th>Redshift加载数据 费用</th>
+<th>Redshift存储数据 费用</th>
+<th>S3 费用</th>
 <th>总计 (美元/月)</th>
 </tr>
 </thead>
@@ -3113,69 +3115,79 @@
 <tr>
 <td>10RPS</td>
 <td>每小时</td>
-<td>$61（$1.24/GB）</td>
+<td>$72（$1.47/GB）</td>
 <td>无服务器 (基于8个RPU)</td>
-<td>$104</td>
-<td>$165</td>
+<td>$74</td>
+<td>$3.4</td>
+<td>$0.36</td>
+<td>$149.76</td>
 </tr>
 <tr>
 <td></td>
 <td>每6小时</td>
-<td>$40.9（$0.83/GB）</td>
+<td>$41.5（$0.84/GB）</td>
 <td>无服务器 (基于8个RPU)</td>
-<td>$16</td>
-<td>$56.9</td>
+<td>$13</td>
+<td>$3.4</td>
+<td>$0.36</td>
+<td>$58.26</td>
 </tr>
 <tr>
 <td></td>
 <td>每日</td>
-<td>$34.3（$0.7/GB）</td>
+<td>$26.7（$0.54/GB）</td>
 <td>无服务器 (基于8个RPU)</td>
-<td>$11</td>
-<td>$45.3</td>
+<td>$8</td>
+<td>$3.4</td>
+<td>$0.36</td>
+<td>$38.46</td>
 </tr>
 <tr>
 <td>100RPS</td>
 <td>每小时</td>
-<td>$403（$0.82/GB）</td>
+<td>$321（$0.65/GB）</td>
 <td>无服务器 (基于8个RPU)</td>
-<td>$170</td>
-<td>$573</td>
+<td>$96</td>
+<td>$34</td>
+<td>$3.6</td>
+<td>$454.6</td>
 </tr>
 <tr>
 <td></td>
 <td>每6小时</td>
-<td>$192（$0.39/GB）</td>
+<td>$202（$0.41/GB）</td>
 <td>无服务器 (基于8个RPU)</td>
-<td>$119</td>
-<td>$311</td>
+<td>$31</td>
+<td>$34</td>
+<td>$3.6</td>
+<td>$270.6</td>
 </tr>
 <tr>
 <td></td>
 <td>每日</td>
-<td>$245（$0.5/GB）</td>
+<td>$281（$0.57/GB）</td>
 <td>无服务器 (基于8个RPU)</td>
-<td>$78</td>
-<td>$323</td>
+<td>$21</td>
+<td>$34</td>
+<td>$3.6</td>
+<td>$339.6</td>
 </tr>
 <tr>
 <td>1000RPS</td>
-<td>每小时</td>
-<td>$2815（$0.57/GB）</td>
+<td>每40分钟（推荐）</td>
+<td>$1926（$0.39/GB）</td>
 <td>无服务器 (基于32个RPU)</td>
-<td>$668</td>
-<td>$3483</td>
-</tr>
-<tr>
-<td></td>
-<td>每8小时</td>
-<td>$2604（$0.53/GB）</td>
-<td>无服务器 (基于32个RPU)</td>
-<td>$359</td>
-<td>$2963</td>
+<td>$440</td>
+<td>$340</td>
+<td>$36</td>
+<td>$2742</td>
 </tr>
 </tbody>
 </table>
+<div class="admonition info">
+<p class="admonition-title">提示</p>
+<p><strong>Redshift存储数据 费用</strong>是指您以表格中对应的RPS发送一个月的请求所花费的redshift存储费用，如果数据存放超过一个月，请根据<a href="https://aws.amazon.com/redshift/pricing/?nc1=h_ls">Redshift 定价</a>计算价格</p>
+</div>
 <h2 id="_4">仪表板</h2>
 <p>如果您选择启用，仪表板模块包括以下成本组成部分：</p>
 <ul>
