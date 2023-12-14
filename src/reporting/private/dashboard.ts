@@ -34,6 +34,15 @@ export interface QuicksightCustomResourceProps {
   readonly redshiftProps: RedShiftProps;
 };
 
+export interface NetworkInterfaceCheckCustomResourceProps {
+  readonly networkInterfaces: string;
+};
+
+export type NetworkInterfaceCheckCustomResourceLambdaProps = {
+  readonly awsRegion: string;
+  readonly networkInterfaces: any[];
+};
+
 export interface QuicksightCustomResourceLambdaProps {
   readonly awsAccountId: string;
   readonly awsRegion: string;
