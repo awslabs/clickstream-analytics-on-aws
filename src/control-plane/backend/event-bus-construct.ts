@@ -49,33 +49,71 @@ export class BackendEventBus extends Construct {
       }),
     );
 
-    const fn = this.listenStackStatusFn(props);
+    const listenStackStatusFn = this.listenStackFn(props);
+    const listenStateStatusFn = this.listenStateFn(props);
 
-    const rule = new Rule(this, 'CloudFormationStackStatusChange', {
+    const ruleStack = new Rule(this, 'ListenStackStatusChange', {
       eventBus: this.eventBus,
+      ruleName: `ClickstreamListenStackStatusChange-${getShortIdOfStack(Stack.of(this))}`,
+      description: 'Rule for listen CFN stack status change',
       eventPattern: {
         source: ['aws.cloudformation'],
         detailType: ['CloudFormation Stack Status Change'],
       },
     });
+    ruleStack.addTarget(
+      new LambdaFunction(listenStackStatusFn, {
+        deadLetterQueue: createDLQueue(this, 'listenStackStatusDLQ'),
+        maxEventAge: Duration.hours(2),
+        retryAttempts: 2,
+      }),
+    );
 
-    const queue = createDLQueue(this, 'listenStackStatusDLQ');
+    const ruleState = new Rule(this, 'ListenStateStatusChange', {
+      eventBus: this.eventBus,
+      ruleName: `ClickstreamListenStateStatusChange-${getShortIdOfStack(Stack.of(this))}`,
+      description: 'Rule for listen SFN state machine status change',
+      eventPattern: {
+        source: ['aws.states'],
+        detailType: ['Step Functions Execution Status Change'],
+      },
+    });
+    ruleState.addTarget(
+      new LambdaFunction(listenStateStatusFn, {
+        deadLetterQueue: createDLQueue(this, 'listenStateStatusDLQ'),
+        maxEventAge: Duration.hours(2),
+        retryAttempts: 2,
+      }),
+    );
 
-    rule.addTarget(new LambdaFunction(fn, {
-      deadLetterQueue: queue,
-      maxEventAge: Duration.hours(2),
-      retryAttempts: 2,
-    }));
   }
 
-  private listenStackStatusFn(props: BackendEventBusProps): IFunction {
-    const fn = new SolutionNodejsFunction(this, 'ListenStackStatusFunction', {
-      description: 'Lambda function for listen stack status of solution Clickstream Analytics on AWS',
-      entry: join(__dirname, './lambda/sfn-action/index.ts'),
+  private listenStackFn(props: BackendEventBusProps): IFunction {
+    const fn = new SolutionNodejsFunction(this, 'ListenStackFunction', {
+      description: 'Lambda function for listen CFN stack status of solution Clickstream Analytics on AWS',
+      entry: join(__dirname, './lambda/listen-stack-status/index.ts'),
       handler: 'handler',
       runtime: Runtime.NODEJS_18_X,
       tracing: Tracing.ACTIVE,
-      role: createLambdaRole(this, 'ListenStackStatusFuncRole', true, []),
+      role: createLambdaRole(this, 'ListenStackFuncRole', true, []),
+      architecture: Architecture.X86_64,
+      timeout: Duration.seconds(60),
+      environment: {
+        ...POWERTOOLS_ENVS,
+      },
+      ...props.lambdaFunctionNetwork,
+    });
+    return fn;
+  }
+
+  private listenStateFn(props: BackendEventBusProps): IFunction {
+    const fn = new SolutionNodejsFunction(this, 'ListenStateFunction', {
+      description: 'Lambda function for listen SFN state machine status of solution Clickstream Analytics on AWS',
+      entry: join(__dirname, './lambda/listen-state-status/index.ts'),
+      handler: 'handler',
+      runtime: Runtime.NODEJS_18_X,
+      tracing: Tracing.ACTIVE,
+      role: createLambdaRole(this, 'ListenStateFuncRole', true, []),
       architecture: Architecture.X86_64,
       timeout: Duration.seconds(60),
       environment: {

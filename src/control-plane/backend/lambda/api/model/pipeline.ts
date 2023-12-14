@@ -13,7 +13,6 @@
 
 import { Tag } from '@aws-sdk/client-cloudformation';
 import { getDiff } from 'json-difference';
-import { v4 as uuidv4 } from 'uuid';
 import { IDictionary } from './dictionary';
 import { IPlugin } from './plugin';
 import { IProject } from './project';
@@ -65,7 +64,7 @@ import {
   WorkflowTemplate,
   WorkflowVersion,
 } from '../common/types';
-import { getStackName, getStackTags, getUpdateTags, isEmpty } from '../common/utils';
+import { getStackName, getStackTags, getUpdateTags, getStateMachineExecutionName, isEmpty } from '../common/utils';
 import { StackManager } from '../service/stack';
 import { describeStack } from '../store/aws/cloudformation';
 import { listMSKClusterBrokers } from '../store/aws/kafka';
@@ -270,7 +269,7 @@ export class CPipeline {
   public async create(): Promise<void> {
     // state machine
     this.pipeline.lastAction = 'Create';
-    this.pipeline.executionName = `main-${uuidv4()}`;
+    this.pipeline.executionName = getStateMachineExecutionName(this.pipeline.pipelineId);
     this.pipeline.workflow = await this.generateWorkflow();
 
     this.pipeline.templateVersion = FULL_SOLUTION_VERSION;
@@ -295,7 +294,7 @@ export class CPipeline {
     this.pipeline.lastAction = 'Update';
     this.pipeline.templateVersion = oldPipeline.templateVersion;
     validateIngestionServerNum(this.pipeline.ingestionServer.size);
-    this.pipeline.executionName = `main-${uuidv4()}`;
+    this.pipeline.executionName = getStateMachineExecutionName(this.pipeline.pipelineId);
 
     this.pipeline.status = await this.stackManager.getPipelineStatus();
     if (this.pipeline.status.status === PipelineStatusType.CREATING ||
@@ -380,8 +379,7 @@ export class CPipeline {
   public async upgrade(oldPipeline: IPipeline): Promise<void> {
     this.pipeline.lastAction = 'Upgrade';
     validateIngestionServerNum(this.pipeline.ingestionServer.size);
-
-    const executionName = `main-${uuidv4()}`;
+    const executionName = getStateMachineExecutionName(this.pipeline.pipelineId);
     this.pipeline.executionName = executionName;
     this.pipeline.templateVersion = FULL_SOLUTION_VERSION;
     this.pipeline.workflow = await this.generateWorkflow();
@@ -403,7 +401,7 @@ export class CPipeline {
 
   public async updateApp(appIds: string[]): Promise<void> {
     this.pipeline.lastAction = 'Update';
-    const executionName = `main-${uuidv4()}`;
+    const executionName = getStateMachineExecutionName(this.pipeline.pipelineId);
     this.pipeline.executionName = executionName;
     const ingestionStackName = getStackName(
       this.pipeline.pipelineId, PipelineStackType.INGESTION, this.pipeline.ingestionServer.sinkType);
@@ -425,7 +423,7 @@ export class CPipeline {
 
   public async delete(): Promise<void> {
     this.pipeline.lastAction = 'Delete';
-    const executionName = `main-${uuidv4()}`;
+    const executionName = getStateMachineExecutionName(this.pipeline.pipelineId);
     this.pipeline.executionName = executionName;
     // update workflow
     this.stackManager.deleteWorkflow();
@@ -449,7 +447,7 @@ export class CPipeline {
   }
 
   public async retry(): Promise<void> {
-    const executionName = `main-${uuidv4()}`;
+    const executionName = getStateMachineExecutionName(this.pipeline.pipelineId);
     this.pipeline.executionName = executionName;
     this.stackManager.retryWorkflow();
     // create new execution

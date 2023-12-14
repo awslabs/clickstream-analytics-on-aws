@@ -990,6 +990,10 @@ function getUpdateTags(newPipeline: IPipeline, oldPipeline: IPipeline) {
   return updateTags;
 }
 
+function getStateMachineExecutionName(pipelineId: string) {
+  return `main-${pipelineId}-${new Date().getTime()}`;
+}
+
 export {
   isEmpty,
   isEmail,
@@ -1035,4 +1039,5 @@ export {
   isFinallyPipelineStatus,
   getStackTags,
   getUpdateTags,
+  getStateMachineExecutionName,
 };

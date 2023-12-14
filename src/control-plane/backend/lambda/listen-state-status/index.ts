@@ -11,20 +11,23 @@
  *  and limitations under the License.
  */
 
-import { StackStatus } from '@aws-sdk/client-cloudformation';
+import { ExecutionStatus } from '@aws-sdk/client-sfn';
 import { EventBridgeEvent } from 'aws-lambda';
 import { logger } from '../../../../common/powertools';
 
-interface CloudFormationStackStatusChangeNotificationEventDetail {
-  'stack-id': string;
-  'status-details': {
-    status: StackStatus;
-    'status-reason': string;
-  };
+interface StepFunctionsExecutionStatusChangeNotificationEventDetail {
+  executionArn: string;
+  stateMachineArn: string;
+  name: string;
+  status?: ExecutionStatus;
+  startDate?: number;
+  stopDate?: number;
+  input?: any;
+  output?: any;
 }
 
 export const handler = async (
-  event: EventBridgeEvent<'CloudFormation Stack Status Change', CloudFormationStackStatusChangeNotificationEventDetail>): Promise<void> => {
+  event: EventBridgeEvent<'Step Functions Execution Status Change', StepFunctionsExecutionStatusChangeNotificationEventDetail>): Promise<void> => {
 
   logger.debug('Event: ', { event: event });
 };

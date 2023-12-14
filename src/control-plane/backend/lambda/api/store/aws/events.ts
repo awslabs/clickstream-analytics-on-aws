@@ -11,20 +11,17 @@
  *  and limitations under the License.
  */
 
-import { StackStatus } from '@aws-sdk/client-cloudformation';
-import { EventBridgeEvent } from 'aws-lambda';
-import { logger } from '../../../../common/powertools';
 
-interface CloudFormationStackStatusChangeNotificationEventDetail {
-  'stack-id': string;
-  'status-details': {
-    status: StackStatus;
-    'status-reason': string;
-  };
-}
+import { STSClient, AssumeRoleCommand } from '@aws-sdk/client-sts';
+import { STSUploadRole } from '../../common/constants';
 
-export const handler = async (
-  event: EventBridgeEvent<'CloudFormation Stack Status Change', CloudFormationStackStatusChangeNotificationEventDetail>): Promise<void> => {
-
-  logger.debug('Event: ', { event: event });
+export const AssumeUploadRole = async (sessionName: string) => {
+  const client = new STSClient({});
+  const command = new AssumeRoleCommand({
+    RoleArn: STSUploadRole,
+    RoleSessionName: sessionName,
+    DurationSeconds: 900,
+  });
+  const data = await client.send(command);
+  return data.Credentials!;
 };
