@@ -17,7 +17,7 @@ import { ISecurityGroup, IVpc, SubnetSelection } from 'aws-cdk-lib/aws-ec2';
 import { Rule, Schedule } from 'aws-cdk-lib/aws-events';
 import { SfnStateMachine } from 'aws-cdk-lib/aws-events-targets';
 import { IRole } from 'aws-cdk-lib/aws-iam';
-import { IFunction, Runtime } from 'aws-cdk-lib/aws-lambda';
+import { IFunction } from 'aws-cdk-lib/aws-lambda';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { StateMachine, LogLevel, IStateMachine, TaskInput, Wait, WaitTime, Succeed, Fail, Choice, Map, Condition, Pass, DefinitionBody } from 'aws-cdk-lib/aws-stepfunctions';
 import { LambdaInvoke } from 'aws-cdk-lib/aws-stepfunctions-tasks';
@@ -26,7 +26,6 @@ import { ClearExpiredEventsWorkflowData, ExistingRedshiftServerlessCustomProps, 
 import { createLambdaRole } from '../../common/lambda';
 import { createLogGroup } from '../../common/logs';
 import { REDSHIFT_MODE } from '../../common/model';
-import { POWERTOOLS_ENVS } from '../../common/powertools';
 import { SolutionNodejsFunction } from '../../private/function';
 
 export interface ClearExpiredEventsWorkflowProps {
@@ -158,7 +157,6 @@ export class ClearExpiredEventsWorkflow extends Construct {
     const fnSG = props.securityGroupForLambda;
 
     const fn = new SolutionNodejsFunction(this, 'ClearExpiredEventsFn', {
-      runtime: Runtime.NODEJS_18_X,
       entry: join(
         this.lambdaRootPath,
         'clear-expired-events.ts',
@@ -174,8 +172,8 @@ export class ClearExpiredEventsWorkflow extends Construct {
       environment: {
         ... this.toRedshiftEnvVariables(props),
         REDSHIFT_DATA_API_ROLE: props.dataAPIRole.roleArn,
-        ... POWERTOOLS_ENVS,
       },
+      applicationLogLevel: 'WARN',
     });
     props.dataAPIRole.grantAssumeRole(fn.grantPrincipal);
     return fn;
@@ -197,7 +195,6 @@ export class ClearExpiredEventsWorkflow extends Construct {
     const fnSG = props.securityGroupForLambda;
 
     const fn = new SolutionNodejsFunction(this, 'CheckClearJobStatusFn', {
-      runtime: Runtime.NODEJS_18_X,
       entry: join(
         this.lambdaRootPath,
         'check-clear-status.ts',
@@ -213,8 +210,8 @@ export class ClearExpiredEventsWorkflow extends Construct {
       environment: {
         ... this.toRedshiftEnvVariables(props),
         REDSHIFT_DATA_API_ROLE: props.dataAPIRole.roleArn,
-        ... POWERTOOLS_ENVS,
       },
+      applicationLogLevel: 'WARN',
     });
 
     props.dataAPIRole.grantAssumeRole(fn.grantPrincipal);

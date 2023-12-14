@@ -14,7 +14,7 @@
 import { join } from 'path';
 import { Arn, ArnFormat, Aws, CustomResource, Duration, Fn, Stack } from 'aws-cdk-lib';
 import { AccountPrincipal, IRole, PolicyDocument, PolicyStatement, Role } from 'aws-cdk-lib/aws-iam';
-import { IFunction, Runtime } from 'aws-cdk-lib/aws-lambda';
+import { IFunction } from 'aws-cdk-lib/aws-lambda';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { CfnWorkgroup } from 'aws-cdk-lib/aws-redshiftserverless';
 import { Provider } from 'aws-cdk-lib/custom-resources';
@@ -24,7 +24,6 @@ import { addCfnNagForCustomResourceProvider, addCfnNagToStack, ruleRolePolicyWit
 import { createLambdaRole } from '../../common/lambda';
 import { attachListTagsPolicyForFunction } from '../../common/lambda/tags';
 import { BuiltInTagKeys } from '../../common/model';
-import { POWERTOOLS_ENVS } from '../../common/powertools';
 import { SolutionInfo } from '../../common/solution-info';
 import { SolutionNodejsFunction } from '../../private/function';
 
@@ -224,7 +223,6 @@ export class RedshiftServerless extends Construct {
   createCreateMappingUserFunction() {
     const lambdaRootPath = __dirname + '/../lambdas/custom-resource';
     const fn = new SolutionNodejsFunction(this, 'CreateUserFn', {
-      runtime: Runtime.NODEJS_18_X,
       entry: join(
         lambdaRootPath,
         'create-redshift-user.ts',
@@ -235,9 +233,6 @@ export class RedshiftServerless extends Construct {
       timeout: Duration.minutes(3),
       logRetention: RetentionDays.ONE_WEEK,
       role: createLambdaRole(this, 'CreateRedshiftUserRole', false, []),
-      environment: {
-        ... POWERTOOLS_ENVS,
-      },
     });
     return fn;
   }
@@ -274,7 +269,6 @@ export class RedshiftServerless extends Construct {
   private createCreateNamespaceFunction(): IFunction {
     const lambdaRootPath = __dirname + '/../lambdas/custom-resource';
     const fn = new SolutionNodejsFunction(this, 'CreateNamespaceFn', {
-      runtime: Runtime.NODEJS_18_X,
       entry: join(
         lambdaRootPath,
         'create-redshift-namespace.ts',
@@ -285,9 +279,6 @@ export class RedshiftServerless extends Construct {
       timeout: Duration.minutes(3),
       logRetention: RetentionDays.ONE_WEEK,
       role: createLambdaRole(this, 'CreateRedshiftNamespaceRole', false, []),
-      environment: {
-        ... POWERTOOLS_ENVS,
-      },
     });
     return fn;
   }

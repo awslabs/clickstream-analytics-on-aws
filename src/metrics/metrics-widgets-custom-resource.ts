@@ -15,14 +15,12 @@
 import { join } from 'path';
 import { Arn, ArnFormat, CfnResource, CustomResource, Duration, Resource, Stack } from 'aws-cdk-lib';
 import { PolicyStatement } from 'aws-cdk-lib/aws-iam';
-import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Provider } from 'aws-cdk-lib/custom-resources';
 import { Construct } from 'constructs';
 import { addCfnNagSuppressRules, rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions } from '../common/cfn-nag';
 import { createLambdaRole } from '../common/lambda';
 import { attachListTagsPolicyForFunction } from '../common/lambda/tags';
-import { POWERTOOLS_ENVS } from '../common/powertools';
 import { getShortIdOfStack } from '../common/stack';
 import { SolutionNodejsFunction } from '../private/function';
 
@@ -159,7 +157,6 @@ function createSetMetricsWidgetsResourceLambda(scope: Construct, id: string): So
 
   const stackId = getShortIdOfStack(Stack.of(scope));
   const fn = new SolutionNodejsFunction(scope, id + 'Lambda', {
-    runtime: Runtime.NODEJS_18_X,
     entry: join(
       __dirname,
       'custom-resource',
@@ -173,8 +170,6 @@ function createSetMetricsWidgetsResourceLambda(scope: Construct, id: string): So
     role,
     environment: {
       STACK_ID: stackId,
-      ...POWERTOOLS_ENVS,
-
     },
   });
 

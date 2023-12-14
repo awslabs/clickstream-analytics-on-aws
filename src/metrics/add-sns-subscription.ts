@@ -14,14 +14,12 @@
 import { join } from 'path';
 import { CfnResource, CustomResource, Duration } from 'aws-cdk-lib';
 import { PolicyStatement } from 'aws-cdk-lib/aws-iam';
-import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Topic } from 'aws-cdk-lib/aws-sns';
 import { Provider } from 'aws-cdk-lib/custom-resources';
 import { Construct } from 'constructs';
 import { addCfnNagSuppressRules, rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions } from '../common/cfn-nag';
 import { createLambdaRole } from '../common/lambda';
-import { POWERTOOLS_ENVS } from '../common/powertools';
 import { SolutionNodejsFunction } from '../private/function';
 
 export interface AddSubscriptionCustomResourceProps {
@@ -67,7 +65,6 @@ function createAddSubscriptionLambda(scope: Construct, props: AddSubscriptionCus
   ]);
 
   const fn = new SolutionNodejsFunction(scope, 'addSubscriptionLambda', {
-    runtime: Runtime.NODEJS_18_X,
     entry: join(
       __dirname,
       'custom-resource',
@@ -82,7 +79,6 @@ function createAddSubscriptionLambda(scope: Construct, props: AddSubscriptionCus
     environment: {
       SNS_TOPIC_ARN: props.snsTopic.topicArn,
       EMAILS: props.emails,
-      ...POWERTOOLS_ENVS,
     },
   });
   fn.node.addDependency(role);

@@ -11,8 +11,11 @@
  *  and limitations under the License.
  */
 
+import { Architecture, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { NodejsFunction, NodejsFunctionProps } from 'aws-cdk-lib/aws-lambda-nodejs';
+import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Construct } from 'constructs';
+import { POWERTOOLS_ENVS } from '../common/powertools';
 
 export class SolutionNodejsFunction extends NodejsFunction {
 
@@ -25,6 +28,15 @@ export class SolutionNodejsFunction extends NodejsFunction {
       } : {
         externalModules: [],
       },
+      runtime: Runtime.NODEJS_18_X,
+      architecture: Architecture.ARM_64,
+      environment: {
+        ...POWERTOOLS_ENVS,
+        ...(props?.environment ?? {}),
+      },
+      logRetention: props?.logRetention ?? RetentionDays.ONE_MONTH,
+      logFormat: 'JSON',
+      applicationLogLevel: props?.applicationLogLevel ?? 'INFO',
     });
   }
 }

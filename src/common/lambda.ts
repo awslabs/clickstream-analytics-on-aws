@@ -20,12 +20,9 @@ import {
   ServicePrincipal,
   PrincipalBase,
 } from 'aws-cdk-lib/aws-iam';
-import { IFunction, Runtime } from 'aws-cdk-lib/aws-lambda';
+import { IFunction } from 'aws-cdk-lib/aws-lambda';
 import { IConstruct } from 'constructs';
 import { addCfnNagSuppressRules } from './cfn-nag';
-
-
-export const LAMBDA_NODEJS_RUNTIME = Runtime.NODEJS_18_X;
 
 export function cloudWatchSendLogs(id: string, func: IFunction): IFunction {
   if (func.role !== undefined) {

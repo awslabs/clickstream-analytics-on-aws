@@ -18,7 +18,7 @@ import { ISecurityGroup, IVpc, SubnetSelection } from 'aws-cdk-lib/aws-ec2';
 import { Rule, Match } from 'aws-cdk-lib/aws-events';
 import { SfnStateMachine, LambdaFunction } from 'aws-cdk-lib/aws-events-targets';
 import { IRole, Policy, PolicyStatement } from 'aws-cdk-lib/aws-iam';
-import { IFunction, Runtime } from 'aws-cdk-lib/aws-lambda';
+import { IFunction } from 'aws-cdk-lib/aws-lambda';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import {
   StateMachine, LogLevel, IStateMachine, TaskInput, Wait, WaitTime, Succeed, Choice, Map,
@@ -32,7 +32,6 @@ import { createLambdaRole } from '../../common/lambda';
 import { createLogGroup } from '../../common/logs';
 import { getPutMetricsPolicyStatements } from '../../common/metrics';
 import { MetricsNamespace, REDSHIFT_MODE } from '../../common/model';
-import { POWERTOOLS_ENVS } from '../../common/powertools';
 import { SolutionNodejsFunction } from '../../private/function';
 
 export interface LoadOdsDataToRedshiftWorkflowProps {
@@ -129,7 +128,6 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
     const fnSG = props.securityGroupForLambda;
 
     const fn = new SolutionNodejsFunction(this, `s3EventFn-${redshiftTable}`, {
-      runtime: Runtime.NODEJS_18_X,
       entry: join(
         this.lambdaRootPath,
         'put-ods-source-to-store.ts',
@@ -147,8 +145,8 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
         S3_FILE_SUFFIX: odsSource.fileSuffix,
         DYNAMODB_TABLE_NAME: taskTable.tableName,
         REDSHIFT_ODS_TABLE_NAME: redshiftTable,
-        ...POWERTOOLS_ENVS,
       },
+      applicationLogLevel: 'WARN',
     });
 
     return fn;
@@ -434,7 +432,6 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
     const fnSG = props.securityGroupForLambda;
     const cloudwatchPolicyStatements = getPutMetricsPolicyStatements(MetricsNamespace.REDSHIFT_ANALYTICS);
     const fn = new SolutionNodejsFunction(this, `${resourceId}Fn`, {
-      runtime: Runtime.NODEJS_18_X,
       entry: join(
         this.lambdaRootPath,
         'create-load-manifest.ts',
@@ -457,8 +454,8 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
         DYNAMODB_TABLE_NAME: ddbTable.tableName,
         DYNAMODB_TABLE_INDEX_NAME: DYNAMODB_TABLE_INDEX_NAME,
         REDSHIFT_ODS_TABLE_NAME: odsTableName,
-        ...POWERTOOLS_ENVS,
       },
+      applicationLogLevel: 'WARN',
     });
 
     // Update the job_status from NEW to ENQUEUE.
@@ -476,7 +473,6 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
     const fnSG = props.securityGroupForLambda;
     const cloudwatchPolicyStatements = getPutMetricsPolicyStatements(MetricsNamespace.REDSHIFT_ANALYTICS);
     const fn = new SolutionNodejsFunction(this, `${resourceId}Fn`, {
-      runtime: Runtime.NODEJS_18_X,
       entry: join(
         this.lambdaRootPath,
         'load-manifest-to-redshift.ts',
@@ -496,8 +492,8 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
         ... this.toRedshiftEnvVariables(odsTableName, props),
         REDSHIFT_ROLE: copyRole.roleArn,
         REDSHIFT_DATA_API_ROLE: props.dataAPIRole.roleArn,
-        ...POWERTOOLS_ENVS,
       },
+      applicationLogLevel: 'WARN',
     });
     // Update the job_status from ENQUEUE to PROCESSING.
     ddbTable.grantReadWriteData(fn);
@@ -525,7 +521,6 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
     const fnSG = props.securityGroupForLambda;
 
     const fn = new SolutionNodejsFunction(this, `${resourceId}Fn`, {
-      runtime: Runtime.NODEJS_18_X,
       entry: join(
         this.lambdaRootPath,
         'check-load-status.ts',
@@ -543,8 +538,8 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
         DYNAMODB_TABLE_NAME: ddbTable.tableName,
         ... this.toRedshiftEnvVariables(odsTableName, props),
         REDSHIFT_DATA_API_ROLE: props.dataAPIRole.roleArn,
-        ...POWERTOOLS_ENVS,
       },
+      applicationLogLevel: 'WARN',
     });
 
     ddbTable.grantWriteData(fn);
@@ -563,7 +558,6 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
     const fnSG = props.securityGroupForLambda;
 
     const fn = new SolutionNodejsFunction(this, `${resourceId}Fn`, {
-      runtime: Runtime.NODEJS_18_X,
       entry: join(
         this.lambdaRootPath,
         'has-more-job-new.ts',
@@ -583,9 +577,8 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
         DYNAMODB_TABLE_NAME: ddbTable.tableName,
         DYNAMODB_TABLE_INDEX_NAME: DYNAMODB_TABLE_INDEX_NAME,
         REDSHIFT_ODS_TABLE_NAME: odsTableName,
-        ...POWERTOOLS_ENVS,
       },
-
+      applicationLogLevel: 'WARN',
     });
     ddbTable.grantReadData(fn);
     return fn;
@@ -597,7 +590,6 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
     const fnSG = props.securityGroupForLambda;
 
     const fn = new SolutionNodejsFunction(this, 'CheckSkippingRunningWorkflowFn', {
-      runtime: Runtime.NODEJS_18_X,
       entry: join(
         this.lambdaRootPath,
         'skip-running-workflow.ts',
@@ -614,9 +606,8 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
         PROJECT_ID: props.projectId,
         DYNAMODB_TABLE_NAME: ddbTable.tableName,
         DYNAMODB_TABLE_INDEX_NAME: DYNAMODB_TABLE_INDEX_NAME,
-        ...POWERTOOLS_ENVS,
       },
-
+      applicationLogLevel: 'WARN',
     });
     ddbTable.grantReadData(fn);
     return fn;
@@ -628,7 +619,6 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
 
     const fnSG = props.securityGroupForLambda;
     const fn = new SolutionNodejsFunction(this, `${resourceId}Fn`, {
-      runtime: Runtime.NODEJS_18_X,
       entry: join(
         this.lambdaRootPath,
         'refresh-views.ts',
@@ -653,8 +643,8 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
 
         REDSHIFT_ROLE: copyRole.roleArn,
         REDSHIFT_DATA_API_ROLE: props.dataAPIRole.roleArn,
-        ...POWERTOOLS_ENVS,
       },
+      applicationLogLevel: 'WARN',
     });
     props.dataAPIRole.grantAssumeRole(fn.grantPrincipal);
     return fn;

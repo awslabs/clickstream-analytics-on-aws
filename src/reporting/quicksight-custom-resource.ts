@@ -14,7 +14,6 @@
 import { join } from 'path';
 import { TimeGranularity } from '@aws-sdk/client-quicksight';
 import { Aws, CustomResource, Duration } from 'aws-cdk-lib';
-import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Provider } from 'aws-cdk-lib/custom-resources';
 import { Construct } from 'constructs';
@@ -52,7 +51,6 @@ import {
   CLICKSTREAM_LIFECYCLE_WEEKLY_VIEW_NAME,
 } from '../common/constant';
 
-import { POWERTOOLS_ENVS } from '../common/powertools';
 import { SolutionNodejsFunction } from '../private/function';
 
 export function createQuicksightCustomResource(
@@ -419,7 +417,6 @@ function createQuicksightLambda(
 ): SolutionNodejsFunction {
   const role = createRoleForQuicksightCustomResourceLambda(scope, templateArn);
   const fn = new SolutionNodejsFunction(scope, 'QuicksightCustomResourceLambda', {
-    runtime: Runtime.NODEJS_18_X,
     entry: join(
       __dirname,
       'lambda',
@@ -431,9 +428,6 @@ function createQuicksightLambda(
     timeout: Duration.minutes(15),
     logRetention: RetentionDays.ONE_WEEK,
     role,
-    environment: {
-      ...POWERTOOLS_ENVS,
-    },
   });
 
   return fn;

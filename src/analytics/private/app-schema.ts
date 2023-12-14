@@ -24,7 +24,6 @@ import { reportingViewsDef, schemaDefs } from './sql-def';
 import { CUSTOM_RESOURCE_RESPONSE_REDSHIFT_BI_USER_NAME } from '../../common/constant';
 import { createLambdaRole } from '../../common/lambda';
 import { attachListTagsPolicyForFunction } from '../../common/lambda/tags';
-import { POWERTOOLS_ENVS } from '../../common/powertools';
 import { SolutionNodejsFunction } from '../../private/function';
 import { RedshiftOdsTables } from '../analytics-on-redshift';
 
@@ -125,7 +124,6 @@ export class ApplicationSchemas extends Construct {
     });
 
     const fn = new SolutionNodejsFunction(this, 'CreateSchemaForApplicationsFn', {
-      runtime: Runtime.NODEJS_18_X,
       entry: join(
         lambdaRootPath,
         'create-schemas.ts',
@@ -137,9 +135,6 @@ export class ApplicationSchemas extends Construct {
       logRetention: RetentionDays.ONE_WEEK,
       role: createLambdaRole(this, 'CreateApplicationSchemaRole', false,
         [writeSecretPolicy]),
-      environment: {
-        ... POWERTOOLS_ENVS,
-      },
       layers: [sqlLayer],
     });
 

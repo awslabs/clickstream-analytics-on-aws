@@ -550,6 +550,10 @@ describe('CloudFrontS3PortalStack - Default stack props for common features', ()
       },
       Handler: 'index.handler',
       Runtime: 'nodejs18.x',
+      LoggingConfig: {
+        ApplicationLogLevel: 'WARN',
+        LogFormat: 'JSON',
+      },
     },
     );
   });
@@ -903,9 +907,12 @@ describe('CloudFrontS3PortalStack - China region', () => {
           'Arn',
         ],
       },
-      Architectures: Match.absent(),
       Handler: 'index.handler',
       Runtime: 'nodejs18.x',
+      LoggingConfig: {
+        ApplicationLogLevel: 'WARN',
+        LogFormat: 'JSON',
+      },
     },
     );
 

@@ -58,7 +58,6 @@ import { Constant } from './private/constant';
 import { LogProps, setAccessLogForApplicationLoadBalancer } from '../common/alb';
 import { addCfnNagSuppressRules, rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions } from '../common/cfn-nag';
 import { cloudWatchSendLogs, createENI } from '../common/lambda';
-import { POWERTOOLS_ENVS } from '../common/powertools';
 
 export interface RouteProps {
   readonly routePath: string;
@@ -399,9 +398,6 @@ export class ApplicationLoadBalancerLambdaPortal extends Construct {
       vpcSubnets: props.networkProps.subnets,
       securityGroups: [frontendLambdaSG],
       architecture: Architecture.X86_64,
-      environment: {
-        ...POWERTOOLS_ENVS,
-      },
     });
 
 

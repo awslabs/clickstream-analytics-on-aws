@@ -14,13 +14,11 @@
 import { join } from 'path';
 import { CustomResource, Duration, CfnResource } from 'aws-cdk-lib';
 import { PolicyStatement } from 'aws-cdk-lib/aws-iam';
-import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Provider } from 'aws-cdk-lib/custom-resources';
 import { Construct } from 'constructs';
 import { addCfnNagSuppressRules } from '../../common/cfn-nag';
 import { createLambdaRole } from '../../common/lambda';
-import { POWERTOOLS_ENVS } from '../../common/powertools';
 import { SolutionNodejsFunction } from '../../private/function';
 
 export interface UpdateAlbRulesCustomResourceProps {
@@ -95,7 +93,6 @@ function createUpdateAlbRulesLambda(scope: Construct, listenerArn: string, authe
   const role = createLambdaRole(scope, 'updateAlbRulesLambdaRole', false, policyStatements);
 
   const fn = new SolutionNodejsFunction(scope, 'updateAlbRulesLambda', {
-    runtime: Runtime.NODEJS_18_X,
     entry: join(
       __dirname,
       'update-alb-rules',
@@ -106,9 +103,6 @@ function createUpdateAlbRulesLambda(scope: Construct, listenerArn: string, authe
     timeout: Duration.minutes(5),
     logRetention: RetentionDays.ONE_WEEK,
     role,
-    environment: {
-      ...POWERTOOLS_ENVS,
-    },
   });
   fn.node.addDependency(role);
   addCfnNagSuppressRules(fn.node.defaultChild as CfnResource, [

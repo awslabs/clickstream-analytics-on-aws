@@ -11,8 +11,9 @@
  *  and limitations under the License.
  */
 
-import { Annotations, App, Aspects, IAspect, Stack } from 'aws-cdk-lib';
-import { Function, Runtime } from 'aws-cdk-lib/aws-lambda';
+import { Architecture } from '@aws-sdk/client-lambda';
+import { Annotations, App, Aspects, CfnCondition, Fn, IAspect, Stack } from 'aws-cdk-lib';
+import { CfnFunction, Function, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { BootstraplessStackSynthesizer, CompositeECRRepositoryAspect } from 'cdk-bootstrapless-synthesizer';
 import { AwsSolutionsChecks, NagPackSuppression, NagSuppressions } from 'cdk-nag';
@@ -38,7 +39,7 @@ function stackSuppressions(stacks: Stack[], suppressions: NagPackSuppression[]) 
   });
 }
 
-const commonSuppresionRulesForALBLambdaPattern = [
+const commonSuppressionRulesForALBLambdaPattern = [
   { id: 'AwsSolutions-IAM5', reason: 'allow the logs of Lambda publishing to CloudWatch Logs with ambiguous logstream name' },
   { id: 'AwsSolutions-EC23', reason: 'It is a public facing service so it works as design' },
 ];
@@ -58,7 +59,7 @@ stackSuppressions([
     useExistingOIDCProvider: false,
     synthesizer: synthesizer(),
   }),
-], commonSuppresionRulesForALBLambdaPattern);
+], commonSuppressionRulesForALBLambdaPattern);
 
 
 stackSuppressions([
@@ -76,7 +77,7 @@ stackSuppressions([
     useExistingOIDCProvider: false,
     synthesizer: synthesizer(),
   }),
-], commonSuppresionRulesForALBLambdaPattern);
+], commonSuppressionRulesForALBLambdaPattern);
 
 const commonSuppressionRulesForCloudFrontS3Pattern = [
   { id: 'AwsSolutions-IAM4', reason: 'Cause by CDK BucketDeployment construct (aws-cdk-lib/aws-s3-deployment)' },
@@ -284,6 +285,49 @@ class NodejsFunctionSanityAspect implements IAspect {
   }
 }
 Aspects.of(app).add(new NodejsFunctionSanityAspect());
+
+class CNLambdaFunctionAspect implements IAspect {
+
+  private conditionCache: { [key: string]: CfnCondition } = {};
+
+  public visit(node: IConstruct): void {
+    if (node instanceof Function) {
+      const func = node.node.defaultChild as CfnFunction;
+      if (func.loggingConfig) {
+        func.addPropertyOverride('LoggingConfig',
+          Fn.conditionIf(this.awsChinaCondition(Stack.of(node)).logicalId,
+            Fn.ref('AWS::NoValue'), {
+              LogFormat: (func.loggingConfig as CfnFunction.LoggingConfigProperty).logFormat,
+              ApplicationLogLevel: (func.loggingConfig as CfnFunction.LoggingConfigProperty).applicationLogLevel,
+              LogGroup: (func.loggingConfig as CfnFunction.LoggingConfigProperty).logGroup,
+              SystemLogLevel: (func.loggingConfig as CfnFunction.LoggingConfigProperty).systemLogLevel,
+            }));
+      }
+      if (func.architectures && func.architectures[0] == Architecture.arm64) {
+        func.addPropertyOverride('Architectures',
+          Fn.conditionIf(this.awsChinaCondition(Stack.of(node)).logicalId,
+            Fn.ref('AWS::NoValue'), func.architectures));
+      }
+    }
+  }
+
+  private awsChinaCondition(stack: Stack): CfnCondition {
+    const conditionName = 'AWSCNCondition';
+    // Check if the resource already exists
+    const existingResource = this.conditionCache[stack.artifactId];
+
+    if (existingResource) {
+      return existingResource;
+    } else {
+      const awsCNCondition = new CfnCondition(stack, conditionName, {
+        expression: Fn.conditionEquals('aws-cn', stack.partition),
+      });
+      this.conditionCache[stack.artifactId] = awsCNCondition;
+      return awsCNCondition;
+    }
+  }
+}
+Aspects.of(app).add(new CNLambdaFunctionAspect());
 
 function synthesizer() {
   return process.env.USE_BSS ? new BootstraplessStackSynthesizer(): undefined;

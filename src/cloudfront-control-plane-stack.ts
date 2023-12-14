@@ -30,7 +30,6 @@ import {
 } from 'aws-cdk-lib/aws-cloudfront';
 import { AddBehaviorOptions } from 'aws-cdk-lib/aws-cloudfront/lib/distribution';
 import { FunctionAssociation } from 'aws-cdk-lib/aws-cloudfront/lib/function';
-import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { HostedZone } from 'aws-cdk-lib/aws-route53';
 import { IBucket } from 'aws-cdk-lib/aws-s3';
@@ -40,7 +39,6 @@ import { Construct, IConstruct } from 'constructs';
 import { addCfnNagForCustomResourceProvider, addCfnNagForLogRetention, addCfnNagSuppressRules, addCfnNagToStack, rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions } from './common/cfn-nag';
 import { OUTPUT_CONTROL_PLANE_BUCKET, OUTPUT_CONTROL_PLANE_URL } from './common/constant';
 import { Parameters } from './common/parameters';
-import { POWERTOOLS_ENVS } from './common/powertools';
 import { SolutionBucket } from './common/solution-bucket';
 import { SolutionInfo } from './common/solution-info';
 import { getShortIdOfStackWithRegion } from './common/stack';
@@ -353,16 +351,15 @@ export class CloudFrontControlPlaneStack extends Stack {
 
   private createAuthorizer(oidcInfo: OIDCInfo): TokenAuthorizer {
     const authFunction = new SolutionNodejsFunction(this, 'AuthorizerFunction', {
-      runtime: Runtime.NODEJS_18_X,
       handler: 'handler',
       entry: './src/control-plane/auth/index.ts',
       environment: {
         ISSUER: oidcInfo.issuer,
-        ... POWERTOOLS_ENVS,
       },
       timeout: Duration.seconds(15),
       memorySize: 512,
       logRetention: RetentionDays.TEN_YEARS,
+      applicationLogLevel: 'WARN',
     });
     addCfnNagSuppressRules(authFunction.node.defaultChild as CfnResource, [
       ...rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions('AuthorizerFunction'),

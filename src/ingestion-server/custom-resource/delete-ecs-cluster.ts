@@ -14,13 +14,11 @@
 import { join } from 'path';
 import { CustomResource, Duration, CfnResource } from 'aws-cdk-lib';
 import { PolicyStatement } from 'aws-cdk-lib/aws-iam';
-import { Runtime } from 'aws-cdk-lib/aws-lambda';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Provider } from 'aws-cdk-lib/custom-resources';
 import { Construct } from 'constructs';
 import { addCfnNagSuppressRules, rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions } from '../../common/cfn-nag';
 import { createLambdaRole } from '../../common/lambda';
-import { POWERTOOLS_ENVS } from '../../common/powertools';
 import { SolutionNodejsFunction } from '../../private/function';
 
 export interface DeleteECSClusterCustomResourceProps {
@@ -87,7 +85,6 @@ function createDeleteECSClusterLambda(scope: Construct, ecsClusterArn: string): 
   const role = createLambdaRole(scope, 'deleteECSClusterLambdaRole', false, policyStatements);
 
   const fn = new SolutionNodejsFunction(scope, 'deleteECSClusterLambda', {
-    runtime: Runtime.NODEJS_18_X,
     entry: join(
       __dirname,
       'delete-ecs-cluster',
@@ -98,9 +95,6 @@ function createDeleteECSClusterLambda(scope: Construct, ecsClusterArn: string): 
     timeout: Duration.minutes(10),
     logRetention: RetentionDays.ONE_WEEK,
     role,
-    environment: {
-      ...POWERTOOLS_ENVS,
-    },
   });
   fn.node.addDependency(role);
   addCfnNagSuppressRules(fn.node.defaultChild as CfnResource, [

@@ -14,13 +14,11 @@
 import path from 'path';
 import { Duration, CustomResource, Stack } from 'aws-cdk-lib';
 import { Table } from 'aws-cdk-lib/aws-dynamodb';
-import { Architecture, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Provider } from 'aws-cdk-lib/custom-resources';
 import { Construct } from 'constructs';
 import { addCfnNagToStack, ruleForLambdaVPCAndReservedConcurrentExecutions } from '../../common/cfn-nag';
 import { cloudWatchSendLogs, createLambdaRole } from '../../common/lambda';
-import { POWERTOOLS_ENVS } from '../../common/powertools';
 import { SolutionNodejsFunction } from '../../private/function';
 
 export interface CdkCallCustomResourceProps {
@@ -40,14 +38,9 @@ export class BatchInsertDDBCustomResource extends Construct {
       entry: path.join(__dirname, './lambda/batch-insert-ddb/index.ts'),
       handler: 'handler',
       timeout: Duration.seconds(30),
-      runtime: Runtime.NODEJS_18_X,
       memorySize: 256,
       reservedConcurrentExecutions: 1,
       role: createLambdaRole(this, 'DicInitCustomResourceRole', false, []),
-      architecture: Architecture.X86_64,
-      environment: {
-        ... POWERTOOLS_ENVS,
-      },
     });
 
     props.table.grantReadWriteData(customResourceLambda);

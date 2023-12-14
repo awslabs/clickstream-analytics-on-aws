@@ -40,6 +40,7 @@ import {
 } from 'aws-cdk-lib/aws-ec2';
 import { ArnPrincipal } from 'aws-cdk-lib/aws-iam';
 import { Architecture, Code, Function as LambdaFunction, Runtime } from 'aws-cdk-lib/aws-lambda';
+import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { IBucket } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
 import { BatchInsertDDBCustomResource } from './batch-insert-ddb-custom-resource-construct';
@@ -372,8 +373,8 @@ export class ClickStreamApiConstruct extends Construct {
       }),
       handler: 'run.sh',
       runtime: Runtime.NODEJS_18_X,
-      architecture: Architecture.X86_64,
-      layers: [new LambdaAdapterLayer(this, 'LambdaAdapterLayerX86')],
+      architecture: Architecture.ARM_64,
+      layers: [new LambdaAdapterLayer(this, 'LambdaAdapterLayer')],
       environment: {
         AWS_LAMBDA_EXEC_WRAPPER: '/opt/bootstrap',
         CLICK_STREAM_TABLE_NAME: clickStreamTable.tableName,
@@ -394,11 +395,14 @@ export class ClickStreamApiConstruct extends Construct {
         QUICKSIGHT_CONTROL_PLANE_REGION: props.targetToCNRegions ? 'cn-north-1' : 'us-east-1',
         WITH_VALIDATE_ROLE: 'true',
         FULL_SOLUTION_VERSION: SolutionInfo.SOLUTION_VERSION,
-        ... POWERTOOLS_ENVS,
+        ...POWERTOOLS_ENVS,
       },
       timeout: Duration.seconds(30),
       memorySize: 512,
       role: clickStreamApiFunctionRole,
+      logRetention: RetentionDays.ONE_MONTH,
+      logFormat: 'JSON',
+      applicationLogLevel: 'WARN',
       ...apiFunctionProps,
     });
 
