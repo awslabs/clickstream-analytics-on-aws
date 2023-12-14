@@ -151,12 +151,12 @@ update_dict() {
 
     cd ${CODEBUILD_SRC_DIR}
 
-    sed -i'' -e 's/__SOLUTION_NAME__/'$SOLUTION_NAME'/g' src/control-plane/backend/config/dictionary.json
-    sed -i'' -e 's/__DIST_OUTPUT_BUCKET__/'$TEMPLATE_OUTPUT_BUCKET'/g' src/control-plane/backend/config/dictionary.json
-    sed -i'' -e 's~__TARGET__~'$target'~g' src/control-plane/backend/config/dictionary.json
-    sed -i'' -e 's~__PREFIX__~'$prefix'~g' src/control-plane/backend/config/dictionary.json
-    sed -i'' -e 's/__SOLUTION_VERSION__/'$VERSION'/g' src/control-plane/backend/config/dictionary.json
-    cat src/control-plane/backend/config/dictionary.json
+    sed -i'' -e 's/__SOLUTION_NAME__/'$SOLUTION_NAME'/g' src/control-plane/backend/lambda/api/config/dictionary.json
+    sed -i'' -e 's/__DIST_OUTPUT_BUCKET__/'$TEMPLATE_OUTPUT_BUCKET'/g' src/control-plane/backend/lambda/api/config/dictionary.json
+    sed -i'' -e 's~__TARGET__~'$target'~g' src/control-plane/backend/lambda/api/config/dictionary.json
+    sed -i'' -e 's~__PREFIX__~'$prefix'~g' src/control-plane/backend/lambda/api/config/dictionary.json
+    sed -i'' -e 's/__SOLUTION_VERSION__/'$VERSION'/g' src/control-plane/backend/lambda/api/config/dictionary.json
+    cat src/control-plane/backend/lambda/api/config/dictionary.json
 
     cd $currDir
 }

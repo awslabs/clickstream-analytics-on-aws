@@ -17,13 +17,13 @@ update_dict() {
     local target=$1
     local prefix=$2
 
-    git restore src/control-plane/backend/config/dictionary.json || true
-    sed -i'' -e 's/__SOLUTION_NAME__/'$SOLUTION_NAME'/g' src/control-plane/backend/config/dictionary.json
-    sed -i'' -e 's/__DIST_OUTPUT_BUCKET__/'$BUCKET_NAME'/g' src/control-plane/backend/config/dictionary.json
-    sed -i'' -e 's~__TARGET__~'$target'~g' src/control-plane/backend/config/dictionary.json
-    sed -i'' -e 's~__PREFIX__~'$prefix'~g' src/control-plane/backend/config/dictionary.json
-    sed -i'' -e 's/__SOLUTION_VERSION__/'$SOLUTION_VERSION'/g' src/control-plane/backend/config/dictionary.json
-    cat src/control-plane/backend/config/dictionary.json
+    git restore src/control-plane/backend/lambda/api/config/dictionary.json || true
+    sed -i'' -e 's/__SOLUTION_NAME__/'$SOLUTION_NAME'/g' src/control-plane/backend/lambda/api/config/dictionary.json
+    sed -i'' -e 's/__DIST_OUTPUT_BUCKET__/'$BUCKET_NAME'/g' src/control-plane/backend/lambda/api/config/dictionary.json
+    sed -i'' -e 's~__TARGET__~'$target'~g' src/control-plane/backend/lambda/api/config/dictionary.json
+    sed -i'' -e 's~__PREFIX__~'$prefix'~g' src/control-plane/backend/lambda/api/config/dictionary.json
+    sed -i'' -e 's/__SOLUTION_VERSION__/'$SOLUTION_VERSION'/g' src/control-plane/backend/lambda/api/config/dictionary.json
+    cat src/control-plane/backend/lambda/api/config/dictionary.json
 }
 
 __dir="$(cd "$(dirname $0)";pwd)"

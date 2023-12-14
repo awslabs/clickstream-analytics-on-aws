@@ -43,7 +43,6 @@ import { Architecture, Code, Function as LambdaFunction, Runtime } from 'aws-cdk
 import { IBucket } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
 import { BatchInsertDDBCustomResource } from './batch-insert-ddb-custom-resource-construct';
-import dictionary from './config/dictionary.json';
 import { AddAdminUser } from './insert-admin-user';
 import { LambdaAdapterLayer } from './layer/lambda-web-adapter/layer';
 import { StackActionStateMachine } from './stack-action-state-machine-construct';
@@ -54,12 +53,6 @@ import { cloudWatchSendLogs, createENI } from '../../common/lambda';
 import { createLogGroup } from '../../common/logs';
 import { POWERTOOLS_ENVS } from '../../common/powertools';
 import { SolutionInfo } from '../../common/solution-info';
-
-export interface DicItem {
-  readonly name: string;
-  readonly data: any;
-}
-
 export interface ApplicationLoadBalancerProps {
   readonly vpc: IVpc;
   readonly subnets: SubnetSelection;
@@ -165,7 +158,6 @@ export class ClickStreamApiConstruct extends Construct {
     // Dictionary data init
     this.batchInsertDDBCustomResource = new BatchInsertDDBCustomResource(this, 'BatchInsertDDBCustomResource', {
       table: dictionaryTable,
-      items: dictionary,
       targetToCNRegions: props.targetToCNRegions ?? false,
     });
 
