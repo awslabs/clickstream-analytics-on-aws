@@ -106,7 +106,7 @@ export const DEFAULT_EVENT_ITEM = {
   conditionRelationShip: ERelationShip.AND,
   hasTab: true,
   isMultiSelect: true,
-  enableChangeRelation: false,
+  enableChangeRelation: true,
 };
 
 export const DEFAULT_RETENTION_ITEM = {

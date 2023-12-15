@@ -202,6 +202,10 @@ export const analyticsEventSelectReducer = (
       newState[action.eventIndex].conditionOptions = parameterOption;
       return newState;
     }
+    case 'changeCurRelationShip': {
+      newState[action.eventIndex].conditionRelationShip = action.relation;
+      return newState;
+    }
     default:
       return state;
   }

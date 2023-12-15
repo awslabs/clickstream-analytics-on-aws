@@ -257,7 +257,7 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
     eventDataDispatch({
       type: 'resetEventData',
       isMultiSelect: false,
-      enableChangeRelation: false,
+      enableChangeRelation: true,
       disabled: true,
     });
     filterOptionDataDispatch({
@@ -492,7 +492,7 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
     eventDataDispatch({
       type: 'resetEventData',
       isMultiSelect: false,
-      enableChangeRelation: false,
+      enableChangeRelation: true,
       disabled: true,
     });
     filterOptionDataDispatch({
@@ -706,7 +706,7 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
                         ...DEFAULT_EVENT_ITEM,
                         selectedEventOption: option,
                         conditionOptions: parameterOption,
-                        enableChangeRelation: false,
+                        enableChangeRelation: true,
                         isMultiSelect: false,
                         disabled: true,
                       },
@@ -734,7 +734,7 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
                 metadataEvents={metadataEvents}
                 metadataUserAttributes={metadataUserAttributes}
                 isMultiSelect={false}
-                enableChangeRelation={false}
+                enableChangeRelation={true}
               />
 
               <div className="cs-analytics-config">
