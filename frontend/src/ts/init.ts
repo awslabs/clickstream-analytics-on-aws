@@ -145,6 +145,7 @@ export const INIT_EXT_PIPELINE_DATA: IExtPipeline = {
   selectedRegion: null,
   selectedVPC: null,
   selectedSDK: null,
+  selectedS3Bucket: null,
   selectedPublicSubnet: [],
   selectedPrivateSubnet: [],
   selectedCertificate: null,

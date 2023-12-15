@@ -14,6 +14,7 @@
     "vpcEmpty": "请选择 VPC。",
     "sdkEmpty": "请指定您将使用哪种类型的 SDK 向该数据管道发送数据",
     "s3BucketEmpty": "请选择 Amazon S3 存储桶",
+    "s3BucketNoExist": "Amazon S3 存储桶不存在",
     "publicSubnetEmpty": "请为采集终端节点选择至少 2 个跨可用区的公共子网",
     "privateSubnetEmpty": "请为采集端点选择至少 2 个跨可用区的私有子网",
     "privateSubnetDiffWithPublicError": "私有子网必须位于与公有子网相同的可用区中。",

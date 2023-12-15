@@ -19,6 +19,7 @@ import {
   GetBucketPolicyCommand,
 } from '@aws-sdk/client-s3';
 import pLimit from 'p-limit';
+import { awsAccountId } from '../../common/constants';
 import { logger } from '../../common/powertools';
 import { aws_sdk_client_common_config } from '../../common/sdk-client-config-ln';
 import { ClickStreamBucket } from '../../common/types';
@@ -103,5 +104,23 @@ export const getS3BucketPolicy = async (region: string, bucket: string) => {
   } catch (error) {
     logger.error('get S3 bucket policy error ', { error });
     return undefined;
+  }
+};
+
+export const isBucketExist = async (region: string, bucket: string) => {
+  try {
+    const s3Client = new S3Client({
+      ...aws_sdk_client_common_config,
+      region,
+    });
+    const params: GetBucketLocationCommand = new GetBucketLocationCommand({
+      Bucket: bucket,
+      ExpectedBucketOwner: awsAccountId,
+    });
+    await s3Client.send(params);
+    return true;
+  } catch (error) {
+    logger.warn('get S3 bucket location error ', { error });
+    return false;
   }
 };
