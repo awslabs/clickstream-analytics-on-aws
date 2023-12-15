@@ -19,6 +19,7 @@ import {
   StartExecutionCommandOutput,
   DescribeExecutionOutput,
   ExecutionStatus,
+  ExecutionDoesNotExist,
 } from '@aws-sdk/client-sfn';
 import { stackWorkflowS3Bucket, stackWorkflowStateMachineArn } from '../common/constants';
 import { sfnClient } from '../common/sfn';
@@ -312,7 +313,11 @@ export class StackManager {
       const result: DescribeExecutionCommandOutput = await sfnClient.send(params);
       return result;
     } catch (error) {
-      logger.error('get execution detail error ', { error });
+      if (error instanceof ExecutionDoesNotExist) {
+        logger.info(`The specified execution does not exist: ${executionArn}`);
+      } else {
+        logger.warn('Get execution detail error ', { error });
+      }
       return undefined;
     }
   }
