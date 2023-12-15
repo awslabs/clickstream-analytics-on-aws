@@ -1277,7 +1277,7 @@
                                     "ComparisonValue": {
                                         "TextColor": {
                                             "Solid": {
-                                                "Expression": "percentDifference(COUNT({user_pseudo_id}),[COUNT({user_pseudo_id}) DESC],1,[]) > 0.0",
+                                                "Expression": "percentDifference(DISTINCT_COUNT({user_pseudo_id}),[DISTINCT_COUNT({user_pseudo_id}) DESC],1,[]) > 0.0",
                                                 "Color": "#2CAD00"
                                             }
                                         }
@@ -1287,7 +1287,7 @@
                                     "ComparisonValue": {
                                         "TextColor": {
                                             "Solid": {
-                                                "Expression": "percentDifference(COUNT({user_pseudo_id}),[COUNT({user_pseudo_id}) DESC],1,[]) < 0.0",
+                                                "Expression": "percentDifference(DISTINCT_COUNT({user_pseudo_id}),[DISTINCT_COUNT({user_pseudo_id}) DESC],1,[]) < 0.0",
                                                 "Color": "#DE3B00"
                                             }
                                         }
@@ -1297,7 +1297,7 @@
                                     "ComparisonValue": {
                                         "Icon": {
                                             "CustomCondition": {
-                                                "Expression": "percentDifference(COUNT({user_pseudo_id}),[COUNT({user_pseudo_id}) DESC],1,[]) > 0.0",
+                                                "Expression": "percentDifference(DISTINCT_COUNT({user_pseudo_id}),[DISTINCT_COUNT({user_pseudo_id}) DESC],1,[]) > 0.0",
                                                 "IconOptions": {
                                                     "Icon": "CARET_UP"
                                                 },
@@ -1310,7 +1310,7 @@
                                     "ComparisonValue": {
                                         "Icon": {
                                             "CustomCondition": {
-                                                "Expression": "percentDifference(COUNT({user_pseudo_id}),[COUNT({user_pseudo_id}) DESC],1,[]) < 0.0",
+                                                "Expression": "percentDifference(DISTINCT_COUNT({user_pseudo_id}),[DISTINCT_COUNT({user_pseudo_id}) DESC],1,[]) < 0.0",
                                                 "IconOptions": {
                                                     "Icon": "CARET_DOWN"
                                                 },
@@ -3387,7 +3387,7 @@
             "TextBoxes": [
                 {
                     "SheetTextBoxId": "5f4876f5-f2cf-4f94-a18f-e73429477270",
-                    "Content": "<text-box>\n  <inline font-size=\"20px\">\n    <b>Engagement report</b>\n  </inline>\n  <br/>\n  <inline font-size=\"16px\">User engagemetn report provides metrics based on sessions and views that your users trigger when they are using with your apps to help you understand their engagement level.</inline>\n</text-box>"
+                    "Content": "<text-box>\n  <inline font-size=\"20px\">\n    <b>Engagement report</b>\n  </inline>\n  <br/>\n  <inline font-size=\"16px\">User engagement report provides metrics based on sessions and views that your users trigger when they are using with your apps to help you understand their engagement level.</inline>\n</text-box>"
                 }
             ],
             "Layouts": [
@@ -4848,7 +4848,7 @@
                         "Subtitle": {
                             "Visibility": "VISIBLE",
                             "FormatText": {
-                                "RichText": "<visual-subtitle>You can search individual event and view its dimension and parameter details in this table. Click on the 'evnet_id' to view the event attributes. </visual-subtitle>"
+                                "RichText": "<visual-subtitle>You can search individual event and view its dimension and parameter details in this table. Click on the 'event_id' to view the event attributes. </visual-subtitle>"
                             }
                         },
                         "ChartConfiguration": {
@@ -6677,7 +6677,7 @@
                         "Title": {
                             "Visibility": "VISIBLE",
                             "FormatText": {
-                                "RichText": "<visual-title>\n  <inline font-size=\"16px\">Lifecyle retention - weekly view</inline>\n</visual-title>"
+                                "RichText": "<visual-title>\n  <inline font-size=\"16px\">Lifecycle retention - weekly view</inline>\n</visual-title>"
                             }
                         },
                         "Subtitle": {
@@ -6813,7 +6813,7 @@
                         "Title": {
                             "Visibility": "VISIBLE",
                             "FormatText": {
-                                "RichText": "<visual-title>\n  <inline font-size=\"16px\">Lifecyle retention - daily view</inline>\n</visual-title>"
+                                "RichText": "<visual-title>\n  <inline font-size=\"16px\">Lifecycle retention - daily view</inline>\n</visual-title>"
                             }
                         },
                         "Subtitle": {
@@ -9187,7 +9187,7 @@
                         "Subtitle": {
                             "Visibility": "VISIBLE",
                             "FormatText": {
-                                "RichText": "<visual-subtitle>You can search individual event and view its dimension and parameter details in this table. Click on the 'evnet_id' to view the event attributes. </visual-subtitle>"
+                                "RichText": "<visual-subtitle>You can search individual event and view its dimension and parameter details in this table. Click on the 'event_id' to view the event attributes. </visual-subtitle>"
                             }
                         },
                         "ChartConfiguration": {
