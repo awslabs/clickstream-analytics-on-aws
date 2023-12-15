@@ -11,11 +11,7 @@
  *  and limitations under the License.
  */
 
-import {
-  AppLayout,
-  AutosuggestProps,
-  Wizard,
-} from '@cloudscape-design/components';
+import { AppLayout, Wizard } from '@cloudscape-design/components';
 import {
   createProjectPipeline,
   getPipelineDetail,
@@ -27,6 +23,7 @@ import {
   getCertificates,
   getMSKList,
   getRedshiftCluster,
+  getS3BucketList,
   getSSMSecrets,
   getSecurityGroups,
   getSubnetList,
@@ -116,11 +113,6 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
   const [vpcEmptyError, setVPCEmptyError] = useState(false);
   const [sdkEmptyError, setSDKEmptyError] = useState(false);
   const [assetsBucketEmptyError, setAssetsBucketEmptyError] = useState(false);
-
-  const [s3BucketOptionList, setS3BucketOptionList] =
-    useState<AutosuggestProps.Options>([]);
-  const [assetsBucketNoExistError, setAssetsBucketNoExistError] =
-    useState(false);
 
   const [publicSubnetError, setPublicSubnetError] = useState(false);
   const [privateSubnetError, setPrivateSubnetError] = useState(false);
@@ -240,15 +232,6 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
     }
     if (!pipelineInfo.ingestionServer.loadBalancer.logS3Bucket.name) {
       setAssetsBucketEmptyError(true);
-      return false;
-    } else if (
-      !s3BucketOptionList.some(
-        (element) =>
-          element.value ===
-          pipelineInfo.ingestionServer.loadBalancer.logS3Bucket.name
-      )
-    ) {
-      setAssetsBucketNoExistError(true);
       return false;
     }
     return true;
@@ -982,6 +965,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
       'selectedRegion',
       'selectedVPC',
       'selectedSDK',
+      'selectedS3Bucket',
       'selectedPublicSubnet',
       'selectedPrivateSubnet',
       'enableEdp',
@@ -1124,7 +1108,6 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
               sdkEmptyError={sdkEmptyError}
               pipelineInfo={pipelineInfo}
               assetsS3BucketEmptyError={assetsBucketEmptyError}
-              assetsBucketNoExistError={assetsBucketNoExistError}
               loadingServiceAvailable={loadingServiceAvailable}
               unSupportedServices={unSupportedServices}
               changeRegion={(region) => {
@@ -1177,16 +1160,15 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                   };
                 });
               }}
-              changeS3Bucket={(bucket, s3BucketOptionList) => {
+              changeS3Bucket={(bucket) => {
                 setAssetsBucketEmptyError(false);
-                setAssetsBucketNoExistError(false);
-                setS3BucketOptionList(s3BucketOptionList);
                 setPipelineInfo((prev) => {
                   return {
                     ...prev,
+                    selectedS3Bucket: bucket,
                     bucket: {
                       ...prev.bucket,
-                      name: bucket,
+                      name: defaultStr(bucket.value),
                     },
                     ingestionServer: {
                       ...prev.ingestionServer,
@@ -1194,21 +1176,21 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                         ...prev.ingestionServer.loadBalancer,
                         logS3Bucket: {
                           ...prev.ingestionServer.loadBalancer.logS3Bucket,
-                          name: bucket,
+                          name: defaultStr(bucket.value),
                         },
                       },
                       sinkKinesis: {
                         ...prev.ingestionServer.sinkKinesis,
                         sinkBucket: {
                           ...prev.ingestionServer.sinkKinesis.sinkBucket,
-                          name: bucket,
+                          name: defaultStr(bucket.value),
                         },
                       },
                       sinkS3: {
                         ...prev.ingestionServer.sinkS3,
                         sinkBucket: {
                           ...prev.ingestionServer.sinkS3.sinkBucket,
-                          name: bucket,
+                          name: defaultStr(bucket.value),
                         },
                       },
                     },
@@ -1216,15 +1198,15 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                       ...prev.dataProcessing,
                       sourceS3Bucket: {
                         ...prev.dataProcessing.sourceS3Bucket,
-                        name: bucket,
+                        name: defaultStr(bucket.value),
                       },
                       sinkS3Bucket: {
                         ...prev.dataProcessing.sinkS3Bucket,
-                        name: bucket,
+                        name: defaultStr(bucket.value),
                       },
                       pipelineBucket: {
                         ...prev.dataProcessing.pipelineBucket,
-                        name: bucket,
+                        name: defaultStr(bucket.value),
                       },
                     },
                   };
@@ -2219,6 +2201,23 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
       (sdk) => sdk.value === pipelineInfo.dataCollectionSDK
     )[0];
   };
+  const setUpdateS3Bucket = async (pipelineInfo: IExtPipeline) => {
+    try {
+      const { success, data }: ApiResponse<S3Response[]> =
+        await getS3BucketList(pipelineInfo.region);
+      if (success) {
+        const selectedS3Bucket = data.filter(
+          (element) => element.name === pipelineInfo.bucket.name
+        )[0];
+        pipelineInfo.selectedS3Bucket = {
+          label: selectedS3Bucket.name,
+          value: selectedS3Bucket.name,
+        };
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
   const setUpdateSubnetList = async (pipelineInfo: IExtPipeline) => {
     try {
       const { success, data }: ApiResponse<SubnetResponse[]> =
@@ -2744,6 +2743,7 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
             setUpdateRegion(extPipeline),
             setUpdateVpc(extPipeline),
             setUpdateSDK(extPipeline),
+            setUpdateS3Bucket(extPipeline),
             setUpdateSubnetList(extPipeline),
             setUpdateCetificate(extPipeline),
             setUpdateSSMSecret(extPipeline),

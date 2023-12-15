@@ -13,7 +13,6 @@
 
 import {
   Alert,
-  Autosuggest,
   AutosuggestProps,
   Button,
   Container,
@@ -39,15 +38,11 @@ interface BasicInformationProps {
   changeVPC: (vpc: SelectProps.Option) => void;
   changeSDK: (sdk: SelectProps.Option) => void;
   changeTags: (tag: TagEditorProps.Tag[]) => void;
-  changeS3Bucket: (
-    bucket: string,
-    s3BucketOptionList: AutosuggestProps.Options
-  ) => void;
+  changeS3Bucket: (bucket: SelectProps.Option) => void;
   regionEmptyError: boolean;
   vpcEmptyError: boolean;
   sdkEmptyError: boolean;
   assetsS3BucketEmptyError: boolean;
-  assetsBucketNoExistError: boolean;
   loadingServiceAvailable: boolean;
   unSupportedServices: string;
 }
@@ -68,7 +63,6 @@ const BasicInformation: React.FC<BasicInformationProps> = (
     vpcEmptyError,
     sdkEmptyError,
     assetsS3BucketEmptyError,
-    assetsBucketNoExistError,
     loadingServiceAvailable,
     unSupportedServices,
   } = props;
@@ -156,8 +150,6 @@ const BasicInformation: React.FC<BasicInformationProps> = (
   const getS3BucketErrorMessage = () => {
     if (assetsS3BucketEmptyError) {
       return t('pipeline:valid.s3BucketEmpty');
-    } else if (assetsBucketNoExistError) {
-      return t('pipeline:valid.s3BucketNoExist');
     }
     return '';
   };
@@ -286,16 +278,17 @@ const BasicInformation: React.FC<BasicInformationProps> = (
           }
           errorText={getS3BucketErrorMessage()}
         >
-          <Autosuggest
+          <Select
             disabled={isDisabled(update, pipelineInfo)}
             placeholder={defaultStr(t('pipeline:create.selectS3'))}
             statusType={loadingBucket ? 'loading' : 'finished'}
-            onChange={({ detail }) =>
-              changeS3Bucket(detail.value, s3BucketOptionList)
-            }
-            value={pipelineInfo.ingestionServer.loadBalancer.logS3Bucket.name}
+            selectedOption={pipelineInfo.selectedS3Bucket}
             options={s3BucketOptionList}
-            enteredTextLabel={(value) => `${t('use')}: "${value}"`}
+            filteringType="auto"
+            selectedAriaLabel="Selected"
+            onChange={(e) => {
+              changeS3Bucket(e.detail.selectedOption);
+            }}
           />
         </FormField>
 

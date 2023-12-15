@@ -120,7 +120,7 @@ export const isBucketExist = async (region: string, bucket: string) => {
     await s3Client.send(params);
     return true;
   } catch (error) {
-    logger.error('get S3 bucket location error ', { error });
+    logger.warn('get S3 bucket location error ', { error });
     return false;
   }
 };
