@@ -22,6 +22,7 @@ import {
   ExecutionDoesNotExist,
 } from '@aws-sdk/client-sfn';
 import { stackWorkflowS3Bucket, stackWorkflowStateMachineArn } from '../common/constants';
+import { logger } from '../common/powertools';
 import { sfnClient } from '../common/sfn';
 import {
   PipelineStackType,
@@ -36,7 +37,6 @@ import {
 import { getStackName, isEmpty } from '../common/utils';
 import { IPipeline } from '../model/pipeline';
 import { getStacksDetailsByNames } from '../store/aws/cloudformation';
-import { logger } from '../common/powertools';
 
 
 export class StackManager {
