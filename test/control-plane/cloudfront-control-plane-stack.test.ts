@@ -32,8 +32,8 @@ describe('CloudFrontS3PortalStack - Default stack props for common features', ()
   test('Global region', () => {
     commonTemplate.resourceCountIs('AWS::CloudFront::CloudFrontOriginAccessIdentity', 1);
     commonTemplate.resourceCountIs('AWS::CloudFront::Distribution', 1);
-    commonTemplate.resourceCountIs('AWS::Lambda::LayerVersion', 2);
-    commonTemplate.resourceCountIs('Custom::CDKBucketDeployment', 1);
+    commonTemplate.resourceCountIs('AWS::Lambda::LayerVersion', 3);
+    commonTemplate.resourceCountIs('Custom::CDKBucketDeployment', 2);
 
     commonTemplate.hasOutput(OUTPUT_CONTROL_PLANE_URL, {});
     commonTemplate.hasOutput(OUTPUT_CONTROL_PLANE_BUCKET, {});
@@ -170,6 +170,10 @@ describe('CloudFrontS3PortalStack - Default stack props for common features', ()
           Key: Match.stringLikeRegexp('aws-cdk:cr-owned:[a-zA-Z0-9]'),
           Value: 'true',
         },
+        {
+          Key: Match.stringLikeRegexp('aws-cdk:cr-owned:[a-zA-Z0-9]'),
+          Value: 'true',
+        },
       ],
     });
   });
@@ -232,7 +236,7 @@ describe('CloudFrontS3PortalStack - Default stack props for common features', ()
     );
   });
 
-  test('at least two BucketDeployment sources', () => {
+  test('at least three BucketDeployment sources', () => {
 
     const capture = new Capture();
     commonTemplate.hasResourceProperties('Custom::CDKBucketDeployment', {
@@ -240,7 +244,12 @@ describe('CloudFrontS3PortalStack - Default stack props for common features', ()
     });
     commonTemplate.hasResourceProperties('Custom::CDKBucketDeployment', {
       SystemMetadata: {
-        'cache-control': 'max-age=86400',
+        'cache-control': 'max-age=2592000, immutable',
+      },
+    });
+    commonTemplate.hasResourceProperties('Custom::CDKBucketDeployment', {
+      SystemMetadata: {
+        'cache-control': 'max-age=0',
       },
     });
     expect(capture.asArray().length).toBeGreaterThanOrEqual(2);
@@ -406,8 +415,8 @@ describe('CloudFrontS3PortalStack - Default stack props for common features', ()
     commonTemplate.resourceCountIs('AWS::S3::Bucket', 2);
     commonTemplate.resourceCountIs('AWS::CloudFront::CloudFrontOriginAccessIdentity', 1);
     commonTemplate.resourceCountIs('AWS::CloudFront::Distribution', 1);
-    commonTemplate.resourceCountIs('AWS::Lambda::LayerVersion', 2);
-    commonTemplate.resourceCountIs('Custom::CDKBucketDeployment', 1);
+    commonTemplate.resourceCountIs('AWS::Lambda::LayerVersion', 3);
+    commonTemplate.resourceCountIs('Custom::CDKBucketDeployment', 2);
     expect(findResourcesName(commonTemplate, 'AWS::Lambda::Function').sort())
       .toEqual([
         'AWS679f53fac002430cb0da5b7982bd22872D164C4C',
@@ -801,8 +810,8 @@ describe('CloudFrontS3PortalStack - custom domain', () => {
     template.resourceCountIs('AWS::CloudFront::CloudFrontOriginAccessIdentity', 1);
     template.resourceCountIs('AWS::CloudFront::Distribution', 1);
     template.resourceCountIs('AWS::Route53::RecordSet', 1);
-    template.resourceCountIs('AWS::Lambda::LayerVersion', 2);
-    template.resourceCountIs('Custom::CDKBucketDeployment', 1);
+    template.resourceCountIs('AWS::Lambda::LayerVersion', 3);
+    template.resourceCountIs('Custom::CDKBucketDeployment', 2);
 
     template.hasOutput(OUTPUT_CONTROL_PLANE_URL, {});
     template.hasOutput(OUTPUT_CONTROL_PLANE_BUCKET, {});
@@ -876,8 +885,8 @@ describe('CloudFrontS3PortalStack - China region', () => {
     template.resourceCountIs('AWS::CloudFront::CloudFrontOriginAccessIdentity', 1);
     template.resourceCountIs('AWS::CloudFront::Distribution', 1);
     template.resourceCountIs('AWS::Route53::RecordSet', 0);
-    template.resourceCountIs('AWS::Lambda::LayerVersion', 2);
-    template.resourceCountIs('Custom::CDKBucketDeployment', 1);
+    template.resourceCountIs('AWS::Lambda::LayerVersion', 3);
+    template.resourceCountIs('Custom::CDKBucketDeployment', 2);
 
     // Check Origin Request Policy
     template.resourceCountIs('AWS::CloudFront::OriginRequestPolicy', 0);
