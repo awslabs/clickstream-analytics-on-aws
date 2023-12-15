@@ -14,6 +14,7 @@
     "vpcEmpty": "Please select VPC.",
     "sdkEmpty": "Please specify which type of SDK you will use to send data to this data pipeline",
     "s3BucketEmpty": "Please select Amazon S3 Bucket",
+    "s3BucketNoExist": "The Amazon S3 bucket does not exist",
     "publicSubnetEmpty": "Please select at least 2 public subnets cross AZs for the ingestion endpoint",
     "privateSubnetEmpty": "Please select at least 2 private subnets cross AZs for the ingestion endpoint",
     "privateSubnetDiffWithPublicError": "Private subnets must in the same AZs with public subnets.",
