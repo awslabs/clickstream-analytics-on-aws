@@ -71,6 +71,20 @@ analytics.record(name: 'button_click', attributes: {
 analytics.record(name: "button_click");
 ```
 
+#### 添加全局属性
+
+```dart
+analytics.addGlobalAttributes({
+  "_traffic_source_medium": "Search engine",
+  "_traffic_source_name": "Summer promotion",
+  "level": 10
+});
+// 删除全局属性
+analytics.deleteGlobalAttributes(["level"]);
+```
+
+建议每次 SDK 初始化后设置全局属性，全局属性将包含在设置后产生的所有事件中。
+
 #### 登录和登出
 
 ```dart
@@ -93,19 +107,34 @@ analytics.setUserAttributes({
 当前登录用户的属性会进行缓存，因此在下次App打开时不需要再次设置所有的用户属性，当然您可以使用相同的
 api `analytics.setUserAttributes()` 在当用户属性改变时来更新当前用户的属性。
 
-#### 添加全局属性
+#### 记录带有 Item 的事件
 
+您可以添加以下代码来记录带有 Item 的事件，同时您可以在 `attributes` Map 中添加自定义 Item 属性。 除了预置属性外，一个 Item 最多可以添加 10 个自定义属性。
 ```dart
-analytics.addGlobalAttributes({
-  "_traffic_source_medium": "Search engine",
-  "_traffic_source_name": "Summer promotion",
-  "level": 10
-});
-// 删除全局属性
-analytics.deleteGlobalAttributes(["level"]);
-```
+var itemBook = ClickstreamItem(
+    id: "123",
+    name: "Nature",
+    category: "book",
+    price: 99,
+    attributes: {
+      "book_publisher": "Nature Research"
+    }
+);
 
-建议每次 SDK 初始化后设置全局属性，全局属性将包含在设置后产生的所有事件中。
+analytics.record(
+    name: "view_item", 
+    attributes: {
+        "currency": 'USD',
+        "event_category": 'recommended'
+    }, 
+    items: [itemBook]
+);
+```
+要记录 Item 中的更多属性，请参阅 [Item 属性](android.md#item_1)。
+
+!!! warning "重要提示"
+
+    数据管道的版本需要在 v1.1 及以上才能够处理带有自定义属性的 Item。
 
 #### 其他配置项
 
@@ -260,9 +289,10 @@ iOS: 参考 [Swift SDK 事件属性](./swift.md#event-attributes)
 
 原生 SDK 版本依赖关系
 
-| Flutter SDK 版本 | Android SDK 版本 | Swift SDK 版本      |
-|----------------|----------------|-------------------|
-| 0.1.0          | 0.9.0          | 0.8.0             |
+| Flutter SDK 版本  | Android SDK 版本 | Swift SDK 版本 |
+|-----------------|----------------|--------------|
+| 0.2.0           | 0.10.0         | 0.9.1        |
+| 0.1.0           | 0.9.0          | 0.8.0        |
 
 ## 参考链接
 
