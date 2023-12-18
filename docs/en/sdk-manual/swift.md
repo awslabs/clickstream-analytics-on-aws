@@ -132,7 +132,7 @@ Add the following code where you need to record event.
     ```
 === "Objective-C"
     ```objective-c
-    import Clickstream;
+    @import Clickstream;
     
     // for record an event with custom attributes
     NSDictionary *attributes =@{
@@ -165,7 +165,7 @@ Add the following code where you need to record event.
     ```
 === "Objective-C"
     ```objective-c
-    import Clickstream;
+    @import Clickstream;
     
     NSDictionary *attributes =@{
         @"channel": @"apple",
@@ -196,7 +196,7 @@ Please add the global attribute after the SDK initialization is completed, the g
 === "Objective-C"
 
     ```objective-c
-    import Clickstream;
+    @import Clickstream;
     
     // when user login usccess.
     [ClickstreamObjc setUserId:@"userId"];
@@ -222,7 +222,7 @@ Please add the global attribute after the SDK initialization is completed, the g
 === "Objective-C"
 
     ```objective-c
-    import Clickstream;
+    @import Clickstream;
     
     NSDictionary *userAttributes =@{
         @"_user_age": @21,
@@ -237,6 +237,58 @@ Current login user's attributes will be cached in disk, so the next time app lau
 
     If your application is already published and most users have already logged in, please manually set the user attributes once when integrate the Clickstream SDK for the first time to ensure that subsequent events contains user attributes.
 
+#### Record event with items
+
+You can add the following code to log an event with an item.
+
+=== "Swift"
+
+    ```swift
+    import Clickstream
+
+    let attributes: ClickstreamAttribute = [
+        ClickstreamAnalytics.Item.ITEM_ID: "123",
+        ClickstreamAnalytics.Item.CURRENCY: "USD",
+        "event_category": "recommended"
+    ]
+    
+    let item_book: ClickstreamAttribute = [
+        ClickstreamAnalytics.Item.ITEM_ID: 123,
+        ClickstreamAnalytics.Item.ITEM_NAME: "Nature",
+        ClickstreamAnalytics.Item.ITEM_CATEGORY: "book",
+        ClickstreamAnalytics.Item.PRICE: 99.9,
+        "book_publisher": "Nature Research"
+    ]
+    ClickstreamAnalytics.recordEvent("view_item", attributes, [item_book])
+    ```
+
+=== "Objective-C"
+
+    ```objective-c
+    @import Clickstream;
+    
+    NSDictionary *attributes = @{
+        ClickstreamItemKey.ITEM_ID: @"123",
+        ClickstreamItemKey.CURRENCY: @"USD",
+        "event_category": @"recommended"
+    };
+    NSDictionary *item_book = @{
+        ClickstreamItemKey.ITEM_ID: @123,
+        ClickstreamItemKey.ITEM_NAME: @"Nature",
+        ClickstreamItemKey.ITEM_CATEGORY: @"book",
+        ClickstreamItemKey.PRICE: @99.9,
+        "book_publisher": @"Nature Research"
+    };
+    [ClickstreamObjc recordEvent:@"view_item" :attributes, @[item_book]];
+    ```
+
+For logging more attribute in an item, please refer to [item attributes](#item-attributes).
+
+!!! danger "Important"
+
+    Only pipelines from version 1.1+ can handle items with custom attribute.
+
+
 #### Send event immediately
 === "Swift"
 
@@ -249,7 +301,7 @@ Current login user's attributes will be cached in disk, so the next time app lau
 === "Objective-C"
 
     ```objective-c
-    import Clickstream;
+    @import Clickstream;
     // for send event immediately.
     [ClickstreamObjc flushEvents];
     ```
@@ -273,7 +325,7 @@ You can disable the SDK in the scenario you need. After disabling the SDK, the S
 === "Objective-C"
 
     ```objective-c
-    import Clickstream;
+    @import Clickstream;
     
     // disable SDK
     [ClickstreamObjc disable];
@@ -310,7 +362,7 @@ After initializing the SDK, you can use the following code to customize the conf
 === "Objective-C"
 
     ```objective-c
-    import Clickstream;
+    @import Clickstream;
     
     // config the sdk after initialize.
     ClickstreamContextConfiguration *configuration = [ClickstreamObjc getClickstreamConfigurationAndReturnError:&error];
@@ -377,18 +429,23 @@ Clickstream Swift SDK supports the following data types:
 
 In order to improve the efficiency of querying and analysis, we need to limit events as follows:
 
-| Name                            | Suggestion           | Hard limit           | Strategy                                                                           | Error code |
-|---------------------------------|----------------------|----------------------|------------------------------------------------------------------------------------|------------|
-| Event name invalid              | --                   | --                   | discard event, print log and record `_clickstream_error` event                     | 1001       |
-| Length of event name            | under 25 characters  | 50 characters        | discard event, print log and record `_clickstream_error` event                     | 1002       |
-| Length of event attribute name  | under 25 characters  | 50 characters        | discard the attribute,  print log and record error in event attribute              | 2001       |
-| Attribute name invalid          | --                   | --                   | discard the attribute,  print log and record error in event attribute              | 2002       |
-| Length of event attribute value | under 100 characters | 1024 characters      | discard the attribute,  print log and record error in event attribute              | 2003       |
-| Event attribute per event       | under 50 attributes  | 500 evnet attributes | discard the attribute that exceed, print log and record error in event attribute   | 2004       |
-| User attribute number           | under 25 attributes  | 100 user attributes  | discard the attribute that exceed, print log and record `_clickstream_error` event | 3001       |
-| Length of User attribute name   | under 25 characters  | 50 characters        | discard the attribute, print log and record `_clickstream_error` event             | 3002       |
-| User attribute name invalid     | --                   | --                   | discard the attribute, print log and record `_clickstream_error` event             | 3003       |
-| Length of User attribute value  | under 50 characters  | 256 characters       | discard the attribute, print log and record `_clickstream_error` event             | 3004       |
+| Name                                     | Suggestion                 | Hard limit           | Strategy                                                                           | Error code |
+|------------------------------------------|----------------------------|----------------------|------------------------------------------------------------------------------------|------------|
+| Event name invalid                       | --                         | --                   | discard event, print log and record `_clickstream_error` event                     | 1001       |
+| Length of event name                     | under 25 characters        | 50 characters        | discard event, print log and record `_clickstream_error` event                     | 1002       |
+| Length of event attribute name           | under 25 characters        | 50 characters        | discard the attribute,  print log and record error in event attribute              | 2001       |
+| Attribute name invalid                   | --                         | --                   | discard the attribute,  print log and record error in event attribute              | 2002       |
+| Length of event attribute value          | under 100 characters       | 1024 characters      | discard the attribute,  print log and record error in event attribute              | 2003       |
+| Event attribute per event                | under 50 attributes        | 500 evnet attributes | discard the attribute that exceed, print log and record error in event attribute   | 2004       |
+| User attribute number                    | under 25 attributes        | 100 user attributes  | discard the attribute that exceed, print log and record `_clickstream_error` event | 3001       |
+| Length of User attribute name            | under 25 characters        | 50 characters        | discard the attribute, print log and record `_clickstream_error` event             | 3002       |
+| User attribute name invalid              | --                         | --                   | discard the attribute, print log and record `_clickstream_error` event             | 3003       |
+| Length of User attribute value           | under 50 characters        | 256 characters       | discard the attribute, print log and record `_clickstream_error` event             | 3004       |
+| Item number in one event                 | under 50 items             | 100 items            | discard the item, print log and record error in event attribute                    | 4001       |
+| Length of item attribute value           | under 100 characters       | 256 characters       | discard the item, print log and record error in event attribute                    | 4002       |
+| Custom item attribute number in one item | under 10 custom attributes | 10 custom attributes | discard the item, print log and record error in event attribute                    | 4003       |
+| Length of item attribute name            | under 25 characters        | 50 characters        | discard the item, print log and record error in event attribute                    | 4004       |
+| Item attribute name invalid              | --                         | --                   | discard the item, print log and record error in event attribute                    | 4005       |
 
 !!! info "Important"
 
@@ -569,6 +626,27 @@ All user attributes will be included in `user` object, and all custom and global
 | _session_number          | int       | true       | Added in all events.                                                                                                                                       |
 | _screen_name             | String    | true       | Added in all events.                                                                                                                                       |
 | _screen_unique_id        | String    | true       | Added in all events.                                                                                                                                       |
+
+### Item attributes
+
+| Attribute name | Data type | Required | Description                   |
+|----------------|-----------|----------|-------------------------------|
+| id             | string    | False    | The id of the item            |
+| name           | string    | False    | The name of the item          |
+| brand          | string    | False    | The brand of the item         |
+| currency       | string    | False    | The currency of the item      |
+| price          | number    | False    | The price of the item         |
+| quantity       | string    | False    | The quantity of the item      |
+| creative_name  | string    | False    | The creative name of the item |
+| creative_slot  | string    | False    | The creative slot of the item |
+| location_id    | string    | False    | The location id of the item   |
+| category       | string    | False    | The category of the item      |
+| category2      | string    | False    | The category2 of the item     |
+| category3      | string    | False    | The category3 of the item     |
+| category4      | string    | False    | The category4 of the item     |
+| category5      | string    | False    | The category5 of the item     |
+
+You can use the above preset item attributes, of course, you can also add custom attributes to an item. In addition to the preset attributes, an item can add up to 10 custom attributes.
 
 ## Change log
 
