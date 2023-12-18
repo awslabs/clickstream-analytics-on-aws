@@ -45,7 +45,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: templates-${{ github.event.pull_request.number }}
           path: templates
@@ -68,7 +68,7 @@ jobs:
       image: stelligent/cfn_nag
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: templates-${{ github.event.pull_request.number }}
           path: templates
@@ -92,7 +92,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 18
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: templates-${{ github.event.pull_request.number }}
           path: deployment/global-s3-assets
