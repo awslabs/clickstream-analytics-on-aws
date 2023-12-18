@@ -94,7 +94,7 @@ export const executeStatements = async (client: RedshiftDataClient, sqlStatement
 
 export const executeStatementsWithWait = async (client: RedshiftDataClient, sqlStatements: string[],
   serverlessRedshiftProps?: ExistingRedshiftServerlessCustomProps, provisionedRedshiftProps?: ProvisionedRedshiftProps,
-  database?: string, logSQL: boolean = true) => {
+  database?: string, logSQL: boolean = true, waitMilliseconds: number = 1000) => {
   const queryId = await executeStatements(client, sqlStatements, serverlessRedshiftProps, provisionedRedshiftProps, database, logSQL);
 
   const checkParams = new DescribeStatementCommand({
@@ -104,17 +104,17 @@ export const executeStatementsWithWait = async (client: RedshiftDataClient, sqlS
   logger.info(`Got statement query '${queryId}' with status: ${response.Status} after submitting it`);
   let count = 0;
   while (response.Status != StatusString.FINISHED && response.Status != StatusString.FAILED && count < GET_STATUS_TIMEOUT) {
-    await Sleep(1000);
+    await Sleep(waitMilliseconds);
     count++;
     response = await client.send(checkParams);
-    logger.info(`Got statement query '${queryId}' with status: ${response.Status} in ${count} seconds`);
+    logger.info(`Got statement query '${queryId}' with status: ${response.Status} in ${count * waitMilliseconds} Milliseconds`);
   }
   if (response.Status == StatusString.FAILED) {
-    logger.error(`Got statement query '${queryId}' with status: ${response.Status} in ${count} seconds`, { response });
-    throw new Error(`Statement query '${queryId}' with status ${response.Status}`);
+    logger.error(`Got statement query '${queryId}' with status: ${response.Status} in ${count * waitMilliseconds} Milliseconds`, { response });
+    throw new Error(`Statement query '${queryId}' with status ${response.Status}, error: ${response.Error}, queryString: ${response.QueryString}`);
   } else if (count == GET_STATUS_TIMEOUT) {
     logger.error('Wait status timeout: '+ response.Status, { response });
-    throw new Error(`Wait statement query '${queryId}' with status ${response.Status} timeout in ${GET_STATUS_TIMEOUT} seconds`);
+    throw new Error(`Wait statement query '${queryId}' with status ${response.Status} timeout in ${GET_STATUS_TIMEOUT} seconds, queryString: ${response.QueryString}`);
   }
   return queryId;
 };
