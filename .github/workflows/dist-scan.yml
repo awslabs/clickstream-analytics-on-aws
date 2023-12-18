@@ -33,7 +33,7 @@ jobs:
           chmod +x ./deployment/test-build-dist-1.sh
           ./deployment/test-build-dist-1.sh
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: templates-${{ github.event.pull_request.number }}
           path: |
