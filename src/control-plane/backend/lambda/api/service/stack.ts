@@ -19,8 +19,10 @@ import {
   StartExecutionCommandOutput,
   DescribeExecutionOutput,
   ExecutionStatus,
+  ExecutionDoesNotExist,
 } from '@aws-sdk/client-sfn';
 import { stackWorkflowS3Bucket, stackWorkflowStateMachineArn } from '../common/constants';
+import { logger } from '../common/powertools';
 import { sfnClient } from '../common/sfn';
 import {
   PipelineStackType,
@@ -304,11 +306,20 @@ export class StackManager {
   }
 
   private async getExecutionDetail(executionArn: string): Promise<DescribeExecutionOutput | undefined> {
-    const params: DescribeExecutionCommand = new DescribeExecutionCommand({
-      executionArn: executionArn,
-    });
-    const result: DescribeExecutionCommandOutput = await sfnClient.send(params);
-    return result;
+    try {
+      const params: DescribeExecutionCommand = new DescribeExecutionCommand({
+        executionArn: executionArn,
+      });
+      const result: DescribeExecutionCommandOutput = await sfnClient.send(params);
+      return result;
+    } catch (error) {
+      if (error instanceof ExecutionDoesNotExist) {
+        logger.info(`The specified execution does not exist: ${executionArn}`);
+      } else {
+        logger.warn('Get execution detail error ', { error });
+      }
+      return undefined;
+    }
   }
 
   public setWorkflowType(state: WorkflowState, type: WorkflowStateType): WorkflowState {

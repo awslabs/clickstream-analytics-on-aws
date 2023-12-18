@@ -1355,6 +1355,193 @@ describe('Pipeline test', () => {
       },
     });
   });
+  it('Get pipeline when Step function Execution history was expired', async () => {
+    projectExistedMock(ddbMock, true);
+    ddbMock.on(QueryCommand).resolves({
+      Items: [{ ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW }],
+    });
+    const mockOutputs = [
+      {
+        OutputKey: 'IngestionServerC000IngestionServerURL',
+        OutputValue: 'http://xxx/xxx',
+      },
+      {
+        OutputKey: 'IngestionServerC000IngestionServerDNS',
+        OutputValue: 'http://yyy/yyy',
+      },
+      {
+        OutputKey: 'Dashboards',
+        OutputValue: '[{"appId":"app1","dashboardId":"clickstream_dashboard_v1_notepad_mtzfsocy_app1"},{"appId":"app2","dashboardId":"clickstream_dashboard_v1_notepad_mtzfsocy_app2"}]',
+      },
+      {
+        OutputKey: 'ObservabilityDashboardName',
+        OutputValue: 'clickstream_dashboard_notepad_mtzfsocy',
+      },
+    ];
+    cloudFormationMock.on(DescribeStacksCommand).resolves({
+      Stacks: [
+        {
+          StackName: 'xxx',
+          Outputs: mockOutputs,
+          Tags: [{ Key: BuiltInTagKeys.AWS_SOLUTION_VERSION, Value: MOCK_SOLUTION_VERSION }],
+          StackStatus: StackStatus.CREATE_COMPLETE,
+          CreationTime: new Date(),
+        },
+      ],
+    });
+
+    sfnMock.on(DescribeExecutionCommand).rejects(new Error('Mock DynamoDB error'));
+    dictionaryMock(ddbMock);
+    ddbMock.on(QueryCommand, {
+      ExclusiveStartKey: undefined,
+      ExpressionAttributeNames:
+        { '#prefix': 'prefix' },
+      ExpressionAttributeValues: {
+        ':d': false,
+        ':prefix': 'PLUGIN',
+      },
+      FilterExpression: 'deleted = :d',
+      KeyConditionExpression:
+    '#prefix= :prefix',
+      Limit: undefined,
+      ScanIndexForward: true,
+      TableName: clickStreamTableName,
+      IndexName: prefixTimeGSIName,
+    }).resolves({
+      Items: [
+        { id: `${MOCK_PLUGIN_ID}_2`, name: `${MOCK_PLUGIN_ID}_2` },
+      ],
+    });
+    let res = await request(app)
+      .get(`/api/pipeline/${MOCK_PIPELINE_ID}?pid=${MOCK_PROJECT_ID}`);
+    expect(sfnMock).toHaveReceivedCommandTimes(DescribeExecutionCommand, 1);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({
+      success: true,
+      message: '',
+      data: {
+        ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
+        status: {
+          ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW.status,
+          stackDetails: [
+            {
+              ...BASE_STATUS.stackDetails[0],
+              outputs: mockOutputs,
+            },
+            {
+              ...BASE_STATUS.stackDetails[1],
+              outputs: mockOutputs,
+            },
+            {
+              ...BASE_STATUS.stackDetails[2],
+              outputs: mockOutputs,
+            },
+            {
+              ...BASE_STATUS.stackDetails[4],
+              outputs: mockOutputs,
+            },
+            {
+              ...BASE_STATUS.stackDetails[3],
+              outputs: mockOutputs,
+            },
+            {
+              ...BASE_STATUS.stackDetails[5],
+              outputs: mockOutputs,
+            },
+          ],
+          executionDetail: {},
+        },
+        dataProcessing: {
+          ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW.dataProcessing,
+          enrichPlugin: [
+            {
+              bindCount: 0,
+              builtIn: true,
+              createAt: 1667355960000,
+              deleted: false,
+              dependencyFiles: [],
+              description: {
+                'en-US': 'Derive OS, device, browser information from User Agent string from the HTTP request header',
+                'zh-CN': '从 HTTP 请求标头的用户代理（User Agent)字符串中获取操作系统、设备和浏览器信息',
+              },
+              id: 'BUILT-IN-2',
+              jarFile: '',
+              mainFunction: 'software.aws.solution.clickstream.UAEnrichment',
+              name: 'UAEnrichment',
+              operator: '',
+              pluginType: 'Enrich',
+              prefix: 'PLUGIN',
+              type: 'PLUGIN#BUILT-IN-2',
+              updateAt: 1667355960000,
+            },
+            {
+              bindCount: 0,
+              builtIn: true,
+              createAt: 1667355960000,
+              deleted: false,
+              dependencyFiles: [],
+              description: {
+                'en-US': 'Derive location information (e.g., city, country, region) based on the request source IP',
+                'zh-CN': '根据请求源 IP 获取位置信息（例如，城市、国家、地区）',
+              },
+              id: 'BUILT-IN-3',
+              jarFile: '',
+              mainFunction: 'software.aws.solution.clickstream.IPEnrichment',
+              name: 'IPEnrichment',
+              operator: '',
+              pluginType: 'Enrich',
+              prefix: 'PLUGIN',
+              type: 'PLUGIN#BUILT-IN-3',
+              updateAt: 1667355960000,
+            },
+            {
+              id: `${MOCK_PLUGIN_ID}_2`, name: `${MOCK_PLUGIN_ID}_2`,
+            },
+          ],
+          transformPlugin: {
+            bindCount: 0,
+            builtIn: true,
+            createAt: 1667355960000,
+            deleted: false,
+            dependencyFiles: [],
+            description: {
+              'en-US': 'Convert the data format reported by SDK into the data format in the data warehouse',
+              'zh-CN': '把SDK上报的数据格式，转换成数据仓库中的数据格式',
+            },
+            id: 'BUILT-IN-1',
+            jarFile: '',
+            mainFunction: 'software.aws.solution.clickstream.TransformerV2',
+            name: 'Transformer',
+            operator: '',
+            pluginType: 'Transform',
+            prefix: 'PLUGIN',
+            type: 'PLUGIN#BUILT-IN-1',
+            updateAt: 1667355960000,
+          },
+        },
+        dns: 'http://yyy/yyy',
+        endpoint: 'http://xxx/xxx',
+        dashboards: [
+          {
+            appId: 'app1',
+            dashboardId: 'clickstream_dashboard_v1_notepad_mtzfsocy_app1',
+          },
+          {
+            appId: 'app2',
+            dashboardId: 'clickstream_dashboard_v1_notepad_mtzfsocy_app2',
+          },
+        ],
+        templateInfo: {
+          isLatest: false,
+          pipelineVersion: MOCK_SOLUTION_VERSION,
+          solutionVersion: FULL_SOLUTION_VERSION,
+        },
+        metricsDashboardName: 'clickstream_dashboard_notepad_mtzfsocy',
+        analysisStudioEnabled: false,
+      },
+    });
+  });
   it('Get pipeline that analysis studio enabled', async () => {
     projectExistedMock(ddbMock, true);
     ddbMock.on(QueryCommand).resolves({
