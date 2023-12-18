@@ -122,7 +122,7 @@ ClickstreamAnalytics.setUserAttributes({
 
 当前登录用户的属性会缓存在 `localStorage` 中，因此在下次浏览器打开时不需要再次设置所有的用户属性，当然您可以使用相同的 api `ClickstreamAnalytics.setUserAttributes()` 在当用户属性改变时来更新当前用户的属性。
 
-!!! error "重要提示"
+!!! info "重要提示"
 
     如果您的应用已经上线，这时大部分用户已经登录过，则第一次接入Clickstream SDK时请手动设置一次用户属性，确保后续事件都带有用户属性。
 
@@ -154,7 +154,7 @@ ClickstreamAnalytics.record({
 
 要记录 Item 中的更多属性，请参阅 [Item 属性](#item_1).
 
-!!! danger "重要提示"
+!!! warning "重要提示"
 
     数据管道的版本需要在 v1.1 及以上才能够处理带有自定义属性的 Item。
 

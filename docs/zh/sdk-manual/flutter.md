@@ -132,7 +132,7 @@ analytics.record(
 ```
 要记录 Item 中的更多属性，请参阅 [Item 属性](android.md#item_1)。
 
-!!! danger "重要提示"
+!!! warning "重要提示"
 
     数据管道的版本需要在 v1.1 及以上才能够处理带有自定义属性的 Item。
 

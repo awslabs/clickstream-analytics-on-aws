@@ -152,7 +152,7 @@ ClickstreamAnalytics.record({
 
 For logging more attribute in an item, please refer to [item attributes](#item-attributes).
 
-!!! danger "Important"
+!!! warning "Important"
 
     Only pipelines from version 1.1+ can handle items with custom attribute.
 
