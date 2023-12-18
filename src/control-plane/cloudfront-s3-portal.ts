@@ -61,6 +61,7 @@ import {
 import {
   Source,
   BucketDeployment,
+  CacheControl,
 } from 'aws-cdk-lib/aws-s3-deployment';
 
 import { Construct, IConstruct } from 'constructs';
@@ -81,7 +82,7 @@ export interface DistributionProps {
 export interface FrontendProps {
   readonly assetPath: string;
   readonly dockerImage: DockerImage;
-  readonly buildCommand: string[];
+  readonly buildCommands: string[];
   readonly user?: string;
   readonly autoInvalidFilePaths?: string[];
   readonly assetHash?: string;
@@ -116,6 +117,7 @@ export class CloudFrontS3Portal extends Construct {
   public readonly logBucket: IBucket;
   public readonly controlPlaneUrl: string;
   public readonly bucketDeployment: BucketDeployment;
+  public readonly htmlDeployment: BucketDeployment;
   private origins: Array<CfnDistribution.OriginProperty | IResolvable> | IResolvable;
   private cacheBehaviors: Array<CfnDistribution.CacheBehaviorProperty | IResolvable> | IResolvable;
 
@@ -168,27 +170,61 @@ export class CloudFrontS3Portal extends Construct {
 
     portalBucket.addToResourcePolicy(portalBucketPolicyStatement);
 
-
     // upload static web assets
     this.bucketDeployment = new BucketDeployment(this, 'portal_deploy', {
-      sources: process.env.IS_SKIP_ASSET_BUNDLE === 'true' ? [Source.data('test', 'test')] : [
-        Source.asset(props.frontendProps.assetPath, {
-          bundling: {
-            image: props.frontendProps.dockerImage,
-            command: props.frontendProps.buildCommand,
-            user: props.frontendProps.user,
-            outputType: BundlingOutput.NOT_ARCHIVED,
-            environment: props.frontendProps.environment,
-          },
-          assetHash: props.frontendProps.assetHash ?? undefined,
-          assetHashType: props.frontendProps.assetHashType ?? AssetHashType.SOURCE,
-        }),
+      sources: [
+        this.getWebAssets(props, true),
       ],
       destinationBucket: portalBucket,
       prune: false,
       distribution: this.distribution,
       distributionPaths: props.frontendProps.autoInvalidFilePaths,
+      cacheControl: [
+        CacheControl.maxAge(Duration.days(30)),
+        CacheControl.immutable(),
+      ],
     });
+    this.htmlDeployment = new BucketDeployment(this, 'portal_html_deploy', {
+      sources: [
+        this.getWebAssets(props, false),
+      ],
+      destinationBucket: portalBucket,
+      prune: false,
+      distribution: this.distribution,
+      distributionPaths: props.frontendProps.autoInvalidFilePaths,
+      cacheControl: [
+        CacheControl.maxAge(Duration.seconds(0)),
+      ],
+    });
+  }
+
+  private getWebAssets(props: CloudFrontS3PortalProps, excludeIndexHtml: boolean) {
+    if (process.env.IS_SKIP_ASSET_BUNDLE === 'true') {
+      return Source.data('test', 'test');
+    } else {
+      const commands = [...props.frontendProps.buildCommands];
+      if (excludeIndexHtml) {
+        commands.push('cd /asset-output');
+        commands.push('rm /asset-output/index.html');
+      } else {
+        commands.push('cd /asset-output');
+        commands.push('ls | grep -xv index.html | xargs rm -rf');
+      }
+      return Source.asset(props.frontendProps.assetPath, {
+        bundling: {
+          image: props.frontendProps.dockerImage,
+          command: [
+            'bash', '-c',
+            commands.join(' && '),
+          ],
+          user: props.frontendProps.user,
+          outputType: BundlingOutput.NOT_ARCHIVED,
+          environment: props.frontendProps.environment,
+        },
+        assetHash: props.frontendProps.assetHash ?? undefined,
+        assetHashType: props.frontendProps.assetHashType ?? AssetHashType.SOURCE,
+      });
+    }
   }
 
   private createDistribution(portalBucket: IBucket, distDescription: string,

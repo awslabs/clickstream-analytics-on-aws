@@ -196,10 +196,15 @@ export class CloudFrontControlPlaneStack extends Stack {
         assetPath: join(__dirname, '..'),
 
         dockerImage: DockerImage.fromRegistry(Constant.NODE_IMAGE_V18),
-        buildCommand: [
-          'bash', '-c',
-          'export APP_PATH=/tmp/app && mkdir $APP_PATH && cd ./frontend/ && find -L . -type f -not -path "./build/*" -not -path "./node_modules/*" ' +
-          '-exec cp --parents {} $APP_PATH \\; && cd $APP_PATH && yarn install --loglevel error && yarn run build --loglevel error && cp -r ./build/* /asset-output/',
+        buildCommands: [
+          'export APP_PATH=/tmp/app',
+          'mkdir $APP_PATH',
+          'cd ./frontend/',
+          'find -L . -type f -not -path "./build/*" -not -path "./node_modules/*" -exec cp --parents {} $APP_PATH \\;',
+          'cd $APP_PATH',
+          'yarn install --loglevel error',
+          'yarn run build --loglevel error',
+          'cp -r ./build/* /asset-output/',
         ],
         environment: {
           GENERATE_SOURCEMAP: process.env.GENERATE_SOURCEMAP ?? 'false',
