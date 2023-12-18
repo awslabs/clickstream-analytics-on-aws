@@ -121,6 +121,11 @@
       "type": "runtime"
     },
     {
+      "name": "@aws-sdk/client-cloudwatch-events",
+      "version": "^3.405.0",
+      "type": "runtime"
+    },
+    {
       "name": "@aws-sdk/client-cloudwatch",
       "version": "^3.405.0",
       "type": "runtime"

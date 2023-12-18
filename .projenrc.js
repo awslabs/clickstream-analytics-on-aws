@@ -24,7 +24,6 @@ const cdkAlphaModules = [
 const commonDeps = [
   'uuid@^9.0.0',
   '@types/aws-lambda@^8.10.110',
-  '@types/aws-events@^8.10.110',
   '@aws-lambda-powertools/logger@^1.17.0',
   '@aws-lambda-powertools/metrics@^1.17.0',
   'jsonwebtoken@^9.0.0',
