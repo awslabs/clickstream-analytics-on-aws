@@ -26,7 +26,7 @@ import { ListNodesCommand } from '@aws-sdk/client-kafka';
 import { DescribeAccountSubscriptionCommand, Edition } from '@aws-sdk/client-quicksight';
 import { DescribeClustersCommand, DescribeClusterSubnetGroupsCommand } from '@aws-sdk/client-redshift';
 import { GetNamespaceCommand, GetWorkgroupCommand } from '@aws-sdk/client-redshift-serverless';
-import { GetBucketPolicyCommand } from '@aws-sdk/client-s3';
+import { BucketLocationConstraint, GetBucketLocationCommand, GetBucketPolicyCommand } from '@aws-sdk/client-s3';
 import { GetSecretValueCommand } from '@aws-sdk/client-secrets-manager';
 import { StartExecutionCommand } from '@aws-sdk/client-sfn';
 import { DynamoDBDocumentClient, GetCommand, GetCommandInput, PutCommand, PutCommandOutput, QueryCommand, QueryCommandInput } from '@aws-sdk/lib-dynamodb';
@@ -449,6 +449,7 @@ function createPipelineMock(
     twoAZsInRegion?: boolean;
     quickSightStandard?: boolean;
     albPolicyDisable?: boolean;
+    bucketNotExist?: boolean;
   }): any {
   iamMock.on(SimulateCustomPolicyCommand).resolves({
     EvaluationResults: [
@@ -997,6 +998,15 @@ function createPipelineMock(
     Policy: props?.albPolicyDisable ? AllowIAMUserPutObejectPolicyWithErrorService
       :AllowIAMUserPutObejectPolicyInApSouthEast1,
   });
+  if (props?.bucketNotExist) {
+    const mockNoSuchBucketError = new Error('NoSuchBucket');
+    mockNoSuchBucketError.name = 'NoSuchBucket';
+    s3Mock.on(GetBucketLocationCommand).rejects(mockNoSuchBucketError);
+  } else {
+    s3Mock.on(GetBucketLocationCommand).resolves({
+      LocationConstraint: BucketLocationConstraint.ap_southeast_1,
+    });
+  }
 }
 
 function createPipelineMockForBJSRegion(s3Mock: any) {

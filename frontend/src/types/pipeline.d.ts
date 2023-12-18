@@ -184,6 +184,7 @@ declare global {
     selectedRegion: SelectProps.Option | null;
     selectedVPC: SelectProps.Option | null;
     selectedSDK: SelectProps.Option | null;
+    selectedS3Bucket: SelectProps.Option | null;
     selectedPublicSubnet: SelectProps.Option[];
 
     selectedPrivateSubnet: SelectProps.Option[];
