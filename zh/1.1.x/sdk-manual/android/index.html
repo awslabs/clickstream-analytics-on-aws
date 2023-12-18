@@ -1721,6 +1721,15 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#item" class="md-nav__link">
+    <span class="md-ellipsis">
+      记录带有 Item 的事件
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#_7" class="md-nav__link">
     <span class="md-ellipsis">
       实时发送事件
@@ -1909,6 +1918,15 @@
   <a href="#_22" class="md-nav__link">
     <span class="md-ellipsis">
       事件属性
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#item_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Item 属性
     </span>
   </a>
   
@@ -3102,6 +3120,15 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#item" class="md-nav__link">
+    <span class="md-ellipsis">
+      记录带有 Item 的事件
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#_7" class="md-nav__link">
     <span class="md-ellipsis">
       实时发送事件
@@ -3295,6 +3322,15 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#item_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Item 属性
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -3347,7 +3383,7 @@
 <h3 id="1-sdk">1. 添加 SDK</h3>
 <p>在您 <code>app</code> 模块的 <code>build.gradle</code> 文件中添加 Clickstream SDK 依赖，例如：</p>
 <div class="language-groovy highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">dependencies</span><span class="w"> </span><span class="o">{</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">    </span><span class="n">implementation</span><span class="w"> </span><span class="s1">&#39;software.aws.solution:clickstream:0.9.0&#39;</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">    </span><span class="n">implementation</span><span class="w"> </span><span class="s1">&#39;software.aws.solution:clickstream:0.10.0&#39;</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="o">}</span>
 </span></code></pre></div>
 <p>您可以将SDK同步为最新版本：<a href="https://central.sonatype.com/artifact/software.aws.solution/clickstream/versions"><img alt="Maven Central" src="https://img.shields.io/maven-central/v/software.aws.solution/clickstream.svg" /></a></p>
@@ -3451,20 +3487,48 @@ api <code>ClickstreamAnalytics.addUserAttributes()</code> 在当用户属性改�
 <p class="admonition-title">重要提示</p>
 <p>如果您的应用已经上线，这时大部分用户已经登录过，则第一次接入Clickstream SDK时请手动设置一次用户属性，确保后续事件都带有用户属性。</p>
 </div>
+<h4 id="item">记录带有 Item 的事件</h4>
+<p>您可以添加以下代码来记录带有 Item 的事件。</p>
+<div class="language-java highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">software.aws.solution.clickstream.ClickstreamAnalytcs</span><span class="p">;</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="kn">import</span><span class="w"> </span><span class="nn">software.aws.solution.clickstream.ClickstreamItem</span><span class="p">;</span>
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>
+</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="n">ClickstreamItem</span><span class="w"> </span><span class="n">item_book</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ClickstreamItem</span><span class="p">.</span><span class="na">builder</span><span class="p">()</span>
+</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="w">    </span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="n">ClickstreamAnalytics</span><span class="p">.</span><span class="na">Item</span><span class="p">.</span><span class="na">ITEM_ID</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;123&quot;</span><span class="p">)</span>
+</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="w">    </span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="n">ClickstreamAnalytics</span><span class="p">.</span><span class="na">Item</span><span class="p">.</span><span class="na">ITEM_NAME</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Nature&quot;</span><span class="p">)</span>
+</span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="w">    </span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="n">ClickstreamAnalytics</span><span class="p">.</span><span class="na">Item</span><span class="p">.</span><span class="na">ITEM_CATEGORY</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;book&quot;</span><span class="p">)</span>
+</span><span id="__span-7-8"><a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="w">    </span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="n">ClickstreamAnalytics</span><span class="p">.</span><span class="na">Item</span><span class="p">.</span><span class="na">PRICE</span><span class="p">,</span><span class="w"> </span><span class="mi">99</span><span class="p">)</span>
+</span><span id="__span-7-9"><a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a><span class="w">    </span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="s">&quot;book_publisher&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Nature Research&quot;</span><span class="p">)</span>
+</span><span id="__span-7-10"><a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a><span class="w">    </span><span class="p">.</span><span class="na">build</span><span class="p">();</span>
+</span><span id="__span-7-11"><a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a>
+</span><span id="__span-7-12"><a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a><span class="n">ClickstreamEvent</span><span class="w"> </span><span class="n">event</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ClickstreamEvent</span><span class="p">.</span><span class="na">builder</span><span class="p">()</span>
+</span><span id="__span-7-13"><a id="__codelineno-7-13" name="__codelineno-7-13" href="#__codelineno-7-13"></a><span class="w">    </span><span class="p">.</span><span class="na">name</span><span class="p">(</span><span class="s">&quot;view_item&quot;</span><span class="p">)</span>
+</span><span id="__span-7-14"><a id="__codelineno-7-14" name="__codelineno-7-14" href="#__codelineno-7-14"></a><span class="w">    </span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="n">ClickstreamAnalytics</span><span class="p">.</span><span class="na">Item</span><span class="p">.</span><span class="na">ITEM_ID</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;123&quot;</span><span class="p">)</span>
+</span><span id="__span-7-15"><a id="__codelineno-7-15" name="__codelineno-7-15" href="#__codelineno-7-15"></a><span class="w">    </span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="n">ClickstreamAnalytics</span><span class="p">.</span><span class="na">Item</span><span class="p">.</span><span class="na">CURRENCY</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;USD&quot;</span><span class="p">)</span>
+</span><span id="__span-7-16"><a id="__codelineno-7-16" name="__codelineno-7-16" href="#__codelineno-7-16"></a><span class="w">    </span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="s">&quot;event_category&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;recommended&quot;</span><span class="p">)</span>
+</span><span id="__span-7-17"><a id="__codelineno-7-17" name="__codelineno-7-17" href="#__codelineno-7-17"></a><span class="w">    </span><span class="p">.</span><span class="na">setItems</span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">ClickstreamItem</span><span class="o">[]</span><span class="w"> </span><span class="p">{</span><span class="n">item_book</span><span class="p">})</span>
+</span><span id="__span-7-18"><a id="__codelineno-7-18" name="__codelineno-7-18" href="#__codelineno-7-18"></a><span class="w">    </span><span class="p">.</span><span class="na">build</span><span class="p">();</span>
+</span><span id="__span-7-19"><a id="__codelineno-7-19" name="__codelineno-7-19" href="#__codelineno-7-19"></a>
+</span><span id="__span-7-20"><a id="__codelineno-7-20" name="__codelineno-7-20" href="#__codelineno-7-20"></a><span class="n">ClickstreamAnalytics</span><span class="p">.</span><span class="na">recordEvent</span><span class="p">(</span><span class="n">event</span><span class="p">);</span>
+</span></code></pre></div>
+<p>要记录 Item 中的更多属性，请参阅 <a href="#item_1">Item 属性</a>.</p>
+<div class="admonition warning">
+<p class="admonition-title">重要提示</p>
+<p>数据管道的版本需要在 v1.1 及以上才能够处理带有自定义属性的 Item。</p>
+</div>
 <h4 id="_7">实时发送事件</h4>
-<div class="language-java highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="c1">// 实时发送事件</span>
-</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="n">ClickstreamAnalytics</span><span class="p">.</span><span class="na">flushEvent</span><span class="p">();</span>
+<div class="language-java highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="c1">// 实时发送事件</span>
+</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="n">ClickstreamAnalytics</span><span class="p">.</span><span class="na">flushEvent</span><span class="p">();</span>
 </span></code></pre></div>
 <h4 id="sdk_1">禁用 SDK</h4>
 <p>您可以根据需要禁用 SDK 。禁用后 SDK 将不会处理任何事件的记录和发送，同时您可以在需要继续记录事件时再次启用SDK。</p>
 <p>请注意，禁用和启用的代码需要在主线程中运行。</p>
-<div class="language-java highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">software.aws.solution.clickstream.ClickstreamAnalytics</span><span class="p">;</span>
-</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>
-</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="c1">// 禁用 SDK</span>
-</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="n">ClickstreamAnalytics</span><span class="p">.</span><span class="na">disable</span><span class="p">();</span>
-</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>
-</span><span id="__span-8-6"><a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="c1">// 启用 SDK</span>
-</span><span id="__span-8-7"><a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="n">ClickstreamAnalytics</span><span class="p">.</span><span class="na">enable</span><span class="p">();</span>
+<div class="language-java highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">software.aws.solution.clickstream.ClickstreamAnalytics</span><span class="p">;</span>
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>
+</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="c1">// 禁用 SDK</span>
+</span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="n">ClickstreamAnalytics</span><span class="p">.</span><span class="na">disable</span><span class="p">();</span>
+</span><span id="__span-9-5"><a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>
+</span><span id="__span-9-6"><a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="c1">// 启用 SDK</span>
+</span><span id="__span-9-7"><a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="n">ClickstreamAnalytics</span><span class="p">.</span><span class="na">enable</span><span class="p">();</span>
 </span></code></pre></div>
 <h4 id="sdk_2">SDK 配置更新</h4>
 <p>在初始化 SDK 后，您可以使用以下代码对其进行自定义配置。</p>
@@ -3472,21 +3536,21 @@ api <code>ClickstreamAnalytics.addUserAttributes()</code> 在当用户属性改�
 <p class="admonition-title">重要提示</p>
 <p>此配置将覆盖 <code>amplifyconfiguration.json</code> 文件中的默认配置。</p>
 </div>
-<div class="language-java highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">software.aws.solution.clickstream.ClickstreamAnalytics</span><span class="p">;</span>
-</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>
-</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="c1">// 在初始化后更新SDK配置</span>
-</span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="n">ClickstreamAnalytics</span><span class="p">.</span><span class="na">getClickStreamConfiguration</span><span class="p">()</span>
-</span><span id="__span-9-5"><a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="w">        </span><span class="p">.</span><span class="na">withAppId</span><span class="p">(</span><span class="s">&quot;your appId&quot;</span><span class="p">)</span>
-</span><span id="__span-9-6"><a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="w">        </span><span class="p">.</span><span class="na">withEndpoint</span><span class="p">(</span><span class="s">&quot;https://example.com/collect&quot;</span><span class="p">)</span>
-</span><span id="__span-9-7"><a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="w">        </span><span class="p">.</span><span class="na">withAuthCookie</span><span class="p">(</span><span class="s">&quot;your authentication cookie&quot;</span><span class="p">)</span>
-</span><span id="__span-9-8"><a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a><span class="w">        </span><span class="p">.</span><span class="na">withSendEventsInterval</span><span class="p">(</span><span class="mi">10000</span><span class="p">)</span>
-</span><span id="__span-9-9"><a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a><span class="w">        </span><span class="p">.</span><span class="na">withSessionTimeoutDuration</span><span class="p">(</span><span class="mi">1800000</span><span class="p">)</span>
-</span><span id="__span-9-10"><a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a><span class="w">        </span><span class="p">.</span><span class="na">withTrackScreenViewEvents</span><span class="p">(</span><span class="kc">false</span><span class="p">)</span>
-</span><span id="__span-9-11"><a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a><span class="w">        </span><span class="p">.</span><span class="na">withTrackUserEngagementEvents</span><span class="p">(</span><span class="kc">false</span><span class="p">)</span>
-</span><span id="__span-9-12"><a id="__codelineno-9-12" name="__codelineno-9-12" href="#__codelineno-9-12"></a><span class="w">        </span><span class="p">.</span><span class="na">withTrackAppExceptionEvents</span><span class="p">(</span><span class="kc">false</span><span class="p">)</span>
-</span><span id="__span-9-13"><a id="__codelineno-9-13" name="__codelineno-9-13" href="#__codelineno-9-13"></a><span class="w">        </span><span class="p">.</span><span class="na">withLogEvents</span><span class="p">(</span><span class="kc">true</span><span class="p">)</span>
-</span><span id="__span-9-14"><a id="__codelineno-9-14" name="__codelineno-9-14" href="#__codelineno-9-14"></a><span class="w">        </span><span class="p">.</span><span class="na">withCustomDns</span><span class="p">(</span><span class="n">CustomOkhttpDns</span><span class="p">.</span><span class="na">getInstance</span><span class="p">())</span>
-</span><span id="__span-9-15"><a id="__codelineno-9-15" name="__codelineno-9-15" href="#__codelineno-9-15"></a><span class="w">        </span><span class="p">.</span><span class="na">withCompressEvents</span><span class="p">(</span><span class="kc">true</span><span class="p">);</span>
+<div class="language-java highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">software.aws.solution.clickstream.ClickstreamAnalytics</span><span class="p">;</span>
+</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>
+</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="c1">// 在初始化后更新SDK配置</span>
+</span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="n">ClickstreamAnalytics</span><span class="p">.</span><span class="na">getClickStreamConfiguration</span><span class="p">()</span>
+</span><span id="__span-10-5"><a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a><span class="w">        </span><span class="p">.</span><span class="na">withAppId</span><span class="p">(</span><span class="s">&quot;your appId&quot;</span><span class="p">)</span>
+</span><span id="__span-10-6"><a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a><span class="w">        </span><span class="p">.</span><span class="na">withEndpoint</span><span class="p">(</span><span class="s">&quot;https://example.com/collect&quot;</span><span class="p">)</span>
+</span><span id="__span-10-7"><a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a><span class="w">        </span><span class="p">.</span><span class="na">withAuthCookie</span><span class="p">(</span><span class="s">&quot;your authentication cookie&quot;</span><span class="p">)</span>
+</span><span id="__span-10-8"><a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a><span class="w">        </span><span class="p">.</span><span class="na">withSendEventsInterval</span><span class="p">(</span><span class="mi">10000</span><span class="p">)</span>
+</span><span id="__span-10-9"><a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a><span class="w">        </span><span class="p">.</span><span class="na">withSessionTimeoutDuration</span><span class="p">(</span><span class="mi">1800000</span><span class="p">)</span>
+</span><span id="__span-10-10"><a id="__codelineno-10-10" name="__codelineno-10-10" href="#__codelineno-10-10"></a><span class="w">        </span><span class="p">.</span><span class="na">withTrackScreenViewEvents</span><span class="p">(</span><span class="kc">false</span><span class="p">)</span>
+</span><span id="__span-10-11"><a id="__codelineno-10-11" name="__codelineno-10-11" href="#__codelineno-10-11"></a><span class="w">        </span><span class="p">.</span><span class="na">withTrackUserEngagementEvents</span><span class="p">(</span><span class="kc">false</span><span class="p">)</span>
+</span><span id="__span-10-12"><a id="__codelineno-10-12" name="__codelineno-10-12" href="#__codelineno-10-12"></a><span class="w">        </span><span class="p">.</span><span class="na">withTrackAppExceptionEvents</span><span class="p">(</span><span class="kc">false</span><span class="p">)</span>
+</span><span id="__span-10-13"><a id="__codelineno-10-13" name="__codelineno-10-13" href="#__codelineno-10-13"></a><span class="w">        </span><span class="p">.</span><span class="na">withLogEvents</span><span class="p">(</span><span class="kc">true</span><span class="p">)</span>
+</span><span id="__span-10-14"><a id="__codelineno-10-14" name="__codelineno-10-14" href="#__codelineno-10-14"></a><span class="w">        </span><span class="p">.</span><span class="na">withCustomDns</span><span class="p">(</span><span class="n">CustomOkhttpDns</span><span class="p">.</span><span class="na">getInstance</span><span class="p">())</span>
+</span><span id="__span-10-15"><a id="__codelineno-10-15" name="__codelineno-10-15" href="#__codelineno-10-15"></a><span class="w">        </span><span class="p">.</span><span class="na">withCompressEvents</span><span class="p">(</span><span class="kc">true</span><span class="p">);</span>
 </span></code></pre></div>
 <p>以下是每个方法的说明</p>
 <table>
@@ -3582,20 +3646,20 @@ api <code>ClickstreamAnalytics.addUserAttributes()</code> 在当用户属性改�
 <h4 id="_8">调试事件</h4>
 <p>您可以按照以下步骤查看事件原始 json 并调试您的事件。</p>
 <p>1.使用 <code>ClickstreamAnalytics.getClickStreamConfiguration()</code> 并在调试模式下将 <code>withLogEvents()</code> 方法设置为 true，例如：</p>
-<div class="language-java highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">software.aws.solution.clickstream.ClickstreamAnalytics</span><span class="p">;</span>
-</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>
-</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="c1">// 在调试模式下打开事件json内容的打印</span>
-</span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="n">ClickstreamAnalytics</span><span class="p">.</span><span class="na">getClickStreamConfiguration</span><span class="p">()</span>
-</span><span id="__span-10-5"><a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a><span class="w">        </span><span class="p">.</span><span class="na">withLogEvents</span><span class="p">(</span><span class="n">BuildConfig</span><span class="p">.</span><span class="na">DEBUG</span><span class="p">);</span>
+<div class="language-java highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">software.aws.solution.clickstream.ClickstreamAnalytics</span><span class="p">;</span>
+</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>
+</span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="c1">// 在调试模式下打开事件json内容的打印</span>
+</span><span id="__span-11-4"><a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="n">ClickstreamAnalytics</span><span class="p">.</span><span class="na">getClickStreamConfiguration</span><span class="p">()</span>
+</span><span id="__span-11-5"><a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a><span class="w">        </span><span class="p">.</span><span class="na">withLogEvents</span><span class="p">(</span><span class="n">BuildConfig</span><span class="p">.</span><span class="na">DEBUG</span><span class="p">);</span>
 </span></code></pre></div>
 <p>2.集成 SDK 并通过 Android Studio 启动您的应用程序，然后打开 <strong>Logcat</strong> 窗口。</p>
 <p>3.在filter中输入<code>EventRecorder</code>，您将看到Clickstream Android SDK记录的所有事件的json内容。</p>
 <h4 id="dns">配置自定义DNS</h4>
-<div class="language-java highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">software.aws.solution.clickstream.ClickstreamAnalytics</span><span class="p">;</span>
-</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>
-</span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="c1">// 配置自定义DNS</span>
-</span><span id="__span-11-4"><a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="n">ClickstreamAnalytics</span><span class="p">.</span><span class="na">getClickStreamConfiguration</span><span class="p">()</span>
-</span><span id="__span-11-5"><a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a><span class="w">        </span><span class="p">.</span><span class="na">withCustomDns</span><span class="p">(</span><span class="n">CustomOkhttpDns</span><span class="p">.</span><span class="na">getInstance</span><span class="p">());</span>
+<div class="language-java highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">software.aws.solution.clickstream.ClickstreamAnalytics</span><span class="p">;</span>
+</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>
+</span><span id="__span-12-3"><a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="c1">// 配置自定义DNS</span>
+</span><span id="__span-12-4"><a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="n">ClickstreamAnalytics</span><span class="p">.</span><span class="na">getClickStreamConfiguration</span><span class="p">()</span>
+</span><span id="__span-12-5"><a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a><span class="w">        </span><span class="p">.</span><span class="na">withCustomDns</span><span class="p">(</span><span class="n">CustomOkhttpDns</span><span class="p">.</span><span class="na">getInstance</span><span class="p">());</span>
 </span></code></pre></div>
 <p>如果你想使用自定义DNS进行网络请求，你可以创建你的 <code>CustomOkhttpDns</code>并继承<code>okhttp3.Dns</code>
 ，然后配置 <code>.withCustomDns(CustomOkhttpDns.getInstance())</code>
@@ -3735,6 +3799,41 @@ api <code>ClickstreamAnalytics.addUserAttributes()</code> 在当用户属性改�
 <td style="text-align: left;">丢弃该属性、打印日志并记录<code>_clickstream_error</code>事件</td>
 <td style="text-align: left;">3004</td>
 </tr>
+<tr>
+<td style="text-align: left;">事件中 Item 的个数</td>
+<td style="text-align: left;">50 个 Item 以下</td>
+<td style="text-align: left;">100 个 Item</td>
+<td style="text-align: left;">丢弃超出限制的 Item，打印错误日志并在事件属性中记录错误</td>
+<td style="text-align: left;">4001</td>
+</tr>
+<tr>
+<td style="text-align: left;">Item 属性值的长度</td>
+<td style="text-align: left;">少于 100 个字符</td>
+<td style="text-align: left;">256 个字符</td>
+<td style="text-align: left;">丢弃超出限制的 Item，打印错误日志并在事件属性中记录错误</td>
+<td style="text-align: left;">4002</td>
+</tr>
+<tr>
+<td style="text-align: left;">一个 Item 中自定义属性的个数</td>
+<td style="text-align: left;">少于 10 个自定义属性</td>
+<td style="text-align: left;">10 个自定义属性</td>
+<td style="text-align: left;">丢弃超出限制的 Item，打印错误日志并在事件属性中记录错误</td>
+<td style="text-align: left;">4003</td>
+</tr>
+<tr>
+<td style="text-align: left;">Item 属性名的长度</td>
+<td style="text-align: left;">25 个字符以下</td>
+<td style="text-align: left;">50 个字符</td>
+<td style="text-align: left;">丢弃超出限制的 Item，打印错误日志并在事件属性中记录错误</td>
+<td style="text-align: left;">4004</td>
+</tr>
+<tr>
+<td style="text-align: left;">Item 属性名称合规</td>
+<td style="text-align: left;">--</td>
+<td style="text-align: left;">--</td>
+<td style="text-align: left;">丢弃超出限制的 Item，打印错误日志并在事件属性中记录错误</td>
+<td style="text-align: left;">4005</td>
+</tr>
 </tbody>
 </table>
 <div class="admonition info">
@@ -3851,57 +3950,57 @@ api <code>ClickstreamAnalytics.addUserAttributes()</code> 在当用户属性改�
 <p><strong>engagement_time_msec</strong>：从屏幕可见到用户离开屏幕的毫秒数。</p>
 <h2 id="_18">事件属性</h2>
 <h3 id="_19">事件结构示例</h3>
-<div class="language-json highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="p">{</span>
-</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="w">  </span><span class="nt">&quot;hashCode&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;80452b0&quot;</span><span class="p">,</span>
-</span><span id="__span-12-3"><a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="w">  </span><span class="nt">&quot;unique_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;c84ad28d-16a8-4af4-a331-f34cdc7a7a18&quot;</span><span class="p">,</span>
-</span><span id="__span-12-4"><a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="w">  </span><span class="nt">&quot;event_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;add_to_cart&quot;</span><span class="p">,</span>
-</span><span id="__span-12-5"><a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a><span class="w">  </span><span class="nt">&quot;event_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;460daa08-0717-4385-8f2e-acb5bd019ee7&quot;</span><span class="p">,</span>
-</span><span id="__span-12-6"><a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a><span class="w">  </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1667877566697</span><span class="p">,</span>
-</span><span id="__span-12-7"><a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a><span class="w">  </span><span class="nt">&quot;device_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;f24bec657ea8eff7&quot;</span><span class="p">,</span>
-</span><span id="__span-12-8"><a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a><span class="w">  </span><span class="nt">&quot;platform&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Android&quot;</span><span class="p">,</span>
-</span><span id="__span-12-9"><a id="__codelineno-12-9" name="__codelineno-12-9" href="#__codelineno-12-9"></a><span class="w">  </span><span class="nt">&quot;os_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;10&quot;</span><span class="p">,</span>
-</span><span id="__span-12-10"><a id="__codelineno-12-10" name="__codelineno-12-10" href="#__codelineno-12-10"></a><span class="w">  </span><span class="nt">&quot;make&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Samsung&quot;</span><span class="p">,</span>
-</span><span id="__span-12-11"><a id="__codelineno-12-11" name="__codelineno-12-11" href="#__codelineno-12-11"></a><span class="w">  </span><span class="nt">&quot;brand&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Samsung&quot;</span><span class="p">,</span>
-</span><span id="__span-12-12"><a id="__codelineno-12-12" name="__codelineno-12-12" href="#__codelineno-12-12"></a><span class="w">  </span><span class="nt">&quot;model&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;TAS-AN00&quot;</span><span class="p">,</span>
-</span><span id="__span-12-13"><a id="__codelineno-12-13" name="__codelineno-12-13" href="#__codelineno-12-13"></a><span class="w">  </span><span class="nt">&quot;locale&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;zh_CN_#Hans&quot;</span><span class="p">,</span>
-</span><span id="__span-12-14"><a id="__codelineno-12-14" name="__codelineno-12-14" href="#__codelineno-12-14"></a><span class="w">  </span><span class="nt">&quot;carrier&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;CDMA&quot;</span><span class="p">,</span>
-</span><span id="__span-12-15"><a id="__codelineno-12-15" name="__codelineno-12-15" href="#__codelineno-12-15"></a><span class="w">  </span><span class="nt">&quot;network_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Mobile&quot;</span><span class="p">,</span>
-</span><span id="__span-12-16"><a id="__codelineno-12-16" name="__codelineno-12-16" href="#__codelineno-12-16"></a><span class="w">  </span><span class="nt">&quot;screen_height&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2259</span><span class="p">,</span>
-</span><span id="__span-12-17"><a id="__codelineno-12-17" name="__codelineno-12-17" href="#__codelineno-12-17"></a><span class="w">  </span><span class="nt">&quot;screen_width&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1080</span><span class="p">,</span>
-</span><span id="__span-12-18"><a id="__codelineno-12-18" name="__codelineno-12-18" href="#__codelineno-12-18"></a><span class="w">  </span><span class="nt">&quot;zone_offset&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">28800000</span><span class="p">,</span>
-</span><span id="__span-12-19"><a id="__codelineno-12-19" name="__codelineno-12-19" href="#__codelineno-12-19"></a><span class="w">  </span><span class="nt">&quot;system_language&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;zh&quot;</span><span class="p">,</span>
-</span><span id="__span-12-20"><a id="__codelineno-12-20" name="__codelineno-12-20" href="#__codelineno-12-20"></a><span class="w">  </span><span class="nt">&quot;country_code&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;CN&quot;</span><span class="p">,</span>
-</span><span id="__span-12-21"><a id="__codelineno-12-21" name="__codelineno-12-21" href="#__codelineno-12-21"></a><span class="w">  </span><span class="nt">&quot;sdk_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0.7.1&quot;</span><span class="p">,</span>
-</span><span id="__span-12-22"><a id="__codelineno-12-22" name="__codelineno-12-22" href="#__codelineno-12-22"></a><span class="w">  </span><span class="nt">&quot;sdk_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;aws-solution-clickstream-sdk&quot;</span><span class="p">,</span>
-</span><span id="__span-12-23"><a id="__codelineno-12-23" name="__codelineno-12-23" href="#__codelineno-12-23"></a><span class="w">  </span><span class="nt">&quot;app_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1.0&quot;</span><span class="p">,</span>
-</span><span id="__span-12-24"><a id="__codelineno-12-24" name="__codelineno-12-24" href="#__codelineno-12-24"></a><span class="w">  </span><span class="nt">&quot;app_package_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;com.notepad.app&quot;</span><span class="p">,</span>
-</span><span id="__span-12-25"><a id="__codelineno-12-25" name="__codelineno-12-25" href="#__codelineno-12-25"></a><span class="w">  </span><span class="nt">&quot;app_title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Notepad&quot;</span><span class="p">,</span>
-</span><span id="__span-12-26"><a id="__codelineno-12-26" name="__codelineno-12-26" href="#__codelineno-12-26"></a><span class="w">  </span><span class="nt">&quot;app_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;notepad-4a929eb9&quot;</span><span class="p">,</span>
-</span><span id="__span-12-27"><a id="__codelineno-12-27" name="__codelineno-12-27" href="#__codelineno-12-27"></a><span class="w">  </span><span class="nt">&quot;user&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-12-28"><a id="__codelineno-12-28" name="__codelineno-12-28" href="#__codelineno-12-28"></a><span class="w">    </span><span class="nt">&quot;_user_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-12-29"><a id="__codelineno-12-29" name="__codelineno-12-29" href="#__codelineno-12-29"></a><span class="w">      </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;312121&quot;</span><span class="p">,</span>
-</span><span id="__span-12-30"><a id="__codelineno-12-30" name="__codelineno-12-30" href="#__codelineno-12-30"></a><span class="w">      </span><span class="nt">&quot;set_timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1667877566697</span>
-</span><span id="__span-12-31"><a id="__codelineno-12-31" name="__codelineno-12-31" href="#__codelineno-12-31"></a><span class="w">    </span><span class="p">},</span>
-</span><span id="__span-12-32"><a id="__codelineno-12-32" name="__codelineno-12-32" href="#__codelineno-12-32"></a><span class="w">    </span><span class="nt">&quot;_user_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-12-33"><a id="__codelineno-12-33" name="__codelineno-12-33" href="#__codelineno-12-33"></a><span class="w">      </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;carl&quot;</span><span class="p">,</span>
-</span><span id="__span-12-34"><a id="__codelineno-12-34" name="__codelineno-12-34" href="#__codelineno-12-34"></a><span class="w">      </span><span class="nt">&quot;set_timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1667877566697</span>
-</span><span id="__span-12-35"><a id="__codelineno-12-35" name="__codelineno-12-35" href="#__codelineno-12-35"></a><span class="w">    </span><span class="p">},</span>
-</span><span id="__span-12-36"><a id="__codelineno-12-36" name="__codelineno-12-36" href="#__codelineno-12-36"></a><span class="w">    </span><span class="nt">&quot;_user_first_touch_timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-12-37"><a id="__codelineno-12-37" name="__codelineno-12-37" href="#__codelineno-12-37"></a><span class="w">      </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1667877267895</span><span class="p">,</span>
-</span><span id="__span-12-38"><a id="__codelineno-12-38" name="__codelineno-12-38" href="#__codelineno-12-38"></a><span class="w">      </span><span class="nt">&quot;set_timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1667877566697</span>
-</span><span id="__span-12-39"><a id="__codelineno-12-39" name="__codelineno-12-39" href="#__codelineno-12-39"></a><span class="w">    </span><span class="p">}</span>
-</span><span id="__span-12-40"><a id="__codelineno-12-40" name="__codelineno-12-40" href="#__codelineno-12-40"></a><span class="w">  </span><span class="p">},</span>
-</span><span id="__span-12-41"><a id="__codelineno-12-41" name="__codelineno-12-41" href="#__codelineno-12-41"></a><span class="w">  </span><span class="nt">&quot;attributes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-</span><span id="__span-12-42"><a id="__codelineno-12-42" name="__codelineno-12-42" href="#__codelineno-12-42"></a><span class="w">    </span><span class="nt">&quot;event_category&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;recommended&quot;</span><span class="p">,</span>
-</span><span id="__span-12-43"><a id="__codelineno-12-43" name="__codelineno-12-43" href="#__codelineno-12-43"></a><span class="w">    </span><span class="nt">&quot;currency&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;CNY&quot;</span><span class="p">,</span>
-</span><span id="__span-12-44"><a id="__codelineno-12-44" name="__codelineno-12-44" href="#__codelineno-12-44"></a><span class="w">    </span><span class="nt">&quot;_session_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;dc7a7a18-20221108-031926703&quot;</span><span class="p">,</span>
-</span><span id="__span-12-45"><a id="__codelineno-12-45" name="__codelineno-12-45" href="#__codelineno-12-45"></a><span class="w">    </span><span class="nt">&quot;_session_start_timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1667877566703</span><span class="p">,</span>
-</span><span id="__span-12-46"><a id="__codelineno-12-46" name="__codelineno-12-46" href="#__codelineno-12-46"></a><span class="w">    </span><span class="nt">&quot;_session_duration&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">391809</span><span class="p">,</span>
-</span><span id="__span-12-47"><a id="__codelineno-12-47" name="__codelineno-12-47" href="#__codelineno-12-47"></a><span class="w">    </span><span class="nt">&quot;_session_number&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
-</span><span id="__span-12-48"><a id="__codelineno-12-48" name="__codelineno-12-48" href="#__codelineno-12-48"></a><span class="w">    </span><span class="nt">&quot;_screen_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ProductDetailActivity&quot;</span><span class="p">,</span>
-</span><span id="__span-12-49"><a id="__codelineno-12-49" name="__codelineno-12-49" href="#__codelineno-12-49"></a><span class="w">    </span><span class="nt">&quot;_screen_unique_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;126861252&quot;</span>
-</span><span id="__span-12-50"><a id="__codelineno-12-50" name="__codelineno-12-50" href="#__codelineno-12-50"></a><span class="w">  </span><span class="p">}</span>
-</span><span id="__span-12-51"><a id="__codelineno-12-51" name="__codelineno-12-51" href="#__codelineno-12-51"></a><span class="p">}</span>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="p">{</span>
+</span><span id="__span-13-2"><a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a><span class="w">  </span><span class="nt">&quot;hashCode&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;80452b0&quot;</span><span class="p">,</span>
+</span><span id="__span-13-3"><a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a><span class="w">  </span><span class="nt">&quot;unique_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;c84ad28d-16a8-4af4-a331-f34cdc7a7a18&quot;</span><span class="p">,</span>
+</span><span id="__span-13-4"><a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a><span class="w">  </span><span class="nt">&quot;event_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;add_to_cart&quot;</span><span class="p">,</span>
+</span><span id="__span-13-5"><a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a><span class="w">  </span><span class="nt">&quot;event_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;460daa08-0717-4385-8f2e-acb5bd019ee7&quot;</span><span class="p">,</span>
+</span><span id="__span-13-6"><a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a><span class="w">  </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1667877566697</span><span class="p">,</span>
+</span><span id="__span-13-7"><a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a><span class="w">  </span><span class="nt">&quot;device_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;f24bec657ea8eff7&quot;</span><span class="p">,</span>
+</span><span id="__span-13-8"><a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a><span class="w">  </span><span class="nt">&quot;platform&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Android&quot;</span><span class="p">,</span>
+</span><span id="__span-13-9"><a id="__codelineno-13-9" name="__codelineno-13-9" href="#__codelineno-13-9"></a><span class="w">  </span><span class="nt">&quot;os_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;10&quot;</span><span class="p">,</span>
+</span><span id="__span-13-10"><a id="__codelineno-13-10" name="__codelineno-13-10" href="#__codelineno-13-10"></a><span class="w">  </span><span class="nt">&quot;make&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Samsung&quot;</span><span class="p">,</span>
+</span><span id="__span-13-11"><a id="__codelineno-13-11" name="__codelineno-13-11" href="#__codelineno-13-11"></a><span class="w">  </span><span class="nt">&quot;brand&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Samsung&quot;</span><span class="p">,</span>
+</span><span id="__span-13-12"><a id="__codelineno-13-12" name="__codelineno-13-12" href="#__codelineno-13-12"></a><span class="w">  </span><span class="nt">&quot;model&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;TAS-AN00&quot;</span><span class="p">,</span>
+</span><span id="__span-13-13"><a id="__codelineno-13-13" name="__codelineno-13-13" href="#__codelineno-13-13"></a><span class="w">  </span><span class="nt">&quot;locale&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;zh_CN_#Hans&quot;</span><span class="p">,</span>
+</span><span id="__span-13-14"><a id="__codelineno-13-14" name="__codelineno-13-14" href="#__codelineno-13-14"></a><span class="w">  </span><span class="nt">&quot;carrier&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;CDMA&quot;</span><span class="p">,</span>
+</span><span id="__span-13-15"><a id="__codelineno-13-15" name="__codelineno-13-15" href="#__codelineno-13-15"></a><span class="w">  </span><span class="nt">&quot;network_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Mobile&quot;</span><span class="p">,</span>
+</span><span id="__span-13-16"><a id="__codelineno-13-16" name="__codelineno-13-16" href="#__codelineno-13-16"></a><span class="w">  </span><span class="nt">&quot;screen_height&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2259</span><span class="p">,</span>
+</span><span id="__span-13-17"><a id="__codelineno-13-17" name="__codelineno-13-17" href="#__codelineno-13-17"></a><span class="w">  </span><span class="nt">&quot;screen_width&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1080</span><span class="p">,</span>
+</span><span id="__span-13-18"><a id="__codelineno-13-18" name="__codelineno-13-18" href="#__codelineno-13-18"></a><span class="w">  </span><span class="nt">&quot;zone_offset&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">28800000</span><span class="p">,</span>
+</span><span id="__span-13-19"><a id="__codelineno-13-19" name="__codelineno-13-19" href="#__codelineno-13-19"></a><span class="w">  </span><span class="nt">&quot;system_language&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;zh&quot;</span><span class="p">,</span>
+</span><span id="__span-13-20"><a id="__codelineno-13-20" name="__codelineno-13-20" href="#__codelineno-13-20"></a><span class="w">  </span><span class="nt">&quot;country_code&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;CN&quot;</span><span class="p">,</span>
+</span><span id="__span-13-21"><a id="__codelineno-13-21" name="__codelineno-13-21" href="#__codelineno-13-21"></a><span class="w">  </span><span class="nt">&quot;sdk_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;0.7.1&quot;</span><span class="p">,</span>
+</span><span id="__span-13-22"><a id="__codelineno-13-22" name="__codelineno-13-22" href="#__codelineno-13-22"></a><span class="w">  </span><span class="nt">&quot;sdk_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;aws-solution-clickstream-sdk&quot;</span><span class="p">,</span>
+</span><span id="__span-13-23"><a id="__codelineno-13-23" name="__codelineno-13-23" href="#__codelineno-13-23"></a><span class="w">  </span><span class="nt">&quot;app_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1.0&quot;</span><span class="p">,</span>
+</span><span id="__span-13-24"><a id="__codelineno-13-24" name="__codelineno-13-24" href="#__codelineno-13-24"></a><span class="w">  </span><span class="nt">&quot;app_package_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;com.notepad.app&quot;</span><span class="p">,</span>
+</span><span id="__span-13-25"><a id="__codelineno-13-25" name="__codelineno-13-25" href="#__codelineno-13-25"></a><span class="w">  </span><span class="nt">&quot;app_title&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Notepad&quot;</span><span class="p">,</span>
+</span><span id="__span-13-26"><a id="__codelineno-13-26" name="__codelineno-13-26" href="#__codelineno-13-26"></a><span class="w">  </span><span class="nt">&quot;app_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;notepad-4a929eb9&quot;</span><span class="p">,</span>
+</span><span id="__span-13-27"><a id="__codelineno-13-27" name="__codelineno-13-27" href="#__codelineno-13-27"></a><span class="w">  </span><span class="nt">&quot;user&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-13-28"><a id="__codelineno-13-28" name="__codelineno-13-28" href="#__codelineno-13-28"></a><span class="w">    </span><span class="nt">&quot;_user_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-13-29"><a id="__codelineno-13-29" name="__codelineno-13-29" href="#__codelineno-13-29"></a><span class="w">      </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;312121&quot;</span><span class="p">,</span>
+</span><span id="__span-13-30"><a id="__codelineno-13-30" name="__codelineno-13-30" href="#__codelineno-13-30"></a><span class="w">      </span><span class="nt">&quot;set_timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1667877566697</span>
+</span><span id="__span-13-31"><a id="__codelineno-13-31" name="__codelineno-13-31" href="#__codelineno-13-31"></a><span class="w">    </span><span class="p">},</span>
+</span><span id="__span-13-32"><a id="__codelineno-13-32" name="__codelineno-13-32" href="#__codelineno-13-32"></a><span class="w">    </span><span class="nt">&quot;_user_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-13-33"><a id="__codelineno-13-33" name="__codelineno-13-33" href="#__codelineno-13-33"></a><span class="w">      </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;carl&quot;</span><span class="p">,</span>
+</span><span id="__span-13-34"><a id="__codelineno-13-34" name="__codelineno-13-34" href="#__codelineno-13-34"></a><span class="w">      </span><span class="nt">&quot;set_timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1667877566697</span>
+</span><span id="__span-13-35"><a id="__codelineno-13-35" name="__codelineno-13-35" href="#__codelineno-13-35"></a><span class="w">    </span><span class="p">},</span>
+</span><span id="__span-13-36"><a id="__codelineno-13-36" name="__codelineno-13-36" href="#__codelineno-13-36"></a><span class="w">    </span><span class="nt">&quot;_user_first_touch_timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-13-37"><a id="__codelineno-13-37" name="__codelineno-13-37" href="#__codelineno-13-37"></a><span class="w">      </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1667877267895</span><span class="p">,</span>
+</span><span id="__span-13-38"><a id="__codelineno-13-38" name="__codelineno-13-38" href="#__codelineno-13-38"></a><span class="w">      </span><span class="nt">&quot;set_timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1667877566697</span>
+</span><span id="__span-13-39"><a id="__codelineno-13-39" name="__codelineno-13-39" href="#__codelineno-13-39"></a><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-13-40"><a id="__codelineno-13-40" name="__codelineno-13-40" href="#__codelineno-13-40"></a><span class="w">  </span><span class="p">},</span>
+</span><span id="__span-13-41"><a id="__codelineno-13-41" name="__codelineno-13-41" href="#__codelineno-13-41"></a><span class="w">  </span><span class="nt">&quot;attributes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-13-42"><a id="__codelineno-13-42" name="__codelineno-13-42" href="#__codelineno-13-42"></a><span class="w">    </span><span class="nt">&quot;event_category&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;recommended&quot;</span><span class="p">,</span>
+</span><span id="__span-13-43"><a id="__codelineno-13-43" name="__codelineno-13-43" href="#__codelineno-13-43"></a><span class="w">    </span><span class="nt">&quot;currency&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;CNY&quot;</span><span class="p">,</span>
+</span><span id="__span-13-44"><a id="__codelineno-13-44" name="__codelineno-13-44" href="#__codelineno-13-44"></a><span class="w">    </span><span class="nt">&quot;_session_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;dc7a7a18-20221108-031926703&quot;</span><span class="p">,</span>
+</span><span id="__span-13-45"><a id="__codelineno-13-45" name="__codelineno-13-45" href="#__codelineno-13-45"></a><span class="w">    </span><span class="nt">&quot;_session_start_timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1667877566703</span><span class="p">,</span>
+</span><span id="__span-13-46"><a id="__codelineno-13-46" name="__codelineno-13-46" href="#__codelineno-13-46"></a><span class="w">    </span><span class="nt">&quot;_session_duration&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">391809</span><span class="p">,</span>
+</span><span id="__span-13-47"><a id="__codelineno-13-47" name="__codelineno-13-47" href="#__codelineno-13-47"></a><span class="w">    </span><span class="nt">&quot;_session_number&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+</span><span id="__span-13-48"><a id="__codelineno-13-48" name="__codelineno-13-48" href="#__codelineno-13-48"></a><span class="w">    </span><span class="nt">&quot;_screen_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ProductDetailActivity&quot;</span><span class="p">,</span>
+</span><span id="__span-13-49"><a id="__codelineno-13-49" name="__codelineno-13-49" href="#__codelineno-13-49"></a><span class="w">    </span><span class="nt">&quot;_screen_unique_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;126861252&quot;</span>
+</span><span id="__span-13-50"><a id="__codelineno-13-50" name="__codelineno-13-50" href="#__codelineno-13-50"></a><span class="w">  </span><span class="p">}</span>
+</span><span id="__span-13-51"><a id="__codelineno-13-51" name="__codelineno-13-51" href="#__codelineno-13-51"></a><span class="p">}</span>
 </span></code></pre></div>
 <p>所有用户属性都将存储在 <code>user</code> 对象中，所有自定义和全局属性都存储在 <code>attributes</code> 对象中。</p>
 <h3 id="_20">公共属性</h3>
@@ -4193,6 +4292,104 @@ api <code>ClickstreamAnalytics.addUserAttributes()</code> 在当用户属性改�
 </tr>
 </tbody>
 </table>
+<h3 id="item_1">Item 属性</h3>
+<table>
+<thead>
+<tr>
+<th>属性名</th>
+<th>数据类型</th>
+<th>是否必需</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>id</td>
+<td>string</td>
+<td>否</td>
+<td>item的id</td>
+</tr>
+<tr>
+<td>name</td>
+<td>string</td>
+<td>否</td>
+<td>item的名称</td>
+</tr>
+<tr>
+<td>brand</td>
+<td>string</td>
+<td>否</td>
+<td>item的品牌</td>
+</tr>
+<tr>
+<td>currency</td>
+<td>string</td>
+<td>否</td>
+<td>item的货币</td>
+</tr>
+<tr>
+<td>price</td>
+<td>number</td>
+<td>否</td>
+<td>item的价格</td>
+</tr>
+<tr>
+<td>quantity</td>
+<td>string</td>
+<td>否</td>
+<td>item的数量</td>
+</tr>
+<tr>
+<td>creative_name</td>
+<td>string</td>
+<td>否</td>
+<td>item的创意名称</td>
+</tr>
+<tr>
+<td>creative_slot</td>
+<td>string</td>
+<td>否</td>
+<td>item的创意槽</td>
+</tr>
+<tr>
+<td>location_id</td>
+<td>string</td>
+<td>否</td>
+<td>item的位置id</td>
+</tr>
+<tr>
+<td>category</td>
+<td>string</td>
+<td>否</td>
+<td>item的类别</td>
+</tr>
+<tr>
+<td>category2</td>
+<td>string</td>
+<td>否</td>
+<td>item的类别2</td>
+</tr>
+<tr>
+<td>category3</td>
+<td>string</td>
+<td>否</td>
+<td>item的类别3</td>
+</tr>
+<tr>
+<td>category4</td>
+<td>string</td>
+<td>否</td>
+<td>item的类别4</td>
+</tr>
+<tr>
+<td>category5</td>
+<td>string</td>
+<td>否</td>
+<td>item的类别5</td>
+</tr>
+</tbody>
+</table>
+<p>您可以使用上面预置的 Item 属性，当然您也可以为 Item 添加自定义属性。 除了预置属性外，一个 Item 最多可以添加 10 个自定义属性。</p>
 <h2 id="sdk_3">SDK更新日志</h2>
 <p>参考：<a href="https://github.com/awslabs/clickstream-android/releases">GitHub 更新日志</a></p>
 <h2 id="_23">参考链接</h2>
