@@ -160,6 +160,10 @@ export interface StoreMetadataBody {
   readonly appId: string;
 }
 
+export interface MetadataPostProcessingBody {
+  readonly appId: string;
+}
+
 export type CheckUpsertStatusEventDetail = {
   id: string;
   appId: string;

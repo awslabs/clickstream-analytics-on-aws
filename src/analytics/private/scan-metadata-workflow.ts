@@ -22,6 +22,7 @@ import { StateMachine, LogLevel, IStateMachine, TaskInput, Wait, WaitTime, Succe
 import { LambdaInvoke } from 'aws-cdk-lib/aws-stepfunctions-tasks';
 import { Construct } from 'constructs';
 import { ExistingRedshiftServerlessCustomProps, ProvisionedRedshiftProps, ScanMetadataWorkflowData } from './model';
+import { PREFIX_MONTH_GSI_NAME } from '../../common/constant';
 import { createLambdaRole } from '../../common/lambda';
 import { createLogGroup } from '../../common/logs';
 import { REDSHIFT_MODE } from '../../common/model';
@@ -93,6 +94,19 @@ export class ScanMetadataWorkflow extends Construct {
 
     const checkWorkflowStartJobSKIP = new Succeed(this, `${this.node.id} - check whether should start scan metadata job completes`);
 
+    const metadataPostProcessingFn = this.metadataPostProcessingFn(props);
+    const metadataPostProcessingJob = new LambdaInvoke(this, `${this.node.id} - metadata post processing job`, {
+      lambdaFunction: metadataPostProcessingFn,
+      payload: TaskInput.fromObject({
+        'detail.$': '$.detail',
+      }),
+      outputPath: '$.Payload',
+    }).next(
+      new Choice(this, 'Check if metadata post processing completed')
+        .when(Condition.stringEquals('$.detail.status', WorkflowStatus.SUCCEED), scanMetadataCompleted)
+        .otherwise(scanMetadataJobFailed),
+    );
+
     const storeMetadataIntoDDBFn = this.storeMetadataIntoDDBFn(props);
     const storeMetadataIntoDDBJob = new LambdaInvoke(this, `${this.node.id} - store scan metadata job status`, {
       lambdaFunction: storeMetadataIntoDDBFn,
@@ -102,9 +116,10 @@ export class ScanMetadataWorkflow extends Construct {
       outputPath: '$.Payload',
     }).next(
       new Choice(this, 'Check if store metadata completed')
-        .when(Condition.stringEquals('$.detail.status', WorkflowStatus.SUCCEED), scanMetadataCompleted)
+        .when(Condition.stringEquals('$.detail.status', WorkflowStatus.SUCCEED), metadataPostProcessingJob)
         .otherwise(scanMetadataJobFailed),
     );
+
 
     const scanMetadataFn = this.scanMetadataFn(props);
     const scanMetadataJob = new LambdaInvoke(this, `${this.node.id} - Submit scan metadata job`, {
@@ -381,6 +396,53 @@ export class ScanMetadataWorkflow extends Construct {
         ... this.toRedshiftEnvVariables(props),
         REDSHIFT_DATA_API_ROLE: props.dataAPIRole.roleArn,
         METADATA_DDB_TABLE_ARN: props.scanMetadataWorkflowData.clickstreamAnalyticsMetadataDdbArn,
+      },
+      applicationLogLevel: 'WARN',
+    });
+    props.dataAPIRole.grantAssumeRole(fn.grantPrincipal);
+    return fn;
+  }
+
+  private metadataPostProcessingFn(props: ScanMetadataWorkflowProps): IFunction {
+    const fnSG = props.securityGroupForLambda;
+
+    const policyStatements = [
+      new PolicyStatement({
+        actions: [
+          'dynamodb:UpdateItem',
+        ],
+        resources: [
+          props.scanMetadataWorkflowData.clickstreamAnalyticsMetadataDdbArn,
+
+        ],
+      }),
+      new PolicyStatement({
+        actions: [
+          'dynamodb:Query',
+        ],
+        resources: [
+          props.scanMetadataWorkflowData.clickstreamAnalyticsMetadataDdbArn + '/index/' + PREFIX_MONTH_GSI_NAME,
+        ],
+      }),
+    ];
+
+    const fn = new SolutionNodejsFunction(this, 'MetadataPostProcessingFn', {
+      entry: join(
+        this.lambdaRootPath,
+        'metadata-post-processing.ts',
+      ),
+      handler: 'handler',
+      memorySize: 1024,
+      timeout: Duration.minutes(15),
+      logRetention: RetentionDays.ONE_WEEK,
+      reservedConcurrentExecutions: 1,
+      role: createLambdaRole(this, 'MetadataPostProcessingRole', true, policyStatements),
+      ...props.networkConfig,
+      securityGroups: [fnSG],
+      environment: {
+        METADATA_DDB_TABLE_ARN: props.scanMetadataWorkflowData.clickstreamAnalyticsMetadataDdbArn,
+        PREFIX_MONTH_GSI_NAME: PREFIX_MONTH_GSI_NAME,
+        PROJECT_ID: props.projectId,
       },
       applicationLogLevel: 'WARN',
     });

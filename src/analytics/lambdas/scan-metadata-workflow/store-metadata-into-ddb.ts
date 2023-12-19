@@ -67,7 +67,7 @@ export const handler = async (event: StoreMetadataEvent) => {
     };
   } catch (err) {
     if (err instanceof Error) {
-      logger.error('Error when query metadata.', err);
+      logger.error('Error when store metadata into ddb.', err);
     }
     return {
       detail: {

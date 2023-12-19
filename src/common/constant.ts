@@ -392,3 +392,4 @@ export const QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX = '_tmp_';
 export const QUICKSIGHT_DASHBOARD_INFIX= '-dashboard-';
 export const QUICKSIGHT_ANALYSIS_INFIX= '-analysis-';
 export const QUICKSIGHT_DATASET_INFIX= '-dataset-';
+export const PREFIX_MONTH_GSI_NAME = 'prefix-month-index';
