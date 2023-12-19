@@ -76,7 +76,7 @@ export class ScanMetadataWorkflow extends Construct {
          *  You can also implement with the path stored in the state like:
          *  sfn.WaitTime.secondsPath('$.waitSeconds')
       */
-      time: WaitTime.duration(Duration.seconds(30)),
+      time: WaitTime.duration(Duration.seconds(60)),
     });
 
     const scanMetadataJobFailed = new Fail(this, `${this.node.id} - scan metadata job fails`, {
@@ -359,6 +359,9 @@ export class ScanMetadataWorkflow extends Construct {
         actions: [
           'dynamodb:BatchWriteItem',
           'dynamodb:BatchGetItem',
+          'dynamodb:GetItem',
+          'dynamodb:Query',
+          'dynamodb:PutItem',
         ],
         resources: [props.scanMetadataWorkflowData.clickstreamAnalyticsMetadataDdbArn],
       }),
