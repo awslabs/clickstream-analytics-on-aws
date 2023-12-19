@@ -201,4 +201,4 @@
 ## 验证数据上报成功
 
 - 方式1：可以在 **Athena** 里通过SQL直接查询 **event, event_parameter, user, item** 或者 **ingestion_events** 表（需要启用数据处理)
-- 方式2：可以在 **Redshift** 里通过SQL直接查询 **event, event_parameter, user, item** 表（需要启用数据处理)
+- 方式2：可以在 **Redshift** 里通过SQL直接查询 **event, event_parameter, user, item** 表（需要在数据建模中启用 Redshift)
