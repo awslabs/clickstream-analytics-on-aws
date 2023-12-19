@@ -203,7 +203,7 @@ failures, and the request does not return any other content.
 
 ## Verification data reported successfully
 
-- Method 1: You can query the **ods_events table** in **Athena** directly through SQL. (Requires Athena to be enabled in
-  data modeling)
-- Method 2: You can query the **ods_events table** in **Redshift** directly through SQL. (Requires Redshift to be
-  enabled in data modeling)
+- Method 1: You can query the **event, event_parameter, user, item** or **ingestion_events** table in **Athena**
+  directly through SQL. (Requires data processing to be enabled)
+- Method 2: You can query the **event, event_parameter, user, item** table in **Redshift** directly through SQL. (
+  Requires enable Redshift in data modeling)
