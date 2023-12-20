@@ -19,7 +19,6 @@ export interface LoadDataConfig {
   readonly maxFilesLimit: number;
 }
 
-
 interface BucketInfo {
   readonly s3Bucket: IBucket;
   readonly prefix: string;
@@ -84,7 +83,6 @@ interface CustomProperties {
 }
 
 type SQLBasic = {
-  readonly updatable: 'true' | 'false';
   readonly multipleLine?: 'true' | 'false';
 }
 

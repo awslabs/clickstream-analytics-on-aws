@@ -131,10 +131,14 @@ export class ApplicationSchemas extends Construct {
         'create-schemas.ts',
       ),
       handler: 'handler',
-      memorySize: 128,
+      memorySize: 256,
       reservedConcurrentExecutions: 1,
-      timeout: Duration.minutes(5),
+      timeout: Duration.minutes(15),
       logRetention: RetentionDays.ONE_WEEK,
+      environment: {
+        SUPPRESS_DB_ERROR: 'true',
+        SUPPRESS_ALL_ERROR: 'false',
+      },
       role: createLambdaRole(this, 'CreateApplicationSchemaRole', false,
         [writeSecretPolicy]),
       environment: {
@@ -153,8 +157,8 @@ export class ApplicationSchemas extends Construct {
     const reportingViewsPath = resolve(__dirname, 'sqls/redshift/dashboard');
 
     // Get latest timestamp from both directories
-    const latestSchemaTimestamp = this.getLatestTimestampForDirectory(schemaPath, schemaDefs);
-    const latestReportingViewTimestamp = this.getLatestTimestampForDirectory(reportingViewsPath, reportingViewsDef);
+    const latestSchemaTimestamp = this.getLatestTimestampForDirectory(schemaPath);
+    const latestReportingViewTimestamp = this.getLatestTimestampForDirectory(reportingViewsPath);
 
     // Return the max of both timestamps
     const latestTimestamp = Math.max(latestSchemaTimestamp, latestReportingViewTimestamp);
@@ -162,20 +166,15 @@ export class ApplicationSchemas extends Construct {
     return latestTimestamp;
   }
 
-  private getLatestTimestampForDirectory(directory: string, definitions: any[]): number {
+  private getLatestTimestampForDirectory(directory: string): number {
     let latestTimestamp = 0;
 
-    const updatableFiles = definitions
-      .filter(def => def.updatable === 'true')
-      .map(def => def.sqlFile || (def.viewName + '.sql'));
     const files = readdirSync(directory);
     files.forEach(file => {
-      if (updatableFiles.includes(file)) {
-        const filePath = join(directory, file);
-        const stats = statSync(filePath);
-        if (stats.isFile()) {
-          latestTimestamp = Math.max(stats.mtime.getTime(), latestTimestamp);
-        }
+      const filePath = join(directory, file);
+      const stats = statSync(filePath);
+      if (stats.isFile()) {
+        latestTimestamp = Math.max(stats.mtime.getTime(), latestTimestamp);
       }
     });
 
