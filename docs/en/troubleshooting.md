@@ -112,32 +112,32 @@ When upgrading from 1.0.x to 1.1.x, if the CloudFormation stack `Clickstream-Dat
 
 2. Upadte the `fn_name` and `aws_region` in below script and execute it in a shell terminal (you must have AWS cli installed and configured)
 
-```sh
-aws_region=<us-east-1> # replace this with your AWS region, and remove '<', '>'
-fn_name=<fn_name_to_replace> # replace this with actual function name in step 1 and remove '<', '>'
+    ```sh
+    aws_region=<us-east-1> # replace this with your AWS region, and remove '<', '>'
+    fn_name=<fn_name_to_replace> # replace this with actual function name in step 1 and remove '<', '>'    
 
-cat <<END | > ./index.mjs
-export const handler = async (event) => {
-  console.log('No ops!')
-  const response = {
-    Status: 'SUCCESS',
-    Data: {
-      DatabaseName: '',
-      RedshiftBIUsername: ''
-    }
-  };
-  return response;
-};
-END
+    cat <<END | > ./index.mjs
+    export const handler = async (event) => {
+      console.log('No ops!')
+      const response = {
+        Status: 'SUCCESS',
+        Data: {
+          DatabaseName: '',
+          RedshiftBIUsername: ''
+        }
+      };
+      return response;
+    };
+    END    
 
-rm ./noops-lambda.zip > /dev/null 2>&1
-zip ./noops-lambda.zip ./index.mjs
+    rm ./noops-lambda.zip > /dev/null 2>&1
+    zip ./noops-lambda.zip ./index.mjs    
 
-aws lambda update-function-code --function-name ${fn_name} \
- --zip-file fileb://./noops-lambda.zip \
- --region ${aws_region} | tee /dev/null
+    aws lambda update-function-code --function-name ${fn_name} \
+     --zip-file fileb://./noops-lambda.zip \
+     --region ${aws_region} | tee /dev/null    
 
-```
+    ```
 3. In the Cloudformation web console, choose **Stack actions** -> **Continue update rollback**
 
 4. Wait the stack in **UPDATE_ROLLBACK_COMPLETE** status
