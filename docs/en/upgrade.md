@@ -36,8 +36,6 @@
 
 You can view the status of the stack in the AWS CloudFormation console in the **Status** column. You should receive an `UPDATE_COMPLETE` status after a few minutes.
 
-If you encounter any issues during the upgrade process, please refer to the [troubleshooting page][troubleshooting].
-
 ### Upgrade the pipeline of project
 
 1. Log in to the web console of the solution.
@@ -49,6 +47,8 @@ If you encounter any issues during the upgrade process, please refer to the [tro
 7. Click on **Confirm**, the pipeline will be in `Updating` status.
 
 You can view the status of the pipeline in the solution console in the **Status** column. You should receive an `Active` status after a few minutes.
+
+If you encounter any issues during the upgrade process, please refer to the [troubleshooting page][troubleshooting].
 
 ## Post-Upgrade Actions
 
