@@ -138,12 +138,10 @@ export class ApplicationSchemas extends Construct {
       environment: {
         SUPPRESS_DB_ERROR: 'true',
         SUPPRESS_ALL_ERROR: 'false',
+        ... POWERTOOLS_ENVS,
       },
       role: createLambdaRole(this, 'CreateApplicationSchemaRole', false,
         [writeSecretPolicy]),
-      environment: {
-        ... POWERTOOLS_ENVS,
-      },
       layers: [sqlLayer],
     });
 
