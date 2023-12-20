@@ -49,9 +49,10 @@ import { buildEventAnalysisView, buildEventPathAnalysisView, buildFunnelTableVie
 import { awsAccountId } from '../common/constants';
 import { OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX, OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME, QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX } from '../common/constants-ln';
 import { ExploreLocales, AnalysisType, ExplorePathNodeType, ExploreRequestAction, ExploreTimeScopeType, ExploreVisualName, QuickSightChartType } from '../common/explore-types';
+import { PipelineStackType } from '../common/model-ln';
 import { logger } from '../common/powertools';
 import { SDKClient } from '../common/sdk-client';
-import { ApiFail, ApiSuccess, PipelineStackType } from '../common/types';
+import { ApiFail, ApiSuccess } from '../common/types';
 import { getStackOutputFromPipelineStatus } from '../common/utils';
 import { sleep } from '../common/utils-ln';
 import { QuickSightUserArns, generateEmbedUrlForRegisteredUser, getClickstreamUserArn, waitDashboardSuccess } from '../store/aws/quicksight';
@@ -857,11 +858,8 @@ export class ReportingService {
         return res.status(404).send(new ApiFail('Pipeline not found'));
       }
       const latestPipeline = latestPipelines[0];
-      if (latestPipeline.status === undefined) {
-        return res.status(404).send(new ApiFail('Pipeline status not found'));
-      }
       const dataApiRole = getStackOutputFromPipelineStatus(
-        latestPipeline.status,
+        latestPipeline.stackDetails ?? latestPipeline.status?.stackDetails,
         PipelineStackType.DATA_MODELING_REDSHIFT,
         OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX);
       const redshiftDataClient = sdkClient.RedshiftDataClient(
@@ -878,7 +876,7 @@ export class ReportingService {
       //warm up redshift serverless
       if (latestPipeline.dataModeling?.redshift?.newServerless) {
         const workgroupName = getStackOutputFromPipelineStatus(
-          latestPipeline.status,
+          latestPipeline.stackDetails ?? latestPipeline.status?.stackDetails,
           PipelineStackType.DATA_MODELING_REDSHIFT,
           OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME);
         const input = {

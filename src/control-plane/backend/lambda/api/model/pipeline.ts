@@ -12,6 +12,7 @@
  */
 
 import { Tag } from '@aws-sdk/client-cloudformation';
+import { ExecutionStatus } from '@aws-sdk/client-sfn';
 import { getDiff } from 'json-difference';
 import { IDictionary } from './dictionary';
 import { IPlugin } from './plugin';
@@ -40,7 +41,7 @@ import {
   PROJECT_ID_PATTERN,
   SECRETS_MANAGER_ARN_PATTERN,
 } from '../common/constants-ln';
-import { BuiltInTagKeys } from '../common/model-ln';
+import { BuiltInTagKeys, ExecutionDetail, PipelineStackType, PipelineStatusDetail, PipelineStatusType } from '../common/model-ln';
 import { SolutionInfo } from '../common/solution-info-ln';
 import {
   validateIngestionServerNum,
@@ -55,9 +56,7 @@ import {
   KinesisStreamMode,
   PipelineServerProtocol,
   PipelineSinkType,
-  PipelineStackType,
   PipelineStatus,
-  PipelineStatusType,
   RedshiftInfo,
   StackUpdateParameter,
   WorkflowParallelBranch,
@@ -66,9 +65,8 @@ import {
   WorkflowTemplate,
   WorkflowVersion,
 } from '../common/types';
-import { getStackName, getStackTags, getUpdateTags, getStateMachineExecutionName, isEmpty } from '../common/utils';
+import { getPipelineStatusType, getStackName, getStackTags, getUpdateTags, getStateMachineExecutionName, isEmpty } from '../common/utils';
 import { StackManager } from '../service/stack';
-import { describeStack } from '../store/aws/cloudformation';
 import { createRuleAndAddTargets, deleteRuleAndTargets } from '../store/aws/events';
 import { listMSKClusterBrokers } from '../store/aws/kafka';
 
@@ -232,9 +230,10 @@ export interface IPipeline {
   lastAction?: string;
   status?: PipelineStatus;
   workflow?: WorkflowTemplate;
-  executionName?: string;
-  executionArn?: string;
   templateVersion?: string;
+  statusType?: PipelineStatusType;
+  stackDetails?: PipelineStatusDetail[];
+  executionDetail?: ExecutionDetail;
 
   readonly version: string;
   readonly versionTag: string;
@@ -272,12 +271,19 @@ export class CPipeline {
   public async create(): Promise<void> {
     // state machine
     this.pipeline.lastAction = 'Create';
-    this.pipeline.executionName = getStateMachineExecutionName(this.pipeline.pipelineId);
-    this.pipeline.workflow = await this.generateWorkflow();
-
+    this.pipeline.statusType = PipelineStatusType.CREATING;
     this.pipeline.templateVersion = FULL_SOLUTION_VERSION;
-
-    this.pipeline.executionArn = await this.stackManager.execute(this.pipeline.workflow, this.pipeline.executionName);
+    const executionName = getStateMachineExecutionName(this.pipeline.pipelineId);
+    this.pipeline.workflow = await this.generateWorkflow();
+    const executionArn = await this.stackManager.execute(this.pipeline.workflow, executionName);
+    this.pipeline.executionDetail = {
+      executionArn: executionArn,
+      stateMachineArn: '',
+      name: executionName,
+      status: ExecutionStatus.RUNNING,
+    };
+    this.pipeline.stackDetails = [];
+    this.pipeline.statusType = PipelineStatusType.CREATING;
     // create rule to listen CFN stack
     await this._createRules();
     // bind plugin
@@ -311,14 +317,7 @@ export class CPipeline {
     this.pipeline.lastAction = 'Update';
     this.pipeline.templateVersion = oldPipeline.templateVersion;
     validateIngestionServerNum(this.pipeline.ingestionServer.size);
-    this.pipeline.executionName = getStateMachineExecutionName(this.pipeline.pipelineId);
-
-    this.pipeline.status = await this.stackManager.getPipelineStatus();
-    if (this.pipeline.status.status === PipelineStatusType.CREATING ||
-      this.pipeline.status.status === PipelineStatusType.DELETING ||
-      this.pipeline.status.status === PipelineStatusType.UPDATING) {
-      throw new ClickStreamBadRequestError('Pipeline status can not allow update.');
-    }
+    const executionName = getStateMachineExecutionName(this.pipeline.pipelineId);
     const { editStacks, editParameters } = await this._getEditStacksAndParameters(oldPipeline);
     // update workflow
     this.stackManager.updateWorkflowParameters(editParameters);
@@ -330,7 +329,15 @@ export class CPipeline {
     }
     // create new execution
     const execWorkflow = this.stackManager.getExecWorkflow();
-    this.pipeline.executionArn = await this.stackManager.execute(execWorkflow, this.pipeline.executionName);
+    const executionArn = await this.stackManager.execute(execWorkflow, executionName);
+    this.pipeline.executionDetail = {
+      executionArn: executionArn,
+      stateMachineArn: '',
+      name: executionName,
+      status: ExecutionStatus.RUNNING,
+    };
+    this.pipeline.statusType = PipelineStatusType.UPDATING;
+    this.pipeline.tags = oldPipeline.tags;
     this.pipeline.workflow = this.stackManager.getWorkflow();
     await store.updatePipeline(this.pipeline, oldPipeline);
   }
@@ -397,7 +404,6 @@ export class CPipeline {
     this.pipeline.lastAction = 'Upgrade';
     validateIngestionServerNum(this.pipeline.ingestionServer.size);
     const executionName = getStateMachineExecutionName(this.pipeline.pipelineId);
-    this.pipeline.executionName = executionName;
     this.pipeline.templateVersion = FULL_SOLUTION_VERSION;
     this.pipeline.workflow = await this.generateWorkflow();
     this.stackManager.setExecWorkflow(this.pipeline.workflow);
@@ -406,20 +412,37 @@ export class CPipeline {
     this.stackManager.upgradeWorkflow(oldStackNames);
     // create new execution
     const execWorkflow = this.stackManager.getExecWorkflow();
-    this.pipeline.executionArn = await this.stackManager.execute(execWorkflow, executionName);
+    const executionArn = await this.stackManager.execute(execWorkflow, executionName);
+    this.pipeline.executionDetail = {
+      executionArn: executionArn,
+      stateMachineArn: '',
+      name: executionName,
+      status: ExecutionStatus.RUNNING,
+    };
+    this.pipeline.statusType = PipelineStatusType.UPDATING;
     // update pipeline metadata
     await store.updatePipeline(this.pipeline, oldPipeline);
   }
 
   public async refreshStatus(): Promise<void> {
-    this.pipeline.status = await this.stackManager.getPipelineStatus();
+    if (!this.pipeline.executionDetail) {
+      this.pipeline.executionDetail = {
+        executionArn: '',
+        stateMachineArn: '',
+        name: this.pipeline.status?.executionDetail.name ?? '',
+        status: ExecutionStatus.RUNNING,
+      };
+    }
+    if (!this.pipeline.stackDetails) {
+      this.pipeline.stackDetails = this.pipeline.status?.stackDetails ?? [];
+    }
+    this.pipeline.statusType = getPipelineStatusType(this.pipeline);
     await store.updatePipelineAtCurrentVersion(this.pipeline);
   }
 
   public async updateApp(appIds: string[]): Promise<void> {
     this.pipeline.lastAction = 'Update';
     const executionName = getStateMachineExecutionName(this.pipeline.pipelineId);
-    this.pipeline.executionName = executionName;
     const ingestionStackName = getStackName(
       this.pipeline.pipelineId, PipelineStackType.INGESTION, this.pipeline.ingestionServer.sinkType);
     const dataProcessingStackName = getStackName(
@@ -432,7 +455,14 @@ export class CPipeline {
     this.stackManager.updateWorkflowForApp(appIds, ingestionStackName, dataProcessingStackName, analyticsStackName, reportStackName);
     // create new execution
     const execWorkflow = this.stackManager.getExecWorkflow();
-    this.pipeline.executionArn = await this.stackManager.execute(execWorkflow, executionName);
+    const executionArn = await this.stackManager.execute(execWorkflow, executionName);
+    this.pipeline.executionDetail = {
+      executionArn: executionArn,
+      stateMachineArn: '',
+      name: executionName,
+      status: ExecutionStatus.RUNNING,
+    };
+    this.pipeline.statusType = PipelineStatusType.UPDATING;
     // update pipeline metadata
     this.pipeline.updateAt = Date.now();
     await store.updatePipelineAtCurrentVersion(this.pipeline);
@@ -441,12 +471,18 @@ export class CPipeline {
   public async delete(): Promise<void> {
     this.pipeline.lastAction = 'Delete';
     const executionName = getStateMachineExecutionName(this.pipeline.pipelineId);
-    this.pipeline.executionName = executionName;
     // update workflow
     this.stackManager.deleteWorkflow();
     // create new execution
     const execWorkflow = this.stackManager.getExecWorkflow();
-    this.pipeline.executionArn = await this.stackManager.execute(execWorkflow, executionName);
+    const executionArn = await this.stackManager.execute(execWorkflow, executionName);
+    this.pipeline.executionDetail = {
+      executionArn: executionArn,
+      stateMachineArn: '',
+      name: executionName,
+      status: ExecutionStatus.RUNNING,
+    };
+    this.pipeline.statusType = PipelineStatusType.DELETING;
     // delete rules
     await this._deleteRules();
     // update pipeline metadata
@@ -467,11 +503,17 @@ export class CPipeline {
 
   public async retry(): Promise<void> {
     const executionName = getStateMachineExecutionName(this.pipeline.pipelineId);
-    this.pipeline.executionName = executionName;
     this.stackManager.retryWorkflow();
     // create new execution
     const execWorkflow = this.stackManager.getExecWorkflow();
-    this.pipeline.executionArn = await this.stackManager.execute(execWorkflow, executionName);
+    const executionArn = await this.stackManager.execute(execWorkflow, executionName);
+    this.pipeline.executionDetail = {
+      executionArn: executionArn,
+      stateMachineArn: '',
+      name: executionName,
+      status: ExecutionStatus.RUNNING,
+    };
+    this.pipeline.statusType = PipelineStatusType.UPDATING;
     // update pipeline metadata
     await store.updatePipelineAtCurrentVersion(this.pipeline);
   }
@@ -725,7 +767,7 @@ export class CPipeline {
         },
         Callback: {
           BucketName: stackWorkflowS3Bucket,
-          BucketPrefix: `clickstream/workflow/${this.pipeline.executionName}`,
+          BucketPrefix: `clickstream/workflow/${this.pipeline.executionDetail?.name}`,
         },
       },
       Next: PIPELINE_STACKS,
@@ -787,7 +829,7 @@ export class CPipeline {
         },
         Callback: {
           BucketName: bucketName,
-          BucketPrefix: `clickstream/workflow/${this.pipeline.executionName}`,
+          BucketPrefix: `clickstream/workflow/${this.pipeline.executionDetail?.name}`,
         },
       },
       End: true,
@@ -823,7 +865,7 @@ export class CPipeline {
         },
         Callback: {
           BucketName: bucketName,
-          BucketPrefix: `clickstream/workflow/${this.pipeline.executionName}`,
+          BucketPrefix: `clickstream/workflow/${this.pipeline.executionDetail?.name}`,
         },
       },
       End: true,
@@ -882,7 +924,7 @@ export class CPipeline {
         },
         Callback: {
           BucketName: bucketName,
-          BucketPrefix: `clickstream/workflow/${this.pipeline.executionName}`,
+          BucketPrefix: `clickstream/workflow/${this.pipeline.executionDetail?.name}`,
         },
       },
     };
@@ -909,7 +951,7 @@ export class CPipeline {
           },
           Callback: {
             BucketName: bucketName,
-            BucketPrefix: `clickstream/workflow/${this.pipeline.executionName}`,
+            BucketPrefix: `clickstream/workflow/${this.pipeline.executionDetail?.name}`,
           },
         },
         End: true,
@@ -961,7 +1003,7 @@ export class CPipeline {
         },
         Callback: {
           BucketName: stackWorkflowS3Bucket ?? '',
-          BucketPrefix: `clickstream/workflow/${this.pipeline.executionName}`,
+          BucketPrefix: `clickstream/workflow/${this.pipeline.executionDetail?.name}`,
         },
       },
       End: true,
@@ -993,7 +1035,7 @@ export class CPipeline {
         },
         Callback: {
           BucketName: stackWorkflowS3Bucket ?? '',
-          BucketPrefix: `clickstream/workflow/${this.pipeline.executionName}`,
+          BucketPrefix: `clickstream/workflow/${this.pipeline.executionDetail?.name}`,
         },
       },
       End: true,
@@ -1026,7 +1068,7 @@ export class CPipeline {
         },
         Callback: {
           BucketName: stackWorkflowS3Bucket ?? '',
-          BucketPrefix: `clickstream/workflow/${this.pipeline.executionName}`,
+          BucketPrefix: `clickstream/workflow/${this.pipeline.executionDetail?.name}`,
         },
       },
       End: true,
@@ -1035,18 +1077,16 @@ export class CPipeline {
     return athenaState;
   }
 
-  public async getStackOutputBySuffixes(stackType: PipelineStackType, outputKeySuffixes: string[]): Promise<Map<string, string>> {
+  public getStackOutputBySuffixes(stackType: PipelineStackType, outputKeySuffixes: string[]): Map<string, string> {
     const res: Map<string, string> = new Map<string, string>();
-    const stack = await describeStack(
-      this.pipeline.region,
-      getStackName(this.pipeline.pipelineId, stackType, this.pipeline.ingestionServer.sinkType),
-    );
+    const stackDetails = this.pipeline.stackDetails ?? this.pipeline.status?.stackDetails;
+    const stack = stackDetails?.filter(s => s.stackType === stackType);
     if (!stack) {
       return res;
     }
     for (let suffix of outputKeySuffixes) {
-      if (stack.Outputs) {
-        for (let out of stack.Outputs) {
+      if (stack[0].outputs) {
+        for (let out of stack[0].outputs) {
           if (out.OutputKey?.endsWith(suffix)) {
             res.set(suffix, out.OutputValue ?? '');
             break;

@@ -77,7 +77,7 @@ import {
 } from './pipeline-mock';
 import { FULL_SOLUTION_VERSION, clickStreamTableName, dictionaryTableName, prefixTimeGSIName } from '../../common/constants';
 import { BuiltInTagKeys } from '../../common/model-ln';
-import { PipelineServerProtocol, PipelineStatusType } from '../../common/types';
+import { PipelineServerProtocol } from '../../common/types';
 import { app, server } from '../../index';
 import 'aws-sdk-client-mock-jest';
 
@@ -126,7 +126,7 @@ describe('Pipeline test', () => {
         ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_QUICKSIGHT_PIPELINE,
       });
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
-    expect(res.statusCode).toBe(201);
+    expect(res.body).toBe(201);
     expect(res.body.data).toHaveProperty('id');
     expect(res.body.message).toEqual('Pipeline added.');
     expect(res.body.success).toEqual(true);
@@ -4025,8 +4025,11 @@ describe('Pipeline test', () => {
         update: true,
         updatePipeline: {
           ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
-          status: {
-            ...BASE_STATUS,
+          executionDetail: {
+            name: MOCK_EXECUTION_ID,
+            executionArn: 'arn:aws:states:us-east-1:111122223333:execution:MyPipelineStateMachine:main-5ab07c6e-b6ac-47ea-bf3a-02ede7391807',
+            stateMachineArn: 'arn:aws:states:us-east-1:111122223333:stateMachine:MyPipelineStateMachine',
+            status: ExecutionStatus.SUCCEEDED,
           },
           templateVersion: 'v2.0.0',
         },
@@ -4059,7 +4062,7 @@ describe('Pipeline test', () => {
       ],
     });
     ddbMock.on(TransactWriteItemsCommand).resolves({});
-    let res = await request(app)
+    const res = await request(app)
       .post(`/api/pipeline/${MOCK_PIPELINE_ID}/upgrade?pid=${MOCK_PROJECT_ID}`)
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
@@ -4106,7 +4109,7 @@ describe('Pipeline test', () => {
     });
     sfnMock.on(StartExecutionCommand).resolves({ executionArn: 'xxx' });
     ddbMock.on(TransactWriteItemsCommand).resolves({});
-    let res = await request(app)
+    const res = await request(app)
       .post(`/api/pipeline/${MOCK_PIPELINE_ID}/upgrade?pid=${MOCK_PROJECT_ID}`)
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
@@ -4167,14 +4170,16 @@ describe('Pipeline test', () => {
         update: true,
         updatePipeline: {
           ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
-          status: {
-            ...BASE_STATUS,
-            status: PipelineStatusType.FAILED,
+          executionDetail: {
+            name: MOCK_EXECUTION_ID,
+            executionArn: 'arn:aws:states:us-east-1:111122223333:execution:MyPipelineStateMachine:main-5ab07c6e-b6ac-47ea-bf3a-02ede7391807',
+            stateMachineArn: 'arn:aws:states:us-east-1:111122223333:stateMachine:MyPipelineStateMachine',
+            status: ExecutionStatus.FAILED,
           },
         },
       });
     ddbMock.on(TransactWriteItemsCommand).resolves({});
-    let res = await request(app)
+    const res = await request(app)
       .post(`/api/pipeline/${MOCK_PIPELINE_ID}/upgrade?pid=${MOCK_PROJECT_ID}`)
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');

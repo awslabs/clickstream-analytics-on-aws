@@ -11,6 +11,9 @@
  *  and limitations under the License.
  */
 
+import { Output, StackStatus } from '@aws-sdk/client-cloudformation';
+import { ExecutionStatus } from '@aws-sdk/client-sfn';
+
 export interface AuthenticationProps {
   readonly issuer: string;
   readonly userEndpoint: string;
@@ -23,6 +26,42 @@ export interface AuthenticationProps {
 export interface BIUserCredential {
   readonly username: string;
   readonly password: string;
+}
+
+export interface PipelineStatusDetail {
+  readonly stackName: string;
+  readonly stackType: PipelineStackType;
+  readonly stackTemplateVersion: string;
+  stackStatus: StackStatus | undefined;
+  stackStatusReason: string;
+  outputs: Output[];
+}
+
+export interface ExecutionDetail {
+  executionArn: string;
+  stateMachineArn: string;
+  name: string;
+  status?: ExecutionStatus;
+}
+
+export enum PipelineStackType {
+  INGESTION = 'Ingestion',
+  KAFKA_CONNECTOR = 'KafkaConnector',
+  DATA_PROCESSING = 'DataProcessing',
+  DATA_MODELING_REDSHIFT = 'DataModelingRedshift',
+  REPORTING = 'Reporting',
+  METRICS = 'Metrics',
+  ATHENA = 'DataModelingAthena',
+  APP_REGISTRY = 'ServiceCatalogAppRegistry',
+}
+
+export enum PipelineStatusType {
+  ACTIVE = 'Active',
+  FAILED = 'Failed',
+  WARNING = 'Warning',
+  CREATING = 'Creating',
+  UPDATING = 'Updating',
+  DELETING = 'Deleting',
 }
 
 export enum BuiltInTagKeys {

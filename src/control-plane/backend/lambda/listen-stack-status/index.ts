@@ -11,15 +11,14 @@
  *  and limitations under the License.
  */
 
-import { CloudFormationClient, DescribeStacksCommand, Stack, StackStatus } from '@aws-sdk/client-cloudformation';
+import { CloudFormationClient, DescribeStacksCommand, Stack, StackStatus, Tag } from '@aws-sdk/client-cloudformation';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient, QueryCommandInput, UpdateCommand, UpdateCommandInput, paginateQuery } from '@aws-sdk/lib-dynamodb';
 import { NativeAttributeValue } from '@aws-sdk/util-dynamodb';
 import { EventBridgeEvent } from 'aws-lambda';
+import { BuiltInTagKeys, PipelineStackType, PipelineStatusDetail } from '../../../../common/model';
 import { logger } from '../../../../common/powertools';
 import { aws_sdk_client_common_config } from '../../../../common/sdk-client-config';
-import { PipelineStackType, PipelineStatusDetail } from '../api/common/types';
-import { getVersionFromTags } from '../api/common/utils';
 
 const ddbClient = new DynamoDBClient({
   ...aws_sdk_client_common_config,
@@ -71,7 +70,7 @@ export const handler = async (
     logger.error('Failed to describe stack: ', { stackId, region });
     return;
   }
-  const pipelineId = stackName.split('-')[2];
+  const pipelineId = getPipelineIdFromStackName(stackName);
   const pipeline = await getPipeline(pipelineId);
   if (!pipeline) {
     logger.error('Failed to get pipeline by pipelineId: ', { pipelineId });
@@ -183,4 +182,26 @@ function getNewStackDetails(curStack: Stack, stackDetails: PipelineStatusDetail[
     stackDetails.push(newStackDetail);
   }
   return stackDetails;
+}
+
+function getPipelineIdFromStackName(stackName: string): string {
+  const stackType = stackName.split('-')[1] as PipelineStackType;
+  if (stackType === PipelineStackType.INGESTION) {
+    return stackName.split('-')[3];
+  } else {
+    return stackName.split('-')[2];
+  }
+  return '';
+}
+
+function getVersionFromTags(tags: Tag[] | undefined) {
+  let version = '';
+  if (!tags) {
+    return version;
+  }
+  const versionTag = tags.filter(t => t.Key === BuiltInTagKeys.AWS_SOLUTION_VERSION);
+  if (versionTag.length > 0) {
+    version = versionTag[0].Value ?? '';
+  }
+  return version;
 }

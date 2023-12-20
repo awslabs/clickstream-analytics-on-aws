@@ -12,10 +12,10 @@
  */
 
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-import { ExecutionStatus } from '@aws-sdk/client-sfn';
 import { DynamoDBDocumentClient, UpdateCommand, QueryCommandInput, paginateQuery, UpdateCommandInput } from '@aws-sdk/lib-dynamodb';
 import { NativeAttributeValue } from '@aws-sdk/util-dynamodb';
 import { EventBridgeEvent } from 'aws-lambda';
+import { ExecutionDetail } from '../../../../common/model';
 import { logger } from '../../../../common/powertools';
 import { aws_sdk_client_common_config } from '../../../../common/sdk-client-config';
 
@@ -44,12 +44,6 @@ const docClient = DynamoDBDocumentClient.from(ddbClient, { ...translateConfig })
 const clickStreamTableName = process.env.CLICKSTREAM_TABLE_NAME ?? '';
 const prefixTimeGSIName = process.env.PREFIX_TIME_GSI_NAME ?? '';
 
-interface ExecutionDetail {
-  executionArn: string;
-  stateMachineArn: string;
-  name: string;
-  status?: ExecutionStatus;
-}
 interface StepFunctionsExecutionStatusChangeNotificationEventDetail extends ExecutionDetail {
   startDate?: number;
   stopDate?: number;

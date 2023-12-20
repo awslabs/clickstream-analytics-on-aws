@@ -11,9 +11,7 @@
  *  and limitations under the License.
  */
 
-import { CloudFormationClient, DescribeStacksCommand, StackStatus } from '@aws-sdk/client-cloudformation';
 import { CreateAnalysisCommand, CreateDashboardCommand, CreateDataSetCommand, DeleteAnalysisCommand, DeleteDashboardCommand, DeleteDataSetCommand, DescribeDashboardDefinitionCommand, QuickSightClient, ResourceNotFoundException } from '@aws-sdk/client-quicksight';
-import { DescribeExecutionCommand, ExecutionStatus, SFNClient } from '@aws-sdk/client-sfn';
 import {
   DeleteCommand,
   DynamoDBDocumentClient,
@@ -24,24 +22,19 @@ import {
 } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
 import request from 'supertest';
-import { MOCK_APP_ID, MOCK_DASHBOARD_ID, MOCK_EXECUTION_ID, MOCK_PROJECT_ID, MOCK_SOLUTION_VERSION, MOCK_TOKEN, projectExistedMock, tokenMock } from './ddb-mock';
+import { MOCK_APP_ID, MOCK_DASHBOARD_ID, MOCK_PROJECT_ID, MOCK_TOKEN, projectExistedMock, tokenMock } from './ddb-mock';
 import { KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW } from './pipeline-mock';
 import { OUTPUT_REPORT_DASHBOARDS_SUFFIX } from '../../common/constants-ln';
-import { BuiltInTagKeys } from '../../common/model-ln';
 import { app, server } from '../../index';
 import 'aws-sdk-client-mock-jest';
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 const quickSightMock = mockClient(QuickSightClient);
-const cloudFormationMock = mockClient(CloudFormationClient);
-const sfnMock = mockClient(SFNClient);
 
 describe('Analytics dashboard test', () => {
   beforeEach(() => {
     ddbMock.reset();
     quickSightMock.reset();
-    cloudFormationMock.reset();
-    sfnMock.reset();
   });
 
   it('Create dashboard', async () => {
@@ -49,34 +42,6 @@ describe('Analytics dashboard test', () => {
     projectExistedMock(ddbMock, true);
     ddbMock.on(QueryCommand).resolves({
       Items: [{ ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW }],
-    });
-    const mockOutputs = [
-      {
-        OutputKey: 'Dashboards',
-        OutputValue: '[{"appId":"app1","dashboardId":"clickstream_dashboard_v1_notepad_mtzfsocy_app1"},{"appId":"app2","dashboardId":"clickstream_dashboard_v1_notepad_mtzfsocy_app2"}]',
-      },
-      {
-        OutputKey: 'DataSourceArn',
-        OutputValue: 'arn:aws:quicksight:ap-northeast-1:555555555555:datasource/clickstream_datasource_adfsd_uqqk_d84e29f0',
-      },
-    ];
-    cloudFormationMock.on(DescribeStacksCommand).resolves({
-      Stacks: [
-        {
-          StackName: 'xxx',
-          Outputs: mockOutputs,
-          Tags: [{ Key: BuiltInTagKeys.AWS_SOLUTION_VERSION, Value: MOCK_SOLUTION_VERSION }],
-          StackStatus: StackStatus.CREATE_COMPLETE,
-          CreationTime: new Date(),
-        },
-      ],
-    });
-    sfnMock.on(DescribeExecutionCommand).resolves({
-      executionArn: 'xx',
-      stateMachineArn: 'yy',
-      name: MOCK_EXECUTION_ID,
-      status: ExecutionStatus.SUCCEEDED,
-      output: 'SUCCEEDED',
     });
     ddbMock.on(PutCommand).resolvesOnce({});
     quickSightMock.on(CreateDataSetCommand).resolvesOnce({});
@@ -111,35 +76,10 @@ describe('Analytics dashboard test', () => {
     tokenMock(ddbMock, false);
     projectExistedMock(ddbMock, true);
     ddbMock.on(QueryCommand).resolves({
-      Items: [{ ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW }],
-    });
-    const mockOutputs = [
-      {
-        OutputKey: 'Dashboards',
-        OutputValue: '[{"appId":"app1","dashboardId":"clickstream_dashboard_v1_notepad_mtzfsocy_app1"},{"appId":"app2","dashboardId":"clickstream_dashboard_v1_notepad_mtzfsocy_app2"}]',
-      },
-      {
-        OutputKey: 'DataSourceArn',
-        OutputValue: '',
-      },
-    ];
-    cloudFormationMock.on(DescribeStacksCommand).resolves({
-      Stacks: [
-        {
-          StackName: 'xxx',
-          Outputs: mockOutputs,
-          Tags: [{ Key: BuiltInTagKeys.AWS_SOLUTION_VERSION, Value: MOCK_SOLUTION_VERSION }],
-          StackStatus: StackStatus.CREATE_COMPLETE,
-          CreationTime: new Date(),
-        },
-      ],
-    });
-    sfnMock.on(DescribeExecutionCommand).resolves({
-      executionArn: 'xx',
-      stateMachineArn: 'yy',
-      name: MOCK_EXECUTION_ID,
-      status: ExecutionStatus.SUCCEEDED,
-      output: 'SUCCEEDED',
+      Items: [{
+        ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
+        stackDetails: [],
+      }],
     });
     ddbMock.on(PutCommand).resolvesOnce({});
     quickSightMock.on(CreateDataSetCommand).resolvesOnce({});

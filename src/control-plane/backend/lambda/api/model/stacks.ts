@@ -43,7 +43,7 @@ import {
   REDSHIFT_DB_USER_NAME_PATTERN,
   TRANSFORMER_AND_ENRICH_CLASS_NAMES,
 } from '../common/constants-ln';
-import { REDSHIFT_MODE } from '../common/model-ln';
+import { PipelineStackType, REDSHIFT_MODE } from '../common/model-ln';
 import { validateDataProcessingInterval, validatePattern, validateServerlessRedshiftRPU, validateSinkBatch } from '../common/stack-params-valid';
 import {
   BucketPrefix,
@@ -52,7 +52,6 @@ import {
   KinesisStreamMode, MetricsLegendPosition,
   PipelineServerProtocol,
   PipelineSinkType,
-  PipelineStackType,
   ProjectEnvironment,
 } from '../common/types';
 import {
