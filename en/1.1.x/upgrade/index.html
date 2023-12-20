@@ -2905,6 +2905,7 @@
 <li>Choose <strong>Execute change set</strong> to deploy the stack.</li>
 </ol>
 <p>You can view the status of the stack in the AWS CloudFormation console in the <strong>Status</strong> column. You should receive an <code>UPDATE_COMPLETE</code> status after a few minutes.</p>
+<p>If you encounter any issues during the upgrade process, please refer to the <a href="../troubleshooting/">troubleshooting page</a>.</p>
 <h3 id="upgrade-the-pipeline-of-project">Upgrade the pipeline of project</h3>
 <ol>
 <li>Log in to the web console of the solution.</li>
@@ -2916,7 +2917,6 @@
 <li>Click on <strong>Confirm</strong>, the pipeline will be in <code>Updating</code> status.</li>
 </ol>
 <p>You can view the status of the pipeline in the solution console in the <strong>Status</strong> column. You should receive an <code>Active</code> status after a few minutes.</p>
-<p>If you encounter any issues during the upgrade process, please refer to the <a href="../troubleshooting/">troubleshooting page</a>.</p>
 <h2 id="post-upgrade-actions">Post-Upgrade Actions</h2>
 <h3 id="migrate-the-existing-data-after-upgrading-from-10x">Migrate the existing data after upgrading from 1.0.x</h3>
 <p>When you upgraded the pipeline from v1.0.x, you need to perform the below actions to migrate data from old table <code>ods_events</code> to new tables <code>event</code>, <code>event_parameter</code>, <code>user</code>, and <code>item</code> in the Redshift:</p>
