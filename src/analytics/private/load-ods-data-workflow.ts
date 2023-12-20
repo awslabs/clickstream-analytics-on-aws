@@ -241,7 +241,7 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
            *  You can also implement with the path stored in the state like:
            *  sfn.WaitTime.secondsPath('$.waitSeconds')
            */
-        time: WaitTime.duration(Duration.seconds(30)),
+        time: WaitTime.duration(Duration.seconds(120)),
       });
 
       const jobFailed = new Fail(this, `${odsTableName} - Job fails`, {
@@ -305,7 +305,7 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
       const checkMoreWorkTodo = checkMoreWork.next(hasMoreChoice);
 
       const waitX2 = new Wait(this, `${odsTableName} - Wait and check again`, {
-        time: WaitTime.duration(Duration.seconds(30)),
+        time: WaitTime.duration(Duration.seconds(120)),
       });
 
       const waitAndCheckMoreWork = waitX2.next(checkMoreWorkTodo);
