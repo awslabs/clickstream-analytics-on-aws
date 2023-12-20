@@ -2706,24 +2706,28 @@
 <p>Once the ingestion server is created, use the custom endpoint to create an alias or CNAME mapping in your Domain Name System (DNS) for the custom endpoint.</p>
 </div>
 <ul>
-<li>SSL Certificate: User need to select an ACM certificate corresponding to the domain name that you input. If there is no ACM certificate, please refer <a href="https://docs.aws.amazon.com/acm/latest/userguide/gs-acm-request-public.html">create public certificate</a> to create it.<ul>
-<li>Disable HTTPS: If users choose to disable HTTPS, the ingestion server will provide HTTP endpoint.</li>
+<li>SSL Certificate: User need to select an ACM certificate corresponding to the domain name that you input. If there is no ACM certificate, please refer <a href="https://docs.aws.amazon.com/acm/latest/userguide/gs-acm-request-public.html">create public certificate</a> to create it.</li>
 </ul>
 </li>
-</ul>
+<li>
+<p>Disable HTTPS: If users choose to disable HTTPS, the ingestion server will provide HTTP endpoint.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>DO NOT use HTTP in production, because data will be sent without any encryption, and there are high risks of data being leaked or tampered during transmission. Please acknowledge the risk to proceed.</p>
 </div>
-<ul>
-<li><strong>Cross-Origin Resource Sharing (CORS)</strong>: You can enable CORS to limit requests to data ingestion API from a specific domain. Note that, you need to input a complete internet address, e.g., <code>https://www.example.com</code>, <code>http://localhost:8080</code>. Use comma to separate domain if you have multiple domain for this setting.</li>
+</li>
 </ul>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p>CORS is a mandatory setting if you are collecting data from a website. If you do not set value for this parameter, the ingestion server to reject all the requests from Web platform.</p>
+<p>If you switch between enabling HTTPS and disabling HTTPS, ingestion service interruption will occur.</p>
 </div>
 </li>
-</ul>
+<li>
+<p><strong>Cross-Origin Resource Sharing (CORS)</strong>: You can enable CORS to limit requests to data ingestion API from a specific domain. Note that, you need to input a complete internet address, e.g., <code>https://www.example.com</code>, <code>http://localhost:8080</code>. Use comma to separate domain if you have multiple domain for this setting.</p>
+<div class="language-text highlight"><pre><span></span><code>!!! warning &quot;Warning&quot;
+
+    CORS is a mandatory setting if you are collecting data from a website. If you do not set value for this parameter, the ingestion server to reject all the requests from Web platform.
+</code></pre></div>
 </li>
 <li>
 <p>Additional Settings</p>
@@ -2753,6 +2757,10 @@
 </span></code></pre></div>
       <strong>Note</strong>: In the OIDC provider, you need to add <code>https://&lt;ingestion server endpoint&gt;/oauth2/idpresponse</code> to "Allowed callback URLs"</p>
 <p><strong>Note</strong>: If you need to obtain the authentication token directly without inputting credential(username/password) manually, you can refer to <a href="https://github.com/aws-samples/alb-headless-authentication-client">alb headless authentication client code</a> to setup your client to obtain the authentication token automatically.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>If you switch between enabling Authentication and disabling Authentication, ingestion service interruption will occur.</p>
+</div>
 </li>
 <li>
 <p>Access logs: ALB supports delivering detailed logs of all requests it receives. If you enable this option, the solution will automatically enable access logs for you and store the logs into the S3 bucket you selected in previous step.</p>
