@@ -34,6 +34,10 @@ The solution creates a web service as an ingestion endpoint to collect data sent
 
             CORS is a mandatory setting if you are collecting data from a website. If you do not set value for this parameter, the ingestion server to reject all the requests from Web platform.
 
+        !!! warning "Warning"
+
+            If you switch between enabling HTTPS and disabling HTTPS, ingestion service interruption will occur.
+
 * Additional Settings
     * Request path: User can input the path of ingestion endpoint to collect data, the default path is "/collect".
     * AWS Global Accelerator: User can choose to create an accelerator to get static IP addresses that act as a global fixed entry point to your ingestion server, which will improves the availability and performance of your ingestion server. 
@@ -61,6 +65,9 @@ The solution creates a web service as an ingestion endpoint to collect data sent
 
         **Note**: If you need to obtain the authentication token directly without inputting credential(username/password) manually, you can refer to [alb headless authentication client code][alb-headless-authentication-client] to setup your client to obtain the authentication token automatically.
 
+        !!! warning "Warning"
+
+            If you switch between enabling Authentication and disabling Authentication, ingestion service interruption will occur.
 
     * Access logs: ALB supports delivering detailed logs of all requests it receives. If you enable this option, the solution will automatically enable access logs for you and store the logs into the S3 bucket you selected in previous step.
 
