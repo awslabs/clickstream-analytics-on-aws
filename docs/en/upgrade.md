@@ -36,6 +36,8 @@
 
 You can view the status of the stack in the AWS CloudFormation console in the **Status** column. You should receive an `UPDATE_COMPLETE` status after a few minutes.
 
+If you encounter any issues during the upgrade process, please refer to the [troubleshooting page][troubleshooting].
+
 ### Upgrade the pipeline of project
 
 1. Log in to the web console of the solution.
@@ -103,3 +105,4 @@ When you upgraded the pipeline from v1.0.x, you need to perform the below action
 [cloudfront-s3-oidc-cn-template]: https://{{ aws_cn_bucket }}.s3.cn-north-1.amazonaws.com.cn/{{ aws_cn_prefix }}/{{ aws_cn_version }}/cloudfront-s3-control-plane-stack-cn.template.json
 [intranet-template]: https://{{ aws_bucket }}.s3.amazonaws.com/{{ aws_prefix }}/{{ aws_version }}/private-exist-vpc-control-plane-stack.template.json
 [intranet-cn-template]: https://{{ aws_cn_bucket }}.s3.cn-north-1.amazonaws.com.cn/{{ aws_cn_prefix }}/{{ aws_cn_version }}/private-exist-vpc-control-plane-stack.template.json
+[troubleshooting]: ./troubleshooting.md
