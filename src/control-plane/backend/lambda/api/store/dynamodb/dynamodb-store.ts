@@ -24,6 +24,7 @@ import {
 import { marshall } from '@aws-sdk/util-dynamodb';
 import { clickStreamTableName, dictionaryTableName, prefixTimeGSIName } from '../../common/constants';
 import { docClient, marshallOptions, query, scan } from '../../common/dynamodb-client';
+import { logger } from '../../common/powertools';
 import { KeyVal, PipelineStatusType } from '../../common/types';
 import { isEmpty } from '../../common/utils';
 import { IApplication } from '../../model/application';
@@ -641,61 +642,66 @@ export class DynamoDbStore implements ClickStreamStore {
   };
 
   public async updatePipelineAtCurrentVersion(pipeline: IPipeline): Promise<void> {
-    const params: UpdateCommand = new UpdateCommand({
-      TableName: clickStreamTableName,
-      Key: {
-        id: pipeline.projectId,
-        type: pipeline.type,
-      },
-      ConditionExpression: '#ConditionVersion = :ConditionVersionValue',
-      // Define expressions for the new or updated attributes
-      UpdateExpression: 'SET ' +
-        'dataCollectionSDK = :dataCollectionSDK, ' +
-        '#status = :status, ' +
-        '#tags = :tags, ' +
-        '#network = :network, ' +
-        '#bucket = :bucket, ' +
-        'ingestionServer = :ingestionServer, ' +
-        'dataProcessing = :dataProcessing, ' +
-        'dataModeling = :dataModeling, ' +
-        'reporting = :reporting, ' +
-        'workflow = :workflow, ' +
-        'executionName = :executionName, ' +
-        'executionArn = :executionArn, ' +
-        'templateVersion = :templateVersion, ' +
-        'lastAction = :lastAction, ' +
-        'updateAt = :updateAt, ' +
-        '#pipelineOperator = :operator ',
-      ExpressionAttributeNames: {
-        '#status': 'status',
-        '#tags': 'tags',
-        '#network': 'network',
-        '#bucket': 'bucket',
-        '#pipelineOperator': 'operator',
-        '#ConditionVersion': 'version',
-      },
-      ExpressionAttributeValues: {
-        ':dataCollectionSDK': pipeline.dataCollectionSDK,
-        ':status': pipeline.status,
-        ':tags': pipeline.tags,
-        ':network': pipeline.network,
-        ':bucket': pipeline.bucket,
-        ':ingestionServer': pipeline.ingestionServer,
-        ':dataProcessing': pipeline.dataProcessing ?? {},
-        ':dataModeling': pipeline.dataModeling ?? {},
-        ':reporting': pipeline.reporting ?? {},
-        ':ConditionVersionValue': pipeline.version,
-        ':workflow': pipeline.workflow ?? {},
-        ':executionName': pipeline.executionName ?? '',
-        ':executionArn': pipeline.executionArn ?? '',
-        ':templateVersion': pipeline.templateVersion ?? '',
-        ':lastAction': pipeline.lastAction ?? '',
-        ':updateAt': pipeline.updateAt,
-        ':operator': pipeline.operator,
-      },
-      ReturnValues: 'ALL_NEW',
-    });
-    await docClient.send(params);
+    try {
+      const params: UpdateCommand = new UpdateCommand({
+        TableName: clickStreamTableName,
+        Key: {
+          id: pipeline.projectId,
+          type: pipeline.type,
+        },
+        ConditionExpression: '#ConditionVersion = :ConditionVersionValue',
+        // Define expressions for the new or updated attributes
+        UpdateExpression: 'SET ' +
+          'dataCollectionSDK = :dataCollectionSDK, ' +
+          '#status = :status, ' +
+          '#tags = :tags, ' +
+          '#network = :network, ' +
+          '#bucket = :bucket, ' +
+          'ingestionServer = :ingestionServer, ' +
+          'dataProcessing = :dataProcessing, ' +
+          'dataModeling = :dataModeling, ' +
+          'reporting = :reporting, ' +
+          'workflow = :workflow, ' +
+          'executionName = :executionName, ' +
+          'executionArn = :executionArn, ' +
+          'templateVersion = :templateVersion, ' +
+          'lastAction = :lastAction, ' +
+          'updateAt = :updateAt, ' +
+          '#pipelineOperator = :operator ',
+        ExpressionAttributeNames: {
+          '#status': 'status',
+          '#tags': 'tags',
+          '#network': 'network',
+          '#bucket': 'bucket',
+          '#pipelineOperator': 'operator',
+          '#ConditionVersion': 'version',
+        },
+        ExpressionAttributeValues: {
+          ':dataCollectionSDK': pipeline.dataCollectionSDK,
+          ':status': pipeline.status,
+          ':tags': pipeline.tags,
+          ':network': pipeline.network,
+          ':bucket': pipeline.bucket,
+          ':ingestionServer': pipeline.ingestionServer,
+          ':dataProcessing': pipeline.dataProcessing ?? {},
+          ':dataModeling': pipeline.dataModeling ?? {},
+          ':reporting': pipeline.reporting ?? {},
+          ':ConditionVersionValue': pipeline.version,
+          ':workflow': pipeline.workflow ?? {},
+          ':executionName': pipeline.executionName ?? '',
+          ':executionArn': pipeline.executionArn ?? '',
+          ':templateVersion': pipeline.templateVersion ?? '',
+          ':lastAction': pipeline.lastAction ?? '',
+          ':updateAt': pipeline.updateAt,
+          ':operator': pipeline.operator,
+        },
+        ReturnValues: 'ALL_NEW',
+      });
+      await docClient.send(params);
+    } catch (err) {
+      logger.error('Failed to update pipeline: ', { err });
+      throw err;
+    }
   };
 
   public async deletePipeline(projectId: string, pipelineId: string, operator: string): Promise<void> {
@@ -726,13 +732,12 @@ export class DynamoDbStore implements ClickStreamStore {
           type: pipelines[index].type,
         },
         // Define expressions for the new or updated attributes
-        UpdateExpression: 'SET deleted= :d, #status =:status, #operator= :operator',
+        UpdateExpression: 'SET #status =:status, #operator= :operator',
         ExpressionAttributeNames: {
           '#status': 'status',
           '#operator': 'operator',
         },
         ExpressionAttributeValues: {
-          ':d': true,
           ':operator': operator,
           ':status': status,
         },

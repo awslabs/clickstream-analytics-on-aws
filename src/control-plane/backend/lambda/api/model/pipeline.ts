@@ -28,7 +28,9 @@ import {
   getStackParameters,
 } from './stacks';
 import {
+  awsAccountId,
   awsUrlSuffix,
+  CFN_RULE_PREFIX,
   FULL_SOLUTION_VERSION,
   PIPELINE_STACKS,
   stackWorkflowS3Bucket,
@@ -67,6 +69,7 @@ import {
 import { getStackName, getStackTags, getUpdateTags, getStateMachineExecutionName, isEmpty } from '../common/utils';
 import { StackManager } from '../service/stack';
 import { describeStack } from '../store/aws/cloudformation';
+import { createRuleAndAddTargets, deleteRuleAndTargets } from '../store/aws/events';
 import { listMSKClusterBrokers } from '../store/aws/kafka';
 
 import { QuickSightUserArns, registerClickstreamUser } from '../store/aws/quicksight';
@@ -275,6 +278,8 @@ export class CPipeline {
     this.pipeline.templateVersion = FULL_SOLUTION_VERSION;
 
     this.pipeline.executionArn = await this.stackManager.execute(this.pipeline.workflow, this.pipeline.executionName);
+    // create rule to listen CFN stack
+    await this._createRules();
     // bind plugin
     const pluginIds: string[] = [];
     if (this.pipeline.dataProcessing?.transformPlugin && !this.pipeline.dataProcessing?.transformPlugin?.startsWith('BUILT-IN')) {
@@ -285,6 +290,18 @@ export class CPipeline {
     if (!isEmpty(allPluginIds)) {
       await store.bindPlugins(allPluginIds, 1);
     }
+  }
+
+  private async _createRules() {
+    const cfnRulePatternResourceArn = `arn:aws:cloudformation:${this.pipeline.region}:${awsAccountId}:stack/Clickstream*${this.pipeline.pipelineId}/*`;
+    await createRuleAndAddTargets(
+      this.pipeline.region,
+      `${CFN_RULE_PREFIX}-${this.pipeline.id}`,
+      `{\"source\":[\"aws.cloudformation\"],\"resources\":[{\"wildcard\":\"${cfnRulePatternResourceArn}\"}],\"detail-type\":[\"CloudFormation Stack Status Change\"]}`);
+  }
+
+  private async _deleteRules() {
+    await deleteRuleAndTargets(this.pipeline.region, `${CFN_RULE_PREFIX}-${this.pipeline.id}`);
   }
 
   public async update(oldPipeline: IPipeline): Promise<void> {
@@ -430,6 +447,8 @@ export class CPipeline {
     // create new execution
     const execWorkflow = this.stackManager.getExecWorkflow();
     this.pipeline.executionArn = await this.stackManager.execute(execWorkflow, executionName);
+    // delete rules
+    await this._deleteRules();
     // update pipeline metadata
     this.pipeline.updateAt = Date.now();
     await store.updatePipelineAtCurrentVersion(this.pipeline);

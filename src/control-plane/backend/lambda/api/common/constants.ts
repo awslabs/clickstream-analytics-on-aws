@@ -81,6 +81,10 @@ const SOLUTION_VPC_ENDPOINTS = [
   ...SOLUTION_DATA_MODELING_VPC_ENDPOINTS,
 ];
 
+const CFN_RULE_PREFIX = 'ClickstreamRuleForCFN';
+const clickstreamEventBusArn = process.env.CLICKSTREAM_EVENT_BUS_ARN;
+const clickstreamEventBusInvokeRoleArn = process.env.CLICKSTREAM_EVENT_BUS_INVOKE_ROLE_ARN;
+
 export {
   clickStreamTableName,
   dictionaryTableName,
@@ -116,4 +120,7 @@ export {
   SOLUTION_DATA_MODELING_VPC_ENDPOINTS,
   SOLUTION_VPC_ENDPOINTS,
   FULL_SOLUTION_VERSION,
+  CFN_RULE_PREFIX,
+  clickstreamEventBusArn,
+  clickstreamEventBusInvokeRoleArn,
 };

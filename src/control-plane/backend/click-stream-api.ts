@@ -200,12 +200,6 @@ export class ClickStreamApiConstruct extends Construct {
       };
     }
 
-    // Create event bus to listen stack status
-    new BackendEventBus(this, 'BackendEventBus', {
-      clickStreamTable,
-      lambdaFunctionNetwork,
-    });
-
     // Create stack action StateMachine
     const stackActionStateMachine = new StackActionStateMachine(this, 'StackActionStateMachine', {
       clickStreamTable,
@@ -222,6 +216,14 @@ export class ClickStreamApiConstruct extends Construct {
       workflowBucket: props.stackWorkflowS3Bucket,
     });
     stackActionStateMachine.stateMachine.grantStartExecution(stackWorkflowStateMachine.stackWorkflowMachine);
+
+    // Create event bus to listen stack status
+    const backendEventBus = new BackendEventBus(this, 'BackendEventBus', {
+      clickStreamTable,
+      prefixTimeGSIName,
+      lambdaFunctionNetwork,
+      listenStateMachine: stackWorkflowStateMachine.stackWorkflowMachine,
+    });
 
     // Create a role for lambda
     const clickStreamApiFunctionRole = new iam.Role(this, 'ClickStreamApiFunctionRole', {
@@ -292,6 +294,11 @@ export class ClickStreamApiConstruct extends Construct {
             'cloudwatch:DescribeAlarms',
             'cloudwatch:EnableAlarmActions',
             'cloudwatch:DisableAlarmActions',
+            'events:DeleteRule',
+            'events:PutRule',
+            'events:ListTargetsByRule',
+            'events:PutTargets',
+            'events:RemoveTargets',
           ],
         }),
         new iam.PolicyStatement({
@@ -357,6 +364,15 @@ export class ClickStreamApiConstruct extends Construct {
             'sts:AssumeRole',
           ],
         }),
+        new iam.PolicyStatement({
+          effect: iam.Effect.ALLOW,
+          resources: [
+            backendEventBus.invokeEventBusRole.roleArn,
+          ],
+          actions: [
+            'iam:PassRole',
+          ],
+        }),
       ],
     });
     awsSdkPolicy.attachToRole(clickStreamApiFunctionRole);
@@ -408,6 +424,8 @@ export class ClickStreamApiConstruct extends Construct {
         QUICKSIGHT_CONTROL_PLANE_REGION: props.targetToCNRegions ? 'cn-north-1' : 'us-east-1',
         WITH_VALIDATE_ROLE: 'true',
         FULL_SOLUTION_VERSION: SolutionInfo.SOLUTION_VERSION,
+        CLICKSTREAM_EVENT_BUS_ARN: backendEventBus.defaultEventBusArn,
+        CLICKSTREAM_EVENT_BUS_INVOKE_ROLE_ARN: backendEventBus.invokeEventBusRole.roleArn,
         ...POWERTOOLS_ENVS,
       },
       timeout: Duration.seconds(30),

@@ -29,8 +29,8 @@ import {
   Context,
 } from 'aws-lambda';
 import { logger } from '../../../../common/powertools';
+import { aws_sdk_client_common_config } from '../../../../common/sdk-client-config';
 import dictionary from '../../lambda/api/config/dictionary.json';
-import { aws_sdk_client_common_config } from '../api/common/sdk-client-config-ln';
 
 const ddbClient = new DynamoDBClient({
   ...aws_sdk_client_common_config,

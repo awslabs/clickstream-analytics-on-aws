@@ -14,46 +14,64 @@
 import { join } from 'path';
 import { Aws, Duration, Stack } from 'aws-cdk-lib';
 import { Table } from 'aws-cdk-lib/aws-dynamodb';
-import { EventBus, Rule } from 'aws-cdk-lib/aws-events';
+import { Rule } from 'aws-cdk-lib/aws-events';
 import { LambdaFunction } from 'aws-cdk-lib/aws-events-targets';
-import { AccountPrincipal, PolicyStatement } from 'aws-cdk-lib/aws-iam';
-import { Runtime, IFunction, Tracing, Architecture } from 'aws-cdk-lib/aws-lambda';
+import { Effect, Policy, PolicyStatement, Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
+import { IFunction, Tracing } from 'aws-cdk-lib/aws-lambda';
+import { StateMachine } from 'aws-cdk-lib/aws-stepfunctions';
 import { Construct } from 'constructs';
 import { LambdaFunctionNetworkProps } from './click-stream-api';
 import { createLambdaRole } from '../../common/lambda';
-import { POWERTOOLS_ENVS } from '../../common/powertools';
 import { createDLQueue } from '../../common/sqs';
 import { getShortIdOfStack } from '../../common/stack';
 import { SolutionNodejsFunction } from '../../private/function';
 
 export interface BackendEventBusProps {
   readonly clickStreamTable: Table;
+  readonly prefixTimeGSIName: string;
   readonly lambdaFunctionNetwork: LambdaFunctionNetworkProps;
+  readonly listenStateMachine: StateMachine;
 }
 
 export class BackendEventBus extends Construct {
 
-  readonly eventBus: EventBus;
+  // readonly eventBus: EventBus;
+  readonly defaultEventBusArn: string;
+  readonly invokeEventBusRole: Role;
 
   constructor(scope: Construct, id: string, props: BackendEventBusProps) {
     super(scope, id);
-    this.eventBus = new EventBus(this, 'ClickstreamEventBus', {
-      eventBusName: `ClickstreamEventBus-${getShortIdOfStack(Stack.of(this))}`,
-    });
-    this.eventBus.addToResourcePolicy(
-      new PolicyStatement({
-        sid: 'AllowAccountToPutEvents',
-        actions: ['events:PutEvents'],
-        resources: [this.eventBus.eventBusArn],
-        principals: [new AccountPrincipal(Aws.ACCOUNT_ID)],
-      }),
-    );
 
+    this.defaultEventBusArn = `arn:${Aws.PARTITION}:events:${Aws.REGION}:${Aws.ACCOUNT_ID}:event-bus/default`;
+
+    this.invokeEventBusRole = this.createInvokeEventBusRole(this.defaultEventBusArn);
+    this.createRuleForListenStackStatusChange(props);
+    this.createRuleForListenStateStatusChange(props);
+  }
+
+  private createInvokeEventBusRole(busArn: string): Role {
+    const role = new Role(this, 'InvokeEventBusRole', {
+      assumedBy: new ServicePrincipal('events.amazonaws.com'),
+    });
+    const invokeEventBusRolePolicy = new Policy(this, 'InvokeEventBusRolePolicy', {
+      statements: [
+        new PolicyStatement({
+          effect: Effect.ALLOW,
+          resources: [busArn],
+          actions: [
+            'events:PutEvents',
+          ],
+        }),
+      ],
+    });
+    invokeEventBusRolePolicy.attachToRole(role);
+    return role;
+  };
+
+  private createRuleForListenStackStatusChange = (props: BackendEventBusProps) => {
     const listenStackStatusFn = this.listenStackFn(props);
-    const listenStateStatusFn = this.listenStateFn(props);
 
     const ruleStack = new Rule(this, 'ListenStackStatusChange', {
-      eventBus: this.eventBus,
       ruleName: `ClickstreamListenStackStatusChange-${getShortIdOfStack(Stack.of(this))}`,
       description: 'Rule for listen CFN stack status change',
       eventPattern: {
@@ -68,14 +86,23 @@ export class BackendEventBus extends Construct {
         retryAttempts: 2,
       }),
     );
+  };
+
+  private createRuleForListenStateStatusChange = (props: BackendEventBusProps) => {
+    const listenStateStatusFn = this.listenStateFn(props);
 
     const ruleState = new Rule(this, 'ListenStateStatusChange', {
-      eventBus: this.eventBus,
       ruleName: `ClickstreamListenStateStatusChange-${getShortIdOfStack(Stack.of(this))}`,
       description: 'Rule for listen SFN state machine status change',
       eventPattern: {
         source: ['aws.states'],
         detailType: ['Step Functions Execution Status Change'],
+        detail: {
+          stateMachineArn: [props.listenStateMachine.stateMachineArn],
+          executionArn: [
+            `{"wildcard":"arn:${Aws.PARTITION}:states:${Aws.REGION}:${Aws.ACCOUNT_ID}:execution:${props.listenStateMachine.stateMachineName}:main-*"}`,
+          ],
+        },
       },
     });
     ruleState.addTarget(
@@ -85,24 +112,23 @@ export class BackendEventBus extends Construct {
         retryAttempts: 2,
       }),
     );
-
-  }
+  };
 
   private listenStackFn(props: BackendEventBusProps): IFunction {
     const fn = new SolutionNodejsFunction(this, 'ListenStackFunction', {
       description: 'Lambda function for listen CFN stack status of solution Clickstream Analytics on AWS',
       entry: join(__dirname, './lambda/listen-stack-status/index.ts'),
       handler: 'handler',
-      runtime: Runtime.NODEJS_18_X,
       tracing: Tracing.ACTIVE,
-      role: createLambdaRole(this, 'ListenStackFuncRole', true, []),
-      architecture: Architecture.X86_64,
+      role: createLambdaRole(this, 'ListenStackFuncRole', true, [...this.getDescribeStackPolicyStatements()]),
       timeout: Duration.seconds(60),
       environment: {
-        ...POWERTOOLS_ENVS,
+        CLICKSTREAM_TABLE_NAME: props.clickStreamTable.tableName,
+        PREFIX_TIME_GSI_NAME: props.prefixTimeGSIName,
       },
       ...props.lambdaFunctionNetwork,
     });
+    props.clickStreamTable.grantReadWriteData(fn);
     return fn;
   }
 
@@ -111,16 +137,29 @@ export class BackendEventBus extends Construct {
       description: 'Lambda function for listen SFN state machine status of solution Clickstream Analytics on AWS',
       entry: join(__dirname, './lambda/listen-state-status/index.ts'),
       handler: 'handler',
-      runtime: Runtime.NODEJS_18_X,
       tracing: Tracing.ACTIVE,
       role: createLambdaRole(this, 'ListenStateFuncRole', true, []),
-      architecture: Architecture.X86_64,
       timeout: Duration.seconds(60),
       environment: {
-        ...POWERTOOLS_ENVS,
+        CLICKSTREAM_TABLE_NAME: props.clickStreamTable.tableName,
+        PREFIX_TIME_GSI_NAME: props.prefixTimeGSIName,
       },
       ...props.lambdaFunctionNetwork,
     });
+    props.clickStreamTable.grantReadWriteData(fn);
     return fn;
   }
+
+  private getDescribeStackPolicyStatements(): PolicyStatement[] {
+    const cloudformationPolicyStatements: PolicyStatement[] = [
+      new PolicyStatement({
+        effect: Effect.ALLOW,
+        resources: [`arn:${Aws.PARTITION}:cloudformation:*:${Aws.ACCOUNT_ID}:stack/Clickstream-*`],
+        actions: [
+          'cloudformation:DescribeStacks',
+        ],
+      }),
+    ];
+    return cloudformationPolicyStatements;
+  };
 }

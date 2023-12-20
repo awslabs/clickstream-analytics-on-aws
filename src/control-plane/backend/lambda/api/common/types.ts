@@ -268,10 +268,10 @@ export interface PipelineStatus {
 export interface PipelineStatusDetail {
   readonly stackName: string;
   readonly stackType: PipelineStackType;
-  readonly stackStatus: StackStatus | undefined;
-  readonly stackStatusReason: string;
   readonly stackTemplateVersion: string;
-  readonly outputs: Output[];
+  stackStatus: StackStatus | undefined;
+  stackStatusReason: string;
+  outputs: Output[];
 }
 
 export interface SSMSecret {
