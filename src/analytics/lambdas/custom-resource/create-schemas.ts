@@ -26,14 +26,14 @@ import {
   UpdateSecretCommand,
   UpdateSecretCommandInput,
 } from '@aws-sdk/client-secrets-manager';
-import { CdkCustomResourceHandler, CdkCustomResourceEvent, CdkCustomResourceResponse, CloudFormationCustomResourceEvent, Context, CloudFormationCustomResourceUpdateEvent } from 'aws-lambda';
+import { CdkCustomResourceHandler, CdkCustomResourceEvent, CdkCustomResourceResponse, CloudFormationCustomResourceEvent, Context } from 'aws-lambda';
 import { getFunctionTags } from '../../../common/lambda/tags';
 import { BIUserCredential } from '../../../common/model';
 import { logger } from '../../../common/powertools';
 import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
 import { generateRandomStr } from '../../../common/utils';
 import { SQL_TEMPLATE_PARAMETER } from '../../private/constant';
-import { CreateDatabaseAndSchemas, MustacheParamType, SQLDef, SQLViewDef } from '../../private/model';
+import { CreateDatabaseAndSchemas, MustacheParamType } from '../../private/model';
 import { getSqlContent, getSqlContents } from '../../private/utils';
 import { getRedshiftClient, executeStatementsWithWait } from '../redshift-data';
 
@@ -47,6 +47,7 @@ const secretManagerClient = new SecretsManagerClient({
 
 export const physicalIdPrefix = 'create-redshift-db-schemas-custom-resource-';
 export const handler: CdkCustomResourceHandler = async (event: CloudFormationCustomResourceEvent, context: Context) => {
+
   const physicalId = ('PhysicalResourceId' in event) ? event.PhysicalResourceId :
     `${physicalIdPrefix}${generateRandomStr(8, 'abcdefghijklmnopqrstuvwxyz0123456789')}`;
   const biUsername = `${(event.ResourceProperties as ResourcePropertiesType).redshiftBIUsernamePrefix}${physicalId.substring(physicalIdPrefix.length)}`;
@@ -65,7 +66,9 @@ export const handler: CdkCustomResourceHandler = async (event: CloudFormationCus
     if (e instanceof Error) {
       logger.error('Error when creating database and schema in redshift', e);
     }
-    throw e;
+    if (!isSuppressALLError()) {
+      throw e;
+    }
   }
   return response;
 };
@@ -74,7 +77,7 @@ async function _handler(event: CdkCustomResourceEvent, biUsername: string, conte
   const requestType = event.RequestType;
 
   logger.info('RequestType: ' + requestType);
-  if (requestType == 'Create') {
+  if (requestType == 'Create' || requestType == 'Update') {
     const funcTags = await getFunctionTags(context);
     const tags: Tag[] = [];
     for (let [key, value] of Object.entries(funcTags as any)) {
@@ -85,11 +88,7 @@ async function _handler(event: CdkCustomResourceEvent, biUsername: string, conte
     }
     logger.info('tags', { tags });
 
-    await onCreate(event, biUsername, tags);
-  }
-
-  if (requestType == 'Update') {
-    await onUpdate(event, biUsername);
+    await onCreateOrUpdate(event, biUsername, tags);
   }
 
   if (requestType == 'Delete') {
@@ -97,28 +96,34 @@ async function _handler(event: CdkCustomResourceEvent, biUsername: string, conte
   }
 }
 
-async function onCreate(event: CdkCustomResourceEvent, biUsername: string, tags: Tag[]) {
-  logger.info('onCreate()');
+async function onCreateOrUpdate(event: CdkCustomResourceEvent, biUsername: string, tags: Tag[]) {
+  const requestType = event.RequestType;
+
+  logger.info('onCreateOrUpdate() requestType:' + requestType);
+
+  const isCreate = requestType == 'Create';
 
   const props = event.ResourceProperties as ResourcePropertiesType;
-
-  // 0. generate password and save to parameter store
-  const credential = await createBIUserCredentialSecret(props.redshiftBIUserParameter, biUsername, props.projectId, tags);
 
   // 1. create database in Redshift
   const client = getRedshiftClient(props.dataAPIRole);
   if (props.serverlessRedshiftProps || props.provisionedRedshiftProps) {
-    await createDatabaseInRedshift(client, props.databaseName, props);
-    await createDatabaseBIUser(client, credential, props);
+    if (isCreate) {
+      //generate password and save to parameter store
+      const credential = await createBIUserCredentialSecret(props.redshiftBIUserParameter, biUsername, props.projectId, tags);
+      await createDatabaseInRedshift(client, props.databaseName, props);
+      await createDatabaseBIUser(client, credential, props);
+    }
   } else {
     throw new Error('Can\'t identity the mode Redshift cluster!');
   }
 
   // 2. create schemas in Redshift for applications
-  await createSchemas(props, biUsername);
+  await createOrUpdateSchemas(props, biUsername);
 
   // 3. create views for reporting
-  await createViewForReporting(props, biUsername);
+  await createOrUpdateViewForReporting(props, biUsername);
+
 }
 
 async function createBIUserCredentialSecret(secretName: string, biUsername: string, projectId: string, tags: Tag[]): Promise<BIUserCredential> {
@@ -186,18 +191,6 @@ async function deleteBIUserCredentialSecret(secretName: string, biUsername: stri
   await secretManagerClient.send(new DeleteSecretCommand(params));
 }
 
-async function onUpdate(event: CloudFormationCustomResourceUpdateEvent, biUsername: string) {
-  logger.info('onUpdate()');
-
-  const oldProps = event.OldResourceProperties as ResourcePropertiesType;
-  const props = event.ResourceProperties as ResourcePropertiesType;
-
-  await updateSchemas(props, biUsername, oldProps);
-
-  await updateViewForReporting(props, oldProps, biUsername);
-
-}
-
 async function onDelete(event: CdkCustomResourceEvent, biUsername: string) {
   logger.info('onDelete()');
   const props = event.ResourceProperties as ResourcePropertiesType;
@@ -219,9 +212,8 @@ function splitString(str: string): string[] {
   }
 }
 
-async function createSchemas(props: ResourcePropertiesType, biUsername: string) {
+async function createOrUpdateSchemas(props: ResourcePropertiesType, biUsername: string) {
   const odsTableNames = props.odsTableNames;
-
   const appIds = splitString(props.appIds);
   const sqlStatementsByApp = new Map<string, string[]>();
 
@@ -258,112 +250,6 @@ async function createSchemas(props: ResourcePropertiesType, biUsername: string) 
   }
 }
 
-async function updateSchemas(props: ResourcePropertiesType, biUsername: string, oldProps: ResourcePropertiesType) {
-  const odsTableNames = props.odsTableNames;
-  const appUpdateProps = getAppUpdateProps(props, oldProps);
-
-  logger.info('updateSchemas', { props, oldProps, appUpdateProps });
-
-  const sqlStatementsByApp = new Map<string, string[]>();
-  for (const app of appUpdateProps.createAppIds) {
-    const sqlStatements: string[] = [];
-    const mustacheParam: MustacheParamType = {
-      database_name: props.projectId,
-      schema: app,
-      table_event: odsTableNames.event,
-      table_event_parameter: odsTableNames.event_parameter,
-      table_user: odsTableNames.user,
-      table_item: odsTableNames.item,
-      user_bi: biUsername,
-      ...SQL_TEMPLATE_PARAMETER,
-    };
-    sqlStatements.push(`CREATE SCHEMA IF NOT EXISTS ${app}`);
-    for (const sqlDef of props.schemaDefs) {
-      if (sqlDef.multipleLine !== undefined && sqlDef.multipleLine === 'true') {
-        logger.info('multipleLine SQL: ', sqlDef.sqlFile);
-        sqlStatements.push(...getSqlContents(sqlDef, mustacheParam));
-        continue;
-      }
-      sqlStatements.push(getSqlContent(sqlDef, mustacheParam));
-    }
-    sqlStatementsByApp.set(app, sqlStatements);
-  };
-
-  for (const app of appUpdateProps.updateAppIds) {
-    const mustacheParam: MustacheParamType = {
-      database_name: props.projectId,
-      schema: app,
-      table_event: odsTableNames.event,
-      table_event_parameter: odsTableNames.event_parameter,
-      table_user: odsTableNames.user,
-      table_item: odsTableNames.item,
-      user_bi: biUsername,
-      ...SQL_TEMPLATE_PARAMETER,
-    };
-
-    const sqlStatements2 = getUpdatableSql(props.schemaDefs, appUpdateProps.oldSchemaSqlArray, appUpdateProps.oldViewSqls, mustacheParam);
-
-    logger.info('updateSchemas- sqlStatements2, app=' + app, { app, sqlStatements2 });
-
-    if (sqlStatementsByApp.has(app)) {
-      sqlStatementsByApp.get(app)?.push(...sqlStatements2);
-    } else {
-      sqlStatementsByApp.set(app, sqlStatements2);
-    }
-
-  };
-  await doUpdate(sqlStatementsByApp, props);
-}
-
-function _viewNameExist(sqlArray: string[], viewName: string): boolean {
-  for (const sql of sqlArray) {
-    if (sql.includes(viewName)) {
-      return true;
-    }
-  }
-  return false;
-}
-
-function getUpdatableSql(sqlOrViewDefs: SQLDef[] | SQLViewDef[], oldSqlArray: string[], oldViewSqlArray: string[], mustacheParam: MustacheParamType, path: string = '/opt') {
-  logger.info('getUpdatableSql', { sqlOrViewDefs, oldSqlArray });
-  const newFilesInfo = [];
-  const updateFilesInfo = [];
-  const sqlStatements: string[] = [];
-  for (const schemaOrViewDef of sqlOrViewDefs) {
-    logger.info(`schemaOrViewDef.updatable: ${schemaOrViewDef.updatable}`);
-
-    if ('sqlFile' in schemaOrViewDef && !oldSqlArray.includes(schemaOrViewDef.sqlFile)) {
-      logger.info('new sql: ', { schemaOrViewDef });
-      sqlStatements.push(getSqlContent(schemaOrViewDef, mustacheParam, path));
-      newFilesInfo.push(schemaOrViewDef);
-    } else if (schemaOrViewDef.updatable === 'true'
-      || ('viewName' in schemaOrViewDef
-         && (!_viewNameExist(oldSqlArray, schemaOrViewDef.viewName)) //all view sqls is contained in oldSqlArray when upgrade from 1.0.x
-         && (!_viewNameExist(oldViewSqlArray, schemaOrViewDef.viewName))
-      )
-    ) {
-      logger.info('update sql: ', { schemaOrViewDef });
-      sqlStatements.push(getSqlContent(schemaOrViewDef, mustacheParam, path));
-      updateFilesInfo.push(schemaOrViewDef);
-    } else {
-      logger.info('skip update sql due to it is not updatable.', { schemaOrViewDef });
-    }
-  }
-
-  logger.info('getUpdatableSql: new and update files info', { newFilesInfo, updateFilesInfo });
-
-  return sqlStatements;
-}
-
-async function doUpdate(sqlStatementsByApp: Map<string, string[]>, props: ResourcePropertiesType) {
-  if (sqlStatementsByApp.size == 0) {
-    logger.info('Ignore creating schema in Redshift due to there is no application.');
-  } else {
-    const redShiftClient = getRedshiftClient(props.dataAPIRole);
-    await createSchemasInRedshift(redShiftClient, sqlStatementsByApp, props);
-  }
-}
-
 export const TABLES_VIEWS_FOR_REPORTING = ['event', 'event_parameter', 'user', 'item', 'user_m_view', 'item_m_view'];
 function _buildGrantSqlStatements(views: string[], schema: string, biUser: string): string[] {
 
@@ -379,7 +265,7 @@ function _buildGrantSqlStatements(views: string[], schema: string, biUser: strin
   return statements;
 }
 
-async function createViewForReporting(props: ResourcePropertiesType, biUser: string) {
+async function createOrUpdateViewForReporting(props: ResourcePropertiesType, biUser: string) {
   const odsTableNames = props.odsTableNames;
   const appIds = splitString(props.appIds);
 
@@ -413,68 +299,6 @@ async function createViewForReporting(props: ResourcePropertiesType, biUser: str
   }
 }
 
-async function updateViewForReporting(props: ResourcePropertiesType, oldProps: ResourcePropertiesType, biUser: string) {
-  const odsTableNames = props.odsTableNames;
-
-  const appUpdateProps = getAppUpdateProps(props, oldProps);
-
-  const sqlStatementsByApp = new Map<string, string[]>();
-  for (const app of appUpdateProps.createAppIds) {
-    const sqlStatements: string[] = [];
-    const mustacheParam: MustacheParamType = {
-      database_name: props.projectId,
-      schema: app,
-      table_event: odsTableNames.event,
-      table_event_parameter: odsTableNames.event_parameter,
-      table_user: odsTableNames.user,
-      table_item: odsTableNames.item,
-      ...SQL_TEMPLATE_PARAMETER,
-    };
-    const views: string[] = [];
-    for (const viewDef of props.reportingViewsDef) {
-      views.push(viewDef.viewName);
-      sqlStatements.push(getSqlContent(viewDef, mustacheParam, '/opt/dashboard'));
-    }
-    sqlStatements.push(..._buildGrantSqlStatements(views, app, biUser));
-
-    sqlStatementsByApp.set(app, sqlStatements);
-  };
-
-  for (const app of appUpdateProps.updateAppIds) {
-    const mustacheParam: MustacheParamType = {
-      database_name: props.projectId,
-      schema: app,
-      table_event: odsTableNames.event,
-      table_event_parameter: odsTableNames.event_parameter,
-      table_user: odsTableNames.user,
-      table_item: odsTableNames.item,
-      ...SQL_TEMPLATE_PARAMETER,
-    };
-
-    const sqlStatements2 = getUpdatableSql(props.reportingViewsDef, appUpdateProps.oldSchemaSqlArray, appUpdateProps.oldViewSqls, mustacheParam, '/opt/dashboard');
-
-    //grant select on views to bi user.
-    const views: string[] = [];
-    for (const sqlDef of props.reportingViewsDef) {
-      views.push(sqlDef.viewName);
-    }
-    sqlStatements2.push(..._buildGrantSqlStatements(views, app, biUser));
-
-    if (sqlStatementsByApp.has(app)) {
-      sqlStatementsByApp.get(app)?.push(...sqlStatements2);
-    } else {
-      sqlStatementsByApp.set(app, sqlStatements2);
-    }
-  };
-
-  if (sqlStatementsByApp.size == 0) {
-    logger.info('Ignore creating reporting views in Redshift due to there is no application.');
-  } else {
-    const redShiftClient = getRedshiftClient(props.dataAPIRole);
-    await createSchemasInRedshift(redShiftClient, sqlStatementsByApp, props);
-  }
-
-}
 
 const createDatabaseInRedshift = async (redshiftClient: RedshiftDataClient, databaseName: string,
   props: CreateDatabaseAndSchemas, owner?: string) => {
@@ -484,7 +308,11 @@ const createDatabaseInRedshift = async (redshiftClient: RedshiftDataClient, data
       props.serverlessRedshiftProps, props.provisionedRedshiftProps);
   } catch (err) {
     if (err instanceof Error) {
-      logger.error(`Error happened when creating database '${databaseName}' in Redshift.`, err);
+      if (err.message.includes('already exists')) {
+        logger.error(`Database '${databaseName}' already exists in Redshift.`);
+      } else {
+        logger.error(`Error happened when creating database '${databaseName}' in Redshift.`, err);
+      }
     }
     throw err;
   }
@@ -499,7 +327,11 @@ const createDatabaseBIUser = async (redshiftClient: RedshiftDataClient, credenti
     props.serverlessRedshiftProps?.databaseName ?? props.provisionedRedshiftProps?.databaseName, false);
   } catch (err) {
     if (err instanceof Error) {
-      logger.error(`Error when creating BI user '${credential.username}' in Redshift.`, err);
+      if (err.message.includes('already exists')) {
+        logger.error(`BI user '${credential.username}' already exists in Redshift.`);
+      } else {
+        logger.error(`Error when creating BI user '${credential.username}' in Redshift.`, err);
+      }
     }
     throw err;
   }
@@ -510,14 +342,30 @@ const createSchemasInRedshift = async (redshiftClient: RedshiftDataClient,
 
   for (const [appId, sqlStatements] of sqlStatementsByApp) {
     logger.info(`creating schema in serverless Redshift for ${appId}`);
-    try {
-      await executeStatementsWithWait(redshiftClient, sqlStatements,
-        props.serverlessRedshiftProps, props.provisionedRedshiftProps, props.databaseName);
-    } catch (err) {
-      if (err instanceof Error) {
-        logger.error('Error when creating schema in serverless Redshift, appId=' + appId, err);
+    for (const statement of sqlStatements) {
+      await execSQLInRedshift(redshiftClient, statement, appId, props);
+    }
+  }
+};
+
+const execSQLInRedshift = async (redshiftClient: RedshiftDataClient, sqlStatement: string, appId: string, props: CreateDatabaseAndSchemas) => {
+  logger.info('execSQLInRedshift()', { appId, sqlStatement });
+  const logSql = false;
+  const waitMilliseconds = 500;
+  try {
+    await executeStatementsWithWait(redshiftClient, [sqlStatement],
+      props.serverlessRedshiftProps, props.provisionedRedshiftProps, props.databaseName, logSql, waitMilliseconds);
+  } catch (err) {
+    if (err instanceof Error) {
+      if (err.message.includes('already exists')) {
+        logger.warn(`Schema '${appId}' object already exists in Redshift.`);
+      } else if (isSuppressDBError()) {
+        logger.warn(`Suppressing error for schema '${appId}'`, { appId, err, sqlStatement });
+      } else {
+        logger.error('Error when creating schema in serverless Redshift', { appId, err, sqlStatement });
+        throw err;
       }
-      throw err;
+
     }
   }
 };
@@ -527,51 +375,11 @@ function generateRedshiftUserPassword(length: number): string {
   return password;
 }
 
-export type AppUpdateProps = {
-  createAppIds: string[];
-  updateAppIds: string[];
-  oldViewSqls: string[];
-  oldSchemaSqlArray: string[];
+function isSuppressDBError(): boolean {
+  return process.env.SUPPRESS_DB_ERROR === 'true';
 }
 
-function getAppUpdateProps(props: ResourcePropertiesType, oldProps: ResourcePropertiesType): AppUpdateProps {
-
-  const oldAppIdArray: string[] = [];
-  const oldViewSqlArray: string[] = [];
-  const oldSchemaSqlArray: string[] = [];
-  if (oldProps.appIds.trim().length > 0) {
-    oldAppIdArray.push(...oldProps.appIds.trim().split(','));
-  };
-  for (const view of oldProps.reportingViewsDef) {
-    oldViewSqlArray.push(`${view.viewName}.sql`);
-  }
-  logger.info(`old sql array: ${oldViewSqlArray}`);
-
-  for (const schema of oldProps.schemaDefs) {
-    oldSchemaSqlArray.push(schema.sqlFile);
-  }
-  logger.info(`old schema sql array: ${oldSchemaSqlArray}`);
-
-  const appIdArray: string[] = [];
-  if (props.appIds.trim().length > 0) {
-    appIdArray.push(...props.appIds.trim().split(','));
-  };
-
-  logger.info(`props.appIds: ${props.appIds}`);
-  logger.info(`oldProps.appIds: ${oldProps.appIds}`);
-  logger.info(`appIdArray: ${appIdArray}`);
-  logger.info(`oldAppIdArray: ${oldAppIdArray}`);
-
-  const needCreateAppIds = appIdArray.filter(item => !oldAppIdArray.includes(item));
-  logger.info(`apps need to be create: ${needCreateAppIds}`);
-
-  const needUpdateAppIds = appIdArray.filter(item => oldAppIdArray.includes(item));
-  logger.info(`apps need to be update: ${needUpdateAppIds}`);
-
-  return {
-    createAppIds: needCreateAppIds,
-    updateAppIds: needUpdateAppIds,
-    oldViewSqls: oldViewSqlArray,
-    oldSchemaSqlArray: oldSchemaSqlArray,
-  };
+function isSuppressALLError(): boolean {
+  return process.env.SUPPRESS_ALL_ERROR === 'true';
 }
+
