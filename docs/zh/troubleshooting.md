@@ -87,7 +87,7 @@ aws logs put-resource-policy --policy-name AWSLogDeliveryWrite20150319 \
 
 ## 问题: Clickstream-DataModelingRedshift-xxxxx 堆栈更新失败，状态显示为 UPDATE_ROLLBACK_FAILED
 
-从 1.0.x 升级到 1.1.x 时, 如果 CloudFormation 堆栈 `Clickstream-DataModelingRedshift-xxxxx` 的状态显示为 `UPDATE_ROLLBACK_FAILED`，您需要按照以下步骤手动修复。
+从 1.0.x 升级到最新版本时, 如果 CloudFormation 堆栈 `Clickstream-DataModelingRedshift-xxxxx` 的状态显示为 `UPDATE_ROLLBACK_FAILED`，您需要按照以下步骤手动修复。
 
 **解决方法：**
 
@@ -119,11 +119,10 @@ aws logs put-resource-policy --policy-name AWSLogDeliveryWrite20150319 \
     aws lambda update-function-code --function-name ${fn_name} \
      --zip-file fileb://./noops-lambda.zip \
      --region ${aws_region} | tee /dev/null
-    
     ```
 
 3. 在 CloudFormation Web 控制台中，选择 **堆栈操作** -> **继续更新回滚**。
 
 4. 等待堆栈状态变为 **UPDATE_ROLLBACK_COMPLETE**。
 
-5. 从 Clickstream Web 控制台中重试升级。
+5. 从解决方案 Web 控制台中重试升级。

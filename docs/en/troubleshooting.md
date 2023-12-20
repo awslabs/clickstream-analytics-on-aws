@@ -104,13 +104,13 @@ Login solution web console and click "Retry" button in pipeline detail informati
 
 ## Problem: Clickstream-DataModelingRedshift-xxxxx stack upgrade failed in UPDATE_ROLLBACK_FAILED
 
-When upgrading from 1.0.x to 1.1.x, if the CloudFormation stack `Clickstream-DataModelingRedshift-xxxxx` is in the `UPDATE_ROLLBACK_FAILED` state, you need to manually fix it by following the steps below.
+When upgrading from 1.0.x to the latest version, if the CloudFormation stack `Clickstream-DataModelingRedshift-xxxxx` is in the `UPDATE_ROLLBACK_FAILED` state, you need to manually fix it by following the steps below.
 
 **Resolution:**
 
 1. In the Cloudformation **Resource** tab, find the Lambda Function name with logical id: `CreateApplicationSchemasCreateSchemaForApplicationsFn` 
 
-2. Upadte the `fn_name` and `aws_region` in below script and execute it in a shell terminal (you must have AWS cli installed and configured)
+2. Update the `fn_name` and `aws_region` in below script and execute it in a shell terminal (you must have AWS CLI installed and configured)
 
     ```sh
     aws_region=<us-east-1> # replace this with your AWS region, and remove '<', '>'
@@ -136,10 +136,10 @@ When upgrading from 1.0.x to 1.1.x, if the CloudFormation stack `Clickstream-Dat
     aws lambda update-function-code --function-name ${fn_name} \
      --zip-file fileb://./noops-lambda.zip \
      --region ${aws_region} | tee /dev/null    
-
     ```
-3. In the Cloudformation web console, choose **Stack actions** -> **Continue update rollback**
 
-4. Wait the stack in **UPDATE_ROLLBACK_COMPLETE** status
+3. In the CloudFormation web console, choose **Stack actions** -> **Continue update rollback**
 
-5. Retry upgrade from Clickstream web console
+4. Wait until the stack status is **UPDATE_ROLLBACK_COMPLETE**
+
+5. Retry upgrade from the solution web console
