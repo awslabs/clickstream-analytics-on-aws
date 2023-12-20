@@ -23,11 +23,17 @@ The solution creates a web service as an ingestion endpoint to collect data sent
 
             Once the ingestion server is created, use the custom endpoint to create an alias or CNAME mapping in your Domain Name System (DNS) for the custom endpoint.
         * SSL Certificate: User need to select an ACM certificate corresponding to the domain name that you input. If there is no ACM certificate, please refer [create public certificate](https://docs.aws.amazon.com/acm/latest/userguide/gs-acm-request-public.html) to create it.
+
     * Disable HTTPS: If users choose to disable HTTPS, the ingestion server will provide HTTP endpoint.
 
         !!! warning "Warning"
 
             DO NOT use HTTP in production, because data will be sent without any encryption, and there are high risks of data being leaked or tampered during transmission. Please acknowledge the risk to proceed.
+
+    !!! warning "Warning"
+
+        If you switch between enabling HTTPS and disabling HTTPS, ingestion service interruption will occur.
+
 * **Cross-Origin Resource Sharing (CORS)**: You can enable CORS to limit requests to data ingestion API from a specific domain. Note that, you need to input a complete internet address, e.g., `https://www.example.com`, `http://localhost:8080`. Use comma to separate domain if you have multiple domain for this setting.
 
         !!! warning "Warning"
@@ -61,6 +67,9 @@ The solution creates a web service as an ingestion endpoint to collect data sent
 
         **Note**: If you need to obtain the authentication token directly without inputting credential(username/password) manually, you can refer to [alb headless authentication client code][alb-headless-authentication-client] to setup your client to obtain the authentication token automatically.
 
+        !!! warning "Warning"
+
+            If you switch between enabling Authentication and disabling Authentication, ingestion service interruption will occur.
 
     * Access logs: ALB supports delivering detailed logs of all requests it receives. If you enable this option, the solution will automatically enable access logs for you and store the logs into the S3 bucket you selected in previous step.
 
