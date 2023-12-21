@@ -352,7 +352,7 @@ const createDatabaseBIUser = async (redshiftClient: RedshiftDataClient, credenti
     await executeStatementsWithWait(redshiftClient, [
       `CREATE USER ${credential.username} PASSWORD '${credential.password}'`,
     ], props.serverlessRedshiftProps, props.provisionedRedshiftProps,
-      props.serverlessRedshiftProps?.databaseName ?? props.provisionedRedshiftProps?.databaseName, false);
+    props.serverlessRedshiftProps?.databaseName ?? props.provisionedRedshiftProps?.databaseName, false);
   } catch (err) {
     if (err instanceof Error) {
       if (err.message.includes('already exists')) {
