@@ -111,7 +111,7 @@ In [Step 2. Launch the stack](#step-2-launch-the-stack), enter the parameters be
 
 6. Go back to Keycloak console and select **Clients** on the left navigation bar, and choose **Create**.
 7. Enter a Client ID, which must contain letters (case-insensitive) or numbers. Record the **Client ID** which will be used later.
-8. Change client settings. Enter `http[s]://<{{ solution_name }} Console domain>/signin` in **Valid Redirect URIs**，and enter `<console domain>` and `+` in **Web Origins**.
+8. Change client settings. Enter `http[s]://<{{ solution_name }} Console domain>/signin` in **Valid Redirect URIs**, and enter `<console domain>` and `+` in **Web Origins**.
 
     !!! tip "Tip"
         If you're not using custom domain for the console, the domain name of console is not available yet. You can enter a fake one, for example, `clickstream.example.com`, and then update it following guidelines in Step 3.

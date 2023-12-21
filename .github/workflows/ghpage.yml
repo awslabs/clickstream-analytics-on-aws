@@ -25,6 +25,17 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: '3.11'
+      - name: Check non-ascii characters
+        run: |
+          set -uxo pipefail
+          nonAsciiLine=$(grep --color='auto' -r -P -n "[^\x00-\x7F]"  ./docs/en | wc -l || true)
+          if [ $nonAsciiLine -gt 0 ]; then
+            echo "Non-ascii characters found in ./docs/en"
+            grep --color='auto' -r -P -n "[^\x00-\x7F]"  ./docs/en
+            exit 1
+          else
+            echo "No non-ascii characters found in ./docs/en"
+          fi
 
       - name: Install mkdocs and material theme
         run: |
