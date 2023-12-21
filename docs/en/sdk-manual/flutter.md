@@ -214,7 +214,7 @@ Clickstream Flutter SDK supports the following data types.
 
 | Data type | Range                                        | Example       |
 |-----------|----------------------------------------------|---------------|
-| int       | -9223372036854775808 ～ 9223372036854775807 	 | 12            |
+| int       | -9223372036854775808 ~ 9223372036854775807 	 | 12            |
 | double    | 5e-324 ~ 1.79e+308                           | 3.14          |
 | bool      | true, false                                  | true          |
 | String    | max 1024 characters                          | "Clickstream" |

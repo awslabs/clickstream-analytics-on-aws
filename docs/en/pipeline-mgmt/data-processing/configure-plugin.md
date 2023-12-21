@@ -30,7 +30,7 @@ You can add your plugins by click **Add Plugin** button, which will open a new w
 1. Give the plugin **Name** and **Description**.
 2. Chose **Plugin Type**,
    - **Enrichment**: Plugin to add fields into event data collected by SDK (both Clickstream SDK or third-party SDK)
-   - **Transformation**: A plugin used to transform a third-party SDK’s raw data into solution built-in schema
+   - **Transformation**: A plugin used to transform a third-party SDK's raw data into solution built-in schema
 
 3. Upload plugin java JAR file.
 

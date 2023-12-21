@@ -7,7 +7,7 @@ The solution provides modularized and configurable components of a data pipeline
 
 Use this navigation table to quickly find answers to these questions:
 
-| If you want to … | Read… |
+| If you want to ... | Read ...|
 |----------|--------|
 | Know the cost for running this solution | [Cost](../plan-deployment/cost.md) |
 | Understand the security considerations for this solution | [Security](../plan-deployment/security.md) |
