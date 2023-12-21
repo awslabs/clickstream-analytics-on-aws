@@ -63,7 +63,7 @@ When you upgraded the pipeline from v1.0.x, you need to perform the below action
 
 2. Select the Serverless workgroup or provisioned cluster, `<project-id>`->`<app-id>`->Tables, and make sure tables for the appId are listed there.
 
-3. Create a new SQL Editor。
+3. Create a new SQL Editor.
 
 4. Execute below SQL in editor.
 

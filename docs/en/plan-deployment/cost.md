@@ -122,7 +122,7 @@ Key assumptions include
 
 ## Logs and Monitoring
 
-The solution utilizes CloudWatch Logs， CloudWatch Metrics and CloudWatch Dashboard to implement logging, monitoring and visualizating features. The total cost is around $14 per month and may fluctuate based on the volume of logs and the number of metrics being monitored.
+The solution utilizes CloudWatch Logs, CloudWatch Metrics and CloudWatch Dashboard to implement logging, monitoring and visualizating features. The total cost is around $14 per month and may fluctuate based on the volume of logs and the number of metrics being monitored.
 
 ## Additional features
 
@@ -150,7 +150,7 @@ Key assumptions:
 
 ### Application Load Balancer Access log
 
-You are charged storage costs for Amazon S3, but not charged for the bandwidth used by Elastic Load Balancing to send log files to Amazon S3. For more information about storage costs, see [Amazon S3 pricing](https://aws.amazon.com/s3/pricing/).
+You are charged storage costs for Amazon S3, but not charged for the bandwidth used by Elastic Load Balancing to send log files to Amazon S3. For more information about storage costs, see [Amazon S3 pricing](https://aws.amazon.com/s3/pricing/).
 
 | Request Per Second | Log size(GB) | S3 cost(USD/Month)|
 | --------------------- | -------- | ------- |
