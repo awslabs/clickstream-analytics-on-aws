@@ -87,42 +87,42 @@ aws logs put-resource-policy --policy-name AWSLogDeliveryWrite20150319 \
 
 ## 问题: Clickstream-DataModelingRedshift-xxxxx 堆栈更新失败，状态显示为 UPDATE_ROLLBACK_FAILED
 
-从 1.0.x 升级到 1.1.x 时, 如果 CloudFormation 堆栈 `Clickstream-DataModelingRedshift-xxxxx` 的状态显示为 `UPDATE_ROLLBACK_FAILED`，您需要按照以下步骤手动修复。
+从 1.0.x 升级到最新版本时, 如果 CloudFormation 堆栈 `Clickstream-DataModelingRedshift-xxxxx` 的状态显示为 `UPDATE_ROLLBACK_FAILED`，您需要按照以下步骤手动修复。
 
 **解决方法：**
+
 1. 在 CloudFormation 的 **资源** 选项卡中，找到逻辑 ID 为 `CreateApplicationSchemasCreateSchemaForApplicationsFn` 的 Lambda 函数名称。
 
 2. 在下面的脚本中更新函数名称，并在 shell 终端中执行该脚本（您必须已安装并配置了 AWS CLI）：
 
-```sh
-aws_region=<us-east-1> # replace this with your AWS region, and remove '<', '>'
-fn_name=<fn_name_to_replace> # replace this with actual function name in step 1 and remove '<', '>'
-
-cat <<END | > ./index.mjs
-export const handler = async (event) => {
-  console.log('No ops!')
-  const response = {
-    Status: 'SUCCESS',
-    Data: {
-      DatabaseName: '',
-      RedshiftBIUsername: ''
-    }
-  };
-  return response;
-};
-END
-
-rm ./noops-lambda.zip > /dev/null 2>&1
-zip ./noops-lambda.zip ./index.mjs
-
-aws lambda update-function-code --function-name ${fn_name} \
- --zip-file fileb://./noops-lambda.zip \
- --region ${aws_region} | tee /dev/null
-
-```
+    ```sh
+    aws_region=<us-east-1> # replace this with your AWS region, and remove '<', '>'
+    fn_name=<fn_name_to_replace> # replace this with actual function name in step 1 and remove '<', '>'
+    
+    cat <<END | > ./index.mjs
+    export const handler = async (event) => {
+      console.log('No ops!')
+      const response = {
+        Status: 'SUCCESS',
+        Data: {
+          DatabaseName: '',
+          RedshiftBIUsername: ''
+        }
+      };
+      return response;
+    };
+    END
+    
+    rm ./noops-lambda.zip > /dev/null 2>&1
+    zip ./noops-lambda.zip ./index.mjs
+    
+    aws lambda update-function-code --function-name ${fn_name} \
+     --zip-file fileb://./noops-lambda.zip \
+     --region ${aws_region} | tee /dev/null
+    ```
 
 3. 在 CloudFormation Web 控制台中，选择 **堆栈操作** -> **继续更新回滚**。
 
 4. 等待堆栈状态变为 **UPDATE_ROLLBACK_COMPLETE**。
 
-5. 从 Clickstream Web 控制台中重试升级。
+5. 从解决方案 Web 控制台中重试升级。
