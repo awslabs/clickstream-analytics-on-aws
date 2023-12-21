@@ -1043,7 +1043,6 @@ function _getPipelineStatus(pipeline: IPipeline) {
       pipeline.stackDetails ?? pipeline.status?.stackDetails, pipeline.templateVersion);
   }
   const executionDetail = pipeline.executionDetail ?? pipeline.status?.executionDetail;
-  console.log('executionDetail', executionDetail);
   let status: PipelineStatusType;
   status = _getPipelineStatusFromStacks(pipeline, lastAction);
   if (executionDetail?.status === ExecutionStatus.FAILED ||

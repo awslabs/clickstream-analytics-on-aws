@@ -30,6 +30,7 @@ export class PipelineServ {
       const result = await store.listPipeline(pid, version, order);
       for (let item of result) {
         const pipeline = new CPipeline(item);
+        item.statusType = getPipelineStatusType(item);
         await pipeline.refreshStatus();
       }
       return res.json(new ApiSuccess({
@@ -73,6 +74,7 @@ export class PipelineServ {
       const latestPipeline = latestPipelines[0];
       if (!cache || cache === 'false') {
         const pipeline = new CPipeline(latestPipeline);
+        latestPipeline.statusType = getPipelineStatusType(latestPipeline);
         await pipeline.refreshStatus();
         const pluginsInfo = await pipeline.getPluginsInfo();
         const templateInfo = pipeline.getTemplateInfo();
@@ -147,12 +149,14 @@ export class PipelineServ {
       }
       const newPipeline = { ...curPipeline };
       newPipeline.statusType = getPipelineStatusType(newPipeline);
+      console.log(`Current pipeline status: ${newPipeline.statusType}`);
       // Check pipeline status
       if (newPipeline.statusType !== PipelineStatusType.ACTIVE) {
         return res.status(400).json(new ApiFail('The pipeline current status does not allow upgrade.'));
       }
       const pipeline = new CPipeline(newPipeline);
       const templateInfo = pipeline.getTemplateInfo();
+      console.log(`Current pipeline template version: ${JSON.stringify(templateInfo)}`);
       if (templateInfo.isLatest) {
         return res.status(400).send(new ApiFail('Pipeline is already the latest version.'));
       }

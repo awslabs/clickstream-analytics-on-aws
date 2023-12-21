@@ -42,6 +42,12 @@ const BASE_PIPELINE_ATTRIBUTES = {
   },
   statusType: PipelineStatusType.ACTIVE,
   stackDetails: [],
+  executionDetail: {
+    name: MOCK_EXECUTION_ID,
+    executionArn: 'arn:aws:states:us-east-1:111122223333:execution:MyPipelineStateMachine:main-5ab07c6e-b6ac-47ea-bf3a-02ede7391807',
+    stateMachineArn: 'arn:aws:states:us-east-1:111122223333:stateMachine:MyPipelineStateMachine',
+    status: ExecutionStatus.SUCCEEDED,
+  },
   network: {
     publicSubnetIds: [
       'subnet-00000000000000021',
@@ -98,7 +104,6 @@ const BASE_PIPELINE_ATTRIBUTES = {
       Branches: [],
     },
   },
-  executionName: MOCK_EXECUTION_ID,
   type: `PIPELINE#${MOCK_PIPELINE_ID}#latest`,
   deleted: false,
   createAt: 1681353806173,
@@ -993,12 +998,42 @@ export const BASE_STATUS = {
   },
 };
 
+export const stackDetailsWithOutputs = [
+  BASE_STATUS.stackDetails[0],
+  {
+    ...BASE_STATUS.stackDetails[1],
+    outputs: [
+      {
+        OutputKey: 'IngestionServerC000IngestionServerURL',
+        OutputValue: 'http://xxx/xxx',
+      },
+      {
+        OutputKey: 'IngestionServerC000IngestionServerDNS',
+        OutputValue: 'http://yyy/yyy',
+      },
+    ],
+  },
+  BASE_STATUS.stackDetails[2],
+  BASE_STATUS.stackDetails[3],
+  BASE_STATUS.stackDetails[4],
+  {
+    ...BASE_STATUS.stackDetails[5],
+    Tags: [{ Key: BuiltInTagKeys.AWS_SOLUTION_VERSION, Value: MOCK_SOLUTION_VERSION }],
+    outputs: [
+      {
+        OutputKey: 'ObservabilityDashboardName',
+        OutputValue: 'clickstream_dashboard_notepad_mtzfsocy',
+      },
+    ],
+  },
+];
+
 export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW: IPipeline = {
   ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE,
   status: {
     ...BASE_STATUS,
   },
-  stackDetails: BASE_STATUS.stackDetails,
+  stackDetails: stackDetailsWithOutputs,
   executionDetail: {
     name: MOCK_EXECUTION_ID,
     executionArn: 'arn:aws:states:us-east-1:111122223333:execution:MyPipelineStateMachine:main-5ab07c6e-b6ac-47ea-bf3a-02ede7391807',
@@ -1775,78 +1810,72 @@ const BASE_RETRY_PIPELINE: IPipeline = {
 
 export const RETRY_PIPELINE_WITH_WORKFLOW: IPipeline = {
   ...BASE_RETRY_PIPELINE,
-  status: {
-    ...BASE_STATUS,
-    status: PipelineStatusType.FAILED,
-    stackDetails: [
-      {
-        ...BASE_STATUS.stackDetails[0],
-        stackStatus: StackStatus.CREATE_FAILED,
-      },
-      BASE_STATUS.stackDetails[1],
-      BASE_STATUS.stackDetails[2],
-      {
-        ...BASE_STATUS.stackDetails[3],
-        stackStatus: StackStatus.CREATE_FAILED,
-      },
-      {
-        ...BASE_STATUS.stackDetails[4],
-        stackStatus: undefined,
-      },
-      BASE_STATUS.stackDetails[5],
-    ],
-    executionDetail: {
-      name: MOCK_EXECUTION_ID,
-      status: ExecutionStatus.FAILED,
+  stackDetails: [
+    {
+      ...BASE_STATUS.stackDetails[0],
+      stackStatus: StackStatus.CREATE_FAILED,
     },
+    BASE_STATUS.stackDetails[1],
+    BASE_STATUS.stackDetails[2],
+    {
+      ...BASE_STATUS.stackDetails[3],
+      stackStatus: StackStatus.CREATE_FAILED,
+    },
+    {
+      ...BASE_STATUS.stackDetails[4],
+      stackStatus: undefined,
+    },
+    BASE_STATUS.stackDetails[5],
+  ],
+  executionDetail: {
+    name: MOCK_EXECUTION_ID,
+    status: ExecutionStatus.FAILED,
+    executionArn: 'arn:aws:states:us-east-1:111122223333:execution:MyPipelineStateMachine:main-5ab07c6e-b6ac-47ea-bf3a-02ede7391807',
+    stateMachineArn: 'arn:aws:states:us-east-1:111122223333:stateMachine:MyPipelineStateMachine',
   },
 };
 
 export const RETRY_PIPELINE_WITH_WORKFLOW_WHEN_UPDATE_FAILED: IPipeline = {
   ...BASE_RETRY_PIPELINE,
   lastAction: 'Update',
-  status: {
-    ...BASE_STATUS,
-    status: PipelineStatusType.FAILED,
-    stackDetails: [
-      BASE_STATUS.stackDetails[0],
-      {
-        ...BASE_STATUS.stackDetails[1],
-        stackStatus: StackStatus.UPDATE_FAILED,
-      },
-      BASE_STATUS.stackDetails[2],
-      BASE_STATUS.stackDetails[3],
-      BASE_STATUS.stackDetails[4],
-      BASE_STATUS.stackDetails[5],
-    ],
-    executionDetail: {
-      name: MOCK_EXECUTION_ID,
-      status: ExecutionStatus.FAILED,
+  stackDetails: [
+    BASE_STATUS.stackDetails[0],
+    {
+      ...BASE_STATUS.stackDetails[1],
+      stackStatus: StackStatus.UPDATE_FAILED,
     },
+    BASE_STATUS.stackDetails[2],
+    BASE_STATUS.stackDetails[3],
+    BASE_STATUS.stackDetails[4],
+    BASE_STATUS.stackDetails[5],
+  ],
+  executionDetail: {
+    name: MOCK_EXECUTION_ID,
+    status: ExecutionStatus.FAILED,
+    executionArn: 'arn:aws:states:us-east-1:111122223333:execution:MyPipelineStateMachine:main-5ab07c6e-b6ac-47ea-bf3a-02ede7391807',
+    stateMachineArn: 'arn:aws:states:us-east-1:111122223333:stateMachine:MyPipelineStateMachine',
   },
 };
 
 export const RETRY_PIPELINE_WITH_WORKFLOW_AND_ROLLBACK_COMPLETE: IPipeline = {
   ...BASE_RETRY_PIPELINE,
   lastAction: 'Upgrade',
-  status: {
-    ...BASE_STATUS,
-    status: PipelineStatusType.FAILED,
-    stackDetails: [
-      BASE_STATUS.stackDetails[0],
-      BASE_STATUS.stackDetails[1],
-      BASE_STATUS.stackDetails[2],
-      {
-        ...BASE_STATUS.stackDetails[3],
-        stackStatus: StackStatus.UPDATE_ROLLBACK_COMPLETE,
-      },
-      BASE_STATUS.stackDetails[4],
-      BASE_STATUS.stackDetails[5],
-    ],
-    executionDetail: {
-      name: MOCK_EXECUTION_ID,
-      status: ExecutionStatus.FAILED,
+  stackDetails: [
+    BASE_STATUS.stackDetails[0],
+    BASE_STATUS.stackDetails[1],
+    BASE_STATUS.stackDetails[2],
+    {
+      ...BASE_STATUS.stackDetails[3],
+      stackStatus: StackStatus.UPDATE_ROLLBACK_COMPLETE,
     },
+    BASE_STATUS.stackDetails[4],
+    BASE_STATUS.stackDetails[5],
+  ],
+  executionDetail: {
+    name: MOCK_EXECUTION_ID,
+    status: ExecutionStatus.FAILED,
+    executionArn: 'arn:aws:states:us-east-1:111122223333:execution:MyPipelineStateMachine:main-5ab07c6e-b6ac-47ea-bf3a-02ede7391807',
+    stateMachineArn: 'arn:aws:states:us-east-1:111122223333:stateMachine:MyPipelineStateMachine',
   },
 };
 
