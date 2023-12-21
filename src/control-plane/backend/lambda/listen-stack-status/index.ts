@@ -19,6 +19,7 @@ import { EventBridgeEvent } from 'aws-lambda';
 import { BuiltInTagKeys, PipelineStackType, PipelineStatusDetail } from '../../../../common/model';
 import { logger } from '../../../../common/powertools';
 import { aws_sdk_client_common_config } from '../../../../common/sdk-client-config';
+import { WorkflowParallelBranch, WorkflowState, WorkflowStateType } from '../api/common/types';
 
 const ddbClient = new DynamoDBClient({
   ...aws_sdk_client_common_config,
@@ -78,8 +79,9 @@ export const handler = async (
   }
 
   const projectId = pipeline.projectId;
+  const stackNames = getWorkflowStacks(pipeline.workflow);
 
-  const newStackDetails = getNewStackDetails(stackDetail, pipeline.stackDetails ?? []);
+  const newStackDetails = getNewStackDetails(stackDetail, pipeline.stackDetails ?? [], stackNames);
 
   await updatePipelineStackStatus(projectId, pipelineId, newStackDetails);
 
@@ -159,27 +161,28 @@ async function updatePipelineStackStatus(projectId: string, pipelineId:string, s
   }
 }
 
-function getNewStackDetails(curStack: Stack, stackDetails: PipelineStatusDetail[]): PipelineStatusDetail[] {
-  let replaced = false;
+function getNewStackDetails(curStack: Stack, stackDetails: PipelineStatusDetail[], stackNames: string[]): PipelineStatusDetail[] {
+  const existedStackNames = stackDetails.map(s => s.stackName);
+  for (const stackName of stackNames) {
+    if (!existedStackNames.includes(stackName)) {
+      stackDetails.push({
+        stackName: stackName,
+        stackType: stackName.split('-')[1] as PipelineStackType,
+        stackStatus: undefined,
+        stackStatusReason: '',
+        stackTemplateVersion: '',
+        outputs: [],
+      } as PipelineStatusDetail);
+    }
+  }
   for (const stackDetail of stackDetails) {
     if (stackDetail.stackName === curStack.StackName) {
       stackDetail.stackStatus = curStack.StackStatus;
       stackDetail.stackStatusReason = curStack.StackStatusReason ?? '';
       stackDetail.outputs = curStack.Outputs ?? [];
-      replaced = true;
+      stackDetail.stackTemplateVersion = getVersionFromTags(curStack.Tags);
       break;
     }
-  }
-  if (!replaced) {
-    const newStackDetail: PipelineStatusDetail = {
-      stackName: curStack.StackName ?? '',
-      stackType: curStack.StackName?.split('-')[1] as PipelineStackType,
-      stackStatus: curStack?.StackStatus as StackStatus,
-      stackStatusReason: curStack?.StackStatusReason ?? '',
-      stackTemplateVersion: getVersionFromTags(curStack?.Tags),
-      outputs: curStack?.Outputs ?? [],
-    };
-    stackDetails.push(newStackDetail);
   }
   return stackDetails;
 }
@@ -204,4 +207,20 @@ function getVersionFromTags(tags: Tag[] | undefined) {
     version = versionTag[0].Value ?? '';
   }
   return version;
+}
+
+function getWorkflowStacks(state: WorkflowState): string[] {
+  let res: string[] = [];
+  if (state.Type === WorkflowStateType.PARALLEL) {
+    for (let branch of state.Branches as WorkflowParallelBranch[]) {
+      for (let key of Object.keys(branch.States)) {
+        res = res.concat(getWorkflowStacks(branch.States[key]));
+      }
+    }
+  } else if (state.Type === WorkflowStateType.STACK) {
+    if (state.Data?.Input.StackName) {
+      res.push(state.Data?.Input.StackName);
+    }
+  }
+  return res;
 }

@@ -475,7 +475,7 @@ describe('Application test', () => {
                   },
                   {
                     OutputKey: 'IngestionServerC000IngestionServerDNS',
-                    OutputValue: 'http://yyy/yyy',
+                    OutputValue: 'yyy/yyy',
                   },
                 ],
               },
@@ -511,7 +511,7 @@ describe('Application test', () => {
         pipeline: {
           customDomain: '',
           endpoint: 'http://xxx/xxx',
-          dns: 'http://yyy/yyy',
+          dns: 'yyy/yyy',
           id: MOCK_PROJECT_ID,
           statusType: PipelineStatusType.CREATING,
           stackDetails: [
@@ -528,7 +528,7 @@ describe('Application test', () => {
                 },
                 {
                   OutputKey: 'IngestionServerC000IngestionServerDNS',
-                  OutputValue: 'http://yyy/yyy',
+                  OutputValue: 'yyy/yyy',
                 },
               ],
             },

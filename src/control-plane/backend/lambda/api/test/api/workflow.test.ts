@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { CloudWatchEventsClient } from '@aws-sdk/client-cloudwatch-events';
 import { EC2Client } from '@aws-sdk/client-ec2';
 import {
   IAMClient,
@@ -108,6 +109,7 @@ const ec2Mock = mockClient(EC2Client);
 const quickSightMock = mockClient(QuickSightClient);
 const s3Mock = mockClient(S3Client);
 const iamMock = mockClient(IAMClient);
+const cloudWatchEventsMock = mockClient(CloudWatchEventsClient);
 
 const mockClients = {
   ddbMock,
@@ -121,7 +123,7 @@ const mockClients = {
   quickSightMock,
   s3Mock,
   iamMock,
-  cloudWatchEventsMock: null,
+  cloudWatchEventsMock,
 };
 
 const Tags = [

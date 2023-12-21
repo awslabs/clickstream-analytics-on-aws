@@ -1009,7 +1009,7 @@ export const stackDetailsWithOutputs = [
       },
       {
         OutputKey: 'IngestionServerC000IngestionServerDNS',
-        OutputValue: 'http://yyy/yyy',
+        OutputValue: 'yyy/yyy',
       },
     ],
   },

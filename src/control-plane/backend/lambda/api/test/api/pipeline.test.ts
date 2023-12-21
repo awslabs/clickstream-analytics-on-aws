@@ -1277,7 +1277,7 @@ describe('Pipeline test', () => {
             updateAt: 1667355960000,
           },
         },
-        dns: 'http://yyy/yyy',
+        dns: 'yyy/yyy',
         endpoint: 'http://xxx/xxx',
         dashboards: [
           {
@@ -1306,7 +1306,11 @@ describe('Pipeline test', () => {
         ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
         status: {
           ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW.status,
-          stackDetails: [...stackDetailsWithOutputs],
+          stackDetails: stackDetailsWithOutputs,
+          executionDetail: {
+            name: MOCK_EXECUTION_ID,
+            status: undefined,
+          },
         },
         stackDetails: undefined,
         executionDetail: undefined,
@@ -1345,8 +1349,19 @@ describe('Pipeline test', () => {
         ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
         status: {
           ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW.status,
-          stackDetails: [...stackDetailsWithOutputs],
+          stackDetails: stackDetailsWithOutputs,
+          executionDetail: {
+            name: MOCK_EXECUTION_ID,
+            status: undefined,
+          },
         },
+        executionDetail: {
+          name: MOCK_EXECUTION_ID,
+          stateMachineArn: '',
+          executionArn: '',
+          status: 'RUNNING',
+        },
+        statusType: PipelineStatusType.CREATING,
         dataProcessing: {
           ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW.dataProcessing,
           enrichPlugin: [
@@ -1415,7 +1430,7 @@ describe('Pipeline test', () => {
             updateAt: 1667355960000,
           },
         },
-        dns: 'http://yyy/yyy',
+        dns: 'yyy/yyy',
         endpoint: 'http://xxx/xxx',
         dashboards: [
           {
@@ -1443,72 +1458,33 @@ describe('Pipeline test', () => {
       Items: [{
         ...RETRY_PIPELINE_WITH_WORKFLOW_AND_ROLLBACK_COMPLETE,
         templateVersion: FULL_SOLUTION_VERSION,
-        status: {
-          ...BASE_STATUS,
-          stackDetails: [
-            {
-              ...BASE_STATUS.stackDetails[0],
-              stackTemplateVersion: FULL_SOLUTION_VERSION,
-            },
-            {
-              ...BASE_STATUS.stackDetails[1],
-              stackTemplateVersion: FULL_SOLUTION_VERSION,
-            },
-            {
-              ...BASE_STATUS.stackDetails[2],
-              stackTemplateVersion: FULL_SOLUTION_VERSION,
-            },
-            {
-              ...BASE_STATUS.stackDetails[3],
-              stackTemplateVersion: FULL_SOLUTION_VERSION,
-            },
-            {
-              ...BASE_STATUS.stackDetails[4],
-              stackTemplateVersion: FULL_SOLUTION_VERSION,
-            },
-            {
-              ...BASE_STATUS.stackDetails[5],
-              stackTemplateVersion: FULL_SOLUTION_VERSION,
-            },
-          ],
-        },
+        stackDetails: [
+          {
+            ...stackDetailsWithOutputs[0],
+            stackTemplateVersion: FULL_SOLUTION_VERSION,
+          },
+          {
+            ...stackDetailsWithOutputs[1],
+            stackTemplateVersion: FULL_SOLUTION_VERSION,
+          },
+          {
+            ...stackDetailsWithOutputs[2],
+            stackTemplateVersion: FULL_SOLUTION_VERSION,
+          },
+          {
+            ...stackDetailsWithOutputs[3],
+            stackTemplateVersion: FULL_SOLUTION_VERSION,
+          },
+          {
+            ...stackDetailsWithOutputs[4],
+            stackTemplateVersion: FULL_SOLUTION_VERSION,
+          },
+          {
+            ...stackDetailsWithOutputs[5],
+            stackTemplateVersion: FULL_SOLUTION_VERSION,
+          },
+        ],
       }],
-    });
-    const mockOutputs = [
-      {
-        OutputKey: 'IngestionServerC000IngestionServerURL',
-        OutputValue: 'http://xxx/xxx',
-      },
-      {
-        OutputKey: 'IngestionServerC000IngestionServerDNS',
-        OutputValue: 'http://yyy/yyy',
-      },
-      {
-        OutputKey: 'Dashboards',
-        OutputValue: '[{"appId":"app1","dashboardId":"clickstream_dashboard_v1_notepad_mtzfsocy_app1"},{"appId":"app2","dashboardId":"clickstream_dashboard_v1_notepad_mtzfsocy_app2"}]',
-      },
-      {
-        OutputKey: 'ObservabilityDashboardName',
-        OutputValue: 'clickstream_dashboard_notepad_mtzfsocy',
-      },
-    ];
-    cloudFormationMock.on(DescribeStacksCommand).resolves({
-      Stacks: [
-        {
-          StackName: 'xxx',
-          Outputs: mockOutputs,
-          Tags: [{ Key: BuiltInTagKeys.AWS_SOLUTION_VERSION, Value: FULL_SOLUTION_VERSION }],
-          StackStatus: StackStatus.CREATE_COMPLETE,
-          CreationTime: new Date(),
-        },
-      ],
-    });
-    sfnMock.on(DescribeExecutionCommand).resolves({
-      executionArn: 'xx',
-      stateMachineArn: 'yy',
-      name: MOCK_EXECUTION_ID,
-      status: ExecutionStatus.SUCCEEDED,
-      output: 'SUCCEEDED',
     });
     dictionaryMock(ddbMock);
     ddbMock.on(QueryCommand, {
@@ -1540,41 +1516,6 @@ describe('Pipeline test', () => {
       message: '',
       data: {
         ...RETRY_PIPELINE_WITH_WORKFLOW_AND_ROLLBACK_COMPLETE,
-        status: {
-          ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW.status,
-          stackDetails: [
-            {
-              ...BASE_STATUS.stackDetails[0],
-              stackTemplateVersion: FULL_SOLUTION_VERSION,
-              outputs: mockOutputs,
-            },
-            {
-              ...BASE_STATUS.stackDetails[1],
-              stackTemplateVersion: FULL_SOLUTION_VERSION,
-              outputs: mockOutputs,
-            },
-            {
-              ...BASE_STATUS.stackDetails[2],
-              stackTemplateVersion: FULL_SOLUTION_VERSION,
-              outputs: mockOutputs,
-            },
-            {
-              ...BASE_STATUS.stackDetails[4],
-              stackTemplateVersion: FULL_SOLUTION_VERSION,
-              outputs: mockOutputs,
-            },
-            {
-              ...BASE_STATUS.stackDetails[3],
-              stackTemplateVersion: FULL_SOLUTION_VERSION,
-              outputs: mockOutputs,
-            },
-            {
-              ...BASE_STATUS.stackDetails[5],
-              stackTemplateVersion: FULL_SOLUTION_VERSION,
-              outputs: mockOutputs,
-            },
-          ],
-        },
         dataProcessing: {
           ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW.dataProcessing,
           enrichPlugin: [
@@ -1643,7 +1584,34 @@ describe('Pipeline test', () => {
             updateAt: 1667355960000,
           },
         },
-        dns: 'http://yyy/yyy',
+        statusType: PipelineStatusType.WARNING,
+        stackDetails: [
+          {
+            ...stackDetailsWithOutputs[0],
+            stackTemplateVersion: FULL_SOLUTION_VERSION,
+          },
+          {
+            ...stackDetailsWithOutputs[1],
+            stackTemplateVersion: FULL_SOLUTION_VERSION,
+          },
+          {
+            ...stackDetailsWithOutputs[2],
+            stackTemplateVersion: FULL_SOLUTION_VERSION,
+          },
+          {
+            ...stackDetailsWithOutputs[3],
+            stackTemplateVersion: FULL_SOLUTION_VERSION,
+          },
+          {
+            ...stackDetailsWithOutputs[4],
+            stackTemplateVersion: FULL_SOLUTION_VERSION,
+          },
+          {
+            ...stackDetailsWithOutputs[5],
+            stackTemplateVersion: FULL_SOLUTION_VERSION,
+          },
+        ],
+        dns: 'yyy/yyy',
         endpoint: 'http://xxx/xxx',
         dashboards: [
           {
@@ -1694,6 +1662,7 @@ describe('Pipeline test', () => {
     ddbMock.on(QueryCommand).resolves({
       Items: [{
         ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
+        stackDetails: BASE_STATUS.stackDetails,
         templateVersion: 'v1.1.0',
         reporting: {
           quickSight: {
@@ -1701,23 +1670,6 @@ describe('Pipeline test', () => {
           },
         },
       }],
-    });
-    cloudFormationMock.on(DescribeStacksCommand).resolves({
-      Stacks: [
-        {
-          StackName: 'xxx',
-          Tags: [{ Key: BuiltInTagKeys.AWS_SOLUTION_VERSION, Value: MOCK_SOLUTION_VERSION }],
-          StackStatus: StackStatus.CREATE_COMPLETE,
-          CreationTime: new Date(),
-        },
-      ],
-    });
-    sfnMock.on(DescribeExecutionCommand).resolves({
-      executionArn: 'xx',
-      stateMachineArn: 'yy',
-      name: MOCK_EXECUTION_ID,
-      status: ExecutionStatus.SUCCEEDED,
-      output: 'SUCCEEDED',
     });
     dictionaryMock(ddbMock);
     ddbMock.on(QueryCommand, {
@@ -1749,18 +1701,8 @@ describe('Pipeline test', () => {
       message: '',
       data: {
         ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
-        status: {
-          ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW.status,
-          status: 'Warning',
-          stackDetails: [
-            { ...BASE_STATUS.stackDetails[0] },
-            { ...BASE_STATUS.stackDetails[1] },
-            { ...BASE_STATUS.stackDetails[2] },
-            { ...BASE_STATUS.stackDetails[4] },
-            { ...BASE_STATUS.stackDetails[3] },
-            { ...BASE_STATUS.stackDetails[5] },
-          ],
-        },
+        stackDetails: BASE_STATUS.stackDetails,
+        statusType: 'Warning',
         dataProcessing: {
           ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW.dataProcessing,
           enrichPlugin: [
@@ -1836,7 +1778,16 @@ describe('Pipeline test', () => {
         },
         dns: '',
         endpoint: '',
-        dashboards: [],
+        dashboards: [
+          {
+            appId: 'app1',
+            dashboardId: 'clickstream_dashboard_v1_notepad_mtzfsocy_app1',
+          },
+          {
+            appId: 'app2',
+            dashboardId: 'clickstream_dashboard_v1_notepad_mtzfsocy_app2',
+          },
+        ],
         metricsDashboardName: '',
         templateInfo: {
           isLatest: false,
@@ -1917,10 +1868,8 @@ describe('Pipeline test', () => {
       message: '',
       data: {
         ...S3_INGESTION_PIPELINE,
-        status: {
-          ...S3_INGESTION_PIPELINE.status,
-          executionDetail: {},
-        },
+        stackDetails: [],
+        statusType: 'Active',
         dataProcessing: {
           ...S3_INGESTION_PIPELINE.dataProcessing,
           enrichPlugin: [],
@@ -2030,42 +1979,57 @@ describe('Pipeline test', () => {
         items: [
           {
             name: 'Pipeline-01',
-            status: {
-              status: 'Active',
-              stackDetails: [],
-              executionDetail: {},
+            stackDetails: [],
+            statusType: 'Creating',
+            executionDetail: {
+              name: '',
+              executionArn: '',
+              stateMachineArn: '',
+              status: ExecutionStatus.RUNNING,
             },
           },
           {
             name: 'Pipeline-02',
-            status: {
-              status: 'Active',
-              stackDetails: [],
-              executionDetail: {},
+            stackDetails: [],
+            statusType: 'Creating',
+            executionDetail: {
+              name: '',
+              executionArn: '',
+              stateMachineArn: '',
+              status: ExecutionStatus.RUNNING,
             },
           },
           {
             name: 'Pipeline-03',
-            status: {
-              status: 'Active',
-              stackDetails: [],
-              executionDetail: {},
+            stackDetails: [],
+            statusType: 'Creating',
+            executionDetail: {
+              name: '',
+              executionArn: '',
+              stateMachineArn: '',
+              status: ExecutionStatus.RUNNING,
             },
           },
           {
             name: 'Pipeline-04',
-            status: {
-              status: 'Active',
-              stackDetails: [],
-              executionDetail: {},
+            stackDetails: [],
+            statusType: 'Creating',
+            executionDetail: {
+              name: '',
+              executionArn: '',
+              stateMachineArn: '',
+              status: ExecutionStatus.RUNNING,
             },
           },
           {
             name: 'Pipeline-05',
-            status: {
-              status: 'Active',
-              stackDetails: [],
-              executionDetail: {},
+            stackDetails: [],
+            statusType: 'Creating',
+            executionDetail: {
+              name: '',
+              executionArn: '',
+              stateMachineArn: '',
+              status: ExecutionStatus.RUNNING,
             },
           },
         ],
@@ -2104,10 +2068,6 @@ describe('Pipeline test', () => {
       data: {
         items: [{
           ...S3_INGESTION_PIPELINE,
-          status: {
-            ...S3_INGESTION_PIPELINE.status,
-            executionDetail: {},
-          },
         }],
         totalCount: 1,
       },
@@ -2149,42 +2109,57 @@ describe('Pipeline test', () => {
         items: [
           {
             name: 'Pipeline-01',
-            status: {
-              status: 'Active',
-              stackDetails: [],
-              executionDetail: {},
+            stackDetails: [],
+            statusType: 'Creating',
+            executionDetail: {
+              name: '',
+              executionArn: '',
+              stateMachineArn: '',
+              status: ExecutionStatus.RUNNING,
             },
           },
           {
             name: 'Pipeline-02',
-            status: {
-              status: 'Active',
-              stackDetails: [],
-              executionDetail: {},
+            stackDetails: [],
+            statusType: 'Creating',
+            executionDetail: {
+              name: '',
+              executionArn: '',
+              stateMachineArn: '',
+              status: ExecutionStatus.RUNNING,
             },
           },
           {
             name: 'Pipeline-03',
-            status: {
-              status: 'Active',
-              stackDetails: [],
-              executionDetail: {},
+            stackDetails: [],
+            statusType: 'Creating',
+            executionDetail: {
+              name: '',
+              executionArn: '',
+              stateMachineArn: '',
+              status: ExecutionStatus.RUNNING,
             },
           },
           {
             name: 'Pipeline-04',
-            status: {
-              status: 'Active',
-              stackDetails: [],
-              executionDetail: {},
+            stackDetails: [],
+            statusType: 'Creating',
+            executionDetail: {
+              name: '',
+              executionArn: '',
+              stateMachineArn: '',
+              status: ExecutionStatus.RUNNING,
             },
           },
           {
             name: 'Pipeline-05',
-            status: {
-              status: 'Active',
-              stackDetails: [],
-              executionDetail: {},
+            stackDetails: [],
+            statusType: 'Creating',
+            executionDetail: {
+              name: '',
+              executionArn: '',
+              stateMachineArn: '',
+              status: ExecutionStatus.RUNNING,
             },
           },
         ],
@@ -2228,18 +2203,24 @@ describe('Pipeline test', () => {
         items: [
           {
             name: 'Pipeline-03',
-            status: {
-              status: 'Active',
-              stackDetails: [],
-              executionDetail: {},
+            stackDetails: [],
+            statusType: 'Creating',
+            executionDetail: {
+              name: '',
+              executionArn: '',
+              stateMachineArn: '',
+              status: ExecutionStatus.RUNNING,
             },
           },
           {
             name: 'Pipeline-04',
-            status: {
-              status: 'Active',
-              stackDetails: [],
-              executionDetail: {},
+            stackDetails: [],
+            statusType: 'Creating',
+            executionDetail: {
+              name: '',
+              executionArn: '',
+              stateMachineArn: '',
+              status: ExecutionStatus.RUNNING,
             },
           },
         ],
@@ -2251,652 +2232,192 @@ describe('Pipeline test', () => {
     projectExistedMock(ddbMock, true);
     pipelineExistedMock(ddbMock, true);
     ddbMock.on(QueryCommand).resolves({
-      Items: [{ ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW }],
-    });
-    cloudFormationMock.on(DescribeStacksCommand)
-      .resolvesOnce({
-        Stacks: [{
-          StackName: 'test',
-          StackStatus: StackStatus.CREATE_FAILED,
-          StackStatusReason: '',
-          CreationTime: undefined,
-        }],
-      })
-      .resolves({
-        Stacks: [{
-          StackName: 'test',
-          StackStatus: StackStatus.CREATE_IN_PROGRESS,
-          StackStatusReason: '',
-          CreationTime: undefined,
-        }],
-      });
-    ddbMock.on(UpdateCommand).resolves({});
-    sfnMock.on(DescribeExecutionCommand).resolves({
-      executionArn: 'xx',
-      stateMachineArn: 'yy',
-      name: 'exec1',
-      status: ExecutionStatus.SUCCEEDED,
-      output: 'SUCCEEDED',
+      Items: [{
+        ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
+        stackDetails: [
+          {
+            ...stackDetailsWithOutputs[0],
+            stackStatus: StackStatus.CREATE_FAILED,
+          },
+          stackDetailsWithOutputs[1],
+          stackDetailsWithOutputs[2],
+          stackDetailsWithOutputs[3],
+          stackDetailsWithOutputs[4],
+          stackDetailsWithOutputs[5],
+        ],
+      }],
     });
     const res = await request(app)
       .get(`/api/pipeline?pid=${MOCK_PROJECT_ID}`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
-    expect(res.body.data.items[0].status).toEqual({
-      executionDetail: {
-        name: 'exec1',
-        status: 'SUCCEEDED',
-      },
-      stackDetails: [
-        {
-          stackName: 'Clickstream-KafkaConnector-6666-6666',
-          stackType: 'KafkaConnector',
-          stackStatus: 'CREATE_FAILED',
-          stackStatusReason: '',
-          stackTemplateVersion: '',
-          outputs: [],
-        },
-        {
-          stackName: 'Clickstream-Ingestion-kafka-6666-6666',
-          stackType: 'Ingestion',
-          stackStatus: 'CREATE_IN_PROGRESS',
-          stackStatusReason: '',
-          stackTemplateVersion: '',
-          outputs: [],
-        },
-        {
-          stackName: 'Clickstream-DataProcessing-6666-6666',
-          stackType: 'DataProcessing',
-          stackStatus: 'CREATE_IN_PROGRESS',
-          stackStatusReason: '',
-          stackTemplateVersion: '',
-          outputs: [],
-        },
-        {
-          stackName: 'Clickstream-Reporting-6666-6666',
-          stackType: 'Reporting',
-          stackStatus: 'CREATE_IN_PROGRESS',
-          stackStatusReason: '',
-          stackTemplateVersion: '',
-          outputs: [],
-        },
-        {
-          stackName: 'Clickstream-DataModelingRedshift-6666-6666',
-          stackType: 'DataModelingRedshift',
-          stackStatus: 'CREATE_IN_PROGRESS',
-          stackStatusReason: '',
-          stackTemplateVersion: '',
-          outputs: [],
-        },
-        {
-          stackName: 'Clickstream-Metrics-6666-6666',
-          stackType: 'Metrics',
-          stackStatus: 'CREATE_IN_PROGRESS',
-          stackStatusReason: '',
-          stackTemplateVersion: '',
-          outputs: [],
-        },
-      ],
-      status: 'Failed',
-    });
+    expect(res.body.data.items[0].statusType).toEqual('Failed');
   });
   it('Get pipeline list with stack update fail', async () => {
     projectExistedMock(ddbMock, true);
     pipelineExistedMock(ddbMock, true);
     ddbMock.on(QueryCommand).resolves({
-      Items: [{ ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW }],
-    });
-    cloudFormationMock.on(DescribeStacksCommand)
-      .resolvesOnce({
-        Stacks: [{
-          StackName: 'test',
-          StackStatus: StackStatus.UPDATE_FAILED,
-          StackStatusReason: '',
-          CreationTime: undefined,
-        }],
-      })
-      .resolves({
-        Stacks: [{
-          StackName: 'test',
-          StackStatus: StackStatus.UPDATE_IN_PROGRESS,
-          StackStatusReason: '',
-          CreationTime: undefined,
-        }],
-      });
-    ddbMock.on(UpdateCommand).resolves({});
-    sfnMock.on(DescribeExecutionCommand).resolves({
-      executionArn: 'xx',
-      stateMachineArn: 'yy',
-      name: 'exec1',
-      status: ExecutionStatus.SUCCEEDED,
-      output: 'SUCCEEDED',
+      Items: [{
+        ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
+        stackDetails: [
+          {
+            ...stackDetailsWithOutputs[0],
+            stackStatus: StackStatus.UPDATE_FAILED,
+          },
+          stackDetailsWithOutputs[1],
+          stackDetailsWithOutputs[2],
+          stackDetailsWithOutputs[3],
+          stackDetailsWithOutputs[4],
+          stackDetailsWithOutputs[5],
+        ],
+      }],
     });
     const res = await request(app)
       .get(`/api/pipeline?pid=${MOCK_PROJECT_ID}`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
-    expect(res.body.data.items[0].status).toEqual({
-      executionDetail: {
-        name: 'exec1',
-        status: 'SUCCEEDED',
-      },
-      stackDetails: [
-        {
-          stackName: 'Clickstream-KafkaConnector-6666-6666',
-          stackType: 'KafkaConnector',
-          stackStatus: 'UPDATE_FAILED',
-          stackStatusReason: '',
-          stackTemplateVersion: '',
-          outputs: [],
-        },
-        {
-          stackName: 'Clickstream-Ingestion-kafka-6666-6666',
-          stackType: 'Ingestion',
-          stackStatus: 'UPDATE_IN_PROGRESS',
-          stackStatusReason: '',
-          stackTemplateVersion: '',
-          outputs: [],
-        },
-        {
-          stackName: 'Clickstream-DataProcessing-6666-6666',
-          stackType: 'DataProcessing',
-          stackStatus: 'UPDATE_IN_PROGRESS',
-          stackStatusReason: '',
-          stackTemplateVersion: '',
-          outputs: [],
-        },
-        {
-          stackName: 'Clickstream-Reporting-6666-6666',
-          stackType: 'Reporting',
-          stackStatus: 'UPDATE_IN_PROGRESS',
-          stackStatusReason: '',
-          stackTemplateVersion: '',
-          outputs: [],
-        },
-        {
-          stackName: 'Clickstream-DataModelingRedshift-6666-6666',
-          stackType: 'DataModelingRedshift',
-          stackStatus: 'UPDATE_IN_PROGRESS',
-          stackStatusReason: '',
-          stackTemplateVersion: '',
-          outputs: [],
-        },
-        {
-          stackName: 'Clickstream-Metrics-6666-6666',
-          stackType: 'Metrics',
-          stackStatus: 'UPDATE_IN_PROGRESS',
-          stackStatusReason: '',
-          stackTemplateVersion: '',
-          outputs: [],
-        },
-      ],
-      status: 'Warning',
-    });
+    expect(res.body.data.items[0].statusType).toEqual('Warning');
   });
   it('Get pipeline list with stack creating', async () => {
     projectExistedMock(ddbMock, true);
     pipelineExistedMock(ddbMock, true);
     ddbMock.on(QueryCommand).resolves({
-      Items: [{ ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW }],
-    });
-    cloudFormationMock.on(DescribeStacksCommand)
-      .resolvesOnce({
-        Stacks: [{
-          StackName: 'test',
-          StackStatus: StackStatus.CREATE_IN_PROGRESS,
-          StackStatusReason: '',
-          CreationTime: undefined,
-        }],
-      })
-      .resolves({
-        Stacks: [{
-          StackName: 'test',
-          StackStatus: StackStatus.CREATE_COMPLETE,
-          StackStatusReason: '',
-          CreationTime: undefined,
-        }],
-      });
-    ddbMock.on(UpdateCommand).resolves({});
-    sfnMock.on(DescribeExecutionCommand).resolves({
-      executionArn: 'xx',
-      stateMachineArn: 'yy',
-      name: 'exec1',
-      status: ExecutionStatus.SUCCEEDED,
-      output: 'SUCCEEDED',
+      Items: [{
+        ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
+        stackDetails: [
+          {
+            ...stackDetailsWithOutputs[0],
+            stackStatus: StackStatus.CREATE_IN_PROGRESS,
+          },
+          stackDetailsWithOutputs[1],
+          stackDetailsWithOutputs[2],
+          stackDetailsWithOutputs[3],
+          stackDetailsWithOutputs[4],
+          stackDetailsWithOutputs[5],
+        ],
+      }],
     });
     const res = await request(app)
       .get(`/api/pipeline?pid=${MOCK_PROJECT_ID}`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
-    expect(res.body.data.items[0].status).toEqual({
-      executionDetail: {
-        name: 'exec1',
-        status: 'SUCCEEDED',
-      },
-      stackDetails: [
-        {
-          stackName: 'Clickstream-KafkaConnector-6666-6666',
-          stackType: 'KafkaConnector',
-          stackStatus: 'CREATE_IN_PROGRESS',
-          stackStatusReason: '',
-          stackTemplateVersion: '',
-          outputs: [],
-        },
-        {
-          stackName: 'Clickstream-Ingestion-kafka-6666-6666',
-          stackType: 'Ingestion',
-          stackStatus: 'CREATE_COMPLETE',
-          stackStatusReason: '',
-          stackTemplateVersion: '',
-          outputs: [],
-        },
-        {
-          stackName: 'Clickstream-DataProcessing-6666-6666',
-          stackType: 'DataProcessing',
-          stackStatus: 'CREATE_COMPLETE',
-          stackStatusReason: '',
-          stackTemplateVersion: '',
-          outputs: [],
-        },
-        {
-          stackName: 'Clickstream-Reporting-6666-6666',
-          stackType: 'Reporting',
-          stackStatus: 'CREATE_COMPLETE',
-          stackStatusReason: '',
-          stackTemplateVersion: '',
-          outputs: [],
-        },
-        {
-          stackName: 'Clickstream-DataModelingRedshift-6666-6666',
-          stackType: 'DataModelingRedshift',
-          stackStatus: 'CREATE_COMPLETE',
-          stackStatusReason: '',
-          stackTemplateVersion: '',
-          outputs: [],
-        },
-        {
-          stackName: 'Clickstream-Metrics-6666-6666',
-          stackType: 'Metrics',
-          stackStatus: 'CREATE_COMPLETE',
-          stackStatusReason: '',
-          stackTemplateVersion: '',
-          outputs: [],
-        },
-      ],
-      status: 'Creating',
-    });
+    expect(res.body.data.items[0].statusType).toEqual('Creating');
   });
   it('Get pipeline list with stack updating', async () => {
     projectExistedMock(ddbMock, true);
     pipelineExistedMock(ddbMock, true);
     ddbMock.on(QueryCommand).resolves({
-      Items: [{ ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW }],
-    });
-    cloudFormationMock.on(DescribeStacksCommand)
-      .resolvesOnce({
-        Stacks: [{
-          StackName: 'test',
-          StackStatus: StackStatus.UPDATE_IN_PROGRESS,
-          StackStatusReason: '',
-          CreationTime: undefined,
-        }],
-      })
-      .resolves({
-        Stacks: [{
-          StackName: 'test',
-          StackStatus: StackStatus.UPDATE_COMPLETE,
-          StackStatusReason: '',
-          CreationTime: undefined,
-        }],
-      });
-    ddbMock.on(UpdateCommand).resolves({});
-    sfnMock.on(DescribeExecutionCommand).resolves({
-      executionArn: 'xx',
-      stateMachineArn: 'yy',
-      name: 'exec1',
-      status: ExecutionStatus.SUCCEEDED,
-      output: 'SUCCEEDED',
+      Items: [{
+        ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
+        stackDetails: [
+          {
+            ...stackDetailsWithOutputs[0],
+            stackStatus: StackStatus.UPDATE_IN_PROGRESS,
+          },
+          stackDetailsWithOutputs[1],
+          stackDetailsWithOutputs[2],
+          stackDetailsWithOutputs[3],
+          stackDetailsWithOutputs[4],
+          stackDetailsWithOutputs[5],
+        ],
+      }],
     });
     const res = await request(app)
       .get(`/api/pipeline?pid=${MOCK_PROJECT_ID}`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
-    expect(res.body.data.items[0].status).toEqual({
-      executionDetail: {
-        name: 'exec1',
-        status: 'SUCCEEDED',
-      },
-      stackDetails: [
-        {
-          stackName: 'Clickstream-KafkaConnector-6666-6666',
-          stackType: 'KafkaConnector',
-          stackStatus: 'UPDATE_IN_PROGRESS',
-          stackStatusReason: '',
-          stackTemplateVersion: '',
-          outputs: [],
-        },
-        {
-          stackName: 'Clickstream-Ingestion-kafka-6666-6666',
-          stackType: 'Ingestion',
-          stackStatus: 'UPDATE_COMPLETE',
-          stackStatusReason: '',
-          stackTemplateVersion: '',
-          outputs: [],
-        },
-        {
-          stackName: 'Clickstream-DataProcessing-6666-6666',
-          stackType: 'DataProcessing',
-          stackStatus: 'UPDATE_COMPLETE',
-          stackStatusReason: '',
-          stackTemplateVersion: '',
-          outputs: [],
-        },
-        {
-          stackName: 'Clickstream-Reporting-6666-6666',
-          stackType: 'Reporting',
-          stackStatus: 'UPDATE_COMPLETE',
-          stackStatusReason: '',
-          stackTemplateVersion: '',
-          outputs: [],
-        },
-        {
-          stackName: 'Clickstream-DataModelingRedshift-6666-6666',
-          stackType: 'DataModelingRedshift',
-          stackStatus: 'UPDATE_COMPLETE',
-          stackStatusReason: '',
-          stackTemplateVersion: '',
-          outputs: [],
-        },
-        {
-          stackName: 'Clickstream-Metrics-6666-6666',
-          stackType: 'Metrics',
-          stackStatus: 'UPDATE_COMPLETE',
-          stackStatusReason: '',
-          stackTemplateVersion: '',
-          outputs: [],
-        },
-      ],
-      status: 'Updating',
-    });
+    expect(res.body.data.items[0].statusType).toEqual('Updating');
   });
   it('Get pipeline list with report stack updating', async () => {
     projectExistedMock(ddbMock, true);
     pipelineExistedMock(ddbMock, true);
     ddbMock.on(QueryCommand).resolves({
-      Items: [{ ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW }],
-    });
-    cloudFormationMock
-      .on(DescribeStacksCommand)
-      .resolves({
-        Stacks: [{
-          StackName: 'test',
-          StackStatus: StackStatus.UPDATE_COMPLETE,
-          StackStatusReason: '',
-          CreationTime: undefined,
-        }],
-      })
-      .on(DescribeStacksCommand, {
-        StackName: 'Clickstream-Reporting-6666-6666',
-      })
-      .resolves({
-        Stacks: [{
-          StackName: 'test',
-          StackStatus: StackStatus.UPDATE_IN_PROGRESS,
-          StackStatusReason: '',
-          CreationTime: undefined,
-        }],
-      })
-    ;
-    ddbMock.on(UpdateCommand).resolves({});
-    sfnMock.on(DescribeExecutionCommand).resolves({
-      executionArn: 'xx',
-      stateMachineArn: 'yy',
-      name: 'exec1',
-      status: ExecutionStatus.SUCCEEDED,
-      output: 'SUCCEEDED',
+      Items: [{
+        ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
+        stackDetails: [
+          stackDetailsWithOutputs[0],
+          stackDetailsWithOutputs[1],
+          stackDetailsWithOutputs[2],
+          stackDetailsWithOutputs[3],
+          {
+            ...stackDetailsWithOutputs[4],
+            stackStatus: StackStatus.UPDATE_IN_PROGRESS,
+          },
+          stackDetailsWithOutputs[5],
+        ],
+        executionDetail: {
+          name: MOCK_EXECUTION_ID,
+          executionArn: 'arn:aws:states:us-east-1:111122223333:execution:MyPipelineStateMachine:main-5ab07c6e-b6ac-47ea-bf3a-02ede7391807',
+          stateMachineArn: 'arn:aws:states:us-east-1:111122223333:stateMachine:MyPipelineStateMachine',
+          status: ExecutionStatus.RUNNING,
+        },
+      }],
     });
     const res = await request(app)
       .get(`/api/pipeline?pid=${MOCK_PROJECT_ID}`);
-    expect(cloudFormationMock).toHaveReceivedCommandTimes(DescribeStacksCommand, 6);
+    expect(cloudFormationMock).toHaveReceivedCommandTimes(DescribeStacksCommand, 0);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
-    expect(res.body.data.items[0].status).toEqual({
-      executionDetail: {
-        name: 'exec1',
-        status: 'SUCCEEDED',
-      },
-      stackDetails: [
-        {
-          stackName: 'Clickstream-KafkaConnector-6666-6666',
-          stackType: 'KafkaConnector',
-          stackStatus: 'UPDATE_COMPLETE',
-          stackStatusReason: '',
-          stackTemplateVersion: '',
-          outputs: [],
-        },
-        {
-          stackName: 'Clickstream-Ingestion-kafka-6666-6666',
-          stackType: 'Ingestion',
-          stackStatus: 'UPDATE_COMPLETE',
-          stackStatusReason: '',
-          stackTemplateVersion: '',
-          outputs: [],
-        },
-        {
-          stackName: 'Clickstream-DataProcessing-6666-6666',
-          stackType: 'DataProcessing',
-          stackStatus: 'UPDATE_COMPLETE',
-          stackStatusReason: '',
-          stackTemplateVersion: '',
-          outputs: [],
-        },
-        {
-          stackName: 'Clickstream-Reporting-6666-6666',
-          stackType: 'Reporting',
-          stackStatus: 'UPDATE_IN_PROGRESS',
-          stackStatusReason: '',
-          stackTemplateVersion: '',
-          outputs: [],
-        },
-        {
-          stackName: 'Clickstream-DataModelingRedshift-6666-6666',
-          stackType: 'DataModelingRedshift',
-          stackStatus: 'UPDATE_COMPLETE',
-          stackStatusReason: '',
-          stackTemplateVersion: '',
-          outputs: [],
-        },
-        {
-          stackName: 'Clickstream-Metrics-6666-6666',
-          stackStatus: 'UPDATE_COMPLETE',
-          stackStatusReason: '',
-          stackTemplateVersion: '',
-          stackType: 'Metrics',
-          outputs: [],
-        },
-      ],
-      status: 'Updating',
-    });
+    expect(res.body.data.items[0].statusType).toEqual('Updating');
   });
   it('Get pipeline list with step function execution interval ', async () => {
     projectExistedMock(ddbMock, true);
     pipelineExistedMock(ddbMock, true);
     ddbMock.on(QueryCommand).resolves({
-      Items: [{ ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW }],
+      Items: [{
+        ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
+        stackDetails: [
+          {
+            ...stackDetailsWithOutputs[0],
+            stackStatus: undefined,
+          },
+          stackDetailsWithOutputs[1],
+          stackDetailsWithOutputs[2],
+          stackDetailsWithOutputs[3],
+          stackDetailsWithOutputs[4],
+          stackDetailsWithOutputs[5],
+        ],
+        executionDetail: {
+          name: MOCK_EXECUTION_ID,
+          executionArn: 'arn:aws:states:us-east-1:111122223333:execution:MyPipelineStateMachine:main-5ab07c6e-b6ac-47ea-bf3a-02ede7391807',
+          stateMachineArn: 'arn:aws:states:us-east-1:111122223333:stateMachine:MyPipelineStateMachine',
+          status: ExecutionStatus.RUNNING,
+        },
+      }],
     });
-    cloudFormationMock
-      .on(DescribeStacksCommand)
-      .resolves({
-        Stacks: [{
-          StackName: 'test',
-          StackStatus: StackStatus.UPDATE_COMPLETE,
-          StackStatusReason: '',
-          CreationTime: undefined,
-        }],
-      });
     ddbMock.on(UpdateCommand).resolves({});
-    sfnMock.on(DescribeExecutionCommand).resolves({
-      executionArn: 'xx',
-      stateMachineArn: 'yy',
-      name: 'exec1',
-      status: ExecutionStatus.RUNNING,
-      input: '{"Type":"Parallel","End":true,"Branches":[{"States":{"Ingestion":{"Type":"Stack","Data":{"Input":{"Region":"ap-southeast-1","TemplateURL":"xxx","Action":"Update","Parameters":[],"StackName":"xxx","Tags":[]},"Callback":{"BucketPrefix":"xxx","BucketName":"xxx"}},"End":true}},"StartAt":"Ingestion"}]}',
-      output: 'SUCCEEDED',
-    });
     const res = await request(app)
       .get(`/api/pipeline?pid=${MOCK_PROJECT_ID}`);
-    expect(cloudFormationMock).toHaveReceivedCommandTimes(DescribeStacksCommand, 6);
+    expect(cloudFormationMock).toHaveReceivedCommandTimes(DescribeStacksCommand, 0);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
-    expect(res.body.data.items[0].status).toEqual({
-      executionDetail: {
-        name: 'exec1',
-        status: 'RUNNING',
-      },
-      stackDetails: [
-        {
-          stackName: 'Clickstream-KafkaConnector-6666-6666',
-          stackType: 'KafkaConnector',
-          stackStatus: 'UPDATE_COMPLETE',
-          stackStatusReason: '',
-          stackTemplateVersion: '',
-          outputs: [],
-        },
-        {
-          stackName: 'Clickstream-Ingestion-kafka-6666-6666',
-          stackType: 'Ingestion',
-          stackStatus: 'UPDATE_COMPLETE',
-          stackStatusReason: '',
-          stackTemplateVersion: '',
-          outputs: [],
-        },
-        {
-          stackName: 'Clickstream-DataProcessing-6666-6666',
-          stackType: 'DataProcessing',
-          stackStatus: 'UPDATE_COMPLETE',
-          stackStatusReason: '',
-          stackTemplateVersion: '',
-          outputs: [],
-        },
-        {
-          stackName: 'Clickstream-Reporting-6666-6666',
-          stackType: 'Reporting',
-          stackStatus: 'UPDATE_COMPLETE',
-          stackStatusReason: '',
-          stackTemplateVersion: '',
-          outputs: [],
-        },
-        {
-          stackName: 'Clickstream-DataModelingRedshift-6666-6666',
-          stackType: 'DataModelingRedshift',
-          stackStatus: 'UPDATE_COMPLETE',
-          stackStatusReason: '',
-          stackTemplateVersion: '',
-          outputs: [],
-        }, {
-          stackName: 'Clickstream-Metrics-6666-6666',
-          stackStatus: 'UPDATE_COMPLETE',
-          stackStatusReason: '',
-          stackTemplateVersion: '',
-          stackType: 'Metrics',
-          outputs: [],
-        },
-      ],
-      status: 'Updating',
-    });
+    expect(res.body.data.items[0].statusType).toEqual('Creating');
   });
   it('Get pipeline list with stack deleting', async () => {
     projectExistedMock(ddbMock, true);
     pipelineExistedMock(ddbMock, true);
     ddbMock.on(QueryCommand).resolves({
-      Items: [{ ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW }],
+      Items: [{
+        ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
+        stackDetails: [
+          {
+            ...stackDetailsWithOutputs[0],
+            stackStatus: StackStatus.DELETE_IN_PROGRESS,
+          },
+          stackDetailsWithOutputs[1],
+          stackDetailsWithOutputs[2],
+          stackDetailsWithOutputs[3],
+          stackDetailsWithOutputs[4],
+          stackDetailsWithOutputs[5],
+        ],
+      }],
     });
-    cloudFormationMock.on(DescribeStacksCommand)
-      .resolvesOnce({
-        Stacks: [{
-          StackName: 'test',
-          StackStatus: StackStatus.DELETE_IN_PROGRESS,
-          StackStatusReason: '',
-          CreationTime: undefined,
-        }],
-      })
-      .resolves({
-        Stacks: [{
-          StackName: 'test',
-          StackStatus: StackStatus.DELETE_COMPLETE,
-          StackStatusReason: '',
-          CreationTime: undefined,
-        }],
-      });
     ddbMock.on(UpdateCommand).resolves({});
-    sfnMock.on(DescribeExecutionCommand).resolves({
-      executionArn: 'xx',
-      stateMachineArn: 'yy',
-      name: 'exec1',
-      status: ExecutionStatus.SUCCEEDED,
-      output: 'SUCCEEDED',
-    });
     const res = await request(app)
       .get(`/api/pipeline?pid=${MOCK_PROJECT_ID}`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
-    expect(res.body.data.items[0].status).toEqual({
-      executionDetail: {
-        name: 'exec1',
-        status: 'SUCCEEDED',
-      },
-      stackDetails: [
-        {
-          stackName: 'Clickstream-KafkaConnector-6666-6666',
-          stackType: 'KafkaConnector',
-          stackStatus: 'DELETE_IN_PROGRESS',
-          stackStatusReason: '',
-          stackTemplateVersion: '',
-          outputs: [],
-        },
-        {
-          stackName: 'Clickstream-Ingestion-kafka-6666-6666',
-          stackType: 'Ingestion',
-          stackStatus: 'DELETE_COMPLETE',
-          stackStatusReason: '',
-          stackTemplateVersion: '',
-          outputs: [],
-        },
-        {
-          stackName: 'Clickstream-DataProcessing-6666-6666',
-          stackType: 'DataProcessing',
-          stackStatus: 'DELETE_COMPLETE',
-          stackStatusReason: '',
-          stackTemplateVersion: '',
-          outputs: [],
-        },
-        {
-          stackName: 'Clickstream-Reporting-6666-6666',
-          stackType: 'Reporting',
-          stackStatus: 'DELETE_COMPLETE',
-          stackStatusReason: '',
-          stackTemplateVersion: '',
-          outputs: [],
-        },
-        {
-          stackName: 'Clickstream-DataModelingRedshift-6666-6666',
-          stackType: 'DataModelingRedshift',
-          stackStatus: 'DELETE_COMPLETE',
-          stackStatusReason: '',
-          stackTemplateVersion: '',
-          outputs: [],
-        },
-        {
-          stackName: 'Clickstream-Metrics-6666-6666',
-          stackType: 'Metrics',
-          stackStatus: 'DELETE_COMPLETE',
-          stackStatusReason: '',
-          stackTemplateVersion: '',
-          outputs: [],
-        },
-      ],
-      status: 'Deleting',
-    });
+    expect(res.body.data.items[0].statusType).toEqual('Deleting');
   });
   it('Get pipeline list with stack active', async () => {
     projectExistedMock(ddbMock, true);
@@ -2904,169 +2425,33 @@ describe('Pipeline test', () => {
     ddbMock.on(QueryCommand).resolves({
       Items: [{ ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW }],
     });
-    cloudFormationMock.on(DescribeStacksCommand)
-      .resolves({
-        Stacks: [{
-          StackName: 'test',
-          StackStatus: StackStatus.UPDATE_COMPLETE,
-          StackStatusReason: '',
-          CreationTime: undefined,
-        }],
-      });
     ddbMock.on(UpdateCommand).resolves({});
-    sfnMock.on(DescribeExecutionCommand).resolves({
-      executionArn: 'xx',
-      stateMachineArn: 'yy',
-      name: 'exec1',
-      status: ExecutionStatus.SUCCEEDED,
-      output: 'SUCCEEDED',
-    });
     const res = await request(app)
       .get(`/api/pipeline?pid=${MOCK_PROJECT_ID}`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
-    expect(res.body.data.items[0].status).toEqual({
-      executionDetail: {
-        name: 'exec1',
-        status: 'SUCCEEDED',
-      },
-      stackDetails: [
-        {
-          stackName: 'Clickstream-KafkaConnector-6666-6666',
-          stackType: 'KafkaConnector',
-          stackStatus: 'UPDATE_COMPLETE',
-          stackStatusReason: '',
-          stackTemplateVersion: '',
-          outputs: [],
-        },
-        {
-          stackName: 'Clickstream-Ingestion-kafka-6666-6666',
-          stackType: 'Ingestion',
-          stackStatus: 'UPDATE_COMPLETE',
-          stackStatusReason: '',
-          stackTemplateVersion: '',
-          outputs: [],
-        },
-        {
-          stackName: 'Clickstream-DataProcessing-6666-6666',
-          stackType: 'DataProcessing',
-          stackStatus: 'UPDATE_COMPLETE',
-          stackStatusReason: '',
-          stackTemplateVersion: '',
-          outputs: [],
-        },
-        {
-          stackName: 'Clickstream-Reporting-6666-6666',
-          stackType: 'Reporting',
-          stackStatus: 'UPDATE_COMPLETE',
-          stackStatusReason: '',
-          stackTemplateVersion: '',
-          outputs: [],
-        },
-        {
-          stackName: 'Clickstream-DataModelingRedshift-6666-6666',
-          stackType: 'DataModelingRedshift',
-          stackStatus: 'UPDATE_COMPLETE',
-          stackStatusReason: '',
-          stackTemplateVersion: '',
-          outputs: [],
-        },
-        {
-          stackName: 'Clickstream-Metrics-6666-6666',
-          stackType: 'Metrics',
-          stackStatus: 'UPDATE_COMPLETE',
-          stackStatusReason: '',
-          stackTemplateVersion: '',
-          outputs: [],
-        },
-      ],
-      status: 'Active',
-    });
+    expect(res.body.data.items[0].statusType).toEqual('Active');
   });
   it('Get pipeline list with execution fail status and all stack complete', async () => {
     projectExistedMock(ddbMock, true);
     pipelineExistedMock(ddbMock, true);
     ddbMock.on(QueryCommand).resolves({
-      Items: [{ ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW }],
+      Items: [{
+        ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
+        executionDetail: {
+          name: MOCK_EXECUTION_ID,
+          executionArn: 'arn:aws:states:us-east-1:111122223333:execution:MyPipelineStateMachine:main-5ab07c6e-b6ac-47ea-bf3a-02ede7391807',
+          stateMachineArn: 'arn:aws:states:us-east-1:111122223333:stateMachine:MyPipelineStateMachine',
+          status: ExecutionStatus.FAILED,
+        },
+      }],
     });
-    cloudFormationMock.on(DescribeStacksCommand)
-      .resolves({
-        Stacks: [{
-          StackName: 'test',
-          StackStatus: StackStatus.CREATE_COMPLETE,
-          StackStatusReason: '',
-          CreationTime: undefined,
-        }],
-      });
     ddbMock.on(UpdateCommand).resolves({});
-    sfnMock.on(DescribeExecutionCommand).resolves({
-      executionArn: 'xx',
-      stateMachineArn: 'yy',
-      name: 'exec1',
-      status: ExecutionStatus.FAILED,
-      output: 'error',
-    });
     const res = await request(app)
       .get(`/api/pipeline?pid=${MOCK_PROJECT_ID}`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
-    expect(res.body.data.items[0].status).toEqual({
-      executionDetail: {
-        name: 'exec1',
-        status: 'FAILED',
-      },
-      stackDetails: [
-        {
-          stackName: 'Clickstream-KafkaConnector-6666-6666',
-          stackType: 'KafkaConnector',
-          stackStatus: 'CREATE_COMPLETE',
-          stackStatusReason: '',
-          stackTemplateVersion: '',
-          outputs: [],
-        },
-        {
-          stackName: 'Clickstream-Ingestion-kafka-6666-6666',
-          stackType: 'Ingestion',
-          stackStatus: 'CREATE_COMPLETE',
-          stackStatusReason: '',
-          stackTemplateVersion: '',
-          outputs: [],
-        },
-        {
-          stackName: 'Clickstream-DataProcessing-6666-6666',
-          stackType: 'DataProcessing',
-          stackStatus: 'CREATE_COMPLETE',
-          stackStatusReason: '',
-          stackTemplateVersion: '',
-          outputs: [],
-        },
-        {
-          stackName: 'Clickstream-Reporting-6666-6666',
-          stackType: 'Reporting',
-          stackStatus: 'CREATE_COMPLETE',
-          stackStatusReason: '',
-          stackTemplateVersion: '',
-          outputs: [],
-        },
-        {
-          stackName: 'Clickstream-DataModelingRedshift-6666-6666',
-          stackType: 'DataModelingRedshift',
-          stackStatus: 'CREATE_COMPLETE',
-          stackStatusReason: '',
-          stackTemplateVersion: '',
-          outputs: [],
-        },
-        {
-          stackName: 'Clickstream-Metrics-6666-6666',
-          stackType: 'Metrics',
-          stackStatus: 'CREATE_COMPLETE',
-          stackStatusReason: '',
-          stackTemplateVersion: '',
-          outputs: [],
-        },
-      ],
-      status: 'Failed',
-    });
+    expect(res.body.data.items[0].statusType).toEqual('Failed');
   });
   it('Get pipeline list with execution fail status and miss stack', async () => {
     projectExistedMock(ddbMock, true);
@@ -3085,6 +2470,12 @@ describe('Pipeline test', () => {
           stackDetailsWithOutputs[4],
           stackDetailsWithOutputs[5],
         ],
+        executionDetail: {
+          name: MOCK_EXECUTION_ID,
+          executionArn: 'arn:aws:states:us-east-1:111122223333:execution:MyPipelineStateMachine:main-5ab07c6e-b6ac-47ea-bf3a-02ede7391807',
+          stateMachineArn: 'arn:aws:states:us-east-1:111122223333:stateMachine:MyPipelineStateMachine',
+          status: ExecutionStatus.FAILED,
+        },
       }],
     });
     ddbMock.on(UpdateCommand).resolves({});
@@ -3170,7 +2561,7 @@ describe('Pipeline test', () => {
             },
             {
               OutputKey: 'IngestionServerC000IngestionServerDNS',
-              OutputValue: 'http://yyy/yyy',
+              OutputValue: 'yyy/yyy',
             },
             {
               OutputKey: 'Dashboards',
@@ -3255,7 +2646,7 @@ describe('Pipeline test', () => {
             },
             {
               OutputKey: 'IngestionServerC000IngestionServerDNS',
-              OutputValue: 'http://yyy/yyy',
+              OutputValue: 'yyy/yyy',
             },
             {
               OutputKey: 'Dashboards',
@@ -3321,7 +2712,7 @@ describe('Pipeline test', () => {
             },
             {
               OutputKey: 'IngestionServerC000IngestionServerDNS',
-              OutputValue: 'http://yyy/yyy',
+              OutputValue: 'yyy/yyy',
             },
             {
               OutputKey: 'Dashboards',
@@ -3379,7 +2770,7 @@ describe('Pipeline test', () => {
             },
             {
               OutputKey: 'IngestionServerC000IngestionServerDNS',
-              OutputValue: 'http://yyy/yyy',
+              OutputValue: 'yyy/yyy',
             },
             {
               OutputKey: 'Dashboards',
@@ -3519,7 +2910,7 @@ describe('Pipeline test', () => {
             },
             {
               OutputKey: 'IngestionServerC000IngestionServerDNS',
-              OutputValue: 'http://yyy/yyy',
+              OutputValue: 'yyy/yyy',
             },
             {
               OutputKey: 'Dashboards',
@@ -3677,7 +3068,7 @@ describe('Pipeline test', () => {
             },
             {
               OutputKey: 'IngestionServerC000IngestionServerDNS',
-              OutputValue: 'http://yyy/yyy',
+              OutputValue: 'yyy/yyy',
             },
             {
               OutputKey: 'Dashboards',

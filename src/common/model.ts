@@ -31,7 +31,7 @@ export interface BIUserCredential {
 export interface PipelineStatusDetail {
   readonly stackName: string;
   readonly stackType: PipelineStackType;
-  readonly stackTemplateVersion: string;
+  stackTemplateVersion: string;
   stackStatus: StackStatus | undefined;
   stackStatusReason: string;
   outputs: Output[];

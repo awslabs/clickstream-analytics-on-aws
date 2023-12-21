@@ -1043,7 +1043,7 @@ function _getPipelineStatus(pipeline: IPipeline) {
       pipeline.stackDetails ?? pipeline.status?.stackDetails, pipeline.templateVersion);
   }
   const executionDetail = pipeline.executionDetail ?? pipeline.status?.executionDetail;
-  let status: PipelineStatusType;
+  let status: PipelineStatusType | undefined;
   status = _getPipelineStatusFromStacks(pipeline, lastAction);
   if (executionDetail?.status === ExecutionStatus.FAILED ||
     executionDetail?.status === ExecutionStatus.TIMED_OUT ||
@@ -1067,7 +1067,6 @@ function _getPipelineStatus(pipeline: IPipeline) {
 function _getPipelineStatusFromStacks(pipeline: IPipeline, lastAction: string) {
   let status: PipelineStatusType = PipelineStatusType.ACTIVE;
   const stackDetails = pipeline.stackDetails ?? pipeline.status?.stackDetails;
-  console.log('stackDetails', stackDetails);
   if (!stackDetails) {
     return status;
   }

@@ -195,8 +195,21 @@ describe('App test', () => {
       executionArn: {
         S: 'arn:aws:states:us-east-1:111122223333:execution:MyPipelineStateMachine:main-5ab07c6e-b6ac-47ea-bf3a-02ede7391807',
       },
-      executionName: {
-        S: 'main-3333-3333',
+      executionDetail: {
+        M: {
+          executionArn: {
+            S: 'arn:aws:states:us-east-1:111122223333:execution:MyPipelineStateMachine:main-5ab07c6e-b6ac-47ea-bf3a-02ede7391807',
+          },
+          name: {
+            S: 'main-3333-3333',
+          },
+          stateMachineArn: {
+            S: 'arn:aws:states:us-east-1:111122223333:stateMachine:MyPipelineStateMachine',
+          },
+          status: {
+            S: 'SUCCEEDED',
+          },
+        },
       },
       id: {
         S: 'project_8888_8888',
@@ -340,6 +353,9 @@ describe('App test', () => {
       region: {
         S: 'ap-southeast-1',
       },
+      stackDetails: {
+        L: [],
+      },
       status: {
         M: {
           executionDetail: {
@@ -359,6 +375,9 @@ describe('App test', () => {
             S: 'Active',
           },
         },
+      },
+      statusType: {
+        S: 'Active',
       },
       tags: {
         L: [
@@ -454,8 +473,21 @@ describe('App test', () => {
       executionArn: {
         S: 'arn:aws:states:us-east-1:111122223333:execution:MyPipelineStateMachine:main-5ab07c6e-b6ac-47ea-bf3a-02ede7391807',
       },
-      executionName: {
-        S: 'main-3333-3333',
+      executionDetail: {
+        M: {
+          executionArn: {
+            S: 'arn:aws:states:us-east-1:111122223333:execution:MyPipelineStateMachine:main-5ab07c6e-b6ac-47ea-bf3a-02ede7391807',
+          },
+          name: {
+            S: 'main-3333-3333',
+          },
+          stateMachineArn: {
+            S: 'arn:aws:states:us-east-1:111122223333:stateMachine:MyPipelineStateMachine',
+          },
+          status: {
+            S: 'SUCCEEDED',
+          },
+        },
       },
       id: {
         S: 'project_8888_8888',
@@ -599,6 +631,9 @@ describe('App test', () => {
       region: {
         S: 'ap-southeast-1',
       },
+      stackDetails: {
+        L: [],
+      },
       status: {
         M: {
           executionDetail: {
@@ -618,6 +653,9 @@ describe('App test', () => {
             S: 'Active',
           },
         },
+      },
+      statusType: {
+        S: 'Active',
       },
       tags: {
         L: [
