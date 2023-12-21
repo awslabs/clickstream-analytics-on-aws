@@ -26,7 +26,7 @@ import {
   UpdateSecretCommand,
   UpdateSecretCommandInput,
 } from '@aws-sdk/client-secrets-manager';
-import { CdkCustomResourceHandler, CdkCustomResourceEvent, CdkCustomResourceResponse, CloudFormationCustomResourceEvent, Context } from 'aws-lambda';
+import { CdkCustomResourceHandler, CdkCustomResourceEvent, CdkCustomResourceResponse, CloudFormationCustomResourceEvent, Context, CloudFormationCustomResourceUpdateEvent } from 'aws-lambda';
 import { getFunctionTags } from '../../../common/lambda/tags';
 import { BIUserCredential } from '../../../common/model';
 import { logger } from '../../../common/powertools';
@@ -98,12 +98,11 @@ async function _handler(event: CdkCustomResourceEvent, biUsername: string, conte
 
 async function onCreateOrUpdate(event: CdkCustomResourceEvent, biUsername: string, tags: Tag[]) {
   const requestType = event.RequestType;
-
-  logger.info('onCreateOrUpdate() requestType:' + requestType);
-
   const isCreate = requestType == 'Create';
-
   const props = event.ResourceProperties as ResourcePropertiesType;
+
+  const newAddedAppIdList = getNewAddedAppIdList(event);
+  logger.info('onCreateOrUpdate()', { requestType, newAddedAppIdList });
 
   // 1. create database in Redshift
   const client = getRedshiftClient(props.dataAPIRole);
@@ -119,11 +118,37 @@ async function onCreateOrUpdate(event: CdkCustomResourceEvent, biUsername: strin
   }
 
   // 2. create schemas in Redshift for applications
-  await createOrUpdateSchemas(props, biUsername);
+  await createOrUpdateSchemas(newAddedAppIdList, props, biUsername);
 
   // 3. create views for reporting
-  await createOrUpdateViewForReporting(props, biUsername);
+  await createOrUpdateViewForReporting(newAddedAppIdList, props, biUsername);
 
+}
+
+function getNewAddedAppIdList(event: CdkCustomResourceEvent): string[] {
+  const requestType = event.RequestType;
+  const props = event.ResourceProperties as ResourcePropertiesType;
+  const appIdList = splitString(props.appIds ?? '');
+  const lastModifiedTime = props.lastModifiedTime;
+  const isUpdate = requestType == 'Update';
+
+  let newAddedAppIdList = appIdList;
+  if (isUpdate) {
+    const oldAppIds = ((event as CloudFormationCustomResourceUpdateEvent).OldResourceProperties as ResourcePropertiesType).appIds;
+    const oldAppIdList = splitString(oldAppIds ?? '');
+    const oldLastModifiedTime = ((event as CloudFormationCustomResourceUpdateEvent).OldResourceProperties as ResourcePropertiesType).lastModifiedTime;
+    logger.info('getNewAddedAppIdList()', { requestType, oldAppIdList, oldLastModifiedTime, appIdList, lastModifiedTime });
+    if (lastModifiedTime === oldLastModifiedTime) {
+      newAddedAppIdList = [];
+      for (const appId of appIdList) {
+        if (!oldAppIdList.includes(appId)) {
+          logger.info(`appId ${appId} is not in oldAppIdList ${oldAppIdList}`);
+          newAddedAppIdList.push(appId);
+        }
+      }
+    }
+  }
+  return newAddedAppIdList;
 }
 
 async function createBIUserCredentialSecret(secretName: string, biUsername: string, projectId: string, tags: Tag[]): Promise<BIUserCredential> {
@@ -212,12 +237,14 @@ function splitString(str: string): string[] {
   }
 }
 
-async function createOrUpdateSchemas(props: ResourcePropertiesType, biUsername: string) {
+async function createOrUpdateSchemas(newAddedAppIdList: string[], props: ResourcePropertiesType, biUsername: string) {
   const odsTableNames = props.odsTableNames;
-  const appIds = splitString(props.appIds);
+
+  logger.info('createOrUpdateSchemas()', { newAddedAppIdList });
+
   const sqlStatementsByApp = new Map<string, string[]>();
 
-  for (const app of appIds) {
+  for (const app of newAddedAppIdList) {
     const sqlStatements: string[] = [];
     const mustacheParam: MustacheParamType = {
       database_name: props.projectId,
@@ -265,12 +292,13 @@ function _buildGrantSqlStatements(views: string[], schema: string, biUser: strin
   return statements;
 }
 
-async function createOrUpdateViewForReporting(props: ResourcePropertiesType, biUser: string) {
+async function createOrUpdateViewForReporting(newAddedAppIdList: string[], props: ResourcePropertiesType, biUser: string) {
   const odsTableNames = props.odsTableNames;
-  const appIds = splitString(props.appIds);
+
+  logger.info('createOrUpdateViewForReporting()', { newAddedAppIdList });
 
   const sqlStatementsByApp = new Map<string, string[]>();
-  for (const app of appIds) {
+  for (const app of newAddedAppIdList) {
     const sqlStatements: string[] = [];
     const views: string[] = [];
     const mustacheParam: MustacheParamType = {
@@ -324,7 +352,7 @@ const createDatabaseBIUser = async (redshiftClient: RedshiftDataClient, credenti
     await executeStatementsWithWait(redshiftClient, [
       `CREATE USER ${credential.username} PASSWORD '${credential.password}'`,
     ], props.serverlessRedshiftProps, props.provisionedRedshiftProps,
-    props.serverlessRedshiftProps?.databaseName ?? props.provisionedRedshiftProps?.databaseName, false);
+      props.serverlessRedshiftProps?.databaseName ?? props.provisionedRedshiftProps?.databaseName, false);
   } catch (err) {
     if (err instanceof Error) {
       if (err.message.includes('already exists')) {
@@ -340,12 +368,19 @@ const createDatabaseBIUser = async (redshiftClient: RedshiftDataClient, credenti
 const createSchemasInRedshift = async (redshiftClient: RedshiftDataClient,
   sqlStatementsByApp: Map<string, string[]>, props: CreateDatabaseAndSchemas) => {
 
-  for (const [appId, sqlStatements] of sqlStatementsByApp) {
+  const createSchemasInRedshiftForApp = async (appId: string, sqlStatements: string[]) => {
     logger.info(`creating schema in serverless Redshift for ${appId}`);
     for (const statement of sqlStatements) {
       await execSQLInRedshift(redshiftClient, statement, appId, props);
     }
+  };
+
+  const parallelList = [];
+  for (const [appId, sqlStatements] of sqlStatementsByApp) {
+    parallelList.push(createSchemasInRedshiftForApp(appId, sqlStatements));
   }
+  await Promise.all(parallelList);
+
 };
 
 const execSQLInRedshift = async (redshiftClient: RedshiftDataClient, sqlStatement: string, appId: string, props: CreateDatabaseAndSchemas) => {
