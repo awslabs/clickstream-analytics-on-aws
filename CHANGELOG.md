@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.1] - 2023-12-22
+
+### Fixed
+
+#### Web Console and Data pipeline
+
+* mitigate the data modeling by putting the Redshift stack into UPDATE_ROLLBACK_FAILED status when updating pipeline
+* fail to update the endpoint path, domain name and auth of ingestion
+* fail to get pipeline detail if its age is more than 90 days
+
+#### Analytics Studio
+
+* wrong user count in the built-in dashboard
+* incorrect default value of dataset parameter causes the failure to load values of selectable fields in the built-in dashboard
+
 ## [1.1.0] - 2023-12-08
 
 ### Web Console and Data pipeline
