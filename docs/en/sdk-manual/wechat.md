@@ -115,7 +115,7 @@ Clickstream WeChat Miniprogram SDK supports following data types:
 | Data type | Range                       | Sample                 |
 |-----------|-----------------------------|------------------------|
 | number    | 5e-324~1.79e+308            | 12, 26854775808, 3.14  |
-| boolean   | true、false                  | true                   |
+| boolean   | true, false                  | true                   |
 | string    | max support 1024 characters | "clickstream"          |
 
 ### Naming rules

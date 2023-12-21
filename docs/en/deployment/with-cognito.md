@@ -65,7 +65,7 @@ Meanwhile, an auto-generated temporary password will be sent to your email addre
 
 1. Sign in to the [AWS CloudFormation console][cloudformation]{target='_blank'}.
 
-2. On the **Stacks** page, select the solution’s stack.
+2. On the **Stacks** page, select the solution's stack.
 
 3. Choose the **Outputs** tab and record the domain name.
 
