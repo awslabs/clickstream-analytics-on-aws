@@ -378,13 +378,35 @@ describe('Custom resource - Create schemas for applications in Redshift database
 
   });
 
-  test('Updated schemas and views in Redshift provisioned cluster', async () => {
+  test('Updated schemas and views in Redshift provisioned cluster with same lastModifiedTime', async () => {
     redshiftDataMock.on(ExecuteStatementCommand).resolves({ Id: 'Id-1' });
     redshiftDataMock.on(DescribeStatementCommand).resolves({ Status: 'FINISHED' });
 
     const lastModifiedTime = new Date().getTime();
     updateAdditionalProvisionedEvent.OldResourceProperties.lastModifiedTime = lastModifiedTime;
     updateAdditionalProvisionedEvent.ResourceProperties.lastModifiedTime = lastModifiedTime;
+
+    const resp = await handler(updateAdditionalProvisionedEvent, context, callback) as CdkCustomResourceResponse;
+
+    expect(resp.Status).toEqual('SUCCESS');
+
+    expect(redshiftDataMock).toHaveReceivedCommandTimes(ExecuteStatementCommand, appNewCount);
+    expect(redshiftDataMock).toHaveReceivedNthSpecificCommandWith(1, ExecuteStatementCommand, {
+      WorkgroupName: undefined,
+      Database: projectDBName,
+      ClusterIdentifier: clusterId,
+      DbUser: dbUser,
+    });
+    expect(redshiftDataMock).toHaveReceivedCommandTimes(DescribeStatementCommand, appNewCount);
+  });
+
+  test('Updated schemas and views in Redshift provisioned cluster with lastModifiedTime changed', async () => {
+    redshiftDataMock.on(ExecuteStatementCommand).resolves({ Id: 'Id-1' });
+    redshiftDataMock.on(DescribeStatementCommand).resolves({ Status: 'FINISHED' });
+
+    const lastModifiedTime = new Date().getTime();
+    updateAdditionalProvisionedEvent.OldResourceProperties.lastModifiedTime = lastModifiedTime;
+    updateAdditionalProvisionedEvent.ResourceProperties.lastModifiedTime = lastModifiedTime + 1;
 
     const resp = await handler(updateAdditionalProvisionedEvent, context, callback) as CdkCustomResourceResponse;
 

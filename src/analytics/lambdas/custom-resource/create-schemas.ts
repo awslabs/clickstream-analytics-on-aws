@@ -109,12 +109,11 @@ async function _handler(event: CdkCustomResourceEvent, biUsername: string, conte
 
 async function onCreateOrUpdate(event: CdkCustomResourceEvent, biUsername: string, tags: Tag[]) {
   const requestType = event.RequestType;
-
-  logger.info('onCreateOrUpdate() requestType:' + requestType);
-
   const isCreate = requestType == 'Create';
-
   const props = event.ResourceProperties as ResourcePropertiesType;
+
+  const newAddedAppIdList = getNewAddedAppIdList(event);
+  logger.info('onCreateOrUpdate()', { requestType, newAddedAppIdList });
 
   // 1. create database in Redshift
   const client = getRedshiftClient(props.dataAPIRole);
@@ -128,8 +127,6 @@ async function onCreateOrUpdate(event: CdkCustomResourceEvent, biUsername: strin
   } else {
     throw new Error('Can\'t identity the mode Redshift cluster!');
   }
-
-  const newAddedAppIdList = getNewAddedAppIdList(event);
 
   // 2. create schemas in Redshift for applications
   const schmeaSqlsByAppId: Map<string, string[]> = getCreateOrUpdateSchemasSQL(newAddedAppIdList, props, biUsername);
@@ -261,6 +258,9 @@ function splitString(str: string): string[] {
 
 function getCreateOrUpdateSchemasSQL(newAddedAppIdList: string[], props: ResourcePropertiesType, biUsername: string) {
   const odsTableNames = props.odsTableNames;
+
+  logger.info('createOrUpdateSchemas()', { newAddedAppIdList });
+
   const sqlStatementsByApp = new Map<string, string[]>();
 
   for (const app of newAddedAppIdList) {
@@ -308,6 +308,8 @@ function _buildGrantSqlStatements(views: string[], schema: string, biUser: strin
 
 function getCreateOrUpdateViewForReportingSQL(newAddedAppIdList: string[], props: ResourcePropertiesType, biUser: string) {
   const odsTableNames = props.odsTableNames;
+
+  logger.info('createOrUpdateViewForReporting()', { newAddedAppIdList });
 
   const sqlStatementsByApp = new Map<string, string[]>();
   for (const app of newAddedAppIdList) {
@@ -373,11 +375,16 @@ const createDatabaseBIUser = async (redshiftClient: RedshiftDataClient, credenti
 
 const createSchemasInRedshiftAsync = async (sqlStatementsByApp: Map<string, string[]>) => {
 
-  for (const [appId, sqlStatements] of sqlStatementsByApp) {
+  const createSchemasInRedshiftForApp = async (appId: string, sqlStatements: string[]) => {
     logger.info(`creating schema in serverless Redshift for ${appId}`);
     await executeSqlsByStateMachine(sqlStatements, appId);
-    await sleep(process.env.SUBMIT_SQL_INTERVAL_MS ? parseInt(process.env.SUBMIT_SQL_INTERVAL_MS) : 1000);
   };
+
+  for (const [appId, sqlStatements] of sqlStatementsByApp) {
+    await createSchemasInRedshiftForApp(appId, sqlStatements);
+    await sleep(process.env.SUBMIT_SQL_INTERVAL_MS ? parseInt(process.env.SUBMIT_SQL_INTERVAL_MS) : 1000);
+  }
+
 };
 
 const executeSqlsByStateMachine = async (sqlStatements: string[], appId: string) => {
