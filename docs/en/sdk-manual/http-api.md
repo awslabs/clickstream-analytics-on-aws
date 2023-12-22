@@ -203,7 +203,6 @@ failures, and the request does not return any other content.
 
 ## Verification data reported successfully
 
-- Method 1: You can query the **event, event_parameter, user, item** or **ingestion_events** table in **Athena**
-  directly through SQL. (Requires data processing to be enabled)
-- Method 2: You can query the **event, event_parameter, user, item** table in **Redshift** directly through SQL. (
-  Requires enable Redshift in data modeling)
+If you enabled data processing, you can query the **event**, **event_parameter**, **user**, **item** or **ingestion_events** table in Athena directly through SQL.
+
+Moreover, if you enalbed Redshift in data modeling, you can query the **event**, **event_parameter**, **user**, or **item** table in Redshift directly through SQL.
