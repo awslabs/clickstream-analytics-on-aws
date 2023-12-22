@@ -145,4 +145,3 @@ workbox-webpack-plugin=6.6.1
 @typescript-eslint/parser=5.59.11
 nodemon=2.0.22
 bfj=7.0.2
-@aws-sdk/client-cloudwatch-events
