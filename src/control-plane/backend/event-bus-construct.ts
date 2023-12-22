@@ -12,7 +12,7 @@
  */
 
 import { join } from 'path';
-import { Aws, Duration, Stack } from 'aws-cdk-lib';
+import { Aws, CfnResource, Duration, Stack } from 'aws-cdk-lib';
 import { Table } from 'aws-cdk-lib/aws-dynamodb';
 import { Rule } from 'aws-cdk-lib/aws-events';
 import { LambdaFunction } from 'aws-cdk-lib/aws-events-targets';
@@ -22,6 +22,7 @@ import { StateMachine } from 'aws-cdk-lib/aws-stepfunctions';
 import { Construct } from 'constructs';
 import { LambdaFunctionNetworkProps } from './click-stream-api';
 import { CFN_RULE_PREFIX } from './lambda/api/common/constants';
+import { addCfnNagSuppressRules } from '../../common/cfn-nag';
 import { createLambdaRole } from '../../common/lambda';
 import { createDLQueue } from '../../common/sqs';
 import { getShortIdOfStack } from '../../common/stack';
@@ -129,6 +130,16 @@ export class BackendEventBus extends Construct {
       ...props.lambdaFunctionNetwork,
     });
     props.clickStreamTable.grantReadWriteData(fn);
+    addCfnNagSuppressRules(fn.node.defaultChild as CfnResource, [
+      {
+        id: 'W89', //Lambda functions should be deployed inside a VPC
+        reason: 'Lambda functions deployed outside VPC when cloudfront fronting backend api.',
+      },
+      {
+        id: 'W92',
+        reason: 'Lambda is used as custom resource, ignore setting ReservedConcurrentExecutions',
+      },
+    ]);
     return fn;
   }
 
@@ -147,6 +158,16 @@ export class BackendEventBus extends Construct {
       ...props.lambdaFunctionNetwork,
     });
     props.clickStreamTable.grantReadWriteData(fn);
+    addCfnNagSuppressRules(fn.node.defaultChild as CfnResource, [
+      {
+        id: 'W89', //Lambda functions should be deployed inside a VPC
+        reason: 'Lambda functions deployed outside VPC when cloudfront fronting backend api.',
+      },
+      {
+        id: 'W92',
+        reason: 'Lambda is used as custom resource, ignore setting ReservedConcurrentExecutions',
+      },
+    ]);
     return fn;
   }
 
