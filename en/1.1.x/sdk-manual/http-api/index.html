@@ -3391,12 +3391,8 @@ failures, and the request does not return any other content.</p>
 </div>
 </div>
 <h2 id="verification-data-reported-successfully">Verification data reported successfully</h2>
-<ul>
-<li>Method 1: You can query the <strong>event, event_parameter, user, item</strong> or <strong>ingestion_events</strong> table in <strong>Athena</strong>
-  directly through SQL. (Requires data processing to be enabled)</li>
-<li>Method 2: You can query the <strong>event, event_parameter, user, item</strong> table in <strong>Redshift</strong> directly through SQL. (
-  Requires enable Redshift in data modeling)</li>
-</ul>
+<p>If you enabled data processing, you can query the <strong>event</strong>, <strong>event_parameter</strong>, <strong>user</strong>, <strong>item</strong> or <strong>ingestion_events</strong> table in Athena directly through SQL.</p>
+<p>Moreover, if you enalbed Redshift in data modeling, you can query the <strong>event</strong>, <strong>event_parameter</strong>, <strong>user</strong>, or <strong>item</strong> table in Redshift directly through SQL.</p>
 
 
 
