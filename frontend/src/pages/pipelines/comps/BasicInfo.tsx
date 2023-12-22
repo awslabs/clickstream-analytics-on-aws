@@ -51,7 +51,7 @@ const BasicInfo: React.FC<BasicInfoProps> = (props: BasicInfoProps) => {
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
   const checkStackRollbackFailed = () => {
-    const stackDetails = pipelineInfo?.status?.stackDetails ?? [];
+    const stackDetails = pipelineInfo?.stackDetails ?? [];
     for (const detail of stackDetails) {
       if (detail.stackStatus?.endsWith('_ROLLBACK_FAILED')) {
         return false;
@@ -147,8 +147,8 @@ const BasicInfo: React.FC<BasicInfoProps> = (props: BasicInfoProps) => {
                     reloadPipeline();
                   }}
                 />
-                {(pipelineInfo?.status?.status === EPipelineStatus.Failed ||
-                  pipelineInfo?.status?.status === EPipelineStatus.Warning) && (
+                {(pipelineInfo?.statusType === EPipelineStatus.Failed ||
+                  pipelineInfo?.statusType === EPipelineStatus.Warning) && (
                   <Button
                     iconName="redo"
                     disabled={disableRetry}
@@ -160,8 +160,8 @@ const BasicInfo: React.FC<BasicInfoProps> = (props: BasicInfoProps) => {
                     {t('button.retry')}
                   </Button>
                 )}
-                {(pipelineInfo?.status?.status === EPipelineStatus.Active ||
-                  pipelineInfo?.status?.status === EPipelineStatus.Failed) && (
+                {(pipelineInfo?.statusType === EPipelineStatus.Active ||
+                  pipelineInfo?.statusType === EPipelineStatus.Failed) && (
                   <Button
                     href={`/project/${pipelineInfo.projectId}/pipeline/${pipelineInfo.pipelineId}/update`}
                     iconName="edit"
@@ -170,7 +170,7 @@ const BasicInfo: React.FC<BasicInfoProps> = (props: BasicInfoProps) => {
                     {t('button.edit')}
                   </Button>
                 )}
-                {pipelineInfo?.status?.status === EPipelineStatus.Active && (
+                {pipelineInfo?.statusType === EPipelineStatus.Active && (
                   <Button
                     iconName="upload-download"
                     disabled={
@@ -264,7 +264,7 @@ const BasicInfo: React.FC<BasicInfoProps> = (props: BasicInfoProps) => {
                 <PipelineStatus
                   pipelineId={pipelineInfo?.pipelineId}
                   projectId={pipelineInfo?.projectId}
-                  status={pipelineInfo?.status?.status}
+                  status={pipelineInfo?.statusType}
                   updatePipelineStatus={(status) => {
                     reloadPipeline();
                   }}

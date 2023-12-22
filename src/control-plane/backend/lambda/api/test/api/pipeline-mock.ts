@@ -45,7 +45,6 @@ const BASE_PIPELINE_ATTRIBUTES = {
   executionDetail: {
     name: MOCK_EXECUTION_ID,
     executionArn: 'arn:aws:states:us-east-1:111122223333:execution:MyPipelineStateMachine:main-5ab07c6e-b6ac-47ea-bf3a-02ede7391807',
-    stateMachineArn: 'arn:aws:states:us-east-1:111122223333:stateMachine:MyPipelineStateMachine',
     status: ExecutionStatus.SUCCEEDED,
   },
   network: {
@@ -1037,7 +1036,6 @@ export const KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW: IPipel
   executionDetail: {
     name: MOCK_EXECUTION_ID,
     executionArn: 'arn:aws:states:us-east-1:111122223333:execution:MyPipelineStateMachine:main-5ab07c6e-b6ac-47ea-bf3a-02ede7391807',
-    stateMachineArn: 'arn:aws:states:us-east-1:111122223333:stateMachine:MyPipelineStateMachine',
     status: ExecutionStatus.SUCCEEDED,
   },
   workflow: {
@@ -1831,7 +1829,6 @@ export const RETRY_PIPELINE_WITH_WORKFLOW: IPipeline = {
     name: MOCK_EXECUTION_ID,
     status: ExecutionStatus.FAILED,
     executionArn: 'arn:aws:states:us-east-1:111122223333:execution:MyPipelineStateMachine:main-5ab07c6e-b6ac-47ea-bf3a-02ede7391807',
-    stateMachineArn: 'arn:aws:states:us-east-1:111122223333:stateMachine:MyPipelineStateMachine',
   },
 };
 
@@ -1853,7 +1850,6 @@ export const RETRY_PIPELINE_WITH_WORKFLOW_WHEN_UPDATE_FAILED: IPipeline = {
     name: MOCK_EXECUTION_ID,
     status: ExecutionStatus.FAILED,
     executionArn: 'arn:aws:states:us-east-1:111122223333:execution:MyPipelineStateMachine:main-5ab07c6e-b6ac-47ea-bf3a-02ede7391807',
-    stateMachineArn: 'arn:aws:states:us-east-1:111122223333:stateMachine:MyPipelineStateMachine',
   },
 };
 
@@ -1875,7 +1871,6 @@ export const RETRY_PIPELINE_WITH_WORKFLOW_AND_ROLLBACK_COMPLETE: IPipeline = {
     name: MOCK_EXECUTION_ID,
     status: ExecutionStatus.FAILED,
     executionArn: 'arn:aws:states:us-east-1:111122223333:execution:MyPipelineStateMachine:main-5ab07c6e-b6ac-47ea-bf3a-02ede7391807',
-    stateMachineArn: 'arn:aws:states:us-east-1:111122223333:stateMachine:MyPipelineStateMachine',
   },
 };
 

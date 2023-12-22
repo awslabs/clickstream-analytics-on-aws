@@ -39,7 +39,6 @@ export interface PipelineStatusDetail {
 
 export interface ExecutionDetail {
   executionArn: string;
-  stateMachineArn: string;
   name: string;
   status?: ExecutionStatus;
 }
@@ -62,6 +61,7 @@ export enum PipelineStatusType {
   CREATING = 'Creating',
   UPDATING = 'Updating',
   DELETING = 'Deleting',
+  DELETED = 'Deleted',
 }
 
 export enum BuiltInTagKeys {

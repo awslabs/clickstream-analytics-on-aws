@@ -46,6 +46,7 @@ import { DynamoDBDocumentClient, GetCommand, PutCommand, QueryCommand, ScanComma
 import { mockClient } from 'aws-sdk-client-mock';
 import request from 'supertest';
 import {
+  createEventRuleMock,
   createPipelineMock,
   createPipelineMockForBJSRegion,
   deleteEventRuleMock,
@@ -1352,16 +1353,14 @@ describe('Pipeline test', () => {
           stackDetails: stackDetailsWithOutputs,
           executionDetail: {
             name: MOCK_EXECUTION_ID,
-            status: undefined,
           },
         },
         executionDetail: {
           name: MOCK_EXECUTION_ID,
-          stateMachineArn: '',
           executionArn: '',
-          status: 'RUNNING',
+          status: 'SUCCEEDED',
         },
-        statusType: PipelineStatusType.CREATING,
+        statusType: PipelineStatusType.ACTIVE,
         dataProcessing: {
           ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW.dataProcessing,
           enrichPlugin: [
@@ -1980,56 +1979,51 @@ describe('Pipeline test', () => {
           {
             name: 'Pipeline-01',
             stackDetails: [],
-            statusType: 'Creating',
+            statusType: 'Active',
             executionDetail: {
               name: '',
               executionArn: '',
-              stateMachineArn: '',
-              status: ExecutionStatus.RUNNING,
+              status: ExecutionStatus.SUCCEEDED,
             },
           },
           {
             name: 'Pipeline-02',
             stackDetails: [],
-            statusType: 'Creating',
+            statusType: 'Active',
             executionDetail: {
               name: '',
               executionArn: '',
-              stateMachineArn: '',
-              status: ExecutionStatus.RUNNING,
+              status: ExecutionStatus.SUCCEEDED,
             },
           },
           {
             name: 'Pipeline-03',
             stackDetails: [],
-            statusType: 'Creating',
+            statusType: 'Active',
             executionDetail: {
               name: '',
               executionArn: '',
-              stateMachineArn: '',
-              status: ExecutionStatus.RUNNING,
+              status: ExecutionStatus.SUCCEEDED,
             },
           },
           {
             name: 'Pipeline-04',
             stackDetails: [],
-            statusType: 'Creating',
+            statusType: 'Active',
             executionDetail: {
               name: '',
               executionArn: '',
-              stateMachineArn: '',
-              status: ExecutionStatus.RUNNING,
+              status: ExecutionStatus.SUCCEEDED,
             },
           },
           {
             name: 'Pipeline-05',
             stackDetails: [],
-            statusType: 'Creating',
+            statusType: 'Active',
             executionDetail: {
               name: '',
               executionArn: '',
-              stateMachineArn: '',
-              status: ExecutionStatus.RUNNING,
+              status: ExecutionStatus.SUCCEEDED,
             },
           },
         ],
@@ -2110,56 +2104,51 @@ describe('Pipeline test', () => {
           {
             name: 'Pipeline-01',
             stackDetails: [],
-            statusType: 'Creating',
+            statusType: 'Active',
             executionDetail: {
               name: '',
               executionArn: '',
-              stateMachineArn: '',
-              status: ExecutionStatus.RUNNING,
+              status: ExecutionStatus.SUCCEEDED,
             },
           },
           {
             name: 'Pipeline-02',
             stackDetails: [],
-            statusType: 'Creating',
+            statusType: 'Active',
             executionDetail: {
               name: '',
               executionArn: '',
-              stateMachineArn: '',
-              status: ExecutionStatus.RUNNING,
+              status: ExecutionStatus.SUCCEEDED,
             },
           },
           {
             name: 'Pipeline-03',
             stackDetails: [],
-            statusType: 'Creating',
+            statusType: 'Active',
             executionDetail: {
               name: '',
               executionArn: '',
-              stateMachineArn: '',
-              status: ExecutionStatus.RUNNING,
+              status: ExecutionStatus.SUCCEEDED,
             },
           },
           {
             name: 'Pipeline-04',
             stackDetails: [],
-            statusType: 'Creating',
+            statusType: 'Active',
             executionDetail: {
               name: '',
               executionArn: '',
-              stateMachineArn: '',
-              status: ExecutionStatus.RUNNING,
+              status: ExecutionStatus.SUCCEEDED,
             },
           },
           {
             name: 'Pipeline-05',
             stackDetails: [],
-            statusType: 'Creating',
+            statusType: 'Active',
             executionDetail: {
               name: '',
               executionArn: '',
-              stateMachineArn: '',
-              status: ExecutionStatus.RUNNING,
+              status: ExecutionStatus.SUCCEEDED,
             },
           },
         ],
@@ -2204,23 +2193,21 @@ describe('Pipeline test', () => {
           {
             name: 'Pipeline-03',
             stackDetails: [],
-            statusType: 'Creating',
+            statusType: 'Active',
             executionDetail: {
               name: '',
               executionArn: '',
-              stateMachineArn: '',
-              status: ExecutionStatus.RUNNING,
+              status: ExecutionStatus.SUCCEEDED,
             },
           },
           {
             name: 'Pipeline-04',
             stackDetails: [],
-            statusType: 'Creating',
+            statusType: 'Active',
             executionDetail: {
               name: '',
               executionArn: '',
-              stateMachineArn: '',
-              status: ExecutionStatus.RUNNING,
+              status: ExecutionStatus.SUCCEEDED,
             },
           },
         ],
@@ -2348,7 +2335,6 @@ describe('Pipeline test', () => {
         executionDetail: {
           name: MOCK_EXECUTION_ID,
           executionArn: 'arn:aws:states:us-east-1:111122223333:execution:MyPipelineStateMachine:main-5ab07c6e-b6ac-47ea-bf3a-02ede7391807',
-          stateMachineArn: 'arn:aws:states:us-east-1:111122223333:stateMachine:MyPipelineStateMachine',
           status: ExecutionStatus.RUNNING,
         },
       }],
@@ -2380,7 +2366,6 @@ describe('Pipeline test', () => {
         executionDetail: {
           name: MOCK_EXECUTION_ID,
           executionArn: 'arn:aws:states:us-east-1:111122223333:execution:MyPipelineStateMachine:main-5ab07c6e-b6ac-47ea-bf3a-02ede7391807',
-          stateMachineArn: 'arn:aws:states:us-east-1:111122223333:stateMachine:MyPipelineStateMachine',
           status: ExecutionStatus.RUNNING,
         },
       }],
@@ -2441,7 +2426,6 @@ describe('Pipeline test', () => {
         executionDetail: {
           name: MOCK_EXECUTION_ID,
           executionArn: 'arn:aws:states:us-east-1:111122223333:execution:MyPipelineStateMachine:main-5ab07c6e-b6ac-47ea-bf3a-02ede7391807',
-          stateMachineArn: 'arn:aws:states:us-east-1:111122223333:stateMachine:MyPipelineStateMachine',
           status: ExecutionStatus.FAILED,
         },
       }],
@@ -2473,7 +2457,6 @@ describe('Pipeline test', () => {
         executionDetail: {
           name: MOCK_EXECUTION_ID,
           executionArn: 'arn:aws:states:us-east-1:111122223333:execution:MyPipelineStateMachine:main-5ab07c6e-b6ac-47ea-bf3a-02ede7391807',
-          stateMachineArn: 'arn:aws:states:us-east-1:111122223333:stateMachine:MyPipelineStateMachine',
           status: ExecutionStatus.FAILED,
         },
       }],
@@ -3222,7 +3205,6 @@ describe('Pipeline test', () => {
         executionDetail: {
           name: MOCK_EXECUTION_ID,
           executionArn: 'arn:aws:states:us-east-1:111122223333:execution:MyPipelineStateMachine:main-5ab07c6e-b6ac-47ea-bf3a-02ede7391807',
-          stateMachineArn: 'arn:aws:states:us-east-1:111122223333:stateMachine:MyPipelineStateMachine',
           status: ExecutionStatus.FAILED,
         },
       },
@@ -3240,6 +3222,7 @@ describe('Pipeline test', () => {
   it('Delete pipeline', async () => {
     projectExistedMock(ddbMock, true);
     pipelineExistedMock(ddbMock, true);
+    createEventRuleMock(cloudWatchEventsMock);
     deleteEventRuleMock(cloudWatchEventsMock);
     ddbMock.on(GetCommand).resolves({
       Item: { ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW },

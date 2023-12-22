@@ -94,18 +94,18 @@ const PipelineStatus: React.FC<PipelineStatusProps> = (
           pid: defaultStr(projectId),
         });
       if (success) {
-        setUpdatedStatus(data.status?.status);
+        setUpdatedStatus(data.statusType);
         setPipelineRegion(data.region);
         setPipelineTemplateVersion(data.templateVersion ?? '');
-        setStackStatusList(data.status?.stackDetails ?? []);
+        setStackStatusList(data.stackDetails ?? []);
         if (
-          data.status?.status === EPipelineStatus.Active ||
-          data.status?.status === EPipelineStatus.Failed ||
-          data.status?.status === EPipelineStatus.Warning
+          data.statusType === EPipelineStatus.Active ||
+          data.statusType === EPipelineStatus.Failed ||
+          data.statusType === EPipelineStatus.Warning
         ) {
           window.clearInterval(intervalId);
           // update pipeline status
-          updatePipelineStatus?.(data.status.status);
+          updatePipelineStatus?.(data.statusType);
         }
         setLoadingStatus(false);
       }

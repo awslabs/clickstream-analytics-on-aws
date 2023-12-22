@@ -77,6 +77,7 @@ export class BackendEventBus extends Construct {
       eventPattern: {
         source: ['aws.cloudformation'],
         detailType: ['CloudFormation Stack Status Change'],
+        // resources: [`{ "wildcard": "arn:${Aws.PARTITION}:states:*:${Aws.ACCOUNT_ID}:stack/Clickstream*/*" }`],
       },
     });
     ruleStack.addTarget(
@@ -99,10 +100,8 @@ export class BackendEventBus extends Construct {
         detailType: ['Step Functions Execution Status Change'],
         detail: {
           stateMachineArn: [props.listenStateMachine.stateMachineArn],
-          executionArn: [
-            `{"wildcard":"arn:${Aws.PARTITION}:states:${Aws.REGION}:${Aws.ACCOUNT_ID}:execution:${props.listenStateMachine.stateMachineName}:main-*"}`,
-          ],
         },
+        // resources: [`{ "wildcard": "arn:${Aws.PARTITION}:states:${Aws.REGION}:${Aws.ACCOUNT_ID}:execution:${props.listenStateMachine.stateMachineName}:main*" }`],
       },
     });
     ruleState.addTarget(

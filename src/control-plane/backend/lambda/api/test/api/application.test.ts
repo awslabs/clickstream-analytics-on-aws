@@ -12,6 +12,7 @@
  */
 
 import { StackStatus } from '@aws-sdk/client-cloudformation';
+import { CloudWatchEventsClient } from '@aws-sdk/client-cloudwatch-events';
 import { ExecutionStatus, SFNClient, StartExecutionCommand } from '@aws-sdk/client-sfn';
 import {
   DynamoDBDocumentClient,
@@ -21,7 +22,7 @@ import {
 } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
 import request from 'supertest';
-import { appExistedMock, MOCK_APP_NAME, MOCK_APP_ID, MOCK_PROJECT_ID, MOCK_TOKEN, projectExistedMock, tokenMock, MOCK_EXECUTION_ID, MOCK_PIPELINE_ID, MOCK_SOLUTION_VERSION } from './ddb-mock';
+import { appExistedMock, MOCK_APP_NAME, MOCK_APP_ID, MOCK_PROJECT_ID, MOCK_TOKEN, projectExistedMock, tokenMock, MOCK_EXECUTION_ID, MOCK_PIPELINE_ID, MOCK_SOLUTION_VERSION, createEventRuleMock } from './ddb-mock';
 import { clickStreamTableName } from '../../common/constants';
 import { PipelineStackType, PipelineStatusType } from '../../common/model-ln';
 import { app, server } from '../../index';
@@ -29,15 +30,18 @@ import 'aws-sdk-client-mock-jest';
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 const sfnMock = mockClient(SFNClient);
+const cloudWatchEventsMock = mockClient(CloudWatchEventsClient);
 
 describe('Application test', () => {
   beforeEach(() => {
     ddbMock.reset();
     sfnMock.reset();
+    cloudWatchEventsMock.reset();
   });
   it('Create application', async () => {
     tokenMock(ddbMock, false);
     projectExistedMock(ddbMock, true);
+    createEventRuleMock(cloudWatchEventsMock);
     ddbMock.on(QueryCommand)
       .resolvesOnce({
         Items: [
@@ -684,6 +688,7 @@ describe('Application test', () => {
   it('Delete application', async () => {
     projectExistedMock(ddbMock, true);
     appExistedMock(ddbMock, true);
+    createEventRuleMock(cloudWatchEventsMock);
     ddbMock.on(QueryCommand)
       .resolvesOnce({
         Items: [

@@ -30,6 +30,7 @@ import {
 } from './stacks';
 import {
   awsAccountId,
+  awsRegion,
   awsUrlSuffix,
   CFN_RULE_PREFIX,
   FULL_SOLUTION_VERSION,
@@ -269,7 +270,8 @@ export class CPipeline {
   }
 
   public async create(): Promise<void> {
-    // state machine
+    // create rule to listen CFN stack
+    await this._createRules();
     this.pipeline.lastAction = 'Create';
     this.pipeline.statusType = PipelineStatusType.CREATING;
     this.pipeline.templateVersion = FULL_SOLUTION_VERSION;
@@ -278,14 +280,11 @@ export class CPipeline {
     const executionArn = await this.stackManager.execute(this.pipeline.workflow, executionName);
     this.pipeline.executionDetail = {
       executionArn: executionArn,
-      stateMachineArn: '',
       name: executionName,
       status: ExecutionStatus.RUNNING,
     };
     this.pipeline.stackDetails = [];
     this.pipeline.statusType = PipelineStatusType.CREATING;
-    // create rule to listen CFN stack
-    await this._createRules();
     // bind plugin
     const pluginIds: string[] = [];
     if (this.pipeline.dataProcessing?.transformPlugin && !this.pipeline.dataProcessing?.transformPlugin?.startsWith('BUILT-IN')) {
@@ -299,6 +298,9 @@ export class CPipeline {
   }
 
   private async _createRules() {
+    if (this.pipeline.region === awsRegion) {
+      return;
+    }
     const cfnRulePatternResourceArn = `arn:aws:cloudformation:${this.pipeline.region}:${awsAccountId}:stack/Clickstream*${this.pipeline.pipelineId}/*`;
     await createRuleAndAddTargets(
       this.pipeline.region,
@@ -307,6 +309,9 @@ export class CPipeline {
   }
 
   private async _deleteRules() {
+    if (this.pipeline.region === awsRegion) {
+      return;
+    }
     await deleteRuleAndTargets(this.pipeline.region, `${CFN_RULE_PREFIX}-${this.pipeline.id}`);
   }
 
@@ -314,6 +319,8 @@ export class CPipeline {
     if (isEmpty(oldPipeline.workflow) || isEmpty(oldPipeline.workflow?.Workflow)) {
       throw new ClickStreamBadRequestError('Pipeline Workflow can not empty.');
     }
+    // create rule to listen CFN stack
+    await this._createRules();
     this.pipeline.lastAction = 'Update';
     this.pipeline.templateVersion = oldPipeline.templateVersion;
     validateIngestionServerNum(this.pipeline.ingestionServer.size);
@@ -332,7 +339,6 @@ export class CPipeline {
     const executionArn = await this.stackManager.execute(execWorkflow, executionName);
     this.pipeline.executionDetail = {
       executionArn: executionArn,
-      stateMachineArn: '',
       name: executionName,
       status: ExecutionStatus.RUNNING,
     };
@@ -401,6 +407,8 @@ export class CPipeline {
   }
 
   public async upgrade(oldPipeline: IPipeline): Promise<void> {
+    // create rule to listen CFN stack
+    await this._createRules();
     this.pipeline.lastAction = 'Upgrade';
     validateIngestionServerNum(this.pipeline.ingestionServer.size);
     const executionName = getStateMachineExecutionName(this.pipeline.pipelineId);
@@ -415,7 +423,6 @@ export class CPipeline {
     const executionArn = await this.stackManager.execute(execWorkflow, executionName);
     this.pipeline.executionDetail = {
       executionArn: executionArn,
-      stateMachineArn: '',
       name: executionName,
       status: ExecutionStatus.RUNNING,
     };
@@ -428,9 +435,8 @@ export class CPipeline {
     if (!this.pipeline.executionDetail) {
       this.pipeline.executionDetail = {
         executionArn: '',
-        stateMachineArn: '',
         name: this.pipeline.status?.executionDetail.name ?? '',
-        status: ExecutionStatus.RUNNING,
+        status: this.pipeline.status?.executionDetail.status as ExecutionStatus ?? ExecutionStatus.SUCCEEDED,
       };
     }
     if (!this.pipeline.stackDetails) {
@@ -441,6 +447,8 @@ export class CPipeline {
   }
 
   public async updateApp(appIds: string[]): Promise<void> {
+    // create rule to listen CFN stack
+    await this._createRules();
     this.pipeline.lastAction = 'Update';
     const executionName = getStateMachineExecutionName(this.pipeline.pipelineId);
     const ingestionStackName = getStackName(
@@ -458,7 +466,6 @@ export class CPipeline {
     const executionArn = await this.stackManager.execute(execWorkflow, executionName);
     this.pipeline.executionDetail = {
       executionArn: executionArn,
-      stateMachineArn: '',
       name: executionName,
       status: ExecutionStatus.RUNNING,
     };
@@ -469,6 +476,8 @@ export class CPipeline {
   }
 
   public async delete(): Promise<void> {
+    // create rule to listen CFN stack
+    await this._createRules();
     this.pipeline.lastAction = 'Delete';
     const executionName = getStateMachineExecutionName(this.pipeline.pipelineId);
     // update workflow
@@ -478,7 +487,6 @@ export class CPipeline {
     const executionArn = await this.stackManager.execute(execWorkflow, executionName);
     this.pipeline.executionDetail = {
       executionArn: executionArn,
-      stateMachineArn: '',
       name: executionName,
       status: ExecutionStatus.RUNNING,
     };
@@ -502,6 +510,8 @@ export class CPipeline {
   }
 
   public async retry(): Promise<void> {
+    // create rule to listen CFN stack
+    await this._createRules();
     const executionName = getStateMachineExecutionName(this.pipeline.pipelineId);
     this.stackManager.retryWorkflow();
     // create new execution
@@ -509,7 +519,6 @@ export class CPipeline {
     const executionArn = await this.stackManager.execute(execWorkflow, executionName);
     this.pipeline.executionDetail = {
       executionArn: executionArn,
-      stateMachineArn: '',
       name: executionName,
       status: ExecutionStatus.RUNNING,
     };

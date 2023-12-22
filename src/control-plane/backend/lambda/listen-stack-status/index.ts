@@ -62,6 +62,7 @@ export const handler = async (
   const region = event.region;
   const stackId = eventDetail['stack-id'];
   const stackName = stackId.split('/')[1];
+
   if (!stackName.startsWith('Clickstream')) {
     logger.warn('Not a clickstream stack: ', { stackName });
     return;
@@ -71,6 +72,12 @@ export const handler = async (
     logger.error('Failed to describe stack: ', { stackId, region });
     return;
   }
+  if (stackDetail.ParentId) {
+    logger.warn('Not a root stack: ', { stackName });
+    return;
+  }
+  logger.info('Detail: ', { stackName: stackName, status: stackDetail.StackStatus });
+
   const pipelineId = getPipelineIdFromStackName(stackName);
   const pipeline = await getPipeline(pipelineId);
   if (!pipeline) {
@@ -79,7 +86,11 @@ export const handler = async (
   }
 
   const projectId = pipeline.projectId;
-  const stackNames = getWorkflowStacks(pipeline.workflow);
+  if (!pipeline.workflow) {
+    logger.error('No workflow found in pipeline: ', { pipelineId });
+    return;
+  }
+  const stackNames = getWorkflowStacks(pipeline.workflow.Workflow);
 
   const newStackDetails = getNewStackDetails(stackDetail, pipeline.stackDetails ?? [], stackNames);
 

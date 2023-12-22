@@ -12,10 +12,11 @@
  */
 
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-import { DynamoDBDocumentClient, UpdateCommand, QueryCommandInput, paginateQuery, UpdateCommandInput } from '@aws-sdk/lib-dynamodb';
+import { ExecutionStatus } from '@aws-sdk/client-sfn';
+import { DynamoDBDocumentClient, UpdateCommand, QueryCommandInput, paginateQuery, UpdateCommandInput, ScanCommandInput, ScanCommand } from '@aws-sdk/lib-dynamodb';
 import { NativeAttributeValue } from '@aws-sdk/util-dynamodb';
 import { EventBridgeEvent } from 'aws-lambda';
-import { ExecutionDetail } from '../../../../common/model';
+import { ExecutionDetail, PipelineStatusType } from '../../../../common/model';
 import { logger } from '../../../../common/powertools';
 import { aws_sdk_client_common_config } from '../../../../common/sdk-client-config';
 
@@ -61,18 +62,26 @@ export const handler = async (
     logger.warn('Not a main execution, skip: ', { executionName });
     return;
   }
+  logger.info('Detail: ', { executionName: eventDetail.name, status: eventDetail.status });
+
   const pipelineId = executionName.split('-')[1];
-  const projectId = await getProjectIdByPipelineId(pipelineId);
-  if (!projectId) {
-    logger.error('Failed to get projectId by pipelineId: ', { pipelineId });
+  const pipeline = await getPipeline(pipelineId);
+  if (!pipeline) {
+    logger.error('Failed to get pipeline by pipelineId: ', { pipelineId });
     return;
   }
 
+  const projectId = pipeline.projectId;
+
   await updatePipelineStateStatus(projectId, pipelineId, eventDetail);
+
+  if (eventDetail.status === ExecutionStatus.SUCCEEDED && pipeline.lastAction === 'Delete') {
+    await deleteLatestPipeline(projectId, pipelineId);
+    await deleteProject(projectId);
+  }
 };
 
-
-async function getProjectIdByPipelineId(pipelineId: string): Promise<string | undefined> {
+async function getPipeline(pipelineId: string): Promise<any> {
   try {
     const type = `PIPELINE#${pipelineId}#latest`;
     const input: QueryCommandInput = {
@@ -95,7 +104,7 @@ async function getProjectIdByPipelineId(pipelineId: string): Promise<string | un
       records.push(...page.Items as Record<string, NativeAttributeValue>[]);
     }
     if (records.length > 0) {
-      return records[0].id;
+      return records[0];
     }
     return;
   } catch (err) {
@@ -110,7 +119,6 @@ async function updatePipelineStateStatus(
   try {
     const executionDetail: ExecutionDetail = {
       executionArn: eventDetail.executionArn,
-      stateMachineArn: eventDetail.stateMachineArn,
       name: eventDetail.name,
       status: eventDetail.status,
     };
@@ -133,3 +141,57 @@ async function updatePipelineStateStatus(
     logger.error('Failed to update pipeline state status: ', { projectId, pipelineId, err });
   }
 }
+
+async function deleteProject(projectId: string): Promise<void> {
+  try {
+    // Scan all project versions
+    const input: ScanCommandInput = {
+      TableName: clickStreamTableName,
+      FilterExpression: 'id = :p AND deleted = :d',
+      ExpressionAttributeValues: {
+        ':p': projectId,
+        ':d': false,
+      },
+    };
+    const records = (await docClient.send(new ScanCommand(input))).Items ?? [];
+    for (let rec of records) {
+      const params: UpdateCommand = new UpdateCommand({
+        TableName: clickStreamTableName,
+        Key: {
+          id: projectId,
+          type: rec.type,
+        },
+        UpdateExpression: 'SET deleted= :d',
+        ExpressionAttributeValues: {
+          ':d': true,
+        },
+        ReturnValues: 'ALL_NEW',
+      });
+      await docClient.send(params);
+    }
+  } catch (err) {
+    logger.error('Failed to delete project: ', { projectId, err });
+  }
+}
+
+async function deleteLatestPipeline(
+  projectId: string, pipelineId:string): Promise<void> {
+  try {
+    const input: UpdateCommandInput = {
+      TableName: clickStreamTableName,
+      Key: {
+        id: projectId,
+        type: `PIPELINE#${pipelineId}#latest`,
+      },
+      UpdateExpression: 'SET deleted= :d, statusType= :s',
+      ExpressionAttributeValues: {
+        ':d': true,
+        ':s': PipelineStatusType.DELETED,
+      },
+    };
+    await docClient.send(new UpdateCommand(input));
+  } catch (err) {
+    logger.error('Failed to delete pipeline: ', { projectId, pipelineId, err });
+  }
+}
+

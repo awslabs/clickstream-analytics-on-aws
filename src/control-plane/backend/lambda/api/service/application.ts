@@ -93,7 +93,6 @@ export class ApplicationServ {
           OUTPUT_INGESTION_SERVER_DNS_SUFFIX,
         ],
       );
-      console.log('outputs', outputs);
       return res.json(new ApiSuccess({
         projectId: result.projectId,
         appId: result.appId,

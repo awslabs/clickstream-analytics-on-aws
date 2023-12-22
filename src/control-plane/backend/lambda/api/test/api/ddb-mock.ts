@@ -980,4 +980,5 @@ export {
   metadataEventAttributeExistedMock,
   metadataUserAttributeExistedMock,
   deleteEventRuleMock,
+  createEventRuleMock,
 };

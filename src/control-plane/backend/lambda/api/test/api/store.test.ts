@@ -203,9 +203,6 @@ describe('App test', () => {
           name: {
             S: 'main-3333-3333',
           },
-          stateMachineArn: {
-            S: 'arn:aws:states:us-east-1:111122223333:stateMachine:MyPipelineStateMachine',
-          },
           status: {
             S: 'SUCCEEDED',
           },
@@ -480,9 +477,6 @@ describe('App test', () => {
           },
           name: {
             S: 'main-3333-3333',
-          },
-          stateMachineArn: {
-            S: 'arn:aws:states:us-east-1:111122223333:stateMachine:MyPipelineStateMachine',
           },
           status: {
             S: 'SUCCEEDED',
