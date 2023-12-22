@@ -3369,10 +3369,8 @@
 </div>
 </div>
 <h2 id="_7">验证数据上报成功</h2>
-<ul>
-<li>方式1：可以在 <strong>Athena</strong> 里通过SQL直接查询 <strong>event, event_parameter, user, item</strong> 或者 <strong>ingestion_events</strong> 表（需要启用数据处理)</li>
-<li>方式2：可以在 <strong>Redshift</strong> 里通过SQL直接查询 <strong>event, event_parameter, user, item</strong> 表（需要在数据建模中启用 Redshift)</li>
-</ul>
+<p>如果您启用了数据处理，则可以直接通过 SQL 查询 Athena 中的 <strong>event</strong>、<strong>event_parameter</strong>、<strong>user</strong>、<strong>item</strong> 或 <strong>ingestion_events</strong> 表。</p>
+<p>而且，如果您在数据建模中启用了 Redshift，则可以直接通过 SQL 查询 Redshift 中的<strong>event</strong>、<strong>event_parameter</strong>、<strong>user</strong>或<strong>item</strong>表。</p>
 
 
 
