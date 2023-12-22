@@ -21,6 +21,7 @@ import { IFunction, Tracing } from 'aws-cdk-lib/aws-lambda';
 import { StateMachine } from 'aws-cdk-lib/aws-stepfunctions';
 import { Construct } from 'constructs';
 import { LambdaFunctionNetworkProps } from './click-stream-api';
+import { CFN_RULE_PREFIX } from './lambda/api/common/constants';
 import { createLambdaRole } from '../../common/lambda';
 import { createDLQueue } from '../../common/sqs';
 import { getShortIdOfStack } from '../../common/stack';
@@ -137,7 +138,7 @@ export class BackendEventBus extends Construct {
       entry: join(__dirname, './lambda/listen-state-status/index.ts'),
       handler: 'handler',
       tracing: Tracing.ACTIVE,
-      role: createLambdaRole(this, 'ListenStateFuncRole', true, []),
+      role: createLambdaRole(this, 'ListenStateFuncRole', true, [...this.getDeleteRulePolicyStatements()]),
       timeout: Duration.seconds(60),
       environment: {
         CLICKSTREAM_TABLE_NAME: props.clickStreamTable.tableName,
@@ -153,9 +154,26 @@ export class BackendEventBus extends Construct {
     const cloudformationPolicyStatements: PolicyStatement[] = [
       new PolicyStatement({
         effect: Effect.ALLOW,
-        resources: [`arn:${Aws.PARTITION}:cloudformation:*:${Aws.ACCOUNT_ID}:stack/Clickstream-*`],
+        resources: [`arn:${Aws.PARTITION}:cloudformation:*:${Aws.ACCOUNT_ID}:stack/Clickstream*`],
         actions: [
           'cloudformation:DescribeStacks',
+        ],
+      }),
+    ];
+    return cloudformationPolicyStatements;
+  };
+
+  private getDeleteRulePolicyStatements(): PolicyStatement[] {
+    const cloudformationPolicyStatements: PolicyStatement[] = [
+      new PolicyStatement({
+        effect: Effect.ALLOW,
+        resources: [
+          `arn:${Aws.PARTITION}:events:*:${Aws.ACCOUNT_ID}:rule/${CFN_RULE_PREFIX}*`,
+        ],
+        actions: [
+          'events:DeleteRule',
+          'events:ListTargetsByRule',
+          'events:RemoveTargets',
         ],
       }),
     ];

@@ -64,7 +64,6 @@ export const handler = async (
   const stackName = stackId.split('/')[1];
 
   if (!stackName.startsWith('Clickstream')) {
-    logger.warn('Not a clickstream stack: ', { stackName });
     return;
   }
   const stackDetail = await describeStack(stackId, region);
@@ -73,7 +72,6 @@ export const handler = async (
     return;
   }
   if (stackDetail.ParentId) {
-    logger.warn('Not a root stack: ', { stackName });
     return;
   }
   logger.info('Detail: ', { stackName: stackName, status: stackDetail.StackStatus });

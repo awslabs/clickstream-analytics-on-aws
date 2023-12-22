@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { CloudWatchEventsClient, DeleteRuleCommand, ListTargetsByRuleCommand, RemoveTargetsCommand, ResourceNotFoundException } from '@aws-sdk/client-cloudwatch-events';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { ExecutionStatus } from '@aws-sdk/client-sfn';
 import { DynamoDBDocumentClient, UpdateCommand, QueryCommandInput, paginateQuery, UpdateCommandInput, ScanCommandInput, ScanCommand } from '@aws-sdk/lib-dynamodb';
@@ -19,6 +20,7 @@ import { EventBridgeEvent } from 'aws-lambda';
 import { ExecutionDetail, PipelineStatusType } from '../../../../common/model';
 import { logger } from '../../../../common/powertools';
 import { aws_sdk_client_common_config } from '../../../../common/sdk-client-config';
+import { CFN_RULE_PREFIX } from '../api/common/constants';
 
 const ddbClient = new DynamoDBClient({
   ...aws_sdk_client_common_config,
@@ -59,7 +61,6 @@ export const handler = async (
   const eventDetail = event.detail;
   const executionName = eventDetail.name;
   if (!executionName?.startsWith('main-')) {
-    logger.warn('Not a main execution, skip: ', { executionName });
     return;
   }
   logger.info('Detail: ', { executionName: eventDetail.name, status: eventDetail.status });
@@ -78,6 +79,7 @@ export const handler = async (
   if (eventDetail.status === ExecutionStatus.SUCCEEDED && pipeline.lastAction === 'Delete') {
     await deleteLatestPipeline(projectId, pipelineId);
     await deleteProject(projectId);
+    await deleteRuleAndTargets(pipeline.region, `${CFN_RULE_PREFIX}-${projectId}`);
   }
 };
 
@@ -194,4 +196,67 @@ async function deleteLatestPipeline(
     logger.error('Failed to delete pipeline: ', { projectId, pipelineId, err });
   }
 }
+
+export const deleteRuleAndTargets = async (region: string, name: string) => {
+  try {
+    if (region === process.env.AWS_REGION) {
+      return;
+    }
+    await deleteTargetsOfRule(region, name);
+    await deleteRule(region, name);
+  } catch (error) {
+    logger.error('Error in deleteRuleAndTargets', { error });
+    throw error;
+  }
+};
+
+export const deleteTargetsOfRule = async (region: string, rule: string) => {
+  try {
+    const client = new CloudWatchEventsClient({
+      ...aws_sdk_client_common_config,
+      region,
+    });
+    const command = new ListTargetsByRuleCommand({
+      Rule: rule,
+    });
+    const res = await client.send(command);
+    const targetIds = res.Targets?.map((target) => target.Id || '') || [];
+    if (targetIds.length === 0) {
+      return;
+    }
+    await client.send(new RemoveTargetsCommand({
+      Rule: rule,
+      Ids: targetIds,
+      Force: true,
+    }));
+  } catch (error) {
+    if (error instanceof ResourceNotFoundException) {
+      logger.warn('Rule target not found', { error });
+      return;
+    }
+    logger.error('Error in deleteTargetsOfRule', { error });
+    throw error;
+  }
+};
+
+export const deleteRule = async (region: string, name: string) => {
+  try {
+    const client = new CloudWatchEventsClient({
+      ...aws_sdk_client_common_config,
+      region,
+    });
+    const command = new DeleteRuleCommand({
+      Name: name,
+      Force: true,
+    });
+    await client.send(command);
+  } catch (error) {
+    if (error instanceof ResourceNotFoundException) {
+      logger.warn('Rule not found', { error });
+      return;
+    }
+    logger.error('Error in deleteRule', { error });
+    throw error;
+  }
+};
 

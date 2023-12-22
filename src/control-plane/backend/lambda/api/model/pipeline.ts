@@ -68,7 +68,7 @@ import {
 } from '../common/types';
 import { getPipelineStatusType, getStackName, getStackTags, getUpdateTags, getStateMachineExecutionName, isEmpty } from '../common/utils';
 import { StackManager } from '../service/stack';
-import { createRuleAndAddTargets, deleteRuleAndTargets } from '../store/aws/events';
+import { createRuleAndAddTargets } from '../store/aws/events';
 import { listMSKClusterBrokers } from '../store/aws/kafka';
 
 import { QuickSightUserArns, registerClickstreamUser } from '../store/aws/quicksight';
@@ -308,13 +308,6 @@ export class CPipeline {
       `{\"source\":[\"aws.cloudformation\"],\"resources\":[{\"wildcard\":\"${cfnRulePatternResourceArn}\"}],\"detail-type\":[\"CloudFormation Stack Status Change\"]}`);
   }
 
-  private async _deleteRules() {
-    if (this.pipeline.region === awsRegion) {
-      return;
-    }
-    await deleteRuleAndTargets(this.pipeline.region, `${CFN_RULE_PREFIX}-${this.pipeline.id}`);
-  }
-
   public async update(oldPipeline: IPipeline): Promise<void> {
     if (isEmpty(oldPipeline.workflow) || isEmpty(oldPipeline.workflow?.Workflow)) {
       throw new ClickStreamBadRequestError('Pipeline Workflow can not empty.');
@@ -491,8 +484,6 @@ export class CPipeline {
       status: ExecutionStatus.RUNNING,
     };
     this.pipeline.statusType = PipelineStatusType.DELETING;
-    // delete rules
-    await this._deleteRules();
     // update pipeline metadata
     this.pipeline.updateAt = Date.now();
     await store.updatePipelineAtCurrentVersion(this.pipeline);
