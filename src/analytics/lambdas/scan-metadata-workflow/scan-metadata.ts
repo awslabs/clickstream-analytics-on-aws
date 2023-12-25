@@ -12,6 +12,7 @@
  */
 
 import { logger } from '../../../common/powertools';
+import { SP_SCAN_METADATA } from '../../private/constant';
 import { getRedshiftClient, executeStatements, getRedshiftProps } from '../redshift-data';
 
 const REDSHIFT_DATA_API_ROLE_ARN = process.env.REDSHIFT_DATA_API_ROLE!;
@@ -54,9 +55,9 @@ export const handler = async (event: ScanMetadataEvent) => {
     const scanEndDate = event.scanEndDate;
     const scanStartDate = event.scanStartDate;
     if (scanStartDate) {
-      sqlStatements.push(`CALL ${schema}.sp_scan_metadata(${topFrequentPropertiesLimit}, '${scanEndDate}', '${scanStartDate}')`);
+      sqlStatements.push(`CALL ${schema}.${SP_SCAN_METADATA}(${topFrequentPropertiesLimit}, '${scanEndDate}', '${scanStartDate}')`);
     } else {
-      sqlStatements.push(`CALL ${schema}.sp_scan_metadata(${topFrequentPropertiesLimit}, '${scanEndDate}', NULL)`);
+      sqlStatements.push(`CALL ${schema}.${SP_SCAN_METADATA}(${topFrequentPropertiesLimit}, '${scanEndDate}', NULL)`);
     }
 
     const queryId = await executeStatements(

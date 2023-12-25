@@ -42,7 +42,7 @@ export const REDSHIFT_TABLE_NAMES = [
 
 export const REDSHIFT_DUPLICATE_DATE_INTERVAL = 3; // Days
 
-export const SP_SCAN_METADATA = 'scan_metadata';
+export const SP_SCAN_METADATA = 'sp_scan_metadata';
 export const SP_CLEAR_EXPIRED_EVENTS = 'sp_clear_expired_events';
 
 export const SQL_TEMPLATE_PARAMETER = {
