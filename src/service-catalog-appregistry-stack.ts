@@ -30,7 +30,7 @@ export class ServiceCatalogAppregistryStack extends Stack {
     super(scope, id, props);
 
     const featureName = 'AppRegistry';
-    this.templateOptions.description = `(${SolutionInfo.SOLUTION_ID}-reg ${SolutionInfo.SOLUTION_NAME} - ${featureName} ${SolutionInfo.SOLUTION_VERSION_DETAIL}`;
+    this.templateOptions.description = `(${SolutionInfo.SOLUTION_ID}-reg) ${SolutionInfo.SOLUTION_NAME} - ${featureName} ${SolutionInfo.SOLUTION_VERSION_DETAIL}`;
 
     const projectIdParam = Parameters.createProjectIdParameter(this);
 
