@@ -29,30 +29,17 @@ import {
   Context,
 } from 'aws-lambda';
 import { logger } from '../../../../common/powertools';
-import { aws_sdk_client_common_config } from '../../../../common/sdk-client-config';
+import { aws_sdk_client_common_config, marshallOptions, unmarshallOptions } from '../../../../common/sdk-client-config';
 import dictionary from '../../lambda/api/config/dictionary.json';
 
 const ddbClient = new DynamoDBClient({
   ...aws_sdk_client_common_config,
 });
 
-const marshallOptions = {
-  convertEmptyValues: false,
-  removeUndefinedValues: true,
-  convertClassInstanceToMap: true,
-  convertTopLevelContainer: false,
-};
-
-const unmarshallOptions = {
-  wrapNumbers: false,
-};
-
-const translateConfig = {
-  marshallOptions: { ...marshallOptions },
+const docClient = DynamoDBDocumentClient.from(ddbClient, {
+  marshallOptions: { ...marshallOptions, convertTopLevelContainer: false },
   unmarshallOptions: { ...unmarshallOptions },
-};
-
-const docClient = DynamoDBDocumentClient.from(ddbClient, { ...translateConfig });
+});
 
 interface DicItem {
   readonly name: string;
@@ -100,7 +87,7 @@ async function batchInsert(event: CdkCustomResourceEvent): Promise<any> {
   const items: DicItem[] = dictionary;
   const itemsAsDynamoPutRequest: any[] = [];
   items.forEach(item => {
-    const marshallItem = marshall(item, marshallOptions);
+    const marshallItem = marshall(item, { ...marshallOptions, convertTopLevelContainer: false });
     itemsAsDynamoPutRequest.push({
       PutRequest: {
         Item: marshallItem,

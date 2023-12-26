@@ -37,7 +37,6 @@ export interface BackendEventBusProps {
 
 export class BackendEventBus extends Construct {
 
-  // readonly eventBus: EventBus;
   readonly defaultEventBusArn: string;
   readonly invokeEventBusRole: Role;
 

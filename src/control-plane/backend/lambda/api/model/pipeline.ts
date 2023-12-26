@@ -30,6 +30,7 @@ import {
 } from './stacks';
 import {
   awsAccountId,
+  awsPartition,
   awsRegion,
   awsUrlSuffix,
   CFN_RULE_PREFIX,
@@ -301,7 +302,7 @@ export class CPipeline {
     if (this.pipeline.region === awsRegion) {
       return;
     }
-    const cfnRulePatternResourceArn = `arn:aws:cloudformation:${this.pipeline.region}:${awsAccountId}:stack/Clickstream*${this.pipeline.pipelineId}/*`;
+    const cfnRulePatternResourceArn = `arn:${awsPartition}:cloudformation:${this.pipeline.region}:${awsAccountId}:stack/Clickstream*${this.pipeline.pipelineId}/*`;
     await createRuleAndAddTargets(
       this.pipeline.region,
       `${CFN_RULE_PREFIX}-${this.pipeline.id}`,

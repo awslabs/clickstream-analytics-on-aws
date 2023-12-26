@@ -217,7 +217,7 @@ const BasicInformation: React.FC<BasicInformationProps> = (
           label={t('pipeline:create.vpc')}
           description={t('pipeline:create.vpcDesc')}
           secondaryControl={
-            !update || pipelineInfo.statusType === 'Failed' ? (
+            !update || pipelineInfo.statusType === EPipelineStatus.Failed ? (
               <Button
                 disabled={!pipelineInfo.region}
                 loading={loadingVPC}

@@ -568,7 +568,7 @@ export class DynamoDbStore implements ClickStreamStore {
               createAt: { N: curPipeline.createAt.toString() },
               updateAt: { N: Date.now().toString() },
               operator: { S: pipeline.operator ?? '' },
-              deleted: { BOOL: pipeline.deleted },
+              deleted: { BOOL: true },
             },
           },
         },

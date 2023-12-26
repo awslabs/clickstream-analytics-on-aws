@@ -415,6 +415,7 @@ export class ClickStreamApiConstruct extends Construct {
         PREFIX_TIME_GSI_NAME: prefixTimeGSIName,
         PREFIX_MONTH_GSI_NAME: prefixMonthGSIName,
         AWS_ACCOUNT_ID: Stack.of(this).account,
+        AWS_PARTITION: Aws.PARTITION,
         AWS_URL_SUFFIX: Aws.URL_SUFFIX,
         WITH_AUTH_MIDDLEWARE: props.fronting === 'alb' ? 'true' : 'false',
         ISSUER: props.authProps?.issuer ?? '',

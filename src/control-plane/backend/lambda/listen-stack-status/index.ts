@@ -18,30 +18,17 @@ import { NativeAttributeValue } from '@aws-sdk/util-dynamodb';
 import { EventBridgeEvent } from 'aws-lambda';
 import { BuiltInTagKeys, PipelineStackType, PipelineStatusDetail } from '../../../../common/model';
 import { logger } from '../../../../common/powertools';
-import { aws_sdk_client_common_config } from '../../../../common/sdk-client-config';
+import { aws_sdk_client_common_config, marshallOptions, unmarshallOptions } from '../../../../common/sdk-client-config';
 import { WorkflowParallelBranch, WorkflowState, WorkflowStateType } from '../api/common/types';
 
 const ddbClient = new DynamoDBClient({
   ...aws_sdk_client_common_config,
 });
 
-const marshallOptions = {
-  convertEmptyValues: false,
-  removeUndefinedValues: true,
-  convertClassInstanceToMap: true,
-  convertTopLevelContainer: false,
-};
-
-const unmarshallOptions = {
-  wrapNumbers: false,
-};
-
-const translateConfig = {
-  marshallOptions: { ...marshallOptions, convertTopLevelContainer: true },
+const docClient = DynamoDBDocumentClient.from(ddbClient, {
+  marshallOptions: { ...marshallOptions },
   unmarshallOptions: { ...unmarshallOptions },
-};
-
-const docClient = DynamoDBDocumentClient.from(ddbClient, { ...translateConfig });
+});
 
 const clickStreamTableName = process.env.CLICKSTREAM_TABLE_NAME ?? '';
 const prefixTimeGSIName = process.env.PREFIX_TIME_GSI_NAME ?? '';
@@ -56,7 +43,6 @@ interface CloudFormationStackStatusChangeNotificationEventDetail {
 
 export const handler = async (
   event: EventBridgeEvent<'CloudFormation Stack Status Change', CloudFormationStackStatusChangeNotificationEventDetail>): Promise<void> => {
-  logger.debug('Event: ', { event: event });
 
   const eventDetail = event.detail;
   const region = event.region;

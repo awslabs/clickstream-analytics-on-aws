@@ -12,37 +12,24 @@
  */
 
 import { CloudWatchEventsClient, DeleteRuleCommand, ListTargetsByRuleCommand, RemoveTargetsCommand, ResourceNotFoundException } from '@aws-sdk/client-cloudwatch-events';
-import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
+import { DynamoDBClient, TransactWriteItemsCommand, TransactWriteItemsCommandInput } from '@aws-sdk/client-dynamodb';
 import { ExecutionStatus } from '@aws-sdk/client-sfn';
 import { DynamoDBDocumentClient, UpdateCommand, QueryCommandInput, paginateQuery, UpdateCommandInput, ScanCommandInput, ScanCommand } from '@aws-sdk/lib-dynamodb';
 import { NativeAttributeValue } from '@aws-sdk/util-dynamodb';
 import { EventBridgeEvent } from 'aws-lambda';
 import { ExecutionDetail, PipelineStatusType } from '../../../../common/model';
 import { logger } from '../../../../common/powertools';
-import { aws_sdk_client_common_config } from '../../../../common/sdk-client-config';
+import { aws_sdk_client_common_config, marshallOptions, unmarshallOptions } from '../../../../common/sdk-client-config';
 import { CFN_RULE_PREFIX } from '../api/common/constants';
 
 const ddbClient = new DynamoDBClient({
   ...aws_sdk_client_common_config,
 });
 
-const marshallOptions = {
-  convertEmptyValues: false,
-  removeUndefinedValues: true,
-  convertClassInstanceToMap: true,
-  convertTopLevelContainer: false,
-};
-
-const unmarshallOptions = {
-  wrapNumbers: false,
-};
-
-const translateConfig = {
-  marshallOptions: { ...marshallOptions, convertTopLevelContainer: true },
+const docClient = DynamoDBDocumentClient.from(ddbClient, {
+  marshallOptions: { ...marshallOptions },
   unmarshallOptions: { ...unmarshallOptions },
-};
-
-const docClient = DynamoDBDocumentClient.from(ddbClient, { ...translateConfig });
+});
 
 const clickStreamTableName = process.env.CLICKSTREAM_TABLE_NAME ?? '';
 const prefixTimeGSIName = process.env.PREFIX_TIME_GSI_NAME ?? '';
@@ -56,7 +43,6 @@ interface StepFunctionsExecutionStatusChangeNotificationEventDetail extends Exec
 
 export const handler = async (
   event: EventBridgeEvent<'Step Functions Execution Status Change', StepFunctionsExecutionStatusChangeNotificationEventDetail>): Promise<void> => {
-  logger.debug('Event: ', { event: event });
 
   const eventDetail = event.detail;
   const executionName = eventDetail.name;
@@ -77,7 +63,6 @@ export const handler = async (
   await updatePipelineStateStatus(projectId, pipelineId, eventDetail);
 
   if (eventDetail.status === ExecutionStatus.SUCCEEDED && pipeline.lastAction === 'Delete') {
-    await deleteLatestPipeline(projectId, pipelineId);
     await deleteProject(projectId);
     await deleteRuleAndTargets(pipeline.region, `${CFN_RULE_PREFIX}-${projectId}`);
   }
@@ -156,44 +141,29 @@ async function deleteProject(projectId: string): Promise<void> {
       },
     };
     const records = (await docClient.send(new ScanCommand(input))).Items ?? [];
+    const transactInput: TransactWriteItemsCommandInput = {
+      TransactItems: [],
+    };
     for (let rec of records) {
-      const params: UpdateCommand = new UpdateCommand({
-        TableName: clickStreamTableName,
-        Key: {
-          id: projectId,
-          type: rec.type,
+      transactInput.TransactItems!.push({
+        Update: {
+          TableName: clickStreamTableName,
+          Key: {
+            id: { S: projectId },
+            type: { S: rec.type },
+          },
+          UpdateExpression: 'SET deleted= :d, statusType= :s ',
+          ExpressionAttributeValues: {
+            ':d': { BOOL: true },
+            ':s': { S: PipelineStatusType.DELETED },
+          },
         },
-        UpdateExpression: 'SET deleted= :d',
-        ExpressionAttributeValues: {
-          ':d': true,
-        },
-        ReturnValues: 'ALL_NEW',
       });
-      await docClient.send(params);
     }
+    const params: TransactWriteItemsCommand = new TransactWriteItemsCommand(transactInput);
+    await docClient.send(params);
   } catch (err) {
     logger.error('Failed to delete project: ', { projectId, err });
-  }
-}
-
-async function deleteLatestPipeline(
-  projectId: string, pipelineId:string): Promise<void> {
-  try {
-    const input: UpdateCommandInput = {
-      TableName: clickStreamTableName,
-      Key: {
-        id: projectId,
-        type: `PIPELINE#${pipelineId}#latest`,
-      },
-      UpdateExpression: 'SET deleted= :d, statusType= :s',
-      ExpressionAttributeValues: {
-        ':d': true,
-        ':s': PipelineStatusType.DELETED,
-      },
-    };
-    await docClient.send(new UpdateCommand(input));
-  } catch (err) {
-    logger.error('Failed to delete pipeline: ', { projectId, pipelineId, err });
   }
 }
 
