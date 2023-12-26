@@ -200,5 +200,6 @@
 
 ## 验证数据上报成功
 
-- 方式1：可以在 **Athena** 里查询 **ods_events表** 里通过SQL直接查询（需要在数据建模启用Athena)
-- 方式2：可以在 **Redshift** 里查询 **ods_events表** 里通过SQL直接查询（需要在数据建模启用Redshift)
+如果您启用了数据处理，则可以直接通过 SQL 查询 Athena 中的 **event**、**event_parameter**、**user**、**item** 或 **ingestion_events** 表。
+
+而且，如果您在数据建模中启用了 Redshift，则可以直接通过 SQL 查询 Redshift 中的**event**、**event_parameter**、**user**或**item**表。

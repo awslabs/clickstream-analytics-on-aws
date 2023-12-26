@@ -73,6 +73,22 @@ analytics.record(name: 'button_click', attributes: {
 analytics.record(name: "button_click");
 ```
 
+#### Add global attribute
+
+```dart
+analytics.addGlobalAttributes({
+  "_traffic_source_medium": "Search engine",
+  "_traffic_source_name": "Summer promotion",
+  "level": 10
+});
+
+// delete global attribute
+analytics.deleteGlobalAttributes(["level"]);
+```
+
+It is recommended to set global attributes after each SDK initialization, global attributes will be included in all
+events that occur after it is set.
+
 #### Login and logout
 
 ```dart
@@ -96,21 +112,35 @@ Current login user's attributes will be cached in disk, so the next time app lau
 attribute again, of course you can use the same api `analytics.setUserAttributes()` to update the current user's
 attribute when it changes.
 
-#### Add global attribute
+#### Record event with items
 
+You can add the following code to log an event with an item, and you can add custom item attribute in the `attributes` Map. In addition to the preset attributes, an item can add up to 10 custom attributes.
 ```dart
-analytics.addGlobalAttributes({
-  "_traffic_source_medium": "Search engine",
-  "_traffic_source_name": "Summer promotion",
-  "level": 10
-});
+var itemBook = ClickstreamItem(
+    id: "123",
+    name: "Nature",
+    category: "book",
+    price: 99,
+    attributes: {
+      "book_publisher": "Nature Research"
+    }
+);
 
-// delete global attribute
-analytics.deleteGlobalAttributes(["level"]);
+analytics.record(
+    name: "view_item", 
+    attributes: {
+        "currency": 'USD',
+        "event_category": 'recommended'
+    }, 
+    items: [itemBook]
+);
 ```
 
-It is recommended to set global attributes after each SDK initialization, global attributes will be included in all
-events that occur after it is set.
+For logging more attribute in an item, please refer to [item attributes](android.md#item-attributes).
+
+!!! warning "Important"
+
+    Only pipelines from version 1.1+ can handle items with custom attribute.
 
 #### Other configurations
 
@@ -214,7 +244,7 @@ Clickstream Flutter SDK supports the following data types.
 
 | Data type | Range                                        | Example       |
 |-----------|----------------------------------------------|---------------|
-| int       | -9223372036854775808 ～ 9223372036854775807 	 | 12            |
+| int       | -9223372036854775808 ~ 9223372036854775807 	 | 12            |
 | double    | 5e-324 ~ 1.79e+308                           | 3.14          |
 | bool      | true, false                                  | true          |
 | String    | max 1024 characters                          | "Clickstream" |
@@ -234,18 +264,23 @@ Clickstream Flutter SDK supports the following data types.
 
 In order to improve the efficiency of querying and analysis, we apply limits to event data as follows:
 
-| Name                            | Suggestion           | Hard limit           | Strategy                                                                           | Error code |
-|---------------------------------|----------------------|----------------------|------------------------------------------------------------------------------------|------------|
-| Event name invalid              | --                   | --                   | discard event, print log and record `_clickstream_error` event                     | 1001       |
-| Length of event name            | under 25 characters  | 50 characters        | discard event, print log and record `_clickstream_error` event                     | 1002       |
-| Length of event attribute name  | under 25 characters  | 50 characters        | discard the attribute,  print log and record error in event attribute              | 2001       |
-| Attribute name invalid          | --                   | --                   | discard the attribute,  print log and record error in event attribute              | 2002       |
-| Length of event attribute value | under 100 characters | 1024 characters      | discard the attribute,  print log and record error in event attribute              | 2003       |
-| Event attribute per event       | under 50 attributes  | 500 event attributes | discard the attribute that exceed, print log and record error in event attribute   | 2004       |
-| User attribute number           | under 25 attributes  | 100 user attributes  | discard the attribute that exceed, print log and record `_clickstream_error` event | 3001       |
-| Length of User attribute name   | under 25 characters  | 50 characters        | discard the attribute, print log and record `_clickstream_error` event             | 3002       |
-| User attribute name invalid     | --                   | --                   | discard the attribute, print log and record `_clickstream_error` event             | 3003       |
-| Length of User attribute value  | under 50 characters  | 256 characters       | discard the attribute, print log and record `_clickstream_error` event             | 3004       |
+| Name                                     | Suggestion                 | Hard limit           | Strategy                                                                           | Error code |
+|------------------------------------------|----------------------------|----------------------|------------------------------------------------------------------------------------|------------|
+| Event name invalid                       | --                         | --                   | discard event, print log and record `_clickstream_error` event                     | 1001       |
+| Length of event name                     | under 25 characters        | 50 characters        | discard event, print log and record `_clickstream_error` event                     | 1002       |
+| Length of event attribute name           | under 25 characters        | 50 characters        | discard the attribute,  print log and record error in event attribute              | 2001       |
+| Attribute name invalid                   | --                         | --                   | discard the attribute,  print log and record error in event attribute              | 2002       |
+| Length of event attribute value          | under 100 characters       | 1024 characters      | discard the attribute,  print log and record error in event attribute              | 2003       |
+| Event attribute per event                | under 50 attributes        | 500 event attributes | discard the attribute that exceed, print log and record error in event attribute   | 2004       |
+| User attribute number                    | under 25 attributes        | 100 user attributes  | discard the attribute that exceed, print log and record `_clickstream_error` event | 3001       |
+| Length of User attribute name            | under 25 characters        | 50 characters        | discard the attribute, print log and record `_clickstream_error` event             | 3002       |
+| User attribute name invalid              | --                         | --                   | discard the attribute, print log and record `_clickstream_error` event             | 3003       |
+| Length of User attribute value           | under 50 characters        | 256 characters       | discard the attribute, print log and record `_clickstream_error` event             | 3004       |
+| Item number in one event                 | under 50 items             | 100 items            | discard the item, print log and record error in event attribute                    | 4001       |
+| Length of item attribute value           | under 100 characters       | 256 characters       | discard the item, print log and record error in event attribute                    | 4002       |
+| Custom item attribute number in one item | under 10 custom attributes | 10 custom attributes | discard the item, print log and record error in event attribute                    | 4003       |
+| Length of item attribute name            | under 25 characters        | 50 characters        | discard the item, print log and record error in event attribute                    | 4004       |
+| Item attribute name invalid              | --                         | --                   | discard the item, print log and record error in event attribute                    | 4005       |
 
 !!! info "Important"
 
@@ -274,6 +309,7 @@ Native SDK version dependencies
 
 | Flutter SDK Version | Android SDK Version | Swift SDK Version |
 |---------------------|---------------------|-------------------|
+| 0.2.0               | 0.10.0              | 0.9.1             |
 | 0.1.0               | 0.9.0               | 0.8.0             |
 
 ## Reference link

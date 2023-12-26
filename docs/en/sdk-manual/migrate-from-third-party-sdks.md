@@ -80,7 +80,7 @@ export const AnalyticsLogger = {
 }
 ```
 
-We need to encapsulate three APIs `log()` 、`setUserAttributes()` and `setUserId()`, that's all. When we invoke the `AnalyticsLogger.log('testEvent')`  method, both Clickstream and Firebase SDK will log the event, so we only need to call the `AnalyticsLogger` API when you need to log event data.
+We need to encapsulate three APIs `log()`, `setUserAttributes()` and `setUserId()`, that's all. When we invoke the `AnalyticsLogger.log('testEvent')`  method, both Clickstream and Firebase SDK will log the event, so we only need to call the `AnalyticsLogger` API when you need to log event data.
 
 ## Step 3: Migrate to common APIs in minutes
 

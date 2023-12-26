@@ -76,6 +76,29 @@ ClickstreamAnalytics.record({
 ClickstreamAnalytics.record({ name: 'button_click' });
 ```
 
+#### 添加全局属性
+1. 在 SDK 初始化时添加全局属性。
+   ```typescript
+   ClickstreamAnalytics.init({
+      appId: "your appId",
+      endpoint: "https://example.com/collect",
+      globalAttributes:{
+        _traffic_source_medium: "Search engine",
+        _traffic_source_name: "Summer promotion",
+      }
+   });
+   ```
+
+2. 在 SDK 初始化完成后添加全局属性。
+   ``` typescript
+   ClickstreamAnalytics.setGlobalAttributes({
+     _traffic_source_medium: "Search engine",
+     level: 10,
+   });
+   ```
+
+建议在 SDK 初始化时添加全局属性，全局属性将会出现在其设置后生成的每一个事件中。您也可以通过设置全局属性的值为 `null` 从而删除某个全局属性。
+
 #### 登录和登出
 
 ```typescript
@@ -99,14 +122,14 @@ ClickstreamAnalytics.setUserAttributes({
 
 当前登录用户的属性会缓存在 `localStorage` 中，因此在下次浏览器打开时不需要再次设置所有的用户属性，当然您可以使用相同的 api `ClickstreamAnalytics.setUserAttributes()` 在当用户属性改变时来更新当前用户的属性。
 
-!!! alert "重要提示"
+!!! info "重要提示"
 
-    如果您的应用已经上线，这时大部分用户已经登录过，则第一次接入Clickstrema SDK时请手动设置一次用户属性，确保后续事件都带有用户属性。
+    如果您的应用已经上线，这时大部分用户已经登录过，则第一次接入Clickstream SDK时请手动设置一次用户属性，确保后续事件都带有用户属性。
 
 
-#### 记录带有Item的事件
+#### 记录带有 Item 的事件
 
-您可以添加以下代码来记录带有Item的事件。
+您可以添加以下代码来记录带有 Item 的事件。
 
 ```typescript
 import { ClickstreamAnalytics, Item } from '@aws/clickstream-web';
@@ -116,6 +139,7 @@ const itemBook: Item = {
   name: 'Nature',
   category: 'book',
   price: 99,
+  book_publisher: 'Nature Research',
 };
 
 ClickstreamAnalytics.record({
@@ -128,9 +152,13 @@ ClickstreamAnalytics.record({
 });
 ```
 
-要记录Item中的更多属性，请参阅 [Item 属性](#item_1).
+要记录 Item 中的更多属性，请参阅 [Item 属性](#item_1).
 
-#### 在处于批量发送模式时发送实时事件
+!!! warning "重要提示"
+
+    数据管道的版本需要在 v1.1 及以上才能够处理带有自定义属性的 Item。
+
+#### 在批处理模式时发送实时事件
 
 当您处于批处理模式时，您仍然可以通过将 `isImmediate `属性设置为 `true` 来立即发送事件，代码如下：
 
@@ -239,20 +267,25 @@ Clickstream Web SDK 支持以下数据类型：
 
 为了提高查询和分析的效率，我们需要对事件进行以下限制：
 
-| 名称         | 建议         | 硬限制          | 超过限制的处理策略                                | 错误码     |
-|------------|------------|--------------|------------------------------------------|---------|
-| 事件名称合规     | --         | --           | 丢弃该事件，打印日志并记录`_clickstream_error`事件      | 1001    |
-| 事件名称长度     | 25 个字符以下   | 50 个字符       | 丢弃该事件，打印日志并记录`_clickstream_error`事件      | 1002    |
-| 事件属性名称的长度  | 25 个字符以下   | 50 个字符       | 丢弃该属性、打印日志并在事件属性中记录错误                    | 2001    |
-| 属性名称合规     | --         | --           | 丢弃该属性、打印日志并在事件属性中记录错误                    | 2002    |
-| 事件属性值的长度   | 少于 100 个字符 | 1024 个字符     | 丢弃该属性、打印日志并在事件属性中记录错误                    | 2003    |
-| 每个事件的事件属性  | 50 属性以下    | 500 evnet 属性 | 丢弃超过限制的属性、打印日志并在事件属性中记录错误                | 2004    |
-| 用户属性数      | 25岁以下属性    | 100个用户属性     | 丢弃超过限制的属性、打印日志并记录`_clickstream_error`事件  | 3001    |
-| 用户属性名称的长度  | 25 个字符以下   | 50 个字符       | 丢弃该属性、打印日志并记录`_clickstream_error`事件      | 3002    |
-| 用户属性名称合规   | --         | --           | 丢弃该属性、打印日志并记录`_clickstream_error`事件      | 3003    |
-| 用户属性值的长度   | 50 个字符以下   | 256 个字符      | 丢弃该属性、打印日志并记录`_clickstream_error`事件      | 3004    |
-| 事件中Item的个数 | 50个item以下  | 100个item     | 丢弃超出限制的Item，打印错误日志并在事件属性中记录错误            | 4001    |
-| Item属性值的长度 | 少于 100 个字符 | 256 个字符      | 丢弃超出限制的Item属性，打印错误日志并在事件属性中记录错误          | 4002    |
+| 名称                | 建议           | 硬限制          | 超过限制的处理策略                               | 错误码  |
+|-------------------|--------------|--------------|-----------------------------------------|------|
+| 事件名称合规            | --           | --           | 丢弃该事件，打印日志并记录`_clickstream_error`事件     | 1001 |
+| 事件名称长度            | 25 个字符以下     | 50 个字符       | 丢弃该事件，打印日志并记录`_clickstream_error`事件     | 1002 |
+| 事件属性名称的长度         | 25 个字符以下     | 50 个字符       | 丢弃该属性、打印日志并在事件属性中记录错误                   | 2001 |
+| 属性名称合规            | --           | --           | 丢弃该属性、打印日志并在事件属性中记录错误                   | 2002 |
+| 事件属性值的长度          | 少于 100 个字符   | 1024 个字符     | 丢弃该属性、打印日志并在事件属性中记录错误                   | 2003 |
+| 每个事件的事件属性         | 50 属性以下      | 500 event 属性 | 丢弃超过限制的属性、打印日志并在事件属性中记录错误               | 2004 |
+| 用户属性数             | 25岁以下属性      | 100个用户属性     | 丢弃超过限制的属性、打印日志并记录`_clickstream_error`事件 | 3001 |
+| 用户属性名称的长度         | 25 个字符以下     | 50 个字符       | 丢弃该属性、打印日志并记录`_clickstream_error`事件     | 3002 |
+| 用户属性名称合规          | --           | --           | 丢弃该属性、打印日志并记录`_clickstream_error`事件     | 3003 |
+| 用户属性值的长度          | 50 个字符以下     | 256 个字符      | 丢弃该属性、打印日志并记录`_clickstream_error`事件     | 3004 |
+| 事件中 Item 的个数      | 50 个 Item 以下 | 100 个 Item   | 丢弃超出限制的 Item，打印错误日志并在事件属性中记录错误          | 4001 |
+| Item 属性值的长度       | 少于 100 个字符   | 256 个字符      | 丢弃超出限制的 Item，打印错误日志并在事件属性中记录错误          | 4002 |
+| 一个 Item 中自定义属性的个数 | 少于 10 个自定义属性 | 10 个自定义属性    | 丢弃超出限制的 Item，打印错误日志并在事件属性中记录错误          | 4003 |
+| Item 属性名的长度       | 25 个字符以下     | 50 个字符       | 丢弃超出限制的 Item，打印错误日志并在事件属性中记录错误          | 4004 |
+| Item 属性名称合规       | --           | --           | 丢弃超出限制的 Item，打印错误日志并在事件属性中记录错误          | 4005 |
+
+
 
 !!! info "重要提示"
 
@@ -432,25 +465,26 @@ Clickstream Web SDK 支持以下数据类型：
 | _latest_referrer         | string  | 在所有事件中添加，最近一次站外链接                                         |
 | _latest_referrer_host    | string  | 在所有事件中添加，最近一次站外域名                                         |
 
-### Item属性
+### Item 属性
 
-| 属性名           | 数据类型         | 是否必需 | Description    |
-|---------------| ---------------- | -------- | -------------- |
-| id            | string           | 否       | item的id       |
-| name          | string           | 否       | item的名称     |
-| brand         | string           | 否       | item的品牌     |
-| price         | string \| number | 否       | item的价格     |
-| quantity      | string           | 否       | item的数量     |
-| creative_name | string           | 否       | item的创意名称 |
-| creative_slot | string           | 否       | item的创意槽   |
-| location_id   | string           | 否       | item的位置id   |
-| category      | string           | 否       | item的类别     |
-| category2     | string           | 否       | item的类别2    |
-| category3     | string           | 否       | item的类别3    |
-| category4     | string           | 否       | item的类别4    |
-| category5     | string           | 否       | item的类别5    |
+| 属性名           | 数据类型     | 是否必需 | 描述        |
+|---------------|----------|------|-----------|
+| id            | string   | 否    | item的id   |
+| name          | string   | 否    | item的名称   |
+| brand         | string   | 否    | item的品牌   |
+| currency      | string   | 否    | item的货币   |
+| price         | number   | 否    | item的价格   |
+| quantity      | string   | 否    | item的数量   |
+| creative_name | string   | 否    | item的创意名称 |
+| creative_slot | string   | 否    | item的创意槽  |
+| location_id   | string   | 否    | item的位置id |
+| category      | string   | 否    | item的类别   |
+| category2     | string   | 否    | item的类别2  |
+| category3     | string   | 否    | item的类别3  |
+| category4     | string   | 否    | item的类别4  |
+| category5     | string   | 否    | item的类别5  |
 
-Item中的所有属性只支持上表中的属性，不支持自定义，您可以使用 `category2` 到 `category5` 来表示自定义属性。
+您可以使用上面预置的 Item 属性，当然您也可以为 Item 添加自定义属性。 除了预置属性外，一个 Item 最多可以添加 10 个自定义属性。
 
 ## SDK更新日志
 

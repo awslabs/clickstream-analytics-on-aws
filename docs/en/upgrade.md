@@ -38,17 +38,18 @@ You can view the status of the stack in the AWS CloudFormation console in the **
 
 ### Upgrade the pipeline of project
 
+!!! info "Important"
+
+    If you encounter any issues during the upgrade process, refer to [Troubleshooting][troubleshooting] for more information.
+
 1. Log in to the web console of the solution.
-2. Verify the solution version at the right-bottom of the page starting with `v1.1.0`. If not, you can force reload the page to recheck it.
-3. Go to **Projects**, and choose the project to be upgraded.
-4. Click on `project id` or **View Details** button, which will direct to the pipeline detail page.
-5. In the project details page, click on the **Upgrade** button
-6. You will be prompted to confirm the upgrade action.
-7. Click on **Confirm**, the pipeline will be in `Updating` status.
+2. Go to **Projects**, and choose the project to be upgraded.
+3. Click on `project id` or **View Details** button, which will direct to the pipeline detail page.
+4. In the project details page, click on the **Upgrade** button
+5. You will be prompted to confirm the upgrade action.
+6. Click on **Confirm**, the pipeline will be in `Updating` status.
 
-You can view the status of the pipeline in the solution console in the **Status** column. You should receive an `Active` status after a few minutes.
-
-If you encounter any issues during the upgrade process, please refer to the [troubleshooting page][troubleshooting].
+You can view the status of the pipeline in the solution console in the **Status** column. After a few minutes, you can receive an Active status.
 
 ## Post-Upgrade Actions
 
@@ -63,7 +64,7 @@ When you upgraded the pipeline from v1.0.x, you need to perform the below action
 
 2. Select the Serverless workgroup or provisioned cluster, `<project-id>`->`<app-id>`->Tables, and make sure tables for the appId are listed there.
 
-3. Create a new SQL Editor。
+3. Create a new SQL Editor.
 
 4. Execute below SQL in editor.
 
