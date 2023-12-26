@@ -18,7 +18,7 @@
       
       
       <link rel="icon" href="../../images/favicon.ico">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.2">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.3">
     
     
       
@@ -2959,7 +2959,7 @@
 </span><span id="__span-2-38"><a id="__codelineno-2-38" name="__codelineno-2-38" href="#__codelineno-2-38"></a><span class="w">  </span><span class="p">},</span>
 </span><span id="__span-2-39"><a id="__codelineno-2-39" name="__codelineno-2-39" href="#__codelineno-2-39"></a><span class="p">}</span>
 </span></code></pre></div>
-<p>We need to encapsulate three APIs <code>log()</code> 、<code>setUserAttributes()</code> and <code>setUserId()</code>, that's all. When we invoke the <code>AnalyticsLogger.log('testEvent')</code>  method, both Clickstream and Firebase SDK will log the event, so we only need to call the <code>AnalyticsLogger</code> API when you need to log event data.</p>
+<p>We need to encapsulate three APIs <code>log()</code>, <code>setUserAttributes()</code> and <code>setUserId()</code>, that's all. When we invoke the <code>AnalyticsLogger.log('testEvent')</code>  method, both Clickstream and Firebase SDK will log the event, so we only need to call the <code>AnalyticsLogger</code> API when you need to log event data.</p>
 <h2 id="step-3-migrate-to-common-apis-in-minutes">Step 3: Migrate to common APIs in minutes</h2>
 <h3 id="for-log-events">For log events</h3>
 <div class="language-javascript highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="w">  </span><span class="nx">onSignedUp</span><span class="p">(</span><span class="nx">user</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>

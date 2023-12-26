@@ -18,7 +18,7 @@
       
       
       <link rel="icon" href="../../images/favicon.ico">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.2">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.3">
     
     
       
@@ -3391,12 +3391,8 @@ failures, and the request does not return any other content.</p>
 </div>
 </div>
 <h2 id="verification-data-reported-successfully">Verification data reported successfully</h2>
-<ul>
-<li>Method 1: You can query the <strong>ods_events table</strong> in <strong>Athena</strong> directly through SQL. (Requires Athena to be enabled in
-  data modeling)</li>
-<li>Method 2: You can query the <strong>ods_events table</strong> in <strong>Redshift</strong> directly through SQL. (Requires Redshift to be
-  enabled in data modeling)</li>
-</ul>
+<p>If you enabled data processing, you can query the <strong>event</strong>, <strong>event_parameter</strong>, <strong>user</strong>, <strong>item</strong> or <strong>ingestion_events</strong> table in Athena directly through SQL.</p>
+<p>Moreover, if you enalbed Redshift in data modeling, you can query the <strong>event</strong>, <strong>event_parameter</strong>, <strong>user</strong>, or <strong>item</strong> table in Redshift directly through SQL.</p>
 
 
 
