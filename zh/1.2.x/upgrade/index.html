@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="../images/favicon.ico">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.2">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.3">
     
     
       
@@ -2887,9 +2887,12 @@
 </ol>
 <p>您可以在 AWS CloudFormation 控制台的 <strong>状态</strong> 列中查看堆栈的状态。 几分钟后您应该会收到“UPDATE_COMPLETE”状态。</p>
 <h3 id="_4">升级项目管道</h3>
+<div class="admonition info">
+<p class="admonition-title">重要提示</p>
+<p>如果您在升级过程中遇到任何问题，请参考<a href="../troubleshooting/">故障排除页面</a>。</p>
+</div>
 <ol>
 <li>登录解决方案的Web控制台。</li>
-<li>在页面右下角验证以<code>v1.1.0</code>开头的解决方案版本。 如果没有，您可以强制重新加载页面来重新检查。</li>
 <li>转到<strong>项目</strong>，然后选择要升级的项目。</li>
 <li>点击<code>项目id</code>或<strong>查看详情</strong>按钮，将跳转至数据管道详细信息页面。</li>
 <li>在项目详情页面，点击<strong>升级</strong>按钮</li>
@@ -2897,7 +2900,6 @@
 <li>点击<strong>确认</strong>，管道将处于“正在更新”状态。</li>
 </ol>
 <p>您可以在解决方案控制台的 <strong>状态</strong> 列中查看管道的状态。 几分钟后您应该会收到<code>活跃</code>状态。</p>
-<p>如果您在升级过程中遇到任何问题，请参考<a href="../troubleshooting/">故障排除页面</a>。</p>
 <h2 id="_5">升级后操作</h2>
 <h3 id="10x">从1.0.x升级后迁移现有数据</h3>
 <p>当您从 v1.0.x 升级管道时，您需要执行以下操作将数据从旧表<code>ods_events</code>迁移到 Redshift 中的新表<code>event</code>、<code>event_parameter</code>、<code>user</code>和<code>item</code>:</p>

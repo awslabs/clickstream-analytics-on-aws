@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="../../images/favicon.ico">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.2">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.3">
     
     
       
@@ -3369,10 +3369,8 @@
 </div>
 </div>
 <h2 id="_7">验证数据上报成功</h2>
-<ul>
-<li>方式1：可以在 <strong>Athena</strong> 里查询 <strong>ods_events表</strong> 里通过SQL直接查询（需要在数据建模启用Athena)</li>
-<li>方式2：可以在 <strong>Redshift</strong> 里查询 <strong>ods_events表</strong> 里通过SQL直接查询（需要在数据建模启用Redshift)</li>
-</ul>
+<p>如果您启用了数据处理，则可以直接通过 SQL 查询 Athena 中的 <strong>event</strong>、<strong>event_parameter</strong>、<strong>user</strong>、<strong>item</strong> 或 <strong>ingestion_events</strong> 表。</p>
+<p>而且，如果您在数据建模中启用了 Redshift，则可以直接通过 SQL 查询 Redshift 中的<strong>event</strong>、<strong>event_parameter</strong>、<strong>user</strong>或<strong>item</strong>表。</p>
 
 
 
