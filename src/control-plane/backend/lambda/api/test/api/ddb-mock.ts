@@ -368,7 +368,10 @@ function createPipelineMock(
     twoAZsInRegion?: boolean;
     quickSightStandard?: boolean;
     albPolicyDisable?: boolean;
-    bucketNotExist?: boolean;
+    bucket?: {
+      notExist?: boolean;
+      location?: BucketLocationConstraint;
+    };
   }): any {
   mockClients.iamMock.on(SimulateCustomPolicyCommand).resolves({
     EvaluationResults: [
@@ -917,7 +920,7 @@ function createPipelineMock(
     Policy: props?.albPolicyDisable ? AllowIAMUserPutObejectPolicyWithErrorService
       :AllowIAMUserPutObejectPolicyInApSouthEast1,
   });
-  if (props?.bucketNotExist) {
+  if (props?.bucket?.notExist) {
     const mockNoSuchBucketError = new Error('NoSuchBucket');
     mockNoSuchBucketError.name = 'NoSuchBucket';
     mockClients.s3Mock.on(GetBucketLocationCommand).rejects(mockNoSuchBucketError);
