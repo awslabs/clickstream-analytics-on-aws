@@ -35,7 +35,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { DataSetProps, dataSetAdminPermissionActions, dataSetReaderPermissionActions } from './dashboard-ln';
 import { Condition, EventAndCondition, PairEventAndCondition, SQLCondition } from './sql-builder';
 import { QUICKSIGHT_DATASET_INFIX, QUICKSIGHT_RESOURCE_NAME_PREFIX, QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX } from '../../common/constants-ln';
-import { AnalysisType, ExploreConversionIntervalType, ExploreLocales, ExplorePathNodeType, ExplorePathSessionDef, ExploreRelativeTimeUnit, ExploreRequestAction, ExploreTimeScopeType, ExploreVisualName, MetadataValueType, QuickSightChartType } from '../../common/explore-types';
+import { AnalysisType, AttributionModelType, ExploreConversionIntervalType, ExploreLocales, ExplorePathNodeType, ExplorePathSessionDef, ExploreRelativeTimeUnit, ExploreRequestAction, ExploreTimeScopeType, ExploreVisualName, MetadataValueType, QuickSightChartType } from '../../common/explore-types';
 import { logger } from '../../common/powertools';
 import i18next from '../../i18n';
 
@@ -1120,6 +1120,45 @@ export function checkFunnelAnalysisParameter(params: any): CheckParamsStatus {
   const checkNodesLimit = _checkNodesLimit(params);
   if (checkNodesLimit !== undefined ) {
     return checkNodesLimit;
+  }
+
+  return {
+    success,
+    message,
+  };
+}
+
+export function checkAttributionAnalysisParameter(params: any): CheckParamsStatus {
+
+  let success = true;
+  let message = 'OK';
+
+  const commonCheckResult = _checkCommonPartParameter(params);
+  if (commonCheckResult !== undefined ) {
+    return commonCheckResult;
+  }
+
+  if (params.targetEventAndCondition === undefined
+    || params.modelType === undefined
+  ) {
+    return {
+      success: false,
+      message: 'Missing required parameter.',
+    };
+  }
+
+  if (params.eventAndConditions.length < 1) {
+    return {
+      success: false,
+      message: 'At least specify 1 event for attribution analysis',
+    };
+  }
+
+  if (params.modelType === AttributionModelType.POSITION && (params.modelWeights === undefined || params.modelWeights.length < 1) ) {
+    return {
+      success: false,
+      message: 'missing weights for attribution analysis',
+    };
   }
 
   return {
