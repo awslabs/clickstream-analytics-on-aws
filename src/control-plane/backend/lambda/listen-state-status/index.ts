@@ -62,7 +62,6 @@ export const handler = async (
 
   await updatePipelineStateStatus(projectId, pipelineId, eventDetail);
 
-  console.log('eventDetail.status: ', eventDetail.status, pipeline.lastAction);
   if (eventDetail.status === ExecutionStatus.SUCCEEDED && pipeline.lastAction === 'Delete') {
     await deleteProject(projectId);
     await deleteRuleAndTargets(pipeline.region, `${CFN_RULE_PREFIX}-${projectId}`);

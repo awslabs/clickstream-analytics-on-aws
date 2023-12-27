@@ -89,7 +89,7 @@ export class BackendEventBus extends Construct {
     );
     const cfnRule = ruleStack.node.defaultChild as CfnRule;
     cfnRule.addOverride('Properties.EventPattern.resources', [
-      { wildcard: `arn:${Aws.PARTITION}:states:*:${Aws.ACCOUNT_ID}:stack/Clickstream*/*` },
+      { wildcard: `arn:${Aws.PARTITION}:cloudformation:*:${Aws.ACCOUNT_ID}:stack/Clickstream*/*` },
     ]);
   };
 
