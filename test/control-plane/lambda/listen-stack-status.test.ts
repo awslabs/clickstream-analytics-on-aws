@@ -33,7 +33,7 @@ describe('Listen CFN Stack Status Lambda Function', () => {
   const baseEvent: EventBridgeEvent<'CloudFormation Stack Status Change', CloudFormationStackStatusChangeNotificationEventDetail> = {
     'id': 'b1b9f9b0-1f1e-4f1f-8f1f-1f1f1f1f1f1f',
     'version': '0',
-    'account': '123456789012',
+    'account': '0',
     'time': '2021-09-01T00:00:00Z',
     'region': 'ap-southeast-1',
     'detail-type': 'CloudFormation Stack Status Change',
