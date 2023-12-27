@@ -61,11 +61,9 @@ export class ApplicationServ {
       const appIds: string[] = apps.map(a => a.appId);
       appIds.push(appId);
       validatePattern('AppId', MULTI_APP_ID_PATTERN, appIds.join(','));
-
-      const id = await store.addApplication(app);
-
       const pipeline = new CPipeline(latestPipeline);
       await pipeline.updateApp(appIds);
+      const id = await store.addApplication(app);
       return res.status(201).json(new ApiSuccess({ id }, 'Application created.'));
     } catch (error) {
       next(error);
@@ -147,11 +145,11 @@ export class ApplicationServ {
         validatePattern('AppId', MULTI_APP_ID_PATTERN, appIds.join(','));
       }
 
-      const operator = res.get('X-Click-Stream-Operator');
-      await store.deleteApplication(pid, id, operator);
-
       const pipeline = new CPipeline(latestPipeline);
       await pipeline.updateApp(appIds);
+
+      const operator = res.get('X-Click-Stream-Operator');
+      await store.deleteApplication(pid, id, operator);
       return res.status(200).json(new ApiSuccess(null, 'Application deleted.'));
     } catch (error) {
       next(error);

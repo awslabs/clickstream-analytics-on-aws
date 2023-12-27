@@ -116,9 +116,9 @@ describe('Application test', () => {
     expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 2);
   });
   it('Create application with mock ddb error', async () => {
-    tokenMock(ddbMock, false).rejectsOnce(new Error('Mock DynamoDB error'));;
+    tokenMock(ddbMock, false).rejectsOnce(new Error('Mock DynamoDB error'));
     projectExistedMock(ddbMock, true);
-
+    createEventRuleMock(cloudWatchEventsMock);
     ddbMock.on(QueryCommand)
       .resolvesOnce({
         Items: [
@@ -130,6 +130,36 @@ describe('Application test', () => {
             },
             ingestionServer: {
               sinkType: 's3',
+            },
+            workflow: {
+              Version: '2022-03-15',
+              Workflow: {
+                Branches: [
+                  {
+                    StartAt: 'Ingestion',
+                    States: {
+                      Ingestion: {
+                        Data: {
+                          Callback: {
+                            BucketName: 'EXAMPLE_BUCKET',
+                            BucketPrefix: '/ingestion',
+                          },
+                          Input: {
+                            Action: 'Create',
+                            Parameters: [],
+                            StackName: 'clickstream-ingestion1',
+                            TemplateURL: 'https://xxx.com',
+                          },
+                        },
+                        End: true,
+                        Type: 'Stack',
+                      },
+                    },
+                  },
+                ],
+                End: true,
+                Type: 'Parallel',
+              },
             },
             executionArn: 'arn:aws:states:us-east-1:555555555555:execution:clickstream-stack-workflow:111-111-111',
           },
@@ -143,6 +173,7 @@ describe('Application test', () => {
           },
         ],
       });
+    sfnMock.on(StartExecutionCommand).resolves({});
     const res = await request(app)
       .post('/api/app')
       .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
@@ -759,6 +790,7 @@ describe('Application test', () => {
   it('Delete application with mock ddb error', async () => {
     projectExistedMock(ddbMock, true);
     appExistedMock(ddbMock, true);
+    createEventRuleMock(cloudWatchEventsMock);
     ddbMock.on(QueryCommand)
       .resolvesOnce({
         Items: [
