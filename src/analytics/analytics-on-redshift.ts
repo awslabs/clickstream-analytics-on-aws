@@ -22,7 +22,7 @@ import {
   SubnetSelection,
   IVpc,
 } from 'aws-cdk-lib/aws-ec2';
-import { PolicyStatement, Role, AccountPrincipal, IRole } from 'aws-cdk-lib/aws-iam';
+import { PolicyStatement, Role, AccountPrincipal, IRole, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 import { TaskInput } from 'aws-cdk-lib/aws-stepfunctions';
 import { Construct } from 'constructs';
 import { ApplicationSchemas } from './private/app-schema';
@@ -32,7 +32,7 @@ import { LoadOdsDataToRedshiftWorkflow } from './private/load-ods-data-workflow'
 import { createMetricsWidgetForRedshiftCluster } from './private/metrics-redshift-cluster';
 import { createMetricsWidgetForRedshiftServerless } from './private/metrics-redshift-serverless';
 import { ExistingRedshiftServerlessProps, ProvisionedRedshiftProps, NewRedshiftServerlessProps, ScanMetadataWorkflowData, ClearExpiredEventsWorkflowData, TablesODSSource, WorkflowBucketInfo, LoadDataConfig } from './private/model';
-import { createCustomResourceAssociateIAMRole } from './private/redshift-associate-iam-role';
+import { RedshiftAssociateIAMRole } from './private/redshift-associate-iam-role';
 import { RedshiftServerless } from './private/redshift-serverless';
 import { ScanMetadataWorkflow } from './private/scan-metadata-workflow';
 import { addCfnNagForCustomResourceProvider, addCfnNagForLogRetention, addCfnNagToStack, ruleRolePolicyWithWildcardResources, ruleForLambdaVPCAndReservedConcurrentExecutions } from '../common/cfn-nag';
@@ -220,16 +220,18 @@ export class RedshiftAnalyticsStack extends NestedStack {
     }
 
     // custom resource to associate the IAM role to redshift cluster
-    const { cr: crForModifyClusterIAMRoles, redshiftRoleForCopyFromS3 } = createCustomResourceAssociateIAMRole(this,
+    const redshiftRoleForCopyFromS3 = new Role(this, 'CopyDataFromS3Role', {
+      assumedBy: new ServicePrincipal('redshift.amazonaws.com'),
+    });
+    const crForModifyClusterIAMRoles = new RedshiftAssociateIAMRole(this, 'RedshiftAssociateS3CopyRole',
       {
         serverlessRedshift: existingRedshiftServerlessProps,
         provisionedRedshift: props.provisionedRedshiftProps,
-      });
-
+        role: redshiftRoleForCopyFromS3,
+      }).cr;
     crForModifyClusterIAMRoles.node.addDependency(this.applicationSchema.crForCreateSchemas);
 
     const ddbStatusTable = createDDBStatusTable(this, 'FileStatus');
-
 
     const scanMetadataWorkflow = new ScanMetadataWorkflow(this, 'ScanMetadataWorkflow', {
       appIds: props.appIds,

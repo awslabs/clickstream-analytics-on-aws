@@ -112,6 +112,7 @@ export type CreateMappingRoleUser = Omit<CustomProperties, 'provisionedRedshiftP
 
 export type AssociateIAMRoleToRedshift = CustomProperties & {
   readonly roleArn: string;
+  readonly timeoutInSeconds: number;
 }
 
 export interface NewWorkgroupProperties {

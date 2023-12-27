@@ -37,6 +37,7 @@ import {
 import { CloudFormationCustomResourceEvent, Context } from 'aws-lambda';
 import { logger } from '../../../../common/powertools';
 import { aws_sdk_client_common_config } from '../../../../common/sdk-client-config';
+import { sleep } from '../../../../common/utils';
 
 const region = process.env.AWS_REGION;
 
@@ -209,7 +210,7 @@ async function createCustomPlugin(
   let n = 0;
   while (n < MAX_N) {
     n++;
-    await sleep(5);
+    await sleep(5000);
     let res = await kafkaConnectClient.send(
       new DescribeCustomPluginCommand({
         customPluginArn,
@@ -324,7 +325,7 @@ async function createConnector(event: ResourceEvent, customPluginArn: string) {
   let n = 0;
   while (n < MAX_N) {
     n++;
-    await sleep();
+    await sleep(SLEEP_SEC * 1000);
     let res = await kafkaConnectClient.send(
       new DescribeConnectorCommand({
         connectorArn,
@@ -446,7 +447,7 @@ async function updateConnector(event: ResourceEvent) {
     let n = 0;
     while (n < MAX_N) {
       n++;
-      await sleep();
+      await sleep(SLEEP_SEC * 1000);
       const res = await kafkaConnectClient.send(
         new DescribeConnectorCommand({
           connectorArn,
@@ -491,7 +492,7 @@ async function deletePlugin(event: ResourceEvent) {
     let n = 0;
     while (n < MAX_N) {
       n++;
-      await sleep();
+      await sleep(SLEEP_SEC * 1000);
       try {
         const res = await kafkaConnectClient.send(
           new DescribeCustomPluginCommand({
@@ -534,7 +535,7 @@ async function deleteConnector(event: ResourceEvent) {
     let n = 0;
     while (n < MAX_N) {
       n++;
-      await sleep();
+      await sleep(SLEEP_SEC * 1000);
       try {
         const res = await kafkaConnectClient.send(
           new DescribeConnectorCommand({
@@ -604,11 +605,5 @@ async function download(url: string, outPath: string) {
         reject(err);
       });
     });
-  });
-}
-
-async function sleep(seconds: number = SLEEP_SEC) {
-  return new Promise((resolve) => {
-    setTimeout(resolve, seconds * 1000);
   });
 }

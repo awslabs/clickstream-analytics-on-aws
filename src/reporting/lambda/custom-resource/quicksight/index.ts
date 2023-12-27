@@ -41,6 +41,7 @@ import Mustache from 'mustache';
 import { v4 as uuidv4 } from 'uuid';
 import { logger } from '../../../../common/powertools';
 import { aws_sdk_client_common_config } from '../../../../common/sdk-client-config';
+import { sleep } from '../../../../common/utils';
 import {
   QuicksightCustomResourceLambdaProps,
   waitForAnalysisChangeCompleted,
@@ -56,7 +57,6 @@ import {
   dataSetAdminPermissionActions,
   analysisAdminPermissionActions,
   dataSetReaderPermissionActions,
-  sleep,
   waitForTemplateChangeCompleted,
   existDashboard,
   existAnalysis,

@@ -18,8 +18,8 @@ import { getRedshiftServerlessNamespace } from './redshift-serverless';
 import { getFunctionTags } from '../../../common/lambda/tags';
 import { logger } from '../../../common/powertools';
 import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
+import { sleep } from '../../../common/utils';
 import { NewNamespaceCustomProperties } from '../../private/model';
-import { Sleep } from '../redshift-data';
 
 type ResourcePropertiesType = NewNamespaceCustomProperties & {
   readonly ServiceToken: string;
@@ -134,7 +134,7 @@ async function waitForRedshiftServerlessNamespaceStatus(
     if (namespace.status === NamespaceStatus.AVAILABLE) {
       return namespace;
     }
-    await Sleep(3000);
+    await sleep(3000);
   }
   throw new Error(`Namespace ${namespaceName} is not available.`);
 }
