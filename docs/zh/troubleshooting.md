@@ -111,6 +111,7 @@ aws logs put-resource-policy --policy-name AWSLogDeliveryWrite20150319 \
       };
       return response;
     };
+    
     END
     
     rm ./noops-lambda.zip > /dev/null 2>&1
