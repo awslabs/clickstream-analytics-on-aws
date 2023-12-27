@@ -14,7 +14,7 @@
 import { join } from 'path';
 import { Aws, CfnResource, Duration, Stack } from 'aws-cdk-lib';
 import { Table } from 'aws-cdk-lib/aws-dynamodb';
-import { Rule } from 'aws-cdk-lib/aws-events';
+import { CfnRule, Rule } from 'aws-cdk-lib/aws-events';
 import { LambdaFunction } from 'aws-cdk-lib/aws-events-targets';
 import { Effect, Policy, PolicyStatement, Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 import { IFunction, Tracing } from 'aws-cdk-lib/aws-lambda';
@@ -78,7 +78,6 @@ export class BackendEventBus extends Construct {
       eventPattern: {
         source: ['aws.cloudformation'],
         detailType: ['CloudFormation Stack Status Change'],
-        // resources: [`{ "wildcard": "arn:${Aws.PARTITION}:states:*:${Aws.ACCOUNT_ID}:stack/Clickstream*/*" }`],
       },
     });
     ruleStack.addTarget(
@@ -88,6 +87,10 @@ export class BackendEventBus extends Construct {
         retryAttempts: 2,
       }),
     );
+    const cfnRule = ruleStack.node.defaultChild as CfnRule;
+    cfnRule.addOverride('Properties.EventPattern.resources', [
+      { wildcard: `arn:${Aws.PARTITION}:states:*:${Aws.ACCOUNT_ID}:stack/Clickstream*/*` },
+    ]);
   };
 
   private createRuleForListenStateStatusChange = (props: BackendEventBusProps) => {
@@ -102,7 +105,6 @@ export class BackendEventBus extends Construct {
         detail: {
           stateMachineArn: [props.listenStateMachine.stateMachineArn],
         },
-        // resources: [`{ "wildcard": "arn:${Aws.PARTITION}:states:${Aws.REGION}:${Aws.ACCOUNT_ID}:execution:${props.listenStateMachine.stateMachineName}:main*" }`],
       },
     });
     ruleState.addTarget(
@@ -112,6 +114,10 @@ export class BackendEventBus extends Construct {
         retryAttempts: 2,
       }),
     );
+    const cfnRule = ruleState.node.defaultChild as CfnRule;
+    cfnRule.addOverride('Properties.EventPattern.resources', [
+      { wildcard: `arn:${Aws.PARTITION}:states:${Aws.REGION}:${Aws.ACCOUNT_ID}:execution:${props.listenStateMachine.stateMachineName}:main*` },
+    ]);
   };
 
   private listenStackFn(props: BackendEventBusProps): IFunction {

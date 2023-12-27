@@ -33,7 +33,7 @@ const docClient = DynamoDBDocumentClient.from(ddbClient, {
 const clickStreamTableName = process.env.CLICKSTREAM_TABLE_NAME ?? '';
 const prefixTimeGSIName = process.env.PREFIX_TIME_GSI_NAME ?? '';
 
-interface CloudFormationStackStatusChangeNotificationEventDetail {
+export interface CloudFormationStackStatusChangeNotificationEventDetail {
   'stack-id': string;
   'status-details': {
     status: StackStatus;

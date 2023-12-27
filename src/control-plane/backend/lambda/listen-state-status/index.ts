@@ -34,7 +34,7 @@ const docClient = DynamoDBDocumentClient.from(ddbClient, {
 const clickStreamTableName = process.env.CLICKSTREAM_TABLE_NAME ?? '';
 const prefixTimeGSIName = process.env.PREFIX_TIME_GSI_NAME ?? '';
 
-interface StepFunctionsExecutionStatusChangeNotificationEventDetail extends ExecutionDetail {
+export interface StepFunctionsExecutionStatusChangeNotificationEventDetail extends ExecutionDetail {
   startDate?: number;
   stopDate?: number;
   input?: any;
@@ -62,6 +62,7 @@ export const handler = async (
 
   await updatePipelineStateStatus(projectId, pipelineId, eventDetail);
 
+  console.log('eventDetail.status: ', eventDetail.status, pipeline.lastAction);
   if (eventDetail.status === ExecutionStatus.SUCCEEDED && pipeline.lastAction === 'Delete') {
     await deleteProject(projectId);
     await deleteRuleAndTargets(pipeline.region, `${CFN_RULE_PREFIX}-${projectId}`);
