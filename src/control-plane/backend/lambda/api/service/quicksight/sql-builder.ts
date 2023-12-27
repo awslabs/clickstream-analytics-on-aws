@@ -1131,7 +1131,7 @@ function _getUnionBaseDataForEventPathAnalysis(eventNames: string[], sqlParamete
   let sql = 'union_base_data as (';
   for (const [index, eventCondition] of sqlParameters.eventAndConditions!.entries()) {
     const eventName = eventCondition.eventName;
-    const conditionSql = getConditionSql(eventCondition.sqlCondition);
+    const conditionSql = buildConditionSql(eventCondition.sqlCondition);
 
     if (index > 0) {
       sql += 'union all';
@@ -1795,7 +1795,7 @@ function _buildEventCondition(eventNames: string[], sqlParameters: SQLParameters
 function _buildConditionSQLForRetention(eventName: string, sqlCondition: SQLCondition | undefined) {
 
   let sql = '';
-  sql = getConditionSql(sqlCondition);
+  sql = buildConditionSql(sqlCondition);
   if (sql !== '') {
     sql = `and (${sql}) `;
   }
@@ -1959,7 +1959,7 @@ function generateDateList(startDate: Date, endDate: Date): string[] {
   return dateList;
 }
 
-function getConditionSql(sqlCondition: SQLCondition | undefined) {
+export function buildConditionSql(sqlCondition: SQLCondition | undefined) {
   if (!sqlCondition) {
     return '';
   }

@@ -12,21 +12,106 @@
  */
 
 import { format } from 'sql-formatter';
-import { AttributionSQLParameters, BaseSQLParameters, ColumnAttribute, EVENT_TABLE, EventAndCondition, EventNonNestColProps, USER_TABLE, buildCommonColumnsSql, buildCommonConditionSql, buildConditionProps, buildEventConditionPropsFromEvents, buildEventDateSql, buildEventJoinTable, buildEventsNameFromConditions, buildNecessaryEventColumnsSql, buildUserJoinTable } from './sql-builder';
+import { AttributionSQLParameters, BaseSQLParameters, ColumnAttribute, EVENT_TABLE, EventAndCondition, EventNonNestColProps, USER_TABLE, buildCommonColumnsSql, buildCommonConditionSql, buildConditionProps, buildConditionSql, buildEventConditionPropsFromEvents, buildEventDateSql, buildEventJoinTable, buildEventsNameFromConditions, buildNecessaryEventColumnsSql, buildUserJoinTable } from './sql-builder';
+import { AttributionModelType, ExploreComputeMethod } from '../../common/explore-types';
 
-export function buildSQLForLastTouchModel(params: AttributionSQLParameters): string {
+export function buildSQLForSinglePointModel(params: AttributionSQLParameters): string {
 
   const eventNames = buildEventsNameFromConditions(params.eventAndConditions as EventAndCondition[]);
-  let sql = '';
+  const commonPartSql = buildCommonSqlForAttribution(eventNames, params);
 
-  sql = buildCommonSqlForAttribution(eventNames.concat(params.targetEventAndCondition.eventName), params);
+  let modelBaseDataSql = '';
+  if(params.modelType === AttributionModelType.LAST_TOUCH) {
+    modelBaseDataSql = `
+      model_base_data as (
+        select user_pseudo_id, group_id, max(row_seq) as row_seq
+        from joined_base_data
+        group by user_pseudo_id, group_id
+      ),
+    `
+  } else if (params.modelType === AttributionModelType.FIRST_TOUCH) {
+    modelBaseDataSql = `
+      model_base_data as (
+        select user_pseudo_id, group_id, min(row_seq) as row_seq
+        from joined_base_data
+        group by user_pseudo_id, group_id
+      ),
+    `
+  }
+
+  const modelDataSql = `
+    ${modelBaseDataSql}
+    model_data as (
+      select 
+        joined_base_data.* 
+      from joined_base_data join model_base_data on joined_base_data.user_pseudo_id = model_base_data.user_pseudo_id
+      and joined_base_data.row_seq = model_base_data.row_seq and joined_base_data.group_id = model_base_data.group_id
+    ),
+  `
+
+  let attributionDataSql = '';
+  if(params.computeMethod === ExploreComputeMethod.EVENT_CNT) {
+    attributionDataSql = `
+      attribution_data as (
+        select 
+          t_event_name
+          ,count(t_event_id) as contribution
+        from model_data
+        group by t_event_name
+      )
+      select 
+        attribution_data.t_event_name as event_name
+        ,attribution_data.contribution
+        ,cast(attribution_data.contribution as float)/t.total_contribution as contribution_rate
+      from attribution_data
+      join (
+        select (t_event_id) as total_contribution from model_data
+      ) as t
+      on 1=1
+    `
+  } else if (params.computeMethod === ExploreComputeMethod.USER_CNT) {
+    attributionDataSql = `
+      model_data_with_user as (
+        select 
+          model_data.*
+          COALESCE(user.user_id, user.user_pseudo_id) as u_user_pseudo_id
+        from model_data
+        join ${params.schemaName}.${USER_TABLE} as user
+        on model_data.user_pseudo_id = user.user_pseudo_id
+      ),
+      attribution_data as (
+        select 
+          t_event_name
+          ,count(distinct u_user_pseudo_id) as contribution
+        from model_data_with_user
+        group by t_event_name
+      )
+      select 
+         attribution_data.t_event_name as event_name
+        ,attribution_data.contribution
+        ,cast(attribution_data.contribution as float)/t.total_contribution as contribution_rate
+      from attribution_data
+      join (
+        select sum(attribution_data) as total_contribution from attribution_data
+      ) as t
+      on 1=1
+    `
+  } else if(params.computeMethod === ExploreComputeMethod.SUM_VALUE) {
+    
+  }
+  
+  const sql = `
+    ${commonPartSql}
+    ${modelDataSql}
+    ${attributionDataSql}
+  `
 
   return format(sql, {
     language: 'postgresql',
   });
 }
 
-export function buildCommonSqlForAttribution(eventNames: string[], params: AttributionSQLParameters) : string {
+export function buildBaseDataForAttribution(eventNames: string[], params: AttributionSQLParameters) : string {
 
   let resultSql = 'with';
   const commonConditionSql = buildCommonConditionSql(params as BaseSQLParameters, 'event.');
@@ -123,6 +208,96 @@ export function buildCommonSqlForAttribution(eventNames: string[], params: Attri
   return format(resultSql, { language: 'postgresql' });
 }
 
+export function buildCommonSqlForAttribution(eventNames: string[], params: AttributionSQLParameters) : string {
+
+  const commonPartSql = buildBaseDataForAttribution(eventNames.concat(params.targetEventAndCondition.eventName), params);
+
+  const targetSql = `
+    target_data as (
+      select 
+         user_pseudo_id
+        ,event_id
+        ,event_name
+        ,event_timestamp
+        ,row_number() over(PARTITION by user_pseudo_id ORDER by event_timestamp asc) as rank 
+      from base_data
+      where event_name = '${params.targetEventAndCondition.eventName}' and (
+        ${buildConditionSql(params.targetEventAndCondition.sqlCondition)}
+      )
+    ),
+  `
+  let touchPointSql = `
+    touch_point_data_1 as (
+      select 
+        user_pseudo_id
+      , event_id
+      , event_name
+      , event_timestamp
+      from target_data
+  `;
+  for (const [index, eventAndCondition] of params.eventAndConditions.entries()) {
+    touchPointSql = touchPointSql.concat(`
+      union all
+      select 
+        user_pseudo_id
+      , event_id
+      , event_name || '_${index+1}' as event_name
+      , event_timestamp
+      from base_data 
+      where 
+        event_name = '${eventAndCondition.eventName}' 
+        and ( ${buildConditionSql(eventAndCondition.sqlCondition)} )
+    `)
+  }
+
+  touchPointSql = touchPointSql.concat(`
+    ),
+    touch_point_data_2 as (
+      select 
+      * 
+      , case when event_name = '${params.targetEventAndCondition.eventName}' then 1 else 0 end as conversation_flag
+      from touch_point_data_1 order by event_timestamp
+    ),
+    touch_point_data_3 as (
+      select 
+      * 
+      , SUM(conversation_flag) over (
+      PARTITION by user_pseudo_id
+      order by
+          user_pseudo_id,
+          event_timestamp ROWS BETWEEN UNBOUNDED PRECEDING
+          AND CURRENT ROW
+      ) + 1 AS group_id
+      from touch_point_data_2
+    ),
+  `)
+
+  const joinSql = `
+    joined_base_data as (
+        select 
+         target_data.*
+        ,touch_point_data_3.user_pseudo_id as t_user_pseudo_id
+        ,touch_point_data_3.event_id as t_event_id
+        ,touch_point_data_3.event_name as t_event_name
+        ,touch_point_data_3.event_timestamp as t_event_timestamp
+        ,touch_point_data_3.conversation_flag
+        ,touch_point_data_3.group_id
+        ,row_number() over(PARTITION by t_user_pseudo_id, rank order by t_event_timestamp asc) as row_seq
+        from target_data
+        join touch_point_data_3 on target_data.user_pseudo_id = touch_point_data_3.user_pseudo_id and target_data.rank = touch_point_data_3.group_id and target_data.event_timestamp >= touch_point_data_3.event_timestamp
+        where touch_point_data_3.event_name <> '${params.targetEventAndCondition.eventName}'
+    ),
+  `
+
+  const sql = `
+    ${commonPartSql}
+    ${targetSql}
+    ${touchPointSql}
+    ${joinSql}
+  `
+
+  return format(sql, { language: 'postgresql' });
+}
 
 function buildAttributionEventConditionProps(sqlParameters: AttributionSQLParameters) {
 
@@ -263,27 +438,3 @@ function _buildBaseUserDataTableSql(sqlParameters: AttributionSQLParameters, has
         ${sqlParameters.schemaName}.${USER_TABLE} u ${nextColSQL}
   `;
 }
-
-// function _getAllConditionSql(eventNames: string[], sqlParameters: AttributionSQLParameters) : string {
-
-//   let eventNameAndSQLConditions: EventNameAndConditionsSQL[] = [];
-//   fillEventNameAndSQLConditions(eventNames, sqlParameters, eventNameAndSQLConditions, false);
-
-//   let allConditionSql = '';
-//   for (const [index, eventNameAndSQLCondition] of eventNameAndSQLConditions.entries()) {
-//     let conditionSql = eventNameAndSQLCondition.conditionSql;
-//     if (conditionSql !== '') {
-//       conditionSql = `and (${conditionSql}) `;
-//     }
-
-//     allConditionSql = allConditionSql.concat(`
-//       ${index === 0? '' : 'or' } (event_name = '${eventNameAndSQLCondition.eventName}' ${conditionSql} )
-//     `);
-//   }
-
-//   if (allConditionSql !== '' ) {
-//     allConditionSql = allConditionSql + ` or (event_name not in ('${eventNames.join('\',\'')}'))`;
-//   }
-
-//   return allConditionSql !== '' ? `and (${allConditionSql})` : '';
-// }

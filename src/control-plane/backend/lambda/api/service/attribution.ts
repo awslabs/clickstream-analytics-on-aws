@@ -13,7 +13,7 @@
 
 import { checkAttributionAnalysisParameter } from './quicksight/reporting-utils';
 import { AttributionSQLParameters } from './quicksight/sql-builder';
-import { buildSQLForLastTouchModel } from './quicksight/sql-builder-attribution';
+import { buildSQLForSinglePointModel } from './quicksight/sql-builder-attribution';
 import { AttributionModelType } from '../common/explore-types';
 import { logger } from '../common/powertools';
 import { ApiFail, ApiSuccess } from '../common/types';
@@ -33,8 +33,8 @@ export class AttributionAnalysisService {
         return res.status(400).json(new ApiFail(checkResult.message));
       }
 
-      if (query.modelType == AttributionModelType.LAST_TOUCH) {
-        await this.createLastTouchModelVisual(query as AttributionSQLParameters);
+      if (query.modelType == AttributionModelType.LAST_TOUCH || query.modelType == AttributionModelType.FIRST_TOUCH) {
+        await this.createSinglePointModelVisual(query as AttributionSQLParameters);
       }
 
       return res.status(201).json(new ApiSuccess(''));
@@ -44,13 +44,13 @@ export class AttributionAnalysisService {
     }
   };
 
-  async createLastTouchModelVisual(params: AttributionSQLParameters) {
+  async createSinglePointModelVisual(params: AttributionSQLParameters) {
 
     //construct parameters to build sql
     // const viewName = getTempResourceName(query.viewName, query.action);
-    const sql = buildSQLForLastTouchModel(params);
+    const sql = buildSQLForSinglePointModel(params);
 
-    logger.debug(`sql of last touch model: ${sql}`);
+    logger.debug(`sql of single point model: ${sql}`);
 
     return sql;
 

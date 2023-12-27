@@ -14,15 +14,198 @@
 import { AttributionModelType, ConditionCategory, ExploreComputeMethod, ExploreGroupColumn, ExploreTimeScopeType, MetadataValueType } from '../../common/explore-types';
 // import { logger } from '../../common/powertools';
 import { _buildCommonPartSql } from '../../service/quicksight/sql-builder';
-import { buildSQLForLastTouchModel } from '../../service/quicksight/sql-builder-attribution';
+import { buildSQLForSinglePointModel } from '../../service/quicksight/sql-builder-attribution';
 
 describe('Attribution SQL Builder test', () => {
 
   beforeEach(() => {
   });
 
-  test('last touch model', () => {
-    const sql = buildSQLForLastTouchModel({
+  test('last touch model - event count', () => {
+    const sql = buildSQLForSinglePointModel({
+      schemaName: 'shop',
+      computeMethod: ExploreComputeMethod.EVENT_CNT,
+      globalEventCondition: {
+        conditions: [
+          {
+            category: ConditionCategory.OTHER,
+            property: 'platform',
+            operator: '=',
+            value: ['Android'],
+            dataType: MetadataValueType.STRING,
+          },
+          {
+            category: ConditionCategory.GEO,
+            property: 'country',
+            operator: '=',
+            value: ['China'],
+            dataType: MetadataValueType.STRING,
+          },
+          {
+            category: ConditionCategory.USER,
+            property: '_user_first_touch_timestamp',
+            operator: '>',
+            value: [1686532526770],
+            dataType: MetadataValueType.INTEGER,
+          },
+          {
+            category: ConditionCategory.USER_OUTER,
+            property: '_channel',
+            operator: '<>',
+            value: ['google'],
+            dataType: MetadataValueType.STRING,
+          },
+        ],
+      },
+      targetEventAndCondition:
+        {
+          eventName: 'purchase',
+          sqlCondition: {
+            conditionOperator: 'and',
+            conditions: [
+              {
+                category: ConditionCategory.OTHER,
+                property: 'platform',
+                operator: '=',
+                value: ['Android'],
+                dataType: MetadataValueType.STRING,
+              },
+              {
+                category: ConditionCategory.GEO,
+                property: 'country',
+                operator: '=',
+                value: ['China'],
+                dataType: MetadataValueType.STRING,
+              },
+              {
+                category: ConditionCategory.USER_OUTER,
+                property: '_user_first_touch_timestamp',
+                operator: '>',
+                value: [1686532526770],
+                dataType: MetadataValueType.INTEGER,
+              },
+              {
+                category: ConditionCategory.EVENT,
+                property: '_session_duration',
+                operator: '>',
+                value: [200],
+                dataType: MetadataValueType.INTEGER,
+              },
+              {
+                category: ConditionCategory.USER_OUTER,
+                property: '_channel',
+                operator: '<>',
+                value: ['google'],
+                dataType: MetadataValueType.STRING,
+              },
+            ],
+          },
+        },
+      eventAndConditions: [
+        {
+          eventName: 'view_item',
+          sqlCondition: {
+            conditionOperator: 'and',
+            conditions: [
+              {
+                category: ConditionCategory.OTHER,
+                property: 'platform',
+                operator: '=',
+                value: ['Android'],
+                dataType: MetadataValueType.STRING,
+              },
+              {
+                category: ConditionCategory.GEO,
+                property: 'country',
+                operator: '=',
+                value: ['China'],
+                dataType: MetadataValueType.STRING,
+              },
+              {
+                category: ConditionCategory.USER_OUTER,
+                property: 'user_first_touch_timestamp',
+                operator: '>',
+                value: [1686532526770],
+                dataType: MetadataValueType.INTEGER,
+              },
+              {
+                category: ConditionCategory.EVENT,
+                property: '_session_duration',
+                operator: '>',
+                value: [200],
+                dataType: MetadataValueType.INTEGER,
+              },
+              {
+                category: ConditionCategory.USER_OUTER,
+                property: '_channel',
+                operator: '=',
+                value: ['apple'],
+                dataType: MetadataValueType.STRING,
+              },
+            ],
+          },
+        },
+        {
+          eventName: 'add_to_cart',
+          sqlCondition: {
+            conditionOperator: 'and',
+            conditions: [
+              {
+                category: ConditionCategory.OTHER,
+                property: 'platform',
+                operator: '=',
+                value: ['Android'],
+                dataType: MetadataValueType.STRING,
+              },
+              {
+                category: ConditionCategory.GEO,
+                property: 'country',
+                operator: '=',
+                value: ['China'],
+                dataType: MetadataValueType.STRING,
+              },
+              {
+                category: ConditionCategory.USER,
+                property: '_user_first_touch_timestamp',
+                operator: '>',
+                value: [1686532526770],
+                dataType: MetadataValueType.INTEGER,
+              },
+              {
+                category: ConditionCategory.EVENT,
+                property: '_session_duration',
+                operator: '>',
+                value: [200],
+                dataType: MetadataValueType.INTEGER,
+              },
+              {
+                category: ConditionCategory.USER_OUTER,
+                property: '_channel',
+                operator: '=',
+                value: ['apple'],
+                dataType: MetadataValueType.STRING,
+              },
+            ],
+          },
+        },
+      ],
+      modelType: AttributionModelType.LAST_TOUCH,
+      timeScopeType: ExploreTimeScopeType.FIXED,
+      timeStart: new Date('2023-10-01'),
+      timeEnd: new Date('2025-10-10'),
+      groupColumn: ExploreGroupColumn.DAY,
+    });
+
+    console.log(sql);
+
+    expect(sql.trim().replace(/ /g, '')).toEqual(`
+   
+    `.trim().replace(/ /g, ''));
+
+  });
+
+  test('last touch model - user count', () => {
+    const sql = buildSQLForSinglePointModel({
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.USER_CNT,
       globalEventCondition: {
@@ -94,8 +277,8 @@ describe('Attribution SQL Builder test', () => {
               {
                 category: ConditionCategory.USER_OUTER,
                 property: '_channel',
-                operator: '=',
-                value: ['apple'],
+                operator: '<>',
+                value: ['google'],
                 dataType: MetadataValueType.STRING,
               },
             ],
