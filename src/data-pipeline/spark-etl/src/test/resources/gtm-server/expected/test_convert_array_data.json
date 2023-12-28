@@ -238,6 +238,8 @@
     "eventItems" : [ ],
     "user" : null,
     "requestStartTimeMs" : 1695261256542,
-    "uc" : "US"
+    "uc" : "US",
+    "gtmSessionId" : "1695260713",
+    "gtmSessionNum" : 2
   }
 }
