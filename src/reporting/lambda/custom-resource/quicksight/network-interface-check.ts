@@ -12,12 +12,12 @@
  */
 
 import { EC2, NetworkInterfaceStatus } from '@aws-sdk/client-ec2';
+import { QuickSight } from '@aws-sdk/client-quicksight';
 import { Context, CloudFormationCustomResourceEvent, CdkCustomResourceResponse } from 'aws-lambda';
 import { logger } from '../../../../common/powertools';
 import { aws_sdk_client_common_config } from '../../../../common/sdk-client-config';
 import { sleep } from '../../../../common/utils';
 import { NetworkInterfaceCheckCustomResourceLambdaProps } from '../../../private/dashboard';
-import { QuickSight } from '@aws-sdk/client-quicksight';
 
 type ResourceEvent = CloudFormationCustomResourceEvent;
 
@@ -47,7 +47,23 @@ export const handler = async (event: ResourceEvent, _context: Context): Promise<
   }
 };
 
-const _onCreate = async (ec2Client: EC2, quickSightClient: QuickSight, props: NetworkInterfaceCheckCustomResourceLambdaPropsType): Promise<CdkCustomResourceResponse> => {
+const checkVpcConnection = async (quickSightClient: QuickSight, vpcConnectionId: string, awsAccountId: string): Promise<boolean> => {
+  const vpcConnection = await quickSightClient.describeVPCConnection({
+    VPCConnectionId: vpcConnectionId,
+    AwsAccountId: awsAccountId,
+  });
+
+  if (vpcConnection.VPCConnection !== undefined) {
+    logger.info(`vpc connection status: ${vpcConnectionId} - ${vpcConnection.VPCConnection.AvailabilityStatus}`);
+    if (vpcConnection.VPCConnection.AvailabilityStatus !== 'AVAILABLE') {
+      return false;
+    }
+  }
+  return true;
+};
+
+const _onCreate = async (ec2Client: EC2, quickSightClient: QuickSight,
+  props: NetworkInterfaceCheckCustomResourceLambdaPropsType): Promise<CdkCustomResourceResponse> => {
 
   const networkInterfaceIds: string[] = [];
   for (const ni of props.networkInterfaces) {
@@ -65,7 +81,7 @@ const _onCreate = async (ec2Client: EC2, quickSightClient: QuickSight, props: Ne
     const networkInterfacesDescribeResult = await ec2Client.describeNetworkInterfaces({
       NetworkInterfaceIds: networkInterfaceIds,
     });
-    
+
     let ready = true;
     if (networkInterfacesDescribeResult.NetworkInterfaces !== undefined) {
       for (const networkInterface of networkInterfacesDescribeResult.NetworkInterfaces) {
@@ -76,23 +92,15 @@ const _onCreate = async (ec2Client: EC2, quickSightClient: QuickSight, props: Ne
       }
     }
 
-    const vpcConnection = await quickSightClient.describeVPCConnection({
-      VPCConnectionId: props.vpcConnectionId,
-      AwsAccountId: props.awsAccountId,
-    });
+    const vpcConnectionReady = await checkVpcConnection(quickSightClient, props.vpcConnectionId, props.awsAccountId);
 
-    if(vpcConnection.VPCConnection !== undefined) {
-      logger.info(`vpc connection status: ${props.vpcConnectionId} - ${vpcConnection.VPCConnection.AvailabilityStatus}`);
-      if(vpcConnection.VPCConnection.AvailabilityStatus !== 'AVAILABLE') {
-        ready = false;
-      }
-    }
-    isNetworkInterfaceReady = ready;
+    isNetworkInterfaceReady = ready && vpcConnectionReady;
   }
 
   //force wait 1 minute after vpc connection is available
-  if (isNetworkInterfaceReady) {
-    logger.info('force wait 1 minute after vpc connection is available')
+
+  if (process.env.IS_SKIP_VPC_CONNECTION_FORCE_WAITING !== 'true') {
+    logger.info('force wait 1 minute after vpc connection is available');
     await sleep(60000);
   }
 

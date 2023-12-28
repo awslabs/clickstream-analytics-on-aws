@@ -76,13 +76,13 @@ export class DataReportingQuickSightStack extends Stack {
       subnetIds: Fn.split(',', stackParams.quickSightVpcConnectionSubnetParam.valueAsString),
       vpcConnectionId: vpcConnectionId,
     });
-    
+
     vPCConnectionResource.node.addDependency(vpcConnectionCreateRole);
     const vpcConnectionArn = vPCConnectionResource.getAtt('Arn').toString();
     const networkInterfaces = vPCConnectionResource.getAtt('NetworkInterfaces').toString();
     const interfaceCheckCR = createNetworkInterfaceCheckCustomResource(this, {
       networkInterfaces,
-      vpcConnectionId
+      vpcConnectionId,
     });
     interfaceCheckCR.node.addDependency(vPCConnectionResource);
 
