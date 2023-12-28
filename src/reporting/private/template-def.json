@@ -2253,7 +2253,7 @@
                                                     "DataSetIdentifier": "Session_View",
                                                     "ColumnName": "session_id"
                                                 },
-                                                "AggregationFunction": "DISTINCT_COUNT"
+                                                "AggregationFunction": "COUNT"
                                             }
                                         }
                                     ],
@@ -3302,7 +3302,7 @@
                                                     "DataSetIdentifier": "Session_View",
                                                     "ColumnName": "session_id"
                                                 },
-                                                "AggregationFunction": "DISTINCT_COUNT"
+                                                "AggregationFunction": "COUNT"
                                             }
                                         }
                                     ],
