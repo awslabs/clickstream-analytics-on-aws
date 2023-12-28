@@ -23,7 +23,6 @@ import {
   applyChangeToDashboard,
   getDashboardDefinitionFromArn,
   CreateDashboardResult,
-  sleep,
   DashboardCreateParameters,
   getFunnelVisualDef,
   getVisualRelatedDefs,
@@ -54,6 +53,7 @@ import { logger } from '../common/powertools';
 import { SDKClient } from '../common/sdk-client';
 import { ApiFail, ApiSuccess, PipelineStackType } from '../common/types';
 import { getStackOutputFromPipelineStatus } from '../common/utils';
+import { sleep } from '../common/utils-ln';
 import { QuickSightUserArns, generateEmbedUrlForRegisteredUser, getClickstreamUserArn, waitDashboardSuccess } from '../store/aws/quicksight';
 import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';

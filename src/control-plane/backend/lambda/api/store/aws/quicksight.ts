@@ -49,9 +49,9 @@ import { QUICKSIGHT_ANALYSIS_INFIX, QUICKSIGHT_DASHBOARD_INFIX, QUICKSIGHT_DATAS
 import { logger } from '../../common/powertools';
 import { SDKClient } from '../../common/sdk-client';
 import { QuickSightAccountInfo } from '../../common/types';
+import { sleep } from '../../common/utils-ln';
 import { IDashboard } from '../../model/project';
 import { analysisAdminPermissionActions, dashboardAdminPermissionActions, dataSetAdminPermissionActions } from '../../service/quicksight/dashboard-ln';
-import { sleep } from '../../service/quicksight/reporting-utils';
 
 const QUICKSIGHT_NAMESPACE = 'default';
 const QUICKSIGHT_EXPLORE_USER_NAME = 'ClickstreamExploreUser';

@@ -17,7 +17,8 @@ import { checkLoadStatus } from './check-load-status';
 import { CLICKSTREAM_DEVICE_VIEW_NAME, CLICKSTREAM_EVENT_PARAMETER_VIEW_NAME, CLICKSTREAM_EVENT_VIEW_NAME, CLICKSTREAM_LIFECYCLE_DAILY_VIEW_NAME, CLICKSTREAM_LIFECYCLE_WEEKLY_VIEW_NAME, CLICKSTREAM_RETENTION_VIEW_NAME, CLICKSTREAM_SESSION_VIEW_NAME, CLICKSTREAM_USER_FIRST_ATTR_VIEW_NAME } from '../../../common/constant';
 import { logger } from '../../../common/powertools';
 
-import { getRedshiftClient, executeStatements, getRedshiftProps, Sleep } from '../redshift-data';
+import { sleep } from '../../../common/utils';
+import { getRedshiftClient, executeStatements, getRedshiftProps } from '../redshift-data';
 
 const REDSHIFT_DATA_API_ROLE_ARN = process.env.REDSHIFT_DATA_API_ROLE!;
 const REDSHIFT_DATABASE = process.env.REDSHIFT_DATABASE!;
@@ -68,7 +69,7 @@ REFRESH MATERIALIZED VIEW ${schema}.${CLICKSTREAM_USER_FIRST_ATTR_VIEW_NAME};
   }
 
   const execInfo = [];
-  await Sleep(1000 * parseInt(SLEEP_SEC));
+  await sleep(1000 * parseInt(SLEEP_SEC));
 
   for (const queryId of queryIds) {
     const statusRes = await checkLoadStatus(queryId);

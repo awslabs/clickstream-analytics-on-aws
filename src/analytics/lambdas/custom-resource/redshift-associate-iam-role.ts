@@ -17,18 +17,12 @@ import { CdkCustomResourceHandler, CdkCustomResourceEvent, CdkCustomResourceResp
 import { getRedshiftServerlessNamespace } from './redshift-serverless';
 import { logger } from '../../../common/powertools';
 import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
-import { ExistingRedshiftServerlessProps, ProvisionedRedshiftProps } from '../../private/model';
-import { Sleep } from '../redshift-data';
+import { sleep } from '../../../common/utils';
+import { AssociateIAMRoleToRedshift } from '../../private/model';
 
-interface CustomProperties {
-  readonly roleArn: string;
-  readonly serverlessRedshiftProps?: ExistingRedshiftServerlessProps;
-  readonly provisionedRedshiftProps?: ProvisionedRedshiftProps;
-}
-
-type ResourcePropertiesType = CustomProperties & {
-  readonly ServiceToken: string;
-}
+type ResourcePropertiesType = AssociateIAMRoleToRedshift & {
+  ServiceToken: string;
+};
 
 function strToIamRole(str: string): ClusterIamRole {
   logger.debug('Parsing IAM role string: ', { str });
@@ -63,9 +57,9 @@ function getNewDefaultIAMRole(rolesToBeHaved: string[], rolesToBeAssociated?: st
   return defaultRole;
 }
 
-function excludeToBeUnassociated(roles: string[], toBeUnasscoiated?: string): string[] {
-  if (toBeUnasscoiated) {
-    const index = roles.indexOf(toBeUnasscoiated, 0);
+function excludeToBeUnassociated(roles: string[], toBeUnassociated?: string): string[] {
+  if (toBeUnassociated) {
+    const index = roles.indexOf(toBeUnassociated, 0);
     if (index > -1) {
       roles.splice(index, 1);
     }
@@ -97,7 +91,8 @@ export const handler: CdkCustomResourceHandler = async (event: CdkCustomResource
     }
 
     if (resourceProps.serverlessRedshiftProps) {
-      await doServerlessRedshift(resourceProps.serverlessRedshiftProps.workgroupName, roleToBeAssociated, roleToBeUnassociated);
+      await doServerlessRedshift(resourceProps.serverlessRedshiftProps.workgroupName,
+        resourceProps.timeoutInSeconds, roleToBeAssociated, roleToBeUnassociated);
     } else if (resourceProps.provisionedRedshiftProps) {
       await doProvisionedRedshift(resourceProps.provisionedRedshiftProps.clusterIdentifier, roleToBeAssociated, roleToBeUnassociated);
     } else {
@@ -120,7 +115,7 @@ export const handler: CdkCustomResourceHandler = async (event: CdkCustomResource
   return response;
 };
 
-async function doServerlessRedshift(workgroupName: string,
+async function doServerlessRedshift(workgroupName: string, timeoutInSeconds: number,
   roleToBeAssociated: string | undefined, roleToBeUnassociated: string | undefined) {
   const client = new RedshiftServerlessClient({
     ...aws_sdk_client_common_config,
@@ -147,7 +142,7 @@ async function doServerlessRedshift(workgroupName: string,
   logger.info('Update namespace command ', { updateNamespace });
   await client.send(updateNamespace);
 
-  if (roleToBeAssociated) {await waitForRedshiftServerlessIAMRolesUpdating(namespaceName, client);}
+  if (roleToBeAssociated) {await waitForRedshiftServerlessIAMRolesUpdating(namespaceName, client, timeoutInSeconds);}
 }
 
 async function doProvisionedRedshift(clusterIdentifier: string,
@@ -184,12 +179,13 @@ async function getRedshiftServerlessIAMRoles(
 }
 
 async function waitForRedshiftServerlessIAMRolesUpdating(
-  namespaceName: string, client: RedshiftServerlessClient) {
-  for (const _i of Array(10).keys()) {
+  namespaceName: string, client: RedshiftServerlessClient, timeoutInSeconds: number) {
+  const timeoutRound = timeoutInSeconds > 50 ? Math.round(timeoutInSeconds / 5) : 10;
+  for (const _i of Array(timeoutRound).keys()) {
     const [iamRoles] = await getRedshiftServerlessIAMRoles(namespaceName, client);
     if (iamRoles.every(iamRole => iamRole.ApplyStatus === 'in-sync')) {
       return;
     }
-    await Sleep(5000);
+    await sleep(5000);
   }
 }
