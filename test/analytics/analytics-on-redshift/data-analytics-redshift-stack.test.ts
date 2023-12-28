@@ -2668,6 +2668,7 @@ describe('DataAnalyticsRedshiftStack serverless custom resource test', () => {
             Action: 'iam:PassRole',
             Effect: 'Allow',
             Resource: '*',
+            Condition: Match.absent(),
           },
         ],
         Version: '2012-10-17',
@@ -2676,6 +2677,33 @@ describe('DataAnalyticsRedshiftStack serverless custom resource test', () => {
       Roles: [
         RefAnyValue,
       ],
+    });
+
+    const nestedTemplate2 = Template.fromStack(stack.nestedStacks.redshiftProvisionedStack);
+    nestedTemplate2.hasResourceProperties('AWS::IAM::Policy', {
+      PolicyDocument: {
+        Statement: [
+          {
+            Action: [
+              'logs:CreateLogStream',
+              'logs:PutLogEvents',
+              'logs:CreateLogGroup',
+            ],
+            Effect: 'Allow',
+            Resource: '*',
+          },
+          {
+            Action: 'iam:PassRole',
+            Effect: 'Allow',
+            Resource: '*',
+            Condition: {
+              StringEquals: {
+                'iam:PassedToService': 'redshift.amazonaws.com',
+              },
+            },
+          },
+        ],
+      },
     });
   });
 
