@@ -2862,14 +2862,15 @@
 </span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="s">  };</span>
 </span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a><span class="s">  return response;</span>
 </span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a><span class="s">};</span>
-</span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a><span class="s">END</span>
-</span><span id="__span-1-17"><a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>
-</span><span id="__span-1-18"><a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>rm<span class="w"> </span>./noops-lambda.zip<span class="w"> </span>&gt;<span class="w"> </span>/dev/null<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span>
-</span><span id="__span-1-19"><a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a>zip<span class="w"> </span>./noops-lambda.zip<span class="w"> </span>./index.mjs
-</span><span id="__span-1-20"><a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a>
-</span><span id="__span-1-21"><a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a>aws<span class="w"> </span>lambda<span class="w"> </span>update-function-code<span class="w"> </span>--function-name<span class="w"> </span><span class="si">${</span><span class="nv">fn_name</span><span class="si">}</span><span class="w"> </span><span class="se">\</span>
-</span><span id="__span-1-22"><a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a><span class="w"> </span>--zip-file<span class="w"> </span>fileb://./noops-lambda.zip<span class="w"> </span><span class="se">\</span>
-</span><span id="__span-1-23"><a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a><span class="w"> </span>--region<span class="w"> </span><span class="si">${</span><span class="nv">aws_region</span><span class="si">}</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>tee<span class="w"> </span>/dev/null
+</span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>
+</span><span id="__span-1-17"><a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a><span class="s">END</span>
+</span><span id="__span-1-18"><a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>
+</span><span id="__span-1-19"><a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a>rm<span class="w"> </span>./noops-lambda.zip<span class="w"> </span>&gt;<span class="w"> </span>/dev/null<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span>
+</span><span id="__span-1-20"><a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a>zip<span class="w"> </span>./noops-lambda.zip<span class="w"> </span>./index.mjs
+</span><span id="__span-1-21"><a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a>
+</span><span id="__span-1-22"><a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a>aws<span class="w"> </span>lambda<span class="w"> </span>update-function-code<span class="w"> </span>--function-name<span class="w"> </span><span class="si">${</span><span class="nv">fn_name</span><span class="si">}</span><span class="w"> </span><span class="se">\</span>
+</span><span id="__span-1-23"><a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a><span class="w"> </span>--zip-file<span class="w"> </span>fileb://./noops-lambda.zip<span class="w"> </span><span class="se">\</span>
+</span><span id="__span-1-24"><a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a><span class="w"> </span>--region<span class="w"> </span><span class="si">${</span><span class="nv">aws_region</span><span class="si">}</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>tee<span class="w"> </span>/dev/null
 </span></code></pre></div>
 </li>
 <li>
