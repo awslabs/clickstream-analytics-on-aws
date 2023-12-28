@@ -37,9 +37,12 @@ import java.util.Map;
 import static org.apache.spark.sql.functions.col;
 import static org.apache.spark.sql.functions.expr;
 import static org.apache.spark.sql.functions.lit;
+import static org.apache.spark.sql.functions.max;
 import static org.apache.spark.sql.functions.max_by;
 import static org.apache.spark.sql.functions.min_by;
 import static org.apache.spark.sql.functions.struct;
+import static software.aws.solution.clickstream.gtm.GTMServerDataTransformer.GTM_PREVIOUS_SESSION_KEEP_DAYS;
+import static software.aws.solution.clickstream.gtm.GTMServerDataTransformer.MAX_SN;
 
 @Slf4j
 public final class DatasetUtil {
@@ -112,6 +115,8 @@ public final class DatasetUtil {
     public static final String EVENT_FIRST_VISIT = "_first_visit";
     public static final String EVENT_APP_END = "_app_end";
     public static final String EVENT_APP_START = "_app_start";
+    public static final String EVENT_SESSION_END = "_session_end";
+    public static final String EVENT_SESSION_START = "_session_start";
     public static final String APP_INFO = "app_info";
     public static final String MOBILE = "mobile";
     public static final String MODEL = "model";
@@ -129,6 +134,8 @@ public final class DatasetUtil {
     public static final String GTM_REQUEST_START_TIME_MS = "requestStartTimeMs";
     public static final String GTM_LANGUAGE = "language";
     public static final String GTM_UC = "uc";
+    public static final String GTM_SESSION_ID = "gtmSessionId";
+    public static final String GTM_SESSION_NUM = "gtmSessionNum";
     public static final String GTM_ID = "gtmId";
     public static final String GTM_VERSION = "gtmVersion";
     public static final String EVENT_ITEMS = "eventItems";
@@ -156,6 +163,7 @@ public final class DatasetUtil {
     public static final String FIRST_REFERER = "_first_referer";
     public static final String TABLE_NAME_ETL_GTM_USER_VISIT = "etl_gtm_user_visit";
     public static final String TABLE_NAME_ETL_GTM_USER_REFERRER = "etl_gtm_user_referrer";
+    public static final String TABLE_NAME_ETL_GTM_USER_SESSION = "etl_gtm_user_session";
     public static final String TABLE_NAME_ETL_MERGE_STATE = "etl_merge_state";
     public static final String TABLE_VERSION_SUFFIX_V1 = "_v1";
     public static final String GTM_PAGE_TITLE = "page_title";
@@ -175,7 +183,6 @@ public final class DatasetUtil {
             FULL_SUFFIX,
             INCREMENTAL_SUFFIX);
     private static final Map<String, StructType> SCHEMA_MAP = new HashMap<>();
-
     public static Map<String, StructType> getSchemaMap() {
         return SCHEMA_MAP;
     }
@@ -202,6 +209,29 @@ public final class DatasetUtil {
         log.info("aggTrafficSourceDataset count:" + aggUserRefererDataset.count());
         saveFullDatasetToPath(pathInfo.getFull(), aggUserRefererDataset);
         return aggUserRefererDataset;
+    }
+
+
+    public static Dataset<Row> loadPreviousUserSessionDataset(final Dataset<Row> newUserSessionDataset, final PathInfo pathInfo) {
+        SparkSession spark = newUserSessionDataset.sparkSession();
+        int sessionKeepDays = Integer.parseInt(System.getProperty(GTM_PREVIOUS_SESSION_KEEP_DAYS, "2"));
+        Dataset<Row> allUserSessionDataset = readDatasetFromPath(spark, pathInfo.getIncremental(), sessionKeepDays);
+        allUserSessionDataset.cache();
+        log.info("allUserSessionDataset count:" + allUserSessionDataset.count());
+
+        Dataset<Row> aggAllUserSessionDataset = getAggUserSessionDataset(allUserSessionDataset);
+
+        saveIncrementalDatasetToPath(pathInfo.getIncremental(), newUserSessionDataset);
+        return aggAllUserSessionDataset;
+    }
+
+    private static Dataset<Row> getAggUserSessionDataset(final Dataset<Row> allUserSessionDataset) {
+        String maxSn = MAX_SN;
+        return allUserSessionDataset.groupBy(APP_ID, USER_PSEUDO_ID)
+                .agg(max(maxSn).alias(maxSn))
+                .select(
+                col(APP_ID), col(USER_PSEUDO_ID), col(maxSn)
+        );
     }
 
 
