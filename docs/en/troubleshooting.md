@@ -128,8 +128,9 @@ When upgrading from 1.0.x to the latest version, if the CloudFormation stack `Cl
       };
       return response;
     };
-    END    
 
+    END
+    
     rm ./noops-lambda.zip > /dev/null 2>&1
     zip ./noops-lambda.zip ./index.mjs    
 
