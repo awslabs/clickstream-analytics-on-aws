@@ -176,6 +176,15 @@ public final class DatasetUtil {
     public static final String GTM_BRAND = "brand";
     public static final String GTM_CLIENT_BRAND = "clientBrand";
 
+    public static final String EVENT_BUNDLE_SEQUENCE_ID = "event_bundle_sequence_id";
+    public static final String DEVICE = "device";
+    public static final String TRAFFIC_SOURCE = "traffic_source";
+    public static final String PROJECT_ID = "project_id";
+    public static final String GEO = "geo";
+    public static final String APP_INF = "app_info";
+
+
+
     public static final String TABLE_REGEX = String.format("^(%s)|((%s|%s|(etl_[^/]+))(%s|%s)_v\\d+)$",
             TABLE_NAME_ETL_MERGE_STATE,
             ETLRunner.TableName.ITEM.getTableName(),
@@ -355,16 +364,17 @@ public final class DatasetUtil {
 
             fullItemsDataset = fullItemsDatasetRead.filter(expr(String.format("%s >= '%s'", UPDATE_DATE, nDaysBefore))
                     .and(expr(String.format("%s >= %s", EVENT_TIMESTAMP, nDaysBeforeDate.getTime()))));
-
+            fullItemsDataset.cache();
+            // forces Spark to load the data immediately and cache it in memory
+            log.info(pathInfo + ",cache data count:" + fullItemsDataset.count());
         } catch (Exception e) {
-            log.error(e.getMessage());
+            log.error("readDatasetFromPath " + e.getMessage());
             if (e.getMessage().toLowerCase().contains("path does not exist")) {
                 List<Row> dataList = new ArrayList<>();
                 return spark.createDataFrame(dataList, schemaRead);
             }
             throw e;
         }
-        log.info(pathInfo + ", return count:" + fullItemsDataset.count());
         return fullItemsDataset;
     }
 
@@ -373,7 +383,7 @@ public final class DatasetUtil {
         boolean forceMerge = System.getProperty("force.merge", "false").equals("true");
 
         // run this process daily
-        if (isDatasetMergedToday(sparkSession) && !forceMerge) {
+        if (!isNeedMergedDataset(sparkSession) && !forceMerge) {
             return;
         }
         log.info("start merging incremental tables");
@@ -388,7 +398,7 @@ public final class DatasetUtil {
     }
 
 
-    public static boolean isDatasetMergedToday(final SparkSession sparkSession) {
+    public static boolean isNeedMergedDataset(final SparkSession sparkSession) {
         boolean mergedToday = false;
         Date now = new Date();
         DateFormat dateFormatYMD = new SimpleDateFormat(YYYYMMDD);
@@ -402,11 +412,13 @@ public final class DatasetUtil {
 
         });
         Dataset<Row> existingState;
+        boolean isFirstRun = false;
         try {
             existingState = sparkSession.read().schema(schema).parquet(statePath);
         } catch (Exception e) {
             log.error(e.getMessage());
             if (e.getMessage().toLowerCase().contains("path does not exist")) {
+                isFirstRun = true;
                 List<Row> emptyList = new ArrayList<>();
                 existingState = sparkSession.createDataFrame(emptyList, schema);
             } else {
@@ -424,11 +436,11 @@ public final class DatasetUtil {
             Dataset<Row> newState = sparkSession.createDataFrame(dataList, schema);
             newState.coalesce(1).write().partitionBy(UPDATE_DATE).option(COMPRESSION, SNAPPY).mode(SaveMode.Append).parquet(statePath);
         }
-
+        log.info("isNeedMergedDataset() isFirstRun: " + isFirstRun + ", mergedToday: " + mergedToday);
         if (mergedToday) {
             log.info("Datasets merged today, detail: " + mergedState.first().json());
         }
-        return mergedToday;
+        return !mergedToday && !isFirstRun;
     }
 
     public static class TableInfo {

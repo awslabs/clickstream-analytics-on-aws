@@ -136,7 +136,6 @@ public class GTMServerDataTransformerTest extends BaseSparkTest {
         System.setProperty(PROJECT_ID_PROP, "test_project_id_gtm_server");
         System.setProperty(DEBUG_LOCAL_PROP, "true");
         System.setProperty(GTM_CHECK_PREVIOUS_SESSION, "true");
-
         Dataset<Row> dataset =
                 spark.read().json(requireNonNull(getClass().getResource("/gtm-server/server-all.json")).getPath());
 

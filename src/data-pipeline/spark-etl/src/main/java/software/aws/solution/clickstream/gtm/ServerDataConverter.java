@@ -227,7 +227,7 @@ public class ServerDataConverter {
         }
 
         boolean firstVisit = false;
-        if (result.attrMap.containsKey("ex-ga-system_properties.fv")) {
+        if (result.attrMap.containsKey("x-ga-system_properties.fv")) {
             firstVisit = true;
         }
         List<GenericRow> eventParams = new ArrayList<>();
