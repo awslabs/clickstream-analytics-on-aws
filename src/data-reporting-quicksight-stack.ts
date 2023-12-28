@@ -17,12 +17,11 @@ import {
   Aws,
   CfnCondition,
   CfnOutput,
-  CfnResource,
   Fn,
   Stack,
 } from 'aws-cdk-lib';
 import { PolicyStatement, Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
-import { CfnDataSource, CfnTemplate } from 'aws-cdk-lib/aws-quicksight';
+import { CfnDataSource, CfnTemplate, CfnVPCConnection } from 'aws-cdk-lib/aws-quicksight';
 import { Secret } from 'aws-cdk-lib/aws-secretsmanager';
 import { Construct } from 'constructs';
 import {
@@ -34,7 +33,6 @@ import {
 import { OUTPUT_REPORTING_QUICKSIGHT_DASHBOARDS, OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN } from './common/constant';
 import { SolutionInfo } from './common/solution-info';
 import { associateApplicationWithStack, getShortIdOfStack } from './common/stack';
-import { createNetworkInterfaceCheckCustomResource } from './reporting/network-interface-check-custom-resource';
 import { createStackParametersQuickSight } from './reporting/parameter';
 import { createQuicksightCustomResource } from './reporting/quicksight-custom-resource';
 
@@ -68,24 +66,17 @@ export class DataReportingQuickSightStack extends Stack {
     }));
 
     const vpcConnectionId = `clickstream-quicksight-vpc-connection-${getShortIdOfStack(Stack.of(this))}`;
-    const vPCConnectionResource = new CfnResource(this, 'Clickstream-VPCConnectionResource', {
-      type: 'AWS::QuickSight::VPCConnection',
-      properties: {
-        AwsAccountId: Aws.ACCOUNT_ID,
-        Name: `VPC Connection for Clickstream pipeline ${stackParams.redshiftDBParam.valueAsString}`,
-        RoleArn: vpcConnectionCreateRole.roleArn,
-        SecurityGroupIds: stackParams.quickSightVpcConnectionSGParam.valueAsList,
-        SubnetIds: Fn.split(',', stackParams.quickSightVpcConnectionSubnetParam.valueAsString),
-        VPCConnectionId: vpcConnectionId,
-      },
+    const vpcConnection = new CfnVPCConnection(this, 'Clickstream-VPCConnectionResource', {
+      awsAccountId: Aws.ACCOUNT_ID,
+      name: `VPC Connection for Clickstream pipeline ${stackParams.redshiftDBParam.valueAsString}`,
+      roleArn: vpcConnectionCreateRole.roleArn,
+      securityGroupIds: stackParams.quickSightVpcConnectionSGParam.valueAsList,
+      subnetIds: Fn.split(',', stackParams.quickSightVpcConnectionSubnetParam.valueAsString),
+      vpcConnectionId: vpcConnectionId,
     });
-    vPCConnectionResource.node.addDependency(vpcConnectionCreateRole);
-    const vpcConnectionArn = vPCConnectionResource.getAtt('Arn').toString();
-    const networkInterfaces = vPCConnectionResource.getAtt('NetworkInterfaces').toString();
-    const interfaceCheckCR = createNetworkInterfaceCheckCustomResource(this, {
-      networkInterfaces,
-    });
-    interfaceCheckCR.node.addDependency(vPCConnectionResource);
+    vpcConnection.node.addDependency(vpcConnectionCreateRole);
+
+    const vpcConnectionArn = vpcConnection.getAtt('Arn').toString();
 
     const useTemplateArnCondition = new CfnCondition(
       this,
@@ -148,7 +139,7 @@ export class DataReportingQuickSightStack extends Stack {
         vpcConnectionArn,
       },
     });
-    dataSource.node.addDependency(interfaceCheckCR);
+    dataSource.node.addDependency(vpcConnection);
     dataSource.node.addDependency(template);
 
     const cr = createQuicksightCustomResource(this, {
@@ -166,7 +157,7 @@ export class DataReportingQuickSightStack extends Stack {
         databaseSchemaNames: stackParams.redShiftDBSchemaParam.valueAsString,
       },
     });
-    cr.node.addDependency(vPCConnectionResource);
+    cr.node.addDependency(vpcConnection);
     cr.node.addDependency(template);
 
     this.templateOptions.metadata = {

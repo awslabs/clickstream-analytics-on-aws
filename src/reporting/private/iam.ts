@@ -111,35 +111,3 @@ export function createRoleForQuicksightCustomResourceLambda(
   return createLambdaRole(scope, 'QuicksightCustomResourceLambdaRole', false, policyStatements, principal, logGroupArn);
 
 }
-
-export function createNetworkInterfaceCheckCustomResourceLambda(
-  scope: Construct,
-) {
-  const logGroupArn = Arn.format(
-    {
-      resource: 'log-group',
-      service: 'logs',
-      resourceName: '/aws/lambda/*',
-      arnFormat: ArnFormat.COLON_RESOURCE_NAME,
-      region: Aws.REGION,
-      account: Aws.ACCOUNT_ID,
-      partition: Aws.PARTITION,
-    },
-  );
-
-  const policyStatements = [
-    new PolicyStatement({
-      effect: Effect.ALLOW,
-      resources: [
-        '*',
-      ],
-      actions: [
-        'ec2:DescribeNetworkInterfaces',
-      ],
-    }),
-  ];
-
-  const principal = new ServicePrincipal('lambda.amazonaws.com');
-  return createLambdaRole(scope, 'NetworkInterfaceCheckCustomResourceLambdaRole', false, policyStatements, principal, logGroupArn);
-
-}
