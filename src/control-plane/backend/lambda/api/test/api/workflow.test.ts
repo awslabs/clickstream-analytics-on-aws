@@ -33,6 +33,7 @@ import { SecretsManagerClient } from '@aws-sdk/client-secrets-manager';
 import {
   SFNClient,
 } from '@aws-sdk/client-sfn';
+import { SNSClient } from '@aws-sdk/client-sns';
 import { DynamoDBDocumentClient, GetCommand, QueryCommand } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
 import {
@@ -98,7 +99,6 @@ import { server } from '../../index';
 import { CPipeline } from '../../model/pipeline';
 import { StackManager } from '../../service/stack';
 import 'aws-sdk-client-mock-jest';
-import { SNSClient } from '@aws-sdk/client-sns';
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 const kafkaMock = mockClient(KafkaClient);
