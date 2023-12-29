@@ -13,7 +13,7 @@
 
 import { format } from 'sql-formatter';
 import { formatDateToYYYYMMDD } from './reporting-utils';
-import { AttributionModelType, ConditionCategory, ExploreComputeMethod, ExploreConversionIntervalType, ExploreGroupColumn, ExploreLocales, ExplorePathNodeType, ExplorePathSessionDef, ExploreRelativeTimeUnit, ExploreTimeScopeType, MetadataPlatform, MetadataValueType } from '../../common/explore-types';
+import { ConditionCategory, ExploreComputeMethod, ExploreConversionIntervalType, ExploreGroupColumn, ExploreLocales, ExplorePathNodeType, ExplorePathSessionDef, ExploreRelativeTimeUnit, ExploreTimeScopeType, MetadataPlatform, MetadataValueType } from '../../common/explore-types';
 import { logger } from '../../common/powertools';
 
 export interface Condition {
@@ -96,13 +96,6 @@ export interface SQLParameters extends BaseSQLParameters {
   readonly maxStep?: number;
   readonly pathAnalysis?: PathAnalysisParameter;
   readonly pairEventAndConditions?: PairEventAndCondition[];
-}
-
-export interface AttributionSQLParameters extends BaseSQLParameters {
-  targetEventAndCondition: AttributionTouchPoint;
-  eventAndConditions: AttributionTouchPoint[];
-  modelType: AttributionModelType;
-  modelWeights?: number[];
 }
 
 export const BUILTIN_EVENTS = [
@@ -1677,7 +1670,7 @@ function _buildBaseUserDataSql(sqlParameters: SQLParameters, hasNestParams: bool
   `;
 }
 
-export function fillEventNameAndSQLConditions(eventNames: string[], sqlParameters: SQLParameters | AttributionSQLParameters,
+function fillEventNameAndSQLConditions(eventNames: string[], sqlParameters: SQLParameters,
   eventNameAndSQLConditions: EventNameAndConditionsSQL[], simpleVersion: boolean) {
   if (simpleVersion) {
     for (const [index, event] of eventNames.entries()) {
@@ -1694,7 +1687,6 @@ export function fillEventNameAndSQLConditions(eventNames: string[], sqlParameter
       });
     }
   }
-
 }
 
 function _getAllConditionSql(eventNames: string[], sqlParameters: SQLParameters,

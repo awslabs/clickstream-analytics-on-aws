@@ -12,8 +12,17 @@
  */
 
 import { format } from 'sql-formatter';
-import { AttributionSQLParameters, BaseSQLParameters, ColumnAttribute, EVENT_TABLE, EventAndCondition, EventNonNestColProps, USER_TABLE, buildColNameWithPrefix, buildColumnConditionProps, buildCommonColumnsSql, buildCommonConditionSql, buildConditionProps, buildConditionSql, buildEventConditionPropsFromEvents, buildEventDateSql, buildEventJoinTable, buildEventsNameFromConditions, buildNecessaryEventColumnsSql, buildUserJoinTable } from './sql-builder';
-import { AttributionModelType, ExploreComputeMethod } from '../../common/explore-types';
+import { AttributionTouchPoint, BaseSQLParameters, ColumnAttribute, EVENT_TABLE, EventAndCondition, EventNonNestColProps, USER_TABLE, buildColNameWithPrefix, buildColumnConditionProps, buildCommonColumnsSql, buildCommonConditionSql, buildConditionProps, buildConditionSql, buildEventConditionPropsFromEvents, buildEventDateSql, buildEventJoinTable, buildEventsNameFromConditions, buildNecessaryEventColumnsSql, buildUserJoinTable } from './sql-builder';
+import { AttributionModelType, ConditionCategory, ExploreAttributionTimeWindowType, ExploreComputeMethod, MetadataValueType } from '../../common/explore-types';
+
+export interface AttributionSQLParameters extends BaseSQLParameters {
+  targetEventAndCondition: AttributionTouchPoint;
+  eventAndConditions: AttributionTouchPoint[];
+  modelType: AttributionModelType;
+  modelWeights?: number[];
+  timeWindowType: ExploreAttributionTimeWindowType;
+  timeWindowInSecond?: number;
+}
 
 export function buildSQLForSinglePointModel(params: AttributionSQLParameters): string {
 
@@ -137,7 +146,7 @@ export function buildSQLForSinglePointModel(params: AttributionSQLParameters): s
         from touch_point_data_3 group by event_name
       ) total_count_data on attribution_data.t_event_name = total_count_data.event_name
       join (
-        select count(t_event_id) as total_contribution from model_data
+        select sum(contribution) as total_contribution from attribution_data
       ) as t
       on 1=1
     `;
@@ -264,11 +273,39 @@ export function buildCommonSqlForAttribution(eventNames: string[], params: Attri
     sumValueColDummy = ',0 as sum_value';
   }
 
+  let timeWindowSql = '';
+  let sessionIdColSql = '';
+  switch (params.timeWindowType) {
+    case ExploreAttributionTimeWindowType.CURRENT_DAY:
+      timeWindowSql = `
+        and target_data.event_timestamp >= touch_point_data_3.event_timestamp
+        and TO_CHAR(
+          TIMESTAMP 'epoch' + cast(target_data.event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+          'YYYY-MM-DD'
+        ) = TO_CHAR(
+          TIMESTAMP 'epoch' + cast(touch_point_data_3.event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+          'YYYY-MM-DD'
+        )
+      `;
+      break;
+    case ExploreAttributionTimeWindowType.CUSTOMIZE:
+      timeWindowSql = `
+        and (target_data.event_timestamp - touch_point_data_3.event_timestamp <= ${params.timeWindowInSecond} * 60 * 1000 )
+      `;
+      break;
+    default:
+      sessionIdColSql = ',_session_id';
+      timeWindowSql = `
+        and target_data._session_id = touch_point_data_3._session_id
+      `;
+  }
+
   const targetSql = `
     target_data as (
       select 
          user_pseudo_id
         ,event_id
+        ${sessionIdColSql}
         ,event_name
         ,event_timestamp
         ,row_number() over(PARTITION by user_pseudo_id ORDER by event_timestamp asc) as rank 
@@ -284,6 +321,7 @@ export function buildCommonSqlForAttribution(eventNames: string[], params: Attri
       select 
         user_pseudo_id
       , event_id
+      ${sessionIdColSql}
       , event_name
       , event_timestamp
       ${sumValueColName}
@@ -295,6 +333,7 @@ export function buildCommonSqlForAttribution(eventNames: string[], params: Attri
       select 
         user_pseudo_id
       , event_id
+      ${sessionIdColSql}
       , '${index+1}_' || event_name as event_name
       , event_timestamp
       ${sumValueColDummy}
@@ -339,7 +378,11 @@ export function buildCommonSqlForAttribution(eventNames: string[], params: Attri
         ,touch_point_data_3.group_id
         ,row_number() over(PARTITION by t_user_pseudo_id, rank order by t_event_timestamp asc) as row_seq
         from target_data
-        join touch_point_data_3 on target_data.user_pseudo_id = touch_point_data_3.user_pseudo_id and target_data.rank = touch_point_data_3.group_id and target_data.event_timestamp >= touch_point_data_3.event_timestamp
+        join touch_point_data_3 
+        on target_data.user_pseudo_id = touch_point_data_3.user_pseudo_id 
+        and target_data.rank = touch_point_data_3.group_id 
+        and target_data.event_timestamp >= touch_point_data_3.event_timestamp
+        ${timeWindowSql}
         where touch_point_data_3.event_name <> '${params.targetEventAndCondition.eventName}'
     ),
   `;
@@ -397,6 +440,15 @@ function buildAttributionEventConditionProps(sqlParameters: AttributionSQLParame
 
     hasEventNonNestAttribute = hasEventNonNestAttribute || allAttribute.hasEventNonNestAttribute;
     eventNonNestAttributes.push(...allAttribute.eventNonNestAttributes);
+  }
+
+  if (sqlParameters.timeWindowType === ExploreAttributionTimeWindowType.SESSION) {
+    hasEventAttribute = hasEventAttribute || true;
+    eventAttributes.push({
+      category: ConditionCategory.EVENT,
+      property: '_session_id',
+      dataType: MetadataValueType.STRING,
+    });
   }
 
   return {

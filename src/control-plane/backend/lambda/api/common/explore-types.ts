@@ -129,3 +129,9 @@ export enum AttributionModelType {
   TIME_DECAY = 'TIME_DECAY',
   POSITION = 'POSITION',
 }
+
+export enum ExploreAttributionTimeWindowType {
+  CURRENT_DAY = 'CURRENT_DAY',
+  CUSTOMIZE = 'CUSTOMIZE',
+  SESSION = 'SESSION',
+}

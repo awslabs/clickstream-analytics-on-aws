@@ -35,7 +35,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { DataSetProps, dataSetAdminPermissionActions, dataSetReaderPermissionActions } from './dashboard-ln';
 import { Condition, EventAndCondition, PairEventAndCondition, SQLCondition } from './sql-builder';
 import { QUICKSIGHT_DATASET_INFIX, QUICKSIGHT_RESOURCE_NAME_PREFIX, QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX } from '../../common/constants-ln';
-import { AnalysisType, AttributionModelType, ExploreComputeMethod, ExploreConversionIntervalType, ExploreLocales, ExplorePathNodeType, ExplorePathSessionDef, ExploreRelativeTimeUnit, ExploreRequestAction, ExploreTimeScopeType, ExploreVisualName, MetadataValueType, QuickSightChartType } from '../../common/explore-types';
+import { AnalysisType, AttributionModelType, ExploreAttributionTimeWindowType, ExploreComputeMethod, ExploreConversionIntervalType, ExploreLocales, ExplorePathNodeType, ExplorePathSessionDef, ExploreRelativeTimeUnit, ExploreRequestAction, ExploreTimeScopeType, ExploreVisualName, MetadataValueType, QuickSightChartType } from '../../common/explore-types';
 import { logger } from '../../common/powertools';
 import i18next from '../../i18n';
 
@@ -1240,6 +1240,8 @@ export function checkAttributionAnalysisParameter(params: any): CheckParamsStatu
 
   if (params.targetEventAndCondition === undefined
     || params.modelType === undefined
+    || params.eventAndConditions === undefined
+    || params.timeWindowType === undefined
   ) {
     return {
       success: false,
@@ -1258,6 +1260,13 @@ export function checkAttributionAnalysisParameter(params: any): CheckParamsStatu
     return {
       success: false,
       message: 'missing weights for attribution analysis',
+    };
+  }
+
+  if (params.timeWindowType === ExploreAttributionTimeWindowType.CUSTOMIZE && params.timeWindowInSeconds === undefined) {
+    return {
+      success: false,
+      message: 'missing time window parameter for attribution analysis',
     };
   }
 
