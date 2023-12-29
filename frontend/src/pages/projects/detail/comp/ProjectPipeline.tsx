@@ -137,8 +137,6 @@ const ProjectPipeline: React.FC<ProjectPipelineProps> = (
     );
   };
 
-  console.info('pipelineInfo:', pipelineInfo);
-
   return (
     <SpaceBetween direction="vertical" size="l">
       <Container
