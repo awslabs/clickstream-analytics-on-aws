@@ -110,14 +110,16 @@ export enum AnalysisType {
   FUNNEL = 'FUNNEL',
   EVENT = 'EVENT',
   PATH = 'PATH',
-  RETENTION = 'RETENTION'
+  RETENTION = 'RETENTION',
+  ATTRIBUTION = 'ATTRIBUTION',
 }
 
 export enum QuickSightChartType {
   BAR = 'bar',
   LINE = 'line',
   FUNNEL = 'funnel',
-  SANKEY = 'sankey'
+  SANKEY = 'sankey',
+  TABLE = 'table',
 }
 
 export enum AttributionModelType {

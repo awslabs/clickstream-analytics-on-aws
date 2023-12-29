@@ -99,7 +99,7 @@ export interface SQLParameters extends BaseSQLParameters {
 }
 
 export interface AttributionSQLParameters extends BaseSQLParameters {
-  targetEventAndCondition: EventAndCondition;
+  targetEventAndCondition: AttributionTouchPoint;
   eventAndConditions: AttributionTouchPoint[];
   modelType: AttributionModelType;
   modelWeights?: number[];
@@ -202,7 +202,7 @@ export function buildFunnelTableView(sqlParameters: SQLParameters) : string {
   let colNameWithPrefix = '';
 
   if (sqlParameters.groupCondition !== undefined) {
-    colNameWithPrefix = _getColNameWithPrefix(sqlParameters.groupCondition);
+    colNameWithPrefix = buildColNameWithPrefix(sqlParameters.groupCondition);
     groupCondition = sqlParameters.groupCondition;
     appendGroupingCol = true;
   }
@@ -296,7 +296,7 @@ export function buildFunnelView(sqlParameters: SQLParameters, isMultipleChart: b
   const applyToFirst = sqlParameters.groupCondition?.applyTo === 'FIRST';
 
   if (isMultipleChart && sqlParameters.groupCondition !== undefined) {
-    colNameWithPrefix = _getColNameWithPrefix(sqlParameters.groupCondition);
+    colNameWithPrefix = buildColNameWithPrefix(sqlParameters.groupCondition);
     groupCondition = sqlParameters.groupCondition;
     appendGroupingCol = true;
   }
@@ -366,7 +366,7 @@ export function buildEventAnalysisView(sqlParameters: SQLParameters) : string {
   let groupCol = '';
 
   if (sqlParameters.groupCondition !== undefined) {
-    const colName = _getColNameWithPrefix(sqlParameters.groupCondition);
+    const colName = buildColNameWithPrefix(sqlParameters.groupCondition);
     groupColSQL = `${colName}::varchar as group_col,`;
     groupCol = `${colName}::varchar,`;
   }
@@ -855,8 +855,8 @@ export function buildRetentionAnalysisView(sqlParameters: SQLParameters) : strin
   let groupingColSql = '';
   let groupByColSql = '';
   if (sqlParameters.groupCondition !== undefined) {
-    groupByColSql = `${_getColNameWithPrefix(sqlParameters.groupCondition)}::varchar,`;
-    groupingCol = _getColNameWithPrefix(sqlParameters.groupCondition);
+    groupByColSql = `${buildColNameWithPrefix(sqlParameters.groupCondition)}::varchar,`;
+    groupingCol = buildColNameWithPrefix(sqlParameters.groupCondition);
     groupingColSql = `${groupingCol}::varchar as group_col,`;
   }
 
@@ -890,8 +890,8 @@ function _buildTableListColumnSql(eventNames: string[], groupCondition: Grouping
   let groupCol = '';
   let newColumnTemplate = columnTemplate;
   if (groupCondition !== undefined && groupCondition.applyTo !== 'FIRST') {
-    groupCol = `,COALESCE(${_getColNameWithPrefix(groupCondition)}::varchar, 'null')`;
-    newColumnTemplate += `${groupCol} as ${_getColNameWithPrefix(groupCondition)}####`;
+    groupCol = `,COALESCE(${buildColNameWithPrefix(groupCondition)}::varchar, 'null')`;
+    newColumnTemplate += `${groupCol} as ${buildColNameWithPrefix(groupCondition)}####`;
   }
 
   if (groupCondition !== undefined && groupCondition.applyTo === 'FIRST') {
@@ -900,7 +900,7 @@ function _buildTableListColumnSql(eventNames: string[], groupCondition: Grouping
       ,week
       ,day
       ,hour
-      ,COALESCE(${_getColNameWithPrefix(groupCondition)}::varchar, 'null') as ${_getColNameWithPrefix(groupCondition)}_0
+      ,COALESCE(${buildColNameWithPrefix(groupCondition)}::varchar, 'null') as ${buildColNameWithPrefix(groupCondition)}_0
       ,${newColumnTemplate.replace(/####/g, '_0')}
     `;
   } else {
@@ -953,8 +953,8 @@ function _buildFunnelBaseSql(eventNames: string[], sqlParameters: SQLParameters,
     }
 
     if (groupCondition !== undefined && !applyToFirst ) {
-      joinColumnsSQL = joinColumnsSQL.concat(`, table_${index}.${_getColNameWithPrefix(groupCondition)}_${index} \n`);
-      joinCondition = joinCondition.concat(` and table_${index-1}.${_getColNameWithPrefix(groupCondition)}_${index-1} = table_${index}.${_getColNameWithPrefix(groupCondition)}_${index}`);
+      joinColumnsSQL = joinColumnsSQL.concat(`, table_${index}.${buildColNameWithPrefix(groupCondition)}_${index} \n`);
+      joinCondition = joinCondition.concat(` and table_${index-1}.${buildColNameWithPrefix(groupCondition)}_${index-1} = table_${index}.${buildColNameWithPrefix(groupCondition)}_${index}`);
     }
 
     if (sqlParameters.conversionIntervalType == 'CUSTOMIZE') {
@@ -983,7 +983,7 @@ function _buildColumnsForFunnelTableViews(index: number, applyToFirst: boolean, 
   let newColumnTemplate = columnTemplate;
 
   if (groupCondition !== undefined && !applyToFirst) {
-    groupCol = `,COALESCE(${_getColNameWithPrefix(groupCondition)}::varchar, 'null') as ${_getColNameWithPrefix(groupCondition)}`;
+    groupCol = `,COALESCE(${buildColNameWithPrefix(groupCondition)}::varchar, 'null') as ${buildColNameWithPrefix(groupCondition)}`;
     newColumnTemplate += `${groupCol}`;
   }
 
@@ -992,7 +992,7 @@ function _buildColumnsForFunnelTableViews(index: number, applyToFirst: boolean, 
     ,week
     ,day
     ,hour
-    ${ applyToFirst ? `,COALESCE(${_getColNameWithPrefix(groupCondition!)}::varchar, 'null') as ${_getColNameWithPrefix(groupCondition!)}` : ''}
+    ${ applyToFirst ? `,COALESCE(${buildColNameWithPrefix(groupCondition!)}::varchar, 'null') as ${buildColNameWithPrefix(groupCondition!)}` : ''}
     ,${newColumnTemplate.replace(/####/g, '_0')}
   `;
 
@@ -1018,7 +1018,7 @@ function _buildJoinSqlForFunnelTableVisual(sqlParameters: SQLParameters, index:n
   }
 
   if (groupCondition !== undefined && !applyToFirst) {
-    groupingJoinSQL = `and table_${index-1}.${_getColNameWithPrefix(groupCondition)} = table_${index}.${_getColNameWithPrefix(groupCondition)}`;
+    groupingJoinSQL = `and table_${index-1}.${buildColNameWithPrefix(groupCondition)} = table_${index}.${buildColNameWithPrefix(groupCondition)}`;
   }
 
   if (sqlParameters.conversionIntervalType == 'CUSTOMIZE') {
@@ -1098,7 +1098,7 @@ function _buildEventAnalysisBaseSql(eventNames: string[], sqlParameters: SQLPara
     let groupColSql = '';
     let groupCol = '';
     if (sqlParameters.groupCondition !== undefined) {
-      groupCol = _getColNameWithPrefix(sqlParameters.groupCondition);
+      groupCol = buildColNameWithPrefix(sqlParameters.groupCondition);
       groupColSql = `, table_${index}.${groupCol}_${index} as ${groupCol}`;
     }
 
@@ -1748,7 +1748,7 @@ export function buildEventDateSql(sqlParameters: BaseSQLParameters, prefix: stri
   return eventDateSQL;
 }
 
-function _getColNameWithPrefix(groupCondition: GroupingCondition) {
+export function buildColNameWithPrefix(groupCondition: ColumnAttribute) {
 
   let prefix = '';
   if (groupCondition.category !== ConditionCategory.EVENT
@@ -1766,8 +1766,8 @@ function _buildEventCondition(eventNames: string[], sqlParameters: SQLParameters
   let groupCol = '';
   let newColumnTemplate = columnTemplate;
   if (sqlParameters.groupCondition !== undefined) {
-    groupCol = `,${_getColNameWithPrefix(sqlParameters.groupCondition)}`;
-    newColumnTemplate += `${groupCol} as ${_getColNameWithPrefix(sqlParameters.groupCondition)}####`;
+    groupCol = `,${buildColNameWithPrefix(sqlParameters.groupCondition)}`;
+    newColumnTemplate += `${groupCol} as ${buildColNameWithPrefix(sqlParameters.groupCondition)}####`;
   }
   const computedMethodList: ExploreComputeMethod[] = [];
   for (const [index, event] of eventNames.entries()) {
@@ -1815,7 +1815,7 @@ function _buildRetentionAnalysisSQLs(sqlParameters: SQLParameters) {
   let colName = '';
   if (sqlParameters.groupCondition !== undefined) {
     const groupCondition = sqlParameters.groupCondition;
-    colName = _getColNameWithPrefix(groupCondition);
+    colName = buildColNameWithPrefix(groupCondition);
     groupColSql = `${colName},`;
     groupJoinCol = `and first_table_####.${colName} = second_table_####.${colName}`;
   }
@@ -2497,7 +2497,7 @@ function _getUserConditionProps(sqlParameters: SQLParameters) {
 }
 
 
-function _getRetentionJoinColumnConditionProps(retentionJoinColumn: RetentionJoinColumn | undefined) {
+export function buildColumnConditionProps(columnAttribute: ColumnAttribute | undefined) {
 
   let hasUserAttribute = false;
   let hasEventAttribute = false;
@@ -2509,33 +2509,33 @@ function _getRetentionJoinColumnConditionProps(retentionJoinColumn: RetentionJoi
   const userOuterAttributes: ColumnAttribute[] = [];
   const eventNonNestAttributes: ColumnAttribute[] = [];
 
-  if (retentionJoinColumn?.category === ConditionCategory.USER) {
+  if (columnAttribute?.category === ConditionCategory.USER) {
     hasUserAttribute = true;
     userAttributes.push({
-      property: retentionJoinColumn.property,
-      category: retentionJoinColumn.category,
-      dataType: retentionJoinColumn.dataType,
+      property: columnAttribute.property,
+      category: columnAttribute.category,
+      dataType: columnAttribute.dataType,
     });
-  } else if (retentionJoinColumn?.category === ConditionCategory.EVENT) {
+  } else if (columnAttribute?.category === ConditionCategory.EVENT) {
     hasEventAttribute = true;
     eventAttributes.push({
-      property: retentionJoinColumn.property,
-      category: retentionJoinColumn.category,
-      dataType: retentionJoinColumn.dataType,
+      property: columnAttribute.property,
+      category: columnAttribute.category,
+      dataType: columnAttribute.dataType,
     });
-  } else if (retentionJoinColumn?.category === ConditionCategory.USER_OUTER ) {
+  } else if (columnAttribute?.category === ConditionCategory.USER_OUTER ) {
     hasUserOuterAttribute = true;
     userOuterAttributes.push({
-      property: retentionJoinColumn.property,
-      category: retentionJoinColumn.category,
-      dataType: retentionJoinColumn.dataType,
+      property: columnAttribute.property,
+      category: columnAttribute.category,
+      dataType: columnAttribute.dataType,
     });
-  } else if (retentionJoinColumn !== undefined) {
+  } else if (columnAttribute !== undefined) {
     hasEventNonNestAttribute = true;
     eventNonNestAttributes.push({
-      property: retentionJoinColumn.property,
-      category: retentionJoinColumn.category,
-      dataType: retentionJoinColumn.dataType,
+      property: columnAttribute.property,
+      category: columnAttribute.category,
+      dataType: columnAttribute.dataType,
     });
   }
 
@@ -2562,7 +2562,7 @@ function _getOnePairConditionPropsFromJoinColumn(pairEventAndCondition: PairEven
   let hasEventNonNestAttribute = false;
   const eventNonNestAttributes: ColumnAttribute[] = [];
 
-  const startConditionProps = _getRetentionJoinColumnConditionProps(pairEventAndCondition.startEvent.retentionJoinColumn);
+  const startConditionProps = buildColumnConditionProps(pairEventAndCondition.startEvent.retentionJoinColumn);
   hasEventAttribute = hasEventAttribute || startConditionProps.hasEventAttribute;
   eventAttributes.push(...startConditionProps.eventAttributes);
   hasUserAttribute = hasUserAttribute || startConditionProps.hasUserAttribute;
@@ -2573,7 +2573,7 @@ function _getOnePairConditionPropsFromJoinColumn(pairEventAndCondition: PairEven
   hasEventNonNestAttribute = hasEventNonNestAttribute || startConditionProps.hasEventNonNestAttribute;
   eventNonNestAttributes.push(...startConditionProps.eventNonNestAttributes);
 
-  const backConditionProps = _getRetentionJoinColumnConditionProps(pairEventAndCondition.backEvent.retentionJoinColumn);
+  const backConditionProps = buildColumnConditionProps(pairEventAndCondition.backEvent.retentionJoinColumn);
   hasEventAttribute = hasEventAttribute || backConditionProps.hasEventAttribute;
   eventAttributes.push(...backConditionProps.eventAttributes);
   hasUserAttribute = hasUserAttribute || backConditionProps.hasUserAttribute;

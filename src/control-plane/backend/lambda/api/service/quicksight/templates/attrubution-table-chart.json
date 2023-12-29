@@ -1,0 +1,69 @@
+{
+  "TableVisual": {
+    "VisualId":"{{visualId}}",
+    "Title":{
+        "FormatText": {
+            "PlainText": "{{title}}"
+        },
+        "Visibility":"VISIBLE"
+    },
+    "Subtitle":{
+        "FormatText": {
+            "PlainText": "{{subTitle}}"
+        },
+        "Visibility":"VISIBLE"
+    },
+      "ChartConfiguration": {
+          "FieldWells": {
+              "TableAggregatedFieldWells": {
+                  "GroupBy": [
+                      {
+                          "CategoricalDimensionField": {
+                              "FieldId": "{{eventNameFieldId}}",
+                              "Column": {
+                                  "DataSetIdentifier": "dataSetIdentifier",
+                                  "ColumnName": "event_name"
+                              }
+                          }
+                      },
+                      {
+                          "NumericalDimensionField": {
+                              "FieldId": "{{contributionFieldId}}",
+                              "Column": {
+                                  "DataSetIdentifier": "dataSetIdentifier",
+                                  "ColumnName": "contribution"
+                              }
+                          }
+                      },
+                      {
+                          "CategoricalDimensionField": {
+                              "FieldId": "{{contributionRateFieldId}}",
+                              "Column": {
+                                  "DataSetIdentifier": "dataSetIdentifier",
+                                  "ColumnName": "contribution_rate"
+                              }
+                          }
+                      } 
+                  ],
+                  "Values": []
+              }
+          },
+          "SortConfiguration": {
+            "RowSort": [
+              {
+                  "FieldSort": {
+                      "FieldId": "{{eventNameFieldId}}",
+                      "Direction": "ASC"
+                  }
+              }
+          ]
+          },
+          "TableOptions": {
+              "CellStyle": {
+                  "Height": 25
+              }
+          }
+      },
+      "Actions": []
+  }
+}

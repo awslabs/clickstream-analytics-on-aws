@@ -11,12 +11,15 @@
  *  and limitations under the License.
  */
 
-import { checkAttributionAnalysisParameter } from './quicksight/reporting-utils';
+import { v4 as uuidv4 } from 'uuid';
+import { CreateDashboardResult, attributionVisualColumns, checkAttributionAnalysisParameter, getAttributionTableVisualDef, getDashboardTitleProps, getTempResourceName, getVisualRelatedDefs } from './quicksight/reporting-utils';
 import { AttributionSQLParameters } from './quicksight/sql-builder';
 import { buildSQLForSinglePointModel } from './quicksight/sql-builder-attribution';
-import { AttributionModelType } from '../common/explore-types';
+import { AnalysisType, AttributionModelType, ExploreLocales, ExploreRequestAction, ExploreVisualName, QuickSightChartType } from '../common/explore-types';
 import { logger } from '../common/powertools';
 import { ApiFail, ApiSuccess } from '../common/types';
+import { DataSetProps } from './quicksight/dashboard-ln';
+import { ReportingService } from './reporting';
 
 export class AttributionAnalysisService {
 
@@ -33,26 +36,82 @@ export class AttributionAnalysisService {
         return res.status(400).json(new ApiFail(checkResult.message));
       }
 
-      if (query.modelType == AttributionModelType.LAST_TOUCH || query.modelType == AttributionModelType.FIRST_TOUCH) {
-        await this.createSinglePointModelVisual(query as AttributionSQLParameters);
+      let sheetId;
+      if (!query.dashboardId) {
+        sheetId = uuidv4();
+      } else {
+        if (!query.sheetId) {
+          return res.status(400).send(new ApiFail('missing required parameter sheetId'));
+        }
+        sheetId = query.sheetId;
       }
 
-      return res.status(201).json(new ApiSuccess(''));
+      let result: CreateDashboardResult | undefined = undefined;
+      if (query.modelType == AttributionModelType.LAST_TOUCH || query.modelType == AttributionModelType.FIRST_TOUCH) {
+        result = await this.createSinglePointModelVisual(sheetId, query as AttributionSQLParameters);
+      }
+
+      if (result === undefined || result.dashboardEmbedUrl === '' && query.action === ExploreRequestAction.PREVIEW) {
+        return res.status(500).json(new ApiFail('Failed to create resources, please try again later.'));
+      }
+      return res.status(201).json(new ApiSuccess(result));
 
     } catch (error) {
       next(error);
     }
   };
 
-  async createSinglePointModelVisual(params: AttributionSQLParameters) {
+  async createSinglePointModelVisual(sheetId: string, query: any) {
 
-    //construct parameters to build sql
-    // const viewName = getTempResourceName(query.viewName, query.action);
-    const sql = buildSQLForSinglePointModel(params);
+    const viewName = getTempResourceName(query.viewName, query.action);
+    const sql = buildSQLForSinglePointModel(query as AttributionSQLParameters);
 
     logger.debug(`sql of single point model: ${sql}`);
+    
+    const projectedColumns = [
+      'event_name',
+      'contribution',
+      'contribution_rate',
+    ];
+    const datasetColumns = [...attributionVisualColumns];
 
-    return sql;
+    const datasetPropsArray: DataSetProps[] = [];
+    datasetPropsArray.push({
+      tableName: viewName,
+      columns: datasetColumns,
+      importMode: 'DIRECT_QUERY',
+      customSql: sql,
+      projectedColumns,
+    });
+
+    const locale = query.locale ?? ExploreLocales.EN_US;
+    const visualId = uuidv4();
+    const titleProps = await getDashboardTitleProps(AnalysisType.ATTRIBUTION, query);
+    const quickSightChartType = query.chartType ?? QuickSightChartType.TABLE;
+    const visualDef = getAttributionTableVisualDef(visualId, viewName, titleProps, quickSightChartType);
+    const visualRelatedParams = await getVisualRelatedDefs({
+      timeScopeType: query.timeScopeType,
+      sheetId,
+      visualId,
+      viewName,
+      lastN: query.lastN,
+      timeUnit: query.timeUnit,
+      timeStart: query.timeStart,
+      timeEnd: query.timeEnd,
+    }, locale);
+
+    const visualProps = {
+      sheetId: sheetId,
+      name: ExploreVisualName.CHART,
+      visualId: visualId,
+      visual: visualDef,
+      dataSetIdentifierDeclaration: [],
+      filterControl: visualRelatedParams.filterControl,
+      parameterDeclarations: visualRelatedParams.parameterDeclarations,
+      filterGroup: visualRelatedParams.filterGroup,
+    };
+
+    return await new ReportingService().createDashboardVisuals(sheetId, viewName, query, datasetPropsArray, [visualProps]);
 
   };
 

@@ -160,6 +160,12 @@ export type MustacheEventAnalysisType = MustacheBaseType & {
   hierarchyId?: string;
 }
 
+export type MustacheAttributionAnalysisType = MustacheBaseType & {
+  eventNameFieldId: string;
+  contributionFieldId: string;
+  contributionRateFieldId: string;
+}
+
 export type MustacheRetentionAnalysisType = MustacheBaseType & {
   dateDimFieldId: string;
   catDimFieldId: string;
@@ -250,6 +256,21 @@ export const retentionAnalysisVisualColumns: InputColumn[] = [
   },
   {
     Name: 'retention',
+    Type: 'DECIMAL',
+  },
+];
+
+export const attributionVisualColumns: InputColumn[] = [
+  {
+    Name: 'event_name',
+    Type: 'STRING',
+  },
+  {
+    Name: 'contribution',
+    Type: 'DECIMAL',
+  },
+  {
+    Name: 'contribution_rate',
     Type: 'DECIMAL',
   },
 ];
@@ -835,6 +856,23 @@ export function getEventChartVisualDef(visualId: string, viewName: string, title
   return JSON.parse(Mustache.render(visualDef, mustacheEventAnalysisType)) as Visual;
 }
 
+export function getAttributionTableVisualDef(visualId: string, viewName: string, titleProps: DashboardTitleProps,
+  quickSightChartType: QuickSightChartType) : Visual {
+  const templatePath = `./templates/attribution-${quickSightChartType}-chart.json`;
+  const visualDef = readFileSync(join(__dirname, templatePath), 'utf8');
+  const mustacheAttributionAnalysisType: MustacheAttributionAnalysisType = {
+    visualId,
+    dataSetIdentifier: viewName,
+    eventNameFieldId: uuidv4(),
+    contributionFieldId: uuidv4(),
+    contributionRateFieldId: uuidv4(),
+    title: titleProps.title,
+    subTitle: titleProps.subTitle,
+  };
+
+  return JSON.parse(Mustache.render(visualDef, mustacheAttributionAnalysisType)) as Visual;
+}
+
 export function getEventPivotTableVisualDef(visualId: string, viewName: string,
   titleProps: DashboardTitleProps, groupColumn: string, hasGrouping: boolean) : Visual {
 
@@ -1049,6 +1087,9 @@ export async function getDashboardTitleProps(analysisType: AnalysisType, query: 
         break;
       case AnalysisType.RETENTION:
         title = t('dashboard.title.retentionAnalysis');
+        break;
+      case AnalysisType.ATTRIBUTION:
+        title = t('dashboard.title.attributionAnalysis');
         break;
     }
   }

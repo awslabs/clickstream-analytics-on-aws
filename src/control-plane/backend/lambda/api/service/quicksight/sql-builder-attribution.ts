@@ -12,7 +12,7 @@
  */
 
 import { format } from 'sql-formatter';
-import { AttributionSQLParameters, BaseSQLParameters, ColumnAttribute, EVENT_TABLE, EventAndCondition, EventNonNestColProps, USER_TABLE, buildCommonColumnsSql, buildCommonConditionSql, buildConditionProps, buildConditionSql, buildEventConditionPropsFromEvents, buildEventDateSql, buildEventJoinTable, buildEventsNameFromConditions, buildNecessaryEventColumnsSql, buildUserJoinTable } from './sql-builder';
+import { AttributionSQLParameters, BaseSQLParameters, ColumnAttribute, EVENT_TABLE, EventAndCondition, EventNonNestColProps, USER_TABLE, buildColNameWithPrefix, buildColumnConditionProps, buildCommonColumnsSql, buildCommonConditionSql, buildConditionProps, buildConditionSql, buildEventConditionPropsFromEvents, buildEventDateSql, buildEventJoinTable, buildEventsNameFromConditions, buildNecessaryEventColumnsSql, buildUserJoinTable } from './sql-builder';
 import { AttributionModelType, ExploreComputeMethod } from '../../common/explore-types';
 
 export function buildSQLForSinglePointModel(params: AttributionSQLParameters): string {
@@ -65,7 +65,7 @@ export function buildSQLForSinglePointModel(params: AttributionSQLParameters): s
         ,cast(attribution_data.contribution as float)/t.total_contribution as contribution_rate
       from attribution_data
       join (
-        select (t_event_id) as total_contribution from model_data
+        select count(t_event_id) as total_contribution from model_data
       ) as t
       on 1=1
     `
@@ -74,10 +74,10 @@ export function buildSQLForSinglePointModel(params: AttributionSQLParameters): s
       model_data_with_user as (
         select 
           model_data.*
-          COALESCE(user.user_id, user.user_pseudo_id) as u_user_pseudo_id
+          ,COALESCE(u.user_id, u.user_pseudo_id) as u_user_pseudo_id
         from model_data
-        join ${params.schemaName}.${USER_TABLE} as user
-        on model_data.user_pseudo_id = user.user_pseudo_id
+        join ${params.schemaName}.${USER_TABLE} as u
+        on model_data.user_pseudo_id = u.user_pseudo_id
       ),
       attribution_data as (
         select 
@@ -87,17 +87,34 @@ export function buildSQLForSinglePointModel(params: AttributionSQLParameters): s
         group by t_event_name
       )
       select 
-         attribution_data.t_event_name as event_name
+         t1.t_event_name as event_name
+        ,t1.contribution
+        ,cast(t1.contribution as float)/t2.total_contribution as contribution_rate
+      from attribution_data as t1
+      join (
+        select sum(contribution) as total_contribution from attribution_data
+      ) as t2
+      on 1=1
+    `
+  } else if(params.computeMethod === ExploreComputeMethod.SUM_VALUE) {
+    attributionDataSql = `
+      attribution_data as (
+        select 
+          t_event_name
+          ,sum(sum_value) as contribution
+        from model_data
+        group by t_event_name
+      )
+      select 
+        attribution_data.t_event_name as event_name
         ,attribution_data.contribution
         ,cast(attribution_data.contribution as float)/t.total_contribution as contribution_rate
       from attribution_data
       join (
-        select sum(attribution_data) as total_contribution from attribution_data
+        select (t_event_id) as total_contribution from model_data
       ) as t
       on 1=1
     `
-  } else if(params.computeMethod === ExploreComputeMethod.SUM_VALUE) {
-    
   }
   
   const sql = `
@@ -212,6 +229,15 @@ export function buildCommonSqlForAttribution(eventNames: string[], params: Attri
 
   const commonPartSql = buildBaseDataForAttribution(eventNames.concat(params.targetEventAndCondition.eventName), params);
 
+  let sumValueColSql = '';
+  let sumValueColName = '';
+  let sumValueColDummy = '';
+  if(params.computeMethod === ExploreComputeMethod.SUM_VALUE) {
+    sumValueColSql = `,${buildColNameWithPrefix(params.targetEventAndCondition.groupColumn!)} as sum_value`;
+    sumValueColName = ',sum_value';
+    sumValueColDummy = ',0 as sum_value';
+  }
+
   const targetSql = `
     target_data as (
       select 
@@ -220,6 +246,7 @@ export function buildCommonSqlForAttribution(eventNames: string[], params: Attri
         ,event_name
         ,event_timestamp
         ,row_number() over(PARTITION by user_pseudo_id ORDER by event_timestamp asc) as rank 
+        ${sumValueColSql}
       from base_data
       where event_name = '${params.targetEventAndCondition.eventName}' and (
         ${buildConditionSql(params.targetEventAndCondition.sqlCondition)}
@@ -233,6 +260,7 @@ export function buildCommonSqlForAttribution(eventNames: string[], params: Attri
       , event_id
       , event_name
       , event_timestamp
+      ${sumValueColName}
       from target_data
   `;
   for (const [index, eventAndCondition] of params.eventAndConditions.entries()) {
@@ -243,6 +271,7 @@ export function buildCommonSqlForAttribution(eventNames: string[], params: Attri
       , event_id
       , event_name || '_${index+1}' as event_name
       , event_timestamp
+      ${sumValueColDummy}
       from base_data 
       where 
         event_name = '${eventAndCondition.eventName}' 
@@ -316,6 +345,25 @@ function buildAttributionEventConditionProps(sqlParameters: AttributionSQLParame
     eventNonNestAttributes.push(...eventCondition.eventNonNestAttributes);
   }
 
+  if (sqlParameters.targetEventAndCondition?.sqlCondition?.conditions) {
+    const allAttribute = buildConditionProps(sqlParameters.targetEventAndCondition?.sqlCondition?.conditions);
+    hasEventAttribute = hasEventAttribute || allAttribute.hasEventAttribute;
+    eventAttributes.push(...allAttribute.eventAttributes);
+
+    hasEventNonNestAttribute = hasEventNonNestAttribute || allAttribute.hasEventNonNestAttribute;
+    eventNonNestAttributes.push(...allAttribute.eventNonNestAttributes);
+  }
+
+  if(sqlParameters.targetEventAndCondition?.groupColumn){
+    const groupColumnProps = buildColumnConditionProps(sqlParameters.targetEventAndCondition?.groupColumn);
+
+    hasEventAttribute = hasEventAttribute || groupColumnProps.hasEventAttribute;
+    eventAttributes.push(...groupColumnProps.eventAttributes);
+
+    hasEventNonNestAttribute = hasEventNonNestAttribute || groupColumnProps.hasEventNonNestAttribute;
+    eventNonNestAttributes.push(...groupColumnProps.eventNonNestAttributes);
+  }
+
   if (sqlParameters.globalEventCondition?.conditions) {
     const allAttribute = buildConditionProps(sqlParameters.globalEventCondition?.conditions);
     hasEventAttribute = hasEventAttribute || allAttribute.hasEventAttribute;
@@ -366,21 +414,57 @@ function _buildEventNameClause(eventNames: string[], prefix: string = 'event.') 
   return eventNameClause;
 }
 
+function _getUserConditionPropsFromEventAndConditions(eventAndConditions: EventAndCondition[]) {
+  
+    let hasNestUserAttribute = false;
+    let hasOuterUserAttribute = false;
+    const userAttributes: ColumnAttribute[] = [];
+    const userOuterAttributes: ColumnAttribute[] = [];
+    for (const eventCondition of eventAndConditions) {
+      if (eventCondition.sqlCondition?.conditions !== undefined) {
+        const conditionProps = buildConditionProps(eventCondition.sqlCondition?.conditions);
+        hasNestUserAttribute = hasNestUserAttribute || conditionProps.hasUserAttribute;
+        hasOuterUserAttribute = hasOuterUserAttribute || conditionProps.hasUserOuterAttribute;
+        userAttributes.push(...conditionProps.userAttributes);
+        userOuterAttributes.push(...conditionProps.userOuterAttributes);
+      }
+    }
+  
+    return {
+      hasNestUserAttribute,
+      hasOuterUserAttribute,
+      userAttributes,
+      userOuterAttributes,
+    };
+  }
+
 function _getUserConditionProps(sqlParameters: AttributionSQLParameters) {
 
   let hasNestUserAttribute = false;
   let hasOuterUserAttribute = false;
   const userAttributes: ColumnAttribute[] = [];
   if (sqlParameters.eventAndConditions) {
-    for (const eventCondition of sqlParameters.eventAndConditions) {
-      if (eventCondition.sqlCondition?.conditions !== undefined) {
-        const conditionProps = buildConditionProps(eventCondition.sqlCondition?.conditions);
-        hasNestUserAttribute = hasNestUserAttribute || conditionProps.hasUserAttribute;
-        hasOuterUserAttribute = hasOuterUserAttribute || conditionProps.hasUserOuterAttribute;
-        userAttributes.push(...conditionProps.userAttributes);
-        userAttributes.push(...conditionProps.userOuterAttributes);
-      }
-    }
+    const props = _getUserConditionPropsFromEventAndConditions(sqlParameters.eventAndConditions);
+    hasNestUserAttribute = hasNestUserAttribute || props.hasNestUserAttribute;
+    hasOuterUserAttribute = hasOuterUserAttribute || props.hasOuterUserAttribute;
+    userAttributes.push(...props.userAttributes);
+    userAttributes.push(...props.userOuterAttributes);
+  }
+
+  if (sqlParameters.targetEventAndCondition?.sqlCondition?.conditions) {
+    const conditionProps = buildConditionProps(sqlParameters.targetEventAndCondition?.sqlCondition?.conditions);
+    hasNestUserAttribute = hasNestUserAttribute || conditionProps.hasUserAttribute;
+    hasOuterUserAttribute = hasOuterUserAttribute || conditionProps.hasUserOuterAttribute;
+    userAttributes.push(...conditionProps.userAttributes);
+    userAttributes.push(...conditionProps.userOuterAttributes);
+  }
+
+  if(sqlParameters.targetEventAndCondition?.groupColumn){
+    const groupColumnProps = buildColumnConditionProps(sqlParameters.targetEventAndCondition?.groupColumn);
+    hasNestUserAttribute = hasNestUserAttribute || groupColumnProps.hasUserAttribute;
+    hasOuterUserAttribute = hasOuterUserAttribute || groupColumnProps.hasUserOuterAttribute;
+    userAttributes.push(...groupColumnProps.userAttributes);
+    userAttributes.push(...groupColumnProps.userOuterAttributes);
   }
 
   if (sqlParameters.globalEventCondition?.conditions) {
