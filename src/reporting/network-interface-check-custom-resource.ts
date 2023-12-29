@@ -41,7 +41,9 @@ export function createNetworkInterfaceCheckCustomResource(
     serviceToken: provider.serviceToken,
     properties: {
       awsRegion: Aws.REGION,
+      awsAccountId: Aws.ACCOUNT_ID,
       networkInterfaces: props.networkInterfaces,
+      vpcConnectionId: props.vpcConnectionId,
     },
   });
   return cr;
