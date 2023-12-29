@@ -49,7 +49,7 @@ import {
   createEventRuleMock,
   createPipelineMock,
   createPipelineMockForBJSRegion,
-  deleteEventRuleMock,
+  createSNSTopicMock,
   dictionaryMock,
   MOCK_EXECUTION_ID,
   MOCK_PIPELINE_ID,
@@ -3227,7 +3227,7 @@ describe('Pipeline test', () => {
     projectExistedMock(ddbMock, true);
     pipelineExistedMock(ddbMock, true);
     createEventRuleMock(cloudWatchEventsMock);
-    deleteEventRuleMock(cloudWatchEventsMock);
+    createSNSTopicMock(snsMock);
     ddbMock.on(GetCommand).resolves({
       Item: { ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW },
     });
