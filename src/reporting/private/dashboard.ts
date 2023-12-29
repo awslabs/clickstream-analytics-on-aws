@@ -36,11 +36,14 @@ export interface QuicksightCustomResourceProps {
 
 export interface NetworkInterfaceCheckCustomResourceProps {
   readonly networkInterfaces: string;
+  readonly vpcConnectionId: string;
 };
 
 export type NetworkInterfaceCheckCustomResourceLambdaProps = {
   readonly awsRegion: string;
+  readonly awsAccountId: string;
   readonly networkInterfaces: any[];
+  readonly vpcConnectionId: string;
 };
 
 export interface QuicksightCustomResourceLambdaProps {
