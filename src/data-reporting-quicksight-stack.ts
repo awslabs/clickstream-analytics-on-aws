@@ -17,12 +17,11 @@ import {
   Aws,
   CfnCondition,
   CfnOutput,
-  CfnResource,
   Fn,
   Stack,
 } from 'aws-cdk-lib';
 import { PolicyStatement, Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
-import { CfnDataSource, CfnTemplate } from 'aws-cdk-lib/aws-quicksight';
+import { CfnDataSource, CfnTemplate, CfnVPCConnection } from 'aws-cdk-lib/aws-quicksight';
 import { Secret } from 'aws-cdk-lib/aws-secretsmanager';
 import { Construct } from 'constructs';
 import {
@@ -68,22 +67,22 @@ export class DataReportingQuickSightStack extends Stack {
     }));
 
     const vpcConnectionId = `clickstream-quicksight-vpc-connection-${getShortIdOfStack(Stack.of(this))}`;
-    const vPCConnectionResource = new CfnResource(this, 'Clickstream-VPCConnectionResource', {
-      type: 'AWS::QuickSight::VPCConnection',
-      properties: {
-        AwsAccountId: Aws.ACCOUNT_ID,
-        Name: `VPC Connection for Clickstream pipeline ${stackParams.redshiftDBParam.valueAsString}`,
-        RoleArn: vpcConnectionCreateRole.roleArn,
-        SecurityGroupIds: stackParams.quickSightVpcConnectionSGParam.valueAsList,
-        SubnetIds: Fn.split(',', stackParams.quickSightVpcConnectionSubnetParam.valueAsString),
-        VPCConnectionId: vpcConnectionId,
-      },
+    const vPCConnectionResource = new CfnVPCConnection(this, 'Clickstream-VPCConnectionResource', {
+      availabilityStatus: 'AVAILABLE',
+      awsAccountId: Aws.ACCOUNT_ID,
+      name: `VPC Connection for Clickstream pipeline ${stackParams.redshiftDBParam.valueAsString}`,
+      roleArn: vpcConnectionCreateRole.roleArn,
+      securityGroupIds: stackParams.quickSightVpcConnectionSGParam.valueAsList,
+      subnetIds: Fn.split(',', stackParams.quickSightVpcConnectionSubnetParam.valueAsString),
+      vpcConnectionId: vpcConnectionId,
     });
+
     vPCConnectionResource.node.addDependency(vpcConnectionCreateRole);
     const vpcConnectionArn = vPCConnectionResource.getAtt('Arn').toString();
     const networkInterfaces = vPCConnectionResource.getAtt('NetworkInterfaces').toString();
     const interfaceCheckCR = createNetworkInterfaceCheckCustomResource(this, {
       networkInterfaces,
+      vpcConnectionId,
     });
     interfaceCheckCR.node.addDependency(vPCConnectionResource);
 

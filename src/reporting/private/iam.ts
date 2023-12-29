@@ -135,6 +135,7 @@ export function createNetworkInterfaceCheckCustomResourceLambda(
       ],
       actions: [
         'ec2:DescribeNetworkInterfaces',
+        'quicksight:DescribeVPCConnection',
       ],
     }),
   ];

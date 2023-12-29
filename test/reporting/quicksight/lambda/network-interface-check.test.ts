@@ -12,6 +12,7 @@
  */
 
 import { DescribeNetworkInterfacesCommand, EC2Client, NetworkInterfaceStatus } from '@aws-sdk/client-ec2';
+import { DescribeVPCConnectionCommand, QuickSight } from '@aws-sdk/client-quicksight';
 import { CdkCustomResourceResponse } from 'aws-lambda';
 import { mockClient } from 'aws-sdk-client-mock';
 import { handler } from '../../../../src/reporting/lambda/custom-resource/quicksight/network-interface-check';
@@ -25,9 +26,12 @@ import {
 describe('QuickSight Lambda function', () => {
   const context = getMockContext();
   const ec2ClientMock = mockClient(EC2Client);
+  const quickSightClientMock = mockClient(QuickSight);
 
   const commonProps = {
     awsRegion: 'us-east-1',
+    awsAccountId: 'test-aws-account-id',
+    vpcConnectionId: 'test-vpc-connection-id',
     networkInterfaces: [
       {
         NetworkInterfaceId: 'eni-test11111',
@@ -81,6 +85,12 @@ describe('QuickSight Lambda function', () => {
         },
       ],
     });
+    quickSightClientMock.on(DescribeVPCConnectionCommand).resolves({
+      VPCConnection: {
+        AvailabilityStatus: 'AVAILABLE',
+      },
+    });
+
     const resp = await handler(createEvent, context) as CdkCustomResourceResponse;
     expect(ec2ClientMock).toHaveReceivedCommandTimes(DescribeNetworkInterfacesCommand, 1);
     expect(resp.Data?.isReady).toBeDefined();
@@ -106,6 +116,12 @@ describe('QuickSight Lambda function', () => {
         },
       ],
     });
+    quickSightClientMock.on(DescribeVPCConnectionCommand).resolves({
+      VPCConnection: {
+        AvailabilityStatus: 'AVAILABLE',
+      },
+    });
+
     const resp = await handler(updateEvent, context) as CdkCustomResourceResponse;
     expect(ec2ClientMock).toHaveReceivedCommandTimes(DescribeNetworkInterfacesCommand, 1);
     expect(resp.Data?.isReady).toBeDefined();
@@ -160,6 +176,12 @@ describe('QuickSight Lambda function', () => {
           Status: NetworkInterfaceStatus.in_use,
         },
       ],
+    });
+
+    quickSightClientMock.on(DescribeVPCConnectionCommand).resolves({
+      VPCConnection: {
+        AvailabilityStatus: 'AVAILABLE',
+      },
     });
 
     const resp = await handler(createEvent, context) as CdkCustomResourceResponse;
