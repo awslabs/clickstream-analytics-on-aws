@@ -21,14 +21,14 @@ export function buildSQLForSinglePointModel(params: AttributionSQLParameters): s
   const commonPartSql = buildCommonSqlForAttribution(eventNames, params);
 
   let modelBaseDataSql = '';
-  if(params.modelType === AttributionModelType.LAST_TOUCH) {
+  if (params.modelType === AttributionModelType.LAST_TOUCH) {
     modelBaseDataSql = `
       model_base_data as (
         select user_pseudo_id, group_id, max(row_seq) as row_seq
         from joined_base_data
         group by user_pseudo_id, group_id
       ),
-    `
+    `;
   } else if (params.modelType === AttributionModelType.FIRST_TOUCH) {
     modelBaseDataSql = `
       model_base_data as (
@@ -36,7 +36,7 @@ export function buildSQLForSinglePointModel(params: AttributionSQLParameters): s
         from joined_base_data
         group by user_pseudo_id, group_id
       ),
-    `
+    `;
   }
 
   const modelDataSql = `
@@ -47,15 +47,22 @@ export function buildSQLForSinglePointModel(params: AttributionSQLParameters): s
       from joined_base_data join model_base_data on joined_base_data.user_pseudo_id = model_base_data.user_pseudo_id
       and joined_base_data.row_seq = model_base_data.row_seq and joined_base_data.group_id = model_base_data.group_id
     ),
-  `
+  `;
 
   let attributionDataSql = '';
-  if(params.computeMethod === ExploreComputeMethod.EVENT_CNT) {
+  if (params.computeMethod === ExploreComputeMethod.EVENT_CNT) {
     attributionDataSql = `
+      attribution_data as (
+        select 
+          t_event_name
+          ,count(t_event_id) as contribution
+        from model_data
+        group by t_event_name
+      )
       select 
          total_count_data.total_event_count
         ,attribution_data.t_event_name as event_name
-        ,attribution_data.event_count
+        ,attribution_data.contribution as event_count
         ,cast(attribution_data.contribution as float)/t.total_contribution as contribution
       from attribution_data
       join (
@@ -68,16 +75,16 @@ export function buildSQLForSinglePointModel(params: AttributionSQLParameters): s
         select count(t_event_id) as total_contribution from model_data
       ) as t
       on 1=1
-    `
+    `;
   } else if (params.computeMethod === ExploreComputeMethod.USER_CNT) {
     attributionDataSql = `
       total_count_data as (
         select 
            event_name
-          ,count(distinct COALESCE(u.user_id, u.user_pseudo_id) as u_user_pseudo_id) as total_user_count
+          ,count(distinct COALESCE(u.user_id, u.user_pseudo_id)) as total_user_count
         from touch_point_data_3
         join ${params.schemaName}.${USER_TABLE} as u
-        on model_data.user_pseudo_id = u.user_pseudo_id
+        on touch_point_data_3.user_pseudo_id = u.user_pseudo_id
         group by event_name
       ),
       model_data_with_user as (
@@ -98,16 +105,16 @@ export function buildSQLForSinglePointModel(params: AttributionSQLParameters): s
       select 
          total_count_data.total_user_count
         ,t1.t_event_name as event_name
-        ,t1.user_count
+        ,t1.contribution as user_count
         ,cast(t1.contribution as float)/t2.total_contribution as contribution
       from attribution_data as t1
-      join total_count_data on attribution_data.t_event_name = total_count_data.event_name
+      join total_count_data on t1.t_event_name = total_count_data.event_name
       join (
         select sum(contribution) as total_contribution from attribution_data
       ) as t2
       on 1=1
-    `
-  } else if(params.computeMethod === ExploreComputeMethod.SUM_VALUE) {
+    `;
+  } else if (params.computeMethod === ExploreComputeMethod.SUM_VALUE) {
     attributionDataSql = `
       attribution_data as (
         select 
@@ -133,14 +140,14 @@ export function buildSQLForSinglePointModel(params: AttributionSQLParameters): s
         select count(t_event_id) as total_contribution from model_data
       ) as t
       on 1=1
-    `
+    `;
   }
-  
+
   const sql = `
     ${commonPartSql}
     ${modelDataSql}
     ${attributionDataSql}
-  `
+  `;
 
   return format(sql, {
     language: 'postgresql',
@@ -251,7 +258,7 @@ export function buildCommonSqlForAttribution(eventNames: string[], params: Attri
   let sumValueColSql = '';
   let sumValueColName = '';
   let sumValueColDummy = '';
-  if(params.computeMethod === ExploreComputeMethod.SUM_VALUE) {
+  if (params.computeMethod === ExploreComputeMethod.SUM_VALUE) {
     sumValueColSql = `,${buildColNameWithPrefix(params.targetEventAndCondition.groupColumn!)} as sum_value`;
     sumValueColName = ',sum_value';
     sumValueColDummy = ',0 as sum_value';
@@ -271,7 +278,7 @@ export function buildCommonSqlForAttribution(eventNames: string[], params: Attri
         ${buildConditionSql(params.targetEventAndCondition.sqlCondition)}
       )
     ),
-  `
+  `;
   let touchPointSql = `
     touch_point_data_1 as (
       select 
@@ -295,7 +302,7 @@ export function buildCommonSqlForAttribution(eventNames: string[], params: Attri
       where 
         event_name = '${eventAndCondition.eventName}' 
         and ( ${buildConditionSql(eventAndCondition.sqlCondition)} )
-    `)
+    `);
   }
 
   touchPointSql = touchPointSql.concat(`
@@ -318,7 +325,7 @@ export function buildCommonSqlForAttribution(eventNames: string[], params: Attri
       ) + 1 AS group_id
       from touch_point_data_2
     ),
-  `)
+  `);
 
   const joinSql = `
     joined_base_data as (
@@ -335,14 +342,14 @@ export function buildCommonSqlForAttribution(eventNames: string[], params: Attri
         join touch_point_data_3 on target_data.user_pseudo_id = touch_point_data_3.user_pseudo_id and target_data.rank = touch_point_data_3.group_id and target_data.event_timestamp >= touch_point_data_3.event_timestamp
         where touch_point_data_3.event_name <> '${params.targetEventAndCondition.eventName}'
     ),
-  `
+  `;
 
   const sql = `
     ${commonPartSql}
     ${targetSql}
     ${touchPointSql}
     ${joinSql}
-  `
+  `;
 
   return format(sql, { language: 'postgresql' });
 }
@@ -373,7 +380,7 @@ function buildAttributionEventConditionProps(sqlParameters: AttributionSQLParame
     eventNonNestAttributes.push(...allAttribute.eventNonNestAttributes);
   }
 
-  if(sqlParameters.targetEventAndCondition?.groupColumn){
+  if (sqlParameters.targetEventAndCondition?.groupColumn) {
     const groupColumnProps = buildColumnConditionProps(sqlParameters.targetEventAndCondition?.groupColumn);
 
     hasEventAttribute = hasEventAttribute || groupColumnProps.hasEventAttribute;
@@ -434,28 +441,28 @@ function _buildEventNameClause(eventNames: string[], prefix: string = 'event.') 
 }
 
 function _getUserConditionPropsFromEventAndConditions(eventAndConditions: EventAndCondition[]) {
-  
-    let hasNestUserAttribute = false;
-    let hasOuterUserAttribute = false;
-    const userAttributes: ColumnAttribute[] = [];
-    const userOuterAttributes: ColumnAttribute[] = [];
-    for (const eventCondition of eventAndConditions) {
-      if (eventCondition.sqlCondition?.conditions !== undefined) {
-        const conditionProps = buildConditionProps(eventCondition.sqlCondition?.conditions);
-        hasNestUserAttribute = hasNestUserAttribute || conditionProps.hasUserAttribute;
-        hasOuterUserAttribute = hasOuterUserAttribute || conditionProps.hasUserOuterAttribute;
-        userAttributes.push(...conditionProps.userAttributes);
-        userOuterAttributes.push(...conditionProps.userOuterAttributes);
-      }
+
+  let hasNestUserAttribute = false;
+  let hasOuterUserAttribute = false;
+  const userAttributes: ColumnAttribute[] = [];
+  const userOuterAttributes: ColumnAttribute[] = [];
+  for (const eventCondition of eventAndConditions) {
+    if (eventCondition.sqlCondition?.conditions !== undefined) {
+      const conditionProps = buildConditionProps(eventCondition.sqlCondition?.conditions);
+      hasNestUserAttribute = hasNestUserAttribute || conditionProps.hasUserAttribute;
+      hasOuterUserAttribute = hasOuterUserAttribute || conditionProps.hasUserOuterAttribute;
+      userAttributes.push(...conditionProps.userAttributes);
+      userOuterAttributes.push(...conditionProps.userOuterAttributes);
     }
-  
-    return {
-      hasNestUserAttribute,
-      hasOuterUserAttribute,
-      userAttributes,
-      userOuterAttributes,
-    };
   }
+
+  return {
+    hasNestUserAttribute,
+    hasOuterUserAttribute,
+    userAttributes,
+    userOuterAttributes,
+  };
+}
 
 function _getUserConditionProps(sqlParameters: AttributionSQLParameters) {
 
@@ -478,7 +485,7 @@ function _getUserConditionProps(sqlParameters: AttributionSQLParameters) {
     userAttributes.push(...conditionProps.userOuterAttributes);
   }
 
-  if(sqlParameters.targetEventAndCondition?.groupColumn){
+  if (sqlParameters.targetEventAndCondition?.groupColumn) {
     const groupColumnProps = buildColumnConditionProps(sqlParameters.targetEventAndCondition?.groupColumn);
     hasNestUserAttribute = hasNestUserAttribute || groupColumnProps.hasUserAttribute;
     hasOuterUserAttribute = hasOuterUserAttribute || groupColumnProps.hasUserOuterAttribute;

@@ -11,16 +11,16 @@
  *  and limitations under the License.
  */
 
+import { InputColumn } from '@aws-sdk/client-quicksight';
 import { v4 as uuidv4 } from 'uuid';
+import { DataSetProps } from './quicksight/dashboard-ln';
 import { CreateDashboardResult, attributionVisualColumnsEvent, attributionVisualColumnsSumValue, attributionVisualColumnsUser, checkAttributionAnalysisParameter, getAttributionTableVisualDef, getDashboardTitleProps, getTempResourceName, getVisualRelatedDefs } from './quicksight/reporting-utils';
 import { AttributionSQLParameters } from './quicksight/sql-builder';
 import { buildSQLForSinglePointModel } from './quicksight/sql-builder-attribution';
+import { ReportingService } from './reporting';
 import { AnalysisType, AttributionModelType, ExploreComputeMethod, ExploreLocales, ExploreRequestAction, ExploreVisualName, QuickSightChartType } from '../common/explore-types';
 import { logger } from '../common/powertools';
 import { ApiFail, ApiSuccess } from '../common/types';
-import { DataSetProps } from './quicksight/dashboard-ln';
-import { ReportingService } from './reporting';
-import { InputColumn } from '@aws-sdk/client-quicksight';
 
 export class AttributionAnalysisService {
 
@@ -63,11 +63,11 @@ export class AttributionAnalysisService {
   };
 
   private getDataSetProps(method: ExploreComputeMethod) {
-    
+
     let projectedColumns: string[] = [];
     let datasetColumns: InputColumn[] = [];
 
-    if(method === ExploreComputeMethod.EVENT_CNT) {
+    if (method === ExploreComputeMethod.EVENT_CNT) {
       projectedColumns = [
         'total_event_count',
         'event_name',
@@ -76,7 +76,7 @@ export class AttributionAnalysisService {
       ];
 
       datasetColumns = [...attributionVisualColumnsEvent];
-    } else if(method === ExploreComputeMethod.USER_CNT) {
+    } else if (method === ExploreComputeMethod.USER_CNT) {
       projectedColumns = [
         'total_user_count',
         'event_name',
@@ -85,7 +85,7 @@ export class AttributionAnalysisService {
       ];
 
       datasetColumns = [...attributionVisualColumnsUser];
-    } else if(method === ExploreComputeMethod.SUM_VALUE) {
+    } else if (method === ExploreComputeMethod.SUM_VALUE) {
       projectedColumns = [
         'total_event_count',
         'event_name',
@@ -99,7 +99,7 @@ export class AttributionAnalysisService {
 
     return {
       projectedColumns,
-      datasetColumns
+      datasetColumns,
     };
   }
 
@@ -148,7 +148,7 @@ export class AttributionAnalysisService {
       filterGroup: visualRelatedParams.filterGroup,
     };
 
-    return await new ReportingService().createDashboardVisuals(sheetId, viewName, query, datasetPropsArray, [visualProps]);
+    return new ReportingService().createDashboardVisuals(sheetId, viewName, query, datasetPropsArray, [visualProps]);
 
   };
 
