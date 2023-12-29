@@ -82,7 +82,7 @@ export interface BaseSQLParameters {
   readonly timeEnd?: Date;
   readonly lastN?: number;
   readonly timeUnit?: ExploreRelativeTimeUnit;
-  readonly groupColumn: ExploreGroupColumn;
+  readonly groupColumn?: ExploreGroupColumn;
   readonly locale?: ExploreLocales;
   readonly groupCondition?: GroupingCondition;
 }
@@ -871,7 +871,7 @@ export function buildRetentionAnalysisView(sqlParameters: SQLParameters) : strin
     select 
       ${groupingColSql}
       grouping, 
-      ${_getRetentionDateSql(sqlParameters.groupColumn)}
+      ${_getRetentionDateSql(sqlParameters.groupColumn!)}
       (count(distinct end_user_pseudo_id)::decimal / NULLIF(count(distinct start_user_pseudo_id), 0)):: decimal(20, 4)  as retention 
     from result_table 
     group by ${groupByColSql} grouping, start_event_date, event_date

@@ -12,14 +12,15 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { CreateDashboardResult, attributionVisualColumns, checkAttributionAnalysisParameter, getAttributionTableVisualDef, getDashboardTitleProps, getTempResourceName, getVisualRelatedDefs } from './quicksight/reporting-utils';
+import { CreateDashboardResult, attributionVisualColumnsEvent, attributionVisualColumnsSumValue, attributionVisualColumnsUser, checkAttributionAnalysisParameter, getAttributionTableVisualDef, getDashboardTitleProps, getTempResourceName, getVisualRelatedDefs } from './quicksight/reporting-utils';
 import { AttributionSQLParameters } from './quicksight/sql-builder';
 import { buildSQLForSinglePointModel } from './quicksight/sql-builder-attribution';
-import { AnalysisType, AttributionModelType, ExploreLocales, ExploreRequestAction, ExploreVisualName, QuickSightChartType } from '../common/explore-types';
+import { AnalysisType, AttributionModelType, ExploreComputeMethod, ExploreLocales, ExploreRequestAction, ExploreVisualName, QuickSightChartType } from '../common/explore-types';
 import { logger } from '../common/powertools';
 import { ApiFail, ApiSuccess } from '../common/types';
 import { DataSetProps } from './quicksight/dashboard-ln';
 import { ReportingService } from './reporting';
+import { InputColumn } from '@aws-sdk/client-quicksight';
 
 export class AttributionAnalysisService {
 
@@ -61,34 +62,70 @@ export class AttributionAnalysisService {
     }
   };
 
+  private getDataSetProps(method: ExploreComputeMethod) {
+    
+    let projectedColumns: string[] = [];
+    let datasetColumns: InputColumn[] = [];
+
+    if(method === ExploreComputeMethod.EVENT_CNT) {
+      projectedColumns = [
+        'total_event_count',
+        'event_name',
+        'event_count',
+        'contribution',
+      ];
+
+      datasetColumns = [...attributionVisualColumnsEvent];
+    } else if(method === ExploreComputeMethod.USER_CNT) {
+      projectedColumns = [
+        'total_user_count',
+        'event_name',
+        'user_count',
+        'contribution',
+      ];
+
+      datasetColumns = [...attributionVisualColumnsUser];
+    } else if(method === ExploreComputeMethod.SUM_VALUE) {
+      projectedColumns = [
+        'total_event_count',
+        'event_name',
+        'event_count',
+        'contribution_amount',
+        'contribution',
+      ];
+
+      datasetColumns = [...attributionVisualColumnsSumValue];
+    }
+
+    return {
+      projectedColumns,
+      datasetColumns
+    };
+  }
+
   async createSinglePointModelVisual(sheetId: string, query: any) {
 
     const viewName = getTempResourceName(query.viewName, query.action);
     const sql = buildSQLForSinglePointModel(query as AttributionSQLParameters);
 
     logger.debug(`sql of single point model: ${sql}`);
-    
-    const projectedColumns = [
-      'event_name',
-      'contribution',
-      'contribution_rate',
-    ];
-    const datasetColumns = [...attributionVisualColumns];
+
+    const dataSetProps = this.getDataSetProps(query.computeMethod);
 
     const datasetPropsArray: DataSetProps[] = [];
     datasetPropsArray.push({
       tableName: viewName,
-      columns: datasetColumns,
+      columns: dataSetProps.datasetColumns,
       importMode: 'DIRECT_QUERY',
       customSql: sql,
-      projectedColumns,
+      projectedColumns: dataSetProps.projectedColumns,
     });
 
     const locale = query.locale ?? ExploreLocales.EN_US;
     const visualId = uuidv4();
     const titleProps = await getDashboardTitleProps(AnalysisType.ATTRIBUTION, query);
     const quickSightChartType = query.chartType ?? QuickSightChartType.TABLE;
-    const visualDef = getAttributionTableVisualDef(visualId, viewName, titleProps, quickSightChartType);
+    const visualDef = getAttributionTableVisualDef(visualId, viewName, titleProps, quickSightChartType, query.computeMethod);
     const visualRelatedParams = await getVisualRelatedDefs({
       timeScopeType: query.timeScopeType,
       sheetId,

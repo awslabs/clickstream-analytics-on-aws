@@ -52,18 +52,18 @@ export function buildSQLForSinglePointModel(params: AttributionSQLParameters): s
   let attributionDataSql = '';
   if(params.computeMethod === ExploreComputeMethod.EVENT_CNT) {
     attributionDataSql = `
-      attribution_data as (
-        select 
-          t_event_name
-          ,count(t_event_id) as contribution
-        from model_data
-        group by t_event_name
-      )
       select 
-        attribution_data.t_event_name as event_name
-        ,attribution_data.contribution
-        ,cast(attribution_data.contribution as float)/t.total_contribution as contribution_rate
+         total_count_data.total_event_count
+        ,attribution_data.t_event_name as event_name
+        ,attribution_data.event_count
+        ,cast(attribution_data.contribution as float)/t.total_contribution as contribution
       from attribution_data
+      join (
+        select 
+          event_name
+          ,count(event_id) as total_event_count
+        from touch_point_data_3 group by event_name
+      ) total_count_data on attribution_data.t_event_name = total_count_data.event_name
       join (
         select count(t_event_id) as total_contribution from model_data
       ) as t
@@ -71,6 +71,15 @@ export function buildSQLForSinglePointModel(params: AttributionSQLParameters): s
     `
   } else if (params.computeMethod === ExploreComputeMethod.USER_CNT) {
     attributionDataSql = `
+      total_count_data as (
+        select 
+           event_name
+          ,count(distinct COALESCE(u.user_id, u.user_pseudo_id) as u_user_pseudo_id) as total_user_count
+        from touch_point_data_3
+        join ${params.schemaName}.${USER_TABLE} as u
+        on model_data.user_pseudo_id = u.user_pseudo_id
+        group by event_name
+      ),
       model_data_with_user as (
         select 
           model_data.*
@@ -87,10 +96,12 @@ export function buildSQLForSinglePointModel(params: AttributionSQLParameters): s
         group by t_event_name
       )
       select 
-         t1.t_event_name as event_name
-        ,t1.contribution
-        ,cast(t1.contribution as float)/t2.total_contribution as contribution_rate
+         total_count_data.total_user_count
+        ,t1.t_event_name as event_name
+        ,t1.user_count
+        ,cast(t1.contribution as float)/t2.total_contribution as contribution
       from attribution_data as t1
+      join total_count_data on attribution_data.t_event_name = total_count_data.event_name
       join (
         select sum(contribution) as total_contribution from attribution_data
       ) as t2
@@ -102,16 +113,24 @@ export function buildSQLForSinglePointModel(params: AttributionSQLParameters): s
         select 
           t_event_name
           ,sum(sum_value) as contribution
+          ,count(t_event_id) as event_count
         from model_data
         group by t_event_name
       )
       select 
-        attribution_data.t_event_name as event_name
-        ,attribution_data.contribution
-        ,cast(attribution_data.contribution as float)/t.total_contribution as contribution_rate
+         total_count_data.total_event_count
+        ,attribution_data.t_event_name as event_name
+        ,attribution_data.contribution as contribution_amount
+        ,cast(attribution_data.contribution as float)/t.total_contribution as contribution
       from attribution_data
       join (
-        select (t_event_id) as total_contribution from model_data
+        select 
+          event_name
+          ,count(event_id) as total_event_count
+        from touch_point_data_3 group by event_name
+      ) total_count_data on attribution_data.t_event_name = total_count_data.event_name
+      join (
+        select count(t_event_id) as total_contribution from model_data
       ) as t
       on 1=1
     `
@@ -269,7 +288,7 @@ export function buildCommonSqlForAttribution(eventNames: string[], params: Attri
       select 
         user_pseudo_id
       , event_id
-      , event_name || '_${index+1}' as event_name
+      , '${index+1}_' || event_name as event_name
       , event_timestamp
       ${sumValueColDummy}
       from base_data 

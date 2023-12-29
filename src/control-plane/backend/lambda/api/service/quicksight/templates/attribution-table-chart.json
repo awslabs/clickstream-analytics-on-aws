@@ -1,0 +1,98 @@
+{
+  "TableVisual": {
+    "VisualId":"{{visualId}}",
+    "Title":{
+        "FormatText": {
+            "PlainText": "{{title}}"
+        },
+        "Visibility":"VISIBLE"
+    },
+    "Subtitle":{
+        "FormatText": {
+            "PlainText": "{{subTitle}}"
+        },
+        "Visibility":"VISIBLE"
+    },
+      "ChartConfiguration": {
+          "FieldWells": {
+              "TableAggregatedFieldWells": {
+                  "GroupBy": [
+                      {
+                          "NumericalDimensionField": {
+                            "FieldId": "{{totalCountFieldId}}",
+                            "Column": {
+                                "DataSetIdentifier": "{{dataSetIdentifier}}",
+                                "ColumnName": "{{totalCountFieldName}}"
+                            }
+                          }
+                      },
+                      {
+                          "CategoricalDimensionField": {
+                              "FieldId": "{{eventNameFieldId}}",
+                              "Column": {
+                                  "DataSetIdentifier": "{{dataSetIdentifier}}",
+                                  "ColumnName": "event_name"
+                              }
+                          }
+                      },
+                      {
+                          "NumericalDimensionField": {
+                              "FieldId": "{{countFieldId}}",
+                              "Column": {
+                                  "DataSetIdentifier": "{{dataSetIdentifier}}",
+                                  "ColumnName": "{{countFieldName}}"
+                              }
+                          }
+                      },
+                      {
+                          "NumericalDimensionField": {
+                              "FieldId": "{{contributionFieldId}}",
+                              "Column": {
+                                  "DataSetIdentifier": "{{dataSetIdentifier}}",
+                                  "ColumnName": "contribution"
+                              },
+                              "FormatConfiguration": {
+                                "FormatConfiguration": {
+                                    "PercentageDisplayFormatConfiguration": {
+                                        "Suffix": "%",
+                                        "SeparatorConfiguration": {
+                                            "DecimalSeparator": "DOT",
+                                            "ThousandsSeparator": {
+                                                "Symbol": "COMMA",
+                                                "Visibility": "VISIBLE"
+                                            }
+                                        },
+                                        "DecimalPlacesConfiguration": {
+                                            "DecimalPlaces": 2
+                                        },
+                                        "NegativeValueConfiguration": {
+                                            "DisplayMode": "NEGATIVE"
+                                        }
+                                    }
+                                }
+                            }
+                          }
+                      } 
+                  ],
+                  "Values": []
+              }
+          },
+          "SortConfiguration": {
+            "RowSort": [
+              {
+                  "FieldSort": {
+                      "FieldId": "{{eventNameFieldId}}",
+                      "Direction": "ASC"
+                  }
+              }
+          ]
+          },
+          "TableOptions": {
+              "CellStyle": {
+                  "Height": 25
+              }
+          }
+      },
+      "Actions": []
+  }
+}

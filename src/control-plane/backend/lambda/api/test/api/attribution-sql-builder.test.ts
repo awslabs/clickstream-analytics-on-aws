@@ -193,7 +193,6 @@ describe('Attribution SQL Builder test', () => {
       timeScopeType: ExploreTimeScopeType.FIXED,
       timeStart: new Date('2023-10-01'),
       timeEnd: new Date('2025-10-10'),
-      groupColumn: ExploreGroupColumn.DAY,
     });
 
     console.log(sql);

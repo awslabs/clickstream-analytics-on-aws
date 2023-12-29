@@ -35,7 +35,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { DataSetProps, dataSetAdminPermissionActions, dataSetReaderPermissionActions } from './dashboard-ln';
 import { Condition, EventAndCondition, PairEventAndCondition, SQLCondition } from './sql-builder';
 import { QUICKSIGHT_DATASET_INFIX, QUICKSIGHT_RESOURCE_NAME_PREFIX, QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX } from '../../common/constants-ln';
-import { AnalysisType, AttributionModelType, ExploreConversionIntervalType, ExploreLocales, ExplorePathNodeType, ExplorePathSessionDef, ExploreRelativeTimeUnit, ExploreRequestAction, ExploreTimeScopeType, ExploreVisualName, MetadataValueType, QuickSightChartType } from '../../common/explore-types';
+import { AnalysisType, AttributionModelType, ExploreComputeMethod, ExploreConversionIntervalType, ExploreLocales, ExplorePathNodeType, ExplorePathSessionDef, ExploreRelativeTimeUnit, ExploreRequestAction, ExploreTimeScopeType, ExploreVisualName, MetadataValueType, QuickSightChartType } from '../../common/explore-types';
 import { logger } from '../../common/powertools';
 import i18next from '../../i18n';
 
@@ -163,7 +163,10 @@ export type MustacheEventAnalysisType = MustacheBaseType & {
 export type MustacheAttributionAnalysisType = MustacheBaseType & {
   eventNameFieldId: string;
   contributionFieldId: string;
-  contributionRateFieldId: string;
+  countFieldId: string;
+  countFieldName: string;
+  totalCountFieldId: string;
+  totalCountFieldName: string;
 }
 
 export type MustacheRetentionAnalysisType = MustacheBaseType & {
@@ -260,17 +263,59 @@ export const retentionAnalysisVisualColumns: InputColumn[] = [
   },
 ];
 
-export const attributionVisualColumns: InputColumn[] = [
+export const attributionVisualColumnsEvent: InputColumn[] = [
+  {
+    Name: 'total_event_count',
+    Type: 'DECIMAL',
+  },
   {
     Name: 'event_name',
     Type: 'STRING',
   },
   {
-    Name: 'contribution',
+    Name: 'event_count',
     Type: 'DECIMAL',
   },
   {
-    Name: 'contribution_rate',
+    Name: 'contribution',
+    Type: 'DECIMAL',
+  },
+];
+
+export const attributionVisualColumnsUser: InputColumn[] = [
+  {
+    Name: 'total_user_count',
+    Type: 'DECIMAL',
+  },
+  {
+    Name: 'event_name',
+    Type: 'STRING',
+  },
+  {
+    Name: 'user_count',
+    Type: 'DECIMAL',
+  },
+  {
+    Name: 'contribution',
+    Type: 'DECIMAL',
+  },
+];
+
+export const attributionVisualColumnsSumValue: InputColumn[] = [
+  {
+    Name: 'total_event_count',
+    Type: 'DECIMAL',
+  },
+  {
+    Name: 'event_name',
+    Type: 'STRING',
+  },
+  {
+    Name: 'contribution_amount',
+    Type: 'DECIMAL',
+  },
+  {
+    Name: 'contribution',
     Type: 'DECIMAL',
   },
 ];
@@ -857,7 +902,18 @@ export function getEventChartVisualDef(visualId: string, viewName: string, title
 }
 
 export function getAttributionTableVisualDef(visualId: string, viewName: string, titleProps: DashboardTitleProps,
-  quickSightChartType: QuickSightChartType) : Visual {
+  quickSightChartType: QuickSightChartType, method: ExploreComputeMethod) : Visual {
+
+  let countFieldName = 'event_count';
+  let totalCountFieldName = 'total_event_count';
+
+  if(method === ExploreComputeMethod.USER_CNT) {
+    countFieldName = 'user_count';
+    totalCountFieldName = 'total_user_count';
+  } else if(method === ExploreComputeMethod.SUM_VALUE) {
+    countFieldName = 'contribution_amount';
+  }
+
   const templatePath = `./templates/attribution-${quickSightChartType}-chart.json`;
   const visualDef = readFileSync(join(__dirname, templatePath), 'utf8');
   const mustacheAttributionAnalysisType: MustacheAttributionAnalysisType = {
@@ -865,9 +921,12 @@ export function getAttributionTableVisualDef(visualId: string, viewName: string,
     dataSetIdentifier: viewName,
     eventNameFieldId: uuidv4(),
     contributionFieldId: uuidv4(),
-    contributionRateFieldId: uuidv4(),
     title: titleProps.title,
     subTitle: titleProps.subTitle,
+    countFieldId: uuidv4(),
+    countFieldName,
+    totalCountFieldId: uuidv4(),
+    totalCountFieldName,
   };
 
   return JSON.parse(Mustache.render(visualDef, mustacheAttributionAnalysisType)) as Visual;

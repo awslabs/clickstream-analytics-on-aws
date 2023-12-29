@@ -78,7 +78,7 @@ router_reporting.post(
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
 
-    logger.info('start to create quicksight path analysis report');
+    logger.info('start to create quicksight attribution analysis report');
     return attributionAnalysisService.createAttributionAnalysisVisual(req, res, next);
   });
 
