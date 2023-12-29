@@ -61,11 +61,11 @@ export class RedshiftAssociateIAMRole extends Construct {
             'iam:PassRole',
           ],
           resources: ['*'], //NOSONAR have to use wildcard for keeping existing associated roles
-          conditions: {
+          conditions: props.provisionedRedshift ? {
             StringEquals: {
               'iam:PassedToService': 'redshift.amazonaws.com',
             },
-          },
+          } : undefined,
         }),
       ]),
     });
@@ -92,32 +92,7 @@ export class RedshiftAssociateIAMRole extends Construct {
     });
 
     if (props.serverlessRedshift) {
-      if (props.serverlessRedshift.workgroupId && Token.isUnresolved(props.serverlessRedshift.workgroupId) &&
-              !props.serverlessRedshift.createdInStack) {
-        const noWorkgroupIdCondition = getOrCreateNoWorkgroupIdCondition(scope, props.serverlessRedshift.workgroupId);
-        this.createRedshiftServerlessWorkgroupPolicy('RedshiftServerlessAllWorkgroupPolicy', '*',
-          fn.role!, noWorkgroupIdCondition);
-
-        const withWorkgroupIdCondition = getOrCreateWithWorkgroupIdCondition(scope, props.serverlessRedshift.workgroupId);
-        this.createRedshiftServerlessWorkgroupPolicy('RedshiftServerlessSingleWorkgroupPolicy', props.serverlessRedshift.workgroupId,
-          fn.role!, withWorkgroupIdCondition);
-      } else {
-        this.cr.node.addDependency(this.createRedshiftServerlessWorkgroupPolicy('RedshiftServerlessWorkgroupPolicy',
-          props.serverlessRedshift.workgroupId ?? '*', fn.role!));
-      }
-      if (props.serverlessRedshift.namespaceId && Token.isUnresolved(props.serverlessRedshift.namespaceId) &&
-              !props.serverlessRedshift.createdInStack) {
-        const noNamespaceIdCondition = getOrCreateNoNamespaceIdCondition(scope, props.serverlessRedshift.namespaceId);
-        this.createRedshiftServerlessNamespacePolicy('RedshiftServerlessAllNamespacePolicy', '*',
-          fn.role!, noNamespaceIdCondition);
-
-        const withNamespaceIdCondition = getOrCreateWithNamespaceIdCondition(scope, props.serverlessRedshift.namespaceId);
-        this.createRedshiftServerlessNamespacePolicy('RedshiftServerlessSingleNamespacePolicy',
-          props.serverlessRedshift.namespaceId, fn.role!, withNamespaceIdCondition);
-      } else {
-        this.cr.node.addDependency(this.createRedshiftServerlessNamespacePolicy('RedshiftServerlessNamespacePolicy',
-          props.serverlessRedshift.namespaceId ?? '*', fn.role!));
-      }
+      this.createServerlessPolicy(props.serverlessRedshift, scope, fn);
     } else {
       this.cr.node.addDependency(new Policy(scope, 'ProvisionedRedshiftIAMPolicy', {
         roles: [fn.role!],
@@ -148,6 +123,35 @@ export class RedshiftAssociateIAMRole extends Construct {
           }),
         ],
       }));
+    }
+  }
+
+  private createServerlessPolicy(serverlessRedshift: ExistingRedshiftServerlessProps, scope: Construct, fn: SolutionNodejsFunction) {
+    if (serverlessRedshift.workgroupId && Token.isUnresolved(serverlessRedshift.workgroupId) &&
+      !serverlessRedshift.createdInStack) {
+      const noWorkgroupIdCondition = getOrCreateNoWorkgroupIdCondition(scope, serverlessRedshift.workgroupId);
+      this.createRedshiftServerlessWorkgroupPolicy('RedshiftServerlessAllWorkgroupPolicy', '*',
+        fn.role!, noWorkgroupIdCondition);
+
+      const withWorkgroupIdCondition = getOrCreateWithWorkgroupIdCondition(scope, serverlessRedshift.workgroupId);
+      this.createRedshiftServerlessWorkgroupPolicy('RedshiftServerlessSingleWorkgroupPolicy', serverlessRedshift.workgroupId,
+        fn.role!, withWorkgroupIdCondition);
+    } else {
+      this.cr.node.addDependency(this.createRedshiftServerlessWorkgroupPolicy('RedshiftServerlessWorkgroupPolicy',
+        serverlessRedshift.workgroupId ?? '*', fn.role!));
+    }
+    if (serverlessRedshift.namespaceId && Token.isUnresolved(serverlessRedshift.namespaceId) &&
+      !serverlessRedshift.createdInStack) {
+      const noNamespaceIdCondition = getOrCreateNoNamespaceIdCondition(scope, serverlessRedshift.namespaceId);
+      this.createRedshiftServerlessNamespacePolicy('RedshiftServerlessAllNamespacePolicy', '*',
+        fn.role!, noNamespaceIdCondition);
+
+      const withNamespaceIdCondition = getOrCreateWithNamespaceIdCondition(scope, serverlessRedshift.namespaceId);
+      this.createRedshiftServerlessNamespacePolicy('RedshiftServerlessSingleNamespacePolicy',
+        serverlessRedshift.namespaceId, fn.role!, withNamespaceIdCondition);
+    } else {
+      this.cr.node.addDependency(this.createRedshiftServerlessNamespacePolicy('RedshiftServerlessNamespacePolicy',
+        serverlessRedshift.namespaceId ?? '*', fn.role!));
     }
   }
 
