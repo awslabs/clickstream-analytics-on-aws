@@ -14,6 +14,7 @@
 import { CloudWatchEventsClient, DeleteRuleCommand, ListTargetsByRuleCommand, RemoveTargetsCommand } from '@aws-sdk/client-cloudwatch-events';
 import { TransactWriteItemsCommand } from '@aws-sdk/client-dynamodb';
 import { ExecutionStatus } from '@aws-sdk/client-sfn';
+import { DeleteTopicCommand, ListSubscriptionsByTopicCommand, SNSClient, UnsubscribeCommand } from '@aws-sdk/client-sns';
 import { DynamoDBDocumentClient, QueryCommand, ScanCommand, UpdateCommand } from '@aws-sdk/lib-dynamodb';
 import { EventBridgeEvent } from 'aws-lambda';
 import { mockClient } from 'aws-sdk-client-mock';
@@ -22,6 +23,7 @@ import 'aws-sdk-client-mock-jest';
 
 const docMock = mockClient(DynamoDBDocumentClient);
 const cloudWatchEventsMock = mockClient(CloudWatchEventsClient);
+const snsMock = mockClient(SNSClient);
 
 describe('Listen SFN Status Lambda Function', () => {
 
@@ -50,11 +52,13 @@ describe('Listen SFN Status Lambda Function', () => {
   const mockPipeline = {
     id: MOCK_PIPELINE_ID,
     projectId: MOCK_PROJECT_ID,
+    region: 'ap-southeast-1',
   };
 
   beforeEach(() => {
     docMock.reset();
     cloudWatchEventsMock.reset();
+    snsMock.reset();
   });
 
   test('Save state status to DDB', async () => {
@@ -102,6 +106,18 @@ describe('Listen SFN Status Lambda Function', () => {
     });
     cloudWatchEventsMock.on(RemoveTargetsCommand).resolves({});
     cloudWatchEventsMock.on(DeleteRuleCommand).resolves({});
+    snsMock.on(ListSubscriptionsByTopicCommand).resolves({
+      Subscriptions: [
+        {
+          SubscriptionArn: 'arn:aws:sns:ap-southeast-1:123456789012:s1',
+        },
+        {
+          SubscriptionArn: 'arn:aws:sns:ap-southeast-1:123456789012:s2',
+        },
+      ],
+    });
+    snsMock.on(UnsubscribeCommand).resolves({});
+    snsMock.on(DeleteTopicCommand).resolves({});
     await handler(baseEvent);
     expect(docMock).toHaveReceivedCommandTimes(QueryCommand, 1);
     expect(docMock).toHaveReceivedNthSpecificCommandWith(1, UpdateCommand, {
@@ -123,6 +139,9 @@ describe('Listen SFN Status Lambda Function', () => {
     expect(cloudWatchEventsMock).toHaveReceivedCommandTimes(ListTargetsByRuleCommand, 1);
     expect(cloudWatchEventsMock).toHaveReceivedCommandTimes(RemoveTargetsCommand, 1);
     expect(cloudWatchEventsMock).toHaveReceivedCommandTimes(DeleteRuleCommand, 1);
+    expect(snsMock).toHaveReceivedCommandTimes(ListSubscriptionsByTopicCommand, 1);
+    expect(snsMock).toHaveReceivedCommandTimes(UnsubscribeCommand, 2);
+    expect(snsMock).toHaveReceivedCommandTimes(DeleteTopicCommand, 1);
   });
 
 });

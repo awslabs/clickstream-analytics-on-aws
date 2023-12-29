@@ -98,6 +98,7 @@ import { server } from '../../index';
 import { CPipeline } from '../../model/pipeline';
 import { StackManager } from '../../service/stack';
 import 'aws-sdk-client-mock-jest';
+import { SNSClient } from '@aws-sdk/client-sns';
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 const kafkaMock = mockClient(KafkaClient);
@@ -110,6 +111,7 @@ const quickSightMock = mockClient(QuickSightClient);
 const s3Mock = mockClient(S3Client);
 const iamMock = mockClient(IAMClient);
 const cloudWatchEventsMock = mockClient(CloudWatchEventsClient);
+const snsMock = mockClient(SNSClient);
 
 const mockClients = {
   ddbMock,
@@ -124,6 +126,7 @@ const mockClients = {
   s3Mock,
   iamMock,
   cloudWatchEventsMock,
+  snsMock,
 };
 
 const Tags = [
@@ -161,6 +164,8 @@ describe('Workflow test', () => {
     quickSightMock.reset();
     s3Mock.reset();
     iamMock.reset();
+    cloudWatchEventsMock.reset();
+    snsMock.reset();
   });
 
   it('Generate Workflow ingestion-server-s3', async () => {

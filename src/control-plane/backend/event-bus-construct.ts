@@ -16,12 +16,14 @@ import { Aws, CfnResource, Duration, Stack } from 'aws-cdk-lib';
 import { Table } from 'aws-cdk-lib/aws-dynamodb';
 import { CfnRule, Rule } from 'aws-cdk-lib/aws-events';
 import { LambdaFunction } from 'aws-cdk-lib/aws-events-targets';
-import { Effect, Policy, PolicyStatement, Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
+import { AnyPrincipal, Effect, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { IFunction, Tracing } from 'aws-cdk-lib/aws-lambda';
+import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
+import { Queue, QueueEncryption } from 'aws-cdk-lib/aws-sqs';
 import { StateMachine } from 'aws-cdk-lib/aws-stepfunctions';
 import { Construct } from 'constructs';
 import { LambdaFunctionNetworkProps } from './click-stream-api';
-import { CFN_RULE_PREFIX } from './lambda/api/common/constants';
+import { CFN_RULE_PREFIX, CFN_TOPIC_PREFIX } from './lambda/api/common/constants';
 import { addCfnNagSuppressRules } from '../../common/cfn-nag';
 import { createLambdaRole } from '../../common/lambda';
 import { createDLQueue } from '../../common/sqs';
@@ -37,60 +39,57 @@ export interface BackendEventBusProps {
 
 export class BackendEventBus extends Construct {
 
-  readonly defaultEventBusArn: string;
-  readonly invokeEventBusRole: Role;
+  readonly listenStackQueue: Queue;
 
   constructor(scope: Construct, id: string, props: BackendEventBusProps) {
     super(scope, id);
 
-    this.defaultEventBusArn = `arn:${Aws.PARTITION}:events:${Aws.REGION}:${Aws.ACCOUNT_ID}:event-bus/default`;
-
-    this.invokeEventBusRole = this.createInvokeEventBusRole(this.defaultEventBusArn);
-    this.createRuleForListenStackStatusChange(props);
     this.createRuleForListenStateStatusChange(props);
+
+    this.listenStackQueue = this.createSQSForListenStackStatusChange();
+    this.triggerListenStackStatusFunc(props);
   }
 
-  private createInvokeEventBusRole(busArn: string): Role {
-    const role = new Role(this, 'InvokeEventBusRole', {
-      assumedBy: new ServicePrincipal('events.amazonaws.com'),
-    });
-    const invokeEventBusRolePolicy = new Policy(this, 'InvokeEventBusRolePolicy', {
-      statements: [
-        new PolicyStatement({
-          effect: Effect.ALLOW,
-          resources: [busArn],
-          actions: [
-            'events:PutEvents',
-          ],
-        }),
-      ],
-    });
-    invokeEventBusRolePolicy.attachToRole(role);
-    return role;
-  };
-
-  private createRuleForListenStackStatusChange = (props: BackendEventBusProps) => {
-    const listenStackStatusFn = this.listenStackFn(props);
-
-    const ruleStack = new Rule(this, 'ListenStackStatusChange', {
-      ruleName: `ClickstreamListenStackStatusChange-${getShortIdOfStack(Stack.of(this))}`,
-      description: 'Rule for listen CFN stack status change',
-      eventPattern: {
-        source: ['aws.cloudformation'],
-        detailType: ['CloudFormation Stack Status Change'],
+  private createSQSForListenStackStatusChange = () => {
+    const queue = new Queue(this, 'ListenStackStatusQueue', {
+      queueName: `ClickstreamListenStackStatusChange-${getShortIdOfStack(Stack.of(this))}`,
+      visibilityTimeout: Duration.seconds(60),
+      encryption: QueueEncryption.SQS_MANAGED,
+      enforceSSL: true,
+      deadLetterQueue: {
+        queue: createDLQueue(this, 'listenStackStatusDLQ'),
+        maxReceiveCount: 3,
       },
     });
-    ruleStack.addTarget(
-      new LambdaFunction(listenStackStatusFn, {
-        deadLetterQueue: createDLQueue(this, 'listenStackStatusDLQ'),
-        maxEventAge: Duration.hours(2),
-        retryAttempts: 2,
+
+    // Allow all region SNS topic send messages to the queue
+    queue.addToResourcePolicy(
+      new PolicyStatement({
+        effect: Effect.ALLOW,
+        principals: [new AnyPrincipal()],
+        resources: [queue.queueArn],
+        actions: [
+          'sqs:SendMessage',
+        ],
+        conditions: {
+          ArnEquals: {
+            'aws:SourceArn': `arn:${Aws.PARTITION}:sns:*:${Aws.ACCOUNT_ID}:Clickstream*`,
+          },
+        },
       }),
     );
-    const cfnRule = ruleStack.node.defaultChild as CfnRule;
-    cfnRule.addOverride('Properties.EventPattern.resources', [
-      { wildcard: `arn:${Aws.PARTITION}:cloudformation:*:${Aws.ACCOUNT_ID}:stack/Clickstream*/*` },
-    ]);
+
+    return queue;
+  };
+
+  private triggerListenStackStatusFunc = (props: BackendEventBusProps) => {
+    const listenStackStatusFn = this.listenStackFn(props);
+
+    listenStackStatusFn.addEventSource(
+      new SqsEventSource(this.listenStackQueue, {
+        batchSize: 1,
+      }),
+    );
   };
 
   private createRuleForListenStateStatusChange = (props: BackendEventBusProps) => {
@@ -126,7 +125,10 @@ export class BackendEventBus extends Construct {
       entry: join(__dirname, './lambda/listen-stack-status/index.ts'),
       handler: 'handler',
       tracing: Tracing.ACTIVE,
-      role: createLambdaRole(this, 'ListenStackFuncRole', true, [...this.getDescribeStackPolicyStatements()]),
+      role: createLambdaRole(this, 'ListenStackFuncRole', true, [
+        ...this.getDescribeStackPolicyStatements(),
+        ...this.getSQSPolicyStatements(),
+      ]),
       timeout: Duration.seconds(60),
       environment: {
         CLICKSTREAM_TABLE_NAME: props.clickStreamTable.tableName,
@@ -154,11 +156,15 @@ export class BackendEventBus extends Construct {
       entry: join(__dirname, './lambda/listen-state-status/index.ts'),
       handler: 'handler',
       tracing: Tracing.ACTIVE,
-      role: createLambdaRole(this, 'ListenStateFuncRole', true, [...this.getDeleteRulePolicyStatements()]),
+      role: createLambdaRole(this, 'ListenStateFuncRole', true, [
+        ...this.getDeleteRulePolicyStatements(),
+        ...this.getDeleteTopicPolicyStatements(),
+      ]),
       timeout: Duration.seconds(60),
       environment: {
         CLICKSTREAM_TABLE_NAME: props.clickStreamTable.tableName,
         PREFIX_TIME_GSI_NAME: props.prefixTimeGSIName,
+        AWS_ACCOUNT_ID: Stack.of(this).account,
       },
       ...props.lambdaFunctionNetwork,
     });
@@ -177,7 +183,7 @@ export class BackendEventBus extends Construct {
   }
 
   private getDescribeStackPolicyStatements(): PolicyStatement[] {
-    const cloudformationPolicyStatements: PolicyStatement[] = [
+    const policyStatements: PolicyStatement[] = [
       new PolicyStatement({
         effect: Effect.ALLOW,
         resources: [`arn:${Aws.PARTITION}:cloudformation:*:${Aws.ACCOUNT_ID}:stack/Clickstream*`],
@@ -186,11 +192,26 @@ export class BackendEventBus extends Construct {
         ],
       }),
     ];
-    return cloudformationPolicyStatements;
+    return policyStatements;
+  };
+
+  private getSQSPolicyStatements(): PolicyStatement[] {
+    const policyStatements: PolicyStatement[] = [
+      new PolicyStatement({
+        effect: Effect.ALLOW,
+        resources: [this.listenStackQueue.queueArn],
+        actions: [
+          'sqs:DeleteMessage',
+          'sqs:ReceiveMessage',
+          'sqs:GetQueueAttributes',
+        ],
+      }),
+    ];
+    return policyStatements;
   };
 
   private getDeleteRulePolicyStatements(): PolicyStatement[] {
-    const cloudformationPolicyStatements: PolicyStatement[] = [
+    const policyStatements: PolicyStatement[] = [
       new PolicyStatement({
         effect: Effect.ALLOW,
         resources: [
@@ -203,6 +224,23 @@ export class BackendEventBus extends Construct {
         ],
       }),
     ];
-    return cloudformationPolicyStatements;
+    return policyStatements;
+  };
+
+  private getDeleteTopicPolicyStatements(): PolicyStatement[] {
+    const policyStatements: PolicyStatement[] = [
+      new PolicyStatement({
+        effect: Effect.ALLOW,
+        resources: [
+          `arn:${Aws.PARTITION}:sns:*:${Aws.ACCOUNT_ID}:${CFN_TOPIC_PREFIX}*`,
+        ],
+        actions: [
+          'sns:ListSubscriptionsByTopic',
+          'sns:DeleteTopic',
+          'sns:Unsubscribe',
+        ],
+      }),
+    ];
+    return policyStatements;
   };
 }

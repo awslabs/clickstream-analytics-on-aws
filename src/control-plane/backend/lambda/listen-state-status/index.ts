@@ -14,13 +14,14 @@
 import { CloudWatchEventsClient, DeleteRuleCommand, ListTargetsByRuleCommand, RemoveTargetsCommand, ResourceNotFoundException } from '@aws-sdk/client-cloudwatch-events';
 import { DynamoDBClient, TransactWriteItemsCommand, TransactWriteItemsCommandInput } from '@aws-sdk/client-dynamodb';
 import { ExecutionStatus } from '@aws-sdk/client-sfn';
+import { DeleteTopicCommand, ListSubscriptionsByTopicCommand, SNSClient, UnsubscribeCommand } from '@aws-sdk/client-sns';
 import { DynamoDBDocumentClient, UpdateCommand, QueryCommandInput, paginateQuery, UpdateCommandInput, ScanCommandInput, ScanCommand } from '@aws-sdk/lib-dynamodb';
 import { NativeAttributeValue } from '@aws-sdk/util-dynamodb';
 import { EventBridgeEvent } from 'aws-lambda';
 import { ExecutionDetail, PipelineStatusType } from '../../../../common/model';
 import { logger } from '../../../../common/powertools';
 import { aws_sdk_client_common_config, marshallOptions, unmarshallOptions } from '../../../../common/sdk-client-config';
-import { CFN_RULE_PREFIX } from '../api/common/constants';
+import { CFN_RULE_PREFIX, CFN_TOPIC_PREFIX } from '../api/common/constants';
 
 const ddbClient = new DynamoDBClient({
   ...aws_sdk_client_common_config,
@@ -63,12 +64,20 @@ export const handler = async (
   await updatePipelineStateStatus(projectId, pipelineId, eventDetail);
 
   if (eventDetail.status === ExecutionStatus.SUCCEEDED && pipeline.lastAction === 'Delete') {
+    const ruleName = `${CFN_RULE_PREFIX}-${projectId}`;
+    const topicArn = getTopicArn(pipeline.region, pipeline.pipelineId);
     await deleteProject(projectId);
-    await deleteRuleAndTargets(pipeline.region, `${CFN_RULE_PREFIX}-${projectId}`);
+    await deleteRuleAndTopic(pipeline.region, ruleName, topicArn);
   }
 };
 
-async function getPipeline(pipelineId: string): Promise<any> {
+const getTopicArn = (region: string, pipelineId: string) => {
+  const partition = region.startsWith('cn') ? 'aws-cn' : 'aws';
+  const topicName = `${CFN_TOPIC_PREFIX}-${pipelineId}`;
+  return `arn:${partition}:sns:${region}:${process.env.AWS_ACCOUNT_ID}:${topicName}`;
+};
+
+const getPipeline = async (pipelineId: string) => {
   try {
     const type = `PIPELINE#${pipelineId}#latest`;
     const input: QueryCommandInput = {
@@ -98,11 +107,11 @@ async function getPipeline(pipelineId: string): Promise<any> {
     logger.error('Failed to query pipeline: ', { pipelineId, err });
     return;
   }
-}
+};
 
-async function updatePipelineStateStatus(
+const updatePipelineStateStatus = async (
   projectId: string, pipelineId:string,
-  eventDetail: StepFunctionsExecutionStatusChangeNotificationEventDetail): Promise<void> {
+  eventDetail: StepFunctionsExecutionStatusChangeNotificationEventDetail) => {
   try {
     const executionDetail: ExecutionDetail = {
       executionArn: eventDetail.executionArn,
@@ -127,9 +136,9 @@ async function updatePipelineStateStatus(
   } catch (err) {
     logger.error('Failed to update pipeline state status: ', { projectId, pipelineId, err });
   }
-}
+};
 
-async function deleteProject(projectId: string): Promise<void> {
+const deleteProject = async (projectId: string) => {
   try {
     // Scan all project versions
     const input: ScanCommandInput = {
@@ -165,13 +174,10 @@ async function deleteProject(projectId: string): Promise<void> {
   } catch (err) {
     logger.error('Failed to delete project: ', { projectId, err });
   }
-}
+};
 
-export const deleteRuleAndTargets = async (region: string, name: string) => {
+const deleteRuleAndTargets = async (region: string, name: string) => {
   try {
-    if (region === process.env.AWS_REGION) {
-      return;
-    }
     await deleteTargetsOfRule(region, name);
     await deleteRule(region, name);
   } catch (error) {
@@ -180,7 +186,7 @@ export const deleteRuleAndTargets = async (region: string, name: string) => {
   }
 };
 
-export const deleteTargetsOfRule = async (region: string, rule: string) => {
+const deleteTargetsOfRule = async (region: string, rule: string) => {
   try {
     const client = new CloudWatchEventsClient({
       ...aws_sdk_client_common_config,
@@ -209,7 +215,7 @@ export const deleteTargetsOfRule = async (region: string, rule: string) => {
   }
 };
 
-export const deleteRule = async (region: string, name: string) => {
+const deleteRule = async (region: string, name: string) => {
   try {
     const client = new CloudWatchEventsClient({
       ...aws_sdk_client_common_config,
@@ -226,6 +232,62 @@ export const deleteRule = async (region: string, name: string) => {
       return;
     }
     logger.error('Error in deleteRule', { error });
+    throw error;
+  }
+};
+
+const deleteRuleAndTopic = async (region: string, ruleName: string, topicArn: string) => {
+  try {
+    await deleteTopicAndSubscription(region, topicArn);
+    await deleteRuleAndTargets(region, ruleName);
+  } catch (error) {
+    logger.error('Error in deleteRuleAndTopic', { error });
+    throw error;
+  }
+};
+
+const deleteTopicAndSubscription = async (region: string, topicArn: string) => {
+  try {
+    await unsubscribeTopic(region, topicArn);
+    await deleteTopic(region, topicArn);
+  } catch (error) {
+    logger.error('Error in deleteTopicAndSubscription', { error });
+    throw error;
+  }
+};
+
+const deleteTopic = async (region: string, topicArn: string) => {
+  try {
+    const client = new SNSClient({
+      region,
+    });
+    const command = new DeleteTopicCommand({
+      TopicArn: topicArn,
+    });
+    await client.send(command);
+  } catch (error) {
+    logger.error('Error in delete topic', { error });
+    throw error;
+  }
+};
+
+const unsubscribeTopic = async (region: string, topicArn: string) => {
+  try {
+    const client = new SNSClient({
+      region,
+    });
+    const command = new ListSubscriptionsByTopicCommand({
+      TopicArn: topicArn,
+    });
+    const subs = (await client.send(command)).Subscriptions ?? [];
+    for (const sub of subs) {
+      const unsubscribeCommand = new UnsubscribeCommand({
+        SubscriptionArn: sub.SubscriptionArn,
+      });
+      await client.send(unsubscribeCommand);
+    }
+  } catch (error) {
+    logger.error('Error in unsubscribe topic', { error });
     throw error;
   }
 };

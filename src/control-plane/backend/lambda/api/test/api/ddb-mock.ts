@@ -30,6 +30,7 @@ import { GetNamespaceCommand, GetWorkgroupCommand } from '@aws-sdk/client-redshi
 import { BucketLocationConstraint, GetBucketLocationCommand, GetBucketPolicyCommand } from '@aws-sdk/client-s3';
 import { GetSecretValueCommand } from '@aws-sdk/client-secrets-manager';
 import { StartExecutionCommand } from '@aws-sdk/client-sfn';
+import { CreateTopicCommand, SetTopicAttributesCommand, SubscribeCommand } from '@aws-sdk/client-sns';
 import { DynamoDBDocumentClient, GetCommand, GetCommandInput, PutCommand, PutCommandOutput, QueryCommand, QueryCommandInput } from '@aws-sdk/lib-dynamodb';
 import { AwsClientStub } from 'aws-sdk-client-mock';
 import { analyticsMetadataTable, clickStreamTableName, dictionaryTableName, prefixTimeGSIName } from '../../common/constants';
@@ -346,6 +347,7 @@ function createPipelineMock(
     s3Mock: any;
     iamMock: any;
     cloudWatchEventsMock: any;
+    snsMock: any;
   },
   props?: {
     noApp?: boolean;
@@ -925,6 +927,7 @@ function createPipelineMock(
     });
   }
   createEventRuleMock(mockClients.cloudWatchEventsMock);
+  createSNSTopicMock(mockClients.snsMock);
 }
 
 function createPipelineMockForBJSRegion(s3Mock: any) {
@@ -947,6 +950,14 @@ function deleteEventRuleMock(cloudWatchEventsMock: any): any {
   });
   cloudWatchEventsMock.on(RemoveTargetsCommand).resolves({});
   cloudWatchEventsMock.on(DeleteRuleCommand).resolves({});
+}
+
+function createSNSTopicMock(snsMock: any): any {
+  snsMock.on(CreateTopicCommand).resolves({
+    TopicArn: 'arn:aws:sns:ap-southeast-1:111122223333:ck-clickstream-branch-main',
+  });
+  snsMock.on(SetTopicAttributesCommand).resolves({});
+  snsMock.on(SubscribeCommand).resolves({});
 }
 
 export {
@@ -981,4 +992,5 @@ export {
   metadataUserAttributeExistedMock,
   deleteEventRuleMock,
   createEventRuleMock,
+  createSNSTopicMock,
 };

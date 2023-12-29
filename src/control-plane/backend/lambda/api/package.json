@@ -59,6 +59,7 @@
     "@aws-sdk/client-s3": "^3.405.0",
     "@aws-sdk/client-secrets-manager": "^3.405.0",
     "@aws-sdk/client-sfn": "^3.405.0",
+    "@aws-sdk/client-sns": "^3.405.0",
     "@aws-sdk/client-sts": "^3.405.0",
     "@aws-sdk/credential-providers": "^3.398.0",
     "@aws-sdk/lib-dynamodb": "^3.405.0",

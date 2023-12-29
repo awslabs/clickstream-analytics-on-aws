@@ -191,6 +191,11 @@
       "type": "runtime"
     },
     {
+      "name": "@aws-sdk/client-sns",
+      "version": "^3.405.0",
+      "type": "runtime"
+    },
+    {
       "name": "@aws-sdk/client-sts",
       "version": "^3.405.0",
       "type": "runtime"

@@ -85,6 +85,7 @@ import { BuiltInTagKeys, PipelineStatusType } from '../../common/model-ln';
 import { PipelineServerProtocol } from '../../common/types';
 import { app, server } from '../../index';
 import 'aws-sdk-client-mock-jest';
+import { SNSClient } from '@aws-sdk/client-sns';
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
 const sfnMock = mockClient(SFNClient);
@@ -98,6 +99,7 @@ const quickSightMock = mockClient(QuickSightClient);
 const s3Mock = mockClient(S3Client);
 const iamMock = mockClient(IAMClient);
 const cloudWatchEventsMock = mockClient(CloudWatchEventsClient);
+const snsMock = mockClient(SNSClient);
 
 const mockClients = {
   ddbMock,
@@ -112,6 +114,7 @@ const mockClients = {
   s3Mock,
   iamMock,
   cloudWatchEventsMock,
+  snsMock,
 };
 
 describe('Pipeline test', () => {
@@ -128,6 +131,7 @@ describe('Pipeline test', () => {
     s3Mock.reset();
     iamMock.reset();
     cloudWatchEventsMock.reset();
+    snsMock.reset();
   });
   it('Create pipeline', async () => {
     tokenMock(ddbMock, false);

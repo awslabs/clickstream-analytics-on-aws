@@ -31,10 +31,11 @@ import {
 import {
   awsAccountId,
   awsPartition,
-  awsRegion,
   awsUrlSuffix,
   CFN_RULE_PREFIX,
+  CFN_TOPIC_PREFIX,
   FULL_SOLUTION_VERSION,
+  listenStackQueueArn,
   PIPELINE_STACKS,
   stackWorkflowS3Bucket,
 } from '../common/constants';
@@ -75,6 +76,7 @@ import { listMSKClusterBrokers } from '../store/aws/kafka';
 import { QuickSightUserArns, registerClickstreamUser } from '../store/aws/quicksight';
 import { getRedshiftInfo } from '../store/aws/redshift';
 import { isBucketExist } from '../store/aws/s3';
+import { createTopicAndSubscribeSQSQueue } from '../store/aws/sns';
 import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
 
@@ -299,14 +301,24 @@ export class CPipeline {
   }
 
   private async _createRules() {
-    if (this.pipeline.region === awsRegion) {
-      return;
+    if (!listenStackQueueArn) {
+      throw new ClickStreamBadRequestError('Queue ARN not found. Please check and try again.');
+    }
+    const topicName = `${CFN_TOPIC_PREFIX}-${this.pipeline.pipelineId}`;
+    const topicArn = await createTopicAndSubscribeSQSQueue(this.pipeline.region, topicName, listenStackQueueArn);
+    if (!topicArn) {
+      throw new ClickStreamBadRequestError('Topic create failed. Please check and try again.');
     }
     const cfnRulePatternResourceArn = `arn:${awsPartition}:cloudformation:${this.pipeline.region}:${awsAccountId}:stack/Clickstream*${this.pipeline.pipelineId}/*`;
-    await createRuleAndAddTargets(
+    const ruleArn = await createRuleAndAddTargets(
       this.pipeline.region,
       `${CFN_RULE_PREFIX}-${this.pipeline.id}`,
-      `{\"source\":[\"aws.cloudformation\"],\"resources\":[{\"wildcard\":\"${cfnRulePatternResourceArn}\"}],\"detail-type\":[\"CloudFormation Stack Status Change\"]}`);
+      `{\"source\":[\"aws.cloudformation\"],\"resources\":[{\"wildcard\":\"${cfnRulePatternResourceArn}\"}],\"detail-type\":[\"CloudFormation Stack Status Change\"]}`,
+      topicArn,
+    );
+    if (!ruleArn) {
+      throw new ClickStreamBadRequestError('Rule create failed. Please check and try again.');
+    }
   }
 
   public async update(oldPipeline: IPipeline): Promise<void> {

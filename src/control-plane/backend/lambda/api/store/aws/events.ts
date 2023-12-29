@@ -11,20 +11,17 @@
  *  and limitations under the License.
  */
 
-
-import { CloudWatchEventsClient, DeleteRuleCommand, ListTargetsByRuleCommand, PutRuleCommand, PutTargetsCommand, RemoveTargetsCommand, ResourceNotFoundException, Target } from '@aws-sdk/client-cloudwatch-events';
-import { clickstreamEventBusArn, clickstreamEventBusInvokeRoleArn } from '../../common/constants';
+import { CloudWatchEventsClient, PutRuleCommand, PutTargetsCommand, Target } from '@aws-sdk/client-cloudwatch-events';
 import { logger } from '../../common/powertools';
 import { aws_sdk_client_common_config } from '../../common/sdk-client-config-ln';
 
-export const createRuleAndAddTargets = async (region: string, name: string, eventPattern: string) => {
+export const createRuleAndAddTargets = async (region: string, name: string, eventPattern: string, targetArn: string) => {
   try {
     const ruleArn = await putRule(region, name, eventPattern);
     if (ruleArn) {
       const targets: Target[] = [{
-        Id: 'ClickstreamEventBusArn',
-        Arn: clickstreamEventBusArn,
-        RoleArn: clickstreamEventBusInvokeRoleArn,
+        Id: 'ClickstreamTarget',
+        Arn: targetArn,
       }];
       await putTargets(region, name, targets);
     }
@@ -69,62 +66,3 @@ export const putTargets = async (region: string, rule: string, targets: Target[]
   }
 };
 
-export const deleteRuleAndTargets = async (region: string, name: string) => {
-  try {
-    await deleteTargetsOfRule(region, name);
-    await deleteRule(region, name);
-  } catch (error) {
-    logger.error('Error in deleteRuleAndTargets', { error });
-    throw error;
-  }
-};
-
-export const deleteTargetsOfRule = async (region: string, rule: string) => {
-  try {
-    const client = new CloudWatchEventsClient({
-      ...aws_sdk_client_common_config,
-      region,
-    });
-    const command = new ListTargetsByRuleCommand({
-      Rule: rule,
-    });
-    const res = await client.send(command);
-    const targetIds = res.Targets?.map((target) => target.Id || '') || [];
-    if (targetIds.length === 0) {
-      return;
-    }
-    await client.send(new RemoveTargetsCommand({
-      Rule: rule,
-      Ids: targetIds,
-      Force: true,
-    }));
-  } catch (error) {
-    if (error instanceof ResourceNotFoundException) {
-      logger.warn('Rule target not found', { error });
-      return;
-    }
-    logger.error('Error in deleteTargetsOfRule', { error });
-    throw error;
-  }
-};
-
-export const deleteRule = async (region: string, name: string) => {
-  try {
-    const client = new CloudWatchEventsClient({
-      ...aws_sdk_client_common_config,
-      region,
-    });
-    const command = new DeleteRuleCommand({
-      Name: name,
-      Force: true,
-    });
-    await client.send(command);
-  } catch (error) {
-    if (error instanceof ResourceNotFoundException) {
-      logger.warn('Rule not found', { error });
-      return;
-    }
-    logger.error('Error in deleteRule', { error });
-    throw error;
-  }
-};

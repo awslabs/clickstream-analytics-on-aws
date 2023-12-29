@@ -15,6 +15,7 @@ import { CloudFormationClient, DescribeStacksCommand, StackStatus } from '@aws-s
 import { CloudWatchEventsClient } from '@aws-sdk/client-cloudwatch-events';
 import { DeleteUserCommand, QuickSightClient } from '@aws-sdk/client-quicksight';
 import { DescribeExecutionCommand, ExecutionStatus, SFNClient, StartExecutionCommand } from '@aws-sdk/client-sfn';
+import { SNSClient } from '@aws-sdk/client-sns';
 import {
   DynamoDBDocumentClient,
   GetCommand,
@@ -25,7 +26,7 @@ import {
 } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
 import request from 'supertest';
-import { MOCK_EXECUTION_ID, MOCK_PROJECT_ID, MOCK_TOKEN, createEventRuleMock, deleteEventRuleMock, projectExistedMock, tokenMock } from './ddb-mock';
+import { MOCK_EXECUTION_ID, MOCK_PROJECT_ID, MOCK_TOKEN, createEventRuleMock, createSNSTopicMock, projectExistedMock, tokenMock } from './ddb-mock';
 import { KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW } from './pipeline-mock';
 import { app, server } from '../../index';
 import 'aws-sdk-client-mock-jest';
@@ -35,6 +36,7 @@ const sfnMock = mockClient(SFNClient);
 const quickSightMock = mockClient(QuickSightClient);
 const cloudFormationMock = mockClient(CloudFormationClient);
 const cloudWatchEventsMock = mockClient(CloudWatchEventsClient);
+const snsMock = mockClient(SNSClient);
 
 describe('Project test', () => {
   beforeEach(() => {
@@ -43,6 +45,7 @@ describe('Project test', () => {
     quickSightMock.reset();
     cloudFormationMock.reset();
     cloudWatchEventsMock.reset();
+    snsMock.reset();
   });
   it('Create project', async () => {
     tokenMock(ddbMock, false);
@@ -483,7 +486,7 @@ describe('Project test', () => {
   it('Delete project', async () => {
     projectExistedMock(ddbMock, true);
     createEventRuleMock(cloudWatchEventsMock);
-    deleteEventRuleMock(cloudWatchEventsMock);
+    createSNSTopicMock(snsMock);
     ddbMock.on(ScanCommand).resolves({
       Items: [
         { type: 'project-01' },
@@ -515,7 +518,7 @@ describe('Project test', () => {
   it('Delete project and it status is failed', async () => {
     projectExistedMock(ddbMock, true);
     createEventRuleMock(cloudWatchEventsMock);
-    deleteEventRuleMock(cloudWatchEventsMock);
+    createSNSTopicMock(snsMock);
     ddbMock.on(ScanCommand).resolves({
       Items: [
         { type: 'project-01' },
@@ -554,7 +557,7 @@ describe('Project test', () => {
   it('Delete project and it status is warning', async () => {
     projectExistedMock(ddbMock, true);
     createEventRuleMock(cloudWatchEventsMock);
-    deleteEventRuleMock(cloudWatchEventsMock);
+    createSNSTopicMock(snsMock);
     ddbMock.on(ScanCommand).resolves({
       Items: [
         { type: 'project-01' },
@@ -606,7 +609,7 @@ describe('Project test', () => {
   it('Delete project last one', async () => {
     projectExistedMock(ddbMock, true);
     createEventRuleMock(cloudWatchEventsMock);
-    deleteEventRuleMock(cloudWatchEventsMock);
+    createSNSTopicMock(snsMock);
     ddbMock.on(ScanCommand).resolves({
       Items: [
         { type: 'project-01' },
@@ -637,7 +640,7 @@ describe('Project test', () => {
   it('Delete project with ddb exception', async () => {
     projectExistedMock(ddbMock, true);
     createEventRuleMock(cloudWatchEventsMock);
-    deleteEventRuleMock(cloudWatchEventsMock);
+    createSNSTopicMock(snsMock);
     ddbMock.on(QueryCommand).resolves({
       Items: [{ ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW }],
     });

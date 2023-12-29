@@ -14,6 +14,7 @@
 import { StackStatus } from '@aws-sdk/client-cloudformation';
 import { CloudWatchEventsClient } from '@aws-sdk/client-cloudwatch-events';
 import { ExecutionStatus, SFNClient, StartExecutionCommand } from '@aws-sdk/client-sfn';
+import { SNSClient } from '@aws-sdk/client-sns';
 import {
   DynamoDBDocumentClient,
   PutCommand,
@@ -22,7 +23,7 @@ import {
 } from '@aws-sdk/lib-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
 import request from 'supertest';
-import { appExistedMock, MOCK_APP_NAME, MOCK_APP_ID, MOCK_PROJECT_ID, MOCK_TOKEN, projectExistedMock, tokenMock, MOCK_EXECUTION_ID, MOCK_PIPELINE_ID, MOCK_SOLUTION_VERSION, createEventRuleMock } from './ddb-mock';
+import { appExistedMock, MOCK_APP_NAME, MOCK_APP_ID, MOCK_PROJECT_ID, MOCK_TOKEN, projectExistedMock, tokenMock, MOCK_EXECUTION_ID, MOCK_PIPELINE_ID, MOCK_SOLUTION_VERSION, createEventRuleMock, createSNSTopicMock } from './ddb-mock';
 import { clickStreamTableName } from '../../common/constants';
 import { PipelineStackType, PipelineStatusType } from '../../common/model-ln';
 import { app, server } from '../../index';
@@ -31,6 +32,7 @@ import 'aws-sdk-client-mock-jest';
 const ddbMock = mockClient(DynamoDBDocumentClient);
 const sfnMock = mockClient(SFNClient);
 const cloudWatchEventsMock = mockClient(CloudWatchEventsClient);
+const snsMock = mockClient(SNSClient);
 
 describe('Application test', () => {
   beforeEach(() => {
@@ -42,6 +44,7 @@ describe('Application test', () => {
     tokenMock(ddbMock, false);
     projectExistedMock(ddbMock, true);
     createEventRuleMock(cloudWatchEventsMock);
+    createSNSTopicMock(snsMock);
     ddbMock.on(QueryCommand)
       .resolvesOnce({
         Items: [
@@ -119,6 +122,7 @@ describe('Application test', () => {
     tokenMock(ddbMock, false).rejectsOnce(new Error('Mock DynamoDB error'));
     projectExistedMock(ddbMock, true);
     createEventRuleMock(cloudWatchEventsMock);
+    createSNSTopicMock(snsMock);
     ddbMock.on(QueryCommand)
       .resolvesOnce({
         Items: [
@@ -720,6 +724,7 @@ describe('Application test', () => {
     projectExistedMock(ddbMock, true);
     appExistedMock(ddbMock, true);
     createEventRuleMock(cloudWatchEventsMock);
+    createSNSTopicMock(snsMock);
     ddbMock.on(QueryCommand)
       .resolvesOnce({
         Items: [
@@ -791,6 +796,7 @@ describe('Application test', () => {
     projectExistedMock(ddbMock, true);
     appExistedMock(ddbMock, true);
     createEventRuleMock(cloudWatchEventsMock);
+    createSNSTopicMock(snsMock);
     ddbMock.on(QueryCommand)
       .resolvesOnce({
         Items: [

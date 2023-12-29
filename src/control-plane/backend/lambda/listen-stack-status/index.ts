@@ -15,7 +15,7 @@ import { CloudFormationClient, DescribeStacksCommand, Stack, StackStatus, Tag } 
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient, QueryCommandInput, UpdateCommand, UpdateCommandInput, paginateQuery } from '@aws-sdk/lib-dynamodb';
 import { NativeAttributeValue } from '@aws-sdk/util-dynamodb';
-import { EventBridgeEvent } from 'aws-lambda';
+import { EventBridgeEvent, SQSEvent } from 'aws-lambda';
 import { BuiltInTagKeys, PipelineStackType, PipelineStatusDetail } from '../../../../common/model';
 import { logger } from '../../../../common/powertools';
 import { aws_sdk_client_common_config, marshallOptions, unmarshallOptions } from '../../../../common/sdk-client-config';
@@ -41,11 +41,11 @@ export interface CloudFormationStackStatusChangeNotificationEventDetail {
   };
 }
 
-export const handler = async (
-  event: EventBridgeEvent<'CloudFormation Stack Status Change', CloudFormationStackStatusChangeNotificationEventDetail>): Promise<void> => {
-
-  const eventDetail = event.detail;
-  const region = event.region;
+export const handler = async (event: SQSEvent): Promise<void> => {
+  const eventBody = event.Records[0].body;
+  const eventBridgeEvent = JSON.parse(eventBody) as EventBridgeEvent<'CloudFormation Stack Status Change', CloudFormationStackStatusChangeNotificationEventDetail>;
+  const eventDetail = eventBridgeEvent.detail;
+  const region = eventBridgeEvent.region;
   const stackId = eventDetail['stack-id'];
   const stackName = stackId.split('/')[1];
 

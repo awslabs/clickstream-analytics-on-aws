@@ -95,6 +95,7 @@ const awsSDKServicesDepsForApiProject = [
   '@aws-sdk/client-acm',
   '@aws-sdk/client-secrets-manager',
   '@aws-sdk/client-sts',
+  '@aws-sdk/client-sns',
   '@aws-sdk/client-cloudwatch',
   '@aws-sdk/client-cloudwatch-events',
   '@aws-sdk/lib-dynamodb',

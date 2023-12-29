@@ -15,7 +15,7 @@ import {
   CloudFormationClient, DescribeStacksCommand, Stack, StackStatus,
 } from '@aws-sdk/client-cloudformation';
 import { DynamoDBDocumentClient, QueryCommand, UpdateCommand } from '@aws-sdk/lib-dynamodb';
-import { EventBridgeEvent } from 'aws-lambda';
+import { EventBridgeEvent, SQSEvent } from 'aws-lambda';
 import { mockClient } from 'aws-sdk-client-mock';
 import { BuiltInTagKeys, PipelineStackType, PipelineStatusDetail } from '../../../src/common/model';
 import { handler, CloudFormationStackStatusChangeNotificationEventDetail } from '../../../src/control-plane/backend/lambda/listen-stack-status';
@@ -46,6 +46,27 @@ describe('Listen CFN Stack Status Lambda Function', () => {
     },
     'resources': [],
     'source': 'aws.cloudformation',
+  };
+
+  const sqsEvent: SQSEvent = {
+    Records: [
+      {
+        messageId: '1305930a-8b79-4636-a5e9-def8d04b986a',
+        receiptHandle: 'AQEBNQaNQCrvdypFLS4Z',
+        body: JSON.stringify(baseEvent),
+        attributes: {
+          ApproximateReceiveCount: '1',
+          SentTimestamp: '1630454400000',
+          SenderId: 'EXAMPLE',
+          ApproximateFirstReceiveTimestamp: '1630454400001',
+        },
+        messageAttributes: {},
+        md5OfBody: '4b411ed5dfa42dd53590a142c9aafe98',
+        eventSource: 'aws:sqs',
+        eventSourceARN: 'arn:aws:sqs:ap-southeast-1:555555555555:test-ap-southeast-1',
+        awsRegion: 'ap-southeast-1',
+      },
+    ],
   };
 
   const mockIngestionKafkaStack: Stack = {
@@ -271,7 +292,7 @@ describe('Listen CFN Stack Status Lambda Function', () => {
       Items: [{ ...mockPipeline }],
     });
     docMock.on(UpdateCommand).resolves({});
-    await handler(baseEvent);
+    await handler(sqsEvent);
     expect(cloudFormationMock).toHaveReceivedCommandTimes(DescribeStacksCommand, 1);
     expect(docMock).toHaveReceivedCommandTimes(QueryCommand, 1);
     expect(mockStackDetails).toContainEqual({
