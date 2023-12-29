@@ -94,7 +94,15 @@ describe('Listen SFN Status Lambda Function', () => {
       Items: [{ ...mockPipeline, lastAction: 'Delete' }],
     });
     docMock.on(UpdateCommand).resolves({});
-    docMock.on(ScanCommand).resolves({});
+    docMock.on(ScanCommand).resolves({
+      Items: [
+        {
+          id: MOCK_PROJECT_ID,
+          type: `PIPELINE#${MOCK_PIPELINE_ID}#latest`,
+          executionDetail: mockExecutionDetail,
+        },
+      ],
+    });
     docMock.on(TransactWriteItemsCommand).resolves({});
     cloudWatchEventsMock.on(ListTargetsByRuleCommand).resolves({
       Targets: [
