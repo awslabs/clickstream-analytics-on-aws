@@ -1637,29 +1637,6 @@ describe('Pipeline test', () => {
       },
     });
   });
-  it('Get pipeline with cache status in ddb', async () => {
-    projectExistedMock(ddbMock, true);
-    ddbMock.on(QueryCommand).resolves({
-      Items: [{ ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW }],
-    });
-    let res = await request(app)
-      .get(`/api/pipeline/${MOCK_PIPELINE_ID}?pid=${MOCK_PROJECT_ID}&cache=true`);
-    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toEqual({
-      success: true,
-      message: '',
-      data: {
-        ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
-        dns: null,
-        endpoint: null,
-        dashboards: null,
-        metricsDashboardName: null,
-        templateInfo: null,
-        analysisStudioEnabled: false,
-      },
-    });
-  });
   it('Get pipeline by ID with stack no outputs', async () => {
     projectExistedMock(ddbMock, true);
     ddbMock.on(QueryCommand).resolves({

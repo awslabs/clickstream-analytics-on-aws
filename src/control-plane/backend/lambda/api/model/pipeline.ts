@@ -70,12 +70,14 @@ import {
 } from '../common/types';
 import { getPipelineStatusType, getStackName, getStackTags, getUpdateTags, getStateMachineExecutionName, isEmpty } from '../common/utils';
 import { StackManager } from '../service/stack';
+import { getStacksDetailsByNames } from '../store/aws/cloudformation';
 import { createRuleAndAddTargets } from '../store/aws/events';
 import { listMSKClusterBrokers } from '../store/aws/kafka';
 
 import { QuickSightUserArns, registerClickstreamUser } from '../store/aws/quicksight';
 import { getRedshiftInfo } from '../store/aws/redshift';
 import { isBucketExist } from '../store/aws/s3';
+import { getExecutionDetail } from '../store/aws/sfn';
 import { createTopicAndSubscribeSQSQueue } from '../store/aws/sns';
 import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
@@ -437,19 +439,43 @@ export class CPipeline {
     await store.updatePipeline(this.pipeline, oldPipeline);
   }
 
-  public async refreshStatus(): Promise<void> {
-    if (!this.pipeline.executionDetail) {
-      this.pipeline.executionDetail = {
-        executionArn: '',
-        name: this.pipeline.status?.executionDetail.name ?? '',
-        status: this.pipeline.status?.executionDetail.status as ExecutionStatus ?? ExecutionStatus.SUCCEEDED,
-      };
+  public async refreshStatus(refresh?: string): Promise<void> {
+    if (refresh && refresh === 'force') {
+      await this._forceRefreshStatus();
+    } else {
+      if (!this.pipeline.executionDetail) {
+        this.pipeline.executionDetail = {
+          executionArn: '',
+          name: this.pipeline.status?.executionDetail.name ?? '',
+          status: this.pipeline.status?.executionDetail.status as ExecutionStatus ?? ExecutionStatus.SUCCEEDED,
+        };
+      }
+      if (!this.pipeline.stackDetails) {
+        this.pipeline.stackDetails = this.pipeline.status?.stackDetails ?? [];
+      }
+      this.pipeline.statusType = getPipelineStatusType(this.pipeline);
     }
-    if (!this.pipeline.stackDetails) {
-      this.pipeline.stackDetails = this.pipeline.status?.stackDetails ?? [];
-    }
-    this.pipeline.statusType = getPipelineStatusType(this.pipeline);
     await store.updatePipelineAtCurrentVersion(this.pipeline);
+  }
+
+  private async _forceRefreshStatus(): Promise<void> {
+    let executionDetail;
+    if (this.pipeline.executionDetail?.executionArn) {
+      executionDetail = await getExecutionDetail(this.pipeline.region, this.pipeline.executionDetail?.executionArn);
+      if (executionDetail) {
+        this.pipeline.executionDetail = {
+          executionArn: executionDetail.executionArn ?? '',
+          name: executionDetail.name ?? '',
+          status: executionDetail.status,
+        };
+      }
+    }
+    const stackNames = this.stackManager.getWorkflowStacks(this.pipeline.workflow?.Workflow!);
+    const stackStatusDetails: PipelineStatusDetail[] = await getStacksDetailsByNames(this.pipeline.region, stackNames);
+    if (stackStatusDetails.length > 0) {
+      this.pipeline.stackDetails = stackStatusDetails;
+      this.pipeline.statusType = getPipelineStatusType(this.pipeline);
+    }
   }
 
   public async updateApp(appIds: string[]): Promise<void> {

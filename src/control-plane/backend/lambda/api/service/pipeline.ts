@@ -66,45 +66,33 @@ export class PipelineServ {
 
   public async details(req: any, res: any, next: any) {
     try {
-      const { pid, cache } = req.query;
+      const { pid, refresh } = req.query;
       const latestPipelines = await store.listPipeline(pid, 'latest', 'asc');
       if (latestPipelines.length === 0) {
         return res.status(404).send(new ApiFail('Pipeline not found'));
       }
       const latestPipeline = latestPipelines[0];
-      if (!cache || cache === 'false') {
-        const pipeline = new CPipeline(latestPipeline);
-        await pipeline.refreshStatus();
-        const pluginsInfo = await pipeline.getPluginsInfo();
-        const templateInfo = pipeline.getTemplateInfo();
-        return res.json(new ApiSuccess({
-          ...latestPipeline,
-          statusType: getPipelineStatusType(latestPipeline),
-          dataProcessing: {
-            ...latestPipeline.dataProcessing,
-            transformPlugin: pluginsInfo.transformPlugin,
-            enrichPlugin: pluginsInfo.enrichPlugin,
-          },
-          endpoint: getStackOutputFromPipelineStatus(latestPipeline.stackDetails ?? latestPipeline.status?.stackDetails,
-            PipelineStackType.INGESTION, OUTPUT_INGESTION_SERVER_URL_SUFFIX),
-          dns: getStackOutputFromPipelineStatus(latestPipeline.stackDetails ?? latestPipeline.status?.stackDetails,
-            PipelineStackType.INGESTION, OUTPUT_INGESTION_SERVER_DNS_SUFFIX),
-          dashboards: getReportingDashboardsUrl(latestPipeline.stackDetails ?? latestPipeline.status?.stackDetails,
-            PipelineStackType.REPORTING, OUTPUT_REPORT_DASHBOARDS_SUFFIX),
-          metricsDashboardName: getStackOutputFromPipelineStatus(latestPipeline.stackDetails ?? latestPipeline.status?.stackDetails,
-            PipelineStackType.METRICS, OUTPUT_METRICS_OBSERVABILITY_DASHBOARD_NAME),
-          templateInfo,
-          analysisStudioEnabled: pipelineAnalysisStudioEnabled(latestPipeline),
-        }));
-      }
+      const pipeline = new CPipeline(latestPipeline);
+      await pipeline.refreshStatus(refresh);
+      const pluginsInfo = await pipeline.getPluginsInfo();
+      const templateInfo = pipeline.getTemplateInfo();
       return res.json(new ApiSuccess({
         ...latestPipeline,
         statusType: getPipelineStatusType(latestPipeline),
-        endpoint: null,
-        dns: null,
-        dashboards: null,
-        metricsDashboardName: null,
-        templateInfo: null,
+        dataProcessing: {
+          ...latestPipeline.dataProcessing,
+          transformPlugin: pluginsInfo.transformPlugin,
+          enrichPlugin: pluginsInfo.enrichPlugin,
+        },
+        endpoint: getStackOutputFromPipelineStatus(latestPipeline.stackDetails ?? latestPipeline.status?.stackDetails,
+          PipelineStackType.INGESTION, OUTPUT_INGESTION_SERVER_URL_SUFFIX),
+        dns: getStackOutputFromPipelineStatus(latestPipeline.stackDetails ?? latestPipeline.status?.stackDetails,
+          PipelineStackType.INGESTION, OUTPUT_INGESTION_SERVER_DNS_SUFFIX),
+        dashboards: getReportingDashboardsUrl(latestPipeline.stackDetails ?? latestPipeline.status?.stackDetails,
+          PipelineStackType.REPORTING, OUTPUT_REPORT_DASHBOARDS_SUFFIX),
+        metricsDashboardName: getStackOutputFromPipelineStatus(latestPipeline.stackDetails ?? latestPipeline.status?.stackDetails,
+          PipelineStackType.METRICS, OUTPUT_METRICS_OBSERVABILITY_DASHBOARD_NAME),
+        templateInfo,
         analysisStudioEnabled: pipelineAnalysisStudioEnabled(latestPipeline),
       }));
     } catch (error) {

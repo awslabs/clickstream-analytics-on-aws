@@ -15,7 +15,7 @@ import { CloudWatchEventsClient, DeleteRuleCommand, ListTargetsByRuleCommand, Re
 import { DynamoDBClient, TransactWriteItemsCommand, TransactWriteItemsCommandInput } from '@aws-sdk/client-dynamodb';
 import { ExecutionStatus } from '@aws-sdk/client-sfn';
 import { DeleteTopicCommand, ListSubscriptionsByTopicCommand, SNSClient, UnsubscribeCommand } from '@aws-sdk/client-sns';
-import { DynamoDBDocumentClient, UpdateCommand, QueryCommandInput, paginateQuery, UpdateCommandInput, ScanCommandInput, ScanCommand } from '@aws-sdk/lib-dynamodb';
+import { DynamoDBDocumentClient, UpdateCommand, QueryCommandInput, paginateQuery, UpdateCommandInput, ScanCommandInput, paginateScan } from '@aws-sdk/lib-dynamodb';
 import { NativeAttributeValue } from '@aws-sdk/util-dynamodb';
 import { EventBridgeEvent } from 'aws-lambda';
 import { ExecutionDetail, PipelineStatusType } from '../../../../common/model';
@@ -149,7 +149,13 @@ const deleteProject = async (projectId: string) => {
         ':d': false,
       },
     };
-    const records = (await docClient.send(new ScanCommand(input))).Items ?? [];
+    const records: Record<string, NativeAttributeValue>[] = [];
+    for await (const page of paginateScan({ client: docClient }, input)) {
+      records.push(...page.Items as Record<string, NativeAttributeValue>[]);
+    }
+    if (records.length === 0) {
+      return;
+    }
     const transactInput: TransactWriteItemsCommandInput = {
       TransactItems: [],
     };

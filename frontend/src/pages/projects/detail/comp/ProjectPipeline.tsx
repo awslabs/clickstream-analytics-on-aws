@@ -39,7 +39,7 @@ import { defaultStr } from 'ts/utils';
 interface ProjectPipelineProps {
   pipelineInfo: IPipeline;
   loadingRefresh: boolean;
-  reloadPipeline: () => void;
+  reloadPipeline: (refresh: string) => void;
 }
 
 const PAGE_SIZE = 10;
@@ -114,7 +114,7 @@ const ProjectPipeline: React.FC<ProjectPipelineProps> = (
       setLoadingRetry(false);
       if (resData.success) {
         setDisableRetry(true);
-        reloadPipeline();
+        reloadPipeline('false');
       }
     } catch (error) {
       setLoadingRetry(false);
@@ -151,8 +151,17 @@ const ProjectPipeline: React.FC<ProjectPipelineProps> = (
                 <Button
                   iconName="refresh"
                   loading={loadingRefresh}
-                  onClick={() => {
-                    reloadPipeline();
+                  onClick={(e) => {
+                    let refresh = 'false';
+                    if (
+                      e.detail.altKey ||
+                      e.detail.ctrlKey ||
+                      e.detail.metaKey ||
+                      e.detail.shiftKey
+                    ) {
+                      refresh = 'force';
+                    }
+                    reloadPipeline(refresh);
                   }}
                 />
                 {pipelineInfo.statusType === EPipelineStatus.Failed && (
@@ -211,7 +220,7 @@ const ProjectPipeline: React.FC<ProjectPipelineProps> = (
                   projectId={pipelineInfo.projectId}
                   status={pipelineInfo.statusType}
                   updatePipelineStatus={() => {
-                    reloadPipeline();
+                    reloadPipeline('false');
                   }}
                 />
               </div>

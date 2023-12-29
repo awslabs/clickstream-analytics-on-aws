@@ -16,7 +16,7 @@ import { Aws, CfnResource, Duration, Stack } from 'aws-cdk-lib';
 import { Table } from 'aws-cdk-lib/aws-dynamodb';
 import { CfnRule, Rule } from 'aws-cdk-lib/aws-events';
 import { LambdaFunction } from 'aws-cdk-lib/aws-events-targets';
-import { AnyPrincipal, Effect, PolicyStatement } from 'aws-cdk-lib/aws-iam';
+import { Effect, PolicyStatement, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 import { IFunction, Tracing } from 'aws-cdk-lib/aws-lambda';
 import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
 import { Queue, QueueEncryption } from 'aws-cdk-lib/aws-sqs';
@@ -66,7 +66,7 @@ export class BackendEventBus extends Construct {
     queue.addToResourcePolicy(
       new PolicyStatement({
         effect: Effect.ALLOW,
-        principals: [new AnyPrincipal()],
+        principals: [new ServicePrincipal('sns.amazonaws.com')],
         resources: [queue.queueArn],
         actions: [
           'sqs:SendMessage',
@@ -78,6 +78,11 @@ export class BackendEventBus extends Construct {
         },
       }),
     );
+
+    addCfnNagSuppressRules((queue.node.defaultChild as CfnResource), [{
+      id: 'W48',
+      reason: 'SQS already set SQS_MANAGED encryption',
+    }]);
 
     return queue;
   };

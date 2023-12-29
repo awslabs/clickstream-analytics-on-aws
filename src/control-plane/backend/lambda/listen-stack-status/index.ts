@@ -23,6 +23,7 @@ import { WorkflowParallelBranch, WorkflowState, WorkflowStateType } from '../api
 
 const ddbClient = new DynamoDBClient({
   ...aws_sdk_client_common_config,
+  region: process.env.AWS_REGION,
 });
 
 const docClient = DynamoDBDocumentClient.from(ddbClient, {

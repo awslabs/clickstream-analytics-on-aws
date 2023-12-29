@@ -38,7 +38,7 @@ import { alertMsg, defaultStr } from 'ts/utils';
 interface BasicInfoProps {
   pipelineInfo?: IPipeline;
   loadingRefresh: boolean;
-  reloadPipeline: () => void;
+  reloadPipeline: (refresh: string) => void;
 }
 
 const BasicInfo: React.FC<BasicInfoProps> = (props: BasicInfoProps) => {
@@ -77,7 +77,7 @@ const BasicInfo: React.FC<BasicInfoProps> = (props: BasicInfoProps) => {
       setLoadingRetry(false);
       if (resData.success) {
         setDisableRetry(true);
-        reloadPipeline();
+        reloadPipeline('false');
       }
     } catch (error) {
       setLoadingRetry(false);
@@ -94,7 +94,7 @@ const BasicInfo: React.FC<BasicInfoProps> = (props: BasicInfoProps) => {
       setLoadingUpgrade(false);
       if (resData.success) {
         setDisableUpgrade(true);
-        reloadPipeline();
+        reloadPipeline('false');
         setShowUpgradeModal(false);
       }
     } catch (error) {
@@ -143,8 +143,17 @@ const BasicInfo: React.FC<BasicInfoProps> = (props: BasicInfoProps) => {
                 <Button
                   iconName="refresh"
                   loading={loadingRefresh}
-                  onClick={() => {
-                    reloadPipeline();
+                  onClick={(e) => {
+                    let refresh = 'false';
+                    if (
+                      e.detail.altKey ||
+                      e.detail.ctrlKey ||
+                      e.detail.metaKey ||
+                      e.detail.shiftKey
+                    ) {
+                      refresh = 'force';
+                    }
+                    reloadPipeline(refresh);
                   }}
                 />
                 {(pipelineInfo?.statusType === EPipelineStatus.Failed ||
@@ -266,7 +275,7 @@ const BasicInfo: React.FC<BasicInfoProps> = (props: BasicInfoProps) => {
                   projectId={pipelineInfo?.projectId}
                   status={pipelineInfo?.statusType}
                   updatePipelineStatus={(status) => {
-                    reloadPipeline();
+                    reloadPipeline('false');
                   }}
                 />
               </div>

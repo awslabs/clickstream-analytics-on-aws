@@ -2151,7 +2151,7 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
 ) => {
   const { t } = useTranslation();
   const { update } = props;
-  const { id, pid } = useParams();
+  const { pid } = useParams();
 
   const [loadingData, setLoadingData] = useState(true);
   const [updatePipeline, setUpdatePipeline] = useState<IExtPipeline>();
@@ -2730,9 +2730,7 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
         setLoadingData(true);
         const { success, data }: ApiResponse<IExtPipeline> =
           await getPipelineDetail({
-            id: defaultStr(id),
-            pid: defaultStr(pid),
-            cache: true,
+            projectId: defaultStr(pid),
           });
         if (success) {
           const extPipeline = getDefaultExtPipeline(data);

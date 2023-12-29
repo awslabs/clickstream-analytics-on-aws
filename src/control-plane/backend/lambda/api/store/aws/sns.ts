@@ -12,6 +12,7 @@
  */
 
 import { SNSClient, CreateTopicCommand, SubscribeCommand, SetTopicAttributesCommand } from '@aws-sdk/client-sns';
+import { awsAccountId } from '../../common/constants';
 import { logger } from '../../common/powertools';
 import { aws_sdk_client_common_config } from '../../common/sdk-client-config-ln';
 
@@ -93,7 +94,7 @@ export const setPermissionForEventRule = async (region: string, topicArn: string
           Resource: topicArn,
           Condition: {
             StringEquals: {
-              'AWS:SourceOwner': '615633583142',
+              'AWS:SourceOwner': awsAccountId,
             },
           },
         },

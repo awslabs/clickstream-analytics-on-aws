@@ -12,13 +12,8 @@
  */
 
 import { StackStatus } from '@aws-sdk/client-cloudformation';
-import {
-  StartExecutionCommand,
-  StartExecutionCommandOutput,
-} from '@aws-sdk/client-sfn';
-import { stackWorkflowS3Bucket, stackWorkflowStateMachineArn } from '../common/constants';
+import { awsRegion, stackWorkflowS3Bucket } from '../common/constants';
 import { PipelineStackType, PipelineStatusDetail } from '../common/model-ln';
-import { sfnClient } from '../common/sfn';
 import {
   WorkflowParallelBranch,
   WorkflowState,
@@ -27,6 +22,7 @@ import {
 } from '../common/types';
 import { getPipelineLastActionFromStacksStatus, getStackName, getStackTags } from '../common/utils';
 import { IPipeline } from '../model/pipeline';
+import { startExecution } from '../store/aws/sfn';
 
 
 export class StackManager {
@@ -186,13 +182,8 @@ export class StackManager {
     if (workflow === undefined) {
       throw new Error('Pipeline workflow is empty.');
     }
-    const params: StartExecutionCommand = new StartExecutionCommand({
-      stateMachineArn: stackWorkflowStateMachineArn,
-      input: JSON.stringify(workflow.Workflow),
-      name: executionName,
-    });
-    const result: StartExecutionCommandOutput = await sfnClient.send(params);
-    return result.executionArn ?? '';
+    const executionArn = await startExecution(awsRegion!, executionName, JSON.stringify(workflow.Workflow));
+    return executionArn ?? '';
   }
 
   public setWorkflowType(state: WorkflowState, type: WorkflowStateType): WorkflowState {

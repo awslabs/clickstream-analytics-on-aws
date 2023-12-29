@@ -1070,7 +1070,11 @@ function _getPipelineStatusFromStacks(pipeline: IPipeline, lastAction: string) {
   if (!stackDetails) {
     return status;
   }
+  let allStacksStatusIsUnknown = true;
   for (let s of stackDetails) {
+    if (s.stackStatus) {
+      allStacksStatusIsUnknown = false;
+    }
     if (s.stackStatus?.endsWith('_FAILED')) {
       status = PipelineStatusType.FAILED;
       break;
@@ -1088,6 +1092,9 @@ function _getPipelineStatusFromStacks(pipeline: IPipeline, lastAction: string) {
         status = PipelineStatusType.UPDATING;
       }
     }
+  }
+  if (allStacksStatusIsUnknown && pipeline.lastAction === 'Delete') {
+    status = PipelineStatusType.DELETED;
   }
   return status;
 }

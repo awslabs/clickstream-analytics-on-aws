@@ -37,7 +37,7 @@ interface PipelineStatusProps {
 const PipelineStatus: React.FC<PipelineStatusProps> = (
   props: PipelineStatusProps
 ) => {
-  const { status, projectId, pipelineId, updatePipelineStatus } = props;
+  const { status, projectId, updatePipelineStatus } = props;
   const { t } = useTranslation();
   let intervalId: any = 0;
   const [loadingStatus, setLoadingStatus] = useState(false);
@@ -75,6 +75,9 @@ const PipelineStatus: React.FC<PipelineStatusProps> = (
     } else if (updatedStatus === EPipelineStatus.Warning) {
       tmpIndicatorType = 'warning';
       tmpDisplayStatus = 'status.warning';
+    } else if (updatedStatus === EPipelineStatus.Deleted) {
+      tmpIndicatorType = 'stopped';
+      tmpDisplayStatus = 'status.deleted';
     } else {
       tmpIndicatorType = 'pending';
       tmpDisplayStatus = 'status.pending';
@@ -90,8 +93,7 @@ const PipelineStatus: React.FC<PipelineStatusProps> = (
     try {
       const { success, data }: ApiResponse<IExtPipeline> =
         await getPipelineDetail({
-          id: defaultStr(pipelineId),
-          pid: defaultStr(projectId),
+          projectId: defaultStr(projectId),
         });
       if (success) {
         setUpdatedStatus(data.statusType);
