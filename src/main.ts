@@ -203,7 +203,7 @@ new DataPipelineStack(app, 'data-pipeline-stack', {
 });
 
 stackSuppressions([
-  new DataAnalyticsRedshiftStack(app, app.node.tryGetContext('stackName') ?? 'data-analytics-redshift-stack', {
+  new DataAnalyticsRedshiftStack(app, app.node.tryGetContext('modelRedshiftStackName') ?? 'data-analytics-redshift-stack', {
     synthesizer: synthesizer(),
   }),
 ], [
@@ -212,7 +212,7 @@ stackSuppressions([
   { id: 'AwsSolutions-L1', reason: 'Caused by CDK built-in custom resource provider not using latest Nodejs runtime' },
 ]);
 
-new DataModelingAthenaStack(app, app.node.tryGetContext('stackName') ?? 'data-modeling-athena-stack', {
+new DataModelingAthenaStack(app, app.node.tryGetContext('modelAthenaStackName') ?? 'data-modeling-athena-stack', {
   synthesizer: synthesizer(),
 });
 
