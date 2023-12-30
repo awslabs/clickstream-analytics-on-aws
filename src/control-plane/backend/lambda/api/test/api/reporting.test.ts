@@ -42,7 +42,7 @@ import request from 'supertest';
 import { MOCK_TOKEN, tokenMock } from './ddb-mock';
 import { KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW } from './pipeline-mock';
 import { clickStreamTableName } from '../../common/constants';
-import { ConditionCategory, ExploreLocales, ExplorePathNodeType, ExplorePathSessionDef, MetadataPlatform, MetadataValueType, QuickSightChartType } from '../../common/explore-types';
+import { ConditionCategory, ExploreAttributionTimeWindowType, ExploreLocales, ExplorePathNodeType, ExplorePathSessionDef, MetadataPlatform, MetadataValueType, QuickSightChartType } from '../../common/explore-types';
 import { app, server } from '../../index';
 import 'aws-sdk-client-mock-jest';
 import { EventAndCondition, PairEventAndCondition, SQLCondition } from '../../service/quicksight/sql-builder';
@@ -1230,6 +1230,7 @@ describe('reporting test', () => {
           },
         ],
         modelType: 'LAST_TOUCH',
+        timeWindowType: ExploreAttributionTimeWindowType.CURRENT_DAY,
         timeScopeType: 'RELATIVE',
         lastN: 7,
         timeUnit: 'DD',
@@ -1462,6 +1463,7 @@ describe('reporting test', () => {
           },
         ],
         modelType: 'LAST_TOUCH',
+        timeWindowType: ExploreAttributionTimeWindowType.SESSION,
         timeScopeType: 'RELATIVE',
         lastN: 7,
         timeUnit: 'DD',
