@@ -316,7 +316,7 @@ export function createRedshiftAnalyticsStack(
     value: redshiftExistingServerlessStack.scanMetadataWorkflowArn,
     description: 'Scan metadata workflow stepfunction arn',
     condition: isExistingRedshiftServerless,
-  }).overrideLogicalId(`ExistingRedshiftServerless${OUTPUT_SCAN_METADATA_WORKFLOW_AR_SUFFIX}`);  
+  }).overrideLogicalId(`ExistingRedshiftServerless${OUTPUT_SCAN_METADATA_WORKFLOW_AR_SUFFIX}`);
 
   return {
     redshiftServerlessStack: redshiftExistingServerlessStack,

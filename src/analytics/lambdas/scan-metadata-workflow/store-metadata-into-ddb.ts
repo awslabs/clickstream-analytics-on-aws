@@ -89,16 +89,16 @@ async function handleEventMetadata(appId: string, metadataItems: any[], markedLa
 
   const response = await queryMetadata(inputSql);
 
-  for (const record of response.Records!){
+  for (const record of response.Records!) {
     const key = `${record[0].stringValue}${record[1].stringValue}`;
     if (itemsMap.has(key)) {
-      updateEventItem(itemsMap, key, record, markedLatestMonthMap);
+      await updateEventItem(itemsMap, key, record, markedLatestMonthMap);
     } else {
       const item = await createEventItem(record, itemsMap, markedLatestMonthMap);
       itemsMap.set(key, item);
     }
   }
-  
+
   // aggregate summary info
   aggEventSummary(itemsMap, metadataItems);
 
@@ -114,9 +114,6 @@ async function handlePropertiesMetadata(appId: string, metadataItems: any[], mar
     `SELECT id, month, prefix, project_id, app_id, day_number, category, event_name_set, property_name, value_type, property_value, count, platform FROM ${appId}.event_parameter_metadata;`;
   const response = await queryMetadata(inputSql);
 
-  // clear item.dayN record which will be replaced by new record
-  clearEventParameterItemDayNRecord(ddbItemsMap, response);
-
   for (const record of response.Records!) {
     const id = record[0].stringValue;
     const month = record[1].stringValue;
@@ -128,7 +125,7 @@ async function handlePropertiesMetadata(appId: string, metadataItems: any[], mar
       // there is not existing item in ddb, create a new item and set into ddbItemsMap
       const item = await createEventParameterItem(record, ddbItemsMap, markedLatestMonthMap);
       ddbItemsMap.set(key, item);
-    }    
+    }
   }
   // aggregate summary info
   aggEventParameterSummary(ddbItemsMap);
@@ -145,10 +142,10 @@ async function handleUserAttributeMetadata(appId: string, metadataItems: any[], 
 
   const response = await queryMetadata(inputSql);
 
-  for (const record of response.Records!){
+  for (const record of response.Records!) {
     const key = `${record[0].stringValue}${record[1].stringValue}`;
     if (itemsMap.has(key)) {
-      updateUserPropertiesItem(itemsMap, key, record, markedLatestMonthMap);
+      await updateUserPropertiesItem(itemsMap, key, record, markedLatestMonthMap);
     } else {
       const item = await createUserPropertiesItem(record, itemsMap, markedLatestMonthMap);
       itemsMap.set(key, item);
@@ -189,38 +186,43 @@ function addSetIntoAnotherSet(sourceSet: Set<string>, inputSet: Set<string>) {
 }
 
 async function getAndMarkMonthValue(memoryItemMap: Map<string, any>, id: string, currentMonth: string, markedLatestMonthMap: Map<string, any>) {
-  const getCommandParameter = {
-    TableName: ddbTableName,
-    Key: {
-      id: id,
-      month: 'latest',
-    },
-  };
-
-  // compare with ddb latest month
   try {
-    const response = await ddbDocClient.send(new GetCommand(getCommandParameter));
-    if (response.Item) {
-      const item = response.Item;
-      const existingDDBItemOriginMonth = item.originMonth;
-      if (currentMonth < existingDDBItemOriginMonth) {
-        return currentMonth;
-      }      
-      if (currentMonth > existingDDBItemOriginMonth) {
-        // update ddb latest month to its origin month
-        item.month = existingDDBItemOriginMonth;
-        const params = {
-          TableName: ddbTableName,
-          Item: item
-        };       
-        await ddbDocClient.send(new PutCommand(params));     
+    if (!markedLatestMonthMap.has(id)) {
+      // compare with ddb latest month
+      const getCommandParameter = {
+        TableName: ddbTableName,
+        Key: {
+          id: id,
+          month: 'latest',
+        },
+      };
+      const response = await ddbDocClient.send(new GetCommand(getCommandParameter));
+      if (response.Item) {
+        const item = response.Item;
+        const existingDDBItemOriginMonth = item.originMonth;
+        if (currentMonth < existingDDBItemOriginMonth) {
+          // set markedLatestMonthMap
+          markedLatestMonthMap.set(id, existingDDBItemOriginMonth);
+          //  set ddb latest month item into memory, if there is later month data then ddb latest month data,
+          // it will be updated in later process
+          // const key = `${id}${existingDDBItemOriginMonth}`;
+          // memoryItemMap.set(key, item);
+          return currentMonth;
+        }
+        if (currentMonth > existingDDBItemOriginMonth) {
+          // update ddb latest month to its origin month
+          item.month = existingDDBItemOriginMonth;
+          item.updateTimestamp = Date.now();
+          const params = {
+            TableName: ddbTableName,
+            Item: item,
+          };
+          await ddbDocClient.send(new PutCommand(params));
+        }
       }
-    }
-
-    // compare with memory latest month
-    if (markedLatestMonthMap.has(id)) {       
+    } else {
       const markedMonth = markedLatestMonthMap.get(id);
-      if (currentMonth < markedMonth) {        
+      if (currentMonth < markedMonth) {
         return currentMonth;
       }
       if (currentMonth > markedMonth) {
@@ -231,7 +233,7 @@ async function getAndMarkMonthValue(memoryItemMap: Map<string, any>, id: string,
         memoryItemMap.set(key, item);
       }
     }
-    // update memory latest month   
+    // update memory latest month
     markedLatestMonthMap.set(id, currentMonth);
     return 'latest';
   } catch (error) {
@@ -356,7 +358,7 @@ async function getExistingItemsFromDDB(appId: string, redshiftTableName: string)
     ddbRecrods?.forEach(item => {
       const key = `${id}${originMonth}`;
       itemsMap.set(key, item);
-    });  
+    });
   };
   return itemsMap;
 }
@@ -371,23 +373,23 @@ function putItemsMapIntoDDBItems(metadataItems: any[], itemsMap: Map<string, any
   }
 }
 
-// function to clear item.dayN record which will be replaced by new record
-function clearEventParameterItemDayNRecord(itemsMap: Map<string, any>, response: any) {
-  for (const record of response.Records!) {
-    const id = record[0].stringValue;
-    const month = record[1].stringValue;
-    const key = `${id}${month}`;
-    if (itemsMap.has(key)) {
-      const item = itemsMap.get(key);
-      const dayNumber = record[5].longValue;
-      item[`day${dayNumber}`] = {
-        hasData: true,
-        platform: [],
-        valueEnum: [],
-      };
-    }
-  }
-}  
+// // function to clear item.dayN record which will be replaced by new record
+// function clearEventParameterItemDayNRecord(itemsMap: Map<string, any>, response: any) {
+//   for (const record of response.Records!) {
+//     const id = record[0].stringValue;
+//     const month = record[1].stringValue;
+//     const key = `${id}${month}`;
+//     if (itemsMap.has(key)) {
+//       const item = itemsMap.get(key);
+//       const dayNumber = record[5].longValue;
+//       item[`day${dayNumber}`] = {
+//         hasData: true,
+//         platform: [],
+//         valueEnum: [],
+//       };
+//     }
+//   }
+// }
 
 async function updateEventParameterItem(itemsMap: Map<string, any>, key: string, record: any, markedLatestMonthMap: Map<string, any>) {
   const item = itemsMap.get(key);
@@ -407,18 +409,30 @@ async function updateEventParameterItem(itemsMap: Map<string, any>, key: string,
 
   item[dayNumber].platform = Array.from(platformSet);
 
-  // push parameter value and count into valueEnum
-  item[dayNumber].valueEnum.push({ value: record[10].stringValue, count: record[11].longValue });
+  // convert valueEnum to map, and check if there is same value in valueEnum, if yes, update the count
+  const valueEnumMap = new Map();
+  item[dayNumber].valueEnum.forEach((element: any) => {
+    valueEnumMap.set(element.value, element.count);
+  });
+  valueEnumMap.set(record[10].stringValue, record[11].longValue);
+
+  // convert valueEnumMap to valueEnum and push into item
+  item[dayNumber].valueEnum = [];
+  for (const [parameterValue, countValue] of valueEnumMap) {
+    item[dayNumber].valueEnum.push({ value: parameterValue, count: countValue });
+  }
 
   // item should be updated if other month data is later than current month data
   item.month = await getAndMarkMonthValue(itemsMap, record[0].stringValue, record[1].stringValue, markedLatestMonthMap);
 
-  if(item.summary) {
+  item.updateTimestamp = Date.now();
+
+  if (item.summary) {
     // add event name to event name set
     const eventNameSet: Set<string> = new Set(item.summary.associatedEvents);
     addSetIntoAnotherSet(eventNameSet, convertToSet(record[7].stringValue));
     item.summary.associatedEvents = Array.from(eventNameSet);
-  }  
+  }
 }
 
 async function createEventParameterItem(record: any, itemsMap: Map<string, any>, markedLatestMonthMap: Map<string, any>) {
@@ -432,7 +446,8 @@ async function createEventParameterItem(record: any, itemsMap: Map<string, any>,
     name: record[8].stringValue,
     category: record[6].stringValue,
     valueType: record[9].stringValue,
-    createTimeStamp: Date.now(),
+    createTimestamp: Date.now(),
+    updateTimestamp: Date.now(),
     [`day${record[5].longValue}`]: {
       hasData: true,
       platform: Array.from(convertToSet(record[12].stringValue)),
@@ -444,7 +459,7 @@ async function createEventParameterItem(record: any, itemsMap: Map<string, any>,
       valueEnum: [{ value: record[10].stringValue, count: record[11].longValue }],
       associatedEvents: Array.from(convertToSet(record[7].stringValue)),
     },
-  };  
+  };
 }
 
 function aggEventParameterSummary(itemsMap: Map<string, any>) {
@@ -461,8 +476,7 @@ function aggEventParameterSummary(itemsMap: Map<string, any>) {
 
     item.summary.platform = Array.from(platformSet);
     item.summary.valueEnum = valueEnum;
-    item.updateTimeStamp = Date.now();
-  }  
+  }
 }
 
 function aggEventParameterValueEnumAndPlatform(item: any, platformSet: Set<string>, valueEnumAggregation: { [key: string]: number }) {
@@ -478,7 +492,7 @@ function aggEventParameterValueEnumAndPlatform(item: any, platformSet: Set<strin
         }
       });
     }
-  }  
+  }
 }
 
 async function updateEventItem(itemsMap: Map<string, any>, key: string, record: any, markedLatestMonthMap: Map<string, any>) {
@@ -490,7 +504,8 @@ async function updateEventItem(itemsMap: Map<string, any>, key: string, record: 
     sdkVersion: Array.from(convertToSet(record[9].stringValue)),
     sdkName: Array.from(convertToSet(record[10].stringValue)),
   };
-  item.month = await getAndMarkMonthValue(itemsMap, record[0].stringValue, record[1].stringValue, markedLatestMonthMap);  
+  item.month = await getAndMarkMonthValue(itemsMap, record[0].stringValue, record[1].stringValue, markedLatestMonthMap);
+  item.updateTimestamp = Date.now();
 }
 
 async function createEventItem(record: any, itemsMap: Map<string, any>, markedLatestMonthMap: Map<string, any>) {
@@ -502,6 +517,8 @@ async function createEventItem(record: any, itemsMap: Map<string, any>, markedLa
     projectId: record[3].stringValue,
     appId: record[4].stringValue,
     name: record[7].stringValue,
+    createTimestamp: Date.now(),
+    updateTimestamp: Date.now(),
     [`day${record[5].longValue}`]: {
       count: record[6].longValue,
       hasData: true,
@@ -519,8 +536,8 @@ async function createEventItem(record: any, itemsMap: Map<string, any>, markedLa
   };
 }
 
-function associatedParametersToEvent(eventName: string, associatedParameters: any[], parameterItem: any[]) {
-  for (const parameter of parameterItem) {
+function associatedParametersToEvent(eventName: string, associatedParameters: any[], parameterItems: any[]) {
+  for (const parameter of parameterItems) {
     const parameterItem = parameter.PutRequest.Item;
     if (parameterItem.summary.associatedEvents.includes(eventName)) {
       const parameterName = parameterItem.name;
@@ -558,7 +575,7 @@ function aggEventSummary(itemsMap: Map<string, any>, metadataItems: any[]) {
     item.summary.sdkVersion = Array.from(sdkVersionSet);
     item.summary.sdkName = Array.from(sdkNameSet);
     associatedParametersToEvent(item.name, item.summary.associatedParameters, metadataItems);
-  }  
+  }
 }
 
 async function updateUserPropertiesItem(itemsMap: Map<string, any>, key: string, record: any, markedLatestMonthMap: Map<string, any>) {
@@ -571,7 +588,8 @@ async function updateUserPropertiesItem(itemsMap: Map<string, any>, key: string,
     hasData: true,
     valueEnum: convertValueEnumToDDBList(record[9].stringValue),
   };
-  item.month = await getAndMarkMonthValue(itemsMap, record[0].stringValue, record[1].stringValue, markedLatestMonthMap);  
+  item.month = await getAndMarkMonthValue(itemsMap, record[0].stringValue, record[1].stringValue, markedLatestMonthMap);
+  item.updateTimestamp = Date.now();
 }
 
 async function createUserPropertiesItem(record: any, itemsMap: Map<string, any>, markedLatestMonthMap: Map<string, any>) {
@@ -585,6 +603,8 @@ async function createUserPropertiesItem(record: any, itemsMap: Map<string, any>,
     name: record[7].stringValue,
     category: record[6].stringValue,
     valueType: record[8].stringValue,
+    createTimestamp: Date.now(),
+    updateTimestamp: Date.now(),
     [`day${record[5].longValue}`]: {
       hasData: true,
       valueEnum: convertValueEnumToDDBList(record[9].stringValue),
