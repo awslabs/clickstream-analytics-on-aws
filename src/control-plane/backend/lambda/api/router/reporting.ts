@@ -15,12 +15,14 @@ import express from 'express';
 import { body, header } from 'express-validator';
 import { logger } from '../common/powertools';
 import { isProjectId, isRequestIdExisted, isXSSRequest, validate } from '../common/request-valid';
+import { AttributionAnalysisService } from '../service/attribution';
 import { ReportingService } from '../service/reporting';
 
-const reporting_project = express.Router();
+const router_reporting = express.Router();
 const reportingServ: ReportingService = new ReportingService();
+const attributionAnalysisService: AttributionAnalysisService = new AttributionAnalysisService();
 
-reporting_project.post(
+router_reporting.post(
   '/funnel',
   validate([
     body().custom(isXSSRequest),
@@ -32,7 +34,7 @@ reporting_project.post(
     return reportingServ.createFunnelVisual(req, res, next);
   });
 
-reporting_project.post(
+router_reporting.post(
   '/event',
   validate([
     body().custom(isXSSRequest),
@@ -44,7 +46,7 @@ reporting_project.post(
     return reportingServ.createEventVisual(req, res, next);
   });
 
-reporting_project.post(
+router_reporting.post(
   '/path',
   validate([
     body().custom(isXSSRequest),
@@ -56,7 +58,7 @@ reporting_project.post(
     return reportingServ.createPathAnalysisVisual(req, res, next);
   });
 
-reporting_project.post(
+router_reporting.post(
   '/retention',
   validate([
     body().custom(isXSSRequest),
@@ -68,7 +70,19 @@ reporting_project.post(
     return reportingServ.createRetentionVisual(req, res, next);
   });
 
-reporting_project.post(
+router_reporting.post(
+  '/attribution',
+  validate([
+    body().custom(isXSSRequest),
+    header('X-Click-Stream-Request-Id').custom(isRequestIdExisted),
+  ]),
+  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+
+    logger.info('start to create quicksight attribution analysis report');
+    return attributionAnalysisService.createAttributionAnalysisVisual(req, res, next);
+  });
+
+router_reporting.post(
   '/warmup',
   validate([
     body().custom(isXSSRequest),
@@ -79,7 +93,7 @@ reporting_project.post(
     return reportingServ.warmup(req, res, next);
   });
 
-reporting_project.post(
+router_reporting.post(
   '/clean',
   validate([
     body().custom(isXSSRequest),
@@ -90,5 +104,5 @@ reporting_project.post(
   });
 
 export {
-  reporting_project,
+  router_reporting,
 };

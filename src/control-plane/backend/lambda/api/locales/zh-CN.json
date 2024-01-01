@@ -5,6 +5,7 @@
       "eventAnalysis": "事件分析",
       "pathAnalysis": "路径分析",
       "retentionAnalysis": "留存分析",
+      "attributionAnalysis": "归因分析",
       "tableChart": "详细信息"
     },
     "filter": {

@@ -39,6 +39,7 @@ export enum MetadataParameterType {
 export enum ExploreComputeMethod {
   USER_ID_CNT = 'USER_ID_CNT', // nullif(user_id, user_pseudo_id)
   EVENT_CNT = 'EVENT_CNT',
+  SUM_VALUE = 'SUM_VALUE',
 }
 
 export enum ExploreConversionIntervalType {
@@ -108,12 +109,28 @@ export enum AnalysisType {
   FUNNEL = 'FUNNEL',
   EVENT = 'EVENT',
   PATH = 'PATH',
-  RETENTION = 'RETENTION'
+  RETENTION = 'RETENTION',
+  ATTRIBUTION = 'ATTRIBUTION',
 }
 
 export enum QuickSightChartType {
   BAR = 'bar',
   LINE = 'line',
   FUNNEL = 'funnel',
-  SANKEY = 'sankey'
+  SANKEY = 'sankey',
+  TABLE = 'table',
+}
+
+export enum AttributionModelType {
+  LAST_TOUCH = 'LAST_TOUCH',
+  FIRST_TOUCH = 'FIRST_TOUCH',
+  LINEAR = 'LINEAR',
+  TIME_DECAY = 'TIME_DECAY',
+  POSITION = 'POSITION',
+}
+
+export enum ExploreAttributionTimeWindowType {
+  CURRENT_DAY = 'CURRENT_DAY',
+  CUSTOMIZE = 'CUSTOMIZE',
+  SESSION = 'SESSION',
 }
