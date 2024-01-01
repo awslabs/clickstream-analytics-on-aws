@@ -35,7 +35,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { DataSetProps, dataSetAdminPermissionActions, dataSetReaderPermissionActions } from './dashboard-ln';
 import { Condition, EventAndCondition, PairEventAndCondition, SQLCondition } from './sql-builder';
 import { QUICKSIGHT_DATASET_INFIX, QUICKSIGHT_RESOURCE_NAME_PREFIX, QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX } from '../../common/constants-ln';
-import { AnalysisType, ExploreConversionIntervalType, ExploreLocales, ExplorePathNodeType, ExplorePathSessionDef, ExploreRelativeTimeUnit, ExploreRequestAction, ExploreTimeScopeType, ExploreVisualName, MetadataValueType, QuickSightChartType } from '../../common/explore-types';
+import { AnalysisType, AttributionModelType, ExploreAttributionTimeWindowType, ExploreComputeMethod, ExploreConversionIntervalType, ExploreLocales, ExplorePathNodeType, ExplorePathSessionDef, ExploreRelativeTimeUnit, ExploreRequestAction, ExploreTimeScopeType, ExploreVisualName, MetadataValueType, QuickSightChartType } from '../../common/explore-types';
 import { logger } from '../../common/powertools';
 import i18next from '../../i18n';
 
@@ -160,6 +160,15 @@ export type MustacheEventAnalysisType = MustacheBaseType & {
   hierarchyId?: string;
 }
 
+export type MustacheAttributionAnalysisType = MustacheBaseType & {
+  eventNameFieldId: string;
+  contributionFieldId: string;
+  countFieldId: string;
+  countFieldName: string;
+  totalCountFieldId: string;
+  totalCountFieldName: string;
+}
+
 export type MustacheRetentionAnalysisType = MustacheBaseType & {
   dateDimFieldId: string;
   catDimFieldId: string;
@@ -250,6 +259,63 @@ export const retentionAnalysisVisualColumns: InputColumn[] = [
   },
   {
     Name: 'retention',
+    Type: 'DECIMAL',
+  },
+];
+
+export const attributionVisualColumnsEvent: InputColumn[] = [
+  {
+    Name: 'total_event_count',
+    Type: 'DECIMAL',
+  },
+  {
+    Name: 'event_name',
+    Type: 'STRING',
+  },
+  {
+    Name: 'event_count',
+    Type: 'DECIMAL',
+  },
+  {
+    Name: 'contribution',
+    Type: 'DECIMAL',
+  },
+];
+
+export const attributionVisualColumnsUser: InputColumn[] = [
+  {
+    Name: 'total_user_count',
+    Type: 'DECIMAL',
+  },
+  {
+    Name: 'event_name',
+    Type: 'STRING',
+  },
+  {
+    Name: 'user_count',
+    Type: 'DECIMAL',
+  },
+  {
+    Name: 'contribution',
+    Type: 'DECIMAL',
+  },
+];
+
+export const attributionVisualColumnsSumValue: InputColumn[] = [
+  {
+    Name: 'total_event_count',
+    Type: 'DECIMAL',
+  },
+  {
+    Name: 'event_name',
+    Type: 'STRING',
+  },
+  {
+    Name: 'contribution_amount',
+    Type: 'DECIMAL',
+  },
+  {
+    Name: 'contribution',
     Type: 'DECIMAL',
   },
 ];
@@ -835,6 +901,37 @@ export function getEventChartVisualDef(visualId: string, viewName: string, title
   return JSON.parse(Mustache.render(visualDef, mustacheEventAnalysisType)) as Visual;
 }
 
+export function getAttributionTableVisualDef(visualId: string, viewName: string, titleProps: DashboardTitleProps,
+  quickSightChartType: QuickSightChartType, method: ExploreComputeMethod) : Visual {
+
+  let countFieldName = 'event_count';
+  let totalCountFieldName = 'total_event_count';
+
+  if (method === ExploreComputeMethod.USER_CNT) {
+    countFieldName = 'user_count';
+    totalCountFieldName = 'total_user_count';
+  } else if (method === ExploreComputeMethod.SUM_VALUE) {
+    countFieldName = 'contribution_amount';
+  }
+
+  const templatePath = `./templates/attribution-${quickSightChartType}-chart.json`;
+  const visualDef = readFileSync(join(__dirname, templatePath), 'utf8');
+  const mustacheAttributionAnalysisType: MustacheAttributionAnalysisType = {
+    visualId,
+    dataSetIdentifier: viewName,
+    eventNameFieldId: uuidv4(),
+    contributionFieldId: uuidv4(),
+    title: titleProps.title,
+    subTitle: titleProps.subTitle,
+    countFieldId: uuidv4(),
+    countFieldName,
+    totalCountFieldId: uuidv4(),
+    totalCountFieldName,
+  };
+
+  return JSON.parse(Mustache.render(visualDef, mustacheAttributionAnalysisType)) as Visual;
+}
+
 export function getEventPivotTableVisualDef(visualId: string, viewName: string,
   titleProps: DashboardTitleProps, groupColumn: string, hasGrouping: boolean) : Visual {
 
@@ -1050,6 +1147,9 @@ export async function getDashboardTitleProps(analysisType: AnalysisType, query: 
       case AnalysisType.RETENTION:
         title = t('dashboard.title.retentionAnalysis');
         break;
+      case AnalysisType.ATTRIBUTION:
+        title = t('dashboard.title.attributionAnalysis');
+        break;
     }
   }
 
@@ -1120,6 +1220,54 @@ export function checkFunnelAnalysisParameter(params: any): CheckParamsStatus {
   const checkNodesLimit = _checkNodesLimit(params);
   if (checkNodesLimit !== undefined ) {
     return checkNodesLimit;
+  }
+
+  return {
+    success,
+    message,
+  };
+}
+
+export function checkAttributionAnalysisParameter(params: any): CheckParamsStatus {
+
+  let success = true;
+  let message = 'OK';
+
+  const commonCheckResult = _checkCommonPartParameter(params);
+  if (commonCheckResult !== undefined ) {
+    return commonCheckResult;
+  }
+
+  if (params.targetEventAndCondition === undefined
+    || params.modelType === undefined
+    || params.eventAndConditions === undefined
+    || params.timeWindowType === undefined
+  ) {
+    return {
+      success: false,
+      message: 'Missing required parameter.',
+    };
+  }
+
+  if (params.eventAndConditions.length < 1) {
+    return {
+      success: false,
+      message: 'At least specify 1 event for attribution analysis',
+    };
+  }
+
+  if (params.modelType === AttributionModelType.POSITION && (params.modelWeights === undefined || params.modelWeights.length < 1) ) {
+    return {
+      success: false,
+      message: 'missing weights for attribution analysis',
+    };
+  }
+
+  if (params.timeWindowType === ExploreAttributionTimeWindowType.CUSTOMIZE && params.timeWindowInSeconds === undefined) {
+    return {
+      success: false,
+      message: 'missing time window parameter for attribution analysis',
+    };
   }
 
   return {
