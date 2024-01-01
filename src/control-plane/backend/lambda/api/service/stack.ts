@@ -34,7 +34,7 @@ import {
   WorkflowStateType,
   WorkflowTemplate,
 } from '../common/types';
-import { getStackName, isEmpty } from '../common/utils';
+import { getStackName, getStackTags, isEmpty } from '../common/utils';
 import { IPipeline } from '../model/pipeline';
 import { getStacksDetailsByNames } from '../store/aws/cloudformation';
 
@@ -480,6 +480,29 @@ export class StackManager {
       BucketName: stackWorkflowS3Bucket ?? '',
       BucketPrefix: `clickstream/workflow/${this.pipeline.executionName}`,
     };
+  }
+
+  public updateWorkflowTags(): void {
+    if (!this.execWorkflow || !this.workflow) {
+      throw new Error('Pipeline workflow is empty.');
+    }
+    this.execWorkflow.Workflow = this._updateTags(this.execWorkflow.Workflow, 'Update');
+    this.workflow.Workflow = this._updateTags(this.workflow.Workflow, 'Create');
+  }
+
+  private _updateTags(state: WorkflowState, action: string): WorkflowState {
+    if (state.Type === WorkflowStateType.PARALLEL) {
+      for (let branch of state.Branches as WorkflowParallelBranch[]) {
+        for (let key of Object.keys(branch.States)) {
+          branch.States[key] = this._updateTags(branch.States[key], action);
+        }
+      }
+    } else if (state.Type === WorkflowStateType.STACK || state.Type === WorkflowStateType.PASS) {
+      state.Type = WorkflowStateType.STACK;
+      state.Data!.Input.Action = action;
+      state.Data!.Input.Tags = getStackTags(this.pipeline);
+    }
+    return state;
   }
 
   private getStackStatusByName(stackName: string, statusDetail: PipelineStatusDetail[]) {
