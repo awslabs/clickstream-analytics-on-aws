@@ -71,6 +71,7 @@ export const handler = async (event: CheckMetadataWorkflowEvent) => {
         return {
           status: WorkflowStatus.CONTINUE,
           scanEndDate: scanEndDate,
+          eventSource: '',
           jobStartTimestamp: currentTimestamp,
           scanStartDate: scanStartDate,
         };
@@ -99,10 +100,14 @@ async function handleEventFromUpstreamWorkflow() {
 
     // Triggered if more than 24 hours have passed since the last job execution
     const workflowMinInterval = parseInt(process.env.WORKFLOW_MIN_INTERVAL || '1440');
+    logger.warn('mingtong step workflowMinInterval=' + workflowMinInterval);
+    logger.warn('mingtong step lastJobStartTimestamp=' + lastJobStartTimestamp);
+    logger.warn('mingtong step currentTimestamp=' + currentTimestamp);
     if (!lastJobStartTimestamp || currentTimestamp - lastJobStartTimestamp >= workflowMinInterval * 60 * 1000) {
       result = {
         status: WorkflowStatus.CONTINUE,
         scanEndDate: scanEndDate,
+        eventSource: 'LoadDataFlow',
         jobStartTimestamp: currentTimestamp,
         scanStartDate: startScanDate,
       };

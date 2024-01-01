@@ -123,6 +123,7 @@ export class ScanMetadataWorkflow extends Construct {
       payload: TaskInput.fromObject({
         'lastJobStartTimestamp.$': '$.workflowInfo.Payload.jobStartTimestamp',
         'lastScanEndDate.$': '$.workflowInfo.Payload.scanEndDate',
+        'eventSource.$': '$.workflowInfo.Payload.eventSource',
       }),
       outputPath: '$.Payload',
     });
