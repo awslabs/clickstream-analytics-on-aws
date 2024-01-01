@@ -176,6 +176,15 @@ public final class DatasetUtil {
     public static final String GTM_BRAND = "brand";
     public static final String GTM_CLIENT_BRAND = "clientBrand";
 
+    public static final String EVENT_BUNDLE_SEQUENCE_ID = "event_bundle_sequence_id";
+    public static final String DEVICE = "device";
+    public static final String TRAFFIC_SOURCE = "traffic_source";
+    public static final String PROJECT_ID = "project_id";
+    public static final String GEO = "geo";
+    public static final String APP_INF = "app_info";
+
+
+
     public static final String TABLE_REGEX = String.format("^(%s)|((%s|%s|(etl_[^/]+))(%s|%s)_v\\d+)$",
             TABLE_NAME_ETL_MERGE_STATE,
             ETLRunner.TableName.ITEM.getTableName(),
