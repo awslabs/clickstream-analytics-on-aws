@@ -16,6 +16,7 @@ package software.aws.solution.clickstream.gtm;
 
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
+import org.apache.spark.sql.SaveMode;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import software.aws.solution.clickstream.BaseSparkTest;
@@ -24,6 +25,7 @@ import java.io.IOException;
 
 import static java.util.Objects.requireNonNull;
 import static org.apache.spark.sql.functions.col;
+import static org.apache.spark.sql.functions.expr;
 import static software.aws.solution.clickstream.ContextUtil.*;
 
 public class ServerDataConverterTest extends BaseSparkTest {
@@ -121,6 +123,24 @@ public class ServerDataConverterTest extends BaseSparkTest {
         Dataset<Row> corrupDataset =
                 spark.read().json("/tmp/warehouse/etl_gtm_corrupted_json_data");
         Assertions.assertTrue(corrupDataset.count() > 0);
+    }
+
+    @Test
+    void test_convert_fv_session() throws IOException {
+        // DOWNLOAD_FILE=0 ./gradlew clean test --info --tests software.aws.solution.clickstream.gtm.ServerDataConverterTest.test_convert_fv_session
+        System.setProperty(APP_IDS_PROP, "testApp");
+        System.setProperty(PROJECT_ID_PROP, "gtm_server_demo_https");
+        System.setProperty(DEBUG_LOCAL_PROP, "false");
+
+        Dataset<Row> dataset =
+                spark.read().json(requireNonNull(getClass().getResource("/gtm-server/test-convert-fv-session.json")).getPath());
+
+        Dataset<Row> outDataset = converter.transform(dataset);
+
+        Assertions.assertEquals(7, outDataset.count());
+
+        Long fvCount = outDataset.select(expr("dataOut.*")).select("event_name").where(col("event_name").equalTo("_first_open")).count();
+        Assertions.assertEquals(2, fvCount);
     }
 
 }

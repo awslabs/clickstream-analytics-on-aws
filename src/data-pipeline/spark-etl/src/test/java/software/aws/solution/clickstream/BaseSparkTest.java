@@ -112,6 +112,10 @@ public class BaseSparkTest {
         return om.readTree(jsonStr).toPrettyString();
     }
 
+    public String resourceFileContent(final String fileName) throws IOException {
+       return Resources.toString(getClass().getResource(fileName), StandardCharsets.UTF_8).trim();
+    }
+
     public String datasetToPrettyJson(Dataset<Row> dataset) throws JsonProcessingException {
         String rowsJson = dataset.collectAsList().stream().map(Row::prettyJson).collect(Collectors.joining(",\n"));
         rowsJson = "[" + rowsJson + "]";
