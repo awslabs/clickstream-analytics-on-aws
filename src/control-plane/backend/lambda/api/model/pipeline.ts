@@ -65,7 +65,7 @@ import {
   WorkflowTemplate,
   WorkflowVersion,
 } from '../common/types';
-import { getStackName, isEmpty } from '../common/utils';
+import { getStackName, getStackTags, getUpdateTags, isEmpty } from '../common/utils';
 import { StackManager } from '../service/stack';
 import { describeStack } from '../store/aws/cloudformation';
 import { listMSKClusterBrokers } from '../store/aws/kafka';
@@ -307,12 +307,15 @@ export class CPipeline {
     // update workflow
     this.stackManager.updateWorkflowParameters(editParameters);
     this.stackManager.updateWorkflowAction(editStacks);
+    // update tags
+    this.pipeline.tags = getUpdateTags(this.pipeline, oldPipeline);
+    if (this._editStackTags(oldPipeline)) {
+      this.stackManager.updateWorkflowTags();
+    }
     // create new execution
     const execWorkflow = this.stackManager.getExecWorkflow();
     this.pipeline.executionArn = await this.stackManager.execute(execWorkflow, this.pipeline.executionName);
-    this.pipeline.tags = oldPipeline.tags;
     this.pipeline.workflow = this.stackManager.getWorkflow();
-
     await store.updatePipeline(this.pipeline, oldPipeline);
   }
 
@@ -365,9 +368,19 @@ export class CPipeline {
     };
   }
 
+  private _editStackTags(oldPipeline: IPipeline): boolean {
+    const newStackTags = this.pipeline.tags;
+    const oldStackTags = oldPipeline.tags;
+    newStackTags.sort((a, b) => a.key.localeCompare(b.key));
+    oldStackTags.sort((a, b) => a.key.localeCompare(b.key));
+    const diffTags = getDiff(newStackTags, oldStackTags);
+    return !isEmpty(diffTags.edited) || !isEmpty(diffTags.added) || !isEmpty(diffTags.removed);
+  }
+
   public async upgrade(oldPipeline: IPipeline): Promise<void> {
     this.pipeline.lastAction = 'Upgrade';
     validateIngestionServerNum(this.pipeline.ingestionServer.size);
+
     const executionName = `main-${uuidv4()}`;
     this.pipeline.executionName = executionName;
     this.pipeline.templateVersion = FULL_SOLUTION_VERSION;
@@ -456,7 +469,7 @@ export class CPipeline {
 
     if (!this.stackTags || this.stackTags?.length === 0) {
       this.patchBuiltInTags();
-      this.stackTags = this.getStackTags();
+      this.stackTags = getStackTags(this.pipeline);
     }
 
     if (!this.validateNetworkOnce) {
@@ -629,19 +642,6 @@ export class CPipeline {
         value: this.pipeline.projectId,
       });
     }
-  };
-
-  private getStackTags() {
-    const stackTags: Tag[] = [];
-    if (this.pipeline.tags) {
-      for (let tag of this.pipeline.tags) {
-        stackTags.push({
-          Key: tag.key,
-          Value: tag.value,
-        });
-      }
-    }
-    return stackTags;
   };
 
   public async generateWorkflow(): Promise<WorkflowTemplate> {
