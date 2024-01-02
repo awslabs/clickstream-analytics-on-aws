@@ -57,10 +57,12 @@ import static software.aws.solution.clickstream.DatasetUtil.CHANNEL;
 import static software.aws.solution.clickstream.DatasetUtil.COL_PAGE_REFERER;
 import static software.aws.solution.clickstream.DatasetUtil.DATA;
 import static software.aws.solution.clickstream.DatasetUtil.DATA_SCHEMA_V2_FILE_PATH;
+import static software.aws.solution.clickstream.DatasetUtil.DEVICE;
 import static software.aws.solution.clickstream.DatasetUtil.DEVICE_ID;
 import static software.aws.solution.clickstream.DatasetUtil.DEVICE_ID_LIST;
 import static software.aws.solution.clickstream.DatasetUtil.EVENT_APP_END;
 import static software.aws.solution.clickstream.DatasetUtil.EVENT_APP_START;
+import static software.aws.solution.clickstream.DatasetUtil.EVENT_BUNDLE_SEQUENCE_ID;
 import static software.aws.solution.clickstream.DatasetUtil.EVENT_DATE;
 import static software.aws.solution.clickstream.DatasetUtil.EVENT_FIRST_OPEN;
 import static software.aws.solution.clickstream.DatasetUtil.EVENT_FIRST_VISIT;
@@ -77,14 +79,17 @@ import static software.aws.solution.clickstream.DatasetUtil.EVENT_TIMESTAMP;
 import static software.aws.solution.clickstream.DatasetUtil.EVENT_VALUE_IN_USD;
 import static software.aws.solution.clickstream.DatasetUtil.FIRST_REFERER;
 import static software.aws.solution.clickstream.DatasetUtil.FIRST_VISIT_DATE;
+import static software.aws.solution.clickstream.DatasetUtil.GEO;
 import static software.aws.solution.clickstream.DatasetUtil.GEO_FOR_ENRICH;
 import static software.aws.solution.clickstream.DatasetUtil.ID;
+import static software.aws.solution.clickstream.DatasetUtil.INGEST_TIMESTAMP;
 import static software.aws.solution.clickstream.DatasetUtil.ITEMS;
 import static software.aws.solution.clickstream.DatasetUtil.LOCALE;
 import static software.aws.solution.clickstream.DatasetUtil.MAX_PARAM_STRING_VALUE_LEN;
 import static software.aws.solution.clickstream.DatasetUtil.MAX_STRING_VALUE_LEN;
 import static software.aws.solution.clickstream.DatasetUtil.NEW_USER_COUNT;
 import static software.aws.solution.clickstream.DatasetUtil.PLATFORM;
+import static software.aws.solution.clickstream.DatasetUtil.PROJECT_ID;
 import static software.aws.solution.clickstream.DatasetUtil.PROPERTIES;
 import static software.aws.solution.clickstream.DatasetUtil.PROP_PAGE_REFERRER;
 import static software.aws.solution.clickstream.DatasetUtil.REFERER;
@@ -95,9 +100,11 @@ import static software.aws.solution.clickstream.DatasetUtil.TABLE_ETL_USER_PAGE_
 import static software.aws.solution.clickstream.DatasetUtil.TABLE_ETL_USER_TRAFFIC_SOURCE;
 import static software.aws.solution.clickstream.DatasetUtil.TABLE_VERSION_SUFFIX_V1;
 import static software.aws.solution.clickstream.DatasetUtil.TIMESTAMP;
+import static software.aws.solution.clickstream.DatasetUtil.TRAFFIC_SOURCE;
 import static software.aws.solution.clickstream.DatasetUtil.TRAFFIC_SOURCE_MEDIUM;
 import static software.aws.solution.clickstream.DatasetUtil.TRAFFIC_SOURCE_NAME;
 import static software.aws.solution.clickstream.DatasetUtil.TRAFFIC_SOURCE_SOURCE;
+import static software.aws.solution.clickstream.DatasetUtil.UA;
 import static software.aws.solution.clickstream.DatasetUtil.UA_BROWSER;
 import static software.aws.solution.clickstream.DatasetUtil.UA_BROWSER_VERSION;
 import static software.aws.solution.clickstream.DatasetUtil.UA_DEVICE;
@@ -394,18 +401,18 @@ public final class TransformerV2 {
                 EVENT_PREVIOUS_TIMESTAMP,
                 EVENT_NAME,
                 EVENT_VALUE_IN_USD,
-                "event_bundle_sequence_id",
-                "ingest_timestamp",
-                "device",
-                "geo",
-                "traffic_source",
+                EVENT_BUNDLE_SEQUENCE_ID,
+                INGEST_TIMESTAMP,
+                DEVICE,
+                GEO,
+                TRAFFIC_SOURCE,
                 APP_INFO,
-                "platform",
-                "project_id",
+                PLATFORM,
+                PROJECT_ID,
                 ITEMS,
                 USER_PSEUDO_ID,
                 USER_ID,
-                "ua",
+                UA,
                 GEO_FOR_ENRICH);
     }
 
@@ -669,7 +676,7 @@ public final class TransformerV2 {
 
     private Dataset<Row> convertDevice(final Dataset<Row> dataset) {
         Column dataCol = col(DATA);
-        return dataset.withColumn("device", struct(
+        return dataset.withColumn(DEVICE, struct(
                 (dataCol.getItem("brand")).alias("mobile_brand_name"),
                 (dataCol.getItem("model")).alias("mobile_model_name"),
                 (dataCol.getItem("make")).alias("manufacturer"),
