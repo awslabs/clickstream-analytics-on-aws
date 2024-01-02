@@ -136,13 +136,13 @@ export class StackWorkflowStateMachine extends Construct {
       maxConcurrency: 1,
       itemsPath: JsonPath.stringAt('$'),
     });
-    serialMap.iterator(serialCallSelf);
+    serialMap.itemProcessor(serialCallSelf);
 
     const parallelMap = new SFNMap(this, 'ParallelMap', {
       maxConcurrency: 40,
       itemsPath: JsonPath.stringAt('$'),
     });
-    parallelMap.iterator(parallelCallSelf);
+    parallelMap.itemProcessor(parallelCallSelf);
 
     const pass = new Pass(this, 'Pass');
 
