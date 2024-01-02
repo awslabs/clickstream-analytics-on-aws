@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { join } from 'path';
 import {
   Stack,
   NestedStack,
@@ -25,7 +26,7 @@ import {
 import { PolicyStatement, Role, AccountPrincipal, IRole } from 'aws-cdk-lib/aws-iam';
 import { TaskInput } from 'aws-cdk-lib/aws-stepfunctions';
 import { Construct } from 'constructs';
-import { ApplicationSchemas } from './private/app-schema';
+import { ApplicationSchemasAndReporting } from './private/app-schema';
 import { ClearExpiredEventsWorkflow } from './private/clear-expired-events-workflow';
 import { DYNAMODB_TABLE_INDEX_NAME, REDSHIFT_EVENT_PARAMETER_TABLE_NAME, REDSHIFT_EVENT_TABLE_NAME, REDSHIFT_ITEM_TABLE_NAME, REDSHIFT_USER_TABLE_NAME } from './private/constant';
 import { LoadOdsDataToRedshiftWorkflow } from './private/load-ods-data-workflow';
@@ -67,7 +68,7 @@ export interface RedshiftAnalyticsStackProps extends NestedStackProps {
 export class RedshiftAnalyticsStack extends NestedStack {
 
   readonly redshiftServerlessWorkgroup: RedshiftServerless | undefined;
-  readonly applicationSchema: ApplicationSchemas;
+  readonly applicationSchema: ApplicationSchemasAndReporting;
   readonly redshiftDataAPIExecRole: IRole;
 
   constructor(
@@ -206,7 +207,12 @@ export class RedshiftAnalyticsStack extends NestedStack {
       item: REDSHIFT_ITEM_TABLE_NAME,
     };
 
-    this.applicationSchema = new ApplicationSchemas(this, 'CreateApplicationSchemas', {
+    const functionEntry = join(
+      __dirname + '/lambdas/custom-resource',
+      'create-schemas.ts',
+    );
+    const codePath = __dirname + '/private/sqls/redshift';
+    this.applicationSchema = new ApplicationSchemasAndReporting(this, 'CreateApplicationSchemas', {
       projectId: props.projectId,
       appIds: props.appIds,
       serverlessRedshift: existingRedshiftServerlessProps,
@@ -214,9 +220,16 @@ export class RedshiftAnalyticsStack extends NestedStack {
       odsTableNames: redshiftTables,
       databaseName: projectDatabaseName,
       dataAPIRole: this.redshiftDataAPIExecRole,
+      codePath,
+      functionEntry,
     });
+    // for upgrading backward compatibility
+    (this.applicationSchema.crProvider.node.findChild('framework-onEvent').node.defaultChild as CfnResource)
+      .overrideLogicalId('CreateApplicationSchemasRedshiftSchemasCustomResourceProviderframeworkonEventA11E8EDC');
+    (this.applicationSchema.crForSQLExecution.node.defaultChild as CfnResource)
+      .overrideLogicalId('CreateApplicationSchemasRedshiftSchemasCustomResource7AA8CC71');
     if (redshiftUserCR) {
-      this.applicationSchema.crForCreateSchemas.node.addDependency(redshiftUserCR);
+      this.applicationSchema.crForSQLExecution.node.addDependency(redshiftUserCR);
     }
 
     // custom resource to associate the IAM role to redshift cluster
@@ -225,8 +238,7 @@ export class RedshiftAnalyticsStack extends NestedStack {
         serverlessRedshift: existingRedshiftServerlessProps,
         provisionedRedshift: props.provisionedRedshiftProps,
       });
-
-    crForModifyClusterIAMRoles.node.addDependency(this.applicationSchema.crForCreateSchemas);
+    crForModifyClusterIAMRoles.node.addDependency(this.applicationSchema.crForSQLExecution);
 
     const ddbStatusTable = createDDBStatusTable(this, 'FileStatus');
 
@@ -363,7 +375,7 @@ function createDDBStatusTable(scope: Construct, tableId: string): ITable {
 function addCfnNag(stack: Stack) {
   addCfnNagForLogRetention(stack);
   addCfnNagForCustomResourceProvider(stack, 'CDK built-in provider for RedshiftSchemasCustomResource', 'RedshiftDbSchemasCustomResourceProvider');
-  addCfnNagForCustomResourceProvider(stack, 'CDK built-in custom resource provider for RedshiftSchemasCustomResourceProvider', 'RedshiftSchemasCustomResourceProvider');
+  addCfnNagForCustomResourceProvider(stack, 'CDK built-in custom resource provider for RedshiftSQLExecutionCustomResourceProvider', 'RedshiftSQLExecutionCustomResourceProvider');
   addCfnNagForCustomResourceProvider(stack, 'CDK built-in provider for RedshiftAssociateIAMRoleCustomResource', 'RedshiftAssociateIAMRoleCustomResourceProvider');
   addCfnNagForCustomResourceProvider(stack, 'Metrics', 'MetricsCustomResourceProvider', '');
 
@@ -375,7 +387,7 @@ function addCfnNag(stack: Stack) {
       'RedshiftDataExecRole/DefaultPolicy/Resource',
       'RedshiftDataExecRole', 'redshift-data'),
     ruleForLambdaVPCAndReservedConcurrentExecutions(
-      'CreateApplicationSchemas/CreateSchemaForApplicationsFn/Resource', 'CreateApplicationSchemas'),
+      'CreateApplicationSchemas/RedshiftSQLExecutionFn/Resource', 'CreateApplicationSchemas'),
     ruleForLambdaVPCAndReservedConcurrentExecutions(
       'AssociateIAMRoleToRedshiftFn/Resource', 'AssociateIAMRoleToRedshift'),
     {
