@@ -18,7 +18,8 @@ import { DeleteTopicCommand, ListSubscriptionsByTopicCommand, SNSClient, Unsubsc
 import { DynamoDBDocumentClient, QueryCommand, ScanCommand, UpdateCommand } from '@aws-sdk/lib-dynamodb';
 import { EventBridgeEvent } from 'aws-lambda';
 import { mockClient } from 'aws-sdk-client-mock';
-import { handler, StepFunctionsExecutionStatusChangeNotificationEventDetail } from '../../../src/control-plane/backend/lambda/listen-state-status';
+import { StepFunctionsExecutionStatusChangeNotificationEventDetail } from '../../../src/control-plane/backend/lambda/listen-stack-status/listen-tools';
+import { handler } from '../../../src/control-plane/backend/lambda/listen-state-status';
 import 'aws-sdk-client-mock-jest';
 
 const docMock = mockClient(DynamoDBDocumentClient);

@@ -18,7 +18,8 @@ import { DynamoDBDocumentClient, QueryCommand, UpdateCommand } from '@aws-sdk/li
 import { EventBridgeEvent, SQSEvent } from 'aws-lambda';
 import { mockClient } from 'aws-sdk-client-mock';
 import { BuiltInTagKeys, PipelineStackType, PipelineStatusDetail } from '../../../src/common/model';
-import { handler, CloudFormationStackStatusChangeNotificationEventDetail } from '../../../src/control-plane/backend/lambda/listen-stack-status';
+import { handler } from '../../../src/control-plane/backend/lambda/listen-stack-status';
+import { CloudFormationStackStatusChangeNotificationEventDetail } from '../../../src/control-plane/backend/lambda/listen-stack-status/listen-tools';
 import 'aws-sdk-client-mock-jest';
 
 const cloudFormationMock = mockClient(CloudFormationClient);
