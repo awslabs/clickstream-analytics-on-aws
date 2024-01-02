@@ -52,15 +52,18 @@ import static org.apache.spark.sql.functions.to_date;
 import static software.aws.solution.clickstream.ContextUtil.DEBUG_LOCAL_PROP;
 import static software.aws.solution.clickstream.ContextUtil.PROJECT_ID_PROP;
 import static software.aws.solution.clickstream.DatasetUtil.APP_ID;
+import static software.aws.solution.clickstream.DatasetUtil.APP_INF;
 import static software.aws.solution.clickstream.DatasetUtil.APP_INFO;
 import static software.aws.solution.clickstream.DatasetUtil.CHANNEL;
 import static software.aws.solution.clickstream.DatasetUtil.CLIENT_ID;
 import static software.aws.solution.clickstream.DatasetUtil.COL_PAGE_REFERER;
 import static software.aws.solution.clickstream.DatasetUtil.DATA_OUT;
+import static software.aws.solution.clickstream.DatasetUtil.DEVICE;
 import static software.aws.solution.clickstream.DatasetUtil.DEVICE_ID_LIST;
 import static software.aws.solution.clickstream.DatasetUtil.DOUBLE_VALUE;
 import static software.aws.solution.clickstream.DatasetUtil.EVENT_APP_END;
 import static software.aws.solution.clickstream.DatasetUtil.EVENT_APP_START;
+import static software.aws.solution.clickstream.DatasetUtil.EVENT_BUNDLE_SEQUENCE_ID;
 import static software.aws.solution.clickstream.DatasetUtil.EVENT_FIRST_OPEN;
 import static software.aws.solution.clickstream.DatasetUtil.EVENT_ID;
 import static software.aws.solution.clickstream.DatasetUtil.EVENT_ITEMS;
@@ -72,15 +75,18 @@ import static software.aws.solution.clickstream.DatasetUtil.EVENT_PARAM_FLOAT_VA
 import static software.aws.solution.clickstream.DatasetUtil.EVENT_PARAM_INT_VALUE;
 import static software.aws.solution.clickstream.DatasetUtil.EVENT_PARAM_KEY;
 import static software.aws.solution.clickstream.DatasetUtil.EVENT_PARAM_STRING_VALUE;
+import static software.aws.solution.clickstream.DatasetUtil.EVENT_PREVIOUS_TIMESTAMP;
 import static software.aws.solution.clickstream.DatasetUtil.EVENT_SESSION_END;
 import static software.aws.solution.clickstream.DatasetUtil.EVENT_SESSION_START;
 import static software.aws.solution.clickstream.DatasetUtil.EVENT_TIMESTAMP;
+import static software.aws.solution.clickstream.DatasetUtil.EVENT_VALUE_IN_USD;
 import static software.aws.solution.clickstream.DatasetUtil.FIRST_REFERER;
 import static software.aws.solution.clickstream.DatasetUtil.FIRST_TRAFFIC_MEDIUM;
 import static software.aws.solution.clickstream.DatasetUtil.FIRST_TRAFFIC_SOURCE;
 import static software.aws.solution.clickstream.DatasetUtil.FIRST_TRAFFIC_SOURCE_TYPE;
 import static software.aws.solution.clickstream.DatasetUtil.FIRST_VISIT_DATE;
 import static software.aws.solution.clickstream.DatasetUtil.FLOAT_VALUE;
+import static software.aws.solution.clickstream.DatasetUtil.GEO;
 import static software.aws.solution.clickstream.DatasetUtil.GEO_FOR_ENRICH;
 import static software.aws.solution.clickstream.DatasetUtil.GTM_CLIENT_BRAND;
 import static software.aws.solution.clickstream.DatasetUtil.GTM_CLIENT_PLATFORM;
@@ -104,12 +110,14 @@ import static software.aws.solution.clickstream.DatasetUtil.MAX_PARAM_STRING_VAL
 import static software.aws.solution.clickstream.DatasetUtil.MAX_STRING_VALUE_LEN;
 import static software.aws.solution.clickstream.DatasetUtil.PAGE_REFERRER;
 import static software.aws.solution.clickstream.DatasetUtil.PLATFORM;
+import static software.aws.solution.clickstream.DatasetUtil.PROJECT_ID;
 import static software.aws.solution.clickstream.DatasetUtil.PROPERTIES;
 import static software.aws.solution.clickstream.DatasetUtil.STRING_VALUE;
 import static software.aws.solution.clickstream.DatasetUtil.TABLE_NAME_ETL_GTM_USER_REFERRER;
 import static software.aws.solution.clickstream.DatasetUtil.TABLE_NAME_ETL_GTM_USER_SESSION;
 import static software.aws.solution.clickstream.DatasetUtil.TABLE_NAME_ETL_GTM_USER_VISIT;
 import static software.aws.solution.clickstream.DatasetUtil.TABLE_VERSION_SUFFIX_V1;
+import static software.aws.solution.clickstream.DatasetUtil.TRAFFIC_SOURCE;
 import static software.aws.solution.clickstream.DatasetUtil.UA;
 import static software.aws.solution.clickstream.DatasetUtil.UA_BROWSER;
 import static software.aws.solution.clickstream.DatasetUtil.UA_BROWSER_VERSION;
@@ -170,12 +178,12 @@ public class GTMServerDataTransformer {
 
         Column dataCol = dataset1.col(DATA_OUT);
         Dataset<Row> dataset2 = dataset1
-                .withColumn("event_previous_timestamp", lit(null).cast(DataTypes.LongType))
+                .withColumn(EVENT_PREVIOUS_TIMESTAMP, lit(null).cast(DataTypes.LongType))
                 .withColumn(EVENT_NAME, dataCol.getField(EVENT_NAME))
-                .withColumn("event_value_in_usd", lit(null).cast(DataTypes.FloatType))
-                .withColumn("event_bundle_sequence_id", lit(null).cast(DataTypes.LongType))
+                .withColumn(EVENT_VALUE_IN_USD, lit(null).cast(DataTypes.FloatType))
+                .withColumn(EVENT_BUNDLE_SEQUENCE_ID, lit(null).cast(DataTypes.LongType))
                 .withColumn(INGEST_TIMESTAMP, col("ingest_time"))
-                .withColumn("device", struct(
+                .withColumn(DEVICE, struct(
                         dataCol.getField(GTM_CLIENT_BRAND).cast(DataTypes.StringType).alias("mobile_brand_name"),
                         lit(null).cast(DataTypes.StringType).alias("mobile_model_name"),
                         lit(null).cast(DataTypes.StringType).alias("manufacturer"),
@@ -203,7 +211,7 @@ public class GTMServerDataTransformer {
                         lit(null).cast(DataTypes.LongType).alias("viewport_width"),
                         lit(null).cast(DataTypes.LongType).alias("viewport_height")
                 ))
-                .withColumn("geo", struct(
+                .withColumn(GEO, struct(
                         lit(null).cast(DataTypes.StringType).alias("country"),
                         lit(null).cast(DataTypes.StringType).alias("continent"),
                         lit(null).cast(DataTypes.StringType).alias("sub_continent"),
@@ -212,12 +220,12 @@ public class GTMServerDataTransformer {
                         lit(null).cast(DataTypes.StringType).alias("metro"),
                         lit(null).cast(DataTypes.StringType).alias("city")))
 
-                .withColumn("traffic_source", struct(
+                .withColumn(TRAFFIC_SOURCE, struct(
                         lit(null).cast(DataTypes.StringType).alias("medium"),
                         lit(null).cast(DataTypes.StringType).alias("name"),
                         lit(null).cast(DataTypes.StringType).alias("source")
                 ))
-                .withColumn("app_info", struct(
+                .withColumn(APP_INF, struct(
                         col(APP_ID),
                         dataCol.getField(GTM_ID).alias(ID),
                         lit(null).cast(DataTypes.StringType).alias("install_source"),
@@ -225,8 +233,8 @@ public class GTMServerDataTransformer {
                         lit(null).cast(DataTypes.StringType).alias("sdk_version"),
                         lit("GTM").alias("sdk_name"))
                 )
-                .withColumn("platform", dataCol.getField(GTM_CLIENT_PLATFORM))
-                .withColumn("project_id", lit(projectId))
+                .withColumn(PLATFORM, dataCol.getField(GTM_CLIENT_PLATFORM))
+                .withColumn(PROJECT_ID, lit(projectId))
                 .withColumn(ITEMS, dataCol.getField(EVENT_ITEMS))
                 // enrichment fields
                 .withColumn(UA, dataCol.getField(UA))
@@ -241,17 +249,17 @@ public class GTMServerDataTransformer {
                 col(EVENT_ID),
                 col(EVENT_DATE),
                 col(EVENT_TIMESTAMP),
-                col("event_previous_timestamp"),
+                col(EVENT_PREVIOUS_TIMESTAMP),
                 col(EVENT_NAME),
-                col("event_value_in_usd"),
-                col("event_bundle_sequence_id"),
+                col(EVENT_VALUE_IN_USD),
+                col(EVENT_BUNDLE_SEQUENCE_ID),
                 col(INGEST_TIMESTAMP),
-                col("device"),
-                col("geo"),
-                col("traffic_source"),
+                col(DEVICE),
+                col(GEO),
+                col(TRAFFIC_SOURCE),
                 col(APP_INFO),
                 col(PLATFORM),
-                col("project_id"),
+                col(PROJECT_ID),
                 col(ITEMS),
                 col(USER_PSEUDO_ID),
                 col(USER_ID),
@@ -299,17 +307,17 @@ public class GTMServerDataTransformer {
                 col(EVENT_ID),
                 col(EVENT_DATE),
                 col(EVENT_TIMESTAMP),
-                col("event_previous_timestamp"),
+                col(EVENT_PREVIOUS_TIMESTAMP),
                 col(EVENT_NAME),
-                col("event_value_in_usd"),
-                col("event_bundle_sequence_id"),
+                col(EVENT_VALUE_IN_USD),
+                col(EVENT_BUNDLE_SEQUENCE_ID),
                 col(INGEST_TIMESTAMP),
-                col("device"),
-                col("geo"),
-                col("traffic_source"),
+                col(DEVICE),
+                col(GEO),
+                col(TRAFFIC_SOURCE),
                 col(APP_INFO),
                 col(PLATFORM),
-                col("project_id"),
+                col(PROJECT_ID),
                 col(ITEMS),
                 expr("d." + USER_PSEUDO_ID),
                 col(USER_ID),
