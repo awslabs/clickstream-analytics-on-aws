@@ -45,3 +45,7 @@ export function generateRandomStr(length: number, charSet?: string): string {
   }
   return password;
 }
+
+export function sleep(ms: number) {
+  return new Promise<void>(resolve => setTimeout(() => resolve(), ms));
+};

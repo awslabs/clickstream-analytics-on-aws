@@ -24,6 +24,7 @@ import { ResourcePropertiesType, handler, physicalIdPrefix } from '../../../../.
 import 'aws-sdk-client-mock-jest';
 import { ProvisionedRedshiftProps } from '../../../../../src/analytics/private/model';
 import { reportingViewsDef, schemaDefs } from '../../../../../src/analytics/private/sql-def';
+import { sleep } from '../../../../../src/common/utils';
 import { getMockContext } from '../../../../common/lambda-context';
 import { basicCloudFormationEvent } from '../../../../common/lambda-events';
 
@@ -134,7 +135,7 @@ describe('Custom resource - Create schemas for applications in Redshift database
     smMock.reset();
     const rootPath = __dirname + '/../../../../../src/analytics/private/sqls/redshift/';
     mockfs({
-      ...(schemaDefs.reduce((acc: { [key: string]: string}, item, _index) => {
+      ...(schemaDefs.reduce((acc: { [key: string]: string }, item, _index) => {
         acc[`/opt/${item.sqlFile}`] = testSqlContent(rootPath + item.sqlFile);
         return acc;
       }, {} as { [key: string]: string })),
@@ -291,26 +292,6 @@ describe('Custom resource - Create schemas for applications in Redshift database
       return;
     }
     fail('No exception happened when Redshift DescribeStatementCommand returns FAILED');
-  });
-
-  test('Created database, bi user, schemas and views in Redshift serverless - check status succeeded timeout', async () => {
-    smMock.onAnyCommand().resolves({});
-    lambdaMock.on(ListTagsCommand).resolves({
-      Tags: { tag_key: 'tag_value' },
-    });
-    redshiftDataMock.on(ExecuteStatementCommand).resolves({ Id: 'Id-1' });
-    redshiftDataMock.on(DescribeStatementCommand)
-      .resolvesOnce({ Status: 'FINISHED' })
-      .resolvesOnce({ Status: 'FINISHED' })
-      .resolvesOnce({ Status: 'SUBMITTED' })
-      .resolves({ Status: 'PICKED' });
-    try {
-      await handler(createServerlessEvent, context, callback);
-    } catch (e) {
-      expect(redshiftDataMock).toHaveReceivedCommandTimes(ExecuteStatementCommand, 3);
-      return;
-    }
-    fail('No exception happened when timeout happened in waiting for the status Redshift DescribeStatementCommand becoming FINISHED');
   });
 
   test('Update schemas and views in Redshift serverless should not create database and user', async () => {
@@ -530,6 +511,111 @@ describe('Custom resource - Create schemas for applications in Redshift database
 
     const resp = await handler(createServerlessEvent, context, callback);
     expect(resp.Status).toEqual('SUCCESS');
+  });
+
+
+  test('Created tables in Redshift serverless - timeout error should be raised', async () => {
+    process.env.SUPPRESS_DB_ERROR = 'false';
+    process.env.SUPPRESS_ALL_ERROR = 'false';
+
+    process.env.CREATE_TABLE_MAX_CHECK_COUNT = '1';
+
+    smMock.onAnyCommand().resolves({});
+    lambdaMock.on(ListTagsCommand).resolves({
+      Tags: { tag_key: 'tag_value' },
+    });
+    redshiftDataMock.on(ExecuteStatementCommand).callsFake((r) => {
+      return { Id: r.Sql?.includes('CREATE TABLE') ? 'CreateId' : 'Id-2' };
+    },
+    );
+    redshiftDataMock.on(DescribeStatementCommand)
+      .callsFake(async (r) => {
+        if (r.Id === 'CreateId') {
+          await sleep(1000);
+          return {
+            Status: 'SUBMITTED',
+          };
+        }
+        return {
+          Status: 'FINISHED',
+        };
+      });
+
+    let errorMsg = '';
+    try {
+      await handler(createServerlessEvent, context, callback) as CdkCustomResourceResponse;
+    } catch (e) {
+      errorMsg = e.message;
+    }
+    expect(errorMsg).toEqual('Timeout error, timeout seconds: 1, queryString: undefined');
+
+  });
+
+
+  test('Apply sql in Redshift serverless - timeout error should not be raised', async () => {
+    process.env.SUPPRESS_DB_ERROR = 'false';
+    process.env.SUPPRESS_ALL_ERROR = 'false';
+
+    process.env.APPLAY_SQL_MAX_CHECK_COUNT = '1';
+    process.env.SQL_STATUS_CHECK_INTERVAL_MILLI_SECS = '1';
+
+    smMock.onAnyCommand().resolves({});
+    lambdaMock.on(ListTagsCommand).resolves({
+      Tags: { tag_key: 'tag_value' },
+    });
+
+    redshiftDataMock.on(ExecuteStatementCommand).callsFake((r) => {
+      return { Id: r.Sql?.includes('CREATE MATERIALIZED VIEW') ? 'viewSQL' : 'Other' };
+    },
+    );
+    redshiftDataMock.on(DescribeStatementCommand)
+      .callsFake(async (r) => {
+        if (r.Id === 'viewSQL') {
+          await sleep(2);
+          return {
+            Status: 'SUBMITTED',
+          };
+        }
+        return {
+          Status: 'FINISHED',
+        };
+      });
+
+    const res = await handler(createServerlessEvent, context, callback) as CdkCustomResourceResponse;
+    expect(res.Status).toEqual('SUCCESS');
+  });
+
+
+  test('Created tables in Redshift serverless - timeout error can be suppressed by SUPPRESS_DB_ERROR=true', async () => {
+    process.env.SUPPRESS_DB_ERROR = 'true';
+    process.env.SUPPRESS_ALL_ERROR = 'false';
+
+    process.env.CREATE_TABLE_MAX_CHECK_COUNT = '1';
+
+    smMock.onAnyCommand().resolves({});
+    lambdaMock.on(ListTagsCommand).resolves({
+      Tags: { tag_key: 'tag_value' },
+    });
+    redshiftDataMock.on(ExecuteStatementCommand).callsFake((r) => {
+      return { Id: r.Sql?.includes('CREATE TABLE') ? 'CreateId' : 'Id-2' };
+    },
+    );
+    redshiftDataMock.on(DescribeStatementCommand)
+      .callsFake(async (r) => {
+        if (r.Id === 'CreateId') {
+          await sleep(1);
+          return {
+            Status: 'SUBMITTED',
+          };
+        }
+        return {
+          Status: 'FINISHED',
+        };
+      });
+
+    const res = await handler(createServerlessEvent, context, callback) as CdkCustomResourceResponse;
+    expect(res.Status).toEqual('SUCCESS');
+
   });
 
 });

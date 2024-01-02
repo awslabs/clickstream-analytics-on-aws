@@ -222,6 +222,7 @@ export class RedshiftAnalyticsStack extends NestedStack {
       dataAPIRole: this.redshiftDataAPIExecRole,
       codePath,
       functionEntry,
+      workflowBucketInfo: props.workflowBucketInfo
     });
     // for upgrading backward compatibility
     (this.applicationSchema.crProvider.node.findChild('framework-onEvent').node.defaultChild as CfnResource)

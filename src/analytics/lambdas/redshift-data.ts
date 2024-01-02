@@ -16,7 +16,8 @@ import { NodeHttpHandler } from '@smithy/node-http-handler';
 import { REDSHIFT_MODE } from '../../common/model';
 import { logger } from '../../common/powertools';
 import { aws_sdk_client_common_config } from '../../common/sdk-client-config';
-import { ExistingRedshiftServerlessCustomProps, ProvisionedRedshiftProps } from '../private/model';
+import { ExistingRedshiftServerlessCustomProps, ProvisionedRedshiftProps, RedshiftServerlessProps } from '../private/model';
+import { sleep } from '../../common/utils';
 
 export function getRedshiftClient(roleArn: string) {
   return new RedshiftDataClient({
@@ -40,10 +41,9 @@ export function getRedshiftClient(roleArn: string) {
   });
 }
 
-const GET_STATUS_TIMEOUT = parseInt(process.env.REDSHIFT_DATA_WAIT_TIMEOUT ?? '180', 10); // second
 
 export const executeStatements = async (client: RedshiftDataClient, sqlStatements: string[],
-  serverlessRedshiftProps?: ExistingRedshiftServerlessCustomProps, provisionedRedshiftProps?: ProvisionedRedshiftProps,
+  serverlessRedshiftProps?: RedshiftServerlessProps, provisionedRedshiftProps?: ProvisionedRedshiftProps,
   database?: string, logSQL: boolean = true) => {
   if (serverlessRedshiftProps) {
     logger.info(`Execute SQL statement in ${serverlessRedshiftProps.workgroupName}.${serverlessRedshiftProps.databaseName}`);
@@ -92,9 +92,26 @@ export const executeStatements = async (client: RedshiftDataClient, sqlStatement
   return queryId;
 };
 
+export interface WaitProps {
+  checkIntervalMilliseconds: number;
+  maxCheckCount: number;
+  raiseTimeoutError: boolean;
+}
+
 export const executeStatementsWithWait = async (client: RedshiftDataClient, sqlStatements: string[],
-  serverlessRedshiftProps?: ExistingRedshiftServerlessCustomProps, provisionedRedshiftProps?: ProvisionedRedshiftProps,
-  database?: string, logSQL: boolean = true, waitMilliseconds: number = 1000) => {
+  serverlessRedshiftProps?: ExistingRedshiftServerlessCustomProps,
+  provisionedRedshiftProps?: ProvisionedRedshiftProps,
+  database?: string,
+  logSQL: boolean = true,
+  waitProps: WaitProps = {
+    checkIntervalMilliseconds: 1000,
+    maxCheckCount: 900,
+    raiseTimeoutError: true,
+  },
+) => {
+
+  logger.info('executeStatementsWithWait', { waitProps, sqlStatements_1: sqlStatements[0].substring(0, 64) });
+
   const queryId = await executeStatements(client, sqlStatements, serverlessRedshiftProps, provisionedRedshiftProps, database, logSQL);
 
   const checkParams = new DescribeStatementCommand({
@@ -103,25 +120,27 @@ export const executeStatementsWithWait = async (client: RedshiftDataClient, sqlS
   let response = await client.send(checkParams);
   logger.info(`Got statement query '${queryId}' with status: ${response.Status} after submitting it`);
   let count = 0;
-  while (response.Status != StatusString.FINISHED && response.Status != StatusString.FAILED && count < GET_STATUS_TIMEOUT) {
-    await Sleep(waitMilliseconds);
+  while (response.Status != StatusString.FINISHED && response.Status != StatusString.FAILED && count < waitProps.maxCheckCount) {
+    await sleep(waitProps.checkIntervalMilliseconds);
     count++;
     response = await client.send(checkParams);
-    logger.info(`Got statement query '${queryId}' with status: ${response.Status} in ${count * waitMilliseconds} Milliseconds`);
+    logger.info(`Got statement query '${queryId}' with status: ${response.Status} in ${count * waitProps.checkIntervalMilliseconds} Milliseconds`);
   }
   if (response.Status == StatusString.FAILED) {
-    logger.error(`Got statement query '${queryId}' with status: ${response.Status} in ${count * waitMilliseconds} Milliseconds`, { response });
+    logger.error(`Got statement query '${queryId}' with status: ${response.Status} in ${count * waitProps.checkIntervalMilliseconds} Milliseconds`, { response });
     throw new Error(`Statement query '${queryId}' with status ${response.Status}, error: ${response.Error}, queryString: ${response.QueryString}`);
-  } else if (count == GET_STATUS_TIMEOUT) {
-    logger.error('Wait status timeout: '+ response.Status, { response });
-    throw new Error(`Wait statement query '${queryId}' with status ${response.Status} timeout in ${GET_STATUS_TIMEOUT} seconds, queryString: ${response.QueryString}`);
+  } else if (count == waitProps.maxCheckCount) {
+    logger.error('Timeout: wait status timeout: ' + response.Status, { response });
+    if (waitProps.raiseTimeoutError) {
+      throw new Error(`Timeout error, timeout seconds: ${count * waitProps.checkIntervalMilliseconds / 1000}, queryString: ${response.QueryString}`);
+    }
   }
   return queryId;
 };
 
 export const getStatementResult = async (client: RedshiftDataClient, queryId: string) => {
   let nextToken;
-  let aggregatedRecords:any[] = [];
+  let aggregatedRecords: any[] = [];
   let totalNumRows = 0;
   do {
     const checkParams = new GetStatementResultCommand({
