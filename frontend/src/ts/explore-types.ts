@@ -116,3 +116,17 @@ export enum QuickSightChartType {
   FUNNEL = 'funnel',
   SANKEY = 'sankey',
 }
+
+export enum AttributionModelType {
+  LAST_TOUCH = 'LAST_TOUCH',
+  FIRST_TOUCH = 'FIRST_TOUCH',
+  LINEAR = 'LINEAR',
+  TIME_DECAY = 'TIME_DECAY',
+  POSITION = 'POSITION',
+}
+
+export enum ExploreAttributionTimeWindowType {
+  CURRENT_DAY = 'CURRENT_DAY',
+  CUSTOMIZE = 'CUSTOMIZE',
+  SESSION = 'SESSION',
+}
