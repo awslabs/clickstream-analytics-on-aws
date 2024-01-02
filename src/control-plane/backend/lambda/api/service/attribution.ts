@@ -15,7 +15,7 @@ import { InputColumn } from '@aws-sdk/client-quicksight';
 import { v4 as uuidv4 } from 'uuid';
 import { DataSetProps } from './quicksight/dashboard-ln';
 import { CreateDashboardResult, attributionVisualColumnsEvent, attributionVisualColumnsSumValue, attributionVisualColumnsUser, checkAttributionAnalysisParameter, getAttributionTableVisualDef, getDashboardTitleProps, getTempResourceName, getVisualRelatedDefs } from './quicksight/reporting-utils';
-import { AttributionSQLParameters, buildSQLForSinglePointModel } from './quicksight/sql-builder-attribution';
+import { AttributionSQLParameters, buildSQLForLinearModel, buildSQLForPositionModel, buildSQLForSinglePointModel } from './quicksight/sql-builder-attribution';
 import { ReportingService } from './reporting';
 import { AnalysisType, AttributionModelType, ExploreComputeMethod, ExploreLocales, ExploreRequestAction, ExploreVisualName, QuickSightChartType } from '../common/explore-types';
 import { logger } from '../common/powertools';
@@ -49,6 +49,12 @@ export class AttributionAnalysisService {
       let result: CreateDashboardResult | undefined = undefined;
       if (query.modelType == AttributionModelType.LAST_TOUCH || query.modelType == AttributionModelType.FIRST_TOUCH) {
         result = await this.createSinglePointModelVisual(sheetId, query as AttributionSQLParameters);
+      } else if (query.modelType == AttributionModelType.LINEAR) {
+        result = await this.createLinearModelVisual(sheetId, query as AttributionSQLParameters);
+      } else if (query.modelType == AttributionModelType.POSITION) {
+        result = await this.createPositionBasedModelVisual(sheetId, query as AttributionSQLParameters);
+      } else {
+        return res.status(400).send(new ApiFail('Invalid attribution analysis model type'));
       }
 
       if (result === undefined || result.dashboardEmbedUrl === '' && query.action === ExploreRequestAction.PREVIEW) {
@@ -103,8 +109,6 @@ export class AttributionAnalysisService {
   }
 
   async createSinglePointModelVisual(sheetId: string, query: any) {
-
-    const viewName = getTempResourceName(query.viewName, query.action);
     const sql = buildSQLForSinglePointModel({
       ...query,
       schemaName: query.appId,
@@ -112,6 +116,26 @@ export class AttributionAnalysisService {
 
     logger.debug(`sql of single point model: ${sql}`);
 
+    return this.createModelVisual(sql, sheetId, query);
+  };
+
+  async createLinearModelVisual(sheetId: string, query: any) {
+    const sql = buildSQLForLinearModel(query as AttributionSQLParameters);
+    logger.debug(`sql of linear model: ${sql}`);
+
+    return this.createModelVisual(sql, sheetId, query);
+  };
+
+  async createPositionBasedModelVisual(sheetId: string, query: any) {
+    const sql = buildSQLForPositionModel(query as AttributionSQLParameters);
+    logger.debug(`sql of position based model: ${sql}`);
+
+    return this.createModelVisual(sql, sheetId, query);
+  };
+
+  async createModelVisual(visualSql: string, sheetId: string, query: any) {
+
+    const viewName = getTempResourceName(query.viewName, query.action);
     const dataSetProps = this.getDataSetProps(query.computeMethod);
 
     const datasetPropsArray: DataSetProps[] = [];
@@ -119,7 +143,7 @@ export class AttributionAnalysisService {
       tableName: viewName,
       columns: dataSetProps.datasetColumns,
       importMode: 'DIRECT_QUERY',
-      customSql: sql,
+      customSql: visualSql,
       projectedColumns: dataSetProps.projectedColumns,
     });
 

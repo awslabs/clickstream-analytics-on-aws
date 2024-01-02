@@ -1269,6 +1269,13 @@ export function checkAttributionAnalysisParameter(params: any): CheckParamsStatu
     };
   }
 
+  if (params.computeMethod !== ExploreComputeMethod.EVENT_CNT && params.computeMethod !== ExploreComputeMethod.SUM_VALUE) {
+    return {
+      success: false,
+      message: 'unsupported compute method for attribution analysis',
+    };
+  }
+  
   return {
     success,
     message,
