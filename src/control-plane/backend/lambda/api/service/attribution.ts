@@ -15,7 +15,7 @@ import { InputColumn } from '@aws-sdk/client-quicksight';
 import { v4 as uuidv4 } from 'uuid';
 import { DataSetProps } from './quicksight/dashboard-ln';
 import { CreateDashboardResult, attributionVisualColumnsEvent, attributionVisualColumnsSumValue, attributionVisualColumnsUser, checkAttributionAnalysisParameter, getAttributionTableVisualDef, getDashboardTitleProps, getTempResourceName, getVisualRelatedDefs } from './quicksight/reporting-utils';
-import { AttributionSQLParameters, buildSQLForSinglePointModel } from './quicksight/sql-builder-attribution';
+import { AttributionSQLParameters, buildSQLForLinearModel, buildSQLForSinglePointModel } from './quicksight/sql-builder-attribution';
 import { ReportingService } from './reporting';
 import { AnalysisType, AttributionModelType, ExploreComputeMethod, ExploreLocales, ExploreRequestAction, ExploreVisualName, QuickSightChartType } from '../common/explore-types';
 import { logger } from '../common/powertools';
@@ -49,6 +49,8 @@ export class AttributionAnalysisService {
       let result: CreateDashboardResult | undefined = undefined;
       if (query.modelType == AttributionModelType.LAST_TOUCH || query.modelType == AttributionModelType.FIRST_TOUCH) {
         result = await this.createSinglePointModelVisual(sheetId, query as AttributionSQLParameters);
+      } else if (query.modelType == AttributionModelType.LINEAR) {
+        result = await this.createLinearModelVisual(sheetId, query as AttributionSQLParameters);
       }
 
       if (result === undefined || result.dashboardEmbedUrl === '' && query.action === ExploreRequestAction.PREVIEW) {
@@ -117,6 +119,58 @@ export class AttributionAnalysisService {
       columns: dataSetProps.datasetColumns,
       importMode: 'DIRECT_QUERY',
       customSql: sql,
+      projectedColumns: dataSetProps.projectedColumns,
+    });
+
+    const locale = query.locale ?? ExploreLocales.EN_US;
+    const visualId = uuidv4();
+    const titleProps = await getDashboardTitleProps(AnalysisType.ATTRIBUTION, query);
+    const quickSightChartType = query.chartType ?? QuickSightChartType.TABLE;
+    const visualDef = getAttributionTableVisualDef(visualId, viewName, titleProps, quickSightChartType, query.computeMethod);
+    const visualRelatedParams = await getVisualRelatedDefs({
+      timeScopeType: query.timeScopeType,
+      sheetId,
+      visualId,
+      viewName,
+      lastN: query.lastN,
+      timeUnit: query.timeUnit,
+      timeStart: query.timeStart,
+      timeEnd: query.timeEnd,
+    }, locale);
+
+    const visualProps = {
+      sheetId: sheetId,
+      name: ExploreVisualName.CHART,
+      visualId: visualId,
+      visual: visualDef,
+      dataSetIdentifierDeclaration: [],
+      filterControl: visualRelatedParams.filterControl,
+      parameterDeclarations: visualRelatedParams.parameterDeclarations,
+      filterGroup: visualRelatedParams.filterGroup,
+    };
+
+    return new ReportingService().createDashboardVisuals(sheetId, viewName, query, datasetPropsArray, [visualProps]);
+
+  };
+
+  async createLinearModelVisual(sheetId: string, query: any) {
+    const sql = buildSQLForLinearModel(query as AttributionSQLParameters);
+    logger.debug(`sql of linear model: ${sql}`);
+
+    return this.createModelVisual(sql, sheetId, query);
+  };
+
+  async createModelVisual(visualSql: string, sheetId: string, query: any) {
+
+    const viewName = getTempResourceName(query.viewName, query.action);
+    const dataSetProps = this.getDataSetProps(query.computeMethod);
+
+    const datasetPropsArray: DataSetProps[] = [];
+    datasetPropsArray.push({
+      tableName: viewName,
+      columns: dataSetProps.datasetColumns,
+      importMode: 'DIRECT_QUERY',
+      customSql: visualSql,
       projectedColumns: dataSetProps.projectedColumns,
     });
 
