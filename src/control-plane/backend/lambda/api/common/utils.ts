@@ -17,7 +17,7 @@ import { ExecutionStatus } from '@aws-sdk/client-sfn';
 import { ipv4 as ip } from 'cidr-block';
 import { JSONPath } from 'jsonpath-plus';
 import jwt, { JwtPayload } from 'jsonwebtoken';
-import { amznRequestContextHeader } from './constants';
+import { FULL_SOLUTION_VERSION, amznRequestContextHeader } from './constants';
 import {
   ALBLogServiceAccountMapping,
   CORS_ORIGIN_DOMAIN_PATTERN,
@@ -30,6 +30,7 @@ import {
 import { ConditionCategory, MetadataValueType } from './explore-types';
 import { BuiltInTagKeys, PipelineStackType, PipelineStatusDetail, PipelineStatusType } from './model-ln';
 import { logger } from './powertools';
+import { SolutionInfo } from './solution-info-ln';
 import { ALBRegionMappingObject, BucketPrefix, ClickStreamBadRequestError, ClickStreamSubnet, DataCollectionSDK, IUserRole, RPURange, RPURegionMappingObject, ReportingDashboardOutput, SubnetType } from './types';
 import { IMetadataRaw, IMetadataRawValue, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute, IMetadataAttributeValue } from '../model/metadata';
 import { CPipelineResources, IPipeline, ITag } from '../model/pipeline';
@@ -1001,6 +1002,24 @@ function getUpdateTags(newPipeline: IPipeline, oldPipeline: IPipeline) {
   return updateTags;
 }
 
+function getDefaultTags(projectId: string) {
+  const tags: Tag[] = [
+    {
+      Key: BuiltInTagKeys.AWS_SOLUTION,
+      Value: SolutionInfo.SOLUTION_SHORT_NAME,
+    },
+    {
+      Key: BuiltInTagKeys.AWS_SOLUTION_VERSION,
+      Value: FULL_SOLUTION_VERSION,
+    },
+    {
+      Key: BuiltInTagKeys.CLICKSTREAM_PROJECT,
+      Value: projectId,
+    },
+  ];
+  return tags;
+}
+
 function getStateMachineExecutionName(pipelineId: string) {
   return `main-${pipelineId}-${new Date().getTime()}`;
 }
@@ -1144,6 +1163,7 @@ export {
   isFinallyPipelineStatus,
   getStackTags,
   getUpdateTags,
+  getDefaultTags,
   getStateMachineExecutionName,
   getPipelineStatusType,
   getPipelineLastActionFromStacksStatus,

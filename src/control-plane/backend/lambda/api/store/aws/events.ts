@@ -14,10 +14,11 @@
 import { CloudWatchEventsClient, PutRuleCommand, PutTargetsCommand, Target } from '@aws-sdk/client-cloudwatch-events';
 import { logger } from '../../common/powertools';
 import { aws_sdk_client_common_config } from '../../common/sdk-client-config-ln';
+import { getDefaultTags } from '../../common/utils';
 
-export const createRuleAndAddTargets = async (region: string, name: string, eventPattern: string, targetArn: string) => {
+export const createRuleAndAddTargets = async (region: string, projectId: string, name: string, eventPattern: string, targetArn: string) => {
   try {
-    const ruleArn = await putRule(region, name, eventPattern);
+    const ruleArn = await putRule(region, projectId, name, eventPattern);
     if (ruleArn) {
       const targets: Target[] = [{
         Id: 'ClickstreamTarget',
@@ -32,7 +33,7 @@ export const createRuleAndAddTargets = async (region: string, name: string, even
   }
 };
 
-export const putRule = async (region: string, name: string, eventPattern: string) => {
+export const putRule = async (region: string, projectId: string, name: string, eventPattern: string) => {
   try {
     const client = new CloudWatchEventsClient({
       ...aws_sdk_client_common_config,
@@ -41,6 +42,7 @@ export const putRule = async (region: string, name: string, eventPattern: string
     const command = new PutRuleCommand({
       Name: name,
       EventPattern: eventPattern,
+      Tags: getDefaultTags(projectId),
     });
     return (await client.send(command)).RuleArn;
   } catch (error) {

@@ -307,13 +307,19 @@ export class CPipeline {
       throw new ClickStreamBadRequestError('Queue ARN not found. Please check and try again.');
     }
     const topicName = `${CFN_TOPIC_PREFIX}-${this.pipeline.pipelineId}`;
-    const topicArn = await createTopicAndSubscribeSQSQueue(this.pipeline.region, topicName, listenStackQueueArn);
+    const topicArn = await createTopicAndSubscribeSQSQueue(
+      this.pipeline.region,
+      this.pipeline.projectId,
+      topicName,
+      listenStackQueueArn,
+    );
     if (!topicArn) {
       throw new ClickStreamBadRequestError('Topic create failed. Please check and try again.');
     }
     const cfnRulePatternResourceArn = `arn:${awsPartition}:cloudformation:${this.pipeline.region}:${awsAccountId}:stack/Clickstream*${this.pipeline.pipelineId}/*`;
     const ruleArn = await createRuleAndAddTargets(
       this.pipeline.region,
+      this.pipeline.projectId,
       `${CFN_RULE_PREFIX}-${this.pipeline.id}`,
       `{\"source\":[\"aws.cloudformation\"],\"resources\":[{\"wildcard\":\"${cfnRulePatternResourceArn}\"}],\"detail-type\":[\"CloudFormation Stack Status Change\"]}`,
       topicArn,

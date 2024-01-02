@@ -12,13 +12,13 @@
  */
 
 import { SNSClient, CreateTopicCommand, SubscribeCommand, SetTopicAttributesCommand } from '@aws-sdk/client-sns';
-import { awsAccountId } from '../../common/constants';
 import { logger } from '../../common/powertools';
 import { aws_sdk_client_common_config } from '../../common/sdk-client-config-ln';
+import { getDefaultTags } from '../../common/utils';
 
-export const createTopicAndSubscribeSQSQueue = async (region: string, name: string, queueArn: string) => {
+export const createTopicAndSubscribeSQSQueue = async (region: string, projectId: string, name: string, queueArn: string) => {
   try {
-    const topicArn = await createTopic(region, name);
+    const topicArn = await createTopic(region, projectId, name);
     if (topicArn) {
       await setPermissionForEventRule(region, topicArn);
       await subscribeSQSQueue(region, topicArn, queueArn);
@@ -30,7 +30,7 @@ export const createTopicAndSubscribeSQSQueue = async (region: string, name: stri
   }
 };
 
-export const createTopic = async (region: string, name: string) => {
+export const createTopic = async (region: string, projectId: string, name: string) => {
   try {
     const client = new SNSClient({
       ...aws_sdk_client_common_config,
@@ -38,6 +38,7 @@ export const createTopic = async (region: string, name: string) => {
     });
     const command = new CreateTopicCommand({
       Name: name,
+      Tags: getDefaultTags(projectId),
     });
     const data = await client.send(command);
     return data.TopicArn;
@@ -75,29 +76,6 @@ export const setPermissionForEventRule = async (region: string, topicArn: string
       Version: '2008-10-17',
       Id: '__default_policy_ID',
       Statement: [
-        {
-          Sid: '__default_statement_ID',
-          Effect: 'Allow',
-          Principal: {
-            AWS: '*',
-          },
-          Action: [
-            'SNS:GetTopicAttributes',
-            'SNS:SetTopicAttributes',
-            'SNS:AddPermission',
-            'SNS:RemovePermission',
-            'SNS:DeleteTopic',
-            'SNS:Subscribe',
-            'SNS:ListSubscriptionsByTopic',
-            'SNS:Publish',
-          ],
-          Resource: topicArn,
-          Condition: {
-            StringEquals: {
-              'AWS:SourceOwner': awsAccountId,
-            },
-          },
-        },
         {
           Sid: '__events_statement_ID',
           Effect: 'Allow',

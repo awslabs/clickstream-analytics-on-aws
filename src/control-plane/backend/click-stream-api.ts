@@ -297,9 +297,13 @@ export class ClickStreamApiConstruct extends Construct {
             'events:PutRule',
             'events:ListTargetsByRule',
             'events:PutTargets',
+            'events:TagResource',
+            'events:UntagResource',
             'sns:CreateTopic',
             'sns:Subscribe',
             'sns:SetTopicAttributes',
+            'sns:TagResource',
+            'sns:UntagResource',
           ],
         }),
         new iam.PolicyStatement({
