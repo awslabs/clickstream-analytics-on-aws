@@ -318,8 +318,7 @@ BEGIN
 				)
 			)
 			WHERE row_num <= top_frequent_properties_limit OR
-				property_name IN ('_page_title', '_page_url') OR
-				property_name IN ('_screen_name', '_screen_id')
+				(property_name IN ('_page_title', '_page_url', '_screen_name', '_screen_id') AND row_num <= 50)
 		)
 		GROUP BY project_id, app_info_app_id, property_category, month, day_number, value_type, property_name, property_value
 	);
