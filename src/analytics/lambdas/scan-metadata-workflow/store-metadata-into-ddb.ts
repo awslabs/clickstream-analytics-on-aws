@@ -83,7 +83,7 @@ export const handler = async (event: StoreMetadataEvent) => {
 async function handleEventMetadata(appId: string, metadataItems: any[], markedLatestMonthMap: Map<string, any>) {
   logger.info(`Start to handle event metadata for app: ${appId}`);
   // key is (id, originMonth), value is item
-  const itemsMap = await getExistingItemsFromDDB(appId, 'event_metadata');
+  const ddbItemsMap = await getExistingItemsFromDDB(appId, 'event_metadata');
 
   const inputSql = `SELECT id, month, prefix, project_id, app_id, day_number, count, event_name, platform, sdk_version, sdk_name FROM ${appId}.event_metadata;`;
 
@@ -91,18 +91,18 @@ async function handleEventMetadata(appId: string, metadataItems: any[], markedLa
 
   for (const record of response.Records!) {
     const key = `${record[0].stringValue}${record[1].stringValue}`;
-    if (itemsMap.has(key)) {
-      await updateEventItem(itemsMap, key, record, markedLatestMonthMap);
+    if (ddbItemsMap.has(key)) {
+      await updateEventItem(ddbItemsMap, key, record, markedLatestMonthMap);
     } else {
-      const item = await createEventItem(record, itemsMap, markedLatestMonthMap);
-      itemsMap.set(key, item);
+      const item = await createEventItem(record, ddbItemsMap, markedLatestMonthMap);
+      ddbItemsMap.set(key, item);
     }
   }
 
   // aggregate summary info
-  aggEventSummary(itemsMap, metadataItems);
+  aggEventSummary(ddbItemsMap, metadataItems);
 
-  putItemsMapIntoDDBItems(metadataItems, itemsMap);
+  putItemsMapIntoDDBItems(metadataItems, ddbItemsMap);
 }
 
 async function handlePropertiesMetadata(appId: string, metadataItems: any[], markedLatestMonthMap: Map<string, any>) {
@@ -136,7 +136,7 @@ async function handlePropertiesMetadata(appId: string, metadataItems: any[], mar
 async function handleUserAttributeMetadata(appId: string, metadataItems: any[], markedLatestMonthMap: Map<string, any>) {
   logger.info(`Start to handle user attribute metadata for app: ${appId}`);
   // key is (id, originMonth), value is item
-  const itemsMap = await getExistingItemsFromDDB(appId, 'user_attribute_metadata');
+  const ddbItemsMap = await getExistingItemsFromDDB(appId, 'user_attribute_metadata');
   const inputSql =
     `SELECT id, month, prefix, project_id, app_id, day_number, category, property_name, value_type, value_enum FROM ${appId}.user_attribute_metadata;`;
 
@@ -144,15 +144,15 @@ async function handleUserAttributeMetadata(appId: string, metadataItems: any[], 
 
   for (const record of response.Records!) {
     const key = `${record[0].stringValue}${record[1].stringValue}`;
-    if (itemsMap.has(key)) {
-      await updateUserPropertiesItem(itemsMap, key, record, markedLatestMonthMap);
+    if (ddbItemsMap.has(key)) {
+      await updateUserPropertiesItem(ddbItemsMap, key, record, markedLatestMonthMap);
     } else {
-      const item = await createUserPropertiesItem(record, itemsMap, markedLatestMonthMap);
-      itemsMap.set(key, item);
+      const item = await createUserPropertiesItem(record, ddbItemsMap, markedLatestMonthMap);
+      ddbItemsMap.set(key, item);
     }
   };
 
-  putItemsMapIntoDDBItems(metadataItems, itemsMap);
+  putItemsMapIntoDDBItems(metadataItems, ddbItemsMap);
 }
 
 async function batchWriteIntoDDB(metadataItems: any[]) {
@@ -177,6 +177,7 @@ async function batchWriteIntoDDB(metadataItems: any[]) {
   }
 }
 
+// limit the size of set to 1000 for events in parameter
 function addSetIntoAnotherSet(sourceSet: Set<string>, inputSet: Set<string>) {
   for (const element of inputSet) {
     if (sourceSet.size < 1000) {
@@ -185,6 +186,16 @@ function addSetIntoAnotherSet(sourceSet: Set<string>, inputSet: Set<string>) {
   }
 }
 
+/**
+ * Check whether currentMonth is latest month for id and update earlier month to its origin month
+ * @param memoryItemMap memory item map
+ * @param id id
+ * @param currentMonth current month
+ * @param markedLatestMonthMap marked latest month map
+ * @returns
+ * latest: if currentMonth is latest
+ * originMonth: if currentMonth is not latest
+ **/
 async function getAndMarkMonthValue(memoryItemMap: Map<string, any>, id: string, currentMonth: string, markedLatestMonthMap: Map<string, any>) {
   try {
     let monthValue;
@@ -382,24 +393,6 @@ function putItemsMapIntoDDBItems(metadataItems: any[], itemsMap: Map<string, any
   }
 }
 
-// // function to clear item.dayN record which will be replaced by new record
-// function clearEventParameterItemDayNRecord(itemsMap: Map<string, any>, response: any) {
-//   for (const record of response.Records!) {
-//     const id = record[0].stringValue;
-//     const month = record[1].stringValue;
-//     const key = `${id}${month}`;
-//     if (itemsMap.has(key)) {
-//       const item = itemsMap.get(key);
-//       const dayNumber = record[5].longValue;
-//       item[`day${dayNumber}`] = {
-//         hasData: true,
-//         platform: [],
-//         valueEnum: [],
-//       };
-//     }
-//   }
-// }
-
 async function updateEventParameterItem(itemsMap: Map<string, any>, key: string, record: any, markedLatestMonthMap: Map<string, any>) {
   const item = itemsMap.get(key);
   const dayNumber = `day${record[5].longValue}`;
@@ -477,6 +470,7 @@ function aggEventParameterSummary(itemsMap: Map<string, any>) {
     const valueEnumAggregation: { [key: string]: number } = {};
     aggEventParameterValueEnumAndPlatform(item, platformSet, valueEnumAggregation);
     const valueEnum = [];
+    // limit the size of valueEnum to 50
     for (const key in valueEnumAggregation) {
       if (valueEnum.length < 50) {
         valueEnum.push({ value: key, count: valueEnumAggregation[key] });

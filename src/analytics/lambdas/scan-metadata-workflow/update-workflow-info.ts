@@ -54,7 +54,7 @@ export const handler = async (event: UpdateWorkflowInfoEvent) => {
     const lastScanEndDate = event.lastScanEndDate;
     const eventSource = event.eventSource;
 
-    if (eventSource === 'LoadDataFlow') {
+    if (eventSource !== 'LoadDataFlow') {
       logger.info('The event source is not LoadDataFlow, skip update workflow info.');
       return;
     }
