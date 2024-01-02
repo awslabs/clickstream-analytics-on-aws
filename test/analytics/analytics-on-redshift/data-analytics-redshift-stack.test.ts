@@ -316,12 +316,12 @@ describe('DataAnalyticsRedshiftStack common parameter test', () => {
     }
   });
 
-  test('Should has Resource CreateApplicationSchemasCreateApplicationSchemaRole', () => {
+  test('Should has Resource CreateApplicationSchemasRedshiftSQLExecutionRole', () => {
     const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
-    const role = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::IAM::Role', 'CreateApplicationSchemasCreateApplicationSchemaRole');
+    const role = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::IAM::Role', 'CreateApplicationSchemasRedshiftSQLExecutionRole');
     expect(role.resource.Properties.AssumeRolePolicyDocument.Statement[0].Action).toEqual('sts:AssumeRole');
     let hasDataExecRole = false;
-    const rolePolicy = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::IAM::Policy', 'CreateApplicationSchemasCreateApplicationSchemaRoleDefaultPolicy');
+    const rolePolicy = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::IAM::Policy', 'CreateApplicationSchemasRedshiftSQLExecutionRoleDefaultPolicy');
     for (const s of rolePolicy.resource.Properties.PolicyDocument.Statement) {
       if (s.Action === 'sts:AssumeRole' && s.Resource.Ref) {
         expect(s.Resource.Ref).toContain('RedshiftServerlessIAMRole');
@@ -2828,7 +2828,7 @@ describe('DataAnalyticsRedshiftStack tests', () => {
   });
 
   test('[new Redshift workgroup and namespace] Resources order - custom resource for creating database must depend on creating db user', () => {
-    const customResource = findFirstResourceByKeyPrefix(newServerlessStackTemplate, 'AWS::CloudFormation::CustomResource', 'CreateApplicationSchemasRedshiftSchemasCustomResource');
+    const customResource = findFirstResourceByKeyPrefix(newServerlessStackTemplate, 'AWS::CloudFormation::CustomResource', 'CreateApplicationSchemasRedshiftSchemasCustomResource7AA8CC71');
     expect(customResource.resource.DependsOn[0]).toContain('RedshiftServerelssWorkgroupCreateRedshiftServerlessMappingUserCustomResource');
   });
 

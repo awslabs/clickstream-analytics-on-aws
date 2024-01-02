@@ -15,11 +15,11 @@ import { readdirSync, statSync } from 'fs';
 import { join, resolve } from 'path';
 import { Duration, CustomResource, Arn, ArnFormat, Stack } from 'aws-cdk-lib';
 import { IRole, PolicyStatement, Effect } from 'aws-cdk-lib/aws-iam';
-import { Runtime, Function, LayerVersion, Code } from 'aws-cdk-lib/aws-lambda';
+import { Function, LayerVersion, Code, IFunction } from 'aws-cdk-lib/aws-lambda';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Provider } from 'aws-cdk-lib/custom-resources';
 import { Construct } from 'constructs';
-import { ExistingRedshiftServerlessProps, ProvisionedRedshiftProps, CreateDatabaseAndSchemas } from './model';
+import { ExistingRedshiftServerlessProps, ProvisionedRedshiftProps } from './model';
 import { reportingViewsDef, schemaDefs } from './sql-def';
 import { CUSTOM_RESOURCE_RESPONSE_REDSHIFT_BI_USER_NAME } from '../../common/constant';
 import { createLambdaRole } from '../../common/lambda';
@@ -27,74 +27,120 @@ import { attachListTagsPolicyForFunction } from '../../common/lambda/tags';
 import { SolutionNodejsFunction } from '../../private/function';
 import { RedshiftOdsTables } from '../analytics-on-redshift';
 
-export interface ApplicationSchemasProps {
-  readonly projectId: string;
-  readonly appIds: string;
+export interface RedshiftSQLExecutionProps {
   readonly serverlessRedshift?: ExistingRedshiftServerlessProps;
   readonly provisionedRedshift?: ProvisionedRedshiftProps;
-  readonly databaseName: string;
-  readonly odsTableNames: RedshiftOdsTables;
   readonly dataAPIRole: IRole;
+  readonly codePath: string;
+  readonly functionEntry: string;
 }
 
-export class ApplicationSchemas extends Construct {
+export abstract class RedshiftSQLExecution extends Construct {
 
-  readonly crForCreateSchemas: CustomResource;
-  readonly redshiftBIUserParameter: string;
-  readonly redshiftBIUserName: string;
+  readonly crForSQLExecution: CustomResource;
+  readonly crFunction: IFunction;
+  readonly crProvider: Provider;
 
-  constructor(scope: Construct, id: string, props: ApplicationSchemasProps) {
+  constructor(scope: Construct, id: string, props: RedshiftSQLExecutionProps) {
     super(scope, id);
 
-    this.redshiftBIUserParameter = `/clickstream/reporting/user/${props.projectId}`;
     /**
-     * Create database(projectId) and schemas(appIds) in Redshift using Redshift-Data API.
+     * Create custom resource to execute SQLs in Redshift using Redshift-Data API.
      */
-    this.crForCreateSchemas = this.createRedshiftSchemasCustomResource(props);
-    this.redshiftBIUserName = this.crForCreateSchemas.getAttString(CUSTOM_RESOURCE_RESPONSE_REDSHIFT_BI_USER_NAME);
+    const resource = this.createRedshiftSQLExecutionCustomResource(props);
+    this.crForSQLExecution = resource.cr;
+    this.crFunction = resource.fn;
+    this.crProvider = resource.provider;
   }
 
-  private createRedshiftSchemasCustomResource(props: ApplicationSchemasProps): CustomResource {
-    const fn = this.createRedshiftSchemasLambda();
+  protected abstract getCustomResourceProperties(props: RedshiftSQLExecutionProps): { [key: string]: any };
+  protected abstract additionalPolicies(): PolicyStatement[];
+
+  private createRedshiftSQLExecutionCustomResource(props: RedshiftSQLExecutionProps): {
+    cr: CustomResource;
+    fn: IFunction;
+    provider: Provider;
+  } {
+    const fn = this.createRedshiftSchemasLambda(props);
 
     props.dataAPIRole.grantAssumeRole(fn.grantPrincipal);
 
     const provider = new Provider(
       this,
-      'RedshiftSchemasCustomResourceProvider',
+      'RedshiftSQLExecutionCustomResourceProvider',
       {
         onEventHandler: fn,
         logRetention: RetentionDays.FIVE_DAYS,
       },
     );
 
-    // get schemaDefs files last modify timestamp
-    const lastTimestamp = this.getLatestModifyTimestamp();
-    const customProps: CreateDatabaseAndSchemas = {
-      projectId: props.projectId,
-      appIds: props.appIds,
-      odsTableNames: props.odsTableNames,
-      databaseName: props.databaseName,
+    const customProps: { [key: string]: any } = {
       dataAPIRole: props.dataAPIRole.roleArn,
       serverlessRedshiftProps: props.serverlessRedshift,
       provisionedRedshiftProps: props.provisionedRedshift,
-      redshiftBIUserParameter: `${this.redshiftBIUserParameter}`,
-      redshiftBIUsernamePrefix: 'clickstream_bi_',
-      reportingViewsDef,
-      schemaDefs,
-      lastModifiedTime: lastTimestamp,
+      ...this.getCustomResourceProperties(props),
     };
-    const cr = new CustomResource(this, 'RedshiftSchemasCustomResource', {
+    const cr = new CustomResource(this, 'RedshiftSQLExecutionCustomResource', {
       serviceToken: provider.serviceToken,
       properties: customProps,
     });
 
-    return cr;
+    return {
+      cr,
+      fn,
+      provider,
+    };
   }
 
-  private createRedshiftSchemasLambda(): Function {
-    const lambdaRootPath = __dirname + '/../lambdas/custom-resource';
+  private createRedshiftSchemasLambda(props: RedshiftSQLExecutionProps): Function {
+    const sqlLayer = new LayerVersion(this, 'SqlLayer', {
+      code: Code.fromAsset(props.codePath),
+      description: 'SQL layer',
+    });
 
+    const fnId = 'RedshiftSQLExecutionFn';
+    const fn = new SolutionNodejsFunction(this, fnId, {
+      entry: props.functionEntry,
+      handler: 'handler',
+      memorySize: 256,
+      reservedConcurrentExecutions: 1,
+      timeout: Duration.minutes(15),
+      logRetention: RetentionDays.ONE_WEEK,
+      environment: {
+        SUPPRESS_DB_ERROR: 'true',
+        SUPPRESS_ALL_ERROR: 'false',
+      },
+      role: createLambdaRole(this, 'RedshiftSQLExecutionRole', false,
+        this.additionalPolicies()),
+      layers: [sqlLayer],
+    });
+
+    attachListTagsPolicyForFunction(this, fnId, fn);
+
+    return fn;
+  }
+}
+
+export interface ApplicationSchemasAndReportingProps extends RedshiftSQLExecutionProps {
+  readonly projectId: string;
+  readonly appIds: string;
+  readonly databaseName: string;
+  readonly odsTableNames: RedshiftOdsTables;
+}
+
+export class ApplicationSchemasAndReporting extends RedshiftSQLExecution {
+
+  readonly redshiftBIUserParameter: string;
+  readonly redshiftBIUserName: string;
+
+  constructor(scope: Construct, id: string, props: ApplicationSchemasAndReportingProps) {
+    super(scope, id, props);
+
+    this.redshiftBIUserParameter = `/clickstream/reporting/user/${props.projectId}`;
+    this.redshiftBIUserName = this.crForSQLExecution.getAttString(CUSTOM_RESOURCE_RESPONSE_REDSHIFT_BI_USER_NAME);
+  }
+
+  protected additionalPolicies(): PolicyStatement[] {
     const writeSecretPolicy: PolicyStatement = new PolicyStatement({
       effect: Effect.ALLOW,
       resources: [
@@ -116,35 +162,23 @@ export class ApplicationSchemas extends Construct {
       ],
     });
 
-    const codePath = __dirname + '/sqls/redshift';
-    const sqlLayer = new LayerVersion(this, 'SqlLayer', {
-      compatibleRuntimes: [Runtime.NODEJS_18_X],
-      code: Code.fromAsset(codePath),
-      description: 'SQL layer',
-    });
+    return [writeSecretPolicy];
+  }
 
-    const fn = new SolutionNodejsFunction(this, 'CreateSchemaForApplicationsFn', {
-      entry: join(
-        lambdaRootPath,
-        'create-schemas.ts',
-      ),
-      handler: 'handler',
-      memorySize: 256,
-      reservedConcurrentExecutions: 1,
-      timeout: Duration.minutes(15),
-      logRetention: RetentionDays.ONE_WEEK,
-      environment: {
-        SUPPRESS_DB_ERROR: 'true',
-        SUPPRESS_ALL_ERROR: 'false',
-      },
-      role: createLambdaRole(this, 'CreateApplicationSchemaRole', false,
-        [writeSecretPolicy]),
-      layers: [sqlLayer],
-    });
-
-    attachListTagsPolicyForFunction(this, 'CreateSchemaForApplicationsFn', fn);
-
-    return fn;
+  protected getCustomResourceProperties(props: RedshiftSQLExecutionProps) {
+    const properties = props as ApplicationSchemasAndReportingProps;
+    // get schemaDefs files last modify timestamp
+    return {
+      projectId: properties.projectId,
+      appIds: properties.appIds,
+      odsTableNames: properties.odsTableNames,
+      databaseName: properties.databaseName,
+      redshiftBIUserParameter: `${this.redshiftBIUserParameter}`,
+      redshiftBIUsernamePrefix: 'clickstream_bi_',
+      reportingViewsDef,
+      schemaDefs,
+      lastModifiedTime: this.getLatestModifyTimestamp(),
+    };
   }
 
   private getLatestModifyTimestamp(): number {
