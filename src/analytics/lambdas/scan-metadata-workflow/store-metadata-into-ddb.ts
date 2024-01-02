@@ -187,61 +187,70 @@ function addSetIntoAnotherSet(sourceSet: Set<string>, inputSet: Set<string>) {
 
 async function getAndMarkMonthValue(memoryItemMap: Map<string, any>, id: string, currentMonth: string, markedLatestMonthMap: Map<string, any>) {
   try {
+    let monthValue;
     if (!markedLatestMonthMap.has(id)) {
-      // compare with ddb latest month
-      const getCommandParameter = {
-        TableName: ddbTableName,
-        Key: {
-          id: id,
-          month: 'latest',
-        },
-      };
-      const response = await ddbDocClient.send(new GetCommand(getCommandParameter));
-      if (response.Item) {
-        const item = response.Item;
-        const existingDDBItemOriginMonth = item.originMonth;
-        if (currentMonth < existingDDBItemOriginMonth) {
-          // set markedLatestMonthMap
-          markedLatestMonthMap.set(id, existingDDBItemOriginMonth);
-          //  set ddb latest month item into memory, if there is later month data then ddb latest month data,
-          // it will be updated in later process
-          // const key = `${id}${existingDDBItemOriginMonth}`;
-          // memoryItemMap.set(key, item);
-          return currentMonth;
-        }
-        if (currentMonth > existingDDBItemOriginMonth) {
-          // update ddb latest month to its origin month
-          item.month = existingDDBItemOriginMonth;
-          item.updateTimestamp = Date.now();
-          const params = {
-            TableName: ddbTableName,
-            Item: item,
-          };
-          await ddbDocClient.send(new PutCommand(params));
-        }
-      }
+      monthValue = await checkLatestMonthWithDDB(id, currentMonth, markedLatestMonthMap);
     } else {
-      const markedMonth = markedLatestMonthMap.get(id);
-      if (currentMonth < markedMonth) {
-        return currentMonth;
-      }
-      if (currentMonth > markedMonth) {
-        // update memory latest month
-        const key = `${id}${markedMonth}`;
-        const item = memoryItemMap.get(key);
-        item.month = markedMonth;
-        memoryItemMap.set(key, item);
-      }
+      monthValue = checkLatestMonthWithMemory(memoryItemMap, id, currentMonth, markedLatestMonthMap);
     }
-    // update memory latest month
-    markedLatestMonthMap.set(id, currentMonth);
-    return 'latest';
+    if (monthValue === 'latest') {
+      // update memory latest month
+      markedLatestMonthMap.set(id, currentMonth);
+    }
+    return monthValue;
   } catch (error) {
     if (error instanceof Error) {
       logger.error('Error when mark latest month .', error);
     }
     throw error;
   }
+}
+
+async function checkLatestMonthWithDDB(id: string, currentMonth: string, markedLatestMonthMap: Map<string, any>) {
+  // compare with ddb latest month
+  const getCommandParameter = {
+    TableName: ddbTableName,
+    Key: {
+      id: id,
+      month: 'latest',
+    },
+  };
+  const response = await ddbDocClient.send(new GetCommand(getCommandParameter));
+  if (response.Item) {
+    const item = response.Item;
+    const existingDDBItemOriginMonth = item.originMonth;
+    if (currentMonth < existingDDBItemOriginMonth) {
+      // set markedLatestMonthMap
+      markedLatestMonthMap.set(id, existingDDBItemOriginMonth);
+      return currentMonth;
+    }
+    if (currentMonth > existingDDBItemOriginMonth) {
+      // update ddb latest month to its origin month
+      item.month = existingDDBItemOriginMonth;
+      item.updateTimestamp = Date.now();
+      const params = {
+        TableName: ddbTableName,
+        Item: item,
+      };
+      await ddbDocClient.send(new PutCommand(params));
+    }
+  }
+  return 'latest';
+}
+
+function checkLatestMonthWithMemory(memoryItemMap: Map<string, any>, id: string, currentMonth: string, markedLatestMonthMap: Map<string, any>) {
+  const markedMonth = markedLatestMonthMap.get(id);
+  if (currentMonth < markedMonth) {
+    return currentMonth;
+  }
+  if (currentMonth > markedMonth) {
+    // update memory latest month
+    const key = `${id}${markedMonth}`;
+    const item = memoryItemMap.get(key);
+    item.month = markedMonth;
+    memoryItemMap.set(key, item);
+  }
+  return 'latest';
 }
 
 function chunkArray(inputArray: any[], chunkSize: number) {
