@@ -2594,6 +2594,20 @@ describe('DataAnalyticsRedshiftStack serverless custom resource test', () => {
         workgroupId: RefAnyValue,
         dataAPIRoleArn: RefAnyValue,
       },
+      redshiftBIUserParameter: {
+        'Fn::Join': [
+          '',
+          [
+            '/clickstream/reporting/user/',
+            {
+              Ref: Match.anyValue(),
+            },
+          ],
+        ],
+      },
+      redshiftBIUsernamePrefix: 'clickstream_bi_',
+      reportingViewsDef: Match.not(Match.absent()),
+      schemaDefs: Match.not(Match.absent()),
     });
   });
 
