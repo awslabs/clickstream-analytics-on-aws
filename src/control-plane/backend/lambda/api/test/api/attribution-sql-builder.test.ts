@@ -472,7 +472,7 @@ describe('Attribution SQL Builder test', () => {
       schemaName: 'shop',
       computeMethod: ExploreComputeMethod.USER_CNT,
       timeWindowType: ExploreAttributionTimeWindowType.CUSTOMIZE,
-      timeWindowInSecond: 3600,
+      timeWindowInSeconds: 3600,
       globalEventCondition: {
         conditions: [
           {

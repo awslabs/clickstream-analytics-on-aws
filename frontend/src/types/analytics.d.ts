@@ -156,7 +156,7 @@ declare global {
     modelType: AttributionModelType;
     modelWeights?: number[];
     timeWindowType: ExploreAttributionTimeWindowType;
-    timeWindowInSecond?: number;
+    timeWindowInSeconds?: number;
   }
 
   interface ICondition {

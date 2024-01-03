@@ -22,7 +22,7 @@ import {
   SelectProps,
   SpaceBetween,
 } from '@cloudscape-design/components';
-import { previewEvent } from 'apis/analytics';
+import { previewAttribution } from 'apis/analytics';
 import InfoLink from 'components/common/InfoLink';
 import Loading from 'components/common/Loading';
 import InfoTitle from 'components/common/title/InfoTitle';
@@ -70,9 +70,11 @@ import {
 import {
   getDashboardCreateParameters,
   getDateRange,
-  getEventAndConditions,
   getGlobalEventCondition,
+  getGoalAndConditions,
+  getIntervalInSeconds,
   getLngFromLocalStorage,
+  getTouchPointsAndConditions,
   validEventAnalyticsItem,
   validMultipleEventAnalyticsItems,
   validateFilterConditions,
@@ -280,7 +282,7 @@ const AnalyticsAttribution: React.FC<AnalyticsAttributionProps> = (
         return;
       }
       setLoadingData(true);
-      const { success }: ApiResponse<any> = await previewEvent(body);
+      const { success }: ApiResponse<any> = await previewAttribution(body);
       if (success) {
         setSelectDashboardModalVisible(false);
       }
@@ -324,9 +326,13 @@ const AnalyticsAttribution: React.FC<AnalyticsAttributionProps> = (
         chartSubTitle: chartSubTitle,
       };
     }
-    const body: IExploreRequest = {
+    const targetEventAndCondition = getGoalAndConditions(goalDataState);
+    if (!targetEventAndCondition) {
+      return;
+    }
+    const body: IExploreAttributionRequest = {
       action: action,
-      chartType: QuickSightChartType.LINE,
+      chartType: QuickSightChartType.TABLE,
       locale: getLngFromLocalStorage(),
       projectId: pipeline.projectId,
       pipelineId: pipeline.pipelineId,
@@ -338,10 +344,18 @@ const AnalyticsAttribution: React.FC<AnalyticsAttributionProps> = (
       conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
       conversionIntervalInSeconds: 60 * 60 * 24,
       computeMethod: ExploreComputeMethod.USER_ID_CNT,
-      eventAndConditions: getEventAndConditions(eventDataState),
+      eventAndConditions: getTouchPointsAndConditions(eventDataState),
       globalEventCondition: getGlobalEventCondition(filterOptionData),
+      targetEventAndCondition: targetEventAndCondition,
+      modelType: selectedAttributionModel?.value,
+      timeWindowType: selectedWindowType?.value,
+      timeWindowInSeconds: getIntervalInSeconds(
+        selectedWindowType,
+        selectedWindowUnit,
+        windowValue
+      ),
       timeScopeType: dateRangeParams?.timeScopeType,
-      groupColumn: timeGranularity.value,
+      groupColumn: ExploreGroupColumn.DAY,
       ...dateRangeParams,
       ...saveParams,
     };
@@ -408,7 +422,9 @@ const AnalyticsAttribution: React.FC<AnalyticsAttributionProps> = (
       setExploreEmbedUrl('');
       setLoadingData(true);
       setLoadingChart(true);
-      const { success, data }: ApiResponse<any> = await previewEvent(body);
+      const { success, data }: ApiResponse<any> = await previewAttribution(
+        body
+      );
       setLoadingData(false);
       setLoadingChart(false);
       if (success && data.dashboardEmbedUrl) {

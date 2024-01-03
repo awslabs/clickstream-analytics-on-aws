@@ -295,6 +295,76 @@ export const validConditionItemType = (condition: IConditionItemType) => {
   );
 };
 
+export const getTouchPointsAndConditions = (
+  eventOptionData: IEventAnalyticsItem[]
+) => {
+  const touchPoints: AttributionTouchPoint[] = [];
+  eventOptionData.forEach((item) => {
+    if (validEventAnalyticsItem(item)) {
+      const conditions: ICondition[] = [];
+      item.conditionList.forEach((condition) => {
+        if (validConditionItemType(condition)) {
+          const conditionObj: ICondition = {
+            category: defaultStr(
+              condition.conditionOption?.category,
+              ConditionCategory.OTHER
+            ),
+            property: defaultStr(condition.conditionOption?.name),
+            operator: defaultStr(condition.conditionOperator?.value),
+            value: condition.conditionValue,
+            dataType: defaultStr(
+              condition.conditionOption?.valueType,
+              MetadataValueType.STRING
+            ),
+          };
+          conditions.push(conditionObj);
+        }
+      });
+
+      const touchPoint: AttributionTouchPoint = {
+        eventName: defaultStr(
+          item.selectedEventOption?.value?.split('#').pop()
+        ),
+        sqlCondition: {
+          conditions: conditions,
+          conditionOperator: item.conditionRelationShip,
+        },
+        // groupColumn: {
+        //   category: defaultStr(
+        //     item.calculateMethodOption?.category,
+        //     ConditionCategory.OTHER
+        //   ),
+        //   property: defaultStr(item.calculateMethodOption?.name),
+        //   dataType: defaultStr(
+        //     item.calculateMethodOption?.valueType,
+        //     MetadataValueType.STRING
+        //   ),
+        // },
+      };
+      touchPoints.push(touchPoint);
+    }
+  });
+  return touchPoints;
+};
+
+export const getGoalAndConditions = (
+  eventOptionData: IEventAnalyticsItem[]
+) => {
+  if (eventOptionData.length === 0) {
+    return;
+  }
+  const goalData = eventOptionData[0];
+  return {
+    eventName: defaultStr(
+      goalData.selectedEventOption?.value?.split('#').pop()
+    ),
+    sqlCondition: {
+      conditions: [],
+      conditionOperator: goalData.conditionRelationShip,
+    },
+  } as AttributionTouchPoint;
+};
+
 export const getEventAndConditions = (
   eventOptionData: IEventAnalyticsItem[]
 ) => {

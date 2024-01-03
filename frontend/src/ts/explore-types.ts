@@ -115,6 +115,7 @@ export enum QuickSightChartType {
   LINE = 'line',
   FUNNEL = 'funnel',
   SANKEY = 'sankey',
+  TABLE = 'table',
 }
 
 export enum AttributionModelType {
