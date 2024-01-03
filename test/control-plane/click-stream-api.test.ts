@@ -1423,7 +1423,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
             {
               Ref: 'testClickStreamALBApiStackActionStateMachineD1557E17',
             },
-            '"}},"SerialMap":{"Type":"Map","End":true,"Iterator":{"StartAt":"SerialCallSelf","States":{"SerialCallSelf":{"End":true,"Type":"Task","Resource":"arn:',
+            '"}},"SerialMap":{"Type":"Map","End":true,"ItemsPath":"$","ItemProcessor":{"ProcessorConfig":{"Mode":"INLINE"},"StartAt":"SerialCallSelf","States":{"SerialCallSelf":{"End":true,"Type":"Task","Resource":"arn:',
             {
               Ref: 'AWS::Partition',
             },
@@ -1463,7 +1463,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
                 },
               ],
             },
-            '"}}}},"ItemsPath":"$","MaxConcurrency":1},"ParallelMap":{"Type":"Map","End":true,"Iterator":{"StartAt":"ParallelCallSelf","States":{"ParallelCallSelf":{"End":true,"Type":"Task","Resource":"arn:',
+            '"}}}},"MaxConcurrency":1},"ParallelMap":{"Type":"Map","End":true,"ItemsPath":"$","ItemProcessor":{"ProcessorConfig":{"Mode":"INLINE"},"StartAt":"ParallelCallSelf","States":{"ParallelCallSelf":{"End":true,"Type":"Task","Resource":"arn:',
             {
               Ref: 'AWS::Partition',
             },
@@ -1503,7 +1503,7 @@ describe('Click Stream Api ALB deploy Construct Test', () => {
                 },
               ],
             },
-            '"}}}},"ItemsPath":"$","MaxConcurrency":40}},"TimeoutSeconds":259200}',
+            '"}}}},"MaxConcurrency":40}},"TimeoutSeconds":259200}',
           ],
         ],
       },
@@ -2000,7 +2000,7 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
             {
               Ref: 'testClickStreamALBApiStackActionStateMachineD1557E17',
             },
-            '"}},"SerialMap":{"Type":"Map","End":true,"Iterator":{"StartAt":"SerialCallSelf","States":{"SerialCallSelf":{"End":true,"Type":"Task","Resource":"arn:',
+            '"}},"SerialMap":{"Type":"Map","End":true,"ItemsPath":"$","ItemProcessor":{"ProcessorConfig":{"Mode":"INLINE"},"StartAt":"SerialCallSelf","States":{"SerialCallSelf":{"End":true,"Type":"Task","Resource":"arn:',
             {
               Ref: 'AWS::Partition',
             },
@@ -2040,7 +2040,7 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
                 },
               ],
             },
-            '"}}}},"ItemsPath":"$","MaxConcurrency":1},"ParallelMap":{"Type":"Map","End":true,"Iterator":{"StartAt":"ParallelCallSelf","States":{"ParallelCallSelf":{"End":true,"Type":"Task","Resource":"arn:',
+            '"}}}},"MaxConcurrency":1},"ParallelMap":{"Type":"Map","End":true,"ItemsPath":"$","ItemProcessor":{"ProcessorConfig":{"Mode":"INLINE"},"StartAt":"ParallelCallSelf","States":{"ParallelCallSelf":{"End":true,"Type":"Task","Resource":"arn:',
             {
               Ref: 'AWS::Partition',
             },
@@ -2080,7 +2080,7 @@ describe('Click Stream Api Cloudfront deploy Construct Test', () => {
                 },
               ],
             },
-            '"}}}},"ItemsPath":"$","MaxConcurrency":40}},"TimeoutSeconds":259200}',
+            '"}}}},"MaxConcurrency":40}},"TimeoutSeconds":259200}',
           ],
         ],
       },

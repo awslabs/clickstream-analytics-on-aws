@@ -127,7 +127,7 @@ export class ClearExpiredEventsWorkflow extends Construct {
         itemsPath: '$.appIdList',
       },
     );
-    doClearJob.iterator(subDefinition);
+    doClearJob.itemProcessor(subDefinition);
 
     const doNothing = new Succeed(this, `${this.node.id} - Do Nothing`);
     const checkJobExist = new Choice(this, `${this.node.id} - Check if job exists`)
