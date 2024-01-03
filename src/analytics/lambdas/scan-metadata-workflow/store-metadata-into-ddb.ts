@@ -169,10 +169,7 @@ async function batchWriteIntoDDB(metadataItems: any[]) {
       await ddbDocClient.send(new BatchWriteCommand(inputPara));
     } catch (error) {
       // log error and inputPara
-      if (error instanceof Error) {
-        logger.error('Error when batch write into ddb.', error);
-        logger.error('Error when batch write into ddb with inputPara: ', { inputPara });
-      }
+      logger.error('Error when batch write into ddb: ', { error, inputPara });
     }
   }
 }
@@ -210,9 +207,7 @@ async function getAndMarkMonthValue(memoryItemMap: Map<string, any>, id: string,
     }
     return monthValue;
   } catch (error) {
-    if (error instanceof Error) {
-      logger.error('Error when mark latest month .', error);
-    }
+    logger.error('Error when mark latest month .', { error });
     throw error;
   }
 }
