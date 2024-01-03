@@ -48,7 +48,7 @@ import {
 import { buildEventAnalysisView, buildEventPathAnalysisView, buildFunnelTableView, buildFunnelView, buildNodePathAnalysisView, buildRetentionAnalysisView } from './quicksight/sql-builder';
 import { awsAccountId } from '../common/constants';
 import { OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX, OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME, QUICKSIGHT_TEMP_RESOURCE_NAME_PREFIX } from '../common/constants-ln';
-import { ExploreLocales, AnalysisType, ExplorePathNodeType, ExploreRequestAction, ExploreTimeScopeType, ExploreVisualName, QuickSightChartType } from '../common/explore-types';
+import { ExploreLocales, AnalysisType, ExplorePathNodeType, ExploreRequestAction, ExploreTimeScopeType, ExploreVisualName, QuickSightChartType, ExploreComputeMethod } from '../common/explore-types';
 import { PipelineStackType } from '../common/model-ln';
 import { logger } from '../common/powertools';
 import { SDKClient } from '../common/sdk-client';
@@ -130,7 +130,7 @@ export class ReportingService {
       }
 
       const result = await this._buildFunnelQuickSightDashboard(viewName, sql, tableVisualViewName,
-        sqlTable, query, sheetId);
+        sqlTable, query, sheetId, query.computeMethod);
       if (result.dashboardEmbedUrl === '' && query.action === ExploreRequestAction.PREVIEW) {
         return res.status(500).json(new ApiFail('Failed to create resources, please try again later.'));
       }
@@ -142,14 +142,29 @@ export class ReportingService {
   };
 
   private async _buildFunnelQuickSightDashboard(viewName: string, sql: string, tableVisualViewName: string,
-    sqlTable: string, query: any, sheetId: string) {
+    sqlTable: string, query: any, sheetId: string, computeMethod: ExploreComputeMethod) {
 
     const datasetColumns = [...funnelVisualColumns];
     const visualProjectedColumns = [
       'event_name',
       'event_date',
-      'x_id',
     ];
+
+    let countColName = 'event_id';
+    if (computeMethod === ExploreComputeMethod.EVENT_CNT) {
+      datasetColumns.push({
+        Name: 'event_id',
+        Type: 'STRING',
+      });
+      visualProjectedColumns.push('event_id');
+    } else {
+      datasetColumns.push({
+        Name: 'user_pseudo_id',
+        Type: 'STRING',
+      });
+      visualProjectedColumns.push('user_pseudo_id');
+      countColName = 'user_pseudo_id';
+    }
 
     const hasGrouping = query.chartType == QuickSightChartType.BAR && query.groupCondition !== undefined;
     if (hasGrouping) {
@@ -225,7 +240,7 @@ export class ReportingService {
     const locale = query.locale ?? ExploreLocales.EN_US;
     const titleProps = await getDashboardTitleProps(AnalysisType.FUNNEL, query);
     const quickSightChartType = query.chartType;
-    const visualDef = getFunnelVisualDef(visualId, viewName, titleProps, quickSightChartType, query.groupColumn, hasGrouping);
+    const visualDef = getFunnelVisualDef(visualId, viewName, titleProps, quickSightChartType, query.groupColumn, hasGrouping, countColName);
     const visualRelatedParams = await getVisualRelatedDefs({
       timeScopeType: query.timeScopeType,
       sheetId,

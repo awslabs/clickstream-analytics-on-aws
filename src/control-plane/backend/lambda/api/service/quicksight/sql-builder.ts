@@ -237,50 +237,102 @@ export function buildFunnelTableView(sqlParameters: SQLParameters) : string {
   });
 };
 
+function _buildFunnelChartViewOneResultSql(prefix: string, eventCount: number, index: number, isNameCol: boolean) : string {
+  let sql = ' when ';
+  for (let i = 1; i < eventCount; i++) {
+    if (i < index) {
+      sql += `${i === 1 ? ' ': ' and'} ${prefix}_${i} is not null `;
+    } else {
+      sql += `${i === 1 ? ' ': ' and'} ${prefix}_${i} is null `;
+    }
+  }
 
-function _buildFunnelViewOneResultSql(prefix: string, appendGroupingCol: boolean, applyToFirst: boolean, index: number) : string {
-  let sql = '';
-  if (applyToFirst) {
-    sql = `
-    ${ index === 0 ? '' : 'union all'}
-    select 
-        day::date as event_date
-      ,e_name_${index}::varchar as event_name
-      ,${prefix}_id_${index}::varchar as x_id
-      ${ appendGroupingCol ? ',group_col_0::varchar as group_col' : ''}
-    from final_table where ${prefix}_id_${index} is not null
-    `;
+  if (isNameCol) {
+    sql += `then '${index}_' || event_name_${index-1}`;
   } else {
-    sql = `
-    ${ index === 0 ? '' : 'union all'}
-    select 
-        day::date as event_date
-      ,e_name_${index}::varchar as event_name
-      ,${prefix}_id_${index}::varchar as x_id
-      ${ appendGroupingCol ? `,group_col_${index}::varchar as group_col` : ''}
-    from final_table where ${prefix}_id_${index} is not null
-    `;
+    sql += `then ${prefix}_${index-1}`;
   }
 
   return sql;
 }
 
-function _buildFunnelViewResultSql(sqlParameters: SQLParameters, prefix: string, appendGroupingCol: boolean, applyToFirst: boolean) : string {
-  let resultSql = '';
-  for (const [index, _] of sqlParameters.eventAndConditions!.entries()) {
-    resultSql = resultSql.concat(_buildFunnelViewOneResultSql(prefix, appendGroupingCol, applyToFirst, index));
+function _buildFunnelChartViewGroupingSql(prefix: string, eventCount: number, index: number, groupColNameWithPrefix: string) : string {
+
+  let sql = ' when ';
+  for (let i = 1; i < eventCount; i++) {
+    if (i < index) {
+      sql += `${i === 1 ? ' ': ' and'} ${prefix}_${i} is not null `;
+    } else {
+      sql += `${i === 1 ? ' ': ' and'} ${prefix}_${i} is null `;
+    }
+  }
+  sql += `then ${groupColNameWithPrefix}_${index-1}`;
+
+  return sql;
+}
+
+function _buildFunnelChartViewResultSql(sqlParameters: SQLParameters, prefix: string,
+  appendGroupingCol: boolean, applyToFirst: boolean, groupColNameWithPrefix: string) : string {
+
+  let resultColSql = `
+    case
+  `;
+
+  const eventCount = sqlParameters.eventAndConditions!.length;
+
+  for (let i = 1; i < eventCount; i++) {
+    resultColSql += _buildFunnelChartViewOneResultSql(prefix, eventCount, i, true);
+  }
+  resultColSql += `
+      else '${eventCount}_' || event_name_${eventCount-1} 
+    end as event_name,
+  `;
+
+  resultColSql += `
+    case
+  `;
+
+  for (let i = 1; i < eventCount; i++) {
+    resultColSql += _buildFunnelChartViewOneResultSql(prefix, eventCount, i, false);
+  }
+  resultColSql += `
+    else ${prefix}_${eventCount-1} 
+    end as ${prefix}
+  `;
+
+  if (applyToFirst) {
+    resultColSql += `
+      ${ appendGroupingCol ? `,${groupColNameWithPrefix}_0::varchar as group_col` : ''}
+    `;
+  } else if (appendGroupingCol) {
+    resultColSql += `
+      ,case
+    `;
+    for (let i = 1; i < eventCount; i++) {
+      resultColSql += _buildFunnelChartViewGroupingSql(prefix, eventCount, i, groupColNameWithPrefix);
+    }
+    resultColSql += `
+      else ${groupColNameWithPrefix}_${eventCount-1} 
+      end as group_col
+    `;
   }
 
-  return resultSql;
+  return `
+  select
+    day::date as event_date,
+    ${resultColSql}
+  from
+    join_table
+  `;
 }
 
 export function buildFunnelView(sqlParameters: SQLParameters, isMultipleChart: boolean = false) : string {
 
   const eventNames = buildEventsNameFromConditions(sqlParameters.eventAndConditions!);
 
-  let prefix = 'u';
+  let prefix = 'user_pseudo_id';
   if (sqlParameters.computeMethod === ExploreComputeMethod.EVENT_CNT) {
-    prefix = 'e';
+    prefix = 'event_id';
   }
 
   let groupCondition: GroupingCondition | undefined = undefined;
@@ -295,54 +347,13 @@ export function buildFunnelView(sqlParameters: SQLParameters, isMultipleChart: b
   }
 
   let baseSQL = _buildFunnelBaseSql(eventNames, sqlParameters, applyToFirst, groupCondition);
-  let finalTableColumnsSQL = `
-     month
-    ,week
-    ,day
-    ,hour
-  `;
-
-  let finalTableGroupBySQL = `
-     month
-    ,week
-    ,day
-    ,hour
-  `;
-
-  for (const [ind, _item] of eventNames.entries()) {
-    finalTableColumnsSQL = finalTableColumnsSQL.concat(`, event_id_${ind} as e_id_${ind} \n`);
-    finalTableColumnsSQL = finalTableColumnsSQL.concat(`, '${ind+1}_' || event_name_${ind} as e_name_${ind} \n`);
-    finalTableColumnsSQL = finalTableColumnsSQL.concat(`, user_pseudo_id_${ind} as u_id_${ind} \n`);
-
-    finalTableGroupBySQL = finalTableGroupBySQL.concat(`, event_id_${ind} \n`);
-    finalTableGroupBySQL = finalTableGroupBySQL.concat(`, '${ind+1}_' || event_name_${ind} \n`);
-    finalTableGroupBySQL = finalTableGroupBySQL.concat(`, user_pseudo_id_${ind} \n`);
-
-    if (appendGroupingCol && !applyToFirst) {
-      finalTableColumnsSQL = finalTableColumnsSQL.concat(`, ${colNameWithPrefix}_${ind} as group_col_${ind} \n`);
-      finalTableGroupBySQL = finalTableGroupBySQL.concat(`, ${colNameWithPrefix}_${ind} \n`);
-    } else if (appendGroupingCol && ind === 0) {
-      finalTableColumnsSQL = finalTableColumnsSQL.concat(`, ${colNameWithPrefix}_0 as group_col_0 \n`);
-      finalTableGroupBySQL = finalTableGroupBySQL.concat(`, ${colNameWithPrefix}_0 \n`);
-    }
-  }
-
-  baseSQL = baseSQL.concat(`,
-    final_table as (
-      select 
-      ${finalTableColumnsSQL}
-      from join_table 
-      group by
-      ${finalTableGroupBySQL}
-    )
-  `);
-
-  const resultSql = _buildFunnelViewResultSql(sqlParameters, prefix, appendGroupingCol, applyToFirst);
+  const resultSql = _buildFunnelChartViewResultSql(sqlParameters, prefix, appendGroupingCol, applyToFirst, colNameWithPrefix);
 
   let sql = `
    ${baseSQL}
    ${resultSql}
    `;
+
   return format(sql, {
     language: 'postgresql',
   });
