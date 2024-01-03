@@ -165,17 +165,20 @@ export interface ApplicationSchemasAndReportingProps extends RedshiftSQLExecutio
 
 export class ApplicationSchemasAndReporting extends RedshiftSQLExecution {
 
-  readonly redshiftBIUserParameter: string;
   readonly redshiftBIUserName: string;
 
   constructor(scope: Construct, id: string, props: ApplicationSchemasAndReportingProps) {
     super(scope, id, props);
 
-    this.redshiftBIUserParameter = `/clickstream/reporting/user/${props.projectId}`;
     this.redshiftBIUserName = this.crForSQLExecution.getAttString(CUSTOM_RESOURCE_RESPONSE_REDSHIFT_BI_USER_NAME);
   }
 
+  public getRedshiftBIUserParameter(): string {
+    return `/clickstream/reporting/user/${(this.props as ApplicationSchemasAndReportingProps).projectId}`;
+  }
+
   protected additionalPolicies(): PolicyStatement[] {
+
     const writeSecretPolicy: PolicyStatement = new PolicyStatement({
       effect: Effect.ALLOW,
       resources: [
@@ -183,7 +186,7 @@ export class ApplicationSchemasAndReporting extends RedshiftSQLExecution {
           {
             resource: 'secret',
             service: 'secretsmanager',
-            resourceName: `${this.redshiftBIUserParameter}*`,
+            resourceName: `${this.getRedshiftBIUserParameter()}*`,
             arnFormat: ArnFormat.COLON_RESOURCE_NAME,
           }, Stack.of(this),
         ),
@@ -208,7 +211,7 @@ export class ApplicationSchemasAndReporting extends RedshiftSQLExecution {
       appIds: properties.appIds,
       odsTableNames: properties.odsTableNames,
       databaseName: properties.databaseName,
-      redshiftBIUserParameter: `${this.redshiftBIUserParameter}`,
+      redshiftBIUserParameter: this.getRedshiftBIUserParameter(),
       redshiftBIUsernamePrefix: 'clickstream_bi_',
       reportingViewsDef,
       schemaDefs,
