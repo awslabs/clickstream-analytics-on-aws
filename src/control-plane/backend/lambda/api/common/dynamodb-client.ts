@@ -15,34 +15,18 @@ import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient, QueryCommandInput, ScanCommandInput, paginateQuery, paginateScan } from '@aws-sdk/lib-dynamodb';
 import { NativeAttributeValue } from '@aws-sdk/util-dynamodb';
 import memoize from 'fast-memoize';
-import { aws_sdk_client_common_config } from './sdk-client-config-ln';
+import { aws_sdk_client_common_config, marshallOptions, unmarshallOptions } from './sdk-client-config-ln';
 
 // Create DynamoDB Client and patch it for tracing
 const ddbClient = new DynamoDBClient({
   ...aws_sdk_client_common_config,
 });
 
-const marshallOptions = {
-  // Whether to automatically convert empty strings, blobs, and sets to `null`.
-  convertEmptyValues: false, // false, by default.
-  // Whether to remove undefined values while marshalling.
-  removeUndefinedValues: true, // false, by default.
-  // Whether to convert typeof object to map attribute.
-  convertClassInstanceToMap: true, // false, by default.
-};
-
-const unmarshallOptions = {
-  // Whether to return numbers as a string instead of converting them to native JavaScript numbers.
-  wrapNumbers: false, // false, by default.
-};
-
-const translateConfig = {
-  marshallOptions: { ...marshallOptions },
-  unmarshallOptions: { ...unmarshallOptions },
-};
-
 // Create the DynamoDB Document client.
-const docClient = DynamoDBDocumentClient.from(ddbClient, { ...translateConfig });
+const docClient = DynamoDBDocumentClient.from(ddbClient, {
+  marshallOptions,
+  unmarshallOptions,
+});
 
 const memoized = memoize(query);
 

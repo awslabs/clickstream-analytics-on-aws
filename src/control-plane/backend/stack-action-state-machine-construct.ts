@@ -14,12 +14,12 @@
 import { join } from 'path';
 import { Aws, aws_iam as iam, aws_lambda, Duration, Stack } from 'aws-cdk-lib';
 import { Table } from 'aws-cdk-lib/aws-dynamodb';
-import { ISecurityGroup, IVpc, SubnetSelection } from 'aws-cdk-lib/aws-ec2';
 import { Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 import { IBucket } from 'aws-cdk-lib/aws-s3';
 import { Choice, Condition, DefinitionBody, LogLevel, Pass, StateMachine, TaskInput, Wait, WaitTime } from 'aws-cdk-lib/aws-stepfunctions';
 import { LambdaInvoke } from 'aws-cdk-lib/aws-stepfunctions-tasks';
 import { Construct } from 'constructs';
+import { LambdaFunctionNetworkProps } from './click-stream-api';
 import {
   addCfnNagSuppressRules,
   addCfnNagToStack,
@@ -30,16 +30,9 @@ import { cloudWatchSendLogs, createENI } from '../../common/lambda';
 import { createLogGroup } from '../../common/logs';
 import { SolutionNodejsFunction } from '../../private/function';
 
-
-export interface StackActionStateMachineFuncProps {
-  readonly vpc?: IVpc;
-  readonly vpcSubnets?: SubnetSelection;
-  readonly securityGroups?: ISecurityGroup[];
-}
-
 export interface StackActionStateMachineProps {
   readonly clickStreamTable: Table;
-  readonly lambdaFuncProps: StackActionStateMachineFuncProps;
+  readonly lambdaFunctionNetwork: LambdaFunctionNetworkProps;
   readonly targetToCNRegions?: boolean;
   readonly workflowBucket: IBucket;
 }
@@ -64,7 +57,7 @@ export class StackActionStateMachine extends Construct {
       tracing: aws_lambda.Tracing.ACTIVE,
       role: actionFunctionRole,
       timeout: Duration.seconds(15),
-      ...props.lambdaFuncProps,
+      ...props.lambdaFunctionNetwork,
     });
     cloudWatchSendLogs('action-func-logs', this.actionFunction);
     createENI('action-func-eni', this.actionFunction);

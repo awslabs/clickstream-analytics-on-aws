@@ -30,7 +30,7 @@ import {
 } from 'aws-cdk-lib/aws-stepfunctions';
 import { LambdaInvoke, StepFunctionsStartExecution } from 'aws-cdk-lib/aws-stepfunctions-tasks';
 import { Construct } from 'constructs';
-import { StackActionStateMachineFuncProps } from './stack-action-state-machine-construct';
+import { LambdaFunctionNetworkProps } from './click-stream-api';
 import { addCfnNagToStack, ruleForLambdaVPCAndReservedConcurrentExecutions, ruleRolePolicyWithWildcardResources } from '../../common/cfn-nag';
 import { cloudWatchSendLogs, createENI } from '../../common/lambda';
 import { createLogGroup } from '../../common/logs';
@@ -40,7 +40,7 @@ import { SolutionNodejsFunction } from '../../private/function';
 export interface StackWorkflowStateMachineProps {
   readonly stateActionMachine: StateMachine;
   readonly targetToCNRegions?: boolean;
-  readonly lambdaFuncProps: StackActionStateMachineFuncProps;
+  readonly lambdaFunctionNetwork: LambdaFunctionNetworkProps;
   readonly workflowBucket: IBucket;
 }
 
@@ -78,7 +78,7 @@ export class StackWorkflowStateMachine extends Construct {
       tracing: aws_lambda.Tracing.ACTIVE,
       role: workflowFunctionRole,
       timeout: Duration.seconds(15),
-      ...props.lambdaFuncProps,
+      ...props.lambdaFunctionNetwork,
     });
     props.workflowBucket.grantReadWrite(workflowFunction, 'clickstream/*');
 

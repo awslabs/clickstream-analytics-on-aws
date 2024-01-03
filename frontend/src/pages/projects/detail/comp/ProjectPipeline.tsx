@@ -39,7 +39,7 @@ import { defaultStr } from 'ts/utils';
 interface ProjectPipelineProps {
   pipelineInfo: IPipeline;
   loadingRefresh: boolean;
-  reloadPipeline: () => void;
+  reloadPipeline: (refresh: string) => void;
 }
 
 const PAGE_SIZE = 10;
@@ -114,7 +114,7 @@ const ProjectPipeline: React.FC<ProjectPipelineProps> = (
       setLoadingRetry(false);
       if (resData.success) {
         setDisableRetry(true);
-        reloadPipeline();
+        reloadPipeline('false');
       }
     } catch (error) {
       setLoadingRetry(false);
@@ -137,8 +137,6 @@ const ProjectPipeline: React.FC<ProjectPipelineProps> = (
     );
   };
 
-  console.info('pipelineInfo:', pipelineInfo);
-
   return (
     <SpaceBetween direction="vertical" size="l">
       <Container
@@ -151,11 +149,20 @@ const ProjectPipeline: React.FC<ProjectPipelineProps> = (
                 <Button
                   iconName="refresh"
                   loading={loadingRefresh}
-                  onClick={() => {
-                    reloadPipeline();
+                  onClick={(e) => {
+                    let refresh = 'false';
+                    if (
+                      e.detail.altKey ||
+                      e.detail.ctrlKey ||
+                      e.detail.metaKey ||
+                      e.detail.shiftKey
+                    ) {
+                      refresh = 'force';
+                    }
+                    reloadPipeline(refresh);
                   }}
                 />
-                {pipelineInfo.status?.status === EPipelineStatus.Failed && (
+                {pipelineInfo.statusType === EPipelineStatus.Failed && (
                   <Button
                     iconName="redo"
                     disabled={disableRetry}
@@ -209,9 +216,9 @@ const ProjectPipeline: React.FC<ProjectPipelineProps> = (
                 <PipelineStatus
                   pipelineId={pipelineInfo.pipelineId}
                   projectId={pipelineInfo.projectId}
-                  status={pipelineInfo.status?.status}
+                  status={pipelineInfo.statusType}
                   updatePipelineStatus={() => {
-                    reloadPipeline();
+                    reloadPipeline('false');
                   }}
                 />
               </div>
@@ -267,7 +274,7 @@ const ProjectPipeline: React.FC<ProjectPipelineProps> = (
               {t('project:pipeline.noAppDisplay')}
             </Box>
             <Button
-              disabled={pipelineInfo?.status?.status !== EPipelineStatus.Active}
+              disabled={pipelineInfo?.statusType !== EPipelineStatus.Active}
               iconName="add-plus"
               onClick={() => {
                 goToCreateApplication();
@@ -318,9 +325,7 @@ const ProjectPipeline: React.FC<ProjectPipelineProps> = (
                   {t('button.delete')}
                 </Button>
                 <Button
-                  disabled={
-                    pipelineInfo?.status?.status !== EPipelineStatus.Active
-                  }
+                  disabled={pipelineInfo?.statusType !== EPipelineStatus.Active}
                   variant="primary"
                   iconName="add-plus"
                   onClick={() => {

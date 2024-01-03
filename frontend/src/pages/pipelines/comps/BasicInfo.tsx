@@ -38,7 +38,7 @@ import { alertMsg, defaultStr } from 'ts/utils';
 interface BasicInfoProps {
   pipelineInfo?: IPipeline;
   loadingRefresh: boolean;
-  reloadPipeline: () => void;
+  reloadPipeline: (refresh: string) => void;
 }
 
 const BasicInfo: React.FC<BasicInfoProps> = (props: BasicInfoProps) => {
@@ -51,7 +51,7 @@ const BasicInfo: React.FC<BasicInfoProps> = (props: BasicInfoProps) => {
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
   const checkStackRollbackFailed = () => {
-    const stackDetails = pipelineInfo?.status?.stackDetails ?? [];
+    const stackDetails = pipelineInfo?.stackDetails ?? [];
     for (const detail of stackDetails) {
       if (detail.stackStatus?.endsWith('_ROLLBACK_FAILED')) {
         return false;
@@ -77,7 +77,7 @@ const BasicInfo: React.FC<BasicInfoProps> = (props: BasicInfoProps) => {
       setLoadingRetry(false);
       if (resData.success) {
         setDisableRetry(true);
-        reloadPipeline();
+        reloadPipeline('false');
       }
     } catch (error) {
       setLoadingRetry(false);
@@ -94,7 +94,7 @@ const BasicInfo: React.FC<BasicInfoProps> = (props: BasicInfoProps) => {
       setLoadingUpgrade(false);
       if (resData.success) {
         setDisableUpgrade(true);
-        reloadPipeline();
+        reloadPipeline('false');
         setShowUpgradeModal(false);
       }
     } catch (error) {
@@ -143,12 +143,21 @@ const BasicInfo: React.FC<BasicInfoProps> = (props: BasicInfoProps) => {
                 <Button
                   iconName="refresh"
                   loading={loadingRefresh}
-                  onClick={() => {
-                    reloadPipeline();
+                  onClick={(e) => {
+                    let refresh = 'false';
+                    if (
+                      e.detail.altKey ||
+                      e.detail.ctrlKey ||
+                      e.detail.metaKey ||
+                      e.detail.shiftKey
+                    ) {
+                      refresh = 'force';
+                    }
+                    reloadPipeline(refresh);
                   }}
                 />
-                {(pipelineInfo?.status?.status === EPipelineStatus.Failed ||
-                  pipelineInfo?.status?.status === EPipelineStatus.Warning) && (
+                {(pipelineInfo?.statusType === EPipelineStatus.Failed ||
+                  pipelineInfo?.statusType === EPipelineStatus.Warning) && (
                   <Button
                     iconName="redo"
                     disabled={disableRetry}
@@ -160,8 +169,8 @@ const BasicInfo: React.FC<BasicInfoProps> = (props: BasicInfoProps) => {
                     {t('button.retry')}
                   </Button>
                 )}
-                {(pipelineInfo?.status?.status === EPipelineStatus.Active ||
-                  pipelineInfo?.status?.status === EPipelineStatus.Failed) && (
+                {(pipelineInfo?.statusType === EPipelineStatus.Active ||
+                  pipelineInfo?.statusType === EPipelineStatus.Failed) && (
                   <Button
                     href={`/project/${pipelineInfo.projectId}/pipeline/${pipelineInfo.pipelineId}/update`}
                     iconName="edit"
@@ -170,7 +179,7 @@ const BasicInfo: React.FC<BasicInfoProps> = (props: BasicInfoProps) => {
                     {t('button.edit')}
                   </Button>
                 )}
-                {pipelineInfo?.status?.status === EPipelineStatus.Active && (
+                {pipelineInfo?.statusType === EPipelineStatus.Active && (
                   <Button
                     iconName="upload-download"
                     disabled={
@@ -264,9 +273,9 @@ const BasicInfo: React.FC<BasicInfoProps> = (props: BasicInfoProps) => {
                 <PipelineStatus
                   pipelineId={pipelineInfo?.pipelineId}
                   projectId={pipelineInfo?.projectId}
-                  status={pipelineInfo?.status?.status}
+                  status={pipelineInfo?.statusType}
                   updatePipelineStatus={(status) => {
-                    reloadPipeline();
+                    reloadPipeline('false');
                   }}
                 />
               </div>
