@@ -1095,7 +1095,6 @@ describe('SQL Builder test', () => {
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
     });
-
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
       base_data as (
@@ -1245,25 +1244,56 @@ describe('SQL Builder test', () => {
           left outer join table_2 on table_1.user_pseudo_id_1 = table_2.user_pseudo_id_2
           and table_2.event_timestamp_2 - table_1.event_timestamp_1 > 0
           and table_2.event_timestamp_2 - table_0.event_timestamp_0 <= 600 * 1000
+      ),
+      seq_table as (
+        select
+          0 as seq
+        union all
+        select
+          1 as seq
+        union all
+        select
+          2 as seq
+      ),
+      final_table as (
+        select
+          day,
+          user_pseudo_id_0,
+          user_pseudo_id_1,
+          user_pseudo_id_2,
+          max(
+            case
+              when user_pseudo_id_1 is null
+              and user_pseudo_id_2 is null then user_pseudo_id_0
+              when user_pseudo_id_1 is not null
+              and user_pseudo_id_2 is null then user_pseudo_id_1
+              else user_pseudo_id_2
+            end
+          ) as user_pseudo_id,
+          max(
+            case
+              when user_pseudo_id_1 is null
+              and user_pseudo_id_2 is null then '1_' || event_name_0
+              when user_pseudo_id_1 is not null
+              and user_pseudo_id_2 is null then '2_' || event_name_1
+              else '3_' || event_name_2
+            end
+          ) as event_name
+        from
+          join_table
+          join seq_table on 1 = 1
+        group by
+          day,
+          user_pseudo_id_0,
+          user_pseudo_id_1,
+          user_pseudo_id_2
       )
     select
-      day::date as event_date,
-      case
-        when user_pseudo_id_1 is null
-        and user_pseudo_id_2 is null then '1_' || event_name_0
-        when user_pseudo_id_1 is not null
-        and user_pseudo_id_2 is null then '2_' || event_name_1
-        else '3_' || event_name_2
-      end as event_name,
-      case
-        when user_pseudo_id_1 is null
-        and user_pseudo_id_2 is null then user_pseudo_id_0
-        when user_pseudo_id_1 is not null
-        and user_pseudo_id_2 is null then user_pseudo_id_1
-        else user_pseudo_id_2
-      end as user_pseudo_id
+      day::date,
+      event_name,
+      user_pseudo_id
     from
-      join_table
+      final_table
   `.trim().replace(/ /g, ''),
     );
 
@@ -5230,7 +5260,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildFunnelTableView( {
       schemaName: 'shop',
-      computeMethod: ExploreComputeMethod.USER_ID_CNT,
+      computeMethod: ExploreComputeMethod.USER_CNT,
       specifyJoinColumn: true,
       joinColumn: 'user_pseudo_id',
       conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
@@ -5940,25 +5970,56 @@ describe('SQL Builder test', () => {
           left outer join table_2 on table_1.user_pseudo_id_1 = table_2.user_pseudo_id_2
           and table_2.event_timestamp_2 - table_1.event_timestamp_1 > 0
           and table_2.event_timestamp_2 - table_0.event_timestamp_0 <= 600 * 1000
+      ),
+      seq_table as (
+        select
+          0 as seq
+        union all
+        select
+          1 as seq
+        union all
+        select
+          2 as seq
+      ),
+      final_table as (
+        select
+          day,
+          user_pseudo_id_0,
+          user_pseudo_id_1,
+          user_pseudo_id_2,
+          max(
+            case
+              when user_pseudo_id_1 is null
+              and user_pseudo_id_2 is null then user_pseudo_id_0
+              when user_pseudo_id_1 is not null
+              and user_pseudo_id_2 is null then user_pseudo_id_1
+              else user_pseudo_id_2
+            end
+          ) as user_pseudo_id,
+          max(
+            case
+              when user_pseudo_id_1 is null
+              and user_pseudo_id_2 is null then '1_' || event_name_0
+              when user_pseudo_id_1 is not null
+              and user_pseudo_id_2 is null then '2_' || event_name_1
+              else '3_' || event_name_2
+            end
+          ) as event_name
+        from
+          join_table
+          join seq_table on 1 = 1
+        group by
+          day,
+          user_pseudo_id_0,
+          user_pseudo_id_1,
+          user_pseudo_id_2
       )
     select
-      day::date as event_date,
-      case
-        when user_pseudo_id_1 is null
-        and user_pseudo_id_2 is null then '1_' || event_name_0
-        when user_pseudo_id_1 is not null
-        and user_pseudo_id_2 is null then '2_' || event_name_1
-        else '3_' || event_name_2
-      end as event_name,
-      case
-        when user_pseudo_id_1 is null
-        and user_pseudo_id_2 is null then user_pseudo_id_0
-        when user_pseudo_id_1 is not null
-        and user_pseudo_id_2 is null then user_pseudo_id_1
-        else user_pseudo_id_2
-      end as user_pseudo_id
+      day::date,
+      event_name,
+      user_pseudo_id
     from
-      join_table
+      final_table
   `.trim().replace(/ /g, ''),
     );
 
@@ -9920,32 +9981,66 @@ describe('SQL Builder test', () => {
             TIMESTAMP 'epoch' + cast(table_2.event_timestamp_2 / 1000 as bigint) * INTERVAL '1 second',
             'YYYY-MM-DD'
           )
+      ),
+      seq_table as (
+        select
+          0 as seq
+        union all
+        select
+          1 as seq
+        union all
+        select
+          2 as seq
+      ),
+      final_table as (
+        select
+          day,
+          user_pseudo_id_0,
+          user_pseudo_id_1,
+          user_pseudo_id_2,
+          max(
+            case
+              when user_pseudo_id_1 is null
+              and user_pseudo_id_2 is null then user_pseudo_id_0
+              when user_pseudo_id_1 is not null
+              and user_pseudo_id_2 is null then user_pseudo_id_1
+              else user_pseudo_id_2
+            end
+          ) as user_pseudo_id,
+          max(
+            case
+              when user_pseudo_id_1 is null
+              and user_pseudo_id_2 is null then '1_' || event_name_0
+              when user_pseudo_id_1 is not null
+              and user_pseudo_id_2 is null then '2_' || event_name_1
+              else '3_' || event_name_2
+            end
+          ) as event_name,
+          max(
+            case
+              when user_pseudo_id_1 is null
+              and user_pseudo_id_2 is null then _session_id_0
+              when user_pseudo_id_1 is not null
+              and user_pseudo_id_2 is null then _session_id_1
+              else _session_id_2
+            end
+          ) as group_col
+        from
+          join_table
+          join seq_table on 1 = 1
+        group by
+          day,
+          user_pseudo_id_0,
+          user_pseudo_id_1,
+          user_pseudo_id_2
       )
     select
-      day::date as event_date,
-      case
-        when user_pseudo_id_1 is null
-        and user_pseudo_id_2 is null then '1_' || event_name_0
-        when user_pseudo_id_1 is not null
-        and user_pseudo_id_2 is null then '2_' || event_name_1
-        else '3_' || event_name_2
-      end as event_name,
-      case
-        when user_pseudo_id_1 is null
-        and user_pseudo_id_2 is null then user_pseudo_id_0
-        when user_pseudo_id_1 is not null
-        and user_pseudo_id_2 is null then user_pseudo_id_1
-        else user_pseudo_id_2
-      end as user_pseudo_id,
-      case
-        when user_pseudo_id_1 is null
-        and user_pseudo_id_2 is null then _session_id_0
-        when user_pseudo_id_1 is not null
-        and user_pseudo_id_2 is null then _session_id_1
-        else _session_id_2
-      end as group_col
+      day::date,
+      event_name,
+      user_pseudo_id,
+      group_col
     from
-      join_table
+      final_table
   `.trim().replace(/ /g, ''),
     );
 
@@ -10196,32 +10291,66 @@ describe('SQL Builder test', () => {
             TIMESTAMP 'epoch' + cast(table_2.event_timestamp_2 / 1000 as bigint) * INTERVAL '1 second',
             'YYYY-MM-DD'
           )
+      ),
+      seq_table as (
+        select
+          0 as seq
+        union all
+        select
+          1 as seq
+        union all
+        select
+          2 as seq
+      ),
+      final_table as (
+        select
+          day,
+          user_pseudo_id_0,
+          user_pseudo_id_1,
+          user_pseudo_id_2,
+          max(
+            case
+              when user_pseudo_id_1 is null
+              and user_pseudo_id_2 is null then user_pseudo_id_0
+              when user_pseudo_id_1 is not null
+              and user_pseudo_id_2 is null then user_pseudo_id_1
+              else user_pseudo_id_2
+            end
+          ) as user_pseudo_id,
+          max(
+            case
+              when user_pseudo_id_1 is null
+              and user_pseudo_id_2 is null then '1_' || event_name_0
+              when user_pseudo_id_1 is not null
+              and user_pseudo_id_2 is null then '2_' || event_name_1
+              else '3_' || event_name_2
+            end
+          ) as event_name,
+          max(
+            case
+              when user_pseudo_id_1 is null
+              and user_pseudo_id_2 is null then geo_country_0
+              when user_pseudo_id_1 is not null
+              and user_pseudo_id_2 is null then geo_country_1
+              else geo_country_2
+            end
+          ) as group_col
+        from
+          join_table
+          join seq_table on 1 = 1
+        group by
+          day,
+          user_pseudo_id_0,
+          user_pseudo_id_1,
+          user_pseudo_id_2
       )
     select
-      day::date as event_date,
-      case
-        when user_pseudo_id_1 is null
-        and user_pseudo_id_2 is null then '1_' || event_name_0
-        when user_pseudo_id_1 is not null
-        and user_pseudo_id_2 is null then '2_' || event_name_1
-        else '3_' || event_name_2
-      end as event_name,
-      case
-        when user_pseudo_id_1 is null
-        and user_pseudo_id_2 is null then user_pseudo_id_0
-        when user_pseudo_id_1 is not null
-        and user_pseudo_id_2 is null then user_pseudo_id_1
-        else user_pseudo_id_2
-      end as user_pseudo_id,
-      case
-        when user_pseudo_id_1 is null
-        and user_pseudo_id_2 is null then geo_country_0
-        when user_pseudo_id_1 is not null
-        and user_pseudo_id_2 is null then geo_country_1
-        else geo_country_2
-      end as group_col
+      day::date,
+      event_name,
+      user_pseudo_id,
+      group_col
     from
-      join_table
+      final_table
   `.trim().replace(/ /g, ''),
     );
 
@@ -10467,26 +10596,58 @@ describe('SQL Builder test', () => {
             TIMESTAMP 'epoch' + cast(table_2.event_timestamp_2 / 1000 as bigint) * INTERVAL '1 second',
             'YYYY-MM-DD'
           )
+      ),
+      seq_table as (
+        select
+          0 as seq
+        union all
+        select
+          1 as seq
+        union all
+        select
+          2 as seq
+      ),
+      final_table as (
+        select
+          day,
+          user_pseudo_id_0,
+          user_pseudo_id_1,
+          user_pseudo_id_2,
+          max(
+            case
+              when user_pseudo_id_1 is null
+              and user_pseudo_id_2 is null then user_pseudo_id_0
+              when user_pseudo_id_1 is not null
+              and user_pseudo_id_2 is null then user_pseudo_id_1
+              else user_pseudo_id_2
+            end
+          ) as user_pseudo_id,
+          max(
+            case
+              when user_pseudo_id_1 is null
+              and user_pseudo_id_2 is null then '1_' || event_name_0
+              when user_pseudo_id_1 is not null
+              and user_pseudo_id_2 is null then '2_' || event_name_1
+              else '3_' || event_name_2
+            end
+          ) as event_name,
+          max(geo_country_0) as group_col
+        from
+          join_table
+          join seq_table on 1 = 1
+        group by
+          day,
+          user_pseudo_id_0,
+          user_pseudo_id_1,
+          user_pseudo_id_2
       )
     select
-      day::date as event_date,
-      case
-        when user_pseudo_id_1 is null
-        and user_pseudo_id_2 is null then '1_' || event_name_0
-        when user_pseudo_id_1 is not null
-        and user_pseudo_id_2 is null then '2_' || event_name_1
-        else '3_' || event_name_2
-      end as event_name,
-      case
-        when user_pseudo_id_1 is null
-        and user_pseudo_id_2 is null then user_pseudo_id_0
-        when user_pseudo_id_1 is not null
-        and user_pseudo_id_2 is null then user_pseudo_id_1
-        else user_pseudo_id_2
-      end as user_pseudo_id,
-      geo_country_0::varchar as group_col
+      day::date,
+      event_name,
+      user_pseudo_id,
+      group_col
     from
-      join_table
+      final_table
   `.trim().replace(/ /g, ''),
     );
 
@@ -13180,32 +13341,66 @@ describe('SQL Builder test', () => {
           and table_1.geo_country_1 = table_2.geo_country_2
           and table_2.event_timestamp_2 - table_1.event_timestamp_1 > 0
           and table_2.event_timestamp_2 - table_0.event_timestamp_0 <= 600 * 1000
+      ),
+      seq_table as (
+        select
+          0 as seq
+        union all
+        select
+          1 as seq
+        union all
+        select
+          2 as seq
+      ),
+      final_table as (
+        select
+          day,
+          event_id_0,
+          event_id_1,
+          event_id_2,
+          max(
+            case
+              when event_id_1 is null
+              and event_id_2 is null then event_id_0
+              when event_id_1 is not null
+              and event_id_2 is null then event_id_1
+              else event_id_2
+            end
+          ) as event_id,
+          max(
+            case
+              when event_id_1 is null
+              and event_id_2 is null then '1_' || event_name_0
+              when event_id_1 is not null
+              and event_id_2 is null then '2_' || event_name_1
+              else '3_' || event_name_2
+            end
+          ) as event_name,
+          max(
+            case
+              when event_id_1 is null
+              and event_id_2 is null then geo_country_0
+              when event_id_1 is not null
+              and event_id_2 is null then geo_country_1
+              else geo_country_2
+            end
+          ) as group_col
+        from
+          join_table
+          join seq_table on 1 = 1
+        group by
+          day,
+          event_id_0,
+          event_id_1,
+          event_id_2
       )
     select
-      day::date as event_date,
-      case
-        when event_id_1 is null
-        and event_id_2 is null then '1_' || event_name_0
-        when event_id_1 is not null
-        and event_id_2 is null then '2_' || event_name_1
-        else '3_' || event_name_2
-      end as event_name,
-      case
-        when event_id_1 is null
-        and event_id_2 is null then event_id_0
-        when event_id_1 is not null
-        and event_id_2 is null then event_id_1
-        else event_id_2
-      end as event_id,
-      case
-        when event_id_1 is null
-        and event_id_2 is null then geo_country_0
-        when event_id_1 is not null
-        and event_id_2 is null then geo_country_1
-        else geo_country_2
-      end as group_col
+      day::date,
+      event_name,
+      event_id,
+      group_col
     from
-      join_table
+      final_table
   `.trim().replace(/ /g, ''),
     );
 
@@ -16464,25 +16659,56 @@ describe('SQL Builder test', () => {
           left outer join table_2 on table_1.user_pseudo_id_1 = table_2.user_pseudo_id_2
           and table_2.event_timestamp_2 - table_1.event_timestamp_1 > 0
           and table_2.event_timestamp_2 - table_0.event_timestamp_0 <= 600 * 1000
+      ),
+      seq_table as (
+        select
+          0 as seq
+        union all
+        select
+          1 as seq
+        union all
+        select
+          2 as seq
+      ),
+      final_table as (
+        select
+          day,
+          user_pseudo_id_0,
+          user_pseudo_id_1,
+          user_pseudo_id_2,
+          max(
+            case
+              when user_pseudo_id_1 is null
+              and user_pseudo_id_2 is null then user_pseudo_id_0
+              when user_pseudo_id_1 is not null
+              and user_pseudo_id_2 is null then user_pseudo_id_1
+              else user_pseudo_id_2
+            end
+          ) as user_pseudo_id,
+          max(
+            case
+              when user_pseudo_id_1 is null
+              and user_pseudo_id_2 is null then '1_' || event_name_0
+              when user_pseudo_id_1 is not null
+              and user_pseudo_id_2 is null then '2_' || event_name_1
+              else '3_' || event_name_2
+            end
+          ) as event_name
+        from
+          join_table
+          join seq_table on 1 = 1
+        group by
+          day,
+          user_pseudo_id_0,
+          user_pseudo_id_1,
+          user_pseudo_id_2
       )
     select
-      day::date as event_date,
-      case
-        when user_pseudo_id_1 is null
-        and user_pseudo_id_2 is null then '1_' || event_name_0
-        when user_pseudo_id_1 is not null
-        and user_pseudo_id_2 is null then '2_' || event_name_1
-        else '3_' || event_name_2
-      end as event_name,
-      case
-        when user_pseudo_id_1 is null
-        and user_pseudo_id_2 is null then user_pseudo_id_0
-        when user_pseudo_id_1 is not null
-        and user_pseudo_id_2 is null then user_pseudo_id_1
-        else user_pseudo_id_2
-      end as user_pseudo_id
+      day::date,
+      event_name,
+      user_pseudo_id
     from
-      join_table
+      final_table
   `.trim().replace(/ /g, ''),
     );
 
