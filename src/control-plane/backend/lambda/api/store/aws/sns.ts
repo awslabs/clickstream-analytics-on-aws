@@ -97,7 +97,7 @@ export const setPermissionForEventRule = async (region: string, topicArn: string
     });
     await client.send(command);
   } catch (error) {
-    console.error('Error in subscribe topic', { error });
+    logger.error('Error in subscribe topic', { error });
     throw error;
   }
 };
