@@ -300,6 +300,11 @@ export function buildCommonSqlForAttribution(eventNames: string[], params: Attri
       `;
   }
 
+  let conditionSql = buildConditionSql(params.targetEventAndCondition.sqlCondition);
+  if (conditionSql !== '') {
+    conditionSql = `and (${conditionSql}) `;
+  }
+
   const targetSql = `
     target_data as (
       select 
@@ -311,9 +316,7 @@ export function buildCommonSqlForAttribution(eventNames: string[], params: Attri
         ,row_number() over(PARTITION by user_pseudo_id ORDER by event_timestamp asc) as rank 
         ${sumValueColSql}
       from base_data
-      where event_name = '${params.targetEventAndCondition.eventName}' and (
-        ${buildConditionSql(params.targetEventAndCondition.sqlCondition)}
-      )
+      where event_name = '${params.targetEventAndCondition.eventName}' ${conditionSql}
     ),
   `;
   let touchPointSql = `
@@ -328,6 +331,12 @@ export function buildCommonSqlForAttribution(eventNames: string[], params: Attri
       from target_data
   `;
   for (const [index, eventAndCondition] of params.eventAndConditions.entries()) {
+
+    let conditionSql2 = buildConditionSql(eventAndCondition.sqlCondition);
+    if (conditionSql2 !== '') {
+      conditionSql2 = `and (${conditionSql2}) `;
+    }
+
     touchPointSql = touchPointSql.concat(`
       union all
       select 
@@ -340,7 +349,7 @@ export function buildCommonSqlForAttribution(eventNames: string[], params: Attri
       from base_data 
       where 
         event_name = '${eventAndCondition.eventName}' 
-        and ( ${buildConditionSql(eventAndCondition.sqlCondition)} )
+        ${conditionSql2}
     `);
   }
 

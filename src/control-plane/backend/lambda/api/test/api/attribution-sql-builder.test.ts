@@ -1378,4 +1378,212 @@ describe('Attribution SQL Builder test', () => {
 
   });
 
+  test('last touch model - no condition', () => {
+    const sql = buildSQLForSinglePointModel({
+      schemaName: 'shop',
+      computeMethod: ExploreComputeMethod.EVENT_CNT,
+      timeWindowType: ExploreAttributionTimeWindowType.CURRENT_DAY,
+      targetEventAndCondition:
+        {
+          eventName: 'purchase',
+        },
+      eventAndConditions: [
+        {
+          eventName: 'view_item',
+        },
+        {
+          eventName: 'add_to_cart',
+        },
+      ],
+      modelType: AttributionModelType.LAST_TOUCH,
+      timeScopeType: ExploreTimeScopeType.FIXED,
+      timeStart: new Date('2023-10-01'),
+      timeEnd: new Date('2025-10-10'),
+    });
+
+    expect(sql.trim().replace(/ /g, '')).toEqual(`
+    with
+      base_data as (
+        select
+          event_base.*
+        from
+          (
+            select
+              event_date,
+              event_name::varchar as event_name,
+              event_id::varchar as event_id,
+              event_timestamp::bigint as event_timestamp,
+              user_pseudo_id,
+              user_id
+            from
+              shop.event as event
+            where
+              event.event_date >= date '2023-10-01'
+              and event.event_date <= date '2025-10-10'
+              and event.event_name in ('view_item', 'add_to_cart', 'purchase')
+          ) as event_base
+        where
+          1 = 1
+      ),
+      target_data as (
+        select
+          user_pseudo_id,
+          event_id,
+          event_name,
+          event_timestamp,
+          row_number() over (
+            PARTITION by
+              user_pseudo_id
+            ORDER by
+              event_timestamp asc
+          ) as rank
+        from
+          base_data
+        where
+          event_name = 'purchase'
+      ),
+      touch_point_data_1 as (
+        select
+          user_pseudo_id,
+          event_id,
+          event_name,
+          event_timestamp
+        from
+          target_data
+        union all
+        select
+          user_pseudo_id,
+          event_id,
+          '1_' || event_name as event_name,
+          event_timestamp
+        from
+          base_data
+        where
+          event_name = 'view_item'
+        union all
+        select
+          user_pseudo_id,
+          event_id,
+          '2_' || event_name as event_name,
+          event_timestamp
+        from
+          base_data
+        where
+          event_name = 'add_to_cart'
+      ),
+      touch_point_data_2 as (
+        select
+          *,
+          case
+            when event_name = 'purchase' then 1
+            else 0
+          end as conversation_flag
+        from
+          touch_point_data_1
+        order by
+          event_timestamp
+      ),
+      touch_point_data_3 as (
+        select
+          *,
+          SUM(conversation_flag) over (
+            PARTITION by
+              user_pseudo_id
+            order by
+              user_pseudo_id,
+              event_timestamp ROWS BETWEEN UNBOUNDED PRECEDING
+              AND CURRENT ROW
+          ) + 1 AS group_id
+        from
+          touch_point_data_2
+      ),
+      joined_base_data as (
+        select
+          target_data.*,
+          touch_point_data_3.user_pseudo_id as t_user_pseudo_id,
+          touch_point_data_3.event_id as t_event_id,
+          touch_point_data_3.event_name as t_event_name,
+          touch_point_data_3.event_timestamp as t_event_timestamp,
+          touch_point_data_3.conversation_flag,
+          touch_point_data_3.group_id,
+          row_number() over (
+            PARTITION by
+              t_user_pseudo_id,
+              rank
+            order by
+              t_event_timestamp asc
+          ) as row_seq
+        from
+          target_data
+          join touch_point_data_3 on target_data.user_pseudo_id = touch_point_data_3.user_pseudo_id
+          and target_data.rank = touch_point_data_3.group_id
+          and target_data.event_timestamp >= touch_point_data_3.event_timestamp
+          and target_data.event_timestamp >= touch_point_data_3.event_timestamp
+          and TO_CHAR(
+            TIMESTAMP 'epoch' + cast(target_data.event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+            'YYYY-MM-DD'
+          ) = TO_CHAR(
+            TIMESTAMP 'epoch' + cast(
+              touch_point_data_3.event_timestamp / 1000 as bigint
+            ) * INTERVAL '1 second',
+            'YYYY-MM-DD'
+          )
+        where
+          touch_point_data_3.event_name <> 'purchase'
+      ),
+      model_base_data as (
+        select
+          user_pseudo_id,
+          group_id,
+          max(row_seq) as row_seq
+        from
+          joined_base_data
+        group by
+          user_pseudo_id,
+          group_id
+      ),
+      model_data as (
+        select
+          joined_base_data.*
+        from
+          joined_base_data
+          join model_base_data on joined_base_data.user_pseudo_id = model_base_data.user_pseudo_id
+          and joined_base_data.row_seq = model_base_data.row_seq
+          and joined_base_data.group_id = model_base_data.group_id
+      ),
+      attribution_data as (
+        select
+          t_event_name,
+          count(t_event_id) as contribution
+        from
+          model_data
+        group by
+          t_event_name
+      )
+    select
+      total_count_data.total_event_count,
+      attribution_data.t_event_name as event_name,
+      attribution_data.contribution as event_count,
+      cast(attribution_data.contribution as float) / t.total_contribution as contribution
+    from
+      attribution_data
+      join (
+        select
+          event_name,
+          count(event_id) as total_event_count
+        from
+          touch_point_data_3
+        group by
+          event_name
+      ) total_count_data on attribution_data.t_event_name = total_count_data.event_name
+      join (
+        select
+          count(t_event_id) as total_contribution
+        from
+          model_data
+      ) as t on 1 = 1
+    `.trim().replace(/ /g, ''));
+
+  });
+
 });
