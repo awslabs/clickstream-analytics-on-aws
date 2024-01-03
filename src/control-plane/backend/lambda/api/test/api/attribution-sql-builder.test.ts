@@ -470,7 +470,7 @@ describe('Attribution SQL Builder test', () => {
   test('first touch model - user count', () => {
     const sql = buildSQLForSinglePointModel({
       schemaName: 'shop',
-      computeMethod: ExploreComputeMethod.USER_CNT,
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
       timeWindowType: ExploreAttributionTimeWindowType.CUSTOMIZE,
       timeWindowInSeconds: 3600,
       globalEventCondition: {

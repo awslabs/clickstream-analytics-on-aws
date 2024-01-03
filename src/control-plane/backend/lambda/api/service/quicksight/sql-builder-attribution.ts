@@ -85,7 +85,7 @@ export function buildSQLForSinglePointModel(params: AttributionSQLParameters): s
       ) as t
       on 1=1
     `;
-  } else if (params.computeMethod === ExploreComputeMethod.USER_CNT) {
+  } else if (params.computeMethod === ExploreComputeMethod.USER_ID_CNT) {
     attributionDataSql = `
       total_count_data as (
         select 

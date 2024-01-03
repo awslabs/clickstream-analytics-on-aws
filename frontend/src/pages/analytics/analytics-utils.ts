@@ -354,12 +354,31 @@ export const getGoalAndConditions = (
     return;
   }
   const goalData = eventOptionData[0];
+  const conditions: ICondition[] = [];
+  goalData.conditionList.forEach((condition) => {
+    if (validConditionItemType(condition)) {
+      const conditionObj: ICondition = {
+        category: defaultStr(
+          condition.conditionOption?.category,
+          ConditionCategory.OTHER
+        ),
+        property: defaultStr(condition.conditionOption?.name),
+        operator: defaultStr(condition.conditionOperator?.value),
+        value: condition.conditionValue,
+        dataType: defaultStr(
+          condition.conditionOption?.valueType,
+          MetadataValueType.STRING
+        ),
+      };
+      conditions.push(conditionObj);
+    }
+  });
   return {
     eventName: defaultStr(
       goalData.selectedEventOption?.value?.split('#').pop()
     ),
     sqlCondition: {
-      conditions: [],
+      conditions: conditions,
       conditionOperator: goalData.conditionRelationShip,
     },
   } as AttributionTouchPoint;
