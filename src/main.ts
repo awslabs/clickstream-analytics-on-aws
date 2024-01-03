@@ -39,109 +39,111 @@ function stackSuppressions(stacks: Stack[], suppressions: NagPackSuppression[]) 
   });
 }
 
-const commonSuppressionRulesForALBLambdaPattern = [
-  { id: 'AwsSolutions-IAM5', reason: 'allow the logs of Lambda publishing to CloudWatch Logs with ambiguous logstream name' },
-  { id: 'AwsSolutions-EC23', reason: 'It is a public facing service so it works as design' },
-];
+if (!(/true/i).test(app.node.tryGetContext('ignoreWebConsoleSynth'))) {
+  const commonSuppressionRulesForALBLambdaPattern = [
+    { id: 'AwsSolutions-IAM5', reason: 'allow the logs of Lambda publishing to CloudWatch Logs with ambiguous logstream name' },
+    { id: 'AwsSolutions-EC23', reason: 'It is a public facing service so it works as design' },
+  ];
+
+  stackSuppressions([
+    new ApplicationLoadBalancerControlPlaneStack(app, 'public-exist-vpc-control-plane-stack', {
+      existingVpc: true,
+      internetFacing: true,
+      useCustomDomain: false,
+      useExistingOIDCProvider: true,
+      synthesizer: synthesizer(),
+    }),
+    new ApplicationLoadBalancerControlPlaneStack(app, 'public-exist-vpc-custom-domain-control-plane-stack', {
+      existingVpc: true,
+      internetFacing: true,
+      useCustomDomain: true,
+      useExistingOIDCProvider: false,
+      synthesizer: synthesizer(),
+    }),
+  ], commonSuppressionRulesForALBLambdaPattern);
+
+
+  stackSuppressions([
+    new ApplicationLoadBalancerControlPlaneStack(app, 'private-exist-vpc-control-plane-stack', {
+      existingVpc: true,
+      internetFacing: false,
+      useCustomDomain: false,
+      useExistingOIDCProvider: true,
+      synthesizer: synthesizer(),
+    }),
+    new ApplicationLoadBalancerControlPlaneStack(app, 'private-exist-vpc-cognito-control-plane-stack', {
+      existingVpc: true,
+      internetFacing: false,
+      useCustomDomain: true,
+      useExistingOIDCProvider: false,
+      synthesizer: synthesizer(),
+    }),
+  ], commonSuppressionRulesForALBLambdaPattern);
+
+  const commonSuppressionRulesForCloudFrontS3Pattern = [
+    { id: 'AwsSolutions-IAM4', reason: 'Cause by CDK BucketDeployment construct (aws-cdk-lib/aws-s3-deployment)' },
+    { id: 'AwsSolutions-IAM5', reason: 'Cause by CDK BucketDeployment construct (aws-cdk-lib/aws-s3-deployment)' },
+    { id: 'AwsSolutions-APIG2', reason: 'The REST API input validation in Lambda(Express) code, the front ApiGateway does not need repeated validation.' },
+    { id: 'AwsSolutions-COG4', reason: 'The REST API validate input via OIDC authorizer, there is no need to use Cognito user pool authorizer.' },
+  ];
+
+  stackSuppressions([
+    new CloudFrontControlPlaneStack(app, 'cloudfront-s3-control-plane-stack-cn', {
+      targetToCNRegions: true,
+      useCustomDomainName: true,
+      synthesizer: synthesizer(),
+    }),
+  ], [
+    ...commonSuppressionRulesForCloudFrontS3Pattern,
+    { id: 'AwsSolutions-CFR4', reason: 'TLSv1 is required in China regions' },
+  ]);
+
+  const commonSuppressionRulesForCloudFrontS3PatternInGlobal = [
+    ...commonSuppressionRulesForCloudFrontS3Pattern,
+    { id: 'AwsSolutions-CFR4', reason: 'Cause by using default default CloudFront viewer certificate' },
+    { id: 'AwsSolutions-L1', reason: 'Managed by CDK Cognito module for get service token' },
+  ];
+
+  stackSuppressions([
+    new CloudFrontControlPlaneStack(app, 'cloudfront-s3-control-plane-stack-global', {
+      synthesizer: synthesizer(),
+    }),
+    new CloudFrontControlPlaneStack(app, 'cloudfront-s3-control-plane-stack-global-oidc', {
+      useExistingOIDCProvider: true,
+      synthesizer: synthesizer(),
+    }),
+  ], commonSuppressionRulesForCloudFrontS3PatternInGlobal);
+
+  stackSuppressions([
+    new CloudFrontControlPlaneStack(app, 'cloudfront-s3-control-plane-stack-global-customdomain', {
+      useCustomDomainName: true,
+      synthesizer: synthesizer(),
+    }),
+    new CloudFrontControlPlaneStack(app, 'cloudfront-s3-control-plane-stack-global-customdomain-oidc', {
+      useCustomDomainName: true,
+      useExistingOIDCProvider: true,
+      synthesizer: synthesizer(),
+    }),
+  ], [
+    ...commonSuppressionRulesForCloudFrontS3PatternInGlobal,
+    { id: 'AwsSolutions-L1', reason: 'Caused by CDK DnsValidatedCertificate resource when request ACM certificate' },
+  ]);
+}
 
 stackSuppressions([
-  new ApplicationLoadBalancerControlPlaneStack(app, 'public-exist-vpc-control-plane-stack', {
-    existingVpc: true,
-    internetFacing: true,
-    useCustomDomain: false,
-    useExistingOIDCProvider: true,
-    synthesizer: synthesizer(),
-  }),
-  new ApplicationLoadBalancerControlPlaneStack(app, 'public-exist-vpc-custom-domain-control-plane-stack', {
-    existingVpc: true,
-    internetFacing: true,
-    useCustomDomain: true,
-    useExistingOIDCProvider: false,
-    synthesizer: synthesizer(),
-  }),
-], commonSuppressionRulesForALBLambdaPattern);
-
-
-stackSuppressions([
-  new ApplicationLoadBalancerControlPlaneStack(app, 'private-exist-vpc-control-plane-stack', {
-    existingVpc: true,
-    internetFacing: false,
-    useCustomDomain: false,
-    useExistingOIDCProvider: true,
-    synthesizer: synthesizer(),
-  }),
-  new ApplicationLoadBalancerControlPlaneStack(app, 'private-exist-vpc-cognito-control-plane-stack', {
-    existingVpc: true,
-    internetFacing: false,
-    useCustomDomain: true,
-    useExistingOIDCProvider: false,
-    synthesizer: synthesizer(),
-  }),
-], commonSuppressionRulesForALBLambdaPattern);
-
-const commonSuppressionRulesForCloudFrontS3Pattern = [
-  { id: 'AwsSolutions-IAM4', reason: 'Cause by CDK BucketDeployment construct (aws-cdk-lib/aws-s3-deployment)' },
-  { id: 'AwsSolutions-IAM5', reason: 'Cause by CDK BucketDeployment construct (aws-cdk-lib/aws-s3-deployment)' },
-  { id: 'AwsSolutions-APIG2', reason: 'The REST API input validation in Lambda(Express) code, the front ApiGateway does not need repeated validation.' },
-  { id: 'AwsSolutions-COG4', reason: 'The REST API validate input via OIDC authorizer, there is no need to use Cognito user pool authorizer.' },
-];
-
-stackSuppressions([
-  new CloudFrontControlPlaneStack(app, 'cloudfront-s3-control-plane-stack-cn', {
-    targetToCNRegions: true,
-    useCustomDomainName: true,
-    synthesizer: synthesizer(),
-  }),
-], [
-  ...commonSuppressionRulesForCloudFrontS3Pattern,
-  { id: 'AwsSolutions-CFR4', reason: 'TLSv1 is required in China regions' },
-]);
-
-const commonSuppressionRulesForCloudFrontS3PatternInGlobal = [
-  ...commonSuppressionRulesForCloudFrontS3Pattern,
-  { id: 'AwsSolutions-CFR4', reason: 'Cause by using default default CloudFront viewer certificate' },
-  { id: 'AwsSolutions-L1', reason: 'Managed by CDK Cognito module for get service token' },
-];
-
-stackSuppressions([
-  new CloudFrontControlPlaneStack(app, 'cloudfront-s3-control-plane-stack-global', {
-    synthesizer: synthesizer(),
-  }),
-  new CloudFrontControlPlaneStack(app, 'cloudfront-s3-control-plane-stack-global-oidc', {
-    useExistingOIDCProvider: true,
-    synthesizer: synthesizer(),
-  }),
-], commonSuppressionRulesForCloudFrontS3PatternInGlobal);
-
-stackSuppressions([
-  new CloudFrontControlPlaneStack(app, 'cloudfront-s3-control-plane-stack-global-customdomain', {
-    useCustomDomainName: true,
-    synthesizer: synthesizer(),
-  }),
-  new CloudFrontControlPlaneStack(app, 'cloudfront-s3-control-plane-stack-global-customdomain-oidc', {
-    useCustomDomainName: true,
-    useExistingOIDCProvider: true,
-    synthesizer: synthesizer(),
-  }),
-], [
-  ...commonSuppressionRulesForCloudFrontS3PatternInGlobal,
-  { id: 'AwsSolutions-L1', reason: 'Caused by CDK DnsValidatedCertificate resource when request ACM certificate' },
-]);
-
-stackSuppressions([
-  new IngestionServerStack(app, 'ingestion-server-kafka-stack', { //To Kafka
+  new IngestionServerStack(app, app.node.tryGetContext('ingestToKafkaStackName') ?? 'ingestion-server-kafka-stack', { //To Kafka
     synthesizer: synthesizer(),
     deliverToKafka: true,
     deliverToKinesis: false,
     deliverToS3: false,
   }),
-  new IngestionServerStack(app, 'ingestion-server-kinesis-stack', { //To Kinesis
+  new IngestionServerStack(app, app.node.tryGetContext('ingestToKinesisStackName') ?? 'ingestion-server-kinesis-stack', { //To Kinesis
     synthesizer: synthesizer(),
     deliverToKafka: false,
     deliverToKinesis: true,
     deliverToS3: false,
   }),
-  new IngestionServerStack(app, 'ingestion-server-s3-stack', { //To S3
+  new IngestionServerStack(app, app.node.tryGetContext('ingestToS3StackName') ?? 'ingestion-server-s3-stack', { //To S3
     synthesizer: synthesizer(),
     deliverToKafka: false,
     deliverToKinesis: false,
@@ -194,11 +196,11 @@ stackSuppressions([
   },
 ]);
 
-new KafkaS3SinkConnectorStack(app, 'kafka-s3-sink-stack', { // Kafka S3 sink connector
+new KafkaS3SinkConnectorStack(app, app.node.tryGetContext('kafkaS3SinkStackName') ?? 'kafka-s3-sink-stack', { // Kafka S3 sink connector
   synthesizer: synthesizer(),
 });
 
-new DataPipelineStack(app, 'data-pipeline-stack', {
+new DataPipelineStack(app, app.node.tryGetContext('dataProcessingStackName') ?? 'data-pipeline-stack', {
   synthesizer: synthesizer(),
 });
 
@@ -217,7 +219,7 @@ new DataModelingAthenaStack(app, app.node.tryGetContext('modelAthenaStackName') 
 });
 
 stackSuppressions([
-  new DataReportingQuickSightStack(app, 'data-reporting-quicksight-stack', {
+  new DataReportingQuickSightStack(app, app.node.tryGetContext('reportingStackName') ?? 'data-reporting-quicksight-stack', {
     synthesizer: synthesizer(),
   }),
 ], [
@@ -239,7 +241,7 @@ stackSuppressions([
 ]);
 
 stackSuppressions([
-  new MetricsStack(app, 'metrics-stack', {
+  new MetricsStack(app, app.node.tryGetContext('metricsStackName') ?? 'metrics-stack', {
     synthesizer: synthesizer(),
   }),
 ], [
@@ -248,7 +250,7 @@ stackSuppressions([
   { id: 'AwsSolutions-L1', reason: 'Caused by CDK built-in custom resource provider not using latest Nodejs runtime' },
 ]);
 
-new ServiceCatalogAppregistryStack(app, 'service-catalog-appregistry-stack', {
+new ServiceCatalogAppregistryStack(app, app.node.tryGetContext('appRegistryStackName') ?? 'service-catalog-appregistry-stack', {
   synthesizer: synthesizer(),
 });
 
