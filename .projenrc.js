@@ -51,12 +51,12 @@ const smithyPackagesDeps = [
   '@smithy/node-http-handler',
   '@smithy/util-stream-node',
 ].map(dep => `${dep}@^${smithyPackagesVersion}`);
-const awsSDKPackagesVersion = '3.398.0';
+const awsSDKPackagesVersion = '3.523.0';
 const awsSDKPackagesDeps = [
   '@aws-sdk/types',
   '@aws-sdk/credential-providers',
 ].map(dep => `${dep}@^${awsSDKPackagesVersion}`);
-const awsSDKServicesVersion = '3.405.0';
+const awsSDKServicesVersion = '3.523.0';
 const awsSDKServicesDeps = [
   '@aws-sdk/client-kafkaconnect',
   '@aws-sdk/client-s3',
@@ -95,7 +95,9 @@ const awsSDKServicesDepsForApiProject = [
   '@aws-sdk/client-acm',
   '@aws-sdk/client-secrets-manager',
   '@aws-sdk/client-sts',
+  '@aws-sdk/client-sns',
   '@aws-sdk/client-cloudwatch',
+  '@aws-sdk/client-cloudwatch-events',
   '@aws-sdk/lib-dynamodb',
 ].map(dep => `${dep}@^${awsSDKServicesVersion}`);
 

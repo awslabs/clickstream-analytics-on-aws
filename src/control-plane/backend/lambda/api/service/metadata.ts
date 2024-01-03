@@ -15,8 +15,8 @@ import { CMetadataDisplay } from './display';
 import { PipelineServ } from './pipeline';
 import { OUTPUT_SCAN_METADATA_WORKFLOW_ARN_SUFFIX } from '../common/constants-ln';
 import { ConditionCategory, MetadataValueType } from '../common/explore-types';
-import { MetadataVersionType } from '../common/model-ln';
-import { ApiFail, ApiSuccess, PipelineStackType } from '../common/types';
+import { MetadataVersionType, PipelineStackType } from '../common/model-ln';
+import { ApiFail, ApiSuccess } from '../common/types';
 import { groupAssociatedEventParametersByName, groupByParameterByName, getMetadataVersionType, pathNodesToAttribute, getLocalDateISOString, getStackOutputFromPipelineStatus } from '../common/utils';
 import { IMetadataAttributeValue, IMetadataDisplay, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute } from '../model/metadata';
 import { startExecution } from '../store/aws/sfn';
@@ -132,7 +132,7 @@ export class MetadataEventServ {
         return res.status(404).json(new ApiFail('Pipeline not found'));
       }
       const scanMetadataWorkflowArn = getStackOutputFromPipelineStatus(
-        pipeline.status,
+        pipeline.stackDetails ?? pipeline.status?.stackDetails,
         PipelineStackType.DATA_MODELING_REDSHIFT,
         OUTPUT_SCAN_METADATA_WORKFLOW_ARN_SUFFIX,
       );

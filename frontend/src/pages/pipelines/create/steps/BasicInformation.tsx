@@ -28,7 +28,7 @@ import { getRegionList, getS3BucketList, getVPCList } from 'apis/resource';
 import Tags from 'pages/common/Tags';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AWS_REGION_MAP, SDK_LIST } from 'ts/const';
+import { AWS_REGION_MAP, EPipelineStatus, SDK_LIST } from 'ts/const';
 import { defaultStr, isDisabled } from 'ts/utils';
 
 interface BasicInformationProps {
@@ -219,7 +219,7 @@ const BasicInformation: React.FC<BasicInformationProps> = (
           label={t('pipeline:create.vpc')}
           description={t('pipeline:create.vpcDesc')}
           secondaryControl={
-            !update || pipelineInfo.status?.status === 'Failed' ? (
+            !update || pipelineInfo.statusType === EPipelineStatus.Failed ? (
               <Button
                 disabled={!pipelineInfo.region}
                 loading={loadingVPC}
@@ -267,7 +267,7 @@ const BasicInformation: React.FC<BasicInformationProps> = (
           label={t('pipeline:create.s3Assets')}
           description={t('pipeline:create.s3AssetsDesc')}
           secondaryControl={
-            !update || pipelineInfo.status?.status === 'Failed' ? (
+            !update || pipelineInfo.statusType === EPipelineStatus.Failed ? (
               <Button
                 disabled={!pipelineInfo.region}
                 loading={loadingBucket}

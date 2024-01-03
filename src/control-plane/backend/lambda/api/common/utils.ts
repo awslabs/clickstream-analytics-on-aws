@@ -28,10 +28,10 @@ import {
   SERVICE_CATALOG_SUPPORTED_REGIONS,
 } from './constants-ln';
 import { ConditionCategory, MetadataValueType } from './explore-types';
-import { BuiltInTagKeys, MetadataVersionType } from './model-ln';
+import { BuiltInTagKeys, MetadataVersionType, PipelineStackType, PipelineStatusDetail, PipelineStatusType } from './model-ln';
 import { logger } from './powertools';
 import { SolutionInfo } from './solution-info-ln';
-import { ALBRegionMappingObject, BucketPrefix, ClickStreamBadRequestError, ClickStreamSubnet, DataCollectionSDK, IUserRole, PipelineStackType, PipelineStatus, PipelineStatusDetail, PipelineStatusType, RPURange, RPURegionMappingObject, ReportingDashboardOutput, SubnetType } from './types';
+import { ALBRegionMappingObject, BucketPrefix, ClickStreamBadRequestError, ClickStreamSubnet, DataCollectionSDK, IUserRole, RPURange, RPURegionMappingObject, ReportingDashboardOutput, SubnetType } from './types';
 import { IMetadataRaw, IMetadataRawValue, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute, IMetadataAttributeValue, ISummaryEventParameter } from '../model/metadata';
 import { CPipelineResources, IPipeline, ITag } from '../model/pipeline';
 import { IUserSettings } from '../model/user';
@@ -574,15 +574,15 @@ function getValueFromStackOutputSuffix(pipeline: IPipeline, stackType: PipelineS
   return `#.${stackName}.${suffix}`;
 }
 
-function getStackOutputFromPipelineStatus(status: PipelineStatus | undefined, stackType: PipelineStackType, key: string): string {
-  if (!status || isEmpty(status)) {
+function getStackOutputFromPipelineStatus(stackDetails: PipelineStatusDetail[] | undefined, stackType: PipelineStackType, key: string): string {
+  if (isEmpty(stackDetails) || !stackDetails) {
     return '';
   }
-  const stackTypes = status.stackDetails.map(s => s.stackType);
+  const stackTypes = stackDetails.map(s => s.stackType);
   if (!stackTypes.includes(stackType)) {
     return '';
   }
-  for (let stackDetail of status.stackDetails) {
+  for (let stackDetail of stackDetails) {
     if (stackDetail.stackType === stackType) {
       const outputs = stackDetail.outputs;
       for (let output of outputs) {
@@ -607,10 +607,11 @@ function getVersionFromTags(tags: Tag[] | undefined) {
   return version;
 }
 
-function getReportingDashboardsUrl(status: PipelineStatus, stackType: PipelineStackType, key: string): ReportingDashboardOutput[] {
+function getReportingDashboardsUrl(
+  stackDetails: PipelineStatusDetail[] | undefined, stackType: PipelineStackType, key: string): ReportingDashboardOutput[] {
   let dashboards: ReportingDashboardOutput[] = [];
   const dashboardsOutputs = getStackOutputFromPipelineStatus(
-    status,
+    stackDetails,
     stackType,
     key,
   );
@@ -1046,7 +1047,13 @@ function pipelineAnalysisStudioEnabled(pipeline: IPipeline): boolean {
 };
 
 function getStackVersion(pipeline: IPipeline, stackType: PipelineStackType): string | undefined {
-  if (pipeline.status?.stackDetails) {
+  if (pipeline.stackDetails) {
+    for (let stackDetail of pipeline.stackDetails) {
+      if (stackDetail.stackType === stackType) {
+        return stackDetail.stackTemplateVersion;
+      }
+    }
+  } else if (pipeline.status?.stackDetails) {
     for (let stackDetail of pipeline.status?.stackDetails) {
       if (stackDetail.stackType === stackType) {
         return stackDetail.stackTemplateVersion;
@@ -1056,13 +1063,16 @@ function getStackVersion(pipeline: IPipeline, stackType: PipelineStackType): str
   return undefined;
 }
 
-function isFinallyPipelineStatus(status: PipelineStatusType) {
+function isFinallyPipelineStatus(statusType: PipelineStatusType | undefined) {
+  if (!statusType) {
+    return false;
+  }
   const finallyPipelineStatus = [
     PipelineStatusType.ACTIVE,
     PipelineStatusType.FAILED,
     PipelineStatusType.WARNING,
   ];
-  return finallyPipelineStatus.includes(status);
+  return finallyPipelineStatus.includes(statusType);
 }
 
 function getStackTags(pipeline: IPipeline) {
@@ -1159,9 +1169,9 @@ function _getPipelineStatus(pipeline: IPipeline) {
   let lastAction = pipeline.lastAction;
   if (!lastAction || lastAction === '') {
     lastAction = getPipelineLastActionFromStacksStatus(
-      pipeline.status?.stackDetails, pipeline.templateVersion);
+      pipeline.stackDetails ?? pipeline.status?.stackDetails, pipeline.templateVersion);
   }
-  const executionDetail = pipeline.status?.executionDetail;
+  const executionDetail = pipeline.executionDetail ?? pipeline.status?.executionDetail;
   const stackStatus = _getPipelineStatusFromStacks(pipeline);
   const executionStatus = executionDetail?.status;
   if (executionStatus === ExecutionStatus.FAILED ||
@@ -1202,7 +1212,7 @@ function _catchWarningStatus(status: PipelineStatusType, lastAction: string) {
 
 function _getPipelineStatusFromStacks(pipeline: IPipeline) {
   let status = 'COMPLETE';
-  const stackDetails = pipeline.status?.stackDetails;
+  const stackDetails = pipeline.stackDetails ?? pipeline.status?.stackDetails;
   if (!stackDetails || stackDetails.length === 0) {
     return status;
   }

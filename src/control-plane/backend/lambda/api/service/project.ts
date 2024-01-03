@@ -13,12 +13,12 @@
 
 import { QuickSight, ResourceNotFoundException } from '@aws-sdk/client-quicksight';
 import { v4 as uuidv4 } from 'uuid';
-import { StackManager } from './stack';
 import { DEFAULT_DASHBOARD_NAME, OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN, OUTPUT_REPORT_DASHBOARDS_SUFFIX, QUICKSIGHT_ANALYSIS_INFIX, QUICKSIGHT_DASHBOARD_INFIX, QUICKSIGHT_RESOURCE_NAME_PREFIX } from '../common/constants-ln';
+import { PipelineStackType } from '../common/model-ln';
 import { logger } from '../common/powertools';
 import { aws_sdk_client_common_config } from '../common/sdk-client-config-ln';
-import { ApiFail, ApiSuccess, PipelineStackType } from '../common/types';
-import { getReportingDashboardsUrl, getStackOutputFromPipelineStatus, isEmpty, isFinallyPipelineStatus, paginateData, pipelineAnalysisStudioEnabled } from '../common/utils';
+import { ApiFail, ApiSuccess } from '../common/types';
+import { getPipelineStatusType, getReportingDashboardsUrl, getStackOutputFromPipelineStatus, isEmpty, isFinallyPipelineStatus, paginateData, pipelineAnalysisStudioEnabled } from '../common/utils';
 import { IApplication } from '../model/application';
 import { CPipeline, IPipeline } from '../model/pipeline';
 import { IDashboard, IProject } from '../model/project';
@@ -39,7 +39,7 @@ export class ProjectServ {
 
   private getPresetAppDashboard(pipeline: IPipeline, appId: string) {
     const stackDashboards = getReportingDashboardsUrl(
-      pipeline.status!, PipelineStackType.REPORTING, OUTPUT_REPORT_DASHBOARDS_SUFFIX);
+      pipeline.stackDetails ?? pipeline.status?.stackDetails, PipelineStackType.REPORTING, OUTPUT_REPORT_DASHBOARDS_SUFFIX);
     if (stackDashboards.length === 0) {
       return undefined;
     }
@@ -93,11 +93,8 @@ export class ProjectServ {
       if (!pipeline) {
         return res.status(404).json(new ApiFail('The latest pipeline not found.'));
       }
-      const stackManager: StackManager = new StackManager(pipeline);
-      const status = await stackManager.getPipelineStatus();
-
       const defaultDataSourceArn = getStackOutputFromPipelineStatus(
-        status,
+        pipeline.stackDetails ?? pipeline.status?.stackDetails,
         PipelineStackType.REPORTING,
         OUTPUT_REPORTING_QUICKSIGHT_DATA_SOURCE_ARN);
 
@@ -279,12 +276,11 @@ export class ProjectServ {
       const latestPipelines = await store.listPipeline(id, 'latest', 'asc');
       if (latestPipelines.length === 1) {
         const latestPipeline = latestPipelines[0];
-        const pipeline = new CPipeline(latestPipeline);
-        const stackManager: StackManager = new StackManager(latestPipeline);
-        const latestPipelineStatus = await stackManager.getPipelineStatus();
-        if (!isFinallyPipelineStatus(latestPipelineStatus.status)) {
+        const statusType = getPipelineStatusType(latestPipeline);
+        if (!isFinallyPipelineStatus(statusType)) {
           return res.status(400).json(new ApiFail('The pipeline current status does not allow delete.'));
         }
+        const pipeline = new CPipeline(latestPipeline);
         await pipeline.delete();
       }
       const existProjects = await store.listProjects('asc');

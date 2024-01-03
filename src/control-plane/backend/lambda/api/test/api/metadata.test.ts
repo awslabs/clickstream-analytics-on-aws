@@ -379,6 +379,7 @@ function mockPipeline(version?: string) {
         ...BASE_STATUS,
         stackDetails: stackDetailsWithScanArnOutputs,
       },
+      stackDetails: undefined,
     }],
   });
   ddbMock.on(QueryCommand, getAllEventParametersInput()).resolves({

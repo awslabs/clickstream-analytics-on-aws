@@ -2210,7 +2210,7 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
 ) => {
   const { t } = useTranslation();
   const { update } = props;
-  const { id, pid } = useParams();
+  const { pid } = useParams();
 
   const [loadingData, setLoadingData] = useState(true);
   const [updatePipeline, setUpdatePipeline] = useState<IExtPipeline>();
@@ -2787,13 +2787,10 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
           newServerless: data.dataModeling?.redshift?.newServerless ?? null,
         },
       },
-      status: {
-        status: defaultStr(data.status?.status),
-        stackDetails: data.status?.stackDetails ?? [],
-      },
+      statusType: data.statusType,
+      stackDetails: data.stackDetails ?? [],
+      executionDetail: data.executionDetail,
       workflow: data.workflow,
-      executionName: data.executionName,
-      executionArn: data.executionArn,
       version: defaultStr(data.version),
       versionTag: defaultStr(data.versionTag),
       createAt: defaultGenericsValue(data.createAt, 0),
@@ -2817,9 +2814,7 @@ const CreatePipeline: React.FC<CreatePipelineProps> = (
         setLoadingData(true);
         const { success, data }: ApiResponse<IExtPipeline> =
           await getPipelineDetail({
-            id: defaultStr(id),
-            pid: defaultStr(pid),
-            cache: true,
+            projectId: defaultStr(pid),
           });
         if (success) {
           const extPipeline = getDefaultExtPipeline(data);

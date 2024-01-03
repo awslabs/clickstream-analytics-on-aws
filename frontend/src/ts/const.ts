@@ -81,6 +81,7 @@ export enum EPipelineStatus {
   Creating = 'Creating',
   Updating = 'Updating',
   Deleting = 'Deleting',
+  Deleted = 'Deleted',
   Pending = 'Pending',
 }
 

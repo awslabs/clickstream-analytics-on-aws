@@ -295,9 +295,9 @@ export const extractRegionFromCloudWatchArn = (arn: string) => {
 export const isDisabled = (update?: boolean, pipelineInfo?: IExtPipeline) => {
   return (
     update &&
-    (pipelineInfo?.status?.status === EPipelineStatus.Failed ||
-      pipelineInfo?.status?.status === EPipelineStatus.Active ||
-      pipelineInfo?.status?.status === EPipelineStatus.Warning)
+    (pipelineInfo?.statusType === EPipelineStatus.Failed ||
+      pipelineInfo?.statusType === EPipelineStatus.Active ||
+      pipelineInfo?.statusType === EPipelineStatus.Warning)
   );
 };
 
@@ -313,9 +313,9 @@ export const isReportingDisabled = (
       !pipelineInfo?.serviceStatus?.QUICK_SIGHT ||
       !pipelineInfo.enableRedshift ||
       !(
-        pipelineInfo?.status?.status === EPipelineStatus.Failed ||
-        pipelineInfo?.status?.status === EPipelineStatus.Active ||
-        pipelineInfo?.status?.status === EPipelineStatus.Warning
+        pipelineInfo?.statusType === EPipelineStatus.Failed ||
+        pipelineInfo?.statusType === EPipelineStatus.Active ||
+        pipelineInfo?.statusType === EPipelineStatus.Warning
       )
     );
   }
@@ -356,7 +356,7 @@ export const getValueFromStackOutputs = (
   keys: string[]
 ) => {
   const res: Map<string, string> = new Map<string, string>();
-  const stackDetail = pipeline.status?.stackDetails?.find(
+  const stackDetail = pipeline.stackDetails?.find(
     (s) => s.stackType === stackType
   );
   if (!stackDetail) {

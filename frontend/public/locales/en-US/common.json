@@ -203,6 +203,7 @@
     "status": "Status",
     "active": "Active",
     "failed": "Failed",
+    "deleted": "Deleted",
     "warning": "Warning",
     "creating": "Creating",
     "updating": "Updating",

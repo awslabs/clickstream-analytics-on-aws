@@ -23,3 +23,14 @@ export const aws_sdk_client_common_config = {
   }),
   customUserAgent: userAgent,
 };
+
+export const marshallOptions = {
+  convertEmptyValues: false,
+  removeUndefinedValues: true,
+  convertClassInstanceToMap: true,
+  convertTopLevelContainer: true,
+};
+
+export const unmarshallOptions = {
+  wrapNumbers: false,
+};
