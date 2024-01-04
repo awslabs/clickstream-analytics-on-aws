@@ -125,57 +125,23 @@ export enum ExploreAnalyticsOperators {
   NOT_CONTAINS = 'not_contains',
 }
 
-const baseColumns = `
- event.event_date
-,event.event_name
-,event.event_id
-,event_bundle_sequence_id:: bigint as event_bundle_sequence_id
-,event_previous_timestamp:: bigint as event_previous_timestamp
-,event_timestamp::bigint as event_timestamp
-,ingest_timestamp
-,event_value_in_usd
-,app_info.app_id:: varchar as app_info_app_id
-,app_info.id:: varchar as app_info_id
-,app_info.install_source:: varchar as app_info_install_source
-,app_info.version:: varchar as app_info_version
-,app_info.sdk_name:: varchar as app_info_sdk_name
-,app_info.sdk_version:: varchar as app_info_sdk_version
-,device.vendor_id:: varchar as device_vendor_id
-,device.mobile_brand_name:: varchar as device_mobile_brand_name
-,device.mobile_model_name:: varchar as device_mobile_model_name
-,device.manufacturer:: varchar as device_manufacturer
-,device.screen_width:: bigint as device_screen_width
-,device.screen_height:: bigint as device_screen_height
-,device.viewport_height:: bigint as device_viewport_height
-,device.carrier:: varchar as device_carrier
-,device.network_type:: varchar as device_network_type
-,device.operating_system:: varchar as device_operating_system
-,device.operating_system_version:: varchar as device_operating_system_version
-,device.ua_browser:: varchar as device_ua_browser
-,device.ua_browser_version:: varchar as device_ua_browser_version
-,device.ua_os:: varchar as device_ua_os
-,device.ua_os_version:: varchar as device_ua_os_version
-,device.ua_device:: varchar as device_ua_device
-,device.ua_device_category:: varchar as device_ua_device_category
-,device.system_language:: varchar as device_system_language
-,device.time_zone_offset_seconds:: bigint as device_time_zone_offset_seconds
-,device.advertising_id:: varchar as device_advertising_id
-,device.host_name:: varchar as device_host_name
-,geo.continent:: varchar as geo_continent
-,geo.country:: varchar as geo_country
-,geo.city:: varchar as geo_city
-,geo.metro:: varchar as geo_metro
-,geo.region:: varchar as geo_region
-,geo.sub_continent:: varchar as geo_sub_continent
-,geo.locale:: varchar as geo_locale
-,platform
-,project_id
-,traffic_source.name:: varchar as traffic_source_name
-,traffic_source.medium:: varchar as traffic_source_medium
-,traffic_source.source:: varchar as traffic_source_source
-,COALESCE(u.user_id, event.user_pseudo_id) as user_pseudo_id
-,event.user_id
-`;
+const baseColumns: ColumnAttribute[] = [
+  {
+    category: ConditionCategory.OTHER,
+    property: 'event_name',
+    dataType: MetadataValueType.STRING,
+  },
+  {
+    category: ConditionCategory.OTHER,
+    property: 'event_id',
+    dataType: MetadataValueType.STRING,
+  },
+  {
+    category: ConditionCategory.OTHER,
+    property: 'event_timestamp',
+    dataType: MetadataValueType.INTEGER,
+  },
+];
 
 const columnTemplate = `
  event_date as event_date####
@@ -185,6 +151,27 @@ const columnTemplate = `
 ,user_id as user_id####
 ,user_pseudo_id as user_pseudo_id####
 `;
+
+export interface EventConditionProps {
+  hasEventAttribute: boolean;
+  eventAttributes: ColumnAttribute[];
+  hasEventNonNestAttribute: boolean;
+  eventNonNestAttributes: ColumnAttribute[];
+}
+
+const builtInBigintColumns = [
+  'event_bundle_sequence_id',
+  'event_previous_timestamp',
+  'screen_width',
+  'screen_height',
+  'time_zone_offset_seconds',
+  'viewport_height',
+  'event_timestamp',
+];
+export interface EventNonNestColProps {
+  sql: string;
+  colList: string[];
+}
 
 const EVENT_TABLE = 'event';
 const EVENT_PARAMETER_TABLE = 'event_parameter';
@@ -1334,6 +1321,38 @@ function _getMidTableForNodePathAnalysis(sqlParameters: SQLParameters, isSession
   }
 }
 
+function _buildNecessaryEventColumnsSql(eventConditionProps: EventConditionProps): EventNonNestColProps {
+
+  let sql: string = 'event_date';
+  const eventNonNestAttributes = baseColumns.concat(...eventConditionProps.eventNonNestAttributes);
+  const propertyList: string[] = ['event_date'];
+  const colList: string[] = ['event_date'];
+
+  for (const props of eventNonNestAttributes) {
+    if (propertyList.includes(props.property)) {
+      continue;
+    }
+    propertyList.push(props.property);
+
+    if (props.category === ConditionCategory.DEVICE
+        || props.category === ConditionCategory.GEO
+        || props.category === ConditionCategory.TRAFFIC_SOURCE
+        || props.category === ConditionCategory.APP_INFO
+    ) {
+      sql = sql.concat(`,${props.category}.${props.property}${builtInBigintColumns.includes(props.property) ? '::bigint' : '::varchar'} as ${props.category}_${props.property}`);
+      colList.push(`${props.category}_${props.property}`);
+    } else if (props.category === ConditionCategory.OTHER) {
+      sql = sql.concat(`,${props.property}${builtInBigintColumns.includes(props.property) ? '::bigint' : '::varchar'}  as  ${props.property}`);
+      colList.push(`${props.property}`);
+    }
+  }
+
+  return {
+    sql,
+    colList,
+  };
+}
+
 export function _buildCommonPartSql(eventNames: string[], sqlParameters: SQLParameters,
   isEventPathAnalysis: boolean = false, isNodePathAnalysis: boolean = false, isRetentionAnalysis: boolean = false) : string {
 
@@ -1349,7 +1368,8 @@ export function _buildCommonPartSql(eventNames: string[], sqlParameters: SQLPara
   let baseUserDataSql = '';
   let eventColList: string[] = [];
 
-  const baseEventDataSql = _buildBaseEventDataSql(eventNames, sqlParameters, isEventPathAnalysis, isNodePathAnalysis);
+  const eventNonNestColProps = _buildNecessaryEventColumnsSql(eventConditionProps);
+  const baseEventDataSql = _buildBaseEventDataSql(eventNames, sqlParameters, eventNonNestColProps, isEventPathAnalysis, isNodePathAnalysis);
 
   if (eventConditionProps.hasEventAttribute) {
     const eventAttributes: ColumnAttribute[] = [];
@@ -1404,7 +1424,7 @@ export function _buildCommonPartSql(eventNames: string[], sqlParameters: SQLPara
             ${userOuterCol}
           from
           (
-            ${_buildBaseEventDataTableSQL(eventNames, sqlParameters, isEventPathAnalysis, isNodePathAnalysis)}
+            ${_buildBaseEventDataTableSQL(eventNames, sqlParameters, eventNonNestColProps, isEventPathAnalysis, isNodePathAnalysis)}
           ) as event_base
           ${userOuterSql}
           where 1=1
@@ -1539,48 +1559,63 @@ function _buildEventNameClause(eventNames: string[], sqlParameters: SQLParameter
   return eventNameClause;
 }
 
-function _buildBaseEventDataTableSQL(eventNames: string[], sqlParameters: SQLParameters,
+function _buildBaseEventDataTableSQL(eventNames: string[], sqlParameters: SQLParameters, eventNonNestColProps: EventNonNestColProps,
   isEventPathAnalysis: boolean = false, isNodePathAnalysis: boolean = false) {
   const eventDateSQL = _getEventDateSql(sqlParameters, 'event.');
   const eventNameClause = _buildEventNameClause(eventNames, sqlParameters, isEventPathAnalysis, isNodePathAnalysis);
 
   return `
     select
-      ${baseColumns},
-      TO_CHAR(
-      TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
-      'YYYY-MM'
-      ) as month,
-      TO_CHAR(
-      date_trunc(
-          'week',
-          TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-      ),
-      'YYYY-MM-DD'
-      ) as week,
-      TO_CHAR(
-      TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
-      'YYYY-MM-DD'
-      ) as day,
-      TO_CHAR(
-      TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
-      'YYYY-MM-DD HH24'
-      ) || '00:00' as hour
-    from
-        ${sqlParameters.schemaName}.${EVENT_TABLE} as event
-        join (select user_pseudo_id, user_id from ${sqlParameters.schemaName}.user_m_view group by user_pseudo_id, user_id) as u on event.user_pseudo_id= u.user_pseudo_id
-    where
-        ${eventDateSQL}
-        ${eventNameClause}
+       ${eventNonNestColProps.colList.join(',')}
+      ,COALESCE(r.user_id, l.user_pseudo_id) as user_pseudo_id
+      ,r.user_id
+      ,month
+      ,week
+      ,day
+      ,hour
+    from 
+    (
+      select
+        ${eventNonNestColProps.sql},
+        user_pseudo_id,
+        TO_CHAR(
+        TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+        'YYYY-MM'
+        ) as month,
+        TO_CHAR(
+        date_trunc(
+            'week',
+            TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
+        ),
+        'YYYY-MM-DD'
+        ) as week,
+        TO_CHAR(
+        TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+        'YYYY-MM-DD'
+        ) as day,
+        TO_CHAR(
+        TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+        'YYYY-MM-DD HH24'
+        ) || '00:00' as hour
+      from
+          ${sqlParameters.schemaName}.${EVENT_TABLE} as event
+      where
+          ${eventDateSQL}
+          ${eventNameClause}
+    ) as l
+    join 
+    (
+      select user_pseudo_id, user_id from ${sqlParameters.schemaName}.user_m_view group by user_pseudo_id, user_id
+    ) as r on l.user_pseudo_id= r.user_pseudo_id
   `;
 }
 
-function _buildBaseEventDataSql(eventNames: string[], sqlParameters: SQLParameters,
+function _buildBaseEventDataSql(eventNames: string[], sqlParameters: SQLParameters, eventNonNestColProps: EventNonNestColProps,
   isEventPathAnalysis: boolean = false, isNodePathAnalysis: boolean = false) {
 
   return `
     event_base as (
-      ${_buildBaseEventDataTableSQL(eventNames, sqlParameters, isEventPathAnalysis, isNodePathAnalysis)}
+      ${_buildBaseEventDataTableSQL(eventNames, sqlParameters, eventNonNestColProps, isEventPathAnalysis, isNodePathAnalysis)}
   ),
   `;
 }
@@ -1600,15 +1635,10 @@ function _buildBaseUserDataTableSql(sqlParameters: SQLParameters, hasNestParams:
     nextColSQL = ', u.user_properties as user_properties';
   }
 
-  let userIdSuffix = '';
-  if (suffix !== '') {
-    userIdSuffix = `as user_id${suffix}`;
-  }
-
   return `
     select
       COALESCE(user_id, user_pseudo_id) as user_pseudo_id${suffix},
-      user_id ${userIdSuffix},
+      user_id as user_id${suffix},
       user_first_touch_timestamp,
       _first_visit_date,
       _first_referer,
@@ -2217,9 +2247,12 @@ function _getConditionProps(conditions: Condition[]) {
   let hasUserAttribute = false;
   let hasUserOuterAttribute =false;
   let hasEventAttribute = false;
+  let hasEventNonNestAttribute = false;
   const userAttributes: ColumnAttribute[] = [];
   const eventAttributes: ColumnAttribute[] = [];
   const userOuterAttributes: ColumnAttribute[] = [];
+  const eventNonNestAttributes: ColumnAttribute[] = [];
+
   for (const condition of conditions) {
     if (condition.category === ConditionCategory.USER) {
       hasUserAttribute = true;
@@ -2242,6 +2275,13 @@ function _getConditionProps(conditions: Condition[]) {
         category: condition.category,
         dataType: condition.dataType,
       });
+    } else {
+      hasEventNonNestAttribute = true;
+      eventNonNestAttributes.push({
+        property: condition.property,
+        category: condition.category,
+        dataType: condition.dataType,
+      });
     }
   }
 
@@ -2252,6 +2292,8 @@ function _getConditionProps(conditions: Condition[]) {
     userAttributes,
     eventAttributes,
     userOuterAttributes,
+    hasEventNonNestAttribute,
+    eventNonNestAttributes,
   };
 }
 
@@ -2260,9 +2302,11 @@ function _getGroupingConditionProps(groupCondition: GroupingCondition) {
   let hasUserAttribute = false;
   let hasUserOuterAttribute = false;
   let hasEventAttribute = false;
+  let hasEventNonNestAttribute = false;
   const userAttributes: ColumnAttribute[] = [];
   const eventAttributes: ColumnAttribute[] = [];
   const userOuterAttributes: ColumnAttribute[] = [];
+  const eventNonNestAttributes: ColumnAttribute[] = [];
 
   if (groupCondition.category === ConditionCategory.USER) {
     hasUserAttribute = true;
@@ -2285,47 +2329,95 @@ function _getGroupingConditionProps(groupCondition: GroupingCondition) {
       category: groupCondition.category,
       dataType: groupCondition.dataType,
     });
+  } else {
+    hasEventNonNestAttribute = true;
+    eventNonNestAttributes.push({
+      property: groupCondition.property,
+      category: groupCondition.category,
+      dataType: groupCondition.dataType,
+    });
   }
 
   return {
     hasEventAttribute,
     hasUserAttribute,
     hasUserOuterAttribute,
+    hasEventNonNestAttribute,
     userAttributes,
     eventAttributes,
     userOuterAttributes,
+    eventNonNestAttributes,
   };
+}
+
+
+function _getEventConditionPropsFromEvents(eventAndConditions: EventAndCondition[]) {
+
+  let hasEventAttribute = false;
+  const eventAttributes: ColumnAttribute[] = [];
+  let hasEventNonNestAttribute = false;
+  const eventNonNestAttributes: ColumnAttribute[] = [];
+
+  for (const eventCondition of eventAndConditions) {
+    if (eventCondition.sqlCondition?.conditions !== undefined) {
+      const allAttribute = _getConditionProps(eventCondition.sqlCondition?.conditions);
+      hasEventAttribute = hasEventAttribute || allAttribute.hasEventAttribute;
+      eventAttributes.push(...allAttribute.eventAttributes);
+
+      hasEventNonNestAttribute = hasEventNonNestAttribute || allAttribute.hasEventNonNestAttribute;
+      eventNonNestAttributes.push(...allAttribute.eventNonNestAttributes);
+    }
+  }
+
+  return {
+    hasEventAttribute,
+    hasEventNonNestAttribute,
+    eventAttributes,
+    eventNonNestAttributes,
+  };
+
 }
 
 function _getEventConditionProps(sqlParameters: SQLParameters) {
 
   let hasEventAttribute = false;
   const eventAttributes: ColumnAttribute[] = [];
+
+  let hasEventNonNestAttribute = false;
+  const eventNonNestAttributes: ColumnAttribute[] = [];
+
   if (sqlParameters.eventAndConditions) {
-    for (const eventCondition of sqlParameters.eventAndConditions) {
-      if (eventCondition.sqlCondition?.conditions !== undefined) {
-        const nestAttribute = _getConditionProps(eventCondition.sqlCondition?.conditions);
-        hasEventAttribute = hasEventAttribute || nestAttribute.hasEventAttribute;
-        eventAttributes.push(...nestAttribute.eventAttributes);
-      }
-    }
+    const eventCondition = _getEventConditionPropsFromEvents(sqlParameters.eventAndConditions);
+    hasEventAttribute = hasEventAttribute || eventCondition.hasEventAttribute;
+    eventAttributes.push(...eventCondition.eventAttributes);
+
+    hasEventNonNestAttribute = hasEventNonNestAttribute || eventCondition.hasEventNonNestAttribute;
+    eventNonNestAttributes.push(...eventCondition.eventNonNestAttributes);
   }
 
   if (sqlParameters.globalEventCondition?.conditions) {
-    const nestAttribute = _getConditionProps(sqlParameters.globalEventCondition?.conditions);
-    hasEventAttribute = hasEventAttribute || nestAttribute.hasEventAttribute;
-    eventAttributes.push(...nestAttribute.eventAttributes);
+    const allAttribute = _getConditionProps(sqlParameters.globalEventCondition?.conditions);
+    hasEventAttribute = hasEventAttribute || allAttribute.hasEventAttribute;
+    eventAttributes.push(...allAttribute.eventAttributes);
+
+    hasEventNonNestAttribute = hasEventNonNestAttribute || allAttribute.hasEventNonNestAttribute;
+    eventNonNestAttributes.push(...allAttribute.eventNonNestAttributes);
   }
 
   if (sqlParameters.groupCondition) {
     const groupingCondition = _getGroupingConditionProps(sqlParameters.groupCondition);
     hasEventAttribute = hasEventAttribute || groupingCondition.hasEventAttribute;
     eventAttributes.push(...groupingCondition.eventAttributes);
+
+    hasEventNonNestAttribute = hasEventNonNestAttribute || groupingCondition.hasEventNonNestAttribute;
+    eventNonNestAttributes.push(...groupingCondition.eventNonNestAttributes);
   }
 
   const hasEventConditionRetentionAnalysis = _getEventConditionPropsRetentionAnalysis(sqlParameters);
   hasEventAttribute = hasEventAttribute || hasEventConditionRetentionAnalysis.hasEventAttribute;
   eventAttributes.push(...hasEventConditionRetentionAnalysis.eventAttributes);
+  hasEventNonNestAttribute = hasEventNonNestAttribute || hasEventConditionRetentionAnalysis.hasEventNonNestAttribute;
+  eventNonNestAttributes.push(...hasEventConditionRetentionAnalysis.eventNonNestAttributes);
 
   if (sqlParameters.pathAnalysis?.sessionType === ExplorePathSessionDef.SESSION) {
     hasEventAttribute = true;
@@ -2338,7 +2430,9 @@ function _getEventConditionProps(sqlParameters: SQLParameters) {
 
   return {
     hasEventAttribute,
+    hasEventNonNestAttribute,
     eventAttributes,
+    eventNonNestAttributes,
   };
 }
 
@@ -2392,9 +2486,12 @@ function _getRetentionJoinColumnConditionProps(retentionJoinColumn: RetentionJoi
   let hasUserAttribute = false;
   let hasEventAttribute = false;
   let hasUserOuterAttribute = false;
+  let hasEventNonNestAttribute = false;
+
   const eventAttributes: ColumnAttribute[] = [];
   const userAttributes: ColumnAttribute[] = [];
   const userOuterAttributes: ColumnAttribute[] = [];
+  const eventNonNestAttributes: ColumnAttribute[] = [];
 
   if (retentionJoinColumn?.category === ConditionCategory.USER) {
     hasUserAttribute = true;
@@ -2410,11 +2507,16 @@ function _getRetentionJoinColumnConditionProps(retentionJoinColumn: RetentionJoi
       category: retentionJoinColumn.category,
       dataType: retentionJoinColumn.dataType,
     });
-  }
-
-  if (retentionJoinColumn?.category === ConditionCategory.USER_OUTER ) {
+  } else if (retentionJoinColumn?.category === ConditionCategory.USER_OUTER ) {
     hasUserOuterAttribute = true;
     userOuterAttributes.push({
+      property: retentionJoinColumn.property,
+      category: retentionJoinColumn.category,
+      dataType: retentionJoinColumn.dataType,
+    });
+  } else if (retentionJoinColumn !== undefined) {
+    hasEventNonNestAttribute = true;
+    eventNonNestAttributes.push({
       property: retentionJoinColumn.property,
       category: retentionJoinColumn.category,
       dataType: retentionJoinColumn.dataType,
@@ -2428,6 +2530,54 @@ function _getRetentionJoinColumnConditionProps(retentionJoinColumn: RetentionJoi
     userOuterAttributes,
     eventAttributes,
     userAttributes,
+    hasEventNonNestAttribute,
+    eventNonNestAttributes,
+  };
+}
+
+function _getOnePairConditionPropsFromJoinColumn(pairEventAndCondition: PairEventAndCondition) {
+
+  let hasUserAttribute = false;
+  let hasEventAttribute = false;
+  let hasUserOuterAttribute = false;
+  const eventAttributes: ColumnAttribute[] = [];
+  const userAttributes: ColumnAttribute[] = [];
+  const userOuterAttributes: ColumnAttribute[] = [];
+  let hasEventNonNestAttribute = false;
+  const eventNonNestAttributes: ColumnAttribute[] = [];
+
+  const startConditionProps = _getRetentionJoinColumnConditionProps(pairEventAndCondition.startEvent.retentionJoinColumn);
+  hasEventAttribute = hasEventAttribute || startConditionProps.hasEventAttribute;
+  eventAttributes.push(...startConditionProps.eventAttributes);
+  hasUserAttribute = hasUserAttribute || startConditionProps.hasUserAttribute;
+  userAttributes.push(...startConditionProps.userAttributes);
+  hasUserOuterAttribute = hasUserOuterAttribute || startConditionProps.hasUserOuterAttribute;
+  userOuterAttributes.push(...startConditionProps.userOuterAttributes);
+
+  hasEventNonNestAttribute = hasEventNonNestAttribute || startConditionProps.hasEventNonNestAttribute;
+  eventNonNestAttributes.push(...startConditionProps.eventNonNestAttributes);
+
+  const backConditionProps = _getRetentionJoinColumnConditionProps(pairEventAndCondition.backEvent.retentionJoinColumn);
+  hasEventAttribute = hasEventAttribute || backConditionProps.hasEventAttribute;
+  eventAttributes.push(...backConditionProps.eventAttributes);
+  hasUserAttribute = hasUserAttribute || backConditionProps.hasUserAttribute;
+  userAttributes.push(...backConditionProps.userAttributes);
+  hasUserOuterAttribute = hasUserOuterAttribute || backConditionProps.hasUserOuterAttribute;
+  userOuterAttributes.push(...backConditionProps.userOuterAttributes);
+
+  hasEventNonNestAttribute = hasEventNonNestAttribute || backConditionProps.hasEventNonNestAttribute;
+  eventNonNestAttributes.push(...backConditionProps.eventNonNestAttributes);
+
+
+  return {
+    hasUserAttribute,
+    hasEventAttribute,
+    hasUserOuterAttribute,
+    hasEventNonNestAttribute,
+    userAttributes,
+    eventAttributes,
+    userOuterAttributes,
+    eventNonNestAttributes,
   };
 }
 
@@ -2439,22 +2589,20 @@ function _getOnePairConditionProps(pairEventAndCondition: PairEventAndCondition)
   const eventAttributes: ColumnAttribute[] = [];
   const userAttributes: ColumnAttribute[] = [];
   const userOuterAttributes: ColumnAttribute[] = [];
+  let hasEventNonNestAttribute = false;
+  const eventNonNestAttributes: ColumnAttribute[] = [];
 
-  const startConditionProps = _getRetentionJoinColumnConditionProps(pairEventAndCondition.startEvent.retentionJoinColumn);
-  hasEventAttribute = hasEventAttribute || startConditionProps.hasEventAttribute;
-  eventAttributes.push(...startConditionProps.eventAttributes);
-  hasUserAttribute = hasUserAttribute || startConditionProps.hasUserAttribute;
-  userAttributes.push(...startConditionProps.userAttributes);
-  hasUserOuterAttribute = hasUserOuterAttribute || startConditionProps.hasUserOuterAttribute;
-  userOuterAttributes.push(...startConditionProps.userOuterAttributes);
+  const pairConditionProps = _getOnePairConditionPropsFromJoinColumn(pairEventAndCondition);
+  hasUserOuterAttribute = hasUserOuterAttribute || pairConditionProps.hasUserOuterAttribute;
+  userOuterAttributes.push(...pairConditionProps.userOuterAttributes);
+  hasEventAttribute = hasEventAttribute || pairConditionProps.hasEventAttribute;
+  eventAttributes.push(...pairConditionProps.eventAttributes);
 
-  const backConditionProps = _getRetentionJoinColumnConditionProps(pairEventAndCondition.backEvent.retentionJoinColumn);
-  hasEventAttribute = hasEventAttribute || backConditionProps.hasEventAttribute;
-  eventAttributes.push(...backConditionProps.eventAttributes);
-  hasUserAttribute = hasUserAttribute || backConditionProps.hasUserAttribute;
-  userAttributes.push(...backConditionProps.userAttributes);
-  hasUserOuterAttribute = hasUserOuterAttribute || backConditionProps.hasUserOuterAttribute;
-  userOuterAttributes.push(...backConditionProps.userOuterAttributes);
+  hasUserAttribute = hasUserAttribute || pairConditionProps.hasUserAttribute;
+  userAttributes.push(...pairConditionProps.userAttributes);
+
+  hasEventNonNestAttribute = hasEventNonNestAttribute || pairConditionProps.hasEventNonNestAttribute;
+  eventNonNestAttributes.push(...pairConditionProps.eventNonNestAttributes);
 
   if (pairEventAndCondition.startEvent.sqlCondition?.conditions) {
     const conditionProps = _getConditionProps(pairEventAndCondition.startEvent.sqlCondition?.conditions);
@@ -2462,8 +2610,12 @@ function _getOnePairConditionProps(pairEventAndCondition: PairEventAndCondition)
     userOuterAttributes.push(...conditionProps.userOuterAttributes);
     hasEventAttribute = hasEventAttribute || conditionProps.hasEventAttribute;
     eventAttributes.push(...conditionProps.eventAttributes);
+
     hasUserAttribute = hasUserAttribute || conditionProps.hasUserAttribute;
     userAttributes.push(...conditionProps.userAttributes);
+
+    hasEventNonNestAttribute = hasEventNonNestAttribute || conditionProps.hasEventNonNestAttribute;
+    eventNonNestAttributes.push(...conditionProps.eventNonNestAttributes);
   }
 
   if (pairEventAndCondition.backEvent.sqlCondition?.conditions) {
@@ -2475,15 +2627,20 @@ function _getOnePairConditionProps(pairEventAndCondition: PairEventAndCondition)
     eventAttributes.push(...conditionProps.eventAttributes);
     hasUserAttribute = hasUserAttribute || conditionProps.hasUserAttribute;
     userAttributes.push(...conditionProps.userAttributes);
+
+    hasEventNonNestAttribute = hasEventNonNestAttribute || conditionProps.hasEventNonNestAttribute;
+    eventNonNestAttributes.push(...conditionProps.eventNonNestAttributes);
   }
 
   return {
     hasUserAttribute,
     hasEventAttribute,
     hasUserOuterAttribute,
+    hasEventNonNestAttribute,
     userAttributes,
     eventAttributes,
     userOuterAttributes,
+    eventNonNestAttributes,
   };
 }
 
@@ -2515,16 +2672,24 @@ function _getEventConditionPropsRetentionAnalysis(sqlParameters: SQLParameters) 
 
   let hasEventAttribute = false;
   const eventAttributes: ColumnAttribute[] = [];
+  let hasEventNonNestAttribute = false;
+  const eventNonNestAttributes: ColumnAttribute[] = [];
+
   if (sqlParameters.pairEventAndConditions) {
     for (const pair of sqlParameters.pairEventAndConditions) {
       const pairConditionProps = _getOnePairConditionProps(pair);
       hasEventAttribute = hasEventAttribute || pairConditionProps.hasEventAttribute;
       eventAttributes.push(...pairConditionProps.eventAttributes);
+
+      hasEventNonNestAttribute = hasEventNonNestAttribute || pairConditionProps.hasEventNonNestAttribute;
+      eventNonNestAttributes.push(...pairConditionProps.eventNonNestAttributes);
     }
   }
 
   return {
     hasEventAttribute,
+    hasEventNonNestAttribute,
     eventAttributes,
+    eventNonNestAttributes,
   };
 }
