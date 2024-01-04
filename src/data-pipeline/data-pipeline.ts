@@ -12,13 +12,13 @@
  */
 
 import { Database, Table } from '@aws-cdk/aws-glue-alpha';
-import { Fn, Stack, CfnResource, Duration } from 'aws-cdk-lib';
+import { Fn, Stack, Duration } from 'aws-cdk-lib';
 import { ISecurityGroup, IVpc, SubnetSelection } from 'aws-cdk-lib/aws-ec2';
 import { Rule, Schedule } from 'aws-cdk-lib/aws-events';
 import { LambdaFunction } from 'aws-cdk-lib/aws-events-targets';
 import { Function } from 'aws-cdk-lib/aws-lambda';
 import { IBucket } from 'aws-cdk-lib/aws-s3';
-import { Queue, QueueEncryption } from 'aws-cdk-lib/aws-sqs';
+import { Queue } from 'aws-cdk-lib/aws-sqs';
 import { Construct } from 'constructs';
 import {
   InitPartitionCustomResourceProps,
@@ -31,9 +31,9 @@ import { uploadBuiltInSparkJarsAndFiles } from './utils/s3-asset';
 import { GlueUtil } from './utils/utils-glue';
 import { LambdaUtil } from './utils/utils-lambda';
 import { RoleUtil } from './utils/utils-role';
-import { addCfnNagSuppressRules } from '../common/cfn-nag';
 import { DATA_PROCESSING_APPLICATION_NAME_PREFIX, TABLE_NAME_INGESTION } from '../common/constant';
 import { createSGForEgressToAwsService } from '../common/sg';
+import { createDLQueue } from '../common/sqs';
 import { getShortIdOfStack } from '../common/stack';
 import { EmrApplicationArchitectureType } from '../data-pipeline-stack';
 
@@ -95,7 +95,7 @@ export class DataPipelineConstruct extends Construct {
 
     this.serviceSecurityGroup = createSGForEgressToAwsService(this, 'LambdaEgressToAWSServiceSG', props.vpc);
 
-    const dlQueue = this.createDLQueue();
+    const dlQueue = createDLQueue(this, 'ClickstreamDataPipelineDLQ');
 
     const pluginPrefix = Fn.join('', [this.props.pipelineS3Prefix, Fn.join('/', [
       'plugins',
@@ -306,19 +306,5 @@ export class DataPipelineConstruct extends Construct {
       })],
 
     });
-  }
-
-  private createDLQueue() {
-    const sqs = new Queue(this, 'ClickstreamDataPipelineDLQ', {
-      encryption: QueueEncryption.SQS_MANAGED,
-      enforceSSL: true,
-    });
-
-    addCfnNagSuppressRules((sqs.node.defaultChild as CfnResource), [{
-      id: 'W48',
-      reason: 'SQS already set SQS_MANAGED encryption',
-    }]);
-
-    return sqs;
   }
 }

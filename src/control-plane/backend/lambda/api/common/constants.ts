@@ -81,6 +81,10 @@ const SOLUTION_VPC_ENDPOINTS = [
   ...SOLUTION_DATA_MODELING_VPC_ENDPOINTS,
 ];
 
+const CFN_RULE_PREFIX = 'ClickstreamRuleForCFN';
+const CFN_TOPIC_PREFIX = 'ClickstreamTopicForCFN';
+const listenStackQueueArn = process.env.LISTEN_STACK_QUEUE_ARN;
+
 export {
   clickStreamTableName,
   dictionaryTableName,
@@ -116,4 +120,7 @@ export {
   SOLUTION_DATA_MODELING_VPC_ENDPOINTS,
   SOLUTION_VPC_ENDPOINTS,
   FULL_SOLUTION_VERSION,
+  CFN_RULE_PREFIX,
+  CFN_TOPIC_PREFIX,
+  listenStackQueueArn,
 };

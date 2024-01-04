@@ -12,31 +12,17 @@
  */
 
 import { StackStatus } from '@aws-sdk/client-cloudformation';
+import { awsRegion, stackWorkflowS3Bucket } from '../common/constants';
+import { PipelineStackType, PipelineStatusDetail } from '../common/model-ln';
 import {
-  DescribeExecutionCommand,
-  DescribeExecutionCommandOutput,
-  StartExecutionCommand,
-  StartExecutionCommandOutput,
-  DescribeExecutionOutput,
-  ExecutionStatus,
-  ExecutionDoesNotExist,
-} from '@aws-sdk/client-sfn';
-import { stackWorkflowS3Bucket, stackWorkflowStateMachineArn } from '../common/constants';
-import { logger } from '../common/powertools';
-import { sfnClient } from '../common/sfn';
-import {
-  PipelineStackType,
-  PipelineStatus,
-  PipelineStatusDetail,
-  PipelineStatusType,
   WorkflowParallelBranch,
   WorkflowState,
   WorkflowStateType,
   WorkflowTemplate,
 } from '../common/types';
-import { getStackName, getStackTags, isEmpty } from '../common/utils';
+import { getPipelineLastActionFromStacksStatus, getStackName, getStackTags } from '../common/utils';
 import { IPipeline } from '../model/pipeline';
-import { getStacksDetailsByNames } from '../store/aws/cloudformation';
+import { startExecution } from '../store/aws/sfn';
 
 
 export class StackManager {
@@ -115,17 +101,18 @@ export class StackManager {
   }
 
   public retryWorkflow(): void {
-    if (!this.execWorkflow || !this.workflow || !this.pipeline.status?.stackDetails) {
+    if (!this.execWorkflow || !this.workflow) {
       throw new Error('Pipeline workflow or stack information is empty.');
     }
     let lastAction = this.pipeline.lastAction;
     if (!lastAction || lastAction === '') {
-      lastAction = this.getPipelineLastActionFromStacksStatus(this.pipeline.status.stackDetails);
+      lastAction = getPipelineLastActionFromStacksStatus(
+        this.pipeline.stackDetails ?? this.pipeline.status?.stackDetails, this.pipeline.templateVersion);
     }
     const retryStackNames = this._getRetryStackNames();
     this.execWorkflow.Workflow = this.getRetryWorkflow(
       this.execWorkflow.Workflow,
-      this.pipeline.status?.stackDetails,
+      this.pipeline.stackDetails ?? this.pipeline.status?.stackDetails ?? [],
       retryStackNames,
       lastAction);
   }
@@ -133,7 +120,7 @@ export class StackManager {
   private _getRetryStackNames(): string[] {
     const retryStackNames: string[] = [];
     const retryStackTypes: PipelineStackType[] = [];
-    const stackDetails = this.pipeline.status?.stackDetails;
+    const stackDetails = this.pipeline.stackDetails ?? this.pipeline.status?.stackDetails;
     if (!stackDetails) {
       return retryStackNames;
     }
@@ -184,10 +171,10 @@ export class StackManager {
   }
 
   public updateWorkflowAction(editStacks: string[]): void {
-    if (!this.execWorkflow || !this.pipeline.status?.stackDetails) {
+    if (!this.execWorkflow) {
       throw new Error('Pipeline workflow or stack information is empty.');
     }
-    const stackDetails = this.pipeline.status?.stackDetails;
+    const stackDetails = this.pipeline.stackDetails ?? this.pipeline.status?.stackDetails ?? [];
     this.execWorkflow.Workflow = this.getUpdateWorkflow(this.execWorkflow.Workflow, stackDetails, editStacks);
   }
 
@@ -195,131 +182,8 @@ export class StackManager {
     if (workflow === undefined) {
       throw new Error('Pipeline workflow is empty.');
     }
-    const params: StartExecutionCommand = new StartExecutionCommand({
-      stateMachineArn: stackWorkflowStateMachineArn,
-      input: JSON.stringify(workflow.Workflow),
-      name: executionName,
-    });
-    const result: StartExecutionCommandOutput = await sfnClient.send(params);
-    return result.executionArn ?? '';
-  }
-
-  public async getPipelineStatus(): Promise<PipelineStatus> {
-    const defaultPipelineStatus: PipelineStatus = {
-      status: PipelineStatusType.ACTIVE,
-      stackDetails: [],
-      executionDetail: {},
-    };
-    if (!this.workflow?.Workflow || !this.pipeline.executionArn) {
-      return defaultPipelineStatus;
-    }
-    const executionDetail = await this.getExecutionDetail(this.pipeline.executionArn);
-    const stackNames = this.getWorkflowStacks(this.workflow?.Workflow);
-    const stackStatusDetails: PipelineStatusDetail[] = await getStacksDetailsByNames(this.pipeline.region, stackNames);
-    if (stackStatusDetails.length > 0) {
-      const status: PipelineStatusType = this._getPipelineStatus(executionDetail, stackStatusDetails);
-      const pipelineStatus: PipelineStatus = {
-        status,
-        stackDetails: stackStatusDetails,
-        executionDetail: {
-          name: executionDetail?.name,
-          status: executionDetail?.status,
-        },
-      };
-      return pipelineStatus;
-    }
-    return defaultPipelineStatus;
-  }
-
-  public getPipelineLastActionFromStacksStatus(stackStatusDetails: PipelineStatusDetail[]): string {
-    let lastAction: string = 'Create';
-    const stackStatusPrefixes: string[] = [];
-    stackStatusDetails.forEach(
-      (d) => {
-        if (d.stackStatus) {
-          stackStatusPrefixes.push(d.stackStatus?.split('_')[0]);
-        }
-        if (!isEmpty(d.stackTemplateVersion) && !isEmpty(this.pipeline.templateVersion) &&
-        d.stackTemplateVersion !== this.pipeline.templateVersion) {
-          lastAction = 'Upgrade';
-        }
-      });
-    if (lastAction === 'Upgrade') {
-      return lastAction;
-    }
-    if (stackStatusPrefixes.includes('UPDATE')) {
-      lastAction = 'Update';
-    } else if (stackStatusPrefixes.includes('DELETE')) {
-      lastAction = 'Delete';
-    }
-    return lastAction;
-  }
-
-  private _getPipelineStatus(executionDetail: DescribeExecutionOutput | undefined, stackStatusDetails: PipelineStatusDetail[]) {
-    let lastAction = this.pipeline.lastAction;
-    if (!lastAction || lastAction === '') {
-      lastAction = this.getPipelineLastActionFromStacksStatus(stackStatusDetails);
-    }
-    let status: PipelineStatusType;
-    status = this._getPipelineStatusFromStacks(stackStatusDetails, lastAction);
-    if (executionDetail?.status === ExecutionStatus.FAILED ||
-      executionDetail?.status === ExecutionStatus.TIMED_OUT ||
-      executionDetail?.status === ExecutionStatus.ABORTED) {
-      status = PipelineStatusType.FAILED;
-    } else if (executionDetail?.status === ExecutionStatus.RUNNING) {
-      if (lastAction === 'Create') {
-        status = PipelineStatusType.CREATING;
-      } else if (lastAction === 'Delete') {
-        status = PipelineStatusType.DELETING;
-      } else {
-        status = PipelineStatusType.UPDATING;
-      }
-    }
-    if (status === PipelineStatusType.FAILED && (lastAction === 'Update' || lastAction === 'Upgrade')) {
-      status = PipelineStatusType.WARNING;
-    }
-    return status;
-  }
-
-  private _getPipelineStatusFromStacks(stackStatusDetails: PipelineStatusDetail[], lastAction: string) {
-    let status: PipelineStatusType = PipelineStatusType.ACTIVE;
-    for (let s of stackStatusDetails) {
-      if (s.stackStatus?.endsWith('_FAILED')) {
-        status = PipelineStatusType.FAILED;
-        break;
-      } else if (s.stackStatus?.endsWith('_ROLLBACK_COMPLETE') ||
-      (s.stackTemplateVersion !== '' && this.pipeline.templateVersion &&
-      this.pipeline.templateVersion !== s.stackTemplateVersion)) {
-        status = PipelineStatusType.WARNING;
-        break;
-      } else if (s.stackStatus?.endsWith('_IN_PROGRESS')) {
-        if (lastAction === 'Create') {
-          status = PipelineStatusType.CREATING;
-        } else if (lastAction === 'Delete') {
-          status = PipelineStatusType.DELETING;
-        } else {
-          status = PipelineStatusType.UPDATING;
-        }
-      }
-    }
-    return status;
-  }
-
-  private async getExecutionDetail(executionArn: string): Promise<DescribeExecutionOutput | undefined> {
-    try {
-      const params: DescribeExecutionCommand = new DescribeExecutionCommand({
-        executionArn: executionArn,
-      });
-      const result: DescribeExecutionCommandOutput = await sfnClient.send(params);
-      return result;
-    } catch (error) {
-      if (error instanceof ExecutionDoesNotExist) {
-        logger.info(`The specified execution does not exist: ${executionArn}`);
-      } else {
-        logger.warn('Get execution detail error ', { error });
-      }
-      return undefined;
-    }
+    const executionArn = await startExecution(awsRegion!, executionName, JSON.stringify(workflow.Workflow));
+    return executionArn ?? '';
   }
 
   public setWorkflowType(state: WorkflowState, type: WorkflowStateType): WorkflowState {
@@ -342,7 +206,7 @@ export class StackManager {
       state.Data!.Input.Action = 'Delete';
       state.Data!.Callback = {
         BucketName: stackWorkflowS3Bucket ?? '',
-        BucketPrefix: `clickstream/workflow/${this.pipeline.executionName}`,
+        BucketPrefix: `clickstream/workflow/${this.pipeline.executionDetail?.name}`,
       };
     }
     return state;
@@ -385,15 +249,15 @@ export class StackManager {
       }
       state.Data.Callback = {
         BucketName: stackWorkflowS3Bucket ?? '',
-        BucketPrefix: `clickstream/workflow/${this.pipeline.executionName}`,
+        BucketPrefix: `clickstream/workflow/${this.pipeline.executionDetail?.name}`,
       };
     }
     return state;
   }
 
   private getRetryWorkflow(
-    state: WorkflowState, stackDetails: PipelineStatusDetail[], retryStackNames: string[],
-    lastAction: string): WorkflowState {
+    state: WorkflowState, stackDetails: PipelineStatusDetail[],
+    retryStackNames: string[], lastAction: string): WorkflowState {
     if (state.Type === WorkflowStateType.PARALLEL) {
       for (let branch of state.Branches as WorkflowParallelBranch[]) {
         for (let key of Object.keys(branch.States)) {
@@ -445,7 +309,7 @@ export class StackManager {
     }
     state.Data!.Callback = {
       BucketName: stackWorkflowS3Bucket ?? '',
-      BucketPrefix: `clickstream/workflow/${this.pipeline.executionName}`,
+      BucketPrefix: `clickstream/workflow/${this.pipeline.executionDetail?.name}`,
     };
     return state;
   }
@@ -478,7 +342,7 @@ export class StackManager {
     }
     state.Data!.Callback = {
       BucketName: stackWorkflowS3Bucket ?? '',
-      BucketPrefix: `clickstream/workflow/${this.pipeline.executionName}`,
+      BucketPrefix: `clickstream/workflow/${this.pipeline.executionDetail?.name}`,
     };
   }
 

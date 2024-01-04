@@ -236,17 +236,17 @@ export function createRedshiftAnalyticsStack(
     condition: isNewRedshiftServerless,
   }).overrideLogicalId(OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_NAMESPACE_NAME);
   new CfnOutput(scope, `NewRedshiftServerless${OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_CREDENTIAL_PARAMETER_SUFFIX}`, {
-    value: newRedshiftServerlessStack.applicationSchema.redshiftBIUserParameter,
+    value: newRedshiftServerlessStack.applicationSchema.getRedshiftBIUserParameter(),
     description: 'Credential SSM parameter for BI user in Redshift',
     condition: isNewRedshiftServerless,
   }).overrideLogicalId(`NewRedshiftServerless${OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_CREDENTIAL_PARAMETER_SUFFIX}`);
   new CfnOutput(scope, `ExistingRedshiftServerless${OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_CREDENTIAL_PARAMETER_SUFFIX}`, {
-    value: redshiftExistingServerlessStack.applicationSchema.redshiftBIUserParameter,
+    value: redshiftExistingServerlessStack.applicationSchema.getRedshiftBIUserParameter(),
     description: 'Credential SSM parameter for BI user in Redshift',
     condition: isExistingRedshiftServerless,
   }).overrideLogicalId(`ExistingRedshiftServerless${OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_CREDENTIAL_PARAMETER_SUFFIX}`);
   new CfnOutput(scope, `ProvisionedRedshift${OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_CREDENTIAL_PARAMETER_SUFFIX}`, {
-    value: redshiftProvisionedStack.applicationSchema.redshiftBIUserParameter,
+    value: redshiftProvisionedStack.applicationSchema.getRedshiftBIUserParameter(),
     description: 'Credential SSM parameter for BI user in Redshift',
     condition: isRedshiftProvisioned,
   }).overrideLogicalId(`ProvisionedRedshift${OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_CREDENTIAL_PARAMETER_SUFFIX}`);

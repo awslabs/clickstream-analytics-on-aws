@@ -155,14 +155,11 @@ declare global {
         accountName: string;
       };
     };
-    status?: {
-      status: string;
-      stackDetails: IStackStatus[];
-    };
+    statusType?: PipelineStatusType;
+    stackDetails?: PipelineStatusDetail[];
+    executionDetail?: ExecutionDetail;
     templateVersion?: string;
     workflow?: WorkflowTemplate;
-    executionName?: string;
-    executionArn?: string;
     dashboards?: IDashboard[];
     metricsDashboardName?: string;
     templateInfo?: {

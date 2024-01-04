@@ -325,5 +325,9 @@ function addCfnNag(stack: Stack) {
       reason:
         'The lambda is created by CDK, CustomResource framework-onEvent, the runtime version will be upgraded by CDK',
     },
+    {
+      id: 'AwsSolutions-SQS3',
+      reason: 'The SQS is a dead-letter queue (DLQ), and does not need a DLQ enabled',
+    },
   ]);
 }

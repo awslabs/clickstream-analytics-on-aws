@@ -11,18 +11,21 @@
  *  and limitations under the License.
  */
 
-import {
-  SFNClient,
-} from '@aws-sdk/client-sfn';
+import { CfnResource } from 'aws-cdk-lib';
+import { Queue, QueueEncryption } from 'aws-cdk-lib/aws-sqs';
+import { Construct } from 'constructs';
+import { addCfnNagSuppressRules } from './cfn-nag';
 
-import { aws_sdk_client_common_config } from './sdk-client-config-ln';
+export function createDLQueue(scope: Construct, id: string): Queue {
+  const queue = new Queue(scope, id, {
+    encryption: QueueEncryption.SQS_MANAGED,
+    enforceSSL: true,
+  });
 
+  addCfnNagSuppressRules((queue.node.defaultChild as CfnResource), [{
+    id: 'W48',
+    reason: 'SQS already set SQS_MANAGED encryption',
+  }]);
 
-// Create SFN Client
-const sfnClient = new SFNClient({
-  ...aws_sdk_client_common_config,
-});
-
-export {
-  sfnClient,
-};
+  return queue;
+}

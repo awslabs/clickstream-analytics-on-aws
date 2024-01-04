@@ -43,7 +43,12 @@ test('should get interval seconds for rate expression - hours', async () => {
 
   //@ts-ignore
   const data = await handler(event, c);
-  expect(data).toEqual({ Data: { intervalSeconds: 7200 } });
+  expect(data).toEqual({
+    Data: {
+      intervalSeconds: 7200,
+      scanWorkflowMinIntervalSeconds: 86400,
+    },
+  });
 });
 
 
@@ -58,7 +63,12 @@ test('should get interval seconds for rate expression - days', async () => {
 
   //@ts-ignore
   const data = await handler(event, c);
-  expect(data).toEqual({ Data: { intervalSeconds: 86400 } });
+  expect(data).toEqual({
+    Data: {
+      intervalSeconds: 86400,
+      scanWorkflowMinIntervalSeconds: 86400,
+    },
+  });
 });
 
 
@@ -73,7 +83,12 @@ test('should get interval seconds for rate expression - minutes', async () => {
 
   //@ts-ignore
   const data = await handler(event, c);
-  expect(data).toEqual({ Data: { intervalSeconds: 120 } });
+  expect(data).toEqual({
+    Data: {
+      intervalSeconds: 120,
+      scanWorkflowMinIntervalSeconds: 86400,
+    },
+  });
 });
 
 
@@ -88,7 +103,12 @@ test('should get interval seconds for rate expression - seconds', async () => {
 
   //@ts-ignore
   const data = await handler(event, c);
-  expect(data).toEqual({ Data: { intervalSeconds: 60 } });
+  expect(data).toEqual({
+    Data: {
+      intervalSeconds: 60,
+      scanWorkflowMinIntervalSeconds: 86400,
+    },
+  });
 });
 
 
@@ -104,7 +124,12 @@ test('should get interval seconds for rate expression - evaluationPeriods', asyn
 
   //@ts-ignore
   const data = await handler(event, c);
-  expect(data).toEqual({ Data: { intervalSeconds: 28800 } });
+  expect(data).toEqual({
+    Data: {
+      intervalSeconds: 28800,
+      scanWorkflowMinIntervalSeconds: 86400,
+    },
+  });
 });
 
 
@@ -120,7 +145,12 @@ test('should get interval seconds for rate expression - evaluationPeriods 2', as
 
   //@ts-ignore
   const data = await handler(event, c);
-  expect(data).toEqual({ Data: { intervalSeconds: 28800 } });
+  expect(data).toEqual({
+    Data: {
+      intervalSeconds: 28800,
+      scanWorkflowMinIntervalSeconds: 86400,
+    },
+  });
 });
 
 
@@ -135,7 +165,12 @@ test('should get interval seconds for rate expression - intervalSeconds must N *
 
   //@ts-ignore
   const data = await handler(event, c);
-  expect(data).toEqual({ Data: { intervalSeconds: 60 } });
+  expect(data).toEqual({
+    Data: {
+      intervalSeconds: 60,
+      scanWorkflowMinIntervalSeconds: 86400,
+    },
+  });
 });
 
 
@@ -150,7 +185,12 @@ test('should get interval seconds for rate expression - intervalSeconds must N *
 
   //@ts-ignore
   const data = await handler(event, c);
-  expect(data).toEqual({ Data: { intervalSeconds: 60 } });
+  expect(data).toEqual({
+    Data: {
+      intervalSeconds: 60,
+      scanWorkflowMinIntervalSeconds: 86400,
+    },
+  });
 });
 
 
@@ -165,7 +205,12 @@ test('should get interval seconds for rate expression - weeks', async () => {
 
   //@ts-ignore
   const data = await handler(event, c);
-  expect(data).toEqual({ Data: { intervalSeconds: 3600 * 24 } });
+  expect(data).toEqual({
+    Data: {
+      intervalSeconds: 3600 * 24,
+      scanWorkflowMinIntervalSeconds: 86400,
+    },
+  });
 });
 
 
@@ -180,7 +225,12 @@ test('should get interval seconds for rate expression - month', async () => {
 
   //@ts-ignore
   const data = await handler(event, c);
-  expect(data).toEqual({ Data: { intervalSeconds: 3600 * 24 } });
+  expect(data).toEqual({
+    Data: {
+      intervalSeconds: 3600 * 24,
+      scanWorkflowMinIntervalSeconds: 86400,
+    },
+  });
 });
 
 
@@ -195,7 +245,12 @@ test('should get interval seconds for cron expression', async () => {
 
   //@ts-ignore
   const data = await handler(event, c);
-  expect(data).toEqual({ Data: { intervalSeconds: 120 } });
+  expect(data).toEqual({
+    Data: {
+      intervalSeconds: 120,
+      scanWorkflowMinIntervalSeconds: 86400,
+    },
+  });
 });
 
 
@@ -210,7 +265,12 @@ test('should get interval seconds for cron expression 2', async () => {
 
   //@ts-ignore
   const data = await handler(event, c);
-  expect(data).toEqual({ Data: { intervalSeconds: 120 } });
+  expect(data).toEqual({
+    Data: {
+      intervalSeconds: 120,
+      scanWorkflowMinIntervalSeconds: 86400,
+    },
+  });
 });
 
 
@@ -225,7 +285,12 @@ test('should get interval seconds for cron expression 3', async () => {
 
   //@ts-ignore
   const data = await handler(event, c);
-  expect(data).toEqual({ Data: { intervalSeconds: 3600 } });
+  expect(data).toEqual({
+    Data: {
+      intervalSeconds: 3600,
+      scanWorkflowMinIntervalSeconds: 86400,
+    },
+  });
 });
 
 
@@ -240,7 +305,12 @@ test('should get interval seconds for cron expression 4', async () => {
 
   //@ts-ignore
   const data = await handler(event, c);
-  expect(data).toEqual({ Data: { intervalSeconds: 3600 } });
+  expect(data).toEqual({
+    Data: {
+      intervalSeconds: 3600,
+      scanWorkflowMinIntervalSeconds: 86400,
+    },
+  });
 });
 
 
@@ -255,7 +325,52 @@ test('should get interval seconds for cron expression 5', async () => {
 
   //@ts-ignore
   const data = await handler(event, c);
-  expect(data).toEqual({ Data: { intervalSeconds: 3600 * 24 } });
+  expect(data).toEqual({
+    Data: {
+      intervalSeconds: 3600 * 24,
+      scanWorkflowMinIntervalSeconds: 86400,
+    },
+  });
+});
+
+test('should get scanWorkflowMinIntervalSeconds as 1 day if scanWorkflowMinInterval is more than 1 day', async () => {
+  const event = {
+    ...commonEventProps,
+    ResourceProperties: {
+      ServiceToken: 'arn:aws:lambda:us-east-1:11111111111:function:testFn',
+      expression: 'cron (0 1 1 * ? * )',
+      scanWorkflowMinInterval: '5000', // minutes
+    },
+  };
+
+  //@ts-ignore
+  const data = await handler(event, c);
+  expect(data).toEqual({
+    Data: {
+      intervalSeconds: 3600 * 24,
+      scanWorkflowMinIntervalSeconds: 86400,
+    },
+  });
+});
+
+test('should get scanWorkflowMinIntervalSeconds from scanWorkflowMinInterval', async () => {
+  const event = {
+    ...commonEventProps,
+    ResourceProperties: {
+      ServiceToken: 'arn:aws:lambda:us-east-1:11111111111:function:testFn',
+      expression: 'cron (0 1 1 * ? * )',
+      scanWorkflowMinInterval: '1000', // minutes
+    },
+  };
+
+  //@ts-ignore
+  const data = await handler(event, c);
+  expect(data).toEqual({
+    Data: {
+      intervalSeconds: 3600 * 24,
+      scanWorkflowMinIntervalSeconds: 60000,
+    },
+  });
 });
 
 
@@ -308,5 +423,10 @@ test('should get interval seconds for expression update', async () => {
 
   //@ts-ignore
   const data = await handler(event, c);
-  expect(data).toEqual({ Data: { intervalSeconds: 120 } });
+  expect(data).toEqual({
+    Data: {
+      intervalSeconds: 120,
+      scanWorkflowMinIntervalSeconds: 86400,
+    },
+  });
 });

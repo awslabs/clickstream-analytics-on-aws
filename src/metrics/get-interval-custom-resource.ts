@@ -23,6 +23,7 @@ import { SolutionNodejsFunction } from '../private/function';
 
 export interface GetIntervalProps {
   readonly expression: string;
+  readonly scanWorkflowMinInterval?: string;
   readonly evaluationPeriods?: number;
 }
 
@@ -35,6 +36,10 @@ export class GetInterval extends Construct {
 
   public getIntervalSeconds(): string {
     return this.intervalCustomResource.getAttString('intervalSeconds');
+  }
+
+  public getScanWorkflowMinIntervalSeconds(): string {
+    return this.intervalCustomResource.getAttString('scanWorkflowMinIntervalSeconds');
   }
 }
 
@@ -56,6 +61,7 @@ function createGetIntervalCustomResource(
     serviceToken: provider.serviceToken,
     properties: {
       expression: props.expression,
+      scanWorkflowMinInterval: props.scanWorkflowMinInterval,
       evaluationPeriods: props.evaluationPeriods || '1',
       version: new Date().getTime(),
     },

@@ -18,7 +18,6 @@ import { Function } from 'aws-cdk-lib/aws-lambda';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Construct } from 'constructs';
 import { createLambdaRole } from '../../common/lambda';
-import { attachListTagsPolicyForFunction } from '../../common/lambda/tags';
 import { SolutionNodejsFunction } from '../../private/function';
 import {
   StateMachine, TaskInput, Wait, WaitTime, Succeed, Choice, Map,
@@ -118,7 +117,6 @@ function createSQLExecutionStepFn(scope: Construct, props: SQLExecutionStepFunct
     },
     role,
   });
-  attachListTagsPolicyForFunction(scope, fnId, fn);
   props.dataAPIRole.grantAssumeRole(fn.grantPrincipal);
   props.workflowBucketInfo.s3Bucket.grantRead(fn);
 

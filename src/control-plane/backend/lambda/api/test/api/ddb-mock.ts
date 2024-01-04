@@ -11,6 +11,7 @@
  *  and limitations under the License.
  */
 
+import { DeleteRuleCommand, ListTargetsByRuleCommand, PutRuleCommand, PutTargetsCommand, RemoveTargetsCommand } from '@aws-sdk/client-cloudwatch-events';
 import { ConditionalCheckFailedException, TransactWriteItemsCommand } from '@aws-sdk/client-dynamodb';
 import {
   ConnectivityType,
@@ -29,6 +30,7 @@ import { GetNamespaceCommand, GetWorkgroupCommand } from '@aws-sdk/client-redshi
 import { BucketLocationConstraint, GetBucketLocationCommand, GetBucketPolicyCommand } from '@aws-sdk/client-s3';
 import { GetSecretValueCommand } from '@aws-sdk/client-secrets-manager';
 import { StartExecutionCommand } from '@aws-sdk/client-sfn';
+import { CreateTopicCommand, SetTopicAttributesCommand, SubscribeCommand } from '@aws-sdk/client-sns';
 import { DynamoDBDocumentClient, GetCommand, GetCommandInput, PutCommand, PutCommandOutput, QueryCommand, QueryCommandInput } from '@aws-sdk/lib-dynamodb';
 import { AwsClientStub } from 'aws-sdk-client-mock';
 import { analyticsMetadataTable, clickStreamTableName, dictionaryTableName, prefixTimeGSIName } from '../../common/constants';
@@ -333,16 +335,20 @@ function dictionaryMock(ddbMock: any, name?: string): any {
 }
 
 function createPipelineMock(
-  ddbMock: any,
-  kafkaMock: any,
-  redshiftServerlessMock: any,
-  redshiftMock: any,
-  ec2Mock: any,
-  sfnMock: any,
-  secretsManagerMock: any,
-  quickSightMock: any,
-  s3Mock: any,
-  iamMock: any,
+  mockClients: {
+    ddbMock: any;
+    kafkaMock: any;
+    redshiftServerlessMock: any;
+    redshiftMock: any;
+    ec2Mock: any;
+    sfnMock: any;
+    secretsManagerMock: any;
+    quickSightMock: any;
+    s3Mock: any;
+    iamMock: any;
+    cloudWatchEventsMock: any;
+    snsMock: any;
+  },
   props?: {
     noApp?: boolean;
     update?: boolean;
@@ -364,7 +370,7 @@ function createPipelineMock(
     albPolicyDisable?: boolean;
     bucketNotExist?: boolean;
   }): any {
-  iamMock.on(SimulateCustomPolicyCommand).resolves({
+  mockClients.iamMock.on(SimulateCustomPolicyCommand).resolves({
     EvaluationResults: [
       {
         EvalActionName: '',
@@ -373,7 +379,7 @@ function createPipelineMock(
     ],
   });
   // project
-  ddbMock.on(GetCommand, {
+  mockClients.ddbMock.on(GetCommand, {
     TableName: clickStreamTableName,
     Key: {
       id: MOCK_PROJECT_ID,
@@ -386,9 +392,9 @@ function createPipelineMock(
       emails: 'u1@example.com,u2@example.com,u2@example.com,u3@example.com',
     },
   });
-  ddbMock.on(TransactWriteItemsCommand).resolves({});
+  mockClients.ddbMock.on(TransactWriteItemsCommand).resolves({});
   // pipeline
-  ddbMock.on(QueryCommand, {
+  mockClients.ddbMock.on(QueryCommand, {
     ExclusiveStartKey: undefined,
     ExpressionAttributeNames: { '#prefix': 'prefix' },
     ExpressionAttributeValues: {
@@ -408,7 +414,7 @@ function createPipelineMock(
       Items: [],
     });
   if (props?.update) {
-    ddbMock.on(GetCommand, {
+    mockClients.ddbMock.on(GetCommand, {
       TableName: clickStreamTableName,
       Key: {
         id: MOCK_PROJECT_ID,
@@ -419,7 +425,7 @@ function createPipelineMock(
     });
   }
   //app
-  ddbMock.on(QueryCommand, {
+  mockClients.ddbMock.on(QueryCommand, {
     ExclusiveStartKey: undefined,
     ExpressionAttributeNames: { '#prefix': 'prefix' },
     ExpressionAttributeValues: {
@@ -443,7 +449,7 @@ function createPipelineMock(
     }],
   });
   //plugin
-  ddbMock.on(QueryCommand, {
+  mockClients.ddbMock.on(QueryCommand, {
     ExclusiveStartKey: undefined,
     ExpressionAttributeNames: { '#prefix': 'prefix' },
     ExpressionAttributeValues: {
@@ -474,7 +480,7 @@ function createPipelineMock(
       },
     ],
   });
-  kafkaMock.on(ListNodesCommand).resolves({
+  mockClients.kafkaMock.on(ListNodesCommand).resolves({
     NodeInfoList: [
       {
         BrokerNodeInfo: {
@@ -488,7 +494,7 @@ function createPipelineMock(
       },
     ],
   });
-  redshiftServerlessMock.on(GetWorkgroupCommand).resolves({
+  mockClients.redshiftServerlessMock.on(GetWorkgroupCommand).resolves({
     workgroup: {
       workgroupId: 'd60f7989-f4ce-46c5-95da-2f9cc7a27725',
       workgroupArn: 'arn:aws:redshift-serverless:ap-southeast-1:555555555555:workgroup/d60f7989-f4ce-46c5-95da-2f9cc7a27725',
@@ -501,14 +507,14 @@ function createPipelineMock(
       securityGroupIds: ['sg-00000000000000031', 'sg-00000000000000032'],
     },
   });
-  redshiftServerlessMock.on(GetNamespaceCommand).resolves({
+  mockClients.redshiftServerlessMock.on(GetNamespaceCommand).resolves({
     namespace: {
       namespaceId: '3fe99af1-0b02-4b43-b8d4-34ccfd52c865',
       namespaceArn: 'arn:aws:redshift-serverless:ap-southeast-1:111122223333:namespace/3fe99af1-0b02-4b43-b8d4-34ccfd52c865',
       namespaceName: 'test-ns',
     },
   });
-  redshiftMock.on(DescribeClustersCommand).resolves({
+  mockClients.redshiftMock.on(DescribeClustersCommand).resolves({
     Clusters: [
       {
         ClusterIdentifier: 'cluster-1',
@@ -525,7 +531,7 @@ function createPipelineMock(
       },
     ],
   });
-  redshiftMock.on(DescribeClusterSubnetGroupsCommand).resolves({
+  mockClients.redshiftMock.on(DescribeClusterSubnetGroupsCommand).resolves({
     ClusterSubnetGroups: [
       {
         ClusterSubnetGroupName: 'group-1',
@@ -604,11 +610,11 @@ function createPipelineMock(
       CidrIpv4: '10.0.64.0/20',
     });
   };
-  ec2Mock.on(DescribeSecurityGroupRulesCommand).
+  mockClients.ec2Mock.on(DescribeSecurityGroupRulesCommand).
     resolves({
       SecurityGroupRules: mockSecurityGroupRules,
     });
-  ec2Mock.on(DescribeAvailabilityZonesCommand).
+  mockClients.ec2Mock.on(DescribeAvailabilityZonesCommand).
     resolves({
       AvailabilityZones: props?.twoAZsInRegion ? [
         {
@@ -630,7 +636,7 @@ function createPipelineMock(
       ],
     });
 
-  ec2Mock.on(DescribeNatGatewaysCommand).
+  mockClients.ec2Mock.on(DescribeNatGatewaysCommand).
     resolves({
       NatGateways: [
         {
@@ -824,11 +830,11 @@ function createPipelineMock(
       defaultSubnets[6],
     ];
   }
-  ec2Mock.on(DescribeSubnetsCommand)
+  mockClients.ec2Mock.on(DescribeSubnetsCommand)
     .resolves({
       Subnets: mockSubnets,
     });
-  ec2Mock.on(DescribeRouteTablesCommand).resolves({
+  mockClients.ec2Mock.on(DescribeRouteTablesCommand).resolves({
     RouteTables: [
       {
         Associations: [{
@@ -894,36 +900,64 @@ function createPipelineMock(
       },
     ].concat(vpcEndpoints);
   }
-  ec2Mock.on(DescribeVpcEndpointsCommand).resolves({
+  mockClients.ec2Mock.on(DescribeVpcEndpointsCommand).resolves({
     VpcEndpoints: mockVpcEndpoints,
   });
-  secretsManagerMock.on(GetSecretValueCommand).resolves({
+  mockClients.secretsManagerMock.on(GetSecretValueCommand).resolves({
     SecretString: '{"issuer":"1","userEndpoint":"2","authorizationEndpoint":"3","tokenEndpoint":"4","appClientId":"5","appClientSecret":"6"}',
   });
-  sfnMock.on(StartExecutionCommand).resolves({ executionArn: MOCK_EXECUTION_ID });
-  quickSightMock.on(DescribeAccountSubscriptionCommand).resolves({
+  mockClients.sfnMock.on(StartExecutionCommand).resolves({ executionArn: MOCK_EXECUTION_ID });
+  mockClients.quickSightMock.on(DescribeAccountSubscriptionCommand).resolves({
     AccountInfo: {
       AccountName: 'ck',
       Edition: props?.quickSightStandard ? Edition.STANDARD : Edition.ENTERPRISE,
     },
   });
-  s3Mock.on(GetBucketPolicyCommand).resolves({
+  mockClients.s3Mock.on(GetBucketPolicyCommand).resolves({
     Policy: props?.albPolicyDisable ? AllowIAMUserPutObejectPolicyWithErrorService
       :AllowIAMUserPutObejectPolicyInApSouthEast1,
   });
   if (props?.bucketNotExist) {
     const mockNoSuchBucketError = new Error('NoSuchBucket');
     mockNoSuchBucketError.name = 'NoSuchBucket';
-    s3Mock.on(GetBucketLocationCommand).rejects(mockNoSuchBucketError);
+    mockClients.s3Mock.on(GetBucketLocationCommand).rejects(mockNoSuchBucketError);
   } else {
-    s3Mock.on(GetBucketLocationCommand).resolves({
+    mockClients.s3Mock.on(GetBucketLocationCommand).resolves({
       LocationConstraint: BucketLocationConstraint.ap_southeast_1,
     });
   }
+  createEventRuleMock(mockClients.cloudWatchEventsMock);
+  createSNSTopicMock(mockClients.snsMock);
 }
 
 function createPipelineMockForBJSRegion(s3Mock: any) {
   s3Mock.on(GetBucketPolicyCommand).resolves({ Policy: AllowIAMUserPutObjectPolicyInCnNorth1 });
+}
+
+function createEventRuleMock(cloudWatchEventsMock: any): any {
+  cloudWatchEventsMock.on(PutRuleCommand).resolves({
+    RuleArn: 'arn:aws:events:ap-southeast-1:111122223333:rule/ck-clickstream-branch-main',
+  });
+  cloudWatchEventsMock.on(PutTargetsCommand).resolves({});
+}
+
+function deleteEventRuleMock(cloudWatchEventsMock: any): any {
+  cloudWatchEventsMock.on(ListTargetsByRuleCommand).resolves({
+    Targets: [{
+      Id: '1',
+      Arn: 'arn:aws:states:ap-southeast-1:111122223333:stateMachine:ck-clickstream-branch-main',
+    }],
+  });
+  cloudWatchEventsMock.on(RemoveTargetsCommand).resolves({});
+  cloudWatchEventsMock.on(DeleteRuleCommand).resolves({});
+}
+
+function createSNSTopicMock(snsMock: any): any {
+  snsMock.on(CreateTopicCommand).resolves({
+    TopicArn: 'arn:aws:sns:ap-southeast-1:111122223333:ck-clickstream-branch-main',
+  });
+  snsMock.on(SetTopicAttributesCommand).resolves({});
+  snsMock.on(SubscribeCommand).resolves({});
 }
 
 export {
@@ -956,4 +990,7 @@ export {
   metadataEventExistedMock,
   metadataEventAttributeExistedMock,
   metadataUserAttributeExistedMock,
+  deleteEventRuleMock,
+  createEventRuleMock,
+  createSNSTopicMock,
 };
