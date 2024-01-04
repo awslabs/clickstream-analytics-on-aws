@@ -1275,7 +1275,7 @@ export function checkAttributionAnalysisParameter(params: any): CheckParamsStatu
       message: 'unsupported compute method for attribution analysis',
     };
   }
-  
+
   return {
     success,
     message,
