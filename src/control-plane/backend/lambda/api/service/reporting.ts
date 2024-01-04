@@ -52,7 +52,7 @@ import { OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX, OUTPUT_DATA_MOD
 import { ExploreLocales, AnalysisType, ExplorePathNodeType, ExploreRequestAction, ExploreTimeScopeType, ExploreVisualName, QuickSightChartType, ExploreComputeMethod } from '../common/explore-types';
 import { logger } from '../common/powertools';
 import { SDKClient } from '../common/sdk-client';
-import { ApiFail, ApiSuccess, PipelineStackType} from '../common/types';
+import { ApiFail, ApiSuccess, PipelineStackType } from '../common/types';
 import { getStackOutputFromPipelineStatus } from '../common/utils';
 import { QuickSightUserArns, generateEmbedUrlForRegisteredUser, getClickstreamUserArn, waitDashboardSuccess } from '../store/aws/quicksight';
 import { ClickStreamStore } from '../store/click-stream-store';
