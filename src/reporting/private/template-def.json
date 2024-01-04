@@ -9159,10 +9159,10 @@
                                         },
                                         {
                                             "CategoricalDimensionField": {
-                                                "FieldId": "6cd8af54-c0b2-4afd-a83f-519acf8483c0.event_param_string_value.1.1684997465290",
+                                                "FieldId": "6cd8af54-c0b2-4afd-a83f-519acf8483c0.event_param_value.1.1684997465290",
                                                 "Column": {
                                                     "DataSetIdentifier": "Event_Parameter_View",
-                                                    "ColumnName": "event_param_string_value"
+                                                    "ColumnName": "event_param_value"
                                                 }
                                             }
                                         }
@@ -14970,7 +14970,7 @@
                         "FilterId": "21d38318-c7b6-442e-b08d-7761879d8b1a",
                         "Column": {
                             "DataSetIdentifier": "Event_Parameter_View",
-                            "ColumnName": "event_param_string_value"
+                            "ColumnName": "event_param_value"
                         },
                         "Configuration": {
                             "FilterListConfiguration": {
