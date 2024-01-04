@@ -94,6 +94,7 @@ describe('Listen CFN Stack Status Lambda Function', () => {
 
   const mockStackDetails: PipelineStatusDetail[] = [
     {
+      stackId: '',
       outputs: [],
       stackName: 'Clickstream-KafkaConnector-6972c135cb864885b25c5b7ebe584fdf',
       stackStatus: undefined,
@@ -102,6 +103,7 @@ describe('Listen CFN Stack Status Lambda Function', () => {
       stackType: PipelineStackType.KAFKA_CONNECTOR,
     },
     {
+      stackId: '',
       outputs: [],
       stackName: 'Clickstream-Ingestion-kafka-6972c135cb864885b25c5b7ebe584fdf',
       stackStatus: undefined,
@@ -110,6 +112,7 @@ describe('Listen CFN Stack Status Lambda Function', () => {
       stackType: PipelineStackType.INGESTION,
     },
     {
+      stackId: '',
       outputs: [],
       stackName: 'Clickstream-DataProcessing-6972c135cb864885b25c5b7ebe584fdf',
       stackStatus: undefined,
@@ -118,6 +121,7 @@ describe('Listen CFN Stack Status Lambda Function', () => {
       stackType: PipelineStackType.DATA_PROCESSING,
     },
     {
+      stackId: '',
       outputs: [],
       stackName: 'Clickstream-DataModelingRedshift-6972c135cb864885b25c5b7ebe584fdf',
       stackStatus: undefined,
@@ -126,6 +130,7 @@ describe('Listen CFN Stack Status Lambda Function', () => {
       stackType: PipelineStackType.DATA_MODELING_REDSHIFT,
     },
     {
+      stackId: '',
       outputs: [],
       stackName: 'Clickstream-Reporting-6972c135cb864885b25c5b7ebe584fdf',
       stackStatus: undefined,
@@ -134,6 +139,7 @@ describe('Listen CFN Stack Status Lambda Function', () => {
       stackType: PipelineStackType.REPORTING,
     },
     {
+      stackId: '',
       outputs: [],
       stackName: 'Clickstream-Metrics-6972c135cb864885b25c5b7ebe584fdf',
       stackStatus: undefined,
@@ -297,6 +303,7 @@ describe('Listen CFN Stack Status Lambda Function', () => {
     expect(cloudFormationMock).toHaveReceivedCommandTimes(DescribeStacksCommand, 1);
     expect(docMock).toHaveReceivedCommandTimes(QueryCommand, 1);
     expect(mockStackDetails).toContainEqual({
+      stackId: 'arn:aws:cloudformation:ap-southeast-1:555555555555:stack/Clickstream-Ingestion-kafka-6972c135cb864885b25c5b7ebe584fdf/5b6971e0-f261-11ed-a7e3-02a848659f60',
       outputs: [],
       stackName: mockIngestionKafkaStack.StackName,
       stackStatus: mockIngestionKafkaStack.StackStatus,

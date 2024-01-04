@@ -241,6 +241,7 @@ export interface IPipeline {
   statusType?: PipelineStatusType;
   stackDetails?: PipelineStatusDetail[];
   executionDetail?: ExecutionDetail;
+  executionArn?: string;
 
   readonly version: string;
   readonly versionTag: string;
@@ -483,7 +484,7 @@ export class CPipeline {
     } else {
       if (!this.pipeline.executionDetail) {
         this.pipeline.executionDetail = {
-          executionArn: '',
+          executionArn: this.pipeline.executionArn ?? '',
           name: this.pipeline.status?.executionDetail.name ?? '',
           status: this.pipeline.status?.executionDetail.status as ExecutionStatus ?? ExecutionStatus.SUCCEEDED,
         };
@@ -508,8 +509,28 @@ export class CPipeline {
         };
       }
     }
+    if (!executionDetail) {
+      this.pipeline.executionDetail = {
+        executionArn: '',
+        name: '',
+        status: ExecutionStatus.SUCCEEDED,
+      };
+    }
+    await this._forceRefreshStacksById();
+  }
+
+  private async _forceRefreshStacksByName(): Promise<void> {
     const stackNames = this.stackManager.getWorkflowStacks(this.pipeline.workflow?.Workflow!);
     const stackStatusDetails: PipelineStatusDetail[] = await getStacksDetailsByNames(this.pipeline.region, stackNames);
+    if (stackStatusDetails.length > 0) {
+      this.pipeline.stackDetails = stackStatusDetails;
+    }
+  }
+
+  private async _forceRefreshStacksById(): Promise<void> {
+    const stackDetails = this.pipeline.stackDetails ?? [];
+    const stackIds = stackDetails.map(s => s.stackId);
+    const stackStatusDetails: PipelineStatusDetail[] = await getStacksDetailsByNames(this.pipeline.region, stackIds);
     if (stackStatusDetails.length > 0) {
       this.pipeline.stackDetails = stackStatusDetails;
       this.pipeline.statusType = getPipelineStatusType(this.pipeline);
@@ -548,6 +569,7 @@ export class CPipeline {
   public async delete(): Promise<void> {
     // create rule to listen CFN stack
     await this._createRules();
+    await this._forceRefreshStacksByName();
     this.pipeline.lastAction = 'Delete';
     const executionName = getStateMachineExecutionName(this.pipeline.pipelineId);
     // update workflow
