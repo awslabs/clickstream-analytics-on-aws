@@ -137,6 +137,24 @@ export const dashboardAdminPermissionActions = [
   'quicksight:UpdateDashboardPublishedVersion',
 ];
 
+export const folderReadPermissionActions = [
+  'quicksight:CreateFolderMembership',
+  'quicksight:DeleteFolderMembership',
+  'quicksight:DescribeFolder',
+  'quicksight:ListFolderMembers',
+  'quicksight:ListFolders',
+  'quicksight:SearchFolders',
+];
+
+export const folderAdminPermissionActions = [
+  ...folderReadPermissionActions,
+  'quicksight:CreateFolder',
+  'quicksight:DescribeFolderPermissions',
+  'quicksight:DeleteFolder',
+  'quicksight:UpdateFolder',
+  'quicksight:UpdateFolderPermissions',
+];
+
 export function sleep(ms: number) {
   return new Promise<void>(resolve => setTimeout(() => resolve(), ms));
 };

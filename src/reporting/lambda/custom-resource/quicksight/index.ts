@@ -35,6 +35,7 @@ import {
   TemplateVersionSummary,
   ParameterValueType,
   DatasetParameter,
+  MemberType,
 } from '@aws-sdk/client-quicksight';
 import { Context, CloudFormationCustomResourceEvent, CloudFormationCustomResourceUpdateEvent, CloudFormationCustomResourceCreateEvent, CloudFormationCustomResourceDeleteEvent, CdkCustomResourceResponse } from 'aws-lambda';
 import Mustache from 'mustache';
@@ -64,6 +65,8 @@ import {
   findDashboardWithPrefix,
   waitForDataSourceChangeCompleted,
   DateTimeParameter,
+  folderAdminPermissionActions,
+  // folderReadPermissionActions,
 } from '../../../private/dashboard';
 
 type ResourceEvent = CloudFormationCustomResourceEvent;
@@ -295,11 +298,35 @@ const createQuickSightDashboard = async (quickSight: QuickSight,
     },
   };
 
+  const folder = await quickSight.createFolder({
+    AwsAccountId: commonParams.awsAccountId,
+    FolderId: `${commonParams.databaseName}_${commonParams.schema}`,
+    Name: `${commonParams.databaseName}_${commonParams.schema}`,
+    Permissions: [
+      {
+        Principal: commonParams.ownerPrincipalArn,
+        Actions: folderAdminPermissionActions,
+      },
+      {
+        Principal: commonParams.sharePrincipalArn,
+        Actions: folderAdminPermissionActions,
+      },
+    ],
+  });
+
   const analysis = await createAnalysis(quickSight, commonParams, sourceEntity, dashboardDef);
   logger.info(`Analysis ${analysis?.AnalysisId} creation completed.`);
 
   const dashboard = await createDashboard(quickSight, commonParams, sourceEntity, dashboardDef);
   logger.info(`Dashboard ${dashboard?.DashboardId} creation completed.`);
+
+  await quickSight.createFolderMembership({
+    AwsAccountId: commonParams.awsAccountId,
+    FolderId: folder.FolderId!,
+    MemberId: dashboard?.DashboardId!,
+    MemberType: MemberType.DASHBOARD,
+  });
+
   return dashboard;
 
 };
