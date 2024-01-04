@@ -22,12 +22,13 @@ export interface MetadataStore {
 
   getEventParameter: (projectId: string, appId: string, parameterName: string, category: ConditionCategory, valueType: MetadataValueType) =>
   Promise<IMetadataEventParameter | undefined>;
+  getEventParameterV2: (projectId: string, appId: string, parameterName: string, category: ConditionCategory, valueType: MetadataValueType) =>
+  Promise<IMetadataEventParameter | undefined>;
   listEventParameters: (projectId: string, appId: string) => Promise<IMetadataEventParameter[]>;
   listEventParametersV2: (projectId: string, appId: string) => Promise<IMetadataEventParameter[]>;
 
-  getUserAttribute: (projectId: string, appId: string, userAttributeName: string, valueType: MetadataValueType) =>
-  Promise<IMetadataUserAttribute | undefined>;
   listUserAttributes: (projectId: string, appId: string) => Promise<IMetadataUserAttribute[]>;
+  listUserAttributesV2: (projectId: string, appId: string) => Promise<IMetadataUserAttribute[]>;
 
   getDisplay: (projectId: string, appId: string) => Promise<IMetadataDisplay[]>;
   updateDisplay: (id: string, projectId: string, appId: string,

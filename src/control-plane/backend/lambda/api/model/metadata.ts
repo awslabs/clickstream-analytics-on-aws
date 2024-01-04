@@ -46,7 +46,7 @@ export interface IMetadataRaw {
     readonly sdkName?: string[];
     readonly valueEnum?: IMetadataRawValue[];
     readonly hasData?: boolean;
-    readonly lastCount?: number;
+    readonly latestCount?: number;
     readonly associatedParameters?: ISummaryEventParameter[];
     readonly associatedEvents?: string[];
   };
@@ -88,6 +88,7 @@ export interface IMetadataEventParameter {
   readonly appId: string;
   readonly name: string;
   readonly eventName?: string;
+  readonly eventNames?: string[];
 
   readonly valueType: MetadataValueType;
   readonly category: ConditionCategory;

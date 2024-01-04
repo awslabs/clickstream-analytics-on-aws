@@ -747,10 +747,9 @@ function getLatestEventByName(metadata: IMetadataRaw[]): IMetadataEvent[] {
   return latestEvents;
 }
 
-function rawToEvent(metadataArray: IMetadataRaw[]): IMetadataEvent[] {
+function rawToEvent(metadataArray: IMetadataRaw[], associated: boolean): IMetadataEvent[] {
   const events: IMetadataEvent[] = [];
   for (let meta of metadataArray) {
-    const lastDayData = getDataFromYesterday([meta]);
     const event: IMetadataEvent = {
       id: meta.id,
       month: meta.month,
@@ -758,19 +757,19 @@ function rawToEvent(metadataArray: IMetadataRaw[]): IMetadataEvent[] {
       projectId: meta.projectId,
       appId: meta.appId,
       name: meta.name,
-      hasData: lastDayData.hasData,
+      hasData: true,
       platform: meta.summary.platform ?? [],
       sdkVersion: meta.summary.sdkVersion ?? [],
       sdkName: meta.summary.sdkName ?? [],
-      dataVolumeLastDay: lastDayData.dataVolumeLastDay,
-      associatedParameters: summaryToEventParameter(meta.projectId, meta.appId, meta.summary.associatedParameters),
+      dataVolumeLastDay: meta.summary.latestCount ?? 0,
+      associatedParameters: associated ? summaryToEventParameter(meta.projectId, meta.appId, meta.summary.associatedParameters): [],
     };
     events.push(event);
   }
   return events;
 }
 
-function rawToParameter(metadataArray: IMetadataRaw[]): IMetadataEventParameter[] {
+function rawToParameter(metadataArray: IMetadataRaw[], associated: boolean): IMetadataEventParameter[] {
   const parameters: IMetadataEventParameter[] = [];
   for (let meta of metadataArray) {
     const parameter: IMetadataEventParameter = {
@@ -785,11 +784,31 @@ function rawToParameter(metadataArray: IMetadataRaw[]): IMetadataEventParameter[
       category: meta.category ?? ConditionCategory.OTHER,
       valueType: meta.valueType ?? MetadataValueType.STRING,
       valueEnum: meta.summary.valueEnum ?? [],
-      associatedEvents: summaryToEvent(meta.projectId, meta.appId, meta.summary.associatedEvents),
+      eventNames: meta.summary.associatedEvents ?? [],
+      associatedEvents: associated ? summaryToEvent(meta.projectId, meta.appId, meta.summary.associatedEvents) : [],
     };
     parameters.push(parameter);
   }
   return parameters;
+}
+
+function rawToAttribute(metadataArray: IMetadataRaw[]): IMetadataUserAttribute[] {
+  const attributes: IMetadataUserAttribute[] = [];
+  for (let meta of metadataArray) {
+    const attribute: IMetadataUserAttribute = {
+      id: meta.id,
+      month: meta.month,
+      prefix: meta.prefix,
+      projectId: meta.projectId,
+      appId: meta.appId,
+      name: meta.name,
+      category: meta.category ?? ConditionCategory.USER,
+      valueType: meta.valueType ?? MetadataValueType.STRING,
+      valueEnum: meta.summary.valueEnum ?? [],
+    };
+    attributes.push(attribute);
+  }
+  return attributes;
 }
 
 function summaryToEventParameter(projectId: string, appId: string, metadataArray: ISummaryEventParameter[] | undefined): IMetadataEventParameter[] {
@@ -801,7 +820,7 @@ function summaryToEventParameter(projectId: string, appId: string, metadataArray
     const category = meta.category ?? ConditionCategory.OTHER;
     const valueType = meta.valueType ?? MetadataValueType.STRING;
     const parameter: IMetadataEventParameter = {
-      id: `${projectId}#${appId}#${category}#${valueType}`,
+      id: `${projectId}#${appId}#${category}#${meta.name}#${valueType}`,
       month: 'latest',
       prefix: `EVENT_PARAMETER#${projectId}#${appId}`,
       projectId: projectId,
@@ -814,6 +833,30 @@ function summaryToEventParameter(projectId: string, appId: string, metadataArray
     parameters.push(parameter);
   }
   return parameters;
+}
+
+function summaryToEvent(projectId: string, appId: string, associatedEvents: string[] | undefined): IMetadataEvent[] {
+  const events: IMetadataEvent[] = [];
+  if (!associatedEvents) {
+    return events;
+  }
+  for (let associated of associatedEvents) {
+    const event: IMetadataEvent = {
+      id: `${projectId}#${appId}#${associated}`,
+      month: 'latest',
+      prefix: `EVENT#${projectId}#${appId}`,
+      projectId: projectId,
+      appId: appId,
+      name: associated,
+      dataVolumeLastDay: 0,
+      hasData: false,
+      sdkVersion: [],
+      sdkName: [],
+      platform: [],
+    };
+    events.push(event);
+  }
+  return events;
 }
 
 function getLatestParameterById(metadata: IMetadataRaw[]): IMetadataEventParameter[] {
@@ -1265,4 +1308,6 @@ export {
   getPipelineLastActionFromStacksStatus,
   isNewMetadataVersion,
   rawToEvent,
+  rawToParameter,
+  rawToAttribute,
 };

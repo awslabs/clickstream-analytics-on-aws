@@ -13,6 +13,7 @@
 
 import { CMetadataDisplay } from './display';
 import { PipelineServ } from './pipeline';
+import { ConditionCategory, MetadataValueType } from '../common/explore-types';
 import { ApiFail, ApiSuccess } from '../common/types';
 import { groupAssociatedEventParametersByName, groupByParameterByName, isNewMetadataVersion, pathNodesToAttribute } from '../common/utils';
 import { IMetadataDisplay, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute } from '../model/metadata';
@@ -80,21 +81,6 @@ export class MetadataEventServ {
     return rawEvents;
   }
 
-  public async list(req: any, res: any, next: any) {
-    try {
-      const { projectId, appId, attribute } = req.query;
-      const associated = attribute && attribute === 'true';
-      let events = await this.listRawEvents(projectId, appId, associated);
-      events = await metadataDisplay.patch(projectId, appId, events) as IMetadataEvent[];
-      return res.json(new ApiSuccess({
-        totalCount: events.length,
-        items: events,
-      }));
-    } catch (error) {
-      next(error);
-    }
-  };
-
   private async getRawEvent(projectId: string, appId: string, name: string) {
     let event: IMetadataEvent | undefined;
     const pipeline = await pipelineServ.getPipelineByProjectId(projectId);
@@ -114,6 +100,21 @@ export class MetadataEventServ {
     }
     return event;
   }
+
+  public async list(req: any, res: any, next: any) {
+    try {
+      const { projectId, appId, attribute } = req.query;
+      const associated = attribute && attribute === 'true';
+      let events = await this.listRawEvents(projectId, appId, associated);
+      events = await metadataDisplay.patch(projectId, appId, events) as IMetadataEvent[];
+      return res.json(new ApiSuccess({
+        totalCount: events.length,
+        items: events,
+      }));
+    } catch (error) {
+      next(error);
+    }
+  };
 
   public async details(req: any, res: any, next: any) {
     try {
@@ -147,6 +148,20 @@ export class MetadataEventParameterServ {
     return rawEventParameters;
   }
 
+  private async getRawEventParameter(projectId: string, appId: string, name: string, category: ConditionCategory, type: MetadataValueType) {
+    let parameter: IMetadataEventParameter | undefined;
+    const pipeline = await pipelineServ.getPipelineByProjectId(projectId);
+    if (!pipeline) {
+      return parameter;
+    }
+    if (isNewMetadataVersion(pipeline)) {
+      parameter = await metadataStore.getEventParameterV2(projectId, appId, name, category, type);
+    } else {
+      parameter = await metadataStore.getEventParameter(projectId, appId, name, category, type);
+    }
+    return parameter;
+  }
+
   public async list(req: any, res: any, next: any) {
     try {
       const { projectId, appId } = req.query;
@@ -164,7 +179,7 @@ export class MetadataEventParameterServ {
   public async details(req: any, res: any, next: any) {
     try {
       const { projectId, appId, name, category, type } = req.query;
-      let parameter = await metadataStore.getEventParameter(projectId, appId, name, category, type);
+      let parameter = await this.getRawEventParameter(projectId, appId, name, category, type);
       if (!parameter) {
         return res.status(404).json(new ApiFail('Event attribute not found'));
       }
@@ -177,32 +192,31 @@ export class MetadataEventParameterServ {
 }
 
 export class MetadataUserAttributeServ {
+  private async listRawUserAttributes(projectId: string, appId: string) {
+    let rawUserAttributes: IMetadataUserAttribute[] = [];
+    const pipeline = await pipelineServ.getPipelineByProjectId(projectId);
+    if (!pipeline) {
+      return rawUserAttributes;
+    }
+    if (isNewMetadataVersion(pipeline)) {
+      rawUserAttributes = await metadataStore.listUserAttributesV2(projectId, appId);
+    } else {
+      rawUserAttributes = await metadataStore.listUserAttributes(projectId, appId);
+    }
+    return rawUserAttributes;
+  };
+
   public async list(req: any, res: any, next: any) {
     try {
       const { projectId, appId } = req.query;
-      const results = await metadataStore.listUserAttributes(projectId, appId);
-      const attributes = await metadataDisplay.patch(projectId, appId, results) as IMetadataUserAttribute[];
+      const attributes = await this.listRawUserAttributes(projectId, appId);
+      const results = await metadataDisplay.patch(projectId, appId, attributes) as IMetadataUserAttribute[];
       return res.json(new ApiSuccess({
         totalCount: attributes.length,
-        items: attributes,
+        items: results,
       }));
     } catch (error) {
       next(error);
     }
   };
-
-  public async details(req: any, res: any, next: any) {
-    try {
-      const { projectId, appId, name, type } = req.query;
-      let attribute = await metadataStore.getUserAttribute(projectId, appId, name, type);
-      if (!attribute) {
-        return res.status(404).json(new ApiFail('User attribute not found'));
-      }
-      attribute = (await metadataDisplay.patch(projectId, appId, [attribute]) as IMetadataUserAttribute[])[0];
-      return res.json(new ApiSuccess(attribute));
-    } catch (error) {
-      next(error);
-    }
-  };
-
 }

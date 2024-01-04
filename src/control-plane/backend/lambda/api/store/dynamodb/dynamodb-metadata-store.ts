@@ -22,7 +22,7 @@ import { analyticsMetadataTable, prefixMonthGSIName } from '../../common/constan
 import { docClient, query, memoizedQuery } from '../../common/dynamodb-client';
 import { ConditionCategory, MetadataValueType } from '../../common/explore-types';
 import { KeyVal } from '../../common/types';
-import { getAttributeByNameAndType, getCurMonthStr, getDataFromYesterday, getLatestAttributeByName, getLatestEventByName, getLatestParameterById, getParameterByNameAndType, rawToEvent } from '../../common/utils';
+import { getCurMonthStr, getDataFromYesterday, getLatestAttributeByName, getLatestEventByName, getLatestParameterById, getParameterByNameAndType, rawToAttribute, rawToEvent, rawToParameter } from '../../common/utils';
 import { IMetadataRaw, IMetadataDisplay, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute, IMetadataBuiltInList, IMetadataDisplayNameAndDescription } from '../../model/metadata';
 import { ClickStreamStore } from '../click-stream-store';
 import { MetadataStore } from '../metadata-store';
@@ -76,13 +76,19 @@ export class DynamoDbMetadataStore implements MetadataStore {
         id: `${projectId}#${appId}#${eventName}`,
         month: 'latest',
       },
+      ProjectionExpression: '#id, #month, #prefix, projectId, appId, #name, eventName, category, valueType, summary',
+      ExpressionAttributeNames: {
+        '#prefix': 'prefix',
+        '#id': 'id',
+        '#month': 'month',
+        '#name': 'name',
+      },
     };
     const record = await docClient.send(new GetCommand(input));
     if (!record.Item) {
       return;
     }
-    const event = rawToEvent([record.Item as IMetadataRaw])[0];
-    return event;
+    return rawToEvent([record.Item as IMetadataRaw], true)[0];
   };
 
   public async listEvents(projectId: string, appId: string): Promise<IMetadataEvent[]> {
@@ -107,12 +113,11 @@ export class DynamoDbMetadataStore implements MetadataStore {
   };
 
   public async listEventsV2(projectId: string, appId: string): Promise<IMetadataEvent[]> {
-    const lastDay = `day${new Date().getDate() - 1}`;
     const input: QueryCommandInput = {
       TableName: analyticsMetadataTable,
       IndexName: prefixMonthGSIName,
       KeyConditionExpression: '#prefix= :prefix AND begins_with(#month, :month)',
-      ProjectionExpression: `#id, #month, #prefix, projectId, appId, #name, eventName, category, valueType, ${lastDay}, summary`,
+      ProjectionExpression: '#id, #month, #prefix, projectId, appId, #name, eventName, category, valueType, summary',
       ExpressionAttributeNames: {
         '#prefix': 'prefix',
         '#id': 'id',
@@ -129,14 +134,41 @@ export class DynamoDbMetadataStore implements MetadataStore {
     if (records.length === 0) {
       records = await this.queryMetadataRawsFromBuiltInList(projectId, appId, 'EVENT');
     }
-    const events = rawToEvent(records);
+    const events = rawToEvent(records, false);
     return events;
   };
 
-  public async getEventParameter(projectId: string, appId: string, parameterName: string, category: ConditionCategory, valueType: MetadataValueType):
-  Promise<IMetadataEventParameter | undefined> {
+  public async getEventParameter(
+    projectId: string, appId: string, parameterName: string,
+    category: ConditionCategory, valueType: MetadataValueType):
+    Promise<IMetadataEventParameter | undefined> {
     const records = await this.getAllEventParameters(projectId, appId);
     return getParameterByNameAndType(records, parameterName, category, valueType);
+  };
+
+  public async getEventParameterV2(
+    projectId: string, appId: string, parameterName: string,
+    category: ConditionCategory, valueType: MetadataValueType):
+    Promise<IMetadataEventParameter | undefined> {
+    const input: GetCommandInput = {
+      TableName: analyticsMetadataTable,
+      Key: {
+        id: `${projectId}#${appId}#${category}#${parameterName}#${valueType}`,
+        month: 'latest',
+      },
+      ProjectionExpression: '#id, #month, #prefix, projectId, appId, #name, eventName, category, valueType, summary',
+      ExpressionAttributeNames: {
+        '#prefix': 'prefix',
+        '#id': 'id',
+        '#month': 'month',
+        '#name': 'name',
+      },
+    };
+    const record = await docClient.send(new GetCommand(input));
+    if (!record.Item) {
+      return;
+    }
+    return rawToParameter([record.Item as IMetadataRaw], true)[0];
   };
 
   public async listEventParameters(projectId: string, appId: string): Promise<IMetadataEventParameter[]> {
@@ -145,12 +177,11 @@ export class DynamoDbMetadataStore implements MetadataStore {
   };
 
   public async listEventParametersV2(projectId: string, appId: string): Promise<IMetadataEventParameter[]> {
-    const lastDay = `day${new Date().getDate() - 1}`;
     const input: QueryCommandInput = {
       TableName: analyticsMetadataTable,
       IndexName: prefixMonthGSIName,
       KeyConditionExpression: '#prefix= :prefix AND begins_with(#month, :month)',
-      ProjectionExpression: `#id, #month, #prefix, projectId, appId, #name, eventName, category, valueType, ${lastDay}, summary`,
+      ProjectionExpression: '#id, #month, #prefix, projectId, appId, #name, category, valueType, summary',
       ExpressionAttributeNames: {
         '#prefix': 'prefix',
         '#id': 'id',
@@ -167,8 +198,8 @@ export class DynamoDbMetadataStore implements MetadataStore {
     if (records.length === 0) {
       records = await this.queryMetadataRawsFromBuiltInList(projectId, appId, 'EVENT_PARAMETER');
     }
-    const parameters = rawToParameters(records);
-    return parameters.sort((a, b) => a.category.localeCompare(b.category));
+    const parameters = rawToParameter(records, false);
+    return parameters;
   };
 
   private async getAllEventParameters(projectId: string, appId: string): Promise<IMetadataRaw[]> {
@@ -196,24 +227,6 @@ export class DynamoDbMetadataStore implements MetadataStore {
     return records;
   }
 
-  public async getUserAttribute(projectId: string, appId: string, userAttributeName: string, valueType: MetadataValueType):
-  Promise<IMetadataUserAttribute | undefined> {
-    const input: QueryCommandInput = {
-      TableName: analyticsMetadataTable,
-      IndexName: prefixMonthGSIName,
-      KeyConditionExpression: '#prefix= :prefix',
-      ExpressionAttributeNames: {
-        '#prefix': 'prefix',
-      },
-      ExpressionAttributeValues: {
-        ':prefix': `USER_ATTRIBUTE#${projectId}#${appId}`,
-      },
-      ScanIndexForward: false,
-    };
-    const records = await memoizedQuery(input) as IMetadataRaw[];
-    return getAttributeByNameAndType(records, userAttributeName, valueType);
-  };
-
   public async listUserAttributes(projectId: string, appId: string): Promise<IMetadataUserAttribute[]> {
     const input: QueryCommandInput = {
       TableName: analyticsMetadataTable,
@@ -233,6 +246,32 @@ export class DynamoDbMetadataStore implements MetadataStore {
     }
     const attributes = getLatestAttributeByName(records).sort((a, b) => a.category.localeCompare(b.category));
     return attributes;
+  };
+
+  public async listUserAttributesV2(projectId: string, appId: string): Promise<IMetadataUserAttribute[]> {
+    const input: QueryCommandInput = {
+      TableName: analyticsMetadataTable,
+      IndexName: prefixMonthGSIName,
+      KeyConditionExpression: '#prefix= :prefix AND begins_with(#month, :month)',
+      ProjectionExpression: '#id, #month, #prefix, projectId, appId, #name, category, valueType, summary',
+      ExpressionAttributeNames: {
+        '#prefix': 'prefix',
+        '#id': 'id',
+        '#month': 'month',
+        '#name': 'name',
+      },
+      ExpressionAttributeValues: {
+        ':prefix': `USER_ATTRIBUTE#${projectId}#${appId}`,
+        ':month': 'latest',
+      },
+      ScanIndexForward: false,
+    };
+    let records = await memoizedQuery(input) as IMetadataRaw[];
+    if (records.length === 0) {
+      records = await this.queryMetadataRawsFromBuiltInList(projectId, appId, 'USER_ATTRIBUTE');
+    }
+    const parameters = rawToAttribute(records);
+    return parameters;
   };
 
   public async getDisplay(projectId: string, appId: string): Promise<IMetadataDisplay[]> {
