@@ -16,11 +16,14 @@ import { IMetadataDisplay, IMetadataDisplayNameAndDescription, IMetadataEvent, I
 
 export interface MetadataStore {
   getEvent: (projectId: string, appId: string, eventName: string) => Promise<IMetadataEvent | undefined>;
+  getEventV2: (projectId: string, appId: string, eventName: string) => Promise<IMetadataEvent | undefined>;
   listEvents: (projectId: string, appId: string) => Promise<IMetadataEvent[]>;
+  listEventsV2: (projectId: string, appId: string) => Promise<IMetadataEvent[]>;
 
   getEventParameter: (projectId: string, appId: string, parameterName: string, category: ConditionCategory, valueType: MetadataValueType) =>
   Promise<IMetadataEventParameter | undefined>;
   listEventParameters: (projectId: string, appId: string) => Promise<IMetadataEventParameter[]>;
+  listEventParametersV2: (projectId: string, appId: string) => Promise<IMetadataEventParameter[]>;
 
   getUserAttribute: (projectId: string, appId: string, userAttributeName: string, valueType: MetadataValueType) =>
   Promise<IMetadataUserAttribute | undefined>;

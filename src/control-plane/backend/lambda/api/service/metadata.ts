@@ -12,14 +12,16 @@
  */
 
 import { CMetadataDisplay } from './display';
+import { PipelineServ } from './pipeline';
 import { ApiFail, ApiSuccess } from '../common/types';
-import { groupAssociatedEventParametersByName, groupByParameterByName, pathNodesToAttribute } from '../common/utils';
+import { groupAssociatedEventParametersByName, groupByParameterByName, isNewMetadataVersion, pathNodesToAttribute } from '../common/utils';
 import { IMetadataDisplay, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute } from '../model/metadata';
 import { DynamoDbMetadataStore } from '../store/dynamodb/dynamodb-metadata-store';
 import { MetadataStore } from '../store/metadata-store';
 
 const metadataStore: MetadataStore = new DynamoDbMetadataStore();
 const metadataDisplay: CMetadataDisplay = new CMetadataDisplay();
+const pipelineServ: PipelineServ = new PipelineServ();
 
 export class MetadataEventServ {
 
@@ -60,15 +62,29 @@ export class MetadataEventServ {
     }
   };
 
+  private async listRawEvents(projectId: string, appId: string, associated: boolean) {
+    let rawEvents: IMetadataEvent[] = [];
+    const pipeline = await pipelineServ.getPipelineByProjectId(projectId);
+    if (!pipeline) {
+      return rawEvents;
+    }
+    if (isNewMetadataVersion(pipeline)) {
+      rawEvents = await metadataStore.listEventsV2(projectId, appId);
+    } else {
+      rawEvents = await metadataStore.listEvents(projectId, appId);
+      if (associated) {
+        const eventParameters = await metadataStore.listEventParameters(projectId, appId);
+        rawEvents = groupAssociatedEventParametersByName(rawEvents, eventParameters);
+      }
+    }
+    return rawEvents;
+  }
+
   public async list(req: any, res: any, next: any) {
     try {
       const { projectId, appId, attribute } = req.query;
-      let events = await metadataStore.listEvents(projectId, appId);
       const associated = attribute && attribute === 'true';
-      if (associated) {
-        const eventParameters = await metadataStore.listEventParameters(projectId, appId);
-        events = groupAssociatedEventParametersByName(events, eventParameters);
-      }
+      let events = await this.listRawEvents(projectId, appId, associated);
       events = await metadataDisplay.patch(projectId, appId, events) as IMetadataEvent[];
       return res.json(new ApiSuccess({
         totalCount: events.length,
@@ -79,17 +95,34 @@ export class MetadataEventServ {
     }
   };
 
-  public async details(req: any, res: any, next: any) {
-    try {
-      const { name } = req.params;
-      const { projectId, appId } = req.query;
-      let event = await metadataStore.getEvent(projectId, appId, name);
+  private async getRawEvent(projectId: string, appId: string, name: string) {
+    let event: IMetadataEvent | undefined;
+    const pipeline = await pipelineServ.getPipelineByProjectId(projectId);
+    if (!pipeline) {
+      return event;
+    }
+    if (isNewMetadataVersion(pipeline)) {
+      event = await metadataStore.getEventV2(projectId, appId, name);
+    } else {
+      event = await metadataStore.getEvent(projectId, appId, name);
       if (!event) {
-        return res.status(404).json(new ApiFail('Event not found'));
+        return event;
       }
       let eventParameters = await metadataStore.listEventParameters(projectId, appId);
       eventParameters = groupByParameterByName(eventParameters, name);
       event.associatedParameters = eventParameters.filter((r: IMetadataEventParameter) => r.eventName === name);
+    }
+    return event;
+  }
+
+  public async details(req: any, res: any, next: any) {
+    try {
+      const { name } = req.params;
+      const { projectId, appId } = req.query;
+      let event = await this.getRawEvent(projectId, appId, name);
+      if (!event) {
+        return res.status(404).json(new ApiFail('Event not found'));
+      }
       event = (await metadataDisplay.patch(projectId, appId, [event]) as IMetadataEvent[])[0];
       return res.json(new ApiSuccess(event));
     } catch (error) {
@@ -99,12 +132,26 @@ export class MetadataEventServ {
 }
 
 export class MetadataEventParameterServ {
+  private async listRawParameters(projectId: string, appId: string) {
+    let rawEventParameters: IMetadataEventParameter[] = [];
+    const pipeline = await pipelineServ.getPipelineByProjectId(projectId);
+    if (!pipeline) {
+      return rawEventParameters;
+    }
+    if (isNewMetadataVersion(pipeline)) {
+      rawEventParameters = await metadataStore.listEventParametersV2(projectId, appId);
+    } else {
+      const results = await metadataStore.listEventParameters(projectId, appId);
+      rawEventParameters = groupByParameterByName(results);
+    }
+    return rawEventParameters;
+  }
+
   public async list(req: any, res: any, next: any) {
     try {
       const { projectId, appId } = req.query;
-      let results = await metadataStore.listEventParameters(projectId, appId);
-      results = groupByParameterByName(results);
-      results = await metadataDisplay.patch(projectId, appId, results) as IMetadataEventParameter[];
+      const parameters = await this.listRawParameters(projectId, appId);
+      const results = await metadataDisplay.patch(projectId, appId, parameters) as IMetadataEventParameter[];
       return res.json(new ApiSuccess({
         totalCount: results.length,
         items: results,

@@ -747,10 +747,32 @@ function getLatestEventByName(metadata: IMetadataRaw[]): IMetadataEvent[] {
   return latestEvents;
 }
 
-function getLatestParameterById(metadata: IMetadataRaw[]): IMetadataEventParameter[] {
-  const latestEventParameters: IMetadataEventParameter[] = [];
-  for (let meta of metadata) {
+function rawToEvent(metadataArray: IMetadataRaw[]): IMetadataEvent[] {
+  const events: IMetadataEvent[] = [];
+  for (let meta of metadataArray) {
     const lastDayData = getDataFromYesterday([meta]);
+    const event: IMetadataEvent = {
+      id: meta.id,
+      month: meta.month,
+      prefix: meta.prefix,
+      projectId: meta.projectId,
+      appId: meta.appId,
+      name: meta.name,
+      hasData: lastDayData.hasData,
+      platform: meta.summary.platform ?? [],
+      sdkVersion: meta.summary.sdkVersion ?? [],
+      sdkName: meta.summary.sdkName ?? [],
+      dataVolumeLastDay: lastDayData.dataVolumeLastDay,
+      associatedParameters: summaryToEventParameter(meta.projectId, meta.appId, meta.summary.associatedParameters),
+    };
+    events.push(event);
+  }
+  return events;
+}
+
+function rawToParameter(metadataArray: IMetadataRaw[]): IMetadataEventParameter[] {
+  const parameters: IMetadataEventParameter[] = [];
+  for (let meta of metadataArray) {
     const parameter: IMetadataEventParameter = {
       id: meta.id,
       month: meta.month,
@@ -759,7 +781,52 @@ function getLatestParameterById(metadata: IMetadataRaw[]): IMetadataEventParamet
       appId: meta.appId,
       name: meta.name,
       eventName: meta.eventName ?? '',
-      hasData: lastDayData.hasData,
+      platform: meta.summary.platform ?? [],
+      category: meta.category ?? ConditionCategory.OTHER,
+      valueType: meta.valueType ?? MetadataValueType.STRING,
+      valueEnum: meta.summary.valueEnum ?? [],
+      associatedEvents: summaryToEvent(meta.projectId, meta.appId, meta.summary.associatedEvents),
+    };
+    parameters.push(parameter);
+  }
+  return parameters;
+}
+
+function summaryToEventParameter(projectId: string, appId: string, metadataArray: ISummaryEventParameter[] | undefined): IMetadataEventParameter[] {
+  const parameters: IMetadataEventParameter[] = [];
+  if (!metadataArray) {
+    return parameters;
+  }
+  for (let meta of metadataArray) {
+    const category = meta.category ?? ConditionCategory.OTHER;
+    const valueType = meta.valueType ?? MetadataValueType.STRING;
+    const parameter: IMetadataEventParameter = {
+      id: `${projectId}#${appId}#${category}#${valueType}`,
+      month: 'latest',
+      prefix: `EVENT_PARAMETER#${projectId}#${appId}`,
+      projectId: projectId,
+      appId: appId,
+      name: meta.name,
+      category: category,
+      valueType: valueType,
+      platform: [],
+    };
+    parameters.push(parameter);
+  }
+  return parameters;
+}
+
+function getLatestParameterById(metadata: IMetadataRaw[]): IMetadataEventParameter[] {
+  const latestEventParameters: IMetadataEventParameter[] = [];
+  for (let meta of metadata) {
+    const parameter: IMetadataEventParameter = {
+      id: meta.id,
+      month: meta.month,
+      prefix: meta.prefix,
+      projectId: meta.projectId,
+      appId: meta.appId,
+      name: meta.name,
+      eventName: meta.eventName ?? '',
       platform: meta.summary.platform ?? [],
       category: meta.category ?? ConditionCategory.OTHER,
       valueType: meta.valueType ?? MetadataValueType.STRING,
@@ -840,7 +907,6 @@ function getLatestAttributeByName(metadata: IMetadataRaw[]): IMetadataUserAttrib
       projectId: meta.projectId,
       appId: meta.appId,
       name: meta.name,
-      hasData: meta.summary.hasData ?? false,
       category: meta.category ?? ConditionCategory.OTHER,
       valueType: meta.valueType ?? MetadataValueType.STRING,
       valueEnum: meta.summary.valueEnum ?? [],
@@ -934,7 +1000,7 @@ function pipelineAnalysisStudioEnabled(pipeline: IPipeline): boolean {
   ) {
     return true;
   }
-  return false;
+  return true;
 };
 
 function getStackVersion(pipeline: IPipeline, stackType: PipelineStackType): string | undefined {
@@ -1141,6 +1207,11 @@ function _getRunningStatus(lastAction: string) {
       break;
   }
   return status;
+};
+
+function isNewMetadataVersion(pipeline: IPipeline) {
+  const oldVersions = ['v1.0.0', 'v1.0.1', 'v1.1.1'];
+  return !oldVersions.includes(pipeline.templateVersion ?? '');
 }
 
 export {
@@ -1192,4 +1263,6 @@ export {
   getStateMachineExecutionName,
   getPipelineStatusType,
   getPipelineLastActionFromStacksStatus,
+  isNewMetadataVersion,
+  rawToEvent,
 };
