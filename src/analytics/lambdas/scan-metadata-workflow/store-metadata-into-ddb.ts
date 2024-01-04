@@ -561,14 +561,18 @@ function aggEventSummary(itemsMap: Map<string, any>, metadataItems: any[]) {
     const platformSet: Set<string> = new Set();
     const sdkVersionSet: Set<string> = new Set();
     const sdkNameSet: Set<string> = new Set();
+    let maxDayNumber = 0;
     for (const key in item) {
       if (key.startsWith('day')) {
+        const currentDayNumber = parseInt(key.substring(3));
+        maxDayNumber = Math.max(maxDayNumber, currentDayNumber);
         const dayData = item[key];
         dayData.platform?.forEach((element: string) => platformSet.add(element));
         dayData.sdkVersion?.forEach((element: string) => sdkVersionSet.add(element));
         dayData.sdkName?.forEach((element: string) => sdkNameSet.add(element));
       }
     }
+    item.summary.latestCount = item[`day${maxDayNumber}`].count;
     item.summary.platform = Array.from(platformSet);
     item.summary.sdkVersion = Array.from(sdkVersionSet);
     item.summary.sdkName = Array.from(sdkNameSet);

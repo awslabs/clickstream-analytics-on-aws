@@ -70,13 +70,13 @@ describe('Lambda - store the metadata into DDB from Redshift', () => {
         Records: genEventParameterDistinctIdAndMonth(['#202311']),
       })
       .resolvesOnce({
-        Records: genEventParameterMetadata(['#202311'], [9, 11, 12]),
+        Records: genEventParameterMetadata(['#202311'], [9, 11, 12, 14]),
       })
       .resolvesOnce({
         Records: genEventDistinctIdAndMonth(['#202311']),
       })
       .resolvesOnce({
-        Records: genEventMetadata(['#202311'], [9, 11, 12]),
+        Records: genEventMetadata(['#202311'], [9, 11, 12, 14]),
       })
       .resolvesOnce({
         Records: genUserAttributeDistinctIdAndMonth('#202311'),
@@ -124,12 +124,12 @@ describe('Lambda - store the metadata into DDB from Redshift', () => {
         ClickstreamAnalyticsMetadata: [
           {
             PutRequest: {
-              Item: genParameterItemExpect('#202311', [9, 11, 12]),
+              Item: genParameterItemExpect('#202311', [9, 11, 12, 14]),
             },
           },
           {
             PutRequest: {
-              Item: genEventItemExpect('#202311', [9, 11, 12]),
+              Item: genEventItemExpect('#202311', [9, 11, 12, 14]),
             },
           },
           {
@@ -1108,6 +1108,7 @@ function genGetCommandEventItemFromDDB(originMonth: string, dayNumber: number, i
       platform: [`ANDROID${dayNumber}`, `IOS${dayNumber}`],
       sdkVersion: [`Version${dayNumber}`],
       sdkName: [`sdkA${dayNumber}`, `sdkB${dayNumber}`],
+      latestCount: 20 + dayNumber,
       associatedParameters: [
         {
           category: 'category',
@@ -1274,6 +1275,7 @@ function genEventItemExpect(month: string, dayNumberList: number[], inputMonth: 
 
   item.summary = {
     platform: platform,
+    latestCount: 20 + dayNumberList[dayNumberList.length - 1],
     sdkVersion: sdkVersion,
     sdkName: sdkName,
     associatedParameters: associatedParameters,
