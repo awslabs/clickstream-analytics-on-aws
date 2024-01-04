@@ -51,9 +51,18 @@ async function _handler(event: CdkCustomResourceEvent) {
   intervalSeconds = Math.max(60, intervalSeconds);
   intervalSeconds = Math.floor(intervalSeconds / 60) * 60;
 
+  let scanWorkflowMinIntervalSeconds = 86400;
+  if (event.ResourceProperties.scanWorkflowMinInterval) {
+    const parsedValue = parseInt(event.ResourceProperties.scanWorkflowMinInterval, 10);
+    if (!isNaN(parsedValue)) {
+      scanWorkflowMinIntervalSeconds = Math.min(86400, parsedValue * 60);
+    }
+  }
+
   return {
     Data: {
       intervalSeconds,
+      scanWorkflowMinIntervalSeconds: scanWorkflowMinIntervalSeconds,
     },
   };
 }
