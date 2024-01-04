@@ -24,7 +24,7 @@ import {
 } from '../../common/types';
 import { IPipeline } from '../../model/pipeline';
 
-const BASE_PIPELINE_ATTRIBUTES = {
+export const BASE_PIPELINE_ATTRIBUTES = {
   id: MOCK_PROJECT_ID,
   projectId: MOCK_PROJECT_ID,
   prefix: 'PIPELINE',
@@ -934,6 +934,7 @@ export const BASE_STATUS = {
   status: PipelineStatusType.ACTIVE,
   stackDetails: [
     {
+      stackId: `arn:aws:cloudformation:ap-southeast-1:111122223333:stack/Clickstream-KafkaConnector-${MOCK_PIPELINE_ID}/00000000-0000-0000-0000-000000000000`,
       stackName: `Clickstream-KafkaConnector-${MOCK_PIPELINE_ID}`,
       stackType: PipelineStackType.KAFKA_CONNECTOR,
       stackStatus: StackStatus.CREATE_COMPLETE,
@@ -942,6 +943,7 @@ export const BASE_STATUS = {
       outputs: [],
     },
     {
+      stackId: `arn:aws:cloudformation:ap-southeast-1:111122223333:stack/Clickstream-Ingestion-kafka-${MOCK_PIPELINE_ID}/00000000-0000-0000-0000-000000000000`,
       stackName: `Clickstream-Ingestion-kafka-${MOCK_PIPELINE_ID}`,
       stackType: PipelineStackType.INGESTION,
       stackStatus: StackStatus.CREATE_COMPLETE,
@@ -950,6 +952,7 @@ export const BASE_STATUS = {
       outputs: [],
     },
     {
+      stackId: `arn:aws:cloudformation:ap-southeast-1:111122223333:stack/Clickstream-DataProcessing-${MOCK_PIPELINE_ID}/00000000-0000-0000-0000-000000000000`,
       stackName: `Clickstream-DataProcessing-${MOCK_PIPELINE_ID}`,
       stackType: PipelineStackType.DATA_PROCESSING,
       stackStatus: StackStatus.CREATE_COMPLETE,
@@ -958,6 +961,7 @@ export const BASE_STATUS = {
       outputs: [],
     },
     {
+      stackId: `arn:aws:cloudformation:ap-southeast-1:111122223333:stack/Clickstream-DataModelingRedshift-${MOCK_PIPELINE_ID}/00000000-0000-0000-0000-000000000000`,
       stackName: `Clickstream-DataModelingRedshift-${MOCK_PIPELINE_ID}`,
       stackType: PipelineStackType.DATA_MODELING_REDSHIFT,
       stackStatus: StackStatus.CREATE_COMPLETE,
@@ -966,6 +970,7 @@ export const BASE_STATUS = {
       outputs: [],
     },
     {
+      stackId: `arn:aws:cloudformation:ap-southeast-1:111122223333:stack/Clickstream-Reporting-${MOCK_PIPELINE_ID}/00000000-0000-0000-0000-000000000000`,
       stackName: `Clickstream-Reporting-${MOCK_PIPELINE_ID}`,
       stackType: PipelineStackType.REPORTING,
       stackStatus: StackStatus.CREATE_COMPLETE,
@@ -983,6 +988,7 @@ export const BASE_STATUS = {
       ],
     },
     {
+      stackId: `arn:aws:cloudformation:ap-southeast-1:111122223333:stack/Clickstream-Metrics-${MOCK_PIPELINE_ID}/00000000-0000-0000-0000-000000000000`,
       stackName: `Clickstream-Metrics-${MOCK_PIPELINE_ID}`,
       stackType: PipelineStackType.METRICS,
       stackStatus: StackStatus.CREATE_COMPLETE,
