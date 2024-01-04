@@ -3044,7 +3044,7 @@ describe('Should set metrics widgets', () => {
       Period: {
         'Fn::GetAtt': [
           Match.anyValue(),
-          'intervalSeconds',
+          'scanWorkflowMinIntervalSeconds',
         ],
       },
     });
@@ -3130,7 +3130,7 @@ describe('Should set metrics widgets', () => {
       Period: {
         'Fn::GetAtt': [
           Match.anyValue(),
-          'intervalSeconds',
+          'scanWorkflowMinIntervalSeconds',
         ],
       },
     });
@@ -3214,7 +3214,7 @@ describe('Should set metrics widgets', () => {
       Period: {
         'Fn::GetAtt': [
           Match.anyValue(),
-          'intervalSeconds',
+          'scanWorkflowMinIntervalSeconds',
         ],
       },
     });
