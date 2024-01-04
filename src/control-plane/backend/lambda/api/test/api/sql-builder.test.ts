@@ -1095,215 +1095,205 @@ describe('SQL Builder test', () => {
       timeEnd: new Date('2025-10-10'),
       groupColumn: ExploreGroupColumn.DAY,
     });
-
     expect(sql.trim().replace(/ /g, '')).toEqual(`
     with
-    base_data as (
-      select
-        event_base.*
-      from
-        (
-          select
-            event_date,
-            event_name,
-            event_id,
-            event_timestamp,
-            platform,
-            device_screen_height,
-            COALESCE(r.user_id, l.user_pseudo_id) as user_pseudo_id,
-            r.user_id,
-            month,
-            week,
-            day,
-            hour
-          from
-            (
-              select
-                event_date,
-                event_name::varchar as event_name,
-                event_id::varchar as event_id,
-                event_timestamp::bigint as event_timestamp,
-                platform::varchar as platform,
-                device.screen_height::bigint as device_screen_height,
-                user_pseudo_id,
-                TO_CHAR(
-                  TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
-                  'YYYY-MM'
-                ) as month,
-                TO_CHAR(
-                  date_trunc(
-                    'week',
-                    TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-                  ),
-                  'YYYY-MM-DD'
-                ) as week,
-                TO_CHAR(
-                  TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
-                  'YYYY-MM-DD'
-                ) as day,
-                TO_CHAR(
-                  TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
-                  'YYYY-MM-DD HH24'
-                ) || '00:00' as hour
-              from
-                shop.event as event
-              where
-                event.event_date >= date '2023-10-01'
-                and event.event_date <= date '2025-10-10'
-                and event.event_name in ('view_item', 'add_to_cart', 'purchase')
-            ) as l
-        join (
-          select
-            user_pseudo_id,
-            user_id
-          from
-            shop.user_m_view
-          group by
-            user_pseudo_id,
-            user_id
-        ) as r on l.user_pseudo_id = r.user_pseudo_id
-        ) as event_base
-      where
-        1 = 1
-        and (
+      base_data as (
+        select
+          event_base.*
+        from
           (
-            event_name = 'view_item'
-            and (
-              platform = 'Android'
-              and device_screen_height <> 1400
+            select
+              event_date,
+              event_name,
+              event_id,
+              event_timestamp,
+              platform,
+              device_screen_height,
+              COALESCE(r.user_id, l.user_pseudo_id) as user_pseudo_id,
+              r.user_id,
+              month,
+              week,
+              day,
+              hour
+            from
+              (
+                select
+                  event_date,
+                  event_name::varchar as event_name,
+                  event_id::varchar as event_id,
+                  event_timestamp::bigint as event_timestamp,
+                  platform::varchar as platform,
+                  device.screen_height::bigint as device_screen_height,
+                  user_pseudo_id,
+                  TO_CHAR(
+                    TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+                    'YYYY-MM'
+                  ) as month,
+                  TO_CHAR(
+                    date_trunc(
+                      'week',
+                      TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
+                    ),
+                    'YYYY-MM-DD'
+                  ) as week,
+                  TO_CHAR(
+                    TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+                    'YYYY-MM-DD'
+                  ) as day,
+                  TO_CHAR(
+                    TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+                    'YYYY-MM-DD HH24'
+                  ) || '00:00' as hour
+                from
+                  shop.event as event
+                where
+                  event.event_date >= date '2023-10-01'
+                  and event.event_date <= date '2025-10-10'
+                  and event.event_name in ('view_item', 'add_to_cart', 'purchase')
+              ) as l
+              join (
+                select
+                  user_pseudo_id,
+                  user_id
+                from
+                  shop.user_m_view
+                group by
+                  user_pseudo_id,
+                  user_id
+              ) as r on l.user_pseudo_id = r.user_pseudo_id
+          ) as event_base
+        where
+          1 = 1
+          and (
+            (
+              event_name = 'view_item'
+              and (
+                platform = 'Android'
+                and device_screen_height <> 1400
+              )
             )
-          )
-          or (
-            event_name = 'add_to_cart'
-            and (
-              platform = 'Android'
-              and device_screen_height <> 1400
+            or (
+              event_name = 'add_to_cart'
+              and (
+                platform = 'Android'
+                and device_screen_height <> 1400
+              )
             )
+            or (event_name = 'purchase')
           )
-          or (event_name = 'purchase')
-        )
-    ),
-    table_0 as (
-      select
-        month,
-        week,
-        day,
-        hour,
-        event_date as event_date_0,
-        event_name as event_name_0,
-        event_timestamp as event_timestamp_0,
-        event_id as event_id_0,
-        user_id as user_id_0,
-        user_pseudo_id as user_pseudo_id_0
-      from
-        base_data base
-      where
-        event_name = 'view_item'
-    ),
-    table_1 as (
-      select
-        event_date as event_date_1,
-        event_name as event_name_1,
-        event_timestamp as event_timestamp_1,
-        event_id as event_id_1,
-        user_id as user_id_1,
-        user_pseudo_id as user_pseudo_id_1
-      from
-        base_data base
-      where
-        event_name = 'add_to_cart'
-    ),
-    table_2 as (
-      select
-        event_date as event_date_2,
-        event_name as event_name_2,
-        event_timestamp as event_timestamp_2,
-        event_id as event_id_2,
-        user_id as user_id_2,
-        user_pseudo_id as user_pseudo_id_2
-      from
-        base_data base
-      where
-        event_name = 'purchase'
-    ),
-    join_table as (
-      select
-        table_0.*,
-        table_1.event_id_1,
-        table_1.event_name_1,
-        table_1.user_pseudo_id_1,
-        table_1.event_timestamp_1,
-        table_2.event_id_2,
-        table_2.event_name_2,
-        table_2.user_pseudo_id_2,
-        table_2.event_timestamp_2
-      from
-        table_0
-        left outer join table_1 on table_0.user_pseudo_id_0 = table_1.user_pseudo_id_1
-        and table_1.event_timestamp_1 - table_0.event_timestamp_0 > 0
-        and table_1.event_timestamp_1 - table_0.event_timestamp_0 <= 600 * 1000
-        left outer join table_2 on table_1.user_pseudo_id_1 = table_2.user_pseudo_id_2
-        and table_2.event_timestamp_2 - table_1.event_timestamp_1 > 0
-        and table_2.event_timestamp_2 - table_0.event_timestamp_0 <= 600 * 1000
-    ),
-    final_table as (
-      select
-        month,
-        week,
-        day,
-        hour,
-        event_id_0 as e_id_0,
-        '1_' || event_name_0 as e_name_0,
-        user_pseudo_id_0 as u_id_0,
-        event_id_1 as e_id_1,
-        '2_' || event_name_1 as e_name_1,
-        user_pseudo_id_1 as u_id_1,
-        event_id_2 as e_id_2,
-        '3_' || event_name_2 as e_name_2,
-        user_pseudo_id_2 as u_id_2
-      from
-        join_table
-      group by
-        month,
-        week,
-        day,
-        hour,
-        event_id_0,
-        '1_' || event_name_0,
-        user_pseudo_id_0,
-        event_id_1,
-        '2_' || event_name_1,
-        user_pseudo_id_1,
-        event_id_2,
-        '3_' || event_name_2,
-        user_pseudo_id_2
-    )
-  select
-    day::date as event_date,
-    e_name_0::varchar as event_name,
-    u_id_0::varchar as x_id
-  from
-    final_table
-  where
-    u_id_0 is not null
-  union all
-  select
-    day::date as event_date,
-    e_name_1::varchar as event_name,
-    u_id_1::varchar as x_id
-  from
-    final_table
-  where
-    u_id_1 is not null
-  union all
-  select
-    day::date as event_date,
-    e_name_2::varchar as event_name,
-    u_id_2::varchar as x_id
-  from
-    final_table
-  where
-    u_id_2 is not null
+      ),
+      table_0 as (
+        select
+          month,
+          week,
+          day,
+          hour,
+          event_date as event_date_0,
+          event_name as event_name_0,
+          event_timestamp as event_timestamp_0,
+          event_id as event_id_0,
+          user_id as user_id_0,
+          user_pseudo_id as user_pseudo_id_0
+        from
+          base_data base
+        where
+          event_name = 'view_item'
+      ),
+      table_1 as (
+        select
+          event_date as event_date_1,
+          event_name as event_name_1,
+          event_timestamp as event_timestamp_1,
+          event_id as event_id_1,
+          user_id as user_id_1,
+          user_pseudo_id as user_pseudo_id_1
+        from
+          base_data base
+        where
+          event_name = 'add_to_cart'
+      ),
+      table_2 as (
+        select
+          event_date as event_date_2,
+          event_name as event_name_2,
+          event_timestamp as event_timestamp_2,
+          event_id as event_id_2,
+          user_id as user_id_2,
+          user_pseudo_id as user_pseudo_id_2
+        from
+          base_data base
+        where
+          event_name = 'purchase'
+      ),
+      join_table as (
+        select
+          table_0.*,
+          table_1.event_id_1,
+          table_1.event_name_1,
+          table_1.user_pseudo_id_1,
+          table_1.event_timestamp_1,
+          table_2.event_id_2,
+          table_2.event_name_2,
+          table_2.user_pseudo_id_2,
+          table_2.event_timestamp_2
+        from
+          table_0
+          left outer join table_1 on table_0.user_pseudo_id_0 = table_1.user_pseudo_id_1
+          and table_1.event_timestamp_1 - table_0.event_timestamp_0 > 0
+          and table_1.event_timestamp_1 - table_0.event_timestamp_0 <= 600 * 1000
+          left outer join table_2 on table_1.user_pseudo_id_1 = table_2.user_pseudo_id_2
+          and table_2.event_timestamp_2 - table_1.event_timestamp_1 > 0
+          and table_2.event_timestamp_2 - table_0.event_timestamp_0 <= 600 * 1000
+      ),
+      seq_table as (
+        select
+          0 as seq
+        union all
+        select
+          1 as seq
+        union all
+        select
+          2 as seq
+      ),
+      final_table as (
+        select
+          day,
+          user_pseudo_id_0,
+          user_pseudo_id_1,
+          user_pseudo_id_2,
+          max(
+            case
+              when user_pseudo_id_1 is null
+              and user_pseudo_id_2 is null then user_pseudo_id_0
+              when user_pseudo_id_1 is not null
+              and user_pseudo_id_2 is null then user_pseudo_id_1
+              else user_pseudo_id_2
+            end
+          ) as user_pseudo_id,
+          max(
+            case
+              when user_pseudo_id_1 is null
+              and user_pseudo_id_2 is null then '1_' || event_name_0
+              when user_pseudo_id_1 is not null
+              and user_pseudo_id_2 is null then '2_' || event_name_1
+              else '3_' || event_name_2
+            end
+          ) as event_name
+        from
+          join_table
+          join seq_table on 1 = 1
+        group by
+          day,
+          user_pseudo_id_0,
+          user_pseudo_id_1,
+          user_pseudo_id_2
+      )
+    select
+      day::date,
+      event_name,
+      user_pseudo_id
+    from
+      final_table
   `.trim().replace(/ /g, ''),
     );
 
@@ -5270,7 +5260,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildFunnelTableView( {
       schemaName: 'shop',
-      computeMethod: ExploreComputeMethod.USER_ID_CNT,
+      computeMethod: ExploreComputeMethod.USER_CNT,
       specifyJoinColumn: true,
       joinColumn: 'user_pseudo_id',
       conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
@@ -5981,64 +5971,55 @@ describe('SQL Builder test', () => {
           and table_2.event_timestamp_2 - table_1.event_timestamp_1 > 0
           and table_2.event_timestamp_2 - table_0.event_timestamp_0 <= 600 * 1000
       ),
+      seq_table as (
+        select
+          0 as seq
+        union all
+        select
+          1 as seq
+        union all
+        select
+          2 as seq
+      ),
       final_table as (
         select
-          month,
-          week,
           day,
-          hour,
-          event_id_0 as e_id_0,
-          '1_' || event_name_0 as e_name_0,
-          user_pseudo_id_0 as u_id_0,
-          event_id_1 as e_id_1,
-          '2_' || event_name_1 as e_name_1,
-          user_pseudo_id_1 as u_id_1,
-          event_id_2 as e_id_2,
-          '3_' || event_name_2 as e_name_2,
-          user_pseudo_id_2 as u_id_2
+          user_pseudo_id_0,
+          user_pseudo_id_1,
+          user_pseudo_id_2,
+          max(
+            case
+              when user_pseudo_id_1 is null
+              and user_pseudo_id_2 is null then user_pseudo_id_0
+              when user_pseudo_id_1 is not null
+              and user_pseudo_id_2 is null then user_pseudo_id_1
+              else user_pseudo_id_2
+            end
+          ) as user_pseudo_id,
+          max(
+            case
+              when user_pseudo_id_1 is null
+              and user_pseudo_id_2 is null then '1_' || event_name_0
+              when user_pseudo_id_1 is not null
+              and user_pseudo_id_2 is null then '2_' || event_name_1
+              else '3_' || event_name_2
+            end
+          ) as event_name
         from
           join_table
+          join seq_table on 1 = 1
         group by
-          month,
-          week,
           day,
-          hour,
-          event_id_0,
-          '1_' || event_name_0,
           user_pseudo_id_0,
-          event_id_1,
-          '2_' || event_name_1,
           user_pseudo_id_1,
-          event_id_2,
-          '3_' || event_name_2,
           user_pseudo_id_2
       )
     select
-      day::date as event_date,
-      e_name_0::varchar as event_name,
-      u_id_0::varchar as x_id
+      day::date,
+      event_name,
+      user_pseudo_id
     from
       final_table
-    where
-      u_id_0 is not null
-    union all
-    select
-      day::date as event_date,
-      e_name_1::varchar as event_name,
-      u_id_1::varchar as x_id
-    from
-      final_table
-    where
-      u_id_1 is not null
-    union all
-    select
-      day::date as event_date,
-      e_name_2::varchar as event_name,
-      u_id_2::varchar as x_id
-    from
-      final_table
-    where
-      u_id_2 is not null
   `.trim().replace(/ /g, ''),
     );
 
@@ -9830,42 +9811,42 @@ describe('SQL Builder test', () => {
               event_id::varchar as event_id,
               event_timestamp::bigint as event_timestamp,
               user_pseudo_id,
-          TO_CHAR(
-            TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
-            'YYYY-MM'
-          ) as month,
-          TO_CHAR(
-            date_trunc(
-              'week',
-              TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-            ),
-            'YYYY-MM-DD'
-          ) as week,
-          TO_CHAR(
-            TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
-            'YYYY-MM-DD'
-          ) as day,
-          TO_CHAR(
-            TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
-            'YYYY-MM-DD HH24'
-          ) || '00:00' as hour
-        from
-          shop.event as event
-        where
-          event.event_date >= date '2023-10-01'
-          and event.event_date <= date '2025-10-10'
-          and event.event_name in ('view_item', 'add_to_cart', 'purchase')
-        ) as l
-        join (
-          select
-            user_pseudo_id,
-            user_id
-          from
-            shop.user_m_view
-          group by
-            user_pseudo_id,
-            user_id
-        ) as r on l.user_pseudo_id = r.user_pseudo_id
+              TO_CHAR(
+                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+                'YYYY-MM'
+              ) as month,
+              TO_CHAR(
+                date_trunc(
+                  'week',
+                  TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
+                ),
+                'YYYY-MM-DD'
+              ) as week,
+              TO_CHAR(
+                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+                'YYYY-MM-DD'
+              ) as day,
+              TO_CHAR(
+                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+                'YYYY-MM-DD HH24'
+              ) || '00:00' as hour
+            from
+              shop.event as event
+            where
+              event.event_date >= date '2023-10-01'
+              and event.event_date <= date '2025-10-10'
+              and event.event_name in ('view_item', 'add_to_cart', 'purchase')
+          ) as l
+          join (
+            select
+              user_pseudo_id,
+              user_id
+            from
+              shop.user_m_view
+            group by
+              user_pseudo_id,
+              user_id
+          ) as r on l.user_pseudo_id = r.user_pseudo_id
       ),
       base_data as (
         select
@@ -9931,7 +9912,7 @@ describe('SQL Builder test', () => {
           event_id as event_id_0,
           user_id as user_id_0,
           user_pseudo_id as user_pseudo_id_0,
-          COALESCE(_session_id::varchar,'null') as _session_id_0
+          COALESCE(_session_id::varchar, 'null') as _session_id_0
         from
           base_data base
         where
@@ -9945,7 +9926,7 @@ describe('SQL Builder test', () => {
           event_id as event_id_1,
           user_id as user_id_1,
           user_pseudo_id as user_pseudo_id_1,
-          COALESCE(_session_id::varchar,'null') as _session_id_1
+          COALESCE(_session_id::varchar, 'null') as _session_id_1
         from
           base_data base
         where
@@ -9959,7 +9940,7 @@ describe('SQL Builder test', () => {
           event_id as event_id_2,
           user_id as user_id_2,
           user_pseudo_id as user_pseudo_id_2,
-          COALESCE(_session_id::varchar,'null') as _session_id_2
+          COALESCE(_session_id::varchar, 'null') as _session_id_2
         from
           base_data base
         where
@@ -10001,73 +9982,65 @@ describe('SQL Builder test', () => {
             'YYYY-MM-DD'
           )
       ),
+      seq_table as (
+        select
+          0 as seq
+        union all
+        select
+          1 as seq
+        union all
+        select
+          2 as seq
+      ),
       final_table as (
         select
-          month,
-          week,
           day,
-          hour,
-          event_id_0 as e_id_0,
-          '1_' || event_name_0 as e_name_0,
-          user_pseudo_id_0 as u_id_0,
-          _session_id_0 as group_col_0,
-          event_id_1 as e_id_1,
-          '2_' || event_name_1 as e_name_1,
-          user_pseudo_id_1 as u_id_1,
-          _session_id_1 as group_col_1,
-          event_id_2 as e_id_2,
-          '3_' || event_name_2 as e_name_2,
-          user_pseudo_id_2 as u_id_2,
-          _session_id_2 as group_col_2
+          user_pseudo_id_0,
+          user_pseudo_id_1,
+          user_pseudo_id_2,
+          max(
+            case
+              when user_pseudo_id_1 is null
+              and user_pseudo_id_2 is null then user_pseudo_id_0
+              when user_pseudo_id_1 is not null
+              and user_pseudo_id_2 is null then user_pseudo_id_1
+              else user_pseudo_id_2
+            end
+          ) as user_pseudo_id,
+          max(
+            case
+              when user_pseudo_id_1 is null
+              and user_pseudo_id_2 is null then '1_' || event_name_0
+              when user_pseudo_id_1 is not null
+              and user_pseudo_id_2 is null then '2_' || event_name_1
+              else '3_' || event_name_2
+            end
+          ) as event_name,
+          max(
+            case
+              when user_pseudo_id_1 is null
+              and user_pseudo_id_2 is null then _session_id_0
+              when user_pseudo_id_1 is not null
+              and user_pseudo_id_2 is null then _session_id_1
+              else _session_id_2
+            end
+          ) as group_col
         from
           join_table
+          join seq_table on 1 = 1
         group by
-          month,
-          week,
           day,
-          hour,
-          event_id_0,
-          '1_' || event_name_0,
           user_pseudo_id_0,
-          _session_id_0,
-          event_id_1,
-          '2_' || event_name_1,
           user_pseudo_id_1,
-          _session_id_1,
-          event_id_2,
-          '3_' || event_name_2,
-          user_pseudo_id_2,
-          _session_id_2
+          user_pseudo_id_2
       )
     select
-      day::date as event_date,
-      e_name_0::varchar as event_name,
-      u_id_0::varchar as x_id,
-      group_col_0::varchar as group_col
+      day::date,
+      event_name,
+      user_pseudo_id,
+      group_col
     from
       final_table
-    where
-      u_id_0 is not null
-    union all
-    select
-      day::date as event_date,
-      e_name_1::varchar as event_name,
-      u_id_1::varchar as x_id,
-      group_col_1::varchar as group_col
-    from
-      final_table
-    where
-      u_id_1 is not null
-    union all
-    select
-      day::date as event_date,
-      e_name_2::varchar as event_name,
-      u_id_2::varchar as x_id,
-      group_col_2::varchar as group_col
-    from
-      final_table
-    where
-      u_id_2 is not null
   `.trim().replace(/ /g, ''),
     );
 
@@ -10165,42 +10138,42 @@ describe('SQL Builder test', () => {
               event_timestamp::bigint as event_timestamp,
               geo.country::varchar as geo_country,
               user_pseudo_id,
-          TO_CHAR(
-            TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
-            'YYYY-MM'
-          ) as month,
-          TO_CHAR(
-            date_trunc(
-              'week',
-              TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-            ),
-            'YYYY-MM-DD'
-          ) as week,
-          TO_CHAR(
-            TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
-            'YYYY-MM-DD'
-          ) as day,
-          TO_CHAR(
-            TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
-            'YYYY-MM-DD HH24'
-          ) || '00:00' as hour
-        from
-          shop.event as event
-        where
-          event.event_date >= date '2023-10-01'
-          and event.event_date <= date '2025-10-10'
-          and event.event_name in ('view_item', 'add_to_cart', 'purchase')
-        ) as l
-        join (
-          select
-            user_pseudo_id,
-            user_id
-          from
-            shop.user_m_view
-          group by
-            user_pseudo_id,
-            user_id
-        ) as r on l.user_pseudo_id = r.user_pseudo_id
+              TO_CHAR(
+                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+                'YYYY-MM'
+              ) as month,
+              TO_CHAR(
+                date_trunc(
+                  'week',
+                  TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
+                ),
+                'YYYY-MM-DD'
+              ) as week,
+              TO_CHAR(
+                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+                'YYYY-MM-DD'
+              ) as day,
+              TO_CHAR(
+                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+                'YYYY-MM-DD HH24'
+              ) || '00:00' as hour
+            from
+              shop.event as event
+            where
+              event.event_date >= date '2023-10-01'
+              and event.event_date <= date '2025-10-10'
+              and event.event_name in ('view_item', 'add_to_cart', 'purchase')
+          ) as l
+          join (
+            select
+              user_pseudo_id,
+              user_id
+            from
+              shop.user_m_view
+            group by
+              user_pseudo_id,
+              user_id
+          ) as r on l.user_pseudo_id = r.user_pseudo_id
       ),
       base_data as (
         select
@@ -10249,7 +10222,7 @@ describe('SQL Builder test', () => {
           event_id as event_id_0,
           user_id as user_id_0,
           user_pseudo_id as user_pseudo_id_0,
-          COALESCE(geo_country::varchar,'null') as geo_country_0
+          COALESCE(geo_country::varchar, 'null') as geo_country_0
         from
           base_data base
         where
@@ -10263,7 +10236,7 @@ describe('SQL Builder test', () => {
           event_id as event_id_1,
           user_id as user_id_1,
           user_pseudo_id as user_pseudo_id_1,
-          COALESCE(geo_country::varchar,'null') as geo_country_1
+          COALESCE(geo_country::varchar, 'null') as geo_country_1
         from
           base_data base
         where
@@ -10277,7 +10250,7 @@ describe('SQL Builder test', () => {
           event_id as event_id_2,
           user_id as user_id_2,
           user_pseudo_id as user_pseudo_id_2,
-          COALESCE(geo_country::varchar,'null') as geo_country_2
+          COALESCE(geo_country::varchar, 'null') as geo_country_2
         from
           base_data base
         where
@@ -10319,73 +10292,65 @@ describe('SQL Builder test', () => {
             'YYYY-MM-DD'
           )
       ),
+      seq_table as (
+        select
+          0 as seq
+        union all
+        select
+          1 as seq
+        union all
+        select
+          2 as seq
+      ),
       final_table as (
         select
-          month,
-          week,
           day,
-          hour,
-          event_id_0 as e_id_0,
-          '1_' || event_name_0 as e_name_0,
-          user_pseudo_id_0 as u_id_0,
-          geo_country_0 as group_col_0,
-          event_id_1 as e_id_1,
-          '2_' || event_name_1 as e_name_1,
-          user_pseudo_id_1 as u_id_1,
-          geo_country_1 as group_col_1,
-          event_id_2 as e_id_2,
-          '3_' || event_name_2 as e_name_2,
-          user_pseudo_id_2 as u_id_2,
-          geo_country_2 as group_col_2
+          user_pseudo_id_0,
+          user_pseudo_id_1,
+          user_pseudo_id_2,
+          max(
+            case
+              when user_pseudo_id_1 is null
+              and user_pseudo_id_2 is null then user_pseudo_id_0
+              when user_pseudo_id_1 is not null
+              and user_pseudo_id_2 is null then user_pseudo_id_1
+              else user_pseudo_id_2
+            end
+          ) as user_pseudo_id,
+          max(
+            case
+              when user_pseudo_id_1 is null
+              and user_pseudo_id_2 is null then '1_' || event_name_0
+              when user_pseudo_id_1 is not null
+              and user_pseudo_id_2 is null then '2_' || event_name_1
+              else '3_' || event_name_2
+            end
+          ) as event_name,
+          max(
+            case
+              when user_pseudo_id_1 is null
+              and user_pseudo_id_2 is null then geo_country_0
+              when user_pseudo_id_1 is not null
+              and user_pseudo_id_2 is null then geo_country_1
+              else geo_country_2
+            end
+          ) as group_col
         from
           join_table
+          join seq_table on 1 = 1
         group by
-          month,
-          week,
           day,
-          hour,
-          event_id_0,
-          '1_' || event_name_0,
           user_pseudo_id_0,
-          geo_country_0,
-          event_id_1,
-          '2_' || event_name_1,
           user_pseudo_id_1,
-          geo_country_1,
-          event_id_2,
-          '3_' || event_name_2,
-          user_pseudo_id_2,
-          geo_country_2
+          user_pseudo_id_2
       )
     select
-      day::date as event_date,
-      e_name_0::varchar as event_name,
-      u_id_0::varchar as x_id,
-      group_col_0::varchar as group_col
+      day::date,
+      event_name,
+      user_pseudo_id,
+      group_col
     from
       final_table
-    where
-      u_id_0 is not null
-    union all
-    select
-      day::date as event_date,
-      e_name_1::varchar as event_name,
-      u_id_1::varchar as x_id,
-      group_col_1::varchar as group_col
-    from
-      final_table
-    where
-      u_id_1 is not null
-    union all
-    select
-      day::date as event_date,
-      e_name_2::varchar as event_name,
-      u_id_2::varchar as x_id,
-      group_col_2::varchar as group_col
-    from
-      final_table
-    where
-      u_id_2 is not null
   `.trim().replace(/ /g, ''),
     );
 
@@ -10484,42 +10449,42 @@ describe('SQL Builder test', () => {
               event_timestamp::bigint as event_timestamp,
               geo.country::varchar as geo_country,
               user_pseudo_id,
-          TO_CHAR(
-            TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
-            'YYYY-MM'
-          ) as month,
-          TO_CHAR(
-            date_trunc(
-              'week',
-              TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-            ),
-            'YYYY-MM-DD'
-          ) as week,
-          TO_CHAR(
-            TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
-            'YYYY-MM-DD'
-          ) as day,
-          TO_CHAR(
-            TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
-            'YYYY-MM-DD HH24'
-          ) || '00:00' as hour
-        from
-          shop.event as event
-        where
-          event.event_date >= date '2023-10-01'
-          and event.event_date <= date '2025-10-10'
-          and event.event_name in ('view_item', 'add_to_cart', 'purchase')
-        ) as l
-        join (
-          select
-            user_pseudo_id,
-            user_id
-          from
-            shop.user_m_view
-          group by
-            user_pseudo_id,
-            user_id
-        ) as r on l.user_pseudo_id = r.user_pseudo_id
+              TO_CHAR(
+                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+                'YYYY-MM'
+              ) as month,
+              TO_CHAR(
+                date_trunc(
+                  'week',
+                  TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
+                ),
+                'YYYY-MM-DD'
+              ) as week,
+              TO_CHAR(
+                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+                'YYYY-MM-DD'
+              ) as day,
+              TO_CHAR(
+                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+                'YYYY-MM-DD HH24'
+              ) || '00:00' as hour
+            from
+              shop.event as event
+            where
+              event.event_date >= date '2023-10-01'
+              and event.event_date <= date '2025-10-10'
+              and event.event_name in ('view_item', 'add_to_cart', 'purchase')
+          ) as l
+          join (
+            select
+              user_pseudo_id,
+              user_id
+            from
+              shop.user_m_view
+            group by
+              user_pseudo_id,
+              user_id
+          ) as r on l.user_pseudo_id = r.user_pseudo_id
       ),
       base_data as (
         select
@@ -10632,69 +10597,57 @@ describe('SQL Builder test', () => {
             'YYYY-MM-DD'
           )
       ),
+      seq_table as (
+        select
+          0 as seq
+        union all
+        select
+          1 as seq
+        union all
+        select
+          2 as seq
+      ),
       final_table as (
         select
-          month,
-          week,
           day,
-          hour,
-          event_id_0 as e_id_0,
-          '1_' || event_name_0 as e_name_0,
-          user_pseudo_id_0 as u_id_0,
-          geo_country_0 as group_col_0,
-          event_id_1 as e_id_1,
-          '2_' || event_name_1 as e_name_1,
-          user_pseudo_id_1 as u_id_1,
-          event_id_2 as e_id_2,
-          '3_' || event_name_2 as e_name_2,
-          user_pseudo_id_2 as u_id_2
+          user_pseudo_id_0,
+          user_pseudo_id_1,
+          user_pseudo_id_2,
+          max(
+            case
+              when user_pseudo_id_1 is null
+              and user_pseudo_id_2 is null then user_pseudo_id_0
+              when user_pseudo_id_1 is not null
+              and user_pseudo_id_2 is null then user_pseudo_id_1
+              else user_pseudo_id_2
+            end
+          ) as user_pseudo_id,
+          max(
+            case
+              when user_pseudo_id_1 is null
+              and user_pseudo_id_2 is null then '1_' || event_name_0
+              when user_pseudo_id_1 is not null
+              and user_pseudo_id_2 is null then '2_' || event_name_1
+              else '3_' || event_name_2
+            end
+          ) as event_name,
+          max(geo_country_0) as group_col
         from
           join_table
+          join seq_table on 1 = 1
         group by
-          month,
-          week,
           day,
-          hour,
-          event_id_0,
-          '1_' || event_name_0,
           user_pseudo_id_0,
-          geo_country_0,
-          event_id_1,
-          '2_' || event_name_1,
           user_pseudo_id_1,
-          event_id_2,
-          '3_' || event_name_2,
           user_pseudo_id_2
       )
     select
-      day::date as event_date,
-      e_name_0::varchar as event_name,
-      u_id_0::varchar as x_id,
-      group_col_0::varchar as group_col
+      day::date,
+      event_name,
+      user_pseudo_id,
+      group_col
     from
       final_table
-    where
-      u_id_0 is not null
-    union all
-    select
-      day::date as event_date,
-      e_name_1::varchar as event_name,
-      u_id_1::varchar as x_id,
-      group_col_0::varchar as group_col
-    from
-      final_table
-    where
-      u_id_1 is not null
-    union all
-    select
-      day::date as event_date,
-      e_name_2::varchar as event_name,
-      u_id_2::varchar as x_id,
-      group_col_0::varchar as group_col
-    from
-      final_table
-    where
-      u_id_2 is not null
   `.trim().replace(/ /g, ''),
     );
 
@@ -13036,11 +12989,11 @@ describe('SQL Builder test', () => {
   });
 
 
-  test('buildFunnelView', () => {
+  test('buildFunnelView - event count', () => {
 
     const sql = buildFunnelView({
       schemaName: 'shop',
-      computeMethod: ExploreComputeMethod.USER_CNT,
+      computeMethod: ExploreComputeMethod.EVENT_CNT,
       specifyJoinColumn: true,
       joinColumn: 'user_pseudo_id',
       conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
@@ -13214,42 +13167,42 @@ describe('SQL Builder test', () => {
               platform::varchar as platform,
               geo.country::varchar as geo_country,
               user_pseudo_id,
-          TO_CHAR(
-            TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
-            'YYYY-MM'
-          ) as month,
-          TO_CHAR(
-            date_trunc(
-              'week',
-              TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-            ),
-            'YYYY-MM-DD'
-          ) as week,
-          TO_CHAR(
-            TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
-            'YYYY-MM-DD'
-          ) as day,
-          TO_CHAR(
-            TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
-            'YYYY-MM-DD HH24'
-          ) || '00:00' as hour
-        from
-          shop.event as event
-        where
-          event.event_date >= date '2023-10-01'
-          and event.event_date <= date '2025-10-10'
-          and event.event_name in ('view_item', 'add_to_cart', 'purchase')
-        ) as l
-        join (
-          select
-            user_pseudo_id,
-            user_id
-          from
-            shop.user_m_view
-          group by
-            user_pseudo_id,
-            user_id
-        ) as r on l.user_pseudo_id = r.user_pseudo_id
+              TO_CHAR(
+                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+                'YYYY-MM'
+              ) as month,
+              TO_CHAR(
+                date_trunc(
+                  'week',
+                  TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
+                ),
+                'YYYY-MM-DD'
+              ) as week,
+              TO_CHAR(
+                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+                'YYYY-MM-DD'
+              ) as day,
+              TO_CHAR(
+                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+                'YYYY-MM-DD HH24'
+              ) || '00:00' as hour
+            from
+              shop.event as event
+            where
+              event.event_date >= date '2023-10-01'
+              and event.event_date <= date '2025-10-10'
+              and event.event_name in ('view_item', 'add_to_cart', 'purchase')
+          ) as l
+          join (
+            select
+              user_pseudo_id,
+              user_id
+            from
+              shop.user_m_view
+            group by
+              user_pseudo_id,
+              user_id
+          ) as r on l.user_pseudo_id = r.user_pseudo_id
       ),
       base_data as (
         select
@@ -13331,7 +13284,7 @@ describe('SQL Builder test', () => {
           event_id as event_id_0,
           user_id as user_id_0,
           user_pseudo_id as user_pseudo_id_0,
-          COALESCE(geo_country::varchar,'null') as geo_country_0
+          COALESCE(geo_country::varchar, 'null') as geo_country_0
         from
           base_data base
         where
@@ -13345,7 +13298,7 @@ describe('SQL Builder test', () => {
           event_id as event_id_1,
           user_id as user_id_1,
           user_pseudo_id as user_pseudo_id_1,
-          COALESCE(geo_country::varchar,'null') as geo_country_1
+          COALESCE(geo_country::varchar, 'null') as geo_country_1
         from
           base_data base
         where
@@ -13359,7 +13312,7 @@ describe('SQL Builder test', () => {
           event_id as event_id_2,
           user_id as user_id_2,
           user_pseudo_id as user_pseudo_id_2,
-          COALESCE(geo_country::varchar,'null') as geo_country_2
+          COALESCE(geo_country::varchar, 'null') as geo_country_2
         from
           base_data base
         where
@@ -13389,73 +13342,65 @@ describe('SQL Builder test', () => {
           and table_2.event_timestamp_2 - table_1.event_timestamp_1 > 0
           and table_2.event_timestamp_2 - table_0.event_timestamp_0 <= 600 * 1000
       ),
+      seq_table as (
+        select
+          0 as seq
+        union all
+        select
+          1 as seq
+        union all
+        select
+          2 as seq
+      ),
       final_table as (
         select
-          month,
-          week,
           day,
-          hour,
-          event_id_0 as e_id_0,
-          '1_' || event_name_0 as e_name_0,
-          user_pseudo_id_0 as u_id_0,
-          geo_country_0 as group_col_0,
-          event_id_1 as e_id_1,
-          '2_' || event_name_1 as e_name_1,
-          user_pseudo_id_1 as u_id_1,
-          geo_country_1 as group_col_1,
-          event_id_2 as e_id_2,
-          '3_' || event_name_2 as e_name_2,
-          user_pseudo_id_2 as u_id_2,
-          geo_country_2 as group_col_2
+          event_id_0,
+          event_id_1,
+          event_id_2,
+          max(
+            case
+              when event_id_1 is null
+              and event_id_2 is null then event_id_0
+              when event_id_1 is not null
+              and event_id_2 is null then event_id_1
+              else event_id_2
+            end
+          ) as event_id,
+          max(
+            case
+              when event_id_1 is null
+              and event_id_2 is null then '1_' || event_name_0
+              when event_id_1 is not null
+              and event_id_2 is null then '2_' || event_name_1
+              else '3_' || event_name_2
+            end
+          ) as event_name,
+          max(
+            case
+              when event_id_1 is null
+              and event_id_2 is null then geo_country_0
+              when event_id_1 is not null
+              and event_id_2 is null then geo_country_1
+              else geo_country_2
+            end
+          ) as group_col
         from
           join_table
+          join seq_table on 1 = 1
         group by
-          month,
-          week,
           day,
-          hour,
           event_id_0,
-          '1_' || event_name_0,
-          user_pseudo_id_0,
-          geo_country_0,
           event_id_1,
-          '2_' || event_name_1,
-          user_pseudo_id_1,
-          geo_country_1,
-          event_id_2,
-          '3_' || event_name_2,
-          user_pseudo_id_2,
-          geo_country_2
+          event_id_2
       )
     select
-      day::date as event_date,
-      e_name_0::varchar as event_name,
-      u_id_0::varchar as x_id,
-      group_col_0::varchar as group_col
+      day::date,
+      event_name,
+      event_id,
+      group_col
     from
       final_table
-    where
-      u_id_0 is not null
-    union all
-    select
-      day::date as event_date,
-      e_name_1::varchar as event_name,
-      u_id_1::varchar as x_id,
-      group_col_1::varchar as group_col
-    from
-      final_table
-    where
-      u_id_1 is not null
-    union all
-    select
-      day::date as event_date,
-      e_name_2::varchar as event_name,
-      u_id_2::varchar as x_id,
-      group_col_2::varchar as group_col
-    from
-      final_table
-    where
-      u_id_2 is not null
   `.trim().replace(/ /g, ''),
     );
 
@@ -16573,42 +16518,42 @@ describe('SQL Builder test', () => {
               platform::varchar as platform,
               device.screen_height::bigint as device_screen_height,
               user_pseudo_id,
-          TO_CHAR(
-            TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
-            'YYYY-MM'
-          ) as month,
-          TO_CHAR(
-            date_trunc(
-              'week',
-              TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
-            ),
-            'YYYY-MM-DD'
-          ) as week,
-          TO_CHAR(
-            TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
-            'YYYY-MM-DD'
-          ) as day,
-          TO_CHAR(
-            TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
-            'YYYY-MM-DD HH24'
-          ) || '00:00' as hour
-        from
-          shopping.event as event
-        where
-          event.event_date >= date '2023-10-01'
-          and event.event_date <= date '2025-10-10'
-          and event.event_name in ('view_item', 'add_to_cart', 'purchase')
-        ) as l
-        join (
-          select
-            user_pseudo_id,
-            user_id
-          from
-            shopping.user_m_view
-          group by
-            user_pseudo_id,
-            user_id
-        ) as r on l.user_pseudo_id = r.user_pseudo_id
+              TO_CHAR(
+                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+                'YYYY-MM'
+              ) as month,
+              TO_CHAR(
+                date_trunc(
+                  'week',
+                  TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second'
+                ),
+                'YYYY-MM-DD'
+              ) as week,
+              TO_CHAR(
+                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+                'YYYY-MM-DD'
+              ) as day,
+              TO_CHAR(
+                TIMESTAMP 'epoch' + cast(event_timestamp / 1000 as bigint) * INTERVAL '1 second',
+                'YYYY-MM-DD HH24'
+              ) || '00:00' as hour
+            from
+              shopping.event as event
+            where
+              event.event_date >= date '2023-10-01'
+              and event.event_date <= date '2025-10-10'
+              and event.event_name in ('view_item', 'add_to_cart', 'purchase')
+          ) as l
+          join (
+            select
+              user_pseudo_id,
+              user_id
+            from
+              shopping.user_m_view
+            group by
+              user_pseudo_id,
+              user_id
+          ) as r on l.user_pseudo_id = r.user_pseudo_id
       ),
       base_data as (
         select
@@ -16715,64 +16660,55 @@ describe('SQL Builder test', () => {
           and table_2.event_timestamp_2 - table_1.event_timestamp_1 > 0
           and table_2.event_timestamp_2 - table_0.event_timestamp_0 <= 600 * 1000
       ),
+      seq_table as (
+        select
+          0 as seq
+        union all
+        select
+          1 as seq
+        union all
+        select
+          2 as seq
+      ),
       final_table as (
         select
-          month,
-          week,
           day,
-          hour,
-          event_id_0 as e_id_0,
-          '1_' || event_name_0 as e_name_0,
-          user_pseudo_id_0 as u_id_0,
-          event_id_1 as e_id_1,
-          '2_' || event_name_1 as e_name_1,
-          user_pseudo_id_1 as u_id_1,
-          event_id_2 as e_id_2,
-          '3_' || event_name_2 as e_name_2,
-          user_pseudo_id_2 as u_id_2
+          user_pseudo_id_0,
+          user_pseudo_id_1,
+          user_pseudo_id_2,
+          max(
+            case
+              when user_pseudo_id_1 is null
+              and user_pseudo_id_2 is null then user_pseudo_id_0
+              when user_pseudo_id_1 is not null
+              and user_pseudo_id_2 is null then user_pseudo_id_1
+              else user_pseudo_id_2
+            end
+          ) as user_pseudo_id,
+          max(
+            case
+              when user_pseudo_id_1 is null
+              and user_pseudo_id_2 is null then '1_' || event_name_0
+              when user_pseudo_id_1 is not null
+              and user_pseudo_id_2 is null then '2_' || event_name_1
+              else '3_' || event_name_2
+            end
+          ) as event_name
         from
           join_table
+          join seq_table on 1 = 1
         group by
-          month,
-          week,
           day,
-          hour,
-          event_id_0,
-          '1_' || event_name_0,
           user_pseudo_id_0,
-          event_id_1,
-          '2_' || event_name_1,
           user_pseudo_id_1,
-          event_id_2,
-          '3_' || event_name_2,
           user_pseudo_id_2
       )
     select
-      day::date as event_date,
-      e_name_0::varchar as event_name,
-      u_id_0::varchar as x_id
+      day::date,
+      event_name,
+      user_pseudo_id
     from
       final_table
-    where
-      u_id_0 is not null
-    union all
-    select
-      day::date as event_date,
-      e_name_1::varchar as event_name,
-      u_id_1::varchar as x_id
-    from
-      final_table
-    where
-      u_id_1 is not null
-    union all
-    select
-      day::date as event_date,
-      e_name_2::varchar as event_name,
-      u_id_2::varchar as x_id
-    from
-      final_table
-    where
-      u_id_2 is not null
   `.trim().replace(/ /g, ''),
     );
 
