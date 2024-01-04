@@ -13,128 +13,131 @@
 
 import { DescribeStatementCommand, RedshiftDataClient } from '@aws-sdk/client-redshift-data';
 import { logger } from '../../../common/powertools';
-import { executeStatements, getRedshiftClient } from '../redshift-data';
 import { readS3ObjectAsString } from '../../../common/s3';
+import { executeStatements, getRedshiftClient } from '../redshift-data';
 
 export interface EventType {
-    queryId?: string;
-    sql?: string;
+  queryId?: string;
+  sql?: string;
 }
 
 export interface SubmitSqlResponse {
-    queryId: string;
+  queryId: string;
 }
 
 export interface QueryResponse {
-    status: string;
-    queryId: string;
-    reason?: string;
+  status: string;
+  queryId: string;
+  reason?: string;
 }
 
 export type ResponseType = SubmitSqlResponse | QueryResponse;
 
+const databaseName = process.env.REDSHIFT_DATABASE!;
+const clusterIdentifier = process.env.REDSHIFT_CLUSTER_IDENTIFIER ?? '';
+const dbUser = process.env.REDSHIFT_DB_USER ?? '';
+const workgroupName = process.env.REDSHIFT_SERVERLESS_WORKGROUP_NAME ?? '';
+const dataAPIRole = process.env.REDSHIFT_DATA_API_ROLE!;
+
 export const handler = async (event: EventType): Promise<ResponseType> => {
-
-    try {
-        return await _handler(event);
-    } catch (e) {
-        if (e instanceof Error) {
-            logger.error(e.message, e);
-        }
-        throw e;
+  try {
+    return await _handler(event);
+  } catch (e) {
+    if (e instanceof Error) {
+      logger.error(e.message, e);
     }
-
+    throw e;
+  }
 };
 
 async function _handler(event: EventType): Promise<ResponseType> {
-    logger.info('event', { event });
 
-    const dataAPIRole = process.env.REDSHIFT_DATA_API_ROLE!;
+  const redShiftClient = getRedshiftClient(dataAPIRole);
 
-    const redShiftClient = getRedshiftClient(dataAPIRole);
-
-    if (event.sql) {
-        return submitSql(event.sql, redShiftClient);
-    } else if (event.queryId) {
-        return queryStatus(event.queryId, redShiftClient);
-    } else {
-        logger.error('event', { event });
-        throw new Error('Invalid event');
-    }
+  if (event.sql) {
+    return submitSql(event.sql, redShiftClient);
+  } else if (event.queryId) {
+    return queryStatus(event.queryId, redShiftClient);
+  } else {
+    logger.error('event', { event });
+    throw new Error('Invalid event');
+  }
 }
 
 async function submitSql(sql: string, redShiftClient: RedshiftDataClient): Promise<SubmitSqlResponse> {
-    logger.info('submitSql() sql: ' + sql);
+  logger.info('submitSql() sql: ' + sql);
 
-    const databaseName = process.env.REDSHIFT_DATABASENAME!;
+  const provisionedRedshiftProps = {
+    clusterIdentifier,
+    databaseName,
+    dbUser: dbUser,
+  };
 
-    const clusterIdentifier = process.env.REDSHIFT_CLUSTER_IDENTIFIER ?? '';
-    const dbUser = process.env.REDSHIFT_CLUSTER_DBUSER ?? '';
+  const serverlessRedshiftProps = {
+    workgroupName,
+    databaseName,
+  };
 
-    const workgroupName = process.env.REDSHIFT_WORKGROUPNAME ?? '';
+  const sqlStatements = await getSqlStatement(sql);
 
-    const provisionedRedshiftProps = {
-        clusterIdentifier,
-        databaseName,
-        dbUser: dbUser,
-    };
+  const queryId = await executeStatements(redShiftClient, sqlStatements, serverlessRedshiftProps, provisionedRedshiftProps, databaseName, true);
+  logger.info('submitSql() get queryId: ' + queryId);
 
-    const serverlessRedshiftProps = {
-        workgroupName,
-        databaseName,
-    }
-
-    const sqlStatements = await getSqlStatement(sql);
-
-    const queryId = await executeStatements(redShiftClient, sqlStatements, serverlessRedshiftProps, provisionedRedshiftProps, databaseName, true);
-    logger.info('submitSql() get queryId: ' + queryId);
-
-    return {
-        queryId: queryId!
-    }
+  return {
+    queryId: queryId!,
+  };
 }
 
 async function queryStatus(queryId: string, redShiftClient: RedshiftDataClient): Promise<QueryResponse> {
-    logger.info('queryStatus() queryId: ' + queryId);
+  logger.info('queryStatus() queryId: ' + queryId);
 
-    const checkParams = new DescribeStatementCommand({
-        Id: queryId,
-    });
-    let response = await redShiftClient.send(checkParams);
-    logger.info(`queryId '${queryId}', status: ${response.Status}`);
-    let errorMsg = response.Error;
-    if (response.Status == 'FAILED') {
-        logger.error(`Error: ${response.Error}`);
-    }
+  const checkParams = new DescribeStatementCommand({
+    Id: queryId,
+  });
+  let response = await redShiftClient.send(checkParams);
+  logger.info(`queryId '${queryId}', status: ${response.Status}`);
+  let errorMsg = response.Error;
+  if (response.Status == 'FAILED') {
+    logger.error(`Error: ${response.Error}`);
 
-    return {
-        status: response.Status!,
+    if (errorMsg?.includes('already exists')) {
+      logger.info(`queryId '${queryId}' object already exists, return success`);
+      return {
+        status: 'FINISHED',
         queryId: queryId,
-        reason: errorMsg
+        reason: errorMsg,
+      };
     }
+  }
+
+  return {
+    status: response.Status!,
+    queryId: queryId,
+    reason: errorMsg,
+  };
 }
 
 async function getSqlStatement(sqlOrFile: string): Promise<string[]> {
-    logger.info('getSqlStatement() sqlOrFile: ' + sqlOrFile);
+  logger.info('getSqlStatement() sqlOrFile: ' + sqlOrFile);
 
-    let sql = sqlOrFile;
-    if (sqlOrFile.startsWith('s3://')) {
-        sql = await readSqlFileFromS3(sqlOrFile);
-    }
-    return [sql];
+  let sql = sqlOrFile;
+  if (sqlOrFile.startsWith('s3://')) {
+    sql = await readSqlFileFromS3(sqlOrFile);
+  }
+  return [sql];
 }
 
 async function readSqlFileFromS3(s3Path: string): Promise<string> {
-    logger.info('readSqlFileFromS3() s3Path: ' + s3Path);
+  logger.info('readSqlFileFromS3() s3Path: ' + s3Path);
 
-    const params = {
-        Bucket: s3Path.split('/')[2],
-        Key: s3Path.split('/').slice(3).join('/')
-    };
+  const params = {
+    Bucket: s3Path.split('/')[2],
+    Key: s3Path.split('/').slice(3).join('/'),
+  };
 
-    const sqlString = await readS3ObjectAsString(params.Bucket, params.Key);
-    if (!sqlString) {
-        throw new Error('Failed to read sql file from s3: ' + s3Path);
-    }
-    return sqlString;
+  const sqlString = await readS3ObjectAsString(params.Bucket, params.Key);
+  if (!sqlString) {
+    throw new Error('Failed to read sql file from s3: ' + s3Path);
+  }
+  return sqlString;
 }

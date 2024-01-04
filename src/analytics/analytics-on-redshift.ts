@@ -222,8 +222,11 @@ export class RedshiftAnalyticsStack extends NestedStack {
       dataAPIRole: this.redshiftDataAPIExecRole,
       codePath,
       functionEntry,
-      workflowBucketInfo: props.workflowBucketInfo
+      workflowBucketInfo: props.workflowBucketInfo,
     });
+
+    const sqlExecutionWorkflow = this.applicationSchema.sqlExecutionStepFunctions;
+
     // for upgrading backward compatibility
     (this.applicationSchema.crProvider.node.findChild('framework-onEvent').node.defaultChild as CfnResource)
       .overrideLogicalId('CreateApplicationSchemasRedshiftSchemasCustomResourceProviderframeworkonEventA11E8EDC');
@@ -318,6 +321,7 @@ export class RedshiftAnalyticsStack extends NestedStack {
         scanMetadataWorkflow: scanMetadataWorkflow.scanMetadataWorkflow,
         scanWorkflowMinInterval: props.scanMetadataWorkflowData.scanWorkflowMinInterval,
         clearExpiredEventsWorkflow: clearExpiredEventsWorkflow.clearExpiredEventsWorkflow,
+        sqlExecutionWorkflow,
 
       });
     }
@@ -332,6 +336,7 @@ export class RedshiftAnalyticsStack extends NestedStack {
         scanMetadataWorkflow: scanMetadataWorkflow.scanMetadataWorkflow,
         scanWorkflowMinInterval: props.scanMetadataWorkflowData.scanWorkflowMinInterval,
         clearExpiredEventsWorkflow: clearExpiredEventsWorkflow.clearExpiredEventsWorkflow,
+        sqlExecutionWorkflow,
       });
     }
 
@@ -344,6 +349,7 @@ export class RedshiftAnalyticsStack extends NestedStack {
         scanMetadataWorkflow: scanMetadataWorkflow.scanMetadataWorkflow,
         scanWorkflowMinInterval: props.scanMetadataWorkflowData.scanWorkflowMinInterval,
         clearExpiredEventsWorkflow: clearExpiredEventsWorkflow.clearExpiredEventsWorkflow,
+        sqlExecutionWorkflow,
       });
     }
 
