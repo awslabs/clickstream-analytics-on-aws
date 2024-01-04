@@ -733,12 +733,12 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
   test('Should has 4 StateMachines', () => {
     if (stack.nestedStacks.redshiftServerlessStack) {
       const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
-      nestedTemplate.resourceCountIs('AWS::StepFunctions::StateMachine', 3);
+      nestedTemplate.resourceCountIs('AWS::StepFunctions::StateMachine', 4);
     }
 
     if (stack.nestedStacks.redshiftProvisionedStack) {
       const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftProvisionedStack);
-      nestedTemplate.resourceCountIs('AWS::StepFunctions::StateMachine', 3);
+      nestedTemplate.resourceCountIs('AWS::StepFunctions::StateMachine', 4);
     }
   });
 
@@ -4011,9 +4011,10 @@ describe('DataAnalyticsRedshiftStack tests', () => {
     });
   });
 
-  test('[new Redshift workgroup and namespace] Resources order - custom resource for creating database must depend on creating db user', () => {
+  test('[new Redshift workgroup and namespace] Resources order - custom resource for creating database must depend on SQLExecutionStateMachine/creating db user', () => {
     const customResource = findFirstResourceByKeyPrefix(newServerlessStackTemplate, 'AWS::CloudFormation::CustomResource', 'CreateApplicationSchemasRedshiftSchemasCustomResource7AA8CC71');
-    expect(customResource.resource.DependsOn[0]).toContain('RedshiftServerelssWorkgroupCreateRedshiftServerlessMappingUserCustomResource');
+    expect(customResource.resource.DependsOn[0]).toContain('CreateApplicationSchemasSQLExecutionStateMachine');
+    expect(customResource.resource.DependsOn[3]).toContain('RedshiftServerelssWorkgroupCreateRedshiftServerlessMappingUserCustomResource');
   });
 
   test('stack outputs', () => {

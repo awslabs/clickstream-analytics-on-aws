@@ -26,18 +26,18 @@ import {
   UpdateSecretCommand,
   UpdateSecretCommandInput,
 } from '@aws-sdk/client-secrets-manager';
+import { SFNClient, StartExecutionCommand } from '@aws-sdk/client-sfn';
 import { CdkCustomResourceHandler, CdkCustomResourceEvent, CdkCustomResourceResponse, CloudFormationCustomResourceEvent, Context, CloudFormationCustomResourceUpdateEvent } from 'aws-lambda';
 import { getFunctionTags } from '../../../common/lambda/tags';
 import { BIUserCredential } from '../../../common/model';
 import { logger } from '../../../common/powertools';
+import { putStringToS3 } from '../../../common/s3';
 import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
 import { generateRandomStr, sleep } from '../../../common/utils';
 import { SQL_TEMPLATE_PARAMETER } from '../../private/constant';
 import { CreateDatabaseAndSchemas, MustacheParamType } from '../../private/model';
 import { getSqlContent, getSqlContents } from '../../private/utils';
 import { getRedshiftClient, executeStatementsWithWait } from '../redshift-data';
-import { SFNClient, StartExecutionCommand } from '@aws-sdk/client-sfn';
-import { putStringToS3 } from '../../../common/s3';
 
 export type ResourcePropertiesType = CreateDatabaseAndSchemas & {
   readonly ServiceToken: string;
@@ -128,6 +128,8 @@ async function onCreateOrUpdate(event: CdkCustomResourceEvent, biUsername: strin
   } else {
     throw new Error('Can\'t identity the mode Redshift cluster!');
   }
+
+  const newAddedAppIdList = getNewAddedAppIdList(event);
 
   // 2. create schemas in Redshift for applications
   const schmeaSqlsByAppId: Map<string, string[]> = getCreateOrUpdateSchemasSQL(newAddedAppIdList, props, biUsername);
@@ -259,10 +261,9 @@ function splitString(str: string): string[] {
 
 function getCreateOrUpdateSchemasSQL(newAddedAppIdList: string[], props: ResourcePropertiesType, biUsername: string) {
   const odsTableNames = props.odsTableNames;
-  const appIds = splitString(props.appIds);
   const sqlStatementsByApp = new Map<string, string[]>();
 
-  for (const app of appIds) {
+  for (const app of newAddedAppIdList) {
     const sqlStatements: string[] = [];
     const mustacheParam: MustacheParamType = {
       database_name: props.projectId,
@@ -307,10 +308,9 @@ function _buildGrantSqlStatements(views: string[], schema: string, biUser: strin
 
 function getCreateOrUpdateViewForReportingSQL(newAddedAppIdList: string[], props: ResourcePropertiesType, biUser: string) {
   const odsTableNames = props.odsTableNames;
-  const appIds = splitString(props.appIds);
 
   const sqlStatementsByApp = new Map<string, string[]>();
-  for (const app of appIds) {
+  for (const app of newAddedAppIdList) {
     const sqlStatements: string[] = [];
     const views: string[] = [];
     const mustacheParam: MustacheParamType = {
@@ -358,7 +358,7 @@ const createDatabaseBIUser = async (redshiftClient: RedshiftDataClient, credenti
     await executeStatementsWithWait(redshiftClient, [
       `CREATE USER ${credential.username} PASSWORD '${credential.password}'`,
     ], props.serverlessRedshiftProps, props.provisionedRedshiftProps,
-      props.serverlessRedshiftProps?.databaseName ?? props.provisionedRedshiftProps?.databaseName, false);
+    props.serverlessRedshiftProps?.databaseName ?? props.provisionedRedshiftProps?.databaseName, false);
   } catch (err) {
     if (err instanceof Error) {
       if (err.message.includes('already exists')) {
@@ -375,12 +375,12 @@ const createSchemasInRedshiftAsync = async (sqlStatementsByApp: Map<string, stri
 
   for (const [appId, sqlStatements] of sqlStatementsByApp) {
     logger.info(`creating schema in serverless Redshift for ${appId}`);
-    await executeSqlsInStateMachine(sqlStatements, appId);
+    await executeSqlsByStateMachine(sqlStatements, appId);
     await sleep(process.env.SUBMIT_SQL_INTERVAL_MS ? parseInt(process.env.SUBMIT_SQL_INTERVAL_MS) : 1000);
   };
 };
 
-const executeSqlsInStateMachine = async (sqlStatements: string[], appId: string) => {
+const executeSqlsByStateMachine = async (sqlStatements: string[], appId: string) => {
 
   const s3Paths = [];
   let index = 0;
@@ -399,14 +399,15 @@ const executeSqlsInStateMachine = async (sqlStatements: string[], appId: string)
 
   const params = {
     stateMachineArn: STATE_MACHINE_ARN,
+    name: `${appId}-${timestamp}-${index}`,
     input: JSON.stringify({
       sqls: s3Paths,
     }),
   };
-  logger.info(`executeSqlsInStateMachine()`, { params });
+  logger.info('executeSqlsByStateMachine()', { params });
   try {
     const res = await sfnClient.send(new StartExecutionCommand(params));
-    logger.info(`executeSqlsInStateMachine()`, { res });
+    logger.info('executeSqlsByStateMachine()', { res });
     return res;
   } catch (err) {
     if (err instanceof Error) {
@@ -414,7 +415,7 @@ const executeSqlsInStateMachine = async (sqlStatements: string[], appId: string)
     }
     throw err;
   }
-}
+};
 
 
 function mergeMap(map1: Map<string, string[]>, map2: Map<string, string[]>): Map<string, string[]> {

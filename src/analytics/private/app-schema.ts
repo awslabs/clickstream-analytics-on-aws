@@ -17,17 +17,17 @@ import { Duration, CustomResource, Arn, ArnFormat, Stack } from 'aws-cdk-lib';
 import { IRole, PolicyStatement, Effect } from 'aws-cdk-lib/aws-iam';
 import { Function, LayerVersion, Code, IFunction } from 'aws-cdk-lib/aws-lambda';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
+import { StateMachine } from 'aws-cdk-lib/aws-stepfunctions';
 import { Provider } from 'aws-cdk-lib/custom-resources';
 import { Construct } from 'constructs';
 import { ExistingRedshiftServerlessProps, ProvisionedRedshiftProps, WorkflowBucketInfo } from './model';
 import { reportingViewsDef, schemaDefs } from './sql-def';
+import { createSQLExecutionStepFunctions } from './sql-exectution-stepfuncs';
 import { CUSTOM_RESOURCE_RESPONSE_REDSHIFT_BI_USER_NAME } from '../../common/constant';
 import { createLambdaRole } from '../../common/lambda';
 import { attachListTagsPolicyForFunction } from '../../common/lambda/tags';
 import { SolutionNodejsFunction } from '../../private/function';
 import { RedshiftOdsTables } from '../analytics-on-redshift';
-import { createSQLExecutionStepFunctions } from './sql-exectution-stepfuncs';
-import { StateMachine } from 'aws-cdk-lib/aws-stepfunctions';
 
 export interface RedshiftSQLExecutionProps {
   readonly serverlessRedshift?: ExistingRedshiftServerlessProps;
@@ -44,28 +44,38 @@ export abstract class RedshiftSQLExecution extends Construct {
   readonly crForSQLExecution: CustomResource;
   readonly crFunction: IFunction;
   readonly crProvider: Provider;
-  readonly stateMachine: StateMachine;
+  readonly sqlExecutionStepFunctions: StateMachine;
+  protected readonly props: RedshiftSQLExecutionProps;
 
   constructor(scope: Construct, id: string, props: RedshiftSQLExecutionProps) {
     super(scope, id);
 
-    this.stateMachine = createSQLExecutionStepFunctions(this, {
+    this.props = props;
+
+    const crProps = this.getCustomResourceProperties(props);
+
+    /**
+     * Create step function to execute SQLs using Redshift-Data API
+     */
+    this.sqlExecutionStepFunctions = createSQLExecutionStepFunctions(this, {
       dataAPIRole: props.dataAPIRole,
       serverlessRedshift: props.serverlessRedshift,
       provisionedRedshift: props.provisionedRedshift,
       workflowBucketInfo: props.workflowBucketInfo,
+      databaseName: crProps.databaseName,
     });
 
     /**
-     * Create custom resource to execute SQLs in Redshift using Redshift-Data API.
+     * Create custom resource to execute SQLs through step function
      */
+
     const resource = this.createRedshiftSQLExecutionCustomResource(props);
     this.crForSQLExecution = resource.cr;
     this.crFunction = resource.fn;
     this.crProvider = resource.provider;
 
-    this.stateMachine.grantStartExecution(this.crFunction);
-    resource.cr.node.addDependency(this.stateMachine);
+    this.sqlExecutionStepFunctions.grantStartExecution(this.crFunction);
+    resource.cr.node.addDependency(this.sqlExecutionStepFunctions);
 
   }
 
@@ -90,12 +100,15 @@ export abstract class RedshiftSQLExecution extends Construct {
       },
     );
 
+    const crProps = this.getCustomResourceProperties(props);
+
     const customProps: { [key: string]: any } = {
       dataAPIRole: props.dataAPIRole.roleArn,
       serverlessRedshiftProps: props.serverlessRedshift,
       provisionedRedshiftProps: props.provisionedRedshift,
-      ...this.getCustomResourceProperties(props),
+      ...crProps,
     };
+
     const cr = new CustomResource(this, 'RedshiftSQLExecutionCustomResource', {
       serviceToken: provider.serviceToken,
       properties: customProps,
@@ -124,8 +137,8 @@ export abstract class RedshiftSQLExecution extends Construct {
       logRetention: RetentionDays.ONE_WEEK,
       environment: {
         SUPPRESS_ALL_ERROR: 'false',
-        APPLY_ALL_APP_SQL: 'true',
-        STATE_MACHINE_ARN: this.stateMachine.stateMachineArn,
+        APPLY_ALL_APP_SQL: 'false',
+        STATE_MACHINE_ARN: this.sqlExecutionStepFunctions.stateMachineArn,
         S3_BUCKET: props.workflowBucketInfo.s3Bucket.bucketName,
         S3_PREFIX: props.workflowBucketInfo.prefix,
         PROJECT_ID: props.projectId,

@@ -27,6 +27,7 @@ export function createMetricsWidgetForRedshiftServerless(scope: Construct, id: s
   loadDataWorkflow: IStateMachine;
   scanMetadataWorkflow: IStateMachine;
   clearExpiredEventsWorkflow: IStateMachine;
+  sqlExecutionWorkflow: IStateMachine;
 }) {
 
   const namespace = 'AWS/Redshift-Serverless';

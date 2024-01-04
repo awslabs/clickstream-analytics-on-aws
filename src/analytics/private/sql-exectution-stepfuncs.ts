@@ -12,28 +12,29 @@
  */
 
 import { join } from 'path';
-import { Duration, } from 'aws-cdk-lib';
-import { IRole, } from 'aws-cdk-lib/aws-iam';
+import { CfnResource, Duration } from 'aws-cdk-lib';
+import { IRole } from 'aws-cdk-lib/aws-iam';
 import { Function } from 'aws-cdk-lib/aws-lambda';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
-import { Construct } from 'constructs';
-import { createLambdaRole } from '../../common/lambda';
-import { attachListTagsPolicyForFunction } from '../../common/lambda/tags';
-import { SolutionNodejsFunction } from '../../private/function';
 import {
   StateMachine, TaskInput, Wait, WaitTime, Succeed, Choice, Map,
   Condition, Fail, DefinitionBody, JsonPath, LogLevel,
 } from 'aws-cdk-lib/aws-stepfunctions';
 import { LambdaInvoke } from 'aws-cdk-lib/aws-stepfunctions-tasks';
+import { Construct } from 'constructs';
 import { ProvisionedRedshiftProps, RedshiftServerlessProps, WorkflowBucketInfo } from './model';
+import { createLambdaRole } from '../../common/lambda';
 import { createLogGroup } from '../../common/logs';
+import { SolutionNodejsFunction } from '../../private/function';
+import { addCfnNagSuppressRules, rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions } from '../../common/cfn-nag';
 
 
 export interface SQLExecutionStepFunctionsProps {
   readonly dataAPIRole: IRole;
   readonly serverlessRedshift?: RedshiftServerlessProps;
   readonly provisionedRedshift?: ProvisionedRedshiftProps;
-  readonly workflowBucketInfo: WorkflowBucketInfo
+  readonly workflowBucketInfo: WorkflowBucketInfo;
+  readonly databaseName: string;
 }
 
 export function createSQLExecutionStepFunctions(scope: Construct, props: SQLExecutionStepFunctionsProps) {
@@ -43,6 +44,13 @@ export function createSQLExecutionStepFunctions(scope: Construct, props: SQLExec
   const submitSQL = new LambdaInvoke(scope, 'Submit SQL', {
     lambdaFunction: fn,
     outputPath: '$.Payload',
+  });
+
+  submitSQL.addRetry({
+    errors: ['Lambda.TooManyRequestsException'],
+    interval: Duration.seconds(3),
+    backoffRate: 2,
+    maxAttempts: 10,
   });
 
   const wait1 = new Wait(scope, 'Wait #1', {
@@ -55,6 +63,13 @@ export function createSQLExecutionStepFunctions(scope: Construct, props: SQLExec
       'queryId.$': '$.queryId',
     }),
     outputPath: '$.Payload',
+  });
+
+  checkStatus.addRetry({
+    errors: ['Lambda.TooManyRequestsException'],
+    interval: Duration.seconds(3),
+    backoffRate: 2,
+    maxAttempts: 10,
   });
 
   const isDoneChoice = new Choice(scope, 'Is Done?');
@@ -74,10 +89,10 @@ export function createSQLExecutionStepFunctions(scope: Construct, props: SQLExec
     itemsPath: '$.sqls',
     parameters: {
       sql: JsonPath.stringAt('$$.Map.Item.Value'),
-    }
+    },
   });
 
-  map.iterator(definition);
+  map.itemProcessor(definition);
 
   return new StateMachine(scope, 'SQLExecutionStateMachine', {
     definitionBody: DefinitionBody.fromChainable(map),
@@ -93,7 +108,7 @@ export function createSQLExecutionStepFunctions(scope: Construct, props: SQLExec
       level: LogLevel.ALL,
     },
     tracingEnabled: true,
-  })
+  });
 
 }
 
@@ -106,22 +121,22 @@ function createSQLExecutionStepFn(scope: Construct, props: SQLExecutionStepFunct
     entry: join(__dirname, '..', 'lambdas', 'sql-execution-sfn', 'sql-execution-step-fn.ts'),
     handler: 'handler',
     memorySize: 256,
-    reservedConcurrentExecutions: 1,
     timeout: Duration.minutes(15),
     logRetention: RetentionDays.ONE_WEEK,
     environment: {
       REDSHIFT_DATA_API_ROLE: props.dataAPIRole.roleArn,
-      REDSHIFT_DATABASENAME: props.provisionedRedshift?.databaseName ?? props.serverlessRedshift?.databaseName ?? '',
+      REDSHIFT_DATABASE: props.databaseName,
       REDSHIFT_CLUSTER_IDENTIFIER: props.provisionedRedshift?.clusterIdentifier ?? '',
-      REDSHIFT_CLUSTER_DBUSER: props.provisionedRedshift?.dbUser ?? '',
-      REDSHIFT_WORKGROUPNAME: props.serverlessRedshift?.workgroupName ?? '',      
+      REDSHIFT_DB_USER: props.provisionedRedshift?.dbUser ?? '',
+      REDSHIFT_SERVERLESS_WORKGROUP_NAME: props.serverlessRedshift?.workgroupName ?? '',
     },
     role,
   });
-  attachListTagsPolicyForFunction(scope, fnId, fn);
   props.dataAPIRole.grantAssumeRole(fn.grantPrincipal);
   props.workflowBucketInfo.s3Bucket.grantRead(fn);
 
+  addCfnNagSuppressRules(fn.node.defaultChild as CfnResource,
+    rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions('CDK'));
+
   return fn;
 }
-
