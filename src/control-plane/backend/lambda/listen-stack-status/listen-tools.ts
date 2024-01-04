@@ -131,6 +131,7 @@ export function getNewStackDetails(curStack: Stack, stackDetails: PipelineStatus
   for (const stackName of stackNames) {
     if (!existedStackNames.includes(stackName)) {
       stackDetails.push({
+        stackId: '',
         stackName: stackName,
         stackType: stackName.split('-')[1] as PipelineStackType,
         stackStatus: undefined,
@@ -142,6 +143,7 @@ export function getNewStackDetails(curStack: Stack, stackDetails: PipelineStatus
   }
   for (const stackDetail of stackDetails) {
     if (stackDetail.stackName === curStack.StackName) {
+      stackDetail.stackId = curStack.StackId ?? '';
       stackDetail.stackStatus = curStack.StackStatus;
       stackDetail.stackStatusReason = curStack.StackStatusReason ?? '';
       stackDetail.outputs = curStack.Outputs ?? [];

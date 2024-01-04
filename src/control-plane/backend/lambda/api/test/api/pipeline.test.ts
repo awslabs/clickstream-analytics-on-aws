@@ -1361,7 +1361,7 @@ describe('Pipeline test', () => {
         },
         executionDetail: {
           name: MOCK_EXECUTION_ID,
-          executionArn: '',
+          executionArn: 'arn:aws:states:us-east-1:111122223333:execution:MyPipelineStateMachine:main-5ab07c6e-b6ac-47ea-bf3a-02ede7391807',
           status: 'SUCCEEDED',
         },
         statusType: PipelineStatusType.ACTIVE,
@@ -2252,6 +2252,11 @@ describe('Pipeline test', () => {
     ddbMock.on(QueryCommand).resolves({
       Items: [{
         ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
+        executionDetail: {
+          name: MOCK_EXECUTION_ID,
+          executionArn: 'arn:aws:states:us-east-1:111122223333:execution:MyPipelineStateMachine:main-5ab07c6e-b6ac-47ea-bf3a-02ede7391807',
+          status: ExecutionStatus.RUNNING,
+        },
         stackDetails: [
           {
             ...stackDetailsWithOutputs[0],
@@ -2277,6 +2282,11 @@ describe('Pipeline test', () => {
     ddbMock.on(QueryCommand).resolves({
       Items: [{
         ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
+        executionDetail: {
+          name: MOCK_EXECUTION_ID,
+          executionArn: 'arn:aws:states:us-east-1:111122223333:execution:MyPipelineStateMachine:main-5ab07c6e-b6ac-47ea-bf3a-02ede7391807',
+          status: ExecutionStatus.RUNNING,
+        },
         stackDetails: [
           {
             ...stackDetailsWithOutputs[0],
