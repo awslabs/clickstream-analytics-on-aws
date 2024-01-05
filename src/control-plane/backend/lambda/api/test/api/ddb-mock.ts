@@ -926,7 +926,7 @@ function createPipelineMock(
     mockClients.s3Mock.on(GetBucketLocationCommand).rejects(mockNoSuchBucketError);
   } else {
     mockClients.s3Mock.on(GetBucketLocationCommand).resolves({
-      LocationConstraint: BucketLocationConstraint.ap_southeast_1,
+      LocationConstraint: props?.bucket?.location ?? BucketLocationConstraint.ap_southeast_1,
     });
   }
   createEventRuleMock(mockClients.cloudWatchEventsMock);
