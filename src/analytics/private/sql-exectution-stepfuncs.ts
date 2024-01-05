@@ -23,10 +23,10 @@ import {
 import { LambdaInvoke } from 'aws-cdk-lib/aws-stepfunctions-tasks';
 import { Construct } from 'constructs';
 import { ProvisionedRedshiftProps, RedshiftServerlessProps, WorkflowBucketInfo } from './model';
+import { addCfnNagSuppressRules, rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions } from '../../common/cfn-nag';
 import { createLambdaRole } from '../../common/lambda';
 import { createLogGroup } from '../../common/logs';
 import { SolutionNodejsFunction } from '../../private/function';
-import { addCfnNagSuppressRules, rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions } from '../../common/cfn-nag';
 
 
 export interface SQLExecutionStepFunctionsProps {

@@ -396,6 +396,9 @@ function addCfnNag(stack: Stack) {
       'ClearExpiredEventsWorkflow/ClearExpiredEventsStateMachine/Role/DefaultPolicy/Resource',
       'ClearExpiredEventsWorkflow', 'logs/xray'),
     ruleRolePolicyWithWildcardResources(
+      'CreateApplicationSchemas/SQLExecutionStateMachine/Role/DefaultPolicy/Resource',
+      'SQLExecutionStateMachine', 'redshift-data'),
+    ruleRolePolicyWithWildcardResources(
       'RedshiftDataExecRole/DefaultPolicy/Resource',
       'RedshiftDataExecRole', 'redshift-data'),
     ruleForLambdaVPCAndReservedConcurrentExecutions(
