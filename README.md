@@ -56,6 +56,22 @@ Follow the [implementation guide][doc-deployment] to deploy the solution using A
 npx cdk deploy cloudfront-s3-control-plane-stack-global --parameters Email=<your email> --require-approval never
 ```
 
+#### Deploy pipeline stacks
+
+```shell
+# deploy the ingestion server with s3 sink
+# 1. check stack name in src/main.ts for other stacks
+# 2. check the stack for required CloudFormation parameters
+npx cdk deploy ingestion-server-s3-stack --parameters ...
+```
+
+#### Deploy local code for updating existing stacks created by the web console
+
+```shell
+# update the existing data modeling Redshift stack Clickstream-DataModelingRedshift-xxx
+bash e2e-deploy.sh modelRedshiftStackName Clickstream-DataModelingRedshift-xxx
+```
+
 ## Test
 
 ```shell
