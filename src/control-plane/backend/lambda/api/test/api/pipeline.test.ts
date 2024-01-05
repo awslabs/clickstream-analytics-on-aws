@@ -1221,7 +1221,7 @@ describe('Pipeline test', () => {
           status: PipelineStatusType.ACTIVE,
         },
         stackDetails: stackDetails,
-        statusType: PipelineStatusType.ACTIVE,
+        statusType: PipelineStatusType.WARNING,
         dataProcessing: {
           ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW.dataProcessing,
           enrichPlugin: [
@@ -1771,7 +1771,7 @@ describe('Pipeline test', () => {
       data: {
         ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
         stackDetails: BASE_STATUS.stackDetails,
-        statusType: PipelineStatusType.ACTIVE,
+        statusType: PipelineStatusType.WARNING,
         dataProcessing: {
           ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW.dataProcessing,
           enrichPlugin: [

@@ -688,6 +688,35 @@ describe('Pipeline status test', () => {
     };
     expect(getPipelineStatusType(pipeline5)).toEqual(PipelineStatusType.DELETING);
   });
+  it('wrong version status', async () => {
+    // execution SUCCEEDED
+    // stacks [UPDATE_COMPLETE, UPDATE_COMPLETE, UPDATE_COMPLETE]
+    const pipeline4: IPipeline = {
+      ...BASE_STATUS_PIPELINE,
+      lastAction: 'Upgrade',
+      executionDetail: {
+        executionArn: 'arn:aws:states:us-east-1:123456789012:execution:EXAMPLE',
+        name: 'EXAMPLE',
+        status: ExecutionStatus.SUCCEEDED,
+      },
+      stackDetails: [
+        {
+          ...BASE_STACK_DETAIL,
+          stackTemplateVersion: 'wrong version',
+          stackStatus: StackStatus.UPDATE_COMPLETE,
+        },
+        {
+          ...BASE_STACK_DETAIL,
+          stackStatus: StackStatus.UPDATE_COMPLETE,
+        },
+        {
+          ...BASE_STACK_DETAIL,
+          stackStatus: StackStatus.UPDATE_COMPLETE,
+        },
+      ],
+    };
+    expect(getPipelineStatusType(pipeline4)).toEqual(PipelineStatusType.WARNING);
+  });
   afterAll((done) => {
     done();
   });

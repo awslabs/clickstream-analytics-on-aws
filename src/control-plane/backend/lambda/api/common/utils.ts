@@ -1083,13 +1083,12 @@ function _getPipelineStatus(pipeline: IPipeline) {
 function _getStatusWhenExecutionSuccess(stackStatus: string) {
   switch (stackStatus) {
     case 'FAILED':
-      return PipelineStatusType.FAILED;
     case 'ROLLBACK_COMPLETE':
-      return PipelineStatusType.WARNING;
-    case 'COMPLETE':
-      return PipelineStatusType.ACTIVE;
+      return PipelineStatusType.FAILED;
     case 'DELETE_COMPLETE':
       return PipelineStatusType.DELETED;
+    case 'WRONG_VERSION':
+      return PipelineStatusType.WARNING;
     default:
       return PipelineStatusType.ACTIVE;
   }
@@ -1117,6 +1116,13 @@ function _getPipelineStatusFromStacks(pipeline: IPipeline) {
     status = 'IN_PROGRESS';
   } else if (stackStatusArray.every(s => s === StackStatus.DELETE_COMPLETE)) {
     status = 'DELETE_COMPLETE';
+  }
+  // Error Template Version
+  if (stackDetails.some(
+    s => s.stackTemplateVersion !== '' &&
+    pipeline.templateVersion &&
+    pipeline.templateVersion !== s.stackTemplateVersion)) {
+    status = 'WRONG_VERSION';
   }
   return status;
 }
