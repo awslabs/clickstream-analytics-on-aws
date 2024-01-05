@@ -49,7 +49,8 @@
     "redshiftProvisionedDBUserFormatError": "数据库用户格式错误",
     "emailInvalid": "电子邮件无效。",
     "stackRollbackFailed": "某些堆栈处于 ROLLBACK_FAILED 状态，无法更新。",
-    "transformPluginEmptyError": "使用第三方 SDK 时需选择转换插件。"
+    "transformPluginEmptyError": "使用第三方 SDK 时需选择转换插件。",
+    "tagsKeyValueEmpty": "标签键和值不能为空。"
   },
   "create": {
     "basicInfo": "基本配置",

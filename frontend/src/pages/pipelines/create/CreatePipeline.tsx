@@ -112,6 +112,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
   const [regionEmptyError, setRegionEmptyError] = useState(false);
   const [vpcEmptyError, setVPCEmptyError] = useState(false);
   const [sdkEmptyError, setSDKEmptyError] = useState(false);
+  const [tagsKeyValueEmptyError, setTagsKeyValueEmptyError] = useState(false);
   const [assetsBucketEmptyError, setAssetsBucketEmptyError] = useState(false);
 
   const [publicSubnetError, setPublicSubnetError] = useState(false);
@@ -232,6 +233,14 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
     }
     if (!pipelineInfo.ingestionServer.loadBalancer.logS3Bucket.name) {
       setAssetsBucketEmptyError(true);
+      return false;
+    }
+    if (
+      pipelineInfo.tags.some(
+        (tag) => !tag.key || tag.key === '' || !tag.value || tag.value === ''
+      )
+    ) {
+      setTagsKeyValueEmptyError(true);
       return false;
     }
     return true;
@@ -1106,6 +1115,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
               regionEmptyError={regionEmptyError}
               vpcEmptyError={vpcEmptyError}
               sdkEmptyError={sdkEmptyError}
+              tagsKeyValueEmptyError={tagsKeyValueEmptyError}
               pipelineInfo={pipelineInfo}
               assetsS3BucketEmptyError={assetsBucketEmptyError}
               loadingServiceAvailable={loadingServiceAvailable}
@@ -1213,6 +1223,7 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
                 });
               }}
               changeTags={(tags) => {
+                setTagsKeyValueEmptyError(false);
                 setPipelineInfo((prev) => {
                   return {
                     ...prev,
