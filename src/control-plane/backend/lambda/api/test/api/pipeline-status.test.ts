@@ -691,7 +691,7 @@ describe('Pipeline status test', () => {
   it('wrong version status', async () => {
     // execution SUCCEEDED
     // stacks [UPDATE_COMPLETE, UPDATE_COMPLETE, UPDATE_COMPLETE]
-    const pipeline4: IPipeline = {
+    const pipeline1: IPipeline = {
       ...BASE_STATUS_PIPELINE,
       lastAction: 'Upgrade',
       executionDetail: {
@@ -715,7 +715,34 @@ describe('Pipeline status test', () => {
         },
       ],
     };
-    expect(getPipelineStatusType(pipeline4)).toEqual(PipelineStatusType.WARNING);
+    expect(getPipelineStatusType(pipeline1)).toEqual(PipelineStatusType.WARNING);
+    // execution RUNNING
+    // stacks [UPDATE_COMPLETE, UPDATE_IN_PROGRESS, UPDATE_COMPLETE]
+    const pipeline2: IPipeline = {
+      ...BASE_STATUS_PIPELINE,
+      lastAction: 'Upgrade',
+      executionDetail: {
+        executionArn: 'arn:aws:states:us-east-1:123456789012:execution:EXAMPLE',
+        name: 'EXAMPLE',
+        status: ExecutionStatus.RUNNING,
+      },
+      stackDetails: [
+        {
+          ...BASE_STACK_DETAIL,
+          stackTemplateVersion: 'wrong version',
+          stackStatus: StackStatus.UPDATE_COMPLETE,
+        },
+        {
+          ...BASE_STACK_DETAIL,
+          stackStatus: StackStatus.UPDATE_IN_PROGRESS,
+        },
+        {
+          ...BASE_STACK_DETAIL,
+          stackStatus: StackStatus.UPDATE_COMPLETE,
+        },
+      ],
+    };
+    expect(getPipelineStatusType(pipeline2)).toEqual(PipelineStatusType.UPDATING);
   });
   afterAll((done) => {
     done();

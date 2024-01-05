@@ -1118,7 +1118,7 @@ function _getPipelineStatusFromStacks(pipeline: IPipeline) {
     status = 'DELETE_COMPLETE';
   }
   // Error Template Version
-  if (stackDetails.some(
+  if (status === 'COMPLETE' && stackDetails.some(
     s => s.stackTemplateVersion !== '' &&
     pipeline.templateVersion &&
     pipeline.templateVersion !== s.stackTemplateVersion)) {
