@@ -1221,7 +1221,7 @@ describe('Pipeline test', () => {
           status: PipelineStatusType.ACTIVE,
         },
         stackDetails: stackDetails,
-        statusType: PipelineStatusType.WARNING,
+        statusType: PipelineStatusType.ACTIVE,
         dataProcessing: {
           ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW.dataProcessing,
           enrichPlugin: [
@@ -1310,6 +1310,87 @@ describe('Pipeline test', () => {
         metricsDashboardName: 'clickstream_dashboard_notepad_mtzfsocy',
         analysisStudioEnabled: false,
       },
+    });
+  });
+  it('Get pipeline by ID and refresh force', async () => {
+    projectExistedMock(ddbMock, true);
+    const stackDetails = [
+      stackDetailsWithOutputs[0],
+      stackDetailsWithOutputs[1],
+      stackDetailsWithOutputs[2],
+      stackDetailsWithOutputs[3],
+      stackDetailsWithOutputs[4],
+      {
+        ...stackDetailsWithOutputs[5],
+        stackTemplateVersion: FULL_SOLUTION_VERSION,
+      },
+    ];
+
+    ddbMock.on(QueryCommand).resolves({
+      Items: [{
+        ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
+        stackDetails: stackDetails,
+      }],
+    });
+    dictionaryMock(ddbMock);
+    ddbMock.on(QueryCommand, {
+      ExclusiveStartKey: undefined,
+      ExpressionAttributeNames:
+        { '#prefix': 'prefix' },
+      ExpressionAttributeValues: {
+        ':d': false,
+        ':prefix': 'PLUGIN',
+      },
+      FilterExpression: 'deleted = :d',
+      KeyConditionExpression:
+    '#prefix= :prefix',
+      Limit: undefined,
+      ScanIndexForward: true,
+      TableName: clickStreamTableName,
+      IndexName: prefixTimeGSIName,
+    }).resolves({
+      Items: [
+        { id: `${MOCK_PLUGIN_ID}_2`, name: `${MOCK_PLUGIN_ID}_2` },
+      ],
+    });
+
+    sfnMock.on(DescribeExecutionCommand).resolves({
+      executionArn: 'arn:aws:states:ap-southeast-1:123456789012:execution:ForceExecutionName:12345678-1234-1234-1234-123456789012',
+      name: MOCK_EXECUTION_ID,
+      status: ExecutionStatus.FAILED,
+      startDate: new Date(),
+    });
+    cloudFormationMock.on(DescribeStacksCommand).resolves({
+      Stacks: [
+        {
+          StackName: 'ForceStackName',
+          StackId: 'arn:aws:cloudformation:ap-southeast-1:123456789012:stack/ForceStackName/12345678-1234-1234-1234-123456789012',
+          Tags: [{ Key: BuiltInTagKeys.AWS_SOLUTION_VERSION, Value: MOCK_SOLUTION_VERSION }],
+          StackStatus: StackStatus.CREATE_FAILED,
+          StackStatusReason: 'MockForceStackStatusReason',
+          CreationTime: new Date(),
+        },
+      ],
+    });
+    let res = await request(app)
+      .get(`/api/pipeline/${MOCK_PIPELINE_ID}?pid=${MOCK_PROJECT_ID}&refresh=force`);
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(200);
+    expect(res.body.data.statusType).toEqual(PipelineStatusType.FAILED);
+    expect(res.body.data.stackDetails).toContainEqual(
+      {
+        outputs: [],
+        stackId: 'arn:aws:cloudformation:ap-southeast-1:123456789012:stack/ForceStackName/12345678-1234-1234-1234-123456789012',
+        stackName: 'ForceStackName',
+        stackStatus: StackStatus.CREATE_FAILED,
+        stackStatusReason: 'MockForceStackStatusReason',
+        stackTemplateVersion: MOCK_SOLUTION_VERSION,
+      },
+    );
+    expect(res.body.data.executionDetail).toEqual({
+      executionArn: 'arn:aws:states:ap-southeast-1:123456789012:execution:ForceExecutionName:12345678-1234-1234-1234-123456789012',
+      name: MOCK_EXECUTION_ID,
+      status: ExecutionStatus.FAILED,
     });
   });
   it('Get pipeline when no found Execution history and stack details', async () => {
@@ -1690,7 +1771,7 @@ describe('Pipeline test', () => {
       data: {
         ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
         stackDetails: BASE_STATUS.stackDetails,
-        statusType: 'Warning',
+        statusType: PipelineStatusType.ACTIVE,
         dataProcessing: {
           ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW.dataProcessing,
           enrichPlugin: [

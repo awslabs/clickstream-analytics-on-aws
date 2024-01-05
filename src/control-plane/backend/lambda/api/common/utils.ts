@@ -1056,83 +1056,83 @@ function getPipelineLastActionFromStacksStatus(stackStatusDetails: PipelineStatu
 }
 
 function _getPipelineStatus(pipeline: IPipeline) {
+  let status: PipelineStatusType = PipelineStatusType.ACTIVE;
   let lastAction = pipeline.lastAction;
   if (!lastAction || lastAction === '') {
     lastAction = getPipelineLastActionFromStacksStatus(
       pipeline.stackDetails ?? pipeline.status?.stackDetails, pipeline.templateVersion);
   }
   const executionDetail = pipeline.executionDetail ?? pipeline.status?.executionDetail;
-  let status: PipelineStatusType | undefined;
-  status = _getPipelineStatusFromStacks(pipeline, lastAction);
-  if (executionDetail?.status === ExecutionStatus.FAILED ||
-    executionDetail?.status === ExecutionStatus.TIMED_OUT ||
-    executionDetail?.status === ExecutionStatus.ABORTED) {
+  const stackStatus = _getPipelineStatusFromStacks(pipeline);
+  const executionStatus = executionDetail?.status;
+  if (executionStatus === ExecutionStatus.FAILED ||
+    executionStatus === ExecutionStatus.TIMED_OUT ||
+    executionStatus === ExecutionStatus.ABORTED) {
+    // if execution failed, pipeline status is failed
     status = PipelineStatusType.FAILED;
-  } else if (executionDetail?.status === ExecutionStatus.RUNNING) {
-    if (lastAction === 'Create') {
-      status = PipelineStatusType.CREATING;
-    } else if (lastAction === 'Delete') {
-      status = PipelineStatusType.DELETING;
-    } else {
-      status = PipelineStatusType.UPDATING;
-    }
+  } else if (executionStatus === ExecutionStatus.RUNNING || stackStatus === 'IN_PROGRESS') {
+    // if execution or any stack is running, pipeline status is Updating, Creating or Deleting
+    status = _getRunningStatus(lastAction);
+  } else if (executionStatus === ExecutionStatus.SUCCEEDED) {
+    // if execution succeeded, pipeline status depending on stack status
+    status = _getStatusWhenExecutionSuccess(stackStatus);
   }
-  return _catchWarningDeletingStatus(status, lastAction);
+  return _catchWarningStatus(status, lastAction);
 }
 
-function _catchWarningDeletingStatus(status: PipelineStatusType, lastAction: string) {
+function _getStatusWhenExecutionSuccess(stackStatus: string) {
+  switch (stackStatus) {
+    case 'FAILED':
+      return PipelineStatusType.FAILED;
+    case 'ROLLBACK_COMPLETE':
+      return PipelineStatusType.WARNING;
+    case 'COMPLETE':
+      return PipelineStatusType.ACTIVE;
+    case 'DELETE_COMPLETE':
+      return PipelineStatusType.DELETED;
+    default:
+      return PipelineStatusType.ACTIVE;
+  }
+}
+
+function _catchWarningStatus(status: PipelineStatusType, lastAction: string) {
   if (status === PipelineStatusType.FAILED && (lastAction === 'Update' || lastAction === 'Upgrade')) {
     status = PipelineStatusType.WARNING;
   }
-  if (status === PipelineStatusType.ACTIVE && lastAction === 'Delete') {
-    status = PipelineStatusType.DELETING;
-  }
   return status;
 }
 
-function _getPipelineStatusFromStacks(pipeline: IPipeline, lastAction: string) {
-  let status: PipelineStatusType = PipelineStatusType.ACTIVE;
+function _getPipelineStatusFromStacks(pipeline: IPipeline) {
+  let status = 'COMPLETE';
   const stackDetails = pipeline.stackDetails ?? pipeline.status?.stackDetails;
-  if (!stackDetails) {
+  if (!stackDetails || stackDetails.length === 0) {
     return status;
   }
-  let allStacksDeleted = true;
-  const allStackStatus: PipelineStatusType[] = [];
-  for (let s of stackDetails) {
-    const oneStatus = _getStackStatus(s, pipeline.templateVersion, lastAction);
-    if (oneStatus !== PipelineStatusType.DELETED) {
-      allStacksDeleted = false;
-    }
-    allStackStatus.push(oneStatus);
-  }
-  if (allStackStatus.includes(PipelineStatusType.FAILED)) {
-    status = PipelineStatusType.FAILED;
-  } else if (allStackStatus.includes(PipelineStatusType.WARNING)) {
-    status = PipelineStatusType.WARNING;
-  } else if (allStacksDeleted && lastAction === 'Delete') {
-    status = PipelineStatusType.DELETED;
+  const stackStatusArray = stackDetails.map(s => s.stackStatus);
+  if (stackStatusArray.some(s => s?.endsWith('_FAILED'))) {
+    status = 'FAILED';
+  } else if (stackStatusArray.some(s => s?.endsWith('_ROLLBACK_COMPLETE'))) {
+    status = 'ROLLBACK_COMPLETE';
+  } else if (stackStatusArray.some(s => s?.endsWith('_IN_PROGRESS'))) {
+    status = 'IN_PROGRESS';
+  } else if (stackStatusArray.every(s => s === StackStatus.DELETE_COMPLETE)) {
+    status = 'DELETE_COMPLETE';
   }
   return status;
 }
 
-function _getStackStatus(statusDetail: PipelineStatusDetail, templateVersion: string | undefined, lastAction: string) {
-  let status: PipelineStatusType = PipelineStatusType.ACTIVE;
-  if (statusDetail.stackStatus?.endsWith('_FAILED')) {
-    status = PipelineStatusType.FAILED;
-  } else if (statusDetail.stackStatus?.endsWith('_ROLLBACK_COMPLETE') ||
-  (statusDetail.stackTemplateVersion !== '' && templateVersion &&
-  templateVersion !== statusDetail.stackTemplateVersion)) {
-    status = PipelineStatusType.WARNING;
-  } else if (statusDetail.stackStatus?.endsWith('_IN_PROGRESS')) {
-    if (lastAction === 'Create') {
+function _getRunningStatus(lastAction: string) {
+  let status;
+  switch (lastAction) {
+    case 'Create':
       status = PipelineStatusType.CREATING;
-    } else if (lastAction === 'Delete') {
+      break;
+    case 'Delete':
       status = PipelineStatusType.DELETING;
-    } else {
+      break;
+    default:
       status = PipelineStatusType.UPDATING;
-    }
-  } else if (statusDetail.stackStatus === StackStatus.DELETE_COMPLETE) {
-    status = PipelineStatusType.DELETED;
+      break;
   }
   return status;
 }
