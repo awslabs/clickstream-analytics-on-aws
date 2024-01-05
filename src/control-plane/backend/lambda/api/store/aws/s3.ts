@@ -117,8 +117,9 @@ export const isBucketExist = async (region: string, bucket: string) => {
       Bucket: bucket,
       ExpectedBucketOwner: awsAccountId,
     });
-    await s3Client.send(params);
-    return true;
+    const res = await s3Client.send(params);
+    const location = res.LocationConstraint ?? 'us-east-1';
+    return location === region;
   } catch (error) {
     logger.warn('get S3 bucket location error ', { error });
     return false;
