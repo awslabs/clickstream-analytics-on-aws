@@ -11,7 +11,7 @@
  *  and limitations under the License.
  */
 
-import { Tag } from '@aws-sdk/client-cloudformation';
+import { StackStatus, Tag } from '@aws-sdk/client-cloudformation';
 import { Tag as EC2Tag, Route, RouteTable, RouteTableAssociation, VpcEndpoint, SecurityGroupRule, VpcEndpointType } from '@aws-sdk/client-ec2';
 import { ExecutionStatus } from '@aws-sdk/client-sfn';
 import { ipv4 as ip } from 'cidr-block';
@@ -1077,8 +1077,15 @@ function _getPipelineStatus(pipeline: IPipeline) {
       status = PipelineStatusType.UPDATING;
     }
   }
+  return _catchWarningDeletingStatus(status, lastAction);
+}
+
+function _catchWarningDeletingStatus(status: PipelineStatusType, lastAction: string) {
   if (status === PipelineStatusType.FAILED && (lastAction === 'Update' || lastAction === 'Upgrade')) {
     status = PipelineStatusType.WARNING;
+  }
+  if (status === PipelineStatusType.ACTIVE && lastAction === 'Delete') {
+    status = PipelineStatusType.DELETING;
   }
   return status;
 }
@@ -1089,30 +1096,42 @@ function _getPipelineStatusFromStacks(pipeline: IPipeline, lastAction: string) {
   if (!stackDetails) {
     return status;
   }
-  let allStacksStatusIsUnknown = true;
+  let allStacksDeleted = true;
+  const allStackStatus: PipelineStatusType[] = [];
   for (let s of stackDetails) {
-    if (s.stackStatus) {
-      allStacksStatusIsUnknown = false;
+    const oneStatus = _getStackStatus(s, pipeline.templateVersion, lastAction);
+    if (oneStatus !== PipelineStatusType.DELETED) {
+      allStacksDeleted = false;
     }
-    if (s.stackStatus?.endsWith('_FAILED')) {
-      status = PipelineStatusType.FAILED;
-      break;
-    } else if (s.stackStatus?.endsWith('_ROLLBACK_COMPLETE') ||
-    (s.stackTemplateVersion !== '' && pipeline.templateVersion &&
-    pipeline.templateVersion !== s.stackTemplateVersion)) {
-      status = PipelineStatusType.WARNING;
-      break;
-    } else if (s.stackStatus?.endsWith('_IN_PROGRESS')) {
-      if (lastAction === 'Create') {
-        status = PipelineStatusType.CREATING;
-      } else if (lastAction === 'Delete') {
-        status = PipelineStatusType.DELETING;
-      } else {
-        status = PipelineStatusType.UPDATING;
-      }
-    }
+    allStackStatus.push(oneStatus);
   }
-  if (allStacksStatusIsUnknown && pipeline.lastAction === 'Delete') {
+  if (allStackStatus.includes(PipelineStatusType.FAILED)) {
+    status = PipelineStatusType.FAILED;
+  } else if (allStackStatus.includes(PipelineStatusType.WARNING)) {
+    status = PipelineStatusType.WARNING;
+  } else if (allStacksDeleted && lastAction === 'Delete') {
+    status = PipelineStatusType.DELETED;
+  }
+  return status;
+}
+
+function _getStackStatus(statusDetail: PipelineStatusDetail, templateVersion: string | undefined, lastAction: string) {
+  let status: PipelineStatusType = PipelineStatusType.ACTIVE;
+  if (statusDetail.stackStatus?.endsWith('_FAILED')) {
+    status = PipelineStatusType.FAILED;
+  } else if (statusDetail.stackStatus?.endsWith('_ROLLBACK_COMPLETE') ||
+  (statusDetail.stackTemplateVersion !== '' && templateVersion &&
+  templateVersion !== statusDetail.stackTemplateVersion)) {
+    status = PipelineStatusType.WARNING;
+  } else if (statusDetail.stackStatus?.endsWith('_IN_PROGRESS')) {
+    if (lastAction === 'Create') {
+      status = PipelineStatusType.CREATING;
+    } else if (lastAction === 'Delete') {
+      status = PipelineStatusType.DELETING;
+    } else {
+      status = PipelineStatusType.UPDATING;
+    }
+  } else if (statusDetail.stackStatus === StackStatus.DELETE_COMPLETE) {
     status = PipelineStatusType.DELETED;
   }
   return status;

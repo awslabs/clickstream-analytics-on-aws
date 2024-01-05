@@ -41,9 +41,11 @@ export const getStacksDetailsByNames = async (region: string, stackNames: string
     const stackDetails: PipelineStatusDetail[] = [];
     for (let stackName of stackNames) {
       const stack = await describeStack(region, stackName);
+      const name = stack?.StackName ?? '';
       stackDetails.push({
-        stackName: stackName,
-        stackType: stackName.split('-')[1] as PipelineStackType,
+        stackId: stack?.StackId ?? '',
+        stackName: name,
+        stackType: name.split('-')[1] as PipelineStackType,
         stackStatus: stack?.StackStatus as StackStatus,
         stackStatusReason: stack?.StackStatusReason ?? '',
         stackTemplateVersion: getVersionFromTags(stack?.Tags),

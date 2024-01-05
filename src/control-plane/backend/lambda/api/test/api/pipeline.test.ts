@@ -36,6 +36,7 @@ import {
   RedshiftServerlessClient,
 } from '@aws-sdk/client-redshift-serverless';
 import {
+  BucketLocationConstraint,
   GetBucketPolicyCommand,
   S3Client,
 } from '@aws-sdk/client-s3';
@@ -168,9 +169,10 @@ describe('Pipeline test', () => {
       publicAZContainPrivateAZ: true,
       subnetsCross3AZ: true,
       subnetsIsolated: true,
-      bucketNotExist: true,
+      bucket: {
+        notExist: true,
+      },
     });
-
     ddbMock.on(PutCommand).resolves({});
     const res = await request(app)
       .post('/api/pipeline')
@@ -269,6 +271,9 @@ describe('Pipeline test', () => {
     createPipelineMock(mockClients, {
       publicAZContainPrivateAZ: true,
       noVpcEndpoint: true,
+      bucket: {
+        location: BucketLocationConstraint.cn_north_1,
+      },
     });
     ddbMock.on(PutCommand).resolves({});
     createPipelineMockForBJSRegion(s3Mock);
@@ -315,6 +320,9 @@ describe('Pipeline test', () => {
       publicAZContainPrivateAZ: true,
       subnetsCross3AZ: true,
       noVpcEndpoint: true,
+      bucket: {
+        location: BucketLocationConstraint.us_west_1,
+      },
     });
     ddbMock.on(PutCommand).resolves({});
     const res = await request(app)
@@ -1361,7 +1369,7 @@ describe('Pipeline test', () => {
         },
         executionDetail: {
           name: MOCK_EXECUTION_ID,
-          executionArn: '',
+          executionArn: 'arn:aws:states:us-east-1:111122223333:execution:MyPipelineStateMachine:main-5ab07c6e-b6ac-47ea-bf3a-02ede7391807',
           status: 'SUCCEEDED',
         },
         statusType: PipelineStatusType.ACTIVE,
@@ -2252,6 +2260,11 @@ describe('Pipeline test', () => {
     ddbMock.on(QueryCommand).resolves({
       Items: [{
         ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
+        executionDetail: {
+          name: MOCK_EXECUTION_ID,
+          executionArn: 'arn:aws:states:us-east-1:111122223333:execution:MyPipelineStateMachine:main-5ab07c6e-b6ac-47ea-bf3a-02ede7391807',
+          status: ExecutionStatus.RUNNING,
+        },
         stackDetails: [
           {
             ...stackDetailsWithOutputs[0],
@@ -2277,6 +2290,11 @@ describe('Pipeline test', () => {
     ddbMock.on(QueryCommand).resolves({
       Items: [{
         ...KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW,
+        executionDetail: {
+          name: MOCK_EXECUTION_ID,
+          executionArn: 'arn:aws:states:us-east-1:111122223333:execution:MyPipelineStateMachine:main-5ab07c6e-b6ac-47ea-bf3a-02ede7391807',
+          status: ExecutionStatus.RUNNING,
+        },
         stackDetails: [
           {
             ...stackDetailsWithOutputs[0],

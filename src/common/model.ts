@@ -29,6 +29,7 @@ export interface BIUserCredential {
 }
 
 export interface PipelineStatusDetail {
+  stackId: string;
   readonly stackName: string;
   readonly stackType: PipelineStackType;
   stackTemplateVersion: string;
