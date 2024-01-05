@@ -88,6 +88,7 @@ interface AnalyticsFunnelProps {
   loading: boolean;
   pipeline: IPipeline;
   metadataEvents: IMetadataEvent[];
+  metadataEventParameters: IMetadataEventParameter[];
   metadataUserAttributes: IMetadataUserAttribute[];
   categoryEvents: CategoryItemType[];
   presetParameters: CategoryItemType[];
@@ -103,6 +104,7 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
     loading,
     pipeline,
     metadataEvents,
+    metadataEventParameters,
     metadataUserAttributes,
     categoryEvents,
     presetParameters,
@@ -592,6 +594,7 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
                   eventOptionList={categoryEvents}
                   defaultComputeMethodOption={defaultComputeMethodOption}
                   metadataEvents={metadataEvents}
+                  metadataEventParameters={metadataEventParameters}
                   metadataUserAttributes={metadataUserAttributes}
                   isMultiSelect={false}
                   enableChangeRelation={true}

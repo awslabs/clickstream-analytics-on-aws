@@ -92,6 +92,7 @@ interface AnalyticsPathProps {
   loading: boolean;
   pipeline: IPipeline;
   metadataEvents: IMetadataEvent[];
+  metadataEventParameters: IMetadataEventParameter[];
   metadataUserAttributes: IMetadataUserAttribute[];
   categoryEvents: CategoryItemType[];
   presetParameters: CategoryItemType[];
@@ -112,6 +113,7 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
     loading,
     pipeline,
     metadataEvents,
+    metadataEventParameters,
     metadataUserAttributes,
     categoryEvents,
     presetParameters,
@@ -692,7 +694,7 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
                   );
                   const eventName = option?.name;
                   const eventParameters = getEventParameters(
-                    metadataEvents,
+                    metadataEventParameters,
                     eventName
                   );
                   const parameterOption = parametersConvertToCategoryItemType(
@@ -732,6 +734,7 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
                 eventOptionList={categoryEventsData}
                 defaultComputeMethodOption={defaultComputeMethodOption}
                 metadataEvents={metadataEvents}
+                metadataEventParameters={metadataEventParameters}
                 metadataUserAttributes={metadataUserAttributes}
                 isMultiSelect={false}
                 enableChangeRelation={true}

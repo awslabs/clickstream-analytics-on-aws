@@ -86,6 +86,7 @@ interface AnalyticsRetentionProps {
   loading: boolean;
   pipeline: IPipeline;
   metadataEvents: IMetadataEvent[];
+  metadataEventParameters: IMetadataEventParameter[];
   metadataUserAttributes: IMetadataUserAttribute[];
   categoryEvents: CategoryItemType[];
   presetParameters: CategoryItemType[];
@@ -100,7 +101,7 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
   const {
     loading,
     pipeline,
-    metadataEvents,
+    metadataEventParameters,
     metadataUserAttributes,
     categoryEvents,
     presetParameters,
@@ -608,7 +609,7 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
                 changeStartEvent={(index, item) => {
                   const eventName = item?.name;
                   const eventParameters = getEventParameters(
-                    metadataEvents,
+                    metadataEventParameters,
                     eventName
                   );
                   const parameterOption = parametersConvertToCategoryItemType(
@@ -627,7 +628,7 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
                 changeRevisitEvent={(index, item) => {
                   const eventName = item?.name;
                   const eventParameters = getEventParameters(
-                    metadataEvents,
+                    metadataEventParameters,
                     eventName
                   );
                   const parameterOption = parametersConvertToCategoryItemType(

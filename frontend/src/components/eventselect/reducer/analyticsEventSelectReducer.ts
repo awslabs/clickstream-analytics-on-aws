@@ -92,6 +92,7 @@ export type ChangeCurCategoryOption = {
   eventIndex: number;
   categoryOption: IAnalyticsItem | null;
   metadataEvents: IMetadataEvent[];
+  metadataEventParameters: IMetadataEventParameter[];
   metadataUserAttributes: IMetadataUserAttribute[];
 };
 
@@ -191,7 +192,7 @@ export const analyticsEventSelectReducer = (
     case 'changeCurCategoryOption': {
       const eventName = action.categoryOption?.name;
       const eventParameters = getEventParameters(
-        action.metadataEvents,
+        action.metadataEventParameters,
         eventName
       );
       const parameterOption = parametersConvertToCategoryItemType(

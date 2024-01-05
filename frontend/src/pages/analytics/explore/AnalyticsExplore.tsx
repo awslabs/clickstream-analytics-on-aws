@@ -109,6 +109,9 @@ const AnalyticsExplore: React.FC = () => {
   const [pipeline, setPipeline] = useState<IPipeline | null>(null);
   const [loadingMetadataEvent, setLoadingMetadataEvent] = useState(false);
   const [metadataEvents, setMetadataEvents] = useState<IMetadataEvent[]>([]);
+  const [metadataEventParameters, setMetadataEventParameters] = useState<
+    IMetadataEventParameter[]
+  >([]);
 
   const [metadataUserAttributes, setMetadataUserAttributes] = useState<
     IMetadataUserAttribute[]
@@ -227,6 +230,7 @@ const AnalyticsExplore: React.FC = () => {
   const listAllAttributes = async () => {
     try {
       const parameters = await getAllParameters();
+      setMetadataEventParameters(parameters ?? []);
       const publicParameters = parameters?.filter(
         (item) => item.parameterType === MetadataParameterType.PUBLIC
       );
@@ -257,6 +261,7 @@ const AnalyticsExplore: React.FC = () => {
     try {
       const { success, data }: ApiResponse<IPipeline> =
         await getPipelineDetailByProjectId(defaultStr(projectId));
+      setLoadingData(false);
       if (success && data.analysisStudioEnabled) {
         setPipeline(data);
         // async to call warm and clean
@@ -267,7 +272,6 @@ const AnalyticsExplore: React.FC = () => {
         );
         await getEventParamsAndAttributes();
       }
-      setLoadingData(false);
     } catch (error) {
       setLoadingData(false);
       console.log(error);
@@ -380,6 +384,7 @@ const AnalyticsExplore: React.FC = () => {
                     loading={false}
                     pipeline={pipeline}
                     metadataEvents={metadataEvents}
+                    metadataEventParameters={metadataEventParameters}
                     metadataUserAttributes={metadataUserAttributes}
                     categoryEvents={categoryEvents}
                     presetParameters={presetParameters}
@@ -394,6 +399,7 @@ const AnalyticsExplore: React.FC = () => {
                     loading={false}
                     pipeline={pipeline}
                     metadataEvents={metadataEvents}
+                    metadataEventParameters={metadataEventParameters}
                     metadataUserAttributes={metadataUserAttributes}
                     categoryEvents={categoryEvents}
                     presetParameters={presetParameters}
@@ -406,6 +412,7 @@ const AnalyticsExplore: React.FC = () => {
                   loading={false}
                   pipeline={pipeline}
                   metadataEvents={metadataEvents}
+                  metadataEventParameters={metadataEventParameters}
                   metadataUserAttributes={metadataUserAttributes}
                   categoryEvents={categoryEvents}
                   presetParameters={presetParameters}
@@ -420,6 +427,7 @@ const AnalyticsExplore: React.FC = () => {
                     loading={false}
                     pipeline={pipeline}
                     metadataEvents={metadataEvents}
+                    metadataEventParameters={metadataEventParameters}
                     metadataUserAttributes={metadataUserAttributes}
                     categoryEvents={categoryEvents}
                     presetParameters={presetParameters}

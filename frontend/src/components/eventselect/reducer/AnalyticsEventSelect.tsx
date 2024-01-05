@@ -40,6 +40,7 @@ interface EventsSelectProps {
   isMultiSelect: boolean;
   enableChangeRelation: boolean;
   metadataEvents: IMetadataEvent[];
+  metadataEventParameters: IMetadataEventParameter[];
   metadataUserAttributes: IMetadataUserAttribute[];
 }
 const AnalyticsEventSelect: React.FC<EventsSelectProps> = (
@@ -58,6 +59,7 @@ const AnalyticsEventSelect: React.FC<EventsSelectProps> = (
     isMultiSelect,
     enableChangeRelation,
     metadataEvents,
+    metadataEventParameters,
     metadataUserAttributes,
     loading,
   } = props;
@@ -88,6 +90,7 @@ const AnalyticsEventSelect: React.FC<EventsSelectProps> = (
                       eventIndex: index,
                       categoryOption: item,
                       metadataEvents,
+                      metadataEventParameters,
                       metadataUserAttributes,
                     });
                   }}

@@ -50,6 +50,7 @@ declare global {
     readonly appId: string;
 
     readonly eventName: string;
+    readonly eventNames: string[];
 
     readonly parameterId: string;
     readonly name: string;
