@@ -1087,7 +1087,7 @@ function _getStatusWhenExecutionSuccess(stackStatus: string) {
       return PipelineStatusType.FAILED;
     case 'DELETE_COMPLETE':
       return PipelineStatusType.DELETED;
-    case 'WRONG_VERSION':
+    case 'INCONSISTENT_VERSION':
       return PipelineStatusType.WARNING;
     default:
       return PipelineStatusType.ACTIVE;
@@ -1122,7 +1122,7 @@ function _getPipelineStatusFromStacks(pipeline: IPipeline) {
     s => s.stackTemplateVersion !== '' &&
     pipeline.templateVersion &&
     pipeline.templateVersion !== s.stackTemplateVersion)) {
-    status = 'WRONG_VERSION';
+    status = 'INCONSISTENT_VERSION';
   }
   return status;
 }
