@@ -237,7 +237,11 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
     }
     if (
       pipelineInfo.tags.some(
-        (tag) => !tag.key || tag.key === '' || !tag.value || tag.value === ''
+        (tag) =>
+          !tag.key ||
+          tag.key.trim() === '' ||
+          !tag.value ||
+          tag.value.trim() === ''
       )
     ) {
       setTagsKeyValueEmptyError(true);
