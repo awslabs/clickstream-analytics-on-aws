@@ -141,7 +141,7 @@ export interface IMetadataBuiltInList {
   }>;
   readonly PresetEventParameters: Array<{
     name: string;
-    eventName?: string;
+    eventNames?: string[];
     category: ConditionCategory;
     dataType: MetadataValueType;
     displayName: IMetadataDisplayNameAndDescription;

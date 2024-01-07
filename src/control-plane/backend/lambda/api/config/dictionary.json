@@ -314,7 +314,7 @@
             "en-US": "The screen ID",
             "zh-CN": "屏幕ID"
           },
-          "eventName": "_screen_view"
+          "eventNames": ["_screen_view"]
         },
         {
           "name": "_previous_screen_name",
@@ -328,7 +328,7 @@
             "en-US": "The previous screen name",
             "zh-CN": "上一个屏幕名称"
           },
-          "eventName": "_screen_view"
+          "eventNames": ["_screen_view"]
         },
         {
           "name": "_previous_screen_id",
@@ -342,7 +342,7 @@
             "en-US": "The previous screen ID",
             "zh-CN": "上一个屏幕ID"
           },
-          "eventName": "_screen_view"
+          "eventNames": ["_screen_view"]
         },
         {
           "name": "_previous_screen_unique_id",
@@ -356,7 +356,7 @@
             "en-US": "The previous screen unique ID",
             "zh-CN": "上一个屏幕唯一ID"
           },
-          "eventName": "_screen_view"
+          "eventNames": ["_screen_view"]
         },
         {
           "name": "_page_referrer",
@@ -370,7 +370,7 @@
             "en-US": "The url of the previous page",
             "zh-CN": "前一个页面URL"
           },
-          "eventName": "_page_view"
+          "eventNames": ["_page_view"]
         },
         {
           "name": "_page_referrer_title",
@@ -384,7 +384,7 @@
             "en-US": "The page title of previous page",
             "zh-CN": "前一个页面标题"
           },
-          "eventName": "_page_view"
+          "eventNames": ["_page_view"]
         },
         {
           "name": "_entrances",
@@ -398,7 +398,7 @@
             "en-US": "The first screen view event in a session is 1, others is 0",
             "zh-CN": "会话中的第一个屏幕浏览事件该值为 1，其他则为 0"
           },
-          "eventName": "_page_view"
+          "eventNames": ["_page_view"]
         },
         {
           "name": "_entrances",
@@ -412,7 +412,7 @@
             "en-US": "The first screen view event in a session is 1, others is 0",
             "zh-CN": "会话中的第一个屏幕浏览事件该值为 1，其他则为 0"
           },
-          "eventName": "_screen_view"
+          "eventNames": ["_screen_view"]
         },
         {
           "name": "_previous_timestamp",
@@ -426,21 +426,7 @@
             "en-US": "The timestamp of the previous _screen_view event",
             "zh-CN": "上一个界面浏览事件的时间戳"
           },
-          "eventName": "_screen_view"
-        },
-        {
-          "name": "_previous_timestamp",
-          "dataType": "int",
-          "category": "event",
-          "displayName": {
-            "en-US": "Previous page view timestamp",
-            "zh-CN": "上一个页面浏览时间"
-          },
-          "description": {
-            "en-US": "The timestamp of the previous _page_view event",
-            "zh-CN": "上一个 page_view 事件的时间戳"
-          },
-          "eventName": "_page_view"
+          "eventNames": ["_screen_view", "_page_view"]
         },
         {
           "name": "_engagement_time_msec",
@@ -454,35 +440,7 @@
             "en-US": "Last exposure duration in milliseconds of the previous screen in the foreground",
             "zh-CN": "上个屏幕最近一次在前台的时长的毫秒数"
           },
-          "eventName": "_screen_view"
-        },
-        {
-          "name": "_engagement_time_msec",
-          "dataType": "int",
-          "category": "event",
-          "displayName": {
-            "en-US": "Previous page exposure time(msec)",
-            "zh-CN": "上个页面曝光时长(毫秒）"
-          },
-          "description": {
-            "en-US": "Last exposure duration in milliseconds of the previous page in the foreground",
-            "zh-CN": "上个页面最近一次在前台的时长的毫秒数"
-          },
-          "eventName": "_page_view"
-        },
-        {
-          "name": "_engagement_time_msec",
-          "dataType": "int",
-          "category": "event",
-          "displayName": {
-            "en-US": "User engagement duration(msec)",
-            "zh-CN": "用户互动时长(毫秒）"
-          },
-          "description": {
-            "en-US": "User engagement duration in milliseconds on current screen or page",
-            "zh-CN": "用户在当前界面或页面的互动时长的毫秒数"
-          },
-          "eventName": "_user_engagement"
+          "eventNames": ["_screen_view", "_page_view", "_user_engagement"]
         },
         {
           "name": "_is_first_time",
@@ -496,7 +454,7 @@
             "en-US": "When it is the first _app_start event after the application starts, the value is true",
             "zh-CN": "当应用程序启动后第一个 _app_start 事件时，值为 true"
           },
-          "eventName": "_app_start"
+          "eventNames": ["_app_start"]
         },
         {
           "name": "_exception_message",
@@ -510,7 +468,7 @@
             "en-US": "The message of exception",
             "zh-CN": "异常事件发出的消息"
           },
-          "eventName": "_app_exception"
+          "eventNames": ["_app_exception"]
         },
         {
           "name": "_exception_stack",
@@ -524,7 +482,7 @@
             "en-US": "The stack details of exception",
             "zh-CN": "异常堆栈信息"
           },
-          "eventName": "_app_exception"
+          "eventNames": ["_app_exception"]
         },
         {
           "name": "_previous_app_version",
@@ -538,7 +496,7 @@
             "en-US": "The version of previous app",
             "zh-CN": "上一个应用版本"
           },
-          "eventName": "_app_update"
+          "eventNames": ["_app_update"]
         },
         {
           "name": "_previous_os_version",
@@ -552,7 +510,7 @@
             "en-US": "The version of previous operating system",
             "zh-CN": "上一个操作系统版本"
           },
-          "eventName": "_os_update"
+          "eventNames": ["_os_update"]
         },
         {
           "name": "_error_code",
@@ -566,7 +524,7 @@
             "en-US": "Error code when clickstream data is invalid",
             "zh-CN": "上报数据时出现错误的代码"
           },
-          "eventName": "_clickstream_error"
+          "eventNames": ["_clickstream_error"]
         },
         {
           "name": "_error_message",
@@ -580,7 +538,7 @@
             "en-US": "Error message when clickstream data is invalid",
             "zh-CN": "错误信息"
           },
-          "eventName": "_clickstream_error"
+          "eventNames": ["_clickstream_error"]
         },
         {
           "name": "_search_key",
@@ -594,7 +552,7 @@
             "en-US": "The name of the search keyword",
             "zh-CN": "搜索关键词"
           },
-          "eventName": "_search"
+          "eventNames": ["_search"]
         },
         {
           "name": "_search_term",
@@ -608,7 +566,7 @@
             "en-US": "The search content",
             "zh-CN": "搜索内容"
           },
-          "eventName": "_search"
+          "eventNames": ["_search"]
         },
         {
           "name": "_link_classes",
@@ -622,7 +580,7 @@
             "en-US": "The content of class in tag <a>",
             "zh-CN": "标签<a>中class里的内容"
           },
-          "eventName": "_click"
+          "eventNames": ["_click"]
         },
         {
           "name": "_link_domain",
@@ -636,7 +594,7 @@
             "en-US": "The domain of href in tag <a>",
             "zh-CN": "标签 <a>中href里的域名"
           },
-          "eventName": "_click"
+          "eventNames": ["_click"]
         },
         {
           "name": "_link_id",
@@ -650,7 +608,7 @@
             "en-US": "The content of id in tag <a>",
             "zh-CN": "标签 <a>中id里的内容"
           },
-          "eventName": "_click"
+          "eventNames": ["_click"]
         },
         {
           "name": "_link_url",
@@ -664,7 +622,7 @@
             "en-US": "The content of href in tag <a>",
             "zh-CN": "标签 <a>中href里的内容"
           },
-          "eventName": "_click"
+          "eventNames": ["_click"]
         },
         {
           "name": "_outbound",
@@ -678,7 +636,7 @@
             "en-US": "If the domain is not in configured domain list, the attribute value is true",
             "zh-CN": "如果该域不在配置的域名列表中，则属性值为true"
           },
-          "eventName": "_click"
+          "eventNames": ["_click"]
         },
         {
           "name": "_traffic_source_medium",

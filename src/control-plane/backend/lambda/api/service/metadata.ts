@@ -16,7 +16,7 @@ import { PipelineServ } from './pipeline';
 import { ConditionCategory, MetadataValueType } from '../common/explore-types';
 import { ApiFail, ApiSuccess } from '../common/types';
 import { groupAssociatedEventParametersByName, groupByParameterByName, isNewMetadataVersion, pathNodesToAttribute } from '../common/utils';
-import { IMetadataDisplay, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute } from '../model/metadata';
+import { IMetadataAttributeValue, IMetadataDisplay, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute } from '../model/metadata';
 import { DynamoDbMetadataStore } from '../store/dynamodb/dynamodb-metadata-store';
 import { MetadataStore } from '../store/metadata-store';
 
@@ -38,30 +38,6 @@ export class MetadataEventServ {
       next(error);
     }
   }
-
-  public async listPathNodes(req: any, res: any, next: any) {
-    try {
-      const { projectId, appId } = req.query;
-      const parameters = await metadataStore.listEventParameters(projectId, appId);
-      const pageTitles: IMetadataEventParameter =
-      parameters.find((p: IMetadataEventParameter) => p.eventName === '_page_view' && p.name === '_page_title') as IMetadataEventParameter;
-      const pageUrls: IMetadataEventParameter =
-      parameters.find((p: IMetadataEventParameter) => p.eventName === '_page_view' && p.name === '_page_url') as IMetadataEventParameter;
-      const screenNames: IMetadataEventParameter =
-      parameters.find((p: IMetadataEventParameter) => p.eventName === '_screen_view' && p.name === '_screen_name') as IMetadataEventParameter;
-      const screenIds: IMetadataEventParameter =
-      parameters.find((p: IMetadataEventParameter) => p.eventName === '_screen_view' && p.name === '_screen_id') as IMetadataEventParameter;
-
-      return res.json(new ApiSuccess({
-        pageTitles: pathNodesToAttribute(pageTitles?.valueEnum),
-        pageUrls: pathNodesToAttribute(pageUrls?.valueEnum),
-        screenNames: pathNodesToAttribute(screenNames?.valueEnum),
-        screenIds: pathNodesToAttribute(screenIds?.valueEnum),
-      }));
-    } catch (error) {
-      next(error);
-    }
-  };
 
   private async listRawEvents(projectId: string, appId: string, associated: boolean) {
     let rawEvents: IMetadataEvent[] = [];
@@ -132,20 +108,33 @@ export class MetadataEventServ {
   };
 }
 
+interface IRawParameters {
+  isNewVersion: boolean;
+  parameters: IMetadataEventParameter[];
+}
+
+interface IPathNodes {
+  pageTitles: IMetadataAttributeValue[];
+  pageUrls: IMetadataAttributeValue[];
+  screenNames: IMetadataAttributeValue[];
+  screenIds: IMetadataAttributeValue[];
+}
+
 export class MetadataEventParameterServ {
   private async listRawParameters(projectId: string, appId: string) {
     let rawEventParameters: IMetadataEventParameter[] = [];
     const pipeline = await pipelineServ.getPipelineByProjectId(projectId);
     if (!pipeline) {
-      return rawEventParameters;
+      return { parameters: rawEventParameters, isNewVersion: false } as IRawParameters;
     }
-    if (isNewMetadataVersion(pipeline)) {
+    const isNewVersion = isNewMetadataVersion(pipeline);
+    if (isNewVersion) {
       rawEventParameters = await metadataStore.listEventParametersV2(projectId, appId);
     } else {
       const results = await metadataStore.listEventParameters(projectId, appId);
       rawEventParameters = groupByParameterByName(results);
     }
-    return rawEventParameters;
+    return { parameters: rawEventParameters, isNewVersion } as IRawParameters;
   }
 
   private async getRawEventParameter(projectId: string, appId: string, name: string, category: ConditionCategory, type: MetadataValueType) {
@@ -162,10 +151,44 @@ export class MetadataEventParameterServ {
     return parameter;
   }
 
+  private filterPathNodes(rawParameters: IRawParameters) {
+    const pathNodes: IPathNodes = {
+      pageTitles: [],
+      pageUrls: [],
+      screenNames: [],
+      screenIds: [],
+    };
+    const pageTitles =
+      rawParameters.parameters.find((p: IMetadataEventParameter) => p.name === '_page_title') as IMetadataEventParameter;
+    const pageUrls =
+      rawParameters.parameters.find((p: IMetadataEventParameter) => p.name === '_page_url') as IMetadataEventParameter;
+    const screenNames =
+      rawParameters.parameters.find((p: IMetadataEventParameter) => p.name === '_screen_name') as IMetadataEventParameter;
+    const screenIds =
+      rawParameters.parameters.find((p: IMetadataEventParameter) => p.name === '_screen_id') as IMetadataEventParameter;
+    pathNodes.pageTitles = pathNodesToAttribute(pageTitles?.valueEnum);
+    pathNodes.pageUrls = pathNodesToAttribute(pageUrls?.valueEnum);
+    pathNodes.screenNames = pathNodesToAttribute(screenNames?.valueEnum);
+    pathNodes.screenIds = pathNodesToAttribute(screenIds?.valueEnum);
+    return pathNodes;
+  }
+
+  public async listPathNodes(req: any, res: any, next: any) {
+    try {
+      const { projectId, appId } = req.query;
+      const rawParameters = await this.listRawParameters(projectId, appId);
+      const results = this.filterPathNodes(rawParameters);
+      return res.json(new ApiSuccess(results));
+    } catch (error) {
+      next(error);
+    }
+  };
+
   public async list(req: any, res: any, next: any) {
     try {
       const { projectId, appId } = req.query;
-      const parameters = await this.listRawParameters(projectId, appId);
+      const rawParameters = await this.listRawParameters(projectId, appId);
+      const parameters = rawParameters.parameters;
       const results = await metadataDisplay.patch(projectId, appId, parameters) as IMetadataEventParameter[];
       return res.json(new ApiSuccess({
         totalCount: results.length,

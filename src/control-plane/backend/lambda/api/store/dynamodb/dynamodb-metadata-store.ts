@@ -22,8 +22,8 @@ import { analyticsMetadataTable, prefixMonthGSIName } from '../../common/constan
 import { docClient, query, memoizedQuery } from '../../common/dynamodb-client';
 import { ConditionCategory, MetadataValueType } from '../../common/explore-types';
 import { KeyVal } from '../../common/types';
-import { getCurMonthStr, getDataFromYesterday, getLatestAttributeByName, getLatestEventByName, getLatestParameterById, getParameterByNameAndType, rawToAttribute, rawToEvent, rawToParameter } from '../../common/utils';
-import { IMetadataRaw, IMetadataDisplay, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute, IMetadataBuiltInList, IMetadataDisplayNameAndDescription } from '../../model/metadata';
+import { getCurMonthStr, getDataFromYesterday, getLatestAttributeByName, getLatestEventByName, getLatestParameterById, getParameterByNameAndType, isEmpty, rawToAttribute, rawToEvent, rawToParameter } from '../../common/utils';
+import { IMetadataRaw, IMetadataDisplay, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute, IMetadataBuiltInList, IMetadataDisplayNameAndDescription, ISummaryEventParameter } from '../../model/metadata';
 import { ClickStreamStore } from '../click-stream-store';
 import { MetadataStore } from '../metadata-store';
 
@@ -88,7 +88,17 @@ export class DynamoDbMetadataStore implements MetadataStore {
     if (!record.Item) {
       return;
     }
-    return rawToEvent([record.Item as IMetadataRaw], true)[0];
+    let raw = record.Item as IMetadataRaw;
+    if (isEmpty(record.Item)) {
+      const builtInEvents = await this.queryMetadataRawsFromBuiltInList(projectId, appId, 'EVENT', 'v2');
+      const event = builtInEvents.find(r => r.name === eventName);
+      if (!event) {
+        return;
+      } else {
+        raw = event;
+      }
+    }
+    return rawToEvent([raw], true)[0];
   };
 
   public async listEvents(projectId: string, appId: string): Promise<IMetadataEvent[]> {
@@ -196,7 +206,7 @@ export class DynamoDbMetadataStore implements MetadataStore {
     };
     let records = await memoizedQuery(input) as IMetadataRaw[];
     if (records.length === 0) {
-      records = await this.queryMetadataRawsFromBuiltInList(projectId, appId, 'EVENT_PARAMETER');
+      records = await this.queryMetadataRawsFromBuiltInList(projectId, appId, 'EVENT_PARAMETER', 'v2');
     }
     const parameters = rawToParameter(records, false);
     return parameters;
@@ -329,7 +339,7 @@ export class DynamoDbMetadataStore implements MetadataStore {
     await docClient.send(params);
   };
 
-  private async queryMetadataRawsFromBuiltInList(projectId: string, appId: string, type: string): Promise<IMetadataRaw[]> {
+  private async queryMetadataRawsFromBuiltInList(projectId: string, appId: string, type: string, version?: string): Promise<IMetadataRaw[]> {
     const dic = await store.getDictionary('MetadataBuiltInList');
     if (!dic) {
       return [];
@@ -337,11 +347,11 @@ export class DynamoDbMetadataStore implements MetadataStore {
     const builtInList = dic.data as IMetadataBuiltInList;
     switch (type) {
       case 'EVENT':
-        return this.buildMetadataEventRaws(builtInList, projectId, appId);
+        return this.buildMetadataEventRaws(builtInList, projectId, appId, version);
       case 'EVENT_PARAMETER':
-        return this.buildMetadataEventParameterRaws(builtInList, projectId, appId);
+        return this.buildMetadataEventParameterRaws(builtInList, projectId, appId, version);
       case 'USER_ATTRIBUTE':
-        return this.buildMetadataUserAttributeRaws(builtInList, projectId, appId);
+        return this.buildMetadataUserAttributeRaws(builtInList, projectId, appId, version);
       default:
         break;
     }
@@ -377,10 +387,18 @@ export class DynamoDbMetadataStore implements MetadataStore {
     return metadataRaws;
   };
 
-  private buildMetadataEventRaws(builtInList: IMetadataBuiltInList, projectId: string, appId: string): IMetadataRaw[] {
+  private buildMetadataEventRaws(builtInList: IMetadataBuiltInList, projectId: string, appId: string, version?: string): IMetadataRaw[] {
     const metadataRaws: IMetadataRaw[] = [];
+    const presetEventParameters = builtInList.PresetEventParameters.concat(builtInList.PublicEventParameters);
+    const summaryParameters: ISummaryEventParameter[] = presetEventParameters.flatMap(p => {
+      return {
+        name: p.name,
+        valueType: p.dataType,
+        category: p.category,
+      };
+    });
     for (let e of builtInList.PresetEvents) {
-      const raw: IMetadataRaw = {
+      const data: IMetadataRaw = {
         id: `${projectId}#${appId}#${e.name}`,
         month: getCurMonthStr(),
         prefix: `EVENT#${projectId}#${appId}`,
@@ -392,15 +410,31 @@ export class DynamoDbMetadataStore implements MetadataStore {
           hasData: false,
         },
       };
-      metadataRaws.push(raw);
+      if (version === 'v2') {
+        const raw: IMetadataRaw = {
+          ...data,
+          month: 'latest',
+          summary: {
+            ...data.summary,
+            latestCount: 0,
+            associatedParameters: summaryParameters,
+          },
+        };
+        metadataRaws.push(raw);
+      } else {
+        metadataRaws.push(data);
+      }
     }
     return metadataRaws;
   }
 
-  private buildMetadataEventParameterRaws(builtInList: IMetadataBuiltInList, projectId: string, appId: string): IMetadataRaw[] {
+  private buildMetadataEventParameterRaws(builtInList: IMetadataBuiltInList, projectId: string, appId: string, version?: string): IMetadataRaw[] {
     const metadataRaws: IMetadataRaw[] = [];
+    if (version === 'v2') {
+      return this.buildMetadataEventParameterRawsV2(builtInList, projectId, appId);
+    }
     for (let preset of builtInList.PresetEventParameters) {
-      if (!preset.eventName) {
+      if (isEmpty(preset.eventNames)) {
         for (let e of builtInList.PresetEvents) {
           const raw: IMetadataRaw = {
             id: `${projectId}#${appId}#${e.name}#${preset.category}#${preset.name}#${preset.dataType}`,
@@ -420,22 +454,24 @@ export class DynamoDbMetadataStore implements MetadataStore {
           metadataRaws.push(raw);
         }
       } else {
-        const raw: IMetadataRaw = {
-          id: `${projectId}#${appId}#${preset.eventName}#${preset.category}#${preset.name}#${preset.dataType}`,
-          month: getCurMonthStr(),
-          prefix: `EVENT_PARAMETER#${projectId}#${appId}`,
-          projectId: projectId,
-          appId: appId,
-          name: preset.name,
-          eventName: preset.eventName,
-          category: preset.category,
-          valueType: preset.dataType,
-          summary: {
-            platform: [],
-            hasData: false,
-          },
-        };
-        metadataRaws.push(raw);
+        for (let e of preset.eventNames ?? []) {
+          const raw: IMetadataRaw = {
+            id: `${projectId}#${appId}#${e}#${preset.category}#${preset.name}#${preset.dataType}`,
+            month: getCurMonthStr(),
+            prefix: `EVENT_PARAMETER#${projectId}#${appId}`,
+            projectId: projectId,
+            appId: appId,
+            name: preset.name,
+            eventName: e,
+            category: preset.category,
+            valueType: preset.dataType,
+            summary: {
+              platform: [],
+              hasData: false,
+            },
+          };
+          metadataRaws.push(raw);
+        }
       }
     }
 
@@ -462,10 +498,71 @@ export class DynamoDbMetadataStore implements MetadataStore {
     return metadataRaws;
   }
 
-  private buildMetadataUserAttributeRaws(builtInList: IMetadataBuiltInList, projectId: string, appId: string): IMetadataRaw[] {
+  private buildMetadataEventParameterRawsV2(builtInList: IMetadataBuiltInList, projectId: string, appId: string): IMetadataRaw[] {
+    const metadataRaws: IMetadataRaw[] = [];
+    const allPresetEventNames = builtInList.PresetEvents.map(e => e.name);
+    for (let preset of builtInList.PresetEventParameters) {
+      const data: IMetadataRaw = {
+        id: `${projectId}#${appId}#${preset.category}#${preset.name}#${preset.dataType}`,
+        month: 'latest',
+        prefix: `EVENT_PARAMETER#${projectId}#${appId}`,
+        projectId: projectId,
+        appId: appId,
+        name: preset.name,
+        category: preset.category,
+        valueType: preset.dataType,
+        summary: {
+          associatedEvents: [],
+          platform: [],
+          hasData: false,
+        },
+      };
+      if (isEmpty(preset.eventNames)) {
+        const raw: IMetadataRaw = {
+          ...data,
+          summary: {
+            ...data.summary,
+            associatedEvents: allPresetEventNames,
+          },
+        };
+        metadataRaws.push(raw);
+      } else {
+        const raw: IMetadataRaw = {
+          ...data,
+          summary: {
+            ...data.summary,
+            associatedEvents: preset.eventNames,
+          },
+        };
+        metadataRaws.push(raw);
+      }
+    }
+
+    for (let pub of builtInList.PublicEventParameters) {
+      const raw: IMetadataRaw = {
+        id: `${projectId}#${appId}#${pub.category}#${pub.name}#${pub.dataType}`,
+        month: 'latest',
+        prefix: `EVENT_PARAMETER#${projectId}#${appId}`,
+        projectId: projectId,
+        appId: appId,
+        name: pub.name,
+        category: pub.category,
+        valueType: pub.dataType,
+        summary: {
+          associatedEvents: allPresetEventNames,
+          platform: [],
+          hasData: false,
+        },
+      };
+      metadataRaws.push(raw);
+    }
+    return metadataRaws;
+  }
+
+  private buildMetadataUserAttributeRaws(builtInList: IMetadataBuiltInList, projectId: string, appId: string, version?: string): IMetadataRaw[] {
     const metadataRaws: IMetadataRaw[] = [];
     for (let attr of builtInList.PresetUserAttributes) {
-      const raw: IMetadataRaw = {
+      const data: IMetadataRaw = {
         id: `${projectId}#${appId}#${attr.category}#${attr.name}#${attr.dataType}`,
         month: getCurMonthStr(),
         prefix: `USER_ATTRIBUTE#${projectId}#${appId}`,
@@ -478,7 +575,15 @@ export class DynamoDbMetadataStore implements MetadataStore {
           hasData: false,
         },
       };
-      metadataRaws.push(raw);
+      if (version === 'v2') {
+        const raw: IMetadataRaw = {
+          ...data,
+          month: 'latest',
+        };
+        metadataRaws.push(raw);
+      } else {
+        metadataRaws.push(data);
+      }
     }
     return metadataRaws;
   }

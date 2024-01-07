@@ -32,7 +32,7 @@ import { BuiltInTagKeys, PipelineStackType, PipelineStatusDetail, PipelineStatus
 import { logger } from './powertools';
 import { SolutionInfo } from './solution-info-ln';
 import { ALBRegionMappingObject, BucketPrefix, ClickStreamBadRequestError, ClickStreamSubnet, DataCollectionSDK, IUserRole, RPURange, RPURegionMappingObject, ReportingDashboardOutput, SubnetType } from './types';
-import { IMetadataRaw, IMetadataRawValue, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute, IMetadataAttributeValue } from '../model/metadata';
+import { IMetadataRaw, IMetadataRawValue, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute, IMetadataAttributeValue, ISummaryEventParameter } from '../model/metadata';
 import { CPipelineResources, IPipeline, ITag } from '../model/pipeline';
 import { IUserSettings } from '../model/user';
 import { UserService } from '../service/user';
@@ -1043,7 +1043,7 @@ function pipelineAnalysisStudioEnabled(pipeline: IPipeline): boolean {
   ) {
     return true;
   }
-  return true;
+  return false;
 };
 
 function getStackVersion(pipeline: IPipeline, stackType: PipelineStackType): string | undefined {

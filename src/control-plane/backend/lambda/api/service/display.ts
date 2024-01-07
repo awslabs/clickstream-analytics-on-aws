@@ -86,7 +86,7 @@ export class CMetadataDisplay {
       return;
     }
     const prefix = parameter.prefix.split('#')[0];
-    const key = `${prefix}#${parameter.projectId}#${parameter.appId}#${parameter.category}#${parameter.name}#${parameter.valueType}`;
+    let key = `${prefix}#${parameter.projectId}#${parameter.appId}#${parameter.category}#${parameter.name}#${parameter.valueType}`;
     const metadataDisplay = this.displays.find((d: IMetadataDisplay) => d.id === key);
     parameter.displayName = this.patchCategoryToDisplayName(parameter.category, parameter.name, metadataDisplay?.displayName);
     parameter.description = metadataDisplay?.description ?? { 'en-US': '', 'zh-CN': '' };

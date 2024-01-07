@@ -41,7 +41,7 @@ router_metadata.get(
     query('appId').custom(isValidEmpty),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-    return metadataEventServ.listPathNodes(req, res, next);
+    return metadataEventParameterServ.listPathNodes(req, res, next);
   });
 
 router_metadata.get(
