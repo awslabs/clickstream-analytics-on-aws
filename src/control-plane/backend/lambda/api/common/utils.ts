@@ -1207,9 +1207,6 @@ function _catchWarningStatus(status: PipelineStatusType, lastAction: string) {
   if (status === PipelineStatusType.FAILED && (lastAction === 'Update' || lastAction === 'Upgrade')) {
     status = PipelineStatusType.WARNING;
   }
-  if (status === PipelineStatusType.ACTIVE && lastAction === 'Delete') {
-    status = PipelineStatusType.DELETING;
-  }
   return status;
 }
 
