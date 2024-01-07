@@ -197,6 +197,45 @@ describe('Pipeline status test', () => {
       ],
     };
     expect(getPipelineStatusType(pipeline7)).toEqual(PipelineStatusType.FAILED);
+    // execution SUCCEEDED
+    // stacks [CREATE_IN_PROGRESS, CREATE_IN_PROGRESS, CREATE_COMPLETE]
+    const pipeline8: IPipeline = {
+      ...BASE_STATUS_PIPELINE,
+      lastAction: 'Create',
+      executionDetail: {
+        executionArn: 'arn:aws:states:us-east-1:123456789012:execution:EXAMPLE',
+        name: 'EXAMPLE',
+        status: ExecutionStatus.SUCCEEDED,
+      },
+      stackDetails: [
+        {
+          ...BASE_STACK_DETAIL,
+          stackStatus: StackStatus.CREATE_IN_PROGRESS,
+        },
+        {
+          ...BASE_STACK_DETAIL,
+          stackStatus: StackStatus.CREATE_IN_PROGRESS,
+        },
+        {
+          ...BASE_STACK_DETAIL,
+          stackStatus: StackStatus.CREATE_COMPLETE,
+        },
+      ],
+    };
+    expect(getPipelineStatusType(pipeline8)).toEqual(PipelineStatusType.CREATING);
+    // execution SUCCEEDED
+    // stacks []
+    const pipeline9: IPipeline = {
+      ...BASE_STATUS_PIPELINE,
+      lastAction: 'Create',
+      executionDetail: {
+        executionArn: 'arn:aws:states:us-east-1:123456789012:execution:EXAMPLE',
+        name: 'EXAMPLE',
+        status: ExecutionStatus.SUCCEEDED,
+      },
+      stackDetails: [],
+    };
+    expect(getPipelineStatusType(pipeline9)).toEqual(PipelineStatusType.ACTIVE);
   });
   it('update status', async () => {
     // execution RUNNING
@@ -371,6 +410,45 @@ describe('Pipeline status test', () => {
       ],
     };
     expect(getPipelineStatusType(pipeline8)).toEqual(PipelineStatusType.WARNING);
+    // execution SUCCEEDED
+    // stacks [UPDATE_COMPLETE, UPDATE_IN_PROGRESS, UPDATE_IN_PROGRESS]
+    const pipeline9: IPipeline = {
+      ...BASE_STATUS_PIPELINE,
+      lastAction: 'Update',
+      executionDetail: {
+        executionArn: 'arn:aws:states:us-east-1:123456789012:execution:EXAMPLE',
+        name: 'EXAMPLE',
+        status: ExecutionStatus.SUCCEEDED,
+      },
+      stackDetails: [
+        {
+          ...BASE_STACK_DETAIL,
+          stackStatus: StackStatus.UPDATE_COMPLETE,
+        },
+        {
+          ...BASE_STACK_DETAIL,
+          stackStatus: StackStatus.UPDATE_IN_PROGRESS,
+        },
+        {
+          ...BASE_STACK_DETAIL,
+          stackStatus: StackStatus.UPDATE_IN_PROGRESS,
+        },
+      ],
+    };
+    expect(getPipelineStatusType(pipeline9)).toEqual(PipelineStatusType.UPDATING);
+    // execution SUCCEEDED
+    // stacks []
+    const pipeline10: IPipeline = {
+      ...BASE_STATUS_PIPELINE,
+      lastAction: 'Update',
+      executionDetail: {
+        executionArn: 'arn:aws:states:us-east-1:123456789012:execution:EXAMPLE',
+        name: 'EXAMPLE',
+        status: ExecutionStatus.SUCCEEDED,
+      },
+      stackDetails: [],
+    };
+    expect(getPipelineStatusType(pipeline10)).toEqual(PipelineStatusType.ACTIVE);
   });
   it('upgrade status', async () => {
     // execution RUNNING
@@ -609,6 +687,62 @@ describe('Pipeline status test', () => {
       ],
     };
     expect(getPipelineStatusType(pipeline5)).toEqual(PipelineStatusType.DELETING);
+  });
+  it('wrong version status', async () => {
+    // execution SUCCEEDED
+    // stacks [UPDATE_COMPLETE, UPDATE_COMPLETE, UPDATE_COMPLETE]
+    const pipeline1: IPipeline = {
+      ...BASE_STATUS_PIPELINE,
+      lastAction: 'Upgrade',
+      executionDetail: {
+        executionArn: 'arn:aws:states:us-east-1:123456789012:execution:EXAMPLE',
+        name: 'EXAMPLE',
+        status: ExecutionStatus.SUCCEEDED,
+      },
+      stackDetails: [
+        {
+          ...BASE_STACK_DETAIL,
+          stackTemplateVersion: 'wrong version',
+          stackStatus: StackStatus.UPDATE_COMPLETE,
+        },
+        {
+          ...BASE_STACK_DETAIL,
+          stackStatus: StackStatus.UPDATE_COMPLETE,
+        },
+        {
+          ...BASE_STACK_DETAIL,
+          stackStatus: StackStatus.UPDATE_COMPLETE,
+        },
+      ],
+    };
+    expect(getPipelineStatusType(pipeline1)).toEqual(PipelineStatusType.WARNING);
+    // execution RUNNING
+    // stacks [UPDATE_COMPLETE, UPDATE_IN_PROGRESS, UPDATE_COMPLETE]
+    const pipeline2: IPipeline = {
+      ...BASE_STATUS_PIPELINE,
+      lastAction: 'Upgrade',
+      executionDetail: {
+        executionArn: 'arn:aws:states:us-east-1:123456789012:execution:EXAMPLE',
+        name: 'EXAMPLE',
+        status: ExecutionStatus.RUNNING,
+      },
+      stackDetails: [
+        {
+          ...BASE_STACK_DETAIL,
+          stackTemplateVersion: 'wrong version',
+          stackStatus: StackStatus.UPDATE_COMPLETE,
+        },
+        {
+          ...BASE_STACK_DETAIL,
+          stackStatus: StackStatus.UPDATE_IN_PROGRESS,
+        },
+        {
+          ...BASE_STACK_DETAIL,
+          stackStatus: StackStatus.UPDATE_COMPLETE,
+        },
+      ],
+    };
+    expect(getPipelineStatusType(pipeline2)).toEqual(PipelineStatusType.UPDATING);
   });
   afterAll((done) => {
     done();

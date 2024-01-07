@@ -31,6 +31,7 @@ import {
 import {
   awsAccountId,
   awsPartition,
+  awsRegion,
   awsUrlSuffix,
   CFN_RULE_PREFIX,
   CFN_TOPIC_PREFIX,
@@ -468,7 +469,7 @@ export class CPipeline {
   private async _forceRefreshStatus(): Promise<void> {
     let executionDetail;
     if (this.pipeline.executionDetail?.executionArn) {
-      executionDetail = await getExecutionDetail(this.pipeline.region, this.pipeline.executionDetail?.executionArn);
+      executionDetail = await getExecutionDetail(awsRegion!, this.pipeline.executionDetail?.executionArn);
       if (executionDetail) {
         this.pipeline.executionDetail = {
           executionArn: executionDetail.executionArn ?? '',
@@ -479,8 +480,8 @@ export class CPipeline {
     }
     if (!executionDetail) {
       this.pipeline.executionDetail = {
-        executionArn: '',
-        name: '',
+        executionArn: this.pipeline.executionDetail?.executionArn ?? '',
+        name: this.pipeline.executionDetail?.name ?? '',
         status: ExecutionStatus.SUCCEEDED,
       };
     }
@@ -496,8 +497,18 @@ export class CPipeline {
   }
 
   private async _forceRefreshStacksById(): Promise<void> {
+    const stackNames = this.stackManager.getWorkflowStacks(this.pipeline.workflow?.Workflow!);
     const stackDetails = this.pipeline.stackDetails ?? [];
-    const stackIds = stackDetails.map(s => s.stackId);
+    const stackIds: string[] = [];
+    for (let stackName of stackNames) {
+      const detail = stackDetails.find(s => s.stackName === stackName);
+      if (detail?.stackId) {
+        stackIds.push(detail?.stackId);
+      } else {
+        stackIds.push(stackName);
+      }
+    }
+
     const stackStatusDetails: PipelineStatusDetail[] = await getStacksDetailsByNames(this.pipeline.region, stackIds);
     if (stackStatusDetails.length > 0) {
       this.pipeline.stackDetails = stackStatusDetails;
