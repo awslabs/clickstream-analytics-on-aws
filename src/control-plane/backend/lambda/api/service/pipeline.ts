@@ -15,7 +15,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { StackManager } from './stack';
 import { OUTPUT_INGESTION_SERVER_DNS_SUFFIX, OUTPUT_INGESTION_SERVER_URL_SUFFIX, OUTPUT_METRICS_OBSERVABILITY_DASHBOARD_NAME, OUTPUT_REPORT_DASHBOARDS_SUFFIX } from '../common/constants-ln';
 import { ApiFail, ApiSuccess, PipelineStackType, PipelineStatusType } from '../common/types';
-import { getStackOutputFromPipelineStatus, getReportingDashboardsUrl, paginateData, pipelineAnalysisStudioEnabled } from '../common/utils';
+import { getStackOutputFromPipelineStatus, getReportingDashboardsUrl, paginateData, pipelineAnalysisStudioEnabled, isEmpty } from '../common/utils';
 import { IPipeline, CPipeline } from '../model/pipeline';
 import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
@@ -87,11 +87,11 @@ export class PipelineServ {
         const templateInfo = pipeline.getTemplateInfo();
         return res.json(new ApiSuccess({
           ...latestPipeline,
-          dataProcessing: {
+          dataProcessing: !isEmpty(latestPipeline.dataProcessing) ? {
             ...latestPipeline.dataProcessing,
             transformPlugin: pluginsInfo.transformPlugin,
             enrichPlugin: pluginsInfo.enrichPlugin,
-          },
+          } : {},
           endpoint: getStackOutputFromPipelineStatus(latestPipeline.status, PipelineStackType.INGESTION, OUTPUT_INGESTION_SERVER_URL_SUFFIX),
           dns: getStackOutputFromPipelineStatus(latestPipeline.status, PipelineStackType.INGESTION, OUTPUT_INGESTION_SERVER_DNS_SUFFIX),
           dashboards: getReportingDashboardsUrl(latestPipeline.status, PipelineStackType.REPORTING, OUTPUT_REPORT_DASHBOARDS_SUFFIX),

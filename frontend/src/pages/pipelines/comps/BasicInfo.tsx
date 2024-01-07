@@ -161,7 +161,8 @@ const BasicInfo: React.FC<BasicInfoProps> = (props: BasicInfoProps) => {
                   </Button>
                 )}
                 {(pipelineInfo?.status?.status === EPipelineStatus.Active ||
-                  pipelineInfo?.status?.status === EPipelineStatus.Failed) && (
+                  pipelineInfo?.status?.status === EPipelineStatus.Failed ||
+                  pipelineInfo?.status?.status === EPipelineStatus.Warning) && (
                   <Button
                     href={`/project/${pipelineInfo.projectId}/pipeline/${pipelineInfo.pipelineId}/update`}
                     iconName="edit"

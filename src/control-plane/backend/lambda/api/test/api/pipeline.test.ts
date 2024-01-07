@@ -2026,11 +2026,7 @@ describe('Pipeline test', () => {
           ...S3_INGESTION_PIPELINE.status,
           executionDetail: {},
         },
-        dataProcessing: {
-          ...S3_INGESTION_PIPELINE.dataProcessing,
-          enrichPlugin: [],
-          transformPlugin: null,
-        },
+        dataProcessing: {},
         dns: '',
         endpoint: '',
         dashboards: [],
