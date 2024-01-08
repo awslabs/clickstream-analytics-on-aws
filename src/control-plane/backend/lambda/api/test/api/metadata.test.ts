@@ -354,7 +354,7 @@ function mockPipeline(version?: string) {
   }).resolves({
     Items: [{
       ...MSK_DATA_PROCESSING_NEW_SERVERLESS_PIPELINE_WITH_WORKFLOW,
-      templateVersion: version ?? 'v1.0.0',
+      templateVersion: version ?? 'v1.1.0',
     }],
   });
   ddbMock.on(QueryCommand, getAllEventParametersInput()).resolves({
@@ -507,7 +507,19 @@ describe('Metadata Event test', () => {
     });
   });
   it('Get non-existent metadata event', async () => {
-    ddbMock.on(QueryCommand).resolves({
+    ddbMock.on(QueryCommand, {
+      TableName: analyticsMetadataTable,
+      KeyConditionExpression: '#id= :id AND begins_with(#month, :month)',
+      ExpressionAttributeNames: {
+        '#id': 'id',
+        '#month': 'month',
+      },
+      ExpressionAttributeValues: {
+        ':id': `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}NoExist`,
+        ':month': '#',
+      },
+      ScanIndexForward: false,
+    }).resolves({
       Items: [],
     });
     const res = await request(app)
@@ -1418,7 +1430,7 @@ describe('Metadata Event Attribute test', () => {
     });
   });
   it('Get non-existent metadata event attribute', async () => {
-    ddbMock.on(QueryCommand).resolves({
+    ddbMock.on(QueryCommand, getAllEventParametersInput()).resolves({
       Items: [],
     });
     const res = await request(app)

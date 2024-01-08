@@ -391,10 +391,7 @@ export const getEventParameters = (
   if (!eventName) {
     return [];
   }
-  if (
-    metadataEventParameters.length > 0 &&
-    metadataEventParameters[0].eventNames?.length > 0
-  ) {
+  if (metadataEventParameters?.[0].eventNames?.length > 0) {
     const associatedParameters = metadataEventParameters.filter((p) =>
       p.eventNames.includes(eventName)
     );

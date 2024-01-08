@@ -28,7 +28,7 @@ import {
   SERVICE_CATALOG_SUPPORTED_REGIONS,
 } from './constants-ln';
 import { ConditionCategory, MetadataValueType } from './explore-types';
-import { BuiltInTagKeys, PipelineStackType, PipelineStatusDetail, PipelineStatusType } from './model-ln';
+import { BuiltInTagKeys, MetadataVersionType, PipelineStackType, PipelineStatusDetail, PipelineStatusType } from './model-ln';
 import { logger } from './powertools';
 import { SolutionInfo } from './solution-info-ln';
 import { ALBRegionMappingObject, BucketPrefix, ClickStreamBadRequestError, ClickStreamSubnet, DataCollectionSDK, IUserRole, RPURange, RPURegionMappingObject, ReportingDashboardOutput, SubnetType } from './types';
@@ -1252,9 +1252,16 @@ function _getRunningStatus(lastAction: string) {
   return status;
 };
 
-function isNewMetadataVersion(pipeline: IPipeline) {
-  const oldVersions = ['v1.0.0', 'v1.0.1', 'v1.0.2', 'v1.0.3', 'v1.1.0', 'v1.1.1'];
-  return !oldVersions.includes(pipeline.templateVersion ?? '');
+function getMetadataVersionType(pipeline: IPipeline) {
+  const version = pipeline.templateVersion?.split('-')[0] ?? '';
+  const unSupportVersions = ['v1.0.0', 'v1.0.1', 'v1.0.2', 'v1.0.3'];
+  const oldVersions = ['v1.1.0', 'v1.1.1'];
+  if (unSupportVersions.includes(version)) {
+    return MetadataVersionType.UNSUPPORTED;
+  } else if (oldVersions.includes(version)) {
+    return MetadataVersionType.V1;
+  }
+  return MetadataVersionType.V2;
 }
 
 export {
@@ -1306,7 +1313,7 @@ export {
   getStateMachineExecutionName,
   getPipelineStatusType,
   getPipelineLastActionFromStacksStatus,
-  isNewMetadataVersion,
+  getMetadataVersionType,
   rawToEvent,
   rawToParameter,
   rawToAttribute,
