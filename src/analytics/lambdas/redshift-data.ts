@@ -17,7 +17,6 @@ import { REDSHIFT_MODE } from '../../common/model';
 import { logger } from '../../common/powertools';
 import { aws_sdk_client_common_config } from '../../common/sdk-client-config';
 import { ExistingRedshiftServerlessCustomProps, ProvisionedRedshiftProps, RedshiftServerlessProps } from '../private/model';
-import { sleep } from '../../common/utils';
 
 export function getRedshiftClient(roleArn: string) {
   return new RedshiftDataClient({
@@ -121,7 +120,7 @@ export const executeStatementsWithWait = async (client: RedshiftDataClient, sqlS
   logger.info(`Got statement query '${queryId}' with status: ${response.Status} after submitting it`);
   let count = 0;
   while (response.Status != StatusString.FINISHED && response.Status != StatusString.FAILED && count < waitProps.maxCheckCount) {
-    await sleep(waitProps.checkIntervalMilliseconds);
+    await Sleep(waitProps.checkIntervalMilliseconds);
     count++;
     response = await client.send(checkParams);
     logger.info(`Got statement query '${queryId}' with status: ${response.Status} in ${count * waitProps.checkIntervalMilliseconds} Milliseconds`);
