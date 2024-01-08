@@ -149,7 +149,11 @@ test('SQLExecutionStepFn role policy is created as expected', () => {
                   {
                     Ref: Match.anyValue(),
                   },
-                  '/*',
+                  '/',
+                  {
+                    Ref: Match.anyValue(),
+                  },
+                  '*',
                 ],
               ],
             },

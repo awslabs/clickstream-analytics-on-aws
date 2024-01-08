@@ -25,6 +25,7 @@ import {
   OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME, OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_PORT,
   OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_ADDRESS,
   OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX, OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_NAME_SUFFIX,
+  OUTPUT_DATA_MODELING_REDSHIFT_SQL_EXECUTION_STATE_MACHINE_ARN_SUFFIX,
 } from '../../../src/common/constant';
 import { REDSHIFT_MODE, BuiltInTagKeys, MetricsNamespace } from '../../../src/common/model';
 import { SolutionInfo } from '../../../src/common/solution-info';
@@ -2886,6 +2887,15 @@ describe('DataAnalyticsRedshiftStack tests', () => {
       Condition: 'existingRedshiftServerless',
     });
     stackTemplate.hasOutput(`NewRedshiftServerless${OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX}`, {
+      Condition: 'newRedshiftServerless',
+    });
+    stackTemplate.hasOutput(`ProvisionedRedshift${OUTPUT_DATA_MODELING_REDSHIFT_SQL_EXECUTION_STATE_MACHINE_ARN_SUFFIX}`, {
+      Condition: 'redshiftProvisioned',
+    });
+    stackTemplate.hasOutput(`ExistingRedshiftServerless${OUTPUT_DATA_MODELING_REDSHIFT_SQL_EXECUTION_STATE_MACHINE_ARN_SUFFIX}`, {
+      Condition: 'existingRedshiftServerless',
+    });
+    stackTemplate.hasOutput(`NewRedshiftServerless${OUTPUT_DATA_MODELING_REDSHIFT_SQL_EXECUTION_STATE_MACHINE_ARN_SUFFIX}`, {
       Condition: 'newRedshiftServerless',
     });
   });

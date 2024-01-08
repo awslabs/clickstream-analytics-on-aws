@@ -15,6 +15,7 @@ import { fromTemporaryCredentials } from '@aws-sdk/credential-providers';
 import { NodeHttpHandler } from '@smithy/node-http-handler';
 import { REDSHIFT_MODE } from '../../common/model';
 import { logger } from '../../common/powertools';
+import { readS3ObjectAsString } from '../../common/s3';
 import { aws_sdk_client_common_config } from '../../common/sdk-client-config';
 import { sleep } from '../../common/utils';
 import { ExistingRedshiftServerlessCustomProps, ProvisionedRedshiftProps, RedshiftServerlessProps } from '../private/model';
@@ -184,6 +185,51 @@ export const describeStatement = async (client: RedshiftDataClient, queryId: str
     throw err;
   }
 };
+
+
+export async function exeucteBySqlorS3File(sqlOrS3File: string,
+  redShiftClient: RedshiftDataClient, serverlessRedshiftProps?: RedshiftServerlessProps,
+  provisionedRedshiftProps?: ProvisionedRedshiftProps,
+  databaseName?: string,
+): Promise<{ queryId: string}> {
+  logger.info('exeucteBySqlorS3File() sqlOrS3File: ' + sqlOrS3File);
+
+  const sqlStatements = await getSqlStatement(sqlOrS3File);
+
+  const queryId = await executeStatements(redShiftClient, sqlStatements, serverlessRedshiftProps, provisionedRedshiftProps, databaseName, true);
+  logger.info('exeucteBySqlorS3File() get queryId: ' + queryId);
+
+  return {
+    queryId: queryId!,
+  };
+}
+
+
+async function getSqlStatement(sqlOrS3File: string): Promise<string[]> {
+  logger.info('getSqlStatement() sqlOrS3File: ' + sqlOrS3File);
+
+  let sqlContent = sqlOrS3File;
+  if (sqlOrS3File.startsWith('s3://')) {
+    sqlContent = await readSqlFileFromS3(sqlOrS3File);
+  }
+  return [sqlContent];
+}
+
+async function readSqlFileFromS3(s3Path: string): Promise<string> {
+  logger.info('readSqlFileFromS3() s3Path: ' + s3Path);
+
+  const params = {
+    Bucket: s3Path.split('/')[2],
+    Key: s3Path.split('/').slice(3).join('/'),
+  };
+
+  const sqlString = await readS3ObjectAsString(params.Bucket, params.Key);
+  if (!sqlString) {
+    throw new Error('Failed to read sql file from s3: ' + s3Path);
+  }
+  return sqlString;
+}
+
 
 export function getRedshiftProps(
   redshiftMode: string,

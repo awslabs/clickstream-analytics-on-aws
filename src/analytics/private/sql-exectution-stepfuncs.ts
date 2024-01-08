@@ -133,7 +133,7 @@ function createSQLExecutionStepFn(scope: Construct, props: SQLExecutionStepFunct
     role,
   });
   props.dataAPIRole.grantAssumeRole(fn.grantPrincipal);
-  props.workflowBucketInfo.s3Bucket.grantRead(fn);
+  props.workflowBucketInfo.s3Bucket.grantRead(fn, `${props.workflowBucketInfo.prefix}*`);
 
   addCfnNagSuppressRules(fn.node.defaultChild as CfnResource,
     rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions('CDK'));

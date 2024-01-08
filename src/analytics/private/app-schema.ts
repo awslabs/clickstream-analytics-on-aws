@@ -149,7 +149,7 @@ export abstract class RedshiftSQLExecution extends Construct {
     });
 
     attachListTagsPolicyForFunction(this, fnId, fn);
-    props.workflowBucketInfo.s3Bucket.grantWrite(fn);
+    props.workflowBucketInfo.s3Bucket.grantWrite(fn, `${props.workflowBucketInfo.prefix}*`);
 
     return fn;
   }
