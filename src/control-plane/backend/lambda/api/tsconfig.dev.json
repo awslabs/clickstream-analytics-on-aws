@@ -27,7 +27,6 @@
     "emitDecoratorMetadata": true
   },
   "include": [
-    ".projenrc.js",
     ".//**/*.ts",
     "test//**/*.ts"
   ],
