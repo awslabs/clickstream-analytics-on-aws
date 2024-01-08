@@ -29,6 +29,7 @@ import {
   warmup,
   clean,
   getPathNodes,
+  getBuiltInMetadata,
 } from 'apis/analytics';
 import Loading from 'components/common/Loading';
 import { CategoryItemType } from 'components/eventselect/AnalyticsType';
@@ -40,7 +41,7 @@ import { StateActionType, HelpPanelType } from 'context/reducer';
 import React, { useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { MetadataParameterType } from 'ts/explore-types';
+import { IMetadataBuiltInList, MetadataParameterType } from 'ts/explore-types';
 import { defaultStr } from 'ts/utils';
 import {
   metadataEventsConvertToCategoryItemType,
@@ -108,6 +109,8 @@ const AnalyticsExplore: React.FC = () => {
 
   const [pipeline, setPipeline] = useState<IPipeline | null>(null);
   const [loadingMetadataEvent, setLoadingMetadataEvent] = useState(false);
+  const [builtInMetadata, setBuiltInMetadata] =
+    useState<IMetadataBuiltInList>();
   const [metadataEvents, setMetadataEvents] = useState<IMetadataEvent[]>([]);
   const [metadataEventParameters, setMetadataEventParameters] = useState<
     IMetadataEventParameter[]
@@ -140,6 +143,18 @@ const AnalyticsExplore: React.FC = () => {
     screenNames: [],
     screenIds: [],
   });
+
+  const getAllBuiltInMetadata = async () => {
+    try {
+      const { success, data }: ApiResponse<IMetadataBuiltInList> =
+        await getBuiltInMetadata();
+      if (success) {
+        setBuiltInMetadata(data);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   const getAllPathNodes = async () => {
     try {
@@ -280,6 +295,7 @@ const AnalyticsExplore: React.FC = () => {
 
   useEffect(() => {
     if (projectId && appId) {
+      getAllBuiltInMetadata();
       loadPipeline();
     }
   }, [projectId, appId]);
@@ -383,6 +399,7 @@ const AnalyticsExplore: React.FC = () => {
                     loadingEvents={loadingMetadataEvent}
                     loading={false}
                     pipeline={pipeline}
+                    builtInMetadata={builtInMetadata}
                     metadataEvents={metadataEvents}
                     metadataEventParameters={metadataEventParameters}
                     metadataUserAttributes={metadataUserAttributes}
@@ -398,6 +415,7 @@ const AnalyticsExplore: React.FC = () => {
                     loadingEvents={loadingMetadataEvent}
                     loading={false}
                     pipeline={pipeline}
+                    builtInMetadata={builtInMetadata}
                     metadataEvents={metadataEvents}
                     metadataEventParameters={metadataEventParameters}
                     metadataUserAttributes={metadataUserAttributes}
@@ -411,6 +429,7 @@ const AnalyticsExplore: React.FC = () => {
                   loadingEvents={loadingMetadataEvent}
                   loading={false}
                   pipeline={pipeline}
+                  builtInMetadata={builtInMetadata}
                   metadataEvents={metadataEvents}
                   metadataEventParameters={metadataEventParameters}
                   metadataUserAttributes={metadataUserAttributes}
@@ -426,6 +445,7 @@ const AnalyticsExplore: React.FC = () => {
                     loadingEvents={loadingMetadataEvent}
                     loading={false}
                     pipeline={pipeline}
+                    builtInMetadata={builtInMetadata}
                     metadataEvents={metadataEvents}
                     metadataEventParameters={metadataEventParameters}
                     metadataUserAttributes={metadataUserAttributes}

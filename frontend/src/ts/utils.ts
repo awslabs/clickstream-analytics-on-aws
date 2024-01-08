@@ -26,6 +26,7 @@ import {
   IUserRole,
 } from './const';
 import { ServerlessRedshiftRPUByRegionMapping } from './constant-ln';
+import { IMetadataBuiltInList } from './explore-types';
 
 /**
  * The `ternary` function in TypeScript returns `caseOne` if `cond` is true, otherwise it returns
@@ -384,6 +385,7 @@ export const defaultGenericsValue = <T>(expectValue: T, defaultValue: T) => {
 export const getEventParameters = (
   metadataEventParameters: IMetadataEventParameter[],
   metadataEvents: IMetadataEvent[],
+  builtInMetadata?: IMetadataBuiltInList,
   eventName?: string
 ) => {
   if (!eventName) {
@@ -393,15 +395,47 @@ export const getEventParameters = (
     metadataEventParameters.length > 0 &&
     metadataEventParameters[0].eventNames?.length > 0
   ) {
-    return metadataEventParameters.filter((p) =>
+    const associatedParameters = metadataEventParameters.filter((p) =>
       p.eventNames.includes(eventName)
     );
+    patchBuiltInMetadata(eventName, associatedParameters, builtInMetadata);
+    return associatedParameters;
   }
   const event = metadataEvents.find((item) => item.name === eventName);
   if (event) {
-    return event.associatedParameters ?? [];
+    const associatedParameters = event.associatedParameters ?? [];
+    patchBuiltInMetadata(eventName, associatedParameters, builtInMetadata);
+    return associatedParameters;
   }
   return [];
+};
+
+const patchBuiltInMetadata = (
+  eventName: string,
+  metadataEventParameters: IMetadataEventParameter[],
+  builtInMetadata?: IMetadataBuiltInList
+) => {
+  console.log(builtInMetadata);
+  if (!builtInMetadata) {
+    return metadataEventParameters;
+  }
+  const presetEventParameters = builtInMetadata.PresetEventParameters;
+  console.log(presetEventParameters);
+  for (const parameter of metadataEventParameters) {
+    const presetParameter = presetEventParameters.find(
+      (item) =>
+        item.name === parameter.name &&
+        item.eventName === eventName &&
+        item.category === parameter.category &&
+        item.dataType === parameter.valueType
+    );
+    if (presetParameter) {
+      console.log(presetParameter);
+      const localeLng = getLngFromLocalStorage();
+      parameter.displayName = (presetParameter.displayName as any)[localeLng];
+      parameter.description = (presetParameter.description as any)[localeLng];
+    }
+  }
 };
 
 export const getUserInfoFromLocalStorage = () => {

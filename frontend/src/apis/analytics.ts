@@ -196,6 +196,11 @@ export const getMetadataUserAttributesList = async (params: {
   return result;
 };
 
+export const getBuiltInMetadata = async () => {
+  const result: any = await apiRequest('get', '/metadata/built_in_metadata');
+  return result;
+};
+
 export const previewFunnel = async (data: IExploreRequest) => {
   const result: any = await apiRequest('post', `/reporting/funnel`, data);
   return result;

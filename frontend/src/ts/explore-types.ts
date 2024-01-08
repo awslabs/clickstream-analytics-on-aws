@@ -131,3 +131,38 @@ export enum ExploreAttributionTimeWindowType {
   CUSTOMIZE = 'CUSTOMIZE',
   SESSION = 'SESSION',
 }
+
+export interface IMetadataDisplayNameAndDescription {
+  'zh-CN': string;
+  'en-US': string;
+}
+
+export interface IMetadataBuiltInList {
+  readonly PresetEvents: Array<{
+    name: string;
+    displayName: IMetadataDisplayNameAndDescription;
+    description: IMetadataDisplayNameAndDescription;
+  }>;
+  readonly PresetEventParameters: Array<{
+    name: string;
+    eventName?: string;
+    category: ConditionCategory;
+    dataType: MetadataValueType;
+    displayName: IMetadataDisplayNameAndDescription;
+    description: IMetadataDisplayNameAndDescription;
+  }>;
+  readonly PublicEventParameters: Array<{
+    name: string;
+    dataType: MetadataValueType;
+    category: ConditionCategory;
+    displayName: IMetadataDisplayNameAndDescription;
+    description: IMetadataDisplayNameAndDescription;
+  }>;
+  readonly PresetUserAttributes: Array<{
+    name: string;
+    dataType: MetadataValueType;
+    category: ConditionCategory;
+    displayName: IMetadataDisplayNameAndDescription;
+    description: IMetadataDisplayNameAndDescription;
+  }>;
+}

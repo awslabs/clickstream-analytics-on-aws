@@ -212,6 +212,15 @@ export class MetadataEventParameterServ {
       next(error);
     }
   };
+
+  public async builtInMetadata(_req: any, res: any, next: any) {
+    try {
+      const results = await metadataDisplay.getBuiltList();
+      return res.json(new ApiSuccess(results));
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 export class MetadataUserAttributeServ {

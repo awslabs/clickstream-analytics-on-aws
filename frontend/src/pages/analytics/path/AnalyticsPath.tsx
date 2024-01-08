@@ -58,6 +58,7 @@ import {
   ExplorePathSessionDef,
   MetadataPlatform,
   QuickSightChartType,
+  IMetadataBuiltInList,
 } from 'ts/explore-types';
 import {
   alertMsg,
@@ -91,6 +92,7 @@ import StartNodeSelect from '../comps/StartNodeSelect';
 interface AnalyticsPathProps {
   loading: boolean;
   pipeline: IPipeline;
+  builtInMetadata?: IMetadataBuiltInList;
   metadataEvents: IMetadataEvent[];
   metadataEventParameters: IMetadataEventParameter[];
   metadataUserAttributes: IMetadataUserAttribute[];
@@ -112,6 +114,7 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
   const {
     loading,
     pipeline,
+    builtInMetadata,
     metadataEvents,
     metadataEventParameters,
     metadataUserAttributes,
@@ -696,6 +699,7 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
                   const eventParameters = getEventParameters(
                     metadataEventParameters,
                     metadataEvents,
+                    builtInMetadata,
                     eventName
                   );
                   const parameterOption = parametersConvertToCategoryItemType(
@@ -734,6 +738,7 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
                 addEventButtonLabel={t('common:button.addNode')}
                 eventOptionList={categoryEventsData}
                 defaultComputeMethodOption={defaultComputeMethodOption}
+                builtInMetadata={builtInMetadata}
                 metadataEvents={metadataEvents}
                 metadataEventParameters={metadataEventParameters}
                 metadataUserAttributes={metadataUserAttributes}

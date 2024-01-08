@@ -1122,7 +1122,7 @@ describe('Metadata Event test V2', () => {
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
     expect(res.body.data.month).toEqual('latest');
-    expect(res.body.data.associatedParameters.length).toEqual(81);
+    expect(res.body.data.associatedParameters.length).toEqual(57);
     expect(res.body.data.associatedParameters).toContainEqual({
       id: 'project_8888_8888#app_7777_7777#app_info#install_source#string',
       month: 'latest',
@@ -2053,7 +2053,7 @@ describe('Metadata Event Attribute test V2', () => {
       .get(`/api/metadata/event_parameters?projectId=${MOCK_PROJECT_ID}&appId=${MOCK_APP_ID}`);
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(200);
-    expect(res.body.data.totalCount).toEqual(81);
+    expect(res.body.data.totalCount).toEqual(80);
   });
   it('Get metadata event attribute for path nodes', async () => {
     ddbMock.on(QueryCommand, {

@@ -81,7 +81,7 @@ export class CMetadataDisplay {
     }
   }
 
-  private patchEventParameterInfo(parameter: IMetadataEventParameter) {
+  private patchEventParameterInfo(parameter: IMetadataEventParameter, eventName?: string) {
     if (!this.displays) {
       return;
     }
@@ -90,28 +90,53 @@ export class CMetadataDisplay {
     const metadataDisplay = this.displays.find((d: IMetadataDisplay) => d.id === key);
     parameter.displayName = this.patchCategoryToDisplayName(parameter.category, parameter.name, metadataDisplay?.displayName);
     parameter.description = metadataDisplay?.description ?? { 'en-US': '', 'zh-CN': '' };
-    this._patchEventParameterInfoFromPresetConfiguration(parameter, metadataDisplay);
+    this._patchEventParameterInfoFromPresetConfiguration(parameter, eventName);
   }
 
   private _patchEventParameterInfoFromPresetConfiguration(
     parameter: IMetadataEventParameter,
-    metadataDisplay: IMetadataDisplay | undefined) {
+    eventName?: string) {
     if (!this.builtList) {
       return;
     }
-    const presetEventParameter = this.builtList.PresetEventParameters.find(
-      (e: any) => e.name === parameter.name && e.dataType === parameter.valueType);
-    const publicEventParameter = this.builtList.PublicEventParameters.find(
-      (e: any) => e.name === parameter.name && e.dataType === parameter.valueType);
-    if (!metadataDisplay && presetEventParameter) {
-      parameter.displayName = presetEventParameter.displayName;
-      parameter.description = presetEventParameter.description;
-    } else if (!metadataDisplay && publicEventParameter) {
-      parameter.displayName = publicEventParameter.displayName;
-      parameter.description = publicEventParameter.description;
+    this._findInPresetConfiguration(this.builtList, parameter, eventName);
+  }
+
+  private _findInPresetConfiguration(builtList: IMetadataBuiltInList, parameter: IMetadataEventParameter, eventName?: string) {
+    let matchParameter: any;
+    if (eventName) {
+      matchParameter = builtList.PresetEventParameters.find(
+        (e: any) => e.eventName === eventName && e.name === parameter.name && e.dataType === parameter.valueType);
+      if (matchParameter) {
+        parameter.displayName = matchParameter.displayName;
+        parameter.description = matchParameter.description;
+        parameter.metadataSource = MetadataSource.PRESET;
+        parameter.parameterType = MetadataParameterType.PRIVATE;
+      }
     }
-    parameter.metadataSource = (presetEventParameter || publicEventParameter) ? MetadataSource.PRESET : MetadataSource.CUSTOM;
-    parameter.parameterType = publicEventParameter ? MetadataParameterType.PUBLIC : MetadataParameterType.PRIVATE;
+    if (!matchParameter) {
+      matchParameter = builtList.PresetEventParameters.find(
+        (e: any) => e.name === parameter.name && e.dataType === parameter.valueType);
+      if (matchParameter) {
+        parameter.displayName = matchParameter.displayName;
+        parameter.description = matchParameter.description;
+        parameter.metadataSource = MetadataSource.PRESET;
+        parameter.parameterType = MetadataParameterType.PRIVATE;
+      }
+    }
+    if (!matchParameter) {
+      matchParameter = builtList.PublicEventParameters.find((e: any) => e.name === parameter.name && e.dataType === parameter.valueType);
+      if (matchParameter) {
+        parameter.displayName = matchParameter.displayName;
+        parameter.description = matchParameter.description;
+        parameter.metadataSource = MetadataSource.PRESET;
+        parameter.parameterType = MetadataParameterType.PUBLIC;
+      }
+    }
+    if (!matchParameter) {
+      parameter.metadataSource = MetadataSource.CUSTOM;
+      parameter.parameterType = MetadataParameterType.PRIVATE;
+    }
   }
 
   private patchUserAttributeInfo(attribute: IMetadataUserAttribute) {
@@ -136,7 +161,8 @@ export class CMetadataDisplay {
   }
 
   public async patch(projectId: string, appId: string,
-    metadataArray: IMetadataEvent[] | IMetadataEventParameter[] | IMetadataUserAttribute[]) {
+    metadataArray: IMetadataEvent[] | IMetadataEventParameter[] | IMetadataUserAttribute[],
+    eventName?: string) {
     try {
       await this.getDisplay(projectId, appId);
       await this.getBuiltList();
@@ -146,12 +172,12 @@ export class CMetadataDisplay {
           case 'EVENT':
             let event = metadata as IMetadataEvent;
             this.patchEventInfo(event);
-            event.associatedParameters = this.patchAssociated(event.associatedParameters) as IMetadataEventParameter[];
+            event.associatedParameters = this.patchAssociated(event.associatedParameters, event.name) as IMetadataEventParameter[];
             event.associatedParameters = this.patchValues(event.associatedParameters) as IMetadataEventParameter[];
             break;
           case 'EVENT_PARAMETER':
             let parameter = metadata as IMetadataEventParameter;
-            this.patchEventParameterInfo(parameter);
+            this.patchEventParameterInfo(parameter, eventName);
             parameter.associatedEvents = this.patchAssociated(parameter.associatedEvents) as IMetadataEvent[];
             parameter = this.patchValues([parameter])[0] as IMetadataEventParameter;
             break;
@@ -170,7 +196,7 @@ export class CMetadataDisplay {
     return metadataArray;
   }
 
-  private patchAssociated(associated: IMetadataEvent[] | IMetadataEventParameter[] | undefined) {
+  private patchAssociated(associated: IMetadataEvent[] | IMetadataEventParameter[] | undefined, eventName?: string) {
     if (!associated || associated.length === 0) {
       return [];
     }
@@ -183,7 +209,7 @@ export class CMetadataDisplay {
           break;
         case 'EVENT_PARAMETER':
           const parameter = metadata as IMetadataEventParameter;
-          this.patchEventParameterInfo(parameter);
+          this.patchEventParameterInfo(parameter, eventName);
           break;
         default:
           break;

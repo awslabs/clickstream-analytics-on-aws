@@ -83,6 +83,10 @@ router_metadata.get('/event_parameter', async (req: express.Request, res: expres
   return metadataEventParameterServ.details(req, res, next);
 });
 
+router_metadata.get('/built_in_metadata', async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+  return metadataEventParameterServ.builtInMetadata(req, res, next);
+});
+
 router_metadata.get(
   '/user_attributes',
   validate([
