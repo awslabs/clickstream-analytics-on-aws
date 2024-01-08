@@ -329,17 +329,6 @@ export const getTouchPointsAndConditions = (
           conditions: conditions,
           conditionOperator: item.conditionRelationShip,
         },
-        // groupColumn: {
-        //   category: defaultStr(
-        //     item.calculateMethodOption?.category,
-        //     ConditionCategory.OTHER
-        //   ),
-        //   property: defaultStr(item.calculateMethodOption?.name),
-        //   dataType: defaultStr(
-        //     item.calculateMethodOption?.valueType,
-        //     MetadataValueType.STRING
-        //   ),
-        // },
       };
       touchPoints.push(touchPoint);
     }
