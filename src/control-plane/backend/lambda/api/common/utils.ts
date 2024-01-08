@@ -1253,7 +1253,7 @@ function _getRunningStatus(lastAction: string) {
 };
 
 function isNewMetadataVersion(pipeline: IPipeline) {
-  const oldVersions = ['v1.0.0', 'v1.0.1', 'v1.1.1'];
+  const oldVersions = ['v1.0.0', 'v1.0.1', 'v1.0.2', 'v1.0.3', 'v1.1.0', 'v1.1.1'];
   return !oldVersions.includes(pipeline.templateVersion ?? '');
 }
 

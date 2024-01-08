@@ -695,6 +695,7 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
                   const eventName = option?.name;
                   const eventParameters = getEventParameters(
                     metadataEventParameters,
+                    metadataEvents,
                     eventName
                   );
                   const parameterOption = parametersConvertToCategoryItemType(

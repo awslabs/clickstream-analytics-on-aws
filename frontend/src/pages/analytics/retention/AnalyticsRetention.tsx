@@ -101,6 +101,7 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
   const {
     loading,
     pipeline,
+    metadataEvents,
     metadataEventParameters,
     metadataUserAttributes,
     categoryEvents,
@@ -610,6 +611,7 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
                   const eventName = item?.name;
                   const eventParameters = getEventParameters(
                     metadataEventParameters,
+                    metadataEvents,
                     eventName
                   );
                   const parameterOption = parametersConvertToCategoryItemType(
@@ -629,6 +631,7 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
                   const eventName = item?.name;
                   const eventParameters = getEventParameters(
                     metadataEventParameters,
+                    metadataEvents,
                     eventName
                   );
                   const parameterOption = parametersConvertToCategoryItemType(

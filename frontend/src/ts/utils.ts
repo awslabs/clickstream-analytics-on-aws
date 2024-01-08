@@ -383,14 +383,25 @@ export const defaultGenericsValue = <T>(expectValue: T, defaultValue: T) => {
 
 export const getEventParameters = (
   metadataEventParameters: IMetadataEventParameter[],
+  metadataEvents: IMetadataEvent[],
   eventName?: string
 ) => {
   if (!eventName) {
     return [];
   }
-  return metadataEventParameters.filter((p) =>
-    p.eventNames.includes(eventName)
-  );
+  if (
+    metadataEventParameters.length > 0 &&
+    metadataEventParameters[0].eventNames?.length > 0
+  ) {
+    return metadataEventParameters.filter((p) =>
+      p.eventNames.includes(eventName)
+    );
+  }
+  const event = metadataEvents.find((item) => item.name === eventName);
+  if (event) {
+    return event.associatedParameters ?? [];
+  }
+  return [];
 };
 
 export const getUserInfoFromLocalStorage = () => {

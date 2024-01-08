@@ -193,6 +193,7 @@ export const analyticsEventSelectReducer = (
       const eventName = action.categoryOption?.name;
       const eventParameters = getEventParameters(
         action.metadataEventParameters,
+        action.metadataEvents,
         eventName
       );
       const parameterOption = parametersConvertToCategoryItemType(
