@@ -12,10 +12,17 @@
  */
 //@ts-nocheck
 
+process.env.STATE_MACHINE_ARN = 'arn:aws:states:us-east-1:1234567890:stateMachine:state-machine-name';
+process.env.S3_BUCKET = 'test-bucket';
+process.env.S3_PREFIX='test-prefix/';
+process.env.PROJECT_ID='project1';
+
 import { readFileSync } from 'fs';
 import { LambdaClient, ListTagsCommand } from '@aws-sdk/client-lambda';
 import { DescribeStatementCommand, ExecuteStatementCommand, RedshiftDataClient } from '@aws-sdk/client-redshift-data';
+import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { CreateSecretCommand, DescribeSecretCommand, ResourceNotFoundException, SecretsManagerClient, UpdateSecretCommand } from '@aws-sdk/client-secrets-manager';
+import { SFNClient, StartExecutionCommand } from '@aws-sdk/client-sfn';
 import { CdkCustomResourceEvent, CdkCustomResourceCallback, CdkCustomResourceResponse } from 'aws-lambda';
 import { mockClient } from 'aws-sdk-client-mock';
 import mockfs from 'mock-fs';
@@ -35,6 +42,9 @@ describe('Custom resource - Create schemas for applications in Redshift database
   const redshiftDataMock = mockClient(RedshiftDataClient);
   const smMock = mockClient(SecretsManagerClient);
   const lambdaMock = mockClient(LambdaClient);
+  const sfnClientMock = mockClient(SFNClient);
+  const s3ClientMock = mockClient(S3Client);
+
 
   const projectDBName = 'clickstream_project1';
   const roleName = 'MyRedshiftDBUserRole';
@@ -132,9 +142,12 @@ describe('Custom resource - Create schemas for applications in Redshift database
   beforeEach(async () => {
     redshiftDataMock.reset();
     smMock.reset();
+    sfnClientMock.reset();
+    s3ClientMock.reset();
+
     const rootPath = __dirname + '/../../../../../src/analytics/private/sqls/redshift/';
     mockfs({
-      ...(schemaDefs.reduce((acc: { [key: string]: string}, item, _index) => {
+      ...(schemaDefs.reduce((acc: { [key: string]: string }, item, _index) => {
         acc[`/opt/${item.sqlFile}`] = testSqlContent(rootPath + item.sqlFile);
         return acc;
       }, {} as { [key: string]: string })),
@@ -223,17 +236,14 @@ describe('Custom resource - Create schemas for applications in Redshift database
   });
 
   test('Created database, bi user, schemas and views in Redshift serverless', async () => {
-    smMock.onAnyCommand().resolves({});
-    lambdaMock.on(ListTagsCommand).resolves({
-      Tags: { tag_key: 'tag_value' },
-    });
+
     redshiftDataMock.on(ExecuteStatementCommand).resolves({ Id: 'Id-1' });
     redshiftDataMock.on(DescribeStatementCommand).resolves({ Status: 'FINISHED' });
 
     const resp = await handler(createServerlessEvent, context, callback) as CdkCustomResourceResponse;
 
     expect(resp.Status).toEqual('SUCCESS');
-    expect(redshiftDataMock).toHaveReceivedCommandTimes(ExecuteStatementCommand, baseCount + appNewCount);
+    expect(redshiftDataMock).toHaveReceivedCommandTimes(ExecuteStatementCommand, baseCount);
 
     expect(redshiftDataMock).toHaveReceivedNthSpecificCommandWith(1, ExecuteStatementCommand, {
       Sql: `CREATE DATABASE ${projectDBName};`,
@@ -247,114 +257,68 @@ describe('Custom resource - Create schemas for applications in Redshift database
       Sql: expect.stringMatching(`CREATE USER ${biUserNamePrefix}[a-z0-9]{8} PASSWORD .*`),
     });
 
-    expect(redshiftDataMock).toHaveReceivedNthSpecificCommandWith(3, ExecuteStatementCommand, {
-      Sql: expect.stringContaining('CREATE SCHEMA IF NOT EXISTS app1'),
-    });
+    expect(s3ClientMock).toHaveReceivedCommandTimes(PutObjectCommand, appNewCount);
+    expect(sfnClientMock).toHaveReceivedCommandTimes(StartExecutionCommand, 1);
 
-    expect(redshiftDataMock).toHaveReceivedCommandTimes(DescribeStatementCommand, baseCount + appNewCount);
   });
 
 
   test('Created database, bi user, schemas and views in Redshift serverless - check status multiple times to wait success', async () => {
-    smMock.onAnyCommand().resolves({});
-    lambdaMock.on(ListTagsCommand).resolves({
-      Tags: { tag_key: 'tag_value' },
-    });
     redshiftDataMock.on(ExecuteStatementCommand).resolves({ Id: 'Id-1' });
     redshiftDataMock.on(DescribeStatementCommand)
-      .resolvesOnce({ Status: 'FINISHED' })
-      .resolvesOnce({ Status: 'FINISHED' })
+      .resolvesOnce({ Status: 'STARTED' })
+      .resolvesOnce({ Status: 'STARTED' })
       .resolvesOnce({ Status: 'STARTED' })
       .resolvesOnce({ Status: 'FINISHED' })
       .resolves({ Status: 'FINISHED' });
+
     const resp = await handler(createServerlessEvent, context, callback) as CdkCustomResourceResponse;
+
     expect(resp.Status).toEqual('SUCCESS');
-    expect(redshiftDataMock).toHaveReceivedCommandTimes(ExecuteStatementCommand, baseCount + appNewCount);
-    expect(redshiftDataMock).toHaveReceivedCommandTimes(DescribeStatementCommand, baseCount + appNewCount + 1);
+    expect(redshiftDataMock).toHaveReceivedCommandTimes(ExecuteStatementCommand, baseCount);
+    expect(redshiftDataMock).toHaveReceivedCommandTimes(DescribeStatementCommand, baseCount + 3);
   });
 
   test('Created database, bi user, schemas and views in Redshift serverless - check status multiple times to wait with failure', async () => {
-    smMock.onAnyCommand().resolves({});
-    lambdaMock.on(ListTagsCommand).resolves({
-      Tags: { tag_key: 'tag_value' },
-    });
+
     redshiftDataMock.on(ExecuteStatementCommand).resolves({ Id: 'Id-1' });
     redshiftDataMock.on(DescribeStatementCommand)
-      .resolvesOnce({ Status: 'FINISHED' })
       .resolvesOnce({ Status: 'FINISHED' })
       .resolvesOnce({ Status: 'STARTED' })
       .resolvesOnce({ Status: 'FAILED' });
     try {
       await handler(createServerlessEvent, context, callback);
     } catch (e) {
-      expect(redshiftDataMock).toHaveReceivedCommandTimes(ExecuteStatementCommand, 3);
+      expect(redshiftDataMock).toHaveReceivedCommandTimes(ExecuteStatementCommand, 2);
       return;
     }
     fail('No exception happened when Redshift DescribeStatementCommand returns FAILED');
   });
 
-  test('Created database, bi user, schemas and views in Redshift serverless - check status succeeded timeout', async () => {
-    smMock.onAnyCommand().resolves({});
-    lambdaMock.on(ListTagsCommand).resolves({
-      Tags: { tag_key: 'tag_value' },
-    });
-    redshiftDataMock.on(ExecuteStatementCommand).resolves({ Id: 'Id-1' });
-    redshiftDataMock.on(DescribeStatementCommand)
-      .resolvesOnce({ Status: 'FINISHED' })
-      .resolvesOnce({ Status: 'FINISHED' })
-      .resolvesOnce({ Status: 'SUBMITTED' })
-      .resolves({ Status: 'PICKED' });
-    try {
-      await handler(createServerlessEvent, context, callback);
-    } catch (e) {
-      expect(redshiftDataMock).toHaveReceivedCommandTimes(ExecuteStatementCommand, 3);
-      return;
-    }
-    fail('No exception happened when timeout happened in waiting for the status Redshift DescribeStatementCommand becoming FINISHED');
-  });
-
   test('Update schemas and views in Redshift serverless should not create database and user', async () => {
-    smMock.onAnyCommand().resolves({});
-    lambdaMock.on(ListTagsCommand).resolves({
-      Tags: { tag_key: 'tag_value' },
-    });
+
     redshiftDataMock.on(ExecuteStatementCommand).resolves({ Id: 'Id-1' });
     redshiftDataMock.on(DescribeStatementCommand).resolves({ Status: 'FINISHED' });
 
     const resp = await handler(updateServerlessEvent, context, callback) as CdkCustomResourceResponse;
 
     expect(resp.Status).toEqual('SUCCESS');
-    expect(redshiftDataMock).toHaveReceivedCommandTimes(ExecuteStatementCommand, appNewCount);
-    expect(redshiftDataMock).toHaveReceivedCommandTimes(DescribeStatementCommand, appNewCount);
+    expect(redshiftDataMock).toHaveReceivedCommandTimes(ExecuteStatementCommand, 0);
+    expect(redshiftDataMock).toHaveReceivedCommandTimes(DescribeStatementCommand, 0);
 
-    expect(redshiftDataMock).toHaveReceivedNthSpecificCommandWith(1, ExecuteStatementCommand, {
-      Sql: expect.stringContaining('CREATE SCHEMA IF NOT EXISTS app2'),
+    expect(s3ClientMock).toHaveReceivedCommandTimes(PutObjectCommand, appNewCount);
+    expect(sfnClientMock).toHaveReceivedCommandTimes(StartExecutionCommand, 1);
+
+    expect(sfnClientMock).toHaveReceivedNthSpecificCommandWith(1, StartExecutionCommand, {
+      name: expect.stringContaining('app2'),
+      stateMachineArn: process.env.STATE_MACHINE_ARN,
+      input: expect.stringContaining('"sqls":['),
     });
 
+    expect(sfnClientMock).toHaveReceivedNthSpecificCommandWith(1, StartExecutionCommand, {
+      input: expect.stringContaining('"sqls":['),
+    });
   });
-
-
-  test('Updated schemas and views only in Redshift serverless in update stack from empty appIds', async () => {
-    smMock.onAnyCommand().resolves({});
-    lambdaMock.on(ListTagsCommand).resolves({
-      Tags: { tag_key: 'tag_value' },
-    });
-    redshiftDataMock.on(ExecuteStatementCommand).resolves({ Id: 'Id-2' });
-    redshiftDataMock.on(DescribeStatementCommand).resolves({ Status: 'FINISHED' });
-    const resp = await handler(updateServerlessEvent, context, callback) as CdkCustomResourceResponse;
-    expect(resp.Status).toEqual('SUCCESS');
-    expect(resp.Data?.RedshiftBIUsername).toEqual(`${biUserNamePrefix}abcde`);
-    expect(smMock).toHaveReceivedCommandTimes(CreateSecretCommand, 0);
-    expect(redshiftDataMock).toHaveReceivedCommandTimes(ExecuteStatementCommand, appNewCount);
-    expect(redshiftDataMock).toHaveReceivedNthSpecificCommandWith(1, ExecuteStatementCommand, {
-      WorkgroupName: workgroupName,
-      Database: projectDBName,
-      ClusterIdentifier: undefined,
-      DbUser: undefined,
-    });
-    expect(redshiftDataMock).toHaveReceivedCommandTimes(DescribeStatementCommand, appNewCount);
-  });
-
 
   test('Do nothing when deleting the stack', async () => {
     const deleteEvent: CdkCustomResourceEvent = {
@@ -367,7 +331,10 @@ describe('Custom resource - Create schemas for applications in Redshift database
     expect(smMock).toHaveReceivedCommandTimes(CreateSecretCommand, 0);
     expect(redshiftDataMock).toHaveReceivedCommandTimes(ExecuteStatementCommand, 0);
     expect(redshiftDataMock).toHaveReceivedCommandTimes(DescribeStatementCommand, 0);
+    expect(s3ClientMock).toHaveReceivedCommandTimes(PutObjectCommand, 0);
+    expect(sfnClientMock).toHaveReceivedCommandTimes(StartExecutionCommand, 0);
   });
+
 
   test('Data api exception in Redshift serverless', async () => {
     smMock.onAnyCommand().resolves({});
@@ -396,7 +363,7 @@ describe('Custom resource - Create schemas for applications in Redshift database
 
     expect(resp.Status).toEqual('SUCCESS');
 
-    expect(redshiftDataMock).toHaveReceivedCommandTimes(ExecuteStatementCommand, baseCount + appNewCount);
+    expect(redshiftDataMock).toHaveReceivedCommandTimes(ExecuteStatementCommand, baseCount);
     expect(redshiftDataMock).toHaveReceivedNthSpecificCommandWith(1, ExecuteStatementCommand, {
       Sql: `CREATE DATABASE ${projectDBName};`,
       WorkgroupName: undefined,
@@ -404,7 +371,11 @@ describe('Custom resource - Create schemas for applications in Redshift database
       ClusterIdentifier: clusterId,
       DbUser: dbUser,
     });
-    expect(redshiftDataMock).toHaveReceivedCommandTimes(DescribeStatementCommand, baseCount + appNewCount);
+    expect(redshiftDataMock).toHaveReceivedCommandTimes(DescribeStatementCommand, baseCount);
+
+    expect(s3ClientMock).toHaveReceivedCommandTimes(PutObjectCommand, appNewCount);
+    expect(sfnClientMock).toHaveReceivedCommandTimes(StartExecutionCommand, 1);
+
   });
 
   test('Updated schemas and views in Redshift provisioned cluster with same lastModifiedTime', async () => {
@@ -419,14 +390,32 @@ describe('Custom resource - Create schemas for applications in Redshift database
 
     expect(resp.Status).toEqual('SUCCESS');
 
-    expect(redshiftDataMock).toHaveReceivedCommandTimes(ExecuteStatementCommand, appNewCount);
-    expect(redshiftDataMock).toHaveReceivedNthSpecificCommandWith(1, ExecuteStatementCommand, {
-      WorkgroupName: undefined,
-      Database: projectDBName,
-      ClusterIdentifier: clusterId,
-      DbUser: dbUser,
-    });
-    expect(redshiftDataMock).toHaveReceivedCommandTimes(DescribeStatementCommand, appNewCount);
+    expect(redshiftDataMock).toHaveReceivedCommandTimes(ExecuteStatementCommand, 0);
+    expect(redshiftDataMock).toHaveReceivedCommandTimes(DescribeStatementCommand, 0);
+
+    expect(s3ClientMock).toHaveReceivedCommandTimes(PutObjectCommand, appNewCount);
+    expect(sfnClientMock).toHaveReceivedCommandTimes(StartExecutionCommand, 1);
+  });
+
+
+  test('Updated schemas and views in Redshift provisioned cluster with APPLY_ALL_APP_SQL=true', async () => {
+    process.env.APPLY_ALL_APP_SQL = 'true';
+    redshiftDataMock.on(ExecuteStatementCommand).resolves({ Id: 'Id-1' });
+    redshiftDataMock.on(DescribeStatementCommand).resolves({ Status: 'FINISHED' });
+
+    const lastModifiedTime = new Date().getTime();
+    updateAdditionalProvisionedEvent.OldResourceProperties.lastModifiedTime = lastModifiedTime;
+    updateAdditionalProvisionedEvent.ResourceProperties.lastModifiedTime = lastModifiedTime;
+
+    const resp = await handler(updateAdditionalProvisionedEvent, context, callback) as CdkCustomResourceResponse;
+
+    expect(resp.Status).toEqual('SUCCESS');
+
+    expect(redshiftDataMock).toHaveReceivedCommandTimes(ExecuteStatementCommand, 0);
+    expect(redshiftDataMock).toHaveReceivedCommandTimes(DescribeStatementCommand, 0);
+
+    expect(s3ClientMock).toHaveReceivedCommandTimes(PutObjectCommand, appNewCount * 2);
+    expect(sfnClientMock).toHaveReceivedCommandTimes(StartExecutionCommand, 2);
   });
 
   test('Updated schemas and views in Redshift provisioned cluster with lastModifiedTime changed', async () => {
@@ -441,14 +430,12 @@ describe('Custom resource - Create schemas for applications in Redshift database
 
     expect(resp.Status).toEqual('SUCCESS');
 
-    expect(redshiftDataMock).toHaveReceivedCommandTimes(ExecuteStatementCommand, appNewCount * 2);
-    expect(redshiftDataMock).toHaveReceivedNthSpecificCommandWith(1, ExecuteStatementCommand, {
-      WorkgroupName: undefined,
-      Database: projectDBName,
-      ClusterIdentifier: clusterId,
-      DbUser: dbUser,
-    });
-    expect(redshiftDataMock).toHaveReceivedCommandTimes(DescribeStatementCommand, appNewCount * 2);
+    expect(redshiftDataMock).toHaveReceivedCommandTimes(ExecuteStatementCommand, 0);
+    expect(redshiftDataMock).toHaveReceivedCommandTimes(DescribeStatementCommand, 0);
+
+    expect(s3ClientMock).toHaveReceivedCommandTimes(PutObjectCommand, appNewCount * 2);
+    expect(sfnClientMock).toHaveReceivedCommandTimes(StartExecutionCommand, 2);
+
   });
 
   test('Data api exception in Redshift provisioned cluster', async () => {
@@ -462,6 +449,9 @@ describe('Custom resource - Create schemas for applications in Redshift database
     } catch (e) {
       expect(redshiftDataMock).toHaveReceivedCommandTimes(ExecuteStatementCommand, 1);
       expect(redshiftDataMock).toHaveReceivedCommandTimes(DescribeStatementCommand, 0);
+
+      expect(s3ClientMock).toHaveReceivedCommandTimes(PutObjectCommand, 0);
+      expect(sfnClientMock).toHaveReceivedCommandTimes(StartExecutionCommand, 0);
       return;
     }
     fail('No exception happened when Redshift ExecuteStatementCommand failed');
@@ -489,74 +479,17 @@ describe('Custom resource - Create schemas for applications in Redshift database
   });
 
 
-  test('Created database, error with object already exists will be ignored', async () => {
-    smMock.onAnyCommand().resolves({});
-    lambdaMock.on(ListTagsCommand).resolves({
-      Tags: { tag_key: 'tag_value' },
-    });
-    redshiftDataMock.on(ExecuteStatementCommand).resolves({ Id: 'Id-1' });
-    redshiftDataMock.on(DescribeStatementCommand)
-      .resolvesOnce({ Status: 'FINISHED' })
-      .resolvesOnce({ Status: 'FINISHED' })
-      .resolvesOnce({ Status: 'SUBMITTED' })
-      .resolves({ Status: 'FAILED', Error: 'Object xxxx already exists', QueryString: 'test SQL create' });
-
-    const resp = await handler(createServerlessEvent, context, callback);
-    expect(resp.Status).toEqual('SUCCESS');
-
-  });
-
-
-  test('Update database, error with object already exists will be ignored', async () => {
-    smMock.onAnyCommand().resolves({});
-    lambdaMock.on(ListTagsCommand).resolves({
-      Tags: { tag_key: 'tag_value' },
-    });
-    redshiftDataMock.on(ExecuteStatementCommand).resolves({ Id: 'Id-1' });
-    redshiftDataMock.on(DescribeStatementCommand)
-      .resolvesOnce({ Status: 'FINISHED' })
-      .resolvesOnce({ Status: 'FINISHED' })
-      .resolvesOnce({ Status: 'SUBMITTED' })
-      .resolves({ Status: 'FAILED', Error: 'Object xxxx already exists', QueryString: 'test SQL update' });
-
-    const resp = await handler(updateServerlessEvent, context, callback);
-    expect(resp.Status).toEqual('SUCCESS');
-
-  });
-
-  test('Created database, DB error will be ignored when env.SUPPRESS_DB_ERROR=true', async () => {
-    process.env.SUPPRESS_DB_ERROR = 'true';
-    smMock.onAnyCommand().resolves({});
-    lambdaMock.on(ListTagsCommand).resolves({
-      Tags: { tag_key: 'tag_value' },
-    });
-    redshiftDataMock.on(ExecuteStatementCommand).resolves({ Id: 'Id-1' });
-    redshiftDataMock.on(DescribeStatementCommand)
-      .resolvesOnce({ Status: 'FINISHED' })
-      .resolvesOnce({ Status: 'FINISHED' })
-      .resolvesOnce({ Status: 'SUBMITTED' })
-      .resolves({ Status: 'FAILED', Error: 'got DB error1', QueryString: 'test SQL create' });
-
-    const resp = await handler(createServerlessEvent, context, callback);
-    expect(resp.Status).toEqual('SUCCESS');
-  });
-
   test('Created database, all errors will be ignored when env.SUPPRESS_ALL_ERROR=true', async () => {
     process.env.SUPPRESS_ALL_ERROR = 'true';
-    smMock.onAnyCommand().rejects({});
-    lambdaMock.on(ListTagsCommand).resolves({
-      Tags: { tag_key: 'tag_value' },
-    });
+
     redshiftDataMock.on(ExecuteStatementCommand).resolves({ Id: 'Id-1' });
     redshiftDataMock.on(DescribeStatementCommand)
-      .resolvesOnce({ Status: 'FINISHED' })
-      .resolvesOnce({ Status: 'FINISHED' })
-      .resolvesOnce({ Status: 'SUBMITTED' })
       .resolves({ Status: 'FAILED', Error: 'got DB error1', QueryString: 'test SQL create' });
 
     const resp = await handler(createServerlessEvent, context, callback);
     expect(resp.Status).toEqual('SUCCESS');
   });
+
 
 });
 

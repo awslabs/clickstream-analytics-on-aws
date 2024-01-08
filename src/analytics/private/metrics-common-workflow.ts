@@ -28,6 +28,7 @@ export function buildMetricsWidgetForWorkflows(scope: Construct, id: string, pro
   scanMetadataWorkflow: IStateMachine;
   scanWorkflowMinInterval: string;
   clearExpiredEventsWorkflow: IStateMachine;
+  sqlExecutionWorkflow: IStateMachine;
 }) {
 
   const processingJobInterval = new GetInterval(scope, 'dataProcess', {
@@ -47,6 +48,10 @@ export function buildMetricsWidgetForWorkflows(scope: Construct, id: string, pro
 
   const clearExpiredEventsWorkflowDimension = [
     'StateMachineArn', props.clearExpiredEventsWorkflow.stateMachineArn,
+  ];
+
+  const sqlExecutionWorkflowDimension = [
+    'StateMachineArn', props.sqlExecutionWorkflow.stateMachineArn,
   ];
 
   const customNamespace = MetricsNamespace.REDSHIFT_ANALYTICS;
@@ -118,6 +123,7 @@ export function buildMetricsWidgetForWorkflows(scope: Construct, id: string, pro
     [loadDataWorkflowDimension, 'Load data to redshift tables'],
     [clearExpiredEventsWorkflowDimension, 'Clear expired events'],
     [scanMetadataWorkflowDimension, 'Scan metadata'],
+    [sqlExecutionWorkflowDimension, 'SQL execution'],
   ].flatMap(dimName => {
     return [
       {

@@ -15,9 +15,10 @@ import { fromTemporaryCredentials } from '@aws-sdk/credential-providers';
 import { NodeHttpHandler } from '@smithy/node-http-handler';
 import { REDSHIFT_MODE } from '../../common/model';
 import { logger } from '../../common/powertools';
+import { readS3ObjectAsString } from '../../common/s3';
 import { aws_sdk_client_common_config } from '../../common/sdk-client-config';
 import { sleep } from '../../common/utils';
-import { ExistingRedshiftServerlessCustomProps, ProvisionedRedshiftProps } from '../private/model';
+import { ExistingRedshiftServerlessCustomProps, ProvisionedRedshiftProps, RedshiftServerlessProps } from '../private/model';
 
 export function getRedshiftClient(roleArn: string) {
   return new RedshiftDataClient({
@@ -41,10 +42,9 @@ export function getRedshiftClient(roleArn: string) {
   });
 }
 
-const GET_STATUS_TIMEOUT = parseInt(process.env.REDSHIFT_DATA_WAIT_TIMEOUT ?? '180', 10); // second
 
 export const executeStatements = async (client: RedshiftDataClient, sqlStatements: string[],
-  serverlessRedshiftProps?: ExistingRedshiftServerlessCustomProps, provisionedRedshiftProps?: ProvisionedRedshiftProps,
+  serverlessRedshiftProps?: RedshiftServerlessProps, provisionedRedshiftProps?: ProvisionedRedshiftProps,
   database?: string, logSQL: boolean = true) => {
   if (serverlessRedshiftProps) {
     logger.info(`Execute SQL statement in ${serverlessRedshiftProps.workgroupName}.${serverlessRedshiftProps.databaseName}`);
@@ -93,9 +93,26 @@ export const executeStatements = async (client: RedshiftDataClient, sqlStatement
   return queryId;
 };
 
+export interface WaitProps {
+  checkIntervalMilliseconds: number;
+  maxCheckCount: number;
+  raiseTimeoutError: boolean;
+}
+
 export const executeStatementsWithWait = async (client: RedshiftDataClient, sqlStatements: string[],
-  serverlessRedshiftProps?: ExistingRedshiftServerlessCustomProps, provisionedRedshiftProps?: ProvisionedRedshiftProps,
-  database?: string, logSQL: boolean = true, waitMilliseconds: number = 1000) => {
+  serverlessRedshiftProps?: ExistingRedshiftServerlessCustomProps,
+  provisionedRedshiftProps?: ProvisionedRedshiftProps,
+  database?: string,
+  logSQL: boolean = true,
+  waitProps: WaitProps = {
+    checkIntervalMilliseconds: 1000,
+    maxCheckCount: 900,
+    raiseTimeoutError: true,
+  },
+) => {
+
+  logger.info('executeStatementsWithWait', { waitProps, sqlStatements_1: sqlStatements[0].substring(0, 64) });
+
   const queryId = await executeStatements(client, sqlStatements, serverlessRedshiftProps, provisionedRedshiftProps, database, logSQL);
 
   const checkParams = new DescribeStatementCommand({
@@ -104,25 +121,27 @@ export const executeStatementsWithWait = async (client: RedshiftDataClient, sqlS
   let response = await client.send(checkParams);
   logger.info(`Got statement query '${queryId}' with status: ${response.Status} after submitting it`);
   let count = 0;
-  while (response.Status != StatusString.FINISHED && response.Status != StatusString.FAILED && count < GET_STATUS_TIMEOUT) {
-    await sleep(waitMilliseconds);
+  while (response.Status != StatusString.FINISHED && response.Status != StatusString.FAILED && count < waitProps.maxCheckCount) {
+    await sleep(waitProps.checkIntervalMilliseconds);
     count++;
     response = await client.send(checkParams);
-    logger.info(`Got statement query '${queryId}' with status: ${response.Status} in ${count * waitMilliseconds} Milliseconds`);
+    logger.info(`Got statement query '${queryId}' with status: ${response.Status} in ${count * waitProps.checkIntervalMilliseconds} Milliseconds`);
   }
   if (response.Status == StatusString.FAILED) {
-    logger.error(`Got statement query '${queryId}' with status: ${response.Status} in ${count * waitMilliseconds} Milliseconds`, { response });
+    logger.error(`Got statement query '${queryId}' with status: ${response.Status} in ${count * waitProps.checkIntervalMilliseconds} Milliseconds`, { response });
     throw new Error(`Statement query '${queryId}' with status ${response.Status}, error: ${response.Error}, queryString: ${response.QueryString}`);
-  } else if (count == GET_STATUS_TIMEOUT) {
-    logger.error('Wait status timeout: '+ response.Status, { response });
-    throw new Error(`Wait statement query '${queryId}' with status ${response.Status} timeout in ${GET_STATUS_TIMEOUT} seconds, queryString: ${response.QueryString}`);
+  } else if (count == waitProps.maxCheckCount) {
+    logger.error('Timeout: wait status timeout: ' + response.Status, { response });
+    if (waitProps.raiseTimeoutError) {
+      throw new Error(`Timeout error, timeout seconds: ${count * waitProps.checkIntervalMilliseconds / 1000}, queryString: ${response.QueryString}`);
+    }
   }
   return queryId;
 };
 
 export const getStatementResult = async (client: RedshiftDataClient, queryId: string) => {
   let nextToken;
-  let aggregatedRecords:any[] = [];
+  let aggregatedRecords: any[] = [];
   let totalNumRows = 0;
   do {
     const checkParams = new GetStatementResultCommand({
@@ -166,6 +185,51 @@ export const describeStatement = async (client: RedshiftDataClient, queryId: str
     throw err;
   }
 };
+
+
+export async function exeucteBySqlorS3File(sqlOrS3File: string,
+  redShiftClient: RedshiftDataClient, serverlessRedshiftProps?: RedshiftServerlessProps,
+  provisionedRedshiftProps?: ProvisionedRedshiftProps,
+  databaseName?: string,
+): Promise<{ queryId: string}> {
+  logger.info('exeucteBySqlorS3File() sqlOrS3File: ' + sqlOrS3File);
+
+  const sqlStatements = await getSqlStatement(sqlOrS3File);
+
+  const queryId = await executeStatements(redShiftClient, sqlStatements, serverlessRedshiftProps, provisionedRedshiftProps, databaseName, true);
+  logger.info('exeucteBySqlorS3File() get queryId: ' + queryId);
+
+  return {
+    queryId: queryId!,
+  };
+}
+
+
+async function getSqlStatement(sqlOrS3File: string): Promise<string[]> {
+  logger.info('getSqlStatement() sqlOrS3File: ' + sqlOrS3File);
+
+  let sqlContent = sqlOrS3File;
+  if (sqlOrS3File.startsWith('s3://')) {
+    sqlContent = await readSqlFileFromS3(sqlOrS3File);
+  }
+  return [sqlContent];
+}
+
+async function readSqlFileFromS3(s3Path: string): Promise<string> {
+  logger.info('readSqlFileFromS3() s3Path: ' + s3Path);
+
+  const params = {
+    Bucket: s3Path.split('/')[2],
+    Key: s3Path.split('/').slice(3).join('/'),
+  };
+
+  const sqlString = await readS3ObjectAsString(params.Bucket, params.Key);
+  if (!sqlString) {
+    throw new Error('Failed to read sql file from s3: ' + s3Path);
+  }
+  return sqlString;
+}
+
 
 export function getRedshiftProps(
   redshiftMode: string,
