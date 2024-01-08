@@ -182,6 +182,7 @@
     "createDashboard": "Create Dashboard",
     "deleteDashboard": "Delete Dashboard",
     "addEvent": "Add Event",
+    "addTouchPoint": "Add Touch Point",
     "addNode": "Add Node",
     "addFunnelStep": "Add Step",
     "addFilter": "Add Filter",

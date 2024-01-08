@@ -38,6 +38,7 @@
     "funnelAnalysis": "Funnel analysis",
     "eventAnalysis": "Event analysis",
     "pathAnalysis": "Path analysis",
+    "attributionAnalysis": "Attribution analysis",
     "retentionAnalysis": "Retention analysis",
     "userAnalytics": "User analytics",
     "userSearch": "User search",
@@ -92,7 +93,12 @@
     "platformIOS": "iOS",
     "platformWechatMinPro": "Wechat MiniProgram",
     "directlyFollowed": "Directly followed",
-    "indirectlyFollowed": "Indirectly followed"
+    "indirectlyFollowed": "Indirectly followed",
+    "firstTouchAttributionModel": "First touch",
+    "lastTouchAttributionModel": "Last touch",
+    "linearAttributionModel": "Linear",
+    "positionBasedAttributionModel": "Position based",
+    "timeDecayAttributionModel": "Time decay"
   },
   "metadata": {
     "description": "You can view and manage metadata for events and user attributes here.",
@@ -266,7 +272,14 @@
     "participateNodes": "Select nodes to participate in the analysis",
     "includingOtherEvents": "Including other events",
     "mergeConsecutiveEvents": "Merge consecutive events",
-    "groupApplyToFirst": "Apply grouping to the first step only"
+    "groupApplyToFirst": "Apply grouping to the first step only",
+    "setConversionGoal": "Set conversion goal",
+    "setConversionWindow": "Set conversion window",
+    "selectTouchpointEvent": "Select touchpoint event",
+    "attributionModel": "Attribution model",
+    "attributionFirst": "First",
+    "attributionInBetween": "In-between",
+    "attributionLast": "Last"
   },
   "emptyData": "No Data",
   "emptyDataMessage": "Please configure metrics to query",
@@ -292,6 +305,10 @@
     "retentionMetricInfo": "Select starting and returning events, support filtering event with parameter.",
     "introducingAnalyticsHeader": "Introducing analytics",
     "introducingAnalyticsContent": "Analytics allow you explore the clickstream data on an easy-to-use UI, and provides access to all reports and dashboards.",
-    "groupApplyToFirstInfo": "The grouping will be applied to the first step only, and the grouping will not be applied to the subsequent steps."
+    "groupApplyToFirstInfo": "The grouping will be applied to the first step only, and the grouping will not be applied to the subsequent steps.",
+    "attributionSetConversionGoalInfo": "attributionSetConversionGoalInfo",
+    "attributionSetConversionWindowInfo": "attributionSetConversionWindowInfo",
+    "attributionSelectTouchpointEventInfo": "attributionSelectTouchpointEventInfo",
+    "attributionModelInfo": "attributionModelInfo"
   }
 }

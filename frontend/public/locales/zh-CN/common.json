@@ -183,6 +183,7 @@
     "createDashboard": "创建仪表板",
     "deleteDashboard": "删除仪表板",
     "addEvent": "添加事件",
+    "addTouchPoint": "添加触点",
     "addNode": "添加节点",
     "addFunnelStep": "添加步骤",
     "addFilter": "添加条件",

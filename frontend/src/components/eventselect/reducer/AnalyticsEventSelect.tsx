@@ -33,6 +33,7 @@ interface EventsSelectProps {
   eventDataDispatch: AnalyticsDispatchFunction;
   maxSelectNum?: number;
   disableAddCondition?: boolean;
+  disableAddEvent?: boolean;
   addEventButtonLabel: string;
   loading: boolean;
   eventOptionList: CategoryItemType[];
@@ -53,6 +54,7 @@ const AnalyticsEventSelect: React.FC<EventsSelectProps> = (
     eventDataDispatch,
     maxSelectNum,
     disableAddCondition,
+    disableAddEvent,
     addEventButtonLabel,
     eventOptionList,
     defaultComputeMethodOption,
@@ -71,12 +73,14 @@ const AnalyticsEventSelect: React.FC<EventsSelectProps> = (
         return (
           <div key={identity(index)}>
             <div className="cs-analytics-parameter">
-              <div className="cs-para-name">
-                {element.customOrderName ??
-                  (element?.listOrderType === 'alphabet'
-                    ? ALPHABETS[index]
-                    : index + 1)}
-              </div>
+              {!disableAddEvent && (
+                <div className="cs-para-name">
+                  {element.customOrderName ??
+                    (element?.listOrderType === 'alphabet'
+                      ? ALPHABETS[index]
+                      : index + 1)}
+                </div>
+              )}
               <div className="flex-1">
                 <EventItem
                   type="event"
@@ -215,22 +219,24 @@ const AnalyticsEventSelect: React.FC<EventsSelectProps> = (
           </div>
         );
       })}
-      <div className="mt-10">
-        <Button
-          iconName="add-plus"
-          onClick={() => {
-            eventDataDispatch({
-              type: 'addNewEventAnalyticsItem',
-              defaultComputeMethodOption,
-              isMultiSelect,
-              enableChangeRelation,
-            });
-          }}
-          disabled={eventDataState.length >= (maxSelectNum ?? 10)}
-        >
-          {addEventButtonLabel}
-        </Button>
-      </div>
+      {!disableAddEvent && (
+        <div className="mt-10">
+          <Button
+            iconName="add-plus"
+            onClick={() => {
+              eventDataDispatch({
+                type: 'addNewEventAnalyticsItem',
+                defaultComputeMethodOption,
+                isMultiSelect,
+                enableChangeRelation,
+              });
+            }}
+            disabled={eventDataState.length >= (maxSelectNum ?? 10)}
+          >
+            {addEventButtonLabel}
+          </Button>
+        </div>
+      )}
     </div>
   );
 };

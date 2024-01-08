@@ -115,6 +115,21 @@ export enum QuickSightChartType {
   LINE = 'line',
   FUNNEL = 'funnel',
   SANKEY = 'sankey',
+  TABLE = 'table',
+}
+
+export enum AttributionModelType {
+  LAST_TOUCH = 'LAST_TOUCH',
+  FIRST_TOUCH = 'FIRST_TOUCH',
+  LINEAR = 'LINEAR',
+  TIME_DECAY = 'TIME_DECAY',
+  POSITION = 'POSITION',
+}
+
+export enum ExploreAttributionTimeWindowType {
+  CURRENT_DAY = 'CURRENT_DAY',
+  CUSTOMIZE = 'CUSTOMIZE',
+  SESSION = 'SESSION',
 }
 
 export interface IMetadataDisplayNameAndDescription {

@@ -38,6 +38,7 @@
     "funnelAnalysis": "漏斗分析",
     "eventAnalysis": "事件分析",
     "pathAnalysis": "路径分析",
+    "attributionAnalysis": "归因分析",
     "retentionAnalysis": "留存分析",
     "userAnalytics": "用户分析",
     "userSearch": "用户细查",
@@ -92,7 +93,12 @@
     "platformIOS": "iOS",
     "platformWechatMinPro": "微信小程序",
     "directlyFollowed": "直接跟随",
-    "indirectlyFollowed": "非直接跟随"
+    "indirectlyFollowed": "非直接跟随",
+    "firstTouchAttributionModel": "首次触达",
+    "lastTouchAttributionModel": "末次触达",
+    "linearAttributionModel": "平均分担",
+    "positionBasedAttributionModel": "基于位置分担",
+    "timeDecayAttributionModel": "时间衰减"
   },
   "metadata": {
     "description": "您可以在此处查看和管理事件和属性的元数据。",
@@ -266,7 +272,14 @@
     "participateNodes": "选择参与分析的节点",
     "includingOtherEvents": "包括其他事件",
     "mergeConsecutiveEvents": "合并连续事件",
-    "groupApplyToFirst": "仅将分组应用于第一步"
+    "groupApplyToFirst": "仅将分组应用于第一步",
+    "setConversionGoal": "设置转换目标",
+    "setConversionWindow": "转换窗口期",
+    "selectTouchpointEvent": "选择触点事件",
+    "attributionModel": "归因模型",
+    "attributionFirst": "最初的",
+    "attributionInBetween": "中间的",
+    "attributionLast": "最后的"
   },
   "emptyData": "无数据",
   "emptyDataMessage": "请配置指标进行查询",
@@ -292,6 +305,10 @@
     "retentionMetricInfo": "选择起始和回访事件，支持筛选。",
     "introducingAnalyticsHeader": "介绍分析工作坊",
     "introducingAnalyticsContent": "分析工作坊允许您在易于使用的UI上探索点击流数据，并提供对所有报告和仪表板的访问。",
-    "groupApplyToFirstInfo": "分组将仅应用于第一个步骤，且分组不会应用于后续步骤。"
+    "groupApplyToFirstInfo": "分组将仅应用于第一个步骤，且分组不会应用于后续步骤。",
+    "attributionSetConversionGoalInfo": "attributionSetConversionGoalInfo",
+    "attributionSetConversionWindowInfo": "attributionSetConversionWindowInfo",
+    "attributionSelectTouchpointEventInfo": "attributionSelectTouchpointEventInfo",
+    "attributionModelInfo": "attributionModelInfo"
   }
 }

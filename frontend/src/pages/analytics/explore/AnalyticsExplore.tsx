@@ -47,6 +47,7 @@ import {
   metadataEventsConvertToCategoryItemType,
   parametersConvertToCategoryItemType,
 } from '../analytics-utils';
+import AnalyticsAttribution from '../attribution/AnalyticsAttribution';
 import AnalyticsCustomHeader from '../comps/AnalyticsCustomHeader';
 import AnalyticsCustomHeaderBg from '../comps/AnalyticsCustomHeaderBg';
 import AnalyticsEvent from '../event/AnalyticsEvent';
@@ -86,6 +87,10 @@ const AnalyticsExplore: React.FC = () => {
         {
           label: defaultStr(t('analytics:explore.retentionAnalysis')),
           value: 'Retention',
+        },
+        {
+          label: defaultStr(t('analytics:explore.attributionAnalysis')),
+          value: 'Attribution',
         },
       ],
     },
@@ -447,6 +452,19 @@ const AnalyticsExplore: React.FC = () => {
                     categoryEvents={categoryEvents}
                     presetParameters={presetParameters}
                     groupParameters={groupParameters}
+                  />
+                )}
+              {pipeline &&
+                !loadingData &&
+                selectedOption?.value === 'Attribution' && (
+                  <AnalyticsAttribution
+                    loadingEvents={loadingMetadataEvent}
+                    loading={false}
+                    pipeline={pipeline}
+                    metadataEvents={metadataEvents}
+                    metadataUserAttributes={metadataUserAttributes}
+                    categoryEvents={categoryEvents}
+                    presetParameters={presetParameters}
                   />
                 )}
             </ContentLayout>
