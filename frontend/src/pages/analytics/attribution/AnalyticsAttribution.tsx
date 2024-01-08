@@ -174,6 +174,7 @@ const AnalyticsAttribution: React.FC<AnalyticsAttributionProps> = (
         ...DEFAULT_EVENT_ITEM,
         calculateMethodOption: defaultComputeMethodOption,
         enableChangeRelation: true,
+        isMultiSelect: false,
       },
     ]
   );
@@ -235,7 +236,7 @@ const AnalyticsAttribution: React.FC<AnalyticsAttributionProps> = (
     eventDataDispatch({
       type: 'resetEventData',
       defaultComputeMethodOption: defaultComputeMethodOption,
-      isMultiSelect: true,
+      isMultiSelect: false,
       enableChangeRelation: true,
     });
     filterOptionDataDispatch({
@@ -693,7 +694,7 @@ const AnalyticsAttribution: React.FC<AnalyticsAttributionProps> = (
                   metadataEvents={metadataEvents}
                   metadataUserAttributes={metadataUserAttributes}
                   enableChangeRelation={true}
-                  isMultiSelect={true}
+                  isMultiSelect={false}
                 />
               </SpaceBetween>
             </SpaceBetween>
