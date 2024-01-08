@@ -13,25 +13,24 @@
 
 import { DescribeStatementCommand, RedshiftDataClient } from '@aws-sdk/client-redshift-data';
 import { logger } from '../../../common/powertools';
-import { readS3ObjectAsString } from '../../../common/s3';
-import { executeStatements, getRedshiftClient } from '../redshift-data';
+import { exeucteBySqlorS3File, getRedshiftClient } from '../redshift-data';
 
-export interface EventType {
+interface EventType {
   queryId?: string;
   sql?: string;
 }
 
-export interface SubmitSqlResponse {
+interface SubmitSqlResponse {
   queryId: string;
 }
 
-export interface QueryResponse {
+interface QueryResponse {
   status: string;
   queryId: string;
   reason?: string;
 }
 
-export type ResponseType = SubmitSqlResponse | QueryResponse;
+type ResponseType = SubmitSqlResponse | QueryResponse;
 
 const databaseName = process.env.REDSHIFT_DATABASE!;
 const clusterIdentifier = process.env.REDSHIFT_CLUSTER_IDENTIFIER ?? '';
@@ -53,8 +52,8 @@ export const handler = async (event: EventType): Promise<ResponseType> => {
 async function _handler(event: EventType): Promise<ResponseType> {
 
   const redShiftClient = getRedshiftClient(dataAPIRole);
-
   if (event.sql) {
+
     return submitSql(event.sql, redShiftClient);
   } else if (event.queryId) {
     return queryStatus(event.queryId, redShiftClient);
@@ -64,8 +63,8 @@ async function _handler(event: EventType): Promise<ResponseType> {
   }
 }
 
-async function submitSql(sql: string, redShiftClient: RedshiftDataClient): Promise<SubmitSqlResponse> {
-  logger.info('submitSql() sql: ' + sql);
+async function submitSql(sqlOrs3File: string, redShiftClient: RedshiftDataClient): Promise<SubmitSqlResponse> {
+  logger.info('submitSql() sqlOrs3File: ' + sqlOrs3File);
 
   const provisionedRedshiftProps = {
     clusterIdentifier,
@@ -77,15 +76,9 @@ async function submitSql(sql: string, redShiftClient: RedshiftDataClient): Promi
     workgroupName,
     databaseName,
   };
-
-  const sqlStatements = await getSqlStatement(sql);
-
-  const queryId = await executeStatements(redShiftClient, sqlStatements, serverlessRedshiftProps, provisionedRedshiftProps, databaseName, true);
-  logger.info('submitSql() get queryId: ' + queryId);
-
-  return {
-    queryId: queryId!,
-  };
+  const res = await exeucteBySqlorS3File(sqlOrs3File, redShiftClient, serverlessRedshiftProps, provisionedRedshiftProps, databaseName);
+  logger.info('submitSql() return queryId: ' + res.queryId);
+  return res;
 }
 
 async function queryStatus(queryId: string, redShiftClient: RedshiftDataClient): Promise<QueryResponse> {
@@ -115,29 +108,4 @@ async function queryStatus(queryId: string, redShiftClient: RedshiftDataClient):
     queryId: queryId,
     reason: errorMsg,
   };
-}
-
-async function getSqlStatement(sqlOrFile: string): Promise<string[]> {
-  logger.info('getSqlStatement() sqlOrFile: ' + sqlOrFile);
-
-  let sql = sqlOrFile;
-  if (sqlOrFile.startsWith('s3://')) {
-    sql = await readSqlFileFromS3(sqlOrFile);
-  }
-  return [sql];
-}
-
-async function readSqlFileFromS3(s3Path: string): Promise<string> {
-  logger.info('readSqlFileFromS3() s3Path: ' + s3Path);
-
-  const params = {
-    Bucket: s3Path.split('/')[2],
-    Key: s3Path.split('/').slice(3).join('/'),
-  };
-
-  const sqlString = await readS3ObjectAsString(params.Bucket, params.Key);
-  if (!sqlString) {
-    throw new Error('Failed to read sql file from s3: ' + s3Path);
-  }
-  return sqlString;
 }

@@ -25,6 +25,7 @@ import {
   OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME, OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_PORT,
   OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_ADDRESS,
   OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX, OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_NAME_SUFFIX,
+  OUTPUT_DATA_MODELING_REDSHIFT_SQL_EXECUTION_STATE_MACHINE_ARN_SUFFIX,
 } from '../../../src/common/constant';
 import { REDSHIFT_MODE, BuiltInTagKeys, MetricsNamespace } from '../../../src/common/model';
 import { SolutionInfo } from '../../../src/common/solution-info';
@@ -323,13 +324,16 @@ describe('DataAnalyticsRedshiftStack common parameter test', () => {
     expect(role.resource.Properties.AssumeRolePolicyDocument.Statement[0].Action).toEqual('sts:AssumeRole');
     let hasDataExecRole = false;
     const rolePolicy = findFirstResourceByKeyPrefix(nestedTemplate, 'AWS::IAM::Policy', 'CreateApplicationSchemasRedshiftSQLExecutionRoleDefaultPolicy');
+
     for (const s of rolePolicy.resource.Properties.PolicyDocument.Statement) {
       if (s.Action === 'sts:AssumeRole' && s.Resource.Ref) {
         expect(s.Resource.Ref).toContain('RedshiftServerlessIAMRole');
         hasDataExecRole = true;
+        break;
       }
-      expect(hasDataExecRole).toBeTruthy();
     }
+    expect(hasDataExecRole).toBeTruthy();
+
   });
 
   test('Should has ParameterGroups and ParameterLabels', () => {
@@ -731,13 +735,12 @@ describe('DataAnalyticsRedshiftStack serverless parameter test', () => {
   });
 
   test('Should has 4 StateMachines', () => {
-    if (stack.nestedStacks.redshiftServerlessStack) {
-      const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftServerlessStack);
-      nestedTemplate.resourceCountIs('AWS::StepFunctions::StateMachine', 4);
-    }
-
-    if (stack.nestedStacks.redshiftProvisionedStack) {
-      const nestedTemplate = Template.fromStack(stack.nestedStacks.redshiftProvisionedStack);
+    const templates = [
+      Template.fromStack(stack.nestedStacks.redshiftServerlessStack),
+      Template.fromStack(stack.nestedStacks.newRedshiftServerlessStack),
+      Template.fromStack(stack.nestedStacks.redshiftProvisionedStack),
+    ];
+    for (const nestedTemplate of templates) {
       nestedTemplate.resourceCountIs('AWS::StepFunctions::StateMachine', 4);
     }
   });
@@ -4056,6 +4059,15 @@ describe('DataAnalyticsRedshiftStack tests', () => {
       Condition: 'existingRedshiftServerless',
     });
     stackTemplate.hasOutput(`NewRedshiftServerless${OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX}`, {
+      Condition: 'newRedshiftServerless',
+    });
+    stackTemplate.hasOutput(`ProvisionedRedshift${OUTPUT_DATA_MODELING_REDSHIFT_SQL_EXECUTION_STATE_MACHINE_ARN_SUFFIX}`, {
+      Condition: 'redshiftProvisioned',
+    });
+    stackTemplate.hasOutput(`ExistingRedshiftServerless${OUTPUT_DATA_MODELING_REDSHIFT_SQL_EXECUTION_STATE_MACHINE_ARN_SUFFIX}`, {
+      Condition: 'existingRedshiftServerless',
+    });
+    stackTemplate.hasOutput(`NewRedshiftServerless${OUTPUT_DATA_MODELING_REDSHIFT_SQL_EXECUTION_STATE_MACHINE_ARN_SUFFIX}`, {
       Condition: 'newRedshiftServerless',
     });
   });

@@ -17,8 +17,8 @@ import { CdkCustomResourceHandler, CdkCustomResourceEvent, CdkCustomResourceResp
 import { getRedshiftServerlessNamespace } from './redshift-serverless';
 import { logger } from '../../../common/powertools';
 import { aws_sdk_client_common_config } from '../../../common/sdk-client-config';
+import { sleep } from '../../../common/utils';
 import { ExistingRedshiftServerlessProps, ProvisionedRedshiftProps } from '../../private/model';
-import { Sleep } from '../redshift-data';
 
 interface CustomProperties {
   readonly roleArn: string;
@@ -190,6 +190,6 @@ async function waitForRedshiftServerlessIAMRolesUpdating(
     if (iamRoles.every(iamRole => iamRole.ApplyStatus === 'in-sync')) {
       return;
     }
-    await Sleep(5000);
+    await sleep(5000);
   }
 }

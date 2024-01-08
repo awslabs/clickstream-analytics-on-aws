@@ -390,28 +390,6 @@ describe('Custom resource - Create schemas for applications in Redshift database
 
     expect(resp.Status).toEqual('SUCCESS');
 
-    expect(redshiftDataMock).toHaveReceivedCommandTimes(ExecuteStatementCommand, appNewCount);
-    expect(redshiftDataMock).toHaveReceivedNthSpecificCommandWith(1, ExecuteStatementCommand, {
-      WorkgroupName: undefined,
-      Database: projectDBName,
-      ClusterIdentifier: clusterId,
-      DbUser: dbUser,
-    });
-    expect(redshiftDataMock).toHaveReceivedCommandTimes(DescribeStatementCommand, appNewCount);
-  });
-
-  test('Updated schemas and views in Redshift provisioned cluster with lastModifiedTime changed', async () => {
-    redshiftDataMock.on(ExecuteStatementCommand).resolves({ Id: 'Id-1' });
-    redshiftDataMock.on(DescribeStatementCommand).resolves({ Status: 'FINISHED' });
-
-    const lastModifiedTime = new Date().getTime();
-    updateAdditionalProvisionedEvent.OldResourceProperties.lastModifiedTime = lastModifiedTime;
-    updateAdditionalProvisionedEvent.ResourceProperties.lastModifiedTime = lastModifiedTime + 1;
-
-    const resp = await handler(updateAdditionalProvisionedEvent, context, callback) as CdkCustomResourceResponse;
-
-    expect(resp.Status).toEqual('SUCCESS');
-
     expect(redshiftDataMock).toHaveReceivedCommandTimes(ExecuteStatementCommand, 0);
     expect(redshiftDataMock).toHaveReceivedCommandTimes(DescribeStatementCommand, 0);
 

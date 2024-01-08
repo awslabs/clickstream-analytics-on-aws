@@ -15,7 +15,7 @@ import { readdirSync, statSync } from 'fs';
 import { join, resolve } from 'path';
 import { Duration, CustomResource, Arn, ArnFormat, Stack } from 'aws-cdk-lib';
 import { IRole, PolicyStatement, Effect } from 'aws-cdk-lib/aws-iam';
-import { Function, LayerVersion, Code, IFunction } from 'aws-cdk-lib/aws-lambda';
+import { Function, LayerVersion, Code, IFunction, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { StateMachine } from 'aws-cdk-lib/aws-stepfunctions';
 import { Provider } from 'aws-cdk-lib/custom-resources';
@@ -129,6 +129,7 @@ export abstract class RedshiftSQLExecution extends Construct {
 
     const fnId = 'RedshiftSQLExecutionFn';
     const fn = new SolutionNodejsFunction(this, fnId, {
+      runtime: Runtime.NODEJS_18_X,
       entry: props.functionEntry,
       handler: 'handler',
       memorySize: 256,
@@ -149,7 +150,7 @@ export abstract class RedshiftSQLExecution extends Construct {
     });
 
     attachListTagsPolicyForFunction(this, fnId, fn);
-    props.workflowBucketInfo.s3Bucket.grantWrite(fn);
+    props.workflowBucketInfo.s3Bucket.grantWrite(fn, `${props.workflowBucketInfo.prefix}*`);
 
     return fn;
   }

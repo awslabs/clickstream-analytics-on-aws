@@ -280,7 +280,7 @@ export class LoadOdsDataToRedshiftWorkflow extends Construct {
           itemsPath: '$.manifestList',
         },
       );
-      doLoadJob.itemProcessor(subDefinition);
+      doLoadJob.iterator(subDefinition);
 
 
       const hasMoreWorkFn = this.createHasMoreWorkFn(ddbTable, odsTableName, props);

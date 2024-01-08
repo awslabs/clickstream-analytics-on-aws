@@ -14,7 +14,7 @@
 import { join } from 'path';
 import { CfnResource, Duration } from 'aws-cdk-lib';
 import { IRole } from 'aws-cdk-lib/aws-iam';
-import { Function } from 'aws-cdk-lib/aws-lambda';
+import { Function, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import {
   StateMachine, TaskInput, Wait, WaitTime, Succeed, Choice, Map,
@@ -23,10 +23,10 @@ import {
 import { LambdaInvoke } from 'aws-cdk-lib/aws-stepfunctions-tasks';
 import { Construct } from 'constructs';
 import { ProvisionedRedshiftProps, RedshiftServerlessProps, WorkflowBucketInfo } from './model';
+import { addCfnNagSuppressRules, rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions } from '../../common/cfn-nag';
 import { createLambdaRole } from '../../common/lambda';
 import { createLogGroup } from '../../common/logs';
 import { SolutionNodejsFunction } from '../../private/function';
-import { addCfnNagSuppressRules, rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions } from '../../common/cfn-nag';
 
 
 export interface SQLExecutionStepFunctionsProps {
@@ -92,7 +92,7 @@ export function createSQLExecutionStepFunctions(scope: Construct, props: SQLExec
     },
   });
 
-  map.itemProcessor(definition);
+  map.iterator(definition);
 
   return new StateMachine(scope, 'SQLExecutionStateMachine', {
     definitionBody: DefinitionBody.fromChainable(map),
@@ -118,6 +118,7 @@ function createSQLExecutionStepFn(scope: Construct, props: SQLExecutionStepFunct
 
   const fnId = 'SQLExecutionStepFn';
   const fn = new SolutionNodejsFunction(scope, fnId, {
+    runtime: Runtime.NODEJS_18_X,
     entry: join(__dirname, '..', 'lambdas', 'sql-execution-sfn', 'sql-execution-step-fn.ts'),
     handler: 'handler',
     memorySize: 256,
@@ -133,7 +134,7 @@ function createSQLExecutionStepFn(scope: Construct, props: SQLExecutionStepFunct
     role,
   });
   props.dataAPIRole.grantAssumeRole(fn.grantPrincipal);
-  props.workflowBucketInfo.s3Bucket.grantRead(fn);
+  props.workflowBucketInfo.s3Bucket.grantRead(fn, `${props.workflowBucketInfo.prefix}*`);
 
   addCfnNagSuppressRules(fn.node.defaultChild as CfnResource,
     rulesToSuppressForLambdaVPCAndReservedConcurrentExecutions('CDK'));

@@ -154,7 +154,7 @@ export class ScanMetadataWorkflow extends Construct {
         resultPath: '$.doScanMetadata',
       },
     );
-    doScanMetadataJob.itemProcessor(scanMetaDataDefinition);
+    doScanMetadataJob.iterator(scanMetaDataDefinition);
     doScanMetadataJob.next(updateWorkflowInfoJob);
 
     const doNothing = new Succeed(this, `${this.node.id} - Do Nothing`);
