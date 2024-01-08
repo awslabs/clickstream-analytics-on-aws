@@ -53,7 +53,6 @@ src/data-pipeline/spark-etl/?/
 code-coverage-results.md
 metastore_db
 nohup.out
-!/.projenrc.js
 /test-reports/
 junit.xml
 /coverage/
@@ -86,3 +85,4 @@ junit.xml
 !/.gitlab/ci-templates/postbuild-scan.yml
 !/.gitlab/ci-templates/cfn-nag.yml
 !/.gitlab/ci-templates/cfn-lint.yml
+!/.projenrc.js
