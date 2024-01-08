@@ -906,7 +906,7 @@ export function getAttributionTableVisualDef(visualId: string, viewName: string,
   let countFieldName = 'event_count';
   let totalCountFieldName = 'total_event_count';
 
-  if (method === ExploreComputeMethod.USER_CNT) {
+  if (method === ExploreComputeMethod.USER_ID_CNT) {
     countFieldName = 'user_count';
     totalCountFieldName = 'total_user_count';
   } else if (method === ExploreComputeMethod.SUM_VALUE) {

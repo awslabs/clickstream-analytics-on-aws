@@ -23,7 +23,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildFunnelTableView({
       schemaName: 'shop',
-      computeMethod: ExploreComputeMethod.USER_CNT,
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
       joinColumn: 'user_pseudo_id',
       conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
@@ -802,7 +802,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildFunnelTableView( {
       schemaName: 'shop',
-      computeMethod: ExploreComputeMethod.USER_CNT,
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
       joinColumn: 'user_pseudo_id',
       conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
@@ -1039,7 +1039,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildFunnelView({
       schemaName: 'shop',
-      computeMethod: ExploreComputeMethod.USER_CNT,
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
       joinColumn: 'user_pseudo_id',
       conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
@@ -1303,12 +1303,12 @@ describe('SQL Builder test', () => {
 
     const sql = buildEventAnalysisView({
       schemaName: 'shop',
-      computeMethod: ExploreComputeMethod.USER_CNT,
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: false,
       eventAndConditions: [
         {
           eventName: 'view_item',
-          computeMethod: ExploreComputeMethod.USER_CNT,
+          computeMethod: ExploreComputeMethod.USER_ID_CNT,
         },
         {
           eventName: 'add_to_cart',
@@ -1501,7 +1501,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildEventPathAnalysisView({
       schemaName: 'shop',
-      computeMethod: ExploreComputeMethod.USER_CNT,
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
       joinColumn: 'user_pseudo_id',
       conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
@@ -1798,7 +1798,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildEventPathAnalysisView({
       schemaName: 'shop',
-      computeMethod: ExploreComputeMethod.USER_CNT,
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
       joinColumn: 'user_pseudo_id',
       conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
@@ -2107,7 +2107,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildNodePathAnalysisView({
       schemaName: 'shop',
-      computeMethod: ExploreComputeMethod.USER_CNT,
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
       joinColumn: 'user_pseudo_id',
       conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
@@ -2352,7 +2352,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildNodePathAnalysisView({
       schemaName: 'shop',
-      computeMethod: ExploreComputeMethod.USER_CNT,
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
       joinColumn: 'user_pseudo_id',
       conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
@@ -2620,7 +2620,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildNodePathAnalysisView({
       schemaName: 'shop',
-      computeMethod: ExploreComputeMethod.USER_CNT,
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
       joinColumn: 'user_pseudo_id',
       conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
@@ -2872,7 +2872,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildNodePathAnalysisView({
       schemaName: 'shop',
-      computeMethod: ExploreComputeMethod.USER_CNT,
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: false,
       timeScopeType: ExploreTimeScopeType.FIXED,
       groupColumn: ExploreGroupColumn.DAY,
@@ -3146,7 +3146,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildNodePathAnalysisView({
       schemaName: 'shop',
-      computeMethod: ExploreComputeMethod.USER_CNT,
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: false,
       timeScopeType: ExploreTimeScopeType.FIXED,
       groupColumn: ExploreGroupColumn.DAY,
@@ -3441,7 +3441,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildNodePathAnalysisView({
       schemaName: 'shop',
-      computeMethod: ExploreComputeMethod.USER_CNT,
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: false,
       timeScopeType: ExploreTimeScopeType.FIXED,
       groupColumn: ExploreGroupColumn.DAY,
@@ -3722,7 +3722,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildRetentionAnalysisView({
       schemaName: 'shop',
-      computeMethod: ExploreComputeMethod.USER_CNT,
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
       joinColumn: 'user_pseudo_id',
       conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
@@ -4007,7 +4007,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildRetentionAnalysisView({
       schemaName: 'shop',
-      computeMethod: ExploreComputeMethod.USER_CNT,
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
       joinColumn: 'user_pseudo_id',
       conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
@@ -4295,7 +4295,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildRetentionAnalysisView({
       schemaName: 'shop',
-      computeMethod: ExploreComputeMethod.USER_CNT,
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
       joinColumn: 'user_pseudo_id',
       conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
@@ -4620,7 +4620,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildRetentionAnalysisView({
       schemaName: 'shop',
-      computeMethod: ExploreComputeMethod.USER_CNT,
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
       joinColumn: 'user_pseudo_id',
       conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
@@ -4926,7 +4926,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildFunnelTableView({
       schemaName: 'shop',
-      computeMethod: ExploreComputeMethod.USER_CNT,
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
       joinColumn: 'user_pseudo_id',
       conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
@@ -5260,7 +5260,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildFunnelTableView( {
       schemaName: 'shop',
-      computeMethod: ExploreComputeMethod.USER_CNT,
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
       joinColumn: 'user_pseudo_id',
       conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
@@ -5634,7 +5634,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildFunnelView({
       schemaName: 'shop',
-      computeMethod: ExploreComputeMethod.USER_CNT,
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
       joinColumn: 'user_pseudo_id',
       conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
@@ -5715,7 +5715,7 @@ describe('SQL Builder test', () => {
         },
         {
           eventName: 'purchase',
-          computeMethod: ExploreComputeMethod.USER_CNT,
+          computeMethod: ExploreComputeMethod.USER_ID_CNT,
           sqlCondition: {
             conditionOperator: 'and',
             conditions: [
@@ -6029,7 +6029,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildFunnelTableView({
       schemaName: 'shop',
-      computeMethod: ExploreComputeMethod.USER_CNT,
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
       joinColumn: 'user_pseudo_id',
       conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
@@ -6110,7 +6110,7 @@ describe('SQL Builder test', () => {
         },
         {
           eventName: 'purchase',
-          computeMethod: ExploreComputeMethod.USER_CNT,
+          computeMethod: ExploreComputeMethod.USER_ID_CNT,
           sqlCondition: {
             conditionOperator: 'and',
             conditions: [
@@ -6396,7 +6396,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildEventAnalysisView({
       schemaName: 'shop',
-      computeMethod: ExploreComputeMethod.USER_CNT,
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
       joinColumn: 'user_pseudo_id',
       conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
@@ -6477,7 +6477,7 @@ describe('SQL Builder test', () => {
         },
         {
           eventName: 'purchase',
-          computeMethod: ExploreComputeMethod.USER_CNT,
+          computeMethod: ExploreComputeMethod.USER_ID_CNT,
           sqlCondition: {
             conditionOperator: 'and',
             conditions: [
@@ -6776,7 +6776,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildEventPathAnalysisView({
       schemaName: 'shop',
-      computeMethod: ExploreComputeMethod.USER_CNT,
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
       joinColumn: 'user_pseudo_id',
       conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
@@ -6857,7 +6857,7 @@ describe('SQL Builder test', () => {
         },
         {
           eventName: 'purchase',
-          computeMethod: ExploreComputeMethod.USER_CNT,
+          computeMethod: ExploreComputeMethod.USER_ID_CNT,
           sqlCondition: {
             conditionOperator: 'and',
             conditions: [
@@ -7191,7 +7191,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildEventPathAnalysisView({
       schemaName: 'shop',
-      computeMethod: ExploreComputeMethod.USER_CNT,
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
       joinColumn: 'user_pseudo_id',
       conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
@@ -7272,7 +7272,7 @@ describe('SQL Builder test', () => {
         },
         {
           eventName: 'purchase',
-          computeMethod: ExploreComputeMethod.USER_CNT,
+          computeMethod: ExploreComputeMethod.USER_ID_CNT,
           sqlCondition: {
             conditionOperator: 'and',
             conditions: [
@@ -7653,7 +7653,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildEventPathAnalysisView({
       schemaName: 'shop',
-      computeMethod: ExploreComputeMethod.USER_CNT,
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
       joinColumn: 'user_pseudo_id',
       conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
@@ -7790,7 +7790,7 @@ describe('SQL Builder test', () => {
         },
         {
           eventName: 'purchase',
-          computeMethod: ExploreComputeMethod.USER_CNT,
+          computeMethod: ExploreComputeMethod.USER_ID_CNT,
           sqlCondition: {
             conditionOperator: 'and',
             conditions: [
@@ -8180,7 +8180,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildEventPathAnalysisView({
       schemaName: 'shop',
-      computeMethod: ExploreComputeMethod.USER_CNT,
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
       joinColumn: 'user_pseudo_id',
       conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
@@ -8317,7 +8317,7 @@ describe('SQL Builder test', () => {
         },
         {
           eventName: '_app_end',
-          computeMethod: ExploreComputeMethod.USER_CNT,
+          computeMethod: ExploreComputeMethod.USER_ID_CNT,
         },
       ],
       pathAnalysis: {
@@ -8708,7 +8708,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildNodePathAnalysisView({
       schemaName: 'shop',
-      computeMethod: ExploreComputeMethod.USER_CNT,
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
       joinColumn: 'user_pseudo_id',
       conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
@@ -8789,7 +8789,7 @@ describe('SQL Builder test', () => {
         },
         {
           eventName: 'purchase',
-          computeMethod: ExploreComputeMethod.USER_CNT,
+          computeMethod: ExploreComputeMethod.USER_ID_CNT,
           sqlCondition: {
             conditionOperator: 'and',
             conditions: [
@@ -9162,7 +9162,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildEventAnalysisView({
       schemaName: 'shop',
-      computeMethod: ExploreComputeMethod.USER_CNT,
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: false,
       groupCondition: {
         property: '_session_id',
@@ -9451,7 +9451,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildEventAnalysisView({
       schemaName: 'shop',
-      computeMethod: ExploreComputeMethod.USER_CNT,
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: false,
       groupCondition: {
         property: 'country',
@@ -9725,7 +9725,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildFunnelView({
       schemaName: 'shop',
-      computeMethod: ExploreComputeMethod.USER_CNT,
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: false,
       groupCondition: {
         property: '_session_id',
@@ -10050,7 +10050,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildFunnelView({
       schemaName: 'shop',
-      computeMethod: ExploreComputeMethod.USER_CNT,
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: false,
       groupCondition: {
         property: 'country',
@@ -10360,7 +10360,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildFunnelView({
       schemaName: 'shop',
-      computeMethod: ExploreComputeMethod.USER_CNT,
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: false,
       groupCondition: {
         property: 'country',
@@ -10658,7 +10658,7 @@ describe('SQL Builder test', () => {
     const sql = _buildCommonPartSql(['view_item', 'add_to_cart', 'purchase'],
       {
         schemaName: 'shop',
-        computeMethod: ExploreComputeMethod.USER_CNT,
+        computeMethod: ExploreComputeMethod.USER_ID_CNT,
         specifyJoinColumn: true,
         joinColumn: 'user_pseudo_id',
         conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
@@ -10761,7 +10761,7 @@ describe('SQL Builder test', () => {
     const sql = _buildCommonPartSql(['view_item', 'add_to_cart', 'purchase'],
       {
         schemaName: 'shop',
-        computeMethod: ExploreComputeMethod.USER_CNT,
+        computeMethod: ExploreComputeMethod.USER_ID_CNT,
         specifyJoinColumn: true,
         joinColumn: 'user_pseudo_id',
         conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
@@ -10923,7 +10923,7 @@ describe('SQL Builder test', () => {
     const sql = _buildCommonPartSql(['view_item', 'add_to_cart', 'purchase'],
       {
         schemaName: 'shop',
-        computeMethod: ExploreComputeMethod.USER_CNT,
+        computeMethod: ExploreComputeMethod.USER_ID_CNT,
         specifyJoinColumn: true,
         joinColumn: 'user_pseudo_id',
         conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
@@ -11090,7 +11090,7 @@ describe('SQL Builder test', () => {
     const sql = _buildCommonPartSql(['view_item', 'add_to_cart', 'purchase'],
       {
         schemaName: 'shop',
-        computeMethod: ExploreComputeMethod.USER_CNT,
+        computeMethod: ExploreComputeMethod.USER_ID_CNT,
         specifyJoinColumn: true,
         joinColumn: 'user_pseudo_id',
         conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
@@ -11222,7 +11222,7 @@ describe('SQL Builder test', () => {
     const sql = _buildCommonPartSql(['view_item', 'add_to_cart', 'purchase'],
       {
         schemaName: 'shop',
-        computeMethod: ExploreComputeMethod.USER_CNT,
+        computeMethod: ExploreComputeMethod.USER_ID_CNT,
         specifyJoinColumn: true,
         joinColumn: 'user_pseudo_id',
         conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
@@ -11381,7 +11381,7 @@ describe('SQL Builder test', () => {
     const sql = _buildCommonPartSql(['view_item', 'add_to_cart', 'purchase'],
       {
         schemaName: 'shop',
-        computeMethod: ExploreComputeMethod.USER_CNT,
+        computeMethod: ExploreComputeMethod.USER_ID_CNT,
         specifyJoinColumn: true,
         joinColumn: 'user_pseudo_id',
         conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
@@ -11559,7 +11559,7 @@ describe('SQL Builder test', () => {
     const sql = _buildCommonPartSql(['view_item', 'add_to_cart', 'purchase'],
       {
         schemaName: 'shop',
-        computeMethod: ExploreComputeMethod.USER_CNT,
+        computeMethod: ExploreComputeMethod.USER_ID_CNT,
         specifyJoinColumn: true,
         joinColumn: 'user_pseudo_id',
         conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
@@ -11773,7 +11773,7 @@ describe('SQL Builder test', () => {
     const sql = _buildCommonPartSql(['view_item', 'add_to_cart', 'purchase'],
       {
         schemaName: 'shop',
-        computeMethod: ExploreComputeMethod.USER_CNT,
+        computeMethod: ExploreComputeMethod.USER_ID_CNT,
         specifyJoinColumn: true,
         joinColumn: 'user_pseudo_id',
         conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
@@ -11907,7 +11907,7 @@ describe('SQL Builder test', () => {
     const sql = _buildCommonPartSql(['view_item', 'add_to_cart', 'purchase'],
       {
         schemaName: 'shop',
-        computeMethod: ExploreComputeMethod.USER_CNT,
+        computeMethod: ExploreComputeMethod.USER_ID_CNT,
         specifyJoinColumn: true,
         joinColumn: 'user_pseudo_id',
         conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
@@ -12053,7 +12053,7 @@ describe('SQL Builder test', () => {
     const sql = _buildCommonPartSql(['view_item', 'add_to_cart', 'purchase'],
       {
         schemaName: 'shop',
-        computeMethod: ExploreComputeMethod.USER_CNT,
+        computeMethod: ExploreComputeMethod.USER_ID_CNT,
         specifyJoinColumn: true,
         joinColumn: 'user_pseudo_id',
         conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
@@ -12253,7 +12253,7 @@ describe('SQL Builder test', () => {
     const sql = _buildCommonPartSql(['view_item', 'add_to_cart', 'purchase'],
       {
         schemaName: 'shop',
-        computeMethod: ExploreComputeMethod.USER_CNT,
+        computeMethod: ExploreComputeMethod.USER_ID_CNT,
         specifyJoinColumn: true,
         joinColumn: 'user_pseudo_id',
         conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
@@ -12465,7 +12465,7 @@ describe('SQL Builder test', () => {
     const sql = _buildCommonPartSql(['view_item', 'add_to_cart', 'purchase'],
       {
         schemaName: 'shop',
-        computeMethod: ExploreComputeMethod.USER_CNT,
+        computeMethod: ExploreComputeMethod.USER_ID_CNT,
         specifyJoinColumn: true,
         joinColumn: 'user_pseudo_id',
         conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
@@ -12723,7 +12723,7 @@ describe('SQL Builder test', () => {
     const sql = _buildCommonPartSql(['view_item', 'add_to_cart', 'purchase'],
       {
         schemaName: 'shop',
-        computeMethod: ExploreComputeMethod.USER_CNT,
+        computeMethod: ExploreComputeMethod.USER_ID_CNT,
         specifyJoinColumn: true,
         joinColumn: 'user_pseudo_id',
         conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
@@ -13079,7 +13079,7 @@ describe('SQL Builder test', () => {
         },
         {
           eventName: 'purchase',
-          computeMethod: ExploreComputeMethod.USER_CNT,
+          computeMethod: ExploreComputeMethod.USER_ID_CNT,
           sqlCondition: {
             conditionOperator: 'and',
             conditions: [
@@ -13410,7 +13410,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildFunnelTableView({
       schemaName: 'shop',
-      computeMethod: ExploreComputeMethod.USER_CNT,
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
       joinColumn: 'user_pseudo_id',
       conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
@@ -13484,7 +13484,7 @@ describe('SQL Builder test', () => {
         },
         {
           eventName: 'purchase',
-          computeMethod: ExploreComputeMethod.USER_CNT,
+          computeMethod: ExploreComputeMethod.USER_ID_CNT,
           sqlCondition: {
             conditionOperator: 'and',
             conditions: [
@@ -13769,7 +13769,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildFunnelTableView({
       schemaName: 'shop',
-      computeMethod: ExploreComputeMethod.USER_CNT,
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
       joinColumn: 'user_pseudo_id',
       conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
@@ -13843,7 +13843,7 @@ describe('SQL Builder test', () => {
         },
         {
           eventName: 'purchase',
-          computeMethod: ExploreComputeMethod.USER_CNT,
+          computeMethod: ExploreComputeMethod.USER_ID_CNT,
           sqlCondition: {
             conditionOperator: 'and',
             conditions: [
@@ -14148,7 +14148,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildFunnelTableView({
       schemaName: 'shop',
-      computeMethod: ExploreComputeMethod.USER_CNT,
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
       joinColumn: 'user_pseudo_id',
       conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
@@ -14222,7 +14222,7 @@ describe('SQL Builder test', () => {
         },
         {
           eventName: 'purchase',
-          computeMethod: ExploreComputeMethod.USER_CNT,
+          computeMethod: ExploreComputeMethod.USER_ID_CNT,
           sqlCondition: {
             conditionOperator: 'and',
             conditions: [
@@ -14523,7 +14523,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildEventAnalysisView({
       schemaName: 'shop',
-      computeMethod: ExploreComputeMethod.USER_CNT,
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
       joinColumn: 'user_pseudo_id',
       conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
@@ -14609,7 +14609,7 @@ describe('SQL Builder test', () => {
         },
         {
           eventName: 'purchase',
-          computeMethod: ExploreComputeMethod.USER_CNT,
+          computeMethod: ExploreComputeMethod.USER_ID_CNT,
           sqlCondition: {
             conditionOperator: 'and',
             conditions: [
@@ -14997,7 +14997,7 @@ describe('SQL Builder test', () => {
         },
         {
           eventName: 'purchase',
-          computeMethod: ExploreComputeMethod.USER_CNT,
+          computeMethod: ExploreComputeMethod.USER_ID_CNT,
           sqlCondition: {
             conditionOperator: 'and',
             conditions: [
@@ -15324,7 +15324,7 @@ describe('SQL Builder test', () => {
         },
         {
           eventName: 'purchase',
-          computeMethod: ExploreComputeMethod.USER_CNT,
+          computeMethod: ExploreComputeMethod.USER_ID_CNT,
         },
       ],
       pathAnalysis: {
@@ -15533,7 +15533,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildNodePathAnalysisView({
       schemaName: 'shop',
-      computeMethod: ExploreComputeMethod.USER_CNT,
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
       joinColumn: 'user_pseudo_id',
       conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
@@ -15614,7 +15614,7 @@ describe('SQL Builder test', () => {
         },
         {
           eventName: 'purchase',
-          computeMethod: ExploreComputeMethod.USER_CNT,
+          computeMethod: ExploreComputeMethod.USER_ID_CNT,
           sqlCondition: {
             conditionOperator: 'and',
             conditions: [
@@ -15943,7 +15943,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildRetentionAnalysisView({
       schemaName: 'shop',
-      computeMethod: ExploreComputeMethod.USER_CNT,
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
       joinColumn: 'user_pseudo_id',
       conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
@@ -16431,7 +16431,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildFunnelView({
       schemaName: 'shopping',
-      computeMethod: ExploreComputeMethod.USER_CNT,
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: true,
       joinColumn: 'user_pseudo_id',
       conversionIntervalType: ExploreConversionIntervalType.CUSTOMIZE,
@@ -16799,7 +16799,7 @@ describe('SQL Builder test', () => {
         },
         {
           eventName: 'purchase',
-          computeMethod: ExploreComputeMethod.USER_CNT,
+          computeMethod: ExploreComputeMethod.USER_ID_CNT,
           sqlCondition: {
             conditionOperator: 'and',
             conditions: [
@@ -17154,7 +17154,7 @@ describe('SQL Builder test', () => {
 
     const sql = buildEventAnalysisView({
       schemaName: 'shop',
-      computeMethod: ExploreComputeMethod.USER_CNT,
+      computeMethod: ExploreComputeMethod.USER_ID_CNT,
       specifyJoinColumn: false,
       eventAndConditions: [
         {

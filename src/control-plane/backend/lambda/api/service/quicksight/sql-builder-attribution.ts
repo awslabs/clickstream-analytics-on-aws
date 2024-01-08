@@ -21,7 +21,7 @@ export interface AttributionSQLParameters extends BaseSQLParameters {
   modelType: AttributionModelType;
   modelWeights?: number[];
   timeWindowType: ExploreAttributionTimeWindowType;
-  timeWindowInSecond?: number;
+  timeWindowInSeconds?: number;
 }
 
 export function buildSQLForSinglePointModel(params: AttributionSQLParameters): string {
@@ -85,7 +85,7 @@ export function buildSQLForSinglePointModel(params: AttributionSQLParameters): s
       ) as t
       on 1=1
     `;
-  } else if (params.computeMethod === ExploreComputeMethod.USER_CNT) {
+  } else if (params.computeMethod === ExploreComputeMethod.USER_ID_CNT) {
     attributionDataSql = `
       total_count_data as (
         select 
@@ -290,7 +290,7 @@ export function buildCommonSqlForAttribution(eventNames: string[], params: Attri
       break;
     case ExploreAttributionTimeWindowType.CUSTOMIZE:
       timeWindowSql = `
-        and (target_data.event_timestamp - touch_point_data_3.event_timestamp <= ${params.timeWindowInSecond} * 60 * 1000 )
+        and (target_data.event_timestamp - touch_point_data_3.event_timestamp <= ${params.timeWindowInSeconds} * 60 * 1000 )
       `;
       break;
     default:
@@ -298,6 +298,11 @@ export function buildCommonSqlForAttribution(eventNames: string[], params: Attri
       timeWindowSql = `
         and target_data._session_id = touch_point_data_3._session_id
       `;
+  }
+
+  let conditionSql = buildConditionSql(params.targetEventAndCondition.sqlCondition);
+  if (conditionSql !== '') {
+    conditionSql = `and (${conditionSql}) `;
   }
 
   const targetSql = `
@@ -311,9 +316,7 @@ export function buildCommonSqlForAttribution(eventNames: string[], params: Attri
         ,row_number() over(PARTITION by user_pseudo_id ORDER by event_timestamp asc) as rank 
         ${sumValueColSql}
       from base_data
-      where event_name = '${params.targetEventAndCondition.eventName}' and (
-        ${buildConditionSql(params.targetEventAndCondition.sqlCondition)}
-      )
+      where event_name = '${params.targetEventAndCondition.eventName}' ${conditionSql}
     ),
   `;
   let touchPointSql = `
@@ -328,6 +331,12 @@ export function buildCommonSqlForAttribution(eventNames: string[], params: Attri
       from target_data
   `;
   for (const [index, eventAndCondition] of params.eventAndConditions.entries()) {
+
+    let conditionSql2 = buildConditionSql(eventAndCondition.sqlCondition);
+    if (conditionSql2 !== '') {
+      conditionSql2 = `and (${conditionSql2}) `;
+    }
+
     touchPointSql = touchPointSql.concat(`
       union all
       select 
@@ -340,7 +349,7 @@ export function buildCommonSqlForAttribution(eventNames: string[], params: Attri
       from base_data 
       where 
         event_name = '${eventAndCondition.eventName}' 
-        and ( ${buildConditionSql(eventAndCondition.sqlCondition)} )
+        ${conditionSql2}
     `);
   }
 

@@ -557,7 +557,7 @@ ul.menu-list li.checkbox-item {
 
 .cs-analytics-config {
   display: flex;
-  gap: 50px;
+  gap: 5px;
 }
 
 .cs-analytics-data-range {
@@ -584,6 +584,10 @@ ul.menu-list li.checkbox-item {
   .cs-analytics-window-unit {
     flex: 1;
   }
+}
+
+.cs-analytics-attribution-model {
+  width: 180px;
 }
 
 .cs-analytics-session-window {
@@ -650,6 +654,18 @@ ul.menu-list li.checkbox-item {
       padding: 0 12px;
       border-radius: 8px 0 0 8px;
       margin-right: -6px;
+      color: #0972d3;
+    }
+    .cs-suffix-name {
+      position: relative;
+      z-index: 10;
+      background-color: #efefef;
+      height: 28px;
+      line-height: 28px;
+      border: 2px solid #7d8998;
+      padding: 0 8px;
+      border-radius: 0 8px 8px 0;
+      margin-left: -6px;
       color: #0972d3;
     }
   }

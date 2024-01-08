@@ -144,6 +144,21 @@ declare global {
     readonly groupCondition?: GroupingCondition;
   }
 
+  interface AttributionTouchPoint {
+    readonly eventName: string;
+    readonly sqlCondition?: ISQLCondition;
+    readonly groupColumn?: IColumnAttribute;
+  }
+
+  interface IExploreAttributionRequest extends IExploreRequest {
+    targetEventAndCondition: AttributionTouchPoint;
+    eventAndConditions: AttributionTouchPoint[];
+    modelType: AttributionModelType;
+    modelWeights?: number[];
+    timeWindowType: ExploreAttributionTimeWindowType;
+    timeWindowInSeconds?: number;
+  }
+
   interface ICondition {
     readonly category: string;
     readonly property: string;
@@ -152,7 +167,7 @@ declare global {
     readonly dataType: MetadataValueType;
   }
 
-  type IRetentionJoinColumn = ColumnAttribute;
+  type IRetentionJoinColumn = IColumnAttribute;
 
   interface IEventAndCondition {
     readonly eventName: string;

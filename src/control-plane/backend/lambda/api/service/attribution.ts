@@ -75,7 +75,7 @@ export class AttributionAnalysisService {
       ];
 
       datasetColumns = [...attributionVisualColumnsEvent];
-    } else if (method === ExploreComputeMethod.USER_CNT) {
+    } else if (method === ExploreComputeMethod.USER_ID_CNT) {
       projectedColumns = [
         'total_user_count',
         'event_name',
@@ -105,7 +105,10 @@ export class AttributionAnalysisService {
   async createSinglePointModelVisual(sheetId: string, query: any) {
 
     const viewName = getTempResourceName(query.viewName, query.action);
-    const sql = buildSQLForSinglePointModel(query as AttributionSQLParameters);
+    const sql = buildSQLForSinglePointModel({
+      ...query,
+      schemaName: query.appId,
+    } as AttributionSQLParameters);
 
     logger.debug(`sql of single point model: ${sql}`);
 
