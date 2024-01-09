@@ -137,21 +137,18 @@ export const dashboardAdminPermissionActions = [
   'quicksight:UpdateDashboardPublishedVersion',
 ];
 
-export const folderReadPermissionActions = [
+export const folderContributorPermissionActions = [
+  'quicksight:CreateFolder',
+  'quicksight:DescribeFolder',
   'quicksight:CreateFolderMembership',
   'quicksight:DeleteFolderMembership',
-  'quicksight:DescribeFolder',
-  'quicksight:ListFolderMembers',
-  'quicksight:ListFolders',
-  'quicksight:SearchFolders',
+  'quicksight:DescribeFolderPermissions',
 ];
 
-export const folderAdminPermissionActions = [
-  ...folderReadPermissionActions,
-  'quicksight:CreateFolder',
-  'quicksight:DescribeFolderPermissions',
-  'quicksight:DeleteFolder',
+export const folderOwnerPermissionActions = [
+  ...folderContributorPermissionActions,
   'quicksight:UpdateFolder',
+  'quicksight:DeleteFolder',
   'quicksight:UpdateFolderPermissions',
 ];
 
@@ -392,6 +389,23 @@ export const existDashboard = async (quickSight: QuickSight, accountId: string, 
     await quickSight.describeDashboard({
       AwsAccountId: accountId,
       DashboardId: dashboardId,
+    });
+    return true;
+  } catch (err: any) {
+    if ((err as Error) instanceof ResourceNotFoundException) {
+      return false;
+    } else {
+      throw err;
+    }
+  }
+};
+
+export const existFolder = async (quickSight: QuickSight, accountId: string, folderId: string) => {
+
+  try {
+    await quickSight.describeFolder({
+      AwsAccountId: accountId,
+      FolderId: folderId,
     });
     return true;
   } catch (err: any) {

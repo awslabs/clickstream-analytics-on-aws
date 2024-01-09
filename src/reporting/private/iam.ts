@@ -105,6 +105,23 @@ export function createRoleForQuicksightCustomResourceLambda(
       ],
     }),
 
+    new PolicyStatement({
+      effect: Effect.ALLOW,
+      resources: [
+        `${arnPrefix}:folder/clickstream_*`,
+      ],
+      actions: [
+        'quicksight:CreateFolderMembership',
+        'quicksight:DeleteFolderMembership',
+        'quicksight:DescribeFolder',
+        'quicksight:CreateFolder',
+        'quicksight:DeleteFolder',
+        'quicksight:UpdateFolder',
+        'quicksight:UpdateFolderPermissions',
+        'quicksight:ListFolderMembers',
+      ],
+    }),
+
   ];
 
   const principal = new ServicePrincipal('lambda.amazonaws.com');

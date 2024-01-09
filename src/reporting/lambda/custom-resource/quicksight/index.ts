@@ -36,6 +36,8 @@ import {
   ParameterValueType,
   DatasetParameter,
   MemberType,
+  FolderType,
+  SharingModel,
 } from '@aws-sdk/client-quicksight';
 import { Context, CloudFormationCustomResourceEvent, CloudFormationCustomResourceUpdateEvent, CloudFormationCustomResourceCreateEvent, CloudFormationCustomResourceDeleteEvent, CdkCustomResourceResponse } from 'aws-lambda';
 import Mustache from 'mustache';
@@ -65,8 +67,9 @@ import {
   findDashboardWithPrefix,
   waitForDataSourceChangeCompleted,
   DateTimeParameter,
-  folderAdminPermissionActions,
-  // folderReadPermissionActions,
+  folderContributorPermissionActions,
+  folderOwnerPermissionActions,
+  existFolder,
 } from '../../../private/dashboard';
 
 type ResourceEvent = CloudFormationCustomResourceEvent;
@@ -185,7 +188,7 @@ const _onUpdate = async (quickSight: QuickSight, awsAccountId: string, sharePrin
   logger.info('Filtering params:', {
     propsSchemas: props.schemas,
     oldPropsSchemas: oldProps.schemas,
-    databaseSchemanameArray: databaseSchemaNameArray,
+    databaseSchemaNameArray: databaseSchemaNameArray,
     oldDatabaseSchemaNameArray: oldDatabaseSchemaNameArray,
   });
 
@@ -300,16 +303,18 @@ const createQuickSightDashboard = async (quickSight: QuickSight,
 
   const folder = await quickSight.createFolder({
     AwsAccountId: commonParams.awsAccountId,
-    FolderId: `${commonParams.databaseName}_${commonParams.schema}`,
+    FolderId: `clickstream_${commonParams.databaseName}_${commonParams.schema}`,
     Name: `${commonParams.databaseName}_${commonParams.schema}`,
+    FolderType: FolderType.SHARED,
+    SharingModel: SharingModel.ACCOUNT,
     Permissions: [
       {
-        Principal: commonParams.ownerPrincipalArn,
-        Actions: folderAdminPermissionActions,
+        Principal: commonParams.sharePrincipalArn,
+        Actions: folderContributorPermissionActions,
       },
       {
-        Principal: commonParams.sharePrincipalArn,
-        Actions: folderAdminPermissionActions,
+        Principal: commonParams.ownerPrincipalArn,
+        Actions: folderOwnerPermissionActions,
       },
     ],
   });
@@ -352,8 +357,48 @@ const deleteQuickSightDashboard = async (quickSight: QuickSight,
     await deleteDataSet(quickSight, accountId, schema, databaseName, dataSet);
   }
 
+  await quickSight.listFolderMembers({
+    AwsAccountId: accountId,
+    FolderId: `clickstream_${databaseName}_${schema}`,
+  }).then(async (data) => {
+    if (data !== undefined && data.FolderMemberList !== undefined) {
+      for (const member of data.FolderMemberList) {
+        const memberType = getMemberType(member.MemberArn!, member.MemberId!);
+        await quickSight.deleteFolderMembership({
+          AwsAccountId: accountId,
+          FolderId: `clickstream_${databaseName}_${schema}`,
+          MemberId: member.MemberId!,
+          MemberType: memberType,
+        });
+      }
+    }
+  });
+
+  //delete folder
+  await quickSight.deleteFolder({
+    AwsAccountId: accountId,
+    FolderId: `clickstream_${databaseName}_${schema}`,
+  });
+
   return result;
 
+};
+
+const getMemberType = function(memberArn: string, memberId: string): MemberType | undefined {
+  let memberType = undefined;
+
+  if (memberArn.includes(`:dashboard/${memberId}`)) {
+    memberType = MemberType.DASHBOARD;
+  } else if (memberArn.includes(`:analysis/${memberId}`)) {
+    memberType = MemberType.ANALYSIS;
+  } else if (memberArn.includes(`:dataset/${memberId}`)) {
+    memberType = MemberType.DATASET;
+  } else if (memberArn.includes(`:datasource/${memberId}`)) {
+    memberType = MemberType.DATASOURCE;
+  } else if (memberArn.includes(`:topic/${memberId}`)) {
+    memberType = MemberType.TOPIC;
+  }
+  return memberType;
 };
 
 const getLatestTemplateVersion = async (quickSight: QuickSight,
@@ -484,11 +529,54 @@ const updateQuickSightDashboard = async (quickSight: QuickSight,
     dashboard = await createDashboard(quickSight, commonParams, sourceEntity, dashboardDef);
     logger.info(`Dashboard ${dashboard?.DashboardId} create completed.`);
 
+    //create folder membership
+    const folderExist = await existFolder(quickSight, commonParams.awsAccountId, `clickstream_${commonParams.databaseName}_${commonParams.schema}`);
+    if (folderExist) {
+      await quickSight.createFolderMembership({
+        AwsAccountId: commonParams.awsAccountId,
+        FolderId: `clickstream_${commonParams.databaseName}_${commonParams.schema}`,
+        MemberId: dashboard?.DashboardId!,
+        MemberType: MemberType.DASHBOARD,
+      });
+    } else {
+      const folder = await quickSight.createFolder({
+        AwsAccountId: commonParams.awsAccountId,
+        FolderId: `clickstream_${commonParams.databaseName}_${commonParams.schema}`,
+        Name: `${commonParams.databaseName}_${commonParams.schema}`,
+        FolderType: FolderType.SHARED,
+        SharingModel: SharingModel.ACCOUNT,
+      });
+
+      await quickSight.createFolderMembership({
+        AwsAccountId: commonParams.awsAccountId,
+        FolderId: folder.FolderId!,
+        MemberId: dashboard?.DashboardId!,
+        MemberType: MemberType.DASHBOARD,
+      });
+    }
+
+    //due to dashboardId changed in version v1.1, need to delete old dashboard
     const foundDashboardId = await findDashboardWithPrefix(quickSight, commonParams.awsAccountId, dashboardId.id.replace(`/${dashboardId.idSuffix}/g`, ''), dashboard?.DashboardId);
     if (foundDashboardId !== undefined) {
       await deleteDashboardById(quickSight, commonParams.awsAccountId, foundDashboardId);
     }
   }
+
+  //update folder permissions
+  await quickSight.updateFolderPermissions({
+    AwsAccountId: commonParams.awsAccountId,
+    FolderId: `clickstream_${commonParams.databaseName}_${commonParams.schema}`,
+    GrantPermissions: [
+      {
+        Principal: commonParams.sharePrincipalArn,
+        Actions: folderContributorPermissionActions,
+      },
+      {
+        Principal: commonParams.ownerPrincipalArn,
+        Actions: folderOwnerPermissionActions,
+      },
+    ],
+  });
 
   return dashboard;
 };
