@@ -2811,7 +2811,7 @@
 <h1 id="_1">解决方案端到端架构</h1>
 <p>使用默认配置部署此解决方案将构建以下环境：</p>
 <figure>
-<p><a class="glightbox" href="../images/architecture/01-architecture-end-to-end.png" data-type="image" data-width="100%" data-height="auto" data-desc-position="bottom"><img alt="end-to-end" loading="lazy" src="../images/architecture/01-architecture-end-to-end.png" /></a>
+<p><a class="glightbox" href="../images/architecture/01-architecture-end-to-end.png" data-type="image" data-width="auto" data-height="auto" data-desc-position="bottom"><img alt="end-to-end" loading="lazy" src="../images/architecture/01-architecture-end-to-end.png" /></a>
    </p>
 <figcaption>图 1：亚马逊云科技上的点击流分析架构图</figcaption>
 </figure>
@@ -2834,7 +2834,7 @@
 <p>下面介绍每个模块的架构图。</p>
 <h3 id="_3">摄取模块</h3>
 <figure>
-<p><a class="glightbox" href="../images/architecture/02-architecture-ingestion-module.png" data-type="image" data-width="100%" data-height="auto" data-desc-position="bottom"><img alt="ingestion" loading="lazy" src="../images/architecture/02-architecture-ingestion-module.png" /></a>
+<p><a class="glightbox" href="../images/architecture/02-architecture-ingestion-module.png" data-type="image" data-width="auto" data-height="auto" data-desc-position="bottom"><img alt="ingestion" loading="lazy" src="../images/architecture/02-architecture-ingestion-module.png" /></a>
    </p>
 <figcaption>图 2：摄取模块架构</figcaption>
 </figure>
@@ -2855,7 +2855,7 @@
 </ol>
 <h3 id="_4">数据处理模块</h3>
 <figure>
-<p><a class="glightbox" href="../images/architecture/03-architecture-data-processing.png" data-type="image" data-width="100%" data-height="auto" data-desc-position="bottom"><img alt="etl" loading="lazy" src="../images/architecture/03-architecture-data-processing.png" /></a>
+<p><a class="glightbox" href="../images/architecture/03-architecture-data-processing.png" data-type="image" data-width="auto" data-height="auto" data-desc-position="bottom"><img alt="etl" loading="lazy" src="../images/architecture/03-architecture-data-processing.png" /></a>
    </p>
 <figcaption>图 3：数据处理模块架构</figcaption>
 </figure>
@@ -2869,7 +2869,7 @@
 </ol>
 <h3 id="_5">数据建模模块</h3>
 <figure>
-<p><a class="glightbox" href="../images/architecture/04-architecture-data-modeling-redshift.png" data-type="image" data-width="100%" data-height="auto" data-desc-position="bottom"><img alt="data-modeling-in-redshift" loading="lazy" src="../images/architecture/04-architecture-data-modeling-redshift.png" /></a>
+<p><a class="glightbox" href="../images/architecture/04-architecture-data-modeling-redshift.png" data-type="image" data-width="auto" data-height="auto" data-desc-position="bottom"><img alt="data-modeling-in-redshift" loading="lazy" src="../images/architecture/04-architecture-data-modeling-redshift.png" /></a>
    </p>
 <figcaption>图 4：Redshift 架构中的数据建模</figcaption>
 </figure>
@@ -2887,7 +2887,7 @@
 <li>加载所有对象后，工作流程结束。</li>
 </ol>
 <figure>
-<p><a class="glightbox" href="../images/architecture/05-architecture-data-modeling-scan-metadata.png" data-type="image" data-width="100%" data-height="auto" data-desc-position="bottom"><img alt="metadata-scan-in-redshift" loading="lazy" src="../images/architecture/05-architecture-data-modeling-scan-metadata.png" /></a>
+<p><a class="glightbox" href="../images/architecture/05-architecture-data-modeling-scan-metadata.png" data-type="image" data-width="auto" data-height="auto" data-desc-position="bottom"><img alt="metadata-scan-in-redshift" loading="lazy" src="../images/architecture/05-architecture-data-modeling-scan-metadata.png" /></a>
    </p>
 <figcaption>图 5：扫描元数据流程</figcaption>
 </figure>
@@ -2902,7 +2902,7 @@
 <li><code>store metadata</code> Lambda 函数会将元数据保存到 DynamoDB 表中, 工作流程结束。</li>
 </ol>
 <figure>
-<p><a class="glightbox" href="../images/architecture/06-architecture-data-modeling-athena.png" data-type="image" data-width="100%" data-height="auto" data-desc-position="bottom"><img alt="data-modeling-in-athena" loading="lazy" src="../images/architecture/06-architecture-data-modeling-athena.png" /></a>
+<p><a class="glightbox" href="../images/architecture/06-architecture-data-modeling-athena.png" data-type="image" data-width="auto" data-height="auto" data-desc-position="bottom"><img alt="data-modeling-in-athena" loading="lazy" src="../images/architecture/06-architecture-data-modeling-athena.png" /></a>
    </p>
 <figcaption>图 6：Athena 架构中的数据建模</figcaption>
 </figure>
@@ -2916,7 +2916,7 @@
 </ol>
 <h3 id="_6">报表模块</h3>
 <figure>
-<p><a class="glightbox" href="../images/architecture/07-architecture-reporting.png" data-type="image" data-width="100%" data-height="auto" data-desc-position="bottom"><img alt="dashboard" loading="lazy" src="../images/architecture/07-architecture-reporting.png" /></a>
+<p><a class="glightbox" href="../images/architecture/07-architecture-reporting.png" data-type="image" data-width="auto" data-height="auto" data-desc-position="bottom"><img alt="dashboard" loading="lazy" src="../images/architecture/07-architecture-reporting.png" /></a>
    </p>
 <figcaption>图 7：报表模块架构</figcaption>
 </figure>
@@ -2928,7 +2928,7 @@
 <h2 id="_7">分析工作坊</h2>
 <p>分析工作坊（Analytics Studio）是供业务分析师或数据分析师查看和创建仪表板、查询和探索点击流数据以及管理元数据的统一网页界面。</p>
 <figure>
-<p><a class="glightbox" href="../images/architecture/08-analytics-studio.png" data-type="image" data-width="100%" data-height="auto" data-desc-position="bottom"><img alt="analytics-studio" loading="lazy" src="../images/architecture/08-analytics-studio.png" /></a>
+<p><a class="glightbox" href="../images/architecture/08-analytics-studio.png" data-type="image" data-width="auto" data-height="auto" data-desc-position="bottom"><img alt="analytics-studio" loading="lazy" src="../images/architecture/08-analytics-studio.png" /></a>
    </p>
 <figcaption>图 8: 分析工作坊架构</figcaption>
 </figure>
