@@ -14,6 +14,7 @@
 import { SelectProps } from '@cloudscape-design/components';
 import cloneDeep from 'lodash/cloneDeep';
 import { parametersConvertToCategoryItemType } from 'pages/analytics/analytics-utils';
+import { IMetadataBuiltInList } from 'ts/explore-types';
 import { getEventParameters } from 'ts/utils';
 import {
   DEFAULT_CONDITION_DATA,
@@ -91,7 +92,9 @@ export type ChangeCurCategoryOption = {
   type: 'changeCurCategoryOption';
   eventIndex: number;
   categoryOption: IAnalyticsItem | null;
+  builtInMetadata?: IMetadataBuiltInList;
   metadataEvents: IMetadataEvent[];
+  metadataEventParameters: IMetadataEventParameter[];
   metadataUserAttributes: IMetadataUserAttribute[];
 };
 
@@ -191,7 +194,9 @@ export const analyticsEventSelectReducer = (
     case 'changeCurCategoryOption': {
       const eventName = action.categoryOption?.name;
       const eventParameters = getEventParameters(
+        action.metadataEventParameters,
         action.metadataEvents,
+        action.builtInMetadata,
         eventName
       );
       const parameterOption = parametersConvertToCategoryItemType(

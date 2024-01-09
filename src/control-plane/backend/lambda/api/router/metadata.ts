@@ -41,7 +41,7 @@ router_metadata.get(
     query('appId').custom(isValidEmpty),
   ]),
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-    return metadataEventServ.listPathNodes(req, res, next);
+    return metadataEventParameterServ.listPathNodes(req, res, next);
   });
 
 router_metadata.get(
@@ -83,6 +83,10 @@ router_metadata.get('/event_parameter', async (req: express.Request, res: expres
   return metadataEventParameterServ.details(req, res, next);
 });
 
+router_metadata.get('/built_in_metadata', async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+  return metadataEventParameterServ.builtInMetadata(req, res, next);
+});
+
 router_metadata.get(
   '/user_attributes',
   validate([
@@ -92,10 +96,6 @@ router_metadata.get(
   async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     return metadataUserAttributeServ.list(req, res, next);
   });
-
-router_metadata.get('/user_attribute', async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-  return metadataUserAttributeServ.details(req, res, next);
-});
 
 export {
   router_metadata,

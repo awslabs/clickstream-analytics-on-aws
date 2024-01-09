@@ -100,6 +100,14 @@ export class PipelineServ {
     }
   };
 
+  public async getPipelineByProjectId(projectId: string) {
+    const latestPipelines = await store.listPipeline(projectId, 'latest', 'asc');
+    if (latestPipelines.length === 0) {
+      return;
+    }
+    return latestPipelines[0];
+  };
+
   public async update(req: any, res: any, next: any) {
     try {
       const { projectId } = req.body;

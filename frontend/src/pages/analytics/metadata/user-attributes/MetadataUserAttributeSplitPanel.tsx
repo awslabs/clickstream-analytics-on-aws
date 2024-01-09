@@ -26,8 +26,13 @@ import Loading from 'components/common/Loading';
 import { UserContext } from 'context/UserContext';
 import React, { useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { USER_ATTRIBUTE_DISPLAY_PREFIX } from 'ts/const';
-import { getUserInfoFromLocalStorage, isAnalystAuthorRole } from 'ts/utils';
+import { COMMON_ALERT_TYPE, USER_ATTRIBUTE_DISPLAY_PREFIX } from 'ts/const';
+import { MetadataSource } from 'ts/explore-types';
+import {
+  alertMsg,
+  getUserInfoFromLocalStorage,
+  isAnalystAuthorRole,
+} from 'ts/utils';
 import MetadataSourceFC from '../comps/MetadataSource';
 
 interface MetadataUserAttributeSplitPanelProps {
@@ -104,6 +109,8 @@ const MetadataUserAttributeSplitPanel: React.FC<
     setIsEditingDisplayName(false);
     setIsEditingDesc(false);
     setAttributeDetails(attribute);
+    setPrevDisplayName(attribute.name);
+    setPrevDesc(attribute.description);
     setLoadingData(false);
   }, [attribute.id]);
 
@@ -182,6 +189,18 @@ const MetadataUserAttributeSplitPanel: React.FC<
                             loading={loadingUpdateDisplayName}
                             variant="primary"
                             onClick={() => {
+                              if (
+                                attributeDetails.metadataSource ===
+                                MetadataSource.PRESET
+                              ) {
+                                alertMsg(
+                                  t(
+                                    'analytics:valid.metadataNotAllowEditError'
+                                  ),
+                                  COMMON_ALERT_TYPE.Error as AlertType
+                                );
+                                return;
+                              }
                               updateEventInfo('displayName');
                             }}
                           >
@@ -251,6 +270,16 @@ const MetadataUserAttributeSplitPanel: React.FC<
                           loading={loadingUpdateDesc}
                           variant="primary"
                           onClick={() => {
+                            if (
+                              attributeDetails.metadataSource ===
+                              MetadataSource.PRESET
+                            ) {
+                              alertMsg(
+                                t('analytics:valid.metadataNotAllowEditError'),
+                                COMMON_ALERT_TYPE.Error as AlertType
+                              );
+                              return;
+                            }
                             updateEventInfo('description');
                           }}
                         >

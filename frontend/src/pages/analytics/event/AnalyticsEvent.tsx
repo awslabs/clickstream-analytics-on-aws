@@ -54,6 +54,7 @@ import {
   ExploreRequestAction,
   ExploreGroupColumn,
   QuickSightChartType,
+  IMetadataBuiltInList,
 } from 'ts/explore-types';
 import {
   alertMsg,
@@ -83,7 +84,9 @@ import SaveToDashboardModal from '../comps/SelectDashboardModal';
 interface AnalyticsEventProps {
   loading: boolean;
   pipeline: IPipeline;
+  builtInMetadata?: IMetadataBuiltInList;
   metadataEvents: IMetadataEvent[];
+  metadataEventParameters: IMetadataEventParameter[];
   metadataUserAttributes: IMetadataUserAttribute[];
   categoryEvents: CategoryItemType[];
   presetParameters: CategoryItemType[];
@@ -98,7 +101,9 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
   const {
     loading,
     pipeline,
+    builtInMetadata,
     metadataEvents,
+    metadataEventParameters,
     metadataUserAttributes,
     categoryEvents,
     presetParameters,
@@ -425,7 +430,9 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
                 addEventButtonLabel={t('common:button.addEvent')}
                 eventOptionList={categoryEvents}
                 defaultComputeMethodOption={defaultComputeMethodOption}
+                builtInMetadata={builtInMetadata}
                 metadataEvents={metadataEvents}
+                metadataEventParameters={metadataEventParameters}
                 metadataUserAttributes={metadataUserAttributes}
                 enableChangeRelation={true}
                 isMultiSelect={true}

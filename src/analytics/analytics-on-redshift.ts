@@ -71,6 +71,7 @@ export class RedshiftAnalyticsStack extends NestedStack {
   readonly applicationSchema: ApplicationSchemasAndReporting;
   readonly redshiftDataAPIExecRole: IRole;
   readonly sqlExecutionWorkflow: IStateMachine;
+  readonly scanMetadataWorkflowArn: string;
 
   constructor(
     scope: Construct,
@@ -265,6 +266,8 @@ export class RedshiftAnalyticsStack extends NestedStack {
       dataAPIRole: this.redshiftDataAPIExecRole,
       scanMetadataWorkflowData: props.scanMetadataWorkflowData,
     });
+
+    this.scanMetadataWorkflowArn = scanMetadataWorkflow.scanMetadataWorkflow.stateMachineArn;
 
     const clearExpiredEventsWorkflow = new ClearExpiredEventsWorkflow(this, 'ClearExpiredEventsWorkflow', {
       appId: props.appIds,

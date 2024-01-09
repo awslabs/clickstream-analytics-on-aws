@@ -57,6 +57,7 @@ import {
   ExploreRequestAction,
   ExploreGroupColumn,
   QuickSightChartType,
+  IMetadataBuiltInList,
 } from 'ts/explore-types';
 import {
   alertMsg,
@@ -87,7 +88,9 @@ import SaveToDashboardModal from '../comps/SelectDashboardModal';
 interface AnalyticsFunnelProps {
   loading: boolean;
   pipeline: IPipeline;
+  builtInMetadata?: IMetadataBuiltInList;
   metadataEvents: IMetadataEvent[];
+  metadataEventParameters: IMetadataEventParameter[];
   metadataUserAttributes: IMetadataUserAttribute[];
   categoryEvents: CategoryItemType[];
   presetParameters: CategoryItemType[];
@@ -102,7 +105,9 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
   const {
     loading,
     pipeline,
+    builtInMetadata,
     metadataEvents,
+    metadataEventParameters,
     metadataUserAttributes,
     categoryEvents,
     presetParameters,
@@ -591,7 +596,9 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
                   addEventButtonLabel={t('common:button.addFunnelStep')}
                   eventOptionList={categoryEvents}
                   defaultComputeMethodOption={defaultComputeMethodOption}
+                  builtInMetadata={builtInMetadata}
                   metadataEvents={metadataEvents}
+                  metadataEventParameters={metadataEventParameters}
                   metadataUserAttributes={metadataUserAttributes}
                   isMultiSelect={false}
                   enableChangeRelation={true}
