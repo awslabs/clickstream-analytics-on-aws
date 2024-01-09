@@ -293,7 +293,7 @@ async function queryMetadata(inputSql: string) {
 
     return response;
   } catch (err) {
-    logger.error('Error when query metadata.', { err} );
+    logger.error('Error when query metadata.', { err } );
     throw err;
   }
 }
