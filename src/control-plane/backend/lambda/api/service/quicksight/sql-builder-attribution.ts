@@ -167,7 +167,7 @@ export function buildSQLForLinearModel(params: AttributionSQLParameters): string
 
   const eventNames = buildEventsNameFromConditions(params.eventAndConditions as EventAndCondition[]);
   const commonPartSql = buildCommonSqlForAttribution(eventNames, params);
-  
+
   let modelDataSql = '';
   let attributionDataSql = '';
 
@@ -298,7 +298,7 @@ export function buildSQLForPositionModel(params: AttributionSQLParameters): stri
 
   const eventNames = buildEventsNameFromConditions(params.eventAndConditions as EventAndCondition[]);
   const commonPartSql = buildCommonSqlForAttribution(eventNames, params);
-  
+
   let attributionDataSql = '';
   let modelDataSql = '';
 
