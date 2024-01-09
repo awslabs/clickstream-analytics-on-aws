@@ -11,7 +11,8 @@
  *  and limitations under the License.
  */
 
-import { Route, RouteTable, RouteTableAssociation, Tag, VpcEndpoint, SecurityGroupRule, VpcEndpointType } from '@aws-sdk/client-ec2';
+import { Tag } from '@aws-sdk/client-cloudformation';
+import { Tag as EC2Tag, Route, RouteTable, RouteTableAssociation, VpcEndpoint, SecurityGroupRule, VpcEndpointType } from '@aws-sdk/client-ec2';
 import { ipv4 as ip } from 'cidr-block';
 import { JSONPath } from 'jsonpath-plus';
 import jwt, { JwtPayload } from 'jsonwebtoken';
@@ -30,7 +31,7 @@ import { BuiltInTagKeys } from './model-ln';
 import { logger } from './powertools';
 import { ALBRegionMappingObject, BucketPrefix, ClickStreamBadRequestError, ClickStreamSubnet, DataCollectionSDK, IUserRole, PipelineStackType, PipelineStatus, PipelineStatusType, RPURange, RPURegionMappingObject, ReportingDashboardOutput, SubnetType } from './types';
 import { IMetadataRaw, IMetadataRawValue, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute, IMetadataAttributeValue } from '../model/metadata';
-import { CPipelineResources, IPipeline } from '../model/pipeline';
+import { CPipelineResources, IPipeline, ITag } from '../model/pipeline';
 import { IUserSettings } from '../model/user';
 import { UserService } from '../service/user';
 
@@ -66,7 +67,7 @@ function tryToJson(s: string): any {
   }
 }
 
-function getValueFromTags(tag: string, tags: Tag[]): string {
+function getValueFromTags(tag: string, tags: EC2Tag[]): string {
   if (!isEmpty(tags)) {
     for (let index in tags) {
       if (tags[index].Key === tag) {
@@ -953,6 +954,42 @@ function isFinallyPipelineStatus(status: PipelineStatusType) {
   return finallyPipelineStatus.includes(status);
 }
 
+function getStackTags(pipeline: IPipeline) {
+  const stackTags: Tag[] = [];
+  if (pipeline.tags) {
+    for (let tag of pipeline.tags) {
+      stackTags.push({
+        Key: tag.key,
+        Value: tag.value,
+      });
+    }
+  }
+  return stackTags;
+};
+
+function getUpdateTags(newPipeline: IPipeline, oldPipeline: IPipeline) {
+  const updateTags: ITag[] = [];
+  if (oldPipeline.tags) {
+    for (let tag of oldPipeline.tags) {
+      if (tag.key === BuiltInTagKeys.CLICKSTREAM_PROJECT ||
+        tag.key === BuiltInTagKeys.AWS_SOLUTION ||
+        tag.key === BuiltInTagKeys.AWS_SOLUTION_VERSION) {
+        updateTags.push(tag);
+      }
+    }
+  }
+  if (newPipeline.tags) {
+    for (let tag of newPipeline.tags) {
+      if (tag.key != BuiltInTagKeys.CLICKSTREAM_PROJECT &&
+        tag.key != BuiltInTagKeys.AWS_SOLUTION &&
+        tag.key != BuiltInTagKeys.AWS_SOLUTION_VERSION) {
+        updateTags.push(tag);
+      }
+    }
+  }
+  return updateTags;
+}
+
 export {
   isEmpty,
   isEmail,
@@ -996,4 +1033,6 @@ export {
   deserializeContext,
   pipelineAnalysisStudioEnabled,
   isFinallyPipelineStatus,
+  getStackTags,
+  getUpdateTags,
 };
