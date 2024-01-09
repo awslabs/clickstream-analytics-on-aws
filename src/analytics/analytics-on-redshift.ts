@@ -317,6 +317,7 @@ export class RedshiftAnalyticsStack extends NestedStack {
         redshiftServerlessWorkgroupName: this.redshiftServerlessWorkgroup.workgroup.workgroupName,
         loadDataWorkflow: loadRedshiftTablesWorkflow.loadDataWorkflow,
         scanMetadataWorkflow: scanMetadataWorkflow.scanMetadataWorkflow,
+        scanWorkflowMinInterval: props.scanMetadataWorkflowData.scanWorkflowMinInterval,
         clearExpiredEventsWorkflow: clearExpiredEventsWorkflow.clearExpiredEventsWorkflow,
         sqlExecutionWorkflow: this.sqlExecutionWorkflow,
 
@@ -331,6 +332,7 @@ export class RedshiftAnalyticsStack extends NestedStack {
         redshiftServerlessWorkgroupName: props.existingRedshiftServerlessProps.workgroupName,
         loadDataWorkflow: loadRedshiftTablesWorkflow.loadDataWorkflow,
         scanMetadataWorkflow: scanMetadataWorkflow.scanMetadataWorkflow,
+        scanWorkflowMinInterval: props.scanMetadataWorkflowData.scanWorkflowMinInterval,
         clearExpiredEventsWorkflow: clearExpiredEventsWorkflow.clearExpiredEventsWorkflow,
         sqlExecutionWorkflow: this.sqlExecutionWorkflow,
       });
@@ -343,6 +345,7 @@ export class RedshiftAnalyticsStack extends NestedStack {
         redshiftClusterIdentifier: props.provisionedRedshiftProps.clusterIdentifier,
         loadDataWorkflow: loadRedshiftTablesWorkflow.loadDataWorkflow,
         scanMetadataWorkflow: scanMetadataWorkflow.scanMetadataWorkflow,
+        scanWorkflowMinInterval: props.scanMetadataWorkflowData.scanWorkflowMinInterval,
         clearExpiredEventsWorkflow: clearExpiredEventsWorkflow.clearExpiredEventsWorkflow,
         sqlExecutionWorkflow: this.sqlExecutionWorkflow,
       });
