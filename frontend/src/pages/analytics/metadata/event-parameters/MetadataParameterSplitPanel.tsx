@@ -258,9 +258,7 @@ const MetadataParameterSplitPanel: React.FC<
                                 MetadataSource.PRESET
                               ) {
                                 alertMsg(
-                                  t(
-                                    'analytics:valid.metadataNotAllowEditError'
-                                  ),
+                                  t('analytics:valid.metadataNotAllowEditError')
                                 );
                                 return;
                               }
@@ -351,7 +349,7 @@ const MetadataParameterSplitPanel: React.FC<
                               MetadataSource.PRESET
                             ) {
                               alertMsg(
-                                t('analytics:valid.metadataNotAllowEditError'),
+                                t('analytics:valid.metadataNotAllowEditError')
                               );
                               return;
                             }

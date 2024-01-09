@@ -273,9 +273,7 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
         chartSubTitle
       );
       if (!body) {
-        alertMsg(
-          t('analytics:valid.funnelPipelineVersionError'),
-        );
+        alertMsg(t('analytics:valid.funnelPipelineVersionError'));
         return;
       }
       setLoadingData(true);
@@ -346,9 +344,7 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
     try {
       const body = getRetentionRequest(ExploreRequestAction.PREVIEW);
       if (!body) {
-        alertMsg(
-          t('analytics:valid.funnelPipelineVersionError'),
-        );
+        alertMsg(t('analytics:valid.funnelPipelineVersionError'));
         return;
       }
       setExploreEmbedUrl('');

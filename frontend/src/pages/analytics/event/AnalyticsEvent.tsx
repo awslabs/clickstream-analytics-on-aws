@@ -210,9 +210,7 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
         chartSubTitle
       );
       if (!body) {
-        alertMsg(
-          t('analytics:valid.funnelPipelineVersionError'),
-        );
+        alertMsg(t('analytics:valid.funnelPipelineVersionError'));
         return;
       }
       setLoadingData(true);
@@ -336,9 +334,7 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
     try {
       const body = getEventRequest(ExploreRequestAction.PREVIEW);
       if (!body) {
-        alertMsg(
-          t('analytics:valid.funnelPipelineVersionError'),
-        );
+        alertMsg(t('analytics:valid.funnelPipelineVersionError'));
         return;
       }
       setExploreEmbedUrl('');

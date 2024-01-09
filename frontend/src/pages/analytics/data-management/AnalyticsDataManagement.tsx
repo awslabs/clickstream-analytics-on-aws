@@ -31,7 +31,6 @@ import { StateActionType, HelpPanelType } from 'context/reducer';
 import React, { useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { COMMON_ALERT_TYPE } from 'ts/const';
 import { alertMsg, defaultStr } from 'ts/utils';
 import MetadataDetails from './MetadataDetails';
 import MetadataParametersTable from '../metadata/event-parameters/MetadataParametersTable';
@@ -69,10 +68,7 @@ const AnalyticsDataManagement: React.FC = () => {
         defaultStr(projectId)
       );
       if (success) {
-        alertMsg(
-          t('analytics:metadata.scanTriggeredSuccessfully'),
-          COMMON_ALERT_TYPE.Success as AlertType
-        );
+        alertMsg(t('analytics:metadata.scanTriggeredSuccessfully'), 'success');
       }
     } catch (error) {
       console.log(error);
