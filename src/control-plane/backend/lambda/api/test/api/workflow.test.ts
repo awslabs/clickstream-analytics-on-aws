@@ -26,6 +26,7 @@ import {
   RedshiftServerlessClient,
 } from '@aws-sdk/client-redshift-serverless';
 import {
+  BucketLocationConstraint,
   S3Client,
 } from '@aws-sdk/client-s3';
 import { SecretsManagerClient } from '@aws-sdk/client-secrets-manager';
@@ -258,6 +259,9 @@ describe('Workflow test', () => {
       ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, iamMock, {
         publicAZContainPrivateAZ: true,
         noVpcEndpoint: true,
+        bucket: {
+          location: BucketLocationConstraint.cn_north_1,
+        },
       });
     createPipelineMockForBJSRegion(s3Mock);
     const pipeline: CPipeline = new CPipeline({
@@ -602,6 +606,9 @@ describe('Workflow test', () => {
       ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, iamMock, {
         publicAZContainPrivateAZ: true,
         noVpcEndpoint: true,
+        bucket: {
+          location: BucketLocationConstraint.cn_north_1,
+        },
       });
     createPipelineMockForBJSRegion(s3Mock);
     const pipeline: CPipeline = new CPipeline({
@@ -840,6 +847,9 @@ describe('Workflow test', () => {
       ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, iamMock, {
         publicAZContainPrivateAZ: true,
         noVpcEndpoint: true,
+        bucket: {
+          location: BucketLocationConstraint.cn_north_1,
+        },
       });
     createPipelineMockForBJSRegion(s3Mock);
     const pipeline: CPipeline = new CPipeline({

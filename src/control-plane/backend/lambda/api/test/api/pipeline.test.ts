@@ -35,6 +35,7 @@ import {
   RedshiftServerlessClient,
 } from '@aws-sdk/client-redshift-serverless';
 import {
+  BucketLocationConstraint,
   GetBucketPolicyCommand,
   S3Client,
 } from '@aws-sdk/client-s3';
@@ -145,7 +146,9 @@ describe('Pipeline test', () => {
         publicAZContainPrivateAZ: true,
         subnetsCross3AZ: true,
         subnetsIsolated: true,
-        bucketNotExist: true,
+        bucket: {
+          notExist: true,
+        },
       });
 
     ddbMock.on(PutCommand).resolves({});
@@ -250,6 +253,9 @@ describe('Pipeline test', () => {
       ec2Mock, sfnMock, secretsManagerMock, quickSightMock, s3Mock, iamMock, {
         publicAZContainPrivateAZ: true,
         noVpcEndpoint: true,
+        bucket: {
+          location: BucketLocationConstraint.cn_north_1,
+        },
       });
     ddbMock.on(PutCommand).resolves({});
     createPipelineMockForBJSRegion(s3Mock);
@@ -298,6 +304,9 @@ describe('Pipeline test', () => {
         publicAZContainPrivateAZ: true,
         subnetsCross3AZ: true,
         noVpcEndpoint: true,
+        bucket: {
+          location: BucketLocationConstraint.us_west_1,
+        },
       });
     ddbMock.on(PutCommand).resolves({});
     const res = await request(app)

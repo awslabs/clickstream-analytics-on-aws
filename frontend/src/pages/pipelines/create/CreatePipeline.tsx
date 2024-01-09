@@ -784,67 +784,19 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
             data,
             'quicksight'
           );
-          if (update) {
-            setPipelineInfo((prev) => {
-              return {
-                ...prev,
-                serviceStatus: {
-                  AGA: agaAvailable,
-                  EMR_SERVERLESS: emrAvailable,
-                  REDSHIFT_SERVERLESS: redshiftServerlessAvailable,
-                  MSK: mskAvailable,
-                  QUICK_SIGHT: quickSightAvailable,
-                },
-              };
-            });
-          } else {
-            setPipelineInfo((prev) => {
-              return {
-                ...prev,
-                serviceStatus: {
-                  AGA: agaAvailable,
-                  EMR_SERVERLESS: emrAvailable,
-                  REDSHIFT_SERVERLESS: redshiftServerlessAvailable,
-                  MSK: mskAvailable,
-                  QUICK_SIGHT: quickSightAvailable,
-                },
-                // Below to set resources to empty by regions
-                selectedVPC: null,
-                selectedPublicSubnet: [],
-                selectedPrivateSubnet: [],
-                selectedSecret: null, // clear secret
-                selectedCertificate: null, // clear certificates
-                showServiceStatus: false,
-                redshiftBaseCapacity: null,
-                redshiftServerlessSG: [],
-                redshiftServerlessVPC: null,
-                redshiftServerlessSubnets: [],
-                ingestionServer: {
-                  ...prev.ingestionServer,
-                  sinkS3: {
-                    // set sink s3 to null
-                    ...prev.ingestionServer.sinkS3,
-                    sinkBucket: {
-                      name: '',
-                      prefix: '',
-                    },
-                  },
-                  domain: {
-                    ...prev.ingestionServer.domain,
-                    certificateArn: '', // set certificate arn to empty
-                  },
-                  loadBalancer: {
-                    ...prev.ingestionServer.loadBalancer,
-                    authenticationSecretArn: '', // set secret value to null
-                    logS3Bucket: {
-                      ...prev.ingestionServer.loadBalancer.logS3Bucket,
-                      name: '',
-                    },
-                  },
-                },
-              };
-            });
-
+          setPipelineInfo((prev) => {
+            return {
+              ...prev,
+              serviceStatus: {
+                AGA: agaAvailable,
+                EMR_SERVERLESS: emrAvailable,
+                REDSHIFT_SERVERLESS: redshiftServerlessAvailable,
+                MSK: mskAvailable,
+                QUICK_SIGHT: quickSightAvailable,
+              },
+            };
+          });
+          if (!update) {
             // Set show alert information when has unsupported services
             const unSupportedServiceList = data.filter(
               (service) => !service.available
@@ -1041,6 +993,48 @@ const Content: React.FC<ContentProps> = (props: ContentProps) => {
   // Monitor Region Changed and validate Service Available
   useEffect(() => {
     if (pipelineInfo.region) {
+      if (!update) {
+        setPipelineInfo((prev) => {
+          return {
+            ...prev,
+            // Below to set resources to empty by regions
+            selectedVPC: null,
+            selectedS3Bucket: null,
+            selectedPublicSubnet: [],
+            selectedPrivateSubnet: [],
+            selectedSecret: null, // clear secret
+            selectedCertificate: null, // clear certificates
+            showServiceStatus: false,
+            redshiftBaseCapacity: null,
+            redshiftServerlessSG: [],
+            redshiftServerlessVPC: null,
+            redshiftServerlessSubnets: [],
+            ingestionServer: {
+              ...prev.ingestionServer,
+              sinkS3: {
+                // set sink s3 to null
+                ...prev.ingestionServer.sinkS3,
+                sinkBucket: {
+                  name: '',
+                  prefix: '',
+                },
+              },
+              domain: {
+                ...prev.ingestionServer.domain,
+                certificateArn: '', // set certificate arn to empty
+              },
+              loadBalancer: {
+                ...prev.ingestionServer.loadBalancer,
+                authenticationSecretArn: '', // set secret value to null
+                logS3Bucket: {
+                  ...prev.ingestionServer.loadBalancer.logS3Bucket,
+                  name: '',
+                },
+              },
+            },
+          };
+        });
+      }
       validServiceAvailable(pipelineInfo.region);
     }
   }, [pipelineInfo.region]);
