@@ -43,7 +43,6 @@ import { StateActionType, HelpPanelType } from 'context/reducer';
 import React, { useContext, useEffect, useReducer, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { COMMON_ALERT_TYPE } from 'ts/const';
 import {
   QUICKSIGHT_ANALYSIS_INFIX,
   QUICKSIGHT_DASHBOARD_INFIX,
@@ -213,7 +212,6 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
       if (!body) {
         alertMsg(
           t('analytics:valid.funnelPipelineVersionError'),
-          COMMON_ALERT_TYPE.Error as AlertType
         );
         return;
       }
@@ -340,7 +338,6 @@ const AnalyticsEvent: React.FC<AnalyticsEventProps> = (
       if (!body) {
         alertMsg(
           t('analytics:valid.funnelPipelineVersionError'),
-          COMMON_ALERT_TYPE.Error as AlertType
         );
         return;
       }

@@ -26,7 +26,7 @@ import Loading from 'components/common/Loading';
 import { UserContext } from 'context/UserContext';
 import React, { useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { COMMON_ALERT_TYPE, USER_ATTRIBUTE_DISPLAY_PREFIX } from 'ts/const';
+import { USER_ATTRIBUTE_DISPLAY_PREFIX } from 'ts/const';
 import { MetadataSource } from 'ts/explore-types';
 import {
   alertMsg,
@@ -197,7 +197,6 @@ const MetadataUserAttributeSplitPanel: React.FC<
                                   t(
                                     'analytics:valid.metadataNotAllowEditError'
                                   ),
-                                  COMMON_ALERT_TYPE.Error as AlertType
                                 );
                                 return;
                               }
@@ -276,7 +275,6 @@ const MetadataUserAttributeSplitPanel: React.FC<
                             ) {
                               alertMsg(
                                 t('analytics:valid.metadataNotAllowEditError'),
-                                COMMON_ALERT_TYPE.Error as AlertType
                               );
                               return;
                             }

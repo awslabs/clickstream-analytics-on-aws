@@ -71,7 +71,7 @@ export const generateRedshiftRPUOptionListByRegion = (region: string) => {
   return [];
 };
 
-export const alertMsg = (alertTxt: string, alertType: AlertType) => {
+export const alertMsg = (alertTxt: string, alertType: AlertType = 'error') => {
   const patchEvent = new CustomEvent('showAlertMsg', {
     detail: {
       alertTxt,
@@ -391,7 +391,7 @@ export const getEventParameters = (
   if (!eventName) {
     return [];
   }
-  if (metadataEventParameters?.[0].eventNames?.length > 0) {
+  if (metadataEventParameters?.[0]?.eventNames?.length > 0) {
     const associatedParameters = metadataEventParameters.filter((p) =>
       p.eventNames.includes(eventName)
     );

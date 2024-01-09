@@ -14,7 +14,7 @@
 import Axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { reject } from 'lodash';
 import { User } from 'oidc-client-ts';
-import { COMMON_ALERT_TYPE, PROJECT_CONFIG_JSON } from './const';
+import { PROJECT_CONFIG_JSON } from './const';
 import { alertMsg, generateStr } from './utils';
 
 function getUser() {
@@ -91,7 +91,7 @@ export function getRequest<T>(url: string, params?: any): Promise<T> {
       if (apiRes.success) {
         return response.data;
       } else {
-        alertMsg(apiRes.message, COMMON_ALERT_TYPE.Error as AlertType);
+        alertMsg(apiRes.message);
         throw new Error(response.data.message || 'Error');
       }
     })
@@ -114,7 +114,7 @@ export function postRequest<T>(
       if (apiRes.success) {
         return response.data;
       } else {
-        alertMsg(apiRes.message, COMMON_ALERT_TYPE.Error as AlertType);
+        alertMsg(apiRes.message);
         throw new Error(response.data.message || 'Error');
       }
     })
@@ -138,7 +138,7 @@ export function putRequest<T>(
       if (apiRes.success) {
         return response.data;
       } else {
-        alertMsg(apiRes.message, COMMON_ALERT_TYPE.Error as AlertType);
+        alertMsg(apiRes.message);
         throw new Error(response.data.message || 'Error');
       }
     })
@@ -157,7 +157,7 @@ export function deleteRequest<T>(url: string, data?: any): Promise<T> {
       if (apiRes.success) {
         return response.data;
       } else {
-        alertMsg(apiRes.message, COMMON_ALERT_TYPE.Error as AlertType);
+        alertMsg(apiRes.message);
         throw new Error(response.data.message || 'Error');
       }
     })
@@ -223,67 +223,43 @@ function errMsg(err: { response: { status: any; data: ApiResponse<null> } }) {
   if (err && err.response) {
     switch (err.response.status) {
       case 400:
-        alertMsg(
-          err.response?.data?.message,
-          COMMON_ALERT_TYPE.Error as AlertType
-        );
+        alertMsg(err.response?.data?.message);
         break;
       case 401:
-        alertMsg(
-          'Unauthorized, please log in',
-          COMMON_ALERT_TYPE.Error as AlertType
-        );
+        alertMsg('Unauthorized, please log in');
         break;
       case 403:
-        alertMsg('Access denied', COMMON_ALERT_TYPE.Error as AlertType);
+        alertMsg('Access denied');
         break;
       case 404:
-        alertMsg(
-          'Request address not found',
-          COMMON_ALERT_TYPE.Error as AlertType
-        );
+        alertMsg('Request address not found');
         break;
       case 408:
-        alertMsg('Request timed out', COMMON_ALERT_TYPE.Error as AlertType);
+        alertMsg('Request timed out');
         break;
       case 500:
-        alertMsg('Internal server error', COMMON_ALERT_TYPE.Error as AlertType);
+        alertMsg('Internal server error');
         break;
       case 501:
-        alertMsg(
-          'Service not implemented',
-          COMMON_ALERT_TYPE.Error as AlertType
-        );
+        alertMsg('Service not implemented');
         break;
       case 502:
-        alertMsg('Gateway error', COMMON_ALERT_TYPE.Error as AlertType);
+        alertMsg('Gateway error');
         break;
       case 503:
-        alertMsg(
-          'Service is not available',
-          COMMON_ALERT_TYPE.Error as AlertType
-        );
+        alertMsg('Service is not available');
         break;
       case 504:
-        alertMsg('Gateway timeout', COMMON_ALERT_TYPE.Error as AlertType);
+        alertMsg('Gateway timeout');
         break;
       case 505:
-        alertMsg(
-          'HTTP version not supported',
-          COMMON_ALERT_TYPE.Error as AlertType
-        );
+        alertMsg('HTTP version not supported');
         break;
       default:
-        alertMsg(
-          'Network error please try again later',
-          COMMON_ALERT_TYPE.Error as AlertType
-        );
+        alertMsg('Network error please try again later');
         break;
     }
   } else {
-    alertMsg(
-      'Network error please try again later',
-      COMMON_ALERT_TYPE.Error as AlertType
-    );
+    alertMsg('Network error please try again later');
   }
 }

@@ -136,7 +136,6 @@ export class MetadataEventServ {
         PipelineStackType.DATA_MODELING_REDSHIFT,
         OUTPUT_SCAN_METADATA_WORKFLOW_ARN_SUFFIX,
       );
-      console.log('scanMetadataWorkflowArn', scanMetadataWorkflowArn);
       if (!scanMetadataWorkflowArn) {
         return res.status(400).json(new ApiFail('Scan metadata workflow not found'));
       }
@@ -149,7 +148,6 @@ export class MetadataEventServ {
           scanEndDate: getLocalDateISOString(new Date()),
         }),
       );
-      console.log('executionArn', executionArn);
       if (!executionArn) {
         return res.status(400).json(new ApiFail('Trigger failed'));
       }
