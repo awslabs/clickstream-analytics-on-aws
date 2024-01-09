@@ -17,6 +17,7 @@ export const SUPPORT_SELF_HOSTED_KAFKA = true;
 
 export const PROJECT_CONFIG_JSON = 'ClickStreamOnAWSConfigId';
 export const ANALYTICS_NAV_STATUS = 'ClickStreamAnalyticsNavigationStatus';
+export const ANALYTICS_NAV_ITEM = 'ClickStreamAnalyticsNavigationItem';
 export const CLICK_STREAM_USER_DATA = 'ClickStreamAnalyticsUserInformation';
 export const CONFIG_URL = '/aws-exports.json';
 export const COMMON_ALERT_TYPE = {

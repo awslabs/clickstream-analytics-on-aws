@@ -26,6 +26,7 @@ import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import {
   ANALYTICS_INFO_KEY,
+  ANALYTICS_NAV_ITEM,
   DEFAULT_ZH_LANG,
   EN_TEXT,
   LANGUAGE_ITEMS,
@@ -61,6 +62,11 @@ const AnalyticsHeader: React.FC<IHeaderProps> = (props: IHeaderProps) => {
     }
   );
   const [items, setItems] = useState<FlashbarProps.MessageDefinition[]>([]);
+
+  const getRedirectUrl = (projectId: string, appId: string) => {
+    const navItem = localStorage.getItem(ANALYTICS_NAV_ITEM) ?? 'dashboards';
+    return `/analytics/${projectId}/app/${appId}/${navItem}`;
+  };
 
   const changeLanguage = (lng: string) => {
     i18n.changeLanguage(lng);
@@ -228,7 +234,10 @@ const AnalyticsHeader: React.FC<IHeaderProps> = (props: IHeaderProps) => {
                 appId: defaultStr(option.appId),
                 appName: defaultStr(option.appName),
               });
-              window.location.href = `/analytics/${option.projectId}/app/${option.appId}/dashboards`;
+              window.location.href = getRedirectUrl(
+                defaultStr(option.projectId),
+                defaultStr(option.appId)
+              );
             }}
             options={allProjectOptions}
           />
