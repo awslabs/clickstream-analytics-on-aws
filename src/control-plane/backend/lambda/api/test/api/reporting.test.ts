@@ -43,7 +43,7 @@ import { MOCK_TOKEN, tokenMock } from './ddb-mock';
 import { KINESIS_DATA_PROCESSING_NEW_REDSHIFT_PIPELINE_WITH_WORKFLOW } from './pipeline-mock';
 import { clickStreamTableName } from '../../common/constants';
 import { REDSHIFT_EVENT_TABLE_NAME } from '../../common/constants-ln';
-import { ConditionCategory, ExploreAttributionTimeWindowType, ExploreLocales, ExplorePathNodeType, ExplorePathSessionDef, MetadataPlatform, MetadataValueType, QuickSightChartType } from '../../common/explore-types';
+import { AttributionModelType, ConditionCategory, ExploreAttributionTimeWindowType, ExploreComputeMethod, ExploreLocales, ExplorePathNodeType, ExplorePathSessionDef, MetadataPlatform, MetadataValueType, QuickSightChartType } from '../../common/explore-types';
 import { app, server } from '../../index';
 import 'aws-sdk-client-mock-jest';
 import { EventAndCondition, PairEventAndCondition, SQLCondition } from '../../service/quicksight/sql-builder';
@@ -146,7 +146,7 @@ describe('reporting test', () => {
         pipelineId: 'pipeline-1111111',
         appId: 'app1',
         sheetName: 'sheet99',
-        computeMethod: 'USER_CNT',
+        computeMethod: 'USER_ID_CNT',
         specifyJoinColumn: true,
         joinColumn: 'user_pseudo_id',
         conversionIntervalType: 'CUSTOMIZE',
@@ -226,7 +226,7 @@ describe('reporting test', () => {
         pipelineId: 'pipeline-1111111',
         appId: 'app1',
         sheetName: 'sheet99',
-        computeMethod: 'USER_CNT',
+        computeMethod: 'USER_ID_CNT',
         specifyJoinColumn: true,
         joinColumn: 'user_pseudo_id',
         conversionIntervalType: 'CUSTOMIZE',
@@ -318,7 +318,7 @@ describe('reporting test', () => {
         pipelineId: 'pipeline-1111111',
         appId: 'app1',
         sheetName: 'sheet99',
-        computeMethod: 'USER_CNT',
+        computeMethod: 'USER_ID_CNT',
         specifyJoinColumn: true,
         joinColumn: 'user_pseudo_id',
         conversionIntervalType: 'CUSTOMIZE',
@@ -389,7 +389,7 @@ describe('reporting test', () => {
         analysisId: 'analysis4e448d67-7c0d-4251-9f0f-45dc2c8dcb09',
         analysisName: 'analysis-aaaa',
         dashboardId: 'dashboard-37933899-0bb6-4e89-bced-cd8b17d3c160',
-        computeMethod: 'USER_CNT',
+        computeMethod: 'USER_ID_CNT',
         specifyJoinColumn: true,
         joinColumn: 'user_pseudo_id',
         conversionIntervalType: 'CUSTOMIZE',
@@ -443,7 +443,7 @@ describe('reporting test', () => {
         pipelineId: 'pipeline-1111111',
         appId: 'app1',
         sheetName: 'sheet99',
-        computeMethod: 'USER_CNT',
+        computeMethod: 'USER_ID_CNT',
         specifyJoinColumn: true,
         joinColumn: 'user_pseudo_id',
         conversionIntervalType: 'CUSTOMIZE',
@@ -513,7 +513,7 @@ describe('reporting test', () => {
         pipelineId: 'pipeline-1111111',
         appId: 'app1',
         sheetName: 'sheet99',
-        computeMethod: 'USER_CNT',
+        computeMethod: 'USER_ID_CNT',
         specifyJoinColumn: true,
         joinColumn: 'user_pseudo_id',
         conversionIntervalType: 'CUSTOMIZE',
@@ -604,7 +604,7 @@ describe('reporting test', () => {
       pipelineId: 'pipeline-1111111',
       appId: 'app1',
       sheetName: 'sheet99',
-      computeMethod: 'USER_CNT',
+      computeMethod: 'USER_ID_CNT',
       specifyJoinColumn: true,
       joinColumn: 'user_pseudo_id',
       conversionIntervalType: 'CUSTOMIZE',
@@ -691,7 +691,7 @@ describe('reporting test', () => {
         analysisId: 'analysis4e448d67-7c0d-4251-9f0f-45dc2c8dcb09',
         analysisName: 'analysis-testview0004',
         dashboardId: 'dashboard-37933899-0bb6-4e89-bced-cd8b17d3c160',
-        computeMethod: 'USER_CNT',
+        computeMethod: 'USER_ID_CNT',
         specifyJoinColumn: true,
         joinColumn: 'user_pseudo_id',
         conversionIntervalType: 'CUSTOMIZE',
@@ -767,7 +767,7 @@ describe('reporting test', () => {
         pipelineId: 'pipeline-1111111',
         appId: 'app1',
         sheetName: 'sheet99',
-        computeMethod: 'USER_CNT',
+        computeMethod: 'USER_ID_CNT',
         specifyJoinColumn: true,
         joinColumn: 'user_pseudo_id',
         conversionIntervalType: 'CUSTOMIZE',
@@ -856,7 +856,7 @@ describe('reporting test', () => {
         projectId: 'project01_wvzh',
         pipelineId: 'pipeline-1111111',
         appId: 'app1',
-        computeMethod: 'USER_CNT',
+        computeMethod: 'USER_ID_CNT',
         specifyJoinColumn: true,
         joinColumn: 'user_pseudo_id',
         conversionIntervalType: 'CUSTOMIZE',
@@ -944,7 +944,7 @@ describe('reporting test', () => {
         projectId: 'project01_wvzh',
         pipelineId: 'pipeline-1111111',
         appId: 'app1',
-        computeMethod: 'USER_CNT',
+        computeMethod: 'USER_ID_CNT',
         specifyJoinColumn: true,
         joinColumn: 'user_pseudo_id',
         conversionIntervalType: 'CUSTOMIZE',
@@ -1059,7 +1059,7 @@ describe('reporting test', () => {
               dataSourceArn: 'arn:aws:quicksight:us-east-1:111111111:datasource/clickstream_datasource_shop_1111111111',
             },
         },
-        computeMethod: 'USER_CNT',
+        computeMethod: ExploreComputeMethod.EVENT_CNT,
         globalEventCondition:
         {
           conditions:
@@ -1292,7 +1292,7 @@ describe('reporting test', () => {
         projectId: 'project01_wvzh',
         pipelineId: 'pipeline-1111111',
         appId: 'app1',
-        computeMethod: 'USER_CNT',
+        computeMethod: ExploreComputeMethod.EVENT_CNT,
         globalEventCondition:
         {
           conditions:
@@ -1492,6 +1492,520 @@ describe('reporting test', () => {
     expect(quickSightMock).toHaveReceivedCommandTimes(UpdateDashboardCommand, 1);
     expect(quickSightMock).toHaveReceivedCommandTimes(UpdateDashboardPublishedVersionCommand, 1);
 
+  });
+
+  it('attribution visual - linear model', async () => {
+    tokenMock(ddbMock, false);
+    quickSightMock.on(CreateAnalysisCommand).resolves({
+      Arn: 'arn:aws:quicksight:us-east-1:11111111:analysis/analysisaaaaaaaa',
+    });
+    quickSightMock.on(CreateDashboardCommand).resolves({
+      Arn: 'arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa',
+      VersionArn: 'arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa/1',
+    });
+    quickSightMock.on(GenerateEmbedUrlForRegisteredUserCommand).resolves({
+      EmbedUrl: 'https://quicksight.aws.amazon.com/embed/4ui7xyvq73/studies/4a05631e-cbe6-477c-915d-1704aec9f101?isauthcode=true&identityprovider=quicksight&code=4a05631e-cbe6-477c-915d-1704aec9f101',
+    });
+    quickSightMock.on(DescribeDashboardCommand).resolvesOnce({
+      Dashboard: {
+        Version: {
+          Status: ResourceStatus.CREATION_IN_PROGRESS,
+        },
+      },
+    }).resolves({
+      Dashboard: {
+        Version: {
+          Status: ResourceStatus.CREATION_SUCCESSFUL,
+        },
+      },
+    });
+
+    const res = await request(app)
+      .post('/api/reporting/attribution')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
+      .send({
+        action: 'PREVIEW',
+        locale: 'zh-CN',
+        projectId: 'shop_11111',
+        pipelineId: '0f51e904d3444cf2bd21bb423442ba6c',
+        chartTitle: '归因分析',
+        chartSubTitle: '详细-subtitle',
+        appId: 'shop',
+        sheetName: 'Sheet 1',
+        viewName: 'attribution_view_11122',
+        dashboardCreateParameters:
+        {
+          region: 'us-east-1',
+          allowedDomain: 'http://localhost:7777',
+          redshift:
+            {
+              user: 'clickstream_222222222',
+              dataApiRole: 'arn:aws:iam::111111111:role/Clickstream-DataModelingR-RedshiftServerelssWorkgro-1111111111',
+              newServerless:
+                {
+                  workgroupName: 'clickstream-shop_111111',
+                },
+            },
+          quickSight:
+            {
+              dataSourceArn: 'arn:aws:quicksight:us-east-1:111111111:datasource/clickstream_datasource_shop_1111111111',
+            },
+        },
+        computeMethod: ExploreComputeMethod.EVENT_CNT,
+        globalEventCondition:
+        {
+          conditions:
+            [
+              {
+                category: 'OTHER',
+                property: 'platform',
+                operator: '=',
+                value:
+                    [
+                      'Android',
+                    ],
+                dataType: 'string',
+              },
+              {
+                category: 'GEO',
+                property: 'country',
+                operator: '=',
+                value:
+                    [
+                      'China',
+                    ],
+                dataType: 'string',
+              },
+            ],
+        },
+        targetEventAndCondition:
+        {
+          eventName: 'purchase',
+          sqlCondition:
+            {
+              conditionOperator: 'and',
+              conditions:
+                [
+                  {
+                    category: 'OTHER',
+                    property: 'platform',
+                    operator: '=',
+                    value:
+                        [
+                          'Android',
+                        ],
+                    dataType: 'string',
+                  },
+                  {
+                    category: 'GEO',
+                    property: 'country',
+                    operator: '=',
+                    value:
+                        [
+                          'China',
+                        ],
+                    dataType: 'string',
+                  },
+                  {
+                    category: 'EVENT',
+                    property: '_session_duration',
+                    operator: '>',
+                    value:
+                        [
+                          10,
+                        ],
+                    dataType: 'int',
+                  },
+                  {
+                    category: 'USER_OUTER',
+                    property: '_channel',
+                    operator: '<>',
+                    value:
+                        [
+                          'google',
+                        ],
+                    dataType: 'string',
+                  },
+                ],
+            },
+        },
+        eventAndConditions:
+        [
+          {
+            eventName: 'view_item',
+            sqlCondition:
+                {
+                  conditionOperator: 'and',
+                  conditions:
+                    [
+                      {
+                        category: 'OTHER',
+                        property: 'platform',
+                        operator: '=',
+                        value:
+                            [
+                              'Android',
+                            ],
+                        dataType: 'string',
+                      },
+                      {
+                        category: 'GEO',
+                        property: 'country',
+                        operator: '=',
+                        value:
+                            [
+                              'China',
+                            ],
+                        dataType: 'string',
+                      },
+                      {
+                        category: 'EVENT',
+                        property: '_session_duration',
+                        operator: '>',
+                        value:
+                            [
+                              10,
+                            ],
+                        dataType: 'int',
+                      },
+                    ],
+                },
+          },
+          {
+            eventName: 'add_to_cart',
+            sqlCondition:
+                {
+                  conditionOperator: 'and',
+                  conditions:
+                    [
+                      {
+                        category: 'OTHER',
+                        property: 'platform',
+                        operator: '=',
+                        value:
+                            [
+                              'Android',
+                            ],
+                        dataType: 'string',
+                      },
+                      {
+                        category: 'GEO',
+                        property: 'country',
+                        operator: '=',
+                        value:
+                            [
+                              'China',
+                            ],
+                        dataType: 'string',
+                      },
+                      {
+                        category: 'USER',
+                        property: '_user_first_touch_timestamp',
+                        operator: '>',
+                        value:
+                            [
+                              1686532526770,
+                            ],
+                        dataType: 'int',
+                      },
+                      {
+                        category: 'EVENT',
+                        property: '_session_duration',
+                        operator: '>',
+                        value:
+                            [
+                              200,
+                            ],
+                        dataType: 'int',
+                      },
+                    ],
+                },
+          },
+        ],
+        modelType: AttributionModelType.LINEAR,
+        timeWindowType: ExploreAttributionTimeWindowType.CURRENT_DAY,
+        timeScopeType: 'RELATIVE',
+        lastN: 7,
+        timeUnit: 'DD',
+      });
+
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(201);
+    expect(res.body.success).toEqual(true);
+    expect(res.body.data.dashboardArn).toEqual('arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa');
+    expect(res.body.data.dashboardName).toEqual('_tmp_attribution_view_11122');
+    expect(res.body.data.analysisArn).toEqual('arn:aws:quicksight:us-east-1:11111111:analysis/analysisaaaaaaaa');
+    expect(res.body.data.analysisName).toEqual('_tmp_attribution_view_11122');
+    expect(res.body.data.analysisId).toBeDefined();
+    expect(res.body.data.dashboardId).toBeDefined();
+    expect(res.body.data.visualIds).toBeDefined();
+    expect(res.body.data.visualIds.length).toEqual(1);
+    expect(res.body.data.dashboardEmbedUrl).toEqual('https://quicksight.aws.amazon.com/embed/4ui7xyvq73/studies/4a05631e-cbe6-477c-915d-1704aec9f101?isauthcode=true&identityprovider=quicksight&code=4a05631e-cbe6-477c-915d-1704aec9f101');
+    expect(quickSightMock).toHaveReceivedCommandTimes(CreateDataSetCommand, 1);
+    expect(quickSightMock).toHaveReceivedCommandTimes(CreateAnalysisCommand, 1);
+    expect(quickSightMock).toHaveReceivedCommandTimes(CreateDashboardCommand, 1);
+    expect(quickSightMock).toHaveReceivedCommandTimes(DescribeDashboardCommand, 2);
+    expect(quickSightMock).toHaveReceivedCommandTimes(GenerateEmbedUrlForRegisteredUserCommand, 1);
+  });
+
+  it('attribution visual - position model', async () => {
+    tokenMock(ddbMock, false);
+    quickSightMock.on(CreateAnalysisCommand).resolves({
+      Arn: 'arn:aws:quicksight:us-east-1:11111111:analysis/analysisaaaaaaaa',
+    });
+    quickSightMock.on(CreateDashboardCommand).resolves({
+      Arn: 'arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa',
+      VersionArn: 'arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa/1',
+    });
+    quickSightMock.on(GenerateEmbedUrlForRegisteredUserCommand).resolves({
+      EmbedUrl: 'https://quicksight.aws.amazon.com/embed/4ui7xyvq73/studies/4a05631e-cbe6-477c-915d-1704aec9f101?isauthcode=true&identityprovider=quicksight&code=4a05631e-cbe6-477c-915d-1704aec9f101',
+    });
+    quickSightMock.on(DescribeDashboardCommand).resolvesOnce({
+      Dashboard: {
+        Version: {
+          Status: ResourceStatus.CREATION_IN_PROGRESS,
+        },
+      },
+    }).resolves({
+      Dashboard: {
+        Version: {
+          Status: ResourceStatus.CREATION_SUCCESSFUL,
+        },
+      },
+    });
+
+    const res = await request(app)
+      .post('/api/reporting/attribution')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
+      .send({
+        action: 'PREVIEW',
+        locale: 'zh-CN',
+        projectId: 'shop_11111',
+        pipelineId: '0f51e904d3444cf2bd21bb423442ba6c',
+        chartTitle: '归因分析',
+        chartSubTitle: '详细-subtitle',
+        appId: 'shop',
+        sheetName: 'Sheet 1',
+        viewName: 'attribution_view_11122',
+        dashboardCreateParameters:
+        {
+          region: 'us-east-1',
+          allowedDomain: 'http://localhost:7777',
+          redshift:
+            {
+              user: 'clickstream_222222222',
+              dataApiRole: 'arn:aws:iam::111111111:role/Clickstream-DataModelingR-RedshiftServerelssWorkgro-1111111111',
+              newServerless:
+                {
+                  workgroupName: 'clickstream-shop_111111',
+                },
+            },
+          quickSight:
+            {
+              dataSourceArn: 'arn:aws:quicksight:us-east-1:111111111:datasource/clickstream_datasource_shop_1111111111',
+            },
+        },
+        computeMethod: ExploreComputeMethod.EVENT_CNT,
+        globalEventCondition:
+        {
+          conditions:
+            [
+              {
+                category: 'OTHER',
+                property: 'platform',
+                operator: '=',
+                value:
+                    [
+                      'Android',
+                    ],
+                dataType: 'string',
+              },
+              {
+                category: 'GEO',
+                property: 'country',
+                operator: '=',
+                value:
+                    [
+                      'China',
+                    ],
+                dataType: 'string',
+              },
+            ],
+        },
+        targetEventAndCondition:
+        {
+          eventName: 'purchase',
+          sqlCondition:
+            {
+              conditionOperator: 'and',
+              conditions:
+                [
+                  {
+                    category: 'OTHER',
+                    property: 'platform',
+                    operator: '=',
+                    value:
+                        [
+                          'Android',
+                        ],
+                    dataType: 'string',
+                  },
+                  {
+                    category: 'GEO',
+                    property: 'country',
+                    operator: '=',
+                    value:
+                        [
+                          'China',
+                        ],
+                    dataType: 'string',
+                  },
+                  {
+                    category: 'EVENT',
+                    property: '_session_duration',
+                    operator: '>',
+                    value:
+                        [
+                          10,
+                        ],
+                    dataType: 'int',
+                  },
+                  {
+                    category: 'USER_OUTER',
+                    property: '_channel',
+                    operator: '<>',
+                    value:
+                        [
+                          'google',
+                        ],
+                    dataType: 'string',
+                  },
+                ],
+            },
+          groupColumn: {
+            category: ConditionCategory.EVENT,
+            property: '_session_duration',
+            dataType: MetadataValueType.FLOAT,
+          },
+        },
+        eventAndConditions:
+        [
+          {
+            eventName: 'view_item',
+            sqlCondition:
+                {
+                  conditionOperator: 'and',
+                  conditions:
+                    [
+                      {
+                        category: 'OTHER',
+                        property: 'platform',
+                        operator: '=',
+                        value:
+                            [
+                              'Android',
+                            ],
+                        dataType: 'string',
+                      },
+                      {
+                        category: 'GEO',
+                        property: 'country',
+                        operator: '=',
+                        value:
+                            [
+                              'China',
+                            ],
+                        dataType: 'string',
+                      },
+                      {
+                        category: 'EVENT',
+                        property: '_session_duration',
+                        operator: '>',
+                        value:
+                            [
+                              10,
+                            ],
+                        dataType: 'int',
+                      },
+                    ],
+                },
+          },
+          {
+            eventName: 'add_to_cart',
+            sqlCondition:
+                {
+                  conditionOperator: 'and',
+                  conditions:
+                    [
+                      {
+                        category: 'OTHER',
+                        property: 'platform',
+                        operator: '=',
+                        value:
+                            [
+                              'Android',
+                            ],
+                        dataType: 'string',
+                      },
+                      {
+                        category: 'GEO',
+                        property: 'country',
+                        operator: '=',
+                        value:
+                            [
+                              'China',
+                            ],
+                        dataType: 'string',
+                      },
+                      {
+                        category: 'USER',
+                        property: '_user_first_touch_timestamp',
+                        operator: '>',
+                        value:
+                            [
+                              1686532526770,
+                            ],
+                        dataType: 'int',
+                      },
+                      {
+                        category: 'EVENT',
+                        property: '_session_duration',
+                        operator: '>',
+                        value:
+                            [
+                              200,
+                            ],
+                        dataType: 'int',
+                      },
+                    ],
+                },
+          },
+        ],
+        modelType: AttributionModelType.POSITION,
+        modelWeights: [0.4, 0.2, 0.4],
+        timeWindowType: ExploreAttributionTimeWindowType.CURRENT_DAY,
+        timeScopeType: 'RELATIVE',
+        lastN: 7,
+        timeUnit: 'DD',
+      });
+
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(201);
+    expect(res.body.success).toEqual(true);
+    expect(res.body.data.dashboardArn).toEqual('arn:aws:quicksight:us-east-1:11111111:dashboard/dashboard-aaaaaaaa');
+    expect(res.body.data.dashboardName).toEqual('_tmp_attribution_view_11122');
+    expect(res.body.data.analysisArn).toEqual('arn:aws:quicksight:us-east-1:11111111:analysis/analysisaaaaaaaa');
+    expect(res.body.data.analysisName).toEqual('_tmp_attribution_view_11122');
+    expect(res.body.data.analysisId).toBeDefined();
+    expect(res.body.data.dashboardId).toBeDefined();
+    expect(res.body.data.visualIds).toBeDefined();
+    expect(res.body.data.visualIds.length).toEqual(1);
+    expect(res.body.data.dashboardEmbedUrl).toEqual('https://quicksight.aws.amazon.com/embed/4ui7xyvq73/studies/4a05631e-cbe6-477c-915d-1704aec9f101?isauthcode=true&identityprovider=quicksight&code=4a05631e-cbe6-477c-915d-1704aec9f101');
+    expect(quickSightMock).toHaveReceivedCommandTimes(CreateDataSetCommand, 1);
+    expect(quickSightMock).toHaveReceivedCommandTimes(CreateAnalysisCommand, 1);
+    expect(quickSightMock).toHaveReceivedCommandTimes(CreateDashboardCommand, 1);
+    expect(quickSightMock).toHaveReceivedCommandTimes(DescribeDashboardCommand, 2);
+    expect(quickSightMock).toHaveReceivedCommandTimes(GenerateEmbedUrlForRegisteredUserCommand, 1);
   });
 
   it('warmup', async () => {
@@ -1703,7 +2217,7 @@ describe('reporting test', () => {
         viewName: 'testview0002',
         appId: 'app1',
         sheetName: 'sheet99',
-        computeMethod: 'USER_CNT',
+        computeMethod: 'USER_ID_CNT',
         specifyJoinColumn: true,
         joinColumn: 'user_pseudo_id',
         conversionIntervalType: 'CUSTOMIZE',
@@ -1747,7 +2261,7 @@ describe('reporting test', () => {
         pipelineId: 'pipeline-1111111',
         appId: 'app1',
         sheetName: 'sheet99',
-        computeMethod: 'USER_CNT',
+        computeMethod: 'USER_ID_CNT',
         specifyJoinColumn: true,
         joinColumn: 'user_pseudo_id',
         conversionIntervalType: 'CUSTOMIZE',
@@ -1791,7 +2305,7 @@ describe('reporting test', () => {
         pipelineId: 'pipeline-1111111',
         appId: 'app1',
         sheetName: 'sheet99',
-        computeMethod: 'USER_CNT',
+        computeMethod: 'USER_ID_CNT',
         specifyJoinColumn: true,
         joinColumn: 'user_pseudo_id',
         conversionIntervalType: 'CUSTOMIZE',
@@ -1831,7 +2345,7 @@ describe('reporting test', () => {
       pipelineId: 'pipeline-1111111',
       appId: 'app1',
       sheetName: 'sheet99',
-      computeMethod: 'USER_CNT',
+      computeMethod: 'USER_ID_CNT',
       specifyJoinColumn: true,
       joinColumn: 'user_pseudo_id',
       conversionIntervalType: 'CUSTOMIZE',
@@ -1948,7 +2462,7 @@ describe('reporting test', () => {
         pipelineId: 'pipeline-1111111',
         appId: 'app1',
         sheetName: 'sheet99',
-        computeMethod: 'USER_CNT',
+        computeMethod: 'USER_ID_CNT',
         specifyJoinColumn: true,
         joinColumn: 'user_pseudo_id',
         conversionIntervalType: 'CUSTOMIZE',
@@ -1993,7 +2507,7 @@ describe('reporting test', () => {
         pipelineId: 'pipeline-1111111',
         appId: 'app1',
         sheetName: 'sheet99',
-        computeMethod: 'USER_CNT',
+        computeMethod: 'USER_ID_CNT',
         specifyJoinColumn: true,
         joinColumn: 'user_pseudo_id',
         conversionIntervalType: 'CUSTOMIZE',
@@ -2037,7 +2551,7 @@ describe('reporting test', () => {
         pipelineId: 'pipeline-1111111',
         appId: 'app1',
         sheetName: 'sheet99',
-        computeMethod: 'USER_CNT',
+        computeMethod: 'USER_ID_CNT',
         specifyJoinColumn: true,
         joinColumn: 'user_pseudo_id',
         conversionIntervalType: 'CUSTOMIZE',
@@ -2081,7 +2595,7 @@ describe('reporting test', () => {
         pipelineId: 'pipeline-1111111',
         appId: 'app1',
         sheetName: 'sheet99',
-        computeMethod: 'USER_CNT',
+        computeMethod: 'USER_ID_CNT',
         specifyJoinColumn: true,
         conversionIntervalType: 'CUSTOMIZE',
         conversionIntervalInSeconds: 7200,
@@ -2124,7 +2638,7 @@ describe('reporting test', () => {
         pipelineId: 'pipeline-1111111',
         appId: 'app1',
         sheetName: 'sheet99',
-        computeMethod: 'USER_CNT',
+        computeMethod: 'USER_ID_CNT',
         specifyJoinColumn: true,
         joinColumn: 'user_pseudo_id',
         conversionIntervalType: 'CUSTOMIZE',
@@ -2161,7 +2675,7 @@ describe('reporting test', () => {
         pipelineId: 'pipeline-1111111',
         appId: 'app1',
         sheetName: 'sheet99',
-        computeMethod: 'USER_CNT',
+        computeMethod: 'USER_ID_CNT',
         specifyJoinColumn: true,
         joinColumn: 'user_pseudo_id',
         conversionIntervalType: 'CUSTOMIZE',
@@ -2205,7 +2719,7 @@ describe('reporting test', () => {
         pipelineId: 'pipeline-1111111',
         appId: 'app1',
         sheetName: 'sheet99',
-        computeMethod: 'USER_CNT',
+        computeMethod: 'USER_ID_CNT',
         specifyJoinColumn: true,
         joinColumn: 'user_pseudo_id',
         conversionIntervalType: 'CUSTOMIZE',
@@ -2250,7 +2764,7 @@ describe('reporting test', () => {
         pipelineId: 'pipeline-1111111',
         appId: 'app1',
         sheetName: 'sheet99',
-        computeMethod: 'USER_CNT',
+        computeMethod: 'USER_ID_CNT',
         specifyJoinColumn: true,
         joinColumn: 'user_pseudo_id',
         conversionIntervalType: 'CUSTOMIZE',
@@ -2293,7 +2807,7 @@ describe('reporting test', () => {
         pipelineId: 'pipeline-1111111',
         appId: 'app1',
         sheetName: 'sheet99',
-        computeMethod: 'USER_CNT',
+        computeMethod: 'USER_ID_CNT',
         specifyJoinColumn: true,
         joinColumn: 'user_pseudo_id',
         conversionIntervalType: 'CUSTOMIZE',
@@ -2340,7 +2854,7 @@ describe('reporting test', () => {
         pipelineId: 'pipeline-1111111',
         appId: 'app1',
         sheetName: 'sheet99',
-        computeMethod: 'USER_CNT',
+        computeMethod: 'USER_ID_CNT',
         specifyJoinColumn: true,
         joinColumn: 'user_pseudo_id',
         conversionIntervalType: 'CUSTOMIZE',
@@ -2389,7 +2903,7 @@ describe('reporting test', () => {
         pipelineId: 'pipeline-1111111',
         appId: 'app1',
         sheetName: 'sheet99',
-        computeMethod: 'USER_CNT',
+        computeMethod: 'USER_ID_CNT',
         specifyJoinColumn: true,
         joinColumn: 'user_pseudo_id',
         conversionIntervalType: 'CUSTOMIZE',
@@ -2436,7 +2950,7 @@ describe('reporting test', () => {
         pipelineId: 'pipeline-1111111',
         appId: 'app1',
         sheetName: 'sheet99',
-        computeMethod: 'USER_CNT',
+        computeMethod: 'USER_ID_CNT',
         specifyJoinColumn: true,
         joinColumn: 'user_pseudo_id',
         conversionIntervalType: 'CUSTOMIZE',
@@ -2489,7 +3003,7 @@ describe('reporting test', () => {
         dashboardId: 'dashboard-37933899-0bb6-4e89-bced-cd8b17d3c160',
         appId: 'app1',
         sheetName: 'sheet99',
-        computeMethod: 'USER_CNT',
+        computeMethod: 'USER_ID_CNT',
         specifyJoinColumn: true,
         joinColumn: 'user_pseudo_id',
         conversionIntervalType: 'CUSTOMIZE',
@@ -2540,7 +3054,7 @@ describe('reporting test', () => {
         pipelineId: 'pipeline-1111111',
         appId: 'app1',
         sheetName: 'sheet99',
-        computeMethod: 'USER_CNT',
+        computeMethod: 'USER_ID_CNT',
         specifyJoinColumn: true,
         joinColumn: 'user_pseudo_id',
         conversionIntervalType: 'CUSTOMIZE',

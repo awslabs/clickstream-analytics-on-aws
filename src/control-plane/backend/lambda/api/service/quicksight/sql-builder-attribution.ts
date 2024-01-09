@@ -163,6 +163,274 @@ export function buildSQLForSinglePointModel(params: AttributionSQLParameters): s
   });
 }
 
+export function buildSQLForLinearModel(params: AttributionSQLParameters): string {
+
+  const eventNames = buildEventsNameFromConditions(params.eventAndConditions as EventAndCondition[]);
+  const commonPartSql = buildCommonSqlForAttribution(eventNames, params);
+
+  let modelDataSql = '';
+  let attributionDataSql = '';
+
+  const modelBaseDataSql = `
+    model_base_data as (
+      select 
+        user_pseudo_id, 
+        group_id, 
+        count(1) as cnt
+      from joined_base_data
+      group by user_pseudo_id, group_id
+    ), 
+  `;
+
+  if (params.computeMethod === ExploreComputeMethod.EVENT_CNT) {
+
+    modelDataSql = `
+      ${modelBaseDataSql}
+      model_data as (
+        select
+          joined_base_data.*
+          ,1.0 / model_base_data.cnt as contribution
+        from
+          joined_base_data
+          join model_base_data on joined_base_data.user_pseudo_id = model_base_data.user_pseudo_id 
+          and joined_base_data.group_id = model_base_data.group_id
+      ),
+    `;
+    attributionDataSql = `
+      attribution_data as (
+        select
+          t_event_name
+          ,sum(contribution) as contribution
+        from
+          model_data
+        group by
+          t_event_name
+      ) 
+      select 
+        total_count_data.total_event_count
+        ,attribution_data.t_event_name as event_name
+        ,attribution_data.contribution as event_count
+        ,cast(attribution_data.contribution as float)/t.total_contribution as contribution
+      from attribution_data
+      join (
+        select 
+          event_name
+          ,count(event_id) as total_event_count
+        from touch_point_data_3 group by event_name
+      ) total_count_data on attribution_data.t_event_name = total_count_data.event_name
+      join (
+        select count(t_event_id) as total_contribution from joined_base_data
+      ) as t
+      on 1=1
+    `;
+  } else if (params.computeMethod === ExploreComputeMethod.SUM_VALUE) {
+    modelDataSql = `
+      model_base_data as (
+        select
+          user_pseudo_id,
+          group_id,
+          count(1) as cnt
+        from
+          joined_base_data
+        group by
+          user_pseudo_id,
+          group_id
+      ),
+      model_data as (
+        select
+          joined_base_data.*
+          ,model_base_data.cnt
+          ,cast(joined_base_data.sum_value as float)/model_base_data.cnt as contribution
+        from
+          joined_base_data
+          join model_base_data 
+          on joined_base_data.user_pseudo_id = model_base_data.user_pseudo_id 
+          and joined_base_data.group_id = model_base_data.group_id
+      ),
+    `;
+    attributionDataSql = `
+      attribution_data as (
+        select
+          t_event_name,
+          sum(contribution) as contribution
+        from
+          model_data
+        group by
+          t_event_name
+      )
+      select
+        total_count_data.total_event_count,
+        attribution_data.t_event_name as event_name,
+        attribution_data.contribution as contribution_amount,
+        cast(attribution_data.contribution as float) / t.total_contribution as contribution
+      from
+        attribution_data
+      join (
+        select
+        event_name,
+        count(event_id) as total_event_count
+        from
+        touch_point_data_3
+        group by
+        event_name
+      ) total_count_data on attribution_data.t_event_name = total_count_data.event_name
+      join (
+        select
+        sum(contribution) as total_contribution
+        from
+        attribution_data
+      ) as t on 1 = 1
+    `;
+  }
+
+  const sql = `
+    ${commonPartSql}
+    ${modelDataSql}
+    ${attributionDataSql}
+  `;
+
+  return format(sql, {
+    language: 'postgresql',
+  });
+}
+
+export function buildSQLForPositionModel(params: AttributionSQLParameters): string {
+
+  const eventNames = buildEventsNameFromConditions(params.eventAndConditions as EventAndCondition[]);
+  const commonPartSql = buildCommonSqlForAttribution(eventNames, params);
+
+  let attributionDataSql = '';
+  let modelDataSql = '';
+
+  const modelBaseDataSql = `
+    model_base_data as (
+      select 
+        user_pseudo_id, 
+        group_id, 
+        max(row_seq) as row_seq_max,
+        min(row_seq) as row_seq_min,
+        count(1) as cnt
+      from joined_base_data
+      group by user_pseudo_id, group_id
+    ), 
+  `;
+
+  if (params.computeMethod === ExploreComputeMethod.EVENT_CNT) {
+    modelDataSql = `
+      ${modelBaseDataSql}
+      model_data as (
+        select
+          joined_base_data.*
+          ,case when model_base_data.cnt = 1 then 1 
+          when model_base_data.cnt = 2 then 0.5
+          when model_base_data.cnt > 2 then
+            case 
+              when joined_base_data.row_seq = model_base_data.row_seq_max then ${params.modelWeights![2]}
+              when joined_base_data.row_seq = model_base_data.row_seq_min then ${params.modelWeights![0]}
+              else cast(${params.modelWeights![1]} as float) / model_base_data.cnt 
+            end
+          end as contribution
+        from
+          joined_base_data
+          join model_base_data on joined_base_data.user_pseudo_id = model_base_data.user_pseudo_id 
+          and joined_base_data.group_id = model_base_data.group_id
+      ),
+    `;
+    attributionDataSql = `
+    attribution_data as (
+      select
+        t_event_name
+        ,sum(contribution) as contribution
+      from
+        model_data
+      group by
+        t_event_name
+    )
+    select 
+      total_count_data.total_event_count
+      ,attribution_data.t_event_name as event_name
+      ,attribution_data.contribution as event_count
+      ,cast(attribution_data.contribution as float)/t.total_contribution as contribution
+    from attribution_data
+    join (
+      select 
+        event_name
+        ,count(event_id) as total_event_count
+      from touch_point_data_3 group by event_name
+    ) total_count_data on attribution_data.t_event_name = total_count_data.event_name
+    join (
+      select sum(contribution) as total_contribution from model_data
+    ) as t
+    on 1=1
+    `;
+  } else if (params.computeMethod === ExploreComputeMethod.SUM_VALUE) {
+    modelDataSql = `
+      ${modelBaseDataSql}
+      model_data as (
+        select
+          joined_base_data.*
+          ,case 
+            when model_base_data.cnt = 1 then joined_base_data.sum_value
+            when model_base_data.cnt = 2 then joined_base_data.sum_value * 0.5
+            when model_base_data.cnt > 2 then
+              case 
+                when joined_base_data.row_seq = model_base_data.row_seq_max then joined_base_data.sum_value * ${params.modelWeights![2]}
+                when joined_base_data.row_seq = model_base_data.row_seq_min then joined_base_data.sum_value * ${params.modelWeights![0]}
+                else joined_base_data.sum_value * (cast(${params.modelWeights![1]} as float) / model_base_data.cnt)
+              end
+          end as contribution
+        from
+          joined_base_data
+          join model_base_data on joined_base_data.user_pseudo_id = model_base_data.user_pseudo_id 
+          and joined_base_data.group_id = model_base_data.group_id
+      ),
+    `;
+    attributionDataSql = `
+      attribution_data as (
+        select
+          t_event_name,
+          sum(contribution) as contribution
+        from
+          model_data
+        group by
+          t_event_name
+      )
+      select
+        total_count_data.total_event_count,
+        attribution_data.t_event_name as event_name,
+        attribution_data.contribution as contribution_amount,
+        cast(attribution_data.contribution as float) / t.total_contribution as contribution
+      from
+        attribution_data
+      join (
+        select
+        event_name,
+        count(event_id) as total_event_count
+        from
+        touch_point_data_3
+        group by
+        event_name
+      ) total_count_data on attribution_data.t_event_name = total_count_data.event_name
+      join (
+        select
+        sum(contribution) as total_contribution
+        from
+        attribution_data
+      ) as t on 1 = 1
+    `;
+  }
+
+  const sql = `
+    ${commonPartSql}
+    ${modelDataSql}
+    ${attributionDataSql}
+  `;
+
+  return format(sql, {
+    language: 'postgresql',
+  });
+}
+
 export function buildBaseDataForAttribution(eventNames: string[], params: AttributionSQLParameters) : string {
 
   let resultSql = 'with';
