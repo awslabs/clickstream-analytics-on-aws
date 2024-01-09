@@ -50,6 +50,5 @@ process.env.WORKFLOW_INFO_DDB_TABLE_ARN = 'arn:aws:dynamodb:us-east-1:1111222233
 process.env.PIPELINE_S3_BUCKET_NAME = 'test-pipe-line-bucket';
 process.env.PIPELINE_S3_PREFIX = 'pipeline-prefix/';
 process.env.REDSHIFT_DATABASE = 'project1'
-process.env.REDSHIFT_DATA_WAIT_TIMEOUT = '4'
 
 process.env.IS_SKIP_VPC_CONNECTION_FORCE_WAITING = 'true'

@@ -48,8 +48,8 @@ export async function putStringToS3(
   logger.info(`save content to s3://${bucketName}/${key}`);
 }
 
-export async function readS3ObjectAsJson(bucketName: string, key: string) {
-  logger.info(`readS3ObjectAsJson: s3://${bucketName}/${key}`);
+export async function readS3ObjectAsString(bucketName: string, key: string): Promise<string | undefined> {
+  logger.info(`readS3ObjectAsString: s3://${bucketName}/${key}`);
   try {
     const res = await s3Client.send(
       new GetObjectCommand({
@@ -59,12 +59,22 @@ export async function readS3ObjectAsJson(bucketName: string, key: string) {
     );
     if (res.Body) {
       const jsonStr = await res.Body.transformToString('utf-8');
-      return JSON.parse(jsonStr);
+      return jsonStr;
     } else {
       return;
     }
   } catch (e) {
     return handleNoSuchKeyError(e);
+  }
+}
+
+export async function readS3ObjectAsJson(bucketName: string, key: string) {
+  logger.info(`readS3ObjectAsJson: s3://${bucketName}/${key}`);
+  const content = await readS3ObjectAsString(bucketName, key);
+  if (content) {
+    return JSON.parse(content);
+  } else {
+    return;
   }
 }
 

@@ -353,6 +353,8 @@ export const DATA_PROCESSING_APPLICATION_NAME_PREFIX = 'Clickstream';
 export const CUSTOM_RESOURCE_RESPONSE_REDSHIFT_BI_USER_NAME =
   'RedshiftBIUsername';
 
+export const OUTPUT_DATA_MODELING_REDSHIFT_SQL_EXECUTION_STATE_MACHINE_ARN_SUFFIX = 'SQLExecutionStateMachineArn';
+
 // Metrics
 export const METRICS_PARAMETER_PATH_PREFIX = '/Clickstream/metrics/';
 export const ALARM_NAME_PREFIX = 'Clickstream';

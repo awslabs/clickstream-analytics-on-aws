@@ -26,6 +26,7 @@ export function createMetricsWidgetForRedshiftCluster(scope: Construct, props: {
   loadDataWorkflow: IStateMachine;
   scanMetadataWorkflow: IStateMachine;
   clearExpiredEventsWorkflow: IStateMachine;
+  sqlExecutionWorkflow: IStateMachine;
 }) {
 
   const namespace = 'AWS/Redshift';

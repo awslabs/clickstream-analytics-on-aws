@@ -38,6 +38,7 @@ import {
   TABLE_NAME_EVENT_PARAMETER,
   TABLE_NAME_USER,
   TABLE_NAME_ITEM,
+  OUTPUT_DATA_MODELING_REDSHIFT_SQL_EXECUTION_STATE_MACHINE_ARN_SUFFIX,
 } from './common/constant';
 import { SolutionInfo } from './common/solution-info';
 import { associateApplicationWithStack } from './common/stack';
@@ -282,6 +283,22 @@ export function createRedshiftAnalyticsStack(
     description: 'Redshift data api role arn',
     condition: isExistingRedshiftServerless,
   }).overrideLogicalId(`ExistingRedshiftServerless${OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX}`);
+
+  new CfnOutput(scope, `ProvisionedRedshift${OUTPUT_DATA_MODELING_REDSHIFT_SQL_EXECUTION_STATE_MACHINE_ARN_SUFFIX}`, {
+    value: redshiftProvisionedStack.sqlExecutionWorkflow.stateMachineArn,
+    description: 'Redshift sql exeuction workflow arn',
+    condition: isRedshiftProvisioned,
+  }).overrideLogicalId(`ProvisionedRedshift${OUTPUT_DATA_MODELING_REDSHIFT_SQL_EXECUTION_STATE_MACHINE_ARN_SUFFIX}`);
+  new CfnOutput(scope, `NewRedshiftServerless${OUTPUT_DATA_MODELING_REDSHIFT_SQL_EXECUTION_STATE_MACHINE_ARN_SUFFIX}`, {
+    value: newRedshiftServerlessStack.sqlExecutionWorkflow.stateMachineArn,
+    description: 'Redshift sql exeuction workflow arn',
+    condition: isNewRedshiftServerless,
+  }).overrideLogicalId(`NewRedshiftServerless${OUTPUT_DATA_MODELING_REDSHIFT_SQL_EXECUTION_STATE_MACHINE_ARN_SUFFIX}`);
+  new CfnOutput(scope, `ExistingRedshiftServerless${OUTPUT_DATA_MODELING_REDSHIFT_SQL_EXECUTION_STATE_MACHINE_ARN_SUFFIX}`, {
+    value: redshiftExistingServerlessStack.sqlExecutionWorkflow.stateMachineArn,
+    description: 'Redshift sql exeuction workflow arn',
+    condition: isExistingRedshiftServerless,
+  }).overrideLogicalId(`ExistingRedshiftServerless${OUTPUT_DATA_MODELING_REDSHIFT_SQL_EXECUTION_STATE_MACHINE_ARN_SUFFIX}`);
 
   return {
     redshiftServerlessStack: redshiftExistingServerlessStack,
