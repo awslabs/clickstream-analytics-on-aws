@@ -42,6 +42,7 @@ interface BasicInformationProps {
   regionEmptyError: boolean;
   vpcEmptyError: boolean;
   sdkEmptyError: boolean;
+  tagsKeyValueEmptyError: boolean;
   assetsS3BucketEmptyError: boolean;
   loadingServiceAvailable: boolean;
   unSupportedServices: string;
@@ -62,6 +63,7 @@ const BasicInformation: React.FC<BasicInformationProps> = (
     regionEmptyError,
     vpcEmptyError,
     sdkEmptyError,
+    tagsKeyValueEmptyError,
     assetsS3BucketEmptyError,
     loadingServiceAvailable,
     unSupportedServices,
@@ -298,6 +300,15 @@ const BasicInformation: React.FC<BasicInformationProps> = (
             changeTags(tags);
           }}
         />
+        <div>
+          {tagsKeyValueEmptyError ? (
+            <StatusIndicator type="error">
+              {t('pipeline:valid.tagsKeyValueEmpty')}
+            </StatusIndicator>
+          ) : (
+            ''
+          )}
+        </div>
       </SpaceBetween>
     </Container>
   );
