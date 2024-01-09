@@ -12,6 +12,9 @@
  */
 
 import {
+  SFNClient, StartExecutionCommand,
+} from '@aws-sdk/client-sfn';
+import {
   DynamoDBDocumentClient,
   GetCommand,
   PutCommand,
@@ -22,13 +25,14 @@ import {
 import { mockClient } from 'aws-sdk-client-mock';
 import request from 'supertest';
 import { metadataEventExistedMock, MOCK_APP_ID, MOCK_EVENT_PARAMETER_NAME, MOCK_EVENT_NAME, MOCK_PROJECT_ID, MOCK_TOKEN, MOCK_USER_ATTRIBUTE_NAME, tokenMock, dictionaryMock } from './ddb-mock';
-import { MSK_DATA_PROCESSING_NEW_SERVERLESS_PIPELINE_WITH_WORKFLOW } from './pipeline-mock';
+import { BASE_STATUS, MSK_DATA_PROCESSING_NEW_SERVERLESS_PIPELINE_WITH_WORKFLOW } from './pipeline-mock';
 import { analyticsMetadataTable, clickStreamTableName, prefixMonthGSIName, prefixTimeGSIName } from '../../common/constants';
 import { ConditionCategory, MetadataParameterType, MetadataPlatform, MetadataSource, MetadataValueType } from '../../common/explore-types';
 import { app, server } from '../../index';
 import 'aws-sdk-client-mock-jest';
 
 const ddbMock = mockClient(DynamoDBDocumentClient);
+const SFNMock = mockClient(SFNClient);
 
 const MOCK_EVENT = {
   id: `${MOCK_PROJECT_ID}#${MOCK_APP_ID}#${MOCK_EVENT_NAME}`,
@@ -341,6 +345,22 @@ function getAllEventParametersInput() {
 }
 
 function mockPipeline(version?: string) {
+  const stackDetailsWithScanArnOutputs = [
+    BASE_STATUS.stackDetails[0],
+    BASE_STATUS.stackDetails[1],
+    BASE_STATUS.stackDetails[2],
+    {
+      ...BASE_STATUS.stackDetails[3],
+      outputs: [
+        {
+          OutputKey: 'xxxxScanMetadataWorkflowArn',
+          OutputValue: 'arn:aws:states:us-east-1:123456789012:stateMachine:xxxxScanMetadataWorkflow',
+        },
+      ],
+    },
+    BASE_STATUS.stackDetails[4],
+    BASE_STATUS.stackDetails[5],
+  ];
   ddbMock.on(QueryCommand, {
     TableName: clickStreamTableName,
     IndexName: prefixTimeGSIName,
@@ -355,6 +375,10 @@ function mockPipeline(version?: string) {
     Items: [{
       ...MSK_DATA_PROCESSING_NEW_SERVERLESS_PIPELINE_WITH_WORKFLOW,
       templateVersion: version ?? 'v1.1.0',
+      status: {
+        ...BASE_STATUS,
+        stackDetails: stackDetailsWithScanArnOutputs,
+      },
     }],
   });
   ddbMock.on(QueryCommand, getAllEventParametersInput()).resolves({
@@ -2817,6 +2841,74 @@ describe('Metadata Display test', () => {
     expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
     expect(res.statusCode).toBe(400);
     expect(res.body.message).toEqual('Parameter verification failed.');
+  });
+
+  afterAll((done) => {
+    server.close();
+    done();
+  });
+});
+
+describe('Metadata Scan test', () => {
+  beforeEach(() => {
+    ddbMock.reset();
+    SFNMock.reset();
+    mockPipeline('v1.2.0');
+  });
+
+  it('trigger scan metadata', async () => {
+    tokenMock(ddbMock, false);
+    ddbMock.on(GetCommand).resolves({});
+    SFNMock.on(StartExecutionCommand).resolves({
+      executionArn: 'arn:aws:states:us-east-1:123456789012:execution:scan-StateMachine:scan-StateMachine:00000000-0000-0000-0000-000000000000',
+    });
+    ddbMock.on(PutCommand).resolves({});
+    const res = await request(app)
+      .post('/api/metadata/trigger')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
+      .send({
+        projectId: MOCK_PROJECT_ID,
+      });
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual({
+      data: null,
+      success: true,
+      message: 'Trigger success',
+    });
+    expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 1);
+    expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 1);
+    expect(SFNMock).toHaveReceivedCommandTimes(StartExecutionCommand, 1);
+  });
+
+  it('trigger scan metadata frequently', async () => {
+    tokenMock(ddbMock, false);
+    ddbMock.on(GetCommand).resolves({
+      Item: {
+        id: `MANUAL_TRIGGER_${MOCK_PROJECT_ID}`,
+        type: 'MANUAL_TRIGGER',
+        ttl: Date.now() / 1000 + 600,
+      },
+    });
+    SFNMock.on(StartExecutionCommand).resolves({
+      executionArn: 'arn:aws:states:us-east-1:123456789012:execution:scan-StateMachine:scan-StateMachine:00000000-0000-0000-0000-000000000000',
+    });
+    ddbMock.on(PutCommand).resolves({});
+    const res = await request(app)
+      .post('/api/metadata/trigger')
+      .set('X-Click-Stream-Request-Id', MOCK_TOKEN)
+      .send({
+        projectId: MOCK_PROJECT_ID,
+      });
+    expect(res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    expect(res.statusCode).toBe(400);
+    expect(res.body).toEqual({
+      success: false,
+      message: 'Do not trigger metadata scans frequently, please try again in 10 minutes.',
+    });
+    expect(ddbMock).toHaveReceivedCommandTimes(GetCommand, 1);
+    expect(ddbMock).toHaveReceivedCommandTimes(PutCommand, 0);
+    expect(SFNMock).toHaveReceivedCommandTimes(StartExecutionCommand, 0);
   });
 
   afterAll((done) => {

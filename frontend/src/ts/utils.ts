@@ -412,12 +412,10 @@ const patchBuiltInMetadata = (
   metadataEventParameters: IMetadataEventParameter[],
   builtInMetadata?: IMetadataBuiltInList
 ) => {
-  console.log(builtInMetadata);
   if (!builtInMetadata) {
     return metadataEventParameters;
   }
   const presetEventParameters = builtInMetadata.PresetEventParameters;
-  console.log(presetEventParameters);
   for (const parameter of metadataEventParameters) {
     const presetParameter = presetEventParameters.find(
       (item) =>
@@ -427,7 +425,6 @@ const patchBuiltInMetadata = (
         item.dataType === parameter.valueType
     );
     if (presetParameter) {
-      console.log(presetParameter);
       const localeLng = getLngFromLocalStorage();
       parameter.displayName = (presetParameter.displayName as any)[localeLng];
       parameter.description = (presetParameter.description as any)[localeLng];

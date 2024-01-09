@@ -13,17 +13,22 @@
 
 import { CMetadataDisplay } from './display';
 import { PipelineServ } from './pipeline';
+import { OUTPUT_SCAN_METADATA_WORKFLOW_ARN_SUFFIX } from '../common/constants-ln';
 import { ConditionCategory, MetadataValueType } from '../common/explore-types';
-import { MetadataVersionType } from '../common/model-ln';
+import { MetadataVersionType, PipelineStackType } from '../common/model-ln';
 import { ApiFail, ApiSuccess } from '../common/types';
-import { groupAssociatedEventParametersByName, groupByParameterByName, getMetadataVersionType, pathNodesToAttribute } from '../common/utils';
+import { groupAssociatedEventParametersByName, groupByParameterByName, getMetadataVersionType, pathNodesToAttribute, getLocalDateISOString, getStackOutputFromPipelineStatus } from '../common/utils';
 import { IMetadataAttributeValue, IMetadataDisplay, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute } from '../model/metadata';
+import { startExecution } from '../store/aws/sfn';
+import { ClickStreamStore } from '../store/click-stream-store';
 import { DynamoDbMetadataStore } from '../store/dynamodb/dynamodb-metadata-store';
+import { DynamoDbStore } from '../store/dynamodb/dynamodb-store';
 import { MetadataStore } from '../store/metadata-store';
 
 const metadataStore: MetadataStore = new DynamoDbMetadataStore();
 const metadataDisplay: CMetadataDisplay = new CMetadataDisplay();
 const pipelineServ: PipelineServ = new PipelineServ();
+const clickStreamStore: ClickStreamStore = new DynamoDbStore();
 
 const getVersionType = async (projectId: string) => {
   const pipeline = await pipelineServ.getPipelineByProjectId(projectId);
@@ -118,10 +123,38 @@ export class MetadataEventServ {
   public async trigger(req: any, res: any, next: any) {
     try {
       const { projectId } = req.body;
+      const trigger = await clickStreamStore.isManualTrigger(projectId);
+      if (trigger) {
+        return res.status(400).json(new ApiFail('Do not trigger metadata scans frequently, please try again in 10 minutes.'));
+      }
       const pipeline = await pipelineServ.getPipelineByProjectId(projectId);
       if (!pipeline) {
         return res.status(404).json(new ApiFail('Pipeline not found'));
       }
+      const scanMetadataWorkflowArn = getStackOutputFromPipelineStatus(
+        pipeline.status?.stackDetails,
+        PipelineStackType.DATA_MODELING_REDSHIFT,
+        OUTPUT_SCAN_METADATA_WORKFLOW_ARN_SUFFIX,
+      );
+      console.log('scanMetadataWorkflowArn', scanMetadataWorkflowArn);
+      if (!scanMetadataWorkflowArn) {
+        return res.status(400).json(new ApiFail('Scan metadata workflow not found'));
+      }
+      const executionArn = await startExecution(
+        pipeline.region,
+        `manual-trigger-${new Date().getTime()}`,
+        scanMetadataWorkflowArn,
+        JSON.stringify({
+          scanStartDate: getLocalDateISOString(new Date(), -7),
+          scanEndDate: getLocalDateISOString(new Date()),
+        }),
+      );
+      console.log('executionArn', executionArn);
+      if (!executionArn) {
+        return res.status(400).json(new ApiFail('Trigger failed'));
+      }
+      await clickStreamStore.saveManualTrigger(projectId);
+      return res.json(new ApiSuccess(null, 'Trigger success'));
     } catch (error) {
       next(error);
     }
