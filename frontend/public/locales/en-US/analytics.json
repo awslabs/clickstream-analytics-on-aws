@@ -195,7 +195,8 @@
     "selectTwoEvent": "Query metrics error: Please select at least two steps",
     "retentionJoinColumnDatatype": "Query metrics error: The data type for each set of associated parameter in retention analysis must be the same",
     "errorProjectOrApp": "Non-existent projects or applications: ",
-    "notSupportProjectOrApp": "This project or application does not support Analytics Studio: "
+    "notSupportProjectOrApp": "This project or application does not support Analytics Studio: ",
+    "metadataNotAllowEditError": "The preset metadata does not support editing."
   },
   "operators": {
     "null": "is null",

@@ -50,11 +50,12 @@ declare global {
     readonly appId: string;
 
     readonly eventName: string;
+    readonly eventNames: string[];
 
     readonly parameterId: string;
     readonly name: string;
     displayName: string;
-    readonly description: string;
+    description: string;
     readonly metadataSource: MetadataSource;
     readonly hasData: boolean;
     readonly platform: MetadataPlatform[];

@@ -63,3 +63,9 @@ export enum AnalyticsCustomMetricsName {
   FILE_LOADED='Loaded files count',
   FILE_MAX_AGE='File max age'
 }
+
+export enum MetadataVersionType {
+  UNSUPPORTED = 'Unsupported',
+  V1 = 'V1',
+  V2 = 'V2',
+}

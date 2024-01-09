@@ -58,6 +58,7 @@ import {
   ExplorePathSessionDef,
   MetadataPlatform,
   QuickSightChartType,
+  IMetadataBuiltInList,
 } from 'ts/explore-types';
 import {
   alertMsg,
@@ -91,7 +92,9 @@ import StartNodeSelect from '../comps/StartNodeSelect';
 interface AnalyticsPathProps {
   loading: boolean;
   pipeline: IPipeline;
+  builtInMetadata?: IMetadataBuiltInList;
   metadataEvents: IMetadataEvent[];
+  metadataEventParameters: IMetadataEventParameter[];
   metadataUserAttributes: IMetadataUserAttribute[];
   categoryEvents: CategoryItemType[];
   presetParameters: CategoryItemType[];
@@ -111,7 +114,9 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
   const {
     loading,
     pipeline,
+    builtInMetadata,
     metadataEvents,
+    metadataEventParameters,
     metadataUserAttributes,
     categoryEvents,
     presetParameters,
@@ -692,7 +697,9 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
                   );
                   const eventName = option?.name;
                   const eventParameters = getEventParameters(
+                    metadataEventParameters,
                     metadataEvents,
+                    builtInMetadata,
                     eventName
                   );
                   const parameterOption = parametersConvertToCategoryItemType(
@@ -731,7 +738,9 @@ const AnalyticsPath: React.FC<AnalyticsPathProps> = (
                 addEventButtonLabel={t('common:button.addNode')}
                 eventOptionList={categoryEventsData}
                 defaultComputeMethodOption={defaultComputeMethodOption}
+                builtInMetadata={builtInMetadata}
                 metadataEvents={metadataEvents}
+                metadataEventParameters={metadataEventParameters}
                 metadataUserAttributes={metadataUserAttributes}
                 isMultiSelect={false}
                 enableChangeRelation={false}

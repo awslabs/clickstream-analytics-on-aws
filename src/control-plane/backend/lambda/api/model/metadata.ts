@@ -18,6 +18,12 @@ export interface IMetadataRawValue {
   readonly count: number;
 }
 
+export interface ISummaryEventParameter {
+  readonly name: string;
+  readonly valueType: MetadataValueType;
+  readonly category: ConditionCategory;
+}
+
 export interface IMetadataRaw {
   readonly id: string;
   readonly month: string;
@@ -31,12 +37,18 @@ export interface IMetadataRaw {
   readonly category?: ConditionCategory;
   readonly valueType?: MetadataValueType;
 
+  readonly createTimestamp?: number;
+  readonly updateTimestamp?: number;
+
   readonly summary: {
     readonly platform?: MetadataPlatform[];
     readonly sdkVersion?: string[];
     readonly sdkName?: string[];
     readonly valueEnum?: IMetadataRawValue[];
     readonly hasData?: boolean;
+    readonly latestCount?: number;
+    readonly associatedParameters?: ISummaryEventParameter[];
+    readonly associatedEvents?: string[];
   };
 }
 
@@ -59,7 +71,7 @@ export interface IMetadataEvent {
   description?: IMetadataDisplayNameAndDescription;
   metadataSource?: MetadataSource;
 
-  associatedParameters? : IMetadataEventParameter[];
+  associatedParameters?: IMetadataEventParameter[];
 }
 
 export interface IMetadataAttributeValue {
@@ -75,11 +87,11 @@ export interface IMetadataEventParameter {
   readonly projectId: string;
   readonly appId: string;
   readonly name: string;
-  readonly eventName: string;
+  readonly eventName?: string;
+  readonly eventNames?: string[];
 
   readonly valueType: MetadataValueType;
   readonly category: ConditionCategory;
-  readonly hasData: boolean;
   readonly platform: MetadataPlatform[];
 
   displayName?: IMetadataDisplayNameAndDescription;
@@ -103,7 +115,6 @@ export interface IMetadataUserAttribute {
 
   readonly valueType: MetadataValueType;
   readonly category: ConditionCategory;
-  readonly hasData: boolean;
 
   displayName?: IMetadataDisplayNameAndDescription;
   description?: IMetadataDisplayNameAndDescription;

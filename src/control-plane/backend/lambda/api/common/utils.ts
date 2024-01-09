@@ -11,12 +11,12 @@
  *  and limitations under the License.
  */
 
-import { Tag } from '@aws-sdk/client-cloudformation';
+import { StackStatus, Tag } from '@aws-sdk/client-cloudformation';
 import { Tag as EC2Tag, Route, RouteTable, RouteTableAssociation, VpcEndpoint, SecurityGroupRule, VpcEndpointType } from '@aws-sdk/client-ec2';
 import { ipv4 as ip } from 'cidr-block';
 import { JSONPath } from 'jsonpath-plus';
 import jwt, { JwtPayload } from 'jsonwebtoken';
-import { amznRequestContextHeader } from './constants';
+import { FULL_SOLUTION_VERSION, amznRequestContextHeader } from './constants';
 import {
   ALBLogServiceAccountMapping,
   CORS_ORIGIN_DOMAIN_PATTERN,
@@ -27,10 +27,11 @@ import {
   SERVICE_CATALOG_SUPPORTED_REGIONS,
 } from './constants-ln';
 import { ConditionCategory, MetadataValueType } from './explore-types';
-import { BuiltInTagKeys } from './model-ln';
+import { BuiltInTagKeys, MetadataVersionType } from './model-ln';
 import { logger } from './powertools';
-import { ALBRegionMappingObject, BucketPrefix, ClickStreamBadRequestError, ClickStreamSubnet, DataCollectionSDK, IUserRole, PipelineStackType, PipelineStatus, PipelineStatusType, RPURange, RPURegionMappingObject, ReportingDashboardOutput, SubnetType } from './types';
-import { IMetadataRaw, IMetadataRawValue, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute, IMetadataAttributeValue } from '../model/metadata';
+import { SolutionInfo } from './solution-info-ln';
+import { ALBRegionMappingObject, BucketPrefix, ClickStreamBadRequestError, ClickStreamSubnet, DataCollectionSDK, IUserRole, PipelineStatus, RPURange, RPURegionMappingObject, ReportingDashboardOutput, SubnetType } from './types';
+import { IMetadataRaw, IMetadataRawValue, IMetadataEvent, IMetadataEventParameter, IMetadataUserAttribute, IMetadataAttributeValue, ISummaryEventParameter } from '../model/metadata';
 import { CPipelineResources, IPipeline, ITag } from '../model/pipeline';
 import { IUserSettings } from '../model/user';
 import { UserService } from '../service/user';
@@ -744,10 +745,31 @@ function getLatestEventByName(metadata: IMetadataRaw[]): IMetadataEvent[] {
   return latestEvents;
 }
 
-function getLatestParameterById(metadata: IMetadataRaw[]): IMetadataEventParameter[] {
-  const latestEventParameters: IMetadataEventParameter[] = [];
-  for (let meta of metadata) {
-    const lastDayData = getDataFromYesterday([meta]);
+function rawToEvent(metadataArray: IMetadataRaw[], associated: boolean): IMetadataEvent[] {
+  const events: IMetadataEvent[] = [];
+  for (let meta of metadataArray) {
+    const event: IMetadataEvent = {
+      id: meta.id,
+      month: meta.month,
+      prefix: meta.prefix,
+      projectId: meta.projectId,
+      appId: meta.appId,
+      name: meta.name,
+      hasData: true,
+      platform: meta.summary.platform ?? [],
+      sdkVersion: meta.summary.sdkVersion ?? [],
+      sdkName: meta.summary.sdkName ?? [],
+      dataVolumeLastDay: meta.summary.latestCount ?? 0,
+      associatedParameters: associated ? summaryToEventParameter(meta.projectId, meta.appId, meta.summary.associatedParameters): [],
+    };
+    events.push(event);
+  }
+  return events;
+}
+
+function rawToParameter(metadataArray: IMetadataRaw[], associated: boolean): IMetadataEventParameter[] {
+  const parameters: IMetadataEventParameter[] = [];
+  for (let meta of metadataArray) {
     const parameter: IMetadataEventParameter = {
       id: meta.id,
       month: meta.month,
@@ -756,7 +778,96 @@ function getLatestParameterById(metadata: IMetadataRaw[]): IMetadataEventParamet
       appId: meta.appId,
       name: meta.name,
       eventName: meta.eventName ?? '',
-      hasData: lastDayData.hasData,
+      platform: meta.summary.platform ?? [],
+      category: meta.category ?? ConditionCategory.OTHER,
+      valueType: meta.valueType ?? MetadataValueType.STRING,
+      valueEnum: meta.summary.valueEnum ?? [],
+      eventNames: meta.summary.associatedEvents ?? [],
+      associatedEvents: associated ? summaryToEvent(meta.projectId, meta.appId, meta.summary.associatedEvents) : [],
+    };
+    parameters.push(parameter);
+  }
+  return parameters;
+}
+
+function rawToAttribute(metadataArray: IMetadataRaw[]): IMetadataUserAttribute[] {
+  const attributes: IMetadataUserAttribute[] = [];
+  for (let meta of metadataArray) {
+    const attribute: IMetadataUserAttribute = {
+      id: meta.id,
+      month: meta.month,
+      prefix: meta.prefix,
+      projectId: meta.projectId,
+      appId: meta.appId,
+      name: meta.name,
+      category: meta.category ?? ConditionCategory.USER,
+      valueType: meta.valueType ?? MetadataValueType.STRING,
+      valueEnum: meta.summary.valueEnum ?? [],
+    };
+    attributes.push(attribute);
+  }
+  return attributes;
+}
+
+function summaryToEventParameter(projectId: string, appId: string, metadataArray: ISummaryEventParameter[] | undefined): IMetadataEventParameter[] {
+  const parameters: IMetadataEventParameter[] = [];
+  if (!metadataArray) {
+    return parameters;
+  }
+  for (let meta of metadataArray) {
+    const category = meta.category ?? ConditionCategory.OTHER;
+    const valueType = meta.valueType ?? MetadataValueType.STRING;
+    const parameter: IMetadataEventParameter = {
+      id: `${projectId}#${appId}#${category}#${meta.name}#${valueType}`,
+      month: 'latest',
+      prefix: `EVENT_PARAMETER#${projectId}#${appId}`,
+      projectId: projectId,
+      appId: appId,
+      name: meta.name,
+      category: category,
+      valueType: valueType,
+      platform: [],
+    };
+    parameters.push(parameter);
+  }
+  return parameters;
+}
+
+function summaryToEvent(projectId: string, appId: string, associatedEvents: string[] | undefined): IMetadataEvent[] {
+  const events: IMetadataEvent[] = [];
+  if (!associatedEvents) {
+    return events;
+  }
+  for (let associated of associatedEvents) {
+    const event: IMetadataEvent = {
+      id: `${projectId}#${appId}#${associated}`,
+      month: 'latest',
+      prefix: `EVENT#${projectId}#${appId}`,
+      projectId: projectId,
+      appId: appId,
+      name: associated,
+      dataVolumeLastDay: 0,
+      hasData: false,
+      sdkVersion: [],
+      sdkName: [],
+      platform: [],
+    };
+    events.push(event);
+  }
+  return events;
+}
+
+function getLatestParameterById(metadata: IMetadataRaw[]): IMetadataEventParameter[] {
+  const latestEventParameters: IMetadataEventParameter[] = [];
+  for (let meta of metadata) {
+    const parameter: IMetadataEventParameter = {
+      id: meta.id,
+      month: meta.month,
+      prefix: meta.prefix,
+      projectId: meta.projectId,
+      appId: meta.appId,
+      name: meta.name,
+      eventName: meta.eventName ?? '',
       platform: meta.summary.platform ?? [],
       category: meta.category ?? ConditionCategory.OTHER,
       valueType: meta.valueType ?? MetadataValueType.STRING,
@@ -837,7 +948,6 @@ function getLatestAttributeByName(metadata: IMetadataRaw[]): IMetadataUserAttrib
       projectId: meta.projectId,
       appId: meta.appId,
       name: meta.name,
-      hasData: meta.summary.hasData ?? false,
       category: meta.category ?? ConditionCategory.OTHER,
       valueType: meta.valueType ?? MetadataValueType.STRING,
       valueEnum: meta.summary.valueEnum ?? [],
@@ -990,6 +1100,159 @@ function getUpdateTags(newPipeline: IPipeline, oldPipeline: IPipeline) {
   return updateTags;
 }
 
+function getDefaultTags(projectId: string) {
+  const tags: Tag[] = [
+    {
+      Key: BuiltInTagKeys.AWS_SOLUTION,
+      Value: SolutionInfo.SOLUTION_SHORT_NAME,
+    },
+    {
+      Key: BuiltInTagKeys.AWS_SOLUTION_VERSION,
+      Value: FULL_SOLUTION_VERSION,
+    },
+    {
+      Key: BuiltInTagKeys.CLICKSTREAM_PROJECT,
+      Value: projectId,
+    },
+  ];
+  return tags;
+}
+
+function getStateMachineExecutionName(pipelineId: string) {
+  return `main-${pipelineId}-${new Date().getTime()}`;
+}
+
+function getPipelineStatusType(pipeline: IPipeline): PipelineStatusType {
+  return _getPipelineStatus(pipeline);
+}
+
+function getPipelineLastActionFromStacksStatus(stackStatusDetails: PipelineStatusDetail[] | undefined, templateVersion: string | undefined): string {
+  let lastAction: string = 'Create';
+  if (!stackStatusDetails) {
+    return lastAction;
+  }
+  const stackStatusPrefixes: string[] = [];
+  stackStatusDetails.forEach(
+    (d) => {
+      if (d.stackStatus) {
+        stackStatusPrefixes.push(d.stackStatus?.split('_')[0]);
+      }
+      if (!isEmpty(d.stackTemplateVersion) && !isEmpty(templateVersion) &&
+      d.stackTemplateVersion !== templateVersion) {
+        lastAction = 'Upgrade';
+      }
+    });
+  if (lastAction === 'Upgrade') {
+    return lastAction;
+  }
+  if (stackStatusPrefixes.includes('UPDATE')) {
+    lastAction = 'Update';
+  } else if (stackStatusPrefixes.includes('DELETE')) {
+    lastAction = 'Delete';
+  }
+  return lastAction;
+}
+
+function _getPipelineStatus(pipeline: IPipeline) {
+  let status: PipelineStatusType = PipelineStatusType.ACTIVE;
+  let lastAction = pipeline.lastAction;
+  if (!lastAction || lastAction === '') {
+    lastAction = getPipelineLastActionFromStacksStatus(
+      pipeline.stackDetails ?? pipeline.status?.stackDetails, pipeline.templateVersion);
+  }
+  const executionDetail = pipeline.executionDetail ?? pipeline.status?.executionDetail;
+  const stackStatus = _getPipelineStatusFromStacks(pipeline);
+  const executionStatus = executionDetail?.status;
+  if (executionStatus === ExecutionStatus.FAILED ||
+    executionStatus === ExecutionStatus.TIMED_OUT ||
+    executionStatus === ExecutionStatus.ABORTED) {
+    // if execution failed, pipeline status is failed
+    status = PipelineStatusType.FAILED;
+  } else if (executionStatus === ExecutionStatus.RUNNING || stackStatus === 'IN_PROGRESS') {
+    // if execution or any stack is running, pipeline status is Updating, Creating or Deleting
+    status = _getRunningStatus(lastAction);
+  } else if (executionStatus === ExecutionStatus.SUCCEEDED) {
+    // if execution succeeded, pipeline status depending on stack status
+    status = _getStatusWhenExecutionSuccess(stackStatus);
+  }
+  return _catchWarningStatus(status, lastAction);
+}
+
+function _getStatusWhenExecutionSuccess(stackStatus: string) {
+  switch (stackStatus) {
+    case 'FAILED':
+    case 'ROLLBACK_COMPLETE':
+      return PipelineStatusType.FAILED;
+    case 'DELETE_COMPLETE':
+      return PipelineStatusType.DELETED;
+    case 'INCONSISTENT_VERSION':
+      return PipelineStatusType.WARNING;
+    default:
+      return PipelineStatusType.ACTIVE;
+  }
+}
+
+function _catchWarningStatus(status: PipelineStatusType, lastAction: string) {
+  if (status === PipelineStatusType.FAILED && (lastAction === 'Update' || lastAction === 'Upgrade')) {
+    status = PipelineStatusType.WARNING;
+  }
+  return status;
+}
+
+function _getPipelineStatusFromStacks(pipeline: IPipeline) {
+  let status = 'COMPLETE';
+  const stackDetails = pipeline.stackDetails ?? pipeline.status?.stackDetails;
+  if (!stackDetails || stackDetails.length === 0) {
+    return status;
+  }
+  const stackStatusArray = stackDetails.map(s => s.stackStatus);
+  if (stackStatusArray.some(s => s?.endsWith('_FAILED'))) {
+    status = 'FAILED';
+  } else if (stackStatusArray.some(s => s?.endsWith('_ROLLBACK_COMPLETE'))) {
+    status = 'ROLLBACK_COMPLETE';
+  } else if (stackStatusArray.some(s => s?.endsWith('_IN_PROGRESS'))) {
+    status = 'IN_PROGRESS';
+  } else if (stackStatusArray.every(s => s === StackStatus.DELETE_COMPLETE)) {
+    status = 'DELETE_COMPLETE';
+  }
+  // Error Template Version
+  if (status === 'COMPLETE' && stackDetails.some(
+    s => s.stackTemplateVersion !== '' &&
+    pipeline.templateVersion &&
+    pipeline.templateVersion !== s.stackTemplateVersion)) {
+    status = 'INCONSISTENT_VERSION';
+  }
+  return status;
+}
+
+function _getRunningStatus(lastAction: string) {
+  let status;
+  switch (lastAction) {
+    case 'Create':
+      status = PipelineStatusType.CREATING;
+      break;
+    case 'Delete':
+      status = PipelineStatusType.DELETING;
+      break;
+    default:
+      status = PipelineStatusType.UPDATING;
+      break;
+  }
+  return status;
+};
+
+function getMetadataVersionType(pipeline: IPipeline) {
+  const version = pipeline.templateVersion?.split('-')[0] ?? '';
+  const unSupportVersions = ['v1.0.0', 'v1.0.1', 'v1.0.2', 'v1.0.3'];
+  const oldVersions = ['v1.1.0', 'v1.1.1'];
+  if (unSupportVersions.includes(version)) {
+    return MetadataVersionType.UNSUPPORTED;
+  } else if (oldVersions.includes(version)) {
+    return MetadataVersionType.V1;
+  }
+  return MetadataVersionType.V2;
+}
+
 export {
   isEmpty,
   isEmail,
@@ -1035,4 +1298,12 @@ export {
   isFinallyPipelineStatus,
   getStackTags,
   getUpdateTags,
+  getDefaultTags,
+  getStateMachineExecutionName,
+  getPipelineStatusType,
+  getPipelineLastActionFromStacksStatus,
+  getMetadataVersionType,
+  rawToEvent,
+  rawToParameter,
+  rawToAttribute,
 };
