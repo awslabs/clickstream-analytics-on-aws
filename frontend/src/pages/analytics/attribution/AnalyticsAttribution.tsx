@@ -59,6 +59,7 @@ import {
   ExploreGroupColumn,
   QuickSightChartType,
   AttributionModelType,
+  IMetadataBuiltInList,
 } from 'ts/explore-types';
 import {
   alertMsg,
@@ -88,7 +89,9 @@ import SaveToDashboardModal from '../comps/SelectDashboardModal';
 interface AnalyticsAttributionProps {
   loading: boolean;
   pipeline: IPipeline;
+  builtInMetadata?: IMetadataBuiltInList;
   metadataEvents: IMetadataEvent[];
+  metadataEventParameters: IMetadataEventParameter[];
   metadataUserAttributes: IMetadataUserAttribute[];
   categoryEvents: CategoryItemType[];
   presetParameters: CategoryItemType[];
@@ -102,7 +105,9 @@ const AnalyticsAttribution: React.FC<AnalyticsAttributionProps> = (
   const {
     loading,
     pipeline,
+    builtInMetadata,
     metadataEvents,
+    metadataEventParameters,
     metadataUserAttributes,
     categoryEvents,
     presetParameters,
@@ -514,6 +519,7 @@ const AnalyticsAttribution: React.FC<AnalyticsAttributionProps> = (
                   eventOptionList={categoryEvents}
                   defaultComputeMethodOption={defaultComputeMethodOption}
                   metadataEvents={metadataEvents}
+                  metadataEventParameters={metadataEventParameters}
                   metadataUserAttributes={metadataUserAttributes}
                   enableChangeRelation={true}
                   isMultiSelect={true}
@@ -691,7 +697,9 @@ const AnalyticsAttribution: React.FC<AnalyticsAttributionProps> = (
                   addEventButtonLabel={t('common:button.addTouchPoint')}
                   eventOptionList={categoryEvents}
                   defaultComputeMethodOption={defaultComputeMethodOption}
+                  builtInMetadata={builtInMetadata}
                   metadataEvents={metadataEvents}
+                  metadataEventParameters={metadataEventParameters}
                   metadataUserAttributes={metadataUserAttributes}
                   enableChangeRelation={true}
                   isMultiSelect={false}

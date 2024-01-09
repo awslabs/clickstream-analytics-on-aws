@@ -461,7 +461,9 @@ const AnalyticsExplore: React.FC = () => {
                     loadingEvents={loadingMetadataEvent}
                     loading={false}
                     pipeline={pipeline}
+                    builtInMetadata={builtInMetadata}
                     metadataEvents={metadataEvents}
+                    metadataEventParameters={metadataEventParameters}
                     metadataUserAttributes={metadataUserAttributes}
                     categoryEvents={categoryEvents}
                     presetParameters={presetParameters}
