@@ -114,6 +114,18 @@ export class MetadataEventServ {
       next(error);
     }
   };
+
+  public async trigger(req: any, res: any, next: any) {
+    try {
+      const { projectId } = req.body;
+      const pipeline = await pipelineServ.getPipelineByProjectId(projectId);
+      if (!pipeline) {
+        return res.status(404).json(new ApiFail('Pipeline not found'));
+      }
+    } catch (error) {
+      next(error);
+    }
+  };
 }
 
 interface IPathNodes {

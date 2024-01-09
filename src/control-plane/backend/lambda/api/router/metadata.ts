@@ -97,6 +97,10 @@ router_metadata.get(
     return metadataUserAttributeServ.list(req, res, next);
   });
 
+router_metadata.post('/trigger', async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+  return metadataEventServ.trigger(req, res, next);
+});
+
 export {
   router_metadata,
 };
