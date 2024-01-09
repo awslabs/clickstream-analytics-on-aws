@@ -67,9 +67,7 @@ export const handler = async (event: StoreMetadataEvent) => {
       },
     };
   } catch (err) {
-    if (err instanceof Error) {
-      logger.error('Error when store metadata into ddb.', err);
-    }
+    logger.error('Error when store metadata into ddb.', { err } );
     return {
       detail: {
         appId: appId,
@@ -170,6 +168,7 @@ async function batchWriteIntoDDB(metadataItems: any[]) {
     } catch (error) {
       // log error and inputPara
       logger.error('Error when batch write into ddb: ', { error, inputPara });
+      throw error;
     }
   }
 }
@@ -294,9 +293,7 @@ async function queryMetadata(inputSql: string) {
 
     return response;
   } catch (err) {
-    if (err instanceof Error) {
-      logger.error('Error when query metadata.', err);
-    }
+    logger.error('Error when query metadata.', { err} );
     throw err;
   }
 }
