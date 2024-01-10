@@ -192,7 +192,8 @@
     "clearFiltersText": "Clear filters",
     "applyActionText": "Apply",
     "clear": "Clear",
-    "fullWindowView": "Full window view"
+    "fullWindowView": "Full window view",
+    "scanMetadata": "Scan metadata"
   },
   "item": "item",
   "items": "items",

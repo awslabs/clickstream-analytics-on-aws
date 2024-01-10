@@ -16,8 +16,6 @@ import { Box, SpaceBetween } from '@cloudscape-design/components';
 import Pagination from '@cloudscape-design/components/pagination';
 import PropertyFilter from '@cloudscape-design/components/property-filter';
 import Table from '@cloudscape-design/components/table';
-
-import { getPipelineDetailByProjectId } from 'apis/analytics';
 import { HelpPanelType } from 'context/reducer';
 import { cloneDeep } from 'lodash';
 import {
@@ -28,14 +26,14 @@ import { useColumnWidths } from 'pages/common/use-column-widths';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { COMMON_ALERT_TYPE } from 'ts/const';
 import { MetadataSource } from 'ts/explore-types';
-import { alertMsg, defaultStr } from 'ts/utils';
+import { alertMsg } from 'ts/utils';
 import { MetadataTableHeader } from './MetadataTableHeader';
 import '../../styles/table-select.scss';
 import { descriptionRegex, displayNameRegex } from './table-config';
 
 interface MetadataTableProps {
+  analysisStudioEnabled: boolean;
   infoType: HelpPanelType;
   resourceName: string;
   tableColumnDefinitions: any[];
@@ -67,6 +65,7 @@ const MetadataTable: React.FC<MetadataTableProps> = (
   props: MetadataTableProps
 ) => {
   const {
+    analysisStudioEnabled,
     infoType,
     selectionType,
     resourceName,
@@ -107,24 +106,9 @@ const MetadataTable: React.FC<MetadataTableProps> = (
     }
   };
 
-  const loadPipeline = async () => {
-    setLoadingData(true);
-    try {
-      const { success, data }: ApiResponse<IPipeline> =
-        await getPipelineDetailByProjectId(defaultStr(projectId));
-      if (success && data.analysisStudioEnabled) {
-        await fetchData();
-      }
-      setLoadingData(false);
-    } catch (error) {
-      setLoadingData(false);
-      console.log(error);
-    }
-  };
-
   useEffect(() => {
-    if (projectId && appId) {
-      loadPipeline();
+    if (projectId && appId && analysisStudioEnabled) {
+      fetchData();
     }
   }, []);
 
@@ -205,10 +189,7 @@ const MetadataTable: React.FC<MetadataTableProps> = (
     }
     const newItem = { ...currentItem, [column.id]: value };
     if (newItem.metadataSource === MetadataSource.PRESET) {
-      alertMsg(
-        t('analytics:valid.metadataNotAllowEditError'),
-        COMMON_ALERT_TYPE.Error as AlertType
-      );
+      alertMsg(t('analytics:valid.metadataNotAllowEditError'));
       return;
     }
     await fetchUpdateFunc(newItem);

@@ -95,6 +95,7 @@
   },
   "metadata": {
     "description": "您可以在此处查看和管理事件和属性的元数据。",
+    "scanTriggeredSuccessfully": "扫描已成功触发, 请等待执行完成",
     "event": {
       "title": "事件",
       "description": "此表列出了您选择的App中的所有事件。",

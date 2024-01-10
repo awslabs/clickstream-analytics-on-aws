@@ -33,7 +33,7 @@ import {
   OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_ENDPOINT_PORT,
   OUTPUT_DATA_MODELING_REDSHIFT_SERVERLESS_WORKGROUP_NAME,
   OUTPUT_DATA_MODELING_REDSHIFT_DATA_API_ROLE_ARN_SUFFIX,
-  OUTPUT_SCAN_METADATA_WORKFLOW_AR_SUFFIX,
+  OUTPUT_SCAN_METADATA_WORKFLOW_ARN_SUFFIX,
   OUTPUT_DATA_MODELING_REDSHIFT_BI_USER_NAME_SUFFIX,
   TABLE_NAME_EVENT,
   TABLE_NAME_EVENT_PARAMETER,
@@ -302,21 +302,21 @@ export function createRedshiftAnalyticsStack(
   }).overrideLogicalId(`ExistingRedshiftServerless${OUTPUT_DATA_MODELING_REDSHIFT_SQL_EXECUTION_STATE_MACHINE_ARN_SUFFIX}`);
 
   // add scan metadata workflow arn in stack output for manually trigger scan metadata workflow
-  new CfnOutput(scope, `ProvisionedRedshift${OUTPUT_SCAN_METADATA_WORKFLOW_AR_SUFFIX}`, {
+  new CfnOutput(scope, `ProvisionedRedshift${OUTPUT_SCAN_METADATA_WORKFLOW_ARN_SUFFIX}`, {
     value: redshiftProvisionedStack.scanMetadataWorkflowArn,
     description: 'Scan metadata workflow stepfunction arn',
     condition: isRedshiftProvisioned,
-  }).overrideLogicalId(`ProvisionedRedshift${OUTPUT_SCAN_METADATA_WORKFLOW_AR_SUFFIX}`);
-  new CfnOutput(scope, `NewRedshiftServerless${OUTPUT_SCAN_METADATA_WORKFLOW_AR_SUFFIX}`, {
+  }).overrideLogicalId(`ProvisionedRedshift${OUTPUT_SCAN_METADATA_WORKFLOW_ARN_SUFFIX}`);
+  new CfnOutput(scope, `NewRedshiftServerless${OUTPUT_SCAN_METADATA_WORKFLOW_ARN_SUFFIX}`, {
     value: newRedshiftServerlessStack.scanMetadataWorkflowArn,
     description: 'Scan metadata workflow stepfunction arn',
     condition: isNewRedshiftServerless,
-  }).overrideLogicalId(`NewRedshiftServerless${OUTPUT_SCAN_METADATA_WORKFLOW_AR_SUFFIX}`);
-  new CfnOutput(scope, `ExistingRedshiftServerless${OUTPUT_SCAN_METADATA_WORKFLOW_AR_SUFFIX}`, {
+  }).overrideLogicalId(`NewRedshiftServerless${OUTPUT_SCAN_METADATA_WORKFLOW_ARN_SUFFIX}`);
+  new CfnOutput(scope, `ExistingRedshiftServerless${OUTPUT_SCAN_METADATA_WORKFLOW_ARN_SUFFIX}`, {
     value: redshiftExistingServerlessStack.scanMetadataWorkflowArn,
     description: 'Scan metadata workflow stepfunction arn',
     condition: isExistingRedshiftServerless,
-  }).overrideLogicalId(`ExistingRedshiftServerless${OUTPUT_SCAN_METADATA_WORKFLOW_AR_SUFFIX}`);
+  }).overrideLogicalId(`ExistingRedshiftServerless${OUTPUT_SCAN_METADATA_WORKFLOW_ARN_SUFFIX}`);
 
   return {
     redshiftServerlessStack: redshiftExistingServerlessStack,

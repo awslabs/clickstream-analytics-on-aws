@@ -46,7 +46,7 @@ import { StateActionType, HelpPanelType } from 'context/reducer';
 import React, { useContext, useEffect, useReducer, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { COMMON_ALERT_TYPE, POSITIVE_INTEGER_REGEX } from 'ts/const';
+import { POSITIVE_INTEGER_REGEX } from 'ts/const';
 import {
   QUICKSIGHT_ANALYSIS_INFIX,
   QUICKSIGHT_DASHBOARD_INFIX,
@@ -350,10 +350,7 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
     try {
       const body = getFunnelRequest(ExploreRequestAction.PREVIEW);
       if (!body) {
-        alertMsg(
-          t('analytics:valid.funnelPipelineVersionError'),
-          COMMON_ALERT_TYPE.Error as AlertType
-        );
+        alertMsg(t('analytics:valid.funnelPipelineVersionError'));
         return;
       }
       setExploreEmbedUrl('');
@@ -428,10 +425,7 @@ const AnalyticsFunnel: React.FC<AnalyticsFunnelProps> = (
         chartSubTitle
       );
       if (!body) {
-        alertMsg(
-          t('analytics:valid.funnelPipelineVersionError'),
-          COMMON_ALERT_TYPE.Error as AlertType
-        );
+        alertMsg(t('analytics:valid.funnelPipelineVersionError'));
         return;
       }
       setLoadingData(true);
