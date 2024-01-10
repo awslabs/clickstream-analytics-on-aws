@@ -163,12 +163,23 @@ export class ScanMetadataWorkflow extends Construct {
       .when(Condition.isPresent('$.GetJobList.appIdList'), doScanMetadataJob)
       .otherwise(doNothing);
 
-    const getJobList = new Pass(this, `${this.node.id} - Get app_id`, {
+    const getAppListFromProps = new Pass(this, `${this.node.id} - Get app_id from props`, {
       parameters: {
         'appIdList.$': `States.StringSplit('${props.appIds}', ',')`,
       },
       resultPath: '$.GetJobList',
     }).next(checkJobExist);
+
+    const getJobListFromInput = new Pass(this, `${this.node.id} - Get app_id from input`, {
+      parameters: {
+        'appIdList.$': `States.StringSplit($.appIdList, ',')`,
+      },
+      resultPath: '$.GetJobList',
+    }).next(checkJobExist);
+
+    const getAppIdList = new Choice(this, `${this.node.id} - Check if app_id list exists`)
+      .when(Condition.isPresent('$.appIdList'), getJobListFromInput)
+      .otherwise(getAppListFromProps);
 
     const checkWorkflowStartFn = this.checkWorkflowStartFn(props, bucket);
     const checkWorkflowStartJob = new LambdaInvoke(this, `${this.node.id} - Check whether scan metadata should start`, {
@@ -186,7 +197,7 @@ export class ScanMetadataWorkflow extends Construct {
           .when(Condition.stringEquals('$.workflowInfo.Payload.status', WorkflowStatus.FAILED), checkWorkflowStartJobFailed)
           .when(Condition.stringEquals('$.workflowInfo.Payload.status', WorkflowStatus.ABORTED), checkWorkflowStartJobFailed)
           .when(Condition.stringEquals('$.workflowInfo.Payload.status', WorkflowStatus.SKIP), checkWorkflowStartJobSKIP)
-          .when(Condition.stringEquals('$.workflowInfo.Payload.status', WorkflowStatus.CONTINUE), getJobList));
+          .when(Condition.stringEquals('$.workflowInfo.Payload.status', WorkflowStatus.CONTINUE), getAppIdList));
 
     // Create state machine
     const scanMetadataStateMachine = new StateMachine(this, 'ScanMetadataStateMachine', {
