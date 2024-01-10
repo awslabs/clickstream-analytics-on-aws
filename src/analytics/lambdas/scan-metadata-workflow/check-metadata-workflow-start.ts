@@ -71,6 +71,7 @@ export const handler = async (event: CheckMetadataWorkflowEvent) => {
         return {
           status: WorkflowStatus.CONTINUE,
           scanEndDate: scanEndDate,
+          eventSource: '',
           jobStartTimestamp: currentTimestamp,
           scanStartDate: scanStartDate,
         };
@@ -103,6 +104,7 @@ async function handleEventFromUpstreamWorkflow() {
       result = {
         status: WorkflowStatus.CONTINUE,
         scanEndDate: scanEndDate,
+        eventSource: 'LoadDataFlow',
         jobStartTimestamp: currentTimestamp,
         scanStartDate: startScanDate,
       };

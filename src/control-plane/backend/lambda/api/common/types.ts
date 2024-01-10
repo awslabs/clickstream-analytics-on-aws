@@ -303,6 +303,7 @@ export enum PipelineStatusType {
   CREATING = 'Creating',
   UPDATING = 'Updating',
   DELETING = 'Deleting',
+  DELETED = 'Deleted',
 }
 
 export enum KinesisStreamMode {

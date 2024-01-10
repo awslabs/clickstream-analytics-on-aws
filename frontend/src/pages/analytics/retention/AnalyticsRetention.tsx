@@ -54,6 +54,7 @@ import {
   ExploreGroupColumn,
   ExploreRequestAction,
   ExploreTimeScopeType,
+  IMetadataBuiltInList,
   QuickSightChartType,
 } from 'ts/explore-types';
 import {
@@ -85,7 +86,9 @@ import SaveToDashboardModal from '../comps/SelectDashboardModal';
 interface AnalyticsRetentionProps {
   loading: boolean;
   pipeline: IPipeline;
+  builtInMetadata?: IMetadataBuiltInList;
   metadataEvents: IMetadataEvent[];
+  metadataEventParameters: IMetadataEventParameter[];
   metadataUserAttributes: IMetadataUserAttribute[];
   categoryEvents: CategoryItemType[];
   presetParameters: CategoryItemType[];
@@ -100,7 +103,9 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
   const {
     loading,
     pipeline,
+    builtInMetadata,
     metadataEvents,
+    metadataEventParameters,
     metadataUserAttributes,
     categoryEvents,
     presetParameters,
@@ -608,7 +613,9 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
                 changeStartEvent={(index, item) => {
                   const eventName = item?.name;
                   const eventParameters = getEventParameters(
+                    metadataEventParameters,
                     metadataEvents,
+                    builtInMetadata,
                     eventName
                   );
                   const parameterOption = parametersConvertToCategoryItemType(
@@ -627,7 +634,9 @@ const AnalyticsRetention: React.FC<AnalyticsRetentionProps> = (
                 changeRevisitEvent={(index, item) => {
                   const eventName = item?.name;
                   const eventParameters = getEventParameters(
+                    metadataEventParameters,
                     metadataEvents,
+                    builtInMetadata,
                     eventName
                   );
                   const parameterOption = parametersConvertToCategoryItemType(

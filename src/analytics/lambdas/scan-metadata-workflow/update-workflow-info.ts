@@ -36,6 +36,7 @@ const metaDataDDBDocClient = DynamoDBDocumentClient.from(metaDataDDBClient);
 export interface UpdateWorkflowInfoEvent {
   readonly lastJobStartTimestamp: number;
   readonly lastScanEndDate: string;
+  readonly eventSource: string;
 }
 
 /**
@@ -51,6 +52,12 @@ export const handler = async (event: UpdateWorkflowInfoEvent) => {
   try {
     const lastJobStartTimestamp = event.lastJobStartTimestamp;
     const lastScanEndDate = event.lastScanEndDate;
+    const eventSource = event.eventSource;
+
+    if (eventSource !== 'LoadDataFlow') {
+      logger.info('The event source is not LoadDataFlow, skip update workflow info.');
+      return;
+    }
 
     await updateWorkflowInfoToS3(lastJobStartTimestamp, lastScanEndDate);
 

@@ -26,8 +26,11 @@ import {
 } from 'pages/common/common-components';
 import { useColumnWidths } from 'pages/common/use-column-widths';
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import { defaultStr } from 'ts/utils';
+import { COMMON_ALERT_TYPE } from 'ts/const';
+import { MetadataSource } from 'ts/explore-types';
+import { alertMsg, defaultStr } from 'ts/utils';
 import { MetadataTableHeader } from './MetadataTableHeader';
 import '../../styles/table-select.scss';
 import { descriptionRegex, displayNameRegex } from './table-config';
@@ -75,6 +78,8 @@ const MetadataTable: React.FC<MetadataTableProps> = (
     fetchDataFunc,
     fetchUpdateFunc,
   } = props;
+
+  const { t } = useTranslation();
 
   const { projectId, appId } = useParams();
   const [loadingData, setLoadingData] = useState(false);
@@ -199,6 +204,13 @@ const MetadataTable: React.FC<MetadataTableProps> = (
       throw new Error('Inline error');
     }
     const newItem = { ...currentItem, [column.id]: value };
+    if (newItem.metadataSource === MetadataSource.PRESET) {
+      alertMsg(
+        t('analytics:valid.metadataNotAllowEditError'),
+        COMMON_ALERT_TYPE.Error as AlertType
+      );
+      return;
+    }
     await fetchUpdateFunc(newItem);
     let fullCollection = data;
 

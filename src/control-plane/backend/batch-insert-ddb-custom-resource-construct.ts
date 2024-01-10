@@ -18,7 +18,6 @@ import { Architecture, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 import { Provider } from 'aws-cdk-lib/custom-resources';
 import { Construct } from 'constructs';
-import { DicItem } from './click-stream-api';
 import { addCfnNagToStack, ruleForLambdaVPCAndReservedConcurrentExecutions } from '../../common/cfn-nag';
 import { cloudWatchSendLogs, createLambdaRole } from '../../common/lambda';
 import { POWERTOOLS_ENVS } from '../../common/powertools';
@@ -26,7 +25,6 @@ import { SolutionNodejsFunction } from '../../private/function';
 
 export interface CdkCallCustomResourceProps {
   readonly table: Table;
-  readonly items: DicItem[];
   readonly targetToCNRegions?: boolean;
 }
 
@@ -77,7 +75,6 @@ export class BatchInsertDDBCustomResource extends Construct {
         serviceToken: customResourceProvider.serviceToken,
         properties: {
           tableName: props.table.tableName,
-          items: props.items,
         },
       },
     );

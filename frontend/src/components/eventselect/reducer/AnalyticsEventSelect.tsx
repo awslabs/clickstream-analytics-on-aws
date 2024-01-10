@@ -15,6 +15,7 @@ import { Button, SelectProps } from '@cloudscape-design/components';
 import { identity } from 'lodash';
 import React from 'react';
 import { ALPHABETS } from 'ts/const';
+import { IMetadataBuiltInList } from 'ts/explore-types';
 import { AnalyticsDispatchFunction } from './analyticsEventSelectReducer';
 import {
   CategoryItemType,
@@ -38,7 +39,9 @@ interface EventsSelectProps {
   defaultComputeMethodOption: SelectProps.Option;
   isMultiSelect: boolean;
   enableChangeRelation: boolean;
+  builtInMetadata?: IMetadataBuiltInList;
   metadataEvents: IMetadataEvent[];
+  metadataEventParameters: IMetadataEventParameter[];
   metadataUserAttributes: IMetadataUserAttribute[];
 }
 const AnalyticsEventSelect: React.FC<EventsSelectProps> = (
@@ -55,7 +58,9 @@ const AnalyticsEventSelect: React.FC<EventsSelectProps> = (
     defaultComputeMethodOption,
     isMultiSelect,
     enableChangeRelation,
+    builtInMetadata,
     metadataEvents,
+    metadataEventParameters,
     metadataUserAttributes,
     loading,
   } = props;
@@ -83,7 +88,9 @@ const AnalyticsEventSelect: React.FC<EventsSelectProps> = (
                       type: 'changeCurCategoryOption',
                       eventIndex: index,
                       categoryOption: item,
+                      builtInMetadata,
                       metadataEvents,
+                      metadataEventParameters,
                       metadataUserAttributes,
                     });
                   }}
